@@ -37,6 +37,7 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 
 	if (!Settings::read_settings(file_storage_proxy, &settings)) {
 		settings = UserSettings{};
+		pr_warn("Could not read settings.yml, using defaults\n");
 		if (!Settings::write_settings(file_storage_proxy, settings)) {
 			pr_err("Failed to write settings file\n");
 		}
@@ -53,6 +54,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 
 	params.set_output_plugged(cur_outchan_left, true);
 	params.set_output_plugged(cur_outchan_right, true);
+
+	patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.button_exclude);
 }
 
 // "Scheduler" for UI tasks
