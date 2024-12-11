@@ -71,14 +71,16 @@ public:
 
 		patch_playloader.request_new_audio_settings(settings.audio.sample_rate, settings.audio.block_size);
 		patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.button_exclude);
+
+		lv_tick_set_cb(HAL_GetTick);
 	}
 
 	void update_screen() {
 		auto now = HAL_GetTick();
+
 		if ((now - last_lv_update_tm) > 2) {
-			lv_tick_inc(now - last_lv_update_tm);
-			last_lv_update_tm = now;
 			lv_timer_handler();
+			last_lv_update_tm = now;
 		}
 	}
 
