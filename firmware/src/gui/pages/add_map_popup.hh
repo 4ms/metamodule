@@ -61,8 +61,10 @@ struct AddMapPopUp {
 
 		lv_hide(ui_AddMapPopUp);
 
-		lv_group_activate(base_group);
-		lv_group_set_editing(base_group, false);
+		if (base_group) {
+			lv_group_activate(base_group);
+			lv_group_set_editing(base_group, false);
+		}
 	}
 
 	void update(ParamsMidiState &params) {
