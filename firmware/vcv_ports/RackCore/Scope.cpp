@@ -437,7 +437,7 @@ struct ScopeDisplay : LedDisplay {
 		CableWidget *inputXCable = APP->scene->rack->getTopCable(inputX);
 		CableWidget *inputYCable = APP->scene->rack->getTopCable(inputY);
 		NVGcolor inputXColor = inputXCable ? inputXCable->color : SCHEME_YELLOW;
-		NVGcolor inputYColor = inputYCable ? inputYCable->color : SCHEME_YELLOW;
+		NVGcolor inputYColor = inputYCable ? inputYCable->color : SCHEME_CYAN;
 
 		// Draw waveforms
 		int channelsY = module ? module->channelsY : 1;
