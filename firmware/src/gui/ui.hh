@@ -58,7 +58,7 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, screensaver);
+		MMDisplay::register_params(metaparams, screensaver);
 		Gui::init_lvgl_styles();
 		page_manager.init();
 
