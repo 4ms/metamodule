@@ -20,12 +20,14 @@ struct RackDynDraw : BaseDynDraw {
 		args.vg = nvgCreatePixelBufferContext(widget_canvas);
 		args.fb = nullptr;
 		canvas = widget_canvas;
+
 		lv_obj_refr_size(canvas);
 		width = lv_obj_get_width(canvas);
 		height = lv_obj_get_height(canvas);
 	}
 
 	void draw() override {
+		rack::contextGet()->window->vg = args.vg;
 
 		if (auto mw = module_widget.lock()) {
 
