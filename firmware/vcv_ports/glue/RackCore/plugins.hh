@@ -7,3 +7,5 @@ namespace rack::core
 extern rack::plugin::Model *modelMIDI_CV;
 
 } // namespace rack::core
+
+extern rack::plugin::Model *modelScope;

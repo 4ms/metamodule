@@ -228,6 +228,7 @@ struct InternalPluginManager {
 		auto &RackCore_plugin = internal_plugins.emplace_back("RackCore");
 		pluginInstance = &RackCore_plugin;
 		pluginInstance->addModel(rack::core::modelMIDI_CV);
+		pluginInstance->addModel(modelScope);
 #endif
 	}
 };
