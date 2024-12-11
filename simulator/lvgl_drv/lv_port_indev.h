@@ -48,11 +48,10 @@ private:
 	void set_quit(QuitEvent);
 	void handle_key_up(SDL_Keycode key, lv_indev_data_t *data);
 
-	static void keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *);
+	static void keyboard_rotary_read_cb(lv_indev_t *, lv_indev_data_t *);
 	static inline LvglEncoderSimulatorDriver *_instance;
 
 	RotaryEncoderKeys &keys;
-	lv_indev_drv_t indev_drv_keyboard_encoder;
 	lv_indev_t *indev_encoder;
 	QuitEvent quit_event = LV_QUIT_NONE;
 

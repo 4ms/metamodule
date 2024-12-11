@@ -30,7 +30,9 @@ add_subdirectory(lvgl_drv)
 # #################### LVGL ############################################
 
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
-include(${LVGL_DIR}/CMakeLists.txt)
+
+add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
+
 target_include_directories(lvgl PRIVATE 
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
@@ -44,7 +46,7 @@ add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial
 # #################### SLS Export ##################################
 
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5 ${CMAKE_CURRENT_BINARY_DIR}/ui)
-target_link_libraries(ui PRIVATE lvgl)
+target_link_libraries(ui PRIVATE lvgl_thorvg)
 
 # #################### VCV Adaptor ##################################
 

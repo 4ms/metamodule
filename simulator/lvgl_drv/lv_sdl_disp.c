@@ -9,15 +9,15 @@ static void *fb1, *fb2;
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 SDL_Texture *texture = NULL;
-static lv_disp_drv_t disp_drv;
-static lv_disp_draw_buf_t draw_buf;
+static lv_display_t *display;
 static int DISPLAY_WIDTH;
 static int DISPLAY_HEIGHT;
+
 #ifndef WINDOW_NAME
 #define WINDOW_NAME "MetaModule"
 #endif
 
-static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
+static void disp_flush(lv_display_t *display, const lv_area_t *area, unsigned char *color_p) {
 	SDL_Rect r;
 	r.x = area->x1;
 	r.y = area->y1;
@@ -26,7 +26,7 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
 	SDL_UpdateTexture(texture, &r, color_p, r.w * ((LV_COLOR_DEPTH + 7) / 8));
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
 	SDL_RenderPresent(renderer);
-	lv_disp_flush_ready(disp_drv);
+	lv_disp_flush_ready(display);
 }
 
 void lv_port_disp_init(int width, int height, int zoom) {
@@ -50,18 +50,15 @@ void lv_port_disp_init(int width, int height, int zoom) {
 								DISPLAY_WIDTH,
 								DISPLAY_HEIGHT);
 
-	fb1 = malloc(DISPLAY_WIDTH * DISPLAY_HEIGHT * ((LV_COLOR_DEPTH + 7) / 8));
-	fb2 = malloc(DISPLAY_WIDTH * DISPLAY_HEIGHT * ((LV_COLOR_DEPTH + 7) / 8));
+	const size_t buffersize = DISPLAY_WIDTH * DISPLAY_HEIGHT * ((LV_COLOR_DEPTH + 7) / 8);
+	fb1 = malloc(buffersize);
+	fb2 = malloc(buffersize);
 
-	lv_disp_draw_buf_init(&draw_buf, fb1, fb2, DISPLAY_WIDTH * DISPLAY_HEIGHT);
-	lv_disp_drv_init(&disp_drv);
+	display = lv_display_create(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	lv_display_set_buffers(display, fb1, fb2, buffersize, LV_DISPLAY_RENDER_MODE_FULL);
 
-	disp_drv.hor_res = DISPLAY_WIDTH;
-	disp_drv.ver_res = DISPLAY_HEIGHT;
-	disp_drv.flush_cb = disp_flush;
-	disp_drv.draw_buf = &draw_buf;
-	disp_drv.full_refresh = 1;
-	lv_disp_drv_register(&disp_drv);
+	lv_display_set_flush_cb(display, disp_flush);
+	lv_display_set_color_format(display, (LV_COLOR_DEPTH == 32) ? LV_COLOR_FORMAT_ARGB8888 : LV_COLOR_FORMAT_RGB565);
 }
 
 void lv_port_disp_deinit() {

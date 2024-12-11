@@ -9,10 +9,11 @@ LvglEncoderSimulatorDriver::LvglEncoderSimulatorDriver(RotaryEncoderKeys &keys)
 
 	SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
 
-	lv_indev_drv_init(&indev_drv_keyboard_encoder);
-	indev_drv_keyboard_encoder.type = LV_INDEV_TYPE_ENCODER;
-	indev_drv_keyboard_encoder.read_cb = keyboard_rotary_read_cb;
-	indev_encoder = lv_indev_drv_register(&indev_drv_keyboard_encoder);
+	indev_encoder = lv_indev_create();
+	lv_indev_set_type(indev_encoder, LV_INDEV_TYPE_ENCODER);
+	lv_indev_set_read_cb(indev_encoder, keyboard_rotary_read_cb);
+	lv_indev_enable(indev_encoder, true);
+	lv_indev_set_group(indev_encoder, nullptr);
 
 	set_quit(LV_QUIT_NONE);
 	_instance = this;
@@ -20,7 +21,7 @@ LvglEncoderSimulatorDriver::LvglEncoderSimulatorDriver(RotaryEncoderKeys &keys)
 	lv_log("Starting LVGL\n");
 }
 
-void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
+void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_t *, lv_indev_data_t *data) {
 	auto &keys = _instance->keys;
 	auto &rotary_pressed = _instance->rotary_pressed;
 	auto &aux_pressed = _instance->aux_pressed;

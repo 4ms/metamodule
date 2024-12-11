@@ -2,6 +2,14 @@
 #include "dynload/autoload_plugins.hh"
 #include "gui/notify/queue.hh"
 
+#include <ctime>
+
+static inline uint32_t GetTickCountMs() {
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (uint32_t)(ts.tv_nsec / 1000000) + ((uint32_t)ts.tv_sec * 1000ull);
+}
+
 namespace MetaModule
 {
 
@@ -53,6 +61,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 
 	params.set_output_plugged(cur_outchan_left, true);
 	params.set_output_plugged(cur_outchan_right, true);
+
+	lv_tick_set_cb(GetTickCountMs);
 }
 
 // "Scheduler" for UI tasks
