@@ -18,6 +18,17 @@ namespace MetaModule
 
 struct DrawContext {
 	lv_obj_t *canvas{};
+	lv_draw_line_dsc_t line_dsc{};
+	lv_draw_rect_dsc_t rect_dsc{};
+
+	DrawContext(lv_obj_t *canvas)
+		: canvas{canvas} {
+		lv_draw_line_dsc_init(&line_dsc);
+		line_dsc.width = 1;
+
+		lv_draw_rect_dsc_init(&rect_dsc);
+		rect_dsc.radius = 0;
+	}
 };
 
 namespace NanoVG
@@ -27,9 +38,8 @@ constexpr lv_point_t to_lv_point(NVGvertex vertex) {
 	return lv_point_t(std::round(mm_to_px(to_mm(vertex.x), 240)), std::round(mm_to_px(to_mm(vertex.y), 240.f)));
 }
 
-lv_obj_t *get_canvas_from_context(void *uptr) {
-	auto ctx = (MetaModule::DrawContext *)(uptr);
-	return ctx->canvas;
+MetaModule::DrawContext *get_drawcontext(void *uptr) {
+	return (MetaModule::DrawContext *)(uptr);
 }
 
 lv_color_t to_lv_color(NVGcolor color) {
@@ -40,6 +50,31 @@ constexpr uint8_t to_lv_opa(NVGcolor color) {
 	return std::round(color.a * float(LV_OPA_100));
 }
 
+constexpr bool is_poly_concave(std::span<lv_point_t> points) {
+	auto n = points.size();
+	if (n < 3)
+		return false;
+
+	auto X_prod = [](lv_point_t O, lv_point_t A, lv_point_t B) {
+		return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
+	};
+
+	int sign = 0;
+	for (auto i = 0u; i < points.size(); i++) {
+		auto O = points[i];
+		auto A = points[(i + 1) % n];
+		auto B = points[(i + 2) % n];
+		auto cross = X_prod(O, A, B);
+		if (cross != 0) {
+			if (sign == 0)
+				sign = cross;
+			else if ((sign > 0 && cross < 0) || (sign < 0 && cross > 0))
+				return false;
+		}
+	}
+	return true;
+}
+
 void renderFill(void *uptr,
 				NVGpaint *paint,
 				NVGcompositeOperationState compositeOperation,
@@ -48,32 +83,27 @@ void renderFill(void *uptr,
 				const float *bounds,
 				const NVGpath *paths,
 				int npaths) {
-	auto canvas = get_canvas_from_context(uptr);
 
-	lv_draw_rect_dsc_t rect_dsc;
-	lv_draw_rect_dsc_init(&rect_dsc);
-	rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
-	rect_dsc.bg_color = to_lv_color(paint->innerColor);
-	rect_dsc.radius = 0;
+	auto context = get_drawcontext(uptr);
 
-	lv_draw_line_dsc_t line_dsc;
-	lv_draw_line_dsc_init(&line_dsc);
-	line_dsc.color = to_lv_color(paint->innerColor);
-	line_dsc.opa = to_lv_opa(paint->innerColor);
-	line_dsc.width = 1;
+	context->line_dsc.color = to_lv_color(paint->innerColor);
+	context->line_dsc.opa = to_lv_opa(paint->innerColor);
+
+	context->rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
+	context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
+
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		std::vector<lv_point_t> points;
 
 		std::ranges::transform(std::span{path.fill, (size_t)path.nfill}, std::back_inserter(points), to_lv_point);
-		// [](NVGvertex v) { return to_lv_point(v); });
 
-		// lv_canvas_draw_polygon(canvas, points.data(), points.size(), &rect_dsc);
-		lv_canvas_draw_line(canvas, points.data(), points.size(), &line_dsc);
-
-		// printf("Fill poly: ");
-		// for (auto &p : points)
-		// 	printf("%d,%d -> ", (int)p.x, (int)p.y);
-		// printf("\n");
+		if (is_poly_concave(points)) {
+			lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
+		} else {
+			// LVGL lv_canvas_draw_polygon goes into an infinite loop if polygon is convex.
+			// Fall back to drawing polygon outline (unfilled) if it's convex
+			lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
+		}
 	}
 }
 
@@ -86,26 +116,17 @@ void renderStroke(void *uptr,
 				  const NVGpath *paths,
 				  int npaths) {
 
-	auto canvas = get_canvas_from_context(uptr);
+	auto context = get_drawcontext(uptr);
 
-	lv_draw_line_dsc_t line_dsc;
-	lv_draw_line_dsc_init(&line_dsc);
-	line_dsc.color = to_lv_color(paint->innerColor);
-	line_dsc.opa = to_lv_opa(paint->innerColor);
-	line_dsc.width = 1;
+	context->line_dsc.color = to_lv_color(paint->innerColor);
+	context->line_dsc.opa = to_lv_opa(paint->innerColor);
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		std::vector<lv_point_t> points;
 
 		std::ranges::transform(std::span{path.stroke, (size_t)path.nstroke}, std::back_inserter(points), to_lv_point);
-		// [](NVGvertex v) { return to_lv_point(v); });
 
-		lv_canvas_draw_line(canvas, points.data(), points.size(), &line_dsc);
-
-		// printf("Draw line: ");
-		// for (auto &p : points)
-		// 	printf("%d,%d -> ", (int)p.x, (int)p.y);
-		// printf("\n");
+		lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
 	}
 }
 
@@ -116,7 +137,7 @@ void renderTriangles(void *uptr,
 					 const NVGvertex *verts,
 					 int nverts,
 					 float fringe) {
-	// printf("renderTriangles %d verts\n", nverts);
+	printf("renderTriangles %d verts\n", nverts);
 }
 
 void renderDelete(void *uptr) {
@@ -130,17 +151,13 @@ int renderCreate(void *uptr, void *otherUptr) {
 }
 
 int renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, const unsigned char *data) {
-	// printf("renderCreateTexture (canvas=%p): %d x %d (%p)\n", get_canvas_from_context(uptr), w, h, data);
-	if (data) {
-		// for (auto i = 0; auto c : std::span{data, size_t(w * h)}) {
-		//TODO: copy pixels to canvas
+	printf("renderCreateTexture: %d x %d, type %d, flags %d\n", w, h, type, imageFlags);
+	// if (data) {
+	// for (auto i = 0; auto c : std::span{data, size_t(w * h)}) {
 
-		// 		printf("%02x ", c);
-		// 		if (++i == w)
-		// 			printf("\n");
-		// }
-		// 	printf("\n");
-	}
+	// }
+	// 	printf("\n");
+	// }
 	return 1;
 }
 
@@ -150,7 +167,7 @@ int renderDeleteTexture(void *uptr, int image) {
 }
 
 int renderUpdateTexture(void *uptr, int image, int x, int y, int w, int h, const unsigned char *data) {
-	// printf("renderUpdateTexture\n");
+	printf("renderUpdateTexture (image=%d) %d x %d @ %d,%d\n", image, w, h, x, y);
 	return 1;
 }
 int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
@@ -159,7 +176,7 @@ int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
 }
 
 void renderViewport(void *uptr, float width, float height, float devicePixelRatio) {
-	// printf("renderViewport\n");
+	printf("renderViewport %f x %f, %f\n", width, height, devicePixelRatio);
 }
 
 void renderCancel(void *uptr) {
