@@ -91,7 +91,7 @@ public:
 			}
 
 			//Timeout
-			if (HAL_GetTick() - last_transfer_start_time > 20) {
+			if (HAL_GetTick() - last_transfer_start_time > 200) {
 				Debug::Pin1::high();
 				Debug::Pin1::low();
 				Debug::Pin1::high();

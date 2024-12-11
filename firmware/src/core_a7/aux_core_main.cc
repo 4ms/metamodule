@@ -13,7 +13,7 @@
 #include "patch_play/patch_player.hh"
 
 using FrameBufferT =
-	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
+	std::array<uint8_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height * 2>;
 static inline FrameBufferT framebuf1 alignas(64);
 static inline FrameBufferT framebuf2 alignas(64);
 
