@@ -16,7 +16,7 @@ namespace MetaModule
 {
 
 class MMDisplay {
-	// static inline lv_display_t *last_used_display = nullptr;
+	static inline lv_display_t *last_used_display = nullptr;
 	static inline MetaParams *m = nullptr;
 	static inline Screensaver *_screensaver = nullptr;
 	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
@@ -40,17 +40,17 @@ public:
 	}
 
 	static inline uint32_t last_transfer_start_time = 0;
-	// static inline lv_area_t last_area{0, 0, 0, 0};
-	// static inline uint16_t *last_pixbuf = nullptr;
+	static inline lv_area_t last_area{0, 0, 0, 0};
+	static inline uint16_t *last_pixbuf = nullptr;
 
 	static inline std::atomic<bool> flush_done = false;
 	static inline bool is_init = false;
 
 	static void end_flush() {
 		Debug::Pin2::high();
-		// if (last_used_display) {
-		// 	lv_display_flush_ready(last_used_display);
-		// }
+		if (last_used_display) {
+			lv_display_flush_ready(last_used_display);
+		}
 		flush_done = true;
 		Debug::Pin2::low();
 	}
@@ -62,13 +62,13 @@ public:
 		}
 		Debug::Pin0::high();
 		flush_done = false;
-		// last_used_display = display;
+		last_used_display = display;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
 
 		last_transfer_start_time = HAL_GetTick();
-		// last_area = *area;
-		// last_pixbuf = pixbuf;
+		last_area = *area;
+		last_pixbuf = pixbuf;
 		Debug::Pin0::low();
 	}
 

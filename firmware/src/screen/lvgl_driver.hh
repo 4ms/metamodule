@@ -26,7 +26,6 @@ public:
 
 		display = lv_display_create(ScreenWidth, ScreenHeight); //NOLINT: cannot construct before lv_init
 		lv_display_set_color_format(display, LV_COLOR_FORMAT_RGB565);
-		printf("buffer is %zu bytes\n", buffer1.size_bytes());
 
 		lv_display_set_buffers(
 			display, buffer1.data(), buffer2.data(), buffer1.size_bytes(), LV_DISPLAY_RENDER_MODE_PARTIAL);
