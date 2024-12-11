@@ -29,6 +29,8 @@ if(NOT LV_CONF_BUILD_DISABLE_THORVG_INTERNAL)
     add_library(lvgl::thorvg ALIAS lvgl_thorvg)
     target_include_directories(lvgl_thorvg SYSTEM PUBLIC ${LVGL_ROOT_DIR}/src/libs/thorvg)
     target_link_libraries(lvgl_thorvg PUBLIC lvgl)
+    target_compile_features(lvgl_thorvg PUBLIC cxx_std_20)
+    target_compile_options(lvgl_thorvg PRIVATE -Wno-ambiguous-reversed-operator)
 endif()
 
 set_target_properties(

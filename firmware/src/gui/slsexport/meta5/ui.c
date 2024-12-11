@@ -754,3 +754,8 @@ ui_HwTestPage_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_MainMenu);
 }
+
+void lv_label_set_recolor(lv_obj_t*obj, bool recolor) {
+	(void)obj;
+	(void)recolor;
+}
