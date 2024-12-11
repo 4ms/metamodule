@@ -47,6 +47,7 @@ target_sources(
          src/widget/FramebufferWidget.cc
          src/widget/event.cpp
          src/window/Svg.cpp
+         src/window/Window.cpp
 
          src/Quantity.cpp
          src/VCV_module_wrapper.cc
@@ -64,6 +65,7 @@ target_sources(
          src/common.cpp
          src/resampler.cc
          src/midi_message.cc
+         src/system.cc
 
          src/blendish.c
 )

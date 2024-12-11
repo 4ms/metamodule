@@ -18,16 +18,28 @@ std::string system(std::string_view filename) {
 	auto path = std::string(filename);
 	svg_to_png(path);
 
-	const std::string_view prefix{"res/ComponentLibrary/"};
-	if (path.starts_with(prefix)) {
-		path = path.substr(prefix.length());
-		path = std::string("rack-lib/") + path;
+	{
+		const std::string_view prefix{"res/ComponentLibrary/"};
+		if (path.starts_with(prefix)) {
+			path = path.substr(prefix.length());
+			path = std::string("rack-lib/") + path;
+		}
 	}
 
-	const std::string_view rcprefix{"res/Core/"};
-	if (path.starts_with(rcprefix)) {
-		path = path.substr(rcprefix.length());
-		path = std::string("RackCore/") + path;
+	{
+		const std::string_view prefix{"res/fonts/"};
+		if (path.starts_with(prefix)) {
+			path = path.substr(prefix.length());
+			path = std::string("rack-lib/fonts/") + path;
+		}
+	}
+
+	{
+		const std::string_view rcprefix{"res/Core/"};
+		if (path.starts_with(rcprefix)) {
+			path = path.substr(rcprefix.length());
+			path = std::string("RackCore/") + path;
+		}
 	}
 
 	set_drive(path);
