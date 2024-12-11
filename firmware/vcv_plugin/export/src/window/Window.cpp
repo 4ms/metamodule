@@ -21,7 +21,7 @@ void Font::loadFile(const std::string &filename, NVGcontext *vg) {
 		name = name.substr(pos + 1);
 	}
 
-	auto path = "/ram/" + rack::asset::system(filename);
+	auto path = rack::asset::system(filename);
 
 	size_t size = 0;
 	auto data = rack::system::readFile(path, &size);
