@@ -109,7 +109,7 @@
  *========================*/
 
 /*Align the stride of all layers and images to this bytes*/
-#define LV_DRAW_BUF_STRIDE_ALIGN                1
+#define LV_DRAW_BUF_STRIDE_ALIGN                4
 
 /*Align the start address of draw_buf addresses to this bytes*/
 #define LV_DRAW_BUF_ALIGN                       4
@@ -131,7 +131,7 @@
 /* The stack size of the drawing thread.
  * NOTE: If FreeType or ThorVG is enabled, it is recommended to set it to 32KB or more.
  */
-#define LV_DRAW_THREAD_STACK_SIZE    (128 * 1024)   /*[bytes]*/
+#define LV_DRAW_THREAD_STACK_SIZE    (64 * 1024)   /*[bytes]*/
 
 #define LV_USE_DRAW_SW 1
 #if LV_USE_DRAW_SW == 1
@@ -172,13 +172,13 @@
         /*Allow buffering some shadow calculation.
         *LV_DRAW_SW_SHADOW_CACHE_SIZE is the max. shadow size to buffer, where shadow size is `shadow_width + radius`
         *Caching has LV_DRAW_SW_SHADOW_CACHE_SIZE^2 RAM cost*/
-        #define LV_DRAW_SW_SHADOW_CACHE_SIZE 32
+        #define LV_DRAW_SW_SHADOW_CACHE_SIZE 8 
 
         /* Set number of maximally cached circle data.
         * The circumference of 1/4 circle are saved for anti-aliasing
         * radius * 4 bytes are used per circle (the most often used radiuses are saved)
         * 0: to disable caching */
-        #define LV_DRAW_SW_CIRCLE_CACHE_SIZE 16 
+        #define LV_DRAW_SW_CIRCLE_CACHE_SIZE 8 
     #endif
 
     #define  LV_USE_DRAW_SW_ASM     LV_DRAW_SW_ASM_NONE
@@ -289,7 +289,7 @@
 
     /*1: Print the log with 'printf';
     *0: User need to register a callback with `lv_log_register_print_cb()`*/
-    #define LV_LOG_PRINTF 0
+    #define LV_LOG_PRINTF 1
 
     /*Set callback to print the logs.
      *E.g `my_print`. The prototype should be `void my_print(lv_log_level_t level, const char * buf)`
@@ -378,10 +378,10 @@
 #define LV_COLOR_MIX_ROUND_OFS  0
 
 /* Add 2 x 32 bit variables to each lv_obj_t to speed up getting style properties */
-#define LV_OBJ_STYLE_CACHE      1
+#define LV_OBJ_STYLE_CACHE      0
 
 /* Add `id` field to `lv_obj_t` */
-#define LV_USE_OBJ_ID           1
+#define LV_USE_OBJ_ID           0
 
 /* Automatically assign an ID when obj is created */
 #define LV_OBJ_ID_AUTO_ASSIGN   LV_USE_OBJ_ID
@@ -392,13 +392,13 @@
 * - lv_obj_stringify_id:    Return e.g. "button3"
 * - lv_obj_free_id:         Does nothing, as there is no memory allocation  for the ID.
 * When disabled these functions needs to be implemented by the user.*/
-#define LV_USE_OBJ_ID_BUILTIN   1
+#define LV_USE_OBJ_ID_BUILTIN   0
 
 /*Use obj property set/get API*/
 #define LV_USE_OBJ_PROPERTY 0
 
 /*Enable property name support*/
-#define LV_USE_OBJ_PROPERTY_NAME 1
+#define LV_USE_OBJ_PROPERTY_NAME 0
 
 /* VG-Lite Simulator */
 /*Requires: LV_USE_THORVG_INTERNAL or LV_USE_THORVG_EXTERNAL */
@@ -447,13 +447,13 @@
 
 /*Will be added where memories needs to be aligned (with -Os data might not be aligned to boundary by default).
  * E.g. __attribute__((aligned(4)))*/
-#define LV_ATTRIBUTE_MEM_ALIGN __attribute__((aligned(64)))
+#define LV_ATTRIBUTE_MEM_ALIGN __attribute__((aligned(32)))
 
 /*Attribute to mark large constant arrays for example font's bitmaps*/
-#define LV_ATTRIBUTE_LARGE_CONST __attribute__((aligned(64)))
+#define LV_ATTRIBUTE_LARGE_CONST __attribute__((aligned(32)))
 
 /*Compiler prefix for a big array declaration in RAM*/
-#define LV_ATTRIBUTE_LARGE_RAM_ARRAY __attribute__((aligned(64)))
+#define LV_ATTRIBUTE_LARGE_RAM_ARRAY __attribute__((aligned(32)))
 
 /*Place performance critical functions into a faster memory (e.g RAM)*/
 #define LV_ATTRIBUTE_FAST_MEM
@@ -473,7 +473,7 @@
 #define LV_USE_MATRIX           1
 
 /*Include `lvgl_private.h` in `lvgl.h` to access internal data and functions by default*/
-#define LV_USE_PRIVATE_API		0
+#define LV_USE_PRIVATE_API		1
 
 /*==================
  *   FONT USAGE
