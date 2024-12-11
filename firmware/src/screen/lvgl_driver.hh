@@ -18,26 +18,27 @@ class LVGLDriver {
 	lv_indev_t *indev;
 
 public:
-	LVGLDriver(lv_display_flush_cb_t flush_cb,
-			   lv_indev_read_cb_t indev_cb,
-			   lv_display_flush_wait_cb_t wait_cb,
-			   std::span<lv_color_t> buffer1,
-			   std::span<lv_color_t> buffer2) {
+	LVGLDriver(std::span<lv_color_t> buffer1, std::span<lv_color_t> buffer2) {
 		UartLog::log("LVGLDriver started\n");
 
 		// Debug::Pin0::high();
 		lv_init();
+
+		MMDisplay::init();
+
 		display = lv_display_create(ScreenWidth, ScreenHeight); //NOLINT: cannot construct before lv_init
 		indev = lv_indev_create();								//NOLINT: cannot construct before lv_init
 
-		lv_display_set_flush_cb(display, flush_cb);
 		lv_display_set_buffers(
 			display, buffer1.data(), buffer2.data(), buffer1.size_bytes(), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
-		lv_display_set_flush_wait_cb(display, wait_cb);
+		lv_display_set_flush_cb(display, MMDisplay::flush_to_screen);
+		lv_display_set_flush_wait_cb(display, MMDisplay::wait_cb);
+
+		lv_display_set_color_format(display, LV_COLOR_FORMAT_RGB565);
 
 		lv_indev_set_type(indev, LV_INDEV_TYPE_ENCODER);
-		lv_indev_set_read_cb(indev, indev_cb);
+		lv_indev_set_read_cb(indev, MMDisplay::read_input);
 
 		lv_indev_enable(indev, true);
 		lv_indev_set_group(indev, nullptr);

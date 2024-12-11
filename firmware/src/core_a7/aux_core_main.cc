@@ -41,8 +41,7 @@ extern "C" void aux_core_main() {
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
 #endif
 
-	MMDisplay::init();
-	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
+	LVGLDriver gui{framebuf1, framebuf2};
 
 	RamDiskOps ramdisk_ops{*ramdisk_storage};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
