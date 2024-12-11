@@ -137,7 +137,18 @@ void renderTriangles(void *uptr,
 					 const NVGvertex *verts,
 					 int nverts,
 					 float fringe) {
-	printf("renderTriangles %d verts\n", nverts);
+	auto context = get_drawcontext(uptr);
+
+	context->rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
+	context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
+
+	if (auto rem = nverts % 3; rem != 0)
+		nverts -= rem;
+
+	for (auto i = 0; i < nverts; i += 3) {
+		std::array<lv_point_t, 3> points{to_lv_point(verts[i]), to_lv_point(verts[i + 1]), to_lv_point(verts[i + 2])};
+		lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
+	}
 }
 
 void renderDelete(void *uptr) {
@@ -162,7 +173,7 @@ int renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, cons
 }
 
 int renderDeleteTexture(void *uptr, int image) {
-	// printf("renderDeleteTexture\n");
+	printf("renderDeleteTexture\n");
 	return 1;
 }
 
@@ -171,7 +182,7 @@ int renderUpdateTexture(void *uptr, int image, int x, int y, int w, int h, const
 	return 1;
 }
 int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
-	// printf("renderGetTextureSize\n");
+	printf("renderGetTextureSize\n");
 	return 1;
 }
 
