@@ -168,12 +168,11 @@ void Module::paramsFromJson(json_t *rootJ) {
 
 		ParamQuantity *pq = paramQuantities[paramId];
 		// Check that the Param is bounded
-		if (!pq->isBounded())
-			continue;
-
-		json_t *valueJ = json_object_get(paramJ, "value");
-		if (valueJ)
-			pq->setImmediateValue(json_number_value(valueJ));
+		if (pq && pq->isBounded()) {
+			json_t *valueJ = json_object_get(paramJ, "value");
+			if (valueJ)
+				pq->setImmediateValue(json_number_value(valueJ));
+		}
 	}
 }
 
