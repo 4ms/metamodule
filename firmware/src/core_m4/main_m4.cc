@@ -39,7 +39,7 @@ static void app_startup() {
 
 } // namespace MetaModule
 
-void main() {
+int main() {
 	using namespace MetaModule;
 	using namespace mdrivlib;
 

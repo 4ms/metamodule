@@ -39,7 +39,6 @@ add_compile_options(
   -fdata-sections
   -ffunction-sections
   -nostartfiles
-  -ffreestanding
   -fno-unwind-tables
   -Wall
   -Werror=return-type
