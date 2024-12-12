@@ -1,3 +1,5 @@
+// #define GCC_OPTIMIZE_OFF __attribute__((optimize("-O0")))
+
 void _init(void) {
 }
 void _fini(void) {
@@ -8,14 +10,20 @@ void _exit(int x) {
 	while (1)
 		;
 }
-void _kill(int x) {
+
+// GCC_OPTIMIZE_OFF
+int _kill(int x, int y) {
+	return 0;
 }
+
 int _getpid() {
 	return -1;
 }
-void _fstat(int x, void *p) {
+int _fstat(int x, void *p) {
+	return 0;
 }
-void _isatty() {
+int _isatty(int x) {
+	return -1;
 }
 int *__errno() {
 	static int errno = 0;

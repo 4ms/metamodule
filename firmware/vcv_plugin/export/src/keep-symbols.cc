@@ -66,8 +66,9 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	}
 
 	{
-		log1pl(1.);
-		expm1l(1.);
+		volatile auto x = log1pl(1.);
+		volatile auto y = expm1l(1.);
+		printf("%Lf%Lf\n", x, y);
 	}
 
 	static auto addr = &MetaModule::register_module;
