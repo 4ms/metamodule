@@ -160,15 +160,28 @@ void renderTriangles(void *uptr,
 					 float fringe) {
 	auto context = get_drawcontext(uptr);
 
+	//TODO: how to draw these?
+
 	context->rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
 	context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
+	context->rect_dsc.border_opa = to_lv_opa(paint->outerColor);
+	context->rect_dsc.border_color = to_lv_color(paint->outerColor);
+
+	// context->line_dsc.color = to_lv_color(paint->outerColor);
+	// context->line_dsc.opa = to_lv_opa(paint->outerColor);
 
 	if (auto rem = nverts % 3; rem != 0)
 		nverts -= rem;
 
 	for (auto i = 0; i < nverts; i += 3) {
-		std::array<lv_point_t, 3> points{to_lv_point(verts[i]), to_lv_point(verts[i + 1]), to_lv_point(verts[i + 2])};
+		std::array<lv_point_t, 4> points{
+			to_lv_point(verts[i]),
+			to_lv_point(verts[i + 1]),
+			to_lv_point(verts[i + 2]),
+			to_lv_point(verts[i]),
+		};
 		lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
+		// lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
 	}
 }
 
