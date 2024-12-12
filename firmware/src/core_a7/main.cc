@@ -41,7 +41,7 @@ struct SystemInit : AppStartup, UartLog, Debug, Hardware {
 
 } // namespace MetaModule
 
-void main() {
+int main() {
 	using namespace MetaModule;
 
 	StaticBuffers::init();

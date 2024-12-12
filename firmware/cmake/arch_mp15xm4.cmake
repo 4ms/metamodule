@@ -34,7 +34,6 @@ add_compile_options(
   -fdata-sections
   -ffunction-sections
   -nostartfiles
-  -ffreestanding
   -fno-unwind-tables
   -Wall
   -Werror=return-type
@@ -50,7 +49,6 @@ add_compile_options(
 
 add_link_options(
     -Wl,--gc-sections
-    -ffreestanding
     -nostartfiles
     ${MCU_FLAGS}
 )

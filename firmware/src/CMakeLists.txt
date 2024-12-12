@@ -268,7 +268,6 @@ target_link_script(
   -L${FWDIR}
   -Wl,--gc-sections
   -Wno-psabi
-  -ffreestanding
   -nostartfiles
 )
 
