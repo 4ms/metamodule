@@ -17,10 +17,31 @@
 namespace MetaModule
 {
 
+namespace NanoVG
+{
+
+struct Texture {
+	std::vector<lv_color_t> pix;
+	size_t w{};
+	size_t h{};
+
+	lv_color_t px(size_t x, size_t y) const {
+		return pix[x + y * w];
+	}
+
+	lv_color_t &px(size_t x, size_t y) {
+		return pix[x + y * w];
+	}
+	//type?
+	//flags?
+};
+
 struct DrawContext {
 	lv_obj_t *canvas{};
 	lv_draw_line_dsc_t line_dsc{};
 	lv_draw_rect_dsc_t rect_dsc{};
+
+	std::vector<Texture> textures;
 
 	DrawContext(lv_obj_t *canvas)
 		: canvas{canvas} {
@@ -32,15 +53,16 @@ struct DrawContext {
 	}
 };
 
-namespace NanoVG
-{
-
-constexpr lv_point_t to_lv_point(NVGvertex vertex) {
-	return lv_point_t(std::round(mm_to_px(to_mm(vertex.x), 240)), std::round(mm_to_px(to_mm(vertex.y), 240.f)));
+constexpr lv_coord_t to_lv_coord(float x) {
+	return std::round(mm_to_px(to_mm(x), 240));
 }
 
-MetaModule::DrawContext *get_drawcontext(void *uptr) {
-	return (MetaModule::DrawContext *)(uptr);
+constexpr lv_point_t to_lv_point(NVGvertex vertex) {
+	return lv_point_t(to_lv_coord(vertex.x), to_lv_coord(vertex.y));
+}
+
+DrawContext *get_drawcontext(void *uptr) {
+	return (DrawContext *)(uptr);
 }
 
 lv_color_t to_lv_color(NVGcolor color) {
@@ -160,28 +182,25 @@ void renderTriangles(void *uptr,
 					 float fringe) {
 	auto context = get_drawcontext(uptr);
 
-	//TODO: how to draw these?
-
-	context->rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
-	context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
-	context->rect_dsc.border_opa = to_lv_opa(paint->outerColor);
-	context->rect_dsc.border_color = to_lv_color(paint->outerColor);
-
-	// context->line_dsc.color = to_lv_color(paint->outerColor);
-	// context->line_dsc.opa = to_lv_opa(paint->outerColor);
-
-	if (auto rem = nverts % 3; rem != 0)
+	if (auto rem = nverts % 6; rem != 0)
 		nverts -= rem;
 
-	for (auto i = 0; i < nverts; i += 3) {
-		std::array<lv_point_t, 4> points{
-			to_lv_point(verts[i]),
-			to_lv_point(verts[i + 1]),
-			to_lv_point(verts[i + 2]),
-			to_lv_point(verts[i]),
-		};
-		lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
-		// lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
+	for (auto i = 0; i < nverts; i += 6) {
+		// dest rect
+		auto d_tl = to_lv_point(verts[i]);
+		auto d_br = to_lv_point(verts[i + 1]);
+
+		// source rect:
+		auto tx_width = context->textures[paint->image].w;
+		auto tx_height = context->textures[paint->image].h;
+		auto s_tl = lv_point_t{to_lv_coord(tx_width * verts[i].u), to_lv_coord(tx_height * verts[i].v)};
+		auto s_br = lv_point_t{to_lv_coord(tx_width * verts[i + 1].u), to_lv_coord(tx_height * verts[i + 1].v)};
+
+		// now copy with scaling
+		// from context->textures[paint->image].pix[s_tl...s_br]
+		// to lv_canvas buffer
+
+		//ignore i+2, i+3, i+4, i+5
 	}
 }
 
@@ -197,13 +216,22 @@ int renderCreate(void *uptr, void *otherUptr) {
 
 int renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, const unsigned char *data) {
 	printf("renderCreateTexture: %d x %d, type %d, flags %d\n", w, h, type, imageFlags);
-	// if (data) {
-	// for (auto i = 0; auto c : std::span{data, size_t(w * h)}) {
 
-	// }
-	// 	printf("\n");
-	// }
-	return 1;
+	auto context = get_drawcontext(uptr);
+
+	Texture tx;
+	tx.w = w;
+	tx.h = h;
+	tx.pix.resize(w * h);
+
+	if (data) {
+		// for (auto i = 0; auto c : std::span{data, size_t(w * h)}) {
+		// tx.pix[i] = c; //what format is the data in?
+		// }
+	}
+
+	context->textures.emplace_back(tx);
+	return context->textures.size() - 1;
 }
 
 int renderDeleteTexture(void *uptr, int image) {
@@ -213,11 +241,25 @@ int renderDeleteTexture(void *uptr, int image) {
 
 int renderUpdateTexture(void *uptr, int image, int x, int y, int w, int h, const unsigned char *data) {
 	printf("renderUpdateTexture (image=%d) %d x %d @ %d,%d\n", image, w, h, x, y);
+	auto context = get_drawcontext(uptr);
+
+	if (image < (int)context->textures.size()) {
+		//copy data to context->textures[image]
+	}
+
 	return 1;
 }
 int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
 	printf("renderGetTextureSize\n");
-	return 1;
+	auto context = get_drawcontext(uptr);
+
+	if (image < (int)context->textures.size()) {
+		*w = context->textures[image].w;
+		*h = context->textures[image].h;
+		return 1;
+	}
+
+	return 0;
 }
 
 void renderViewport(void *uptr, float width, float height, float devicePixelRatio) {
@@ -256,7 +298,7 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	params.renderTriangles = renderTriangles;
 	params.renderDelete = renderDelete;
 
-	auto draw_ctx = new MetaModule::DrawContext{(lv_obj_t *)canvas};
+	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas};
 	params.userPtr = draw_ctx;
 
 	params.edgeAntiAlias = 0;
