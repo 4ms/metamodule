@@ -3,7 +3,7 @@
 	url = https://github.com/4ms/mdrivlib.git
 [submodule "firmware/lib/lvgl/lvgl"]
 	path = firmware/lib/lvgl/lvgl
-	url = https://github.com/lvgl/lvgl.git
+	url = https://github.com/danngreen/lvgl.git
 [submodule "shared/cpputil"]
 	path = firmware/lib/cpputil
 	url = https://github.com/4ms/cpputil.git
