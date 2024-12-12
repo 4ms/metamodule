@@ -65,15 +65,17 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 		(void)x;
 	}
 
-	{
-		log1pl(1.);
-		expm1l(1.);
-	}
-
-	static auto addr = &MetaModule::register_module;
-	// static bool keep = MetaModule::register_module("", "", nullptr, {}, "");
-	printf("%p\n", addr);
-
 	// provides vtable for Quantity
 	rack::Quantity q;
+}
+
+void __attribute__((optimize("-O0"))) keep_math(float x) {
+	auto y = log1pl(x);
+	auto z = expm1l(y);
+	printf("%f%Lf%Lf\n", x, y, z);
+}
+
+void __attribute__((optimize("-O0"))) keep_register_module() {
+	static auto addr = &MetaModule::register_module;
+	printf("%p\n", addr);
 }
