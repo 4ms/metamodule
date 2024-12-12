@@ -1,4 +1,5 @@
 #include "CoreModules/elements/units.hh"
+#include "console/pr_dbg.hh"
 #include "lvgl.h"
 #include <algorithm>
 #include <cmath>
@@ -65,14 +66,16 @@ constexpr bool is_poly_concave(std::span<lv_point_t> points) {
 		auto A = points[(i + 1) % n];
 		auto B = points[(i + 2) % n];
 		auto cross = X_prod(O, A, B);
-		if (cross != 0) {
-			if (sign == 0)
-				sign = cross;
-			else if ((sign > 0 && cross < 0) || (sign < 0 && cross > 0))
-				return false;
-		}
+		if (cross == 0)
+			continue;
+
+		if (sign == 0)
+			sign = cross;
+
+		if ((sign > 0 && cross < 0) || (sign < 0 && cross > 0))
+			return true;
 	}
-	return true;
+	return false;
 }
 
 void renderFill(void *uptr,
@@ -83,6 +86,15 @@ void renderFill(void *uptr,
 				const float *bounds,
 				const NVGpath *paths,
 				int npaths) {
+
+	if (npaths < 0 || npaths > 1024) {
+		pr_dbg("Invalid number of paths in RenderFill: %d\n", npaths);
+		return;
+	}
+	if (paths[0].fill[0].x > 10000.f || paths[0].fill[0].y > 10000.f) {
+		pr_dbg("Invalid point in renderFill (point [0] is %f, %f)\n", paths[0].fill[0].x, paths[0].fill[0].y);
+		return;
+	}
 
 	auto context = get_drawcontext(uptr);
 
@@ -98,11 +110,11 @@ void renderFill(void *uptr,
 		std::ranges::transform(std::span{path.fill, (size_t)path.nfill}, std::back_inserter(points), to_lv_point);
 
 		if (is_poly_concave(points)) {
-			lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
-		} else {
-			// LVGL lv_canvas_draw_polygon goes into an infinite loop if polygon is convex.
-			// Fall back to drawing polygon outline (unfilled) if it's convex
+			// LVGL lv_canvas_draw_polygon goes into an infinite loop if polygon is concave.
+			// Fall back to drawing polygon outline (unfilled) if it's concave
 			lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
+		} else {
+			lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
 		}
 	}
 }
@@ -117,6 +129,15 @@ void renderStroke(void *uptr,
 				  int npaths) {
 
 	auto context = get_drawcontext(uptr);
+
+	if (npaths < 0 || npaths > 1024) {
+		pr_dbg("Invalid number of paths in RenderFill: %d\n", npaths);
+		return;
+	}
+	if (paths[0].stroke[0].x > 10000.f || paths[0].stroke[0].y > 10000.f) {
+		pr_dbg("Invalid point in renderStroke (point [0] is %f, %f)\n", paths[0].stroke[0].x, paths[0].stroke[0].y);
+		return;
+	}
 
 	context->line_dsc.color = to_lv_color(paint->innerColor);
 	context->line_dsc.opa = to_lv_opa(paint->innerColor);
