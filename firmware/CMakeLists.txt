@@ -60,6 +60,8 @@ add_custom_command(
           --elf $<TARGET_FILE:main.elf>
           --out ${SYMBOLS_FILE}
           # -v
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/flashing/zero-term.py
+          --in ${SYMBOLS_FILE} --ou ${SYMBOLS_FILE}
   COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
   DEPENDS main.elf 
   COMMENT "Generating table of API symbol addresses and installing in firmware binary"
