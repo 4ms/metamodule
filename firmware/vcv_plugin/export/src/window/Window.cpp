@@ -23,21 +23,13 @@ void Font::loadFile(const std::string &filename, NVGcontext *vg) {
 
 	auto path = rack::asset::system(filename);
 
-	size_t size = 0;
-	auto data = rack::system::readFile(path, &size);
-
-	if (size > 0 && data) {
-		// Transfer ownership of font data to font object
-		handle = nvgCreateFontMem(vg, name.c_str(), data, size, 0);
-		if (handle < 0) {
-			std::free(data);
-			pr_err("Failed to load font %s (%s)", filename.c_str(), name.c_str());
-		}
-	} else {
-		pr_err("Failed to open font file %s", filename.c_str());
+	auto handle = nvgCreateFont(vg, name.c_str(), path.c_str());
+	if (handle < 0) {
+		pr_err("Failed to load font %s (%s)", filename.c_str(), name.c_str());
+		return;
 	}
 
-	pr_dbg("Loaded font %s", filename.c_str());
+	pr_dbg("Loaded font %s\n", filename.c_str());
 }
 
 std::shared_ptr<Font> Font::load(const std::string &filename) {

@@ -22,8 +22,8 @@
 #include <memory.h>
 
 #include "nanovg.h"
-#define FONTSTASH_IMPLEMENTATION
-#include "fontstash.h"
+// #define FONTSTASH_IMPLEMENTATION
+#include "fontstash-wrapper.h"
 
 #ifndef NVG_NO_STB
 #define STB_IMAGE_IMPLEMENTATION
@@ -294,7 +294,7 @@ static NVGstate* nvg__getState(NVGcontext* ctx)
 
 NVGcontext* nvgCreateInternal(NVGparams* params, NVGcontext* other)  // Share the fonts and images of 'other' if it's non-NULL.
 {
-	FONSparams fontParams;
+	// FONSparams fontParams;
 	NVGcontext* ctx = (NVGcontext*)malloc(sizeof(NVGcontext));
 	int i;
 	if (ctx == NULL) goto error;
@@ -329,22 +329,22 @@ NVGcontext* nvgCreateInternal(NVGparams* params, NVGcontext* other)  // Share th
 
 	// Init font rendering
 	if (!other) {
-		memset(&fontParams, 0, sizeof(fontParams));
-		fontParams.width = NVG_INIT_FONTIMAGE_SIZE;
-		fontParams.height = NVG_INIT_FONTIMAGE_SIZE;
-		fontParams.flags = FONS_ZERO_TOPLEFT;
-		fontParams.renderCreate = NULL;
-		fontParams.renderUpdate = NULL;
-		fontParams.renderDraw = NULL;
-		fontParams.renderDelete = NULL;
-		fontParams.userPtr = NULL;
-		ctx->fontContext->fs = fonsCreateInternal(&fontParams);
-		if (ctx->fontContext->fs == NULL) goto error;
+		// memset(&fontParams, 0, sizeof(fontParams));
+		// fontParams.width = NVG_INIT_FONTIMAGE_SIZE;
+		// fontParams.height = NVG_INIT_FONTIMAGE_SIZE;
+		// fontParams.flags = FONS_ZERO_TOPLEFT;
+		// fontParams.renderCreate = NULL;
+		// fontParams.renderUpdate = NULL;
+		// fontParams.renderDraw = NULL;
+		// fontParams.renderDelete = NULL;
+		// fontParams.userPtr = NULL;
+		// ctx->fontContext->fs = fonsCreateInternal(&fontParams);
+		// if (ctx->fontContext->fs == NULL) goto error;
 
-		// Create font texture
-		ctx->fontContext->fontImages[0] = ctx->params.renderCreateTexture(ctx->params.userPtr, NVG_TEXTURE_ALPHA, fontParams.width, fontParams.height, 0, NULL);
-		if (ctx->fontContext->fontImages[0] == 0) goto error;
-		ctx->fontContext->fontImageIdx = 0;
+		// // Create font texture
+		// ctx->fontContext->fontImages[0] = ctx->params.renderCreateTexture(ctx->params.userPtr, NVG_TEXTURE_ALPHA, fontParams.width, fontParams.height, 0, NULL);
+		// if (ctx->fontContext->fontImages[0] == 0) goto error;
+		// ctx->fontContext->fontImageIdx = 0;
 	}
 
 	return ctx;
@@ -2443,6 +2443,7 @@ static float nvg__getFontScale(NVGstate* state)
 	return nvg__minf(nvg__quantize(nvg__getAverageScale(state->xform), 0.01f), 4.0f);
 }
 
+#if(0)
 static void nvg__flushTextTexture(NVGcontext* ctx)
 {
 	int dirty[4];
@@ -2512,7 +2513,47 @@ static int nvg__isTransformFlipped(const float *xform)
 	float det = xform[0] * xform[3] - xform[2] * xform[1];
 	return( det < 0);
 }
+#endif
 
+float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char* end)
+{
+	NVGstate* state = nvg__getState(ctx);
+	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
+
+	struct NVGFontState fs;
+	fs.fontSize = state->fontSize*scale;
+	fs.letterSpacing = state->letterSpacing*scale;
+	fs.lineHeight = state->lineHeight;
+	fs.fontBlur = state->fontBlur*scale;
+	fs.textAlign = state->textAlign;
+	fs.fontId = state->fontId;
+
+	if (end == NULL)
+		end = string + strlen(string);
+
+	return ctx->params.renderText(ctx->params.userPtr, x, y, 320, string, end, &fs);
+}
+
+void nvgTextBox(NVGcontext* ctx, float x, float y, float breakRowWidth, const char* string, const char* end)
+{
+	NVGstate* state = nvg__getState(ctx);
+	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
+
+	struct NVGFontState fs;
+	fs.fontSize = state->fontSize*scale;
+	fs.letterSpacing = state->letterSpacing*scale;
+	fs.lineHeight = state->lineHeight;
+	fs.fontBlur = state->fontBlur*scale;
+	fs.textAlign = state->textAlign;
+	fs.fontId = state->fontId;
+
+	if (end == NULL)
+		end = string + strlen(string);
+
+	ctx->params.renderText(ctx->params.userPtr, x, y, breakRowWidth, string, end, &fs);
+}
+
+#if(0)
 float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char* end)
 {
 	NVGstate* state = nvg__getState(ctx);
@@ -2619,9 +2660,14 @@ void nvgTextBox(NVGcontext* ctx, float x, float y, float breakRowWidth, const ch
 
 	state->textAlign = oldAlign;
 }
+#endif
+
 
 int nvgTextGlyphPositions(NVGcontext* ctx, float x, float y, const char* string, const char* end, NVGglyphPosition* positions, int maxPositions)
 {
+	return 0;
+
+#if(0)
 	NVGstate* state = nvg__getState(ctx);
 	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
 	float invscale = 1.0f / scale;
@@ -2661,6 +2707,7 @@ int nvgTextGlyphPositions(NVGcontext* ctx, float x, float y, const char* string,
 	}
 
 	return npos;
+#endif
 }
 
 enum NVGcodepointType {
@@ -2672,6 +2719,8 @@ enum NVGcodepointType {
 
 int nvgTextBreakLines(NVGcontext* ctx, const char* string, const char* end, float breakRowWidth, NVGtextRow* rows, int maxRows)
 {
+	return 0;
+#if(0)
 	NVGstate* state = nvg__getState(ctx);
 	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
 	float invscale = 1.0f / scale;
@@ -2875,10 +2924,20 @@ int nvgTextBreakLines(NVGcontext* ctx, const char* string, const char* end, floa
 	}
 
 	return nrows;
+#endif
 }
 
 float nvgTextBounds(NVGcontext* ctx, float x, float y, const char* string, const char* end, float* bounds)
 {
+	if (bounds != NULL) {
+		bounds[0] = 0;
+		bounds[1] = 0;
+		bounds[2] = 0;
+		bounds[3] = 0;
+	}
+	return 0;
+
+#if(0)
 	NVGstate* state = nvg__getState(ctx);
 	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
 	float invscale = 1.0f / scale;
@@ -2902,10 +2961,19 @@ float nvgTextBounds(NVGcontext* ctx, float x, float y, const char* string, const
 		bounds[3] *= invscale;
 	}
 	return width * invscale;
+#endif
 }
 
 void nvgTextBoxBounds(NVGcontext* ctx, float x, float y, float breakRowWidth, const char* string, const char* end, float* bounds)
 {
+	if (bounds != NULL) {
+		bounds[0] = 0;
+		bounds[1] = 0;
+		bounds[2] = 0;
+		bounds[3] = 0;
+	}
+
+#if (0)
 	NVGstate* state = nvg__getState(ctx);
 	NVGtextRow rows[2];
 	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
@@ -2971,10 +3039,17 @@ void nvgTextBoxBounds(NVGcontext* ctx, float x, float y, float breakRowWidth, co
 		bounds[2] = maxx;
 		bounds[3] = maxy;
 	}
+#endif
 }
 
 void nvgTextMetrics(NVGcontext* ctx, float* ascender, float* descender, float* lineh)
 {
+	if (ascender) ascender = 0;
+	if (descender) descender = 0;
+	if (lineh) lineh = 0;
+	return;
+
+#if (0)
 	NVGstate* state = nvg__getState(ctx);
 	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
 	float invscale = 1.0f / scale;
@@ -2994,5 +3069,7 @@ void nvgTextMetrics(NVGcontext* ctx, float* ascender, float* descender, float* l
 		*descender *= invscale;
 	if (lineh != NULL)
 		*lineh *= invscale;
+#endif
 }
+
 // vim: ft=c nu noet ts=4

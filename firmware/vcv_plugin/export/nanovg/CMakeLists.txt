@@ -2,6 +2,7 @@ add_library(nanovg STATIC)
 
 target_sources(nanovg PRIVATE 
     nanovg.c 
+    fons-wrapper.cc
 )
 
 set_property(TARGET nanovg PROPERTY CXX_STANDARD 23)

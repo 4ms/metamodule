@@ -1,5 +1,6 @@
 #include "CoreModules/elements/units.hh"
 #include "console/pr_dbg.hh"
+#include "gui/fonts/fonts.hh"
 #include "lvgl.h"
 #include <algorithm>
 #include <cmath>
@@ -40,6 +41,7 @@ struct DrawContext {
 	lv_obj_t *canvas{};
 	lv_draw_line_dsc_t line_dsc{};
 	lv_draw_rect_dsc_t rect_dsc{};
+	lv_draw_label_dsc_t label_dsc{};
 
 	std::vector<Texture> textures;
 
@@ -173,6 +175,23 @@ void renderStroke(void *uptr,
 	}
 }
 
+float renderText(
+	void *uptr, float x, float y, float max_w, const char *text, const char *textend, struct NVGFontState *fs) {
+	auto context = get_drawcontext(uptr);
+	auto canvas = context->canvas;
+
+	char *text2 = const_cast<char *>(text);
+	if (textend && *textend != '\0') {
+		pr_err("String not null terminated, can't draw\n");
+		text2 = (char *)malloc(textend - text);
+	}
+
+	// context->label_dsc.font = MetaModule::get_font(fs->fontId);
+
+	lv_canvas_draw_text(canvas, to_lv_coord(x), to_lv_coord(y), max_w, &context->label_dsc, text2);
+	return 0;
+}
+
 void renderTriangles(void *uptr,
 					 NVGpaint *paint,
 					 NVGcompositeOperationState compositeOperation,
@@ -195,6 +214,11 @@ void renderTriangles(void *uptr,
 		auto tx_height = context->textures[paint->image].h;
 		auto s_tl = lv_point_t{to_lv_coord(tx_width * verts[i].u), to_lv_coord(tx_height * verts[i].v)};
 		auto s_br = lv_point_t{to_lv_coord(tx_width * verts[i + 1].u), to_lv_coord(tx_height * verts[i + 1].v)};
+
+		(void)d_tl;
+		(void)d_br;
+		(void)s_tl;
+		(void)s_br;
 
 		// now copy with scaling
 		// from context->textures[paint->image].pix[s_tl...s_br]
@@ -297,6 +321,7 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	params.renderStroke = renderStroke;
 	params.renderTriangles = renderTriangles;
 	params.renderDelete = renderDelete;
+	params.renderText = renderText;
 
 	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas};
 	params.userPtr = draw_ctx;
