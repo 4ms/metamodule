@@ -94,7 +94,7 @@ int get_handle_from_name(const char *name) {
 		return -1;
 }
 
-int get_handle_from_font(lv_font_t *font) {
+int get_handle_from_font(lv_font_t const *font) {
 	for (auto const &f : font_cache) {
 		if (f.second == font)
 			return get_handle_from_name(f.first.c_str());
