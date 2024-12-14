@@ -338,8 +338,8 @@ NVGcontext* nvgCreateInternal(NVGparams* params, NVGcontext* other)  // Share th
 		// fontParams.renderDraw = NULL;
 		// fontParams.renderDelete = NULL;
 		// fontParams.userPtr = NULL;
-		// ctx->fontContext->fs = fonsCreateInternal(&fontParams);
-		// if (ctx->fontContext->fs == NULL) goto error;
+		ctx->fontContext->fs = fonsCreateInternal();//&fontParams);
+		if (ctx->fontContext->fs == NULL) goto error;
 
 		// // Create font texture
 		// ctx->fontContext->fontImages[0] = ctx->params.renderCreateTexture(ctx->params.userPtr, NVG_TEXTURE_ALPHA, fontParams.width, fontParams.height, 0, NULL);
@@ -2526,7 +2526,8 @@ float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char*
 	fs.lineHeight = state->lineHeight;
 	fs.fontBlur = state->fontBlur*scale;
 	fs.textAlign = state->textAlign;
-	fs.fontId = state->fontId;
+	fs.paint = &state->fill;
+	fs.fontPtr = fonsGetFontByHandle(ctx->fontContext->fs, state->fontId);
 
 	if (end == NULL)
 		end = string + strlen(string);
@@ -2545,7 +2546,8 @@ void nvgTextBox(NVGcontext* ctx, float x, float y, float breakRowWidth, const ch
 	fs.lineHeight = state->lineHeight;
 	fs.fontBlur = state->fontBlur*scale;
 	fs.textAlign = state->textAlign;
-	fs.fontId = state->fontId;
+	fs.paint = &state->fill;
+	fs.fontPtr = fonsGetFontByHandle(ctx->fontContext->fs, state->fontId);
 
 	if (end == NULL)
 		end = string + strlen(string);

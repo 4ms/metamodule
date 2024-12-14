@@ -15,10 +15,9 @@
 #include <nanovg_gl.h>
 #include <nanovg_gl_utils.h>
 
-namespace MetaModule
-{
+#include "medium/debug_raw.h"
 
-namespace NanoVG
+namespace MetaModule::NanoVG
 {
 
 struct Texture {
@@ -45,6 +44,8 @@ struct DrawContext {
 
 	std::vector<Texture> textures;
 
+	void *parent_ctx{}; // needed for deleting
+
 	DrawContext(lv_obj_t *canvas)
 		: canvas{canvas} {
 		lv_draw_line_dsc_init(&line_dsc);
@@ -52,12 +53,22 @@ struct DrawContext {
 
 		lv_draw_rect_dsc_init(&rect_dsc);
 		rect_dsc.radius = 0;
+
+		lv_draw_label_dsc_init(&label_dsc);
+		// label_dsc.flag = 0;
+		// label_dsc.line_space = 0;
+		// label_dsc.letter_space = 0;
+		// label_dsc.ofs_x = 0;
+		// label_dsc.ofs_y = 0;
+		// label_dsc.decor = LV_TEXT_DECOR_NONE;
+		// label_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 	}
 };
 
 constexpr lv_coord_t to_lv_coord(float x) {
 	return std::round(mm_to_px(to_mm(x), 240));
 }
+// static_assert(to_lv_coord(10.f) < 10.f);
 
 constexpr lv_point_t to_lv_point(NVGvertex vertex) {
 	return lv_point_t(to_lv_coord(vertex.x), to_lv_coord(vertex.y));
@@ -186,10 +197,31 @@ float renderText(
 		text2 = (char *)malloc(textend - text);
 	}
 
-	// context->label_dsc.font = MetaModule::get_font(fs->fontId);
+	auto font = (lv_font_t *)fs->fontPtr;
 
-	lv_canvas_draw_text(canvas, to_lv_coord(x), to_lv_coord(y), max_w, &context->label_dsc, text2);
-	return 0;
+	context->label_dsc.font = font;
+	context->label_dsc.color = to_lv_color(fs->paint->innerColor);
+	context->label_dsc.opa = to_lv_opa(fs->paint->innerColor);
+	context->label_dsc.align = fs->textAlign & NVG_ALIGN_LEFT	? LV_TEXT_ALIGN_LEFT :
+							   fs->textAlign & NVG_ALIGN_RIGHT	? LV_TEXT_ALIGN_RIGHT :
+							   fs->textAlign & NVG_ALIGN_CENTER ? LV_TEXT_ALIGN_CENTER :
+																  LV_TEXT_ALIGN_LEFT;
+
+	x += to_lv_coord(fs->paint->xform[4]);
+	y += to_lv_coord(fs->paint->xform[5]);
+
+	if (fs->textAlign & NVG_ALIGN_TOP)
+		y += fs->fontSize;
+	if (fs->textAlign & NVG_ALIGN_MIDDLE)
+		y += fs->fontSize / 2;
+
+	DebugPin1High();
+	// lv_tiny_ttf_set_size(font, to_lv_coord(fs->fontSize));
+
+	lv_canvas_draw_text(canvas, to_lv_coord(x), to_lv_coord(y), 320 /*to_lv_coord(max_w)*/, &context->label_dsc, text2);
+	DebugPin1Low();
+
+	return 10;
 }
 
 void renderTriangles(void *uptr,
@@ -298,9 +330,7 @@ void renderFlush(void *uptr) {
 	// printf("renderFlush\n");
 }
 
-} // namespace NanoVG
-
-} // namespace MetaModule
+} // namespace MetaModule::NanoVG
 
 NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	NVGparams params;
@@ -331,11 +361,18 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	ctx = nvgCreateInternal(&params, nullptr);
 
 	if (ctx) {
+		draw_ctx->parent_ctx = ctx;
 		return ctx;
 	} else {
 		delete draw_ctx;
 		return nullptr;
 	}
+}
+
+void nvgDeletePixelBufferContext(void *canvas) {
+	//TODO: how get the NVGcontext so we can delete it?
+	// NVGcontext *ctx = ....
+	// nvgDeleteInternal(ctx);
 }
 
 void nvgluDeleteFramebuffer(NVGcontext *ctx) {
