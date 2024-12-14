@@ -23,13 +23,13 @@ void Font::loadFile(const std::string &filename, NVGcontext *vg) {
 
 	auto path = rack::asset::system(filename);
 
-	auto handle = nvgCreateFont(vg, name.c_str(), path.c_str());
+	handle = nvgCreateFont(vg, name.c_str(), path.c_str());
 	if (handle < 0) {
 		pr_err("Failed to load font %s (%s)", filename.c_str(), name.c_str());
 		return;
 	}
 
-	pr_dbg("Loaded font %s\n", filename.c_str());
+	pr_dbg("Loaded font %s, with handle %d\n", filename.c_str(), handle);
 }
 
 std::shared_ptr<Font> Font::load(const std::string &filename) {
@@ -75,8 +75,7 @@ std::shared_ptr<Font> Window::loadFont(const std::string &filename) {
 		return pair->second;
 
 	// Load font
-	std::shared_ptr<Font> font;
-	font = std::make_shared<Font>();
+	auto font = std::make_shared<Font>();
 	font->loadFile(filename, vg);
 	internal->fontCache[filename] = font;
 
@@ -89,8 +88,7 @@ std::shared_ptr<Image> Window::loadImage(const std::string &filename) {
 		return pair->second;
 
 	// Load image
-	std::shared_ptr<Image> image;
-	image = std::make_shared<Image>();
+	auto image = std::make_shared<Image>();
 	image->loadFile(filename, vg);
 	internal->imageCache[filename] = image;
 
