@@ -1,5 +1,5 @@
 #pragma once
-// #include "lvgl.h"
+#include <span>
 #include <string_view>
 
 typedef struct _lv_font_t lv_font_t;
@@ -7,11 +7,9 @@ typedef struct _lv_font_t lv_font_t;
 namespace MetaModule
 {
 
-lv_font_t const *get_font(std::string_view name);
-lv_font_t const *get_font_from_handle(int handle);
+lv_font_t const *get_font(std::string_view name, std::string_view path = "");
 
-int get_handle_from_name(const char *name);
-int get_handle_from_font(lv_font_t const *font);
+lv_font_t const *load_ttf_from_memory(std::string_view name, std::span<uint8_t> data);
 
 void free_font(std::string_view name);
 
