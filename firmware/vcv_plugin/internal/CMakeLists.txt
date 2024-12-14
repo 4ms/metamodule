@@ -9,6 +9,7 @@ add_library(vcv_plugin_internal STATIC
     make_element.cc
     svg.cc
     nanovg_gl.cc
+    fons-wrapper.cc
 )
 
 target_include_directories(vcv_plugin_internal PRIVATE 
