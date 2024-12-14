@@ -384,7 +384,10 @@ struct ModuleViewPage : PageBase {
 
 		roller_hover.update();
 
-		dyn_draw.draw();
+		if (dyn_frame_throttle_ctr-- == 0) {
+			dyn_frame_throttle_ctr = DynFrameThrottle;
+			dyn_draw.draw();
+		}
 	}
 
 	bool handle_patch_mods() {
@@ -745,6 +748,8 @@ private:
 	PluginModuleMenu module_menu;
 
 	DynamicElementDraw dyn_draw;
+	unsigned dyn_frame_throttle_ctr = 1;
+	constexpr static unsigned DynFrameThrottle = 8;
 
 	enum { ExtraMenuTag = -2 };
 };
