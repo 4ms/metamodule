@@ -680,7 +680,7 @@ LV_FONT_DECLARE( ui_font_MuseoSansRounded70016)\
 #endif
 
 /*Tiny TTF library*/
-#define LV_USE_TINY_TTF 0
+#define LV_USE_TINY_TTF 1
 #if LV_USE_TINY_TTF
     /*Load TTF data from files*/
     #define LV_TINY_TTF_FILE_SUPPORT 0
