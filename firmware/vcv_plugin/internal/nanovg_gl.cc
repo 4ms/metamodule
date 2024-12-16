@@ -261,12 +261,16 @@ void renderTriangles(void *uptr,
 }
 
 void renderDelete(void *uptr) {
-	// printf("renderDelete\n");
+	printf("renderDelete\n");
+	if (uptr) {
+		if (auto context = get_drawcontext(uptr))
+			delete context;
+	}
 }
 
 // Share the textures of GLNVGcontext 'otherUptr' if it's non-NULL.
 int renderCreate(void *uptr, void *otherUptr) {
-	// printf("RenderCreate (canvas = %p)\n", get_canvas_from_context(uptr));
+	printf("RenderCreate\n");
 	return 1;
 }
 
@@ -369,10 +373,10 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	}
 }
 
-void nvgDeletePixelBufferContext(void *canvas) {
-	//TODO: how get the NVGcontext so we can delete it?
-	// NVGcontext *ctx = ....
-	// nvgDeleteInternal(ctx);
+void nvgDeletePixelBufferContext(NVGcontext *ctx) {
+	printf("nvgDeletePixelBufferContext\n");
+	if (ctx)
+		nvgDeleteInternal(ctx);
 }
 
 void nvgluDeleteFramebuffer(NVGcontext *ctx) {

@@ -55,7 +55,9 @@ public:
 		}
 	}
 
-	void close() {
+	void blur() {
+		if (drawer)
+			drawer->blur();
 		buffer.clear();
 	}
 

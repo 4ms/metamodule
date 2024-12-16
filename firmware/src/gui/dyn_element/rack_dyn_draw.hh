@@ -27,6 +27,9 @@ struct RackDynDraw : BaseDynDraw {
 	}
 
 	void draw() override {
+		if (!args.vg)
+			return;
+
 		rack::contextGet()->window->vg = args.vg;
 
 		if (auto mw = module_widget.lock()) {
@@ -43,6 +46,12 @@ struct RackDynDraw : BaseDynDraw {
 				mw->drawChild(widget, args, 1);
 			}
 		}
+	}
+
+	void blur() override {
+		nvgDeletePixelBufferContext(args.vg);
+		args.vg = nullptr;
+		rack::contextGet()->window->vg = nullptr;
 	}
 
 	~RackDynDraw() override = default;
