@@ -207,8 +207,8 @@ float renderText(
 							   fs->textAlign & NVG_ALIGN_CENTER ? LV_TEXT_ALIGN_CENTER :
 																  LV_TEXT_ALIGN_LEFT;
 
-	x += to_lv_coord(fs->paint->xform[4]);
-	y += to_lv_coord(fs->paint->xform[5]);
+	x += to_lv_coord(fs->xform[4]);
+	y += to_lv_coord(fs->xform[5]);
 
 	if (fs->textAlign & NVG_ALIGN_TOP)
 		y += fs->fontSize;
