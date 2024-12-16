@@ -130,6 +130,7 @@ lv_font_t const *get_ttf_font_from_disk(std::string_view name, std::string_view 
 	std::fclose(f);
 
 	if (auto font = lv_tiny_ttf_create_data(data.data(), data.size(), 12)) {
+		font->fallback = &lv_font_montserrat_14;
 		font_cache.insert({std::string(name), font});
 		pr_dbg("Font found\n");
 		return font;
@@ -152,6 +153,7 @@ lv_font_t const *get_font_from_disk(std::string_view name, std::string_view path
 	std::string full_path = ComponentImages::get_comp_path(path);
 
 	if (auto font = lv_font_load(full_path.data())) {
+		font->fallback = &lv_font_montserrat_14;
 		font_cache.insert({std::string(name), font});
 		return font;
 	}
