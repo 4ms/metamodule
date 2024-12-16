@@ -417,7 +417,7 @@ LV_FONT_DECLARE( ui_font_MuseoSansRounded70016)\
 #endif
 
 /*Enable drawing placeholders when glyph dsc is not found*/
-#define LV_USE_FONT_PLACEHOLDER 0
+#define LV_USE_FONT_PLACEHOLDER 1
 
 /*=================
  *  TEXT SETTINGS
