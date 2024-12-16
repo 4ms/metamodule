@@ -36,6 +36,22 @@ struct Texture {
 	//flags?
 };
 
+// struct TextRenderCacheEntry {
+// 	float x;
+// 	float y;
+// 	uint32_t text_hash;
+// 	const void *font;
+// 	NVGcolor color;
+// 	int nvg_align;
+// 	float font_size;
+
+// 	bool operator==(const TextRenderCacheEntry &other) const {
+// 		return text_hash == other.text_hash && x == other.x && y == other.y && font == other.font &&
+// 			   color.r == other.color.r && color.g == other.color.g && color.b == other.color.b &&
+// 			   color.a == other.color.a && nvg_align == other.nvg_align && font_size == other.font_size;
+// 	}
+// };
+
 struct DrawContext {
 	lv_obj_t *canvas{};
 	lv_draw_line_dsc_t line_dsc{};
@@ -43,6 +59,9 @@ struct DrawContext {
 	lv_draw_label_dsc_t label_dsc{};
 
 	std::vector<Texture> textures;
+
+	std::vector<lv_obj_t *> labels;
+	// std::vector<TextRenderCacheEntry> text_cache;
 
 	void *parent_ctx{}; // needed for deleting
 
@@ -55,20 +74,14 @@ struct DrawContext {
 		rect_dsc.radius = 0;
 
 		lv_draw_label_dsc_init(&label_dsc);
-		// label_dsc.flag = 0;
-		// label_dsc.line_space = 0;
-		// label_dsc.letter_space = 0;
-		// label_dsc.ofs_x = 0;
-		// label_dsc.ofs_y = 0;
-		// label_dsc.decor = LV_TEXT_DECOR_NONE;
-		// label_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 	}
 };
 
 constexpr lv_coord_t to_lv_coord(float x) {
 	return std::round(mm_to_px(to_mm(x), 240));
 }
-// static_assert(to_lv_coord(10.f) < 10.f);
+// 10px in rack dimensions => 6.325px in MM dimensions
+// static_assert(mm_to_px(to_mm(10.f), 240) == 6.325291928f);
 
 constexpr lv_point_t to_lv_point(NVGvertex vertex) {
 	return lv_point_t(to_lv_coord(vertex.x), to_lv_coord(vertex.y));
@@ -191,37 +204,59 @@ float renderText(
 	auto context = get_drawcontext(uptr);
 	auto canvas = context->canvas;
 
-	char *text2 = const_cast<char *>(text);
-	if (textend && *textend != '\0') {
-		pr_err("String not null terminated, can't draw\n");
-		text2 = (char *)malloc(textend - text);
+	DebugPin1High();
+
+	// Move to position
+	x = to_lv_coord(x + fs->xform[4]);
+	y = to_lv_coord(y + fs->xform[5]);
+
+	// Align vertically
+	lv_coord_t font_size = to_lv_coord((fs->fontSize > 20) ? fs->fontSize * 0.8f : fs->fontSize);
+	if (fs->textAlign & NVG_ALIGN_BASELINE)
+		y -= font_size;
+	else if (fs->textAlign & NVG_ALIGN_BOTTOM)
+		y -= std::round(font_size * 1.2f); //? estimate 20% below baseline
+	else if (fs->textAlign & NVG_ALIGN_MIDDLE)
+		y -= font_size / 2;
+
+	// Create or find existing label (match on X,Y pos)
+	lv_obj_t *label{};
+	auto found = std::ranges::find_if(
+		context->labels, [x, y](lv_obj_t *cached) { return lv_obj_get_x(cached) == x && lv_obj_get_y(cached) == y; });
+
+	if (found != context->labels.end()) {
+		label = *found;
+	} else {
+		auto font = (lv_font_t *)fs->fontPtr;
+		auto align = fs->textAlign & NVG_ALIGN_LEFT	  ? LV_TEXT_ALIGN_LEFT :
+					 fs->textAlign & NVG_ALIGN_RIGHT  ? LV_TEXT_ALIGN_RIGHT :
+					 fs->textAlign & NVG_ALIGN_CENTER ? LV_TEXT_ALIGN_CENTER :
+														LV_TEXT_ALIGN_LEFT;
+		label = lv_label_create(canvas);
+		lv_obj_set_pos(label, x, y);
+		lv_obj_set_size(label, max_w, LV_SIZE_CONTENT);
+		lv_tiny_ttf_set_size(font, font_size);
+		lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
+		lv_obj_set_style_text_color(label, to_lv_color(fs->paint->innerColor), LV_PART_MAIN);
+		lv_obj_set_style_text_opa(label, to_lv_opa(fs->paint->innerColor), LV_PART_MAIN);
+		lv_obj_set_style_text_align(label, align, LV_PART_MAIN);
+
+		context->labels.push_back(label);
 	}
 
-	auto font = (lv_font_t *)fs->fontPtr;
+	// Handle case were text doesn't have a null terminator (which LVGL needs)
+	std::string text_copy;
+	if (textend && *textend != '\0') {
+		pr_dbg("String not null terminated\n");
+		text_copy.append(text, textend - text);
+		text = text_copy.c_str();
+	}
 
-	context->label_dsc.font = font;
-	context->label_dsc.color = to_lv_color(fs->paint->innerColor);
-	context->label_dsc.opa = to_lv_opa(fs->paint->innerColor);
-	context->label_dsc.align = fs->textAlign & NVG_ALIGN_LEFT	? LV_TEXT_ALIGN_LEFT :
-							   fs->textAlign & NVG_ALIGN_RIGHT	? LV_TEXT_ALIGN_RIGHT :
-							   fs->textAlign & NVG_ALIGN_CENTER ? LV_TEXT_ALIGN_CENTER :
-																  LV_TEXT_ALIGN_LEFT;
+	lv_label_set_text(label, text);
 
-	x += to_lv_coord(fs->xform[4]);
-	y += to_lv_coord(fs->xform[5]);
-
-	if (fs->textAlign & NVG_ALIGN_TOP)
-		y += fs->fontSize;
-	if (fs->textAlign & NVG_ALIGN_MIDDLE)
-		y += fs->fontSize / 2;
-
-	DebugPin1High();
-	// lv_tiny_ttf_set_size(font, to_lv_coord(fs->fontSize));
-
-	lv_canvas_draw_text(canvas, to_lv_coord(x), to_lv_coord(y), 320 /*to_lv_coord(max_w)*/, &context->label_dsc, text2);
 	DebugPin1Low();
 
-	return 10;
+	return x;
 }
 
 void renderTriangles(void *uptr,
