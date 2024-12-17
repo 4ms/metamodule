@@ -147,6 +147,10 @@ public:
 		if (page_module.is_creating_map())
 			return;
 
+		// TODO: move screensave.wake_knob() to M4: sets a bit in shared memory, which A7 core 2 checks and clears (in GUI thread)
+		// Then remove all this
+		// Then in PatchPlayLoader::save_patch: before saving a patch, call player_.get_all_param_vals() in addition to player_.get_module_states
+
 		// Iterate all panel knobs
 		for (auto panel_knob_i = 0u; panel_knob_i < info.params.knobs.size(); panel_knob_i++) {
 
