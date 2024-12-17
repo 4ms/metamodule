@@ -328,7 +328,7 @@ public:
 	}
 
 	void set_midi_cc(unsigned ccnum, int16_t val) {
-		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) : val / 12.7f;
+		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) : val / 12.7f; //0-127 => 0-10
 
 		// Update jacks connected to this CC
 		if (ccnum < midi_cc_conns.size())
