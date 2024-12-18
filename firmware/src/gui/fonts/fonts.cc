@@ -23,16 +23,19 @@ static lv_font_t const *get_builtin_font(std::string_view name);
 static lv_font_t const *get_font_from_cache(std::string_view name);
 static lv_font_t const *get_font_from_disk(std::string_view name, std::string_view path = "");
 static lv_font_t const *load_from_cache(std::string_view name);
+static std::pair<std::string_view, std::string_view> remap_fonts(std::string_view name, std::string_view path);
 
 // public:
 lv_font_t const *get_font(std::string_view name, std::string_view path) {
-	if (auto font = get_builtin_font(name))
+	auto [name_, path_] = remap_fonts(name, path);
+
+	if (auto font = get_builtin_font(name_))
 		return font;
 
-	if (auto font = get_font_from_cache(name))
+	if (auto font = get_font_from_cache(name_))
 		return font;
 
-	if (auto font = get_font_from_disk(name, path))
+	if (auto font = get_font_from_disk(name_, path_))
 		return font;
 
 	// Default fallback:
@@ -54,6 +57,14 @@ void load_default_fonts() {
 	if (!fallback_ttf || fallback_ttf == &lv_font_montserrat_12) {
 		pr_err("Could not load MuseoSansRounded-700.ttf\n");
 	}
+}
+
+float adjust_font_size(float fontSize, const void *font) {
+	//TODO: get font name from cache
+	if (fontSize == 38) //DrumKit Gnome, Sequencer
+		return 20;
+	else
+		return fontSize;
 }
 
 ////////////////////////////////////////
@@ -166,6 +177,15 @@ lv_font_t const *get_font_from_disk(std::string_view name, std::string_view path
 	}
 
 	return nullptr;
+}
+
+std::pair<std::string_view, std::string_view> remap_fonts(std::string_view name, std::string_view path) {
+
+	if (name == "Segment14") {
+		return {"Segment7Standard", "4ms/fonts/Segment7Standard.ttf"};
+	}
+
+	return {name, path};
 }
 
 } // namespace MetaModule
