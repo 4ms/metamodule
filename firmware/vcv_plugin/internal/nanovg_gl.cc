@@ -207,15 +207,15 @@ float renderText(
 
 	DebugPin1High();
 
-	// Create or find existing label (match on X,Y pos)
-	lv_obj_t *label{};
-	auto found = std::ranges::find_if(context->labels, [x = x, y = y, fs = fs](TextRenderCacheEntry const &cached) {
-		return cached.x == x && cached.y == y && cached.align == fs->textAlign;
-	});
-
 	// Move to position
 	auto lv_x = to_lv_coord(x + fs->xform[4]);
 	auto lv_y = to_lv_coord(y + fs->xform[5]);
+
+	// Create or find existing label (match on X,Y pos)
+	lv_obj_t *label{};
+	auto found = std::ranges::find_if(context->labels, [=](TextRenderCacheEntry const &cached) {
+		return cached.x == lv_x && cached.y == lv_y && cached.align == fs->textAlign;
+	});
 
 	if (found != context->labels.end()) {
 		label = found->label;
@@ -249,8 +249,8 @@ float renderText(
 		lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
 		// Use original x,y for cache
-		context->labels.emplace_back(x, y, fs->textAlign, label);
-		pr_dbg("Creating label at %f,%f (sz %d) %s\n", x, y, lv_font_size, text);
+		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label);
+		pr_dbg("Creating label at %d,%d (sz %d)\n", lv_x, lv_y, lv_font_size);
 	}
 
 	// Handle case were text doesn't have a null terminator (which LVGL needs)
