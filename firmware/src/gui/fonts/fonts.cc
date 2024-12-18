@@ -14,20 +14,17 @@ namespace MetaModule
 
 namespace
 {
-
+// private:
 static std::map<std::string, lv_font_t *> font_cache;
 static std::map<std::string, std::vector<uint8_t>> ttf_cache;
-
+static lv_font_t const *fallback_ttf = nullptr;
 } // namespace
-
-// private:
 static lv_font_t const *get_builtin_font(std::string_view name);
 static lv_font_t const *get_font_from_cache(std::string_view name);
 static lv_font_t const *get_font_from_disk(std::string_view name, std::string_view path = "");
 static lv_font_t const *load_from_cache(std::string_view name);
 
 // public:
-
 lv_font_t const *get_font(std::string_view name, std::string_view path) {
 	if (auto font = get_builtin_font(name))
 		return font;
@@ -49,6 +46,13 @@ void free_font(std::string_view filename) {
 	if (font_cache.contains(name)) {
 		lv_font_free(font_cache.at(name));
 		font_cache.erase(name);
+	}
+}
+
+void load_default_fonts() {
+	fallback_ttf = get_font("MuseoSansRounded-700", "4ms/fonts/MuseoSansRounded-700.ttf");
+	if (!fallback_ttf || fallback_ttf == &lv_font_montserrat_12) {
+		pr_err("Could not load MuseoSansRounded-700.ttf\n");
 	}
 }
 
@@ -113,11 +117,12 @@ lv_font_t const *get_font_from_cache(std::string_view name) {
 }
 
 lv_font_t const *get_ttf_font_from_disk(std::string_view name, std::string_view path) {
-	pr_dbg("Loading ttf from disk path %s\n", path.data());
 
 	auto f = std::fopen(path.data(), "rb");
-	if (!f)
-		return nullptr;
+	if (!f) {
+		pr_dbg("Could not load ttf '%s' from '%s', using %p\n", name.data(), path.data(), fallback_ttf);
+		return fallback_ttf;
+	}
 
 	std::fseek(f, 0, SEEK_END);
 	size_t len = std::ftell(f);
@@ -129,16 +134,18 @@ lv_font_t const *get_ttf_font_from_disk(std::string_view name, std::string_view 
 	std::fread(data.data(), 1, len, f);
 	std::fclose(f);
 
+	pr_dbg("Loading ttf %s from disk path %s, %zu bytes\n", name.data(), path.data(), len);
+
 	if (auto font = lv_tiny_ttf_create_data(data.data(), data.size(), 12)) {
-		font->fallback = &lv_font_montserrat_14;
+		font->fallback = fallback_ttf ? fallback_ttf : &lv_font_montserrat_14;
 		font_cache.insert({std::string(name), font});
-		pr_dbg("Font found\n");
+		pr_dbg("ttf loaded into font cache\n");
 		return font;
 	}
 
-	pr_err("Could not load ttf font %s\n", name.data());
+	pr_err("Error loading ttf, using fallback (%p)\n", fallback_ttf);
 
-	return nullptr;
+	return fallback_ttf;
 }
 
 lv_font_t const *get_font_from_disk(std::string_view name, std::string_view path) {

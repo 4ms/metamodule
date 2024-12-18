@@ -8,8 +8,7 @@ namespace MetaModule
 {
 
 lv_font_t const *get_font(std::string_view name, std::string_view path = "");
-
-lv_font_t const *load_ttf_from_memory(std::string_view name, std::span<uint8_t> data);
+void load_default_fonts();
 
 void free_font(std::string_view name);
 

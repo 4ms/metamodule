@@ -6,6 +6,7 @@
 #include "fs/norflash_layout.hh"
 #include "glue/RackCore/plugins.hh"
 #include "glue/Valley/plugins.hh"
+#include "gui/fonts/fonts.hh"
 #include "internal_plugins.hh"
 #include "plugin/Plugin.hpp"
 #include <list>
@@ -40,7 +41,7 @@ struct InternalPluginManager {
 	void load_internal_assets() {
 		auto raw_image = asset_fs.read_image();
 		auto asset_tar = Tar::Archive(raw_image);
-		// asset_tar.print_info();
+		// asset_tar.print_contents();
 
 		auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
 			return ramdisk.write_file(filename, buffer);
@@ -49,6 +50,8 @@ struct InternalPluginManager {
 		asset_tar.extract_files(ramdisk_writer);
 
 		ramdisk.debug_print_disk_info();
+
+		load_default_fonts();
 	}
 
 	void load_internal_plugins() {
