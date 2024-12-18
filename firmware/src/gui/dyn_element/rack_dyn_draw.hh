@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/units.hh"
 #include "base_dyn_draw.hh"
+#include "debug.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include "vcv_plugin/internal/nanovg_gl.hh"
@@ -35,6 +36,9 @@ struct RackDynDraw : BaseDynDraw {
 		if (auto mw = module_widget.lock()) {
 
 			clear_canvas();
+			Debug::Pin1::high();
+			mw->draw(args);
+			Debug::Pin1::low();
 
 			for (auto &widget : mw->drawable_widgets) {
 				if (!widget->isVisible())
