@@ -213,9 +213,6 @@ float renderText(
 	if (found != context->labels.end()) {
 		label = found->label;
 	} else {
-		// Use original x,y for cache
-		pr_dbg("Creating label at %d,%d align %d (sz %f)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
-		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label);
 
 		auto align = fs->textAlign & NVG_ALIGN_LEFT	  ? LV_TEXT_ALIGN_LEFT :
 					 fs->textAlign & NVG_ALIGN_RIGHT  ? LV_TEXT_ALIGN_RIGHT :
@@ -226,13 +223,13 @@ float renderText(
 		auto lv_font_size = to_lv_coord(adjust_font_size(fs->fontSize, fs->fontPtr));
 
 		// Align vertically
-		lv_y -= fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size :
-				fs->textAlign & NVG_ALIGN_BOTTOM   ? lv_font_size * 1.2f :
-				fs->textAlign & NVG_ALIGN_MIDDLE   ? lv_font_size * 0.5f :
-													 0;
+		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size :
+								  fs->textAlign & NVG_ALIGN_BOTTOM	 ? lv_font_size * 1.2f :
+								  fs->textAlign & NVG_ALIGN_MIDDLE	 ? lv_font_size * 0.5f :
+																	   0);
 
 		label = lv_label_create(canvas);
-		lv_obj_set_pos(label, lv_x, lv_y);
+		lv_obj_set_pos(label, lv_x, align_lv_y);
 		lv_obj_set_size(label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 		lv_tiny_ttf_set_size(font, lv_font_size);
 		lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
@@ -242,8 +239,13 @@ float renderText(
 
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_text_letter_space(label, 0, LV_PART_MAIN);
+
 		lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
+		lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
+
+		pr_dbg("Creating label at %d,%d align %d (sz %f)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label);
 	}
 
 	// Handle case were text doesn't have a null terminator (which LVGL needs)
