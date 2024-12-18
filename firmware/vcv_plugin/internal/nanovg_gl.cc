@@ -193,13 +193,6 @@ void renderStroke(void *uptr,
 	}
 }
 
-lv_coord_t manual_font_tweaks(float fontSize, const void *font) {
-	if (fontSize == 38) //DrumKit Gnome, Sequencer
-		return 20;
-	else
-		return to_lv_coord(fontSize);
-}
-
 float renderText(
 	void *uptr, float x, float y, float max_w, const char *text, const char *textend, struct NVGFontState *fs) {
 	auto context = get_drawcontext(uptr);
@@ -220,13 +213,17 @@ float renderText(
 	if (found != context->labels.end()) {
 		label = found->label;
 	} else {
+		// Use original x,y for cache
+		pr_dbg("Creating label at %d,%d align %d (sz %f)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label);
+
 		auto align = fs->textAlign & NVG_ALIGN_LEFT	  ? LV_TEXT_ALIGN_LEFT :
 					 fs->textAlign & NVG_ALIGN_RIGHT  ? LV_TEXT_ALIGN_RIGHT :
 					 fs->textAlign & NVG_ALIGN_CENTER ? LV_TEXT_ALIGN_CENTER :
 														LV_TEXT_ALIGN_LEFT;
 
 		auto font = (lv_font_t *)fs->fontPtr;
-		auto lv_font_size = manual_font_tweaks(fs->fontSize, fs->fontPtr);
+		auto lv_font_size = to_lv_coord(adjust_font_size(fs->fontSize, fs->fontPtr));
 
 		// Align vertically
 		lv_y -= fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size :
@@ -247,10 +244,6 @@ float renderText(
 		lv_obj_set_style_text_letter_space(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
 		lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
-
-		// Use original x,y for cache
-		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label);
-		pr_dbg("Creating label at %d,%d (sz %d)\n", lv_x, lv_y, lv_font_size);
 	}
 
 	// Handle case were text doesn't have a null terminator (which LVGL needs)
