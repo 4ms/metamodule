@@ -22,6 +22,7 @@ target_sources(
   PRIVATE 
          src/app/Knob.cpp
          src/app/LedDisplay.cpp
+         src/app/LightWidget.cpp
          src/app/ModuleWidget.cpp
          src/app/ParamWidget.cc
          src/app/SvgKnob.cc
