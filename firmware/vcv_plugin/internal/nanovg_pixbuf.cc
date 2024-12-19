@@ -91,8 +91,6 @@ lv_color_t to_lv_color(NVGcolor color) {
 
 lv_color_t to_lv_text_color(NVGcolor color) {
 	auto hsv = lv_color_to_hsv(to_lv_color(color));
-	// return lv_color_hsv_to_rgb(hsv.h, 100, hsv.v); // gray -> dark red?
-	// return lv_color_hsv_to_rgb(hsv.h, hsv.s, 100); // gray -> gray
 	return lv_color_hsv_to_rgb(hsv.h, (hsv.s + 100) / 2, 100);
 }
 
@@ -125,6 +123,48 @@ constexpr bool is_poly_concave(std::span<lv_point_t> points) {
 			return true;
 	}
 	return false;
+}
+
+// Not used:
+bool fix_poly_concave(std::span<lv_point_t> points) {
+	auto n = points.size();
+	if (n < 3)
+		return false;
+
+	auto X_prod = [](lv_point_t O, lv_point_t A, lv_point_t B) {
+		return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
+	};
+
+	int sign = 0;
+
+	int offender = -1;
+	lv_point_t fix{};
+
+	for (auto i = 0u; i < points.size() + 1; i++) {
+		auto O = points[i];
+		auto A = points[(i + 1) % n];
+		auto B = points[(i + 2) % n];
+		auto cross = X_prod(O, A, B);
+		if (cross == 0)
+			continue;
+
+		if (sign == 0)
+			sign = cross;
+
+		if ((sign > 0 && cross < 0) || (sign < 0 && cross > 0)) {
+			// fix = A;
+			// offender = (i + 2) % n;
+			fix = B;
+			offender = (i + 1) % n;
+		}
+	}
+
+	if (offender >= 0) {
+		points[offender] = fix;
+		return fix_poly_concave(points);
+	}
+
+	return true;
 }
 
 void renderFill(void *uptr,
@@ -205,7 +245,7 @@ float renderText(
 	auto context = get_drawcontext(uptr);
 	auto canvas = context->canvas;
 
-	DebugPin1High();
+	DebugPin1High(); // really debug 0
 
 	// Move to position
 	auto lv_x = to_lv_coord(x + fs->xform[4]);
@@ -232,46 +272,54 @@ float renderText(
 														LV_TEXT_ALIGN_LEFT;
 
 		// Align vertically
-		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size :
+		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size * 0.8f :
 								  fs->textAlign & NVG_ALIGN_BOTTOM	 ? lv_font_size * 1.2f :
 								  fs->textAlign & NVG_ALIGN_MIDDLE	 ? lv_font_size * 0.5f :
-																	   0);
+																	   lv_font_size * 1.0f);
 
 		label = lv_label_create(canvas);
 		lv_obj_set_pos(label, lv_x, align_lv_y);
 		lv_obj_set_size(label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 		lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
-		lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
 		lv_obj_set_style_text_opa(label, to_lv_opa(fs->paint->innerColor), LV_PART_MAIN);
 		lv_obj_set_style_text_align(label, align, LV_PART_MAIN);
 
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
-		lv_obj_set_style_text_letter_space(label, 0, LV_PART_MAIN);
+		auto letter_space = corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
+		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
 
-		lv_obj_set_style_border_color(label, lv_color_hex(0x888888), LV_PART_MAIN);
+		lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
 		lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
 		pr_dbg("Creating label at %d,%d align %d (sz %f)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		pr_dbg("Canvas is %d,%d\n", lv_obj_get_width(canvas), lv_obj_get_height(canvas), fs->textAlign, fs->fontSize);
 		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label);
 	}
+
+	if (text == nullptr)
+		text = "";
 
 	// Handle case were text doesn't have a null terminator (which LVGL needs)
 	std::string text_copy;
 	if (textend && *textend != '\0') {
-		// pr_dbg("String not null terminated\n");
 		text_copy.append(text, textend - text);
 		text = text_copy.c_str();
 	}
 
 	if (fs->textAlign & NVG_ALIGN_CENTER) {
-		auto width = lv_txt_get_width(text, strlen(text), font, 0, 0);
+		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
 		lv_obj_set_x(label, lv_x - width / 2);
 	}
+	if (fs->textAlign & NVG_ALIGN_RIGHT) {
+		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
+		lv_obj_set_x(label, lv_x - width);
+	}
 
+	lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
 	lv_label_set_text(label, text);
 
-	DebugPin1Low();
+	DebugPin1Low(); //really debug 0
 
 	return 1;
 }

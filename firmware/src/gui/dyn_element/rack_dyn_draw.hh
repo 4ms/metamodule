@@ -4,7 +4,7 @@
 #include "debug.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
-#include "vcv_plugin/internal/nanovg_gl.hh"
+#include "vcv_plugin/internal/nanovg_pixbuf.hh"
 #include <app/ModuleWidget.hpp>
 #include <memory>
 
