@@ -62,7 +62,7 @@ void load_default_fonts() {
 float adjust_font_size(float fontSize, const void *font) {
 	//TODO: get font name from cache
 	if (fontSize == 38) //DrumKit Gnome, Sequencer
-		return 20;
+		return 30;
 	else
 		return fontSize;
 }
@@ -139,7 +139,10 @@ lv_font_t const *get_ttf_font_from_disk(std::string_view name, std::string_view 
 	size_t len = std::ftell(f);
 	std::fseek(f, 0, SEEK_SET);
 
-	std::vector<uint8_t> data;
+	if (ttf_cache.contains(std::string(name))) {
+		pr_err("Already a font in the ttf cache with name %s: overwriting\n", name.data());
+	}
+	auto &data = ttf_cache[std::string(name)];
 	data.resize(len);
 
 	std::fread(data.data(), 1, len, f);
@@ -149,7 +152,9 @@ lv_font_t const *get_ttf_font_from_disk(std::string_view name, std::string_view 
 
 	if (auto font = lv_tiny_ttf_create_data(data.data(), data.size(), 12)) {
 		font->fallback = fallback_ttf ? fallback_ttf : &lv_font_montserrat_14;
+
 		font_cache.insert({std::string(name), font});
+
 		pr_dbg("ttf loaded into font cache\n");
 		return font;
 	}
