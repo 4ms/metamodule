@@ -314,25 +314,25 @@ struct ModuleViewPage : PageBase {
 	void update() override {
 		if (gui_state.back_button.is_just_released()) {
 
-			if (full_screen_mode) {
-				full_screen_mode = false;
-				resize_module_image(190);
-
-			} else if (action_menu.is_visible()) {
+			if (action_menu.is_visible()) {
 				action_menu.back();
 
 			} else if (settings_menu.is_visible()) {
 				settings_menu.hide();
-
-			} else if (mode == ViewMode::List) {
-				args.module_id = this_module_id;
-				load_prev_page();
 
 			} else if (mode == ViewMode::Mapping) {
 				mapping_pane.back_event();
 
 			} else if (mode == ViewMode::ExtraMenu) {
 				module_menu.back_event();
+
+			} else if (full_screen_mode) {
+				full_screen_mode = false;
+				resize_module_image(190);
+
+			} else if (mode == ViewMode::List) {
+				args.module_id = this_module_id;
+				load_prev_page();
 			}
 		}
 
@@ -677,12 +677,20 @@ private:
 					pr_err("Error completing cable\n");
 
 			} else {
+
 				page->mode = ViewMode::Mapping;
 				page->args.detail_mode = true;
 				lv_hide(ui_ElementRollerPanel);
 				page->roller_hover.hide();
 
 				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+
+				if (page->full_screen_mode) {
+					// TODO: if fullscreen, then open Adjust pop up directly
+					// But keep it hidden?
+					// If it's a button, the just immediately toggle state
+					// page->mapping_pane.control_popup.show(page->drawn_element);
+				}
 			}
 
 			//Not an element: Is it the Extra Menu?
