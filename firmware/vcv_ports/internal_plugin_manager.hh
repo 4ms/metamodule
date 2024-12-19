@@ -8,6 +8,7 @@
 #include "glue/Valley/plugins.hh"
 #include "internal_plugins.hh"
 #include "plugin/Plugin.hpp"
+#include <context.hpp>
 #include <list>
 #include <span>
 #include <string_view>
@@ -52,6 +53,8 @@ struct InternalPluginManager {
 	}
 
 	void load_internal_plugins() {
+		rack::contextSet(nullptr);
+
 		//Load internal plugins
 		// TODO: use the glue/BRAND/plugin.cpp::init() function for each brand...
 		// 		 But, somehow get around the issue of multiple definitions of global symbol pluginInstance
