@@ -16,9 +16,6 @@ namespace
 {
 // private:
 static std::map<std::string, std::map<lv_coord_t, lv_font_t *>> font_cache;
-static std::map<std::string, std::vector<uint8_t>> ttf_cache;
-
-static lv_font_t const *fallback_ttf = nullptr;
 } // namespace
 static lv_font_t const *get_builtin_font(std::string_view name);
 static lv_font_t const *get_font_from_cache(std::string_view name);
@@ -57,24 +54,20 @@ void free_font(std::string_view fontname) {
 	}
 }
 
-void load_default_fonts() {
-	fallback_ttf = get_font("MuseoSansRounded-700", "4ms/fonts/MuseoSansRounded-700.ttf");
-	if (!fallback_ttf || fallback_ttf == &lv_font_montserrat_12) {
-		pr_err("Could not load MuseoSansRounded-700.ttf\n");
-	}
-}
-
 ////////////////////////////////////////
 
 lv_font_t const *load_from_cache(std::string_view name, lv_coord_t font_size = 0) {
+
+	// Search primary map for font name
 	if (auto font = font_cache.find(std::string(name)); font != font_cache.end()) {
-		if (font->second.size()) {
-			if (font->second.contains(font_size)) {
-				return font->second[font_size];
-			}
-			if (font_size == 0) { //0: any font size is ok, return the first entry
-				return font->second.begin()->second;
-			}
+
+		// Search secondary map for font size
+		if (auto fontsized = font->second.find(font_size); fontsized != font->second.end()) {
+			return font->second[font_size];
+		}
+
+		if (font_size == 0) { //0: any font size is ok, return the first entry, e.g. "Montserrat_10"
+			return font->second.begin()->second;
 		}
 	}
 
@@ -153,6 +146,11 @@ lv_font_t const *get_font_from_disk(std::string_view name, std::string_view path
 
 ///////////////////////////////
 //////////////////// TTF
+namespace
+{
+static std::map<std::string, std::vector<uint8_t>> ttf_cache;
+static lv_font_t const *fallback_ttf = nullptr;
+} // namespace
 
 // Loads the file and stores the data in the ttf cache
 // Returns true if a new entry was made
@@ -193,12 +191,19 @@ bool load_ttf(std::string_view name, std::string_view path) {
 	return true;
 }
 
-float adjust_font_size(float fontSize, const void *font) {
+float corrected_ttf_size(float fontSize, const void *font) {
 	//TODO: get font name from cache
 	if (fontSize == 38) //DrumKit Gnome, Sequencer
 		return 30;
 	else
 		return fontSize;
+}
+
+void load_default_fonts() {
+	fallback_ttf = get_font("MuseoSansRounded-700", "4ms/fonts/MuseoSansRounded-700.ttf");
+	if (!fallback_ttf || fallback_ttf == &lv_font_montserrat_12) {
+		pr_err("Could not load MuseoSansRounded-700.ttf\n");
+	}
 }
 
 lv_font_t const *get_ttf_font(std::string const &name, unsigned font_size) {

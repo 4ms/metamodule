@@ -211,7 +211,7 @@ float renderText(
 	auto lv_x = to_lv_coord(x + fs->xform[4]);
 	auto lv_y = to_lv_coord(y + fs->xform[5]);
 
-	auto lv_font_size = to_lv_coord(adjust_font_size(fs->fontSize, fs->fontName));
+	auto lv_font_size = to_lv_coord(corrected_ttf_size(fs->fontSize, fs->fontName));
 	auto font = get_ttf_font(std::string(fs->fontName), lv_font_size);
 	if (!font)
 		return 0;

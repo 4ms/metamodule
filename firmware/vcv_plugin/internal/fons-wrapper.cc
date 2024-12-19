@@ -48,8 +48,6 @@ struct FONScontext {
 	}
 };
 
-// TODO: This should load the file and put it in the ttf_cache
-// our fons cache is just a map from ttf_cache entries to int
 int fonsAddFont(FONScontext *s, const char *name, const char *path, int fontIndex) {
 	if (MetaModule::load_ttf(name, path)) {
 		auto handle = s->new_handle();
