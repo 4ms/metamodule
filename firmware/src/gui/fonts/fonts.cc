@@ -1,3 +1,4 @@
+#include "fonts.hh"
 #include "gui/images/paths.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
@@ -12,28 +13,36 @@ LV_FONT_DECLARE(Segment7Standard_20);
 namespace MetaModule
 {
 
+// private:
 namespace
 {
-// private:
-static std::map<std::string, std::map<lv_coord_t, lv_font_t *>> font_cache;
+
+struct FontEntry {
+	std::string name;
+	lv_coord_t font_size;
+	lv_font_t *font;
+};
+
+static std::vector<FontEntry> font_cache;
+
 } // namespace
+
 static lv_font_t const *get_builtin_font(std::string_view name);
 static lv_font_t const *get_font_from_cache(std::string_view name);
-static lv_font_t const *get_font_from_disk(std::string_view name, std::string_view path = "");
+static lv_font_t const *get_font_from_disk(std::string_view name);
 static lv_font_t const *load_from_cache(std::string_view name, lv_coord_t font_size);
 static std::pair<std::string_view, std::string_view> remap_fonts(std::string_view name, std::string_view path);
+static void free_ttf(std::string_view fontname);
 
 // public:
-lv_font_t const *get_font(std::string_view name, std::string_view path) {
-	auto [name_, path_] = remap_fonts(name, path);
-
-	if (auto font = get_builtin_font(name_))
+lv_font_t const *get_font(std::string_view name) {
+	if (auto font = get_builtin_font(name))
 		return font;
 
-	if (auto font = get_font_from_cache(name_))
+	if (auto font = get_font_from_cache(name))
 		return font;
 
-	if (auto font = get_font_from_disk(name_, path_))
+	if (auto font = get_font_from_disk(name))
 		return font;
 
 	// Default fallback:
@@ -41,34 +50,34 @@ lv_font_t const *get_font(std::string_view name, std::string_view path) {
 }
 
 void free_font(std::string_view fontname) {
-	//TODO: lv_tiny_ttf_delete
-	// remove file data from ttf_cache
-
 	std::string name{fontname};
 
-	if (font_cache.contains(name)) {
-		for (auto &font : font_cache[name]) {
-			lv_font_free(font.second);
-		}
-		font_cache.erase(name);
+	auto match_name = [fontname](FontEntry const &entry) {
+		return entry.name == fontname;
+	};
+
+	for (auto &entry : font_cache) {
+		if (match_name(entry))
+			lv_font_free(entry.font);
 	}
+
+	auto num_erased = std::erase_if(font_cache, match_name);
+	pr_dbg("Erased %zu fonts matching name %s", num_erased, name.c_str());
+
+	free_ttf(fontname);
 }
 
 ////////////////////////////////////////
 
+// font_size 0 will match any size
 lv_font_t const *load_from_cache(std::string_view name, lv_coord_t font_size = 0) {
 
-	// Search primary map for font name
-	if (auto font = font_cache.find(std::string(name)); font != font_cache.end()) {
+	auto font = std::ranges::find_if(font_cache, [name, font_size](auto const &entry) {
+		return entry.name == name && (font_size == 0 || font_size == entry.font_size);
+	});
 
-		// Search secondary map for font size
-		if (auto fontsized = font->second.find(font_size); fontsized != font->second.end()) {
-			return font->second[font_size];
-		}
-
-		if (font_size == 0) { //0: any font size is ok, return the first entry, e.g. "Montserrat_10"
-			return font->second.begin()->second;
-		}
+	if (font != font_cache.end()) {
+		return font->font;
 	}
 
 	return nullptr;
@@ -123,18 +132,14 @@ lv_font_t const *get_font_from_cache(std::string_view name) {
 		return nullptr;
 }
 
-lv_font_t const *get_font_from_disk(std::string_view name, std::string_view path) {
+lv_font_t const *get_font_from_disk(std::string_view name) {
 	// Try loading it from disk:
-	if (path == "")
-		path = name;
-
-	std::string full_path = ComponentImages::get_comp_path(path);
+	std::string full_path = ComponentImages::get_comp_path(name);
 
 	if (auto font = lv_font_load(full_path.data())) {
 		font->fallback = &lv_font_montserrat_14;
 
-		// Insert a map to a map of font size to font
-		font_cache.insert({std::string(name), {{font->line_height, font}}});
+		font_cache.emplace_back(std::string(name), font->line_height, font);
 
 		pr_dbg("font %s sz %u loaded into font cache\n", name.data(), font->line_height);
 
@@ -149,21 +154,26 @@ lv_font_t const *get_font_from_disk(std::string_view name, std::string_view path
 namespace
 {
 static std::map<std::string, std::vector<uint8_t>> ttf_cache;
-static lv_font_t const *fallback_ttf = nullptr;
+static lv_font_t const *fallback_font = nullptr;
+
+static constexpr std::string_view default_ttf = "MuseoSansRounded-700";
 } // namespace
 
 // Loads the file and stores the data in the ttf cache
 // Returns true if a new entry was made
-bool load_ttf(std::string_view name, std::string_view path) {
+TTFLoadResult load_ttf(std::string_view name, std::string_view path_) {
+
+	auto [_, path] = remap_fonts(name, path_);
+
 	if (ttf_cache.contains(std::string(name))) {
 		pr_dbg("Already a font in the ttf cache with name %s\n", name.data());
-		return false;
+		return TTFLoadResult::AlreadyExists;
 	}
 
 	auto f = std::fopen(path.data(), "rb");
 	if (!f) {
-		pr_dbg("Could not load ttf '%s' from '%s'\n", name.data(), path.data());
-		return false;
+		pr_dbg("Could not load ttf '%s' from '%s', using default ttf\n", name.data(), path.data());
+		return TTFLoadResult::Error;
 	}
 
 	std::fseek(f, 0, SEEK_END);
@@ -181,29 +191,59 @@ bool load_ttf(std::string_view name, std::string_view path) {
 		std::fclose(f);
 
 		ttf_cache.erase(std::string(name));
-		return false;
+		return TTFLoadResult::Error;
 	}
 
 	pr_dbg("Loading ttf %s from disk path %s, %zu bytes\n", name.data(), path.data(), len);
 
 	std::fclose(f);
 
-	return true;
+	return TTFLoadResult::Added;
 }
 
-float corrected_ttf_size(float fontSize, const void *font) {
-	//TODO: get font name from cache
+unsigned corrected_ttf_letter_spacing(float fontSize, std::string_view name) {
+	if (name == "Segment14") {
+		if (fontSize < 16)
+			return 1;
+		else
+			return 3;
+	}
+	return 0;
+}
+
+float corrected_ttf_size(float fontSize, std::string_view name) {
+	// CVfunk
+	if (name == "DejaVuSansMono") {
+		if (fontSize == 16)
+			return 18;
+
+		if (fontSize == 10)
+			return 12;
+
+		if (fontSize == 14)
+			return 15;
+	}
+	// CountModula
+	if (name == "Segment14") {
+		return fontSize * 1.3f;
+	}
+
 	if (fontSize == 38) //DrumKit Gnome, Sequencer
 		return 30;
-	else
-		return fontSize;
+
+	return fontSize;
 }
 
-void load_default_fonts() {
-	fallback_ttf = get_font("MuseoSansRounded-700", "4ms/fonts/MuseoSansRounded-700.ttf");
-	if (!fallback_ttf || fallback_ttf == &lv_font_montserrat_12) {
-		pr_err("Could not load MuseoSansRounded-700.ttf\n");
+void load_default_ttf_fonts() {
+	fallback_font = &lv_font_montserrat_14;
+
+	if (load_ttf(default_ttf, std::string("4ms/fonts/").append(default_ttf).append(".ttf")) != TTFLoadResult::Added) {
+		pr_err("Could not load default ttf %s\n", default_ttf.data());
 	}
+}
+
+std::string_view default_ttf_name() {
+	return default_ttf;
 }
 
 lv_font_t const *get_ttf_font(std::string const &name, unsigned font_size) {
@@ -217,18 +257,31 @@ lv_font_t const *get_ttf_font(std::string const &name, unsigned font_size) {
 
 		if (auto font = lv_tiny_ttf_create_data(data.data(), data.size(), font_size)) {
 
-			font->fallback = fallback_ttf ? fallback_ttf : &lv_font_montserrat_14;
+			font->fallback = fallback_font ? fallback_font : &lv_font_montserrat_14;
 
-			font_cache.insert({std::string(name), {{font_size, font}}});
+			font_cache.emplace_back(std::string(name), font_size, font);
 
 			pr_dbg("ttf %s sz %u loaded into font cache\n", name.c_str(), font_size);
 			return font;
+		} else {
+			pr_err("Error creating lvgl font from ttf %s\n", name.c_str());
 		}
+	} else {
+		pr_err("Requested ttf font %s whose file data is not in the cache\n", name.c_str());
 	}
 
-	pr_err("Error loading ttf, using fallback (%p)\n", fallback_ttf);
+	// Recurse to try the default ttf at the requested size
+	if (name != default_ttf) {
+		pr_err("Using fallback font (%s)\n", default_ttf.data());
+		return get_ttf_font(std::string(default_ttf), font_size);
+	}
 
-	return fallback_ttf;
+	pr_err("Failed to load default ttf font at size %u, using default non-ttf\n", font_size);
+	return fallback_font;
+}
+
+void free_ttf(std::string_view fontname) {
+	//TODO
 }
 
 std::pair<std::string_view, std::string_view> remap_fonts(std::string_view name, std::string_view path) {
