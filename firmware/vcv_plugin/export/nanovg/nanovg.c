@@ -2530,7 +2530,7 @@ float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char*
 	fs.xform = state->xform;
 	fs.fontName = fonsGetFontNameByHandle(ctx->fontContext->fs, state->fontId);
 
-	if (end == NULL)
+	if (end == NULL && string != NULL)
 		end = string + strlen(string);
 
 	return ctx->params.renderText(ctx->params.userPtr, x, y, 320, string, end, &fs);
@@ -2551,7 +2551,7 @@ void nvgTextBox(NVGcontext* ctx, float x, float y, float breakRowWidth, const ch
 	fs.xform = state->xform;
 	fs.fontName = fonsGetFontNameByHandle(ctx->fontContext->fs, state->fontId);
 
-	if (end == NULL)
+	if (end == NULL && string != NULL)
 		end = string + strlen(string);
 
 	ctx->params.renderText(ctx->params.userPtr, x, y, breakRowWidth, string, end, &fs);
