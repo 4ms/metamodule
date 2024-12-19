@@ -35,4 +35,23 @@ void contextSet(Context *context) {
 	}
 }
 
+math::Vec widget::ZoomWidget::getRelativeOffset(math::Vec v, Widget *ancestor) {
+	return {};
+}
+float widget::ZoomWidget::getRelativeZoom(Widget *ancestor) {
+	return {};
+}
+math::Rect widget::ZoomWidget::getViewport(math::Rect r) {
+	return {};
+}
+float widget::ZoomWidget::getZoom() {
+	return {};
+}
+void widget::ZoomWidget::setZoom(float zoom) {
+}
+void widget::ZoomWidget::draw(const DrawArgs &args) {
+}
+void widget::ZoomWidget::drawLayer(const DrawArgs &args, int layer) {
+}
+
 } // namespace rack
