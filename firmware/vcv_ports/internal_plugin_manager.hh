@@ -52,7 +52,7 @@ struct InternalPluginManager {
 
 		ramdisk.debug_print_disk_info();
 
-		load_default_fonts();
+		load_default_ttf_fonts();
 	}
 
 	void load_internal_plugins() {

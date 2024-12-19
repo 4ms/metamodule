@@ -12,6 +12,8 @@ struct FONScontext {
 	};
 	std::map<unsigned, FontEntry> font_handles{};
 
+	static constexpr unsigned DefaultFontHandle = 0;
+
 	FONScontext() {
 		pr_dbg("Creating FONScontext\n");
 	}
@@ -40,24 +42,34 @@ struct FONScontext {
 	}
 
 	unsigned new_handle() {
-		unsigned handle = 0;
+		unsigned handle = DefaultFontHandle;
 		for (auto const &entry : font_handles) {
 			handle = std::max(handle, entry.first);
 		}
 		return handle + 1;
 	}
+
+	void set_default_font(std::string_view name) {
+		font_handles[DefaultFontHandle] = {.name = std::string(name)};
+	}
 };
 
 int fonsAddFont(FONScontext *s, const char *name, const char *path, int fontIndex) {
-	if (MetaModule::load_ttf(name, path)) {
+	auto res = MetaModule::load_ttf(name, path);
+
+	if (res == MetaModule::TTFLoadResult::Added) {
 		auto handle = s->new_handle();
 		s->font_handles[handle] = FONScontext::FontEntry{.name = name};
 		pr_dbg("FONS: Adding font %s with handle %d\n", name, handle);
 		return handle;
 
+	} else if (res == MetaModule::TTFLoadResult::Error) {
+		pr_warn("FONS: failed to load ttf for %s, using default\n", name);
+		return s->DefaultFontHandle;
+
 	} else {
-		pr_warn("FONS: failed to load ttf for %s\n", name);
-		return -1;
+		// Already Exists
+		return s->get_handle_from_name(name);
 	}
 }
 
@@ -80,7 +92,9 @@ static FONScontext *get_fonscontext() {
 }
 
 FONScontext *fonsCreateInternal() {
-	return get_fonscontext();
+	auto s = get_fonscontext();
+	s->set_default_font(MetaModule::default_ttf_name());
+	return s;
 }
 
 void fonsDeleteInternal(FONScontext *s) {

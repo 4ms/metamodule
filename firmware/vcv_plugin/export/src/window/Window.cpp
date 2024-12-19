@@ -25,7 +25,7 @@ void Font::loadFile(const std::string &filename, NVGcontext *vg) {
 
 	handle = nvgCreateFont(vg, name.c_str(), path.c_str());
 	if (handle < 0) {
-		pr_err("Failed to load font %s (%s)", filename.c_str(), name.c_str());
+		pr_err("Failed to load font %s (%s)\n", filename.c_str(), name.c_str());
 		return;
 	}
 
