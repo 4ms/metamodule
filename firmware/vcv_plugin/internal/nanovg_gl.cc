@@ -211,9 +211,10 @@ float renderText(
 	auto lv_x = to_lv_coord(x + fs->xform[4]);
 	auto lv_y = to_lv_coord(y + fs->xform[5]);
 
-	auto font = (lv_font_t *)fs->fontPtr;
-	auto lv_font_size = to_lv_coord(adjust_font_size(fs->fontSize, fs->fontPtr));
-	lv_tiny_ttf_set_size(font, lv_font_size);
+	auto lv_font_size = to_lv_coord(adjust_font_size(fs->fontSize, fs->fontName));
+	auto font = get_ttf_font(std::string(fs->fontName), lv_font_size);
+	if (!font)
+		return 0;
 
 	// Create or find existing label (match on X,Y pos)
 	lv_obj_t *label{};
@@ -264,7 +265,7 @@ float renderText(
 	}
 
 	if (fs->textAlign & NVG_ALIGN_CENTER) {
-		auto width = lv_txt_get_width(text, strlen(text), (lv_font_t *)fs->fontPtr, 0, 0);
+		auto width = lv_txt_get_width(text, strlen(text), font, 0, 0);
 		lv_obj_set_x(label, lv_x - width / 2);
 	}
 
