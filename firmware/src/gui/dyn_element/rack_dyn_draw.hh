@@ -36,7 +36,9 @@ struct RackDynDraw : BaseDynDraw {
 		if (auto mw = module_widget.lock()) {
 
 			clear_canvas();
+
 			Debug::Pin1::high();
+			mw->step();
 			mw->draw(args);
 			Debug::Pin1::low();
 
@@ -45,6 +47,10 @@ struct RackDynDraw : BaseDynDraw {
 					continue;
 
 				args.clipBox = widget->getBox();
+
+				Debug::Pin2::high();
+				widget->step();
+				Debug::Pin2::low();
 
 				mw->drawChild(widget, args);
 				mw->drawChild(widget, args, 1);
