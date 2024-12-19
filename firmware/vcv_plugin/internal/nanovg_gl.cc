@@ -89,6 +89,13 @@ lv_color_t to_lv_color(NVGcolor color) {
 	return lv_color_make(color.r * 255.f, color.g * 255.f, color.b * 255.f);
 }
 
+lv_color_t to_lv_text_color(NVGcolor color) {
+	auto hsv = lv_color_to_hsv(to_lv_color(color));
+	// return lv_color_hsv_to_rgb(hsv.h, 100, hsv.v); // gray -> dark red?
+	// return lv_color_hsv_to_rgb(hsv.h, hsv.s, 100); // gray -> gray
+	return lv_color_hsv_to_rgb(hsv.h, (hsv.s + 100) / 2, 100);
+}
+
 constexpr uint8_t to_lv_opa(NVGcolor color) {
 	return std::round(color.a * float(LV_OPA_100));
 }
@@ -204,6 +211,10 @@ float renderText(
 	auto lv_x = to_lv_coord(x + fs->xform[4]);
 	auto lv_y = to_lv_coord(y + fs->xform[5]);
 
+	auto font = (lv_font_t *)fs->fontPtr;
+	auto lv_font_size = to_lv_coord(adjust_font_size(fs->fontSize, fs->fontPtr));
+	lv_tiny_ttf_set_size(font, lv_font_size);
+
 	// Create or find existing label (match on X,Y pos)
 	lv_obj_t *label{};
 	auto found = std::ranges::find_if(context->labels, [=](TextRenderCacheEntry const &cached) {
@@ -219,9 +230,6 @@ float renderText(
 					 fs->textAlign & NVG_ALIGN_CENTER ? LV_TEXT_ALIGN_CENTER :
 														LV_TEXT_ALIGN_LEFT;
 
-		auto font = (lv_font_t *)fs->fontPtr;
-		auto lv_font_size = to_lv_coord(adjust_font_size(fs->fontSize, fs->fontPtr));
-
 		// Align vertically
 		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size :
 								  fs->textAlign & NVG_ALIGN_BOTTOM	 ? lv_font_size * 1.2f :
@@ -231,16 +239,15 @@ float renderText(
 		label = lv_label_create(canvas);
 		lv_obj_set_pos(label, lv_x, align_lv_y);
 		lv_obj_set_size(label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-		lv_tiny_ttf_set_size(font, lv_font_size);
 		lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
-		lv_obj_set_style_text_color(label, to_lv_color(fs->paint->innerColor), LV_PART_MAIN);
+		lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
 		lv_obj_set_style_text_opa(label, to_lv_opa(fs->paint->innerColor), LV_PART_MAIN);
 		lv_obj_set_style_text_align(label, align, LV_PART_MAIN);
 
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_text_letter_space(label, 0, LV_PART_MAIN);
 
-		lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
+		lv_obj_set_style_border_color(label, lv_color_hex(0x888888), LV_PART_MAIN);
 		lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
