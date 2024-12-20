@@ -126,6 +126,7 @@ float renderText(
 		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size * 0.8f :
 								  fs->textAlign & NVG_ALIGN_BOTTOM	 ? lv_font_size * 1.2f :
 								  fs->textAlign & NVG_ALIGN_MIDDLE	 ? lv_font_size * 0.5f :
+								  fs->textAlign & NVG_ALIGN_TOP		 ? 0 :
 																	   lv_font_size * 1.0f);
 
 		label = lv_label_create(canvas);
@@ -139,9 +140,9 @@ float renderText(
 		auto letter_space = corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
 		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
 
-		lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
-		lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
-		lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
+		// lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
+		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
+		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
 		pr_dbg("Creating label at %d,%d align %d (sz %f)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
 		pr_dbg("Canvas is %d,%d\n", lv_obj_get_width(canvas), lv_obj_get_height(canvas), fs->textAlign, fs->fontSize);

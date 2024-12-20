@@ -223,9 +223,16 @@ float corrected_ttf_size(float fontSize, std::string_view name) {
 		if (fontSize == 14)
 			return 15;
 	}
+
 	// CountModula
-	if (name == "Segment14") {
+	else if (name == "Segment14")
+	{
 		return fontSize * 1.3f;
+	}
+
+	else if (name == "ShareTechMono-Regular")
+	{
+		fontSize *= 1.5f;
 	}
 
 	if (fontSize == 38) //DrumKit Gnome, Sequencer
