@@ -1,5 +1,5 @@
 #include "settings_parse.hh"
-#include "conf/catchup_settings.hh"
+#include "catchup_settings.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"

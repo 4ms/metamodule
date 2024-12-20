@@ -2,6 +2,7 @@
 #include "audio/audio.hh"
 #include "calibrate/calibration_data_reader.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_a7/async_thread_control.hh"
 #include "core_a7/static_buffers.hh"
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
@@ -140,6 +141,8 @@ void main() {
 	audio.start();
 
 	print_time();
+
+	start_module_threads();
 
 	while (true) {
 		__NOP();

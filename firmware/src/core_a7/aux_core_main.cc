@@ -1,5 +1,6 @@
 #include "conf/hsem_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_a7/async_thread_control.hh"
 #include "core_a7/smp_api.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
@@ -135,6 +136,8 @@ extern "C" void aux_core_main() {
 #endif
 
 	ui.load_initial_patch();
+
+	start_module_threads();
 
 	while (true) {
 		ui.update_screen();

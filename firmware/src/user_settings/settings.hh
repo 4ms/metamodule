@@ -1,6 +1,6 @@
 #pragma once
-#include "conf/audio_settings.hh"
-#include "conf/catchup_settings.hh"
+#include "audio_settings.hh"
+#include "catchup_settings.hh"
 #include "fs/volumes.hh"
 #include "gui/elements/screensaver_settings.hh"
 #include "gui/pages/view_settings.hh"
