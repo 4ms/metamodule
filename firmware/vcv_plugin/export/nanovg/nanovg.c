@@ -344,7 +344,7 @@ NVGcontext* nvgCreateInternal(NVGparams* params, NVGcontext* other)  // Share th
 		// // Create font texture
 		// ctx->fontContext->fontImages[0] = ctx->params.renderCreateTexture(ctx->params.userPtr, NVG_TEXTURE_ALPHA, fontParams.width, fontParams.height, 0, NULL);
 		// if (ctx->fontContext->fontImages[0] == 0) goto error;
-		// ctx->fontContext->fontImageIdx = 0;
+		ctx->fontContext->fontImageIdx = 0;
 	}
 
 	return ctx;
@@ -414,6 +414,7 @@ void nvgCancelFrame(NVGcontext* ctx)
 void nvgEndFrame(NVGcontext* ctx)
 {
 	ctx->params.renderFlush(ctx->params.userPtr);
+
 	if (ctx->fontContext->fontImageIdx != 0) {
 		int fontImage = ctx->fontContext->fontImages[ctx->fontContext->fontImageIdx];
 		int i, j, iw, ih;

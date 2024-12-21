@@ -38,8 +38,12 @@ struct RackDynDraw : BaseDynDraw {
 			clear_canvas();
 
 			Debug::Pin1::high();
+
 			mw->step();
+			nvgBeginFrame(args.vg, mw->box.getWidth(), mw->box.getHeight(), 1);
 			mw->draw(args);
+			nvgEndFrame(args.vg);
+
 			Debug::Pin1::low();
 
 			for (auto &widget : mw->drawable_widgets) {
@@ -52,8 +56,10 @@ struct RackDynDraw : BaseDynDraw {
 				widget->step();
 				Debug::Pin2::low();
 
+				nvgBeginFrame(args.vg, widget->box.getWidth(), widget->box.getHeight(), 1);
 				mw->drawChild(widget, args);
 				mw->drawChild(widget, args, 1);
+				nvgEndFrame(args.vg);
 			}
 		}
 	}

@@ -27,6 +27,7 @@ struct TextRenderCacheEntry {
 	float y;
 	int align;
 	lv_obj_t *label;
+	uint32_t last_drawn_frame;
 
 	bool operator==(const TextRenderCacheEntry &other) const {
 		return x == other.x && y == other.y && align == other.align;
@@ -42,6 +43,8 @@ struct DrawContext {
 	std::vector<Texture> textures;
 
 	std::vector<TextRenderCacheEntry> labels;
+
+	uint32_t draw_frame_ctr{};
 
 	void *parent_ctx{}; // needed for deleting
 

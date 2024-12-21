@@ -275,7 +275,12 @@ int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
 }
 
 void renderViewport(void *uptr, float width, float height, float devicePixelRatio) {
-	pr_dbg("renderViewport %f x %f, %f\n", width, height, devicePixelRatio);
+	auto context = get_drawcontext(uptr);
+	context->draw_frame_ctr++;
+
+	for (auto &label : context->labels) {
+		label.last_drawn_frame = context->draw_frame_ctr;
+	}
 }
 
 void renderCancel(void *uptr) {
@@ -283,7 +288,13 @@ void renderCancel(void *uptr) {
 }
 
 void renderFlush(void *uptr) {
-	// printf("renderFlush\n");
+	auto context = get_drawcontext(uptr);
+
+	for (auto &label : context->labels) {
+		if (label.last_drawn_frame < context->draw_frame_ctr) {
+			lv_label_set_text(label.label, "");
+		}
+	}
 }
 
 } // namespace MetaModule::NanoVG
