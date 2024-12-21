@@ -4,6 +4,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(mm_sim LANGUAGES C CXX)
 
 set(SIMULATOR 1)
+add_compile_definitions(SIMULATOR)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
