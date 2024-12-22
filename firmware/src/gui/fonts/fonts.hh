@@ -11,7 +11,6 @@ void free_font(std::string_view name);
 
 ///////////////// TTF
 
-void load_default_ttf_fonts();
 std::string_view default_ttf_name();
 
 // Load raw ttf file data into the font cache

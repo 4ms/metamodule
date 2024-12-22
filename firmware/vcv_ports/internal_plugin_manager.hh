@@ -17,6 +17,8 @@
 namespace MetaModule
 {
 
+void init_fonts(FatFileIO &ramdisk);
+
 struct InternalPluginManager {
 	FatFileIO &ramdisk;
 	AssetFS &asset_fs;
@@ -52,7 +54,7 @@ struct InternalPluginManager {
 
 		ramdisk.debug_print_disk_info();
 
-		load_default_ttf_fonts();
+		init_fonts(ramdisk);
 	}
 
 	void load_internal_plugins() {

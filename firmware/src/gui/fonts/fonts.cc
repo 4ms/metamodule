@@ -1,4 +1,5 @@
 #include "fonts.hh"
+#include "fs/fatfs/fat_file_io.hh"
 #include "gui/images/paths.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
@@ -32,7 +33,7 @@ static lv_font_t const *get_font_from_cache(std::string_view name);
 static lv_font_t const *get_font_from_disk(std::string_view name);
 static lv_font_t const *load_from_cache(std::string_view name, lv_coord_t font_size);
 static std::pair<std::string_view, std::string_view> remap_fonts(std::string_view name, std::string_view path);
-static void free_ttf(std::string_view fontname);
+static void free_ttf(std::string const &fontname);
 
 // public:
 lv_font_t const *get_font(std::string_view name) {
@@ -64,7 +65,7 @@ void free_font(std::string_view fontname) {
 	auto num_erased = std::erase_if(font_cache, match_name);
 	pr_dbg("Erased %zu fonts matching name %s", num_erased, name.c_str());
 
-	free_ttf(fontname);
+	free_ttf(name);
 }
 
 ////////////////////////////////////////
@@ -155,6 +156,7 @@ namespace
 {
 static std::map<std::string, std::vector<uint8_t>> ttf_cache;
 static lv_font_t const *fallback_font = nullptr;
+FatFileIO *ramdisk = nullptr;
 
 static constexpr std::string_view default_ttf = "MuseoSansRounded-700";
 } // namespace
@@ -170,33 +172,29 @@ TTFLoadResult load_ttf(std::string_view name, std::string_view path_) {
 		return TTFLoadResult::AlreadyExists;
 	}
 
-	auto f = std::fopen(path.data(), "rb");
-	if (!f) {
+	if (!ramdisk) {
+		pr_err("Fonts not initialized: no ramdisk\n");
+		return TTFLoadResult::Error;
+	}
+
+	auto len = ramdisk->get_file_size(path);
+	if (len == 0) {
 		pr_dbg("Could not load ttf '%s' from '%s', using default ttf\n", name.data(), path.data());
 		return TTFLoadResult::Error;
 	}
 
-	std::fseek(f, 0, SEEK_END);
-	size_t len = std::ftell(f);
-	std::fseek(f, 0, SEEK_SET);
-
-	// insert
 	auto &data = ttf_cache[std::string(name)];
 	data.resize(len);
 
-	auto sz = std::fread(data.data(), 1, len, f);
+	auto sz = ramdisk->read_file(path, std::span{(char *)data.data(), data.size()});
+
 	if (sz != len) {
 		pr_err("Failed to read file %s: expected %zu bytes, read %zu\n", path.data(), len, sz);
-
-		std::fclose(f);
-
 		ttf_cache.erase(std::string(name));
 		return TTFLoadResult::Error;
 	}
 
 	pr_dbg("Loading ttf %s from disk path %s, %zu bytes\n", name.data(), path.data(), len);
-
-	std::fclose(f);
 
 	return TTFLoadResult::Added;
 }
@@ -241,7 +239,9 @@ float corrected_ttf_size(float fontSize, std::string_view name) {
 	return fontSize;
 }
 
-void load_default_ttf_fonts() {
+void init_fonts(FatFileIO &ramdiskio) {
+	ramdisk = &ramdiskio;
+
 	fallback_font = &lv_font_montserrat_14;
 
 	if (load_ttf(default_ttf, std::string("4ms/fonts/").append(default_ttf).append(".ttf")) != TTFLoadResult::Added) {
@@ -287,8 +287,8 @@ lv_font_t const *get_ttf_font(std::string const &name, unsigned font_size) {
 	return fallback_font;
 }
 
-void free_ttf(std::string_view fontname) {
-	//TODO
+void free_ttf(std::string const &fontname) {
+	ttf_cache.erase(fontname);
 }
 
 std::pair<std::string_view, std::string_view> remap_fonts(std::string_view name, std::string_view path) {
