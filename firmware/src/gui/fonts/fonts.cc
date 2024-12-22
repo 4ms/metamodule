@@ -11,7 +11,7 @@
 LV_FONT_DECLARE(Segment7Standard_14);
 LV_FONT_DECLARE(Segment7Standard_20);
 
-namespace MetaModule
+namespace MetaModule::Fonts
 {
 
 // private:
@@ -140,4 +140,4 @@ lv_font_t const *get_font_from_disk(std::string_view name) {
 	return nullptr;
 }
 
-} // namespace MetaModule
+} // namespace MetaModule::Fonts

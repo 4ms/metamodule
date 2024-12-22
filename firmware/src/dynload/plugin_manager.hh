@@ -36,7 +36,7 @@ public:
 				// Cleanup files we copied to the ramdisk
 				for (auto const &file : plugin.loaded_files) {
 					if (file.ends_with(".bin")) {
-						free_font(file);
+						Fonts::free_font(file);
 					}
 					if (file.ends_with(".ttf")) {
 						Fonts::free_ttf(file);
