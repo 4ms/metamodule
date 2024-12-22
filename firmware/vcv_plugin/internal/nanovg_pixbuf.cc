@@ -102,8 +102,8 @@ float renderText(
 	auto lv_x = to_lv_coord(x + fs->xform[4]);
 	auto lv_y = to_lv_coord(y + fs->xform[5]);
 
-	auto lv_font_size = to_lv_coord(corrected_ttf_size(fs->fontSize, fs->fontName));
-	auto font = get_ttf_font(std::string(fs->fontName), lv_font_size);
+	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName));
+	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
 	if (!font)
 		return 0;
 
@@ -137,7 +137,7 @@ float renderText(
 		lv_obj_set_style_text_align(label, align, LV_PART_MAIN);
 
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
-		auto letter_space = corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
+		auto letter_space = Fonts::corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
 		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
 
 		// lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);

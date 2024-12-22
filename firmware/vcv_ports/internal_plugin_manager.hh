@@ -6,7 +6,7 @@
 #include "fs/norflash_layout.hh"
 #include "glue/RackCore/plugins.hh"
 #include "glue/Valley/plugins.hh"
-#include "gui/fonts/fonts.hh"
+#include "gui/fonts/fonts_init.hh"
 #include "internal_plugins.hh"
 #include "plugin/Plugin.hpp"
 #include <context.hpp>
@@ -16,8 +16,6 @@
 
 namespace MetaModule
 {
-
-void init_fonts(FatFileIO &ramdisk);
 
 struct InternalPluginManager {
 	FatFileIO &ramdisk;
@@ -54,7 +52,7 @@ struct InternalPluginManager {
 
 		ramdisk.debug_print_disk_info();
 
-		init_fonts(ramdisk);
+		Fonts::init_fonts(ramdisk);
 	}
 
 	void load_internal_plugins() {

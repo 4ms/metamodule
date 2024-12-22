@@ -26,7 +26,7 @@ target_link_libraries(vcv_plugin_internal PRIVATE
     lvgl::lvgl
 )
 
-set_source_files_properties(svg.cc nanovg_gl.cc
+set_source_files_properties(svg.cc nanovg_pixbuf.cc 
     PROPERTIES 
     COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )

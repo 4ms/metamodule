@@ -39,7 +39,7 @@ public:
 						free_font(file);
 					}
 					if (file.ends_with(".ttf")) {
-						free_ttf(file);
+						Fonts::free_ttf(file);
 					}
 					ramdisk.delete_file(file);
 				}
