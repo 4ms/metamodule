@@ -29,7 +29,7 @@ lv_color_t to_lv_text_color(NVGcolor color) {
 }
 
 constexpr uint8_t to_lv_opa(NVGcolor color) {
-	return std::round(color.a * float(LV_OPA_100));
+	return std::round((1.f - (1.f - color.a) * (1.f - color.a)) * float(LV_OPA_100));
 }
 
 constexpr bool is_poly_concave(std::span<lv_point_t> points) {

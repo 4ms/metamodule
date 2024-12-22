@@ -90,7 +90,11 @@ float corrected_ttf_size(float fontSize, std::string_view name) {
 
 	else if (name == "ShareTechMono-Regular")
 	{
-		fontSize *= 1.5f;
+		if (fontSize == 12.f)
+			fontSize *= 1.2f;
+
+		else if (fontSize < 12.f)
+			fontSize *= 1.5f;
 	}
 
 	if (fontSize == 38) //DrumKit Gnome, Sequencer
