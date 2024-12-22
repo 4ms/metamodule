@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 
+#if !defined(SIMULATOR)
 //C and C++
 
 static inline void DebugPin5High() {
@@ -64,3 +65,44 @@ static inline void DebugPin0Low() {
 }
 
 #define HARDWARE_BKPT() asm volatile("bkpt")
+
+#else
+static inline void DebugPin5High() {
+}
+
+static inline void DebugPin5Low() {
+}
+
+static inline void DebugPin4High() {
+}
+
+static inline void DebugPin4Low() {
+}
+
+static inline void DebugPin3High() {
+}
+
+static inline void DebugPin3Low() {
+}
+
+static inline void DebugPin2High() {
+}
+
+static inline void DebugPin2Low() {
+}
+
+static inline void DebugPin1High() {
+}
+
+static inline void DebugPin1Low() {
+}
+
+static inline void DebugPin0High() {
+}
+
+static inline void DebugPin0Low() {
+}
+
+#define HARDWARE_BKPT()
+
+#endif
