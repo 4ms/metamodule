@@ -1,6 +1,5 @@
 #include "window/Window.hpp"
 #include "console/pr_dbg.hh"
-// #include "gui/fonts/fonts.hh"
 #include <asset.hpp>
 #include <context.hpp>
 #include <system.hpp>

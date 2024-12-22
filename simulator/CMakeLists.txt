@@ -74,6 +74,7 @@ add_executable(
     ${FWDIR}/src/gui/slsexport/ui_local.cc
     ${FWDIR}/src/gui/slsexport/prefs_menu.cc
     ${FWDIR}/src/gui/fonts/fonts.cc
+    ${FWDIR}/src/gui/fonts/ttf.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
     ${FWDIR}/src/patch_play/modules_helpers.cc
     ${FWDIR}/src/midi/midi_router.cc

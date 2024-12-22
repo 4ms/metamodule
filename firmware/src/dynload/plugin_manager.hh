@@ -1,6 +1,7 @@
 #pragma once
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
+#include "gui/fonts/ttf.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
 #include "user_settings/plugin_autoload_settings.hh"
@@ -36,6 +37,9 @@ public:
 				for (auto const &file : plugin.loaded_files) {
 					if (file.ends_with(".bin")) {
 						free_font(file);
+					}
+					if (file.ends_with(".ttf")) {
+						free_ttf(file);
 					}
 					ramdisk.delete_file(file);
 				}

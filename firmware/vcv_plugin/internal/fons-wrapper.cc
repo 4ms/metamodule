@@ -1,5 +1,5 @@
 #include "console/pr_dbg.hh"
-#include "gui/fonts/fonts.hh"
+#include "gui/fonts/ttf.hh"
 #include <algorithm>
 #include <map>
 #include <string>
@@ -55,15 +55,15 @@ struct FONScontext {
 };
 
 int fonsAddFont(FONScontext *s, const char *name, const char *path, int fontIndex) {
-	auto res = MetaModule::load_ttf(name, path);
+	auto res = MetaModule::Fonts::load_ttf(name, path);
 
-	if (res == MetaModule::TTFLoadResult::Added) {
+	if (res == MetaModule::Fonts::TTFLoadResult::Added) {
 		auto handle = s->new_handle();
 		s->font_handles[handle] = FONScontext::FontEntry{.name = name};
 		pr_dbg("FONS: Adding font %s with handle %d\n", name, handle);
 		return handle;
 
-	} else if (res == MetaModule::TTFLoadResult::Error) {
+	} else if (res == MetaModule::Fonts::TTFLoadResult::Error) {
 		pr_warn("FONS: failed to load ttf for %s, using default\n", name);
 		return s->DefaultFontHandle;
 
@@ -93,7 +93,7 @@ static FONScontext *get_fonscontext() {
 
 FONScontext *fonsCreateInternal() {
 	auto s = get_fonscontext();
-	s->set_default_font(MetaModule::default_ttf_name());
+	s->set_default_font(MetaModule::Fonts::default_ttf_name());
 	return s;
 }
 
