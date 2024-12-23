@@ -38,6 +38,10 @@ target_include_directories(vcv_ports INTERFACE
 	${CMAKE_CURRENT_LIST_DIR}/glue
 )
 
+if (NOT TARGET simulator)
+	target_include_directories(vcv_ports INTERFACE ${CMAKE_CURRENT_LIST_DIR}/glue/ext_plugin)
+endif()
+
 # Get list of brands
 include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
 
