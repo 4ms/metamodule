@@ -1,3 +1,10 @@
+# Three steps to build an external plugin into the simulator:
+# 1. Copy/paste the two list APPEND commands, puttting in the path to the
+#    plugin (where the CMakeLists.txt lives), and the plugin cmake library name
+# 2. Copy/paste the two lines per plugin in simulator/src/ext_plugin_builtin.hh.
+# 3. In the plugin, find the file where init(rack::Plugin*) is defined, and rename it to init_BRAND
+#    You can use #if defined(METAMODULE_BUILTIN) so that it's still called init() when building as a plugin for Rack or MM.
+
 # list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/Bogaudio")
 # list(APPEND ext_builtin_brand_libname "BogaudioModules")
 

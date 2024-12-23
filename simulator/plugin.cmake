@@ -1,3 +1,5 @@
+# TODO: Get cmake to copy the source file that contains init() and rename that function to init_BRAND()
+# Also see if Cmake can generate the calls to init (currently manually written into simulator/src/ext_plugin_builtin.hh)
 
 # file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/replace.cmake"
 # [=[
