@@ -30,7 +30,6 @@ add_subdirectory(lvgl_drv)
 # #################### LVGL ############################################
 
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
-cmake_policy(SET CMP0177 OLD)
 include(${LVGL_DIR}/CMakeLists.txt)
 target_include_directories(lvgl PRIVATE 
           ${FWDIR}/lib/fatfs/source
