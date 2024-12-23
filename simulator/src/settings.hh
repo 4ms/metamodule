@@ -10,7 +10,7 @@ struct Settings {
 	unsigned zoom = 100;
 	std::string sdcard_path = "patches/";
 	std::string flash_path = "../patches/default/";
-	std::string asset_file = "../firmware/build/assets.uimg";
+	std::string asset_file = "build/assets.uimg";
 	int audioout_dev = 0;
 
 	void parse(int argc, char *argv[]) {

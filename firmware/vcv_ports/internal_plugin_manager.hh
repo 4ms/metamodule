@@ -1,5 +1,6 @@
 #pragma once
 #include "convert_plugins.hh"
+#include "ext_plugin_builtin.hh"
 #include "fat_file_io.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
@@ -27,6 +28,7 @@ struct InternalPluginManager {
 		prepare_ramdisk();
 		load_internal_assets();
 		load_internal_plugins();
+		load_ext_builtin_plugins(internal_plugins);
 	}
 
 	void prepare_ramdisk() {
