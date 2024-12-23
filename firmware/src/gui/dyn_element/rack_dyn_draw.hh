@@ -42,6 +42,7 @@ struct RackDynDraw : BaseDynDraw {
 			mw->step();
 			nvgBeginFrame(args.vg, mw->box.getWidth(), mw->box.getHeight(), 1);
 			mw->draw(args);
+			mw->drawLayer(args, 1);
 			nvgEndFrame(args.vg);
 
 			Debug::Pin1::low();
