@@ -115,6 +115,7 @@ float renderText(
 
 	if (found != context->labels.end()) {
 		label = found->label;
+		found->last_drawn_frame = context->draw_frame_ctr;
 	} else {
 
 		auto align = fs->textAlign & NVG_ALIGN_LEFT	  ? LV_TEXT_ALIGN_LEFT :
@@ -145,8 +146,7 @@ float renderText(
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
 		pr_dbg("Creating label at %d,%d align %d (sz %f)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
-		pr_dbg("Canvas is %d,%d\n", lv_obj_get_width(canvas), lv_obj_get_height(canvas), fs->textAlign, fs->fontSize);
-		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label);
+		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label, context->draw_frame_ctr);
 	}
 
 	if (text == nullptr)
@@ -277,10 +277,6 @@ int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
 void renderViewport(void *uptr, float width, float height, float devicePixelRatio) {
 	auto context = get_drawcontext(uptr);
 	context->draw_frame_ctr++;
-
-	for (auto &label : context->labels) {
-		label.last_drawn_frame = context->draw_frame_ctr;
-	}
 }
 
 void renderCancel(void *uptr) {
@@ -290,6 +286,7 @@ void renderCancel(void *uptr) {
 void renderFlush(void *uptr) {
 	auto context = get_drawcontext(uptr);
 
+	// Hide all labels that were not re-drawn since the last renderViewport() (via nvgBeginFrame())
 	for (auto &label : context->labels) {
 		if (label.last_drawn_frame < context->draw_frame_ctr) {
 			lv_label_set_text(label.label, "");
