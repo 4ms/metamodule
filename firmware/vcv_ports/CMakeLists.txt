@@ -74,7 +74,7 @@ foreach(brand ${brands})
 
 	target_link_libraries(_vcv_ports_internal PUBLIC ${brand}Library)
 
-	endif()
+endif()
 
 endforeach()
 
