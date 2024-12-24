@@ -34,7 +34,7 @@ add_custom_command(
 add_custom_command(
   OUTPUT ${ASSET_IMG_PATH}
   COMMAND cd ${ASSET_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
-  COMMAND cd ${FWDIR} && flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
+  COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
   COMMENT "Creating assets uimg file at ${ASSET_IMG_PATH}"
   DEPENDS ${ASSET_DIR}
   VERBATIM USES_TERMINAL
