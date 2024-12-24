@@ -1,9 +1,10 @@
 #pragma once
 #include "CoreModules/elements/units.hh"
 #include "base_dyn_draw.hh"
+#include "debug.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
-#include "vcv_plugin/internal/nanovg_gl.hh"
+#include "vcv_plugin/internal/nanovg_pixbuf.hh"
 #include <app/ModuleWidget.hpp>
 #include <memory>
 
@@ -27,11 +28,24 @@ struct RackDynDraw : BaseDynDraw {
 	}
 
 	void draw() override {
+		if (!args.vg)
+			return;
+
 		rack::contextGet()->window->vg = args.vg;
 
 		if (auto mw = module_widget.lock()) {
 
 			clear_canvas();
+
+			Debug::Pin1::high();
+
+			mw->step();
+			nvgBeginFrame(args.vg, mw->box.getWidth(), mw->box.getHeight(), 1);
+			mw->draw(args);
+			mw->drawLayer(args, 1);
+			nvgEndFrame(args.vg);
+
+			Debug::Pin1::low();
 
 			for (auto &widget : mw->drawable_widgets) {
 				if (!widget->isVisible())
@@ -39,10 +53,22 @@ struct RackDynDraw : BaseDynDraw {
 
 				args.clipBox = widget->getBox();
 
+				Debug::Pin2::high();
+				widget->step();
+				Debug::Pin2::low();
+
+				nvgBeginFrame(args.vg, widget->box.getWidth(), widget->box.getHeight(), 1);
 				mw->drawChild(widget, args);
 				mw->drawChild(widget, args, 1);
+				nvgEndFrame(args.vg);
 			}
 		}
+	}
+
+	void blur() override {
+		nvgDeletePixelBufferContext(args.vg);
+		args.vg = nullptr;
+		rack::contextGet()->window->vg = nullptr;
 	}
 
 	~RackDynDraw() override = default;
