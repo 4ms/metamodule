@@ -1,6 +1,5 @@
 #include "window/Window.hpp"
 #include "console/pr_dbg.hh"
-// #include "gui/fonts/fonts.hh"
 #include <asset.hpp>
 #include <context.hpp>
 #include <system.hpp>
@@ -23,21 +22,13 @@ void Font::loadFile(const std::string &filename, NVGcontext *vg) {
 
 	auto path = rack::asset::system(filename);
 
-	size_t size = 0;
-	auto data = rack::system::readFile(path, &size);
-
-	if (size > 0 && data) {
-		// Transfer ownership of font data to font object
-		handle = nvgCreateFontMem(vg, name.c_str(), data, size, 0);
-		if (handle < 0) {
-			std::free(data);
-			pr_err("Failed to load font %s (%s)", filename.c_str(), name.c_str());
-		}
-	} else {
-		pr_err("Failed to open font file %s", filename.c_str());
+	handle = nvgCreateFont(vg, name.c_str(), path.c_str());
+	if (handle < 0) {
+		pr_err("Failed to load font %s (%s)\n", filename.c_str(), name.c_str());
+		return;
 	}
 
-	pr_dbg("Loaded font %s", filename.c_str());
+	pr_dbg("Loaded font %s, with handle %d\n", filename.c_str(), handle);
 }
 
 std::shared_ptr<Font> Font::load(const std::string &filename) {
@@ -83,8 +74,7 @@ std::shared_ptr<Font> Window::loadFont(const std::string &filename) {
 		return pair->second;
 
 	// Load font
-	std::shared_ptr<Font> font;
-	font = std::make_shared<Font>();
+	auto font = std::make_shared<Font>();
 	font->loadFile(filename, vg);
 	internal->fontCache[filename] = font;
 
@@ -97,8 +87,7 @@ std::shared_ptr<Image> Window::loadImage(const std::string &filename) {
 		return pair->second;
 
 	// Load image
-	std::shared_ptr<Image> image;
-	image = std::make_shared<Image>();
+	auto image = std::make_shared<Image>();
 	image->loadFile(filename, vg);
 	internal->imageCache[filename] = image;
 
