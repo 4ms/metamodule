@@ -364,35 +364,6 @@ public:
 		return true;
 	}
 
-	std::optional<std::string_view> get_file_name_by_index(const std::string_view path, unsigned idx) {
-		DIR dj;
-		FILINFO fno;
-
-		f_chdrive(_fatvol);
-
-		auto full_path = std::string(path);
-		// pr_trace("FatFS: scanning dir %s\n", full_path.c_str());
-
-		if (f_opendir(&dj, full_path.c_str()) != FR_OK) {
-			if (!mount_disk())
-				return std::nullopt;
-			if (f_opendir(&dj, full_path.c_str()) != FR_OK)
-				return std::nullopt;
-		}
-
-		f_rewinddir(&dj);
-		idx += 1;
-		while (idx--) {
-			if (f_readdir(&dj, &fno) != FR_OK) {
-				return std::nullopt;
-			}
-			if (fno.fname[0] == '\0') {
-				return std::nullopt;
-			}
-		}
-		return fno.fname;
-	}
-
 	// Returns false if dir cannot be opened
 	bool foreach_dir_entry(const std::string_view path, auto action) {
 		DIR dj;
@@ -422,6 +393,31 @@ public:
 			action(fno.fname, timestamp, fno.fsize, entry_type);
 		}
 		return true;
+	}
+
+	bool
+	foreach_dir_entry_recursive(const std::string_view path, auto action, unsigned max_depth, unsigned cur_depth = 0) {
+		if (cur_depth >= max_depth) {
+			return false;
+		}
+
+		return foreach_dir_entry(
+			path, [=, this](std::string_view filename, uint32_t filesize, uint32_t tmstmp, DirEntryKind kind) {
+				std::string fullpath;
+				if (path.length())
+					fullpath = std::string(path) + std::string("/") + std::string(filename);
+				else
+					fullpath = std::string(filename);
+
+				if (kind == DirEntryKind::File) {
+					action(fullpath, filesize, tmstmp, kind);
+				}
+
+				else if (kind == DirEntryKind::Dir)
+				{
+					foreach_dir_entry_recursive(fullpath, action, max_depth, cur_depth + 1);
+				}
+			});
 	}
 
 	void print_dir(std::string_view path, unsigned max_depth, unsigned cur_depth = 0) {
