@@ -36,16 +36,13 @@ struct RackDynDraw : BaseDynDraw {
 		if (auto mw = module_widget.lock()) {
 
 			clear_canvas();
-
-			Debug::Pin1::high();
-
-			mw->step();
 			nvgBeginFrame(args.vg, mw->box.getWidth(), mw->box.getHeight(), 1);
+
+			// Debug::Pin1::high();
+			mw->step();
 			mw->draw(args);
 			mw->drawLayer(args, 1);
-			nvgEndFrame(args.vg);
-
-			Debug::Pin1::low();
+			// Debug::Pin1::low();
 
 			for (auto &widget : mw->drawable_widgets) {
 				if (!widget->isVisible())
@@ -53,15 +50,13 @@ struct RackDynDraw : BaseDynDraw {
 
 				args.clipBox = widget->getBox();
 
-				Debug::Pin2::high();
+				// Debug::Pin2::high();
 				widget->step();
-				Debug::Pin2::low();
-
-				nvgBeginFrame(args.vg, widget->box.getWidth(), widget->box.getHeight(), 1);
 				mw->drawChild(widget, args);
 				mw->drawChild(widget, args, 1);
-				nvgEndFrame(args.vg);
+				// Debug::Pin2::low();
 			}
+			nvgEndFrame(args.vg);
 		}
 	}
 

@@ -28,11 +28,11 @@ void renderFill(void *uptr,
 				int npaths) {
 
 	if (npaths < 0 || npaths > 1024) {
-		pr_dbg("Invalid number of paths in RenderFill: %d\n", npaths);
+		// pr_dbg("Invalid number of paths in RenderFill: %d\n", npaths);
 		return;
 	}
 	if (paths[0].fill[0].x > 10000.f || paths[0].fill[0].y > 10000.f) {
-		pr_dbg("Invalid point in renderFill (point [0] is %f, %f)\n", paths[0].fill[0].x, paths[0].fill[0].y);
+		// pr_dbg("Invalid point in renderFill (point [0] is %f, %f)\n", paths[0].fill[0].x, paths[0].fill[0].y);
 		return;
 	}
 
@@ -71,11 +71,11 @@ void renderStroke(void *uptr,
 	auto context = get_drawcontext(uptr);
 
 	if (npaths < 0 || npaths > 1024) {
-		pr_dbg("Invalid number of paths in RenderFill: %d\n", npaths);
+		// pr_dbg("Invalid number of paths in renderStroke: %d\n", npaths);
 		return;
 	}
 	if (paths[0].stroke[0].x > 10000.f || paths[0].stroke[0].y > 10000.f) {
-		pr_dbg("Invalid point in renderStroke (point [0] is %f, %f)\n", paths[0].stroke[0].x, paths[0].stroke[0].y);
+		// pr_dbg("Invalid point in renderStroke (point [0] is %f, %f)\n", paths[0].stroke[0].x, paths[0].stroke[0].y);
 		return;
 	}
 
@@ -96,7 +96,7 @@ float renderText(
 	auto context = get_drawcontext(uptr);
 	auto canvas = context->canvas;
 
-	DebugPin1High(); // really debug 0
+	// DebugPin1High(); // really debug 0
 
 	// Move to position
 	auto lv_x = to_lv_coord(x + fs->xform[4]);
@@ -171,7 +171,7 @@ float renderText(
 	lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
 	lv_label_set_text(label, text);
 
-	DebugPin1Low(); //really debug 0
+	// DebugPin1Low(); //really debug 0
 
 	return 1;
 }
