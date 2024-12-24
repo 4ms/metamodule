@@ -657,6 +657,57 @@ lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsAudioBlocksizeDropdow
 lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_SystemPrefsAudioBlocksizeDropdown), lv_color_hex(0xFD8B18),  LV_PART_SELECTED | LV_STATE_CHECKED );
 lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsAudioBlocksizeDropdown), 255,  LV_PART_SELECTED| LV_STATE_CHECKED);
 
+ui_SystemPrefsAudioOverrunRetriesCont = lv_obj_create(ui_SystemMenuPrefsTab);
+lv_obj_remove_style_all(ui_SystemPrefsAudioOverrunRetriesCont);
+lv_obj_set_width( ui_SystemPrefsAudioOverrunRetriesCont, lv_pct(100));
+lv_obj_set_height( ui_SystemPrefsAudioOverrunRetriesCont, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemPrefsAudioOverrunRetriesCont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_SystemPrefsAudioOverrunRetriesCont,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_SystemPrefsAudioOverrunRetriesCont, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_clear_flag( ui_SystemPrefsAudioOverrunRetriesCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_pad_left(ui_SystemPrefsAudioOverrunRetriesCont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemPrefsAudioOverrunRetriesCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemPrefsAudioOverrunRetriesCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemPrefsAudioOverrunRetriesCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemPrefsAudioOverrunRetriesLabel = lv_label_create(ui_SystemPrefsAudioOverrunRetriesCont);
+lv_obj_set_width( ui_SystemPrefsAudioOverrunRetriesLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_SystemPrefsAudioOverrunRetriesLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemPrefsAudioOverrunRetriesLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_SystemPrefsAudioOverrunRetriesLabel,"Overrun retries:");
+lv_obj_set_style_text_font(ui_SystemPrefsAudioOverrunRetriesLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemPrefsAudioOverrunRetriesDropdown = lv_dropdown_create(ui_SystemPrefsAudioOverrunRetriesCont);
+lv_dropdown_set_options( ui_SystemPrefsAudioOverrunRetriesDropdown, "None\n4\n8\n16\n32\n64\n128\n256" );
+lv_obj_set_width( ui_SystemPrefsAudioOverrunRetriesDropdown, 75);
+lv_obj_set_height( ui_SystemPrefsAudioOverrunRetriesDropdown, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemPrefsAudioOverrunRetriesDropdown, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_SystemPrefsAudioOverrunRetriesDropdown, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_text_font(ui_SystemPrefsAudioOverrunRetriesDropdown, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_SystemPrefsAudioOverrunRetriesDropdown, lv_color_hex(0x666666), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_SystemPrefsAudioOverrunRetriesDropdown, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_SystemPrefsAudioOverrunRetriesDropdown, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_EDITED );
+lv_obj_set_style_outline_opa(ui_SystemPrefsAudioOverrunRetriesDropdown, 0, LV_PART_MAIN| LV_STATE_EDITED);
+lv_obj_set_style_outline_color(ui_SystemPrefsAudioOverrunRetriesDropdown, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_SystemPrefsAudioOverrunRetriesDropdown, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_SystemPrefsAudioOverrunRetriesDropdown, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_SystemPrefsAudioOverrunRetriesDropdown, 1, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_SystemPrefsAudioOverrunRetriesDropdown, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_SystemPrefsAudioOverrunRetriesDropdown, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+lv_obj_set_style_text_font(ui_SystemPrefsAudioOverrunRetriesDropdown, &lv_font_montserrat_14, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+
+lv_obj_set_style_text_letter_space(lv_dropdown_get_list(ui_SystemPrefsAudioOverrunRetriesDropdown), 0,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_line_space(lv_dropdown_get_list(ui_SystemPrefsAudioOverrunRetriesDropdown), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_radius(lv_dropdown_get_list(ui_SystemPrefsAudioOverrunRetriesDropdown), 0,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_SystemPrefsAudioOverrunRetriesDropdown), lv_color_hex(0x666666),  LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsAudioOverrunRetriesDropdown), 255,  LV_PART_MAIN| LV_STATE_DEFAULT);
+
+lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_SystemPrefsAudioOverrunRetriesDropdown), lv_color_hex(0xFD8B18),  LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsAudioOverrunRetriesDropdown), 255,  LV_PART_SELECTED| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_SystemPrefsAudioOverrunRetriesDropdown), lv_color_hex(0xFD8B18),  LV_PART_SELECTED | LV_STATE_CHECKED );
+lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsAudioOverrunRetriesDropdown), 255,  LV_PART_SELECTED| LV_STATE_CHECKED);
+
 ui_SystemPrefsScreensaverSettingsTitle = lv_label_create(ui_SystemMenuPrefsTab);
 lv_obj_set_width( ui_SystemPrefsScreensaverSettingsTitle, lv_pct(100));
 lv_obj_set_height( ui_SystemPrefsScreensaverSettingsTitle, LV_SIZE_CONTENT);   /// 1
