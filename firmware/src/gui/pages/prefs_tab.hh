@@ -24,11 +24,13 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsRevertButton, revert_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_SystemPrefsAudioOverrunRetriesDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioSampleRateDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverTimeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
+		lv_obj_add_event_cb(ui_SystemPrefsAudioOverrunRetriesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioSampleRateDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverTimeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
@@ -40,6 +42,18 @@ struct PrefsTab : SystemMenuTab {
 		if (opts.length())
 			opts.pop_back();
 		lv_dropdown_set_options(ui_SystemPrefsAudioBlocksizeDropdown, opts.c_str());
+
+		opts = std::accumulate(AudioSettings::ValidOverrunRetries.begin(),
+							   AudioSettings::ValidOverrunRetries.end(),
+							   std::string(""),
+							   [](std::string const &sum, uint32_t item) {
+								   if (item == 0)
+									   return std::string("None");
+								   else
+									   return sum + std::string("\n") + std::to_string(item);
+							   });
+
+		lv_dropdown_set_options(ui_SystemPrefsAudioOverrunRetriesDropdown, opts.c_str());
 
 		opts = "";
 		for (auto item : AudioSettings::ValidSampleRates) {
@@ -63,6 +77,7 @@ struct PrefsTab : SystemMenuTab {
 
 		lv_group_remove_obj(ui_SystemPrefsAudioSampleRateDropdown);
 		lv_group_remove_obj(ui_SystemPrefsAudioBlocksizeDropdown);
+		lv_group_remove_obj(ui_SystemPrefsAudioOverrunRetriesDropdown);
 		lv_group_remove_obj(ui_SystemPrefsScreensaverTimeDropdown);
 		lv_group_remove_obj(ui_SystemPrefsScreensaverKnobsCheck);
 		lv_group_remove_obj(ui_SystemPrefsRevertButton);
@@ -70,6 +85,7 @@ struct PrefsTab : SystemMenuTab {
 
 		lv_group_add_obj(group, ui_SystemPrefsAudioSampleRateDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsAudioBlocksizeDropdown);
+		lv_group_add_obj(group, ui_SystemPrefsAudioOverrunRetriesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverTimeDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverKnobsCheck);
 		lv_group_add_obj(group, ui_SystemPrefsRevertButton);
@@ -77,6 +93,7 @@ struct PrefsTab : SystemMenuTab {
 
 		lv_dropdown_close(ui_SystemPrefsAudioSampleRateDropdown);
 		lv_dropdown_close(ui_SystemPrefsAudioBlocksizeDropdown);
+		lv_dropdown_close(ui_SystemPrefsAudioOverrunRetriesDropdown);
 		lv_dropdown_close(ui_SystemPrefsScreensaverTimeDropdown);
 
 		lv_group_focus_obj(ui_SystemPrefsAudioSampleRateDropdown);
@@ -98,6 +115,10 @@ struct PrefsTab : SystemMenuTab {
 
 		auto bs_item = get_index(AudioSettings::ValidBlockSizes, [this](auto t) { return t == settings.block_size; });
 		lv_dropdown_set_selected(ui_SystemPrefsAudioBlocksizeDropdown, bs_item >= 0 ? bs_item : 1);
+
+		auto ovr_item =
+			get_index(AudioSettings::ValidOverrunRetries, [this](auto t) { return t == settings.max_overrun_retries; });
+		lv_dropdown_set_selected(ui_SystemPrefsAudioOverrunRetriesDropdown, ovr_item >= 0 ? ovr_item : 1);
 
 		auto screensaver_item = get_index(ScreensaverSettings::ValidOptions,
 										  [this](auto t) { return t.timeout_ms == screensaver.timeout_ms; });
@@ -129,6 +150,15 @@ struct PrefsTab : SystemMenuTab {
 			return AudioSettings::DefaultBlockSize;
 	}
 
+	uint32_t read_overrun_dropdown() {
+		auto ovr_item = lv_dropdown_get_selected(ui_SystemPrefsAudioOverrunRetriesDropdown);
+
+		if (ovr_item >= 0 && ovr_item < AudioSettings::ValidOverrunRetries.size())
+			return AudioSettings::ValidOverrunRetries[ovr_item];
+		else
+			return AudioSettings::DefaultOverrunRetries;
+	}
+
 	uint32_t read_timeout_dropdown() {
 		auto to_item = lv_dropdown_get_selected(ui_SystemPrefsScreensaverTimeDropdown);
 
@@ -145,6 +175,7 @@ struct PrefsTab : SystemMenuTab {
 	void update_settings_from_dropdown() {
 		auto block_size = read_blocksize_dropdown();
 		auto sample_rate = read_samplerate_dropdown();
+		auto max_overrun_retries = read_overrun_dropdown();
 
 		if (settings.block_size != block_size || settings.sample_rate != sample_rate) {
 
@@ -152,6 +183,11 @@ struct PrefsTab : SystemMenuTab {
 			settings.sample_rate = sample_rate;
 
 			patch_playloader.request_new_audio_settings(sample_rate, block_size);
+			gui_state.do_write_settings = true;
+		}
+
+		if (settings.max_overrun_retries != max_overrun_retries) {
+			settings.max_overrun_retries = max_overrun_retries;
 			gui_state.do_write_settings = true;
 		}
 
@@ -179,6 +215,12 @@ struct PrefsTab : SystemMenuTab {
 		} else if (lv_dropdown_is_open(ui_SystemPrefsAudioBlocksizeDropdown)) {
 			lv_dropdown_close(ui_SystemPrefsAudioBlocksizeDropdown);
 			lv_group_focus_obj(ui_SystemPrefsAudioBlocksizeDropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
+		} else if (lv_dropdown_is_open(ui_SystemPrefsAudioOverrunRetriesDropdown)) {
+			lv_dropdown_close(ui_SystemPrefsAudioOverrunRetriesDropdown);
+			lv_group_focus_obj(ui_SystemPrefsAudioOverrunRetriesDropdown);
 			lv_group_set_editing(group, false);
 			return true;
 
@@ -218,11 +260,13 @@ private:
 
 		auto block_size = page->read_blocksize_dropdown();
 		auto sample_rate = page->read_samplerate_dropdown();
+		auto overrun_retries = page->read_overrun_dropdown();
 		auto timeout = page->read_timeout_dropdown();
 		auto knobwake = page->read_knobwake_check();
 
 		if (block_size == page->settings.block_size && sample_rate == page->settings.sample_rate &&
-			timeout == page->screensaver.timeout_ms && knobwake == page->screensaver.knobs_can_wake)
+			overrun_retries == page->settings.max_overrun_retries && timeout == page->screensaver.timeout_ms &&
+			knobwake == page->screensaver.knobs_can_wake)
 		{
 			lv_disable(ui_SystemPrefsSaveButton);
 			lv_disable(ui_SystemPrefsRevertButton);
