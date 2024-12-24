@@ -48,6 +48,10 @@ public:
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 	uint32_t get_audio_errors();
 
+	bool is_overrun_retrying();
+	void done_retry_overrun();
+	void step();
+
 private:
 	SyncParams &sync_params;
 	ParamsState param_state;
@@ -81,6 +85,8 @@ private:
 	ParamBlock local_params;
 
 	bool midi_last_connected = false;
+
+	bool overrun_retrying = false;
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	AudioConf::SampleT get_ext_audio_output(int output_id);

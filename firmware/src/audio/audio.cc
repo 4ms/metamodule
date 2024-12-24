@@ -91,10 +91,10 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
 		// 71.2us w/both MIDIs
-		// alternating 44us/71.3us with jack sense in metamparams (why alternating?)
+		// alternating 44us/71.3us with jack sense in metaparams (why alternating?)
 		auto &params = cache_params(block);
 
-		if (is_playing_patch())
+		if (!overrun_retrying && is_playing_patch())
 			process(audio_blocks[1 - block], params);
 		else
 			process_nopatch(audio_blocks[1 - block], params);
@@ -109,8 +109,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.end_measurement();
 		if (load_measure.get_last_measurement_load_percent() >= 98) {
-			output_fade_amt = 0.f;
-			patch_loader.notify_audio_overrun();
+			overrun_retrying = true;
 		}
 
 		// Debug::Pin0::low();
@@ -122,6 +121,14 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	for (auto &s : param_state.smoothed_ins)
 		s.set_size(block_size_);
+}
+
+void AudioStream::step() {
+	player.update_patch();
+}
+
+void AudioStream::done_retry_overrun() {
+	overrun_retrying = false;
 }
 
 void AudioStream::start() {
@@ -142,6 +149,11 @@ AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
 }
 
 bool AudioStream::is_playing_patch() {
+	// Don't allow anyone to stop the patch while we are retrying to recover from an overrun:
+	// because core 0 has a lock on the player
+	if (overrun_retrying)
+		return true;
+
 	if (patch_loader.should_fade_down_audio()) {
 		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt <= 0.f) {
@@ -392,6 +404,10 @@ void AudioStream::set_calibration(CalData const &caldata) {
 
 uint32_t AudioStream::get_audio_errors() {
 	return codec_.get_sai_errors();
+}
+
+bool AudioStream::is_overrun_retrying() {
+	return overrun_retrying;
 }
 
 // It's measurably faster to copy params into cacheable ram
