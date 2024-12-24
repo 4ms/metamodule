@@ -1,104 +1,22 @@
 #include "CoreModules/elements/units.hh"
-#include "console/pr_dbg.hh"
+#include "gui/fonts/ttf.hh"
 #include "lvgl.h"
+#include "nanovg_pixbuf_drawctx.hh"
+#include "nanovg_pixbuf_util.hh"
 #include <algorithm>
 #include <cmath>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <nanovg.h>
 #include <span>
+#include <string>
 #include <vector>
 
-#define NANOVG_PIXELBUFFER_IMPLEMENTATION
-#include <nanovg_gl.h>
-#include <nanovg_gl_utils.h>
+#include "console/pr_dbg.hh"
+#include "medium/debug_raw.h"
 
-namespace MetaModule
+namespace MetaModule::NanoVG
 {
-
-namespace NanoVG
-{
-
-struct Texture {
-	std::vector<lv_color_t> pix;
-	size_t w{};
-	size_t h{};
-
-	lv_color_t px(size_t x, size_t y) const {
-		return pix[x + y * w];
-	}
-
-	lv_color_t &px(size_t x, size_t y) {
-		return pix[x + y * w];
-	}
-	//type?
-	//flags?
-};
-
-struct DrawContext {
-	lv_obj_t *canvas{};
-	lv_draw_line_dsc_t line_dsc{};
-	lv_draw_rect_dsc_t rect_dsc{};
-
-	std::vector<Texture> textures;
-
-	DrawContext(lv_obj_t *canvas)
-		: canvas{canvas} {
-		lv_draw_line_dsc_init(&line_dsc);
-		line_dsc.width = 1;
-
-		lv_draw_rect_dsc_init(&rect_dsc);
-		rect_dsc.radius = 0;
-	}
-};
-
-constexpr lv_coord_t to_lv_coord(float x) {
-	return std::round(mm_to_px(to_mm(x), 240));
-}
-
-constexpr lv_point_t to_lv_point(NVGvertex vertex) {
-	return lv_point_t(to_lv_coord(vertex.x), to_lv_coord(vertex.y));
-}
-
-DrawContext *get_drawcontext(void *uptr) {
-	return (DrawContext *)(uptr);
-}
-
-lv_color_t to_lv_color(NVGcolor color) {
-	return lv_color_make(color.r * 255.f, color.g * 255.f, color.b * 255.f);
-}
-
-constexpr uint8_t to_lv_opa(NVGcolor color) {
-	return std::round(color.a * float(LV_OPA_100));
-}
-
-constexpr bool is_poly_concave(std::span<lv_point_t> points) {
-	auto n = points.size();
-	if (n < 3)
-		return false;
-
-	auto X_prod = [](lv_point_t O, lv_point_t A, lv_point_t B) {
-		return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
-	};
-
-	int sign = 0;
-	for (auto i = 0u; i < points.size(); i++) {
-		auto O = points[i];
-		auto A = points[(i + 1) % n];
-		auto B = points[(i + 2) % n];
-		auto cross = X_prod(O, A, B);
-		if (cross == 0)
-			continue;
-
-		if (sign == 0)
-			sign = cross;
-
-		if ((sign > 0 && cross < 0) || (sign < 0 && cross > 0))
-			return true;
-	}
-	return false;
-}
 
 void renderFill(void *uptr,
 				NVGpaint *paint,
@@ -173,6 +91,91 @@ void renderStroke(void *uptr,
 	}
 }
 
+float renderText(
+	void *uptr, float x, float y, float max_w, const char *text, const char *textend, struct NVGFontState *fs) {
+	auto context = get_drawcontext(uptr);
+	auto canvas = context->canvas;
+
+	DebugPin1High(); // really debug 0
+
+	// Move to position
+	auto lv_x = to_lv_coord(x + fs->xform[4]);
+	auto lv_y = to_lv_coord(y + fs->xform[5]);
+
+	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName));
+	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
+	if (!font)
+		return 0;
+
+	// Create or find existing label (match on X,Y pos)
+	lv_obj_t *label{};
+	auto found = std::ranges::find_if(context->labels, [=](TextRenderCacheEntry const &cached) {
+		return cached.x == lv_x && cached.y == lv_y && cached.align == fs->textAlign;
+	});
+
+	if (found != context->labels.end()) {
+		label = found->label;
+		found->last_drawn_frame = context->draw_frame_ctr;
+	} else {
+
+		auto align = fs->textAlign & NVG_ALIGN_LEFT	  ? LV_TEXT_ALIGN_LEFT :
+					 fs->textAlign & NVG_ALIGN_RIGHT  ? LV_TEXT_ALIGN_RIGHT :
+					 fs->textAlign & NVG_ALIGN_CENTER ? LV_TEXT_ALIGN_CENTER :
+														LV_TEXT_ALIGN_LEFT;
+
+		// Align vertically
+		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size * 0.8f :
+								  fs->textAlign & NVG_ALIGN_BOTTOM	 ? lv_font_size * 1.2f :
+								  fs->textAlign & NVG_ALIGN_MIDDLE	 ? lv_font_size * 0.5f :
+								  fs->textAlign & NVG_ALIGN_TOP		 ? 0 :
+																	   lv_font_size * 1.0f);
+
+		label = lv_label_create(canvas);
+		lv_obj_set_pos(label, lv_x, align_lv_y);
+		lv_obj_set_size(label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+		lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
+		lv_obj_set_style_text_opa(label, to_lv_opa(fs->paint->innerColor), LV_PART_MAIN);
+		lv_obj_set_style_text_align(label, align, LV_PART_MAIN);
+
+		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
+		auto letter_space = Fonts::corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
+		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
+
+		// lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
+		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
+		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
+
+		pr_dbg("Creating label at %d,%d align %d (sz %f)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label, context->draw_frame_ctr);
+	}
+
+	if (text == nullptr)
+		text = "";
+
+	// Handle case were text doesn't have a null terminator (which LVGL needs)
+	std::string text_copy;
+	if (textend && *textend != '\0') {
+		text_copy.append(text, textend - text);
+		text = text_copy.c_str();
+	}
+
+	if (fs->textAlign & NVG_ALIGN_CENTER) {
+		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
+		lv_obj_set_x(label, lv_x - width / 2);
+	}
+	if (fs->textAlign & NVG_ALIGN_RIGHT) {
+		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
+		lv_obj_set_x(label, lv_x - width);
+	}
+
+	lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
+	lv_label_set_text(label, text);
+
+	DebugPin1Low(); //really debug 0
+
+	return 1;
+}
+
 void renderTriangles(void *uptr,
 					 NVGpaint *paint,
 					 NVGcompositeOperationState compositeOperation,
@@ -196,6 +199,11 @@ void renderTriangles(void *uptr,
 		auto s_tl = lv_point_t{to_lv_coord(tx_width * verts[i].u), to_lv_coord(tx_height * verts[i].v)};
 		auto s_br = lv_point_t{to_lv_coord(tx_width * verts[i + 1].u), to_lv_coord(tx_height * verts[i + 1].v)};
 
+		(void)d_tl;
+		(void)d_br;
+		(void)s_tl;
+		(void)s_br;
+
 		// now copy with scaling
 		// from context->textures[paint->image].pix[s_tl...s_br]
 		// to lv_canvas buffer
@@ -205,17 +213,21 @@ void renderTriangles(void *uptr,
 }
 
 void renderDelete(void *uptr) {
-	// printf("renderDelete\n");
+	// pr_dbg("renderDelete\n");
+	if (uptr) {
+		if (auto context = get_drawcontext(uptr))
+			delete context;
+	}
 }
 
 // Share the textures of GLNVGcontext 'otherUptr' if it's non-NULL.
 int renderCreate(void *uptr, void *otherUptr) {
-	// printf("RenderCreate (canvas = %p)\n", get_canvas_from_context(uptr));
+	// pr_dbg("RenderCreate\n");
 	return 1;
 }
 
 int renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, const unsigned char *data) {
-	printf("renderCreateTexture: %d x %d, type %d, flags %d\n", w, h, type, imageFlags);
+	pr_dbg("renderCreateTexture: %d x %d, type %d, flags %d\n", w, h, type, imageFlags);
 
 	auto context = get_drawcontext(uptr);
 
@@ -235,12 +247,12 @@ int renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, cons
 }
 
 int renderDeleteTexture(void *uptr, int image) {
-	printf("renderDeleteTexture\n");
+	pr_dbg("renderDeleteTexture\n");
 	return 1;
 }
 
 int renderUpdateTexture(void *uptr, int image, int x, int y, int w, int h, const unsigned char *data) {
-	printf("renderUpdateTexture (image=%d) %d x %d @ %d,%d\n", image, w, h, x, y);
+	pr_dbg("renderUpdateTexture (image=%d) %d x %d @ %d,%d\n", image, w, h, x, y);
 	auto context = get_drawcontext(uptr);
 
 	if (image < (int)context->textures.size()) {
@@ -250,7 +262,7 @@ int renderUpdateTexture(void *uptr, int image, int x, int y, int w, int h, const
 	return 1;
 }
 int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
-	printf("renderGetTextureSize\n");
+	pr_dbg("renderGetTextureSize\n");
 	auto context = get_drawcontext(uptr);
 
 	if (image < (int)context->textures.size()) {
@@ -263,7 +275,8 @@ int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
 }
 
 void renderViewport(void *uptr, float width, float height, float devicePixelRatio) {
-	printf("renderViewport %f x %f, %f\n", width, height, devicePixelRatio);
+	auto context = get_drawcontext(uptr);
+	context->draw_frame_ctr++;
 }
 
 void renderCancel(void *uptr) {
@@ -271,12 +284,17 @@ void renderCancel(void *uptr) {
 }
 
 void renderFlush(void *uptr) {
-	// printf("renderFlush\n");
+	auto context = get_drawcontext(uptr);
+
+	// Hide all labels that were not re-drawn since the last renderViewport() (via nvgBeginFrame())
+	for (auto &label : context->labels) {
+		if (label.last_drawn_frame < context->draw_frame_ctr) {
+			lv_label_set_text(label.label, "");
+		}
+	}
 }
 
-} // namespace NanoVG
-
-} // namespace MetaModule
+} // namespace MetaModule::NanoVG
 
 NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	NVGparams params;
@@ -297,6 +315,7 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	params.renderStroke = renderStroke;
 	params.renderTriangles = renderTriangles;
 	params.renderDelete = renderDelete;
+	params.renderText = renderText;
 
 	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas};
 	params.userPtr = draw_ctx;
@@ -306,6 +325,7 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	ctx = nvgCreateInternal(&params, nullptr);
 
 	if (ctx) {
+		draw_ctx->parent_ctx = ctx;
 		return ctx;
 	} else {
 		delete draw_ctx;
@@ -313,49 +333,12 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	}
 }
 
+void nvgDeletePixelBufferContext(NVGcontext *ctx) {
+	// pr_dbg("nvgDeletePixelBufferContext\n");
+	if (ctx)
+		nvgDeleteInternal(ctx);
+}
+
 void nvgluDeleteFramebuffer(NVGcontext *ctx) {
 	// keep track of them?
 }
-
-// void nvgluBindFramebuffer(NVGLUframebuffer *) {
-// }
-
-// NVGLUframebuffer *nvgluCreateFramebuffer(NVGcontext *ctx, int w, int h, int imageFlags) {
-
-// 	NVGLUframebuffer *fb = nullptr;
-
-// 	fb = (NVGLUframebuffer *)malloc(sizeof(NVGLUframebuffer));
-// 	if (fb == nullptr)
-// 		return nullptr;
-
-// 	memset(fb, 0, sizeof(NVGLUframebuffer));
-
-// 	// fb->image = nvgCreateImageRGBA(ctx, w, h, imageFlags | NVG_IMAGE_FLIPY | NVG_IMAGE_PREMULTIPLIED, NULL);
-// 	// fb->texture = nvglImageHandleGL2(ctx, fb->image);
-// 	fb->ctx = ctx;
-
-// 	return fb;
-// }
-
-// void nvgluDeleteFramebuffer(NVGLUframebuffer *fb) {
-// 	if (fb == nullptr)
-// 		return;
-// 	// if (fb->fbo != 0)
-// 	// 	glDeleteFramebuffers(1, &fb->fbo);
-// 	// if (fb->rbo != 0)
-// 	// 	glDeleteRenderbuffers(1, &fb->rbo);
-// 	// if (fb->image >= 0)
-// 	// 	nvgDeleteImage(fb->ctx, fb->image);
-// 	fb->ctx = nullptr;
-// 	fb->fbo = 0;
-// 	fb->rbo = 0;
-// 	fb->texture = 0;
-// 	fb->image = -1;
-// 	free(fb);
-// }
-
-// void nvgBindFrameBuffer(NVGcontext *ctx, lv_obj_t *canvas) {
-// 	if (ctx) {
-// 		MetaModule::draw_ctx.canvas = canvas;
-// 	}
-// }

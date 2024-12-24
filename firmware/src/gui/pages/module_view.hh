@@ -384,7 +384,10 @@ struct ModuleViewPage : PageBase {
 
 		roller_hover.update();
 
-		dyn_draw.draw();
+		if (dyn_frame_throttle_ctr-- == 0) {
+			dyn_frame_throttle_ctr = DynFrameThrottle;
+			dyn_draw.draw();
+		}
 	}
 
 	bool handle_patch_mods() {
@@ -446,6 +449,8 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
+		pr_dbg("ModuleView::blur\n");
+		dyn_draw.blur();
 		params.lights.stop_watching_all();
 		params.displays.stop_watching_all();
 		params.param_watcher.stop_watching_all();
@@ -493,6 +498,9 @@ private:
 	void reset_module_page() {
 		for (auto &b : button)
 			lv_obj_del(b);
+
+		pr_dbg("reset_module_page\n");
+		dyn_draw.blur();
 
 		if (canvas)
 			lv_obj_del(canvas);
@@ -745,6 +753,8 @@ private:
 	PluginModuleMenu module_menu;
 
 	DynamicElementDraw dyn_draw;
+	unsigned dyn_frame_throttle_ctr = 1;
+	constexpr static unsigned DynFrameThrottle = 2;
 
 	enum { ExtraMenuTag = -2 };
 };

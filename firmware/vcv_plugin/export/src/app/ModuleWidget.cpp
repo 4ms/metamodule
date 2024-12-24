@@ -124,7 +124,15 @@ void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget
 
 void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
 	log_widget("addChild(ModuleLightWidget)", widget);
-	adaptor->addLight(widget);
+	if (widget) {
+		if (widget->getNumColors()) {
+			adaptor->addLight(widget);
+		} else {
+			auto box = widget->box;
+			pr_dbg("Add drawable (light) at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
+			drawable_widgets.push_back(widget);
+		}
+	}
 	Widget::addChild(widget);
 }
 

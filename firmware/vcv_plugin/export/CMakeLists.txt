@@ -22,6 +22,7 @@ target_sources(
   PRIVATE 
          src/app/Knob.cpp
          src/app/LedDisplay.cpp
+         src/app/LightWidget.cpp
          src/app/ModuleWidget.cpp
          src/app/ParamWidget.cc
          src/app/SvgKnob.cc
@@ -73,6 +74,8 @@ target_sources(
 add_subdirectory(jansson)
 add_subdirectory(pffft)
 add_subdirectory(nanovg)
+
+target_include_directories(nanovg PRIVATE ${MM_ROOT}/firmware/src)
 target_link_libraries(nanovg PRIVATE metamodule::rack-interface)
 
 target_link_libraries(vcv_plugin_export PUBLIC cpputil) 

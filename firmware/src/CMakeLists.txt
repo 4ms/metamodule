@@ -128,6 +128,7 @@ add_executable(
   ${FWDIR}/src/gui/slsexport/ui_local.cc
   ${FWDIR}/src/gui/slsexport/prefs_menu.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
+  ${FWDIR}/src/gui/fonts/ttf.cc
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
@@ -197,6 +198,7 @@ set_source_files_properties(
   ${FWDIR}/src/gui/slsexport/ui_local.cc
   ${FWDIR}/src/gui/slsexport/prefs_menu.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
+  ${FWDIR}/src/gui/fonts/ttf.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 

@@ -229,7 +229,7 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 
 	auto label = lv_label_create(canvas);
 	lv_label_set_text(label, el.text.data());
-	lv_obj_set_style_text_font(label, get_font(el.font.data()), LV_PART_MAIN);
+	lv_obj_set_style_text_font(label, Fonts::get_font(el.font.data()), LV_PART_MAIN);
 	lv_obj_set_style_text_color(label, lv_color_t{.full = el.color.raw()}, LV_PART_MAIN);
 
 	lv_obj_set_align(label, LV_ALIGN_TOP_LEFT);
