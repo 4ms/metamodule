@@ -59,8 +59,38 @@ constexpr bool is_poly_concave(std::span<lv_point_t> points) {
 	return false;
 }
 
-// Not used:
-bool fix_poly_concave(std::span<lv_point_t> points) {
+// returns number of points to draw:
+constexpr size_t split_poly_concave(std::span<lv_point_t> points) {
+	auto n = points.size();
+	if (n < 3)
+		return 0;
+
+	auto X_prod = [](lv_point_t O, lv_point_t A, lv_point_t B) {
+		return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
+	};
+
+	int sign = 0;
+
+	for (auto i = 0u; i < points.size(); i++) {
+		auto O = points[i];
+		auto A = points[(i + 1) % n];
+		auto B = points[(i + 2) % n];
+		auto cross = X_prod(O, A, B);
+		if (cross == 0)
+			continue;
+
+		if (sign == 0)
+			sign = cross;
+
+		if ((sign > 0 && cross < 0) || (sign < 0 && cross > 0)) {
+			return i + 2;
+		}
+	}
+
+	return points.size();
+}
+
+constexpr bool fix_poly_concave(std::span<lv_point_t> points) {
 	auto n = points.size();
 	if (n < 3)
 		return false;
@@ -86,10 +116,19 @@ bool fix_poly_concave(std::span<lv_point_t> points) {
 			sign = cross;
 
 		if ((sign > 0 && cross < 0) || (sign < 0 && cross > 0)) {
-			// fix = A;
-			// offender = (i + 2) % n;
-			fix = B;
-			offender = (i + 1) % n;
+			auto AOdist = (A.x - O.x) * (A.x - O.x) + (A.y - O.y) * (A.y * O.y);
+			auto BAdist = (B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y * A.y);
+			if (BAdist <= AOdist) {
+				// set A to B
+				fix = B;
+				offender = (i + 1) % n;
+			} else {
+				// fix = O;
+				// offender = (i + 1) % n;
+				// set B to A
+				fix = A;
+				offender = (i + 2) % n;
+			}
 		}
 	}
 
