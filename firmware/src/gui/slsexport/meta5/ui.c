@@ -175,6 +175,8 @@ lv_obj_t *ui_ElementRollerPanel;
 lv_obj_t *ui_ElementRollerButtonCont;
 lv_obj_t *ui_ElementRollerModuleName;
 lv_obj_t *ui_ModuleViewCableCreateLabel;
+lv_obj_t *ui_ModuleViewHideBut;
+lv_obj_t *ui_ModuleViewActionHideButLabel;
 lv_obj_t *ui_ModuleViewActionBut;
 lv_obj_t *ui_ModuleViewActionButLabel;
 lv_obj_t *ui_ModuleViewSettingsBut;

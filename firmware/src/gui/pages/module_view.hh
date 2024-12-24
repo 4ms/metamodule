@@ -54,6 +54,7 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_ModuleViewCableCancelBut);
 
 		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, ui_ModuleViewHideBut);
 		lv_group_add_obj(group, ui_ModuleViewActionBut);
 		lv_group_add_obj(group, ui_ModuleViewSettingsBut);
 		lv_group_add_obj(group, ui_ModuleViewCableCancelBut);
@@ -69,6 +70,7 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewHideBut, hide_but_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() override {
@@ -128,20 +130,11 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
-	void redraw_module() {
-		reset_module_page();
-		size_t num_elements = moduleinfo.elements.size();
-		opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
-		button.reserve(num_elements);
-		drawn_elements.reserve(num_elements);
-
-		auto module_drawer = ModuleDrawer{ui_ModuleImage, 240};
-		canvas = module_drawer.draw_faceplate(slug, buffer);
-
+	unsigned resize_module_image(unsigned max) {
 		lv_obj_refr_size(canvas);
 		auto width_px = lv_obj_get_width(canvas);
 		//module img + padding is no more than 190px wide
-		auto display_widthpx = std::min<lv_coord_t>(width_px + 4, 190);
+		auto display_widthpx = std::min<lv_coord_t>(width_px + 4, max);
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
 		if (lv_obj_get_width(ui_ModuleImage) > width_px) {
@@ -151,6 +144,27 @@ struct ModuleViewPage : PageBase {
 		}
 
 		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+
+		auto roller_width = std::min<lv_coord_t>(320 - display_widthpx, 220); //roller is no more than 220px wide
+		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
+		if (max == 320) {
+			lv_obj_set_x(ui_ElementRollerPanel, 320);
+		} else {
+			lv_obj_set_x(ui_ElementRollerPanel, 0);
+		}
+
+		return display_widthpx;
+	}
+
+	void redraw_module() {
+		reset_module_page();
+		size_t num_elements = moduleinfo.elements.size();
+		opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
+		button.reserve(num_elements);
+		drawn_elements.reserve(num_elements);
+
+		auto module_drawer = ModuleDrawer{.container = ui_ModuleImage, .height = 240};
+		canvas = module_drawer.draw_faceplate(slug, buffer);
 
 		active_knobset = page_list.get_active_knobset();
 
@@ -174,7 +188,7 @@ struct ModuleViewPage : PageBase {
 			auto base = base_element(drawn_element.element);
 
 			if (base.short_name.size() == 0) {
-				pr_info("Skipping element with no name\n");
+				pr_info("Element roller: Skipping element with no name\n");
 				continue;
 			}
 
@@ -233,11 +247,13 @@ struct ModuleViewPage : PageBase {
 		if (opts.length() > 0)
 			opts.pop_back();
 
-		//Show Roller and select it
+		//Size Module Image and Roller
 		lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
-		auto roller_width = std::min<lv_coord_t>(320 - display_widthpx, 220); //roller is no more than 220px wide
-		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
-		lv_obj_clear_flag(ui_ElementRollerPanel, LV_OBJ_FLAG_HIDDEN);
+
+		resize_module_image(190);
+		full_screen_mode = false;
+
+		lv_show(ui_ElementRollerPanel);
 
 		// Add text list to roller options
 		lv_roller_set_options(ui_ElementRoller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
@@ -256,6 +272,8 @@ struct ModuleViewPage : PageBase {
 		cable_drawer.set_height(240);
 		update_cable_style(true);
 
+		lv_obj_refr_size(ui_ElementRollerPanel);
+		auto roller_width = lv_obj_get_width(ui_ElementRollerPanel);
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 
 		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
@@ -302,15 +320,19 @@ struct ModuleViewPage : PageBase {
 			} else if (settings_menu.is_visible()) {
 				settings_menu.hide();
 
-			} else if (mode == ViewMode::List) {
-				args.module_id = this_module_id;
-				load_prev_page();
-
 			} else if (mode == ViewMode::Mapping) {
 				mapping_pane.back_event();
 
 			} else if (mode == ViewMode::ExtraMenu) {
 				module_menu.back_event();
+
+			} else if (full_screen_mode) {
+				full_screen_mode = false;
+				resize_module_image(190);
+
+			} else if (mode == ViewMode::List) {
+				args.module_id = this_module_id;
+				load_prev_page();
 			}
 		}
 
@@ -655,12 +677,20 @@ private:
 					pr_err("Error completing cable\n");
 
 			} else {
+
 				page->mode = ViewMode::Mapping;
 				page->args.detail_mode = true;
 				lv_hide(ui_ElementRollerPanel);
 				page->roller_hover.hide();
 
 				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+
+				if (page->full_screen_mode) {
+					// TODO: if fullscreen, then open Adjust pop up directly
+					// But keep it hidden?
+					// If it's a button, the just immediately toggle state
+					// page->mapping_pane.control_popup.show(page->drawn_element);
+				}
 			}
 
 			//Not an element: Is it the Extra Menu?
@@ -701,6 +731,15 @@ private:
 
 		abort_cable(page->gui_state, page->notify_queue);
 		page->page_list.request_new_page(PageId::PatchView, page->args);
+	}
+
+	static void hide_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+
+		page->resize_module_image(320);
+		page->full_screen_mode = true;
 	}
 
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx) {
@@ -755,6 +794,8 @@ private:
 	DynamicElementDraw dyn_draw;
 	unsigned dyn_frame_throttle_ctr = 1;
 	constexpr static unsigned DynFrameThrottle = 2;
+
+	bool full_screen_mode = false;
 
 	enum { ExtraMenuTag = -2 };
 };
