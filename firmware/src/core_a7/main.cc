@@ -146,7 +146,7 @@ void main() {
 				overrun_count = 0;
 			}
 
-			if (overrun_count >= patch_playloader.get_audio_settings().max_overrun_retries) {
+			if (overrun_count >= patch_playloader.get_audio_overrun_retries()) {
 				patch_playloader.notify_audio_overrun();
 			} else {
 				audio.step();

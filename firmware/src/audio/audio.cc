@@ -440,7 +440,7 @@ void AudioStream::set_block_spans() {
 }
 
 void AudioStream::update_audio_settings() {
-	auto [sample_rate, block_size, _] = patch_loader.get_audio_settings();
+	auto [sample_rate, block_size] = patch_loader.get_audio_samplerate_block();
 
 	if (sample_rate != sample_rate_ || block_size != block_size_) {
 

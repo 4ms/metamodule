@@ -177,17 +177,15 @@ struct PrefsTab : SystemMenuTab {
 		auto sample_rate = read_samplerate_dropdown();
 		auto max_overrun_retries = read_overrun_dropdown();
 
-		if (settings.block_size != block_size || settings.sample_rate != sample_rate) {
+		if (settings.block_size != block_size || settings.sample_rate != sample_rate ||
+			settings.max_overrun_retries != max_overrun_retries)
+		{
 
 			settings.block_size = block_size;
 			settings.sample_rate = sample_rate;
-
-			patch_playloader.request_new_audio_settings(sample_rate, block_size);
-			gui_state.do_write_settings = true;
-		}
-
-		if (settings.max_overrun_retries != max_overrun_retries) {
 			settings.max_overrun_retries = max_overrun_retries;
+
+			patch_playloader.request_new_audio_settings(sample_rate, block_size, max_overrun_retries);
 			gui_state.do_write_settings = true;
 		}
 
