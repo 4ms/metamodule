@@ -292,6 +292,8 @@ public:
 
 				auto version = VersionUtil::Version(vers);
 				plugin.version = std::string_view(vers);
+				plugin.sdk_major_version = version.major;
+				plugin.sdk_minor_version = version.minor;
 				pr_trace("Plugin: %s => %s => %u.%u.%u\n",
 						 name.c_str(),
 						 vers.c_str(),

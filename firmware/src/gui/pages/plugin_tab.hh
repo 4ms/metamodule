@@ -83,8 +83,16 @@ struct PluginTab : SystemMenuTab {
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
 				auto pluginname = std::string{plugin.plugin_name};
-				if (plugin.version.length() > 0)
-					pluginname += Gui::grey_text(" " + std::string{plugin.version});
+
+				if (plugin.version.length() > 0) {
+					pluginname += " " + Gui::grey_text(plugin.version);
+
+					auto pvers = Version(plugin.sdk_major_version, plugin.sdk_minor_version, 0);
+					if (!sdk_version().can_host_version(pvers)) {
+						pr_trace("Can't host %s version %s\n", plugin.plugin_name.c_str(), plugin.version.c_str());
+						continue;
+					}
+				}
 
 				if (!plugin_already_loaded(plugin)) {
 
@@ -166,7 +174,7 @@ private:
 		auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
 		for (auto &loaded_plugin_file : loaded_plugin_list) {
 			auto const &loaded_plugin = loaded_plugin_file.fileinfo;
-			pr_dbg(
+			pr_trace(
 				"Comparing %s (new) and %s (loaded)\n", plugin.plugin_name.c_str(), loaded_plugin.plugin_name.c_str());
 			if (loaded_plugin.plugin_name == plugin.plugin_name) {
 				return true;
@@ -199,8 +207,7 @@ private:
 			plugin_name = plugin_name.substr(0, colorpos);
 		}
 
-		const auto is_autoloaded =
-			std::find(page->settings.slug.begin(), page->settings.slug.end(), plugin_name) != page->settings.slug.end();
+		const auto is_autoloaded = std::ranges::find(page->settings.slug, plugin_name) != page->settings.slug.end();
 
 		page->confirm_popup.show(
 			[page, plugin_name, target](uint8_t opt) {
@@ -214,8 +221,7 @@ private:
 				}
 			},
 			[page, plugin_name](bool opt) {
-				const auto autoload_slot =
-					std::find(page->settings.slug.begin(), page->settings.slug.end(), plugin_name);
+				const auto autoload_slot = std::ranges::find(page->settings.slug, plugin_name);
 				if (opt) {
 					pr_info("Set Autoload Enabled: %s\n", plugin_name.data());
 					page->settings.slug.push_back(plugin_name);
