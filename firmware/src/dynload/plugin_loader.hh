@@ -9,7 +9,9 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
 #include "util/monotonic_allocator.hh"
+#include "util/string_compare.hh"
 #include "util/version_tools.hh"
+#include <algorithm>
 #include <cstdint>
 #include <deque>
 #include <string>
@@ -95,9 +97,8 @@ public:
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
 					plugin_files = *plugin_file_list; //make local copy
-					std::sort(plugin_files.begin(), plugin_files.end(), [](auto const &a, auto const &b) {
-						return std::string_view{a.plugin_name} < std::string_view{b.plugin_name};
-					});
+
+					std::ranges::sort(plugin_files, less_ci, &PluginFile::plugin_name);
 					pr_trace("Found %d plugins\n", plugin_files.size());
 
 					parse_versions();
