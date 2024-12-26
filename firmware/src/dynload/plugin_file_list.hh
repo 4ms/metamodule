@@ -20,7 +20,7 @@ struct PluginFile {
 	unsigned sdk_minor_version = 0;
 };
 
-static constexpr size_t MaxPlugins = 32;
+static constexpr size_t MaxPlugins = 64;
 using PluginFileList = FixedVector<PluginFile, MaxPlugins>;
 
 } // namespace MetaModule
