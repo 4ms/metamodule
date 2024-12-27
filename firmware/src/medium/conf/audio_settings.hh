@@ -10,11 +10,11 @@ namespace MetaModule
 struct AudioSettings {
 	static constexpr std::array ValidSampleRates = {24000u, 32000u, 48000u, 96000u};
 	static constexpr std::array ValidBlockSizes = {16u, 32u, 64u, 128u, 256u, 512u};
-	static constexpr std::array ValidOverrunRetries = {0u, 4u, 8u, 16u, 32u, 64u, 128u, 256u};
+	static constexpr std::array ValidOverrunRetries = {0u, 1u, 2u, 4u, 8u, 16u, 32u, 64u};
 
 	static constexpr uint32_t DefaultSampleRate = 48000;
 	static constexpr uint32_t DefaultBlockSize = 64;
-	static constexpr uint32_t DefaultOverrunRetries = 16;
+	static constexpr uint32_t DefaultOverrunRetries = 2u;
 
 	uint32_t sample_rate = DefaultSampleRate;
 	uint32_t block_size = DefaultBlockSize;
