@@ -6,6 +6,7 @@
 #include "drivers/codec_PCM3168.hh"
 #include "drivers/cycle_counter.hh"
 #include "drivers/stm32xx.h"
+#include "overrun_handler.hh"
 #include "param_block.hh"
 #include "params.hh"
 #include "params_state.hh"
@@ -47,9 +48,7 @@ public:
 	void start_playing();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 	uint32_t get_audio_errors();
-
-	bool is_overrun_retrying();
-	void done_retry_overrun();
+	void handle_overruns();
 	void step();
 
 private:
@@ -86,7 +85,7 @@ private:
 
 	bool midi_last_connected = false;
 
-	bool overrun_retrying = false;
+	AudioOverrunHandler overrun_handler;
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	AudioConf::SampleT get_ext_audio_output(int output_id);

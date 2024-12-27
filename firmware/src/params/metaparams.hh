@@ -26,6 +26,7 @@ struct MetaParams {
 
 	// Audio -> GUI
 	uint8_t audio_load = 0;
+	int8_t audio_overruns = 0;
 
 	// Controls -> Audio
 	bool midi_connected = false;
@@ -55,6 +56,7 @@ struct MetaParams {
 		rotary_pushed.motion = 0;
 		rotary_pushed.abs_pos = 0;
 		audio_load = 0;
+		audio_overruns = 0;
 		jack_senses = 0;
 	}
 
@@ -70,6 +72,8 @@ struct MetaParams {
 		rotary.add_motion(that.rotary);
 		rotary_pushed.add_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
+
+		audio_overruns = std::max(that.audio_overruns, audio_overruns);
 
 		midi_connected = that.midi_connected;
 
@@ -91,6 +95,13 @@ struct MetaParams {
 		rotary.transfer_motion(that.rotary);
 		rotary_pushed.transfer_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
+
+		// transfer
+		if (that.audio_overruns > 0) {
+			audio_overruns = that.audio_overruns;
+			that.audio_overruns = 0;
+		} else if (audio_overruns > 0)
+			audio_overruns--;
 
 		midi_connected = that.midi_connected;
 

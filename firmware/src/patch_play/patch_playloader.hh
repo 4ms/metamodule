@@ -255,12 +255,9 @@ struct PatchPlayLoader {
 		max_audio_retries = max_retries;
 	}
 
-	AudioSRBlock get_audio_samplerate_block() {
-		return new_audio_settings_.load();
-	}
-
-	unsigned get_audio_overrun_retries() {
-		return max_audio_retries;
+	AudioSettings get_audio_settings() {
+		auto [sr, bs] = new_audio_settings_.load();
+		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
 	}
 
 private:

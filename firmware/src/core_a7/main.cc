@@ -131,29 +131,10 @@ void main() {
 
 	print_time();
 
-	uint64_t last_overrun = 0;
-	uint64_t overrun_count = 0;
-
 	while (true) {
 		__NOP();
 
-		if (audio.is_overrun_retrying()) {
-			auto tm = PL1_GetCurrentPhysicalValue();
-			if (tm - last_overrun < 2400000) { //100ms
-				overrun_count++;
-			} else {
-				last_overrun = tm;
-				overrun_count = 0;
-			}
-
-			if (overrun_count >= patch_playloader.get_audio_overrun_retries()) {
-				patch_playloader.notify_audio_overrun();
-			} else {
-				audio.step();
-				audio.step();
-			}
-			audio.done_retry_overrun();
-		}
+		audio.handle_overruns();
 
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");
