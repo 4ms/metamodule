@@ -82,6 +82,7 @@ struct PluginTab : SystemMenuTab {
 			auto *found_plugins = plugin_manager.found_plugin_list();
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
+				idx++;
 				auto pluginname = std::string{plugin.plugin_name};
 
 				if (plugin.version.length() > 0) {
@@ -98,12 +99,10 @@ struct PluginTab : SystemMenuTab {
 
 					lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, pluginname.c_str());
 
-					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx + 1));
+					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx));
 					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
 					lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 				}
-
-				idx++;
 			}
 			reset_group();
 			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, 0));
@@ -202,6 +201,7 @@ private:
 		const auto target = lv_event_get_target(event);
 		if (lv_obj_get_child_cnt(target) != 1)
 			return;
+
 		std::string plugin_name = lv_label_get_text(lv_obj_get_child(target, 0));
 		if (auto colorpos = plugin_name.find_first_of("^"); colorpos != std::string::npos) {
 			plugin_name = plugin_name.substr(0, colorpos);
