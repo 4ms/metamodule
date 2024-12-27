@@ -105,7 +105,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		if (load_measure.get_last_measurement_load_percent() >= 98) {
 			overrun_handler.start_retrying();
-			param_blocks[block].metaparams.audio_overruns = 63;
+			param_blocks[block].metaparams.audio_overruns = 10;
 		} else
 			param_blocks[block].metaparams.audio_overruns = 0;
 

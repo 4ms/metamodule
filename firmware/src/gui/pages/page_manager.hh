@@ -200,6 +200,8 @@ public:
 			pr_info("Notify: %s\n", msg->message.c_str());
 			DisplayNotification::show(*msg);
 		}
+
+		DisplayNotification::flash_overload(info.metaparams.audio_overruns);
 	}
 
 	void handle_audio_errors() {
