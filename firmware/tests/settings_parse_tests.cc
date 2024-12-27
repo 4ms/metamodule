@@ -189,7 +189,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.audio.sample_rate == 48000);
 	CHECK(settings.audio.block_size == 64);
-	CHECK(settings.audio.max_overrun_retries == 16);
+	CHECK(settings.audio.max_overrun_retries == 2);
 
 	CHECK(settings.plugin_autoload.slug.size() == 0);
 
