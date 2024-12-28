@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/helpers/load_meter.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/make_cable.hh"
@@ -70,11 +71,7 @@ struct MainMenuPage : PageBase {
 				load_page(PageId::PatchView, {.patch_loc_hash = patches.get_view_patch_loc_hash()});
 		}
 
-		if (last_audio_load != metaparams.audio_load) {
-			last_audio_load = metaparams.audio_load;
-			lv_label_set_text_fmt(ui_MainMenuLoadMeter, "%d%%", metaparams.audio_load);
-			lv_show(ui_MainMenuLoadMeter);
-		};
+		update_load_text(metaparams, ui_MainMenuLoadMeter);
 	}
 
 	void blur() final {
@@ -123,8 +120,6 @@ private:
 			return;
 		page->load_page(PageId::SystemMenu, {});
 	}
-
-	unsigned last_audio_load = 0;
 };
 
 } // namespace MetaModule

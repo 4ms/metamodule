@@ -39,6 +39,7 @@ TEST_CASE("Parse settings file") {
   audio:
     sample_rate: 96000
     block_size: 128
+    max_overrun_retries: 4
 
   plugin_autoload:
     - Plugin One
@@ -86,6 +87,7 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.audio.sample_rate == 96000);
 	CHECK(settings.audio.block_size == 128);
+	CHECK(settings.audio.max_overrun_retries == 4);
 
 	CHECK(settings.plugin_autoload.slug.at(0) == "Plugin One");
 	CHECK(settings.plugin_autoload.slug.at(1) == "Plugin Two");
@@ -158,6 +160,11 @@ TEST_CASE("Get default settings if file is missing fields") {
   screensaver:
 )";
 	}
+	SUBCASE("Bad audio overrun settings:") {
+		yaml = R"(Settings:
+  max_overrun_retries: 94
+)";
+	}
 	SUBCASE("Bad catchup settings:") {
 		yaml = R"(Settings:
   catchup:
@@ -201,6 +208,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.audio.sample_rate == 48000);
 	CHECK(settings.audio.block_size == 64);
+	CHECK(settings.audio.max_overrun_retries == 2);
 
 	CHECK(settings.plugin_autoload.slug.size() == 0);
 
@@ -242,6 +250,7 @@ TEST_CASE("Serialize settings") {
 
 	settings.audio.sample_rate = 24000;
 	settings.audio.block_size = 512;
+	settings.audio.max_overrun_retries = 4;
 
 	settings.plugin_autoload.slug.emplace_back("Plugin One");
 	settings.plugin_autoload.slug.emplace_back("Plugin Two");
@@ -286,6 +295,7 @@ TEST_CASE("Serialize settings") {
   audio:
     sample_rate: 24000
     block_size: 512
+    max_overrun_retries: 4
   plugin_autoload:
     - Plugin One
     - Plugin Two

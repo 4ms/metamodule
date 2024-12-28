@@ -25,6 +25,11 @@ struct PatchPlayLoader {
 		, patches_{patches} {
 	}
 
+	struct AudioSRBlock {
+		uint32_t sample_rate;
+		uint32_t block_size;
+	};
+
 	void load_initial_patch(std::string_view patchname, Volume patch_vol) {
 		uint32_t tries = 10000;
 
@@ -246,12 +251,14 @@ struct PatchPlayLoader {
 		}
 	}
 
-	void request_new_audio_settings(uint32_t sample_rate, uint32_t block_size) {
-		new_audio_settings_.store(AudioSettings{sample_rate, block_size});
+	void request_new_audio_settings(uint32_t sample_rate, uint32_t block_size, uint32_t max_retries) {
+		new_audio_settings_.store(AudioSRBlock{.sample_rate = sample_rate, .block_size = block_size});
+		max_audio_retries = max_retries;
 	}
 
 	AudioSettings get_audio_settings() {
-		return new_audio_settings_.load();
+		auto [sr, bs] = new_audio_settings_.load();
+		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
 	}
 
 	template<typename PluginModuleType>
@@ -321,7 +328,8 @@ private:
 	RenameState rename_state_{RenameState::Idle};
 	uint32_t attempts = 0;
 
-	std::atomic<AudioSettings> new_audio_settings_ = {};
+	std::atomic<AudioSRBlock> new_audio_settings_ = {};
+	unsigned max_audio_retries = 0;
 
 	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
