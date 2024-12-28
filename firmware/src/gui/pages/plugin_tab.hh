@@ -1,7 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/page_list.hh"
 #include "gui/pages/plugin_popup.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -206,6 +205,9 @@ private:
 		if (auto colorpos = plugin_name.find_first_of("^"); colorpos != std::string::npos) {
 			plugin_name = plugin_name.substr(0, colorpos);
 		}
+		//trim
+		while (plugin_name.back() == ' ')
+			plugin_name.pop_back();
 
 		const auto is_autoloaded = std::ranges::find(page->settings.slug, plugin_name) != page->settings.slug.end();
 
