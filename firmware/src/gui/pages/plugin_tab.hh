@@ -82,20 +82,27 @@ struct PluginTab : SystemMenuTab {
 			auto *found_plugins = plugin_manager.found_plugin_list();
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
+				idx++;
 				auto pluginname = std::string{plugin.plugin_name};
-				if (plugin.version.length() > 0)
-					pluginname += Gui::grey_text(" " + std::string{plugin.version});
+
+				if (plugin.version.length() > 0) {
+					pluginname += " " + Gui::grey_text(plugin.version);
+
+					auto pvers = Version(plugin.sdk_major_version, plugin.sdk_minor_version, 0);
+					if (!sdk_version().can_host_version(pvers)) {
+						pr_trace("Can't host %s version %s\n", plugin.plugin_name.c_str(), plugin.version.c_str());
+						continue;
+					}
+				}
 
 				if (!plugin_already_loaded(plugin)) {
 
 					lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, pluginname.c_str());
 
-					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx + 1));
+					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx));
 					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
 					lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 				}
-
-				idx++;
 			}
 			reset_group();
 			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, 0));
@@ -166,7 +173,7 @@ private:
 		auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
 		for (auto &loaded_plugin_file : loaded_plugin_list) {
 			auto const &loaded_plugin = loaded_plugin_file.fileinfo;
-			pr_dbg(
+			pr_trace(
 				"Comparing %s (new) and %s (loaded)\n", plugin.plugin_name.c_str(), loaded_plugin.plugin_name.c_str());
 			if (loaded_plugin.plugin_name == plugin.plugin_name) {
 				return true;
@@ -194,13 +201,13 @@ private:
 		const auto target = lv_event_get_target(event);
 		if (lv_obj_get_child_cnt(target) != 1)
 			return;
+
 		std::string plugin_name = lv_label_get_text(lv_obj_get_child(target, 0));
 		if (auto colorpos = plugin_name.find_first_of("^"); colorpos != std::string::npos) {
 			plugin_name = plugin_name.substr(0, colorpos);
 		}
 
-		const auto is_autoloaded =
-			std::find(page->settings.slug.begin(), page->settings.slug.end(), plugin_name) != page->settings.slug.end();
+		const auto is_autoloaded = std::ranges::find(page->settings.slug, plugin_name) != page->settings.slug.end();
 
 		page->confirm_popup.show(
 			[page, plugin_name, target](std::optional<uint8_t> button, std::optional<bool> toggle) {

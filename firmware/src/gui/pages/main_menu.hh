@@ -14,14 +14,16 @@ struct MainMenuPage : PageBase {
 		: PageBase{info, PageId::MainMenu} {
 		init_bg(ui_MainMenu);
 		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, ui_MenuPanelPatches);
-		lv_group_add_obj(group, ui_MenuPanelSave); //new patch
-		lv_group_add_obj(group, ui_MenuPanelSettings);
 
 		lv_group_add_obj(group, ui_MainMenuNowPlayingPanel);
 		lv_group_add_obj(group, ui_MainMenuLastViewedPanel);
 
+		lv_group_add_obj(group, ui_MenuPanelPatches);
+		lv_group_add_obj(group, ui_MenuPanelSave); //new patch
+		lv_group_add_obj(group, ui_MenuPanelSettings);
+
 		lv_group_focus_obj(ui_MenuPanelPatches);
+		lv_group_set_wrap(group, false);
 
 		lv_obj_add_event_cb(ui_MenuPanelPatches, patchsel_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MenuPanelSettings, settings_cb, LV_EVENT_CLICKED, this);

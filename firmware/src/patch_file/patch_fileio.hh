@@ -5,6 +5,7 @@
 #include "patch_file/patch_dir_list.hh"
 #include "patches_default.hh"
 #include "pr_dbg.hh"
+#include "util/string_compare.hh"
 
 namespace MetaModule
 {
@@ -91,10 +92,8 @@ public:
 			}
 		}
 
-		std::sort(patch_dir.files.begin(), patch_dir.files.end(), [](auto a, auto b) {
-			return std::string_view{a.patchname} < std::string_view{b.patchname};
-		});
-		std::sort(patch_dir.dirs.begin(), patch_dir.dirs.end(), [](auto a, auto b) { return a.name < b.name; });
+		std::ranges::sort(patch_dir.files, less_ci, &PatchFile::patchname);
+		std::ranges::sort(patch_dir.dirs, less_ci, &DirTree<PatchFile>::name);
 
 		return ok;
 	}
