@@ -120,7 +120,7 @@ void main() {
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked() || mdrivlib::HWSemaphore<AuxCoreReady>::is_locked())
 		;
 
-		// ~290ms until while loop
+	// ~290ms until while loop
 
 #ifdef CPU_TEST_ALL_MODULES
 	mdrivlib::HWSemaphore<MainCoreReady>::lock();
@@ -146,6 +146,9 @@ void main() {
 
 	while (true) {
 		__NOP();
+
+		audio.handle_overruns();
+
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");
 			audio.start();

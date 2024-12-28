@@ -37,6 +37,7 @@ static void write(ryml::NodeRef *n, AudioSettings const &s) {
 
 	n->append_child() << ryml::key("sample_rate") << s.sample_rate;
 	n->append_child() << ryml::key("block_size") << s.block_size;
+	n->append_child() << ryml::key("max_overrun_retries") << s.max_overrun_retries;
 }
 
 static void write(ryml::NodeRef *n, PluginAutoloadSettings const &s) {

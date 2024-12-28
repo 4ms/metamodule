@@ -51,6 +51,7 @@ static bool read(ryml::ConstNodeRef const &node, AudioSettings *audio) {
 
 	read_or_default(node, "sample_rate", audio, &AudioSettings::sample_rate);
 	read_or_default(node, "block_size", audio, &AudioSettings::block_size);
+	read_or_default(node, "max_overrun_retries", audio, &AudioSettings::max_overrun_retries);
 	audio->make_valid();
 
 	return true;
