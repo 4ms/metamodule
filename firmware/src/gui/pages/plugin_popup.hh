@@ -1,10 +1,12 @@
 #pragma once
+#include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "lvgl.h"
 #include "src/core/lv_obj.h"
 #include "src/core/lv_obj_tree.h"
 #include <functional>
+#include <optional>
 #include <string_view>
 
 namespace MetaModule
@@ -28,7 +30,7 @@ struct PluginPopup {
 		lv_hide(ui_DelMapPopUpPanel);
 	}
 
-	void show(auto button_cb, auto toggle_cb, const char *message, std::string_view choice1_text, bool state) {
+	void show(auto callback, const char *message, std::string_view choice1_text, bool state) {
 		lv_hide(ui_TrashButton2);
 		lv_hide(ui_Choice2Button);
 
@@ -47,8 +49,7 @@ struct PluginPopup {
 		lv_label_set_text(ui_CancelLabel, "Close");
 		lv_label_set_text(ui_DelMapLabel, message);
 
-		_button_callback = std::move(button_cb);
-		_toggle_callback = std::move(toggle_cb);
+		_callback = std::move(callback);
 
 		lv_check(check, state);
 
@@ -93,11 +94,11 @@ struct PluginPopup {
 		if (!page)
 			return;
 
-		if (page->_button_callback) {
+		if (page->_callback) {
 			if (event->target == ui_CancelButton)
-				page->_button_callback(0);
+				page->_callback(0, {});
 			else if (event->target == ui_ConfirmButton)
-				page->_button_callback(1);
+				page->_callback(1, {});
 		}
 
 		page->hide();
@@ -110,9 +111,9 @@ struct PluginPopup {
 		if (!page)
 			return;
 
-		if (page->_toggle_callback) {
+		if (page->_callback) {
 			if (event->target == page->check)
-				page->_toggle_callback(lv_obj_has_state(page->check, LV_STATE_CHECKED));
+				page->_callback({}, lv_obj_has_state(page->check, LV_STATE_CHECKED));
 		}
 	}
 
@@ -124,8 +125,7 @@ protected:
 
 	bool visible = false;
 
-	std::function<void(unsigned)> _button_callback;
-	std::function<void(bool)> _toggle_callback;
+	std::function<void(std::optional<unsigned>, std::optional<bool>)> _callback;
 };
 
 } // namespace MetaModule
