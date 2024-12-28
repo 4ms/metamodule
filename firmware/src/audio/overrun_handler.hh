@@ -31,7 +31,7 @@ struct AudioOverrunHandler {
 			overrun_count++;
 		} else {
 			last_overrun = tm;
-			pr_dbg("Reset count from %u\n", overrun_count);
+			// pr_dbg("Reset count from %u\n", overrun_count);
 			overrun_count = 0;
 		}
 

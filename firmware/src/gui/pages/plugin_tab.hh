@@ -210,26 +210,37 @@ private:
 		const auto is_autoloaded = std::ranges::find(page->settings.slug, plugin_name) != page->settings.slug.end();
 
 		page->confirm_popup.show(
-			[page, plugin_name, target](uint8_t opt) {
-				if (!opt)
-					return;
+			[page, plugin_name, target](std::optional<uint8_t> button, std::optional<bool> toggle) {
+				if (button) {
+					// Cancel
+					if (*button == 0)
+						return;
 
-				if (opt == 1) {
-					pr_info("Unload Plugin: %s\n", plugin_name.data());
-					page->unload_plugin(plugin_name);
-					lv_obj_del_async(target);
+					// Unload
+					if (*button == 1) {
+						pr_info("Unload Plugin: %s\n", plugin_name.data());
+						page->unload_plugin(plugin_name);
+						lv_obj_del_async(target);
+					}
 				}
-			},
-			[page, plugin_name](bool opt) {
-				const auto autoload_slot = std::ranges::find(page->settings.slug, plugin_name);
-				if (opt) {
-					pr_info("Set Autoload Enabled: %s\n", plugin_name.data());
-					page->settings.slug.push_back(plugin_name);
-				} else {
-					pr_info("Set Autoload Disabled: %s\n", plugin_name.data());
-					page->settings.slug.erase(autoload_slot);
+
+				// Autoload toggle
+				if (toggle) {
+					if (*toggle) {
+						pr_info("Autoload Enabled: %s\n", plugin_name.data());
+						page->settings.slug.push_back(plugin_name);
+					} else {
+						const auto autoload_slot = std::ranges::find(page->settings.slug, plugin_name);
+						if (autoload_slot != page->settings.slug.end()) {
+							pr_info("Autoload Disabled: %s\n", plugin_name.data());
+							page->settings.slug.erase(autoload_slot);
+						} else {
+							pr_err("Error: can't disable autoload for %s: not found in settings autoload list\n",
+								   plugin_name.data());
+						}
+					}
+					page->should_write_settings = true;
 				}
-				page->should_write_settings = true;
 			},
 			plugin_name.c_str(),
 			"Unload",
