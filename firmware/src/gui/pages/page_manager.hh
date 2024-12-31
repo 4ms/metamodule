@@ -60,18 +60,18 @@ public:
 				UserSettings &settings,
 				Screensaver &screensaver,
 				FatFileIO &ramdisk)
-		: info{patch_storage,
-			   open_patch_manager,
-			   patch_playloader,
-			   params,
-			   metaparams,
-			   notify_queue,
-			   patch_mod_queue,
-			   page_list,
-			   gui_state,
-			   settings,
-			   plugin_manager,
-			   ramdisk}
+		: info{.patch_storage = patch_storage,
+			   .open_patch_manager = open_patch_manager,
+			   .patch_playloader = patch_playloader,
+			   .params = params,
+			   .metaparams = metaparams,
+			   .notify_queue = notify_queue,
+			   .patch_mod_queue = patch_mod_queue,
+			   .page_list = page_list,
+			   .gui_state = gui_state,
+			   .settings = settings,
+			   .plugin_manager = plugin_manager,
+			   .ramdisk = ramdisk}
 		, screensaver{screensaver} {
 	}
 
@@ -121,7 +121,7 @@ public:
 
 					if (cur_page != page_list.page(PageId::KnobSetView))
 						info.notify_queue.put(
-							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 1000});
+							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 800});
 
 					button_light.display_knobset(next_knobset);
 				}
@@ -200,6 +200,8 @@ public:
 			pr_info("Notify: %s\n", msg->message.c_str());
 			DisplayNotification::show(*msg);
 		}
+
+		DisplayNotification::flash_overload(info.metaparams.audio_overruns);
 	}
 
 	void handle_audio_errors() {

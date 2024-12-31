@@ -63,9 +63,8 @@ Archive::Archive(std::span<const char> filedata)
 
 	bool update = true;
 
-	int count = 0;
 	unsigned offset = 0;
-	for (count = 0;; count++) {
+	while (true) {
 		TarRaw buffer;
 
 		if (update) {

@@ -1,6 +1,7 @@
 #pragma once
 #include "fs/dir_entry_kind.hh"
 #include "gui/helpers/dir_entry_info.hh"
+#include "gui/helpers/load_meter.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/lvgl_mem_helper.hh"
 #include "gui/helpers/lvgl_string_helper.hh"
@@ -290,7 +291,7 @@ struct PatchSelectorPage : PageBase {
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
 
-					lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
+					update_load_text(metaparams, ui_LoadMeter);
 				}
 			} break;
 

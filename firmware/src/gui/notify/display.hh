@@ -1,4 +1,6 @@
 #pragma once
+#include "console/pr_dbg.hh"
+#include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/notification.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
@@ -24,6 +26,14 @@ struct DisplayNotification {
 		}
 		if (msg.duration_ms > 0)
 			SlideUp_Animation(ui_MessagePanel, msg.duration_ms);
+	}
+
+	static void flash_overload(unsigned num_overruns) {
+		if (num_overruns > 0) {
+			lv_show(ui_OverloadMsgLabel);
+			lv_obj_set_style_opa(ui_OverloadMsgLabel, LV_OPA_100, LV_PART_MAIN);
+			Flashfade_Animation(ui_OverloadMsgLabel, 0);
+		}
 	}
 };
 

@@ -67,19 +67,19 @@ void main() {
 					  patch_mod_queue};
 
 	SharedMemoryS::ptrs = {
-		&StaticBuffers::param_blocks,
-		&StaticBuffers::virtdrive,
-		&StaticBuffers::icc_shared_message,
+		.param_block = &StaticBuffers::param_blocks,
+		.ramdrive = &StaticBuffers::virtdrive,
+		.icc_message = &StaticBuffers::icc_shared_message,
 	};
 
 	A7SharedMemoryS::ptrs = {
-		&patch_player,
-		&patch_playloader,
-		&file_storage_proxy,
-		&open_patches_manager,
-		&StaticBuffers::sync_params,
-		&patch_mod_queue,
-		&StaticBuffers::virtdrive,
+		.patch_player = &patch_player,
+		.patch_playloader = &patch_playloader,
+		.patch_storage = &file_storage_proxy,
+		.open_patch_manager = &open_patches_manager,
+		.sync_params = &StaticBuffers::sync_params,
+		.patch_mod_queue = &patch_mod_queue,
+		.ramdrive = &StaticBuffers::virtdrive,
 	};
 
 	{
@@ -109,7 +109,7 @@ void main() {
 	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() || mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
 
-		// ~290ms until while loop
+	// ~290ms until while loop
 
 #ifdef CPU_TEST_ALL_MODULES
 	mdrivlib::HWSemaphore<MainCoreReady>::lock();
@@ -119,7 +119,7 @@ void main() {
 	if (but0.is_on()) {
 		auto db = LoadTest::test_all_modules();
 		auto filedata = LoadTest::entries_to_csv(db);
-		FS::write_file(file_storage_proxy, filedata, {"cpu_test.csv", Volume::USB});
+		FS::write_file(file_storage_proxy, filedata, {.filename = "cpu_test.csv", .vol = Volume::USB});
 	}
 
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
@@ -133,6 +133,9 @@ void main() {
 
 	while (true) {
 		__NOP();
+
+		audio.handle_overruns();
+
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");
 			audio.start();

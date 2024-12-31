@@ -7,6 +7,7 @@
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_display.hh"
 #include "gui/elements/redraw_light.hh"
+#include "gui/helpers/load_meter.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
@@ -70,7 +71,7 @@ struct PatchViewPage : PageBase {
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
-			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
+			lv_label_set_text(ui_LoadMeter2, "");
 			lv_show(ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
@@ -310,11 +311,7 @@ struct PatchViewPage : PageBase {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 			}
 
-			if (last_audio_load != metaparams.audio_load) {
-				last_audio_load = metaparams.audio_load;
-				lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
-				lv_show(ui_LoadMeter2);
-			}
+			update_load_text(metaparams, ui_LoadMeter2);
 
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
@@ -658,8 +655,6 @@ private:
 
 	PatchLocHash displayed_patch_loc_hash;
 	uint32_t patch_revision = 0xFFFFFFFF;
-
-	unsigned last_audio_load = 0;
 
 	struct focussed_context {
 		PatchViewPage *page;

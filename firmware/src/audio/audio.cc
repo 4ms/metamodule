@@ -91,27 +91,29 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
 		// 71.2us w/both MIDIs
-		// alternating 44us/71.3us with jack sense in metamparams (why alternating?)
+		// alternating 44us/71.3us with jack sense in metaparams (why alternating?)
 		auto &params = cache_params(block);
 
-		if (is_playing_patch())
+		if (!overrun_handler.is_retrying() && is_playing_patch())
 			process(audio_blocks[1 - block], params);
 		else
 			process_nopatch(audio_blocks[1 - block], params);
 
 		return_cached_params(block);
 
+		load_measure.end_measurement();
+
+		if (load_measure.get_last_measurement_load_percent() >= 98) {
+			overrun_handler.start_retrying();
+			param_blocks[block].metaparams.audio_overruns = 10;
+		} else
+			param_blocks[block].metaparams.audio_overruns = 0;
+
 		// 3.5us w/both MIDIs
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
 
 		update_audio_settings();
-
-		load_measure.end_measurement();
-		if (load_measure.get_last_measurement_load_percent() >= 98) {
-			output_fade_amt = 0.f;
-			patch_loader.notify_audio_overrun();
-		}
 
 		// Debug::Pin0::low();
 	};
@@ -124,10 +126,25 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		s.set_size(block_size_);
 }
 
+void AudioStream::step() {
+	player.update_patch();
+}
+
 void AudioStream::start() {
 	codec_.start();
 	if (ext_audio_connected)
 		codec_ext_.start();
+}
+
+void AudioStream::handle_overruns() {
+	if (overrun_handler.is_retrying()) {
+		if (overrun_handler.handle()) {
+			step();
+		} else {
+			patch_loader.notify_audio_overrun();
+		}
+		overrun_handler.reset();
+	}
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
@@ -142,6 +159,11 @@ AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
 }
 
 bool AudioStream::is_playing_patch() {
+	// Don't allow anyone to stop the patch while we are retrying to recover from an overrun:
+	// because core 0 has a lock on the player
+	if (overrun_handler.is_retrying())
+		return true;
+
 	if (patch_loader.should_fade_down_audio()) {
 		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt <= 0.f) {
@@ -424,7 +446,9 @@ void AudioStream::set_block_spans() {
 }
 
 void AudioStream::update_audio_settings() {
-	auto [sample_rate, block_size] = patch_loader.get_audio_settings();
+	auto [sample_rate, block_size, max_retries] = patch_loader.get_audio_settings();
+
+	overrun_handler.set_max_retry(max_retries);
 
 	if (sample_rate != sample_rate_ || block_size != block_size_) {
 

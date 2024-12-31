@@ -12,7 +12,7 @@ struct AutoLoader {
 		std::string message;
 	};
 
-	AutoLoader(PluginManager &plugins, PluginAutoloadSettings const &plugin_settings)
+	AutoLoader(PluginManager &plugins, PluginAutoloadSettings &plugin_settings)
 		: plugin_settings{plugin_settings}
 		, plugins{plugins} {
 	}
@@ -57,7 +57,10 @@ private:
 		}
 
 		auto &s = plugin_settings.slug[slug_idx];
-		pr_trace("Autoload: Looking for plugin: %s\n", s.c_str());
+		// trim leading and trailing whitespace on plugin name:
+		s = s.substr(0, s.find_last_not_of(" \t\n") + 1);
+		s = s.substr(s.find_first_not_of(" \t\n"));
+		pr_trace("Autoload: Looking for plugin: '%s'\n", s.c_str());
 
 		autoload_state = State::Processing;
 
@@ -123,7 +126,7 @@ private:
 		}
 
 		if (!match) {
-			pr_info("Autoload: Can't find plugin: %.*s\n", (int)s.size(), s.data());
+			pr_info("Autoload: Can't find plugin: '%.*s'\n", (int)s.size(), s.data());
 			return false;
 		}
 
@@ -133,7 +136,7 @@ private:
 		return true;
 	}
 
-	PluginAutoloadSettings const &plugin_settings;
+	PluginAutoloadSettings &plugin_settings;
 	PluginManager &plugins;
 	PluginFileList const *found_plugins = nullptr;
 	unsigned slug_idx = 0;

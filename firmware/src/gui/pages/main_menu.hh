@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/helpers/load_meter.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/make_cable.hh"
@@ -13,14 +14,16 @@ struct MainMenuPage : PageBase {
 		: PageBase{info, PageId::MainMenu} {
 		init_bg(ui_MainMenu);
 		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, ui_MenuPanelPatches);
-		lv_group_add_obj(group, ui_MenuPanelSave); //new patch
-		lv_group_add_obj(group, ui_MenuPanelSettings);
 
 		lv_group_add_obj(group, ui_MainMenuNowPlayingPanel);
 		lv_group_add_obj(group, ui_MainMenuLastViewedPanel);
 
+		lv_group_add_obj(group, ui_MenuPanelPatches);
+		lv_group_add_obj(group, ui_MenuPanelSave); //new patch
+		lv_group_add_obj(group, ui_MenuPanelSettings);
+
 		lv_group_focus_obj(ui_MenuPanelPatches);
+		lv_group_set_wrap(group, false);
 
 		lv_obj_add_event_cb(ui_MenuPanelPatches, patchsel_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MenuPanelSettings, settings_cb, LV_EVENT_CLICKED, this);
@@ -70,11 +73,7 @@ struct MainMenuPage : PageBase {
 				load_page(PageId::PatchView, {.patch_loc_hash = patches.get_view_patch_loc_hash()});
 		}
 
-		if (last_audio_load != metaparams.audio_load) {
-			last_audio_load = metaparams.audio_load;
-			lv_label_set_text_fmt(ui_MainMenuLoadMeter, "%d%%", metaparams.audio_load);
-			lv_show(ui_MainMenuLoadMeter);
-		};
+		update_load_text(metaparams, ui_MainMenuLoadMeter);
 	}
 
 	void blur() final {
@@ -123,8 +122,6 @@ private:
 			return;
 		page->load_page(PageId::SystemMenu, {});
 	}
-
-	unsigned last_audio_load = 0;
 };
 
 } // namespace MetaModule

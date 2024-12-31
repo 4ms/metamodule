@@ -23,7 +23,7 @@ namespace MetaModule
 class ModuleViewActionMenu {
 	struct Preset {
 		std::string fname{};
-		int idx{};
+		std::string path{};
 	};
 
 public:
@@ -82,18 +82,26 @@ public:
 		presets.clear();
 		preset_map.clear();
 
-		auto populate_vector = [this](std::string fname, unsigned time_stamp, unsigned size, DirEntryKind type) {
-			fname.erase(fname.find(".vcvm"));
-			preset_map.push_back({fname, (int)preset_map.size()});
+		auto populate_vector = [this](std::string fullpath, unsigned time_stamp, unsigned size, DirEntryKind type) {
+			if (fullpath.length() && type == DirEntryKind::File) {
+				if (auto ext_pos = fullpath.find(".vcvm"); ext_pos != std::string::npos) {
+					auto slash_pos = fullpath.find_last_of('/');
+					slash_pos = (slash_pos == std::string::npos) ? 0 : slash_pos + 1;
+					if (fullpath[slash_pos] != '.') {
+						preset_map.push_back({fullpath.substr(slash_pos, ext_pos - slash_pos), fullpath});
+					}
+				}
+			}
 		};
 
-		if (ramdisk.foreach_dir_entry(preset_path.c_str(), populate_vector)) {
+		if (ramdisk.foreach_dir_entry_recursive(preset_path.c_str(), populate_vector, 2)) {
 			std::ranges::sort(preset_map, std::less{}, &Preset::fname);
 
 			for (auto &p : preset_map) {
 				if (p.fname.find_first_of('_') == 2) {
 					// some vcv presets have an ugly 'xx_' prefix.. let's remove it
-					p.fname = p.fname.substr(3);
+					if (isdigit(p.fname[0]) && isdigit(p.fname[1]))
+						p.fname = p.fname.substr(3);
 				}
 				presets += p.fname + '\n';
 			}
@@ -190,7 +198,7 @@ private:
 
 	void reset_params() {
 		reset_params_.reset(module_idx, patches.get_view_patch());
-		patch_mod_queue.put(LoadModuleState{static_cast<uint16_t>(module_idx), ""});
+		patch_mod_queue.put(LoadModuleState{.module_id = static_cast<uint16_t>(module_idx), .data = ""});
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -230,20 +238,19 @@ private:
 	void preset_but_cb() {
 		preset_popup.show(
 			[this](unsigned opt) {
-				const auto t = ramdisk.get_file_name_by_index(preset_path, preset_map[opt].idx);
-				if (!t.has_value()) {
-					return;
-				}
 				cur_preset_idx = opt;
-				const auto filename = preset_path + "/" + t.value().data();
+				const auto filename = preset_map[opt].path;
 				const auto preset_file_size = ramdisk.get_file_size(filename);
 
-				auto mod_request = LoadModuleState{static_cast<uint16_t>(module_idx)};
+				auto mod_request = LoadModuleState{.module_id = static_cast<uint16_t>(module_idx)};
 				mod_request.data.resize(preset_file_size);
 
-				pr_dbg("Loading preset: %s\n", filename.c_str());
-				ramdisk.read_file(filename, mod_request.data);
-				patch_mod_queue.put(std::move(mod_request));
+				auto bytes_read = ramdisk.read_file(filename, mod_request.data);
+				if (bytes_read == 0) {
+					pr_err("Failed to read preset file\n");
+				} else {
+					patch_mod_queue.put(std::move(mod_request));
+				}
 			},
 			"Presets",
 			presets.c_str(),

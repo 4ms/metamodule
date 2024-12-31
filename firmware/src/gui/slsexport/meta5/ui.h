@@ -21,7 +21,7 @@ void DropInFromLeft_Animation(lv_obj_t *TargetObject, int delay);
 void DropOutToRight_Animation(lv_obj_t *TargetObject, int delay);
 void SlideDown_Animation(lv_obj_t *TargetObject, int delay);
 void SlideUp_Animation(lv_obj_t *TargetObject, int delay);
-// SCREEN: ui_MainMenu
+void Flashfade_Animation( lv_obj_t *TargetObject, int delay);
 void ui_MainMenu_screen_init(void);
 extern lv_obj_t *ui_MainMenu;
 extern lv_obj_t *ui_MainMenuStatusBar;
@@ -471,6 +471,9 @@ extern lv_obj_t *ui_SystemPrefsAudioSampleRateDropdown;
 extern lv_obj_t *ui_SystemPrefsAudioBlocksizeCont;
 extern lv_obj_t *ui_SystemPrefsAudioBlocksizeLabel;
 extern lv_obj_t *ui_SystemPrefsAudioBlocksizeDropdown;
+extern lv_obj_t *ui_SystemPrefsAudioOverrunRetriesCont;
+extern lv_obj_t *ui_SystemPrefsAudioOverrunRetriesLabel;
+extern lv_obj_t *ui_SystemPrefsAudioOverrunRetriesDropdown;
 extern lv_obj_t *ui_SystemPrefsScreensaverSettingsTitle;
 extern lv_obj_t *ui_SystemPrefsScreensaverTimeCont;
 extern lv_obj_t *ui_SystemPrefsScreensaverTimeLabel;
@@ -538,7 +541,7 @@ extern lv_obj_t *ui_SystemMenuUpdateFWlabel;
 extern lv_obj_t *ui_SystemMenUpdateProgressBar;
 extern lv_obj_t *ui_FWUpdateSpinner;
 extern lv_obj_t *ui_SystemMenuUpdateLog;
-// SCREEN: ui_JackMapViewPage
+extern lv_obj_t *ui_OverloadMsgLabel;
 void ui_JackMapViewPage_screen_init(void);
 extern lv_obj_t *ui_JackMapViewPage;
 extern lv_obj_t *ui_JackMapViewCont;
