@@ -112,9 +112,6 @@ struct ParamsState {
 			knob.val = that_knob.val;
 			// only reader can clear knob change events, writer can set them
 			knob.changed = that_knob.changed | knob.changed;
-			if (knob.changed) {
-				printf("%f\n", knob.val);
-			}
 		}
 
 		dst.jack_senses = src.jack_senses;

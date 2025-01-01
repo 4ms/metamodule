@@ -84,7 +84,7 @@ public:
 
 		handle_knobset_change();
 
-		update_patch_params();
+		update_screensaver();
 
 		handle_back_event();
 
@@ -121,7 +121,7 @@ public:
 
 					if (cur_page != page_list.page(PageId::KnobSetView))
 						info.notify_queue.put(
-							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 800});
+							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 600});
 
 					button_light.display_knobset(next_knobset);
 				}
@@ -133,20 +133,7 @@ public:
 		}
 	}
 
-	// Update internal copy of patch with knob changes
-	// This is used to keep GUI in sync with patch player's copy of the patch without concurrancy issues
-	void update_patch_params() {
-		auto patch = info.open_patch_manager.get_playing_patch();
-		if (!patch)
-			return;
-
-		auto active_knobset = info.page_list.get_active_knobset();
-		if (active_knobset >= patch->knob_sets.size())
-			return;
-
-		if (page_module.is_creating_map())
-			return;
-
+	void update_screensaver() {
 		// Wake screen saver on knob movement
 		if (screensaver.is_active() && screensaver.can_wake_on_knob()) {
 			for (auto const &knob : info.params.knobs) {
