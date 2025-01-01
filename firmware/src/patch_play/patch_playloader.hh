@@ -334,8 +334,10 @@ private:
 	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
 
-		if (view_patch == patches_.get_playing_patch())
-			patches_.update_view_patch_module_states(player_.get_module_states());
+		if (view_patch == patches_.get_playing_patch()) {
+			patches_.update_view_patch_module_states(player_.patch_query.get_module_states(),
+													 player_.patch_query.get_all_params());
+		}
 
 		std::span<char> filedata = storage_.get_patch_data();
 		patch_to_yaml_buffer(*view_patch, filedata);

@@ -15,6 +15,7 @@
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/multicore_play.hh"
+#include "patch_play/patch_player_query_patch.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include "util/countzip.hh"
@@ -35,7 +36,10 @@ namespace MetaModule
 class PatchPlayer {
 public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
+	unsigned num_modules = 0;
 	std::atomic<bool> is_loaded = false;
+
+	PatchQuery patch_query{modules, pd};
 
 private:
 	// Out1-Out8 + Ext Out1-8
@@ -46,8 +50,6 @@ private:
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
-
-	unsigned num_modules = 0;
 
 	// MIDI
 	bool midi_connected = false;
@@ -79,7 +81,6 @@ private:
 
 	float samplerate = 48000.f;
 
-private:
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
 	// 1 => reads "LFO #1", 2=> "LFO #2", etc.
@@ -243,22 +244,6 @@ public:
 	void update_lights() {
 		smp.read_patch_state();
 		smp.join();
-	}
-
-	std::vector<ModuleInitState> get_module_states() {
-		std::vector<ModuleInitState> states;
-		states.reserve(num_modules);
-
-		for (auto [i, module] : enumerate(modules)) {
-			if (i >= num_modules)
-				break;
-			if (!module)
-				continue;
-			if (auto state_data = module->save_state(); state_data.size() > 0)
-				states.push_back({(uint32_t)i, state_data});
-		}
-
-		return states;
 	}
 
 	void unload_patch() {

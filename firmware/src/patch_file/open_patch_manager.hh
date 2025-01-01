@@ -304,10 +304,12 @@ public:
 		}
 	}
 
-	void update_view_patch_module_states(std::vector<ModuleInitState> const &states) {
-		if (view_patch_)
+	void update_view_patch_module_states(std::vector<ModuleInitState> const &states,
+										 std::vector<StaticParam> const &params) {
+		if (view_patch_) {
 			view_patch_->patch.module_states = states; //copy
-		else
+			view_patch_->patch.static_knobs = params;  //copy
+		} else
 			pr_err("Error: tried to update_view_patch_module_states on a null view_patch\n");
 	}
 
