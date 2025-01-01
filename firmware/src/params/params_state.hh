@@ -103,6 +103,25 @@ struct ParamsState {
 		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
 			in = that_in;
 	}
+
+	friend void transfer_events(ParamsState &dst, ParamsState const &src) {
+		for (auto [gate_in, that_gate_in] : zip(dst.gate_ins, src.gate_ins))
+			gate_in = that_gate_in;
+
+		for (auto [knob, that_knob] : zip(dst.knobs, src.knobs)) {
+			knob.val = that_knob.val;
+			// only reader can clear knob change events, writer can set them
+			knob.changed = that_knob.changed | knob.changed;
+			if (knob.changed) {
+				printf("%f\n", knob.val);
+			}
+		}
+
+		dst.jack_senses = src.jack_senses;
+
+		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
+			in = that_in;
+	}
 };
 
 struct ParamsMidiState : ParamsState {
@@ -123,25 +142,9 @@ struct ParamsMidiState : ParamsState {
 
 		for (auto &cc : midi_ccs)
 			cc = 0;
-	}
 
-	std::optional<float> panel_knob_new_value(uint16_t mapped_panel_id) {
-
-		auto mk = MappedKnob{.panel_knob_id = mapped_panel_id};
-
-		if (mk.is_panel_knob()) {
-			auto &latched = knobs[mapped_panel_id];
-			return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
-		}
-
-		else if (mk.is_midi_cc())
-		{
-			auto &latched = midi_ccs[mk.cc_num()];
-			return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
-		}
-
-		else
-			return std::nullopt;
+		midi_gate = false;
+		last_midi_note = 0;
 	}
 };
 

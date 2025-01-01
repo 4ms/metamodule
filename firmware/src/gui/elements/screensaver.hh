@@ -33,16 +33,14 @@ public:
 	bool is_active() const {
 		return !lv_obj_has_flag(screensaver, LV_OBJ_FLAG_HIDDEN);
 	}
-	// return false if event is consumed
+
+	bool can_wake_on_knob() const {
+		return s.knobs_can_wake;
+	}
+
 	void wake() {
 		lv_disp_trig_activity(nullptr);
 		lv_hide(screensaver);
-	}
-
-	void wake_knob() {
-		if (!s.knobs_can_wake)
-			return;
-		return static_cast<void>(wake());
 	}
 
 	void update() {

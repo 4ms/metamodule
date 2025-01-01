@@ -143,6 +143,11 @@ public:
 
 private:
 	void page_update_task() {
+		// Clear all accumulated knob change events
+		for (auto &knob : params.knobs) {
+			knob.changed = false;
+		}
+
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		page_manager.update_current_page();

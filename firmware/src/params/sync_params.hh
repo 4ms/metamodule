@@ -42,7 +42,7 @@ public:
 		using namespace mdrivlib;
 		bool read_ok = false;
 		if (HWSemaphore<ParamCacheLock>::lock(ReadProcID) == HWSemaphoreFlag::LockedOk) {
-			copy(params, p);
+			transfer_events(params, p);
 			metaparams.transfer(m);
 			HWSemaphore<ParamCacheLock>::unlock(ReadProcID);
 			read_ok = true;

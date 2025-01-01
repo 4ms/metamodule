@@ -147,38 +147,12 @@ public:
 		if (page_module.is_creating_map())
 			return;
 
-		// TODO: move screensave.wake_knob() to M4: sets a bit in shared memory, which A7 core 2 checks and clears (in GUI thread)
-		// Then remove all this
-		// Then in PatchPlayLoader::save_patch: before saving a patch, call player_.get_all_param_vals() in addition to player_.get_module_states
-
-		// Iterate all panel knobs
-		for (auto panel_knob_i = 0u; panel_knob_i < info.params.knobs.size(); panel_knob_i++) {
-
-			// Find knobs that have moved
-			auto knobpos = info.params.panel_knob_new_value(panel_knob_i);
-			if (!knobpos.has_value())
-				continue;
-
-			screensaver.wake_knob();
-
-			// Update patch for any map that's mapped to the knob that moved
-			for (auto &map : patch->knob_sets[active_knobset].set) {
-				if (map.panel_knob_id == panel_knob_i) {
-					auto scaled_val = map.get_mapped_val(knobpos.value());
-					patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
-				}
-			}
-		}
-
-		for (auto &map : patch->midi_maps.set) {
-			auto knobpos = info.params.panel_knob_new_value(map.panel_knob_id);
-			if (knobpos.has_value()) {
-				// Update all MIDI maps to this CC
-				for (auto &other_map : patch->midi_maps.set) {
-					if (other_map.panel_knob_id == map.panel_knob_id) {
-						auto scaled_val = other_map.get_mapped_val(knobpos.value());
-						patch->set_or_add_static_knob_value(other_map.module_id, other_map.param_id, scaled_val);
-					}
+		// Wake screen saver on knob movement
+		if (screensaver.is_active() && screensaver.can_wake_on_knob()) {
+			for (auto const &knob : info.params.knobs) {
+				if (knob.changed) {
+					screensaver.wake();
+					break;
 				}
 			}
 		}
