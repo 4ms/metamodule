@@ -64,21 +64,35 @@ attach without loading.
 If you need to load new firmware and then debug it, then follow the guide in
 [Debugging with gdb](firmware-debugging.md).
 
-To load firmware (without debugging) with a JLink programmer, do this:
+To load firmware (without debugging) with a JLink programmer, you need to install a "Freeze Jumper".
 
-1) Install a "Freeze jumper" on `Control Expander` header that bridges the top-left pin
-and the pin just to the right of it. Make sure you use the right header, it's
-the one above the Wifi header, near the `y` and `z` pots. The jumper should be
-horizontal, not vertical, on the top row of pins all the way to the left:
+There are two bootloader versions. If you see a blue light flash when you start up normally,
+then you have the later bootloader. If not, then you have the earlier bootloader.
+
+1a) Earlier bootloader: The jumper goes on the `Control Expander` header
+that bridges the top-left pin and the pin just to the right of it. Make sure
+you use the right header, it's the one above the Wifi header, near the `y` and
+`z` pots. The jumper should be horizontal, not vertical, on the top row of pins
+all the way to the left:
 
 ```
   Control
  Expander
-          [====] o  o 
+          [o==o] o  o 
            o  o  o  o
 ```
 
-See image above for reference.
+
+1b) Later bootloader: The jumper goes on the two left-most pins of the 2x4 debug header. 
+This is the header located next to the SWD/JTAG header that contains the connections for 
+the UART (RX/TX).
+
+```
+     _      RX  TX 
+    |o|  o   o   o
+    |o|  o   o   o
+     -
+```
 
 2) Power off and back on (full power-cycle is required).
 
@@ -97,9 +111,9 @@ Connect a Jlink programmer and run this:
 make jprog
 ```
 
-This should take 15-30 seconds. 
+This should take 8-30 seconds.
  
-### Load into NOR Flash over DFU-USB
+### Load into NOR Flash over USB DFU
 
 Loading onto NOR Flash will flash the firmware into the on-board FLASH chip so
 you can boot normally without a computer connected. It takes a minute or two,
