@@ -109,7 +109,7 @@ private:
 			if (seg.is_loadable()) {
 				std::ranges::copy(seg, std::next(codeblock.begin(), seg.address()));
 
-				pr_info("Loading segment with file offset 0x%x-0x%x to %p-%p\n",
+				pr_info("Loading segment with file offset 0x%x - 0x%x to %p - %p\n",
 						seg.offset(),
 						seg.offset() + seg.file_size(),
 						std::next(codeblock.begin(), seg.address()),
