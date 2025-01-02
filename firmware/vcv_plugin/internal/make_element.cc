@@ -163,7 +163,7 @@ Element make_element(rack::app::SvgKnob *widget) {
 		element.image = widget->sw->svg->filename;
 
 	} else {
-		pr_err("SvgKnob with no sw->svg or inner child of fb\n");
+		pr_err("SvgKnob with no sw->svg or inner child of fb at %f, %f\n", widget->box.pos.x, widget->box.pos.y);
 	}
 
 	return element;
