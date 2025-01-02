@@ -32,7 +32,7 @@ float VCVModuleWrapper::get_param(int id) const {
 	if ((size_t)id < params.size()) {
 		float val = params[id].getValue();
 		// Reverse scale it
-		if ((size_t)id < paramQuantities.size())
+		if ((size_t)id < paramQuantities.size() && paramQuantities[id])
 			val = MathTools::map_value(val, paramQuantities[id]->minValue, paramQuantities[id]->maxValue, 0.f, 1.f);
 		return val;
 	}
