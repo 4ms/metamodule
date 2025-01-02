@@ -83,10 +83,10 @@ void start_module_threads() {
 	};
 
 	task_runner.init(task_config, []() {
-		if (core() == 0)
-			Debug::Pin2::high();
-		else
-			Debug::Pin1::high();
+		// if (core() == 0)
+		// 	Debug::Pin2::high();
+		// else
+		// 	Debug::Pin1::high();
 
 		auto &tasks = core() == 1 ? tasks_core1 : tasks_core0;
 
@@ -96,10 +96,10 @@ void start_module_threads() {
 			}
 		}
 
-		if (core() == 0)
-			Debug::Pin2::low();
-		else
-			Debug::Pin1::low();
+		// if (core() == 0)
+		// 	Debug::Pin2::low();
+		// else
+		// 	Debug::Pin1::low();
 	});
 	task_runner.start();
 }
