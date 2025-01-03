@@ -53,6 +53,9 @@ target_sources(lvgl
             ${PROJECT_SOURCE_DIR}/src/fs/fatfs/delete_node.cc
 )
 
+set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
+add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
+
 #
 # VCV Adaptor
 #

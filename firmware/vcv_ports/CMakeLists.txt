@@ -69,6 +69,8 @@ foreach(brand ${brands})
 
 	target_link_libraries(${brand}Library PRIVATE cpputil::cpputil)
 
+	target_link_libraries(${brand}Library PRIVATE CMSISDSP)
+
     target_compile_definitions(${brand}Library PRIVATE METAMODULE)
 
 	if (CMAKE_CROSSCOMPILING)
