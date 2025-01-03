@@ -5,8 +5,8 @@ project(CMSISDSP)
 # DSP Sources
 SET(DSP ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
-option(NEON "Neon acceleration" OFF)
-option(NEONEXPERIMENTAL "Neon experimental acceleration" OFF)
+option(NEON "Neon acceleration" ON)
+option(NEONEXPERIMENTAL "Neon experimental acceleration" ON)
 option(HELIUMEXPERIMENTAL "Helium experimental acceleration" OFF)
 option(LOOPUNROLL "Loop unrolling" ON)
 option(ROUNDING "Rounding" OFF)
@@ -15,7 +15,7 @@ option(HELIUM "Helium acceleration (MVEF and MVEI supported)" OFF)
 option(MVEF "MVEF intrinsics supported" OFF)
 option(MVEI "MVEI intrinsics supported" OFF)
 option(MVEFLOAT16 "Float16 MVE intrinsics supported" OFF)
-option(DISABLEFLOAT16 "Disable building float16 kernels" OFF)
+option(DISABLEFLOAT16 "Disable building float16 kernels" ON)
 option(HOST "Build for host" OFF)
 option(AUTOVECTORIZE "Prefer autovectorizable code to one using C intrinsics" OFF)
 option(LAXVECTORCONVERSIONS "Lax vector conversions" ON)
@@ -30,31 +30,31 @@ add_library(CMSISDSP STATIC)
 
 include(BasicMathFunctions/Config.cmake)
 
-include(ComplexMathFunctions/Config.cmake)
+# include(ComplexMathFunctions/Config.cmake)
 
-include(QuaternionMathFunctions/Config.cmake)
+# include(QuaternionMathFunctions/Config.cmake)
 
-include(ControllerFunctions/Config.cmake)
+# include(ControllerFunctions/Config.cmake)
  
 include(FastMathFunctions/Config.cmake)
  
 include(FilteringFunctions/Config.cmake)
  
-include(MatrixFunctions/Config.cmake)
+# include(MatrixFunctions/Config.cmake)
 
-include(StatisticsFunctions/Config.cmake)
+# include(StatisticsFunctions/Config.cmake)
 
 include(SupportFunctions/Config.cmake)
 
-include(TransformFunctions/Config.cmake)
+# include(TransformFunctions/Config.cmake)
  
 include(CommonTables/Config.cmake)
   
-include(SVMFunctions/Config.cmake)
+# include(SVMFunctions/Config.cmake)
 
-include(BayesFunctions/Config.cmake)
+# include(BayesFunctions/Config.cmake)
 
-include(DistanceFunctions/Config.cmake)
+# include(DistanceFunctions/Config.cmake)
 
 include(InterpolationFunctions/Config.cmake)
 
