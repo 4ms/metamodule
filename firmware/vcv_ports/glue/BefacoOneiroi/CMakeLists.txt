@@ -35,12 +35,16 @@ target_include_directories(BefacoOneiroiLibrary PRIVATE
 )
 
 target_compile_options(BefacoOneiroiLibrary PRIVATE 
-    -Wno-double-promotion 
+    -Wdouble-promotion 
     $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-float-conversion>
-    -Wno-asm-operand-widths
+    -Wno-alloc-size-larger-than
+    -fsingle-precision-constant
+    -ffast-math
+    -funsafe-math-optimizations
+    -Ofast
 )
 
-target_compile_definitions(BefacoOneiroiLibrary PRIVATE METAMODULE)
+target_compile_definitions(BefacoOneiroiLibrary PRIVATE ARM_CORTEX)
 
 set_property(TARGET BefacoOneiroiLibrary PROPERTY CXX_STANDARD 23)
 

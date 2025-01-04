@@ -53,6 +53,12 @@ target_sources(lvgl
 )
 
 #
+# CMSIS-DSP
+#
+set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
+add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
+
+#
 # VCV Adaptor
 #
 add_subdirectory(../vcv_plugin ${CMAKE_BINARY_DIR}/vcv_plugin)
