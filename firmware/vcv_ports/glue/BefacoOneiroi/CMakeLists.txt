@@ -11,11 +11,19 @@ project(BefacoOneiroiMetaModulePlugin
     LANGUAGES   C CXX ASM
 )
 
-include(modules.cmake)
-# the above should define ${BEFACO_ONEIROI_SOURCE_PATHS}, the list of sources to add to the BefacoLibrary OBJECT
+set(BEFACO_ONEIROI_DIR ${CMAKE_CURRENT_LIST_DIR}/../../BefacoOneiroi)
 
-add_library(BefacoOneiroiLibrary STATIC ${BEFACO_ONEIROI_SOURCE_PATHS})
+file(GLOB ONEIROI_DSP_SOURCES 
+    ${BEFACO_ONEIROI_DIR}/libs/OwlProgram/LibSource/FloatArray.cpp
+    ${BEFACO_ONEIROI_DIR}/libs/OwlProgram/LibSource/basicmaths.c
+    ${BEFACO_ONEIROI_DIR}/libs/OwlProgram/LibSource/fastlog.c
+    ${BEFACO_ONEIROI_DIR}/libs/OwlProgram/LibSource/fastpow.c
+)
 
+add_library(BefacoOneiroiLibrary STATIC 
+    ${BEFACO_ONEIROI_DIR}/src/Oneiroi.cpp
+    ${ONEIROI_DSP_SOURCES}
+)
 
 target_include_directories(BefacoOneiroiLibrary PRIVATE 
 	${BEFACO_ONEIROI_DIR}/src 
@@ -25,15 +33,6 @@ target_include_directories(BefacoOneiroiLibrary PRIVATE
     ${BEFACO_ONEIROI_DIR}/libs/OwlProgram/Libraries
     ${BEFACO_ONEIROI_DIR}/libs/Oneiroi
 )
-
-file(GLOB DSP_SOURCES 
-    ${SOURCE_DIR}/libs/OwlProgram/LibSource/*.cpp
-    ${SOURCE_DIR}/libs/OwlProgram/LibSource/*.c
-    ${SOURCE_DIR}/libs/OwlProgram/Libraries/KissFFT/*.c
-    libs/OwlProgram/LibSource/*.c
-)
-
-
 
 target_compile_options(BefacoOneiroiLibrary PRIVATE 
     -Wno-double-promotion 
