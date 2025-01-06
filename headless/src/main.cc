@@ -16,9 +16,9 @@ int main(int argc, char *argv[]) {
 	settings.parse(argc, argv);
 
 	// Read patch
-	auto yaml = Headless::FileIO::read_file(settings.patch_path);
+	auto yaml = Headless::FileIO::read_file(settings.patch);
 	if (yaml.size() == 0) {
-		printf("Error: Failed to read patch file %s\n", settings.patch_path.c_str());
+		printf("Error: Failed to read patch file %s\n", settings.patch.c_str());
 		return 1;
 	}
 	PatchData patchdata;
@@ -31,9 +31,10 @@ int main(int argc, char *argv[]) {
 	player.load_patch(patchdata);
 
 	// TODO: read audio input file from settings
-	std::vector<StreamConfSim::Audio::AudioInFrame> dummy_input_file(48000 * 10);
-	auto samples_to_run = std::min(settings.samples_to_run, dummy_input_file.size());
-	printf("Running for %lu samples\n", samples_to_run);
+	auto samples_to_run = settings.samples_to_run;
+	float effective_play_time = samples_to_run / 48000.f;
+	std::vector<StreamConfSim::Audio::AudioInFrame> dummy_input_file(settings.samples_to_run);
+	printf("Running for %lu samples (%f sec @ 48kHz)\n", samples_to_run, effective_play_time);
 
 	// Play patch
 	std::vector<StreamConfSim::Audio::AudioOutFrame> output(samples_to_run);
@@ -54,7 +55,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	const auto end = std::chrono::high_resolution_clock::now();
-	printf("Duration: %lld ms\n", (end - start) / 1ms);
+	auto duration = (end - start) / 1ms;
+	printf("Duration: %lld ms\n", duration);
+	printf("Effective load (single core): %f\n", duration / effective_play_time);
 
 	// TODO: write output to file specified in settings
 	write_file(output);
