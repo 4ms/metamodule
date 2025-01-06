@@ -10,13 +10,12 @@ struct StreamConfSim {
 	struct Audio {
 
 		// BlockSize: Number of Frames processed each time AudioStream::process() is called
-		// For the simulator, it's set by SDL at runtime
 		// static constexpr int BlockSize = 512;
 
 		using SampleT = float;
 		static constexpr int SampleBits = 24;
-		static constexpr int NumInChans = 6;
-		static constexpr int NumOutChans = 8;
+		static constexpr int NumInChans = 2;
+		static constexpr int NumOutChans = 2;
 
 		// One frame: data for all input channels at a single moment of time
 		using AudioInFrame = AudioFrame<SampleT, SampleBits, NumInChans>;

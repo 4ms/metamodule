@@ -41,7 +41,7 @@ target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
 
 add_executable(
-    simulator 
+    headless 
     src/main.cc 
     stubs/svg.cc
     stubs/random.cpp
@@ -52,7 +52,7 @@ add_executable(
     )
 
 target_include_directories(
-  simulator
+  headless
   PRIVATE src
           stubs
           ${FWDIR}/src
@@ -62,15 +62,15 @@ target_include_directories(
             .
           )
 
-target_compile_options(simulator PRIVATE -Wall -Og)
-target_compile_options(simulator PRIVATE -Wno-double-promotion)
+target_compile_options(headless PRIVATE -Wall -Og)
+target_compile_options(headless PRIVATE -Wno-double-promotion)
 
 # Workaround for std::expected not available in clang
 # https://www.reddit.com/r/cpp/comments/1b6f3s4/any_news_on_when_libc_is_going_to_support/
 # https://github.com/llvm/llvm-project/issues/62801
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  target_compile_options(simulator PRIVATE 
+  target_compile_options(headless PRIVATE 
     $<$<COMPILE_LANGUAGE:CXX>:-D__cpp_concepts=202002>
     $<$<COMPILE_LANGUAGE:CXX>:-Wno-builtin-macro-redefined>
     $<$<COMPILE_LANGUAGE:CXX>:-Wno-macro-redefined>
@@ -78,37 +78,37 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 
-target_link_libraries(simulator PRIVATE 
+target_link_libraries(headless PRIVATE 
 	metamodule::patch-serial
 	vcv_ports
 )
-target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
-target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
-target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
+target_link_libraries(headless PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
+target_link_libraries(headless PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
+target_link_libraries(headless PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
-target_compile_definitions(simulator PUBLIC SIMULATOR)
+target_compile_definitions(headless PUBLIC SIMULATOR)
 
-set_property(TARGET simulator PROPERTY CXX_STANDARD 23)
+set_property(TARGET headless PROPERTY CXX_STANDARD 23)
 
 # Arch-dependent Link options:
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_link_options(simulator PUBLIC "-Wl,-map,simulator.map")
+    target_link_options(headless PUBLIC "-Wl,-map,headless.map")
   else()
-    target_link_options(simulator PUBLIC LINKER:-Map,simulator.map)
+    target_link_options(headless PUBLIC LINKER:-Map,headless.map)
   endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  target_link_options(simulator PUBLIC LINKER:-Map,simulator.map)
+  target_link_options(headless PUBLIC LINKER:-Map,headless.map)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  target_link_options(simulator PRIVATE "/MAP:simulator.map")
+  target_link_options(headless PRIVATE "/MAP:headless.map")
 endif()
 
 
 ## Debugging
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") 
   find_program(CMAKE_DEBUGGER_BINARY lldb)
-  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- 
+  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:headless> -- 
     --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
     --flashdir ${CMAKE_CURRENT_LIST_DIR}/../patches/default
     --assets ${CMAKE_CURRENT_LIST_DIR}/build/assets.uimg
@@ -121,7 +121,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     -ex \"set debuginfod enabled off\"
     -ex \"set pagination off\" 
     -ex \"run\"
-    --args $<TARGET_FILE:simulator> 
+    --args $<TARGET_FILE:headless> 
     --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
     --flashdir ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/default
     --assets ${CMAKE_CURRENT_LIST_DIR}/build/assets.uimg
@@ -132,9 +132,10 @@ endif()
 
 add_custom_target(
   debug
-  DEPENDS simulator
+  DEPENDS headless
   COMMAND ${DEBUG_COMMAND}
   USES_TERMINAL
 )
 
 include(ext-plugins.cmake)
+target_include_directories(headless PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ext_plugin)

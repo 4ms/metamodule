@@ -8,7 +8,7 @@
     "configurePresets": [
         {
             "name": "Default",
-            "displayName": "Normal simulator",
+            "displayName": "Normal headless build",
             "description": "Sets Ninja generator, build and install directory",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build",
