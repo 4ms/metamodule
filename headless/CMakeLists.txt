@@ -9,7 +9,11 @@ set(METAMODULE_HEADLESS 1)
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
 
-add_compile_options(-O3 -g2)
+add_compile_options(
+	-Ofast
+	-ffast-math
+	-funsafe-math-optimizations
+)
 include(${FWDIR}/cmake/log_levels.cmake)
 enable_logging()
 
