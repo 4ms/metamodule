@@ -61,5 +61,4 @@ foreach(branddir brand IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_brand_li
 endforeach()
 
 configure_file(src/ext_plugin_builtin.hh.in ${CMAKE_CURRENT_BINARY_DIR}/ext_plugin/ext_plugin_builtin.hh)
-target_include_directories(simulator PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ext_plugin)
 
