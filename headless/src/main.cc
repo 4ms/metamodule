@@ -56,8 +56,10 @@ int main(int argc, char *argv[]) {
 
 	const auto end = std::chrono::high_resolution_clock::now();
 	auto duration = (end - start) / 1ms;
+	auto duration_s = (end - start) / 1s;
+
 	printf("Duration: %lld ms\n", duration);
-	printf("Effective load (single core): %f\n", duration / effective_play_time);
+	printf("Effective load (single core): %f\n", duration_s / effective_play_time);
 
 	// TODO: write output to file specified in settings
 	write_file(output);
