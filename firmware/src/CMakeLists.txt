@@ -252,6 +252,12 @@ include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
 foreach(brand ${brands})
 	if (DEFINED BUILD_DYN_PLUGIN_${brand})
 	target_compile_definitions(main.elf PRIVATE -DBUILD_DYN_PLUGIN_${brand})
+
+	elseif (DEFINED OMIT_BRAND_${brand})
+	target_compile_definitions(main.elf PRIVATE -DOMIT_BRAND_${brand})
+
+    else()
+	target_compile_definitions(main.elf PRIVATE -DBUILD_INTERNAL_${brand})
 	endif()
 endforeach()
 

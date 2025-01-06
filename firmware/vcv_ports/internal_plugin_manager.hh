@@ -64,7 +64,7 @@ struct InternalPluginManager {
 		// TODO: use the glue/BRAND/plugin.cpp::init() function for each brand...
 		// 		 But, somehow get around the issue of multiple definitions of global symbol pluginInstance
 
-#ifndef BUILD_DYN_PLUGIN_Befaco
+#ifdef BUILD_INTERNAL_Befaco
 		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
 		befaco_plugin.slug = "Befaco";
 		pluginInstance = &befaco_plugin;
@@ -94,7 +94,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelBandit);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_AudibleInstruments
+#ifdef BUILD_INTERNAL_AudibleInstruments
 		auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
 		audins_plugin.slug = "AudibleInstruments";
 		pluginInstance = &audins_plugin;
@@ -120,7 +120,7 @@ struct InternalPluginManager {
 		AudibleInstruments::addModel(&audins_plugin, modelWarps);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_hetrickcv
+#ifdef BUILD_INTERNAL_hetrickcv
 		auto &hcv_plugin = internal_plugins.emplace_back("hetrickcv");
 		hcv_plugin.slug = "hetrickcv";
 		pluginInstance = &hcv_plugin;
@@ -192,7 +192,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelRungler);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_nonlinearcircuits
+#ifdef BUILD_INTERNAL_nonlinearcircuits
 		auto &nlc_plugin = internal_plugins.emplace_back("nonlinearcircuits");
 		nlc_plugin.slug = "nonlinearcircuits";
 		pluginInstance = &nlc_plugin;
@@ -216,14 +216,14 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelTripleSloth);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_eightfold
+#ifdef BUILD_INTERNAL_eightfold
 		auto &eightfold_plugin = internal_plugins.emplace_back("eightfold");
 		eightfold_plugin.slug = "eightfold";
 		pluginInstance = &eightfold_plugin;
 		pluginInstance->addModel(modelSDOrcasHeartV2);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_Valley
+#ifdef BUILD_INTERNAL_Valley
 		auto &Valley_plugin = internal_plugins.emplace_back("Valley");
 		pluginInstance = &Valley_plugin;
 		pluginInstance->addModel(modelTopograph);
@@ -231,7 +231,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelPlateau);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_RackCore
+#ifdef BUILD_INTERNAL_RackCore
 		auto &RackCore_plugin = internal_plugins.emplace_back("RackCore");
 		pluginInstance = &RackCore_plugin;
 		pluginInstance->addModel(rack::core::modelMIDI_CV);

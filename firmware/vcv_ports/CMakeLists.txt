@@ -46,7 +46,7 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
 
 foreach(brand ${brands})
-
+  
   if (BUILD_DYN_PLUGIN_${brand})
 	message("Building ${brand} as external plugin")
 	include(ExternalProject)
@@ -58,8 +58,10 @@ foreach(brand ${brands})
 		INSTALL_COMMAND ""
 	)
 
-  else()
+  elseif(OMIT_BRAND_${brand})
+    message("Omitting ${brand} from build")
 
+  else()
 	message("Building ${brand} as built-in plugin")
 	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glue/${brand})
 	target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
