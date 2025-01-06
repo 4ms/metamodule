@@ -45,7 +45,7 @@
 	url = https://github.com/4ms/ValleyRackFree
 [submodule "metamodule-patch-serial"]
 	path = firmware/lib/patch-serial
-	url = git@github.com:4ms/metamodule-patch-serial
+	url = https://github.com:4ms/metamodule-patch-serial
 [submodule "firmware/lib/CoreModules"]
 	path = firmware/lib/CoreModules
 	url = https://github.com/4ms/metamodule-core-modules
