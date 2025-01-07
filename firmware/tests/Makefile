@@ -62,7 +62,7 @@ TMPFILE = $(BUILDDIR)/runtests.out
 
 .PHONY: all tests clean patches
 
-all: $(DOCTESTHEADER_DIR)/doctest.h patches tests
+all: patches tests
 
 $(BUILDDIR)/tests/DualAtenCore_tests.o: CXXFLAGS += -Wno-missing-braces
 
@@ -88,9 +88,6 @@ tests: $(BUILDDIR)/runtests
 $(BUILDDIR)/runtests: $(OBJECTS)
 	$(info Building $(BUILDDIR)/runtests) 
 	@$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
-
-$(DOCTESTHEADER_DIR)/doctest.h:
-	wget https://raw.githubusercontent.com/onqtam/doctest/master/doctest/doctest.h -P $(DOCTESTHEADER_DIR)/
 
 clean:
 	rm -rf $(BUILDDIR)
