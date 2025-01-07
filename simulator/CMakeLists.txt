@@ -56,6 +56,11 @@ add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
 add_subdirectory(${FWDIR}/vcv_ports/ ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
 target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 
+# #################### CMSIS-DSP ############################################
+
+set(CMSISCORE ${FWDIR}/lib/cmsis)
+add_subdirectory(${FWDIR}/lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
+
 # #################### Application ############################################
 
 add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
