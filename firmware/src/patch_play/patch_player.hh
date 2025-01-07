@@ -197,7 +197,7 @@ public:
 	}
 
 	void rebalance_modules() {
-		core_balancer.split_modules(modules, num_modules);
+		core_balancer.split_modules(modules, num_modules, [this] { update_int_cables(); });
 		smp.assign_modules(core_balancer.cores.parts[1]);
 	}
 
@@ -223,30 +223,24 @@ public:
 		} else
 			return;
 
-		for (auto &cable : pd.int_cables) {
-			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
-			for (auto &input_jack : cable.ins) {
-				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
-			}
-		}
-
+		update_int_cables();
 		update_midi_pulses();
 	}
 
-	void update_patch_singlecore() {
-		// Debug::Pin2::high();
-		for (size_t module_i = 1; module_i < num_modules; module_i++) {
-			modules[module_i]->update();
-		}
-		// Debug::Pin2::low();
-
+	void update_int_cables() {
 		for (auto &cable : pd.int_cables) {
 			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
 			for (auto &input_jack : cable.ins) {
 				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
 			}
 		}
+	}
 
+	void update_patch_singlecore() {
+		for (size_t module_i = 1; module_i < num_modules; module_i++) {
+			modules[module_i]->update();
+		}
+		update_int_cables();
 		update_midi_pulses();
 	}
 

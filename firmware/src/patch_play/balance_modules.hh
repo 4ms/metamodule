@@ -14,7 +14,7 @@ template<size_t NumCores, size_t MaxModules>
 struct Balancer {
 	Partition<NumCores, MaxModules> cores;
 
-	void split_modules(std::span<std::unique_ptr<CoreProcessor>> modules, unsigned num_modules) {
+	void split_modules(std::span<std::unique_ptr<CoreProcessor>> modules, unsigned num_modules, auto &&prepare) {
 		mdrivlib::CycleCounter counter;
 		counter.init();
 		std::vector<unsigned> times(num_modules - 1);
@@ -26,17 +26,20 @@ struct Balancer {
 			}
 
 			// Run another 512 samples and measure
-			counter.start_measurement();
+			times[i - 1] = 0;
 			for (auto j = 0; j < 512; j++) {
+				counter.start_measurement();
 				modules[i]->update();
+				counter.end_measurement();
+				times[i - 1] += counter.get_last_measurement_raw();
+				prepare();
 			}
-			counter.end_measurement();
 
-			times[i - 1] = counter.get_last_measurement_raw();
+			// times[i - 1] = counter.get_last_measurement_raw();
 			pr_dbg("Module %u: %u\n", i, times[i - 1]);
 		}
 
-		cores.calculate(times);
+		cores.calc_partitions(times);
 
 		// Adjust indices since we skip module 0
 		for (auto &part : cores.parts) {
