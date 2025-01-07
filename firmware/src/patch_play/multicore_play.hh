@@ -8,10 +8,10 @@ namespace MetaModule
 
 class MulticorePlayer {
 public:
-	static constexpr unsigned ModuleStride = mdrivlib::SMPControl::NumCores;
+	static constexpr unsigned NumCores = mdrivlib::SMPControl::NumCores;
 
 	void assign_modules(std::span<unsigned> module_ids) {
-		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
+		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::init();
 			mdrivlib::SMPControl::write(SMPRegister::NumModulesInPatch, module_ids.size());
 
@@ -23,19 +23,19 @@ public:
 	}
 
 	void update_modules() {
-		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
+		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::split_with_command<SMPCommand::PlayModuleList>();
 		}
 	}
 
 	void read_patch_state() {
-		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
+		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchLights>();
 		}
 	}
 
 	void join() {
-		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
+		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::join();
 		}
 	}

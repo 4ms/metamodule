@@ -76,7 +76,7 @@ private:
 	std::array<bool, NumInJacks> in_patched{};
 
 	MulticorePlayer smp;
-	Balancer<MulticorePlayer::ModuleStride, MAX_MODULES_IN_PATCH> core_balancer;
+	Balancer<MulticorePlayer::NumCores, MAX_MODULES_IN_PATCH> core_balancer;
 
 	float samplerate = 48000.f;
 
@@ -198,7 +198,7 @@ public:
 
 	void rebalance_modules() {
 		core_balancer.split_modules(modules, num_modules, [this] { update_int_cables(); });
-		smp.assign_modules(core_balancer.cores.parts[1]);
+		smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
 	}
 
 	// Runs the patch
