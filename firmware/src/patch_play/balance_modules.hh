@@ -39,10 +39,10 @@ struct Balancer {
 		cores.calculate(times);
 
 		// Adjust indices since we skip module 0
-		for (auto &a : cores.parts[0])
-			a++;
-		for (auto &b : cores.parts[1])
-			b++;
+		for (auto &part : cores.parts) {
+			for (auto &idx : part)
+				idx++;
+		}
 
 		// Debug output:
 		for (auto core = 0u; core < NumCores; core++) {
