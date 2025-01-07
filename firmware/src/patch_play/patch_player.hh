@@ -648,22 +648,25 @@ public:
 		// that their jacks are to be disconnected
 		for (auto &cable : pd.int_cables) {
 
-			unsigned ins_to_disconnect = 0;
+			// unsigned ins_to_disconnect = 0;
 			for (auto in : cable.ins) {
 
 				if (cable.out.module_id == module_idx) {
 					modules[in.module_id]->mark_input_unpatched(in.jack_id);
 				}
-
-				if (in.module_id == module_idx) {
-					ins_to_disconnect++;
-				}
 			}
 
-			if (ins_to_disconnect == cable.ins.size()) {
+			std::erase_if(cable.ins, [module_idx](auto const &jack) { return jack.module_id == module_idx; });
+
+			if (cable.ins.size() == 0) {
 				modules[cable.out.module_id]->mark_output_unpatched(cable.out.jack_id);
 			}
 		}
+
+		//remove cables with no input jacks or the output jack was removed
+		std::erase_if(pd.int_cables, [module_idx](auto const &cable) {
+			return (cable.out.module_id == module_idx) || (cable.ins.size() == 0);
+		});
 
 		// Knob and MIDI connections
 		for (auto &param_set : knob_maps) {
@@ -1030,7 +1033,7 @@ private:
 		}
 	}
 
-	///////////////////////////////////////
+///////////////////////////////////////
 #if defined(TESTPROJECT)
 public:
 	//Used in unit tests
