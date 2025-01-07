@@ -20,9 +20,12 @@ struct Balancer {
 		std::vector<unsigned> times(num_modules - 1);
 
 		for (size_t i = 1; i < num_modules; i++) {
-			modules[i]->update();
-			modules[i]->update();
+			// Run 512 samples, and discard
+			for (auto j = 0; j < 512; j++) {
+				modules[i]->update();
+			}
 
+			// Run another 512 samples and measure
 			counter.start_measurement();
 			for (auto j = 0; j < 512; j++) {
 				modules[i]->update();
@@ -38,7 +41,7 @@ struct Balancer {
 		// Adjust indices since we skip module 0
 		for (auto &a : cores.parts[0])
 			a++;
-		for (auto &b : cores.parts[0])
+		for (auto &b : cores.parts[1])
 			b++;
 
 		// Debug output:
@@ -48,11 +51,8 @@ struct Balancer {
 				pr_dbg("Core %d: Module %u: %u\n", core, idx, times[idx - 1]);
 				sum += times[idx - 1];
 			}
-			pr_dbg("Core %d: %u\n", core, sum);
+			pr_dbg("Core %d Total: %u\n", core, sum);
 		}
-
-		// Tell the other core about the patch
-		// smp.assign_modules(parts.parts[0]);
 	}
 };
 
