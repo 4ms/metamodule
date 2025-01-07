@@ -17,29 +17,33 @@ struct Balancer {
 	void split_modules(std::span<std::unique_ptr<CoreProcessor>> modules, unsigned num_modules, auto &&prepare) {
 		mdrivlib::CycleCounter counter;
 		counter.init();
-		std::vector<unsigned> times(num_modules - 1);
+		std::vector<unsigned> times(num_modules - 1, 0);
 
-		for (size_t i = 1; i < num_modules; i++) {
-			// Run 512 samples, and discard
-			for (auto j = 0; j < 512; j++) {
-				modules[i]->update();
-			}
+		for (auto iter_i = 0; iter_i < 512 + 32; iter_i++) {
 
-			// Run another 512 samples and measure
-			times[i - 1] = 0;
-			for (auto j = 0; j < 512; j++) {
+			for (size_t module_i = 1; module_i < num_modules; module_i++) {
+
 				counter.start_measurement();
-				modules[i]->update();
+				modules[module_i]->update();
 				counter.end_measurement();
-				times[i - 1] += counter.get_last_measurement_raw();
-				prepare();
+
+				// Discard first 32 runs
+				if (iter_i >= 32)
+					times[module_i - 1] += counter.get_last_measurement_raw();
 			}
 
-			// times[i - 1] = counter.get_last_measurement_raw();
-			pr_dbg("Module %u: %u\n", i, times[i - 1]);
+			prepare();
 		}
 
-		cores.calc_partitions(times);
+		for (size_t module_i = 1; module_i < num_modules; module_i++) {
+			pr_dbg("Module %u: %u\n", module_i, times[module_i - 1]);
+		}
+
+		if (NumCores == 2) {
+			auto bias = std::array<unsigned, 2>{0, 1000};
+			cores.calc_partitions(times, bias);
+		} else
+			cores.calc_partitions(times);
 
 		// Adjust indices since we skip module 0
 		for (auto &part : cores.parts) {
