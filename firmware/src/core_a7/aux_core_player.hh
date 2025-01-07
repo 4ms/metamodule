@@ -4,6 +4,7 @@
 #include "drivers/smp.hh"
 #include "gui/ui.hh"
 #include "patch_play/patch_player.hh"
+#include "util/fixed_vector.hh"
 
 namespace MetaModule
 {
@@ -12,11 +13,7 @@ struct AuxPlayer {
 	PatchPlayer &patch_player;
 	Ui &ui;
 
-	struct AuxCoreModulesToRun {
-		uint32_t starting_idx = 1;
-		uint32_t num_modules = 0;
-		uint32_t idx_increment = 2;
-	} modules_to_run;
+	FixedVector<unsigned, 64> module_ids;
 
 	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
 		: patch_player{patch_player}
@@ -34,19 +31,33 @@ struct AuxPlayer {
 	}
 
 	void play_modules() {
-		for (unsigned i = modules_to_run.starting_idx; i < modules_to_run.num_modules;
-			 i += modules_to_run.idx_increment)
-		{
+		for (auto i : module_ids) {
+			// Debug::Pin1::high();
 			patch_player.modules[i]->update();
+			// Debug::Pin1::low();
 		}
+
 		mdrivlib::SMPThread::signal_done();
 	}
 
 	void assign_module_list() {
 		using namespace mdrivlib;
-		modules_to_run.starting_idx = SMPControl::read<SMPRegister::ModuleID>();
-		modules_to_run.num_modules = SMPControl::read<SMPRegister::NumModulesInPatch>();
-		modules_to_run.idx_increment = SMPControl::read<SMPRegister::UpdateModuleOffset>();
+
+		module_ids.clear();
+
+		auto num_modules = SMPControl::read<SMPRegister::NumModulesInPatch>();
+		// pr_dbg("Core 2 will play %u modules:\n", num_modules);
+
+		if (num_modules < module_ids.max_size()) {
+			for (auto i = 0u; i < num_modules; i++) {
+				auto id = SMPControl::read(i + 2);
+				module_ids.push_back(id);
+				// pr_dbg("%u\n", id);
+			}
+
+		} else
+			pr_err("Error: %u modules requested to run on core 2, max is %z\n", num_modules, module_ids.size());
+
 		SMPThread::signal_done();
 	}
 
