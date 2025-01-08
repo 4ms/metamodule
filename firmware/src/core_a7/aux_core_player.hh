@@ -33,6 +33,10 @@ struct AuxPlayer {
 	void play_modules() {
 
 		for (auto module_i : module_ids) {
+			patch_player.process_module_outputs(module_i);
+		}
+
+		for (auto module_i : module_ids) {
 			patch_player.step_module(module_i);
 		}
 
@@ -45,13 +49,11 @@ struct AuxPlayer {
 		module_ids.clear();
 
 		auto num_modules = SMPControl::read<SMPRegister::NumModulesInPatch>();
-		// pr_dbg("Core 2 will play %u modules:\n", num_modules);
 
 		if (num_modules < module_ids.max_size()) {
 			for (auto i = 0u; i < num_modules; i++) {
 				auto id = SMPControl::read(i + 2);
 				module_ids.push_back(id);
-				// pr_dbg("%u\n", id);
 			}
 
 		} else

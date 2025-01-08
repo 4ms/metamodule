@@ -214,6 +214,9 @@ public:
 		else if (num_modules > 2) {
 			smp.update_modules();
 			for (auto module_i : core_balancer.cores.parts[0]) {
+				process_module_outputs(module_i);
+			}
+			for (auto module_i : core_balancer.cores.parts[0]) {
 				step_module(module_i);
 			}
 			smp.join();
@@ -223,14 +226,16 @@ public:
 		update_midi_pulses();
 	}
 
+	void process_module_outputs(unsigned module_i) {
+		for (auto &out : cables.outs[module_i])
+			out.val = modules[module_i]->get_output(out.jack_id);
+	}
+
 	void step_module(unsigned module_i) {
 		for (auto const &in : cables.ins[module_i])
 			modules[module_i]->set_input(in.jack_id, cables.outs[in.out_module_id][in.out_cache_idx].val);
 
 		modules[module_i]->update();
-
-		for (auto &out : cables.outs[module_i])
-			out.val = modules[module_i]->get_output(out.jack_id);
 	}
 
 	void update_patch_singlecore() {
