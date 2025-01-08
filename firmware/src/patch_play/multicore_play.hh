@@ -11,7 +11,6 @@ public:
 
 	void load_patch(unsigned num_modules) {
 
-		num_modules_ = num_modules;
 		//Module 0 is the hub
 		//Module 1 is processed by first core
 		//Module 2 is processed by second core
@@ -20,9 +19,16 @@ public:
 		//... etc
 		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
 			mdrivlib::SMPThread::init();
-			mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2); //first module to process
-			mdrivlib::SMPControl::write<SMPRegister::NumModulesInPatch>(num_modules);
-			mdrivlib::SMPControl::write<SMPRegister::UpdateModuleOffset>(ModuleStride);
+
+			if (num_modules == 0)
+				num_modules = 1;
+
+			mdrivlib::SMPControl::write<SMPRegister::NumModulesInPatch>((num_modules - 1) / 2);
+
+			for (auto i = 2u, module_id = 2u; module_id < num_modules; module_id += 2) {
+				mdrivlib::SMPControl::write(i++, module_id);
+			}
+
 			mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
 		}
 	}
@@ -44,9 +50,6 @@ public:
 			mdrivlib::SMPThread::join();
 		}
 	}
-
-private:
-	unsigned num_modules_ = 0;
 };
 
 } // namespace MetaModule

@@ -13,12 +13,6 @@ namespace SMPRegister
 {
 enum : uint32_t {
 	DoneZero,
-	ModuleID,
-	ParamID,
-	ParamVal,
-	FunctionAddress,
 	NumModulesInPatch,
-	UpdateModuleOffset,
-	Unused,
 };
 } // namespace SMPRegister
