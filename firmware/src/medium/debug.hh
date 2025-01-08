@@ -27,9 +27,9 @@ struct Debug {
 	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::A, 14, mdrivlib::PinMode::Output>; //Control Exp pin 3 (EXTGPIO1)
 	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::E, 2, mdrivlib::PinMode::Output>;  //Control Exp pin 5 (EXTGPIO2)
 	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::G, 11, mdrivlib::PinMode::Output>; //Control Exp pin 7 (EXTGPIO3)
-	using Pin3 = NoPin;
+	using Pin3 = mdrivlib::FPin<mdrivlib::GPIO::E, 4, mdrivlib::PinMode::Output>;  //DEBUG0 pin 5 of debug header
 
-	using Pin4 = mdrivlib::FPin<mdrivlib::GPIO::E, 4, mdrivlib::PinMode::Output>; //DEBUG0 pin 5 of debug header
+	using Pin4 = NoPin;
 	using Pin5 = NoPin;
 	using Pin6 = mdrivlib::FPin<mdrivlib::GPIO::B, 14, mdrivlib::PinMode::Output>; //DEBUG2 pad
 	using Pin7 = mdrivlib::FPin<mdrivlib::GPIO::G, 6, mdrivlib::PinMode::Output>;  //DEBUG3 pad (p11)
