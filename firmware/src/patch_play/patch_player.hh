@@ -177,7 +177,7 @@ public:
 
 		calc_multiple_module_indicies();
 
-		cables.create(pd.int_cables);
+		cables.build(pd.int_cables);
 
 		active_knob_set = 0;
 		catchup_manager.reset(modules, knob_maps[active_knob_set]);
@@ -484,6 +484,7 @@ public:
 
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
+		cables.add(in, out);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
@@ -557,6 +558,8 @@ public:
 		}
 
 		pd.disconnect_injack(jack);
+
+		cables.build(pd.int_cables);
 	}
 
 	void disconnect_outjack(Jack jack) {
@@ -575,6 +578,8 @@ public:
 		}
 
 		pd.disconnect_outjack(jack);
+
+		cables.build(pd.int_cables);
 	}
 
 	void reset_module(uint16_t module_id, std::string_view data = "") {
@@ -645,14 +650,13 @@ public:
 		// that their jacks are to be disconnected
 		for (auto &cable : pd.int_cables) {
 
-			// unsigned ins_to_disconnect = 0;
 			for (auto in : cable.ins) {
-
 				if (cable.out.module_id == module_idx) {
 					modules[in.module_id]->mark_input_unpatched(in.jack_id);
 				}
 			}
 
+			// If this cable goes to input jack(s) on the module to be removed, then remove those jacks from the cable
 			std::erase_if(cable.ins, [module_idx](auto const &jack) { return jack.module_id == module_idx; });
 
 			if (cable.ins.size() == 0) {
@@ -660,7 +664,7 @@ public:
 			}
 		}
 
-		//remove cables with no input jacks or the output jack was removed
+		//remove cables with no input jacks or if the output jack's module is being removed
 		std::erase_if(pd.int_cables, [module_idx](auto const &cable) {
 			return (cable.out.module_id == module_idx) || (cable.ins.size() == 0);
 		});
@@ -697,8 +701,6 @@ public:
 				modules[i]->id = i;
 		}
 
-		//TODO: move async tasks to right core
-
 		rebalance_modules();
 	}
 
@@ -706,6 +708,7 @@ public:
 
 	// Jack patched/unpatched status
 
+	// Follow every internal cable and tell the modules that their jacks are patched
 	void mark_patched_jacks() {
 		for (auto const &cable : pd.int_cables) {
 			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
