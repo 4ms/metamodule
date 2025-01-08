@@ -31,10 +31,9 @@ struct AuxPlayer {
 	}
 
 	void play_modules() {
-		for (auto i : module_ids) {
-			// Debug::Pin1::high();
-			patch_player.modules[i]->update();
-			// Debug::Pin1::low();
+
+		for (auto module_i : module_ids) {
+			patch_player.step_module(module_i);
 		}
 
 		mdrivlib::SMPThread::signal_done();
