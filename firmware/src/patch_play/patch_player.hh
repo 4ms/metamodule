@@ -13,6 +13,7 @@
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/balance_modules.hh"
+#include "patch_play/cable_cache.hh"
 #include "patch_play/multicore_play.hh"
 #include "patch_play/patch_player_query_patch.hh"
 #include "pr_dbg.hh"
@@ -34,6 +35,8 @@ namespace MetaModule
 class PatchPlayer {
 public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
+	CableCache cables;
+
 	unsigned num_modules = 0;
 	std::atomic<bool> is_loaded = false;
 
@@ -174,15 +177,12 @@ public:
 
 		calc_multiple_module_indicies();
 
+		cables.create(pd.int_cables);
+
 		active_knob_set = 0;
 		catchup_manager.reset(modules, knob_maps[active_knob_set]);
 
 		rebalance_modules();
-
-		// Test-run the modules once
-		for (size_t i = 1; i < num_modules; i++) {
-			modules[i]->update();
-		}
 
 		is_loaded = true;
 		if (num_not_found == 1)
@@ -197,7 +197,12 @@ public:
 	}
 
 	void rebalance_modules() {
-		core_balancer.split_modules(modules, num_modules, [this] { update_int_cables(); });
+		auto cpu_times =
+			core_balancer.measure_modules(modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
+		core_balancer.balance_loads(cpu_times);
+
+		core_balancer.print_times(cpu_times, pd.module_slugs);
+
 		smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
 	}
 
@@ -209,38 +214,29 @@ public:
 		else if (num_modules > 2) {
 			smp.update_modules();
 			for (auto module_i : core_balancer.cores.parts[0]) {
-				//for (auto &in: cable_ins[module_i]) {
-				//    modules[module_i]->set_input(in.jack_id, in.out_cable->val);
-				//}
-				// Debug::Pin2::high();
-				modules[module_i]->update();
-				//for (auto &out: cable_outs[module_i]) {
-				//    out.val = modules[module_i]->get_output(out.jack_id);
-				//}
-				// Debug::Pin2::low();
+				step_module(module_i);
 			}
 			smp.join();
 		} else
 			return;
 
-		update_int_cables();
 		update_midi_pulses();
 	}
 
-	void update_int_cables() {
-		for (auto &cable : pd.int_cables) {
-			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
-			for (auto &input_jack : cable.ins) {
-				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
-			}
-		}
+	void step_module(unsigned module_i) {
+		for (auto const &in : cables.ins[module_i])
+			modules[module_i]->set_input(in.jack_id, cables.outs[in.out_module_id][in.out_cache_idx].val);
+
+		modules[module_i]->update();
+
+		for (auto &out : cables.outs[module_i])
+			out.val = modules[module_i]->get_output(out.jack_id);
 	}
 
 	void update_patch_singlecore() {
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
-			modules[module_i]->update();
+			step_module(module_i);
 		}
-		update_int_cables();
 		update_midi_pulses();
 	}
 
@@ -255,6 +251,7 @@ public:
 		for (size_t i = 0; i < num_modules; i++) {
 			modules[i].reset(nullptr);
 		}
+		cables.clear();
 		pd.int_cables.clear();
 		pd.mapped_ins.clear();
 		pd.knob_sets.clear();
