@@ -2,21 +2,21 @@
 #include "patch_play/patch_player.hh"
 #include "stream_conf.hh"
 
-namespace MetaModule
+namespace MetaModule::Headless
 {
 
 struct AudioWrapper {
 	AudioWrapper(PatchPlayer &patch_player)
 		: player{patch_player} {
 
-		for (auto i = 0u; i < StreamConfSim::Audio::NumInChans; i++)
+		for (auto i = 0u; i < AudioConf::NumInChans; i++)
 			player.set_input_jack_patched_status(i, true);
 
-		for (auto i = 0u; i < StreamConfSim::Audio::NumOutChans; i++)
+		for (auto i = 0u; i < AudioConf::NumOutChans; i++)
 			player.set_output_jack_patched_status(i, true);
 	}
 
-	void process(StreamConfSim::Audio::AudioInBuffer in_buff, StreamConfSim::Audio::AudioOutBuffer out_buff) {
+	void process(AudioConf::AudioInBuffer in_buff, AudioConf::AudioOutBuffer out_buff) {
 
 		for (unsigned i = 0; auto &out : out_buff) {
 			auto &in = in_buff[i++];
@@ -39,4 +39,4 @@ private:
 	PatchPlayer &player;
 };
 
-} // namespace MetaModule
+} // namespace MetaModule::Headless

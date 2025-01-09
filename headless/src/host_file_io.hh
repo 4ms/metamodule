@@ -156,7 +156,7 @@ struct HostFileIO {
 		else
 			filepath = filename;
 
-		std::cout << "HostFileIO: get file size " << filepath << "\n";
+		// std::cout << "HostFileIO: get file size " << filepath << "\n";
 		std::ifstream ifs(filepath, std::ios::in);
 		uint64_t sz = 0;
 		if (ifs.is_open()) {

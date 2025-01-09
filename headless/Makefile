@@ -16,7 +16,7 @@ warnings:
 	cmake --fresh --preset gcc-warn -DLOG_LEVEL=TRACE
 
 run: all
-	build/simulator
+	build/headless
 
 debug:
 	cmake --build ${BUILDDIR} --target debug

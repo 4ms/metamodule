@@ -9,8 +9,8 @@ namespace MetaModuleSim
 struct Settings {
 	size_t samples_to_run = 48000 * 100;
 	std::string patch = "../patches/default/Djembe4verb.yml";
-	std::string audio_in_file = "audio_in.raw";
-	std::string audio_out_file = "audio_out.raw";
+	std::string audio_in_file = "audio_in.wav";
+	std::string audio_out_file = "audio_out.wav";
 
 	void parse(int argc, char *argv[]) {
 
@@ -44,10 +44,10 @@ struct Settings {
 				samples_to_run = args["num_samples"].as<unsigned>();
 
 			if (args.count("out") > 0)
-				audio_out_file = args["audio_out_file"].as<std::string>();
+				audio_out_file = args["out"].as<std::string>();
 
-			if (args.count("int") > 0)
-				audio_in_file = args["audio_in_file"].as<std::string>();
+			if (args.count("in") > 0)
+				audio_in_file = args["in"].as<std::string>();
 
 			if (args.count("help") || args.count("?") || args.count("h")) {
 				std::cout << options.help() << std::endl;

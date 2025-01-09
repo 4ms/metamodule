@@ -47,6 +47,7 @@ target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 add_executable(
     headless 
     src/main.cc 
+    src/audio_files.cc 
     stubs/svg.cc
     stubs/random.cpp
 
