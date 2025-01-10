@@ -10,6 +10,12 @@
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
 
+#ifdef CPU_TEST_ALL_MODULES
+#include "conf/pin_conf.hh"
+#include "fs/general_io.hh"
+#include "load_test/test_modules.hh"
+#endif
+
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
 static inline FrameBufferT framebuf1 alignas(64);
@@ -38,9 +44,10 @@ extern "C" void aux_core_main() {
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 	AssetFS asset_fs{AssetVolFlashOffset};
 	Filesystem::Init(ramdisk);
-	PluginManager plugin_manager{*A7SharedMemoryS::ptrs.patch_storage, ramdisk};
+	auto &file_storage_proxy = *A7SharedMemoryS::ptrs.patch_storage;
+	PluginManager plugin_manager{file_storage_proxy, ramdisk};
 	Ui ui{*A7SharedMemoryS::ptrs.patch_playloader,
-		  *A7SharedMemoryS::ptrs.patch_storage,
+		  file_storage_proxy,
 		  *A7SharedMemoryS::ptrs.open_patch_manager,
 		  *A7SharedMemoryS::ptrs.sync_params,
 		  *A7SharedMemoryS::ptrs.patch_mod_queue,
@@ -60,15 +67,20 @@ extern "C" void aux_core_main() {
 
 	// Signal that we're ready
 	pr_info("A7 Core 2 initialized\n");
-	HWSemaphore<AuxCoreReady>::unlock();
 
 #ifdef CPU_TEST_ALL_MODULES
-	// Wait for main core to be done with testing all modules
-	HAL_Delay(50);
-	while (mdrivlib::HWSemaphore<MainCoreReady>::is_locked()) {
-		ui.update_screen();
-	};
+	{
+		using namespace mdrivlib;
+		if (Pin{ControlPins::but0, PinMode::Input, PinPull::Up, PinPolarity::Inverted}.is_on()) {
+			pr_info("A7 Core 2 running CPU load tests\n");
+			auto db = LoadTest::test_all_modules();
+			auto filedata = LoadTest::entries_to_csv(db);
+			FS::write_file(file_storage_proxy, filedata, {"cpu_test.csv", Volume::USB});
+		}
+	}
 #endif
+
+	HWSemaphore<AuxCoreReady>::unlock();
 
 	ui.load_initial_patch();
 
