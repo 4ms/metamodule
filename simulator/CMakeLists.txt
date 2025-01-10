@@ -59,6 +59,10 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 # #################### CMSIS-DSP ############################################
 
 set(CMSISCORE ${FWDIR}/lib/cmsis)
+set(NEON OFF)
+set(NEONEXPERIMENTAL OFF)
+set(LOOPUNROLL OFF)
+set(HOST ON)
 add_subdirectory(${FWDIR}/lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
 # #################### Application ############################################
