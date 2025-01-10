@@ -65,6 +65,7 @@ void Model::move_strings() {
 	}
 }
 
+// Creates a new string, puts it in the strings deque, and then returns a string_view to it
 std::string_view Model::add_string(std::string_view str) {
 	return strings.emplace_back(str);
 }

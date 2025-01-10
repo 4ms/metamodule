@@ -144,7 +144,7 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 			// s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
 			s += entry.mem_usage.double_free ? "YES" : "n";
 		}
-		pr_info("%zu, %zu, %lld, %d, %s\n",
+		pr_info("%zu, %zu, %zu, %d, %s\n",
 				entry.mem_usage.peak_mem_startup,
 				entry.mem_usage.peak_running_mem,
 				entry.mem_usage.mem_leaked,

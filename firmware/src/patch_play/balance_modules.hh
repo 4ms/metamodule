@@ -6,7 +6,10 @@
 #include <memory>
 #include <vector>
 
+// #define PRINT_LOAD_BALANCE
+#ifdef PRINT_LOAD_BALANCE
 #include "console/pr_dbg.hh"
+#endif
 
 namespace MetaModule
 {
@@ -58,6 +61,7 @@ struct Balancer {
 	}
 
 	void print_times(std::span<unsigned> times, std::span<BrandModuleSlug> slugs) {
+#ifdef PRINT_LOAD_BALANCE
 		// Debug output:
 		for (auto core = 0u; core < NumCores; core++) {
 			unsigned sum = 0;
@@ -67,6 +71,7 @@ struct Balancer {
 			}
 			pr_dbg("Core %d Total: %u\n", core, sum);
 		}
+#endif
 	}
 };
 

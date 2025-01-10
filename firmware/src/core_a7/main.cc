@@ -7,11 +7,8 @@
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
-#include "fs/time_convert.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
-#include "load_test/test_modules.hh"
-#include "params.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
@@ -19,15 +16,7 @@
 #include "system/time.hh"
 #include "uart_log.hh"
 
-#include "conf/qspi_flash_conf.hh"
-#include "drivers/qspi_flash_driver.hh"
 #include "fs/norflash_layout.hh"
-
-#ifdef CPU_TEST_ALL_MODULES
-#include "conf/pin_conf.hh"
-#include "fs/general_io.hh"
-#include "load_test/tester.hh"
-#endif
 
 #ifdef ENABLE_WIFI_BRIDGE
 #include <wifi_update.hh>
@@ -119,22 +108,6 @@ int main() {
 	// wait for other cores to be ready: ~2400ms + more for auto-loading plugins
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked() || mdrivlib::HWSemaphore<AuxCoreReady>::is_locked())
 		;
-
-	// ~290ms until while loop
-
-#ifdef CPU_TEST_ALL_MODULES
-	mdrivlib::HWSemaphore<MainCoreReady>::lock();
-
-	mdrivlib::Pin but0{
-		ControlPins::but0, mdrivlib::PinMode::Input, mdrivlib::PinPull::Up, mdrivlib::PinPolarity::Inverted};
-	if (but0.is_on()) {
-		auto db = LoadTest::test_all_modules();
-		auto filedata = LoadTest::entries_to_csv(db);
-		FS::write_file(file_storage_proxy, filedata, {"cpu_test.csv", Volume::USB});
-	}
-
-	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
-#endif
 
 	StaticBuffers::sync_params.clear();
 
