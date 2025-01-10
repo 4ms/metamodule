@@ -79,3 +79,8 @@ void __attribute__((optimize("-O0"))) keep_register_module() {
 	static auto addr = &MetaModule::register_module;
 	printf("%p\n", addr);
 }
+
+void __attribute__((optimize("-O0"))) keep_light_widget() {
+	rack::app::LightWidget x;
+	printf("%p\n", &x);
+}
