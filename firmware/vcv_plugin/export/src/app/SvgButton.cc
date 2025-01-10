@@ -17,7 +17,7 @@ SvgButton::SvgButton()
 SvgButton::~SvgButton() = default;
 
 void SvgButton::addFrame(std::shared_ptr<window::Svg> svg) {
-	if (svg->filename.length()) {
+	if (svg->filename().length()) {
 		frames.push_back(svg);
 		if (frames.size() == 1) {
 			sw->setSvg(svg);

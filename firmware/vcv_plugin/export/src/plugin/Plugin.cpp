@@ -33,14 +33,13 @@ void Plugin::addModel(Model *model) {
 	auto module = model->createModule();
 	auto modulewidget = model->createModuleWidget(module);
 
-	modulewidget->adaptor->populate_elements_indices(model->elements, model->indices);
+	modulewidget->populate_elements_indices(model->elements, model->indices);
 	model->move_strings();
 
 	std::string panelsvg;
-	if (modulewidget->svg_filename.size()) {
-		panelsvg = modulewidget->svg_filename;
-	} else if (modulewidget->panel && modulewidget->panel->svg) {
-		panelsvg = modulewidget->panel->svg->filename;
+
+	if (modulewidget->getPanel() && modulewidget->getPanel()->svg) {
+		panelsvg = modulewidget->getPanel()->svg->filename();
 	}
 
 	std::string_view panel_filename = "";

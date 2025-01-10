@@ -18,18 +18,18 @@ SvgSlider::SvgSlider()
 SvgSlider::~SvgSlider() = default;
 
 void SvgSlider::setBackgroundSvg(std::shared_ptr<window::Svg> svg) {
-	if (svg && svg->filename.size()) {
+	if (svg && svg->filename().size()) {
 		background->svg = svg;
-		background->box.size = get_svg_size(background->svg->filename);
+		background->box.size = background->svg->getSize();
 		this->box = background->box;
 	} else
 		pr_warn("Svgslider: Svg bg with empty name\n");
 }
 
 void SvgSlider::setHandleSvg(std::shared_ptr<window::Svg> svg) {
-	if (svg && svg->filename.size()) {
+	if (svg && svg->filename().size()) {
 		handle->svg = svg;
-		handle->box.size = get_svg_size(svg->filename);
+		handle->box.size = svg->getSize();
 	} else
 		pr_warn("Svgslider: Svg with empty name\n");
 }

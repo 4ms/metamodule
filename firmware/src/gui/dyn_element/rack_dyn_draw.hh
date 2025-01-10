@@ -44,7 +44,7 @@ struct RackDynDraw : BaseDynDraw {
 			mw->drawLayer(args, 1);
 			// Debug::Pin1::low();
 
-			for (auto &widget : mw->drawable_widgets) {
+			for (auto &widget : mw->get_drawable_widgets()) {
 				if (!widget->isVisible())
 					continue;
 
