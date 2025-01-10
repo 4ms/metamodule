@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "console/pr_dbg.hh"
-#include "medium/debug_raw.h"
+// #include "medium/debug_raw.h"
 
 namespace MetaModule::NanoVG
 {
@@ -96,8 +96,6 @@ float renderText(
 	auto context = get_drawcontext(uptr);
 	auto canvas = context->canvas;
 
-	// DebugPin1High(); // really debug 0
-
 	// Move to position
 	auto lv_x = to_lv_coord(x + fs->xform[4]);
 	auto lv_y = to_lv_coord(y + fs->xform[5]);
@@ -146,7 +144,7 @@ float renderText(
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
 		pr_dbg("Creating label at %d,%d align %d (sz %f)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
-		context->labels.emplace_back(lv_x, lv_y, fs->textAlign, label, context->draw_frame_ctr);
+		context->labels.push_back({(float)lv_x, (float)lv_y, fs->textAlign, label, context->draw_frame_ctr});
 	}
 
 	if (text == nullptr)
@@ -170,8 +168,6 @@ float renderText(
 
 	lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
 	lv_label_set_text(label, text);
-
-	// DebugPin1Low(); //really debug 0
 
 	return 1;
 }
@@ -213,7 +209,6 @@ void renderTriangles(void *uptr,
 }
 
 void renderDelete(void *uptr) {
-	// pr_dbg("renderDelete\n");
 	if (uptr) {
 		if (auto context = get_drawcontext(uptr))
 			delete context;
@@ -222,7 +217,6 @@ void renderDelete(void *uptr) {
 
 // Share the textures of GLNVGcontext 'otherUptr' if it's non-NULL.
 int renderCreate(void *uptr, void *otherUptr) {
-	// pr_dbg("RenderCreate\n");
 	return 1;
 }
 

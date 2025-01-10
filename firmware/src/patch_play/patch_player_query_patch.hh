@@ -28,7 +28,7 @@ struct PatchQuery {
 		for (auto module_id : std::views::iota(0u, pd.module_slugs.size())) {
 			if (modules[module_id]) {
 				if (auto state_data = modules[module_id]->save_state(); state_data.size() > 0)
-					states.emplace_back(module_id, state_data);
+					states.push_back({module_id, state_data});
 			}
 		}
 
@@ -48,7 +48,7 @@ struct PatchQuery {
 
 				for (auto param_id : std::views::iota(0u, num_params)) {
 					auto val = modules[module_id]->get_param(param_id);
-					params.emplace_back(module_id, param_id, val);
+					params.push_back({uint16_t(module_id), uint16_t(param_id), val});
 				}
 			}
 			module_id++;

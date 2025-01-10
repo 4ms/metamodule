@@ -77,7 +77,7 @@ lv_font_t const *load_from_cache(std::string_view name, unsigned font_size) {
 }
 
 void add_font_to_cache(std::string_view name, unsigned font_size, lv_font_t *font) {
-	font_cache.emplace_back(std::string(name), (lv_coord_t)font_size, font);
+	font_cache.push_back({std::string(name), (lv_coord_t)font_size, font});
 }
 
 ////////////////////////////////////////
@@ -130,7 +130,7 @@ lv_font_t const *get_font_from_disk(std::string_view name) {
 	if (auto font = lv_font_load(full_path.data())) {
 		font->fallback = &lv_font_montserrat_14;
 
-		font_cache.emplace_back(std::string(name), font->line_height, font);
+		font_cache.push_back({std::string(name), font->line_height, font});
 
 		pr_dbg("font %s sz %u loaded into font cache\n", name.data(), font->line_height);
 
