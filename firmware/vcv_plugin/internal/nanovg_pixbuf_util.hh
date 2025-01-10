@@ -16,14 +16,18 @@ constexpr lv_coord_t to_lv_coord(float x) {
 // static_assert(mm_to_px(to_mm(10.f), 240) == 6.325291928f);
 
 constexpr lv_point_t to_lv_point(NVGvertex vertex) {
-	return lv_point_t(to_lv_coord(vertex.x), to_lv_coord(vertex.y));
+	lv_point_t p{
+		.x = to_lv_coord(vertex.x),
+		.y = to_lv_coord(vertex.y),
+	};
+	return p;
 }
 
-lv_color_t to_lv_color(NVGcolor color) {
+inline lv_color_t to_lv_color(NVGcolor color) {
 	return lv_color_make(color.r * 255.f, color.g * 255.f, color.b * 255.f);
 }
 
-lv_color_t to_lv_text_color(NVGcolor color) {
+inline lv_color_t to_lv_text_color(NVGcolor color) {
 	auto hsv = lv_color_to_hsv(to_lv_color(color));
 	return lv_color_hsv_to_rgb(hsv.h, (hsv.s + 100) / 2, 100);
 }
