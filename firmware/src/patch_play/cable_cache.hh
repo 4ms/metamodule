@@ -52,7 +52,7 @@ struct CableCache {
 		if (injack.module_id < ins.size() && outjack.module_id < outs.size()) {
 			auto &out = outs[outjack.module_id];
 			auto out_idx = out.size();
-			out.emplace_back(0.f, outjack.jack_id);
+			out.push_back({0.f, outjack.jack_id});
 			ins[injack.module_id].push_back({injack.jack_id, outjack.module_id, (uint16_t)out_idx});
 		}
 	}
