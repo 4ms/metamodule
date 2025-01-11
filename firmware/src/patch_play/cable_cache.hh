@@ -38,11 +38,11 @@ struct CableCache {
 
 			auto &out = outs[cable.out.module_id];
 			auto out_idx = out.size();
-			out.emplace_back(0.f, cable.out.jack_id);
+			out.push_back({0.f, cable.out.jack_id});
 
 			for (auto &in : cable.ins) {
 				if (in.module_id < ins.size()) {
-					ins[in.module_id].emplace_back(in.jack_id, cable.out.module_id, out_idx);
+					ins[in.module_id].push_back({in.jack_id, cable.out.module_id, (uint16_t)out_idx});
 				}
 			}
 		}
@@ -53,7 +53,7 @@ struct CableCache {
 			auto &out = outs[outjack.module_id];
 			auto out_idx = out.size();
 			out.emplace_back(0.f, outjack.jack_id);
-			ins[injack.module_id].emplace_back(injack.jack_id, outjack.module_id, out_idx);
+			ins[injack.module_id].push_back({injack.jack_id, outjack.module_id, (uint16_t)out_idx});
 		}
 	}
 
