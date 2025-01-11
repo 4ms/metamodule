@@ -17,6 +17,10 @@ add_compile_options(-O0 -g2)
 include(${FWDIR}/cmake/log_levels.cmake)
 enable_logging()
 
+# #################### CMSIS-DSP ############################################
+set(CMSISCORE ${LIBDIR}/cmsis)
+add_subdirectory(${LIBDIR}/cmsis-dsp ${CMAKE_CURRENT_BINARY_DIR}/cmsis-dsp)
+
 # #################### cpputil #########################################
 
 add_subdirectory(${LIBDIR}/cpputil cpputil)
