@@ -91,9 +91,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
-		// 71.2us w/both MIDIs
-		// alternating 44us/71.3us with jack sense in metaparams (why alternating?)
 		auto &params = cache_params(block);
+		// Debug::Pin0::low();
 
 		if (!overrun_handler.is_retrying() && is_playing_patch())
 			process(audio_blocks[1 - block], params);
@@ -463,7 +462,10 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.midi_connected = param_blocks[block].metaparams.midi_connected;
 	local_params.metaparams.jack_senses = param_blocks[block].metaparams.jack_senses;
 
-	std::memcpy(local_params.params.data(), param_blocks[block].params.data(), sizeof(Params) * block_size_);
+	for (auto i = 0u; i < block_size_; i++)
+		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt
+
+	// std::memcpy(local_params.params.data(), param_blocks[block].params.data(), sizeof(Params) * block_size_); //34us/63us alt
 
 	return local_params;
 }
