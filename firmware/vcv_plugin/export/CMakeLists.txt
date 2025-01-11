@@ -68,20 +68,22 @@ target_sources(
          src/midi_message.cc
          src/system.cc
 
-         src/blendish.c
+		 src/blendish.c
 )
 
 add_subdirectory(jansson)
 add_subdirectory(pffft)
-add_subdirectory(nanovg)
-
-target_include_directories(nanovg PRIVATE ${MM_ROOT}/firmware/src)
-target_link_libraries(nanovg PRIVATE metamodule::rack-interface)
 
 target_link_libraries(vcv_plugin_export PUBLIC cpputil) 
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,jansson>")
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,pffft>")
-target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,nanovg>")
+
+if(NOT METAMODULE_HEADLESS)
+	add_subdirectory(nanovg)
+	target_include_directories(nanovg PRIVATE ${MM_ROOT}/firmware/src)
+	target_link_libraries(nanovg PRIVATE metamodule::rack-interface)
+	target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,nanovg>")
+endif()
 
 target_include_directories( vcv_plugin_export PUBLIC
     src
