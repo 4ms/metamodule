@@ -9,6 +9,8 @@ $(BUILDDIR):
 clean:
 	cmake --fresh --preset Default -DLOG_LEVEL=DEBUG
 
+config-sim: clean
+
 realclean:
 	rm -rf $(BUILDDIR)
 
@@ -21,4 +23,12 @@ run: all
 debug:
 	cmake --build ${BUILDDIR} --target debug
 	
+
+config-headless:
+	cmake --fresh --preset headless -DLOG_LEVEL=DEBUG
+
+config-headless-min:
+	cmake --fresh --preset headless-min -DLOG_LEVEL=NONE
+	
+
 .PHONY: all clean warnings run
