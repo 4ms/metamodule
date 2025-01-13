@@ -18,10 +18,6 @@
 
 #include "fs/norflash_layout.hh"
 
-#ifdef ENABLE_WIFI_BRIDGE
-#include <wifi_update.hh>
-#endif
-
 namespace MetaModule
 {
 
@@ -85,10 +81,6 @@ int main() {
 	mdrivlib::SystemCache::clean_dcache_by_range(&A7SharedMemoryS::ptrs, sizeof(A7SharedMemoryS::ptrs));
 	mdrivlib::SystemCache::clean_dcache_by_range(&SharedMemoryS::ptrs, sizeof(SharedMemoryS::ptrs));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
-
-#ifdef ENABLE_WIFI_BRIDGE
-	WifiUpdate::run();
-#endif
 
 	// prevents M4 from using it as a USBD device:
 	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);

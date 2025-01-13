@@ -12,9 +12,7 @@
 #include "patch_file/patch_storage.hh"
 #include "usb/usb_manager.hh"
 
-#ifdef ENABLE_WIFI_BRIDGE
 #include <wifi_interface.hh>
-#endif
 
 namespace MetaModule
 {
@@ -61,10 +59,8 @@ int main() {
 	if (reload_default_patches)
 		fs_messages.reload_default_patches();
 
-#ifdef ENABLE_WIFI_BRIDGE
 	WifiInterface::init(&fs_messages.get_patch_storage());
 	WifiInterface::start();
-#endif
 
 	// Controls
 	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host()};
@@ -90,8 +86,6 @@ int main() {
 
 		fs_messages.process();
 
-#ifdef ENABLE_WIFI_BRIDGE
 		WifiInterface::run();
-#endif
 	}
 }
