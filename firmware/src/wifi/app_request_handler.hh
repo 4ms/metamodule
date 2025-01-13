@@ -13,7 +13,6 @@ struct WifiAppRequestHandler {
 
 	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
 
-#ifdef ENABLE_WIFI_BRIDGE
 		if (message.message_type == RequestWifiIP) {
 			IntercoreStorageMessage result;
 
@@ -42,7 +41,7 @@ struct WifiAppRequestHandler {
 
 			return result;
 		}
-#endif
+
 		return std::nullopt;
 	}
 };
