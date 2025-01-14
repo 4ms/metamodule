@@ -90,6 +90,7 @@ struct PatchSelectorPage : PageBase {
 		subdir_panel.focus_cb = [this](Volume vol, std::string_view dir) {
 			if (!is_populating_subdir_panel) {
 				for (auto [i, entry] : enumerate(roller_item_infos)) {
+					pr_dbg("Setup subpanel entry %d\n", i);
 					if (entry.path == dir && entry.vol == vol) {
 						lv_roller_set_selected(ui_PatchListRoller, i + 1, LV_ANIM_ON);
 						scroll_to_next_valid();
@@ -106,6 +107,7 @@ struct PatchSelectorPage : PageBase {
 	void refresh_subdir_panel() {
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
 		if (idx < roller_item_infos.size()) {
+			pr_dbg("Refresh subpanel\n");
 			subdir_panel.refresh(roller_item_infos[idx]);
 		}
 	}
@@ -164,7 +166,12 @@ struct PatchSelectorPage : PageBase {
 				last_entry_info = roller_item_infos[idx];
 		}
 
+		for (auto const &item : roller_item_infos) {
+			pr_dbg("%p %s %p %s\n", item.name.data(), item.name.c_str(), item.path.data(), item.path.c_str());
+		}
+		pr_dbg("clearing\n");
 		roller_item_infos.clear();
+		pr_dbg("Done clearing\n");
 
 		std::string roller_text;
 		for (auto [vol, vol_name, root] : zip(patchfiles.vols, patchfiles.vol_name, patchfiles.vol_root)) {
@@ -297,11 +304,11 @@ struct PatchSelectorPage : PageBase {
 
 			case State::TryingToRequestPatchList: {
 				//Pick first vol needing refresh
-				std::optional<Volume> force_refresh_vol =
-					gui_state.force_refresh_vol.needs_refresh(Volume::USB)		? Volume::USB :
-					gui_state.force_refresh_vol.needs_refresh(Volume::SDCard)	? Volume::SDCard :
-					gui_state.force_refresh_vol.needs_refresh(Volume::NorFlash) ? Volume::NorFlash :
-																				  std::optional<Volume>{};
+				std::optional<Volume> force_refresh_vol = {};
+				// gui_state.force_refresh_vol.needs_refresh(Volume::USB)		? Volume::USB :
+				// gui_state.force_refresh_vol.needs_refresh(Volume::SDCard)	? Volume::SDCard :
+				// gui_state.force_refresh_vol.needs_refresh(Volume::NorFlash) ? Volume::NorFlash :
+				// 															  std::optional<Volume>{};
 
 				if (patch_storage.request_patchlist(force_refresh_vol)) {
 					// Lock patchesfiles: we are not allowed to access it, because M4 has access now
@@ -309,8 +316,8 @@ struct PatchSelectorPage : PageBase {
 					state = State::RequestedPatchList;
 					show_spinner();
 
-					if (force_refresh_vol)
-						gui_state.force_refresh_vol.unmark(*force_refresh_vol);
+					// if (force_refresh_vol)
+					// 	gui_state.force_refresh_vol.unmark(*force_refresh_vol);
 				}
 			} break;
 
@@ -318,24 +325,25 @@ struct PatchSelectorPage : PageBase {
 				auto message = patch_storage.get_message();
 				if (message.message_type == FileStorageProxy::PatchListChanged) {
 
-					if (message.USBEvent == IntercoreStorageMessage::VolEvent::Mounted) {
-						patches.mark_patches_force_reload(Volume::USB);
-					}
-					if (message.USBEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
-						patches.mark_patches_no_reload(Volume::USB);
-					}
-					if (message.SDEvent == IntercoreStorageMessage::VolEvent::Mounted) {
-						patches.mark_patches_force_reload(Volume::SDCard);
-					}
-					if (message.SDEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
-						patches.mark_patches_no_reload(Volume::SDCard);
-					}
-					if (message.NorFlashEvent == IntercoreStorageMessage::VolEvent::Mounted) {
-						patches.mark_patches_force_reload(Volume::NorFlash);
-					}
-					if (message.NorFlashEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
-						patches.mark_patches_no_reload(Volume::NorFlash);
-					}
+					// if (message.USBEvent == IntercoreStorageMessage::VolEvent::Mounted) {
+					// 	patches.mark_patches_force_reload(Volume::USB);
+					// }
+					// if (message.USBEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
+					// 	patches.mark_patches_no_reload(Volume::USB);
+					// }
+					// if (message.SDEvent == IntercoreStorageMessage::VolEvent::Mounted) {
+					// 	patches.mark_patches_force_reload(Volume::SDCard);
+					// }
+					// if (message.SDEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
+					// 	patches.mark_patches_no_reload(Volume::SDCard);
+					// }
+					// if (message.NorFlashEvent == IntercoreStorageMessage::VolEvent::Mounted) {
+					// 	patches.mark_patches_force_reload(Volume::NorFlash);
+					// }
+					// if (message.NorFlashEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
+					// 	patches.mark_patches_no_reload(Volume::NorFlash);
+					// }
+					pr_dbg("Got patchlist back\n");
 					state = State::ReloadingPatchList;
 
 					// Unlock patchesfiles: M4 is done with it

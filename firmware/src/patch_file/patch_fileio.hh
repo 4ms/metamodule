@@ -189,20 +189,11 @@ public:
 		return ok;
 	}
 
-private:
-	static ModuleTypeSlug _read_patch_name(FileIoC auto &fileio, const std::string_view filename) {
-		constexpr uint32_t HEADER_SIZE = 64;
-		std::array<char, HEADER_SIZE> _buf;
+	static ModuleTypeSlug extract_patch_name(std::string_view header) {
+		const size_t HEADER_SIZE = header.size();
 
-		auto bytes_read = fileio.read_file(filename, _buf, 0);
-		if (bytes_read == 0) {
-			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
-			return "";
-		}
-		_buf[63] = 0;
-
-		auto header = std::string_view{_buf.data(), _buf.size()};
 		std::string_view name_tag{"patch_name"};
+
 		auto startpos = header.find(name_tag);
 		if (startpos == header.npos) {
 			pr_trace("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
@@ -225,6 +216,22 @@ private:
 		header.remove_suffix(header.size() - endpos);
 
 		return ModuleTypeSlug{header};
+	}
+
+private:
+	static ModuleTypeSlug _read_patch_name(FileIoC auto &fileio, const std::string_view filename) {
+		constexpr uint32_t HEADER_SIZE = 64;
+		std::array<char, HEADER_SIZE> _buf;
+
+		auto bytes_read = fileio.read_file(filename, _buf, 0);
+		if (bytes_read == 0) {
+			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
+			return "";
+		}
+		_buf[63] = 0;
+
+		auto header = std::string_view{_buf.data(), _buf.size()};
+		return extract_patch_name(header);
 	}
 };
 } // namespace MetaModule

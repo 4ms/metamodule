@@ -51,21 +51,18 @@ public:
 	[[nodiscard]] bool request_patchlist(std::optional<Volume> force_refresh_vol = std::nullopt) {
 		IntercoreStorageMessage message{
 			.message_type = RequestRefreshPatchList,
-			.patch_dir_list = &patch_dir_list_,
+			.patch_dir_list = &patch_dir_list_, // this is where we want M4 to copy the patch_dir_list
 		};
 
-		if (force_refresh_vol.has_value()) {
-			message.force_refresh = true;
-			message.vol_id = force_refresh_vol.value();
-		}
+		// pr_dbg("A7: RequestRefreshPatchList to %p\n", &patch_dir_list_);
+		// if (force_refresh_vol.has_value()) {
+		// 	message.force_refresh = true;
+		// 	message.vol_id = force_refresh_vol.value();
+		// }
 		return comm_.send_message(message);
 	}
 
 	PatchDirList &get_patch_list() {
-		//FIXME: Ensure this is only called when
-		//we have access to the shared data. Return a ptr,
-		//or return nullptr if we've sent a RequestRefreshPatchList but
-		//haven't gotten a reply yet
 		return patch_dir_list_;
 	}
 
