@@ -22,7 +22,7 @@ struct FilesystemMessages {
 	}
 
 	void process() {
-		patch_storage.poll_media_change();
+		patch_storage.refresh_patch_list();
 
 		auto message = intercore_comm.get_new_message();
 
