@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/../firmware/cmake/aarch-linux-none-gnu.cmake)
 
 project(MetaModuleHeadless LANGUAGES C CXX)
 
@@ -86,6 +87,7 @@ endif()
 target_link_libraries(headless PRIVATE 
 	metamodule::patch-serial
 	vcv_ports
+    jack
 )
 target_link_libraries(headless PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
 target_link_libraries(headless PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
