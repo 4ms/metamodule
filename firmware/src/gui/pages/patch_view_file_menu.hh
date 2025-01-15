@@ -140,7 +140,6 @@ struct PatchViewFileMenu {
 					notify_queue.put({"Error deleting file", Notification::Priority::Error});
 
 				filesystem_changed = true;
-				gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
 
 				delete_state = DeleteState::Idle;
 
@@ -239,7 +238,6 @@ private:
 		} else {
 			page->play_loader.request_save_patch();
 			page->filesystem_changed = true;
-			page->gui_state.force_refresh_vol.mark(page->patches.get_view_patch_vol());
 		}
 	}
 

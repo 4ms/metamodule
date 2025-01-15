@@ -333,7 +333,7 @@ struct PatchSelectorPage : PageBase {
 					pr_dbg("Load patch from cache\n");
 					view_loaded_patch();
 				} else {
-					pr_dbg("Cannot patch from cache\n");
+					pr_dbg("Cannot load from cache\n");
 					show_spinner();
 					auto result = patchloader.reload_patch_file(selected_patch, [this] {
 						pr_dbg("Loaded from patch file\n");
@@ -420,7 +420,6 @@ private:
 	}
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
-
 		auto page = static_cast<PatchSelectorPage *>(event->user_data);
 
 		page->scroll_to_next_valid();

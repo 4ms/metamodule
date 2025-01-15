@@ -95,8 +95,8 @@ struct SaveDialog {
 
 		if (is_renaming) {
 			if (patch_playloader.is_renaming_idle()) {
-				gui_state.force_refresh_vol.mark(file_vol);
-				gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
+				// gui_state.force_refresh_vol.mark(file_vol);
+				// gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
 				saved = true;
 				is_renaming = false;
 				hide();
@@ -279,7 +279,6 @@ private:
 		strip_yml(patchname);
 
 		if (page->method == Action::Save) {
-			//TODO: have playloader rename the open patch
 			page->patches.get_view_patch()->patch_name = patchname;
 			page->patches.rename_view_patch_file(fullpath, page->file_vol);
 			page->patch_playloader.request_save_patch();
@@ -287,26 +286,22 @@ private:
 			patchname.copy(page->file_name);
 
 			page->saved = true;
-			page->gui_state.force_refresh_vol.mark(page->file_vol);
-			page->gui_state.force_refresh_vol.mark(page->patches.get_view_patch_vol());
 			page->hide();
 
 		} else if (page->method == Action::Rename) {
-			if (page->patches.get_view_patch_loc_hash() == PatchLocHash{fullpath, page->file_vol}) {
-				//send notification of failure
-				page->notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
-			} else {
+			if (page->patches.get_view_patch_loc_hash() != PatchLocHash{fullpath, page->file_vol}) {
 				page->patches.get_view_patch()->patch_name = patchname;
 				page->patch_playloader.request_rename_view_patch({fullpath, page->file_vol});
 				page->is_renaming = true;
+			} else {
+				page->notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
 			}
 
 		} else { //Duplicate
 			if (page->patches.duplicate_view_patch(fullpath, page->file_vol)) {
+				page->patches.get_view_patch()->patch_name = patchname;
 				page->patch_playloader.request_save_patch();
 				page->saved = true;
-				page->gui_state.force_refresh_vol.mark(page->file_vol);
-				page->gui_state.force_refresh_vol.mark(page->patches.get_view_patch_vol());
 				auto patch_loc = PatchLocation{std::string_view{fullpath}, page->file_vol};
 				page->page_list.request_new_page_no_history(
 					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
