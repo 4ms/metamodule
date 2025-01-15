@@ -17,12 +17,12 @@ class PatchFileIO {
 	static constexpr unsigned MaxAssetDirRecursion = 2; // /Brand/components/name.png
 
 public:
-	enum class FileFilter { All, NewerTimestamp };
-	// void factory_clean();
-
-	static bool read_file(std::span<char> &buffer, FileIoC auto &fileio, const std::string_view filename) {
+	// timestamp is an out param
+	static bool
+	read_file(std::span<char> &buffer, FileIoC auto &fileio, const std::string_view filename, uint32_t *timestamp) {
 
 		auto file_size = fileio.get_file_size(filename);
+		*timestamp = fileio.get_file_timestamp(filename);
 		if (file_size == 0) {
 			pr_warn("File '%.*s' does not exist, cannot read\n", (int)filename.size(), filename.data());
 		}

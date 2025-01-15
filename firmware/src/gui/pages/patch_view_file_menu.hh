@@ -174,7 +174,7 @@ struct PatchViewFileMenu {
 
 				auto data = patch_storage.get_patch_data(message.bytes_read);
 
-				if (patches.open_patch(data, patch_loc)) {
+				if (patches.open_patch(data, patch_loc, message.timestamp)) {
 					if (was_playing) {
 						play_loader.request_load_view_patch();
 					}

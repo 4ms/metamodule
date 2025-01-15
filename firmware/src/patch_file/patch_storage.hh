@@ -118,7 +118,7 @@ public:
 			};
 
 			if ((uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
-				auto bytes_read = load_file(message.buffer, message.vol_id, message.filename);
+				auto bytes_read = load_file(message.buffer, message.vol_id, message.filename, &result.timestamp);
 				if (bytes_read) {
 					result.message_type = LoadFileOK;
 					result.bytes_read = bytes_read;
@@ -267,18 +267,18 @@ private:
 		patch_list_changed_wifi_ = true;
 	}
 
-	uint32_t load_file(std::span<char> buffer, Volume vol, std::string_view filename) {
+	uint32_t load_file(std::span<char> buffer, Volume vol, std::string_view filename, uint32_t *timestamp) {
 
 		bool ok = false;
 		switch (vol) {
 			case Volume::NorFlash:
-				ok = PatchFileIO::read_file(buffer, norflash_, filename);
+				ok = PatchFileIO::read_file(buffer, norflash_, filename, timestamp);
 				break;
 			case Volume::SDCard:
-				ok = PatchFileIO::read_file(buffer, sdcard_, filename);
+				ok = PatchFileIO::read_file(buffer, sdcard_, filename, timestamp);
 				break;
 			case Volume::USB:
-				ok = PatchFileIO::read_file(buffer, usbdrive_, filename);
+				ok = PatchFileIO::read_file(buffer, usbdrive_, filename, timestamp);
 				break;
 			default:
 				break;

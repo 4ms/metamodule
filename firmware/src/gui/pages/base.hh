@@ -66,6 +66,7 @@ struct GuiState {
 		}
 	};
 
+	//TODO: get rid of this
 	ForceRefreshVol force_refresh_vol{};
 
 	bool do_write_settings{};

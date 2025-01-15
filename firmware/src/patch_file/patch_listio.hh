@@ -6,6 +6,14 @@
 namespace MetaModule::PatchListIO
 {
 
+inline PatchDir &base_dir(PatchDirList &patch_dir_list, Volume vol, std::string_view filename) {
+	// TODO: extract dir from filename, set tree to that dir
+	if (filename.contains("/"))
+		pr_err("Error: subdirs not supported yet\n");
+
+	return patch_dir_list.volume_root(vol);
+}
+
 inline void add_file(PatchDirList &patch_dir_list,
 					 Volume vol,
 					 std::string_view filename,
@@ -16,14 +24,17 @@ inline void add_file(PatchDirList &patch_dir_list,
 	if (filename.length() == 0)
 		return;
 
-	// TODO: extract dir from filename, set tree to that dir
-	auto &tree = patch_dir_list.volume_root(vol);
+	auto &tree = base_dir(patch_dir_list, vol, filename);
 
 	if (filename.substr(1).contains("/"))
 		pr_err("Warning, adding files to subdir not supported yet\n");
 
 	if (auto found = std::ranges::find(tree.files, filename, &PatchFile::filename); found != tree.files.end()) {
-		pr_dbg("M4: file %s found, sz=%u, ts=%u, name '%s'\n", filename.data(), filesize, timestamp, patchname.data());
+		pr_dbg("M4 add_file: file %s found, sz=%u, ts=%u, name '%s'\n",
+			   filename.data(),
+			   filesize,
+			   timestamp,
+			   patchname.data());
 		found->filesize = filesize;
 		found->timestamp = timestamp;
 		found->patchname = patchname;
@@ -37,7 +48,7 @@ inline bool remove_file(PatchDirList &patch_dir_list, Volume vol, std::string_vi
 	if (filename.length() == 0)
 		return false;
 
-	auto &tree = patch_dir_list.volume_root(vol);
+	auto &tree = base_dir(patch_dir_list, vol, filename);
 	std::erase_if(tree.files, [=](auto const &file) { return file.filename == filename; });
 
 	if (filename.substr(1).contains("/"))
@@ -46,11 +57,10 @@ inline bool remove_file(PatchDirList &patch_dir_list, Volume vol, std::string_vi
 }
 
 inline PatchFile *find_fileinfo(PatchDirList &patch_dir_list, Volume vol, std::string_view filename) {
-	// TODO: extract dir from filename, set tree to that dir
-	auto &tree = patch_dir_list.volume_root(vol);
+	auto &tree = base_dir(patch_dir_list, vol, filename);
 
 	if (auto found = std::ranges::find(tree.files, filename, &PatchFile::filename); found != tree.files.end()) {
-		pr_dbg("M4: file %s found, sz=%u, ts=%u\n", filename.data(), found->filesize, found->timestamp);
+		pr_dbg("M4 find_fileinfo: file %s found, sz=%u, ts=%u\n", filename.data(), found->filesize, found->timestamp);
 		return &*found;
 	} else {
 		return nullptr;

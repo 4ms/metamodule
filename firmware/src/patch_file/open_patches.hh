@@ -19,6 +19,8 @@ struct OpenPatch {
 	PatchData patch{};
 	unsigned modification_count = 0;
 	bool force_reload = false;
+	uint32_t timestamp{};
+	uint32_t filesize{};
 };
 
 struct OpenPatchList {

@@ -19,6 +19,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
+#include "patch_file/reload_patch.hh"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 
@@ -81,12 +82,22 @@ struct PatchViewPage : PageBase {
 		}
 
 		bool needs_refresh = false;
+		//TODO: if patch was missing modules, force redraw each time we load (in case plugin was eventually loaded)
+		// Also force re-load it into patch player when we press play/unpause
 		if (gui_state.force_redraw_patch)
 			needs_refresh = true;
 		if (patch_revision != patches.get_view_patch_modification_count())
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
+
+		// if (args.patch_loc) {
+		// 	auto timestamp = 0;
+		// 	auto filesize = 0;
+		// 	if (check_file_changed(patch_storage, *args.patch_loc, timestamp, filesize)) {
+		// 		reload_patch_file(patch_storage, *args.patch_loc);
+		// 	}
+		// }
 
 		if (!needs_refresh) {
 			is_ready = true;
