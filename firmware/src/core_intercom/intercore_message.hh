@@ -69,6 +69,10 @@ struct IntercoreStorageMessage {
 		WifiIPSuccess,
 		WifiIPFailed,
 
+		RequestFileInfo,
+		FileInfoFailed,
+		FileInfoSuccess,
+
 		NumRequests,
 	};
 
@@ -83,12 +87,10 @@ struct IntercoreStorageMessage {
 	StaticString<255> filename;
 	StaticString<255> dest_filename;
 	enum class VolEvent { None, Mounted, Unmounted };
-	VolEvent USBEvent;
-	VolEvent SDEvent;
-	VolEvent NorFlashEvent;
 
 	uint32_t address;
 	uint32_t length;
+	uint32_t timestamp;
 	std::optional<uint32_t> uncompressed_size;
 	StaticString<32> checksum;
 	uint32_t *bytes_processed;

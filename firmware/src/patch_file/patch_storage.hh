@@ -95,53 +95,11 @@ public:
 
 		if (message.message_type == RequestRefreshPatchList) {
 
-			using VolEvent = IntercoreStorageMessage::VolEvent;
-
-			IntercoreStorageMessage result{
-				.message_type = PatchListUnchanged,
-				.USBEvent = VolEvent::None,
-				.SDEvent = VolEvent::None,
-				.NorFlashEvent = VolEvent::None,
-			};
+			IntercoreStorageMessage result{.message_type = PatchListUnchanged};
 
 			if (patch_list_changed_) {
-
-				// pr_dbg("M4: Copying Patch dir list %p => %p\n", &patch_dir_list_, message.patch_dir_list);
-
 				// Make a copy
-				// *(message.patch_dir_list) = patch_dir_list_;
-				message.patch_dir_list->clear_patches(Volume::USB);
-				message.patch_dir_list->clear_patches(Volume::SDCard);
-				message.patch_dir_list->clear_patches(Volume::NorFlash);
-
-				for (auto i = 0u; auto m : patch_dir_list_.mounted)
-					message.patch_dir_list->mounted[i++] = m;
-
-				for (auto i = 0u; auto const &volroot : patch_dir_list_.vol_root) {
-					auto &dstroot = message.patch_dir_list->vol_root[i++];
-					dstroot.name = volroot.name;
-					// pr_dbg("Vol: %s\n", dstroot.name.c_str());
-
-					for (auto const &file : volroot.files) {
-						dstroot.files.emplace_back(
-							file.filename, file.filesize, file.timestamp, file.patchname, file.link_vol);
-						// pr_dbg("%s\n", dstroot.files.back().filename.c_str());
-					}
-
-					for (auto &dir : volroot.dirs) {
-						auto &dstdir = dstroot.dirs.emplace_back();
-						dstdir.name = dir.name;
-						// pr_dbg("Dir: %s\n", dstdir.name.c_str());
-
-						for (auto const &file : dir.files) {
-							dstdir.files.emplace_back(
-								file.filename, file.filesize, file.timestamp, file.patchname, file.link_vol);
-							// pr_dbg("  %s\n", dstdir.files.back().filename.c_str());
-						}
-					}
-				}
-
-				// pr_dbg("M4: Done\n");
+				PatchListIO::copy_patchlist(message.patch_dir_list, patch_dir_list_);
 
 				result.message_type = patch_list_changed_ ? PatchListChanged : PatchListUnchanged;
 				patch_list_changed_ = false;
@@ -232,6 +190,18 @@ public:
 			return result;
 		}
 
+		if (message.message_type == RequestFileInfo) {
+			IntercoreStorageMessage result{.message_type = FileInfoFailed};
+
+			if (auto *patchfile = PatchListIO::find_fileinfo(patch_dir_list_, message.vol_id, message.filename)) {
+				result.timestamp = patchfile->timestamp;
+				result.length = patchfile->filesize;
+				result.message_type = FileInfoSuccess;
+			}
+
+			return result;
+		}
+
 		return std::nullopt;
 	}
 
@@ -250,47 +220,26 @@ public:
 		sd_changes_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
 		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
 
-		bool sd_mounted_changed = sd_changes_.take_change();
-		if (sd_mounted_changed) {
-			patch_dir_list_.clear_patches(Volume::SDCard);
+		auto check_disk = [this](auto &changes, auto &diskio, Volume vol) {
+			bool mounted_changed = changes.take_change();
+			if (mounted_changed) {
+				patch_dir_list_.clear_patches(vol);
 
-			if (sdcard_.is_mounted()) {
-				PatchFileIO::add_directory(sdcard_, patch_dir_list_.volume_root(Volume::SDCard));
-				patch_dir_list_.mark_mounted(Volume::SDCard, true);
-			} else {
-				patch_dir_list_.mark_mounted(Volume::SDCard, false);
+				if (diskio.is_mounted()) {
+					PatchFileIO::add_directory(diskio, patch_dir_list_.volume_root(vol));
+					patch_dir_list_.mark_mounted(vol, true);
+				} else {
+					patch_dir_list_.mark_mounted(vol, false);
+				}
+
+				patch_list_changed_ = true;
+				patch_list_changed_wifi_ = true;
 			}
+		};
 
-			patch_list_changed_ = true;
-			patch_list_changed_wifi_ = true;
-		}
-
-		bool usb_mounted_changed = usb_changes_.take_change();
-		if (usb_mounted_changed) {
-			patch_dir_list_.clear_patches(Volume::USB);
-
-			if (usbdrive_.is_mounted()) {
-				PatchFileIO::add_directory(usbdrive_, patch_dir_list_.volume_root(Volume::USB));
-				patch_dir_list_.mark_mounted(Volume::USB, true);
-			} else {
-				patch_dir_list_.mark_mounted(Volume::USB, false);
-			}
-			patch_list_changed_ = true;
-			patch_list_changed_wifi_ = true;
-		}
-
-		bool norflash_mounted_changed = norflash_changes_.take_change();
-		if (norflash_mounted_changed) {
-			patch_dir_list_.mark_mounted(Volume::NorFlash, true);
-			patch_dir_list_.clear_patches(Volume::NorFlash);
-
-			PatchFileIO::add_directory(norflash_, patch_dir_list_.volume_root(Volume::NorFlash));
-			// if (norflash_changed)
-			// 	result.NorFlashEvent = VolEvent::Mounted;
-
-			patch_list_changed_ = true;
-			patch_list_changed_wifi_ = true;
-		}
+		check_disk(sd_changes_, sdcard_, Volume::SDCard);
+		check_disk(usb_changes_, usbdrive_, Volume::USB);
+		check_disk(norflash_changes_, norflash_, Volume::NorFlash);
 	}
 
 private:

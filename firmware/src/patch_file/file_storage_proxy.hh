@@ -160,17 +160,17 @@ public:
 	}
 
 	bool request_reset_factory_patches() {
-		IntercoreStorageMessage message{
-			.message_type = RequestFactoryResetPatches,
-		};
+		IntercoreStorageMessage message{.message_type = RequestFactoryResetPatches};
 		return comm_.send_message(message);
 	}
 
 	bool request_plugin_file_list(PluginFileList *plugin_file_list) {
-		IntercoreStorageMessage message{
-			.message_type = RequestPluginFileList,
-			.plugin_file_list = plugin_file_list,
-		};
+		IntercoreStorageMessage message{.message_type = RequestPluginFileList, .plugin_file_list = plugin_file_list};
+		return comm_.send_message(message);
+	}
+
+	bool request_file_info(Volume vol, std::string_view path) {
+		IntercoreStorageMessage message{.message_type = RequestFileInfo, .vol_id = vol, .filename = path};
 		return comm_.send_message(message);
 	}
 
