@@ -131,9 +131,7 @@ void AudioStream::step() {
 }
 
 void AudioStream::start() {
-	codec_.start();
-	if (ext_audio_connected)
-		codec_ext_.start();
+	update_audio_settings();
 }
 
 void AudioStream::handle_overruns() {
@@ -360,7 +358,9 @@ void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsig
 void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 	for (unsigned i = 0; auto &plug_detect : plug_detects) {
 		bool sense = jack_is_patched(jack_senses, i);
+
 		plug_detect.update(sense);
+
 		if (plug_detect.changed()) {
 			if (i < PanelDef::NumUserFacingInJacks)
 				player.set_input_jack_patched_status(i, sense);
