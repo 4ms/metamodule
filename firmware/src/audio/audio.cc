@@ -189,6 +189,8 @@ void AudioStream::handle_patch_just_loaded() {
 	// and will propagate to the patch player
 	for (auto &p : plug_detects)
 		p.reset();
+	for (auto &p : ext_plug_detects)
+		p.reset();
 
 	midi_last_connected = false;
 }
@@ -366,6 +368,23 @@ void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 				player.set_input_jack_patched_status(i, sense);
 			else
 				player.set_output_jack_patched_status(i - PanelDef::NumUserFacingInJacks, sense);
+		}
+		i++;
+	}
+
+	for (unsigned i = 0; auto &plug_detect : ext_plug_detects) {
+		bool sense = AudioExpander::jack_is_patched(jack_senses, i);
+
+		plug_detect.update(sense);
+
+		if (plug_detect.changed()) {
+			if (i < AudioExpander::NumInJacks) {
+				auto panel_in_jack = AudioExpander::exp_to_panel_input(i);
+				player.set_input_jack_patched_status(panel_in_jack, sense);
+			} else {
+				auto panel_out_jack = AudioExpander::exp_to_panel_output(i - AudioExpander::NumInJacks);
+				player.set_output_jack_patched_status(panel_out_jack, sense);
+			}
 		}
 		i++;
 	}
