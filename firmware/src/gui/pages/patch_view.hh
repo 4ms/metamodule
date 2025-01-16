@@ -596,9 +596,17 @@ private:
 		if (!page->is_patch_loaded) {
 			page->patch_playloader.request_load_view_patch();
 			page->save_last_opened_patch_in_settings();
+			page->gui_state.force_reload_patch = false;
+
 		} else {
 			if (page->patch_playloader.is_audio_muted()) {
-				page->patch_playloader.start_audio();
+				if (page->gui_state.force_reload_patch) {
+					pr_dbg("Patch force reloaded\n");
+					page->patch_playloader.request_load_view_patch();
+					page->gui_state.force_reload_patch = false;
+				} else {
+					page->patch_playloader.start_audio();
+				}
 			} else {
 				page->patch_playloader.stop_audio();
 			}
