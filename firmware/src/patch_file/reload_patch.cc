@@ -63,6 +63,7 @@ Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()>
 	}
 
 	while (!patch_storage.request_load_patch(loc)) {
+		wait_func();
 	}
 
 	uint32_t timeout = get_time() + 3000;
@@ -90,6 +91,8 @@ Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()>
 			} else
 				return {false, "Failed to load patch file"};
 		}
+
+		wait_func();
 	}
 
 	pr_err("Timed out trying to load patch from disk\n");
