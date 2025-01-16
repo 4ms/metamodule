@@ -179,6 +179,13 @@ public:
 		return view_patch_->modification_count;
 	}
 
+	uint32_t get_modification_count(PatchLocation const &patch_loc) {
+		if (auto patch = find_open_patch(patch_loc))
+			return patch->modification_count;
+		else
+			return 0;
+	}
+
 	void new_patch() {
 		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
 		std::string filename = name + ".yml";

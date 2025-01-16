@@ -71,6 +71,7 @@ Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()>
 
 		auto message = patch_storage.get_message();
 
+		// Successfully loaded
 		if (message.message_type == FileStorageProxy::LoadFileOK) {
 
 			auto data = patch_storage.get_patch_data(message.bytes_read);
@@ -84,6 +85,7 @@ Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()>
 			}
 
 		} else if (message.message_type == FileStorageProxy::LoadFileFailed) {
+			// Filesystem error (disk ejected, etc)
 			// If it's the playing patch, try loading it from memory
 			if (patches.get_playing_patch_loc_hash() == PatchLocHash{loc}) {
 				patches.view_playing_patch();
@@ -99,6 +101,7 @@ Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()>
 	return {false, "Timed ou requesting to load patch"};
 }
 
+// Returns true if timestamp/filesize on disk differs from the open patch (or there is no open patch)
 bool PatchLoader::has_changed_on_disk(PatchLocation const &loc) {
 	if (auto openpatch = patches.find_open_patch(loc)) {
 		if (!check_file_changed(loc, openpatch->timestamp, openpatch->filesize)) {

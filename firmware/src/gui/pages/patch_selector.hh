@@ -331,6 +331,15 @@ struct PatchSelectorPage : PageBase {
 			case State::LoadPatchFile: {
 				if (!patchloader.has_changed_on_disk(selected_patch)) {
 					view_loaded_patch();
+
+				} else if (patches.get_modification_count(selected_patch) > 0) {
+					// Has changed on disk AND there are unsaved changes
+					notify_queue.put({.message = "Patch has been modified on disk, but has unsaved changes. Please "
+												 "save, revert, or rename the patch",
+									  .priority = Notification::Priority::Info,
+									  .duration_ms = 3000});
+					view_loaded_patch();
+
 				} else {
 					show_spinner();
 					auto result = patchloader.reload_patch_file(selected_patch, [this] {

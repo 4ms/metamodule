@@ -95,19 +95,27 @@ struct PatchViewPage : PageBase {
 
 		if (args.patch_loc) {
 			if (patchloader.has_changed_on_disk(*args.patch_loc)) {
-				pr_dbg("PatchView: File changed on disk, reloading...\n");
 
-				auto result = patchloader.reload_patch_file(*args.patch_loc, [] {});
-
-				if (result.success) {
-					needs_refresh = true;
-					gui_state.force_reload_patch = true;
-					notify_queue.put({.message = "Patch has changed on disk, pause and then play to reload",
-									  .priority = {},
-									  .duration_ms = 1000});
-
+				// Check if it's changed on disk AND there are unsaved changes
+				if (patches.get_view_patch_modification_count() > 0) {
+					notify_queue.put({.message = "Patch has been modified on disk, but has unsaved changes. Please "
+												 "save, revert, or rename the patch",
+									  .priority = Notification::Priority::Info,
+									  .duration_ms = 3000});
 				} else {
-					notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
+					pr_dbg("PatchView: File changed on disk, reloading...\n");
+
+					auto result = patchloader.reload_patch_file(*args.patch_loc, [] {});
+
+					if (result.success) {
+						needs_refresh = true;
+						if (is_patch_loaded && !patch_playloader.is_audio_muted()) {
+							gui_state.force_reload_patch = true;
+						}
+
+					} else {
+						notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
+					}
 				}
 			}
 		}
