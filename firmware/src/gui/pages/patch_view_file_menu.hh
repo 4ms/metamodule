@@ -8,8 +8,6 @@
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/pages/save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
-#include "lvgl.h"
 #include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
@@ -30,7 +28,7 @@ struct PatchViewFileMenu {
 		, notify_queue{notify_queue}
 		, page_list{page_list}
 		, gui_state{gui_state}
-		, save_dialog{patch_storage, patches, play_loader, subdir_panel, notify_queue, page_list, gui_state}
+		, save_dialog{patch_storage, patches, play_loader, subdir_panel, notify_queue, page_list}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);

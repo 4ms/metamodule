@@ -110,8 +110,6 @@ struct PatchViewPage : PageBase {
 					notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
 				}
 			}
-		} else {
-			pr_warn("No args.patch_loc\n");
 		}
 
 		if (!needs_refresh) {

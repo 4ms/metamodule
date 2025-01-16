@@ -1,12 +1,9 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
-#include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
-#include "lvgl.h"
 #include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
@@ -19,15 +16,13 @@ struct SaveDialog {
 			   PatchPlayLoader &play_loader,
 			   PatchSelectorSubdirPanel &subdir_panel,
 			   NotificationQueue &notify_queue,
-			   PageList &page_list,
-			   GuiState &gui_state)
+			   PageList &page_list)
 		: patch_storage{patch_storage}
 		, patches{patches}
 		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
 		, notify_queue{notify_queue}
 		, page_list{page_list}
-		, gui_state{gui_state}
 		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
@@ -95,8 +90,6 @@ struct SaveDialog {
 
 		if (is_renaming) {
 			if (patch_playloader.is_renaming_idle()) {
-				// gui_state.force_refresh_vol.mark(file_vol);
-				// gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
 				saved = true;
 				is_renaming = false;
 				hide();
@@ -338,7 +331,6 @@ private:
 	PatchSelectorSubdirPanel &subdir_panel;
 	NotificationQueue &notify_queue;
 	PageList &page_list;
-	GuiState &gui_state;
 
 	std::vector<EntryInfo> subdir_panel_patches;
 
