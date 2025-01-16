@@ -5,10 +5,10 @@ the audio output to a file.
 
 **Usage:**
 ```
-cd headless
-cmake -B build
+cd simulator
+cmake --fresh --preset headless 
 cmake --build build
-build/headless  -p../patches/default/Djembe4Verb.yml
+build/simulator  -p../patches/default/Djembe4Verb.yml
 ```
 The `-p` option specifies the patch file to load.
 

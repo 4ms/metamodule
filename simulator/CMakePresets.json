@@ -18,6 +18,35 @@
             }
         },
         {
+            "name": "headless",
+            "displayName": "Headless processing",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build",
+				"HEADLESS": { "type": "BOOL", "value": "ON" }
+            }
+        },
+        {
+            "name": "headless-min",
+            "displayName": "Headless, minimum brands (only 4ms)",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build",
+				"HEADLESS": { "type": "BOOL", "value": "ON" },
+				"OMIT_BRAND_AudibleInstruments": { "type": "BOOL", "value": "ON" },
+				"OMIT_BRAND_Befaco":             { "type": "BOOL", "value": "ON" }, 
+				"OMIT_BRAND_hetrickcv":          { "type": "BOOL", "value": "ON" },
+				"OMIT_BRAND_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
+				"OMIT_BRAND_eightfold":          { "type": "BOOL", "value": "ON" },
+				"OMIT_BRAND_Valley":             { "type": "BOOL", "value": "ON" },
+				"OMIT_BRAND_RackCore":           { "type": "BOOL", "value": "ON" }
+            }
+        },
+        {
             "name": "gcc-warn",
             "displayName": "GCC",
             "description": "Warnings-enabled build options for GCC",

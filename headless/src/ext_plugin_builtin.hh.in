@@ -1,3 +1,0 @@
-inline void load_ext_builtin_plugins(auto &internal_plugins) {
-${EXT_PLUGIN_INIT_CALLS}
-}

@@ -4,7 +4,7 @@
 #include "fat_file_io.hh"
 #include "fs/volumes.hh"
 #include "fw_update/update_path.hh"
-#include "patch_file/host_file_io.hh"
+#include "host_file_io.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_location.hh"

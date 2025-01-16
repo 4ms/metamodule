@@ -39,7 +39,7 @@ void log(Level level, const char *filename, int line, const char *func, const ch
 
 	va_list args;
 	va_start(args, format);
-	printf("[%lld %s %s:%d %s] ", std::time(nullptr), levelLabels[level], filename, line, func);
+	printf("[%lld %s %s:%d %s] ", (long long)std::time(nullptr), levelLabels[level], filename, line, func);
 	vprintf(format, args);
 	printf("\n");
 	va_end(args);
