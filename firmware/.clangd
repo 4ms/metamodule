@@ -23,8 +23,8 @@ CompileFlags:
         "-DSIMULATOR",
 	]
 	Add: [
-		"--target=arm-none-eabi", 
-        "-std=gnu++2b",
+		# "--target=arm-none-eabi", 
+        "-std=c++20",
         "-I../src/console", #Needed because clangd16 infers compilation of some headers with a file from a different cmake target
         "-I../src/medium",
         "-I../lib/lvgl/lvgl",
