@@ -128,20 +128,20 @@ public:
 		view_patch_ = playing_patch_;
 	}
 
-	std::string_view get_view_patch_filename() {
+	PatchLocation get_view_patch_loc() {
 		if (view_patch_)
-			return view_patch_->loc.filename;
+			return view_patch_->loc;
 		else {
-			return "";
+			return {"", Volume::MaxVolumes};
 		}
 	}
 
+	std::string_view get_view_patch_filename() {
+		return get_view_patch_loc().filename;
+	}
+
 	Volume get_view_patch_vol() {
-		if (view_patch_)
-			return view_patch_->loc.vol;
-		else {
-			return Volume::MaxVolumes;
-		}
+		return get_view_patch_loc().vol;
 	}
 
 	PatchLocHash get_playing_patch_loc_hash() {

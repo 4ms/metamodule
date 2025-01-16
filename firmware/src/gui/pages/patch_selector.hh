@@ -329,14 +329,11 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::LoadPatchFile: {
-				if (patchloader.try_reload_from_cache(selected_patch)) {
-					pr_dbg("Load patch from cache\n");
+				if (!patchloader.has_changed_on_disk(selected_patch)) {
 					view_loaded_patch();
 				} else {
-					pr_dbg("Cannot load from cache\n");
 					show_spinner();
 					auto result = patchloader.reload_patch_file(selected_patch, [this] {
-						pr_dbg("Loaded from patch file\n");
 						update_spinner();
 						lv_timer_handler();
 					});
@@ -385,9 +382,6 @@ struct PatchSelectorPage : PageBase {
 
 private:
 	void view_loaded_patch() {
-		auto patch = patches.get_view_patch();
-		pr_trace("View view_loaded_patch: %.31s\n", patch->patch_name.data());
-
 		args.patch_loc_hash = PatchLocHash{selected_patch};
 		gui_state.force_redraw_patch = true;
 		page_list.request_new_page(PageId::PatchView, args);

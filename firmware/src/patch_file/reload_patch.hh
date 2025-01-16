@@ -19,12 +19,8 @@ public:
 	// and compares it to our own
 	bool check_file_changed(PatchLocation const &patch_loc, uint32_t timestamp, uint32_t filesize);
 
-	// blocking
 	Result reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func);
 
-	// non-blocking
-	// enum class ReloadResult { Trying, Reloaded, Failed };
-	// ReloadResult try_reload_patch_file(PatchLocation const &loc);
-	bool try_reload_from_cache(PatchLocation const &loc);
+	bool has_changed_on_disk(PatchLocation const &loc);
 };
 } // namespace MetaModule

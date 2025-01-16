@@ -39,7 +39,6 @@ bool PatchLoader::check_file_changed(PatchLocation const &patch_loc, uint32_t ti
 		auto msg = patch_storage.get_message();
 
 		if (msg.message_type == FileStorageProxy::FileInfoSuccess) {
-			pr_dbg("t:%u vs %u, sz:%u vs %u\n", msg.timestamp, timestamp, msg.length, filesize);
 			if (msg.timestamp != timestamp || msg.length != filesize)
 				return true;
 			else
@@ -97,19 +96,16 @@ Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()>
 	return {false, "Timed ou requesting to load patch"};
 }
 
-// non-blocking
-bool PatchLoader::try_reload_from_cache(PatchLocation const &loc) {
+bool PatchLoader::has_changed_on_disk(PatchLocation const &loc) {
 	if (auto openpatch = patches.find_open_patch(loc)) {
 		if (!check_file_changed(loc, openpatch->timestamp, openpatch->filesize)) {
 			patches.start_viewing(openpatch);
-			pr_dbg("Patch %s is open and timestamp/filesize match\n", loc.filename.c_str());
-			return true;
+			// pr_dbg("Patch %s is open and timestamp/filesize match\n", loc.filename.c_str());
+			return false;
 		}
 	}
 
-	// patch_storage.request_load_patch(loc);
-
-	return false;
+	return true;
 }
 
 } // namespace MetaModule
