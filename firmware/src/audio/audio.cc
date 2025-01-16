@@ -131,9 +131,7 @@ void AudioStream::step() {
 }
 
 void AudioStream::start() {
-	codec_.start();
-	if (ext_audio_connected)
-		codec_ext_.start();
+	update_audio_settings();
 }
 
 void AudioStream::handle_overruns() {
@@ -190,6 +188,8 @@ void AudioStream::handle_patch_just_loaded() {
 	// this ensures any patched jacks will be detected as a new event
 	// and will propagate to the patch player
 	for (auto &p : plug_detects)
+		p.reset();
+	for (auto &p : ext_plug_detects)
 		p.reset();
 
 	midi_last_connected = false;
@@ -360,12 +360,31 @@ void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsig
 void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 	for (unsigned i = 0; auto &plug_detect : plug_detects) {
 		bool sense = jack_is_patched(jack_senses, i);
+
 		plug_detect.update(sense);
+
 		if (plug_detect.changed()) {
 			if (i < PanelDef::NumUserFacingInJacks)
 				player.set_input_jack_patched_status(i, sense);
 			else
 				player.set_output_jack_patched_status(i - PanelDef::NumUserFacingInJacks, sense);
+		}
+		i++;
+	}
+
+	for (unsigned i = 0; auto &plug_detect : ext_plug_detects) {
+		bool sense = AudioExpander::jack_is_patched(jack_senses, i);
+
+		plug_detect.update(sense);
+
+		if (plug_detect.changed()) {
+			if (i < AudioExpander::NumInJacks) {
+				auto panel_in_jack = AudioExpander::exp_to_panel_input(i);
+				player.set_input_jack_patched_status(panel_in_jack, sense);
+			} else {
+				auto panel_out_jack = AudioExpander::exp_to_panel_output(i - AudioExpander::NumInJacks);
+				player.set_output_jack_patched_status(panel_out_jack, sense);
+			}
 		}
 		i++;
 	}

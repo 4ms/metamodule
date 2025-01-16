@@ -72,6 +72,7 @@ private:
 	CalData ext_cal_stash{};
 
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
+	EdgeStateDetector ext_plug_detects[AudioExpander::NumJacks];
 
 	PatchPlayer &player;
 	mdrivlib::CycleCounter load_measure;
