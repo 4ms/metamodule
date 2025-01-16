@@ -45,11 +45,13 @@ struct SimulatorFileStorageComm {
 			case RequestLoadFile: {
 				requested_view_patch_loc_ = PatchLocation{msg.filename, msg.vol_id};
 				raw_patch_data_ = msg.buffer;
-				auto bytes_read = load_patch_file(requested_view_patch_loc_);
+				uint32_t timestamp;
+				auto bytes_read = load_patch_file(requested_view_patch_loc_, &timestamp);
 				reply = {.message_type = bytes_read ? LoadFileOK : LoadFileFailed,
 						 .bytes_read = bytes_read,
 						 .vol_id = requested_view_patch_loc_.vol,
-						 .filename = requested_view_patch_loc_.filename};
+						 .filename = requested_view_patch_loc_.filename,
+						 .timestamp = timestamp};
 			} break;
 
 			case RequestRefreshPatchList: {
@@ -152,19 +154,19 @@ struct SimulatorFileStorageComm {
 	}
 
 private:
-	uint32_t load_patch_file(PatchLocation const &loc) {
+	uint32_t load_patch_file(PatchLocation const &loc, uint32_t *timestamp) {
 
 		bool ok = false;
 
 		if (loc.vol == Volume::SDCard) {
 			std::cout << "Trying to load " << loc.filename.c_str() << " from SD Card\n";
-			ok = PatchFileIO::read_file(raw_patch_data_, storage.sd_hostfs, loc.filename);
+			ok = PatchFileIO::read_file(raw_patch_data_, storage.sd_hostfs, loc.filename, timestamp);
 		}
 
 		else if (loc.vol == Volume::NorFlash)
 		{
 			std::cout << "Trying to load " << loc.filename.c_str() << " from NorFlash\n";
-			ok = PatchFileIO::read_file(raw_patch_data_, storage.flash_hostfs, loc.filename);
+			ok = PatchFileIO::read_file(raw_patch_data_, storage.flash_hostfs, loc.filename, timestamp);
 		}
 
 		//TODO: add USB when we have a usb fileio

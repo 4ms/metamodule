@@ -111,6 +111,7 @@ else()
 		${FWDIR}/src/fw_update/updater_proxy.cc
 		${FWDIR}/src/patch_play/modules_helpers.cc
 		${FWDIR}/src/params/expanders.cc
+        ${FWDIR}/src/patch_file/reload_patch.cc
 
 		#Fatfs:
 		stubs/fattime.cc
