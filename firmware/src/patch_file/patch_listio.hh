@@ -6,12 +6,28 @@
 namespace MetaModule::PatchListIO
 {
 
-inline PatchDir &base_dir(PatchDirList &patch_dir_list, Volume vol, std::string_view filename) {
-	// TODO: extract dir from filename, set tree to that dir
-	if (filename.contains("/"))
-		pr_err("Error: subdirs not supported yet\n");
+inline PatchDir &base_dir(PatchDirList &patch_dir_list, Volume vol, std::string_view path) {
+	auto *root = &patch_dir_list.volume_root(vol);
 
-	return patch_dir_list.volume_root(vol);
+	// trim leading slash
+	if (path[0] == '/')
+		path = path.substr(1);
+
+	// extract dir name if path contains a slash
+	if (auto slashpos = path.find_last_of('/'); slashpos != path.npos) {
+		path = path.substr(0, slashpos);
+
+		if (auto slashpos = path.find_last_of('/'); slashpos != path.npos) {
+			pr_err("Error: patch files in nested subdirs are not supported\n");
+		}
+
+		auto found = std::ranges::find(root->dirs, path, &PatchDir::name);
+		if (found != root->dirs.end()) {
+			root = &*found;
+		}
+	}
+
+	return *root;
 }
 
 inline void add_file(PatchDirList &patch_dir_list,
