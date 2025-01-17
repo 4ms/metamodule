@@ -1,8 +1,8 @@
 #pragma once
 #include "gui/elements/context.hh"
-#include "gui/pages/view_settings.hh"
 #include "lvgl.h"
 #include "src/misc/lv_color.h"
+#include "user_settings/view_settings.hh"
 #include "util/overloaded.hh"
 
 namespace MetaModule

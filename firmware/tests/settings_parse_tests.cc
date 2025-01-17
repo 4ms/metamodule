@@ -1,7 +1,7 @@
 #include "doctest.h"
-#include "gui/pages/view_settings.hh"
 #include "user_settings/settings_parse.hh"
 #include "user_settings/settings_serialize.hh"
+#include "user_settings/view_settings.hh"
 #include <string>
 
 TEST_CASE("Parse settings file") {
