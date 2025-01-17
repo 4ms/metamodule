@@ -17,6 +17,7 @@ struct UserSettings {
 	std::string last_patch_opened{};
 	Volume last_patch_vol{Volume::NorFlash};
 	ScreensaverSettings screensaver{};
+	FilesystemSettings filesystem{};
 };
 
 } // namespace MetaModule
