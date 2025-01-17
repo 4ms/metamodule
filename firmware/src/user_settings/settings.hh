@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/audio_settings.hh"
 #include "fs/volumes.hh"
+#include "user_settings/fs_settings.hh"
 #include "user_settings/plugin_autoload_settings.hh"
 #include "user_settings/screensaver_settings.hh"
 #include "user_settings/view_settings.hh"
