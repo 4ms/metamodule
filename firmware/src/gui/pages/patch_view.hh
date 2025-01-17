@@ -86,39 +86,37 @@ struct PatchViewPage : PageBase {
 
 		if (gui_state.force_redraw_patch)
 			needs_refresh = true;
-		if (gui_state.force_reload_patch)
-			needs_refresh = true;
 		if (patch_revision != patches.get_view_patch_modification_count())
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
 
-		if (args.patch_loc) {
-			if (patchloader.has_changed_on_disk(*args.patch_loc)) {
+		// if (args.patch_loc) {
+		// 	if (patchloader.has_changed_on_disk(*args.patch_loc)) {
 
-				// Check if it's changed on disk AND there are unsaved changes
-				if (patches.get_view_patch_modification_count() > 0) {
-					notify_queue.put({.message = "Patch has been modified on disk, but has unsaved changes. Please "
-												 "save, revert, or rename the patch",
-									  .priority = Notification::Priority::Info,
-									  .duration_ms = 3000});
-				} else {
-					pr_dbg("PatchView: File changed on disk, reloading...\n");
+		// 		// Check if it's changed on disk AND there are unsaved changes
+		// 		if (patches.get_view_patch_modification_count() > 0) {
+		// 			notify_queue.put({.message = "Patch has been modified on disk, but has unsaved changes. Please "
+		// 										 "save, revert, or rename the patch",
+		// 							  .priority = Notification::Priority::Info,
+		// 							  .duration_ms = 3000});
+		// 		} else {
+		// 			pr_dbg("PatchView: File changed on disk, reloading...\n");
 
-					auto result = patchloader.reload_patch_file(*args.patch_loc, [] {});
+		// 			auto result = patchloader.reload_patch_file(*args.patch_loc, [] {});
 
-					if (result.success) {
-						needs_refresh = true;
-						if (is_patch_loaded && !patch_playloader.is_audio_muted()) {
-							gui_state.force_reload_patch = true;
-						}
+		// 			if (result.success) {
+		// 				needs_refresh = true;
+		// 				if (is_patch_loaded && !patch_playloader.is_audio_muted()) {
+		// 					gui_state.force_reload_patch = true;
+		// 				}
 
-					} else {
-						notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
-					}
-				}
-			}
-		}
+		// 			} else {
+		// 				notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 		if (!needs_refresh) {
 			is_ready = true;
@@ -152,11 +150,20 @@ struct PatchViewPage : PageBase {
 
 		patch_revision = patches.get_view_patch_modification_count();
 
+		redraw_patch();
+	}
+
+	void redraw_patch() {
 		clear();
 
 		lv_hide(modules_cont);
 
 		patch = patches.get_view_patch();
+
+		if (!patch) {
+			pr_err("view patch is null\n");
+			return;
+		}
 
 		if (patch->patch_name.length() == 0)
 			return;
@@ -338,7 +345,7 @@ struct PatchViewPage : PageBase {
 		if (is_patch_loaded && !patch_playloader.is_audio_muted()) {
 			update_changed_params();
 
-			if (gui_state.force_reload_patch) {
+			if (gui_state.playing_patch_needs_manual_reload) {
 				auto flash = get_time() % 1000 < 500 ? 2 : 0;
 				lv_obj_set_style_border_color(ui_PlayButton, lv_color_hex(0xAA4400), LV_PART_MAIN);
 				lv_obj_set_style_border_opa(ui_PlayButton, LV_OPA_100, LV_PART_MAIN);
@@ -611,14 +618,14 @@ private:
 		if (!page->is_patch_loaded) {
 			page->patch_playloader.request_load_view_patch();
 			page->save_last_opened_patch_in_settings();
-			page->gui_state.force_reload_patch = false;
+			page->gui_state.playing_patch_needs_manual_reload = false;
 
 		} else {
 			if (page->patch_playloader.is_audio_muted()) {
-				if (page->gui_state.force_reload_patch) {
+				if (page->gui_state.playing_patch_needs_manual_reload) {
 					pr_dbg("Patch force reloaded\n");
 					page->patch_playloader.request_load_view_patch();
-					page->gui_state.force_reload_patch = false;
+					page->gui_state.playing_patch_needs_manual_reload = false;
 				} else {
 					page->patch_playloader.start_audio();
 				}

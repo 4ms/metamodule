@@ -190,13 +190,11 @@ public:
 	}
 
 	static ModuleTypeSlug extract_patch_name(std::string_view header) {
-		const size_t HEADER_SIZE = header.size();
-
 		std::string_view name_tag{"patch_name"};
 
 		auto startpos = header.find(name_tag);
 		if (startpos == header.npos) {
-			pr_trace("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
+			pr_trace("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), header.size());
 			return "";
 		}
 
@@ -210,7 +208,7 @@ public:
 		if (endpos == header.npos) {
 			pr_trace("File does not contain a quote or newline after '%s' in the first %d chars, ignoring\n",
 					 name_tag.data(),
-					 HEADER_SIZE);
+					 header.size());
 			return "";
 		}
 		header.remove_suffix(header.size() - endpos);

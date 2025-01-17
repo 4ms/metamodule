@@ -121,7 +121,7 @@ struct PluginTab : SystemMenuTab {
 				lv_obj_del_async(load_in_progress_obj);
 
 				load_in_progress_obj = nullptr;
-				gui_state.force_reload_patch = true;
+				gui_state.playing_patch_needs_manual_reload = true;
 			}
 		}
 
@@ -129,7 +129,6 @@ struct PluginTab : SystemMenuTab {
 			lv_hide(ui_PluginTabSpinner);
 			std::string err = "Error loading plugin: " + result.error_message;
 			notify_queue.put({err, Notification::Priority::Error, 2500});
-			gui_state.force_reload_patch = true;
 		}
 	}
 

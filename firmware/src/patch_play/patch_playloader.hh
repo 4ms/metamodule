@@ -56,6 +56,7 @@ struct PatchPlayLoader {
 				if (!patches_.open_patch(raw_patch_file, initial_patch_loc, message.timestamp))
 					pr_err("ERROR: could not parse initial patch\n");
 				else {
+					patches_.start_viewing(initial_patch_loc);
 					next_patch = patches_.get_view_patch();
 					load_patch();
 				}

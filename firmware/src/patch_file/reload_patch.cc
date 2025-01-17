@@ -27,12 +27,11 @@ bool PatchLoader::check_file_changed(PatchLocation const &patch_loc, uint32_t ti
 
 	auto start = get_time();
 
-	while (true) {
-		auto ok = patch_storage.request_file_info(patch_loc.vol, patch_loc.filename);
-		if (ok == true)
-			break;
-		if (get_time() - start > 5000)
+	while (!patch_storage.request_file_info(patch_loc.vol, patch_loc.filename)) {
+		if (get_time() - start > 5000) {
+			pr_dbg("check_file_changed timeout 1\n");
 			return false;
+		}
 	}
 
 	while (true) {
@@ -41,18 +40,23 @@ bool PatchLoader::check_file_changed(PatchLocation const &patch_loc, uint32_t ti
 		if (msg.message_type == FileStorageProxy::FileInfoSuccess) {
 			if (msg.timestamp != timestamp || msg.length != filesize)
 				return true;
-			else
+			else {
 				return false;
+			}
 		}
 
 		if (msg.message_type == FileStorageProxy::FileInfoFailed) {
+			pr_dbg("check_file_changed: get file info failed \n");
 			return false;
 		}
 
-		if (get_time() - start > 5000)
+		if (get_time() - start > 5000) {
+			pr_dbg("check_file_changed timeout 2\n");
 			return false;
+		}
 	}
 
+	pr_dbg("check_file_changed internal error\n");
 	return false;
 }
 
@@ -98,7 +102,7 @@ Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()>
 	}
 
 	pr_err("Timed out trying to load patch from disk\n");
-	return {false, "Timed ou requesting to load patch"};
+	return {false, "Timed out requesting to load patch"};
 }
 
 // Returns true if timestamp/filesize on disk differs from the open patch (or there is no open patch)

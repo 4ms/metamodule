@@ -19,7 +19,7 @@ public:
 	// and compares it to our own
 	bool check_file_changed(PatchLocation const &patch_loc, uint32_t timestamp, uint32_t filesize);
 
-	Result reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func);
+	Result reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func = [] {});
 
 	bool has_changed_on_disk(PatchLocation const &loc);
 };

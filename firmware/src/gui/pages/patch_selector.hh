@@ -330,7 +330,12 @@ struct PatchSelectorPage : PageBase {
 
 			case State::LoadPatchFile: {
 				if (!patchloader.has_changed_on_disk(selected_patch)) {
+					pr_dbg("Patch file is already open\n");
 					view_loaded_patch();
+
+					// else if this is the playing patch AND we have auto load off
+					// } else if () {
+					// view_loaded_patch();
 
 				} else if (patches.get_modification_count(selected_patch) > 0) {
 					// Has changed on disk AND there are unsaved changes
@@ -342,6 +347,7 @@ struct PatchSelectorPage : PageBase {
 
 				} else {
 					show_spinner();
+					pr_dbg("Loading patch file from disk\n");
 					auto result = patchloader.reload_patch_file(selected_patch, [this] {
 						update_spinner();
 						lv_timer_handler();
@@ -391,6 +397,7 @@ struct PatchSelectorPage : PageBase {
 
 private:
 	void view_loaded_patch() {
+		patches.start_viewing(selected_patch);
 		args.patch_loc_hash = PatchLocHash{selected_patch};
 		gui_state.force_redraw_patch = true;
 		page_list.request_new_page(PageId::PatchView, args);

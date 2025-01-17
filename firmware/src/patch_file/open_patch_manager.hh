@@ -15,21 +15,26 @@ public:
 	using enum IntercoreStorageMessage::MessageType;
 
 	// Parses and opens the loaded patch, and sets the view patch to point to it
+	// Removes existing patch with same name/vol if one exists
 	bool open_patch(std::span<char> file_data, PatchLocation const &patch_loc, uint32_t timestamp) {
 		bool patch_is_playing = false;
 
-		if (auto patch = open_patches_.find(patch_loc)) {
-			// open_patches_.dump_open_patches();
+		OpenPatch *new_patch{};
 
-			if (patch == playing_patch_)
+		// open_patches_.dump_open_patches();
+
+		if (auto existing_patch = open_patches_.find(patch_loc)) {
+			if (existing_patch == playing_patch_)
 				patch_is_playing = true;
 
-			pr_warn("Open patch found already, will remove and replace it: is_playing=%d\n", patch_is_playing);
-			open_patches_.remove(patch_loc);
-			// open_patches_.dump_open_patches();
+			pr_dbg("Open patch found already, will replace the patch data: is_playing=%d\n", patch_is_playing);
+			new_patch = existing_patch;
+
+		} else {
+			pr_dbg("Adding new patch '%s' on vol:%d\n", patch_loc.filename.data(), patch_loc.vol);
+			new_patch = open_patches_.emplace_back(patch_loc);
 		}
 
-		auto *new_patch = open_patches_.emplace_back(patch_loc);
 		new_patch->timestamp = timestamp;
 		new_patch->filesize = file_data.size();
 
@@ -47,11 +52,6 @@ public:
 		new_patch->patch.trim_empty_knobsets();
 		// Handle legacy use of midi poly num
 		new_patch->patch.update_midi_poly_num();
-
-		view_patch_ = new_patch;
-
-		if (patch_is_playing)
-			playing_patch_ = new_patch;
 
 		return true;
 	}
@@ -88,6 +88,12 @@ public:
 	void start_viewing(OpenPatch *patch) {
 		if (patch)
 			view_patch_ = patch;
+	}
+
+	void start_viewing(PatchLocation const &patch_loc) {
+		if (auto new_patch = find_open_patch(patch_loc)) {
+			view_patch_ = new_patch;
+		}
 	}
 
 	//
@@ -136,6 +142,14 @@ public:
 		}
 	}
 
+	PatchLocation get_playing_patch_loc() {
+		if (playing_patch_)
+			return playing_patch_->loc;
+		else {
+			return {"", Volume::MaxVolumes};
+		}
+	}
+
 	std::string_view get_view_patch_filename() {
 		return get_view_patch_loc().filename;
 	}
@@ -176,7 +190,11 @@ public:
 	}
 
 	unsigned get_view_patch_modification_count() {
-		return view_patch_->modification_count;
+		return view_patch_ ? view_patch_->modification_count : 0;
+	}
+
+	unsigned get_playing_patch_modification_count() {
+		return playing_patch_ ? playing_patch_->modification_count : 0;
 	}
 
 	uint32_t get_modification_count(PatchLocation const &patch_loc) {

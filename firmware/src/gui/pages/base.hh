@@ -31,7 +31,8 @@ struct GuiState {
 	bool already_displayed_cable_instructions = false;
 
 	bool force_redraw_patch{};
-	bool force_reload_patch{};
+	bool playing_patch_needs_manual_reload{};
+	bool view_patch_file_changed{};
 
 	bool do_write_settings{};
 	uint32_t write_settings_after_ms{};
