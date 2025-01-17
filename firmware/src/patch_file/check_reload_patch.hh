@@ -29,24 +29,8 @@ struct PatchFileChangeChecker {
 	}
 
 	void check_playing_patch() {
-		// If playing patch changed on disk:
-
-		//
-		//  modification_count == 0:
-		//    audio is not muted:
-		//    audio is muted: set gui_state.patch_file_changed to make PatchView reload
-		//
-		//  modification_count == 1:
-		//    audio is not muted:
-		//    audio is muted:
-		//
-		// If view patch changed? (and viewpatch!=playing_patch)
-		//  set gui_state flag to make PatchView reload
-
-		// If any open patch changed?
-		// can't do patchloader.reload_patch_file if patch is playing unless we also reload audio
-
 		auto auto_reload = true; //settings.filesystem.auto_reload_patch_file;
+
 		PatchLocation loc = open_patch_manager.get_playing_patch_loc();
 
 		if (patch_loader.has_changed_on_disk(loc)) {
@@ -69,11 +53,11 @@ struct PatchFileChangeChecker {
 							pr_dbg("... also marking view_patch_file_changed\n");
 						}
 					} else {
-						//Failed to load:
-						// notify_queue.put({
-						// 	.message = result.error_string,
-						// 	.priority = Notification::Priority::Error,
-						// });
+						//Failed to load file:
+						notify_queue.put({
+							.message = result.error_string,
+							.priority = Notification::Priority::Error,
+						});
 					}
 				} else {
 					// Patch is not muted and auto reload is disabled:

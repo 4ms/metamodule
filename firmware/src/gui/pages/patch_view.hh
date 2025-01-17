@@ -19,9 +19,11 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
+#include "patch_file/check_reload_patch.hh"
 #include "patch_file/reload_patch.hh"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
+#include "util/poll_change.hh"
 
 namespace MetaModule
 {
@@ -36,7 +38,8 @@ struct PatchViewPage : PageBase {
 		, settings_menu{settings.patch_view, gui_state}
 		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list, gui_state}
 		, map_ring_display{settings.patch_view}
-		, patchloader{patch_storage, patches} {
+		, patchloader{patch_storage, patches}
+		, file_change_checker{patch_storage, patches, patch_playloader, gui_state, notify_queue} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -70,9 +73,9 @@ struct PatchViewPage : PageBase {
 			return;
 		}
 
-		is_patch_loaded = patch_is_playing(args.patch_loc_hash);
+		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
-		if (is_patch_loaded && !patch_playloader.is_audio_muted()) {
+		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			lv_label_set_text(ui_LoadMeter2, "");
 			lv_show(ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
@@ -90,6 +93,11 @@ struct PatchViewPage : PageBase {
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
+
+		if (is_patch_playloaded)
+			file_change_checker.check_playing_patch();
+		else
+			file_change_checker.check_view_patch();
 
 		// if (args.patch_loc) {
 		// 	if (patchloader.has_changed_on_disk(*args.patch_loc)) {
@@ -134,7 +142,7 @@ struct PatchViewPage : PageBase {
 		gui_state.force_redraw_patch = false;
 
 		// Prepare the knobset menu with the actively playing patch's knobset
-		if (is_patch_loaded)
+		if (is_patch_playloaded)
 			active_knobset = page_list.get_active_knobset();
 
 		else {
@@ -199,7 +207,7 @@ struct PatchViewPage : PageBase {
 				continue;
 
 			module_drawer.draw_mapped_elements(
-				*patch, module_idx, active_knobset, canvas, drawn_elements, is_patch_loaded);
+				*patch, module_idx, active_knobset, canvas, drawn_elements, is_patch_playloaded);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
@@ -280,7 +288,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
-		bool last_is_patch_loaded = is_patch_loaded;
+		bool last_is_patch_loaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
 
@@ -288,26 +296,40 @@ struct PatchViewPage : PageBase {
 			patch = patches.get_view_patch();
 		}
 
-		is_patch_loaded = patch_is_playing(displayed_patch_loc_hash);
+		is_patch_playloaded = patch_is_playing(displayed_patch_loc_hash);
 
-		if (is_patch_loaded != last_is_patch_loaded || page_settings.changed) {
+		if (is_patch_playloaded != last_is_patch_loaded || page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
 			watch_lights();
 		}
 
-		if (is_patch_loaded != last_is_patch_loaded) {
+		if (is_patch_playloaded != last_is_patch_loaded) {
 			args.view_knobset_id = active_knobset;
 			page_list.set_active_knobset(active_knobset);
 			patch_mod_queue.put(ChangeKnobSet{active_knobset});
 			redraw_map_rings();
 		}
 
-		if (is_patch_loaded && active_knobset != page_list.get_active_knobset()) {
+		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
 			redraw_map_rings();
+		}
+
+		file_change_poll.poll(get_time(), [this] {
+			if (is_patch_playloaded)
+				file_change_checker.check_playing_patch();
+			else
+				file_change_checker.check_view_patch();
+			return false;
+		});
+
+		if (gui_state.view_patch_file_changed) {
+			gui_state.view_patch_file_changed = false;
+			pr_dbg("view_patch_file_changed: redrawing patching\n");
+			redraw_patch();
 		}
 
 		if (gui_state.back_button.is_just_released()) {
@@ -342,7 +364,7 @@ struct PatchViewPage : PageBase {
 			args.patch_loc_hash = patches.get_view_patch_loc_hash();
 		}
 
-		if (is_patch_loaded && !patch_playloader.is_audio_muted()) {
+		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			update_changed_params();
 
 			if (gui_state.playing_patch_needs_manual_reload) {
@@ -376,7 +398,7 @@ private:
 
 	void watch_lights() {
 
-		if (is_patch_loaded) {
+		if (is_patch_playloaded) {
 			for (const auto &drawn_element : drawn_elements) {
 				auto &gui_el = drawn_element.gui_element;
 
@@ -478,7 +500,7 @@ private:
 
 		for (auto &drawn_el : drawn_elements) {
 			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
-			map_ring_display.update(drawn_el, is_on_highlighted_module, is_patch_loaded);
+			map_ring_display.update(drawn_el, is_on_highlighted_module, is_patch_playloaded);
 		}
 	}
 
@@ -522,7 +544,7 @@ private:
 
 	void clear() {
 		for (auto &m : module_canvases)
-			lv_obj_del(m);
+			lv_obj_del_async(m);
 
 		module_canvases.clear();
 		drawn_elements.clear();
@@ -615,7 +637,7 @@ private:
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 
-		if (!page->is_patch_loaded) {
+		if (!page->is_patch_playloaded) {
 			page->patch_playloader.request_load_view_patch();
 			page->save_last_opened_patch_in_settings();
 			page->gui_state.playing_patch_needs_manual_reload = false;
@@ -637,6 +659,8 @@ private:
 
 	static void button_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+		if (!page)
+			return;
 		lv_label_set_text(ui_ModuleName, "");
 		lv_hide(ui_ModuleName);
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
@@ -706,7 +730,7 @@ private:
 	std::vector<lv_obj_t *> module_canvases;
 	std::vector<uint32_t> module_ids;
 	std::vector<DrawnElement> drawn_elements;
-	bool is_patch_loaded = false;
+	bool is_patch_playloaded = false;
 	bool is_ready = false;
 
 	PatchLocHash displayed_patch_loc_hash;
@@ -718,6 +742,8 @@ private:
 	};
 
 	PatchLoader patchloader;
+	PatchFileChangeChecker file_change_checker;
+	PollChange file_change_poll{500};
 };
 
 } // namespace MetaModule
