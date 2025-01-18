@@ -13,11 +13,19 @@ class PatchLoader {
 	OpenPatchManager &patches;
 
 public:
+	struct FileTimeSize {
+		uint32_t timestamp;
+		uint32_t filesize;
+	};
+
 	PatchLoader(FileStorageProxy &patch_storage, OpenPatchManager &patches);
 
 	// Gets the latest file timestamp and size from M4's cache
 	// and compares it to our own
+
 	bool check_file_changed(PatchLocation const &patch_loc, uint32_t timestamp, uint32_t filesize);
+
+	std::optional<FileTimeSize> get_file_info(PatchLocation const &patch_loc);
 
 	Result reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func = [] {});
 

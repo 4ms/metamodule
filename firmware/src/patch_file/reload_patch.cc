@@ -3,16 +3,9 @@
 #include "open_patch_manager.hh"
 #include "result_t.hh"
 #include "util/callable.hh"
-// #include <functional>
 
 namespace MetaModule
 {
-// enum class ReloadState {
-// 	Idle,
-// 	Requested,
-// 	Reloaded,
-// 	Failed,
-// };
 
 static constexpr unsigned max_open_patches = 20;
 
@@ -22,15 +15,14 @@ PatchLoader::PatchLoader(FileStorageProxy &patch_storage, OpenPatchManager &patc
 }
 
 // Gets the latest file timestamp and size from M4's cache
-// and compares it to our own
-bool PatchLoader::check_file_changed(PatchLocation const &patch_loc, uint32_t timestamp, uint32_t filesize) {
+std::optional<PatchLoader::FileTimeSize> PatchLoader::get_file_info(PatchLocation const &patch_loc) {
 
 	auto start = get_time();
 
 	while (!patch_storage.request_file_info(patch_loc.vol, patch_loc.filename)) {
 		if (get_time() - start > 5000) {
-			pr_dbg("check_file_changed timeout 1\n");
-			return false;
+			pr_err("get_file_info timeout making request\n");
+			return {};
 		}
 	}
 
@@ -38,26 +30,29 @@ bool PatchLoader::check_file_changed(PatchLocation const &patch_loc, uint32_t ti
 		auto msg = patch_storage.get_message();
 
 		if (msg.message_type == FileStorageProxy::FileInfoSuccess) {
-			if (msg.timestamp != timestamp || msg.length != filesize)
-				return true;
-			else {
-				return false;
-			}
+			return FileTimeSize{.timestamp = msg.timestamp, .filesize = msg.length};
 		}
 
 		if (msg.message_type == FileStorageProxy::FileInfoFailed) {
-			pr_dbg("check_file_changed: get file info failed \n");
-			return false;
+			pr_err("get_file_info: get file info failed \n");
+			return {};
 		}
 
 		if (get_time() - start > 5000) {
-			pr_dbg("check_file_changed timeout 2\n");
-			return false;
+			pr_err("get_file_info timeout waiting for response\n");
+			return {};
 		}
 	}
 
-	pr_dbg("check_file_changed internal error\n");
-	return false;
+	pr_err("get_file_info internal error\n");
+	return {};
+}
+
+bool PatchLoader::check_file_changed(PatchLocation const &patch_loc, uint32_t timestamp, uint32_t filesize) {
+	if (auto filetimesize = get_file_info(patch_loc)) {
+		return (filetimesize->timestamp != timestamp) || (filetimesize->filesize != filesize);
+	} else
+		return false;
 }
 
 Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func) {
