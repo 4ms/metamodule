@@ -33,7 +33,6 @@ struct GuiState {
 	bool force_redraw_patch{};
 	bool playing_patch_needs_manual_reload{};
 	bool view_patch_file_changed{};
-	bool patch_version_conflict = false;
 
 	bool do_write_settings{};
 	uint32_t write_settings_after_ms{};

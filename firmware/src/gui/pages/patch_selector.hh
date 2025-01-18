@@ -334,16 +334,9 @@ struct PatchSelectorPage : PageBase {
 					pr_dbg("Patch file is already open\n");
 					view_loaded_patch();
 
-					// else if this is the playing patch AND we have auto load off
-					// } else if () {
-					// view_loaded_patch();
-
 				} else if (patches.get_modification_count(selected_patch) > 0) {
 					// Has changed on disk AND there are unsaved changes
-					notify_queue.put({.message = "Patch has been modified on disk, but has unsaved changes. Please "
-												 "save, revert, or rename the patch",
-									  .priority = Notification::Priority::Info,
-									  .duration_ms = 3000});
+					// PatchViewPage will notify the user of this.
 					view_loaded_patch();
 
 				} else {

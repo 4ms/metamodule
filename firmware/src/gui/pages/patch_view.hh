@@ -67,8 +67,6 @@ struct PatchViewPage : PageBase {
 	void prepare_focus() override {
 		is_ready = false;
 
-		gui_state.patch_version_conflict = false;
-
 		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
 			pr_err("Error: Tried to load PatchView with no patch\n");
 			return;
@@ -95,7 +93,7 @@ struct PatchViewPage : PageBase {
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
 
-		file_change_poll.force_next_poll();
+		file_change_poll.force_next_poll(); // avoid 500ms delay before refreshing the patch
 		poll_patch_file_changed();
 
 		if (!needs_refresh) {
@@ -365,21 +363,6 @@ private:
 		file_change_poll.poll(get_time(), [this] {
 			auto status = is_patch_playloaded ? file_change_checker.check_playing_patch() :
 												file_change_checker.check_view_patch();
-
-			if (status == PatchFileChangeChecker::Status::VersionConflict) {
-				//TODO: instead of setting a patch_version_conflict flag, which we have to clear in two other files
-				//we could keep the logic all right here by storing the timestamp/filesize values. Then when we read
-				//new values from M4 we ignore it if the new values match the stored ones
-				if (!gui_state.patch_version_conflict) {
-					gui_state.patch_version_conflict = true;
-					notify_queue.put({
-						.message = "A new version of the patch that's playing was just transferred, but "
-								   "you have unsaved changes. Please save, revert, or duplicate the patch",
-						.priority = Notification::Priority::Info,
-						.duration_ms = 3000,
-					});
-				}
-			}
 
 			if (status == PatchFileChangeChecker::Status::FailLoadFile) {
 				pr_err("Error: File failed to load\n");

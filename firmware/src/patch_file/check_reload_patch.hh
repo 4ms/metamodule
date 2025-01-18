@@ -14,6 +14,8 @@ struct PatchFileChangeChecker {
 	NotificationQueue &notify_queue;
 	PatchLoader patch_loader;
 
+	bool version_conflict = false;
+
 	// Handle user modifying patch file disk via wifi or usb/sdcard
 	PatchFileChangeChecker(FileStorageProxy &patch_storage,
 						   OpenPatchManager &open_patch_manager,
@@ -40,8 +42,11 @@ struct PatchFileChangeChecker {
 		PatchLocation loc = open_patch_manager.get_playing_patch_loc();
 
 		if (patch_loader.has_changed_on_disk(loc)) {
+			pr_dbg("file on disk does not match file in memory (changed on disk)\n");
 
 			if (open_patch_manager.get_playing_patch_modification_count() == 0) {
+				version_conflict = false;
+
 				// Patch changed on disk, but not in memory, so reload it if muted
 				// or if auto reload is enabled
 				// Otherwise if we're playing and disabled auto-reload, then PatchView/ModuleView
@@ -73,8 +78,23 @@ struct PatchFileChangeChecker {
 					return Status::OK;
 				}
 			} else {
-				return Status::VersionConflict;
+				if (version_conflict) {
+					pr_dbg("Version conflict\n");
+					return Status::OK; //only notify once
+				} else {
+					version_conflict = true;
+					notify_queue.put({
+						.message = "A new version of the patch that's playing was just transferred, but "
+								   "you have unsaved changes. Please save, revert, or duplicate the patch",
+						.priority = Notification::Priority::Info,
+						.duration_ms = 3000,
+					});
+
+					return Status::VersionConflict;
+				}
 			}
+		} else {
+			pr_dbg("file on disk matches file in memory\n");
 		}
 		return Status::OK;
 	}

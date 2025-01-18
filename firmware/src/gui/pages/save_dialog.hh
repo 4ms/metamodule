@@ -93,7 +93,6 @@ struct SaveDialog {
 
 		if (is_renaming) {
 			if (patch_playloader.is_renaming_idle()) {
-				gui_state.patch_version_conflict = false;
 				saved = true;
 				is_renaming = false;
 				hide();
@@ -286,7 +285,6 @@ private:
 			auto &patchname = patches.get_view_patch()->patch_name;
 			patchname.copy(file_name);
 
-			gui_state.patch_version_conflict = false;
 			saved = true;
 			hide();
 
@@ -308,7 +306,6 @@ private:
 				page_list.request_new_page_no_history(
 					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
 
-				gui_state.patch_version_conflict = false;
 				hide();
 			} else {
 				//send notification of failure
