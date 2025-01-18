@@ -63,10 +63,7 @@ struct SimulatorFileStorageComm {
 				auto *patch_dir_list_ = msg.patch_dir_list;
 
 				if (patch_dir_list_) {
-					bool force_sd_refresh =
-						msg.force_refresh && (msg.vol_id == Volume::SDCard || msg.vol_id == Volume::MaxVolumes);
-
-					if (refresh_required || force_sd_refresh) {
+					if (refresh_required) {
 						patch_dir_list_->clear_patches(Volume::SDCard);
 						PatchFileIO::add_directory(storage.sd_hostfs, patch_dir_list_->volume_root(Volume::SDCard));
 						reply.message_type = PatchListChanged;
@@ -118,7 +115,7 @@ struct SimulatorFileStorageComm {
 					return false;
 				}
 				reply = {WriteFileOK};
-				// refresh_required = true;
+				refresh_required = true;
 			} break;
 
 			case RequestDeleteFile: {
