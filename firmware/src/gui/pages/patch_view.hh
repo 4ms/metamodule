@@ -68,6 +68,8 @@ struct PatchViewPage : PageBase {
 	void prepare_focus() override {
 		is_ready = false;
 
+		gui_state.patch_version_conflict = false;
+
 		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
 			pr_err("Error: Tried to load PatchView with no patch\n");
 			return;
@@ -98,33 +100,6 @@ struct PatchViewPage : PageBase {
 			file_change_checker.check_playing_patch();
 		else
 			file_change_checker.check_view_patch();
-
-		// if (args.patch_loc) {
-		// 	if (patchloader.has_changed_on_disk(*args.patch_loc)) {
-
-		// 		// Check if it's changed on disk AND there are unsaved changes
-		// 		if (patches.get_view_patch_modification_count() > 0) {
-		// 			notify_queue.put({.message = "Patch has been modified on disk, but has unsaved changes. Please "
-		// 										 "save, revert, or rename the patch",
-		// 							  .priority = Notification::Priority::Info,
-		// 							  .duration_ms = 3000});
-		// 		} else {
-		// 			pr_dbg("PatchView: File changed on disk, reloading...\n");
-
-		// 			auto result = patchloader.reload_patch_file(*args.patch_loc, [] {});
-
-		// 			if (result.success) {
-		// 				needs_refresh = true;
-		// 				if (is_patch_loaded && !patch_playloader.is_audio_muted()) {
-		// 					gui_state.force_reload_patch = true;
-		// 				}
-
-		// 			} else {
-		// 				notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
-		// 			}
-		// 		}
-		// 	}
-		// }
 
 		if (!needs_refresh) {
 			is_ready = true;
@@ -319,11 +294,25 @@ struct PatchViewPage : PageBase {
 		}
 
 		file_change_poll.poll(get_time(), [this] {
-			if (is_patch_playloaded)
-				file_change_checker.check_playing_patch();
-			else
-				file_change_checker.check_view_patch();
-			return false;
+			auto status = is_patch_playloaded ? file_change_checker.check_playing_patch() :
+												file_change_checker.check_view_patch();
+
+			if (status == PatchFileChangeChecker::Status::VersionConflict) {
+				if (!gui_state.patch_version_conflict) {
+					gui_state.patch_version_conflict = true;
+					notify_queue.put({
+						.message = "A new version of the patch that's playing was just transferred, but "
+								   "you have unsaved changes. Please save, revert, or duplicate the patch",
+						.priority = Notification::Priority::Info,
+						.duration_ms = 3000,
+					});
+				}
+			}
+
+			// if (status == PatchFileChangeChecker::Status::FailLoadFile)
+			//?? what to do here?
+
+			return false; //ignored
 		});
 
 		if (gui_state.view_patch_file_changed) {

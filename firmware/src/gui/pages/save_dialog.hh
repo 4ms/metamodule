@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
+#include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -16,14 +17,16 @@ struct SaveDialog {
 			   PatchPlayLoader &play_loader,
 			   PatchSelectorSubdirPanel &subdir_panel,
 			   NotificationQueue &notify_queue,
-			   PageList &page_list)
+			   PageList &page_list,
+			   GuiState &gui_state)
 		: patch_storage{patch_storage}
 		, patches{patches}
 		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
 		, notify_queue{notify_queue}
 		, page_list{page_list}
-		, group(lv_group_create()) {
+		, group(lv_group_create())
+		, gui_state{gui_state} {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
 		lv_group_add_obj(group, ui_SaveDialogDir);
@@ -90,6 +93,7 @@ struct SaveDialog {
 
 		if (is_renaming) {
 			if (patch_playloader.is_renaming_idle()) {
+				gui_state.patch_version_conflict = false;
 				saved = true;
 				is_renaming = false;
 				hide();
@@ -278,6 +282,7 @@ private:
 			auto &patchname = page->patches.get_view_patch()->patch_name;
 			patchname.copy(page->file_name);
 
+			page->gui_state.patch_version_conflict = false;
 			page->saved = true;
 			page->hide();
 
@@ -299,6 +304,7 @@ private:
 				page->page_list.request_new_page_no_history(
 					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
 
+				page->gui_state.patch_version_conflict = false;
 				page->hide();
 			} else {
 				//send notification of failure
@@ -355,6 +361,8 @@ private:
 	bool is_renaming = false;
 
 	Action method{};
+
+	GuiState &gui_state;
 };
 
 } // namespace MetaModule

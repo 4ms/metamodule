@@ -28,7 +28,13 @@ struct PatchFileChangeChecker {
 		, patch_loader{patch_storage, open_patch_manager} {
 	}
 
-	void check_playing_patch() {
+	enum class Status {
+		OK,
+		FailLoadFile,
+		VersionConflict,
+	};
+
+	Status check_playing_patch() {
 		auto auto_reload = true; //settings.filesystem.auto_reload_patch_file;
 
 		PatchLocation loc = open_patch_manager.get_playing_patch_loc();
@@ -52,12 +58,10 @@ struct PatchFileChangeChecker {
 							gui_state.view_patch_file_changed = true;
 							pr_dbg("... also marking view_patch_file_changed\n");
 						}
+						return Status::OK;
+
 					} else {
-						//Failed to load file:
-						notify_queue.put({
-							.message = result.error_string,
-							.priority = Notification::Priority::Error,
-						});
+						return Status::FailLoadFile;
 					}
 				} else {
 					// Patch is not muted and auto reload is disabled:
@@ -65,19 +69,17 @@ struct PatchFileChangeChecker {
 					if (gui_state.playing_patch_needs_manual_reload == false)
 						pr_dbg("patch is not muted and auto reload disabled: set ppnmr=true\n");
 					gui_state.playing_patch_needs_manual_reload = true;
+
+					return Status::OK;
 				}
 			} else {
-				notify_queue.put({
-					.message = "A new version of the patch that's playing was just transferred, but "
-							   "you have unsaved changes. Please save, revert, or duplicate the patch",
-					.priority = Notification::Priority::Info,
-					.duration_ms = 3000,
-				});
+				return Status::VersionConflict;
 			}
 		}
+		return Status::OK;
 	}
 
-	void check_view_patch() {
+	Status check_view_patch() {
 		auto auto_reload = true; //settings.filesystem.auto_reload_patch_file;
 		PatchLocation loc = open_patch_manager.get_playing_patch_loc();
 
@@ -90,15 +92,20 @@ struct PatchFileChangeChecker {
 				// And it didn't change in memory
 				if (open_patch_manager.get_view_patch_modification_count() == 0) {
 					if (auto_reload) {
-						auto result = patch_loader.reload_patch_file(loc);
-						gui_state.view_patch_file_changed = true;
+						if (auto result = patch_loader.reload_patch_file(loc); result.success) {
+							gui_state.view_patch_file_changed = true;
+						} else
+							return Status::FailLoadFile;
 					}
 				} else {
 					// It changed in memory and on disk:
 					gui_state.view_patch_file_changed = true;
+					return Status::VersionConflict;
 				}
 			}
 		}
+
+		return Status::OK;
 	}
 };
 

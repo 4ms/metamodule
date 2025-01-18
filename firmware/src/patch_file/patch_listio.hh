@@ -76,7 +76,7 @@ inline PatchFile *find_fileinfo(PatchDirList &patch_dir_list, Volume vol, std::s
 	auto &tree = base_dir(patch_dir_list, vol, filename);
 
 	if (auto found = std::ranges::find(tree.files, filename, &PatchFile::filename); found != tree.files.end()) {
-		pr_dbg("M4 find_fileinfo: file %s found, sz=%u, ts=%u\n", filename.data(), found->filesize, found->timestamp);
+		// pr_dbg("M4 find_fileinfo: file %s found, sz=%u, ts=%u\n", filename.data(), found->filesize, found->timestamp);
 		return &*found;
 	} else {
 		return nullptr;

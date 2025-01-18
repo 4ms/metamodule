@@ -139,6 +139,8 @@ struct PatchViewFileMenu {
 
 				filesystem_changed = true;
 
+				gui_state.patch_version_conflict = false;
+
 				delete_state = DeleteState::Idle;
 
 				page_list.remove_history_matching_args(
@@ -178,6 +180,9 @@ struct PatchViewFileMenu {
 
 					page_list.request_new_page_no_history(
 						PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
+
+					gui_state.force_redraw_patch = true;
+					gui_state.patch_version_conflict = false;
 					revert_state = RevertState::Idle;
 					hide_menu();
 				} else {
