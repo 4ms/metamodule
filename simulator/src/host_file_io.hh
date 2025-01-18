@@ -30,8 +30,7 @@ struct HostFileIO {
 			for (const auto &entry : fs::directory_iterator(_root_dir)) {
 				auto fn = entry.path();
 				if (fn.extension() == fs::path(extension)) {
-					auto last_modif = fs::last_write_time(fn);
-					auto timestamp = last_modif.time_since_epoch().count();
+					auto timestamp = convert_timestamp(fn);
 					auto sz = (uint32_t)fs::file_size(fn);
 					action(fn.string().c_str(), timestamp, sz);
 				}
@@ -68,8 +67,7 @@ struct HostFileIO {
 				auto fn = entry.path();
 				auto entry_type = (entry.is_directory()) ? DirEntryKind::Dir : DirEntryKind::File;
 
-				auto last_modif = fs::last_write_time(fn);
-				auto timestamp = last_modif.time_since_epoch().count();
+				auto timestamp = convert_timestamp(fn);
 
 				auto sz = entry.is_directory() ? 0 : (uint32_t)fs::file_size(fn);
 				std::string name = fn.filename().string();
@@ -131,7 +129,7 @@ struct HostFileIO {
 	uint64_t get_file_size(std::string_view filename) {
 		auto filepath = normalize_path(filename);
 
-		std::cout << "HostFileIO: get file size " << filepath << "\n";
+		// std::cout << "HostFileIO: get file size " << filepath << "\n";
 
 		std::ifstream ifs(filepath, std::ios::in);
 		uint64_t sz = 0;
@@ -147,14 +145,21 @@ struct HostFileIO {
 	uint32_t get_file_timestamp(std::string_view filename) {
 		auto filepath = normalize_path(filename);
 
+		// std::cout << "HostFileIO: get file timestamp " << filepath << "\n";
+
+		return convert_timestamp(filepath);
+	}
+
+	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
+		//TODO?
+	}
+
+	// converts native filesystem timestamp to MM 32-bit timestamp
+	uint32_t convert_timestamp(std::string const &filepath) {
 		auto tm = std::filesystem::last_write_time(filepath);
 
 		// returns unix timestamp (seconds since 1/1/1970)
 		return std::chrono::duration_cast<std::chrono::seconds>(tm.time_since_epoch()).count();
-	}
-
-	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
-		//TODO
 	}
 
 	std::string normalize_path(std::string_view filename) {

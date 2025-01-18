@@ -7,6 +7,7 @@
 #include "host_file_io.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
+#include "patch_file/patch_listio.hh"
 #include "patch_file/patch_location.hh"
 #include <cstdint>
 #include <string_view>
@@ -138,6 +139,23 @@ struct SimulatorFileStorageComm {
 
 			case RequestFactoryResetPatches: {
 				pr_info("Reset to factory patches = no action. (simulator default patches are read-only)\n");
+			} break;
+
+			case RequestFileInfo: {
+				reply = {FileInfoFailed};
+
+				if (msg.vol_id == Volume::SDCard) {
+					reply.length = storage.sd_hostfs.get_file_size(msg.filename);
+					reply.timestamp = storage.sd_hostfs.get_file_timestamp(msg.filename);
+					reply.message_type = FileInfoSuccess;
+				}
+
+				if (msg.vol_id == Volume::NorFlash) {
+					reply.length = storage.flash_hostfs.get_file_size(msg.filename);
+					reply.timestamp = storage.flash_hostfs.get_file_timestamp(msg.filename);
+					reply.message_type = FileInfoSuccess;
+				}
+
 			} break;
 
 			default:
