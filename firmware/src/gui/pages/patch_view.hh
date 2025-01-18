@@ -38,7 +38,6 @@ struct PatchViewPage : PageBase {
 		, settings_menu{settings.patch_view, gui_state}
 		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list, gui_state}
 		, map_ring_display{settings.patch_view}
-		, patchloader{patch_storage, patches}
 		, file_change_checker{patch_storage, patches, patch_playloader, gui_state, notify_queue} {
 
 		init_bg(base);
@@ -96,10 +95,8 @@ struct PatchViewPage : PageBase {
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
 
-		if (is_patch_playloaded)
-			file_change_checker.check_playing_patch();
-		else
-			file_change_checker.check_view_patch();
+		file_change_poll.force_next_poll();
+		poll_patch_file_changed();
 
 		if (!needs_refresh) {
 			is_ready = true;
@@ -739,7 +736,6 @@ private:
 		uint32_t selected_module_id;
 	};
 
-	PatchLoader patchloader;
 	PatchFileChangeChecker file_change_checker;
 	PollChange file_change_poll{500};
 };

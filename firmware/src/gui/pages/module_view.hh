@@ -14,8 +14,10 @@
 #include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/patch_view.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+#include "patch_file/reload_patch.hh"
 
 namespace MetaModule
 {
@@ -30,7 +32,8 @@ struct ModuleViewPage : PageBase {
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
-		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller) {
+		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
+		, file_change_checker{patch_storage, patches, patch_playloader, gui_state, notify_queue} {
 
 		init_bg(ui_MappingMenu);
 
@@ -68,9 +71,12 @@ struct ModuleViewPage : PageBase {
 
 		patch = patches.get_view_patch();
 
-		is_patch_playing = patch_is_playing(args.patch_loc_hash);
+		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
 		this_module_id = args.module_id.value_or(this_module_id);
+
+		file_change_poll.force_next_poll();
+		poll_patch_file_changed();
 
 		if (!read_slug()) {
 			notify_queue.put(
@@ -147,7 +153,7 @@ struct ModuleViewPage : PageBase {
 		active_knobset = page_list.get_active_knobset();
 
 		module_drawer.draw_mapped_elements(
-			*patch, this_module_id, active_knobset, canvas, drawn_elements, is_patch_playing);
+			*patch, this_module_id, active_knobset, canvas, drawn_elements, is_patch_playloaded);
 
 		lv_obj_update_layout(canvas);
 
@@ -238,7 +244,7 @@ struct ModuleViewPage : PageBase {
 		cable_drawer.set_height(240);
 		update_cable_style(true);
 
-		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
+		mapping_pane.prepare_focus(group, roller_width, is_patch_playloaded);
 
 		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
 		if (cur_el && args.detail_mode == true) {
@@ -341,8 +347,11 @@ struct ModuleViewPage : PageBase {
 
 		if (action_menu.is_visible())
 			action_menu.update();
+		else {
+			poll_patch_file_changed();
+		}
 
-		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
+		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
 			redraw_module();
@@ -357,7 +366,7 @@ struct ModuleViewPage : PageBase {
 			update_cable_style();
 		}
 
-		if (is_patch_playing) {
+		if (is_patch_playloaded) {
 			// copy light values from params, indexed by light element id
 			for (auto &wl : params.lights.watch_lights) {
 				if (wl.light_id >= MAX_LIGHTS_PER_MODULE)
@@ -421,7 +430,7 @@ struct ModuleViewPage : PageBase {
 					   patch_mod.value());
 
 			// Forward the mod to the audio/patch_player queue
-			if (is_patch_playing)
+			if (is_patch_playloaded)
 				patch_mod_queue.put(patch_mod.value());
 		}
 
@@ -431,7 +440,7 @@ struct ModuleViewPage : PageBase {
 	// This gets called after map_ring_style changes
 	void update_map_ring_style() {
 		for (auto &drawn_el : drawn_elements) {
-			map_ring_display.update(drawn_el, true, is_patch_playing);
+			map_ring_display.update(drawn_el, true, is_patch_playloaded);
 		}
 	}
 
@@ -457,6 +466,32 @@ struct ModuleViewPage : PageBase {
 	}
 
 private:
+	void poll_patch_file_changed() {
+		file_change_poll.poll(get_time(), [this] {
+			auto status = is_patch_playloaded ? file_change_checker.check_playing_patch() :
+												file_change_checker.check_view_patch();
+			if (status == PatchFileChangeChecker::Status::VersionConflict) {
+				//TODO: instead of setting a patch_version_conflict flag, which we have to clear in two other files
+				//we could keep the logic all right here by storing the timestamp/filesize values. Then when we read
+				//new values from M4 we ignore it if the new values match the stored ones
+				if (!gui_state.patch_version_conflict) {
+					gui_state.patch_version_conflict = true;
+					notify_queue.put({
+						.message = "A new version of the patch that's playing was just transferred, but "
+								   "you have unsaved changes. Please save, revert, or duplicate the patch",
+						.priority = Notification::Priority::Info,
+						.duration_ms = 3000,
+					});
+				}
+			}
+			if (status == PatchFileChangeChecker::Status::FailLoadFile) {
+				pr_err("Error: File failed to load\n");
+				//?? what to do here?
+			}
+			return false;
+		});
+	}
+
 	void show_roller() {
 		mode = ViewMode::List;
 		mapping_pane.hide();
@@ -701,7 +736,7 @@ private:
 	uint16_t this_module_id = 0;
 	uint32_t cur_selected = 0;
 	std::string_view slug = "";
-	bool is_patch_playing = false;
+	bool is_patch_playloaded = false;
 	PatchData *patch;
 
 	unsigned active_knobset = 0;
@@ -723,6 +758,9 @@ private:
 	enum class ViewMode { List, Mapping } mode{ViewMode::List};
 
 	RollerHoverText roller_hover;
+
+	PatchFileChangeChecker file_change_checker;
+	PollChange file_change_poll{500};
 };
 
 } // namespace MetaModule
