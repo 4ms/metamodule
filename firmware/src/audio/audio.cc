@@ -131,7 +131,9 @@ void AudioStream::step() {
 }
 
 void AudioStream::start() {
-	update_audio_settings();
+	if (ext_audio_connected)
+		codec_ext_.start();
+	codec_.start();
 }
 
 void AudioStream::handle_overruns() {
@@ -372,21 +374,23 @@ void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 		i++;
 	}
 
-	for (unsigned i = 0; auto &plug_detect : ext_plug_detects) {
-		bool sense = AudioExpander::jack_is_patched(jack_senses, i);
+	if (ext_audio_connected) {
+		for (unsigned i = 0; auto &plug_detect : ext_plug_detects) {
+			bool sense = AudioExpander::jack_is_patched(jack_senses, i);
 
-		plug_detect.update(sense);
+			plug_detect.update(sense);
 
-		if (plug_detect.changed()) {
-			if (i < AudioExpander::NumInJacks) {
-				auto panel_in_jack = AudioExpander::exp_to_panel_input(i);
-				player.set_input_jack_patched_status(panel_in_jack, sense);
-			} else {
-				auto panel_out_jack = AudioExpander::exp_to_panel_output(i - AudioExpander::NumInJacks);
-				player.set_output_jack_patched_status(panel_out_jack, sense);
+			if (plug_detect.changed()) {
+				if (i < AudioExpander::NumInJacks) {
+					auto panel_in_jack = AudioExpander::exp_to_panel_input(i);
+					player.set_input_jack_patched_status(panel_in_jack, sense);
+				} else {
+					auto panel_out_jack = AudioExpander::exp_to_panel_output(i - AudioExpander::NumInJacks);
+					player.set_output_jack_patched_status(panel_out_jack, sense);
+				}
 			}
+			i++;
 		}
-		i++;
 	}
 
 	param_state.jack_senses = jack_senses;
