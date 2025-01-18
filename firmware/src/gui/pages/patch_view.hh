@@ -293,28 +293,6 @@ struct PatchViewPage : PageBase {
 			redraw_map_rings();
 		}
 
-		file_change_poll.poll(get_time(), [this] {
-			auto status = is_patch_playloaded ? file_change_checker.check_playing_patch() :
-												file_change_checker.check_view_patch();
-
-			if (status == PatchFileChangeChecker::Status::VersionConflict) {
-				if (!gui_state.patch_version_conflict) {
-					gui_state.patch_version_conflict = true;
-					notify_queue.put({
-						.message = "A new version of the patch that's playing was just transferred, but "
-								   "you have unsaved changes. Please save, revert, or duplicate the patch",
-						.priority = Notification::Priority::Info,
-						.duration_ms = 3000,
-					});
-				}
-			}
-
-			// if (status == PatchFileChangeChecker::Status::FailLoadFile)
-			//?? what to do here?
-
-			return false; //ignored
-		});
-
 		if (gui_state.view_patch_file_changed) {
 			gui_state.view_patch_file_changed = false;
 			pr_dbg("view_patch_file_changed: redrawing patching\n");
@@ -380,9 +358,40 @@ struct PatchViewPage : PageBase {
 
 		if (file_menu.is_visible())
 			file_menu.update();
+		else {
+			poll_patch_file_changed();
+		}
 	}
 
 private:
+	void poll_patch_file_changed() {
+		file_change_poll.poll(get_time(), [this] {
+			auto status = is_patch_playloaded ? file_change_checker.check_playing_patch() :
+												file_change_checker.check_view_patch();
+
+			if (status == PatchFileChangeChecker::Status::VersionConflict) {
+				//TODO: instead of setting a patch_version_conflict flag, which we have to clear in two other files
+				//we could keep the logic all right here by storing the timestamp/filesize values. Then when we read
+				//new values from M4 we ignore it if the new values match the stored ones
+				if (!gui_state.patch_version_conflict) {
+					gui_state.patch_version_conflict = true;
+					notify_queue.put({
+						.message = "A new version of the patch that's playing was just transferred, but "
+								   "you have unsaved changes. Please save, revert, or duplicate the patch",
+						.priority = Notification::Priority::Info,
+						.duration_ms = 3000,
+					});
+				}
+			}
+
+			if (status == PatchFileChangeChecker::Status::FailLoadFile) {
+				pr_err("Error: File failed to load\n");
+				//?? what to do here?
+			}
+
+			return false; //ignored
+		});
+	}
 	std::vector<std::vector<float>> light_vals;
 
 	void watch_lights() {
