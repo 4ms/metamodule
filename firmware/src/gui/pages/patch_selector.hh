@@ -114,7 +114,7 @@ struct PatchSelectorPage : PageBase {
 		// Do not access patchfiles while M4 is accessing them
 		if (!patchfiles_locked) {
 			is_populating_subdir_panel = true;
-			update_open_patches();
+			refresh_open_patches();
 			subdir_panel.populate(patchfiles);
 			subdir_panel.show_recent_files();
 			populate_roller();
@@ -134,7 +134,7 @@ struct PatchSelectorPage : PageBase {
 		subdir_panel.blur();
 	}
 
-	void update_open_patches() {
+	void refresh_open_patches() {
 		auto &root = patchfiles.volume_root(Volume::RamDisk);
 		root.files.clear();
 		root.dirs.clear();

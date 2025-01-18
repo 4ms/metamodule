@@ -264,52 +264,56 @@ private:
 			return;
 		auto page = static_cast<SaveDialog *>(event->user_data);
 
-		page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+		page->save();
+	}
 
-		std::string fullpath = page->file_path.length() ? (page->file_path + "/") : "";
-		fullpath += page->file_name;
+	void save() {
+		file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+
+		std::string fullpath = file_path.length() ? (file_path + "/") : "";
+		fullpath += file_name;
 		if (!fullpath.ends_with(".yml")) {
 			fullpath.append(".yml");
 		}
 
-		std::string patchname = page->file_name;
+		std::string patchname = file_name;
 		strip_yml(patchname);
 
-		if (page->method == Action::Save) {
-			page->patches.get_view_patch()->patch_name = patchname;
-			page->patches.rename_view_patch_file(fullpath, page->file_vol);
-			page->patch_playloader.request_save_patch();
-			auto &patchname = page->patches.get_view_patch()->patch_name;
-			patchname.copy(page->file_name);
+		if (method == Action::Save) {
+			patches.get_view_patch()->patch_name = patchname;
+			patches.rename_view_patch_file(fullpath, file_vol);
+			patch_playloader.request_save_patch();
+			auto &patchname = patches.get_view_patch()->patch_name;
+			patchname.copy(file_name);
 
-			page->gui_state.patch_version_conflict = false;
-			page->saved = true;
-			page->hide();
+			gui_state.patch_version_conflict = false;
+			saved = true;
+			hide();
 
-		} else if (page->method == Action::Rename) {
-			if (page->patches.get_view_patch_loc_hash() != PatchLocHash{fullpath, page->file_vol}) {
-				page->patches.get_view_patch()->patch_name = patchname;
-				page->patch_playloader.request_rename_view_patch({fullpath, page->file_vol});
-				page->is_renaming = true;
+		} else if (method == Action::Rename) {
+			if (patches.get_view_patch_loc_hash() != PatchLocHash{fullpath, file_vol}) {
+				patches.get_view_patch()->patch_name = patchname;
+				patch_playloader.request_rename_view_patch({fullpath, file_vol});
+				is_renaming = true;
 			} else {
-				page->notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
+				notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
 			}
 
 		} else { //Duplicate
-			if (page->patches.duplicate_view_patch(fullpath, page->file_vol)) {
-				page->patches.get_view_patch()->patch_name = patchname;
-				page->patch_playloader.request_save_patch();
-				page->saved = true;
-				auto patch_loc = PatchLocation{std::string_view{fullpath}, page->file_vol};
-				page->page_list.request_new_page_no_history(
+			if (patches.duplicate_view_patch(fullpath, file_vol)) {
+				patches.get_view_patch()->patch_name = patchname;
+				patch_playloader.request_save_patch();
+				saved = true;
+				auto patch_loc = PatchLocation{std::string_view{fullpath}, file_vol};
+				page_list.request_new_page_no_history(
 					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
 
-				page->gui_state.patch_version_conflict = false;
-				page->hide();
+				gui_state.patch_version_conflict = false;
+				hide();
 			} else {
 				//send notification of failure
 				std::string err_str = "File " + fullpath + " already exists and is open, cannot save over it.";
-				page->notify_queue.put({err_str, Notification::Priority::Error});
+				notify_queue.put({err_str, Notification::Priority::Error});
 			}
 		}
 	}

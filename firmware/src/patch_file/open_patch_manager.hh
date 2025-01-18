@@ -19,7 +19,7 @@ public:
 	bool open_patch(std::span<char> file_data, PatchLocation const &patch_loc, uint32_t timestamp) {
 		bool patch_is_playing = false;
 
-		OpenPatch *new_patch{};
+		OpenPatch *patch{};
 
 		// open_patches_.dump_open_patches();
 
@@ -28,17 +28,18 @@ public:
 				patch_is_playing = true;
 
 			pr_dbg("Open patch found already, will replace the patch data: is_playing=%d\n", patch_is_playing);
-			new_patch = existing_patch;
+			patch = existing_patch;
 
 		} else {
 			pr_dbg("Adding new patch '%s' on vol:%d\n", patch_loc.filename.data(), patch_loc.vol);
-			new_patch = open_patches_.emplace_back(patch_loc);
+			patch = open_patches_.emplace_back(patch_loc);
 		}
 
-		new_patch->timestamp = timestamp;
-		new_patch->filesize = file_data.size();
+		patch->timestamp = timestamp;
+		patch->filesize = file_data.size();
+		patch->modification_count = 0;
 
-		if (!yaml_raw_to_patch(file_data, new_patch->patch)) {
+		if (!yaml_raw_to_patch(file_data, patch->patch)) {
 			pr_err("Failed to parse\n");
 			open_patches_.remove_last();
 
@@ -49,9 +50,9 @@ public:
 		}
 
 		// Handle patches saved by legacy firmware with empty knob sets
-		new_patch->patch.trim_empty_knobsets();
+		patch->patch.trim_empty_knobsets();
 		// Handle legacy use of midi poly num
-		new_patch->patch.update_midi_poly_num();
+		patch->patch.update_midi_poly_num();
 
 		return true;
 	}
