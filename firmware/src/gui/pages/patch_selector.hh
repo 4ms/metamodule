@@ -142,7 +142,8 @@ struct PatchSelectorPage : PageBase {
 		auto open_patch_list = patches.get_open_patch_list();
 
 		for (auto &patch : open_patch_list) {
-			auto patch_name = std::string{std::string_view{patch.patch.patch_name}};
+			auto vol_name = std::string{PatchDirList::get_vol_name(patch.loc.vol)};
+			auto patch_name = vol_name + ": " + std::string{std::string_view{patch.patch.patch_name}};
 
 			if (patch.modification_count > 0)
 				patch_name = Gui::red_text("•") + " " + patch_name;
