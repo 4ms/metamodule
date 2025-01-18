@@ -169,8 +169,6 @@ struct PatchViewFileMenu {
 			auto message = patch_storage.get_message();
 
 			if (message.message_type == FileStorageProxy::LoadFileOK) {
-				patches.close_view_patch();
-
 				auto data = patch_storage.get_patch_data(message.bytes_read);
 
 				if (patches.open_patch(data, patch_loc, message.timestamp)) {
