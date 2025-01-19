@@ -88,10 +88,8 @@ struct PatchViewPage : PageBase {
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
 
-		if (args.patch_loc_hash) {
-			file_change_poll.force_next_poll(); // avoid 500ms delay before refreshing the patch
-			poll_patch_file_changed(args.patch_loc_hash.value());
-		}
+		file_change_poll.force_next_poll(); // avoid 500ms delay before refreshing the patch
+		poll_patch_file_changed(patches.get_view_patch_loc_hash());
 
 		if (!needs_refresh) {
 			is_ready = true;
@@ -259,9 +257,7 @@ struct PatchViewPage : PageBase {
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
 
-		if (patch != patches.get_view_patch()) {
-			patch = patches.get_view_patch();
-		}
+		patch = patches.get_view_patch();
 
 		is_patch_playloaded = patch_is_playing(displayed_patch_loc_hash);
 
@@ -351,10 +347,9 @@ struct PatchViewPage : PageBase {
 		if (file_menu.is_visible())
 			file_menu.update();
 		// Don't poll for patch changes while file menu is open:
-		// just an easy way to prevent races on the filesystem
-		else if (args.patch_loc_hash) {
-			poll_patch_file_changed(args.patch_loc_hash.value());
-		}
+		// This is just an easy way to prevent races on the filesystem.
+		else
+			poll_patch_file_changed(patches.get_view_patch_loc_hash());
 	}
 
 private:
@@ -364,6 +359,7 @@ private:
 
 		params.lights.stop_watching_all();
 		params.displays.stop_watching_all();
+
 		if (is_patch_playloaded) {
 			for (const auto &drawn_element : drawn_elements) {
 				auto &gui_el = drawn_element.gui_element;
