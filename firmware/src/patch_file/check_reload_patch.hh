@@ -1,8 +1,10 @@
+#include "gui/gui_state.hh"
 #include "gui/pages/base.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/reload_patch.hh"
 #include "patch_play/patch_playloader.hh"
+
 namespace MetaModule
 {
 
@@ -42,7 +44,7 @@ struct PatchFileChangeChecker {
 		PatchLocation loc = open_patch_manager.get_playing_patch_loc();
 
 		if (patch_loader.has_changed_on_disk(loc)) {
-			pr_dbg("file on disk does not match file in memory (changed on disk)\n");
+			pr_trace("check_playing_patch: File on disk does not match file in memory (changed on disk)\n");
 
 			if (open_patch_manager.get_playing_patch_modification_count() == 0) {
 				version_conflict = false;
@@ -57,11 +59,12 @@ struct PatchFileChangeChecker {
 					if (auto result = patch_loader.reload_patch_file(loc); result.success) {
 						patch_playloader.request_reload_playing_patch(false);
 
-						pr_dbg("patch is muted or auto reload enabled: reloading playing patch\n");
+						pr_trace(
+							"check_playing_patch: patch is muted or auto reload enabled: reloading playing patch\n");
 
 						if (open_patch_manager.get_playing_patch() == open_patch_manager.get_view_patch()) {
 							gui_state.view_patch_file_changed = true;
-							pr_dbg("... also marking view_patch_file_changed\n");
+							pr_trace("check_playing_patch: ... also marking view_patch_file_changed\n");
 						}
 						return Status::OK;
 
@@ -72,15 +75,15 @@ struct PatchFileChangeChecker {
 					// Patch is not muted and auto reload is disabled:
 					// So we just wait until user mutes/unmutes
 					if (gui_state.playing_patch_needs_manual_reload == false)
-						pr_dbg("patch is not muted and auto reload disabled: set ppnmr=true\n");
+						pr_trace("check_playing_patch: patch is not muted and auto reload disabled: set ppnmr=true\n");
 					gui_state.playing_patch_needs_manual_reload = true;
 
 					return Status::OK;
 				}
 			} else {
 				if (version_conflict) {
-					pr_dbg("Version conflict\n");
 					return Status::OK; //only notify once
+
 				} else {
 					version_conflict = true;
 					notify_queue.put({
@@ -94,7 +97,7 @@ struct PatchFileChangeChecker {
 				}
 			}
 		} else {
-			pr_dbg("file on disk matches file in memory\n");
+			pr_trace("check_playing_patch: file on disk matches file in memory\n");
 		}
 		return Status::OK;
 	}

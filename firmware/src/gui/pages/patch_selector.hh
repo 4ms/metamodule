@@ -218,7 +218,13 @@ struct PatchSelectorPage : PageBase {
 		for (auto &p : dir.files) {
 			roller_text += prefix + std::string{p.patchname} + "\n";
 
-			roller_item_infos.emplace_back(EntryInfo{DirEntryKind::File, vol, dir.name, p.filename, p.link_vol});
+			roller_item_infos.emplace_back(EntryInfo{
+				.kind = DirEntryKind::File,
+				.vol = vol,
+				.path = dir.name,
+				.name = p.filename,
+				.link_vol = p.link_vol,
+			});
 		}
 	}
 
@@ -334,17 +340,18 @@ struct PatchSelectorPage : PageBase {
 
 			case State::LoadPatchFile: {
 				if (!patchloader.has_changed_on_disk(selected_patch)) {
-					pr_dbg("Patch file is already open\n");
+					pr_dbg("Patch file is already open and unchanged on disk\n");
 					view_loaded_patch();
 
 				} else if (patches.get_modification_count(selected_patch) > 0) {
+					pr_dbg("Patch file is already open and changed on disk AND in memory\n");
 					// Has changed on disk AND there are unsaved changes
 					// PatchViewPage will notify the user of this.
 					view_loaded_patch();
 
 				} else {
 					show_spinner();
-					pr_dbg("Loading patch file from disk\n");
+					pr_dbg("(Re-)Loading patch file from disk\n");
 					auto result = patchloader.reload_patch_file(selected_patch, [this] {
 						update_spinner();
 						lv_timer_handler();
