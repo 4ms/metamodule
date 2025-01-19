@@ -362,6 +362,8 @@ private:
 
 	void watch_lights() {
 
+		params.lights.stop_watching_all();
+		params.displays.stop_watching_all();
 		if (is_patch_playloaded) {
 			for (const auto &drawn_element : drawn_elements) {
 				auto &gui_el = drawn_element.gui_element;
