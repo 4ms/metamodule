@@ -508,7 +508,7 @@ private:
 
 	void clear() {
 		for (auto &m : module_canvases)
-			lv_obj_del_async(m);
+			lv_obj_del(m);
 
 		module_canvases.clear();
 		drawn_elements.clear();
