@@ -2,43 +2,25 @@
 #include "conf/panel_conf.hh"
 #include "dynload/plugin_manager.hh"
 #include "gui/elements/element_name.hh"
+#include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
 #include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
+#include "patch_file/check_reload_patch.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/settings.hh"
+#include "util/poll_change.hh"
 
 // Use for helpers:
 
 namespace MetaModule
 {
-
-enum class PageChangeDirection { Back, Forward, Jump };
-
-struct GuiState {
-	struct CableBeginning {
-		Jack jack;
-		ElementType type;
-		bool has_connections;
-	};
-	std::optional<CableBeginning> new_cable{};
-	bool already_displayed_cable_instructions = false;
-
-	bool force_redraw_patch{};
-	bool playing_patch_needs_manual_reload{};
-	bool view_patch_file_changed{};
-
-	bool do_write_settings{};
-	uint32_t write_settings_after_ms{};
-
-	Toggler back_button{};
-};
 
 struct PatchContext {
 	FileStorageProxy &patch_storage;
@@ -53,6 +35,7 @@ struct PatchContext {
 	UserSettings &settings;
 	PluginManager &plugin_manager;
 	FatFileIO &ramdisk;
+	PatchFileChangeChecker &file_change_checker;
 };
 
 struct PageBase {
@@ -68,6 +51,9 @@ struct PageBase {
 	UserSettings &settings;
 
 	PageArguments args;
+
+	PatchFileChangeChecker &file_change_checker;
+	PollChange file_change_poll{500};
 
 	PageId id;
 
@@ -91,6 +77,7 @@ struct PageBase {
 		, page_list{info.page_list}
 		, gui_state{info.gui_state}
 		, settings{info.settings}
+		, file_change_checker{info.file_change_checker}
 		, id{id} {
 		page_list.register_page(this, id);
 	}
@@ -145,6 +132,22 @@ struct PageBase {
 		} else {
 			return false;
 		}
+	}
+
+	// Each page calls this periodically.
+	// TODO: Try running this automatically, and have pages opt-out of it when ICC bus is busy or patch should not be reloaded?
+	void poll_patch_file_changed(PatchLocHash patch_loc_hash) {
+		file_change_poll.poll(get_time(), [this, patch_loc_hash] {
+			auto status = patch_is_playing(patch_loc_hash) ? file_change_checker.check_playing_patch() :
+															 file_change_checker.check_view_patch();
+
+			if (status == PatchFileChangeChecker::Status::FailLoadFile) {
+				pr_err("Error: File failed to load\n");
+				//?? what to do here?
+			}
+
+			return false; //ignored
+		});
 	}
 };
 } // namespace MetaModule

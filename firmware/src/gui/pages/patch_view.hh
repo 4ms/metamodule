@@ -16,14 +16,10 @@
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
-#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
-#include "patch_file/check_reload_patch.hh"
-#include "patch_file/reload_patch.hh"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
-#include "util/poll_change.hh"
 
 namespace MetaModule
 {
@@ -37,8 +33,7 @@ struct PatchViewPage : PageBase {
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
 		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list, gui_state}
-		, map_ring_display{settings.patch_view}
-		, file_change_checker{patch_storage, patches, patch_playloader, gui_state, notify_queue} {
+		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -93,8 +88,10 @@ struct PatchViewPage : PageBase {
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
 
-		file_change_poll.force_next_poll(); // avoid 500ms delay before refreshing the patch
-		poll_patch_file_changed();
+		if (args.patch_loc_hash) {
+			file_change_poll.force_next_poll(); // avoid 500ms delay before refreshing the patch
+			poll_patch_file_changed(args.patch_loc_hash.value());
+		}
 
 		if (!needs_refresh) {
 			is_ready = true;
@@ -353,25 +350,14 @@ struct PatchViewPage : PageBase {
 
 		if (file_menu.is_visible())
 			file_menu.update();
-		else {
-			poll_patch_file_changed();
+		// Don't poll for patch changes while file menu is open:
+		// just an easy way to prevent races on the filesystem
+		else if (args.patch_loc_hash) {
+			poll_patch_file_changed(args.patch_loc_hash.value());
 		}
 	}
 
 private:
-	void poll_patch_file_changed() {
-		file_change_poll.poll(get_time(), [this] {
-			auto status = is_patch_playloaded ? file_change_checker.check_playing_patch() :
-												file_change_checker.check_view_patch();
-
-			if (status == PatchFileChangeChecker::Status::FailLoadFile) {
-				pr_err("Error: File failed to load\n");
-				//?? what to do here?
-			}
-
-			return false; //ignored
-		});
-	}
 	std::vector<std::vector<float>> light_vals;
 
 	void watch_lights() {
@@ -718,9 +704,6 @@ private:
 		PatchViewPage *page;
 		uint32_t selected_module_id;
 	};
-
-	PatchFileChangeChecker file_change_checker;
-	PollChange file_change_poll{500};
 };
 
 } // namespace MetaModule

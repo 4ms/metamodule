@@ -15,9 +15,7 @@
 #include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view.hh"
-#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
-#include "patch_file/reload_patch.hh"
 
 namespace MetaModule
 {
@@ -32,8 +30,7 @@ struct ModuleViewPage : PageBase {
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
-		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
-		, file_change_checker{patch_storage, patches, patch_playloader, gui_state, notify_queue} {
+		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller) {
 
 		init_bg(ui_MappingMenu);
 
@@ -75,8 +72,10 @@ struct ModuleViewPage : PageBase {
 
 		this_module_id = args.module_id.value_or(this_module_id);
 
-		file_change_poll.force_next_poll();
-		poll_patch_file_changed();
+		if (args.patch_loc_hash) {
+			file_change_poll.force_next_poll();
+			poll_patch_file_changed(args.patch_loc_hash.value());
+		}
 
 		if (!read_slug()) {
 			notify_queue.put(
@@ -345,10 +344,13 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		if (action_menu.is_visible())
+		if (action_menu.is_visible()) {
 			action_menu.update();
-		else {
-			poll_patch_file_changed();
+			// Don't poll for patch changes while action menu is open
+			// just an easy way to prevent races on the filesystem
+			// since this menu might access filesystem in the future
+		} else if (args.patch_loc_hash) {
+			poll_patch_file_changed(args.patch_loc_hash.value());
 		}
 
 		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
@@ -466,20 +468,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 private:
-	void poll_patch_file_changed() {
-		file_change_poll.poll(get_time(), [this] {
-			auto status = is_patch_playloaded ? file_change_checker.check_playing_patch() :
-												file_change_checker.check_view_patch();
-
-			if (status == PatchFileChangeChecker::Status::FailLoadFile) {
-				pr_err("Error: File failed to load\n");
-				//?? what to do here?
-			}
-
-			return false; //ignored
-		});
-	}
-
 	void show_roller() {
 		mode = ViewMode::List;
 		mapping_pane.hide();
@@ -746,9 +734,6 @@ private:
 	enum class ViewMode { List, Mapping } mode{ViewMode::List};
 
 	RollerHoverText roller_hover;
-
-	PatchFileChangeChecker file_change_checker;
-	PollChange file_change_poll{500};
 };
 
 } // namespace MetaModule

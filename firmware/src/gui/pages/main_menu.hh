@@ -74,6 +74,8 @@ struct MainMenuPage : PageBase {
 		}
 
 		update_load_text(metaparams, ui_MainMenuLoadMeter);
+
+		poll_patch_file_changed(patches.get_playing_patch_loc_hash());
 	}
 
 	void blur() final {
