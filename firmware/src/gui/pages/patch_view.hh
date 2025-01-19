@@ -302,7 +302,7 @@ struct PatchViewPage : PageBase {
 				desc_panel.back_event();
 
 			} else if (file_menu.is_visible()) {
-				file_menu.hide();
+				file_menu.back();
 
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);

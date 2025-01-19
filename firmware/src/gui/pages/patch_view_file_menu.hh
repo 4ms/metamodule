@@ -62,6 +62,9 @@ struct PatchViewFileMenu {
 		if (save_dialog.is_visible()) {
 			save_dialog.hide();
 
+		} else if (confirm_popup.is_visible()) {
+			confirm_popup.hide();
+
 		} else if (visible) {
 			hide();
 		}
@@ -69,6 +72,7 @@ struct PatchViewFileMenu {
 
 	void hide() {
 		save_dialog.hide();
+		confirm_popup.hide();
 		hide_menu();
 	}
 
