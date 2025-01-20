@@ -301,7 +301,7 @@ struct PatchSelectorPage : PageBase {
 					update_load_text(metaparams, ui_LoadMeter);
 				} else {
 					// Poll for patch file changes in between polling for patch list updates
-					poll_patch_file_changed(patches.get_playing_patch_loc_hash());
+					poll_patch_file_changed();
 				}
 			} break;
 

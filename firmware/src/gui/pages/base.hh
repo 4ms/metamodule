@@ -136,14 +136,27 @@ struct PageBase {
 
 	// Each page calls this periodically.
 	// TODO: Try running this automatically, and have pages opt-out of it when ICC bus is busy or patch should not be reloaded?
-	void poll_patch_file_changed(PatchLocHash patch_loc_hash) {
-		file_change_poll.poll(get_time(), [this, patch_loc_hash] {
-			auto status = patch_is_playing(patch_loc_hash) ? file_change_checker.check_playing_patch() :
-															 file_change_checker.check_view_patch();
+	void poll_patch_file_changed() {
 
-			if (status == PatchFileChangeChecker::Status::FailLoadFile) {
-				pr_err("Error: File failed to load\n");
-				//?? what to do here?
+		file_change_poll.poll(get_time(), [this] {
+			auto playing_patch = patches.get_playing_patch();
+
+			if (playing_patch) {
+				auto status = file_change_checker.check_playing_patch();
+
+				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
+					pr_err("Error: Failed to load playing patc file: '%s')\n",
+						   patches.get_playing_patch_loc().filename.c_str());
+				}
+			}
+
+			auto view_patch = patches.get_view_patch();
+			if (view_patch && view_patch != playing_patch) {
+				auto status = file_change_checker.check_view_patch();
+
+				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
+					pr_err("Error: File failed to load\n");
+				}
 			}
 
 			return false; //ignored

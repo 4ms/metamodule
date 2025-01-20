@@ -74,7 +74,7 @@ struct ModuleViewPage : PageBase {
 
 		if (args.patch_loc_hash) {
 			file_change_poll.force_next_poll();
-			poll_patch_file_changed(args.patch_loc_hash.value());
+			poll_patch_file_changed();
 		}
 
 		if (!read_slug()) {
@@ -350,7 +350,7 @@ struct ModuleViewPage : PageBase {
 			// just an easy way to prevent races on the filesystem
 			// since this menu might access filesystem in the future
 		} else if (args.patch_loc_hash) {
-			poll_patch_file_changed(args.patch_loc_hash.value());
+			poll_patch_file_changed();
 		}
 
 		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {

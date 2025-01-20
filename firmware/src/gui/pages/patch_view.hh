@@ -89,7 +89,7 @@ struct PatchViewPage : PageBase {
 			needs_refresh = true;
 
 		file_change_poll.force_next_poll(); // avoid 500ms delay before refreshing the patch
-		poll_patch_file_changed(patches.get_view_patch_loc_hash());
+		poll_patch_file_changed();
 
 		if (!needs_refresh) {
 			is_ready = true;
@@ -349,7 +349,7 @@ struct PatchViewPage : PageBase {
 		// Don't poll for patch changes while file menu is open:
 		// This is just an easy way to prevent races on the filesystem.
 		else
-			poll_patch_file_changed(patches.get_view_patch_loc_hash());
+			poll_patch_file_changed();
 	}
 
 private:
