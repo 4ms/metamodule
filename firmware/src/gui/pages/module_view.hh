@@ -78,15 +78,15 @@ struct ModuleViewPage : PageBase {
 		}
 
 		if (!read_slug()) {
-			notify_queue.put(
-				{"Cannot determine module to view. Patch file may be corrupted.", Notification::Priority::Error});
+			page_list.request_new_page(PageId::PatchView, args);
+			pr_err("Module id out of range, or patch is invalid\n");
 			return;
 		}
 
 		moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
-			notify_queue.put(
-				{"Cannot show module " + std::string(slug) + ". Never heard of it!", Notification::Priority::Error});
+			page_list.request_new_page(PageId::PatchView, args);
+			pr_err("Module hp is 0, cannot draw module\n");
 			return;
 		}
 
@@ -346,12 +346,9 @@ struct ModuleViewPage : PageBase {
 
 		if (action_menu.is_visible()) {
 			action_menu.update();
-			// Don't poll for patch changes while action menu is open
-			// just an easy way to prevent races on the filesystem
-			// since this menu might access filesystem in the future
-		} else if (args.patch_loc_hash) {
-			poll_patch_file_changed();
 		}
+
+		poll_patch_file_changed();
 
 		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
@@ -366,6 +363,24 @@ struct ModuleViewPage : PageBase {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
+		}
+
+		if (gui_state.view_patch_file_changed) {
+			gui_state.view_patch_file_changed = false;
+
+			abort_cable(gui_state, notify_queue);
+
+			// Check if module slug changed: go to patch view if it did
+			// Otherwise re-draw the patch
+			auto prev_slug = slug;
+			patch = patches.get_view_patch();
+			auto ok = read_slug();
+			if (!ok || prev_slug != slug) {
+				page_list.request_new_page(PageId::PatchView, args);
+			} else {
+				prepare_focus();
+			}
+			gui_state.force_redraw_patch = true; // this informs patch_view to refresh
 		}
 
 		if (is_patch_playloaded) {

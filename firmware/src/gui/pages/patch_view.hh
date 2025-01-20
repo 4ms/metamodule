@@ -128,6 +128,9 @@ struct PatchViewPage : PageBase {
 	}
 
 	void redraw_patch() {
+		lv_group_remove_all_objs(group);
+		lv_group_set_editing(group, false);
+
 		clear();
 
 		lv_hide(modules_cont);
@@ -146,9 +149,6 @@ struct PatchViewPage : PageBase {
 
 		module_canvases.reserve(patch->module_slugs.size());
 		module_ids.reserve(patch->module_slugs.size());
-
-		lv_group_remove_all_objs(group);
-		lv_group_set_editing(group, false);
 
 		lv_group_add_obj(group, ui_PlayButton);
 		lv_group_add_obj(group, ui_InfoButton);
@@ -284,7 +284,14 @@ struct PatchViewPage : PageBase {
 
 		if (gui_state.view_patch_file_changed) {
 			gui_state.view_patch_file_changed = false;
-			pr_dbg("view_patch_file_changed: redrawing patching\n");
+
+			abort_cable(gui_state, notify_queue);
+
+			if (auto obj = lv_group_get_focused(group)) {
+				if (std::ranges::find(module_canvases, obj) != module_canvases.end()) {
+					args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+				}
+			}
 			redraw_patch();
 		}
 
@@ -321,7 +328,7 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
-			update_changed_params();
+			redraw_elements();
 
 			if (gui_state.playing_patch_needs_manual_reload) {
 				auto flash = get_time() % 1000 < 500 ? 2 : 0;
@@ -347,8 +354,7 @@ struct PatchViewPage : PageBase {
 
 		if (file_menu.is_visible())
 			file_menu.update();
-		// Don't poll for patch changes while file menu is open:
-		// This is just an easy way to prevent races on the filesystem.
+		// Don't poll for patch changes while file menu is open to prevent races on the filesystem.
 		else
 			poll_patch_file_changed();
 	}
@@ -357,7 +363,6 @@ private:
 	std::vector<std::vector<float>> light_vals;
 
 	void watch_lights() {
-
 		params.lights.stop_watching_all();
 		params.displays.stop_watching_all();
 
@@ -396,7 +401,7 @@ private:
 		}
 	}
 
-	void update_changed_params() {
+	void redraw_elements() {
 
 		// copy light values from params
 		// indexed by module id and light element id
@@ -506,8 +511,11 @@ private:
 	}
 
 	void clear() {
-		for (auto &m : module_canvases)
+		for (auto &m : module_canvases) {
 			lv_obj_del(m);
+		}
+		highlighted_module_obj = nullptr;
+		highlighted_module_id = std::nullopt;
 
 		module_canvases.clear();
 		drawn_elements.clear();
@@ -608,7 +616,6 @@ private:
 		} else {
 			if (page->patch_playloader.is_audio_muted()) {
 				if (page->gui_state.playing_patch_needs_manual_reload) {
-					pr_dbg("Patch force reloaded\n");
 					page->patch_playloader.request_load_view_patch();
 					page->gui_state.playing_patch_needs_manual_reload = false;
 				} else {

@@ -49,11 +49,7 @@ struct PatchFileChangeChecker {
 			if (open_patch_manager.get_playing_patch_modification_count() == 0) {
 				version_conflict = false;
 
-				// Patch changed on disk, but not in memory, so reload it if muted
-				// or if auto reload is enabled
-				// Otherwise if we're playing and disabled auto-reload, then PatchView/ModuleView
-				// will see the patch_file_changed flag and reload if we stop/start playback
-				// or do Revert or Reload from the fiel menu
+				// Patch changed on disk, but not in memory, so reload it if muted or if auto reload is enabled
 				if (patch_playloader.is_audio_muted() || auto_reload) {
 
 					if (auto result = patch_loader.reload_patch_file(loc); result.success) {
@@ -86,9 +82,12 @@ struct PatchFileChangeChecker {
 
 				} else {
 					version_conflict = true;
+					std::string message = "A new version of ";
+					message.append(loc.filename.c_str());
+					message.append("was just transferred, but you have unsaved changes. Please save, revert, or "
+								   "duplicate the patch");
 					notify_queue.put({
-						.message = "A new version of the patch that's playing was just transferred, but "
-								   "you have unsaved changes. Please save, revert, or duplicate the patch",
+						.message = message,
 						.priority = Notification::Priority::Info,
 						.duration_ms = 3000,
 					});
@@ -103,26 +102,38 @@ struct PatchFileChangeChecker {
 	}
 
 	Status check_view_patch() {
-		auto auto_reload = true; //settings.filesystem.auto_reload_patch_file;
-		PatchLocation loc = open_patch_manager.get_playing_patch_loc();
+		PatchLocation viewloc = open_patch_manager.get_view_patch_loc();
 
-		// If we're viewing a different patch than the one that's playing...
-		if (open_patch_manager.get_playing_patch() != open_patch_manager.get_view_patch()) {
+		if (patch_loader.has_changed_on_disk(viewloc)) {
+			pr_dbg("check_view_patch: File on disk does not match file in memory (changed on disk)\n");
 
-			PatchLocation viewloc = open_patch_manager.get_view_patch_loc();
-			// ...And the view patch changed on disk
-			if (patch_loader.has_changed_on_disk(viewloc)) {
-				// And it didn't change in memory
-				if (open_patch_manager.get_view_patch_modification_count() == 0) {
-					if (auto_reload) {
-						if (auto result = patch_loader.reload_patch_file(loc); result.success) {
-							gui_state.view_patch_file_changed = true;
-						} else
-							return Status::FailLoadFile;
-					}
-				} else {
-					// It changed in memory and on disk:
+			if (open_patch_manager.get_view_patch_modification_count() == 0) {
+				version_conflict = false;
+
+				if (auto result = patch_loader.reload_patch_file(viewloc); result.success) {
+					pr_dbg("check_view_patch: Marking view_patch_file_changed true\n");
+					notify_queue.put({"New patch file detected, refreshed", Notification::Priority::Status, 800});
+
 					gui_state.view_patch_file_changed = true;
+				} else
+					return Status::FailLoadFile;
+
+			} else {
+				if (version_conflict) {
+					return Status::OK; //only notify once
+
+				} else {
+					version_conflict = true;
+					std::string message = "A new version of ";
+					message.append(viewloc.filename.c_str());
+					message.append("was just transferred, but you have unsaved changes. Please save, revert, or "
+								   "duplicate the patch");
+					notify_queue.put({
+						.message = message,
+						.priority = Notification::Priority::Info,
+						.duration_ms = 3000,
+					});
+
 					return Status::VersionConflict;
 				}
 			}

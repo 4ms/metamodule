@@ -25,10 +25,11 @@ struct KnobSetViewPage : PageBase {
 		, patch{patches.get_view_patch()} {
 		init_bg(base);
 		lv_group_set_editing(group, false);
-		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
+
 		// Use Prev button for Jack Map
 		lv_show(ui_PreviousKnobSet);
 		lv_obj_add_event_cb(ui_PreviousKnobSet, goto_jackmap_cb, LV_EVENT_CLICKED, this);
+		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
 		lv_label_set_text(ui_PreviousKnobSetLabel, "Jacks");
 
 		lv_obj_add_event_cb(ui_KnobSetNameText, rename_knobset_cb, LV_EVENT_CLICKED, this);
