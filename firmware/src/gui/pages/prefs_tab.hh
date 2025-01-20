@@ -102,6 +102,10 @@ struct PrefsTab : SystemMenuTab {
 		update_dropdowns_from_settings();
 	}
 
+	bool is_idle() override {
+		return true;
+	}
+
 	void update_dropdowns_from_settings() {
 		auto get_index = [](auto dataset, auto test) {
 			int idx = -1;

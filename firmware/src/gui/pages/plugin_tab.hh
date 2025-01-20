@@ -132,6 +132,10 @@ struct PluginTab : SystemMenuTab {
 		}
 	}
 
+	bool is_idle() override {
+		return plugin_manager.is_idle();
+	}
+
 private:
 	void reset_group() {
 		lv_group_remove_all_objs(group);

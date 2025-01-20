@@ -16,6 +16,10 @@ struct SystemMenuTab {
 
 	virtual void update() {
 	}
+
+	virtual bool is_idle() {
+		return false;
+	}
 };
 
 } // namespace MetaModule

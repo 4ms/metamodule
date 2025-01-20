@@ -280,6 +280,11 @@ public:
 		return status;
 	}
 
+	bool is_idle() {
+		return status.state == State::Idle || status.state == State::NotInit || status.state == State::Success ||
+			   status.state == State::Error;
+	}
+
 	void parse_versions() {
 		for (auto &plugin : plugin_files) {
 			const auto name = std::string{plugin.plugin_name};

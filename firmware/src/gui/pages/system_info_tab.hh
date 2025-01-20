@@ -75,6 +75,10 @@ struct InfoTab : SystemMenuTab {
 		update_wifi_expander();
 	}
 
+	bool is_idle() override {
+		return detect_wifi.is_idle();
+	}
+
 	void update_wifi_expander() {
 #ifdef SIMULATOR
 		lv_show(ui_SystemMenuExpanders);
