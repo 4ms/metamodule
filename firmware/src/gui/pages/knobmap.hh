@@ -148,6 +148,7 @@ struct KnobMapPage : PageBase {
 			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, s_val);
 		}
 
+		poll_patch_file_changed();
 		// add_map_popup.update(params);
 	}
 

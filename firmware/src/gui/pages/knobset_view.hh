@@ -264,6 +264,8 @@ struct KnobSetViewPage : PageBase {
 				lv_arc_set_value(arc, s_val * 120.f);
 			}
 		}
+
+		poll_patch_file_changed();
 	}
 
 	void blur() final {
