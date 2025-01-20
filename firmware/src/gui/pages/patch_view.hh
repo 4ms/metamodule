@@ -60,6 +60,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+
 		is_ready = false;
 
 		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
