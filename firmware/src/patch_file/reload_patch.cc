@@ -103,14 +103,10 @@ Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()>
 // Returns true if timestamp/filesize on disk differs from the open patch (or there is no open patch)
 bool PatchLoader::has_changed_on_disk(PatchLocation const &loc) {
 	if (auto openpatch = patches.find_open_patch(loc)) {
-		if (!check_file_changed(loc, openpatch->timestamp, openpatch->filesize)) {
-			patches.start_viewing(openpatch);
-			// pr_dbg("Patch %s is open and timestamp/filesize match\n", loc.filename.c_str());
-			return false;
-		}
+		return check_file_changed(loc, openpatch->timestamp, openpatch->filesize);
 	}
 
-	return true;
+	return true; //not found, return true because patch needs to be loaded from disk
 }
 
 } // namespace MetaModule
