@@ -55,12 +55,8 @@ struct PatchFileChangeChecker {
 					if (auto result = patch_loader.reload_patch_file(loc); result.success) {
 						patch_playloader.request_reload_playing_patch(false);
 
-						pr_trace(
-							"check_playing_patch: patch is muted or auto reload enabled: reloading playing patch\n");
-
 						if (open_patch_manager.get_playing_patch() == open_patch_manager.get_view_patch()) {
 							gui_state.view_patch_file_changed = true;
-							pr_trace("check_playing_patch: ... also marking view_patch_file_changed\n");
 						}
 						return Status::OK;
 
@@ -69,9 +65,7 @@ struct PatchFileChangeChecker {
 					}
 				} else {
 					// Patch is not muted and auto reload is disabled:
-					// So we just wait until user mutes/unmutes
-					if (gui_state.playing_patch_needs_manual_reload == false)
-						pr_trace("check_playing_patch: patch is not muted and auto reload disabled: set ppnmr=true\n");
+					// So we just notify the user
 					gui_state.playing_patch_needs_manual_reload = true;
 
 					return Status::OK;
@@ -84,7 +78,7 @@ struct PatchFileChangeChecker {
 					version_conflict = true;
 					std::string message = "A new version of ";
 					message.append(loc.filename.c_str());
-					message.append("was just transferred, but you have unsaved changes. Please save, revert, or "
+					message.append(" was just transferred, but you have unsaved changes. Please save, revert, or "
 								   "duplicate the patch");
 					notify_queue.put({
 						.message = message,
@@ -126,7 +120,7 @@ struct PatchFileChangeChecker {
 					version_conflict = true;
 					std::string message = "A new version of ";
 					message.append(viewloc.filename.c_str());
-					message.append("was just transferred, but you have unsaved changes. Please save, revert, or "
+					message.append(" was just transferred, but you have unsaved changes. Please save, revert, or "
 								   "duplicate the patch");
 					notify_queue.put({
 						.message = message,

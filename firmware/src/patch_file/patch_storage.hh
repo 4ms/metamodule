@@ -173,9 +173,7 @@ public:
 					break;
 			}
 
-			if (ramdisk_.unmount_drive())
-				pr_dbg("Unmounted ramdisk\n");
-			else
+			if (!ramdisk_.unmount_drive())
 				pr_err("Failed to unmount ramdisk\n");
 
 			// ramdisk_.print_dir("/", 4);
