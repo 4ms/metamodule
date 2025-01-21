@@ -174,9 +174,29 @@ struct KnobSetViewPage : PageBase {
 		handle_changed_active_status();
 
 		if (knobset) {
-			for (auto [arc, s_param, map] : zip(arcs, static_params, knobset->set)) {
-				float s_val = s_param ? map.unmap_val(s_param->value) : 0;
-				lv_arc_set_value(arc, s_val * 120.f);
+			auto watched_params = params.param_watcher.active_watched_params();
+
+			for (auto const &p : watched_params) {
+				if (!p.is_active())
+					continue;
+
+				auto map_it = std::ranges::find_if(knobset->set, [&p](MappedKnob const &m) {
+					return m.module_id == p.module_id && m.param_id == p.param_id;
+				});
+				if (map_it == knobset->set.end())
+					continue;
+				auto idx = std::distance(knobset->set.begin(), map_it);
+				auto arc_val = map_it->unmap_val(p.value) * 120.f;
+				lv_arc_set_value(arcs[idx], arc_val);
+
+				if (map_it->is_panel_knob()) {
+					auto phys_val = params.knobs[map_it->panel_knob_id].val;
+					auto mapped_phys_val = map_it->get_mapped_val(phys_val);
+
+					auto is_tracking = patch_playloader.is_param_tracking(p.module_id, p.param_id);
+					update_indicator(indicators[idx], is_tracking, mapped_phys_val);
+					update_knob(arcs[idx], is_tracking, arc_val);
+				}
 			}
 		}
 
@@ -187,6 +207,30 @@ struct KnobSetViewPage : PageBase {
 			if (kb_popup.is_visible())
 				kb_popup.hide();
 			prepare_focus();
+		}
+	}
+
+	void update_indicator(lv_obj_t *indicator, bool is_tracking, float val) {
+		if (is_tracking) {
+			lv_hide(indicator);
+		} else {
+			lv_obj_set_style_transform_angle(indicator, val * 2500.f - 1250.f, LV_PART_MAIN);
+			lv_show(indicator);
+		}
+	}
+
+	void update_knob(lv_obj_t *arc, bool is_tracking, float arc_val) {
+		if (arc_val > lv_arc_get_max_value(arc) || arc_val < lv_arc_get_min_value(arc)) {
+			lv_obj_set_style_radius(arc, 0, LV_PART_KNOB);
+			lv_obj_set_style_bg_color(arc, lv_color_hex(0x000000), LV_PART_KNOB);
+		} else {
+			lv_obj_set_style_radius(arc, 20, LV_PART_KNOB);
+
+			if (is_tracking) {
+				lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+			} else {
+				lv_obj_set_style_bg_color(arc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
+			}
 		}
 	}
 
@@ -224,12 +268,9 @@ private:
 			lv_arc_set_mode(knob, LV_ARC_MODE_NORMAL);
 			lv_arc_set_bg_angles(knob, min_arc, max_arc);
 			lv_arc_set_value(knob, 0);
-			lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
 
 			auto label = get_label(cont);
 			lv_label_set_text(label, "");
-
-			disable(cont, i);
 
 			i++;
 		}

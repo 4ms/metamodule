@@ -232,7 +232,7 @@ struct ModuleViewPage : PageBase {
 			roller_idx++;
 		}
 
-		if (is_patch_playing) {
+		if (is_patch_playloaded) {
 			if (module_menu.create_options_menu(this_module_id)) {
 				opts += Gui::orange_text("Options:") + "\n";
 				opts += " >>>\n";
@@ -279,7 +279,7 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_refr_size(ui_ElementRollerPanel);
 		auto roller_width = lv_obj_get_width(ui_ElementRollerPanel);
-		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
+		mapping_pane.prepare_focus(group, roller_width, is_patch_playloaded);
 
 		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
 		if (cur_el && args.detail_mode == true) {
@@ -356,7 +356,7 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		if (action_menu.is_visible())
+		if (action_menu.is_visible()) {
 			action_menu.update();
 		}
 

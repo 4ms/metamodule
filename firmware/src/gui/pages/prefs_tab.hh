@@ -126,38 +126,6 @@ struct PrefsTab : SystemMenuTab {
 		update_dropdowns_from_settings();
 	}
 
-	// Returns true if this page uses the back event
-	bool consume_back_event() override {
-		if (lv_dropdown_is_open(ui_SystemPrefsAudioSampleRateDropdown)) {
-			lv_dropdown_close(ui_SystemPrefsAudioSampleRateDropdown);
-			lv_group_focus_obj(ui_SystemPrefsAudioSampleRateDropdown);
-			lv_group_set_editing(group, false);
-			return true;
-
-		} else if (lv_dropdown_is_open(ui_SystemPrefsAudioBlocksizeDropdown)) {
-			lv_dropdown_close(ui_SystemPrefsAudioBlocksizeDropdown);
-			lv_group_focus_obj(ui_SystemPrefsAudioBlocksizeDropdown);
-			lv_group_set_editing(group, false);
-			return true;
-
-		} else if (lv_dropdown_is_open(ui_SystemPrefsAudioOverrunRetriesDropdown)) {
-			lv_dropdown_close(ui_SystemPrefsAudioOverrunRetriesDropdown);
-			lv_group_focus_obj(ui_SystemPrefsAudioOverrunRetriesDropdown);
-			lv_group_set_editing(group, false);
-			return true;
-
-		} else if (lv_dropdown_is_open(ui_SystemPrefsScreensaverTimeDropdown)) {
-			lv_dropdown_close(ui_SystemPrefsScreensaverTimeDropdown);
-			lv_group_focus_obj(ui_SystemPrefsScreensaverTimeDropdown);
-			lv_group_set_editing(group, false);
-			return true;
-
-		} else {
-			update_settings_from_dropdown();
-			return false;
-		}
-	}
-
 	bool is_idle() override {
 		return true;
 	}
