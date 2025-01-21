@@ -270,7 +270,7 @@ private:
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
 		std::string confirm_msg =
-			"Delete " + std::string(page->patches.get_view_patch_filename()) + " on disk? This cannot be undone.";
+			"Delete " + page->patches.get_view_patch_filename() + " on disk? This cannot be undone.";
 
 		page->patch_loc = {page->patches.get_view_patch_filename(), page->patches.get_view_patch_vol()};
 		page->confirm_popup.show(
@@ -288,7 +288,7 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		std::string confirm_msg = "Revert " + std::string(page->patches.get_view_patch_filename()) +
+		std::string confirm_msg = "Revert " + page->patches.get_view_patch_filename() +
 								  " to last saved version on disk? This cannot be undone.";
 
 		page->patch_loc = {page->patches.get_view_patch_filename(), page->patches.get_view_patch_vol()};

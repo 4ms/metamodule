@@ -151,7 +151,7 @@ public:
 		}
 	}
 
-	std::string_view get_view_patch_filename() {
+	std::string get_view_patch_filename() {
 		return get_view_patch_loc().filename;
 	}
 
