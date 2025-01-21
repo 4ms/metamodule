@@ -92,6 +92,10 @@ struct PatchViewPage : PageBase {
 		file_change_poll.force_next_poll(); // avoid 500ms delay before refreshing the patch
 		poll_patch_file_changed();
 
+		if (patch_file_timestamp != patches.get_view_patch_timestamp()) {
+			needs_refresh = true;
+		}
+
 		if (!needs_refresh) {
 			is_ready = true;
 			watch_lights();
@@ -705,6 +709,7 @@ private:
 
 	PatchLocHash displayed_patch_loc_hash;
 	uint32_t patch_revision = 0xFFFFFFFF;
+	uint32_t patch_file_timestamp = 0;
 
 	struct focussed_context {
 		PatchViewPage *page;

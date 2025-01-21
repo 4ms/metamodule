@@ -348,8 +348,6 @@ struct ModuleViewPage : PageBase {
 			action_menu.update();
 		}
 
-		poll_patch_file_changed();
-
 		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
@@ -364,6 +362,8 @@ struct ModuleViewPage : PageBase {
 			update_map_ring_style();
 			update_cable_style();
 		}
+
+		poll_patch_file_changed();
 
 		if (gui_state.view_patch_file_changed) {
 			gui_state.view_patch_file_changed = false;
@@ -380,7 +380,6 @@ struct ModuleViewPage : PageBase {
 			} else {
 				prepare_focus();
 			}
-			gui_state.force_redraw_patch = true; // this informs patch_view to refresh
 		}
 
 		if (is_patch_playloaded) {

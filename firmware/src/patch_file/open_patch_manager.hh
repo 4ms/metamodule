@@ -194,6 +194,10 @@ public:
 		return view_patch_ ? view_patch_->modification_count : 0;
 	}
 
+	uint32_t get_view_patch_timestamp() {
+		return view_patch_ ? view_patch_->timestamp : 0;
+	}
+
 	unsigned get_playing_patch_modification_count() {
 		return playing_patch_ ? playing_patch_->modification_count : 0;
 	}
