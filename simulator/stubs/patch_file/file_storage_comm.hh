@@ -40,126 +40,133 @@ struct SimulatorFileStorageComm {
 	}
 
 	[[nodiscard]] bool send_message(const IntercoreStorageMessage &msg) {
-		using enum IntercoreStorageMessage::MessageType;
+		try {
 
-		switch (msg.message_type) {
-			case RequestLoadFile: {
-				requested_view_patch_loc_ = PatchLocation{msg.filename, msg.vol_id};
-				raw_patch_data_ = msg.buffer;
-				uint32_t timestamp;
-				auto bytes_read = load_patch_file(requested_view_patch_loc_, &timestamp);
-				reply = {.message_type = bytes_read ? LoadFileOK : LoadFileFailed,
-						 .bytes_read = bytes_read,
-						 .vol_id = requested_view_patch_loc_.vol,
-						 .filename = requested_view_patch_loc_.filename,
-						 .timestamp = timestamp};
-			} break;
+			using enum IntercoreStorageMessage::MessageType;
 
-			case RequestRefreshPatchList: {
-				// TODO: Check if anything changed in hostfs
+			switch (msg.message_type) {
+				case RequestLoadFile: {
+					requested_view_patch_loc_ = PatchLocation{msg.filename, msg.vol_id};
+					raw_patch_data_ = msg.buffer;
+					uint32_t timestamp;
+					auto bytes_read = load_patch_file(requested_view_patch_loc_, &timestamp);
+					reply = {.message_type = bytes_read ? LoadFileOK : LoadFileFailed,
+							 .bytes_read = bytes_read,
+							 .vol_id = requested_view_patch_loc_.vol,
+							 .filename = requested_view_patch_loc_.filename,
+							 .timestamp = timestamp};
+				} break;
 
-				reply.message_type = PatchListUnchanged;
+				case RequestRefreshPatchList: {
+					// TODO: Check if anything changed in hostfs
 
-				auto *patch_dir_list_ = msg.patch_dir_list;
+					reply.message_type = PatchListUnchanged;
 
-				if (patch_dir_list_) {
-					if (refresh_required) {
-						patch_dir_list_->clear_patches(Volume::SDCard);
-						PatchFileIO::add_directory(storage.sd_hostfs, patch_dir_list_->volume_root(Volume::SDCard));
-						reply.message_type = PatchListChanged;
+					auto *patch_dir_list_ = msg.patch_dir_list;
+
+					if (patch_dir_list_) {
+						if (refresh_required) {
+							patch_dir_list_->clear_patches(Volume::SDCard);
+							PatchFileIO::add_directory(storage.sd_hostfs, patch_dir_list_->volume_root(Volume::SDCard));
+							reply.message_type = PatchListChanged;
+						}
+
+						refresh_required = false;
+					}
+				} break;
+
+				case RequestFirmwareFile: {
+					if (find_manifest(storage.sd_hostfs)) {
+						reply.message_type = FirmwareFileFound;
+						reply.filename.copy(found_filename);
+						reply.bytes_read = found_filesize;
+						reply.vol_id = Volume::SDCard;
+					} else {
+						reply = {FirmwareFileFound};
+					}
+				} break;
+
+				case StartChecksumCompare: {
+					reply = {ChecksumMatch}; //TODO: make it fail sometimes?
+				} break;
+
+				case RequestPluginFileList: {
+					if (find_plugin_files(msg))
+						reply = {PluginFileListOK};
+					else
+						reply = {PluginFileListFail};
+				} break;
+
+				case RequestCopyPluginAssets: {
+					storage.ramdisk.mount_disk();
+					bool ok = PatchFileIO::deep_copy_dirs(storage.sd_hostfs, storage.ramdisk, msg.filename);
+					reply.message_type = ok ? CopyPluginAssetsOK : CopyPluginAssetsFail;
+				} break;
+
+				case RequestWriteFile: {
+					bool ok = false;
+					if (msg.vol_id == Volume::SDCard) {
+						ok = storage.sd_hostfs.update_or_create_file(msg.filename, msg.buffer);
+					} else if (msg.vol_id == Volume::NorFlash) {
+						ok = storage.flash_hostfs.update_or_create_file(msg.filename, msg.buffer);
 					}
 
-					refresh_required = false;
-				}
-			} break;
+					if (!ok) {
+						pr_err("Error writing file!\n");
+						reply = {WriteFileFail};
+						return false;
+					}
+					reply = {WriteFileOK};
+					refresh_required = true;
+				} break;
 
-			case RequestFirmwareFile: {
-				if (find_manifest(storage.sd_hostfs)) {
-					reply.message_type = FirmwareFileFound;
-					reply.filename.copy(found_filename);
-					reply.bytes_read = found_filesize;
-					reply.vol_id = Volume::SDCard;
-				} else {
-					reply = {FirmwareFileFound};
-				}
-			} break;
+				case RequestDeleteFile: {
+					bool ok = false;
 
-			case StartChecksumCompare: {
-				reply = {ChecksumMatch}; //TODO: make it fail sometimes?
-			} break;
+					if (msg.vol_id == Volume::SDCard)
+						ok = storage.sd_hostfs.delete_file(msg.filename);
 
-			case RequestPluginFileList: {
-				if (find_plugin_files(msg))
-					reply = {PluginFileListOK};
-				else
-					reply = {PluginFileListFail};
-			} break;
+					if (msg.vol_id == Volume::NorFlash)
+						ok = storage.flash_hostfs.delete_file(msg.filename);
 
-			case RequestCopyPluginAssets: {
-				storage.ramdisk.mount_disk();
-				bool ok = PatchFileIO::deep_copy_dirs(storage.sd_hostfs, storage.ramdisk, msg.filename);
-				reply.message_type = ok ? CopyPluginAssetsOK : CopyPluginAssetsFail;
-			} break;
+					if (!ok) {
+						reply = {DeleteFileFailed};
+					} else {
+						reply = {DeleteFileSuccess};
+					}
+				} break;
 
-			case RequestWriteFile: {
-				bool ok = false;
-				if (msg.vol_id == Volume::SDCard) {
-					ok = storage.sd_hostfs.update_or_create_file(msg.filename, msg.buffer);
-				} else if (msg.vol_id == Volume::NorFlash) {
-					ok = storage.flash_hostfs.update_or_create_file(msg.filename, msg.buffer);
-				}
+				case RequestFactoryResetPatches: {
+					pr_info("Reset to factory patches = no action. (simulator default patches are read-only)\n");
+				} break;
 
-				if (!ok) {
-					pr_err("Error writing file!\n");
-					reply = {WriteFileFail};
-					return false;
-				}
-				reply = {WriteFileOK};
-				refresh_required = true;
-			} break;
+				case RequestFileInfo: {
+					reply = {FileInfoFailed};
 
-			case RequestDeleteFile: {
-				bool ok = false;
+					if (msg.vol_id == Volume::SDCard) {
+						reply.length = storage.sd_hostfs.get_file_size(msg.filename);
+						reply.timestamp = storage.sd_hostfs.get_file_timestamp(msg.filename);
+						reply.message_type = FileInfoSuccess;
+					}
 
-				if (msg.vol_id == Volume::SDCard)
-					ok = storage.sd_hostfs.delete_file(msg.filename);
+					if (msg.vol_id == Volume::NorFlash) {
+						reply.length = storage.flash_hostfs.get_file_size(msg.filename);
+						reply.timestamp = storage.flash_hostfs.get_file_timestamp(msg.filename);
+						reply.message_type = FileInfoSuccess;
+					}
 
-				if (msg.vol_id == Volume::NorFlash)
-					ok = storage.flash_hostfs.delete_file(msg.filename);
+				} break;
 
-				if (!ok) {
-					reply = {DeleteFileFailed};
-				} else {
-					reply = {DeleteFileSuccess};
-				}
-			} break;
+				default:
+					break;
+			}
 
-			case RequestFactoryResetPatches: {
-				pr_info("Reset to factory patches = no action. (simulator default patches are read-only)\n");
-			} break;
+			return true;
 
-			case RequestFileInfo: {
-				reply = {FileInfoFailed};
-
-				if (msg.vol_id == Volume::SDCard) {
-					reply.length = storage.sd_hostfs.get_file_size(msg.filename);
-					reply.timestamp = storage.sd_hostfs.get_file_timestamp(msg.filename);
-					reply.message_type = FileInfoSuccess;
-				}
-
-				if (msg.vol_id == Volume::NorFlash) {
-					reply.length = storage.flash_hostfs.get_file_size(msg.filename);
-					reply.timestamp = storage.flash_hostfs.get_file_timestamp(msg.filename);
-					reply.message_type = FileInfoSuccess;
-				}
-
-			} break;
-
-			default:
-				break;
+		} catch (const std::filesystem::filesystem_error &e) {
+			std::cout << "Error: " << e.what() << std::endl;
+			return true;
 		}
-
-		return true;
 	}
 
 	IntercoreStorageMessage get_new_message() {
