@@ -53,10 +53,8 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, uint32_t length, Checksum_t checksum) {
 	IntercoreStorageMessage returnValue;
 
-// Stop wifi reception before long running operation
-#ifdef ENABLE_WIFI_BRIDGE
+	// Stop wifi reception before long running operation
 	WifiInterface::stop();
-#endif
 
 	auto result = Flasher::init(230400);
 
@@ -92,10 +90,8 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer,
 												  uint32_t &bytesWritten) {
 	IntercoreStorageMessage returnValue;
 
-// Stop wifi reception before long running operation
-#ifdef ENABLE_WIFI_BRIDGE
+	// Stop wifi reception before long running operation
 	WifiInterface::stop();
-#endif
 
 	auto result = Flasher::init(230400);
 
@@ -152,9 +148,7 @@ IntercoreStorageMessage
 FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum, uint32_t &bytesChecked) {
 
 	// Stop wifi reception before long running operation
-#ifdef ENABLE_WIFI_BRIDGE
 	WifiInterface::stop();
-#endif
 
 	MD5Processor processor;
 
@@ -188,10 +182,8 @@ FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_
 
 IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uint32_t address, uint32_t &bytesWritten) {
 
-// Stop wifi reception before long running operation
-#ifdef ENABLE_WIFI_BRIDGE
+	// Stop wifi reception before long running operation
 	WifiInterface::stop();
-#endif
 
 	const uint32_t FlashSectorSize = 64 * 1024;
 	const std::size_t BatchSize = FlashSectorSize;
