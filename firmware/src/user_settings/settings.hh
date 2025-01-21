@@ -2,9 +2,9 @@
 #include "audio_settings.hh"
 #include "catchup_settings.hh"
 #include "fs/volumes.hh"
-#include "gui/elements/screensaver_settings.hh"
-#include "gui/pages/view_settings.hh"
-#include "plugin_autoload_settings.hh"
+#include "user_settings/plugin_autoload_settings.hh"
+#include "user_settings/screensaver_settings.hh"
+#include "user_settings/view_settings.hh"
 #include "user_settings/fs_settings.hh"
 
 namespace MetaModule

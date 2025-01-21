@@ -2,9 +2,9 @@
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/view_settings.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
+#include "user_settings/view_settings.hh"
 #include <algorithm>
 
 namespace MetaModule
