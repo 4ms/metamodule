@@ -340,18 +340,16 @@ struct PatchSelectorPage : PageBase {
 
 			case State::LoadPatchFile: {
 				if (!patchloader.has_changed_on_disk(selected_patch)) {
-					pr_dbg("Patch file is already open and unchanged on disk\n");
 					view_loaded_patch();
 
 				} else if (patches.get_modification_count(selected_patch) > 0) {
-					pr_dbg("Patch file is already open and changed on disk AND in memory\n");
 					// Has changed on disk AND there are unsaved changes
 					// PatchViewPage will notify the user of this.
 					view_loaded_patch();
 
 				} else {
 					show_spinner();
-					pr_dbg("(Re-)Loading patch file from disk\n");
+
 					auto result = patchloader.reload_patch_file(selected_patch, [this] {
 						update_spinner();
 						lv_timer_handler();
