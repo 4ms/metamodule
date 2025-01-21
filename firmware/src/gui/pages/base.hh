@@ -9,7 +9,7 @@
 #include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
-#include "patch_file/check_reload_patch.hh"
+#include "patch_file/change_checker.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_play/patch_mod_queue.hh"

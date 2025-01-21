@@ -9,19 +9,19 @@ namespace MetaModule
 
 static constexpr unsigned max_open_patches = 20;
 
-PatchLoader::PatchLoader(FileStorageProxy &patch_storage, OpenPatchManager &patches)
+ReloadPatch::ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches)
 	: patch_storage{patch_storage}
 	, patches{patches} {
 }
 
 // Gets the latest file timestamp and size from M4's cache
-std::optional<PatchLoader::FileTimeSize> PatchLoader::get_file_info(PatchLocation const &patch_loc) {
+std::optional<ReloadPatch::FileTimeSize> ReloadPatch::get_file_info(PatchLocation const &patch_loc) {
 
 	auto start = get_time();
 
 	while (!patch_storage.request_file_info(patch_loc.vol, patch_loc.filename)) {
 		if (get_time() - start > 5000) {
-			pr_err("get_file_info timeout making request\n");
+			pr_err("ReloadPatch::get_file_info timeout making request\n");
 			return {};
 		}
 	}
@@ -34,28 +34,28 @@ std::optional<PatchLoader::FileTimeSize> PatchLoader::get_file_info(PatchLocatio
 		}
 
 		if (msg.message_type == FileStorageProxy::FileInfoFailed) {
-			pr_err("get_file_info: get file info failed \n");
+			pr_dbg("ReloadPatch::get_file_info: get file info for '%s' failed \n", patch_loc.filename.c_str());
 			return {};
 		}
 
 		if (get_time() - start > 5000) {
-			pr_err("get_file_info timeout waiting for response\n");
+			pr_err("ReloadPatch::get_file_info timeout waiting for response\n");
 			return {};
 		}
 	}
 
-	pr_err("get_file_info internal error\n");
+	pr_err("ReloadPatch::get_file_info internal error\n");
 	return {};
 }
 
-bool PatchLoader::check_file_changed(PatchLocation const &patch_loc, uint32_t timestamp, uint32_t filesize) {
+bool ReloadPatch::check_file_changed(PatchLocation const &patch_loc, uint32_t timestamp, uint32_t filesize) {
 	if (auto filetimesize = get_file_info(patch_loc)) {
 		return (filetimesize->timestamp != timestamp) || (filetimesize->filesize != filesize);
 	} else
 		return false;
 }
 
-Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func) {
+Result ReloadPatch::reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func) {
 
 	if (!patches.have_space_to_open_patch(max_open_patches)) {
 		return {false, "Too many unsaved patches open! Save or close them to open a new patch"};
@@ -101,7 +101,7 @@ Result PatchLoader::reload_patch_file(PatchLocation const &loc, Function<void()>
 }
 
 // Returns true if timestamp/filesize on disk differs from the open patch (or there is no open patch)
-bool PatchLoader::has_changed_on_disk(PatchLocation const &loc) {
+bool ReloadPatch::has_changed_on_disk(PatchLocation const &loc) {
 	if (auto openpatch = patches.find_open_patch(loc)) {
 		return check_file_changed(loc, openpatch->timestamp, openpatch->filesize);
 	}

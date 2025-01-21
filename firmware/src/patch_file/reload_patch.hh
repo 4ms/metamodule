@@ -8,7 +8,7 @@
 namespace MetaModule
 {
 
-class PatchLoader {
+class ReloadPatch {
 	FileStorageProxy &patch_storage;
 	OpenPatchManager &patches;
 
@@ -18,7 +18,7 @@ public:
 		uint32_t filesize;
 	};
 
-	PatchLoader(FileStorageProxy &patch_storage, OpenPatchManager &patches);
+	ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches);
 
 	// Gets the latest file timestamp and size from M4's cache
 	// and compares it to our own
