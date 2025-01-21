@@ -17,16 +17,14 @@ struct SaveDialog {
 			   PatchPlayLoader &play_loader,
 			   PatchSelectorSubdirPanel &subdir_panel,
 			   NotificationQueue &notify_queue,
-			   PageList &page_list,
-			   GuiState &gui_state)
+			   PageList &page_list)
 		: patch_storage{patch_storage}
 		, patches{patches}
 		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
 		, notify_queue{notify_queue}
 		, page_list{page_list}
-		, group(lv_group_create())
-		, gui_state{gui_state} {
+		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
 		lv_group_add_obj(group, ui_SaveDialogDir);
@@ -362,8 +360,6 @@ private:
 	bool is_renaming = false;
 
 	Action method{};
-
-	GuiState &gui_state;
 };
 
 } // namespace MetaModule
