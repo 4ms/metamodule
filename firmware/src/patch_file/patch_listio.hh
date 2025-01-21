@@ -56,7 +56,8 @@ inline void add_file(PatchDirList &patch_dir_list,
 		found->patchname = patchname;
 	} else {
 		pr_dbg("M4: file %s added, sz=%u, ts=%u, name '%s'\n", filename.data(), filesize, timestamp, patchname.data());
-		tree.files.push_back(PatchFile(filename, filesize, timestamp, patchname));
+		auto pos = std::ranges::lower_bound(tree.files, filename, less_ci, &PatchFile::filename);
+		tree.files.insert(pos, PatchFile(filename, filesize, timestamp, patchname));
 	}
 }
 
