@@ -62,6 +62,8 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_parent(ui_Keyboard, ui_EditMappingPage);
 		lv_obj_set_y(ui_Keyboard, 1);
 
+		lv_hide(ui_Keyboard);
+
 		patch = patches.get_view_patch();
 
 		view_set_idx = args.view_knobset_id.value_or(view_set_idx);
@@ -149,6 +151,11 @@ struct KnobMapPage : PageBase {
 		}
 
 		poll_patch_file_changed();
+
+		if (gui_state.view_patch_file_changed) {
+			gui_state.view_patch_file_changed = false;
+			prepare_focus();
+		}
 		// add_map_popup.update(params);
 	}
 
