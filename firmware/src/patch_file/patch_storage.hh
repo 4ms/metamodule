@@ -10,7 +10,7 @@
 #include "fs/littlefs/norflash_lfs.hh"
 #include "fs/volumes.hh"
 #include "patch_file/patch_fileio.hh"
-#include "patch_file/patch_listio.hh"
+#include "patch_file/patch_list_helper.hh"
 #include "pr_dbg.hh"
 #include "util/poll_change.hh"
 #include <optional>
@@ -40,13 +40,15 @@ class PatchStorage {
 	using enum IntercoreStorageMessage::MessageType;
 
 	PatchDirList patch_dir_list_;
+	PatchListHelper patch_list_helper_;
 	bool patch_list_changed_ = false;
 	bool patch_list_changed_wifi_ = false;
 
 public:
 	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
 		: sdcard_{sdcard_fileio}
-		, usbdrive_{usb_fileio} {
+		, usbdrive_{usb_fileio}
+		, patch_list_helper_{patch_dir_list_} {
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
@@ -101,7 +103,7 @@ public:
 
 			if (patch_list_changed_) {
 				// Make a copy
-				PatchListIO::copy_patchlist(message.patch_dir_list, patch_dir_list_);
+				patch_list_helper_.copy_patchlist(message.patch_dir_list);
 
 				result.message_type = patch_list_changed_ ? PatchListChanged : PatchListUnchanged;
 				patch_list_changed_ = false;
@@ -197,7 +199,7 @@ public:
 		if (message.message_type == RequestFileInfo) {
 			IntercoreStorageMessage result{.message_type = FileInfoFailed};
 
-			if (auto *patchfile = PatchListIO::find_fileinfo(patch_dir_list_, message.vol_id, message.filename)) {
+			if (auto *patchfile = patch_list_helper_.find_fileinfo(message.vol_id, message.filename)) {
 				result.timestamp = patchfile->timestamp;
 				result.length = patchfile->filesize;
 				result.message_type = FileInfoSuccess;
@@ -266,7 +268,7 @@ private:
 		}
 
 		auto patchname = PatchFileIO::extract_patch_name(header);
-		PatchListIO::add_file(patch_dir_list_, vol, filename, patchname, filesize, timestamp);
+		patch_list_helper_.add_file(vol, filename, patchname, filesize, timestamp);
 
 		patch_list_changed_ = true;
 		patch_list_changed_wifi_ = true;
@@ -316,7 +318,7 @@ private:
 		}
 
 		if (success) {
-			PatchListIO::remove_file(patch_dir_list_, vol, filename);
+			patch_list_helper_.remove_file(vol, filename);
 
 			patch_list_changed_ = true;
 			patch_list_changed_wifi_ = true;

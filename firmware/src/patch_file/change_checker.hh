@@ -14,7 +14,7 @@ struct PatchFileChangeChecker {
 	PatchPlayLoader &patch_playloader;
 	GuiState &gui_state;
 	NotificationQueue &notify_queue;
-	PatchLoader patch_loader;
+	ReloadPatch patch_loader;
 
 	bool version_conflict = false;
 

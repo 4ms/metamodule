@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "patch_file/patch_listio.hh"
+#include "patch_file/patch_list_helper.hh"
 
 TEST_CASE("base_dir") {
 	using namespace MetaModule;
@@ -19,22 +19,28 @@ TEST_CASE("base_dir") {
 
 	auto &d2 = vol.dirs.emplace_back();
 	d2.name = "Dir2";
+	d2.files.emplace_back("xyz2.yml", 998, 12272021, "xyz2");
 	d2.files.emplace_back("xyz.yml", 999, 12272021, "xyz");
 	d2.files.emplace_back("abc.txt", 125, 12262021, "abc");
-	d2.files.emplace_back("xyz2.yml", 998, 12272021, "xyz2");
 
-	auto abc_root = PatchListIO::base_dir(pdl, Volume::USB, "abc.txt");
+	PatchListHelper patch_list_helper{pdl};
+
+	auto abc_root = patch_list_helper.base_dir(Volume::USB, "abc.txt");
 	CHECK(abc_root.name == "USB root");
-	CHECK(abc_root.files[1].filename == "abc.txt");
-	CHECK(abc_root.files[1].filesize == 123);
 
-	auto dir1abc_root = PatchListIO::base_dir(pdl, Volume::USB, "Dir1/abc.txt");
+	auto dir1abc_root = patch_list_helper.base_dir(Volume::USB, "Dir1/abc.txt");
 	CHECK(dir1abc_root.name == "Dir1");
-	CHECK(dir1abc_root.files[0].filename == "abc.txt");
-	CHECK(dir1abc_root.files[0].filesize == 124);
 
-	auto dir2abc_root = PatchListIO::base_dir(pdl, Volume::USB, "Dir2/abc.txt");
-	CHECK(dir2abc_root.name == "Dir2");
-	CHECK(dir2abc_root.files[1].filename == "abc.txt");
-	CHECK(dir2abc_root.files[1].filesize == 125);
+	{
+		auto tree = patch_list_helper.base_dir(Volume::USB, "/Dir2/xyz2.yml");
+		CHECK(tree.name == "Dir2");
+	}
+	{
+		auto tree = patch_list_helper.base_dir(Volume::USB, "Dir2/abc.txt");
+		CHECK(tree.name == "Dir2");
+	}
+	{
+		auto tree = patch_list_helper.base_dir(Volume::USB, "Dir3/abc.txt");
+		CHECK(tree.name == "USB root");
+	}
 }

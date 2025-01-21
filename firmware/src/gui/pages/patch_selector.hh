@@ -491,7 +491,7 @@ private:
 	PatchSelectorSubdirPanel &subdir_panel;
 	PatchDirList &patchfiles;
 	bool patchfiles_locked = true;
-	PatchLoader patchloader;
+	ReloadPatch patchloader;
 
 	bool is_populating_subdir_panel = false;
 
