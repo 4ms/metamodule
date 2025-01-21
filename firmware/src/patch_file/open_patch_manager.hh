@@ -198,6 +198,16 @@ public:
 		return view_patch_ ? view_patch_->timestamp : 0;
 	}
 
+	void set_view_patch_timestamp(uint32_t timestamp) {
+		if (view_patch_)
+			view_patch_->timestamp = timestamp;
+	}
+
+	void set_view_patch_filesize(uint32_t filesize) {
+		if (view_patch_)
+			view_patch_->filesize = filesize;
+	}
+
 	unsigned get_playing_patch_modification_count() {
 		return playing_patch_ ? playing_patch_->modification_count : 0;
 	}

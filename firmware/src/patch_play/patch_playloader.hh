@@ -330,6 +330,8 @@ private:
 		} else if (msg.message_type == FileStorageProxy::WriteFileOK) {
 			saving_patch_ = false;
 			patches_.reset_view_patch_modification_count();
+			patches_.set_view_patch_timestamp(msg.timestamp);
+			patches_.set_view_patch_filesize(msg.length);
 			return {true, "Saved"};
 
 		} else {

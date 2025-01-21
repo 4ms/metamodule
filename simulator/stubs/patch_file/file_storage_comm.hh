@@ -50,11 +50,13 @@ struct SimulatorFileStorageComm {
 					raw_patch_data_ = msg.buffer;
 					uint32_t timestamp;
 					auto bytes_read = load_patch_file(requested_view_patch_loc_, &timestamp);
-					reply = {.message_type = bytes_read ? LoadFileOK : LoadFileFailed,
-							 .bytes_read = bytes_read,
-							 .vol_id = requested_view_patch_loc_.vol,
-							 .filename = requested_view_patch_loc_.filename,
-							 .timestamp = timestamp};
+					reply = {
+						.message_type = bytes_read ? LoadFileOK : LoadFileFailed,
+						.bytes_read = bytes_read,
+						.vol_id = requested_view_patch_loc_.vol,
+						.filename = requested_view_patch_loc_.filename,
+						.timestamp = timestamp,
+					};
 				} break;
 
 				case RequestRefreshPatchList: {
@@ -105,18 +107,25 @@ struct SimulatorFileStorageComm {
 
 				case RequestWriteFile: {
 					bool ok = false;
+					uint32_t timestamp = 0;
+
 					if (msg.vol_id == Volume::SDCard) {
 						ok = storage.sd_hostfs.update_or_create_file(msg.filename, msg.buffer);
+						timestamp = storage.sd_hostfs.get_file_timestamp(msg.filename);
 					} else if (msg.vol_id == Volume::NorFlash) {
 						ok = storage.flash_hostfs.update_or_create_file(msg.filename, msg.buffer);
+						timestamp = storage.flash_hostfs.get_file_timestamp(msg.filename);
 					}
 
-					if (!ok) {
+					if (!ok || timestamp == 0) {
 						pr_err("Error writing file!\n");
 						reply = {WriteFileFail};
 						return false;
 					}
-					reply = {WriteFileOK};
+
+					reply = {.message_type = WriteFileOK,
+							 .length = (uint32_t)msg.buffer.size_bytes(),
+							 .timestamp = timestamp};
 					refresh_required = true;
 				} break;
 

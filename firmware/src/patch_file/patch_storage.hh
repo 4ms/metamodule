@@ -68,7 +68,8 @@ public:
 		PatchFileIO::create_default_patches(norflash_);
 	}
 
-	bool write_file(Volume vol, std::string_view filename, std::span<const char> data) {
+	// returns timestamp
+	uint32_t write_file(Volume vol, std::string_view filename, std::span<const char> data) {
 		bool success = false;
 
 		if (vol == Volume::USB) {
@@ -82,12 +83,13 @@ public:
 		}
 
 		if (success) {
-			add_or_replace_file(vol, filename, {data.data(), 64});
+			return add_or_replace_file(vol, filename, {data.data(), 64});
 		}
-		return success;
+		return 0;
 	}
 
-	bool write_file(Volume vol, std::string_view filename, std::span<const uint8_t> data) {
+	// returns timestamp
+	uint32_t write_file(Volume vol, std::string_view filename, std::span<const uint8_t> data) {
 		return write_file(vol, filename, {(const char *)data.data(), data.size()});
 	}
 
@@ -132,8 +134,10 @@ public:
 			IntercoreStorageMessage result{.message_type = WriteFileFail};
 
 			if (message.filename.size() > 0 && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
-				auto wrote_ok = write_file(message.vol_id, message.filename, message.buffer);
-				if (wrote_ok) {
+				auto timestamp = write_file(message.vol_id, message.filename, message.buffer);
+				if (timestamp != 0) {
+					result.length = message.buffer.size();
+					result.timestamp = timestamp;
 					result.message_type = WriteFileOK;
 				}
 			}
@@ -243,7 +247,8 @@ public:
 	}
 
 private:
-	void add_or_replace_file(Volume vol, std::string_view filename, std::string_view header) {
+	// returns timestamp
+	uint32_t add_or_replace_file(Volume vol, std::string_view filename, std::string_view header) {
 		uint32_t filesize{};
 		uint32_t timestamp{};
 
@@ -265,6 +270,7 @@ private:
 
 		patch_list_changed_ = true;
 		patch_list_changed_wifi_ = true;
+		return timestamp;
 	}
 
 	uint32_t load_file(std::span<char> buffer, Volume vol, std::string_view filename, uint32_t *timestamp) {

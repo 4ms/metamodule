@@ -22,7 +22,7 @@ PatchStorage *patchStorage;
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
 
-	auto ExtractFileInfo = [&fbb](auto& thisFile) {
+	auto ExtractFileInfo = [&fbb](auto &thisFile) {
 		auto thisName = fbb.CreateString(std::string_view(thisFile.patchname));
 		auto thisFilename = fbb.CreateString(std::string_view(thisFile.filename));
 
@@ -288,9 +288,9 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 			auto volumeString = flatbuffers::GetStringView(uploadPatchMessage->volume());
 
 			if (auto thisVolume = ParseStorageString(volumeString); thisVolume) {
-				auto success = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
+				auto timestamp = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
 
-				if (success) {
+				if (timestamp != 0) {
 					auto result = CreateResult(fbb, true);
 					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 					fbb.Finish(message);
