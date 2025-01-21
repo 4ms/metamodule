@@ -240,6 +240,7 @@ private:
 		} else {
 			page->play_loader.request_save_patch();
 			page->filesystem_changed = true;
+			page->hide_menu();
 		}
 	}
 
