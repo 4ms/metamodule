@@ -49,6 +49,14 @@ struct JackMapViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		redraw();
+		lv_group_activate(group);
+
+		lv_obj_scroll_to_y(ui_JackMapLeftColumn, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(ui_JackMapRightColumn, 0, LV_ANIM_OFF);
+	}
+
+	void redraw() {
 		patch = patches.get_view_patch();
 
 		// Clear old text
@@ -83,11 +91,6 @@ struct JackMapViewPage : PageBase {
 				}
 			}
 		}
-
-		lv_group_activate(group);
-
-		lv_obj_scroll_to_y(ui_JackMapLeftColumn, 0, LV_ANIM_OFF);
-		lv_obj_scroll_to_y(ui_JackMapRightColumn, 0, LV_ANIM_OFF);
 	}
 
 	void update() override {
@@ -95,6 +98,12 @@ struct JackMapViewPage : PageBase {
 			if (page_list.request_last_page()) {
 				blur();
 			}
+		}
+
+		poll_patch_file_changed();
+		if (gui_state.view_patch_file_changed) {
+			gui_state.view_patch_file_changed = false;
+			redraw();
 		}
 	}
 
