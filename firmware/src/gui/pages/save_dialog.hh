@@ -5,8 +5,6 @@
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
-#include "lvgl.h"
 #include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
@@ -19,15 +17,13 @@ struct SaveDialog {
 			   PatchPlayLoader &play_loader,
 			   PatchSelectorSubdirPanel &subdir_panel,
 			   NotificationQueue &notify_queue,
-			   PageList &page_list,
-			   GuiState &gui_state)
+			   PageList &page_list)
 		: patch_storage{patch_storage}
 		, patches{patches}
 		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
 		, notify_queue{notify_queue}
 		, page_list{page_list}
-		, gui_state{gui_state}
 		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
@@ -95,8 +91,6 @@ struct SaveDialog {
 
 		if (is_renaming) {
 			if (patch_playloader.is_renaming_idle()) {
-				gui_state.force_refresh_vol.mark(file_vol);
-				gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
 				saved = true;
 				is_renaming = false;
 				hide();
@@ -267,55 +261,54 @@ private:
 			return;
 		auto page = static_cast<SaveDialog *>(event->user_data);
 
-		page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+		page->save();
+	}
 
-		std::string fullpath = page->file_path.length() ? (page->file_path + "/") : "";
-		fullpath += page->file_name;
+	void save() {
+		file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+
+		std::string fullpath = file_path.length() ? (file_path + "/") : "";
+		fullpath += file_name;
 		if (!fullpath.ends_with(".yml")) {
 			fullpath.append(".yml");
 		}
 
-		std::string patchname = page->file_name;
+		std::string patchname = file_name;
 		strip_yml(patchname);
 
-		if (page->method == Action::Save) {
-			//TODO: have playloader rename the open patch
-			page->patches.get_view_patch()->patch_name = patchname;
-			page->patches.rename_view_patch_file(fullpath, page->file_vol);
-			page->patch_playloader.request_save_patch();
-			auto &patchname = page->patches.get_view_patch()->patch_name;
-			patchname.copy(page->file_name);
+		if (method == Action::Save) {
+			patches.get_view_patch()->patch_name = patchname;
+			patches.rename_view_patch_file(fullpath, file_vol);
+			patch_playloader.request_save_patch();
+			auto &patchname = patches.get_view_patch()->patch_name;
+			patchname.copy(file_name);
 
-			page->saved = true;
-			page->gui_state.force_refresh_vol.mark(page->file_vol);
-			page->gui_state.force_refresh_vol.mark(page->patches.get_view_patch_vol());
-			page->hide();
+			saved = true;
+			hide();
 
-		} else if (page->method == Action::Rename) {
-			if (page->patches.get_view_patch_loc_hash() == PatchLocHash{fullpath, page->file_vol}) {
-				//send notification of failure
-				page->notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
+		} else if (method == Action::Rename) {
+			if (patches.get_view_patch_loc_hash() != PatchLocHash{fullpath, file_vol}) {
+				patches.get_view_patch()->patch_name = patchname;
+				patch_playloader.request_rename_view_patch({fullpath, file_vol});
+				is_renaming = true;
 			} else {
-				page->patches.get_view_patch()->patch_name = patchname;
-				page->patch_playloader.request_rename_view_patch({fullpath, page->file_vol});
-				page->is_renaming = true;
+				notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
 			}
 
 		} else { //Duplicate
-			if (page->patches.duplicate_view_patch(fullpath, page->file_vol)) {
-				page->patch_playloader.request_save_patch();
-				page->saved = true;
-				page->gui_state.force_refresh_vol.mark(page->file_vol);
-				page->gui_state.force_refresh_vol.mark(page->patches.get_view_patch_vol());
-				auto patch_loc = PatchLocation{std::string_view{fullpath}, page->file_vol};
-				page->page_list.request_new_page_no_history(
+			if (patches.duplicate_view_patch(fullpath, file_vol)) {
+				patches.get_view_patch()->patch_name = patchname;
+				patch_playloader.request_save_patch();
+				saved = true;
+				auto patch_loc = PatchLocation{std::string_view{fullpath}, file_vol};
+				page_list.request_new_page_no_history(
 					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
 
-				page->hide();
+				hide();
 			} else {
 				//send notification of failure
 				std::string err_str = "File " + fullpath + " already exists and is open, cannot save over it.";
-				page->notify_queue.put({err_str, Notification::Priority::Error});
+				notify_queue.put({err_str, Notification::Priority::Error});
 			}
 		}
 	}
@@ -343,7 +336,6 @@ private:
 	PatchSelectorSubdirPanel &subdir_panel;
 	NotificationQueue &notify_queue;
 	PageList &page_list;
-	GuiState &gui_state;
 
 	std::vector<EntryInfo> subdir_panel_patches;
 

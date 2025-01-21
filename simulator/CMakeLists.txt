@@ -129,6 +129,7 @@ else()
 		${FWDIR}/src/midi/midi_router.cc
 		${FWDIR}/src/params/expanders.cc
 		${FWDIR}/src/patch_play/patch_player_catchup.cc
+        ${FWDIR}/src/patch_file/reload_patch.cc
 
 		#Fatfs:
 		stubs/fattime.cc

@@ -17,7 +17,7 @@ TEST_CASE("typical use case") {
 	PageBase pagea{PageId::PatchSel};
 	PageBase pageb{PageId::PatchView};
 	PageBase pagec{PageId::ModuleView};
-	PageBase paged{PageId::Settings};
+	PageBase paged{PageId::SystemMenu};
 	PageList page_list;
 
 	page_list.register_page(&pagea, pagea.id);
@@ -122,7 +122,7 @@ TEST_CASE("Push arguments") {
 	PageBase pagea{PageId::PatchSel};
 	PageBase pageb{PageId::PatchView};
 	PageBase pagec{PageId::ModuleView};
-	PageBase paged{PageId::Settings};
+	PageBase paged{PageId::SystemMenu};
 
 	page_list.register_page(&pagea, pagea.id);
 	page_list.register_page(&pageb, pageb.id);

@@ -57,6 +57,10 @@ public:
 		return plugin_file_loader.process(loaded_plugin_list);
 	}
 
+	bool is_idle() {
+		return plugin_file_loader.is_idle();
+	}
+
 	PluginFileList const *found_plugin_list() {
 		return plugin_file_loader.found_plugin_list();
 	}

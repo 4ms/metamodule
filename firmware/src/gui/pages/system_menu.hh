@@ -67,6 +67,11 @@ struct SystemMenuPage : PageBase {
 				}
 			}
 		}
+
+		// update playing patch from disk when tab is
+		// not making filesystem calls
+		if (active_tab->is_idle())
+			poll_patch_file_changed();
 	}
 
 	void blur() final {

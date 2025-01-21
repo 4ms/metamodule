@@ -17,10 +17,8 @@ enum class PageId {
 	PatchSel,
 	PatchView,
 	ModuleView,
-	Settings,
 	KnobSetView,
 	KnobMap,
-	CableEdit,
 	SystemMenu,
 	ModuleList,
 	JackMapView

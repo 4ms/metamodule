@@ -70,10 +70,12 @@ struct MainMenuPage : PageBase {
 	void update() final {
 		if (gui_state.back_button.is_just_released()) {
 			if (patches.get_view_patch())
-				load_page(PageId::PatchView, {.patch_loc_hash = patches.get_view_patch_loc_hash()});
+				load_patch_view_page();
 		}
 
 		update_load_text(metaparams, ui_MainMenuLoadMeter);
+
+		poll_patch_file_changed();
 	}
 
 	void blur() final {
@@ -81,11 +83,19 @@ struct MainMenuPage : PageBase {
 	}
 
 private:
+	void load_patch_view_page() {
+		load_page(PageId::PatchView,
+				  {
+					  .patch_loc = patches.get_view_patch_loc(),
+					  .patch_loc_hash = patches.get_view_patch_loc_hash(),
+				  });
+	}
+
 	static void last_viewed_cb(lv_event_t *event) {
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patches.get_view_patch_loc_hash()});
+		page->load_patch_view_page();
 	}
 
 	static void now_playing_cb(lv_event_t *event) {
@@ -94,7 +104,7 @@ private:
 			return;
 		if (page->patches.get_playing_patch()) {
 			page->patches.view_playing_patch();
-			page->load_page(PageId::PatchView, {.patch_loc_hash = page->patches.get_playing_patch_loc_hash()});
+			page->load_patch_view_page();
 		}
 	}
 

@@ -48,24 +48,16 @@ public:
 	//
 	// TODO: consider passing patch_dir_list_ as a param here,
 	// so the caller can read it on their own (but must ensure it's in shared/non-cache ram)
-	[[nodiscard]] bool request_patchlist(std::optional<Volume> force_refresh_vol = std::nullopt) {
+	[[nodiscard]] bool request_patchlist() {
 		IntercoreStorageMessage message{
 			.message_type = RequestRefreshPatchList,
-			.patch_dir_list = &patch_dir_list_,
+			.patch_dir_list = &patch_dir_list_, // this is where we want M4 to copy the patch_dir_list
 		};
 
-		if (force_refresh_vol.has_value()) {
-			message.force_refresh = true;
-			message.vol_id = force_refresh_vol.value();
-		}
 		return comm_.send_message(message);
 	}
 
 	PatchDirList &get_patch_list() {
-		//FIXME: Ensure this is only called when
-		//we have access to the shared data. Return a ptr,
-		//or return nullptr if we've sent a RequestRefreshPatchList but
-		//haven't gotten a reply yet
 		return patch_dir_list_;
 	}
 
@@ -163,17 +155,17 @@ public:
 	}
 
 	bool request_reset_factory_patches() {
-		IntercoreStorageMessage message{
-			.message_type = RequestFactoryResetPatches,
-		};
+		IntercoreStorageMessage message{.message_type = RequestFactoryResetPatches};
 		return comm_.send_message(message);
 	}
 
 	bool request_plugin_file_list(PluginFileList *plugin_file_list) {
-		IntercoreStorageMessage message{
-			.message_type = RequestPluginFileList,
-			.plugin_file_list = plugin_file_list,
-		};
+		IntercoreStorageMessage message{.message_type = RequestPluginFileList, .plugin_file_list = plugin_file_list};
+		return comm_.send_message(message);
+	}
+
+	bool request_file_info(Volume vol, std::string_view path) {
+		IntercoreStorageMessage message{.message_type = RequestFileInfo, .vol_id = vol, .filename = path};
 		return comm_.send_message(message);
 	}
 

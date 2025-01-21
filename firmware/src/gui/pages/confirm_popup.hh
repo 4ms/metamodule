@@ -102,9 +102,9 @@ struct ConfirmPopup {
 	}
 
 protected:
-	lv_obj_t *base;
+	lv_obj_t *base{};
 	lv_group_t *group;
-	lv_group_t *orig_group;
+	lv_group_t *orig_group{};
 
 	bool visible = false;
 

@@ -17,7 +17,7 @@
 #include "gui/pages/module_view_roller_helpers.hh"
 #include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/pages/patch_view.hh"
 #include "gui/styles.hh"
 
 namespace MetaModule
@@ -78,20 +78,25 @@ struct ModuleViewPage : PageBase {
 
 		patch = patches.get_view_patch();
 
-		is_patch_playing = patch_is_playing(args.patch_loc_hash);
+		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
 		this_module_id = args.module_id.value_or(this_module_id);
 
+		if (args.patch_loc_hash) {
+			file_change_poll.force_next_poll();
+			poll_patch_file_changed();
+		}
+
 		if (!read_slug()) {
-			notify_queue.put(
-				{"Cannot determine module to view. Patch file may be corrupted.", Notification::Priority::Error});
+			page_list.request_new_page(PageId::PatchView, args);
+			pr_err("Module id out of range, or patch is invalid\n");
 			return;
 		}
 
 		moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
-			notify_queue.put(
-				{"Cannot show module " + std::string(slug) + ". Never heard of it!", Notification::Priority::Error});
+			page_list.request_new_page(PageId::PatchView, args);
+			pr_err("Module hp is 0, cannot draw module\n");
 			return;
 		}
 
@@ -169,7 +174,7 @@ struct ModuleViewPage : PageBase {
 		active_knobset = page_list.get_active_knobset();
 
 		module_drawer.draw_mapped_elements(
-			*patch, this_module_id, active_knobset, canvas, drawn_elements, is_patch_playing);
+			*patch, this_module_id, active_knobset, canvas, drawn_elements, is_patch_playloaded);
 
 		lv_obj_update_layout(canvas);
 
@@ -353,8 +358,9 @@ struct ModuleViewPage : PageBase {
 
 		if (action_menu.is_visible())
 			action_menu.update();
+		}
 
-		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
+		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
 			redraw_module();
@@ -369,7 +375,26 @@ struct ModuleViewPage : PageBase {
 			update_cable_style();
 		}
 
-		if (is_patch_playing) {
+		poll_patch_file_changed();
+
+		if (gui_state.view_patch_file_changed) {
+			gui_state.view_patch_file_changed = false;
+
+			abort_cable(gui_state, notify_queue);
+
+			// Check if module slug changed: go to patch view if it did
+			// Otherwise re-draw the patch
+			auto prev_slug = slug;
+			patch = patches.get_view_patch();
+			auto ok = read_slug();
+			if (!ok || prev_slug != slug) {
+				page_list.request_new_page(PageId::PatchView, args);
+			} else {
+				prepare_focus();
+			}
+		}
+
+		if (is_patch_playloaded) {
 			// copy light values from params, indexed by light element id
 			for (auto &wl : params.lights.watch_lights) {
 				if (wl.light_id >= MAX_LIGHTS_PER_MODULE)
@@ -442,7 +467,7 @@ struct ModuleViewPage : PageBase {
 					   patch_mod.value());
 
 			// Forward the mod to the audio/patch_player queue
-			if (is_patch_playing)
+			if (is_patch_playloaded)
 				patch_mod_queue.put(patch_mod.value());
 		}
 
@@ -452,7 +477,7 @@ struct ModuleViewPage : PageBase {
 	// This gets called after map_ring_style changes
 	void update_map_ring_style() {
 		for (auto &drawn_el : drawn_elements) {
-			map_ring_display.update(drawn_el, true, is_patch_playing);
+			map_ring_display.update(drawn_el, true, is_patch_playloaded);
 		}
 	}
 
@@ -766,7 +791,7 @@ private:
 	uint16_t this_module_id = 0;
 	uint32_t cur_selected = 0;
 	std::string_view slug = "";
-	bool is_patch_playing = false;
+	bool is_patch_playloaded = false;
 	PatchData *patch;
 
 	unsigned active_knobset = 0;

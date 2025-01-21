@@ -5,6 +5,7 @@
 #include "gui/elements/screensaver_settings.hh"
 #include "gui/pages/view_settings.hh"
 #include "plugin_autoload_settings.hh"
+#include "user_settings/fs_settings.hh"
 
 namespace MetaModule
 {
@@ -18,6 +19,7 @@ struct UserSettings {
 	Volume last_patch_vol{Volume::NorFlash};
 	ScreensaverSettings screensaver{};
 	CatchupSettings catchup{};
+	FilesystemSettings filesystem{};
 };
 
 } // namespace MetaModule

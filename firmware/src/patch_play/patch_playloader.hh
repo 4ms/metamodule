@@ -54,9 +54,10 @@ struct PatchPlayLoader {
 
 			if (message.message_type == FileStorageProxy::LoadFileOK) {
 				auto raw_patch_file = storage_.get_patch_data(message.bytes_read);
-				if (!patches_.open_patch(raw_patch_file, initial_patch_loc))
+				if (!patches_.open_patch(raw_patch_file, initial_patch_loc, message.timestamp))
 					pr_err("ERROR: could not parse initial patch\n");
 				else {
+					patches_.start_viewing(initial_patch_loc);
 					next_patch = patches_.get_view_patch();
 					load_patch();
 				}
@@ -334,9 +335,9 @@ private:
 	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
 
-		if (view_patch == patches_.get_playing_patch()) {
-			patches_.update_view_patch_module_states(player_.patch_query.get_module_states(),
-													 player_.patch_query.get_all_params());
+		if (view_patch && view_patch == patches_.get_playing_patch()) {
+			view_patch->module_states = player_.patch_query.get_module_states();
+			view_patch->static_knobs = player_.patch_query.get_all_params();
 		}
 
 		std::span<char> filedata = storage_.get_patch_data();
@@ -375,6 +376,8 @@ private:
 		} else if (msg.message_type == FileStorageProxy::WriteFileOK) {
 			saving_patch_ = false;
 			patches_.reset_view_patch_modification_count();
+			patches_.set_view_patch_timestamp(msg.timestamp);
+			patches_.set_view_patch_filesize(msg.length);
 			return {true, "Saved"};
 
 		} else {

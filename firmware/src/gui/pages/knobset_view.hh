@@ -27,9 +27,11 @@ struct KnobSetViewPage : PageBase {
 		, patch{patches.get_view_patch()} {
 		init_bg(base);
 		lv_group_set_editing(group, false);
+
 		// Use Prev button for Jack Map
 		lv_show(ui_PreviousKnobSet);
 		lv_obj_add_event_cb(ui_PreviousKnobSet, goto_jackmap_cb, LV_EVENT_CLICKED, this);
+		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
 		lv_label_set_text(ui_PreviousKnobSetLabel, "Jacks");
 
 		lv_obj_add_event_cb(ui_KnobSetNameText, rename_knobset_cb, LV_EVENT_CLICKED, this);
@@ -43,31 +45,9 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		while (lv_obj_remove_event_cb(ui_Keyboard, nullptr))
-			;
-		lv_obj_add_event_cb(ui_Keyboard, lv_keyboard_def_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
-		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
-		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
+		reset_keyboard();
 
-		lv_obj_set_parent(ui_Keyboard, ui_KnobSetViewPage);
-		lv_obj_set_y(ui_Keyboard, 40);
-
-		lv_hide(ui_Keyboard);
-		// Clear
-		for (unsigned i = 0; auto cont : containers) {
-			set_for_knob(cont, i);
-
-			auto knob = get_knob(cont);
-			lv_arc_set_mode(knob, LV_ARC_MODE_NORMAL);
-			lv_arc_set_bg_angles(knob, min_arc, max_arc);
-			lv_arc_set_value(knob, 0);
-
-			auto label = get_label(cont);
-			lv_label_set_text(label, "");
-
-			i++;
-		}
-		lv_group_remove_all_objs(group);
+		clear_containers();
 
 		knobset = nullptr;
 		arcs.clear();
@@ -172,6 +152,90 @@ struct KnobSetViewPage : PageBase {
 		display_active_status();
 	}
 
+	void update() override {
+		if (!kb_visible)
+			lv_group_set_editing(group, false);
+
+		if (gui_state.back_button.is_just_released()) {
+			if (kb_visible) {
+				if (knobset->name.is_equal(lv_textarea_get_text(ui_KnobSetNameText))) {
+					save_knobset_name(false);
+				} else {
+					kb_popup.show(
+						[this](bool ok) { save_knobset_name(ok); }, "Do you want to keep your edits?", "Keep");
+				}
+			} else if (page_list.request_last_page()) {
+				blur();
+			} else if (kb_popup.is_visible()) {
+				kb_popup.hide();
+			}
+		}
+
+		handle_changed_active_status();
+
+		if (knobset) {
+			for (auto [arc, s_param, map] : zip(arcs, static_params, knobset->set)) {
+				float s_val = s_param ? map.unmap_val(s_param->value) : 0;
+				lv_arc_set_value(arc, s_val * 120.f);
+			}
+		}
+
+		poll_patch_file_changed();
+
+		if (gui_state.view_patch_file_changed) {
+			gui_state.view_patch_file_changed = false;
+			if (kb_popup.is_visible())
+				kb_popup.hide();
+			prepare_focus();
+		}
+	}
+
+	void blur() final {
+		// Clear all containers except for the original ones
+		for (auto [pane, cont] : zip(panes, containers)) {
+			auto num_children = lv_obj_get_child_cnt(pane);
+			for (auto i = 0u; i < num_children; i++) {
+				auto child = lv_obj_get_child(pane, i);
+				if (child != cont)
+					lv_obj_del_async(child);
+			}
+		}
+	}
+
+private:
+	void reset_keyboard() {
+		while (lv_obj_remove_event_cb(ui_Keyboard, nullptr))
+			;
+		lv_obj_add_event_cb(ui_Keyboard, lv_keyboard_def_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
+
+		lv_obj_set_parent(ui_Keyboard, ui_KnobSetViewPage);
+		lv_obj_set_y(ui_Keyboard, 40);
+
+		lv_hide(ui_Keyboard);
+	}
+
+	void clear_containers() {
+		for (unsigned i = 0; auto cont : containers) {
+			set_for_knob(cont, i);
+
+			auto knob = get_knob(cont);
+			lv_arc_set_mode(knob, LV_ARC_MODE_NORMAL);
+			lv_arc_set_bg_angles(knob, min_arc, max_arc);
+			lv_arc_set_value(knob, 0);
+			lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
+
+			auto label = get_label(cont);
+			lv_label_set_text(label, "");
+
+			disable(cont, i);
+
+			i++;
+		}
+		lv_group_remove_all_objs(group);
+	}
+
 	void jump_to_active_knobset() {
 		// When changing knobsets with button+knob, then
 		// jump to the new active knobset
@@ -214,90 +278,6 @@ struct KnobSetViewPage : PageBase {
 			for (auto i = 0u; i < num_children; i++) {
 				auto child = lv_obj_get_child(pane, i);
 				update_enabled_status(child, knob_i, is_actively_playing);
-			}
-		}
-	}
-
-	void update() override {
-		if (!kb_visible)
-			lv_group_set_editing(group, false);
-
-		if (gui_state.back_button.is_just_released()) {
-			if (kb_visible) {
-				if (knobset->name.is_equal(lv_textarea_get_text(ui_KnobSetNameText))) {
-					save_knobset_name(false);
-				} else {
-					kb_popup.show(
-						[this](bool ok) { save_knobset_name(ok); }, "Do you want to keep your edits?", "Keep");
-				}
-			} else if (page_list.request_last_page()) {
-				blur();
-			} else if (kb_popup.is_visible()) {
-				kb_popup.hide();
-			}
-		}
-
-		handle_changed_active_status();
-
-		if (knobset) {
-			auto watched_params = params.param_watcher.active_watched_params();
-
-			for (auto const &p : watched_params) {
-				if (p.is_active()) {
-					auto map_it = std::ranges::find_if(knobset->set, [&p](MappedKnob const &m) {
-						return m.module_id == p.module_id && m.param_id == p.param_id;
-					});
-					if (map_it != knobset->set.end()) {
-						auto idx = std::distance(knobset->set.begin(), map_it);
-						auto arc_val = map_it->unmap_val(p.value) * 120.f;
-						lv_arc_set_value(arcs[idx], arc_val);
-
-						if (map_it->is_panel_knob()) {
-							auto phys_val = params.knobs[map_it->panel_knob_id].val;
-							auto mapped_phys_val = map_it->get_mapped_val(phys_val);
-
-							auto is_tracking = patch_playloader.is_param_tracking(p.module_id, p.param_id);
-							update_indicator(indicators[idx], is_tracking, mapped_phys_val);
-							update_knob(arcs[idx], is_tracking, arc_val);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	void update_indicator(lv_obj_t *indicator, bool is_tracking, float val) {
-		if (is_tracking) {
-			lv_hide(indicator);
-		} else {
-			lv_obj_set_style_transform_angle(indicator, val * 2500.f - 1250.f, LV_PART_MAIN);
-			lv_show(indicator);
-		}
-	}
-
-	void update_knob(lv_obj_t *arc, bool is_tracking, float arc_val) {
-		if (arc_val > lv_arc_get_max_value(arc) || arc_val < lv_arc_get_min_value(arc)) {
-			lv_obj_set_style_radius(arc, 0, LV_PART_KNOB);
-			lv_obj_set_style_bg_color(arc, lv_color_hex(0x000000), LV_PART_KNOB);
-		} else {
-			lv_obj_set_style_radius(arc, 20, LV_PART_KNOB);
-
-			if (is_tracking) {
-				lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
-			} else {
-				lv_obj_set_style_bg_color(arc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
-			}
-		}
-	}
-
-	void blur() final {
-		// Clear all containers except for the original ones
-		for (auto [pane, cont] : zip(panes, containers)) {
-			auto num_children = lv_obj_get_child_cnt(pane);
-			for (auto i = 0u; i < num_children; i++) {
-				auto child = lv_obj_get_child(pane, i);
-				if (child != cont)
-					lv_obj_del_async(child);
 			}
 		}
 	}
@@ -433,7 +413,6 @@ struct KnobSetViewPage : PageBase {
 			page->activate_knobset(page->args.view_knobset_id.value());
 	}
 
-private:
 	void activate_knobset(unsigned knobset_idx) {
 		args.view_knobset_id = knobset_idx;
 		page_list.set_active_knobset(knobset_idx);

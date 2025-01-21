@@ -144,6 +144,8 @@ public:
 			do_redraw = false;
 			draw_module();
 		}
+
+		poll_patch_file_changed();
 	}
 
 	void blur() final {
