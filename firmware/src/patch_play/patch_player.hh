@@ -171,7 +171,8 @@ public:
 
 		calc_multiple_module_indicies();
 
-		set_active_knob_set(0);
+		if (active_knob_set >= pd.knob_sets.size())
+			set_active_knob_set(0);
 
 		// Test-run the modules once
 		for (size_t i = 1; i < num_modules; i++) {
