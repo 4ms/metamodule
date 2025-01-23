@@ -3,8 +3,6 @@
 #include "gui/helpers/dir_entry_info.hh"
 #include "gui/helpers/load_meter.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/helpers/lvgl_mem_helper.hh"
-#include "gui/helpers/lvgl_string_helper.hh"
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/make_cable.hh"
@@ -12,6 +10,7 @@
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+#include "patch_file/reload_patch.hh"
 #include "pr_dbg.hh"
 
 namespace MetaModule
@@ -25,6 +24,7 @@ struct PatchSelectorPage : PageBase {
 		: PageBase{info, PageId::PatchSel}
 		, subdir_panel{subdir_panel}
 		, patchfiles{patch_storage.get_patch_list()}
+		, patchloader{patch_storage, patches}
 		, roller_hover(ui_PatchSelectorPage, ui_PatchListRoller, [this] { redraw_cb(); }) {
 
 		init_bg(ui_PatchSelectorPage);
@@ -114,7 +114,7 @@ struct PatchSelectorPage : PageBase {
 		// Do not access patchfiles while M4 is accessing them
 		if (!patchfiles_locked) {
 			is_populating_subdir_panel = true;
-			update_open_patches();
+			refresh_open_patches();
 			subdir_panel.populate(patchfiles);
 			subdir_panel.show_recent_files();
 			populate_roller();
@@ -134,7 +134,7 @@ struct PatchSelectorPage : PageBase {
 		subdir_panel.blur();
 	}
 
-	void update_open_patches() {
+	void refresh_open_patches() {
 		auto &root = patchfiles.volume_root(Volume::RamDisk);
 		root.files.clear();
 		root.dirs.clear();
@@ -142,7 +142,8 @@ struct PatchSelectorPage : PageBase {
 		auto open_patch_list = patches.get_open_patch_list();
 
 		for (auto &patch : open_patch_list) {
-			auto patch_name = std::string{std::string_view{patch.patch.patch_name}};
+			auto vol_name = std::string{PatchDirList::get_vol_name(patch.loc.vol)};
+			auto patch_name = vol_name + ": " + std::string{std::string_view{patch.patch.patch_name}};
 
 			if (patch.modification_count > 0)
 				patch_name = Gui::red_text("•") + " " + patch_name;
@@ -217,7 +218,13 @@ struct PatchSelectorPage : PageBase {
 		for (auto &p : dir.files) {
 			roller_text += prefix + std::string{p.patchname} + "\n";
 
-			roller_item_infos.emplace_back(EntryInfo{DirEntryKind::File, vol, dir.name, p.filename, p.link_vol});
+			roller_item_infos.emplace_back(EntryInfo{
+				.kind = DirEntryKind::File,
+				.vol = vol,
+				.path = dir.name,
+				.name = p.filename,
+				.link_vol = p.link_vol,
+			});
 		}
 	}
 
@@ -292,50 +299,24 @@ struct PatchSelectorPage : PageBase {
 					state = State::TryingToRequestPatchList;
 
 					update_load_text(metaparams, ui_LoadMeter);
+				} else {
+					// Poll for patch file changes in between polling for patch list updates
+					poll_patch_file_changed();
 				}
 			} break;
 
 			case State::TryingToRequestPatchList: {
-				//Pick first vol needing refresh
-				std::optional<Volume> force_refresh_vol =
-					gui_state.force_refresh_vol.needs_refresh(Volume::USB)		? Volume::USB :
-					gui_state.force_refresh_vol.needs_refresh(Volume::SDCard)	? Volume::SDCard :
-					gui_state.force_refresh_vol.needs_refresh(Volume::NorFlash) ? Volume::NorFlash :
-																				  std::optional<Volume>{};
-
-				if (patch_storage.request_patchlist(force_refresh_vol)) {
+				if (patch_storage.request_patchlist()) {
 					// Lock patchesfiles: we are not allowed to access it, because M4 has access now
 					patchfiles_locked = true;
 					state = State::RequestedPatchList;
 					show_spinner();
-
-					if (force_refresh_vol)
-						gui_state.force_refresh_vol.unmark(*force_refresh_vol);
 				}
 			} break;
 
 			case State::RequestedPatchList: {
 				auto message = patch_storage.get_message();
 				if (message.message_type == FileStorageProxy::PatchListChanged) {
-
-					if (message.USBEvent == IntercoreStorageMessage::VolEvent::Mounted) {
-						patches.mark_patches_force_reload(Volume::USB);
-					}
-					if (message.USBEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
-						patches.mark_patches_no_reload(Volume::USB);
-					}
-					if (message.SDEvent == IntercoreStorageMessage::VolEvent::Mounted) {
-						patches.mark_patches_force_reload(Volume::SDCard);
-					}
-					if (message.SDEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
-						patches.mark_patches_no_reload(Volume::SDCard);
-					}
-					if (message.NorFlashEvent == IntercoreStorageMessage::VolEvent::Mounted) {
-						patches.mark_patches_force_reload(Volume::NorFlash);
-					}
-					if (message.NorFlashEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
-						patches.mark_patches_no_reload(Volume::NorFlash);
-					}
 					state = State::ReloadingPatchList;
 
 					// Unlock patchesfiles: M4 is done with it
@@ -357,79 +338,41 @@ struct PatchSelectorPage : PageBase {
 				state = State::Idle;
 				break;
 
-			case State::TryingToRequestPatchData:
-				if (patches.load_if_open(selected_patch)) {
+			case State::LoadPatchFile: {
+				if (!patchloader.has_changed_on_disk(selected_patch)) {
 					view_loaded_patch();
+
+				} else if (patches.get_modification_count(selected_patch) > 0) {
+					// Has changed on disk AND there are unsaved changes
+					// PatchViewPage will notify the user of this.
+					view_loaded_patch();
+
 				} else {
-					if (patches.have_space_to_open_patch(max_open_patches)) {
-						if (patch_storage.request_load_patch(selected_patch)) {
-							state = State::RequestedPatchData;
-							show_spinner();
-						}
-					} else {
-						notify_queue.put(
-							{"Cannot open a patch: too many open unsaved patches!", Notification::Priority::Error});
-						state = State::Idle;
-					}
-				}
-				break;
+					show_spinner();
 
-			case State::RequestedPatchData: {
-				auto message = patch_storage.get_message();
+					auto result = patchloader.reload_patch_file(selected_patch, [this] {
+						update_spinner();
+						lv_timer_handler();
+					});
 
-				if (message.message_type == FileStorageProxy::LoadFileOK) {
-					// Try to parse the patch and open the PatchView page
-
-					auto data = patch_storage.get_patch_data(message.bytes_read);
-
-					if (patches.open_patch(data, selected_patch)) {
+					if (result.success) {
 						view_loaded_patch();
-						patches.mark_patch_no_reload(selected_patch);
-
-						// if we just loaded a file that's already playing, then reload it into the patch player
-						if (patches.get_playing_patch_loc_hash() == PatchLocHash{selected_patch}) {
-							patches.play_view_patch();
-							patch_playloader.request_reload_playing_patch(false);
-						}
-						hide_spinner();
 
 					} else {
-						pr_warn("Error parsing %s\n", selected_patch.filename.c_str());
+						lv_group_set_editing(group, true);
 						state = State::Idle;
-						hide_spinner();
+
+						notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
 					}
-				} else if (message.message_type == FileStorageProxy::LoadFileFailed) {
-					// If it's the playing patch, try loading it from memory
-					if (patches.get_playing_patch_loc_hash() == PatchLocHash{selected_patch}) {
-						patches.view_playing_patch();
-						view_loaded_patch();
-						hide_spinner();
-					}
-					pr_warn("Error loading patch %s\n", selected_patch.filename.c_str());
-					state = State::Idle;
-					lv_group_set_editing(group, true);
-					hide_spinner();
-					//TODO: handle error... try reloading patch list?
 				}
+				hide_spinner();
+				state = State::Idle;
+
 			} break;
 
 			case State::Closing:
 				break;
 		}
-	}
-
-	void view_loaded_patch() {
-		auto patch = patches.get_view_patch();
-		pr_trace("View view_loaded_patch: %.31s\n", patch->patch_name.data());
-
-		args.patch_loc_hash = PatchLocHash{selected_patch};
-		// Anytime you open a patch from PatchSel, force redraw it
-		// This fixes issues with a patch that's reloaded from disk
-		gui_state.force_redraw_patch = true;
-		page_list.request_new_page(PageId::PatchView, args);
-		roller_hover.hide();
-
-		state = State::Closing;
 	}
 
 	void blur() final {
@@ -455,6 +398,16 @@ struct PatchSelectorPage : PageBase {
 	}
 
 private:
+	void view_loaded_patch() {
+		patches.start_viewing(selected_patch);
+		args.patch_loc_hash = PatchLocHash{selected_patch};
+		gui_state.force_redraw_patch = true;
+		page_list.request_new_page(PageId::PatchView, args);
+		roller_hover.hide();
+
+		state = State::Closing;
+	}
+
 	void scroll_to_next_valid() {
 		static uint32_t prev_idx = 0;
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
@@ -479,7 +432,6 @@ private:
 	}
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
-
 		auto page = static_cast<PatchSelectorPage *>(event->user_data);
 
 		page->scroll_to_next_valid();
@@ -500,7 +452,7 @@ private:
 		auto selected_patch = page->get_roller_item_patchloc(idx);
 		if (selected_patch) {
 			page->selected_patch = *selected_patch;
-			page->state = State::TryingToRequestPatchData;
+			page->state = State::LoadPatchFile;
 			page->last_selected_idx = idx;
 		} else {
 			//Do nothing? Close/open directory? Focus subdir panel?
@@ -537,6 +489,7 @@ private:
 	PatchSelectorSubdirPanel &subdir_panel;
 	PatchDirList &patchfiles;
 	bool patchfiles_locked = true;
+	ReloadPatch patchloader;
 
 	bool is_populating_subdir_panel = false;
 
@@ -550,8 +503,7 @@ private:
 		RequestedPatchList,
 		ReloadingPatchList,
 
-		TryingToRequestPatchData,
-		RequestedPatchData,
+		LoadPatchFile,
 
 		Closing,
 	} state{State::TryingToRequestPatchList};

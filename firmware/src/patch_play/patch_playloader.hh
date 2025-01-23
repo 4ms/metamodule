@@ -53,9 +53,10 @@ struct PatchPlayLoader {
 
 			if (message.message_type == FileStorageProxy::LoadFileOK) {
 				auto raw_patch_file = storage_.get_patch_data(message.bytes_read);
-				if (!patches_.open_patch(raw_patch_file, initial_patch_loc))
+				if (!patches_.open_patch(raw_patch_file, initial_patch_loc, message.timestamp))
 					pr_err("ERROR: could not parse initial patch\n");
 				else {
+					patches_.start_viewing(initial_patch_loc);
 					next_patch = patches_.get_view_patch();
 					load_patch();
 				}
@@ -84,6 +85,7 @@ struct PatchPlayLoader {
 		audio_is_muted_ = false;
 		starting_audio_ = true;
 		stopping_audio_ = false;
+		stopped_because_of_overrun_ = false;
 		clear_audio_overrun();
 	}
 
@@ -112,8 +114,10 @@ struct PatchPlayLoader {
 		loading_new_patch_ = true;
 		if (start_audio_immediately)
 			should_play_when_loaded_ = true;
-		else
-			should_play_when_loaded_ = !audio_is_muted_;
+		else {
+			// start playing if audio is already playing, or if it stopped because of overload
+			should_play_when_loaded_ = !audio_is_muted_ || stopped_because_of_overrun_;
+		}
 	}
 
 	bool should_fade_down_audio() {
@@ -132,6 +136,7 @@ struct PatchPlayLoader {
 	void notify_audio_overrun() {
 		notify_audio_is_muted();
 		audio_overrun_ = true;
+		stopped_because_of_overrun_ = true;
 	}
 
 	void notify_audio_not_muted() {
@@ -161,6 +166,7 @@ struct PatchPlayLoader {
 			auto result = load_patch(should_play_when_loaded_);
 			loading_new_patch_ = false;
 			should_play_when_loaded_ = true;
+			stopped_because_of_overrun_ = false;
 			return result;
 		}
 
@@ -275,6 +281,7 @@ private:
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
 	std::atomic<bool> audio_overrun_ = false;
+	bool stopped_because_of_overrun_ = false;
 	bool should_play_when_loaded_ = true;
 
 	PatchLocation new_loc{};
@@ -289,8 +296,9 @@ private:
 	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
 
-		if (view_patch == patches_.get_playing_patch())
-			patches_.update_view_patch_module_states(player_.get_module_states());
+		if (view_patch && view_patch == patches_.get_playing_patch()) {
+			view_patch->module_states = player_.get_module_states();
+		}
 
 		std::span<char> filedata = storage_.get_patch_data();
 		patch_to_yaml_buffer(*view_patch, filedata);
@@ -328,6 +336,8 @@ private:
 		} else if (msg.message_type == FileStorageProxy::WriteFileOK) {
 			saving_patch_ = false;
 			patches_.reset_view_patch_modification_count();
+			patches_.set_view_patch_timestamp(msg.timestamp);
+			patches_.set_view_patch_filesize(msg.length);
 			return {true, "Saved"};
 
 		} else {

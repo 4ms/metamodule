@@ -94,7 +94,6 @@ public:
 	void draw(const PatchData &patch) {
 		clear();
 		lv_obj_move_foreground(canvas);
-		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 
 		for (const auto &cable : patch.int_cables) {
 			if (auto outpos = find_outjack_xy(cable.out)) {
@@ -111,7 +110,6 @@ public:
 	void draw_single_module(const PatchData &patch, uint32_t module_id) {
 		clear();
 		lv_obj_move_foreground(canvas);
-		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 
 		for (const auto &cable : patch.int_cables) {
 			if (cable.out.module_id == module_id) {

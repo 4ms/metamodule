@@ -22,16 +22,14 @@ PatchStorage *patchStorage;
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
 
-	auto ExtractFileInfo = [&fbb](auto& thisFile)
-	{
+	auto ExtractFileInfo = [&fbb](auto &thisFile) {
 		auto thisName = fbb.CreateString(std::string_view(thisFile.patchname));
 		auto thisFilename = fbb.CreateString(std::string_view(thisFile.filename));
 
 		return CreatePatchInfo(fbb, thisName, thisFilename, thisFile.filesize, thisFile.timestamp);
 	};
 
-	auto ExtractFileFromDir = [&fbb, &ExtractFileInfo](const auto& fileList)
-	{
+	auto ExtractFileFromDir = [&fbb, &ExtractFileInfo](const auto &fileList) {
 		std::vector<flatbuffers::Offset<PatchInfo>> fileInfos(fileList.files.size());
 		for (std::size_t i = 0; i < fileList.files.size(); i++) {
 			fileInfos[i] = ExtractFileInfo(fileList.files[i]);
@@ -41,17 +39,15 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
 		return files;
 	};
 
-	auto ExtractDirFull = [&fbb, &ExtractFileFromDir](const auto& fileList, std::string_view overrideName, bool isMounted)
-	{
-		auto FixDirName = [](std::string_view in)
-		{
+	auto ExtractDirFull = [&fbb,
+						   &ExtractFileFromDir](const auto &fileList, std::string_view overrideName, bool isMounted) {
+		auto FixDirName = [](std::string_view in) {
 			// remove extra leading slash
 			return in.substr(1);
 		};
 
 		std::vector<flatbuffers::Offset<DirInfo>> dirInfos(fileList.dirs.size());
-		for (std::size_t i=0; i<fileList.dirs.size(); i++)
-		{
+		for (std::size_t i = 0; i < fileList.dirs.size(); i++) {
 			auto files = ExtractFileFromDir(fileList.dirs[i]);
 			auto name = fbb.CreateString(FixDirName(std::string_view(fileList.dirs[i].name)));
 
@@ -60,20 +56,23 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
 		auto dirs = fbb.CreateVector(dirInfos);
 
 		auto files = ExtractFileFromDir(fileList);
-		
-		auto name = isMounted 
-			? fbb.CreateString(std::string_view(overrideName)) 
-			: fbb.CreateString("(not mounted)");
+
+		auto name = isMounted ? fbb.CreateString(std::string_view(overrideName)) : fbb.CreateString("(not mounted)");
 
 		return CreateDirInfo(fbb, name, dirs, files);
 	};
 
+	auto patchFileList = patchStorage->get_patch_list();
 
-	auto patchFileList = patchStorage->getPatchList();
-
-	auto usbList    = ExtractDirFull(patchFileList.volume_root(Volume::USB), patchFileList.get_vol_name(Volume::USB), patchFileList.is_mounted(Volume::USB));
-	auto flashList  = ExtractDirFull(patchFileList.volume_root(Volume::NorFlash), patchFileList.get_vol_name(Volume::NorFlash), patchFileList.is_mounted(Volume::NorFlash));
-	auto sdcardList = ExtractDirFull(patchFileList.volume_root(Volume::SDCard), patchFileList.get_vol_name(Volume::SDCard), patchFileList.is_mounted(Volume::SDCard));
+	auto usbList = ExtractDirFull(patchFileList.volume_root(Volume::USB),
+								  patchFileList.get_vol_name(Volume::USB),
+								  patchFileList.is_mounted(Volume::USB));
+	auto flashList = ExtractDirFull(patchFileList.volume_root(Volume::NorFlash),
+									patchFileList.get_vol_name(Volume::NorFlash),
+									patchFileList.is_mounted(Volume::NorFlash));
+	auto sdcardList = ExtractDirFull(patchFileList.volume_root(Volume::SDCard),
+									 patchFileList.get_vol_name(Volume::SDCard),
+									 patchFileList.is_mounted(Volume::SDCard));
 
 	auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
 	auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
@@ -85,7 +84,7 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
 
 Configuration_t FrameConfig{.start = 0x01, .end = 0x02, .escape = 0x03};
 
-__attribute__((section(".wifi"))) std::array<uint8_t,8*1024*1024> ReceiveBuffer;
+__attribute__((section(".wifi"))) std::array<uint8_t, 8 * 1024 * 1024> ReceiveBuffer;
 
 StaticDeframer deframer(FrameConfig, std::span(ReceiveBuffer));
 Framer framer(FrameConfig);
@@ -98,11 +97,11 @@ static constexpr Timestamp_t HeartbeatInterval = 1000;
 std::optional<Timestamp_t> lastPatchListSentTime;
 static constexpr Timestamp_t PatchListInterval = 1000;
 
-enum ChannelID_t : uint8_t {Broadcast = 0, Management = 1, Connections = 2};
+enum ChannelID_t : uint8_t { Broadcast = 0, Management = 1, Connections = 2 };
 
 std::optional<Timestamp_t> lastIPAnswerTime;
 static constexpr Timestamp_t IPRequestTimeout = 1000;
-std::expected<Endpoint_t,ErrorCode_t> currentEndpoint = std::unexpected(ErrorCode_t::NO_ANSWER);
+std::expected<Endpoint_t, ErrorCode_t> currentEndpoint = std::unexpected(ErrorCode_t::NO_ANSWER);
 
 void handle_management_channel(std::span<uint8_t>);
 void handle_client_channel(uint8_t, std::span<uint8_t>);
@@ -131,12 +130,9 @@ void receiveFrame(std::span<uint8_t> fullFrame) {
 			auto destination = fullFrame[2];
 			auto payload = fullFrame.subspan(3, fullFrame.size() - 3);
 
-			if (destination == ChannelID_t::Management)
-			{
+			if (destination == ChannelID_t::Management) {
 				handle_management_channel(payload);
-			}
-			else
-			{
+			} else {
 				handle_client_channel(destination, payload);
 			}
 
@@ -148,26 +144,21 @@ void receiveFrame(std::span<uint8_t> fullFrame) {
 
 ///////////////////////////
 
-Timestamp_t getTimestamp()
-{
+Timestamp_t getTimestamp() {
 	return HAL_GetTick();
 }
 
-
-void requestIP()
-{
+void requestIP() {
 	// For now, every request on the management channel is responded the IP
-	std::array<uint8_t,3> payload{0xA, 0xB, 0xC};
+	std::array<uint8_t, 3> payload{0xA, 0xB, 0xC};
 	sendFrame(ChannelID_t::Management, std::span(payload));
 
-	if (auto now = getTimestamp(); !lastIPAnswerTime or (now - *lastIPAnswerTime) > IPRequestTimeout)
-	{
-		 currentEndpoint = std::unexpected(ErrorCode_t::NO_ANSWER);
+	if (auto now = getTimestamp(); !lastIPAnswerTime or (now - *lastIPAnswerTime) > IPRequestTimeout) {
+		currentEndpoint = std::unexpected(ErrorCode_t::NO_ANSWER);
 	}
 }
 
-void send_heartbeat()
-{
+void send_heartbeat() {
 	flatbuffers::FlatBufferBuilder fbb;
 	auto answer = fbb.CreateStruct(Heartbeat());
 	auto message = CreateMessage(fbb, AnyMessage_Heartbeat, answer.Union());
@@ -196,8 +187,7 @@ void stop() {
 
 void run() {
 
-	if (BufferedUSART2::detectedOverrunSinceLastCall())
-	{
+	if (BufferedUSART2::detectedOverrunSinceLastCall()) {
 		deframer.reset();
 	}
 
@@ -205,18 +195,15 @@ void run() {
 		deframer.parse(*val, receiveFrame);
 	}
 
-	if (not lastHeartbeatSentTime or (getTimestamp() - *lastHeartbeatSentTime) > HeartbeatInterval)
-	{
+	if (not lastHeartbeatSentTime or (getTimestamp() - *lastHeartbeatSentTime) > HeartbeatInterval) {
 		send_heartbeat();
 		lastHeartbeatSentTime = getTimestamp();
 
 		requestIP();
 	}
 
-	if (not lastPatchListSentTime or (getTimestamp() - *lastPatchListSentTime) > PatchListInterval)
-	{
-		if (patchStorage->has_media_changed() and not deframer.isReceivingFrame())
-		{
+	if (not lastPatchListSentTime or (getTimestamp() - *lastPatchListSentTime) > PatchListInterval) {
+		if (patchStorage->has_media_changed() and not deframer.isReceivingFrame()) {
 			flatbuffers::FlatBufferBuilder fbb;
 			auto message = constructPatchesMessage(fbb);
 			fbb.Finish(message);
@@ -228,38 +215,30 @@ void run() {
 	}
 }
 
-std::expected<Endpoint_t,ErrorCode_t> getCurrentIP()
-{
+std::expected<Endpoint_t, ErrorCode_t> getCurrentIP() {
 	return currentEndpoint;
 }
 
 ////////////////////////////////
 
-void handle_management_channel(std::span<uint8_t> payload)
-{
-	if (payload.size() == 6)
-	{
+void handle_management_channel(std::span<uint8_t> payload) {
+	if (payload.size() == 6) {
 		// assemble endpoint struct
 		Endpoint_t thisEndpoint;
 		std::copy(payload.begin(), payload.begin() + 4, thisEndpoint.ip.data());
 		thisEndpoint.port = (payload[5] << 8) | payload[4];
 
-		const Endpoint_t DummyEndpoint {{0,0,0,0}, 0};
+		const Endpoint_t DummyEndpoint{{0, 0, 0, 0}, 0};
 
-		if (std::equal(DummyEndpoint.ip.begin(), DummyEndpoint.ip.end(), thisEndpoint.ip.begin()))
-		{
+		if (std::equal(DummyEndpoint.ip.begin(), DummyEndpoint.ip.end(), thisEndpoint.ip.begin())) {
 			currentEndpoint = std::unexpected(ErrorCode_t::NO_IP);
-		}
-		else
-		{
+		} else {
 			currentEndpoint = thisEndpoint;
 		}
 
 		lastIPAnswerTime = getTimestamp();
 	}
 }
-
-
 
 void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 
@@ -293,21 +272,13 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 			pr_info("Received Patch %.*s of %u bytes\n", filename.size(), filename.data(), receivedPatchData.size());
 
 			auto ParseStorageString = [](std::string_view locationName) -> std::optional<Volume> {
-
-				if (locationName.compare(PatchDirList::get_vol_name(Volume::USB)) == 0)
-				{
+				if (locationName.compare(PatchDirList::get_vol_name(Volume::USB)) == 0) {
 					return Volume::USB;
-				}
-				else if (locationName.compare(PatchDirList::get_vol_name(Volume::NorFlash)) == 0)
-				{
+				} else if (locationName.compare(PatchDirList::get_vol_name(Volume::NorFlash)) == 0) {
 					return Volume::NorFlash;
-				}
-				else if (locationName.compare(PatchDirList::get_vol_name(Volume::SDCard)) == 0)
-				{
+				} else if (locationName.compare(PatchDirList::get_vol_name(Volume::SDCard)) == 0) {
 					return Volume::SDCard;
-				}
-				else
-				{
+				} else {
 					return std::nullopt;
 				}
 			};
@@ -317,9 +288,9 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 			auto volumeString = flatbuffers::GetStringView(uploadPatchMessage->volume());
 
 			if (auto thisVolume = ParseStorageString(volumeString); thisVolume) {
-				auto success = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
+				auto timestamp = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
 
-				if (success) {
+				if (timestamp != 0) {
 					auto result = CreateResult(fbb, true);
 					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 					fbb.Finish(message);
@@ -337,8 +308,7 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				fbb.Finish(message);
 			}
 
-			if (patchStorage->has_media_changed())
-			{
+			if (patchStorage->has_media_changed()) {
 				flatbuffers::FlatBufferBuilder fbb;
 				auto message = constructPatchesMessage(fbb);
 				fbb.Finish(message);
@@ -349,7 +319,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 			}
 
 			sendResponse(fbb.GetBufferSpan());
-
 
 		} else {
 			pr_trace("Other option\n");

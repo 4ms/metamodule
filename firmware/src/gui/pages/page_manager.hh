@@ -28,6 +28,8 @@ namespace MetaModule
 class PageManager {
 	SlsComponentInit sls_comp_init;
 
+	PatchFileChangeChecker file_change_checker;
+
 	PatchContext info;
 	PageList page_list;
 	GuiState gui_state;
@@ -60,7 +62,8 @@ public:
 				UserSettings &settings,
 				Screensaver &screensaver,
 				FatFileIO &ramdisk)
-		: info{.patch_storage = patch_storage,
+		: file_change_checker{patch_storage, open_patch_manager, patch_playloader, gui_state, notify_queue}
+		, info{.patch_storage = patch_storage,
 			   .open_patch_manager = open_patch_manager,
 			   .patch_playloader = patch_playloader,
 			   .params = params,
@@ -71,7 +74,8 @@ public:
 			   .gui_state = gui_state,
 			   .settings = settings,
 			   .plugin_manager = plugin_manager,
-			   .ramdisk = ramdisk}
+			   .ramdisk = ramdisk,
+			   .file_change_checker = file_change_checker}
 		, screensaver{screensaver} {
 	}
 

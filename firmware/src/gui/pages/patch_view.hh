@@ -16,7 +16,6 @@
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
-#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
@@ -61,6 +60,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+
 		is_ready = false;
 
 		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
@@ -68,9 +68,9 @@ struct PatchViewPage : PageBase {
 			return;
 		}
 
-		is_patch_playing = patch_is_playing(args.patch_loc_hash);
+		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
-		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
+		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			lv_label_set_text(ui_LoadMeter2, "");
 			lv_show(ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
@@ -81,12 +81,20 @@ struct PatchViewPage : PageBase {
 		}
 
 		bool needs_refresh = false;
+
 		if (gui_state.force_redraw_patch)
 			needs_refresh = true;
 		if (patch_revision != patches.get_view_patch_modification_count())
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
+
+		file_change_poll.force_next_poll(); // avoid 500ms delay before refreshing the patch
+		poll_patch_file_changed();
+
+		if (patch_file_timestamp != patches.get_view_patch_timestamp()) {
+			needs_refresh = true;
+		}
 
 		if (!needs_refresh) {
 			is_ready = true;
@@ -104,7 +112,7 @@ struct PatchViewPage : PageBase {
 		gui_state.force_redraw_patch = false;
 
 		// Prepare the knobset menu with the actively playing patch's knobset
-		if (is_patch_playing)
+		if (is_patch_playloaded)
 			active_knobset = page_list.get_active_knobset();
 
 		else {
@@ -120,11 +128,23 @@ struct PatchViewPage : PageBase {
 
 		patch_revision = patches.get_view_patch_modification_count();
 
+		redraw_patch();
+	}
+
+	void redraw_patch() {
+		lv_group_remove_all_objs(group);
+		lv_group_set_editing(group, false);
+
 		clear();
 
 		lv_hide(modules_cont);
 
 		patch = patches.get_view_patch();
+
+		if (!patch) {
+			pr_err("view patch is null\n");
+			return;
+		}
 
 		if (patch->patch_name.length() == 0)
 			return;
@@ -133,9 +153,6 @@ struct PatchViewPage : PageBase {
 
 		module_canvases.reserve(patch->module_slugs.size());
 		module_ids.reserve(patch->module_slugs.size());
-
-		lv_group_remove_all_objs(group);
-		lv_group_set_editing(group, false);
 
 		lv_group_add_obj(group, ui_PlayButton);
 		lv_group_add_obj(group, ui_InfoButton);
@@ -160,7 +177,7 @@ struct PatchViewPage : PageBase {
 				continue;
 
 			module_drawer.draw_mapped_elements(
-				*patch, module_idx, active_knobset, canvas, drawn_elements, is_patch_playing);
+				*patch, module_idx, active_knobset, canvas, drawn_elements, is_patch_playloaded);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
@@ -241,34 +258,45 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
-		bool last_is_patch_playing = is_patch_playing;
+		bool last_is_patch_loaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
 
-		if (patch != patches.get_view_patch()) {
-			patch = patches.get_view_patch();
-		}
+		patch = patches.get_view_patch();
 
-		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
+		is_patch_playloaded = patch_is_playing(displayed_patch_loc_hash);
 
-		if (is_patch_playing != last_is_patch_playing || page_settings.changed) {
+		if (is_patch_playloaded != last_is_patch_loaded || page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
 			watch_lights();
 		}
 
-		if (is_patch_playing != last_is_patch_playing) {
+		if (is_patch_playloaded != last_is_patch_loaded) {
 			args.view_knobset_id = active_knobset;
 			page_list.set_active_knobset(active_knobset);
 			patch_mod_queue.put(ChangeKnobSet{active_knobset});
 			redraw_map_rings();
 		}
 
-		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
+		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
 			redraw_map_rings();
+		}
+
+		if (gui_state.view_patch_file_changed) {
+			gui_state.view_patch_file_changed = false;
+
+			abort_cable(gui_state, notify_queue);
+
+			if (auto obj = lv_group_get_focused(group)) {
+				if (std::ranges::find(module_canvases, obj) != module_canvases.end()) {
+					args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+				}
+			}
+			redraw_patch();
 		}
 
 		if (gui_state.back_button.is_just_released()) {
@@ -279,7 +307,7 @@ struct PatchViewPage : PageBase {
 				desc_panel.back_event();
 
 			} else if (file_menu.is_visible()) {
-				file_menu.hide();
+				file_menu.back();
 
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
@@ -294,7 +322,6 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (desc_panel.did_update_names()) {
-			gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
 			patches.mark_view_patch_modified();
 			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
 		}
@@ -304,8 +331,17 @@ struct PatchViewPage : PageBase {
 			args.patch_loc_hash = patches.get_view_patch_loc_hash();
 		}
 
-		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
-			update_changed_params();
+		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
+			redraw_elements();
+
+			if (gui_state.playing_patch_needs_manual_reload) {
+				auto flash = get_time() % 1000 < 500 ? 2 : 0;
+				lv_obj_set_style_border_color(ui_PlayButton, lv_color_hex(0xAA4400), LV_PART_MAIN);
+				lv_obj_set_style_border_opa(ui_PlayButton, LV_OPA_100, LV_PART_MAIN);
+				lv_obj_set_style_border_width(ui_PlayButton, flash, LV_PART_MAIN);
+			} else {
+				lv_obj_set_style_border_width(ui_PlayButton, 0, LV_PART_MAIN);
+			}
 
 			if (!lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
@@ -320,16 +356,26 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
-		if (file_menu.is_visible())
+		if (file_menu.is_visible()) {
 			file_menu.update();
+			if (!file_menu.is_visible()) {
+				lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
+			}
+		}
+
+		// Don't poll for patch changes while file menu is open to prevent races on the filesystem.
+		if (!file_menu.is_visible())
+			poll_patch_file_changed();
 	}
 
 private:
 	std::vector<std::vector<float>> light_vals;
 
 	void watch_lights() {
+		params.lights.stop_watching_all();
+		params.displays.stop_watching_all();
 
-		if (is_patch_playing) {
+		if (is_patch_playloaded) {
 			for (const auto &drawn_element : drawn_elements) {
 				auto &gui_el = drawn_element.gui_element;
 
@@ -364,7 +410,7 @@ private:
 		}
 	}
 
-	void update_changed_params() {
+	void redraw_elements() {
 
 		// copy light values from params
 		// indexed by module id and light element id
@@ -431,7 +477,7 @@ private:
 
 		for (auto &drawn_el : drawn_elements) {
 			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
-			map_ring_display.update(drawn_el, is_on_highlighted_module, is_patch_playing);
+			map_ring_display.update(drawn_el, is_on_highlighted_module, is_patch_playloaded);
 		}
 	}
 
@@ -474,8 +520,11 @@ private:
 	}
 
 	void clear() {
-		for (auto &m : module_canvases)
+		for (auto &m : module_canvases) {
 			lv_obj_del(m);
+		}
+		highlighted_module_obj = nullptr;
+		highlighted_module_id = std::nullopt;
 
 		module_canvases.clear();
 		drawn_elements.clear();
@@ -567,12 +616,20 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		if (!page->is_patch_playing) {
+
+		if (!page->is_patch_playloaded) {
 			page->patch_playloader.request_load_view_patch();
 			page->save_last_opened_patch_in_settings();
+			page->gui_state.playing_patch_needs_manual_reload = false;
+
 		} else {
 			if (page->patch_playloader.is_audio_muted()) {
-				page->patch_playloader.start_audio();
+				if (page->gui_state.playing_patch_needs_manual_reload) {
+					page->patch_playloader.request_load_view_patch();
+					page->gui_state.playing_patch_needs_manual_reload = false;
+				} else {
+					page->patch_playloader.start_audio();
+				}
 			} else {
 				page->patch_playloader.stop_audio();
 			}
@@ -581,6 +638,8 @@ private:
 
 	static void button_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+		if (!page)
+			return;
 		lv_label_set_text(ui_ModuleName, "");
 		lv_hide(ui_ModuleName);
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
@@ -590,7 +649,7 @@ private:
 		page->file_menu.hide();
 
 		if (event->target == ui_SaveButton) {
-			lv_label_set_text(ui_PatchName, page->patches.get_view_patch_filename().data());
+			lv_label_set_text(ui_PatchName, page->patches.get_view_patch_filename().c_str());
 		} else {
 			lv_label_set_text(ui_PatchName, page->patch->patch_name.c_str());
 		}
@@ -650,11 +709,12 @@ private:
 	std::vector<lv_obj_t *> module_canvases;
 	std::vector<uint32_t> module_ids;
 	std::vector<DrawnElement> drawn_elements;
-	bool is_patch_playing = false;
+	bool is_patch_playloaded = false;
 	bool is_ready = false;
 
 	PatchLocHash displayed_patch_loc_hash;
 	uint32_t patch_revision = 0xFFFFFFFF;
+	uint32_t patch_file_timestamp = 0;
 
 	struct focussed_context {
 		PatchViewPage *page;

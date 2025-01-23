@@ -8,8 +8,6 @@
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/pages/save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
-#include "lvgl.h"
 #include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
@@ -30,7 +28,7 @@ struct PatchViewFileMenu {
 		, notify_queue{notify_queue}
 		, page_list{page_list}
 		, gui_state{gui_state}
-		, save_dialog{patch_storage, patches, play_loader, subdir_panel, notify_queue, page_list, gui_state}
+		, save_dialog{patch_storage, patches, play_loader, subdir_panel, notify_queue, page_list}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
@@ -64,6 +62,9 @@ struct PatchViewFileMenu {
 		if (save_dialog.is_visible()) {
 			save_dialog.hide();
 
+		} else if (confirm_popup.is_visible()) {
+			confirm_popup.hide();
+
 		} else if (visible) {
 			hide();
 		}
@@ -71,6 +72,7 @@ struct PatchViewFileMenu {
 
 	void hide() {
 		save_dialog.hide();
+		confirm_popup.hide();
 		hide_menu();
 	}
 
@@ -140,7 +142,6 @@ struct PatchViewFileMenu {
 					notify_queue.put({"Error deleting file", Notification::Priority::Error});
 
 				filesystem_changed = true;
-				gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
 
 				delete_state = DeleteState::Idle;
 
@@ -170,17 +171,17 @@ struct PatchViewFileMenu {
 			auto message = patch_storage.get_message();
 
 			if (message.message_type == FileStorageProxy::LoadFileOK) {
-				patches.close_view_patch();
-
 				auto data = patch_storage.get_patch_data(message.bytes_read);
 
-				if (patches.open_patch(data, patch_loc)) {
+				if (patches.open_patch(data, patch_loc, message.timestamp)) {
 					if (was_playing) {
 						play_loader.request_load_view_patch();
 					}
 
 					page_list.request_new_page_no_history(
 						PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
+
+					gui_state.force_redraw_patch = true;
 					revert_state = RevertState::Idle;
 					hide_menu();
 				} else {
@@ -239,7 +240,7 @@ private:
 		} else {
 			page->play_loader.request_save_patch();
 			page->filesystem_changed = true;
-			page->gui_state.force_refresh_vol.mark(page->patches.get_view_patch_vol());
+			page->hide_menu();
 		}
 	}
 
@@ -269,7 +270,7 @@ private:
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
 		std::string confirm_msg =
-			"Delete " + std::string(page->patches.get_view_patch_filename()) + " on disk? This cannot be undone.";
+			"Delete " + page->patches.get_view_patch_filename() + " on disk? This cannot be undone.";
 
 		page->patch_loc = {page->patches.get_view_patch_filename(), page->patches.get_view_patch_vol()};
 		page->confirm_popup.show(
@@ -287,7 +288,7 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		std::string confirm_msg = "Revert " + std::string(page->patches.get_view_patch_filename()) +
+		std::string confirm_msg = "Revert " + page->patches.get_view_patch_filename() +
 								  " to last saved version on disk? This cannot be undone.";
 
 		page->patch_loc = {page->patches.get_view_patch_filename(), page->patches.get_view_patch_vol()};

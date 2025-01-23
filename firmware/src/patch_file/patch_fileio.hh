@@ -17,12 +17,12 @@ class PatchFileIO {
 	static constexpr unsigned MaxAssetDirRecursion = 2; // /Brand/components/name.png
 
 public:
-	enum class FileFilter { All, NewerTimestamp };
-	// void factory_clean();
-
-	static bool read_file(std::span<char> &buffer, FileIoC auto &fileio, const std::string_view filename) {
+	// timestamp is an out param
+	static bool
+	read_file(std::span<char> &buffer, FileIoC auto &fileio, const std::string_view filename, uint32_t *timestamp) {
 
 		auto file_size = fileio.get_file_size(filename);
+		*timestamp = fileio.get_file_timestamp(filename);
 		if (file_size == 0) {
 			pr_warn("File '%.*s' does not exist, cannot read\n", (int)filename.size(), filename.data());
 		}
@@ -189,23 +189,12 @@ public:
 		return ok;
 	}
 
-private:
-	static ModuleTypeSlug _read_patch_name(FileIoC auto &fileio, const std::string_view filename) {
-		constexpr uint32_t HEADER_SIZE = 64;
-		std::array<char, HEADER_SIZE> _buf;
-
-		auto bytes_read = fileio.read_file(filename, _buf, 0);
-		if (bytes_read == 0) {
-			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
-			return "";
-		}
-		_buf[63] = 0;
-
-		auto header = std::string_view{_buf.data(), _buf.size()};
+	static ModuleTypeSlug extract_patch_name(std::string_view header) {
 		std::string_view name_tag{"patch_name"};
+
 		auto startpos = header.find(name_tag);
 		if (startpos == header.npos) {
-			pr_trace("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
+			pr_trace("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), header.size());
 			return "";
 		}
 
@@ -219,12 +208,28 @@ private:
 		if (endpos == header.npos) {
 			pr_trace("File does not contain a quote or newline after '%s' in the first %d chars, ignoring\n",
 					 name_tag.data(),
-					 HEADER_SIZE);
+					 header.size());
 			return "";
 		}
 		header.remove_suffix(header.size() - endpos);
 
 		return ModuleTypeSlug{header};
+	}
+
+private:
+	static ModuleTypeSlug _read_patch_name(FileIoC auto &fileio, const std::string_view filename) {
+		constexpr uint32_t HEADER_SIZE = 64;
+		std::array<char, HEADER_SIZE> _buf;
+
+		auto bytes_read = fileio.read_file(filename, _buf, 0);
+		if (bytes_read == 0) {
+			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
+			return "";
+		}
+		_buf[63] = 0;
+
+		auto header = std::string_view{_buf.data(), _buf.size()};
+		return extract_patch_name(header);
 	}
 };
 } // namespace MetaModule

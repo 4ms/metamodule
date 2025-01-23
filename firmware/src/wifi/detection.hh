@@ -60,6 +60,10 @@ struct DetectExpander {
 		return result;
 	}
 
+	bool is_idle() {
+		return wifi_ip_state == WifiIPState::Idle;
+	}
+
 private:
 	FileStorageProxy &storage;
 
