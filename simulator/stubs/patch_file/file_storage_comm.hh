@@ -7,7 +7,6 @@
 #include "host_file_io.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
-#include "patch_file/patch_listio.hh"
 #include "patch_file/patch_location.hh"
 #include <cstdint>
 #include <string_view>
