@@ -45,7 +45,7 @@ add_executable(
   ${FWDIR}/lib/littlefs/lfs.c
   ${FWDIR}/lib/littlefs/lfs_util.c
   ${FWDIR}/system/libc_stub.c
-  ${FWDIR}/src/fs/filesystem.cc
+  ${M4DIR}/libc_stub.c
   ${M4DIR}/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
