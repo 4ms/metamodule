@@ -30,7 +30,7 @@ struct HostFileIO {
 			for (const auto &entry : fs::directory_iterator(_root_dir)) {
 				auto fn = entry.path();
 				if (fn.extension() == fs::path(extension)) {
-					auto timestamp = convert_timestamp(fn);
+					auto timestamp = convert_timestamp(std::string(fn));
 					auto sz = (uint32_t)fs::file_size(fn);
 					action(fn.string().c_str(), timestamp, sz);
 				}
@@ -67,7 +67,7 @@ struct HostFileIO {
 				auto fn = entry.path();
 				auto entry_type = (entry.is_directory()) ? DirEntryKind::Dir : DirEntryKind::File;
 
-				auto timestamp = convert_timestamp(fn);
+				auto timestamp = convert_timestamp(std::string(fn));
 
 				auto sz = entry.is_directory() ? 0 : (uint32_t)fs::file_size(fn);
 				std::string name = fn.filename().string();
