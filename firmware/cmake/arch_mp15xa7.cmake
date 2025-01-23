@@ -5,7 +5,6 @@ add_compile_definitions(
       STM32MP1
       STM32MP157Cxx
       CORE_CA7
-      $<$<BOOL:${USE_FEWER_MODULES}>:USE_FEWER_MODULES=1>
 )
 
 # Note: MCU_FLAGS is used with linking as well

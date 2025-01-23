@@ -131,7 +131,7 @@ target_include_directories(
 
 target_link_libraries(main_m4.elf PUBLIC metamodule::core-interface)
 
-# set_property(TARGET main_m4.elf PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+set_property(TARGET main_m4.elf PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 target_link_script(
   main_m4
