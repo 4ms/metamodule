@@ -92,6 +92,7 @@ target_include_directories( vcv_plugin_export PUBLIC
     ${MM_ROOT}/firmware/src #for svg.cc to access gui/elements/..., and for console/pr_dbg.hh
     ${SHARED}
 	${MM_ROOT}/firmware/lib
+	${MM_ROOT}/firmware #for system/time.hh
 )
 
 target_compile_definitions(vcv_plugin_export PRIVATE METAMODULE)

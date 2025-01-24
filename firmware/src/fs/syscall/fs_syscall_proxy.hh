@@ -7,6 +7,7 @@ namespace MetaModule
 
 // Goes between fs syscall wrappers and inter-core comunication.
 // For SD and USB, not for RamDisk
+// TODO: make this a DiskDevice* (see TODO in fileio_t.hh)
 class FsSyscallProxy {
 public:
 	FsSyscallProxy();
@@ -16,6 +17,12 @@ public:
 	int close(FIL *fil);
 	uint64_t seek(FIL *fil, int offset, int whence);
 	std::optional<size_t> read(FIL *fil, std::span<char> buffer);
+
+	bool stat(std::string_view path, FILINFO *info);
+
+	bool opendir(std::string_view path, DIR *dir);
+	bool closedir(DIR *dir);
+	bool readdir(DIR *dir, FILINFO *info);
 
 private:
 	std::unique_ptr<FsProxy> impl;

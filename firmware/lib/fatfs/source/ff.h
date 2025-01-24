@@ -225,7 +225,7 @@ typedef struct {
 
 /* Directory object structure (DIR) */
 
-typedef struct {
+typedef struct DIR {
 	FFOBJID	obj;			/* Object identifier */
 	DWORD	dptr;			/* Current read/write offset */
 	DWORD	clust;			/* Current cluster */

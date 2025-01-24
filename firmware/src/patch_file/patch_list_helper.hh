@@ -132,14 +132,14 @@ private:
 		for (auto const &vol : patch_dir_list.vol_root) {
 			pr_dbg("\nVolume: %s:\n", vol.name.c_str());
 
-			for (auto const &f : vol.files) {
+			for ([[maybe_unused]] auto const &f : vol.files) {
 				pr_dbg(" %s\n", f.filename.c_str());
 			}
 
 			for (auto const &d : vol.dirs) {
 				pr_dbg(" %s (dir):\n", d.name.c_str());
 
-				for (auto const &f : d.files) {
+				for ([[maybe_unused]] auto const &f : d.files) {
 					pr_dbg("  %s\n", f.filename.c_str());
 				}
 			}

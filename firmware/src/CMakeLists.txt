@@ -139,6 +139,7 @@ add_executable(
   ${FWDIR}/src/fs/syscall/fs_syscall_proxy.cc
   ${FWDIR}/src/fs/syscall/filedesc_manager.cc
   ${FWDIR}/src/fs/fatfs/fatfs_adaptor.cc
+  ${FWDIR}/src/fs/dirent/dirent.cc
 
   #
   ${FWDIR}/src/dynload/dynloader.cc
