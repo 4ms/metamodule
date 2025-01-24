@@ -97,4 +97,22 @@ int FsSyscallProxy::close(FIL *fil) {
 	return -1;
 }
 
+bool FsSyscallProxy::stat(std::string_view path, FILINFO *info) {
+	auto msg = IntercoreModuleFS::Stat{
+		.path = path,
+		.info = *info, //copy to non-cacheable message
+	};
+
+	pr_trace("A7: stat %s => info %p\n", msg.path.data(), msg.info);
+
+	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Stat>(msg, 3000)) {
+		pr_trace("A7: Stat response = %d\n", response->res);
+		*info = response->info; //copy back
+		return response->res == FR_OK;
+	}
+
+	pr_err("Failed to send Stat request\n");
+	return false;
+}
+
 } // namespace MetaModule

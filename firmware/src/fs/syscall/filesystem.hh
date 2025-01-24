@@ -3,6 +3,7 @@
 #include "ff.h"
 #include "filedesc_manager.hh"
 #include "fs_syscall_proxy.hh"
+#include "time_convert.hh"
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -137,11 +138,51 @@ public:
 
 		} else if (FileDescManager::filedesc(fd)) {
 			st->st_mode = S_IFREG;
+			pr_trace(
+				"Warning: fstat not fully supported: only the return value is valid, and st_mode field is valid\n");
 			return 0;
 
 		} else {
 			return -1;
 		}
+	}
+
+	static int stat(const char *filename, struct stat *st) {
+		auto [path, volume] = split_volume(filename);
+
+		if (volume == Volume::RamDisk || volume == Volume::SDCard || volume == Volume::USB) {
+			FILINFO filinfo;
+
+			bool ok = false;
+			if (volume == Volume::RamDisk)
+				ok = mRamdisk->get_fat_filinfo(path, filinfo);
+			else
+				ok = fs_proxy.stat(path, &filinfo);
+
+			if (ok) {
+				FatTime fattime{.date = filinfo.fdate, .time = filinfo.ftime};
+				auto tm = fattime_to_tm(fattime);
+				time_t secs = mktime(&tm);
+				st->st_mtim.tv_sec = secs; //since poweron
+				st->st_mtim.tv_nsec = secs * 1000;
+
+				/// we don't know created time, use last modification
+				st->st_ctim.tv_sec = secs;
+				st->st_ctim.tv_nsec = secs * 1000;
+
+				/// we don't know accessed time, use last modification
+				st->st_atim.tv_sec = secs;
+				st->st_atim.tv_nsec = secs * 1000;
+
+				st->st_size = filinfo.fsize;
+
+				st->st_mode = S_IFREG;
+				return 0;
+			}
+		}
+
+		pr_err("stat() on file %s on vol %d failed\n", filename, (int)volume);
+		return -1;
 	}
 
 private:

@@ -17,6 +17,8 @@ public:
 	uint64_t seek(FIL *fil, int offset, int whence);
 	std::optional<size_t> read(FIL *fil, std::span<char> buffer);
 
+	bool stat(std::string_view path, FILINFO *info);
+
 private:
 	std::unique_ptr<FsProxy> impl;
 };

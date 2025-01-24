@@ -26,4 +26,8 @@ int _fstat(int fd, struct stat *st) {
 int _isatty(int fd) {
 	return MetaModule::Filesystem::isatty(fd);
 }
+
+int _stat(const char *filename, struct stat *st) {
+	return MetaModule::Filesystem::stat(filename, st);
+}
 }

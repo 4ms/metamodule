@@ -15,3 +15,7 @@ void print_time() {
 			(unsigned long)HAL_GetTick(),
 			secs);
 }
+
+uint32_t get_ticks() {
+	return HAL_GetTick();
+}
