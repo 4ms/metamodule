@@ -14,10 +14,10 @@ int _read(int fd, char *ptr, int len) {
 	return -1;
 }
 
-int _fstat(int x, void *p) {
+__attribute__((used)) int _fstat(int x, void *p) {
 	return 0;
 }
 
-int _isatty(int fd) {
-	return 0;
+__attribute__((used)) int _isatty(int x) {
+	return -1;
 }
