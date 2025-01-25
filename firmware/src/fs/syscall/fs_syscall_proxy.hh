@@ -19,6 +19,10 @@ public:
 
 	bool stat(std::string_view path, FILINFO *info);
 
+	bool opendir(std::string_view path, DIR *dir);
+	bool closedir(DIR *dir);
+	bool readdir(DIR *dir, FILINFO *info);
+
 private:
 	std::unique_ptr<FsProxy> impl;
 };

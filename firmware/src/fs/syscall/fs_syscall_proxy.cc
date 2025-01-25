@@ -115,4 +115,16 @@ bool FsSyscallProxy::stat(std::string_view path, FILINFO *info) {
 	return false;
 }
 
+bool FsSyscallProxy::opendir(std::string_view path, DIR *dir) {
+	return false;
+}
+
+bool FsSyscallProxy::closedir(DIR *dir) {
+	return false;
+}
+
+bool FsSyscallProxy::readdir(DIR *dir, FILINFO *info) {
+	return false;
+}
+
 } // namespace MetaModule
