@@ -116,14 +116,55 @@ bool FsSyscallProxy::stat(std::string_view path, FILINFO *info) {
 }
 
 bool FsSyscallProxy::opendir(std::string_view path, DIR *dir) {
+	auto msg = IntercoreModuleFS::OpenDir{
+		.dir = *dir, //copy to non-cacheable Message
+		.path = path,
+	};
+
+	pr_trace("A7: opendir %s => %p\n", msg.path.data(), msg.dir);
+
+	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::OpenDir>(msg, 3000)) {
+		pr_trace("A7: Opendir response = %d\n", response->res);
+		*dir = response->dir; //copy back
+		return response->res == FR_OK;
+	}
+
+	pr_err("Failed to send Opendir request\n");
 	return false;
 }
 
 bool FsSyscallProxy::closedir(DIR *dir) {
+	auto msg = IntercoreModuleFS::CloseDir{
+		.dir = *dir,
+	};
+
+	pr_trace("A7: closedir %p\n", dir);
+
+	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::CloseDir>(msg, 3000)) {
+		*dir = response->dir; //copy DIR back
+		return response->res;
+	}
+
+	pr_err("Failed to send closedir request\n");
 	return false;
 }
 
 bool FsSyscallProxy::readdir(DIR *dir, FILINFO *info) {
+	auto msg = IntercoreModuleFS::ReadDir{
+		.dir = *dir,   //copy
+		.info = *info, //copy to non-cacheable message
+	};
+
+	pr_trace("A7: ReadDir dir %p => info %p\n", dir, info);
+
+	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::ReadDir>(msg, 3000)) {
+		pr_trace("A7: ReadDir response = %d\n", response->res);
+		*dir = response->dir;	//copy back
+		*info = response->info; //copy back
+		return response->res == FR_OK;
+	}
+
+	pr_err("Failed to send ReadDir request\n");
 	return false;
 }
 
