@@ -7,6 +7,7 @@ namespace MetaModule
 
 // Goes between fs syscall wrappers and inter-core comunication.
 // For SD and USB, not for RamDisk
+// TODO: make this a DiskDevice* (see TODO in fileio_t.hh)
 class FsSyscallProxy {
 public:
 	FsSyscallProxy();
