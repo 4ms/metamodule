@@ -30,7 +30,8 @@ FileDesc *filedesc(size_t fd);
 int isatty(int fd);
 
 DirDesc *alloc_dir();
-void dealloc_dir(DirDesc *dirdesc);
+bool dealloc_dir(DIR *dir);
+bool dealloc_dir(DirDesc *dirdesc);
 
 DirDesc *dirdesc(DIR *dir);
 

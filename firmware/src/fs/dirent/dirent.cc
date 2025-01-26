@@ -15,34 +15,45 @@ struct dirent *readdir(DIR *dir) {
 }
 
 int alphasort(const struct dirent **, const struct dirent **) {
+	// TODO
 	return -1;
 }
 
 int dirfd(DIR *) {
+	// TODO
 	return -1;
 }
 
 DIR *fdopendir(int) {
+	// TODO
 	return nullptr;
 }
 
-int readdir_r(DIR *, struct dirent *, struct dirent **) {
-	return -1;
+int readdir_r(DIR *dir, struct dirent *dirent, struct dirent **) {
+	if (dirent) {
+		// TODO: is this correct?
+		dirent = MetaModule::Filesystem::readdir(dir);
+	}
+	return dirent ? 0 : -1;
 }
 
-void rewinddir(DIR *) {
+void rewinddir(DIR *dir) {
+	MetaModule::Filesystem::rewinddir(dir);
 }
 
 int scandir(const char *,
 			struct dirent ***,
 			int (*)(const struct dirent *),
 			int (*)(const struct dirent **, const struct dirent **)) {
+	// TODO
 	return -1;
 }
 
 void seekdir(DIR *, long) {
+	// TODO
 }
 
 long telldir(DIR *) {
+	// TODO
 	return -1;
 }

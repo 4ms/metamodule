@@ -191,28 +191,26 @@ public:
 	}
 
 	static DIR *opendir(std::string_view fullpath) {
-		if (auto dir = FileDescManager::alloc_dir()) {
+		if (auto dirdesc = FileDescManager::alloc_dir()) {
 
 			auto [path, volume] = split_volume(fullpath);
 
-			if (volume == Volume::RamDisk) {
-				if (mRamdisk) {
-					if (mRamdisk->opendir(path, dir->dir)) {
-						dir->vol = volume;
-						return dir->dir;
-					}
+			if (volume == Volume::RamDisk && mRamdisk) {
+				if (mRamdisk->opendir(path, dirdesc->dir)) {
+					dirdesc->vol = volume;
+					return dirdesc->dir;
 				}
 			}
 
 			if (volume == Volume::SDCard || volume == Volume::USB) {
-				if (fs_proxy.opendir(path, dir->dir)) {
-					dir->vol = volume;
-					return dir->dir;
+				if (fs_proxy.opendir(path, dirdesc->dir)) {
+					dirdesc->vol = volume;
+					return dirdesc->dir;
 				}
 			}
 
 			pr_err("Opening dir %s on vol %d failed\n", fullpath.data(), (int)volume);
-			FileDescManager::dealloc_dir(dir);
+			FileDescManager::dealloc_dir(dirdesc);
 			return nullptr;
 
 		} else {
@@ -245,8 +243,29 @@ public:
 		return nullptr;
 	}
 
+	static void rewinddir(DIR *dir) {
+		if (!dir)
+			return;
+
+		auto dirdesc = FileDescManager::dirdesc(dir);
+		if (!dirdesc)
+			return;
+
+		if (dirdesc->vol == Volume::RamDisk) {
+			//TODO
+		}
+
+		else if (dirdesc->vol == Volume::SDCard || dirdesc->vol == Volume::USB)
+		{
+			fs_proxy.readdir(dirdesc->dir, nullptr);
+		}
+	}
+
 	static int closedir(DIR *dir) {
-		return -1;
+		if (!dir)
+			return -1;
+
+		return FileDescManager::dealloc_dir(dir) ? 0 : -1;
 	}
 
 private:

@@ -85,11 +85,11 @@ DirDesc *alloc_dir() {
 	}
 }
 
-void dealloc_dir(DirDesc *dir) {
+bool dealloc_dir(DIR *dir) {
 	if (!dir)
-		return;
+		return false;
 
-	auto it = std::ranges::find(dir_scriptors, dir->dir, &DirDesc::dir);
+	auto it = std::ranges::find(dir_scriptors, dir, &DirDesc::dir);
 
 	if (it != dir_scriptors.end()) {
 		auto d_idx = std::distance(dir_scriptors.begin(), it);
@@ -98,8 +98,18 @@ void dealloc_dir(DirDesc *dir) {
 			dir_scriptors[d_idx].dir = nullptr;
 			dir_scriptors[d_idx].vol = Volume::MaxVolumes;
 			dir_scriptors[d_idx].cur_entry.d_name[0] = '\0';
+			return true;
 		}
 	}
+
+	return false;
+}
+
+bool dealloc_dir(DirDesc *dirdesc) {
+	if (!dirdesc)
+		return false;
+
+	return dealloc_dir(dirdesc->dir);
 }
 
 DirDesc *dirdesc(DIR *dir) {
