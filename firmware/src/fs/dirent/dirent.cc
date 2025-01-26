@@ -1,11 +1,20 @@
 #include "filesystem/dirent.h"
 #include "ff.h"
+#include "fs/syscall/filesystem.hh"
 
-int alphasort(const struct dirent **, const struct dirent **) {
-	return -1;
+DIR *opendir(const char *path) {
+	return MetaModule::Filesystem::opendir(path);
 }
 
-int closedir(DIR *) {
+int closedir(DIR *dir) {
+	return MetaModule::Filesystem::closedir(dir);
+}
+
+struct dirent *readdir(DIR *dir) {
+	return MetaModule::Filesystem::readdir(dir);
+}
+
+int alphasort(const struct dirent **, const struct dirent **) {
 	return -1;
 }
 
@@ -14,14 +23,6 @@ int dirfd(DIR *) {
 }
 
 DIR *fdopendir(int) {
-	return nullptr;
-}
-
-DIR *opendir(const char *) {
-	return nullptr;
-}
-
-struct dirent *readdir(DIR *) {
 	return nullptr;
 }
 

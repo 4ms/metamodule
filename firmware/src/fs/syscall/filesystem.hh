@@ -1,4 +1,5 @@
 #pragma once
+#include "dirent.h"
 #include "fat_file_io.hh"
 #include "ff.h"
 #include "filedesc_manager.hh"
@@ -24,6 +25,14 @@
 //           -> FSProxyImpl::
 //           -> Core M4 handler
 
+// TODO: make FsSyscallProxy and FatFileIO derive from DiskDevice (see TODO in fileio_t.hh)
+// then for each function, we can get the device like:
+// static DiskDevice *get_device(Volume volume) {
+// 		if (volume == Volume::RamDisk)
+// 			return mRamdisk;
+// 		else if (volume === Volume::SDCard || volume == USB)
+// 			return &fs_proxy;
+// }
 namespace MetaModule
 {
 
@@ -44,16 +53,15 @@ public:
 
 			auto [path, volume] = split_volume(filename);
 
-			if (volume == Volume::RamDisk) {
-				if (mRamdisk) {
-					if (mRamdisk->open(path, file->fatfil)) {
-						file->vol = volume;
-						return *fd;
-					}
+			if (volume == Volume::RamDisk && mRamdisk) {
+				if (mRamdisk->open(path, file->fatfil)) {
+					file->vol = volume;
+					return *fd;
 				}
 			}
 
-			if (volume == Volume::SDCard || volume == Volume::USB) {
+			else if (volume == Volume::SDCard || volume == Volume::USB)
+			{
 				if (fs_proxy.open(path, file->fatfil, FA_READ)) {
 					file->vol = volume;
 					return *fd;
@@ -73,13 +81,12 @@ public:
 	static int lseek(int fd, int offset, int whence) {
 		if (auto file = FileDescManager::filedesc(fd)) {
 
-			if (file->vol == Volume::RamDisk) {
-				if (mRamdisk) {
-					return mRamdisk->seek(file->fatfil, offset, whence);
-				}
+			if (file->vol == Volume::RamDisk && mRamdisk) {
+				return mRamdisk->seek(file->fatfil, offset, whence);
 			}
 
-			if (file->vol == Volume::SDCard || file->vol == Volume::USB) {
+			else if (file->vol == Volume::SDCard || file->vol == Volume::USB)
+			{
 				return fs_proxy.seek(file->fatfil, offset, whence);
 			}
 		}
@@ -91,14 +98,13 @@ public:
 
 			auto buff = std::span{ptr, (size_t)len};
 
-			if (file->vol == Volume::RamDisk) {
-				if (mRamdisk) {
-					const auto bytes_read = mRamdisk->read(file->fatfil, buff);
-					return bytes_read.value_or(-1);
-				}
+			if (file->vol == Volume::RamDisk && mRamdisk) {
+				const auto bytes_read = mRamdisk->read(file->fatfil, buff);
+				return bytes_read.value_or(-1);
 			}
 
-			if (file->vol == Volume::SDCard || file->vol == Volume::USB) {
+			else if (file->vol == Volume::SDCard || file->vol == Volume::USB)
+			{
 				auto bytes_read = fs_proxy.read(file->fatfil, buff);
 				return bytes_read.value_or(-1);
 			}
@@ -110,13 +116,12 @@ public:
 	static int close(int fd) {
 		if (auto file = FileDescManager::filedesc(fd)) {
 
-			if (file->vol == Volume::RamDisk) {
-				if (mRamdisk) {
-					mRamdisk->close(file->fatfil);
-				}
+			if (file->vol == Volume::RamDisk && mRamdisk) {
+				mRamdisk->close(file->fatfil);
 			}
 
-			if (file->vol == Volume::USB || file->vol == Volume::SDCard) {
+			else if (file->vol == Volume::USB || file->vol == Volume::SDCard)
+			{
 				fs_proxy.close(file->fatfil);
 			}
 
@@ -154,7 +159,7 @@ public:
 			FILINFO filinfo;
 
 			bool ok = false;
-			if (volume == Volume::RamDisk)
+			if (volume == Volume::RamDisk && mRamdisk)
 				ok = mRamdisk->get_fat_filinfo(path, filinfo);
 			else
 				ok = fs_proxy.stat(path, &filinfo);
@@ -185,24 +190,86 @@ public:
 		return -1;
 	}
 
+	static DIR *opendir(std::string_view fullpath) {
+		if (auto dir = FileDescManager::alloc_dir()) {
+
+			auto [path, volume] = split_volume(fullpath);
+
+			if (volume == Volume::RamDisk) {
+				if (mRamdisk) {
+					if (mRamdisk->opendir(path, dir->dir)) {
+						dir->vol = volume;
+						return dir->dir;
+					}
+				}
+			}
+
+			if (volume == Volume::SDCard || volume == Volume::USB) {
+				if (fs_proxy.opendir(path, dir->dir)) {
+					dir->vol = volume;
+					return dir->dir;
+				}
+			}
+
+			pr_err("Opening dir %s on vol %d failed\n", fullpath.data(), (int)volume);
+			FileDescManager::dealloc_dir(dir);
+			return nullptr;
+
+		} else {
+			pr_err("Cannot open any more dirs\n");
+			return nullptr;
+		}
+	}
+
+	static dirent *readdir(DIR *dir) {
+		if (!dir)
+			return nullptr;
+
+		auto dirdesc = FileDescManager::dirdesc(dir);
+		if (!dirdesc)
+			return nullptr;
+
+		if (dirdesc->vol == Volume::RamDisk) {
+			//TODO
+		}
+
+		else if (dirdesc->vol == Volume::SDCard || dirdesc->vol == Volume::USB)
+		{
+			FILINFO info;
+			if (fs_proxy.readdir(dirdesc->dir, &info)) {
+				strncpy(dirdesc->cur_entry.d_name, info.fname, 255);
+				return &dirdesc->cur_entry;
+			}
+		}
+
+		return nullptr;
+	}
+
+	static int closedir(DIR *dir) {
+		return -1;
+	}
+
 private:
 	static std::pair<std::string_view, Volume> split_volume(const char *filename) {
 		auto sv = std::string_view{filename};
+		return split_volume(sv);
+	}
 
-		if (sv.starts_with("ram:"))
-			return {sv, Volume::RamDisk};
+	static std::pair<std::string_view, Volume> split_volume(std::string_view filename) {
+		if (filename.starts_with("ram:"))
+			return {filename, Volume::RamDisk};
 
-		if (sv.starts_with("usb:"))
-			return {sv, Volume::USB};
+		if (filename.starts_with("usb:"))
+			return {filename, Volume::USB};
 
-		if (sv.starts_with("sdc:"))
-			return {sv, Volume::SDCard};
+		if (filename.starts_with("sdc:"))
+			return {filename, Volume::SDCard};
 
-		if (sv.starts_with("nor:"))
-			return {sv, Volume::NorFlash};
+		if (filename.starts_with("nor:"))
+			return {filename, Volume::NorFlash};
 
 		// Default (no volume given) is RamDisk
-		return {sv, Volume::RamDisk};
+		return {filename, Volume::RamDisk};
 	}
 };
 } // namespace MetaModule
