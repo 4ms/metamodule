@@ -377,29 +377,6 @@ public:
 	}
 
 	// Returns false if dir cannot be opened
-	bool foreach_file_with_ext(const std::string_view extension, auto action) {
-		DIR dj;
-		FILINFO fno;
-
-		if (f_opendir(&dj, _fatvol) != FR_OK) {
-			if (!mount_disk())
-				return false;
-			if (f_opendir(&dj, _fatvol) != FR_OK)
-				return false;
-		}
-
-		while (f_readdir(&dj, &fno) == FR_OK) {
-			if (fno.fname[0] == '\0')
-				break;
-			if (std::string_view{fno.fname}.ends_with(extension)) {
-				uint32_t timestamp = rawtimestamp(fno);
-				action(fno.fname, timestamp, fno.fsize);
-			}
-		}
-		return true;
-	}
-
-	// Returns false if dir cannot be opened
 	bool foreach_dir_entry(const std::string_view path, auto action) {
 		DIR dj;
 		FILINFO fno;

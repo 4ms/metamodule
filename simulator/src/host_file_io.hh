@@ -17,32 +17,6 @@ struct HostFileIO {
 		_root_dir = std::filesystem::absolute(root_dir);
 	}
 
-	bool foreach_file_with_ext(const std::string_view extension, auto action) {
-		namespace fs = std::filesystem;
-
-		std::cout << "Scanning " << _root_dir << " for " << extension << " files...\n";
-
-		fs::current_path(_root_dir);
-
-		fs::path full_path{"."};
-
-		try {
-			for (const auto &entry : fs::directory_iterator(_root_dir)) {
-				auto fn = entry.path();
-				if (fn.extension() == fs::path(extension)) {
-					auto timestamp = convert_timestamp(fn);
-					auto sz = (uint32_t)fs::file_size(fn);
-					action(fn.string().c_str(), timestamp, sz);
-				}
-			}
-		} catch (const fs::filesystem_error &e) {
-			std::cout << "Error: " << e.what() << std::endl;
-			return false;
-		}
-
-		return true;
-	}
-
 	// Returns false if dir cannot be opened
 	bool foreach_dir_entry(const std::string_view path, auto action) {
 		namespace fs = std::filesystem;

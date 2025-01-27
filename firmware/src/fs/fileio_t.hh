@@ -32,10 +32,6 @@ concept FileIoC = requires(T t,
 	} -> std::integral;
 
 	{
-		t.foreach_file_with_ext(filename, action)
-	} -> std::convertible_to<bool>;
-
-	{
 		t.foreach_dir_entry(path, direntry_action)
 	} -> std::convertible_to<bool>;
 

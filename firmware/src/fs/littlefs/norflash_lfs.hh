@@ -171,32 +171,6 @@ public:
 		return update_or_create_file(filename, buffer);
 	}
 
-	// Performs an action(filename, timestamp) on each file in LittleFS root dir ending with the extension
-	// TODO: Add parameter for dir to search
-	bool foreach_file_with_ext(const std::string_view extension, auto action) {
-		lfs_dir_t dir;
-		if (lfs_dir_open(&lfs, &dir, "/") < 0)
-			return false;
-
-		lfs_dir_rewind(&lfs, &dir);
-
-		lfs_info info{};
-		while (int err = lfs_dir_read(&lfs, &dir, &info) != 0) {
-			if (err < 0)
-				return false;
-
-			if (std::string_view{info.name}.ends_with(extension)) {
-				auto timestamp = get_file_timestamp(info.name);
-				if (timestamp)
-					action(info.name, timestamp, info.size);
-			}
-		}
-
-		lfs_dir_close(&lfs, &dir);
-
-		return true;
-	}
-
 	// TODO: Add parameter for dir to search
 	bool foreach_dir_entry(std::string_view path, auto action) {
 		lfs_dir_t dir;
