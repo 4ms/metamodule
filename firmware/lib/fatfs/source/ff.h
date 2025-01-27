@@ -202,7 +202,7 @@ typedef struct {
 
 /* File object structure (FIL) */
 
-typedef struct {
+typedef struct FIL {
 	FFOBJID	obj;			/* Object identifier (must be the 1st member to detect invalid object pointer) */
 	BYTE	flag;			/* File status flags */
 	BYTE	err;			/* Abort flag (error code) */
@@ -244,7 +244,7 @@ typedef struct DIR {
 
 /* File information structure (FILINFO) */
 
-typedef struct {
+typedef struct FILINFO {
 	FSIZE_t	fsize;			/* File size */
 	WORD	fdate;			/* Modified date */
 	WORD	ftime;			/* Modified time */
