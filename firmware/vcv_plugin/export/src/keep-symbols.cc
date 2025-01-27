@@ -2,6 +2,7 @@
 #include "app/ModuleWidget.hpp"
 #include "app/SvgSlider.hpp"
 #include "app/SvgSwitch.hpp"
+#include "dirent.h"
 #include "random.hpp"
 #include "widget/TransformWidget.hpp"
 
@@ -83,4 +84,18 @@ void __attribute__((optimize("-O0"))) keep_register_module() {
 void __attribute__((optimize("-O0"))) keep_light_widget() {
 	rack::app::LightWidget x;
 	printf("%p\n", &x);
+}
+
+void keep_dirent() {
+	auto d = opendir(".");
+	auto e = readdir(d);
+	closedir(d);
+	alphasort({}, {});
+	[[maybe_unused]] auto x = dirfd({});
+	[[maybe_unused]] auto x2 = fdopendir(0);
+	[[maybe_unused]] auto x3 = readdir_r(d, e, {});
+	rewinddir(d);
+	[[maybe_unused]] auto x4 = scandir({}, {}, {}, {});
+	seekdir(d, 0);
+	telldir(d);
 }
