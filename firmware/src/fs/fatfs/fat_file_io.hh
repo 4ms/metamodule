@@ -1,4 +1,5 @@
 #pragma once
+#include "disk_device.hh"
 #include "disk_ops.hh"
 #include "fs/dir_entry_kind.hh"
 #include "fs/fatfs/delete_node.hh"
@@ -13,7 +14,7 @@
 // defined in fatfs/diskio.cc:
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
-class FatFileIO {
+class FatFileIO : DiskDevice {
 	using Volume = MetaModule::Volume;
 
 	FATFS fs{};
@@ -41,7 +42,9 @@ public:
 		}
 	}
 
-	bool mount_disk() {
+	virtual ~FatFileIO() = default;
+
+	bool mount_disk() override {
 		// Try mounting previously mounted partition,
 		// if that fails, try auto-detect, then each partition 1 - 8.
 
@@ -72,24 +75,20 @@ public:
 		return false;
 	}
 
-	bool unmount_drive() {
+	bool unmount_drive() override {
 		return f_unmount(_fatvol) == FR_OK;
 	}
 
-	bool unmount_disk() {
+	bool unmount_disk() override {
 		auto disk_id = static_cast<uint8_t>(_vol);
 		return (disk_ioctl(disk_id, CTRL_EJECT, nullptr) == RES_OK);
 	}
 
-	std::string_view volname() {
+	std::string_view volname() override {
 		return _volname;
 	}
 
-	Volume vol_id() {
-		return _vol;
-	}
-
-	bool is_mounted() {
+	bool is_mounted() override {
 		auto disk_id = static_cast<uint8_t>(_vol);
 		uint8_t mounted = 0;
 		auto err = disk_ioctl(disk_id, MMC_GET_SDSTAT, &mounted);
@@ -114,7 +113,7 @@ public:
 		return true;
 	}
 
-	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
+	void set_file_timestamp(std::string_view filename, uint32_t timestamp) override {
 		FILINFO fno;
 
 		if (!get_fat_filinfo(filename, fno)) {
@@ -155,11 +154,6 @@ public:
 			.minute = static_cast<uint8_t>((fno.ftime >> 5) & 0x3F), //middle 6 bits are minute 0..59
 			.second = static_cast<uint8_t>((fno.ftime & 0x1F) * 2)	 //bottom 5 bits are seconds/2 0..29
 		};
-	}
-
-	bool file_exists(std::string_view filename) {
-		auto res = f_stat(filename.data(), nullptr);
-		return res == FR_OK;
 	}
 
 	bool get_fat_filinfo(std::string_view filename, FILINFO &fno) {
