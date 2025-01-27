@@ -196,6 +196,10 @@ add_executable(
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
+  #
+  ${FWDIR}/src/gui/slsexport/filebrowser/ui.c
+  ${FWDIR}/src/gui/slsexport/filebrowser/screens/ui_FileBrowserPage.c
+  #
 )
 
 
@@ -208,6 +212,9 @@ set_source_files_properties(
   ${FWDIR}/src/gui/slsexport/prefs_menu.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
+
+  ${FWDIR}/vcv_plugin/export/osdialog/osdialog-mm.cc
+
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 

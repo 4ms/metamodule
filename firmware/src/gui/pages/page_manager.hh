@@ -21,6 +21,7 @@
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"
 #include "gui/pages/system_menu.hh"
+#include "vcv_plugin/export/osdialog/osdialog-mm.hh"
 
 namespace MetaModule
 {
@@ -47,6 +48,7 @@ class PageManager {
 	JackMapViewPage page_jackmap{info};
 
 	PatchSelectorSubdirPanel subdir_panel;
+	FileBrowserDialog file_browser;
 
 public:
 	PageBase *cur_page = &page_mainmenu;
@@ -76,7 +78,10 @@ public:
 			   .plugin_manager = plugin_manager,
 			   .ramdisk = ramdisk,
 			   .file_change_checker = file_change_checker}
-		, screensaver{screensaver} {
+		, screensaver{screensaver}
+		, file_browser{patch_storage, notify_queue, subdir_panel, page_list} {
+		// Register file browswer with VCV to support osdialog
+		register_file_browser_vcv(file_browser);
 	}
 
 	void init() {
