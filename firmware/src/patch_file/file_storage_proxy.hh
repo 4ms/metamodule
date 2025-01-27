@@ -179,6 +179,18 @@ public:
 		return comm_.send_message(message);
 	}
 
+	[[nodiscard]] bool request_dir_entries(DirTree<FileEntry> *dir_tree, Volume vol, std::string_view extension) {
+		IntercoreStorageMessage message{
+			.message_type = RequestDirEntries,
+			.vol_id = vol,
+			.filename = extension,	 // example: "wav"
+			.length = 2,			 // max subdirs to search: example: 2 == scan '/*' and '/*/*', but not '/*/*/*'
+			.dir_entries = dir_tree, // this is where we want M4 to copy the dir tree
+		};
+
+		return comm_.send_message(message);
+	}
+
 private:
 	FileStorageComm &comm_;
 	PatchDirList &patch_dir_list_;
