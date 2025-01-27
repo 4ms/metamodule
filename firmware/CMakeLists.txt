@@ -38,11 +38,11 @@ set(SYMBOLS_BINFILE_DIRS
   --objdir ${VcvPluginBinDir} 
   --objdir ${CoreProcPluginBinDir} 
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
+  --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/fs/dirent/
 )
 
 add_custom_target(
   new-api-sym-list
-  COMMAND echo "vcv export dir is ${VcvPluginBinDir}"
   COMMAND scripts/dump_syms.py
           ${SYMBOLS_BINFILE_DIRS}
           --text-out ${API_SYMBOL_NAMES_FILE}
