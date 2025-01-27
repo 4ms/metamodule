@@ -110,6 +110,7 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_MIDIMapPanel);
 
 		if (gui_state.new_cable) {
+			lv_hide(ui_ModuleViewHideBut);
 			lv_hide(ui_ModuleViewActionBut);
 			lv_hide(ui_ModuleViewSettingsBut);
 			lv_show(ui_ModuleViewCableCancelBut);
@@ -121,6 +122,7 @@ struct ModuleViewPage : PageBase {
 			lv_obj_set_flex_align(
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 		} else {
+			lv_show(ui_ModuleViewHideBut);
 			lv_show(ui_ModuleViewActionBut);
 			lv_show(ui_ModuleViewSettingsBut);
 			lv_hide(ui_ModuleViewCableCancelBut);
