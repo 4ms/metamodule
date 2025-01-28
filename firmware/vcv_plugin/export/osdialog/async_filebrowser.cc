@@ -1,12 +1,6 @@
-#include "delay.hh"
 #include "gui/pages/file_browser.hh"
-#include "lvgl.h"
-#include "util/static_string.hh"
-#include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <memory>
-#include <vector>
 
 namespace MetaModule
 {

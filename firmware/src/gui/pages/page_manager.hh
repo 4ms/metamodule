@@ -77,10 +77,12 @@ public:
 			   .settings = settings,
 			   .plugin_manager = plugin_manager,
 			   .ramdisk = ramdisk,
-			   .file_change_checker = file_change_checker}
+			   .file_change_checker = file_change_checker,
+			   .file_browser = file_browser}
 		, screensaver{screensaver}
 		, file_browser{patch_storage, notify_queue, subdir_panel, page_list} {
-		// Register file browswer with VCV to support osdialog
+
+		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
 		register_file_browser_vcv(file_browser);
 	}
 

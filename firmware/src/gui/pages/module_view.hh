@@ -321,7 +321,10 @@ struct ModuleViewPage : PageBase {
 	void update() override {
 		if (gui_state.back_button.is_just_released()) {
 
-			if (action_menu.is_visible()) {
+			if (file_browser.is_visible()) {
+				file_browser.hide();
+
+			} else if (action_menu.is_visible()) {
 				action_menu.back();
 
 			} else if (settings_menu.is_visible()) {
@@ -343,14 +346,17 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		if (mode == ViewMode::Mapping) {
+		if (file_browser.is_visible()) {
+			file_browser.update();
+			return; //????
+
+		} else if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
 				show_roller();
 			}
-		}
 
-		if (mode == ViewMode::ExtraMenu) {
+		} else if (mode == ViewMode::ExtraMenu) {
 			module_menu.update();
 			if (module_menu.wants_to_close()) {
 				module_menu.hide();

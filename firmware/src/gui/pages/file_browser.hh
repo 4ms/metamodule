@@ -4,12 +4,13 @@
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/filebrowser/ui.h"
-#include "gui/slsexport/meta5/ui.h"
-#include "lvgl.h"
 #include "patch_file/file_storage_proxy.hh"
 
 namespace MetaModule
 {
+
+static __attribute__((section(".ddma"))) DirTree<FileEntry> usb_dir_tree;
+static __attribute__((section(".ddma"))) DirTree<FileEntry> sd_dir_tree;
 
 struct FileBrowserDialog {
 	FileBrowserDialog(FileStorageProxy &file_storage,
@@ -121,12 +122,12 @@ struct FileBrowserDialog {
 
 	void refresh_roller(DirTree<FileEntry> &root) {
 		for (auto const &f : root.files) {
-			pr_dbg("%s - %u %u\n", f.filename, f.filesize, f.timestamp);
+			pr_dbg("%s - %u %u\n", f.filename.c_str(), f.filesize, f.timestamp);
 		}
 		for (auto const &d : root.dirs) {
 			pr_dbg("%s:\n", d.name.c_str());
-			for (auto const &f : usb_dir_tree.files) {
-				pr_dbg(" %s - %u %u\n", f.filename, f.filesize, f.timestamp);
+			for (auto const &f : d.files) {
+				pr_dbg(" %s - %u %u\n", f.filename.c_str(), f.filesize, f.timestamp);
 			}
 		}
 	}
@@ -137,8 +138,8 @@ private:
 	PatchSelectorSubdirPanel &subdir_panel;
 	PageList &page_list;
 
-	DirTree<FileEntry> usb_dir_tree;
-	DirTree<FileEntry> sd_dir_tree;
+	// DirTree<FileEntry> usb_dir_tree;
+	// DirTree<FileEntry> sd_dir_tree;
 
 	lv_group_t *group;
 
@@ -156,5 +157,8 @@ private:
 	Volume cur_refresh_vol = Volume::USB;
 
 	uint32_t last_refresh_check_tm = 0;
+
+	Volume show_vol = Volume::USB;
+	std::string show_path = "";
 };
 } // namespace MetaModule

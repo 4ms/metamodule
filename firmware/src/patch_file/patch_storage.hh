@@ -210,9 +210,16 @@ public:
 			IntercoreStorageMessage result{.message_type = DirEntriesFailed};
 
 			if (message.vol_id == Volume::USB) {
+				message.dir_entries->files.clear();
+				message.dir_entries->dirs.clear();
+				// for (auto &d : message.dir_entries->dirs) {
+				// 	d.files.clear();
+				// 	d.dirs.clear();
+				// }
+				message.dir_entries->dirs.clear();
 				message.dir_entries->files.push_back({"a.wav", 123, 999});
 				message.dir_entries->files.push_back({"another.wav", 124, 1000});
-				auto dir = message.dir_entries->dirs.emplace_back();
+				auto &dir = message.dir_entries->dirs.emplace_back();
 				dir.name = "Dir1";
 				dir.files.push_back({"innerfile.wav", 222, 333});
 				dir.files.push_back({"innerfile2.wav", 222, 333});
@@ -220,14 +227,16 @@ public:
 				result.message_type = DirEntriesSuccess;
 
 			} else if (message.vol_id == Volume::SDCard) {
+				message.dir_entries->files.clear();
+				message.dir_entries->dirs.clear();
 				message.dir_entries->files.push_back({"b.wav", 123, 999});
 				message.dir_entries->files.push_back({"c.wav", 124, 1000});
-				auto dir = message.dir_entries->dirs.emplace_back();
+				auto &dir = message.dir_entries->dirs.emplace_back();
 				dir.name = "Dir22";
 				dir.files.push_back({"cdd.wav", 222, 333});
 				dir.files.push_back({"dsdd.wav", 222, 333});
 				dir.files.push_back({"iuieee.wav", 222, 333});
-				auto dir2 = message.dir_entries->dirs.emplace_back();
+				auto &dir2 = message.dir_entries->dirs.emplace_back();
 				dir2.name = "Dir33";
 				dir2.files.push_back({"1.wav", 222, 333});
 				dir2.files.push_back({"2.wav", 222, 333});
