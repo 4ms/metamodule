@@ -22,26 +22,11 @@ extern lv_obj_t *ui_FileBrowserCont;
 extern lv_obj_t *ui_FileBrowserTitlePanel;
 extern lv_obj_t *ui_FileBrowserTitle;
 extern lv_obj_t *ui_FileBrowserSubtitle;
-extern lv_obj_t *ui_FileBrowserDrivesPanel;
+extern lv_obj_t *ui_FileBrowserPathCont;
+extern lv_obj_t *ui_FileBrowserPathLabel;
 extern lv_obj_t *ui_FileBrowserRoller;
 extern lv_obj_t *ui_FileBrowserSpinner;
 // CUSTOM VARIABLES
-
-// EVENTS
-extern lv_obj_t *ui____initial_actions0;
-
-// FONTS
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50010);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50012);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50014);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded70014);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded70016);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded90018);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded90032);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded90040);
-
-// UI INIT
-void ui_init(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/

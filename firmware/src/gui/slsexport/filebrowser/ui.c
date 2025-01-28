@@ -3,7 +3,8 @@
 // LVGL version: 8.3.6
 // Project name: FileBrowser
 
-#include "lvgl.h"
+#include "ui.h"
+// #include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -14,7 +15,8 @@ lv_obj_t *ui_FileBrowserCont;
 lv_obj_t *ui_FileBrowserTitlePanel;
 lv_obj_t *ui_FileBrowserTitle;
 lv_obj_t *ui_FileBrowserSubtitle;
-lv_obj_t *ui_FileBrowserDrivesPanel;
+lv_obj_t *ui_FileBrowserPathCont;
+lv_obj_t *ui_FileBrowserPathLabel;
 lv_obj_t *ui_FileBrowserRoller;
 lv_obj_t *ui_FileBrowserSpinner;
 // CUSTOM VARIABLES
