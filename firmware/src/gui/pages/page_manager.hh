@@ -80,7 +80,7 @@ public:
 			   .file_change_checker = file_change_checker,
 			   .file_browser = file_browser}
 		, screensaver{screensaver}
-		, file_browser{patch_storage, notify_queue, subdir_panel, page_list} {
+		, file_browser{patch_storage, notify_queue, page_list} {
 
 		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
 		register_file_browser_vcv(file_browser);

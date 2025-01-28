@@ -13,6 +13,7 @@
 #include "patch_file/patch_list_helper.hh"
 #include "pr_dbg.hh"
 #include "util/poll_change.hh"
+#include "util/string_util.hh"
 #include <optional>
 
 namespace MetaModule
@@ -209,39 +210,32 @@ public:
 		if (message.message_type == RequestDirEntries) {
 			IntercoreStorageMessage result{.message_type = DirEntriesFailed};
 
-			if (message.vol_id == Volume::USB) {
-				message.dir_entries->files.clear();
-				message.dir_entries->dirs.clear();
-				// for (auto &d : message.dir_entries->dirs) {
-				// 	d.files.clear();
-				// 	d.dirs.clear();
-				// }
-				message.dir_entries->dirs.clear();
-				message.dir_entries->files.push_back({"a.wav", 123, 999});
-				message.dir_entries->files.push_back({"another.wav", 124, 1000});
-				auto &dir = message.dir_entries->dirs.emplace_back();
-				dir.name = "Dir1";
-				dir.files.push_back({"innerfile.wav", 222, 333});
-				dir.files.push_back({"innerfile2.wav", 222, 333});
-				dir.files.push_back({"innerfile3.wav", 222, 333});
+			auto path = message.filename;
+			auto exts = message.dest_filename;
+			auto *dir_tree = message.dir_entries;
+			dir_tree->files.clear();
+			dir_tree->dirs.clear();
+
+			if (message.vol_id == Volume::MaxVolumes) {
+				if (sdcard_.is_mounted()) {
+					dir_tree->dirs.push_back("SD Card:");
+				}
+				if (usbdrive_.is_mounted()) {
+					dir_tree->dirs.push_back("USB:");
+				}
 				result.message_type = DirEntriesSuccess;
 
+			} else if (message.vol_id == Volume::USB) {
+				if (usbdrive_.is_mounted()) {
+					get_dir_entries(usbdrive_, path, exts, dir_tree);
+					result.message_type = DirEntriesSuccess;
+				}
+
 			} else if (message.vol_id == Volume::SDCard) {
-				message.dir_entries->files.clear();
-				message.dir_entries->dirs.clear();
-				message.dir_entries->files.push_back({"b.wav", 123, 999});
-				message.dir_entries->files.push_back({"c.wav", 124, 1000});
-				auto &dir = message.dir_entries->dirs.emplace_back();
-				dir.name = "Dir22";
-				dir.files.push_back({"cdd.wav", 222, 333});
-				dir.files.push_back({"dsdd.wav", 222, 333});
-				dir.files.push_back({"iuieee.wav", 222, 333});
-				auto &dir2 = message.dir_entries->dirs.emplace_back();
-				dir2.name = "Dir33";
-				dir2.files.push_back({"1.wav", 222, 333});
-				dir2.files.push_back({"2.wav", 222, 333});
-				dir2.files.push_back({"3.wav", 222, 333});
-				result.message_type = DirEntriesSuccess;
+				if (sdcard_.is_mounted()) {
+					get_dir_entries(sdcard_, path, exts, dir_tree);
+					result.message_type = DirEntriesSuccess;
+				}
 			}
 
 			return result;
@@ -258,6 +252,41 @@ public:
 		auto result = patch_list_changed_wifi_;
 		patch_list_changed_wifi_ = false;
 		return result;
+	}
+
+	void get_dir_entries(FatFileIO &drive,
+						 std::string_view path,
+						 std::string_view filter_exts,
+						 DirTree<FileEntry> *dir_tree) {
+
+		std::vector<std::string> exts;
+		tokenize_string(filter_exts, exts, ",");
+
+		auto ok = drive.foreach_dir_entry(
+			path, [dir_tree, &exts](std::string_view name, size_t tm, size_t size, DirEntryKind kind) {
+				if (kind == DirEntryKind::Dir) {
+					dir_tree->dirs.push_back({std::string(name)});
+				}
+
+				if (kind == DirEntryKind::File) {
+					if (exts.size() == 0) {
+						dir_tree->files.push_back({std::string(name), size, tm});
+
+					} else {
+						for (auto const &ext : exts) {
+							if (name.ends_with(ext)) {
+								dir_tree->files.push_back({std::string(name), size, tm});
+								break;
+							}
+						}
+					}
+				}
+			});
+
+		if (ok) {
+			std::ranges::sort(dir_tree->files, less_ci, &FileEntry::filename);
+			std::ranges::sort(dir_tree->dirs, less_ci, &DirTree<FileEntry>::name);
+		}
 	}
 
 	// Refreshes patchlist for any volume which was just mounted or unmounted
