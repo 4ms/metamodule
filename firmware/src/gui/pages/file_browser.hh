@@ -27,14 +27,24 @@ struct FileBrowserDialog {
 	}
 
 	void prepare_focus(lv_group_t *parent_group) {
-
 		group = parent_group;
+		lv_label_set_text(ui_FileBrowserTitle, "Open a file\n");
+		exts = "";
 	}
 
-	void show(std::string extensions) {
+	void set_title(std::string_view title) {
+		if (title.data() && title.length())
+			lv_label_set_text(ui_FileBrowserTitle, title.data());
+	}
+
+	// Extension are comma-separated list
+	void filter_extensions(std::string_view extensions) {
+		exts = extensions;
+	}
+
+	void show(std::string_view start_dir, const std::function<void(char *)> action) {
 		mode = Mode::MainPanel;
 		refresh_state = RefreshState::TryingToRequest;
-		exts = extensions;
 		lv_obj_set_parent(ui_FileBrowserCont, lv_layer_top());
 		lv_show(ui_FileBrowserCont);
 	}
