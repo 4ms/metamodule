@@ -74,8 +74,8 @@ struct IntercoreStorageMessage {
 		FileInfoSuccess,
 
 		RequestDirEntries,
-		DirEntriesFailed,
-		DirEntriesSuccess,
+		DirEntriesChanged,
+		DirEntriesNoChange,
 
 		NumRequests,
 	};
