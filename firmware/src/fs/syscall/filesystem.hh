@@ -235,7 +235,7 @@ public:
 		{
 			FILINFO info;
 			if (fs_proxy.readdir(dirdesc->dir, &info)) {
-				strncpy(dirdesc->cur_entry.d_name, info.fname, 255);
+				strncpy(dirdesc->cur_entry.d_name, info.fname, 256);
 				return &dirdesc->cur_entry;
 			}
 		}
