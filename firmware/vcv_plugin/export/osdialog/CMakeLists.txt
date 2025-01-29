@@ -15,11 +15,9 @@ target_include_directories(osdialog PRIVATE
 
 target_link_libraries(osdialog PRIVATE 
     metamodule::rack-interface 
-    metamodule::core-interface 
-    metamodule-patch-serial
-    mdrivlib_interface
-    cpputil 
-    lvgl
+    # metamodule::core-interface 
+    # metamodule-patch-serial
+    # cpputil 
 )
 
 # target_compile_definitions(osdialog PRIVATE)

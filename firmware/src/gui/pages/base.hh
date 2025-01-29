@@ -2,7 +2,7 @@
 #include "dynload/plugin_manager.hh"
 #include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
-#include "gui/pages/file_browser.hh"
+#include "gui/pages//file_browser/file_browser.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
 #include "params/metaparams.hh"

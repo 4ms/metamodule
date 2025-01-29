@@ -2,9 +2,10 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/filebrowser/ui.h"
+#include "gui/styles.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include <functional>
 
 namespace MetaModule
 {
@@ -188,7 +189,7 @@ private:
 	void roller_click() {
 		std::string text;
 		text.resize(256);
-		lv_roller_get_selected_str(ui_FileBrowserRoller, text.data(), text.max_size());
+		lv_roller_get_selected_str(ui_FileBrowserRoller, text.data(), (uint32_t)text.max_size());
 		text.resize(strlen(text.data()));
 
 		pr_dbg("Path: '%s', click item %d: '%s'\n",

@@ -1,6 +1,5 @@
-#include "gui/pages/file_browser.hh"
+#include "gui/pages/file_browser/file_browser_adaptor.hh"
 #include <cstdio>
-#include <cstring>
 
 namespace MetaModule
 {
@@ -29,9 +28,6 @@ void async_dialog_filebrowser(const bool saving,
 	if (saving) {
 		printf("Save file dialog box -- not supported\n");
 	} else {
-		printf("Open file dialog box\n");
-		browser->set_title(title);
-		browser->filter_extensions(nameOrExtensions);
-		browser->show(startDir, action);
+		show_file_browser(browser, title, nameOrExtensions, startDir, action);
 	}
 }

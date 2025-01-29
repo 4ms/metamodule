@@ -1,4 +1,4 @@
-#include "gui/pages/file_browser.hh"
+#include "gui/pages/file_browser//file_browser_adaptor.hh"
 
 namespace MetaModule
 {
