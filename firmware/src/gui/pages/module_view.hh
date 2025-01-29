@@ -426,6 +426,11 @@ struct ModuleViewPage : PageBase {
 
 				redraw_display(drawn_el, this_module_id, params.displays.watch_displays);
 			}
+
+			if (dyn_frame_throttle_ctr-- == 0) {
+				dyn_frame_throttle_ctr = DynFrameThrottle;
+				dyn_draw.draw();
+			}
 		}
 
 		if (handle_patch_mods()) {
@@ -438,11 +443,6 @@ struct ModuleViewPage : PageBase {
 			roller_hover.hide();
 
 		roller_hover.update();
-
-		if (dyn_frame_throttle_ctr-- == 0) {
-			dyn_frame_throttle_ctr = DynFrameThrottle;
-			dyn_draw.draw();
-		}
 	}
 
 	bool handle_patch_mods() {
