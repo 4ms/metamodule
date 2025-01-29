@@ -44,6 +44,9 @@ struct FileBrowserDialog {
 	}
 
 	void show(std::string_view start_dir, const std::function<void(char *)> action) {
+		parent_group = lv_indev_get_act()->group;
+		lv_group_activate(group);
+		lv_group_set_editing(group, true);
 		this->action = std::move(action);
 
 		visible = true;
@@ -73,7 +76,7 @@ struct FileBrowserDialog {
 			case RefreshState::Requested: {
 				auto message = file_storage.get_message().message_type;
 				if (message == FileStorageProxy::DirEntriesSuccess) {
-					pr_dbg("Reloading %d:%s\n", show_vol, show_path.c_str());
+					pr_dbg("Reloading vol %d, path: '%s'\n", show_vol, show_path.c_str());
 					refresh_roller();
 					refresh_state = RefreshState::Idle;
 
@@ -84,11 +87,15 @@ struct FileBrowserDialog {
 						ui_FileBrowserRoller, "< Back\nCannot display directory", LV_ROLLER_MODE_NORMAL);
 					refresh_state = RefreshState::Idle;
 				}
+				lv_group_set_editing(group, true);
 			} break;
 		}
 	}
 
 	void hide() {
+		if (parent_group)
+			lv_group_activate(parent_group);
+
 		lv_hide(ui_FileBrowserCont);
 		visible = false;
 	}
@@ -104,14 +111,16 @@ private:
 
 		std::string roller_text;
 
+		roller_text.append("< Back\n");
+
 		for (auto const &subdir : dir_tree.dirs) {
-			pr_dbg("%s:\n", subdir.name.c_str());
+			pr_dbg("Vol %s:\n", subdir.name.c_str());
 			roller_text += Gui::yellow_text(subdir.name);
 			roller_text += "/\n"; //dirs end in a slash
 		}
 
 		for (auto const &file : dir_tree.files) {
-			pr_dbg("%s - %u %u\n", file.filename.c_str(), file.filesize, file.timestamp);
+			pr_dbg("File %s - %u %u\n", file.filename.c_str(), file.filesize, file.timestamp);
 			roller_text += file.filename;
 			roller_text += "\n";
 		}
@@ -124,8 +133,9 @@ private:
 	}
 
 	void pop_dir() {
-		if (show_path.back() == '/')
+		if (show_path.back() == '/') {
 			show_path.back() = '\0';
+		}
 
 		auto lastslash = show_path.rfind('/');
 		if (lastslash != std::string::npos) {
@@ -149,27 +159,73 @@ private:
 			return "Disks:";
 	}
 
+	Volume strvol(std::string_view str) {
+		if (str.starts_with("usb:") || str.starts_with("USB:"))
+			return Volume::USB;
+
+		if (str.starts_with("sdc:") || str.starts_with("SD Card:"))
+			return Volume::SDCard;
+
+		// if (str.starts_with("ram:"))
+		// 	return Volume::RamDisk;
+		// if (str.starts_with("nor:"))
+		// 	return Volume::NorFlash;
+
+		return Volume::MaxVolumes;
+	}
+
 	void choose(std::string_view file) {
 		push_dir(file);
 		std::string fullpath = volstr(show_vol) + show_path;
+
 		char *path = strndup(fullpath.data(), fullpath.size());
 		// Rack and Cardinal specify that the caller will free() path
 		action(path);
+
+		hide();
 	}
 
 	void roller_click() {
-		char txt[256];
-		lv_roller_get_selected_str(ui_FileBrowserRoller, txt, sizeof(txt));
+		std::string text;
+		text.resize(256);
+		lv_roller_get_selected_str(ui_FileBrowserRoller, text.data(), text.max_size());
+		text.resize(strlen(text.data()));
 
-		std::string_view text{txt};
+		pr_dbg("Path: '%s', click item %d: '%s'\n",
+			   show_path.c_str(),
+			   lv_roller_get_selected(ui_FileBrowserRoller),
+			   text.c_str());
+
+		// Trim color
+		if (text.starts_with("^")) {
+			//  "^123456 Text^ "
+			//   ________....
+			//    8 char
+			text = text.substr(8);
+			if (auto endpos = text.find('^'); endpos != text.npos) {
+				if (text[endpos + 1] == ' ')
+					text.erase(endpos, 2);
+				else
+					text.erase(endpos, 1);
+			}
+			// text = text.substr(8, text.length() - 11);
+			pr_dbg("Trimmed: '%s' (%d)\n", text.c_str(), text.length());
+		}
 
 		if (text == "< Back") {
 			pop_dir();
+		} else if (text.ends_with(":/")) {
+			show_vol = strvol(text);
+			show_path = "";
+			pr_dbg("Set vol: %d\n", show_vol);
 		} else if (text.ends_with("/")) {
 			push_dir(text);
+			pr_dbg("Push dir=>'%s'\n", show_path.c_str());
 		} else {
 			choose(text);
 		}
+
+		pr_dbg("=>path: '%s'\n", show_path.c_str());
 		refresh_state = RefreshState::TryingToRequest;
 	}
 
@@ -185,6 +241,7 @@ private:
 	PageList &page_list;
 
 	lv_group_t *group;
+	lv_group_t *parent_group = nullptr;
 
 	std::function<void(char *)> action;
 

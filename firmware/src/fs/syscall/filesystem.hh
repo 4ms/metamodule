@@ -278,10 +278,10 @@ private:
 		if (filename.starts_with("ram:"))
 			return {filename, Volume::RamDisk};
 
-		if (filename.starts_with("usb:"))
+		if (filename.starts_with("usb:") || filename.starts_with("USB:/"))
 			return {filename, Volume::USB};
 
-		if (filename.starts_with("sdc:"))
+		if (filename.starts_with("sdc:") || filename.starts_with("SD Card:/"))
 			return {filename, Volume::SDCard};
 
 		if (filename.starts_with("nor:"))
