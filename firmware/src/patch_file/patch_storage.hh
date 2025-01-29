@@ -261,9 +261,21 @@ public:
 
 		std::vector<std::string> exts;
 		tokenize_string(filter_exts, exts, ",");
+		for (auto &ext : exts) {
+			if (ext.starts_with(" "))
+				ext = ext.substr(1);
+		}
+		if (auto pos = std::ranges::find(exts, "*.*"); pos != exts.end())
+			exts.erase(pos);
+
+		for (auto const &ext : exts)
+			pr_dbg("Find ending in '%s'\n", ext.c_str());
 
 		auto ok = drive.foreach_dir_entry(
 			path, [dir_tree, &exts](std::string_view name, size_t tm, size_t size, DirEntryKind kind) {
+				if (name.starts_with("."))
+					return;
+
 				if (kind == DirEntryKind::Dir) {
 					dir_tree->dirs.push_back({std::string(name)});
 				}
@@ -276,9 +288,11 @@ public:
 						for (auto const &ext : exts) {
 							if (name.ends_with(ext)) {
 								dir_tree->files.push_back({std::string(name), size, tm});
+								pr_dbg("Match: %s ends in %s\n", name.data(), ext.data());
 								break;
 							}
 						}
+						pr_dbg("No match: %s\n", name.data());
 					}
 				}
 			});
