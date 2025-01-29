@@ -1,7 +1,6 @@
 #pragma once
 #include "dynload/plugin_file_list.hh"
 #include "fs/fileio_t.hh"
-#include "patch-serial/yaml_to_patch.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "patches_default.hh"
 #include "pr_dbg.hh"

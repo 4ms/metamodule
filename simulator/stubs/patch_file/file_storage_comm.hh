@@ -1,7 +1,7 @@
 #pragma once
 #include "../src/core_intercom/intercore_message.hh"
 #include "dynload/plugin_file_scan.hh"
-#include "fat_file_io.hh"
+#include "fs/fatfs/fat_file_io.hh"
 #include "fs/volumes.hh"
 #include "fw_update/update_path.hh"
 #include "host_file_io.hh"
