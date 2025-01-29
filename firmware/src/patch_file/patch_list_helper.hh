@@ -1,6 +1,7 @@
 #pragma once
 #include "patch_file/patch_dir_list.hh"
-#include "patch_file/patch_fileio.hh"
+#include "pr_dbg.hh"
+#include "util/string_compare.hh"
 #include <string_view>
 
 namespace MetaModule

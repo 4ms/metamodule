@@ -1,10 +1,8 @@
 #pragma once
 #include "fs/volumes.hh"
 #include "patch/module_type_slug.hh"
-#include "util/static_string.hh"
 #include <cstdint>
 #include <optional>
-#include <span>
 #include <string>
 #include <string_view>
 
