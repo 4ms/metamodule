@@ -69,8 +69,8 @@ add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial
 
 # #################### SLS Export ##################################
 if (NOT HEADLESS)
-	add_subdirectory(${FWDIR}/src/gui/slsexport/meta5 ${CMAKE_CURRENT_BINARY_DIR}/ui)
-	target_link_libraries(ui PRIVATE lvgl)
+	add_subdirectory(${FWDIR}/src/gui/slsexport ${CMAKE_CURRENT_BINARY_DIR}/ui)
+	# target_link_libraries(ui PRIVATE lvgl)
 endif()
 
 # #################### VCV Adaptor ##################################
@@ -104,6 +104,7 @@ if(HEADLESS)
 		src/headless/nanovg.cc
 		stubs/svg.cc
 		stubs/random.cpp
+		stubs/drivers/time.cc
 
 		${FWDIR}/src/midi/midi_router.cc
 
@@ -117,11 +118,13 @@ else()
 		src/ui.cc
 		stubs/random.cpp
 		stubs/memory/heap.cc
+		stubs/fs/fs_proxy.cc
 		stubs/async_thread.cc
+		stubs/drivers/time.cc
 
 		${FWDIR}/src/gui/elements/element_name.cc
 		${FWDIR}/src/gui/slsexport/ui_local.cc
-		${FWDIR}/src/gui/slsexport/prefs_menu.cc
+		# ${FWDIR}/src/gui/slsexport/prefs_menu.cc
 		${FWDIR}/src/gui/fonts/fonts.cc
 		${FWDIR}/src/gui/fonts/ttf.cc
 		${FWDIR}/src/fw_update/updater_proxy.cc
@@ -130,6 +133,7 @@ else()
 		${FWDIR}/src/params/expanders.cc
 		${FWDIR}/src/patch_play/patch_player_catchup.cc
         ${FWDIR}/src/patch_file/reload_patch.cc
+		${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
 
 		#Fatfs:
 		stubs/fattime.cc
@@ -200,7 +204,7 @@ if(NOT HEADLESS)
 		${SDL2_LIBRARIES}
 		lvglsdl
 		SDL2
-		ui
+		ui_lvgl
 	)
 endif()
 
