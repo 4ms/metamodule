@@ -44,12 +44,19 @@ struct FileBrowserDialog {
 
 	// Extension filters are comma-separated list without dot or start: "wav, WAV, raw"
 	void filter_extensions(std::string_view extensions) {
-		exts = extensions;
+		if (extensions == "*/") {
+			exts = "Dirs only";
+			dir_mode = true;
+			lv_label_set_text(ui_FileBrowserSubtitle, "Folders only:");
+		} else {
+			exts = extensions;
+			dir_mode = false;
 
-		if (extensions.contains("*.*"))
-			lv_label_set_text(ui_FileBrowserSubtitle, "*.*");
-		else
-			lv_label_set_text(ui_FileBrowserSubtitle, extensions.data());
+			if (extensions.contains("*.*"))
+				lv_label_set_text(ui_FileBrowserSubtitle, "*.*");
+			else
+				lv_label_set_text(ui_FileBrowserSubtitle, extensions.data());
+		}
 	}
 
 	void show(std::string_view start_dir, const std::function<void(char *)> action) {
@@ -135,6 +142,10 @@ private:
 
 		roller_text.append("< Back\n");
 
+		if (dir_mode) {
+			roller_text.append(Gui::blue_text("[Select this folder]\n"));
+		}
+
 		for (auto const &subdir : dir_tree.dirs) {
 			pr_dbg("Vol %s:\n", subdir.name.c_str());
 			roller_text += Gui::yellow_text(subdir.name);
@@ -142,11 +153,13 @@ private:
 			num_items++;
 		}
 
-		for (auto const &file : dir_tree.files) {
-			pr_dbg("File %s - %u %u\n", file.filename.c_str(), file.filesize, file.timestamp);
-			roller_text += file.filename;
-			roller_text += "\n";
-			num_items++;
+		if (!dir_mode) {
+			for (auto const &file : dir_tree.files) {
+				pr_dbg("File %s - %u %u\n", file.filename.c_str(), file.filesize, file.timestamp);
+				roller_text += file.filename;
+				roller_text += "\n";
+				num_items++;
+			}
 		}
 
 		// remove trailing \n
@@ -198,8 +211,9 @@ private:
 		push_dir(file);
 		std::string fullpath = volstr(show_vol) + show_path;
 
+		// Allocate some chars:
 		char *path = strndup(fullpath.data(), fullpath.size());
-		// Rack and Cardinal specify that the caller will free() path
+		// Rack and Cardinal specify that the caller will free() path in action():
 		if (action)
 			action(path);
 
@@ -222,15 +236,15 @@ private:
 			//  "^123456 Text^ "
 			//   ________....
 			//    8 char
+			// Remove the leading chars
 			text = text.substr(8);
+			// Erase the final "^" or "^ "
 			if (auto endpos = text.find('^'); endpos != text.npos) {
 				if (text[endpos + 1] == ' ')
 					text.erase(endpos, 2);
 				else
 					text.erase(endpos, 1);
 			}
-			// text = text.substr(8, text.length() - 11);
-			pr_dbg("Trimmed: '%s' (%d)\n", text.c_str(), text.length());
 		}
 
 		if (text == "< Back") {
@@ -238,10 +252,10 @@ private:
 		} else if (text.ends_with(":/")) {
 			show_vol = strvol(text);
 			show_path = "";
-			pr_dbg("Set vol: %d\n", show_vol);
 		} else if (text.ends_with("/")) {
 			push_dir(text);
-			pr_dbg("Push dir=>'%s'\n", show_path.c_str());
+		} else if (text.starts_with("[Select this folder]")) {
+			choose("");
 		} else {
 			choose(text);
 		}
