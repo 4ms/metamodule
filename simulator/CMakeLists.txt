@@ -124,6 +124,7 @@ else()
 
 		${FWDIR}/src/gui/elements/element_name.cc
 		${FWDIR}/src/gui/slsexport/ui_local.cc
+		${FWDIR}/src/fs/helpers.cc
 		# ${FWDIR}/src/gui/slsexport/prefs_menu.cc
 		${FWDIR}/src/gui/fonts/fonts.cc
 		${FWDIR}/src/gui/fonts/ttf.cc
