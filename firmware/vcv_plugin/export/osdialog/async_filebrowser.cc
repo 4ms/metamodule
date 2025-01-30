@@ -28,6 +28,6 @@ void async_dialog_filebrowser(const bool saving,
 	if (saving) {
 		printf("Save file dialog box -- not supported\n");
 	} else {
-		show_file_browser(browser, title, nameOrExtensions, startDir, action);
+		show_file_browser(browser, nameOrExtensions, startDir, title, action);
 	}
 }

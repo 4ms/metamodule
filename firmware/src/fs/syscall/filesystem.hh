@@ -3,6 +3,7 @@
 #include "fat_file_io.hh"
 #include "ff.h"
 #include "filedesc_manager.hh"
+#include "fs/helpers.hh"
 #include "fs_syscall_proxy.hh"
 #include "time_convert.hh"
 #include <sys/stat.h>
@@ -239,7 +240,6 @@ public:
 				return &dirdesc->cur_entry;
 			}
 		}
-
 		return nullptr;
 	}
 
@@ -266,29 +266,6 @@ public:
 			return -1;
 
 		return FileDescManager::dealloc_dir(dir) ? 0 : -1;
-	}
-
-private:
-	static std::pair<std::string_view, Volume> split_volume(const char *filename) {
-		auto sv = std::string_view{filename};
-		return split_volume(sv);
-	}
-
-	static std::pair<std::string_view, Volume> split_volume(std::string_view filename) {
-		if (filename.starts_with("ram:"))
-			return {filename, Volume::RamDisk};
-
-		if (filename.starts_with("usb:") || filename.starts_with("USB:/"))
-			return {filename, Volume::USB};
-
-		if (filename.starts_with("sdc:") || filename.starts_with("SD Card:/"))
-			return {filename, Volume::SDCard};
-
-		if (filename.starts_with("nor:"))
-			return {filename, Volume::NorFlash};
-
-		// Default (no volume given) is RamDisk
-		return {filename, Volume::RamDisk};
 	}
 };
 } // namespace MetaModule

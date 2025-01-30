@@ -2,18 +2,16 @@
 #include "conf/qspi_flash_conf.hh"
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/shared_memory.hh"
-#include "drivers/inter_core_comm.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
-#include "fs/fatfs/sdcard_ops.hh"
+#include "fs/helpers.hh"
 #include "fs/littlefs/norflash_lfs.hh"
 #include "fs/volumes.hh"
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_list_helper.hh"
 #include "pr_dbg.hh"
 #include "util/poll_change.hh"
-#include "util/string_util.hh"
 #include <optional>
 
 namespace MetaModule
@@ -259,17 +257,7 @@ public:
 						 std::string_view filter_exts,
 						 DirTree<FileEntry> *dir_tree) {
 
-		std::vector<std::string> exts;
-		tokenize_string(filter_exts, exts, ",");
-		for (auto &ext : exts) {
-			if (ext.starts_with(" "))
-				ext = ext.substr(1);
-		}
-		if (auto pos = std::ranges::find(exts, "*.*"); pos != exts.end())
-			exts.erase(pos);
-
-		for (auto const &ext : exts)
-			pr_dbg("Find ending in '%s'\n", ext.c_str());
+		auto exts = parse_extensions(filter_exts, ",");
 
 		auto ok = drive.foreach_dir_entry(
 			path, [dir_tree, &exts](std::string_view name, size_t tm, size_t size, DirEntryKind kind) {

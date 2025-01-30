@@ -4,6 +4,9 @@
 namespace MetaModule
 {
 
+// #define fs_trace pr_dbg
+#define fs_trace(...)
+
 FsSyscallProxy::FsSyscallProxy()
 	: impl{std::make_unique<FsProxy>()} {
 }
@@ -17,10 +20,10 @@ bool FsSyscallProxy::open(std::string_view path, FIL *fil, uint8_t mode) {
 		.access_mode = mode,
 	};
 
-	pr_trace("A7: open (mode %d) %s => %p\n", msg.access_mode, msg.path.data(), msg.fil);
+	fs_trace("A7: open (mode %d) %s => %p\n", msg.access_mode, msg.path.data(), msg.fil);
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Open>(msg, 3000)) {
-		pr_trace("A7: Open response = %d\n", response->res);
+		fs_trace("A7: Open response = %d\n", response->res);
 		*fil = response->fil; //copy back
 		return response->res == FR_OK;
 	}
@@ -40,14 +43,15 @@ uint64_t FsSyscallProxy::seek(FIL *fil, int offset, int whence) {
 									   CurrentPos,
 	};
 
-	pr_trace("A7: seek %p + %d (%d)\n", fil, offset, whence);
+	fs_trace("A7: seek %p + %d (%s)\n", fil, offset, whence == SEEK_CUR ? "cur" : whence == SEEK_END ? "end" : "set");
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Seek>(msg, 3000)) {
 		if (response->res == FR_OK) {
 			*fil = response->fil;
-			pr_trace("A7: seek response: f_tell is %zu\n", response->fil.fptr);
-		}
-		pr_err("A7: seek responded with error: %d\n", response->res);
+			fs_trace("A7: seek response: f_tell is %llu\n", response->fil.fptr);
+		} else
+			pr_err("A7: seek responded with error: %d\n", response->res);
+
 		return response->fil.fptr;
 	}
 
@@ -68,7 +72,7 @@ std::optional<size_t> FsSyscallProxy::read(FIL *fil, std::span<char> buffer) {
 		.buffer = impl->file_buffer().subspan(0, bytes_to_read),
 	};
 
-	pr_trace("A7: read %p into {%p, +%zu}\n", fil, buffer.data(), buffer.size());
+	fs_trace("A7: read %p into {%p, +%zu}\n", fil, buffer.data(), buffer.size());
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Read>(msg, 3000)) {
 		std::copy(response->buffer.begin(), std::next(response->buffer.begin(), response->bytes_read), buffer.data());
@@ -86,7 +90,7 @@ int FsSyscallProxy::close(FIL *fil) {
 		.fil = *fil,
 	};
 
-	pr_trace("A7: close %p\n", fil);
+	fs_trace("A7: close %p\n", fil);
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Close>(msg, 3000)) {
 		*fil = response->fil; //copy FIL back
@@ -103,10 +107,10 @@ bool FsSyscallProxy::stat(std::string_view path, FILINFO *info) {
 		.info = *info, //copy to non-cacheable message
 	};
 
-	pr_trace("A7: stat %s => info %p\n", msg.path.data(), msg.info);
+	fs_trace("A7: stat %s => info %p\n", msg.path.data(), msg.info);
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Stat>(msg, 3000)) {
-		pr_trace("A7: Stat response = %d\n", response->res);
+		fs_trace("A7: Stat response = %d\n", response->res);
 		*info = response->info; //copy back
 		return response->res == FR_OK;
 	}
@@ -121,10 +125,10 @@ bool FsSyscallProxy::opendir(std::string_view path, DIR *dir) {
 		.path = path,
 	};
 
-	pr_trace("A7: opendir %s => %p\n", msg.path.data(), msg.dir);
+	fs_trace("A7: opendir %s => %p\n", msg.path.data(), msg.dir);
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::OpenDir>(msg, 3000)) {
-		pr_trace("A7: Opendir response = %d\n", response->res);
+		fs_trace("A7: Opendir response = %d\n", response->res);
 		*dir = response->dir; //copy back
 		return response->res == FR_OK;
 	}
@@ -138,7 +142,7 @@ bool FsSyscallProxy::closedir(DIR *dir) {
 		.dir = *dir,
 	};
 
-	pr_trace("A7: closedir %p\n", dir);
+	fs_trace("A7: closedir %p\n", dir);
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::CloseDir>(msg, 3000)) {
 		*dir = response->dir; //copy DIR back
@@ -155,13 +159,13 @@ bool FsSyscallProxy::readdir(DIR *dir, FILINFO *info) {
 		.info = *info, //copy to non-cacheable message
 	};
 
-	pr_trace("A7: ReadDir dir %p => info %p\n", dir, info);
+	fs_trace("A7: ReadDir dir %p => info %p\n", dir, info);
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::ReadDir>(msg, 3000)) {
-		pr_trace("A7: ReadDir response = %d\n", response->res);
+		fs_trace("A7: ReadDir response = %d, name='%.255s'\n", response->res, response->info.fname);
 		*dir = response->dir;	//copy back
 		*info = response->info; //copy back
-		return response->res == FR_OK;
+		return response->info.fname[0] != '\0';
 	}
 
 	pr_err("Failed to send ReadDir request\n");

@@ -1,4 +1,5 @@
 #pragma once
+#include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_list.hh"
@@ -35,13 +36,20 @@ struct FileBrowserDialog {
 	}
 
 	void set_title(std::string_view title) {
-		if (title.data() && title.length())
+		if (title.data() && strlen(title.data()))
 			lv_label_set_text(ui_FileBrowserTitle, title.data());
+		else
+			lv_label_set_text(ui_FileBrowserTitle, "Open a file\n");
 	}
 
 	// Extension filters are comma-separated list without dot or start: "wav, WAV, raw"
 	void filter_extensions(std::string_view extensions) {
 		exts = extensions;
+
+		if (extensions.contains("*.*"))
+			lv_label_set_text(ui_FileBrowserSubtitle, "*.*");
+		else
+			lv_label_set_text(ui_FileBrowserSubtitle, extensions.data());
 	}
 
 	void show(std::string_view start_dir, const std::function<void(char *)> action) {
@@ -52,11 +60,22 @@ struct FileBrowserDialog {
 
 		visible = true;
 		refresh_state = RefreshState::TryingToRequest;
+
+		auto [start_path, start_vol] = split_volume(start_dir);
+		show_path = start_path;
+		show_vol = start_vol;
+		// show_path = std::filesystem::path{start_dir}.parent_path().string();
+
+		pr_dbg(
+			"Showing browser. start_dir = %s, show_path => %s, vol %d", start_dir.data(), show_path.c_str(), show_vol);
+
 		lv_obj_set_parent(ui_FileBrowserCont, lv_layer_top());
 		lv_show(ui_FileBrowserCont);
 	}
 
 	bool consume_back() {
+		if (action)
+			action(nullptr);
 		// TODO: should back go back to the previous directory? Or close the dialog?
 		return false;
 	}
@@ -86,6 +105,7 @@ struct FileBrowserDialog {
 					pr_dbg("Failed to load %d:%s\n", show_vol, show_path.c_str());
 					lv_roller_set_options(
 						ui_FileBrowserRoller, "< Back\nCannot display directory", LV_ROLLER_MODE_NORMAL);
+					lv_roller_set_selected(ui_FileBrowserRoller, 0, LV_ANIM_OFF);
 					refresh_state = RefreshState::Idle;
 				}
 				lv_group_set_editing(group, true);
@@ -111,6 +131,7 @@ private:
 		lv_label_set_text(ui_FileBrowserPathLabel, path.c_str());
 
 		std::string roller_text;
+		unsigned num_items = 0;
 
 		roller_text.append("< Back\n");
 
@@ -118,12 +139,14 @@ private:
 			pr_dbg("Vol %s:\n", subdir.name.c_str());
 			roller_text += Gui::yellow_text(subdir.name);
 			roller_text += "/\n"; //dirs end in a slash
+			num_items++;
 		}
 
 		for (auto const &file : dir_tree.files) {
 			pr_dbg("File %s - %u %u\n", file.filename.c_str(), file.filesize, file.timestamp);
 			roller_text += file.filename;
 			roller_text += "\n";
+			num_items++;
 		}
 
 		// remove trailing \n
@@ -131,6 +154,7 @@ private:
 			roller_text.pop_back();
 
 		lv_roller_set_options(ui_FileBrowserRoller, roller_text.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_selected(ui_FileBrowserRoller, num_items > 0 ? 1 : 0, LV_ANIM_OFF);
 	}
 
 	void pop_dir() {
@@ -167,11 +191,6 @@ private:
 		if (str.starts_with("sdc:") || str.starts_with("SD Card:"))
 			return Volume::SDCard;
 
-		// if (str.starts_with("ram:"))
-		// 	return Volume::RamDisk;
-		// if (str.starts_with("nor:"))
-		// 	return Volume::NorFlash;
-
 		return Volume::MaxVolumes;
 	}
 
@@ -181,7 +200,8 @@ private:
 
 		char *path = strndup(fullpath.data(), fullpath.size());
 		// Rack and Cardinal specify that the caller will free() path
-		action(path);
+		if (action)
+			action(path);
 
 		hide();
 	}
@@ -226,7 +246,7 @@ private:
 			choose(text);
 		}
 
-		pr_dbg("=>path: '%s'\n", show_path.c_str());
+		// pr_dbg("roller_click show_path=>'%s'\n", show_path.c_str());
 		refresh_state = RefreshState::TryingToRequest;
 	}
 
@@ -255,5 +275,6 @@ private:
 
 	Volume show_vol = Volume::MaxVolumes;
 	std::string show_path = "";
+	bool dir_mode = false;
 };
 } // namespace MetaModule

@@ -9,9 +9,13 @@ void show_file_browser(FileBrowserDialog *browser,
 					   const char *const startDir,
 					   const char *const title,
 					   const std::function<void(char *)> action) {
-	browser->set_title(title);
-	browser->filter_extensions(nameOrExtensions);
-	browser->show(startDir, action);
+	if (title)
+		browser->set_title(title);
+	if (nameOrExtensions)
+		browser->filter_extensions(nameOrExtensions);
+
+	std::string_view start_dir = (startDir) ? std::string_view{startDir} : std::string_view{};
+	browser->show(start_dir, action);
 }
 
 } // namespace MetaModule
