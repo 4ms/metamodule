@@ -66,15 +66,20 @@ struct FileBrowserDialog {
 		this->action = std::move(action);
 
 		visible = true;
+
 		refresh_state = RefreshState::TryingToRequest;
 
-		auto [start_path, start_vol] = split_volume(start_dir);
-		show_path = start_path;
-		show_vol = start_vol;
-		// show_path = std::filesystem::path{start_dir}.parent_path().string();
-
-		pr_dbg(
-			"Showing browser. start_dir = %s, show_path => %s, vol %d", start_dir.data(), show_path.c_str(), show_vol);
+		if (start_dir.length()) {
+			auto [start_path, start_vol] = split_volume(start_dir);
+			show_path = start_path;
+			show_vol = start_vol;
+			pr_dbg("Showing browser. start_dir = %s => %s (vol %d)", start_dir.data(), show_path.c_str(), show_vol);
+		} else {
+			if (show_path == "") {
+				show_vol = Volume::MaxVolumes;
+			}
+			pr_dbg("Showing browser. No path specified, using %s (vol %d)\n", show_path.c_str(), show_vol);
+		}
 
 		lv_obj_set_parent(ui_FileBrowserCont, lv_layer_top());
 		lv_show(ui_FileBrowserCont);
@@ -143,7 +148,7 @@ private:
 		roller_text.append("< Back\n");
 
 		if (dir_mode) {
-			roller_text.append(Gui::blue_text("[Select this folder]\n"));
+			roller_text.append(Gui::blue_text("[Select this folder]") + std::string("\n"));
 		}
 
 		for (auto const &subdir : dir_tree.dirs) {
