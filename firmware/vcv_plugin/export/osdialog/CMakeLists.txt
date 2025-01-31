@@ -15,4 +15,5 @@ target_include_directories(osdialog PRIVATE
 
 target_link_libraries(osdialog PRIVATE 
     metamodule::rack-interface 
+    metamodule::core-interface 
 )

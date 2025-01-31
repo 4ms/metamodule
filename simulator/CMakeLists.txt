@@ -134,7 +134,7 @@ else()
 		${FWDIR}/src/params/expanders.cc
 		${FWDIR}/src/patch_play/patch_player_catchup.cc
         ${FWDIR}/src/patch_file/reload_patch.cc
-		${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
+		src/file_browser_adaptor.cc
 
 		#Fatfs:
 		stubs/fattime.cc
@@ -213,7 +213,7 @@ target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
-target_compile_definitions(simulator PUBLIC SIMULATOR)
+target_compile_definitions(simulator PUBLIC SIMULATOR METAMODULE)
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 23)
 
