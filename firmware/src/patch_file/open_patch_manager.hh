@@ -175,13 +175,6 @@ public:
 		}
 	}
 
-	void set_patch_filename(std::string_view filename) {
-		if (view_patch_)
-			view_patch_->loc.filename.copy(filename);
-		else
-			pr_err("Tried to set_patch_filename() for null view_patch\n");
-	}
-
 	void mark_view_patch_modified() {
 		view_patch_->modification_count++;
 	}

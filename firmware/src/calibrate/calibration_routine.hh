@@ -18,9 +18,7 @@ namespace MetaModule
 struct CalibrationRoutine {
 	enum class JackCalStatus { NotCal, Settling, LowOnly, HighOnly, Error, Done };
 
-	CalibrationRoutine(ParamsMidiState &params,
-					   FileStorageProxy &storage,
-					   PatchModQueue &patch_mod_queue)
+	CalibrationRoutine(ParamsMidiState &params, FileStorageProxy &storage, PatchModQueue &patch_mod_queue)
 		: storage{storage}
 		, patch_mod_queue{patch_mod_queue}
 		, params{params}
@@ -400,8 +398,9 @@ private:
 					if (check_offset_error(active_output)) {
 						set_output_status(active_output, JackCalStatus::Done);
 						lv_label_set_text_fmt(ui_CalibrationInstructionLabel,
-											  "Calibrated Out %d. Patch another Out jack to In 1",
-											  int(active_output + first_output + 1));
+											  "Calibrated Out %d. Patch another Out jack to In %d",
+											  int(active_output + first_output + 1),
+											  int(first_input + 1));
 					} else {
 						current_output = std::nullopt;
 						// will automatically retry
