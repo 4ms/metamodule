@@ -359,9 +359,6 @@ struct PatchViewPage : PageBase {
 
 		if (file_menu.is_visible()) {
 			file_menu.update();
-			if (!file_menu.is_visible()) {
-				lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
-			}
 		}
 
 		// Don't poll for patch changes while file menu is open to prevent races on the filesystem.
