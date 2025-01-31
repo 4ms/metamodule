@@ -2,6 +2,7 @@
 #include "../src/core_intercom/intercore_message.hh"
 #include "dynload/plugin_file_scan.hh"
 #include "fs/fatfs/fat_file_io.hh"
+#include "fs/helpers.hh"
 #include "fs/volumes.hh"
 #include "fw_update/update_path.hh"
 #include "host_file_io.hh"
@@ -165,6 +166,30 @@ struct SimulatorFileStorageComm {
 
 				} break;
 
+				case RequestDirEntries: {
+					reply = {DirEntriesFailed};
+
+					auto path = msg.filename;
+					auto exts = msg.dest_filename;
+					auto *dir_tree = msg.dir_entries;
+					dir_tree->files.clear();
+					dir_tree->dirs.clear();
+
+					if (msg.vol_id == Volume::MaxVolumes) {
+						if (storage.sd_hostfs.is_mounted()) {
+							dir_tree->dirs.push_back("SD Card:");
+						}
+						reply.message_type = DirEntriesSuccess;
+
+					} else if (msg.vol_id == Volume::SDCard) {
+						if (storage.sd_hostfs.is_mounted()) {
+							get_dir_entries(storage.sd_hostfs, path, exts, dir_tree);
+							reply.message_type = DirEntriesSuccess;
+						}
+					}
+
+				} break;
+
 				default:
 					break;
 			}
@@ -239,6 +264,45 @@ private:
 
 		return (hostfs_ok || defaultpatchfs_ok);
 	}
+
+	// void get_dir_entries(FatFileIO &drive,
+	// 					 std::string_view path,
+	// 					 std::string_view filter_exts,
+	// 					 DirTree<FileEntry> *dir_tree) {
+
+	// 	auto exts = parse_extensions(filter_exts, ",");
+
+	// 	auto ok = drive.foreach_dir_entry(
+	// 		path, [dir_tree, &exts](std::string_view name, size_t tm, size_t size, DirEntryKind kind) {
+	// 			if (name.starts_with("."))
+	// 				return;
+
+	// 			if (kind == DirEntryKind::Dir) {
+	// 				dir_tree->dirs.push_back({std::string(name)});
+	// 			}
+
+	// 			if (kind == DirEntryKind::File) {
+	// 				if (exts.size() == 0) {
+	// 					dir_tree->files.push_back({std::string(name), (uint32_t)size, (uint32_t)tm});
+
+	// 				} else {
+	// 					for (auto const &ext : exts) {
+	// 						if (name.ends_with(ext)) {
+	// 							dir_tree->files.push_back({std::string(name), (uint32_t)size, (uint32_t)tm});
+	// 							pr_dbg("Match: %s ends in %s\n", name.data(), ext.data());
+	// 							break;
+	// 						}
+	// 					}
+	// 					pr_dbg("No match: %s\n", name.data());
+	// 				}
+	// 			}
+	// 		});
+
+	// 	if (ok) {
+	// 		std::ranges::sort(dir_tree->files, less_ci, &FileEntry::filename);
+	// 		std::ranges::sort(dir_tree->dirs, less_ci, &DirTree<FileEntry>::name);
+	// 	}
+	// }
 
 private:
 	SimulatorPatchStorage &storage;
