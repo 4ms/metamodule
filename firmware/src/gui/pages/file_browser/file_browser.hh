@@ -6,6 +6,7 @@
 #include "gui/slsexport/filebrowser/ui.h"
 #include "gui/styles.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include <filesystem>
 #include <functional>
 
 namespace MetaModule
@@ -72,12 +73,21 @@ struct FileBrowserDialog {
 		if (start_dir.length()) {
 			auto [start_path, start_vol] = split_volume(start_dir);
 			show_path = start_path;
+			if (!show_path.ends_with("/")) {
+				show_path += "/";
+			}
 			show_vol = start_vol;
-			pr_dbg("Showing browser. start_dir = %s => %s (vol %d)", start_dir.data(), show_path.c_str(), show_vol);
+			pr_dbg("Showing browser. start_dir = %s => %s (vol %d)\n", start_dir.data(), show_path.c_str(), show_vol);
 		} else {
 			if (show_path == "") {
 				show_vol = Volume::MaxVolumes;
 			}
+
+			if (!show_path.ends_with("/")) {
+				show_path = std::filesystem::path(show_path).parent_path().string() + "/";
+				pr_dbg("Browser: Path did not end in /, using parent: %s\n", show_path.c_str());
+			}
+
 			pr_dbg("Showing browser. No path specified, using %s (vol %d)\n", show_path.c_str(), show_vol);
 		}
 
@@ -108,7 +118,7 @@ struct FileBrowserDialog {
 			case RefreshState::Requested: {
 				auto message = file_storage.get_message().message_type;
 				if (message == FileStorageProxy::DirEntriesSuccess) {
-					pr_dbg("Reloading vol %d, path: '%s'\n", show_vol, show_path.c_str());
+					// pr_dbg("Reloading vol %d, path: '%s'\n", show_vol, show_path.c_str());
 					refresh_roller();
 					refresh_state = RefreshState::Idle;
 
@@ -152,19 +162,17 @@ private:
 		}
 
 		for (auto const &subdir : dir_tree.dirs) {
-			pr_dbg("Vol %s:\n", subdir.name.c_str());
+			// pr_dbg("Vol %s:\n", subdir.name.c_str());
 			roller_text += Gui::yellow_text(subdir.name);
 			roller_text += "/\n"; //dirs end in a slash
 			num_items++;
 		}
 
-		if (!dir_mode) {
-			for (auto const &file : dir_tree.files) {
-				pr_dbg("File %s - %u %u\n", file.filename.c_str(), file.filesize, file.timestamp);
-				roller_text += file.filename;
-				roller_text += "\n";
-				num_items++;
-			}
+		for (auto const &file : dir_tree.files) {
+			// pr_dbg("File %s - %u %u\n", file.filename.c_str(), file.filesize, file.timestamp);
+			roller_text += file.filename;
+			roller_text += "\n";
+			num_items++;
 		}
 
 		// remove trailing \n
@@ -176,21 +184,33 @@ private:
 	}
 
 	void pop_dir() {
+		if (show_vol == Volume::MaxVolumes)
+			return; // not valid
+
 		if (show_path.back() == '/') {
 			show_path.back() = '\0';
 		}
 
-		auto lastslash = show_path.rfind('/');
-		if (lastslash != std::string::npos) {
-			show_path = show_path.substr(0, lastslash);
-		} else {
+		if (show_path == "" || show_path == "/") {
 			show_vol = Volume::MaxVolumes;
 			show_path = "";
 		}
+
+		pr_dbg("pop_dir(): '%s' => ", show_path.c_str());
+		show_path = std::filesystem::path(show_path).parent_path().string();
+		pr_dbg("'%s'\n", show_path.c_str());
+
+		// auto lastslash = show_path.rfind('/');
+		// if (lastslash != std::string::npos) {
+		// 	show_path = show_path.substr(0, lastslash);
+		// } else {
+		// 	show_vol = Volume::MaxVolumes;
+		// 	show_path = "";
+		// }
 	}
 
 	void push_dir(std::string_view dir) {
-		show_path += std::string(dir);
+		show_path = std::filesystem::path(show_path) / dir;
 	}
 
 	std::string volstr(Volume vol) {
@@ -218,7 +238,7 @@ private:
 
 		// Allocate some chars:
 		char *path = strndup(fullpath.data(), fullpath.size());
-		// Rack and Cardinal specify that the caller will free() path in action():
+		// Rack specifies that the caller will free() path in action():
 		if (action)
 			action(path);
 
@@ -231,41 +251,29 @@ private:
 		lv_roller_get_selected_str(ui_FileBrowserRoller, text.data(), (uint32_t)text.max_size());
 		text.resize(strlen(text.data()));
 
-		pr_dbg("Path: '%s', click item %d: '%s'\n",
-			   show_path.c_str(),
-			   lv_roller_get_selected(ui_FileBrowserRoller),
-			   text.c_str());
-
-		// Trim color
-		if (text.starts_with("^")) {
-			//  "^123456 Text^ "
-			//   ________....
-			//    8 char
-			// Remove the leading chars
-			text = text.substr(8);
-			// Erase the final "^" or "^ "
-			if (auto endpos = text.find('^'); endpos != text.npos) {
-				if (text[endpos + 1] == ' ')
-					text.erase(endpos, 2);
-				else
-					text.erase(endpos, 1);
-			}
-		}
+		trim_color_string(text);
 
 		if (text == "< Back") {
 			pop_dir();
+
 		} else if (text.ends_with(":/")) {
+			// Clicked a volume:
 			show_vol = strvol(text);
 			show_path = "";
+
 		} else if (text.ends_with("/")) {
+			// Clicked a dir:
 			push_dir(text);
+
 		} else if (text.starts_with("[Select this folder]")) {
+			// Selected a folder
 			choose("");
+
 		} else {
+			// Selected a file
 			choose(text);
 		}
 
-		// pr_dbg("roller_click show_path=>'%s'\n", show_path.c_str());
 		refresh_state = RefreshState::TryingToRequest;
 	}
 
