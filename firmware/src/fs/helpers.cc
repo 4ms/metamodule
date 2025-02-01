@@ -36,29 +36,49 @@ std::vector<std::string> parse_extensions(std::string_view str, std::string cons
 	return tokens;
 }
 
+constexpr auto volume_labels = std::array{
+	std::pair<std::string_view, Volume>{{"ram:"}, {Volume::RamDisk}},
+	std::pair<std::string_view, Volume>{{"usb:"}, {Volume::USB}},
+	std::pair<std::string_view, Volume>{{"sdc:"}, {Volume::SDCard}},
+	std::pair<std::string_view, Volume>{{"nor:"}, {Volume::NorFlash}},
+	// Alternative labels:
+	std::pair<std::string_view, Volume>{{"USB:"}, {Volume::USB}},
+	std::pair<std::string_view, Volume>{{"SD Card:"}, {Volume::SDCard}},
+	std::pair<std::string_view, Volume>{{"Internal:"}, {Volume::NorFlash}},
+};
+
+constexpr std::string_view vol_label(Volume vol) {
+	for (auto &label : volume_labels) {
+		if (vol == label.second) {
+			return label.first;
+		}
+	}
+	return "";
+}
+
 std::pair<std::string_view, Volume> split_volume(const char *filename) {
 	auto sv = std::string_view{filename};
 	return split_volume(sv);
 }
 
 std::pair<std::string_view, Volume> split_volume(std::string_view filename) {
-	if (filename.starts_with("ram:"))
-		return {filename.substr(4), Volume::RamDisk};
 
-	if (filename.starts_with("usb:") || filename.starts_with("USB:"))
-		return {filename.substr(4), Volume::USB};
+	Volume vol = Volume::RamDisk;
+	std::string_view path = filename;
 
-	if (filename.starts_with("sdc:"))
-		return {filename.substr(4), Volume::SDCard};
+	auto strip_slash = [](auto f) {
+		return f[0] == '/' ? f.substr(1) : f;
+	};
 
-	if (filename.starts_with("SD Card:"))
-		return {filename.substr(8), Volume::SDCard};
+	for (auto &label : volume_labels) {
+		if (filename.starts_with(label.first)) {
+			path = filename.substr(label.first.length());
+			path = strip_slash(path);
+			vol = label.second;
+		}
+	}
 
-	if (filename.starts_with("nor:"))
-		return {filename.substr(4), Volume::NorFlash};
-
-	// Default (no volume given) is RamDisk
-	return {filename, Volume::RamDisk};
+	return {path, vol};
 }
 
 } // namespace MetaModule

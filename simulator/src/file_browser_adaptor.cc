@@ -20,11 +20,13 @@ void show_file_browser(FileBrowserDialog *browser,
 		return;
 	}
 
-	std::string_view start_dir = (startDir) ? std::string_view{startDir} : std::string_view{};
+	std::string start_dir = (startDir) ? SimulatorPatchStorage::convert_path_to_mm(startDir) : "";
+	if (startDir)
+		printf("Simulator: start '%s'\n=>               '%s'\n", startDir, start_dir.c_str());
 
 	browser->show(start_dir, [=](char *path) {
 		auto host_path = SimulatorPatchStorage::convert_path_to_host(path);
-		printf("Simulator: path %s => %s\n", path, host_path.c_str());
+		printf("Simulator: path '%s'\n=>              '%s'\n", path, host_path.c_str());
 
 		// Need to allocate char* because action() is expecting to free() it
 		auto dup_data = strndup(host_path.data(), host_path.length());

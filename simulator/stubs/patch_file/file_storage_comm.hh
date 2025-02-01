@@ -43,6 +43,18 @@ struct SimulatorPatchStorage {
 		}
 	}
 
+	static std::string convert_path_to_mm(std::string_view path) {
+		if (path.starts_with(sd_root)) {
+			return "sdc:/" + std::string(path.substr(sd_root.length()));
+
+		} else if (path.starts_with(flash_root)) {
+			return "nor:/" + std::string(path.substr(sd_root.length()));
+
+		} else {
+			return std::string(path);
+		}
+	}
+
 	HostFileIO sd_hostfs;
 	HostFileIO flash_hostfs;
 	FatFileIO &ramdisk;
