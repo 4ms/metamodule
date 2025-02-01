@@ -30,7 +30,7 @@ struct HostFileIO {
 			for (const auto &entry : fs::directory_iterator(_root_dir)) {
 				auto fn = entry.path();
 				if (fn.extension() == fs::path(extension)) {
-					auto timestamp = convert_timestamp(fn);
+					auto timestamp = convert_timestamp(fn.string());
 					auto sz = (uint32_t)fs::file_size(fn);
 					action(fn.string().c_str(), timestamp, sz);
 				}
@@ -60,14 +60,14 @@ struct HostFileIO {
 		}
 		fs::path full_path{f_path};
 
-		// std::cout << "HostFileIO: foreach_dir_entry() in " << full_path << "\n";
+		std::cout << "HostFileIO: foreach_dir_entry() in " << full_path << "\n";
 
 		try {
 			for (const auto &entry : fs::directory_iterator(full_path)) {
 				auto fn = entry.path();
 				auto entry_type = (entry.is_directory()) ? DirEntryKind::Dir : DirEntryKind::File;
 
-				auto timestamp = convert_timestamp(fn);
+				auto timestamp = convert_timestamp(fn.string());
 
 				auto sz = entry.is_directory() ? 0 : (uint32_t)fs::file_size(fn);
 				std::string name = fn.filename().string();
@@ -85,7 +85,7 @@ struct HostFileIO {
 	uint64_t read_file(const std::string_view filename, std::span<char> buffer, size_t offset = 0) {
 		auto filepath = normalize_path(filename);
 
-		// std::cout << "HostFileIO: read " << filepath << "\n";
+		std::cout << "HostFileIO: read " << filepath << "\n";
 
 		std::ifstream ifs(filepath, std::ios::in);
 		uint64_t sz = 0;
@@ -106,7 +106,7 @@ struct HostFileIO {
 	bool update_or_create_file(const std::string_view filename, const std::span<const char> buffer) {
 		auto filepath = normalize_path(filename);
 
-		// std::cout << "HostFileIO: write " << filepath << "\n";
+		std::cout << "HostFileIO: write " << filepath << "\n";
 
 		auto ofs = std::ofstream{filepath, std::ios::out};
 		uint64_t sz = 0;
@@ -121,7 +121,7 @@ struct HostFileIO {
 	bool delete_file(std::string_view filename) {
 		auto filepath = normalize_path(filename);
 
-		// std::cout << "HostFileIO: delete " << filepath << "\n";
+		std::cout << "HostFileIO: delete " << filepath << "\n";
 
 		return std::filesystem::remove(filepath) > 0;
 	}
@@ -129,7 +129,7 @@ struct HostFileIO {
 	uint64_t get_file_size(std::string_view filename) {
 		auto filepath = normalize_path(filename);
 
-		// std::cout << "HostFileIO: get file size " << filepath << "\n";
+		std::cout << "HostFileIO: get file size " << filepath << "\n";
 
 		std::ifstream ifs(filepath, std::ios::in);
 		uint64_t sz = 0;
@@ -145,7 +145,7 @@ struct HostFileIO {
 	uint32_t get_file_timestamp(std::string_view filename) {
 		auto filepath = normalize_path(filename);
 
-		// std::cout << "HostFileIO: get file timestamp " << filepath << "\n";
+		std::cout << "HostFileIO: get file timestamp " << filepath << "\n";
 
 		return convert_timestamp(filepath);
 	}
