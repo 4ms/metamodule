@@ -34,6 +34,9 @@ struct FileBrowserDialog {
 		lv_label_set_recolor(roller_label, true);
 
 		lv_obj_add_event_cb(ui_FileBrowserRoller, roller_click_cb, LV_EVENT_CLICKED, this);
+
+		lv_obj_set_width(ui_FileBrowserPathLabel, 300);
+		lv_label_set_long_mode(ui_FileBrowserPathLabel, LV_LABEL_LONG_SCROLL);
 	}
 
 	void set_title(std::string_view title) {
