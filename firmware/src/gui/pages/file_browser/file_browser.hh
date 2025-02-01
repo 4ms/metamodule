@@ -73,17 +73,20 @@ struct FileBrowserDialog {
 		if (start_dir.length()) {
 			auto [start_path, start_vol] = split_volume(start_dir);
 			show_path = start_path;
+			show_vol = start_vol;
+
 			if (!show_path.ends_with("/")) {
 				show_path += "/";
 			}
-			show_vol = start_vol;
+
 			pr_dbg("Showing browser. start_dir = %s => %s (vol %d)\n", start_dir.data(), show_path.c_str(), show_vol);
 		} else {
 			if (show_path == "") {
 				show_vol = Volume::MaxVolumes;
 			}
 
-			if (!show_path.ends_with("/")) {
+			else if (!show_path.ends_with("/"))
+			{
 				show_path = std::filesystem::path(show_path).parent_path().string() + "/";
 				pr_dbg("Browser: Path did not end in /, using parent: %s\n", show_path.c_str());
 			}
@@ -124,11 +127,15 @@ struct FileBrowserDialog {
 
 				} else if (message == FileStorageProxy::DirEntriesFailed) {
 					// hide_spinner();
-					pr_dbg("Failed to load %d:%s\n", show_vol, show_path.c_str());
-					lv_roller_set_options(
-						ui_FileBrowserRoller, "< Back\nCannot display directory", LV_ROLLER_MODE_NORMAL);
-					lv_roller_set_selected(ui_FileBrowserRoller, 0, LV_ANIM_OFF);
-					refresh_state = RefreshState::Idle;
+					pr_dbg("Failed to display dir %d:%s\n", show_vol, show_path.c_str());
+					auto ok = pop_dir();
+					if (ok)
+						refresh_state = RefreshState::TryingToRequest;
+					else {
+						lv_roller_set_options(ui_FileBrowserRoller, "< Back", LV_ROLLER_MODE_NORMAL);
+						lv_roller_set_selected(ui_FileBrowserRoller, 0, LV_ANIM_OFF);
+						refresh_state = RefreshState::Idle;
+					}
 				}
 				lv_group_set_editing(group, true);
 			} break;
@@ -183,9 +190,9 @@ private:
 		lv_roller_set_selected(ui_FileBrowserRoller, num_items > 0 ? 1 : 0, LV_ANIM_OFF);
 	}
 
-	void pop_dir() {
+	bool pop_dir() {
 		if (show_vol == Volume::MaxVolumes)
-			return; // not valid
+			return false; // not valid
 
 		if (show_path.back() == '/') {
 			show_path.back() = '\0';
@@ -199,6 +206,8 @@ private:
 		pr_dbg("pop_dir(): '%s' => ", show_path.c_str());
 		show_path = std::filesystem::path(show_path).parent_path().string();
 		pr_dbg("'%s'\n", show_path.c_str());
+
+		return true;
 
 		// auto lastslash = show_path.rfind('/');
 		// if (lastslash != std::string::npos) {
