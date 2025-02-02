@@ -9,7 +9,7 @@ std::vector<std::string> parse_extensions(std::string_view str, std::string cons
 
 	// Matching *.* means no filtering: return an empty vector
 	if (str.contains("*.*")) {
-		pr_dbg("M4: filter contains *.*, ignoring filter\n");
+		// pr_dbg("M4: filter contains *.*, ignoring filter\n");
 		return tokens;
 	}
 

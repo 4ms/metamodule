@@ -49,7 +49,7 @@ struct FileBrowserDialog {
 	// Extension filters are comma-separated list without dot or start: "wav, WAV, raw"
 	void filter_extensions(std::string_view extensions) {
 		if (extensions == "*/") {
-			exts = "Dirs only";
+			exts = "";
 			dir_mode = true;
 			lv_label_set_text(ui_FileBrowserSubtitle, "Folders only:");
 		} else {
