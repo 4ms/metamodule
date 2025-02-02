@@ -128,6 +128,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelTwoToFour);
 		pluginInstance->addModel(modelAnalogToDigital);
 		pluginInstance->addModel(modelASR);
+		pluginInstance->addModel(modelBinaryCounter);
 		pluginInstance->addModel(modelBinaryGate);
 		pluginInstance->addModel(modelBinaryNoise);
 		pluginInstance->addModel(modelBitshift);
