@@ -4,7 +4,9 @@
 #include "gui/styles.hh"
 #include <app/ModuleWidget.hpp>
 #include <helpers.hpp>
+#include <ui/MenuEntry.hpp>
 #include <ui/MenuItem.hpp>
+#include <ui/MenuSeparator.hpp>
 
 namespace MetaModule
 {
@@ -59,7 +61,7 @@ struct RackModuleMenu : BasePluginModuleMenu {
 			//find the child that was clicked
 			for (auto i = 0u; auto child : current_menu->children) {
 				if (auto menu_item = dynamic_cast<rack::ui::MenuItem *>(child)) {
-					if (i++ == idx) {
+					if (i == idx) {
 						auto has_submenu = click_submenu(menu_item);
 						if (!has_submenu) {
 							click_action_item(menu_item);
@@ -68,6 +70,7 @@ struct RackModuleMenu : BasePluginModuleMenu {
 						break;
 					}
 				}
+				i++;
 			}
 		}
 	}
@@ -126,21 +129,32 @@ private:
 
 			unsigned num_children = 0;
 			for (auto child : children) {
+				// Reasonable limit to size of menu:
+				if (num_children++ >= 256)
+					break;
+
 				if (auto rack_item = dynamic_cast<rack::ui::MenuItem *>(child)) {
 					child->step();
 
-					// Reasonable limit to size of menu:
-					if (num_children++ < 256) {
-						auto &item = menu.emplace_back();
-						// Checkmarks go on left side
-						if (rack_item->rightText.ends_with(CHECKMARK_STRING))
-							item = Gui::yellow_text(CHECKMARK_STRING);
+					auto &item = menu.emplace_back();
+					// Checkmarks go on left side
+					if (rack_item->rightText.ends_with(CHECKMARK_STRING))
+						item = Gui::yellow_text(CHECKMARK_STRING);
 
-						item += rack_item->text;
+					item += rack_item->text;
 
-						if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
-							item += " " + Gui::yellow_text(rack_item->rightText);
-					}
+					if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
+						item += " " + Gui::yellow_text(rack_item->rightText);
+				}
+
+				if (auto rack_item = dynamic_cast<rack::ui::MenuLabel *>(child)) {
+					rack_item->step();
+					menu.emplace_back(Gui::grey_text(rack_item->text));
+				}
+
+				if (auto rack_item = dynamic_cast<rack::ui::MenuSeparator *>(child)) {
+					rack_item->step();
+					menu.emplace_back(Gui::grey_text("----------"));
 				}
 			}
 		}

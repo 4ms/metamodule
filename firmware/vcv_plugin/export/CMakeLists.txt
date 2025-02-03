@@ -42,6 +42,9 @@ target_sources(
 
          src/ui/Menu.cc
          src/ui/MenuItem.cc
+         src/ui/MenuEntry.cc
+         src/ui/MenuLabel.cc
+         src/ui/MenuSeparator.cc
 
          src/widget/Widget.cc
          src/widget/SvgWidget.cc
