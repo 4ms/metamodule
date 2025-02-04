@@ -20,7 +20,6 @@ struct RackModuleMenu : BasePluginModuleMenu {
 		std::vector<std::string> item_strings;
 
 		if (auto mw = module_widget.lock()) {
-
 			// Initialize the first time
 			if (!menu_owner) {
 				menu_owner = std::make_unique<rack::widget::Widget>();
@@ -44,9 +43,8 @@ struct RackModuleMenu : BasePluginModuleMenu {
 				return;
 			}
 		}
-		current_menu = nullptr;
-		menu_owner.reset();
-		exited = true;
+
+		close();
 	}
 
 	bool is_done() override {
@@ -73,6 +71,12 @@ struct RackModuleMenu : BasePluginModuleMenu {
 				i++;
 			}
 		}
+	}
+
+	void close() override {
+		current_menu = nullptr;
+		menu_owner.reset();
+		exited = true;
 	}
 
 private:

@@ -27,6 +27,9 @@ struct NativeModuleMenu : BasePluginModuleMenu {
 	bool is_done() override {
 		return true;
 	}
+
+	void close() override {
+	}
 };
 
 } // namespace MetaModule

@@ -68,6 +68,7 @@ struct PluginModuleMenu {
 
 	void hide() {
 		if (visible) {
+			plugin_menu->close();
 			lv_hide(roller);
 			roller_hover.hide();
 			visible = false;
