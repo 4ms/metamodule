@@ -335,14 +335,7 @@ struct PatchViewPage : PageBase {
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			redraw_elements();
 
-			if (gui_state.playing_patch_needs_manual_reload) {
-				auto flash = get_time() % 1000 < 500 ? 2 : 0;
-				lv_obj_set_style_border_color(ui_PlayButton, lv_color_hex(0xAA4400), LV_PART_MAIN);
-				lv_obj_set_style_border_opa(ui_PlayButton, LV_OPA_100, LV_PART_MAIN);
-				lv_obj_set_style_border_width(ui_PlayButton, flash, LV_PART_MAIN);
-			} else {
-				lv_obj_set_style_border_width(ui_PlayButton, 0, LV_PART_MAIN);
-			}
+			lv_obj_set_style_border_width(ui_PlayButton, 0, LV_PART_MAIN);
 
 			if (!lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
