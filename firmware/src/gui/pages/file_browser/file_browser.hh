@@ -2,7 +2,6 @@
 #include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
-#include "gui/pages/page_list.hh"
 #include "gui/slsexport/filebrowser/ui.h"
 #include "gui/styles.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -21,10 +20,9 @@ static DirTree<FileEntry>
 	dir_tree;
 
 struct FileBrowserDialog {
-	FileBrowserDialog(FileStorageProxy &file_storage, NotificationQueue &notify_queue, PageList &page_list)
+	FileBrowserDialog(FileStorageProxy &file_storage, NotificationQueue &notify_queue)
 		: file_storage{file_storage}
 		, notify_queue{notify_queue}
-		, page_list{page_list}
 		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_FileBrowserRoller);
@@ -101,11 +99,18 @@ struct FileBrowserDialog {
 		lv_show(ui_FileBrowserCont);
 	}
 
-	bool consume_back() {
-		if (action)
-			action(nullptr);
-		// TODO: should back go back to the previous directory? Or close the dialog?
-		return false;
+	void back_event() {
+		// Try going back a dir
+		if (pop_dir()) {
+			refresh_state = RefreshState::TryingToRequest;
+			return; //consumed
+		}
+
+		// Module crashes if given a nullptr, even though that's what Rack does
+		// if (action)
+		// 	action(nullptr);
+
+		hide();
 	}
 
 	void update() {
@@ -130,12 +135,11 @@ struct FileBrowserDialog {
 
 				} else if (message == FileStorageProxy::DirEntriesFailed) {
 					// hide_spinner();
-					pr_dbg("Failed to display dir %d:%s\n", show_vol, show_path.c_str());
 					auto ok = pop_dir();
 					if (ok)
 						refresh_state = RefreshState::TryingToRequest;
 					else {
-						lv_roller_set_options(ui_FileBrowserRoller, "< Back", LV_ROLLER_MODE_NORMAL);
+						lv_roller_set_options(ui_FileBrowserRoller, TextBack.data(), LV_ROLLER_MODE_NORMAL);
 						lv_roller_set_selected(ui_FileBrowserRoller, 0, LV_ANIM_OFF);
 						refresh_state = RefreshState::Idle;
 					}
@@ -165,21 +169,21 @@ private:
 		std::string roller_text;
 		unsigned num_items = 0;
 
-		roller_text.append("< Back\n");
+		if (show_vol != Volume::MaxVolumes) {
+			roller_text.append("< Back\n");
 
-		if (dir_mode) {
-			roller_text.append(Gui::blue_text("[Select this folder]") + std::string("\n"));
+			if (dir_mode) {
+				roller_text.append(Gui::blue_text(TextSelectFolder) + std::string("\n"));
+			}
 		}
 
 		for (auto const &subdir : dir_tree.dirs) {
-			// pr_dbg("Vol %s:\n", subdir.name.c_str());
 			roller_text += Gui::yellow_text(subdir.name);
 			roller_text += "/\n"; //dirs end in a slash
 			num_items++;
 		}
 
 		for (auto const &file : dir_tree.files) {
-			// pr_dbg("File %s - %u %u\n", file.filename.c_str(), file.filesize, file.timestamp);
 			roller_text += file.filename;
 			roller_text += "\n";
 			num_items++;
@@ -188,6 +192,10 @@ private:
 		// remove trailing \n
 		if (roller_text.length() > 0)
 			roller_text.pop_back();
+		else {
+			// Empty
+			roller_text = "No disks detected";
+		}
 
 		lv_roller_set_options(ui_FileBrowserRoller, roller_text.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_selected(ui_FileBrowserRoller, num_items > 0 ? 1 : 0, LV_ANIM_OFF);
@@ -206,19 +214,9 @@ private:
 			show_path = "";
 		}
 
-		pr_dbg("pop_dir(): '%s' => ", show_path.c_str());
 		show_path = std::filesystem::path(show_path).parent_path().string();
-		pr_dbg("'%s'\n", show_path.c_str());
 
 		return true;
-
-		// auto lastslash = show_path.rfind('/');
-		// if (lastslash != std::string::npos) {
-		// 	show_path = show_path.substr(0, lastslash);
-		// } else {
-		// 	show_vol = Volume::MaxVolumes;
-		// 	show_path = "";
-		// }
 	}
 
 	void push_dir(std::string_view dir) {
@@ -265,25 +263,25 @@ private:
 
 		trim_color_string(text);
 
-		if (text == "< Back") {
+		if (text == TextBack) {
 			pop_dir();
+
+		} else if (text == TextNoDisksFound) {
+			hide();
 
 		} else if (text.ends_with(":/")) {
 			// Clicked a volume:
 			show_vol = strvol(text);
 			show_path = "";
-
 		} else if (text.ends_with("/")) {
 			// Clicked a dir:
 			push_dir(text);
-
-		} else if (text.starts_with("[Select this folder]")) {
+		} else if (text.starts_with(TextSelectFolder)) {
 			// Selected a folder
 			choose("");
-
 		} else {
 			// Selected a file
-			choose(text);
+			choose(dir_mode ? "" : text);
 		}
 
 		refresh_state = RefreshState::TryingToRequest;
@@ -298,7 +296,6 @@ private:
 
 	FileStorageProxy &file_storage;
 	NotificationQueue &notify_queue;
-	PageList &page_list;
 
 	lv_group_t *group;
 	lv_group_t *parent_group = nullptr;
@@ -315,5 +312,9 @@ private:
 	Volume show_vol = Volume::MaxVolumes;
 	std::string show_path = "";
 	bool dir_mode = false;
+
+	static constexpr std::string_view TextSelectFolder = "[Select this folder]";
+	static constexpr std::string_view TextBack = "< Back";
+	static constexpr std::string_view TextNoDisksFound = "No disks found";
 };
 } // namespace MetaModule

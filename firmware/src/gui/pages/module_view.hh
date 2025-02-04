@@ -321,10 +321,7 @@ struct ModuleViewPage : PageBase {
 	void update() override {
 		if (gui_state.back_button.is_just_released()) {
 
-			if (file_browser.is_visible()) {
-				file_browser.hide();
-
-			} else if (action_menu.is_visible()) {
+			if (action_menu.is_visible()) {
 				action_menu.back();
 
 			} else if (settings_menu.is_visible()) {
@@ -346,11 +343,14 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		if (file_browser.is_visible()) {
-			file_browser.update();
-			return; //????
+		if (gui_state.file_browser_visible.just_went_low()) {
+			// File Browser detected as just closed
+			if (mode == ViewMode::ExtraMenu) {
+				show_roller();
+			}
+		}
 
-		} else if (mode == ViewMode::Mapping) {
+		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
 				show_roller();
@@ -359,7 +359,6 @@ struct ModuleViewPage : PageBase {
 		} else if (mode == ViewMode::ExtraMenu) {
 			module_menu.update();
 			if (module_menu.wants_to_close()) {
-				module_menu.hide();
 				show_roller();
 			}
 		}
@@ -504,7 +503,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
-		pr_dbg("ModuleView::blur\n");
 		dyn_draw.blur();
 		params.lights.stop_watching_all();
 		params.displays.stop_watching_all();
@@ -515,6 +513,7 @@ struct ModuleViewPage : PageBase {
 
 private:
 	void show_roller() {
+		module_menu.hide();
 		mode = ViewMode::List;
 		mapping_pane.hide();
 		lv_show(ui_ElementRoller);

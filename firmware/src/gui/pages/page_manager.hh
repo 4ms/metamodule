@@ -80,7 +80,7 @@ public:
 			   .file_change_checker = file_change_checker,
 			   .file_browser = file_browser}
 		, screensaver{screensaver}
-		, file_browser{patch_storage, notify_queue, page_list} {
+		, file_browser{patch_storage, notify_queue} {
 
 		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
 		register_file_browser_vcv(file_browser);
@@ -106,8 +106,22 @@ public:
 				// debug_print_args(newpage);
 				cur_page->focus(newpage->args);
 			}
-		} else
-			cur_page->update();
+		} else {
+			if (file_browser.is_visible()) {
+				if (gui_state.back_button.is_just_released())
+					file_browser.back_event();
+				file_browser.update();
+
+				gui_state.file_browser_visible.register_state(true);
+			} else {
+				gui_state.file_browser_visible.register_state(false);
+
+				cur_page->update();
+
+				// Don't let old events do surprising things when you change pages
+				gui_state.file_browser_visible.clear_events();
+			}
+		}
 
 		handle_audio_errors();
 
