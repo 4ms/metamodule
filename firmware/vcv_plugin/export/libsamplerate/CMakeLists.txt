@@ -6,4 +6,4 @@ add_library(
   libsamplerate-0.1.9/src/src_zoh.c
 )
 
-target_include_directories(libsamplerate PUBLIC libsamplerate/src )
+target_include_directories(libsamplerate PRIVATE libsamplerate-0.1.9/src )
