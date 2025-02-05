@@ -73,10 +73,12 @@ target_sources(
 
 add_subdirectory(jansson)
 add_subdirectory(pffft)
+add_subdirectory(libsamplerate)
 
 target_link_libraries(vcv_plugin_export PUBLIC cpputil) 
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,jansson>")
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,pffft>")
+target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,libsamplerate>")
 
 if(NOT METAMODULE_HEADLESS)
 	add_subdirectory(nanovg)
