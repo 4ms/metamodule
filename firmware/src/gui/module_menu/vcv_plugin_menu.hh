@@ -52,23 +52,26 @@ struct RackModuleMenu : BasePluginModuleMenu {
 	}
 
 	void click_item(unsigned idx) override {
-		if (!current_menu)
+		if (!current_menu) {
+			pr_err("VCV module menu not initialized\n");
 			return;
+		}
 
-		if (auto mw = module_widget.lock()) {
-			//find the child that was clicked
-			for (auto i = 0u; auto child : current_menu->children) {
-				if (auto menu_item = dynamic_cast<rack::ui::MenuItem *>(child)) {
-					if (i == idx) {
-						auto has_submenu = click_submenu(menu_item);
-						if (!has_submenu) {
-							click_action_item(menu_item);
-							refresh_menu(mw);
-						}
-						break;
-					}
+		if (idx > current_menu->children.size()) {
+			pr_err("Clicked vcv module menu out of range\n");
+			return;
+		}
+
+		//find the child that was clicked
+		auto child = std::next(current_menu->children.begin(), idx);
+		if (auto menu_item = dynamic_cast<rack::ui::MenuItem *>(*child)) {
+
+			if (auto mw = module_widget.lock()) {
+				auto has_submenu = click_submenu(menu_item);
+				if (!has_submenu) {
+					click_action_item(menu_item);
+					refresh_menu(mw);
 				}
-				i++;
 			}
 		}
 	}
@@ -151,14 +154,21 @@ private:
 						item += " " + Gui::yellow_text(rack_item->rightText);
 				}
 
-				if (auto rack_item = dynamic_cast<rack::ui::MenuLabel *>(child)) {
+				else if (auto rack_item = dynamic_cast<rack::ui::MenuLabel *>(child))
+				{
 					rack_item->step();
 					menu.emplace_back(Gui::grey_text(rack_item->text));
 				}
 
-				if (auto rack_item = dynamic_cast<rack::ui::MenuSeparator *>(child)) {
+				else if (auto rack_item = dynamic_cast<rack::ui::MenuSeparator *>(child))
+				{
 					rack_item->step();
 					menu.emplace_back(Gui::grey_text("----------"));
+				}
+
+				else
+				{
+					menu.emplace_back("?");
 				}
 			}
 		}
