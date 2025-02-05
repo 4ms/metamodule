@@ -33,7 +33,7 @@ typedef float	coeff_t ;
 
 #include "fastest_coeffs.h"
 #include "mid_qual_coeffs.h"
-#include "high_qual_coeffs.h"
+// #include "high_qual_coeffs.h"
 
 typedef struct
 {	int		sinc_magic_marker ;
@@ -101,7 +101,7 @@ sinc_get_name (int src_enum)
 {
 	switch (src_enum)
 	{	case SRC_SINC_BEST_QUALITY :
-			return "Best Sinc Interpolator" ;
+			return "Best Sinc Interpolator -- not supported" ;
 
 		case SRC_SINC_MEDIUM_QUALITY :
 			return "Medium Sinc Interpolator" ;
@@ -126,7 +126,8 @@ sinc_get_description (int src_enum)
 			return "Band limited sinc interpolation, medium quality, 121dB SNR, 90% BW." ;
 
 		case SRC_SINC_BEST_QUALITY :
-			return "Band limited sinc interpolation, best quality, 144dB SNR, 96% BW." ;
+			return "Not supported";
+			// return "Band limited sinc interpolation, best quality, 144dB SNR, 96% BW." ;
 
 		default :
 			break ;
@@ -190,16 +191,17 @@ sinc_set_converter (SRC_PRIVATE *psrc, int src_enum)
 				break ;
 
 		case SRC_SINC_MEDIUM_QUALITY :
+		case SRC_SINC_BEST_QUALITY :
 				temp_filter.coeffs = slow_mid_qual_coeffs.coeffs ;
 				temp_filter.coeff_half_len = ARRAY_LEN (slow_mid_qual_coeffs.coeffs) - 2 ;
 				temp_filter.index_inc = slow_mid_qual_coeffs.increment ;
 				break ;
 
-		case SRC_SINC_BEST_QUALITY :
-				temp_filter.coeffs = slow_high_qual_coeffs.coeffs ;
-				temp_filter.coeff_half_len = ARRAY_LEN (slow_high_qual_coeffs.coeffs) - 2 ;
-				temp_filter.index_inc = slow_high_qual_coeffs.increment ;
-				break ;
+		// case SRC_SINC_BEST_QUALITY :
+		// 		temp_filter.coeffs = slow_high_qual_coeffs.coeffs ;
+		// 		temp_filter.coeff_half_len = ARRAY_LEN (slow_high_qual_coeffs.coeffs) - 2 ;
+		// 		temp_filter.index_inc = slow_high_qual_coeffs.increment ;
+		// 		break ;
 
 		default :
 				return SRC_ERR_BAD_CONVERTER ;
