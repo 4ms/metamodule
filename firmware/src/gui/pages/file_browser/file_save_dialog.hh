@@ -260,7 +260,7 @@ private:
 		file_name.append(file_ext);
 
 		if (save_action) {
-			save_action(file_vol, file_path + file_name);
+			save_action(file_vol, make_full_path(file_path, file_name));
 		}
 
 		else if (vcv_save_action)

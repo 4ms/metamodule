@@ -4,6 +4,7 @@
 #include "util/string_compare.hh"
 #include "volumes.hh"
 #include <algorithm>
+#include <filesystem>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -31,10 +32,14 @@ inline std::string_view volume_string(Volume vol) {
 		return "";
 }
 
+inline std::string make_full_path(std::string_view path, std::string_view filename = "") {
+	std::string fullpath = std::string(path) + std::string("/");
+	return std::filesystem::path(fullpath).lexically_normal().string() + std::string(filename);
+}
+
 inline std::string make_full_path(Volume vol, std::string_view path, std::string_view filename = "") {
-	if (path.starts_with("/"))
-		path = path.substr(1);
-	return std::string(volume_string(vol)) + std::string(path) + std::string(filename);
+	auto fullpath = std::string(volume_string(vol)) + make_full_path(path, filename);
+	return std::filesystem::path(fullpath).lexically_normal().string();
 }
 
 static inline void
