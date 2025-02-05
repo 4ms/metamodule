@@ -10,7 +10,8 @@ namespace MetaModule
 namespace
 {
 FileBrowserDialog *browser = nullptr;
-}
+FileSaveDialog *save_dialog = nullptr;
+} // namespace
 
 void register_file_browser_vcv(FileBrowserDialog &file_browser) {
 	browser = &file_browser;
@@ -22,20 +23,18 @@ void async_open_file(std::string_view initial_path,
 					 std::string_view filter_extension_list,
 					 std::string_view title,
 					 std::function<void(char *path)> &&action) {
-	using namespace MetaModule;
-	show_file_browser(browser, filter_extension_list.data(), initial_path.data(), title.data(), action);
+	show_file_browser(MetaModule::browser, filter_extension_list.data(), initial_path.data(), title.data(), action);
 }
 
-void async_open_dir(std::string_view initial_path,
-					std::string_view filter_extension_list,
-					std::string_view title,
-					std::function<void(char *path)> &&action) {
+void async_open_dir(std::string_view initial_path, std::string_view title, std::function<void(char *path)> &&action) {
+	show_file_browser(MetaModule::browser, "*/", initial_path.data(), title.data(), action);
 }
 
 void async_save_file(std::string_view initial_path,
 					 std::string_view filename,
-					 std::string_view title,
+					 std::string_view extension,
 					 std::function<void(char *path)> &&action) {
+	MetaModule::show_file_save_dialog(MetaModule::save_dialog, initial_path, filename, extension, action);
 }
 
 void async_osdialog_file(osdialog_file_action action,
@@ -50,12 +49,24 @@ void async_osdialog_file(osdialog_file_action action,
 		return;
 
 	if (action == OSDIALOG_SAVE) {
-		std::string p = (!path || path[0] == '\0') ? "Untitled" : path;
-		std::string fake_path = "usb:/" + p;
+		// std::string p = (!path || path[0] == '\0') ? "Untitled" : path;
+		// std::string fake_path = "usb:/" + p;
 
-		auto dup_str = strndup(fake_path.data(), fake_path.length());
-		printf("Skipping file browser and saving to %s\n", dup_str);
-		action_function(dup_str);
+		// auto dup_str = strndup(fake_path.data(), fake_path.length());
+		// printf("Skipping file browser and saving to %s\n", dup_str);
+
+		if (!path)
+			path = "";
+		if (!filename || filename[0] == '\0')
+			filename = "Untitled";
+
+		std::string extension = "";
+		if (filters && filters->patterns) {
+			extension = "." + std::string(filters->patterns->pattern);
+		}
+		show_file_save_dialog(MetaModule::save_dialog, std::string_view(path), filename, extension, action_function);
+
+		// action_function(dup_str);
 		// show_file_browser(browser, "", filename, "Save File:", action_function);
 
 	} else if (action == OSDIALOG_OPEN) {

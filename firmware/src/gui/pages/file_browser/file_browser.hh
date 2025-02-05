@@ -14,8 +14,7 @@ namespace MetaModule
 
 struct FileBrowserDialog {
 	FileBrowserDialog(FileStorageProxy &file_storage, NotificationQueue &notify_queue)
-		: file_storage{file_storage}
-		, notify_queue{notify_queue}
+		: file_storage{file_storage} // , notify_queue{notify_queue}
 		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_FileBrowserRoller);
@@ -288,7 +287,7 @@ private:
 	}
 
 	FileStorageProxy &file_storage;
-	NotificationQueue &notify_queue;
+	// NotificationQueue &notify_queue;
 
 	lv_group_t *group;
 	lv_group_t *parent_group = nullptr;

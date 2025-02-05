@@ -1,4 +1,5 @@
 #pragma once
+#include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -75,8 +76,25 @@ struct FileSaveDialog {
 		}
 	}
 
+	void show(Volume vol,
+			  std::string_view fullpath,
+			  std::string_view ext,
+			  std::function<void(Volume, std::string_view)> action) {
+		this->vcv_save_action = {};
+		this->save_action = action;
+		show(vol, fullpath, ext);
+	}
+
+	void show(std::string_view fullpath, std::string_view ext, std::function<void(char *)> action) {
+		this->vcv_save_action = action;
+		this->save_action = {};
+		auto [path, vol] = split_volume(fullpath);
+		show(vol, fullpath, ext);
+	}
+
 	void show(Volume vol, std::string_view fullpath, std::string_view ext) {
 		if (mode == Mode::Hidden) {
+
 			file_vol = vol;
 			// Default Volume:
 			if (file_vol == Volume::RamDisk)
@@ -109,7 +127,6 @@ struct FileSaveDialog {
 			lv_group_set_editing(group, false);
 
 			mode = Mode::Idle;
-			do_save = false;
 		}
 	}
 
@@ -129,24 +146,6 @@ struct FileSaveDialog {
 
 	bool is_visible() {
 		return mode != Mode::Hidden;
-	}
-
-	bool should_save() {
-		auto tmp = do_save;
-		do_save = false;
-		return tmp;
-	}
-
-	std::string get_save_filename() {
-		return file_name;
-	}
-
-	std::string get_save_path() {
-		return file_path;
-	}
-
-	Volume get_save_vol() {
-		return file_vol;
 	}
 
 private:
@@ -251,15 +250,33 @@ private:
 			return;
 		auto page = static_cast<FileSaveDialog *>(event->user_data);
 
-		page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
-		page->do_save = true;
+		page->save();
+	}
+
+	void save() {
+		// Ensure file name ends in extension exactly once
+		file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+		strip_ext();
+		file_name.append(file_ext);
+
+		if (save_action) {
+			save_action(file_vol, file_path + file_name);
+		}
+
+		else if (vcv_save_action)
+		{
+			// Allocate a char*, because save_action will free() it.
+			// (this is a requirement of the Rack API)
+			auto path = make_full_path(file_vol, file_path, file_name);
+			char *str = strndup(path.data(), path.length());
+			vcv_save_action(str);
+		}
 	}
 
 	static void cancel_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<FileSaveDialog *>(event->user_data);
-		page->do_save = false;
 		page->hide();
 	}
 
@@ -294,7 +311,8 @@ private:
 
 	uint32_t last_refresh_check_tm = 0;
 
-	bool do_save = false;
+	std::function<void(char *)> vcv_save_action;
+	std::function<void(Volume, std::string_view)> save_action;
 };
 
 } // namespace MetaModule

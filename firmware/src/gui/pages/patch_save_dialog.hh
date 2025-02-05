@@ -35,13 +35,6 @@ struct SaveDialog {
 	void update() {
 		dialog.update();
 
-		if (dialog.should_save()) {
-			file_name = dialog.get_save_filename();
-			file_path = dialog.get_save_path();
-			file_vol = dialog.get_save_vol();
-			save();
-		}
-
 		if (is_renaming) {
 			if (patch_playloader.is_renaming_idle()) {
 				saved = true;
@@ -58,7 +51,7 @@ struct SaveDialog {
 
 		auto fullpath = patches.get_view_patch_filename();
 
-		dialog.show(vol, fullpath, ".yml");
+		dialog.show(vol, fullpath, ".yml", [this](Volume vol, std::string_view path) { save(vol, path); });
 
 		is_renaming = false;
 	}
@@ -78,28 +71,23 @@ struct SaveDialog {
 	}
 
 private:
-	static void strip_yml(std::string &fname) {
-		if (fname.ends_with(".yml")) {
-			fname = fname.substr(0, fname.length() - 4);
-		}
-	}
+	void save(Volume file_vol, std::string_view path) {
+		// Cleanup path:
+		auto fullpath = std::filesystem::path(path).lexically_normal().string();
 
-	void save() {
-		std::string fullpath = file_path.length() ? (file_path + "/") : "";
-		fullpath += file_name;
 		if (!fullpath.ends_with(".yml")) {
 			fullpath.append(".yml");
 		}
 
-		std::string patchname = file_name;
-		strip_yml(patchname);
+		auto patchname = std::filesystem::path(fullpath).filename().string();
+		if (patchname.ends_with(".yml")) {
+			patchname = patchname.substr(0, patchname.length() - 4);
+		}
 
 		if (action == Action::Save) {
 			patches.get_view_patch()->patch_name = patchname;
 			patches.rename_view_patch_file(fullpath, file_vol);
 			patch_playloader.request_save_patch();
-			auto &patchname = patches.get_view_patch()->patch_name;
-			patchname.copy(file_name);
 
 			saved = true;
 			hide();
@@ -136,10 +124,6 @@ private:
 	PatchPlayLoader &patch_playloader;
 	NotificationQueue &notify_queue;
 	PageList &page_list;
-
-	Volume file_vol{};
-	std::string file_path;
-	std::string file_name;
 
 	bool saved = false;
 	bool is_renaming = false;

@@ -18,6 +18,25 @@ std::vector<std::string> parse_extensions(std::string_view str, std::string cons
 std::pair<std::string_view, Volume> split_volume(const char *filename);
 std::pair<std::string_view, Volume> split_volume(std::string_view filename);
 
+inline std::string_view volume_string(Volume vol) {
+	if (vol == Volume::USB)
+		return "usb:/";
+	else if (vol == Volume::SDCard)
+		return "sdc:/";
+	else if (vol == Volume::NorFlash)
+		return "nor:/";
+	else if (vol == Volume::RamDisk)
+		return "ram:/";
+	else
+		return "";
+}
+
+inline std::string make_full_path(Volume vol, std::string_view path, std::string_view filename = "") {
+	if (path.starts_with("/"))
+		path = path.substr(1);
+	return std::string(volume_string(vol)) + std::string(path) + std::string(filename);
+}
+
 static inline void
 get_dir_entries(auto &drive, std::string_view path, std::string_view filter_exts, DirTree<FileEntry> *dir_tree) {
 
