@@ -20,6 +20,7 @@ add_executable(
   main_m4.elf
   ${M4DIR}/controls.cc
   ${M4DIR}/main_m4.cc
+  ${M4DIR}/write.cc
   ${M4DIR}/system_stm32mp1xx.c
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_intercom/shared_memory.cc

@@ -134,15 +134,55 @@ struct ModuleFSMessageHandler {
 					return true;
 				},
 
-				//TODO:
-				//Write
-				//Sync
-				//Trunc
-				//Puts
-				//Unlink
-				//Rename
-				//UTime
-				//Expand
+				[](IntercoreModuleFS::Write &msg) {
+					UINT bytes_written = 0;
+					msg.res = f_write(&msg.fil, msg.buffer.data(), msg.buffer.size(), &bytes_written);
+					msg.bytes_written = bytes_written;
+					pr_trace("M4: f_write(%p, %p, %zu, -> %u) -> %d\n",
+							 &msg.fil,
+							 msg.buffer.data(),
+							 msg.buffer.size(),
+							 bytes_written,
+							 msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::Sync &msg) {
+					msg.res = f_sync(&msg.fil);
+					pr_trace("M4: f_sync(%p) -> %d\n", &msg.fil, msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::Trunc &msg) {
+					msg.res = f_truncate(&msg.fil);
+					pr_trace("M4: f_truncate(%p) -> %d\n", &msg.fil, msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::Puts &msg) {
+					msg.bytes_written = f_puts(msg.buffer.data(), &msg.fil);
+					pr_trace("M4: f_puts(%p) -> %d\n", &msg.fil, msg.bytes_written);
+					return true;
+				},
+
+				[](IntercoreModuleFS::Unlink &msg) {
+					msg.res = f_unlink(msg.path.data());
+					pr_trace("M4: f_unlink(%p) -> %d\n", msg.path.data(), msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::Rename &msg) {
+					msg.res = f_rename(msg.old_path.data(), msg.new_path.data());
+					pr_trace("M4: f_rename(%s, %s) -> %d\n", msg.old_path.data(), msg.new_path.data(), msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::Utime &msg) {
+					msg.res = f_utime(msg.path.data(), &msg.info);
+					pr_trace(
+						"M4: f_utime(%s, %p [tm:%x]) -> %d\n", msg.path.data(), &msg.info, msg.info.ftime, msg.res);
+					return true;
+				},
 
 			},
 			message);

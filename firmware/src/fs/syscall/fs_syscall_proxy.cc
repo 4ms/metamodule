@@ -43,7 +43,7 @@ uint64_t FsSyscallProxy::seek(FIL *fil, int offset, int whence) {
 									   CurrentPos,
 	};
 
-	fs_trace("A7: seek %p + %d (%s)\n", fil, offset, whence == SEEK_CUR ? "cur" : whence == SEEK_END ? "end" : "set");
+	pr_dbg("A7: seek %p + %d (%s)\n", fil, offset, whence == SEEK_CUR ? "cur" : whence == SEEK_END ? "end" : "set");
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Seek>(msg, 3000)) {
 		if (response->res == FR_OK) {
@@ -94,7 +94,7 @@ int FsSyscallProxy::close(FIL *fil) {
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Close>(msg, 3000)) {
 		*fil = response->fil; //copy FIL back
-		return response->res;
+		return response->res == FR_OK;
 	}
 
 	pr_err("Failed to send close request\n");
@@ -146,7 +146,7 @@ bool FsSyscallProxy::closedir(DIR *dir) {
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::CloseDir>(msg, 3000)) {
 		*dir = response->dir; //copy DIR back
-		return response->res;
+		return response->res == FR_OK;
 	}
 
 	pr_err("Failed to send closedir request\n");
@@ -169,6 +169,138 @@ bool FsSyscallProxy::readdir(DIR *dir, FILINFO *info) {
 	}
 
 	pr_err("Failed to send ReadDir request\n");
+	return false;
+}
+
+std::optional<size_t> FsSyscallProxy::write(FIL *fil, std::span<const char> buffer) {
+
+	auto bytes_remaining = buffer.size();
+	auto chunk_start = buffer.begin();
+
+	pr_dbg("A7: write %zu bytes starting with %p, max %zu\n", bytes_remaining, chunk_start, impl->file_buffer().size());
+
+	while (bytes_remaining > 0) {
+		auto bytes_to_write = std::min(bytes_remaining, impl->file_buffer().size());
+
+		// Copy given buffer -> impl internal buffer and advance chunk
+		auto chunk_end = std::next(chunk_start, bytes_to_write);
+		std::copy(chunk_start, chunk_end, impl->file_buffer().begin());
+
+		auto msg = IntercoreModuleFS::Write{
+			.fil = *fil,
+			.buffer = impl->file_buffer().subspan(0, bytes_to_write),
+		};
+
+		pr_dbg("A7: write %p from {%p - %p [+%zu]}\n", fil, chunk_start, chunk_end, bytes_to_write);
+		chunk_start = chunk_end;
+
+		if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Write>(msg, 8000)) {
+			*fil = response->fil;
+
+			if (response->bytes_written < bytes_to_write) {
+				pr_err("Failed to write, only %zu bytes written. Disk is full?\n", response->bytes_written);
+				return {};
+			} else if (response->bytes_written == bytes_to_write) {
+				bytes_remaining -= bytes_to_write;
+			} else {
+				pr_err("Internal error: wrote more bytes than requested: %zu\n", response->bytes_written);
+				return {};
+			}
+		} else {
+			pr_err("Failed to send write request\n");
+			return {};
+		}
+	}
+
+	return buffer.size();
+}
+
+bool FsSyscallProxy::sync(FIL *fil) {
+	auto msg = IntercoreModuleFS::Sync{
+		.fil = *fil,
+	};
+
+	fs_trace("A7: sync %p\n", fil);
+
+	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Sync>(msg, 8000)) {
+		*fil = response->fil;
+		return (response->res == FR_OK);
+	}
+
+	pr_err("Failed to send sync request\n");
+	return false;
+}
+
+bool FsSyscallProxy::mkdir(std::string_view path) {
+	if (path.length() == 0)
+		return false;
+
+	auto msg = IntercoreModuleFS::MkDir{
+		.path = path,
+	};
+
+	fs_trace("A7: mkdir %.*s\n", path.data(), path.size());
+
+	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::MkDir>(msg, 8000)) {
+		return response->res == FR_OK;
+	}
+
+	pr_err("Failed to send mkdir request\n");
+	return false;
+}
+
+bool FsSyscallProxy::unlink(std::string_view path) {
+	if (path.length() == 0)
+		return false;
+
+	auto msg = IntercoreModuleFS::Unlink{
+		.path = path,
+	};
+
+	fs_trace("A7: unlink %.*s\n", path.data(), path.size());
+
+	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Unlink>(msg, 2000)) {
+		return response->res == FR_OK;
+	}
+
+	pr_err("Failed to send unlink request\n");
+	return false;
+}
+
+// TODO: implement these and provide a public API
+
+bool FsSyscallProxy::rename(std::string_view old_path, std::string_view new_path) {
+	pr_err("FsSyscallProxy::rename not implemented\n");
+	return false;
+}
+
+bool FsSyscallProxy::findfirst(DIR *dir, FILINFO *info, std::string_view path, std::string_view pattern) {
+	pr_err("FsSyscallProxy::findfirst not implemented\n");
+	return false;
+}
+
+bool FsSyscallProxy::findnext(DIR *dir, FILINFO *info) {
+	pr_err("FsSyscallProxy::findnext not implemented\n");
+	return false;
+}
+
+bool FsSyscallProxy::trunc(FIL *fil) {
+	pr_err("FsSyscallProxy::trunc not implemented\n");
+	return false;
+}
+
+int FsSyscallProxy::gets(FIL *fil, std::span<char> data) {
+	pr_err("FsSyscallProxy::gets not implemented\n");
+	return -1;
+}
+
+int FsSyscallProxy::puts(FIL *fil, std::string_view data) {
+	pr_err("FsSyscallProxy::puts not implemented\n");
+	return -1;
+}
+
+bool FsSyscallProxy::utime(std::string_view path, uint32_t timestamp) {
+	pr_err("FsSyscallProxy::utime not implemented\n");
 	return false;
 }
 

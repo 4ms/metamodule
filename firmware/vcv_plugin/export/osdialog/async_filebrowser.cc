@@ -1,6 +1,7 @@
 #include "async_filebrowser.hh"
 #include "gui/pages/file_browser/file_browser_adaptor.hh"
 #include <cstdio>
+#include <cstring>
 #include <osdialog.h>
 
 namespace MetaModule
@@ -17,6 +18,26 @@ void register_file_browser_vcv(FileBrowserDialog &file_browser) {
 
 } // namespace MetaModule
 
+void async_open_file(std::string_view initial_path,
+					 std::string_view filter_extension_list,
+					 std::string_view title,
+					 std::function<void(char *path)> &&action) {
+	using namespace MetaModule;
+	show_file_browser(browser, filter_extension_list.data(), initial_path.data(), title.data(), action);
+}
+
+void async_open_dir(std::string_view initial_path,
+					std::string_view filter_extension_list,
+					std::string_view title,
+					std::function<void(char *path)> &&action) {
+}
+
+void async_save_file(std::string_view initial_path,
+					 std::string_view filename,
+					 std::string_view title,
+					 std::function<void(char *path)> &&action) {
+}
+
 void async_osdialog_file(osdialog_file_action action,
 						 const char *path,
 						 const char *filename,
@@ -29,7 +50,13 @@ void async_osdialog_file(osdialog_file_action action,
 		return;
 
 	if (action == OSDIALOG_SAVE) {
-		printf("Save file dialog box -- not supported\n");
+		std::string p = (!path || path[0] == '\0') ? "Untitled" : path;
+		std::string fake_path = "usb:/" + p;
+
+		auto dup_str = strndup(fake_path.data(), fake_path.length());
+		printf("Skipping file browser and saving to %s\n", dup_str);
+		action_function(dup_str);
+		// show_file_browser(browser, "", filename, "Save File:", action_function);
 
 	} else if (action == OSDIALOG_OPEN) {
 		auto filter_string = stringify_osdialog_filters(filters);
