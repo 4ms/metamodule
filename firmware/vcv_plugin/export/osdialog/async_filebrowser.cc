@@ -13,8 +13,9 @@ FileBrowserDialog *browser = nullptr;
 FileSaveDialog *save_dialog = nullptr;
 } // namespace
 
-void register_file_browser_vcv(FileBrowserDialog &file_browser) {
+void register_file_browser_vcv(FileBrowserDialog &file_browser, FileSaveDialog &file_save_dialog) {
 	browser = &file_browser;
+	save_dialog = &file_save_dialog;
 }
 
 } // namespace MetaModule
@@ -49,11 +50,6 @@ void async_osdialog_file(osdialog_file_action action,
 		return;
 
 	if (action == OSDIALOG_SAVE) {
-		// std::string p = (!path || path[0] == '\0') ? "Untitled" : path;
-		// std::string fake_path = "usb:/" + p;
-
-		// auto dup_str = strndup(fake_path.data(), fake_path.length());
-		// printf("Skipping file browser and saving to %s\n", dup_str);
 
 		if (!path)
 			path = "";

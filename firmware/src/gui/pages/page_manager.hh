@@ -21,7 +21,7 @@
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"
 #include "gui/pages/system_menu.hh"
-#include "vcv_plugin/export/osdialog/osdialog-mm.hh"
+#include "vcv_plugin/internal/osdialog-mm.hh"
 
 namespace MetaModule
 {
@@ -49,6 +49,7 @@ class PageManager {
 
 	PatchSelectorSubdirPanel subdir_panel;
 	FileBrowserDialog file_browser;
+	FileSaveDialog file_save_dialog{info.patch_storage, subdir_panel};
 
 public:
 	PageBase *cur_page = &page_mainmenu;
@@ -83,7 +84,7 @@ public:
 		, file_browser{patch_storage, notify_queue} {
 
 		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
-		register_file_browser_vcv(file_browser);
+		register_file_browser_vcv(file_browser, file_save_dialog);
 	}
 
 	void init() {
