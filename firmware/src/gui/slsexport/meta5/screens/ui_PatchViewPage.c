@@ -1510,7 +1510,7 @@ ui_DescPanelFileNameTitle = lv_label_create(ui_DescPanelFilenameCont);
 lv_obj_set_width( ui_DescPanelFileNameTitle, 78);
 lv_obj_set_height( ui_DescPanelFileNameTitle, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_DescPanelFileNameTitle, LV_ALIGN_CENTER );
-lv_label_set_text(ui_DescPanelFileNameTitle,"File name:");
+lv_label_set_text(ui_DescPanelFileNameTitle,"Save file as:");
 lv_obj_set_style_text_color(ui_DescPanelFileNameTitle, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_DescPanelFileNameTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -2000,7 +2000,7 @@ lv_obj_set_style_text_font(ui_DescriptionEditCancelLabel, &ui_font_MuseoSansRoun
 ui_SaveDialogCont = lv_obj_create(ui_PatchViewPage);
 lv_obj_remove_style_all(ui_SaveDialogCont);
 lv_obj_set_width( ui_SaveDialogCont, 316);
-lv_obj_set_height( ui_SaveDialogCont, 215);
+lv_obj_set_height( ui_SaveDialogCont, 240);
 lv_obj_set_align( ui_SaveDialogCont, LV_ALIGN_BOTTOM_LEFT );
 lv_obj_set_flex_flow(ui_SaveDialogCont,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_SaveDialogCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -2033,7 +2033,7 @@ lv_obj_set_style_pad_column(ui_SaveDialogLeftCont, 0, LV_PART_MAIN| LV_STATE_DEF
 
 ui_SaveDialogRightCont = lv_obj_create(ui_SaveDialogCont);
 lv_obj_remove_style_all(ui_SaveDialogRightCont);
-lv_obj_set_height( ui_SaveDialogRightCont, 215);
+lv_obj_set_height( ui_SaveDialogRightCont, 240);
 lv_obj_set_flex_grow( ui_SaveDialogRightCont, 2);
 lv_obj_set_align( ui_SaveDialogRightCont, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_SaveDialogRightCont,LV_FLEX_FLOW_COLUMN);
@@ -2054,7 +2054,7 @@ ui_SaveDialogFileNameLabel = lv_label_create(ui_SaveDialogRightCont);
 lv_obj_set_width( ui_SaveDialogFileNameLabel, lv_pct(100));
 lv_obj_set_height( ui_SaveDialogFileNameLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SaveDialogFileNameLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SaveDialogFileNameLabel,"File Name:");
+lv_label_set_text(ui_SaveDialogFileNameLabel,"Save file as:");
 lv_obj_set_style_text_color(ui_SaveDialogFileNameLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_SaveDialogFileNameLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_SaveDialogFileNameLabel, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -2080,7 +2080,7 @@ lv_obj_set_style_pad_row(ui_SaveDialogFilenameCont, 0, LV_PART_MAIN| LV_STATE_DE
 lv_obj_set_style_pad_column(ui_SaveDialogFilenameCont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SaveDialogFilenameDotyml = lv_label_create(ui_SaveDialogFilenameCont);
-lv_obj_set_width( ui_SaveDialogFilenameDotyml, 30);
+lv_obj_set_width( ui_SaveDialogFilenameDotyml, LV_SIZE_CONTENT);
 lv_obj_set_height( ui_SaveDialogFilenameDotyml, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SaveDialogFilenameDotyml, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SaveDialogFilenameDotyml,".yml");

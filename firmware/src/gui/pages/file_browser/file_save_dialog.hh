@@ -147,6 +147,8 @@ private:
 			file_ext = ext;
 			strip_ext();
 
+			lv_label_set_text(ui_SaveDialogFilenameDotyml, ext.data());
+
 			update_dir_label();
 
 			lv_show(ui_SaveDialogCont);

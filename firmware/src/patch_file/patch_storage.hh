@@ -221,6 +221,10 @@ public:
 				if (usbdrive_.is_mounted()) {
 					dir_tree->dirs.push_back("USB:");
 				}
+
+				// Hide Internal. TODO: allow an option to show it?
+				// dir_tree->dirs.push_back("Internal:");
+
 				result.message_type = DirEntriesSuccess;
 
 			} else if (message.vol_id == Volume::USB) {
@@ -234,6 +238,10 @@ public:
 					get_dir_entries(sdcard_, path, exts, dir_tree);
 					result.message_type = DirEntriesSuccess;
 				}
+
+			} else if (message.vol_id == Volume::NorFlash) {
+				get_dir_entries(norflash_, path, exts, dir_tree);
+				result.message_type = DirEntriesSuccess;
 			}
 
 			return result;

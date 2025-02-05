@@ -72,7 +72,6 @@ struct FileBrowserDialog {
 				show_path += "/";
 			}
 
-			pr_dbg("Showing browser. start_dir = %s => %s (vol %d)\n", start_dir.data(), show_path.c_str(), show_vol);
 		} else {
 			if (show_path == "") {
 				show_vol = Volume::MaxVolumes;
@@ -81,10 +80,7 @@ struct FileBrowserDialog {
 			else if (!show_path.ends_with("/"))
 			{
 				show_path = std::filesystem::path(show_path).parent_path().string() + "/";
-				pr_dbg("Browser: Path did not end in /, using parent: %s\n", show_path.c_str());
 			}
-
-			pr_dbg("Showing browser. No path specified, using %s (vol %d)\n", show_path.c_str(), show_vol);
 		}
 
 		lv_obj_set_parent(ui_FileBrowserCont, lv_layer_top());
@@ -220,6 +216,8 @@ private:
 			return "usb:/";
 		else if (vol == Volume::SDCard)
 			return "sdc:/";
+		else if (vol == Volume::NorFlash)
+			return "nor:/";
 		else
 			return "Disks:";
 	}
@@ -230,6 +228,9 @@ private:
 
 		if (str.starts_with("sdc:") || str.starts_with("SD Card:"))
 			return Volume::SDCard;
+
+		if (str.starts_with("nor:") || str.starts_with("Internal:"))
+			return Volume::NorFlash;
 
 		return Volume::MaxVolumes;
 	}
