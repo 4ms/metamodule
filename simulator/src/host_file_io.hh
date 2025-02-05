@@ -129,7 +129,7 @@ struct HostFileIO {
 	uint64_t get_file_size(std::string_view filename) {
 		auto filepath = normalize_path(filename);
 
-		std::cout << "HostFileIO: get file size " << filepath << "\n";
+		// std::cout << "HostFileIO: get file size " << filepath << "\n";
 
 		std::ifstream ifs(filepath, std::ios::in);
 		uint64_t sz = 0;
@@ -145,7 +145,7 @@ struct HostFileIO {
 	uint32_t get_file_timestamp(std::string_view filename) {
 		auto filepath = normalize_path(filename);
 
-		std::cout << "HostFileIO: get file timestamp " << filepath << "\n";
+		// std::cout << "HostFileIO: get file timestamp " << filepath << "\n";
 
 		return convert_timestamp(filepath);
 	}
