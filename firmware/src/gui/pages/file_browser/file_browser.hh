@@ -5,19 +5,12 @@
 #include "gui/slsexport/filebrowser/ui.h"
 #include "gui/styles.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "static_buffers.hh"
 #include <filesystem>
 #include <functional>
 
 namespace MetaModule
 {
-
-// TODO: try aligned_alloc with clean/invalidate cache  (see calibration_routine)
-// If not, then put this in static_buffers
-#if !defined(SIMULATOR) && !defined(TEST_PROJECT)
-__attribute__((section(".ddma")))
-#endif
-static DirTree<FileEntry>
-	dir_tree;
 
 struct FileBrowserDialog {
 	FileBrowserDialog(FileStorageProxy &file_storage, NotificationQueue &notify_queue)
@@ -120,7 +113,7 @@ struct FileBrowserDialog {
 			} break;
 
 			case RefreshState::TryingToRequest: {
-				if (file_storage.request_dir_entries(&dir_tree, show_vol, show_path, exts)) {
+				if (file_storage.request_dir_entries(&StaticBuffers::dir_tree, show_vol, show_path, exts)) {
 					refresh_state = RefreshState::Requested;
 					// show_spinner();
 				}
@@ -177,13 +170,13 @@ private:
 			}
 		}
 
-		for (auto const &subdir : dir_tree.dirs) {
+		for (auto const &subdir : StaticBuffers::dir_tree.dirs) {
 			roller_text += Gui::yellow_text(subdir.name);
 			roller_text += "/\n"; //dirs end in a slash
 			num_items++;
 		}
 
-		for (auto const &file : dir_tree.files) {
+		for (auto const &file : StaticBuffers::dir_tree.files) {
 			roller_text += file.filename;
 			roller_text += "\n";
 			num_items++;
