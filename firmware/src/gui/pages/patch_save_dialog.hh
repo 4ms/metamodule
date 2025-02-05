@@ -28,16 +28,6 @@ struct PatchSaveDialog {
 		this->action = action;
 	}
 
-	// void update() {
-	// 	if (is_renaming) {
-	// 		if (patch_playloader.is_renaming_idle()) {
-	// 			saved = true;
-	// 			is_renaming = false;
-	// 			hide();
-	// 		}
-	// 	}
-	// }
-
 	void show(lv_group_t *parent_group) {
 		auto vol = patches.get_view_patch_vol();
 		if (vol == Volume::RamDisk)

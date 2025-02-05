@@ -330,7 +330,6 @@ struct PatchViewPage : PageBase {
 		if (file_menu.did_filesystem_change()) {
 			displayed_patch_loc_hash = patches.get_view_patch_loc_hash();
 			args.patch_loc_hash = patches.get_view_patch_loc_hash();
-			pr_dbg("patch view sees fs changed: %s\n", patches.get_view_patch_filename().data());
 			lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
 		}
 
