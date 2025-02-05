@@ -28,9 +28,9 @@ struct FileSaveDialog {
 		lv_hide(ui_SaveDialogCont);
 	}
 
-	void prepare_focus(lv_group_t *parent_group) {
-		base_group = parent_group;
-	}
+	// void prepare_focus(lv_group_t *parent_group) {
+	// 	base_group = parent_group;
+	// }
 
 	void update() {
 		if (mode == Mode::EditDir) {
@@ -122,6 +122,7 @@ struct FileSaveDialog {
 			lv_hide(ui_SaveDialogLeftCont);
 			lv_hide(ui_Keyboard);
 
+			base_group = lv_indev_get_act()->group;
 			lv_group_activate(group);
 			lv_group_focus_obj(ui_SaveDialogFilename);
 			lv_group_set_editing(group, false);

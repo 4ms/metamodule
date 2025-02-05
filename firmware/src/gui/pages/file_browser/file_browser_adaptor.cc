@@ -32,8 +32,10 @@ void show_file_save_dialog(FileSaveDialog *save_dialog,
 		return;
 
 	auto full_path = std::string(initial_path);
+
 	if (!full_path.ends_with("/"))
 		full_path += "/";
+
 	full_path += std::string(file_name);
 
 	save_dialog->show(full_path, extension, action);

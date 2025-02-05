@@ -28,7 +28,7 @@ struct SaveDialog {
 	enum class Action { None, Save, Duplicate, Rename };
 
 	void prepare_focus(lv_group_t *parent_group, Action action) {
-		dialog.prepare_focus(parent_group);
+		// dialog.prepare_focus(parent_group);
 		this->action = action;
 	}
 
