@@ -27,11 +27,8 @@ struct FileSaveDialog {
 		lv_hide(ui_SaveDialogCont);
 	}
 
-	enum class Action { None, Save, Duplicate, Rename };
-
-	void prepare_focus(lv_group_t *parent_group, Action action) {
+	void prepare_focus(lv_group_t *parent_group) {
 		base_group = parent_group;
-		method = action;
 	}
 
 	void update() {
@@ -76,14 +73,6 @@ struct FileSaveDialog {
 					break;
 			}
 		}
-
-		// if (is_renaming) {
-		// 	if (patch_playloader.is_renaming_idle()) {
-		// 		saved = true;
-		// 		is_renaming = false;
-		// 		hide();
-		// 	}
-		// }
 	}
 
 	void show(Volume vol, std::string_view fullpath, std::string_view ext) {
@@ -120,7 +109,7 @@ struct FileSaveDialog {
 			lv_group_set_editing(group, false);
 
 			mode = Mode::Idle;
-			is_renaming = false;
+			do_save = false;
 		}
 	}
 
@@ -138,6 +127,29 @@ struct FileSaveDialog {
 		}
 	}
 
+	bool is_visible() {
+		return mode != Mode::Hidden;
+	}
+
+	bool should_save() {
+		auto tmp = do_save;
+		do_save = false;
+		return tmp;
+	}
+
+	std::string get_save_filename() {
+		return file_name;
+	}
+
+	std::string get_save_path() {
+		return file_path;
+	}
+
+	Volume get_save_vol() {
+		return file_vol;
+	}
+
+private:
 	void show_keyboard() {
 		mode = Mode::EditName;
 
@@ -162,7 +174,7 @@ struct FileSaveDialog {
 	void hide_keyboard() {
 		mode = Mode::Idle;
 		file_name = lv_textarea_get_text(ui_SaveDialogFilename);
-		strip_yml(file_name);
+		strip_ext();
 		lv_textarea_set_text(ui_SaveDialogFilename, file_name.c_str());
 
 		lv_obj_clear_state(ui_SaveDialogFilename, LV_STATE_USER_1);
@@ -199,10 +211,6 @@ struct FileSaveDialog {
 		lv_group_activate(group);
 	}
 
-	bool is_visible() {
-		return mode != Mode::Hidden;
-	}
-
 	void update_dir_label() {
 		strip_ext();
 		lv_textarea_set_text(ui_SaveDialogFilename, file_name.c_str());
@@ -212,13 +220,6 @@ struct FileSaveDialog {
 		lv_label_set_text(ui_SaveDialogDir, displayed_path.c_str());
 	}
 
-	bool did_save() {
-		bool t = saved;
-		saved = false;
-		return t;
-	}
-
-private:
 	void strip_ext() {
 		if (file_name.ends_with(file_ext)) {
 			file_name = file_name.substr(0, file_name.length() - file_ext.length());
@@ -258,6 +259,7 @@ private:
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<FileSaveDialog *>(event->user_data);
+		page->do_save = false;
 		page->hide();
 	}
 
@@ -291,11 +293,6 @@ private:
 	} refresh_state{RefreshState::TryingToRequestPatchList};
 
 	uint32_t last_refresh_check_tm = 0;
-
-	bool saved = false;
-	bool is_renaming = false;
-
-	Action method{};
 
 	bool do_save = false;
 };
