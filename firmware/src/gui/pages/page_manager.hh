@@ -37,19 +37,19 @@ class PageManager {
 	ButtonLight button_light;
 	Screensaver &screensaver;
 
+	PatchSelectorSubdirPanel subdir_panel;
+	FileBrowserDialog file_browser;
+	FileSaveDialog file_save_dialog{info.patch_storage, subdir_panel};
+
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info, subdir_panel};
-	PatchViewPage page_patchview{info, subdir_panel};
+	PatchViewPage page_patchview{info, file_save_dialog};
 	ModuleViewPage page_module{info};
 	KnobSetViewPage page_knobsetview{info};
 	KnobMapPage page_knobmap{info};
 	SystemMenuPage page_systemmenu{info};
 	ModuleListPage page_modulelist{info};
 	JackMapViewPage page_jackmap{info};
-
-	PatchSelectorSubdirPanel subdir_panel;
-	FileBrowserDialog file_browser;
-	FileSaveDialog file_save_dialog{info.patch_storage, subdir_panel};
 
 public:
 	PageBase *cur_page = &page_mainmenu;
@@ -114,6 +114,15 @@ public:
 				file_browser.update();
 
 				gui_state.file_browser_visible.register_state(true);
+
+			} else if (file_save_dialog.is_visible()) {
+				if (gui_state.back_button.is_just_released())
+					file_save_dialog.back_event();
+
+				file_save_dialog.update();
+
+				gui_state.file_browser_visible.register_state(true);
+
 			} else {
 				gui_state.file_browser_visible.register_state(false);
 

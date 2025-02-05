@@ -60,6 +60,9 @@ void async_osdialog_file(osdialog_file_action action,
 		if (filters && filters->patterns) {
 			extension = "." + std::string(filters->patterns->pattern);
 		}
+
+		printf("async_osdialog_file(OSDIALOG_SAVE, %s, %s, %s)\n", path, filename, extension.c_str());
+
 		show_file_save_dialog(MetaModule::save_dialog, std::string_view(path), filename, extension, action_function);
 
 		// action_function(dup_str);

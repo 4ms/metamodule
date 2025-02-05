@@ -25,14 +25,14 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
-	PatchViewPage(PatchContext info, PatchSelectorSubdirPanel &subdir_panel)
+	PatchViewPage(PatchContext info, FileSaveDialog &file_save_dialog)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
-		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list, gui_state}
+		, file_menu{patch_playloader, patch_storage, patches, file_save_dialog, notify_queue, page_list, gui_state}
 		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
@@ -330,6 +330,8 @@ struct PatchViewPage : PageBase {
 		if (file_menu.did_filesystem_change()) {
 			displayed_patch_loc_hash = patches.get_view_patch_loc_hash();
 			args.patch_loc_hash = patches.get_view_patch_loc_hash();
+			pr_dbg("patch view sees fs changed: %s\n", patches.get_view_patch_filename().data());
+			lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
 		}
 
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
@@ -350,12 +352,7 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
-		if (file_menu.is_visible()) {
-			file_menu.update();
-			if (!file_menu.is_visible()) {
-				lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
-			}
-		}
+		file_menu.update();
 
 		// Don't poll for patch changes while file menu is open to prevent races on the filesystem.
 		if (!file_menu.is_visible())

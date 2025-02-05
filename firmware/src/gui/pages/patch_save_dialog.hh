@@ -1,24 +1,21 @@
 #pragma once
-#include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
-#include "gui/pages/base.hh"
 #include "gui/pages/file_browser/file_save_dialog.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/patch_selector_sidebar.hh"
 #include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
 {
 
-struct SaveDialog {
+struct PatchSaveDialog {
 
-	SaveDialog(FileStorageProxy &patch_storage,
-			   OpenPatchManager &patches,
-			   PatchPlayLoader &play_loader,
-			   PatchSelectorSubdirPanel &subdir_panel,
-			   NotificationQueue &notify_queue,
-			   PageList &page_list)
-		: dialog{patch_storage, subdir_panel}
+	PatchSaveDialog(FileStorageProxy &patch_storage,
+					OpenPatchManager &patches,
+					PatchPlayLoader &play_loader,
+					FileSaveDialog &file_save_dialog,
+					NotificationQueue &notify_queue,
+					PageList &page_list)
+		: dialog{file_save_dialog}
 		, patches{patches}
 		, patch_playloader{play_loader}
 		, notify_queue{notify_queue}
@@ -27,31 +24,29 @@ struct SaveDialog {
 
 	enum class Action { None, Save, Duplicate, Rename };
 
-	void prepare_focus(lv_group_t *parent_group, Action action) {
-		// dialog.prepare_focus(parent_group);
+	void prepare_focus(Action action) {
 		this->action = action;
 	}
 
-	void update() {
-		dialog.update();
+	// void update() {
+	// 	if (is_renaming) {
+	// 		if (patch_playloader.is_renaming_idle()) {
+	// 			saved = true;
+	// 			is_renaming = false;
+	// 			hide();
+	// 		}
+	// 	}
+	// }
 
-		if (is_renaming) {
-			if (patch_playloader.is_renaming_idle()) {
-				saved = true;
-				is_renaming = false;
-				hide();
-			}
-		}
-	}
-
-	void show() {
+	void show(lv_group_t *parent_group) {
 		auto vol = patches.get_view_patch_vol();
 		if (vol == Volume::RamDisk)
 			vol = Volume::NorFlash;
 
 		auto fullpath = patches.get_view_patch_filename();
 
-		dialog.show(vol, fullpath, ".yml", [this](Volume vol, std::string_view path) { save(vol, path); });
+		dialog.show(
+			vol, fullpath, ".yml", parent_group, [this](Volume vol, std::string_view path) { save(vol, path); });
 
 		is_renaming = false;
 	}
@@ -68,6 +63,17 @@ struct SaveDialog {
 		bool t = saved;
 		saved = false;
 		return t;
+	}
+
+	bool did_rename() {
+		bool t = is_renaming;
+		is_renaming = false;
+		return t;
+	}
+
+	void back_event() {
+		pr_err("Should not call PSD::back_event bec. PageManager handles it\n");
+		dialog.back_event();
 	}
 
 private:
@@ -97,6 +103,7 @@ private:
 				patches.get_view_patch()->patch_name = patchname;
 				patch_playloader.request_rename_view_patch({fullpath, file_vol});
 				is_renaming = true;
+				hide();
 			} else {
 				notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
 			}
@@ -119,7 +126,7 @@ private:
 		}
 	}
 
-	FileSaveDialog dialog;
+	FileSaveDialog &dialog;
 	OpenPatchManager &patches;
 	PatchPlayLoader &patch_playloader;
 	NotificationQueue &notify_queue;

@@ -26,11 +26,8 @@ struct FileSaveDialog {
 		lv_obj_add_event_cb(ui_SaveDialogSaveBut, save_cb, LV_EVENT_CLICKED, this);
 
 		lv_hide(ui_SaveDialogCont);
+		lv_obj_set_parent(ui_SaveDialogCont, lv_layer_top());
 	}
-
-	// void prepare_focus(lv_group_t *parent_group) {
-	// 	base_group = parent_group;
-	// }
 
 	void update() {
 		if (mode == Mode::EditDir) {
@@ -79,10 +76,12 @@ struct FileSaveDialog {
 	void show(Volume vol,
 			  std::string_view fullpath,
 			  std::string_view ext,
+			  lv_group_t *parent_group,
 			  std::function<void(Volume, std::string_view)> action) {
 		this->vcv_save_action = {};
 		this->save_action = action;
 		show(vol, fullpath, ext);
+		base_group = parent_group;
 	}
 
 	void show(std::string_view fullpath, std::string_view ext, std::function<void(char *)> action) {
@@ -92,7 +91,46 @@ struct FileSaveDialog {
 		show(vol, fullpath, ext);
 	}
 
+	void hide() {
+		if (mode == Mode::EditDir) {
+			hide_subdir_panel();
+		}
+
+		if (mode == Mode::EditName) {
+			hide_keyboard();
+		}
+
+		if (mode == Mode::Idle) {
+			lv_hide(ui_SaveDialogCont);
+			lv_group_activate(base_group);
+			pr_dbg("FSD:hide group reset to %p\n", base_group);
+		}
+		mode = Mode::Hidden;
+	}
+
+	bool is_visible() {
+		return mode != Mode::Hidden;
+	}
+
+	void back_event() {
+		if (mode == Mode::Idle) {
+			lv_hide(ui_SaveDialogCont);
+			lv_group_activate(base_group);
+			pr_dbg("FSD:back_event group reset to %p\n", base_group);
+			mode = Mode::Hidden;
+
+		} else if (mode == Mode::EditDir) {
+			hide_subdir_panel();
+
+		} else if (mode == Mode::EditName) {
+			hide_keyboard();
+		}
+	}
+
+private:
 	void show(Volume vol, std::string_view fullpath, std::string_view ext) {
+		pr_dbg("FileSaveDialog::show(%d, %s, %s, )\n", (int)vol, fullpath.data(), ext.data());
+
 		if (mode == Mode::Hidden) {
 
 			file_vol = vol;
@@ -123,34 +161,19 @@ struct FileSaveDialog {
 			lv_hide(ui_Keyboard);
 
 			base_group = lv_indev_get_act()->group;
+			pr_dbg("FSD:show group %p => %p\n", base_group, group);
 			lv_group_activate(group);
 			lv_group_focus_obj(ui_SaveDialogFilename);
 			lv_group_set_editing(group, false);
 
 			mode = Mode::Idle;
+		} else {
+			pr_err("Error: FileSaveDialog already visible, cannot show()\n");
 		}
 	}
 
-	void hide() {
-		if (mode == Mode::Idle) {
-			lv_hide(ui_SaveDialogCont);
-			lv_group_activate(base_group);
-			mode = Mode::Hidden;
-
-		} else if (mode == Mode::EditDir) {
-			hide_subdir_panel();
-
-		} else if (mode == Mode::EditName) {
-			hide_keyboard();
-		}
-	}
-
-	bool is_visible() {
-		return mode != Mode::Hidden;
-	}
-
-private:
 	void show_keyboard() {
+		pr_dbg("FSD: show_keyboard\n");
 		mode = Mode::EditName;
 
 		lv_obj_add_state(ui_SaveDialogFilename, LV_STATE_USER_1);
@@ -172,6 +195,7 @@ private:
 	}
 
 	void hide_keyboard() {
+		pr_dbg("FSD: hide_keyboard\n");
 		mode = Mode::Idle;
 		file_name = lv_textarea_get_text(ui_SaveDialogFilename);
 		strip_ext();
@@ -184,6 +208,7 @@ private:
 	}
 
 	void show_subdir_panel() {
+		pr_dbg("FSD: show_subdir_panel\n");
 		mode = Mode::EditDir;
 
 		lv_show(ui_SaveDialogLeftCont);
@@ -205,6 +230,7 @@ private:
 	}
 
 	void hide_subdir_panel() {
+		pr_dbg("FSD: hide_subdir_panel\n");
 		mode = Mode::Idle;
 
 		lv_hide(ui_SaveDialogLeftCont);
@@ -252,6 +278,7 @@ private:
 		auto page = static_cast<FileSaveDialog *>(event->user_data);
 
 		page->save();
+		page->hide();
 	}
 
 	void save() {
