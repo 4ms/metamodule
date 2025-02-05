@@ -43,7 +43,7 @@ uint64_t FsSyscallProxy::seek(FIL *fil, int offset, int whence) {
 									   CurrentPos,
 	};
 
-	pr_dbg("A7: seek %p + %d (%s)\n", fil, offset, whence == SEEK_CUR ? "cur" : whence == SEEK_END ? "end" : "set");
+	fs_trace("A7: seek %p + %d (%s)\n", fil, offset, whence == SEEK_CUR ? "cur" : whence == SEEK_END ? "end" : "set");
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Seek>(msg, 3000)) {
 		if (response->res == FR_OK) {
@@ -177,7 +177,8 @@ std::optional<size_t> FsSyscallProxy::write(FIL *fil, std::span<const char> buff
 	auto bytes_remaining = buffer.size();
 	auto chunk_start = buffer.begin();
 
-	pr_dbg("A7: write %zu bytes starting with %p, max %zu\n", bytes_remaining, chunk_start, impl->file_buffer().size());
+	fs_trace(
+		"A7: write %zu bytes starting with %p, max %zu\n", bytes_remaining, chunk_start, impl->file_buffer().size());
 
 	while (bytes_remaining > 0) {
 		auto bytes_to_write = std::min(bytes_remaining, impl->file_buffer().size());
@@ -191,7 +192,7 @@ std::optional<size_t> FsSyscallProxy::write(FIL *fil, std::span<const char> buff
 			.buffer = impl->file_buffer().subspan(0, bytes_to_write),
 		};
 
-		pr_dbg("A7: write %p from {%p - %p [+%zu]}\n", fil, chunk_start, chunk_end, bytes_to_write);
+		fs_trace("A7: write %p from {%p - %p [+%zu]}\n", fil, chunk_start, chunk_end, bytes_to_write);
 		chunk_start = chunk_end;
 
 		if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Write>(msg, 8000)) {
