@@ -4,6 +4,7 @@
 #include <cstring>
 #include <optional>
 #include <unistd.h>
+#include <vector>
 
 namespace MetaModule::FileDescManager
 {
