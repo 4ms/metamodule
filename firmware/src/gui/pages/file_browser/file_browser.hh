@@ -208,7 +208,8 @@ private:
 	}
 
 	void push_dir(std::string_view dir) {
-		show_path = std::filesystem::path(show_path) / dir;
+		auto t = std::filesystem::path(show_path) / std::filesystem::path(dir);
+		show_path = t.string();
 	}
 
 	std::string volstr(Volume vol) {
@@ -240,7 +241,7 @@ private:
 		std::string fullpath = volstr(show_vol) + show_path;
 
 		// Allocate some chars:
-		char *path = strndup(fullpath.data(), fullpath.size());
+		char *path = strdup(fullpath.data());
 		// Rack specifies that the caller will free() path in action():
 		if (action)
 			action(path);

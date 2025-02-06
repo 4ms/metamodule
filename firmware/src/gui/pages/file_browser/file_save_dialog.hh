@@ -288,7 +288,7 @@ private:
 			// Allocate a char*, because save_action will free() it.
 			// (this is a requirement of the Rack API)
 			auto path = make_full_path(file_vol, file_path, file_name);
-			char *str = strndup(path.data(), path.length());
+			char *str = strdup(path.data());
 			vcv_save_action(str);
 		}
 	}
