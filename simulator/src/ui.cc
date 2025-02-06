@@ -1,7 +1,7 @@
 #include "ui.hh"
 #include "dynload/autoload_plugins.hh"
-#include "fs_proxy.hh"
 #include "gui/notify/queue.hh"
+#include "stubs/fs/fs_proxy.hh"
 
 namespace MetaModule
 {
