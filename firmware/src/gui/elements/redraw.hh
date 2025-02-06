@@ -104,12 +104,12 @@ inline bool redraw_element(const MomentaryButton &element, const GuiElement &gui
 	auto state = StateConversion::convertState(element, val);
 	auto image_name = state == MomentaryButton::State_t::PRESSED ? element.pressed_image : element.image;
 
-	auto img = ComponentImages::get_comp_path(image_name);
-	if (!img.length())
+	if (!image_name.length() || image_name.length() >= 256)
 		return false;
 
-	auto cur_img_src = lv_img_get_src(gui_el.obj);
-	auto cur_img = std::string_view{static_cast<const char *>(cur_img_src)};
+	auto img = ComponentImages::get_comp_path(image_name);
+
+	auto cur_img = std::string_view{static_cast<const char *>(lv_img_get_src(gui_el.obj))};
 
 	if (img != cur_img) {
 		lv_img_set_src(gui_el.obj, img.c_str());

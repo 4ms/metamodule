@@ -27,12 +27,4 @@ __attribute__((used)) int *__errno() {
 	return &errno;
 }
 
-__attribute__((used)) int _fstat(int x, void *p) {
-	return 0;
-}
-
-__attribute__((used)) int _isatty(int x) {
-	return -1;
-}
-
 void *__dso_handle = (void *)&__dso_handle;

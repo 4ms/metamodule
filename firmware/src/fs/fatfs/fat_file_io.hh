@@ -208,6 +208,23 @@ public:
 		f_close(fil);
 	}
 
+	int seek(FIL *fil, int offset, int whenc) {
+		FRESULT t{FR_INT_ERR};
+		if (whenc == SEEK_SET) {
+			t = f_lseek(fil, offset);
+		} else if (whenc == SEEK_CUR) {
+			t = f_lseek(fil, f_tell(fil) + offset);
+		} else if (whenc == SEEK_END) {
+			t = f_lseek(fil, f_size(fil) + offset);
+		}
+
+		if (t != FR_OK) {
+			return -1;
+		}
+
+		return f_tell(fil);
+	}
+
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset = 0) {
 		FIL fil;
 		UINT bytes_read = 0;

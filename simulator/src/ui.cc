@@ -1,5 +1,6 @@
 #include "ui.hh"
 #include "dynload/autoload_plugins.hh"
+#include "fs_proxy.hh"
 #include "gui/notify/queue.hh"
 
 namespace MetaModule
@@ -28,6 +29,9 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 				   ramdisk}
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
+
+	register_volume_host_path(Volume::SDCard, sdcard_path);
+	register_volume_host_path(Volume::NorFlash, flash_path);
 
 	params.clear();
 	metaparams.clear();

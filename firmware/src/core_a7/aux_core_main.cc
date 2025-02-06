@@ -5,8 +5,8 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "dynload/plugin_manager.hh"
-#include "fs/filesystem.hh"
 #include "fs/norflash_layout.hh"
+#include "fs/syscall/filesystem.hh"
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
 
@@ -43,7 +43,7 @@ extern "C" void aux_core_main() {
 	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 	AssetFS asset_fs{AssetVolFlashOffset};
-	Filesystem::Init(ramdisk);
+	Filesystem::init(ramdisk);
 	auto &file_storage_proxy = *A7SharedMemoryS::ptrs.patch_storage;
 	PluginManager plugin_manager{file_storage_proxy, ramdisk};
 	Ui ui{*A7SharedMemoryS::ptrs.patch_playloader,

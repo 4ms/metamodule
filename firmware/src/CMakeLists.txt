@@ -104,7 +104,6 @@ add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 #
 add_executable(
   main.elf
-  ${FWDIR}/src/fs/filesystem.cc
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
@@ -134,6 +133,12 @@ add_executable(
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
+
+  #
+  ${FWDIR}/src/fs/syscall/syscalls.cc
+  ${FWDIR}/src/fs/syscall/fs_syscall_proxy.cc
+  ${FWDIR}/src/fs/syscall/filedesc_manager.cc
+  ${FWDIR}/src/fs/fatfs/fatfs_adaptor.cc
 
   #
   ${FWDIR}/src/dynload/dynloader.cc
@@ -214,6 +219,7 @@ target_include_directories(
           ${FWDIR}/src/console
           ${FWDIR}/src/params
           ${FWDIR}/src/vcv_hardware
+          ${FWDIR}/src/fs
           ${FWDIR}/src/core_a7
           ${FWDIR}/src/medium
           ${FWDIR}/lib/mdrivlib
