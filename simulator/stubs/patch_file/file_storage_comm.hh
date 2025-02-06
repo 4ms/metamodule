@@ -1,13 +1,12 @@
 #pragma once
 #include "../src/core_intercom/intercore_message.hh"
 #include "dynload/plugin_file_scan.hh"
-#include "fat_file_io.hh"
+#include "fs/fatfs/fat_file_io.hh"
 #include "fs/volumes.hh"
 #include "fw_update/update_path.hh"
 #include "host_file_io.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
-#include "patch_file/patch_list_helper.hh"
 #include "patch_file/patch_location.hh"
 #include <cstdint>
 #include <string_view>

@@ -118,6 +118,8 @@ else()
 		stubs/random.cpp
 		stubs/memory/heap.cc
 		stubs/async_thread.cc
+		stubs/drivers/time.cc
+		stubs/fs/fs_proxy.cc
 
 		${FWDIR}/src/gui/elements/element_name.cc
 		${FWDIR}/src/gui/slsexport/ui_local.cc

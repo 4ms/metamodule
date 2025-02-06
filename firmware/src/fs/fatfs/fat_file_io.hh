@@ -358,6 +358,24 @@ public:
 			   info.second);
 	}
 
+	bool opendir(std::string_view path, DIR *dir) {
+		if (!dir)
+			return false;
+
+		if (f_opendir(dir, _fatvol) != FR_OK) {
+			if (!mount_disk())
+				return false;
+			if (f_opendir(dir, _fatvol) != FR_OK)
+				return false;
+		}
+
+		return true;
+	}
+
+	bool closedir(DIR *dir) {
+		return f_closedir(dir) == FR_OK;
+	}
+
 	// Returns false if dir cannot be opened
 	bool foreach_file_with_ext(const std::string_view extension, auto action) {
 		DIR dj;
