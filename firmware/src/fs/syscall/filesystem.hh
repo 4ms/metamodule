@@ -1,11 +1,5 @@
 #pragma once
-#include "dirent.h"
-#include "fat_file_io.hh"
-#include "ff.h"
-#include "fs_syscall_proxy.hh"
 #include <string_view>
-#include <sys/stat.h>
-#include <unistd.h>
 
 struct DIR;
 struct dirent;
@@ -35,6 +29,7 @@ DIR *opendir(std::string_view fullpath);
 dirent *readdir(DIR *dir);
 void rewinddir(DIR *dir);
 int closedir(DIR *dir);
+
 }; // namespace Filesystem
 
 } // namespace MetaModule

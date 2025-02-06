@@ -165,22 +165,6 @@ private:
 			lv_group_set_editing(group, false);
 
 			mode = Mode::Idle;
-			is_renaming = false;
-		}
-	}
-
-	void hide() {
-		if (mode == Mode::Idle) {
-			lv_hide(ui_SaveDialogCont);
-			lv_group_activate(base_group);
-			lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
-			mode = Mode::Hidden;
-
-		} else if (mode == Mode::EditDir) {
-			hide_subdir_panel();
-
-		} else if (mode == Mode::EditName) {
-			hide_keyboard();
 		}
 	}
 
