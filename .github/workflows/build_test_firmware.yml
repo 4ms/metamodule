@@ -70,11 +70,11 @@ jobs:
         run: cd firmware && cmake --fresh --preset ${{ env.preset }} -G Ninja && make all
 
       - name: Set Release Version
-        if: startsWith(github.ref, 'refs/tags/firmware-v')
+        if: startsWith(github.ref, 'refs/tags/firmware-v') || startsWith(github.ref, 'refs/tags/firmware-debug-v')
         uses: FranzDiebold/github-env-vars-action@v2
 
       - name: Release
-        if: startsWith(github.ref, 'refs/tags/firmware-v')
+        if: startsWith(github.ref, 'refs/tags/firmware-v') || startsWith(github.ref, 'refs/tags/firmware-debug-v')
         uses: softprops/action-gh-release@v1
         with:
           name: "Firmware Version: ${{ env.CI_REF_NAME }}"
