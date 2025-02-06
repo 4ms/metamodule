@@ -23,7 +23,7 @@ void show_file_browser(FileBrowserDialog *browser,
 		auto host_path = SimulatorPatchStorage::convert_path_to_host(path);
 
 		// Need to allocate char* because action() is expecting to free() it
-		auto dup_data = strndup(host_path.data(), host_path.length());
+		auto dup_data = strdup(host_path.data());
 		if (action)
 			action(dup_data);
 	});
@@ -45,7 +45,7 @@ void show_file_save_dialog(FileSaveDialog *save_dialog,
 			auto host_path = SimulatorPatchStorage::convert_path_to_host(path);
 
 			// Need to allocate char* because action() is expecting to free() it
-			auto dup_data = strndup(host_path.data(), host_path.length());
+			auto dup_data = strdup(host_path.data());
 
 			if (action)
 				action(dup_data);
