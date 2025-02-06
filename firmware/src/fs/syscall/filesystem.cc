@@ -7,7 +7,7 @@
 #include "fs/helpers.hh"
 #include "fs_syscall_proxy.hh"
 #include "time_convert.hh"
-#include <Sys/fcntl.h>
+#include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
