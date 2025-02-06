@@ -92,8 +92,66 @@ struct MkDir {
 	FRESULT res{};
 };
 
-using Message =
-	std::variant<None, Open, Close, Read, GetS, Seek, OpenDir, CloseDir, ReadDir, Stat, FindFirst, FindNext, MkDir>;
+struct Write {
+	FIL fil{};
+	std::span<const char> buffer;
+	uint32_t bytes_written{};
+	FRESULT res{};
+};
+
+struct Sync {
+	FIL fil{};
+	FRESULT res{};
+};
+
+struct Trunc {
+	FIL fil{};
+	FRESULT res{};
+};
+
+struct Puts {
+	FIL fil{};
+	std::span<const char> buffer;
+	uint32_t bytes_written{};
+};
+
+struct Unlink {
+	StaticString<255> path;
+	FRESULT res{};
+};
+
+struct Rename {
+	StaticString<255> old_path;
+	StaticString<255> new_path;
+	FRESULT res{};
+};
+
+struct Utime {
+	StaticString<255> path;
+	FILINFO info{};
+	FRESULT res{};
+};
+
+using Message = std::variant<None,
+							 Open,
+							 Close,
+							 Read,
+							 GetS,
+							 Seek,
+							 OpenDir,
+							 CloseDir,
+							 ReadDir,
+							 Stat,
+							 FindFirst,
+							 FindNext,
+							 MkDir,
+							 Write,
+							 Sync,
+							 Trunc,
+							 Puts,
+							 Unlink,
+							 Rename,
+							 Utime>;
 
 static constexpr size_t MessageSize = sizeof(Message);
 //880B with DIR FIL FILINFO

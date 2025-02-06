@@ -2,11 +2,10 @@
 #include "conf/qspi_flash_conf.hh"
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/shared_memory.hh"
-#include "drivers/inter_core_comm.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
-#include "fs/fatfs/sdcard_ops.hh"
+#include "fs/helpers.hh"
 #include "fs/littlefs/norflash_lfs.hh"
 #include "fs/volumes.hh"
 #include "patch_file/patch_fileio.hh"
@@ -201,6 +200,48 @@ public:
 				result.timestamp = patchfile->timestamp;
 				result.length = patchfile->filesize;
 				result.message_type = FileInfoSuccess;
+			}
+
+			return result;
+		}
+
+		if (message.message_type == RequestDirEntries) {
+			IntercoreStorageMessage result{.message_type = DirEntriesFailed};
+
+			auto path = message.filename;
+			auto exts = message.dest_filename;
+			auto *dir_tree = message.dir_entries;
+			dir_tree->files.clear();
+			dir_tree->dirs.clear();
+
+			if (message.vol_id == Volume::MaxVolumes) {
+				if (sdcard_.is_mounted()) {
+					dir_tree->dirs.push_back("SD Card:");
+				}
+				if (usbdrive_.is_mounted()) {
+					dir_tree->dirs.push_back("USB:");
+				}
+
+				// Hide Internal. TODO: allow an option to show it?
+				// dir_tree->dirs.push_back("Internal:");
+
+				result.message_type = DirEntriesSuccess;
+
+			} else if (message.vol_id == Volume::USB) {
+				if (usbdrive_.is_mounted()) {
+					get_dir_entries(usbdrive_, path, exts, dir_tree);
+					result.message_type = DirEntriesSuccess;
+				}
+
+			} else if (message.vol_id == Volume::SDCard) {
+				if (sdcard_.is_mounted()) {
+					get_dir_entries(sdcard_, path, exts, dir_tree);
+					result.message_type = DirEntriesSuccess;
+				}
+
+			} else if (message.vol_id == Volume::NorFlash) {
+				get_dir_entries(norflash_, path, exts, dir_tree);
+				result.message_type = DirEntriesSuccess;
 			}
 
 			return result;

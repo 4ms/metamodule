@@ -4,7 +4,9 @@
 #include "gui/styles.hh"
 #include <app/ModuleWidget.hpp>
 #include <helpers.hpp>
+#include <ui/MenuEntry.hpp>
 #include <ui/MenuItem.hpp>
+#include <ui/MenuSeparator.hpp>
 
 namespace MetaModule
 {
@@ -18,7 +20,6 @@ struct RackModuleMenu : BasePluginModuleMenu {
 		std::vector<std::string> item_strings;
 
 		if (auto mw = module_widget.lock()) {
-
 			// Initialize the first time
 			if (!menu_owner) {
 				menu_owner = std::make_unique<rack::widget::Widget>();
@@ -42,9 +43,8 @@ struct RackModuleMenu : BasePluginModuleMenu {
 				return;
 			}
 		}
-		current_menu = nullptr;
-		menu_owner.reset();
-		exited = true;
+
+		close();
 	}
 
 	bool is_done() override {
@@ -52,24 +52,34 @@ struct RackModuleMenu : BasePluginModuleMenu {
 	}
 
 	void click_item(unsigned idx) override {
-		if (!current_menu)
+		if (!current_menu) {
+			pr_err("VCV module menu not initialized\n");
 			return;
+		}
 
-		if (auto mw = module_widget.lock()) {
-			//find the child that was clicked
-			for (auto i = 0u; auto child : current_menu->children) {
-				if (auto menu_item = dynamic_cast<rack::ui::MenuItem *>(child)) {
-					if (i++ == idx) {
-						auto has_submenu = click_submenu(menu_item);
-						if (!has_submenu) {
-							click_action_item(menu_item);
-							refresh_menu(mw);
-						}
-						break;
-					}
+		if (idx > current_menu->children.size()) {
+			pr_err("Clicked vcv module menu out of range\n");
+			return;
+		}
+
+		//find the child that was clicked
+		auto child = std::next(current_menu->children.begin(), idx);
+		if (auto menu_item = dynamic_cast<rack::ui::MenuItem *>(*child)) {
+
+			if (auto mw = module_widget.lock()) {
+				auto has_submenu = click_submenu(menu_item);
+				if (!has_submenu) {
+					click_action_item(menu_item);
+					refresh_menu(mw);
 				}
 			}
 		}
+	}
+
+	void close() override {
+		current_menu = nullptr;
+		menu_owner.reset();
+		exited = true;
 	}
 
 private:
@@ -126,21 +136,39 @@ private:
 
 			unsigned num_children = 0;
 			for (auto child : children) {
+				// Reasonable limit to size of menu:
+				if (num_children++ >= 256)
+					break;
+
 				if (auto rack_item = dynamic_cast<rack::ui::MenuItem *>(child)) {
 					child->step();
 
-					// Reasonable limit to size of menu:
-					if (num_children++ < 256) {
-						auto &item = menu.emplace_back();
-						// Checkmarks go on left side
-						if (rack_item->rightText.ends_with(CHECKMARK_STRING))
-							item = Gui::yellow_text(CHECKMARK_STRING);
+					auto &item = menu.emplace_back();
+					// Checkmarks go on left side
+					if (rack_item->rightText.ends_with(CHECKMARK_STRING))
+						item = Gui::yellow_text(CHECKMARK_STRING);
 
-						item += rack_item->text;
+					item += rack_item->text;
 
-						if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
-							item += " " + Gui::yellow_text(rack_item->rightText);
-					}
+					if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
+						item += " " + Gui::yellow_text(rack_item->rightText);
+				}
+
+				else if (auto rack_item = dynamic_cast<rack::ui::MenuLabel *>(child))
+				{
+					rack_item->step();
+					menu.emplace_back(Gui::grey_text(rack_item->text));
+				}
+
+				else if (auto rack_item = dynamic_cast<rack::ui::MenuSeparator *>(child))
+				{
+					rack_item->step();
+					menu.emplace_back(Gui::grey_text("----------"));
+				}
+
+				else
+				{
+					menu.emplace_back("?");
 				}
 			}
 		}

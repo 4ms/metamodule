@@ -43,14 +43,14 @@ void UartLog::use_uart() {
 	port[core_id()] = UartLog::Port::Uart;
 }
 
-void UartLog::write_uart(char *ptr, size_t len) {
+void UartLog::write_uart(const char *ptr, size_t len) {
 	for (auto idx = 0u; idx < len; idx++) {
 		UartLog::putchar(*ptr++);
 	}
 }
 
 //TODO: make this interrupt-safe
-void UartLog::write_usb(char *ptr, size_t len) {
+void UartLog::write_usb(const char *ptr, size_t len) {
 	auto core = core_id();
 
 	log_usb[core]->writer_ref_count++;
@@ -71,7 +71,7 @@ void UartLog::write_usb(char *ptr, size_t len) {
 	log_usb[core]->writer_ref_count--;
 }
 
-extern "C" int _write(int file, char *ptr, int len) {
+void UartLog::write_stdout(const char *ptr, size_t len) {
 	if (UartLog::port[core_id()] == UartLog::Port::Uart) {
 		UartLog::write_uart(ptr, len);
 
@@ -79,8 +79,6 @@ extern "C" int _write(int file, char *ptr, int len) {
 		if (UartLog::log_usb[core_id()])
 			UartLog::write_usb(ptr, len);
 	}
-
-	return len;
 }
 
 // This is used for bypassing write() and going direct to UART

@@ -1,29 +1,18 @@
 #pragma once
+#include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/notify/queue.hh"
-#include "gui/pages/base.hh"
-#include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "patch_play/patch_playloader.hh"
+#include "patch_file/file_storage_proxy.hh"
 
 namespace MetaModule
 {
 
-struct SaveDialog {
+struct FileSaveDialog {
 
-	SaveDialog(FileStorageProxy &patch_storage,
-			   OpenPatchManager &patches,
-			   PatchPlayLoader &play_loader,
-			   PatchSelectorSubdirPanel &subdir_panel,
-			   NotificationQueue &notify_queue,
-			   PageList &page_list)
+	FileSaveDialog(FileStorageProxy &patch_storage, PatchSelectorSubdirPanel &subdir_panel)
 		: patch_storage{patch_storage}
-		, patches{patches}
-		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
-		, notify_queue{notify_queue}
-		, page_list{page_list}
 		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
@@ -37,13 +26,7 @@ struct SaveDialog {
 		lv_obj_add_event_cb(ui_SaveDialogSaveBut, save_cb, LV_EVENT_CLICKED, this);
 
 		lv_hide(ui_SaveDialogCont);
-	}
-
-	enum class Action { None, Save, Duplicate, Rename };
-
-	void prepare_focus(lv_group_t *parent_group, Action action) {
-		base_group = parent_group;
-		method = action;
+		lv_obj_set_parent(ui_SaveDialogCont, lv_layer_top());
 	}
 
 	void update() {
@@ -88,24 +71,70 @@ struct SaveDialog {
 					break;
 			}
 		}
+	}
 
-		if (is_renaming) {
-			if (patch_playloader.is_renaming_idle()) {
-				saved = true;
-				is_renaming = false;
-				hide();
-			}
+	void show(Volume vol,
+			  std::string_view fullpath,
+			  std::string_view ext,
+			  lv_group_t *parent_group,
+			  std::function<void(Volume, std::string_view)> action) {
+		this->vcv_save_action = {};
+		this->save_action = action;
+		show(vol, fullpath, ext);
+		base_group = parent_group;
+	}
+
+	void show(std::string_view fullpath, std::string_view ext, std::function<void(char *)> action) {
+		this->vcv_save_action = action;
+		this->save_action = {};
+		auto [path, vol] = split_volume(fullpath);
+		show(vol, fullpath, ext);
+	}
+
+	void hide() {
+		if (mode == Mode::EditDir) {
+			hide_subdir_panel();
+		}
+
+		if (mode == Mode::EditName) {
+			hide_keyboard();
+		}
+
+		if (mode == Mode::Idle) {
+			lv_hide(ui_SaveDialogCont);
+			lv_group_activate(base_group);
+		}
+		mode = Mode::Hidden;
+	}
+
+	bool is_visible() {
+		return mode != Mode::Hidden;
+	}
+
+	void back_event() {
+		if (mode == Mode::Idle) {
+			lv_hide(ui_SaveDialogCont);
+			lv_group_activate(base_group);
+			mode = Mode::Hidden;
+
+		} else if (mode == Mode::EditDir) {
+			hide_subdir_panel();
+
+		} else if (mode == Mode::EditName) {
+			hide_keyboard();
 		}
 	}
 
-	void show() {
+private:
+	void show(Volume vol, std::string_view fullpath, std::string_view ext) {
+
 		if (mode == Mode::Hidden) {
-			file_vol = patches.get_view_patch_vol();
+
+			file_vol = vol;
 			// Default Volume:
 			if (file_vol == Volume::RamDisk)
 				file_vol = Volume::NorFlash;
 
-			auto fullpath = patches.get_view_patch_filename();
 			auto slashpos = fullpath.find_last_of('/');
 			if (slashpos != std::string_view::npos) {
 				file_path = fullpath.substr(0, slashpos);
@@ -114,7 +143,11 @@ struct SaveDialog {
 				file_path = "";
 				file_name = std::string{fullpath};
 			}
-			strip_yml(file_name);
+
+			file_ext = ext;
+			strip_ext();
+
+			lv_label_set_text(ui_SaveDialogFilenameDotyml, ext.data());
 
 			update_dir_label();
 
@@ -126,27 +159,12 @@ struct SaveDialog {
 			lv_hide(ui_SaveDialogLeftCont);
 			lv_hide(ui_Keyboard);
 
+			base_group = lv_indev_get_act()->group;
 			lv_group_activate(group);
 			lv_group_focus_obj(ui_SaveDialogFilename);
 			lv_group_set_editing(group, false);
 
 			mode = Mode::Idle;
-			is_renaming = false;
-		}
-	}
-
-	void hide() {
-		if (mode == Mode::Idle) {
-			lv_hide(ui_SaveDialogCont);
-			lv_group_activate(base_group);
-			lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
-			mode = Mode::Hidden;
-
-		} else if (mode == Mode::EditDir) {
-			hide_subdir_panel();
-
-		} else if (mode == Mode::EditName) {
-			hide_keyboard();
 		}
 	}
 
@@ -174,7 +192,7 @@ struct SaveDialog {
 	void hide_keyboard() {
 		mode = Mode::Idle;
 		file_name = lv_textarea_get_text(ui_SaveDialogFilename);
-		strip_yml(file_name);
+		strip_ext();
 		lv_textarea_set_text(ui_SaveDialogFilename, file_name.c_str());
 
 		lv_obj_clear_state(ui_SaveDialogFilename, LV_STATE_USER_1);
@@ -199,7 +217,7 @@ struct SaveDialog {
 			hide_subdir_panel();
 		};
 
-		EntryInfo selected_patch{.kind = DirEntryKind::Dir, .vol = patches.get_view_patch_vol(), .path = file_path};
+		EntryInfo selected_patch{.kind = DirEntryKind::Dir, .vol = file_vol, .path = file_path};
 		subdir_panel.refresh(selected_patch);
 		subdir_panel.hide_recent_files();
 	}
@@ -211,12 +229,8 @@ struct SaveDialog {
 		lv_group_activate(group);
 	}
 
-	bool is_visible() {
-		return mode != Mode::Hidden;
-	}
-
 	void update_dir_label() {
-		strip_yml(file_name);
+		strip_ext();
 		lv_textarea_set_text(ui_SaveDialogFilename, file_name.c_str());
 
 		auto displayed_path = std::string{PatchDirList::get_vol_name(file_vol)};
@@ -224,23 +238,16 @@ struct SaveDialog {
 		lv_label_set_text(ui_SaveDialogDir, displayed_path.c_str());
 	}
 
-	bool did_save() {
-		bool t = saved;
-		saved = false;
-		return t;
-	}
-
-private:
-	static void strip_yml(std::string &fname) {
-		if (fname.ends_with(".yml")) {
-			fname = fname.substr(0, fname.length() - 4);
+	void strip_ext() {
+		if (file_name.ends_with(file_ext)) {
+			file_name = file_name.substr(0, file_name.length() - file_ext.length());
 		}
 	}
 
 	static void click_filename_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<FileSaveDialog *>(event->user_data);
 
 		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
 		if (kb_hidden) {
@@ -253,78 +260,50 @@ private:
 	static void click_location_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<FileSaveDialog *>(event->user_data);
 		page->show_subdir_panel();
 	}
 
 	static void save_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<FileSaveDialog *>(event->user_data);
 
 		page->save();
+		page->hide();
 	}
 
 	void save() {
+		// Ensure file name ends in extension exactly once
 		file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+		strip_ext();
+		file_name.append(file_ext);
 
-		std::string fullpath = file_path.length() ? (file_path + "/") : "";
-		fullpath += file_name;
-		if (!fullpath.ends_with(".yml")) {
-			fullpath.append(".yml");
+		if (save_action) {
+			save_action(file_vol, make_full_path(file_path, file_name));
 		}
 
-		std::string patchname = file_name;
-		strip_yml(patchname);
-
-		if (method == Action::Save) {
-			patches.get_view_patch()->patch_name = patchname;
-			patches.rename_view_patch_file(fullpath, file_vol);
-			patch_playloader.request_save_patch();
-			auto &patchname = patches.get_view_patch()->patch_name;
-			patchname.copy(file_name);
-
-			saved = true;
-			hide();
-
-		} else if (method == Action::Rename) {
-			if (patches.get_view_patch_loc_hash() != PatchLocHash{fullpath, file_vol}) {
-				patches.get_view_patch()->patch_name = patchname;
-				patch_playloader.request_rename_view_patch({fullpath, file_vol});
-				is_renaming = true;
-			} else {
-				notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
-			}
-
-		} else { //Duplicate
-			if (patches.duplicate_view_patch(fullpath, file_vol)) {
-				patches.get_view_patch()->patch_name = patchname;
-				patch_playloader.request_save_patch();
-				saved = true;
-				auto patch_loc = PatchLocation{std::string_view{fullpath}, file_vol};
-				page_list.request_new_page_no_history(
-					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
-
-				hide();
-			} else {
-				//send notification of failure
-				std::string err_str = "File " + fullpath + " already exists and is open, cannot save over it.";
-				notify_queue.put({err_str, Notification::Priority::Error});
-			}
+		else if (vcv_save_action)
+		{
+			// Allocate a char*, because save_action will free() it.
+			// (this is a requirement of the Rack API)
+			auto path = make_full_path(file_vol, file_path, file_name);
+			char *str = strndup(path.data(), path.length());
+			vcv_save_action(str);
 		}
 	}
 
 	static void cancel_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<FileSaveDialog *>(event->user_data);
 		page->hide();
 	}
 
 	static void keyboard_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<FileSaveDialog *>(event->user_data);
 
 		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
 			page->hide_keyboard();
@@ -332,17 +311,12 @@ private:
 	}
 
 	FileStorageProxy &patch_storage;
-	OpenPatchManager &patches;
-	PatchPlayLoader &patch_playloader;
 	PatchSelectorSubdirPanel &subdir_panel;
-	NotificationQueue &notify_queue;
-	PageList &page_list;
-
-	std::vector<EntryInfo> subdir_panel_patches;
 
 	Volume file_vol{};
 	std::string file_path;
 	std::string file_name;
+	std::string file_ext;
 
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
@@ -357,10 +331,8 @@ private:
 
 	uint32_t last_refresh_check_tm = 0;
 
-	bool saved = false;
-	bool is_renaming = false;
-
-	Action method{};
+	std::function<void(char *)> vcv_save_action;
+	std::function<void(Volume, std::string_view)> save_action;
 };
 
 } // namespace MetaModule

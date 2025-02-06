@@ -83,10 +83,9 @@ if (NOT TARGET jansson)
 endif()
 
 #
-# SLS Exported GUI (meta5)
+# SLS Exported GUI (ui_lvgl)
 #
-add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
-target_link_libraries(ui PRIVATE lvgl)
+add_subdirectory(${FWDIR}/src/gui/slsexport)
 
 #
 # Core Interface
@@ -124,12 +123,13 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
+  ${FWDIR}/src/fs/helpers.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/src/gui/slsexport/prefs_menu.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
+  ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
@@ -138,6 +138,7 @@ add_executable(
   ${FWDIR}/src/fs/syscall/syscalls.cc
   ${FWDIR}/src/fs/syscall/fs_syscall_proxy.cc
   ${FWDIR}/src/fs/syscall/filedesc_manager.cc
+  ${FWDIR}/src/fs/syscall/filesystem.cc
   ${FWDIR}/src/fs/fatfs/fatfs_adaptor.cc
   ${FWDIR}/src/fs/dirent/dirent.cc
 
@@ -205,9 +206,12 @@ set_source_files_properties(
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/src/gui/slsexport/prefs_menu.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
+  ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
+
+  ${FWDIR}/vcv_plugin/export/osdialog/osdialog-mm.cc
+
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 
@@ -240,7 +244,7 @@ endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui metamodule::patch-serial cpputil vcv_ports)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")

@@ -343,17 +343,22 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		if (gui_state.file_browser_visible.just_went_low()) {
+			// File Browser detected as just closed
+			if (mode == ViewMode::ExtraMenu) {
+				show_roller();
+			}
+		}
+
 		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
 				show_roller();
 			}
-		}
 
-		if (mode == ViewMode::ExtraMenu) {
+		} else if (mode == ViewMode::ExtraMenu) {
 			module_menu.update();
 			if (module_menu.wants_to_close()) {
-				module_menu.hide();
 				show_roller();
 			}
 		}
@@ -498,7 +503,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
-		pr_dbg("ModuleView::blur\n");
 		dyn_draw.blur();
 		params.lights.stop_watching_all();
 		params.displays.stop_watching_all();
@@ -509,6 +513,7 @@ struct ModuleViewPage : PageBase {
 
 private:
 	void show_roller() {
+		module_menu.hide();
 		mode = ViewMode::List;
 		mapping_pane.hide();
 		lv_show(ui_ElementRoller);

@@ -9,7 +9,7 @@ namespace rack::system
 namespace fs = std::filesystem;
 
 std::string join(const std::string &path1, const std::string &path2) {
-	return (fs::u8path(path1) / fs::u8path(path2)).string();
+	return (fs::path(path1) / fs::path(path2)).string();
 }
 
 static void appendEntries(std::vector<std::string> &entries, const fs::path &dir, int depth) {
@@ -26,69 +26,69 @@ static void appendEntries(std::vector<std::string> &entries, const fs::path &dir
 
 std::vector<std::string> getEntries(const std::string &dirPath, int depth) {
 	std::vector<std::string> entries;
-	appendEntries(entries, fs::u8path(dirPath), depth);
+	appendEntries(entries, fs::path(dirPath), depth);
 	return entries;
 }
 
 bool exists(const std::string &path) {
-	return fs::exists(fs::u8path(path));
+	return fs::exists(fs::path(path));
 }
 
 bool isFile(const std::string &path) {
-	return fs::is_regular_file(fs::u8path(path));
+	return fs::is_regular_file(fs::path(path));
 }
 
 bool isDirectory(const std::string &path) {
-	return fs::is_directory(fs::u8path(path));
+	return fs::is_directory(fs::path(path));
 }
 
 uint64_t getFileSize(const std::string &path) {
-	return fs::file_size(fs::u8path(path));
+	return fs::file_size(fs::path(path));
 }
 
 bool rename(const std::string &srcPath, const std::string &destPath) {
 	// fs is read-only
 	return false;
-	// fs::rename(fs::u8path(srcPath), fs::u8path(destPath));
+	// fs::rename(fs::path(srcPath), fs::path(destPath));
 	// return true;
 }
 
 bool copy(const std::string &srcPath, const std::string &destPath) {
 	// fs is read-only
 	return false;
-	// fs::copy(fs::u8path(srcPath), fs::u8path(destPath), fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+	// fs::copy(fs::path(srcPath), fs::path(destPath), fs::copy_options::recursive | fs::copy_options::overwrite_existing);
 	// return true;
 }
 
 bool createDirectory(const std::string &path) {
 	// fs is read-only
 	return false;
-	// return fs::create_directory(fs::u8path(path));
+	// return fs::create_directory(fs::path(path));
 }
 
 bool createDirectories(const std::string &path) {
 	// fs is read-only
 	return false;
-	// return fs::create_directories(fs::u8path(path));
+	// return fs::create_directories(fs::path(path));
 }
 
 bool createSymbolicLink(const std::string &target, const std::string &link) {
 	// fs is read-only
 	return false;
-	// fs::create_symlink(fs::u8path(target), fs::u8path(link));
+	// fs::create_symlink(fs::path(target), fs::path(link));
 	// return true;
 }
 
 bool remove(const std::string &path) {
 	// fs is read-only
 	return false;
-	// return fs::remove(fs::u8path(path));
+	// return fs::remove(fs::path(path));
 }
 
 int removeRecursively(const std::string &pathStr) {
 	// fs is read-only
 	return false;
-	// fs::path path = fs::u8path(pathStr);
+	// fs::path path = fs::path(pathStr);
 	// // Make all entries writable before attempting to remove
 	// for (auto &entry : fs::recursive_directory_iterator(path)) {
 	// 	fs::permissions(entry.path(), fs::perms::owner_write, fs::perm_options::add);
@@ -107,7 +107,7 @@ std::string getWorkingDirectory() {
 void setWorkingDirectory(const std::string &path) {
 	// not supported
 	printf("Warning: rack::system::setWorkingDirectory() not supported\n");
-	// fs::current_path(fs::u8path(path));
+	// fs::current_path(fs::path(path));
 }
 
 std::string getTempDirectory() {
@@ -121,30 +121,30 @@ std::string getAbsolute(const std::string &path) {
 	// TODO: use fatfs to resolve path
 	printf("Warning: rack::system::getAbsolute() not supported\n");
 	return path;
-	// return fs::absolute(fs::u8path(path)).string();
+	// return fs::absolute(fs::path(path)).string();
 }
 
 std::string getCanonical(const std::string &path) {
 	// TODO: use fatfs to resolve path
 	printf("Warning: rack::system::getCanonical() not supported\n");
 	return path;
-	// return fs::canonical(fs::u8path(path)).string();
+	// return fs::canonical(fs::path(path)).string();
 }
 
 std::string getDirectory(const std::string &path) {
-	return fs::u8path(path).parent_path().string();
+	return fs::path(path).parent_path().string();
 }
 
 std::string getFilename(const std::string &path) {
-	return fs::u8path(path).filename().string();
+	return fs::path(path).filename().string();
 }
 
 std::string getStem(const std::string &path) {
-	return fs::u8path(path).stem().string();
+	return fs::path(path).stem().string();
 }
 
 std::string getExtension(const std::string &path) {
-	return fs::u8path(path).extension().string();
+	return fs::path(path).extension().string();
 }
 
 //// MetaModule impl:

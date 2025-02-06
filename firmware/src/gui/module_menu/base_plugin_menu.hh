@@ -12,6 +12,7 @@ struct BasePluginModuleMenu {
 	virtual void back_event() = 0;
 	virtual void click_item(unsigned idx) = 0;
 	virtual bool is_done() = 0;
+	virtual void close() = 0;
 };
 
 } // namespace MetaModule

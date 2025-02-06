@@ -20,12 +20,14 @@ add_executable(
   main_m4.elf
   ${M4DIR}/controls.cc
   ${M4DIR}/main_m4.cc
+  ${M4DIR}/write.cc
   ${M4DIR}/system_stm32mp1xx.c
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
+  ${FWDIR}/src/fs/helpers.cc
   ${FWDIR}/src/fw_update/hash/hash_processor.cc
   ${FWDIR}/src/fw_update/hash/md5_hash.c
   ${FWDIR}/src/fw_update/firmware_writer.cc

@@ -1,6 +1,7 @@
 #include "filesystem.hh"
-#include "pr_dbg.hh"
 #include <cstdio>
+
+// These are used by newlib to provide libc filesystem and io functions
 
 extern "C" {
 int _open(const char *filename, int flags, int mode) {
@@ -29,5 +30,9 @@ int _isatty(int fd) {
 
 int _stat(const char *filename, struct stat *st) {
 	return MetaModule::Filesystem::stat(filename, st);
+}
+
+int _write(int fd, const char *ptr, int len) {
+	return MetaModule::Filesystem::write(fd, ptr, len);
 }
 }

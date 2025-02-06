@@ -30,6 +30,9 @@ struct PluginModuleMenu {
 		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
 		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_SELECTED);
 
+		lv_obj_set_style_text_color(roller, lv_color_hex(0xCCCCCC), LV_STATE_DEFAULT);
+		lv_obj_set_style_text_opa(roller, 255, LV_STATE_DEFAULT);
+
 		auto hover_label = lv_obj_get_child(roller_hover.get_cont(), 0);
 		lv_obj_set_style_text_font(hover_label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
 	}
@@ -65,6 +68,7 @@ struct PluginModuleMenu {
 
 	void hide() {
 		if (visible) {
+			plugin_menu->close();
 			lv_hide(roller);
 			roller_hover.hide();
 			visible = false;
@@ -156,7 +160,7 @@ private:
 
 	std::unique_ptr<BasePluginModuleMenu> plugin_menu;
 
-	lv_obj_t *roller = ui_ModuleViewExtraMenuRoller;
+	lv_obj_t *const roller = ui_ModuleViewExtraMenuRoller;
 
 	RollerHoverText roller_hover;
 	PatchPlayLoader &patch_playloader;

@@ -12,8 +12,8 @@ namespace StaticBuffers
 {
 extern IntercoreModuleFS::Message icc_module_fs_message_core0;
 extern IntercoreModuleFS::Message icc_module_fs_message_core1;
-extern std::array<uint8_t, 64 * 1024> module_fs_buffer_core0;
-extern std::array<uint8_t, 64 * 1024> module_fs_buffer_core1;
+extern std::array<uint8_t, 128 * 1024> module_fs_buffer_core0;
+extern std::array<uint8_t, 128 * 1024> module_fs_buffer_core1;
 } // namespace StaticBuffers
 
 struct FsProxy {
@@ -47,7 +47,8 @@ struct FsProxy {
 			auto response = get_message();
 
 			// Ignore empty messages
-			if (response.index() != IntercoreModuleFS::Message{IntercoreModuleFS::None{}}.index()) {
+			IntercoreModuleFS::Message nullmsg = IntercoreModuleFS::None();
+			if (response.index() != nullmsg.index()) {
 
 				if (auto type_response = std::get_if<ResponseT>(&response))
 					return std::optional<ResponseT>(*type_response);

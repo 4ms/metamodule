@@ -60,7 +60,7 @@ struct HostFileIO {
 		}
 		fs::path full_path{f_path};
 
-		// std::cout << "HostFileIO: foreach_dir_entry() in " << full_path << "\n";
+		std::cout << "HostFileIO: foreach_dir_entry() in " << full_path << "\n";
 
 		try {
 			for (const auto &entry : fs::directory_iterator(full_path)) {
@@ -85,7 +85,7 @@ struct HostFileIO {
 	uint64_t read_file(const std::string_view filename, std::span<char> buffer, size_t offset = 0) {
 		auto filepath = normalize_path(filename);
 
-		// std::cout << "HostFileIO: read " << filepath << "\n";
+		std::cout << "HostFileIO: read " << filepath << "\n";
 
 		std::ifstream ifs(filepath, std::ios::in);
 		uint64_t sz = 0;
@@ -106,7 +106,7 @@ struct HostFileIO {
 	bool update_or_create_file(const std::string_view filename, const std::span<const char> buffer) {
 		auto filepath = normalize_path(filename);
 
-		// std::cout << "HostFileIO: write " << filepath << "\n";
+		std::cout << "HostFileIO: write " << filepath << "\n";
 
 		auto ofs = std::ofstream{filepath, std::ios::out};
 		uint64_t sz = 0;
@@ -121,7 +121,7 @@ struct HostFileIO {
 	bool delete_file(std::string_view filename) {
 		auto filepath = normalize_path(filename);
 
-		// std::cout << "HostFileIO: delete " << filepath << "\n";
+		std::cout << "HostFileIO: delete " << filepath << "\n";
 
 		return std::filesystem::remove(filepath) > 0;
 	}

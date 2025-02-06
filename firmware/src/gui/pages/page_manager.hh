@@ -21,6 +21,7 @@
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"
 #include "gui/pages/system_menu.hh"
+#include "vcv_plugin/internal/osdialog-mm.hh"
 
 namespace MetaModule
 {
@@ -36,17 +37,19 @@ class PageManager {
 	ButtonLight button_light;
 	Screensaver &screensaver;
 
+	PatchSelectorSubdirPanel subdir_panel;
+	FileBrowserDialog file_browser;
+	FileSaveDialog file_save_dialog{info.patch_storage, subdir_panel};
+
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info, subdir_panel};
-	PatchViewPage page_patchview{info, subdir_panel};
+	PatchViewPage page_patchview{info, file_save_dialog};
 	ModuleViewPage page_module{info};
 	KnobSetViewPage page_knobsetview{info};
 	KnobMapPage page_knobmap{info};
 	SystemMenuPage page_systemmenu{info};
 	ModuleListPage page_modulelist{info};
 	JackMapViewPage page_jackmap{info};
-
-	PatchSelectorSubdirPanel subdir_panel;
 
 public:
 	PageBase *cur_page = &page_mainmenu;
@@ -75,8 +78,13 @@ public:
 			   .settings = settings,
 			   .plugin_manager = plugin_manager,
 			   .ramdisk = ramdisk,
-			   .file_change_checker = file_change_checker}
-		, screensaver{screensaver} {
+			   .file_change_checker = file_change_checker,
+			   .file_browser = file_browser}
+		, screensaver{screensaver}
+		, file_browser{patch_storage, notify_queue} {
+
+		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
+		register_file_browser_vcv(file_browser, file_save_dialog);
 	}
 
 	void init() {
@@ -99,8 +107,31 @@ public:
 				// debug_print_args(newpage);
 				cur_page->focus(newpage->args);
 			}
-		} else
-			cur_page->update();
+		} else {
+			if (file_browser.is_visible()) {
+				if (gui_state.back_button.is_just_released())
+					file_browser.back_event();
+				file_browser.update();
+
+				gui_state.file_browser_visible.register_state(true);
+
+			} else if (file_save_dialog.is_visible()) {
+				if (gui_state.back_button.is_just_released())
+					file_save_dialog.back_event();
+
+				file_save_dialog.update();
+
+				gui_state.file_browser_visible.register_state(true);
+
+			} else {
+				gui_state.file_browser_visible.register_state(false);
+
+				cur_page->update();
+
+				// Don't let old events do surprising things when you change pages
+				gui_state.file_browser_visible.clear_events();
+			}
+		}
 
 		handle_audio_errors();
 

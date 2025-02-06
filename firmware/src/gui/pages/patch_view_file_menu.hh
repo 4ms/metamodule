@@ -1,12 +1,10 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
-#include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/patch_selector_sidebar.hh"
-#include "gui/pages/save_dialog.hh"
+#include "gui/pages/patch_save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "patch_play/patch_playloader.hh"
 
@@ -18,7 +16,7 @@ struct PatchViewFileMenu {
 	PatchViewFileMenu(PatchPlayLoader &play_loader,
 					  FileStorageProxy &patch_storage,
 					  OpenPatchManager &patches,
-					  PatchSelectorSubdirPanel &subdir_panel,
+					  FileSaveDialog &file_save_dialog,
 					  NotificationQueue &notify_queue,
 					  PageList &page_list,
 					  GuiState &gui_state)
@@ -28,7 +26,7 @@ struct PatchViewFileMenu {
 		, notify_queue{notify_queue}
 		, page_list{page_list}
 		, gui_state{gui_state}
-		, save_dialog{patch_storage, patches, play_loader, subdir_panel, notify_queue, page_list}
+		, patch_save_dialog{patch_storage, patches, play_loader, file_save_dialog, notify_queue, page_list}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
@@ -59,10 +57,12 @@ struct PatchViewFileMenu {
 	}
 
 	void back() {
-		if (save_dialog.is_visible()) {
-			save_dialog.hide();
+		// if (patch_save_dialog.is_visible()) {
+		// 	patch_save_dialog.back_event();
 
-		} else if (confirm_popup.is_visible()) {
+		// } else
+
+		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
 
 		} else if (visible) {
@@ -71,7 +71,7 @@ struct PatchViewFileMenu {
 	}
 
 	void hide() {
-		save_dialog.hide();
+		patch_save_dialog.hide();
 		confirm_popup.hide();
 		hide_menu();
 	}
@@ -112,13 +112,24 @@ struct PatchViewFileMenu {
 	}
 
 	bool is_visible() {
-		return save_dialog.is_visible() || visible;
+		return patch_save_dialog.is_visible() || visible;
 	}
 
 	void update() {
-		save_dialog.update();
-		process_delete_file();
-		process_revert_patch();
+		if (is_visible()) {
+			process_delete_file();
+			process_revert_patch();
+		} else {
+			process_rename_patch();
+		}
+	}
+
+	void process_rename_patch() {
+		if (play_loader.is_renaming_idle()) {
+			if (patch_save_dialog.did_rename()) {
+				filesystem_changed = true;
+			}
+		}
 	}
 
 	void process_delete_file() {
@@ -198,21 +209,21 @@ struct PatchViewFileMenu {
 	}
 
 	bool did_filesystem_change() {
-		bool result = save_dialog.did_save();
+		bool result = patch_save_dialog.did_save();
 		result |= filesystem_changed;
 		filesystem_changed = false;
 		return result;
 	}
 
 private:
-	void show_save_dialog(SaveDialog::Action method) {
+	void show_save_dialog(PatchSaveDialog::Action method) {
 		current_action = method;
-		save_dialog.prepare_focus(base_group, method);
+		patch_save_dialog.prepare_focus(method);
 
 		lv_obj_set_x(ui_PatchFileMenu, 220);
 		visible = false;
 
-		save_dialog.show();
+		patch_save_dialog.show(base_group);
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -251,9 +262,9 @@ private:
 
 		// If it hasn't been saved yet, then we can't duplicate, so save
 		if (page->patches.get_view_patch_vol() == Volume::RamDisk)
-			page->show_save_dialog(SaveDialog::Action::Save);
+			page->show_save_dialog(PatchSaveDialog::Action::Save);
 		else
-			page->show_save_dialog(SaveDialog::Action::Duplicate);
+			page->show_save_dialog(PatchSaveDialog::Action::Duplicate);
 	}
 
 	static void rename_but_cb(lv_event_t *event) {
@@ -261,7 +272,7 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		page->show_save_dialog(SaveDialog::Action::Rename);
+		page->show_save_dialog(PatchSaveDialog::Action::Rename);
 	}
 
 	static void delete_but_cb(lv_event_t *event) {
@@ -309,7 +320,7 @@ private:
 	PageList &page_list;
 	GuiState &gui_state;
 
-	SaveDialog save_dialog;
+	PatchSaveDialog patch_save_dialog;
 	ConfirmPopup confirm_popup;
 
 	lv_group_t *group;
@@ -323,7 +334,7 @@ private:
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 	enum class RevertState { Idle, TryRequest, Requested } revert_state = RevertState::Idle;
 
-	SaveDialog::Action current_action{};
+	PatchSaveDialog::Action current_action{};
 };
 
 } // namespace MetaModule

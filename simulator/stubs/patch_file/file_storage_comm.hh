@@ -2,6 +2,7 @@
 #include "../src/core_intercom/intercore_message.hh"
 #include "dynload/plugin_file_scan.hh"
 #include "fs/fatfs/fat_file_io.hh"
+#include "fs/helpers.hh"
 #include "fs/volumes.hh"
 #include "fw_update/update_path.hh"
 #include "host_file_io.hh"
@@ -9,6 +10,7 @@
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_location.hh"
 #include <cstdint>
+#include <string>
 #include <string_view>
 
 namespace MetaModule
@@ -25,11 +27,40 @@ struct SimulatorPatchStorage {
 		, ramdisk{ramdisk} {
 		PatchFileIO::add_directory(sd_hostfs, patch_dir_list_.volume_root(Volume::SDCard));
 		PatchFileIO::add_directory(flash_hostfs, patch_dir_list_.volume_root(Volume::NorFlash));
+		sd_root = sd_path;
+		flash_root = flash_path;
+	}
+
+	static std::string convert_path_to_host(std::string_view path) {
+		if (path.starts_with("sdc:/")) {
+			return sd_root + std::string(path.substr(5));
+
+		} else if (path.starts_with("nor:/")) {
+			return flash_root + std::string(path.substr(5));
+
+		} else {
+			return std::string(path);
+		}
+	}
+
+	static std::string convert_path_to_mm(std::string_view path) {
+		if (path.starts_with(sd_root)) {
+			return "sdc:/" + std::string(path.substr(sd_root.length()));
+
+		} else if (path.starts_with(flash_root)) {
+			return "nor:/" + std::string(path.substr(sd_root.length()));
+
+		} else {
+			return std::string(path);
+		}
 	}
 
 	HostFileIO sd_hostfs;
 	HostFileIO flash_hostfs;
 	FatFileIO &ramdisk;
+
+	static inline std::string sd_root;
+	static inline std::string flash_root;
 };
 
 struct SimulatorFileStorageComm {
@@ -161,6 +192,30 @@ struct SimulatorFileStorageComm {
 						reply.length = storage.flash_hostfs.get_file_size(msg.filename);
 						reply.timestamp = storage.flash_hostfs.get_file_timestamp(msg.filename);
 						reply.message_type = FileInfoSuccess;
+					}
+
+				} break;
+
+				case RequestDirEntries: {
+					reply = {DirEntriesFailed};
+
+					auto path = msg.filename;
+					auto exts = msg.dest_filename;
+					auto *dir_tree = msg.dir_entries;
+					dir_tree->files.clear();
+					dir_tree->dirs.clear();
+
+					if (msg.vol_id == Volume::MaxVolumes) {
+						if (storage.sd_hostfs.is_mounted()) {
+							dir_tree->dirs.push_back("SD Card:");
+						}
+						reply.message_type = DirEntriesSuccess;
+
+					} else if (msg.vol_id == Volume::SDCard) {
+						if (storage.sd_hostfs.is_mounted()) {
+							get_dir_entries(storage.sd_hostfs, path, exts, dir_tree);
+							reply.message_type = DirEntriesSuccess;
+						}
 					}
 
 				} break;
