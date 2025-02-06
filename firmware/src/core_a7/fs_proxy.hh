@@ -47,7 +47,8 @@ struct FsProxy {
 			auto response = get_message();
 
 			// Ignore empty messages
-			if (response.index() != IntercoreModuleFS::Message{IntercoreModuleFS::None{}}.index()) {
+			IntercoreModuleFS::Message nullmsg = IntercoreModuleFS::None();
+			if (response.index() != nullmsg.index()) {
 
 				if (auto type_response = std::get_if<ResponseT>(&response))
 					return std::optional<ResponseT>(*type_response);
