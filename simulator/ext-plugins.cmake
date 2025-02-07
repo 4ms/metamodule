@@ -1,15 +1,12 @@
-# Two steps to build an external plugin into the simulator:
+# External plugins as "built-ins" for the Simulator
 #
-# 1. Copy/paste the two `list APPEND commands` below, puttting in the path to the
-#    plugin (where the CMakeLists.txt lives), and the plugin cmake library name
-#
-# 2. In the plugin, find the file where init(rack::Plugin*) is defined, and rename it to init_Brand
-#    You can use #if defined(METAMODULE_BUILTIN) so that it's still called init() when building as a plugin for Rack or MM.
-#    `Brand` in init_Brand must match the plugin cmake library name you used in step 1.
-
-# Example with Venom:
+# Example with `Venom`:
 # list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/Venom")
 # list(APPEND ext_builtin_brand_libname "Venom")
+#
+# Don't forget to change init() => init_Venom(), and add `extern` to the pluginInstance!
+# 
+# See docs/simulator-ext-plugins.md for instructions
 
 
 #
