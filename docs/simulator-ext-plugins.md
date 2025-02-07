@@ -38,7 +38,7 @@ You must make a few changes to the code to make this hack work:
    This is needed because there already is a global variable called pluginInstance, and 
    we can't have two.
 
-3. In your plugin's CMakeLists.txt file, make sure something like this at the top:
+3. In your plugin's CMakeLists.txt file, make sure something like this is at the top:
 
 ```cmake
 if(NOT "${METAMODULE_SDK_DIR}" STREQUAL "")
@@ -96,13 +96,14 @@ make run
 Since this is a bit of a hack, there are some limitations:
 
 - Plugins cannot use POSIX filesystem calls to access files in their assets/ dir.
-  Plugins *can* access these ttf fonts and png files for widgets, using the
-  rack interface, but calls to fopen(), fread(), etc. will not find the files
-  in the assets/ dir. The reason is that on hardware the assets are loaded as a
-  FatFS RAM disk. The simulator simulates this untarring and mounting of the
-  RAM Disk (one goal of the simulator is to closely imitate hardware, so doing
-  it this way is intentional). It probably wouldn't be too difficult to make a
-  workaround for this.
+  Plugins *can* access .ttf fonts and .png files for widgets loaded by the
+  rack interface or by the native plugin ModuleInfo interface. But calls to
+  fopen(), fread(), etc. will not find the files in the assets/ dir. The reason
+  is that on hardware the assets are loaded as a FatFS RAM disk. The simulator
+  simulates mounting the FatFS RAM Disk and accesses the files via that instead
+  of directly from the host computer. (One goal of the simulator is to closely
+  imitate hardware, so doing it this way is intentional). It probably wouldn't
+  be too difficult to make a workaround for this.
 
 - Other filesystem calls might not work. I haven't explored every edge case,
   but in general since the simulator is simulating the filesystem of the
@@ -110,7 +111,7 @@ Since this is a bit of a hack, there are some limitations:
   the host computer.
 
 If you are experiencing an issue along these lines with an external plugin on
-the simulator, testing on actual hardware is the only way to determine if an
+the simulator, testing on actual hardware is the best way to determine if an
 issue is due to one of these limitations or is an actual bug.
 
 - Variable names, function names, and macros (`#define`) might collide. Since
@@ -119,9 +120,10 @@ issue is due to one of these limitations or is an actual bug.
   function or global variable name your plugin uses will already be in use.
   Hopefully this will cause a compiler error, but in the worst case it could
   cause a runtime crash (especially with macros). Unfortunately there's not an
-  easy way around this besides using namespacing and avoiding macros. Searching
-  the metamodule repo for the offending text should tell you if this is
-  happening. 
+  easy way around this besides renaming your functions/variables, using
+  namespacing, and/or avoiding macros. Searching the metamodule repo for the
+  offending text should tell you if this is happening, or you can try building
+  the plugin normally and see if you get the same error.
 
 
   I would not be surprised if there are other limiations, so please report it
