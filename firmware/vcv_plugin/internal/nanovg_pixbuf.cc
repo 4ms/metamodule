@@ -143,7 +143,7 @@ float renderText(
 		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
-		pr_dbg("Creating label at %d,%d align %d (sz %f)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		pr_dbg("Creating label at %d,%d align 0x%x (sz %g) ", lv_x, lv_y, fs->textAlign, fs->fontSize);
 		context->labels.push_back({(float)lv_x, (float)lv_y, fs->textAlign, label, context->draw_frame_ctr});
 	}
 
@@ -167,6 +167,7 @@ float renderText(
 	}
 
 	lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
+	lv_obj_set_style_text_opa(label, LV_OPA_100, LV_PART_MAIN);
 	lv_label_set_text(label, text);
 
 	return 1;
