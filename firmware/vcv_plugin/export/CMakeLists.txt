@@ -32,6 +32,8 @@ target_sources(
          src/app/SvgSwitch.cc
          src/app/SvgButton.cc
          src/app/SvgScrew.cc
+		 src/app/CableWidget.cc
+		 src/app/CircularShadow.cc
 
          src/engine/Engine.cpp
          src/engine/Module.cpp
