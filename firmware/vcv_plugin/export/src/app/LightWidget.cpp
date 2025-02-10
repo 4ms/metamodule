@@ -14,4 +14,13 @@ void LightWidget::drawLayer(const DrawArgs &args, int layer) {
 	Widget::drawLayer(args, layer);
 }
 
+void LightWidget::drawBackground(const DrawArgs &args) {
+}
+
+void LightWidget::drawLight(const DrawArgs &args) {
+}
+
+void LightWidget::drawHalo(const DrawArgs &args) {
+}
+
 } // namespace rack::app
