@@ -16,6 +16,7 @@ set(HETRICKCV_SOURCE_PATHS
     ${HETRICKCV_DIR}/src/2To4.cpp
     ${HETRICKCV_DIR}/src/ASR.cpp
     ${HETRICKCV_DIR}/src/AnalogToDigital.cpp
+    ${HETRICKCV_DIR}/src/BinaryCounter.cpp
     ${HETRICKCV_DIR}/src/BinaryGate.cpp
     ${HETRICKCV_DIR}/src/BinaryNoise.cpp
     ${HETRICKCV_DIR}/src/Bitshift.cpp

@@ -18,6 +18,10 @@
 		"name": "Analog To Digital"
 	},
 	{
+		"slug": "BinaryCounter",
+		"name": "Binary Counter"
+	},
+	{
 		"slug": "BinaryGate",
 		"name": "Binary Gate"
 	},

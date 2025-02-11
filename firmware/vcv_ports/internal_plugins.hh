@@ -51,6 +51,7 @@ extern rack::plugin::Model *modelStreams;
 extern rack::plugin::Model *modelTwoToFour;
 extern rack::plugin::Model *modelAnalogToDigital;
 extern rack::plugin::Model *modelASR;
+extern rack::plugin::Model *modelBinaryCounter;
 extern rack::plugin::Model *modelBinaryGate;
 extern rack::plugin::Model *modelBinaryNoise;
 extern rack::plugin::Model *modelBitshift;
