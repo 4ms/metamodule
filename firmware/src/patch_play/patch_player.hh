@@ -723,6 +723,14 @@ public:
 		mark_patched(midi_cc_conns);
 		mark_patched(midi_gate_conns);
 
+		for (auto const &conn : midi_pulses) {
+			for (auto const &jack : conn.conns) {
+				if (jack.module_id < num_modules) {
+					modules[jack.module_id]->mark_input_patched(jack.jack_id);
+				}
+			}
+		}
+
 		midi_connected = true;
 	}
 
@@ -741,6 +749,14 @@ public:
 		mark_unpatched(midi_note_aft_conns);
 		mark_unpatched(midi_cc_conns);
 		mark_unpatched(midi_gate_conns);
+
+		for (auto const &conn : midi_pulses) {
+			for (auto const &jack : conn.conns) {
+				if (jack.module_id < num_modules) {
+					modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+				}
+			}
+		}
 
 		midi_connected = false;
 	}
