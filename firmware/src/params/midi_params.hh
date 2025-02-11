@@ -30,4 +30,18 @@ struct Event {
 };
 static constexpr auto sizeofEvent = sizeof(Event);
 
+enum DivClock : uint8_t {
+	DivClock1,
+	DivClock2,
+	DivClock3,
+	DivClock6,
+	DivClock12,
+	DivClock24,
+	DivClock48,
+	DivClock96,
+	NumDivClocks
+};
+
+static constexpr uint8_t DivClockAmt[] = {1, 2, 3, 6, 12, 24, 48, 96};
+
 } // namespace MetaModule::Midi

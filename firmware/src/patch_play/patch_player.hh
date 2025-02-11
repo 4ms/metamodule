@@ -7,6 +7,7 @@
 #include "core_a7/smp_api.hh"
 #include "drivers/smp.hh"
 #include "null_module.hh"
+#include "params/midi_params.hh"
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
@@ -59,11 +60,15 @@ private:
 		OneShot pulse{};
 		std::vector<Jack> conns;
 	};
-	std::array<MidiPulse, 5> midi_pulses;
-	std::array<MidiPulse, MaxMidiPolyphony> midi_note_retrig;
+	struct MidiPulseDivider {
+		OneShot pulse{};
+		std::vector<Jack> conns;
+		uint32_t midi_divclk_ctr = 0;
+	};
+	std::array<MidiPulse, TimingEvents::NumTimingEvents> midi_pulses;
+	std::array<MidiPulseDivider, Midi::NumDivClocks> midi_divclk_pulses;
 
-	uint32_t midi_divclk_ctr = 0;
-	uint32_t midi_divclk_div_amt = 0;
+	std::array<MidiPulse, MaxMidiPolyphony> midi_note_retrig;
 
 	// knob_conns[]: ABCDEFuvwxyz
 	using KnobSet = std::array<std::vector<MappedKnob>, PanelDef::NumKnobs>;
@@ -113,7 +118,7 @@ public:
 		num_modules = pd.module_slugs.size();
 
 		if (num_modules > MAX_MODULES_IN_PATCH) {
-			return {false, "Too many modules in the patch! Max is 32"};
+			return {false, "Too many modules in the patch! Max is 64"};
 		}
 
 		// Tell the other core about the patch
@@ -329,24 +334,54 @@ public:
 			set_all_connected_jacks(midi_gate_conns[note_num], val);
 	}
 
+	// Event must be either Clock, or Start, Stop, or Cont.
+	// Div clocks are calculated here on each Clock event
 	void send_midi_time_event(uint8_t event, float val) {
-		if (event > TimingEvents::Cont || event == TimingEvents::DivClock)
-			return;
+		if (event == TimingEvents::Cont || event == TimingEvents::Stop || event == TimingEvents::Start ||
+			event == TimingEvents::Clock)
+		{
 
-		set_all_connected_jacks(midi_pulses[event].conns, val);
-		midi_pulses[event].pulse.start(0.01);
-
-		if (event == TimingEvents::Start) {
-			midi_divclk_ctr = 0;
+			set_all_connected_jacks(midi_pulses[event].conns, val);
+			midi_pulses[event].pulse.start(0.01);
 		}
 
+		if (event == TimingEvents::Start) {
+			midi_divclocks_reset();
+		}
+
+		// Handle DivClocks
 		if (event == TimingEvents::Clock) {
-			midi_divclk_ctr++;
-			if (midi_divclk_ctr >= midi_divclk_div_amt) {
-				set_all_connected_jacks(midi_pulses[TimingEvents::DivClock].conns, val);
-				midi_divclk_ctr = 0;
-				midi_pulses[TimingEvents::DivClock].pulse.start(0.01);
+			unsigned idx = 0;
+			for (auto &midi_divclk_pulse : midi_divclk_pulses) {
+				midi_divclk_pulse.midi_divclk_ctr++;
+				if (midi_divclk_pulse.midi_divclk_ctr >= Midi::DivClockAmt[idx]) {
+					midi_divclk_pulse.midi_divclk_ctr = 0;
+					midi_divclk_pulse.pulse.start(0.01);
+					set_all_connected_jacks(midi_divclk_pulse.conns, val);
+				}
+				idx++;
 			}
+		}
+	}
+
+	void midi_divclocks_reset() {
+		// Reset all clock counters on Start event
+		for (auto &midi_divclk_pulse : midi_divclk_pulses) {
+			midi_divclk_pulse.midi_divclk_ctr = 0;
+		}
+	}
+
+	void set_samplerate(float hz) {
+		samplerate = hz;
+
+		for (auto &mp : midi_pulses)
+			mp.pulse.set_update_rate_hz(samplerate);
+
+		for (auto &mp : midi_divclk_pulses)
+			mp.pulse.set_update_rate_hz(samplerate);
+
+		for (size_t i = 1; i < num_modules; i++) {
+			modules[i]->set_samplerate(samplerate);
 		}
 	}
 
@@ -358,8 +393,15 @@ private:
 
 	void update_midi_pulses() {
 		for (auto &mp : midi_pulses) {
-			if (!mp.pulse.update())
+			if (!mp.pulse.update()) {
 				set_all_connected_jacks(mp.conns, 0);
+			}
+		}
+
+		for (auto &mp : midi_divclk_pulses) {
+			if (!mp.pulse.update()) {
+				set_all_connected_jacks(mp.conns, 0);
+			}
 		}
 
 		for (auto &ret : midi_note_retrig) {
@@ -418,9 +460,8 @@ public:
 		auto &knobconn = knobset_id == PatchData::MIDIKnobSet ? midi_knob_conns[map.cc_num()] :
 																knob_conns[knobset_id][map.panel_knob_id];
 
-		auto found = std::find_if(knobconn.begin(), knobconn.end(), [&map](auto m) {
-			return map.param_id == m.param_id && map.module_id == m.module_id;
-		});
+		auto found = std::ranges::find_if(
+			knobconn, [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
 
 		if (found != knobconn.end()) {
 			found->min = map.min;
@@ -507,6 +548,8 @@ public:
 		for (auto &ins : midi_gate_conns)
 			std::erase(ins, jack);
 		for (auto &mp : midi_pulses)
+			std::erase(mp.conns, jack);
+		for (auto &mp : midi_divclk_pulses)
 			std::erase(mp.conns, jack);
 		for (auto &mp : midi_note_retrig)
 			std::erase(mp.conns, jack);
@@ -641,6 +684,7 @@ public:
 		erase_and_squash(midi_gate_conns);
 		erase_and_squash_inner(midi_note_retrig);
 		erase_and_squash_inner(midi_pulses);
+		erase_and_squash_inner(midi_divclk_pulses);
 
 		pd.remove_module(module_idx);
 
@@ -649,17 +693,6 @@ public:
 		calc_multiple_module_indicies();
 
 		smp.load_patch(num_modules);
-	}
-
-	void set_samplerate(float hz) {
-		samplerate = hz;
-
-		for (auto &mp : midi_pulses)
-			mp.pulse.set_update_rate_hz(samplerate);
-
-		for (size_t i = 1; i < num_modules; i++) {
-			modules[i]->set_samplerate(samplerate);
-		}
 	}
 
 	// General info getters:
@@ -730,6 +763,15 @@ public:
 				}
 			}
 		}
+		for (auto const &conn : midi_divclk_pulses) {
+			for (auto const &jack : conn.conns) {
+				if (jack.module_id < num_modules) {
+					modules[jack.module_id]->mark_input_patched(jack.jack_id);
+				}
+			}
+		}
+
+		midi_divclocks_reset();
 
 		midi_connected = true;
 	}
@@ -751,6 +793,13 @@ public:
 		mark_unpatched(midi_gate_conns);
 
 		for (auto const &conn : midi_pulses) {
+			for (auto const &jack : conn.conns) {
+				if (jack.module_id < num_modules) {
+					modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+				}
+			}
+		}
+		for (auto const &conn : midi_divclk_pulses) {
 			for (auto const &jack : conn.conns) {
 				if (jack.module_id < num_modules) {
 					modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
@@ -800,6 +849,8 @@ private:
 		for (auto &conn : midi_gate_conns)
 			conn.clear();
 		for (auto &mp : midi_pulses)
+			mp.conns.clear();
+		for (auto &mp : midi_divclk_pulses)
 			mp.conns.clear();
 	}
 
@@ -897,8 +948,20 @@ public:
 			pr_dbg("MIDI Clk");
 
 		} else if (auto num = Midi::midi_divclk(panel_jack_id); num.has_value()) {
-			update_or_add(midi_pulses[TimingEvents::DivClock].conns, input_jack);
-			midi_divclk_div_amt = num.value() + 1;
+			uint8_t div_event = *num == 0  ? Midi::DivClock1 :
+								*num == 1  ? Midi::DivClock2 :
+								*num == 2  ? Midi::DivClock3 :
+								*num == 5  ? Midi::DivClock6 :
+								*num == 11 ? Midi::DivClock12 :
+								*num == 23 ? Midi::DivClock24 :
+								*num == 47 ? Midi::DivClock48 :
+								*num == 95 ? Midi::DivClock96 :
+											 0xFF;
+			if (div_event == 0xFF) {
+				pr_err("Error: Unknown MIDI clock division: %d. Using /24\n", *num);
+				div_event = Midi::DivClock24;
+			}
+			update_or_add(midi_divclk_pulses[div_event].conns, input_jack);
 			pr_dbg("MIDI Div %d Clk", num.value() + 1);
 
 		} else if (auto num = Midi::midi_transport(panel_jack_id); num.has_value()) {
