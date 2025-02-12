@@ -130,4 +130,32 @@ std::string Model::getFullName() {
 		return slug;
 }
 
+void Model::fromJson(json_t *rootJ) {
+}
+
+std::string Model::getFactoryPresetDirectory() {
+	// TODO:
+	return "";
+}
+
+std::string Model::getUserPresetDirectory() {
+	// TODO:
+	return "";
+}
+
+std::string Model::getManualUrl() {
+	return "";
+}
+
+void Model::appendContextMenu(ui::Menu *menu, bool inBrowser) {
+	// TODO
+}
+
+bool Model::isFavorite() {
+	return false;
+}
+
+void Model::setFavorite(bool favorite) {
+}
+
 } // namespace rack::plugin

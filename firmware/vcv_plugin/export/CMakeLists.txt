@@ -38,6 +38,8 @@ target_sources(
          src/engine/Engine.cpp
          src/engine/Module.cpp
          src/engine/ParamQuantity.cpp
+         src/engine/LightInfo.cc
+         src/engine/PortInfo.cc
 
          src/plugin/Model.cpp
          src/plugin/Plugin.cpp

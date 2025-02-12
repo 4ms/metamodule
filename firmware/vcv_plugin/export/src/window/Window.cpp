@@ -60,6 +60,9 @@ Image::~Image() = default;
 struct Window::Internal {
 	std::map<std::string, std::shared_ptr<Font>> fontCache;
 	std::map<std::string, std::shared_ptr<Image>> imageCache;
+
+	bool fbdirty_subpx{};
+	int fb_count{};
 };
 
 Window::Window()
@@ -92,6 +95,55 @@ std::shared_ptr<Image> Window::loadImage(const std::string &filename) {
 	internal->imageCache[filename] = image;
 
 	return image;
+}
+
+math::Vec Window::getSize() {
+	return {};
+}
+void Window::setSize(math::Vec size) {
+}
+void Window::run() {
+}
+void Window::step() {
+}
+void Window::screenshot(const std::string &screenshotPath) {
+}
+void Window::screenshotModules(const std::string &screenshotsDir, float zoom) {
+}
+void Window::close() {
+}
+void Window::cursorLock() {
+}
+void Window::cursorUnlock() {
+}
+bool Window::isCursorLocked() {
+	return true;
+}
+int Window::getMods() {
+	return 0;
+}
+void Window::setFullScreen(bool fullScreen) {
+}
+bool Window::isFullScreen() {
+	return false;
+}
+double Window::getMonitorRefreshRate() {
+	return 1;
+}
+double Window::getFrameTime() {
+	return 1;
+}
+double Window::getLastFrameDuration() {
+	return 1;
+}
+double Window::getFrameDurationRemaining() {
+	return 0;
+}
+bool &Window::fbDirtyOnSubpixelChange() {
+	return internal->fbdirty_subpx;
+}
+int &Window::fbCount() {
+	return internal->fb_count;
 }
 
 } // namespace rack::window
