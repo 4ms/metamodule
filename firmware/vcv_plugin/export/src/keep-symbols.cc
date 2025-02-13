@@ -1,15 +1,19 @@
+// These must be inluded so the symbols are not dropped by the linker:
 #include "app/ModuleLightWidget.hpp"
 #include "app/ModuleWidget.hpp"
 #include "app/SvgSlider.hpp"
 #include "app/SvgSwitch.hpp"
-#include "dirent.h"
+#include "history.hpp"
 #include "random.hpp"
+#include "string.hpp"
+#include "ui/ChoiceButton.hpp"
+#include "ui/List.hpp"
+#include "ui/OptionButton.hpp"
 #include "widget/TransformWidget.hpp"
 
-#include "history.hpp"
+#include "dirent.h"
 #include "jansson.h"
 #include "pffft.h"
-#include "string.hpp"
 #include <cmath>
 #include <cstring>
 #include <memory>
@@ -82,8 +86,22 @@ void __attribute__((optimize("-O0"))) keep_register_module() {
 }
 
 void __attribute__((optimize("-O0"))) keep_light_widget() {
-	rack::app::LightWidget x;
-	printf("%p\n", &x);
+	{
+		rack::app::LightWidget x;
+		printf("%p\n", &x);
+	}
+	{
+		rack::ui::List x{};
+		printf("%p\n", &x);
+	}
+	{
+		rack::ui::OptionButton x{};
+		printf("%p\n", &x);
+	}
+	{
+		rack::ui::ChoiceButton x{};
+		printf("%p\n", &x);
+	}
 }
 
 void keep_dirent() {
