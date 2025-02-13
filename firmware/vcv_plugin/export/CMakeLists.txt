@@ -26,6 +26,7 @@ target_sources(
          src/app/LedDisplay.cpp
          src/app/LightWidget.cpp
          src/app/MidiDisplay.cc
+         src/app/ModuleLightWidget.cc
          src/app/ModuleWidget.cpp
          src/app/MultiLightWidget.cc
          src/app/ParamWidget.cc
@@ -72,6 +73,7 @@ target_sources(
          src/ui/ScrollWidget.cc
          src/ui/Slider.cc
          src/ui/TextField.cc
+         src/ui/Tooltip.cc
 
 
          src/widget/Widget.cc
@@ -84,7 +86,7 @@ target_sources(
          src/Quantity.cpp
          src/VCV_module_wrapper.cc
          src/asset.cc
-         src/context.cpp
+         src/context.cc
          src/glfw3.c
          src/history.cpp
          src/logger.cpp

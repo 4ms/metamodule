@@ -21,11 +21,7 @@ void SvgWidget::draw(const DrawArgs &args) {
 	// nothing
 }
 
-// void SvgWidget::setSvg(std::shared_ptr<window::Svg> svg) {
-// 	this->svg = svg;
-// 	wrap();
-// }
-
+// FIXME: set box size from svg
 void SvgWidget::setSvg(std::shared_ptr<window::Svg> svg) {
 	if (this->svg) {
 		if (this->svg->filename() != svg->filename()) {

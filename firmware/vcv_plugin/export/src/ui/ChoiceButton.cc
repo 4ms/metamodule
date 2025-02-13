@@ -2,7 +2,8 @@
 
 namespace rack::ui
 {
-void draw(const DrawArgs &args) {
+
+void ChoiceButton::draw(const DrawArgs &args) {
 }
 
 } // namespace rack::ui

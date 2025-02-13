@@ -3,6 +3,9 @@
 namespace rack::app
 {
 
+void LightWidget::draw(const DrawArgs &args) {
+}
+
 void LightWidget::drawLayer(const DrawArgs &args, int layer) {
 	if (layer == 1) {
 		// Use the formula `lightColor * (1 - dest) + dest` for blending

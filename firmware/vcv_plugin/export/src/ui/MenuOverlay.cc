@@ -2,6 +2,9 @@
 
 namespace rack::ui
 {
+
+MenuOverlay::MenuOverlay() = default;
+
 void MenuOverlay::draw(const DrawArgs &args) {
 }
 void MenuOverlay::step() {

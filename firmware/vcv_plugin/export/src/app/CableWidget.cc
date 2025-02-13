@@ -43,4 +43,11 @@ engine::Cable *CableWidget::releaseCable() {
 	return t;
 }
 
+void CableWidget::step() {
+}
+void CableWidget::draw(const DrawArgs &args) {
+}
+void CableWidget::drawLayer(const DrawArgs &args, int layer) {
+}
+
 } // namespace rack::app

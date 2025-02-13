@@ -14,7 +14,7 @@ static void svg_to_png(std::string &path) {
 static void set_drive(std::string &path) {
 }
 
-std::string system(std::string_view filename) {
+std::string system(std::string filename) {
 	auto path = std::string(filename);
 	svg_to_png(path);
 
@@ -46,14 +46,14 @@ std::string system(std::string_view filename) {
 	return path;
 }
 
-std::string user(std::string_view filename) {
+std::string user(std::string filename) {
 	auto path = std::string("usr/") + std::string(filename);
 	svg_to_png(path);
 	set_drive(path);
 	return path;
 }
 
-std::string plugin(plugin::Plugin *plugin, std::string_view filename) {
+std::string plugin(plugin::Plugin *plugin, std::string filename) {
 	std::string path{filename};
 
 	// Strip the res/

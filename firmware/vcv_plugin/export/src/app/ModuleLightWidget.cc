@@ -2,8 +2,10 @@
 
 namespace rack::app
 {
+ModuleLightWidget::ModuleLightWidget() = default;
+ModuleLightWidget::~ModuleLightWidget() = default;
 
-engine::Light *ModuleLightWidet::getLight(int colorId) {
+engine::Light *ModuleLightWidget::getLight(int colorId) {
 	if (!module || firstLightId < 0)
 		return nullptr;
 	return &module->lights[firstLightId + colorId];
@@ -19,6 +21,15 @@ void ModuleLightWidget::createTooltip() {
 }
 
 void ModuleLightWidget::destroyTooltip() {
+}
+
+void ModuleLightWidget::step() {
+}
+void ModuleLightWidget::onHover(const HoverEvent &e) {
+}
+void ModuleLightWidget::onEnter(const EnterEvent &e) {
+}
+void ModuleLightWidget::onLeave(const LeaveEvent &e) {
 }
 
 } // namespace rack::app

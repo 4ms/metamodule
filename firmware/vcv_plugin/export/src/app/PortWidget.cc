@@ -4,6 +4,11 @@
 namespace rack::app
 {
 
+struct PortWidget::Internal {};
+
+PortWidget::PortWidget() = default;
+PortWidget::~PortWidget() = default;
+
 engine::Port *PortWidget::getPort() {
 	if (!module)
 		return nullptr;
@@ -31,10 +36,28 @@ void PortWidget::destroyTooltip() {
 void PortWidget::createContextMenu() {
 }
 
-void PortWidget::appendContextMenu(ui::Menu *menu) {
+void PortWidget::deleteTopCableAction() {
 }
 
-void PortWidget::deleteTopCableAction() {
+void PortWidget::step() {
+}
+void PortWidget::draw(const DrawArgs &args) {
+}
+void PortWidget::onButton(const ButtonEvent &e) {
+}
+void PortWidget::onEnter(const EnterEvent &e) {
+}
+void PortWidget::onLeave(const LeaveEvent &e) {
+}
+void PortWidget::onDragStart(const DragStartEvent &e) {
+}
+void PortWidget::onDragEnd(const DragEndEvent &e) {
+}
+void PortWidget::onDragDrop(const DragDropEvent &e) {
+}
+void PortWidget::onDragEnter(const DragEnterEvent &e) {
+}
+void PortWidget::onDragLeave(const DragLeaveEvent &e) {
 }
 
 } // namespace rack::app

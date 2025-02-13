@@ -171,4 +171,21 @@ ParamWidget *RackWidget::getTouchedParam() {
 void RackWidget::setTouchedParam(ParamWidget *pw) {
 }
 
+void RackWidget::step() {
+}
+void RackWidget::draw(const DrawArgs &args) {
+}
+void RackWidget::onHover(const HoverEvent &e) {
+}
+void RackWidget::onHoverKey(const HoverKeyEvent &e) {
+}
+void RackWidget::onButton(const ButtonEvent &e) {
+}
+void RackWidget::onDragStart(const DragStartEvent &e) {
+}
+void RackWidget::onDragEnd(const DragEndEvent &e) {
+}
+void RackWidget::onDragHover(const DragHoverEvent &e) {
+}
+
 } // namespace rack::app

@@ -4,6 +4,9 @@
 namespace rack::app
 {
 
+ParamWidget::ParamWidget() = default;
+ParamWidget::~ParamWidget() = default;
+
 engine::ParamQuantity *ParamWidget::getParamQuantity() {
 	if (!module)
 		return nullptr;
