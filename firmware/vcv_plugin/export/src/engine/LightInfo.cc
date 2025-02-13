@@ -1,4 +1,4 @@
-#include <LightInfo.hpp>
+#include <engine/LightInfo.hpp>
 
 namespace rack::engine
 {

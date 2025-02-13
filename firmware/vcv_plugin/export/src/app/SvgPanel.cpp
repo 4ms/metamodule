@@ -40,9 +40,4 @@ void ThemedSvgPanel::setBackground(std::shared_ptr<window::Svg> lightSvg, std::s
 	SvgPanel::setBackground(settings::preferDarkPanels ? darkSvg : lightSvg);
 }
 
-void ThemedSvgPanel::step() override {
-	SvgPanel::setBackground(settings::preferDarkPanels ? darkSvg : lightSvg);
-	SvgPanel::step();
-}
-
 } // namespace rack::app

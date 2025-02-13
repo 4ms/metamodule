@@ -3,6 +3,18 @@
 namespace rack::app
 {
 
+struct RackWidget::Internal {
+	std::set<ModuleWidget *> selected;
+};
+
+RackWidget::RackWidget()
+	: internal{new Internal} {
+}
+
+RackWidget::~RackWidget() {
+	delete internal;
+}
+
 widget::Widget *RackWidget::getModuleContainer() {
 	return {};
 }
@@ -35,7 +47,7 @@ void RackWidget::removeModule(ModuleWidget *mw) {
 ModuleWidget *RackWidget::getModule(int64_t moduleId) {
 	return nullptr;
 }
-std::vector<ModuleWidget * RackWidget::> getModules() {
+std::vector<ModuleWidget *> RackWidget::getModules() {
 	return {};
 }
 bool RackWidget::hasModules() {
@@ -63,19 +75,20 @@ void RackWidget::selectAll() {
 }
 void RackWidget::deselectAll() {
 }
-void RackWidget::select(ModuleWidget *mw, bool selected = true) {
+void RackWidget::select(ModuleWidget *mw, bool selected) {
 }
 bool RackWidget::hasSelection() {
 	return {};
 }
-std::set<ModuleWidget *> RackWidget::selected;
-const RackWidget::std::set<ModuleWidget *> &getSelected() {
-	return selected;
+
+const std::set<ModuleWidget *> &RackWidget::getSelected() {
+	return internal->selected;
 }
+
 bool RackWidget::isSelected(ModuleWidget *mw) {
 	return {};
 }
-json_t *RackWidget::selectionToJson(bool cables = true) {
+json_t *RackWidget::selectionToJson(bool cables) {
 	return {};
 }
 void RackWidget::loadSelection(std::string path) {
@@ -94,7 +107,7 @@ void RackWidget::randomizeSelectionAction() {
 }
 void RackWidget::disconnectSelectionAction() {
 }
-void RackWidget::cloneSelectionAction(bool cloneCables = true) {
+void RackWidget::cloneSelectionAction(bool cloneCables) {
 }
 void RackWidget::bypassSelectionAction(bool bypassed) {
 }
@@ -135,13 +148,13 @@ CableWidget *RackWidget::getTopCable(PortWidget *port) {
 CableWidget *RackWidget::getCable(int64_t cableId) {
 	return {};
 }
-std::vector<CableWidget * RackWidget::> getCompleteCables() {
+std::vector<CableWidget *> RackWidget::getCompleteCables() {
 	return {};
 }
-std::vector<CableWidget * RackWidget::> getCablesOnPort(PortWidget *port) {
+std::vector<CableWidget *> RackWidget::getCablesOnPort(PortWidget *port) {
 	return {};
 }
-std::vector<CableWidget * RackWidget::> getCompleteCablesOnPort(PortWidget *port) {
+std::vector<CableWidget *> RackWidget::getCompleteCablesOnPort(PortWidget *port) {
 	return {};
 }
 int RackWidget::getNextCableColorId() {

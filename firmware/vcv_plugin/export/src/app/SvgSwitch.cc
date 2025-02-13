@@ -26,4 +26,11 @@ void SvgSwitch::addFrame(std::shared_ptr<window::Svg> svg) {
 	}
 }
 
+void SvgSwitch::onDragStart(const DragStartEvent &e) {
+}
+void SvgSwitch::onDragEnd(const DragEndEvent &e) {
+}
+void SvgSwitch::onChange(const ChangeEvent &e) {
+}
+
 } // namespace rack::app

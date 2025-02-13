@@ -3,6 +3,9 @@
 namespace rack::app
 {
 
+RackScrollWidget::RackScrollWidget() = default;
+RackScrollWidget::~RackScrollWidget() = default;
+
 void RackScrollWidget::reset() {
 }
 
@@ -17,10 +20,23 @@ float RackScrollWidget::getZoom() {
 	return {};
 }
 
-void RackScrollWid::setZoom(float zoom) {
+void RackScrollWidget::setZoom(float zoom) {
 }
 
-void RackScrollWid::setZoom(float zoom, math::Vec pivot) {
+void RackScrollWidget::setZoom(float zoom, math::Vec pivot) {
+}
+
+void RackScrollWidget::step() {
+}
+void RackScrollWidget::draw(const DrawArgs &args) {
+}
+void RackScrollWidget::onHoverKey(const HoverKeyEvent &e) {
+}
+void RackScrollWidget::onHoverScroll(const HoverScrollEvent &e) {
+}
+void RackScrollWidget::onHover(const HoverEvent &e) {
+}
+void RackScrollWidget::onButton(const ButtonEvent &e) {
 }
 
 } // namespace rack::app

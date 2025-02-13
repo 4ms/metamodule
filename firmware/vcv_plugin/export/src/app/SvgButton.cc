@@ -26,4 +26,13 @@ void SvgButton::addFrame(std::shared_ptr<window::Svg> svg) {
 	}
 }
 
+void SvgButton::onButton(const ButtonEvent &e) {
+}
+void SvgButton::onDragStart(const DragStartEvent &e) {
+}
+void SvgButton::onDragEnd(const DragEndEvent &e) {
+}
+void SvgButton::onDragDrop(const DragDropEvent &e) {
+}
+
 } // namespace rack::app

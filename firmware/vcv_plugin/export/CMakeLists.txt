@@ -20,20 +20,30 @@ target_link_libraries(vcv_plugin_export PUBLIC vcv_plugin_interface)
 target_sources(
   vcv_plugin_export
   PRIVATE 
+		 src/app/CableWidget.cc
+		 src/app/CircularShadow.cc
          src/app/Knob.cpp
          src/app/LedDisplay.cpp
          src/app/LightWidget.cpp
+         src/app/MidiDisplay.cc
          src/app/ModuleWidget.cpp
+         src/app/MultiLightWidget.cc
          src/app/ParamWidget.cc
+         src/app/PortWidget.cc
+         src/app/RackScrollWidget.cc
+         src/app/RackWidget.cc
+         src/app/RailWidget.cc
+         src/app/RackWidget.cc
+         src/app/Scene.cc
+         src/app/SliderKnob.cc
+         src/app/SvgButton.cc
          src/app/SvgKnob.cc
          src/app/SvgPanel.cpp
          src/app/SvgPort.cc
+         src/app/SvgScrew.cc
          src/app/SvgSlider.cc
          src/app/SvgSwitch.cc
-         src/app/SvgButton.cc
-         src/app/SvgScrew.cc
-		 src/app/CableWidget.cc
-		 src/app/CircularShadow.cc
+         src/app/Switch.cc
 
          src/engine/Engine.cpp
          src/engine/Module.cpp
@@ -44,11 +54,25 @@ target_sources(
          src/plugin/Model.cpp
          src/plugin/Plugin.cpp
 
+		 src/ui/Button.cc
+		 src/ui/ChoiceButton.cc
+		 src/ui/common.cc
+		 src/ui/Label.cc
+		 src/ui/List.cc
          src/ui/Menu.cc
          src/ui/MenuItem.cc
          src/ui/MenuEntry.cc
          src/ui/MenuLabel.cc
+         src/ui/MenuOverlay.cc
          src/ui/MenuSeparator.cc
+         src/ui/OptionButton.cc
+         src/ui/ProgressBar.cc
+         src/ui/RadioButton.cc
+         src/ui/Scrollbar.cc
+         src/ui/ScrollWidget.cc
+         src/ui/Slider.cc
+         src/ui/TextField.cc
+
 
          src/widget/Widget.cc
          src/widget/SvgWidget.cc
