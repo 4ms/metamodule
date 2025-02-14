@@ -69,7 +69,7 @@ target_sources(
          src/ui/OptionButton.cc
          src/ui/ProgressBar.cc
          src/ui/RadioButton.cc
-         src/ui/Scrollbar.cc
+         src/ui/ScrollBar.cc
          src/ui/ScrollWidget.cc
          src/ui/Slider.cc
          src/ui/TextField.cc
