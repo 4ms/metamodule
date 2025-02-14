@@ -2,6 +2,28 @@
 
 namespace rack::widget
 {
+
+math::Rect Widget::getBox() {
+	return box;
+}
+
+void Widget::setBox(math::Rect box) {
+	setPosition(box.pos);
+	setSize(box.size);
+}
+
+math::Vec Widget::getPosition() {
+	return box.pos;
+}
+
+void Widget::setPosition(math::Vec pos) {
+	box.pos = pos;
+}
+
+math::Vec Widget::getSize() {
+	return {box.size};
+}
+
 void Widget::setSize(math::Vec size) {
 	if (size.equals(box.size))
 		return;
@@ -9,6 +31,18 @@ void Widget::setSize(math::Vec size) {
 	// Dispatch Resize event
 	ResizeEvent eResize;
 	onResize(eResize);
+}
+
+widget::Widget *Widget::getParent() {
+	return parent;
+}
+
+bool Widget::isVisible() {
+	return visible;
+}
+
+void Widget::setVisible(bool visible) {
+	this->visible = visible;
 }
 
 void Widget::requestDelete() {
@@ -176,9 +210,16 @@ math::Vec Widget::getRelativeOffset(math::Vec v, Widget *ancestor) {
 	return {};
 }
 
+float Widget::getRelativeZoom(Widget *ancestor) {
+	return 1.f;
+}
+
 math::Rect Widget::getViewport(math::Rect r) {
 	//TODO:
 	return {};
+}
+
+void Widget::step() {
 }
 
 } // namespace rack::widget

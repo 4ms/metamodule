@@ -40,4 +40,7 @@ void SvgSlider::setHandlePos(math::Vec minHandlePos, math::Vec maxHandlePos) {
 void SvgSlider::setHandlePosCentered(math::Vec minHandlePosCentered, math::Vec maxHandlePosCentered) {
 }
 
+void SvgSlider::onChange(const ChangeEvent &e) {
+}
+
 } // namespace rack::app

@@ -25,6 +25,8 @@ Context *contextGet() {
 	return &rack_context;
 }
 
+Context::~Context() = default;
+
 void contextSet(Context *context) {
 	rack_context.scene->rackScroll = &rackScroll;
 	rack_context.scene->rackScroll->zoomWidget = &zoomWidget;

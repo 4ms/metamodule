@@ -52,9 +52,6 @@ void FramebufferWidget::deleteFramebuffer() {
 	if (!internal->fb)
 		return;
 
-	// If the framebuffer exists, the Window should exist.
-	// assert(APP->window);
-
 	// nvgluDeleteFramebuffer(internal->fb);
 	internal->fb = nullptr;
 }
@@ -66,7 +63,8 @@ void FramebufferWidget::step() {
 void FramebufferWidget::draw(const DrawArgs &args) {
 }
 
-void FramebufferWidget::render(math::Vec scale, math::Vec offsetF, math::Rect clipBox) {};
+void FramebufferWidget::render(math::Vec scale, math::Vec offsetF, math::Rect clipBox) {
+}
 
 void FramebufferWidget::drawFramebuffer() {
 }

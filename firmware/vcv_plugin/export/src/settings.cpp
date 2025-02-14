@@ -13,13 +13,13 @@ bool isPlugin = false;
 // Persistent state
 
 bool safeMode{};
-std::string token{};
+std::string token;
 bool windowMaximized{};
 math::Vec windowSize{};
 math::Vec windowPos{};
 bool invertZoom{};
 float pixelRatio{};
-std::string uiTheme{};
+std::string uiTheme;
 float cableOpacity{};
 float cableTension{};
 float rackBrightness{};
@@ -39,9 +39,12 @@ bool preferDarkPanels{};
 float frameRateLimit{};
 float autosaveInterval{};
 bool skipLoadOnLaunch{};
-std::list<std::string> recentPatchPaths{};
-std::vector<NVGcolor> cableColors{};
+std::list<std::string> recentPatchPaths;
+std::vector<NVGcolor> cableColors;
+std::vector<std::string> cableLabels;
+bool cableAutoRotate{};
 bool autoCheckUpdates{};
+bool verifyHttpsCerts{};
 bool showTipsOnLaunch{};
 int tipIndex{};
 BrowserSort browserSort{};
@@ -55,5 +58,9 @@ std::map<std::string, PluginWhitelist> moduleWhitelist;
 bool isModuleWhitelisted(const std::string &pluginSlug, const std::string &moduleSlug) {
 	return false;
 };
+
+void resetCables(){
+}
+
 
 } // namespace rack::settings

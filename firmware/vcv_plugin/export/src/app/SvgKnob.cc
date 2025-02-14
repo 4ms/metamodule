@@ -1,4 +1,3 @@
-#include "console/pr_dbg.hh"
 #include "metamodule/svg.hh"
 #include <app/SvgKnob.hpp>
 
@@ -15,13 +14,17 @@ void SvgKnob::setSvg(std::shared_ptr<window::Svg> svg) {
 SvgKnob::SvgKnob()
 	: fb(new widget::FramebufferWidget)
 	, shadow(new CircularShadow)
-	, sw(new widget::SvgWidget)
-	, tw(new widget::TransformWidget) {
+	, tw(new widget::TransformWidget)
+	, sw(new widget::SvgWidget) {
+
 	addChild(fb);
 	fb->addChild(shadow);
 	shadow->box.size = math::Vec();
 	fb->addChild(tw);
 	tw->addChild(sw);
+}
+
+void SvgKnob::onChange(const ChangeEvent &e) {
 }
 
 } // namespace rack::app

@@ -34,4 +34,10 @@ void SvgPanel::setBackground(std::shared_ptr<window::Svg> svg) {
 	fb->setDirty();
 }
 
+void ThemedSvgPanel::setBackground(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
+	this->lightSvg = lightSvg;
+	this->darkSvg = darkSvg;
+	SvgPanel::setBackground(settings::preferDarkPanels ? darkSvg : lightSvg);
+}
+
 } // namespace rack::app

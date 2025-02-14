@@ -1,7 +1,6 @@
 #include "console/pr_dbg.hh"
 #include "module_widget_adaptor.hh"
 #include <app/ModuleWidget.hpp>
-#include <deque>
 #include <plugin/Model.hpp>
 #include <plugin/Plugin.hpp>
 #include <string_view>
@@ -74,6 +73,14 @@ void Plugin::addModel(Model *model) {
 
 	delete modulewidget;
 	delete module;
+}
+
+Plugin::Plugin()
+	: slug{""} {
+}
+
+Plugin::Plugin(std::string slug)
+	: slug{slug} {
 }
 
 Plugin::~Plugin() {

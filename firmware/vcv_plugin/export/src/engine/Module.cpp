@@ -10,7 +10,13 @@
 namespace rack::engine
 {
 
-Module::Module() {
+struct Module::Internal {
+	//nothing for now
+	uint32_t _;
+};
+
+Module::Module()
+	: internal{new Internal} {
 	onReset();
 }
 
@@ -31,6 +37,8 @@ Module::~Module() {
 		if (lightInfo)
 			delete lightInfo;
 	}
+
+	delete internal;
 }
 
 void Module::load_state(std::string_view state_data) {
@@ -145,11 +153,26 @@ void Module::processBypass(const ProcessArgs &args) {
 	}
 }
 
+std::string Module::createPatchStorageDirectory() {
+	return "";
+}
+
+std::string Module::getPatchStorageDirectory() {
+	return "";
+}
+
 void Module::set_samplerate(float rate) {
-	APP->engine->sample_rate = rate;
+	APP->engine->setSampleRate(rate);
 	args.sampleRate = rate;
 	args.sampleTime = 1.f / rate;
 	onSampleRateChange({.sampleRate = rate, .sampleTime = 1.f / rate});
+}
+
+json_t *Module::toJson() {
+	return nullptr;
+}
+
+void Module::fromJson(json_t *rootJ) {
 }
 
 json_t *Module::paramsToJson() {
@@ -197,6 +220,15 @@ void Module::paramsFromJson(json_t *rootJ) {
 		if (valueJ)
 			pq->setImmediateValue(json_number_value(valueJ));
 	}
+}
+
+void Module::onReset(const ResetEvent &e) {
+}
+
+void Module::onRandomize(const RandomizeEvent &e) {
+}
+bool Module::isBypassed() {
+	return false;
 }
 
 } // namespace rack::engine
