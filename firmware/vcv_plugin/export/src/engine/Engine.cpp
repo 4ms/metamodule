@@ -18,7 +18,7 @@ Engine::~Engine() {
 // clang-format off
 
 void Engine::clear(){}
-void Engine::clear_NoLock(){}
+// void Engine::clear_NoLock(){}
 void Engine::stepBlock(int frames){}
 void Engine::setMasterModule(Module *module){}
 void Engine::setMasterModule_NoLock(Module *module){}
