@@ -11,8 +11,9 @@ namespace MetaModule
 struct Params {
 	std::array<float, PanelDef::NumPot> knobs{};
 
-	Midi::Event midi_event{}; //6B
-	MidiMessage raw_msg{};	  //3B
+	Midi::Event midi_event{};  //6B
+	MidiMessage raw_msg{};	   //3B
+	MidiMessage raw_msg_out{}; //3B
 	uint8_t gate_ins{};
 	Toggler button{};
 
@@ -32,6 +33,7 @@ struct Params {
 
 		midi_event = that.midi_event;
 		raw_msg = that.raw_msg;
+		raw_msg_out = that.raw_msg_out;
 
 		gate_ins = that.gate_ins;
 

@@ -126,6 +126,12 @@ void Controls::parse_midi() {
 		cur_params->raw_msg = 0;
 		cur_params->midi_event.type = Midi::Event::Type::None;
 	}
+
+	// Parse outgoing MIDI message if available
+	if (cur_params->raw_msg_out.raw() != MidiMessage{}.raw()) {
+		_midi_host.transmit(cur_params->raw_msg_out.raw());
+		cur_params->raw_msg_out = MidiMessage{};
+	}
 }
 
 template<size_t block_num>
