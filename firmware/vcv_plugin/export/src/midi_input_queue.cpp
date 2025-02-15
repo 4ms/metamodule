@@ -10,7 +10,7 @@ struct InputQueue::Internal {
 };
 
 InputQueue::InputQueue()
-	: internal(new Internal) { //std::make_unique<Internal>()) {
+	: internal(new Internal) {
 
 	MetaModule::MidiRouter::subscribe(&internal->queue);
 }
