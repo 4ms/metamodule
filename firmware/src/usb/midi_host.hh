@@ -8,9 +8,8 @@
 
 #pragma once
 #include "pr_dbg.hh"
-#include "usbh_midi.hh"
-#include "util/fixed_vector.hh"
-#include <optional>
+#include "usb/usbh_midi.hh"
+#include "util/doublebuf_stream.hh"
 
 class MidiHost {
 	MidiStreamingHandle MSHandle;
@@ -27,16 +26,22 @@ class MidiHost {
 	};
 	bool _is_connected = false;
 
-	// This size can be adjusted if needed
-	FixedVector<uint8_t, 64> tx_buffer[2];
-	std::optional<unsigned> in_progress_idx = 0;
+	DoubleBufferStream<uint8_t, 64> tx_stream;
 
 public:
 	MidiHost(USBH_HandleTypeDef &usbhh)
-		: usbhost{usbhh} {
+		: usbhost{usbhh}
+		, tx_stream{[this](std::span<uint8_t> buf) {
+			auto res = USBH_MIDI_Transmit(&usbhost, buf.data(), buf.size());
+			if (res == USBH_BUSY) {
+				// TODO: how to handle?
+				pr_err("MIDI Host: USBH is busy, cannot send\n");
+			}
+			return res == USBH_OK;
+		}} {
 
 		MSHandle.tx_callback = [this]() {
-			tx_done_callback();
+			tx_stream.tx_done_callback();
 		};
 	}
 
@@ -58,9 +63,9 @@ public:
 		return USBH_Stop(&usbhost) == USBH_OK;
 	}
 
-	void process() {
-		USBH_Process(&usbhost);
-	}
+	// void process() {
+	// 	USBH_Process(&usbhost);
+	// }
 
 	bool is_connected() {
 		return _is_connected;
@@ -81,54 +86,9 @@ public:
 
 	// Pushes to the inactive buffer and starts transmission if it's not already started
 	bool transmit(uint32_t word) {
-		auto inactive_idx = 1 - in_progress_idx.value_or(1);
-		auto &inactive_buf = tx_buffer[inactive_idx];
+		// rely on unsigned overflow:
+		std::array<uint8_t, 3> bytes{uint8_t(word >> 16), uint8_t(word >> 8), uint8_t(word)};
 
-		// Note: STM USB host library does not call the tx callback in an IRQ,
-		// so we do not run the risk of tx_done_callback() interrupting us
-		if (inactive_buf.available() >= 3) {
-			inactive_buf.push_back(word >> 16);
-			inactive_buf.push_back(word >> 8);
-			inactive_buf.push_back(word);
-
-			// Start a new transmission if one isn't in progress
-			if (!in_progress_idx.has_value()) {
-				auto res = start_tx(inactive_idx);
-				return res == USBH_OK;
-			}
-
-			// tx_done_callback() will transmit our data when it's called
-			return true;
-		} else
-			return false;
-	}
-
-private:
-	USBH_StatusTypeDef start_tx(unsigned idx) {
-		in_progress_idx = idx;
-		auto &active_buf = tx_buffer[idx];
-		auto res = USBH_MIDI_Transmit(&usbhost, active_buf.begin(), active_buf.size());
-
-		if (res == USBH_BUSY) {
-			// TODO: how to handle?
-			pr_err("MIDI Host: USBH is busy, cannot send\n");
-		}
-		return res;
-	}
-
-	void tx_done_callback() {
-		if (!in_progress_idx.has_value())
-			pr_err("MIDI Host internal error: tx_done_callback called but no buffer is in progress\n");
-
-		tx_buffer[in_progress_idx.value()].clear();
-
-		// Check if we should start transmitting the other buffer
-		auto other_buffer = 1 - in_progress_idx.value();
-
-		if (tx_buffer[other_buffer].size()) {
-			start_tx(other_buffer);
-		} else {
-			in_progress_idx = std::nullopt;
-		}
+		return tx_stream.transmit(bytes);
 	}
 };
