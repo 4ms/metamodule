@@ -205,7 +205,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
-		auto const &params = param_block.params[idx];
+		auto &params = param_block.params[idx];
 		auto &ext_out = audio_block.out_ext_codec[idx];
 		auto const &ext_in = audio_block.in_ext_codec[idx];
 		idx++;
@@ -266,7 +266,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		midi.process(param_block.metaparams.midi_connected,
 					 params.midi_event,
 					 param_block.metaparams.midi_poly_chans,
-					 params.raw_msg);
+					 params.raw_msg,
+					 &params.raw_msg_out);
 
 		// Run each module
 		player.update_patch();
@@ -333,7 +334,8 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		midi.process(param_block.metaparams.midi_connected,
 					 params.midi_event,
 					 param_block.metaparams.midi_poly_chans,
-					 params.raw_msg);
+					 params.raw_msg,
+					 &params.raw_msg_out);
 
 		for (auto &outchan : out.chan)
 			outchan = 0;

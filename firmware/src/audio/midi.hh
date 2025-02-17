@@ -17,7 +17,12 @@ struct AudioStreamMidi {
 		, sync_params{sync_params} {
 	}
 
-	void process(bool is_connected, Midi::Event const &event, unsigned poly_num, MidiMessage const &raw_msg) {
+	void process(bool is_connected,
+				 Midi::Event const &event,
+				 unsigned poly_num,
+				 MidiMessage const &raw_msg,
+				 MidiMessage *raw_out_msg) {
+
 		if (is_connected && !last_connected) {
 			player.set_midi_connected();
 		} else if (!is_connected && last_connected) {
@@ -31,7 +36,11 @@ struct AudioStreamMidi {
 
 		if (raw_msg.status != 0xfe && raw_msg.status != 0) {
 			// 50ns with no listeners + ~100ns additional per listener
-			player.send_raw_midi(raw_msg);
+			MidiRouter::push_incoming_message(raw_msg);
+		}
+
+		if (auto tx_msg = MidiRouter::pop_outgoing_message()) {
+			*raw_out_msg = *tx_msg;
 		}
 
 		if (event.type == Midi::Event::Type::None)
