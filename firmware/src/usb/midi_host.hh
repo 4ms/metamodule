@@ -63,10 +63,6 @@ public:
 		return USBH_Stop(&usbhost) == USBH_OK;
 	}
 
-	// void process() {
-	// 	USBH_Process(&usbhost);
-	// }
-
 	bool is_connected() {
 		return _is_connected;
 	}

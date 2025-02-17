@@ -5,37 +5,61 @@
 namespace rack::midi
 {
 
-Output::Output() {
+struct Output::Internal {
+	MetaModule::MidiQueue queue;
+};
+
+Output::Output()
+	: internal(new Internal) {
+	MetaModule::MidiRouter::subscribe_tx(&internal->queue);
+	reset();
 }
 
 Output::~Output() {
+	setDeviceId(-1);
+	MetaModule::MidiRouter::unsubscribe_tx(&internal->queue);
+	delete internal;
 }
 
 void Output::reset() {
+	setDriverId(-1);
+	channel = 0;
 }
 
-std::vector<int> getDeviceIds() {
+std::vector<int> Output::getDeviceIds() {
 	return {1};
 }
 
-int getDefaultDeviceId() {
-	return 1;
+void Output::setDeviceId(int deviceId) {
+	//
 }
 
-void setDeviceId(int deviceId) {
-	//ignored
+int Output::getDefaultDeviceId() {
+	return -1;
 }
 
-std::string getDeviceName(int deviceId) {
+std::string Output::getDeviceName(int deviceId) {
 	return "USB-C MIDI";
 }
 
-std::vector<int> getChannels() {
+std::vector<int> Output::getChannels() {
 	return {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 }
 
-void sendMessage(const Message &message) {
-	// TODO
+void Output::sendMessage(const Message &message) {
+	// Convert from rack::midi::Message to MidiMessage
+	MidiMessage msg;
+
+	auto status = MidiStatusByte::make(message.bytes[0]);
+
+	// Set channel
+	if (channel >= 0 && status.command != MidiCommand::Sys)
+		status.channel = channel;
+
+	msg.status = status;
+	msg.data.byte[0] = message.bytes[1];
+	msg.data.byte[1] = message.bytes[2];
+	internal->queue.put(msg);
 }
 
 } // namespace rack::midi

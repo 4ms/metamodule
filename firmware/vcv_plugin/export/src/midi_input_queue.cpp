@@ -12,11 +12,11 @@ struct InputQueue::Internal {
 InputQueue::InputQueue()
 	: internal(new Internal) {
 
-	MetaModule::MidiRouter::subscribe(&internal->queue);
+	MetaModule::MidiRouter::subscribe_rx(&internal->queue);
 }
 
 InputQueue::~InputQueue() {
-	MetaModule::MidiRouter::unsubscribe(&internal->queue);
+	MetaModule::MidiRouter::unsubscribe_rx(&internal->queue);
 	delete internal;
 }
 
