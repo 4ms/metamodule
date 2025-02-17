@@ -778,11 +778,16 @@ public:
 		out_patched[panel_out_jack_id] = is_patched;
 
 		auto const &jack = out_conns[panel_out_jack_id];
+
 		if (jack.module_id < num_modules) {
-			if (is_patched)
-				modules[jack.module_id]->mark_output_patched(jack.jack_id);
-			else
-				modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
+			// Don't mark the virtual module jack unpatched/patched
+			// if there is an existing internal cable
+			if (!pd.find_internal_cable_with_outjack(jack)) {
+				if (is_patched)
+					modules[jack.module_id]->mark_output_patched(jack.jack_id);
+				else
+					modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
+			}
 		}
 	}
 
