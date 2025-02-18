@@ -110,6 +110,11 @@ void Controls::update_midi_connected() {
 }
 
 void Controls::parse_midi() {
+	// Parse outgoing MIDI message if available
+	if (cur_params->raw_msg.raw() != MidiMessage{}.raw()) {
+		_midi_host.transmit(cur_params->raw_msg.raw());
+	}
+
 	// Parse a MIDI message if available
 	if (auto msg = _midi_rx_buf.get(); msg.has_value()) {
 		cur_params->raw_msg = msg.value();
@@ -125,12 +130,6 @@ void Controls::parse_midi() {
 	} else {
 		cur_params->raw_msg = 0;
 		cur_params->midi_event.type = Midi::Event::Type::None;
-	}
-
-	// Parse outgoing MIDI message if available
-	if (cur_params->raw_msg_out.raw() != MidiMessage{}.raw()) {
-		_midi_host.transmit(cur_params->raw_msg_out.raw());
-		cur_params->raw_msg_out = MidiMessage{};
 	}
 }
 
