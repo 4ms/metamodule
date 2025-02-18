@@ -431,14 +431,15 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 	for (auto i = 0u; i < block_size_; i++)
 		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt
 
-	// std::memcpy(local_params.params.data(), param_blocks[block].params.data(), sizeof(Params) * block_size_); //34us/63us alt
-
 	return local_params;
 }
 
 void AudioStream::return_cached_params(unsigned block) {
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
+	// ~46ns / sample:
+	for (auto i = 0u; i < block_size_; i++)
+		param_blocks[block].params[i].raw_msg = local_params.params[i].raw_msg;
 }
 
 void AudioStream::set_block_spans() {
