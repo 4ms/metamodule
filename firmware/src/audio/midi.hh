@@ -17,11 +17,7 @@ struct AudioStreamMidi {
 		, sync_params{sync_params} {
 	}
 
-	void process(bool is_connected,
-				 Midi::Event const &event,
-				 unsigned poly_num,
-				 MidiMessage const &raw_msg,
-				 MidiMessage *raw_out_msg) {
+	void process(bool is_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg) {
 
 		if (is_connected && !last_connected) {
 			player.set_midi_connected();
@@ -34,13 +30,17 @@ struct AudioStreamMidi {
 		if (!is_connected)
 			return;
 
-		if (raw_msg.status != 0xfe && raw_msg.status != 0) {
+		// Transfer MIDI RX message to router (from hardware)
+		if (raw_msg->status != 0xfe && raw_msg->status != 0) {
 			// 50ns with no listeners + ~100ns additional per listener
-			MidiRouter::push_incoming_message(raw_msg);
+			MidiRouter::push_incoming_message(*raw_msg);
 		}
 
+		// Transfer MIDI TX message from router (towards hardware)
 		if (auto tx_msg = MidiRouter::pop_outgoing_message()) {
-			*raw_out_msg = *tx_msg;
+			*raw_msg = *tx_msg;
+		} else {
+			*raw_msg = MidiMessage{};
 		}
 
 		if (event.type == Midi::Event::Type::None)

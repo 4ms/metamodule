@@ -263,13 +263,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// MIDI
-		MidiMessage msg;
 		midi.process(param_block.metaparams.midi_connected,
 					 params.midi_event,
 					 param_block.metaparams.midi_poly_chans,
-					 params.raw_msg,
-					 &msg);
-		params.raw_msg = msg;
+					 &params.raw_msg);
 
 		// Run each module
 		player.update_patch();
@@ -333,13 +330,10 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		}
 
 		// MIDI
-		MidiMessage msg;
 		midi.process(param_block.metaparams.midi_connected,
 					 params.midi_event,
 					 param_block.metaparams.midi_poly_chans,
-					 params.raw_msg,
-					 &msg);
-		params.raw_msg = msg;
+					 &params.raw_msg);
 
 		for (auto &outchan : out.chan)
 			outchan = 0;
