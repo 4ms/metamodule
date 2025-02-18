@@ -255,12 +255,6 @@ private:
 		lv_hide(ui_MappedPanel);
 	}
 
-	void make_nonselectable_item(lv_obj_t *obj) {
-		map_list_items.push_back(obj);
-		lv_group_add_obj(pane_group, obj);
-		lv_group_focus_obj(obj);
-	}
-
 	//
 	// Jacks
 	//
@@ -378,6 +372,12 @@ private:
 		lv_group_add_obj(pane_group, ui_CableMidiAddButton);
 		lv_group_add_obj(pane_group, ui_CableRemoveButton);
 		lv_group_focus_obj(ui_CableAddButton);
+	}
+
+	void make_nonselectable_item(lv_obj_t *obj) {
+		map_list_items.push_back(obj);
+		lv_group_add_obj(pane_group, obj);
+		lv_group_focus_obj(obj);
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
