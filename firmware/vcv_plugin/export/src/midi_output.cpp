@@ -53,6 +53,7 @@ void Output::sendMessage(const Message &message) {
 	auto status = MidiStatusByte::make(message.bytes[0]);
 
 	// Set channel
+	channel = getChannel();
 	if (channel >= 0 && status.command != MidiCommand::Sys)
 		status.channel = channel;
 
