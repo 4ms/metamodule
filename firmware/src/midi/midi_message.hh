@@ -113,6 +113,23 @@ struct MidiMessage {
 		return (status << 16) | data;
 	}
 
+	void make_usb_msg(std::array<uint8_t, 4> &bytes) {
+		bytes[0] = status >> 4;
+		if (is_timing_transport()) {
+			bytes[1] = status;
+			bytes[2] = 0;
+			bytes[3] = 0;
+		} else if (status.command == MidiCommand::ChannelPressure) {
+			bytes[1] = status;
+			bytes[2] = data.byte[0];
+			bytes[3] = 0;
+		} else {
+			bytes[1] = status;
+			bytes[2] = data.byte[0];
+			bytes[3] = data.byte[1];
+		}
+	}
+
 	uint8_t note() const {
 		return data.byte[0];
 	}

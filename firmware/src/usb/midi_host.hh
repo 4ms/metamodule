@@ -31,8 +31,9 @@ class MidiHost {
 public:
 	MidiHost(USBH_HandleTypeDef &usbhh)
 		: usbhost{usbhh}
-		, tx_stream{[this](std::span<uint8_t> buf) {
-			auto res = USBH_MIDI_Transmit(&usbhost, buf.data(), buf.size());
+		, tx_stream{[this](std::span<uint8_t> bytes) {
+			auto res = USBH_MIDI_Transmit(&usbhost, bytes.data(), bytes.size());
+
 			if (res == USBH_BUSY) {
 				// TODO: how to handle?
 				pr_err("MIDI Host: USBH is busy, cannot send\n");
@@ -50,7 +51,7 @@ public:
 	}
 
 	bool init() {
-		pr_info("Registered MIDI Host\n");
+		pr_info("Listening as a MIDI Host\n");
 		USBH_RegisterClass(&usbhost, &midi_class_ops);
 		return true;
 	}
@@ -80,11 +81,7 @@ public:
 		return USBH_MIDI_Receive(&usbhost, MSHandle.rx_buffer, 128);
 	}
 
-	// Pushes to the inactive buffer and starts transmission if it's not already started
-	bool transmit(uint32_t word) {
-		// rely on unsigned overflow:
-		std::array<uint8_t, 3> bytes{uint8_t(word >> 16), uint8_t(word >> 8), uint8_t(word)};
-
+	bool transmit(std::span<uint8_t> bytes) {
 		return tx_stream.transmit(bytes);
 	}
 };
