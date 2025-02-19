@@ -105,6 +105,10 @@ struct MidiMessage {
 		return status == EndExclusive || data.byte[0] == EndExclusive || data.byte[1] == EndExclusive;
 	}
 
+	bool is_noteon() const {
+		return is_command<MidiCommand::NoteOn>() && velocity() > 0;
+	}
+
 	bool is_noteoff() const {
 		return is_command<MidiCommand::NoteOff>() || (is_command<MidiCommand::NoteOn>() && velocity() == 0);
 	}

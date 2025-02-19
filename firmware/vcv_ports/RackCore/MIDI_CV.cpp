@@ -68,7 +68,7 @@ struct MIDI_CV : Module {
 	dsp::PulseGenerator continuePulse;
 
 	// METAMODULE
-	CircularBuffer<midi::Message, 8> msg_history;
+	CircularBuffer<midi::Message, 2> msg_history;
 
 	MIDI_CV() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -490,7 +490,9 @@ struct MIDI_CV : Module {
 
 		for (auto i = 0u; i < msg_history.count(); i++) {
 			auto msg = msg_history.peek(i);
-			chars += " " + MetaModule::Midi::toPrettyString(msg.bytes) + "\n";
+			if (i != 0)
+				chars += "\n\n";
+			chars += MetaModule::Midi::toPrettyMultilineString(msg.bytes);
 		}
 
 		size_t chars_to_copy = std::min(text.size(), chars.length());
@@ -528,8 +530,8 @@ struct MIDI_CVWidget : ModuleWidget {
 			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(32.591, 112.975)), module, MIDI_CV::CONTINUE_OUTPUT));
 
 		// Changed for METAMODULE
-		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(2, 10)));
-		display->box.size = mm2px(Vec(36, 42));
+		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(4, 12)));
+		display->box.size = mm2px(Vec(32, 42));
 		display->firstLightId = 0;
 		display->font = "Default_10";
 		display->color = Colors565::Yellow;

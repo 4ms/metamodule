@@ -1,4 +1,6 @@
+#include "CoreModules/midi/midi_message.hh"
 #include "plugin.hpp"
+#include "util/circular_buffer.hh"
 
 namespace rack
 {
@@ -6,8 +8,17 @@ namespace core
 {
 
 struct MidiOutput : dsp::MidiGenerator<PORT_MAX_CHANNELS>, midi::Output {
+	CircularBuffer<midi::Message, 2> msg_history;
+
 	void onMessage(const midi::Message &message) override {
 		Output::sendMessage(message);
+
+		midi::Message msg = message;
+		if (msg.getStatus() != 0xF)
+			msg.setChannel(getChannel());
+
+		if (msg.bytes[0] < 0xFE && msg.bytes[0] != 0xF8)
+			msg_history.put(msg);
 	}
 
 	void reset() {
@@ -128,6 +139,23 @@ struct CV_MIDI : Module {
 		if (midiJ)
 			midiOutput.fromJson(midiJ);
 	}
+
+	// METAMODULE
+	size_t get_display_text(int led_id, std::span<char> text) override {
+		std::string chars = "";
+
+		for (auto i = 0u; i < midiOutput.msg_history.count(); i++) {
+			auto msg = midiOutput.msg_history.peek(i);
+			if (i != 0)
+				chars += "\n\n";
+			chars += MetaModule::Midi::toPrettyMultilineString(msg.bytes);
+		}
+
+		size_t chars_to_copy = std::min(text.size(), chars.length());
+		std::copy(chars.begin(), chars.begin() + chars_to_copy, text.begin());
+
+		return chars_to_copy;
+	}
 };
 
 struct CV_MIDIPanicItem : MenuItem {
@@ -160,16 +188,39 @@ struct CV_MIDIWidget : ModuleWidget {
 		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(20.249, 113.115)), module, CV_MIDI::STOP_INPUT));
 		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(32.591, 112.975)), module, CV_MIDI::CONTINUE_INPUT));
 
-		MidiDisplay *display = createWidget<MidiDisplay>(mm2px(Vec(0.0, 13.039)));
-		display->box.size = mm2px(Vec(40.64, 29.021));
-		display->setMidiPort(module ? &module->midiOutput : NULL);
+		// Changed for METAMODULE
+		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(4, 12)));
+		display->box.size = mm2px(Vec(32, 42));
+		display->firstLightId = 0;
+		display->font = "Default_10";
+		display->color = Colors565::Yellow;
 		addChild(display);
 	}
 
 	void appendContextMenu(Menu *menu) override {
 		CV_MIDI *module = dynamic_cast<CV_MIDI *>(this->module);
 
+		if (!module)
+			return;
+
 		menu->addChild(new MenuSeparator);
+
+		// METAMODULE: add MIDI channel selection to menu
+		menu->addChild(createSubmenuItem(
+			"MIDI channel",
+			[=] {
+				auto chan = module->midiOutput.getChannel();
+				return chan < 0 ? "Omni" : std::to_string(chan + 1);
+			},
+			[=](Menu *menu) {
+				for (int c = 0; c < 16; c++) {
+					menu->addChild(createCheckMenuItem(
+						string::f("Channel %d", c + 1),
+						"",
+						[=]() { return module->midiOutput.getChannel() == c; },
+						[=]() { module->midiOutput.setChannel(c); }));
+				}
+			}));
 
 		menu->addChild(createMenuItem("Panic", "", [=]() { module->midiOutput.panic(); }));
 	}
