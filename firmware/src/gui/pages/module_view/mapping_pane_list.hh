@@ -55,15 +55,15 @@ struct MappingPaneList {
 		return obj;
 	}
 
-	static lv_obj_t *create_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *parent) {
+	static lv_obj_t *create_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *parent, std::string_view name) {
 		auto obj = ui_MappedKnobsetitem_create(parent);
-		style_panel_incable_item(panel_jack_id, obj);
+		style_panel_incable_item(panel_jack_id, obj, name);
 		return obj;
 	}
 
-	static lv_obj_t *create_panel_outcable_item(uint16_t panel_jack_id, lv_obj_t *parent) {
+	static lv_obj_t *create_panel_outcable_item(uint16_t panel_jack_id, lv_obj_t *parent, std::string_view name) {
 		auto obj = ui_MappedKnobsetitem_create(parent);
-		style_panel_outcable_item(panel_jack_id, obj);
+		style_panel_outcable_item(panel_jack_id, obj, name);
 		return obj;
 	}
 
@@ -73,7 +73,7 @@ struct MappingPaneList {
 		return obj;
 	}
 
-	static void style_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *obj) {
+	static void style_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *obj, std::string_view alias_name) {
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
@@ -85,7 +85,11 @@ struct MappingPaneList {
 
 		if (panel_jack_id < PanelDef::NumUserFacingInJacks) {
 			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
-			lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
+			if (alias_name.size()) {
+				lv_label_set_text_fmt(setname, "%.16s", alias_name.data());
+			} else {
+				lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
+			}
 			if (panel_jack_id < 6)
 				lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
 			else
@@ -101,7 +105,7 @@ struct MappingPaneList {
 		format_panel_cable_circle(circle);
 	}
 
-	static void style_panel_outcable_item(uint16_t panel_jack_id, lv_obj_t *obj) {
+	static void style_panel_outcable_item(uint16_t panel_jack_id, lv_obj_t *obj, std::string_view alias_name) {
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
@@ -114,7 +118,12 @@ struct MappingPaneList {
 		if (panel_jack_id < Gui::knob_palette.size())
 			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
 
-		lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
+		if (alias_name.size()) {
+			lv_label_set_text_fmt(setname, "%.16s", alias_name.data());
+		} else {
+			lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
+		}
+
 		lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
 		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
 

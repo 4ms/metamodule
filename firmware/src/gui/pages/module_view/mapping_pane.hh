@@ -328,7 +328,7 @@ private:
 			lv_hide(ui_CablePanelAddButton);
 			lv_hide(ui_CableMidiAddButton);
 
-			auto obj = list.create_panel_incable_item(panel_jack->panel_jack_id, ui_MapList);
+			auto obj = list.create_panel_incable_item(panel_jack->panel_jack_id, ui_MapList, panel_jack->alias_name);
 			make_nonselectable_item(obj);
 
 			for (auto &mappedin : panel_jack->ins) {
@@ -344,7 +344,8 @@ private:
 		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_CableMidiAddButton);
 
-		auto obj = list.create_panel_outcable_item(panel_jack_id, ui_MapList);
+		const auto al = patch->find_mapped_outjack(panel_jack_id)->alias_name;
+		auto obj = list.create_panel_outcable_item(panel_jack_id, ui_MapList, al);
 		make_nonselectable_item(obj);
 	}
 
