@@ -6,7 +6,7 @@ namespace MetaModule
 {
 
 struct AutoLoader {
-	enum class State { NotStarted, Done, Error, Processing, LoadingPlugin };
+	enum class State { NotStarted, Done, Warning, Error, Processing, LoadingPlugin };
 	struct Status {
 		State state;
 		std::string message;
@@ -91,6 +91,17 @@ private:
 			return {autoload_state, "Loaded " + s};
 		}
 
+		if (result.state == PluginFileLoader::State::InvalidPlugin) {
+			pr_err("Autoload: Warning: %s\n", result.error_message.c_str());
+			slug_idx++;
+			if (slug_idx >= plugin_settings.slug.size()) {
+				autoload_state = State::Done;
+			} else {
+				autoload_state = State::LoadingPlugin;
+			}
+			return {State::Warning, "Error: " + result.error_message};
+		}
+
 		if (result.state == PluginFileLoader::State::Error) {
 			if (result.error_message.length()) {
 				pr_err("Autoload: Error: %s\n", result.error_message.c_str());
@@ -111,8 +122,10 @@ private:
 			if (found_plugin.plugin_name == s) {
 				auto fw_version = sdk_version();
 				auto found_version = VersionUtil::Version(found_plugin.version);
+
 				if (found_version.major == 0)
-					found_version = {1, 0, 0};
+					found_version = fw_version;
+
 				if (fw_version.can_host_version(found_version)) {
 					if (latest_version.is_later(found_version))
 						continue;

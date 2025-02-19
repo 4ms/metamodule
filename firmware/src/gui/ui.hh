@@ -119,6 +119,9 @@ public:
 				notify_queue.put({status.message, Notification::Priority::Error, 2000});
 				break;
 
+			} else if (status.state == AutoLoader::State::Warning) {
+				notify_queue.put({status.message, Notification::Priority::Error, 2000});
+
 			} else if (status.state == AutoLoader::State::Done) {
 				break;
 
@@ -129,6 +132,7 @@ public:
 			}
 
 			update_screen();
+			page_manager.handle_notifications();
 		}
 
 		lv_label_set_text(ui_MainMenuNowPlaying, "");

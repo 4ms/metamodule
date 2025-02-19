@@ -26,6 +26,7 @@ public:
 	enum class State {
 		NotInit,
 		Error,
+		InvalidPlugin,
 		Idle,
 		RequestList,
 		WaitingForList,
@@ -134,7 +135,7 @@ public:
 				auto msg = file_storage.get_message();
 
 				if (msg.message_type == FileStorageProxy::LoadFileFailed) {
-					status.state = State::Error;
+					status.state = State::InvalidPlugin;
 					status.error_message = "Failed to read from disk";
 
 				} else if (msg.message_type == FileStorageProxy::LoadFileOK) {
@@ -219,7 +220,7 @@ public:
 
 				auto vers_pos = plugin_vers_filename.find_last_of("/SDK-");
 				if (plugin_vers_filename.length() == 0 || vers_pos == std::string::npos) {
-					status.state = State::Error;
+					status.state = State::InvalidPlugin;
 					status.error_message = "Warning: Plugin missing version file.";
 					break;
 				}
@@ -229,8 +230,10 @@ public:
 					status.state = State::ProcessingPlugin;
 				} else {
 					std::string fw_vers = std::to_string(fw_version.major) + "." + std::to_string(fw_version.minor);
-					status.error_message = "Plugin version is " + plugin_vers + ", but firmware version is " + fw_vers;
-					status.state = State::Error;
+					auto plugin_name = std::string(plugin_file.plugin_name);
+					status.error_message = "Plugin " + plugin_name + ": version is " + plugin_vers +
+										   ", but firmware version is " + fw_vers;
+					status.state = State::InvalidPlugin;
 				}
 
 			} break;
@@ -252,7 +255,7 @@ public:
 				if (load_plugin(plugin))
 					status.state = State::Success;
 				else {
-					status.state = State::Error;
+					status.state = State::InvalidPlugin;
 					// Cleanup files we copied to the ramdisk
 					for (auto const &file : plugin.loaded_files) {
 						ramdisk.delete_file(file);
@@ -272,6 +275,7 @@ public:
 			case State::Success:
 				break;
 			case State::Error:
+			case State::InvalidPlugin:
 				status.error_message.clear();
 				break;
 		}
@@ -281,7 +285,7 @@ public:
 
 	bool is_idle() {
 		return status.state == State::Idle || status.state == State::NotInit || status.state == State::Success ||
-			   status.state == State::Error;
+			   status.state == State::Error || status.state == State::InvalidPlugin;
 	}
 
 	void parse_versions() {
