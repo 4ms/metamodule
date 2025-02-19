@@ -1,4 +1,5 @@
 #pragma once
+#include "audio/midi.hh"
 #include "calibrate/calibration_data.hh"
 #include "conf/board_codec_conf.hh"
 #include "conf/stream_conf.hh"
@@ -60,33 +61,41 @@ private:
 	PatchModQueue &patch_mod_queue;
 	AudioInBlock &audio_in_block;
 	AudioOutBlock &audio_out_block;
+	PatchPlayer &player;
 
+	AudioStreamMidi midi;
+
+	// Hardware interface
 	CodecT &codec_;
 	CodecT &codec_ext_;
 	uint32_t sample_rate_;
 	uint32_t block_size_;
 
+	// Calibration
 	CalData cal;
 	CalData cal_stash;
 	CalData ext_cal{};
 	CalData ext_cal_stash{};
 
+	// Plug detector
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 	EdgeStateDetector ext_plug_detects[AudioExpander::NumJacks];
 
-	PatchPlayer &player;
+	// Load measurement
 	mdrivlib::CycleCounter load_measure;
 	float load_lpf = 0.f;
+
+	// Start/Pause State
 	float output_fade_amt = -1.f;
 	float output_fade_delta = 0.f;
 	uint32_t halves_muted = 0;
-	bool ext_audio_connected = false;
-
-	ParamBlock local_params;
-
-	bool midi_last_connected = false;
 
 	AudioOverrunHandler overrun_handler;
+
+	// Local
+	ParamBlock local_params;
+
+	bool ext_audio_connected = false;
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	AudioConf::SampleT get_ext_audio_output(int output_id);
@@ -94,7 +103,6 @@ private:
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
 	void propagate_sense_pins(uint32_t jack_senses);
-	void handle_midi(bool is_connected, Midi::Event const &event, unsigned poly_num, MidiMessage const &raw_msg);
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool is_playing_patch();
 	void handle_patch_just_loaded();

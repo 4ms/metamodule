@@ -41,11 +41,12 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, patch_mod_queue{patch_mod_queue}
 	, audio_in_block{audio_in_block}
 	, audio_out_block{audio_out_block}
+	, player{patchplayer}
+	, midi{patchplayer, sync_params}
 	, codec_{Hardware::codec}
 	, codec_ext_{Hardware::codec_ext}
 	, sample_rate_{AudioSettings::DefaultSampleRate}
-	, block_size_{AudioSettings::DefaultBlockSize}
-	, player{patchplayer} {
+	, block_size_{AudioSettings::DefaultBlockSize} {
 
 	if (codec_.init() == CodecT::CODEC_NO_ERR)
 		pr_info("Codec initialized\n");
@@ -194,7 +195,7 @@ void AudioStream::handle_patch_just_loaded() {
 	for (auto &p : ext_plug_detects)
 		p.reset();
 
-	midi_last_connected = false;
+	midi.last_connected = false;
 }
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
@@ -204,7 +205,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
-		auto const &params = param_block.params[idx];
+		auto &params = param_block.params[idx];
 		auto &ext_out = audio_block.out_ext_codec[idx];
 		auto const &ext_in = audio_block.in_ext_codec[idx];
 		idx++;
@@ -262,10 +263,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// MIDI
-		handle_midi(param_block.metaparams.midi_connected,
-					params.midi_event,
-					param_block.metaparams.midi_poly_chans,
-					params.raw_msg);
+		midi.process(param_block.metaparams.midi_connected,
+					 params.midi_event,
+					 param_block.metaparams.midi_poly_chans,
+					 &params.raw_msg);
 
 		// Run each module
 		player.update_patch();
@@ -329,10 +330,10 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		}
 
 		// MIDI
-		handle_midi(param_block.metaparams.midi_connected,
-					params.midi_event,
-					param_block.metaparams.midi_poly_chans,
-					params.raw_msg);
+		midi.process(param_block.metaparams.midi_connected,
+					 params.midi_event,
+					 param_block.metaparams.midi_poly_chans,
+					 &params.raw_msg);
 
 		for (auto &outchan : out.chan)
 			outchan = 0;
@@ -342,62 +343,6 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 	}
 
 	player.update_lights();
-}
-
-void AudioStream::handle_midi(bool is_connected,
-							  Midi::Event const &event,
-							  unsigned poly_num,
-							  MidiMessage const &raw_msg) {
-	if (is_connected && !midi_last_connected) {
-		player.set_midi_connected();
-	} else if (!is_connected && midi_last_connected) {
-		player.set_midi_disconnected();
-	}
-
-	midi_last_connected = is_connected;
-
-	if (!is_connected)
-		return;
-
-	if (raw_msg.status != 0xfe && raw_msg.status != 0) {
-		// 50ns with no listeners + ~100ns additional per listener
-		player.send_raw_midi(raw_msg);
-	}
-
-	if (event.type == Midi::Event::Type::None)
-		return;
-
-	// All other MIDI events: 150ns min (no listeners) + more... 150-600ns for some listeners
-	if (event.type == Midi::Event::Type::NoteOn) {
-		player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note));
-		player.set_midi_note_gate(event.poly_chan, 10.f);
-		player.set_midi_note_velocity(event.poly_chan, event.val);
-		player.set_midi_note_retrig(event.poly_chan, 10.f);
-		player.set_midi_gate(event.note, 10.f);
-		sync_params.midi_events.put(event);
-
-	} else if (event.type == Midi::Event::Type::NoteOff) {
-		player.set_midi_note_gate(event.poly_chan, 0);
-		player.set_midi_gate(event.note, 0);
-		sync_params.midi_events.put(event);
-
-	} else if (event.type == Midi::Event::Type::Aft) {
-		player.set_midi_note_aftertouch(event.poly_chan, event.val);
-
-	} else if (event.type == Midi::Event::Type::ChanPress) {
-		for (unsigned i = 0; i < poly_num; i++)
-			player.set_midi_note_aftertouch(i, event.val);
-
-	} else if (event.type == Midi::Event::Type::CC) {
-		player.set_midi_cc(event.note, event.val);
-		sync_params.midi_events.put(event);
-
-	} else if (event.type == Midi::Event::Type::Bend) {
-		player.set_midi_cc(128, event.val);
-
-	} else if (event.type == Midi::Event::Type::Time) {
-		player.send_midi_time_event(event.note, 10.f);
-	}
 }
 
 void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
@@ -486,14 +431,15 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 	for (auto i = 0u; i < block_size_; i++)
 		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt
 
-	// std::memcpy(local_params.params.data(), param_blocks[block].params.data(), sizeof(Params) * block_size_); //34us/63us alt
-
 	return local_params;
 }
 
 void AudioStream::return_cached_params(unsigned block) {
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
+	// ~46ns / sample:
+	for (auto i = 0u; i < block_size_; i++)
+		param_blocks[block].params[i].raw_msg = local_params.params[i].raw_msg;
 }
 
 void AudioStream::set_block_spans() {

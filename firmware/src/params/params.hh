@@ -24,18 +24,7 @@ struct Params {
 			knob = 0.f;
 
 		midi_event = Midi::Event{};
-	}
-
-	void copy(const Params &that) {
-		for (unsigned i = 0; i < PanelDef::NumPot; i++)
-			knobs[i] = that.knobs[i];
-
-		midi_event = that.midi_event;
-		raw_msg = that.raw_msg;
-
-		gate_ins = that.gate_ins;
-
-		button.copy_state(that.button);
+		raw_msg = {};
 	}
 };
 

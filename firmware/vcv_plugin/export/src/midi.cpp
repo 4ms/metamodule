@@ -176,40 +176,7 @@ std::vector<int> Input::getChannels() {
 // Output
 ////////////////////
 
-Output::Output() {
-	reset();
-}
-
-Output::~Output() {
-	setDeviceId(-1);
-}
-
-void Output::reset() {
-	setDriverId(-1);
-	channel = 0;
-}
-
-std::vector<int> Output::getDeviceIds() {
-	return {};
-}
-
-void Output::setDeviceId(int deviceId) {
-}
-
-int Output::getDefaultDeviceId() {
-	return -1;
-}
-
-std::string Output::getDeviceName(int deviceId) {
-	return "";
-}
-
-std::vector<int> Output::getChannels() {
-	return {};
-}
-
-void Output::sendMessage(const Message &message) {
-}
+// See midi_output.cpp
 
 ////////////////////
 // midi

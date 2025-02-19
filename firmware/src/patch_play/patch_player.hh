@@ -300,10 +300,6 @@ public:
 		}
 	}
 
-	void send_raw_midi(MidiMessage msg) {
-		MidiRouter::push_incoming_message(msg);
-	}
-
 	void set_midi_note_pitch(unsigned midi_poly_note, float val) {
 		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val);
 	}

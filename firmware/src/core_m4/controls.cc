@@ -110,6 +110,15 @@ void Controls::update_midi_connected() {
 }
 
 void Controls::parse_midi() {
+	// Parse outgoing MIDI message if available and connected
+	if (cur_params->raw_msg.raw() != MidiMessage{}.raw()) {
+		if (_midi_connected.is_high()) {
+			std::array<uint8_t, 4> bytes;
+			cur_params->raw_msg.make_usb_msg(bytes);
+			_midi_host.transmit(bytes);
+		}
+	}
+
 	// Parse a MIDI message if available
 	if (auto msg = _midi_rx_buf.get(); msg.has_value()) {
 		cur_params->raw_msg = msg.value();
@@ -123,7 +132,7 @@ void Controls::parse_midi() {
 		cur_params->raw_msg = {0x80, noteoff->note, 0};
 
 	} else {
-		cur_params->raw_msg = 0;
+		cur_params->raw_msg = MidiMessage{};
 		cur_params->midi_event.type = Midi::Event::Type::None;
 	}
 }

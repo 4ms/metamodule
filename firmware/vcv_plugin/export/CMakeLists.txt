@@ -92,6 +92,7 @@ target_sources(
          src/logger.cpp
          src/midi.cpp
          src/midi_input_queue.cpp
+         src/midi_output.cpp
          src/settings.cpp
          src/string.cpp
          src/roundevenf.c
