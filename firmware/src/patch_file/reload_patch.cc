@@ -65,7 +65,7 @@ Result ReloadPatch::reload_patch_file(PatchLocation const &loc, Function<void()>
 		wait_func();
 	}
 
-	uint32_t timeout = get_time() + 3000;
+	auto timeout = get_time() + 3000;
 	while (get_time() < timeout) {
 
 		auto message = patch_storage.get_message();
