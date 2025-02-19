@@ -70,7 +70,11 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_ModuleViewHideBut, hide_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewHideBut, fullscreen_but_cb, LV_EVENT_CLICKED, this);
+
+		lv_obj_add_event_cb(ui_ModuleViewHideBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 	}
 
 	void prepare_focus() override {
@@ -553,7 +557,6 @@ private:
 		for (auto &b : button)
 			lv_obj_del(b);
 
-		pr_dbg("reset_module_page\n");
 		dyn_draw.blur();
 
 		if (canvas)
@@ -610,10 +613,14 @@ private:
 			} else {
 				if (cur_sel)
 					cur_sel--;
-				else {
+
+				else if (!page->full_screen_mode) {
 					//Scrolling up from first header -> defocus roller and focus button bar
 					page->focus_button_bar();
 					page->roller_hover.hide();
+					return;
+				} else {
+					// stay on the first item in the roller
 					return;
 				}
 			}
@@ -649,15 +656,17 @@ private:
 	}
 
 	void focus_button_bar() {
-		if (gui_state.new_cable)
-			lv_group_focus_obj(ui_ModuleViewCableCancelBut);
-		else
-			lv_group_focus_obj(ui_ModuleViewSettingsBut);
+		if (!full_screen_mode) {
+			if (gui_state.new_cable)
+				lv_group_focus_obj(ui_ModuleViewCableCancelBut);
+			else
+				lv_group_focus_obj(ui_ModuleViewSettingsBut);
 
-		lv_group_set_editing(group, false);
-		cur_selected = 1;
-		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
-		unhighlight_component(cur_selected);
+			lv_group_set_editing(group, false);
+			cur_selected = 1;
+			lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
+			unhighlight_component(cur_selected);
+		}
 	}
 
 	static void roller_click_cb(lv_event_t *event) {
@@ -728,10 +737,13 @@ private:
 			//Not an element: Is it the Extra Menu?
 		} else if (roller_idx < page->roller_drawn_el_idx.size()) {
 			if (page->roller_drawn_el_idx[roller_idx] == ExtraMenuTag) {
-				page->mode = ViewMode::ExtraMenu;
-				lv_hide(ui_ElementRoller);
-				page->roller_hover.hide();
-				page->module_menu.show();
+				// Just ignore clicking on Extra Menu when in full_screen_mode
+				if (!page->full_screen_mode) {
+					page->mode = ViewMode::ExtraMenu;
+					lv_hide(ui_ElementRoller);
+					page->roller_hover.hide();
+					page->module_menu.show();
+				}
 			}
 		}
 	}
@@ -765,13 +777,22 @@ private:
 		page->page_list.request_new_page(PageId::PatchView, page->args);
 	}
 
-	static void hide_but_cb(lv_event_t *event) {
+	static void fullscreen_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		page->resize_module_image(320);
 		page->full_screen_mode = true;
+	}
+
+	static void jump_to_roller_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		if (page->full_screen_mode) {
+			lv_group_focus_obj(ui_ElementRoller);
+		}
 	}
 
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx) {
