@@ -162,18 +162,28 @@ float renderText(
 		text = text_copy.c_str();
 	}
 
+	auto cur_x = lv_obj_get_x(label);
+	auto new_x = cur_x;
 	if (fs->textAlign & NVG_ALIGN_CENTER) {
 		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
-		lv_obj_set_x(label, lv_x - width / 2);
-	}
-	if (fs->textAlign & NVG_ALIGN_RIGHT) {
+		new_x = lv_x - width / 2;
+	} else if (fs->textAlign & NVG_ALIGN_RIGHT) {
 		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
-		lv_obj_set_x(label, lv_x - width);
+		new_x = lv_x - width;
+	}
+	if (new_x != cur_x) {
+		lv_obj_set_x(label, new_x);
 	}
 
-	lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
-	lv_obj_set_style_text_opa(label, LV_OPA_100, LV_PART_MAIN);
-	lv_label_set_text(label, text);
+	auto cur_col = lv_obj_get_style_text_color(label, LV_PART_MAIN);
+	auto new_col = to_lv_text_color(fs->paint->innerColor);
+	if (cur_col.full != new_col.full) {
+		lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
+
+	auto cur_text = lv_label_get_text(label);
+	if (strcmp(cur_text, text) != 0) {
+		lv_label_set_text(label, text);
+	}
 
 	return 1;
 }
