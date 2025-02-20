@@ -1,9 +1,8 @@
 #pragma once
-#include "CoreModules/elements/units.hh"
 #include "base_dyn_draw.hh"
-#include "debug.hh"
 #include "lvgl.h"
-#include "pr_dbg.hh"
+// #include "debug.hh"
+// #include "pr_dbg.hh"
 #include "vcv_plugin/internal/nanovg_pixbuf.hh"
 #include <app/ModuleWidget.hpp>
 #include <memory>
@@ -17,7 +16,9 @@ struct RackDynDraw : BaseDynDraw {
 		: module_widget{module_widget} {
 	}
 
-	void prepare(lv_obj_t *widget_canvas) override {
+	void prepare(lv_obj_t *widget_canvas, unsigned height) override {
+		args.vg = nvgCreatePixelBufferContext(widget_canvas, height);
+		args.fb = nullptr;
 		canvas = widget_canvas;
 
 		args.vg = nvgCreatePixelBufferContext(canvas);
