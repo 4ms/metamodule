@@ -352,11 +352,7 @@ struct PatchViewPage : PageBase {
 
 			update_load_text(metaparams, ui_LoadMeter2);
 
-			if (dyn_frame_throttle_ctr-- == 0) {
-				dyn_frame_throttle_ctr = DynFrameThrottle;
-				dyn_module_idx = (dyn_module_idx + 1) % dyn_draws.size();
-				dyn_draws[dyn_module_idx].draw();
-			}
+			draw_dynamic_elements(start_update_tm);
 
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
@@ -373,6 +369,17 @@ struct PatchViewPage : PageBase {
 	}
 
 private:
+	void draw_dynamic_elements(uint64_t start_update_tm) {
+		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
+			dyn_frame_throttle_ctr = 0;
+			dyn_module_idx++;
+			if (dyn_module_idx >= dyn_draws.size())
+				dyn_module_idx = 0;
+
+			dyn_draws[dyn_module_idx].draw();
+		}
+	}
+
 	void watch_modules() {
 		params.lights.stop_watching_all();
 		params.text_displays.stop_watching_all();
