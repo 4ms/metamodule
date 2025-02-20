@@ -11,6 +11,7 @@
 #include "ui/OptionButton.hpp"
 #include "widget/TransformWidget.hpp"
 
+#include "CoreModules/async_thread.hh"
 #include "dirent.h"
 #include "jansson.h"
 #include "pffft.h"
@@ -72,6 +73,16 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 
 	// provides vtable for Quantity
 	rack::Quantity q;
+}
+
+void keep_async() {
+	MetaModule::AsyncThread a;
+	a.start(0xFFFFFFFF);
+	a.start(0xFFFFFFFF, []() {});
+	a.run_once(0xFFFFFFFF);
+	a.stop();
+	MetaModule::AsyncThread b{[]() {
+	}};
 }
 
 void __attribute__((optimize("-O0"))) keep_math(float x) {

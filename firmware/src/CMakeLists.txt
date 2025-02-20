@@ -114,6 +114,7 @@ add_executable(
   ${FWDIR}/src/core_a7/a7_shared_memory.cc
   ${FWDIR}/src/core_a7/gettimeofday.cc
   ${FWDIR}/src/core_a7/async_thread.cc
+  ${FWDIR}/src/core_a7/async_thread_control.cc
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
