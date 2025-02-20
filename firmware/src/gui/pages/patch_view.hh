@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
+#include "gui/dyn_element.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
@@ -192,6 +193,9 @@ struct PatchViewPage : PageBase {
 			module_canvases.push_back(canvas);
 			style_module(canvas);
 
+			auto &dyn = dyn_draws.emplace_back(patch_playloader);
+			dyn.prepare_module(module_idx, canvas);
+
 			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_click_cb, LV_EVENT_CLICKED, (void *)this);
@@ -229,6 +233,8 @@ struct PatchViewPage : PageBase {
 		} else {
 			lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 		}
+
+		dyn_module_idx = 0;
 	}
 
 	void redraw_map_rings() {
@@ -259,6 +265,8 @@ struct PatchViewPage : PageBase {
 		params.displays.stop_watching_all();
 		params.lights.stop_watching_all();
 		params.param_watcher.stop_watching_all();
+		for (auto &dyn : dyn_draws)
+			dyn.blur();
 	}
 
 	void update() override {
@@ -346,6 +354,12 @@ struct PatchViewPage : PageBase {
 			}
 
 			update_load_text(metaparams, ui_LoadMeter2);
+
+			if (dyn_frame_throttle_ctr-- == 0) {
+				dyn_frame_throttle_ctr = DynFrameThrottle;
+				dyn_module_idx = (dyn_module_idx + 1) % dyn_draws.size();
+				dyn_draws[dyn_module_idx].draw();
+			}
 
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
@@ -718,6 +732,13 @@ private:
 		PatchViewPage *page;
 		uint32_t selected_module_id;
 	};
+
+	std::vector<std::vector<float>> light_vals;
+
+	std::vector<DynamicElementDraw> dyn_draws;
+	unsigned dyn_frame_throttle_ctr = 1;
+	unsigned dyn_module_idx = 0;
+	constexpr static unsigned DynFrameThrottle = 2;
 };
 
 } // namespace MetaModule
