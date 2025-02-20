@@ -127,6 +127,7 @@ public:
 	}
 
 	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
+		Debug::Pin3::high();
 		data->continue_reading = false;
 
 #ifdef LONG_PRESS_MANUALLY_PARSED
@@ -164,8 +165,9 @@ public:
 				m->rotary_with_metabutton.transfer_motion(m->rotary);
 				_screensaver->wake();
 			}
-		} else
+		} else {
 			data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+		}
 #endif
 
 #ifdef MONKEYROTARY
@@ -183,6 +185,7 @@ public:
 		if (data->state || data->enc_diff)
 			_screensaver->wake();
 #endif
+		Debug::Pin3::low();
 	}
 };
 } // namespace MetaModule

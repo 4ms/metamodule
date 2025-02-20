@@ -372,11 +372,21 @@ private:
 	void draw_dynamic_elements(uint64_t start_update_tm) {
 		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
 			dyn_frame_throttle_ctr = 0;
+			// while (true) {
 			dyn_module_idx++;
 			if (dyn_module_idx >= dyn_draws.size())
 				dyn_module_idx = 0;
 
+			// if (dyn_module_idx == orig_idx)
+			// 	break;
+
+			// if (get_time() - start_update_tm >= 10)
+			// 	break;
+
+			Debug::Pin0::high();
 			dyn_draws[dyn_module_idx].draw();
+			Debug::Pin0::low();
+			// }
 		}
 	}
 

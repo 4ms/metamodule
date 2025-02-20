@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "console/pr_dbg.hh"
-// #include "medium/debug_raw.h"
+#include "medium/debug_raw.h"
 
 namespace MetaModule::NanoVG
 {
@@ -50,6 +50,10 @@ void renderFill(void *uptr,
 		std::ranges::transform(std::span{path.fill, (size_t)path.nfill},
 							   std::back_inserter(points),
 							   [context](NVGvertex x) { return to_lv_point(x, context->px_per_3U); });
+
+		for (auto &p : std::span{path.fill, (size_t)path.nfill}) {
+			pr_dbg("%g %g %g %g\n", p.x, p.y, p.u, p.v);
+		}
 
 		if (is_poly_concave(points)) {
 			// LVGL lv_canvas_draw_polygon goes into an infinite loop if polygon is concave.
@@ -90,6 +94,10 @@ void renderStroke(void *uptr,
 		std::ranges::transform(std::span{path.stroke, (size_t)path.nstroke},
 							   std::back_inserter(points),
 							   [context](NVGvertex x) { return to_lv_point(x, context->px_per_3U); });
+
+		for (auto &p : std::span{path.stroke, (size_t)path.nstroke}) {
+			pr_dbg("%g %g %g %g\n", p.x, p.y, p.u, p.v);
+		}
 
 		lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
 	}
@@ -172,17 +180,26 @@ float renderText(
 		new_x = lv_x - width;
 	}
 	if (new_x != cur_x) {
+		DebugPin1High();
 		lv_obj_set_x(label, new_x);
+		DebugPin1Low();
 	}
 
 	auto cur_col = lv_obj_get_style_text_color(label, LV_PART_MAIN);
 	auto new_col = to_lv_text_color(fs->paint->innerColor);
 	if (cur_col.full != new_col.full) {
+		DebugPin0High();
 		lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
+		DebugPin0Low();
+	}
 
 	auto cur_text = lv_label_get_text(label);
 	if (strcmp(cur_text, text) != 0) {
+		DebugPin1High();
+		DebugPin0High();
 		lv_label_set_text(label, text);
+		DebugPin1Low();
+		DebugPin0Low();
 	}
 
 	return 1;
