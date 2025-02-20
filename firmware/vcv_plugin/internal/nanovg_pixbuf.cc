@@ -47,7 +47,9 @@ void renderFill(void *uptr,
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		std::vector<lv_point_t> points;
 
-		std::ranges::transform(std::span{path.fill, (size_t)path.nfill}, std::back_inserter(points), to_lv_point);
+		std::ranges::transform(std::span{path.fill, (size_t)path.nfill},
+							   std::back_inserter(points),
+							   [context](NVGvertex x) { return to_lv_point(x, context->px_per_3U); });
 
 		if (is_poly_concave(points)) {
 			// LVGL lv_canvas_draw_polygon goes into an infinite loop if polygon is concave.
@@ -85,7 +87,9 @@ void renderStroke(void *uptr,
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		std::vector<lv_point_t> points;
 
-		std::ranges::transform(std::span{path.stroke, (size_t)path.nstroke}, std::back_inserter(points), to_lv_point);
+		std::ranges::transform(std::span{path.stroke, (size_t)path.nstroke},
+							   std::back_inserter(points),
+							   [context](NVGvertex x) { return to_lv_point(x, context->px_per_3U); });
 
 		lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
 	}
@@ -97,15 +101,15 @@ float renderText(
 	auto canvas = context->canvas;
 
 	// Move to position
-	auto lv_x = to_lv_coord(x + fs->xform[4]);
-	auto lv_y = to_lv_coord(y + fs->xform[5]);
+	auto lv_x = to_lv_coord(x + fs->xform[4], context->px_per_3U);
+	auto lv_y = to_lv_coord(y + fs->xform[5], context->px_per_3U);
 
-	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName));
+	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName), context->px_per_3U);
 	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
 	if (!font)
 		return 0;
 
-	// Create or find existing label (match on X,Y pos)
+	// Create or find existing label (match on X,Y pos and alignment)
 	lv_obj_t *label{};
 	auto found = std::ranges::find_if(context->labels, [=](TextRenderCacheEntry const &cached) {
 		return cached.x == lv_x && cached.y == lv_y && cached.align == fs->textAlign;
@@ -132,7 +136,8 @@ float renderText(
 		lv_obj_set_pos(label, lv_x, align_lv_y);
 		lv_obj_set_size(label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 		lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
-		lv_obj_set_style_text_opa(label, to_lv_opa(fs->paint->innerColor), LV_PART_MAIN);
+		// lv_obj_set_style_text_opa(label, to_lv_opa(fs->paint->innerColor), LV_PART_MAIN);
+		lv_obj_set_style_text_opa(label, LV_OPA_100, LV_PART_MAIN);
 		lv_obj_set_style_text_align(label, align, LV_PART_MAIN);
 
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
@@ -143,7 +148,7 @@ float renderText(
 		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
-		pr_dbg("Creating label at %d,%d align 0x%x (sz %g) ", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		pr_dbg("Creating label at %d,%d align 0x%x (sz %g)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
 		context->labels.push_back({(float)lv_x, (float)lv_y, fs->textAlign, label, context->draw_frame_ctr});
 	}
 
@@ -187,14 +192,16 @@ void renderTriangles(void *uptr,
 
 	for (auto i = 0; i < nverts; i += 6) {
 		// dest rect
-		auto d_tl = to_lv_point(verts[i]);
-		auto d_br = to_lv_point(verts[i + 1]);
+		auto d_tl = to_lv_point(verts[i], context->px_per_3U);
+		auto d_br = to_lv_point(verts[i + 1], context->px_per_3U);
 
 		// source rect:
 		auto tx_width = context->textures[paint->image].w;
 		auto tx_height = context->textures[paint->image].h;
-		auto s_tl = lv_point_t{to_lv_coord(tx_width * verts[i].u), to_lv_coord(tx_height * verts[i].v)};
-		auto s_br = lv_point_t{to_lv_coord(tx_width * verts[i + 1].u), to_lv_coord(tx_height * verts[i + 1].v)};
+		auto s_tl = lv_point_t{to_lv_coord(tx_width * verts[i].u, context->px_per_3U),
+							   to_lv_coord(tx_height * verts[i].v, context->px_per_3U)};
+		auto s_br = lv_point_t{to_lv_coord(tx_width * verts[i + 1].u, context->px_per_3U),
+							   to_lv_coord(tx_height * verts[i + 1].v, context->px_per_3U)};
 
 		(void)d_tl;
 		(void)d_br;
@@ -291,7 +298,7 @@ void renderFlush(void *uptr) {
 
 } // namespace MetaModule::NanoVG
 
-NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
+NVGcontext *nvgCreatePixelBufferContext(void *canvas, unsigned height) {
 	NVGparams params;
 	NVGcontext *ctx = nullptr;
 
@@ -313,6 +320,7 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	params.renderText = renderText;
 
 	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas};
+	draw_ctx->px_per_3U = height;
 	params.userPtr = draw_ctx;
 
 	params.edgeAntiAlias = 0;

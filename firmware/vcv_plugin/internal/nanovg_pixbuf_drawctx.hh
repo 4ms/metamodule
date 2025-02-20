@@ -48,6 +48,8 @@ struct DrawContext {
 
 	void *parent_ctx{}; // needed for deleting
 
+	unsigned px_per_3U = 240;
+
 	DrawContext(lv_obj_t *canvas)
 		: canvas{canvas} {
 		lv_draw_line_dsc_init(&line_dsc);
@@ -60,7 +62,7 @@ struct DrawContext {
 	}
 };
 
-DrawContext *get_drawcontext(void *uptr) {
+inline DrawContext *get_drawcontext(void *uptr) {
 	return (DrawContext *)(uptr);
 }
 

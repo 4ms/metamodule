@@ -191,7 +191,7 @@ struct PatchViewPage : PageBase {
 			style_module(canvas);
 
 			auto &dyn = dyn_draws.emplace_back(patch_playloader);
-			dyn.prepare_module(module_idx, canvas);
+			dyn.prepare_module(module_idx, canvas, page_settings.view_height_px);
 
 			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
