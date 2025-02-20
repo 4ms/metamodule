@@ -20,9 +20,10 @@ inline bool redraw_text(lv_obj_t *obj, std::string_view text) {
 	return false;
 }
 
-inline bool redraw_display(DrawnElement &drawn_el,
-						   unsigned this_module_id,
-						   std::array<WatchedTextDisplay, TextDisplayWatcher::MaxDisplaysToWatch> &watch_displays) {
+inline bool
+redraw_text_display(DrawnElement &drawn_el,
+					unsigned this_module_id,
+					std::array<WatchedTextDisplay, TextDisplayWatcher::MaxDisplaysToWatch> &watch_displays) {
 
 	bool was_redrawn = false;
 	if (drawn_el.element.index() == Element{DynamicTextDisplay{}}.index()) {
