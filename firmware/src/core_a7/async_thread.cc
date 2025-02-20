@@ -35,6 +35,25 @@ void AsyncThread::start(unsigned module_id, Callback &&new_action) {
 	start(module_id);
 }
 
+void AsyncThread::run_once(unsigned module_id) {
+	if (auto task = get_task(internal->id)) {
+		internal->id = module_id;
+
+		task->action = action;
+		__DSB();
+		task->enabled = true;
+		task->one_shot = true;
+		__DSB();
+	}
+}
+
+void AsyncThread::stop() {
+	if (auto task = get_task(internal->id)) {
+		task->enabled = false;
+		__DSB();
+	}
+}
+
 AsyncThread::~AsyncThread() {
 	stop();
 }
