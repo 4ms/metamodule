@@ -146,7 +146,7 @@ struct PageBase {
 				auto status = file_change_checker.check_playing_patch();
 
 				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
-					pr_err("Error: Failed to auto reload playing patch file: '%s')\n",
+					pr_err("Error: Failed to load playing patch file: '%s')\n",
 						   patches.get_playing_patch_loc().filename.c_str());
 				}
 			}
