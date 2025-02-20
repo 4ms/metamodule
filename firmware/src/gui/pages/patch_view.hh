@@ -253,7 +253,7 @@ struct PatchViewPage : PageBase {
 		settings_menu.hide();
 		desc_panel.hide();
 		file_menu.hide();
-		params.displays.stop_watching_all();
+		params.text_displays.stop_watching_all();
 		params.lights.stop_watching_all();
 		params.param_watcher.stop_watching_all();
 	}
@@ -359,11 +359,9 @@ struct PatchViewPage : PageBase {
 	}
 
 private:
-	std::vector<std::vector<float>> light_vals;
-
 	void watch_modules() {
 		params.lights.stop_watching_all();
-		params.displays.stop_watching_all();
+		params.text_displays.stop_watching_all();
 
 		if (is_patch_playloaded) {
 			for (const auto &drawn_element : drawn_elements) {
@@ -381,7 +379,7 @@ private:
 								   }
 							   },
 							   [&](DynamicTextDisplay const &el) {
-								   params.displays.start_watching_display(gui_el.module_idx, gui_el.idx.light_idx);
+								   params.text_displays.start_watching_display(gui_el.module_idx, gui_el.idx.light_idx);
 							   },
 						   },
 						   drawn_element.element);
@@ -462,7 +460,7 @@ private:
 			if (gui_el.module_idx < light_vals.size())
 				update_light(drawn_el, light_vals[gui_el.module_idx]);
 
-			redraw_display(drawn_el, gui_el.module_idx, params.displays.watch_displays);
+			redraw_text_display(drawn_el, gui_el.module_idx, params.text_displays.watch_displays);
 		}
 	}
 
@@ -715,6 +713,8 @@ private:
 		PatchViewPage *page;
 		uint32_t selected_module_id;
 	};
+
+	std::vector<std::vector<float>> light_vals;
 };
 
 } // namespace MetaModule
