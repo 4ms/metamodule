@@ -9,16 +9,16 @@
 namespace MetaModule::NanoVG
 {
 
-constexpr lv_coord_t to_lv_coord(float x) {
-	return std::round(mm_to_px(to_mm(x), 240));
+constexpr lv_coord_t to_lv_coord(float x, unsigned px_per_3U = 240) {
+	return std::round(mm_to_px(to_mm(x), px_per_3U));
 }
 // 10px in rack dimensions => 6.325px in MM dimensions
 // static_assert(mm_to_px(to_mm(10.f), 240) == 6.325291928f);
 
-constexpr lv_point_t to_lv_point(NVGvertex vertex) {
+constexpr lv_point_t to_lv_point(NVGvertex vertex, unsigned px_per_3U) {
 	lv_point_t p{
-		.x = to_lv_coord(vertex.x),
-		.y = to_lv_coord(vertex.y),
+		.x = to_lv_coord(vertex.x, px_per_3U),
+		.y = to_lv_coord(vertex.y, px_per_3U),
 	};
 	return p;
 }

@@ -16,7 +16,7 @@ public:
 		: patch_playloader{patch_playloader} {
 	}
 
-	void prepare_module(unsigned this_module_id, lv_obj_t *module_canvas) {
+	void prepare_module(unsigned this_module_id, lv_obj_t *module_canvas, unsigned px_per_3U) {
 		drawer.reset();
 
 		if (auto rack_module = patch_playloader.get_plugin_module<rack::engine::Module>(this_module_id)) {
@@ -46,7 +46,7 @@ public:
 			std::ranges::fill(buffer, 0);
 			lv_canvas_set_buffer(canvas, buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
-			drawer->prepare(canvas);
+			drawer->prepare(canvas, px_per_3U);
 		}
 	}
 
