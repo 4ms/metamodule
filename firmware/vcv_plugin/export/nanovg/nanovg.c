@@ -1787,13 +1787,19 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 		u1 = 0.5f;
 	}
 
+#if !defined(METAMODULE)
 	nvg__calculateJoins(ctx, w, lineJoin, miterLimit);
+#endif
 
 	// Calculate max vertex usage.
 	cverts = 0;
 	for (i = 0; i < cache->npaths; i++) {
 		NVGpath* path = &cache->paths[i];
 		int loop = (path->closed == 0) ? 0 : 1;
+
+#if defined(METAMODULE)
+		cverts += (path->count + loop) * 2; // plus one for loop
+#else
 		if (lineJoin == NVG_ROUND)
 			cverts += (path->count + path->nbevel*(ncap+2) + 1) * 2; // plus one for loop
 		else
@@ -1806,6 +1812,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 				cverts += (3+3)*2;
 			}
 		}
+#endif
 	}
 
 	verts = nvg__allocTempVerts(ctx, cverts);
@@ -1842,6 +1849,12 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 		}
 
 		if (loop == 0) {
+#if defined(METAMODULE)
+			// No end caps on MetaModule:
+			nvg__vset(dst, p0->x, p0->y, u0, 1); dst++;
+			(void)dx;
+			(void)dy;
+#else
 			// Add cap
 			dx = p1->x - p0->x;
 			dy = p1->y - p0->y;
@@ -1852,9 +1865,14 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 				dst = nvg__buttCapStart(dst, p0, dx, dy, w, w-aa, aa, u0, u1);
 			else if (lineCap == NVG_ROUND)
 				dst = nvg__roundCapStart(dst, p0, dx, dy, w, ncap, aa, u0, u1);
+#endif
 		}
 
 		for (j = s; j < e; ++j) {
+#if defined(METAMODULE)
+			// For MetaModule: do not make triangles, just use the points as-is
+			nvg__vset(dst, p1->x, p1->y, u0,1); dst++;
+#else
 			if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0) {
 				if (lineJoin == NVG_ROUND) {
 					dst = nvg__roundJoin(dst, p0, p1, w, w, u0, u1, ncap, aa);
@@ -1865,9 +1883,17 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 				nvg__vset(dst, p1->x + (p1->dmx * w), p1->y + (p1->dmy * w), u0,1); dst++;
 				nvg__vset(dst, p1->x - (p1->dmx * w), p1->y - (p1->dmy * w), u1,1); dst++;
 			}
+#endif
 			p0 = p1++;
 		}
 
+#if defined(METAMODULE)
+		if (loop) {
+			nvg__vset(dst, verts[0].x, verts[0].y, u0,1); dst++;
+		} else {
+			nvg__vset(dst, p1->x, p1->y, u0,1); dst++;
+		}
+#else
 		if (loop) {
 			// Loop it
 			nvg__vset(dst, verts[0].x, verts[0].y, u0,1); dst++;
@@ -1884,6 +1910,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 			else if (lineCap == NVG_ROUND)
 				dst = nvg__roundCapEnd(dst, p1, dx, dy, w, ncap, aa, u0, u1);
 		}
+#endif
 
 		path->nstroke = (int)(dst - verts);
 
