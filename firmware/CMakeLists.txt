@@ -39,7 +39,6 @@ set(SYMBOLS_BINFILE_DIRS
   --objdir ${CoreProcPluginBinDir} 
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/fs/dirent/
-  --objfile ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/core_a7/async_thread.cc.obj
 
 )
 
