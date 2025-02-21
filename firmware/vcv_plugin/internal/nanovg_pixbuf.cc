@@ -87,6 +87,7 @@ void renderStroke(void *uptr,
 
 	context->line_dsc.color = to_lv_color(paint->innerColor);
 	context->line_dsc.opa = to_lv_opa(paint->innerColor);
+	context->line_dsc.width = strokeWidth;
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		std::vector<lv_point_t> points;

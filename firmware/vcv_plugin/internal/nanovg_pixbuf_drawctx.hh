@@ -54,6 +54,8 @@ struct DrawContext {
 		: canvas{canvas} {
 		lv_draw_line_dsc_init(&line_dsc);
 		line_dsc.width = 1;
+		line_dsc.round_end = 1;
+		line_dsc.round_start = 1;
 
 		lv_draw_rect_dsc_init(&rect_dsc);
 		rect_dsc.radius = 0;
