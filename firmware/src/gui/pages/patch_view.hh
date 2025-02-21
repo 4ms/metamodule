@@ -352,7 +352,7 @@ struct PatchViewPage : PageBase {
 
 			update_load_text(metaparams, ui_LoadMeter2);
 
-			draw_dynamic_elements(start_update_tm);
+			draw_dynamic_elements();
 
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
@@ -369,7 +369,7 @@ struct PatchViewPage : PageBase {
 	}
 
 private:
-	void draw_dynamic_elements(uint64_t start_update_tm) {
+	void draw_dynamic_elements() {
 		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
 			dyn_frame_throttle_ctr = 0;
 			// while (true) {
