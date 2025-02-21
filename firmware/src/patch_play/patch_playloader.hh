@@ -80,6 +80,7 @@ struct PatchPlayLoader {
 	void stop_audio() {
 		starting_audio_ = false;
 		stopping_audio_ = true;
+		pause_module_threads();
 	}
 
 	void start_audio() {
@@ -87,6 +88,7 @@ struct PatchPlayLoader {
 		starting_audio_ = true;
 		stopping_audio_ = false;
 		clear_audio_overrun();
+		resume_module_threads();
 	}
 
 	void request_load_view_patch() {

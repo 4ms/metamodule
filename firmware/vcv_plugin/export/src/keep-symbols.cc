@@ -76,13 +76,13 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 }
 
 void keep_async() {
-	MetaModule::AsyncThread a;
-	a.start(0xFFFFFFFF);
-	a.start(0xFFFFFFFF, []() {});
-	a.run_once(0xFFFFFFFF);
+	MetaModule::AsyncThread a{nullptr};
+	a.start();
+	a.start([]() {});
+	a.run_once();
 	a.stop();
-	MetaModule::AsyncThread b{[]() {
-	}};
+	MetaModule::AsyncThread b{nullptr, []() {
+							  }};
 }
 
 void __attribute__((optimize("-O0"))) keep_math(float x) {

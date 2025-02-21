@@ -4,6 +4,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "conf/panel_conf.hh"
 #include "conf/patch_conf.hh"
+#include "core_a7/async_thread_control.hh"
 #include "midi/midi_message.hh"
 #include "midi/midi_router.hh"
 #include "null_module.hh"
@@ -113,6 +114,8 @@ public:
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	Result load_patch(const PatchData &patchdata) {
 
+		pause_module_threads();
+
 		if (patchdata.patch_name.length() == 0)
 			return {false, "Cannot load: patch does not have a name"};
 
@@ -189,6 +192,8 @@ public:
 
 		rebalance_modules();
 
+		resume_module_threads();
+
 		is_loaded = true;
 		if (num_not_found == 1)
 			return {true, std::string{"Module "} + not_found + std::string{" not known, ignoring."}};
@@ -209,6 +214,12 @@ public:
 		core_balancer.print_times(cpu_times, pd.module_slugs);
 
 		smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
+
+		for (auto core_id = 0u; core_id < core_balancer.cores.parts.size(); core_id++) {
+			for (auto id : core_balancer.cores.parts[core_id]) {
+				peg_task_to_core(id, core_id);
+			}
+		}
 	}
 
 	// Runs the patch
@@ -633,6 +644,7 @@ public:
 		}
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
+		modules[module_idx]->id = module_idx;
 		modules[module_idx]->mark_all_inputs_unpatched();
 		modules[module_idx]->mark_all_outputs_unpatched();
 		modules[module_idx]->set_samplerate(samplerate);
