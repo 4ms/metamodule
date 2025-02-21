@@ -119,7 +119,7 @@ else()
 		stubs/random.cpp
 		stubs/memory/heap.cc
 		stubs/fs/fs_proxy.cc
-		stubs/async_thread.cc
+		stubs/async_thread_control.cc
 		stubs/drivers/time.cc
 		stubs/static_buffers.cc
 
@@ -154,6 +154,7 @@ else()
 		${FWDIR}/src/user_settings/settings_serialize.cc
 
 		${FWDIR}/coreproc_plugin/create.cc
+		${FWDIR}/coreproc_plugin/async_thread.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
