@@ -20,6 +20,8 @@ inline bool redraw_element(const Knob &el, const GuiElement &gui_el, float val) 
 	int32_t begin_angle = std::round(el.min_angle * 10.f);
 	int32_t end_angle = std::round(el.max_angle * 10.f);
 	int32_t angle = (val * (end_angle - begin_angle)) + begin_angle;
+	if (angle < 0)
+		angle += 3600;
 	angle = angle % 3600;
 
 	bool is_img = lv_obj_has_class(gui_el.obj, &lv_img_class);
