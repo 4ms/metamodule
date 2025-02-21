@@ -1,7 +1,6 @@
 #include "CoreModules/async_thread.hh"
 #include "async_thread_control.hh"
 #include "console/pr_dbg.hh"
-#include "drivers/stm32xx.h"
 
 namespace MetaModule
 {
@@ -25,10 +24,8 @@ void AsyncThread::start() {
 			pr_trace("Start task id %u on core %u\n", *internal->id, task->core_id);
 
 			task->action = action;
-			__DSB();
 			task->enabled = true;
 			task->one_shot = false;
-			__DSB();
 		}
 	}
 }
@@ -44,10 +41,8 @@ void AsyncThread::run_once() {
 			pr_trace("Run once task id %u core %u\n", *internal->id, task->core_id);
 
 			task->action = action;
-			__DSB();
 			task->enabled = true;
 			task->one_shot = true;
-			__DSB();
 		}
 	}
 }
@@ -57,7 +52,6 @@ void AsyncThread::stop() {
 		if (auto task = get_task(*internal->id)) {
 			pr_trace("Stop task id %u on core %u\n", *internal->id, task->core_id);
 			task->enabled = false;
-			__DSB();
 		} else
 			pr_err("Can't stop unknown task id %u\n", *internal->id);
 	}

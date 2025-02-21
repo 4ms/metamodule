@@ -1,7 +1,7 @@
 #include "aux_core_player.hh"
 #include "conf/hsem_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
-#include "core_a7/async_thread_control.hh"
+#include "coreproc_plugin/async_thread_control.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "dynload/plugin_manager.hh"

@@ -4,7 +4,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "conf/panel_conf.hh"
 #include "conf/patch_conf.hh"
-#include "core_a7/async_thread_control.hh"
+#include "coreproc_plugin/async_thread_control.hh"
 #include "midi/midi_message.hh"
 #include "midi/midi_router.hh"
 #include "null_module.hh"
