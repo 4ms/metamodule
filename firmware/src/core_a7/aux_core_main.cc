@@ -34,6 +34,8 @@ extern "C" void aux_core_main() {
 
 	pr_info("A7 Core 2 starting\n");
 
+	start_module_threads();
+
 #ifdef CONSOLE_USE_USB
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
 #endif
@@ -83,8 +85,6 @@ extern "C" void aux_core_main() {
 	HWSemaphore<AuxCoreReady>::unlock();
 
 	ui.load_initial_patch();
-
-	start_module_threads();
 
 	while (true) {
 		ui.update_screen();

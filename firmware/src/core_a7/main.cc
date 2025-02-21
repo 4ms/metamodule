@@ -87,6 +87,8 @@ int main() {
 	// prevents M4 from using it as a USBD device:
 	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
 
+	start_module_threads();
+
 	pr_info("A7 Core 1 initialized\n");
 	// Note: from after the HAL_Delay(50) until here, it takes 20ms
 
@@ -108,8 +110,6 @@ int main() {
 	audio.start();
 
 	print_time();
-
-	start_module_threads();
 
 	while (true) {
 		__NOP();
