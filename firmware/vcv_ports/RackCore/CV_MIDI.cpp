@@ -165,9 +165,83 @@ struct CV_MIDIPanicItem : MenuItem {
 	}
 };
 
+struct TestDisplay : LedDisplay {
+
+	unsigned count = 0;
+
+	void drawLayer(const DrawArgs &args, int layer) override {
+		// if (count++ < 100) {
+		printf("\n\nDraw test display:\n");
+
+		nvgScissor(args.vg, RECT_ARGS(args.clipBox));
+		// Closed stroked
+		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0x80, 0x00, 0xff));
+		nvgStrokeWidth(args.vg, 3);
+		nvgBeginPath(args.vg);
+		nvgRect(args.vg, 10, 17, 15, 20);
+		nvgStroke(args.vg);
+
+		// Open stroked shape
+		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0x80, 0x80, 0xff));
+		nvgStrokeWidth(args.vg, 2);
+		nvgBeginPath(args.vg);
+		nvgMoveTo(args.vg, 40, 17);
+		nvgLineTo(args.vg, 50, 17);
+		nvgLineTo(args.vg, 50, 27);
+		// pick up pen and move:
+		nvgMoveTo(args.vg, 95, 22);
+		nvgLineTo(args.vg, 85, 22);
+		nvgLineTo(args.vg, 85, 32);
+		nvgStroke(args.vg);
+
+		// Open stroked shape, thin line
+		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0x80, 0x00, 0xff));
+		nvgStrokeWidth(args.vg, 0.25f);
+		nvgBeginPath(args.vg);
+		nvgMoveTo(args.vg, 60, 17);
+		nvgLineTo(args.vg, 70, 17);
+		nvgLineTo(args.vg, 70, 27);
+		nvgStroke(args.vg);
+
+		// Filled closed shape
+		nvgFillColor(args.vg, nvgRGBA(0x8f, 0xf0, 0x00, 0xff));
+		nvgBeginPath(args.vg);
+		nvgRect(args.vg, 10, 47, 15, 20);
+		nvgFill(args.vg);
+
+		// Filled open shape
+		nvgBeginPath(args.vg);
+		nvgMoveTo(args.vg, 40, 47);
+		nvgLineTo(args.vg, 50, 47);
+		nvgLineTo(args.vg, 50, 57);
+		nvgFill(args.vg);
+
+		// Open stroked round
+		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0x80, 0x00, 0xff));
+		nvgStrokeWidth(args.vg, 1);
+		nvgBeginPath(args.vg);
+		nvgCircle(args.vg, 70, 17, 15);
+		nvgStroke(args.vg);
+
+		// Closedd round
+		// nvgBeginPath(args.vg);
+		// nvgCircle(args.vg, 70, -17, 15);
+		// nvgFill(args.vg);
+
+		Widget::drawLayer(args, layer);
+		nvgResetScissor(args.vg);
+		printf("Done drawing test display\n");
+		// }
+	}
+
+	void draw(const DrawArgs &args) override {
+	}
+};
+
 struct CV_MIDIWidget : ModuleWidget {
 	CV_MIDIWidget(CV_MIDI *module) {
 		setModule(module);
+		printf("CV_MIDI\n");
 		setPanel(createPanel(asset::system("res/Core/CV_MIDI.svg"), asset::system("res/Core/CV_MIDI-dark.svg")));
 
 		addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
@@ -189,12 +263,17 @@ struct CV_MIDIWidget : ModuleWidget {
 		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(32.591, 112.975)), module, CV_MIDI::CONTINUE_INPUT));
 
 		// Changed for METAMODULE
-		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(4, 12)));
-		display->box.size = mm2px(Vec(32, 42));
-		display->firstLightId = 0;
-		display->font = "Default_10";
-		display->color = Colors565::Yellow;
-		addChild(display);
+		// auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(4, 12)));
+		// display->box.size = mm2px(Vec(32, 42));
+		// display->firstLightId = 0;
+		// display->font = "Default_10";
+		// display->color = Colors565::Yellow;
+		// addChild(display);
+
+		auto test = createWidget<TestDisplay>(Vec(5, 100));
+		test->box.size = Vec(75, 80);
+		addChild(test);
+		printf("end CV_MIDI\n");
 	}
 
 	void appendContextMenu(Menu *menu) override {
