@@ -45,14 +45,18 @@ void renderFill(void *uptr,
 	context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
+		pr_dbg("Fill path: #fill %d = count:%d\n", path.nfill, path.count);
+
+		auto path_pts = std::span{path.fill, (size_t)(path.count)};
+
 		std::vector<lv_point_t> points;
 
-		std::ranges::transform(std::span{path.fill, (size_t)path.nfill},
-							   std::back_inserter(points),
-							   [context](NVGvertex x) { return to_lv_point(x, context->px_per_3U); });
+		std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex x) {
+			return to_lv_point(x, context->px_per_3U);
+		});
 
-		for (auto &p : std::span{path.fill, (size_t)path.nfill}) {
-			pr_dbg("%g %g %g %g\n", p.x, p.y, p.u, p.v);
+		for (auto &p : path_pts) {
+			pr_dbg("%g %g\n", p.x, p.y);
 		}
 
 		if (is_poly_concave(points)) {
