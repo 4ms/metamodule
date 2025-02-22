@@ -1123,6 +1123,12 @@ static float nvg__distPtSeg(float x, float y, float px, float py, float qx, floa
 
 static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 {
+	printf("nvg__appendCommands: ");
+	for (int i = 0; i < nvals; i++) {
+		printf("%g ", vals[i]);
+	}
+	printf("\n");
+
 	NVGstate* state = nvg__getState(ctx);
 	int i;
 
@@ -1818,6 +1824,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 	verts = nvg__allocTempVerts(ctx, cverts);
 	if (verts == NULL) return 0;
 
+	printf("alloc %u cverts (linjoin=%d), num paths: %d\n", cverts, lineJoin, cache->npaths);
 	for (i = 0; i < cache->npaths; i++) {
 		NVGpath* path = &cache->paths[i];
 		NVGpoint* pts = &cache->points[path->first];
@@ -1852,6 +1859,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 #if defined(METAMODULE)
 			// No end caps on MetaModule:
 			nvg__vset(dst, p0->x, p0->y, u0, 1); dst++;
+			printf("exp1: %g %g\n", p0->x, p0->y);
 			(void)dx;
 			(void)dy;
 #else
@@ -1872,6 +1880,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 #if defined(METAMODULE)
 			// For MetaModule: do not make triangles, just use the points as-is
 			nvg__vset(dst, p1->x, p1->y, u0,1); dst++;
+			printf("exp2: %g %g\n", p0->x, p0->y);
 #else
 			if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0) {
 				if (lineJoin == NVG_ROUND) {
@@ -1890,8 +1899,10 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 #if defined(METAMODULE)
 		if (loop) {
 			nvg__vset(dst, verts[0].x, verts[0].y, u0,1); dst++;
+			printf("exp3: %g %g\n", p0->x, p0->y);
 		} else {
 			nvg__vset(dst, p1->x, p1->y, u0,1); dst++;
+			printf("exp4: %g %g\n", p0->x, p0->y);
 		}
 #else
 		if (loop) {
@@ -1915,6 +1926,10 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 		path->nstroke = (int)(dst - verts);
 
 		verts = dst;
+		printf("Path strokes: ");
+		for (int i = 0; i < path->nstroke; i++)
+			printf("%g,%g    ", path->stroke[i].x, path->stroke[i].y);
+		printf("\n");
 	}
 
 	return 1;
@@ -2343,6 +2358,7 @@ void nvgStroke(NVGcontext* ctx)
 		strokePaint.innerColor.a *= alpha*alpha;
 		strokePaint.outerColor.a *= alpha*alpha;
 		strokeWidth = ctx->fringeWidth;
+		printf("Using alpha to emulate thin stroke: %g < %g\n", strokeWidth, ctx->fringeWidth);
 	}
 
 	// Apply global tint
@@ -2353,6 +2369,13 @@ void nvgStroke(NVGcontext* ctx)
 
 	nvg__flattenPaths(ctx);
 
+	printf("ctx->cache->points post flattens: ");
+	for (int i = 0; i < ctx->cache->npoints; i++) {
+		printf("%g, %g   ", ctx->cache->points[i].x, ctx->cache->points[i].y);
+	}
+	printf("\n");
+
+	printf("edgeAntiAlias = %d, shapeAntiAlias = %d\n", ctx->params.edgeAntiAlias , state->shapeAntiAlias);
 	if (ctx->params.edgeAntiAlias && state->shapeAntiAlias)
 		nvg__expandStroke(ctx, strokeWidth*0.5f, ctx->fringeWidth, state->lineCap, state->lineJoin, state->miterLimit);
 	else

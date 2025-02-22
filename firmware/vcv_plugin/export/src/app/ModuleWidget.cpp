@@ -173,7 +173,7 @@ void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
 			internal->adaptor->addLight(widget);
 		} else {
 			auto box = widget->box;
-			pr_trace("Add drawable (light) at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
+			pr_dbg("Add drawable (light) at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
 			internal->drawable_widgets.push_back(widget);
 		}
 	}
@@ -236,7 +236,7 @@ void ModuleWidget::addChild(Widget *widget) {
 	Widget::addChild(widget);
 
 	auto box = widget->box;
-	pr_trace("Add drawable at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
+	pr_dbg("Add drawable at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
 	internal->drawable_widgets.push_back(widget);
 }
 
