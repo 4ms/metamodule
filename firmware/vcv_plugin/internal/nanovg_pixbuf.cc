@@ -90,14 +90,18 @@ void renderStroke(void *uptr,
 	context->line_dsc.width = strokeWidth;
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
+		pr_dbg("Stroke path: #strokes %d = count:%d + closed:%d\n", path.nstroke, path.count, path.closed);
+
+		auto path_pts = std::span{path.stroke, (size_t)(path.count + path.closed)};
+
 		std::vector<lv_point_t> points;
 
-		std::ranges::transform(std::span{path.stroke, (size_t)path.nstroke},
-							   std::back_inserter(points),
-							   [context](NVGvertex x) { return to_lv_point(x, context->px_per_3U); });
+		std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex x) {
+			return to_lv_point(x, context->px_per_3U);
+		});
 
-		for (auto &p : std::span{path.stroke, (size_t)path.nstroke}) {
-			pr_dbg("%g %g %g %g\n", p.x, p.y, p.u, p.v);
+		for (auto const &p : path_pts) {
+			pr_dbg("%g %g\n", p.x, p.y);
 		}
 
 		lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
