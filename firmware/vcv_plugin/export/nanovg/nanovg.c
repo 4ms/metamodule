@@ -150,7 +150,9 @@ static float nvg__acosf(float a) { return acosf(a); }
 
 static int nvg__mini(int a, int b) { return a < b ? a : b; }
 static int nvg__maxi(int a, int b) { return a > b ? a : b; }
+#if !defined(METAMODULE)
 static int nvg__clampi(int a, int mn, int mx) { return a < mn ? mn : (a > mx ? mx : a); }
+#endif
 static float nvg__minf(float a, float b) { return a < b ? a : b; }
 static float nvg__maxf(float a, float b) { return a > b ? a : b; }
 static float nvg__absf(float a) { return a >= 0.0f ? a : -a; }
@@ -1121,6 +1123,8 @@ static float nvg__distPtSeg(float x, float y, float px, float py, float qx, floa
 	return dx*dx + dy*dy;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
 static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 {
 	printf("nvg__appendCommands: ");
@@ -1180,6 +1184,7 @@ static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 
 	ctx->ncommands += nvals;
 }
+#pragma GCC diagnostic pop
 
 
 static void nvg__clearPathCache(NVGcontext* ctx)
@@ -1481,6 +1486,7 @@ static int nvg__curveDivs(float r, float arc, float tol)
 	return nvg__maxi(2, (int)ceilf(arc / da));
 }
 
+#if !defined(METAMODULE) 
 static void nvg__chooseBevel(int bevel, NVGpoint* p0, NVGpoint* p1, float w,
 							float* x0, float* y0, float* x1, float* y1)
 {
@@ -1703,6 +1709,7 @@ static NVGvertex* nvg__roundCapEnd(NVGvertex* dst, NVGpoint* p,
 	}
 	return dst;
 }
+#endif
 
 
 static void nvg__calculateJoins(NVGcontext* ctx, float w, int lineJoin, float miterLimit)
@@ -1805,6 +1812,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 
 #if defined(METAMODULE)
 		cverts += (path->count + loop) * 2; // plus one for loop
+		(void)ncap;
 #else
 		if (lineJoin == NVG_ROUND)
 			cverts += (path->count + path->nbevel*(ncap+2) + 1) * 2; // plus one for loop
@@ -1862,6 +1870,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 			printf("exp1: %g %g\n", p0->x, p0->y);
 			(void)dx;
 			(void)dy;
+			(void)u1;
 #else
 			// Add cap
 			dx = p1->x - p0->x;
@@ -2030,6 +2039,11 @@ static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLi
 			p0 = &pts[path->count-1];
 			p1 = &pts[0];
 
+#if defined(METAMODULE)
+			nvg__vset(dst, p1->x + (p1->dmx * lw), p1->y + (p1->dmy * lw), lu,1); dst++;
+			p0 = p1++;
+			(void)rw;
+#else
 			for (j = 0; j < path->count; ++j) {
 				if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0) {
 					dst = nvg__bevelJoin(dst, p0, p1, lw, rw, lu, ru, ctx->fringeWidth);
@@ -2040,6 +2054,7 @@ static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLi
 				p0 = p1++;
 			}
 
+#endif
 			// Loop it
 			nvg__vset(dst, verts[0].x, verts[0].y, lu,1); dst++;
 			nvg__vset(dst, verts[1].x, verts[1].y, ru,1); dst++;
