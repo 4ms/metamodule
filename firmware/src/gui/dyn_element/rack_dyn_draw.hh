@@ -16,8 +16,8 @@ struct RackDynDraw : BaseDynDraw {
 		: module_widget{module_widget} {
 	}
 
-	void prepare(lv_obj_t *widget_canvas, unsigned height) override {
-		args.vg = nvgCreatePixelBufferContext(widget_canvas, height);
+	void prepare(lv_obj_t *widget_canvas, unsigned px_per_3U) override {
+		args.vg = nvgCreatePixelBufferContext(widget_canvas, px_per_3U);
 		args.fb = nullptr;
 		canvas = widget_canvas;
 
