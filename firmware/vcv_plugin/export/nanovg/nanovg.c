@@ -1781,6 +1781,125 @@ static void nvg__calculateJoins(NVGcontext* ctx, float w, int lineJoin, float mi
 	}
 }
 
+#if 1 || defined(METAMODULE)
+
+static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap, int lineJoin, float miterLimit)
+{
+	NVGpathCache* cache = ctx->cache;
+	NVGvertex* verts;
+	NVGvertex* dst;
+	int cverts, i, j;
+
+	// Calculate max vertex usage.
+	cverts = 0;
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		int loop = (path->closed == 0) ? 0 : 1;
+
+		cverts += (path->count + loop) * 2; // plus one for loop
+	}
+
+	verts = nvg__allocTempVerts(ctx, cverts);
+	if (verts == NULL) return 0;
+
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		NVGpoint* pts = &cache->points[path->first];
+		NVGpoint* p0;
+		NVGpoint* p1;
+		int s, e, loop;
+
+		path->fill = 0;
+		path->nfill = 0;
+
+		// Calculate fringe or stroke
+		loop = (path->closed == 0) ? 0 : 1;
+		dst = verts;
+		path->stroke = dst;
+
+		if (loop) {
+			// Looping
+			p0 = &pts[path->count-1];
+			p1 = &pts[0];
+			s = 0;
+			e = path->count;
+		} else {
+			// Add cap
+			p0 = &pts[0];
+			p1 = &pts[1];
+			s = 1;
+			e = path->count-1;
+		}
+
+		if (loop == 0) {
+			nvg__vset(dst, p0->x, p0->y, 0, 1); dst++;
+		}
+
+		for (j = s; j < e; ++j) {
+			nvg__vset(dst, p1->x, p1->y, 0,1); dst++;
+			p0 = p1++;
+		}
+
+		if (loop) {
+			nvg__vset(dst, verts[0].x, verts[0].y, 0,1); dst++;
+		} else {
+			nvg__vset(dst, p1->x, p1->y, 0,1); dst++;
+		}
+
+		path->nstroke = (int)(dst - verts);
+
+		verts = dst;
+
+		// printf("Path strokes: ");
+		// for (int i = 0; i < path->nstroke; i++)
+		// 	printf("%g,%g    ", path->stroke[i].x, path->stroke[i].y);
+		// printf("\n");
+	}
+
+	return 1;
+}
+
+static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLimit)
+{
+	NVGpathCache* cache = ctx->cache;
+	NVGvertex* verts;
+	NVGvertex* dst;
+	int cverts, i, j;
+
+	// Calculate max vertex usage.
+	cverts = 0;
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		cverts += path->count +  1;
+	}
+
+	verts = nvg__allocTempVerts(ctx, cverts);
+	if (verts == NULL) return 0;
+
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		NVGpoint* pts = &cache->points[path->first];
+
+		// Calculate shape vertices.
+		dst = verts;
+		path->fill = dst;
+
+		for (j = 0; j < path->count; ++j) {
+			nvg__vset(dst, pts[j].x, pts[j].y, 0.5f, 1);
+			dst++;
+		}
+
+		path->nfill = (int)(dst - verts);
+		verts = dst;
+
+		path->stroke = NULL;
+		path->nstroke = 0;
+	}
+
+	return 1;
+}
+
+#else
 
 static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap, int lineJoin, float miterLimit)
 {
@@ -1800,9 +1919,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 		u1 = 0.5f;
 	}
 
-#if !defined(METAMODULE)
 	nvg__calculateJoins(ctx, w, lineJoin, miterLimit);
-#endif
 
 	// Calculate max vertex usage.
 	cverts = 0;
@@ -1810,10 +1927,6 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 		NVGpath* path = &cache->paths[i];
 		int loop = (path->closed == 0) ? 0 : 1;
 
-#if defined(METAMODULE)
-		cverts += (path->count + loop) * 2; // plus one for loop
-		(void)ncap;
-#else
 		if (lineJoin == NVG_ROUND)
 			cverts += (path->count + path->nbevel*(ncap+2) + 1) * 2; // plus one for loop
 		else
@@ -1826,13 +1939,11 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 				cverts += (3+3)*2;
 			}
 		}
-#endif
 	}
 
 	verts = nvg__allocTempVerts(ctx, cverts);
 	if (verts == NULL) return 0;
 
-	printf("alloc %u cverts (linjoin=%d), num paths: %d\n", cverts, lineJoin, cache->npaths);
 	for (i = 0; i < cache->npaths; i++) {
 		NVGpath* path = &cache->paths[i];
 		NVGpoint* pts = &cache->points[path->first];
@@ -1864,14 +1975,6 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 		}
 
 		if (loop == 0) {
-#if defined(METAMODULE)
-			// No end caps on MetaModule:
-			nvg__vset(dst, p0->x, p0->y, u0, 1); dst++;
-			printf("exp1: %g %g\n", p0->x, p0->y);
-			(void)dx;
-			(void)dy;
-			(void)u1;
-#else
 			// Add cap
 			dx = p1->x - p0->x;
 			dy = p1->y - p0->y;
@@ -1882,15 +1985,9 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 				dst = nvg__buttCapStart(dst, p0, dx, dy, w, w-aa, aa, u0, u1);
 			else if (lineCap == NVG_ROUND)
 				dst = nvg__roundCapStart(dst, p0, dx, dy, w, ncap, aa, u0, u1);
-#endif
 		}
 
 		for (j = s; j < e; ++j) {
-#if defined(METAMODULE)
-			// For MetaModule: do not make triangles, just use the points as-is
-			nvg__vset(dst, p1->x, p1->y, u0,1); dst++;
-			printf("exp2: %g %g\n", p0->x, p0->y);
-#else
 			if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0) {
 				if (lineJoin == NVG_ROUND) {
 					dst = nvg__roundJoin(dst, p0, p1, w, w, u0, u1, ncap, aa);
@@ -1901,19 +1998,9 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 				nvg__vset(dst, p1->x + (p1->dmx * w), p1->y + (p1->dmy * w), u0,1); dst++;
 				nvg__vset(dst, p1->x - (p1->dmx * w), p1->y - (p1->dmy * w), u1,1); dst++;
 			}
-#endif
 			p0 = p1++;
 		}
 
-#if defined(METAMODULE)
-		if (loop) {
-			nvg__vset(dst, verts[0].x, verts[0].y, u0,1); dst++;
-			printf("exp3: %g %g\n", p0->x, p0->y);
-		} else {
-			nvg__vset(dst, p1->x, p1->y, u0,1); dst++;
-			printf("exp4: %g %g\n", p0->x, p0->y);
-		}
-#else
 		if (loop) {
 			// Loop it
 			nvg__vset(dst, verts[0].x, verts[0].y, u0,1); dst++;
@@ -1930,15 +2017,10 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 			else if (lineCap == NVG_ROUND)
 				dst = nvg__roundCapEnd(dst, p1, dx, dy, w, ncap, aa, u0, u1);
 		}
-#endif
 
 		path->nstroke = (int)(dst - verts);
 
 		verts = dst;
-		printf("Path strokes: ");
-		for (int i = 0; i < path->nstroke; i++)
-			printf("%g,%g    ", path->stroke[i].x, path->stroke[i].y);
-		printf("\n");
 	}
 
 	return 1;
@@ -2039,11 +2121,6 @@ static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLi
 			p0 = &pts[path->count-1];
 			p1 = &pts[0];
 
-#if defined(METAMODULE)
-			nvg__vset(dst, p1->x + (p1->dmx * lw), p1->y + (p1->dmy * lw), lu,1); dst++;
-			p0 = p1++;
-			(void)rw;
-#else
 			for (j = 0; j < path->count; ++j) {
 				if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0) {
 					dst = nvg__bevelJoin(dst, p0, p1, lw, rw, lu, ru, ctx->fringeWidth);
@@ -2054,7 +2131,6 @@ static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLi
 				p0 = p1++;
 			}
 
-#endif
 			// Loop it
 			nvg__vset(dst, verts[0].x, verts[0].y, lu,1); dst++;
 			nvg__vset(dst, verts[1].x, verts[1].y, ru,1); dst++;
@@ -2070,6 +2146,7 @@ static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLi
 	return 1;
 }
 
+#endif
 
 // Draw
 void nvgBeginPath(NVGcontext* ctx)
