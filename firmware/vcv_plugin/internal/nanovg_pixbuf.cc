@@ -40,6 +40,7 @@ void renderFill(void *uptr,
 
 	context->line_dsc.color = to_lv_color(paint->innerColor);
 	context->line_dsc.opa = to_lv_opa(paint->innerColor);
+	context->line_dsc.width = 1;
 
 	context->rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
 	context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
@@ -91,7 +92,7 @@ void renderStroke(void *uptr,
 
 	context->line_dsc.color = to_lv_color(paint->innerColor);
 	context->line_dsc.opa = to_lv_opa(paint->innerColor);
-	context->line_dsc.width = strokeWidth;
+	context->line_dsc.width = std::round(to_lv_coord(strokeWidth, context->px_per_3U));
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		pr_dbg("Stroke path: #strokes %d = count:%d + closed:%d\n", path.nstroke, path.count, path.closed);
