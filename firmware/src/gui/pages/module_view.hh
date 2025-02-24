@@ -296,7 +296,7 @@ struct ModuleViewPage : PageBase {
 			show_roller();
 		}
 
-		dyn_draw.prepare_module(this_module_id, canvas, 240);
+		dyn_draw.prepare_module(slug, this_module_id, canvas, 240);
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {

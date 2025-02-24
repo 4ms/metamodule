@@ -16,10 +16,27 @@ struct RackDynDraw : BaseDynDraw {
 		: module_widget{module_widget} {
 	}
 
-	void prepare(lv_obj_t *widget_canvas, unsigned px_per_3U) override {
-		args.vg = nvgCreatePixelBufferContext(widget_canvas, px_per_3U);
+	void prepare(lv_obj_t *module_canvas, unsigned px_per_3U) override {
+		// create canvas, same size as module
+		lv_obj_refr_size(module_canvas);
+		auto w = lv_obj_get_width(module_canvas);
+		auto h = lv_obj_get_height(module_canvas);
+
+		if (canvas && lv_obj_is_valid(canvas)) {
+			lv_obj_del(canvas);
+		}
+
+		canvas = lv_canvas_create(module_canvas);
+		lv_obj_set_pos(canvas, 0, 0);
+		lv_obj_set_size(canvas, w, h);
+
+		// setup backing buffer for canvas
+		buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h));
+		std::ranges::fill(buffer, 0);
+		lv_canvas_set_buffer(canvas, buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+
+		args.vg = nvgCreatePixelBufferContext(canvas, px_per_3U);
 		args.fb = nullptr;
-		canvas = widget_canvas;
 
 		lv_obj_refr_size(canvas);
 		width = lv_obj_get_width(canvas);
@@ -63,6 +80,8 @@ struct RackDynDraw : BaseDynDraw {
 		nvgDeletePixelBufferContext(args.vg);
 		args.vg = nullptr;
 		rack::contextGet()->window->vg = nullptr;
+
+		buffer.clear();
 	}
 
 	~RackDynDraw() override = default;
@@ -74,6 +93,8 @@ private:
 
 	std::weak_ptr<rack::app::ModuleWidget> module_widget{};
 	rack::app::ModuleWidget::DrawArgs args{}; // one per module
+
+	std::vector<char> buffer;
 
 	// Takes ~50us for A 14HP-ish module
 	void clear_canvas() {
