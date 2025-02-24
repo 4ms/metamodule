@@ -95,7 +95,7 @@ void renderStroke(void *uptr,
 
 	context->line_dsc.color = to_lv_color(paint->innerColor);
 	context->line_dsc.opa = to_lv_opa(paint->innerColor);
-	context->line_dsc.width = std::round(to_lv_coord(strokeWidth, context->px_per_3U));
+	context->line_dsc.width = std::max<lv_coord_t>(std::round(to_lv_coord(strokeWidth, context->px_per_3U)), 1);
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Stroke path: #strokes %d = count:%d + closed:%d\n", path.nstroke, path.count, path.closed);
