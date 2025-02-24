@@ -18,13 +18,13 @@ struct DynDraw : BaseDynDraw {
 		// Scan elements for dynamic graphic displays
 		unsigned i = 0;
 		for (auto const &el : info.elements) {
-			std::visit(overloaded{
-						   [](BaseElement const &e) {},
-						   [i = i, this](DynamicGraphicDisplay const &e) {
-							   displays.push_back({i, e.x_mm, e.y_mm, e.width_mm, e.height_mm});
-						   },
-					   },
-					   el);
+			// std::visit(overloaded{
+			// 			   [](BaseElement const &e) {},
+			// 			   [i = i, this](DynamicGraphicDisplay const &e) {
+			// 				   displays.push_back({i, e.x_mm, e.y_mm, e.width_mm, e.height_mm});
+			// 			   },
+			// 		   },
+			// 		   el);
 			i++;
 		}
 	}
@@ -40,8 +40,7 @@ struct DynDraw : BaseDynDraw {
 			auto h = mm_to_px(disp.h, px_per_3U);
 			lv_obj_set_pos(disp.canvas, x, y);
 			lv_obj_set_size(disp.canvas, w, h);
-			disp.draw_buffer.resize(w * h, CoreProcessor::Pixel{});
-			disp.lvgl_buffer.resize(w * h * 3, 0);
+			// disp.buffer.resize(w * h, CoreProcessor::Pixel{});
 		}
 	}
 
@@ -50,7 +49,7 @@ struct DynDraw : BaseDynDraw {
 			return;
 
 		for (auto &disp : displays) {
-			[[maybe_unused]] auto changed = module->get_canvas_pixels(disp.id, disp.draw_buffer.data(), disp.w, disp.h);
+			// [[maybe_unused]] auto changed = module->get_canvas_pixels(disp.id, disp.draw_buffer.data(), disp.w, disp.h);
 		}
 	}
 
@@ -70,8 +69,7 @@ private:
 		float w{};
 		float h{};
 		lv_obj_t *canvas{};
-		std::vector<CoreProcessor::Pixel> draw_buffer;
-		std::vector<char> lvgl_buffer;
+		// std::vector<CoreProcessor::Pixel> buffer;
 	};
 	std::vector<Display> displays;
 
@@ -79,8 +77,7 @@ private:
 
 	void clear_pixels() {
 		for (auto &disp : displays) {
-			std::ranges::fill(disp.draw_buffer, CoreProcessor::Pixel{0, 0, 0, 0});
-			std::ranges::fill(disp.lvgl_buffer, 0);
+			// std::ranges::fill(disp.buffer, CoreProcessor::Pixel{0, 0, 0, 0});
 		}
 	}
 };
