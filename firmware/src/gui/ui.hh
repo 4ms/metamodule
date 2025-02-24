@@ -78,7 +78,9 @@ public:
 		auto now = HAL_GetTick();
 		if ((now - last_lv_update_tm) > 2) {
 			last_lv_update_tm = now;
+			Debug::Pin1::high();
 			lv_timer_handler();
+			Debug::Pin1::low();
 		}
 	}
 
