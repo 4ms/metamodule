@@ -171,7 +171,7 @@ struct TestDisplay : LedDisplay {
 
 	void drawLayer(const DrawArgs &args, int layer) override {
 		// if (count++ < 100) {
-		printf("\n\nDraw test display:\n");
+		// printf("\n\nDraw test display:\n");
 
 		nvgScissor(args.vg, RECT_ARGS(args.clipBox));
 		// Closed stroked
@@ -230,7 +230,7 @@ struct TestDisplay : LedDisplay {
 
 		Widget::drawLayer(args, layer);
 		nvgResetScissor(args.vg);
-		printf("Done drawing test display\n");
+		// printf("Done drawing test display\n");
 		// }
 	}
 

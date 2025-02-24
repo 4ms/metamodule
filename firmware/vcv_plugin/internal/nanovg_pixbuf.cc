@@ -193,26 +193,18 @@ float renderText(
 		new_x = lv_x - width;
 	}
 	if (new_x != cur_x) {
-		DebugPin1High();
 		lv_obj_set_x(label, new_x);
-		DebugPin1Low();
 	}
 
 	auto cur_col = lv_obj_get_style_text_color(label, LV_PART_MAIN);
 	auto new_col = to_lv_text_color(fs->paint->innerColor);
 	if (cur_col.full != new_col.full) {
-		DebugPin0High();
 		lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
-		DebugPin0Low();
 	}
 
 	auto cur_text = lv_label_get_text(label);
 	if (strcmp(cur_text, text) != 0) {
-		DebugPin1High();
-		DebugPin0High();
 		lv_label_set_text(label, text);
-		DebugPin1Low();
-		DebugPin0Low();
 	}
 
 	return 1;
