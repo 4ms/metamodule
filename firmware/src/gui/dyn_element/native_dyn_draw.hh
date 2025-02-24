@@ -2,11 +2,9 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "base_dyn_draw.hh"
-#include "lvgl.h"
 #include "util/overloaded.hh"
 // #include "debug.hh"
 // #include "pr_dbg.hh"
-#include <memory>
 
 namespace MetaModule
 {
@@ -52,7 +50,7 @@ struct DynDraw : BaseDynDraw {
 			return;
 
 		for (auto &disp : displays) {
-			[[maybe_unused]] auto changed = module->get_canvas_pixels(disp.id, disp.draw_buffer, disp.w, disp.h);
+			[[maybe_unused]] auto changed = module->get_canvas_pixels(disp.id, disp.draw_buffer.data(), disp.w, disp.h);
 		}
 	}
 
