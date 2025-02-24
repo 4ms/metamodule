@@ -430,8 +430,8 @@ struct ModuleViewPage : PageBase {
 				redraw_text_display(drawn_el, this_module_id, params.text_displays.watch_displays);
 			}
 
-			if (dyn_frame_throttle_ctr-- == 0) {
-				dyn_frame_throttle_ctr = DynFrameThrottle;
+			if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
+				dyn_frame_throttle_ctr = 0;
 				dyn_draw.draw();
 			}
 		}

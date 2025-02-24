@@ -785,7 +785,7 @@ private:
 	std::vector<DynamicElementDraw> dyn_draws;
 	unsigned dyn_frame_throttle_ctr = 1;
 	unsigned dyn_module_idx = 0;
-	constexpr static unsigned DynFrameThrottle = 1;
+	constexpr static unsigned DynFrameThrottle = 2;
 	bool dynamic_elements_prepared = false;
 };
 
