@@ -133,6 +133,14 @@ struct PatchViewPage : PageBase {
 	}
 
 	void redraw_patch() {
+		// Delete resources used for dynamic drawing
+		pr_dbg("PatchView: redraw_patch -> blur and release %zu dyn_draws\n", dyn_draws.size());
+		for (auto &dyn : dyn_draws)
+			dyn.blur();
+		dyn_draws.clear();
+
+		dynamic_elements_prepared = false;
+
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
 
@@ -189,9 +197,6 @@ struct PatchViewPage : PageBase {
 
 			module_canvases.push_back(canvas);
 			style_module(canvas);
-
-			auto &dyn = dyn_draws.emplace_back(patch_playloader);
-			dyn.prepare_module(slug, module_idx, canvas, page_settings.view_height_px);
 
 			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
@@ -262,12 +267,10 @@ struct PatchViewPage : PageBase {
 		params.text_displays.stop_watching_all();
 		params.lights.stop_watching_all();
 		params.param_watcher.stop_watching_all();
-		for (auto &dyn : dyn_draws)
-			dyn.blur();
 	}
 
 	void update() override {
-		bool last_is_patch_playing = is_patch_playloaded;
+		bool last_is_patch_playloaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
 
@@ -275,14 +278,14 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(displayed_patch_loc_hash);
 
-		if (is_patch_playloaded != last_is_patch_playing || page_settings.changed) {
+		if (is_patch_playloaded != last_is_patch_playloaded || page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
 			watch_modules();
 		}
 
-		if (is_patch_playloaded != last_is_patch_playing) {
+		if (is_patch_playloaded != last_is_patch_playloaded) {
 			args.view_knobset_id = active_knobset;
 			page_list.set_active_knobset(active_knobset);
 			patch_mod_queue.put(ChangeKnobSet{active_knobset});
@@ -352,6 +355,8 @@ struct PatchViewPage : PageBase {
 
 			update_load_text(metaparams, ui_LoadMeter2);
 
+			prepare_dynamic_elements();
+
 			draw_dynamic_elements();
 
 		} else {
@@ -369,24 +374,45 @@ struct PatchViewPage : PageBase {
 	}
 
 private:
+	void prepare_dynamic_elements() {
+
+		if (dynamic_elements_prepared)
+			return;
+
+		pr_dbg("PatchView::prepare_dynamic_elements()\n");
+		for (auto &canvas : module_canvases) {
+			if (auto user_data = lv_obj_get_user_data(canvas)) {
+
+				auto module_idx = *(static_cast<uint32_t *>(user_data));
+				if (module_idx < patch->module_slugs.size()) {
+
+					auto slug = patch->module_slugs[module_idx];
+
+					auto &dyn = dyn_draws.emplace_back(patch_playloader);
+					dyn.prepare_module(slug, module_idx, canvas, page_settings.view_height_px);
+
+					if (!dyn.is_active()) {
+						dyn_draws.pop_back();
+						pr_dbg("PatchView: Removing last dyndraw -- no valid drawer\n");
+					}
+				}
+			}
+		}
+
+		dynamic_elements_prepared = true;
+	}
+
 	void draw_dynamic_elements() {
 		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
 			dyn_frame_throttle_ctr = 0;
-			// while (true) {
+
 			dyn_module_idx++;
 			if (dyn_module_idx >= dyn_draws.size())
 				dyn_module_idx = 0;
 
-			// if (dyn_module_idx == orig_idx)
-			// 	break;
-
-			// if (get_time() - start_update_tm >= 10)
-			// 	break;
-
-			Debug::Pin0::high();
+			Debug::Pin1::high();
 			dyn_draws[dyn_module_idx].draw();
-			Debug::Pin0::low();
-			// }
+			Debug::Pin1::low();
 		}
 	}
 
@@ -750,7 +776,8 @@ private:
 	std::vector<DynamicElementDraw> dyn_draws;
 	unsigned dyn_frame_throttle_ctr = 1;
 	unsigned dyn_module_idx = 0;
-	constexpr static unsigned DynFrameThrottle = 2;
+	constexpr static unsigned DynFrameThrottle = 1;
+	bool dynamic_elements_prepared = false;
 };
 
 } // namespace MetaModule

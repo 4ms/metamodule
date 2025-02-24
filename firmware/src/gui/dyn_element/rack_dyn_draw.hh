@@ -1,8 +1,7 @@
 #pragma once
 #include "base_dyn_draw.hh"
-#include "lvgl.h"
-// #include "debug.hh"
-// #include "pr_dbg.hh"
+#include "debug.hh"
+#include "pr_dbg.hh"
 #include "vcv_plugin/internal/nanovg_pixbuf.hh"
 #include <app/ModuleWidget.hpp>
 #include <memory>
@@ -23,6 +22,7 @@ struct RackDynDraw : BaseDynDraw {
 		height = lv_obj_get_height(module_canvas);
 
 		if (canvas && lv_obj_is_valid(canvas)) {
+			pr_dbg("RackDynDraw: canvas is a valid lvgl object, deleting\n");
 			lv_obj_del(canvas);
 		}
 
@@ -39,6 +39,7 @@ struct RackDynDraw : BaseDynDraw {
 		args.fb = nullptr;
 
 		lv_obj_refr_size(canvas);
+		pr_dbg("RackDynDraw: prepared canvas %u x %u (pxp3u %u) -- create ctx %p\n", width, height, px_per_3U, args.vg);
 	}
 
 	void draw() override {
@@ -64,25 +65,31 @@ struct RackDynDraw : BaseDynDraw {
 
 				args.clipBox = widget->getBox();
 
-				// Debug::Pin2::high();
+				Debug::Pin2::high();
 				widget->step();
 				mw->drawChild(widget, args);
 				mw->drawChild(widget, args, 1);
-				// Debug::Pin2::low();
+				Debug::Pin2::low();
 			}
 			nvgEndFrame(args.vg);
 		}
 	}
 
 	void blur() override {
-		nvgDeletePixelBufferContext(args.vg);
-		args.vg = nullptr;
+		if (args.vg) {
+			pr_dbg("RackDynDraw:: blur (del ctx %p)\n", args.vg);
+			nvgDeletePixelBufferContext(args.vg);
+			args.vg = nullptr;
+		}
 		rack::contextGet()->window->vg = nullptr;
 
 		buffer.clear();
 	}
 
-	~RackDynDraw() override = default;
+	~RackDynDraw() override {
+		pr_dbg("~RackDynDraw()\n");
+		blur();
+	}
 
 private:
 	lv_obj_t *canvas{};

@@ -507,6 +507,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
+		pr_dbg("ModuleView: blur -> dyn_draw.blur\n");
 		dyn_draw.blur();
 		params.lights.stop_watching_all();
 		params.text_displays.stop_watching_all();
@@ -556,8 +557,6 @@ private:
 	void reset_module_page() {
 		for (auto &b : button)
 			lv_obj_del(b);
-
-		dyn_draw.blur();
 
 		if (canvas)
 			lv_obj_del(canvas);
