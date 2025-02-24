@@ -1127,11 +1127,11 @@ static float nvg__distPtSeg(float x, float y, float px, float py, float qx, floa
 #pragma GCC diagnostic ignored "-Warray-bounds"
 static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 {
-	printf("nvg__appendCommands: ");
-	for (int i = 0; i < nvals; i++) {
-		printf("%g ", vals[i]);
-	}
-	printf("\n");
+	// printf("nvg__appendCommands: ");
+	// for (int i = 0; i < nvals; i++) {
+	// 	printf("%g ", vals[i]);
+	// }
+	// printf("\n");
 
 	NVGstate* state = nvg__getState(ctx);
 	int i;
@@ -2450,7 +2450,6 @@ void nvgStroke(NVGcontext* ctx)
 		strokePaint.innerColor.a *= alpha*alpha;
 		strokePaint.outerColor.a *= alpha*alpha;
 		strokeWidth = ctx->fringeWidth;
-		printf("Using alpha to emulate thin stroke: %g < %g\n", strokeWidth, ctx->fringeWidth);
 	}
 
 	// Apply global tint
@@ -2461,13 +2460,12 @@ void nvgStroke(NVGcontext* ctx)
 
 	nvg__flattenPaths(ctx);
 
-	printf("ctx->cache->points post flattens: ");
-	for (int i = 0; i < ctx->cache->npoints; i++) {
-		printf("%g, %g   ", ctx->cache->points[i].x, ctx->cache->points[i].y);
-	}
-	printf("\n");
+	// printf("ctx->cache->points post flattens: ");
+	// for (int i = 0; i < ctx->cache->npoints; i++) {
+	// 	printf("%g, %g   ", ctx->cache->points[i].x, ctx->cache->points[i].y);
+	// }
+	// printf("\n");
 
-	printf("edgeAntiAlias = %d, shapeAntiAlias = %d\n", ctx->params.edgeAntiAlias , state->shapeAntiAlias);
 	if (ctx->params.edgeAntiAlias && state->shapeAntiAlias)
 		nvg__expandStroke(ctx, strokeWidth*0.5f, ctx->fringeWidth, state->lineCap, state->lineJoin, state->miterLimit);
 	else
