@@ -19,8 +19,8 @@ struct RackDynDraw : BaseDynDraw {
 	void prepare(lv_obj_t *module_canvas, unsigned px_per_3U) override {
 		// create canvas, same size as module
 		lv_obj_refr_size(module_canvas);
-		auto w = lv_obj_get_width(module_canvas);
-		auto h = lv_obj_get_height(module_canvas);
+		width = lv_obj_get_width(module_canvas);
+		height = lv_obj_get_height(module_canvas);
 
 		if (canvas && lv_obj_is_valid(canvas)) {
 			lv_obj_del(canvas);
@@ -28,19 +28,17 @@ struct RackDynDraw : BaseDynDraw {
 
 		canvas = lv_canvas_create(module_canvas);
 		lv_obj_set_pos(canvas, 0, 0);
-		lv_obj_set_size(canvas, w, h);
+		lv_obj_set_size(canvas, width, height);
 
 		// setup backing buffer for canvas
-		buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h));
+		buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(width, height));
 		std::ranges::fill(buffer, 0);
-		lv_canvas_set_buffer(canvas, buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		lv_canvas_set_buffer(canvas, buffer.data(), width, height, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
 		args.vg = nvgCreatePixelBufferContext(canvas, px_per_3U);
 		args.fb = nullptr;
 
 		lv_obj_refr_size(canvas);
-		width = lv_obj_get_width(canvas);
-		height = lv_obj_get_height(canvas);
 	}
 
 	void draw() override {
@@ -98,12 +96,7 @@ private:
 
 	// Takes ~50us for A 14HP-ish module
 	void clear_canvas() {
-		if (canvas) {
-			auto buf = lv_canvas_get_img(canvas);
-			if (buf) {
-				std::memset((void *)buf->data, 0, width * height * 3);
-			}
-		}
+		std::ranges::fill(buffer, 0);
 	}
 };
 } // namespace MetaModule

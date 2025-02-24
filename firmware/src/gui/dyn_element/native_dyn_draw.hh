@@ -16,57 +16,73 @@ struct DynDraw : BaseDynDraw {
 	DynDraw(CoreProcessor *module, std::string_view slug)
 		: module{module} {
 		auto info = ModuleFactory::getModuleInfo(slug);
+
+		// Scan elements for dynamic graphic displays
 		unsigned i = 0;
 		for (auto const &el : info.elements) {
 			std::visit(overloaded{
 						   [](BaseElement const &e) {},
-						   [i = i, this](DynamicGraphicDisplay const &e) { dyn_element_ids.push_back(i); },
+						   [i = i, this](DynamicGraphicDisplay const &e) {
+							   displays.push_back({i, e.x_mm, e.y_mm, e.width_mm, e.height_mm});
+						   },
 					   },
 					   el);
+			i++;
 		}
-		i++;
 	}
 
 	void prepare(lv_obj_t *widget_canvas, unsigned px_per_3U) override {
-		canvas = widget_canvas;
+		module_canvas = widget_canvas;
 
-		lv_obj_refr_size(canvas);
-		width = lv_obj_get_width(canvas);
-		height = lv_obj_get_height(canvas);
+		for (auto &disp : displays) {
+			disp.canvas = lv_canvas_create(module_canvas);
+			auto x = mm_to_px(disp.x, px_per_3U);
+			auto y = mm_to_px(disp.y, px_per_3U);
+			auto w = mm_to_px(disp.w, px_per_3U);
+			auto h = mm_to_px(disp.h, px_per_3U);
+			lv_obj_set_pos(disp.canvas, x, y);
+			lv_obj_set_size(disp.canvas, w, h);
+			disp.draw_buffer.resize(w * h, CoreProcessor::Pixel{});
+			disp.lvgl_buffer.resize(w * h * 3, 0);
+		}
 	}
 
 	void draw() override {
-		if (!canvas || !lv_obj_is_valid(canvas) || !lv_obj_is_visible(canvas))
+		if (!module || !module_canvas || !lv_obj_is_valid(module_canvas) || !lv_obj_is_visible(module_canvas))
 			return;
 
-		clear_canvas();
-		auto lv_img_src = lv_canvas_get_img(canvas);
-		auto lv_img_buf = const_cast<uint8_t *>(lv_img_src->data);
-		auto pixels = reinterpret_cast<CoreProcessor::Pixel *>(lv_img_buf);
-		if (module) {
-			[[maybe_unused]] auto changed = module->get_canvas_pixels(0, pixels, width, height);
+		for (auto &disp : displays) {
+			[[maybe_unused]] auto changed = module->get_canvas_pixels(disp.id, disp.draw_buffer, disp.w, disp.h);
 		}
 	}
 
 	void blur() override {
+		clear_pixels();
 	}
 
 	~DynDraw() override = default;
 
 private:
 	CoreProcessor *module = nullptr;
-	std::vector<unsigned> dyn_element_ids;
-	lv_obj_t *canvas{};
-	lv_coord_t width{};
-	lv_coord_t height{};
 
-	// Takes ~50us for A 14HP-ish module
-	void clear_canvas() {
-		if (canvas) {
-			auto buf = lv_canvas_get_img(canvas);
-			if (buf) {
-				memset((void *)buf->data, 0, width * height * 3);
-			}
+	struct Display {
+		unsigned id{};
+		float x{};
+		float y{};
+		float w{};
+		float h{};
+		lv_obj_t *canvas{};
+		std::vector<CoreProcessor::Pixel> draw_buffer;
+		std::vector<char> lvgl_buffer;
+	};
+	std::vector<Display> displays;
+
+	lv_obj_t *module_canvas{};
+
+	void clear_pixels() {
+		for (auto &disp : displays) {
+			std::ranges::fill(disp.draw_buffer, CoreProcessor::Pixel{0, 0, 0, 0});
+			std::ranges::fill(disp.lvgl_buffer, 0);
 		}
 	}
 };
