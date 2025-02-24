@@ -3,7 +3,7 @@ PatchData:
   description: Patch Description
   module_slugs:
     0: HubMedium
-    1: ENVVCA
+    1: "kocmoc:TRG"
   int_cables: []
   mapped_ins:
     - panel_jack_id: 0
