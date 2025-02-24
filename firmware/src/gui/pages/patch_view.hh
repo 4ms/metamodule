@@ -382,23 +382,28 @@ private:
 		if (dynamic_elements_prepared)
 			return;
 
-		pr_dbg("PatchView::prepare_dynamic_elements()\n");
+		pr_dbg("PatchView::prepare_dynamic_elements(). There are %zu canvases\n", module_canvases.size());
+
 		for (auto &canvas : module_canvases) {
-			if (auto user_data = lv_obj_get_user_data(canvas)) {
+			if (!canvas)
+				continue;
 
-				auto module_idx = *(static_cast<uint32_t *>(user_data));
-				if (module_idx < patch->module_slugs.size()) {
+			auto user_data = lv_obj_get_user_data(canvas);
+			if (!user_data)
+				continue;
 
-					auto slug = patch->module_slugs[module_idx];
+			auto module_idx = *(static_cast<uint32_t *>(user_data));
+			if (module_idx >= patch->module_slugs.size())
+				continue;
 
-					auto &dyn = dyn_draws.emplace_back(patch_playloader);
-					dyn.prepare_module(slug, module_idx, canvas, page_settings.view_height_px);
+			auto slug = patch->module_slugs[module_idx];
 
-					if (!dyn.is_active()) {
-						dyn_draws.pop_back();
-						pr_dbg("PatchView: Removing last dyndraw -- no valid drawer\n");
-					}
-				}
+			auto &dyn = dyn_draws.emplace_back(patch_playloader);
+			dyn.prepare_module(slug, module_idx, canvas, page_settings.view_height_px);
+
+			if (!dyn.is_active()) {
+				dyn_draws.pop_back();
+				pr_dbg("PatchView: Removing last dyndraw -- no valid drawer\n");
 			}
 		}
 
@@ -406,6 +411,9 @@ private:
 	}
 
 	void draw_dynamic_elements() {
+		if (dyn_draws.size() == 0)
+			return;
+
 		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
 			dyn_frame_throttle_ctr = 0;
 
@@ -413,9 +421,7 @@ private:
 			if (dyn_module_idx >= dyn_draws.size())
 				dyn_module_idx = 0;
 
-			Debug::Pin1::high();
 			dyn_draws[dyn_module_idx].draw();
-			Debug::Pin1::low();
 		}
 	}
 
