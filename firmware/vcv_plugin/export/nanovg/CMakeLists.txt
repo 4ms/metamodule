@@ -9,3 +9,5 @@ set_property(TARGET nanovg PROPERTY CXX_STANDARD 23)
 target_include_directories(nanovg PRIVATE ./)
 
 target_compile_definitions(nanovg PRIVATE METAMODULE)
+
+target_link_libraries(nanovg PRIVATE ThorVG)

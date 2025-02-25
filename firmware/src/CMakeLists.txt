@@ -56,6 +56,12 @@ set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
 add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
 #
+# ThorVG
+#
+add_subdirectory(../lib/thorvg ${CMAKE_BINARY_DIR}/thorvg)
+
+
+#
 # VCV Adaptor
 #
 add_subdirectory(../vcv_plugin ${CMAKE_BINARY_DIR}/vcv_plugin)
@@ -244,7 +250,7 @@ endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports ThorVG)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
