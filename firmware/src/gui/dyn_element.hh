@@ -3,9 +3,7 @@
 #include "gui/dyn_element/base_dyn_draw.hh"
 #include "gui/dyn_element/native_dyn_draw.hh"
 #include "gui/dyn_element/rack_dyn_draw.hh"
-#include "lvgl.h"
 #include "patch_play/patch_playloader.hh"
-#include <algorithm>
 #include <memory>
 
 namespace MetaModule
