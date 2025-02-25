@@ -63,6 +63,13 @@ if (NOT HEADLESS)
 
 endif()
 
+# #################### ThorVG ############################################
+
+if (NOT HEADLESS)
+	add_subdirectory(${FWDIR}/lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
+endif()
+
+
 # #################### RYML ##################################
 
 add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
@@ -208,6 +215,7 @@ if(NOT HEADLESS)
 		lvglsdl
 		SDL2
 		ui_lvgl
+		ThorVG
 	)
 endif()
 

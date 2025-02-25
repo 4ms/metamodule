@@ -10,6 +10,7 @@ target_include_directories(ThorVG PUBLIC
     thorvg/src/common
     thorvg/src/renderer
     thorvg/src/renderer/sw_engine
+	thorvg/src/loaders/raw
 )
 
 target_include_directories(ThorVG PRIVATE thorvg/src)
@@ -24,7 +25,7 @@ target_sources(ThorVG PRIVATE
    thorvg/src/renderer/tvgFill.cpp
    # thorvg/src/renderer/tvgGlCanvas.cpp
    thorvg/src/renderer/tvgInitializer.cpp
-   # thorvg/src/renderer/tvgLoader.cpp
+   thorvg/src/renderer/tvgLoader.cpp
    thorvg/src/renderer/tvgPaint.cpp
    thorvg/src/renderer/tvgPicture.cpp
    thorvg/src/renderer/tvgRender.cpp
@@ -48,6 +49,8 @@ target_sources(ThorVG PRIVATE
    thorvg/src/renderer/sw_engine/tvgSwRle.cpp
    thorvg/src/renderer/sw_engine/tvgSwShape.cpp
    thorvg/src/renderer/sw_engine/tvgSwStroke.cpp
+
+   thorvg/src/loaders/raw/tvgRawLoader.cpp
 )
 
 target_compile_definitions(ThorVG PRIVATE 

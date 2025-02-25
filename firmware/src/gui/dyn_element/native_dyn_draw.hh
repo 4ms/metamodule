@@ -2,9 +2,10 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "base_dyn_draw.hh"
+#include "thorvg.h"
 #include "util/overloaded.hh"
 // #include "debug.hh"
-// #include "pr_dbg.hh"
+#include "pr_dbg.hh"
 
 namespace MetaModule
 {
@@ -18,13 +19,13 @@ struct DynDraw : BaseDynDraw {
 		// Scan elements for dynamic graphic displays
 		unsigned i = 0;
 		for (auto const &el : info.elements) {
-			// std::visit(overloaded{
-			// 			   [](BaseElement const &e) {},
-			// 			   [i = i, this](DynamicGraphicDisplay const &e) {
-			// 				   displays.push_back({i, e.x_mm, e.y_mm, e.width_mm, e.height_mm});
-			// 			   },
-			// 		   },
-			// 		   el);
+			std::visit(overloaded{
+						   [](BaseElement const &e) {},
+						   [i = i, this](DynamicGraphicDisplay const &e) {
+							   displays.push_back({i, e.x_mm, e.y_mm, e.width_mm, e.height_mm});
+						   },
+					   },
+					   el);
 			i++;
 		}
 	}
@@ -40,7 +41,16 @@ struct DynDraw : BaseDynDraw {
 			auto h = mm_to_px(disp.h, px_per_3U);
 			lv_obj_set_pos(disp.canvas, x, y);
 			lv_obj_set_size(disp.canvas, w, h);
-			// disp.buffer.resize(w * h, CoreProcessor::Pixel{});
+
+			pr_dbg("Create buffer w*h * 4 = %u*%u, %u\n", w, h, w * h * 4);
+			disp.lv_buffer.resize(w * h, 0); //CoreProcessor::Pixel{});
+			lv_canvas_set_buffer(
+				disp.canvas, disp.lv_buffer.data(), w, h, LV_IMG_CF_RGBA8888); //LV_IMG_CF_TRUE_COLOR_ALPHA);
+
+			disp.lv_buffer.resize(w * h, 0); //CoreProcessor::Pixel{});
+
+			// disp.tvg_canvas = tvg::SwCanvas::gen();
+			// disp.tvg_canvas->target(disp.buffer.data(), w, w, h, tvg::ColorSpace::ARGB8888);
 		}
 	}
 
@@ -49,7 +59,8 @@ struct DynDraw : BaseDynDraw {
 			return;
 
 		for (auto &disp : displays) {
-			// [[maybe_unused]] auto changed = module->get_canvas_pixels(disp.id, disp.draw_buffer.data(), disp.w, disp.h);
+			auto pix_buf = reinterpret_cast<CoreProcessor::Pixel *>(disp.fullcolor_buffer.data());
+			[[maybe_unused]] auto changed = module->get_canvas_pixels(disp.id, pix_buf, disp.w, disp.h);
 		}
 	}
 
@@ -69,7 +80,9 @@ private:
 		float w{};
 		float h{};
 		lv_obj_t *canvas{};
-		// std::vector<CoreProcessor::Pixel> buffer;
+		// tvg::SwCanvas *tvg_canvas{};
+		std::vector<char> lv_buffer;
+		std::vector<uint32_t> fullcolor_buffer;
 	};
 	std::vector<Display> displays;
 
@@ -78,6 +91,7 @@ private:
 	void clear_pixels() {
 		for (auto &disp : displays) {
 			// std::ranges::fill(disp.buffer, CoreProcessor::Pixel{0, 0, 0, 0});
+			std::ranges::fill(disp.lv_buffer, 0);
 		}
 	}
 };

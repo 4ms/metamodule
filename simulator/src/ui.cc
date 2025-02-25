@@ -39,6 +39,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 	Gui::init_lvgl_styles();
 	page_manager.init();
 
+	tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
+
 	if (!Settings::read_settings(file_storage_proxy, &settings)) {
 		settings = UserSettings{};
 		pr_warn("Could not read settings.yml, using defaults\n");
