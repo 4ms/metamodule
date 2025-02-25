@@ -51,4 +51,4 @@
 	url = https://github.com/4ms/metamodule-core-modules
 [submodule "firmware/lib/thorvg/thorvg"]
 	path = firmware/lib/thorvg/thorvg
-	url = https://github.com/thorvg/thorvg.git
+	url = https://github.com/4ms/thorvg.git
