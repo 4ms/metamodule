@@ -20,36 +20,34 @@ struct DynDraw : BaseDynDraw {
 		auto info = ModuleFactory::getModuleInfo(slug);
 
 		// Scan elements for dynamic graphic displays
-		unsigned i = 0;
-		for (auto const &el : info.elements) {
-			std::visit(overloaded{
-						   [](BaseElement const &e) {},
-						   [i = i, this](DynamicGraphicDisplay const &e) {
-							   displays.push_back({.id = i});
-							   element = e;
-							   pr_dbg("Found display: %f,%f + %f,%f\n", e.x_mm, e.y_mm, e.width_mm, e.height_mm);
-						   },
-					   },
+		for (auto i = 0u; auto const &el : info.elements) {
+			auto const &index = info.indices[i++];
+
+			std::visit(overloaded{[](BaseElement const &e) {},
+								  [=, this](DynamicGraphicDisplay const &e) {
+									  displays.push_back({.id = index.light_idx, .element = e});
+								  }},
 					   el);
-			i++;
 		}
 	}
 
-	void prepare(lv_obj_t *widget_canvas, unsigned px_per_3U) override {
-		module_canvas = widget_canvas;
+	void prepare(lv_obj_t *module_canvas, unsigned px_per_3U) override {
+		parent_canvas = module_canvas;
 
 		for (auto &disp : displays) {
-			disp.canvas = lv_canvas_create(module_canvas);
+			disp.x = std::round(mm_to_px(disp.element.x_mm, px_per_3U));
+			disp.y = std::round(mm_to_px(disp.element.y_mm, px_per_3U));
+			disp.w = std::round(mm_to_px(disp.element.width_mm, px_per_3U));
+			disp.h = std::round(mm_to_px(disp.element.height_mm, px_per_3U));
 
-			disp.x = std::round(mm_to_px(element.x_mm, px_per_3U));
-			disp.y = std::round(mm_to_px(element.y_mm, px_per_3U));
-			disp.w = std::round(mm_to_px(element.width_mm, px_per_3U));
-			disp.h = std::round(mm_to_px(element.height_mm, px_per_3U));
-
-			if (disp.h > (lv_coord_t)px_per_3U) {
-				pr_dbg("Height %u cannot exceed 3U\n", disp.h);
-				disp.h = px_per_3U;
+			if (disp.h > (lv_coord_t)px_per_3U || disp.w > 1000) {
+				pr_dbg("Height %u exceeds module height, or width > 1000px\n", disp.h, disp.w);
+				disp.h = std::min<lv_coord_t>(px_per_3U, disp.h);
+				disp.w = std::min<lv_coord_t>(1000, disp.w);
 			}
+
+			disp.canvas = lv_canvas_create(parent_canvas);
+			lv_obj_move_to_index(disp.canvas, 0);
 			lv_obj_set_pos(disp.canvas, disp.x, disp.y);
 			lv_obj_set_size(disp.canvas, disp.w, disp.h);
 
@@ -65,13 +63,13 @@ struct DynDraw : BaseDynDraw {
 	}
 
 	void draw() override {
-		if (!module || !module_canvas || !lv_obj_is_valid(module_canvas) || !lv_obj_is_visible(module_canvas))
+		if (!module || !parent_canvas || !lv_obj_is_valid(parent_canvas) || !lv_obj_is_visible(parent_canvas))
 			return;
 
 		for (auto &disp : displays) {
 			Debug::Pin2::high();
 
-			if (module->get_canvas_pixels(disp.id, disp.fullcolor_buffer.data(), disp.w, disp.h)) {
+			if (module->get_canvas_pixels(disp.id)) {
 				lv_coord_t x = 0;
 				lv_coord_t y = 0;
 				bool diff = false;
@@ -129,20 +127,18 @@ private:
 
 	struct Display {
 		unsigned id{};
+		DynamicGraphicDisplay element{};
 		lv_coord_t x{};
 		lv_coord_t y{};
 		lv_coord_t w{};
 		lv_coord_t h{};
 		lv_obj_t *canvas{};
-		// tvg::SwCanvas *tvg_canvas{};
 		std::vector<char> lv_buffer;
 		std::vector<CoreProcessor::Pixel> fullcolor_buffer;
 	};
 	std::vector<Display> displays;
 
-	DynamicGraphicDisplay element{};
-
-	lv_obj_t *module_canvas{};
+	lv_obj_t *parent_canvas{};
 
 	void clear_pixels() {
 		for (auto &disp : displays) {

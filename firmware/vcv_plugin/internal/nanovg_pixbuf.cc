@@ -122,8 +122,8 @@ float renderText(
 	auto canvas = context->canvas;
 
 	// Move to position
-	auto lv_x = to_lv_coord(x + fs->xform[4], context->px_per_3U);
-	auto lv_y = to_lv_coord(y + fs->xform[5], context->px_per_3U);
+	auto lv_x = to_lv_coord(x, context->px_per_3U);
+	auto lv_y = to_lv_coord(y, context->px_per_3U);
 
 	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName), context->px_per_3U);
 	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
