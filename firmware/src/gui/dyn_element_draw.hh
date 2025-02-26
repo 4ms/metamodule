@@ -20,9 +20,7 @@ public:
 		drawer.reset();
 
 		if (auto rack_module = patch_playloader.get_plugin_module<rack::engine::Module>(module_id)) {
-			pr_dbg("DynamicElementDraw: is valid rack module\n");
 			if (rack_module->module_widget.get()) {
-				pr_dbg("DynamicElementDraw: has valid rack modulewidget\n");
 				drawer = std::make_unique<RackDynDraw>(rack_module->module_widget);
 			}
 		}

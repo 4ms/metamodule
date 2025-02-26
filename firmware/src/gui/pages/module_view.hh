@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "conf/patch_conf.hh"
-#include "gui/dyn_element.hh"
+#include "gui/dyn_element_draw.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
