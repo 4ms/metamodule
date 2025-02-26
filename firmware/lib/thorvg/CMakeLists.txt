@@ -36,7 +36,7 @@ target_sources(ThorVG PRIVATE
    thorvg/src/renderer/tvgSwCanvas.cpp
    thorvg/src/renderer/tvgTaskScheduler.cpp
    thorvg/src/renderer/tvgText.cpp
-   # thorvg/src/renderer/tvgTrimPath.cpp
+   thorvg/src/renderer/tvgTrimPath.cpp
    # thorvg/src/renderer/tvgWgCanvas.cpp
 
    thorvg/src/renderer/sw_engine/tvgSwFill.cpp
