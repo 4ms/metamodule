@@ -55,8 +55,8 @@ void renderFill(void *uptr,
 
 		std::vector<lv_point_t> points;
 
-		std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex x) {
-			return to_lv_point(x, context->px_per_3U);
+		std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex pt) {
+			return to_lv_point(pt, context->px_per_3U);
 		});
 
 		for ([[maybe_unused]] auto p : points) {
