@@ -64,6 +64,7 @@ private:
 	PatchPlayer &player;
 
 	AudioStreamMidi midi;
+	unsigned cur_block = 0;
 
 	// Hardware interface
 	CodecT &codec_;
