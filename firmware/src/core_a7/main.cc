@@ -118,7 +118,13 @@ int main() {
 
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");
-			audio.start();
+			// audio.start();
+		}
+
+		if (StaticBuffers::kill_signal) {
+			patch_playloader.mute_audio_immediate();
+			StaticBuffers::kill_signal = false;
+			printf("Audio Halted -- kill signal\n");
 		}
 	}
 }
@@ -126,6 +132,7 @@ int main() {
 extern "C" {
 __attribute__((used)) int _kill(int x) {
 	puts("_kill\n");
+	MetaModule::StaticBuffers::kill_signal = true;
 	return 1;
 }
 }

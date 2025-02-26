@@ -41,6 +41,8 @@ __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff{};
 
+__attribute__((section(".sysram"))) bool kill_signal{false};
+
 void init() {
 	for (auto &block : param_blocks) {
 		for (auto &param : block.params) {

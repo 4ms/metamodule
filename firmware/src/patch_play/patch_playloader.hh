@@ -151,6 +151,13 @@ struct PatchPlayLoader {
 		return !audio_is_muted_ && player_.is_loaded;
 	}
 
+	void mute_audio_immediate() {
+		audio_is_muted_ = true;
+		loading_new_patch_ = false;
+		stopping_audio_ = false;
+		starting_audio_ = false;
+	}
+
 	bool did_audio_overrun() {
 		return audio_overrun_;
 	}

@@ -31,6 +31,7 @@ extern RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 extern ConcurrentBuffer console_a7_0_buff;
 extern ConcurrentBuffer console_a7_1_buff;
 extern ConcurrentBuffer console_m4_buff;
+extern bool kill_signal;
 
 void init();
 
