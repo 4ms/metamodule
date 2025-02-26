@@ -1,6 +1,8 @@
 #pragma once
 
 #include "lvgl.h"
+#include "thorvg.h"
+#include <span>
 #include <vector>
 
 namespace MetaModule::NanoVG
@@ -50,7 +52,9 @@ struct DrawContext {
 
 	unsigned px_per_3U = 240;
 
-	DrawContext(lv_obj_t *canvas)
+	tvg::SwCanvas *tvg_canvas{};
+
+	DrawContext(lv_obj_t *canvas, std::span<uint32_t> buff, uint32_t width)
 		: canvas{canvas} {
 		lv_draw_line_dsc_init(&line_dsc);
 		line_dsc.width = 1;
@@ -61,6 +65,9 @@ struct DrawContext {
 		rect_dsc.radius = 0;
 
 		lv_draw_label_dsc_init(&label_dsc);
+
+		tvg_canvas = tvg::SwCanvas::gen();
+		tvg_canvas->target(buff.data(), width, width, buff.size() / width, tvg::ColorSpace::ARGB8888);
 	}
 };
 

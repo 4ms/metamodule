@@ -3,6 +3,7 @@
 #include "lvgl.h"
 #include "nanovg_pixbuf_drawctx.hh"
 #include "nanovg_pixbuf_util.hh"
+#include "thorvg.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -41,35 +42,55 @@ void renderFill(void *uptr,
 
 	auto context = get_drawcontext(uptr);
 
-	context->line_dsc.color = to_lv_color(paint->innerColor);
-	context->line_dsc.opa = to_lv_opa(paint->innerColor);
-	context->line_dsc.width = 1;
+	// context->line_dsc.color = to_lv_color(paint->innerColor);
+	// context->line_dsc.opa = to_lv_opa(paint->innerColor);
+	// context->line_dsc.width = 1;
 
-	context->rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
-	context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
+	// context->rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
+	// context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Fill path: #fill %d = count:%d\n", path.nfill, path.count);
+		if (path.count < 3)
+			continue;
 
-		auto path_pts = std::span{path.fill, (size_t)(path.count)};
+		// auto path_pts = std::span{path.fill, (size_t)(path.count)};
 
-		std::vector<lv_point_t> points;
+		// std::vector<lv_point_t> points;
 
-		std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex pt) {
-			return to_lv_point(pt, context->px_per_3U);
-		});
+		// std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex pt) {
+		// 	return to_lv_point(pt, context->px_per_3U);
+		// });
 
-		for ([[maybe_unused]] auto p : points) {
-			dump_draw("%d %d\n", p.x, p.y);
+		// for ([[maybe_unused]] auto p : points) {
+		// 	dump_draw("%d %d\n", p.x, p.y);
+		// }
+
+		// if (is_poly_concave(points)) {
+		// 	// LVGL lv_canvas_draw_polygon goes into an infinite loop if polygon is concave.
+		// 	// Fall back to drawing polygon outline (unfilled) if it's concave
+		// 	lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
+		// } else {
+		// 	lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
+		// }
+
+		auto poly = tvg::Shape::gen();
+
+		poly->moveTo(path.fill[0].x, path.fill[0].y);
+		for (auto pt : std::span{path.fill + 1, (size_t)(path.count - 1)}) {
+			poly->lineTo(pt.x, pt.y);
 		}
+		poly->close();
 
-		if (is_poly_concave(points)) {
-			// LVGL lv_canvas_draw_polygon goes into an infinite loop if polygon is concave.
-			// Fall back to drawing polygon outline (unfilled) if it's concave
-			lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
-		} else {
-			lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
-		}
+		auto col = to_lv_color(paint->innerColor);
+		poly->fill(col.ch.red, col.ch.green, col.ch.blue, to_lv_opa(paint->innerColor));
+
+		poly->scale(mm_to_px(to_mm(1.), context->px_per_3U));
+
+		context->tvg_canvas->remove();
+		context->tvg_canvas->push(poly);
+		context->tvg_canvas->draw();
+		context->tvg_canvas->sync();
 	}
 }
 
@@ -93,26 +114,45 @@ void renderStroke(void *uptr,
 		return;
 	}
 
-	context->line_dsc.color = to_lv_color(paint->innerColor);
-	context->line_dsc.opa = to_lv_opa(paint->innerColor);
-	context->line_dsc.width = std::max<lv_coord_t>(std::round(to_lv_coord(strokeWidth, context->px_per_3U)), 1);
+	// context->line_dsc.color = to_lv_color(paint->innerColor);
+	// context->line_dsc.opa = to_lv_opa(paint->innerColor);
+	// context->line_dsc.width = std::max<lv_coord_t>(std::round(to_lv_coord(strokeWidth, context->px_per_3U)), 1);
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Stroke path: #strokes %d = count:%d + closed:%d\n", path.nstroke, path.count, path.closed);
+		if (path.count < 2)
+			continue;
 
-		auto path_pts = std::span{path.stroke, (size_t)(path.count + path.closed)};
+		// auto path_pts = std::span{path.stroke, (size_t)(path.count + path.closed)};
 
-		std::vector<lv_point_t> points;
+		// std::vector<lv_point_t> points;
 
-		std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex x) {
-			return to_lv_point(x, context->px_per_3U);
-		});
+		// std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex x) {
+		// 	return to_lv_point(x, context->px_per_3U);
+		// });
 
-		for ([[maybe_unused]] auto p : path_pts) {
-			dump_draw("%g %g\n", p.x, p.y);
+		// for ([[maybe_unused]] auto p : path_pts) {
+		// 	dump_draw("%g %g\n", p.x, p.y);
+		// }
+
+		// lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
+
+		auto poly = tvg::Shape::gen();
+
+		poly->moveTo(path.stroke[0].x, path.stroke[0].y);
+		for (auto pt : std::span{path.stroke + 1, (size_t)(path.count - 1)}) {
+			poly->lineTo(pt.x, pt.y);
 		}
+		auto col = to_lv_color(paint->innerColor);
+		poly->strokeFill(col.ch.red, col.ch.green, col.ch.blue, to_lv_opa(paint->innerColor));
+		poly->strokeWidth(std::max<lv_coord_t>(std::round(to_lv_coord(strokeWidth, context->px_per_3U)), 1));
 
-		lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
+		poly->scale(mm_to_px(to_mm(1.), context->px_per_3U));
+
+		context->tvg_canvas->remove();
+		context->tvg_canvas->push(poly);
+		context->tvg_canvas->draw();
+		context->tvg_canvas->sync();
 	}
 }
 
@@ -250,8 +290,10 @@ void renderTriangles(void *uptr,
 
 void renderDelete(void *uptr) {
 	if (uptr) {
-		if (auto context = get_drawcontext(uptr))
+		if (auto context = get_drawcontext(uptr)) {
+			printf("Delete DrawContext %p\n", context);
 			delete context;
+		}
 	}
 }
 
@@ -330,7 +372,8 @@ void renderFlush(void *uptr) {
 
 } // namespace MetaModule::NanoVG
 
-NVGcontext *nvgCreatePixelBufferContext(void *canvas, unsigned height) {
+NVGcontext *
+nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t buffer_width, uint32_t px_per_3U) {
 	NVGparams params;
 	NVGcontext *ctx = nullptr;
 
@@ -351,8 +394,9 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas, unsigned height) {
 	params.renderDelete = renderDelete;
 	params.renderText = renderText;
 
-	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas};
-	draw_ctx->px_per_3U = height;
+	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas, buffer, buffer_width};
+	printf("Create new DrawContext %p\n", draw_ctx);
+	draw_ctx->px_per_3U = px_per_3U;
 	params.userPtr = draw_ctx;
 
 	params.edgeAntiAlias = 0;
@@ -363,6 +407,7 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas, unsigned height) {
 		draw_ctx->parent_ctx = ctx;
 		return ctx;
 	} else {
+		printf("delete newly created DrawContext %p\n", draw_ctx);
 		delete draw_ctx;
 		return nullptr;
 	}
