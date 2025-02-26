@@ -55,8 +55,8 @@ struct RackDynDraw : BaseDynDraw {
 				lv_obj_set_pos(disp.canvas, disp.x, disp.y);
 				lv_obj_set_size(disp.canvas, disp.w, disp.h);
 				lv_obj_set_align(disp.canvas, LV_ALIGN_TOP_LEFT);
-				lv_obj_set_style_border_width(disp.canvas, 1, 0);
-				lv_obj_set_style_border_color(disp.canvas, lv_color_make(0xFF, 0, 0), 0);
+				// lv_obj_set_style_border_width(disp.canvas, 1, 0);
+				// lv_obj_set_style_border_color(disp.canvas, lv_color_make(0xFF, 0, 0), 0);
 
 				// setup backing buffer for canvas
 				disp.buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(disp.w, disp.h));
