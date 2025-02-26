@@ -103,7 +103,7 @@ add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 #
 add_executable(
   main.elf
-  ${FWDIR}/system/libc_stub.c
+  ${FWDIR}/system/libc_stub.cc
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc

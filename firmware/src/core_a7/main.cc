@@ -122,3 +122,10 @@ int main() {
 		}
 	}
 }
+
+extern "C" {
+__attribute__((used)) int _kill(int x) {
+	puts("_kill\n");
+	return 1;
+}
+}

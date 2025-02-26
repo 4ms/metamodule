@@ -46,7 +46,7 @@ add_executable(
   ${FWDIR}/lib/fatfs/source/ffunicode.c
   ${FWDIR}/lib/littlefs/lfs.c
   ${FWDIR}/lib/littlefs/lfs_util.c
-  ${FWDIR}/system/libc_stub.c
+  ${FWDIR}/system/libc_stub.cc
   ${M4DIR}/libc_stub.c
   ${M4DIR}/libcpp_stub.cc
   ${FWDIR}/system/new.cc

@@ -1,5 +1,14 @@
-// #define GCC_OPTIMIZE_OFF __attribute__((optimize("-O0")))
 #include <stdio.h>
+
+namespace MetaModule
+{
+namespace StaticBuffers
+{
+extern bool kill_signal;
+}
+} // namespace MetaModule
+
+extern "C" {
 
 __attribute__((used)) void _init(void) {
 }
@@ -13,11 +22,6 @@ __attribute__((used)) void _exit(int x) {
 		;
 }
 
-__attribute__((used)) int _kill(int x) {
-	puts("_kill\n");
-	return -1;
-}
-
 __attribute__((used)) int _getpid() {
 	return -1;
 }
@@ -28,3 +32,4 @@ __attribute__((used)) int *__errno() {
 }
 
 void *__dso_handle = (void *)&__dso_handle;
+}

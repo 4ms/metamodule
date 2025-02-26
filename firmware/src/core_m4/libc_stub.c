@@ -21,3 +21,7 @@ __attribute__((used)) int _fstat(int x, void *p) {
 __attribute__((used)) int _isatty(int x) {
 	return -1;
 }
+
+__attribute__((used)) int _kill(int x) {
+	return -1;
+}
