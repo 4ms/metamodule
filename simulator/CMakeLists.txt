@@ -104,6 +104,10 @@ add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 add_subdirectory(${LIBDIR}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
+if (NOT HEADLESS)
+	target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
+endif()
+
 if(HEADLESS)
 	add_executable(simulator 
 		src/headless/main-headless.cc 

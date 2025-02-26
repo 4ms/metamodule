@@ -20,6 +20,7 @@ target_sources(ThorVG PRIVATE
    thorvg/src/common/tvgMath.cpp
    thorvg/src/common/tvgStr.cpp
 
+   thorvg/src/renderer/tvgAccessor.cpp
    thorvg/src/renderer/tvgAnimation.cpp
    thorvg/src/renderer/tvgCanvas.cpp
    thorvg/src/renderer/tvgFill.cpp
@@ -53,22 +54,6 @@ target_sources(ThorVG PRIVATE
    thorvg/src/loaders/raw/tvgRawLoader.cpp
 )
 
-target_compile_definitions(ThorVG PRIVATE 
-    # THORVG_THREAD_SUPPORT=0
-    THORVG_SW_RASTER_SUPPORT=1
-    # THORVG_GL_RASTER_SUPPORT=0
-    # THORVG_WG_RASTER_SUPPORT=0
-
-#     THORVG_SVG_LOADER_SUPPORT=0
-#     THORVG_PNG_LOADER_SUPPORT=0
-#     THORVG_TTF_LOADER_SUPPORT=0
-
-#     THORVG_JPG_LOADER_SUPPORT=0
-#     THORVG_LOTTIE_LOADER_SUPPORT=0
-#     THORVG_WEBP_LOADER_SUPPORT=0
-#     THORVG_GIF_SAVER_SUPPORT=0
-
-#     THORVG_NEON_VECTOR_SUPPORT=0
-#     THORVG_FILE_IO_SUPPORT=0
- )
-
+target_compile_options(ThorVG PRIVATE 
+	-Wno-unknown-pragmas
+)

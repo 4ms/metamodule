@@ -74,6 +74,8 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_
 add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 target_include_directories(CoreModules-4ms PRIVATE ${FWDIR}/src/vcv_hardware)
 
+target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
+
 #
 # Patch format and serialization
 #
