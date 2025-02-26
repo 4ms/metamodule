@@ -2,7 +2,7 @@ project(ThorVG CXX)
 
 add_library(ThorVG STATIC)
 
-target_compile_features(ThorVG PUBLIC cxx_std_20)
+target_compile_features(ThorVG PRIVATE cxx_std_14)
 
 target_include_directories(ThorVG PUBLIC 
     ./ 
@@ -35,7 +35,7 @@ target_sources(ThorVG PRIVATE
    thorvg/src/renderer/tvgSwCanvas.cpp
    thorvg/src/renderer/tvgTaskScheduler.cpp
    thorvg/src/renderer/tvgText.cpp
-   thorvg/src/renderer/tvgTrimPath.cpp
+   # thorvg/src/renderer/tvgTrimPath.cpp
    # thorvg/src/renderer/tvgWgCanvas.cpp
 
    thorvg/src/renderer/sw_engine/tvgSwFill.cpp
