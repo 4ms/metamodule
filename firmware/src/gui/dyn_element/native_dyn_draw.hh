@@ -69,63 +69,30 @@ struct DynDraw : BaseDynDraw {
 		for (auto &disp : displays) {
 			Debug::Pin2::high();
 
-			if (module->get_canvas_pixels(disp.id)) {
-				lv_coord_t x = 0;
-				lv_coord_t y = 0;
-				bool diff = false;
-				for (auto px : disp.fullcolor_buffer) {
-					auto col = lv_color_make_rgb565(px.red, px.green, px.blue);
+			if (!module->get_canvas_pixels(disp.id))
+				continue; //no updated needed
 
-					const unsigned buf_pos = (x + y * disp.w) * 3;
-
-					if (disp.lv_buffer[buf_pos] != (col.full & 0xFF)) {
-						diff = true;
-						disp.lv_buffer[buf_pos] = col.full & 0xFF;
-					}
-					if (disp.lv_buffer[buf_pos + 1] != (col.full >> 8)) {
-						diff = true;
-						disp.lv_buffer[buf_pos + 1] = col.full >> 8;
-					}
-					if (disp.lv_buffer[buf_pos + 2] != px.alpha) {
-						diff = true;
-						disp.lv_buffer[buf_pos + 2] = px.alpha;
-					}
-
-					if (++x >= disp.w) {
-						x = 0;
-						y++;
-						if (y > disp.h) {
-							pr_err("NativeDynDraw Range error: %u x %u != %zu\n",
-								   disp.w,
-								   disp.h,
-								   disp.fullcolor_buffer.size());
-							break;
-						}
-					}
-				}
-
-				if (diff) {
-					lv_obj_invalidate(disp.canvas);
-				}
-			}
+			if (copy_buffer(disp.lv_buffer, disp.fullcolor_buffer))
+				lv_obj_invalidate(disp.canvas);
 
 			Debug::Pin2::low();
 		}
 	}
 
 	void blur() override {
-		clear_pixels();
-
-		if (!module)
-			return;
 
 		for (auto &disp : displays) {
-			pr_dbg("Hide graphic display for %u\n", disp.id);
-			module->hide_graphic_display(disp.id);
+			pr_dbg("NativeDynDraw: Release graphic display %u buffers\n", disp.id);
+			if (module)
+				module->hide_graphic_display(disp.id);
+			disp.fullcolor_buffer.clear();
+			disp.lv_buffer.clear();
 		}
 	}
 
-	~DynDraw() override = default;
+	~DynDraw() override {
+		blur();
+	}
 
 private:
 	CoreProcessor *module = nullptr;
@@ -147,7 +114,7 @@ private:
 
 	void clear_pixels() {
 		for (auto &disp : displays) {
-			// std::ranges::fill(disp.buffer, CoreProcessor::Pixel{0, 0, 0, 0});
+			std::ranges::fill(disp.fullcolor_buffer, CoreProcessor::Pixel{0, 0, 0, 0});
 			std::ranges::fill(disp.lv_buffer, 0);
 		}
 	}

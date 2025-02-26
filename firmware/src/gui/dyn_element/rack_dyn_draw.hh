@@ -3,6 +3,7 @@
 #include "base_dyn_draw.hh"
 #include "debug.hh"
 #include "pr_dbg.hh"
+#include "thorvg.h"
 #include "vcv_plugin/internal/nanovg_pixbuf.hh"
 #include <app/ModuleWidget.hpp>
 #include <memory>
@@ -22,7 +23,6 @@ struct RackDynDraw : BaseDynDraw {
 
 			// This violates safety of shared pointer, so we must be careful
 			// to use it only when the weak_ptr is locked
-			// displays.push_back({.widget = module_widget.get()});
 		}
 	}
 
@@ -30,15 +30,11 @@ struct RackDynDraw : BaseDynDraw {
 		// create canvas, same size as module
 		if (auto mw = module_widget.lock()) {
 			for (auto &disp : displays) {
-				if (disp.canvas && lv_obj_is_valid(disp.canvas)) {
+				if (disp.lv_canvas && lv_obj_is_valid(disp.lv_canvas)) {
 					pr_dbg("RackDynDraw: canvas is a valid lvgl object, deleting\n");
-					lv_obj_del(disp.canvas);
+					lv_obj_del(disp.lv_canvas);
 				}
 
-				// disp.x = std::round(PNGpx_to_SVGpx(disp.widget->box.pos.x));
-				// disp.y = std::round(PNGpx_to_SVGpx(disp.widget->box.pos.y));
-				// disp.w = std::round(PNGpx_to_SVGpx(disp.widget->box.size.x));
-				// disp.h = std::round(PNGpx_to_SVGpx(disp.widget->box.size.y));
 				disp.x = std::round(svgpx_to_pngpx(disp.widget->box.pos.x, px_per_3U));
 				disp.y = std::round(svgpx_to_pngpx(disp.widget->box.pos.y, px_per_3U));
 				disp.w = std::round(svgpx_to_pngpx(disp.widget->box.size.x, px_per_3U));
@@ -50,23 +46,27 @@ struct RackDynDraw : BaseDynDraw {
 					disp.w = std::min<lv_coord_t>(1000, disp.w);
 				}
 
-				disp.canvas = lv_canvas_create(module_canvas);
-				lv_obj_move_to_index(disp.canvas, 0);
-				lv_obj_set_pos(disp.canvas, disp.x, disp.y);
-				lv_obj_set_size(disp.canvas, disp.w, disp.h);
-				lv_obj_set_align(disp.canvas, LV_ALIGN_TOP_LEFT);
+				disp.lv_canvas = lv_canvas_create(module_canvas);
+				lv_obj_move_to_index(disp.lv_canvas, 0);
+				lv_obj_set_pos(disp.lv_canvas, disp.x, disp.y);
+				lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
+				lv_obj_set_align(disp.lv_canvas, LV_ALIGN_TOP_LEFT);
 				// lv_obj_set_style_border_width(disp.canvas, 1, 0);
 				// lv_obj_set_style_border_color(disp.canvas, lv_color_make(0xFF, 0, 0), 0);
 
 				// setup backing buffer for canvas
-				disp.buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(disp.w, disp.h));
-				std::ranges::fill(disp.buffer, 0);
-				lv_canvas_set_buffer(disp.canvas, disp.buffer.data(), disp.w, disp.h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+				disp.lv_buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(disp.w, disp.h));
+				std::ranges::fill(disp.lv_buffer, 0);
+				lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), disp.w, disp.h, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
-				disp.args.vg = nvgCreatePixelBufferContext(disp.canvas, px_per_3U);
+				disp.fullcolor_buffer.resize(disp.w * disp.h);
+				std::ranges::fill(disp.fullcolor_buffer, 0);
+				// disp.tvg_canvas.reset(tvg::SwCanvas::gen());
+
+				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
 				disp.args.fb = nullptr;
 
-				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u) (pxp3u %u) -- create ctx %p\n",
+				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u) (pxp3u %u) -- create NVGContext %p\n",
 					   disp.x,
 					   disp.y,
 					   disp.w,
@@ -86,6 +86,8 @@ struct RackDynDraw : BaseDynDraw {
 			// mw->drawLayer(disp.args, 1);
 
 			for (auto &disp : displays) {
+				Debug::Pin2::high();
+
 				if (!disp.widget->isVisible())
 					continue;
 
@@ -99,13 +101,19 @@ struct RackDynDraw : BaseDynDraw {
 
 				disp.args.clipBox = disp.widget->getBox();
 
-				Debug::Pin2::high();
 				disp.widget->step();
 				mw->drawChild(disp.widget, disp.args);
 				mw->drawChild(disp.widget, disp.args, 1);
-				Debug::Pin2::low();
 
 				nvgEndFrame(disp.args.vg);
+
+				auto buf_as_pixels =
+					std::span{(CoreProcessor::Pixel *)disp.fullcolor_buffer.data(), disp.fullcolor_buffer.size()};
+
+				if (copy_buffer(disp.lv_buffer, buf_as_pixels))
+					lv_obj_invalidate(disp.lv_canvas);
+
+				Debug::Pin2::low();
 			}
 		}
 	}
@@ -115,11 +123,12 @@ struct RackDynDraw : BaseDynDraw {
 
 			for (auto &disp : displays) {
 				if (disp.args.vg) {
-					pr_dbg("RackDynDraw:: blur (del ctx %p)\n", disp.args.vg);
+					pr_dbg("RackDynDraw:: blur (del NVGcontext %p)\n", disp.args.vg);
 					nvgDeletePixelBufferContext(disp.args.vg);
 					disp.args.vg = nullptr;
 				}
-				disp.buffer.clear();
+				disp.lv_buffer.clear();
+				disp.fullcolor_buffer.clear();
 			}
 		}
 		rack::contextGet()->window->vg = nullptr;
@@ -138,17 +147,21 @@ private:
 		lv_coord_t y{};
 		lv_coord_t w{};
 		lv_coord_t h{};
-		lv_obj_t *canvas{};
+		lv_obj_t *lv_canvas{};
 
 		rack::app::ModuleWidget::DrawArgs args{}; // one per module
-		std::vector<char> buffer;
+		std::vector<char> lv_buffer;
+
+		// std::unique_ptr<tvg::SwCanvas> tvg_canvas;
+		std::vector<uint32_t> fullcolor_buffer;
 	};
 
 	std::vector<Display> displays;
 
 	void clear_canvas() {
 		for (auto &disp : displays) {
-			std::ranges::fill(disp.buffer, 0);
+			std::ranges::fill(disp.fullcolor_buffer, 0);
+			std::ranges::fill(disp.lv_buffer, 0);
 		}
 	}
 };
