@@ -115,7 +115,12 @@ struct DynDraw : BaseDynDraw {
 
 	void blur() override {
 		clear_pixels();
+
+		if (!module)
+			return;
+
 		for (auto &disp : displays) {
+			pr_dbg("Hide graphic display for %u\n", disp.id);
 			module->hide_graphic_display(disp.id);
 		}
 	}

@@ -134,12 +134,6 @@ struct PatchViewPage : PageBase {
 
 	void redraw_patch() {
 		// Delete resources used for dynamic drawing
-		pr_dbg("PatchView: redraw_patch -> blur and release %zu dyn_draws\n", dyn_draws.size());
-		for (auto &dyn : dyn_draws)
-			dyn.blur();
-		dyn_draws.clear();
-
-		dynamic_elements_prepared = false;
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -267,6 +261,13 @@ struct PatchViewPage : PageBase {
 		params.text_displays.stop_watching_all();
 		params.lights.stop_watching_all();
 		params.param_watcher.stop_watching_all();
+
+		pr_dbg("PatchView: blur(): blur and release %zu dyn_draws\n", dyn_draws.size());
+		for (auto &dyn : dyn_draws)
+			dyn.blur();
+		dyn_draws.clear();
+
+		dynamic_elements_prepared = false;
 	}
 
 	void update() override {
@@ -329,7 +330,7 @@ struct PatchViewPage : PageBase {
 
 			} else {
 				page_list.request_new_page_no_history(PageId::MainMenu, args);
-				blur();
+				// blur();
 			}
 		}
 
