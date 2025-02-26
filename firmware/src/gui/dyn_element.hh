@@ -39,6 +39,7 @@ public:
 			auto canvas = lv_canvas_create(module_canvas);
 			lv_obj_set_pos(canvas, 0, 0);
 			lv_obj_set_size(canvas, w, h);
+			lv_obj_move_to_index(canvas, 0);
 
 			// setup backing buffer for canvas
 			buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h));

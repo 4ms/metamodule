@@ -18,9 +18,11 @@ struct RackDynDraw : BaseDynDraw {
 	}
 
 	void prepare(lv_obj_t *widget_canvas) override {
-		args.vg = nvgCreatePixelBufferContext(widget_canvas);
-		args.fb = nullptr;
 		canvas = widget_canvas;
+		lv_obj_move_to_index(widget_canvas, 0);
+
+		args.vg = nvgCreatePixelBufferContext(canvas);
+		args.fb = nullptr;
 
 		lv_obj_refr_size(canvas);
 		width = lv_obj_get_width(canvas);
