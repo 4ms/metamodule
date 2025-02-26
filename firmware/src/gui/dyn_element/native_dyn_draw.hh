@@ -59,6 +59,8 @@ struct DynDraw : BaseDynDraw {
 			lv_canvas_set_buffer(disp.canvas, disp.lv_buffer.data(), disp.w, disp.h, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
 			disp.fullcolor_buffer.resize(disp.w * disp.h, CoreProcessor::Pixel{});
+
+			module->show_graphic_display(disp.id, disp.fullcolor_buffer.data(), disp.w, disp.h);
 		}
 	}
 
@@ -115,6 +117,9 @@ struct DynDraw : BaseDynDraw {
 
 	void blur() override {
 		clear_pixels();
+		for (auto &disp : displays) {
+			module->hide_graphic_display(disp.id);
+		}
 	}
 
 	~DynDraw() override = default;
