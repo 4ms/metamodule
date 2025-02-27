@@ -95,6 +95,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		auto &params = cache_params(block);
 		// Debug::Pin0::low();
 
+		cur_block = block;
 		if (!overrun_handler.is_retrying() && is_playing_patch())
 			process(audio_blocks[1 - block], params);
 		else
@@ -263,10 +264,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// MIDI
-		midi.process(param_block.metaparams.midi_connected,
-					 params.midi_event,
-					 param_block.metaparams.midi_poly_chans,
-					 &params.raw_msg);
+		MidiMessage msg = params.raw_msg;
+
+		midi.process(
+			param_block.metaparams.midi_connected, params.midi_event, param_block.metaparams.midi_poly_chans, &msg);
+
+		param_blocks[cur_block].params[idx].raw_msg = msg;
 
 		// Run each module
 		player.update_patch();
@@ -437,9 +440,6 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 void AudioStream::return_cached_params(unsigned block) {
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
-	// ~46ns / sample:
-	for (auto i = 0u; i < block_size_; i++)
-		param_blocks[block].params[i].raw_msg = local_params.params[i].raw_msg;
 }
 
 void AudioStream::set_block_spans() {
