@@ -264,10 +264,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// MIDI
-		midi.process(param_block.metaparams.midi_connected,
-					 params.midi_event,
-					 param_block.metaparams.midi_poly_chans,
-					 &param_blocks[cur_block].params[idx].raw_msg);
+		MidiMessage msg = params.raw_msg;
+
+		midi.process(
+			param_block.metaparams.midi_connected, params.midi_event, param_block.metaparams.midi_poly_chans, &msg);
+
+		param_blocks[cur_block].params[idx].raw_msg = msg;
 
 		// Run each module
 		player.update_patch();
