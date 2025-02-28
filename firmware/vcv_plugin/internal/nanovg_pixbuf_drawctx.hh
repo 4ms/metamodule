@@ -53,7 +53,7 @@ struct DrawContext {
 
 	unsigned px_per_3U = 240;
 
-	// tvg::SwCanvas *tvg_canvas{};
+	tvg::SwCanvas *tvg_canvas{};
 
 	DrawContext(lv_obj_t *canvas, std::span<uint32_t> buff, uint32_t width)
 		// DrawContext(lv_obj_t *canvas)
@@ -68,11 +68,13 @@ struct DrawContext {
 
 		lv_draw_label_dsc_init(&label_dsc);
 
-		// tvg_canvas = tvg::SwCanvas::gen();
-		// tvg_canvas->target(buff.data(), width, width, buff.size() / width, tvg::ColorSpace::ARGB8888);
+		tvg_canvas = tvg::SwCanvas::gen();
+		tvg_canvas->target(buff.data(), width, width, buff.size() / width, tvg::ColorSpace::ARGB8888);
 	}
 
 	~DrawContext() {
+		printf("~DrawContext():delete tvg_canvas\n");
+		delete tvg_canvas;
 		printf("~DrawContext()\n");
 	}
 };
