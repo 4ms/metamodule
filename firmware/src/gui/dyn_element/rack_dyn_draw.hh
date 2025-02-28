@@ -120,8 +120,8 @@ struct RackDynDraw : BaseDynDraw {
 				auto buf_as_pixels =
 					std::span{(CoreProcessor::Pixel *)disp.fullcolor_buffer.data(), disp.fullcolor_buffer.size()};
 
-				// if (copy_buffer(disp.lv_buffer, buf_as_pixels))
-				// 	lv_obj_invalidate(disp.lv_canvas);
+				if (copy_buffer(disp.lv_buffer, buf_as_pixels))
+					lv_obj_invalidate(disp.lv_canvas);
 
 				Debug::Pin2::low();
 			}
