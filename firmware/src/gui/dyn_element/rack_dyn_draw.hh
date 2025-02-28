@@ -96,7 +96,9 @@ struct RackDynDraw : BaseDynDraw {
 
 				rack::contextGet()->window->vg = disp.args.vg;
 
-				clear_canvas();
+				std::ranges::fill(disp.lv_buffer, 0);
+				std::ranges::fill(disp.fullcolor_buffer, 0);
+
 				nvgBeginFrame(disp.args.vg, mw->box.getWidth(), mw->box.getHeight(), 1);
 
 				disp.args.clipBox = disp.widget->getBox();
