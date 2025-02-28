@@ -39,8 +39,6 @@ struct TextRenderCacheEntry {
 
 struct DrawContext {
 	lv_obj_t *canvas{};
-	lv_draw_line_dsc_t line_dsc{};
-	lv_draw_rect_dsc_t rect_dsc{};
 	lv_draw_label_dsc_t label_dsc{};
 
 	std::vector<Texture> textures;
@@ -56,15 +54,7 @@ struct DrawContext {
 	tvg::SwCanvas *tvg_canvas{};
 
 	DrawContext(lv_obj_t *canvas, std::span<uint32_t> buff, uint32_t width)
-		// DrawContext(lv_obj_t *canvas)
 		: canvas{canvas} {
-		lv_draw_line_dsc_init(&line_dsc);
-		line_dsc.width = 1;
-		line_dsc.round_end = 1;
-		line_dsc.round_start = 1;
-
-		lv_draw_rect_dsc_init(&rect_dsc);
-		rect_dsc.radius = 0;
 
 		lv_draw_label_dsc_init(&label_dsc);
 
@@ -73,9 +63,7 @@ struct DrawContext {
 	}
 
 	~DrawContext() {
-		printf("~DrawContext():delete tvg_canvas\n");
 		delete tvg_canvas;
-		printf("~DrawContext()\n");
 	}
 };
 

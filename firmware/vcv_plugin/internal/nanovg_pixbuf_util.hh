@@ -1,10 +1,8 @@
 #pragma once
-
 #include "CoreModules/elements/units.hh"
 #include "lvgl.h"
 #include <cmath>
 #include <nanovg.h>
-#include <span>
 
 namespace MetaModule::NanoVG
 {

@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "console/pr_dbg.hh"
-#include "medium/debug_raw.h"
+// #include "medium/debug_raw.h"
 
 namespace MetaModule::NanoVG
 {
@@ -42,13 +42,6 @@ void renderFill(void *uptr,
 
 	auto context = get_drawcontext(uptr);
 
-	context->line_dsc.color = to_lv_color(paint->innerColor);
-	context->line_dsc.opa = to_lv_opa(paint->innerColor);
-	context->line_dsc.width = 1;
-
-	context->rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
-	context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
-
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Fill path: #fill %d = count:%d\n", path.nfill, path.count);
 		if (path.count < 3)
@@ -63,10 +56,8 @@ void renderFill(void *uptr,
 		}
 		poly->close();
 
-		auto r = paint->innerColor.r * 255.f;
-		auto g = paint->innerColor.g * 255.f;
-		auto b = paint->innerColor.b * 255.f;
-		poly->fill(r, g, b, to_lv_opa(paint->innerColor));
+		auto [r, g, b, a] = to_tvg_color(paint->innerColor);
+		poly->fill(r, g, b, a);
 
 		poly->scale(mm_to_px(to_mm(1.), context->px_per_3U));
 
@@ -110,10 +101,9 @@ void renderStroke(void *uptr,
 			poly->lineTo(pt.x, pt.y);
 		}
 
-		auto r = paint->innerColor.r * 255.f;
-		auto g = paint->innerColor.g * 255.f;
-		auto b = paint->innerColor.b * 255.f;
-		poly->strokeFill(r, g, b, to_lv_opa(paint->innerColor));
+		auto [r, g, b, a] = to_tvg_color(paint->innerColor);
+		poly->strokeFill(r, g, b, a);
+
 		poly->strokeWidth(std::max<lv_coord_t>(std::round(to_lv_coord(strokeWidth, context->px_per_3U)), 1));
 
 		poly->scale(mm_to_px(to_mm(1.), context->px_per_3U));
@@ -174,7 +164,7 @@ float renderText(
 		auto letter_space = Fonts::corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
 		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
 
-		// Debug borders
+		// Debug positions with red borders around labels
 		// lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
 		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
@@ -344,7 +334,6 @@ void renderFlush(void *uptr) {
 
 NVGcontext *
 nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t buffer_width, uint32_t px_per_3U) {
-	// nvgCreatePixelBufferContext(void *canvas, uint32_t px_per_3U) {
 	NVGparams params;
 	NVGcontext *ctx = nullptr;
 
@@ -366,7 +355,6 @@ nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t b
 	params.renderText = renderText;
 
 	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas, buffer, buffer_width};
-	// auto draw_ctx = new DrawContext{(lv_obj_t *)canvas};
 	printf("Create new DrawContext %p\n", draw_ctx);
 	draw_ctx->px_per_3U = px_per_3U;
 	params.userPtr = draw_ctx;
@@ -379,14 +367,12 @@ nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t b
 		draw_ctx->parent_ctx = ctx;
 		return ctx;
 	} else {
-		printf("delete newly created DrawContext %p\n", draw_ctx);
 		delete draw_ctx;
 		return nullptr;
 	}
 }
 
 void nvgDeletePixelBufferContext(NVGcontext *ctx) {
-	// pr_dbg("nvgDeletePixelBufferContext\n");
 	if (ctx)
 		nvgDeleteInternal(ctx);
 }
