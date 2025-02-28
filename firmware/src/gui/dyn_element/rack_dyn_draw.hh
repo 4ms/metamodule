@@ -17,19 +17,19 @@ struct RackDynDraw : BaseDynDraw {
 		: module_widget{module_widget} {
 
 		if (auto mw = this->module_widget.lock()) {
+			// This violates safety of shared pointer, so we must be careful
+			// to use `displays[].widget` only when the weak_ptr is locked
+			displays.push_back({.widget = mw.get()});
 			for (auto &widget : mw->get_drawable_widgets()) {
 				displays.push_back({.widget = widget});
 			}
-
-			// This violates safety of shared pointer, so we must be careful
-			// to use it only when the weak_ptr is locked
 		}
 	}
 
 	void prepare(lv_obj_t *module_canvas, unsigned px_per_3U) override {
-		// create canvas, same size as module
 		if (auto mw = module_widget.lock()) {
 			for (auto &disp : displays) {
+
 				if (disp.lv_canvas && lv_obj_is_valid(disp.lv_canvas)) {
 					pr_dbg("RackDynDraw: canvas is a valid lvgl object, deleting\n");
 					lv_obj_del(disp.lv_canvas);
@@ -50,7 +50,7 @@ struct RackDynDraw : BaseDynDraw {
 				lv_obj_move_to_index(disp.lv_canvas, 0);
 				lv_obj_set_pos(disp.lv_canvas, disp.x, disp.y);
 				lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
-				lv_obj_set_align(disp.lv_canvas, LV_ALIGN_TOP_LEFT);
+
 				// lv_obj_set_style_border_width(disp.canvas, 1, 0);
 				// lv_obj_set_style_border_color(disp.canvas, lv_color_make(0xFF, 0, 0), 0);
 
@@ -110,8 +110,8 @@ struct RackDynDraw : BaseDynDraw {
 
 				nvgEndFrame(disp.args.vg);
 
-				// auto buf_as_pixels =
-				// 	std::span{(CoreProcessor::Pixel *)disp.fullcolor_buffer.data(), disp.fullcolor_buffer.size()};
+				auto buf_as_pixels =
+					std::span{(CoreProcessor::Pixel *)disp.fullcolor_buffer.data(), disp.fullcolor_buffer.size()};
 
 				// if (copy_buffer(disp.lv_buffer, buf_as_pixels))
 				// 	lv_obj_invalidate(disp.lv_canvas);
@@ -126,13 +126,11 @@ struct RackDynDraw : BaseDynDraw {
 
 			for (auto &disp : displays) {
 				if (disp.args.vg) {
-					pr_dbg("RackDynDraw:: blur (del NVGcontext %p)\n", disp.args.vg);
+					pr_dbg("RackDynDraw::blur() call nvgDeletePixelBufferContext(NVGcontext %p)\n", disp.args.vg);
 					nvgDeletePixelBufferContext(disp.args.vg);
-					pr_dbg("RackDynDraw:: done\n");
+					pr_dbg("RackDynDraw::blur() returned from nvgDeletePixelBufferContext\n");
 					disp.args.vg = nullptr;
 				}
-				// disp.lv_buffer.clear();
-				// disp.fullcolor_buffer.clear();
 			}
 		}
 		rack::contextGet()->window->vg = nullptr;
@@ -161,12 +159,5 @@ private:
 	};
 
 	std::vector<Display> displays;
-
-	void clear_canvas() {
-		for (auto &disp : displays) {
-			std::ranges::fill(disp.fullcolor_buffer, 0);
-			std::ranges::fill(disp.lv_buffer, 0);
-		}
-	}
 };
 } // namespace MetaModule
