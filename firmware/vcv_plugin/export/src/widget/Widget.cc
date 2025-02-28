@@ -171,7 +171,7 @@ void Widget::drawChild(Widget *child, const DrawArgs &args, int layer) {
 	childArgs.clipBox.pos = childArgs.clipBox.pos.minus(child->box.pos);
 
 	nvgSave(args.vg);
-	// nvgTranslate(args.vg, child->box.pos.x, child->box.pos.y);
+	nvgTranslate(args.vg, child->box.pos.x, child->box.pos.y);
 
 	if (layer == 0) {
 		child->draw(childArgs);
