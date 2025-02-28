@@ -46,15 +46,15 @@ struct DynDraw : BaseDynDraw {
 				disp.w = std::min<lv_coord_t>(1000, disp.w);
 			}
 
-			disp.canvas = lv_canvas_create(parent_canvas);
-			lv_obj_move_to_index(disp.canvas, 0);
-			lv_obj_set_pos(disp.canvas, disp.x, disp.y);
-			lv_obj_set_size(disp.canvas, disp.w, disp.h);
+			disp.lv_canvas = lv_canvas_create(parent_canvas);
+			lv_obj_move_to_index(disp.lv_canvas, 0);
+			lv_obj_set_pos(disp.lv_canvas, disp.x, disp.y);
+			lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
 
 			pr_dbg("Create buffer %u*%u lvgl pixels:  %u bytes\n", disp.w, disp.h, disp.w * disp.h * 3);
 
 			disp.lv_buffer.resize(disp.w * disp.h * 3, 0);
-			lv_canvas_set_buffer(disp.canvas, disp.lv_buffer.data(), disp.w, disp.h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+			lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), disp.w, disp.h, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
 			disp.fullcolor_buffer.resize(disp.w * disp.h, CoreProcessor::Pixel{});
 
@@ -73,7 +73,7 @@ struct DynDraw : BaseDynDraw {
 				continue; //no updated needed
 
 			if (copy_buffer(disp.lv_buffer, disp.fullcolor_buffer))
-				lv_obj_invalidate(disp.canvas);
+				lv_obj_invalidate(disp.lv_canvas);
 
 			Debug::Pin2::low();
 		}
@@ -87,6 +87,9 @@ struct DynDraw : BaseDynDraw {
 				module->hide_graphic_display(disp.id);
 			disp.fullcolor_buffer.clear();
 			disp.lv_buffer.clear();
+
+			if (disp.lv_canvas)
+				lv_obj_del(disp.lv_canvas);
 		}
 	}
 
@@ -104,7 +107,7 @@ private:
 		lv_coord_t y{};
 		lv_coord_t w{};
 		lv_coord_t h{};
-		lv_obj_t *canvas{};
+		lv_obj_t *lv_canvas{};
 		std::vector<char> lv_buffer;
 		std::vector<CoreProcessor::Pixel> fullcolor_buffer;
 	};

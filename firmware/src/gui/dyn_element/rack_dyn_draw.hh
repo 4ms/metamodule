@@ -154,6 +154,12 @@ struct RackDynDraw : BaseDynDraw {
 				}
 			}
 		}
+		for (auto &disp : displays) {
+			if (disp.lv_canvas) {
+				lv_obj_del(disp.lv_canvas);
+				disp.lv_canvas = nullptr;
+			}
+		}
 		rack::contextGet()->window->vg = nullptr;
 	}
 
