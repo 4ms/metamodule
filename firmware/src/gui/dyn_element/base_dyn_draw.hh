@@ -25,8 +25,6 @@ struct BaseDynDraw {
 		for (auto px : fullcolor_buffer) {
 			auto col = lv_color_make_rgb565(px.blue, px.green, px.red);
 
-			buf_pos += 3;
-
 			if (lv_buffer[buf_pos] != (col.full & 0xFF)) {
 				diff = true;
 				lv_buffer[buf_pos] = col.full & 0xFF;
@@ -39,6 +37,8 @@ struct BaseDynDraw {
 				diff = true;
 				lv_buffer[buf_pos + 2] = px.alpha;
 			}
+
+			buf_pos += 3;
 		}
 		return diff;
 	}
