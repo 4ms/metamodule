@@ -19,10 +19,16 @@ struct RackDynDraw : BaseDynDraw {
 		if (auto mw = this->module_widget.lock()) {
 			// This violates safety of shared pointer, so we must be careful
 			// to use `displays[].widget` only when the weak_ptr is locked
-			displays.push_back({.widget = mw.get()});
+
 			for (auto &widget : mw->get_drawable_widgets()) {
 				displays.push_back({.widget = widget});
 			}
+
+			// mw->draw(...);
+			// if (mw->uses_overridden_draw) {
+			// displays.push_back({.widget = mw.get()});
+			//  module_widget_disp.widget = mw.get();
+			// }
 		}
 	}
 
@@ -63,8 +69,8 @@ struct RackDynDraw : BaseDynDraw {
 				std::ranges::fill(disp.fullcolor_buffer, 0);
 				// disp.tvg_canvas.reset(tvg::SwCanvas::gen());
 
-				// disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
-				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, px_per_3U);
+				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
+				// disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, px_per_3U);
 				disp.args.fb = nullptr;
 
 				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u) (pxp3u %u) -- create NVGContext %p\n",
@@ -81,10 +87,11 @@ struct RackDynDraw : BaseDynDraw {
 	void draw() override {
 
 		if (auto mw = module_widget.lock()) {
-
 			mw->step();
-			// mw->draw(disp.args);
-			// mw->drawLayer(disp.args, 1);
+			// if (module_widget_disp.args.vg) {
+			// mw->draw(module_widget.disp.args);
+			// mw->drawLayer(module_widget.disp.args, 1);
+			// }
 
 			for (auto &disp : displays) {
 				Debug::Pin2::high();
@@ -105,8 +112,8 @@ struct RackDynDraw : BaseDynDraw {
 				disp.args.clipBox = disp.widget->getBox();
 
 				disp.widget->step();
-				mw->drawChild(disp.widget, disp.args);
-				mw->drawChild(disp.widget, disp.args, 1);
+				disp.widget->draw(disp.args);
+				disp.widget->drawLayer(disp.args, 1);
 
 				nvgEndFrame(disp.args.vg);
 
@@ -159,5 +166,6 @@ private:
 	};
 
 	std::vector<Display> displays;
+	// Display module_widget_disp;
 };
 } // namespace MetaModule

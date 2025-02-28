@@ -55,8 +55,8 @@ struct DrawContext {
 
 	// tvg::SwCanvas *tvg_canvas{};
 
-	// DrawContext(lv_obj_t *canvas, std::span<uint32_t> buff, uint32_t width)
-	DrawContext(lv_obj_t *canvas)
+	DrawContext(lv_obj_t *canvas, std::span<uint32_t> buff, uint32_t width)
+		// DrawContext(lv_obj_t *canvas)
 		: canvas{canvas} {
 		lv_draw_line_dsc_init(&line_dsc);
 		line_dsc.width = 1;

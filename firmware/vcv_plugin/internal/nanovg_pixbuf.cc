@@ -373,8 +373,8 @@ void renderFlush(void *uptr) {
 } // namespace MetaModule::NanoVG
 
 NVGcontext *
-// nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t buffer_width, uint32_t px_per_3U) {
-nvgCreatePixelBufferContext(void *canvas, uint32_t px_per_3U) {
+nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t buffer_width, uint32_t px_per_3U) {
+	// nvgCreatePixelBufferContext(void *canvas, uint32_t px_per_3U) {
 	NVGparams params;
 	NVGcontext *ctx = nullptr;
 
@@ -395,8 +395,8 @@ nvgCreatePixelBufferContext(void *canvas, uint32_t px_per_3U) {
 	params.renderDelete = renderDelete;
 	params.renderText = renderText;
 
-	// auto draw_ctx = new DrawContext{(lv_obj_t *)canvas, buffer, buffer_width};
-	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas};
+	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas, buffer, buffer_width};
+	// auto draw_ctx = new DrawContext{(lv_obj_t *)canvas};
 	printf("Create new DrawContext %p\n", draw_ctx);
 	draw_ctx->px_per_3U = px_per_3U;
 	params.userPtr = draw_ctx;
