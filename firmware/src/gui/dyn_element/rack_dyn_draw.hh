@@ -3,7 +3,6 @@
 #include "base_dyn_draw.hh"
 #include "debug.hh"
 #include "pr_dbg.hh"
-#include "thorvg.h"
 #include "vcv_plugin/internal/nanovg_pixbuf.hh"
 #include <app/ModuleWidget.hpp>
 #include <memory>
@@ -70,6 +69,7 @@ struct RackDynDraw : BaseDynDraw {
 				lv_obj_set_pos(disp.lv_canvas, disp.x, disp.y);
 				lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
 
+				// Debug object positions with a red border:
 				// lv_obj_set_style_border_width(disp.canvas, 1, 0);
 				// lv_obj_set_style_border_color(disp.canvas, lv_color_make(0xFF, 0, 0), 0);
 
@@ -83,16 +83,18 @@ struct RackDynDraw : BaseDynDraw {
 				// disp.tvg_canvas.reset(tvg::SwCanvas::gen());
 
 				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
-				// disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, px_per_3U);
 				disp.args.fb = nullptr;
 
-				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u) (pxp3u %u) -- create NVGContext %p\n",
+				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u) (pxp3u %u) -- create NVGContext %p buffer %p "
+					   "+ %x\n",
 					   disp.x,
 					   disp.y,
 					   disp.w,
 					   disp.h,
 					   px_per_3U,
-					   disp.args.vg);
+					   disp.args.vg,
+					   disp.fullcolor_buffer.data(),
+					   disp.fullcolor_buffer.size());
 			}
 		}
 	}
@@ -129,8 +131,11 @@ struct RackDynDraw : BaseDynDraw {
 				auto buf_as_pixels =
 					std::span{(CoreProcessor::Pixel *)disp.fullcolor_buffer.data(), disp.fullcolor_buffer.size()};
 
-				if (copy_buffer(disp.lv_buffer, buf_as_pixels))
+				if (copy_buffer(disp.lv_buffer, buf_as_pixels)) {
+					Debug::Pin1::high();
 					lv_obj_invalidate(disp.lv_canvas);
+					Debug::Pin1::low();
+				}
 
 				Debug::Pin2::low();
 			}
