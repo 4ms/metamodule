@@ -296,6 +296,7 @@ struct ModuleViewPage : PageBase {
 			show_roller();
 		}
 
+		printf("\nModuleView: prepare module\n");
 		dyn_draw.prepare_module(slug, this_module_id, canvas, 240);
 	}
 
@@ -507,7 +508,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
-		pr_dbg("ModuleView: blur -> dyn_draw.blur\n");
+		pr_dbg("\nModuleView: blur -> dyn_draw.blur\n");
 		dyn_draw.blur();
 		params.lights.stop_watching_all();
 		params.text_displays.stop_watching_all();

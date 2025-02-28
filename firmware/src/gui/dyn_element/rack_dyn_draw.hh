@@ -85,8 +85,9 @@ struct RackDynDraw : BaseDynDraw {
 				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
 				disp.args.fb = nullptr;
 
-				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u) (pxp3u %u) -- create NVGContext %p buffer %p "
-					   "+ %x\n",
+				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u, 3u=%u)\n-- create NVGContext %p buffer %p, "
+					   "lv_buffer is %p + 0x%xB"
+					   "+ 0x%xB\n",
 					   disp.x,
 					   disp.y,
 					   disp.w,
@@ -94,7 +95,9 @@ struct RackDynDraw : BaseDynDraw {
 					   px_per_3U,
 					   disp.args.vg,
 					   disp.fullcolor_buffer.data(),
-					   disp.fullcolor_buffer.size());
+					   disp.fullcolor_buffer.size() * sizeof(disp.fullcolor_buffer[0]),
+					   disp.lv_buffer.data(),
+					   disp.lv_buffer.size());
 			}
 		}
 	}
@@ -132,6 +135,7 @@ struct RackDynDraw : BaseDynDraw {
 					std::span{(CoreProcessor::Pixel *)disp.fullcolor_buffer.data(), disp.fullcolor_buffer.size()};
 
 				if (copy_buffer(disp.lv_buffer, buf_as_pixels)) {
+					printf("Copied from %p to %p\n", buf_as_pixels.data(), disp.lv_buffer.data());
 					Debug::Pin1::high();
 					lv_obj_invalidate(disp.lv_canvas);
 					Debug::Pin1::low();
@@ -156,6 +160,7 @@ struct RackDynDraw : BaseDynDraw {
 		}
 		for (auto &disp : displays) {
 			if (disp.lv_canvas) {
+				pr_dbg("RackDynDraw::blur(): lv_obj_del(lv_canvas)\n");
 				lv_obj_del(disp.lv_canvas);
 				disp.lv_canvas = nullptr;
 			}
@@ -183,6 +188,14 @@ private:
 
 		// std::unique_ptr<tvg::SwCanvas> tvg_canvas;
 		std::vector<uint32_t> fullcolor_buffer;
+
+		~Display() {
+			// pr_dbg("~Display() buffer %p + 0x%xB\n", fullcolor_buffer.data(), fullcolor_buffer.size() * 4);
+			// if (lv_canvas && lv_obj_is_valid(lv_canvas)) {
+			// 	pr_dbg("~Display(): lv_obj_del(lv_canvas)\n");
+			// 	lv_obj_del(lv_canvas);
+			// }
+		}
 	};
 
 	std::vector<Display> displays;

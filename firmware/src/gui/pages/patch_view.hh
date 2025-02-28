@@ -264,9 +264,7 @@ struct PatchViewPage : PageBase {
 		params.lights.stop_watching_all();
 		params.param_watcher.stop_watching_all();
 
-		pr_dbg("PatchView: blur(): blur and release %zu dyn_draws\n", dyn_draws.size());
-		// for (auto &dyn : dyn_draws)
-		// 	dyn.blur();
+		pr_dbg("\nPatchView: blur(): blur and release %zu dyn_draws\n", dyn_draws.size());
 		dyn_draws.clear();
 		pr_dbg("PatchView: blur(): done clearing dyn_draws()\n");
 
@@ -383,7 +381,7 @@ private:
 		if (dynamic_elements_prepared)
 			return;
 
-		pr_dbg("PatchView::prepare_dynamic_elements(). There are %zu canvases\n", module_canvases.size());
+		pr_dbg("\nPatchView::prepare_dynamic_elements(). There are %zu modules\n", module_canvases.size());
 
 		for (auto &canvas : module_canvases) {
 			if (!canvas)
