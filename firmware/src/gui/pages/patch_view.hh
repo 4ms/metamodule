@@ -263,9 +263,10 @@ struct PatchViewPage : PageBase {
 		params.param_watcher.stop_watching_all();
 
 		pr_dbg("PatchView: blur(): blur and release %zu dyn_draws\n", dyn_draws.size());
-		for (auto &dyn : dyn_draws)
-			dyn.blur();
+		// for (auto &dyn : dyn_draws)
+		// 	dyn.blur();
 		dyn_draws.clear();
+		pr_dbg("PatchView: blur(): done clearing dyn_draws()\n");
 
 		dynamic_elements_prepared = false;
 	}
