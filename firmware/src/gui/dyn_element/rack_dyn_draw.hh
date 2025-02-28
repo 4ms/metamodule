@@ -24,11 +24,24 @@ struct RackDynDraw : BaseDynDraw {
 				displays.push_back({.widget = widget});
 			}
 
-			// mw->draw(...);
-			// if (mw->uses_overridden_draw) {
-			// displays.push_back({.widget = mw.get()});
-			//  module_widget_disp.widget = mw.get();
-			// }
+			// See if the ModuleWidget overrides draw() or drawLayer().
+			// We will only allocate the module-sized pixel buffer if the module needs it.
+			// Uses a GCC extension, so for simulator we just always assume
+			// the ModuleWidget uses a custom draw().
+			// See https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+#if defined(__GNUC__) && !defined(__clang__)
+			rack::app::ModuleWidget *ptr = mw.get();
+			custom_draw =
+				(void *)((*ptr).*(&rack::app::ModuleWidget::draw)) != (void *)(&rack::app::ModuleWidget::draw);
+			custom_draw |= (void *)((*ptr).*(&rack::app::ModuleWidget::drawLayer)) !=
+						   (void *)(&rack::app::ModuleWidget::drawLayer);
+
+			if (custom_draw) {
+				displays.push_back({.widget = mw.get()});
+			}
+#else
+			custom_draw = true;
+#endif
 		}
 	}
 
@@ -87,11 +100,8 @@ struct RackDynDraw : BaseDynDraw {
 	void draw() override {
 
 		if (auto mw = module_widget.lock()) {
-			mw->step();
-			// if (module_widget_disp.args.vg) {
-			// mw->draw(module_widget.disp.args);
-			// mw->drawLayer(module_widget.disp.args, 1);
-			// }
+			if (!custom_draw)
+				mw->step();
 
 			for (auto &disp : displays) {
 				Debug::Pin2::high();
@@ -166,6 +176,7 @@ private:
 	};
 
 	std::vector<Display> displays;
-	// Display module_widget_disp;
+
+	bool custom_draw = false;
 };
 } // namespace MetaModule
