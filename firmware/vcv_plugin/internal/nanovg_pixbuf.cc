@@ -169,7 +169,7 @@ float renderText(
 		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
-		pr_dbg("Creating label at %d,%d align 0x%x (sz %g)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		pr_trace("Creating label at %d,%d align 0x%x (sz %g)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
 		context->labels.push_back({(float)lv_x, (float)lv_y, fs->textAlign, label, context->draw_frame_ctr});
 	}
 
@@ -355,7 +355,7 @@ nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t b
 	params.renderText = renderText;
 
 	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas, buffer, buffer_width};
-	printf("Create new DrawContext %p\n", draw_ctx);
+	dump_draw("Create new DrawContext %p\n", draw_ctx);
 	draw_ctx->px_per_3U = px_per_3U;
 	params.userPtr = draw_ctx;
 
@@ -373,6 +373,7 @@ nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t b
 }
 
 void nvgDeletePixelBufferContext(NVGcontext *ctx) {
+	dump_draw("Delete NVGcontext %p\n", ctx);
 	if (ctx)
 		nvgDeleteInternal(ctx);
 }
