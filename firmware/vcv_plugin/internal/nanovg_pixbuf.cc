@@ -54,12 +54,22 @@ void renderFill(void *uptr,
 		if (path.count < 3)
 			continue;
 
+		auto x1 = context->canvas->coords.x1;
+		auto x2 = context->canvas->coords.x2;
+		auto y1 = context->canvas->coords.y1;
+		auto y2 = context->canvas->coords.y2;
+		auto w = x2 - x1 + 1;
+		auto h = y2 - y1 + 1;
+
 		auto path_pts = std::span{path.fill, (size_t)(path.count)};
 
 		std::vector<lv_point_t> points;
 
-		std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex pt) {
-			return to_lv_point(pt, context->px_per_3U);
+		std::ranges::transform(path_pts, std::back_inserter(points), [=](NVGvertex pt) {
+			auto x = to_lv_coord(pt.x, context->px_per_3U);
+			auto y = to_lv_coord(pt.y, context->px_per_3U);
+			return lv_point_t{std::clamp<lv_coord_t>(x, 0, w), std::clamp<lv_coord_t>(y, 0, h)};
+			// return to_lv_point(pt, context->px_per_3U);
 		});
 
 		for ([[maybe_unused]] auto p : points) {
@@ -114,6 +124,13 @@ void renderStroke(void *uptr,
 		return;
 	}
 
+	auto x1 = context->canvas->coords.x1;
+	auto x2 = context->canvas->coords.x2;
+	auto y1 = context->canvas->coords.y1;
+	auto y2 = context->canvas->coords.y2;
+	auto w = x2 - x1 + 1;
+	auto h = y2 - y1 + 1;
+
 	context->line_dsc.color = to_lv_color(paint->innerColor);
 	context->line_dsc.opa = to_lv_opa(paint->innerColor);
 	context->line_dsc.width = std::max<lv_coord_t>(std::round(to_lv_coord(strokeWidth, context->px_per_3U)), 1);
@@ -127,8 +144,11 @@ void renderStroke(void *uptr,
 
 		std::vector<lv_point_t> points;
 
-		std::ranges::transform(path_pts, std::back_inserter(points), [context](NVGvertex x) {
-			return to_lv_point(x, context->px_per_3U);
+		std::ranges::transform(path_pts, std::back_inserter(points), [=](NVGvertex pt) {
+			auto x = to_lv_coord(pt.x, context->px_per_3U);
+			auto y = to_lv_coord(pt.y, context->px_per_3U);
+			return lv_point_t{std::clamp<lv_coord_t>(x, 0, w), std::clamp<lv_coord_t>(y, 0, h)};
+			// return to_lv_point(x, context->px_per_3U);
 		});
 
 		for ([[maybe_unused]] auto p : path_pts) {
