@@ -63,7 +63,8 @@ struct RackDynDraw : BaseDynDraw {
 				std::ranges::fill(disp.fullcolor_buffer, 0);
 				// disp.tvg_canvas.reset(tvg::SwCanvas::gen());
 
-				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
+				// disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
+				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, px_per_3U);
 				disp.args.fb = nullptr;
 
 				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u) (pxp3u %u) -- create NVGContext %p\n",
@@ -109,11 +110,11 @@ struct RackDynDraw : BaseDynDraw {
 
 				nvgEndFrame(disp.args.vg);
 
-				auto buf_as_pixels =
-					std::span{(CoreProcessor::Pixel *)disp.fullcolor_buffer.data(), disp.fullcolor_buffer.size()};
+				// auto buf_as_pixels =
+				// 	std::span{(CoreProcessor::Pixel *)disp.fullcolor_buffer.data(), disp.fullcolor_buffer.size()};
 
-				if (copy_buffer(disp.lv_buffer, buf_as_pixels))
-					lv_obj_invalidate(disp.lv_canvas);
+				// if (copy_buffer(disp.lv_buffer, buf_as_pixels))
+				// 	lv_obj_invalidate(disp.lv_canvas);
 
 				Debug::Pin2::low();
 			}
@@ -127,10 +128,11 @@ struct RackDynDraw : BaseDynDraw {
 				if (disp.args.vg) {
 					pr_dbg("RackDynDraw:: blur (del NVGcontext %p)\n", disp.args.vg);
 					nvgDeletePixelBufferContext(disp.args.vg);
+					pr_dbg("RackDynDraw:: done\n");
 					disp.args.vg = nullptr;
 				}
-				disp.lv_buffer.clear();
-				disp.fullcolor_buffer.clear();
+				// disp.lv_buffer.clear();
+				// disp.fullcolor_buffer.clear();
 			}
 		}
 		rack::contextGet()->window->vg = nullptr;
@@ -151,7 +153,7 @@ private:
 		lv_coord_t h{};
 		lv_obj_t *lv_canvas{};
 
-		rack::app::ModuleWidget::DrawArgs args{}; // one per module
+		rack::app::ModuleWidget::DrawArgs args{};
 		std::vector<char> lv_buffer;
 
 		// std::unique_ptr<tvg::SwCanvas> tvg_canvas;

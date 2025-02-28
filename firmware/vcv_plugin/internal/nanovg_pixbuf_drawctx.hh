@@ -2,6 +2,7 @@
 
 #include "lvgl.h"
 #include "thorvg.h"
+#include <cstdio>
 #include <span>
 #include <vector>
 
@@ -52,9 +53,10 @@ struct DrawContext {
 
 	unsigned px_per_3U = 240;
 
-	tvg::SwCanvas *tvg_canvas{};
+	// tvg::SwCanvas *tvg_canvas{};
 
-	DrawContext(lv_obj_t *canvas, std::span<uint32_t> buff, uint32_t width)
+	// DrawContext(lv_obj_t *canvas, std::span<uint32_t> buff, uint32_t width)
+	DrawContext(lv_obj_t *canvas)
 		: canvas{canvas} {
 		lv_draw_line_dsc_init(&line_dsc);
 		line_dsc.width = 1;
@@ -66,8 +68,12 @@ struct DrawContext {
 
 		lv_draw_label_dsc_init(&label_dsc);
 
-		tvg_canvas = tvg::SwCanvas::gen();
-		tvg_canvas->target(buff.data(), width, width, buff.size() / width, tvg::ColorSpace::ARGB8888);
+		// tvg_canvas = tvg::SwCanvas::gen();
+		// tvg_canvas->target(buff.data(), width, width, buff.size() / width, tvg::ColorSpace::ARGB8888);
+	}
+
+	~DrawContext() {
+		printf("~DrawContext()\n");
 	}
 };
 
