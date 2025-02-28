@@ -54,40 +54,11 @@ void renderFill(void *uptr,
 		if (path.count < 3)
 			continue;
 
-		// auto x1 = context->canvas->coords.x1;
-		// auto x2 = context->canvas->coords.x2;
-		// auto y1 = context->canvas->coords.y1;
-		// auto y2 = context->canvas->coords.y2;
-		// auto w = x2 - x1 + 1;
-		// auto h = y2 - y1 + 1;
-
-		// auto path_pts = std::span{path.fill, (size_t)(path.count)};
-
-		// std::vector<lv_point_t> points;
-
-		// std::ranges::transform(path_pts, std::back_inserter(points), [=](NVGvertex pt) {
-		// 	auto x = to_lv_coord(pt.x, context->px_per_3U);
-		// 	auto y = to_lv_coord(pt.y, context->px_per_3U);
-		// 	return lv_point_t{std::clamp<lv_coord_t>(x, 0, w), std::clamp<lv_coord_t>(y, 0, h)};
-		// 	// return to_lv_point(pt, context->px_per_3U);
-		// });
-
-		// for ([[maybe_unused]] auto p : points) {
-		// 	dump_draw("%d %d\n", p.x, p.y);
-		// }
-
-		// if (is_poly_concave(points)) {
-		// 	// LVGL lv_canvas_draw_polygon goes into an infinite loop if polygon is concave.
-		// 	// Fall back to drawing polygon outline (unfilled) if it's concave
-		// 	lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
-		// } else {
-		// 	lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
-		// }
-
 		auto poly = tvg::Shape::gen();
 
 		poly->moveTo(path.fill[0].x, path.fill[0].y);
 		for (auto pt : std::span{path.fill + 1, (size_t)(path.count - 1)}) {
+			// TODO: do we need to clip to viewport?
 			poly->lineTo(pt.x, pt.y);
 		}
 		poly->close();
@@ -135,8 +106,10 @@ void renderStroke(void *uptr,
 
 		poly->moveTo(path.stroke[0].x, path.stroke[0].y);
 		for (auto pt : std::span{path.stroke + 1, (size_t)(path.count - 1)}) {
+			// TODO: do we need to clip to viewport?
 			poly->lineTo(pt.x, pt.y);
 		}
+
 		auto r = paint->innerColor.r * 255.f;
 		auto g = paint->innerColor.g * 255.f;
 		auto b = paint->innerColor.b * 255.f;
