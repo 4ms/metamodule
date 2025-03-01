@@ -158,7 +158,7 @@ struct RackDynDraw : BaseDynDraw {
 			}
 		}
 		for (auto &disp : displays) {
-			if (disp.lv_canvas) {
+			if (disp.lv_canvas && lv_obj_is_valid(disp.lv_canvas)) {
 				lv_obj_del(disp.lv_canvas);
 				disp.lv_canvas = nullptr;
 			}
