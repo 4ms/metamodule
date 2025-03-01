@@ -102,8 +102,11 @@ struct PatchViewPage : PageBase {
 			update_map_ring_style();
 
 			if (args.module_id) {
-				if (*args.module_id < module_canvases.size()) {
-					lv_obj_scroll_to_view_recursive(module_canvases[*args.module_id], LV_ANIM_ON);
+				auto canvas = std::ranges::find_if(module_canvases, [module_id = args.module_id](lv_obj_t *canv) {
+					return module_id == *(static_cast<uint32_t *>(lv_obj_get_user_data(canv)));
+				});
+				if (canvas != module_canvases.end()) {
+					lv_obj_scroll_to_view_recursive(*canvas, LV_ANIM_ON);
 				}
 			}
 			return;
