@@ -251,7 +251,7 @@ void renderTriangles(void *uptr,
 void renderDelete(void *uptr) {
 	if (uptr) {
 		if (auto context = get_drawcontext(uptr)) {
-			printf("nanovg_pixbuf: renderDelete(): Delete DrawContext %p\n", context);
+			pr_trace("nanovg_pixbuf: renderDelete(): Delete DrawContext %p\n", context);
 			delete context;
 		}
 	}
@@ -263,7 +263,7 @@ int renderCreate(void *uptr, void *otherUptr) {
 }
 
 int renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, const unsigned char *data) {
-	pr_dbg("renderCreateTexture: %d x %d, type %d, flags %d\n", w, h, type, imageFlags);
+	// pr_dbg("renderCreateTexture: %d x %d, type %d, flags %d\n", w, h, type, imageFlags);
 
 	auto context = get_drawcontext(uptr);
 
@@ -283,12 +283,12 @@ int renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, cons
 }
 
 int renderDeleteTexture(void *uptr, int image) {
-	pr_dbg("renderDeleteTexture\n");
+	// pr_dbg("renderDeleteTexture\n");
 	return 1;
 }
 
 int renderUpdateTexture(void *uptr, int image, int x, int y, int w, int h, const unsigned char *data) {
-	pr_dbg("renderUpdateTexture (image=%d) %d x %d @ %d,%d\n", image, w, h, x, y);
+	// pr_dbg("renderUpdateTexture (image=%d) %d x %d @ %d,%d\n", image, w, h, x, y);
 	auto context = get_drawcontext(uptr);
 
 	if (image < (int)context->textures.size()) {
@@ -298,7 +298,7 @@ int renderUpdateTexture(void *uptr, int image, int x, int y, int w, int h, const
 	return 1;
 }
 int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
-	pr_dbg("renderGetTextureSize\n");
+	// pr_dbg("renderGetTextureSize\n");
 	auto context = get_drawcontext(uptr);
 
 	if (image < (int)context->textures.size()) {

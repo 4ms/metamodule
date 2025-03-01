@@ -88,19 +88,19 @@ struct RackDynDraw : BaseDynDraw {
 				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
 				disp.args.fb = nullptr;
 
-				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u, 3u=%u)\n",
-					   disp.x,
-					   disp.y,
-					   disp.w,
-					   disp.h,
-					   px_per_3U);
+				pr_trace("RackDynDraw: prepared canvas at %u, %u (%u x %u, 3u=%u)\n",
+						 disp.x,
+						 disp.y,
+						 disp.w,
+						 disp.h,
+						 px_per_3U);
 
-				pr_dump(" -- Create NVGContext %p buffer %p + 0x%xB, lv_buffer is %p + 0x%xB \n",
-						disp.args.vg,
-						disp.fullcolor_buffer.data(),
-						disp.fullcolor_buffer.size() * sizeof(disp.fullcolor_buffer[0]),
-						disp.lv_buffer.data(),
-						disp.lv_buffer.size());
+				pr_trace(" -- Create NVGContext %p buffer %p + 0x%xB, lv_buffer is %p + 0x%xB \n",
+						 disp.args.vg,
+						 disp.fullcolor_buffer.data(),
+						 disp.fullcolor_buffer.size() * sizeof(disp.fullcolor_buffer[0]),
+						 disp.lv_buffer.data(),
+						 disp.lv_buffer.size());
 			}
 		}
 	}

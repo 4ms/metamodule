@@ -15,11 +15,11 @@ struct FONScontext {
 	static constexpr unsigned DefaultFontHandle = 0;
 
 	FONScontext() {
-		pr_dbg("Creating FONScontext\n");
+		pr_trace("Creating FONScontext\n");
 	}
 
 	~FONScontext() {
-		pr_dbg("Destroying FONScontext\n");
+		pr_trace("Destroying FONScontext\n");
 	}
 
 	int get_handle_from_name(std::string const &name) {
