@@ -144,11 +144,12 @@ float renderText(
 		auto letter_space = Fonts::corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
 		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
 
+		// Debug positions with red borders around labels
 		// lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
 		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
-		pr_dbg("Creating label at %d,%d align 0x%x (sz %g)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		pr_trace("Creating label at %d,%d align 0x%x (sz %g)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
 		context->labels.push_back({(float)lv_x, (float)lv_y, fs->textAlign, label, context->draw_frame_ctr});
 	}
 
@@ -162,18 +163,29 @@ float renderText(
 		text = text_copy.c_str();
 	}
 
+	auto cur_x = lv_obj_get_x(label);
+	auto new_x = cur_x;
 	if (fs->textAlign & NVG_ALIGN_CENTER) {
 		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
-		lv_obj_set_x(label, lv_x - width / 2);
-	}
-	if (fs->textAlign & NVG_ALIGN_RIGHT) {
+		new_x = lv_x - width / 2;
+	} else if (fs->textAlign & NVG_ALIGN_RIGHT) {
 		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
-		lv_obj_set_x(label, lv_x - width);
+		new_x = lv_x - width;
+	}
+	if (new_x != cur_x) {
+		lv_obj_set_x(label, new_x);
 	}
 
-	lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
-	lv_obj_set_style_text_opa(label, LV_OPA_100, LV_PART_MAIN);
-	lv_label_set_text(label, text);
+	auto cur_col = lv_obj_get_style_text_color(label, LV_PART_MAIN);
+	auto new_col = to_lv_text_color(fs->paint->innerColor);
+	if (cur_col.full != new_col.full) {
+		lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
+	}
+
+	auto cur_text = lv_label_get_text(label);
+	if (strcmp(cur_text, text) != 0) {
+		lv_label_set_text(label, text);
+	}
 
 	return 1;
 }
