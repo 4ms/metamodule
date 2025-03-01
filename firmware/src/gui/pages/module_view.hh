@@ -508,7 +508,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
-		pr_dbg("\nModuleView: blur -> dyn_draw.blur\n");
 		dyn_draw.blur();
 		params.lights.stop_watching_all();
 		params.text_displays.stop_watching_all();

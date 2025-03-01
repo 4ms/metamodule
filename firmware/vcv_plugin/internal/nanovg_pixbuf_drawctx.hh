@@ -58,7 +58,6 @@ struct DrawContext {
 
 		lv_draw_label_dsc_init(&label_dsc);
 
-		printf("DrawContext() %p tvg_canvas target buffer %p + 0x%xB\n", this, buff.data(), buff.size_bytes());
 		tvg_canvas = tvg::SwCanvas::gen();
 		tvg_canvas->target(buff.data(), width, width, buff.size() / width, tvg::ColorSpace::ARGB8888);
 	}

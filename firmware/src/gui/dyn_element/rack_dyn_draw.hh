@@ -23,12 +23,14 @@ struct RackDynDraw : BaseDynDraw {
 				displays.push_back({.widget = widget});
 			}
 
+#if defined(__GNUC__) && !defined(__clang__)
 			// See if the ModuleWidget overrides draw() or drawLayer().
 			// We will only allocate the module-sized pixel buffer if the module needs it.
-			// Uses a GCC extension, so for simulator we just always assume
+			// This uses a GCC extension, so for simulator we just always assume
 			// the ModuleWidget uses a custom draw().
+			//
 			// See https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
-#if defined(__GNUC__) && !defined(__clang__)
+
 			rack::app::ModuleWidget *ptr = mw.get();
 			custom_draw =
 				(void *)((*ptr).*(&rack::app::ModuleWidget::draw)) != (void *)(&rack::app::ModuleWidget::draw);
@@ -49,7 +51,7 @@ struct RackDynDraw : BaseDynDraw {
 			for (auto &disp : displays) {
 
 				if (disp.lv_canvas && lv_obj_is_valid(disp.lv_canvas)) {
-					pr_dbg("RackDynDraw: canvas is a valid lvgl object, deleting\n");
+					pr_warn("RackDynDraw: canvas is a valid lvgl object, deleting\n");
 					lv_obj_del(disp.lv_canvas);
 				}
 
@@ -59,7 +61,8 @@ struct RackDynDraw : BaseDynDraw {
 				disp.h = std::round(svgpx_to_pngpx(disp.widget->box.size.y, px_per_3U));
 
 				if (disp.h > (lv_coord_t)px_per_3U || disp.w > 1000) {
-					pr_dbg("Height %u exceeds module height, or width %u > 1000px\n", disp.h, disp.w);
+					pr_warn(
+						"RackDynDraw: canvas height %u exceeds module height, or width %u > 1000px\n", disp.h, disp.w);
 					disp.h = std::min<lv_coord_t>(px_per_3U, disp.h);
 					disp.w = std::min<lv_coord_t>(1000, disp.w);
 				}
@@ -85,19 +88,19 @@ struct RackDynDraw : BaseDynDraw {
 				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
 				disp.args.fb = nullptr;
 
-				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u, 3u=%u)\n-- create NVGContext %p buffer %p, "
-					   "lv_buffer is %p + 0x%xB"
-					   "+ 0x%xB\n",
+				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u, 3u=%u)\n",
 					   disp.x,
 					   disp.y,
 					   disp.w,
 					   disp.h,
-					   px_per_3U,
-					   disp.args.vg,
-					   disp.fullcolor_buffer.data(),
-					   disp.fullcolor_buffer.size() * sizeof(disp.fullcolor_buffer[0]),
-					   disp.lv_buffer.data(),
-					   disp.lv_buffer.size());
+					   px_per_3U);
+
+				pr_dump(" -- Create NVGContext %p buffer %p + 0x%xB, lv_buffer is %p + 0x%xB \n",
+						disp.args.vg,
+						disp.fullcolor_buffer.data(),
+						disp.fullcolor_buffer.size() * sizeof(disp.fullcolor_buffer[0]),
+						disp.lv_buffer.data(),
+						disp.lv_buffer.size());
 			}
 		}
 	}
@@ -135,10 +138,7 @@ struct RackDynDraw : BaseDynDraw {
 					std::span{(CoreProcessor::Pixel *)disp.fullcolor_buffer.data(), disp.fullcolor_buffer.size()};
 
 				if (copy_buffer(disp.lv_buffer, buf_as_pixels)) {
-					printf("Copied from %p to %p\n", buf_as_pixels.data(), disp.lv_buffer.data());
-					Debug::Pin1::high();
 					lv_obj_invalidate(disp.lv_canvas);
-					Debug::Pin1::low();
 				}
 
 				Debug::Pin2::low();
@@ -151,16 +151,14 @@ struct RackDynDraw : BaseDynDraw {
 
 			for (auto &disp : displays) {
 				if (disp.args.vg) {
-					pr_dbg("RackDynDraw::blur() call nvgDeletePixelBufferContext(NVGcontext %p)\n", disp.args.vg);
+					pr_trace("RackDynDraw::blur() call nvgDeletePixelBufferContext(NVGcontext %p)\n", disp.args.vg);
 					nvgDeletePixelBufferContext(disp.args.vg);
-					pr_dbg("RackDynDraw::blur() returned from nvgDeletePixelBufferContext\n");
 					disp.args.vg = nullptr;
 				}
 			}
 		}
 		for (auto &disp : displays) {
 			if (disp.lv_canvas) {
-				pr_dbg("RackDynDraw::blur(): lv_obj_del(lv_canvas)\n");
 				lv_obj_del(disp.lv_canvas);
 				disp.lv_canvas = nullptr;
 			}
@@ -188,14 +186,6 @@ private:
 
 		// std::unique_ptr<tvg::SwCanvas> tvg_canvas;
 		std::vector<uint32_t> fullcolor_buffer;
-
-		~Display() {
-			// pr_dbg("~Display() buffer %p + 0x%xB\n", fullcolor_buffer.data(), fullcolor_buffer.size() * 4);
-			// if (lv_canvas && lv_obj_is_valid(lv_canvas)) {
-			// 	pr_dbg("~Display(): lv_obj_del(lv_canvas)\n");
-			// 	lv_obj_del(lv_canvas);
-			// }
-		}
 	};
 
 	std::vector<Display> displays;

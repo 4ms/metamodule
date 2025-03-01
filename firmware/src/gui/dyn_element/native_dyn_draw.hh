@@ -41,7 +41,7 @@ struct DynDraw : BaseDynDraw {
 			disp.h = std::round(mm_to_px(disp.element.height_mm, px_per_3U));
 
 			if (disp.h > (lv_coord_t)px_per_3U || disp.w > 1000) {
-				pr_dbg("Height %u exceeds module height, or width > 1000px\n", disp.h, disp.w);
+				pr_warn("NativeDynDraw: canvas height %u exceeds module height, or width > 1000px\n", disp.h, disp.w);
 				disp.h = std::min<lv_coord_t>(px_per_3U, disp.h);
 				disp.w = std::min<lv_coord_t>(1000, disp.w);
 			}
@@ -51,7 +51,7 @@ struct DynDraw : BaseDynDraw {
 			lv_obj_set_pos(disp.lv_canvas, disp.x, disp.y);
 			lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
 
-			pr_dbg("Create buffer %u*%u lvgl pixels:  %u bytes\n", disp.w, disp.h, disp.w * disp.h * 3);
+			pr_trace("Create buffer %u*%u lvgl pixels:  %u bytes\n", disp.w, disp.h, disp.w * disp.h * 3);
 
 			disp.lv_buffer.resize(disp.w * disp.h * 3, 0);
 			lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), disp.w, disp.h, LV_IMG_CF_TRUE_COLOR_ALPHA);
@@ -82,7 +82,7 @@ struct DynDraw : BaseDynDraw {
 	void blur() override {
 
 		for (auto &disp : displays) {
-			pr_dbg("NativeDynDraw: Release graphic display %u buffers\n", disp.id);
+			pr_trace("NativeDynDraw: Release graphic display %u buffers\n", disp.id);
 			if (module)
 				module->hide_graphic_display(disp.id);
 			disp.fullcolor_buffer.clear();
