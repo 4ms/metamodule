@@ -362,6 +362,8 @@ struct ScopeDisplay : LedDisplay {
 		}
 		nvgFill(args.vg);
 
+#if !defined(METAMODULE)
+		// This is almost illegible and text that moves is memory-intensive on the MM
 		std::shared_ptr<Font> font = APP->window->loadFont(fontPath);
 		if (font) {
 			nvgFontSize(args.vg, 9);
@@ -369,6 +371,7 @@ struct ScopeDisplay : LedDisplay {
 			nvgFillColor(args.vg, nvgRGBA(0x1e, 0x28, 0x2b, 0xff));
 			nvgText(args.vg, p.x - 8, p.y + 3, "T", NULL);
 		}
+#endif
 		nvgResetScissor(args.vg);
 	}
 
