@@ -1,9 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
-#include "gui/dyn_element.hh"
+#include "gui/dyn_element_draw.hh"
 #include "gui/elements/map_ring_animate.hh"
-#include "gui/elements/map_ring_drawer.hh"
-#include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_display.hh"
@@ -18,7 +16,6 @@
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/styles.hh"
-#include "lvgl.h"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 

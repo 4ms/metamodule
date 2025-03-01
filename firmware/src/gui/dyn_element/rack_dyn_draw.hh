@@ -21,9 +21,6 @@ struct RackDynDraw : BaseDynDraw {
 		args.fb = nullptr;
 		canvas = widget_canvas;
 
-		args.vg = nvgCreatePixelBufferContext(canvas);
-		args.fb = nullptr;
-
 		lv_obj_refr_size(canvas);
 		width = lv_obj_get_width(canvas);
 		height = lv_obj_get_height(canvas);
