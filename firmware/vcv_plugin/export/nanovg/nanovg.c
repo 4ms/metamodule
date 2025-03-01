@@ -150,7 +150,9 @@ static float nvg__acosf(float a) { return acosf(a); }
 
 static int nvg__mini(int a, int b) { return a < b ? a : b; }
 static int nvg__maxi(int a, int b) { return a > b ? a : b; }
+#if !defined(METAMODULE)
 static int nvg__clampi(int a, int mn, int mx) { return a < mn ? mn : (a > mx ? mx : a); }
+#endif
 static float nvg__minf(float a, float b) { return a < b ? a : b; }
 static float nvg__maxf(float a, float b) { return a > b ? a : b; }
 static float nvg__absf(float a) { return a >= 0.0f ? a : -a; }
@@ -1121,8 +1123,16 @@ static float nvg__distPtSeg(float x, float y, float px, float py, float qx, floa
 	return dx*dx + dy*dy;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
 static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 {
+	// printf("nvg__appendCommands: ");
+	// for (int i = 0; i < nvals; i++) {
+	// 	printf("%g ", vals[i]);
+	// }
+	// printf("\n");
+
 	NVGstate* state = nvg__getState(ctx);
 	int i;
 
@@ -1174,6 +1184,7 @@ static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 
 	ctx->ncommands += nvals;
 }
+#pragma GCC diagnostic pop
 
 
 static void nvg__clearPathCache(NVGcontext* ctx)
@@ -1468,6 +1479,8 @@ static void nvg__flattenPaths(NVGcontext* ctx)
 		}
 	}
 }
+
+#if !defined(METAMODULE) 
 
 static int nvg__curveDivs(float r, float arc, float tol)
 {
@@ -1768,6 +1781,127 @@ static void nvg__calculateJoins(NVGcontext* ctx, float w, int lineJoin, float mi
 	}
 }
 
+#endif
+
+#if defined(METAMODULE)
+
+static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap, int lineJoin, float miterLimit)
+{
+	NVGpathCache* cache = ctx->cache;
+	NVGvertex* verts;
+	NVGvertex* dst;
+	int cverts, i, j;
+
+	// Calculate max vertex usage.
+	cverts = 0;
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		int loop = (path->closed == 0) ? 0 : 1;
+
+		cverts += (path->count + loop) * 2; // plus one for loop
+	}
+
+	verts = nvg__allocTempVerts(ctx, cverts);
+	if (verts == NULL) return 0;
+
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		NVGpoint* pts = &cache->points[path->first];
+		NVGpoint* p0;
+		NVGpoint* p1;
+		int s, e, loop;
+
+		path->fill = 0;
+		path->nfill = 0;
+
+		// Calculate fringe or stroke
+		loop = (path->closed == 0) ? 0 : 1;
+		dst = verts;
+		path->stroke = dst;
+
+		if (loop) {
+			// Looping
+			p0 = &pts[path->count-1];
+			p1 = &pts[0];
+			s = 0;
+			e = path->count;
+		} else {
+			// Add cap
+			p0 = &pts[0];
+			p1 = &pts[1];
+			s = 1;
+			e = path->count-1;
+		}
+
+		if (loop == 0) {
+			nvg__vset(dst, p0->x, p0->y, 0, 1); dst++;
+		}
+
+		for (j = s; j < e; ++j) {
+			nvg__vset(dst, p1->x, p1->y, 0,1); dst++;
+			p0 = p1++;
+		}
+
+		if (loop) {
+			nvg__vset(dst, verts[0].x, verts[0].y, 0,1); dst++;
+		} else {
+			nvg__vset(dst, p1->x, p1->y, 0,1); dst++;
+		}
+
+		path->nstroke = (int)(dst - verts);
+
+		verts = dst;
+
+		// printf("Path strokes: ");
+		// for (int i = 0; i < path->nstroke; i++)
+		// 	printf("%g,%g    ", path->stroke[i].x, path->stroke[i].y);
+		// printf("\n");
+	}
+
+	return 1;
+}
+
+static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLimit)
+{
+	NVGpathCache* cache = ctx->cache;
+	NVGvertex* verts;
+	NVGvertex* dst;
+	int cverts, i, j;
+
+	// Calculate max vertex usage.
+	cverts = 0;
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		cverts += path->count +  1;
+	}
+
+	verts = nvg__allocTempVerts(ctx, cverts);
+	if (verts == NULL) return 0;
+
+	for (i = 0; i < cache->npaths; i++) {
+		NVGpath* path = &cache->paths[i];
+		NVGpoint* pts = &cache->points[path->first];
+
+		// Calculate shape vertices.
+		dst = verts;
+		path->fill = dst;
+
+		for (j = 0; j < path->count; ++j) {
+			nvg__vset(dst, pts[j].x, pts[j].y, 0.5f, 1);
+			dst++;
+		}
+
+		path->nfill = (int)(dst - verts);
+		verts = dst;
+
+		path->stroke = NULL;
+		path->nstroke = 0;
+	}
+
+	return 1;
+}
+
+#else
 
 static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap, int lineJoin, float miterLimit)
 {
@@ -1794,6 +1928,7 @@ static int nvg__expandStroke(NVGcontext* ctx, float w, float fringe, int lineCap
 	for (i = 0; i < cache->npaths; i++) {
 		NVGpath* path = &cache->paths[i];
 		int loop = (path->closed == 0) ? 0 : 1;
+
 		if (lineJoin == NVG_ROUND)
 			cverts += (path->count + path->nbevel*(ncap+2) + 1) * 2; // plus one for loop
 		else
@@ -2013,6 +2148,7 @@ static int nvg__expandFill(NVGcontext* ctx, float w, int lineJoin, float miterLi
 	return 1;
 }
 
+#endif
 
 // Draw
 void nvgBeginPath(NVGcontext* ctx)
@@ -2325,6 +2461,12 @@ void nvgStroke(NVGcontext* ctx)
 	}
 
 	nvg__flattenPaths(ctx);
+
+	// printf("ctx->cache->points post flattens: ");
+	// for (int i = 0; i < ctx->cache->npoints; i++) {
+	// 	printf("%g, %g   ", ctx->cache->points[i].x, ctx->cache->points[i].y);
+	// }
+	// printf("\n");
 
 	if (ctx->params.edgeAntiAlias && state->shapeAntiAlias)
 		nvg__expandStroke(ctx, strokeWidth*0.5f, ctx->fringeWidth, state->lineCap, state->lineJoin, state->miterLimit);
