@@ -13,6 +13,7 @@
 #include "patch_play/param_watch.hh"
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
+#include "thorvg.h"
 #include "user_settings/plugin_autoload_settings.hh"
 
 namespace MetaModule
@@ -72,6 +73,8 @@ public:
 		patch_playloader.request_new_audio_settings(
 			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);
 		patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.button_exclude);
+
+		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 	}
 
 	void update_screen() {

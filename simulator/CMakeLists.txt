@@ -63,6 +63,13 @@ if (NOT HEADLESS)
 
 endif()
 
+# #################### ThorVG ############################################
+
+if (NOT HEADLESS)
+	add_subdirectory(${FWDIR}/lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
+endif()
+
+
 # #################### RYML ##################################
 
 add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
@@ -96,6 +103,10 @@ add_subdirectory(${FWDIR}/lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 add_subdirectory(${LIBDIR}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
+
+if (NOT HEADLESS)
+	target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
+endif()
 
 if(HEADLESS)
 	add_executable(simulator 
@@ -208,6 +219,7 @@ if(NOT HEADLESS)
 		lvglsdl
 		SDL2
 		ui_lvgl
+		ThorVG
 	)
 endif()
 

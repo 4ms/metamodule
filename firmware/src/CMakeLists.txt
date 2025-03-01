@@ -56,6 +56,12 @@ set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
 add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
 #
+# ThorVG
+#
+add_subdirectory(../lib/thorvg ${CMAKE_BINARY_DIR}/thorvg)
+
+
+#
 # VCV Adaptor
 #
 add_subdirectory(../vcv_plugin ${CMAKE_BINARY_DIR}/vcv_plugin)
@@ -67,6 +73,8 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 target_include_directories(CoreModules-4ms PRIVATE ${FWDIR}/src/vcv_hardware)
+
+target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
 
 #
 # Patch format and serialization
@@ -243,8 +251,10 @@ if (NOT TARGET cpputil::cpputil)
 endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
+# see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+target_compile_options(main.elf PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-pmf-conversions>)
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports ThorVG)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
