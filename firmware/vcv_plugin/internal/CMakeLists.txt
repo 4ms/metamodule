@@ -22,6 +22,7 @@ target_link_libraries(vcv_plugin_internal PRIVATE
 
 if (NOT DEFINED METAMODULE_HEADLESS)
 	target_link_libraries(vcv_plugin_internal PRIVATE lvgl::lvgl)
+	target_link_libraries(vcv_plugin_internal PRIVATE ThorVG)
 
 	target_sources(vcv_plugin_internal PRIVATE
 		svg.cc

@@ -2,6 +2,7 @@
 #include "dynload/autoload_plugins.hh"
 #include "gui/notify/queue.hh"
 #include "stubs/fs/fs_proxy.hh"
+#include "thorvg.h"
 
 namespace MetaModule
 {
@@ -38,6 +39,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 
 	Gui::init_lvgl_styles();
 	page_manager.init();
+
+	tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 
 	if (!Settings::read_settings(file_storage_proxy, &settings)) {
 		settings = UserSettings{};
