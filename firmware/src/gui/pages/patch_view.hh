@@ -101,6 +101,7 @@ struct PatchViewPage : PageBase {
 			is_ready = true;
 			watch_modules();
 			update_map_ring_style();
+			prepare_dynamic_elements();
 
 			if (args.module_id) {
 				if (*args.module_id < module_canvases.size()) {
@@ -130,6 +131,7 @@ struct PatchViewPage : PageBase {
 		patch_revision = patches.get_view_patch_modification_count();
 
 		redraw_patch();
+		prepare_dynamic_elements();
 	}
 
 	void redraw_patch() {
@@ -189,9 +191,6 @@ struct PatchViewPage : PageBase {
 
 			module_canvases.push_back(canvas);
 			style_module(canvas);
-
-			auto &dyn = dyn_draws.emplace_back(patch_playloader);
-			dyn.prepare_module(module_idx, canvas, page_settings.view_height_px);
 
 			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
@@ -262,12 +261,14 @@ struct PatchViewPage : PageBase {
 		params.text_displays.stop_watching_all();
 		params.lights.stop_watching_all();
 		params.param_watcher.stop_watching_all();
-		for (auto &dyn : dyn_draws)
-			dyn.blur();
+
+		dyn_draws.clear();
+
+		dynamic_elements_prepared = false;
 	}
 
 	void update() override {
-		bool last_is_patch_playing = is_patch_playloaded;
+		bool last_is_patch_playloaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
 
@@ -275,14 +276,14 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(displayed_patch_loc_hash);
 
-		if (is_patch_playloaded != last_is_patch_playing || page_settings.changed) {
+		if (is_patch_playloaded != last_is_patch_playloaded || page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
 			watch_modules();
 		}
 
-		if (is_patch_playloaded != last_is_patch_playing) {
+		if (is_patch_playloaded != last_is_patch_playloaded) {
 			args.view_knobset_id = active_knobset;
 			page_list.set_active_knobset(active_knobset);
 			patch_mod_queue.put(ChangeKnobSet{active_knobset});
@@ -326,7 +327,7 @@ struct PatchViewPage : PageBase {
 
 			} else {
 				page_list.request_new_page_no_history(PageId::MainMenu, args);
-				blur();
+				// blur();
 			}
 		}
 
@@ -352,11 +353,9 @@ struct PatchViewPage : PageBase {
 
 			update_load_text(metaparams, ui_LoadMeter2);
 
-			if (dyn_frame_throttle_ctr-- == 0) {
-				dyn_frame_throttle_ctr = DynFrameThrottle;
-				dyn_module_idx = (dyn_module_idx + 1) % dyn_draws.size();
-				dyn_draws[dyn_module_idx].draw();
-			}
+			prepare_dynamic_elements();
+
+			draw_dynamic_elements();
 
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
@@ -373,6 +372,51 @@ struct PatchViewPage : PageBase {
 	}
 
 private:
+	void prepare_dynamic_elements() {
+
+		if (dynamic_elements_prepared)
+			return;
+
+		for (auto &canvas : module_canvases) {
+			if (!canvas)
+				continue;
+
+			auto user_data = lv_obj_get_user_data(canvas);
+			if (!user_data)
+				continue;
+
+			auto module_idx = *(static_cast<uint32_t *>(user_data));
+			if (module_idx >= patch->module_slugs.size())
+				continue;
+
+			auto slug = patch->module_slugs[module_idx];
+
+			auto &dyn = dyn_draws.emplace_back(patch_playloader);
+			dyn.prepare_module(slug, module_idx, canvas, page_settings.view_height_px);
+
+			if (!dyn.is_active()) {
+				dyn_draws.pop_back();
+			}
+		}
+
+		dynamic_elements_prepared = true;
+	}
+
+	void draw_dynamic_elements() {
+		if (dyn_draws.size() == 0)
+			return;
+
+		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
+			dyn_frame_throttle_ctr = 0;
+
+			dyn_module_idx++;
+			if (dyn_module_idx >= dyn_draws.size())
+				dyn_module_idx = 0;
+
+			dyn_draws[dyn_module_idx].draw();
+		}
+	}
+
 	void watch_modules() {
 		params.lights.stop_watching_all();
 		params.text_displays.stop_watching_all();
@@ -734,6 +778,7 @@ private:
 	unsigned dyn_frame_throttle_ctr = 1;
 	unsigned dyn_module_idx = 0;
 	constexpr static unsigned DynFrameThrottle = 2;
+	bool dynamic_elements_prepared = false;
 };
 
 } // namespace MetaModule
