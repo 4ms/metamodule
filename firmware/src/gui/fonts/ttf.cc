@@ -73,13 +73,13 @@ float corrected_ttf_size(float fontSize, std::string_view name) {
 	// CVfunk
 	if (name == "DejaVuSansMono") {
 		if (fontSize == 16)
-			return 18;
+			return 16;
 
 		if (fontSize == 10)
-			return 12;
+			return 10;
 
 		if (fontSize == 14)
-			return 15;
+			return 14;
 	}
 
 	// CountModula
