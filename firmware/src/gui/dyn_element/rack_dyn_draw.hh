@@ -85,7 +85,7 @@ struct RackDynDraw : BaseDynDraw {
 				std::ranges::fill(disp.fullcolor_buffer, 0);
 				// disp.tvg_canvas.reset(tvg::SwCanvas::gen());
 
-				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, px_per_3U);
+				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
 				disp.args.fb = nullptr;
 
 				pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u, 3u=%u)\n",
