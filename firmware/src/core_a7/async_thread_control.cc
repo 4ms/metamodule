@@ -68,10 +68,10 @@ void start_module_threads() {
 	};
 
 	task_runner.init(task_config, [=]() {
-		if (current_core == 0)
-			Debug::Pin2::high();
-		else
-			Debug::Pin1::high();
+		// if (current_core == 0)
+		// 	Debug::Pin2::high();
+		// else
+		// 	Debug::Pin1::high();
 
 		for (auto &task : tasks) {
 			if (task.enabled && task.core_id == current_core) {
@@ -82,10 +82,10 @@ void start_module_threads() {
 			}
 		}
 
-		if (current_core == 0)
-			Debug::Pin2::low();
-		else
-			Debug::Pin1::low();
+		// if (current_core == 0)
+		// 	Debug::Pin2::low();
+		// else
+		// 	Debug::Pin1::low();
 	});
 	task_runner.start();
 }
