@@ -63,8 +63,8 @@ struct RackDynDraw : BaseDynDraw {
 				disp.h = std::round(svgpx_to_pngpx(disp.widget->box.size.y, px_per_3U));
 
 				// Don't let rounding errors make us have an empty buffer
-				disp.w = std::min(disp.w, 1);
-				disp.h = std::min(disp.h, 1);
+				disp.w = std::max(disp.w, 1);
+				disp.h = std::max(disp.h, 1);
 
 				if (disp.h > (lv_coord_t)px_per_3U || disp.w > 1000) {
 					pr_warn(
@@ -79,8 +79,10 @@ struct RackDynDraw : BaseDynDraw {
 				lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
 
 				// Debug object positions with a red border:
-				// lv_obj_set_style_border_width(disp.canvas, 1, 0);
-				// lv_obj_set_style_border_color(disp.canvas, lv_color_make(0xFF, 0, 0), 0);
+				// lv_obj_set_style_outline_width(disp.lv_canvas, 1, 0);
+				// lv_obj_set_style_outline_color(disp.lv_canvas, lv_color_make(0xFF, 0, 0), 0);
+				// lv_obj_set_style_outline_opa(disp.lv_canvas, LV_OPA_50, 0);
+				// lv_obj_set_style_outline_pad(disp.lv_canvas, 1, 0);
 
 				// setup backing buffer for canvas
 				disp.lv_buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(disp.w, disp.h));
