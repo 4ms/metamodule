@@ -104,9 +104,15 @@ void renderStroke(void *uptr,
 		auto [r, g, b, a] = to_tvg_color(paint->innerColor);
 		poly->strokeFill(r, g, b, a);
 
-		poly->strokeWidth(std::max<lv_coord_t>(std::round(to_lv_coord(strokeWidth, context->px_per_3U)), 1));
+		// Scale by ratio of 1 Rack pixel to 1 MM pixel
+		auto scaling = mm_to_px(to_mm(1.), context->px_per_3U);
 
-		poly->scale(mm_to_px(to_mm(1.), context->px_per_3U));
+		auto stroke_width = std::round(to_lv_coord(strokeWidth, context->px_per_3U));
+
+		constexpr float MinStroke = 1.3f;
+		poly->strokeWidth(std::max<lv_coord_t>(stroke_width, MinStroke / scaling));
+
+		poly->scale(scaling);
 
 		context->tvg_canvas->push(poly);
 		context->tvg_canvas->draw();
