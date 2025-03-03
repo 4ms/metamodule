@@ -60,6 +60,22 @@ struct AudioWrapper {
 			jack_client_close(client);
 			return false;
 		}
+
+		const auto ports = jack_get_ports(client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
+		if (ports == NULL) {
+			printf("no phys playback ports\n");
+			return false;
+		}
+
+		for (auto i = 0; i < 2; ++i) {
+			if (jack_connect(client, jack_port_name(out[i]), ports[i])) {
+				printf("cannon connect port\n");
+				return false;
+			}
+		}
+
+		jack_free(ports);
+
 		return true;
 	}
 
