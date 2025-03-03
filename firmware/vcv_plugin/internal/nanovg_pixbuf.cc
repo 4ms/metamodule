@@ -42,6 +42,9 @@ void renderFill(void *uptr,
 
 	auto context = get_drawcontext(uptr);
 
+	// Scale by ratio of 1 Rack pixel to 1 MM pixel
+	auto scaling = mm_to_px(to_mm(1.), context->px_per_3U);
+
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Fill path: #fill %d = count:%d\n", path.nfill, path.count);
 		if (path.count < 3)
@@ -51,7 +54,6 @@ void renderFill(void *uptr,
 
 		poly->moveTo(path.fill[0].x, path.fill[0].y);
 		for (auto pt : std::span{path.fill + 1, (size_t)(path.count - 1)}) {
-			// TODO: do we need to clip to viewport?
 			poly->lineTo(pt.x, pt.y);
 		}
 		poly->close();
@@ -59,9 +61,23 @@ void renderFill(void *uptr,
 		auto [r, g, b, a] = to_tvg_color(paint->innerColor);
 		poly->fill(r, g, b, a);
 
-		poly->scale(mm_to_px(to_mm(1.), context->px_per_3U));
+		// Clip/Scissor
+		if (scissor->extent[0] >= 0 && scissor->extent[1] >= 0) {
+			auto clip_region = tvg::Shape::gen();
+			auto x = scissor->xform[4] - scissor->extent[0];
+			auto y = scissor->xform[5] - scissor->extent[1];
+			auto w = 2 * scissor->extent[0];
+			auto h = 2 * scissor->extent[1];
+			clip_region->appendRect(x, y, w, h);
+			poly->clip(clip_region);
+		}
 
-		context->tvg_canvas->push(poly);
+		// Scene is required for clipping (at least in ThorVG 1.0-pre)
+		auto scene = tvg::Scene::gen();
+		scene->push(poly);
+		scene->scale(scaling);
+
+		context->tvg_canvas->push(scene);
 		context->tvg_canvas->draw();
 		context->tvg_canvas->sync();
 		context->tvg_canvas->remove();
@@ -88,6 +104,9 @@ void renderStroke(void *uptr,
 		return;
 	}
 
+	// Scale by ratio of 1 Rack pixel to 1 MM pixel
+	auto scaling = mm_to_px(to_mm(1.), context->px_per_3U);
+
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Stroke path: #strokes %d = count:%d + closed:%d\n", path.nstroke, path.count, path.closed);
 		if (path.count < 2)
@@ -97,24 +116,34 @@ void renderStroke(void *uptr,
 
 		poly->moveTo(path.stroke[0].x, path.stroke[0].y);
 		for (auto pt : std::span{path.stroke + 1, (size_t)(path.count - 1)}) {
-			// TODO: do we need to clip to viewport?
 			poly->lineTo(pt.x, pt.y);
 		}
 
 		auto [r, g, b, a] = to_tvg_color(paint->innerColor);
 		poly->strokeFill(r, g, b, a);
 
-		// Scale by ratio of 1 Rack pixel to 1 MM pixel
-		auto scaling = mm_to_px(to_mm(1.), context->px_per_3U);
-
 		auto stroke_width = std::round(to_lv_coord(strokeWidth, context->px_per_3U));
 
 		constexpr float MinStroke = 1.3f;
 		poly->strokeWidth(std::max<lv_coord_t>(stroke_width, MinStroke / scaling));
 
-		poly->scale(scaling);
+		// Clip/Scissor
+		if (scissor->extent[0] >= 0 && scissor->extent[1] >= 0) {
+			auto clip_region = tvg::Shape::gen();
+			auto x = scissor->xform[4] - scissor->extent[0];
+			auto y = scissor->xform[5] - scissor->extent[1];
+			auto w = 2 * scissor->extent[0];
+			auto h = 2 * scissor->extent[1];
+			clip_region->appendRect(x, y, w, h);
+			poly->clip(clip_region);
+		}
 
-		context->tvg_canvas->push(poly);
+		// Scene is required for clipping (at least in ThorVG 1.0-pre)
+		auto scene = tvg::Scene::gen();
+		scene->push(poly);
+		scene->scale(scaling);
+
+		context->tvg_canvas->push(scene);
 		context->tvg_canvas->draw();
 		context->tvg_canvas->sync();
 		context->tvg_canvas->remove();
