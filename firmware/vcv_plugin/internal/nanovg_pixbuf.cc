@@ -3,6 +3,7 @@
 #include "lvgl.h"
 #include "nanovg_pixbuf_drawctx.hh"
 #include "nanovg_pixbuf_util.hh"
+#include "thorvg.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -17,6 +18,9 @@
 
 namespace MetaModule::NanoVG
 {
+
+// #define dump_draw printf
+#define dump_draw(...)
 
 void renderFill(void *uptr,
 				NVGpaint *paint,
@@ -38,24 +42,45 @@ void renderFill(void *uptr,
 
 	auto context = get_drawcontext(uptr);
 
-	context->line_dsc.color = to_lv_color(paint->innerColor);
-	context->line_dsc.opa = to_lv_opa(paint->innerColor);
-
-	context->rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
-	context->rect_dsc.bg_color = to_lv_color(paint->innerColor);
+	// Scale by ratio of 1 Rack pixel to 1 MM pixel
+	auto scaling = mm_to_px(to_mm(1.), context->px_per_3U);
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
-		std::vector<lv_point_t> points;
+		dump_draw("Fill path: #fill %d = count:%d\n", path.nfill, path.count);
+		if (path.count < 3)
+			continue;
 
-		std::ranges::transform(std::span{path.fill, (size_t)path.nfill}, std::back_inserter(points), to_lv_point);
+		auto poly = tvg::Shape::gen();
 
-		if (is_poly_concave(points)) {
-			// LVGL lv_canvas_draw_polygon goes into an infinite loop if polygon is concave.
-			// Fall back to drawing polygon outline (unfilled) if it's concave
-			lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
-		} else {
-			lv_canvas_draw_polygon(context->canvas, points.data(), points.size(), &context->rect_dsc);
+		poly->moveTo(path.fill[0].x, path.fill[0].y);
+		for (auto pt : std::span{path.fill + 1, (size_t)(path.count - 1)}) {
+			poly->lineTo(pt.x, pt.y);
 		}
+		poly->close();
+
+		auto [r, g, b, a] = to_tvg_color(paint->innerColor);
+		poly->fill(r, g, b, a);
+
+		// Clip/Scissor
+		if (scissor->extent[0] >= 0 && scissor->extent[1] >= 0) {
+			auto clip_region = tvg::Shape::gen();
+			auto x = scissor->xform[4] - scissor->extent[0];
+			auto y = scissor->xform[5] - scissor->extent[1];
+			auto w = 2 * scissor->extent[0];
+			auto h = 2 * scissor->extent[1];
+			clip_region->appendRect(x, y, w, h);
+			poly->clip(clip_region);
+		}
+
+		// Scene is required for clipping (at least in ThorVG 1.0-pre)
+		auto scene = tvg::Scene::gen();
+		scene->push(poly);
+		scene->scale(scaling);
+
+		context->tvg_canvas->push(scene);
+		context->tvg_canvas->draw();
+		context->tvg_canvas->sync();
+		context->tvg_canvas->remove();
 	}
 }
 
@@ -79,15 +104,49 @@ void renderStroke(void *uptr,
 		return;
 	}
 
-	context->line_dsc.color = to_lv_color(paint->innerColor);
-	context->line_dsc.opa = to_lv_opa(paint->innerColor);
+	// Scale by ratio of 1 Rack pixel to 1 MM pixel
+	auto scaling = mm_to_px(to_mm(1.), context->px_per_3U);
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
-		std::vector<lv_point_t> points;
+		dump_draw("Stroke path: #strokes %d = count:%d + closed:%d\n", path.nstroke, path.count, path.closed);
+		if (path.count < 2)
+			continue;
 
-		std::ranges::transform(std::span{path.stroke, (size_t)path.nstroke}, std::back_inserter(points), to_lv_point);
+		auto poly = tvg::Shape::gen();
 
-		lv_canvas_draw_line(context->canvas, points.data(), points.size(), &context->line_dsc);
+		poly->moveTo(path.stroke[0].x, path.stroke[0].y);
+		for (auto pt : std::span{path.stroke + 1, (size_t)(path.count - 1)}) {
+			poly->lineTo(pt.x, pt.y);
+		}
+
+		auto [r, g, b, a] = to_tvg_color(paint->innerColor);
+		poly->strokeFill(r, g, b, a);
+
+		auto stroke_width = std::round(to_lv_coord(strokeWidth, context->px_per_3U));
+
+		constexpr float MinStroke = 1.3f;
+		poly->strokeWidth(std::max<lv_coord_t>(stroke_width, MinStroke / scaling));
+
+		// Clip/Scissor
+		if (scissor->extent[0] >= 0 && scissor->extent[1] >= 0) {
+			auto clip_region = tvg::Shape::gen();
+			auto x = scissor->xform[4] - scissor->extent[0];
+			auto y = scissor->xform[5] - scissor->extent[1];
+			auto w = 2 * scissor->extent[0];
+			auto h = 2 * scissor->extent[1];
+			clip_region->appendRect(x, y, w, h);
+			poly->clip(clip_region);
+		}
+
+		// Scene is required for clipping (at least in ThorVG 1.0-pre)
+		auto scene = tvg::Scene::gen();
+		scene->push(poly);
+		scene->scale(scaling);
+
+		context->tvg_canvas->push(scene);
+		context->tvg_canvas->draw();
+		context->tvg_canvas->sync();
+		context->tvg_canvas->remove();
 	}
 }
 
@@ -97,15 +156,15 @@ float renderText(
 	auto canvas = context->canvas;
 
 	// Move to position
-	auto lv_x = to_lv_coord(x + fs->xform[4]);
-	auto lv_y = to_lv_coord(y + fs->xform[5]);
+	auto lv_x = to_lv_coord(x, context->px_per_3U);
+	auto lv_y = to_lv_coord(y, context->px_per_3U);
 
-	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName));
+	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName), context->px_per_3U);
 	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
 	if (!font)
 		return 0;
 
-	// Create or find existing label (match on X,Y pos)
+	// Create or find existing label (match on X,Y pos and alignment)
 	lv_obj_t *label{};
 	auto found = std::ranges::find_if(context->labels, [=](TextRenderCacheEntry const &cached) {
 		return cached.x == lv_x && cached.y == lv_y && cached.align == fs->textAlign;
@@ -132,18 +191,20 @@ float renderText(
 		lv_obj_set_pos(label, lv_x, align_lv_y);
 		lv_obj_set_size(label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 		lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
-		lv_obj_set_style_text_opa(label, to_lv_opa(fs->paint->innerColor), LV_PART_MAIN);
+		// lv_obj_set_style_text_opa(label, to_lv_opa(fs->paint->innerColor), LV_PART_MAIN);
+		lv_obj_set_style_text_opa(label, LV_OPA_100, LV_PART_MAIN);
 		lv_obj_set_style_text_align(label, align, LV_PART_MAIN);
 
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
 		auto letter_space = Fonts::corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
 		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
 
+		// Debug positions with red borders around labels
 		// lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
 		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
-		pr_dbg("Creating label at %d,%d align 0x%x (sz %g) ", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		pr_trace("Creating label at %d,%d align 0x%x (sz %g)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
 		context->labels.push_back({(float)lv_x, (float)lv_y, fs->textAlign, label, context->draw_frame_ctr});
 	}
 
@@ -157,18 +218,29 @@ float renderText(
 		text = text_copy.c_str();
 	}
 
+	auto cur_x = lv_obj_get_x(label);
+	auto new_x = cur_x;
 	if (fs->textAlign & NVG_ALIGN_CENTER) {
 		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
-		lv_obj_set_x(label, lv_x - width / 2);
-	}
-	if (fs->textAlign & NVG_ALIGN_RIGHT) {
+		new_x = lv_x - width / 2;
+	} else if (fs->textAlign & NVG_ALIGN_RIGHT) {
 		auto width = text ? lv_txt_get_width(text, strlen(text), font, 0, 0) : 0;
-		lv_obj_set_x(label, lv_x - width);
+		new_x = lv_x - width;
+	}
+	if (new_x != cur_x) {
+		lv_obj_set_x(label, new_x);
 	}
 
-	lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
-	lv_obj_set_style_text_opa(label, LV_OPA_100, LV_PART_MAIN);
-	lv_label_set_text(label, text);
+	auto cur_col = lv_obj_get_style_text_color(label, LV_PART_MAIN);
+	auto new_col = to_lv_text_color(fs->paint->innerColor);
+	if (cur_col.full != new_col.full) {
+		lv_obj_set_style_text_color(label, to_lv_text_color(fs->paint->innerColor), LV_PART_MAIN);
+	}
+
+	auto cur_text = lv_label_get_text(label);
+	if (strcmp(cur_text, text) != 0) {
+		lv_label_set_text(label, text);
+	}
 
 	return 1;
 }
@@ -187,14 +259,16 @@ void renderTriangles(void *uptr,
 
 	for (auto i = 0; i < nverts; i += 6) {
 		// dest rect
-		auto d_tl = to_lv_point(verts[i]);
-		auto d_br = to_lv_point(verts[i + 1]);
+		auto d_tl = to_lv_point(verts[i], context->px_per_3U);
+		auto d_br = to_lv_point(verts[i + 1], context->px_per_3U);
 
 		// source rect:
 		auto tx_width = context->textures[paint->image].w;
 		auto tx_height = context->textures[paint->image].h;
-		auto s_tl = lv_point_t{to_lv_coord(tx_width * verts[i].u), to_lv_coord(tx_height * verts[i].v)};
-		auto s_br = lv_point_t{to_lv_coord(tx_width * verts[i + 1].u), to_lv_coord(tx_height * verts[i + 1].v)};
+		auto s_tl = lv_point_t{to_lv_coord(tx_width * verts[i].u, context->px_per_3U),
+							   to_lv_coord(tx_height * verts[i].v, context->px_per_3U)};
+		auto s_br = lv_point_t{to_lv_coord(tx_width * verts[i + 1].u, context->px_per_3U),
+							   to_lv_coord(tx_height * verts[i + 1].v, context->px_per_3U)};
 
 		(void)d_tl;
 		(void)d_br;
@@ -211,8 +285,10 @@ void renderTriangles(void *uptr,
 
 void renderDelete(void *uptr) {
 	if (uptr) {
-		if (auto context = get_drawcontext(uptr))
+		if (auto context = get_drawcontext(uptr)) {
+			printf("nanovg_pixbuf: renderDelete(): Delete DrawContext %p\n", context);
 			delete context;
+		}
 	}
 }
 
@@ -291,7 +367,8 @@ void renderFlush(void *uptr) {
 
 } // namespace MetaModule::NanoVG
 
-NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
+NVGcontext *
+nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t buffer_width, uint32_t px_per_3U) {
 	NVGparams params;
 	NVGcontext *ctx = nullptr;
 
@@ -312,7 +389,9 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 	params.renderDelete = renderDelete;
 	params.renderText = renderText;
 
-	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas};
+	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas, buffer, buffer_width};
+	dump_draw("Create new DrawContext %p\n", draw_ctx);
+	draw_ctx->px_per_3U = px_per_3U;
 	params.userPtr = draw_ctx;
 
 	params.edgeAntiAlias = 0;
@@ -329,7 +408,7 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 }
 
 void nvgDeletePixelBufferContext(NVGcontext *ctx) {
-	// pr_dbg("nvgDeletePixelBufferContext\n");
+	dump_draw("Delete NVGcontext %p\n", ctx);
 	if (ctx)
 		nvgDeleteInternal(ctx);
 }

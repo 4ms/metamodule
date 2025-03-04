@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "conf/patch_conf.hh"
-#include "gui/dyn_element.hh"
+#include "gui/dyn_element_draw.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -17,7 +17,6 @@
 #include "gui/pages/module_view_roller_helpers.hh"
 #include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/patch_view.hh"
 #include "gui/styles.hh"
 
 namespace MetaModule
@@ -296,7 +295,7 @@ struct ModuleViewPage : PageBase {
 			show_roller();
 		}
 
-		dyn_draw.prepare_module(this_module_id, canvas);
+		dyn_draw.prepare_module(slug, this_module_id, canvas, 240);
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {
@@ -430,8 +429,8 @@ struct ModuleViewPage : PageBase {
 				redraw_display(drawn_el, this_module_id, params.displays.watch_displays);
 			}
 
-			if (dyn_frame_throttle_ctr-- == 0) {
-				dyn_frame_throttle_ctr = DynFrameThrottle;
+			if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
+				dyn_frame_throttle_ctr = 0;
 				dyn_draw.draw();
 			}
 		}
@@ -556,8 +555,6 @@ private:
 	void reset_module_page() {
 		for (auto &b : button)
 			lv_obj_del(b);
-
-		dyn_draw.blur();
 
 		if (canvas)
 			lv_obj_del(canvas);

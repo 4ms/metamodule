@@ -1,8 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
+#include "gui/dyn_element_draw.hh"
 #include "gui/elements/map_ring_animate.hh"
-#include "gui/elements/map_ring_drawer.hh"
-#include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_display.hh"
@@ -17,7 +16,6 @@
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/styles.hh"
-#include "lvgl.h"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 
@@ -100,10 +98,14 @@ struct PatchViewPage : PageBase {
 			is_ready = true;
 			watch_modules();
 			update_map_ring_style();
+			prepare_dynamic_elements();
 
 			if (args.module_id) {
-				if (*args.module_id < module_canvases.size()) {
-					lv_obj_scroll_to_view_recursive(module_canvases[*args.module_id], LV_ANIM_ON);
+				auto canvas = std::ranges::find_if(module_canvases, [module_id = args.module_id](lv_obj_t *canv) {
+					return module_id == *(static_cast<uint32_t *>(lv_obj_get_user_data(canv)));
+				});
+				if (canvas != module_canvases.end()) {
+					lv_obj_scroll_to_view_recursive(*canvas, LV_ANIM_ON);
 				}
 			}
 			return;
@@ -129,6 +131,7 @@ struct PatchViewPage : PageBase {
 		patch_revision = patches.get_view_patch_modification_count();
 
 		redraw_patch();
+		prepare_dynamic_elements();
 	}
 
 	void redraw_patch() {
@@ -226,6 +229,8 @@ struct PatchViewPage : PageBase {
 		} else {
 			lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 		}
+
+		dyn_module_idx = 0;
 	}
 
 	void redraw_map_rings() {
@@ -256,10 +261,14 @@ struct PatchViewPage : PageBase {
 		params.displays.stop_watching_all();
 		params.lights.stop_watching_all();
 		params.param_watcher.stop_watching_all();
+
+		dyn_draws.clear();
+
+		dynamic_elements_prepared = false;
 	}
 
 	void update() override {
-		bool last_is_patch_playing = is_patch_playloaded;
+		bool last_is_patch_playloaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
 
@@ -267,14 +276,14 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(displayed_patch_loc_hash);
 
-		if (is_patch_playloaded != last_is_patch_playing || page_settings.changed) {
+		if (is_patch_playloaded != last_is_patch_playloaded || page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
 			watch_modules();
 		}
 
-		if (is_patch_playloaded != last_is_patch_playing) {
+		if (is_patch_playloaded != last_is_patch_playloaded) {
 			args.view_knobset_id = active_knobset;
 			page_list.set_active_knobset(active_knobset);
 			patch_mod_queue.put(ChangeKnobSet{active_knobset});
@@ -318,7 +327,7 @@ struct PatchViewPage : PageBase {
 
 			} else {
 				page_list.request_new_page_no_history(PageId::MainMenu, args);
-				blur();
+				// blur();
 			}
 		}
 
@@ -344,6 +353,10 @@ struct PatchViewPage : PageBase {
 
 			update_load_text(metaparams, ui_LoadMeter2);
 
+			prepare_dynamic_elements();
+
+			draw_dynamic_elements();
+
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
 				lv_hide(ui_LoadMeter2);
@@ -359,7 +372,53 @@ struct PatchViewPage : PageBase {
 	}
 
 private:
-	std::vector<std::vector<float>> light_vals;
+	void prepare_dynamic_elements() {
+
+		if (dynamic_elements_prepared)
+			return;
+
+		if (!is_patch_playloaded || patch_playloader.is_audio_muted())
+			return;
+
+		for (auto &canvas : module_canvases) {
+			if (!canvas)
+				continue;
+
+			auto user_data = lv_obj_get_user_data(canvas);
+			if (!user_data)
+				continue;
+
+			auto module_idx = *(static_cast<uint32_t *>(user_data));
+			if (module_idx >= patch->module_slugs.size())
+				continue;
+
+			auto slug = patch->module_slugs[module_idx];
+
+			auto &dyn = dyn_draws.emplace_back(patch_playloader);
+			dyn.prepare_module(slug, module_idx, canvas, page_settings.view_height_px);
+
+			if (!dyn.is_active()) {
+				dyn_draws.pop_back();
+			}
+		}
+
+		dynamic_elements_prepared = true;
+	}
+
+	void draw_dynamic_elements() {
+		if (dyn_draws.size() == 0)
+			return;
+
+		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
+			dyn_frame_throttle_ctr = 0;
+
+			dyn_module_idx++;
+			if (dyn_module_idx >= dyn_draws.size())
+				dyn_module_idx = 0;
+
+			dyn_draws[dyn_module_idx].draw();
+		}
+	}
 
 	void watch_modules() {
 		params.lights.stop_watching_all();
@@ -715,6 +774,14 @@ private:
 		PatchViewPage *page;
 		uint32_t selected_module_id;
 	};
+
+	std::vector<std::vector<float>> light_vals;
+
+	std::vector<DynamicElementDraw> dyn_draws;
+	unsigned dyn_frame_throttle_ctr = 1;
+	unsigned dyn_module_idx = 0;
+	constexpr static unsigned DynFrameThrottle = 2;
+	bool dynamic_elements_prepared = false;
 };
 
 } // namespace MetaModule

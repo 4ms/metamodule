@@ -70,21 +70,8 @@ unsigned corrected_ttf_letter_spacing(float fontSize, std::string_view name) {
 }
 
 float corrected_ttf_size(float fontSize, std::string_view name) {
-	// CVfunk
-	if (name == "DejaVuSansMono") {
-		if (fontSize == 16)
-			return 18;
-
-		if (fontSize == 10)
-			return 12;
-
-		if (fontSize == 14)
-			return 15;
-	}
-
 	// CountModula
-	else if (name == "Segment14")
-	{
+	if (name == "Segment14") {
 		return fontSize * 1.3f;
 	}
 
