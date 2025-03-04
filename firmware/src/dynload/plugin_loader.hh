@@ -156,6 +156,7 @@ public:
 
 				so_buffer.clear();
 				json_buffer.clear();
+				mm_json_buffer.clear();
 				files_copied_to_ramdisk.clear();
 
 				std::string plugin_vers_filename;
@@ -186,6 +187,10 @@ public:
 
 					} else if (filename.ends_with("plugin.json")) {
 						json_buffer.assign(buffer.begin(), buffer.end());
+						return buffer.size();
+
+					} else if (filename.ends_with("plugin-mm.json")) {
+						mm_json_buffer.assign(buffer.begin(), buffer.end());
 						return buffer.size();
 
 					} else if (filename.contains("/SDK-")) {
@@ -370,6 +375,7 @@ private:
 	std::span<uint8_t> buffer;
 	std::vector<uint8_t> so_buffer;
 	std::vector<char> json_buffer;
+	std::vector<char> mm_json_buffer;
 	std::vector<std::string> files_copied_to_ramdisk;
 
 	// Dynamically allocated in non-cacheable RAM
