@@ -47,7 +47,6 @@ inline lv_obj_t *draw_element(const FlipSwitch &el, lv_obj_t *canvas, uint32_t m
 }
 
 inline lv_obj_t *draw_element(const Knob &el, lv_obj_t *canvas, uint32_t module_height) {
-	printf("Draw Knob %s\n", el.image.data());
 	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	if (obj)
 		return obj;
