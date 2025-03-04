@@ -63,8 +63,8 @@ struct RackDynDraw : BaseDynDraw {
 				disp.h = std::round(svgpx_to_pngpx(disp.widget->box.size.y, px_per_3U));
 
 				// Don't let rounding errors make us have an empty buffer
-				disp.w = std::max(disp.w, 1);
-				disp.h = std::max(disp.h, 1);
+				disp.w = std::max<lv_coord_t>(disp.w, 1);
+				disp.h = std::max<lv_coord_t>(disp.h, 1);
 
 				if (disp.h > (lv_coord_t)px_per_3U || disp.w > 1000) {
 					pr_warn(
