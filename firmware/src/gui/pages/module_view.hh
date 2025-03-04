@@ -302,7 +302,7 @@ struct ModuleViewPage : PageBase {
 	void watch_element(DrawnElement const &drawn_element) {
 		auto gui_el = drawn_element.gui_element;
 		std::visit(overloaded{[&](DynamicTextDisplay const &el) {
-								  params.displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
+								  params.text_displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
 							  },
 							  [](auto const &el) {
 							  }},
@@ -422,7 +422,7 @@ struct ModuleViewPage : PageBase {
 					update_light(drawn_el, light_vals);
 				}
 
-				redraw_display(drawn_el, this_module_id, params.displays.watch_displays);
+				redraw_text_display(drawn_el, this_module_id, params.text_displays.watch_displays);
 			}
 
 			if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
@@ -503,7 +503,7 @@ struct ModuleViewPage : PageBase {
 
 	void blur() final {
 		dyn_draw.blur();
-		params.displays.stop_watching_all();
+		params.text_displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}

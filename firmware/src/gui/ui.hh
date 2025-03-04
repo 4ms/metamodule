@@ -94,7 +94,7 @@ public:
 	}
 
 	TextDisplayWatcher &displays() {
-		return params.displays;
+		return params.text_displays;
 	}
 
 	void autoload_plugins() {
