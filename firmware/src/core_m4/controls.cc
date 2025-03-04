@@ -21,8 +21,6 @@ void Controls::update_debouncers() {
 	gate_in_2.update();
 }
 
-unsigned num_pot_updates = 0;
-
 void Controls::update_params() {
 	cur_params->gate_ins[0] = gate_in_1.is_high();
 	cur_params->gate_ins[1] = gate_in_2.is_high();
@@ -37,10 +35,11 @@ void Controls::update_params() {
 	}
 
 	num_pot_updates++;
-	if (num_pot_updates > _knobs[0].get_num_updates()) {
+	if (num_pot_updates >= _knobs[0].get_num_updates()) {
 		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
 			auto val = _knobs[i].target_val;
 			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
+			_knobs[i].cur_val = _knobs[i].target_val;
 		}
 	} else {
 		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
