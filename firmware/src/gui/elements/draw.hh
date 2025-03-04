@@ -17,8 +17,15 @@ inline lv_obj_t *draw_element(const BaseElement &, lv_obj_t *, uint32_t) {
 	return nullptr;
 }
 
+inline lv_obj_t *draw_element(const JackElement &el, lv_obj_t *canvas, uint32_t module_height) {
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
+	return obj;
+}
+
 inline lv_obj_t *draw_element(const ImageElement &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
+	// Pure images always go to the background
+	lv_obj_move_background(obj);
 	return obj;
 }
 
@@ -40,6 +47,7 @@ inline lv_obj_t *draw_element(const FlipSwitch &el, lv_obj_t *canvas, uint32_t m
 }
 
 inline lv_obj_t *draw_element(const Knob &el, lv_obj_t *canvas, uint32_t module_height) {
+	printf("Draw Knob %s\n", el.image.data());
 	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	if (obj)
 		return obj;
