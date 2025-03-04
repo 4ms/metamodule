@@ -377,6 +377,9 @@ private:
 		if (dynamic_elements_prepared)
 			return;
 
+		if (!is_patch_playloaded || patch_playloader.is_audio_muted())
+			return;
+
 		for (auto &canvas : module_canvases) {
 			if (!canvas)
 				continue;

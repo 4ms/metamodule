@@ -17,7 +17,6 @@
 #include "gui/pages/module_view_roller_helpers.hh"
 #include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/patch_view.hh"
 #include "gui/styles.hh"
 
 namespace MetaModule
