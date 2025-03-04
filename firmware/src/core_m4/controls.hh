@@ -86,6 +86,8 @@ private:
 	bool _first_param = true;
 
 	uint32_t sample_rate = 48000;
+
+	unsigned num_pot_updates = 0;
 };
 
 } // namespace MetaModule

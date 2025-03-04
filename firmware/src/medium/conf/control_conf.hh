@@ -1,13 +1,10 @@
 #pragma once
-#include "conf/panel_conf.hh"
-#include "conf/pin_conf.hh"
 #include "drivers/adc_builtin_conf.hh"
 #include "drivers/adc_periph_nums.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change_conf.hh"
-#include "drivers/stm32xx.h"
-#include "drivers/timekeeper.hh"
+#include <array>
 
 namespace MetaModule
 {
