@@ -126,7 +126,7 @@ issue is due to one of these limitations or is an actual bug.
   the plugin normally and see if you get the same error.
 
 
-  I would not be surprised if there are other limiations, so please report it
+  I would not be surprised if there are other limitations, so please report it
   (via email, the forum, or open a github issue) if you find something.
 
 
