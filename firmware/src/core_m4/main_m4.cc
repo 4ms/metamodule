@@ -1,16 +1,12 @@
 #include "conf/hsem_conf.hh"
 #include "controls.hh"
 #include "core_intercom/shared_memory.hh"
-#include "debug.hh"
 #include "drivers/hsem.hh"
-#include "drivers/ipcc.hh"
-#include "drivers/rcc.hh"
 #include "drivers/system_clocks.hh"
 #include "fs/fatfs/sd_host.hh"
 #include "fs/fs_messages.hh"
 #include "fs/module_fs_message_handler.hh"
 #include "hsem_handler.hh"
-#include "patch_file/patch_storage.hh"
 #include "usb/usb_manager.hh"
 
 #include <wifi_interface.hh>
