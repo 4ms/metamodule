@@ -1,7 +1,7 @@
 #pragma once
 #include "app/ModuleWidget.hpp"
 #include "gui/dyn_element/base_dyn_draw.hh"
-// #include "gui/dyn_element/native_dyn_draw.hh"
+#include "gui/dyn_element/native_dyn_draw.hh"
 #include "gui/dyn_element/rack_dyn_draw.hh"
 #include "patch_play/patch_playloader.hh"
 #include <memory>
@@ -28,8 +28,7 @@ public:
 
 		else if ([[maybe_unused]] auto native_module = patch_playloader.get_plugin_module<CoreProcessor>(module_id))
 		{
-			//TODO
-			// drawer = std::make_unique<DynDraw>(native_module, slug);
+			drawer = std::make_unique<DynDraw>(native_module, slug);
 		}
 
 		if (drawer) {
