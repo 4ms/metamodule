@@ -42,7 +42,12 @@ struct tvgColor {
 };
 
 constexpr tvgColor to_tvg_color(NVGcolor color) {
-	return tvgColor(color.r * 255, color.g * 255, color.b * 255, to_lv_opa(color));
+	tvgColor c;
+	c.r = color.r * 255;
+	c.g = color.g * 255;
+	c.b = color.b * 255;
+	c.a = to_lv_opa(color);
+	return c;
 }
 
 } // namespace MetaModule::NanoVG
