@@ -171,7 +171,9 @@ else()
 		)
 
 # see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 target_compile_options(simulator PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-pmf-conversions>)
+endif()
 
 endif()
 
