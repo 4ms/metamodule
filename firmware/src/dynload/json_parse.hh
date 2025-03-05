@@ -1,47 +1,81 @@
 #pragma once
+#include "ryml.hpp"
+#include "ryml_init.hh"
+#include "ryml_std.hpp"
+#include <algorithm>
 #include <span>
 #include <string>
 
 namespace MetaModule::Plugin
 {
 
-struct Manifest {
-	std::string slug;
-	std::string name;
+struct Metadata {
+	// The name displayed on the screen to users
+	std::string display_name;
+
+	// The slug used when saving a patch, and to find modules in this plugin when loading patches.
+	std::string brand_slug;
+
+	// When loading a patch, consider use of these names as equivalent to using the brand_slug
+	std::vector<std::string> brand_aliases;
 };
 
-// TODO: use ryml to actually parse the json
-// This implementation would fail if there are escaped quotes,
-// or if there was a value that was exactly "slug" or "name"
-// that preceded the first key "slug" or "name"
-// and probably fail in other ways too
-inline Manifest parse_json(std::span<char> file_data) {
-	Manifest manifest{};
+inline bool parse_json(std::span<char> file_data, Metadata *metadata) {
+	RymlInit::init_once();
 
-	//"slug"*"[^"*]"
+	// ryml has issues with tabs in json sometimes:
+	std::ranges::replace(file_data, '\t', ' ');
 
-	auto data = std::string_view{file_data.data(), file_data.size()};
+	ryml::Tree tree = ryml::parse_in_place(ryml::substr(file_data.data(), file_data.size()));
 
-	auto value_of_first_matching_key = [&data](std::string_view key) {
-		if (auto key_start = data.find(key); key_start != std::string_view::npos) {
+	if (tree.num_children(0) == 0)
+		return false;
 
-			auto key_end = key_start + key.length();
+	ryml::ConstNodeRef root = tree.rootref();
 
-			if (auto val_start = data.find("\"", key_end); val_start != std::string_view::npos) {
-				val_start++; //skip the "
+	if (root.has_child("slug")) {
+		root["slug"] >> metadata->brand_slug;
+	}
 
-				if (auto val_end = data.find("\"", val_start); val_end != std::string_view::npos) {
-					return std::string{data.substr(val_start, val_end - val_start)};
-				}
-			}
-		}
-		return std::string{};
-	};
+	if (root.has_child("name")) {
+		root["name"] >> metadata->display_name;
+	}
 
-	manifest.slug = value_of_first_matching_key("\"slug\"");
-	manifest.name = value_of_first_matching_key("\"name\"");
+	// `brand` overrides `name`: https://vcvrack.com/manual/Manifest#brand
+	if (root.has_child("brand")) {
+		root["brand"] >> metadata->display_name;
+	}
 
-	return manifest;
+	return true;
+}
+
+inline bool parse_mm_json(std::span<char> file_data, Metadata *metadata) {
+	RymlInit::init_once();
+
+	// ryml has issues with tabs in json sometimes:
+	std::ranges::replace(file_data, '\t', ' ');
+
+	ryml::Tree tree = ryml::parse_in_place(ryml::substr(file_data.data(), file_data.size()));
+
+	if (tree.num_children(0) == 0)
+		return false;
+
+	ryml::ConstNodeRef root = tree.rootref();
+
+	if (root.has_child("MetaModuleBrandSlug")) {
+		root["MetaModuleBrandSlug"] >> metadata->brand_slug;
+	}
+
+	// `MetaModuleBrandName` overrides plugin.json's `brand` and `name`
+	if (root.has_child("MetaModuleBrandName")) {
+		root["MetaModuleBrandName"] >> metadata->display_name;
+	}
+
+	if (root.has_child("MetaModuleBrandAliases")) {
+		root["MetaModuleBrandAliases"] >> metadata->brand_aliases;
+	}
+
+	return true;
 }
 
 } // namespace MetaModule::Plugin

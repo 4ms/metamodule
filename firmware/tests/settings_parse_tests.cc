@@ -6,7 +6,7 @@
 
 TEST_CASE("Parse settings file") {
 
-	// clang format-off
+	// clang-format off
 	std::string yaml = R"(Settings:
   patch_view:
     map_ring_flash_active: true
@@ -57,7 +57,7 @@ TEST_CASE("Parse settings file") {
     exclude_buttons: 0
 
 )";
-	// clang format-on
+	// clang-format on
 
 	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
