@@ -356,7 +356,17 @@ public:
 		if (note_num < midi_note_knob_maps.size()) {
 			for (auto &mm : midi_note_knob_maps[note_num]) {
 				if (mm.module_id < num_modules) {
-					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val));
+					if (mm.curve_type == MappedKnob::CurveType::Toggle) {
+						// Latching: toggle
+						if (mm.get_mapped_val(val) > 0.5f) {
+							auto cur_val = modules[mm.module_id]->get_param(mm.param_id);
+							modules[mm.module_id]->set_param(mm.param_id, 1.f - cur_val);
+						}
+
+					} else {
+						// Momentary (follow)
+						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val));
+					}
 				}
 			}
 		}
