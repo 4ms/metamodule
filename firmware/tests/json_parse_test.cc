@@ -1,7 +1,7 @@
 #include "doctest.h"
 #include "src/dynload/json_parse.hh"
 
-TEST_CASE("Check hack parser") {
+TEST_CASE("Brand overrides name") {
 
 	std::string filedata = R"({
   "slug": "ThisSlug",
@@ -23,19 +23,20 @@ TEST_CASE("Check hack parser") {
 )";
 
 	auto file_data = std::span<char>{filedata.data(), filedata.length()};
-	auto json = MetaModule::Plugin::parse_json(file_data);
-	CHECK(json.slug == "ThisSlug");
-	CHECK(json.name == "PluginName");
+	MetaModule::Plugin::Metadata metadata;
+	CHECK(MetaModule::Plugin::parse_json(file_data, &metadata));
+	CHECK(metadata.brand_slug == "ThisSlug");
+	// brand overrides name
+	CHECK(metadata.display_name == "4msCompany");
 }
 
-TEST_CASE("Check spaces, tabs") {
+TEST_CASE("No brand, use name") {
 
 	std::string filedata = R"({
-  	"name":   "PluginName" ,
-  "slug"  : 		 "ThisSlug",
+  "name":   "PluginName" ,
+  "slug"  :   "ThisSlug",
   "version": "1.0.0",
   "license": "GPL-3.0-or-later",
-  "brand": "4msCompany",
   "author": "Dan Green",
   "modules": [
     {
@@ -50,7 +51,8 @@ TEST_CASE("Check spaces, tabs") {
 )";
 
 	auto file_data = std::span<char>{filedata.data(), filedata.length()};
-	auto json = MetaModule::Plugin::parse_json(file_data);
-	CHECK(json.slug == "ThisSlug");
-	CHECK(json.name == "PluginName");
+	MetaModule::Plugin::Metadata metadata;
+	CHECK(MetaModule::Plugin::parse_json(file_data, &metadata));
+	CHECK(metadata.brand_slug == "ThisSlug");
+	CHECK(metadata.display_name == "PluginName");
 }

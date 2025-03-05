@@ -156,6 +156,7 @@ public:
 
 				so_buffer.clear();
 				json_buffer.clear();
+				mm_json_buffer.clear();
 				files_copied_to_ramdisk.clear();
 
 				std::string plugin_vers_filename;
@@ -186,6 +187,10 @@ public:
 
 					} else if (filename.ends_with("plugin.json")) {
 						json_buffer.assign(buffer.begin(), buffer.end());
+						return buffer.size();
+
+					} else if (filename.ends_with("plugin-mm.json")) {
+						mm_json_buffer.assign(buffer.begin(), buffer.end());
 						return buffer.size();
 
 					} else if (filename.contains("/SDK-")) {
@@ -240,19 +245,22 @@ public:
 				auto &plugin_file = plugin_files[file_idx];
 				auto &plugin = loaded_plugins.emplace_back();
 				plugin.fileinfo = plugin_file;
-				// name/name
+
 				pr_info("Put plugin in loaded list: %s\n", plugin.fileinfo.plugin_name.c_str());
-				auto plugin_json = Plugin::parse_json(json_buffer);
-				plugin.rack_plugin.slug =
-					plugin_json.slug.length() ? plugin_json.slug : std::string{plugin_file.plugin_name};
-				plugin.rack_plugin.name =
-					plugin_json.name.length() ? plugin_json.name : std::string{plugin_file.plugin_name};
+
+				// set slug and display name
+				auto metadata = get_plugin_metadata();
+				std::string fallback_name = plugin_file.plugin_name;
+				plugin.rack_plugin.slug = metadata.brand_slug.length() ? metadata.brand_slug : fallback_name;
+				plugin.rack_plugin.name = metadata.display_name.length() ? metadata.display_name : fallback_name;
 
 				plugin.loaded_files = std::move(files_copied_to_ramdisk);
 
-				if (load_plugin(plugin))
+				if (load_plugin(plugin)) {
+					for (auto const &alias : metadata.brand_aliases)
+						ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
 					status.state = State::Success;
-				else {
+				} else {
 					status.state = State::Error;
 					// Cleanup files we copied to the ramdisk
 					for (auto const &file : plugin.loaded_files) {
@@ -278,6 +286,29 @@ public:
 		}
 
 		return status;
+	}
+
+	Plugin::Metadata get_plugin_metadata() {
+		Plugin::Metadata metadata;
+
+		if (json_buffer.size()) {
+			Plugin::parse_json(json_buffer, &metadata);
+		}
+
+		if (mm_json_buffer.size()) {
+			Plugin::parse_mm_json(mm_json_buffer, &metadata);
+		}
+
+		// Report warnings/errors:
+		if (!metadata.brand_slug.length()) {
+			pr_warn("Warning: plugin slug not found in plugin.json or plugin-mm.json\n");
+		}
+
+		if (!metadata.display_name.length()) {
+			pr_warn("Warning: plugin display name not found in plugin.json or plugin-mm.json\n");
+		}
+
+		return metadata;
 	}
 
 	bool is_idle() {
@@ -370,6 +401,7 @@ private:
 	std::span<uint8_t> buffer;
 	std::vector<uint8_t> so_buffer;
 	std::vector<char> json_buffer;
+	std::vector<char> mm_json_buffer;
 	std::vector<std::string> files_copied_to_ramdisk;
 
 	// Dynamically allocated in non-cacheable RAM
