@@ -74,7 +74,7 @@ public:
 				static uint8_t last_note = 0;
 
 				if (random_midi_ctr % 24000 == 0) {
-					last_note = std::rand() & 0x3F + 0x20;
+					last_note = (std::rand() & 0x3F) + 0x20;
 					MidiRouter::push_incoming_message({0x90, last_note, (uint8_t)std::rand()});
 				} else if (random_midi_ctr % 24000 == 12000) {
 					MidiRouter::push_incoming_message({0x80, last_note, 0x00});

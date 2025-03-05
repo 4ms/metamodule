@@ -7,6 +7,10 @@ namespace MetaModule
 
 struct AsyncThread::Internal {
 	std::optional<uint32_t> id = 0;
+
+	Internal(std::optional<uint32_t> id)
+		: id{id} {
+	}
 };
 
 AsyncThread::AsyncThread(CoreProcessor *module)

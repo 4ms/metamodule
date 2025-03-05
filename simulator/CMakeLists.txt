@@ -169,6 +169,10 @@ else()
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
+
+# see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+target_compile_options(simulator PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-pmf-conversions>)
+
 endif()
 
 target_include_directories(
