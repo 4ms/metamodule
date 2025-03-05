@@ -13,7 +13,6 @@
 #include "util/version_tools.hh"
 #include <algorithm>
 #include <cstdint>
-#include <deque>
 #include <string>
 
 extern rack::plugin::Plugin *pluginInstance;
@@ -259,8 +258,10 @@ public:
 				plugin.loaded_files = std::move(files_copied_to_ramdisk);
 
 				if (load_plugin(plugin)) {
+					for (auto const &alias : metadata.brand_aliases)
+						ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
 					status.state = State::Success;
-				else {
+				} else {
 					status.state = State::InvalidPlugin;
 					// Cleanup files we copied to the ramdisk
 					for (auto const &file : plugin.loaded_files) {
