@@ -25,7 +25,8 @@ inline lv_obj_t *draw_element(const JackElement &el, lv_obj_t *canvas, uint32_t 
 inline lv_obj_t *draw_element(const ImageElement &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	// Pure images always go to the background
-	lv_obj_move_background(obj);
+	if (obj)
+		lv_obj_move_background(obj);
 	return obj;
 }
 
