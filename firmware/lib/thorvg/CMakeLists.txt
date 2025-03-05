@@ -57,3 +57,7 @@ target_sources(ThorVG PRIVATE
 target_compile_options(ThorVG PRIVATE 
 	-Wno-unknown-pragmas
 )
+
+target_compile_definitions(ThorVG PRIVATE 
+	TVG_STATIC=1
+)
