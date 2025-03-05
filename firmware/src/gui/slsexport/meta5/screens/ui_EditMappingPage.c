@@ -479,6 +479,10 @@ lv_obj_set_align( ui_ModuleMapToggleSwitchCont, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_ModuleMapToggleSwitchCont,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_ModuleMapToggleSwitchCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 lv_obj_clear_flag( ui_ModuleMapToggleSwitchCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_pad_left(ui_ModuleMapToggleSwitchCont, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_ModuleMapToggleSwitchCont, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_ModuleMapToggleSwitchCont, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_ModuleMapToggleSwitchCont, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_ModuleMapToggleSwitchCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_ModuleMapToggleSwitchCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -486,7 +490,7 @@ ui_ModuleMapToggleSwitchLabel = lv_label_create(ui_ModuleMapToggleSwitchCont);
 lv_obj_set_width( ui_ModuleMapToggleSwitchLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_ModuleMapToggleSwitchLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_ModuleMapToggleSwitchLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_ModuleMapToggleSwitchLabel,"Toggle the param value");
+lv_label_set_text(ui_ModuleMapToggleSwitchLabel,"Toggle param value (Min/Max)");
 lv_obj_set_style_text_font(ui_ModuleMapToggleSwitchLabel, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_ModuleMapToggleSwitch = lv_switch_create(ui_ModuleMapToggleSwitchCont);

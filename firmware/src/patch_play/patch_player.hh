@@ -343,31 +343,43 @@ public:
 		// Update knobs connected to theis CC
 		if (ccnum < midi_cc_knob_maps.size()) {
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
-				if (mm.module_id < num_modules)
+				if (mm.module_id < num_modules) {
 					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
+					pr_dbg("CC %d => %f\n", ccnum, mm.get_mapped_val(volts / 10.f));
+				}
 			}
 		}
 	}
 
-	void set_midi_gate(unsigned note_num, float val) {
+	void set_midi_gate(unsigned note_num, float volts) {
 		if (note_num < midi_gate_conns.size())
-			set_all_connected_jacks(midi_gate_conns[note_num], val);
+			set_all_connected_jacks(midi_gate_conns[note_num], volts);
 
-		if (note_num < midi_note_knob_maps.size()) {
-			for (auto &mm : midi_note_knob_maps[note_num]) {
-				if (mm.module_id < num_modules) {
-					if (mm.curve_type == MappedKnob::CurveType::Toggle) {
-						// Latching: toggle
-						if (mm.get_mapped_val(val) > 0.5f) {
-							auto cur_val = modules[mm.module_id]->get_param(mm.param_id);
-							modules[mm.module_id]->set_param(mm.param_id, 1.f - cur_val);
-						}
+		if (note_num >= midi_note_knob_maps.size())
+			return;
 
+		for (auto &mm : midi_note_knob_maps[note_num]) {
+			if (mm.module_id >= num_modules)
+				return;
+
+			auto normal_val = volts / 10.f;
+			if (mm.curve_type == MappedKnob::CurveType::Toggle) {
+				// Latching: toggle
+				if (mm.get_mapped_val(normal_val) > 0.5f) {
+					auto cur_val = modules[mm.module_id]->get_param(mm.param_id);
+
+					// if param is currently closer to min, then set it to max (and vice-versa)
+					if (std::abs(cur_val - mm.min) < std::abs(cur_val - mm.max)) {
+						modules[mm.module_id]->set_param(mm.param_id, mm.max);
 					} else {
-						// Momentary (follow)
-						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val));
+						modules[mm.module_id]->set_param(mm.param_id, mm.min);
 					}
 				}
+
+			} else {
+				// Momentary (follow)
+				modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(normal_val));
+				pr_dbg("Gatenote %d => %f\n", note_num, mm.get_mapped_val(normal_val));
 			}
 		}
 	}
