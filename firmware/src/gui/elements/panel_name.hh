@@ -27,7 +27,7 @@ std::string get_panel_name(const ParamElement &, uint16_t panel_id) {
 		name = "CC" + std::to_string(mk.cc_num());
 
 	else if (mk.is_midi_notegate())
-		name = "N:" + MidiMessage::note_name(mk.notegate_num());
+		name = MidiMessage::note_name(mk.notegate_num());
 
 	return name;
 }
