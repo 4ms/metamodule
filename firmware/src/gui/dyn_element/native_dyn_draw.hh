@@ -68,7 +68,7 @@ struct DynDraw : BaseDynDraw {
 		for (auto &disp : displays) {
 			Debug::Pin2::high();
 
-			if (!module->get_canvas_pixels(disp.id))
+			if (!module->draw_graphic_display(disp.id))
 				continue; //no updated needed
 
 			if (copy_buffer(disp.lv_buffer, disp.fullcolor_buffer))
@@ -87,7 +87,7 @@ struct DynDraw : BaseDynDraw {
 			disp.fullcolor_buffer.clear();
 			disp.lv_buffer.clear();
 
-			if (disp.lv_canvas)
+			if (disp.lv_canvas && lv_obj_is_valid(disp.lv_canvas))
 				lv_obj_del(disp.lv_canvas);
 		}
 	}
