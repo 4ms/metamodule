@@ -1,12 +1,10 @@
 #pragma once
-#include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/pages/base.hh"
-#include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
-#include "lvgl.h"
+#include "midi/midi_message.hh"
+#include "params_state.hh"
+#include "patch_play/patch_mod_queue.hh"
 
 namespace MetaModule
 {
@@ -36,7 +34,7 @@ struct AddMapPopUp {
 		lv_obj_scroll_to_y(ui_AddMapPopUp, 0, LV_ANIM_OFF);
 
 		if (knobset_id == PatchData::MIDIKnobSet) {
-			lv_label_set_text(ui_AddMappingTitle, "Add a map: Send MIDI CC");
+			lv_label_set_text(ui_AddMappingTitle, "Add a map: Send MIDI Note or CC");
 		} else
 			lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob");
 		lv_label_set_text(ui_MapDetected, "");
@@ -70,6 +68,7 @@ struct AddMapPopUp {
 			auto last_selected_knob = selected_knob;
 
 			if (set_id == PatchData::MIDIKnobSet) {
+				// Detect MIDI CC
 				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
 					if (cc.did_change()) {
 						lv_label_set_text_fmt(ui_MapDetected, "MIDI CC: %d", ccnum);
@@ -77,6 +76,15 @@ struct AddMapPopUp {
 					}
 					ccnum++;
 				}
+
+				// Detect MIDI Note On/Off
+				auto &note = params.last_midi_note;
+				if (note.did_change()) {
+					lv_label_set_text_fmt(
+						ui_MapDetected, "MIDI Note (gate): %s", MidiMessage::note_name(note.val).c_str());
+					selected_knob = MidiGateNote0 + note.val;
+				}
+
 			} else {
 				for (unsigned i = 0; auto &knob : params.knobs) {
 					if (knob.did_change()) {
@@ -126,7 +134,7 @@ struct AddMapPopUp {
 					// TODO: just have AddMapping type (not AddMidiMap) and use set_id to indicate MidiMap?
 					page->patch_mod_queue.put(AddMapping{.map = map, .set_id = page->set_id});
 
-				} else if (map.is_midi_cc()) {
+				} else if (map.is_midi()) {
 					page->patch_mod_queue.put(AddMidiMap{.map = map});
 				}
 			}

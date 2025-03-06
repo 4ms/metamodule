@@ -2,8 +2,6 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
-#include "lvgl.h"
-#include "metaparams.hh"
 #include "params_state.hh"
 #include "patch-serial/patch/midi_def.hh"
 #include <functional>

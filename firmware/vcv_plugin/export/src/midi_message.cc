@@ -16,17 +16,9 @@ std::string toPrettyMultilineString(std::span<uint8_t, 3> bytes) {
 		return channel;
 	};
 
-	auto note = [b = bytes[1]] {
-		constexpr std::array<std::string_view, 12> nts = {
-			"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"};
-		// int oct = int(b) / 12 - 6; // This makes it consistant with a MIDI loop (Rack on computer->BSP->CV outputs -> CV_MIDI module
-		int oct = int(b) / 12 - 2; // This makes it consistant with MetaModule MIDI
-		return std::string(nts[b % 12]) + std::to_string(oct);
-	};
-
 	if (msg.is_noteon()) {
 		s = "Note On ";
-		s += note();
+		s += MidiMessage::note_name(bytes[1]);
 		s += "\nV:" + std::to_string(bytes[2]);
 		s += " " + channel();
 	}
@@ -34,14 +26,14 @@ std::string toPrettyMultilineString(std::span<uint8_t, 3> bytes) {
 	else if (msg.is_noteoff())
 	{
 		s = "Note Off ";
-		s += note();
+		s += MidiMessage::note_name(bytes[1]);
 		s += "\n" + channel();
 	}
 
 	else if (msg.is_command<MidiCommand::PolyKeyPressure>())
 	{
 		s = "Aft Note #";
-		s += std::to_string(bytes[1]);
+		s += MidiMessage::note_name(bytes[1]);
 		s += "\nV:" + std::to_string(bytes[2]);
 		s += " " + channel();
 	}
