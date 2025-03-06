@@ -345,7 +345,6 @@ public:
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules) {
 					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
-					pr_dbg("CC %d => %f\n", ccnum, mm.get_mapped_val(volts / 10.f));
 				}
 			}
 		}
@@ -379,7 +378,6 @@ public:
 			} else {
 				// Momentary (follow)
 				modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(normal_val));
-				pr_dbg("Gatenote %d => %f\n", note_num, mm.get_mapped_val(normal_val));
 			}
 		}
 	}
