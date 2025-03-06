@@ -58,6 +58,6 @@ target_compile_options(ThorVG PRIVATE
 	-Wno-unknown-pragmas
 )
 
-target_compile_definitions(ThorVG PRIVATE 
+target_compile_definitions(ThorVG PUBLIC 
 	TVG_STATIC=1
 )
