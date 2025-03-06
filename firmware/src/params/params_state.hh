@@ -123,7 +123,7 @@ struct ParamsMidiState : ParamsState {
 			cc = 0;
 
 		for (auto &nt : midi_notes)
-			nt = 0;
+			nt = false;
 	}
 
 	std::optional<float> panel_knob_new_value(uint16_t mapped_panel_id) {
