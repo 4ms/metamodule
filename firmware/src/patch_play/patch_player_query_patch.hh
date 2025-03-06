@@ -42,13 +42,12 @@ struct PatchQuery {
 
 			// Skip module 0 (Hub)
 			if (module_id > 0 && modules[module_id]) {
-				auto num_params = ElementCount::count(ModuleFactory::getModuleInfo(slug).elements).num_params;
 
-				params.reserve(params.size() + num_params);
-
-				for (auto param_id : std::views::iota(0u, num_params)) {
-					auto val = modules[module_id]->get_param(param_id);
-					params.push_back({uint16_t(module_id), uint16_t(param_id), val});
+				for (auto indices : ModuleFactory::getModuleInfo(slug).indices) {
+					if (indices.param_idx != indices.NoElementMarker) {
+						auto val = modules[module_id]->get_param(indices.param_idx);
+						params.push_back({uint16_t(module_id), uint16_t(indices.param_idx), val});
+					}
 				}
 			}
 			module_id++;
