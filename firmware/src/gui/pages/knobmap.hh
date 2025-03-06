@@ -130,6 +130,7 @@ struct KnobMapPage : PageBase {
 		params.param_watcher.stop_watching_all();
 		params.param_watcher.start_watching_param(map.module_id, map.param_id);
 		pr_dbg("Start watching m:%d p:%d\n", map.module_id, map.param_id);
+
 		float knob_val = static_param ? map.unmap_val(static_param->value) : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
 
@@ -154,9 +155,6 @@ struct KnobMapPage : PageBase {
 		update_active_status();
 
 		lv_group_set_editing(group, false);
-
-		// add_map_popup.prepare_focus(group, ui_EditMappingPage);
-		// add_map_popup.hide();
 	}
 
 	void update() override {
@@ -176,17 +174,20 @@ struct KnobMapPage : PageBase {
 		update_active_status();
 
 		if (is_actively_playing) {
-			auto is_tracking = patch_playloader.is_param_tracking(map.module_id, map.param_id);
+			auto is_tracking = map.is_midi() || patch_playloader.is_param_tracking(map.module_id, map.param_id);
 
 			if (is_tracking) {
 				lv_hide(indicator);
 				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
 			} else {
+				lv_show(indicator);
 				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
 
-				auto phys_val = params.knobs[map.panel_knob_id].val;
-				auto mapped_phys_val = map.get_mapped_val(phys_val);
-				lv_obj_set_style_transform_angle(indicator, mapped_phys_val * 2500.f - 1250.f, LV_PART_MAIN);
+				if (map.panel_knob_id < params.knobs.size()) {
+					auto phys_val = params.knobs[map.panel_knob_id].val;
+					auto mapped_phys_val = map.get_mapped_val(phys_val);
+					lv_obj_set_style_transform_angle(indicator, mapped_phys_val * 2500.f - 1250.f, LV_PART_MAIN);
+				}
 			}
 
 			auto watched_params = params.param_watcher.active_watched_params();
@@ -204,13 +205,13 @@ struct KnobMapPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 			prepare_focus();
 		}
-		// add_map_popup.update(params);
 	}
 
 	void update_active_status() {
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
-		if (is_patch_playing && args.view_knobset_id.value_or(999) == page_list.get_active_knobset()) {
+		auto is_active_knobset = map.is_midi() || args.view_knobset_id.value_or(999) == page_list.get_active_knobset();
+		if (is_patch_playing && is_active_knobset) {
 			if (!is_actively_playing) {
 				lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_100, LV_PART_KNOB);
 			}
