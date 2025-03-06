@@ -719,6 +719,9 @@ private:
 		if (knobset_id == PatchData::MIDIKnobSet) {
 			for (auto &cc : page->params.midi_ccs)
 				cc.changed = false;
+
+			for (auto &nt : page->params.midi_notes)
+				nt.changed = false;
 		}
 
 		auto module_id = page->drawn_element->gui_element.module_idx;

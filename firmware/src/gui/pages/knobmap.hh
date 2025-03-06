@@ -116,8 +116,12 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
 		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
 		lv_label_set_text(ui_EditMappingLetter, panel_name.c_str());
-		if (panel_name.size() > 3)
+		if (map.is_midi())
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
+
+		else if (panel_name.size() > 3)
+			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
+
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 

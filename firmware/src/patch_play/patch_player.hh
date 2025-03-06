@@ -54,7 +54,8 @@ private:
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_aft_conns;
 	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
-	std::array<std::vector<MappedKnob>, NumMidiCCs> midi_knob_conns;
+	std::array<std::vector<MappedKnob>, NumMidiCCs> midi_cc_knob_maps;
+	std::array<std::vector<MappedKnob>, NumMidiNotes> midi_note_knob_maps;
 
 	struct MidiPulse {
 		OneShot pulse{};
@@ -321,8 +322,8 @@ public:
 			set_all_connected_jacks(midi_cc_conns[ccnum], val);
 
 		// Update knobs connected to theis CC
-		if (ccnum < midi_knob_conns.size()) {
-			for (auto &mm : midi_knob_conns[ccnum]) {
+		if (ccnum < midi_cc_knob_maps.size()) {
+			for (auto &mm : midi_cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules)
 					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val / 10.f));
 			}
@@ -332,6 +333,14 @@ public:
 	void set_midi_gate(unsigned note_num, float val) {
 		if (note_num < midi_gate_conns.size())
 			set_all_connected_jacks(midi_gate_conns[note_num], val);
+
+		if (note_num < midi_note_knob_maps.size()) {
+			for (auto &mm : midi_note_knob_maps[note_num]) {
+				if (mm.module_id < num_modules) {
+					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val));
+				}
+			}
+		}
 	}
 
 	// Event must be either Clock, or Start, Stop, or Cont.
@@ -457,13 +466,25 @@ public:
 		if (knobset_id != PatchData::MIDIKnobSet && knobset_id >= knob_conns.size())
 			return;
 
-		auto &knobconn = knobset_id == PatchData::MIDIKnobSet ? midi_knob_conns[map.cc_num()] :
-																knob_conns[knobset_id][map.panel_knob_id];
+		std::vector<MappedKnob> *knobconn = nullptr;
+		if (knobset_id == PatchData::MIDIKnobSet) {
+
+			knobconn = map.is_midi_cc()		  ? &midi_cc_knob_maps[map.cc_num()] :
+					   map.is_midi_notegate() ? &midi_note_knob_maps[map.notegate_num()] :
+												nullptr;
+
+		} else {
+			if (map.is_panel_knob())
+				knobconn = &knob_conns[knobset_id][map.panel_knob_id];
+		}
+
+		if (!knobconn)
+			return;
 
 		auto found = std::ranges::find_if(
-			knobconn, [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
+			*knobconn, [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
 
-		if (found != knobconn.end()) {
+		if (found != knobconn->end()) {
 			found->min = map.min;
 			found->max = map.max;
 			found->curve_type = map.curve_type;
@@ -675,7 +696,8 @@ public:
 			erase_and_squash(knob_set);
 		}
 
-		erase_and_squash(midi_knob_conns);
+		erase_and_squash(midi_cc_knob_maps);
+		erase_and_squash(midi_note_knob_maps);
 		erase_and_squash(midi_note_pitch_conns);
 		erase_and_squash(midi_note_gate_conns);
 		erase_and_squash(midi_note_vel_conns);
@@ -837,7 +859,9 @@ private:
 			for (auto &mappings : knob_set)
 				mappings.clear();
 
-		for (auto &conn : midi_knob_conns)
+		for (auto &conn : midi_cc_knob_maps)
+			conn.clear();
+		for (auto &conn : midi_note_knob_maps)
 			conn.clear();
 		for (auto &conn : midi_note_pitch_conns)
 			conn.clear();
@@ -1043,10 +1067,15 @@ private:
 
 	void cache_midi_mapping(const MappedKnob &k) {
 		if (k.is_midi_cc()) {
-			pr_dbg("Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
-			update_or_add(midi_knob_conns[k.cc_num()], k);
+			pr_trace("Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
+			update_or_add(midi_cc_knob_maps[k.cc_num()], k);
+
+		} else if (k.is_midi_notegate()) {
+			pr_trace("Midi Map: Note %d to m:%d p:%d\n", k.notegate_num(), k.module_id, k.param_id);
+			update_or_add(midi_note_knob_maps[k.notegate_num()], k);
+
 		} else {
-			pr_warn("Bad Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
+			pr_warn("Bad Midi Map: panel_knob_id:%d to m:%d p:%d\n", k.panel_knob_id, k.module_id, k.param_id);
 		}
 	}
 
