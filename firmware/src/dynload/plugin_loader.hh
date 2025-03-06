@@ -1,4 +1,5 @@
 #pragma once
+#include "dev_version.hh"
 #include "dynload/dynloader.hh"
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
@@ -324,6 +325,7 @@ public:
 
 			if (auto v = name.find("-v"); v != std::string_view::npos) {
 				// extract version string:
+				// skip the "-v"
 				std::string vers = name.substr(v + 2);
 
 				// drop version from plugin name:
@@ -331,19 +333,23 @@ public:
 
 				auto version = VersionUtil::Version(vers);
 				plugin.version = std::string_view(vers);
-				plugin.sdk_major_version = version.major;
-				plugin.sdk_minor_version = version.minor;
-				pr_trace("Plugin: %s => %s => %u.%u.%u\n",
-						 name.c_str(),
-						 vers.c_str(),
-						 version.major,
-						 version.minor,
-						 version.revision);
+
+				// If version contains "-dev-X" where X is the current dev version,
+				// then we will assume it's the right major/minor
+				if (name.contains(DevVersionChars)) {
+					plugin.sdk_major_version = sdk_version().major;
+					plugin.sdk_minor_version = sdk_version().minor;
+					pr_dbg("Plugin %s: contains %s so assuming it's compatible\n", name.c_str(), DevVersionChars);
+				} else {
+					plugin.sdk_major_version = version.major;
+					plugin.sdk_minor_version = version.minor;
+					pr_dbg("Plugin %s: parsed as v%d.%d\n", name.c_str(), version.major, version.minor);
+				}
 			} else {
-				pr_warn("Plugin %s: No version found\n", name.c_str());
 				plugin.version = "";
-				plugin.sdk_major_version = 1;
-				plugin.sdk_minor_version = 0;
+				plugin.sdk_major_version = sdk_version().major;
+				plugin.sdk_minor_version = sdk_version().minor;
+				pr_dbg("Plugin %s: No version found, assuming it's compatible\n", name.c_str());
 			}
 		}
 	}
