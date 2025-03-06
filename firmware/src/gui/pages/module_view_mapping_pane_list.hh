@@ -38,6 +38,9 @@ struct MappingPaneList {
 		else if (map.is_midi_cc())
 			format_cc_map_circle(map.cc_num(), circle, label);
 
+		else if (map.is_midi_notegate())
+			format_cc_map_circle(map.notegate_num(), circle, label);
+
 		else
 			pr_err("Unknown mapping panel_knob_id: %d\n", map.panel_knob_id);
 
