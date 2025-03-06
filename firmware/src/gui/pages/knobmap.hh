@@ -28,6 +28,7 @@ struct KnobMapPage : PageBase {
 		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_MinSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MaxSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_ModuleMapToggleSwitch, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_ListButton, list_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_EditButton, edit_cb, LV_EVENT_RELEASED, this);
@@ -41,6 +42,7 @@ struct KnobMapPage : PageBase {
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_MinSlider);
 		lv_group_add_obj(group, ui_MaxSlider);
+		lv_group_add_obj(group, ui_ModuleMapToggleSwitch);
 		lv_group_add_obj(group, ui_AliasTextArea);
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
@@ -115,11 +117,20 @@ struct KnobMapPage : PageBase {
 		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
 		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
 
+		if (map.is_midi_notegate()) {
+			lv_show(ui_ModuleMapToggleSwitchCont);
+			lv_check(ui_ModuleMapToggleSwitch, map.curve_type == MappedKnob::CurveType::Toggle);
+		} else {
+			lv_hide(ui_ModuleMapToggleSwitchCont);
+			lv_check(ui_ModuleMapToggleSwitch, false);
+		}
+
 		// Knob arc
 
 		params.param_watcher.stop_watching_all();
 		params.param_watcher.start_watching_param(map.module_id, map.param_id);
 		pr_dbg("Start watching m:%d p:%d\n", map.module_id, map.param_id);
+
 		float knob_val = static_param ? map.unmap_val(static_param->value) : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
 
@@ -129,8 +140,12 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
 		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
 		lv_label_set_text(ui_EditMappingLetter, panel_name.c_str());
-		if (panel_name.size() > 3)
+		if (map.is_midi())
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
+
+		else if (panel_name.size() > 3)
+			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
+
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
@@ -140,9 +155,6 @@ struct KnobMapPage : PageBase {
 		update_active_status();
 
 		lv_group_set_editing(group, false);
-
-		// add_map_popup.prepare_focus(group, ui_EditMappingPage);
-		// add_map_popup.hide();
 	}
 
 	void update() override {
@@ -162,17 +174,20 @@ struct KnobMapPage : PageBase {
 		update_active_status();
 
 		if (is_actively_playing) {
-			auto is_tracking = patch_playloader.is_param_tracking(map.module_id, map.param_id);
+			auto is_tracking = map.is_midi() || patch_playloader.is_param_tracking(map.module_id, map.param_id);
 
 			if (is_tracking) {
 				lv_hide(indicator);
 				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
 			} else {
+				lv_show(indicator);
 				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
 
-				auto phys_val = params.knobs[map.panel_knob_id].val;
-				auto mapped_phys_val = map.get_mapped_val(phys_val);
-				lv_obj_set_style_transform_angle(indicator, mapped_phys_val * 2500.f - 1250.f, LV_PART_MAIN);
+				if (map.panel_knob_id < params.knobs.size()) {
+					auto phys_val = params.knobs[map.panel_knob_id].val;
+					auto mapped_phys_val = map.get_mapped_val(phys_val);
+					lv_obj_set_style_transform_angle(indicator, mapped_phys_val * 2500.f - 1250.f, LV_PART_MAIN);
+				}
 			}
 
 			auto watched_params = params.param_watcher.active_watched_params();
@@ -190,13 +205,13 @@ struct KnobMapPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 			prepare_focus();
 		}
-		// add_map_popup.update(params);
 	}
 
 	void update_active_status() {
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
-		if (is_patch_playing && args.view_knobset_id.value_or(999) == page_list.get_active_knobset()) {
+		auto is_active_knobset = map.is_midi() || args.view_knobset_id.value_or(999) == page_list.get_active_knobset();
+		if (is_patch_playing && is_active_knobset) {
 			if (!is_actively_playing) {
 				lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_100, LV_PART_KNOB);
 			}
@@ -221,16 +236,23 @@ struct KnobMapPage : PageBase {
 			return;
 
 		auto obj = event->current_target;
-		if (obj != ui_MinSlider && obj != ui_MaxSlider)
+		if (obj != ui_MinSlider && obj != ui_MaxSlider && obj != ui_ModuleMapToggleSwitch) {
 			return;
+		}
 
-		auto val = lv_slider_get_value(obj);
 		if (obj == ui_MinSlider) {
+			auto val = lv_slider_get_value(obj);
 			page->map.min = val / 100.f;
 			lv_label_set_text_fmt(ui_MinValue, "%d%%", (int)val);
-		} else {
+
+		} else if (obj == ui_MaxSlider) {
+			auto val = lv_slider_get_value(obj);
 			page->map.max = val / 100.f;
 			lv_label_set_text_fmt(ui_MaxValue, "%d%%", (int)val);
+
+		} else {
+			auto checked = lv_obj_has_state(ui_ModuleMapToggleSwitch, LV_STATE_CHECKED);
+			page->map.curve_type = checked ? MappedKnob::CurveType::Toggle : MappedKnob::CurveType::Normal;
 		}
 
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});

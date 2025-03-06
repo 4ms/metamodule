@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <span>
+#include <string>
 
 // #define MIDIDEBUG
 #if defined(MIDIDEBUG)
@@ -219,5 +220,16 @@ struct MidiMessage {
 
 	void print() const {
 		MidiMessage::print(*this);
+	}
+
+	static std::string note_name(uint8_t midi_val) {
+		constexpr std::array<std::string_view, 12> nts = {
+			"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+		// "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"};
+
+		// int oct = int(b) / 12 - 6; // This makes it consistant with a MIDI loop (Rack on computer->BSP->CV outputs -> CV_MIDI module
+		int oct = int(midi_val) / 12 - 2; // This makes it consistant with MetaModule MIDI
+
+		return std::string(nts[midi_val % 12]) + std::to_string(oct);
 	}
 };
