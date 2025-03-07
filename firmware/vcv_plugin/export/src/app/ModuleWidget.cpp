@@ -346,10 +346,8 @@ std::vector<PortWidget *> ModuleWidget::getOutputs() {
 	return pws;
 }
 
-void ModuleWidget::populate_elements_indices(std::vector<MetaModule::Element> &elements,
-											 std::vector<ElementCount::Indices> &indices) {
-
-	internal->adaptor->populate_elements_indices(elements, indices);
+void ModuleWidget::populate_elements_indices(rack::plugin::Model *model) {
+	internal->adaptor->populate_elements_indices(model->elements, model->indices);
 }
 
 //////////////// No-ops:
