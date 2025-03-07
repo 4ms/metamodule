@@ -24,10 +24,7 @@ inline uint32_t flag_is_set(uint32_t flags, uint32_t interrupt) {
 	return (flags & interrupt) == interrupt;
 }
 
-
-
-inline uint32_t LL_USB_HC_ReadInterrupt(USB_OTG_GlobalTypeDef *USBx)
-{
+inline uint32_t LL_USB_HC_ReadInterrupt(USB_OTG_GlobalTypeDef *USBx) {
 	uint32_t USBx_BASE = (uint32_t)USBx;
 
 	return ((USBx_HOST->HAINT) & 0xFFFFU);

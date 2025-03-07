@@ -108,10 +108,10 @@ void HAL_HCD_PortDisabled_Callback(HCD_HandleTypeDef *hhcd) {
  * @param  urb_state: URB State
  * @retval None
  */
-void HAL_HCD_HC_NotifyURBChange_Callback(HCD_HandleTypeDef *hhcd, uint8_t chnum, HCD_URBStateTypeDef urb_state) {
-	/* To be used with OS to sync URB state with the global state machine */
-	// USBH_LL_NotifyURBChange(hhcd->phost);
-}
+// void HAL_HCD_HC_NotifyURBChange_Callback(HCD_HandleTypeDef *hhcd, uint8_t chnum, HCD_URBStateTypeDef urb_state) {
+// 	/* To be used with OS to sync URB state with the global state machine */
+// 	// USBH_LL_NotifyURBChange(hhcd->phost);
+// }
 
 /*******************************************************************************
 					   LL Driver Interface (USB Host Library --> HCD)
