@@ -418,7 +418,7 @@ HAL_StatusTypeDef USB_DevInit(USB_OTG_GlobalTypeDef *USBx, USB_OTG_CfgTypeDef cf
   */
 HAL_StatusTypeDef USB_FlushTxFifo(USB_OTG_GlobalTypeDef *USBx, uint32_t num)
 {
-	__IO uint32_t count = 0U;
+	uint32_t count = 0U;
 
 	/* Wait for AHB master IDLE state. */
 	do {
@@ -447,7 +447,7 @@ HAL_StatusTypeDef USB_FlushTxFifo(USB_OTG_GlobalTypeDef *USBx, uint32_t num)
  */
 HAL_StatusTypeDef USB_FlushRxFifo(USB_OTG_GlobalTypeDef *USBx)
 {
-	__IO uint32_t count = 0U;
+	uint32_t count = 0U;
 
 	/* Wait for AHB master IDLE state. */
 	do {
