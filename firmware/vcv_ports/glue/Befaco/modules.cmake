@@ -5,18 +5,23 @@ set(BefacoModules
     DualAtenuverter
     SpringReverb
     ABC
+    AxBC
     ADSR
+    Atte
     ChoppingKinky
     HexmixVCA
     Kickall
     Mixer
+    Mixer2
     Morphader
     MotionMTR
+    MuDi
     Percall
     PonyVCO
     Rampage
     STMix
     SamplingModulator
+    Slew
     SlewLimiter
     StereoStrip
     Voltio
