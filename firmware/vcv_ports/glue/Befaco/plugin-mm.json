@@ -10,6 +10,14 @@
 		"name": "ABC"
 	},
 	{
+		"slug": "Atte",
+		"name": "Atte"
+	},
+	{
+		"slug": "AxBC",
+		"name": "AxBC"
+	},
+	{
 		"slug": "ADSR",
 		"name": "ADSR"
 	},
@@ -44,7 +52,11 @@
 	{
 		"slug": "Mixer",
 		"name": "Mixer"
-	},        
+	},      
+	{
+		"slug": "Mixer2",
+		"name": "Mixer2"
+	},
 	{
 		"slug": "Morphader",
 		"name": "Morphader"
@@ -52,6 +64,10 @@
 	{
 		"slug": "MotionMTR",
 		"name": "MotionMTR"
+	},
+	{
+		"slug": "MuDi",
+		"name": "MuDi"
 	},
 	{
 		"slug": "Muxlicer",
@@ -84,6 +100,10 @@
 	{
 		"slug": "SamplingModulator",
 		"name": "SamplingModulator"
+	},
+	{
+		"slug": "Slew",
+		"name": "Slew"
 	},
 	{
 		"slug": "SlewLimiter",
