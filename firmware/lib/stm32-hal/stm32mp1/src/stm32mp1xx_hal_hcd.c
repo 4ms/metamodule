@@ -589,17 +589,20 @@ void HAL_HCD_IRQHandler(HCD_HandleTypeDef *hhcd)
     if (flag_is_set(flags, USB_OTG_GINTSTS_HCINT))
     {
       interrupt = LL_USB_HC_ReadInterrupt(hhcd->Instance);
-      for (i = 0U; i < hhcd->Init.Host_channels; i++)
+      if (interrupt != 0)
       {
-        if ((interrupt & (1UL << (i & 0xFU))) != 0U)
+        for (i = 0U; i < hhcd->Init.Host_channels; i++)
         {
-          if ((USBx_HC(i)->HCCHAR & USB_OTG_HCCHAR_EPDIR) == USB_OTG_HCCHAR_EPDIR)
+          if ((interrupt & (1UL << (i & 0xFU))) != 0U)
           {
-            HCD_HC_IN_IRQHandler(hhcd, (uint8_t)i);
-          }
-          else
-          {
-            HCD_HC_OUT_IRQHandler(hhcd, (uint8_t)i);
+            if ((USBx_HC(i)->HCCHAR & USB_OTG_HCCHAR_EPDIR) == USB_OTG_HCCHAR_EPDIR)
+            {
+              HCD_HC_IN_IRQHandler(hhcd, (uint8_t)i);
+            }
+            else
+            {
+              HCD_HC_OUT_IRQHandler(hhcd, (uint8_t)i);
+            }
           }
         }
       }
