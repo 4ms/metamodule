@@ -49,6 +49,9 @@ std::optional<ReloadPatch::FileTimeSize> ReloadPatch::get_file_info(PatchLocatio
 }
 
 bool ReloadPatch::check_file_changed(PatchLocation const &patch_loc, uint32_t timestamp, uint32_t filesize) {
+	if (patch_loc.vol == Volume::RamDisk || patch_loc.vol == Volume::MaxVolumes)
+		return false;
+
 	if (auto filetimesize = get_file_info(patch_loc)) {
 		return (filetimesize->timestamp != timestamp) || (filetimesize->filesize != filesize);
 	} else
