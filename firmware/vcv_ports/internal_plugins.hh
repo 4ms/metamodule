@@ -26,6 +26,11 @@ extern rack::plugin::Model *modelOctaves;
 extern rack::plugin::Model *modelNoisePlethora;
 extern rack::plugin::Model *modelMuxlicer;
 extern rack::plugin::Model *modelBandit;
+extern rack::plugin::Model *modelAtte;
+extern rack::plugin::Model *modelAxBC;
+extern rack::plugin::Model *modelMixer2;
+extern rack::plugin::Model *modelMuDi;
+extern rack::plugin::Model *modelSlew;
 
 extern rack::plugin::Model *modelBraids;
 extern rack::plugin::Model *modelPlaits;

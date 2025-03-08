@@ -93,6 +93,11 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelNoisePlethora);
 		pluginInstance->addModel(modelMuxlicer);
 		pluginInstance->addModel(modelBandit);
+		pluginInstance->addModel(modelAtte);
+		pluginInstance->addModel(modelAxBC);
+		pluginInstance->addModel(modelMixer2);
+		pluginInstance->addModel(modelMuDi);
+		pluginInstance->addModel(modelSlew);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_AudibleInstruments
