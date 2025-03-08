@@ -106,6 +106,7 @@ struct ParamsState {
 
 struct ParamsMidiState : ParamsState {
 	std::array<LatchedParam<float, 1, 127>, NumMidiCCs> midi_ccs;
+	std::array<LatchedParam<bool, 1, 127>, NumMidiNotes> midi_notes;
 	LatchedParam<uint8_t, 1, 1> last_midi_note;
 	bool midi_gate = false;
 
@@ -120,6 +121,9 @@ struct ParamsMidiState : ParamsState {
 
 		for (auto &cc : midi_ccs)
 			cc = 0;
+
+		for (auto &nt : midi_notes)
+			nt = false;
 	}
 
 	std::optional<float> panel_knob_new_value(uint16_t mapped_panel_id) {
@@ -135,6 +139,12 @@ struct ParamsMidiState : ParamsState {
 		{
 			auto &latched = midi_ccs[mk.cc_num()];
 			return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
+		}
+
+		else if (mk.is_midi_notegate())
+		{
+			auto &latched = midi_notes[mk.notegate_num()];
+			return latched.did_change() ? std::optional<float>{latched.val ? 1.f : 0.f} : std::nullopt;
 		}
 
 		else

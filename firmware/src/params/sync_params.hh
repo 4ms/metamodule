@@ -56,10 +56,12 @@ public:
 
 				if (e.type == Midi::Event::Type::NoteOn && e.note < NumMidiNotes) {
 					params.last_midi_note.store_changed(e.note);
+					params.midi_notes[e.note].store_changed(true);
 					params.midi_gate = true;
 				}
 				if (e.type == Midi::Event::Type::NoteOff && e.note < NumMidiNotes) {
 					params.last_midi_note.store_changed(e.note);
+					params.midi_notes[e.note].store_changed(false);
 					params.midi_gate = false;
 				}
 			} else

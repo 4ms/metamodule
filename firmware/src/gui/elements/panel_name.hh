@@ -1,7 +1,8 @@
 #pragma once
-#include "CoreModules/elements/elements.hh"
+#include "CoreModules/elements/base_element.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "patch/patch.hh"
+#include "usb/midi_message.hh"
 #include <string>
 
 //TODO: does this file belong in firmware/src/gui? Seems more closely related to CoreModules/Hub
@@ -24,6 +25,9 @@ std::string get_panel_name(const ParamElement &, uint16_t panel_id) {
 
 	else if (mk.is_midi_cc())
 		name = "CC" + std::to_string(mk.cc_num());
+
+	else if (mk.is_midi_notegate())
+		name = MidiMessage::note_name(mk.notegate_num());
 
 	return name;
 }
