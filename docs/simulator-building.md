@@ -60,6 +60,7 @@ show the updated image assets. This is done automatically whenever you build the
 # edit/add/remove some graphical asset in the firmware/assets dir
 
 cd ../firmware
+cmake -B build -GNinja      #Or whatever build system you want
 cmake --build build -- asset-image
 cd ../simulator
 
