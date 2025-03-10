@@ -29,7 +29,8 @@ public:
 			// if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
 
 			auto module_val = modules[map.module_id]->get_param(map.param_id);
-			auto scaled_phys_val = map.get_mapped_val(val);
+			auto scaled_phys_val = map.get_mapped_val(val); //0.501 to 0
+
 			if (auto v = knob_map.catchup.update(scaled_phys_val, module_val)) {
 				modules[map.module_id]->set_param(map.param_id, *v);
 
@@ -38,6 +39,32 @@ public:
 				// E.g. "ParamQuantity::snapEnabled" or "Pot::integral"
 				auto new_module_val = modules[map.module_id]->get_param(map.param_id);
 				knob_map.catchup.report_actual_module_val(new_module_val);
+
+				printf("Catchup: module_val %f -> %f, scaled_phys_val %f. Set param %f\n",
+					   module_val,
+					   new_module_val,
+					   scaled_phys_val,
+					   *v);
+			} else {
+				auto min_scaled = map.get_mapped_val(0);
+				auto max_scaled = map.get_mapped_val(1);
+				if (min_scaled > max_scaled)
+					val = 1 - val;
+				if (val == 0) {
+					if (module_val < min_scaled && module_val < max_scaled) {
+						knob_map.catchup.enter_tracking(scaled_phys_val);
+						modules[map.module_id]->set_param(map.param_id, min_scaled);
+						auto new_module_val = modules[map.module_id]->get_param(map.param_id);
+						knob_map.catchup.report_actual_module_val(new_module_val);
+					}
+				} else if (val == 1) {
+					if (module_val > max_scaled && module_val > min_scaled) {
+						knob_map.catchup.enter_tracking(scaled_phys_val);
+						modules[map.module_id]->set_param(map.param_id, max_scaled);
+						auto new_module_val = modules[map.module_id]->get_param(map.param_id);
+						knob_map.catchup.report_actual_module_val(new_module_val);
+					}
+				}
 			}
 		}
 	}

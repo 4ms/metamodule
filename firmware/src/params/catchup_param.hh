@@ -1,6 +1,7 @@
 #pragma once
 #include "util/math.hh"
 
+#include <cstdio>
 #include <optional>
 
 namespace MetaModule
@@ -25,6 +26,9 @@ public:
 	enum class Mode { ResumeOnMotion, ResumeOnEqual, LinearFade } mode = Mode::ResumeOnMotion;
 
 	// Called when a physical knob changes value.
+	// - cur_phys_val is the new physical value of the knob.
+	// - cur_module_val is the value the module reports the knob is at.
+	// Returns the value that we should set the module param, or nullopt if we shouldn't set anything
 	std::optional<T> update(T cur_phys_val, T cur_module_val) {
 
 		last_phys_val = cur_phys_val;
@@ -37,6 +41,7 @@ public:
 
 		if (state == State::Tracking) {
 			// Change to Catchup mode if module changes value
+			printf("update(): tracking: last_module_val = %f, cur_module_val = %f\n", last_module_val, cur_module_val);
 			if (MathTools::abs_diff(last_module_val, cur_module_val) >= Tolerance) {
 				enter_catchup();
 				return {};
@@ -105,7 +110,9 @@ public:
 private:
 	std::optional<T> update_resume_equal(T phys_val, T module_val) {
 		// Exit catchup mode if module and physical values are close
+		printf("update_resume_equal: phys %f, module_val %f. Tol = %f\n", phys_val, module_val, Tolerance);
 		if (MathTools::abs_diff(module_val, phys_val) < Tolerance) {
+			printf("enter tracking\n");
 			return enter_tracking(phys_val);
 		}
 		return {};
@@ -133,12 +140,14 @@ private:
 		return new_module_val;
 	}
 
+public:
 	T enter_tracking(T phys_val) {
 		last_module_val = phys_val;
 		state = State::Tracking;
 		return phys_val;
 	}
 
+private:
 	void enter_catchup() {
 		if (state != State::Catchup && mode == Mode::LinearFade) {
 			// pr_dbg("Should not get here!\n");
