@@ -121,7 +121,7 @@ struct RackDynDraw : BaseDynDraw {
 			}
 
 			for (auto &disp : displays) {
-				Debug::Pin2::high();
+				// Debug::Pin2::high();
 
 				if (!disp.widget->isVisible())
 					continue;
@@ -147,7 +147,7 @@ struct RackDynDraw : BaseDynDraw {
 					lv_obj_invalidate(disp.lv_canvas);
 				}
 
-				Debug::Pin2::low();
+				// Debug::Pin2::low();
 			}
 		}
 	}
