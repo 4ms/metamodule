@@ -160,6 +160,10 @@ struct PatchPlayLoader {
 		audio_overrun_ = false;
 	}
 
+	std::optional<unsigned> is_panel_knob_catchup_inaccessible() {
+		return player_.panel_knob_catchup_inaccessible();
+	}
+
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {

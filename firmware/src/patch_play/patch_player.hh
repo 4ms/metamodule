@@ -929,6 +929,8 @@ public:
 
 	bool is_param_tracking(unsigned module_id, unsigned param_id);
 
+	std::optional<unsigned> panel_knob_catchup_inaccessible();
+
 private:
 	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
 

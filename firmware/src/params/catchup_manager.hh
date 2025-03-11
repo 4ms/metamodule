@@ -16,10 +16,15 @@ using ParamSet = std::array<std::vector<MappedParam>, PanelDef::NumKnobs>;
 class CatchupManager {
 
 	std::array<float, PanelDef::NumKnobs> panel_knobs{0.f};
+	std::array<bool, PanelDef::NumKnobs> catchup_inaccessible{false};
+
 	CatchupParam::Mode default_mode{CatchupParam::Mode::ResumeOnMotion};
 
 public:
 	void set_panel_param(auto &modules, ParamSet &active_knob_maps, unsigned panel_knob_id, float val) {
+		if (panel_knob_id >= panel_knobs.size())
+			return;
+
 		panel_knobs[panel_knob_id] = val;
 
 		for (auto &knob_map : active_knob_maps[panel_knob_id]) {
@@ -40,39 +45,47 @@ public:
 				auto new_module_val = modules[map.module_id]->get_param(map.param_id);
 				knob_map.catchup.report_actual_module_val(new_module_val);
 
-				printf("Catchup: module_val %f -> %f, scaled_phys_val %f. Set param %f\n",
-					   module_val,
-					   new_module_val,
-					   scaled_phys_val,
-					   *v);
 			} else {
-				auto min_scaled = map.get_mapped_val(0);
-				auto max_scaled = map.get_mapped_val(1);
-				if (min_scaled > max_scaled)
-					val = 1 - val;
-				if (val == 0) {
-					if (module_val < min_scaled && module_val < max_scaled) {
-						knob_map.catchup.enter_tracking(scaled_phys_val);
-						modules[map.module_id]->set_param(map.param_id, min_scaled);
-						auto new_module_val = modules[map.module_id]->get_param(map.param_id);
-						knob_map.catchup.report_actual_module_val(new_module_val);
-					}
-				} else if (val == 1) {
-					if (module_val > max_scaled && module_val > min_scaled) {
-						knob_map.catchup.enter_tracking(scaled_phys_val);
-						modules[map.module_id]->set_param(map.param_id, max_scaled);
-						auto new_module_val = modules[map.module_id]->get_param(map.param_id);
-						knob_map.catchup.report_actual_module_val(new_module_val);
+				// If user moves the knob to the extreme position (0 or 1), and the module's knob
+				// is still not reachable, then mark this catchup as inaccessible.
+				// The GUI thread will query for this state and send a notification.
+				if (val == 0 || val == 1) {
+					auto min_scaled = map.get_mapped_val(0);
+					auto max_scaled = map.get_mapped_val(1);
+					if (min_scaled > max_scaled)
+						std::swap(min_scaled, max_scaled);
+
+					if (module_val < min_scaled || module_val > max_scaled) {
+						catchup_inaccessible[panel_knob_id] = true;
+						// TODO: optionally jump the module's knob to the panel position
+						// if (settings.allow_jump_out_of_range_param) {
+						//     knob_map.catchup.enter_tracking(scaled_phys_val);
+						//     modules[map.module_id]->set_param(map.param_id, val == 0 ? min_scaled : max_scaled);
+						//     auto new_module_val = modules[map.module_id]->get_param(map.param_id);
+						//     knob_map.catchup.report_actual_module_val(new_module_val);
+						// }
 					}
 				}
 			}
 		}
 	}
+
 	void set_panel_param_no_play(unsigned panel_knob_id, float val) {
 		panel_knobs[panel_knob_id] = val;
 	}
 
+	bool is_out_of_range(unsigned panel_knob_id) {
+		if (panel_knob_id < catchup_inaccessible.size()) {
+			auto res = catchup_inaccessible[panel_knob_id];
+			catchup_inaccessible[panel_knob_id] = false;
+			return res;
+		} else
+			return false;
+	}
+
 	void recalc_panel_param(auto &modules, ParamSet &active_knob_maps, unsigned panel_knob_id) {
+		if (panel_knob_id < catchup_inaccessible.size())
+			catchup_inaccessible[panel_knob_id] = false;
 		set_panel_param(modules, active_knob_maps, panel_knob_id, panel_knobs[panel_knob_id]);
 	}
 
@@ -86,6 +99,8 @@ public:
 			}
 			i++;
 		}
+		for (auto &stuck : catchup_inaccessible)
+			stuck = false;
 	}
 
 	void set_default_mode(CatchupParam::Mode mode) {

@@ -70,4 +70,12 @@ bool PatchPlayer::is_param_tracking(unsigned module_id, unsigned param_id) {
 	return false;
 }
 
+std::optional<unsigned> PatchPlayer::panel_knob_catchup_inaccessible() {
+	for (auto panel_knob_id = 0u; panel_knob_id < PanelDef::NumKnobs; panel_knob_id++) {
+		if (catchup_manager.is_out_of_range(panel_knob_id))
+			return panel_knob_id;
+	}
+	return {};
+}
+
 } // namespace MetaModule

@@ -207,6 +207,13 @@ public:
 		}
 
 		DisplayNotification::flash_overload(info.metaparams.audio_overruns);
+
+		if (auto panel_knob_id = info.patch_playloader.is_panel_knob_catchup_inaccessible()) {
+			std::string msg =
+				"Knob " + std::string(PanelDef::get_map_param_name(*panel_knob_id)) +
+				" cannot reach the mapped knob. Adjust the mapping's Min/Max values or disable Track on Equal mode.";
+			DisplayNotification::show({msg, Notification::Priority::Info, 3000});
+		}
 	}
 
 	void handle_audio_errors() {
