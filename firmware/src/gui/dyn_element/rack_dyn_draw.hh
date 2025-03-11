@@ -135,7 +135,7 @@ struct RackDynDraw : BaseDynDraw {
 
 				nvgBeginFrame(disp.args.vg, mw->box.getWidth(), mw->box.getHeight(), 1);
 
-				disp.args.clipBox = disp.widget->getBox();
+				disp.args.clipBox = disp.widget->getBox().zeroPos();
 
 				disp.widget->step();
 				disp.widget->draw(disp.args);
