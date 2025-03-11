@@ -115,7 +115,7 @@ void renderStroke(void *uptr,
 		auto poly = tvg::Shape::gen();
 
 		poly->moveTo(path.stroke[0].x, path.stroke[0].y);
-		for (auto pt : std::span{path.stroke + 1, (size_t)(path.count - 1)}) {
+		for (auto pt : std::span{path.stroke + 1, (size_t)(path.nstroke - 1)}) {
 			poly->lineTo(pt.x, pt.y);
 		}
 
