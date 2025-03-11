@@ -108,12 +108,12 @@ public:
 	}
 
 private:
-	std::optional<T> update_resume_equal(T phys_val, T module_val) {
+	std::optional<T> update_resume_equal(T scaled_phys_val, T module_val) {
 		// Exit catchup mode if module and physical values are close
-		printf("update_resume_equal: phys %f, module_val %f. Tol = %f\n", phys_val, module_val, Tolerance);
-		if (MathTools::abs_diff(module_val, phys_val) < Tolerance) {
+		printf("update_resume_equal: phys %f, module_val %f. Tol = %f\n", scaled_phys_val, module_val, Tolerance);
+		if (MathTools::abs_diff(module_val, scaled_phys_val) < Tolerance) {
 			printf("enter tracking\n");
-			return enter_tracking(phys_val);
+			return enter_tracking(scaled_phys_val);
 		}
 		return {};
 	}
