@@ -39,10 +39,15 @@ struct PatchSelectorSubdirPanel {
 			// Delete existing dir labels (except first one, which is the volume root)
 			if (auto num_children = lv_obj_get_child_cnt(vol_cont); num_children > 1) {
 				for (unsigned i = 1; i < num_children; i++) {
+					auto child = lv_obj_get_child(vol_cont, i);
+					if (child == nullptr)
+						continue;
+
 					if (last_subdir_sel == lv_obj_get_child(vol_cont, i)) {
 						last_subdir_sel = nullptr; //prevent dangling pointer
 					}
-					lv_obj_del_async(lv_obj_get_child(vol_cont, i));
+
+					lv_obj_del(child);
 				}
 			}
 
