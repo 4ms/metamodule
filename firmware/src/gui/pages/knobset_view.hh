@@ -139,10 +139,7 @@ struct KnobSetViewPage : PageBase {
 			if (!num_maps[idx])
 				continue;
 
-			lv_foreach_child(pane, [this](lv_obj_t *cont, int idx) {
-				lv_group_add_obj(group, cont);
-				return true;
-			});
+			lv_foreach_child(pane, [this](lv_obj_t *cont, int idx) { lv_group_add_obj(group, cont); });
 		}
 
 		lv_group_focus_obj(focus);

@@ -141,28 +141,16 @@ private:
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, lv_tabview_get_tab_btns(ui_SystemMenuTabView));
 		lv_group_add_obj(group, ui_PluginScanButton);
-		lv_foreach_child(ui_PluginsFoundCont, [this](auto *obj, unsigned) {
-			lv_group_add_obj(this->group, obj);
-			return true;
-		});
-		lv_foreach_child(ui_PluginsLoadedCont, [this](auto *obj, unsigned) {
-			lv_group_add_obj(this->group, obj);
-			return true;
-		});
+		lv_foreach_child(ui_PluginsFoundCont, [this](auto *obj, unsigned) { lv_group_add_obj(this->group, obj); });
+		lv_foreach_child(ui_PluginsLoadedCont, [this](auto *obj, unsigned) { lv_group_add_obj(this->group, obj); });
 	}
 
 	void clear_loaded_list() {
-		lv_foreach_child(ui_PluginsLoadedCont, [](auto *obj, unsigned) {
-			lv_obj_del_async(obj);
-			return true;
-		});
+		lv_foreach_child(ui_PluginsLoadedCont, [](auto *obj, unsigned) { lv_obj_del_async(obj); });
 	}
 
 	void clear_found_list() {
-		lv_foreach_child(ui_PluginsFoundCont, [](auto *obj, unsigned) {
-			lv_obj_del_async(obj);
-			return true;
-		});
+		lv_foreach_child(ui_PluginsFoundCont, [](auto *obj, unsigned) { lv_obj_del_async(obj); });
 	}
 
 	void populate_loaded_list() {
