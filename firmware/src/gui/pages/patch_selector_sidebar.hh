@@ -42,23 +42,6 @@ struct PatchSelectorSubdirPanel {
 		// populate side bar with volumes and dirs
 		for (auto [vol_cont, root] : zip(vol_conts, patchfiles.vol_root)) {
 
-			// Delete existing dir labels (except first one, which is the volume root)
-			// if (auto num_children = lv_obj_get_child_cnt(vol_cont); num_children > 1) {
-			// 	for (unsigned i = 1; i < num_children; i++) {
-			// 		auto child = lv_obj_get_child(vol_cont, i);
-			// 		if (child == nullptr)
-			// 			continue;
-
-			// 		if (last_subdir_sel == lv_obj_get_child(vol_cont, i)) {
-			// 			last_subdir_sel = nullptr; //prevent dangling pointer
-			// 		}
-
-			// 		lv_obj_del(child);
-			// 	}
-			// }
-
-			// lv_obj_refresh_style(vol_cont, LV_PART_MAIN, LV_STYLE_PROP_ANY);
-
 			auto vol_item = lv_obj_get_child(vol_cont, 0);
 
 			// No need to scan if no files or dirs: disable it
@@ -74,8 +57,22 @@ struct PatchSelectorSubdirPanel {
 			lv_group_add_obj(group, vol_item);
 
 			// Add all dirs on volume
-			// for (auto &dir : root.dirs)
-			// 	add_subdir_to_panel(dir, vol_cont);
+			auto num_existing_subdir_items = lv_obj_get_child_cnt(vol_cont) - 1;
+			for (auto i = 0u; auto &dir : root.dirs) {
+				if (i < num_existing_subdir_items) {
+					overwrite_subdir(dir, lv_obj_get_child(vol_cont, i + 1));
+				} else {
+					add_subdir_to_panel(dir, vol_cont);
+				}
+				i++;
+			}
+
+			int excess_dirs = (int)num_existing_subdir_items - (int)root.dirs.size();
+			if (excess_dirs > 0) {
+				for (auto i = 0; i < excess_dirs; i++) {
+					lv_hide(lv_obj_get_child(vol_cont, i + root.dirs.size() + 1));
+				}
+			}
 
 			lv_enable(vol_cont);
 			lv_enable_all_children(vol_cont);
@@ -218,6 +215,26 @@ struct PatchSelectorSubdirPanel {
 	std::function<void(Volume vol, std::string_view dirname)> click_cb;
 
 private:
+	void overwrite_subdir(PatchDir const &dir, lv_obj_t *btn) {
+		if (lv_obj_get_child_cnt(btn) != 1) {
+			pr_err("Volume button %p has %d children, expected 1\n", btn, lv_obj_get_child_cnt(btn));
+			return;
+		}
+
+		auto name_label = lv_obj_get_child(btn, 0);
+
+		if (!lv_obj_has_class(name_label, &lv_label_class)) {
+			pr_err("Volume button %p child is not a label\n", btn);
+			return;
+		}
+
+		lv_label_set_text(name_label, dir.name.c_str());
+		lv_obj_set_user_data(btn, (void *)&dir);
+		lv_show(btn);
+
+		lv_group_add_obj(group, btn);
+	}
+
 	void add_subdir_to_panel(PatchDir const &dir, lv_obj_t *vol_label) {
 		if (dir.files.size() == 0)
 			return;
