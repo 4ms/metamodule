@@ -286,7 +286,7 @@ void renderTriangles(void *uptr,
 void renderDelete(void *uptr) {
 	if (uptr) {
 		if (auto context = get_drawcontext(uptr)) {
-			printf("nanovg_pixbuf: renderDelete(): Delete DrawContext %p\n", context);
+			// printf("nanovg_pixbuf: renderDelete(): Delete DrawContext %p\n", context);
 			delete context;
 		}
 	}

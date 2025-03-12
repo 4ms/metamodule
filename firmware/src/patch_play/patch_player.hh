@@ -550,7 +550,10 @@ public:
 
 	void remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
 		if (pd.remove_mapping(knobset_id, map)) {
-			uncache_knob_mapping(knobset_id, map);
+			if (knobset_id == PatchData::MIDIKnobSet)
+				uncache_midi_mapping(map);
+			else
+				uncache_knob_mapping(knobset_id, map);
 		}
 	}
 
@@ -1168,6 +1171,20 @@ private:
 
 		} else {
 			pr_warn("Bad Midi Map: panel_knob_id:%d to m:%d p:%d\n", k.panel_knob_id, k.module_id, k.param_id);
+		}
+	}
+
+	void uncache_midi_mapping(const MappedKnob &k) {
+		if (k.is_midi_cc()) {
+			pr_trace("Midi un-map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
+			std::erase_if(midi_cc_knob_maps[k.cc_num()], [&k](auto m) { return (k.maps_to_same_as(m)); });
+
+		} else if (k.is_midi_notegate()) {
+			pr_trace("Midi un-map: Note %d to m:%d p:%d\n", k.notegate_num(), k.module_id, k.param_id);
+			std::erase_if(midi_note_knob_maps[k.notegate_num()], [&k](auto m) { return (k.maps_to_same_as(m)); });
+
+		} else {
+			pr_warn("Cannot unmap MIDI: raw panel_knob_id:%d to m:%d p:%d\n", k.panel_knob_id, k.module_id, k.param_id);
 		}
 	}
 
