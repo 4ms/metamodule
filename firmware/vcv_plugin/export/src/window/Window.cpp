@@ -10,6 +10,11 @@ namespace rack::window
 Font::~Font() = default;
 
 void Font::loadFile(const std::string &filename, NVGcontext *vg) {
+	if (!vg) {
+		pr_err("Cannot Font::loadFile with a null NVGcontext\n");
+		return;
+	}
+
 	this->vg = vg;
 
 	auto name = filename;
@@ -67,6 +72,7 @@ struct Window::Internal {
 
 Window::Window()
 	: internal{std::make_unique<Internal>()} {
+	uiFont = std::make_shared<Font>();
 }
 
 Window::~Window() = default;

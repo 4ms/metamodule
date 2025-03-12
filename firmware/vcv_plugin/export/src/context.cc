@@ -1,5 +1,6 @@
 #include "console/pr_dbg.hh"
 #include "engine/Engine.hpp"
+#include "vcv_plugin/export/nanovg/fontstash-wrapper.h"
 #include "window/Window.hpp"
 #include <app/Scene.hpp>
 #include <context.hpp>
@@ -30,6 +31,10 @@ Context::~Context() = default;
 void contextSet(Context *context) {
 	rack_context.scene->rackScroll = &rackScroll;
 	rack_context.scene->rackScroll->zoomWidget = &zoomWidget;
+
+	auto fonsctx = fonsCreateInternal();
+	auto handle = fonsAddFont(fonsctx, "DejaVuSans", asset::system("res/fonts/DejaVuSans.ttf").c_str(), 0);
+	rack_context.window->uiFont->handle = handle;
 
 	if (context != nullptr) {
 		pr_warn("rack context changed!\n");

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct FONScontext FONScontext;
 
 int fonsAddFont(FONScontext *s, const char *name, const char *path, int fontIndex);
@@ -11,3 +15,7 @@ void fonsDeleteInternal(FONScontext *s);
 FONScontext *fonsCreateInternal();
 void fonsResetFallbackFont(FONScontext *stash, int base);
 int fonsAddFallbackFont(FONScontext *stash, int base, int fallback);
+
+#ifdef __cplusplus
+}
+#endif
