@@ -1,5 +1,6 @@
 #pragma once
 #include "lvgl.h"
+#include <functional>
 
 namespace MetaModule
 {
@@ -42,13 +43,22 @@ inline void lv_disable_all_children(lv_obj_t *obj) {
 		lv_disable(lv_obj_get_child(obj, i));
 }
 
-inline void lv_foreach_child(lv_obj_t *obj, auto action) {
+// "forsome" is like "foreach" but will abort if action() returns false
+inline void lv_forsome_child(lv_obj_t *obj, std::function<bool(lv_obj_t *obj, unsigned i)> action) {
 	auto num_children = lv_obj_get_child_cnt(obj);
 	for (unsigned i = 0; i < num_children; i++) {
 		auto child = lv_obj_get_child(obj, i);
 		bool should_continue = action(child, i);
 		if (!should_continue)
 			break;
+	}
+}
+
+inline void lv_foreach_child(lv_obj_t *obj, std::function<void(lv_obj_t *obj, unsigned i)> action) {
+	auto num_children = lv_obj_get_child_cnt(obj);
+	for (unsigned i = 0; i < num_children; i++) {
+		auto child = lv_obj_get_child(obj, i);
+		action(child, i);
 	}
 }
 

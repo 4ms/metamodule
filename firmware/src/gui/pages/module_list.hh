@@ -241,10 +241,7 @@ private:
 	}
 
 	void clear_module_canvas() {
-		lv_foreach_child(ui_ModuleListImage, [](auto *obj, int i) {
-			lv_obj_del_async(obj);
-			return true;
-		});
+		lv_foreach_child(ui_ModuleListImage, [](auto *obj, int i) { lv_obj_del_async(obj); });
 	}
 
 	enum class View { BrandRoller, ModuleRoller, ModuleOnly } view{View::BrandRoller};
