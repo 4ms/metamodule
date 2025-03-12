@@ -15,12 +15,14 @@ namespace MetaModule
 
 struct PatchSelectorSubdirPanel {
 
-	void set_parent(lv_obj_t *parent, unsigned zindex) {
-		lv_obj_set_parent(ui_DrivesPanel, parent);
-		lv_obj_move_to_index(ui_DrivesPanel, zindex);
+	PatchSelectorSubdirPanel() {
+		group = lv_group_create();
 
 		for (auto vol_cont : vol_conts) {
 			auto vol_item = lv_obj_get_child(vol_cont, 0);
+
+			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_sel_blurred_style, LV_STATE_USER_2);
+
 			while (lv_obj_remove_event_cb(vol_item, nullptr)) {
 			}
 			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
@@ -29,30 +31,35 @@ struct PatchSelectorSubdirPanel {
 		}
 	}
 
+	void set_parent(lv_obj_t *parent, unsigned zindex) {
+		lv_obj_set_parent(ui_DrivesPanel, parent);
+		lv_obj_move_to_index(ui_DrivesPanel, zindex);
+	}
+
 	void populate(PatchDirList const &patchfiles) {
-		if (group == nullptr)
-			group = lv_group_create();
+		lv_group_remove_all_objs(group);
 
 		// populate side bar with volumes and dirs
 		for (auto [vol_cont, root] : zip(vol_conts, patchfiles.vol_root)) {
 
 			// Delete existing dir labels (except first one, which is the volume root)
-			if (auto num_children = lv_obj_get_child_cnt(vol_cont); num_children > 1) {
-				for (unsigned i = 1; i < num_children; i++) {
-					auto child = lv_obj_get_child(vol_cont, i);
-					if (child == nullptr)
-						continue;
+			// if (auto num_children = lv_obj_get_child_cnt(vol_cont); num_children > 1) {
+			// 	for (unsigned i = 1; i < num_children; i++) {
+			// 		auto child = lv_obj_get_child(vol_cont, i);
+			// 		if (child == nullptr)
+			// 			continue;
 
-					if (last_subdir_sel == lv_obj_get_child(vol_cont, i)) {
-						last_subdir_sel = nullptr; //prevent dangling pointer
-					}
+			// 		if (last_subdir_sel == lv_obj_get_child(vol_cont, i)) {
+			// 			last_subdir_sel = nullptr; //prevent dangling pointer
+			// 		}
 
-					lv_obj_del(child);
-				}
-			}
+			// 		lv_obj_del(child);
+			// 	}
+			// }
+
+			// lv_obj_refresh_style(vol_cont, LV_PART_MAIN, LV_STYLE_PROP_ANY);
 
 			auto vol_item = lv_obj_get_child(vol_cont, 0);
-			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_sel_blurred_style, LV_STATE_USER_2);
 
 			// No need to scan if no files or dirs: disable it
 			if (root.files.size() == 0 && root.dirs.size() == 0) {
@@ -67,8 +74,8 @@ struct PatchSelectorSubdirPanel {
 			lv_group_add_obj(group, vol_item);
 
 			// Add all dirs on volume
-			for (auto &dir : root.dirs)
-				add_subdir_to_panel(dir, vol_cont);
+			// for (auto &dir : root.dirs)
+			// 	add_subdir_to_panel(dir, vol_cont);
 
 			lv_enable(vol_cont);
 			lv_enable_all_children(vol_cont);
