@@ -188,13 +188,11 @@ private:
 		lv_foreach_child(ui_AutoMapKnobCont, [](lv_obj_t *obj, unsigned id) {
 			if (id > 0)
 				lv_obj_del_async(obj);
-			return true;
 		});
 
 		lv_foreach_child(ui_AutoMapJackCont, [](lv_obj_t *obj, unsigned id) {
 			if (id > 0)
 				lv_obj_del_async(obj);
-			return true;
 		});
 	}
 

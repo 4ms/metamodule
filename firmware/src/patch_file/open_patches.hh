@@ -69,10 +69,6 @@ struct OpenPatchList {
 		// return (std::find(list.begin(), list.end(), patch) != list.end());
 	}
 
-	void remove(std::list<OpenPatch>::iterator item) {
-		list.erase(item);
-	}
-
 	void remove_last() {
 		list.pop_back();
 	}

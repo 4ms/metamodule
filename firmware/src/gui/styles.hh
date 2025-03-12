@@ -5,7 +5,6 @@
 #include "slsexport/meta5/ui.h"
 #include <array>
 #include <charconv>
-#include <span>
 #include <string>
 
 // lvgl has prop1 and has_group fields out of order, thus not C++ friendly
