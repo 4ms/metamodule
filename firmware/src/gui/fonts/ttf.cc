@@ -49,7 +49,7 @@ TTFLoadResult load_ttf(std::string_view name, std::string_view path_) {
 	auto sz = ramdisk->read_file(path, std::span{(char *)data.data(), data.size()});
 
 	if (sz != len) {
-		pr_err("Failed to read file %s: expected %zu bytes, read %zu\n", path.data(), len, sz);
+		pr_warn("Failed to read file %s: expected %zu bytes, read %zu\n", path.data(), len, sz);
 		ttf_cache.erase(std::string(name));
 		return TTFLoadResult::Error;
 	}
@@ -122,19 +122,19 @@ lv_font_t const *get_ttf_font(std::string const &name, unsigned font_size) {
 			pr_dbg("ttf %s sz %u loaded into font cache\n", name.c_str(), font_size);
 			return font;
 		} else {
-			pr_err("Error creating lvgl font from ttf %s\n", name.c_str());
+			pr_warn("Error creating lvgl font from ttf %s\n", name.c_str());
 		}
 	} else {
-		pr_err("Requested ttf font %s whose file data is not in the cache\n", name.c_str());
+		pr_warn("Requested ttf font %s whose file data is not in the cache\n", name.c_str());
 	}
 
 	// Recurse to try the default ttf at the requested size
 	if (name != default_ttf) {
-		pr_err("Using fallback font (%s)\n", default_ttf.data());
+		pr_warn("Using fallback font (%s)\n", default_ttf.data());
 		return get_ttf_font(std::string(default_ttf), font_size);
 	}
 
-	pr_err("Failed to load default ttf font at size %u, using default non-ttf\n", font_size);
+	pr_warn("Failed to load default ttf font at size %u, using default non-ttf\n", font_size);
 	return fallback_font;
 }
 
