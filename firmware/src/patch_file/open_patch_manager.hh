@@ -74,7 +74,7 @@ public:
 			if (first == open_patches_.end()) {
 				return false;
 			} else {
-				open_patches_.remove(first);
+				open_patches_.remove(first->loc_hash);
 				num_to_remove--;
 			}
 		}
