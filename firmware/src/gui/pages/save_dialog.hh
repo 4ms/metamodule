@@ -3,7 +3,7 @@
 #include "gui/notify/queue.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/patch_selector_sidebar.hh"
+#include "gui/pages/patch_selector_subdir_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "patch_play/patch_playloader.hh"
 
@@ -200,7 +200,7 @@ struct SaveDialog {
 		};
 
 		EntryInfo selected_patch{.kind = DirEntryKind::Dir, .vol = patches.get_view_patch_vol(), .path = file_path};
-		subdir_panel.refresh(selected_patch);
+		subdir_panel.refresh_highlighted_item(selected_patch);
 		subdir_panel.hide_recent_files();
 	}
 

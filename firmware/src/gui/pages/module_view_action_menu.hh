@@ -3,7 +3,6 @@
 #include "gui/notify/queue.hh"
 #include "gui/pages/module_view_automap.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/pages/roller_popup.hh"
 #include "gui/pages/save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"

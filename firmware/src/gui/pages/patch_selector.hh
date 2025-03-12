@@ -7,7 +7,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/patch_selector_sidebar.hh"
+#include "gui/pages/patch_selector_subdir_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "patch_file/reload_patch.hh"
@@ -106,7 +106,7 @@ struct PatchSelectorPage : PageBase {
 	void refresh_subdir_panel() {
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
 		if (idx < roller_item_infos.size()) {
-			subdir_panel.refresh(roller_item_infos[idx]);
+			subdir_panel.refresh_highlighted_item(roller_item_infos[idx]);
 		}
 	}
 

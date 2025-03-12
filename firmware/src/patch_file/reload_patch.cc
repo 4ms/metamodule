@@ -7,7 +7,7 @@
 namespace MetaModule
 {
 
-static constexpr unsigned max_open_patches = 20;
+static constexpr unsigned max_open_patches = 5;
 
 ReloadPatch::ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches)
 	: patch_storage{patch_storage}
