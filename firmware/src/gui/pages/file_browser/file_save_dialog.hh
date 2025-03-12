@@ -1,7 +1,7 @@
 #pragma once
 #include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/pages/patch_selector_sidebar.hh"
+#include "gui/pages/patch_selector_subdir_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "patch_file/file_storage_proxy.hh"
 
@@ -65,7 +65,10 @@ struct FileSaveDialog {
 				case RefreshState::ReloadingPatchList:
 					subdir_panel.populate(patch_storage.get_patch_list());
 					subdir_panel.hide_recent_files();
-					// hide_spinner();
+
+					EntryInfo selected_patch{.kind = DirEntryKind::Dir, .vol = file_vol, .path = file_path};
+					subdir_panel.refresh_highlighted_item(selected_patch);
+
 					subdir_panel.focus();
 					refresh_state = RefreshState::Idle;
 					break;
@@ -218,7 +221,7 @@ private:
 		};
 
 		EntryInfo selected_patch{.kind = DirEntryKind::Dir, .vol = file_vol, .path = file_path};
-		subdir_panel.refresh(selected_patch);
+		subdir_panel.refresh_highlighted_item(selected_patch);
 		subdir_panel.hide_recent_files();
 	}
 

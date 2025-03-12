@@ -3,11 +3,9 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
-#include "lvgl.h"
 #include "patch_file/patch_dir_list.hh"
 #include "pr_dbg.hh"
-#include "util/countzip.hh"
-#include "util/zip.hh"
+#include <cstring>
 #include <functional>
 
 namespace MetaModule
@@ -47,8 +45,10 @@ struct PatchSelectorSubdirPanel {
 			// No need to scan if no files or dirs: disable it
 			if (root.files.size() == 0 && root.dirs.size() == 0) {
 				lv_disable(vol_cont);
-				lv_disable_all_children(vol_cont);
-				lv_obj_clear_state(vol_cont, LV_STATE_FOCUSED);
+				lv_foreach_child(vol_cont, [](lv_obj_t *child, unsigned i) {
+					lv_show(child, i == 0);
+					lv_disable(child);
+				});
 				continue;
 			}
 
@@ -56,9 +56,14 @@ struct PatchSelectorSubdirPanel {
 			lv_obj_set_user_data(vol_item, (void *)&root);
 			lv_group_add_obj(group, vol_item);
 
-			// Add all dirs on volume
+			// Add all dirs with files
 			auto num_existing_subdir_items = lv_obj_get_child_cnt(vol_cont) - 1;
 			for (auto i = 0u; auto &dir : root.dirs) {
+				if (dir.files.size() == 0) {
+					continue;
+				}
+
+				// Use existing lvgl entry object, or add a new one if needed
 				if (i < num_existing_subdir_items) {
 					overwrite_subdir(dir, lv_obj_get_child(vol_cont, i + 1));
 				} else {
@@ -87,40 +92,42 @@ struct PatchSelectorSubdirPanel {
 		lv_show(vol_conts[0]);
 	}
 
-	void refresh(EntryInfo const &selected_patch) {
+	void refresh_highlighted_item(EntryInfo const &selected_patch) {
 		// TODO: check if list was re-populated, or if entry info dir name changed, and only refresh if so
 
 		for (auto [vol, vol_name, vol_cont] : zip(PatchDirList::vols, PatchDirList::vol_name, vol_conts)) {
-			if (vol != selected_patch.vol)
+
+			// Clear highlighting styles on all entries
+			lv_obj_clear_state(vol_cont, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY | LV_STATE_USER_2);
+			lv_foreach_child(vol_cont, [](lv_obj_t *child, unsigned i) {
+				lv_obj_clear_state(child, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY | LV_STATE_USER_2);
+				label_clips(child);
+			});
+
+			if (vol != selected_patch.vol) {
 				continue;
+			}
 
 			lv_obj_t *dir_obj = nullptr;
 
+			// Find the entry that matches the current patch's volume and path
 			lv_foreach_child(vol_cont, [selected_patch, vol_name = vol_name, &dir_obj](lv_obj_t *obj, unsigned i) {
-				auto label_child = (i == 0) ? 1 : 0;
-				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
+				auto label_child = lv_obj_get_child(obj, (i == 0) ? 1 : 0);
+				const char *txt = lv_label_get_text(label_child);
 				const char *roller_path = (i == 0) ? vol_name : selected_patch.path.c_str();
-				if (txt == nullptr)
-					return true; //continue
-
-				if (strcmp(txt, roller_path) == 0) {
-					dir_obj = obj;
+				if (txt != nullptr) {
+					if (strcmp(txt, roller_path) == 0)
+						dir_obj = obj;
 				}
-				return true;
 			});
 
-			if (dir_obj && last_subdir_sel != dir_obj) {
-				if (last_subdir_sel) {
-					lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
-					lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUS_KEY);
-					lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
-					label_clips(last_subdir_sel);
-				}
-
+			if (dir_obj) {
 				if (lv_obj_has_state(ui_DrivesPanel, LV_STATE_FOCUSED)) {
 					lv_obj_add_state(dir_obj, LV_STATE_FOCUSED);
+					lv_obj_clear_state(dir_obj, LV_STATE_USER_2);
 				} else {
 					lv_obj_add_state(dir_obj, LV_STATE_USER_2);
+					lv_obj_clear_state(dir_obj, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY);
 				}
 				label_scrolls(dir_obj);
 				lv_obj_scroll_to_view_recursive(dir_obj, LV_ANIM_ON);
@@ -136,8 +143,16 @@ struct PatchSelectorSubdirPanel {
 		lv_group_activate(group);
 
 		if (last_subdir_sel) {
-			lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
-			lv_group_focus_obj(last_subdir_sel);
+			if (lv_obj_has_flag(last_subdir_sel, LV_OBJ_FLAG_HIDDEN)) {
+				if (group) {
+					lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
+					lv_group_focus_next(group);
+					last_subdir_sel = lv_group_get_focused(group);
+				}
+			} else {
+				lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
+				lv_group_focus_obj(last_subdir_sel);
+			}
 		} else {
 			if (group)
 				lv_group_focus_next(group);
