@@ -4,6 +4,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/prefs_pane_fs.hh"
 #include "patch_play/patch_playloader.hh"
 #include "src/core/lv_obj_scroll.h"
 #include <functional>
