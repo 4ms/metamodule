@@ -27,6 +27,7 @@ TEST_SOURCES += src/fw_update/hash/hash_processor.cc
 TEST_SOURCES += lib/CoreModules/moduleFactory.cc
 TEST_SOURCES += tests/resampler_tests.cc
 TEST_SOURCES += vcv_plugin/export/src/resampler.cc
+TEST_SOURCES += tests/stubs/plugin_module.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
