@@ -778,7 +778,9 @@ public:
 		pd.remove_module(module_idx);
 
 		plugin_module_deinit(modules[module_idx]);
+		modules[module_idx].reset();
 
+		// Move [i+1...end) to i
 		std::move(std::next(modules.begin(), module_idx + 1), modules.end(), std::next(modules.begin(), module_idx));
 
 		calc_multiple_module_indicies();
