@@ -209,7 +209,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		auto &params = param_block.params[idx];
 		auto &ext_out = audio_block.out_ext_codec[idx];
 		auto const &ext_in = audio_block.in_ext_codec[idx];
-		idx++;
 
 		// Audio inputs
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
@@ -285,6 +284,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			for (auto [i, extoutchan] : countzip(ext_out.chan))
 				extoutchan = get_ext_audio_output(i);
 		}
+
+		idx++;
 	}
 
 	player.update_lights();
