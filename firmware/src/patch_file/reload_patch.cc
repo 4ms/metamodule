@@ -7,11 +7,10 @@
 namespace MetaModule
 {
 
-static constexpr unsigned max_open_patches = 5;
-
-ReloadPatch::ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches)
+ReloadPatch::ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches, uint32_t max_open_patches)
 	: patch_storage{patch_storage}
-	, patches{patches} {
+	, patches{patches}
+	, max_open_patches{max_open_patches} {
 }
 
 // Gets the latest file timestamp and size from M4's cache

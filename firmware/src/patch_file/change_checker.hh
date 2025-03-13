@@ -23,13 +23,14 @@ struct PatchFileChangeChecker {
 						   OpenPatchManager &open_patch_manager,
 						   PatchPlayLoader &patch_playloader,
 						   GuiState &gui_state,
-						   NotificationQueue &notify_queue)
+						   NotificationQueue &notify_queue,
+						   uint32_t max_open_patches)
 		: patch_storage{patch_storage}
 		, open_patch_manager{open_patch_manager}
 		, patch_playloader{patch_playloader}
 		, gui_state{gui_state}
 		, notify_queue{notify_queue}
-		, patch_loader{patch_storage, open_patch_manager} {
+		, patch_loader{patch_storage, open_patch_manager, max_open_patches} {
 	}
 
 	enum class Status {

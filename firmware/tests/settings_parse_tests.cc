@@ -52,6 +52,9 @@ TEST_CASE("Parse settings file") {
     index: 3
     knobs_can_wake: 1
 
+  filesystem:
+    auto_reload_patch_file: false
+    max_open_patches: 7
 )";
 	// clang-format on
 
@@ -93,6 +96,9 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.screensaver.timeout_ms == 3);
 	CHECK(settings.screensaver.knobs_can_wake == true);
+
+	CHECK(settings.filesystem.auto_reload_patch_file == false);
+	CHECK(settings.filesystem.max_open_patches == 7);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -158,6 +164,12 @@ TEST_CASE("Get default settings if file is missing fields") {
   max_overrun_retries: 94
 )";
 	}
+	SUBCASE("Bad filesystem settings:") {
+		yaml = R"(Settings:
+  filesystem:
+    max_open_patches: INvalID
+)";
+	}
 
 	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
@@ -198,6 +210,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.screensaver.timeout_ms == MetaModule::ScreensaverSettings::defaultTimeout);
 	CHECK(settings.screensaver.knobs_can_wake == true);
+
+	CHECK(settings.filesystem.auto_reload_patch_file == true);
+	CHECK(settings.filesystem.max_open_patches == 5);
 }
 
 TEST_CASE("Serialize settings") {
@@ -239,6 +254,9 @@ TEST_CASE("Serialize settings") {
 	settings.screensaver.knobs_can_wake = false;
 	settings.screensaver.timeout_ms = 2;
 
+	settings.filesystem.max_open_patches = 8;
+	settings.filesystem.auto_reload_patch_file = false;
+
 	// clang format-off
 	std::string expected = R"(Settings:
   patch_view:
@@ -279,6 +297,9 @@ TEST_CASE("Serialize settings") {
   screensaver:
     index: 2
     knobs_can_wake: 0
+  filesystem:
+    auto_reload_patch_file: 0
+    max_open_patches: 8
 )";
 	// clang format-on
 

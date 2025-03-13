@@ -62,7 +62,12 @@ public:
 				UserSettings &settings,
 				Screensaver &screensaver,
 				FatFileIO &ramdisk)
-		: file_change_checker{patch_storage, open_patch_manager, patch_playloader, gui_state, notify_queue}
+		: file_change_checker{patch_storage,
+							  open_patch_manager,
+							  patch_playloader,
+							  gui_state,
+							  notify_queue,
+							  settings.filesystem.max_open_patches}
 		, info{.patch_storage = patch_storage,
 			   .open_patch_manager = open_patch_manager,
 			   .patch_playloader = patch_playloader,

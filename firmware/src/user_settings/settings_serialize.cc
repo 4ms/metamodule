@@ -54,6 +54,13 @@ static void write(ryml::NodeRef *n, ScreensaverSettings const &s) {
 	n->append_child() << ryml::key("knobs_can_wake") << s.knobs_can_wake;
 }
 
+static void write(ryml::NodeRef *n, FilesystemSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("auto_reload_patch_file") << s.auto_reload_patch_file;
+	n->append_child() << ryml::key("max_open_patches") << s.max_open_patches;
+}
+
 namespace Settings
 {
 
@@ -74,6 +81,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["last_patch_opened"] << settings.last_patch_opened;
 	data["last_patch_vol"] << static_cast<unsigned>(settings.last_patch_vol);
 	data["screensaver"] << settings.screensaver;
+	data["filesystem"] << settings.filesystem;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();
