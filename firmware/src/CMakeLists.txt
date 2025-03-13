@@ -121,6 +121,7 @@ add_executable(
   ${FWDIR}/src/fw_update/updater_proxy.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
+  ${FWDIR}/src/gui/slsexport/prefs_pane_fs.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/params/expanders.cc
   #
@@ -188,6 +189,7 @@ set_source_files_properties(
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
+  ${FWDIR}/src/gui/slsexport/prefs_pane_fs.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )

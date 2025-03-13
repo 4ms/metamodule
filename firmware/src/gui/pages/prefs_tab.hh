@@ -16,11 +16,15 @@ struct PrefsTab : SystemMenuTab {
 	PrefsTab(PatchPlayLoader &patch_playloader,
 			 AudioSettings &settings,
 			 ScreensaverSettings &screensaver,
+			 FilesystemSettings &fs,
 			 GuiState &gui_state)
 		: patch_playloader{patch_playloader}
 		, settings{settings}
 		, screensaver{screensaver}
-		, gui_state{gui_state} {
+		, gui_state{gui_state}
+		, fs{fs} {
+		init_SystemPrefsFSPane(ui_SystemMenuPrefsTab);
+
 		lv_obj_add_event_cb(ui_SystemPrefsSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsRevertButton, revert_cb, LV_EVENT_CLICKED, this);
 
@@ -29,12 +33,17 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsAudioSampleRateDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverTimeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioOverrunRetriesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioSampleRateDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverTimeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
+
+		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
+
+		lv_obj_move_foreground(ui_SystemPrefsButtonCont);
 
 		std::string opts;
 		for (auto item : AudioSettings::ValidBlockSizes) {
@@ -81,6 +90,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_remove_obj(ui_SystemPrefsAudioOverrunRetriesDropdown);
 		lv_group_remove_obj(ui_SystemPrefsScreensaverTimeDropdown);
 		lv_group_remove_obj(ui_SystemPrefsScreensaverKnobsCheck);
+		lv_group_remove_obj(ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_remove_obj(ui_SystemPrefsRevertButton);
 		lv_group_remove_obj(ui_SystemPrefsSaveButton);
 
@@ -89,6 +99,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_SystemPrefsAudioOverrunRetriesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverTimeDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverKnobsCheck);
+		lv_group_add_obj(group, ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsRevertButton);
 		lv_group_add_obj(group, ui_SystemPrefsSaveButton);
 
@@ -96,6 +107,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_dropdown_close(ui_SystemPrefsAudioBlocksizeDropdown);
 		lv_dropdown_close(ui_SystemPrefsAudioOverrunRetriesDropdown);
 		lv_dropdown_close(ui_SystemPrefsScreensaverTimeDropdown);
+		lv_dropdown_close(ui_SystemPrefsFSMaxPatchesDropdown);
 
 		lv_group_focus_obj(ui_SystemPrefsAudioSampleRateDropdown);
 		lv_group_set_editing(group, true);
@@ -126,6 +138,12 @@ struct PrefsTab : SystemMenuTab {
 		} else if (lv_dropdown_is_open(ui_SystemPrefsScreensaverTimeDropdown)) {
 			lv_dropdown_close(ui_SystemPrefsScreensaverTimeDropdown);
 			lv_group_focus_obj(ui_SystemPrefsScreensaverTimeDropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
+		} else if (lv_dropdown_is_open(ui_SystemPrefsFSMaxPatchesDropdown)) {
+			lv_dropdown_close(ui_SystemPrefsFSMaxPatchesDropdown);
+			lv_group_focus_obj(ui_SystemPrefsFSMaxPatchesDropdown);
 			lv_group_set_editing(group, false);
 			return true;
 
@@ -163,6 +181,11 @@ private:
 		lv_dropdown_set_selected(ui_SystemPrefsScreensaverTimeDropdown, screensaver_item >= 0 ? screensaver_item : 1);
 
 		lv_check(ui_SystemPrefsScreensaverKnobsCheck, screensaver.knobs_can_wake);
+
+		auto maxpatches_item = get_index(std::array{2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25},
+										 [this](uint32_t t) { return t == fs.max_open_patches; });
+
+		lv_dropdown_set_selected(ui_SystemPrefsFSMaxPatchesDropdown, maxpatches_item >= 0 ? maxpatches_item : 3);
 
 		gui_state.do_write_settings = false;
 
@@ -210,6 +233,13 @@ private:
 		return lv_obj_has_state(ui_SystemPrefsScreensaverKnobsCheck, LV_STATE_CHECKED);
 	}
 
+	uint32_t read_fs_max_open_patches() {
+		std::array<char, 4> txt{};
+		lv_dropdown_get_selected_str(ui_SystemPrefsFSMaxPatchesDropdown, txt.data(), txt.size());
+		auto val = atoi(txt.data());
+		return val > 0 ? val : FilesystemSettings::DefaultMaxOpenPatches;
+	}
+
 	void update_settings_from_dropdown() {
 		auto block_size = read_blocksize_dropdown();
 		auto sample_rate = read_samplerate_dropdown();
@@ -236,10 +266,18 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		auto max_open_patches = read_fs_max_open_patches();
+
+		if (fs.max_open_patches != max_open_patches) {
+			fs.max_open_patches = max_open_patches;
+			gui_state.do_write_settings = true;
+		}
+
 		lv_disable(ui_SystemPrefsSaveButton);
 		lv_disable(ui_SystemPrefsRevertButton);
 	}
 
+private:
 	static void save_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -268,10 +306,11 @@ private:
 		auto overrun_retries = page->read_overrun_dropdown();
 		auto timeout = page->read_timeout_dropdown();
 		auto knobwake = page->read_knobwake_check();
+		auto fs_max_patches = page->read_fs_max_open_patches();
 
 		if (block_size == page->settings.block_size && sample_rate == page->settings.sample_rate &&
 			overrun_retries == page->settings.max_overrun_retries && timeout == page->screensaver.timeout_ms &&
-			knobwake == page->screensaver.knobs_can_wake)
+			knobwake == page->screensaver.knobs_can_wake && fs_max_patches == page->fs.max_open_patches)
 		{
 			lv_disable(ui_SystemPrefsSaveButton);
 			lv_disable(ui_SystemPrefsRevertButton);
@@ -285,12 +324,14 @@ private:
 		if (!event)
 			return;
 
-		auto tar = event->target;
+		auto target = event->target;
 
-		if (tar == ui_SystemPrefsScreensaverTimeDropdown || tar == ui_SystemPrefsScreensaverKnobsCheck) {
+		// scroll to bottom if we select last items
+		if (target == ui_SystemPrefsFSMaxPatchesDropdown) {
 			lv_obj_scroll_to_view_recursive(ui_SystemPrefsSaveButton, LV_ANIM_ON);
 
-		} else if (tar == ui_SystemPrefsAudioBlocksizeDropdown || tar == ui_SystemPrefsAudioSampleRateDropdown) {
+			// scroll to top if we select first items
+		} else if (target == ui_SystemPrefsAudioBlocksizeDropdown || target == ui_SystemPrefsAudioSampleRateDropdown) {
 			lv_obj_scroll_to_y(ui_SystemMenuPrefsTab, 0, LV_ANIM_ON);
 		}
 	}
@@ -299,6 +340,7 @@ private:
 	AudioSettings &settings;
 	ScreensaverSettings &screensaver;
 	GuiState &gui_state;
+	FilesystemSettings &fs;
 
 	lv_group_t *group = nullptr;
 };
