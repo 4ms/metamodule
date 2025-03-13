@@ -24,7 +24,7 @@ struct PatchSelectorPage : PageBase {
 		: PageBase{info, PageId::PatchSel}
 		, subdir_panel{subdir_panel}
 		, patchfiles{patch_storage.get_patch_list()}
-		, patchloader{patch_storage, patches, settings.filesystem.max_open_patches}
+		, patchloader{patch_storage, patches, settings.filesystem}
 		, roller_hover(ui_PatchSelectorPage, ui_PatchListRoller, [this] { redraw_cb(); }) {
 
 		init_bg(ui_PatchSelectorPage);

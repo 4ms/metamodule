@@ -70,7 +70,7 @@ public:
 							  patch_playloader,
 							  gui_state,
 							  notify_queue,
-							  settings.filesystem.max_open_patches}
+							  settings.filesystem}
 		, info{.patch_storage = patch_storage,
 			   .open_patch_manager = open_patch_manager,
 			   .patch_playloader = patch_playloader,
