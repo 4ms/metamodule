@@ -119,11 +119,21 @@ private:
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		page->patches.new_patch();
-		page->patch_playloader.request_load_view_patch();
-		page->page_list.set_active_knobset(0);
-		page->load_page(PageId::ModuleList,
-						{.patch_loc_hash = page->patches.get_view_patch_loc_hash(), .view_knobset_id = 0});
+
+		auto max_open_patches = std::max<uint32_t>(page->settings.filesystem.max_open_patches, 2u) - 1;
+		if (page->patches.have_space_to_open_patch(max_open_patches)) {
+			page->patches.new_patch();
+			page->patch_playloader.request_load_view_patch();
+			page->page_list.set_active_knobset(0);
+			page->load_page(PageId::ModuleList,
+							{.patch_loc_hash = page->patches.get_view_patch_loc_hash(), .view_knobset_id = 0});
+		} else {
+			page->notify_queue.put(
+				{"Too many unsaved patches open! Save or close them to open a new patch, or change this in "
+				 "Settings > Prefs.",
+				 Notification::Priority::Info,
+				 4000});
+		}
 	}
 
 	static void settings_cb(lv_event_t *event) {

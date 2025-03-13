@@ -7,11 +7,10 @@
 namespace MetaModule
 {
 
-static constexpr unsigned max_open_patches = 5;
-
-ReloadPatch::ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches)
+ReloadPatch::ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches, FilesystemSettings &fs_settings)
 	: patch_storage{patch_storage}
-	, patches{patches} {
+	, patches{patches}
+	, fs_settings{fs_settings} {
 }
 
 // Gets the latest file timestamp and size from M4's cache
@@ -60,8 +59,12 @@ bool ReloadPatch::check_file_changed(PatchLocation const &patch_loc, uint32_t ti
 
 Result ReloadPatch::reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func) {
 
+	auto max_open_patches = std::max<uint32_t>(fs_settings.max_open_patches, 2u) - 1;
+
 	if (!patches.have_space_to_open_patch(max_open_patches)) {
-		return {false, "Too many unsaved patches open! Save or close them to open a new patch"};
+		return {false,
+				"Too many unsaved patches open! Save or close them to open a new patch, or change this in Settings > "
+				"Prefs"};
 	}
 
 	while (!patch_storage.request_load_patch(loc)) {

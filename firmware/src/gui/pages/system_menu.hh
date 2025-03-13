@@ -1,7 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/firmware_update_tab.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/plugin_tab.hh"
@@ -9,8 +8,6 @@
 #include "gui/pages/system_info_tab.hh"
 #include "gui/pages/system_tab.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
-#include "util/poll_event.hh"
 
 namespace MetaModule
 {
@@ -21,7 +18,11 @@ struct SystemMenuPage : PageBase {
 		: PageBase{info, PageId::SystemMenu}
 		, info_tab{patch_storage}
 		, plugin_tab{info.plugin_manager, info.settings.plugin_autoload, info.notify_queue, gui_state, patch_playloader}
-		, prefs_tab{info.patch_playloader, info.settings.audio, info.settings.screensaver, gui_state}
+		, prefs_tab{info.patch_playloader,
+					info.settings.audio,
+					info.settings.screensaver,
+					info.settings.filesystem,
+					gui_state}
 		, system_tab{patch_storage, params, metaparams, patch_playloader, patch_mod_queue}
 		, fwupdate_tab{patch_storage, patch_playloader}
 		, tab_bar(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {

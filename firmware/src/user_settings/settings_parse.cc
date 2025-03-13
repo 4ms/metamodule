@@ -92,6 +92,17 @@ static bool read(ryml::ConstNodeRef const &node, ScreensaverSettings *s) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	read_or_default(node, "auto_reload_patch_file", settings, &FilesystemSettings::auto_reload_patch_file);
+	read_or_default(node, "max_open_patches", settings, &FilesystemSettings::max_open_patches);
+	settings->make_valid();
+
+	return true;
+}
+
 namespace Settings
 {
 
@@ -116,8 +127,9 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_autoload);
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::last_patch_opened);
 	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
+	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
 
-	// TODO: cleaner way to parse and enum and reject out of range?
+	// TODO: cleaner way to parse an enum and reject out of range?
 	if (node.is_map() && node.has_child("last_patch_vol")) {
 		unsigned t = 0;
 		node["last_patch_vol"] >> t;

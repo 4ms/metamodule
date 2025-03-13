@@ -3,6 +3,7 @@
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
 #include "result_t.hh"
+#include "user_settings/fs_settings.hh"
 #include "util/callable.hh"
 
 namespace MetaModule
@@ -11,6 +12,7 @@ namespace MetaModule
 class ReloadPatch {
 	FileStorageProxy &patch_storage;
 	OpenPatchManager &patches;
+	FilesystemSettings &fs_settings;
 
 public:
 	struct FileTimeSize {
@@ -18,7 +20,7 @@ public:
 		uint32_t filesize;
 	};
 
-	ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches);
+	ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches, FilesystemSettings &fs_settings);
 
 	// Gets the latest file timestamp and size from M4's cache
 	// and compares it to our own

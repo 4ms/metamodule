@@ -1,5 +1,5 @@
 #include "gui/gui_state.hh"
-#include "gui/pages/base.hh"
+#include "gui/notify/queue.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/reload_patch.hh"
@@ -23,13 +23,14 @@ struct PatchFileChangeChecker {
 						   OpenPatchManager &open_patch_manager,
 						   PatchPlayLoader &patch_playloader,
 						   GuiState &gui_state,
-						   NotificationQueue &notify_queue)
+						   NotificationQueue &notify_queue,
+						   FilesystemSettings &fs_settings)
 		: patch_storage{patch_storage}
 		, open_patch_manager{open_patch_manager}
 		, patch_playloader{patch_playloader}
 		, gui_state{gui_state}
 		, notify_queue{notify_queue}
-		, patch_loader{patch_storage, open_patch_manager} {
+		, patch_loader{patch_storage, open_patch_manager, fs_settings} {
 	}
 
 	enum class Status {
