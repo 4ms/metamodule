@@ -145,6 +145,7 @@ else()
 		${FWDIR}/src/midi/midi_router.cc
 		${FWDIR}/src/params/expanders.cc
 		${FWDIR}/src/patch_play/patch_player_catchup.cc
+		${FWDIR}/src/patch_play/plugin_module.cc
         ${FWDIR}/src/patch_file/reload_patch.cc
 		src/file_browser_adaptor.cc
 
