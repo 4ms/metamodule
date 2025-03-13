@@ -16,7 +16,7 @@ void init_SystemPrefsCatchupPane(lv_obj_t *parentTab) {
 
 	ui_SystemPrefsCatchupTitle = lv_label_create(parentTab);
 	lv_obj_set_width(ui_SystemPrefsCatchupTitle, lv_pct(100));
-	lv_obj_set_height(ui_SystemPrefsCatchupTitle, LV_SIZE_CONTENT); /// 1
+	lv_obj_set_height(ui_SystemPrefsCatchupTitle, LV_SIZE_CONTENT);
 	lv_obj_set_align(ui_SystemPrefsCatchupTitle, LV_ALIGN_CENTER);
 	lv_label_set_text(ui_SystemPrefsCatchupTitle, "KNOB CATCHUP MODE");
 	lv_obj_set_style_text_color(ui_SystemPrefsCatchupTitle, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT);
