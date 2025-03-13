@@ -168,6 +168,7 @@ struct ModuleViewPage : PageBase {
 
 	void redraw_module() {
 		reset_module_page();
+
 		size_t num_elements = moduleinfo.elements.size();
 		opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
 		button.reserve(num_elements);
@@ -555,12 +556,17 @@ private:
 	void reset_module_page() {
 		for (auto &b : button)
 			lv_obj_del(b);
+		button.clear();
 
+		dyn_draw.blur();
+
+		// This should delete all canvas children
+		// which includes drawn_elements and dyn canvases
 		if (canvas)
 			lv_obj_del(canvas);
 
-		button.clear();
 		drawn_elements.clear();
+
 		opts.clear();
 		roller_drawn_el_idx.clear();
 		cur_selected = 1;
