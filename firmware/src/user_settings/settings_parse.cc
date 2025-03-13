@@ -109,7 +109,7 @@ static bool read(ryml::ConstNodeRef const &node, CatchupSettings *settings) {
 		settings->mode = CatchupParam{}.mode;
 	}
 
-	read_or_default(node, "exclude_buttons", settings, &CatchupSettings::button_exclude);
+	read_or_default(node, "allow_jump_outofrange", settings, &CatchupSettings::allow_jump_outofrange);
 	settings->make_valid();
 
 	return true;

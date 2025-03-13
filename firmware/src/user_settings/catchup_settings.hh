@@ -18,10 +18,10 @@ struct CatchupSettings {
 		Option{CatchupParam::Mode::LinearFade, "Linear fade"},
 	};
 	static constexpr CatchupParam::Mode DefaultMode = CatchupParam::Mode::ResumeOnMotion;
-	static constexpr bool DefaultButtonExclude = true;
+	static constexpr bool DefaultAllowJump = true;
 
 	CatchupParam::Mode mode = DefaultMode;
-	bool button_exclude = DefaultButtonExclude;
+	bool allow_jump_outofrange = DefaultAllowJump;
 
 	void make_valid() {
 
@@ -34,10 +34,10 @@ struct CatchupSettings {
 			mode = DefaultMode;
 
 		// Check if deserialized data contains a value other than 0 or 1
-		if (*reinterpret_cast<uint8_t *>(&button_exclude) != 0)
-			button_exclude = true;
+		if (*reinterpret_cast<uint8_t *>(&allow_jump_outofrange) != 0)
+			allow_jump_outofrange = true;
 		else
-			button_exclude = false;
+			allow_jump_outofrange = false;
 	}
 };
 

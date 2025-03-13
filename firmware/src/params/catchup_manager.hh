@@ -2,6 +2,7 @@
 #include "catchup_param.hh"
 #include "conf/panel_conf.hh"
 #include "patch-serial/patch/patch.hh"
+#include "pr_dbg.hh"
 #include <vector>
 
 namespace MetaModule
@@ -19,6 +20,8 @@ class CatchupManager {
 	std::array<bool, PanelDef::NumKnobs> catchup_inaccessible{false};
 
 	CatchupParam::Mode default_mode{CatchupParam::Mode::ResumeOnMotion};
+
+	bool allow_jump_out_of_range = false;
 
 public:
 	void set_panel_param(auto &modules, ParamSet &active_knob_maps, unsigned panel_knob_id, float val) {
@@ -56,14 +59,15 @@ public:
 						std::swap(min_scaled, max_scaled);
 
 					if (module_val < min_scaled || module_val > max_scaled) {
-						catchup_inaccessible[panel_knob_id] = true;
-						// TODO: optionally jump the module's knob to the panel position
-						// if (settings.allow_jump_out_of_range_param) {
-						//     knob_map.catchup.enter_tracking(scaled_phys_val);
-						//     modules[map.module_id]->set_param(map.param_id, val == 0 ? min_scaled : max_scaled);
-						//     auto new_module_val = modules[map.module_id]->get_param(map.param_id);
-						//     knob_map.catchup.report_actual_module_val(new_module_val);
-						// }
+						if (allow_jump_out_of_range) {
+							pr_dbg("Param is out of range, jumping value\n");
+							knob_map.catchup.enter_tracking(scaled_phys_val);
+							modules[map.module_id]->set_param(map.param_id, val == 0 ? min_scaled : max_scaled);
+							auto new_module_val = modules[map.module_id]->get_param(map.param_id);
+							knob_map.catchup.report_actual_module_val(new_module_val);
+						} else {
+							catchup_inaccessible[panel_knob_id] = true;
+						}
 					}
 				}
 			}
@@ -103,8 +107,9 @@ public:
 			stuck = false;
 	}
 
-	void set_default_mode(CatchupParam::Mode mode) {
+	void set_default_mode(CatchupParam::Mode mode, bool allow_jump_outofrange) {
 		default_mode = mode;
+		allow_jump_out_of_range = allow_jump_outofrange;
 	}
 
 	CatchupParam::Mode get_default_mode() {

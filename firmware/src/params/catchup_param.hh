@@ -41,7 +41,6 @@ public:
 
 		if (state == State::Tracking) {
 			// Change to Catchup mode if module changes value
-			printf("update(): tracking: last_module_val = %f, cur_module_val = %f\n", last_module_val, cur_module_val);
 			if (MathTools::abs_diff(last_module_val, cur_module_val) >= Tolerance) {
 				enter_catchup();
 				return {};
@@ -110,9 +109,7 @@ public:
 private:
 	std::optional<T> update_resume_equal(T scaled_phys_val, T module_val) {
 		// Exit catchup mode if module and physical values are close
-		printf("update_resume_equal: phys %f, module_val %f. Tol = %f\n", scaled_phys_val, module_val, Tolerance);
 		if (MathTools::abs_diff(module_val, scaled_phys_val) < Tolerance) {
-			printf("enter tracking\n");
 			return enter_tracking(scaled_phys_val);
 		}
 		return {};

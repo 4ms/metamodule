@@ -915,11 +915,7 @@ public:
 	}
 
 	// Set mode for all maps
-	void set_catchup_mode(CatchupParam::Mode mode);
-
-	// Set mode for one knobset only.
-	// If knob_set_idx is out of range, then active knob set will be changed.
-	void set_catchup_mode(CatchupParam::Mode mode, int knob_set_idx);
+	void set_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange);
 
 	// Set mode for one mapping only
 	void set_catchup_mode(int knob_set_idx, unsigned module_id, unsigned param_id, CatchupParam::Mode mode);

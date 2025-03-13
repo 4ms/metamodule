@@ -54,7 +54,7 @@ TEST_CASE("Parse settings file") {
 
   catchup:
     mode: ResumeOnEqual
-    exclude_buttons: 0
+    allow_jump_outofrange: 0
 
   filesystem:
     auto_reload_patch_file: false
@@ -102,7 +102,7 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.screensaver.knobs_can_wake == true);
 
 	CHECK(settings.catchup.mode == MetaModule::CatchupParam::Mode::ResumeOnEqual);
-	CHECK(settings.catchup.button_exclude == false);
+	CHECK(settings.catchup.allow_jump_outofrange == false);
 
 	CHECK(settings.filesystem.auto_reload_patch_file == false);
 	CHECK(settings.filesystem.max_open_patches == 7);
@@ -180,7 +180,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	SUBCASE("Bad catchup settings:") {
 		yaml = R"(Settings:
   catchup:
-    exclude_buttons: 2
+    allow_jump_outofrange: 2
 )";
 	}
 	SUBCASE("Bad filesystem settings:") {
@@ -231,7 +231,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.screensaver.knobs_can_wake == true);
 
 	CHECK(settings.catchup.mode == MetaModule::CatchupParam::Mode::ResumeOnMotion);
-	CHECK(settings.catchup.button_exclude == true);
+	CHECK(settings.catchup.allow_jump_outofrange == true);
 
 	CHECK(settings.filesystem.auto_reload_patch_file == true);
 	CHECK(settings.filesystem.max_open_patches == 15);
@@ -277,7 +277,7 @@ TEST_CASE("Serialize settings") {
 	settings.screensaver.timeout_ms = 2;
 
 	settings.catchup.mode = MetaModule::CatchupParam::Mode::LinearFade;
-	settings.catchup.button_exclude = false;
+	settings.catchup.allow_jump_outofrange = false;
 
 	settings.filesystem.max_open_patches = 8;
 	settings.filesystem.auto_reload_patch_file = false;
@@ -326,7 +326,7 @@ TEST_CASE("Serialize settings") {
     knobs_can_wake: 0
   catchup:
     mode: LinearFade
-    exclude_buttons: 0
+    allow_jump_outofrange: 0
   filesystem:
     auto_reload_patch_file: 0
     max_open_patches: 8
