@@ -56,6 +56,9 @@ TEST_CASE("Parse settings file") {
     mode: ResumeOnEqual
     exclude_buttons: 0
 
+  filesystem:
+    auto_reload_patch_file: false
+    max_open_patches: 7
 )";
 	// clang-format on
 
@@ -100,6 +103,9 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.catchup.mode == MetaModule::CatchupParam::Mode::ResumeOnEqual);
 	CHECK(settings.catchup.button_exclude == false);
+
+	CHECK(settings.filesystem.auto_reload_patch_file == false);
+	CHECK(settings.filesystem.max_open_patches == 7);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -177,6 +183,12 @@ TEST_CASE("Get default settings if file is missing fields") {
     exclude_buttons: 2
 )";
 	}
+	SUBCASE("Bad filesystem settings:") {
+		yaml = R"(Settings:
+  filesystem:
+    max_open_patches: INvalID
+)";
+	}
 
 	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
@@ -220,6 +232,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.catchup.mode == MetaModule::CatchupParam::Mode::ResumeOnMotion);
 	CHECK(settings.catchup.button_exclude == true);
+
+	CHECK(settings.filesystem.auto_reload_patch_file == true);
+	CHECK(settings.filesystem.max_open_patches == 5);
 }
 
 TEST_CASE("Serialize settings") {
@@ -264,6 +279,9 @@ TEST_CASE("Serialize settings") {
 	settings.catchup.mode = MetaModule::CatchupParam::Mode::LinearFade;
 	settings.catchup.button_exclude = false;
 
+	settings.filesystem.max_open_patches = 8;
+	settings.filesystem.auto_reload_patch_file = false;
+
 	// clang format-off
 	std::string expected = R"(Settings:
   patch_view:
@@ -279,6 +297,7 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: ShowAll
       opa: 100
+    show_graphic_screens: 1
   module_view:
     map_ring_flash_active: 0
     scroll_to_active_param: 1
@@ -292,6 +311,7 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: HideAlways
       opa: 0
+    show_graphic_screens: 1
   audio:
     sample_rate: 24000
     block_size: 512
@@ -307,6 +327,9 @@ TEST_CASE("Serialize settings") {
   catchup:
     mode: LinearFade
     exclude_buttons: 0
+  filesystem:
+    auto_reload_patch_file: 0
+    max_open_patches: 8
 )";
 	// clang format-on
 

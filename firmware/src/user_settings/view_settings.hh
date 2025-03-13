@@ -22,7 +22,8 @@ struct ModuleDisplaySettings {
 	MapRingStyle paneljack_style = {.mode = MapRingStyle::Mode::CurModuleIfPlaying, .opa = 128};
 	MapRingStyle cable_style = {.mode = MapRingStyle::Mode::ShowAll, .opa = 128};
 	unsigned view_height_px = 180;
-	bool changed = true;
+	bool changed = true; //???unused but keep for backward compat
+	bool show_graphic_screens = true;
 };
 
 } // namespace MetaModule

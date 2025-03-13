@@ -11,6 +11,7 @@ namespace MetaModule
 class ReloadPatch {
 	FileStorageProxy &patch_storage;
 	OpenPatchManager &patches;
+	uint32_t max_open_patches;
 
 public:
 	struct FileTimeSize {
@@ -18,7 +19,7 @@ public:
 		uint32_t filesize;
 	};
 
-	ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches);
+	ReloadPatch(FileStorageProxy &patch_storage, OpenPatchManager &patches, uint32_t max_open_patches);
 
 	// Gets the latest file timestamp and size from M4's cache
 	// and compares it to our own
