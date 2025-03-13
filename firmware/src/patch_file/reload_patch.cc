@@ -62,7 +62,9 @@ Result ReloadPatch::reload_patch_file(PatchLocation const &loc, Function<void()>
 	auto max_open_patches = std::max<uint32_t>(fs_settings.max_open_patches, 2u) - 1;
 
 	if (!patches.have_space_to_open_patch(max_open_patches)) {
-		return {false, "Too many unsaved patches open! Save or close them to open a new patch"};
+		return {false,
+				"Too many unsaved patches open! Save or close them to open a new patch, or change this in Settings > "
+				"Prefs"};
 	}
 
 	while (!patch_storage.request_load_patch(loc)) {
