@@ -79,6 +79,7 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	read_or_default(node, "param_style", s, &ModuleDisplaySettings::param_style);
 	read_or_default(node, "paneljack_style", s, &ModuleDisplaySettings::paneljack_style);
 	read_or_default(node, "cable_style", s, &ModuleDisplaySettings::cable_style);
+	read_or_default(node, "show_graphic_screens", s, &ModuleDisplaySettings::show_graphic_screens);
 
 	return true;
 }
@@ -114,6 +115,19 @@ static bool read(ryml::ConstNodeRef const &node, CatchupSettings *settings) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	using enum CatchupParam::Mode;
+
+	read_or_default(node, "auto_reload_patch_file", settings, &FilesystemSettings::auto_reload_patch_file);
+	read_or_default(node, "max_open_patches", settings, &FilesystemSettings::max_open_patches);
+	settings->make_valid();
+
+	return true;
+}
+
 namespace Settings
 {
 
@@ -139,6 +153,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::last_patch_opened);
 	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
 	read_or_default(node, "catchup", settings, &UserSettings::catchup);
+	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
 
 	// TODO: cleaner way to parse an enum and reject out of range?
 	if (node.is_map() && node.has_child("last_patch_vol")) {

@@ -30,6 +30,7 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("param_style") << s.param_style;
 	n->append_child() << ryml::key("paneljack_style") << s.paneljack_style;
 	n->append_child() << ryml::key("cable_style") << s.cable_style;
+	n->append_child() << ryml::key("show_graphic_screens") << s.show_graphic_screens;
 }
 
 static void write(ryml::NodeRef *n, AudioSettings const &s) {
@@ -66,6 +67,13 @@ static void write(ryml::NodeRef *n, CatchupSettings const &s) {
 	n->append_child() << ryml::key("exclude_buttons") << s.button_exclude;
 }
 
+static void write(ryml::NodeRef *n, FilesystemSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("auto_reload_patch_file") << s.auto_reload_patch_file;
+	n->append_child() << ryml::key("max_open_patches") << s.max_open_patches;
+}
+
 namespace Settings
 {
 
@@ -87,6 +95,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["last_patch_vol"] << static_cast<unsigned>(settings.last_patch_vol);
 	data["screensaver"] << settings.screensaver;
 	data["catchup"] << settings.catchup;
+	data["filesystem"] << settings.filesystem;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();

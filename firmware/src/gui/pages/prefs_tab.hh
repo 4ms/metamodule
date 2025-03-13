@@ -3,11 +3,11 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/prefs_menu.hh"
+#include "gui/slsexport/prefs_pane_catchup.hh"
+#include "gui/slsexport/prefs_pane_fs.hh"
 #include "patch_play/patch_playloader.hh"
 #include "src/core/lv_obj_scroll.h"
 #include "user_settings/audio_settings.hh"
-#include <functional>
 
 namespace MetaModule
 {
@@ -17,13 +17,16 @@ struct PrefsTab : SystemMenuTab {
 			 AudioSettings &audio_settings,
 			 ScreensaverSettings &screensaver,
 			 CatchupSettings &catchup,
+			 FilesystemSettings &fs,
 			 GuiState &gui_state)
 		: patch_playloader{patch_playloader}
 		, audio_settings{audio_settings}
 		, screensaver{screensaver}
 		, catchup{catchup}
-		, gui_state{gui_state} {
+		, gui_state{gui_state}
+		, fs{fs} {
 		init_SystemPrefsCatchupPane(ui_SystemMenuPrefsTab);
+		init_SystemPrefsFSPane(ui_SystemMenuPrefsTab);
 
 		lv_obj_add_event_cb(ui_SystemPrefsSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsRevertButton, revert_cb, LV_EVENT_CLICKED, this);
@@ -35,6 +38,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupModeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupExcludeButtonsCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioOverrunRetriesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
@@ -43,6 +47,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupModeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupExcludeButtonsCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
+		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 
 		lv_obj_move_foreground(ui_SystemPrefsButtonCont);
 
@@ -98,6 +103,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_remove_obj(ui_SystemPrefsScreensaverKnobsCheck);
 		lv_group_remove_obj(ui_SystemPrefsCatchupModeDropdown);
 		lv_group_remove_obj(ui_SystemPrefsCatchupExcludeButtonsCheck);
+		lv_group_remove_obj(ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_remove_obj(ui_SystemPrefsRevertButton);
 		lv_group_remove_obj(ui_SystemPrefsSaveButton);
 
@@ -108,6 +114,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverKnobsCheck);
 		lv_group_add_obj(group, ui_SystemPrefsCatchupModeDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsCatchupExcludeButtonsCheck);
+		lv_group_add_obj(group, ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsRevertButton);
 		lv_group_add_obj(group, ui_SystemPrefsSaveButton);
 
@@ -116,6 +123,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_dropdown_close(ui_SystemPrefsAudioOverrunRetriesDropdown);
 		lv_dropdown_close(ui_SystemPrefsScreensaverTimeDropdown);
 		lv_dropdown_close(ui_SystemPrefsCatchupModeDropdown);
+		lv_dropdown_close(ui_SystemPrefsFSMaxPatchesDropdown);
 
 		lv_group_focus_obj(ui_SystemPrefsAudioSampleRateDropdown);
 		lv_group_set_editing(group, true);
@@ -162,6 +170,11 @@ private:
 		lv_dropdown_set_selected(ui_SystemPrefsCatchupModeDropdown, catchupmode_item >= 0 ? catchupmode_item : 1);
 
 		lv_check(ui_SystemPrefsCatchupExcludeButtonsCheck, catchup.button_exclude);
+
+		auto maxpatches_item = get_index(std::array{2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25},
+										 [this](uint32_t t) { return t == fs.max_open_patches; });
+		printf("settings: %u, found at index %u\n", fs.max_open_patches, maxpatches_item);
+		lv_dropdown_set_selected(ui_SystemPrefsFSMaxPatchesDropdown, maxpatches_item >= 0 ? maxpatches_item : 3);
 
 		gui_state.do_write_settings = false;
 
@@ -223,6 +236,13 @@ private:
 		return lv_obj_has_state(ui_SystemPrefsCatchupExcludeButtonsCheck, LV_STATE_CHECKED);
 	}
 
+	uint32_t read_fs_max_open_patches() {
+		std::array<char, 4> txt;
+		lv_dropdown_get_selected_str(ui_SystemPrefsFSMaxPatchesDropdown, txt.data(), txt.size());
+		auto val = atoi(txt.data());
+		return val > 0 ? val : FilesystemSettings::DefaultMaxOpenPatches;
+	}
+
 	void update_settings_from_dropdown() {
 		auto block_size = read_blocksize_dropdown();
 		auto sample_rate = read_samplerate_dropdown();
@@ -259,6 +279,14 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		auto max_open_patches = read_fs_max_open_patches();
+		printf("dropdown: %u, settings: %u\n", max_open_patches, fs.max_open_patches);
+
+		if (fs.max_open_patches != max_open_patches) {
+			fs.max_open_patches = max_open_patches;
+			gui_state.do_write_settings = true;
+		}
+
 		lv_disable(ui_SystemPrefsSaveButton);
 		lv_disable(ui_SystemPrefsRevertButton);
 	}
@@ -292,6 +320,12 @@ private:
 		} else if (lv_dropdown_is_open(ui_SystemPrefsCatchupModeDropdown)) {
 			lv_dropdown_close(ui_SystemPrefsCatchupModeDropdown);
 			lv_group_focus_obj(ui_SystemPrefsCatchupModeDropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
+		} else if (lv_dropdown_is_open(ui_SystemPrefsFSMaxPatchesDropdown)) {
+			lv_dropdown_close(ui_SystemPrefsFSMaxPatchesDropdown);
+			lv_group_focus_obj(ui_SystemPrefsFSMaxPatchesDropdown);
 			lv_group_set_editing(group, false);
 			return true;
 
@@ -332,11 +366,14 @@ private:
 		auto knobwake = page->read_knobwake_check();
 		auto catchupmode = page->read_catchup_mode_dropdown();
 		auto catchup_exclude_buttons = page->read_catchup_exclude_check();
+		auto fs_max_patches = page->read_fs_max_open_patches();
+
+		printf("dropdown: %u, settings: %u\n", fs_max_patches, page->fs.max_open_patches);
 
 		if (block_size == page->audio_settings.block_size && sample_rate == page->audio_settings.sample_rate &&
 			overrun_retries == page->audio_settings.max_overrun_retries && timeout == page->screensaver.timeout_ms &&
 			knobwake == page->screensaver.knobs_can_wake && catchupmode == page->catchup.mode &&
-			catchup_exclude_buttons == page->catchup.button_exclude)
+			catchup_exclude_buttons == page->catchup.button_exclude && fs_max_patches == page->fs.max_open_patches)
 		{
 			lv_disable(ui_SystemPrefsSaveButton);
 			lv_disable(ui_SystemPrefsRevertButton);
@@ -350,12 +387,15 @@ private:
 		if (!event)
 			return;
 
-		auto tar = event->target;
+		auto target = event->target;
 
-		if (tar == ui_SystemPrefsCatchupModeDropdown || tar == ui_SystemPrefsCatchupExcludeButtonsCheck) {
+		// scroll to bottom if we select last items
+		// if (target == ui_SystemPrefsCatchupModeDropdown || target == ui_SystemPrefsCatchupExcludeButtonsCheck ||
+		if (target == ui_SystemPrefsFSMaxPatchesDropdown) {
 			lv_obj_scroll_to_view_recursive(ui_SystemPrefsSaveButton, LV_ANIM_ON);
 
-		} else if (tar == ui_SystemPrefsAudioBlocksizeDropdown || tar == ui_SystemPrefsAudioSampleRateDropdown) {
+			// scroll to top if we select first items
+		} else if (target == ui_SystemPrefsAudioBlocksizeDropdown || target == ui_SystemPrefsAudioSampleRateDropdown) {
 			lv_obj_scroll_to_y(ui_SystemMenuPrefsTab, 0, LV_ANIM_ON);
 		}
 	}
@@ -365,6 +405,7 @@ private:
 	ScreensaverSettings &screensaver;
 	CatchupSettings &catchup;
 	GuiState &gui_state;
+	FilesystemSettings &fs;
 
 	lv_group_t *group = nullptr;
 };

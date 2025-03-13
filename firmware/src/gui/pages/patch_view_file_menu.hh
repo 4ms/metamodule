@@ -93,7 +93,7 @@ struct PatchViewFileMenu {
 			lv_disable(ui_PatchFileRevertBut);
 			lv_disable(ui_PatchFileDuplicateBut);
 			lv_disable(ui_PatchFileRenameBut);
-			lv_disable(ui_PatchFileDeleteBut);
+			lv_enable(ui_PatchFileDeleteBut);
 		} else {
 			lv_group_focus_obj(ui_PatchFileSaveBut);
 			lv_enable(ui_PatchFileDuplicateBut);
@@ -134,7 +134,20 @@ struct PatchViewFileMenu {
 
 	void process_delete_file() {
 		if (delete_state == DeleteState::TryRequest) {
-			if (patch_storage.request_delete_file(patch_loc.filename, patch_loc.vol)) {
+			if (patch_loc.vol == Volume::RamDisk) {
+				// Patch has never been saved, so just remove it from open patches
+				// and from history
+				if (patches.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
+					play_loader.stop_audio();
+				}
+				patches.close_view_patch();
+				page_list.remove_history_matching_args(
+					{.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
+				page_list.request_new_page_no_history(PageId::PatchSel, {});
+				hide_menu();
+				delete_state = DeleteState::Idle;
+
+			} else if (patch_storage.request_delete_file(patch_loc.filename, patch_loc.vol)) {
 				delete_state = DeleteState::Requested;
 
 				if (patches.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
