@@ -141,6 +141,7 @@ add_executable(
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
+  ${FWDIR}/src/patch_play/plugin_module.cc
 
   #
   ${FWDIR}/src/fs/syscall/syscalls.cc
