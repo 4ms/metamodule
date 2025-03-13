@@ -8,7 +8,7 @@ struct FilesystemSettings {
 	bool auto_reload_patch_file{true}; //ignored
 	uint32_t max_open_patches{5};
 
-	static constexpr uint32_t MinOpenPatches = 1;
+	static constexpr uint32_t MinOpenPatches = 2;
 	static constexpr uint32_t DefaultMaxOpenPatches = 5;
 	static constexpr uint32_t MaxOpenPatches = 20;
 
