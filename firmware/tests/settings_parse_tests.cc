@@ -234,7 +234,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.catchup.button_exclude == true);
 
 	CHECK(settings.filesystem.auto_reload_patch_file == true);
-	CHECK(settings.filesystem.max_open_patches == 5);
+	CHECK(settings.filesystem.max_open_patches == 15);
 }
 
 TEST_CASE("Serialize settings") {
