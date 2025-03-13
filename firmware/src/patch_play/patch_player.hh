@@ -12,6 +12,7 @@
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/multicore_play.hh"
+#include "patch_play/plugin_module.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include "util/countzip.hh"
@@ -265,6 +266,7 @@ public:
 		smp.join();
 		is_loaded = false;
 		for (size_t i = 0; i < num_modules; i++) {
+			plugin_module_deinit(modules[i]);
 			modules[i].reset(nullptr);
 		}
 		pd.int_cables.clear();
@@ -712,6 +714,8 @@ public:
 		erase_and_squash_inner(midi_divclk_pulses);
 
 		pd.remove_module(module_idx);
+
+		plugin_module_deinit(modules[module_idx]);
 
 		std::move(std::next(modules.begin(), module_idx + 1), modules.end(), std::next(modules.begin(), module_idx));
 

@@ -124,6 +124,7 @@ add_executable(
   ${FWDIR}/src/gui/slsexport/prefs_pane_fs.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/params/expanders.cc
+  ${FWDIR}/src/patch_play/plugin_module.cc
   #
   ${FWDIR}/src/dynload/dynloader.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc
