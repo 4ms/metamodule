@@ -54,6 +54,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include "host_ll_usb.h"
 #include "stm32mp1xx_hal.h"
 
 /** @addtogroup STM32MP1xx_HAL_Driver
@@ -498,42 +499,45 @@ void HAL_HCD_IRQHandler(HCD_HandleTypeDef *hhcd)
   uint32_t interrupt;
 
   /* Ensure that we are in device mode */
-  if (USB_GetMode(hhcd->Instance) == USB_OTG_MODE_HOST)
+  if (LL_USB_GetMode(USBx) == USB_OTG_MODE_HOST)
   {
+
+	uint32_t flags = LL_USB_ReadInterrupts(USBx);
+
     /* Avoid spurious interrupt */
-    if (__HAL_HCD_IS_INVALID_INTERRUPT(hhcd))
+    if (flags == 0)
     {
       return;
     }
 
-    if (__HAL_HCD_GET_FLAG(hhcd, USB_OTG_GINTSTS_PXFR_INCOMPISOOUT))
+    if (flag_is_set(flags, USB_OTG_GINTSTS_PXFR_INCOMPISOOUT))
     {
       /* Incorrect mode, acknowledge the interrupt */
-      __HAL_HCD_CLEAR_FLAG(hhcd, USB_OTG_GINTSTS_PXFR_INCOMPISOOUT);
+      LL_USB_CLEAR_INT_FLAG(USBx, USB_OTG_GINTSTS_PXFR_INCOMPISOOUT);
     }
 
-    if (__HAL_HCD_GET_FLAG(hhcd, USB_OTG_GINTSTS_IISOIXFR))
+    if (flag_is_set(flags, USB_OTG_GINTSTS_IISOIXFR))
     {
       /* Incorrect mode, acknowledge the interrupt */
-      __HAL_HCD_CLEAR_FLAG(hhcd, USB_OTG_GINTSTS_IISOIXFR);
+      LL_USB_CLEAR_INT_FLAG(USBx, USB_OTG_GINTSTS_IISOIXFR);
     }
 
-    if (__HAL_HCD_GET_FLAG(hhcd, USB_OTG_GINTSTS_PTXFE))
+    if (flag_is_set(flags, USB_OTG_GINTSTS_PTXFE))
     {
       /* Incorrect mode, acknowledge the interrupt */
-      __HAL_HCD_CLEAR_FLAG(hhcd, USB_OTG_GINTSTS_PTXFE);
+      LL_USB_CLEAR_INT_FLAG(USBx, USB_OTG_GINTSTS_PTXFE);
     }
 
-    if (__HAL_HCD_GET_FLAG(hhcd, USB_OTG_GINTSTS_MMIS))
+    if (flag_is_set(flags, USB_OTG_GINTSTS_MMIS))
     {
       /* Incorrect mode, acknowledge the interrupt */
-      __HAL_HCD_CLEAR_FLAG(hhcd, USB_OTG_GINTSTS_MMIS);
+      LL_USB_CLEAR_INT_FLAG(USBx, USB_OTG_GINTSTS_MMIS);
     }
 
     /* Handle Host Disconnect Interrupts */
-    if (__HAL_HCD_GET_FLAG(hhcd, USB_OTG_GINTSTS_DISCINT))
+    if (flag_is_set(flags, USB_OTG_GINTSTS_DISCINT))
     {
-      __HAL_HCD_CLEAR_FLAG(hhcd, USB_OTG_GINTSTS_DISCINT);
+      LL_USB_CLEAR_INT_FLAG(USBx, USB_OTG_GINTSTS_DISCINT);
 
       if ((USBx_HPRT0 & USB_OTG_HPRT_PCSTS) == 0U)
       {
@@ -554,13 +558,13 @@ void HAL_HCD_IRQHandler(HCD_HandleTypeDef *hhcd)
     }
 
     /* Handle Host Port Interrupts */
-    if (__HAL_HCD_GET_FLAG(hhcd, USB_OTG_GINTSTS_HPRTINT))
+    if (flag_is_set(flags, USB_OTG_GINTSTS_HPRTINT))
     {
       HCD_Port_IRQHandler(hhcd);
     }
 
     /* Handle Host SOF Interrupt */
-    if (__HAL_HCD_GET_FLAG(hhcd, USB_OTG_GINTSTS_SOF))
+    if (flag_is_set(flags, USB_OTG_GINTSTS_SOF))
     {
 #if (USE_HAL_HCD_REGISTER_CALLBACKS == 1U)
       hhcd->SOFCallback(hhcd);
@@ -568,11 +572,11 @@ void HAL_HCD_IRQHandler(HCD_HandleTypeDef *hhcd)
       HAL_HCD_SOF_Callback(hhcd);
 #endif /* USE_HAL_HCD_REGISTER_CALLBACKS */
 
-      __HAL_HCD_CLEAR_FLAG(hhcd, USB_OTG_GINTSTS_SOF);
+      LL_USB_CLEAR_INT_FLAG(USBx, USB_OTG_GINTSTS_SOF);
     }
 
     /* Handle Rx Queue Level Interrupts */
-    if ((__HAL_HCD_GET_FLAG(hhcd, USB_OTG_GINTSTS_RXFLVL)) != 0U)
+    if ((flag_is_set(flags, USB_OTG_GINTSTS_RXFLVL)) != 0U)
     {
       USB_MASK_INTERRUPT(hhcd->Instance, USB_OTG_GINTSTS_RXFLVL);
 
@@ -582,24 +586,27 @@ void HAL_HCD_IRQHandler(HCD_HandleTypeDef *hhcd)
     }
 
     /* Handle Host channel Interrupt */
-    if (__HAL_HCD_GET_FLAG(hhcd, USB_OTG_GINTSTS_HCINT))
+    if (flag_is_set(flags, USB_OTG_GINTSTS_HCINT))
     {
-      interrupt = USB_HC_ReadInterrupt(hhcd->Instance);
-      for (i = 0U; i < hhcd->Init.Host_channels; i++)
+      interrupt = LL_USB_HC_ReadInterrupt(hhcd->Instance);
+      if (interrupt != 0)
       {
-        if ((interrupt & (1UL << (i & 0xFU))) != 0U)
+        for (i = 0U; i < hhcd->Init.Host_channels; i++)
         {
-          if ((USBx_HC(i)->HCCHAR & USB_OTG_HCCHAR_EPDIR) == USB_OTG_HCCHAR_EPDIR)
+          if ((interrupt & (1UL << (i & 0xFU))) != 0U)
           {
-            HCD_HC_IN_IRQHandler(hhcd, (uint8_t)i);
-          }
-          else
-          {
-            HCD_HC_OUT_IRQHandler(hhcd, (uint8_t)i);
+            if ((USBx_HC(i)->HCCHAR & USB_OTG_HCCHAR_EPDIR) == USB_OTG_HCCHAR_EPDIR)
+            {
+              HCD_HC_IN_IRQHandler(hhcd, (uint8_t)i);
+            }
+            else
+            {
+              HCD_HC_OUT_IRQHandler(hhcd, (uint8_t)i);
+            }
           }
         }
       }
-      __HAL_HCD_CLEAR_FLAG(hhcd, USB_OTG_GINTSTS_HCINT);
+      LL_USB_CLEAR_INT_FLAG(USBx, USB_OTG_GINTSTS_HCINT);
     }
   }
 }
@@ -1631,8 +1638,8 @@ static void HCD_Port_IRQHandler(HCD_HandleTypeDef *hhcd)
 {
   USB_OTG_GlobalTypeDef *USBx = hhcd->Instance;
   uint32_t USBx_BASE = (uint32_t)USBx;
-  __IO uint32_t hprt0;
-  __IO uint32_t hprt0_dup;
+  uint32_t hprt0;
+  uint32_t hprt0_dup;
 
   /* Handle Host Port Interrupts */
   hprt0 = USBx_HPRT0;
