@@ -87,7 +87,6 @@ struct KnobSetViewPage : PageBase {
 		indicators.resize(knobset->set.size());
 
 		lv_obj_t *focus{};
-		params.param_watcher.stop_watching_all();
 
 		for (auto [idx, map] : enumerate(knobset->set)) {
 			if (!map.is_panel_knob())
@@ -112,7 +111,6 @@ struct KnobSetViewPage : PageBase {
 				}
 			}
 
-			params.param_watcher.start_watching_param(map.module_id, map.param_id);
 			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), 0);
 
 			set_for_knob(cont, map.panel_knob_id);
@@ -171,29 +169,22 @@ struct KnobSetViewPage : PageBase {
 		handle_changed_active_status();
 
 		if (knobset) {
-			auto watched_params = params.param_watcher.active_watched_params();
+			for (auto idx = 0u; auto const &map : knobset->set) {
+				auto value = patch_playloader.param_value(map.module_id, map.param_id);
 
-			for (auto const &p : watched_params) {
-				if (!p.is_active())
-					continue;
-
-				auto map_it = std::ranges::find_if(knobset->set, [&p](MappedKnob const &m) {
-					return m.module_id == p.module_id && m.param_id == p.param_id;
-				});
-				if (map_it == knobset->set.end())
-					continue;
-				auto idx = std::distance(knobset->set.begin(), map_it);
-				auto arc_val = map_it->unmap_val(p.value) * 120.f;
+				auto arc_val = map.unmap_val(value) * 120.f;
 				lv_arc_set_value(arcs[idx], arc_val);
 
-				if (map_it->is_panel_knob()) {
-					auto phys_val = params.knobs[map_it->panel_knob_id].val;
-					auto mapped_phys_val = map_it->get_mapped_val(phys_val);
+				if (map.is_panel_knob()) {
+					auto phys_val = params.knobs[map.panel_knob_id].val;
+					auto mapped_phys_val = map.get_mapped_val(phys_val);
 
-					auto is_tracking = patch_playloader.is_param_tracking(p.module_id, p.param_id);
+					auto is_tracking = patch_playloader.is_param_tracking(map.module_id, map.param_id);
 					update_indicator(indicators[idx], is_tracking, mapped_phys_val);
 					update_knob(arcs[idx], is_tracking, arc_val);
 				}
+
+				idx++;
 			}
 		}
 

@@ -260,7 +260,6 @@ struct PatchViewPage : PageBase {
 		file_menu.hide();
 		params.displays.stop_watching_all();
 		params.lights.stop_watching_all();
-		params.param_watcher.stop_watching_all();
 
 		dyn_draws.clear();
 
@@ -433,11 +432,6 @@ private:
 								   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
 									   params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
 								   }
-
-								   if (gui_el.count.num_params > 0) {
-									   params.param_watcher.start_watching_param(gui_el.module_idx,
-																				 gui_el.idx.param_idx);
-								   }
 							   },
 							   [&](DynamicTextDisplay const &el) {
 								   params.displays.start_watching_display(gui_el.module_idx, gui_el.idx.light_idx);
@@ -507,17 +501,22 @@ private:
 
 			auto &gui_el = drawn_el.gui_element;
 
-			auto was_redrawn = redraw_param(drawn_el, params.param_watcher.active_watched_params());
+			if (drawn_el.gui_element.count.num_params > 0) {
+				auto value =
+					patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
+				auto was_redrawn = redraw_param(drawn_el, value);
 
-			if (was_redrawn) {
-				if (page_settings.map_ring_flash_active)
-					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
+				if (was_redrawn) {
+					if (page_settings.map_ring_flash_active)
+						map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
 
-				if (page_settings.scroll_to_active_param) {
-					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+					if (page_settings.scroll_to_active_param) {
+						lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+					}
 				}
 			}
 
+			// TODO: this should just query player->get_light_brightness(gui_el.module_idx, light_i...);
 			if (gui_el.module_idx < light_vals.size())
 				update_light(drawn_el, light_vals[gui_el.module_idx]);
 

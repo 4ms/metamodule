@@ -30,7 +30,7 @@ struct ModuleViewPage : PageBase {
 		, page_settings{settings.module_view}
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
-		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
+		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state, patch_playloader}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
 		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
 		, module_menu{patch_playloader}
@@ -309,10 +309,6 @@ struct ModuleViewPage : PageBase {
 						   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
 							   params.lights.start_watching_light(this_module_id, gui_el.idx.light_idx + i);
 						   }
-
-						   if (gui_el.count.num_params > 0) {
-							   params.param_watcher.start_watching_param(this_module_id, gui_el.idx.param_idx);
-						   }
 					   },
 				   },
 				   drawn_element.element);
@@ -419,7 +415,9 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
 
-				auto was_redrawn = redraw_param(drawn_el, params.param_watcher.active_watched_params());
+				auto value =
+					patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
+				auto was_redrawn = redraw_param(drawn_el, value);
 
 				if (was_redrawn && page_settings.map_ring_flash_active) {
 					map_ring_display.flash_once(gui_el.map_ring, true);
@@ -510,7 +508,6 @@ struct ModuleViewPage : PageBase {
 		dyn_draw.blur();
 		params.lights.stop_watching_all();
 		params.displays.stop_watching_all();
-		params.param_watcher.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}

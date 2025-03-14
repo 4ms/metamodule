@@ -5,7 +5,6 @@
 #include "gui/images/paths.hh"
 #include "lvgl.h"
 #include "patch/patch_data.hh"
-#include "patch_play/param_watch.hh"
 #include "pr_dbg.hh"
 #include <cmath>
 
@@ -169,20 +168,12 @@ inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }
 
-inline bool redraw_param(DrawnElement &drawn_el, std::span<const WatchedParam> watched_params) {
+inline bool redraw_param(DrawnElement &drawn_el, float value) {
 	bool was_redrawn = false;
 
 	if (drawn_el.gui_element.count.num_params > 0) {
-		// Scan all watched_params to find a match
-		for (auto const &p : watched_params) {
-			if (p.is_active() && p.module_id == drawn_el.gui_element.module_idx &&
-				p.param_id == drawn_el.gui_element.idx.param_idx)
-			{
-				was_redrawn = std::visit([&](auto &el) { return redraw_element(el, drawn_el.gui_element, p.value); },
-										 drawn_el.element);
-				break;
-			}
-		}
+		was_redrawn =
+			std::visit([&](auto &el) { return redraw_element(el, drawn_el.gui_element, value); }, drawn_el.element);
 	}
 	return was_redrawn;
 }
