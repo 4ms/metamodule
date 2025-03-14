@@ -102,22 +102,11 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 	audio_stream.process(in_buffer, out_buffer);
 
-	for (auto &w : params.lights.watch_lights) {
-		if (w.is_active())
-			w.value = patch_player.get_module_light(w.module_id, w.light_id);
-	}
-
 	for (auto &d : params.displays.watch_displays) {
 		if (d.is_active()) {
 			auto text = std::span<char>(d.text._data, d.text.capacity);
 			auto sz = patch_player.get_display_text(d.module_id, d.light_id, text);
 			d.text._data[sz] = 0;
-		}
-	}
-
-	for (auto &p : params.param_watcher.active_watched_params()) {
-		if (p.is_active()) {
-			p.value = patch_player.get_param(p.module_id, p.param_id);
 		}
 	}
 
