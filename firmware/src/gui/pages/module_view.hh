@@ -301,16 +301,11 @@ struct ModuleViewPage : PageBase {
 
 	void watch_element(DrawnElement const &drawn_element) {
 		auto gui_el = drawn_element.gui_element;
-		std::visit(overloaded{
-					   [&](DynamicTextDisplay const &el) {
-						   params.displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
-					   },
-					   [&](auto const &el) {
-						   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
-							   params.lights.start_watching_light(this_module_id, gui_el.idx.light_idx + i);
-						   }
-					   },
-				   },
+		std::visit(overloaded{[&](DynamicTextDisplay const &el) {
+								  params.displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
+							  },
+							  [](auto const &el) {
+							  }},
 				   drawn_element.element);
 	}
 
@@ -402,15 +397,6 @@ struct ModuleViewPage : PageBase {
 		}
 
 		if (is_patch_playloaded) {
-			// copy light values from params, indexed by light element id
-			for (auto &wl : params.lights.watch_lights) {
-				if (wl.light_id >= MAX_LIGHTS_PER_MODULE)
-					continue;
-
-				if (wl.is_active() && wl.module_id == this_module_id) {
-					light_vals[wl.light_id] = wl.value;
-				}
-			}
 
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
@@ -423,7 +409,18 @@ struct ModuleViewPage : PageBase {
 					map_ring_display.flash_once(gui_el.map_ring, true);
 				}
 
-				update_light(drawn_el, light_vals);
+				if (auto num_light_elements = gui_el.count.num_lights) {
+
+					std::array<float, 3> storage{};
+					auto light_vals = std::span{storage.data(), std::min(storage.size(), num_light_elements)};
+
+					for (auto i = 0u; auto &val : light_vals) {
+						val = patch_playloader.light_value(gui_el.module_idx, gui_el.idx.light_idx + i);
+						i++;
+					}
+
+					update_light(drawn_el, light_vals);
+				}
 
 				redraw_display(drawn_el, this_module_id, params.displays.watch_displays);
 			}
@@ -506,7 +503,6 @@ struct ModuleViewPage : PageBase {
 
 	void blur() final {
 		dyn_draw.blur();
-		params.lights.stop_watching_all();
 		params.displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
@@ -827,8 +823,6 @@ private:
 	std::vector<lv_obj_t *> button;
 	std::vector<DrawnElement> drawn_elements;
 	std::vector<int> roller_drawn_el_idx;
-
-	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals{};
 
 	lv_obj_t *canvas = nullptr;
 	ModuleViewMappingPane mapping_pane;

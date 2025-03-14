@@ -93,10 +93,6 @@ public:
 		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
-	LightWatcher &lights() {
-		return params.lights;
-	}
-
 	TextDisplayWatcher &displays() {
 		return params.displays;
 	}

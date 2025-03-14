@@ -138,16 +138,7 @@ struct UpdateLightElement {
 inline void update_light(DrawnElement &drawn_el, std::span<const float> light_vals) {
 	auto &gui_el = drawn_el.gui_element;
 
-	auto num_lights = gui_el.count.num_lights;
-	auto first_light = gui_el.idx.light_idx;
-
-	if (num_lights > 0) {
-		if (light_vals.size() >= (first_light + num_lights)) {
-			auto these_lights = std::span<const float>{&light_vals[first_light], &light_vals[first_light + num_lights]};
-
-			std::visit(UpdateLightElement{gui_el, these_lights}, drawn_el.element);
-		}
-	}
+	std::visit(UpdateLightElement{gui_el, light_vals}, drawn_el.element);
 }
 
 } // namespace MetaModule

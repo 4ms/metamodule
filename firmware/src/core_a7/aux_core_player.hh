@@ -66,13 +66,6 @@ struct AuxPlayer {
 	void read_patch_gui_elements() {
 		if (ui.new_patch_data.load() == false) {
 
-			for (auto &w : ui.lights().watch_lights) {
-				if (w.is_active()) {
-					auto val = patch_player.get_module_light(w.module_id, w.light_id);
-					w.value = val;
-				}
-			}
-
 			for (auto &d : ui.displays().watch_displays) {
 				if (d.is_active()) {
 					auto text = std::span<char>(d.text._data, d.text.capacity);

@@ -2,10 +2,7 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
-#include "midi_params.hh"
 #include "patch/midi_def.hh"
-#include "patch/patch.hh"
-#include "patch_play/lights.hh"
 #include "patch_play/text_display.hh"
 #include "util/debouncer.hh"
 #include "util/filter.hh"
@@ -125,13 +122,11 @@ struct ParamsMidiState : ParamsState {
 	LatchedParam<uint8_t, 1, 1> last_midi_note;
 	bool midi_gate = false;
 
-	LightWatcher lights;
 	TextDisplayWatcher displays;
 
 	void clear() {
 		ParamsState::clear();
 
-		lights.stop_watching_all();
 		displays.stop_watching_all();
 
 		for (auto &cc : midi_ccs)
