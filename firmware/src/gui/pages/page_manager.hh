@@ -211,7 +211,7 @@ public:
 		if (auto panel_knob_id = info.patch_playloader.is_panel_knob_catchup_inaccessible()) {
 			std::string msg =
 				"Knob " + std::string(PanelDef::get_map_param_name(*panel_knob_id)) +
-				" cannot reach the mapped knob. Adjust the mapping's Min/Max values or disable Track on Equal mode.";
+				" cannot reach the mapped parameter's value. Adjust the Min/Max or your Knob Catchup preferences.";
 			DisplayNotification::show({msg, Notification::Priority::Info, 3000});
 		}
 	}

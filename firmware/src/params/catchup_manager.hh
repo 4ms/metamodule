@@ -2,7 +2,6 @@
 #include "catchup_param.hh"
 #include "conf/panel_conf.hh"
 #include "patch-serial/patch/patch.hh"
-#include "pr_dbg.hh"
 #include <vector>
 
 namespace MetaModule
@@ -52,17 +51,21 @@ public:
 				// If user moves the knob to the extreme position (0 or 1), and the module's knob
 				// is still not reachable, then mark this catchup as inaccessible.
 				// The GUI thread will query for this state and send a notification.
-				if (val == 0 || val == 1) {
+				bool pot_low = val < 2.f / 4095.f;
+				bool pot_high = val > 4093.f / 4095.f;
+
+				if (pot_low || pot_high) {
 					auto min_scaled = map.get_mapped_val(0);
 					auto max_scaled = map.get_mapped_val(1);
-					if (min_scaled > max_scaled)
+					if (min_scaled > max_scaled) {
 						std::swap(min_scaled, max_scaled);
+						std::swap(pot_low, pot_high);
+					}
 
-					if (module_val < min_scaled || module_val > max_scaled) {
+					if ((pot_low && module_val < min_scaled) || (pot_high && module_val > max_scaled)) {
 						if (allow_jump_out_of_range) {
-							pr_dbg("Param is out of range, jumping value\n");
 							knob_map.catchup.enter_tracking(scaled_phys_val);
-							modules[map.module_id]->set_param(map.param_id, val == 0 ? min_scaled : max_scaled);
+							modules[map.module_id]->set_param(map.param_id, pot_low ? min_scaled : max_scaled);
 							auto new_module_val = modules[map.module_id]->get_param(map.param_id);
 							knob_map.catchup.report_actual_module_val(new_module_val);
 						} else {
