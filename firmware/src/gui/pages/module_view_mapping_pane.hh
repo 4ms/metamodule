@@ -37,7 +37,8 @@ struct ModuleViewMappingPane {
 						  PageArguments &args,
 						  PageList &page_list,
 						  NotificationQueue &notify_queue,
-						  GuiState &gui_state)
+						  GuiState &gui_state,
+						  PatchPlayLoader &playloader)
 		: pane_group(lv_group_create())
 		, patch{patches.get_view_patch()}
 		, params{params}
@@ -46,7 +47,7 @@ struct ModuleViewMappingPane {
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
-		, control_popup{patches, patch_mod_queue, params.param_watcher}
+		, control_popup{patches, patch_mod_queue, playloader}
 		, midi_map_popup{params}
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {

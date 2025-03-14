@@ -164,6 +164,14 @@ struct PatchPlayLoader {
 		return player_.panel_knob_catchup_inaccessible();
 	}
 
+	float param_value(uint16_t module_idx, uint16_t param_idx) {
+		return player_.get_param(module_idx, param_idx);
+	}
+
+	float light_value(uint16_t module_idx, uint16_t param_idx) {
+		return player_.get_module_light(module_idx, param_idx);
+	}
+
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {

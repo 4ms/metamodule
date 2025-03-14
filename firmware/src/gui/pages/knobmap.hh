@@ -127,10 +127,6 @@ struct KnobMapPage : PageBase {
 
 		// Knob arc
 
-		params.param_watcher.stop_watching_all();
-		params.param_watcher.start_watching_param(map.module_id, map.param_id);
-		pr_dbg("Start watching m:%d p:%d\n", map.module_id, map.param_id);
-
 		float knob_val = static_param ? map.unmap_val(static_param->value) : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
 
@@ -190,13 +186,9 @@ struct KnobMapPage : PageBase {
 				}
 			}
 
-			auto watched_params = params.param_watcher.active_watched_params();
-			for (auto const &p : watched_params) {
-				if (p.is_active() && p.param_id == map.param_id && p.module_id == map.module_id) {
-					auto arc_val = map.unmap_val(p.value);
-					set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, arc_val);
-				}
-			}
+			auto value = patch_playloader.param_value(map.module_id, map.param_id);
+			auto arc_val = map.unmap_val(value);
+			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, arc_val);
 		}
 
 		poll_patch_file_changed();

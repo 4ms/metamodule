@@ -259,8 +259,6 @@ struct PatchViewPage : PageBase {
 		desc_panel.hide();
 		file_menu.hide();
 		params.displays.stop_watching_all();
-		params.lights.stop_watching_all();
-		params.param_watcher.stop_watching_all();
 
 		dyn_draws.clear();
 
@@ -421,7 +419,6 @@ private:
 	}
 
 	void watch_modules() {
-		params.lights.stop_watching_all();
 		params.displays.stop_watching_all();
 
 		if (is_patch_playloaded) {
@@ -429,62 +426,17 @@ private:
 				auto &gui_el = drawn_element.gui_element;
 
 				std::visit(overloaded{
-							   [&](auto const &el) {
-								   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
-									   params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
-								   }
-
-								   if (gui_el.count.num_params > 0) {
-									   params.param_watcher.start_watching_param(gui_el.module_idx,
-																				 gui_el.idx.param_idx);
-								   }
-							   },
+							   [](auto const &el) {},
 							   [&](DynamicTextDisplay const &el) {
 								   params.displays.start_watching_display(gui_el.module_idx, gui_el.idx.light_idx);
 							   },
 						   },
 						   drawn_element.element);
 			}
-
-			// Get number of lights per module and resize the vectors
-			light_vals.clear();
-			for (auto const &slug : patch->module_slugs) {
-				auto info = ModuleFactory::getModuleInfo(slug);
-				auto &vec = light_vals.emplace_back();
-				int max = -1;
-				for (auto i = 0u; auto idx : info.indices) {
-					auto count = ElementCount::count(info.elements[i]).num_lights;
-					if (count > 0 && idx.light_idx != ElementCount::Indices::NoElementMarker) {
-						max = std::max(int(idx.light_idx + count), max);
-					}
-					i++;
-				}
-				vec.resize(max + 1, 0.f);
-			}
 		}
 	}
 
 	void redraw_elements() {
-
-		// copy light values from params
-		// indexed by module id and light element id
-		for (auto &wl : params.lights.watch_lights) {
-			if (wl.is_active()) {
-				if (wl.module_id < light_vals.size()) {
-					auto &vec = light_vals[wl.module_id];
-					if (wl.light_id < 256) {
-						if (wl.light_id < vec.size())
-							vec[wl.light_id] = wl.value;
-						else
-							pr_err("Invalid light size %u for module %u\n", wl.light_id, wl.module_id);
-					} else {
-						pr_err("Can only watch 256 lights, request made for %u\n", wl.light_id);
-					}
-				} else
-					pr_err("Invalid module id in watch lights: %u\n", wl.module_id);
-			}
-		}
-
 		// Redraw all elements that have changed state (knobs, lights, etc)
 		auto is_visible = [](lv_coord_t pos) {
 			auto visible_top = lv_obj_get_scroll_y(ui_PatchViewPage);
@@ -507,19 +459,32 @@ private:
 
 			auto &gui_el = drawn_el.gui_element;
 
-			auto was_redrawn = redraw_param(drawn_el, params.param_watcher.active_watched_params());
+			if (drawn_el.gui_element.count.num_params > 0) {
+				auto value =
+					patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
+				auto was_redrawn = redraw_param(drawn_el, value);
 
-			if (was_redrawn) {
-				if (page_settings.map_ring_flash_active)
-					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
+				if (was_redrawn) {
+					if (page_settings.map_ring_flash_active)
+						map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
 
-				if (page_settings.scroll_to_active_param) {
-					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+					if (page_settings.scroll_to_active_param) {
+						lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+					}
 				}
 			}
 
-			if (gui_el.module_idx < light_vals.size())
-				update_light(drawn_el, light_vals[gui_el.module_idx]);
+			if (auto num_light_elements = gui_el.count.num_lights) {
+				std::array<float, 3> storage{};
+				auto light_vals = std::span{storage.data(), std::min(storage.size(), num_light_elements)};
+
+				for (auto i = 0u; auto &val : light_vals) {
+					val = patch_playloader.light_value(gui_el.module_idx, gui_el.idx.light_idx + i);
+					i++;
+				}
+
+				update_light(drawn_el, light_vals);
+			}
 
 			redraw_display(drawn_el, gui_el.module_idx, params.displays.watch_displays);
 		}
@@ -775,7 +740,7 @@ private:
 		uint32_t selected_module_id;
 	};
 
-	std::vector<std::vector<float>> light_vals;
+	// std::vector<std::vector<float>> light_vals;
 
 	std::vector<DynamicElementDraw> dyn_draws;
 	unsigned dyn_frame_throttle_ctr = 1;

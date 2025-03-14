@@ -11,6 +11,7 @@
 #include "patch/patch_data.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_play/patch_mod_queue.hh"
+#include "patch_play/patch_playloader.hh"
 #include "util/overloaded.hh"
 
 namespace MetaModule
@@ -18,10 +19,10 @@ namespace MetaModule
 
 struct ManualControlPopUp {
 
-	ManualControlPopUp(OpenPatchManager &patches, PatchModQueue &patch_mod_queue, ParamWatcher &param_watcher)
+	ManualControlPopUp(OpenPatchManager &patches, PatchModQueue &patch_mod_queue, PatchPlayLoader &playloader)
 		: patch_mod_queue{patch_mod_queue}
 		, patches{patches}
-		, param_watcher{param_watcher}
+		, playloader{playloader}
 		, controlarc_group(lv_group_create()) {
 
 		lv_group_add_obj(controlarc_group, ui_ControlArc);
@@ -55,15 +56,11 @@ struct ManualControlPopUp {
 
 		auto param_id = drawn_el->gui_element.idx.param_idx;
 		auto module_id = drawn_el->gui_element.module_idx;
-		auto watched = param_watcher.active_watched_params();
-		auto found = std::find_if(watched.begin(), watched.end(), [=](auto const &knob) {
-			return knob.module_id == module_id && knob.param_id == param_id && knob.is_active();
-		});
-		if (found != watched.end()) {
-			float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
-			lv_arc_set_value(ui_ControlArc, std::round(found->value * range) + lv_arc_get_min_value(ui_ControlArc));
-			update_control_arc_text();
-		}
+
+		auto value = playloader.param_value(module_id, param_id);
+		float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
+		lv_arc_set_value(ui_ControlArc, std::round(value * range) + lv_arc_get_min_value(ui_ControlArc));
+		update_control_arc_text();
 	}
 
 	void hide() {
@@ -203,6 +200,7 @@ private:
 			.value = (float)value / range, //0/6 1/6 ... 6/6 => 1 2 ... 7
 		};
 		patch_mod_queue.put(SetStaticParam{.param = sp});
+
 		patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
 
 		update_control_arc_text();
@@ -253,7 +251,7 @@ private:
 	PatchData *patch{};
 	PatchModQueue &patch_mod_queue;
 	OpenPatchManager &patches;
-	ParamWatcher &param_watcher;
+	PatchPlayLoader &playloader;
 
 	lv_group_t *controlarc_group = nullptr;
 	lv_group_t *prev_group = nullptr;

@@ -5,6 +5,7 @@
 #include "gui/ui.hh"
 #include "patch_play/patch_player.hh"
 #include "util/fixed_vector.hh"
+#include <atomic>
 
 namespace MetaModule
 {
@@ -63,14 +64,7 @@ struct AuxPlayer {
 	}
 
 	void read_patch_gui_elements() {
-		if (ui.new_patch_data == false) {
-
-			for (auto &w : ui.lights().watch_lights) {
-				if (w.is_active()) {
-					auto val = patch_player.get_module_light(w.module_id, w.light_id);
-					w.value = val;
-				}
-			}
+		if (ui.new_patch_data.load() == false) {
 
 			for (auto &d : ui.displays().watch_displays) {
 				if (d.is_active()) {
@@ -80,13 +74,7 @@ struct AuxPlayer {
 				}
 			}
 
-			for (auto &p : ui.watched_params().active_watched_params()) {
-				if (p.is_active()) {
-					p.value = patch_player.get_param(p.module_id, p.param_id);
-				}
-			}
-
-			ui.new_patch_data = true;
+			ui.new_patch_data.store(true, std::memory_order_release);
 		}
 
 		SMPThread::signal_done();
