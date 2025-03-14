@@ -160,6 +160,10 @@ struct PatchPlayLoader {
 		audio_overrun_ = false;
 	}
 
+	std::optional<unsigned> is_panel_knob_catchup_inaccessible() {
+		return player_.panel_knob_catchup_inaccessible();
+	}
+
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {
@@ -274,7 +278,7 @@ struct PatchPlayLoader {
 		return player_.is_param_tracking(module_id, param_id);
 	}
 
-	void set_all_param_catchup_mode(CatchupParam::Mode mode, bool exclude_buttons) {
+	void set_all_param_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange) {
 		// if (exclude_buttons) {
 
 		// 	for (auto module_id = 0u; auto slug : patches_.get_view_patch()->module_slugs) {
@@ -302,7 +306,7 @@ struct PatchPlayLoader {
 		// 	}
 
 		// } else {
-		player_.set_catchup_mode(mode);
+		player_.set_catchup_mode(mode, allow_jump_outofrange);
 		// }
 	}
 

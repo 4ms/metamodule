@@ -37,7 +37,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverTimeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupModeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_SystemPrefsCatchupExcludeButtonsCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
@@ -46,7 +46,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverTimeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupModeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
-		lv_obj_add_event_cb(ui_SystemPrefsCatchupExcludeButtonsCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
+		lv_obj_add_event_cb(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 
 		lv_obj_move_foreground(ui_SystemPrefsButtonCont);
@@ -102,8 +102,9 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_remove_obj(ui_SystemPrefsScreensaverTimeDropdown);
 		lv_group_remove_obj(ui_SystemPrefsScreensaverKnobsCheck);
 		lv_group_remove_obj(ui_SystemPrefsCatchupModeDropdown);
-		lv_group_remove_obj(ui_SystemPrefsCatchupExcludeButtonsCheck);
+		lv_group_remove_obj(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck);
 		lv_group_remove_obj(ui_SystemPrefsFSMaxPatchesDropdown);
+
 		lv_group_remove_obj(ui_SystemPrefsRevertButton);
 		lv_group_remove_obj(ui_SystemPrefsSaveButton);
 
@@ -113,7 +114,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverTimeDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverKnobsCheck);
 		lv_group_add_obj(group, ui_SystemPrefsCatchupModeDropdown);
-		lv_group_add_obj(group, ui_SystemPrefsCatchupExcludeButtonsCheck);
+		lv_group_add_obj(group, ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck);
 		lv_group_add_obj(group, ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsRevertButton);
 		lv_group_add_obj(group, ui_SystemPrefsSaveButton);
@@ -128,8 +129,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_focus_obj(ui_SystemPrefsAudioSampleRateDropdown);
 		lv_group_set_editing(group, true);
 
-		//todo: implement this
-		lv_hide(ui_SystemPrefsCatchupExcludeButtonsCont);
+		lv_show(ui_SystemPrefsCatchupAllowJumpOutofRangeCont);
 
 		update_dropdowns_from_settings();
 	}
@@ -169,12 +169,13 @@ private:
 			get_index(CatchupSettings::ValidOptions, [this](auto t) { return t.mode == catchup.mode; });
 		lv_dropdown_set_selected(ui_SystemPrefsCatchupModeDropdown, catchupmode_item >= 0 ? catchupmode_item : 1);
 
-		lv_check(ui_SystemPrefsCatchupExcludeButtonsCheck, catchup.button_exclude);
+		lv_check(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck, catchup.allow_jump_outofrange);
 
 		auto maxpatches_item = get_index(std::array{2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25},
 										 [this](uint32_t t) { return t == fs.max_open_patches; });
-		printf("settings: %u, found at index %u\n", fs.max_open_patches, maxpatches_item);
 		lv_dropdown_set_selected(ui_SystemPrefsFSMaxPatchesDropdown, maxpatches_item >= 0 ? maxpatches_item : 3);
+
+		lv_show(ui_SystemPrefsCatchupAllowJumpOutofRangeCont, catchup.mode == CatchupParam::Mode::ResumeOnEqual);
 
 		gui_state.do_write_settings = false;
 
@@ -233,7 +234,7 @@ private:
 	}
 
 	bool read_catchup_exclude_check() {
-		return lv_obj_has_state(ui_SystemPrefsCatchupExcludeButtonsCheck, LV_STATE_CHECKED);
+		return lv_obj_has_state(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck, LV_STATE_CHECKED);
 	}
 
 	uint32_t read_fs_max_open_patches() {
@@ -272,15 +273,14 @@ private:
 		auto catchupmode = read_catchup_mode_dropdown();
 		auto catchup_exclude_buttons = read_catchup_exclude_check();
 
-		if (catchup.mode != catchupmode || catchup.button_exclude != catchup_exclude_buttons) {
+		if (catchup.mode != catchupmode || catchup.allow_jump_outofrange != catchup_exclude_buttons) {
 			catchup.mode = catchupmode;
-			catchup.button_exclude = catchup_exclude_buttons;
-			patch_playloader.set_all_param_catchup_mode(catchup.mode, catchup.button_exclude);
+			catchup.allow_jump_outofrange = catchup_exclude_buttons;
+			patch_playloader.set_all_param_catchup_mode(catchup.mode, catchup.allow_jump_outofrange);
 			gui_state.do_write_settings = true;
 		}
 
 		auto max_open_patches = read_fs_max_open_patches();
-		printf("dropdown: %u, settings: %u\n", max_open_patches, fs.max_open_patches);
 
 		if (fs.max_open_patches != max_open_patches) {
 			fs.max_open_patches = max_open_patches;
@@ -368,12 +368,11 @@ private:
 		auto catchup_exclude_buttons = page->read_catchup_exclude_check();
 		auto fs_max_patches = page->read_fs_max_open_patches();
 
-		printf("dropdown: %u, settings: %u\n", fs_max_patches, page->fs.max_open_patches);
-
 		if (block_size == page->audio_settings.block_size && sample_rate == page->audio_settings.sample_rate &&
 			overrun_retries == page->audio_settings.max_overrun_retries && timeout == page->screensaver.timeout_ms &&
 			knobwake == page->screensaver.knobs_can_wake && catchupmode == page->catchup.mode &&
-			catchup_exclude_buttons == page->catchup.button_exclude && fs_max_patches == page->fs.max_open_patches)
+			catchup_exclude_buttons == page->catchup.allow_jump_outofrange &&
+			fs_max_patches == page->fs.max_open_patches)
 		{
 			lv_disable(ui_SystemPrefsSaveButton);
 			lv_disable(ui_SystemPrefsRevertButton);
@@ -381,6 +380,8 @@ private:
 			lv_enable(ui_SystemPrefsSaveButton);
 			lv_enable(ui_SystemPrefsRevertButton);
 		}
+
+		lv_show(ui_SystemPrefsCatchupAllowJumpOutofRangeCont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 	}
 
 	static void focus_cb(lv_event_t *event) {

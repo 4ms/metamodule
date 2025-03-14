@@ -64,7 +64,7 @@ static void write(ryml::NodeRef *n, CatchupSettings const &s) {
 								s.mode == LinearFade	 ? "LinearFade" :
 														   "ResumeOnMotion";
 	n->append_child() << ryml::key("mode") << mode_string;
-	n->append_child() << ryml::key("exclude_buttons") << s.button_exclude;
+	n->append_child() << ryml::key("allow_jump_outofrange") << s.allow_jump_outofrange;
 }
 
 static void write(ryml::NodeRef *n, FilesystemSettings const &s) {

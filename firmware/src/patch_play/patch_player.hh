@@ -915,11 +915,7 @@ public:
 	}
 
 	// Set mode for all maps
-	void set_catchup_mode(CatchupParam::Mode mode);
-
-	// Set mode for one knobset only.
-	// If knob_set_idx is out of range, then active knob set will be changed.
-	void set_catchup_mode(CatchupParam::Mode mode, int knob_set_idx);
+	void set_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange);
 
 	// Set mode for one mapping only
 	void set_catchup_mode(int knob_set_idx, unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
@@ -928,6 +924,8 @@ public:
 	void set_catchup_mode(unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
 
 	bool is_param_tracking(unsigned module_id, unsigned param_id);
+
+	std::optional<unsigned> panel_knob_catchup_inaccessible();
 
 private:
 	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
