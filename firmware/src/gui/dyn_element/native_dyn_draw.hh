@@ -80,14 +80,17 @@ struct DynDraw : BaseDynDraw {
 	void blur() override {
 
 		for (auto &disp : displays) {
-			pr_trace("NativeDynDraw: Release graphic display %u buffers\n", disp.id);
+			pr_trace("DynDraw::blur() Release graphic display %u buffers\n", disp.id);
 			if (module)
 				module->hide_graphic_display(disp.id);
 			disp.fullcolor_buffer.clear();
 			disp.lv_buffer.clear();
 
-			if (disp.lv_canvas && lv_obj_is_valid(disp.lv_canvas))
+			if (disp.lv_canvas && lv_obj_is_valid(disp.lv_canvas) && parent_canvas && lv_obj_is_valid(parent_canvas)) {
 				lv_obj_del(disp.lv_canvas);
+				disp.lv_canvas = nullptr;
+			} else
+				pr_err("DynDraw: cannot delete child canvas of module canvas %p\n", parent_canvas);
 		}
 	}
 

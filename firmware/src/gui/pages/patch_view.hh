@@ -541,7 +541,9 @@ private:
 
 	void clear() {
 		for (auto &m : module_canvases) {
-			lv_obj_del(m);
+			if (m)
+				lv_obj_del(m);
+			m = nullptr;
 		}
 		highlighted_module_obj = nullptr;
 		highlighted_module_id = std::nullopt;

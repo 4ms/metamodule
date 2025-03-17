@@ -18,8 +18,6 @@ public:
 	void prepare_module(std::string_view slug, unsigned module_id, lv_obj_t *module_canvas, unsigned px_per_3U) {
 		pr_trace("DynamicElementDraw: Prepare canvas for %s, id %u, pxp3u %u\n", slug.data(), module_id, px_per_3U);
 
-		drawer.reset();
-
 		if (auto rack_module = patch_playloader.get_plugin_module<rack::engine::Module>(module_id)) {
 			if (rack_module->module_widget.get()) {
 				drawer = std::make_unique<RackDynDraw>(rack_module->module_widget);
