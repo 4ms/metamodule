@@ -19,3 +19,7 @@ void print_time() {
 uint32_t get_ticks() {
 	return HAL_GetTick();
 }
+
+extern "C" clock_t _times(struct tms *buf) {
+	return HAL_GetTick();
+}
