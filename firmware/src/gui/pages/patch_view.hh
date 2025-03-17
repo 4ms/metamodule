@@ -238,7 +238,7 @@ struct PatchViewPage : PageBase {
 			auto &gui_el = drawn_el.gui_element;
 
 			if (gui_el.count.num_params > 0 && gui_el.map_ring) {
-				lv_obj_del_async(gui_el.map_ring);
+				lv_obj_del(gui_el.map_ring);
 				gui_el.map_ring = nullptr;
 			}
 		}
@@ -301,7 +301,9 @@ struct PatchViewPage : PageBase {
 
 			if (auto obj = lv_group_get_focused(group)) {
 				if (std::ranges::find(module_canvases, obj) != module_canvases.end()) {
-					args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+					if (auto user_data = lv_obj_get_user_data(obj)) {
+						args.module_id = *(static_cast<uint32_t *>(user_data));
+					}
 				}
 			}
 			redraw_patch();
