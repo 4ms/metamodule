@@ -1,11 +1,9 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "CoreModules/pixels.hh"
 #include "base_dyn_draw.hh"
 #include "debug.hh"
 #include "pr_dbg.hh"
-#include "thorvg.h"
 #include "util/overloaded.hh"
 #include <cmath>
 
@@ -67,7 +65,7 @@ struct DynDraw : BaseDynDraw {
 
 			disp.fullcolor_buffer.resize(disp.w * disp.h, 0);
 
-			module->show_graphic_display(disp.id, disp.fullcolor_buffer, disp.w, disp.h);
+			module->show_graphic_display(disp.id, disp.fullcolor_buffer, disp.w, disp.lv_canvas);
 		}
 	}
 

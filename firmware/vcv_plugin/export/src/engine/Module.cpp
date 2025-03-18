@@ -1,4 +1,5 @@
 #include "engine/Module.hpp"
+#include "CoreModules/elements/units.hh"
 #include "app/ModuleWidget.hpp"
 #include "console/pr_dbg.hh"
 #include "jansson.h"
@@ -12,9 +13,13 @@ namespace rack::engine
 {
 
 struct Module::Internal {
-	//nothing for now
-	uint32_t _;
-	rack::app::ModuleWidget::DrawArgs args;
+	struct Display {
+		rack::widget::Widget *widget{};
+		rack::app::ModuleWidget::DrawArgs args{};
+		std::span<uint32_t> pix_buffer;
+	};
+
+	std::map<int, Display> displays;
 };
 
 Module::Module()
@@ -234,7 +239,7 @@ bool Module::isBypassed() {
 	return false;
 }
 
-void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer, unsigned width, lv_canvas_t *canvas) {
+void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer, unsigned width, lv_obj_t *canvas) {
 	auto find_widget = [&] -> widget::Widget * {
 		auto graphics = module_widget->get_drawable_widgets();
 		for (auto &gr : graphics) {
@@ -245,27 +250,66 @@ void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer
 	};
 
 	if (auto widget = find_widget()) {
-		rack::app::ModuleWidget::DrawArgs args{};
-		uint32_t px_per_3U = std::round((float)width / widget->box.getWidth() * 240);
-		args.vg = nvgCreatePixelBufferContext(canvas, pix_buffer, width, px_per_3U);
-		args.fb = nullptr;
+		auto height = pix_buffer.size() / width;
 
-		pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u, 3u=%u)\n",
-			   widget->box.getLeft(),
-			   widget->box.getTop(),
-			   widget->box.getWidth(),
-			   widget->box.getHeight(),
+		uint32_t px_per_3U = std::round((float)width / MetaModule::svgpx_to_pngpx(widget->box.getWidth(), 240) * 240);
+
+		auto &disp = internal->displays[display_id];
+		disp.widget = widget;
+		disp.pix_buffer = pix_buffer;
+		disp.args.vg = nvgCreatePixelBufferContext(canvas, pix_buffer, width, px_per_3U);
+		disp.args.fb = nullptr;
+
+		pr_dbg("rack show_graphic_display(): prepared canvas at %f, %f (%u x %u, 3u=%u)\n",
+			   MetaModule::svgpx_to_pngpx(widget->box.pos.x),
+			   MetaModule::svgpx_to_pngpx(widget->box.pos.y),
+			   width,
+			   height,
 			   px_per_3U);
 
-		pr_dump(" -- Create NVGContext %p buffer %p\n", args.vg, pix_buffer.data());
+		pr_dump(" -- Create NVGContext %p buffer %p\n", disp.args.vg, pix_buffer.data());
 	}
 }
 
 bool Module::draw_graphic_display(int display_id) {
-	return false;
+	if (auto entry = internal->displays.find(display_id); entry != internal->displays.end()) {
+		auto &disp = entry->second;
+		if (!disp.widget->isVisible())
+			return false;
+
+		if (!disp.args.vg)
+			return false;
+
+		rack::contextGet()->window->vg = disp.args.vg;
+		std::ranges::fill(disp.pix_buffer, 0);
+
+		nvgBeginFrame(disp.args.vg, disp.widget->box.getWidth(), disp.widget->box.getHeight(), 1);
+
+		disp.args.clipBox = disp.widget->getBox().zeroPos();
+
+		disp.widget->step();
+
+		if (disp.pix_buffer.size() > 0) {
+			disp.widget->draw(disp.args);
+			disp.widget->drawLayer(disp.args, 1);
+		}
+
+		nvgEndFrame(disp.args.vg);
+
+		return true;
+	} else
+		return false;
 }
 
 void Module::hide_graphic_display(int display_id) {
+	if (auto entry = internal->displays.find(display_id); entry != internal->displays.end()) {
+		auto &disp = entry->second;
+		if (disp.args.vg) {
+			pr_trace("rack hide_graphic_display() call nvgDeletePixelBufferContext(NVGcontext %p)\n", disp.args.vg);
+			nvgDeletePixelBufferContext(disp.args.vg);
+			disp.args.vg = nullptr;
+		}
+	}
 }
 
 } // namespace rack::engine
