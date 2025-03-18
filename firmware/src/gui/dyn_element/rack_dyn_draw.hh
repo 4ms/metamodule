@@ -20,8 +20,13 @@ struct RackDynDraw : BaseDynDraw {
 			// to use `displays[].widget` only when the weak_ptr is locked
 
 			for (auto &widget : mw->get_drawable_widgets()) {
-				displays.push_back({.widget = widget});
+				displays.push_back({.widget = widget.widget, .element_idx = widget.element_idx});
 			}
+
+			// TODO: check this in the ModuleWidget construction (first call to addChild??)
+			// But always push_back the ModuleWidget as a graphic widget (that way we always call step)
+			// Only allocate the huge drawing buffer if custom_draw is not set
+			// And in he draw_graphic_display, skip out if the buffer is null
 
 #if defined(__GNUC__) && !defined(__clang__)
 			// See if the ModuleWidget overrides draw() or drawLayer().
@@ -91,7 +96,6 @@ struct RackDynDraw : BaseDynDraw {
 
 				disp.fullcolor_buffer.resize(disp.w * disp.h);
 				std::ranges::fill(disp.fullcolor_buffer, 0);
-				// disp.tvg_canvas.reset(tvg::SwCanvas::gen());
 
 				disp.args.vg = nvgCreatePixelBufferContext(disp.lv_canvas, disp.fullcolor_buffer, disp.w, px_per_3U);
 				disp.args.fb = nullptr;
@@ -181,6 +185,8 @@ private:
 
 	struct Display {
 		rack::widget::Widget *widget{};
+		unsigned element_idx;
+
 		lv_coord_t x{};
 		lv_coord_t y{};
 		lv_coord_t w{};
@@ -190,7 +196,6 @@ private:
 		rack::app::ModuleWidget::DrawArgs args{};
 		std::vector<char> lv_buffer;
 
-		// std::unique_ptr<tvg::SwCanvas> tvg_canvas;
 		std::vector<uint32_t> fullcolor_buffer;
 	};
 

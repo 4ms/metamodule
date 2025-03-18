@@ -158,6 +158,19 @@ struct ModuleWidgetAdaptor {
 			pr_err("Error: can't add a null VCVTextDisplay\n");
 	}
 
+	void addGraphicDisplay(int graphic_display_idx, rack::widget::TransparentWidget *widget) {
+		if (widget) {
+			Element element = DynamicGraphicDisplay{};
+			assign_element_fields(widget, "", element);
+
+			ElementCount::Indices indices = clear();
+			indices.light_idx = graphic_display_idx;
+			elem_idx.emplace_back(element, indices);
+
+			log_widget("TransparentWidget:", graphic_display_idx, widget, element);
+		}
+	}
+
 	void populate_elements_indices(std::vector<MetaModule::Element> &elements,
 								   std::vector<ElementCount::Indices> &indices) {
 

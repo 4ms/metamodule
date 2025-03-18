@@ -2,6 +2,7 @@
 #include "app/ModuleWidget.hpp"
 #include "console/pr_dbg.hh"
 #include "jansson.h"
+#include "vcv_plugin/internal/nanovg_pixbuf.hh"
 #include <array>
 #include <context.hpp>
 #include <engine/Engine.hpp>
@@ -13,6 +14,7 @@ namespace rack::engine
 struct Module::Internal {
 	//nothing for now
 	uint32_t _;
+	rack::app::ModuleWidget::DrawArgs args;
 };
 
 Module::Module()
@@ -227,8 +229,43 @@ void Module::onReset(const ResetEvent &e) {
 
 void Module::onRandomize(const RandomizeEvent &e) {
 }
+
 bool Module::isBypassed() {
 	return false;
+}
+
+void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer, unsigned width, lv_canvas_t *canvas) {
+	auto find_widget = [&] -> widget::Widget * {
+		auto graphics = module_widget->get_drawable_widgets();
+		for (auto &gr : graphics) {
+			if (gr.element_idx == (unsigned)display_id)
+				return gr.widget;
+		}
+		return nullptr;
+	};
+
+	if (auto widget = find_widget()) {
+		rack::app::ModuleWidget::DrawArgs args{};
+		uint32_t px_per_3U = std::round((float)width / widget->box.getWidth() * 240);
+		args.vg = nvgCreatePixelBufferContext(canvas, pix_buffer, width, px_per_3U);
+		args.fb = nullptr;
+
+		pr_dbg("RackDynDraw: prepared canvas at %u, %u (%u x %u, 3u=%u)\n",
+			   widget->box.getLeft(),
+			   widget->box.getTop(),
+			   widget->box.getWidth(),
+			   widget->box.getHeight(),
+			   px_per_3U);
+
+		pr_dump(" -- Create NVGContext %p buffer %p\n", args.vg, pix_buffer.data());
+	}
+}
+
+bool Module::draw_graphic_display(int display_id) {
+	return false;
+}
+
+void Module::hide_graphic_display(int display_id) {
 }
 
 } // namespace rack::engine

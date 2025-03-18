@@ -39,8 +39,12 @@ struct DynDraw : BaseDynDraw {
 			disp.w = std::round(mm_to_px(disp.element.width_mm, px_per_3U));
 			disp.h = std::round(mm_to_px(disp.element.height_mm, px_per_3U));
 
+			// Don't let rounding errors make us have an empty buffer
+			disp.w = std::max<lv_coord_t>(disp.w, 1);
+			disp.h = std::max<lv_coord_t>(disp.h, 1);
+
 			if (disp.h > (lv_coord_t)px_per_3U || disp.w > 1000) {
-				pr_warn("NativeDynDraw: canvas height %u exceeds module height, or width > 1000px\n", disp.h, disp.w);
+				pr_warn("DynDraw: canvas height %u exceeds module height, or width > 1000px\n", disp.h, disp.w);
 				disp.h = std::min<lv_coord_t>(px_per_3U, disp.h);
 				disp.w = std::min<lv_coord_t>(1000, disp.w);
 			}
@@ -50,9 +54,15 @@ struct DynDraw : BaseDynDraw {
 			lv_obj_set_pos(disp.lv_canvas, disp.x, disp.y);
 			lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
 
-			pr_trace("Create buffer %u*%u lvgl pixels:  %u bytes\n", disp.w, disp.h, disp.w * disp.h * 3);
+			// Debug object positions with a red border:
+			// lv_obj_set_style_outline_width(disp.lv_canvas, 1, 0);
+			// lv_obj_set_style_outline_color(disp.lv_canvas, lv_color_make(0xFF, 0, 0), 0);
+			// lv_obj_set_style_outline_opa(disp.lv_canvas, LV_OPA_50, 0);
+			// lv_obj_set_style_outline_pad(disp.lv_canvas, 1, 0);
 
-			disp.lv_buffer.resize(disp.w * disp.h * 3, 0);
+			pr_trace("DynDraw: Create buffer %u*%u lvgl px: %u bytes\n", disp.w, disp.h, disp.w * disp.h * 3);
+
+			disp.lv_buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(disp.w, disp.h), 0);
 			lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), disp.w, disp.h, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
 			disp.fullcolor_buffer.resize(disp.w * disp.h, 0);
