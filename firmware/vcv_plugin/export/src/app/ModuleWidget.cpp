@@ -241,26 +241,15 @@ void ModuleWidget::addChild(app::SvgScrew *widget) {
 
 void ModuleWidget::addChild(Widget *widget) {
 	log_widget("addChild(unknown Widget)", widget);
-	Widget::addChild(widget);
-
-	auto box = widget->box;
-	pr_trace("Skipping drawable at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
-}
-
-void ModuleWidget::addChild(widget::TransparentWidget *widget) {
-	log_widget("addChild(TransparentWidget)", widget);
 
 	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
 
-	// Widget::addChild(widget);
+	Widget::addChild(widget);
 
 	auto box = widget->box;
-	pr_trace("Add drawable at (%f, %f) size (%f, %f), idx %d\n",
-			 box.pos.x,
-			 box.pos.y,
-			 box.size.x,
-			 box.size.y,
-			 internal->graphic_display_idx);
+	pr_trace("Add drawable at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+	pr_trace("idx %d\n", internal->graphic_display_idx);
+
 	internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
 	internal->graphic_display_idx++;
 }
