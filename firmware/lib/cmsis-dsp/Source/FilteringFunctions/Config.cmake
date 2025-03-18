@@ -123,5 +123,12 @@ target_sources(CMSISDSP PRIVATE FilteringFunctions/arm_levinson_durbin_f16.c)
 endif()
 
 
+set_source_files_properties(
+	FilteringFunctions/arm_fir_interpolate_f32.c 
+	FilteringFunctions/arm_fir_decimate_f32.c 
+	FilteringFunctions/arm_biquad_cascade_df1_f32.c 
+	PROPERTIES COMPILE_OPTIONS "-Wno-maybe-uninitialized"
+)
+
 
 
