@@ -160,10 +160,13 @@ struct ModuleWidgetAdaptor {
 			pr_err("Error: can't add a null VCVTextDisplay\n");
 	}
 
-	void addGraphicDisplay(int graphic_display_idx, rack::widget::Widget *widget, bool step_only) {
+	void addGraphicDisplay(int graphic_display_idx, rack::widget::Widget *widget, bool is_entire_modulewidget) {
 		if (widget) {
 
-			// bool has_custom_draw = true;
+			// Everything has a custom draw, unless it's the module widget
+			// in that case, we see if it has an override or not
+
+			bool has_custom_draw = true;
 
 #if defined(__GNUC__) && !defined(__clang__)
 			// See if the the Widget overrides draw() or drawLayer().
@@ -173,44 +176,39 @@ struct ModuleWidgetAdaptor {
 			//
 			// See https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
 
-			// bool custom_draw =
-			// 	(void *)((*widget).*(&rack::widget::Widget::draw)) != (void *)(&rack::widget::Widget::draw);
+			if (is_entire_modulewidget) {
+				bool custom_draw =
+					(void *)((*widget).*(&rack::app::ModuleWidget::draw)) != (void *)(&rack::app::ModuleWidget::draw);
 
-			// if (!custom_draw) {
-			// 	pr_dbg("this draw: %p, widget::draw: %p\n",
-			// 		   (void *)((*widget).*(&rack::widget::Widget::draw)),
-			// 		   (void *)(&rack::widget::Widget::draw));
-			// }
+				if (!custom_draw) {
+					pr_dbg("this draw: %p, app::Moduledraw: %p\n",
+						   (void *)((*widget).*(&rack::app::ModuleWidget::draw)),
+						   (void *)(&rack::app::ModuleWidget::draw));
+				}
 
-			// bool custom_draw_layer =
-			// 	(void *)((*widget).*(&rack::widget::Widget::drawLayer)) != (void *)(&rack::widget::Widget::drawLayer);
+				bool custom_draw_layer = (void *)((*widget).*(&rack::app::ModuleWidget::drawLayer)) !=
+										 (void *)(&rack::app::ModuleWidget::drawLayer);
 
-			// if (!custom_draw_layer) {
-			// 	pr_dbg("this drawLayer: %p, widget::drawLayer: %p\n",
-			// 		   (void *)((*widget).*(&rack::widget::Widget::drawLayer)),
-			// 		   (void *)(&rack::widget::Widget::drawLayer));
-			// }
+				if (!custom_draw_layer) {
+					pr_dbg("this drawLayer: %p, app::ModuledrawLayer: %p\n",
+						   (void *)((*widget).*(&rack::app::ModuleWidget::drawLayer)),
+						   (void *)(&rack::app::ModuleWidget::drawLayer));
+				}
 
-			// has_custom_draw = custom_draw || custom_draw_layer;
+				has_custom_draw = custom_draw || custom_draw_layer;
 
-			// if (dynamic_cast<rack::app::DigitalDisplay *>(widget)) {
-			// 	has_custom_draw = true;
-			// 	pr_dbg("Derives from DigitalDisplay, so it has a custom drawLayer %p\n",
-			// 		   (void *)(&rack::app::DigitalDisplay::drawLayer));
-			// }
-			// if (dynamic_cast<rack::app::LedDisplay *>(widget)) {
-			// 	has_custom_draw = true;
-			// 	pr_dbg("Derives from LedDisplay, so it has a custom drawLayer %p\n",
-			// 		   (void *)(&rack::app::LedDisplay::drawLayer));
-			// }
-
-			// has_custom_draw = true;
+				if (dynamic_cast<rack::app::LedDisplay *>(widget)) {
+					has_custom_draw = true;
+					pr_dbg("Derives from LedDisplay, so it has a custom drawLayer %p\n",
+						   (void *)(&rack::app::LedDisplay::drawLayer));
+				}
+			}
 
 #endif
 
 			Element element = DynamicGraphicDisplay{};
 
-			if (!step_only) {
+			if (has_custom_draw) {
 				auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx));
 
 				assign_element_fields(widget, name, element);

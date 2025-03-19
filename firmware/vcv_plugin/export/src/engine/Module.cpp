@@ -314,8 +314,10 @@ bool Module::draw_graphic_display(int display_id) {
 		nvgEndFrame(disp.args.vg);
 
 		return true;
-	} else
+	} else {
+		pr_err("cannot find display %d\n", display_id);
 		return false;
+	}
 }
 
 void Module::hide_graphic_display(int display_id) {
