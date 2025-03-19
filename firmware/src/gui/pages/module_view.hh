@@ -1,7 +1,5 @@
 #pragma once
-#include "CoreModules/elements/element_info.hh"
-#include "conf/patch_conf.hh"
-#include "gui/dyn_element_draw.hh"
+#include "gui/dyn_display.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -203,7 +201,7 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
-			if (ModView::is_light_only(gui_el))
+			if (ModView::is_light_only(drawn_element))
 				continue;
 
 			if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
@@ -502,6 +500,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
+		pr_dbg("ModuleView::blur()\n");
 		dyn_draw.blur();
 		params.text_displays.stop_watching_all();
 		settings_menu.hide();
@@ -551,6 +550,7 @@ private:
 			lv_obj_del(b);
 		button.clear();
 
+		pr_dbg("ModuleView::reset_module_page()\n");
 		dyn_draw.blur();
 
 		// This should delete all canvas children
@@ -838,7 +838,7 @@ private:
 
 	PluginModuleMenu module_menu;
 
-	DynamicElementDraw dyn_draw;
+	DynamicDisplay dyn_draw;
 	unsigned dyn_frame_throttle_ctr = 1;
 	constexpr static unsigned DynFrameThrottle = 2;
 

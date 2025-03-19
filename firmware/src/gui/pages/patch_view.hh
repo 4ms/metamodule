@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
-#include "gui/dyn_element_draw.hh"
+#include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/redraw.hh"
@@ -260,6 +260,7 @@ struct PatchViewPage : PageBase {
 		file_menu.hide();
 		params.text_displays.stop_watching_all();
 
+		pr_dbg("PatchView::blur()\n");
 		dyn_draws.clear();
 
 		dynamic_elements_prepared = false;
@@ -395,9 +396,8 @@ private:
 			auto slug = patch->module_slugs[module_idx];
 
 			auto &dyn = dyn_draws.emplace_back(patch_playloader);
-			dyn.prepare_module(slug, module_idx, canvas, page_settings.view_height_px);
-
-			if (!dyn.is_active()) {
+			if (!dyn.prepare_module(slug, module_idx, canvas, page_settings.view_height_px)) {
+				pr_dbg("Failed to create dyn draw, removing from PatchView dyn draw vector\n");
 				dyn_draws.pop_back();
 			}
 		}
@@ -746,7 +746,7 @@ private:
 
 	// std::vector<std::vector<float>> light_vals;
 
-	std::vector<DynamicElementDraw> dyn_draws;
+	std::vector<DynamicDisplay> dyn_draws;
 	unsigned dyn_frame_throttle_ctr = 1;
 	unsigned dyn_module_idx = 0;
 	constexpr static unsigned DynFrameThrottle = 2;
