@@ -160,61 +160,62 @@ struct ModuleWidgetAdaptor {
 			pr_err("Error: can't add a null VCVTextDisplay\n");
 	}
 
-	void addGraphicDisplay(int graphic_display_idx, rack::widget::Widget *widget, bool is_entire_modulewidget) {
-		if (widget) {
-
-			// Everything has a custom draw, unless it's the module widget
-			// in that case, we see if it has an override or not
-
-			bool has_custom_draw = true;
+	void addModuleWidget(int graphic_display_idx, rack::app::ModuleWidget *mw) {
+		bool has_custom_draw = true;
 
 #if defined(__GNUC__) && !defined(__clang__)
-			// See if the the Widget overrides draw() or drawLayer().
-			// We will only allocate the module-sized pixel buffer if the module needs it.
-			// This uses a GCC extension, so for simulator we just always assume
-			// the ModuleWidget uses a custom draw().
-			//
-			// See https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+		// See if the the Widget overrides draw() or drawLayer().
+		// We will only allocate the module-sized pixel buffer if the module needs it.
+		// This uses a GCC extension, so for simulator we just always assume
+		// the ModuleWidget uses a custom draw().
+		//
+		// See https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
 
-			if (is_entire_modulewidget) {
-				bool custom_draw_func =
-					(void *)((*widget).*(&rack::app::ModuleWidget::draw)) != (void *)(&rack::app::ModuleWidget::draw);
+		bool custom_draw_func =
+			(void *)((*mw).*(&rack::app::ModuleWidget::draw)) != (void *)(&rack::app::ModuleWidget::draw);
 
-				bool custom_drawLayer_func = (void *)((*widget).*(&rack::app::ModuleWidget::drawLayer)) !=
-											 (void *)(&rack::app::ModuleWidget::drawLayer);
+		bool custom_drawLayer_func =
+			(void *)((*mw).*(&rack::app::ModuleWidget::drawLayer)) != (void *)(&rack::app::ModuleWidget::drawLayer);
 
-				bool derives_from_leddisplay = (dynamic_cast<rack::app::LedDisplay *>(widget) != nullptr);
+		bool derives_from_leddisplay = (dynamic_cast<rack::app::LedDisplay *>(mw) != nullptr);
 
-				has_custom_draw = custom_draw_func || custom_drawLayer_func || derives_from_leddisplay;
+		has_custom_draw = custom_draw_func || custom_drawLayer_func || derives_from_leddisplay;
 
-				if (has_custom_draw) {
-					pr_dbg("ModuleWidget has_custom_draw\n");
-				}
-			}
+		if (has_custom_draw) {
+			pr_dbg("ModuleWidget has_custom_draw\n");
+		}
 
 #endif
 
+		Element element = DynamicGraphicDisplay{};
+
+		if (has_custom_draw) {
+			// Use a blank name for the entire module widget so that it doesn't show up in the element roller
+			assign_element_fields(mw, "", element);
+
+		} else {
+			// Set element's box a 0 size if it has no custom draw
+			// This will ensure we call step() but don't allocate a pixel buffer
+			pr_dbg("Widget with size %fx%f has no draw() or drawLayer() override\n", mw->box.size.x, mw->box.size.y);
+
+			rack::widget::Widget zero_size_widget;
+			zero_size_widget.box = {{0, 0}, {0, 0}};
+			assign_element_fields(&zero_size_widget, "", element);
+		}
+
+		ElementCount::Indices indices = clear();
+		indices.light_idx = graphic_display_idx;
+		elem_idx.emplace_back(element, indices);
+
+		log_widget("ModuleWidget:", graphic_display_idx, mw, element);
+	}
+
+	void addGraphicDisplay(int graphic_display_idx, rack::widget::Widget *widget) {
+		if (widget) {
 			Element element = DynamicGraphicDisplay{};
 
-			if (has_custom_draw) {
-				// Use a blank name for the entire module widget so that it doesn't show up in the element roller
-				if (is_entire_modulewidget) {
-					assign_element_fields(widget, "", element);
-				} else {
-					auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx));
-					assign_element_fields(widget, name, element);
-				}
-
-			} else {
-				// Set element's box a 0 size if it has no custom draw
-				// This will ensure we call step() but don't allocate a pixel buffer
-				rack::widget::Widget zero_size_widget;
-				zero_size_widget.box = {{0, 0}, {0, 0}};
-				assign_element_fields(&zero_size_widget, "", element);
-				pr_dbg("Widget with size %fx%f has no draw() or drawLayer() override\n",
-					   widget->box.size.x,
-					   widget->box.size.y);
-			}
+			auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx));
+			assign_element_fields(widget, name, element);
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = graphic_display_idx;

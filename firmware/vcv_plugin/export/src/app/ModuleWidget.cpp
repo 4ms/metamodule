@@ -64,7 +64,7 @@ void ModuleWidget::setModule(engine::Module *m) {
 	if (model && model->slug.size())
 		pr_dbg("setModule for %.*s\n", model->slug.c_str());
 
-	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, this, true);
+	internal->adaptor->addModuleWidget(internal->graphic_display_idx, this);
 	internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
 	internal->graphic_display_idx++;
 }
@@ -249,7 +249,7 @@ void ModuleWidget::addChild(app::SvgScrew *widget) {
 void ModuleWidget::addChild(Widget *widget) {
 	log_widget("addChild(unknown Widget)", widget);
 
-	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget, false);
+	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
 
 	Widget::addChild(widget);
 
