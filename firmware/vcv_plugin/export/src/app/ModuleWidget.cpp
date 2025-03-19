@@ -26,10 +26,6 @@ ModuleWidget::ModuleWidget() {
 	internal = new Internal;
 	internal->adaptor = std::make_unique<MetaModule::ModuleWidgetAdaptor>();
 	box.size = math::Vec(0, RACK_GRID_HEIGHT);
-
-	if (module) {
-		internal->graphic_display_idx = std::max(module->lights.size(), module->lightInfos.size());
-	}
 }
 
 ModuleWidget::~ModuleWidget() {
@@ -63,6 +59,8 @@ void ModuleWidget::setModule(engine::Module *m) {
 
 	if (model && model->slug.size())
 		pr_dbg("setModule for %.*s\n", model->slug.c_str());
+	else if (m->model && m->model->slug.size())
+		pr_dbg("setModule for %.*s\n", m->model->slug.c_str());
 
 	internal->adaptor->addModuleWidget(internal->graphic_display_idx, this);
 	internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
@@ -188,8 +186,12 @@ void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
 			internal->adaptor->addLight(widget);
 		} else {
 			auto box = widget->box;
-			pr_trace("Add drawable (light) at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
-			internal->drawable_widgets.push_back({(unsigned)widget->firstLightId, widget});
+			internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
+			internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
+			internal->graphic_display_idx++;
+
+			pr_trace("Add drawable (light) at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+			pr_trace("idx %d (firstLightId = %d)\n", internal->graphic_display_idx - 1, widget->firstLightId);
 		}
 	}
 	Widget::addChild(widget);
@@ -250,15 +252,14 @@ void ModuleWidget::addChild(Widget *widget) {
 	log_widget("addChild(unknown Widget)", widget);
 
 	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
+	internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
+	internal->graphic_display_idx++;
 
 	Widget::addChild(widget);
 
 	auto box = widget->box;
 	pr_trace("Add drawable at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
-	pr_trace("idx %d\n", internal->graphic_display_idx);
-
-	internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
-	internal->graphic_display_idx++;
+	pr_trace("idx %d\n", internal->graphic_display_idx - 1);
 }
 
 void ModuleWidget::addChild(MetaModule::VCVTextDisplay *widget) {
