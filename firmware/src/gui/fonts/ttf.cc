@@ -69,10 +69,18 @@ unsigned corrected_ttf_letter_spacing(float fontSize, std::string_view name) {
 	return 0;
 }
 
+float corrected_ttf_ypos_shift(float fontSize, std::string_view name) {
+	if (name == "Segment14") {
+		return fontSize * 0.1f;
+	}
+
+	return 0;
+}
+
 float corrected_ttf_size(float fontSize, std::string_view name) {
 	// CountModula
 	if (name == "Segment14") {
-		return fontSize * 1.3f;
+		return fontSize * 1.2f;
 	}
 
 	else if (name == "ShareTechMono-Regular")

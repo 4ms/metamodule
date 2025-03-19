@@ -187,6 +187,8 @@ float renderText(
 								  fs->textAlign & NVG_ALIGN_TOP		 ? 0 :
 																	   lv_font_size * 1.0f);
 
+		align_lv_y += Fonts::corrected_ttf_ypos_shift(fs->fontSize, fs->fontName);
+
 		if (!(fs->textAlign & NVG_ALIGN_TOP))
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 

@@ -20,5 +20,6 @@ lv_font_t const *get_ttf_font(std::string const &name, unsigned font_size);
 // Tweak the ttf font size so it looks better on the MM screen
 float corrected_ttf_size(float fontSize, std::string_view name);
 unsigned corrected_ttf_letter_spacing(float fontSize, std::string_view name);
+float corrected_ttf_ypos_shift(float fontSize, std::string_view name);
 
 } // namespace MetaModule::Fonts
