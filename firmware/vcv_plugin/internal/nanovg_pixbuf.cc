@@ -181,11 +181,14 @@ float renderText(
 														LV_TEXT_ALIGN_LEFT;
 
 		// Align vertically
-		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size * 0.8f :
+		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size * 1.0f :
 								  fs->textAlign & NVG_ALIGN_BOTTOM	 ? lv_font_size * 1.2f :
 								  fs->textAlign & NVG_ALIGN_MIDDLE	 ? lv_font_size * 0.5f :
 								  fs->textAlign & NVG_ALIGN_TOP		 ? 0 :
 																	   lv_font_size * 1.0f);
+
+		if (!(fs->textAlign & NVG_ALIGN_TOP))
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
 		label = lv_label_create(canvas);
 		lv_obj_set_pos(label, lv_x, align_lv_y);
