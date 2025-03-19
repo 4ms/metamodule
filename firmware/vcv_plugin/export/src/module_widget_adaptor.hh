@@ -177,30 +177,19 @@ struct ModuleWidgetAdaptor {
 			// See https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
 
 			if (is_entire_modulewidget) {
-				bool custom_draw =
+				bool custom_draw_func =
 					(void *)((*widget).*(&rack::app::ModuleWidget::draw)) != (void *)(&rack::app::ModuleWidget::draw);
 
-				if (!custom_draw) {
-					pr_dbg("this draw: %p, app::Moduledraw: %p\n",
-						   (void *)((*widget).*(&rack::app::ModuleWidget::draw)),
-						   (void *)(&rack::app::ModuleWidget::draw));
-				}
+				bool custom_drawLayer_func = (void *)((*widget).*(&rack::app::ModuleWidget::drawLayer)) !=
+											 (void *)(&rack::app::ModuleWidget::drawLayer);
 
-				bool custom_draw_layer = (void *)((*widget).*(&rack::app::ModuleWidget::drawLayer)) !=
-										 (void *)(&rack::app::ModuleWidget::drawLayer);
+				bool derives_from_leddisplay = (dynamic_cast<rack::app::LedDisplay *>(widget) != nullptr);
 
-				if (!custom_draw_layer) {
-					pr_dbg("this drawLayer: %p, app::ModuledrawLayer: %p\n",
-						   (void *)((*widget).*(&rack::app::ModuleWidget::drawLayer)),
-						   (void *)(&rack::app::ModuleWidget::drawLayer));
-				}
+				has_custom_draw = custom_draw_func || custom_drawLayer_func || derives_from_leddisplay;
 
-				has_custom_draw = custom_draw || custom_draw_layer;
-
-				if (dynamic_cast<rack::app::LedDisplay *>(widget)) {
-					has_custom_draw = true;
-					pr_dbg("Derives from LedDisplay, so it has a custom drawLayer %p\n",
-						   (void *)(&rack::app::LedDisplay::drawLayer));
+				if (has_custom_draw) {
+					pr_dbg("ModuleWidget %s has_custom_draw\n",
+						   (model && model->slug.size()) ? model->slug.c_str() : "");
 				}
 			}
 
@@ -209,9 +198,13 @@ struct ModuleWidgetAdaptor {
 			Element element = DynamicGraphicDisplay{};
 
 			if (has_custom_draw) {
-				auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx));
-
-				assign_element_fields(widget, name, element);
+				// Use a blank name for the entire module widget so that it doesn't show up in the element roller
+				if (is_entire_modulewidget) {
+					assign_element_fields(widget, "", element);
+				} else {
+					auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx));
+					assign_element_fields(widget, name, element);
+				}
 
 			} else {
 				// Set element's box a 0 size if it has no custom draw

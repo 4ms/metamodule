@@ -64,10 +64,10 @@ struct DynamicDisplayDrawer {
 				lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
 
 				// Debug object positions with a red border:
-				lv_obj_set_style_outline_width(disp.lv_canvas, 1, 0);
-				lv_obj_set_style_outline_color(disp.lv_canvas, lv_color_make(0xFF, 0, 0), 0);
-				lv_obj_set_style_outline_opa(disp.lv_canvas, LV_OPA_50, 0);
-				lv_obj_set_style_outline_pad(disp.lv_canvas, 1, 0);
+				// lv_obj_set_style_outline_width(disp.lv_canvas, 1, 0);
+				// lv_obj_set_style_outline_color(disp.lv_canvas, lv_color_make(0xFF, 0, 0), 0);
+				// lv_obj_set_style_outline_opa(disp.lv_canvas, LV_OPA_50, 0);
+				// lv_obj_set_style_outline_pad(disp.lv_canvas, 1, 0);
 
 				pr_trace("DynDraw: Create buffer %u*%u lvgl px: %u bytes\n", disp.w, disp.h, disp.w * disp.h * 3);
 
