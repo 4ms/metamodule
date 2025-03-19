@@ -366,10 +366,6 @@ void ModuleWidget::populate_elements_indices(rack::plugin::Model *model) {
 
 //////////////// No-ops:
 
-void ModuleWidget::draw(const DrawArgs &args) {
-}
-void ModuleWidget::drawLayer(const DrawArgs &args, int layer) {
-}
 void ModuleWidget::onHover(const HoverEvent &e) {
 }
 void ModuleWidget::onHoverKey(const HoverKeyEvent &e) {
