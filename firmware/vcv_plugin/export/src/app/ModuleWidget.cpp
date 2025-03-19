@@ -58,9 +58,9 @@ void ModuleWidget::setModule(engine::Module *m) {
 	internal->graphic_display_idx = std::max(m->lights.size(), m->lightInfos.size());
 
 	if (model && model->slug.size())
-		pr_dbg("setModule for %.*s\n", model->slug.c_str());
+		pr_dbg("setModule for %s\n", model->slug.c_str());
 	else if (m->model && m->model->slug.size())
-		pr_dbg("setModule for %.*s\n", m->model->slug.c_str());
+		pr_dbg("setModule for %s\n", m->model->slug.c_str());
 
 	internal->adaptor->addModuleWidget(internal->graphic_display_idx, this);
 	internal->drawable_widgets.push_back({internal->graphic_display_idx, this});

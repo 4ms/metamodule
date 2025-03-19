@@ -36,7 +36,7 @@ struct DynamicDisplayDrawer {
 			// This is done intentionally by rack::Module to create non-drawable elements
 			// that need to be stepped
 			if (disp.element.width_mm == 0 && disp.element.height_mm == 0) {
-				pr_dbg("DynDraw::prepare() Graphic display has zero size, will not draw\n");
+				pr_trace("DynDraw::prepare() Graphic display has zero size, will not draw\n");
 				disp.fullcolor_buffer.clear();
 				disp.w = 0;
 				disp.lv_canvas = nullptr;
@@ -115,7 +115,6 @@ struct DynamicDisplayDrawer {
 	}
 
 	~DynamicDisplayDrawer() {
-		pr_dbg("~DynDraw() %zu displays\n", displays.size());
 		blur();
 	}
 

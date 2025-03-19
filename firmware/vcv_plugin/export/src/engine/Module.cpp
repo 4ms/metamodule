@@ -262,15 +262,15 @@ void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer
 			disp.args.vg = nvgCreatePixelBufferContext(canvas, pix_buffer, width, px_per_3U);
 			disp.args.fb = nullptr;
 
-			pr_dbg("rack show_graphic_display(): id:%d canvas at %d, %d (%u x %u, 3u=%u)\n",
-				   display_id,
-				   MetaModule::svgpx_to_pngpx(widget->box.pos.x),
-				   MetaModule::svgpx_to_pngpx(widget->box.pos.y),
-				   width,
-				   height,
-				   px_per_3U);
+			pr_trace("rack show_graphic_display(): id:%d canvas at %d, %d (%u x %u, 3u=%u)\n",
+					 display_id,
+					 MetaModule::svgpx_to_pngpx(widget->box.pos.x),
+					 MetaModule::svgpx_to_pngpx(widget->box.pos.y),
+					 width,
+					 height,
+					 px_per_3U);
 
-			pr_dump(" -- Create NVGContext %p buffer %p\n", disp.args.vg, pix_buffer.data());
+			pr_trace(" -- Create NVGContext %p buffer %p\n", disp.args.vg, pix_buffer.data());
 		} else {
 			auto &disp = internal->displays[display_id];
 			disp.widget = widget;
