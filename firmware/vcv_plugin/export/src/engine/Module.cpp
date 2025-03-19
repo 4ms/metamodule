@@ -250,30 +250,49 @@ void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer
 	};
 
 	if (auto widget = find_widget()) {
-		auto height = pix_buffer.size() / width;
+		if (pix_buffer.size()) {
+			auto height = pix_buffer.size() / width;
 
-		uint32_t px_per_3U = std::round((float)width / MetaModule::svgpx_to_pngpx(widget->box.getWidth(), 240) * 240);
+			uint32_t px_per_3U =
+				std::round((float)width / MetaModule::svgpx_to_pngpx(widget->box.getWidth(), 240) * 240);
 
-		auto &disp = internal->displays[display_id];
-		disp.widget = widget;
-		disp.pix_buffer = pix_buffer;
-		disp.args.vg = nvgCreatePixelBufferContext(canvas, pix_buffer, width, px_per_3U);
-		disp.args.fb = nullptr;
+			auto &disp = internal->displays[display_id];
+			disp.widget = widget;
+			disp.pix_buffer = pix_buffer;
+			disp.args.vg = nvgCreatePixelBufferContext(canvas, pix_buffer, width, px_per_3U);
+			disp.args.fb = nullptr;
 
-		pr_dbg("rack show_graphic_display(): prepared canvas at %f, %f (%u x %u, 3u=%u)\n",
-			   MetaModule::svgpx_to_pngpx(widget->box.pos.x),
-			   MetaModule::svgpx_to_pngpx(widget->box.pos.y),
-			   width,
-			   height,
-			   px_per_3U);
+			pr_dbg("rack show_graphic_display(): id:%d canvas at %d, %d (%u x %u, 3u=%u)\n",
+				   display_id,
+				   MetaModule::svgpx_to_pngpx(widget->box.pos.x),
+				   MetaModule::svgpx_to_pngpx(widget->box.pos.y),
+				   width,
+				   height,
+				   px_per_3U);
 
-		pr_dump(" -- Create NVGContext %p buffer %p\n", disp.args.vg, pix_buffer.data());
+			pr_dump(" -- Create NVGContext %p buffer %p\n", disp.args.vg, pix_buffer.data());
+		} else {
+			auto &disp = internal->displays[display_id];
+			disp.widget = widget;
+			disp.pix_buffer = std::span<uint32_t>{};
+			pr_dbg("rack::Module::show_graphic_display(): step()-only display id:%u\n", display_id);
+		}
+	} else {
+		pr_warn("rack::Module::show_graphic_display() could not find widget (id: %d, w: %u)\n", display_id, width);
 	}
 }
 
 bool Module::draw_graphic_display(int display_id) {
 	if (auto entry = internal->displays.find(display_id); entry != internal->displays.end()) {
+
 		auto &disp = entry->second;
+
+		// Non-drawable item: just call step()
+		if (disp.pix_buffer.size() == 0) {
+			disp.widget->step();
+			return true;
+		}
+
 		if (!disp.widget->isVisible())
 			return false;
 
@@ -289,10 +308,8 @@ bool Module::draw_graphic_display(int display_id) {
 
 		disp.widget->step();
 
-		if (disp.pix_buffer.size() > 0) {
-			disp.widget->draw(disp.args);
-			disp.widget->drawLayer(disp.args, 1);
-		}
+		disp.widget->draw(disp.args);
+		disp.widget->drawLayer(disp.args, 1);
 
 		nvgEndFrame(disp.args.vg);
 
@@ -304,8 +321,8 @@ bool Module::draw_graphic_display(int display_id) {
 void Module::hide_graphic_display(int display_id) {
 	if (auto entry = internal->displays.find(display_id); entry != internal->displays.end()) {
 		auto &disp = entry->second;
-		if (disp.args.vg) {
-			pr_trace("rack hide_graphic_display() call nvgDeletePixelBufferContext(NVGcontext %p)\n", disp.args.vg);
+		if (disp.pix_buffer.size() && disp.args.vg) {
+			pr_trace("rack hide_graphic_display(): call nvgDeletePixelBufferContext(NVGcontext %p)\n", disp.args.vg);
 			nvgDeletePixelBufferContext(disp.args.vg);
 			disp.args.vg = nullptr;
 		}

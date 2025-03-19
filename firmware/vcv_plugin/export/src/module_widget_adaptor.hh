@@ -14,6 +14,8 @@ struct ModuleWidgetAdaptor {
 
 	std::vector<std::pair<MetaModule::Element, ElementCount::Indices>> elem_idx;
 
+	std::deque<std::string> temp_names;
+
 	ElementCount::Indices clear() {
 		auto None = ElementCount::Indices::NoElementMarker;
 		return {None, None, None, None};
@@ -158,16 +160,77 @@ struct ModuleWidgetAdaptor {
 			pr_err("Error: can't add a null VCVTextDisplay\n");
 	}
 
-	void addGraphicDisplay(int graphic_display_idx, rack::widget::Widget *widget) {
+	void addGraphicDisplay(int graphic_display_idx, rack::widget::Widget *widget, bool step_only) {
 		if (widget) {
+
+			// bool has_custom_draw = true;
+
+#if defined(__GNUC__) && !defined(__clang__)
+			// See if the the Widget overrides draw() or drawLayer().
+			// We will only allocate the module-sized pixel buffer if the module needs it.
+			// This uses a GCC extension, so for simulator we just always assume
+			// the ModuleWidget uses a custom draw().
+			//
+			// See https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+
+			// bool custom_draw =
+			// 	(void *)((*widget).*(&rack::widget::Widget::draw)) != (void *)(&rack::widget::Widget::draw);
+
+			// if (!custom_draw) {
+			// 	pr_dbg("this draw: %p, widget::draw: %p\n",
+			// 		   (void *)((*widget).*(&rack::widget::Widget::draw)),
+			// 		   (void *)(&rack::widget::Widget::draw));
+			// }
+
+			// bool custom_draw_layer =
+			// 	(void *)((*widget).*(&rack::widget::Widget::drawLayer)) != (void *)(&rack::widget::Widget::drawLayer);
+
+			// if (!custom_draw_layer) {
+			// 	pr_dbg("this drawLayer: %p, widget::drawLayer: %p\n",
+			// 		   (void *)((*widget).*(&rack::widget::Widget::drawLayer)),
+			// 		   (void *)(&rack::widget::Widget::drawLayer));
+			// }
+
+			// has_custom_draw = custom_draw || custom_draw_layer;
+
+			// if (dynamic_cast<rack::app::DigitalDisplay *>(widget)) {
+			// 	has_custom_draw = true;
+			// 	pr_dbg("Derives from DigitalDisplay, so it has a custom drawLayer %p\n",
+			// 		   (void *)(&rack::app::DigitalDisplay::drawLayer));
+			// }
+			// if (dynamic_cast<rack::app::LedDisplay *>(widget)) {
+			// 	has_custom_draw = true;
+			// 	pr_dbg("Derives from LedDisplay, so it has a custom drawLayer %p\n",
+			// 		   (void *)(&rack::app::LedDisplay::drawLayer));
+			// }
+
+			// has_custom_draw = true;
+
+#endif
+
 			Element element = DynamicGraphicDisplay{};
-			assign_element_fields(widget, "", element);
+
+			if (!step_only) {
+				auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx));
+
+				assign_element_fields(widget, name, element);
+
+			} else {
+				// Set element's box a 0 size if it has no custom draw
+				// This will ensure we call step() but don't allocate a pixel buffer
+				rack::widget::Widget zero_size_widget;
+				zero_size_widget.box = {{0, 0}, {0, 0}};
+				assign_element_fields(&zero_size_widget, "", element);
+				pr_dbg("Widget with size %fx%f has no draw() or drawLayer() override\n",
+					   widget->box.size.x,
+					   widget->box.size.y);
+			}
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = graphic_display_idx;
 			elem_idx.emplace_back(element, indices);
 
-			log_widget("Widget (as Graphic Display):", graphic_display_idx, widget, element);
+			log_widget("Widget (as Graphic Display buffer):", graphic_display_idx, widget, element);
 		}
 	}
 

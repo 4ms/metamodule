@@ -60,6 +60,9 @@ void ModuleWidget::setModule(engine::Module *m) {
 	this->module = m;
 
 	internal->graphic_display_idx = std::max(m->lights.size(), m->lightInfos.size());
+	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, this, true);
+	internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
+	internal->graphic_display_idx++;
 }
 
 app::SvgPanel *ModuleWidget::getPanel() {
@@ -242,7 +245,7 @@ void ModuleWidget::addChild(app::SvgScrew *widget) {
 void ModuleWidget::addChild(Widget *widget) {
 	log_widget("addChild(unknown Widget)", widget);
 
-	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
+	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget, false);
 
 	Widget::addChild(widget);
 
