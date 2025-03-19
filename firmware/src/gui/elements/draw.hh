@@ -31,7 +31,7 @@ inline lv_obj_t *draw_element(const ImageElement &el, lv_obj_t *canvas, uint32_t
 }
 
 inline lv_obj_t *draw_element(const LightElement &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto obj = draw_element(ImageElement(el), canvas, module_height);
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	if (!obj)
 		return nullptr;
 
@@ -179,7 +179,7 @@ inline lv_obj_t *draw_element(const SliderLight &el, lv_obj_t *canvas, uint32_t 
 }
 
 inline lv_obj_t *draw_element(const Button &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto obj = draw_element(ImageElement(el), canvas, module_height);
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	if (!obj)
 		return nullptr;
 	lv_obj_set_style_radius(obj, 20, LV_PART_MAIN);
@@ -264,6 +264,10 @@ inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, ui
 	//because we can't compare the new text with the existing text since it may contain dots
 	lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
 	return label;
+}
+
+inline lv_obj_t *draw_element(const DynamicGraphicDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
+	return nullptr;
 }
 
 } // namespace MetaModule::ElementDrawer
