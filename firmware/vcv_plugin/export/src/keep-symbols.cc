@@ -17,6 +17,7 @@
 #include "pffft.h"
 #include <cmath>
 #include <cstring>
+#include <ctime>
 #include <memory>
 #include <random>
 #include <unordered_map>
@@ -68,6 +69,11 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 
 	{
 		auto x = &gettimeofday;
+		(void)x;
+	}
+
+	{
+		auto x = &clock;
 		(void)x;
 	}
 
