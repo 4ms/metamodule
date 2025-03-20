@@ -15,39 +15,44 @@ namespace MetaModule
 {
 
 struct ModuleDrawer {
+	enum Error { FaceplateNotFound, CantDecodeFaceplateFile, BufferTooSmall, CanvasCreateFailed };
+
 	lv_obj_t *container;
 	uint32_t height;
 
-	// Draws the module from patch, into container, using the provided buffer.
-	lv_obj_t *draw_faceplate(std::string_view slug, std::span<lv_color_t> canvas_buffer) {
-		lv_obj_scroll_to_x(container, 0, LV_ANIM_OFF);
-		lv_obj_scroll_to_y(container, 0, LV_ANIM_OFF);
+	// Returns faceplate filename, and width of the png (or 0 if cannot read/decode file).
+	std::pair<std::string, lv_coord_t> read_faceplate(std::string_view slug) {
 		const auto img_filename = ModuleImages::get_faceplate_path(slug);
+
 		if (img_filename.length() <= 2) {
 			if (!slug.ends_with("HubMedium"))
 				pr_warn("Image not found for %.*s\n", (int)slug.size(), slug.data());
-			return nullptr;
+			return {"", 0};
 		}
 
 		float zoom = height / 240.f;
 
-		// we need the image size to set the canvas buffer
-		// but we need the canvas w/buffer to draw the image
 		lv_img_header_t img_header;
 		auto res = lv_img_decoder_get_info(img_filename.c_str(), &img_header);
 		if (res != LV_RES_OK) {
 			pr_warn("Could not read image %s for module %.*s\n", img_filename.data(), slug.size(), slug.data());
-			return nullptr;
+			return {img_filename, 0};
 		}
 
 		uint32_t widthpx = img_header.w * zoom;
-		if ((widthpx * height) > canvas_buffer.size()) {
-			pr_warn("Buffer not big enough for %dpx x %dpx (%zu avail), not drawing\n",
-					widthpx,
-					height,
-					canvas_buffer.size());
+
+		pr_trace("Read faceplate for %s (%d x %d)\n", slug.data(), widthpx, height);
+
+		return {img_filename, widthpx};
+	}
+
+	// Draws the module from patch, into container, using the provided buffer.
+	lv_obj_t *draw_faceplate(std::string_view img_filename, lv_coord_t widthpx, std::span<lv_color_t> canvas_buffer) {
+		if (img_filename.size() == 0 || widthpx == 0)
 			return nullptr;
-		}
+
+		lv_obj_scroll_to_x(container, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(container, 0, LV_ANIM_OFF);
 
 		lv_obj_t *canvas = lv_canvas_create(container);
 		if (!canvas) {
@@ -61,11 +66,9 @@ struct ModuleDrawer {
 		// Draw module artwork
 		lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
-		draw_img_dsc.zoom = zoom * 256;
+		draw_img_dsc.zoom = float(height / 240.f) * 256;
 
-		pr_trace("Drawing faceplate %s (%d x %d)\n", slug.data(), widthpx, height);
-
-		lv_canvas_draw_img(canvas, 0, 0, img_filename.c_str(), &draw_img_dsc);
+		lv_canvas_draw_img(canvas, 0, 0, img_filename.data(), &draw_img_dsc);
 		// Overflow visible: requires too much processing when zoomed-out to view lots of modules
 		if (height == 240)
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);

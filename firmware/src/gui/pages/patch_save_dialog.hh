@@ -70,6 +70,9 @@ private:
 	void save(Volume file_vol, std::string_view path) {
 		// Cleanup path:
 		auto fullpath = std::filesystem::path(path).lexically_normal().string();
+		if (fullpath.starts_with("/")) {
+			fullpath = fullpath.substr(1);
+		}
 
 		if (!fullpath.ends_with(".yml")) {
 			fullpath.append(".yml");

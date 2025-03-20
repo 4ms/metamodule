@@ -172,10 +172,28 @@ struct PatchViewPage : PageBase {
 		int bottom = 0;
 		lv_obj_t *initial_selected_module = nullptr;
 
+		unsigned modules_skipped_for_size = 0;
+		std::string modules_skipped_slugs;
+
 		for (auto [module_idx, slug] : enumerate(patch->module_slugs)) {
 			module_ids.push_back(module_idx);
 
-			auto canvas = module_drawer.draw_faceplate(slug, canvas_buf);
+			auto [faceplate, width] = module_drawer.read_faceplate(slug);
+			if (faceplate.size() == 0 || width == 0)
+				continue; // file not found or corrupted, ignore this
+
+			if ((width * page_settings.view_height_px) > canvas_buf.size()) {
+				modules_skipped_for_size++;
+				if (modules_skipped_for_size < 6) {
+					modules_skipped_slugs.append(slug.c_str());
+					modules_skipped_slugs.append(", ");
+				} else if (modules_skipped_for_size == 6) {
+					modules_skipped_slugs.append("and others ");
+				}
+				continue;
+			}
+
+			auto canvas = module_drawer.draw_faceplate(faceplate, width, canvas_buf);
 			if (!canvas)
 				continue;
 
@@ -184,8 +202,7 @@ struct PatchViewPage : PageBase {
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
-			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) *
-											page_settings.view_height_px);
+			canvas_buf = canvas_buf.subspan(lv_obj_get_width(canvas) * page_settings.view_height_px);
 			int this_bottom = lv_obj_get_y(canvas) + lv_obj_get_height(canvas);
 			bottom = std::max(bottom, this_bottom);
 
@@ -202,6 +219,11 @@ struct PatchViewPage : PageBase {
 					initial_selected_module = canvas;
 				}
 			}
+		}
+
+		if (modules_skipped_for_size) {
+			std::string msg = "Not displaying: " + modules_skipped_slugs + "because graphics buffer is full";
+			notify_queue.put({msg, Notification::Priority::Info, 4000});
 		}
 
 		is_ready = true;
