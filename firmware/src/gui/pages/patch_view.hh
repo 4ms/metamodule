@@ -184,8 +184,12 @@ struct PatchViewPage : PageBase {
 
 			if ((width * page_settings.view_height_px) > canvas_buf.size()) {
 				modules_skipped_for_size++;
-				modules_skipped_slugs.append(slug.c_str());
-				modules_skipped_slugs.append(", ");
+				if (modules_skipped_for_size < 6) {
+					modules_skipped_slugs.append(slug.c_str());
+					modules_skipped_slugs.append(", ");
+				} else if (modules_skipped_for_size == 6) {
+					modules_skipped_slugs.append("and others ");
+				}
 				continue;
 			}
 
