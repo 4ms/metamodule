@@ -99,7 +99,10 @@ struct PatchViewFileMenu {
 			lv_enable(ui_PatchFileDuplicateBut);
 			lv_enable(ui_PatchFileRenameBut);
 			lv_enable(ui_PatchFileDeleteBut);
-			lv_enable(ui_PatchFileRevertBut, patches.get_view_patch_modification_count() > 0);
+			lv_enable(ui_PatchFileRevertBut);
+
+			lv_label_set_text(ui_PatchFileRevertLabel,
+							  patches.get_view_patch_modification_count() == 0 ? "Reload" : "Revert");
 		}
 
 		if (!visible) {
