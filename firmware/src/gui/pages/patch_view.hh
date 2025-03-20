@@ -184,8 +184,7 @@ struct PatchViewPage : PageBase {
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
-			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) *
-											page_settings.view_height_px);
+			canvas_buf = canvas_buf.subspan(lv_obj_get_width(canvas) * page_settings.view_height_px);
 			int this_bottom = lv_obj_get_y(canvas) + lv_obj_get_height(canvas);
 			bottom = std::max(bottom, this_bottom);
 
