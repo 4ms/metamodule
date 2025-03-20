@@ -175,7 +175,9 @@ struct ModuleViewPage : PageBase {
 		drawn_elements.reserve(num_elements);
 
 		auto module_drawer = ModuleDrawer{.container = ui_ModuleImage, .height = 240};
-		canvas = module_drawer.draw_faceplate(slug, buffer);
+
+		auto [faceplate, width] = module_drawer.read_faceplate(slug);
+		canvas = module_drawer.draw_faceplate(faceplate, width, buffer);
 
 		active_knobset = page_list.get_active_knobset();
 

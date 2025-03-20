@@ -229,7 +229,10 @@ private:
 		clear_module_canvas();
 
 		ModuleDrawer drawer{ui_ModuleListImage, 240};
-		auto module_canvas = drawer.draw_faceplate(slug, page_pixel_buffer);
+
+		auto [faceplate, width] = drawer.read_faceplate(slug);
+		auto module_canvas = drawer.draw_faceplate(faceplate, width, page_pixel_buffer);
+
 		if (module_canvas) {
 			lv_obj_refr_size(module_canvas);
 			auto width_px = lv_obj_get_width(module_canvas);
