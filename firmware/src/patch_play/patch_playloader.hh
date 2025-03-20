@@ -207,6 +207,8 @@ struct PatchPlayLoader {
 	}
 
 	void load_module(std::string_view slug) {
+		bool should_play = is_playing();
+
 		stop_audio();
 		while (!is_audio_muted())
 			;
@@ -228,7 +230,8 @@ struct PatchPlayLoader {
 		}
 
 		pr_info("Heap: %u\n", get_heap_size());
-		start_audio();
+		if (should_play)
+			start_audio();
 	}
 
 	void remove_module(unsigned module_id) {
