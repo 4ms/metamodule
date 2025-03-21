@@ -12,7 +12,6 @@ namespace MetaModule
 
 struct DynamicDisplayDrawer {
 
-	// TODO: pass in the std::vector<DrawnElement> here
 	DynamicDisplayDrawer(CoreProcessor *module, std::span<const DrawnElement> drawn_elements, unsigned module_id)
 		: module{module} {
 
@@ -23,12 +22,14 @@ struct DynamicDisplayDrawer {
 				continue;
 
 			// Copy useful data from the DynamicGraphicDisplays
-			std::visit(overloaded{[](BaseElement const &e) {},
-								  [&drawn_el, this](DynamicGraphicDisplay const &e) {
-									  displays.push_back({.id = drawn_el.gui_element.idx.light_idx,
-														  .element = e,
-														  .lv_canvas = drawn_el.gui_element.obj});
-								  }},
+			std::visit(overloaded{
+						   [](BaseElement const &e) {},
+						   [&drawn_el, this](DynamicGraphicDisplay const &e) {
+							   displays.push_back({.id = drawn_el.gui_element.idx.light_idx,
+												   .element = e,
+												   .lv_canvas = drawn_el.gui_element.obj});
+						   },
+					   },
 					   drawn_el.element);
 		}
 	}
@@ -55,9 +56,7 @@ struct DynamicDisplayDrawer {
 
 				pr_trace("DynDraw: Create buffer %u*%u lvgl px: %u bytes\n", w, h, w * h * 3);
 
-				// Create pixel buffers: the module draws into fullcolor_buffer
-				// and then we compare it against lv_buffer to detect if any pixels changed.
-				// If not, then LVGL save a lot of time by not re-drawing the lv_canvas object.
+				// Create pixel buffers:
 				disp.fullcolor_buffer.resize(w * h, 0);
 
 				disp.lv_buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h), 0);
@@ -66,14 +65,8 @@ struct DynamicDisplayDrawer {
 
 				module->show_graphic_display(disp.id, disp.fullcolor_buffer, w, disp.lv_canvas);
 
-				// Send it to the back??
+				// Send it to the back?? TODO: do we need to do this?
 				// lv_obj_move_to_index(disp.lv_canvas, 0);
-
-				// Debug object positions with a red border:
-				// lv_obj_set_style_outline_width(disp.lv_canvas, 1, 0);
-				// lv_obj_set_style_outline_color(disp.lv_canvas, lv_color_make(0xFF, 0, 0), 0);
-				// lv_obj_set_style_outline_opa(disp.lv_canvas, LV_OPA_50, 0);
-				// lv_obj_set_style_outline_pad(disp.lv_canvas, 1, 0);
 			}
 		}
 	}
@@ -85,8 +78,12 @@ struct DynamicDisplayDrawer {
 		for (auto &disp : displays) {
 			Debug::Pin2::high();
 
+			// Draw all displays:
+			// The module draws into fullcolor_buffer, and then we compare it against
+			// lv_buffer to detect if any pixels changed.
+			// If not, then we save a lot of time by not re-drawing the lv_canvas object.
 			if (module->draw_graphic_display(disp.id)) {
-				if (copy_buffer(disp.lv_buffer, disp.fullcolor_buffer))
+				if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
 					lv_obj_invalidate(disp.lv_canvas);
 			}
 
@@ -123,7 +120,7 @@ private:
 
 	lv_obj_t *parent_canvas{};
 
-	bool copy_buffer(std::span<char> lv_buffer, std::span<uint32_t> fullcolor_buffer) {
+	bool copy_and_compare_buffer(std::span<char> lv_buffer, std::span<uint32_t> fullcolor_buffer) {
 		if ((fullcolor_buffer.size() * 3) > lv_buffer.size()) {
 			pr_err("DynDraw buffer size error\n");
 			return false;
