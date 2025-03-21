@@ -1,12 +1,8 @@
 #pragma once
-#include "CoreModules/elements/element_info.hh"
-#include "CoreModules/elements/elements.hh"
 #include "gui/elements/draw_img.hh"
 #include "gui/fonts/fonts.hh"
 #include "gui/helpers/units_conversion.hh"
-#include "gui/images/paths.hh"
 #include "gui/styles.hh"
-#include "lvgl.h"
 #include <cmath>
 #include <cstdint>
 
@@ -105,14 +101,14 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 		float y = mm_to_px(el.y_mm, module_height);
 		float width = mm_to_px(el.width_mm, module_height);
 		float height = mm_to_px(el.height_mm, module_height);
-		const float channel_width_px = module_height / 60;
+		const float channel_width_px = module_height / 60.f;
 		if (height > width) {
 			x += (width - channel_width_px) / 2;
 			width = channel_width_px;
-			height -= module_height / 30; //padding
+			height -= module_height / 30.f; //padding
 		} else {
 			y += (width - channel_width_px) / 2;
-			width -= module_height / 30; //padding
+			width -= module_height / 30.f; //padding
 			height = channel_width_px;
 		}
 		float zoom = module_height / 240.f;
@@ -272,16 +268,14 @@ inline lv_obj_t *draw_element(const DynamicGraphicDisplay &el, lv_obj_t *canvas,
 	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h));
 	lv_coord_t h = std::round(mm_to_px(el.height_mm, module_h));
 
-	auto obj = lv_obj_create(canvas);
+	// Don't let rounding errors make us have an empty buffer
+	w = std::clamp<lv_coord_t>(w, 1, 1000);
+	h = std::clamp<lv_coord_t>(h, 1, module_h);
+
+	auto obj = lv_canvas_create(canvas);
 	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
 	lv_obj_set_pos(obj, x, y);
 	lv_obj_set_size(obj, w, h);
-	lv_obj_set_style_bg_opa(obj, LV_OPA_0, 0);
-	lv_obj_set_style_border_opa(obj, LV_OPA_0, 0);
-	if (module_h < 240) {
-		float zoom = (float)module_h / 240.f;
-		lv_obj_set_style_transform_zoom(obj, 255 * zoom, LV_PART_MAIN);
-	}
 
 	return obj;
 }
