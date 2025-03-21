@@ -155,7 +155,8 @@ void LedDisplayTextField::drawLayer(const DrawArgs &args, int layer) {
 			NVGcolor highlightColor = color;
 			highlightColor.a = 0.5;
 			int begin = std::min(cursor, selection);
-			int end = (this == APP->event->selectedWidget) ? std::max(cursor, selection) : -1;
+			// int end = (this == APP->event->selectedWidget) ? std::max(cursor, selection) : -1;
+			int end = -1;
 			bndIconLabelCaret(args.vg,
 							  textOffset.x,
 							  textOffset.y,

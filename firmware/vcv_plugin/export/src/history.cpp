@@ -4,7 +4,6 @@
 #include <engine/Cable.hpp>
 #include <engine/Engine.hpp>
 #include <history.hpp>
-#include <ranges>
 
 namespace rack::history
 {
@@ -54,11 +53,11 @@ void ModuleAdd::setModule(app::ModuleWidget *mw) {
 }
 
 void ModuleAdd::undo() {
-	app::ModuleWidget *mw = APP->scene->rack->getModule(moduleId);
-	if (!mw)
-		return;
-	APP->scene->rack->removeModule(mw);
-	delete mw;
+	// app::ModuleWidget *mw = APP->scene->rack->getModule(moduleId);
+	// if (!mw)
+	// 	return;
+	// APP->scene->rack->removeModule(mw);
+	// delete mw;
 }
 
 void ModuleAdd::redo() {
