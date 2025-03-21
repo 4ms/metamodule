@@ -8,18 +8,38 @@
 namespace rack
 {
 
+namespace midiloopback
+{
+struct Context {};
+} // namespace midiloopback
+
+namespace patch
+{
+struct Manager {};
+} // namespace patch
+
 static app::Scene _scene;
 static window::Window _window;
 static engine::Engine _engine;
-static app::RackScrollWidget rackScroll;
-static widget::ZoomWidget zoomWidget;
+static app::RackScrollWidget _rackScroll;
+static widget::ZoomWidget _zoomWidget;
+static widget::EventState _event;
+static history::State _history;
+static patch::Manager _patch;
+static midiloopback::Context _midiLoopbackContext;
+static app::RackWidget _rackWidget;
+
+static widget::Widget _menuBar;
+static widget::Widget _browser;
 
 static Context rack_context{
-	.scene = &_scene, .engine = &_engine, .window = &_window,
-	//event
-	//history
-	//patch
-	//midiLoopbackContext
+	.event = &_event,
+	.scene = &_scene,
+	.engine = &_engine,
+	.window = &_window,
+	.history = &_history,
+	.patch = &_patch,
+	.midiLoopbackContext = &_midiLoopbackContext,
 };
 
 Context *contextGet() {
@@ -29,8 +49,11 @@ Context *contextGet() {
 Context::~Context() = default;
 
 void contextSet(Context *context) {
-	rack_context.scene->rackScroll = &rackScroll;
-	rack_context.scene->rackScroll->zoomWidget = &zoomWidget;
+	rack_context.scene->rack = &_rackWidget;
+	rack_context.scene->rackScroll = &_rackScroll;
+	rack_context.scene->rackScroll->zoomWidget = &_zoomWidget;
+	rack_context.scene->menuBar = &_menuBar;
+	rack_context.scene->browser = &_browser;
 
 	auto fonsctx = fonsCreateInternal();
 	auto handle = fonsAddFont(fonsctx, "DejaVuSans", asset::system("res/fonts/DejaVuSans.ttf").c_str(), 0);
