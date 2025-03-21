@@ -12,6 +12,22 @@ public:
 		: patch_playloader{patch_playloader} {
 	}
 
+	bool prepare_module(std::vector<DrawnElement> const &drawn_elements,
+						unsigned module_id,
+						lv_obj_t *module_canvas,
+						unsigned px_per_3U) {
+
+		pr_trace("DynamicElementDraw: Prepare canvas for module_id %u, pxp3u %u\n", module_id, px_per_3U);
+
+		if (auto module = patch_playloader.get_plugin_module<CoreProcessor>(module_id)) {
+			drawer = std::make_unique<DynamicDisplayDrawer>(module, drawn_elements);
+			drawer->prepare(module_canvas, px_per_3U);
+			return true;
+		}
+
+		return false;
+	}
+
 	bool prepare_module(std::string_view slug, unsigned module_id, lv_obj_t *module_canvas, unsigned px_per_3U) {
 		pr_trace("DynamicElementDraw: Prepare canvas for %s, id %u, pxp3u %u\n", slug.data(), module_id, px_per_3U);
 

@@ -267,7 +267,23 @@ inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, ui
 }
 
 inline lv_obj_t *draw_element(const DynamicGraphicDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
-	return nullptr;
+	lv_coord_t x = std::round(mm_to_px(el.x_mm, module_h));
+	lv_coord_t y = std::round(mm_to_px(el.y_mm, module_h));
+	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h));
+	lv_coord_t h = std::round(mm_to_px(el.height_mm, module_h));
+
+	auto obj = lv_obj_create(canvas);
+	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
+	lv_obj_set_pos(obj, x, y);
+	lv_obj_set_size(obj, w, h);
+	lv_obj_set_style_bg_opa(obj, LV_OPA_0, 0);
+	lv_obj_set_style_border_opa(obj, LV_OPA_0, 0);
+	if (module_h < 240) {
+		float zoom = (float)module_h / 240.f;
+		lv_obj_set_style_transform_zoom(obj, 255 * zoom, LV_PART_MAIN);
+	}
+
+	return obj;
 }
 
 } // namespace MetaModule::ElementDrawer

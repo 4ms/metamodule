@@ -2,6 +2,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "debug.hh"
+#include "gui/elements/context.hh"
 #include "gui/styles.hh"
 #include "pr_dbg.hh"
 #include "util/overloaded.hh"
@@ -11,6 +12,21 @@ namespace MetaModule
 {
 
 struct DynamicDisplayDrawer {
+
+	// TODO: pass in the std::vector<DrawnElement> here
+	DynamicDisplayDrawer(CoreProcessor *module, std::vector<DrawnElement> const &drawn_elements)
+		: module{module} {
+		for (auto const &drawn_el : drawn_elements) {
+
+			std::visit(overloaded{[](BaseElement const &e) {},
+								  [&drawn_el, this](DynamicGraphicDisplay const &e) {
+									  displays.push_back({.id = drawn_el.gui_element.idx.light_idx,
+														  .element = e,
+														  .lv_canvas = drawn_el.gui_element.obj});
+								  }},
+					   drawn_el.element);
+		}
+	}
 
 	DynamicDisplayDrawer(CoreProcessor *module, std::string_view slug)
 		: module{module} {
@@ -22,7 +38,7 @@ struct DynamicDisplayDrawer {
 
 			std::visit(overloaded{[](BaseElement const &e) {},
 								  [=, this](DynamicGraphicDisplay const &e) {
-									  displays.push_back({.id = index.light_idx, .element = e});
+									  displays.push_back({.id = index.light_idx, .element = e, .lv_canvas = nullptr});
 								  }},
 					   el);
 		}
@@ -58,10 +74,14 @@ struct DynamicDisplayDrawer {
 					disp.w = std::min<lv_coord_t>(1000, disp.w);
 				}
 
-				disp.lv_canvas = lv_canvas_create(parent_canvas);
-				lv_obj_move_to_index(disp.lv_canvas, 0);
-				lv_obj_set_pos(disp.lv_canvas, disp.x, disp.y);
-				lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
+				if (disp.lv_canvas == nullptr) {
+					disp.lv_canvas = lv_canvas_create(parent_canvas);
+					lv_obj_move_to_index(disp.lv_canvas, 0);
+					lv_obj_set_pos(disp.lv_canvas, disp.x, disp.y);
+					lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
+				} else {
+					lv_obj_move_to_index(disp.lv_canvas, 0);
+				}
 
 				// Debug object positions with a red border:
 				// lv_obj_set_style_outline_width(disp.lv_canvas, 1, 0);
