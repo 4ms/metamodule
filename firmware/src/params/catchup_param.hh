@@ -73,7 +73,12 @@ public:
 
 			// If phys knob value jumps (e.g. loaded a knobset or patch and knobs are in a different position)
 			// then enter catchup mode
-			if (MathTools::abs_diff(last_phys_val, phys_val) >= Tolerance) {
+			if (MathTools::abs_diff(phys_val, module_val) < Tolerance) {
+				enter_tracking(phys_val);
+			}
+
+			else if (MathTools::abs_diff(last_phys_val, phys_val) >= Tolerance)
+			{
 				enter_catchup();
 
 			} else if (MathTools::abs_diff(last_module_val, module_val) >= Tolerance) {

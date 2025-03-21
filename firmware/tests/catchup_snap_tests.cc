@@ -6,12 +6,15 @@
 #include <memory>
 
 // These tests use a module that has 'snapping' params:
-// only values N/4 are allowed: 0, 0.25, 0.5, 0.75, 1.0
+// Param 0-6: only values N/4 are allowed: 0, 0.25, 0.5, 0.75, 1.0
+// Param 7: button: snap to 0 or 1 (0.5f threshold)
 struct SnapModule : CoreProcessor {
 	std::array<float, 8> params{};
 
 	void set_param(int param_id, float val) override {
-		if (param_id > 0 && param_id < (int)params.size())
+		if (param_id == 7) {
+			params[param_id] = (val > 0.5f) ? 1.f : 0.f;
+		} else if (param_id > 0 && param_id < (int)params.size())
 			params[param_id] = std::round(val * 4.f) / 4.f;
 	}
 	float get_param(int param_id) const override {
@@ -41,16 +44,16 @@ TEST_CASE("Basic usage of ResumeOnEqual") {
 	std::array<ParamSet, MaxKnobSets> knob_maps;
 
 	unsigned active_knobset = 0;
-	unsigned panel_knob = 1;
-	unsigned param_id = 2;
-
-	auto &p = knob_maps[active_knobset][panel_knob].emplace_back();
-	p.map.panel_knob_id = panel_knob;
-	p.map.module_id = 0;
-	p.map.param_id = param_id;
-	p.catchup.set_mode(CatchupParam::Mode::ResumeOnEqual);
 
 	SUBCASE("Normal mapping (0-1 => 0-1). Test for pickup on equal, module changing value, switching knobsets") {
+		unsigned panel_knob = 1;
+		unsigned param_id = 2;
+
+		auto &p = knob_maps[active_knobset][panel_knob].emplace_back();
+		p.map.panel_knob_id = panel_knob;
+		p.map.module_id = 0;
+		p.map.param_id = param_id;
+		p.catchup.set_mode(CatchupParam::Mode::ResumeOnEqual);
 		p.map.min = 0;
 		p.map.max = 1;
 
@@ -140,6 +143,33 @@ TEST_CASE("Basic usage of ResumeOnEqual") {
 		catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.75001f);
 		CHECK(p.catchup.is_tracking() == false);
 		CHECK(modules[0]->get_param(param_id) == 0.25f);
+	}
+
+	SUBCASE("Inverted mapping") {
+		unsigned panel_knob = 1;
+		unsigned param_id = 7;
+
+		auto &p = knob_maps[active_knobset][panel_knob].emplace_back();
+		p.map.panel_knob_id = panel_knob;
+		p.map.module_id = 0;
+		p.map.param_id = param_id;
+		p.catchup.set_mode(CatchupParam::Mode::ResumeOnEqual);
+		p.map.min = 0.51f;
+		p.map.max = 0.f;
+
+		catchup_manager.set_default_mode(CatchupParam::Mode::ResumeOnEqual, true);
+
+		// Starting param value is 1 (which is what our panel knob at 0 maps to)
+		modules[0]->set_param(param_id, 1.f);
+		CHECK(modules[0]->get_param(param_id) == 1.0f);
+
+		// Load the patch
+		catchup_manager.reset(modules, knob_maps[active_knobset]);
+
+		// Moving knob should track
+		catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.01f);
+		CHECK(modules[0]->get_param(param_id) == 1.0f);
+		CHECK(p.catchup.is_tracking() == true);
 	}
 }
 
