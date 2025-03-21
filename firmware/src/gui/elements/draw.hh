@@ -263,6 +263,11 @@ inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, ui
 }
 
 inline lv_obj_t *draw_element(const DynamicGraphicDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
+	if (el.height_mm == 0) {
+		pr_trace("Skipping graphic display with no height\n");
+		return nullptr;
+	}
+
 	lv_coord_t x = std::round(mm_to_px(el.x_mm, module_h));
 	lv_coord_t y = std::round(mm_to_px(el.y_mm, module_h));
 	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h));

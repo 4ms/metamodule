@@ -41,20 +41,21 @@ struct DynamicDisplayDrawer {
 			// If size is 0, then don't make a buffer for it
 			// This is done intentionally by rack::Module to create non-drawable elements
 			// that need to be stepped
-			if (disp.element.width_mm == 0 && disp.element.height_mm == 0) {
-				pr_trace("DynDraw::prepare() Graphic display has zero size, will not draw\n");
+			if (disp.element.width_mm == 0 || disp.element.height_mm == 0) {
+				pr_trace("DynDraw::prepare() Graphic display %u has zero size, will not draw\n", disp.id);
 				disp.fullcolor_buffer.clear();
 				disp.lv_canvas = nullptr;
+				module->show_graphic_display(disp.id, disp.fullcolor_buffer, 0, disp.lv_canvas);
 
 			} else if (disp.lv_canvas == nullptr || !lv_obj_is_valid(disp.lv_canvas)) {
-				pr_err("DynDraw::prepare(): lv object not valid\n");
+				pr_err("DynDraw::prepare(): id:%d lv object not valid\n", disp.id);
 
 			} else {
 				lv_obj_refr_size(disp.lv_canvas);
 				auto w = lv_obj_get_width(disp.lv_canvas);
 				auto h = lv_obj_get_height(disp.lv_canvas);
 
-				pr_trace("DynDraw: Create buffer %u*%u lvgl px: %u bytes\n", w, h, w * h * 3);
+				pr_trace("DynDraw: id:%d Create buffer %u*%u lvgl px: %u bytes\n", disp.id, w, h, w * h * 3);
 
 				// Create pixel buffers:
 				disp.fullcolor_buffer.resize(w * h, 0);

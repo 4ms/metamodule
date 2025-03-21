@@ -193,14 +193,18 @@ struct ModuleWidgetAdaptor {
 			// Use a blank name for the entire module widget so that it doesn't show up in the element roller
 			assign_element_fields(mw, "", element);
 
+			pr_trace("Widget with size %g x %g has a custom draw() or drawLayer()\n", mw->box.size.x, mw->box.size.y);
+
 		} else {
 			// Set element's box a 0 size if it has no custom draw
 			// This will ensure we call step() but don't allocate a pixel buffer
-			pr_dbg("Widget with size %fx%f has no draw() or drawLayer() override\n", mw->box.size.x, mw->box.size.y);
 
 			rack::widget::Widget zero_size_widget;
 			zero_size_widget.box = {{0, 0}, {0, 0}};
 			assign_element_fields(&zero_size_widget, "", element);
+
+			pr_trace(
+				"Widget with size %g x %g has no draw() or drawLayer() override\n", mw->box.size.x, mw->box.size.y);
 		}
 
 		ElementCount::Indices indices = clear();
