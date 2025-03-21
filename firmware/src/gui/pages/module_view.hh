@@ -287,7 +287,6 @@ struct ModuleViewPage : PageBase {
 		auto roller_width = lv_obj_get_width(ui_ElementRollerPanel);
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playloaded);
 
-		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
 		if (cur_el && args.detail_mode == true) {
 			mode = ViewMode::Mapping;
 			mapping_pane.hide();
@@ -296,8 +295,7 @@ struct ModuleViewPage : PageBase {
 			show_roller();
 		}
 
-		// dyn_draw.prepare_module(slug, this_module_id, canvas, 240);
-		dyn_draw.prepare_module(drawn_elements, this_module_id, canvas, 240);
+		dyn_draw.prepare_module(drawn_elements, this_module_id, canvas);
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {

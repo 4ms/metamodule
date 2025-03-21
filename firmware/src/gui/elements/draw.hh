@@ -256,7 +256,7 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 
 inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
 	auto label = draw_element(TextDisplay(el), canvas, module_h);
-	//DOT mode doesn't work with dynamic elements
+	//LV_LABEL_LONG_DOT mode doesn't work with dynamic elements
 	//because we can't compare the new text with the existing text since it may contain dots
 	lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
 	return label;
@@ -276,6 +276,12 @@ inline lv_obj_t *draw_element(const DynamicGraphicDisplay &el, lv_obj_t *canvas,
 	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
 	lv_obj_set_pos(obj, x, y);
 	lv_obj_set_size(obj, w, h);
+
+	// Debug with a red border around objects:
+	// lv_obj_set_style_outline_width(obj, 1, 0);
+	// lv_obj_set_style_outline_color(obj, lv_color_make(0xFF, 0, 0), 0);
+	// lv_obj_set_style_outline_opa(obj, LV_OPA_50, 0);
+	// lv_obj_set_style_outline_pad(obj, 1, 0);
 
 	return obj;
 }

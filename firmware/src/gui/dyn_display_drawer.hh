@@ -1,6 +1,5 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
-#include "CoreModules/moduleFactory.hh"
 #include "debug.hh"
 #include "gui/elements/context.hh"
 #include "gui/styles.hh"
@@ -14,10 +13,16 @@ namespace MetaModule
 struct DynamicDisplayDrawer {
 
 	// TODO: pass in the std::vector<DrawnElement> here
-	DynamicDisplayDrawer(CoreProcessor *module, std::vector<DrawnElement> const &drawn_elements)
+	DynamicDisplayDrawer(CoreProcessor *module, std::span<const DrawnElement> drawn_elements, unsigned module_id)
 		: module{module} {
+
 		for (auto const &drawn_el : drawn_elements) {
 
+			// Filter out other modules
+			if (drawn_el.gui_element.module_idx != module_id)
+				continue;
+
+			// Copy useful data from the DynamicGraphicDisplays
 			std::visit(overloaded{[](BaseElement const &e) {},
 								  [&drawn_el, this](DynamicGraphicDisplay const &e) {
 									  displays.push_back({.id = drawn_el.gui_element.idx.light_idx,
@@ -28,23 +33,7 @@ struct DynamicDisplayDrawer {
 		}
 	}
 
-	DynamicDisplayDrawer(CoreProcessor *module, std::string_view slug)
-		: module{module} {
-		auto info = ModuleFactory::getModuleInfo(slug);
-
-		// Scan elements for dynamic graphic displays
-		for (auto i = 0u; auto const &el : info.elements) {
-			auto const &index = info.indices[i++];
-
-			std::visit(overloaded{[](BaseElement const &e) {},
-								  [=, this](DynamicGraphicDisplay const &e) {
-									  displays.push_back({.id = index.light_idx, .element = e, .lv_canvas = nullptr});
-								  }},
-					   el);
-		}
-	}
-
-	void prepare(lv_obj_t *module_canvas, unsigned px_per_3U) {
+	void prepare(lv_obj_t *module_canvas) {
 		parent_canvas = module_canvas;
 
 		for (auto &disp : displays) {
@@ -54,50 +43,38 @@ struct DynamicDisplayDrawer {
 			if (disp.element.width_mm == 0 && disp.element.height_mm == 0) {
 				pr_trace("DynDraw::prepare() Graphic display has zero size, will not draw\n");
 				disp.fullcolor_buffer.clear();
-				disp.w = 0;
 				disp.lv_canvas = nullptr;
 
+			} else if (disp.lv_canvas == nullptr || !lv_obj_is_valid(disp.lv_canvas)) {
+				pr_err("DynDraw::prepare(): lv object not valid\n");
+
 			} else {
+				lv_obj_refr_size(disp.lv_canvas);
+				auto w = lv_obj_get_width(disp.lv_canvas);
+				auto h = lv_obj_get_height(disp.lv_canvas);
 
-				disp.x = std::round(mm_to_px(disp.element.x_mm, px_per_3U));
-				disp.y = std::round(mm_to_px(disp.element.y_mm, px_per_3U));
-				disp.w = std::round(mm_to_px(disp.element.width_mm, px_per_3U));
-				disp.h = std::round(mm_to_px(disp.element.height_mm, px_per_3U));
+				pr_trace("DynDraw: Create buffer %u*%u lvgl px: %u bytes\n", w, h, w * h * 3);
 
-				// Don't let rounding errors make us have an empty buffer
-				disp.w = std::max<lv_coord_t>(disp.w, 1);
-				disp.h = std::max<lv_coord_t>(disp.h, 1);
+				// Create pixel buffers: the module draws into fullcolor_buffer
+				// and then we compare it against lv_buffer to detect if any pixels changed.
+				// If not, then LVGL save a lot of time by not re-drawing the lv_canvas object.
+				disp.fullcolor_buffer.resize(w * h, 0);
 
-				if (disp.h > (lv_coord_t)px_per_3U || disp.w > 1000) {
-					pr_warn("DynDraw: canvas height %u exceeds module height, or width > 1000px\n", disp.h, disp.w);
-					disp.h = std::min<lv_coord_t>(px_per_3U, disp.h);
-					disp.w = std::min<lv_coord_t>(1000, disp.w);
-				}
+				disp.lv_buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h), 0);
 
-				if (disp.lv_canvas == nullptr) {
-					disp.lv_canvas = lv_canvas_create(parent_canvas);
-					lv_obj_move_to_index(disp.lv_canvas, 0);
-					lv_obj_set_pos(disp.lv_canvas, disp.x, disp.y);
-					lv_obj_set_size(disp.lv_canvas, disp.w, disp.h);
-				} else {
-					lv_obj_move_to_index(disp.lv_canvas, 0);
-				}
+				lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+
+				module->show_graphic_display(disp.id, disp.fullcolor_buffer, w, disp.lv_canvas);
+
+				// Send it to the back??
+				// lv_obj_move_to_index(disp.lv_canvas, 0);
 
 				// Debug object positions with a red border:
 				// lv_obj_set_style_outline_width(disp.lv_canvas, 1, 0);
 				// lv_obj_set_style_outline_color(disp.lv_canvas, lv_color_make(0xFF, 0, 0), 0);
 				// lv_obj_set_style_outline_opa(disp.lv_canvas, LV_OPA_50, 0);
 				// lv_obj_set_style_outline_pad(disp.lv_canvas, 1, 0);
-
-				pr_trace("DynDraw: Create buffer %u*%u lvgl px: %u bytes\n", disp.w, disp.h, disp.w * disp.h * 3);
-
-				disp.lv_buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(disp.w, disp.h), 0);
-				lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), disp.w, disp.h, LV_IMG_CF_TRUE_COLOR_ALPHA);
-
-				disp.fullcolor_buffer.resize(disp.w * disp.h, 0);
 			}
-
-			module->show_graphic_display(disp.id, disp.fullcolor_buffer, disp.w, disp.lv_canvas);
 		}
 	}
 
@@ -125,12 +102,6 @@ struct DynamicDisplayDrawer {
 				module->hide_graphic_display(disp.id);
 			disp.fullcolor_buffer.clear();
 			disp.lv_buffer.clear();
-
-			if (disp.lv_canvas && lv_obj_is_valid(disp.lv_canvas) && parent_canvas && lv_obj_is_valid(parent_canvas)) {
-				lv_obj_del(disp.lv_canvas);
-				disp.lv_canvas = nullptr;
-			} else
-				pr_err("DynDraw: cannot delete child canvas %p of module canvas %p\n", disp.lv_canvas, parent_canvas);
 		}
 	}
 
@@ -144,10 +115,6 @@ private:
 	struct Display {
 		unsigned id{};
 		DynamicGraphicDisplay element{};
-		lv_coord_t x{};
-		lv_coord_t y{};
-		lv_coord_t w{};
-		lv_coord_t h{};
 		lv_obj_t *lv_canvas{};
 		std::vector<char> lv_buffer;
 		std::vector<uint32_t> fullcolor_buffer;

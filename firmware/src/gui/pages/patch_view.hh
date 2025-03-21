@@ -166,10 +166,35 @@ struct PatchViewPage : PageBase {
 
 		lv_show(modules_cont);
 
+		draw_modules();
+
+		is_ready = true;
+
+		watch_modules();
+
+		highlighted_module_id = std::nullopt;
+		highlighted_module_obj = nullptr;
+		update_map_ring_style();
+
+		auto last_module = lv_obj_get_child(modules_cont, -1);
+		auto last_bottom = lv_obj_get_y(last_module) + lv_obj_get_height(last_module);
+		cable_drawer.set_height(last_bottom + 30);
+
+		update_cable_style(true);
+
+		settings_menu.prepare_focus(group);
+		file_menu.prepare_focus(group);
+
+		patch = patches.get_view_patch();
+		desc_panel.prepare_focus(group);
+
+		dyn_module_idx = 0;
+	}
+
+	void draw_modules() {
 		auto module_drawer = ModuleDrawer{modules_cont, page_settings.view_height_px};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
-		int bottom = 0;
 		lv_obj_t *initial_selected_module = nullptr;
 
 		unsigned modules_skipped_for_size = 0;
@@ -203,8 +228,6 @@ struct PatchViewPage : PageBase {
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
 			canvas_buf = canvas_buf.subspan(lv_obj_get_width(canvas) * page_settings.view_height_px);
-			int this_bottom = lv_obj_get_y(canvas) + lv_obj_get_height(canvas);
-			bottom = std::max(bottom, this_bottom);
 
 			module_canvases.push_back(canvas);
 			style_module(canvas);
@@ -226,23 +249,6 @@ struct PatchViewPage : PageBase {
 			notify_queue.put({msg, Notification::Priority::Info, 4000});
 		}
 
-		is_ready = true;
-
-		watch_modules();
-
-		highlighted_module_id = std::nullopt;
-		highlighted_module_obj = nullptr;
-		update_map_ring_style();
-
-		cable_drawer.set_height(bottom + 30);
-		update_cable_style(true);
-
-		settings_menu.prepare_focus(group);
-		file_menu.prepare_focus(group);
-
-		patch = patches.get_view_patch();
-		desc_panel.prepare_focus(group);
-
 		if (initial_selected_module) {
 			lv_obj_refr_size(base);
 			lv_obj_refr_pos(base);
@@ -251,8 +257,6 @@ struct PatchViewPage : PageBase {
 		} else {
 			lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 		}
-
-		dyn_module_idx = 0;
 	}
 
 	void redraw_map_rings() {
@@ -282,7 +286,6 @@ struct PatchViewPage : PageBase {
 		file_menu.hide();
 		params.text_displays.stop_watching_all();
 
-		pr_dbg("PatchView::blur()\n");
 		dyn_draws.clear();
 
 		dynamic_elements_prepared = false;
@@ -376,10 +379,6 @@ struct PatchViewPage : PageBase {
 
 			update_load_text(metaparams, ui_LoadMeter2);
 
-			prepare_dynamic_elements();
-
-			draw_dynamic_elements();
-
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
 				lv_hide(ui_LoadMeter2);
@@ -415,11 +414,10 @@ private:
 			if (module_idx >= patch->module_slugs.size())
 				continue;
 
-			auto slug = patch->module_slugs[module_idx];
-
 			auto &dyn = dyn_draws.emplace_back(patch_playloader);
-			if (!dyn.prepare_module(slug, module_idx, canvas, page_settings.view_height_px)) {
-				pr_dbg("Failed to create dyn draw, removing from PatchView dyn draw vector\n");
+
+			if (!dyn.prepare_module(drawn_elements, module_idx, canvas)) {
+				pr_warn("Failed to create dyn draw, removing from PatchView dyn draw vector\n");
 				dyn_draws.pop_back();
 			}
 		}
@@ -512,6 +510,9 @@ private:
 
 			redraw_text_display(drawn_el, gui_el.module_idx, params.text_displays.watch_displays);
 		}
+
+		prepare_dynamic_elements();
+		draw_dynamic_elements();
 	}
 
 	void update_map_ring_style() {
