@@ -37,9 +37,7 @@ private:
 		//TODO: only repopulate if plugins changed
 
 		auto all_slugs = ModuleFactory::getAllModuleDisplayNames(selected_brand_slug);
-		std::sort(all_slugs.begin(), all_slugs.end(), [](auto a, auto b) {
-			return std::string_view{a} < std::string_view{b};
-		});
+		std::ranges::sort(all_slugs, less_ci);
 
 		std::string slugs_str;
 		slugs_str.reserve(all_slugs.size() * (sizeof(ModuleTypeSlug) + 1));
