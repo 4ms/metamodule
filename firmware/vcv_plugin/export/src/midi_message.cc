@@ -11,7 +11,7 @@ std::string toPrettyMultilineString(std::span<uint8_t, 3> bytes) {
 
 	MidiMessage msg(bytes[0], bytes[1], bytes[2]);
 	auto channel = [b = bytes[0]] {
-		uint8_t chan = b & 0x0F + 1;
+		uint8_t chan = (b & 0x0F) + 1;
 		std::string channel = "Ch:" + std::to_string(chan);
 		return channel;
 	};
