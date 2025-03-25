@@ -185,6 +185,9 @@ void Module::fromJson(json_t *rootJ) {
 json_t *Module::paramsToJson() {
 	json_t *rootJ = json_array();
 	for (size_t paramId = 0; paramId < paramQuantities.size(); paramId++) {
+		if (!paramQuantities[paramId])
+			continue;
+
 		// Don't serialize unbounded Params
 		if (!paramQuantities[paramId]->isBounded())
 			continue;
