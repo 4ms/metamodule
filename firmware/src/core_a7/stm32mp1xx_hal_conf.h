@@ -89,6 +89,18 @@ extern "C" {
 #define LL_GPIO_MODULE_ENABLED
 #define LL_ADC_MODULE_ENABLED
 
+//#define USE_HAL_ADC_REGISTER_CALLBACKS    0u
+//#define USE_HAL_CEC_REGISTER_CALLBACKS    0u
+//#define USE_HAL_DAC_REGISTER_CALLBACKS    0u
+//#define USE_HAL_I2C_REGISTER_CALLBACKS    0u
+//#define USE_HAL_LTDC_REGISTER_CALLBACKS	0u
+//#define USE_HAL_RNG_REGISTER_CALLBACKS    0u
+//#define USE_HAL_SPI_REGISTER_CALLBACKS    0u
+//#define USE_HAL_SRAM_REGISTER_CALLBACKS   0U
+#define USE_HAL_UART_REGISTER_CALLBACKS 1
+//#define USE_HAL_USART_REGISTER_CALLBACKS  0u
+//#define USE_HAL_WWDG_REGISTER_CALLBACKS   0u
+
 /* ########################## Oscillator Values adaptation ####################*/
 /**
  * @brief Adjust the value of External High Speed oscillator (HSE) used in your application.

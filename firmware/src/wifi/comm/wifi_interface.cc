@@ -84,7 +84,8 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
 
 Configuration_t FrameConfig{.start = 0x01, .end = 0x02, .escape = 0x03};
 
-__attribute__((section(".wifi"))) std::array<uint8_t, 8 * 1024 * 1024> ReceiveBuffer;
+__attribute__((section(".wifi"))) std::array<uint8_t, 7 * 1024 * 1024> ReceiveBuffer;
+__attribute__((section(".wifi"))) FixedVector<uint8_t, 1024 * 1024 - 64> TransmitBuffer;
 
 StaticDeframer deframer(FrameConfig, std::span(ReceiveBuffer));
 Framer framer(FrameConfig);
@@ -111,15 +112,28 @@ void handle_client_channel(uint8_t, std::span<uint8_t>);
 void sendFrame(uint8_t channel, std::span<uint8_t> payload) {
 	uint16_t payloadLength = payload.size() + 1;
 
-	framer.sendStart(BufferedUSART2::transmit);
-	framer.sendPayload(uint8_t(payloadLength & 0xFF), BufferedUSART2::transmit);
-	framer.sendPayload(uint8_t((payloadLength & 0xFF00) >> 8), BufferedUSART2::transmit);
-	framer.sendPayload(channel, BufferedUSART2::transmit);
+	if ((size_t)payloadLength > TransmitBuffer.max_size()) {
+		pr_err("Cannot send more than %zu bytes\n", TransmitBuffer.size());
+	}
+
+	// TODO: spin until BufferedUSART2 is done transmitting
+
+	TransmitBuffer.clear();
+	auto xmit = [&](uint8_t c) {
+		TransmitBuffer.push_back(c);
+	};
+
+	framer.sendStart(xmit);
+	framer.sendPayload(uint8_t(payloadLength & 0xFF), xmit);
+	framer.sendPayload(uint8_t((payloadLength & 0xFF00) >> 8), xmit);
+	framer.sendPayload(channel, xmit);
 
 	for (auto p : payload) {
-		framer.sendPayload(p, BufferedUSART2::transmit);
+		framer.sendPayload(p, xmit);
 	}
-	framer.sendStop(BufferedUSART2::transmit);
+	framer.sendStop(xmit);
+
+	BufferedUSART2::transmit_dma(TransmitBuffer);
 }
 
 void receiveFrame(std::span<uint8_t> fullFrame) {
@@ -291,17 +305,20 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				auto timestamp = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
 
 				if (timestamp != 0) {
+					pr_info("Sending OK response\n");
 					auto result = CreateResult(fbb, true);
 					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 					fbb.Finish(message);
 
 				} else {
+					pr_info("Sending 'Saving failed' response\n");
 					auto description = fbb.CreateString("Saving failed");
 					auto result = CreateResult(fbb, false, description);
 					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 					fbb.Finish(message);
 				}
 			} else {
+				pr_info("Sending 'Invalid volume' response\n");
 				auto description = fbb.CreateString("Invalid volume id");
 				auto result = CreateResult(fbb, false, description);
 				auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
@@ -318,7 +335,9 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				lastPatchListSentTime = getTimestamp();
 			}
 
+			pr_info("Sending...\n");
 			sendResponse(fbb.GetBufferSpan());
+			pr_info("Sent\n");
 
 		} else {
 			pr_trace("Other option\n");
