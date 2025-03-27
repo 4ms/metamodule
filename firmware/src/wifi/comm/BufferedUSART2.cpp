@@ -70,6 +70,10 @@ void BufferedUSART2::initPeripheral() {
 // 	commMain.transmit(val);
 // }
 
+bool BufferedUSART2::is_busy() {
+	return commMain.is_busy();
+}
+
 void BufferedUSART2::transmit_dma(std::span<uint8_t> data) {
 	pr_info("BufferedUSART2: Transmitting %zu bytes\n", data.size());
 	commMain.send_dma(data);

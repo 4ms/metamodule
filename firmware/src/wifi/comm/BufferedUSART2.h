@@ -24,6 +24,8 @@ public:
 		return false;
 	}
 
+	static bool is_busy();
+
 private:
 	static void initPeripheral();
 

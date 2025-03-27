@@ -117,6 +117,9 @@ void sendFrame(uint8_t channel, std::span<uint8_t> payload) {
 	}
 
 	// TODO: spin until BufferedUSART2 is done transmitting
+	// spin until BufferedUSART2 is done transmitting
+	while (BufferedUSART2::is_busy())
+		;
 
 	TransmitBuffer.clear();
 	auto xmit = [&](uint8_t c) {
