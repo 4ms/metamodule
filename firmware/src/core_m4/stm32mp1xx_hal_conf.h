@@ -88,6 +88,8 @@ extern "C" {
 #define LL_GPIO_MODULE_ENABLED
 // #define LL_ADC_MODULE_ENABLED
 
+#define USE_HAL_UART_REGISTER_CALLBACKS 1
+
 /* ########################## Oscillator Values adaptation ####################*/
 /**
  * @brief Adjust the value of External High Speed oscillator (HSE) used in your application.

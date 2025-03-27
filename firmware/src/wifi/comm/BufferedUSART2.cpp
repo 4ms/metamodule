@@ -3,7 +3,7 @@
 #include "conf/wifi_uart_conf.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/uart_conf.hh"
-#include "drivers/uart_dma.hh"
+#include "drivers/uart_it.hh"
 
 #include <stm32mp1xx.h>
 #include <stm32mp1xx_ll_usart.h>
@@ -11,7 +11,7 @@
 #include <console/pr_dbg.hh>
 
 // static mdrivlib::Uart<WifiUartConfig> commMain;
-static mdrivlib::UartDma<WifiUartConfig> commMain;
+static mdrivlib::UartIT<WifiUartConfig> commMain;
 
 LockFreeFifoSpsc<uint8_t, 256> BufferedUSART2::queue;
 std::atomic_bool BufferedUSART2::overrunDetected;
@@ -80,7 +80,7 @@ void BufferedUSART2::initPeripheral() {
 	// read RX from hardware to clear RXNE flag
 	// (void)USART_PERIPH->RDR;
 
-	LL_USART_EnableIT_RXNE_RXFNE(USART_PERIPH);
+	// LL_USART_EnableIT_RXNE_RXFNE(USART_PERIPH);
 }
 
 // void BufferedUSART2::transmit(uint8_t val) {
@@ -91,11 +91,10 @@ bool BufferedUSART2::is_busy() {
 	return commMain.is_busy();
 }
 
-void BufferedUSART2::transmit_dma(std::span<uint8_t> data) {
-	if (commMain.send_dma(data)) {
-		pr_info("BufferedUSART2: Transmitting %zu bytes\n", data.size());
-	} else {
-		pr_err("BufferedUSART2: Failed transmitting %zu bytes\n", data.size());
+void BufferedUSART2::transmit_intr(std::span<uint8_t> data) {
+	pr_info("BufferedUSART2: Transmitting %zu bytes\n", data.size());
+	if (!commMain.send_intr(data)) {
+		pr_err("Failed transmitting\n");
 	}
 }
 

@@ -70,6 +70,7 @@ add_executable(
   ${HALDIR}/src/stm32mp1xx_hal_sd.c
   ${HALDIR}/src/stm32mp1xx_hal_sd_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_uart.c
+  ${HALDIR}/src/stm32mp1xx_hal_uart_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_usart.c
   ${HALDIR}/src/stm32mp1xx_ll_rcc.c
   ${HALDIR}/src/stm32mp1xx_ll_sdmmc.c

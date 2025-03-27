@@ -116,7 +116,6 @@ void sendFrame(uint8_t channel, std::span<uint8_t> payload) {
 		pr_err("Cannot send more than %zu bytes\n", TransmitBuffer.size());
 	}
 
-	// TODO: spin until BufferedUSART2 is done transmitting
 	// spin until BufferedUSART2 is done transmitting
 	while (BufferedUSART2::is_busy())
 		;
@@ -136,7 +135,7 @@ void sendFrame(uint8_t channel, std::span<uint8_t> payload) {
 	}
 	framer.sendStop(xmit);
 
-	BufferedUSART2::transmit_dma(TransmitBuffer);
+	BufferedUSART2::transmit_intr(TransmitBuffer);
 }
 
 void receiveFrame(std::span<uint8_t> fullFrame) {
@@ -225,6 +224,7 @@ void run() {
 			auto message = constructPatchesMessage(fbb);
 			fbb.Finish(message);
 
+			pr_info("Patch media changed, send:\n");
 			sendFrame(ChannelID_t::Broadcast, fbb.GetBufferSpan());
 		}
 
@@ -338,7 +338,7 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				lastPatchListSentTime = getTimestamp();
 			}
 
-			pr_info("Sending...\n");
+			pr_info("Sending Response to patch...\n");
 			sendResponse(fbb.GetBufferSpan());
 			pr_info("Sent\n");
 
