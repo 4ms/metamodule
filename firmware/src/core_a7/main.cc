@@ -144,6 +144,8 @@ extern "C" void kill_audio_thread(int type) {
 
 	printf("Recovering from crash type %d\n", type);
 
+	GIC_EndInterrupt(DMA2_Stream1_IRQn);
+
 	if (auto audio = AudioThreadMinder::audio_stream()) {
 		printf("Stopping audio...\n");
 		audio->stop();
