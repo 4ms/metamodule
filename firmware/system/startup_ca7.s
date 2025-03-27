@@ -136,23 +136,33 @@ auxcore_usrsys_loop:
 
 
 Abort_Exception:
-	b .
+	msr cpsr_c, MODE_SYS
+	mov r0, #1
+	bl kill_audio_thread
 
 Undef_Handler:
-	b .
+	msr cpsr_c, MODE_SYS
+	mov r0, #2
+	bl kill_audio_thread
 
 //The CP15 SCTLR.TE bit is used to specify whether exception handlers will use ARM or Thumb.
 PAbt_Handler:
-	subs pc, r14, #4
 	msr cpsr_c, MODE_SYS
-	bx lr
-	b .
+	mov r0, #3
+	bl kill_audio_thread
+	; subs pc, r14, #4
+	; msr cpsr_c, MODE_SYS
+	; bx lr
+	; b .
 
 DAbt_Handler:
-	subs pc, r14, #8
 	msr cpsr_c, MODE_SYS
-	bx lr
-	b .
+	mov r0, #4
+	bl kill_audio_thread
+	; subs pc, r14, #8
+	; msr cpsr_c, MODE_SYS
+	; bx lr
+	; b .
 
 
 // Useful macros for flipping pin PG9 to debug:

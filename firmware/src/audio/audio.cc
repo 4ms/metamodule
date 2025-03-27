@@ -131,6 +131,12 @@ void AudioStream::start() {
 	codec_.start();
 }
 
+void AudioStream::stop() {
+	codec_.stop();
+	if (ext_audio_connected)
+		codec_ext_.stop();
+}
+
 void AudioStream::handle_overruns() {
 	if (overrun_handler.is_retrying()) {
 		if (overrun_handler.handle()) {

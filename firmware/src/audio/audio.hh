@@ -46,6 +46,7 @@ public:
 				PatchModQueue &patch_mod_queue);
 
 	void start();
+	void stop();
 	void start_playing();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 	uint32_t get_audio_errors();

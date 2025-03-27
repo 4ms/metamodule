@@ -1,5 +1,6 @@
 #include "app_startup.hh"
 #include "audio/audio.hh"
+#include "audio/audio_thread_minder.hh"
 #include "calibrate/calibration_data_reader.hh"
 #include "core_a7/a7_shared_memory.hh"
 #include "core_a7/static_buffers.hh"
@@ -26,6 +27,8 @@ struct SystemInit : AppStartup, UartLog, Debug, Hardware {
 } _sysinit;
 
 } // namespace MetaModule
+
+extern "C" void run_audio();
 
 int main() {
 	using namespace MetaModule;
@@ -110,18 +113,51 @@ int main() {
 
 	StaticBuffers::sync_params.clear();
 
-	audio.start();
-
 	print_time();
+
+	AudioThreadMinder::register_audio_stream(audio);
+
+	run_audio();
+}
+
+extern "C" void run_audio() {
+	using namespace MetaModule;
+
+	auto audio = AudioThreadMinder::audio_stream();
+
+	audio->start();
 
 	while (true) {
 		__NOP();
 
-		audio.handle_overruns();
+		audio->handle_overruns();
 
-		if (audio.get_audio_errors() > 0) {
+		if (audio->get_audio_errors() > 0) {
 			pr_err("Audio error\n");
-			audio.start();
+			audio->start();
 		}
 	}
+}
+
+extern "C" void kill_audio_thread(int type) {
+	using namespace MetaModule;
+
+	printf("Recovering from crash type %d\n", type);
+
+	if (auto audio = AudioThreadMinder::audio_stream()) {
+		printf("Stopping audio...\n");
+		audio->stop();
+		printf("Stopped\n");
+	}
+
+	if (auto player = AudioThreadMinder::player()) {
+		printf("Unloading patch...\n");
+		player->unload_patch();
+		printf("Unloaded\n");
+	}
+
+	HAL_Delay(100);
+
+	printf("Restarting audio...\n");
+	run_audio();
 }
