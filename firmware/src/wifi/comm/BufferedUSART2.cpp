@@ -36,32 +36,49 @@ void BufferedUSART2::deinit() {
 void BufferedUSART2::initPeripheral() {
 	commMain.init();
 
-	mdrivlib::Interrupt::register_and_start_isr(USART_IRQ, USART_IRQ_PRIO, 0, []() {
-		if (LL_USART_IsActiveFlag_RXNE_RXFNE(USART_PERIPH)) {
-			do {
-				auto val = USART_PERIPH->RDR;
-
-				auto result = queue.put(val);
-				if (not result) {
-					queue.reset();
-					pr_warn("USART2: RX Soft Overrun\n");
-					overrunDetected = true;
-					break;
-				}
-			} while (LL_USART_IsActiveFlag_RXNE(USART_PERIPH));
-		} else if (LL_USART_IsActiveFlag_ORE(USART_PERIPH)) {
+	commMain.rx_callback([](uint8_t c) {
+		auto result = queue.put(c);
+		if (!result) {
 			queue.reset();
+			pr_warn("USART2: RX Soft Overrun\n");
 			overrunDetected = true;
-			pr_warn("USART2: FIFO Overrun\n");
-			LL_USART_ClearFlag_ORE(USART_PERIPH);
-		} else {
-			// pr_warn("USART2: ISR called with no flag\n");
-			// (void)USART_PERIPH->RDR;
 		}
 	});
 
+	// mdrivlib::Interrupt::register_and_start_isr(USART_IRQ, USART_IRQ_PRIO, 0, []() {
+	// 	if (LL_USART_IsActiveFlag_RXNE_RXFNE(USART_PERIPH)) {
+	// 		do {
+	// 			auto val = USART_PERIPH->RDR;
+
+	// 			auto result = queue.put(val);
+	// 			if (not result) {
+	// 				queue.reset();
+	// 				pr_warn("USART2: RX Soft Overrun\n");
+	// 				overrunDetected = true;
+	// 				break;
+	// 			}
+	// 		} while (LL_USART_IsActiveFlag_RXNE(USART_PERIPH));
+
+	// 	} else if (LL_USART_IsActiveFlag_ORE(USART_PERIPH)) {
+	// 		queue.reset();
+	// 		overrunDetected = true;
+	// 		pr_warn("USART2: FIFO Overrun\n");
+	// 		LL_USART_ClearFlag_ORE(USART_PERIPH);
+
+	// 	} else if (LL_USART_IsActiveFlag_TC(USART_PERIPH)) {
+	// 		LL_USART_ClearFlag_TC(USART_PERIPH);
+
+	// 	} else if (LL_USART_IsActiveFlag_TXFE(USART_PERIPH)) {
+	// 		LL_USART_ClearFlag_TXFE(USART_PERIPH);
+
+	// 	} else {
+	// 		// pr_warn("USART2: ISR called with no flag\n");
+	// 		// (void)USART_PERIPH->RDR;
+	// 	}
+	// });
+
 	// read RX from hardware to clear RXNE flag
-	(void)USART_PERIPH->RDR;
+	// (void)USART_PERIPH->RDR;
 
 	LL_USART_EnableIT_RXNE_RXFNE(USART_PERIPH);
 }
@@ -75,8 +92,11 @@ bool BufferedUSART2::is_busy() {
 }
 
 void BufferedUSART2::transmit_dma(std::span<uint8_t> data) {
-	pr_info("BufferedUSART2: Transmitting %zu bytes\n", data.size());
-	commMain.send_dma(data);
+	if (commMain.send_dma(data)) {
+		pr_info("BufferedUSART2: Transmitting %zu bytes\n", data.size());
+	} else {
+		pr_err("BufferedUSART2: Failed transmitting %zu bytes\n", data.size());
+	}
 }
 
 std::optional<uint8_t> BufferedUSART2::receive() {
