@@ -96,6 +96,7 @@ struct PluginTab : SystemMenuTab {
 
 	void update() override {
 		auto result = plugin_manager.process_loading();
+		bool loading_done = false;
 
 		if (result.state == PluginFileLoader::State::GotList) {
 			lv_hide(ui_PluginTabSpinner);
@@ -158,6 +159,10 @@ struct PluginTab : SystemMenuTab {
 			notify_queue.put({err, Notification::Priority::Error, 2500});
 
 			loading_done = true;
+		}
+
+		if (is_loading_all && loading_done) {
+			load_next();
 		}
 	}
 
@@ -360,36 +365,45 @@ private:
 			return;
 
 		lv_show(ui_PluginTabSpinner);
-		lv_timer_handler();
 
-		std::vector<std::pair<lv_obj_t *, uint32_t>> plugins_to_load;
+		page->start_loading_all();
+	}
+
+	void end_loading_all() {
+		lv_hide(ui_PluginTabSpinner);
+		is_loading_all = false;
+		reset_group();
+		notify_queue.put({"Done loading all plugins"});
+		if (lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0)
+			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, -1));
+		else
+			lv_group_focus_obj(lv_tabview_get_tab_btns(ui_SystemMenuTabView));
+	}
+
+	void start_loading_all() {
+		plugins_to_load.clear();
 
 		lv_foreach_child(ui_PluginsFoundCont, [&](lv_obj_t *child, unsigned id) {
 			auto idx = (uint32_t)(uintptr_t)lv_obj_get_user_data(child);
 			if (idx > 0)
 				plugins_to_load.emplace_back(child, idx - 1);
 		});
+		load_next();
+		is_loading_all = true;
+	}
 
-		for (auto [obj, idx] : plugins_to_load) {
-			page->loading_done = false;
+	void load_next() {
+		if (plugins_to_load.size()) {
+			auto [obj, idx] = plugins_to_load.back();
+			plugins_to_load.pop_back();
+
+			load_in_progress_obj = obj;
 			pr_dbg("Load plugin idx = %d\n", idx);
-			page->plugin_manager.load_plugin(idx);
-			page->load_in_progress_obj = obj;
 
-			while (page->loading_done == false) {
-				page->update();
-				lv_timer_handler_run_in_period(16);
-				lv_anim_refr_now();
-			}
+			plugin_manager.load_plugin(idx);
+		} else {
+			end_loading_all();
 		}
-		page->reset_group();
-		page->notify_queue.put({"Done loading all plugins"});
-		if (lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0)
-			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, -1));
-		else
-			lv_group_focus_obj(lv_tabview_get_tab_btns(ui_SystemMenuTabView));
-
-		page->is_loading_all = true;
 	}
 
 	PluginManager &plugin_manager;
@@ -410,6 +424,7 @@ private:
 	lv_obj_t *load_all_found_button;
 
 	bool is_loading_all = false;
-	bool loading_done = false;
+	// bool loading_done = false;
+	std::vector<std::pair<lv_obj_t *, uint32_t>> plugins_to_load;
 };
 } // namespace MetaModule
