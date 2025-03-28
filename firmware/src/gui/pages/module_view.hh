@@ -218,7 +218,11 @@ struct ModuleViewPage : PageBase {
 			last_type = gui_el.count;
 
 			opts.append(" ");
-			opts.append(base.short_name);
+			if (auto nl = base.short_name.find_first_of('\n'); nl != base.short_name.npos) {
+				opts.append(base.short_name.substr(0, nl));
+			} else {
+				opts.append(base.short_name);
+			}
 
 			if (gui_el.mapped_panel_id) {
 				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
