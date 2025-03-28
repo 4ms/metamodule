@@ -51,7 +51,7 @@ struct PluginTab : SystemMenuTab {
 			for (auto const &p : loaded_plugins) {
 				auto pluginname = std::string{p.fileinfo.plugin_name};
 				if (p.fileinfo.version.length() > 0)
-					pluginname += Gui::grey_text(" " + std::string{p.fileinfo.version});
+					pluginname += "\n" + Gui::grey_text(std::string{p.fileinfo.version});
 
 				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
 				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
@@ -101,7 +101,7 @@ struct PluginTab : SystemMenuTab {
 				auto pluginname = std::string{plugin.plugin_name};
 
 				if (plugin.version.length() > 0) {
-					pluginname += " " + Gui::grey_text(plugin.version);
+					pluginname += "\n" + Gui::grey_text(plugin.version);
 
 					auto pvers = Version(plugin.sdk_major_version, plugin.sdk_minor_version, 0);
 					if (!sdk_version().can_host_version(pvers)) {
