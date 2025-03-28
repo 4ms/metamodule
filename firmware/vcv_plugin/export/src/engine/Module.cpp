@@ -311,6 +311,12 @@ bool Module::draw_graphic_display(int display_id) {
 
 		disp.widget->step();
 
+		// Iterate children
+		for (auto *child : disp.widget->children) {
+			if (child->isVisible())
+				child->step();
+		}
+
 		disp.widget->draw(disp.args);
 		disp.widget->drawLayer(disp.args, 1);
 
