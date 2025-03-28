@@ -19,7 +19,9 @@ inline bool is_light_only(DrawnElement const &drawn_el) {
 											(gui_el.count.num_outputs == 0) && (gui_el.count.num_inputs == 0);
 								 },
 								 [](DynamicGraphicDisplay const &el) {
-									 return false;
+									 return true;
+									 // TODO: display these so we can click them to zoom in
+									 // return false;
 								 }},
 					  drawn_el.element);
 }
