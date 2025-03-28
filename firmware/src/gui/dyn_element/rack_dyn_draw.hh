@@ -138,6 +138,11 @@ struct RackDynDraw : BaseDynDraw {
 				disp.args.clipBox = disp.widget->getBox().zeroPos();
 
 				disp.widget->step();
+				for (auto *child : disp.widget->children) {
+					if (child->isVisible())
+						child->step();
+				}
+
 				disp.widget->draw(disp.args);
 				disp.widget->drawLayer(disp.args, 1);
 
