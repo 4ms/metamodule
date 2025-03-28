@@ -26,6 +26,10 @@ struct PluginTab : SystemMenuTab {
 		, gui_state{gui_state}
 		, play_loader{play_loader} {
 
+		clear_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload None");
+		current_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload Current");
+		load_all_found_button = create_button(ui_PluginsLeftColumn, "Load all");
+
 		clear_loaded_list();
 		clear_found_list();
 		lv_show(ui_PluginScanButton);
@@ -33,15 +37,17 @@ struct PluginTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_PluginScanButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
 		lv_hide(ui_PluginsFoundCont);
 
-		clear_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload None");
-		current_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload Current");
 		lv_obj_add_event_cb(clear_autoloads_button, clear_autoloads, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(current_autoloads_button, current_autoloads, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(load_all_found_button, load_all, LV_EVENT_CLICKED, this);
+
+		lv_hide(load_all_found_button);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
 		this->group = group;
 		lv_show(ui_PluginScanButton);
+		lv_hide(load_all_found_button);
 		lv_hide(ui_PluginsFoundCont);
 		lv_hide(ui_PluginTabSpinner);
 
@@ -67,8 +73,10 @@ struct PluginTab : SystemMenuTab {
 
 		pr_dbg("Autoload list:\n");
 		for (auto const &slug : settings.slug) {
-			pr_dbg("%s\n", slug.c_str());
+			pr_dbg("'%s'\n", slug.c_str());
 		}
+
+		is_loading_all = false;
 	}
 
 	bool consume_back_event() override {
@@ -119,6 +127,7 @@ struct PluginTab : SystemMenuTab {
 					lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 				}
 			}
+
 			reset_group();
 			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, 0));
 		}
@@ -134,17 +143,21 @@ struct PluginTab : SystemMenuTab {
 				lv_group_focus_obj(plugin_obj);
 				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
 
-				lv_obj_del_async(load_in_progress_obj);
+				lv_obj_del(load_in_progress_obj);
 
 				load_in_progress_obj = nullptr;
 				gui_state.playing_patch_needs_manual_reload = true;
 			}
+
+			loading_done = true;
 		}
 
 		if (result.error_message.length()) {
 			lv_hide(ui_PluginTabSpinner);
 			std::string err = "Error loading plugin: " + result.error_message;
 			notify_queue.put({err, Notification::Priority::Error, 2500});
+
+			loading_done = true;
 		}
 	}
 
@@ -159,10 +172,13 @@ private:
 		lv_group_add_obj(group, ui_PluginScanButton);
 
 		lv_foreach_child(ui_PluginsFoundCont, [this](auto *obj, unsigned) { lv_group_add_obj(this->group, obj); });
-		lv_foreach_child(ui_PluginsLoadedCont, [this](auto *obj, unsigned) { lv_group_add_obj(this->group, obj); });
+		lv_group_add_obj(group, load_all_found_button);
 
+		lv_foreach_child(ui_PluginsLoadedCont, [this](auto *obj, unsigned) { lv_group_add_obj(this->group, obj); });
 		lv_group_add_obj(group, clear_autoloads_button);
 		lv_group_add_obj(group, current_autoloads_button);
+
+		lv_show(load_all_found_button, lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0);
 	}
 
 	void clear_loaded_list() {
@@ -171,6 +187,7 @@ private:
 
 	void clear_found_list() {
 		lv_foreach_child(ui_PluginsFoundCont, [](auto *obj, unsigned) { lv_obj_del_async(obj); });
+		lv_hide(load_all_found_button);
 	}
 
 	void populate_loaded_list() {
@@ -202,6 +219,7 @@ private:
 			clear_found_list();
 			scan_plugins();
 			lv_show(ui_PluginScanButton);
+			lv_hide(load_all_found_button);
 		}
 	}
 
@@ -215,14 +233,15 @@ private:
 			return;
 
 		std::string plugin_name = lv_label_get_text(lv_obj_get_child(target, 0));
-		if (auto colorpos = plugin_name.find_first_of("^"); colorpos != std::string::npos) {
-			plugin_name = plugin_name.substr(0, colorpos);
+		if (auto newline = plugin_name.find_first_of("\n"); newline != std::string::npos) {
+			plugin_name = plugin_name.substr(0, newline);
 		}
 		//trim
 		while (plugin_name.back() == ' ')
 			plugin_name.pop_back();
 
 		const auto is_autoloaded = std::ranges::find(page->settings.slug, plugin_name) != page->settings.slug.end();
+		pr_dbg("%s found %s in slugs\n", is_autoloaded ? "Did" : "Did not", plugin_name.c_str());
 
 		page->plugin_state_popup.show(
 			[page, plugin_name, target](std::optional<uint8_t> button, std::optional<bool> toggle) {
@@ -335,6 +354,44 @@ private:
 			"OK");
 	}
 
+	static void load_all(lv_event_t *event) {
+		auto page = static_cast<PluginTab *>(event->user_data);
+		if (!page)
+			return;
+
+		lv_show(ui_PluginTabSpinner);
+		lv_timer_handler();
+
+		std::vector<std::pair<lv_obj_t *, uint32_t>> plugins_to_load;
+
+		lv_foreach_child(ui_PluginsFoundCont, [&](lv_obj_t *child, unsigned id) {
+			auto idx = (uint32_t)(uintptr_t)lv_obj_get_user_data(child);
+			if (idx > 0)
+				plugins_to_load.emplace_back(child, idx - 1);
+		});
+
+		for (auto [obj, idx] : plugins_to_load) {
+			page->loading_done = false;
+			pr_dbg("Load plugin idx = %d\n", idx);
+			page->plugin_manager.load_plugin(idx);
+			page->load_in_progress_obj = obj;
+
+			while (page->loading_done == false) {
+				page->update();
+				lv_timer_handler_run_in_period(16);
+				lv_anim_refr_now();
+			}
+		}
+		page->reset_group();
+		page->notify_queue.put({"Done loading all plugins"});
+		if (lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0)
+			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, -1));
+		else
+			lv_group_focus_obj(lv_tabview_get_tab_btns(ui_SystemMenuTabView));
+
+		page->is_loading_all = true;
+	}
+
 	PluginManager &plugin_manager;
 	NotificationQueue &notify_queue;
 	PluginAutoloadSettings &settings;
@@ -350,5 +407,9 @@ private:
 
 	lv_obj_t *clear_autoloads_button;
 	lv_obj_t *current_autoloads_button;
+	lv_obj_t *load_all_found_button;
+
+	bool is_loading_all = false;
+	bool loading_done = false;
 };
 } // namespace MetaModule
