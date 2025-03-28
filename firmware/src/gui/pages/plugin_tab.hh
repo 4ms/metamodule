@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/plugin_popup.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -31,6 +32,11 @@ struct PluginTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_PluginScanButton, scan_plugins_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PluginScanButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
 		lv_hide(ui_PluginsFoundCont);
+
+		clear_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload None");
+		current_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload Current");
+		lv_obj_add_event_cb(clear_autoloads_button, clear_autoloads, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(current_autoloads_button, current_autoloads, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -42,7 +48,7 @@ struct PluginTab : SystemMenuTab {
 		const auto &loaded_plugins = plugin_manager.loaded_plugins();
 		if (!lv_obj_get_child_cnt(ui_PluginsLoadedCont) && loaded_plugins.size()) {
 			// plugins were autoloaded on startup, they need to be added to the loaded plugin list.
-			for (auto &p : loaded_plugins) {
+			for (auto const &p : loaded_plugins) {
 				auto pluginname = std::string{p.fileinfo.plugin_name};
 				if (p.fileinfo.version.length() > 0)
 					pluginname += Gui::grey_text(" " + std::string{p.fileinfo.version});
@@ -56,10 +62,20 @@ struct PluginTab : SystemMenuTab {
 		clear_found_list();
 		reset_group();
 		lv_group_focus_obj(ui_PluginScanButton);
+		plugin_state_popup.init(ui_SystemMenu, group);
 		confirm_popup.init(ui_SystemMenu, group);
+
+		pr_dbg("Autoload list:\n");
+		for (auto const &slug : settings.slug) {
+			pr_dbg("%s\n", slug.c_str());
+		}
 	}
 
 	bool consume_back_event() override {
+		if (plugin_state_popup.is_visible()) {
+			plugin_state_popup.hide();
+			return true;
+		}
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
 			return true;
@@ -141,8 +157,12 @@ private:
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, lv_tabview_get_tab_btns(ui_SystemMenuTabView));
 		lv_group_add_obj(group, ui_PluginScanButton);
+
 		lv_foreach_child(ui_PluginsFoundCont, [this](auto *obj, unsigned) { lv_group_add_obj(this->group, obj); });
 		lv_foreach_child(ui_PluginsLoadedCont, [this](auto *obj, unsigned) { lv_group_add_obj(this->group, obj); });
+
+		lv_group_add_obj(group, clear_autoloads_button);
+		lv_group_add_obj(group, current_autoloads_button);
 	}
 
 	void clear_loaded_list() {
@@ -204,7 +224,7 @@ private:
 
 		const auto is_autoloaded = std::ranges::find(page->settings.slug, plugin_name) != page->settings.slug.end();
 
-		page->confirm_popup.show(
+		page->plugin_state_popup.show(
 			[page, plugin_name, target](std::optional<uint8_t> button, std::optional<bool> toggle) {
 				if (button) {
 					// Cancel
@@ -277,16 +297,58 @@ private:
 		}
 	}
 
+	static void clear_autoloads(lv_event_t *event) {
+		auto page = static_cast<PluginTab *>(event->user_data);
+		if (!page)
+			return;
+
+		page->confirm_popup.show(
+			[page](unsigned ok) {
+				if (ok) {
+					page->settings.slug.clear();
+					page->gui_state.do_write_settings = true;
+				}
+			},
+			"Are you sure you want to clear all names of autoloaded plugins?",
+			"OK");
+	}
+
+	static void current_autoloads(lv_event_t *event) {
+		auto page = static_cast<PluginTab *>(event->user_data);
+		if (!page)
+			return;
+
+		page->confirm_popup.show(
+			[page](unsigned ok) {
+				if (ok) {
+					page->settings.slug.clear();
+					auto current = page->plugin_manager.loaded_plugins();
+					for (auto const &plugin : current) {
+						std::string name = plugin.fileinfo.plugin_name;
+						page->settings.slug.push_back(name);
+					}
+
+					page->gui_state.do_write_settings = true;
+				}
+			},
+			"This will set list of autoloaded plugins equal to the current set of loaded plugins",
+			"OK");
+	}
+
 	PluginManager &plugin_manager;
 	NotificationQueue &notify_queue;
 	PluginAutoloadSettings &settings;
 	GuiState &gui_state;
 	bool should_write_settings = false;
 	PatchPlayLoader &play_loader;
-	PluginPopup confirm_popup;
+	PluginPopup plugin_state_popup;
+	ConfirmPopup confirm_popup;
 
 	lv_obj_t *load_in_progress_obj = nullptr;
 
 	lv_group_t *group = nullptr;
+
+	lv_obj_t *clear_autoloads_button;
+	lv_obj_t *current_autoloads_button;
 };
 } // namespace MetaModule

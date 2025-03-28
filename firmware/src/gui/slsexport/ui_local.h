@@ -21,4 +21,6 @@ lv_obj_t *create_lv_roller(lv_obj_t *parent);
 
 lv_obj_t *create_lv_labeled_popup(lv_obj_t *parent, const char *label_text);
 
+lv_obj_t *create_button(lv_obj_t *parent, const char *name);
+
 } // namespace MetaModule

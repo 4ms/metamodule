@@ -391,6 +391,7 @@ lv_obj_set_style_pad_left(ui_PluginsRightColumn, 6, LV_PART_MAIN| LV_STATE_DEFAU
 lv_obj_set_style_pad_right(ui_PluginsRightColumn, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PluginsRightColumn, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_PluginsRightColumn, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_PluginsRightColumn, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_set_style_radius(ui_PluginsRightColumn, 2, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_PluginsRightColumn, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
