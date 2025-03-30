@@ -1,6 +1,9 @@
 #pragma once
-#include "delay.hh"
-#include "plugin_manager.hh"
+#include "console/pr_dbg.hh"
+#include "dynload/plugin_file_list.hh"
+#include "dynload/plugin_manager.hh"
+#include "user_settings/plugin_autoload_settings.hh"
+#include "util/version_tools.hh"
 
 namespace MetaModule
 {
@@ -36,7 +39,6 @@ struct AutoLoader {
 private:
 	Status start() {
 		if (plugin_settings.slug.size()) {
-			delay_ms(600); //allow time for ???
 
 			pr_trace("Autoload: Scanning...\n");
 			plugins.start_loading_plugin_list();
