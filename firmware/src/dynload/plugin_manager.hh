@@ -4,7 +4,6 @@
 #include "gui/fonts/ttf.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
-#include "user_settings/plugin_autoload_settings.hh"
 
 #include "gui/fonts/fonts.hh"
 

@@ -319,9 +319,17 @@ public:
 			   status.state == State::Error || status.state == State::InvalidPlugin;
 	}
 
+	// Gets or deduces the version from the filename
+	// This lets us weed out obvious wrong versions
 	void parse_versions() {
 		for (auto &plugin : plugin_files) {
 			const auto name = std::string{plugin.plugin_name};
+
+			// drop version from plugin name:
+			// if (auto v = name.find("-v"); v != std::string_view::npos)
+			// 	plugin.plugin_name.copy(name.substr(0, v));
+
+			// PluginVersionCheck::parse_version(name);
 
 			if (auto v = name.find("-v"); v != std::string_view::npos) {
 				// extract version string:
@@ -365,6 +373,8 @@ public:
 			return false;
 		}
 
+		// Check the sdk version by calling sdk_version() in the plugin
+		// This function will return the SDK version used to build the plugin.
 		auto plugin_sdk_version = dynloader.get_sdk_version();
 		if (!plugin_sdk_version.has_value()) {
 			pr_err("Plugin uses SDK < 0.15.0, or is not valid: not sdk_version() symbol found\n");

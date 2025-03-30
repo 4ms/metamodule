@@ -15,7 +15,15 @@ struct PluginFile {
 	StaticString<255> full_path;   //"metamodule-plugins/BrandX.mmpatch"
 	StaticString<255> plugin_name; //"BrandX" ==> "dirname will untar to: BrandX/BrandX.so"
 	size_t file_size{};
-	StaticString<31> version; //1.0.16
+
+	// This is everything after the "-v": 1.0.16-beta2-dev-13
+	// It's used for
+	// - displaying the plugin on the plugin tab
+	// - autoloader detecting if it can load
+	StaticString<31> version;
+
+	// The SDK version is deduced from the filename
+	// The plugin tab uses it to hide older versions
 	unsigned sdk_major_version = 1;
 	unsigned sdk_minor_version = 0;
 };
