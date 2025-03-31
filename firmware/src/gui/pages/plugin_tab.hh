@@ -9,6 +9,7 @@
 #include "gui/styles.hh"
 #include "user_settings/plugin_autoload_settings.hh"
 #include <algorithm>
+#include <deque>
 
 namespace MetaModule
 {
@@ -40,6 +41,7 @@ struct PluginTab : SystemMenuTab {
 		lv_hide(loading_popup);
 		loading_group = lv_group_create();
 		lv_group_add_obj(loading_group, loading_popup);
+
 		clear_loaded_list();
 		clear_found_list();
 		lv_show(ui_PluginScanButton);
@@ -77,6 +79,7 @@ struct PluginTab : SystemMenuTab {
 		clear_found_list();
 		reset_group();
 		lv_hide(load_all_found_button);
+
 		lv_group_focus_obj(ui_PluginScanButton);
 		plugin_state_popup.init(ui_SystemMenu, group);
 		confirm_popup.init(ui_SystemMenu, group);
@@ -113,25 +116,7 @@ struct PluginTab : SystemMenuTab {
 			lv_hide(ui_PluginScanButton);
 			lv_show(ui_PluginsFoundCont);
 
-			auto *found_plugins = plugin_manager.found_plugin_list();
-
-			for (unsigned idx = 0; auto plugin : *found_plugins) {
-				idx++;
-				auto pluginname = std::string{plugin.plugin_name};
-
-				if (plugin.version_in_filename.length() > 0) {
-					pluginname += "\n" + Gui::grey_text(plugin.version_in_filename);
-				}
-
-				if (!plugin_already_loaded(plugin)) {
-
-					lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, pluginname.c_str());
-
-					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx));
-					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
-					lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
-				}
-			}
+			display_found_plugins();
 
 			reset_group();
 			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, 0));
@@ -140,20 +125,9 @@ struct PluginTab : SystemMenuTab {
 		else if (result.state == PluginFileLoader::State::Success)
 		{
 			lv_hide(ui_PluginTabSpinner);
-			if (load_in_progress_obj) {
-				auto label = lv_obj_get_child(load_in_progress_obj, 0);
-				std::string pluginname = label ? lv_label_get_text(label) : "(new plugin)";
-				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
-				lv_group_add_obj(group, plugin_obj);
-				lv_group_focus_obj(plugin_obj);
-				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
+			move_found_plugin_to_loaded();
 
-				lv_obj_del(load_in_progress_obj);
-
-				load_in_progress_obj = nullptr;
-				gui_state.playing_patch_needs_manual_reload = true;
-			}
-
+			reset_group();
 			loading_done = true;
 		}
 
@@ -230,6 +204,91 @@ private:
 			scan_plugins();
 			lv_show(ui_PluginScanButton);
 			lv_hide(load_all_found_button);
+		}
+	}
+
+	void display_found_plugins() {
+		auto *found_plugins = plugin_manager.found_plugin_list();
+		std::string last_pluginname = "";
+
+		for (unsigned idx = 0; auto const &plugin : *found_plugins) {
+			idx++;
+
+			if (!plugin_already_loaded(plugin)) {
+
+				std::string pluginname;
+				lv_obj_t *plugin_obj;
+
+				if (last_pluginname == std::string_view(plugin.plugin_name)) {
+					pluginname = (plugin.version_in_filename.length() > 0) ?
+									 Gui::grey_text(plugin.version_in_filename) :
+									 "(no version)";
+
+					plugin_obj = create_plugin_list_version_item(ui_PluginsFoundCont, pluginname.c_str());
+
+				} else {
+					pluginname = std::string{plugin.plugin_name};
+
+					if (plugin.version_in_filename.length() > 0) {
+						pluginname += "\n" + Gui::grey_text(plugin.version_in_filename);
+					}
+
+					plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, pluginname.c_str());
+				}
+
+				lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx));
+				lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
+				lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
+
+				last_pluginname = std::string(plugin.plugin_name);
+			}
+		}
+	}
+
+	void delete_found_items_with_name(std::string_view plugin_name) {
+		auto *found_plugins = plugin_manager.found_plugin_list();
+
+		lv_foreach_child(ui_PluginsFoundCont, [=](lv_obj_t *obj, unsigned) {
+			auto idx = (uintptr_t)lv_obj_get_user_data(obj);
+
+			if (idx > 0 && idx < (*found_plugins).size()) {
+				auto &plugin = (*found_plugins)[idx - 1];
+
+				if (plugin.plugin_name == plugin_name) {
+					lv_obj_del_async(obj);
+				}
+			}
+		});
+	}
+
+	void move_found_plugin_to_loaded() {
+		if (load_in_progress_obj) {
+			auto label = lv_obj_get_child(load_in_progress_obj, 0);
+
+			std::string pluginname;
+
+			if (auto idx = (uintptr_t)lv_obj_get_user_data(load_in_progress_obj); idx > 0) {
+				auto *found_plugins = plugin_manager.found_plugin_list();
+				auto &plugin = (*found_plugins)[idx - 1];
+				pluginname = std::string{plugin.plugin_name};
+				if (plugin.version_in_filename.length() > 0)
+					pluginname += "\n" + Gui::grey_text(plugin.version_in_filename);
+
+				delete_found_items_with_name(plugin.plugin_name);
+
+			} else {
+				pluginname = label ? lv_label_get_text(label) : "(new plugin)";
+				lv_obj_del(load_in_progress_obj);
+			}
+
+			lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
+
+			lv_group_add_obj(group, plugin_obj);
+			lv_group_focus_obj(plugin_obj);
+			lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
+
+			load_in_progress_obj = nullptr;
+			gui_state.playing_patch_needs_manual_reload = true;
 		}
 	}
 
@@ -381,10 +440,6 @@ private:
 		lv_group_activate(group);
 		reset_group();
 		notify_queue.put({"Done loading all plugins"});
-		if (lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0)
-			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, -1));
-		else
-			lv_group_focus_obj(lv_tabview_get_tab_btns(ui_SystemMenuTabView));
 	}
 
 	void start_loading_all() {
@@ -393,6 +448,7 @@ private:
 
 		lv_obj_scroll_to_y(ui_SystemMenuPluginsTab, 0, LV_ANIM_ON);
 		lv_group_activate(loading_group);
+
 		plugins_to_load.clear();
 
 		lv_foreach_child(ui_PluginsFoundCont, [&](lv_obj_t *child, unsigned id) {
@@ -430,6 +486,10 @@ private:
 	lv_obj_t *load_in_progress_obj = nullptr;
 
 	lv_group_t *group = nullptr;
+
+	struct DisplayedPlugins {
+		std::optional<unsigned> found_idx;
+	};
 
 	lv_obj_t *clear_autoloads_button;
 	lv_obj_t *current_autoloads_button;
