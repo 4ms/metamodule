@@ -94,6 +94,11 @@ private:
 		}
 
 		if (result.state == PluginFileLoader::State::InvalidPlugin) {
+			// TODO: retry current plugin name, check for earlier versions.
+			// Need to keep track of which ones we've tried
+			// And how many are left
+			// if (versions_remaining) { try_idx++; autoload_state = State::LoadingPlugin } else { slug_idx++; ...
+
 			pr_err("Autoload: Warning: %s\n", result.error_message.c_str());
 			slug_idx++;
 			if (slug_idx >= plugin_settings.slug.size()) {
