@@ -56,8 +56,8 @@ struct PluginTab : SystemMenuTab {
 			// plugins were autoloaded on startup, they need to be added to the loaded plugin list.
 			for (auto const &p : loaded_plugins) {
 				auto pluginname = std::string{p.fileinfo.plugin_name};
-				if (p.fileinfo.version.length() > 0)
-					pluginname += "\n" + Gui::grey_text(std::string{p.fileinfo.version});
+				if (p.fileinfo.version_in_filename.length() > 0)
+					pluginname += "\n" + Gui::grey_text(std::string{p.fileinfo.version_in_filename});
 
 				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
 				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
@@ -109,14 +109,8 @@ struct PluginTab : SystemMenuTab {
 				idx++;
 				auto pluginname = std::string{plugin.plugin_name};
 
-				if (plugin.version.length() > 0) {
-					pluginname += "\n" + Gui::grey_text(plugin.version);
-
-					auto pvers = Version(plugin.sdk_major_version, plugin.sdk_minor_version, 0);
-					if (!sdk_version().can_host_version(pvers)) {
-						pr_trace("Can't host %s version %s\n", plugin.plugin_name.c_str(), plugin.version.c_str());
-						continue;
-					}
+				if (plugin.version_in_filename.length() > 0) {
+					pluginname += "\n" + Gui::grey_text(plugin.version_in_filename);
 				}
 
 				if (!plugin_already_loaded(plugin)) {

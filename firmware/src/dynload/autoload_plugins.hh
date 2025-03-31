@@ -122,21 +122,15 @@ private:
 
 		for (auto const &found_plugin : *found_plugins) {
 			if (found_plugin.plugin_name == s) {
-				auto fw_version = sdk_version();
-				auto found_version = VersionUtil::Version(found_plugin.version);
+				auto found_version = VersionUtil::Version(found_plugin.version_in_filename);
 
-				if (found_version.major == 0)
-					found_version = fw_version;
+				if (latest_version.is_later(found_version))
+					continue;
 
-				if (fw_version.can_host_version(found_version)) {
-					if (latest_version.is_later(found_version))
-						continue;
-
-					latest_version.major = found_version.major;
-					latest_version.minor = found_version.minor;
-					latest_version.revision = found_version.revision;
-					match = &found_plugin;
-				}
+				latest_version.major = found_version.major;
+				latest_version.minor = found_version.minor;
+				latest_version.revision = found_version.revision;
+				match = &found_plugin;
 			}
 		}
 
@@ -146,6 +140,12 @@ private:
 		}
 
 		const auto idx = std::distance(found_plugins->begin(), match);
+
+		if ((size_t)idx >= found_plugins->size()) {
+			pr_info("Autoload: Internal error finding plugin: '%.*s'\n", (int)s.size(), s.data());
+			return false;
+		}
+
 		plugins.load_plugin(idx);
 
 		return true;

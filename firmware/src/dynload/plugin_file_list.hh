@@ -19,13 +19,8 @@ struct PluginFile {
 	// This is everything after the "-v": 1.0.16-beta2-dev-13
 	// It's used for
 	// - displaying the plugin on the plugin tab
-	// - autoloader detecting if it can load
-	StaticString<31> version;
-
-	// The SDK version is deduced from the filename
-	// The plugin tab uses it to hide older versions
-	unsigned sdk_major_version = 1;
-	unsigned sdk_minor_version = 0;
+	// - autoloader picking the plugin with the latest version in the filename
+	StaticString<31> version_in_filename;
 };
 
 static constexpr size_t MaxPlugins = 64;

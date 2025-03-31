@@ -326,38 +326,11 @@ public:
 			const auto name = std::string{plugin.plugin_name};
 
 			// drop version from plugin name:
-			// if (auto v = name.find("-v"); v != std::string_view::npos)
-			// 	plugin.plugin_name.copy(name.substr(0, v));
-
-			// PluginVersionCheck::parse_version(name);
-
 			if (auto v = name.find("-v"); v != std::string_view::npos) {
-				// extract version string:
-				// skip the "-v"
-				std::string vers = name.substr(v + 2);
-
-				// drop version from plugin name:
 				plugin.plugin_name.copy(name.substr(0, v));
-
-				auto version = VersionUtil::Version(vers);
-				plugin.version = std::string_view(vers);
-
-				// If version contains "-dev-X" where X is the current dev version,
-				// then we will assume it's the right major/minor
-				if (name.contains(DevVersionChars)) {
-					plugin.sdk_major_version = sdk_version().major;
-					plugin.sdk_minor_version = sdk_version().minor;
-					pr_dbg("Plugin %s: contains %s so assuming it's compatible\n", name.c_str(), DevVersionChars);
-				} else {
-					plugin.sdk_major_version = version.major;
-					plugin.sdk_minor_version = version.minor;
-					pr_dbg("Plugin %s: parsed as v%d.%d\n", name.c_str(), version.major, version.minor);
-				}
+				plugin.version_in_filename.copy(name.substr(v + 2));
 			} else {
-				plugin.version = "";
-				plugin.sdk_major_version = sdk_version().major;
-				plugin.sdk_minor_version = sdk_version().minor;
-				pr_dbg("Plugin %s: No version found, assuming it's compatible\n", name.c_str());
+				plugin.version_in_filename = "";
 			}
 		}
 	}
