@@ -30,6 +30,16 @@ struct PluginTab : SystemMenuTab {
 		current_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload Current");
 		load_all_found_button = create_button(ui_PluginsLeftColumn, "Load all");
 
+		loading_popup = lv_obj_create(lv_layer_top());
+		lv_obj_set_width(loading_popup, 320);
+		lv_obj_set_height(loading_popup, LV_SIZE_CONTENT);
+		auto label = lv_label_create(loading_popup);
+		lv_label_set_text(label, "Loading All Plugins\n");
+		lv_obj_set_style_bg_color(loading_popup, lv_color_hex(0x222222), 0);
+		lv_obj_add_flag(loading_popup, LV_OBJ_FLAG_SNAPABLE);
+		lv_hide(loading_popup);
+		loading_group = lv_group_create();
+		lv_group_add_obj(loading_group, loading_popup);
 		clear_loaded_list();
 		clear_found_list();
 		lv_show(ui_PluginScanButton);
@@ -47,7 +57,6 @@ struct PluginTab : SystemMenuTab {
 	void prepare_focus(lv_group_t *group) override {
 		this->group = group;
 		lv_show(ui_PluginScanButton);
-		lv_hide(load_all_found_button);
 		lv_hide(ui_PluginsFoundCont);
 		lv_hide(ui_PluginTabSpinner);
 
@@ -67,6 +76,7 @@ struct PluginTab : SystemMenuTab {
 
 		clear_found_list();
 		reset_group();
+		lv_hide(load_all_found_button);
 		lv_group_focus_obj(ui_PluginScanButton);
 		plugin_state_popup.init(ui_SystemMenu, group);
 		confirm_popup.init(ui_SystemMenu, group);
@@ -177,7 +187,8 @@ private:
 		lv_group_add_obj(group, clear_autoloads_button);
 		lv_group_add_obj(group, current_autoloads_button);
 
-		lv_show(load_all_found_button, lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0);
+		// TODO: cleanup load_all functionality
+		// lv_show(load_all_found_button, lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0);
 	}
 
 	void clear_loaded_list() {
@@ -358,14 +369,16 @@ private:
 		if (!page)
 			return;
 
-		lv_show(ui_PluginTabSpinner);
-
 		page->start_loading_all();
 	}
 
 	void end_loading_all() {
 		lv_hide(ui_PluginTabSpinner);
+		lv_hide(loading_popup);
+
 		is_loading_all = false;
+
+		lv_group_activate(group);
 		reset_group();
 		notify_queue.put({"Done loading all plugins"});
 		if (lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0)
@@ -375,6 +388,11 @@ private:
 	}
 
 	void start_loading_all() {
+		lv_show(loading_popup);
+		lv_show(ui_PluginTabSpinner);
+
+		lv_obj_scroll_to_y(ui_SystemMenuPluginsTab, 0, LV_ANIM_ON);
+		lv_group_activate(loading_group);
 		plugins_to_load.clear();
 
 		lv_foreach_child(ui_PluginsFoundCont, [&](lv_obj_t *child, unsigned id) {
@@ -388,8 +406,8 @@ private:
 
 	void load_next() {
 		if (plugins_to_load.size()) {
-			auto [obj, idx] = plugins_to_load.back();
-			plugins_to_load.pop_back();
+			auto [obj, idx] = plugins_to_load.front();
+			plugins_to_load.pop_front();
 
 			load_in_progress_obj = obj;
 			pr_dbg("Load plugin idx = %d\n", idx);
@@ -415,10 +433,15 @@ private:
 
 	lv_obj_t *clear_autoloads_button;
 	lv_obj_t *current_autoloads_button;
+
+	// Load all:
 	lv_obj_t *load_all_found_button;
 
 	bool is_loading_all = false;
 	// bool loading_done = false;
-	std::vector<std::pair<lv_obj_t *, uint32_t>> plugins_to_load;
+	std::deque<std::pair<lv_obj_t *, uint32_t>> plugins_to_load;
+
+	lv_obj_t *loading_popup = nullptr;
+	lv_group_t *loading_group = nullptr;
 };
 } // namespace MetaModule
