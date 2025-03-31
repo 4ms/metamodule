@@ -3,6 +3,7 @@
 #include "dynload/dynloader.hh"
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
+#include "dynload/version_sort.hh"
 #include "fat_file_io.hh"
 #include "fs/asset_drive/untar.hh"
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
@@ -99,10 +100,12 @@ public:
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
 					plugin_files = *plugin_file_list; //make local copy
 
-					std::ranges::sort(plugin_files, less_ci, &PluginFile::plugin_name);
 					pr_trace("Found %d plugins\n", plugin_files.size());
 
 					parse_versions();
+
+					std::ranges::sort(plugin_files, alpha_then_newest_version);
+
 					status.state = State::GotList;
 					file_idx = 0;
 				}
