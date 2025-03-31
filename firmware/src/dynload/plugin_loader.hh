@@ -319,18 +319,22 @@ public:
 			   status.state == State::Error || status.state == State::InvalidPlugin;
 	}
 
-	// Gets or deduces the version from the filename
-	// This lets us weed out obvious wrong versions
+	// Splits plugin names at the first "-v"
 	void parse_versions() {
 		for (auto &plugin : plugin_files) {
+			plugin.version_in_filename = "";
+
 			const auto name = std::string{plugin.plugin_name};
 
-			// drop version from plugin name:
-			if (auto v = name.find("-v"); v != std::string_view::npos) {
-				plugin.plugin_name.copy(name.substr(0, v));
-				plugin.version_in_filename.copy(name.substr(v + 2));
-			} else {
-				plugin.version_in_filename = "";
+			// Make sure the char after the -v is a digit
+			auto v = name.find("-v");
+			while (v != std::string_view::npos) {
+				if (isdigit(name[v + 2])) {
+					plugin.plugin_name.copy(name.substr(0, v));
+					plugin.version_in_filename.copy(name.substr(v + 2));
+					break;
+				}
+				v = name.find("-v", v + 2);
 			}
 		}
 	}
