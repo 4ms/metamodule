@@ -39,13 +39,17 @@ struct AutoLoader {
 private:
 	Status start() {
 		if (plugin_settings.slug.size()) {
-
 			pr_trace("Autoload: Scanning...\n");
+
 			plugins.start_loading_plugin_list();
 
+			attempted_to_load.clear();
 			autoload_state = State::Processing;
+
 			return {autoload_state, "Scanning disks"};
+
 		} else {
+
 			pr_info("Autoload: No plugins to load\n");
 			autoload_state = State::Done;
 			return {autoload_state, "No plugins to auto-load"};
@@ -94,19 +98,21 @@ private:
 		}
 
 		if (result.state == PluginFileLoader::State::InvalidPlugin) {
-			// TODO: retry current plugin name, check for earlier versions.
-			// Need to keep track of which ones we've tried
-			// And how many are left
-			// if (versions_remaining) { try_idx++; autoload_state = State::LoadingPlugin } else { slug_idx++; ...
 
-			pr_err("Autoload: Warning: %s\n", result.error_message.c_str());
-			slug_idx++;
-			if (slug_idx >= plugin_settings.slug.size()) {
-				autoload_state = State::Done;
-			} else {
+			if (left_to_try > 1) {
+				pr_trace("Autoload: failed with '%s', %u left to try\n", result.error_message.c_str(), left_to_try);
 				autoload_state = State::LoadingPlugin;
+
+			} else {
+				pr_warn("Autoload: Warning: %s\n", result.error_message.c_str());
+				slug_idx++;
+				if (slug_idx >= plugin_settings.slug.size()) {
+					autoload_state = State::Done;
+				} else {
+					autoload_state = State::LoadingPlugin;
+				}
+				return {State::Warning, "Error: " + result.error_message};
 			}
-			return {State::Warning, "Error: " + result.error_message};
 		}
 
 		if (result.state == PluginFileLoader::State::Error) {
@@ -123,37 +129,48 @@ private:
 
 	bool load_plugin(std::string_view s) {
 		Version latest_version{};
-		const PluginFile *match = nullptr;
+		std::optional<unsigned> match_idx{std::nullopt};
 
-		for (auto const &found_plugin : *found_plugins) {
+		left_to_try = 0;
+
+		for (unsigned idx = 0; auto const &found_plugin : *found_plugins) {
 			if (found_plugin.plugin_name == s) {
-				auto found_version = VersionUtil::Version(found_plugin.version_in_filename);
 
-				if (latest_version.is_later(found_version))
-					continue;
+				// Skip this file if we've already attempted to load it
+				if (std::ranges::find(attempted_to_load, idx) == attempted_to_load.end()) {
 
-				latest_version.major = found_version.major;
-				latest_version.minor = found_version.minor;
-				latest_version.revision = found_version.revision;
-				match = &found_plugin;
+					left_to_try++;
+
+					auto found_version = VersionUtil::Version(found_plugin.version_in_filename);
+
+					if (!latest_version.is_later(found_version)) {
+						// Note that if versions are equal, we make this one the latest
+
+						latest_version.major = found_version.major;
+						latest_version.minor = found_version.minor;
+						latest_version.revision = found_version.revision;
+						match_idx = idx;
+					}
+				}
 			}
+			idx++;
 		}
 
-		if (!match) {
+		if (match_idx.has_value()) {
+			pr_trace("Autoload: Attempting to load '%.*s', found at idx %u (total %u left to try)\n",
+					 (int)s.size(),
+					 s.data(),
+					 match_idx.value(),
+					 left_to_try);
+
+			attempted_to_load.push_back(match_idx.value());
+			plugins.load_plugin(match_idx.value());
+			return true;
+
+		} else {
 			pr_info("Autoload: Can't find plugin: '%.*s'\n", (int)s.size(), s.data());
 			return false;
 		}
-
-		const auto idx = std::distance(found_plugins->begin(), match);
-
-		if ((size_t)idx >= found_plugins->size()) {
-			pr_info("Autoload: Internal error finding plugin: '%.*s'\n", (int)s.size(), s.data());
-			return false;
-		}
-
-		plugins.load_plugin(idx);
-
-		return true;
 	}
 
 	PluginAutoloadSettings &plugin_settings;
@@ -161,6 +178,9 @@ private:
 	PluginFileList const *found_plugins = nullptr;
 	unsigned slug_idx = 0;
 	State autoload_state{State::NotStarted};
+
+	std::vector<unsigned> attempted_to_load;
+	unsigned left_to_try;
 };
 
 } // namespace MetaModule
