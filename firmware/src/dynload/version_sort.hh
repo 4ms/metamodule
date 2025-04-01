@@ -16,11 +16,6 @@ namespace MetaModule
 // Except we're not strict about section 11.4. TODO: follow section 11.4 strictly
 //
 inline bool alpha_then_newest_version(PluginFile const &a, PluginFile const &b) {
-	printf("Comparing %s-v%s and %s-v%s\n",
-		   a.plugin_name.c_str(),
-		   a.version_in_filename.c_str(),
-		   b.plugin_name.c_str(),
-		   b.version_in_filename.c_str());
 	if (a.plugin_name == b.plugin_name) {
 		// sort by version, newest first
 		auto vers_a = VersionUtil::Version(a.version_in_filename);
