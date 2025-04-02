@@ -127,7 +127,6 @@ struct PluginTab : SystemMenuTab {
 			lv_hide(ui_PluginTabSpinner);
 			move_found_plugin_to_loaded();
 
-			reset_group();
 			loading_done = true;
 		}
 
@@ -286,6 +285,8 @@ private:
 			lv_group_add_obj(group, plugin_obj);
 			lv_group_focus_obj(plugin_obj);
 			lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
+
+			reset_group();
 
 			load_in_progress_obj = nullptr;
 			gui_state.playing_patch_needs_manual_reload = true;

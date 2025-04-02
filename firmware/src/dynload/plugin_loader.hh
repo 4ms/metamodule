@@ -284,6 +284,7 @@ public:
 			case State::Idle:
 				break;
 			case State::Success:
+				status.state = State::Idle;
 				break;
 			case State::Error:
 			case State::InvalidPlugin:
