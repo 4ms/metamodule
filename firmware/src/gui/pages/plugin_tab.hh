@@ -398,7 +398,7 @@ private:
 					page->gui_state.do_write_settings = true;
 				}
 			},
-			"Are you sure you want to clear all names of autoloaded plugins?",
+			"Are you sure you want to autoload no plugins?",
 			"OK");
 	}
 
@@ -420,7 +420,7 @@ private:
 					page->gui_state.do_write_settings = true;
 				}
 			},
-			"This will set list of autoloaded plugins equal to the current set of loaded plugins",
+			"This will autoload the current set of loaded plugins the next time you power on",
 			"OK");
 	}
 
