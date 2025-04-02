@@ -174,7 +174,7 @@ private:
 	}
 
 	void populate_loaded_list() {
-		auto loaded_plugin_list = plugin_manager.loaded_plugins();
+		auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
 		for (auto &plugin : loaded_plugin_list) {
 			auto plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
 			lv_group_add_obj(group, plugin_obj);
@@ -411,7 +411,7 @@ private:
 			[page](unsigned ok) {
 				if (ok) {
 					page->settings.slug.clear();
-					auto current = page->plugin_manager.loaded_plugins();
+					auto const &current = page->plugin_manager.loaded_plugins();
 					for (auto const &plugin : current) {
 						std::string name = plugin.fileinfo.plugin_name;
 						page->settings.slug.push_back(name);
