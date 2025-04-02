@@ -8,6 +8,8 @@
 namespace MetaModule::LoadTest
 {
 
+constexpr bool MM_LOADTEST_MEASURE_MEMORY = false;
+
 struct ModuleEntry {
 	static constexpr std::array<unsigned, 5> blocksizes{32, 64, 128, 256, 512};
 	std::string slug;
@@ -20,7 +22,7 @@ struct ModuleEntry {
 	ModuleMemoryTester::Measurements mem_usage{};
 };
 
-std::vector<ModuleEntry> test_all_modules() {
+inline std::vector<ModuleEntry> test_all_modules() {
 
 	std::vector<ModuleEntry> res;
 
@@ -36,8 +38,10 @@ std::vector<ModuleEntry> test_all_modules() {
 			pr_info("Testing %s\n", slug.c_str());
 			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
 
-			auto mem_tester = ModuleMemoryTester{entry.slug};
-			entry.mem_usage = mem_tester.run_test(ModuleMemoryTester::TestType::FirstRun);
+			if constexpr (MM_LOADTEST_MEASURE_MEMORY) {
+				auto mem_tester = ModuleMemoryTester{entry.slug};
+				entry.mem_usage = mem_tester.run_test(ModuleMemoryTester::TestType::FirstRun);
+			}
 
 			for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
 				ModuleLoadTester tester(entry.slug);
@@ -69,7 +73,7 @@ std::vector<ModuleEntry> test_all_modules() {
 	return res;
 }
 
-std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
+inline std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 	constexpr float sampletime = 1'000'000.f / 48000.f;
 
 	std::string s;
@@ -98,11 +102,13 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 		pr_info("InputsAudio-%u, ", blocksize);
 	}
 
-	s += "PeakStartupMem, PeakRunningMem, ";
-	// Not accurate, don't include in CSV report:
-	// s += "LeakedMem, ";
-	s += "DoubleFree?";
-	pr_info("PeakStartupMem, PeakRunningMem, LeakedMem, DoubleFree?, Valid");
+	if constexpr (MM_LOADTEST_MEASURE_MEMORY) {
+		s += "PeakStartupMem, PeakRunningMem, ";
+		// Not accurate, don't include in CSV report:
+		// s += "LeakedMem, ";
+		s += "DoubleFree?";
+		pr_info("PeakStartupMem, PeakRunningMem, LeakedMem, DoubleFree?, Valid");
+	}
 
 	s += "\n";
 	pr_info("\n");
@@ -135,21 +141,23 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 			report_cpu(entry.audio_modulated[i]);
 		}
 
-		if (entry.mem_usage.results_invalid) {
-			s += "CAN'T MEASURE, , , ";
-		} else {
-			s += std::to_string(entry.mem_usage.peak_mem_startup) + ", ";
-			s += std::to_string(entry.mem_usage.peak_running_mem) + ", ";
-			// Not accurate, don't include in report:
-			// s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
-			s += entry.mem_usage.double_free ? "YES" : "n";
+		if constexpr (MM_LOADTEST_MEASURE_MEMORY) {
+			if (entry.mem_usage.results_invalid) {
+				s += "CAN'T MEASURE, , , ";
+			} else {
+				s += std::to_string(entry.mem_usage.peak_mem_startup) + ", ";
+				s += std::to_string(entry.mem_usage.peak_running_mem) + ", ";
+				// Not accurate, don't include in report:
+				// s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
+				s += entry.mem_usage.double_free ? "YES" : "n";
+			}
+			pr_info("%zu, %zu, %zu, %d, %s\n",
+					entry.mem_usage.peak_mem_startup,
+					entry.mem_usage.peak_running_mem,
+					entry.mem_usage.mem_leaked,
+					entry.mem_usage.double_free,
+					entry.mem_usage.results_invalid ? "TOOMANYALLOCS" : "ok");
 		}
-		pr_info("%zu, %zu, %zu, %d, %s\n",
-				entry.mem_usage.peak_mem_startup,
-				entry.mem_usage.peak_running_mem,
-				entry.mem_usage.mem_leaked,
-				entry.mem_usage.double_free,
-				entry.mem_usage.results_invalid ? "TOOMANYALLOCS" : "ok");
 
 		s += "\n";
 		pr_info("\n");
