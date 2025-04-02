@@ -13,10 +13,12 @@ namespace rack::app
 struct ModuleWidget::Internal {
 	app::SvgPanel *panel = nullptr;
 	std::unique_ptr<MetaModule::ModuleWidgetAdaptor> adaptor;
-	std::vector<rack::widget::Widget *> drawable_widgets;
+	std::vector<ModuleWidget::WidgetElement> drawable_widgets;
+
+	unsigned graphic_display_idx = 10'000;
 };
 
-std::vector<rack::widget::Widget *> &ModuleWidget::get_drawable_widgets() {
+std::vector<ModuleWidget::WidgetElement> &ModuleWidget::get_drawable_widgets() {
 	return internal->drawable_widgets;
 }
 
@@ -52,6 +54,17 @@ void ModuleWidget::setModule(engine::Module *m) {
 		pr_err("Error: Setting the module of a ModuleWidget when a module is already set!\n");
 	}
 	this->module = m;
+
+	internal->graphic_display_idx = std::max(m->lights.size(), m->lightInfos.size());
+
+	if (model && model->slug.size())
+		pr_trace("setModule for %s\n", model->slug.c_str());
+	else if (m->model && m->model->slug.size())
+		pr_trace("setModule for %s\n", m->model->slug.c_str());
+
+	internal->adaptor->addModuleWidget(internal->graphic_display_idx, this);
+	internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
+	internal->graphic_display_idx++;
 }
 
 app::SvgPanel *ModuleWidget::getPanel() {
@@ -173,8 +186,12 @@ void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
 			internal->adaptor->addLight(widget);
 		} else {
 			auto box = widget->box;
-			pr_trace("Add drawable (light) at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
-			internal->drawable_widgets.push_back(widget);
+			internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
+			internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
+			internal->graphic_display_idx++;
+
+			pr_trace("Add drawable (light) at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+			pr_trace("idx %d (firstLightId = %d)\n", internal->graphic_display_idx - 1, widget->firstLightId);
 		}
 	}
 	Widget::addChild(widget);
@@ -232,12 +249,17 @@ void ModuleWidget::addChild(app::SvgScrew *widget) {
 }
 
 void ModuleWidget::addChild(Widget *widget) {
-	log_widget("Skipped: addChild(unknown Widget)", widget);
+	log_widget("addChild(unknown Widget)", widget);
+
+	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
+	internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
+	internal->graphic_display_idx++;
+
 	Widget::addChild(widget);
 
 	auto box = widget->box;
-	pr_trace("Add drawable at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
-	internal->drawable_widgets.push_back(widget);
+	pr_trace("Add drawable at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+	pr_trace("idx %d\n", internal->graphic_display_idx - 1);
 }
 
 void ModuleWidget::addChild(MetaModule::VCVTextDisplay *widget) {
@@ -346,10 +368,8 @@ std::vector<PortWidget *> ModuleWidget::getOutputs() {
 	return pws;
 }
 
-void ModuleWidget::populate_elements_indices(std::vector<MetaModule::Element> &elements,
-											 std::vector<ElementCount::Indices> &indices) {
-
-	internal->adaptor->populate_elements_indices(elements, indices);
+void ModuleWidget::populate_elements_indices(rack::plugin::Model *model) {
+	internal->adaptor->populate_elements_indices(model->elements, model->indices);
 }
 
 //////////////// No-ops:

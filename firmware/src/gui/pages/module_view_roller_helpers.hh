@@ -2,7 +2,6 @@
 #include "CoreModules/elements/element_counter.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/element_type.hh"
-#include "gui/pages/base.hh"
 #include "gui/pages/make_cable.hh"
 #include "gui/styles.hh"
 #include "patch/patch_data.hh"
@@ -12,9 +11,19 @@
 namespace MetaModule::ModView
 {
 
-inline bool is_light_only(GuiElement const &gui_el) {
-	return (gui_el.count.num_lights > 0) && (gui_el.count.num_params == 0) && (gui_el.count.num_outputs == 0) &&
-		   (gui_el.count.num_inputs == 0);
+inline bool is_light_only(DrawnElement const &drawn_el) {
+	GuiElement const &gui_el = drawn_el.gui_element;
+
+	return std::visit(overloaded{[&](auto const &el) {
+									 return (gui_el.count.num_lights > 0) && (gui_el.count.num_params == 0) &&
+											(gui_el.count.num_outputs == 0) && (gui_el.count.num_inputs == 0);
+								 },
+								 [](DynamicGraphicDisplay const &el) {
+									 return true;
+									 // TODO: display these so we can click them to zoom in
+									 // return false;
+								 }},
+					  drawn_el.element);
 }
 
 inline bool should_skip_for_cable_mode(std::optional<GuiState::CableBeginning> const &new_cable,

@@ -94,7 +94,7 @@ public:
 	}
 
 	TextDisplayWatcher &displays() {
-		return params.displays;
+		return params.text_displays;
 	}
 
 	void autoload_plugins() {
@@ -102,6 +102,9 @@ public:
 		lv_show(ui_MainMenuNowPlaying);
 
 		auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
+
+		if (settings.plugin_autoload.slug.size())
+			delay_ms(600); //allow time for ???
 
 		while (true) {
 			auto status = autoloader.process();

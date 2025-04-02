@@ -122,12 +122,12 @@ struct ParamsMidiState : ParamsState {
 	LatchedParam<uint8_t, 1, 1> last_midi_note;
 	bool midi_gate = false;
 
-	TextDisplayWatcher displays;
+	TextDisplayWatcher text_displays;
 
 	void clear() {
 		ParamsState::clear();
 
-		displays.stop_watching_all();
+		text_displays.stop_watching_all();
 
 		for (auto &cc : midi_ccs)
 			cc = 0;

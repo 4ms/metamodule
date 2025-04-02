@@ -252,8 +252,6 @@ if (NOT TARGET cpputil::cpputil)
 endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
-# see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
-target_compile_options(main.elf PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-pmf-conversions>)
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports ThorVG)
 target_link_libraries(main.elf PUBLIC vcv_plugin)

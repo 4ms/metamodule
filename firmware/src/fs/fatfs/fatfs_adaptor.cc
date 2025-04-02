@@ -1,9 +1,7 @@
-#include "CoreModules/fatfs_adaptor.hh"
+#include "filesystem/fatfs_adaptor.hh"
 #include "console/pr_dbg.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
-#include "drivers/inter_core_comm.hh"
 #include "fs_proxy.hh"
-#include "util/padded_aligned.hh"
 #include <cstdarg>
 #include <cstring>
 #include <optional>

@@ -7,6 +7,8 @@ VCVModuleWrapper::VCVModuleWrapper() {
 	rack::random::init();
 }
 
+VCVModuleWrapper::~VCVModuleWrapper() = default;
+
 void VCVModuleWrapper::update() {
 	args.frame++;
 	update(args, bypassed);

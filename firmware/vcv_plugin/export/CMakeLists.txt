@@ -138,4 +138,6 @@ target_compile_options(vcv_plugin_export PRIVATE -fno-function-sections -fno-dat
 set_target_properties(vcv_plugin_export PROPERTIES CXX_STANDARD 23)
 # set_target_properties(vcv_plugin_export PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/vcv-export)
 
+# see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+target_compile_options(vcv_plugin_export PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-pmf-conversions>)
 

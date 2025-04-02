@@ -3,6 +3,7 @@
 #include "dynload/dynloader.hh"
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
+#include "dynload/version_sort.hh"
 #include "fat_file_io.hh"
 #include "fs/asset_drive/untar.hh"
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
@@ -99,10 +100,12 @@ public:
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
 					plugin_files = *plugin_file_list; //make local copy
 
-					std::ranges::sort(plugin_files, less_ci, &PluginFile::plugin_name);
 					pr_trace("Found %d plugins\n", plugin_files.size());
 
 					parse_versions();
+
+					std::ranges::sort(plugin_files, alpha_then_newest_version);
+
 					status.state = State::GotList;
 					file_idx = 0;
 				}
@@ -281,6 +284,7 @@ public:
 			case State::Idle:
 				break;
 			case State::Success:
+				status.state = State::Idle;
 				break;
 			case State::Error:
 			case State::InvalidPlugin:
@@ -319,37 +323,22 @@ public:
 			   status.state == State::Error || status.state == State::InvalidPlugin;
 	}
 
+	// Splits plugin names at the first "-v"
 	void parse_versions() {
 		for (auto &plugin : plugin_files) {
+			plugin.version_in_filename = "";
+
 			const auto name = std::string{plugin.plugin_name};
 
-			if (auto v = name.find("-v"); v != std::string_view::npos) {
-				// extract version string:
-				// skip the "-v"
-				std::string vers = name.substr(v + 2);
-
-				// drop version from plugin name:
-				plugin.plugin_name.copy(name.substr(0, v));
-
-				auto version = VersionUtil::Version(vers);
-				plugin.version = std::string_view(vers);
-
-				// If version contains "-dev-X" where X is the current dev version,
-				// then we will assume it's the right major/minor
-				if (name.contains(DevVersionChars)) {
-					plugin.sdk_major_version = sdk_version().major;
-					plugin.sdk_minor_version = sdk_version().minor;
-					pr_dbg("Plugin %s: contains %s so assuming it's compatible\n", name.c_str(), DevVersionChars);
-				} else {
-					plugin.sdk_major_version = version.major;
-					plugin.sdk_minor_version = version.minor;
-					pr_dbg("Plugin %s: parsed as v%d.%d\n", name.c_str(), version.major, version.minor);
+			// Make sure the char after the -v is a digit
+			auto v = name.find("-v");
+			while (v != std::string_view::npos) {
+				if (isdigit(name[v + 2])) {
+					plugin.plugin_name.copy(name.substr(0, v));
+					plugin.version_in_filename.copy(name.substr(v + 2));
+					break;
 				}
-			} else {
-				plugin.version = "";
-				plugin.sdk_major_version = sdk_version().major;
-				plugin.sdk_minor_version = sdk_version().minor;
-				pr_dbg("Plugin %s: No version found, assuming it's compatible\n", name.c_str());
+				v = name.find("-v", v + 2);
 			}
 		}
 	}
@@ -365,6 +354,8 @@ public:
 			return false;
 		}
 
+		// Check the sdk version by calling sdk_version() in the plugin
+		// This function will return the SDK version used to build the plugin.
 		auto plugin_sdk_version = dynloader.get_sdk_version();
 		if (!plugin_sdk_version.has_value()) {
 			pr_err("Plugin uses SDK < 0.15.0, or is not valid: not sdk_version() symbol found\n");

@@ -159,6 +159,11 @@ float renderText(
 	auto lv_x = to_lv_coord(x, context->px_per_3U);
 	auto lv_y = to_lv_coord(y, context->px_per_3U);
 
+	if (fs->xform && (fs->xform[4] != 0 || fs->xform[5] != 0)) {
+		lv_x += to_lv_coord(fs->xform[4], context->px_per_3U);
+		lv_y += to_lv_coord(fs->xform[5], context->px_per_3U);
+	}
+
 	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName), context->px_per_3U);
 	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
 	if (!font)
@@ -181,11 +186,20 @@ float renderText(
 														LV_TEXT_ALIGN_LEFT;
 
 		// Align vertically
-		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size * 0.8f :
+		auto align_lv_y = lv_y - (fs->textAlign & NVG_ALIGN_BASELINE ? lv_font_size * 1.0f :
 								  fs->textAlign & NVG_ALIGN_BOTTOM	 ? lv_font_size * 1.2f :
 								  fs->textAlign & NVG_ALIGN_MIDDLE	 ? lv_font_size * 0.5f :
 								  fs->textAlign & NVG_ALIGN_TOP		 ? 0 :
 																	   lv_font_size * 1.0f);
+
+		align_lv_y += Fonts::corrected_ttf_ypos_shift(fs->fontSize, fs->fontName);
+
+		if (fs->xform && (fs->xform[4] != 0 || fs->xform[5] != 0)) {
+			pr_dbg("Text xform %f, %f\n", fs->xform[4], fs->xform[5]);
+		}
+
+		if (!(fs->textAlign & NVG_ALIGN_TOP))
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
 		label = lv_label_create(canvas);
 		lv_obj_set_pos(label, lv_x, align_lv_y);

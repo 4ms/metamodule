@@ -1,7 +1,5 @@
 #pragma once
-#include "CoreModules/elements/element_info.hh"
-#include "conf/patch_conf.hh"
-#include "gui/dyn_element_draw.hh"
+#include "gui/dyn_display.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -205,7 +203,7 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
-			if (ModView::is_light_only(gui_el))
+			if (ModView::is_light_only(drawn_element))
 				continue;
 
 			if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
@@ -218,11 +216,8 @@ struct ModuleViewPage : PageBase {
 			last_type = gui_el.count;
 
 			opts.append(" ");
-			if (auto nl = base.short_name.find_first_of('\n'); nl != base.short_name.npos) {
-				opts.append(base.short_name.substr(0, nl));
-			} else {
-				opts.append(base.short_name);
-			}
+			// Display up to the first newline (if any)
+			opts.append(base.short_name.substr(0, base.short_name.find_first_of('\n')));
 
 			if (gui_el.mapped_panel_id) {
 				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
@@ -293,7 +288,6 @@ struct ModuleViewPage : PageBase {
 		auto roller_width = lv_obj_get_width(ui_ElementRollerPanel);
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playloaded);
 
-		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
 		if (cur_el && args.detail_mode == true) {
 			mode = ViewMode::Mapping;
 			mapping_pane.hide();
@@ -302,13 +296,13 @@ struct ModuleViewPage : PageBase {
 			show_roller();
 		}
 
-		dyn_draw.prepare_module(slug, this_module_id, canvas, 240);
+		dyn_draw.prepare_module(drawn_elements, this_module_id, canvas);
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {
 		auto gui_el = drawn_element.gui_element;
 		std::visit(overloaded{[&](DynamicTextDisplay const &el) {
-								  params.displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
+								  params.text_displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
 							  },
 							  [](auto const &el) {
 							  }},
@@ -428,7 +422,7 @@ struct ModuleViewPage : PageBase {
 					update_light(drawn_el, light_vals);
 				}
 
-				redraw_display(drawn_el, this_module_id, params.displays.watch_displays);
+				redraw_text_display(drawn_el, this_module_id, params.text_displays.watch_displays);
 			}
 
 			if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
@@ -508,8 +502,9 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
+		pr_dbg("ModuleView::blur()\n");
 		dyn_draw.blur();
-		params.displays.stop_watching_all();
+		params.text_displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}
@@ -557,6 +552,7 @@ private:
 			lv_obj_del(b);
 		button.clear();
 
+		pr_dbg("ModuleView::reset_module_page()\n");
 		dyn_draw.blur();
 
 		// This should delete all canvas children
@@ -844,7 +840,7 @@ private:
 
 	PluginModuleMenu module_menu;
 
-	DynamicElementDraw dyn_draw;
+	DynamicDisplay dyn_draw;
 	unsigned dyn_frame_throttle_ctr = 1;
 	constexpr static unsigned DynFrameThrottle = 2;
 
