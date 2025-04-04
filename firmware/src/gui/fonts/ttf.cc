@@ -78,6 +78,10 @@ float corrected_ttf_ypos_shift(float fontSize, std::string_view name) {
 }
 
 float corrected_ttf_size(float fontSize, std::string_view name) {
+	if (fontSize == 0) {
+		fontSize = 9;
+	}
+
 	// CountModula
 	if (name == "Segment14") {
 		return fontSize * 1.2f;
@@ -114,6 +118,10 @@ std::string_view default_ttf_name() {
 
 lv_font_t const *get_ttf_font(std::string const &name, unsigned font_size) {
 
+	if (font_size == 0) {
+		font_size = 9;
+	}
+
 	if (auto font = load_from_cache(name, font_size)) {
 		return font;
 	}
@@ -127,7 +135,7 @@ lv_font_t const *get_ttf_font(std::string const &name, unsigned font_size) {
 
 			add_font_to_cache(name, font_size, font);
 
-			pr_dbg("ttf %s sz %u loaded into font cache\n", name.c_str(), font_size);
+			pr_trace("ttf %s sz %u loaded into font cache\n", name.c_str(), font_size);
 			return font;
 		} else {
 			pr_warn("Error creating lvgl font from ttf %s\n", name.c_str());
