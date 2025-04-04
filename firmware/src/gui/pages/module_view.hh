@@ -795,6 +795,7 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		page->resize_module_image(320);
+		lv_obj_scroll_to_x(ui_ModuleImage, 0, LV_ANIM_ON);
 		page->full_screen_mode = true;
 	}
 
