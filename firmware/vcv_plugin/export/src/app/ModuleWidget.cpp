@@ -251,6 +251,14 @@ void ModuleWidget::addChild(app::SvgScrew *widget) {
 void ModuleWidget::addChild(Widget *widget) {
 	log_widget("addChild(unknown Widget)", widget);
 
+	if (widget->box.size.y > 300 || widget->box.size.y == 0) {
+		pr_err("Widget box size y invalid: %f. Fixing=>%f\n", widget->box.size.y, box.size.y);
+		widget->box.size.y = box.size.y;
+	}
+	if (widget->box.size.x > 300 || widget->box.size.x == 0) {
+		pr_err("Widget box size x invalid: %f. Fixing=>%f\n", widget->box.size.x, box.size.x);
+		widget->box.size.x = box.size.x;
+	}
 	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
 	internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
 	internal->graphic_display_idx++;
