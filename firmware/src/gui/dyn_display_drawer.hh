@@ -3,6 +3,7 @@
 #include "debug.hh"
 #include "gui/elements/context.hh"
 #include "gui/styles.hh"
+#include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
 #include "util/overloaded.hh"
 #include <cmath>
@@ -12,8 +13,11 @@ namespace MetaModule
 
 struct DynamicDisplayDrawer {
 
-	DynamicDisplayDrawer(CoreProcessor *module, std::span<const DrawnElement> drawn_elements, unsigned module_id)
-		: module{module} {
+	DynamicDisplayDrawer(PatchPlayLoader &patch_playloader,
+						 std::span<const DrawnElement> drawn_elements,
+						 unsigned module_id)
+		: patch_playloader{patch_playloader}
+		, module_id{module_id} {
 
 		for (auto const &drawn_el : drawn_elements) {
 
@@ -45,7 +49,8 @@ struct DynamicDisplayDrawer {
 				pr_trace("DynDraw::prepare() Graphic display %u has zero size, will not draw\n", disp.id);
 				disp.fullcolor_buffer.clear();
 				disp.lv_canvas = nullptr;
-				module->show_graphic_display(disp.id, disp.fullcolor_buffer, 0, disp.lv_canvas);
+				if (auto module = patch_playloader.get_plugin_module(module_id))
+					module->show_graphic_display(disp.id, disp.fullcolor_buffer, 0, disp.lv_canvas);
 
 			} else if (disp.lv_canvas == nullptr || !lv_obj_is_valid(disp.lv_canvas)) {
 				pr_err("DynDraw::prepare(): id:%d lv object not valid\n", disp.id);
@@ -64,7 +69,8 @@ struct DynamicDisplayDrawer {
 
 				lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
-				module->show_graphic_display(disp.id, disp.fullcolor_buffer, w, disp.lv_canvas);
+				if (auto module = patch_playloader.get_plugin_module(module_id))
+					module->show_graphic_display(disp.id, disp.fullcolor_buffer, w, disp.lv_canvas);
 
 				// Send it to the back?? TODO: do we need to do this?
 				// lv_obj_move_to_index(disp.lv_canvas, 0);
@@ -73,6 +79,8 @@ struct DynamicDisplayDrawer {
 	}
 
 	void draw() {
+		auto module = patch_playloader.get_plugin_module(module_id);
+
 		if (!module || !parent_canvas || !lv_obj_is_valid(parent_canvas) || !lv_obj_is_visible(parent_canvas))
 			return;
 
@@ -95,9 +103,11 @@ struct DynamicDisplayDrawer {
 	void blur() {
 
 		for (auto &disp : displays) {
-			pr_trace("DynDraw::blur() Release graphic display %u buffers\n", disp.id);
-			if (module)
+			pr_dbg("DynDraw::blur() Release graphic display id %u\n", disp.id);
+
+			if (auto module = patch_playloader.get_plugin_module(module_id))
 				module->hide_graphic_display(disp.id);
+
 			disp.fullcolor_buffer.clear();
 			disp.lv_buffer.clear();
 		}
@@ -108,19 +118,6 @@ struct DynamicDisplayDrawer {
 	}
 
 private:
-	CoreProcessor *module = nullptr;
-
-	struct Display {
-		unsigned id{};
-		DynamicGraphicDisplay element{};
-		lv_obj_t *lv_canvas{};
-		std::vector<char> lv_buffer;
-		std::vector<uint32_t> fullcolor_buffer;
-	};
-	std::vector<Display> displays;
-
-	lv_obj_t *parent_canvas{};
-
 	bool copy_and_compare_buffer(std::span<char> lv_buffer, std::span<uint32_t> fullcolor_buffer) {
 		if ((fullcolor_buffer.size() * 3) > lv_buffer.size()) {
 			pr_err("DynDraw buffer size error\n");
@@ -151,6 +148,20 @@ private:
 		}
 		return diff;
 	}
+
+	PatchPlayLoader &patch_playloader;
+	unsigned module_id = 0;
+
+	struct Display {
+		unsigned id{};
+		DynamicGraphicDisplay element{};
+		lv_obj_t *lv_canvas{};
+		std::vector<char> lv_buffer;
+		std::vector<uint32_t> fullcolor_buffer;
+	};
+	std::vector<Display> displays;
+
+	lv_obj_t *parent_canvas{};
 };
 
 } // namespace MetaModule

@@ -57,7 +57,7 @@ struct PatchFileChangeChecker {
 						patch_playloader.request_reload_playing_patch(false);
 
 						if (open_patch_manager.get_playing_patch() == open_patch_manager.get_view_patch()) {
-							gui_state.view_patch_file_changed = true;
+							gui_state.force_redraw_patch = true;
 						}
 						return Status::OK;
 

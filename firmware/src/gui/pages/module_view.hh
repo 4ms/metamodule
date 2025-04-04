@@ -296,7 +296,14 @@ struct ModuleViewPage : PageBase {
 			show_roller();
 		}
 
-		dyn_draw.prepare_module(drawn_elements, this_module_id, canvas);
+		dynamic_elements_prepared = false;
+	}
+
+	void prepare_dynamic_elements() {
+		if (!dynamic_elements_prepared) {
+			dyn_draw.prepare_module(drawn_elements, this_module_id, canvas);
+			dynamic_elements_prepared = true;
+		}
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {
@@ -379,8 +386,7 @@ struct ModuleViewPage : PageBase {
 
 		poll_patch_file_changed();
 
-		if (gui_state.view_patch_file_changed) {
-			gui_state.view_patch_file_changed = false;
+		if (gui_state.force_redraw_patch || gui_state.view_patch_file_changed) {
 
 			abort_cable(gui_state, notify_queue);
 
@@ -392,43 +398,18 @@ struct ModuleViewPage : PageBase {
 			if (!ok || prev_slug != slug) {
 				page_list.request_new_page(PageId::PatchView, args);
 			} else {
+				if (gui_state.force_redraw_patch)
+					blur();
 				prepare_focus();
 			}
+
+			gui_state.force_redraw_patch = false;
+			gui_state.view_patch_file_changed = false;
 		}
 
-		if (is_patch_playloaded) {
-
-			for (auto &drawn_el : drawn_elements) {
-				auto &gui_el = drawn_el.gui_element;
-
-				auto value =
-					patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
-				auto was_redrawn = redraw_param(drawn_el, value);
-
-				if (was_redrawn && page_settings.map_ring_flash_active) {
-					map_ring_display.flash_once(gui_el.map_ring, true);
-				}
-
-				if (auto num_light_elements = gui_el.count.num_lights) {
-
-					std::array<float, 3> storage{};
-					auto light_vals = std::span{storage.data(), std::min(storage.size(), num_light_elements)};
-
-					for (auto i = 0u; auto &val : light_vals) {
-						val = patch_playloader.light_value(gui_el.module_idx, gui_el.idx.light_idx + i);
-						i++;
-					}
-
-					update_light(drawn_el, light_vals);
-				}
-
-				redraw_text_display(drawn_el, this_module_id, params.text_displays.watch_displays);
-			}
-
-			if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
-				dyn_frame_throttle_ctr = 0;
-				dyn_draw.draw();
-			}
+		// if (is_patch_playloaded) {
+		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
+			redraw_elements();
 		}
 
 		if (handle_patch_mods()) {
@@ -441,6 +422,41 @@ struct ModuleViewPage : PageBase {
 			roller_hover.hide();
 
 		roller_hover.update();
+	}
+
+	void redraw_elements() {
+		for (auto &drawn_el : drawn_elements) {
+			auto &gui_el = drawn_el.gui_element;
+
+			auto value =
+				patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
+			auto was_redrawn = redraw_param(drawn_el, value);
+
+			if (was_redrawn && page_settings.map_ring_flash_active) {
+				map_ring_display.flash_once(gui_el.map_ring, true);
+			}
+
+			if (auto num_light_elements = gui_el.count.num_lights) {
+
+				std::array<float, 3> storage{};
+				auto light_vals = std::span{storage.data(), std::min(storage.size(), num_light_elements)};
+
+				for (auto i = 0u; auto &val : light_vals) {
+					val = patch_playloader.light_value(gui_el.module_idx, gui_el.idx.light_idx + i);
+					i++;
+				}
+
+				update_light(drawn_el, light_vals);
+			}
+
+			redraw_text_display(drawn_el, this_module_id, params.text_displays.watch_displays);
+		}
+
+		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
+			dyn_frame_throttle_ctr = 0;
+			prepare_dynamic_elements();
+			dyn_draw.draw();
+		}
 	}
 
 	bool handle_patch_mods() {
@@ -502,7 +518,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
-		pr_dbg("ModuleView::blur()\n");
 		dyn_draw.blur();
 		params.text_displays.stop_watching_all();
 		settings_menu.hide();
@@ -552,7 +567,6 @@ private:
 			lv_obj_del(b);
 		button.clear();
 
-		pr_dbg("ModuleView::reset_module_page()\n");
 		dyn_draw.blur();
 
 		// This should delete all canvas children
@@ -841,6 +855,7 @@ private:
 	PluginModuleMenu module_menu;
 
 	DynamicDisplay dyn_draw;
+	bool dynamic_elements_prepared = false;
 	unsigned dyn_frame_throttle_ctr = 1;
 	constexpr static unsigned DynFrameThrottle = 2;
 

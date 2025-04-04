@@ -16,8 +16,8 @@ public:
 
 		pr_trace("DynamicElementDraw: Prepare canvas for module_id %u\n", module_id);
 
-		if (auto module = patch_playloader.get_plugin_module<CoreProcessor>(module_id)) {
-			drawer = std::make_unique<DynamicDisplayDrawer>(module, drawn_elements, module_id);
+		if (patch_playloader.get_plugin_module(module_id)) {
+			drawer = std::make_unique<DynamicDisplayDrawer>(patch_playloader, drawn_elements, module_id);
 			drawer->prepare(module_canvas);
 			return true;
 		}

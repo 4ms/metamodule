@@ -320,11 +320,28 @@ struct PatchViewPage : PageBase {
 			redraw_map_rings();
 		}
 
+		if (gui_state.force_redraw_patch) {
+			blur();
+			prepare_focus();
+
+			// Preserve the currently selected module, so we can restore that after redrawing
+			// if (auto obj = lv_group_get_focused(group)) {
+			// 	if (std::ranges::find(module_canvases, obj) != module_canvases.end()) {
+			// 		if (auto user_data = lv_obj_get_user_data(obj)) {
+			// 			args.module_id = *(static_cast<uint32_t *>(user_data));
+			// 		}
+			// 	}
+			// }
+
+			gui_state.force_redraw_patch = false;
+		}
+
 		if (gui_state.view_patch_file_changed) {
 			gui_state.view_patch_file_changed = false;
 
 			abort_cable(gui_state, notify_queue);
 
+			// Preserve the currently selected module, so we can restore that after redrawing
 			if (auto obj = lv_group_get_focused(group)) {
 				if (std::ranges::find(module_canvases, obj) != module_canvases.end()) {
 					if (auto user_data = lv_obj_get_user_data(obj)) {
@@ -332,6 +349,7 @@ struct PatchViewPage : PageBase {
 					}
 				}
 			}
+
 			redraw_patch();
 		}
 

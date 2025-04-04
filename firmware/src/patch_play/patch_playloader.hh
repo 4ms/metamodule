@@ -6,7 +6,6 @@
 #include "patch_file/patch_location.hh"
 #include "patch_play/modules_helpers.hh"
 #include "patch_play/patch_player.hh"
-#include "patch_play/plugin_module.hh"
 #include "patch_to_yaml.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
@@ -283,6 +282,10 @@ struct PatchPlayLoader {
 	template<typename PluginModuleType>
 	PluginModuleType *get_plugin_module(int32_t module_idx) {
 		return dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get());
+	}
+
+	CoreProcessor *get_plugin_module(int32_t module_idx) {
+		return player_.modules[module_idx].get();
 	}
 
 	bool is_param_tracking(unsigned module_id, unsigned param_id) {
