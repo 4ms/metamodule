@@ -404,7 +404,7 @@ nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t b
 	params.renderText = renderText;
 
 	auto draw_ctx = new DrawContext{(lv_obj_t *)canvas, buffer, buffer_width};
-	dump_draw("Create new DrawContext %p\n", draw_ctx);
+	dump_draw("Create new DrawContext %p with px_per_3U %u\n", draw_ctx, px_per_3U);
 	draw_ctx->px_per_3U = px_per_3U;
 	params.userPtr = draw_ctx;
 

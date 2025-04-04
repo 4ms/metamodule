@@ -262,6 +262,9 @@ void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer
 
 			uint32_t px_per_3U =
 				std::round((float)width / MetaModule::svgpx_to_pngpx(widget->box.getWidth(), 240) * 240);
+			if (px_per_3U < 180) {
+				pr_err("pp3=%u: width=%u box.getWidth()=%f\n", px_per_3U, width, widget->box.getWidth());
+			}
 
 			auto &disp = internal->displays[display_id];
 			disp.widget = widget;
