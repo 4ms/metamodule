@@ -113,9 +113,13 @@ public:
 		pd = patchdata;
 	}
 
+public:
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	Result load_patch(const PatchData &patchdata) {
 
+		// load_patch must only be called from the GUI context -- which ASyncThreads will interrupt
+		// Otherwise, if load_patch is interrupting an AsyncThread, then the AsyncThread
+		// will crash since its module * is no longer valid
 		pause_module_threads();
 
 		if (patchdata.patch_name.length() == 0)
