@@ -18,6 +18,8 @@
 
 #include "fs/norflash_layout.hh"
 
+#include "CoreModules/4ms/tests/djembe-selfcontained-test.hh"
+
 namespace MetaModule
 {
 
@@ -86,6 +88,49 @@ int main() {
 
 	// prevents M4 from using it as a USBD device:
 	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
+
+	{
+		volatile float out;
+		struct Params {
+			unsigned hit_ctr = 0;
+			unsigned hit_rate = 12'000;
+			std::array<bool, 4> knob_changed{true, true, true, true};
+			std::array<float, 4> knobs{0.5f, 0.5f, 0.5f, 0.5f};
+		} params;
+
+		DjembeSelfContained::MetaModule::DjembeCore dj;
+		dj.set_samplerate(48000);
+		dj.set_param(0, 0.5f);
+		dj.set_param(1, 0.5f);
+		dj.set_param(2, 0.5f);
+		dj.set_param(3, 0.5f);
+		dj.set_input(0, 0);
+		dj.set_input(1, 0);
+		dj.set_input(2, 0);
+		dj.set_input(3, 0);
+		dj.set_input(4, 0);
+
+		Debug::Pin1::high();
+		for (auto i = 0u; i < 48000; i++) {
+			Debug::Pin0::high();
+			params.hit_ctr++;
+
+			for (auto knob_id = 0; auto &changed : params.knob_changed) {
+				if (changed) {
+					dj.set_param(knob_id, params.knobs[knob_id]);
+					changed = false;
+				}
+				knob_id++;
+			}
+
+			dj.set_input(4, params.hit_ctr % params.hit_rate == 0 ? 1 : 0);
+			dj.update();
+
+			out = dj.get_output(0);
+			Debug::Pin0::low();
+		}
+		Debug::Pin1::low();
+	}
 
 	start_module_threads();
 
