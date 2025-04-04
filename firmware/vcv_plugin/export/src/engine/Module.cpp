@@ -45,6 +45,10 @@ Module::~Module() {
 			delete lightInfo;
 	}
 
+	for (auto &[id, _] : internal->displays) {
+		hide_graphic_display(id);
+	}
+
 	delete internal;
 }
 
