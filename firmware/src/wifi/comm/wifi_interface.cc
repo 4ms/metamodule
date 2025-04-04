@@ -308,16 +308,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				fbb.Finish(message);
 			}
 
-			if (patchStorage->has_media_changed()) {
-				flatbuffers::FlatBufferBuilder fbb;
-				auto message = constructPatchesMessage(fbb);
-				fbb.Finish(message);
-
-				sendBroadcast(fbb.GetBufferSpan());
-
-				lastPatchListSentTime = getTimestamp();
-			}
-
 			sendResponse(fbb.GetBufferSpan());
 
 		} else {
