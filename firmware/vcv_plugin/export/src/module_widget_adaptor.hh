@@ -218,6 +218,23 @@ struct ModuleWidgetAdaptor {
 		if (widget) {
 			Element element = DynamicGraphicDisplay{};
 
+			if (widget->box.size.y > 400 || widget->box.size.y == 0) {
+				pr_dbg("Widget graph_disp_idx %d @ %f box size y invalid: %f. Fix=>%f - @\n",
+					   graphic_display_idx,
+					   widget->box.pos.y,
+					   widget->box.size.y,
+					   widget->parent->box.size.y);
+				widget->box.size.y = widget->parent->box.size.y - widget->box.pos.y;
+			}
+			if (widget->box.size.x > 400 || widget->box.size.x == 0) {
+				pr_dbg("Widget graph_disk_idx %d @ %f box size x invalid: %f. Fix=>%f - @\n",
+					   graphic_display_idx,
+					   widget->box.pos.x,
+					   widget->box.size.x,
+					   widget->parent->box.size.x);
+				widget->box.size.x = widget->parent->box.size.x - widget->box.pos.x;
+			}
+
 			auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx));
 			assign_element_fields(widget, name, element);
 
