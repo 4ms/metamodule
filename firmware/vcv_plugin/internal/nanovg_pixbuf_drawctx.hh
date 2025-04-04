@@ -47,8 +47,6 @@ struct DrawContext {
 
 	uint32_t draw_frame_ctr{};
 
-	void *parent_ctx{}; // needed for deleting
-
 	unsigned px_per_3U = 240;
 
 	tvg::SwCanvas *tvg_canvas{};

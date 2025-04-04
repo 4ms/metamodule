@@ -413,7 +413,6 @@ nvgCreatePixelBufferContext(void *canvas, std::span<uint32_t> buffer, uint32_t b
 	ctx = nvgCreateInternal(&params, nullptr);
 
 	if (ctx) {
-		draw_ctx->parent_ctx = ctx;
 		return ctx;
 	} else {
 		delete draw_ctx;
