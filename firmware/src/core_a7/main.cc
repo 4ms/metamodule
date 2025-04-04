@@ -110,6 +110,8 @@ int main() {
 		dj.set_input(3, 0);
 		dj.set_input(4, 0);
 
+		// 31ms = 3.1% load
+		// 0.550ms each
 		Debug::Pin1::high();
 		for (auto i = 0u; i < 48000; i++) {
 			Debug::Pin0::high();
