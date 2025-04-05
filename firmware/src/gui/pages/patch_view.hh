@@ -98,7 +98,6 @@ struct PatchViewPage : PageBase {
 			is_ready = true;
 			watch_modules();
 			update_map_ring_style();
-			prepare_dynamic_elements();
 
 			if (args.module_id) {
 				auto canvas = std::ranges::find_if(module_canvases, [module_id = args.module_id](lv_obj_t *canv) {
@@ -131,7 +130,6 @@ struct PatchViewPage : PageBase {
 		patch_revision = patches.get_view_patch_modification_count();
 
 		redraw_patch();
-		prepare_dynamic_elements();
 	}
 
 	void redraw_patch() {
