@@ -81,6 +81,9 @@ struct PluginTab : SystemMenuTab {
 		lv_hide(load_all_found_button);
 
 		lv_group_focus_obj(ui_PluginScanButton);
+		lv_obj_scroll_to_y(ui_SystemMenuPluginsTab, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_view_recursive(ui_PluginScanButton, LV_ANIM_OFF);
+
 		plugin_state_popup.init(ui_SystemMenu, group);
 		confirm_popup.init(ui_SystemMenu, group);
 
@@ -282,11 +285,11 @@ private:
 
 			lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
 
-			lv_group_add_obj(group, plugin_obj);
-			lv_group_focus_obj(plugin_obj);
 			lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
 
 			reset_group();
+
+			lv_group_focus_obj(plugin_obj);
 
 			load_in_progress_obj = nullptr;
 			gui_state.playing_patch_needs_manual_reload = true;
