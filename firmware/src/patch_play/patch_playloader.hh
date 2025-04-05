@@ -120,6 +120,10 @@ struct PatchPlayLoader {
 			should_play_when_loaded_ = !audio_is_muted_;
 	}
 
+	bool is_loading_patch() {
+		return loading_new_patch_;
+	}
+
 	bool should_fade_down_audio() {
 		return loading_new_patch_ || stopping_audio_;
 	}

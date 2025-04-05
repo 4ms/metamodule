@@ -415,6 +415,9 @@ private:
 		if (dynamic_elements_prepared)
 			return;
 
+		if (patch_playloader.is_loading_patch())
+			return;
+
 		if (!is_patch_playloaded || patch_playloader.is_audio_muted())
 			return;
 
@@ -443,6 +446,9 @@ private:
 
 	void draw_dynamic_elements() {
 		if (dyn_draws.size() == 0)
+			return;
+
+		if (patch_playloader.is_loading_patch())
 			return;
 
 		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
