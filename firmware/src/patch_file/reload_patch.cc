@@ -102,7 +102,7 @@ Result ReloadPatch::reload_patch_file(PatchLocation const &loc, Function<void()>
 }
 
 // Returns true if timestamp/filesize on disk differs from the open patch (or there is no open patch)
-bool ReloadPatch::has_changed_on_disk(PatchLocation const &loc) {
+bool ReloadPatch::is_not_open_or_has_changed_on_disk(PatchLocation const &loc) {
 	if (auto openpatch = patches.find_open_patch(loc)) {
 		return check_file_changed(loc, openpatch->timestamp, openpatch->filesize);
 	}

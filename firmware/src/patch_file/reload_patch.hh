@@ -31,6 +31,6 @@ public:
 
 	Result reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func = [] {});
 
-	bool has_changed_on_disk(PatchLocation const &loc);
+	bool is_not_open_or_has_changed_on_disk(PatchLocation const &loc);
 };
 } // namespace MetaModule

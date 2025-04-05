@@ -339,15 +339,12 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::LoadPatchFile: {
-				if (!patchloader.has_changed_on_disk(selected_patch)) {
-					view_loaded_patch();
+				bool file_needs_loading =
+					patchloader.is_not_open_or_has_changed_on_disk(selected_patch) &&
+					patches.get_modification_count(selected_patch) == 0; //don't load if we have unsaved changes
 
-				} else if (patches.get_modification_count(selected_patch) > 0) {
-					// Has changed on disk AND there are unsaved changes
-					// PatchViewPage will notify the user of this.
-					view_loaded_patch();
+				if (file_needs_loading) {
 
-				} else {
 					show_spinner();
 
 					auto result = patchloader.reload_patch_file(selected_patch, [this] {
@@ -356,18 +353,20 @@ struct PatchSelectorPage : PageBase {
 					});
 
 					if (result.success) {
+						gui_state.playing_patch_needs_manual_reload = false;
 						view_loaded_patch();
 
 					} else {
 						lv_group_set_editing(group, true);
 						state = State::Idle;
-
 						notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
 					}
+				} else {
+					view_loaded_patch();
 				}
+
 				hide_spinner();
 				state = State::Idle;
-
 			} break;
 
 			case State::Closing:
