@@ -4,6 +4,8 @@
 #include "fs/fatfs/delete_node.hh"
 #include "fs/volumes.hh"
 #include "pr_dbg.hh"
+#include <algorithm>
+#include <array>
 #include <cstdint>
 #include <optional>
 #include <span>

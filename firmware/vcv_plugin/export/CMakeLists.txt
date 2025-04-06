@@ -139,5 +139,7 @@ set_target_properties(vcv_plugin_export PROPERTIES CXX_STANDARD 23)
 # set_target_properties(vcv_plugin_export PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/vcv-export)
 
 # see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 target_compile_options(vcv_plugin_export PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-pmf-conversions>)
+endif()
 

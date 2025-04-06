@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <span>
 #include <string>
+#include <array>
 
 // #define MIDIDEBUG
 #if defined(MIDIDEBUG)
