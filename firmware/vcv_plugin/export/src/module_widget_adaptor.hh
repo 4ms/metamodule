@@ -191,6 +191,9 @@ struct ModuleWidgetAdaptor {
 
 		if (has_custom_draw) {
 			// Use a blank name for the entire module widget so that it doesn't show up in the element roller
+			// Make sure widget width or height is not 0, or else it won't be drawn.
+			mw->box.size.x = std::max(1.f, mw->box.size.x);
+			mw->box.size.y = std::max(1.f, mw->box.size.y);
 			assign_element_fields(mw, "", element);
 
 			pr_trace("Widget with size %g x %g has a custom draw() or drawLayer()\n", mw->box.size.x, mw->box.size.y);

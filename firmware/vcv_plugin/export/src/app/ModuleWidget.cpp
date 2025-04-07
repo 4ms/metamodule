@@ -15,7 +15,7 @@ struct ModuleWidget::Internal {
 	std::unique_ptr<MetaModule::ModuleWidgetAdaptor> adaptor;
 	std::vector<ModuleWidget::WidgetElement> drawable_widgets;
 
-	unsigned graphic_display_idx = 10'000;
+	unsigned graphic_display_idx = 200;
 };
 
 std::vector<ModuleWidget::WidgetElement> &ModuleWidget::get_drawable_widgets() {
@@ -61,10 +61,6 @@ void ModuleWidget::setModule(engine::Module *m) {
 		pr_trace("setModule for %s\n", model->slug.c_str());
 	else if (m->model && m->model->slug.size())
 		pr_trace("setModule for %s\n", m->model->slug.c_str());
-
-	internal->adaptor->addModuleWidget(internal->graphic_display_idx, this);
-	internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
-	internal->graphic_display_idx++;
 }
 
 app::SvgPanel *ModuleWidget::getPanel() {
@@ -72,11 +68,15 @@ app::SvgPanel *ModuleWidget::getPanel() {
 }
 
 void ModuleWidget::setPanel(app::SvgPanel *newpanel) {
+	bool first_panel = false;
+
 	// Remove existing panel
 	if (internal->panel) {
 		removeChild(internal->panel);
 		delete internal->panel;
 		internal->panel = nullptr;
+	} else {
+		first_panel = true;
 	}
 
 	if (newpanel) {
@@ -87,6 +87,12 @@ void ModuleWidget::setPanel(app::SvgPanel *newpanel) {
 			box.size = newpanel->svg->getSize();
 			if (box.size != newpanel->box.size)
 				pr_err("Error: In ModuleWidget::setPanel, new panel's svg->getSize() != box.size\n");
+
+			if (first_panel) {
+				internal->adaptor->addModuleWidget(internal->graphic_display_idx, this);
+				internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
+				internal->graphic_display_idx++;
+			}
 		}
 	}
 }
