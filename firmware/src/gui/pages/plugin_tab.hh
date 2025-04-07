@@ -253,7 +253,7 @@ private:
 		lv_foreach_child(ui_PluginsFoundCont, [=](lv_obj_t *obj, unsigned) {
 			auto idx = (uintptr_t)lv_obj_get_user_data(obj);
 
-			if (idx > 0 && idx < (*found_plugins).size()) {
+			if (idx > 0 && idx <= (*found_plugins).size()) {
 				auto &plugin = (*found_plugins)[idx - 1];
 
 				if (plugin.plugin_name == plugin_name) {
@@ -273,10 +273,11 @@ private:
 				auto *found_plugins = plugin_manager.found_plugin_list();
 				auto &plugin = (*found_plugins)[idx - 1];
 				pluginname = std::string{plugin.plugin_name};
-				if (plugin.version_in_filename.length() > 0)
-					pluginname += "\n" + Gui::grey_text(plugin.version_in_filename);
 
 				delete_found_items_with_name(plugin.plugin_name);
+
+				if (plugin.version_in_filename.length() > 0)
+					pluginname += "\n" + Gui::grey_text(plugin.version_in_filename);
 
 			} else {
 				pluginname = label ? lv_label_get_text(label) : "(new plugin)";
