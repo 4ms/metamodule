@@ -3,16 +3,15 @@
 #include "dynload/dynloader.hh"
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
+#include "dynload/plugin_file_load_states.hh"
 #include "dynload/version_sort.hh"
 #include "fat_file_io.hh"
-#include "fs/asset_drive/untar.hh"
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
 #include "untar_contents.hh"
 #include "util/monotonic_allocator.hh"
-#include "util/string_compare.hh"
 #include "util/version_tools.hh"
 #include <algorithm>
 #include <cstdint>
@@ -25,22 +24,7 @@ namespace MetaModule
 
 class PluginFileLoader {
 public:
-	enum class State {
-		NotInit,
-		Error,
-		InvalidPlugin,
-		RamDiskFull,
-		Idle,
-		RequestList,
-		WaitingForList,
-		GotList,
-		PrepareForReadingPlugin,
-		RequestReadPlugin,
-		LoadingPlugin,
-		UntarPlugin,
-		ProcessingPlugin,
-		Success
-	};
+	using State = PluginFileLoaderState;
 
 	struct Status {
 		State state{State::NotInit};
@@ -157,13 +141,16 @@ public:
 
 			case State::UntarPlugin: {
 				auto &plugin_file = plugin_files[file_idx];
-				auto err = contents.untar_contents(buffer, plugin_file);
-				if (err.length()) {
-					if (err == "Out of memory")
-						status.state = State::RamDiskFull;
-					else
-						status.state = State::InvalidPlugin;
+				auto [result, err] = contents.untar_contents(buffer, plugin_file);
+
+				if (result == PluginFileLoaderState::RamDiskFull) {
+					status.state = State::RamDiskFull;
 					status.error_message = err;
+
+				} else if (result == PluginFileLoaderState::InvalidPlugin) {
+					status.state = State::InvalidPlugin;
+					status.error_message = err;
+
 				} else {
 					status.state = State::ProcessingPlugin;
 				}
@@ -334,10 +321,6 @@ private:
 	std::span<uint8_t> buffer;
 
 	PluginLoadUntar contents;
-	// std::vector<uint8_t> so_buffer;
-	// std::vector<char> json_buffer;
-	// std::vector<char> mm_json_buffer;
-	// std::vector<std::string> files_copied_to_ramdisk;
 
 	// Dynamically allocated in non-cacheable RAM
 	// Used to transfer from M4 to A7 core

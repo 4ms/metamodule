@@ -9,6 +9,7 @@ struct PluginFileLoader {
 		NotInit,
 		Error,
 		InvalidPlugin,
+		RamDiskFull,
 		Idle,
 		RequestList,
 		WaitingForList,
