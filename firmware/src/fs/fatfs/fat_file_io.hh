@@ -332,21 +332,30 @@ public:
 		return res == FR_OK;
 	}
 
-	void debug_print_disk_info() {
+	std::pair<int32_t, int32_t> get_free_total_space_kb() {
 		/* Get volume information and free clusters of drive 1 */
 		FATFS *fs = nullptr;
 		DWORD free_clust = 0;
 		auto res = f_getfree(_fatvol, &free_clust, &fs);
 
 		if (res == FR_OK && fs) {
-			/* Get total sectors and free sectors */
 			auto tot_sect = (fs->n_fatent - 2) * fs->csize;
 			auto free_sect = free_clust * fs->csize;
-
 			// Assume 512B sector:
-			pr_info("Ramdisk: %u/%u KB free/total\n", free_sect / 2, tot_sect / 2);
+			return {free_sect / 2, tot_sect / 2};
+
 		} else
 			pr_err("Error f_getfree returned %d\n", res);
+
+		return {-1, -1};
+	}
+
+	void debug_print_disk_info() {
+		auto [avail, total] = get_free_total_space_kb();
+
+		if (avail >= 0 && total >= 0) {
+			pr_info("Ramdisk: %u/%u KB free/total\n", avail, total);
+		}
 	}
 
 	void debug_print_fileinfo(FileInfo info) {

@@ -31,16 +31,18 @@ struct PluginTab : SystemMenuTab {
 		current_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload Current");
 		load_all_found_button = create_button(ui_PluginsLeftColumn, "Load all");
 
-		loading_popup = lv_obj_create(lv_layer_top());
-		lv_obj_set_width(loading_popup, 320);
-		lv_obj_set_height(loading_popup, LV_SIZE_CONTENT);
-		auto label = lv_label_create(loading_popup);
-		lv_label_set_text(label, "Loading All Plugins\n");
-		lv_obj_set_style_bg_color(loading_popup, lv_color_hex(0x222222), 0);
-		lv_obj_add_flag(loading_popup, LV_OBJ_FLAG_SNAPABLE);
-		lv_hide(loading_popup);
-		loading_group = lv_group_create();
-		lv_group_add_obj(loading_group, loading_popup);
+		{ // Load All popup
+			loading_popup = lv_obj_create(lv_layer_top());
+			lv_obj_set_width(loading_popup, 320);
+			lv_obj_set_height(loading_popup, LV_SIZE_CONTENT);
+			auto label = lv_label_create(loading_popup);
+			lv_label_set_text(label, "Loading All Plugins\n");
+			lv_obj_set_style_bg_color(loading_popup, lv_color_hex(0x222222), 0);
+			lv_obj_add_flag(loading_popup, LV_OBJ_FLAG_SNAPABLE);
+			lv_hide(loading_popup);
+			loading_group = lv_group_create();
+			lv_group_add_obj(loading_group, loading_popup);
+		}
 
 		clear_loaded_list();
 		clear_found_list();
@@ -54,6 +56,11 @@ struct PluginTab : SystemMenuTab {
 		lv_obj_add_event_cb(load_all_found_button, load_all, LV_EVENT_CLICKED, this);
 
 		lv_hide(load_all_found_button);
+
+		ram_label = lv_label_create(ui_PluginsRightColumn);
+		lv_obj_move_to_index(ram_label, 1);
+		lv_obj_set_style_text_font(ram_label, &ui_font_MuseoSansRounded50012, 0);
+		lv_label_set_text(ram_label, "");
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -86,6 +93,8 @@ struct PluginTab : SystemMenuTab {
 
 		plugin_state_popup.init(ui_SystemMenu, group);
 		confirm_popup.init(ui_SystemMenu, group);
+
+		show_ramdisk_free();
 
 		pr_dbg("Autoload list:\n");
 		for (auto const &slug : settings.slug) {
@@ -127,6 +136,8 @@ struct PluginTab : SystemMenuTab {
 
 		else if (result.state == PluginFileLoader::State::Success)
 		{
+			show_ramdisk_free();
+
 			lv_hide(ui_PluginTabSpinner);
 			move_found_plugin_to_loaded();
 
@@ -139,6 +150,7 @@ struct PluginTab : SystemMenuTab {
 			notify_queue.put({err, Notification::Priority::Error, 2500});
 
 			loading_done = true;
+			show_ramdisk_free();
 		}
 
 		if (is_loading_all && loading_done) {
@@ -207,6 +219,7 @@ private:
 			lv_show(ui_PluginScanButton);
 			lv_hide(load_all_found_button);
 		}
+		show_ramdisk_free();
 	}
 
 	void display_found_plugins() {
@@ -295,6 +308,16 @@ private:
 			load_in_progress_obj = nullptr;
 			gui_state.playing_patch_needs_manual_reload = true;
 			gui_state.force_redraw_patch = true;
+		}
+	}
+
+	void show_ramdisk_free() {
+		auto [avail, total] = plugin_manager.get_free_total_space_kb();
+		if (avail >= 0 && total >= 0) {
+			lv_label_set_text_fmt(
+				ram_label, "%d of %dMB free", (int)std::round(avail / 1024), (int)std::round(total / 1024));
+		} else {
+			lv_label_set_text(ram_label, "");
 		}
 	}
 
@@ -499,6 +522,8 @@ private:
 
 	lv_obj_t *clear_autoloads_button;
 	lv_obj_t *current_autoloads_button;
+
+	lv_obj_t *ram_label;
 
 	// Load all:
 	lv_obj_t *load_all_found_button;

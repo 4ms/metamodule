@@ -56,6 +56,10 @@ public:
 		return plugin_file_loader.process(loaded_plugin_list);
 	}
 
+	std::pair<int32_t, int32_t> get_free_total_space_kb() {
+		return ramdisk.get_free_total_space_kb();
+	}
+
 	bool is_idle() {
 		return plugin_file_loader.is_idle();
 	}
