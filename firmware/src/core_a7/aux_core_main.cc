@@ -9,6 +9,7 @@
 #include "fs/syscall/filesystem.hh"
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
+#include "ramdisk_ops.hh"
 
 #ifdef CPU_TEST_ALL_MODULES
 #include "conf/pin_conf.hh"

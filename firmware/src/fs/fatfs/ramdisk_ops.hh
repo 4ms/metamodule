@@ -2,6 +2,7 @@
 #include "conf/ramdisk_conf.hh"
 #include "disk_ops.hh"
 #include "fs/ramdisk.hh"
+#include "ld.h"
 #include "pr_dbg.hh"
 #include <cstring>
 
@@ -13,6 +14,9 @@ public:
 
 	RamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
 		: ramdisk{rmdisk} {
+		if (RamDiskSizeBytes != VIRTDRIVE_SZ) {
+			pr_warn("Warning: RamDisk is not occupying entire VIRTDRIVE\n");
+		}
 	}
 
 	DSTATUS status() override {
