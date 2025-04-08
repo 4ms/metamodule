@@ -1,6 +1,7 @@
 #pragma once
 #include "audio_stream.hh"
 #include "frame.hh"
+#include "fs/fatfs/ramdisk_ops.hh"
 #include "gui/elements/screensaver.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_manager.hh"

@@ -1,8 +1,8 @@
 #pragma once
-#include "asset_drive/untar.hh"
 #include "console/pr_dbg.hh"
 #include "dynload/plugin_file_list.hh"
 #include "fat_file_io.hh"
+#include "fs/asset_drive/untar.hh"
 #include "metamodule-plugin-sdk/version.hh"
 #include "plugin_file_load_states.hh"
 #include <cstdint>

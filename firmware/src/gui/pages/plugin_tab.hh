@@ -38,11 +38,20 @@ struct PluginTab : SystemMenuTab {
 			loading_popup = lv_obj_create(lv_layer_top());
 			lv_obj_set_width(loading_popup, 320);
 			lv_obj_set_height(loading_popup, LV_SIZE_CONTENT);
-			auto label = lv_label_create(loading_popup);
-			lv_label_set_text(label, "Loading All Plugins\n");
-			lv_obj_set_style_bg_color(loading_popup, lv_color_hex(0x222222), 0);
+			lv_obj_set_style_radius(loading_popup, 0, LV_PART_MAIN);
+			lv_obj_set_style_pad_hor(loading_popup, 8, LV_PART_MAIN);
+			lv_obj_set_style_pad_ver(loading_popup, 6, LV_PART_MAIN);
+			lv_obj_set_style_bg_color(loading_popup, lv_color_hex(0xE1E878), LV_PART_MAIN);
 			lv_obj_add_flag(loading_popup, LV_OBJ_FLAG_SNAPABLE);
+
+			load_in_progress_label = lv_label_create(loading_popup);
+			lv_label_set_text(load_in_progress_label, "Loading All Plugins: Please Wait");
+			lv_obj_set_style_text_color(loading_popup, lv_color_black(), LV_PART_MAIN);
+			lv_label_set_long_mode(load_in_progress_label, LV_LABEL_LONG_DOT);
+			lv_obj_set_width(load_in_progress_label, LV_PCT(100));
+			lv_obj_set_height(load_in_progress_label, LV_SIZE_CONTENT);
 			lv_hide(loading_popup);
+
 			loading_group = lv_group_create();
 			lv_group_add_obj(loading_group, loading_popup);
 		}
@@ -58,7 +67,7 @@ struct PluginTab : SystemMenuTab {
 		lv_obj_add_event_cb(current_autoloads_button, current_autoloads, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(load_all_found_button, load_all, LV_EVENT_CLICKED, this);
 
-		lv_hide(load_all_found_button);
+		lv_show(load_all_found_button);
 
 		ram_label = lv_label_create(ui_PluginsRightColumn);
 		lv_obj_move_to_index(ram_label, 1);
@@ -88,6 +97,7 @@ struct PluginTab : SystemMenuTab {
 
 		clear_found_list();
 		reset_group();
+		lv_hide(loading_popup);
 		lv_hide(load_all_found_button);
 
 		lv_group_focus_obj(ui_PluginScanButton);
@@ -115,6 +125,10 @@ struct PluginTab : SystemMenuTab {
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
 			return true;
+		}
+		if (is_loading_all) {
+			is_loading_all = false;
+			return false;
 		}
 
 		if (should_write_settings)
@@ -157,6 +171,7 @@ struct PluginTab : SystemMenuTab {
 		}
 
 		if (is_loading_all && loading_done) {
+			lv_show(ui_PluginTabSpinner);
 			load_next();
 		}
 	}
@@ -179,7 +194,7 @@ private:
 		lv_group_add_obj(group, current_autoloads_button);
 
 		// TODO: cleanup load_all functionality
-		// lv_show(load_all_found_button, lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0);
+		lv_show(load_all_found_button, lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0);
 	}
 
 	void clear_loaded_list() {
@@ -306,7 +321,8 @@ private:
 
 			reset_group();
 
-			lv_group_focus_obj(plugin_obj);
+			if (!is_loading_all)
+				lv_group_focus_obj(plugin_obj);
 
 			load_in_progress_obj = nullptr;
 			gui_state.playing_patch_needs_manual_reload = true;
@@ -477,6 +493,7 @@ private:
 	void start_loading_all() {
 		lv_show(loading_popup);
 		lv_show(ui_PluginTabSpinner);
+		lv_hide(load_all_found_button);
 
 		lv_obj_scroll_to_y(ui_SystemMenuPluginsTab, 0, LV_ANIM_ON);
 		lv_group_activate(loading_group);
@@ -497,6 +514,11 @@ private:
 			auto [obj, idx] = plugins_to_load.front();
 			plugins_to_load.pop_front();
 
+			auto const *found_plugins = plugin_manager.found_plugin_list();
+			auto const &plugin = (*found_plugins)[idx];
+
+			lv_label_set_text_fmt(load_in_progress_label, "Loading All Plugins:\n%s", plugin.plugin_name.c_str());
+
 			load_in_progress_obj = obj;
 			pr_dbg("Load plugin idx = %d\n", idx);
 
@@ -516,6 +538,7 @@ private:
 	ConfirmPopup confirm_popup;
 
 	lv_obj_t *load_in_progress_obj = nullptr;
+	lv_obj_t *load_in_progress_label = nullptr;
 
 	lv_group_t *group = nullptr;
 
