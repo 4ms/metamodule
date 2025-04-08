@@ -18,6 +18,12 @@ struct Metadata {
 
 	// When loading a patch, consider use of these names as equivalent to using the brand_slug
 	std::vector<std::string> brand_aliases;
+
+	struct ModuleDisplayName {
+		std::string slug;
+		std::string display_name;
+	};
+	std::vector<ModuleDisplayName> module_aliases;
 };
 
 inline bool parse_json(std::span<char> file_data, Metadata *metadata) {
@@ -49,6 +55,17 @@ inline bool parse_json(std::span<char> file_data, Metadata *metadata) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
+	if (!n.is_map())
+		return false;
+
+	if (n.has_child("slug") && n.has_child("displayName")) {
+		n["slug"] >> s->slug;
+		n["displayName"] >> s->display_name;
+	}
+	return true;
+}
+
 inline bool parse_mm_json(std::span<char> file_data, Metadata *metadata) {
 	RymlInit::init_once();
 
@@ -73,6 +90,10 @@ inline bool parse_mm_json(std::span<char> file_data, Metadata *metadata) {
 
 	if (root.has_child("MetaModuleBrandAliases")) {
 		root["MetaModuleBrandAliases"] >> metadata->brand_aliases;
+	}
+
+	if (root.has_child("MetaModuleIncludedModules")) {
+		root["MetaModuleIncludedModules"] >> metadata->module_aliases;
 	}
 
 	return true;

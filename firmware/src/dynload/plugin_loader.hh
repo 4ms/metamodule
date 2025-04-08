@@ -264,6 +264,14 @@ public:
 				if (load_plugin(plugin)) {
 					for (auto const &alias : metadata.brand_aliases)
 						ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
+
+					for (auto const &alias : metadata.module_aliases) {
+						if (alias.display_name.length() && alias.slug.length()) {
+							ModuleFactory::setModuleDisplayName(metadata.brand_slug + ":" + alias.slug,
+																alias.display_name);
+						}
+					}
+
 					status.state = State::Success;
 				} else {
 					status.state = State::InvalidPlugin;
