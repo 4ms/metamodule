@@ -246,10 +246,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 		sendFrame(destination, payload);
 	};
 
-	auto sendBroadcast = [](auto payload) {
-		sendFrame(ChannelID_t::Broadcast, payload);
-	};
-
 	// Parse message
 
 	auto message = GetMessage(payload.data());
