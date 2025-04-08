@@ -32,6 +32,8 @@ public:
 	using extract_func_t = std::function<uint32_t(std::string_view, std::span<const char>)>;
 	bool extract_files(extract_func_t func);
 
+	static constexpr uint32_t FlagAbort = 0xFFFFFFFF;
+
 private:
 	bool image_read(char *buf, int size);
 	bool image_read(TarRaw *buf, int size);

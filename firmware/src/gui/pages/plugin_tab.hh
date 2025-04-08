@@ -1,11 +1,15 @@
 #pragma once
+#include "dynload/plugin_manager.hh"
+#include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/notify/queue.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/plugin_popup.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "patch_play/patch_playloader.hh"
 #include "user_settings/plugin_autoload_settings.hh"
 #include <algorithm>
 #include <deque>
@@ -314,7 +318,7 @@ private:
 		auto [avail, total] = plugin_manager.get_free_total_space_kb();
 		if (avail >= 0 && total >= 0) {
 			lv_label_set_text_fmt(
-				ram_label, "%d of %dMB free", (int)std::round(avail / 1024), (int)std::round(total / 1024));
+				ram_label, "%dMB of %dMB used", (int)std::round((total - avail) / 1024), (int)std::round(total / 1024));
 		} else {
 			lv_label_set_text(ram_label, "");
 		}
