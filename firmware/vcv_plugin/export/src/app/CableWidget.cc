@@ -3,6 +3,9 @@
 namespace rack::app
 {
 
+CableWidget::CableWidget() {
+}
+
 CableWidget::~CableWidget() {
 	if (cable)
 		delete cable;
