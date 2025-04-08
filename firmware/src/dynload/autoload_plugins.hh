@@ -97,6 +97,11 @@ private:
 			return {autoload_state, "Loaded " + s};
 		}
 
+		if (result.state == PluginFileLoader::State::RamDiskFull) {
+			autoload_state = State::Done;
+			return {State::Warning, "Error: " + result.error_message};
+		}
+
 		if (result.state == PluginFileLoader::State::InvalidPlugin) {
 
 			if (left_to_try > 1) {

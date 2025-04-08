@@ -29,6 +29,7 @@ public:
 		NotInit,
 		Error,
 		InvalidPlugin,
+		RamDiskFull,
 		Idle,
 		RequestList,
 		WaitingForList,
@@ -158,7 +159,10 @@ public:
 				auto &plugin_file = plugin_files[file_idx];
 				auto err = contents.untar_contents(buffer, plugin_file);
 				if (err.length()) {
-					status.state = State::InvalidPlugin;
+					if (err == "Out of memory")
+						status.state = State::RamDiskFull;
+					else
+						status.state = State::InvalidPlugin;
 					status.error_message = err;
 				} else {
 					status.state = State::ProcessingPlugin;
@@ -216,6 +220,7 @@ public:
 				break;
 			case State::Error:
 			case State::InvalidPlugin:
+			case State::RamDiskFull:
 				status.error_message.clear();
 				break;
 		}
@@ -248,7 +253,8 @@ public:
 
 	bool is_idle() {
 		return status.state == State::Idle || status.state == State::NotInit || status.state == State::Success ||
-			   status.state == State::Error || status.state == State::InvalidPlugin;
+			   status.state == State::Error || status.state == State::InvalidPlugin ||
+			   status.state == State::RamDiskFull;
 	}
 
 	// Splits plugin names at the first "-v"
