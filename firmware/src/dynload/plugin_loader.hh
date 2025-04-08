@@ -10,6 +10,7 @@
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
+#include "untar_contents.hh"
 #include "util/monotonic_allocator.hh"
 #include "util/string_compare.hh"
 #include "util/version_tools.hh"
@@ -49,7 +50,8 @@ public:
 	PluginFileLoader(FileStorageProxy &file_storage, FatFileIO &ramdisk)
 		: file_storage{file_storage}
 		, ramdisk{ramdisk}
-		, allocator{get_ram_buffer()} {
+		, allocator{get_ram_buffer()}
+		, contents{ramdisk} {
 	}
 
 	void start() {
@@ -154,94 +156,12 @@ public:
 
 			case State::UntarPlugin: {
 				auto &plugin_file = plugin_files[file_idx];
-
-				auto plugin_tar = Tar::Archive({(char *)buffer.data(), buffer.size()});
-				// plugin_tar.print_info();
-
-				so_buffer.clear();
-				json_buffer.clear();
-				mm_json_buffer.clear();
-				files_copied_to_ramdisk.clear();
-
-				std::string plugin_vers_filename;
-
-				auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
-					if (filename.ends_with(".so")) {
-						if (so_buffer.size() == 0) {
-							auto name = filename;
-							if (auto slashpos = name.find_last_of("/"); slashpos != std::string::npos) {
-								name = name.substr(slashpos + 1);
-							}
-							name.remove_suffix(3); //.so
-							if (!name.starts_with(".")) {
-								plugin_file.plugin_name = name;
-
-								pr_trace("Found plugin binary file: %s, plugin name is %s\n",
-										 filename.data(),
-										 plugin_file.plugin_name.c_str());
-
-								so_buffer.assign(buffer.begin(), buffer.end());
-								return buffer.size();
-							} else
-								return 0;
-						} else {
-							pr_warn("More than one .so file found! Using just the first\n");
-							return 0;
-						}
-
-					} else if (filename.ends_with("plugin.json")) {
-						json_buffer.assign(buffer.begin(), buffer.end());
-						return buffer.size();
-
-					} else if (filename.ends_with("plugin-mm.json")) {
-						mm_json_buffer.assign(buffer.begin(), buffer.end());
-						return buffer.size();
-
-					} else if (filename.contains("/SDK-")) {
-						plugin_vers_filename = filename;
-						return buffer.size();
-					} else {
-						if (!ramdisk.file_exists(filename)) {
-							pr_trace("Copying file to ramdisk: %s\n", filename.data());
-							auto bytes_written = ramdisk.write_file(filename, buffer);
-							if (bytes_written > 0)
-								files_copied_to_ramdisk.emplace_back(filename);
-							return bytes_written;
-						} else {
-							pr_trace("File exists, skipping: %s\n", filename.data());
-							return 0;
-						}
-					}
-				};
-
-				bool all_ok = plugin_tar.extract_files(ramdisk_writer);
-
-				if (!all_ok) {
-					pr_warn("Skipped loading some files in plugin dir (did not end in .png)\n");
-					// status.error_message = "Warning: Failed to load some files";
-				}
-
-				if (so_buffer.size() == 0) {
-					status.error_message = "Error: no plugin .so file found. Plugin is corrupted?";
-					break;
-				}
-
-				auto vers_pos = plugin_vers_filename.find_last_of("/SDK-");
-				if (plugin_vers_filename.length() == 0 || vers_pos == std::string::npos) {
+				auto err = contents.untar_contents(buffer, plugin_file);
+				if (err.length()) {
 					status.state = State::InvalidPlugin;
-					status.error_message = "Warning: Plugin missing version file.";
-					break;
-				}
-				auto plugin_vers = plugin_vers_filename.substr(vers_pos + 1);
-				auto fw_version = sdk_version();
-				if (fw_version.can_host_version(VersionUtil::Version(plugin_vers))) {
-					status.state = State::ProcessingPlugin;
+					status.error_message = err;
 				} else {
-					std::string fw_vers = std::to_string(fw_version.major) + "." + std::to_string(fw_version.minor);
-					auto plugin_name = std::string(plugin_file.plugin_name);
-					status.error_message = "Plugin " + plugin_name + ": version is " + plugin_vers +
-										   ", but firmware version is " + fw_vers;
-					status.state = State::InvalidPlugin;
+					status.state = State::ProcessingPlugin;
 				}
 
 			} break;
@@ -259,7 +179,7 @@ public:
 				plugin.rack_plugin.slug = metadata.brand_slug.length() ? metadata.brand_slug : fallback_name;
 				plugin.rack_plugin.name = metadata.display_name.length() ? metadata.display_name : fallback_name;
 
-				plugin.loaded_files = std::move(files_copied_to_ramdisk);
+				plugin.loaded_files = std::move(contents.files_copied_to_ramdisk);
 
 				if (load_plugin(plugin)) {
 					for (auto const &alias : metadata.brand_aliases)
@@ -306,12 +226,12 @@ public:
 	Plugin::Metadata get_plugin_metadata() {
 		Plugin::Metadata metadata;
 
-		if (json_buffer.size()) {
-			Plugin::parse_json(json_buffer, &metadata);
+		if (contents.json_buffer.size()) {
+			Plugin::parse_json(contents.json_buffer, &metadata);
 		}
 
-		if (mm_json_buffer.size()) {
-			Plugin::parse_mm_json(mm_json_buffer, &metadata);
+		if (contents.mm_json_buffer.size()) {
+			Plugin::parse_mm_json(contents.mm_json_buffer, &metadata);
 		}
 
 		// Report warnings/errors:
@@ -354,7 +274,7 @@ public:
 	bool load_plugin(LoadedPlugin &plugin) {
 		using InitPluginFunc = void(rack::plugin::Plugin *);
 
-		DynLoader dynloader{so_buffer, plugin.code};
+		DynLoader dynloader{contents.so_buffer, plugin.code};
 
 		if (auto err_msg = dynloader.load(); err_msg != "") {
 			status.error_message = err_msg;
@@ -406,10 +326,12 @@ private:
 
 	MonotonicAllocator allocator;
 	std::span<uint8_t> buffer;
-	std::vector<uint8_t> so_buffer;
-	std::vector<char> json_buffer;
-	std::vector<char> mm_json_buffer;
-	std::vector<std::string> files_copied_to_ramdisk;
+
+	PluginLoadUntar contents;
+	// std::vector<uint8_t> so_buffer;
+	// std::vector<char> json_buffer;
+	// std::vector<char> mm_json_buffer;
+	// std::vector<std::string> files_copied_to_ramdisk;
 
 	// Dynamically allocated in non-cacheable RAM
 	// Used to transfer from M4 to A7 core

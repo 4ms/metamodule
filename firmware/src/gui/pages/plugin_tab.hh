@@ -1,6 +1,5 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/plugin_popup.hh"
 #include "gui/pages/system_menu_tab_base.hh"

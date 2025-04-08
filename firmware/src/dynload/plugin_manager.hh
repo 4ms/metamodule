@@ -1,6 +1,5 @@
 #pragma once
 #include "fs/fatfs/fat_file_io.hh"
-#include "fs/fatfs/ramdisk_ops.hh"
 #include "gui/fonts/ttf.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
