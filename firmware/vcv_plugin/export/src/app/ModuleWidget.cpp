@@ -320,17 +320,17 @@ T *getFirstDescendantOfTypeWithCondition(widget::Widget *w, F f) {
 
 ParamWidget *ModuleWidget::getParam(int paramId) {
 	return getFirstDescendantOfTypeWithCondition<ParamWidget>(
-		this, [&](ParamWidget *pw) -> bool { return pw->paramId == paramId; });
+		this, [&](ParamWidget *pw) -> bool { return pw && pw->paramId == paramId; });
 }
 
 PortWidget *ModuleWidget::getInput(int portId) {
 	return getFirstDescendantOfTypeWithCondition<PortWidget>(
-		this, [&](PortWidget *pw) -> bool { return pw->type == engine::Port::INPUT && pw->portId == portId; });
+		this, [&](PortWidget *pw) -> bool { return pw && pw->type == engine::Port::INPUT && pw->portId == portId; });
 }
 
 PortWidget *ModuleWidget::getOutput(int portId) {
 	return getFirstDescendantOfTypeWithCondition<PortWidget>(
-		this, [&](PortWidget *pw) -> bool { return pw->type == engine::Port::OUTPUT && pw->portId == portId; });
+		this, [&](PortWidget *pw) -> bool { return pw && pw->type == engine::Port::OUTPUT && pw->portId == portId; });
 }
 
 template<class T, typename F>
