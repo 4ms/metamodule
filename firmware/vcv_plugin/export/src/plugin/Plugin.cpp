@@ -91,9 +91,9 @@ Plugin::~Plugin() {
 		// In MetaModule: we need to delete the models when the Plugin is removed
 		pr_trace("Deleting Model %s\n", model->slug.c_str());
 		delete model;
-
-		MetaModule::ModuleFactory::unregisterBrand(slug);
 	}
+
+	MetaModule::ModuleFactory::unregisterBrand(slug);
 }
 
 Model *Plugin::getModel(const std::string &slug) {
