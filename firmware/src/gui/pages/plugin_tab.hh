@@ -154,8 +154,6 @@ struct PluginTab : SystemMenuTab {
 
 		else if (result.state == PluginFileLoader::State::Success)
 		{
-			show_ramdisk_free();
-
 			lv_hide(ui_PluginTabSpinner);
 			move_found_plugin_to_loaded();
 
@@ -164,14 +162,17 @@ struct PluginTab : SystemMenuTab {
 
 		if (result.error_message.length()) {
 			lv_hide(ui_PluginTabSpinner);
+
 			std::string err = "Error loading plugin: " + result.error_message;
 			notify_queue.put({err, Notification::Priority::Error, 2500});
 
+			last_loaded_name = "";
 			loading_done = true;
-			show_ramdisk_free();
 		}
 
 		if (is_loading_all && loading_done) {
+			show_ramdisk_free();
+
 			lv_show(ui_PluginTabSpinner);
 			load_next();
 		}
@@ -483,6 +484,8 @@ private:
 	void end_loading_all() {
 		lv_hide(ui_PluginTabSpinner);
 		lv_hide(load_all_popup);
+		lv_hide(load_all_found_button);
+		lv_show(ui_PluginScanButton);
 
 		is_loading_all = false;
 
@@ -502,10 +505,12 @@ private:
 		plugins_to_load.clear();
 
 		lv_foreach_child(ui_PluginsFoundCont, [&](lv_obj_t *child, unsigned id) {
-			auto idx = (uint32_t)(uintptr_t)lv_obj_get_user_data(child);
-			if (idx > 0)
+			auto idx = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child)));
+			if (idx > 0) {
 				plugins_to_load.emplace_back(child, idx - 1);
+			}
 		});
+		last_loaded_name = "";
 		load_next();
 		is_loading_all = true;
 	}
@@ -518,10 +523,18 @@ private:
 			auto const *found_plugins = plugin_manager.found_plugin_list();
 			auto const &plugin = (*found_plugins)[idx];
 
+			// Skip loading different versions of same plugin
+			auto this_loaded_name = std::string(plugin.plugin_name);
+			if (this_loaded_name == last_loaded_name) {
+				load_next();
+				return;
+			}
+
+			last_loaded_name = std::string(plugin.plugin_name);
+
 			lv_label_set_text_fmt(load_in_progress_label, "Loading All Plugins: %s", plugin.plugin_name.c_str());
 
 			load_in_progress_obj = obj;
-			pr_dbg("Load plugin idx = %d\n", idx);
 
 			plugin_manager.load_plugin(idx);
 		} else {
@@ -561,5 +574,6 @@ private:
 
 	lv_obj_t *load_all_popup = nullptr;
 	lv_group_t *loading_group = nullptr;
+	std::string last_loaded_name;
 };
 } // namespace MetaModule
