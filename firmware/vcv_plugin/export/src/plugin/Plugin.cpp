@@ -85,15 +85,17 @@ Plugin::Plugin(std::string slug)
 
 Plugin::~Plugin() {
 	for (Model *model : models) {
-		model->plugin = nullptr;
 		// In VCV Rack: don't delete model because it's allocated once and referenced by a global.
 
 		// In MetaModule: we need to delete the models when the Plugin is removed
-		pr_trace("Deleting Model %s\n", model->slug.c_str());
+		pr_trace("Deleting Model %s (%p)\n", model->slug.c_str(), model);
+
+		auto removed_ok = MetaModule::ModuleFactory::unregisterModule(slug, model->slug);
+		if (!removed_ok) {
+			pr_warn("Failed to remove module '%s' in brand '%s'\n", model->slug.c_str(), slug.c_str());
+		}
 		delete model;
 	}
-
-	MetaModule::ModuleFactory::unregisterBrand(slug);
 }
 
 Model *Plugin::getModel(const std::string &slug) {
