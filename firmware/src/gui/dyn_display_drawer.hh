@@ -69,11 +69,13 @@ struct DynamicDisplayDrawer {
 
 				lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
+				// Debug border
+				// lv_obj_set_style_border_color(disp.lv_canvas, lv_color_hex(0xFFFF00), LV_PART_MAIN);
+				// lv_obj_set_style_border_opa(disp.lv_canvas, LV_OPA_50, LV_PART_MAIN);
+				// lv_obj_set_style_border_width(disp.lv_canvas, 1, LV_PART_MAIN);
+
 				if (auto module = patch_playloader.get_plugin_module(module_id))
 					module->show_graphic_display(disp.id, disp.fullcolor_buffer, w, disp.lv_canvas);
-
-				// Send it to the back?? TODO: do we need to do this?
-				// lv_obj_move_to_index(disp.lv_canvas, 0);
 			}
 		}
 	}

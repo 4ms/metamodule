@@ -205,6 +205,7 @@ float renderText(
 		lv_obj_set_pos(label, lv_x, align_lv_y);
 		lv_obj_set_size(label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 		lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
+		// Ignore text opacity
 		// lv_obj_set_style_text_opa(label, to_lv_opa(fs->paint->innerColor), LV_PART_MAIN);
 		lv_obj_set_style_text_opa(label, LV_OPA_100, LV_PART_MAIN);
 		lv_obj_set_style_text_align(label, align, LV_PART_MAIN);
@@ -212,6 +213,8 @@ float renderText(
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
 		auto letter_space = Fonts::corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
 		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
+
+		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
 		// Debug positions with red borders around labels
 		// lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
