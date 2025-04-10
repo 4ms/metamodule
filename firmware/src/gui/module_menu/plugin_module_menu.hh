@@ -38,6 +38,10 @@ struct PluginModuleMenu {
 	}
 
 	bool create_options_menu(unsigned this_module_id) {
+		if (plugin_menu) {
+			pr_err("Error: Plugin menu was not deleted\n");
+		}
+
 		if (auto rack_module = patch_playloader.get_plugin_module<rack::engine::Module>(this_module_id)) {
 			plugin_menu = std::make_unique<RackModuleMenu>(rack_module->module_widget);
 			return populate_menu_items() > 0;
@@ -68,11 +72,18 @@ struct PluginModuleMenu {
 
 	void hide() {
 		if (visible) {
-			plugin_menu->close();
 			lv_hide(roller);
 			roller_hover.hide();
 			visible = false;
 			should_close = false;
+		}
+	}
+
+	void blur() {
+		if (plugin_menu) {
+			plugin_menu->close();
+			pr_dbg("plugin_menu.reset()\n");
+			plugin_menu.reset();
 		}
 	}
 

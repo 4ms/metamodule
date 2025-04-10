@@ -31,7 +31,7 @@ struct ModuleViewPage : PageBase {
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state, patch_playloader}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
 		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
-		, module_menu{patch_playloader}
+		, module_context_menu{patch_playloader}
 		, dyn_draw{patch_playloader} {
 
 		init_bg(ui_MappingMenu);
@@ -103,6 +103,8 @@ struct ModuleViewPage : PageBase {
 
 		auto module_display_name = ModuleFactory::getModuleDisplayName(slug);
 		lv_label_set_text(ui_ElementRollerModuleName, module_display_name.data());
+
+		has_context_menu = module_context_menu.create_options_menu(this_module_id);
 
 		redraw_module();
 
@@ -240,7 +242,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		if (is_patch_playloaded) {
-			if (module_menu.create_options_menu(this_module_id)) {
+			if (has_context_menu) {
 				opts += Gui::orange_text("Options:") + "\n";
 				opts += " >>>\n";
 				roller_drawn_el_idx.push_back(-1);
@@ -332,8 +334,8 @@ struct ModuleViewPage : PageBase {
 			} else if (mode == ViewMode::Mapping) {
 				mapping_pane.back_event();
 
-			} else if (mode == ViewMode::ExtraMenu) {
-				module_menu.back_event();
+			} else if (mode == ViewMode::ModuleContextMenu) {
+				module_context_menu.back_event();
 
 			} else if (full_screen_mode) {
 				full_screen_mode = false;
@@ -347,7 +349,7 @@ struct ModuleViewPage : PageBase {
 
 		if (gui_state.file_browser_visible.just_went_low()) {
 			// File Browser detected as just closed
-			if (mode == ViewMode::ExtraMenu) {
+			if (mode == ViewMode::ModuleContextMenu) {
 				show_roller();
 			}
 		}
@@ -358,9 +360,9 @@ struct ModuleViewPage : PageBase {
 				show_roller();
 			}
 
-		} else if (mode == ViewMode::ExtraMenu) {
-			module_menu.update();
-			if (module_menu.wants_to_close()) {
+		} else if (mode == ViewMode::ModuleContextMenu) {
+			module_context_menu.update();
+			if (module_context_menu.wants_to_close()) {
 				show_roller();
 			}
 		}
@@ -518,6 +520,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
+		module_context_menu.blur();
 		dyn_draw.blur();
 		params.text_displays.stop_watching_all();
 		settings_menu.hide();
@@ -526,7 +529,7 @@ struct ModuleViewPage : PageBase {
 
 private:
 	void show_roller() {
-		module_menu.hide();
+		module_context_menu.hide();
 		mode = ViewMode::List;
 		mapping_pane.hide();
 		lv_show(ui_ElementRoller);
@@ -751,10 +754,10 @@ private:
 			if (page->roller_drawn_el_idx[roller_idx] == ExtraMenuTag) {
 				// Just ignore clicking on Extra Menu when in full_screen_mode
 				if (!page->full_screen_mode) {
-					page->mode = ViewMode::ExtraMenu;
+					page->mode = ViewMode::ModuleContextMenu;
 					lv_hide(ui_ElementRoller);
 					page->roller_hover.hide();
-					page->module_menu.show();
+					page->module_context_menu.show();
 				}
 			}
 		}
@@ -849,11 +852,12 @@ private:
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};
 	lv_draw_img_dsc_t img_dsc{};
 
-	enum class ViewMode { List, Mapping, ExtraMenu } mode{ViewMode::List};
+	enum class ViewMode { List, Mapping, ModuleContextMenu } mode{ViewMode::List};
 
 	RollerHoverText roller_hover;
 
-	PluginModuleMenu module_menu;
+	PluginModuleMenu module_context_menu;
+	bool has_context_menu = false;
 
 	DynamicDisplay dyn_draw;
 	bool dynamic_elements_prepared = false;
