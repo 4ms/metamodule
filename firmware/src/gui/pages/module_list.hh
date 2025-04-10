@@ -34,7 +34,6 @@ struct ModuleListPage : PageBase {
 
 private:
 	void populate_modules() {
-		//TODO: only repopulate if plugins changed
 
 		auto all_slugs = ModuleFactory::getAllModuleDisplayNames(selected_brand_slug);
 		std::ranges::sort(all_slugs, less_ci);
@@ -54,6 +53,7 @@ private:
 
 	void populate_brands() {
 		auto all_brands = ModuleFactory::getAllBrandDisplayNames();
+		std::ranges::sort(all_brands, less_ci);
 
 		std::string roller_str = "";
 		roller_str.reserve(all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
