@@ -22,6 +22,11 @@ struct InternalPluginManager {
 	FatFileIO &ramdisk;
 	AssetFS &asset_fs;
 
+	// These can be used by the plugin if they need to load from their plugin files after startup
+	rack::plugin::Plugin *valleyPluginInstance;
+	rack::plugin::Plugin *rackCorePluginInstance;
+	rack::plugin::Plugin *befacoPluginInstance;
+
 	std::list<rack::plugin::Plugin> internal_plugins;
 
 	InternalPluginManager(FatFileIO &ramdisk, AssetFS &asset_fs)
@@ -65,9 +70,9 @@ struct InternalPluginManager {
 		// 		 But, somehow get around the issue of multiple definitions of global symbol pluginInstance
 
 #ifdef BUILD_INTERNAL_Befaco
-		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
-		befaco_plugin.slug = "Befaco";
-		pluginInstance = &befaco_plugin;
+		pluginInstance = &internal_plugins.emplace_back("Befaco");
+		befacoPluginInstance = pluginInstance;
+		befacoPluginInstance->slug = "Befaco";
 		pluginInstance->addModel(modelEvenVCO);
 		pluginInstance->addModel(modelPonyVCO);
 		pluginInstance->addModel(modelRampage);
@@ -229,16 +234,16 @@ struct InternalPluginManager {
 #endif
 
 #ifdef BUILD_INTERNAL_Valley
-		auto &Valley_plugin = internal_plugins.emplace_back("Valley");
-		pluginInstance = &Valley_plugin;
+		pluginInstance = &internal_plugins.emplace_back("Valley");
+		valleyPluginInstance = pluginInstance;
 		pluginInstance->addModel(modelTopograph);
 		pluginInstance->addModel(modelUGraph);
 		pluginInstance->addModel(modelPlateau);
 #endif
 
 #ifdef BUILD_INTERNAL_RackCore
-		auto &RackCore_plugin = internal_plugins.emplace_back("RackCore");
-		pluginInstance = &RackCore_plugin;
+		pluginInstance = &internal_plugins.emplace_back("RackCore");
+		rackCorePluginInstance = pluginInstance;
 		pluginInstance->addModel(rack::core::modelMIDI_CV);
 		pluginInstance->addModel(rack::core::modelCV_MIDI);
 		pluginInstance->addModel(modelScope);
