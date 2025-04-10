@@ -8,6 +8,12 @@ struct Plugin;
 // We need it when the internal plugin loads an asset, because it needs to know what dir to look in (which is stored in Plugin)
 rack::plugin::Plugin *pluginInstance;
 
+// These are optionally used by the plugins if they need to refer to their instance after the
+// plugin is loaded (i.e. while a module is running)
+rack::plugin::Plugin *befacoPluginInstance;
+rack::plugin::Plugin *audibleInstrumentsPluginInstance;
+rack::plugin::Plugin *hetrickcvPluginInstance;
+rack::plugin::Plugin *nonlinearcircuitsPluginInstance;
+rack::plugin::Plugin *eightfoldPluginInstance;
 rack::plugin::Plugin *valleyPluginInstance;
 rack::plugin::Plugin *rackCorePluginInstance;
-rack::plugin::Plugin *befacoPluginInstance;
