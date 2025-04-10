@@ -285,7 +285,10 @@ struct PatchPlayLoader {
 
 	template<typename PluginModuleType>
 	PluginModuleType *get_plugin_module(int32_t module_idx) {
-		return dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get());
+		if (module_idx >= 0 && module_idx < (int32_t)player_.num_modules)
+			return dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get());
+		else 
+			return nullptr;
 	}
 
 	CoreProcessor *get_plugin_module(int32_t module_idx) {
