@@ -22,11 +22,6 @@ struct InternalPluginManager {
 	FatFileIO &ramdisk;
 	AssetFS &asset_fs;
 
-	// These can be used by the plugin if they need to load from their plugin files after startup
-	rack::plugin::Plugin *valleyPluginInstance;
-	rack::plugin::Plugin *rackCorePluginInstance;
-	rack::plugin::Plugin *befacoPluginInstance;
-
 	std::list<rack::plugin::Plugin> internal_plugins;
 
 	InternalPluginManager(FatFileIO &ramdisk, AssetFS &asset_fs)
