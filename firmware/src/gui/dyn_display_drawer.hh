@@ -105,7 +105,7 @@ struct DynamicDisplayDrawer {
 	void blur() {
 
 		for (auto &disp : displays) {
-			pr_dbg("DynDraw::blur() Release graphic display id %u\n", disp.id);
+			pr_trace("DynDraw::blur() Release graphic display id %u\n", disp.id);
 
 			if (auto module = patch_playloader.get_plugin_module(module_id))
 				module->hide_graphic_display(disp.id);
