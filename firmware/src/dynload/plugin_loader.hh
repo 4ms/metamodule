@@ -167,12 +167,17 @@ public:
 				// set slug and display name
 				auto metadata = get_plugin_metadata();
 				std::string fallback_name = plugin_file.plugin_name;
-				plugin.rack_plugin.slug = metadata.brand_slug.length() ? metadata.brand_slug : fallback_name;
+				if (metadata.brand_slug.length() == 0)
+					metadata.brand_slug = fallback_name;
+				plugin.rack_plugin.slug = metadata.brand_slug;
 				plugin.rack_plugin.name = metadata.display_name.length() ? metadata.display_name : fallback_name;
 
 				plugin.loaded_files = std::move(contents.files_copied_to_ramdisk);
 
 				if (load_plugin(plugin)) {
+					if (metadata.display_name.length())
+						ModuleFactory::setBrandDisplayName(metadata.brand_slug, metadata.display_name);
+
 					for (auto const &alias : metadata.brand_aliases)
 						ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
 
