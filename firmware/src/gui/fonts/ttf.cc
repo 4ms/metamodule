@@ -61,31 +61,18 @@ TTFLoadResult load_ttf(std::string_view name, std::string_view path_) {
 }
 
 unsigned corrected_ttf_letter_spacing(float fontSize, std::string_view name) {
-	if (name == "Segment14") {
-		if (fontSize < 16)
-			return 1;
-		else
-			return 3;
-	}
+	// Not currently used
 	return 0;
 }
 
 float corrected_ttf_ypos_shift(float fontSize, std::string_view name) {
-	if (name == "Segment14") {
-		return fontSize * 0.1f;
-	}
-
+	// Not currently used
 	return 0;
 }
 
 float corrected_ttf_size(float fontSize, std::string_view name) {
 	if (fontSize == 0) {
 		fontSize = 9;
-	}
-
-	// CountModula
-	if (name == "Segment14") {
-		return fontSize * 1.2f;
 	}
 
 	else if (name == "ShareTechMono-Regular")

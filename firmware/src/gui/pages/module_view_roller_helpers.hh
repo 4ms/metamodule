@@ -33,12 +33,16 @@ inline bool should_skip_for_cable_mode(std::optional<GuiState::CableBeginning> c
 									   uint16_t this_module_id) {
 	if (gui_state.new_cable.has_value()) {
 		uint16_t this_jack_id{};
+
 		if (gui_el.count.num_inputs > 0)
 			this_jack_id = gui_el.idx.input_idx;
+
 		else if (gui_el.count.num_outputs > 0)
 			this_jack_id = gui_el.idx.output_idx;
+
 		else
 			return true;
+
 		auto this_jack_type = (gui_el.count.num_inputs > 0) ? ElementType::Input : ElementType::Output;
 		if (!can_finish_cable(gui_state.new_cable.value(),
 							  patch,

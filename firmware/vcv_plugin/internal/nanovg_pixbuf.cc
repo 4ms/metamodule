@@ -211,7 +211,7 @@ float renderText(
 		lv_obj_set_style_text_align(label, align, LV_PART_MAIN);
 
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
-		auto letter_space = Fonts::corrected_ttf_letter_spacing(fs->fontSize, fs->fontName);
+		auto letter_space = to_lv_coord(fs->letterSpacing, context->px_per_3U);
 		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
 
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
@@ -221,7 +221,7 @@ float renderText(
 		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
-		pr_trace("Creating label at %d,%d align 0x%x (sz %g)\n", lv_x, lv_y, fs->textAlign, fs->fontSize);
+		pr_trace("Creating label at %d,%d a:0x%x sz:%g sp:%d\n", lv_x, lv_y, fs->textAlign, fs->fontSize, letter_space);
 		context->labels.push_back({(float)lv_x, (float)lv_y, fs->textAlign, label, context->draw_frame_ctr});
 	}
 
