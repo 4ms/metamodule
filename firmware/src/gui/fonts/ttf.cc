@@ -15,13 +15,7 @@ std::map<std::string, std::vector<uint8_t>> ttf_cache;
 lv_font_t const *fallback_font = nullptr;
 FatFileIO *ramdisk = nullptr;
 
-// constexpr std::string_view default_ttf = "MuseoSansRounded-700";
-// constexpr std::string_view default_ttf_path = "4ms/fonts/MuseoSansRounded-700.ttf";
-
-// constexpr std::string_view default_ttf = "ShareTechMono-Regular"; 
-// constexpr std::string_view default_ttf_path = "rack-lib/fonts/ShareTechMono-Regular.ttf";
-
-constexpr std::string_view default_ttf = "DejaVuSans"; 
+constexpr std::string_view default_ttf = "DejaVuSans";
 constexpr std::string_view default_ttf_path = "rack-lib/fonts/DejaVuSans.ttf";
 
 std::pair<std::string_view, std::string_view> remap_fonts(std::string_view name, std::string_view path);
@@ -178,14 +172,6 @@ void free_ttf(std::string const &filename) {
 namespace
 {
 std::pair<std::string_view, std::string_view> remap_fonts(std::string_view name, std::string_view path) {
-
-	if (name == "Segment14") {
-		pr_dbg("Request for font %s at %s remapped to Segment7Standard at 4ms/fonts/Segment7Standard.ttf\n",
-			   name.data(),
-			   path.data());
-		return {"Segment7Standard", "4ms/fonts/Segment7Standard.ttf"};
-	}
-
 	return {name, path};
 }
 
