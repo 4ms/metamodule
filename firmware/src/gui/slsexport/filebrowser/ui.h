@@ -34,7 +34,6 @@ LV_FONT_DECLARE(ui_font_MuseoSansRounded50016);
 LV_FONT_DECLARE(ui_font_MuseoSansRounded70014);
 LV_FONT_DECLARE(ui_font_MuseoSansRounded70016);
 LV_FONT_DECLARE(ui_font_MuseoSansRounded90018);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded90032);
 LV_FONT_DECLARE(ui_font_MuseoSansRounded90040);
 
 #ifdef __cplusplus
