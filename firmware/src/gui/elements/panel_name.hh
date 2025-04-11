@@ -80,7 +80,7 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 		name = "MIDI Bend";
 
 	else if (panel_id >= MidiGateNote0 && panel_id <= MidiGateNote127)
-		name = "MIDI Gate " + std::to_string(panel_id - MidiGateNote0); //TODO: C4
+		name = std::string("MIDI Gate ") + MidiMessage::note_name(panel_id - MidiGateNote0);
 
 	else if (panel_id == MidiClockJack)
 		name = "MIDI Clk";

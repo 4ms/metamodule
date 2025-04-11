@@ -185,7 +185,7 @@ private:
 	State autoload_state{State::NotStarted};
 
 	std::vector<unsigned> attempted_to_load;
-	unsigned left_to_try;
+	unsigned left_to_try = 0;
 };
 
 } // namespace MetaModule
