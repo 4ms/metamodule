@@ -26,8 +26,12 @@ inline lv_color_t to_lv_color(NVGcolor color) {
 }
 
 inline lv_color_t to_lv_text_color(NVGcolor color) {
-	auto hsv = lv_color_to_hsv(to_lv_color(color));
-	return lv_color_hsv_to_rgb(hsv.h, (hsv.s + 100) / 2, 100);
+	if (color.r == color.b && color.b == color.g) {
+		return to_lv_color(color);
+	} else {
+		auto hsv = lv_color_to_hsv(to_lv_color(color));
+		return lv_color_hsv_to_rgb(hsv.h, (hsv.s + 100) / 2, 100);
+	}
 }
 
 constexpr uint8_t to_lv_opa(NVGcolor color) {
