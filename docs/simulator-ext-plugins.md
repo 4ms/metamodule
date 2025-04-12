@@ -126,6 +126,15 @@ Since this is a bit of a hack, there are some limitations:
   MetaModule, there might be other things broken when trying to access files on
   the host computer.
 
+- The global variable `pluginInstance` will not be properly set to your plugin's
+  plugin instance during runtime (that is, outside of the init() function). This
+  usually shows up as a font or image that's supposed to be loaded during runtime,
+  cannot be found. To work around this, temporarily change
+  `rack::asset::plugin(pluginInstance, "res/path/to/file.svg")` to a hard-coded
+  path like `"MyPluginSlug/path/to/file.png"`. See
+  `firmware/vcv_plugin/export/src/asset.cc` to understand how
+  `rack::asset::plugin` transforms the path.
+
 If you are experiencing an issue along these lines with an external plugin on
 the simulator, testing on actual hardware is the best way to determine if an
 issue is due to one of these limitations or is an actual bug.
