@@ -76,11 +76,27 @@ else METAMODULE_SDK_DIR is not being set properly.
    and add these two lines at the top:
 
 ```cmake
-list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/PluginSlug")
-list(APPEND ext_builtin_brand_libname "PluginSlug")
+list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/PluginDir")
+list(APPEND ext_builtin_brand_libname "PluginLibraryName")
+list(APPEND ext_builtin_brand_slug "plugin_brand_slug")  # this line is only needed if the brand slug is different than the library name
 ```
 
-Replace PluginSlug with your brand slug.
+The first line (`ext_builtin_brand_paths`) is the path to the plugin dir that contains the `CMakeLists.txt` file which builds the plugin.
+You can specify a full path, but it's highly recommended to use the variable `${CMAKE_CURRENT_LIST_DIR}`, which will automatically
+by set to the path of the simulator directory.
+
+The second line (`ext_builtin_brand_libname`) is the name of the CMake library that's created in the CMakeLists.txt file.
+For example you would use `MyModulesLib` if the plugin CMake file has the line:
+
+```cmake
+add_library(MyModulesLib STATIC)
+```
+
+
+The third line (`ext_builtin_brand_slug`) is the brand slug used by the plugin. This must match the slug found in the plugin.json file
+or plugin-mm.json file. If the slug is the same as the CMake library name, then you can omit this line.
+
+If you have more than one external plugin, then you need to specify the slug for all of them, or for none of them.
 
 5. Now, you can build the simulator from within the simulator directory (not the firmware dir!) and your plugin should show up as a built-in brand.
 

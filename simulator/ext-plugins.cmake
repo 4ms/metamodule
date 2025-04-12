@@ -4,7 +4,15 @@
 # list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/Venom")
 # list(APPEND ext_builtin_brand_libname "Venom")
 #
-# Don't forget to change init() => init_Venom(), and add `extern` to the pluginInstance!
+# Optionally, if the brand slug is different than the Cmake library name,
+# then you can specify the brand slug like this:
+# list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../mm-plugins/squinky")
+# list(APPEND ext_builtin_brand_libname "SquinkyLabs")
+# list(APPEND ext_builtin_brand_slug "squinkylabs-plug1")
+#
+# If you have more than one external plugin, then you have to specify the slug for ALL of them or NONE of them.
+#
+# Don't forget to change init() => init_BrandSlug(), and add `extern` to the pluginInstance!
 # 
 # See docs/simulator-ext-plugins.md for instructions
 
@@ -43,7 +51,10 @@ add_custom_command(
 
  set(EXT_PLUGIN_INIT_CALLS "")
 
-foreach(branddir brand IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_brand_libname)
+foreach(branddir brand slug IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_brand_libname ext_builtin_brand_slug)
+	if ("${slug}" STREQUAL "")
+		set(slug ${brand})
+	endif()
 	set(METAMODULE_SDK_DIR ${CMAKE_CURRENT_LIST_DIR})
 	add_subdirectory(${branddir} ${CMAKE_CURRENT_BINARY_DIR}/builtins/${brand})
 
@@ -54,7 +65,7 @@ foreach(branddir brand IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_brand_li
 	target_link_libraries(_vcv_ports_internal PUBLIC ${brand})
 	add_dependencies(asset-image ${brand}-assets)
 
-	string(APPEND EXT_PLUGIN_INIT_CALLS "\textern void init_${brand}(rack::plugin::Plugin *);\n\tinit_${brand}(&internal_plugins.emplace_back(\"${brand}\"));")
+	string(APPEND EXT_PLUGIN_INIT_CALLS "\textern void init_${brand}(rack::plugin::Plugin *);\n\tinit_${brand}(&internal_plugins.emplace_back(\"${slug}\"));")
 endforeach()
 
 configure_file(src/ext_plugin_builtin.hh.in ${CMAKE_CURRENT_BINARY_DIR}/ext_plugin/ext_plugin_builtin.hh)
