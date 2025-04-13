@@ -28,9 +28,9 @@ public:
 		}
 	}
 
-	void read_patch_state() {
+	void read_patch_gui_elements() {
 		if constexpr (NumCores > 1) {
-			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchLights>();
+			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchGuiElements>();
 		}
 	}
 

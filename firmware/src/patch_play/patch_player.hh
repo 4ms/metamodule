@@ -267,8 +267,8 @@ public:
 		update_midi_pulses();
 	}
 
-	void update_lights() {
-		smp.read_patch_state();
+	void trigger_reading_gui_elements() {
+		smp.read_patch_gui_elements();
 		smp.join();
 	}
 

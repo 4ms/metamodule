@@ -288,7 +288,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		idx++;
 	}
 
-	player.update_lights();
+	player.trigger_reading_gui_elements();
 	propagate_sense_pins(param_block.metaparams.jack_senses);
 }
 
@@ -346,7 +346,7 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			extoutchan = 0;
 	}
 
-	player.update_lights();
+	player.trigger_reading_gui_elements();
 }
 
 void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
