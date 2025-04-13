@@ -19,6 +19,9 @@ struct AudioStreamMidi {
 
 	void process(bool is_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg) {
 
+		if (!player.is_loaded)
+			return;
+
 		if (is_connected && !last_connected) {
 			player.set_midi_connected();
 		} else if (!is_connected && last_connected) {
