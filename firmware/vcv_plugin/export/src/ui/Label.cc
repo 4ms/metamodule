@@ -16,14 +16,23 @@ void Label::draw(const DrawArgs &args) {
 	nvgFontSize(args.vg, fontSize);
 
 	auto halign = alignment == LEFT_ALIGNMENT	? NVG_ALIGN_LEFT :
-				  alignment == RIGHT_ALIGNMENT	? NVG_ALIGN_RIGHT :
 				  alignment == CENTER_ALIGNMENT ? NVG_ALIGN_CENTER :
+				  alignment == RIGHT_ALIGNMENT	? NVG_ALIGN_RIGHT :
 												  NVG_ALIGN_LEFT;
 	nvgTextAlign(args.vg, halign | NVG_ALIGN_TOP);
 
 	nvgFillColor(args.vg, color);
 
-	nvgText(args.vg, 6, 4, text.c_str(), nullptr);
+	auto x_offset = alignment == LEFT_ALIGNMENT		 ? 6 :
+					alignment == CENTER_ALIGNMENT	 ? 6 :
+					alignment == RIGHT_ALIGNMENT	 ? 6 :
+					alignment == MM_CENTER_ALIGNMENT ? 0 :
+					alignment == MM_RIGHT_ALIGNMENT	 ? 0 :
+													   0;
+
+	auto y_offset = 4; // TODO: does this depend on anything?
+
+	nvgText(args.vg, x_offset, y_offset, text.c_str(), nullptr);
 }
 
 } // namespace rack::ui
