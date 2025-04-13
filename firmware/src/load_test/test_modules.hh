@@ -22,12 +22,15 @@ struct ModuleEntry {
 	ModuleMemoryTester::Measurements mem_usage{};
 };
 
-inline std::vector<ModuleEntry> test_all_modules() {
+inline std::string csv_header();
+inline std::string entry_to_csv(ModuleEntry const &entry);
 
-	std::vector<ModuleEntry> res;
+inline void test_all_modules(auto append_file) {
 
 	lv_show(ui_MainMenuNowPlayingPanel);
 	lv_show(ui_MainMenuNowPlaying);
+
+	append_file(csv_header());
 
 	auto brands = ModuleFactory::getAllBrands();
 	for (auto brand : brands) {
@@ -64,18 +67,27 @@ inline std::vector<ModuleEntry> test_all_modules() {
 				i++;
 			}
 
-			res.emplace_back(entry);
+			append_file(entry_to_csv(entry));
+			// res.emplace_back(entry);
 		}
 	}
 
 	lv_label_set_text(ui_MainMenuNowPlaying, "");
 
-	return res;
+	// return res;
 }
 
-inline std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
-	constexpr float sampletime = 1'000'000.f / 48000.f;
+// inline std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
+// 	std::string s = csv_header();
 
+// 	for (auto const &entry : entries) {
+// 		s.append(entry_to_csv(entry));
+// 	}
+
+// 	return s;
+// }
+
+inline std::string csv_header() {
 	std::string s;
 
 	// Header
@@ -113,55 +125,60 @@ inline std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 	s += "\n";
 	pr_info("\n");
 
-	// Body
-	for (auto const &entry : entries) {
-		s += entry.slug + ", ";
-		pr_info("%s, ", entry.slug.c_str());
+	return s;
+}
 
-		auto report_cpu = [&s](auto entryitem) {
-			char buf[8];
-			snprintf(buf, 8, "%.3f, ", entryitem.average_run_time / sampletime);
-			s += buf;
-			pr_info("%.3f, ", entryitem.average_run_time / sampletime);
-		};
+inline std::string entry_to_csv(ModuleEntry const &entry) {
+	constexpr float sampletime = 1'000'000.f / 48000.f;
 
-		for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-			report_cpu(entry.isolated[i]);
-		}
+	std::string s;
 
-		for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-			report_cpu(entry.patched[i]);
-		}
+	s = entry.slug + ", ";
+	pr_info("%s, ", entry.slug.c_str());
 
-		for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-			report_cpu(entry.cv_modulated[i]);
-		}
+	auto report_cpu = [&s](auto entryitem) {
+		char buf[8];
+		snprintf(buf, 8, "%.3f, ", entryitem.average_run_time / sampletime);
+		s += buf;
+		pr_info("%.3f, ", entryitem.average_run_time / sampletime);
+	};
 
-		for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-			report_cpu(entry.audio_modulated[i]);
-		}
-
-		if constexpr (MM_LOADTEST_MEASURE_MEMORY) {
-			if (entry.mem_usage.results_invalid) {
-				s += "CAN'T MEASURE, , , ";
-			} else {
-				s += std::to_string(entry.mem_usage.peak_mem_startup) + ", ";
-				s += std::to_string(entry.mem_usage.peak_running_mem) + ", ";
-				// Not accurate, don't include in report:
-				// s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
-				s += entry.mem_usage.double_free ? "YES" : "n";
-			}
-			pr_info("%zu, %zu, %zu, %d, %s\n",
-					entry.mem_usage.peak_mem_startup,
-					entry.mem_usage.peak_running_mem,
-					entry.mem_usage.mem_leaked,
-					entry.mem_usage.double_free,
-					entry.mem_usage.results_invalid ? "TOOMANYALLOCS" : "ok");
-		}
-
-		s += "\n";
-		pr_info("\n");
+	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
+		report_cpu(entry.isolated[i]);
 	}
+
+	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
+		report_cpu(entry.patched[i]);
+	}
+
+	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
+		report_cpu(entry.cv_modulated[i]);
+	}
+
+	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
+		report_cpu(entry.audio_modulated[i]);
+	}
+
+	if constexpr (MM_LOADTEST_MEASURE_MEMORY) {
+		if (entry.mem_usage.results_invalid) {
+			s += "CAN'T MEASURE, , , ";
+		} else {
+			s += std::to_string(entry.mem_usage.peak_mem_startup) + ", ";
+			s += std::to_string(entry.mem_usage.peak_running_mem) + ", ";
+			// Not accurate, don't include in report:
+			// s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
+			s += entry.mem_usage.double_free ? "YES" : "n";
+		}
+		pr_info("%zu, %zu, %zu, %d, %s\n",
+				entry.mem_usage.peak_mem_startup,
+				entry.mem_usage.peak_running_mem,
+				entry.mem_usage.mem_leaked,
+				entry.mem_usage.double_free,
+				entry.mem_usage.results_invalid ? "TOOMANYALLOCS" : "ok");
+	}
+
+	s += "\n";
+	pr_info("\n");
 
 	return s;
 }
