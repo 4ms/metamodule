@@ -104,17 +104,16 @@ public:
 		return Status::NewlyFormatted;
 	}
 
-	uint32_t
-	update_or_create_file(const std::string_view filename, const std::span<const char> data, uint32_t timestamp = 0) {
+	uint32_t write_file(const std::string_view filename, const std::span<const char> data, int flags) {
 		TimeFile file;
 
-		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY | LFS_O_TRUNC);
+		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY | flags);
 		if (err < 0) {
 			pr_err("LFS: Open failed with err %d\n", err);
 			return 0;
 		}
 
-		file.timestamp = timestamp ? timestamp : get_fattime();
+		file.timestamp = get_fattime();
 
 		pr_trace("LFS: write file %s, timestamp 0x%x, size %u\n", filename.data(), file.timestamp, data.size());
 
@@ -129,6 +128,19 @@ public:
 		}
 
 		return data.size_bytes();
+	}
+
+	// Write
+	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
+		return write_file(filename, buffer, LFS_O_TRUNC);
+	}
+
+	uint32_t append_file(const std::string_view filename, std::span<const char> buffer) {
+		return write_file(filename, buffer, LFS_O_APPEND);
+	}
+
+	uint32_t update_or_create_file(const std::string_view filename, const std::span<const char> data) {
+		return write_file(filename, data, LFS_O_TRUNC);
 	}
 
 	bool delete_file(const std::string_view filename) {
@@ -164,11 +176,6 @@ public:
 
 		lfs_file_close(&lfs, &file);
 		return bytes_read;
-	}
-
-	// Write
-	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
-		return update_or_create_file(filename, buffer);
 	}
 
 	// Performs an action(filename, timestamp) on each file in LittleFS root dir ending with the extension

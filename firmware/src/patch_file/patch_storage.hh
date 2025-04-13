@@ -94,6 +94,24 @@ public:
 		return write_file(vol, filename, {(const char *)data.data(), data.size()});
 	}
 
+	uint32_t append_file(Volume vol, std::string_view filename, std::span<const char> data) {
+		bool success = false;
+
+		if (vol == Volume::USB) {
+			success = PatchFileIO::append_file(data, usbdrive_, filename);
+
+		} else if (vol == Volume::SDCard) {
+			success = PatchFileIO::append_file(data, sdcard_, filename);
+
+		} else if (vol == Volume::NorFlash) {
+			success = PatchFileIO::append_file(data, norflash_, filename);
+		}
+
+		// TODO: need to update the file size in patch_list_helper
+
+		return success;
+	}
+
 	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
 
 		if (message.message_type == RequestRefreshPatchList) {
@@ -136,6 +154,21 @@ public:
 
 			if (message.filename.size() > 0 && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
 				auto timestamp = write_file(message.vol_id, message.filename, message.buffer);
+				if (timestamp != 0) {
+					result.length = message.buffer.size();
+					result.timestamp = timestamp;
+					result.message_type = WriteFileOK;
+				}
+			}
+
+			return result;
+		}
+
+		if (message.message_type == RequestAppendFile) {
+			IntercoreStorageMessage result{.message_type = WriteFileFail};
+
+			if (message.filename.size() > 0 && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
+				auto timestamp = append_file(message.vol_id, message.filename, message.buffer);
 				if (timestamp != 0) {
 					result.length = message.buffer.size();
 					result.timestamp = timestamp;

@@ -150,6 +150,22 @@ public:
 		return comm_.send_message(message) ? WriteResult::Success : WriteResult::Busy;
 	}
 
+	WriteResult request_append_file(std::span<char> file_data, Volume vol, std::string_view filename) {
+		if (vol == Volume::RamDisk || vol == Volume::MaxVolumes) {
+			pr_err("Error: not a valid volume for writing a patch\n");
+			return WriteResult::InvalidVol;
+		}
+
+		IntercoreStorageMessage message{
+			.message_type = RequestAppendFile,
+			.vol_id = vol,
+			.buffer = file_data,
+			.filename = filename,
+		};
+
+		return comm_.send_message(message) ? WriteResult::Success : WriteResult::Busy;
+	}
+
 	bool request_reset_factory_patches() {
 		IntercoreStorageMessage message{.message_type = RequestFactoryResetPatches};
 		return comm_.send_message(message);

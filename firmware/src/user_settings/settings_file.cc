@@ -1,6 +1,8 @@
 #include "settings_file.hh"
+#include "delay.hh"
 #include "drivers/cache.hh"
 #include "fs/general_io.hh"
+#include "memory/ram_buffer.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "settings_parse.hh"
 #include "settings_serialize.hh"

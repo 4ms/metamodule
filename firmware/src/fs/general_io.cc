@@ -1,7 +1,11 @@
 #include "general_io.hh"
+#include "debug.hh"
+#include "delay.hh"
+#include "memory/ram_buffer.hh"
 
 namespace MetaModule::FS
 {
+static bool wait_response(FileStorageProxy &proxy);
 
 bool write_file(FileStorageProxy &proxy, std::string_view filedata, PatchLocation location) {
 	return write_file(proxy, std::span<const char>{filedata.data(), filedata.size()}, location);
@@ -25,7 +29,28 @@ bool write_file(FileStorageProxy &proxy, std::span<const char> filedata, PatchLo
 		}
 	}
 
-	timeout = get_time();
+	return wait_response(proxy);
+}
+
+bool append_file(FileStorageProxy &proxy, std::string_view filedata, PatchLocation location) {
+	// Copy into non-cacheable RAM:
+	auto buffer = get_ram_buffer();
+	std::memcpy(buffer.data(), filedata.data(), filedata.size());
+	auto bufferc = std::span<char>{(char *)buffer.data(), filedata.size()};
+
+	uint32_t timeout = get_time();
+	while (proxy.request_append_file(bufferc, location.vol, location.filename) == FileStorageProxy::WriteResult::Busy) {
+		if (get_time() - timeout > 1000) {
+			pr_err("File write request not made in 1 second\n");
+			return false;
+		}
+	}
+
+	return wait_response(proxy);
+}
+
+static bool wait_response(FileStorageProxy &proxy) {
+	uint32_t timeout = get_time();
 	while (true) {
 		auto msg = proxy.get_message();
 

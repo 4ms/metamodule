@@ -271,7 +271,7 @@ public:
 		return f_mkdir(path.c_str()) == FR_OK;
 	}
 
-	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
+	uint32_t write_file(const std::string_view filename, std::span<const char> buffer, uint8_t flags) {
 		FIL fil;
 		UINT bytes_written = 0;
 
@@ -283,13 +283,13 @@ public:
 			make_dir(path.substr(0, slashpos));
 		}
 
-		if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+		if (f_open(&fil, filename.data(), FA_WRITE | flags) != FR_OK) {
 			if (!mount_disk()) {
 				pr_err("Failed to mount %.3s\n", _fatvol);
 				return 0;
 			}
 
-			if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+			if (f_open(&fil, filename.data(), FA_WRITE | flags) != FR_OK) {
 				pr_err("Failed to open for writing %.*s on %.3s\n", (int)filename.size(), filename.data(), _fatvol);
 				return 0;
 			}
@@ -307,8 +307,16 @@ public:
 		return bytes_written;
 	}
 
+	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
+		return write_file(filename, buffer, FA_CREATE_ALWAYS);
+	}
+
 	uint32_t update_or_create_file(const std::string_view filename, const std::span<const char> data) {
-		return write_file(filename, data);
+		return write_file(filename, data, FA_CREATE_ALWAYS);
+	}
+
+	uint32_t append_file(const std::string_view filename, std::span<const char> data) {
+		return write_file(filename, data, FA_OPEN_APPEND);
 	}
 
 	bool delete_file(std::string_view filename) {

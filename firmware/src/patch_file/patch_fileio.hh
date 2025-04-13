@@ -42,13 +42,21 @@ public:
 	}
 
 	static bool write_file(std::span<const char> buffer, FileIoC auto &fileio, const std::string_view filename) {
-		auto success = fileio.update_or_create_file(filename, buffer);
-
-		if (not success) {
+		if (fileio.update_or_create_file(filename, buffer)) {
+			return true;
+		} else {
 			pr_err("Error writing file %.*s\n", (int)filename.size(), filename.data());
+			return false;
 		}
+	}
 
-		return success;
+	static bool append_file(std::span<const char> buffer, FileIoC auto &fileio, const std::string_view filename) {
+		if (auto success = fileio.append_file(filename, buffer)) {
+			return true;
+		} else {
+			pr_err("Error writing file %.*s\n", (int)filename.size(), filename.data());
+			return false;
+		}
 	}
 
 	// Adds all files/dirs to patch_dir
