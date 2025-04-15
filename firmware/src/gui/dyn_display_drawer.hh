@@ -87,7 +87,7 @@ struct DynamicDisplayDrawer {
 			return;
 
 		for (auto &disp : displays) {
-			Debug::Pin2::high();
+			// Debug::Pin2::high();
 
 			// Draw all displays:
 			// The module draws into fullcolor_buffer, and then we compare it against
@@ -98,7 +98,7 @@ struct DynamicDisplayDrawer {
 					lv_obj_invalidate(disp.lv_canvas);
 			}
 
-			Debug::Pin2::low();
+			// Debug::Pin2::low();
 		}
 	}
 

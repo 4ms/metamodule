@@ -31,7 +31,7 @@ public:
 			patch = existing_patch;
 
 		} else {
-			pr_dbg("Adding new patch '%s' on vol:%d\n", patch_loc.filename.data(), patch_loc.vol);
+			pr_dbg("OpenPatchManager: Adding new patch '%s' on vol:%d\n", patch_loc.filename.data(), patch_loc.vol);
 			patch = open_patches_.emplace_back(patch_loc);
 		}
 

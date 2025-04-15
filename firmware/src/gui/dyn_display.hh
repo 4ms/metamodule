@@ -15,7 +15,7 @@ public:
 
 	bool prepare_module(std::span<const DrawnElement> drawn_elements, unsigned module_id, lv_obj_t *module_canvas) {
 
-		pr_trace("DynamicDisplay: Prepare canvas for module_id %u\n", module_id);
+		pr_dbg("DynamicDisplay: Prepare canvas for module_id %u\n", module_id);
 
 		if (patch_playloader.get_plugin_module(module_id)) {
 			drawer = std::make_unique<DynamicDisplayDrawer>(patch_playloader, drawn_elements, module_id);

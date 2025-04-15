@@ -84,6 +84,7 @@ struct PatchPlayLoader {
 	}
 
 	void start_audio() {
+		pr_dbg("PatchPlayLoader::start_audio\n");
 		audio_is_muted_ = false;
 		starting_audio_ = true;
 		stopping_audio_ = false;
@@ -92,6 +93,7 @@ struct PatchPlayLoader {
 	}
 
 	void request_load_view_patch() {
+		pr_dbg("PatchPlayLoader::request_load_view_patch (should play %d)\n", should_play_when_loaded_);
 		next_patch = patches_.get_view_patch();
 		loading_new_patch_ = true;
 	}
@@ -178,6 +180,8 @@ struct PatchPlayLoader {
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {
+			pr_dbg("PatchPlayLoader::handle_file_events(): load patch(should_play_when_loaded_=%d)\n",
+				   should_play_when_loaded_);
 			auto result = load_patch(should_play_when_loaded_);
 			loading_new_patch_ = false;
 			should_play_when_loaded_ = true;
@@ -287,7 +291,7 @@ struct PatchPlayLoader {
 	PluginModuleType *get_plugin_module(int32_t module_idx) {
 		if (module_idx >= 0 && module_idx < (int32_t)player_.num_modules)
 			return dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get());
-		else 
+		else
 			return nullptr;
 	}
 
@@ -440,6 +444,8 @@ private:
 
 			if (start_audio_immediately)
 				start_audio();
+
+			pr_dbg("PatchPlayLoader:: end of load_patch\n");
 		}
 
 		return result;

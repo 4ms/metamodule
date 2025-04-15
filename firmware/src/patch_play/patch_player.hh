@@ -106,6 +106,7 @@ public:
 	}
 
 	void copy_patch_data(const PatchData &patchdata) {
+		pr_dbg("copy_patch_data\n");
 		if (is_loaded)
 			unload_patch();
 
@@ -136,6 +137,8 @@ public:
 			return {false, "Too many modules in the patch! Max is 64"};
 		}
 
+		pr_dbg("load_patch\n");
+
 		// First module is the hub
 		modules[0] = ModuleFactory::create(PanelDef::typeID);
 		if (modules[0] != nullptr)
@@ -153,7 +156,7 @@ public:
 				if (num_not_found == 1)
 					not_found = std::string_view{pd.module_slugs[i]};
 			} else {
-				pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
+				pr_dbg("Loaded module[%zu]: %s at %p\n", i, pd.module_slugs[i].data(), modules[i].get());
 
 				modules[i]->id = i;
 				modules[i]->mark_all_inputs_unpatched();
@@ -273,9 +276,11 @@ public:
 	}
 
 	void unload_patch() {
+		pr_dbg("unload_patch\n");
 		smp.join();
 		is_loaded = false;
 		for (size_t i = 0; i < num_modules; i++) {
+			pr_dbg("deinit and delete module %u (%s)\n", i, pd.module_slugs[i].c_str());
 			plugin_module_deinit(modules[i]);
 			modules[i].reset(nullptr);
 		}
