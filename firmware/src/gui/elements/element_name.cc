@@ -1,12 +1,10 @@
 #include "element_name.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "conf/panel_conf.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/styles.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
-#include "pr_dbg.hh"
 #include "util/overloaded.hh"
 
 namespace MetaModule

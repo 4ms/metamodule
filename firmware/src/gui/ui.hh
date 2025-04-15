@@ -70,6 +70,8 @@ public:
 			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);
 		patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.allow_jump_outofrange);
 
+		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
+
 		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 	}
 
