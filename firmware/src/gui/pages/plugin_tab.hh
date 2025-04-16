@@ -230,7 +230,7 @@ private:
 	}
 
 	void unload_plugin(std::string_view plugin_name) {
-		play_loader.prepare_remove_plugin(plugin_name);
+		play_loader.prepare_patch_for_plugin_change(plugin_name);
 		plugin_manager.unload_plugin(plugin_name);
 		gui_state.force_redraw_patch = true;
 		if (lv_obj_has_flag(ui_PluginScanButton, LV_OBJ_FLAG_HIDDEN)) {
@@ -430,6 +430,10 @@ private:
 		auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
 		if (idx > 0) {
 			lv_show(ui_PluginTabSpinner);
+
+			auto *plugins = page->plugin_manager.found_plugin_list();
+			page->play_loader.prepare_patch_for_plugin_change((*plugins)[idx - 1].plugin_name);
+
 			page->plugin_manager.load_plugin(idx - 1);
 			page->load_in_progress_obj = event->target;
 		}

@@ -255,7 +255,7 @@ struct PatchPlayLoader {
 		start_audio();
 	}
 
-	void prepare_remove_plugin(std::string_view brand_slug) {
+	void prepare_patch_for_plugin_change(std::string_view brand_slug) {
 		auto playing_patch = patches_.get_playing_patch();
 		if (!playing_patch)
 			return;
