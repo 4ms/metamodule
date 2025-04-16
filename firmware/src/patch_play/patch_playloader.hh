@@ -145,8 +145,11 @@ struct PatchPlayLoader {
 		audio_overrun_ = true;
 	}
 
-	void notify_audio_not_muted() {
+	void notify_audio_done_starting() {
 		starting_audio_ = false;
+	}
+
+	void notify_audio_not_muted() {
 		audio_is_muted_ = false;
 	}
 

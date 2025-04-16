@@ -175,11 +175,12 @@ bool AudioStream::is_playing_patch() {
 		}
 
 	} else if (patch_loader.should_fade_up_audio()) {
+		patch_loader.notify_audio_not_muted();
 		output_fade_delta = 1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt >= 1.f) {
 			output_fade_amt = 1.f;
 			output_fade_delta = 0.f;
-			patch_loader.notify_audio_not_muted();
+			patch_loader.notify_audio_done_starting();
 			handle_patch_just_loaded();
 		}
 	}
