@@ -166,14 +166,20 @@ private:
 		}
 
 		for (auto const &subdir : StaticBuffers::dir_tree.dirs) {
-			roller_text += Gui::yellow_text(subdir.name);
-			roller_text += "/\n"; //dirs end in a slash
+			// Workaround for string alignment differences in M4 vs A7?
+			StaticString<255> subdirname;
+			subdirname.copy(subdir.name);
+			roller_text.append(Gui::yellow_text(subdirname));
+			roller_text.append("/\n"); // dirs end in a slash
 			num_items++;
 		}
 
 		for (auto const &file : StaticBuffers::dir_tree.files) {
-			roller_text += file.filename;
-			roller_text += "\n";
+			// Workaround for string alignment differences in M4 vs A7?
+			StaticString<255> filename;
+			filename.copy(file.filename);
+			roller_text.append(std::string_view(filename));
+			roller_text.append("\n");
 			num_items++;
 		}
 
