@@ -85,9 +85,10 @@ struct PatchPlayLoader {
 
 	void start_audio() {
 		pr_dbg("PatchPlayLoader::start_audio\n");
+		loading_new_patch_ = false;
 		audio_is_muted_ = false;
-		starting_audio_ = true;
 		stopping_audio_ = false;
+		starting_audio_ = true;
 		clear_audio_overrun();
 		resume_module_threads();
 	}
@@ -183,7 +184,6 @@ struct PatchPlayLoader {
 			pr_dbg("PatchPlayLoader::handle_file_events(): load patch(should_play_when_loaded_=%d)\n",
 				   should_play_when_loaded_);
 			auto result = load_patch(should_play_when_loaded_);
-			loading_new_patch_ = false;
 			should_play_when_loaded_ = true;
 			return result;
 		}
@@ -431,6 +431,7 @@ private:
 	Result load_patch(bool start_audio_immediately = true) {
 		if (!next_patch) {
 			pr_err("Internal error loading patch\n");
+			loading_new_patch_ = false;
 			return {false, "Internal error loading patch"};
 		}
 
@@ -448,6 +449,7 @@ private:
 			pr_dbg("PatchPlayLoader:: end of load_patch\n");
 		}
 
+		loading_new_patch_ = false;
 		return result;
 	}
 
