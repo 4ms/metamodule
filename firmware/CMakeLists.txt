@@ -44,19 +44,19 @@ set(SYMBOLS_BINFILE_DIRS
 
 add_custom_target(
   new-api-sym-list
-  COMMAND scripts/dump_syms.py
+  COMMAND flashing/dump_syms.py
           ${SYMBOLS_BINFILE_DIRS}
           --text-out ${API_SYMBOL_NAMES_FILE}
 		  #-v
   DEPENDS main.elf
   COMMENT "Creating new API symbol list file in the SDK directory ${API_SYMBOL_NAMES_FILE}"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
 )
 
 add_custom_command(
   OUTPUT ${SYMBOLS_FILE}
-  COMMAND scripts/find_syms.py
+  COMMAND flashing/find_syms.py
           --symbols ${API_SYMBOL_NAMES_FILE}
           --elf $<TARGET_FILE:main.elf>
           --out ${SYMBOLS_FILE}
@@ -64,7 +64,7 @@ add_custom_command(
   COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
   DEPENDS main.elf 
   COMMENT "Generating table of API symbol addresses and installing in firmware binary"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
 )
 
