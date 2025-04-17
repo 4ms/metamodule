@@ -344,7 +344,6 @@ struct PatchSelectorPage : PageBase {
 					patches.get_modification_count(selected_patch) == 0; //don't load if we have unsaved changes
 
 				if (file_needs_loading) {
-					pr_dbg("PatchSelector: file needs loading.\n");
 
 					show_spinner();
 
@@ -363,7 +362,6 @@ struct PatchSelectorPage : PageBase {
 						notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
 					}
 				} else {
-					pr_dbg("PatchSelector: file does not need loading.\n");
 					view_loaded_patch();
 				}
 

@@ -55,7 +55,6 @@ struct AuxPlayer {
 			for (auto i = 0u; i < num_modules; i++) {
 				auto id = SMPControl::read(i + 2);
 				module_ids.push_back(id);
-				pr_dbg("Aux core will process module %u\n", id);
 			}
 
 		} else

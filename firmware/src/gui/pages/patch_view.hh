@@ -94,16 +94,6 @@ struct PatchViewPage : PageBase {
 			needs_refresh = true;
 		}
 
-		///////////////
-		// lv_group_add_obj(group, ui_PlayButton);
-		// lv_group_add_obj(group, ui_InfoButton);
-		// lv_group_add_obj(group, ui_KnobButton);
-		// lv_group_add_obj(group, ui_AddButton);
-		// lv_group_add_obj(group, ui_SaveButton);
-		// lv_group_add_obj(group, ui_SettingsButton);
-		// return;
-		///////////////////
-
 		if (!needs_refresh) {
 			is_ready = true;
 			watch_modules();
@@ -695,25 +685,17 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-
 		if (!page->is_patch_playloaded) {
-			pr_dbg("playbut_cb: patch is not playloaded\n");
 			page->patch_playloader.request_load_view_patch();
 			page->save_last_opened_patch_in_settings();
 			page->gui_state.playing_patch_needs_manual_reload = false;
 
 		} else {
-			pr_dbg("playbut_cb: patch is playloaded\n");
-
 			if (page->patch_playloader.is_audio_muted()) {
-				pr_dbg("playbut_cb: patch is muted\n");
-
 				if (page->gui_state.playing_patch_needs_manual_reload) {
-					pr_dbg("playbut_cb: patch needs playing_patch_needs_manual_reload\n");
 					page->patch_playloader.request_load_view_patch();
 					page->gui_state.playing_patch_needs_manual_reload = false;
 				} else {
-					pr_dbg("playbut_cb: patch does not need manual_reload\n");
 					page->patch_playloader.start_audio();
 				}
 			} else {
