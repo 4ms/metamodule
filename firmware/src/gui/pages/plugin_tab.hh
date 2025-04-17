@@ -195,7 +195,12 @@ private:
 		lv_group_add_obj(group, clear_autoloads_button);
 		lv_group_add_obj(group, current_autoloads_button);
 
-		// TODO: cleanup load_all functionality
+		// Show "autoload none" only if there are plugins to be autoloaded
+		lv_show(clear_autoloads_button, settings.slug.size() > 0);
+
+		// Show "autoload current" only if there are plugins currently loaded
+		lv_show(current_autoloads_button, (lv_obj_get_child_cnt(ui_PluginsLoadedCont) > 0));
+
 		// Show "load all" only if there are plugins found
 		lv_show(load_all_found_button, lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0);
 	}
