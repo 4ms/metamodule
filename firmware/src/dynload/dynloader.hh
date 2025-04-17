@@ -103,6 +103,8 @@ private:
 
 		codeblock.clear();
 		codeblock.resize(load_size);
+		std::ranges::fill(codeblock, 0);
+
 		pr_trace("Allocating %zu bytes for loading code at 0x%x\n", load_size, codeblock.begin());
 
 		for (auto &seg : elf.segments) {
