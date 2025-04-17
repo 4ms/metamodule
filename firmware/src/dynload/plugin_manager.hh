@@ -42,8 +42,19 @@ public:
 					ramdisk.delete_file(file);
 				}
 
+				// Get the location of the code
+				auto plug = std::next(loaded_plugin_list.begin(), i);
+				auto code = std::span<uint32_t>(reinterpret_cast<uint32_t *>(plug->code.data()), plug->code.size() / 4);
+
 				// Delete it
 				loaded_plugin_list.erase(std::next(loaded_plugin_list.begin(), i));
+
+				// Skip the first two words -- malloc/free use these to tag the block
+				code = code.subspan(2);
+				pr_dbg("Clearing unallocated code block %p to %p (0x%x)\n", code.data(), code.end(), code.size_bytes());
+				for (auto &x : code) {
+					x = 0xEAFFFFFE; //bl .
+				}
 				break;
 			}
 			i++;
