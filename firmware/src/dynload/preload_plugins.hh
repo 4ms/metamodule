@@ -8,14 +8,14 @@
 namespace MetaModule
 {
 
-struct AutoLoader {
+struct PreLoader {
 	enum class State { NotStarted, Done, Warning, Error, Processing, LoadingPlugin };
 	struct Status {
 		State state;
 		std::string message;
 	};
 
-	AutoLoader(PluginManager &plugins, PluginAutoloadSettings &plugin_settings)
+	PreLoader(PluginManager &plugins, PluginPreloadSettings &plugin_settings)
 		: plugin_settings{plugin_settings}
 		, plugins{plugins} {
 	}
@@ -178,7 +178,7 @@ private:
 		}
 	}
 
-	PluginAutoloadSettings &plugin_settings;
+	PluginPreloadSettings &plugin_settings;
 	PluginManager &plugins;
 	PluginFileList const *found_plugins = nullptr;
 	unsigned slug_idx = 0;

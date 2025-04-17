@@ -66,7 +66,7 @@ extern "C" void aux_core_main() {
 	// Wait for M4 to be ready (so USB and SD are available)
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
-	ui.autoload_plugins();
+	ui.preload_plugins();
 
 	// Signal that we're ready
 	pr_info("A7 Core 2 initialized\n");

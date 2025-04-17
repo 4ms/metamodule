@@ -1,7 +1,7 @@
 #pragma once
 #include "debug.hh"
-#include "dynload/autoload_plugins.hh"
 #include "dynload/plugin_manager.hh"
+#include "dynload/preload_plugins.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params_dbg_print.hh"
@@ -99,26 +99,26 @@ public:
 		return params.text_displays;
 	}
 
-	void autoload_plugins() {
+	void preload_plugins() {
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
 
-		auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
+		auto preloader = PreLoader{plugin_manager, settings.plugin_autoload};
 
 		if (settings.plugin_autoload.slug.size())
 			delay_ms(600); //allow time for ???
 
 		while (true) {
-			auto status = autoloader.process();
+			auto status = preloader.process();
 
-			if (status.state == AutoLoader::State::Error) {
+			if (status.state == PreLoader::State::Error) {
 				notify_queue.put({status.message, Notification::Priority::Error, 2000});
 				break;
 
-			} else if (status.state == AutoLoader::State::Warning) {
+			} else if (status.state == PreLoader::State::Warning) {
 				notify_queue.put({status.message, Notification::Priority::Error, 2000});
 
-			} else if (status.state == AutoLoader::State::Done) {
+			} else if (status.state == PreLoader::State::Done) {
 				break;
 
 			} else {

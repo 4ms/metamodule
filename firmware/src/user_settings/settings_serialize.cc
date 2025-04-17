@@ -41,7 +41,7 @@ static void write(ryml::NodeRef *n, AudioSettings const &s) {
 	n->append_child() << ryml::key("max_overrun_retries") << s.max_overrun_retries;
 }
 
-static void write(ryml::NodeRef *n, PluginAutoloadSettings const &s) {
+static void write(ryml::NodeRef *n, PluginPreloadSettings const &s) {
 	*n |= ryml::SEQ;
 
 	for (auto const &s : s.slug)

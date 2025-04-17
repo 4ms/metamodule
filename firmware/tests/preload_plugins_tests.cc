@@ -1,11 +1,11 @@
 #include "doctest.h"
-#include "dynload/autoload_plugins.hh"
+#include "dynload/preload_plugins.hh"
 
 TEST_CASE("Versions") {
 	MetaModule::PluginManager plugins;
 
 	// User requested to auto load these plugins:
-	MetaModule::PluginAutoloadSettings settings;
+	MetaModule::PluginPreloadSettings settings;
 	settings.slug.push_back("b1");
 	settings.slug.push_back("b2");
 	settings.slug.push_back("b3");
@@ -27,7 +27,7 @@ TEST_CASE("Versions") {
 
 	plugins.fake_plugin_list = &plugin_list;
 
-	MetaModule::AutoLoader autoloader{plugins, settings};
+	MetaModule::PreLoader autoloader{plugins, settings};
 
 	// Load the plugin list (first process())
 	CHECK(plugins.spy_loaded.size() == 0);

@@ -1,5 +1,5 @@
 #include "ui.hh"
-#include "dynload/autoload_plugins.hh"
+#include "dynload/preload_plugins.hh"
 #include "gui/notify/queue.hh"
 #include "stubs/fs/fs_proxy.hh"
 #include "thorvg.h"
@@ -50,7 +50,7 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 		}
 	}
 
-	autoload_plugins();
+	preload_plugins();
 
 	patch_playloader.notify_audio_is_muted();
 	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";
@@ -200,18 +200,18 @@ void Ui::update_channel_selections() {
 	}
 }
 
-void Ui::autoload_plugins() {
-	auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
+void Ui::preload_plugins() {
+	auto preloader = PreLoader{plugin_manager, settings.plugin_autoload};
 
 	while (true) {
-		auto status = autoloader.process();
+		auto status = preloader.process();
 
-		if (status.state == AutoLoader::State::Error) {
+		if (status.state == PreLoader::State::Error) {
 			notify_queue.put({status.message, Notification::Priority::Error, 2000});
 			break;
 		}
 
-		if (status.state == AutoLoader::State::Done) {
+		if (status.state == PreLoader::State::Done) {
 			break;
 		}
 

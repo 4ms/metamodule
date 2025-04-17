@@ -20,7 +20,7 @@ namespace MetaModule
 struct PluginTab : SystemMenuTab {
 
 	PluginTab(PluginManager &plugin_manager,
-			  PluginAutoloadSettings &settings,
+			  PluginPreloadSettings &settings,
 			  NotificationQueue &notify_queue,
 			  GuiState &gui_state,
 			  PatchPlayLoader &play_loader)
@@ -30,8 +30,8 @@ struct PluginTab : SystemMenuTab {
 		, gui_state{gui_state}
 		, play_loader{play_loader} {
 
-		clear_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload None");
-		current_autoloads_button = create_button(ui_PluginsRightColumn, "Autoload Current");
+		clear_autoloads_button = create_button(ui_PluginsRightColumn, "Preload None");
+		current_autoloads_button = create_button(ui_PluginsRightColumn, "Preload Current");
 		load_all_found_button = create_button(ui_PluginsLeftColumn, "Load all");
 
 		{ // Load All popup
@@ -109,7 +109,7 @@ struct PluginTab : SystemMenuTab {
 
 		show_ramdisk_free();
 
-		pr_dbg("Autoload list:\n");
+		pr_dbg("Preloaded list:\n");
 		for (auto const &slug : settings.slug) {
 			pr_dbg("'%s'\n", slug.c_str());
 		}
@@ -196,6 +196,7 @@ private:
 		lv_group_add_obj(group, current_autoloads_button);
 
 		// TODO: cleanup load_all functionality
+		// Show "load all" only if there are plugins found
 		lv_show(load_all_found_button, lv_obj_get_child_cnt(ui_PluginsFoundCont) > 0);
 	}
 
@@ -377,15 +378,15 @@ private:
 					}
 				}
 
-				// Autoload toggle
+				// Preload toggle
 				if (toggle) {
 					if (*toggle) {
-						pr_info("Autoload Enabled: %s\n", plugin_name.data());
+						pr_info("Preload Enabled: %s\n", plugin_name.data());
 						page->settings.slug.push_back(plugin_name);
 					} else {
 						const auto autoload_slot = std::ranges::find(page->settings.slug, plugin_name);
 						if (autoload_slot != page->settings.slug.end()) {
-							pr_info("Autoload Disabled: %s\n", plugin_name.data());
+							pr_info("Preload Disabled: %s\n", plugin_name.data());
 							page->settings.slug.erase(autoload_slot);
 						} else {
 							pr_err("Error: can't disable autoload for %s: not found in settings autoload list\n",
@@ -548,7 +549,7 @@ private:
 
 	PluginManager &plugin_manager;
 	NotificationQueue &notify_queue;
-	PluginAutoloadSettings &settings;
+	PluginPreloadSettings &settings;
 	GuiState &gui_state;
 	bool should_write_settings = false;
 	PatchPlayLoader &play_loader;

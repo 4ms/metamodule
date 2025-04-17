@@ -57,7 +57,7 @@ static bool read(ryml::ConstNodeRef const &node, AudioSettings *audio) {
 	return true;
 }
 
-static bool read(ryml::ConstNodeRef const &node, PluginAutoloadSettings *autoload) {
+static bool read(ryml::ConstNodeRef const &node, PluginPreloadSettings *autoload) {
 	if (!node.is_seq())
 		return false;
 
