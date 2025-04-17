@@ -8,7 +8,7 @@
 namespace MetaModule::LoadTest
 {
 
-constexpr bool MM_LOADTEST_MEASURE_MEMORY = false;
+constexpr bool MM_LOADTEST_MEASURE_MEMORY = true;
 
 struct ModuleEntry {
 	static constexpr std::array<unsigned, 5> blocksizes{32, 64, 128, 256, 512};
@@ -68,24 +68,11 @@ inline void test_all_modules(auto append_file) {
 			}
 
 			append_file(entry_to_csv(entry));
-			// res.emplace_back(entry);
 		}
 	}
 
 	lv_label_set_text(ui_MainMenuNowPlaying, "");
-
-	// return res;
 }
-
-// inline std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
-// 	std::string s = csv_header();
-
-// 	for (auto const &entry : entries) {
-// 		s.append(entry_to_csv(entry));
-// 	}
-
-// 	return s;
-// }
 
 inline std::string csv_header() {
 	std::string s;
@@ -116,8 +103,8 @@ inline std::string csv_header() {
 
 	if constexpr (MM_LOADTEST_MEASURE_MEMORY) {
 		s += "PeakStartupMem, PeakRunningMem, ";
-		// Not accurate, don't include in CSV report:
-		// s += "LeakedMem, ";
+		// Not accurate, but sometimes a hint:
+		s += "LeakedMem?, ";
 		s += "DoubleFree?";
 		pr_info("PeakStartupMem, PeakRunningMem, LeakedMem, DoubleFree?, Valid");
 	}
@@ -165,8 +152,8 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 		} else {
 			s += std::to_string(entry.mem_usage.peak_mem_startup) + ", ";
 			s += std::to_string(entry.mem_usage.peak_running_mem) + ", ";
-			// Not accurate, don't include in report:
-			// s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
+			// Not accurate, but sometimes a hint:
+			s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
 			s += entry.mem_usage.double_free ? "YES" : "n";
 		}
 		pr_info("%zu, %zu, %zu, %d, %s\n",
@@ -177,6 +164,10 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 				entry.mem_usage.results_invalid ? "TOOMANYALLOCS" : "ok");
 	}
 
+	if (s.ends_with(", ")) {
+		s.pop_back();
+		s.pop_back();
+	}
 	s += "\n";
 	pr_info("\n");
 
