@@ -24,4 +24,9 @@ lv_obj_t *create_lv_labeled_popup(lv_obj_t *parent, const char *label_text);
 
 lv_obj_t *create_button(lv_obj_t *parent, const char *name);
 
+lv_obj_t *create_settings_menu_switch(lv_obj_t *parent, std::string const &onoff_label_text);
+lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slider_text);
+
+lv_obj_t *create_settings_menu_title(lv_obj_t *parent, std::string const &title_name);
+
 } // namespace MetaModule

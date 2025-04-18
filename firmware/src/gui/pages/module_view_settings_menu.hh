@@ -3,6 +3,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "lvgl.h"
 #include "user_settings/view_settings.hh"
 #include <algorithm>
@@ -11,10 +12,30 @@ namespace MetaModule
 {
 
 struct ModuleViewSettingsMenu {
+	lv_obj_t *graphics_show_check;
+	lv_obj_t *graphics_update_rate_label;
+	lv_obj_t *graphics_update_rate_slider;
+
 	ModuleViewSettingsMenu(ModuleDisplaySettings &settings, GuiState &gui_state)
 		: settings_menu_group(lv_group_create())
 		, settings{settings}
 		, gui_state{gui_state} {
+
+		create_settings_menu_title(ui_MVSettingsMenu, "GRAPHICS");
+
+		auto graphics_settings = create_settings_menu_switch(ui_MVSettingsMenu, "Show Graphics");
+		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
+
+		graphics_update_rate_label = create_settings_menu_slider(ui_MVSettingsMenu, "Update Rate");
+		lv_obj_set_style_text_font(graphics_update_rate_label, &ui_font_MuseoSansRounded50014, 0);
+		lv_obj_set_width(graphics_update_rate_label, lv_pct(100));
+		lv_obj_set_align(graphics_update_rate_label, LV_ALIGN_LEFT_MID);
+
+		graphics_update_rate_slider = lv_obj_get_child(graphics_update_rate_label, 0);
+		lv_obj_set_width(graphics_update_rate_slider, lv_pct(40));
+		lv_slider_set_range(graphics_update_rate_slider, 0, ModuleDisplaySettings::ThrottleAmounts.size() - 1);
+		lv_slider_set_value(
+			graphics_update_rate_slider, ModuleDisplaySettings::ThrottleAmounts.size() - 2, LV_ANIM_OFF);
 
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, settings_button_cb, LV_EVENT_CLICKED, this);
 
@@ -31,6 +52,12 @@ struct ModuleViewSettingsMenu {
 
 		lv_obj_add_event_cb(ui_MVShowAllCablesCheck, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MVCablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+
+		lv_obj_add_event_cb(graphics_show_check, graphics_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(
+			graphics_update_rate_slider, graphics_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+
+		lv_obj_add_event_cb(graphics_show_check, scroll_menu_down_cb, LV_EVENT_FOCUSED, this);
 
 		lv_obj_set_x(ui_MVSettingsMenu, 220);
 	}
@@ -54,6 +81,9 @@ struct ModuleViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, ui_MVShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVCablesTranspSlider);
+
+		lv_group_add_obj(settings_menu_group, graphics_show_check);
+		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
 
 		fix_forbidden_states();
 
@@ -151,9 +181,11 @@ private:
 	void update_interactive_states() {
 		auto show_control_maps = lv_obj_has_state(ui_MVShowControlMapsCheck, LV_STATE_CHECKED);
 		auto show_jack_maps = lv_obj_has_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
+		auto show_graphic_maps = lv_obj_has_state(graphics_show_check, LV_STATE_CHECKED);
 
 		lv_enable(ui_MVControlMapTranspSlider, show_control_maps);
 		lv_enable(ui_MVJackMapTranspSlider, show_jack_maps);
+		lv_enable(graphics_update_rate_slider, show_graphic_maps);
 
 		if (!show_control_maps && !show_jack_maps) {
 			lv_disable(ui_MVShowMapsAlwaysCheck);
@@ -234,6 +266,35 @@ private:
 
 		page->settings.changed = true;
 		page->changed_while_visible = true;
+	}
+
+	static void graphics_settings_value_change_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+
+		auto show_graphics = lv_obj_has_state(page->graphics_show_check, LV_STATE_CHECKED);
+
+		page->settings.show_graphic_screens = show_graphics;
+
+		auto updaterate = lv_slider_get_value(page->graphics_update_rate_slider);
+		updaterate = std::clamp<int32_t>(updaterate, 0, ModuleDisplaySettings::ThrottleAmounts.size() - 1);
+		page->settings.graphic_screen_throttle = ModuleDisplaySettings::ThrottleAmounts[updaterate];
+
+		page->update_interactive_states();
+
+		page->settings.changed = true;
+		page->changed_while_visible = true;
+	}
+
+	static void scroll_menu_down_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+
+		lv_obj_scroll_to_view_recursive(page->graphics_update_rate_slider, LV_ANIM_ON);
 	}
 
 	lv_group_t *base_group = nullptr;

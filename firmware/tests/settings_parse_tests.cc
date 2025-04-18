@@ -298,6 +298,7 @@ TEST_CASE("Serialize settings") {
       mode: ShowAll
       opa: 100
     show_graphic_screens: 1
+    graphic_screen_throttle: 1
   module_view:
     map_ring_flash_active: 0
     scroll_to_active_param: 1
@@ -312,6 +313,7 @@ TEST_CASE("Serialize settings") {
       mode: HideAlways
       opa: 0
     show_graphic_screens: 1
+    graphic_screen_throttle: 1
   audio:
     sample_rate: 24000
     block_size: 512
@@ -334,7 +336,7 @@ TEST_CASE("Serialize settings") {
 	// clang format-on
 
 	std::string parsed;
-	parsed.resize(1024);
+	parsed.resize(2048);
 	auto bytes_size = MetaModule::Settings::serialize(settings, {parsed.data(), parsed.size()});
 	parsed.resize(bytes_size);
 
