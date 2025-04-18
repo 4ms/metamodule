@@ -28,8 +28,8 @@ void AsyncThread::start() {
 			pr_trace("Start task id %u on core %u\n", *internal->id, task->core_id);
 
 			task->action = action;
-			task->enabled = true;
 			task->one_shot = false;
+			task->enabled = true;
 		}
 	}
 }
@@ -42,11 +42,11 @@ void AsyncThread::start(Callback &&new_action) {
 void AsyncThread::run_once() {
 	if (internal->id) {
 		if (auto task = get_task(*internal->id)) {
-			pr_trace("Run once task id %u core %u\n", *internal->id, task->core_id);
-
 			task->action = action;
-			task->enabled = true;
 			task->one_shot = true;
+			task->enabled = true;
+
+			pr_dbg("Run once task id %u core %u\n", *internal->id, task->core_id);
 		}
 	}
 }
@@ -54,8 +54,9 @@ void AsyncThread::run_once() {
 void AsyncThread::stop() {
 	if (internal->id) {
 		if (auto task = get_task(*internal->id)) {
-			pr_trace("Stop task id %u on core %u\n", *internal->id, task->core_id);
 			task->enabled = false;
+
+			pr_trace("Stop task id %u on core %u\n", *internal->id, task->core_id);
 		} else
 			pr_err("Can't stop unknown task id %u\n", *internal->id);
 	}
