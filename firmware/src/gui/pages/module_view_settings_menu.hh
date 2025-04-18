@@ -18,7 +18,7 @@ struct ModuleViewSettingsMenu {
 		, settings{settings}
 		, gui_state{gui_state} {
 
-		create_settings_menu_title(ui_MVSettingsMenu, "GRAPHICS");
+		auto title = create_settings_menu_title(ui_MVSettingsMenu, "GRAPHICS");
 
 		auto graphics_settings = create_settings_menu_switch(ui_MVSettingsMenu, "Draw Screens");
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
@@ -33,6 +33,10 @@ struct ModuleViewSettingsMenu {
 		lv_slider_set_range(graphics_update_rate_slider, 0, ModuleDisplaySettings::ThrottleAmounts.size() - 1);
 		lv_slider_set_value(
 			graphics_update_rate_slider, ModuleDisplaySettings::ThrottleAmounts.size() - 2, LV_ANIM_OFF);
+
+		lv_obj_move_to_index(title, 1);
+		lv_obj_move_to_index(graphics_settings, 2);
+		lv_obj_move_to_index(graphics_update_rate_label, 3);
 
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, settings_button_cb, LV_EVENT_CLICKED, this);
 
@@ -67,6 +71,9 @@ struct ModuleViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, ui_MVSettingsCloseButton);
 
+		lv_group_add_obj(settings_menu_group, graphics_show_check);
+		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
+
 		lv_group_add_obj(settings_menu_group, ui_MVShowControlMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVControlMapTranspSlider);
 		lv_group_add_obj(settings_menu_group, ui_MVFlashMapCheck);
@@ -78,9 +85,6 @@ struct ModuleViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, ui_MVShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVCablesTranspSlider);
-
-		lv_group_add_obj(settings_menu_group, graphics_show_check);
-		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
 
 		fix_forbidden_states();
 

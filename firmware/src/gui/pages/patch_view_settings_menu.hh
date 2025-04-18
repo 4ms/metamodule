@@ -17,7 +17,7 @@ struct PatchViewSettingsMenu {
 		, settings{settings}
 		, gui_state{gui_state} {
 
-		create_settings_menu_title(ui_PVSettingsMenu, "GRAPHICS");
+		auto title = create_settings_menu_title(ui_PVSettingsMenu, "GRAPHICS");
 
 		auto graphics_settings = create_settings_menu_switch(ui_PVSettingsMenu, "Draw Screens");
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
@@ -32,6 +32,10 @@ struct PatchViewSettingsMenu {
 		lv_slider_set_range(graphics_update_rate_slider, 0, ModuleDisplaySettings::ThrottleAmounts.size() - 1);
 		lv_slider_set_value(
 			graphics_update_rate_slider, ModuleDisplaySettings::ThrottleAmounts.size() - 2, LV_ANIM_OFF);
+
+		lv_obj_move_to_index(title, 1);
+		lv_obj_move_to_index(graphics_settings, 2);
+		lv_obj_move_to_index(graphics_update_rate_label, 3);
 
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
@@ -63,6 +67,9 @@ struct PatchViewSettingsMenu {
 		lv_group_set_editing(settings_menu_group, false);
 		lv_group_add_obj(settings_menu_group, ui_PVSettingsCloseButton);
 
+		lv_group_add_obj(settings_menu_group, graphics_show_check);
+		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
+
 		lv_group_add_obj(settings_menu_group, ui_PVShowControlMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_PVControlMapTranspSlider);
 		lv_group_add_obj(settings_menu_group, ui_PVFlashMapCheck);
@@ -75,9 +82,6 @@ struct PatchViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, ui_PVShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_PVCablesTranspSlider);
-
-		lv_group_add_obj(settings_menu_group, graphics_show_check);
-		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
 	}
 
 	void prepare_focus(lv_group_t *group) {
