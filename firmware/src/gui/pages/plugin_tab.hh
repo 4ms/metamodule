@@ -494,13 +494,13 @@ private:
 	void end_loading_all() {
 		lv_hide(ui_PluginTabSpinner);
 		lv_hide(load_all_popup);
-		lv_hide(load_all_found_button);
 		lv_show(ui_PluginScanButton);
 
 		is_loading_all = false;
 
 		lv_group_activate(group);
 		reset_group();
+		lv_hide(load_all_found_button);
 		notify_queue.put({"Done loading all plugins"});
 	}
 
