@@ -12,9 +12,6 @@ namespace MetaModule
 {
 
 struct ModuleViewSettingsMenu {
-	lv_obj_t *graphics_show_check;
-	lv_obj_t *graphics_update_rate_label;
-	lv_obj_t *graphics_update_rate_slider;
 
 	ModuleViewSettingsMenu(ModuleDisplaySettings &settings, GuiState &gui_state)
 		: settings_menu_group(lv_group_create())
@@ -23,7 +20,7 @@ struct ModuleViewSettingsMenu {
 
 		create_settings_menu_title(ui_MVSettingsMenu, "GRAPHICS");
 
-		auto graphics_settings = create_settings_menu_switch(ui_MVSettingsMenu, "Show Graphics");
+		auto graphics_settings = create_settings_menu_switch(ui_MVSettingsMenu, "Draw Screens");
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
 
 		graphics_update_rate_label = create_settings_menu_slider(ui_MVSettingsMenu, "Update Rate");
@@ -93,6 +90,8 @@ struct ModuleViewSettingsMenu {
 		lv_check(ui_MVShowAllCablesCheck, settings.cable_style.mode != HideAlways);
 		lv_check(ui_MVFlashMapCheck, settings.map_ring_flash_active);
 
+		lv_check(graphics_show_check, settings.show_graphic_screens);
+
 		lv_check(ui_MVShowMapsAlwaysCheck,
 				 settings.param_style.mode == ShowAll || settings.paneljack_style.mode == ShowAll);
 
@@ -113,6 +112,14 @@ struct ModuleViewSettingsMenu {
 			uint32_t opacity = (float)settings.cable_style.opa / 2.5f;
 			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
 			lv_slider_set_value(ui_MVCablesTranspSlider, opacity, LV_ANIM_OFF);
+		}
+		{
+			int slider_val = ModuleDisplaySettings::ThrottleAmounts.size() - 2;
+			auto throttle = settings.graphic_screen_throttle;
+			if (auto found = std::ranges::find(ModuleDisplaySettings::ThrottleAmounts, throttle)) {
+				slider_val = std::distance(ModuleDisplaySettings::ThrottleAmounts.begin(), found);
+			}
+			lv_slider_set_value(graphics_update_rate_slider, slider_val, LV_ANIM_OFF);
 		}
 	}
 
@@ -181,11 +188,11 @@ private:
 	void update_interactive_states() {
 		auto show_control_maps = lv_obj_has_state(ui_MVShowControlMapsCheck, LV_STATE_CHECKED);
 		auto show_jack_maps = lv_obj_has_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
-		auto show_graphic_maps = lv_obj_has_state(graphics_show_check, LV_STATE_CHECKED);
+		auto show_graphics = lv_obj_has_state(graphics_show_check, LV_STATE_CHECKED);
 
 		lv_enable(ui_MVControlMapTranspSlider, show_control_maps);
 		lv_enable(ui_MVJackMapTranspSlider, show_jack_maps);
-		lv_enable(graphics_update_rate_slider, show_graphic_maps);
+		lv_enable(graphics_update_rate_slider, show_graphics);
 
 		if (!show_control_maps && !show_jack_maps) {
 			lv_disable(ui_MVShowMapsAlwaysCheck);
@@ -299,6 +306,11 @@ private:
 
 	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
+
+	lv_obj_t *graphics_show_check;
+	lv_obj_t *graphics_update_rate_label;
+	lv_obj_t *graphics_update_rate_slider;
+
 	bool visible = false;
 	bool changed_while_visible = false;
 	ModuleDisplaySettings &settings;

@@ -527,7 +527,6 @@ struct ModuleViewPage : PageBase {
 		} else {
 			dyn_draw_throttle = 0;
 		}
-		pr_dbg("Graphic throttle = %u\n", dyn_draw_throttle);
 	}
 
 	void blur() final {
