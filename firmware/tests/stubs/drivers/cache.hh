@@ -7,6 +7,9 @@ namespace mdrivlib::SystemCache
 inline void invalidate_dcache() {
 }
 
+inline void invalidate_icache() {
+}
+
 template<typename ptr>
 inline void invalidate_dcache_by_addr(ptr addr) {
 }

@@ -12,6 +12,7 @@ enum SemaphoreLocks {
 	ParamCacheLock,
 	RamDiskLock,
 	SharedI2CLock,
+	InvalidateICache,
 };
 
 } // namespace MetaModule
