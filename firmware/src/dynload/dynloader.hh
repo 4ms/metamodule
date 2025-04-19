@@ -1,13 +1,15 @@
 #pragma once
 #include "CoreModules/dump.hh"
+#include "conf/hsem_conf.hh"
 #include "debug.hh"
+#include "drivers/cache.hh"
+#include "drivers/hsem.hh"
 #include "elf_process/elf_file.hh"
 #include "elf_process/elf_relocator.hh"
 #include "host_sym_list.hh"
 #include "keep-symbols.hh"
 #include "metamodule-plugin-sdk/version.hh"
 #include "pr_dbg.hh"
-#include "stm32mp1xx.h"
 #include <cstring>
 #include <elf.h>
 #include <span>
@@ -118,6 +120,16 @@ private:
 						std::next(codeblock.begin(), seg.address() + seg.file_size()));
 			}
 		}
+
+		// Flush codeblock from Data Cache to main memory, then
+		// Invalidate any instructions in the Instruction cache, forcing the processor
+		// to read the new code from main memory
+		mdrivlib::SystemCache::clean_dcache_by_range(codeblock.data(), codeblock.size());
+		mdrivlib::SystemCache::invalidate_icache();
+		HAL_Delay(10);
+		mdrivlib::HWSemaphore<InvalidateICache>::lock();
+		mdrivlib::HWSemaphore<InvalidateICache>::unlock();
+		HAL_Delay(50);
 	}
 
 	void init_host_symbol_table() {
