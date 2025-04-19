@@ -187,6 +187,9 @@ struct PatchViewPage : PageBase {
 		desc_panel.prepare_focus(group);
 
 		dyn_module_idx = 0;
+		// FIXME: is this needed here?
+		//dynamic_elements_prepared = false;
+		update_graphic_throttle_setting();
 	}
 
 	void draw_modules() {
@@ -302,6 +305,7 @@ struct PatchViewPage : PageBase {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
+			update_graphic_throttle_setting();
 			watch_modules();
 		}
 
@@ -451,8 +455,8 @@ private:
 		if (patch_playloader.is_loading_patch())
 			return;
 
-		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
-			dyn_frame_throttle_ctr = 0;
+		if (dyn_draw_throttle && (++dyn_draw_throttle_ctr >= dyn_draw_throttle)) {
+			dyn_draw_throttle_ctr = 0;
 
 			dyn_module_idx++;
 			if (dyn_module_idx >= dyn_draws.size())
@@ -560,6 +564,14 @@ private:
 				cable_drawer.clear();
 		}
 		last_cable_style = page_settings.cable_style;
+	}
+
+	void update_graphic_throttle_setting() {
+		if (page_settings.show_graphic_screens) {
+			dyn_draw_throttle = std::max(page_settings.graphic_screen_throttle, 1u);
+		} else {
+			dyn_draw_throttle = 0;
+		}
 	}
 
 	void redraw_modulename() {
@@ -792,9 +804,9 @@ private:
 	// std::vector<std::vector<float>> light_vals;
 
 	std::vector<DynamicDisplay> dyn_draws;
-	unsigned dyn_frame_throttle_ctr = 1;
+	unsigned dyn_draw_throttle_ctr = 1;
+	unsigned dyn_draw_throttle = 2;
 	unsigned dyn_module_idx = 0;
-	constexpr static unsigned DynFrameThrottle = 2;
 	bool dynamic_elements_prepared = false;
 };
 

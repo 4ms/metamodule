@@ -299,6 +299,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		dynamic_elements_prepared = false;
+		update_graphic_throttle_setting();
 	}
 
 	void prepare_dynamic_elements() {
@@ -384,6 +385,7 @@ struct ModuleViewPage : PageBase {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
+			update_graphic_throttle_setting();
 		}
 
 		poll_patch_file_changed();
@@ -454,8 +456,8 @@ struct ModuleViewPage : PageBase {
 			redraw_text_display(drawn_el, this_module_id, params.text_displays.watch_displays);
 		}
 
-		if (++dyn_frame_throttle_ctr >= DynFrameThrottle) {
-			dyn_frame_throttle_ctr = 0;
+		if (dyn_draw_throttle && (++dyn_draw_throttle_ctr >= dyn_draw_throttle)) {
+			dyn_draw_throttle_ctr = 0;
 			prepare_dynamic_elements();
 			dyn_draw.draw();
 		}
@@ -517,6 +519,14 @@ struct ModuleViewPage : PageBase {
 				cable_drawer.clear();
 		}
 		last_cable_style = page_settings.cable_style;
+	}
+
+	void update_graphic_throttle_setting() {
+		if (page_settings.show_graphic_screens) {
+			dyn_draw_throttle = std::max(page_settings.graphic_screen_throttle, 1u);
+		} else {
+			dyn_draw_throttle = 0;
+		}
 	}
 
 	void blur() final {
@@ -861,8 +871,8 @@ private:
 
 	DynamicDisplay dyn_draw;
 	bool dynamic_elements_prepared = false;
-	unsigned dyn_frame_throttle_ctr = 1;
-	constexpr static unsigned DynFrameThrottle = 2;
+	unsigned dyn_draw_throttle_ctr = 0;
+	unsigned dyn_draw_throttle = 16;
 
 	bool full_screen_mode = false;
 
