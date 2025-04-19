@@ -3,6 +3,7 @@
 #include "calibrate/calibration_data_reader.hh"
 #include "core_a7/a7_shared_memory.hh"
 #include "core_a7/static_buffers.hh"
+#include "core_intercom/semaphore_action.hh"
 #include "core_intercom/shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "debug.hh"
@@ -86,6 +87,8 @@ int main() {
 
 	// prevents M4 from using it as a USBD device:
 	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
+	// Invalidate our I cache when plugin code is loaded
+	SemaphoreActionOnUnlock<InvalidateICache> clean_cache([] { mdrivlib::SystemCache::invalidate_icache(); });
 
 	start_module_threads();
 
