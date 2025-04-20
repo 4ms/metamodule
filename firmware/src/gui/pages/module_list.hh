@@ -41,10 +41,10 @@ private:
 		std::string slugs_str;
 		slugs_str.reserve(all_slugs.size() * (sizeof(ModuleTypeSlug) + 1));
 		for (auto slug : all_slugs) {
-			if (slug != "HubMedium") {
-				slugs_str += slug;
-				slugs_str += "\n";
-			}
+			if (selected_brand_slug == "4msCompany" && (slug == "HubMedium" || slug == "Panel"))
+				continue;
+			slugs_str += slug;
+			slugs_str += "\n";
 		}
 		slugs_str.pop_back();
 		lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
