@@ -1054,33 +1054,36 @@ public:
 	}
 
 	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack) {
+		pr_dbg("update_or_add_input_panel_conn: %x\n", panel_jack_id);
+		auto chan = Midi::midi_channel(panel_jack_id);
+
 		if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_pitch_conns[num.value()], input_jack, Midi::midi_channel(panel_jack_id));
-			pr_dbg("MIDI note (poly %d)", num.value());
+			update_or_add(midi_note_pitch_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI note (poly %d) ch: %u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_gate(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_gate_conns[num.value()], input_jack, Midi::midi_channel(panel_jack_id));
-			pr_dbg("MIDI gate (poly %d)", num.value());
+			update_or_add(midi_note_gate_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI gate (poly %d) ch:% ch:%uu", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_vel(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_vel_conns[num.value()], input_jack, Midi::midi_channel(panel_jack_id));
-			pr_dbg("MIDI vel (poly %d)", num.value());
+			update_or_add(midi_note_vel_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI vel (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_aft(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_aft_conns[num.value()], input_jack, Midi::midi_channel(panel_jack_id));
-			pr_dbg("MIDI aftertouch (poly %d)", num.value());
+			update_or_add(midi_note_aft_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI aftertouch (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_retrig(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_retrig[num.value()].conns, input_jack, Midi::midi_channel(panel_jack_id));
-			pr_dbg("MIDI retrig (poly %d)", num.value());
+			update_or_add(midi_note_retrig[num.value()].conns, input_jack, chan);
+			pr_dbg("MIDI retrig (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_gate(panel_jack_id); num.has_value()) {
-			update_or_add(midi_gate_conns[num.value()], input_jack, Midi::midi_channel(panel_jack_id));
-			pr_dbg("MIDI note %d gate", num.value());
+			update_or_add(midi_gate_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI note %d gate ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_cc(panel_jack_id); num.has_value()) {
-			update_or_add(midi_cc_conns[num.value()], input_jack, Midi::midi_channel(panel_jack_id));
-			pr_dbg("MIDI CC/PW %d", num.value());
+			update_or_add(midi_cc_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI CC/PW %d ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_clk(panel_jack_id); num.has_value()) {
 			update_or_add(midi_pulses[TimingEvents::Clock].conns, input_jack);

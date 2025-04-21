@@ -655,4 +655,78 @@ lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slide
 	return slider_label;
 }
 
+lv_obj_t *create_midi_map_check(lv_obj_t *parent) {
+	auto check = lv_switch_create(parent);
+	lv_obj_set_width(check, 19);
+	lv_obj_set_height(check, 18);
+	lv_obj_set_align(check, LV_ALIGN_CENTER);
+	lv_obj_add_flag(check, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK); /// Flags
+	lv_obj_set_style_radius(check, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(check, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(check, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_style_bg_color(check, lv_color_hex(0xDDDDDD), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(check, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_color(check, lv_color_hex(0x333333), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_opa(check, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_width(check, 2, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_pad(check, 1, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(check, lv_color_hex(0xDDDDDD), LV_PART_INDICATOR | LV_STATE_CHECKED);
+	lv_obj_set_style_bg_opa(check, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
+	lv_obj_set_style_outline_color(check, lv_color_hex(0xFD8B18), LV_PART_INDICATOR | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_opa(check, 255, LV_PART_INDICATOR | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_width(check, 2, LV_PART_INDICATOR | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_pad(check, 2, LV_PART_INDICATOR | LV_STATE_FOCUS_KEY);
+
+	lv_obj_set_style_radius(check, 20, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(check, lv_color_hex(0x333333), LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(check, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(check, lv_color_hex(0xFD8B18), LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_bg_opa(check, 255, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_outline_width(check, 0, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_outline_pad(check, 0, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_shadow_color(check, lv_color_hex(0xFD8B18), LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_shadow_opa(check, 255, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_shadow_width(check, 1, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_shadow_spread(check, 1, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_shadow_ofs_x(check, -1, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_shadow_ofs_y(check, 0, LV_PART_KNOB | LV_STATE_CHECKED);
+
+	return check;
+}
+
+lv_obj_t *create_midi_map_label(lv_obj_t *parent, std::string const &title) {
+	auto label = lv_label_create(parent);
+	lv_obj_set_width(label, LV_SIZE_CONTENT);  /// 1
+	lv_obj_set_height(label, LV_SIZE_CONTENT); /// 1
+	lv_obj_set_align(label, LV_ALIGN_CENTER);
+	lv_label_set_text(label, title.data());
+	return label;
+}
+
+lv_obj_t *create_midi_map_dropdown(lv_obj_t *parent, std::string const &options) {
+	auto dropdown = lv_dropdown_create(parent);
+	lv_dropdown_set_options(dropdown, options.c_str());
+	lv_obj_set_width(dropdown, 60);
+	lv_obj_set_height(dropdown, 36);
+	lv_obj_set_align(dropdown, LV_ALIGN_CENTER);
+	lv_obj_add_flag(dropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+	lv_obj_set_style_bg_color(dropdown, lv_color_hex(0x666666), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(dropdown, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_style_text_letter_space(lv_dropdown_get_list(dropdown), 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_line_space(lv_dropdown_get_list(dropdown), 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(lv_dropdown_get_list(dropdown), lv_color_hex(0x666666), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(lv_dropdown_get_list(dropdown), 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_style_bg_color(
+		lv_dropdown_get_list(dropdown), lv_color_hex(0xFB8B18), LV_PART_SELECTED | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(lv_dropdown_get_list(dropdown), 255, LV_PART_SELECTED | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(
+		lv_dropdown_get_list(dropdown), lv_color_hex(0xFB8B18), LV_PART_SELECTED | LV_STATE_CHECKED);
+	lv_obj_set_style_bg_opa(lv_dropdown_get_list(dropdown), 255, LV_PART_SELECTED | LV_STATE_CHECKED);
+
+	return dropdown;
+}
+
 } // namespace MetaModule

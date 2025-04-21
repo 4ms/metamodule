@@ -497,7 +497,7 @@ private:
 		std::string title = "Map MIDI to: " + std::string(name.element_name);
 		page->midi_map_popup.set_header_text(title);
 
-		page->midi_map_popup.show([page](std::optional<unsigned> choice) {
+		page->midi_map_popup.show([page](std::optional<MidiMappings> choice) {
 			if (choice.has_value()) {
 				page->notify_queue.put({"Connected to MIDI signal"});
 
