@@ -90,9 +90,9 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 
 	std::string letterchar = "";
 	if (type == JackMapType::Input) {
-		letterchar = get_panel_brief_name<PanelDef>(JackInput{}, panel_jack_id);
+		letterchar = get_panel_brief_name(JackInput{}, panel_jack_id);
 	} else if (type == JackMapType::Output) {
-		letterchar = get_panel_brief_name<PanelDef>(JackOutput{}, panel_jack_id);
+		letterchar = get_panel_brief_name(JackOutput{}, panel_jack_id);
 	}
 
 	auto font = letterchar.size() > 1 ? &ui_font_MuseoSansRounded70014 : &ui_font_MuseoSansRounded70016;

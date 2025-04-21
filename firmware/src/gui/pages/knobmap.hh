@@ -107,7 +107,7 @@ struct KnobMapPage : PageBase {
 
 		update_alias_text_area();
 
-		auto panel_name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
+		auto panel_name = get_panel_name(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text_fmt(
 			ui_MappedName, "Knob %s in '%s'", panel_name.c_str(), patch->valid_knob_set_name(view_set_idx));
 

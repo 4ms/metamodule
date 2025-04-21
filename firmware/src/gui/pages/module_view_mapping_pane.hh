@@ -430,7 +430,7 @@ private:
 			unsigned num_jacks = PanelDef::NumUserFacingInJacks;
 			num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumInJacks : 0;
 			for (auto i = 0u; i < num_jacks; i++) {
-				choices += get_panel_name<PanelDef>(JackInput{}, i);
+				choices += get_panel_name(JackInput{}, i);
 				if (page->patch->find_mapped_injack(i))
 					choices += " (patched)";
 				else if (!first_unpatched_jack.has_value())
@@ -442,7 +442,7 @@ private:
 			unsigned num_jacks = PanelDef::NumUserFacingOutJacks;
 			num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumOutJacks : 0;
 			for (auto i = 0u; i < num_jacks; i++) {
-				choices += get_panel_name<PanelDef>(JackOutput{}, i);
+				choices += get_panel_name(JackOutput{}, i);
 				if (page->patch->find_mapped_outjack(i))
 					choices += " (patched)";
 				else if (!first_unpatched_jack.has_value())
