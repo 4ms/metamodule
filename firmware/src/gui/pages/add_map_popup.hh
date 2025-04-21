@@ -1,7 +1,11 @@
 #pragma once
+#include "console/pr_dbg.hh"
 #include "gui/elements/element_name.hh"
+#include "gui/elements/panel_name.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
+#include "gui/styles.hh"
 #include "midi/midi_message.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
@@ -15,15 +19,37 @@ struct AddMapPopUp {
 		: patch_mod_queue{patch_mod_queue}
 		, popup_group(lv_group_create()) {
 
+		midi_channel_dropdown = create_midi_map_dropdown(
+			ui_AddMapPopUp,
+			"All Chan.\nChan. 1\nChan. 2\nChan. 3\nChan. 4\nChan. 5\nChan. 6\nChan. 7\nChan. 8\nChan. 9\nChan. "
+			"10\nChan. 11\nChan. 12\nChan. 13\nChan. 14\nChan. 15\nChan. 16");
+		lv_obj_add_style(midi_channel_dropdown, &Gui::dropdown_style, LV_PART_MAIN);
+		lv_obj_set_style_pad_ver(midi_channel_dropdown, 8, LV_PART_MAIN);
+		lv_obj_add_style(midi_channel_dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);
+		lv_obj_add_style(midi_channel_dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
+		lv_obj_add_style(midi_channel_dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY | LV_STATE_PRESSED);
+		lv_obj_add_style(midi_channel_dropdown, &Gui::focus_style, LV_STATE_EDITED);
+		lv_obj_set_style_border_width(midi_channel_dropdown, 0, LV_PART_MAIN);
+		lv_obj_set_style_bg_color(midi_channel_dropdown, lv_color_hex(0x999999), LV_PART_MAIN);
+		lv_obj_set_style_text_font(midi_channel_dropdown, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+		lv_obj_move_to_index(midi_channel_dropdown, -2);
+
+		lv_obj_set_width(midi_channel_dropdown, LV_PCT(100));
+
+		lv_group_add_obj(popup_group, midi_channel_dropdown);
 		lv_group_add_obj(popup_group, ui_CancelAdd);
 		lv_group_add_obj(popup_group, ui_OkAdd);
+
 		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(midi_channel_dropdown, drop_callback, LV_EVENT_VALUE_CHANGED, this);
 	}
 
 	void prepare_focus(lv_group_t *group, lv_obj_t *base) {
 		base_group = group;
 		lv_obj_set_parent(ui_AddMapPopUp, base);
+		midi_learn_channel = true;
+		lv_dropdown_set_selected(midi_channel_dropdown, 0);
 	}
 
 	void show(uint32_t knobset_id, uint16_t param_id, uint16_t module_id, PatchData *patchdata) {
@@ -53,14 +79,19 @@ struct AddMapPopUp {
 	}
 
 	void hide() {
-		visible = false;
-		lv_obj_clear_state(ui_CancelAdd, LV_STATE_PRESSED);
-		lv_obj_clear_state(ui_OkAdd, LV_STATE_PRESSED);
+		if (lv_dropdown_is_open(midi_channel_dropdown)) {
+			lv_dropdown_close(midi_channel_dropdown);
+			lv_group_set_editing(popup_group, false);
+		} else {
+			visible = false;
+			lv_obj_clear_state(ui_CancelAdd, LV_STATE_PRESSED);
+			lv_obj_clear_state(ui_OkAdd, LV_STATE_PRESSED);
 
-		lv_hide(ui_AddMapPopUp);
+			lv_hide(ui_AddMapPopUp);
 
-		lv_group_activate(base_group);
-		lv_group_set_editing(base_group, false);
+			lv_group_activate(base_group);
+			lv_group_set_editing(base_group, false);
+		}
 	}
 
 	void update(ParamsMidiState &params) {
@@ -72,8 +103,13 @@ struct AddMapPopUp {
 				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
 					if (cc.changed) {
 						cc.changed = 0;
-						lv_label_set_text_fmt(ui_MapDetected, "MIDI CC: %d", ccnum);
+						if (midi_learn_channel && cc.val < 16)
+							lv_dropdown_set_selected(midi_channel_dropdown, cc.val + 1);
+
 						selected_knob = MidiCC0 + ccnum;
+						selected_midi_chan = lv_dropdown_get_selected(midi_channel_dropdown);
+
+						set_midi_detected_name();
 					}
 					ccnum++;
 				}
@@ -82,9 +118,13 @@ struct AddMapPopUp {
 				auto &note = params.last_midi_note;
 				if (note.changed) {
 					note.changed = 0;
-					lv_label_set_text_fmt(
-						ui_MapDetected, "MIDI Note (gate): %s", MidiMessage::note_name(note.val).c_str());
+					if (midi_learn_channel && params.last_midi_note_channel < 16)
+						lv_dropdown_set_selected(midi_channel_dropdown, params.last_midi_note_channel + 1);
+
 					selected_knob = MidiGateNote0 + note.val;
+					selected_midi_chan = lv_dropdown_get_selected(midi_channel_dropdown);
+
+					set_midi_detected_name();
 				}
 
 			} else {
@@ -117,6 +157,23 @@ struct AddMapPopUp {
 		}
 	}
 
+	void set_midi_detected_name() {
+		if (!selected_knob)
+			return;
+
+		auto map = MappedKnob{.panel_knob_id = *selected_knob};
+
+		if (map.is_midi_cc()) {
+			auto name = get_panel_name(ParamElement{}, Midi::set_midi_channel(*selected_knob, selected_midi_chan));
+			lv_label_set_text(ui_MapDetected, name.c_str());
+
+		} else if (map.is_midi_notegate()) {
+			auto name = get_panel_name(ParamElement{}, Midi::set_midi_channel(*selected_knob, selected_midi_chan));
+			name = "Note (gate) " + name;
+			lv_label_set_text(ui_MapDetected, name.c_str());
+		}
+	}
+
 	static void button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -137,6 +194,8 @@ struct AddMapPopUp {
 					page->patch_mod_queue.put(AddMapping{.map = map, .set_id = page->set_id});
 
 				} else if (map.is_midi()) {
+					map.panel_knob_id = Midi::strip_midi_channel(map.panel_knob_id);
+					map.midi_chan = Midi::midi_channel(map.panel_knob_id);
 					page->patch_mod_queue.put(AddMidiMap{.map = map});
 				}
 			}
@@ -147,9 +206,22 @@ struct AddMapPopUp {
 		}
 	}
 
+	static void drop_callback(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<AddMapPopUp *>(event->user_data);
+
+		page->midi_learn_channel = false;
+		page->selected_midi_chan = lv_dropdown_get_selected(page->midi_channel_dropdown);
+		page->set_midi_detected_name();
+	}
+
 	PatchModQueue &patch_mod_queue;
 	lv_group_t *base_group = nullptr;
 	lv_group_t *popup_group = nullptr;
+	lv_obj_t *midi_channel_dropdown;
+	bool midi_learn_channel = true;
+
 	PatchData *patch = nullptr;
 
 	uint16_t module_idx = 0;
@@ -157,6 +229,7 @@ struct AddMapPopUp {
 	uint32_t set_id = 0;
 	bool visible = false;
 	std::optional<uint16_t> selected_knob{};
+	uint8_t selected_midi_chan = 0;
 };
 
 } // namespace MetaModule
