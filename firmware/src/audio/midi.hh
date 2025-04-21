@@ -1,4 +1,6 @@
 #pragma once
+#include "midi/midi_message.hh"
+#include "midi/midi_router.hh"
 #include "params/sync_params.hh"
 #include "patch_play/patch_player.hh"
 
@@ -71,11 +73,11 @@ struct AudioStreamMidi {
 				player.set_midi_note_aftertouch(i, event.val);
 
 		} else if (event.type == Midi::Event::Type::CC) {
-			player.set_midi_cc(event.note, event.val);
+			player.set_midi_cc(event.note, event.val, event.midi_chan);
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::Bend) {
-			player.set_midi_cc(128, event.val);
+			player.set_midi_cc(128, event.val, event.midi_chan);
 
 		} else if (event.type == Midi::Event::Type::Time) {
 			player.send_midi_time_event(event.note, 10.f);
