@@ -70,7 +70,8 @@ struct AddMapPopUp {
 			if (set_id == PatchData::MIDIKnobSet) {
 				// Detect MIDI CC
 				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
-					if (cc.did_change()) {
+					if (cc.changed) {
+						cc.changed = 0;
 						lv_label_set_text_fmt(ui_MapDetected, "MIDI CC: %d", ccnum);
 						selected_knob = MidiCC0 + ccnum;
 					}
@@ -79,7 +80,8 @@ struct AddMapPopUp {
 
 				// Detect MIDI Note On/Off
 				auto &note = params.last_midi_note;
-				if (note.did_change()) {
+				if (note.changed) {
+					note.changed = 0;
 					lv_label_set_text_fmt(
 						ui_MapDetected, "MIDI Note (gate): %s", MidiMessage::note_name(note.val).c_str());
 					selected_knob = MidiGateNote0 + note.val;

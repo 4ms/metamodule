@@ -38,63 +38,68 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 
 	if (PanelDef::is_main_panel_input(panel_id)) {
 		name = PanelDef::get_map_injack_name(panel_id);
+		return name;
 
 	} else if (AudioExpander::is_expander_input(panel_id)) {
 		name = AudioExpander::get_map_injack_name(AudioExpander::panel_to_exp_input(panel_id));
+		return name;
 	}
 
-	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack)
+	auto midi_message = Midi::strip_midi_channel(panel_id);
+	auto midi_chan = Midi::midi_channel(panel_id);
+	std::string midi_chan_str = (midi_chan >= 1 && midi_chan <= 16) ? " Ch:" + std::to_string(midi_chan) : "";
+
+	if (midi_message >= MidiMonoNoteJack && midi_message <= MidiNote8Jack) {
+		std::string id = std::to_string(midi_message + 1 - MidiMonoNoteJack);
+		name = "MIDI Note " + id + midi_chan_str;
+	}
+
+	else if (midi_message >= MidiMonoGateJack && midi_message <= MidiGate8Jack)
 	{
-		std::string id = std::to_string(panel_id + 1 - MidiMonoNoteJack);
-		name = "MIDI Note " + id;
+		std::string id = std::to_string(midi_message + 1 - MidiMonoGateJack);
+		name = "MIDI Gate " + id + midi_chan_str;
 	}
 
-	else if (panel_id >= MidiMonoGateJack && panel_id <= MidiGate8Jack)
+	else if (midi_message >= MidiMonoVelJack && midi_message <= MidiVel8Jack)
 	{
-		std::string id = std::to_string(panel_id + 1 - MidiMonoGateJack);
-		name = "MIDI Gate " + id;
+		std::string id = std::to_string(midi_message + 1 - MidiMonoVelJack);
+		name = "MIDI Vel. " + id + midi_chan_str;
 	}
 
-	else if (panel_id >= MidiMonoVelJack && panel_id <= MidiVel8Jack)
+	else if (midi_message >= MidiMonoAftertouchJack && midi_message <= MidiAftertouch8Jack)
 	{
-		std::string id = std::to_string(panel_id + 1 - MidiMonoVelJack);
-		name = "MIDI Vel. " + id;
+		std::string id = std::to_string(midi_message + 1 - MidiMonoAftertouchJack);
+		name = "MIDI Aft. " + id + midi_chan_str;
 	}
 
-	else if (panel_id >= MidiMonoAftertouchJack && panel_id <= MidiAftertouch8Jack)
+	else if (midi_message >= MidiMonoRetrigJack && midi_message <= MidiRetrig8Jack)
 	{
-		std::string id = std::to_string(panel_id + 1 - MidiMonoAftertouchJack);
-		name = "MIDI Aft. " + id;
+		std::string id = std::to_string(midi_message + 1 - MidiMonoRetrigJack);
+		name = "MIDI Ret " + id + midi_chan_str;
 	}
 
-	else if (panel_id >= MidiMonoRetrigJack && panel_id <= MidiRetrig8Jack)
-	{
-		std::string id = std::to_string(panel_id + 1 - MidiMonoRetrigJack);
-		name = "MIDI Ret " + id;
-	}
+	else if (midi_message >= MidiCC0 && midi_message <= MidiCC127)
+		name = "MIDI CC " + std::to_string(midi_message - MidiCC0) + midi_chan_str;
 
-	else if (panel_id >= MidiCC0 && panel_id <= MidiCC127)
-		name = "MIDI CC " + std::to_string(panel_id - MidiCC0);
+	else if (midi_message == MidiPitchWheelJack)
+		name = "MIDI Bend" + midi_chan_str;
 
-	else if (panel_id == MidiPitchWheelJack)
-		name = "MIDI Bend";
+	else if (midi_message >= MidiGateNote0 && midi_message <= MidiGateNote127)
+		name = std::string("MIDI Gate ") + MidiMessage::note_name(midi_message - MidiGateNote0) + midi_chan_str;
 
-	else if (panel_id >= MidiGateNote0 && panel_id <= MidiGateNote127)
-		name = std::string("MIDI Gate ") + MidiMessage::note_name(panel_id - MidiGateNote0);
-
-	else if (panel_id == MidiClockJack)
+	else if (midi_message == MidiClockJack)
 		name = "MIDI Clk";
 
-	else if (panel_id >= MidiClockDiv1Jack && panel_id <= MidiClockDiv96Jack)
-		name = "MIDI Clk/" + std::to_string(panel_id - MidiClockDiv1Jack + 1);
+	else if (midi_message >= MidiClockDiv1Jack && midi_message <= MidiClockDiv96Jack)
+		name = "MIDI Clk/" + std::to_string(midi_message - MidiClockDiv1Jack + 1);
 
-	else if (panel_id == MidiStartJack)
+	else if (midi_message == MidiStartJack)
 		name = "MIDI Start";
 
-	else if (panel_id == MidiStopJack)
+	else if (midi_message == MidiStopJack)
 		name = "MIDI Stop";
 
-	else if (panel_id == MidiContinueJack)
+	else if (midi_message == MidiContinueJack)
 		name = "MIDI Cont.";
 
 	else

@@ -51,15 +51,20 @@ public:
 		while (true) {
 			if (auto event = midi_events.get(); event.has_value()) {
 				auto e = event.value();
-				if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs)
-					params.midi_ccs[e.note].store_changed(e.val / 127.f);
-
+				if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs) {
+					params.midi_ccs[e.note].changed = 1;
+					params.midi_ccs[e.note].val = e.midi_chan;
+				}
 				if (e.type == Midi::Event::Type::NoteOn && e.note < NumMidiNotes) {
-					params.last_midi_note.store_changed(e.note);
+					params.last_midi_note.changed = 1;
+					params.last_midi_note.val = e.note;
+					params.last_midi_note_channel = e.midi_chan;
 					params.midi_gate = true;
 				}
 				if (e.type == Midi::Event::Type::NoteOff && e.note < NumMidiNotes) {
-					params.last_midi_note.store_changed(e.note);
+					params.last_midi_note.changed = 1;
+					params.last_midi_note.val = e.note;
+					params.last_midi_note_channel = e.midi_chan;
 					params.midi_gate = false;
 				}
 			} else

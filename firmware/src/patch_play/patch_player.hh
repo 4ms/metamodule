@@ -456,7 +456,7 @@ private:
 
 	void set_all_connected_jacks(std::vector<JackMidi> const &jacks, float val, uint32_t midi_chan) {
 		for (auto const &jack : jacks) {
-			if (jack.midi_chan == 0 || jack.midi_chan == midi_chan)
+			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1))
 				modules[jack.module_id]->set_input(jack.jack_id, val);
 		}
 	}
