@@ -168,11 +168,15 @@ private:
 	void process_delete_module() {
 		if (delete_state == DeleteState::TryRequest) {
 			patches.get_view_patch()->remove_module(module_idx);
-			patch_playloader.remove_module(module_idx);
+
+			if (patches.get_view_patch() == patches.get_playing_patch()) {
+				patch_playloader.remove_module(module_idx);
+			}
 
 			page_list.remove_history_matching_args(PageArguments{.module_id = module_idx});
 			page_list.request_new_page_no_history(PageId::PatchView,
 												  PageArguments{.patch_loc_hash = patches.get_view_patch_loc_hash()});
+
 			patches.mark_view_patch_modified();
 			delete_state = DeleteState::Idle;
 		}
