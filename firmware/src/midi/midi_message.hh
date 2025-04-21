@@ -1,8 +1,8 @@
 #pragma once
+#include <array>
 #include <cstdint>
 #include <span>
 #include <string>
-#include <array>
 
 // #define MIDIDEBUG
 #if defined(MIDIDEBUG)
@@ -10,7 +10,7 @@
 #endif
 
 // Specifications from
-// https://www.midi.org/specifications/midi1-specifications/m1-v4-2-1-midi-1-0-detailed-specification-96-1-4
+// https://midi.org/midi-1-0-core-specifications
 
 enum class MidiCommand : uint8_t {
 	None = 0,
@@ -157,6 +157,10 @@ struct MidiMessage {
 	}
 
 	uint8_t ccval() const {
+		return data.byte[1];
+	}
+
+	uint8_t pcval() const {
 		return data.byte[1];
 	}
 

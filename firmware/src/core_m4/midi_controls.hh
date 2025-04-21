@@ -21,6 +21,7 @@ struct MessageParser {
 	}
 
 	Midi::Event parse(MidiMessage msg) {
+
 		Midi::Event event{};
 
 		// Monophonic MIDI CV/Gate
@@ -37,6 +38,7 @@ struct MessageParser {
 			}
 			event.type = Midi::Event::Type::NoteOff;
 			event.note = msg.note();
+			event.midi_chan = msg.status.channel;
 
 		} else if (msg.is_command<MidiCommand::NoteOn>()) {
 
@@ -49,6 +51,7 @@ struct MessageParser {
 			event.poly_chan = poly_chan;
 			event.note = msg.note();
 			event.val = msg.velocity();
+			event.midi_chan = msg.status.channel;
 
 		} else if (msg.is_command<MidiCommand::PolyKeyPressure>()) { //aka Aftertouch
 			for (unsigned i = 0; auto &midi_note : midi_notes) {
@@ -56,23 +59,32 @@ struct MessageParser {
 					event.type = Midi::Event::Type::Aft;
 					event.poly_chan = i;
 					event.val = msg.aftertouch();
+					event.midi_chan = msg.status.channel;
 					break;
 				}
 				i++;
 			}
 
-		} else if (msg.is_command<MidiCommand::ChannelPressure>()) {
-			event.type = Midi::Event::Type::ChanPress;
-			event.val = msg.chan_pressure();
-
 		} else if (msg.is_command<MidiCommand::ControlChange>()) {
 			event.type = Midi::Event::Type::CC;
 			event.note = msg.ccnum();
 			event.val = msg.ccval();
+			event.midi_chan = msg.status.channel;
+
+		} else if (msg.is_command<MidiCommand::ProgramChange>()) {
+			event.type = Midi::Event::Type::PC;
+			event.val = msg.pcval();
+			event.midi_chan = msg.status.channel;
+
+		} else if (msg.is_command<MidiCommand::ChannelPressure>()) {
+			event.type = Midi::Event::Type::ChanPress;
+			event.val = msg.chan_pressure();
+			event.midi_chan = msg.status.channel;
 
 		} else if (msg.is_command<MidiCommand::PitchBend>()) {
 			event.type = Midi::Event::Type::Bend;
 			event.val = msg.bend();
+			event.midi_chan = msg.status.channel;
 
 		} else if (msg.is_timing_transport()) {
 			event.type = Midi::Event::Type::Time;
