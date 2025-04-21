@@ -242,14 +242,20 @@ struct PatchPlayLoader {
 	}
 
 	void remove_module(unsigned module_id) {
-		stop_audio();
-		while (!is_audio_muted())
-			;
+		bool audio_was_playing = is_audio_muted();
+		if (audio_was_playing) {
+			stop_audio();
+			while (!is_audio_muted())
+				;
+		}
 
 		player_.remove_module(module_id);
 
 		pr_info("Heap: %u\n", get_heap_size());
-		start_audio();
+
+		if (audio_was_playing) {
+			start_audio();
+		}
 	}
 
 	void prepare_patch_for_plugin_change(std::string_view brand_slug) {
@@ -291,7 +297,7 @@ struct PatchPlayLoader {
 	PluginModuleType *get_plugin_module(int32_t module_idx) {
 		if (module_idx >= 0 && module_idx < (int32_t)player_.num_modules)
 			return dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get());
-		else 
+		else
 			return nullptr;
 	}
 
