@@ -320,24 +320,24 @@ public:
 		}
 	}
 
-	void set_midi_note_pitch(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val);
+	void set_midi_note_pitch(unsigned midi_poly_note, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val, midi_chan);
 	}
 
-	void set_midi_note_gate(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_gate_conns[midi_poly_note], val);
+	void set_midi_note_gate(unsigned midi_poly_note, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_gate_conns[midi_poly_note], val, midi_chan);
 	}
 
-	void set_midi_note_velocity(unsigned midi_poly_note, int16_t val) {
-		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], float(val) / 12.7f);
+	void set_midi_note_velocity(unsigned midi_poly_note, int16_t val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], float(val) / 12.7f, midi_chan);
 	}
 
-	void set_midi_note_aftertouch(unsigned midi_poly_note, int16_t val) {
-		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], float(val) / 12.7f);
+	void set_midi_note_aftertouch(unsigned midi_poly_note, int16_t val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], float(val) / 12.7f, midi_chan);
 	}
 
-	void set_midi_note_retrig(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_retrig[midi_poly_note].conns, val);
+	void set_midi_note_retrig(unsigned midi_poly_note, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_retrig[midi_poly_note].conns, val, midi_chan);
 		midi_note_retrig[midi_poly_note].pulse.start(0.01);
 	}
 
@@ -361,16 +361,19 @@ public:
 		}
 	}
 
-	void set_midi_gate(unsigned note_num, float volts) {
+	void set_midi_gate(unsigned note_num, float volts, uint16_t midi_chan) {
 		if (note_num < midi_gate_conns.size())
-			set_all_connected_jacks(midi_gate_conns[note_num], volts);
+			set_all_connected_jacks(midi_gate_conns[note_num], volts, midi_chan);
 
 		if (note_num >= midi_note_knob_maps.size())
 			return;
 
 		for (auto &mm : midi_note_knob_maps[note_num]) {
 			if (mm.module_id >= num_modules)
-				return;
+				continue;
+
+			if (mm.midi_chan > 0 && mm.midi_chan != midi_chan)
+				continue;
 
 			auto normal_val = volts / 10.f;
 			if (mm.curve_type == MappedKnob::CurveType::Toggle) {
