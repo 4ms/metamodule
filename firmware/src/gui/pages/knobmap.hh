@@ -35,7 +35,13 @@ struct KnobMapPage : PageBase {
 		lv_obj_add_event_cb(ui_KnobSetButton, knobset_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_TrashButton, trash_cb, LV_EVENT_RELEASED, this);
 
-		ui_EditMapMidiChannelDropdown = create_midi_map_dropdown(ui_EditMapMidiChannelCont, "");
+		ui_EditMapMidiChannelDropdown = create_midi_map_dropdown(
+			ui_EditMapMidiChannelCont,
+			"All Chan.\nChannel 1\nChannel 2\nChannel 3\nChannel 4\nChannel 5\nChannel 6\nChannel 7\nChannel "
+			"8\nChannel 9\nChannel 10\nChannel 11\nChannel 12\nChannel 13\nChannel 14\nChannel 15\nChannel 16");
+
+		lv_obj_set_height(ui_EditMapMidiChannelDropdown, 28);
+		lv_obj_set_width(ui_EditMapMidiChannelDropdown, 110);
 
 		lv_obj_add_event_cb(ui_EditMapMidiChannelDropdown, midichan_cb, LV_EVENT_VALUE_CHANGED, this);
 
@@ -359,6 +365,7 @@ struct KnobMapPage : PageBase {
 
 		page->map.midi_chan = lv_dropdown_get_selected(ui_EditMapMidiChannelDropdown);
 		page->patch->add_update_midi_map(page->map);
+		page->patches.mark_view_patch_modified();
 	}
 
 	void save_knob_alias(bool save) {
@@ -371,6 +378,7 @@ struct KnobMapPage : PageBase {
 		if (save) {
 			map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
 			patch->add_update_mapped_knob(view_set_idx, map);
+			patches.mark_view_patch_modified();
 		}
 
 		update_alias_text_area();

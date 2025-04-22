@@ -19,9 +19,11 @@ struct AddMapPopUp {
 		: patch_mod_queue{patch_mod_queue}
 		, popup_group(lv_group_create()) {
 
-		midi_channel_dropdown = create_midi_map_dropdown(ui_AddMapPopUp, "");
-		// "All Channels\nChan. 1\nChan. 2\nChan. 3\nChan. 4\nChan. 5\nChan. 6\nChan. 7\nChan. 8\nChan. 9\nChan. "
-		// "10\nChannel 11\nChan. 12\nChan. 13\nChan. 14\nChan. 15\nChan. 16");
+		midi_channel_dropdown = create_midi_map_dropdown(
+			ui_AddMapPopUp,
+			"All Chan.\nChan. 1\nChan. 2\nChan. 3\nChan. 4\nChan. 5\nChan. 6\nChan. 7\nChan. 8\nChan. 9\nChan. "
+			"10\nChan. 11\nChan. 12\nChan. 13\nChan. 14\nChan. 15\nChan. 16");
+		lv_obj_set_height(midi_channel_dropdown, 28);
 		lv_obj_move_to_index(midi_channel_dropdown, -2);
 
 		lv_obj_set_width(midi_channel_dropdown, LV_PCT(100));
