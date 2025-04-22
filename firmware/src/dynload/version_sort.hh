@@ -12,7 +12,8 @@ namespace MetaModule
 // Returns true if `a` should be shown in a list above `b`:
 // - true if a's plugin name is alphabetically before b's
 // - true if the plugin names are equal and a's version is LATER than b's
-// use definition of Precedence in SemVer: https://semver.org/#spec-item-11
+//
+// Uses definition of Precedence in SemVer: https://semver.org/#spec-item-11
 // Except we're not strict about section 11.4. TODO: follow section 11.4 strictly
 //
 inline bool alpha_then_newest_version(PluginFile const &a, PluginFile const &b) {

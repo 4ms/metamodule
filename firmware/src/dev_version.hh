@@ -1,4 +1,4 @@
 #pragma once
 
-constexpr unsigned DevVersion = 12;
-constexpr const char *DevVersionChars = "-dev-13";
+constexpr unsigned DevVersion = 20;
+constexpr const char *DevVersionChars = "-dev-20";

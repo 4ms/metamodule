@@ -52,7 +52,7 @@ private:
 
 			pr_info("Autoload: No plugins to load\n");
 			autoload_state = State::Done;
-			return {autoload_state, "No plugins to auto-load"};
+			return {autoload_state, "No plugins to pre-load"};
 		}
 	}
 
@@ -71,7 +71,7 @@ private:
 		autoload_state = State::Processing;
 
 		if (load_plugin(s)) {
-			return {State::Processing, "Auto-loading " + s};
+			return {State::Processing, "Pre-loading " + s};
 		} else {
 			return {State::Processing, "Can't find " + s};
 		}
@@ -126,7 +126,7 @@ private:
 				autoload_state = State::Error;
 				return {State::Error, "Error: " + result.error_message};
 			} else
-				return {State::Error, "Error auto-loading"};
+				return {State::Error, "Error pre-loading"};
 		}
 
 		return {autoload_state, ""};

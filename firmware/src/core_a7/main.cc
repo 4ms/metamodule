@@ -104,7 +104,7 @@ int main() {
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
-	// wait for other cores to be ready: ~2400ms + more for auto-loading plugins
+	// wait for other cores to be ready: ~2400ms + more for preloading plugins
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked() || mdrivlib::HWSemaphore<AuxCoreReady>::is_locked())
 		;
 

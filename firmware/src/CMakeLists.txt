@@ -1,7 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
-option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and auto-loaded plugins)" OFF)
+option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" OFF)
 option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
 
 
