@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/elements_index.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/gui_state.hh"
@@ -362,12 +363,12 @@ private:
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
-		auto idx = ElementCount::mark_unused_indices({.output_idx = (uint8_t)dest.jack_id}, {.num_outputs = 1});
+		auto idx = ElementIndex::set_index(JackOutput{}, dest.jack_id);
 		make_selectable_jack_item(obj, dest.module_id, idx);
 	}
 
 	void make_selectable_injack_item(lv_obj_t *obj, Jack dest) {
-		auto idx = ElementCount::mark_unused_indices({.input_idx = (uint8_t)dest.jack_id}, {.num_inputs = 1});
+		auto idx = ElementIndex::set_index(JackInput{}, dest.jack_id);
 		make_selectable_jack_item(obj, dest.module_id, idx);
 	}
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/elements_index.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -326,8 +327,7 @@ struct KnobMapPage : PageBase {
 			return;
 
 		page->args.module_id = page->map.module_id;
-		page->args.element_indices =
-			ElementCount::mark_unused_indices({.param_idx = (uint8_t)page->map.param_id}, {.num_params = 1});
+		page->args.element_indices = ElementIndex::set_index(ParamElement{}, page->map.param_id);
 		page->args.detail_mode = true;
 		page->page_list.request_new_page(PageId::ModuleView, page->args);
 	}
