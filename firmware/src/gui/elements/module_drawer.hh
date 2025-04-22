@@ -1,13 +1,10 @@
 #pragma once
-#include "CoreModules/elements/elements_index.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/draw.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
 #include "gui/images/paths.hh"
-#include "gui/styles.hh"
-#include "lvgl.h"
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 
