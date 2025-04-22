@@ -672,20 +672,28 @@ lv_obj_set_style_pad_right(ui_EditMapMidiChannelTitle, 0, LV_PART_MAIN| LV_STATE
 lv_obj_set_style_pad_top(ui_EditMapMidiChannelTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_EditMapMidiChannelTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_EditMapMidiChannelDropdown = lv_dropdown_create(ui_EditMapMidiChannelCont);
-lv_dropdown_set_dir( ui_EditMapMidiChannelDropdown, LV_DIR_TOP);
-lv_dropdown_set_options( ui_EditMapMidiChannelDropdown, "All\nChannel 1\nChannel 2\nChannel 3\nChannel 4\nChannel 5\nChannel 6\nChannel 7\nChannel 8\nChannel 9\nChannel 10\nChannel 11\nChannel 12\nChannel 13\nChannel 14\nChannel 15\nChannel 16" );
-lv_obj_set_width( ui_EditMapMidiChannelDropdown, 90);
-lv_obj_set_height( ui_EditMapMidiChannelDropdown, LV_SIZE_CONTENT);   /// 30
-lv_obj_set_align( ui_EditMapMidiChannelDropdown, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_EditMapMidiChannelDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_set_style_text_font(ui_EditMapMidiChannelDropdown, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_EditMapMidiChannelDropdown, lv_color_hex(0x999999), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_EditMapMidiChannelDropdown, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_EditMapMidiChannelDropdown, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_EditMapMidiChannelDropdown, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_EditMapMidiChannelDropdown, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_EditMapMidiChannelDropdown, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+// ui_EditMapMidiChannelDropdown = lv_dropdown_create(ui_EditMapMidiChannelCont);
+// lv_dropdown_set_dir( ui_EditMapMidiChannelDropdown, LV_DIR_TOP);
+// lv_dropdown_set_options( ui_EditMapMidiChannelDropdown, "All\nChannel 1\nChannel 2\nChannel 3\nChannel 4\nChannel 5\nChannel 6\nChannel 7\nChannel 8\nChannel 9\nChannel 10\nChannel 11\nChannel 12\nChannel 13\nChannel 14\nChannel 15\nChannel 16" );
+// lv_obj_set_width( ui_EditMapMidiChannelDropdown, 110);
+// lv_obj_set_height( ui_EditMapMidiChannelDropdown, 30);
+// lv_obj_set_align( ui_EditMapMidiChannelDropdown, LV_ALIGN_CENTER );
+// lv_obj_add_flag( ui_EditMapMidiChannelDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+// lv_obj_set_style_text_font(ui_EditMapMidiChannelDropdown, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_bg_color(ui_EditMapMidiChannelDropdown, lv_color_hex(0x666666), LV_PART_MAIN | LV_STATE_DEFAULT );
+// lv_obj_set_style_bg_opa(ui_EditMapMidiChannelDropdown, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_pad_left(ui_EditMapMidiChannelDropdown, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_pad_right(ui_EditMapMidiChannelDropdown, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_pad_top(ui_EditMapMidiChannelDropdown, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_pad_bottom(ui_EditMapMidiChannelDropdown, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+// lv_obj_set_style_text_line_space(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), lv_color_hex(0x555555),  LV_PART_MAIN | LV_STATE_DEFAULT );
+
+// lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), lv_color_hex(0xFB8B18),  LV_PART_SELECTED | LV_STATE_DEFAULT );
+// lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), 255,  LV_PART_SELECTED| LV_STATE_DEFAULT);
+// lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), lv_color_hex(0xFB8B18),  LV_PART_SELECTED | LV_STATE_CHECKED );
+// lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), 255,  LV_PART_SELECTED| LV_STATE_CHECKED);
 
 
 

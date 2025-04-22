@@ -706,7 +706,15 @@ lv_obj_t *create_midi_map_label(lv_obj_t *parent, std::string const &title) {
 
 lv_obj_t *create_midi_map_dropdown(lv_obj_t *parent, std::string const &options) {
 	auto dropdown = lv_dropdown_create(parent);
-	lv_dropdown_set_options(dropdown, options.c_str());
+	lv_dropdown_set_dir(dropdown, LV_DIR_BOTTOM);
+	if (options.length())
+		lv_dropdown_set_options(dropdown, options.c_str());
+	else
+		lv_dropdown_set_options(
+			dropdown,
+			"All Channels\nChannel 1\nChannel 2\nChannel 3\nChannel 4\nChannel 5\nChannel 6\nChannel 7\nChannel "
+			"8\nChannel 9\nChannel 10\nChannel 11\nChannel 12\nChannel 13\nChannel 14\nChannel 15\nChannel 16");
+
 	lv_obj_set_width(dropdown, 60);
 	lv_obj_set_height(dropdown, 36);
 	lv_obj_set_align(dropdown, LV_ALIGN_CENTER);
@@ -725,6 +733,16 @@ lv_obj_t *create_midi_map_dropdown(lv_obj_t *parent, std::string const &options)
 	lv_obj_set_style_bg_color(
 		lv_dropdown_get_list(dropdown), lv_color_hex(0xFB8B18), LV_PART_SELECTED | LV_STATE_CHECKED);
 	lv_obj_set_style_bg_opa(lv_dropdown_get_list(dropdown), 255, LV_PART_SELECTED | LV_STATE_CHECKED);
+
+	lv_obj_add_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
+	lv_obj_add_style(dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);
+	lv_obj_add_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY | LV_STATE_PRESSED);
+	lv_obj_add_style(dropdown, &Gui::focus_style, LV_STATE_EDITED);
+	lv_obj_set_style_pad_ver(dropdown, 8, LV_PART_MAIN);
+	lv_obj_set_style_border_width(dropdown, 0, LV_PART_MAIN);
+	lv_obj_set_style_bg_color(dropdown, lv_color_hex(0x999999), LV_PART_MAIN);
+	lv_obj_set_style_text_font(dropdown, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
 
 	return dropdown;
 }

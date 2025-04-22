@@ -19,19 +19,9 @@ struct AddMapPopUp {
 		: patch_mod_queue{patch_mod_queue}
 		, popup_group(lv_group_create()) {
 
-		midi_channel_dropdown = create_midi_map_dropdown(
-			ui_AddMapPopUp,
-			"All Chan.\nChan. 1\nChan. 2\nChan. 3\nChan. 4\nChan. 5\nChan. 6\nChan. 7\nChan. 8\nChan. 9\nChan. "
-			"10\nChan. 11\nChan. 12\nChan. 13\nChan. 14\nChan. 15\nChan. 16");
-		lv_obj_add_style(midi_channel_dropdown, &Gui::dropdown_style, LV_PART_MAIN);
-		lv_obj_set_style_pad_ver(midi_channel_dropdown, 8, LV_PART_MAIN);
-		lv_obj_add_style(midi_channel_dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);
-		lv_obj_add_style(midi_channel_dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
-		lv_obj_add_style(midi_channel_dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY | LV_STATE_PRESSED);
-		lv_obj_add_style(midi_channel_dropdown, &Gui::focus_style, LV_STATE_EDITED);
-		lv_obj_set_style_border_width(midi_channel_dropdown, 0, LV_PART_MAIN);
-		lv_obj_set_style_bg_color(midi_channel_dropdown, lv_color_hex(0x999999), LV_PART_MAIN);
-		lv_obj_set_style_text_font(midi_channel_dropdown, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+		midi_channel_dropdown = create_midi_map_dropdown(ui_AddMapPopUp, "");
+		// "All Channels\nChan. 1\nChan. 2\nChan. 3\nChan. 4\nChan. 5\nChan. 6\nChan. 7\nChan. 8\nChan. 9\nChan. "
+		// "10\nChannel 11\nChan. 12\nChan. 13\nChan. 14\nChan. 15\nChan. 16");
 		lv_obj_move_to_index(midi_channel_dropdown, -2);
 
 		lv_obj_set_width(midi_channel_dropdown, LV_PCT(100));
@@ -194,8 +184,7 @@ struct AddMapPopUp {
 					page->patch_mod_queue.put(AddMapping{.map = map, .set_id = page->set_id});
 
 				} else if (map.is_midi()) {
-					map.panel_knob_id = Midi::strip_midi_channel(map.panel_knob_id);
-					map.midi_chan = Midi::midi_channel(map.panel_knob_id);
+					map.midi_chan = page->selected_midi_chan;
 					page->patch_mod_queue.put(AddMidiMap{.map = map});
 				}
 			}
