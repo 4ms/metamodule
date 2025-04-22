@@ -8,7 +8,6 @@ namespace MetaModule
 {
 
 struct AudioStreamMidi {
-	//
 	PatchPlayer &player;
 	SyncParams &sync_params;
 

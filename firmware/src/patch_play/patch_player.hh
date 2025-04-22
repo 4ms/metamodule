@@ -353,7 +353,7 @@ public:
 		if (ccnum < midi_cc_knob_maps.size()) {
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules) {
-					if (mm.midi_chan == 0 || mm.midi_chan == midi_chan) {
+					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
 						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
 					}
 				}
@@ -372,7 +372,7 @@ public:
 			if (mm.module_id >= num_modules)
 				continue;
 
-			if (mm.midi_chan > 0 && mm.midi_chan != midi_chan)
+			if (mm.midi_chan > 0 && mm.midi_chan != (midi_chan + 1))
 				continue;
 
 			auto normal_val = volts / 10.f;
