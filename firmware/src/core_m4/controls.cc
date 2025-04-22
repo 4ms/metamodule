@@ -53,6 +53,8 @@ void Controls::update_params() {
 
 		update_midi_connected();
 
+		cur_metaparams->midi_connected = _midi_connected;
+
 		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
 
 		update_rotary();
@@ -94,14 +96,14 @@ void Controls::update_rotary() {
 }
 
 void Controls::update_midi_connected() {
-	_midi_connected.update(_midi_host.is_connected());
+	_midi_connected_raw.update(_midi_host.is_connected());
 
-	if (_midi_connected.went_low()) {
+	if (_midi_connected_raw.went_low()) {
 		_midi_parser.start_all_notes_off_sequence();
 	}
 
-	if (_midi_connected.is_high() && !cur_metaparams->midi_connected) {
-		cur_metaparams->midi_connected = true;
+	if (_midi_connected_raw.went_high()) {
+		_midi_connected = true;
 	}
 
 	if (cur_metaparams->midi_poly_chans > 0)
@@ -111,7 +113,7 @@ void Controls::update_midi_connected() {
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected
 	if (cur_params->raw_msg.raw() != MidiMessage{}.raw()) {
-		if (_midi_connected.is_high()) {
+		if (_midi_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
 			cur_params->raw_msg.make_usb_msg(bytes);
 			_midi_host.transmit(bytes);
@@ -125,10 +127,14 @@ void Controls::parse_midi() {
 
 	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence()) {
 		if (noteoff->type == Midi::Event::Type::None) {
-			cur_metaparams->midi_connected = false;
+			_midi_connected = false;
+			cur_metaparams->midi_connected = _midi_connected;
+			cur_params->raw_msg = MidiMessage{};
+			cur_params->midi_event.type = Midi::Event::Type::None;
+		} else {
+			cur_params->midi_event = *noteoff;
+			cur_params->raw_msg = {0x80, noteoff->note, 0};
 		}
-		cur_params->midi_event = *noteoff;
-		cur_params->raw_msg = {0x80, noteoff->note, 0};
 
 	} else {
 		cur_params->raw_msg = MidiMessage{};

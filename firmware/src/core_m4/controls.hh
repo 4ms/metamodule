@@ -76,7 +76,8 @@ private:
 	MidiHost &_midi_host;
 	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
 	Midi::MessageParser _midi_parser;
-	EdgeStateDetector _midi_connected;
+	EdgeStateDetector _midi_connected_raw;
+	bool _midi_connected = false;
 
 	// Params
 	DoubleBufParamBlock &param_blocks;

@@ -29,7 +29,7 @@ struct MappingPaneList {
 		lv_show(circle);
 		lv_obj_set_style_text_color(obj, is_active ? lv_color_hex(0xFF8918) : lv_color_white(), LV_STATE_DEFAULT);
 
-		auto name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
+		auto name = get_panel_name(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text(label, name.c_str());
 
 		if (map.is_panel_knob())
@@ -81,7 +81,7 @@ struct MappingPaneList {
 		lv_obj_set_style_pad_right(obj, 4, LV_STATE_DEFAULT);
 		lv_show(circle);
 
-		auto name = get_panel_name<PanelDef>(JackInput{}, panel_jack_id);
+		auto name = get_panel_name(JackInput{}, panel_jack_id);
 
 		if (panel_jack_id < PanelDef::NumUserFacingInJacks) {
 			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
@@ -109,7 +109,7 @@ struct MappingPaneList {
 		lv_obj_set_style_pad_right(obj, 4, LV_STATE_DEFAULT);
 		lv_show(circle);
 
-		auto name = get_panel_name<PanelDef>(JackOutput{}, panel_jack_id);
+		auto name = get_panel_name(JackOutput{}, panel_jack_id);
 
 		if (panel_jack_id < Gui::knob_palette.size())
 			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);

@@ -2,11 +2,8 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "conf/panel_conf.hh"
 #include "conf/patch_conf.hh"
 #include "coreproc_plugin/async_thread_control.hh"
-#include "midi/midi_message.hh"
-#include "midi/midi_router.hh"
 #include "null_module.hh"
 #include "params/catchup_manager.hh"
 #include "params/catchup_param.hh"
@@ -57,18 +54,23 @@ private:
 
 	// MIDI
 	bool midi_connected = false;
-	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_pitch_conns;
-	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_gate_conns;
-	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_vel_conns;
-	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_aft_conns;
-	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
-	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
+
+	struct JackMidi : Jack {
+		uint32_t midi_chan = 0; //0: Omni
+	};
+	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_pitch_conns;
+	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_gate_conns;
+	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_vel_conns;
+	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_aft_conns;
+	std::array<std::vector<JackMidi>, NumMidiCCsPW> midi_cc_conns;
+	std::array<std::vector<JackMidi>, NumMidiNotes> midi_gate_conns;
+
 	std::array<std::vector<MappedKnob>, NumMidiCCs> midi_cc_knob_maps;
 	std::array<std::vector<MappedKnob>, NumMidiNotes> midi_note_knob_maps;
 
 	struct MidiPulse {
 		OneShot pulse{};
-		std::vector<Jack> conns;
+		std::vector<JackMidi> conns;
 	};
 	struct MidiPulseDivider {
 		OneShot pulse{};
@@ -318,54 +320,60 @@ public:
 		}
 	}
 
-	void set_midi_note_pitch(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val);
+	void set_midi_note_pitch(unsigned midi_poly_note, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val, midi_chan);
 	}
 
-	void set_midi_note_gate(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_gate_conns[midi_poly_note], val);
+	void set_midi_note_gate(unsigned midi_poly_note, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_gate_conns[midi_poly_note], val, midi_chan);
 	}
 
-	void set_midi_note_velocity(unsigned midi_poly_note, int16_t val) {
-		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], float(val) / 12.7f);
+	void set_midi_note_velocity(unsigned midi_poly_note, int16_t val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], float(val) / 12.7f, midi_chan);
 	}
 
-	void set_midi_note_aftertouch(unsigned midi_poly_note, int16_t val) {
-		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], float(val) / 12.7f);
+	void set_midi_note_aftertouch(unsigned midi_poly_note, int16_t val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], float(val) / 12.7f, midi_chan);
 	}
 
-	void set_midi_note_retrig(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_retrig[midi_poly_note].conns, val);
+	void set_midi_note_retrig(unsigned midi_poly_note, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_retrig[midi_poly_note].conns, val, midi_chan);
 		midi_note_retrig[midi_poly_note].pulse.start(0.01);
 	}
 
-	void set_midi_cc(unsigned ccnum, int16_t val) {
+	void set_midi_cc(unsigned ccnum, int16_t val, uint16_t midi_chan) {
 		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) : val / 12.7f; //0-127 => 0-10
 
 		// Update jacks connected to this CC
-		if (ccnum < midi_cc_conns.size())
-			set_all_connected_jacks(midi_cc_conns[ccnum], volts);
+		if (ccnum < midi_cc_conns.size()) {
+			set_all_connected_jacks(midi_cc_conns[ccnum], volts, midi_chan);
+		}
 
-		// Update knobs connected to theis CC
+		// Update knobs connected to this CC
 		if (ccnum < midi_cc_knob_maps.size()) {
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules) {
-					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
+					if (mm.midi_chan == 0 || mm.midi_chan == midi_chan) {
+						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
+					}
 				}
 			}
 		}
 	}
 
-	void set_midi_gate(unsigned note_num, float volts) {
+	void set_midi_gate(unsigned note_num, float volts, uint16_t midi_chan) {
 		if (note_num < midi_gate_conns.size())
-			set_all_connected_jacks(midi_gate_conns[note_num], volts);
+			set_all_connected_jacks(midi_gate_conns[note_num], volts, midi_chan);
 
 		if (note_num >= midi_note_knob_maps.size())
 			return;
 
 		for (auto &mm : midi_note_knob_maps[note_num]) {
 			if (mm.module_id >= num_modules)
-				return;
+				continue;
+
+			if (mm.midi_chan > 0 && mm.midi_chan != midi_chan)
+				continue;
 
 			auto normal_val = volts / 10.f;
 			if (mm.curve_type == MappedKnob::CurveType::Toggle) {
@@ -440,9 +448,17 @@ public:
 	}
 
 private:
-	void set_all_connected_jacks(std::vector<Jack> const &jacks, float val) {
+	template<typename JackT>
+	void set_all_connected_jacks(std::vector<JackT> const &jacks, float val) {
 		for (auto const &jack : jacks)
 			modules[jack.module_id]->set_input(jack.jack_id, val);
+	}
+
+	void set_all_connected_jacks(std::vector<JackMidi> const &jacks, float val, uint32_t midi_chan) {
+		for (auto const &jack : jacks) {
+			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1))
+				modules[jack.module_id]->set_input(jack.jack_id, val);
+		}
 	}
 
 	void update_midi_pulses() {
@@ -1038,33 +1054,36 @@ public:
 	}
 
 	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack) {
+		pr_dbg("update_or_add_input_panel_conn: %x\n", panel_jack_id);
+		auto chan = Midi::midi_channel(panel_jack_id);
+
 		if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_pitch_conns[num.value()], input_jack);
-			pr_dbg("MIDI note (poly %d)", num.value());
+			update_or_add(midi_note_pitch_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI note (poly %d) ch: %u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_gate(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_gate_conns[num.value()], input_jack);
-			pr_dbg("MIDI gate (poly %d)", num.value());
+			update_or_add(midi_note_gate_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI gate (poly %d) ch:% ch:%uu", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_vel(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_vel_conns[num.value()], input_jack);
-			pr_dbg("MIDI vel (poly %d)", num.value());
+			update_or_add(midi_note_vel_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI vel (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_aft(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_aft_conns[num.value()], input_jack);
-			pr_dbg("MIDI aftertouch (poly %d)", num.value());
+			update_or_add(midi_note_aft_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI aftertouch (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_retrig(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_retrig[num.value()].conns, input_jack);
-			pr_dbg("MIDI retrig (poly %d)", num.value());
+			update_or_add(midi_note_retrig[num.value()].conns, input_jack, chan);
+			pr_dbg("MIDI retrig (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_gate(panel_jack_id); num.has_value()) {
-			update_or_add(midi_gate_conns[num.value()], input_jack);
-			pr_dbg("MIDI note %d gate", num.value());
+			update_or_add(midi_gate_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI note %d gate ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_cc(panel_jack_id); num.has_value()) {
-			update_or_add(midi_cc_conns[num.value()], input_jack);
-			pr_dbg("MIDI CC/PW %d", num.value());
+			update_or_add(midi_cc_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI CC/PW %d ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_clk(panel_jack_id); num.has_value()) {
 			update_or_add(midi_pulses[TimingEvents::Clock].conns, input_jack);
@@ -1129,15 +1148,29 @@ public:
 	}
 
 private:
-	template<typename T>
-	void update_or_add(std::vector<T> &v, const T &d) {
+	void update_or_add(std::vector<Jack> &v, const Jack &d) {
+		if (auto found = std::ranges::find(v, d); found == v.end())
+			v.push_back(d);
+	}
+
+	void update_or_add(std::vector<MappedKnob> &v, const MappedKnob &d) {
 		for (auto &el : v) {
-			if (el == d) { //if (T::operator==(el, d)) {
+			if (el.maps_to_same_as(d)) {
 				el = d;
 				return;
 			}
 		}
 		v.push_back(d);
+	}
+
+	void update_or_add(std::vector<JackMidi> &v, const Jack &d, uint32_t midi_chan = 0) {
+		for (auto &el : v) {
+			if (el.module_id == d.module_id && el.jack_id == d.jack_id) {
+				el.midi_chan = midi_chan;
+				return;
+			}
+		}
+		v.push_back({d, midi_chan});
 	}
 
 	// Cache a panel knob mapping into knob_conns[]

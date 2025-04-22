@@ -1,5 +1,6 @@
 #pragma once
 #include "expanders.hh"
+#include "midi/midi_router.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_mods.hh"

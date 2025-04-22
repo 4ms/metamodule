@@ -29,4 +29,8 @@ lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slide
 
 lv_obj_t *create_settings_menu_title(lv_obj_t *parent, std::string const &title_name);
 
+lv_obj_t *create_midi_map_check(lv_obj_t *parent);
+lv_obj_t *create_midi_map_label(lv_obj_t *parent, std::string const &title);
+lv_obj_t *create_midi_map_dropdown(lv_obj_t *parent, std::string const &options);
+
 } // namespace MetaModule

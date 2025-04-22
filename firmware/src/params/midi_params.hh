@@ -22,6 +22,7 @@ struct Event {
 		CC,
 		Bend,
 		Time,
+		PC,
 	} type = Type::None;
 
 	uint8_t midi_chan = 0; //currently not implemented

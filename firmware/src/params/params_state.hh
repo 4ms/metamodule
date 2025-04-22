@@ -118,8 +118,13 @@ struct ParamsState {
 };
 
 struct ParamsMidiState : ParamsState {
-	std::array<LatchedParam<float, 1, 127>, NumMidiCCs> midi_ccs;
-	LatchedParam<uint8_t, 1, 1> last_midi_note;
+	struct MidiChangedVal {
+		uint8_t changed : 1;
+		uint8_t val : 7;
+	};
+	std::array<MidiChangedVal, NumMidiCCs> midi_ccs;
+	MidiChangedVal last_midi_note;
+	uint8_t last_midi_note_channel;
 	bool midi_gate = false;
 
 	TextDisplayWatcher text_displays;
@@ -130,10 +135,10 @@ struct ParamsMidiState : ParamsState {
 		text_displays.stop_watching_all();
 
 		for (auto &cc : midi_ccs)
-			cc = 0;
+			cc.changed = 0;
 
 		midi_gate = false;
-		last_midi_note = 0;
+		last_midi_note.changed = 0;
 	}
 };
 

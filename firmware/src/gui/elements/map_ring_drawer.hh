@@ -113,7 +113,7 @@ inline lv_obj_t *draw_mapped_ring(const JackInput &el,
 	if (auto label = lv_obj_get_child(circle, 0)) {
 
 		if (panel_el_id.has_value()) {
-			auto name = get_panel_brief_name<PanelDef>(el, *panel_el_id);
+			auto name = get_panel_brief_name(el, *panel_el_id);
 			lv_label_set_text(label, name.c_str());
 		}
 	}

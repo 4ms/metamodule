@@ -2,12 +2,12 @@
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/pages/add_map_popup.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/knob_arc.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 
 namespace MetaModule
@@ -35,7 +35,18 @@ struct KnobMapPage : PageBase {
 		lv_obj_add_event_cb(ui_KnobSetButton, knobset_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_TrashButton, trash_cb, LV_EVENT_RELEASED, this);
 
+		ui_EditMapMidiChannelDropdown = create_midi_map_dropdown(
+			ui_EditMapMidiChannelCont,
+			"All Chan.\nChannel 1\nChannel 2\nChannel 3\nChannel 4\nChannel 5\nChannel 6\nChannel 7\nChannel "
+			"8\nChannel 9\nChannel 10\nChannel 11\nChannel 12\nChannel 13\nChannel 14\nChannel 15\nChannel 16");
+
+		lv_obj_set_height(ui_EditMapMidiChannelDropdown, 28);
+		lv_obj_set_width(ui_EditMapMidiChannelDropdown, 110);
+
+		lv_obj_add_event_cb(ui_EditMapMidiChannelDropdown, midichan_cb, LV_EVENT_VALUE_CHANGED, this);
+
 		lv_hide(ui_Keyboard);
+		lv_hide(ui_EditMapMidiChannelCont);
 
 		del_popup.init(base, group);
 
@@ -44,6 +55,7 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_MaxSlider);
 		lv_group_add_obj(group, ui_ModuleMapToggleSwitch);
 		lv_group_add_obj(group, ui_AliasTextArea);
+		lv_group_add_obj(group, ui_EditMapMidiChannelDropdown);
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
 		lv_group_add_obj(group, ui_KnobSetButton);
@@ -88,8 +100,10 @@ struct KnobMapPage : PageBase {
 
 		if (view_set_idx == PatchData::MIDIKnobSet) {
 			lv_hide(ui_KnobSetButton);
+			lv_show(ui_EditMapMidiChannelCont);
 		} else {
 			lv_show(ui_KnobSetButton);
+			lv_hide(ui_EditMapMidiChannelCont);
 		}
 
 		//mappedknob_id is the index of the MappedKnob in the MappedKnobSet::set vector
@@ -107,7 +121,7 @@ struct KnobMapPage : PageBase {
 
 		update_alias_text_area();
 
-		auto panel_name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
+		auto panel_name = get_panel_name(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text_fmt(
 			ui_MappedName, "Knob %s in '%s'", panel_name.c_str(), patch->valid_knob_set_name(view_set_idx));
 
@@ -124,6 +138,7 @@ struct KnobMapPage : PageBase {
 			lv_hide(ui_ModuleMapToggleSwitchCont);
 			lv_check(ui_ModuleMapToggleSwitch, false);
 		}
+		lv_dropdown_set_selected(ui_EditMapMidiChannelDropdown, map.midi_chan);
 
 		// Knob arc
 
@@ -341,6 +356,18 @@ struct KnobMapPage : PageBase {
 			"Trash");
 	}
 
+	static void midichan_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+		if (!page)
+			return;
+
+		page->map.midi_chan = lv_dropdown_get_selected(ui_EditMapMidiChannelDropdown);
+		page->patch->add_update_midi_map(page->map);
+		page->patches.mark_view_patch_modified();
+	}
+
 	void save_knob_alias(bool save) {
 		lv_obj_clear_state(ui_AliasTextArea, LV_STATE_USER_1);
 		lv_group_focus_obj(ui_AliasTextArea);
@@ -351,6 +378,7 @@ struct KnobMapPage : PageBase {
 		if (save) {
 			map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
 			patch->add_update_mapped_knob(view_set_idx, map);
+			patches.mark_view_patch_modified();
 		}
 
 		update_alias_text_area();
