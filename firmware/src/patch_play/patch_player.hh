@@ -378,7 +378,7 @@ public:
 			auto normal_val = volts / 10.f;
 			if (mm.curve_type == MappedKnob::CurveType::Toggle) {
 				// Latching: toggle
-				if (mm.get_mapped_val(normal_val) > 0.5f) {
+				if (normal_val > 0.5f) { //rising edge
 					auto cur_val = modules[mm.module_id]->get_param(mm.param_id);
 
 					// if param is currently closer to min, then set it to max (and vice-versa)
