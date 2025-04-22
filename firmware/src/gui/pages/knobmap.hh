@@ -264,7 +264,7 @@ struct KnobMapPage : PageBase {
 		}
 
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});
-		page->patch_mod_queue.put(EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx});
+		page->patch_mod_queue.put(ModifyMapping{.map = page->map, .set_id = page->view_set_idx});
 		page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
 		page->patches.mark_view_patch_modified();
 	}
@@ -364,6 +364,7 @@ struct KnobMapPage : PageBase {
 			return;
 
 		page->map.midi_chan = lv_dropdown_get_selected(ui_EditMapMidiChannelDropdown);
+		page->patch_mod_queue.put(ModifyMapping{.map = page->map, .set_id = PatchData::MIDIKnobSet});
 		page->patch->add_update_midi_map(page->map);
 		page->patches.mark_view_patch_modified();
 	}

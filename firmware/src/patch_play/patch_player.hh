@@ -551,6 +551,7 @@ public:
 				found->min = map.min;
 				found->max = map.max;
 				found->curve_type = map.curve_type;
+				found->midi_chan = map.midi_chan;
 				if (map.panel_knob_id < PanelDef::NumKnobs)
 					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
 			}
