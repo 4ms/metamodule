@@ -33,9 +33,10 @@ inline bool alpha_then_newest_version(PluginFile const &a, PluginFile const &b) 
 				return false;
 
 			} else {
-				// Both or neither have suffixes, so show the lexically later one
-				// true if b is lexicaxlly before a (e.g. "dev-12" is before "dev-13")
-				// so we should show a above b (dev-13 is newer).
+				// Both or neither have suffixes, so show the lexically later one.
+				// Return true if a is lexically after b (e.g. "dev-13" is after "dev-12")
+				// meaning we should show a above b (dev-13 is newer).
+				// This also means "fw-X.X" will show above (newer) than "dev-ZZ", since "f" is after "d"
 				return less_ci(b.version_in_filename, a.version_in_filename);
 			}
 		} else
