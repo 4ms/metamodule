@@ -212,6 +212,7 @@ struct PatchSelectorPage : PageBase {
 		}
 
 		lv_roller_set_selected(ui_PatchListRoller, match_idx, LV_ANIM_OFF);
+		roller_hover.hide();
 	}
 
 	void add_all_files_to_roller(Volume vol, std::string &roller_text, std::string prefix, PatchDir &dir) {
