@@ -291,7 +291,7 @@ struct PatchPlayLoader {
 	PluginModuleType *get_plugin_module(int32_t module_idx) {
 		if (module_idx >= 0 && module_idx < (int32_t)player_.num_modules)
 			return dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get());
-		else 
+		else
 			return nullptr;
 	}
 
@@ -439,6 +439,7 @@ private:
 
 		auto result = player_.load_patch(*next_patch);
 		if (result.success) {
+			HAL_Delay(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
 			if (next_patch == patches_.get_view_patch())
 				patches_.play_view_patch();
