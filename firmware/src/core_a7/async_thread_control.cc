@@ -118,7 +118,7 @@ void kill_module_threads() {
 void peg_task_to_core(uint32_t module_id, uint32_t core_id) {
 	for (auto &task : tasks) {
 		if (task.module && task.module->id == module_id) {
-			pr_trace("Peg task for module id %u: task id %u -> core %u\n", module_id, task.id, core_id);
+			pr_info("Peg task for module id %u: task id %u -> core %u\n", module_id, task.id, core_id);
 			task.core_id = core_id;
 		}
 	}
