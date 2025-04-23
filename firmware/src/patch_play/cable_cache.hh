@@ -1,6 +1,6 @@
 #pragma once
 #include "conf/patch_conf.hh"
-#include "patch/patch_data.hh"
+#include "patch/patch.hh"
 #include <span>
 
 namespace MetaModule

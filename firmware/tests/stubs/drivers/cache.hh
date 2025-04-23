@@ -14,6 +14,13 @@ template<typename ptr>
 inline void invalidate_dcache_by_addr(ptr addr) {
 }
 
+template<typename ptr>
+inline void invalidate_dcache_by_addr_fast(ptr addr) {
+}
+
+inline void mem_barrier() {
+}
+
 inline void invalidate_dcache_by_range(void *addr, int32_t size) {
 }
 

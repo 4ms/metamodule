@@ -4,6 +4,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "conf/patch_conf.hh"
 #include "coreproc_plugin/async_thread_control.hh"
+#include "drivers/cache.hh"
 #include "null_module.hh"
 #include "params/catchup_manager.hh"
 #include "params/catchup_param.hh"
@@ -250,11 +251,24 @@ public:
 		update_midi_pulses();
 	}
 
+	// Inval each out.val, no DMB: 72-73% [sounds good]
+	// Inval each out.val, DMB after: 72-73% [sounds good] <<<<<<<<<<<<<
+	// Inval each out.val: 73-74% [sounds good]
+	// Inval before, clean after: 73-75 [sounds good]
+	// Inval before only: 69-71% [sounds good]
+	// Clean after only: 64-67% [sounds bad]
+	// Neither: 59-61% [sounds bad]
 	void process_module_outputs(unsigned module_i) {
-		for (auto &out : cables.outs[module_i])
+		for (auto &out : cables.outs[module_i]) {
+			mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(&out.val);
 			out.val = modules[module_i]->get_output(out.jack_id);
+		}
+		mdrivlib::SystemCache::mem_barrier();
 	}
 
+	// None above and
+	// Clean before: 63-65% sounds bad
+	// Inval before: 69% sounds bad
 	void step_module(unsigned module_i) {
 		for (auto const &in : cables.ins[module_i])
 			modules[module_i]->set_input(in.jack_id, cables.outs[in.out_module_id][in.out_cache_idx].val);
