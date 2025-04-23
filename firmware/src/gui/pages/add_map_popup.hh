@@ -35,6 +35,8 @@ struct AddMapPopUp {
 		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(midi_channel_dropdown, drop_callback, LV_EVENT_VALUE_CHANGED, this);
+
+		lv_hide(midi_channel_dropdown);
 	}
 
 	void prepare_focus(lv_group_t *group, lv_obj_t *base) {
@@ -53,8 +55,11 @@ struct AddMapPopUp {
 
 		if (knobset_id == PatchData::MIDIKnobSet) {
 			lv_label_set_text(ui_AddMappingTitle, "Add a map: Send MIDI Note or CC");
-		} else
+			lv_show(midi_channel_dropdown);
+		} else {
 			lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob");
+			lv_hide(midi_channel_dropdown);
+		}
 		lv_label_set_text(ui_MapDetected, "");
 		lv_label_set_text(ui_MapExistsLabel, "");
 
