@@ -14,7 +14,7 @@ namespace MetaModule::MapRingDrawer
 inline lv_obj_t *draw_mapped_ring(const BaseElement &,
 								  lv_obj_t *element_obj,
 								  lv_obj_t *canvas,
-								  std::optional<uint32_t> panel_el_id,
+								  std::optional<uint16_t> panel_el_id,
 								  uint32_t module_height) {
 	return nullptr;
 }
@@ -22,7 +22,7 @@ inline lv_obj_t *draw_mapped_ring(const BaseElement &,
 inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 								  lv_obj_t *element_obj,
 								  lv_obj_t *canvas,
-								  std::optional<uint32_t> panel_el_id,
+								  std::optional<uint16_t> panel_el_id,
 								  uint32_t module_height) {
 	if (!panel_el_id.has_value() || !element_obj)
 		return nullptr;
@@ -80,7 +80,7 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 }
 
 inline lv_obj_t *
-draw_mapped_jack(const JackElement &, lv_obj_t *element_obj, lv_obj_t *canvas, std::optional<uint32_t> panel_el_id) {
+draw_mapped_jack(const JackElement &, lv_obj_t *element_obj, lv_obj_t *canvas, std::optional<uint16_t> panel_el_id) {
 
 	if (!panel_el_id.has_value() || !element_obj)
 		return nullptr;
@@ -102,7 +102,7 @@ draw_mapped_jack(const JackElement &, lv_obj_t *element_obj, lv_obj_t *canvas, s
 inline lv_obj_t *draw_mapped_ring(const JackInput &el,
 								  lv_obj_t *element_obj,
 								  lv_obj_t *canvas,
-								  std::optional<uint32_t> panel_el_id,
+								  std::optional<uint16_t> panel_el_id,
 								  uint32_t module_height) {
 
 	auto circle = draw_mapped_jack(el, element_obj, canvas, panel_el_id);
@@ -124,7 +124,7 @@ inline lv_obj_t *draw_mapped_ring(const JackInput &el,
 inline lv_obj_t *draw_mapped_ring(const JackOutput &el,
 								  lv_obj_t *element_obj,
 								  lv_obj_t *canvas,
-								  std::optional<uint32_t> panel_el_id,
+								  std::optional<uint16_t> panel_el_id,
 								  uint32_t module_height) {
 
 	auto circle = draw_mapped_jack(el, element_obj, canvas, panel_el_id);
