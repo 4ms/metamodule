@@ -16,6 +16,18 @@
 	{
 		"slug": "uGraph",
 		"name": "uGraph"
+	},
+	{
+		"slug": "Amalgam",
+		"name": "Amalgam"
+	},
+	{
+		"slug": "Feline",
+		"name": "Feline"
+	},
+	{
+		"slug": "Interzone",
+		"name": "Interzone"
 	}
 	]
 }
