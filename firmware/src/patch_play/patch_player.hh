@@ -4,6 +4,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "conf/patch_conf.hh"
 #include "coreproc_plugin/async_thread_control.hh"
+#include "delay.hh"
 #include "drivers/cache.hh"
 #include "null_module.hh"
 #include "params/catchup_manager.hh"
@@ -29,6 +30,7 @@
 #include <vector>
 
 #include "debug.hh"
+#include "util/zip.hh"
 
 namespace MetaModule
 {
@@ -36,7 +38,7 @@ namespace MetaModule
 class PatchPlayer {
 public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
-	CableCache cables;
+	CableCache<MulticorePlayer::NumCores> cables;
 
 	unsigned num_modules = 0;
 	std::atomic<bool> is_loaded = false;
@@ -194,14 +196,15 @@ public:
 
 		calc_multiple_module_indicies();
 
-		cables.build(pd.int_cables);
-
 		active_knob_set = 0;
 		catchup_manager.reset(modules, knob_maps[active_knob_set]);
 
 		rebalance_modules();
 
+		cables.build(pd.int_cables, core_balancer.cores.parts);
+
 		resume_module_threads();
+		delay_ms(2); // Allow threads to start
 
 		is_loaded = true;
 		if (num_not_found == 1)
@@ -216,12 +219,14 @@ public:
 	}
 
 	void rebalance_modules() {
-		auto cpu_times =
-			core_balancer.measure_modules(modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
+		auto cpu_times = core_balancer.measure_modules(
+			modules, num_modules, [this](unsigned module_i) { step_module(module_i, 1); });
+
 		core_balancer.balance_loads(cpu_times);
 
 		core_balancer.print_times(cpu_times, pd.module_slugs);
 
+		// Tell other SMP core which modules it's been assigned
 		smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
 
 		for (auto core_id = 0u; core_id < core_balancer.cores.parts.size(); core_id++) {
@@ -239,10 +244,12 @@ public:
 		else if (num_modules > 2) {
 			smp.update_modules();
 			for (auto module_i : core_balancer.cores.parts[0]) {
-				process_module_outputs(module_i);
+				Debug::Pin0::high();
+				process_module_outputs(module_i, 0);
+				Debug::Pin0::low();
 			}
 			for (auto module_i : core_balancer.cores.parts[0]) {
-				step_module(module_i);
+				step_module(module_i, 0);
 			}
 			smp.join();
 		} else
@@ -252,33 +259,53 @@ public:
 	}
 
 	// Inval each out.val, no DMB: 72-73% [sounds good]
-	// Inval each out.val, DMB after: 72-73% [sounds good] <<<<<<<<<<<<<
+	// Inval each out.val, DMB after: 72-73% [sounds good]
 	// Inval each out.val: 73-74% [sounds good]
 	// Inval before, clean after: 73-75 [sounds good]
-	// Inval before only: 69-71% [sounds good]
+
+	// Inval range and single DMB before only: 70% [sounds good]  <<<<<<<<<
+
 	// Clean after only: 64-67% [sounds bad]
 	// Neither: 59-61% [sounds bad]
-	void process_module_outputs(unsigned module_i) {
-		for (auto &out : cables.outs[module_i]) {
-			mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(&out.val);
-			out.val = modules[module_i]->get_output(out.jack_id);
+	void process_module_outputs(unsigned module_i, unsigned core) {
+		auto *startaddr = cables.outvals[core].data();
+		mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(startaddr);
+
+		for (auto [val, jack] : zip(cables.outvals[core], cables.outjacks[core])) {
+			val = modules[jack.module_id_only()]->get_output(jack.jack_id);
+			// if (jack.is_tagged())
+			// 	mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(&val);
 		}
-		mdrivlib::SystemCache::mem_barrier();
+
+		// mdrivlib::SystemCache::invalidate_dcache_by_range(cables.outs[module_i].data(), cables.outs[module_i].size());
+
+		// for (auto &out : cables.outs[module_i]) {
+		// 	// mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(&out.val);
+		// 	out.val = modules[module_i]->get_output(out.jack_id);
+		// 	mdrivlib::SystemCache::clean_dcache_by_addr_fast(&out.val);
+		// }
+
+		// mdrivlib::SystemCache::mem_barrier();
 	}
 
 	// None above and
 	// Clean before: 63-65% sounds bad
 	// Inval before: 69% sounds bad
-	void step_module(unsigned module_i) {
-		for (auto const &in : cables.ins[module_i])
-			modules[module_i]->set_input(in.jack_id, cables.outs[in.out_module_id][in.out_cache_idx].val);
+	void step_module(unsigned module_i, unsigned core) {
+		// if (core == 0)
+		// 	Debug::Pin1::high();
+		for (auto const &in : cables.ins[module_i]) {
+			modules[module_i]->set_input(in.jack_id, *in.outval);
+		}
+		// if (core == 0)
+		// 	Debug::Pin1::low();
 
 		modules[module_i]->update();
 	}
 
 	void update_patch_singlecore() {
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
-			step_module(module_i);
+			step_module(module_i, 0);
 		}
 		update_midi_pulses();
 	}
@@ -602,7 +629,7 @@ public:
 
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
-		cables.add(in, out);
+		cables.add(in, out, core_balancer.cores.parts);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
@@ -679,7 +706,7 @@ public:
 
 		pd.disconnect_injack(jack);
 
-		cables.build(pd.int_cables);
+		cables.build(pd.int_cables, core_balancer.cores.parts);
 	}
 
 	void disconnect_outjack(Jack jack) {
@@ -699,7 +726,7 @@ public:
 
 		pd.disconnect_outjack(jack);
 
-		cables.build(pd.int_cables);
+		cables.build(pd.int_cables, core_balancer.cores.parts);
 	}
 
 	void reset_module(uint16_t module_id, std::string_view data = "") {
