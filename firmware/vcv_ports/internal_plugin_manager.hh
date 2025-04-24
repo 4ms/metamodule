@@ -126,8 +126,8 @@ struct InternalPluginManager {
 #endif
 
 #ifdef BUILD_INTERNAL_hetrickcv
-		pluginInstance = &internal_plugins.emplace_back("hetrickcv");
-		pluginInstance->slug = "hetrickcv";
+		pluginInstance = &internal_plugins.emplace_back("HetrickCV");
+		pluginInstance->slug = "HetrickCV";
 		hetrickcvPluginInstance = pluginInstance;
 		pluginInstance->addModel(modelTwoToFour);
 		pluginInstance->addModel(modelAnalogToDigital);
@@ -198,8 +198,8 @@ struct InternalPluginManager {
 #endif
 
 #ifdef BUILD_INTERNAL_nonlinearcircuits
-		pluginInstance = &internal_plugins.emplace_back("nonlinearcircuits");
-		pluginInstance->slug = "nonlinearcircuits";
+		pluginInstance = &internal_plugins.emplace_back("NonlinearCircuits");
+		pluginInstance->slug = "NonlinearCircuits";
 		nonlinearcircuitsPluginInstance = pluginInstance;
 		pluginInstance->addModel(model4Seq);
 		pluginInstance->addModel(modelCipher);
