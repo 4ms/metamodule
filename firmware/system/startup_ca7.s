@@ -9,6 +9,7 @@
 .equ MODE_SYS, 0x1F
 
 .equ GICC_BASE, 0xA0022000
+.equ SCU_BASE, 0xA0020000
 
 .section .vector_table, "x"
 .global _Reset
@@ -34,6 +35,11 @@ Reset_Handler:
 	bic     r0, r0, #(0x1 << 13) 					// Clear V bit 13 to disable hivecs
 	mcr     p15, 0, r0, c1, c0, 0 					// Write value back to CP15 System Control register
 	isb
+
+	ldr r4, =SCU_BASE 								// Enable SCU: FIXME: does this have any effect on CA7?
+	mov r0, #0x11
+	str r0, [r4]
+
 													// Configure ACTLR
 	mrc     p15, 0, r0, c1, c0, 1 					// Read CP15 Auxiliary Control Register
 	orr     r0, r0, #(1 <<  1) 						// Enable L2 prefetch hint (UNK/WI since r4p1)
