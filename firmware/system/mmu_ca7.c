@@ -120,7 +120,7 @@ void MMU_CreateTranslationTable(void) {
 
 	create_aligned_section(TTB_BASE, A7_CODE, A7_CODE_SZ, Sect_Normal);
 
-	create_aligned_section(TTB_BASE, A7_RAM, A7_RAM_SZ, Sect_Normal_RW);
+	create_aligned_section(TTB_BASE, A7_RAM, A7_RAM_SZ, Sect_Normal_Shared);
 
 	create_aligned_section(TTB_BASE, A7_HEAP, A7_HEAP_SZ, Sect_Normal_Shared); //Executable!
 
