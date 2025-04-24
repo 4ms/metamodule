@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/patch_conf.hh"
 #include "patch/patch.hh"
+#include "util/aligned_allocator.hh"
 #include <span>
 
 namespace MetaModule
@@ -58,7 +59,7 @@ struct CableCache {
 	}
 
 	// outs[N] and ins[N] are the cables connected to module id N
-	std::array<std::vector<CableOut>, MAX_MODULES_IN_PATCH> outs;
+	std::array<std::vector<CableOut, AlignedAllocator<CableOut, 64>>, MAX_MODULES_IN_PATCH> outs;
 	std::array<std::vector<CableIn>, MAX_MODULES_IN_PATCH> ins;
 };
 } // namespace MetaModule
