@@ -268,11 +268,10 @@ public:
 	// Clean after only: 64-67% [sounds bad]
 	// Neither: 59-61% [sounds bad]
 	void process_module_outputs(unsigned module_i, unsigned core) {
-		auto *startaddr = cables.outvals[core].data();
-		mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(startaddr);
+		mdrivlib::SystemCache::invalidate_dcache_by_range(cables.outvals[core].data(), cables.outvals[core].size());
 
-		for (auto [val, jack] : zip(cables.outvals[core], cables.outjacks[core])) {
-			val = modules[jack.module_id_only()]->get_output(jack.jack_id);
+		for (auto i = 0; auto &jack : cables.outjacks[core]) {
+			cables.outvals[core][i] = modules[jack.module_id_only()]->get_output(jack.jack_id);
 			// if (jack.is_tagged())
 			// 	mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(&val);
 		}
@@ -285,20 +284,25 @@ public:
 		// 	mdrivlib::SystemCache::clean_dcache_by_addr_fast(&out.val);
 		// }
 
-		// mdrivlib::SystemCache::mem_barrier();
+		mdrivlib::SystemCache::mem_barrier();
 	}
 
 	// None above and
 	// Clean before: 63-65% sounds bad
 	// Inval before: 69% sounds bad
 	void step_module(unsigned module_i, unsigned core) {
-		// if (core == 0)
-		// 	Debug::Pin1::high();
 		for (auto const &in : cables.ins[module_i]) {
 			modules[module_i]->set_input(in.jack_id, *in.outval);
 		}
-		// if (core == 0)
-		// 	Debug::Pin1::low();
+
+		modules[module_i]->update();
+	}
+	void step_module2(unsigned module_i, unsigned core) {
+		Debug::Pin1::high();
+		for (auto const &in : cables.ins[module_i]) {
+			modules[module_i]->set_input(in.jack_id, *in.outval);
+		}
+		Debug::Pin1::low();
 
 		modules[module_i]->update();
 	}
@@ -395,7 +399,8 @@ public:
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules) {
 					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
-						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
+						modules[mm.module_id]->set_param(mm.param_id,
+														 mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
 					}
 				}
 			}

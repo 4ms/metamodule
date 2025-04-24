@@ -34,7 +34,7 @@ struct CableCache {
 	}
 
 	template<typename SpanT>
-	unsigned find_core(uint16_t module_id, std::array<SpanT, NumCores> module_cores) {
+	unsigned find_core(uint16_t module_id, std::array<SpanT, NumCores> const &module_cores) {
 		for (auto i = 0u; auto &modules : module_cores) {
 			if (std::ranges::find(modules, module_id) != modules.end()) {
 				return i;
@@ -45,21 +45,22 @@ struct CableCache {
 	}
 
 	template<typename SpanT>
-	void build(std::span<const InternalCable> cables, std::array<SpanT, NumCores> module_cores) {
+	void build(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
 		clear();
 
 		for (auto &cable : cables) {
 			// Find which core the module belongs to
 			auto core_id = find_core(cable.out.module_id, module_cores);
 
-			pr_dbg("CableCache::build(): cable m:%u j:%u c:%u ", cable.out.module_id, cable.out.jack_id, core_id);
+			printf("CableCache::build(): cable m:%u j:%u c:%u ", cable.out.module_id, cable.out.jack_id, core_id);
 
 			if (core_id == NumCores)
 				continue; //error: bad module_id in the cable
 
 			auto &outval = outvals[core_id].emplace_back(0);
-			outjacks[core_id].push_back({cable.out.module_id, cable.out.jack_id});
-			auto &outjack = outjacks[core_id][outjacks[core_id].size() - 1];
+			auto &outjack = outjacks[core_id].emplace_back();
+			// outjacks[core_id].push_back({cable.out.module_id, cable.out.jack_id});
+			// auto &outjack = outjacks[core_id][outjacks[core_id].size() - 1];
 
 			for (auto &in : cable.ins) {
 				if (in.module_id < ins.size()) {
@@ -67,19 +68,19 @@ struct CableCache {
 					auto this_core = find_core(in.module_id, module_cores);
 					if (this_core != core_id) {
 						outjack.set_tag();
-						pr_dbg("(tag) ");
+						printf("(tag) ");
 					}
-					pr_dbg("-> m:%u j:%u c:%u ", in.module_id, in.jack_id, this_core);
+					printf("-> m:%u j:%u c:%u ", in.module_id, in.jack_id, this_core);
 					ins[in.module_id].push_back({in.jack_id, &outval});
 				}
 			}
 
-			pr_dbg("\n");
+			printf("\n");
 		}
 	}
 
 	template<typename SpanT>
-	void add(Jack in, Jack out, std::array<SpanT, NumCores> module_cores) {
+	void add(Jack in, Jack out, std::array<SpanT, NumCores> const &module_cores) {
 		// Find which core the module belongs to
 		auto out_core_id = find_core(out.module_id, module_cores);
 		if (out_core_id == NumCores)
