@@ -202,6 +202,7 @@ public:
 		rebalance_modules();
 
 		cables.build(pd.int_cables, core_balancer.cores.parts);
+		printf("-> %zu/%zu\n", cables.outjacks[0].size(), cables.outjacks[1].size());
 
 		resume_module_threads();
 		delay_ms(2); // Allow threads to start
@@ -220,7 +221,7 @@ public:
 
 	void rebalance_modules() {
 		auto cpu_times = core_balancer.measure_modules(
-			modules, num_modules, [this](unsigned module_i) { step_module(module_i, 1); });
+			modules, num_modules, [this](unsigned module_i) { step_module<1>(module_i); });
 
 		core_balancer.balance_loads(cpu_times);
 
@@ -244,13 +245,15 @@ public:
 		else if (num_modules > 2) {
 			smp.update_modules();
 			for (auto module_i : core_balancer.cores.parts[0]) {
-				Debug::Pin0::high();
-				process_module_outputs(module_i, 0);
-				Debug::Pin0::low();
+				process_module_outputs<0>(module_i);
 			}
+			clean_outjacks<0>();
+
 			for (auto module_i : core_balancer.cores.parts[0]) {
-				step_module(module_i, 0);
+				step_module<0>(module_i);
 			}
+
+			mdrivlib::SystemCache::mem_barrier();
 			smp.join();
 		} else
 			return;
@@ -258,58 +261,56 @@ public:
 		update_midi_pulses();
 	}
 
-	// Inval each out.val, no DMB: 72-73% [sounds good]
-	// Inval each out.val, DMB after: 72-73% [sounds good]
-	// Inval each out.val: 73-74% [sounds good]
-	// Inval before, clean after: 73-75 [sounds good]
-
-	// Inval range and single DMB before only: 70% [sounds good]  <<<<<<<<<
-
-	// Clean after only: 64-67% [sounds bad]
-	// Neither: 59-61% [sounds bad]
-	void process_module_outputs(unsigned module_i, unsigned core) {
-		mdrivlib::SystemCache::invalidate_dcache_by_range(cables.outvals[core].data(), cables.outvals[core].size());
-
-		for (auto i = 0; auto &jack : cables.outjacks[core]) {
-			cables.outvals[core][i] = modules[jack.module_id_only()]->get_output(jack.jack_id);
-			// if (jack.is_tagged())
-			// 	mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(&val);
-		}
-
-		// mdrivlib::SystemCache::invalidate_dcache_by_range(cables.outs[module_i].data(), cables.outs[module_i].size());
-
-		// for (auto &out : cables.outs[module_i]) {
-		// 	// mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(&out.val);
-		// 	out.val = modules[module_i]->get_output(out.jack_id);
-		// 	mdrivlib::SystemCache::clean_dcache_by_addr_fast(&out.val);
-		// }
-
-		mdrivlib::SystemCache::mem_barrier();
+	template<size_t Core>
+	void invalidate_outjacks() {
+		mdrivlib::SystemCache::invalidate_dcache_by_range(cables.outvals[Core].data(), cables.outvals[Core].size());
 	}
 
-	// None above and
-	// Clean before: 63-65% sounds bad
-	// Inval before: 69% sounds bad
-	void step_module(unsigned module_i, unsigned core) {
-		for (auto const &in : cables.ins[module_i]) {
-			modules[module_i]->set_input(in.jack_id, *in.outval);
-		}
-
-		modules[module_i]->update();
+	template<size_t Core>
+	void clean_outjacks() {
+		mdrivlib::SystemCache::clean_dcache_by_range(cables.outvals[Core].data(), cables.outvals[Core].size());
 	}
-	void step_module2(unsigned module_i, unsigned core) {
-		Debug::Pin1::high();
-		for (auto const &in : cables.ins[module_i]) {
-			modules[module_i]->set_input(in.jack_id, *in.outval);
+
+	template<size_t Core>
+	void process_module_outputs(unsigned module_i) {
+		for (auto i = 0; auto &jack : cables.outjacks[Core]) {
+			if constexpr (Core == 0)
+				Debug::Pin0::high();
+			else
+				Debug::Pin2::high();
+
+			cables.outvals[Core][i] = modules[jack.module_id_only()]->get_output(jack.jack_id);
+
+			if constexpr (Core == 0)
+				Debug::Pin0::low();
+			else
+				Debug::Pin2::low();
 		}
-		Debug::Pin1::low();
+	}
+
+	template<size_t Core>
+	void step_module(unsigned module_i) {
+		for (auto const &in : cables.ins[module_i]) {
+			if constexpr (Core == 0)
+				Debug::Pin1::high();
+			else
+				Debug::Pin3::high();
+
+			float val = cables.outvals[in.out_core_id][in.out_cache_idx];
+			modules[module_i]->set_input(in.jack_id, val);
+
+			if constexpr (Core == 0)
+				Debug::Pin1::low();
+			else
+				Debug::Pin3::low();
+		}
 
 		modules[module_i]->update();
 	}
 
 	void update_patch_singlecore() {
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
-			step_module(module_i, 0);
+			step_module<0>(module_i);
 		}
 		update_midi_pulses();
 	}
@@ -712,6 +713,7 @@ public:
 		pd.disconnect_injack(jack);
 
 		cables.build(pd.int_cables, core_balancer.cores.parts);
+		printf("-> %zu/%zu\n", cables.outjacks[0].size(), cables.outjacks[1].size());
 	}
 
 	void disconnect_outjack(Jack jack) {
@@ -732,6 +734,7 @@ public:
 		pd.disconnect_outjack(jack);
 
 		cables.build(pd.int_cables, core_balancer.cores.parts);
+		printf("-> %zu/%zu\n", cables.outjacks[0].size(), cables.outjacks[1].size());
 	}
 
 	void reset_module(uint16_t module_id, std::string_view data = "") {

@@ -12,16 +12,10 @@ template<size_t NumCores>
 struct CableCache {
 	CableCache() = default;
 
-	// struct CableOut {
-	// 	float val;
-	// 	uint16_t jack_id;
-	// };
-
 	struct CableIn {
 		uint16_t jack_id;
-		float *outval;
-		//todo: profile using this instead:
-		// uint16_t out_cache_idx;
+		uint16_t out_cache_idx;
+		uint32_t out_core_id;
 	};
 
 	void clear() {
@@ -48,35 +42,42 @@ struct CableCache {
 	void build(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
 		clear();
 
-		for (auto &cable : cables) {
+		for (auto const &cable : cables) {
 			// Find which core the module belongs to
-			auto core_id = find_core(cable.out.module_id, module_cores);
+			auto out_core_id = find_core(cable.out.module_id, module_cores);
 
-			printf("CableCache::build(): cable m:%u j:%u c:%u ", cable.out.module_id, cable.out.jack_id, core_id);
-
-			if (core_id == NumCores)
+			if (out_core_id == NumCores)
 				continue; //error: bad module_id in the cable
 
-			auto &outval = outvals[core_id].emplace_back(0);
-			auto &outjack = outjacks[core_id].emplace_back();
-			// outjacks[core_id].push_back({cable.out.module_id, cable.out.jack_id});
-			// auto &outjack = outjacks[core_id][outjacks[core_id].size() - 1];
+			auto &outjack = outjacks[out_core_id].emplace_back();
+			outvals[out_core_id].push_back(0);
+			outjack.module_id = cable.out.module_id;
+			outjack.jack_id = cable.out.jack_id;
+
+			printf("CableCache::build(): cable m:%u j:%u c:%u ", cable.out.module_id, cable.out.jack_id, out_core_id);
 
 			for (auto &in : cable.ins) {
 				if (in.module_id < ins.size()) {
 					// Tag output jacks if one or more inputs is on another core
-					auto this_core = find_core(in.module_id, module_cores);
-					if (this_core != core_id) {
+					auto in_core_id = find_core(in.module_id, module_cores);
+					if (in_core_id != out_core_id) {
 						outjack.set_tag();
 						printf("(tag) ");
 					}
-					printf("-> m:%u j:%u c:%u ", in.module_id, in.jack_id, this_core);
-					ins[in.module_id].push_back({in.jack_id, &outval});
+					printf("-> m:%u j:%u c:%u [%u %zu]",
+						   in.module_id,
+						   in.jack_id,
+						   in_core_id,
+						   out_core_id,
+						   outvals[out_core_id].size() - 1);
+					ins[in.module_id].push_back(
+						{in.jack_id, static_cast<uint16_t>(outvals[out_core_id].size() - 1), out_core_id});
 				}
 			}
 
 			printf("\n");
 		}
+		printf("Built %zu cables -> %zu\n", cables.size(), outjacks.size());
 	}
 
 	template<typename SpanT>
@@ -89,14 +90,17 @@ struct CableCache {
 		if (in_core_id == NumCores)
 			return;
 
-		auto &outval = outvals[out_core_id].emplace_back(0);
+		outvals[out_core_id].push_back(0);
 		outjacks[out_core_id].push_back({out.module_id, out.jack_id});
+
 		// Tag output jacks if one or more inputs is on another core
 		if (in_core_id != out_core_id) {
 			outjacks[out_core_id][outjacks[out_core_id].size() - 1].set_tag();
 		}
 
-		ins[in.module_id].push_back({in.jack_id, &outval});
+		ins[in.module_id].push_back({in.jack_id, static_cast<uint16_t>(outvals[out_core_id].size() - 1), out_core_id});
+
+		printf("Add cables -> %zu/%zu\n", outjacks[0].size(), outjacks[1].size());
 	}
 
 	// ins[N] are the cables connected to module id N

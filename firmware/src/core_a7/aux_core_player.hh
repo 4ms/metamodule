@@ -34,11 +34,13 @@ struct AuxPlayer {
 	void play_modules() {
 
 		for (auto module_i : module_ids) {
-			patch_player.process_module_outputs(module_i, 1);
+			patch_player.process_module_outputs<1>(module_i);
 		}
 
+		patch_player.clean_outjacks<1>();
+
 		for (auto module_i : module_ids) {
-			patch_player.step_module(module_i, 0);
+			patch_player.step_module<1>(module_i);
 		}
 
 		mdrivlib::SMPThread::signal_done();
