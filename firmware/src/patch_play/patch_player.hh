@@ -244,10 +244,12 @@ public:
 
 		else if (num_modules > 2) {
 			smp.update_modules();
+
+			// invalidate_outjacks<0>();
 			for (auto module_i : core_balancer.cores.parts[0]) {
 				process_module_outputs<0>(module_i);
 			}
-			clean_outjacks<0>();
+			// clean_outjacks<0>();
 
 			for (auto module_i : core_balancer.cores.parts[0]) {
 				step_module<0>(module_i);
@@ -274,35 +276,36 @@ public:
 	template<size_t Core>
 	void process_module_outputs(unsigned module_i) {
 		for (auto i = 0; auto &jack : cables.outjacks[Core]) {
-			if constexpr (Core == 0)
-				Debug::Pin0::high();
-			else
-				Debug::Pin2::high();
+			// if constexpr (Core == 0)
+			// 	Debug::Pin0::high();
+			// else
+			// 	Debug::Pin2::high();
 
 			cables.outvals[Core][i] = modules[jack.module_id_only()]->get_output(jack.jack_id);
+			i++;
 
-			if constexpr (Core == 0)
-				Debug::Pin0::low();
-			else
-				Debug::Pin2::low();
+			// if constexpr (Core == 0)
+			// 	Debug::Pin0::low();
+			// else
+			// 	Debug::Pin2::low();
 		}
 	}
 
 	template<size_t Core>
 	void step_module(unsigned module_i) {
 		for (auto const &in : cables.ins[module_i]) {
-			if constexpr (Core == 0)
-				Debug::Pin1::high();
-			else
-				Debug::Pin3::high();
+			// if constexpr (Core == 0)
+			// 	Debug::Pin1::high();
+			// else
+			// 	Debug::Pin3::high();
 
 			float val = cables.outvals[in.out_core_id][in.out_cache_idx];
 			modules[module_i]->set_input(in.jack_id, val);
 
-			if constexpr (Core == 0)
-				Debug::Pin1::low();
-			else
-				Debug::Pin3::low();
+			// if constexpr (Core == 0)
+			// 	Debug::Pin1::low();
+			// else
+			// 	Debug::Pin3::low();
 		}
 
 		modules[module_i]->update();

@@ -33,11 +33,13 @@ struct AuxPlayer {
 
 	void play_modules() {
 
+		// patch_player.invalidate_outjacks<1>();
+
 		for (auto module_i : module_ids) {
 			patch_player.process_module_outputs<1>(module_i);
 		}
 
-		patch_player.clean_outjacks<1>();
+		// patch_player.clean_outjacks<1>();
 
 		for (auto module_i : module_ids) {
 			patch_player.step_module<1>(module_i);

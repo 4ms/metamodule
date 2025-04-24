@@ -14,8 +14,9 @@ struct CableCache {
 
 	struct CableIn {
 		uint16_t jack_id;
-		uint16_t out_cache_idx;
-		uint32_t out_core_id;
+		uint16_t out_cache_idx : 15;
+		uint16_t out_core_id : 1;
+		// uint32_t out_core_id;
 	};
 
 	void clear() {
@@ -70,8 +71,11 @@ struct CableCache {
 						   in_core_id,
 						   out_core_id,
 						   outvals[out_core_id].size() - 1);
-					ins[in.module_id].push_back(
-						{in.jack_id, static_cast<uint16_t>(outvals[out_core_id].size() - 1), out_core_id});
+					CableIn c;
+					c.jack_id = in.jack_id;
+					c.out_cache_idx = outvals[out_core_id].size() - 1;
+					c.out_core_id = out_core_id;
+					ins[in.module_id].push_back(c);
 				}
 			}
 
@@ -98,7 +102,11 @@ struct CableCache {
 			outjacks[out_core_id][outjacks[out_core_id].size() - 1].set_tag();
 		}
 
-		ins[in.module_id].push_back({in.jack_id, static_cast<uint16_t>(outvals[out_core_id].size() - 1), out_core_id});
+		CableIn c;
+		c.jack_id = in.jack_id;
+		c.out_cache_idx = outvals[out_core_id].size() - 1;
+		c.out_core_id = out_core_id;
+		ins[in.module_id].push_back(c);
 
 		printf("Add cables -> %zu/%zu\n", outjacks[0].size(), outjacks[1].size());
 	}
@@ -111,13 +119,15 @@ struct CableCache {
 		static constexpr uint16_t tag = 1 << tag_bit_shift;
 
 		void set_tag() {
-			module_id |= tag;
+			// module_id |= tag;
 		}
 		bool is_tagged() const {
-			return module_id & tag;
+			return false;
+			// return module_id & tag;
 		}
 		uint16_t module_id_only() const {
-			return module_id & ~tag;
+			return module_id;
+			// return module_id & ~tag;
 		}
 	};
 
