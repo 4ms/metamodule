@@ -37,6 +37,7 @@ Reset_Handler:
 													// Configure ACTLR
 	mrc     p15, 0, r0, c1, c0, 1 					// Read CP15 Auxiliary Control Register
 	orr     r0, r0, #(1 <<  1) 						// Enable L2 prefetch hint (UNK/WI since r4p1)
+	orr     r0, r0, #0x040							// Set SMP bit to enable Snoop (SCU)
 	mcr     p15, 0, r0, c1, c0, 1 					// Write CP15 Auxiliary Control Register
 
 													// Set Vector Base Address Register (VBAR) to point to this application's vector table

@@ -74,6 +74,7 @@ static uint32_t Sect_Device_RO;	 // device, non-shareable, non-executable, ro, d
 static uint32_t Sect_Device_RW;	 // as Sect_Device_RO, but writeable
 static uint32_t Sect_StronglyOrdered;
 static uint32_t Sect_Normal_NonCache;
+static uint32_t Sect_Normal_Shared;
 
 static uint32_t Page_L1_4k = 0x0;	// generic
 static uint32_t Page_L1_64k = 0x0;	// generic
@@ -106,6 +107,7 @@ void MMU_CreateTranslationTable(void) {
 	MMU_TTSection(TTB_BASE, 0, 4096, DESCRIPTOR_FAULT);
 
 	section_normal(Sect_Normal, region);
+	section_normal_shared(Sect_Normal_Shared, region);
 	section_normal_cod(Sect_Normal_Cod, region);
 	section_normal_ro(Sect_Normal_RO, region);
 	section_normal_rw(Sect_Normal_RW, region);
@@ -120,7 +122,7 @@ void MMU_CreateTranslationTable(void) {
 
 	create_aligned_section(TTB_BASE, A7_RAM, A7_RAM_SZ, Sect_Normal_RW);
 
-	create_aligned_section(TTB_BASE, A7_HEAP, A7_HEAP_SZ, Sect_Normal); //Executable!
+	create_aligned_section(TTB_BASE, A7_HEAP, A7_HEAP_SZ, Sect_Normal_Shared); //Executable!
 
 	//.ddma: non-cacheable
 	// Note: section_so is quite a bit faster than section_normal_nc (sometimes)
