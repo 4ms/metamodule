@@ -239,10 +239,10 @@ public:
 		else if (num_modules > 2) {
 			smp.update_modules();
 			for (auto module_i : core_balancer.cores.parts[0]) {
-				process_module_outputs(module_i);
+				process_module_outputs2(module_i);
 			}
 			for (auto module_i : core_balancer.cores.parts[0]) {
-				step_module(module_i);
+				step_module2(module_i);
 			}
 			smp.join();
 		} else
@@ -266,12 +266,32 @@ public:
 		mdrivlib::SystemCache::mem_barrier();
 	}
 
+	// each call: 50ns with no cache stuff
+	// 105-666 (avg 132) with inval fast for each, then a mem_barrier (and allocaligned 64)
+	void process_module_outputs2(unsigned module_i) {
+		Debug::Pin0::high();
+		for (auto &out : cables.outs[module_i]) {
+			mdrivlib::SystemCache::invalidate_dcache_by_addr_fast(&out.val);
+			out.val = modules[module_i]->get_output(out.jack_id);
+		}
+		mdrivlib::SystemCache::mem_barrier();
+		Debug::Pin0::low();
+	}
 	// None above and
 	// Clean before: 63-65% sounds bad
 	// Inval before: 69% sounds bad
 	void step_module(unsigned module_i) {
 		for (auto const &in : cables.ins[module_i])
 			modules[module_i]->set_input(in.jack_id, cables.outs[in.out_module_id][in.out_cache_idx].val);
+
+		modules[module_i]->update();
+	}
+	void step_module2(unsigned module_i) {
+		for (auto const &in : cables.ins[module_i]) {
+			Debug::Pin1::high();
+			modules[module_i]->set_input(in.jack_id, cables.outs[in.out_module_id][in.out_cache_idx].val);
+			Debug::Pin1::low();
+		}
 
 		modules[module_i]->update();
 	}
