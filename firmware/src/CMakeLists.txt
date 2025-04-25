@@ -262,6 +262,7 @@ target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-
 
 if (CPU_TEST_ALL_MODULES)
   target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)
+  # target_compile_definitions(main.elf PRIVATE MM_LOADTEST_MEASURE_MEMORY=1)
 endif()
 
 if (CONSOLE_USE_USB)
