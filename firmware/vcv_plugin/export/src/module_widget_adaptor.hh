@@ -182,7 +182,7 @@ struct ModuleWidgetAdaptor {
 		has_custom_draw = custom_draw_func || custom_drawLayer_func || derives_from_leddisplay;
 
 		if (has_custom_draw) {
-			pr_dbg("ModuleWidget has_custom_draw\n");
+			pr_trace("ModuleWidget has_custom_draw\n");
 		}
 
 #endif
