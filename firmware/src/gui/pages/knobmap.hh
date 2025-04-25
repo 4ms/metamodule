@@ -127,10 +127,12 @@ struct KnobMapPage : PageBase {
 			ui_MappedName, "Knob %s in '%s'", panel_name.c_str(), patch->valid_knob_set_name(view_set_idx));
 
 		// Min/Max sliders
-		lv_label_set_text_fmt(ui_MinValue, "%d%%", unsigned(map.min * 100));
-		lv_label_set_text_fmt(ui_MaxValue, "%d%%", unsigned(map.max * 100));
-		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
-		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
+		int intmin = std::round(map.min * 100.f);
+		int intmax = std::round(map.max * 100.f);
+		lv_label_set_text_fmt(ui_MinValue, "%d%%", intmin);
+		lv_label_set_text_fmt(ui_MaxValue, "%d%%", intmax);
+		lv_slider_set_value(ui_MinSlider, intmin, LV_ANIM_OFF);
+		lv_slider_set_value(ui_MaxSlider, intmax, LV_ANIM_OFF);
 
 		if (map.is_midi_notegate()) {
 			lv_show(ui_ModuleMapToggleSwitchCont);
@@ -251,12 +253,12 @@ struct KnobMapPage : PageBase {
 		if (obj == ui_MinSlider) {
 			auto val = lv_slider_get_value(obj);
 			page->map.min = val / 100.f;
-			lv_label_set_text_fmt(ui_MinValue, "%d%%", (int)val);
+			lv_label_set_text_fmt(ui_MinValue, "%d%%", val);
 
 		} else if (obj == ui_MaxSlider) {
 			auto val = lv_slider_get_value(obj);
 			page->map.max = val / 100.f;
-			lv_label_set_text_fmt(ui_MaxValue, "%d%%", (int)val);
+			lv_label_set_text_fmt(ui_MaxValue, "%d%%", val);
 
 		} else {
 			auto checked = lv_obj_has_state(ui_ModuleMapToggleSwitch, LV_STATE_CHECKED);
