@@ -10,7 +10,7 @@
 		"name": "4Seq"
 	},
 	{
-		"slug": "Cipher",
+		"slug": "8BitCipher",
 		"name": "Cipher"
 	},
 	{
@@ -30,7 +30,7 @@
 		"name": "DoubleNeuron"
 	},
 	{
-		"slug": "Genie",
+		"slug": "GENiE",
 		"name": "Genie"
 	},
 	{
