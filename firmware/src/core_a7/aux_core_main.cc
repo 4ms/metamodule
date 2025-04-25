@@ -76,8 +76,9 @@ extern "C" void aux_core_main() {
 		using namespace mdrivlib;
 		if (Pin{ControlPins::but0, PinMode::Input, PinPull::Up, PinPolarity::Inverted}.is_on()) {
 			pr_info("A7 Core 2 running CPU load tests\n");
-			LoadTest::test_all_modules([&file_storage_proxy](std::string_view csv_line) {
+			LoadTest::test_all_modules([&file_storage_proxy, &ui](std::string_view csv_line) {
 				FS::append_file(file_storage_proxy, csv_line, {"cpu_test.csv", Volume::USB});
+				ui.update_screen();
 			});
 		}
 	}
