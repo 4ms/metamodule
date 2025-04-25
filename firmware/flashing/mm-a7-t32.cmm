@@ -38,6 +38,5 @@ ETM.ON
 Trace.arm
 ENDDO
 
-// CHECK THE ADDRESS THAT PLUGIN IS LOADED TO (e.g. 0xd001e800)
-// data.load.elf /Users/dann/4ms/stm32/meta-module/firmware/vcv_ports/build/Befaco.so 0xd001e800 /cpp /nocode
-// data.load.elf /Users/dann/4ms/stm32/meta-module/firmware/build/mp1corea7/medium/main.elf /cpp /nocode
+// CHANGE THE ADDRESS THAT PLUGIN IS LOADED TO
+// data.load.elf /Users/dann/4ms/stm32/*-debug.so 0xcd4203d0 /cpp /nocode /merge
