@@ -201,7 +201,7 @@ void Ui::update_channel_selections() {
 }
 
 void Ui::preload_plugins() {
-	auto preloader = PreLoader{plugin_manager, settings.plugin_autoload};
+	auto preloader = PreLoader{plugin_manager, settings.plugin_preload};
 
 	while (true) {
 		auto status = preloader.process();

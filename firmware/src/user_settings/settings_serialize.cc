@@ -91,7 +91,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["patch_view"] << settings.patch_view;
 	data["module_view"] << settings.module_view;
 	data["audio"] << settings.audio;
-	data["plugin_autoload"] << settings.plugin_autoload;
+	data["plugin_autoload"] << settings.plugin_preload;
 	data["last_patch_opened"] << settings.last_patch_opened;
 	data["last_patch_vol"] << static_cast<unsigned>(settings.last_patch_vol);
 	data["screensaver"] << settings.screensaver;

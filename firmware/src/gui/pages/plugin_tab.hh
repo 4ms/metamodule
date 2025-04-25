@@ -10,7 +10,7 @@
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "patch_play/patch_playloader.hh"
-#include "user_settings/plugin_autoload_settings.hh"
+#include "user_settings/plugin_preload_settings.hh"
 #include <algorithm>
 #include <deque>
 
@@ -30,8 +30,8 @@ struct PluginTab : SystemMenuTab {
 		, gui_state{gui_state}
 		, play_loader{play_loader} {
 
-		clear_autoloads_button = create_button(ui_PluginsRightColumn, "Preload None");
-		current_autoloads_button = create_button(ui_PluginsRightColumn, "Preload Current");
+		clear_autoloads_button = create_button(ui_PluginsRightColumn, "Pre-load None");
+		current_autoloads_button = create_button(ui_PluginsRightColumn, "Pre-load Current");
 		load_all_found_button = create_button(ui_PluginsLeftColumn, "Load all");
 
 		{ // Load All popup
@@ -109,7 +109,7 @@ struct PluginTab : SystemMenuTab {
 
 		show_ramdisk_free();
 
-		pr_dbg("Preloaded list:\n");
+		pr_dbg("Pre-loaded list:\n");
 		for (auto const &slug : settings.slug) {
 			pr_dbg("'%s'\n", slug.c_str());
 		}
@@ -386,12 +386,12 @@ private:
 				// Preload toggle
 				if (toggle) {
 					if (*toggle) {
-						pr_info("Preload Enabled: %s\n", plugin_name.data());
+						pr_info("Pre-load Enabled: %s\n", plugin_name.data());
 						page->settings.slug.push_back(plugin_name);
 					} else {
 						const auto autoload_slot = std::ranges::find(page->settings.slug, plugin_name);
 						if (autoload_slot != page->settings.slug.end()) {
-							pr_info("Preload Disabled: %s\n", plugin_name.data());
+							pr_info("Pre-load Disabled: %s\n", plugin_name.data());
 							page->settings.slug.erase(autoload_slot);
 						} else {
 							pr_err("Error: can't disable autoload for %s: not found in settings autoload list\n",

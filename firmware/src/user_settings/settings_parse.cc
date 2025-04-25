@@ -150,7 +150,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "patch_view", settings, &UserSettings::patch_view);
 	read_or_default(node, "module_view", settings, &UserSettings::module_view);
 	read_or_default(node, "audio", settings, &UserSettings::audio);
-	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_autoload);
+	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_preload);
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::last_patch_opened);
 	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
 	read_or_default(node, "catchup", settings, &UserSettings::catchup);
