@@ -194,10 +194,48 @@ private:
 		float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 		auto value = lv_arc_get_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 
+		// Check if this is a snapped knob so that we can just jump to the nearest value
+		std::visit([&](const auto& el) {
+			using T = std::decay_t<decltype(el)>;
+			if constexpr (std::is_base_of_v<Pot, T>) {
+				if (el.integral) {
+					float min_val = el.min_value;
+					float max_val = el.max_value;
+					int num_steps = max_val - min_val + 1; // +1 because range is inclusive
+
+					if (num_steps > 1) {
+						float step_size = 1.0f / (num_steps - 1);
+						
+						float current_param_value = playloader.param_value(drawn_el->gui_element.module_idx, 
+																		drawn_el->gui_element.idx.param_idx);
+						float movement_direction = normalized_value - (float)value / range;
+						
+						int target_step;
+						if (movement_direction > 0) {
+							target_step = std::ceil(normalized_value / step_size);
+						} else if (movement_direction < 0) {
+							target_step = std::floor(normalized_value / step_size);
+						} else {
+							target_step = std::round(normalized_value / step_size);
+						}
+						
+						target_step = std::max(0, std::min(target_step, num_steps - 1));
+						
+						normalized_value = target_step * step_size;
+						
+						int snapped_value = std::round(normalized_value * range) + lv_arc_get_min_value(ui_ControlArc);
+						lv_arc_set_value(ui_ControlArc, snapped_value);
+			
+						value = snapped_value - lv_arc_get_min_value(ui_ControlArc);
+					}
+				}
+			}
+		}, drawn_el->element);
+
 		StaticParam sp{
 			.module_id = drawn_el->gui_element.module_idx,
 			.param_id = drawn_el->gui_element.idx.param_idx,
-			.value = (float)value / range, //0/6 1/6 ... 6/6 => 1 2 ... 7
+			.value = (float)value / range,
 		};
 		patch_mod_queue.put(SetStaticParam{.param = sp});
 
