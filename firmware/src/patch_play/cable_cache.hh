@@ -1,64 +1,79 @@
 #pragma once
-#include "conf/patch_conf.hh"
-#include "patch/patch_data.hh"
+#include "console/pr_dbg.hh"
+#include "patch/patch.hh"
+#include "util/aligned_allocator.hh"
 #include <span>
 
 namespace MetaModule
 {
 
+template<size_t NumCores>
 struct CableCache {
 	CableCache() = default;
 
-	struct CableOut {
-		float val;
-		uint16_t jack_id;
-	};
-
-	struct CableIn {
-		uint16_t jack_id;
-		uint16_t out_module_id;
-		uint16_t out_cache_idx;
-		//todo: profile using this instead:
-		// CableOut *out;
-	};
-
 	void clear() {
-		for (auto &out : outs)
+		for (auto &out : _cables) {
 			out.clear();
-		for (auto &in : ins)
-			in.clear();
+		}
 	}
 
-	void build(std::span<const InternalCable> cables) {
+	template<typename SpanT>
+	unsigned find_core(uint16_t module_id, std::array<SpanT, NumCores> const &module_cores) {
+		for (auto i = 0u; auto &modules : module_cores) {
+			if (std::ranges::find(modules, module_id) != modules.end()) {
+				return i;
+			}
+			i++;
+		}
+		return NumCores;
+	}
+
+	template<typename SpanT>
+	void build(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
 		clear();
 
-		for (auto &cable : cables) {
-			if (cable.out.module_id >= outs.size())
-				continue;
-
-			auto &out = outs[cable.out.module_id];
-			auto out_idx = out.size();
-			out.push_back({0.f, cable.out.jack_id});
-
-			for (auto &in : cable.ins) {
-				if (in.module_id < ins.size()) {
-					ins[in.module_id].push_back({in.jack_id, cable.out.module_id, (uint16_t)out_idx});
-				}
+		for (auto const &cable : cables) {
+			for (auto const &in : cable.ins) {
+				add(in, cable.out, module_cores);
 			}
 		}
 	}
 
-	void add(Jack injack, Jack outjack) {
-		if (injack.module_id < ins.size() && outjack.module_id < outs.size()) {
-			auto &out = outs[outjack.module_id];
-			auto out_idx = out.size();
-			out.push_back({0.f, outjack.jack_id});
-			ins[injack.module_id].push_back({injack.jack_id, outjack.module_id, (uint16_t)out_idx});
-		}
+	template<typename SpanT>
+	void add(Jack in, Jack out, std::array<SpanT, NumCores> const &module_cores) {
+		auto out_core_id = find_core(out.module_id, module_cores);
+		if (out_core_id == NumCores)
+			return;
+
+		uint16_t outmodule = out.module_id;
+		_cables[out_core_id].push_back({{outmodule, out.jack_id}, {in.module_id, in.jack_id}});
+
+		// pr_dbg("Cable[%u]: m%u j%u -> m%u j%u\n", out_core_id, out.module_id, out.jack_id, in.module_id, in.jack_id);
 	}
 
-	// outs[N] and ins[N] are the cables connected to module id N
-	std::array<std::vector<CableOut>, MAX_MODULES_IN_PATCH> outs;
-	std::array<std::vector<CableIn>, MAX_MODULES_IN_PATCH> ins;
+	//
+	// struct TaggedJack : Jack {
+	// 	static constexpr unsigned tag_bit_shift = sizeof(module_id) * 8 - 1;
+	// 	static constexpr uint16_t tag = 1 << tag_bit_shift;
+
+	// 	void set_tag() {
+	// 		module_id |= tag;
+	// 	}
+	// 	bool is_tagged() const {
+	// 		return module_id & tag;
+	// 	}
+	// 	uint16_t module_id_only() const {
+	// 		return module_id & ~tag;
+	// 	}
+	// };
+	using TaggedJack = Jack;
+
+	struct SingleCable {
+		TaggedJack out;
+		Jack in;
+	};
+
+	// organized by out
+	std::array<std::vector<SingleCable>, NumCores> _cables;
 };
 } // namespace MetaModule

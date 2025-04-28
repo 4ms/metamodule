@@ -35,7 +35,7 @@ namespace MetaModule
 class PatchPlayer {
 public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
-	CableCache cables;
+	CableCache<MulticorePlayer::NumCores> cables;
 
 	unsigned num_modules = 0;
 	std::atomic<bool> is_loaded = false;
@@ -193,12 +193,12 @@ public:
 
 		calc_multiple_module_indicies();
 
-		cables.build(pd.int_cables);
-
 		active_knob_set = 0;
 		catchup_manager.reset(modules, knob_maps[active_knob_set]);
 
 		rebalance_modules();
+
+		cables.build(pd.int_cables, core_balancer.cores.parts);
 
 		resume_module_threads();
 
@@ -215,12 +215,21 @@ public:
 	}
 
 	void rebalance_modules() {
-		auto cpu_times =
-			core_balancer.measure_modules(modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
-		core_balancer.balance_loads(cpu_times);
+		if (num_modules > 2) {
+			auto cpu_times = core_balancer.measure_modules(
+				modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
 
-		core_balancer.print_times(cpu_times, pd.module_slugs);
+			core_balancer.balance_loads(cpu_times);
 
+			core_balancer.print_times(cpu_times, pd.module_slugs);
+
+		} else {
+			core_balancer.cores.parts[0].clear();
+			core_balancer.cores.parts[0].push_back(1);
+			core_balancer.cores.parts[1].clear();
+		}
+
+		// Tell other SMP core which modules it's been assigned
 		smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
 
 		for (auto core_id = 0u; core_id < core_balancer.cores.parts.size(); core_id++) {
@@ -232,37 +241,41 @@ public:
 
 	// Runs the patch
 	void update_patch() {
-		if (num_modules == 2)
-			modules[1]->update();
+		if (num_modules == 2) {
+			update_patch_singlecore();
+			return;
+		}
 
-		else if (num_modules > 2) {
+		if (num_modules > 2) {
 			smp.update_modules();
-			for (auto module_i : core_balancer.cores.parts[0]) {
-				process_module_outputs(module_i);
-			}
 			for (auto module_i : core_balancer.cores.parts[0]) {
 				step_module(module_i);
 			}
 			smp.join();
+
+			smp.process_cables();
+			process_module_outputs<0>();
+			smp.join();
+
+			update_midi_pulses();
 		} else
 			return;
-
-		update_midi_pulses();
 	}
 
-	void process_module_outputs(unsigned module_i) {
-		for (auto &out : cables.outs[module_i])
-			out.val = modules[module_i]->get_output(out.jack_id);
+	template<size_t Core>
+	void process_module_outputs() {
+		for (auto &cable : cables._cables[Core]) {
+			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+			modules[cable.in.module_id]->set_input(cable.in.jack_id, val);
+		}
 	}
 
 	void step_module(unsigned module_i) {
-		for (auto const &in : cables.ins[module_i])
-			modules[module_i]->set_input(in.jack_id, cables.outs[in.out_module_id][in.out_cache_idx].val);
-
 		modules[module_i]->update();
 	}
 
 	void update_patch_singlecore() {
+		process_module_outputs<0>();
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
 			step_module(module_i);
 		}
@@ -354,7 +367,8 @@ public:
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules) {
 					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
-						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
+						modules[mm.module_id]->set_param(mm.param_id,
+														 mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
 					}
 				}
 			}
@@ -588,7 +602,7 @@ public:
 
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
-		cables.add(in, out);
+		cables.add(in, out, core_balancer.cores.parts);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
@@ -665,7 +679,7 @@ public:
 
 		pd.disconnect_injack(jack);
 
-		cables.build(pd.int_cables);
+		cables.build(pd.int_cables, core_balancer.cores.parts);
 	}
 
 	void disconnect_outjack(Jack jack) {
@@ -685,7 +699,7 @@ public:
 
 		pd.disconnect_outjack(jack);
 
-		cables.build(pd.int_cables);
+		cables.build(pd.int_cables, core_balancer.cores.parts);
 	}
 
 	void reset_module(uint16_t module_id, std::string_view data = "") {
@@ -1230,7 +1244,7 @@ private:
 		}
 	}
 
-	///////////////////////////////////////
+///////////////////////////////////////
 #if defined(TESTPROJECT)
 public:
 	//Used in unit tests
