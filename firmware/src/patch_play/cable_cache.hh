@@ -48,7 +48,7 @@ struct CableCache {
 		uint16_t outmodule = out.module_id;
 		_cables[out_core_id].push_back({{outmodule, out.jack_id}, {in.module_id, in.jack_id}});
 
-		pr_dbg("Cable[%u]: m%u j%u -> m%u j%u\n", out_core_id, out.module_id, out.jack_id, in.module_id, in.jack_id);
+		// pr_dbg("Cable[%u]: m%u j%u -> m%u j%u\n", out_core_id, out.module_id, out.jack_id, in.module_id, in.jack_id);
 	}
 
 	//
