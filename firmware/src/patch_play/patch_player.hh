@@ -245,14 +245,14 @@ public:
 		}
 
 		if (num_modules > 2) {
-			smp.process_cables();
-			process_module_outputs<0>();
-			smp.join();
-
 			smp.update_modules();
 			for (auto module_i : core_balancer.cores.parts[0]) {
-				step_module<0>(module_i);
+				step_module(module_i);
 			}
+			smp.join();
+
+			smp.process_cables();
+			process_module_outputs<0>();
 			smp.join();
 
 			update_midi_pulses();
@@ -263,41 +263,20 @@ public:
 	template<size_t Core>
 	void process_module_outputs() {
 		for (auto &cable : cables._cables[Core]) {
-			// if constexpr (Core == 0)
-			// 	Debug::Pin0::high();
-			// else
-			// 	Debug::Pin2::high();
-
 			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
 			modules[cable.in.module_id]->set_input(cable.in.jack_id, val);
-
-			// if constexpr (Core == 0)
-			// 	Debug::Pin0::low();
-			// else
-			// 	Debug::Pin2::low();
 		}
 	}
 
-	template<size_t Core>
 	void step_module(unsigned module_i) {
-		// if constexpr (Core == 0)
-		// 	Debug::Pin1::high();
-		// else
-		// 	Debug::Pin3::high();
-
 		modules[module_i]->update();
-
-		// if constexpr (Core == 0)
-		// 	Debug::Pin1::low();
-		// else
-		// 	Debug::Pin3::low();
 	}
 
 	void update_patch_singlecore() {
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
 			process_module_outputs<0>();
 			process_module_outputs<1>();
-			step_module<0>(module_i);
+			step_module(module_i);
 		}
 		update_midi_pulses();
 	}
