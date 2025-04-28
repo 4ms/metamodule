@@ -202,7 +202,7 @@ public:
 		rebalance_modules();
 
 		cables.build(pd.int_cables, core_balancer.cores.parts);
-		printf("-> %zu/%zu\n", cables.outjacks[0].size(), cables.outjacks[1].size());
+		// printf("-> %zu/%zu\n", cables.outjacks[0].size(), cables.outjacks[1].size());
 
 		resume_module_threads();
 		delay_ms(2); // Allow threads to start
@@ -239,50 +239,37 @@ public:
 
 	// Runs the patch
 	void update_patch() {
-		if (num_modules == 2)
-			modules[1]->update();
+		if (num_modules == 2) {
+			update_patch_singlecore();
+			return;
+		}
 
-		else if (num_modules > 2) {
+		if (num_modules > 2) {
+			smp.process_cables();
+			process_module_outputs<0>();
+			smp.join();
+
 			smp.update_modules();
-
-			// invalidate_outjacks<0>();
-			for (auto module_i : core_balancer.cores.parts[0]) {
-				process_module_outputs<0>(module_i);
-			}
-			// clean_outjacks<0>();
-
 			for (auto module_i : core_balancer.cores.parts[0]) {
 				step_module<0>(module_i);
 			}
-
-			mdrivlib::SystemCache::mem_barrier();
 			smp.join();
+
+			update_midi_pulses();
 		} else
 			return;
-
-		update_midi_pulses();
 	}
 
 	template<size_t Core>
-	void invalidate_outjacks() {
-		mdrivlib::SystemCache::invalidate_dcache_by_range(cables.outvals[Core].data(), cables.outvals[Core].size());
-	}
-
-	template<size_t Core>
-	void clean_outjacks() {
-		mdrivlib::SystemCache::clean_dcache_by_range(cables.outvals[Core].data(), cables.outvals[Core].size());
-	}
-
-	template<size_t Core>
-	void process_module_outputs(unsigned module_i) {
-		for (auto i = 0; auto &jack : cables.outjacks[Core]) {
+	void process_module_outputs() {
+		for (auto &cable : cables._cables[Core]) {
 			// if constexpr (Core == 0)
 			// 	Debug::Pin0::high();
 			// else
 			// 	Debug::Pin2::high();
 
-			cables.outvals[Core][i] = modules[jack.module_id_only()]->get_output(jack.jack_id);
-			i++;
+			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+			modules[cable.in.module_id]->set_input(cable.in.jack_id, val);
 
 			// if constexpr (Core == 0)
 			// 	Debug::Pin0::low();
@@ -293,26 +280,23 @@ public:
 
 	template<size_t Core>
 	void step_module(unsigned module_i) {
-		for (auto const &in : cables.ins[module_i]) {
-			// if constexpr (Core == 0)
-			// 	Debug::Pin1::high();
-			// else
-			// 	Debug::Pin3::high();
-
-			float val = cables.outvals[in.out_core_id][in.out_cache_idx];
-			modules[module_i]->set_input(in.jack_id, val);
-
-			// if constexpr (Core == 0)
-			// 	Debug::Pin1::low();
-			// else
-			// 	Debug::Pin3::low();
-		}
+		// if constexpr (Core == 0)
+		// 	Debug::Pin1::high();
+		// else
+		// 	Debug::Pin3::high();
 
 		modules[module_i]->update();
+
+		// if constexpr (Core == 0)
+		// 	Debug::Pin1::low();
+		// else
+		// 	Debug::Pin3::low();
 	}
 
 	void update_patch_singlecore() {
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
+			process_module_outputs<0>();
+			process_module_outputs<1>();
 			step_module<0>(module_i);
 		}
 		update_midi_pulses();
@@ -716,7 +700,7 @@ public:
 		pd.disconnect_injack(jack);
 
 		cables.build(pd.int_cables, core_balancer.cores.parts);
-		printf("-> %zu/%zu\n", cables.outjacks[0].size(), cables.outjacks[1].size());
+		// printf("-> %zu/%zu\n", cables.outjacks[0].size(), cables.outjacks[1].size());
 	}
 
 	void disconnect_outjack(Jack jack) {
@@ -737,7 +721,7 @@ public:
 		pd.disconnect_outjack(jack);
 
 		cables.build(pd.int_cables, core_balancer.cores.parts);
-		printf("-> %zu/%zu\n", cables.outjacks[0].size(), cables.outjacks[1].size());
+		// printf("-> %zu/%zu\n", cables.outjacks[0].size(), cables.outjacks[1].size());
 	}
 
 	void reset_module(uint16_t module_id, std::string_view data = "") {
@@ -1282,7 +1266,7 @@ private:
 		}
 	}
 
-	///////////////////////////////////////
+///////////////////////////////////////
 #if defined(TESTPROJECT)
 public:
 	//Used in unit tests

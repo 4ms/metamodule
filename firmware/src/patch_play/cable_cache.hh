@@ -12,20 +12,10 @@ template<size_t NumCores>
 struct CableCache {
 	CableCache() = default;
 
-	struct CableIn {
-		uint16_t jack_id;
-		uint16_t out_cache_idx : 15;
-		uint16_t out_core_id : 1;
-		// uint32_t out_core_id;
-	};
-
 	void clear() {
-		for (auto &out : outvals)
+		for (auto &out : _cables) {
 			out.clear();
-		for (auto &out : outjacks)
-			out.clear();
-		for (auto &in : ins)
-			in.clear();
+		}
 	}
 
 	template<typename SpanT>
@@ -50,38 +40,17 @@ struct CableCache {
 			if (out_core_id == NumCores)
 				continue; //error: bad module_id in the cable
 
-			auto &outjack = outjacks[out_core_id].emplace_back();
-			outvals[out_core_id].push_back(0);
-			outjack.module_id = cable.out.module_id;
-			outjack.jack_id = cable.out.jack_id;
+			for (auto const &in : cable.ins) {
+				auto in_core_id = find_core(in.module_id, module_cores);
+				if (in_core_id == NumCores)
+					return;
 
-			printf("CableCache::build(): cable m:%u j:%u c:%u ", cable.out.module_id, cable.out.jack_id, out_core_id);
-
-			for (auto &in : cable.ins) {
-				if (in.module_id < ins.size()) {
-					// Tag output jacks if one or more inputs is on another core
-					auto in_core_id = find_core(in.module_id, module_cores);
-					if (in_core_id != out_core_id) {
-						outjack.set_tag();
-						printf("(tag) ");
-					}
-					printf("-> m:%u j:%u c:%u [%u %zu]",
-						   in.module_id,
-						   in.jack_id,
-						   in_core_id,
-						   out_core_id,
-						   outvals[out_core_id].size() - 1);
-					CableIn c;
-					c.jack_id = in.jack_id;
-					c.out_cache_idx = outvals[out_core_id].size() - 1;
-					c.out_core_id = out_core_id;
-					ins[in.module_id].push_back(c);
-				}
+				auto outmodule = cable.out.module_id;
+				if (in_core_id != out_core_id)
+					outmodule |= TaggedJack::tag;
+				_cables[out_core_id].push_back({{outmodule, cable.out.jack_id}, {in.module_id, in.jack_id}});
 			}
-
-			printf("\n");
 		}
-		printf("Built %zu cables -> %zu\n", cables.size(), outjacks.size());
 	}
 
 	template<typename SpanT>
@@ -94,25 +63,10 @@ struct CableCache {
 		if (in_core_id == NumCores)
 			return;
 
-		outvals[out_core_id].push_back(0);
-		outjacks[out_core_id].push_back({out.module_id, out.jack_id});
-
-		// Tag output jacks if one or more inputs is on another core
-		if (in_core_id != out_core_id) {
-			outjacks[out_core_id][outjacks[out_core_id].size() - 1].set_tag();
-		}
-
-		CableIn c;
-		c.jack_id = in.jack_id;
-		c.out_cache_idx = outvals[out_core_id].size() - 1;
-		c.out_core_id = out_core_id;
-		ins[in.module_id].push_back(c);
-
-		printf("Add cables -> %zu/%zu\n", outjacks[0].size(), outjacks[1].size());
+		uint16_t outmodule = (in_core_id == out_core_id) ? out.module_id : out.module_id | TaggedJack::tag;
+		_cables[out_core_id].push_back({{outmodule, out.jack_id}, {in.module_id, in.jack_id}});
+		// pr_dbg("Cable[%u]: m%u j%u -> m%u j%u\n", out_core_id, out.module_id, out.jack_id, in.module_id, in.jack_id);
 	}
-
-	// ins[N] are the cables connected to module id N
-	std::array<std::vector<CableIn>, MAX_MODULES_IN_PATCH> ins;
 
 	struct TaggedJack : Jack {
 		static constexpr unsigned tag_bit_shift = sizeof(module_id) * 8 - 1;
@@ -131,8 +85,12 @@ struct CableCache {
 		}
 	};
 
-	// Struct of arrays:
-	std::array<std::vector<float, AlignedAllocator<float, 64>>, NumCores> outvals;
-	std::array<std::vector<TaggedJack, AlignedAllocator<TaggedJack, 64>>, NumCores> outjacks;
+	struct SingleCable {
+		TaggedJack out;
+		Jack in;
+	};
+
+	// organized by out
+	std::array<std::vector<SingleCable>, NumCores> _cables;
 };
 } // namespace MetaModule

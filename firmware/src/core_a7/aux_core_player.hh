@@ -29,18 +29,18 @@ struct AuxPlayer {
 
 		constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchGuiElements);
 		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [this]() { read_patch_gui_elements(); });
+
+		constexpr auto ProcessCablesIRQn = SMPControl::IRQn(SMPCommand::ProcessCables);
+		InterruptManager::register_and_start_isr(ProcessCablesIRQn, 1, 0, [this]() { process_cables(); });
+	}
+
+	void process_cables() {
+		patch_player.process_module_outputs<1>();
+
+		mdrivlib::SMPThread::signal_done();
 	}
 
 	void play_modules() {
-
-		// patch_player.invalidate_outjacks<1>();
-
-		for (auto module_i : module_ids) {
-			patch_player.process_module_outputs<1>(module_i);
-		}
-
-		// patch_player.clean_outjacks<1>();
-
 		for (auto module_i : module_ids) {
 			patch_player.step_module<1>(module_i);
 		}

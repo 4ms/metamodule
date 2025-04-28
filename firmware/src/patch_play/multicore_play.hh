@@ -28,6 +28,12 @@ public:
 		}
 	}
 
+	void process_cables() {
+		if constexpr (NumCores > 1) {
+			mdrivlib::SMPThread::split_with_command<SMPCommand::ProcessCables>();
+		}
+	}
+
 	void read_patch_gui_elements() {
 		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchGuiElements>();
