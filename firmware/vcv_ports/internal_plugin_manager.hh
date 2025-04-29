@@ -4,7 +4,6 @@
 #include "fat_file_io.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
-#include "fs/norflash_layout.hh"
 #include "glue/RackCore/plugins.hh"
 #include "glue/Valley/plugins.hh"
 #include "gui/fonts/fonts_init.hh"
@@ -31,6 +30,7 @@ struct InternalPluginManager {
 		load_internal_assets();
 		load_internal_plugins();
 		load_ext_builtin_plugins(internal_plugins);
+		ModuleFactory::setBrandDisplayName("4msCompany", "4ms");
 	}
 
 	void prepare_ramdisk() {
