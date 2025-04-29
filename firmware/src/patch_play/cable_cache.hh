@@ -1,7 +1,6 @@
 #pragma once
 #include "console/pr_dbg.hh"
 #include "patch/patch.hh"
-#include "util/aligned_allocator.hh"
 #include <span>
 
 namespace MetaModule
