@@ -1,5 +1,4 @@
 #pragma once
-#include "dev_version.hh"
 #include "dynload/dynloader.hh"
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
@@ -12,7 +11,6 @@
 #include "plugin/Plugin.hpp"
 #include "untar_contents.hh"
 #include "util/monotonic_allocator.hh"
-#include "util/string_compare.hh"
 #include "util/version_tools.hh"
 #include <algorithm>
 #include <cstdint>

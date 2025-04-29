@@ -5,7 +5,6 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "dynload/plugin_manager.hh"
-#include "fs/filesystem.hh"
 #include "fs/norflash_layout.hh"
 #include "fs/syscall/filesystem.hh"
 #include "gui/ui.hh"
