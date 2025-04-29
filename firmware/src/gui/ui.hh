@@ -139,6 +139,10 @@ public:
 		patch_playloader.load_initial_patch(settings.last_patch_opened, settings.last_patch_vol);
 	}
 
+	void notify_error(std::string const &message) {
+		notify_queue.put({message, Notification::Priority::Error, 2000});
+	}
+
 	std::atomic<bool> new_patch_data = false;
 
 private:
