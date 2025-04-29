@@ -37,6 +37,8 @@ public:
 	bool extract_files(extract_func_t func);
 	bool is_valid();
 
+	static constexpr uint32_t FlagAbort = 0xFFFFFFFF;
+
 private:
 	bool image_read(char *buf, int size);
 	bool image_read(TarRaw *buf, int size);

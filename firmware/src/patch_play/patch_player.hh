@@ -2,21 +2,23 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "conf/panel_conf.hh"
 #include "conf/patch_conf.hh"
-#include "core_a7/smp_api.hh"
-#include "drivers/smp.hh"
+#include "coreproc_plugin/async_thread_control.hh"
 #include "null_module.hh"
+#include "params/catchup_manager.hh"
+#include "params/catchup_param.hh"
 #include "params/midi_params.hh"
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
+#include "patch_play/balance_modules.hh"
+#include "patch_play/cable_cache.hh"
 #include "patch_play/multicore_play.hh"
+#include "patch_play/patch_player_query_patch.hh"
 #include "patch_play/plugin_module.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include "util/countzip.hh"
-#include "util/math.hh"
 #include "util/oscs.hh"
 #include <algorithm>
 #include <array>
@@ -33,7 +35,12 @@ namespace MetaModule
 class PatchPlayer {
 public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
+	CableCache<MulticorePlayer::NumCores> cables;
+
+	unsigned num_modules = 0;
 	std::atomic<bool> is_loaded = false;
+
+	PatchQuery patch_query{modules, pd};
 
 private:
 	// Out1-Out8 + Ext Out1-8
@@ -45,22 +52,25 @@ private:
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
 
-	unsigned num_modules = 0;
-
 	// MIDI
 	bool midi_connected = false;
-	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_pitch_conns;
-	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_gate_conns;
-	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_vel_conns;
-	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_aft_conns;
-	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
-	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
+
+	struct JackMidi : Jack {
+		uint32_t midi_chan = 0; //0: Omni
+	};
+	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_pitch_conns;
+	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_gate_conns;
+	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_vel_conns;
+	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_aft_conns;
+	std::array<std::vector<JackMidi>, NumMidiCCsPW> midi_cc_conns;
+	std::array<std::vector<JackMidi>, NumMidiNotes> midi_gate_conns;
+
 	std::array<std::vector<MappedKnob>, NumMidiCCs> midi_cc_knob_maps;
 	std::array<std::vector<MappedKnob>, NumMidiNotes> midi_note_knob_maps;
 
 	struct MidiPulse {
 		OneShot pulse{};
-		std::vector<Jack> conns;
+		std::vector<JackMidi> conns;
 	};
 	struct MidiPulseDivider {
 		OneShot pulse{};
@@ -72,18 +82,17 @@ private:
 
 	std::array<MidiPulse, MaxMidiPolyphony> midi_note_retrig;
 
-	// knob_conns[]: ABCDEFuvwxyz
-	using KnobSet = std::array<std::vector<MappedKnob>, PanelDef::NumKnobs>;
-	std::array<KnobSet, MaxKnobSets> knob_conns;
+	std::array<ParamSet, MaxKnobSets> knob_maps;
+	CatchupManager catchup_manager;
 
 	std::array<bool, NumOutJacks> out_patched{};
 	std::array<bool, NumInJacks> in_patched{};
 
 	MulticorePlayer smp;
+	Balancer<MulticorePlayer::NumCores, MAX_MODULES_IN_PATCH> core_balancer;
 
 	float samplerate = 48000.f;
 
-private:
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
 	// 1 => reads "LFO #1", 2=> "LFO #2", etc.
@@ -106,8 +115,14 @@ public:
 		pd = patchdata;
 	}
 
+public:
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	Result load_patch(const PatchData &patchdata) {
+
+		// load_patch must only be called from the GUI context -- which ASyncThreads will interrupt
+		// Otherwise, if load_patch is interrupting an AsyncThread, then the AsyncThread
+		// will crash since its module * is no longer valid
+		pause_module_threads();
 
 		if (patchdata.patch_name.length() == 0)
 			return {false, "Cannot load: patch does not have a name"};
@@ -123,11 +138,10 @@ public:
 			return {false, "Too many modules in the patch! Max is 64"};
 		}
 
-		// Tell the other core about the patch
-		smp.load_patch(num_modules);
-
 		// First module is the hub
 		modules[0] = ModuleFactory::create(PanelDef::typeID);
+		if (modules[0] != nullptr)
+			modules[0]->id = 0;
 
 		unsigned num_not_found = 0;
 		std::string not_found;
@@ -143,6 +157,7 @@ public:
 			} else {
 				pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
+				modules[i]->id = i;
 				modules[i]->mark_all_inputs_unpatched();
 				modules[i]->mark_all_outputs_unpatched();
 				modules[i]->set_samplerate(samplerate);
@@ -178,13 +193,12 @@ public:
 
 		calc_multiple_module_indicies();
 
-		if (active_knob_set >= pd.knob_sets.size())
-			set_active_knob_set(0);
+		active_knob_set = 0;
+		catchup_manager.reset(modules, knob_maps[active_knob_set]);
 
-		// Test-run the modules once
-		for (size_t i = 1; i < num_modules; i++) {
-			modules[i]->update();
-		}
+		rebalance_modules();
+
+		resume_module_threads();
 
 		is_loaded = true;
 		if (num_not_found == 1)
@@ -198,68 +212,79 @@ public:
 			return {true};
 	}
 
+	void rebalance_modules() {
+		if (num_modules > 2) {
+			auto cpu_times = core_balancer.measure_modules(
+				modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
+
+			core_balancer.balance_loads(cpu_times);
+
+			core_balancer.print_times(cpu_times, pd.module_slugs);
+
+		} else {
+			core_balancer.cores.parts[0].clear();
+			core_balancer.cores.parts[0].push_back(1);
+			core_balancer.cores.parts[1].clear();
+		}
+
+		// Tell other SMP core which modules it's been assigned
+		smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
+
+		for (auto core_id = 0u; core_id < core_balancer.cores.parts.size(); core_id++) {
+			for (auto id : core_balancer.cores.parts[core_id]) {
+				peg_task_to_core(id, core_id);
+			}
+		}
+
+		cables.build(pd.int_cables, core_balancer.cores.parts);
+	}
+
 	// Runs the patch
 	void update_patch() {
-		if (num_modules <= 1)
+		if (num_modules == 2) {
+			update_patch_singlecore();
 			return;
-		else if (num_modules == 2)
-			modules[1]->update();
-		else {
+		}
+
+		if (num_modules > 2) {
 			smp.update_modules();
-			// Debug::Pin2::high();
-			for (size_t module_i = 1; module_i < num_modules; module_i += smp.ModuleStride) {
-				modules[module_i]->update();
+			for (auto module_i : core_balancer.cores.parts[0]) {
+				step_module(module_i);
 			}
-			// Debug::Pin2::low();
 			smp.join();
-		}
 
-		for (auto &cable : pd.int_cables) {
-			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
-			for (auto &input_jack : cable.ins) {
-				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
-			}
-		}
+			smp.process_cables();
+			process_module_outputs<0>();
+			smp.join();
 
-		update_midi_pulses();
+			update_midi_pulses();
+		} else
+			return;
+	}
+
+	template<size_t Core>
+	void process_module_outputs() {
+		for (auto &cable : cables._cables[Core]) {
+			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+			modules[cable.in.module_id]->set_input(cable.in.jack_id, val);
+		}
+	}
+
+	void step_module(unsigned module_i) {
+		modules[module_i]->update();
 	}
 
 	void update_patch_singlecore() {
-		// Debug::Pin2::high();
+		process_module_outputs<0>();
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
-			modules[module_i]->update();
+			step_module(module_i);
 		}
-		// Debug::Pin2::low();
-
-		for (auto &cable : pd.int_cables) {
-			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
-			for (auto &input_jack : cable.ins) {
-				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
-			}
-		}
-
 		update_midi_pulses();
 	}
 
-	void update_lights() {
-		smp.read_patch_state();
+	void trigger_reading_gui_elements() {
+		smp.read_patch_gui_elements();
 		smp.join();
-	}
-
-	std::vector<ModuleInitState> get_module_states() {
-		std::vector<ModuleInitState> states;
-		states.reserve(num_modules);
-
-		for (auto [i, module] : enumerate(modules)) {
-			if (i >= num_modules)
-				break;
-			if (!module)
-				continue;
-			if (auto state_data = module->save_state(); state_data.size() > 0)
-				states.push_back({(uint32_t)i, state_data});
-		}
-
-		return states;
 	}
 
 	void unload_patch() {
@@ -269,6 +294,7 @@ public:
 			plugin_module_deinit(modules[i]);
 			modules[i].reset(nullptr);
 		}
+		cables.clear();
 		pd.int_cables.clear();
 		pd.mapped_ins.clear();
 		pd.knob_sets.clear();
@@ -283,64 +309,103 @@ public:
 		clear_cache();
 	}
 
-	// K-rate setters/getters:
+	// Interface with audio stream:
 
-	void set_panel_param(unsigned param_id, float val) {
-		if (param_id < PanelDef::NumKnobs) {
-			for (auto const &k : knob_conns[active_knob_set][param_id]) {
-				modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
-			}
-		}
+	void set_panel_param(unsigned panel_knob_id, float val) {
+		catchup_manager.set_panel_param(modules, knob_maps[active_knob_set], panel_knob_id, val);
+	}
+
+	void set_panel_param_no_play(unsigned panel_knob_id, float val) {
+		catchup_manager.set_panel_param_no_play(panel_knob_id, val);
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {
 		set_all_connected_jacks(in_conns[jack_id], val);
 	}
 
-	void set_midi_note_pitch(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val);
+	void set_active_knob_set(unsigned num) {
+		auto new_active_knob_set = std::min(num, MaxKnobSets - 1);
+
+		if (active_knob_set != new_active_knob_set) {
+			active_knob_set = new_active_knob_set;
+
+			catchup_manager.reset(modules, knob_maps[active_knob_set]);
+		}
 	}
 
-	void set_midi_note_gate(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_gate_conns[midi_poly_note], val);
+	void set_midi_note_pitch(unsigned midi_poly_note, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val, midi_chan);
 	}
 
-	void set_midi_note_velocity(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], val);
+	void set_midi_note_gate(unsigned midi_poly_note, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_gate_conns[midi_poly_note], val, midi_chan);
 	}
 
-	void set_midi_note_aftertouch(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], val);
+	void set_midi_note_velocity(unsigned midi_poly_note, int16_t val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], float(val) / 12.7f, midi_chan);
 	}
 
-	void set_midi_note_retrig(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_retrig[midi_poly_note].conns, val);
+	void set_midi_note_aftertouch(unsigned midi_poly_note, int16_t val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], float(val) / 12.7f, midi_chan);
+	}
+
+	void set_midi_note_retrig(unsigned midi_poly_note, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_retrig[midi_poly_note].conns, val, midi_chan);
 		midi_note_retrig[midi_poly_note].pulse.start(0.01);
 	}
 
-	void set_midi_cc(unsigned ccnum, float val) {
-		// Update jacks connected to this CC
-		if (ccnum < midi_cc_conns.size())
-			set_all_connected_jacks(midi_cc_conns[ccnum], val);
+	void set_midi_cc(unsigned ccnum, int16_t val, uint16_t midi_chan) {
+		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) : val / 12.7f; //0-127 => 0-10
 
-		// Update knobs connected to theis CC
+		// Update jacks connected to this CC
+		if (ccnum < midi_cc_conns.size()) {
+			set_all_connected_jacks(midi_cc_conns[ccnum], volts, midi_chan);
+		}
+
+		// Update knobs connected to this CC
 		if (ccnum < midi_cc_knob_maps.size()) {
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
-				if (mm.module_id < num_modules)
-					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val / 10.f));
+				if (mm.module_id < num_modules) {
+					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
+						modules[mm.module_id]->set_param(mm.param_id,
+														 mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
+					}
+				}
 			}
 		}
 	}
 
-	void set_midi_gate(unsigned note_num, float val) {
+	void set_midi_gate(unsigned note_num, float volts, uint16_t midi_chan) {
 		if (note_num < midi_gate_conns.size())
-			set_all_connected_jacks(midi_gate_conns[note_num], val);
+			set_all_connected_jacks(midi_gate_conns[note_num], volts, midi_chan);
 
-		if (note_num < midi_note_knob_maps.size()) {
-			for (auto &mm : midi_note_knob_maps[note_num]) {
-				if (mm.module_id < num_modules) {
-					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val));
+		if (note_num >= midi_note_knob_maps.size())
+			return;
+
+		for (auto &mm : midi_note_knob_maps[note_num]) {
+			if (mm.module_id >= num_modules)
+				continue;
+
+			if (mm.midi_chan > 0 && mm.midi_chan != (midi_chan + 1))
+				continue;
+
+			auto normal_val = volts / 10.f;
+			if (mm.curve_type == MappedKnob::CurveType::Toggle) {
+				// Latching: toggle
+				if (normal_val > 0.5f) { //rising edge
+					auto cur_val = modules[mm.module_id]->get_param(mm.param_id);
+
+					// if param is currently closer to min, then set it to max (and vice-versa)
+					if (std::abs(cur_val - mm.min) < std::abs(cur_val - mm.max)) {
+						modules[mm.module_id]->set_param(mm.param_id, mm.max);
+					} else {
+						modules[mm.module_id]->set_param(mm.param_id, mm.min);
+					}
 				}
+
+			} else {
+				// Momentary (follow)
+				modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(normal_val));
 			}
 		}
 	}
@@ -397,9 +462,17 @@ public:
 	}
 
 private:
-	void set_all_connected_jacks(std::vector<Jack> const &jacks, float val) {
+	template<typename JackT>
+	void set_all_connected_jacks(std::vector<JackT> const &jacks, float val) {
 		for (auto const &jack : jacks)
 			modules[jack.module_id]->set_input(jack.jack_id, val);
+	}
+
+	void set_all_connected_jacks(std::vector<JackMidi> const &jacks, float val, uint32_t midi_chan) {
+		for (auto const &jack : jacks) {
+			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1))
+				modules[jack.module_id]->set_input(jack.jack_id, val);
+		}
 	}
 
 	void update_midi_pulses() {
@@ -444,6 +517,13 @@ public:
 			return 0;
 	}
 
+	float get_param(uint16_t module_id, uint16_t param_id) const {
+		if (is_loaded && module_id < num_modules)
+			return modules[module_id]->get_param(param_id);
+		else
+			return 0;
+	}
+
 	void set_midi_poly_num(uint32_t poly_num) {
 		pd.midi_poly_num = poly_num;
 	}
@@ -451,6 +531,8 @@ public:
 	uint32_t get_midi_poly_num() {
 		return pd.midi_poly_num;
 	}
+
+	// Patch Mods:
 
 	void apply_static_param(const StaticParam &sparam) {
 		if (sparam.module_id < num_modules && modules[sparam.module_id])
@@ -464,33 +546,42 @@ public:
 		}
 	}
 
-	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map, float cur_val) {
-		if (knobset_id != PatchData::MIDIKnobSet && knobset_id >= knob_conns.size())
+	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
+		if (knobset_id != PatchData::MIDIKnobSet && knobset_id >= knob_maps.size())
 			return;
 
-		std::vector<MappedKnob> *knobconn = nullptr;
 		if (knobset_id == PatchData::MIDIKnobSet) {
 
-			knobconn = map.is_midi_cc()		  ? &midi_cc_knob_maps[map.cc_num()] :
-					   map.is_midi_notegate() ? &midi_note_knob_maps[map.notegate_num()] :
-												nullptr;
+			auto *knobconn = map.is_midi_cc()		? &midi_cc_knob_maps[map.cc_num()] :
+							 map.is_midi_notegate() ? &midi_note_knob_maps[map.notegate_num()] :
+													  nullptr;
+			if (!knobconn)
+				return;
+
+			auto found = std::ranges::find_if(
+				*knobconn, [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
+
+			if (found != knobconn->end()) {
+				found->min = map.min;
+				found->max = map.max;
+				found->curve_type = map.curve_type;
+				found->midi_chan = map.midi_chan;
+				if (map.panel_knob_id < PanelDef::NumKnobs)
+					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
+			}
 
 		} else {
-			if (map.is_panel_knob())
-				knobconn = &knob_conns[knobset_id][map.panel_knob_id];
-		}
-
-		if (!knobconn)
-			return;
-
-		auto found = std::ranges::find_if(
-			*knobconn, [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
-
-		if (found != knobconn->end()) {
-			found->min = map.min;
-			found->max = map.max;
-			found->curve_type = map.curve_type;
-			set_panel_param(map.panel_knob_id, cur_val);
+			auto &knobconn = knob_maps[knobset_id][map.panel_knob_id];
+			auto found = std::ranges::find_if(knobconn, [&map](auto m) {
+				return map.param_id == m.map.param_id && map.module_id == m.map.module_id;
+			});
+			if (found != knobconn.end()) {
+				found->map.min = map.min;
+				found->map.max = map.max;
+				found->map.curve_type = map.curve_type;
+				if (map.panel_knob_id < PanelDef::NumKnobs)
+					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
+			}
 		}
 	}
 
@@ -509,12 +600,9 @@ public:
 		}
 	}
 
-	void set_active_knob_set(unsigned num) {
-		active_knob_set = std::min(num, MaxKnobSets - 1);
-	}
-
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
+		cables.add(in, out, core_balancer.cores.parts);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
@@ -590,6 +678,8 @@ public:
 		}
 
 		pd.disconnect_injack(jack);
+
+		cables.build(pd.int_cables, core_balancer.cores.parts);
 	}
 
 	void disconnect_outjack(Jack jack) {
@@ -608,6 +698,8 @@ public:
 		}
 
 		pd.disconnect_outjack(jack);
+
+		cables.build(pd.int_cables, core_balancer.cores.parts);
 	}
 
 	void reset_module(uint16_t module_id, std::string_view data = "") {
@@ -627,18 +719,18 @@ public:
 		}
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
+		modules[module_idx]->id = module_idx;
 		modules[module_idx]->mark_all_inputs_unpatched();
 		modules[module_idx]->mark_all_outputs_unpatched();
 		modules[module_idx]->set_samplerate(samplerate);
 
 		reset_module(module_idx);
 
-		smp.load_patch(num_modules);
+		rebalance_modules();
 	}
 
 	void remove_module(uint16_t module_idx) {
-		// TODO: for all cache structures, if (module_id > deleted_module_idx) module_id -= 1;
-		// For testing, we just replace module with a blank and don't touch any indices
+		// For all cache structures, if (module_id > deleted_module_idx) module_id -= 1;
 
 		auto squash_module_id = [gap = module_idx](auto &module_id) {
 			if (module_id > gap && module_id != disconnected_jack.module_id)
@@ -681,7 +773,6 @@ public:
 
 			unsigned ins_to_disconnect = 0;
 			for (auto in : cable.ins) {
-
 				if (cable.out.module_id == module_idx) {
 					modules[in.module_id]->mark_input_unpatched(in.jack_id);
 				}
@@ -697,8 +788,14 @@ public:
 		}
 
 		// Knob and MIDI connections
-		for (auto &knob_set : knob_conns) {
-			erase_and_squash(knob_set);
+		for (auto &param_set : knob_maps) {
+			// erase_and_squash(knob_set);
+			for (auto &set : param_set) {
+				std::erase_if(set, [=](auto &map) { return (map.map.module_id == module_idx); });
+				for (auto &map : set) {
+					squash_module_id(map.map.module_id);
+				}
+			}
 		}
 
 		erase_and_squash(midi_cc_knob_maps);
@@ -716,18 +813,26 @@ public:
 		pd.remove_module(module_idx);
 
 		plugin_module_deinit(modules[module_idx]);
+		modules[module_idx].reset();
 
+		// Move [i+1...end) to i
 		std::move(std::next(modules.begin(), module_idx + 1), modules.end(), std::next(modules.begin(), module_idx));
 
 		calc_multiple_module_indicies();
 
-		smp.load_patch(num_modules);
+		for (auto i = 0u; i < num_modules; i++) {
+			if (modules[i])
+				modules[i]->id = i;
+		}
+
+		rebalance_modules();
 	}
 
 	// General info getters:
 
 	// Jack patched/unpatched status
 
+	// Follow every internal cable and tell the modules that their jacks are patched
 	void mark_patched_jacks() {
 		for (auto const &cable : pd.int_cables) {
 			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
@@ -844,15 +949,28 @@ public:
 		midi_connected = false;
 	}
 
+	// Set mode for all maps
+	void set_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange);
+
+	// Set mode for one mapping only
+	void set_catchup_mode(int knob_set_idx, unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
+
+	// Set mode for one module/param, in any knobset
+	void set_catchup_mode(unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
+
+	bool is_param_tracking(unsigned module_id, unsigned param_id);
+
+	std::optional<unsigned> panel_knob_catchup_inaccessible();
+
 private:
 	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
 
 	// Cache functions:
 	void clear_cache() {
-		for (auto i = 0u; i < dup_module_index.size(); i++)
+		for (auto i = 0u; i < dup_module_index.size(); i++) // NOLINT
 			dup_module_index[i] = 0;
 		// gcc 12.3 complains of writing past end of array
-		// when using range-based for loop:
+		// when using range-based for loop
 		// for (auto &d : dup_module_index)
 		// 	d = 0;
 
@@ -862,7 +980,7 @@ private:
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
 
-		for (auto &knob_set : knob_conns)
+		for (auto &knob_set : knob_maps)
 			for (auto &mappings : knob_set)
 				mappings.clear();
 
@@ -951,33 +1069,36 @@ public:
 	}
 
 	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack) {
+		pr_dbg("update_or_add_input_panel_conn: %x\n", panel_jack_id);
+		auto chan = Midi::midi_channel(panel_jack_id);
+
 		if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_pitch_conns[num.value()], input_jack);
-			pr_dbg("MIDI note (poly %d)", num.value());
+			update_or_add(midi_note_pitch_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI note (poly %d) ch: %u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_gate(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_gate_conns[num.value()], input_jack);
-			pr_dbg("MIDI gate (poly %d)", num.value());
+			update_or_add(midi_note_gate_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI gate (poly %d) ch:% ch:%uu", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_vel(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_vel_conns[num.value()], input_jack);
-			pr_dbg("MIDI vel (poly %d)", num.value());
+			update_or_add(midi_note_vel_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI vel (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_aft(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_aft_conns[num.value()], input_jack);
-			pr_dbg("MIDI aftertouch (poly %d)", num.value());
+			update_or_add(midi_note_aft_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI aftertouch (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_retrig(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_retrig[num.value()].conns, input_jack);
-			pr_dbg("MIDI retrig (poly %d)", num.value());
+			update_or_add(midi_note_retrig[num.value()].conns, input_jack, chan);
+			pr_dbg("MIDI retrig (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_gate(panel_jack_id); num.has_value()) {
-			update_or_add(midi_gate_conns[num.value()], input_jack);
-			pr_dbg("MIDI note %d gate", num.value());
+			update_or_add(midi_gate_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI note %d gate ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_cc(panel_jack_id); num.has_value()) {
-			update_or_add(midi_cc_conns[num.value()], input_jack);
-			pr_dbg("MIDI CC/PW %d", num.value());
+			update_or_add(midi_cc_conns[num.value()], input_jack, chan);
+			pr_dbg("MIDI CC/PW %d ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_clk(panel_jack_id); num.has_value()) {
 			update_or_add(midi_pulses[TimingEvents::Clock].conns, input_jack);
@@ -1042,10 +1163,14 @@ public:
 	}
 
 private:
-	template<typename T>
-	void update_or_add(std::vector<T> &v, const T &d) {
+	void update_or_add(std::vector<Jack> &v, const Jack &d) {
+		if (auto found = std::ranges::find(v, d); found == v.end())
+			v.push_back(d);
+	}
+
+	void update_or_add(std::vector<MappedKnob> &v, const MappedKnob &d) {
 		for (auto &el : v) {
-			if (el == d) { //if (T::operator==(el, d)) {
+			if (el.maps_to_same_as(d)) {
 				el = d;
 				return;
 			}
@@ -1053,23 +1178,42 @@ private:
 		v.push_back(d);
 	}
 
+	void update_or_add(std::vector<JackMidi> &v, const Jack &d, uint32_t midi_chan = 0) {
+		for (auto &el : v) {
+			if (el.module_id == d.module_id && el.jack_id == d.jack_id) {
+				el.midi_chan = midi_chan;
+				return;
+			}
+		}
+		v.push_back({d, midi_chan});
+	}
+
 	// Cache a panel knob mapping into knob_conns[]
 	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
-		if (knob_set >= knob_conns.size())
+		if (knob_set >= knob_maps.size())
 			return;
 		if (k.panel_knob_id < PanelDef::NumKnobs) {
-			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
+			// Update existing, if present
+			for (auto &el : knob_maps[knob_set][k.panel_knob_id]) {
+				if (el.map.maps_to_same_as(k)) {
+					el.map = k;
+					return;
+				}
+			}
+			// Create new entry:
+			CatchupParam f{};
+			f.mode = catchup_manager.get_default_mode();
+			knob_maps[knob_set][k.panel_knob_id].push_back({k, f});
 		}
 	}
 
 	//Remove a mapping
 	void uncache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
-		if (knob_set >= knob_conns.size())
+		if (knob_set >= knob_maps.size())
 			return;
-		if (k.panel_knob_id >= knob_conns[knob_set].size())
+		if (k.panel_knob_id >= knob_maps[knob_set].size())
 			return;
-		std::erase_if(knob_conns[knob_set][k.panel_knob_id],
-					  [&k](auto m) { return (k.module_id == m.module_id && k.param_id == m.param_id); });
+		std::erase_if(knob_maps[knob_set][k.panel_knob_id], [&k](auto m) { return (k.maps_to_same_as(m.map)); });
 	}
 
 	void cache_midi_mapping(const MappedKnob &k) {
@@ -1100,7 +1244,7 @@ private:
 		}
 	}
 
-	///////////////////////////////////////
+///////////////////////////////////////
 #if defined(TESTPROJECT)
 public:
 	//Used in unit tests
@@ -1151,7 +1295,7 @@ public:
 	}
 
 	auto const &get_knobconns() {
-		return knob_conns;
+		return knob_maps;
 	}
 
 	auto const &get_int_cables() {

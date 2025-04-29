@@ -33,6 +33,8 @@ R"(PatchData:
   mapped_knobs: 
   midi_maps:
   midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
 )"};
 						 // clang-format on
 	MetaModule::PatchData pd;
@@ -100,6 +102,8 @@ PatchData:
   mapped_knobs: 
   midi_maps:
   midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
 	)"};
 	// clang-format on
 
@@ -773,6 +777,8 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
   mapped_lights: []
   vcvModuleStates: []
 )"
@@ -1060,6 +1066,8 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
   mapped_lights: []
   vcvModuleStates: []
 )");

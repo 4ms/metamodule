@@ -1,6 +1,8 @@
 #include "ui.hh"
-#include "dynload/autoload_plugins.hh"
+#include "dynload/preload_plugins.hh"
 #include "gui/notify/queue.hh"
+#include "stubs/fs/fs_proxy.hh"
+#include "thorvg.h"
 
 namespace MetaModule
 {
@@ -29,20 +31,26 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
 
+	register_volume_host_path(Volume::SDCard, sdcard_path);
+	register_volume_host_path(Volume::NorFlash, flash_path);
+
 	params.clear();
 	metaparams.clear();
 
 	Gui::init_lvgl_styles();
 	page_manager.init();
 
+	tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
+
 	if (!Settings::read_settings(file_storage_proxy, &settings)) {
 		settings = UserSettings{};
+		pr_warn("Could not read settings.yml, using defaults\n");
 		if (!Settings::write_settings(file_storage_proxy, settings)) {
 			pr_err("Failed to write settings file\n");
 		}
 	}
 
-	autoload_plugins();
+	preload_plugins();
 
 	patch_playloader.notify_audio_is_muted();
 	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";
@@ -53,6 +61,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 
 	params.set_output_plugged(cur_outchan_left, true);
 	params.set_output_plugged(cur_outchan_right, true);
+
+	patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.allow_jump_outofrange);
 }
 
 // "Scheduler" for UI tasks
@@ -92,15 +102,11 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 	audio_stream.process(in_buffer, out_buffer);
 
-	for (auto &w : params.lights.watch_lights) {
-		if (w.is_active())
-			w.value = patch_player.get_module_light(w.module_id, w.light_id);
-	}
-
-	for (auto &d : params.displays.watch_displays) {
+	for (auto &d : params.text_displays.watch_displays) {
 		if (d.is_active()) {
 			auto text = std::span<char>(d.text._data, d.text.capacity);
-			patch_player.get_display_text(d.module_id, d.light_id, text);
+			auto sz = patch_player.get_display_text(d.module_id, d.light_id, text);
+			d.text._data[sz] = 0;
 		}
 	}
 
@@ -137,20 +143,23 @@ void Ui::transfer_aux_button_events() {
 
 void Ui::transfer_params() {
 	if (unsigned cur_param = input_driver.selected_param(); cur_param < params.knobs.size()) {
-		params.knobs[cur_param].changed = false;
+
+		auto delta = input_driver.param_fine() ? 0.001f : 0.05f;
 
 		if (input_driver.param_inc()) {
-			params.knobs[cur_param].val = std::clamp(params.knobs[cur_param] + 0.05f, 0.f, 1.f);
-			params.knobs[cur_param].changed = true;
-
-			std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
+			float val = std::clamp(params.knobs[cur_param].val + delta, 0.f, 1.f);
+			if (params.knobs[cur_param].store_changed(val))
+				std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
+			else
+				std::cout << "Failed to change knob";
 		}
 
 		if (input_driver.param_dec()) {
-			params.knobs[cur_param].val = std::clamp(params.knobs[cur_param] - 0.05f, 0.f, 1.f);
-			params.knobs[cur_param].changed = true;
-
-			std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
+			float val = std::clamp(params.knobs[cur_param].val - delta, 0.f, 1.f);
+			if (params.knobs[cur_param].store_changed(val))
+				std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
+			else
+				std::cout << "Failed to change knob";
 		}
 	}
 }
@@ -191,18 +200,18 @@ void Ui::update_channel_selections() {
 	}
 }
 
-void Ui::autoload_plugins() {
-	auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
+void Ui::preload_plugins() {
+	auto preloader = PreLoader{plugin_manager, settings.plugin_preload};
 
 	while (true) {
-		auto status = autoloader.process();
+		auto status = preloader.process();
 
-		if (status.state == AutoLoader::State::Error) {
+		if (status.state == PreLoader::State::Error) {
 			notify_queue.put({status.message, Notification::Priority::Error, 2000});
 			break;
 		}
 
-		if (status.state == AutoLoader::State::Done) {
+		if (status.state == PreLoader::State::Done) {
 			break;
 		}
 

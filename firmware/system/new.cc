@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <new>
 
-#ifdef CPU_TEST_ALL_MODULES
+#ifdef MM_LOADTEST_MEASURE_MEMORY
 #include "alloc_watch.hh"
 
 AllocationWatcher *watch = nullptr;
@@ -14,7 +14,7 @@ AllocationWatcher *watch = nullptr;
 #endif
 
 void *operator new(size_t size) THROW_SPEC {
-#ifdef CPU_TEST_ALL_MODULES
+#ifdef MM_LOADTEST_MEASURE_MEMORY
 	auto ptr = malloc(size);
 	if (watch)
 		watch->register_alloc(size, ptr);
@@ -25,7 +25,7 @@ void *operator new(size_t size) THROW_SPEC {
 }
 
 void operator delete(void *p) noexcept {
-#ifdef CPU_TEST_ALL_MODULES
+#ifdef MM_LOADTEST_MEASURE_MEMORY
 	if (watch)
 		watch->register_dealloc(p);
 	free(p);

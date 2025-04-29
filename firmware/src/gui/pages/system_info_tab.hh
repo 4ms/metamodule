@@ -56,6 +56,9 @@ struct InfoTab : SystemMenuTab {
 							  memory_percent_used,
 							  memory_used,
 							  memory_total);
+		lv_label_set_long_mode(ui_SystemMenuFWversion, LV_LABEL_LONG_WRAP);
+		lv_obj_set_height(ui_SystemMenuFWversion, LV_SIZE_CONTENT);
+		lv_obj_set_width(ui_SystemMenuFWversion, LV_PCT(100));
 
 		lv_hide(ui_SystemMenuExpanders);
 

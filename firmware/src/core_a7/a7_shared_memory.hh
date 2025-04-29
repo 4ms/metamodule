@@ -1,4 +1,5 @@
 #pragma once
+#include "concurrent_buffer.hh"
 #include "conf/ramdisk_conf.hh"
 #include "patch_play/patch_mod_queue.hh"
 
@@ -20,6 +21,7 @@ struct A7SharedMemoryS {
 		SyncParams *sync_params{};
 		PatchModQueue *patch_mod_queue{};
 		RamDrive *ramdrive{};
+		ConcurrentBuffer *console_buffer{};
 	};
 
 	static Ptrs ptrs;

@@ -44,7 +44,7 @@ struct PatchFileChangeChecker {
 
 		PatchLocation loc = open_patch_manager.get_playing_patch_loc();
 
-		if (patch_loader.has_changed_on_disk(loc)) {
+		if (patch_loader.is_not_open_or_has_changed_on_disk(loc)) {
 			pr_trace("check_playing_patch: File on disk does not match file in memory (changed on disk)\n");
 
 			if (open_patch_manager.get_playing_patch_modification_count() == 0) {
@@ -57,7 +57,7 @@ struct PatchFileChangeChecker {
 						patch_playloader.request_reload_playing_patch(false);
 
 						if (open_patch_manager.get_playing_patch() == open_patch_manager.get_view_patch()) {
-							gui_state.view_patch_file_changed = true;
+							gui_state.force_redraw_patch = true;
 						}
 						return Status::OK;
 
@@ -99,7 +99,7 @@ struct PatchFileChangeChecker {
 	Status check_view_patch() {
 		PatchLocation viewloc = open_patch_manager.get_view_patch_loc();
 
-		if (patch_loader.has_changed_on_disk(viewloc)) {
+		if (patch_loader.is_not_open_or_has_changed_on_disk(viewloc)) {
 			pr_dbg("check_view_patch: File on disk does not match file in memory (changed on disk)\n");
 
 			if (open_patch_manager.get_view_patch_modification_count() == 0) {

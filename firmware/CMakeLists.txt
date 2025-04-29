@@ -38,24 +38,25 @@ set(SYMBOLS_BINFILE_DIRS
   --objdir ${VcvPluginBinDir} 
   --objdir ${CoreProcPluginBinDir} 
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
+  --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/fs/dirent/
+
 )
 
 add_custom_target(
   new-api-sym-list
-  COMMAND echo "vcv export dir is ${VcvPluginBinDir}"
-  COMMAND scripts/dump_syms.py
+  COMMAND flashing/dump_syms.py
           ${SYMBOLS_BINFILE_DIRS}
           --text-out ${API_SYMBOL_NAMES_FILE}
 		  #-v
   DEPENDS main.elf
   COMMENT "Creating new API symbol list file in the SDK directory ${API_SYMBOL_NAMES_FILE}"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
 )
 
 add_custom_command(
   OUTPUT ${SYMBOLS_FILE}
-  COMMAND scripts/find_syms.py
+  COMMAND flashing/find_syms.py
           --symbols ${API_SYMBOL_NAMES_FILE}
           --elf $<TARGET_FILE:main.elf>
           --out ${SYMBOLS_FILE}
@@ -65,7 +66,7 @@ add_custom_command(
   COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
   DEPENDS main.elf 
   COMMENT "Generating table of API symbol addresses and installing in firmware binary"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
 )
 
@@ -96,6 +97,7 @@ add_custom_target(asset-image ALL DEPENDS ${ASSET_IMG_PATH})
 set(RELEASE_TARGET_DIR   ${CMAKE_CURRENT_BINARY_DIR}/metamodule-firmware)
 
 set(RELEASE_AS_ARCHIVE             ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-assets.zip)
+set(RELEASE_FW_ARCHIVE             ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware.zip)
 set(RELEASE_FW_AS_ARCHIVE          ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware-assets.zip)
 set(RELEASE_FW_AS_BL_ARCHIVE       ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware-assets-bl.zip)
 set(RELEASE_FW_AS_WIFI_ARCHIVE     ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware-assets-wifi.zip)
@@ -131,6 +133,16 @@ add_custom_command(
                                     ${RELEASE_TARGET_DIR}/${ASSET_IMG_FILENAME} 
                                     ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} 
                                     && rm -rf ${RELEASE_TARGET_DIR}
+
+  # Firmware
+  COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
+                                   --version         "${GIT_FIRMWARE_VERSION_TAG}"
+                                   --app             "${MAIN_FW_FILENAME}"
+                                   "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_ARCHIVE} --format=zip -- 
+                                        ${RELEASE_TARGET_DIR}/main.uimg 
+                                        ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} 
+                                        && rm -rf ${RELEASE_TARGET_DIR}
 
   # Firmware+Assets
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py

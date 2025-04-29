@@ -1,16 +1,23 @@
+// These must be inluded so the symbols are not dropped by the linker:
 #include "app/ModuleLightWidget.hpp"
 #include "app/ModuleWidget.hpp"
 #include "app/SvgSlider.hpp"
 #include "app/SvgSwitch.hpp"
+#include "history.hpp"
 #include "random.hpp"
+#include "string.hpp"
+#include "ui/ChoiceButton.hpp"
+#include "ui/List.hpp"
+#include "ui/OptionButton.hpp"
 #include "widget/TransformWidget.hpp"
 
-#include "history.hpp"
+#include "CoreModules/async_thread.hh"
+#include "dirent.h"
 #include "jansson.h"
 #include "pffft.h"
-#include "string.hpp"
 #include <cmath>
 #include <cstring>
+#include <ctime>
 #include <memory>
 #include <random>
 #include <unordered_map>
@@ -66,14 +73,64 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	}
 
 	{
-		log1pl(1.);
-		expm1l(1.);
+		auto x = &clock;
+		(void)x;
 	}
-
-	static auto addr = &MetaModule::register_module;
-	// static bool keep = MetaModule::register_module("", "", nullptr, {}, "");
-	printf("%p\n", addr);
 
 	// provides vtable for Quantity
 	rack::Quantity q;
+}
+
+void keep_async() {
+	MetaModule::AsyncThread a{nullptr};
+	a.start();
+	a.start([]() {});
+	a.run_once();
+	a.stop();
+	MetaModule::AsyncThread b{nullptr, []() {
+							  }};
+}
+
+void __attribute__((optimize("-O0"))) keep_math(float x) {
+	auto y = log1pl(x);
+	auto z = expm1l(y);
+	printf("%f%Lf%Lf\n", x, y, z);
+}
+
+void __attribute__((optimize("-O0"))) keep_register_module() {
+	static auto addr = &MetaModule::register_module;
+	printf("%p\n", addr);
+}
+
+void __attribute__((optimize("-O0"))) keep_rack_widgets() {
+	{
+		rack::app::LightWidget x;
+		printf("%p\n", &x);
+	}
+	{
+		rack::ui::List x{};
+		printf("%p\n", &x);
+	}
+	{
+		rack::ui::OptionButton x{};
+		printf("%p\n", &x);
+	}
+	{
+		rack::ui::ChoiceButton x{};
+		printf("%p\n", &x);
+	}
+}
+
+void keep_dirent() {
+	auto d = opendir(".");
+	auto e = readdir(d);
+	closedir(d);
+	alphasort({}, {});
+	[[maybe_unused]] auto x = dirfd({});
+	[[maybe_unused]] auto x2 = fdopendir(0);
+	[[maybe_unused]] auto x3 = readdir_r(d, e, {});
+	rewinddir(d);
+	[[maybe_unused]] auto x4 = scandir({}, {}, {}, {});
+	seekdir(d, 0);
+	telldir(d);
 }

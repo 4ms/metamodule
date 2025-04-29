@@ -1,14 +1,15 @@
 #pragma once
 #include "calibrate/calibration_patch.hh"
-#include "conf/audio_settings.hh"
 #include "delay.hh"
-#include "modules_helpers.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
+#include "patch_play/modules_helpers.hh"
 #include "patch_play/patch_player.hh"
+#include "patch_to_yaml.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
+#include "user_settings/audio_settings.hh"
 #include <atomic>
 
 size_t get_heap_size();
@@ -79,14 +80,17 @@ struct PatchPlayLoader {
 	void stop_audio() {
 		starting_audio_ = false;
 		stopping_audio_ = true;
+		pause_module_threads();
 	}
 
 	void start_audio() {
+		pr_dbg("PatchPlayLoader::start_audio\n");
+		loading_new_patch_ = false;
 		audio_is_muted_ = false;
-		starting_audio_ = true;
 		stopping_audio_ = false;
-		stopped_because_of_overrun_ = false;
+		starting_audio_ = true;
 		clear_audio_overrun();
+		resume_module_threads();
 	}
 
 	void request_load_view_patch() {
@@ -120,6 +124,10 @@ struct PatchPlayLoader {
 		}
 	}
 
+	bool is_loading_patch() {
+		return loading_new_patch_;
+	}
+
 	bool should_fade_down_audio() {
 		return loading_new_patch_ || stopping_audio_;
 	}
@@ -139,8 +147,11 @@ struct PatchPlayLoader {
 		stopped_because_of_overrun_ = true;
 	}
 
-	void notify_audio_not_muted() {
+	void notify_audio_done_starting() {
 		starting_audio_ = false;
+	}
+
+	void notify_audio_not_muted() {
 		audio_is_muted_ = false;
 	}
 
@@ -160,11 +171,22 @@ struct PatchPlayLoader {
 		audio_overrun_ = false;
 	}
 
+	std::optional<unsigned> is_panel_knob_catchup_inaccessible() {
+		return player_.panel_knob_catchup_inaccessible();
+	}
+
+	float param_value(uint16_t module_idx, uint16_t param_idx) {
+		return player_.get_param(module_idx, param_idx);
+	}
+
+	float light_value(uint16_t module_idx, uint16_t param_idx) {
+		return player_.get_module_light(module_idx, param_idx);
+	}
+
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {
 			auto result = load_patch(should_play_when_loaded_);
-			loading_new_patch_ = false;
 			should_play_when_loaded_ = true;
 			stopped_because_of_overrun_ = false;
 			return result;
@@ -196,6 +218,8 @@ struct PatchPlayLoader {
 	}
 
 	void load_module(std::string_view slug) {
+		bool should_play = is_playing();
+
 		stop_audio();
 		while (!is_audio_muted())
 			;
@@ -217,7 +241,8 @@ struct PatchPlayLoader {
 		}
 
 		pr_info("Heap: %u\n", get_heap_size());
-		start_audio();
+		if (should_play)
+			start_audio();
 	}
 
 	void remove_module(unsigned module_id) {
@@ -231,7 +256,7 @@ struct PatchPlayLoader {
 		start_audio();
 	}
 
-	void prepare_remove_plugin(std::string_view brand_slug) {
+	void prepare_patch_for_plugin_change(std::string_view brand_slug) {
 		auto playing_patch = patches_.get_playing_patch();
 		if (!playing_patch)
 			return;
@@ -266,6 +291,54 @@ struct PatchPlayLoader {
 		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
 	}
 
+	template<typename PluginModuleType>
+	PluginModuleType *get_plugin_module(int32_t module_idx) {
+		if (module_idx >= 0 && module_idx < (int32_t)player_.num_modules)
+			return dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get());
+		else
+			return nullptr;
+	}
+
+	CoreProcessor *get_plugin_module(int32_t module_idx) {
+		return player_.modules[module_idx].get();
+	}
+
+	bool is_param_tracking(unsigned module_id, unsigned param_id) {
+		return player_.is_param_tracking(module_id, param_id);
+	}
+
+	void set_all_param_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange) {
+		// if (exclude_buttons) {
+
+		// 	for (auto module_id = 0u; auto slug : patches_.get_view_patch()->module_slugs) {
+		// 		auto info = ModuleFactory::getModuleInfo(slug);
+
+		// 		for (unsigned i = 0; auto const &element : info.elements) {
+		// 			auto param_id = info.indices[i].param_idx;
+		// 			enum { Ignore, Enable, Disable };
+		// 			auto action = std::visit(overloaded{
+		// 										 [](Pot const &el) { return el.integral ? Disable : Enable; },
+		// 										 [](Switch const &el) { return Disable; },
+		// 										 [](Button const &el) { return Disable; },
+		// 										 [](ParamElement const &el) { return Enable; },
+		// 										 [](BaseElement const &el) { return Ignore; },
+		// 									 },
+		// 									 element);
+		// 			if (action == Enable)
+		// 				player_.set_catchup_mode(module_id, param_id, mode);
+		// 			else if (action == Disable)
+		// 				player_.set_catchup_mode(module_id, param_id, CatchupParam::Mode::ResumeOnMotion);
+
+		// 			i++;
+		// 		}
+		// 		module_id++;
+		// 	}
+
+		// } else {
+		player_.set_catchup_mode(mode, allow_jump_outofrange);
+		// }
+	}
+
 private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;
@@ -297,7 +370,8 @@ private:
 		auto view_patch = patches_.get_view_patch();
 
 		if (view_patch && view_patch == patches_.get_playing_patch()) {
-			view_patch->module_states = player_.get_module_states();
+			view_patch->module_states = player_.patch_query.get_module_states();
+			view_patch->static_knobs = player_.patch_query.get_all_params();
 		}
 
 		std::span<char> filedata = storage_.get_patch_data();
@@ -362,6 +436,7 @@ private:
 	Result load_patch(bool start_audio_immediately = true) {
 		if (!next_patch) {
 			pr_err("Internal error loading patch\n");
+			loading_new_patch_ = false;
 			return {false, "Internal error loading patch"};
 		}
 
@@ -369,6 +444,7 @@ private:
 
 		auto result = player_.load_patch(*next_patch);
 		if (result.success) {
+			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
 			if (next_patch == patches_.get_view_patch())
 				patches_.play_view_patch();
@@ -377,6 +453,7 @@ private:
 				start_audio();
 		}
 
+		loading_new_patch_ = false;
 		return result;
 	}
 

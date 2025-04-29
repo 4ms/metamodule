@@ -52,4 +52,5 @@ settings.yml
 .cache
 simulator/patches/metamodule-firmware
 
+.clangd
 firmware/.clangd

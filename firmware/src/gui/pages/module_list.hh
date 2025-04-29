@@ -34,20 +34,17 @@ struct ModuleListPage : PageBase {
 
 private:
 	void populate_modules() {
-		//TODO: only repopulate if plugins changed
 
 		auto all_slugs = ModuleFactory::getAllModuleDisplayNames(selected_brand_slug);
-		std::sort(all_slugs.begin(), all_slugs.end(), [](auto a, auto b) {
-			return std::string_view{a} < std::string_view{b};
-		});
+		std::ranges::sort(all_slugs, less_ci);
 
 		std::string slugs_str;
 		slugs_str.reserve(all_slugs.size() * (sizeof(ModuleTypeSlug) + 1));
 		for (auto slug : all_slugs) {
-			if (slug != "HubMedium") {
-				slugs_str += slug;
-				slugs_str += "\n";
-			}
+			if (selected_brand_slug == "4msCompany" && (slug == "HubMedium" || slug == "Panel"))
+				continue;
+			slugs_str += slug;
+			slugs_str += "\n";
 		}
 		slugs_str.pop_back();
 		lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
@@ -56,6 +53,7 @@ private:
 
 	void populate_brands() {
 		auto all_brands = ModuleFactory::getAllBrandDisplayNames();
+		std::ranges::sort(all_brands, less_ci);
 
 		std::string roller_str = "";
 		roller_str.reserve(all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
@@ -229,7 +227,10 @@ private:
 		clear_module_canvas();
 
 		ModuleDrawer drawer{ui_ModuleListImage, 240};
-		auto module_canvas = drawer.draw_faceplate(slug, page_pixel_buffer);
+
+		auto [faceplate, width] = drawer.read_faceplate(slug);
+		auto module_canvas = drawer.draw_faceplate(faceplate, width, page_pixel_buffer);
+
 		if (module_canvas) {
 			lv_obj_refr_size(module_canvas);
 			auto width_px = lv_obj_get_width(module_canvas);

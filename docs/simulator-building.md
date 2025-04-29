@@ -15,7 +15,7 @@ cd simulator
 Generate the build system:
 
 ```
-cmake -B build -GNinja      #Or whatever build system you want
+cmake --fresh -B build -GNinja      #Or whatever build system you want
 ```
 
 Build it:

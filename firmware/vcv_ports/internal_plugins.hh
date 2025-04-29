@@ -147,3 +147,12 @@ extern rack::plugin::Model *modelStatues;
 extern rack::plugin::Model *modelTripleSloth;
 
 extern rack::plugin::Model *modelSDOrcasHeartV2;
+
+// These can be used by the plugin if they need to load from their plugin files after startup
+extern rack::plugin::Plugin *befacoPluginInstance;
+extern rack::plugin::Plugin *audibleInstrumentsPluginInstance;
+extern rack::plugin::Plugin *hetrickcvPluginInstance;
+extern rack::plugin::Plugin *nonlinearcircuitsPluginInstance;
+extern rack::plugin::Plugin *eightfoldPluginInstance;
+extern rack::plugin::Plugin *valleyPluginInstance;
+extern rack::plugin::Plugin *rackCorePluginInstance;

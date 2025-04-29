@@ -1,12 +1,10 @@
 #pragma once
-#include "conf/panel_conf.hh"
 #include "dynload/plugin_manager.hh"
-#include "gui/elements/element_name.hh"
 #include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
+#include "gui/pages//file_browser/file_browser.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
-#include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
 #include "patch_file/change_checker.hh"
@@ -36,6 +34,7 @@ struct PatchContext {
 	PluginManager &plugin_manager;
 	FatFileIO &ramdisk;
 	PatchFileChangeChecker &file_change_checker;
+	FileBrowserDialog &file_browser;
 };
 
 struct PageBase {
@@ -49,6 +48,7 @@ struct PageBase {
 	PageList &page_list;
 	GuiState &gui_state;
 	UserSettings &settings;
+	FileBrowserDialog &file_browser;
 
 	PageArguments args;
 
@@ -77,6 +77,7 @@ struct PageBase {
 		, page_list{info.page_list}
 		, gui_state{info.gui_state}
 		, settings{info.settings}
+		, file_browser{info.file_browser}
 		, file_change_checker{info.file_change_checker}
 		, id{id} {
 		page_list.register_page(this, id);
@@ -145,7 +146,7 @@ struct PageBase {
 				auto status = file_change_checker.check_playing_patch();
 
 				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
-					pr_err("Error: Failed to load playing patc file: '%s')\n",
+					pr_err("Error: Failed to auto reload playing patch file: '%s')\n",
 						   patches.get_playing_patch_loc().filename.c_str());
 				}
 			}
@@ -155,7 +156,7 @@ struct PageBase {
 				auto status = file_change_checker.check_view_patch();
 
 				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
-					pr_err("Error: File failed to load\n");
+					pr_err("Error: File failed to auto reload\n");
 				}
 			}
 

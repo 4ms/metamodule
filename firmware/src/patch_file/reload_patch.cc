@@ -33,7 +33,7 @@ std::optional<ReloadPatch::FileTimeSize> ReloadPatch::get_file_info(PatchLocatio
 		}
 
 		if (msg.message_type == FileStorageProxy::FileInfoFailed) {
-			pr_dbg("ReloadPatch::get_file_info: get file info for '%s' failed \n", patch_loc.filename.c_str());
+			pr_trace("ReloadPatch::get_file_info: get file info for '%s' failed \n", patch_loc.filename.c_str());
 			return {};
 		}
 
@@ -48,9 +48,6 @@ std::optional<ReloadPatch::FileTimeSize> ReloadPatch::get_file_info(PatchLocatio
 }
 
 bool ReloadPatch::check_file_changed(PatchLocation const &patch_loc, uint32_t timestamp, uint32_t filesize) {
-	if (patch_loc.vol == Volume::RamDisk || patch_loc.vol == Volume::MaxVolumes)
-		return false;
-
 	if (auto filetimesize = get_file_info(patch_loc)) {
 		return (filetimesize->timestamp != timestamp) || (filetimesize->filesize != filesize);
 	} else
@@ -62,16 +59,14 @@ Result ReloadPatch::reload_patch_file(PatchLocation const &loc, Function<void()>
 	auto max_open_patches = std::max<uint32_t>(fs_settings.max_open_patches, 2u) - 1;
 
 	if (!patches.have_space_to_open_patch(max_open_patches)) {
-		return {false,
-				"Too many unsaved patches open! Save or close them to open a new patch, or change this in Settings > "
-				"Prefs"};
+		return {false, "Too many unsaved patches open! Save or close them to open a new patch"};
 	}
 
 	while (!patch_storage.request_load_patch(loc)) {
 		wait_func();
 	}
 
-	uint32_t timeout = get_time() + 3000;
+	auto timeout = get_time() + 3000;
 	while (get_time() < timeout) {
 
 		auto message = patch_storage.get_message();
@@ -107,7 +102,7 @@ Result ReloadPatch::reload_patch_file(PatchLocation const &loc, Function<void()>
 }
 
 // Returns true if timestamp/filesize on disk differs from the open patch (or there is no open patch)
-bool ReloadPatch::has_changed_on_disk(PatchLocation const &loc) {
+bool ReloadPatch::is_not_open_or_has_changed_on_disk(PatchLocation const &loc) {
 	if (auto openpatch = patches.find_open_patch(loc)) {
 		return check_file_changed(loc, openpatch->timestamp, openpatch->filesize);
 	}

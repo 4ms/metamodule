@@ -3,23 +3,39 @@
 namespace rack::engine
 {
 
+struct Engine::Internal {
+	float sample_rate = 48000.f;
+};
+
+Engine::Engine()
+	: internal{new Internal{}} {
+}
+
+Engine::~Engine() {
+	delete internal;
+}
+
 // clang-format off
 
 void Engine::clear(){}
-// PRIVATE Engine::void clear_NoLock();
+// void Engine::clear_NoLock(){}
 void Engine::stepBlock(int frames){}
 void Engine::setMasterModule(Module *module){}
 void Engine::setMasterModule_NoLock(Module *module){}
 Module Engine::*getMasterModule(){ return {}; }
 
 float Engine::getSampleRate() { 
-	return sample_rate; 
+	return internal->sample_rate; 
+}
+
+void Engine::setSampleRate(float sampleRate) {
+	internal->sample_rate = sampleRate;
 }
 
 void Engine::setSuggestedSampleRate(float suggestedSampleRate){}
 
 float Engine::getSampleTime() { 
-	return 1.f / sample_rate; 
+	return 1.f / internal->sample_rate; 
 }
 
 void Engine::yieldWorkers(){}
@@ -38,7 +54,7 @@ size_t Engine::getModuleIds(int64_t *moduleIds, size_t len){ return {}; }
 std::vector<int64_t> Engine::getModuleIds(){ return {}; }
 void Engine::addModule(Module *module){}
 void Engine::removeModule(Module *module){}
-// PRIVATE Engine::void removeModule_NoLock(Module *module){ return {}; }
+void Engine::removeModule_NoLock(Module *module){}
 bool Engine::hasModule(Module *module){ return {}; }
 Module *Engine::getModule(int64_t moduleId){ return {}; }
 Module *Engine::getModule_NoLock(int64_t moduleId){ return {}; }
@@ -55,8 +71,9 @@ size_t Engine::getNumCables(){ return {}; }
 size_t Engine::getCableIds(int64_t *cableIds, size_t len){ return {}; }
 std::vector<int64_t> Engine::getCableIds(){ return {}; }
 void Engine::addCable(Cable *cable){}
+void Engine::addCable_NoLock(Cable *cable){}
 void Engine::removeCable(Cable *cable){}
-// PRIVATE Engine::void removeCable_NoLock(Cable *cable){ return {}; }
+void Engine::removeCable_NoLock(Cable *cable){}
 bool Engine::hasCable(Cable *cable){ return {}; }
 Cable* Engine::getCable(int64_t cableId){ return {}; }
 
@@ -80,17 +97,17 @@ float Engine::getParamSmoothValue(Module *module, int paramId){
 // ParamHandles
 void Engine::addParamHandle(ParamHandle *paramHandle){}
 void Engine::removeParamHandle(ParamHandle *paramHandle){}
-// PRIVATE Engine::void removeParamHandle_NoLock(ParamHandle *paramHandle){ return {}; }
+void Engine::removeParamHandle_NoLock(ParamHandle *paramHandle){}
 ParamHandle* Engine::getParamHandle(int64_t moduleId, int paramId){ return {}; }
 ParamHandle* Engine::getParamHandle_NoLock(int64_t moduleId, int paramId){ return {}; }
-// DEPRECATED Engine::ParamHandle *getParamHandle(Module *module, int paramId){ return {}; }
+ParamHandle* Engine::getParamHandle(Module *module, int paramId){ return {}; }
 void Engine::updateParamHandle(ParamHandle *paramHandle, int64_t moduleId, int paramId, bool overwrite){}
 void Engine::updateParamHandle_NoLock(ParamHandle *paramHandle, int64_t moduleId, int paramId, bool overwrite){}
 
 json_t* Engine::toJson(){ return {}; }
 void Engine::fromJson(json_t *rootJ){}
 
-// PRIVATE Engine::void startFallbackThread(){ return {}; }
+void Engine::startFallbackThread(){}
 
 // clang-format on
 } // namespace rack::engine

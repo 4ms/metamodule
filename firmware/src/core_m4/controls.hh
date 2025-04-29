@@ -13,12 +13,12 @@
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 #include "metaparams.hh"
+#include "midi/midi_message.hh"
 #include "midi_controls.hh"
 #include "param_block.hh"
 #include "params.hh"
 #include "sense_pin_reader.hh"
 #include "usb/midi_host.hh"
-#include "usb/midi_message.hh"
 #include "util/edge_detector.hh"
 #include "util/interp_param.hh"
 #include "util/lockfree_fifo_spsc.hh"
@@ -47,6 +47,10 @@ private:
 	template<size_t block_num>
 	void start_param_block();
 
+	void parse_midi();
+	void update_midi_connected();
+	void update_rotary();
+
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
 	// Digital controls: Rotary, Buttons and Gate jacks
@@ -72,7 +76,8 @@ private:
 	MidiHost &_midi_host;
 	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
 	Midi::MessageParser _midi_parser;
-	EdgeStateDetector _midi_connected;
+	EdgeStateDetector _midi_connected_raw;
+	bool _midi_connected = false;
 
 	// Params
 	DoubleBufParamBlock &param_blocks;

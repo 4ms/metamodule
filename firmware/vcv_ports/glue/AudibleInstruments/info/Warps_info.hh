@@ -15,11 +15,11 @@ struct WarpsInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 15> Elements{{
-		Rogan6PSWhite{{to_mm<72>(71.71), to_mm<72>(94.73), Center, "Algorithm", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(109.63), to_mm<72>(185.46), Center, "Timbre", ""}, 0.421875f},
+		Rogan6PSWhite{{to_mm<72>(71.71), to_mm<72>(94.73), Center, "Algorithm", ""}, 0, 8, 0},
+		WhiteMediumKnob{{to_mm<72>(109.63), to_mm<72>(185.46), Center, "Timbre", ""}, 0, 1, .5f, "", "%", 0, 100},
 		SmallButton{{to_mm<72>(23.15), to_mm<72>(182.05), Center, "Int. Osc Mode", ""}},
-		Trimpot{{to_mm<72>(23.09), to_mm<72>(213.52), Center, "Osc Amp/Freq", ""}, 0.0f},
-		Trimpot{{to_mm<72>(59.95), to_mm<72>(213.52), Center, "Mod Amp", ""}, 0.0f},
+		Trimpot{{to_mm<72>(23.09), to_mm<72>(213.52), Center, "Osc Amp/Freq", ""}, 0, 1, 1, "", "%", 0, 100},
+		Trimpot{{to_mm<72>(59.95), to_mm<72>(213.52), Center, "Mod Amp", ""}, 0, 1, 1, "", "%", 0, 100},
 		AnalogJackInput4ms{{to_mm<72>(20.3), to_mm<72>(273.63), Center, "Level 1 In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(54.57), to_mm<72>(273.63), Center, "Level 2 In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(88.9), to_mm<72>(273.63), Center, "Algorithm CV", ""}},

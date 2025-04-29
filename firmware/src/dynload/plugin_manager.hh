@@ -1,9 +1,8 @@
 #pragma once
 #include "fs/fatfs/fat_file_io.hh"
-#include "fs/fatfs/ramdisk_ops.hh"
+#include "gui/fonts/ttf.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
-#include "user_settings/plugin_autoload_settings.hh"
 
 #include "gui/fonts/fonts.hh"
 
@@ -35,13 +34,27 @@ public:
 				// Cleanup files we copied to the ramdisk
 				for (auto const &file : plugin.loaded_files) {
 					if (file.ends_with(".bin")) {
-						free_font(file);
+						Fonts::free_font(file);
+					}
+					if (file.ends_with(".ttf")) {
+						Fonts::free_ttf(file);
 					}
 					ramdisk.delete_file(file);
 				}
 
+				// Get the location of the code
+				auto plug = std::next(loaded_plugin_list.begin(), i);
+				auto code = std::span<uint32_t>(reinterpret_cast<uint32_t *>(plug->code.data()), plug->code.size() / 4);
+
 				// Delete it
 				loaded_plugin_list.erase(std::next(loaded_plugin_list.begin(), i));
+
+				// Skip the first two words -- malloc/free use these to tag the block
+				code = code.subspan(2);
+				pr_dbg("Clearing unallocated code block %p to %p (0x%x)\n", code.data(), code.end(), code.size_bytes());
+				for (auto &x : code) {
+					x = 0xEAFFFFFE; //bl .
+				}
 				break;
 			}
 			i++;
@@ -51,6 +64,10 @@ public:
 
 	auto process_loading() {
 		return plugin_file_loader.process(loaded_plugin_list);
+	}
+
+	std::pair<int32_t, int32_t> get_free_total_space_kb() {
+		return ramdisk.get_free_total_space_kb();
 	}
 
 	bool is_idle() {

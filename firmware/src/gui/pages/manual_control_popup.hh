@@ -6,10 +6,12 @@
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
+#include "params_state.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_play/patch_mod_queue.hh"
+#include "patch_play/patch_playloader.hh"
 #include "util/overloaded.hh"
 
 namespace MetaModule
@@ -17,9 +19,10 @@ namespace MetaModule
 
 struct ManualControlPopUp {
 
-	ManualControlPopUp(OpenPatchManager &patches, PatchModQueue &patch_mod_queue)
+	ManualControlPopUp(OpenPatchManager &patches, PatchModQueue &patch_mod_queue, PatchPlayLoader &playloader)
 		: patch_mod_queue{patch_mod_queue}
 		, patches{patches}
+		, playloader{playloader}
 		, controlarc_group(lv_group_create()) {
 
 		lv_group_add_obj(controlarc_group, ui_ControlArc);
@@ -53,12 +56,11 @@ struct ManualControlPopUp {
 
 		auto param_id = drawn_el->gui_element.idx.param_idx;
 		auto module_id = drawn_el->gui_element.module_idx;
-		auto cur_val = patch->get_static_knob_value(module_id, param_id);
-		if (cur_val) {
-			float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
-			lv_arc_set_value(ui_ControlArc, std::round(cur_val.value() * range) + lv_arc_get_min_value(ui_ControlArc));
-			update_control_arc_text();
-		}
+
+		auto value = playloader.param_value(module_id, param_id);
+		float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
+		lv_arc_set_value(ui_ControlArc, std::round(value * range) + lv_arc_get_min_value(ui_ControlArc));
+		update_control_arc_text();
 	}
 
 	void hide() {
@@ -88,16 +90,16 @@ private:
 						   arc_change_value();
 					   },
 
-					   [this](const Pot &) {
-						   auto cur_arc_range = arc_range_value[arc_range_idx];
-						   auto next_idx = (arc_range_idx + 1) % arc_range_value.size();
-						   auto next_arc_range = arc_range_value[next_idx];
+					   [this](const Pot &pot) {
 						   float cur_value = lv_arc_get_value(ui_ControlArc);
-						   lv_arc_set_range(ui_ControlArc, 0, next_arc_range);
+						   auto cur_arc_range = lv_arc_get_max_value(ui_ControlArc);
+						   arc_range_idx = (arc_range_idx + 1) % arc_range_value.size();
+
+						   set_pot_range(pot);
+
+						   auto new_arc_range = lv_arc_get_max_value(ui_ControlArc);
 						   lv_arc_set_value(ui_ControlArc,
-											std::round(cur_value / (float)cur_arc_range * (float)next_arc_range));
-						   arc_range_idx = next_idx;
-						   show_resolution_text();
+											std::round(cur_value / (float)cur_arc_range * (float)new_arc_range));
 					   },
 
 					   // switches: increment value, wrapping
@@ -156,10 +158,12 @@ private:
 		if (!drawn_el)
 			return;
 
+		hide_resolution_text();
+
 		std::visit(overloaded{
 					   [](const BaseElement &) {},
 					   [](const ParamElement &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
-					   [this](const Pot &) { lv_arc_set_range(ui_ControlArc, 0, arc_range_value[arc_range_idx]); },
+					   [this](const Pot &pot) { set_pot_range(pot); },
 					   [](const Button &el) { lv_arc_set_range(ui_ControlArc, 0, 1); },
 					   [](const FlipSwitch &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
@@ -168,17 +172,22 @@ private:
 				   },
 				   drawn_el->element);
 
-		std::visit(overloaded{
-					   [this](const BaseElement &) { hide_resolution_text(); },
-					   [this](const Pot &) { show_resolution_text(); },
-				   },
-				   drawn_el->element);
-
 		auto name = base_element(drawn_el->element).short_name;
 		if (name.size() == 0)
 			name = "the control";
 		lv_label_set_text_fmt(ui_ControlAlertLabel, "Turn rotary to adjust %.*s", (int)name.size(), name.data());
 		lv_label_set_text(ui_ControlAlertAmount, "");
+	}
+
+	void set_pot_range(Pot const &pot) {
+		// Use coarse/fine/ultrafine unless value is displayed what we are guessing is an integer with no units
+		if (pot.display_mult > 1 && pot.display_mult != 100 && pot.display_base == 0 && pot.units == "") {
+			lv_arc_set_range(ui_ControlArc, 0, pot.display_mult);
+			hide_resolution_text();
+		} else {
+			lv_arc_set_range(ui_ControlArc, 0, arc_range_value[arc_range_idx]);
+			show_resolution_text();
+		}
 	}
 
 	void arc_change_value() {
@@ -191,6 +200,7 @@ private:
 			.value = (float)value / range, //0/6 1/6 ... 6/6 => 1 2 ... 7
 		};
 		patch_mod_queue.put(SetStaticParam{.param = sp});
+
 		patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
 
 		update_control_arc_text();
@@ -241,12 +251,14 @@ private:
 	PatchData *patch{};
 	PatchModQueue &patch_mod_queue;
 	OpenPatchManager &patches;
+	PatchPlayLoader &playloader;
+
 	lv_group_t *controlarc_group = nullptr;
 	lv_group_t *prev_group = nullptr;
 
 	unsigned arc_range_idx = 0;
 	std::array<unsigned, 3> arc_range_value{100, 1000, 10000};
-	std::array<std::string_view, 3> arc_range_text{"Coarse (1%)", "Fine (0.1%)", "Ultra (0.01%)"};
+	std::array<std::string_view, 3> arc_range_text{"Coarse", "Fine", "Ultra-fine"};
 
 public:
 	bool visible = true;

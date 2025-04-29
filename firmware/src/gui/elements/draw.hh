@@ -1,12 +1,8 @@
 #pragma once
-#include "CoreModules/elements/element_info.hh"
-#include "CoreModules/elements/elements.hh"
 #include "gui/elements/draw_img.hh"
 #include "gui/fonts/fonts.hh"
 #include "gui/helpers/units_conversion.hh"
-#include "gui/images/paths.hh"
 #include "gui/styles.hh"
-#include "lvgl.h"
 #include <cmath>
 #include <cstdint>
 
@@ -17,13 +13,21 @@ inline lv_obj_t *draw_element(const BaseElement &, lv_obj_t *, uint32_t) {
 	return nullptr;
 }
 
-inline lv_obj_t *draw_element(const ImageElement &el, lv_obj_t *canvas, uint32_t module_height) {
+inline lv_obj_t *draw_element(const JackElement &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	return obj;
 }
 
+inline lv_obj_t *draw_element(const ImageElement &el, lv_obj_t *canvas, uint32_t module_height) {
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
+	// Pure images always go to the background
+	if (obj)
+		lv_obj_move_background(obj);
+	return obj;
+}
+
 inline lv_obj_t *draw_element(const LightElement &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto obj = draw_element(ImageElement(el), canvas, module_height);
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	if (!obj)
 		return nullptr;
 
@@ -97,14 +101,14 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 		float y = mm_to_px(el.y_mm, module_height);
 		float width = mm_to_px(el.width_mm, module_height);
 		float height = mm_to_px(el.height_mm, module_height);
-		const float channel_width_px = module_height / 60;
+		const float channel_width_px = module_height / 60.f;
 		if (height > width) {
 			x += (width - channel_width_px) / 2;
 			width = channel_width_px;
-			height -= module_height / 30; //padding
+			height -= module_height / 30.f; //padding
 		} else {
 			y += (width - channel_width_px) / 2;
-			width -= module_height / 30; //padding
+			width -= module_height / 30.f; //padding
 			height = channel_width_px;
 		}
 		float zoom = module_height / 240.f;
@@ -171,7 +175,7 @@ inline lv_obj_t *draw_element(const SliderLight &el, lv_obj_t *canvas, uint32_t 
 }
 
 inline lv_obj_t *draw_element(const Button &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto obj = draw_element(ImageElement(el), canvas, module_height);
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	if (!obj)
 		return nullptr;
 	lv_obj_set_style_radius(obj, 20, LV_PART_MAIN);
@@ -229,7 +233,7 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 
 	auto label = lv_label_create(canvas);
 	lv_label_set_text(label, el.text.data());
-	lv_obj_set_style_text_font(label, get_font(el.font.data()), LV_PART_MAIN);
+	lv_obj_set_style_text_font(label, Fonts::get_font(el.font.data()), LV_PART_MAIN);
 	lv_obj_set_style_text_color(label, lv_color_t{.full = el.color.raw()}, LV_PART_MAIN);
 
 	lv_obj_set_align(label, LV_ALIGN_TOP_LEFT);
@@ -252,10 +256,39 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 
 inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
 	auto label = draw_element(TextDisplay(el), canvas, module_h);
-	//DOT mode doesn't work with dynamic elements
+	//LV_LABEL_LONG_DOT mode doesn't work with dynamic elements
 	//because we can't compare the new text with the existing text since it may contain dots
 	lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
 	return label;
+}
+
+inline lv_obj_t *draw_element(const DynamicGraphicDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
+	if (el.height_mm == 0) {
+		pr_trace("Skipping graphic display with no height\n");
+		return nullptr;
+	}
+
+	lv_coord_t x = std::round(mm_to_px(el.x_mm, module_h));
+	lv_coord_t y = std::round(mm_to_px(el.y_mm, module_h));
+	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h));
+	lv_coord_t h = std::round(mm_to_px(el.height_mm, module_h));
+
+	// Don't let rounding errors make us have an empty buffer
+	w = std::clamp<lv_coord_t>(w, 1, 1000);
+	h = std::clamp<lv_coord_t>(h, 1, module_h);
+
+	auto obj = lv_canvas_create(canvas);
+	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
+	lv_obj_set_pos(obj, x, y);
+	lv_obj_set_size(obj, w, h);
+
+	// Debug with a red border around objects:
+	// lv_obj_set_style_outline_width(obj, 1, 0);
+	// lv_obj_set_style_outline_color(obj, lv_color_make(0xFF, 0, 0), 0);
+	// lv_obj_set_style_outline_opa(obj, LV_OPA_50, 0);
+	// lv_obj_set_style_outline_pad(obj, 1, 0);
+
+	return obj;
 }
 
 } // namespace MetaModule::ElementDrawer

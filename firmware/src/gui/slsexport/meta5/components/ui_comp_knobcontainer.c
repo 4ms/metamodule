@@ -129,12 +129,25 @@ lv_obj_set_style_text_font(cui_Label, &ui_font_MuseoSansRounded50012, LV_PART_MA
 lv_obj_set_style_text_color(cui_Label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DISABLED );
 lv_obj_set_style_text_opa(cui_Label, 128, LV_PART_MAIN| LV_STATE_DISABLED);
 
+lv_obj_t *cui_Indicator;
+cui_Indicator = lv_btn_create(cui_KnobContainer);
+lv_obj_set_width( cui_Indicator, 3);
+lv_obj_set_height( cui_Indicator, 5);
+lv_obj_set_x( cui_Indicator, 0 );
+lv_obj_set_y( cui_Indicator, 11 );
+lv_obj_set_align( cui_Indicator, LV_ALIGN_TOP_MID );
+lv_obj_set_style_bg_color(cui_Indicator, lv_color_hex(0x0), LV_PART_MAIN);
+lv_obj_set_style_radius(cui_Indicator, 0, LV_PART_MAIN);
+lv_obj_set_style_transform_pivot_x(cui_Indicator, 0, LV_PART_MAIN);
+lv_obj_set_style_transform_pivot_y(cui_Indicator, 10, LV_PART_MAIN);
+
 lv_obj_t ** children = lv_mem_alloc(sizeof(lv_obj_t *) * _UI_COMP_KNOBCONTAINER_NUM);
 children[UI_COMP_KNOBCONTAINER_KNOBCONTAINER] = cui_KnobContainer;
 children[UI_COMP_KNOBCONTAINER_KNOB] = cui_Knob;
 children[UI_COMP_KNOBCONTAINER_CIRCLE] = cui_Circle;
 children[UI_COMP_KNOBCONTAINER_CIRCLE_KNOBLETTER] = cui_KnobLetter;
 children[UI_COMP_KNOBCONTAINER_LABEL] = cui_Label;
+children[UI_COMP_KNOBCONTAINER_INDICATOR] = cui_Indicator;
 lv_obj_add_event_cb(cui_KnobContainer, get_component_child_event_cb, LV_EVENT_GET_COMP_CHILD, children);
 lv_obj_add_event_cb(cui_KnobContainer, del_component_child_event_cb, LV_EVENT_DELETE, children);
 ui_comp_KnobContainer_create_hook(cui_KnobContainer);

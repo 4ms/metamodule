@@ -63,14 +63,21 @@ if (NOT HEADLESS)
 
 endif()
 
+# #################### ThorVG ############################################
+
+if (NOT HEADLESS)
+	add_subdirectory(${FWDIR}/lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
+endif()
+
+
 # #################### RYML ##################################
 
 add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
 
 # #################### SLS Export ##################################
 if (NOT HEADLESS)
-	add_subdirectory(${FWDIR}/src/gui/slsexport/meta5 ${CMAKE_CURRENT_BINARY_DIR}/ui)
-	target_link_libraries(ui PRIVATE lvgl)
+	add_subdirectory(${FWDIR}/src/gui/slsexport ${CMAKE_CURRENT_BINARY_DIR}/ui)
+	# target_link_libraries(ui PRIVATE lvgl)
 endif()
 
 # #################### VCV Adaptor ##################################
@@ -82,18 +89,35 @@ add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
 add_subdirectory(${FWDIR}/vcv_ports/ ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
 target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 
+# #################### CMSIS-DSP ############################################
+
+set(CMSISCORE ${FWDIR}/lib/cmsis)
+set(NEON OFF)
+set(NEONEXPERIMENTAL OFF)
+set(LOOPUNROLL OFF)
+set(HOST ON)
+add_subdirectory(${FWDIR}/lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
+
 # #################### Application ############################################
 
 add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 add_subdirectory(${LIBDIR}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
+if (NOT HEADLESS)
+	target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
+endif()
+
 if(HEADLESS)
 	add_executable(simulator 
 		src/headless/main-headless.cc 
 		src/headless/audio_files.cc 
+		src/headless/nanovg.cc
 		stubs/svg.cc
 		stubs/random.cpp
+		stubs/drivers/time.cc
+
+		${FWDIR}/src/midi/midi_router.cc
 
 		${FWDIR}/coreproc_plugin/create.cc
 
@@ -105,15 +129,26 @@ else()
 		src/ui.cc
 		stubs/random.cpp
 		stubs/memory/heap.cc
+		stubs/fs/fs_proxy.cc
+		stubs/async_thread_control.cc
+		stubs/drivers/time.cc
+		stubs/static_buffers.cc
+
 		${FWDIR}/src/gui/elements/element_name.cc
+		${FWDIR}/src/gui/elements/panel_name.cc
 		${FWDIR}/src/gui/slsexport/ui_local.cc
-		${FWDIR}/src/gui/slsexport/prefs_pane_fs.cc
+		${FWDIR}/src/fs/helpers.cc
+		# ${FWDIR}/src/gui/slsexport/prefs_menu.cc
 		${FWDIR}/src/gui/fonts/fonts.cc
+		${FWDIR}/src/gui/fonts/ttf.cc
 		${FWDIR}/src/fw_update/updater_proxy.cc
 		${FWDIR}/src/patch_play/modules_helpers.cc
+		${FWDIR}/src/midi/midi_router.cc
 		${FWDIR}/src/params/expanders.cc
+		${FWDIR}/src/patch_play/patch_player_catchup.cc
 		${FWDIR}/src/patch_play/plugin_module.cc
         ${FWDIR}/src/patch_file/reload_patch.cc
+		src/file_browser_adaptor.cc
 
 		#Fatfs:
 		stubs/fattime.cc
@@ -132,9 +167,16 @@ else()
 		${FWDIR}/src/user_settings/settings_serialize.cc
 
 		${FWDIR}/coreproc_plugin/create.cc
+		${FWDIR}/coreproc_plugin/async_thread.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
+
+# see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+target_compile_options(simulator PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-pmf-conversions>)
+endif()
+
 endif()
 
 target_include_directories(
@@ -184,7 +226,8 @@ if(NOT HEADLESS)
 		${SDL2_LIBRARIES}
 		lvglsdl
 		SDL2
-		ui
+		ui_lvgl
+		ThorVG
 	)
 endif()
 
@@ -192,7 +235,7 @@ target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
-target_compile_definitions(simulator PUBLIC SIMULATOR)
+target_compile_definitions(simulator PUBLIC SIMULATOR METAMODULE)
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 23)
 

@@ -22,9 +22,6 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_compile_options(
   ${MCU_FLAGS}
-  "SHELL:--param l1-cache-size=32"
-  "SHELL:--param l1-cache-line-size=64"
-  "SHELL:--param l2-cache-size=256"
   "$<$<CONFIG:Debug>:-O0>"
   "$<$<CONFIG:Debug>:-g3>"
   "$<$<CONFIG:Release>:-O3>"
@@ -34,23 +31,22 @@ add_compile_options(
   -fdata-sections
   -ffunction-sections
   -nostartfiles
-  -ffreestanding
   -fno-unwind-tables
   -Wall
   -Werror=return-type
   -Wsign-compare
   -Wdouble-promotion
   $<$<COMPILE_LANGUAGE:CXX>:-ffold-simple-inlines>
-  $<$<COMPILE_LANGUAGE:CXX>:-Wno-psabi>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
-  $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>  
+
+  $<$<COMPILE_LANGUAGE:CXX>:-Wno-psabi>
+  $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>
 )
 
 add_link_options(
     -Wl,--gc-sections
-    -ffreestanding
     -nostartfiles
     ${MCU_FLAGS}
 )

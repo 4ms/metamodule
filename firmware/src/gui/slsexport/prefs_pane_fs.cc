@@ -94,7 +94,7 @@ void init_SystemPrefsFSPane(lv_obj_t *parentTab) {
 	lv_obj_set_width(restart_note, LV_SIZE_CONTENT);
 	lv_obj_add_flag(restart_note, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
-	lv_label_set_text(restart_note, "New value takes effect after reboot");
+	lv_label_set_text(restart_note, "Takes effect after restart");
 	lv_obj_set_style_text_color(restart_note, lv_color_hex(0xBBBBBB), LV_PART_MAIN);
 	lv_obj_set_style_text_opa(restart_note, 255, LV_PART_MAIN);
 	lv_obj_set_style_text_font(restart_note, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);

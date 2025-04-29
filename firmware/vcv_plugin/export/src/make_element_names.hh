@@ -1,11 +1,19 @@
 #pragma once
-#include "CoreModules/elements/element_strings.hh"
 #include "util/contains_word.hh"
 #include "util/overloaded.hh"
 #include <engine/Module.hpp>
 
 namespace MetaModule
 {
+
+static void remove_extended_chars(std::string &name) {
+	// Do nothing -- all fonts have been updated with many unicode chars
+	// But keep this function here in case we need to start filtering again
+	// for (auto &c : name) {
+	// 	if (c < 0)
+	// 		c = '_';
+	// }
+}
 
 inline std::string_view getParamName(rack::engine::Module *module, int id) {
 	if (auto pq = module->getParamQuantity(id)) {

@@ -1,7 +1,6 @@
 #include "console/pr_dbg.hh"
 #include "module_widget_adaptor.hh"
 #include <app/ModuleWidget.hpp>
-#include <deque>
 #include <plugin/Model.hpp>
 #include <plugin/Plugin.hpp>
 #include <string_view>
@@ -33,14 +32,13 @@ void Plugin::addModel(Model *model) {
 	auto module = model->createModule();
 	auto modulewidget = model->createModuleWidget(module);
 
-	modulewidget->adaptor->populate_elements_indices(model->elements, model->indices);
+	modulewidget->populate_elements_indices(model);
 	model->move_strings();
 
 	std::string panelsvg;
-	if (modulewidget->svg_filename.size()) {
-		panelsvg = modulewidget->svg_filename;
-	} else if (modulewidget->panel && modulewidget->panel->svg) {
-		panelsvg = modulewidget->panel->svg->filename;
+
+	if (modulewidget->getPanel() && modulewidget->getPanel()->svg) {
+		panelsvg = modulewidget->getPanel()->svg->filename();
 	}
 
 	std::string_view panel_filename = "";
@@ -77,16 +75,26 @@ void Plugin::addModel(Model *model) {
 	delete module;
 }
 
+Plugin::Plugin()
+	: slug{""} {
+}
+
+Plugin::Plugin(std::string slug)
+	: slug{slug} {
+}
+
 Plugin::~Plugin() {
 	for (Model *model : models) {
-		model->plugin = nullptr;
 		// In VCV Rack: don't delete model because it's allocated once and referenced by a global.
 
 		// In MetaModule: we need to delete the models when the Plugin is removed
-		pr_trace("Deleting Model %s\n", model->slug.c_str());
-		delete model;
+		pr_trace("Deleting Model %s (%p)\n", model->slug.c_str(), model);
 
-		MetaModule::ModuleFactory::unregisterBrand(slug);
+		auto removed_ok = MetaModule::ModuleFactory::unregisterModule(slug, model->slug);
+		if (!removed_ok) {
+			pr_warn("Failed to remove module '%s' in brand '%s'\n", model->slug.c_str(), slug.c_str());
+		}
+		delete model;
 	}
 }
 

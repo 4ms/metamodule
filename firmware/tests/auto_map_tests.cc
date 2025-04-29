@@ -1,3 +1,4 @@
+#include "CoreModules/elements/elements_index.hh"
 #include "doctest.h"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
@@ -23,7 +24,7 @@ TEST_CASE("Basic usage: knob") {
 				CHECK(p.find_mapped_knob(set_i, module_id, param_id) == nullptr);
 			}
 
-			auto index = ElementCount::mark_unused_indices({.param_idx = param_id}, {.num_params = 1});
+			auto index = ElementIndex::set_index(ParamElement{}, param_id);
 			auto res = automap.map(module_id, index, p);
 
 			// Check result is expected mapping
@@ -126,7 +127,7 @@ TEST_CASE("Map jacks") {
 		// Check that the jack is initially not mapped
 		CHECK(p.find_mapped_injack(jack) == nullptr);
 
-		auto index = ElementCount::mark_unused_indices({.input_idx = jack_id}, {.num_inputs = 1});
+		auto index = ElementIndex::set_index(JackInput{}, jack_id);
 
 		auto res = automap.map(module_id, index, p);
 
@@ -150,7 +151,7 @@ TEST_CASE("Map jacks") {
 
 	auto test_fail_map_injack = [&](uint16_t module_id, uint8_t jack_id) {
 		Jack jack{.module_id = module_id, .jack_id = jack_id};
-		auto index = ElementCount::mark_unused_indices({.input_idx = jack_id}, {.num_inputs = 1});
+		auto index = ElementIndex::set_index(JackInput{}, jack_id);
 
 		// Check that the jack is initially not mapped
 		CHECK(p.find_mapped_injack(jack) == nullptr);
@@ -166,7 +167,7 @@ TEST_CASE("Map jacks") {
 		// Check that the jack is initially not mapped
 		CHECK(p.find_mapped_outjack(jack) == nullptr);
 
-		auto index = ElementCount::mark_unused_indices({.output_idx = jack_id}, {.num_outputs = 1});
+		auto index = ElementIndex::set_index(JackOutput{}, jack_id);
 
 		auto res = automap.map(module_id, index, p);
 
@@ -189,7 +190,7 @@ TEST_CASE("Map jacks") {
 
 	auto test_fail_map_outjack = [&](uint16_t module_id, uint8_t jack_id) {
 		Jack jack{.module_id = module_id, .jack_id = jack_id};
-		auto index = ElementCount::mark_unused_indices({.output_idx = jack_id}, {.num_outputs = 1});
+		auto index = ElementIndex::set_index(JackOutput{}, jack_id);
 
 		// Check that the jack is initially not mapped
 		CHECK(p.find_mapped_outjack(jack) == nullptr);

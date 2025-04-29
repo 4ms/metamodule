@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include "componentlibrary.hpp"
+#include "metamodule/VCVTextDisplay.hpp"
 
 namespace MetaModule
 {

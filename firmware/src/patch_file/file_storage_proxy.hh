@@ -1,9 +1,5 @@
 #pragma once
 #include "core_intercom/intercore_message.hh"
-#include "patch-serial/patch_to_yaml.hh"
-#include "patch-serial/yaml_to_patch.hh"
-#include "patch/patch_data.hh"
-#include "patch_file.hh"
 #include "patch_file/file_storage_comm.hh"
 #include "patch_file/patch_location.hh"
 #include "pr_dbg.hh"
@@ -154,6 +150,22 @@ public:
 		return comm_.send_message(message) ? WriteResult::Success : WriteResult::Busy;
 	}
 
+	WriteResult request_append_file(std::span<char> file_data, Volume vol, std::string_view filename) {
+		if (vol == Volume::RamDisk || vol == Volume::MaxVolumes) {
+			pr_err("Error: not a valid volume for writing a patch\n");
+			return WriteResult::InvalidVol;
+		}
+
+		IntercoreStorageMessage message{
+			.message_type = RequestAppendFile,
+			.vol_id = vol,
+			.buffer = file_data,
+			.filename = filename,
+		};
+
+		return comm_.send_message(message) ? WriteResult::Success : WriteResult::Busy;
+	}
+
 	bool request_reset_factory_patches() {
 		IntercoreStorageMessage message{.message_type = RequestFactoryResetPatches};
 		return comm_.send_message(message);
@@ -176,6 +188,19 @@ public:
 
 	[[nodiscard]] bool request_wifi_ip() {
 		IntercoreStorageMessage message{.message_type = RequestWifiIP};
+		return comm_.send_message(message);
+	}
+
+	[[nodiscard]] bool
+	request_dir_entries(DirTree<FileEntry> *dir_tree, Volume vol, std::string_view path, std::string_view extension) {
+		IntercoreStorageMessage message{
+			.message_type = RequestDirEntries,
+			.vol_id = vol,
+			.filename = path,			// directory whose contents to display
+			.dest_filename = extension, // filter by extension. example: "wav" => shows *.wav (subdirs are always shown)
+			.dir_entries = dir_tree,	// this is where we want M4 to copy the dir tree
+		};
+
 		return comm_.send_message(message);
 	}
 

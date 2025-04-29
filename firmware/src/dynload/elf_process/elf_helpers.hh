@@ -46,15 +46,19 @@ inline void print_sec_header(Elf32_Shdr &sec, std::string_view string_table) {
 }
 
 inline void print_symbol(Elf32_Sym &sym, std::string_view string_table) {
-	auto name = string_table.substr(sym.st_name); //name.size() is wrong, but it is null-terminated, so it prints OK
-	pr_info("Symbol: Name: %s ", name.data());
-	pr_info("addr = %08x, size = %x, info = %d, other = %d, sec=#%d, name offset = %d\n",
-			sym.st_value,
-			sym.st_size,
-			sym.st_info,
-			sym.st_other,
-			sym.st_shndx,
-			sym.st_name);
+	if (sym.st_name >= string_table.size()) {
+		pr_info("Symbol offset in string table (%u) > string table size (%u)\n", sym.st_name, string_table.size());
+	} else {
+		auto name = string_table.substr(sym.st_name); //name.size() is wrong, but it is null-terminated, so it prints OK
+		pr_info("Symbol: Name: '%s' ", name.data());
+		pr_info("addr = %08x, size = %x, info = %d, other = %d, sec=#%d, name offset = %d\n",
+				sym.st_value,
+				sym.st_size,
+				sym.st_info,
+				sym.st_other,
+				sym.st_shndx,
+				sym.st_name);
+	}
 }
 
 } // namespace ElfFile

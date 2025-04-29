@@ -1,9 +1,7 @@
 #pragma once
-#include "midi_message.hh"
-#include "params.hh"
+#include "midi/midi_message.hh"
 #include "params/midi_params.hh"
 #include "patch/midi_def.hh"
-#include "usb/midi_message.hh"
 #include <algorithm>
 #include <optional>
 
@@ -23,6 +21,7 @@ struct MessageParser {
 	}
 
 	Midi::Event parse(MidiMessage msg) {
+
 		Midi::Event event{};
 
 		// Monophonic MIDI CV/Gate
@@ -39,6 +38,7 @@ struct MessageParser {
 			}
 			event.type = Midi::Event::Type::NoteOff;
 			event.note = msg.note();
+			event.midi_chan = msg.status.channel;
 
 		} else if (msg.is_command<MidiCommand::NoteOn>()) {
 
@@ -50,31 +50,41 @@ struct MessageParser {
 			event.type = Midi::Event::Type::NoteOn;
 			event.poly_chan = poly_chan;
 			event.note = msg.note();
-			event.val = Midi::u7_to_volts<10>(msg.velocity());
+			event.val = msg.velocity();
+			event.midi_chan = msg.status.channel;
 
 		} else if (msg.is_command<MidiCommand::PolyKeyPressure>()) { //aka Aftertouch
 			for (unsigned i = 0; auto &midi_note : midi_notes) {
 				if (midi_note.note == msg.note()) {
 					event.type = Midi::Event::Type::Aft;
 					event.poly_chan = i;
-					event.val = Midi::u7_to_volts<10>(msg.aftertouch());
+					event.val = msg.aftertouch();
+					event.midi_chan = msg.status.channel;
 					break;
 				}
 				i++;
 			}
 
-		} else if (msg.is_command<MidiCommand::ChannelPressure>()) {
-			event.type = Midi::Event::Type::ChanPress;
-			event.val = Midi::u7_to_volts<10>(msg.chan_pressure());
-
 		} else if (msg.is_command<MidiCommand::ControlChange>()) {
 			event.type = Midi::Event::Type::CC;
 			event.note = msg.ccnum();
-			event.val = Midi::u7_to_volts<10>(msg.ccval());
+			event.val = msg.ccval();
+			event.midi_chan = msg.status.channel;
+
+		} else if (msg.is_command<MidiCommand::ProgramChange>()) {
+			event.type = Midi::Event::Type::PC;
+			event.val = msg.pcval();
+			event.midi_chan = msg.status.channel;
+
+		} else if (msg.is_command<MidiCommand::ChannelPressure>()) {
+			event.type = Midi::Event::Type::ChanPress;
+			event.val = msg.chan_pressure();
+			event.midi_chan = msg.status.channel;
 
 		} else if (msg.is_command<MidiCommand::PitchBend>()) {
 			event.type = Midi::Event::Type::Bend;
-			event.val = Midi::s14_to_semitones<2>(msg.bend());
+			event.val = msg.bend();
+			event.midi_chan = msg.status.channel;
 
 		} else if (msg.is_timing_transport()) {
 			event.type = Midi::Event::Type::Time;

@@ -463,7 +463,7 @@ typedef struct
 /* USB Host handle structure */
 typedef struct _USBH_HandleTypeDef
 {
-  __IO HOST_StateTypeDef     gState;       /*  Host State Machine Value */
+  HOST_StateTypeDef     gState;       /*  Host State Machine Value */
   ENUM_StateTypeDef     EnumState;    /* Enumeration state Machine */
   CMD_StateTypeDef      RequestState;
   USBH_CtrlTypeDef      Control;
@@ -472,7 +472,7 @@ typedef struct _USBH_HandleTypeDef
   USBH_ClassTypeDef    *pActiveClass;
   uint32_t              ClassNumber;
   uint32_t              Pipes[16];
-  __IO uint32_t         Timer;
+  uint32_t         Timer;
   uint32_t              Timeout;
   uint8_t               id;
   void                 *pData;

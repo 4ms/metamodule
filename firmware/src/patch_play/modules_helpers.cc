@@ -14,7 +14,7 @@ std::optional<float> get_normalized_default_value(Element const &element) {
 			[&]<typename T>(T const &el)
 				requires(std::derived_from<T, AltParamChoice> || std::derived_from<T, Switch>)
 			{ 
-				return std::optional<float>{el.num_pos > 0 ? (float)el.DefaultValue / (float)el.num_pos : 0};
+				return std::optional<float>{el.num_pos > 0 ? (float)el.default_value / (float)el.num_pos : 0};
 			},
 
 			[&]<typename T>(T const &el)
@@ -22,7 +22,7 @@ std::optional<float> get_normalized_default_value(Element const &element) {
 				requires(std::derived_from<T, AltParamContinuous> ||
 						 (std::derived_from<T, ParamElement> && !std::derived_from<T, Switch> && !std::derived_from<T, AltParamChoice>))
 			{ 
-				return std::optional<float>((float)el.DefaultValue); 
+				return std::optional<float>((float)el.default_value); 
 			},
 		},
 		element);

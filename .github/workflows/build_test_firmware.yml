@@ -13,8 +13,8 @@ on:
         required: true
         default: false
         type: boolean
-      skip_wifi:
-        description: 'Skip building wifi features'
+      usb_logging:
+        description: 'Enable USB serial device for logging'
         default: false
         type: boolean
   push:
@@ -23,6 +23,7 @@ on:
       - fix-ci
     tags:
       - 'firmware-v[0-9]+.[0-9]+.[0-9]+*'
+      - 'firmware-debug-v[0-9]+.[0-9]+.[0-9]+*'
     paths:
       - 'firmware/**'
       - '!firmware/bootloader/**'
@@ -36,11 +37,11 @@ jobs:
     if: ${{ github.event_name == 'push' || inputs.linux_x64 }}
     strategy:
         matrix:
-          gcc: ['12.3.Rel1']  # can add other versions if needed
+          gcc: ['14.2.Rel1']  # can add other versions if needed
     name: "Build firmware"
     runs-on: ubuntu-24.04
     env:
-      preset: ${{ inputs.skip_wifi && 'base' || 'full' }}
+      preset: ${{ (startsWith(github.ref, 'refs/tags/firmware-debug-v') || inputs.usb_logging) && 'usb-log' || 'full' }}
     steps:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
@@ -68,11 +69,11 @@ jobs:
         run: cd firmware && cmake --fresh --preset ${{ env.preset }} -G Ninja && make all
 
       - name: Set Release Version
-        if: startsWith(github.ref, 'refs/tags/firmware-v')
+        if: startsWith(github.ref, 'refs/tags/firmware-v') || startsWith(github.ref, 'refs/tags/firmware-debug-v')
         uses: FranzDiebold/github-env-vars-action@v2
 
       - name: Release
-        if: startsWith(github.ref, 'refs/tags/firmware-v')
+        if: startsWith(github.ref, 'refs/tags/firmware-v') || startsWith(github.ref, 'refs/tags/firmware-debug-v')
         uses: softprops/action-gh-release@v1
         with:
           name: "Firmware Version: ${{ env.CI_REF_NAME }}"
@@ -87,7 +88,7 @@ jobs:
       run:
         shell: msys2 {0}
     env:
-      preset: ${{ inputs.skip_wifi && 'base' || 'full' }}
+      preset: ${{ inputs.usb_logging && 'usb-log' || 'full' }}
     steps:
       - name: Install windows dependencies
         uses: msys2/setup-msys2@v2
@@ -100,7 +101,7 @@ jobs:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          release: '12.3.Rel1'
+          release: '14.2.Rel1'
 
       - name: Checkout
         uses: actions/checkout@v4

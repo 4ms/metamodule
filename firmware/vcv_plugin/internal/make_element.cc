@@ -45,14 +45,14 @@ Element make_element(rack::app::SvgPort *widget) {
 		log_make_element("SvgPort In", widget->portId);
 		JackInput element{};
 		if (widget->sw->svg)
-			element.image = widget->sw->svg->filename;
+			element.image = widget->sw->svg->filename();
 		return element;
 
 	} else {
 		log_make_element("SvgPort Out", widget->portId);
 		JackOutput element{};
 		if (widget->sw->svg)
-			element.image = widget->sw->svg->filename;
+			element.image = widget->sw->svg->filename();
 		return element;
 	}
 }
@@ -62,8 +62,8 @@ Element make_element(rack::app::PortWidget *widget) {
 	if (auto inner_fb = match_child<rack::widget::FramebufferWidget>(widget); inner_fb != nullptr) {
 		if (auto svgw = match_child<rack::widget::SvgWidget>(inner_fb); svgw != nullptr) {
 			if (!svgw->box.size.isZero() && svgw->box.size.isFinite()) {
-				if (svgw->svg && svgw->svg->filename.size() > 0) {
-					element.image = std::string_view{svgw->svg->filename};
+				if (svgw->svg && svgw->svg->filename().size() > 0) {
+					element.image = std::string_view{svgw->svg->filename()};
 				}
 			}
 		}
@@ -81,21 +81,43 @@ Element make_element(rack::app::PortWidget *widget) {
 //
 // Pots
 //
+static float radians_to_degrees(float radians) {
+	return radians / (M_PI / 180.f);
+};
+
+static Knob create_base_knob(rack::app::Knob *widget) {
+	Knob element{};
+	element.default_value = getScaledDefaultValue(widget);
+	element.min_angle = radians_to_degrees(widget->minAngle);
+	element.max_angle = radians_to_degrees(widget->maxAngle);
+
+	if (auto pq = widget->getParamQuantity()) {
+		element.min_value = pq->minValue;
+		element.max_value = pq->maxValue;
+		element.units = pq->unit;
+		element.display_base = pq->displayBase;
+		element.display_mult = pq->displayMultiplier;
+		element.display_offset = pq->displayOffset;
+		element.integral = pq->snapEnabled;
+		element.display_precision = pq->displayPrecision;
+	}
+
+	return element;
+}
 
 Element make_element(rack::app::Knob *widget) {
 	log_make_element("Knob", widget->paramId);
 
-	Knob element{};
-	element.DefaultValue = getScaledDefaultValue(widget);
-	return element;
+	return create_base_knob(widget);
 }
 
 Element make_element(rack::componentlibrary::Rogan *widget) {
-	Knob element{};
-	element.DefaultValue = getScaledDefaultValue(widget);
+	log_make_element("Rogan", widget->paramId);
 
-	if (widget->sw->svg->filename.size()) {
-		element.image = widget->sw->svg->filename;
+	Knob element = create_base_knob(widget);
+
+	if (widget->sw->svg->filename().size()) {
+		element.image = widget->sw->svg->filename();
 
 	} else {
 		pr_err("make_element(Rogan): No svg was set\n");
@@ -107,8 +129,7 @@ Element make_element(rack::componentlibrary::Rogan *widget) {
 Element make_element(rack::app::SvgKnob *widget) {
 	log_make_element("SvgKnob", widget->paramId);
 
-	Knob element{};
-	element.DefaultValue = getScaledDefaultValue(widget);
+	Knob element = create_base_knob(widget);
 
 	// Hack to support BefacoTinyKnobs:
 	// The main SVG is just the dot, either BefacoTinyPointWhite or BefacoTinyPointBlack.
@@ -119,14 +140,14 @@ Element make_element(rack::app::SvgKnob *widget) {
 	// The Point PNG is not drawn, but it must have the right size because that's used to center the jack.
 	//
 	// TODO: consider using a concept make_element like:
-	// requires derived_form<T, SvgKnob> && !same_as<T, SvgKnob> && requires(...){w->bg->svg->filename;}
+	// requires derived_form<T, SvgKnob> && !same_as<T, SvgKnob> && requires(...){w->bg->svg->filename();}
 	//
 	// This does not work for Rogan knobs
 	auto find_inner_svg_widget = [](rack::widget::FramebufferWidget *fb) {
 		if (auto svgw = match_child<rack::widget::SvgWidget>(fb)) {
 			if (!svgw->box.size.isZero() && svgw->box.size.isFinite()) {
-				if (svgw->svg && svgw->svg->filename.size() > 0) {
-					return std::string_view{svgw->svg->filename};
+				if (svgw->svg && svgw->svg->filename().size() > 0) {
+					return std::string_view{svgw->svg->filename()};
 				}
 			}
 		}
@@ -137,12 +158,13 @@ Element make_element(rack::app::SvgKnob *widget) {
 		log_make_element_notes("...found SvgWidget child of fb with an SVG %s\n", inner_img.data());
 		element.image = inner_img;
 
-	} else if (widget->sw->svg->filename.size() && widget->sw->box.size.isFinite() && !widget->sw->box.size.isZero()) {
-		log_make_element_notes("...use sw->svg %s\n", widget->sw->svg->filename.data());
-		element.image = widget->sw->svg->filename;
+	} else if (widget->sw->svg->filename().size() && widget->sw->box.size.isFinite() && !widget->sw->box.size.isZero())
+	{
+		log_make_element_notes("...use sw->svg %s\n", widget->sw->svg->filename().data());
+		element.image = widget->sw->svg->filename();
 
 	} else {
-		pr_err("SvgKnob with no sw->svg or inner child of fb\n");
+		pr_trace("SvgKnob with no sw->svg or inner child of fb at %f, %f\n", widget->box.pos.x, widget->box.pos.y);
 	}
 
 	return element;
@@ -156,21 +178,21 @@ Element make_element(rack::app::SliderKnob *widget) {
 	log_make_element("SliderKnob", widget->paramId);
 
 	Slider element{};
-	element.DefaultValue = getScaledDefaultValue(widget);
+	element.default_value = getScaledDefaultValue(widget);
 	return element;
 }
 
 static Element make_slideswitch(rack::app::SvgSlider *widget) {
 	SlideSwitch element{};
 
-	if (widget->background->svg->filename.length()) {
-		element.image = widget->background->svg->filename;
+	if (widget->background->svg->filename().length()) {
+		element.image = widget->background->svg->filename();
 	}
 
-	element.DefaultValue = getDefaultValue(widget);
+	element.default_value = getDefaultValue(widget);
 
-	if (widget->handle->svg->filename.length())
-		element.image_handle = widget->handle->svg->filename;
+	if (widget->handle->svg->filename().length())
+		element.image_handle = widget->handle->svg->filename();
 
 	auto pq = widget->getParamQuantity();
 
@@ -205,11 +227,11 @@ Element make_element(rack::app::SvgSlider *widget) {
 		log_make_element("SvgSlider slider", widget->paramId);
 
 		Slider element{};
-		element.DefaultValue = getScaledDefaultValue(widget);
-		element.image_handle = widget->handle->svg->filename;
+		element.default_value = getScaledDefaultValue(widget);
+		element.image_handle = widget->handle->svg->filename();
 
-		if (widget->background->svg->filename.length()) {
-			element.image = widget->background->svg->filename;
+		if (widget->background->svg->filename().length()) {
+			element.image = widget->background->svg->filename();
 			// Modify the widget's box to match the background
 			widget->box.pos = widget->box.pos + widget->background->box.pos;
 		}
@@ -222,13 +244,13 @@ Element make_element(rack::app::SvgSlider *widget, rack::app::MultiLightWidget *
 	log_make_element("SvgSlider, Light", widget->paramId);
 
 	SliderLight element;
-	element.DefaultValue = getScaledDefaultValue(widget);
-	element.image_handle = widget->handle->svg->filename;
+	element.default_value = getScaledDefaultValue(widget);
+	element.image_handle = widget->handle->svg->filename();
 	auto color = light->baseColors.size() ? light->baseColors[0] : light->color;
 	element.color = RGB565{color.r, color.g, color.b};
 
-	if (widget->background->svg->filename.length()) {
-		element.image = widget->background->svg->filename;
+	if (widget->background->svg->filename().length()) {
+		element.image = widget->background->svg->filename();
 	}
 
 	return element;
@@ -242,10 +264,10 @@ static MomentaryButton make_momentary(rack::app::SvgSwitch *widget) {
 	MomentaryButton element{};
 
 	if (widget->frames.size() > 0) {
-		element.image = widget->frames[0]->filename;
+		element.image = widget->frames[0]->filename();
 
 		if (widget->frames.size() > 1)
-			element.pressed_image = widget->frames[1]->filename;
+			element.pressed_image = widget->frames[1]->filename();
 
 		if (widget->frames.size() > 2)
 			pr_info("Excess momentary button frames ignored\n");
@@ -280,8 +302,8 @@ static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
 	}
 
 	element.image_handle = "no-image";
-	element.image = widget->frames[0]->filename;
-	element.DefaultValue = getDefaultValue(widget);
+	element.image = widget->frames[0]->filename();
+	element.default_value = getDefaultValue(widget);
 	return element;
 }
 
@@ -307,10 +329,10 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 	}
 
 	for (unsigned i = 0; i < std::min<size_t>(FlipSwitch::MaxPositions, widget->frames.size()); i++) {
-		element.frames[i] = widget->frames[i]->filename;
+		element.frames[i] = widget->frames[i]->filename();
 	}
 
-	element.DefaultValue = getDefaultValue(widget);
+	element.default_value = getDefaultValue(widget);
 	return element;
 }
 
@@ -364,7 +386,7 @@ static Element make_latching_mono(std::string_view image, NVGcolor c, LatchingBu
 	LatchingButton element;
 	element.image = image;
 	element.color = RGB565{c.r, c.g, c.b};
-	element.DefaultValue = defaultValue;
+	element.default_value = defaultValue;
 	log_make_element_notes("make_latching_mono()", "");
 	return element;
 }
@@ -390,16 +412,16 @@ Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *
 
 		auto c = light->baseColors[0];
 		if (widget->momentary)
-			return make_momentary_mono(widget->frames[0]->filename, c);
+			return make_momentary_mono(widget->frames[0]->filename(), c);
 		else
-			return make_latching_mono(widget->frames[0]->filename, c, defaultValue);
+			return make_latching_mono(widget->frames[0]->filename(), c, defaultValue);
 
 		// Treat 3 or more lights as an RGB light
 	} else {
 		if (widget->momentary)
-			return make_momentary_rgb(widget->frames[0]->filename);
+			return make_momentary_rgb(widget->frames[0]->filename());
 		else
-			return make_latching_rgb(widget->frames[0]->filename, defaultValue);
+			return make_latching_rgb(widget->frames[0]->filename(), defaultValue);
 	}
 }
 
@@ -490,10 +512,10 @@ Element make_element(rack::app::MultiLightWidget *widget, std::string_view image
 //
 
 Element make_element(rack::widget::SvgWidget *widget) {
-	if (widget->svg->filename.size()) {
+	if (widget->svg->filename().size()) {
 		pr_trace("SvgWidget: using image as a ImageElement\n");
 		ImageElement element{};
-		element.image = widget->svg->filename;
+		element.image = widget->svg->filename();
 		return element;
 
 	} else {

@@ -21,6 +21,7 @@
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"
 #include "gui/pages/system_menu.hh"
+#include "vcv_plugin/internal/osdialog-mm.hh"
 
 namespace MetaModule
 {
@@ -36,17 +37,19 @@ class PageManager {
 	ButtonLight button_light;
 	Screensaver &screensaver;
 
+	PatchSelectorSubdirPanel subdir_panel;
+	FileBrowserDialog file_browser;
+	FileSaveDialog file_save_dialog{info.patch_storage, subdir_panel};
+
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info, subdir_panel};
-	PatchViewPage page_patchview{info, subdir_panel};
+	PatchViewPage page_patchview{info, file_save_dialog};
 	ModuleViewPage page_module{info};
 	KnobSetViewPage page_knobsetview{info};
 	KnobMapPage page_knobmap{info};
 	SystemMenuPage page_systemmenu{info};
 	ModuleListPage page_modulelist{info};
 	JackMapViewPage page_jackmap{info};
-
-	PatchSelectorSubdirPanel subdir_panel;
 
 public:
 	PageBase *cur_page = &page_mainmenu;
@@ -80,8 +83,13 @@ public:
 			   .settings = settings,
 			   .plugin_manager = plugin_manager,
 			   .ramdisk = ramdisk,
-			   .file_change_checker = file_change_checker}
-		, screensaver{screensaver} {
+			   .file_change_checker = file_change_checker,
+			   .file_browser = file_browser}
+		, screensaver{screensaver}
+		, file_browser{patch_storage, notify_queue} {
+
+		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
+		register_file_browser_vcv(file_browser, file_save_dialog);
 	}
 
 	void init() {
@@ -93,7 +101,7 @@ public:
 
 		handle_knobset_change();
 
-		update_patch_params();
+		update_screensaver();
 
 		handle_back_event();
 
@@ -104,8 +112,31 @@ public:
 				// debug_print_args(newpage);
 				cur_page->focus(newpage->args);
 			}
-		} else
-			cur_page->update();
+		} else {
+			if (file_browser.is_visible()) {
+				if (gui_state.back_button.is_just_released())
+					file_browser.back_event();
+				file_browser.update();
+
+				gui_state.file_browser_visible.register_state(true);
+
+			} else if (file_save_dialog.is_visible()) {
+				if (gui_state.back_button.is_just_released())
+					file_save_dialog.back_event();
+
+				file_save_dialog.update();
+
+				gui_state.file_browser_visible.register_state(true);
+
+			} else {
+				gui_state.file_browser_visible.register_state(false);
+
+				cur_page->update();
+
+				// Don't let old events do surprising things when you change pages
+				gui_state.file_browser_visible.clear_events();
+			}
+		}
 
 		handle_audio_errors();
 
@@ -130,7 +161,7 @@ public:
 
 					if (cur_page != page_list.page(PageId::KnobSetView))
 						info.notify_queue.put(
-							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 800});
+							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 600});
 
 					button_light.display_knobset(next_knobset);
 				}
@@ -142,48 +173,13 @@ public:
 		}
 	}
 
-	// Update internal copy of patch with knob changes
-	// This is used to keep GUI in sync with patch player's copy of the patch without concurrancy issues
-	void update_patch_params() {
-		auto patch = info.open_patch_manager.get_playing_patch();
-		if (!patch)
-			return;
-
-		auto active_knobset = info.page_list.get_active_knobset();
-		if (active_knobset >= patch->knob_sets.size())
-			return;
-
-		if (page_module.is_creating_map())
-			return;
-
-		// Iterate all panel knobs
-		for (auto panel_knob_i = 0u; panel_knob_i < info.params.knobs.size(); panel_knob_i++) {
-
-			// Find knobs that have moved
-			auto knobpos = info.params.panel_knob_new_value(panel_knob_i);
-			if (!knobpos.has_value())
-				continue;
-
-			screensaver.wake_knob();
-
-			// Update patch for any map that's mapped to the knob that moved
-			for (auto &map : patch->knob_sets[active_knobset].set) {
-				if (map.panel_knob_id == panel_knob_i) {
-					auto scaled_val = map.get_mapped_val(knobpos.value());
-					patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
-				}
-			}
-		}
-
-		for (auto &map : patch->midi_maps.set) {
-			auto knobpos = info.params.panel_knob_new_value(map.panel_knob_id);
-			if (knobpos.has_value()) {
-				// Update all MIDI maps to this CC
-				for (auto &other_map : patch->midi_maps.set) {
-					if (other_map.panel_knob_id == map.panel_knob_id) {
-						auto scaled_val = other_map.get_mapped_val(knobpos.value());
-						patch->set_or_add_static_knob_value(other_map.module_id, other_map.param_id, scaled_val);
-					}
+	void update_screensaver() {
+		// Wake screen saver on knob movement
+		if (screensaver.is_active() && screensaver.can_wake_on_knob()) {
+			for (auto const &knob : info.params.knobs) {
+				if (knob.changed) {
+					screensaver.wake();
+					break;
 				}
 			}
 		}
@@ -211,6 +207,13 @@ public:
 		}
 
 		DisplayNotification::flash_overload(info.metaparams.audio_overruns);
+
+		if (auto panel_knob_id = info.patch_playloader.is_panel_knob_catchup_inaccessible()) {
+			std::string msg =
+				"Knob " + std::string(PanelDef::get_map_param_name(*panel_knob_id)) +
+				" cannot reach the mapped parameter's value. Adjust the Min/Max or your Knob Catchup preferences.";
+			DisplayNotification::show({msg, Notification::Priority::Info, 3000});
+		}
 	}
 
 	void handle_audio_errors() {

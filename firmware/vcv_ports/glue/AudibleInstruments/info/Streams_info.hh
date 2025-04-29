@@ -15,14 +15,14 @@ struct StreamsInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 27> Elements{{
-		WhiteSmallKnob{{to_mm<72>(31.37), to_mm<72>(59.68), Center, "Ch1 Shape", ""}, 0.5f},
-		WhiteSmallKnob{{to_mm<72>(31.37), to_mm<72>(126.3), Center, "Ch1 Mod", ""}, 0.5f},
-		RedSmallKnob{{to_mm<72>(31.37), to_mm<72>(192.88), Center, "Ch1 Level Mod", ""}, 0.5f},
-		Trimpot{{to_mm<72>(86.24), to_mm<72>(172.19), Center, "Ch1 Response", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(141.12), to_mm<72>(59.68), Center, "Ch2 Shape", ""}, 0.5f},
-		WhiteSmallKnob{{to_mm<72>(141.12), to_mm<72>(126.3), Center, "Ch2 Mod", ""}, 0.5f},
-		BlueSmallKnob{{to_mm<72>(141.12), to_mm<72>(192.88), Center, "Ch2 Level Mod", ""}, 0.5f},
-		Trimpot{{to_mm<72>(86.24), to_mm<72>(213.58), Center, "Ch2 Response", ""}, 0.0f},
+		WhiteSmallKnob{{to_mm<72>(31.37), to_mm<72>(59.68), Center, "Ch1 Shape", ""}, 0, 1, 0.5f, "", "%", 0, 100},
+		WhiteSmallKnob{{to_mm<72>(31.37), to_mm<72>(126.3), Center, "Ch1 Mod", ""}, 0, 1, 0.5f, "", "%", 0, 100},
+		RedSmallKnob{{to_mm<72>(31.37), to_mm<72>(192.88), Center, "Ch1 Level Mod", ""}, 0, 1, 0.5f, "", "%", 0, 100},
+		Trimpot{{to_mm<72>(86.24), to_mm<72>(172.19), Center, "Ch1 Response", ""}, 0, 1, 0.5f, "", "%", 0, 100},
+		WhiteSmallKnob{{to_mm<72>(141.12), to_mm<72>(59.68), Center, "Ch2 Shape", ""}, 0, 1, 0.5f, "", "%", 0, 100},
+		WhiteSmallKnob{{to_mm<72>(141.12), to_mm<72>(126.3), Center, "Ch2 Mod", ""}, 0, 1, 0.5f, "", "%", 0, 100},
+		BlueSmallKnob{{to_mm<72>(141.12), to_mm<72>(192.88), Center, "Ch2 Level Mod", ""}, 0, 1, 0.5f, "", "%", 0, 100},
+		Trimpot{{to_mm<72>(86.24), to_mm<72>(213.58), Center, "Ch2 Response", ""}, 0, 1, 0.5f, "", "%", 0, 100},
 		SmallButton{{to_mm<72>(70.06), to_mm<72>(42.59), Center, "Ch1 Function", ""}},
 		SmallButton{{to_mm<72>(102.43), to_mm<72>(42.59), Center, "Ch2 Function", ""}},
 		SmallButton{{to_mm<72>(86.24), to_mm<72>(132.59), Center, "Meter", ""}},

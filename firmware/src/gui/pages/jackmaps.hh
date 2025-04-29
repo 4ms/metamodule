@@ -72,10 +72,12 @@ struct JackMapViewPage : PageBase {
 		//Populate new text
 		for (auto map : patch->mapped_ins) {
 			for (auto &jack : map.ins) {
-				if (map.panel_jack_id < in_conts.size()) {
-					if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
+				if (map.panel_jack_id >= in_conts.size())
+					continue;
+				if (auto cont = in_conts[map.panel_jack_id]) {
+					if (lv_obj_get_child_cnt(cont) > 1) {
 						auto name = get_full_element_name(jack.module_id, jack.jack_id, ElementType::Input, *patch);
-						auto label = lv_obj_get_child(in_conts[map.panel_jack_id], 1);
+						auto label = lv_obj_get_child(cont, 1);
 						lv_label_set_text_fmt(label, "%s %s", name.module_name.data(), name.element_name.data());
 					}
 				}
@@ -83,10 +85,12 @@ struct JackMapViewPage : PageBase {
 		}
 
 		for (auto map : patch->mapped_outs) {
-			if (map.panel_jack_id < out_conts.size()) {
-				if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
+			if (map.panel_jack_id >= out_conts.size())
+				continue;
+			if (auto cont = out_conts[map.panel_jack_id]) {
+				if (lv_obj_get_child_cnt(cont) > 1) {
 					auto name = get_full_element_name(map.out.module_id, map.out.jack_id, ElementType::Output, *patch);
-					auto label = lv_obj_get_child(out_conts[map.panel_jack_id], 1);
+					auto label = lv_obj_get_child(cont, 1);
 					lv_label_set_text_fmt(label, "%s %s", name.module_name.data(), name.element_name.data());
 				}
 			}

@@ -1,9 +1,9 @@
 #pragma once
-#include "audio_settings.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/sai_config_struct.hh"
 #include "drivers/stm32xx.h"
+#include "user_settings/audio_settings.hh"
 
 using mdrivlib::GPIO;
 using mdrivlib::PinAF;

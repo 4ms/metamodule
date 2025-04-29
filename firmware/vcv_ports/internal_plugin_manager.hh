@@ -4,10 +4,12 @@
 #include "fat_file_io.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
-#include "fs/norflash_layout.hh"
+#include "glue/RackCore/plugins.hh"
 #include "glue/Valley/plugins.hh"
+#include "gui/fonts/fonts_init.hh"
 #include "internal_plugins.hh"
 #include "plugin/Plugin.hpp"
+#include <context.hpp>
 #include <list>
 #include <span>
 #include <string_view>
@@ -29,6 +31,7 @@ struct InternalPluginManager {
 		load_internal_assets();
 		load_internal_plugins();
 		load_ext_builtin_plugins(internal_plugins);
+		ModuleFactory::setBrandDisplayName("4msCompany", "4ms");
 	}
 
 	void prepare_ramdisk() {
@@ -42,6 +45,7 @@ struct InternalPluginManager {
 	void load_internal_assets() {
 		auto raw_image = asset_fs.read_image();
 		auto asset_tar = Tar::Archive(raw_image);
+		// asset_tar.print_contents();
 
 		if (asset_tar.is_valid()) {
 			// asset_tar.print_info();
@@ -58,17 +62,21 @@ struct InternalPluginManager {
 		asset_tar.extract_files(ramdisk_writer);
 
 		ramdisk.debug_print_disk_info();
+
+		Fonts::init_fonts(ramdisk);
 	}
 
 	void load_internal_plugins() {
+		rack::contextSet(nullptr);
+
 		//Load internal plugins
 		// TODO: use the glue/BRAND/plugin.cpp::init() function for each brand...
 		// 		 But, somehow get around the issue of multiple definitions of global symbol pluginInstance
 
-#ifndef BUILD_DYN_PLUGIN_Befaco
-		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
-		befaco_plugin.slug = "Befaco";
-		pluginInstance = &befaco_plugin;
+#ifdef BUILD_INTERNAL_Befaco
+		pluginInstance = &internal_plugins.emplace_back("Befaco");
+		befacoPluginInstance = pluginInstance;
+		befacoPluginInstance->slug = "Befaco";
 		pluginInstance->addModel(modelEvenVCO);
 		pluginInstance->addModel(modelPonyVCO);
 		pluginInstance->addModel(modelRampage);
@@ -100,36 +108,36 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelSlew);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_AudibleInstruments
-		auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
-		audins_plugin.slug = "AudibleInstruments";
-		pluginInstance = &audins_plugin;
-		AudibleInstruments::addModel(&audins_plugin, modelBlinds);
-		AudibleInstruments::addModel(&audins_plugin, modelBraids);
-		AudibleInstruments::addModel(&audins_plugin, modelBranches);
-		AudibleInstruments::addModel(&audins_plugin, modelElements);
-		AudibleInstruments::addModel(&audins_plugin, modelKinks);
-		AudibleInstruments::addModel(&audins_plugin, modelLinks);
-		AudibleInstruments::addModel(&audins_plugin, modelMarbles);
-		AudibleInstruments::addModel(&audins_plugin, modelRings);
-		AudibleInstruments::addModel(&audins_plugin, modelRipples);
-		AudibleInstruments::addModel(&audins_plugin, modelShades);
-		AudibleInstruments::addModel(&audins_plugin, modelShelves);
-		AudibleInstruments::addModel(&audins_plugin, modelTides2);
-		AudibleInstruments::addModel(&audins_plugin, modelVeils);
-		AudibleInstruments::addModel(&audins_plugin, modelClouds);
-		AudibleInstruments::addModel(&audins_plugin, modelFrames);
-		AudibleInstruments::addModel(&audins_plugin, modelPlaits);
-		AudibleInstruments::addModel(&audins_plugin, modelStages);
-		AudibleInstruments::addModel(&audins_plugin, modelStreams);
-		AudibleInstruments::addModel(&audins_plugin, modelTides);
-		AudibleInstruments::addModel(&audins_plugin, modelWarps);
+#ifdef BUILD_INTERNAL_AudibleInstruments
+		pluginInstance = &internal_plugins.emplace_back("AudibleInstruments");
+		pluginInstance->slug = "AudibleInstruments";
+		audibleInstrumentsPluginInstance = pluginInstance;
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelBlinds);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelBraids);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelBranches);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelElements);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelKinks);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelLinks);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelMarbles);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelRings);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelRipples);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelShades);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelShelves);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelTides2);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelVeils);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelClouds);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelFrames);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelPlaits);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelStages);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelStreams);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelTides);
+		AudibleInstruments::addModel(audibleInstrumentsPluginInstance, modelWarps);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_hetrickcv
-		auto &hcv_plugin = internal_plugins.emplace_back("hetrickcv");
-		hcv_plugin.slug = "hetrickcv";
-		pluginInstance = &hcv_plugin;
+#ifdef BUILD_INTERNAL_hetrickcv
+		pluginInstance = &internal_plugins.emplace_back("HetrickCV");
+		pluginInstance->slug = "HetrickCV";
+		hetrickcvPluginInstance = pluginInstance;
 		pluginInstance->addModel(modelTwoToFour);
 		pluginInstance->addModel(modelAnalogToDigital);
 		pluginInstance->addModel(modelASR);
@@ -203,10 +211,10 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelXYToPolar);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_nonlinearcircuits
-		auto &nlc_plugin = internal_plugins.emplace_back("nonlinearcircuits");
-		nlc_plugin.slug = "nonlinearcircuits";
-		pluginInstance = &nlc_plugin;
+#ifdef BUILD_INTERNAL_nonlinearcircuits
+		pluginInstance = &internal_plugins.emplace_back("NonlinearCircuits");
+		pluginInstance->slug = "NonlinearCircuits";
+		nonlinearcircuitsPluginInstance = pluginInstance;
 		pluginInstance->addModel(model4Seq);
 		pluginInstance->addModel(modelCipher);
 		pluginInstance->addModel(modelBOOLs);
@@ -228,19 +236,29 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelTripleSloth);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_eightfold
-		auto &eightfold_plugin = internal_plugins.emplace_back("eightfold");
-		eightfold_plugin.slug = "eightfold";
-		pluginInstance = &eightfold_plugin;
+#ifdef BUILD_INTERNAL_eightfold
+		pluginInstance = &internal_plugins.emplace_back("eightfold");
+		pluginInstance->slug = "eightfold";
+		eightfoldPluginInstance = pluginInstance;
 		pluginInstance->addModel(modelSDOrcasHeartV2);
 #endif
 
-#ifndef BUILD_DYN_PLUGIN_Valley
-		auto &Valley_plugin = internal_plugins.emplace_back("Valley");
-		pluginInstance = &Valley_plugin;
+#ifdef BUILD_INTERNAL_Valley
+		pluginInstance = &internal_plugins.emplace_back("Valley");
+		valleyPluginInstance = pluginInstance;
 		pluginInstance->addModel(modelTopograph);
 		pluginInstance->addModel(modelUGraph);
 		pluginInstance->addModel(modelPlateau);
+		pluginInstance->addModel(modelFeline);
+		pluginInstance->addModel(modelAmalgam);
+		pluginInstance->addModel(modelInterzone);
+#endif
+
+#ifdef BUILD_INTERNAL_RackCore
+		pluginInstance = &internal_plugins.emplace_back("RackCore");
+		rackCorePluginInstance = pluginInstance;
+		pluginInstance->addModel(rack::core::modelMIDI_CV);
+		pluginInstance->addModel(rack::core::modelCV_MIDI);
 #endif
 	}
 };

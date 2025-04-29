@@ -1,11 +1,9 @@
 #pragma once
 #include "fs/dir_tree.hh"
-#include "patch/module_type_slug.hh"
 #include "patch_file.hh"
 #include "util/zip.hh"
 #include <algorithm>
 #include <array>
-#include <utility>
 
 namespace MetaModule
 {

@@ -1,6 +1,7 @@
 #pragma once
 #include "audio_stream.hh"
 #include "frame.hh"
+#include "fs/fatfs/ramdisk_ops.hh"
 #include "gui/elements/screensaver.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_manager.hh"
@@ -21,6 +22,7 @@ class Ui {
 		.quit = SDLK_ESCAPE,
 		.param_inc = ']',
 		.param_dec = '[',
+		.param_fine_toggle = '\\',
 		.prev_knobset = ',',
 		.next_knobset = '.',
 	};
@@ -79,7 +81,7 @@ private:
 	void transfer_params();
 	void change_knobset();
 	void update_channel_selections();
-	void autoload_plugins();
+	void preload_plugins();
 };
 
 } // namespace MetaModule

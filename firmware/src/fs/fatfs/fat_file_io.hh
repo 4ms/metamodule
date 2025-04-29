@@ -4,6 +4,8 @@
 #include "fs/fatfs/delete_node.hh"
 #include "fs/volumes.hh"
 #include "pr_dbg.hh"
+#include <algorithm>
+#include <array>
 #include <cstdint>
 #include <optional>
 #include <span>
@@ -208,6 +210,23 @@ public:
 		f_close(fil);
 	}
 
+	int seek(FIL *fil, int offset, int whenc) {
+		FRESULT t{FR_INT_ERR};
+		if (whenc == SEEK_SET) {
+			t = f_lseek(fil, offset);
+		} else if (whenc == SEEK_CUR) {
+			t = f_lseek(fil, f_tell(fil) + offset);
+		} else if (whenc == SEEK_END) {
+			t = f_lseek(fil, f_size(fil) + offset);
+		}
+
+		if (t != FR_OK) {
+			return -1;
+		}
+
+		return f_tell(fil);
+	}
+
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset = 0) {
 		FIL fil;
 		UINT bytes_read = 0;
@@ -252,7 +271,7 @@ public:
 		return f_mkdir(path.c_str()) == FR_OK;
 	}
 
-	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
+	uint32_t write_file(const std::string_view filename, std::span<const char> buffer, uint8_t flags) {
 		FIL fil;
 		UINT bytes_written = 0;
 
@@ -264,13 +283,13 @@ public:
 			make_dir(path.substr(0, slashpos));
 		}
 
-		if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+		if (f_open(&fil, filename.data(), FA_WRITE | flags) != FR_OK) {
 			if (!mount_disk()) {
 				pr_err("Failed to mount %.3s\n", _fatvol);
 				return 0;
 			}
 
-			if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+			if (f_open(&fil, filename.data(), FA_WRITE | flags) != FR_OK) {
 				pr_err("Failed to open for writing %.*s on %.3s\n", (int)filename.size(), filename.data(), _fatvol);
 				return 0;
 			}
@@ -288,8 +307,16 @@ public:
 		return bytes_written;
 	}
 
+	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
+		return write_file(filename, buffer, FA_CREATE_ALWAYS);
+	}
+
 	uint32_t update_or_create_file(const std::string_view filename, const std::span<const char> data) {
-		return write_file(filename, data);
+		return write_file(filename, data, FA_CREATE_ALWAYS);
+	}
+
+	uint32_t append_file(const std::string_view filename, std::span<const char> data) {
+		return write_file(filename, data, FA_OPEN_APPEND);
 	}
 
 	bool delete_file(std::string_view filename) {
@@ -313,21 +340,30 @@ public:
 		return res == FR_OK;
 	}
 
-	void debug_print_disk_info() {
+	std::pair<int32_t, int32_t> get_free_total_space_kb() {
 		/* Get volume information and free clusters of drive 1 */
 		FATFS *fs = nullptr;
 		DWORD free_clust = 0;
 		auto res = f_getfree(_fatvol, &free_clust, &fs);
 
 		if (res == FR_OK && fs) {
-			/* Get total sectors and free sectors */
 			auto tot_sect = (fs->n_fatent - 2) * fs->csize;
 			auto free_sect = free_clust * fs->csize;
-
 			// Assume 512B sector:
-			pr_info("Ramdisk: %u/%u KB free/total\n", free_sect / 2, tot_sect / 2);
+			return {free_sect / 2, tot_sect / 2};
+
 		} else
 			pr_err("Error f_getfree returned %d\n", res);
+
+		return {-1, -1};
+	}
+
+	void debug_print_disk_info() {
+		auto [avail, total] = get_free_total_space_kb();
+
+		if (avail >= 0 && total >= 0) {
+			pr_info("Ramdisk: %u/%u KB free/total\n", avail, total);
+		}
 	}
 
 	void debug_print_fileinfo(FileInfo info) {
@@ -339,6 +375,24 @@ public:
 			   info.hour,
 			   info.minute,
 			   info.second);
+	}
+
+	bool opendir(std::string_view path, DIR *dir) {
+		if (!dir)
+			return false;
+
+		if (f_opendir(dir, _fatvol) != FR_OK) {
+			if (!mount_disk())
+				return false;
+			if (f_opendir(dir, _fatvol) != FR_OK)
+				return false;
+		}
+
+		return true;
+	}
+
+	bool closedir(DIR *dir) {
+		return f_closedir(dir) == FR_OK;
 	}
 
 	// Returns false if dir cannot be opened

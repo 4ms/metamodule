@@ -1,13 +1,14 @@
 #pragma once
+#include "CoreModules/elements/elements_index.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/pages/add_map_popup.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/knob_arc.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 
 namespace MetaModule
@@ -20,8 +21,7 @@ struct KnobMapPage : PageBase {
 	KnobMapPage(PatchContext info)
 		: PageBase{info, PageId::KnobMap}
 		, base{ui_EditMappingPage}
-		, patch{patches.get_view_patch()} // , add_map_popup{patch_mod_queue}
-	{
+		, patch{patches.get_view_patch()} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -29,26 +29,51 @@ struct KnobMapPage : PageBase {
 		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_MinSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MaxSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_ModuleMapToggleSwitch, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_ListButton, list_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_EditButton, edit_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_KnobSetButton, knobset_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_TrashButton, trash_cb, LV_EVENT_RELEASED, this);
 
+		ui_EditMapMidiChannelDropdown = create_midi_map_dropdown(
+			ui_EditMapMidiChannelCont,
+			"All Chan.\nChannel 1\nChannel 2\nChannel 3\nChannel 4\nChannel 5\nChannel 6\nChannel 7\nChannel "
+			"8\nChannel 9\nChannel 10\nChannel 11\nChannel 12\nChannel 13\nChannel 14\nChannel 15\nChannel 16");
+
+		lv_obj_set_height(ui_EditMapMidiChannelDropdown, 28);
+		lv_obj_set_width(ui_EditMapMidiChannelDropdown, 110);
+
+		lv_obj_add_event_cb(ui_EditMapMidiChannelDropdown, midichan_cb, LV_EVENT_VALUE_CHANGED, this);
+
 		lv_hide(ui_Keyboard);
+		lv_hide(ui_EditMapMidiChannelCont);
 
 		del_popup.init(base, group);
 
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_MinSlider);
 		lv_group_add_obj(group, ui_MaxSlider);
+		lv_group_add_obj(group, ui_ModuleMapToggleSwitch);
 		lv_group_add_obj(group, ui_AliasTextArea);
+		lv_group_add_obj(group, ui_EditMapMidiChannelDropdown);
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
 		lv_group_add_obj(group, ui_KnobSetButton);
 		lv_group_add_obj(group, ui_TrashButton);
 		lv_hide(ui_EditButton);
 		lv_group_set_editing(group, false);
+
+		indicator = lv_btn_create(ui_EditMapKnob); //NOLINT
+		lv_obj_set_width(indicator, 3);
+		lv_obj_set_height(indicator, 10);
+		lv_obj_set_x(indicator, 0);
+		lv_obj_set_y(indicator, 31);
+		lv_obj_set_align(indicator, LV_ALIGN_TOP_MID);
+		lv_obj_set_style_bg_color(indicator, lv_color_hex(0x0), LV_PART_MAIN);
+		lv_obj_set_style_radius(indicator, 0, LV_PART_MAIN);
+		lv_obj_set_style_transform_pivot_x(indicator, 0, LV_PART_MAIN);
+		lv_obj_set_style_transform_pivot_y(indicator, 23, LV_PART_MAIN);
 	}
 
 	void prepare_focus() override {
@@ -76,8 +101,10 @@ struct KnobMapPage : PageBase {
 
 		if (view_set_idx == PatchData::MIDIKnobSet) {
 			lv_hide(ui_KnobSetButton);
+			lv_show(ui_EditMapMidiChannelCont);
 		} else {
 			lv_show(ui_KnobSetButton);
+			lv_hide(ui_EditMapMidiChannelCont);
 		}
 
 		//mappedknob_id is the index of the MappedKnob in the MappedKnobSet::set vector
@@ -95,21 +122,32 @@ struct KnobMapPage : PageBase {
 
 		update_alias_text_area();
 
-		auto panel_name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
+		auto panel_name = get_panel_name(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text_fmt(
 			ui_MappedName, "Knob %s in '%s'", panel_name.c_str(), patch->valid_knob_set_name(view_set_idx));
 
 		// Min/Max sliders
-		lv_label_set_text_fmt(ui_MinValue, "%d%%", unsigned(map.min * 100));
-		lv_label_set_text_fmt(ui_MaxValue, "%d%%", unsigned(map.max * 100));
-		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
-		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
+		int intmin = std::round(map.min * 100.f);
+		int intmax = std::round(map.max * 100.f);
+		lv_label_set_text_fmt(ui_MinValue, "%d%%", intmin);
+		lv_label_set_text_fmt(ui_MaxValue, "%d%%", intmax);
+		lv_slider_set_value(ui_MinSlider, intmin, LV_ANIM_OFF);
+		lv_slider_set_value(ui_MaxSlider, intmax, LV_ANIM_OFF);
+
+		if (map.is_midi_notegate()) {
+			lv_show(ui_ModuleMapToggleSwitchCont);
+			lv_check(ui_ModuleMapToggleSwitch, map.curve_type == MappedKnob::CurveType::Toggle);
+		} else {
+			lv_hide(ui_ModuleMapToggleSwitchCont);
+			lv_check(ui_ModuleMapToggleSwitch, false);
+		}
+		lv_dropdown_set_selected(ui_EditMapMidiChannelDropdown, map.midi_chan);
 
 		// Knob arc
 
-		static_param = patch->find_static_knob(map.module_id, map.param_id);
 		float knob_val = static_param ? map.unmap_val(static_param->value) : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
+
 		lv_obj_set_style_opa(ui_EditMappingArc, is_actively_playing ? LV_OPA_100 : LV_OPA_50, LV_PART_KNOB);
 
 		auto color = Gui::knob_palette[map.panel_knob_id % 6];
@@ -125,12 +163,12 @@ struct KnobMapPage : PageBase {
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
+		lv_obj_set_style_bg_color(indicator, Gui::knob_palette[(map.panel_knob_id + 1) % 6], LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
+
 		update_active_status();
 
 		lv_group_set_editing(group, false);
-
-		// add_map_popup.prepare_focus(group, ui_EditMappingPage);
-		// add_map_popup.hide();
 	}
 
 	void update() override {
@@ -149,9 +187,26 @@ struct KnobMapPage : PageBase {
 
 		update_active_status();
 
-		if (is_actively_playing && static_param) {
-			float s_val = map.unmap_val(static_param->value);
-			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, s_val);
+		if (is_actively_playing) {
+			auto is_tracking = map.is_midi() || patch_playloader.is_param_tracking(map.module_id, map.param_id);
+
+			if (is_tracking) {
+				lv_hide(indicator);
+				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+			} else {
+				lv_show(indicator);
+				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
+
+				if (map.panel_knob_id < params.knobs.size()) {
+					auto phys_val = params.knobs[map.panel_knob_id].val;
+					auto mapped_phys_val = map.get_mapped_val(phys_val);
+					lv_obj_set_style_transform_angle(indicator, mapped_phys_val * 2500.f - 1250.f, LV_PART_MAIN);
+				}
+			}
+
+			auto value = patch_playloader.param_value(map.module_id, map.param_id);
+			auto arc_val = map.unmap_val(value);
+			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, arc_val);
 		}
 
 		poll_patch_file_changed();
@@ -160,19 +215,21 @@ struct KnobMapPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 			prepare_focus();
 		}
-		// add_map_popup.update(params);
 	}
 
 	void update_active_status() {
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
-		if (is_patch_playing && args.view_knobset_id.value_or(999) == page_list.get_active_knobset()) {
-			if (!is_actively_playing)
+		auto is_active_knobset = map.is_midi() || args.view_knobset_id.value_or(999) == page_list.get_active_knobset();
+		if (is_patch_playing && is_active_knobset) {
+			if (!is_actively_playing) {
 				lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_100, LV_PART_KNOB);
+			}
 			is_actively_playing = true;
 		} else {
-			if (is_actively_playing)
+			if (is_actively_playing) {
 				lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_50, LV_PART_KNOB);
+			}
 			is_actively_playing = false;
 		}
 	}
@@ -189,21 +246,27 @@ struct KnobMapPage : PageBase {
 			return;
 
 		auto obj = event->current_target;
-		if (obj != ui_MinSlider && obj != ui_MaxSlider)
+		if (obj != ui_MinSlider && obj != ui_MaxSlider && obj != ui_ModuleMapToggleSwitch) {
 			return;
+		}
 
-		auto val = lv_slider_get_value(obj);
 		if (obj == ui_MinSlider) {
+			auto val = lv_slider_get_value(obj);
 			page->map.min = val / 100.f;
 			lv_label_set_text_fmt(ui_MinValue, "%d%%", (int)val);
-		} else {
+
+		} else if (obj == ui_MaxSlider) {
+			auto val = lv_slider_get_value(obj);
 			page->map.max = val / 100.f;
 			lv_label_set_text_fmt(ui_MaxValue, "%d%%", (int)val);
+
+		} else {
+			auto checked = lv_obj_has_state(ui_ModuleMapToggleSwitch, LV_STATE_CHECKED);
+			page->map.curve_type = checked ? MappedKnob::CurveType::Toggle : MappedKnob::CurveType::Normal;
 		}
 
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});
-		page->patch_mod_queue.put(
-			EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx, .cur_val = val / 100.f});
+		page->patch_mod_queue.put(ModifyMapping{.map = page->map, .set_id = page->view_set_idx});
 		page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
 		page->patches.mark_view_patch_modified();
 	}
@@ -266,8 +329,7 @@ struct KnobMapPage : PageBase {
 			return;
 
 		page->args.module_id = page->map.module_id;
-		page->args.element_indices =
-			ElementCount::mark_unused_indices({.param_idx = (uint8_t)page->map.param_id}, {.num_params = 1});
+		page->args.element_indices = ElementIndex::set_index(ParamElement{}, page->map.param_id);
 		page->args.detail_mode = true;
 		page->page_list.request_new_page(PageId::ModuleView, page->args);
 	}
@@ -296,6 +358,19 @@ struct KnobMapPage : PageBase {
 			"Trash");
 	}
 
+	static void midichan_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+		if (!page)
+			return;
+
+		page->map.midi_chan = lv_dropdown_get_selected(ui_EditMapMidiChannelDropdown);
+		page->patch_mod_queue.put(ModifyMapping{.map = page->map, .set_id = PatchData::MIDIKnobSet});
+		page->patch->add_update_midi_map(page->map);
+		page->patches.mark_view_patch_modified();
+	}
+
 	void save_knob_alias(bool save) {
 		lv_obj_clear_state(ui_AliasTextArea, LV_STATE_USER_1);
 		lv_group_focus_obj(ui_AliasTextArea);
@@ -306,6 +381,7 @@ struct KnobMapPage : PageBase {
 		if (save) {
 			map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
 			patch->add_update_mapped_knob(view_set_idx, map);
+			patches.mark_view_patch_modified();
 		}
 
 		update_alias_text_area();
@@ -325,6 +401,7 @@ struct KnobMapPage : PageBase {
 
 private:
 	lv_obj_t *base = nullptr;
+	lv_obj_t *indicator = nullptr;
 	PatchData *patch;
 	MappedKnob map{};
 	const StaticParam *static_param = nullptr;

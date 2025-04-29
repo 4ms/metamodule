@@ -30,7 +30,7 @@ struct ModuleMemoryTester {
 
 	Measurements run_test(TestType test_type) {
 		Measurements meas;
-		struct mallinfo mi {};
+		struct mallinfo mi{};
 
 		// Enable allocation watching
 		watch = &watcher;
@@ -49,6 +49,7 @@ struct ModuleMemoryTester {
 			meas.peak_mem_startup = watcher.peak_usage;
 			watcher.peak_usage = watcher.mem_alloced - watcher.mem_dealloced;
 
+			module->set_samplerate(48000.f);
 			module->update();
 
 			for (uint16_t injack_id = 0; injack_id < counts.num_inputs; injack_id++) {

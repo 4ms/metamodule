@@ -4,12 +4,16 @@
 #include "ui_local.h"
 #include <array>
 
+extern "C" void ui_FileBrowserPage_screen_init();
+
 namespace MetaModule
 {
 
 struct SlsComponentInit {
 	SlsComponentInit() {
 		ui_init();
+		ui_FileBrowserPage_screen_init();
+
 		lv_disp_t *dispp = lv_disp_get_default();
 		lv_theme_t *theme = lv_theme_default_init(
 			dispp, lv_color_hex(0xFD8B18), lv_palette_main(LV_PALETTE_BLUE), LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);

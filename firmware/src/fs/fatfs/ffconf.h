@@ -49,7 +49,7 @@
 #define FF_USE_FORWARD 0
 /* This option switches f_forward() function. (0:Disable or 1:Enable) */
 
-#define FF_USE_STRFUNC 0
+#define FF_USE_STRFUNC 1
 #define FF_PRINT_LLI 0
 #define FF_PRINT_FLOAT 0
 #define FF_STRF_ENCODE 0
@@ -134,7 +134,7 @@
 /  Also behavior of string I/O functions will be affected by this option.
 /  When LFN is not enabled, this option has no effect. */
 
-#define FF_LFN_BUF 640
+#define FF_LFN_BUF 255
 #define FF_SFN_BUF 12
 /* This set of options defines size of file name members in the FILINFO structure
 /  which is used to read out directory items. These values should be suffcient for
@@ -157,7 +157,7 @@
 /* Number of volumes (logical drives) to be used. (1-10) */
 
 #define FF_STR_VOLUME_ID 1
-#define FF_VOLUME_STRS "USB", "SD", "RAMDISK"
+#define FF_VOLUME_STRS "usb", "sdc", "ram"
 //"CF", "SD", "SD2", "USB", "USB2", "USB3"
 /* FF_STR_VOLUME_ID switches support for volume ID in arbitrary strings.
 /  When FF_STR_VOLUME_ID is set to 1 or 2, arbitrary strings can be used as drive
