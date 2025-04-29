@@ -98,8 +98,6 @@ private:
 
 	bool ext_audio_connected = false;
 
-	AudioOverrunHandler overrun_handler;
-
 	AudioConf::SampleT get_audio_output(int output_id);
 	AudioConf::SampleT get_ext_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);

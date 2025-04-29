@@ -42,7 +42,6 @@ typedef unsigned __int64 QWORD;
 #include <float.h>
 #ifndef __cplusplus
 #define isnan(v) _isnan(v)
-#endif
 #define isinf(v) (!_finite(v))
 #endif
 
