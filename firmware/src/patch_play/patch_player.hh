@@ -198,8 +198,6 @@ public:
 
 		rebalance_modules();
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
-
 		resume_module_threads();
 
 		is_loaded = true;
@@ -237,6 +235,8 @@ public:
 				peg_task_to_core(id, core_id);
 			}
 		}
+
+		cables.build(pd.int_cables, core_balancer.cores.parts);
 	}
 
 	// Runs the patch
