@@ -253,12 +253,12 @@ struct KnobMapPage : PageBase {
 		if (obj == ui_MinSlider) {
 			auto val = lv_slider_get_value(obj);
 			page->map.min = val / 100.f;
-			lv_label_set_text_fmt(ui_MinValue, "%u%%", val);
+			lv_label_set_text_fmt(ui_MinValue, "%d%%", (int)val);
 
 		} else if (obj == ui_MaxSlider) {
 			auto val = lv_slider_get_value(obj);
 			page->map.max = val / 100.f;
-			lv_label_set_text_fmt(ui_MaxValue, "%u%%", val);
+			lv_label_set_text_fmt(ui_MaxValue, "%d%%", (int)val);
 
 		} else {
 			auto checked = lv_obj_has_state(ui_ModuleMapToggleSwitch, LV_STATE_CHECKED);
