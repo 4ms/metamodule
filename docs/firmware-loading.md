@@ -64,35 +64,42 @@ attach without loading.
 If you need to load new firmware and then debug it, then follow the guide in
 [Debugging with gdb](firmware-debugging.md).
 
-To load firmware (without debugging) with a JLink programmer, do this:
 
 1) Install a "Freeze jumper" :
 
-On earlier bootloaders, this is on `Control Expander` header that bridges the top-left pin
-and the pin just to the right of it. Make sure you use the right header, it's
-the one above the Wifi header, near the `y` and `z` pots. The jumper should be
-horizontal, not vertical, on the top row of pins all the way to the left:
+To load firmware (without debugging) with a JLink programmer, you need to install a "Freeze Jumper".
+
+There are two bootloader versions. If you see a blue light flash when you start up normally,
+then you have the later bootloader. If not, then you have the earlier bootloader.
+
+1a) Earlier bootloader: The jumper goes on the `Control Expander` header
+that bridges the top-left pin and the pin just to the right of it. Make sure
+you use the right header, it's the one above the Wifi header, near the `y` and
+`z` pots. The jumper should be horizontal, not vertical, on the top row of pins
+all the way to the left:
 
 ```
   Control
  Expander
-          [====] o  o 
+          [o==o] o  o 
            o  o  o  o
 ```
 
-On later bootloaders, this is on the Debug header, on the left-most pins:
+1b) Later bootloader: The jumper goes on the two left-most pins of the 2x4 debug header. 
+This is the header located next to the SWD/JTAG header that contains the connections for 
+the UART (RX/TX).
+
 ```
-          __    RX TX
-          || o  o  o 
-          || o  o  o
-          --
+     _      RX  TX 
+    |o|  o   o   o
+    |o|  o   o   o
+     -
 ```
 
-As of Nov 1, 2024 all shipped units have the older bootloader unless
-you intentionally installed a newer one. This is done via loading a 
-release file that has "-bl-" in the name.
-Release tag `firmware-v2.0.0-dev-2` and later on the v2.0-dev branch use the newer bootloader.
-
+Up until Nov 1, 2024 all shipped units had the older bootloader unless
+you intentionally installed a newer one. 
+Updating the bootloaders is done via loading a release file that has "-bl-" in the name,
+where the release tag is `firmware-v2.0.0-dev-2` or later.
 
 2) Power off and back on (full power-cycle is required).
 
@@ -111,9 +118,9 @@ Connect a Jlink programmer and run this:
 make jprog
 ```
 
-This should take 15-30 seconds. 
+This should take 8-30 seconds.
  
-### Load into NOR Flash over DFU-USB
+### Load into NOR Flash over USB DFU
 
 Loading onto NOR Flash will flash the firmware into the on-board FLASH chip so
 you can boot normally without a computer connected. It takes a minute or two,

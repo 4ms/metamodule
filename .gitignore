@@ -53,3 +53,4 @@ settings.yml
 simulator/patches/metamodule-firmware
 
 .clangd
+firmware/.clangd

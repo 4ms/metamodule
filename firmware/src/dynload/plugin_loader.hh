@@ -1,5 +1,4 @@
 #pragma once
-#include "dev_version.hh"
 #include "dynload/dynloader.hh"
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"

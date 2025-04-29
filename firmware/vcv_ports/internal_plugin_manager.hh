@@ -22,6 +22,7 @@ struct InternalPluginManager {
 	AssetFS &asset_fs;
 
 	std::list<rack::plugin::Plugin> internal_plugins;
+	bool asset_fs_valid = true;
 
 	InternalPluginManager(FatFileIO &ramdisk, AssetFS &asset_fs)
 		: ramdisk{ramdisk}
@@ -45,6 +46,14 @@ struct InternalPluginManager {
 		auto raw_image = asset_fs.read_image();
 		auto asset_tar = Tar::Archive(raw_image);
 		// asset_tar.print_contents();
+
+		if (asset_tar.is_valid()) {
+			// asset_tar.print_info();
+			asset_fs_valid = true;
+		} else {
+			pr_err("Internal Assets tar file is not valid\n");
+			asset_fs_valid = false;
+		}
 
 		auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
 			return ramdisk.write_file(filename, buffer);
@@ -132,6 +141,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelTwoToFour);
 		pluginInstance->addModel(modelAnalogToDigital);
 		pluginInstance->addModel(modelASR);
+		pluginInstance->addModel(modelBinaryCounter);
 		pluginInstance->addModel(modelBinaryGate);
 		pluginInstance->addModel(modelBinaryNoise);
 		pluginInstance->addModel(modelBitshift);
@@ -141,8 +151,11 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelChaos3Op);
 		pluginInstance->addModel(modelChaoticAttractors);
 		pluginInstance->addModel(modelClockedNoise);
+		pluginInstance->addModel(modelComparator);
 		pluginInstance->addModel(modelContrast);
 		pluginInstance->addModel(modelCrackle);
+		pluginInstance->addModel(modelDataCompander);
+		pluginInstance->addModel(modelDelta);
 		pluginInstance->addModel(modelDigitalToAnalog);
 		pluginInstance->addModel(modelDust);
 		pluginInstance->addModel(modelExponent);
@@ -162,13 +175,16 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelPhasorBurstGen);
 		pluginInstance->addModel(modelPhasorDivMult);
 		pluginInstance->addModel(modelPhasorEuclidean);
+		pluginInstance->addModel(modelPhasorFreezer);
 		pluginInstance->addModel(modelPhasorGates);
 		pluginInstance->addModel(modelPhasorGates32);
 		pluginInstance->addModel(modelPhasorGates64);
 		pluginInstance->addModel(modelPhasorGen);
 		pluginInstance->addModel(modelPhasorGeometry);
 		pluginInstance->addModel(modelPhasorHumanizer);
+		pluginInstance->addModel(modelPhasorMixer);
 		pluginInstance->addModel(modelPhasorOctature);
+		pluginInstance->addModel(modelPhasorProbability);
 		pluginInstance->addModel(modelPhasorQuadrature);
 		pluginInstance->addModel(modelPhasorRandom);
 		pluginInstance->addModel(modelPhasorRanger);
@@ -176,6 +192,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelPhasorRhythmGroup);
 		pluginInstance->addModel(modelPhasorShape);
 		pluginInstance->addModel(modelPhasorShift);
+		pluginInstance->addModel(modelPhasorSplitter);
 		pluginInstance->addModel(modelPhasorStutter);
 		pluginInstance->addModel(modelPhasorSubstepShape);
 		pluginInstance->addModel(modelPhasorSwing);
@@ -184,17 +201,14 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelPhasorToLFO);
 		pluginInstance->addModel(modelPhasorToWaveforms);
 		pluginInstance->addModel(modelProbability);
+		pluginInstance->addModel(modelRandomGates);
+		pluginInstance->addModel(modelRotator);
+		pluginInstance->addModel(modelRungler);
 		pluginInstance->addModel(modelScanner);
+		pluginInstance->addModel(modelTrigShaper);
 		pluginInstance->addModel(modelVectorMix);
 		pluginInstance->addModel(modelWaveshape);
 		pluginInstance->addModel(modelXYToPolar);
-		pluginInstance->addModel(modelPhasorMixer);
-		pluginInstance->addModel(modelRandomGates);
-		pluginInstance->addModel(modelComparator);
-		pluginInstance->addModel(modelDataCompander);
-		pluginInstance->addModel(modelDelta);
-		pluginInstance->addModel(modelRotator);
-		pluginInstance->addModel(modelRungler);
 #endif
 
 #ifdef BUILD_INTERNAL_nonlinearcircuits
@@ -217,6 +231,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelSlothInertia);
 		pluginInstance->addModel(modelSlothTorpor);
 		pluginInstance->addModel(modelSquidAxon);
+		pluginInstance->addModel(modelSplish);
 		pluginInstance->addModel(modelStatues);
 		pluginInstance->addModel(modelTripleSloth);
 #endif

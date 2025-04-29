@@ -10,14 +10,32 @@ project(nonlinearcircuitsMetaModulePlugin
     LANGUAGES   C CXX ASM
 )
 
-include(modules.cmake)
-
-set(EXTRA_SOURCES ${NONLINEARCIRCUITS_DIR}/src/NLCShared.cpp)
+set(NONLINEARCIRCUITS_DIR ${CMAKE_CURRENT_LIST_DIR}/../../nonlinearcircuits)
 
 add_library(
-  nonlinearcircuitsLibrary OBJECT
-  ${NONLINEARCIRCUITS_SOURCE_PATHS}
-  ${EXTRA_SOURCES}
+    nonlinearcircuitsLibrary OBJECT
+
+    ${NONLINEARCIRCUITS_DIR}/src/4Seq.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/8BitCipher.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/BOOLs.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/DivideConquer.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/DivineCMOS.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/DoubleNeuron.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/Genie.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/LetsSplosh.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/Neuron.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/Numberwang.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/Router.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/Segue.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/SlothApathy.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/SlothInertia.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/SlothTorpor.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/SquidAxon.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/Splish.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/Statues.cpp
+    ${NONLINEARCIRCUITS_DIR}/src/TripleSloth.cpp
+
+    ${NONLINEARCIRCUITS_DIR}/src/NLCShared.cpp
 )
 
 target_include_directories(nonlinearcircuitsLibrary PRIVATE ${NONLINEARCIRCUITS_DIR}/src)

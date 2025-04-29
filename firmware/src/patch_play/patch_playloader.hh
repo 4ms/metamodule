@@ -118,8 +118,10 @@ struct PatchPlayLoader {
 		loading_new_patch_ = true;
 		if (start_audio_immediately)
 			should_play_when_loaded_ = true;
-		else
-			should_play_when_loaded_ = !audio_is_muted_;
+		else {
+			// start playing if audio is already playing, or if it stopped because of overload
+			should_play_when_loaded_ = !audio_is_muted_ || stopped_because_of_overrun_;
+		}
 	}
 
 	bool is_loading_patch() {
@@ -142,6 +144,7 @@ struct PatchPlayLoader {
 	void notify_audio_overrun() {
 		notify_audio_is_muted();
 		audio_overrun_ = true;
+		stopped_because_of_overrun_ = true;
 	}
 
 	void notify_audio_done_starting() {
@@ -185,6 +188,7 @@ struct PatchPlayLoader {
 		if (loading_new_patch_ && audio_is_muted_) {
 			auto result = load_patch(should_play_when_loaded_);
 			should_play_when_loaded_ = true;
+			stopped_because_of_overrun_ = false;
 			return result;
 		}
 
@@ -350,6 +354,7 @@ private:
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
 	std::atomic<bool> audio_overrun_ = false;
+	bool stopped_because_of_overrun_ = false;
 	bool should_play_when_loaded_ = true;
 
 	PatchLocation new_loc{};

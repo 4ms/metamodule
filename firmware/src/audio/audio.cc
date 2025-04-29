@@ -346,7 +346,9 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 	for (unsigned i = 0; auto &plug_detect : plug_detects) {
 		bool sense = jack_is_patched(jack_senses, i);
+
 		plug_detect.update(sense);
+
 		if (plug_detect.changed()) {
 			if (i < PanelDef::NumUserFacingInJacks)
 				player.set_input_jack_patched_status(i, sense);

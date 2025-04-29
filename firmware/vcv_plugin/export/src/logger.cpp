@@ -35,6 +35,8 @@ void log(Level level, const char *filename, int line, const char *func, const ch
 		return;
 	else if (level == Level::FATAL_LEVEL && LOG_LEVEL <= 0)
 		return;
+	else if ((unsigned)level >= 4)
+		return;
 
 	va_list args;
 	va_start(args, format);
