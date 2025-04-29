@@ -111,7 +111,6 @@ add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 #
 add_executable(
   main.elf
-  ${FWDIR}/src/fs/filesystem.cc
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
@@ -137,7 +136,6 @@ add_executable(
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/elements/panel_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/src/gui/slsexport/prefs_pane_fs.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
   ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
@@ -218,7 +216,6 @@ set_source_files_properties(
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/src/gui/slsexport/prefs_pane_fs.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
   ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
