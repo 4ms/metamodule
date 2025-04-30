@@ -7,7 +7,8 @@ namespace rack::logger
 
 std::string logPath;
 
-void init() {
+bool init() {
+	return true;
 }
 
 void destroy() {

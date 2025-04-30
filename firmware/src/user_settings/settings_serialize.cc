@@ -30,6 +30,8 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("param_style") << s.param_style;
 	n->append_child() << ryml::key("paneljack_style") << s.paneljack_style;
 	n->append_child() << ryml::key("cable_style") << s.cable_style;
+	n->append_child() << ryml::key("show_graphic_screens") << s.show_graphic_screens;
+	n->append_child() << ryml::key("graphic_screen_throttle") << s.graphic_screen_throttle;
 }
 
 static void write(ryml::NodeRef *n, AudioSettings const &s) {
@@ -40,7 +42,7 @@ static void write(ryml::NodeRef *n, AudioSettings const &s) {
 	n->append_child() << ryml::key("max_overrun_retries") << s.max_overrun_retries;
 }
 
-static void write(ryml::NodeRef *n, PluginAutoloadSettings const &s) {
+static void write(ryml::NodeRef *n, PluginPreloadSettings const &s) {
 	*n |= ryml::SEQ;
 
 	for (auto const &s : s.slug)
@@ -52,6 +54,18 @@ static void write(ryml::NodeRef *n, ScreensaverSettings const &s) {
 
 	n->append_child() << ryml::key("index") << s.timeout_ms;
 	n->append_child() << ryml::key("knobs_can_wake") << s.knobs_can_wake;
+}
+
+static void write(ryml::NodeRef *n, CatchupSettings const &s) {
+	*n |= ryml::MAP;
+
+	using enum CatchupParam::Mode;
+	ryml::csubstr mode_string = s.mode == ResumeOnEqual	 ? "ResumeOnEqual" :
+								s.mode == ResumeOnMotion ? "ResumeOnMotion" :
+								s.mode == LinearFade	 ? "LinearFade" :
+														   "ResumeOnMotion";
+	n->append_child() << ryml::key("mode") << mode_string;
+	n->append_child() << ryml::key("allow_jump_outofrange") << s.allow_jump_outofrange;
 }
 
 static void write(ryml::NodeRef *n, FilesystemSettings const &s) {
@@ -77,10 +91,11 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["patch_view"] << settings.patch_view;
 	data["module_view"] << settings.module_view;
 	data["audio"] << settings.audio;
-	data["plugin_autoload"] << settings.plugin_autoload;
+	data["plugin_autoload"] << settings.plugin_preload;
 	data["last_patch_opened"] << settings.last_patch_opened;
 	data["last_patch_vol"] << static_cast<unsigned>(settings.last_patch_vol);
 	data["screensaver"] << settings.screensaver;
+	data["catchup"] << settings.catchup;
 	data["filesystem"] << settings.filesystem;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));

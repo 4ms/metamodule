@@ -1,5 +1,6 @@
 #pragma once
 #include "expanders.hh"
+#include "midi/midi_router.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_mods.hh"
@@ -15,7 +16,7 @@ namespace MetaModule
 {
 
 class AudioStream {
-	ParamsState &params;
+	ParamsState &param_state;
 	PatchPlayer &player;
 	PatchPlayLoader &patch_loader;
 	PatchModQueue &patch_mod_queue;
@@ -28,7 +29,7 @@ public:
 				PatchPlayer &player,
 				PatchPlayLoader &play_loader,
 				PatchModQueue &patch_mod_queue)
-		: params{params_state}
+		: param_state{params_state}
 		, player{player}
 		, patch_loader{play_loader}
 		, patch_mod_queue{patch_mod_queue} {
@@ -36,6 +37,8 @@ public:
 		// Pretend that we found an audio expander
 		Expanders::ext_audio_found(true);
 	}
+
+	std::array<float, PanelDef::NumPot> last_knob_val{};
 
 	void process(StreamConfSim::Audio::AudioInBuffer in_buff, StreamConfSim::Audio::AudioOutBuffer out_buff) {
 
@@ -56,9 +59,30 @@ public:
 			auto &in = in_buff[i++];
 
 			// Knobs
-			for (auto [i, knob] : enumerate(params.knobs)) {
-				if (knob.changed)
+			for (auto i = 0u; auto &knob : param_state.knobs) {
+				// if (knob.did_change()) { // Why does the changed flag not sync with the SDL audio callback?
+				if (std::abs(last_knob_val[i] - knob.val) > 2.5f / 4096.f) {
+					last_knob_val[i] = knob.val;
 					player.set_panel_param(i, knob.val);
+				}
+				// }
+				i++;
+			}
+
+			// MIDI: random stream
+			{
+				static unsigned random_midi_ctr = 0;
+				static uint8_t last_note = 0;
+
+				if (random_midi_ctr % 24000 == 0) {
+					last_note = (std::rand() & 0x3F) + 0x20;
+					MidiRouter::push_incoming_message({0x90, last_note, (uint8_t)std::rand()});
+				} else if (random_midi_ctr % 24000 == 12000) {
+					MidiRouter::push_incoming_message({0x80, last_note, 0x00});
+				} else if (random_midi_ctr % 36000 == 0) {
+					MidiRouter::push_incoming_message({0xB0, 0x74, (uint8_t)std::rand()});
+				}
+				random_midi_ctr++;
 			}
 
 			// TODO: enable "recording" in SDL
@@ -77,7 +101,7 @@ public:
 
 			// Get outputs
 			for (auto [i, outjack] : enumerate(out.chan)) {
-				if (params.is_output_plugged(i)) {
+				if (param_state.is_output_plugged(i)) {
 					outjack = player.get_panel_output(i);
 					player.set_output_jack_patched_status(i, true);
 				} else {

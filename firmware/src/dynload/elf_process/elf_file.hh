@@ -23,16 +23,19 @@ struct Elf {
 		, raw_prog_headers{(Elf32_Phdr *)(elfdata.data() + raw_elf_header->e_phoff), raw_elf_header->e_phnum}
 		, string_table{find_string_table()} {
 
-		// pr_trace("elf data is at %08x++%x\n", elfdata.data(), elfdata.size_bytes());
-		// pr_trace("phnum: %u\n", raw_elf_header->e_phnum);
-		// pr_trace("shnum: %u\n", raw_elf_header->e_shnum);
+		// pr_info("elf data is at %08x ++ %x\n", elfdata.data(), elfdata.size_bytes());
+		// pr_info("phnum: %u\n", raw_elf_header->e_phnum);
+		// pr_info("shnum: %u\n", raw_elf_header->e_shnum);
 		if (string_table != "") {
 			populate_segments();
 			populate_sections();
-			find_dyn_strings();
 			symbol_table = find_section(".symtab");
 			dyn_symbol_table = find_section(".dynsym");
+			find_dyn_strings();
+			find_sym_strings();
+
 			find_raw_symbols();
+
 			populate_relocations(".rel.dyn");
 			populate_relocations(".rel.plt");
 		}
@@ -81,7 +84,7 @@ struct Elf {
 
 	std::optional<ElfSymbol> find_symbol(std::string_view name) {
 		auto symbol = std::ranges::find_if(
-			raw_symbols, [&](Elf32_Sym &sym) { return read_string(string_table, sym.st_name) == name; });
+			raw_symbols, [&](Elf32_Sym &sym) { return read_string(sym_string_table, sym.st_name) == name; });
 		if (symbol != raw_symbols.end())
 			return *symbol;
 		else
@@ -155,11 +158,29 @@ private:
 			return "";
 	}
 
+	void find_sym_strings() {
+		if (auto sym_string_table_section = get_section(symbol_table->linked_section_idx())) {
+			sym_string_table = sym_string_table_section->as_string_table();
+		} else {
+			pr_err("Symbol sections says its string table is section #%u but this is not found\n",
+				   symbol_table->linked_section_idx());
+		}
+	}
+
 	void find_dyn_strings() {
 		auto dyn_string_section = find_section(".dynstr");
 
 		if (dyn_string_section) {
 			dyn_string_table = dyn_string_section->as_string_table();
+
+			// Check .dynstr is the mlinked string table of the .dynsym section
+			if (auto linked_dyn_string_table = get_section(dyn_symbol_table->linked_section_idx())) {
+				if (dyn_string_table.begin() != linked_dyn_string_table->as_string_table().begin()) {
+					pr_err("Error: dyn symbol section links to a section (#%u) that's not the first .dynstr section\n",
+						   dyn_symbol_table->linked_section_idx());
+				}
+			}
+
 		} else {
 			pr_err("No .dynstr section found\n");
 			dyn_string_table = "";
@@ -181,6 +202,7 @@ private:
 
 	// String tables:
 	std::string_view string_table;
+	std::string_view sym_string_table;
 	std::string_view dyn_string_table;
 
 	// Symbol table sections:

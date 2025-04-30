@@ -28,6 +28,19 @@
       "inherits": "base"
     },
     {
+      "name": "min-brands",
+      "inherits": "full",
+      "cacheVariables": {
+        "OMIT_BRAND_AudibleInstruments": { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_Befaco":             { "type": "BOOL", "value": "ON" }, 
+        "OMIT_BRAND_hetrickcv":          { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_eightfold":          { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_Valley":             { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_RackCore":           { "type": "BOOL", "value": "ON" }
+      }
+    },
+    {
       "name": "dyn-plugins",
       "inherits": "full",
       "cacheVariables": {
@@ -64,6 +77,14 @@
       "cacheVariables": {
         "CPU_TEST_ALL_MODULES": { "type": "BOOL", "value": "ON" }
       }
+    },
+    {
+      "name": "usb-log",
+      "inherits": "full",
+      "cacheVariables": {
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "ON" },
+        "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
+      }
     }
   ],
   "buildPresets": [
@@ -82,6 +103,14 @@
     {
       "name": "cpu-test",
       "configurePreset": "cpu-test"
+    },
+    {
+      "name": "usb-log",
+      "configurePreset": "usb-log"
+    },
+    {
+      "name": "min-brands",
+      "configurePreset": "min-brands"
     }
   ]
 }

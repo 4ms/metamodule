@@ -14,8 +14,7 @@ add_library(ValleyLibrary STATIC)
 
 set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../Valley)
 
-target_sources(ValleyLibrary
-    PRIVATE
+target_sources(ValleyLibrary PRIVATE
     ${SOURCE_DIR}/src/Plateau/Plateau.cpp
     ${SOURCE_DIR}/src/Plateau/Dattorro.cpp
 
@@ -30,32 +29,26 @@ target_sources(ValleyLibrary
     ${SOURCE_DIR}/src/gui/ValleyChoiceMenu.cpp
     ${SOURCE_DIR}/src/gui/PlainText.cpp
 
-    ${SOURCE_DIR}/src/utilities/math_lut.cc
+    ${SOURCE_DIR}/src/Feline/Feline.cpp
+
+    ${SOURCE_DIR}/src/Amalgam/Amalgam.cpp
+    ${SOURCE_DIR}/src/Amalgam/VecAmalgam.cpp
+
+    ${SOURCE_DIR}/src/Interzone/Interzone.cpp
+
+    ${SOURCE_DIR}/src/dsp/filters/VecOnePoleFilters.cpp
+    ${SOURCE_DIR}/src/dsp/filters/VecOTAFilter.cpp
+    ${SOURCE_DIR}/src/dsp/modulation/VecLoopingADSR.cpp
+    ${SOURCE_DIR}/src/dsp/fx/VecDiodeRingMod.cpp
+    ${SOURCE_DIR}/src/gui/SteppedSlider.cpp
+    ${SOURCE_DIR}/src/gui/DigitalDisplay.cpp
+    ${SOURCE_DIR}/src/utilities/Utilities.cpp
+
 )
 
 if (BUILD_DYN_PLUGIN)
-    target_sources(ValleyLibrary
-        PRIVATE
-
+    target_sources(ValleyLibrary PRIVATE
         ${SOURCE_DIR}/src/Terrorform/Terrorform.cpp
-
-        ${SOURCE_DIR}/src/Interzone/Interzone.cpp
-        
-        ${SOURCE_DIR}/src/Amalgam/Amalgam.cpp
-        ${SOURCE_DIR}/src/Amalgam/VecAmalgam.cpp
-
-        ${SOURCE_DIR}/src/Feline/Feline.cpp
-
-        ${SOURCE_DIR}/src/dsp/filters/VecOnePoleFilters.cpp
-        ${SOURCE_DIR}/src/dsp/filters/VecOTAFilter.cpp
-        ${SOURCE_DIR}/src/dsp/filters/OTAFilter.cpp
-        ${SOURCE_DIR}/src/dsp/modulation/VecLoopingADSR.cpp
-        ${SOURCE_DIR}/src/dsp/fx/DiodeRingMod.cpp
-        ${SOURCE_DIR}/src/dsp/fx/VecDiodeRingMod.cpp
-        ${SOURCE_DIR}/src/gui/SteppedSlider.cpp
-        ${SOURCE_DIR}/src/gui/DigitalDisplay.cpp
-        ${SOURCE_DIR}/src/utilities/Utilities.cpp
-
         plugin.cpp 
     )
 
@@ -76,10 +69,20 @@ target_compile_options(ValleyLibrary PRIVATE
 	$<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-float-conversion>
 )
 
-target_compile_definitions(ValleyLibrary PRIVATE
-    USE_SINGLE_FLOAT=1
-)
+# Use floats, not doubles for Plateau
+target_compile_definitions(ValleyLibrary PRIVATE USE_SINGLE_FLOAT=1)
 
+# Use lookup tables for VecOTA (Interzone and Feline)
+# Speeds up loading these modules and changing samplerate 2x:
+target_compile_definitions(ValleyLibrary PRIVATE VALLEY_USE_VECOTA_LUT=1)
+target_sources(ValleyLibrary PRIVATE ${SOURCE_DIR}/src/utilities/math_lut.cc)
+
+# Use a smaller table for VecOTA
+# This is 1/10th of VCV plugin value. 
+# Speeds up loading and changing samplerate substantially for Interzone and Feline
+target_compile_definitions(ValleyLibrary PRIVATE G_TABLE_SIZE=110000)
+
+target_compile_definitions(ValleyLibrary PRIVATE DSJ_VEC_DIODE_TABLE_N=64)
 
 if (BUILD_DYN_PLUGIN)
 	create_plugin(

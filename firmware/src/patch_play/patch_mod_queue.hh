@@ -22,19 +22,14 @@ struct AddMapping {
 	uint32_t set_id{};
 };
 
-struct EditMappingMinMax {
+struct ModifyMapping {
 	MappedKnob map;
 	uint32_t set_id{};
-	float cur_val{};
 };
 
 struct RemoveMapping {
 	MappedKnob map;
 	uint32_t set_id{};
-};
-
-struct ModifyMapping {
-	MappedKnob map;
 };
 
 struct AddMidiMap {
@@ -79,10 +74,9 @@ struct LoadModuleState {
 
 using PatchModRequest = std::variant<SetStaticParam,
 									 AddMapping,
-									 EditMappingMinMax,
+									 ModifyMapping,
 									 RemoveMapping,
 									 AddMidiMap,
-									 ModifyMapping,
 									 ChangeKnobSet,
 									 AddInternalCable,
 									 AddJackMapping,

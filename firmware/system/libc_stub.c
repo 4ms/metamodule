@@ -1,23 +1,30 @@
-void _init(void) {
-}
-void _fini(void) {
-}
-void *__dso_handle = (void *)&__dso_handle;
+// #define GCC_OPTIMIZE_OFF __attribute__((optimize("-O0")))
+#include <stdio.h>
 
-void _exit(int x) {
+__attribute__((used)) void _init(void) {
+}
+
+__attribute__((used)) void _fini(void) {
+}
+
+__attribute__((used)) void _exit(int x) {
+	puts("_exit\n");
 	while (1)
 		;
 }
-void _kill(int x) {
-}
-int _getpid() {
+
+__attribute__((used)) int _kill(int x) {
+	puts("_kill\n");
 	return -1;
 }
-void _fstat(int x, void *p) {
+
+__attribute__((used)) int _getpid() {
+	return -1;
 }
-void _isatty() {
-}
-int *__errno() {
+
+__attribute__((used)) int *__errno() {
 	static int errno = 0;
 	return &errno;
 }
+
+void *__dso_handle = (void *)&__dso_handle;

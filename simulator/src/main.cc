@@ -23,6 +23,8 @@ int main(int argc, char *argv[]) {
 
 	MetaModule::Ui ui{sdcard_path.string(), flash_path.string(), asset_tar_path.string(), audio_out.get_block_size()};
 
+	MetaModule::start_module_threads();
+
 	audio_out.set_callback([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
 	audio_out.unpause();
 
@@ -31,6 +33,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	audio_out.pause();
+
+	MetaModule::kill_module_threads();
 
 	lv_port_disp_deinit();
 	lv_deinit();

@@ -28,6 +28,8 @@ struct GuiState {
 	uint32_t write_settings_after_ms{};
 
 	Toggler back_button{};
+
+	Toggler file_browser_visible;
 };
 
 } // namespace MetaModule

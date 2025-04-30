@@ -29,42 +29,61 @@ namespace MetaModule::AudibleInstruments
 inline std::string_view get_display_name(std::string_view slug) {
 	if (slug == "Blinds")
 		return "Quad Attenuverter";
+
 	if (slug == "Braids")
 		return "Algorithm VCO";
+
 	if (slug == "Branches")
 		return "Random Router";
+
 	if (slug == "Clouds")
 		return "Granulation";
+
 	if (slug == "Elements")
 		return "Modeler";
+
 	if (slug == "Frames")
 		return "Keyframes";
+
 	if (slug == "Kinks")
 		return "Rect-Logic-S&H";
+
 	if (slug == "Links")
 		return "Split-Combine";
+
 	if (slug == "Marbles")
 		return "Random-maker";
+
 	if (slug == "Plaits")
 		return "Algorithm VCO II";
+
 	if (slug == "Rings")
 		return "Resonator";
+
 	if (slug == "Ripples")
 		return "VC Filter";
+
 	if (slug == "Shades")
 		return "Triple Mix";
+
 	if (slug == "Shelves")
 		return "Multi-filter";
+
 	if (slug == "Stages")
 		return "Slope Sequencer";
+
 	if (slug == "Streams")
 		return "Compressing Filter";
+
 	if (slug == "Tides")
 		return "Envelopes";
+
 	if (slug == "Tides2")
 		return "Envelopes II";
+
 	if (slug == "Veils")
 		return "Quad VCA";
+
 	if (slug == "Warps")
 		return "Mod Osc";
 	return "";

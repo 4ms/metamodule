@@ -2,18 +2,18 @@
 #include "dynload/dynloader.hh"
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
+#include "dynload/plugin_file_load_states.hh"
+#include "dynload/version_sort.hh"
 #include "fat_file_io.hh"
-#include "fs/asset_drive/untar.hh"
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
+#include "untar_contents.hh"
 #include "util/monotonic_allocator.hh"
-#include "util/string_compare.hh"
 #include "util/version_tools.hh"
 #include <algorithm>
 #include <cstdint>
-#include <deque>
 #include <string>
 
 extern rack::plugin::Plugin *pluginInstance;
@@ -23,20 +23,7 @@ namespace MetaModule
 
 class PluginFileLoader {
 public:
-	enum class State {
-		NotInit,
-		Error,
-		Idle,
-		RequestList,
-		WaitingForList,
-		GotList,
-		PrepareForReadingPlugin,
-		RequestReadPlugin,
-		LoadingPlugin,
-		UntarPlugin,
-		ProcessingPlugin,
-		Success
-	};
+	using State = PluginFileLoaderState;
 
 	struct Status {
 		State state{State::NotInit};
@@ -47,7 +34,8 @@ public:
 	PluginFileLoader(FileStorageProxy &file_storage, FatFileIO &ramdisk)
 		: file_storage{file_storage}
 		, ramdisk{ramdisk}
-		, allocator{get_ram_buffer()} {
+		, allocator{get_ram_buffer()}
+		, contents{ramdisk} {
 	}
 
 	void start() {
@@ -98,10 +86,12 @@ public:
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
 					plugin_files = *plugin_file_list; //make local copy
 
-					std::ranges::sort(plugin_files, less_ci, &PluginFile::plugin_name);
 					pr_trace("Found %d plugins\n", plugin_files.size());
 
 					parse_versions();
+
+					std::ranges::sort(plugin_files, alpha_then_newest_version);
+
 					status.state = State::GotList;
 					file_idx = 0;
 				}
@@ -134,7 +124,7 @@ public:
 				auto msg = file_storage.get_message();
 
 				if (msg.message_type == FileStorageProxy::LoadFileFailed) {
-					status.state = State::Error;
+					status.state = State::InvalidPlugin;
 					status.error_message = "Failed to read from disk";
 
 				} else if (msg.message_type == FileStorageProxy::LoadFileOK) {
@@ -150,93 +140,18 @@ public:
 
 			case State::UntarPlugin: {
 				auto &plugin_file = plugin_files[file_idx];
+				auto [result, err] = contents.untar_contents(buffer, plugin_file);
 
-				auto plugin_tar = Tar::Archive({(char *)buffer.data(), buffer.size()});
-				// plugin_tar.print_info();
+				if (result == PluginFileLoaderState::RamDiskFull) {
+					status.state = State::RamDiskFull;
+					status.error_message = err;
 
-				so_buffer.clear();
-				json_buffer.clear();
-				mm_json_buffer.clear();
-				files_copied_to_ramdisk.clear();
+				} else if (result == PluginFileLoaderState::InvalidPlugin) {
+					status.state = State::InvalidPlugin;
+					status.error_message = err;
 
-				std::string plugin_vers_filename;
-
-				auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
-					if (filename.ends_with(".so")) {
-						if (so_buffer.size() == 0) {
-							auto name = filename;
-							if (auto slashpos = name.find_last_of("/"); slashpos != std::string::npos) {
-								name = name.substr(slashpos + 1);
-							}
-							name.remove_suffix(3); //.so
-							if (!name.starts_with(".")) {
-								plugin_file.plugin_name = name;
-
-								pr_trace("Found plugin binary file: %s, plugin name is %s\n",
-										 filename.data(),
-										 plugin_file.plugin_name.c_str());
-
-								so_buffer.assign(buffer.begin(), buffer.end());
-								return buffer.size();
-							} else
-								return 0;
-						} else {
-							pr_warn("More than one .so file found! Using just the first\n");
-							return 0;
-						}
-
-					} else if (filename.ends_with("plugin.json")) {
-						json_buffer.assign(buffer.begin(), buffer.end());
-						return buffer.size();
-
-					} else if (filename.ends_with("plugin-mm.json")) {
-						mm_json_buffer.assign(buffer.begin(), buffer.end());
-						return buffer.size();
-
-					} else if (filename.contains("/SDK-")) {
-						plugin_vers_filename = filename;
-						return buffer.size();
-					} else {
-						if (!ramdisk.file_exists(filename)) {
-							pr_trace("Copying file to ramdisk: %s\n", filename.data());
-							auto bytes_written = ramdisk.write_file(filename, buffer);
-							if (bytes_written > 0)
-								files_copied_to_ramdisk.emplace_back(filename);
-							return bytes_written;
-						} else {
-							pr_trace("File exists, skipping: %s\n", filename.data());
-							return 0;
-						}
-					}
-				};
-
-				bool all_ok = plugin_tar.extract_files(ramdisk_writer);
-
-				if (!all_ok) {
-					pr_warn("Skipped loading some files in plugin dir (did not end in .png)\n");
-					// status.error_message = "Warning: Failed to load some files";
-				}
-
-				if (so_buffer.size() == 0) {
-					status.error_message = "Error: no plugin .so file found. Plugin is corrupted?";
-					status.state = State::Error;
-					break;
-				}
-
-				auto vers_pos = plugin_vers_filename.find_last_of("/SDK-");
-				if (plugin_vers_filename.length() == 0 || vers_pos == std::string::npos) {
-					status.state = State::Error;
-					status.error_message = "Warning: Plugin missing version file.";
-					break;
-				}
-				auto plugin_vers = plugin_vers_filename.substr(vers_pos + 1);
-				auto fw_version = sdk_version();
-				if (fw_version.can_host_version(VersionUtil::Version(plugin_vers))) {
-					status.state = State::ProcessingPlugin;
 				} else {
-					std::string fw_vers = std::to_string(fw_version.major) + "." + std::to_string(fw_version.minor);
-					status.error_message = "Plugin version is " + plugin_vers + ", but firmware version is " + fw_vers;
-					status.state = State::Error;
+					status.state = State::ProcessingPlugin;
 				}
 
 			} break;
@@ -251,17 +166,30 @@ public:
 				// set slug and display name
 				auto metadata = get_plugin_metadata();
 				std::string fallback_name = plugin_file.plugin_name;
-				plugin.rack_plugin.slug = metadata.brand_slug.length() ? metadata.brand_slug : fallback_name;
+				if (metadata.brand_slug.length() == 0)
+					metadata.brand_slug = fallback_name;
+				plugin.rack_plugin.slug = metadata.brand_slug;
 				plugin.rack_plugin.name = metadata.display_name.length() ? metadata.display_name : fallback_name;
 
-				plugin.loaded_files = std::move(files_copied_to_ramdisk);
+				plugin.loaded_files = std::move(contents.files_copied_to_ramdisk);
 
 				if (load_plugin(plugin)) {
+					if (metadata.display_name.length())
+						ModuleFactory::setBrandDisplayName(metadata.brand_slug, metadata.display_name);
+
 					for (auto const &alias : metadata.brand_aliases)
 						ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
+
+					for (auto const &alias : metadata.module_aliases) {
+						if (alias.display_name.length() && alias.slug.length()) {
+							ModuleFactory::setModuleDisplayName(metadata.brand_slug + ":" + alias.slug,
+																alias.display_name);
+						}
+					}
+
 					status.state = State::Success;
 				} else {
-					status.state = State::Error;
+					status.state = State::InvalidPlugin;
 					// Cleanup files we copied to the ramdisk
 					for (auto const &file : plugin.loaded_files) {
 						ramdisk.delete_file(file);
@@ -279,8 +207,11 @@ public:
 			case State::Idle:
 				break;
 			case State::Success:
+				status.state = State::Idle;
 				break;
 			case State::Error:
+			case State::InvalidPlugin:
+			case State::RamDiskFull:
 				status.error_message.clear();
 				break;
 		}
@@ -291,12 +222,12 @@ public:
 	Plugin::Metadata get_plugin_metadata() {
 		Plugin::Metadata metadata;
 
-		if (json_buffer.size()) {
-			Plugin::parse_json(json_buffer, &metadata);
+		if (contents.json_buffer.size()) {
+			Plugin::parse_json(contents.json_buffer, &metadata);
 		}
 
-		if (mm_json_buffer.size()) {
-			Plugin::parse_mm_json(mm_json_buffer, &metadata);
+		if (contents.mm_json_buffer.size()) {
+			Plugin::parse_mm_json(contents.mm_json_buffer, &metadata);
 		}
 
 		// Report warnings/errors:
@@ -313,35 +244,26 @@ public:
 
 	bool is_idle() {
 		return status.state == State::Idle || status.state == State::NotInit || status.state == State::Success ||
-			   status.state == State::Error;
+			   status.state == State::Error || status.state == State::InvalidPlugin ||
+			   status.state == State::RamDiskFull;
 	}
 
+	// Splits plugin names at the first "-v"
 	void parse_versions() {
 		for (auto &plugin : plugin_files) {
+			plugin.version_in_filename = "";
+
 			const auto name = std::string{plugin.plugin_name};
 
-			if (auto v = name.find("-v"); v != std::string_view::npos) {
-				// extract version string:
-				std::string vers = name.substr(v + 2);
-
-				// drop version from plugin name:
-				plugin.plugin_name.copy(name.substr(0, v));
-
-				auto version = VersionUtil::Version(vers);
-				plugin.version = std::string_view(vers);
-				plugin.sdk_major_version = version.major;
-				plugin.sdk_minor_version = version.minor;
-				pr_trace("Plugin: %s => %s => %u.%u.%u\n",
-						 name.c_str(),
-						 vers.c_str(),
-						 version.major,
-						 version.minor,
-						 version.revision);
-			} else {
-				pr_warn("Plugin %s: No version found\n", name.c_str());
-				plugin.version = "";
-				plugin.sdk_major_version = 1;
-				plugin.sdk_minor_version = 0;
+			// Make sure the char after the -v is a digit
+			auto v = name.find("-v");
+			while (v != std::string_view::npos) {
+				if (isdigit(name[v + 2])) {
+					plugin.plugin_name.copy(name.substr(0, v));
+					plugin.version_in_filename.copy(name.substr(v + 2));
+					break;
+				}
+				v = name.find("-v", v + 2);
 			}
 		}
 	}
@@ -349,7 +271,7 @@ public:
 	bool load_plugin(LoadedPlugin &plugin) {
 		using InitPluginFunc = void(rack::plugin::Plugin *);
 
-		DynLoader dynloader{so_buffer, plugin.code};
+		DynLoader dynloader{contents.so_buffer, plugin.code};
 
 		if (auto err_msg = dynloader.load(); err_msg != "") {
 			status.error_message = err_msg;
@@ -357,6 +279,8 @@ public:
 			return false;
 		}
 
+		// Check the sdk version by calling sdk_version() in the plugin
+		// This function will return the SDK version used to build the plugin.
 		auto plugin_sdk_version = dynloader.get_sdk_version();
 		if (!plugin_sdk_version.has_value()) {
 			pr_err("Plugin uses SDK < 0.15.0, or is not valid: not sdk_version() symbol found\n");
@@ -399,10 +323,8 @@ private:
 
 	MonotonicAllocator allocator;
 	std::span<uint8_t> buffer;
-	std::vector<uint8_t> so_buffer;
-	std::vector<char> json_buffer;
-	std::vector<char> mm_json_buffer;
-	std::vector<std::string> files_copied_to_ramdisk;
+
+	PluginLoadUntar contents;
 
 	// Dynamically allocated in non-cacheable RAM
 	// Used to transfer from M4 to A7 core

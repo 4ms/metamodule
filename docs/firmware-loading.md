@@ -64,6 +64,9 @@ attach without loading.
 If you need to load new firmware and then debug it, then follow the guide in
 [Debugging with gdb](firmware-debugging.md).
 
+
+1) Install a "Freeze jumper" :
+
 To load firmware (without debugging) with a JLink programmer, you need to install a "Freeze Jumper".
 
 There are two bootloader versions. If you see a blue light flash when you start up normally,
@@ -82,7 +85,6 @@ all the way to the left:
            o  o  o  o
 ```
 
-
 1b) Later bootloader: The jumper goes on the two left-most pins of the 2x4 debug header. 
 This is the header located next to the SWD/JTAG header that contains the connections for 
 the UART (RX/TX).
@@ -93,6 +95,11 @@ the UART (RX/TX).
     |o|  o   o   o
      -
 ```
+
+Up until Nov 1, 2024 all shipped units had the older bootloader unless
+you intentionally installed a newer one. 
+Updating the bootloaders is done via loading a release file that has "-bl-" in the name,
+where the release tag is `firmware-v2.0.0-dev-2` or later.
 
 2) Power off and back on (full power-cycle is required).
 

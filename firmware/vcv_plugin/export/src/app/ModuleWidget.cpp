@@ -1,9 +1,6 @@
-#include "CoreModules/elements/element_counter.hh"
 #include "console/pr_dbg.hh"
 #include "metamodule/svg.hh"
 #include "module_widget_adaptor.hh"
-#include "util/countzip.hh"
-#include "util/zip.hh"
 #include <app/ModuleWidget.hpp>
 
 static constexpr inline bool LogWidgetPlacements = false;
@@ -13,20 +10,90 @@ static void log_widget(std::string_view preface, rack::widget::Widget const *wid
 namespace rack::app
 {
 
-ModuleWidget::ModuleWidget() {
-	adaptor = std::make_unique<MetaModule::ModuleWidgetAdaptor>();
+struct ModuleWidget::Internal {
+	app::SvgPanel *panel = nullptr;
+	std::unique_ptr<MetaModule::ModuleWidgetAdaptor> adaptor;
+	std::vector<ModuleWidget::WidgetElement> drawable_widgets;
+
+	unsigned graphic_display_idx = 200;
+};
+
+std::vector<ModuleWidget::WidgetElement> &ModuleWidget::get_drawable_widgets() {
+	return internal->drawable_widgets;
 }
 
-ModuleWidget::~ModuleWidget() = default;
+ModuleWidget::ModuleWidget() {
+	internal = new Internal;
+	internal->adaptor = std::make_unique<MetaModule::ModuleWidgetAdaptor>();
+	box.size = math::Vec(0, RACK_GRID_HEIGHT);
+}
+
+ModuleWidget::~ModuleWidget() {
+	clearChildren();
+	delete internal;
+}
+
+plugin::Model *ModuleWidget::getModel() {
+	return model;
+}
+
+void ModuleWidget::setModel(plugin::Model *m) {
+	model = m;
+}
+
+engine::Module *ModuleWidget::getModule() {
+	return module;
+}
+
+void ModuleWidget::setModule(engine::Module *m) {
+	if (!m) {
+		pr_err("ModuleWidget is not allowed to delete Module\n");
+		return;
+	}
+	if (this->module) {
+		pr_err("Error: Setting the module of a ModuleWidget when a module is already set!\n");
+	}
+	this->module = m;
+
+	internal->graphic_display_idx = std::max(m->lights.size(), m->lightInfos.size());
+
+	if (model && model->slug.size())
+		pr_trace("setModule for %s\n", model->slug.c_str());
+	else if (m->model && m->model->slug.size())
+		pr_trace("setModule for %s\n", m->model->slug.c_str());
+}
+
+app::SvgPanel *ModuleWidget::getPanel() {
+	return internal->panel;
+}
 
 void ModuleWidget::setPanel(app::SvgPanel *newpanel) {
-	if (!newpanel)
-		return;
-	panel.reset(newpanel);
+	bool first_panel = false;
 
-	if (newpanel->svg) {
-		svg_filename = newpanel->svg->filename;
-		box.size = get_svg_size(svg_filename);
+	// Remove existing panel
+	if (internal->panel) {
+		removeChild(internal->panel);
+		delete internal->panel;
+		internal->panel = nullptr;
+	} else {
+		first_panel = true;
+	}
+
+	if (newpanel) {
+		Widget::addChild(newpanel);
+		internal->panel = newpanel;
+
+		if (newpanel->svg) {
+			box.size = newpanel->svg->getSize();
+			if (box.size != newpanel->box.size)
+				pr_err("Error: In ModuleWidget::setPanel, new panel's svg->getSize() != box.size\n");
+
+			if (first_panel) {
+				internal->adaptor->addModuleWidget(internal->graphic_display_idx, this);
+				internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
+				internal->graphic_display_idx++;
+			}
+		}
 	}
 }
 
@@ -36,35 +103,31 @@ void ModuleWidget::setPanel(std::shared_ptr<window::Svg> svg) {
 	setPanel(panel);
 }
 
-widget::Widget *ModuleWidget::getPanel() {
-	return panel.get();
-}
-
 //
 // Params
 //
 
 void ModuleWidget::addParam(app::Knob *widget) {
 	log_widget("addParam(Knob)", widget);
-	adaptor->addParam(widget);
+	internal->adaptor->addParam(widget);
 	Widget::addChild(widget);
 }
 
 void ModuleWidget::addParam(app::SvgKnob *widget) {
 	log_widget("addParam(SvgKnob)", widget);
-	adaptor->addParam(widget);
+	internal->adaptor->addParam(widget);
 	Widget::addChild(widget);
 }
 
 void ModuleWidget::addParam(rack::componentlibrary::Rogan *widget) {
 	log_widget("addParam(Rogan)", widget);
-	adaptor->addParam(widget);
+	internal->adaptor->addParam(widget);
 	Widget::addChild(widget);
 }
 
 void ModuleWidget::addParam(app::SliderKnob *widget) {
 	log_widget("addParam(SliderKnob)", widget);
-	adaptor->addParam(widget);
+	internal->adaptor->addParam(widget);
 	Widget::addChild(widget);
 }
 
@@ -72,13 +135,13 @@ void ModuleWidget::addParam(app::SvgSlider *widget) {
 	log_widget("addParam(SvgSlider)", widget);
 	// Modify the widget's box to match the background
 	// widget->box.pos = widget->box.pos + widget->background->box.pos;
-	adaptor->addParam(widget);
+	internal->adaptor->addParam(widget);
 	Widget::addChild(widget);
 }
 
 void ModuleWidget::addParam(app::SvgSwitch *widget) {
 	log_widget("addParam(SvgSwitch)", widget);
-	adaptor->addParam(widget);
+	internal->adaptor->addParam(widget);
 	Widget::addChild(widget);
 }
 
@@ -108,13 +171,13 @@ void ModuleWidget::addParam(app::ParamWidget *widget) {
 
 void ModuleWidget::addLightSwitch(app::SvgSwitch *widget, app::ModuleLightWidget *light) {
 	log_widget("addLightSwitch()", widget);
-	adaptor->addLightParam(widget, light);
+	internal->adaptor->addLightParam(widget, light);
 	Widget::addChild(widget);
 }
 
 void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget *light) {
 	log_widget("addLightSwitch()", widget);
-	adaptor->addLightParam(widget, light);
+	internal->adaptor->addLightParam(widget, light);
 	Widget::addChild(light);
 }
 
@@ -124,13 +187,26 @@ void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget
 
 void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
 	log_widget("addChild(ModuleLightWidget)", widget);
-	adaptor->addLight(widget);
-	Widget::addChild(widget);
+	if (widget) {
+		Widget::addChild(widget);
+
+		if (widget->getNumColors()) {
+			internal->adaptor->addLight(widget);
+		} else {
+			auto box = widget->box;
+			internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
+			internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
+			internal->graphic_display_idx++;
+
+			pr_trace("Add drawable (light) at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+			pr_trace("idx %d (firstLightId = %d)\n", internal->graphic_display_idx - 1, widget->firstLightId);
+		}
+	}
 }
 
 void ModuleWidget::addSvgLight(std::string_view image, app::ModuleLightWidget *widget) {
 	log_widget("addSvgLight()", widget);
-	adaptor->addSvgLight(widget, image);
+	internal->adaptor->addSvgLight(widget, image);
 	Widget::addChild(widget);
 }
 
@@ -143,14 +219,14 @@ void ModuleWidget::addInput(app::PortWidget *widget) {
 		addInput(w);
 	} else {
 		log_widget("addInput(PortWidget)", widget);
-		adaptor->addInput(widget);
+		internal->adaptor->addInput(widget);
 		Widget::addChild(widget);
 	}
 }
 
 void ModuleWidget::addInput(app::SvgPort *widget) {
 	log_widget("addOutput(SvgPort)", widget);
-	adaptor->addInput(widget);
+	internal->adaptor->addInput(widget);
 	Widget::addChild(widget);
 }
 
@@ -159,14 +235,14 @@ void ModuleWidget::addOutput(app::PortWidget *widget) {
 		addOutput(w);
 	} else {
 		log_widget("addOutput(PortWidget)", widget);
-		adaptor->addOutput(widget);
+		internal->adaptor->addOutput(widget);
 		Widget::addChild(widget);
 	}
 }
 
 void ModuleWidget::addOutput(app::SvgPort *widget) {
 	log_widget("addOutput(SvgPort)", widget);
-	adaptor->addOutput(widget);
+	internal->adaptor->addOutput(widget);
 	Widget::addChild(widget);
 }
 
@@ -180,25 +256,33 @@ void ModuleWidget::addChild(app::SvgScrew *widget) {
 }
 
 void ModuleWidget::addChild(Widget *widget) {
-	log_widget("Skipped: addChild(unknown Widget)", widget);
+	log_widget("addChild(unknown Widget)", widget);
 	Widget::addChild(widget);
+
+	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
+	internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
+	internal->graphic_display_idx++;
+
+	auto box = widget->box;
+	pr_trace("Add drawable at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+	pr_trace("idx %d\n", internal->graphic_display_idx - 1);
 }
 
 void ModuleWidget::addChild(MetaModule::VCVTextDisplay *widget) {
-	adaptor->addTextDisplay(widget);
+	internal->adaptor->addTextDisplay(widget);
 	Widget::addChild(widget);
 }
 
 void ModuleWidget::addChild(widget::SvgWidget *widget) {
 	log_widget("addChild(SvgWidget)", widget);
-	adaptor->addImage(widget);
+	internal->adaptor->addImage(widget);
 	Widget::addChild(widget);
 }
 
 void ModuleWidget::addChild(app::SvgButton *widget) {
 	log_widget("addChild(SvgButton)", widget);
 	widget->sw->box.pos = widget->box.pos;
-	adaptor->addImage(widget->sw);
+	internal->adaptor->addImage(widget->sw);
 	Widget::addChild(widget);
 }
 
@@ -207,11 +291,17 @@ void ModuleWidget::addChild(app::SvgButton *widget) {
 //
 
 void ModuleWidget::addChild(SvgPanel *child) {
-	setPanel(child);
+	if (child->visible)
+		setPanel(child);
+	else
+		Widget::addChild(child);
 }
 
 void ModuleWidget::addChildBottom(SvgPanel *child) {
-	setPanel(child);
+	if (child->visible)
+		setPanel(child);
+	else
+		Widget::addChild(child);
 }
 
 template<class T, typename F>
@@ -230,17 +320,17 @@ T *getFirstDescendantOfTypeWithCondition(widget::Widget *w, F f) {
 
 ParamWidget *ModuleWidget::getParam(int paramId) {
 	return getFirstDescendantOfTypeWithCondition<ParamWidget>(
-		this, [&](ParamWidget *pw) -> bool { return pw->paramId == paramId; });
+		this, [&](ParamWidget *pw) -> bool { return pw && pw->paramId == paramId; });
 }
 
 PortWidget *ModuleWidget::getInput(int portId) {
 	return getFirstDescendantOfTypeWithCondition<PortWidget>(
-		this, [&](PortWidget *pw) -> bool { return pw->type == engine::Port::INPUT && pw->portId == portId; });
+		this, [&](PortWidget *pw) -> bool { return pw && pw->type == engine::Port::INPUT && pw->portId == portId; });
 }
 
 PortWidget *ModuleWidget::getOutput(int portId) {
 	return getFirstDescendantOfTypeWithCondition<PortWidget>(
-		this, [&](PortWidget *pw) -> bool { return pw->type == engine::Port::OUTPUT && pw->portId == portId; });
+		this, [&](PortWidget *pw) -> bool { return pw && pw->type == engine::Port::OUTPUT && pw->portId == portId; });
 }
 
 template<class T, typename F>
@@ -282,6 +372,96 @@ std::vector<PortWidget *> ModuleWidget::getOutputs() {
 			pws.push_back(pw);
 	});
 	return pws;
+}
+
+void ModuleWidget::populate_elements_indices(rack::plugin::Model *model) {
+	internal->adaptor->populate_elements_indices(model->elements, model->indices);
+}
+
+//////////////// No-ops:
+
+void ModuleWidget::draw(const DrawArgs &args) {
+}
+void ModuleWidget::drawLayer(const DrawArgs &args, int layer) {
+}
+void ModuleWidget::onHover(const HoverEvent &e) {
+}
+void ModuleWidget::onHoverKey(const HoverKeyEvent &e) {
+}
+void ModuleWidget::onButton(const ButtonEvent &e) {
+}
+void ModuleWidget::onDragStart(const DragStartEvent &e) {
+}
+void ModuleWidget::onDragEnd(const DragEndEvent &e) {
+}
+void ModuleWidget::onDragMove(const DragMoveEvent &e) {
+}
+void ModuleWidget::onDragHover(const DragHoverEvent &e) {
+}
+json_t *ModuleWidget::toJson() {
+	return {};
+}
+void ModuleWidget::fromJson(json_t *rootJ) {
+}
+bool ModuleWidget::pasteJsonAction(json_t *rootJ) {
+	return false;
+}
+void ModuleWidget::copyClipboard() {
+}
+bool ModuleWidget::pasteClipboardAction() {
+	return {};
+}
+void ModuleWidget::load(std::string filename) {
+}
+void ModuleWidget::loadAction(std::string filename) {
+}
+void ModuleWidget::loadTemplate() {
+}
+void ModuleWidget::loadDialog() {
+}
+void ModuleWidget::save(std::string filename) {
+}
+void ModuleWidget::saveTemplate() {
+}
+void ModuleWidget::saveTemplateDialog() {
+}
+bool ModuleWidget::hasTemplate() {
+	return {};
+}
+void ModuleWidget::clearTemplate() {
+}
+void ModuleWidget::clearTemplateDialog() {
+}
+void ModuleWidget::saveDialog() {
+}
+void ModuleWidget::disconnect() {
+}
+void ModuleWidget::resetAction() {
+}
+void ModuleWidget::randomizeAction() {
+}
+void ModuleWidget::appendDisconnectActions(history::ComplexAction *complexAction) {
+}
+void ModuleWidget::disconnectAction() {
+}
+void ModuleWidget::cloneAction(bool cloneCables) {
+}
+void ModuleWidget::bypassAction(bool bypassed) {
+}
+void ModuleWidget::removeAction() {
+}
+void ModuleWidget::createContextMenu() {
+}
+math::Vec ModuleWidget::getGridPosition() {
+	return {};
+}
+void ModuleWidget::setGridPosition(math::Vec pos) {
+}
+math::Vec ModuleWidget::getGridSize() {
+	return {};
+}
+math::Rect ModuleWidget::getGridBox() {
+	return {};
 }
 
 } // namespace rack::app

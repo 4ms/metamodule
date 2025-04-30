@@ -8,7 +8,7 @@
 class UsbHostManager {
 private:
 	mdrivlib::Pin src_enable;
-	USBH_HandleTypeDef usbhost;
+	USBH_HandleTypeDef usbhost{};
 	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
 	MSCHost msc_host{usbhost, MetaModule::Volume::USB};

@@ -1,6 +1,5 @@
 #pragma once
-#include "CoreModules/elements/element_info.hh"
-#include "conf/patch_conf.hh"
+#include "gui/dyn_display.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -8,13 +7,14 @@
 #include "gui/elements/redraw_display.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/helpers/roller_hover_text.hh"
+#include "gui/module_menu/plugin_module_menu.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_action_menu.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
+#include "gui/pages/module_view_roller_helpers.hh"
 #include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/patch_view.hh"
 #include "gui/styles.hh"
 
 namespace MetaModule
@@ -28,9 +28,11 @@ struct ModuleViewPage : PageBase {
 		, page_settings{settings.module_view}
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
-		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
+		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state, patch_playloader}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
-		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller) {
+		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
+		, module_context_menu{patch_playloader}
+		, dyn_draw{patch_playloader} {
 
 		init_bg(ui_MappingMenu);
 
@@ -49,11 +51,15 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_ModuleViewCableCancelBut);
 
 		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, ui_ModuleViewHideBut);
 		lv_group_add_obj(group, ui_ModuleViewActionBut);
 		lv_group_add_obj(group, ui_ModuleViewSettingsBut);
 		lv_group_add_obj(group, ui_ModuleViewCableCancelBut);
 		lv_group_add_obj(group, ui_ElementRoller);
 		lv_group_focus_obj(ui_ElementRoller);
+
+		lv_group_add_obj(group, ui_ModuleViewExtraMenuRoller);
+		lv_hide(ui_ModuleViewExtraMenuRoller);
 
 		lv_group_set_wrap(group, false);
 
@@ -61,6 +67,11 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewHideBut, fullscreen_but_cb, LV_EVENT_CLICKED, this);
+
+		lv_obj_add_event_cb(ui_ModuleViewHideBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 	}
 
 	void prepare_focus() override {
@@ -93,6 +104,8 @@ struct ModuleViewPage : PageBase {
 		auto module_display_name = ModuleFactory::getModuleDisplayName(slug);
 		lv_label_set_text(ui_ElementRollerModuleName, module_display_name.data());
 
+		has_context_menu = module_context_menu.create_options_menu(this_module_id);
+
 		redraw_module();
 
 		lv_hide(ui_ModuleViewActionMenu);
@@ -100,6 +113,7 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_MIDIMapPanel);
 
 		if (gui_state.new_cable) {
+			lv_hide(ui_ModuleViewHideBut);
 			lv_hide(ui_ModuleViewActionBut);
 			lv_hide(ui_ModuleViewSettingsBut);
 			lv_show(ui_ModuleViewCableCancelBut);
@@ -111,6 +125,7 @@ struct ModuleViewPage : PageBase {
 			lv_obj_set_flex_align(
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 		} else {
+			lv_show(ui_ModuleViewHideBut);
 			lv_show(ui_ModuleViewActionBut);
 			lv_show(ui_ModuleViewSettingsBut);
 			lv_hide(ui_ModuleViewCableCancelBut);
@@ -125,20 +140,11 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
-	void redraw_module() {
-		reset_module_page();
-		size_t num_elements = moduleinfo.elements.size();
-		opts.reserve(num_elements * 32); // 32 chars per roller item
-		button.reserve(num_elements);
-		drawn_elements.reserve(num_elements);
-
-		auto module_drawer = ModuleDrawer{ui_ModuleImage, 240};
-		canvas = module_drawer.draw_faceplate(slug, buffer);
-
+	unsigned resize_module_image(unsigned max) {
 		lv_obj_refr_size(canvas);
 		auto width_px = lv_obj_get_width(canvas);
 		//module img + padding is no more than 190px wide
-		auto display_widthpx = std::min<lv_coord_t>(width_px + 4, 190);
+		auto display_widthpx = std::min<lv_coord_t>(width_px + 4, max);
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
 		if (lv_obj_get_width(ui_ModuleImage) > width_px) {
@@ -148,6 +154,30 @@ struct ModuleViewPage : PageBase {
 		}
 
 		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+
+		auto roller_width = std::min<lv_coord_t>(320 - display_widthpx, 220); //roller is no more than 220px wide
+		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
+		if (max == 320) {
+			lv_obj_set_x(ui_ElementRollerPanel, 320);
+		} else {
+			lv_obj_set_x(ui_ElementRollerPanel, 0);
+		}
+
+		return display_widthpx;
+	}
+
+	void redraw_module() {
+		reset_module_page();
+
+		size_t num_elements = moduleinfo.elements.size();
+		opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
+		button.reserve(num_elements);
+		drawn_elements.reserve(num_elements);
+
+		auto module_drawer = ModuleDrawer{.container = ui_ModuleImage, .height = 240};
+
+		auto [faceplate, width] = module_drawer.read_faceplate(slug);
+		canvas = module_drawer.draw_faceplate(faceplate, width, buffer);
 
 		active_knobset = page_list.get_active_knobset();
 
@@ -164,31 +194,32 @@ struct ModuleViewPage : PageBase {
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &gui_el = drawn_element.gui_element;
 
-			watch_lights(drawn_element);
+			watch_element(drawn_element);
 
 			add_button(gui_el.obj);
 
 			auto base = base_element(drawn_element.element);
 
 			if (base.short_name.size() == 0) {
-				pr_info("Skipping element with no name\n");
+				pr_info("Element roller: Skipping element with no name\n");
 				continue;
 			}
 
-			if (is_light_only(gui_el))
+			if (ModView::is_light_only(drawn_element))
 				continue;
 
-			if (should_skip_for_cable_mode(gui_state.new_cable, gui_el))
+			if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
 				continue;
 
-			if (append_header(opts, last_type, gui_el.count)) {
+			if (ModView::append_header(opts, last_type, gui_el.count)) {
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 			}
 			last_type = gui_el.count;
 
 			opts.append(" ");
-			opts.append(base.short_name);
+			// Display up to the first newline (if any)
+			opts.append(base.short_name.substr(0, base.short_name.find_first_of('\n')));
 
 			if (gui_el.mapped_panel_id) {
 				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
@@ -210,6 +241,16 @@ struct ModuleViewPage : PageBase {
 			roller_idx++;
 		}
 
+		if (is_patch_playloaded) {
+			if (has_context_menu) {
+				opts += Gui::orange_text("Options:") + "\n";
+				opts += " >>>\n";
+				roller_drawn_el_idx.push_back(-1);
+				roller_drawn_el_idx.push_back(ExtraMenuTag);
+				roller_idx += 2;
+			}
+		}
+
 		if (roller_idx <= 1) {
 			if (gui_state.new_cable) {
 				opts.append("No available jacks to patch\n");
@@ -220,11 +261,13 @@ struct ModuleViewPage : PageBase {
 		if (opts.length() > 0)
 			opts.pop_back();
 
-		//Show Roller and select it
+		//Size Module Image and Roller
 		lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
-		auto roller_width = std::min<lv_coord_t>(320 - display_widthpx, 220); //roller is no more than 220px wide
-		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
-		lv_obj_clear_flag(ui_ElementRollerPanel, LV_OBJ_FLAG_HIDDEN);
+
+		resize_module_image(190);
+		full_screen_mode = false;
+
+		lv_show(ui_ElementRollerPanel);
 
 		// Add text list to roller options
 		lv_roller_set_options(ui_ElementRoller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
@@ -243,9 +286,10 @@ struct ModuleViewPage : PageBase {
 		cable_drawer.set_height(240);
 		update_cable_style(true);
 
+		lv_obj_refr_size(ui_ElementRollerPanel);
+		auto roller_width = lv_obj_get_width(ui_ElementRollerPanel);
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playloaded);
 
-		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
 		if (cur_el && args.detail_mode == true) {
 			mode = ViewMode::Mapping;
 			mapping_pane.hide();
@@ -253,66 +297,26 @@ struct ModuleViewPage : PageBase {
 		} else {
 			show_roller();
 		}
+
+		dynamic_elements_prepared = false;
+		update_graphic_throttle_setting();
 	}
 
-	void watch_lights(DrawnElement const &drawn_element) {
+	void prepare_dynamic_elements() {
+		if (!dynamic_elements_prepared) {
+			dyn_draw.prepare_module(drawn_elements, this_module_id, canvas);
+			dynamic_elements_prepared = true;
+		}
+	}
+
+	void watch_element(DrawnElement const &drawn_element) {
 		auto gui_el = drawn_element.gui_element;
-		std::visit(overloaded{
-					   [&](auto const &el) {
-						   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
-							   params.lights.start_watching_light(this_module_id, gui_el.idx.light_idx + i);
-						   }
-					   },
-					   [&](DynamicTextDisplay const &el) {
-						   params.displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
-					   },
-				   },
+		std::visit(overloaded{[&](DynamicTextDisplay const &el) {
+								  params.text_displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
+							  },
+							  [](auto const &el) {
+							  }},
 				   drawn_element.element);
-	}
-
-	bool is_light_only(GuiElement const &gui_el) const {
-		return (gui_el.count.num_lights > 0) && (gui_el.count.num_params == 0) && (gui_el.count.num_outputs == 0) &&
-			   (gui_el.count.num_inputs == 0);
-	}
-
-	bool should_skip_for_cable_mode(std::optional<GuiState::CableBeginning> const &new_cable,
-									GuiElement const &gui_el) const {
-		if (gui_state.new_cable.has_value()) {
-			uint16_t this_jack_id{};
-			if (gui_el.count.num_inputs > 0)
-				this_jack_id = gui_el.idx.input_idx;
-			else if (gui_el.count.num_outputs > 0)
-				this_jack_id = gui_el.idx.output_idx;
-			else
-				return true;
-			auto this_jack_type = (gui_el.count.num_inputs > 0) ? ElementType::Input : ElementType::Output;
-			if (!can_finish_cable(gui_state.new_cable.value(),
-								  patch,
-								  Jack{.module_id = this_module_id, .jack_id = this_jack_id},
-								  this_jack_type,
-								  gui_el.mapped_panel_id.has_value()))
-				return true;
-		}
-		return false;
-	}
-
-	bool append_header(std::string &opts, ElementCount::Counts last_type, ElementCount::Counts this_type) {
-		if (last_type.num_params == 0 && this_type.num_params > 0) {
-			opts += Gui::orange_text("Params:") + "\n";
-			return true;
-
-		} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
-				   (this_type.num_inputs > 0 || this_type.num_outputs > 0))
-		{
-			opts += Gui::orange_text("Jacks:") + "\n";
-			return true;
-
-		} else if (last_type.num_lights == 0 && this_type.num_lights > 0 && this_type.num_params == 0) {
-			opts += Gui::orange_text("Lights:") + "\n";
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	bool is_creating_map() const {
@@ -323,23 +327,43 @@ struct ModuleViewPage : PageBase {
 		if (gui_state.back_button.is_just_released()) {
 
 			if (action_menu.is_visible()) {
-				action_menu.hide();
+				action_menu.back();
 
 			} else if (settings_menu.is_visible()) {
 				settings_menu.hide();
 
+			} else if (mode == ViewMode::Mapping) {
+				mapping_pane.back_event();
+
+			} else if (mode == ViewMode::ModuleContextMenu) {
+				module_context_menu.back_event();
+
+			} else if (full_screen_mode) {
+				full_screen_mode = false;
+				resize_module_image(190);
+
 			} else if (mode == ViewMode::List) {
 				args.module_id = this_module_id;
 				load_prev_page();
+			}
+		}
 
-			} else if (mode == ViewMode::Mapping) {
-				mapping_pane.back_event();
+		if (gui_state.file_browser_visible.just_went_low()) {
+			// File Browser detected as just closed
+			if (mode == ViewMode::ModuleContextMenu) {
+				show_roller();
 			}
 		}
 
 		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
+				show_roller();
+			}
+
+		} else if (mode == ViewMode::ModuleContextMenu) {
+			module_context_menu.update();
+			if (module_context_menu.wants_to_close()) {
 				show_roller();
 			}
 		}
@@ -361,12 +385,12 @@ struct ModuleViewPage : PageBase {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
+			update_graphic_throttle_setting();
 		}
 
 		poll_patch_file_changed();
 
-		if (gui_state.view_patch_file_changed) {
-			gui_state.view_patch_file_changed = false;
+		if (gui_state.force_redraw_patch || gui_state.view_patch_file_changed) {
 
 			abort_cable(gui_state, notify_queue);
 
@@ -378,34 +402,18 @@ struct ModuleViewPage : PageBase {
 			if (!ok || prev_slug != slug) {
 				page_list.request_new_page(PageId::PatchView, args);
 			} else {
+				if (gui_state.force_redraw_patch)
+					blur();
 				prepare_focus();
 			}
+
+			gui_state.force_redraw_patch = false;
+			gui_state.view_patch_file_changed = false;
 		}
 
-		if (is_patch_playloaded) {
-			// copy light values from params, indexed by light element id
-			for (auto &wl : params.lights.watch_lights) {
-				if (wl.light_id >= MAX_LIGHTS_PER_MODULE)
-					continue;
-
-				if (wl.is_active() && wl.module_id == this_module_id) {
-					light_vals[wl.light_id] = wl.value;
-				}
-			}
-
-			for (auto &drawn_el : drawn_elements) {
-				auto &gui_el = drawn_el.gui_element;
-
-				auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
-
-				if (was_redrawn && page_settings.map_ring_flash_active) {
-					map_ring_display.flash_once(gui_el.map_ring, true);
-				}
-
-				update_light(drawn_el, light_vals);
-
-				redraw_display(drawn_el, this_module_id, params.displays.watch_displays);
-			}
+		// if (is_patch_playloaded) {
+		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
+			redraw_elements();
 		}
 
 		if (handle_patch_mods()) {
@@ -413,7 +421,46 @@ struct ModuleViewPage : PageBase {
 			mapping_pane.refresh();
 		}
 
+		if (lv_group_get_focused(group) == ui_ModuleViewActionBut ||
+			lv_group_get_focused(group) == ui_ModuleViewSettingsBut)
+			roller_hover.hide();
+
 		roller_hover.update();
+	}
+
+	void redraw_elements() {
+		for (auto &drawn_el : drawn_elements) {
+			auto &gui_el = drawn_el.gui_element;
+
+			auto value =
+				patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
+			auto was_redrawn = redraw_param(drawn_el, value);
+
+			if (was_redrawn && page_settings.map_ring_flash_active) {
+				map_ring_display.flash_once(gui_el.map_ring, true);
+			}
+
+			if (auto num_light_elements = gui_el.count.num_lights) {
+
+				std::array<float, 3> storage{};
+				auto light_vals = std::span{storage.data(), std::min(storage.size(), num_light_elements)};
+
+				for (auto i = 0u; auto &val : light_vals) {
+					val = patch_playloader.light_value(gui_el.module_idx, gui_el.idx.light_idx + i);
+					i++;
+				}
+
+				update_light(drawn_el, light_vals);
+			}
+
+			redraw_text_display(drawn_el, this_module_id, params.text_displays.watch_displays);
+		}
+
+		if (dyn_draw_throttle && (++dyn_draw_throttle_ctr >= dyn_draw_throttle)) {
+			dyn_draw_throttle_ctr = 0;
+			prepare_dynamic_elements();
+			dyn_draw.draw();
+		}
 	}
 
 	bool handle_patch_mods() {
@@ -474,17 +521,28 @@ struct ModuleViewPage : PageBase {
 		last_cable_style = page_settings.cable_style;
 	}
 
+	void update_graphic_throttle_setting() {
+		if (page_settings.show_graphic_screens) {
+			dyn_draw_throttle = std::max(page_settings.graphic_screen_throttle, 1u);
+		} else {
+			dyn_draw_throttle = 0;
+		}
+	}
+
 	void blur() final {
-		params.lights.stop_watching_all();
-		params.displays.stop_watching_all();
+		module_context_menu.blur();
+		dyn_draw.blur();
+		params.text_displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}
 
 private:
 	void show_roller() {
+		module_context_menu.hide();
 		mode = ViewMode::List;
 		mapping_pane.hide();
+		lv_show(ui_ElementRoller);
 		lv_show(ui_ElementRollerPanel);
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_group_set_editing(group, true);
@@ -520,12 +578,17 @@ private:
 	void reset_module_page() {
 		for (auto &b : button)
 			lv_obj_del(b);
+		button.clear();
 
+		dyn_draw.blur();
+
+		// This should delete all canvas children
+		// which includes drawn_elements and dyn canvases
 		if (canvas)
 			lv_obj_del(canvas);
 
-		button.clear();
 		drawn_elements.clear();
+
 		opts.clear();
 		roller_drawn_el_idx.clear();
 		cur_selected = 1;
@@ -547,14 +610,24 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
-		if (cur_sel >= page->roller_drawn_el_idx.size())
+		if (cur_sel >= page->roller_drawn_el_idx.size()) {
+			page->roller_hover.hide();
 			return;
+		}
 
 		auto prev_sel = page->cur_selected;
 		auto cur_idx = page->roller_drawn_el_idx[cur_sel];
 
+		// Extra menu:
+		if (cur_idx == ExtraMenuTag) {
+			page->unhighlight_component(prev_sel);
+			page->cur_selected = cur_sel;
+			page->roller_hover.hide();
+			return;
+		}
+
 		// Skip over headers by scrolling over them in the same direction we just scrolled
-		if (cur_idx < 0) {
+		if (cur_idx == -1) {
 			if (prev_sel < cur_sel) {
 				if (cur_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
 					cur_sel++;
@@ -565,10 +638,14 @@ private:
 			} else {
 				if (cur_sel)
 					cur_sel--;
-				else {
+
+				else if (!page->full_screen_mode) {
 					//Scrolling up from first header -> defocus roller and focus button bar
 					page->focus_button_bar();
 					page->roller_hover.hide();
+					return;
+				} else {
+					// stay on the first item in the roller
 					return;
 				}
 			}
@@ -604,21 +681,24 @@ private:
 	}
 
 	void focus_button_bar() {
-		if (gui_state.new_cable)
-			lv_group_focus_obj(ui_ModuleViewCableCancelBut);
-		else
-			lv_group_focus_obj(ui_ModuleViewSettingsBut);
+		if (!full_screen_mode) {
+			if (gui_state.new_cable)
+				lv_group_focus_obj(ui_ModuleViewCableCancelBut);
+			else
+				lv_group_focus_obj(ui_ModuleViewSettingsBut);
 
-		lv_group_set_editing(group, false);
-		cur_selected = 1;
-		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
-		unhighlight_component(cur_selected);
+			lv_group_set_editing(group, false);
+			cur_selected = 1;
+			lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
+			unhighlight_component(cur_selected);
+		}
 	}
 
 	static void roller_click_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		auto roller_idx = page->cur_selected;
 
-		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
+		if (auto drawn_idx = page->get_drawn_idx(roller_idx)) {
 			if (page->gui_state.new_cable) {
 				// Determine id and type of this element
 				std::optional<Jack> this_jack{};
@@ -663,12 +743,32 @@ private:
 					pr_err("Error completing cable\n");
 
 			} else {
+
 				page->mode = ViewMode::Mapping;
 				page->args.detail_mode = true;
 				lv_hide(ui_ElementRollerPanel);
 				page->roller_hover.hide();
 
 				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+
+				if (page->full_screen_mode) {
+					// TODO: if fullscreen, then open Adjust pop up directly
+					// But keep it hidden?
+					// If it's a button, the just immediately toggle state
+					// page->mapping_pane.control_popup.show(page->drawn_element);
+				}
+			}
+
+			//Not an element: Is it the Extra Menu?
+		} else if (roller_idx < page->roller_drawn_el_idx.size()) {
+			if (page->roller_drawn_el_idx[roller_idx] == ExtraMenuTag) {
+				// Just ignore clicking on Extra Menu when in full_screen_mode
+				if (!page->full_screen_mode) {
+					page->mode = ViewMode::ModuleContextMenu;
+					lv_hide(ui_ElementRoller);
+					page->roller_hover.hide();
+					page->module_context_menu.show();
+				}
 			}
 		}
 	}
@@ -700,6 +800,25 @@ private:
 
 		abort_cable(page->gui_state, page->notify_queue);
 		page->page_list.request_new_page(PageId::PatchView, page->args);
+	}
+
+	static void fullscreen_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+
+		page->resize_module_image(320);
+		lv_obj_scroll_to_x(ui_ModuleImage, 0, LV_ANIM_ON);
+		page->full_screen_mode = true;
+	}
+
+	static void jump_to_roller_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		if (page->full_screen_mode) {
+			lv_group_focus_obj(ui_ElementRoller);
+		}
 	}
 
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx) {
@@ -735,8 +854,6 @@ private:
 	std::vector<DrawnElement> drawn_elements;
 	std::vector<int> roller_drawn_el_idx;
 
-	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals{};
-
 	lv_obj_t *canvas = nullptr;
 	ModuleViewMappingPane mapping_pane;
 
@@ -745,9 +862,21 @@ private:
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};
 	lv_draw_img_dsc_t img_dsc{};
 
-	enum class ViewMode { List, Mapping } mode{ViewMode::List};
+	enum class ViewMode { List, Mapping, ModuleContextMenu } mode{ViewMode::List};
 
 	RollerHoverText roller_hover;
+
+	PluginModuleMenu module_context_menu;
+	bool has_context_menu = false;
+
+	DynamicDisplay dyn_draw;
+	bool dynamic_elements_prepared = false;
+	unsigned dyn_draw_throttle_ctr = 0;
+	unsigned dyn_draw_throttle = 16;
+
+	bool full_screen_mode = false;
+
+	enum { ExtraMenuTag = -2 };
 };
 
 } // namespace MetaModule

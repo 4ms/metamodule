@@ -1,20 +1,18 @@
 #pragma once
+#include "CoreModules/elements/elements_index.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
-#include "gui/elements/state_names.hh"
+#include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/notify/queue.hh"
 #include "gui/pages/add_map_popup.hh"
-#include "gui/pages/base.hh"
 #include "gui/pages/choice_popup.hh"
 #include "gui/pages/confirm_popup.hh"
-#include "gui/pages/make_cable.hh"
 #include "gui/pages/manual_control_popup.hh"
 #include "gui/pages/midi_map_input.hh"
 #include "gui/pages/module_view_mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
-#include "lvgl.h"
 #include "params/expanders.hh"
 #include "params/params_state.hh"
 
@@ -40,7 +38,8 @@ struct ModuleViewMappingPane {
 						  PageArguments &args,
 						  PageList &page_list,
 						  NotificationQueue &notify_queue,
-						  GuiState &gui_state)
+						  GuiState &gui_state,
+						  PatchPlayLoader &playloader)
 		: pane_group(lv_group_create())
 		, patch{patches.get_view_patch()}
 		, params{params}
@@ -49,7 +48,7 @@ struct ModuleViewMappingPane {
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
-		, control_popup{patches, patch_mod_queue}
+		, control_popup{patches, patch_mod_queue, playloader}
 		, midi_map_popup{params}
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
@@ -364,12 +363,12 @@ private:
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
-		auto idx = ElementCount::mark_unused_indices({.output_idx = (uint8_t)dest.jack_id}, {.num_outputs = 1});
+		auto idx = ElementIndex::set_index(JackOutput{}, dest.jack_id);
 		make_selectable_jack_item(obj, dest.module_id, idx);
 	}
 
 	void make_selectable_injack_item(lv_obj_t *obj, Jack dest) {
-		auto idx = ElementCount::mark_unused_indices({.input_idx = (uint8_t)dest.jack_id}, {.num_inputs = 1});
+		auto idx = ElementIndex::set_index(JackInput{}, dest.jack_id);
 		make_selectable_jack_item(obj, dest.module_id, idx);
 	}
 
@@ -396,7 +395,7 @@ private:
 		notify_queue.put(
 			{"Choose a jack to connect to " + std::string(name.module_name) + " " + std::string(name.element_name),
 			 Notification::Priority::Status,
-			 0});
+			 4000});
 
 		page_list.request_new_page(PageId::PatchView, args);
 	}
@@ -432,7 +431,7 @@ private:
 			unsigned num_jacks = PanelDef::NumUserFacingInJacks;
 			num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumInJacks : 0;
 			for (auto i = 0u; i < num_jacks; i++) {
-				choices += get_panel_name<PanelDef>(JackInput{}, i);
+				choices += get_panel_name(JackInput{}, i);
 				if (page->patch->find_mapped_injack(i))
 					choices += " (patched)";
 				else if (!first_unpatched_jack.has_value())
@@ -444,7 +443,7 @@ private:
 			unsigned num_jacks = PanelDef::NumUserFacingOutJacks;
 			num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumOutJacks : 0;
 			for (auto i = 0u; i < num_jacks; i++) {
-				choices += get_panel_name<PanelDef>(JackOutput{}, i);
+				choices += get_panel_name(JackOutput{}, i);
 				if (page->patch->find_mapped_outjack(i))
 					choices += " (patched)";
 				else if (!first_unpatched_jack.has_value())
@@ -499,7 +498,7 @@ private:
 		std::string title = "Map MIDI to: " + std::string(name.element_name);
 		page->midi_map_popup.set_header_text(title);
 
-		page->midi_map_popup.show([page](std::optional<unsigned> choice) {
+		page->midi_map_popup.show([page](std::optional<MidiMappings> choice) {
 			if (choice.has_value()) {
 				page->notify_queue.put({"Connected to MIDI signal"});
 
@@ -719,9 +718,6 @@ private:
 		if (knobset_id == PatchData::MIDIKnobSet) {
 			for (auto &cc : page->params.midi_ccs)
 				cc.changed = false;
-
-			for (auto &nt : page->params.midi_notes)
-				nt.changed = false;
 		}
 
 		auto module_id = page->drawn_element->gui_element.module_idx;

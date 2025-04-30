@@ -1,4 +1,5 @@
 #include "settings_parse.hh"
+#include "catchup_settings.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"
@@ -56,7 +57,7 @@ static bool read(ryml::ConstNodeRef const &node, AudioSettings *audio) {
 	return true;
 }
 
-static bool read(ryml::ConstNodeRef const &node, PluginAutoloadSettings *autoload) {
+static bool read(ryml::ConstNodeRef const &node, PluginPreloadSettings *autoload) {
 	if (!node.is_seq())
 		return false;
 
@@ -78,6 +79,8 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	read_or_default(node, "param_style", s, &ModuleDisplaySettings::param_style);
 	read_or_default(node, "paneljack_style", s, &ModuleDisplaySettings::paneljack_style);
 	read_or_default(node, "cable_style", s, &ModuleDisplaySettings::cable_style);
+	read_or_default(node, "show_graphic_screens", s, &ModuleDisplaySettings::show_graphic_screens);
+	read_or_default(node, "graphic_screen_throttle", s, &ModuleDisplaySettings::graphic_screen_throttle);
 
 	return true;
 }
@@ -92,9 +95,32 @@ static bool read(ryml::ConstNodeRef const &node, ScreensaverSettings *s) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, CatchupSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	using enum CatchupParam::Mode;
+
+	if (node.has_child("mode")) {
+		settings->mode = node["mode"].val() == "ResumeOnEqual"	? ResumeOnEqual :
+						 node["mode"].val() == "ResumeOnMotion" ? ResumeOnMotion :
+						 node["mode"].val() == "LinearFade"		? LinearFade :
+																  ResumeOnMotion;
+	} else {
+		settings->mode = CatchupParam{}.mode;
+	}
+
+	read_or_default(node, "allow_jump_outofrange", settings, &CatchupSettings::allow_jump_outofrange);
+	settings->make_valid();
+
+	return true;
+}
+
 static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
 	if (!node.is_map())
 		return false;
+
+	using enum CatchupParam::Mode;
 
 	read_or_default(node, "auto_reload_patch_file", settings, &FilesystemSettings::auto_reload_patch_file);
 	read_or_default(node, "max_open_patches", settings, &FilesystemSettings::max_open_patches);
@@ -124,9 +150,10 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "patch_view", settings, &UserSettings::patch_view);
 	read_or_default(node, "module_view", settings, &UserSettings::module_view);
 	read_or_default(node, "audio", settings, &UserSettings::audio);
-	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_autoload);
+	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_preload);
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::last_patch_opened);
 	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
+	read_or_default(node, "catchup", settings, &UserSettings::catchup);
 	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
 
 	// TODO: cleaner way to parse an enum and reject out of range?

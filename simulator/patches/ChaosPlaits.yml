@@ -84,7 +84,7 @@ PatchData:
       value: 0
     - module_id: 2
       param_id: 2
-      value: -1.4843364
+      value: 0
     - module_id: 2
       param_id: 3
       value: 0.40000007
@@ -96,10 +96,10 @@ PatchData:
       value: 0.56746995
     - module_id: 2
       param_id: 6
-      value: -0.016867995
+      value: 0.016867995
     - module_id: 2
       param_id: 7
-      value: -0.04337436
+      value: 0.04337436
     - module_id: 2
       param_id: 8
       value: 0

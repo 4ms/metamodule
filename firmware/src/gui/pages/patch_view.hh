@@ -1,8 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
+#include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
-#include "gui/elements/map_ring_drawer.hh"
-#include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_display.hh"
@@ -17,7 +16,6 @@
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/styles.hh"
-#include "lvgl.h"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 
@@ -25,14 +23,14 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
-	PatchViewPage(PatchContext info, PatchSelectorSubdirPanel &subdir_panel)
+	PatchViewPage(PatchContext info, FileSaveDialog &file_save_dialog)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
-		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list, gui_state}
+		, file_menu{patch_playloader, patch_storage, patches, file_save_dialog, notify_queue, page_list, gui_state}
 		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
@@ -71,7 +69,7 @@ struct PatchViewPage : PageBase {
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
-			lv_label_set_text(ui_LoadMeter2, "");
+			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
 			lv_show(ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
@@ -98,12 +96,15 @@ struct PatchViewPage : PageBase {
 
 		if (!needs_refresh) {
 			is_ready = true;
-			watch_lights();
+			watch_modules();
 			update_map_ring_style();
 
 			if (args.module_id) {
-				if (*args.module_id < module_canvases.size()) {
-					lv_obj_scroll_to_view_recursive(module_canvases[*args.module_id], LV_ANIM_ON);
+				auto canvas = std::ranges::find_if(module_canvases, [module_id = args.module_id](lv_obj_t *canv) {
+					return module_id == *(static_cast<uint32_t *>(lv_obj_get_user_data(canv)));
+				});
+				if (canvas != module_canvases.end()) {
+					lv_obj_scroll_to_view_recursive(*canvas, LV_ANIM_ON);
 				}
 			}
 			return;
@@ -163,16 +164,62 @@ struct PatchViewPage : PageBase {
 
 		lv_show(modules_cont);
 
+		draw_modules();
+
+		is_ready = true;
+
+		watch_modules();
+
+		highlighted_module_id = std::nullopt;
+		highlighted_module_obj = nullptr;
+		update_map_ring_style();
+
+		auto last_module = lv_obj_get_child(modules_cont, -1);
+		auto last_bottom = lv_obj_get_y(last_module) + lv_obj_get_height(last_module);
+		cable_drawer.set_height(last_bottom + 30);
+
+		update_cable_style(true);
+
+		settings_menu.prepare_focus(group);
+		file_menu.prepare_focus(group);
+
+		patch = patches.get_view_patch();
+		desc_panel.prepare_focus(group);
+
+		dyn_module_idx = 0;
+		// FIXME: is this needed here?
+		//dynamic_elements_prepared = false;
+		update_graphic_throttle_setting();
+	}
+
+	void draw_modules() {
 		auto module_drawer = ModuleDrawer{modules_cont, page_settings.view_height_px};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
-		int bottom = 0;
 		lv_obj_t *initial_selected_module = nullptr;
+
+		unsigned modules_skipped_for_size = 0;
+		std::string modules_skipped_slugs;
 
 		for (auto [module_idx, slug] : enumerate(patch->module_slugs)) {
 			module_ids.push_back(module_idx);
 
-			auto canvas = module_drawer.draw_faceplate(slug, canvas_buf);
+			auto [faceplate, width] = module_drawer.read_faceplate(slug);
+			if (faceplate.size() == 0 || width == 0)
+				continue; // file not found or corrupted, ignore this
+
+			if ((width * page_settings.view_height_px) > canvas_buf.size()) {
+				modules_skipped_for_size++;
+				if (modules_skipped_for_size < 6) {
+					modules_skipped_slugs.append(slug.c_str());
+					modules_skipped_slugs.append(", ");
+				} else if (modules_skipped_for_size == 6) {
+					modules_skipped_slugs.append("and others ");
+				}
+				continue;
+			}
+
+			auto canvas = module_drawer.draw_faceplate(faceplate, width, canvas_buf);
 			if (!canvas)
 				continue;
 
@@ -181,10 +228,7 @@ struct PatchViewPage : PageBase {
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
-			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) *
-											page_settings.view_height_px);
-			int this_bottom = lv_obj_get_y(canvas) + lv_obj_get_height(canvas);
-			bottom = std::max(bottom, this_bottom);
+			canvas_buf = canvas_buf.subspan(lv_obj_get_width(canvas) * page_settings.view_height_px);
 
 			module_canvases.push_back(canvas);
 			style_module(canvas);
@@ -201,22 +245,10 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
-		is_ready = true;
-
-		watch_lights();
-
-		highlighted_module_id = std::nullopt;
-		highlighted_module_obj = nullptr;
-		update_map_ring_style();
-
-		cable_drawer.set_height(bottom + 30);
-		update_cable_style(true);
-
-		settings_menu.prepare_focus(group);
-		file_menu.prepare_focus(group);
-
-		patch = patches.get_view_patch();
-		desc_panel.prepare_focus(group);
+		if (modules_skipped_for_size) {
+			std::string msg = "Not displaying: " + modules_skipped_slugs + "because graphics buffer is full";
+			notify_queue.put({msg, Notification::Priority::Info, 4000});
+		}
 
 		if (initial_selected_module) {
 			lv_obj_refr_size(base);
@@ -233,7 +265,7 @@ struct PatchViewPage : PageBase {
 			auto &gui_el = drawn_el.gui_element;
 
 			if (gui_el.count.num_params > 0 && gui_el.map_ring) {
-				lv_obj_del_async(gui_el.map_ring);
+				lv_obj_del(gui_el.map_ring);
 				gui_el.map_ring = nullptr;
 			}
 		}
@@ -253,12 +285,15 @@ struct PatchViewPage : PageBase {
 		settings_menu.hide();
 		desc_panel.hide();
 		file_menu.hide();
-		params.displays.stop_watching_all();
-		params.lights.stop_watching_all();
+		params.text_displays.stop_watching_all();
+
+		dyn_draws.clear();
+
+		dynamic_elements_prepared = false;
 	}
 
 	void update() override {
-		bool last_is_patch_loaded = is_patch_playloaded;
+		bool last_is_patch_playloaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
 
@@ -266,14 +301,15 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(displayed_patch_loc_hash);
 
-		if (is_patch_playloaded != last_is_patch_loaded || page_settings.changed) {
+		if (is_patch_playloaded != last_is_patch_playloaded || page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
-			watch_lights();
+			update_graphic_throttle_setting();
+			watch_modules();
 		}
 
-		if (is_patch_playloaded != last_is_patch_loaded) {
+		if (is_patch_playloaded != last_is_patch_playloaded) {
 			args.view_knobset_id = active_knobset;
 			page_list.set_active_knobset(active_knobset);
 			patch_mod_queue.put(ChangeKnobSet{active_knobset});
@@ -286,16 +322,36 @@ struct PatchViewPage : PageBase {
 			redraw_map_rings();
 		}
 
+		if (gui_state.force_redraw_patch) {
+			blur();
+			prepare_focus();
+
+			// Preserve the currently selected module, so we can restore that after redrawing
+			// if (auto obj = lv_group_get_focused(group)) {
+			// 	if (std::ranges::find(module_canvases, obj) != module_canvases.end()) {
+			// 		if (auto user_data = lv_obj_get_user_data(obj)) {
+			// 			args.module_id = *(static_cast<uint32_t *>(user_data));
+			// 		}
+			// 	}
+			// }
+
+			gui_state.force_redraw_patch = false;
+		}
+
 		if (gui_state.view_patch_file_changed) {
 			gui_state.view_patch_file_changed = false;
 
 			abort_cable(gui_state, notify_queue);
 
+			// Preserve the currently selected module, so we can restore that after redrawing
 			if (auto obj = lv_group_get_focused(group)) {
 				if (std::ranges::find(module_canvases, obj) != module_canvases.end()) {
-					args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+					if (auto user_data = lv_obj_get_user_data(obj)) {
+						args.module_id = *(static_cast<uint32_t *>(user_data));
+					}
 				}
 			}
+
 			redraw_patch();
 		}
 
@@ -317,7 +373,7 @@ struct PatchViewPage : PageBase {
 
 			} else {
 				page_list.request_new_page_no_history(PageId::MainMenu, args);
-				blur();
+				// blur();
 			}
 		}
 
@@ -329,19 +385,13 @@ struct PatchViewPage : PageBase {
 		if (file_menu.did_filesystem_change()) {
 			displayed_patch_loc_hash = patches.get_view_patch_loc_hash();
 			args.patch_loc_hash = patches.get_view_patch_loc_hash();
+			lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
 		}
 
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			redraw_elements();
 
-			if (gui_state.playing_patch_needs_manual_reload) {
-				auto flash = get_time() % 1000 < 500 ? 2 : 0;
-				lv_obj_set_style_border_color(ui_PlayButton, lv_color_hex(0xAA4400), LV_PART_MAIN);
-				lv_obj_set_style_border_opa(ui_PlayButton, LV_OPA_100, LV_PART_MAIN);
-				lv_obj_set_style_border_width(ui_PlayButton, flash, LV_PART_MAIN);
-			} else {
-				lv_obj_set_style_border_width(ui_PlayButton, 0, LV_PART_MAIN);
-			}
+			lv_obj_set_style_border_width(ui_PlayButton, 0, LV_PART_MAIN);
 
 			if (!lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
@@ -356,9 +406,7 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
-		if (file_menu.is_visible()) {
-			file_menu.update();
-		}
+		file_menu.update();
 
 		// Don't poll for patch changes while file menu is open to prevent races on the filesystem.
 		if (!file_menu.is_visible())
@@ -366,68 +414,77 @@ struct PatchViewPage : PageBase {
 	}
 
 private:
-	std::vector<std::vector<float>> light_vals;
+	void prepare_dynamic_elements() {
 
-	void watch_lights() {
-		params.lights.stop_watching_all();
-		params.displays.stop_watching_all();
+		if (dynamic_elements_prepared)
+			return;
+
+		if (patch_playloader.is_loading_patch())
+			return;
+
+		if (!is_patch_playloaded || patch_playloader.is_audio_muted())
+			return;
+
+		for (auto &canvas : module_canvases) {
+			if (!canvas)
+				continue;
+
+			auto user_data = lv_obj_get_user_data(canvas);
+			if (!user_data)
+				continue;
+
+			auto module_idx = *(static_cast<uint32_t *>(user_data));
+			if (module_idx >= patch->module_slugs.size())
+				continue;
+
+			auto &dyn = dyn_draws.emplace_back(patch_playloader);
+
+			if (!dyn.prepare_module(drawn_elements, module_idx, canvas)) {
+				pr_warn("Failed to create dyn draw, removing from PatchView dyn draw vector\n");
+				dyn_draws.pop_back();
+			}
+		}
+
+		dynamic_elements_prepared = true;
+	}
+
+	void draw_dynamic_elements() {
+		if (dyn_draws.size() == 0)
+			return;
+
+		if (patch_playloader.is_loading_patch())
+			return;
+
+		if (dyn_draw_throttle && (++dyn_draw_throttle_ctr >= dyn_draw_throttle)) {
+			dyn_draw_throttle_ctr = 0;
+
+			dyn_module_idx++;
+			if (dyn_module_idx >= dyn_draws.size())
+				dyn_module_idx = 0;
+
+			dyn_draws[dyn_module_idx].draw();
+		}
+	}
+
+	void watch_modules() {
+		params.text_displays.stop_watching_all();
 
 		if (is_patch_playloaded) {
 			for (const auto &drawn_element : drawn_elements) {
 				auto &gui_el = drawn_element.gui_element;
 
 				std::visit(overloaded{
-							   [&](auto const &el) {
-								   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
-									   params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
-								   }
-							   },
+							   [](auto const &el) {},
 							   [&](DynamicTextDisplay const &el) {
-								   params.displays.start_watching_display(gui_el.module_idx, gui_el.idx.light_idx);
+								   params.text_displays.start_watching_display(gui_el.module_idx, gui_el.idx.light_idx);
 							   },
 						   },
 						   drawn_element.element);
-			}
-
-			// Get number of lights per module and resize the vectors
-			light_vals.clear();
-			for (auto const &slug : patch->module_slugs) {
-				auto info = ModuleFactory::getModuleInfo(slug);
-				auto &vec = light_vals.emplace_back();
-				int max = -1;
-				for (auto i = 0u; auto idx : info.indices) {
-					auto count = ElementCount::count(info.elements[i]).num_lights;
-					if (count > 0 && idx.light_idx != ElementCount::Indices::NoElementMarker) {
-						max = std::max(int(idx.light_idx + count), max);
-					}
-					i++;
-				}
-				vec.resize(max + 1, 0.f);
 			}
 		}
 	}
 
 	void redraw_elements() {
-
-		// copy light values from params
-		// indexed by module id and light element id
-		for (auto &wl : params.lights.watch_lights) {
-			if (wl.is_active()) {
-				if (wl.module_id < light_vals.size()) {
-					auto &vec = light_vals[wl.module_id];
-					if (wl.light_id < 256) {
-						if (wl.light_id < vec.size())
-							vec[wl.light_id] = wl.value;
-						else
-							pr_err("Invalid light size %u for module %u\n", wl.light_id, wl.module_id);
-					} else {
-						pr_err("Can only watch 256 lights, request made for %u\n", wl.light_id);
-					}
-				} else
-					pr_err("Invalid module id in watch lights: %u\n", wl.module_id);
-			}
-		}
-
 		// Redraw all elements that have changed state (knobs, lights, etc)
 		auto is_visible = [](lv_coord_t pos) {
 			auto visible_top = lv_obj_get_scroll_y(ui_PatchViewPage);
@@ -450,21 +507,38 @@ private:
 
 			auto &gui_el = drawn_el.gui_element;
 
-			auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
-			if (was_redrawn) {
-				if (page_settings.map_ring_flash_active)
-					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
+			if (drawn_el.gui_element.count.num_params > 0) {
+				auto value =
+					patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
+				auto was_redrawn = redraw_param(drawn_el, value);
 
-				if (page_settings.scroll_to_active_param) {
-					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+				if (was_redrawn) {
+					if (page_settings.map_ring_flash_active)
+						map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
+
+					if (page_settings.scroll_to_active_param) {
+						lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+					}
 				}
 			}
 
-			if (gui_el.module_idx < light_vals.size())
-				update_light(drawn_el, light_vals[gui_el.module_idx]);
+			if (auto num_light_elements = gui_el.count.num_lights) {
+				std::array<float, 3> storage{};
+				auto light_vals = std::span{storage.data(), std::min(storage.size(), num_light_elements)};
 
-			redraw_display(drawn_el, gui_el.module_idx, params.displays.watch_displays);
+				for (auto i = 0u; auto &val : light_vals) {
+					val = patch_playloader.light_value(gui_el.module_idx, gui_el.idx.light_idx + i);
+					i++;
+				}
+
+				update_light(drawn_el, light_vals);
+			}
+
+			redraw_text_display(drawn_el, gui_el.module_idx, params.text_displays.watch_displays);
 		}
+
+		prepare_dynamic_elements();
+		draw_dynamic_elements();
 	}
 
 	void update_map_ring_style() {
@@ -490,6 +564,14 @@ private:
 				cable_drawer.clear();
 		}
 		last_cable_style = page_settings.cable_style;
+	}
+
+	void update_graphic_throttle_setting() {
+		if (page_settings.show_graphic_screens) {
+			dyn_draw_throttle = std::max(page_settings.graphic_screen_throttle, 1u);
+		} else {
+			dyn_draw_throttle = 0;
+		}
 	}
 
 	void redraw_modulename() {
@@ -518,7 +600,9 @@ private:
 
 	void clear() {
 		for (auto &m : module_canvases) {
-			lv_obj_del(m);
+			if (m)
+				lv_obj_del(m);
+			m = nullptr;
 		}
 		highlighted_module_obj = nullptr;
 		highlighted_module_id = std::nullopt;
@@ -613,7 +697,6 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-
 		if (!page->is_patch_playloaded) {
 			page->patch_playloader.request_load_view_patch();
 			page->save_last_opened_patch_in_settings();
@@ -706,7 +789,7 @@ private:
 	std::vector<lv_obj_t *> module_canvases;
 	std::vector<uint32_t> module_ids;
 	std::vector<DrawnElement> drawn_elements;
-	bool is_patch_playloaded = false;
+	bool is_patch_playloaded = false; //loaded into the player: might be paused or playing
 	bool is_ready = false;
 
 	PatchLocHash displayed_patch_loc_hash;
@@ -717,6 +800,14 @@ private:
 		PatchViewPage *page;
 		uint32_t selected_module_id;
 	};
+
+	// std::vector<std::vector<float>> light_vals;
+
+	std::vector<DynamicDisplay> dyn_draws;
+	unsigned dyn_draw_throttle_ctr = 1;
+	unsigned dyn_draw_throttle = 2;
+	unsigned dyn_module_idx = 0;
+	bool dynamic_elements_prepared = false;
 };
 
 } // namespace MetaModule

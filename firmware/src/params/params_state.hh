@@ -2,10 +2,7 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
-#include "midi_params.hh"
 #include "patch/midi_def.hh"
-#include "patch/patch.hh"
-#include "patch_play/lights.hh"
 #include "patch_play/text_display.hh"
 #include "util/debouncer.hh"
 #include "util/filter.hh"
@@ -102,53 +99,46 @@ struct ParamsState {
 		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
 			in = that_in;
 	}
+
+	friend void transfer_events(ParamsState &dst, ParamsState const &src) {
+		for (auto [gate_in, that_gate_in] : zip(dst.gate_ins, src.gate_ins))
+			gate_in = that_gate_in;
+
+		for (auto [knob, that_knob] : zip(dst.knobs, src.knobs)) {
+			knob.val = that_knob.val;
+			// only reader can clear knob change events, writer can set them
+			knob.changed = that_knob.changed | knob.changed;
+		}
+
+		dst.jack_senses = src.jack_senses;
+
+		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
+			in = that_in;
+	}
 };
 
 struct ParamsMidiState : ParamsState {
-	std::array<LatchedParam<float, 1, 127>, NumMidiCCs> midi_ccs;
-	std::array<LatchedParam<bool, 1, 127>, NumMidiNotes> midi_notes;
-	LatchedParam<uint8_t, 1, 1> last_midi_note;
+	struct MidiChangedVal {
+		uint8_t changed : 1;
+		uint8_t val : 7;
+	};
+	std::array<MidiChangedVal, NumMidiCCs> midi_ccs;
+	MidiChangedVal last_midi_note;
+	uint8_t last_midi_note_channel;
 	bool midi_gate = false;
 
-	LightWatcher lights;
-	TextDisplayWatcher displays;
+	TextDisplayWatcher text_displays;
 
 	void clear() {
 		ParamsState::clear();
 
-		lights.stop_watching_all();
-		displays.stop_watching_all();
+		text_displays.stop_watching_all();
 
 		for (auto &cc : midi_ccs)
-			cc = 0;
+			cc.changed = 0;
 
-		for (auto &nt : midi_notes)
-			nt = false;
-	}
-
-	std::optional<float> panel_knob_new_value(uint16_t mapped_panel_id) {
-
-		auto mk = MappedKnob{.panel_knob_id = mapped_panel_id};
-
-		if (mk.is_panel_knob()) {
-			auto &latched = knobs[mapped_panel_id];
-			return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
-		}
-
-		else if (mk.is_midi_cc())
-		{
-			auto &latched = midi_ccs[mk.cc_num()];
-			return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
-		}
-
-		else if (mk.is_midi_notegate())
-		{
-			auto &latched = midi_notes[mk.notegate_num()];
-			return latched.did_change() ? std::optional<float>{latched.val ? 1.f : 0.f} : std::nullopt;
-		}
-
-		else
-			return std::nullopt;
+		midi_gate = false;
+		last_midi_note.changed = 0;
 	}
 };
 

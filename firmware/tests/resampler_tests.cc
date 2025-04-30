@@ -2,6 +2,7 @@
 #include "speex/speex_resampler.h"
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <vector>
 

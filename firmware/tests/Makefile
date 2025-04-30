@@ -28,6 +28,7 @@ TEST_SOURCES += lib/CoreModules/moduleFactory.cc
 TEST_SOURCES += tests/resampler_tests.cc
 TEST_SOURCES += vcv_plugin/export/src/resampler.cc
 TEST_SOURCES += tests/stubs/plugin_module.cc
+TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
@@ -63,7 +64,7 @@ TMPFILE = $(BUILDDIR)/runtests.out
 
 .PHONY: all tests clean patches
 
-all: $(DOCTESTHEADER_DIR)/doctest.h patches tests
+all: patches tests
 
 $(BUILDDIR)/tests/DualAtenCore_tests.o: CXXFLAGS += -Wno-missing-braces
 
@@ -89,9 +90,6 @@ tests: $(BUILDDIR)/runtests
 $(BUILDDIR)/runtests: $(OBJECTS)
 	$(info Building $(BUILDDIR)/runtests) 
 	@$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
-
-$(DOCTESTHEADER_DIR)/doctest.h:
-	wget https://raw.githubusercontent.com/onqtam/doctest/master/doctest/doctest.h -P $(DOCTESTHEADER_DIR)/
 
 clean:
 	rm -rf $(BUILDDIR)

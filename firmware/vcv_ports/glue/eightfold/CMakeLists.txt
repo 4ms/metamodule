@@ -13,6 +13,7 @@ project(eightfoldMetaModulePlugin
 include(modules.cmake)
 
 add_library(eightfoldLibrary OBJECT ${EIGHTFOLD_SOURCE_PATHS}
+    # ADSR.cpp
 )
 
 target_include_directories(eightfoldLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../../eightfold/src)

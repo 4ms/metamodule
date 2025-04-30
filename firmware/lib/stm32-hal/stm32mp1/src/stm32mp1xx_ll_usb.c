@@ -418,7 +418,7 @@ HAL_StatusTypeDef USB_DevInit(USB_OTG_GlobalTypeDef *USBx, USB_OTG_CfgTypeDef cf
   */
 HAL_StatusTypeDef USB_FlushTxFifo(USB_OTG_GlobalTypeDef *USBx, uint32_t num)
 {
-	__IO uint32_t count = 0U;
+	uint32_t count = 0U;
 
 	/* Wait for AHB master IDLE state. */
 	do {
@@ -447,7 +447,7 @@ HAL_StatusTypeDef USB_FlushTxFifo(USB_OTG_GlobalTypeDef *USBx, uint32_t num)
  */
 HAL_StatusTypeDef USB_FlushRxFifo(USB_OTG_GlobalTypeDef *USBx)
 {
-	__IO uint32_t count = 0U;
+	uint32_t count = 0U;
 
 	/* Wait for AHB master IDLE state. */
 	do {
@@ -852,7 +852,7 @@ HAL_StatusTypeDef USB_EP0StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_EPTypeDe
  */
 HAL_StatusTypeDef USB_EPStopXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_EPTypeDef *ep)
 {
-	__IO uint32_t count = 0U;
+	uint32_t count = 0U;
 	HAL_StatusTypeDef ret = HAL_OK;
 	uint32_t USBx_BASE = (uint32_t)USBx;
 
@@ -1241,7 +1241,7 @@ HAL_StatusTypeDef USB_ActivateSetup(USB_OTG_GlobalTypeDef *USBx)
 HAL_StatusTypeDef USB_EP0_OutStart(USB_OTG_GlobalTypeDef *USBx, uint8_t dma, uint8_t *psetup)
 {
 	uint32_t USBx_BASE = (uint32_t)USBx;
-	uint32_t gSNPSiD = *(__IO uint32_t *)(&USBx->CID + 0x1U);
+	uint32_t gSNPSiD = *(uint32_t *)(&USBx->CID + 0x1U);
 
 	if (gSNPSiD > USB_OTG_CORE_ID_300A) {
 		if ((USBx_OUTEP(0U)->DOEPCTL & USB_OTG_DOEPCTL_EPENA) == USB_OTG_DOEPCTL_EPENA) {
@@ -1619,7 +1619,7 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 {
 	uint32_t USBx_BASE = (uint32_t)USBx;
 	uint32_t ch_num = (uint32_t)hc->ch_num;
-	__IO uint32_t tmpreg;
+	uint32_t tmpreg;
 	uint8_t is_oddframe;
 	uint16_t len_words;
 	uint16_t num_packets;
@@ -1752,7 +1752,7 @@ HAL_StatusTypeDef USB_HC_Halt(USB_OTG_GlobalTypeDef *USBx, uint8_t hc_num)
 {
 	uint32_t USBx_BASE = (uint32_t)USBx;
 	uint32_t hcnum = (uint32_t)hc_num;
-	__IO uint32_t count = 0U;
+	uint32_t count = 0U;
 	uint32_t HcEpType = (USBx_HC(hcnum)->HCCHAR & USB_OTG_HCCHAR_EPTYP) >> 18;
 	uint32_t ChannelEna = (USBx_HC(hcnum)->HCCHAR & USB_OTG_HCCHAR_CHENA) >> 31;
 

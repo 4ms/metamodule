@@ -246,10 +246,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 		sendFrame(destination, payload);
 	};
 
-	auto sendBroadcast = [](auto payload) {
-		sendFrame(ChannelID_t::Broadcast, payload);
-	};
-
 	// Parse message
 
 	auto message = GetMessage(payload.data());
@@ -306,16 +302,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				auto result = CreateResult(fbb, false, description);
 				auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 				fbb.Finish(message);
-			}
-
-			if (patchStorage->has_media_changed()) {
-				flatbuffers::FlatBufferBuilder fbb;
-				auto message = constructPatchesMessage(fbb);
-				fbb.Finish(message);
-
-				sendBroadcast(fbb.GetBufferSpan());
-
-				lastPatchListSentTime = getTimestamp();
 			}
 
 			sendResponse(fbb.GetBufferSpan());

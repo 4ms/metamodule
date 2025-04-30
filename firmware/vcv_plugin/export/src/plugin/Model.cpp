@@ -26,6 +26,12 @@ void Model::move_strings() {
 				   element);
 
 		std::visit(overloaded{[](BaseElement &el) {},
+							  [this](Knob &el) {
+								  el.units = strings.emplace_back(el.units);
+							  }},
+				   element);
+
+		std::visit(overloaded{[](BaseElement &el) {},
 							  [this](Slider &el) {
 								  el.image_handle = strings.emplace_back(el.image_handle);
 							  }},
@@ -59,6 +65,7 @@ void Model::move_strings() {
 	}
 }
 
+// Creates a new string, puts it in the strings deque, and then returns a string_view to it
 std::string_view Model::add_string(std::string_view str) {
 	return strings.emplace_back(str);
 }
@@ -121,6 +128,34 @@ std::string Model::getFullName() {
 		return plugin->getBrand() + " " + slug;
 	else
 		return slug;
+}
+
+void Model::fromJson(json_t *rootJ) {
+}
+
+std::string Model::getFactoryPresetDirectory() {
+	// TODO:
+	return "";
+}
+
+std::string Model::getUserPresetDirectory() {
+	// TODO:
+	return "";
+}
+
+std::string Model::getManualUrl() {
+	return "";
+}
+
+void Model::appendContextMenu(ui::Menu *menu, bool inBrowser) {
+	// TODO
+}
+
+bool Model::isFavorite() {
+	return false;
+}
+
+void Model::setFavorite(bool favorite) {
 }
 
 } // namespace rack::plugin

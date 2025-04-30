@@ -17,13 +17,20 @@ SvgSwitch::SvgSwitch()
 SvgSwitch::~SvgSwitch() = default;
 
 void SvgSwitch::addFrame(std::shared_ptr<window::Svg> svg) {
-	if (svg->filename.length()) {
+	if (svg->filename().length()) {
 		frames.push_back(svg);
 		if (frames.size() == 1) {
-			box.size = get_svg_size(svg->filename);
+			box.size = svg->getSize();
 			sw->box.size = box.size;
 		}
 	}
+}
+
+void SvgSwitch::onDragStart(const DragStartEvent &e) {
+}
+void SvgSwitch::onDragEnd(const DragEndEvent &e) {
+}
+void SvgSwitch::onChange(const ChangeEvent &e) {
 }
 
 } // namespace rack::app

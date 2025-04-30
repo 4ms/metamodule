@@ -3,14 +3,13 @@
 #include "calibrate/calibration_data_reader.hh"
 #include "core_a7/a7_shared_memory.hh"
 #include "core_a7/static_buffers.hh"
+#include "core_intercom/semaphore_action.hh"
 #include "core_intercom/shared_memory.hh"
+#include "coreproc_plugin/async_thread_control.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
-#include "fs/time_convert.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
-#include "load_test/test_modules.hh"
-#include "params.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
@@ -18,15 +17,8 @@
 #include "system/time.hh"
 #include "uart_log.hh"
 
-#include "conf/qspi_flash_conf.hh"
-#include "drivers/qspi_flash_driver.hh"
 #include "fs/norflash_layout.hh"
 
-#ifdef CPU_TEST_ALL_MODULES
-#include "conf/pin_conf.hh"
-#include "fs/general_io.hh"
-#include "load_test/tester.hh"
-#endif
 namespace MetaModule
 {
 
@@ -35,7 +27,7 @@ struct SystemInit : AppStartup, UartLog, Debug, Hardware {
 
 } // namespace MetaModule
 
-void main() {
+int main() {
 	using namespace MetaModule;
 
 	StaticBuffers::init();
@@ -62,19 +54,25 @@ void main() {
 					  patch_mod_queue};
 
 	SharedMemoryS::ptrs = {
-		.param_block = &StaticBuffers::param_blocks,
-		.ramdrive = &StaticBuffers::virtdrive,
-		.icc_message = &StaticBuffers::icc_shared_message,
+		&StaticBuffers::param_blocks,
+		&StaticBuffers::virtdrive,
+		&StaticBuffers::icc_shared_message,
+		&StaticBuffers::icc_module_fs_message_core0,
+		&StaticBuffers::icc_module_fs_message_core1,
+		&StaticBuffers::console_a7_0_buff,
+		&StaticBuffers::console_a7_1_buff,
+		&StaticBuffers::console_m4_buff,
 	};
 
 	A7SharedMemoryS::ptrs = {
-		.patch_player = &patch_player,
-		.patch_playloader = &patch_playloader,
-		.patch_storage = &file_storage_proxy,
-		.open_patch_manager = &open_patches_manager,
-		.sync_params = &StaticBuffers::sync_params,
-		.patch_mod_queue = &patch_mod_queue,
-		.ramdrive = &StaticBuffers::virtdrive,
+		&patch_player,
+		&patch_playloader,
+		&file_storage_proxy,
+		&open_patches_manager,
+		&StaticBuffers::sync_params,
+		&patch_mod_queue,
+		&StaticBuffers::virtdrive,
+		&StaticBuffers::console_a7_1_buff,
 	};
 
 	{
@@ -89,32 +87,26 @@ void main() {
 
 	// prevents M4 from using it as a USBD device:
 	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
+	// Invalidate our I cache when plugin code is loaded
+	SemaphoreActionOnUnlock<InvalidateICache> clean_cache([] { mdrivlib::SystemCache::invalidate_icache(); });
+
+	start_module_threads();
 
 	pr_info("A7 Core 1 initialized\n");
 	// Note: from after the HAL_Delay(50) until here, it takes 20ms
 
+#ifdef CONSOLE_USE_USB
+	printf("Stopping UART buffer\n");
+	UartLog::use_usb(&StaticBuffers::console_a7_0_buff);
+	printf("Using USB buffer\n");
+#endif
+
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
-	// wait for other cores to be ready: ~2400ms + more for auto-loading plugins
-	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() || mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
+	// wait for other cores to be ready: ~2400ms + more for preloading plugins
+	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked() || mdrivlib::HWSemaphore<AuxCoreReady>::is_locked())
 		;
-
-	// ~290ms until while loop
-
-#ifdef CPU_TEST_ALL_MODULES
-	mdrivlib::HWSemaphore<MainCoreReady>::lock();
-
-	mdrivlib::Pin but0{
-		ControlPins::but0, mdrivlib::PinMode::Input, mdrivlib::PinPull::Up, mdrivlib::PinPolarity::Inverted};
-	if (but0.is_on()) {
-		auto db = LoadTest::test_all_modules();
-		auto filedata = LoadTest::entries_to_csv(db);
-		FS::write_file(file_storage_proxy, filedata, {.filename = "cpu_test.csv", .vol = Volume::USB});
-	}
-
-	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
-#endif
 
 	StaticBuffers::sync_params.clear();
 

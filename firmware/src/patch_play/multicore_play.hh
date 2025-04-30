@@ -1,52 +1,50 @@
 #pragma once
 #include "core_a7/smp_api.hh"
 #include "drivers/smp.hh"
+#include <span>
 
 namespace MetaModule
 {
 
 class MulticorePlayer {
 public:
-	static constexpr unsigned ModuleStride = mdrivlib::SMPControl::NumCores;
+	static constexpr unsigned NumCores = mdrivlib::SMPControl::NumCores;
 
-	void load_patch(unsigned num_modules) {
-
-		num_modules_ = num_modules;
-		//Module 0 is the hub
-		//Module 1 is processed by first core
-		//Module 2 is processed by second core
-		//Module 3 is processed by first core
-		//Module 4 is processed by second core
-		//... etc
-		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
+	void assign_modules(std::span<unsigned> module_ids) {
+		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::init();
-			mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2); //first module to process
-			mdrivlib::SMPControl::write<SMPRegister::NumModulesInPatch>(num_modules);
-			mdrivlib::SMPControl::write<SMPRegister::UpdateModuleOffset>(ModuleStride);
+			mdrivlib::SMPControl::write(SMPRegister::NumModulesInPatch, module_ids.size());
+
+			for (auto i = 2u; auto module_id : module_ids) { // regs 2 and up are the module ids
+				mdrivlib::SMPControl::write(i++, module_id);
+			}
 			mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
 		}
 	}
 
 	void update_modules() {
-		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
+		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::split_with_command<SMPCommand::PlayModuleList>();
 		}
 	}
 
-	void read_patch_state() {
-		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
-			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchLights>();
+	void process_cables() {
+		if constexpr (NumCores > 1) {
+			mdrivlib::SMPThread::split_with_command<SMPCommand::ProcessCables>();
+		}
+	}
+
+	void read_patch_gui_elements() {
+		if constexpr (NumCores > 1) {
+			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchGuiElements>();
 		}
 	}
 
 	void join() {
-		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
+		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::join();
 		}
 	}
-
-private:
-	unsigned num_modules_ = 0;
 };
 
 } // namespace MetaModule

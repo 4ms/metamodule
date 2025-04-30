@@ -5,6 +5,12 @@
 #include <span>
 #include <string_view>
 
+// TODO:
+// Rename this DiskDevice
+// Add more functions to make it a complete driver (opendir, closedir, readdir)
+// Use more standard names (maybe just use POSIX?): update_or_create_file => write(), etc..
+// Make it a virtual base class
+
 using FileAction = std::function<void(const std::string_view filename, uint32_t timestamp, uint32_t filesize)>;
 
 using DirEntryAction =

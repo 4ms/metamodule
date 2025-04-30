@@ -15,12 +15,12 @@ struct ShadesInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 15> Elements{{
-		WhiteMediumKnob{{to_mm<72>(57.66), to_mm<72>(59.44), Center, "Ch1 Gain", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(57.66), to_mm<72>(122.46), Center, "Ch2 Gain", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(57.66), to_mm<72>(185.47), Center, "Ch3 Gain", ""}, 0.5f},
-		Toggle2pos{{to_mm<72>(16.27), to_mm<72>(59.415), Center, "Ch1 Mode", ""}, {"Atten", "Attenuvert"}},
-		Toggle2pos{{to_mm<72>(16.27), to_mm<72>(122.455), Center, "Ch2 Mode", ""}, {"Atten", "Attenuvert"}},
-		Toggle2pos{{to_mm<72>(16.27), to_mm<72>(185.475), Center, "Ch3 Mode", ""}, {"Atten", "Attenuvert"}},
+		WhiteMediumKnob{{to_mm<72>(57.66), to_mm<72>(59.44), Center, "Ch1 Gain", ""}, 0, 1, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(57.66), to_mm<72>(122.46), Center, "Ch2 Gain", ""}, 0, 1, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(57.66), to_mm<72>(185.47), Center, "Ch3 Gain", ""}, 0, 1, 0.5f},
+		Toggle2pos{{to_mm<72>(16.27), to_mm<72>(59.415), Center, "Ch1 Mode", ""}, {"Attenuate", "Attenuvert"}},
+		Toggle2pos{{to_mm<72>(16.27), to_mm<72>(122.455), Center, "Ch2 Mode", ""}, {"Attenuate", "Attenuvert"}},
+		Toggle2pos{{to_mm<72>(16.27), to_mm<72>(185.475), Center, "Ch3 Mode", ""}, {"Attenuate", "Attenuvert"}},
 		AnalogJackInput4ms{{to_mm<72>(20.75), to_mm<72>(246.71), Center, "Ch1 In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(20.75), to_mm<72>(280.86), Center, "Ch2 In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(20.75), to_mm<72>(315.07), Center, "Ch3 In", ""}},

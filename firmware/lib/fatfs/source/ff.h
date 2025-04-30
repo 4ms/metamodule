@@ -42,8 +42,8 @@ typedef unsigned __int64 QWORD;
 #include <float.h>
 #ifndef __cplusplus
 #define isnan(v) _isnan(v)
-#endif
 #define isinf(v) (!_finite(v))
+#endif
 
 #elif (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || defined(__cplusplus)	/* C99 or later */
 #define FF_INTDEF 2
@@ -227,7 +227,7 @@ typedef struct {
 
 /* Directory object structure (DIR) */
 
-typedef struct {
+typedef struct DIR {
 	FFOBJID	obj;			/* Object identifier */
 	DWORD	dptr;			/* Current read/write offset */
 	DWORD	clust;			/* Current cluster */

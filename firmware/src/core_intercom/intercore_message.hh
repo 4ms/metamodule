@@ -47,6 +47,7 @@ struct IntercoreStorageMessage {
 		ReadFlashOk,
 
 		RequestWriteFile,
+		RequestAppendFile,
 		WriteFileFail,
 		WriteFileOK,
 
@@ -73,6 +74,10 @@ struct IntercoreStorageMessage {
 		FileInfoFailed,
 		FileInfoSuccess,
 
+		RequestDirEntries,
+		DirEntriesSuccess,
+		DirEntriesFailed,
+
 		NumRequests,
 	};
 
@@ -98,6 +103,8 @@ struct IntercoreStorageMessage {
 	WifiIPResult wifi_ip_result;
 
 	PluginFileList *plugin_file_list;
+
+	DirTree<FileEntry> *dir_entries;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);

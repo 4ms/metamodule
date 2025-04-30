@@ -52,6 +52,10 @@ TEST_CASE("Parse settings file") {
     index: 3
     knobs_can_wake: 1
 
+  catchup:
+    mode: ResumeOnEqual
+    allow_jump_outofrange: 0
+
   filesystem:
     auto_reload_patch_file: false
     max_open_patches: 7
@@ -88,14 +92,17 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.audio.block_size == 128);
 	CHECK(settings.audio.max_overrun_retries == 4);
 
-	CHECK(settings.plugin_autoload.slug.at(0) == "Plugin One");
-	CHECK(settings.plugin_autoload.slug.at(1) == "Plugin Two");
+	CHECK(settings.plugin_preload.slug.at(0) == "Plugin One");
+	CHECK(settings.plugin_preload.slug.at(1) == "Plugin Two");
 
 	CHECK(settings.last_patch_opened == "/somedir/SomePatch.yml");
 	CHECK(settings.last_patch_vol == MetaModule::Volume::SDCard);
 
 	CHECK(settings.screensaver.timeout_ms == 3);
 	CHECK(settings.screensaver.knobs_can_wake == true);
+
+	CHECK(settings.catchup.mode == MetaModule::CatchupParam::Mode::ResumeOnEqual);
+	CHECK(settings.catchup.allow_jump_outofrange == false);
 
 	CHECK(settings.filesystem.auto_reload_patch_file == false);
 	CHECK(settings.filesystem.max_open_patches == 7);
@@ -164,6 +171,18 @@ TEST_CASE("Get default settings if file is missing fields") {
   max_overrun_retries: 94
 )";
 	}
+	SUBCASE("Bad catchup settings:") {
+		yaml = R"(Settings:
+  catchup:
+    mode: INvaliDmodE
+)";
+	}
+	SUBCASE("Bad catchup settings:") {
+		yaml = R"(Settings:
+  catchup:
+    allow_jump_outofrange: 2
+)";
+	}
 	SUBCASE("Bad filesystem settings:") {
 		yaml = R"(Settings:
   filesystem:
@@ -203,7 +222,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.audio.block_size == 64);
 	CHECK(settings.audio.max_overrun_retries == 2);
 
-	CHECK(settings.plugin_autoload.slug.size() == 0);
+	CHECK(settings.plugin_preload.slug.size() == 0);
 
 	CHECK(settings.last_patch_opened == "");
 	CHECK(settings.last_patch_vol == MetaModule::Volume::NorFlash);
@@ -211,8 +230,11 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.screensaver.timeout_ms == MetaModule::ScreensaverSettings::defaultTimeout);
 	CHECK(settings.screensaver.knobs_can_wake == true);
 
+	CHECK(settings.catchup.mode == MetaModule::CatchupParam::Mode::ResumeOnMotion);
+	CHECK(settings.catchup.allow_jump_outofrange == true);
+
 	CHECK(settings.filesystem.auto_reload_patch_file == true);
-	CHECK(settings.filesystem.max_open_patches == 5);
+	CHECK(settings.filesystem.max_open_patches == 15);
 }
 
 TEST_CASE("Serialize settings") {
@@ -245,14 +267,17 @@ TEST_CASE("Serialize settings") {
 	settings.audio.block_size = 512;
 	settings.audio.max_overrun_retries = 4;
 
-	settings.plugin_autoload.slug.emplace_back("Plugin One");
-	settings.plugin_autoload.slug.emplace_back("Plugin Two");
+	settings.plugin_preload.slug.emplace_back("Plugin One");
+	settings.plugin_preload.slug.emplace_back("Plugin Two");
 
 	settings.last_patch_vol = MetaModule::Volume::SDCard;
 	settings.last_patch_opened = "SomePatch.yml";
 
 	settings.screensaver.knobs_can_wake = false;
 	settings.screensaver.timeout_ms = 2;
+
+	settings.catchup.mode = MetaModule::CatchupParam::Mode::LinearFade;
+	settings.catchup.allow_jump_outofrange = false;
 
 	settings.filesystem.max_open_patches = 8;
 	settings.filesystem.auto_reload_patch_file = false;
@@ -272,6 +297,8 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: ShowAll
       opa: 100
+    show_graphic_screens: 1
+    graphic_screen_throttle: 1
   module_view:
     map_ring_flash_active: 0
     scroll_to_active_param: 1
@@ -285,6 +312,8 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: HideAlways
       opa: 0
+    show_graphic_screens: 1
+    graphic_screen_throttle: 1
   audio:
     sample_rate: 24000
     block_size: 512
@@ -297,6 +326,9 @@ TEST_CASE("Serialize settings") {
   screensaver:
     index: 2
     knobs_can_wake: 0
+  catchup:
+    mode: LinearFade
+    allow_jump_outofrange: 0
   filesystem:
     auto_reload_patch_file: 0
     max_open_patches: 8
@@ -304,7 +336,7 @@ TEST_CASE("Serialize settings") {
 	// clang format-on
 
 	std::string parsed;
-	parsed.resize(1024);
+	parsed.resize(2048);
 	auto bytes_size = MetaModule::Settings::serialize(settings, {parsed.data(), parsed.size()});
 	parsed.resize(bytes_size);
 

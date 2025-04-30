@@ -15,14 +15,14 @@ struct VeilsInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 24> Elements{{
-		WhiteMediumKnob{{to_mm<72>(27.26), to_mm<72>(69.39), Center, "Ch1 Gain", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(27.26), to_mm<72>(144.94), Center, "Ch2 Gain", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(27.26), to_mm<72>(220.48), Center, "Ch3 Gain", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(27.26), to_mm<72>(296.02), Center, "Ch4 Gain", ""}, 0.5f},
-		Trimpot{{to_mm<72>(77.86), to_mm<72>(62.31), Center, "Ch1 Response", ""}, 0.0f},
-		Trimpot{{to_mm<72>(77.86), to_mm<72>(137.85), Center, "Ch2 Response", ""}, 0.0f},
-		Trimpot{{to_mm<72>(77.86), to_mm<72>(213.39), Center, "Ch3 Response", ""}, 0.0f},
-		Trimpot{{to_mm<72>(77.86), to_mm<72>(288.94), Center, "Ch4 Response", ""}, 0.0f},
+		WhiteMediumKnob{{to_mm<72>(27.26), to_mm<72>(69.39), Center, "Ch1 Gain", ""}, 0, 1, 0, "", "%", 0, 100},
+		WhiteMediumKnob{{to_mm<72>(27.26), to_mm<72>(144.94), Center, "Ch2 Gain", ""}, 0, 1, 0, "", "%", 0, 100},
+		WhiteMediumKnob{{to_mm<72>(27.26), to_mm<72>(220.48), Center, "Ch3 Gain", ""}, 0, 1, 0, "", "%", 0, 100},
+		WhiteMediumKnob{{to_mm<72>(27.26), to_mm<72>(296.02), Center, "Ch4 Gain", ""}, 0, 1, 0, "", "%", 0, 100},
+		Trimpot{{to_mm<72>(77.86), to_mm<72>(62.31), Center, "Ch1 Response", ""}, 0, 1, 0},
+		Trimpot{{to_mm<72>(77.86), to_mm<72>(137.85), Center, "Ch2 Response", ""}, 0, 1, 0},
+		Trimpot{{to_mm<72>(77.86), to_mm<72>(213.39), Center, "Ch3 Response", ""}, 0, 1, 0},
+		Trimpot{{to_mm<72>(77.86), to_mm<72>(288.94), Center, "Ch4 Response", ""}, 0, 1, 0},
 		AnalogJackInput4ms{{to_mm<72>(117.32), to_mm<72>(50.54), Center, "Ch1 In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(117.32), to_mm<72>(126.09), Center, "Ch2 In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(117.32), to_mm<72>(201.63), Center, "Ch3 In", ""}},

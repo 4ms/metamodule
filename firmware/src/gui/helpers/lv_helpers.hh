@@ -1,6 +1,7 @@
 #pragma once
 #include "lvgl.h"
 #include <functional>
+#include <string>
 
 namespace MetaModule
 {
@@ -123,4 +124,20 @@ inline bool lv_is_checked(lv_obj_t *obj) {
 	return lv_obj_has_state(obj, LV_STATE_CHECKED);
 }
 
+inline void trim_color_string(std::string &text) {
+	if (text.starts_with("^")) {
+		//  "^123456 Text^ "
+		//   ________....
+		//    8 char
+		// Remove the leading chars
+		text = text.substr(8);
+		// Erase the final "^" or "^ "
+		if (auto endpos = text.find('^'); endpos != text.npos) {
+			if (text[endpos + 1] == ' ')
+				text.erase(endpos, 2);
+			else
+				text.erase(endpos, 1);
+		}
+	}
+}
 } // namespace MetaModule

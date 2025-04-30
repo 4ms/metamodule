@@ -8,20 +8,20 @@
 #include "pr_dbg.hh"
 #include <cmath>
 
-// TODO: there should be no dependency on a specific brand here
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
-
 namespace MetaModule
 {
 
-inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
+inline bool redraw_element(const Knob &el, const GuiElement &gui_el, float val) {
 	bool did_update_position = false;
 
 	constexpr int32_t threshold_centidegrees = 10; // 10 centidegrees = 1.0 degrees
 
-	int32_t angle = val * 3000.f - 1500.f;
-	while (angle < 0)
+	int32_t begin_angle = std::round(el.min_angle * 10.f);
+	int32_t end_angle = std::round(el.max_angle * 10.f);
+	int32_t angle = (val * (end_angle - begin_angle)) + begin_angle;
+	if (angle < 0)
 		angle += 3600;
+	angle = angle % 3600;
 
 	bool is_img = lv_obj_has_class(gui_el.obj, &lv_img_class);
 
@@ -105,12 +105,12 @@ inline bool redraw_element(const MomentaryButton &element, const GuiElement &gui
 	auto state = StateConversion::convertState(element, val);
 	auto image_name = state == MomentaryButton::State_t::PRESSED ? element.pressed_image : element.image;
 
-	auto img = ComponentImages::get_comp_path(image_name);
-	if (!img.length())
+	if (!image_name.length() || image_name.length() >= 256)
 		return false;
 
-	auto cur_img_src = lv_img_get_src(gui_el.obj);
-	auto cur_img = std::string_view{static_cast<const char *>(cur_img_src)};
+	auto img = ComponentImages::get_comp_path(image_name);
+
+	auto cur_img = std::string_view{static_cast<const char *>(lv_img_get_src(gui_el.obj))};
 
 	if (img != cur_img) {
 		lv_img_set_src(gui_el.obj, img.c_str());
@@ -168,19 +168,14 @@ inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }
 
-struct RedrawElement {
-	PatchData const *patch;
-	GuiElement &gui_el;
+inline bool redraw_param(DrawnElement &drawn_el, float value) {
+	bool was_redrawn = false;
 
-	bool operator()(auto &el) {
-		if (!gui_el.obj)
-			return false;
-
-		if (auto s_param = patch->find_static_knob(gui_el.module_idx, gui_el.idx.param_idx))
-			return redraw_element(el, gui_el, s_param->value);
-		else
-			return false;
+	if (drawn_el.gui_element.count.num_params > 0) {
+		was_redrawn =
+			std::visit([&](auto &el) { return redraw_element(el, drawn_el.gui_element, value); }, drawn_el.element);
 	}
-};
+	return was_redrawn;
+}
 
 } // namespace MetaModule

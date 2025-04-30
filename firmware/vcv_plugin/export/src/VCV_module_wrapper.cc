@@ -1,14 +1,17 @@
 #include "metamodule/VCV_module_wrapper.hh"
 #include "console/pr_dbg.hh"
+#include "util/math.hh"
 #include <random.hpp>
 
 VCVModuleWrapper::VCVModuleWrapper() {
 	rack::random::init();
 }
 
+VCVModuleWrapper::~VCVModuleWrapper() = default;
+
 void VCVModuleWrapper::update() {
 	args.frame++;
-	process(args);
+	update(args, bypassed);
 }
 
 // This is called by SDK v1.3 and earlier: (later will call Module::set_samplerate)
@@ -25,6 +28,17 @@ void VCVModuleWrapper::set_param(int id, float val) {
 	}
 	if ((size_t)id < params.size())
 		params[id].setValue(val);
+}
+
+float VCVModuleWrapper::get_param(int id) const {
+	if ((size_t)id < params.size()) {
+		float val = params[id].getValue();
+		// Reverse scale it
+		if ((size_t)id < paramQuantities.size() && paramQuantities[id])
+			val = MathTools::map_value(val, paramQuantities[id]->minValue, paramQuantities[id]->maxValue, 0.f, 1.f);
+		return val;
+	}
+	return 0.f;
 }
 
 void VCVModuleWrapper::set_input(int input_id, float val) {

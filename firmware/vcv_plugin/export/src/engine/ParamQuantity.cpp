@@ -162,6 +162,14 @@ void ParamQuantity::fromJson(json_t *rootJ) {
 		setImmediateValue(json_number_value(valueJ));
 }
 
+void ParamQuantity::setSmoothValue(float value) {
+	setValue(value);
+}
+
+float ParamQuantity::getSmoothValue() {
+	return getValue();
+}
+
 // SwitchQuantity
 
 std::string SwitchQuantity::getDisplayValueString() {

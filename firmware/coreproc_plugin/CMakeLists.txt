@@ -4,13 +4,18 @@ project(CoreProc-Plugin)
 add_library(coreproc_plugin_export STATIC)
 
 target_sources(coreproc_plugin_export PRIVATE
-    create.cc
+	create.cc
+	async_thread.cc
 )
 
 target_link_libraries(coreproc_plugin_export PRIVATE 
 	cpputil 
 	metamodule::core-interface
 	CoreModules
+)
+
+target_include_directories(coreproc_plugin_export PUBLIC
+	./
 )
 
 target_compile_options(coreproc_plugin_export PRIVATE 

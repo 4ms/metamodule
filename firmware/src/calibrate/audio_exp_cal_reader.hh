@@ -17,7 +17,7 @@ struct AudioExpCalibrationReader {
 		if (get_lock()) {
 			auto ok = codec_ext_memory.read(data, start_addr);
 			mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
-			Debug::Pin1::low();
+			// Debug::Pin1::low();
 			return ok;
 		} else
 			return false;
@@ -27,7 +27,7 @@ struct AudioExpCalibrationReader {
 		if (get_lock()) {
 			auto ok = codec_ext_memory.write(data, start_addr);
 			mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
-			Debug::Pin1::low();
+			// Debug::Pin1::low();
 			return ok;
 		} else
 			return false;
@@ -40,7 +40,7 @@ private:
 		uint32_t timeout = 0x100000;
 		while (--timeout) {
 			if (mdrivlib::HWSemaphore<SharedI2CLock>::lock() == mdrivlib::HWSemaphoreFlag::LockedOk) {
-				Debug::Pin1::high();
+				// Debug::Pin1::high();
 				return true;
 			}
 		}
