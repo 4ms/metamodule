@@ -251,22 +251,40 @@ public:
 			for (auto module_i : core_balancer.cores.parts[0]) {
 				step_module(module_i);
 			}
-			smp.join();
+			process_outputs_samecore<0>();
 
-			smp.process_cables();
-			process_module_outputs<0>();
+			// Synchronize cores here before they update each other's module's inputs
 			smp.join();
 
 			update_midi_pulses();
+
+			smp.process_cables();
+			process_outputs_diffcore<0>();
+
+			smp.join();
 		} else
 			return;
 	}
 
 	template<size_t Core>
-	void process_module_outputs() {
-		for (auto &cable : cables._cables[Core]) {
+	void process_outputs_samecore() {
+		for (auto const &cable : cables.samecore_cables[Core]) {
 			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
-			modules[cable.in.module_id]->set_input(cable.in.jack_id, val);
+
+			for (auto const &in : cable.ins) {
+				modules[in.module_id]->set_input(in.jack_id, val);
+			}
+		}
+	}
+
+	template<size_t Core>
+	void process_outputs_diffcore() {
+		for (auto const &cable : cables.diffcore_cables[Core]) {
+			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+
+			for (auto const &in : cable.ins) {
+				modules[in.module_id]->set_input(in.jack_id, val);
+			}
 		}
 	}
 
@@ -275,10 +293,11 @@ public:
 	}
 
 	void update_patch_singlecore() {
-		process_module_outputs<0>();
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
 			step_module(module_i);
 		}
+		process_outputs_samecore<0>();
+		process_outputs_diffcore<0>();
 		update_midi_pulses();
 	}
 

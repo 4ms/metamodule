@@ -27,23 +27,24 @@ struct AuxPlayer {
 		constexpr auto PlayModuleListIRQn = SMPControl::IRQn(SMPCommand::PlayModuleList);
 		InterruptManager::register_and_start_isr(PlayModuleListIRQn, 1, 0, [this]() { play_modules(); });
 
-		constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchGuiElements);
-		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [this]() { read_patch_gui_elements(); });
-
 		constexpr auto ProcessCablesIRQn = SMPControl::IRQn(SMPCommand::ProcessCables);
 		InterruptManager::register_and_start_isr(ProcessCablesIRQn, 1, 0, [this]() { process_cables(); });
-	}
 
-	void process_cables() {
-		patch_player.process_module_outputs<1>();
-
-		mdrivlib::SMPThread::signal_done();
+		constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchGuiElements);
+		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [this]() { read_patch_gui_elements(); });
 	}
 
 	void play_modules() {
 		for (auto module_i : module_ids) {
 			patch_player.step_module(module_i);
 		}
+
+		patch_player.process_outputs_samecore<1>();
+		mdrivlib::SMPThread::signal_done();
+	}
+
+	void process_cables() {
+		patch_player.process_outputs_diffcore<1>();
 
 		mdrivlib::SMPThread::signal_done();
 	}
