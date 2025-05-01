@@ -1235,7 +1235,8 @@ private:
 	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
 		if (knob_set >= knob_maps.size())
 			return;
-		if (k.panel_knob_id < PanelDef::NumKnobs) {
+
+		if (k.is_panel_knob() || k.is_button()) {
 			// Update existing, if present
 			for (auto &el : knob_maps[knob_set][k.panel_knob_id]) {
 				if (el.map.maps_to_same_as(k)) {
@@ -1247,9 +1248,6 @@ private:
 			CatchupParam f{};
 			f.mode = catchup_manager.get_default_mode();
 			knob_maps[knob_set][k.panel_knob_id].push_back({k, f});
-
-		} else if (k.is_button()) {
-			// TODO
 		}
 	}
 
