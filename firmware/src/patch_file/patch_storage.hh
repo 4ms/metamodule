@@ -65,6 +65,10 @@ public:
 	}
 
 	void reload_default_patches() {
+		PatchFileIO::create_default_patches(norflash_);
+	}
+
+	void reformat_norflash() {
 		norflash_.reformat();
 		PatchFileIO::create_default_patches(norflash_);
 	}
@@ -179,8 +183,15 @@ public:
 			return result;
 		}
 
-		if (message.message_type == RequestFactoryResetPatches) {
-			IntercoreStorageMessage result{.message_type = FactoryResetPatchesDone};
+		if (message.message_type == RequestFactoryReset) {
+			IntercoreStorageMessage result{.message_type = FactoryResetDone};
+			reformat_norflash();
+
+			return result;
+		}
+
+		if (message.message_type == RequestReloadDefaultPatches) {
+			IntercoreStorageMessage result{.message_type = ReloadDefaultPatchesDone};
 			reload_default_patches();
 
 			return result;
