@@ -26,6 +26,7 @@ set(HETRICKCV_SOURCE_PATHS
     ${HETRICKCV_DIR}/src/Chaos3Op.cpp
     ${HETRICKCV_DIR}/src/ChaoticAttractors.cpp
     ${HETRICKCV_DIR}/src/ClockedNoise.cpp
+    ${HETRICKCV_DIR}/src/ClockToPhasor.cpp
     ${HETRICKCV_DIR}/src/Comparator.cpp
     ${HETRICKCV_DIR}/src/Contrast.cpp
     ${HETRICKCV_DIR}/src/Crackle.cpp
@@ -44,6 +45,7 @@ set(HETRICKCV_SOURCE_PATHS
     ${HETRICKCV_DIR}/src/LogicCombine.cpp
     ${HETRICKCV_DIR}/src/MidSide.cpp
     ${HETRICKCV_DIR}/src/MinMax.cpp
+    ${HETRICKCV_DIR}/src/Normals.cpp
     ${HETRICKCV_DIR}/src/PhaseDrivenSequencer.cpp
     ${HETRICKCV_DIR}/src/PhaseDrivenSequencer32.cpp
     ${HETRICKCV_DIR}/src/PhasorAnalyzer.cpp
@@ -74,7 +76,9 @@ set(HETRICKCV_SOURCE_PATHS
     ${HETRICKCV_DIR}/src/PhasorTimetable.cpp
     ${HETRICKCV_DIR}/src/PhasorToClock.cpp
     ${HETRICKCV_DIR}/src/PhasorToLFO.cpp
+    ${HETRICKCV_DIR}/src/PhasorToRandom.cpp
     ${HETRICKCV_DIR}/src/PhasorToWaveforms.cpp
+    ${HETRICKCV_DIR}/src/PolymetricPhasors.cpp
     ${HETRICKCV_DIR}/src/Probability.cpp
     ${HETRICKCV_DIR}/src/RandomGates.cpp
     ${HETRICKCV_DIR}/src/Rotator.cpp

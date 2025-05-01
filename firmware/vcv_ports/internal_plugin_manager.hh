@@ -150,6 +150,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelChaos2Op);
 		pluginInstance->addModel(modelChaos3Op);
 		pluginInstance->addModel(modelChaoticAttractors);
+		pluginInstance->addModel(modelClockToPhasor);
 		pluginInstance->addModel(modelClockedNoise);
 		pluginInstance->addModel(modelComparator);
 		pluginInstance->addModel(modelContrast);
@@ -169,6 +170,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelLogicCombine);
 		pluginInstance->addModel(modelMidSide);
 		pluginInstance->addModel(modelMinMax);
+		pluginInstance->addModel(modelNormals);
 		pluginInstance->addModel(modelPhaseDrivenSequencer);
 		pluginInstance->addModel(modelPhaseDrivenSequencer32);
 		pluginInstance->addModel(modelPhasorAnalyzer);
@@ -199,7 +201,9 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelPhasorTimetable);
 		pluginInstance->addModel(modelPhasorToClock);
 		pluginInstance->addModel(modelPhasorToLFO);
+		pluginInstance->addModel(modelPhasorToRandom);
 		pluginInstance->addModel(modelPhasorToWaveforms);
+		pluginInstance->addModel(modelPolymetricPhasors);
 		pluginInstance->addModel(modelProbability);
 		pluginInstance->addModel(modelRandomGates);
 		pluginInstance->addModel(modelRotator);
