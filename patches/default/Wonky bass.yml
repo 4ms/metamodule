@@ -1,0 +1,744 @@
+PatchData:
+  patch_name: Wonky bass
+  description: A simple monophonic bass patch with a goofy seqeuence.
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:MultiLFO'
+    2: '4msCompany:QCD'
+    3: '4msCompany:Switch41'
+    4: '4msCompany:Seq8'
+    5: '4msCompany:Seq8'
+    6: 'Befaco:DualAtenuverter'
+    7: 'AudibleInstruments:Plaits'
+    8: 'AudibleInstruments:Ripples'
+    9: '4msCompany:SHEV'
+    10: '4msCompany:SCM'
+    11: 'Befaco:Kickall'
+    12: '4msCompany:Noise'
+    13: '4msCompany:HPF'
+    14: '4msCompany:BPF'
+    15: '4msCompany:ENVVCA'
+    16: '4msCompany:StMix'
+  int_cables:
+    - out:
+        module_id: 6
+        jack_id: 1
+      ins:
+        - module_id: 8
+          jack_id: 1
+      color: 13501
+    - out:
+        module_id: 9
+        jack_id: 2
+      ins:
+        - module_id: 8
+          jack_id: 2
+      color: 1453
+    - out:
+        module_id: 2
+        jack_id: 6
+      ins:
+        - module_id: 4
+          jack_id: 1
+        - module_id: 3
+          jack_id: 4
+        - module_id: 5
+          jack_id: 1
+        - module_id: 10
+          jack_id: 1
+      color: 64934
+    - out:
+        module_id: 4
+        jack_id: 1
+      ins:
+        - module_id: 3
+          jack_id: 0
+      color: 35419
+    - out:
+        module_id: 5
+        jack_id: 1
+      ins:
+        - module_id: 3
+          jack_id: 1
+      color: 61865
+    - out:
+        module_id: 8
+        jack_id: 1
+      ins:
+        - module_id: 9
+          jack_id: 8
+      color: 64934
+    - out:
+        module_id: 9
+        jack_id: 1
+      ins:
+        - module_id: 9
+          jack_id: 10
+      color: 1453
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 6
+          jack_id: 0
+        - module_id: 6
+          jack_id: 1
+      color: 64934
+    - out:
+        module_id: 2
+        jack_id: 8
+      ins:
+        - module_id: 11
+          jack_id: 0
+      color: 13501
+    - out:
+        module_id: 9
+        jack_id: 4
+      ins:
+        - module_id: 16
+          jack_id: 0
+      color: 64934
+    - out:
+        module_id: 11
+        jack_id: 0
+      ins:
+        - module_id: 16
+          jack_id: 2
+      color: 64934
+    - out:
+        module_id: 13
+        jack_id: 0
+      ins:
+        - module_id: 14
+          jack_id: 1
+      color: 61865
+    - out:
+        module_id: 1
+        jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 2
+        - module_id: 2
+          jack_id: 10
+      color: 13501
+    - out:
+        module_id: 12
+        jack_id: 0
+      ins:
+        - module_id: 13
+          jack_id: 1
+      color: 1453
+    - out:
+        module_id: 15
+        jack_id: 2
+      ins:
+        - module_id: 16
+          jack_id: 4
+      color: 35419
+    - out:
+        module_id: 14
+        jack_id: 0
+      ins:
+        - module_id: 15
+          jack_id: 4
+      color: 13501
+    - out:
+        module_id: 15
+        jack_id: 1
+      ins:
+        - module_id: 15
+          jack_id: 0
+      color: 61865
+    - out:
+        module_id: 2
+        jack_id: 2
+      ins:
+        - module_id: 2
+          jack_id: 6
+        - module_id: 2
+          jack_id: 14
+      color: 35419
+    - out:
+        module_id: 2
+        jack_id: 1
+      ins:
+        - module_id: 10
+          jack_id: 0
+      color: 35419
+    - out:
+        module_id: 10
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+        - module_id: 5
+          jack_id: 0
+        - module_id: 9
+          jack_id: 0
+        - module_id: 9
+          jack_id: 1
+      color: 64934
+    - out:
+        module_id: 2
+        jack_id: 4
+      ins:
+        - module_id: 3
+          jack_id: 6
+      color: 61865
+    - out:
+        module_id: 10
+        jack_id: 2
+      ins:
+        - module_id: 15
+          jack_id: 1
+      color: 61865
+    - out:
+        module_id: 6
+        jack_id: 0
+      ins:
+        - module_id: 7
+          jack_id: 7
+      color: 61865
+    - out:
+        module_id: 7
+        jack_id: 0
+      ins:
+        - module_id: 8
+          jack_id: 3
+      color: 35419
+  mapped_ins: []
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 16
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 16
+        jack_id: 1
+  static_knobs:
+    - module_id: 6
+      param_id: 0
+      value: 0.574181
+    - module_id: 6
+      param_id: 1
+      value: 0.5
+    - module_id: 6
+      param_id: 2
+      value: 0.646988
+    - module_id: 6
+      param_id: 3
+      value: 0.5
+    - module_id: 9
+      param_id: 0
+      value: 0
+    - module_id: 9
+      param_id: 1
+      value: 0.5
+    - module_id: 9
+      param_id: 2
+      value: 0.5
+    - module_id: 9
+      param_id: 3
+      value: 0.5
+    - module_id: 9
+      param_id: 4
+      value: 0.5
+    - module_id: 9
+      param_id: 5
+      value: 0
+    - module_id: 9
+      param_id: 6
+      value: 1
+    - module_id: 9
+      param_id: 7
+      value: 0.5
+    - module_id: 9
+      param_id: 8
+      value: 0
+    - module_id: 9
+      param_id: 9
+      value: 0.29518
+    - module_id: 9
+      param_id: 10
+      value: 0
+    - module_id: 9
+      param_id: 11
+      value: 0.261446
+    - module_id: 9
+      param_id: 12
+      value: 0.5
+    - module_id: 9
+      param_id: 13
+      value: 1
+    - module_id: 9
+      param_id: 14
+      value: 0.5
+    - module_id: 9
+      param_id: 15
+      value: 0.5
+    - module_id: 9
+      param_id: 16
+      value: 1
+    - module_id: 9
+      param_id: 17
+      value: 0.852
+    - module_id: 9
+      param_id: 18
+      value: 0.662
+    - module_id: 9
+      param_id: 19
+      value: 1
+    - module_id: 9
+      param_id: 20
+      value: 1
+    - module_id: 9
+      param_id: 21
+      value: 1
+    - module_id: 9
+      param_id: 22
+      value: 1
+    - module_id: 9
+      param_id: 23
+      value: 1
+    - module_id: 8
+      param_id: 0
+      value: 0.312048
+    - module_id: 8
+      param_id: 1
+      value: 0
+    - module_id: 8
+      param_id: 2
+      value: 0.692771
+    - module_id: 4
+      param_id: 0
+      value: 0.0855892
+    - module_id: 4
+      param_id: 1
+      value: 0.843339
+    - module_id: 4
+      param_id: 2
+      value: 0.530958
+    - module_id: 4
+      param_id: 3
+      value: 0.19681
+    - module_id: 4
+      param_id: 4
+      value: 0.273969
+    - module_id: 4
+      param_id: 5
+      value: 0.0430953
+    - module_id: 4
+      param_id: 6
+      value: 0.235943
+    - module_id: 4
+      param_id: 7
+      value: 0.82522
+    - module_id: 5
+      param_id: 0
+      value: 0.0818408
+    - module_id: 5
+      param_id: 1
+      value: 0.489473
+    - module_id: 5
+      param_id: 2
+      value: 0.237927
+    - module_id: 5
+      param_id: 3
+      value: 0.848178
+    - module_id: 5
+      param_id: 4
+      value: 0.325429
+    - module_id: 5
+      param_id: 5
+      value: 0.413987
+    - module_id: 5
+      param_id: 6
+      value: 0.438732
+    - module_id: 5
+      param_id: 7
+      value: 0.51725
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 1
+    - module_id: 2
+      param_id: 2
+      value: 0.5
+    - module_id: 2
+      param_id: 3
+      value: 0.5
+    - module_id: 2
+      param_id: 4
+      value: 1
+    - module_id: 2
+      param_id: 5
+      value: 0.356627
+    - module_id: 2
+      param_id: 6
+      value: 1
+    - module_id: 2
+      param_id: 7
+      value: 0.5
+    - module_id: 2
+      param_id: 8
+      value: 0.5
+    - module_id: 2
+      param_id: 9
+      value: 1
+    - module_id: 2
+      param_id: 10
+      value: 0
+    - module_id: 2
+      param_id: 11
+      value: 1
+    - module_id: 2
+      param_id: 12
+      value: 0.5
+    - module_id: 2
+      param_id: 13
+      value: 0.5
+    - module_id: 2
+      param_id: 14
+      value: 1
+    - module_id: 2
+      param_id: 15
+      value: 0.106024
+    - module_id: 2
+      param_id: 16
+      value: 1
+    - module_id: 2
+      param_id: 17
+      value: 0.5
+    - module_id: 2
+      param_id: 18
+      value: 0.5
+    - module_id: 2
+      param_id: 19
+      value: 1
+    - module_id: 2
+      param_id: 20
+      value: 0.244
+    - module_id: 1
+      param_id: 0
+      value: 0.56265
+    - module_id: 1
+      param_id: 1
+      value: 0
+    - module_id: 1
+      param_id: 2
+      value: 0.5
+    - module_id: 1
+      param_id: 3
+      value: 0
+    - module_id: 10
+      param_id: 0
+      value: 0.186747
+    - module_id: 10
+      param_id: 1
+      value: 0
+    - module_id: 10
+      param_id: 2
+      value: 0
+    - module_id: 10
+      param_id: 3
+      value: 0
+    - module_id: 10
+      param_id: 4
+      value: 0.5
+    - module_id: 10
+      param_id: 5
+      value: 0
+    - module_id: 10
+      param_id: 6
+      value: 0
+    - module_id: 11
+      param_id: 0
+      value: 0.19
+    - module_id: 11
+      param_id: 1
+      value: 0
+    - module_id: 11
+      param_id: 2
+      value: 0.154217
+    - module_id: 11
+      param_id: 3
+      value: 0.453012
+    - module_id: 11
+      param_id: 4
+      value: 0.0187501
+    - module_id: 11
+      param_id: 5
+      value: 0.37625
+    - module_id: 13
+      param_id: 0
+      value: 0.957831
+    - module_id: 13
+      param_id: 1
+      value: 0.793976
+    - module_id: 13
+      param_id: 2
+      value: 1
+    - module_id: 16
+      param_id: 0
+      value: 0.784338
+    - module_id: 16
+      param_id: 1
+      value: 0.783132
+    - module_id: 16
+      param_id: 2
+      value: 0.419277
+    - module_id: 16
+      param_id: 3
+      value: 0.875
+    - module_id: 16
+      param_id: 4
+      value: 0.375904
+    - module_id: 16
+      param_id: 5
+      value: 0.608434
+    - module_id: 16
+      param_id: 6
+      value: 0.5
+    - module_id: 16
+      param_id: 7
+      value: 0.5
+    - module_id: 14
+      param_id: 0
+      value: 0.815663
+    - module_id: 14
+      param_id: 1
+      value: 0.163855
+    - module_id: 14
+      param_id: 2
+      value: 1
+    - module_id: 15
+      param_id: 0
+      value: 0
+    - module_id: 15
+      param_id: 1
+      value: 0
+    - module_id: 15
+      param_id: 2
+      value: 0
+    - module_id: 15
+      param_id: 3
+      value: 0.134
+    - module_id: 15
+      param_id: 4
+      value: 0.811323
+    - module_id: 15
+      param_id: 5
+      value: 1
+    - module_id: 15
+      param_id: 6
+      value: 0.5
+    - module_id: 15
+      param_id: 7
+      value: 0.394987
+    - module_id: 7
+      param_id: 0
+      value: 0
+    - module_id: 7
+      param_id: 1
+      value: 0
+    - module_id: 7
+      param_id: 2
+      value: 0.197917
+    - module_id: 7
+      param_id: 3
+      value: 0.115663
+    - module_id: 7
+      param_id: 4
+      value: 0.256627
+    - module_id: 7
+      param_id: 5
+      value: 0.5
+    - module_id: 7
+      param_id: 6
+      value: 0.5
+    - module_id: 7
+      param_id: 7
+      value: 0.5
+    - module_id: 7
+      param_id: 8
+      value: 0.5
+    - module_id: 7
+      param_id: 9
+      value: 0.5
+    - module_id: 7
+      param_id: 10
+      value: 0.5
+  mapped_knobs:
+    - name: Main
+      set:
+        - panel_knob_id: 0
+          module_id: 7
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Root pitch
+        - panel_knob_id: 2
+          module_id: 6
+          param_id: 0
+          curve_type: 0
+          min: 0.505
+          max: 1
+          alias_name: Osc Seq Attenuator
+        - panel_knob_id: 3
+          module_id: 8
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Cutoff
+        - panel_knob_id: 4
+          module_id: 8
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Resonance
+        - panel_knob_id: 5
+          module_id: 8
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Filter Depth
+        - panel_knob_id: 6
+          module_id: 9
+          param_id: 9
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Bass Amp Decay
+        - panel_knob_id: 7
+          module_id: 9
+          param_id: 11
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Bass Filter Decay
+        - panel_knob_id: 8
+          module_id: 6
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Bass Filter Seq Amt
+        - panel_knob_id: 9
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Master Tempo
+        - panel_knob_id: 10
+          module_id: 11
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Kick Decay
+        - panel_knob_id: 11
+          module_id: 15
+          param_id: 7
+          curve_type: 0
+          min: 0.373
+          max: 0.604
+          alias_name: Hat Decay
+    - name: SCM + Mixer
+      set:
+        - panel_knob_id: 0
+          module_id: 10
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Tempo Rotate
+        - panel_knob_id: 1
+          module_id: 10
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Slip
+        - panel_knob_id: 2
+          module_id: 10
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Shuffle
+        - panel_knob_id: 3
+          module_id: 10
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Skip
+        - panel_knob_id: 4
+          module_id: 2
+          param_id: 20
+          curve_type: 0
+          min: 0.244
+          max: 0.542
+          alias_name: Kick Tempo
+        - panel_knob_id: 6
+          module_id: 16
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Bass Vol
+        - panel_knob_id: 7
+          module_id: 16
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Kick Vol
+        - panel_knob_id: 8
+          module_id: 16
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Hat Vol
+        - panel_knob_id: 11
+          module_id: 14
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Hat filter
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates:
+    - module_id: 2
+      data: |-
+        wF0AAA==
+    - module_id: 7
+      data: |-
+        {"lowCpu":false,"model":1}
