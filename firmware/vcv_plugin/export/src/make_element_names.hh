@@ -87,33 +87,6 @@ inline std::string_view getLightName(rack::engine::Module *module, int id) {
 	return "(Light)";
 }
 
-inline void set_labels(std::span<std::string_view> pos_names, std::vector<std::string> &labels) {
-	for (unsigned i = 0; auto &label : labels) {
-		if (i >= pos_names.size())
-			break;
-		pos_names[i++] = label;
-	}
-}
-
-inline void set_labels(rack::engine::ParamQuantity *pq, MetaModule::Element &element) {
-	// Switches with strings for each position
-	if (pq->labels.size() > 0) {
-		using namespace MetaModule;
-		std::visit(overloaded{
-					   [](BaseElement &) {},
-					   [&pq](FlipSwitch &el) {
-						   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, 3);
-						   set_labels(el.pos_names, pq->labels);
-					   },
-					   [&pq](SlideSwitch &el) {
-						   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, 8);
-						   set_labels(el.pos_names, pq->labels);
-					   },
-				   },
-				   element);
-	}
-}
-
 // Debug helper:
 inline ImageElement image_element(MetaModule::Element const &el) {
 	return std::visit(overloaded{
