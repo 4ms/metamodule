@@ -125,6 +125,10 @@ extern rack::plugin::Model *modelTrigShaper;
 extern rack::plugin::Model *modelVectorMix;
 extern rack::plugin::Model *modelWaveshape;
 extern rack::plugin::Model *modelXYToPolar;
+extern rack::plugin::Model *modelClockToPhasor;
+extern rack::plugin::Model *modelPhasorToRandom;
+extern rack::plugin::Model *modelPolymetricPhasors;
+extern rack::plugin::Model *modelNormals;
 
 extern rack::plugin::Model *model4Seq;
 extern rack::plugin::Model *modelCipher;

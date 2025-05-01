@@ -209,6 +209,24 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelVectorMix);
 		pluginInstance->addModel(modelWaveshape);
 		pluginInstance->addModel(modelXYToPolar);
+<<<<<<< HEAD
+=======
+		pluginInstance->addModel(modelPhasorMixer);
+		pluginInstance->addModel(modelRandomGates);
+		pluginInstance->addModel(modelComparator);
+		pluginInstance->addModel(modelDataCompander);
+		pluginInstance->addModel(modelDelta);
+		pluginInstance->addModel(modelRotator);
+		pluginInstance->addModel(modelRungler);
+		pluginInstance->addModel(modelBinaryCounter);
+		pluginInstance->addModel(modelClockToPhasor);
+		pluginInstance->addModel(modelPhasorFreezer);
+		pluginInstance->addModel(modelPhasorSplitter);
+		pluginInstance->addModel(modelPhasorToRandom);
+		pluginInstance->addModel(modelPolymetricPhasors);
+		pluginInstance->addModel(modelTrigShaper);
+		pluginInstance->addModel(modelNormals);
+>>>>>>> e6dc36953 (Add 8 HetrickCV modules)
 #endif
 
 #ifdef BUILD_INTERNAL_nonlinearcircuits
