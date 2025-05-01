@@ -1,6 +1,5 @@
 #include "audio/audio.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
-#include "audio/audio_buttonexp.hh"
 #include "calibrate/calibration_data_reader.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
@@ -344,6 +343,16 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 	}
 
 	player.trigger_reading_gui_elements();
+}
+
+void AudioStream::handle_button_events(uint32_t event_bitmask, float param_val) {
+	unsigned i = 0;
+	while (event_bitmask) {
+		if (event_bitmask & 0b1)
+			player.set_panel_param(i + FirstButton, param_val);
+		event_bitmask >>= 1;
+		i++;
+	}
 }
 
 void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
