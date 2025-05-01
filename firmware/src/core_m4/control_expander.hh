@@ -31,7 +31,7 @@ public:
 		while (!expander_found) {
 			if (buttonexp_gpio_chip.is_present()) {
 				buttonexp_gpio_chip.start();
-				printf_("Button Expander found at addr 0x%x\n", addr);
+				pr_info("Button Expander found at addr 0x%x\n", addr);
 				expander_found = true;
 			} else {
 				pr_trace("Button Expander not found at addr 0x%x\n", addr);
