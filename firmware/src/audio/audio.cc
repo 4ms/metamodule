@@ -199,6 +199,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
+	// Button Expander
+	if (param_block.metaparams.num_button_exp_connected > 0) {
+		handle_button_events(param_block.metaparams.ext_buttons_high_events, 1.f);
+		handle_button_events(param_block.metaparams.ext_buttons_low_events, 0.f);
+	}
+
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
@@ -264,12 +270,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			param_block.metaparams.midi_connected, params.midi_event, param_block.metaparams.midi_poly_chans, &msg);
 
 		param_blocks[cur_block].params[idx].raw_msg = msg;
-
-		// Button Expander
-		if (param_block.metaparams.num_button_exp_connected > 0) {
-			handle_button_events(param_block.metaparams.ext_buttons_high_events, 1.f);
-			handle_button_events(param_block.metaparams.ext_buttons_low_events, 0.f);
-		}
 
 		// Run each module
 		player.update_patch();
