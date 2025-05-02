@@ -394,7 +394,7 @@ private:
 							pr_info("Pre-load Disabled: %s\n", plugin_name.data());
 							page->settings.slug.erase(autoload_slot);
 						} else {
-							pr_err("Error: can't disable autoload for %s: not found in settings autoload list\n",
+							pr_err("Error: can't disable pre-load for %s: not found in settings pre-load list\n",
 								   plugin_name.data());
 						}
 					}
@@ -457,7 +457,7 @@ private:
 					page->gui_state.do_write_settings = true;
 				}
 			},
-			"Are you sure you want to autoload no plugins?",
+			"Are you sure you want to disable pre-loading plugins?",
 			"OK");
 	}
 
@@ -479,7 +479,7 @@ private:
 					page->gui_state.do_write_settings = true;
 				}
 			},
-			"This will autoload the current set of loaded plugins the next time you power on",
+			"This will pre-load the current set of loaded plugins the next time you power on",
 			"OK");
 	}
 
