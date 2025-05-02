@@ -743,6 +743,8 @@ private:
 
 		auto module_id = page->drawn_element->gui_element.module_idx;
 		auto param_id = page->drawn_element->gui_element.idx.param_idx;
+		page->metaparams.ext_buttons_high_events = 0;
+		page->metaparams.ext_buttons_low_events = 0;
 		page->add_map_popup.show(knobset_id, param_id, module_id, page->patch);
 	}
 
