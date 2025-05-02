@@ -1,0 +1,238 @@
+PatchData:
+  patch_name: ButtonTester
+  description: Patch Description
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:ENVVCA'
+    2: 'Fundamental:Push'
+    3: '4msDrums:Snare'
+    4: '4msCompany:StMix'
+    5: '4msCompany:ENVVCA'
+    6: 'Fundamental:Push'
+    7: '4msDrums:Kick'
+  int_cables:
+    - out:
+        module_id: 2
+        jack_id: 1
+      ins:
+        - module_id: 3
+          jack_id: 0
+      color: 61865
+    - out:
+        module_id: 6
+        jack_id: 1
+      ins:
+        - module_id: 7
+          jack_id: 0
+      color: 64934
+    - out:
+        module_id: 7
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 2
+      color: 61865
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+      color: 64934
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 1
+      color: 1453
+    - out:
+        module_id: 6
+        jack_id: 0
+      ins:
+        - module_id: 5
+          jack_id: 1
+      color: 13501
+  mapped_ins: []
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 4
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 4
+        jack_id: 1
+  static_knobs:
+    - module_id: 7
+      param_id: 0
+      value: 0.328125
+    - module_id: 7
+      param_id: 1
+      value: 0.5
+    - module_id: 7
+      param_id: 2
+      value: 0.5
+    - module_id: 7
+      param_id: 3
+      value: 0.328125
+    - module_id: 7
+      param_id: 4
+      value: 0.328125
+    - module_id: 7
+      param_id: 5
+      value: 0
+    - module_id: 3
+      param_id: 0
+      value: 0.195312
+    - module_id: 3
+      param_id: 1
+      value: 0.117188
+    - module_id: 3
+      param_id: 2
+      value: 0.195312
+    - module_id: 3
+      param_id: 3
+      value: 0.195312
+    - module_id: 3
+      param_id: 4
+      value: 0.257812
+    - module_id: 3
+      param_id: 5
+      value: 0.3125
+    - module_id: 3
+      param_id: 6
+      value: 0.3125
+    - module_id: 3
+      param_id: 7
+      value: 0
+    - module_id: 3
+      param_id: 8
+      value: 0.78125
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 0
+    - module_id: 6
+      param_id: 0
+      value: 0
+    - module_id: 6
+      param_id: 1
+      value: 0
+    - module_id: 4
+      param_id: 0
+      value: 0.875
+    - module_id: 4
+      param_id: 1
+      value: 0.875
+    - module_id: 4
+      param_id: 2
+      value: 0.875
+    - module_id: 4
+      param_id: 3
+      value: 0.875
+    - module_id: 4
+      param_id: 4
+      value: 0.5
+    - module_id: 4
+      param_id: 5
+      value: 0.5
+    - module_id: 4
+      param_id: 6
+      value: 0.5
+    - module_id: 4
+      param_id: 7
+      value: 0.5
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0.5
+    - module_id: 1
+      param_id: 2
+      value: 0
+    - module_id: 1
+      param_id: 3
+      value: 0.5
+    - module_id: 1
+      param_id: 4
+      value: 0.5
+    - module_id: 1
+      param_id: 5
+      value: 1
+    - module_id: 1
+      param_id: 6
+      value: 1
+    - module_id: 1
+      param_id: 7
+      value: 1
+    - module_id: 5
+      param_id: 0
+      value: 0.5
+    - module_id: 5
+      param_id: 1
+      value: 0.5
+    - module_id: 5
+      param_id: 2
+      value: 0
+    - module_id: 5
+      param_id: 3
+      value: 0.5
+    - module_id: 5
+      param_id: 4
+      value: 0.5
+    - module_id: 5
+      param_id: 5
+      value: 1
+    - module_id: 5
+      param_id: 6
+      value: 1
+    - module_id: 5
+      param_id: 7
+      value: 1
+  mapped_knobs:
+    - name: ''
+      set:
+        - panel_knob_id: 28
+          module_id: 2
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 12
+          module_id: 6
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates:
+    - module_id: 2
+      data: |-
+        {"hold":false}
+    - module_id: 6
+      data: |-
+        {"hold":false}

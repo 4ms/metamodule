@@ -66,9 +66,9 @@ public:
 
 				// Testing (loopback)
 				// TODO: Remove this
-				set_leds(buttons);
+				// set_leds(buttons);
 
-				buttonexp_gpio_chip.set_output_values(leds.load());
+				// buttonexp_gpio_chip.set_output_values(leds.load());
 
 				tmr = HAL_GetTick();
 				state = States::Pause;
@@ -89,7 +89,7 @@ public:
 	}
 
 	void set_leds(uint32_t led_bitmask) {
-		leds.store(ButtonExpander::calc_output_data(led_bitmask));
+		// leds.store(ButtonExpander::calc_output_data(led_bitmask));
 	}
 
 	uint32_t get_buttons() {
@@ -109,7 +109,7 @@ private:
 	bool expander_found = false;
 
 	// Each Expander has 8 buttons, 8 LEDs, so we can support max 4 expander modules
-	std::atomic<uint32_t> leds;
+	// std::atomic<uint32_t> leds;
 	std::atomic<uint32_t> buttons;
 
 	enum class States {
