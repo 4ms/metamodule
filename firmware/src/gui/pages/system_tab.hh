@@ -156,7 +156,7 @@ private:
 					page->storage.request_reset_factory_patches();
 					while (true) {
 						auto msg = page->storage.get_message();
-						if (msg.message_type == FileStorageProxy::FactoryResetPatchesDone)
+						if (msg.message_type == FileStorageProxy::FactoryResetDone)
 							break;
 					}
 				}

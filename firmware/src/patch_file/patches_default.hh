@@ -21,11 +21,11 @@
 #include "../patches/default/KarplusStereo.hh"
 #include "../patches/default/MIDI_Poly4.hh"
 #include "../patches/default/Orcas_Heart_Octo_Djembe.hh"
-#include "../patches/default/PlaygroundBefaco.hh"
-#include "../patches/default/QuadDrum.hh"
+// #include "../patches/default/PlaygroundBefaco.hh"
+// #include "../patches/default/QuadDrum.hh"
 #include "../patches/default/SlothDrone.hh"
-#include "../patches/default/SpringsintoCaves.hh"
-#include "../patches/default/UntwistedBraid.hh"
+// #include "../patches/default/SpringsintoCaves.hh"
+// #include "../patches/default/UntwistedBraid.hh"
 #include "../patches/default/WanderVoices.hh"
 
 struct DefaultPatches {
@@ -47,11 +47,11 @@ struct DefaultPatches {
 		KarplusStereo_patch,
 		MIDI_Poly4_patch,
 		Orcas_Heart_Octo_Djembe_patch,
-		PlaygroundBefaco_patch,
-		QuadDrum_patch,
+		// PlaygroundBefaco_patch,
+		// QuadDrum_patch,
 		Sloth_Drone_patch,
-		SpringsIntoCaves_patch,
-		UntwistedBraid_patch,
+		// SpringsIntoCaves_patch,
+		// UntwistedBraid_patch,
 		WanderVoices_patch,
 	});
 
@@ -72,11 +72,11 @@ struct DefaultPatches {
 		"KarplusStereo.yml", //
 		"MIDI_Poly4.yml",	 //
 		"Orcas_Heart_Octo_Djembe.yml",
-		"PlaygroundBefaco.yml",
-		"QuadDrum.yml",			//
-		"SlothDrone.yml",		//
-		"SpringsintoCaves.yml", //
-		"UntwistedBraid_patch.yml",
+		// "PlaygroundBefaco.yml",
+		// "QuadDrum.yml",			//
+		"SlothDrone.yml", //
+		// "SpringsintoCaves.yml", //
+		// "UntwistedBraid_patch.yml",
 		"WanderVoices.yml", //
 	});
 
