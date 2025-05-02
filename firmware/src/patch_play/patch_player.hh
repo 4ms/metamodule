@@ -1207,12 +1207,12 @@ public:
 	}
 
 private:
-	void update_or_add(std::vector<Jack> &v, const Jack &d) {
+	static void update_or_add(std::vector<Jack> &v, const Jack &d) {
 		if (auto found = std::ranges::find(v, d); found == v.end())
 			v.push_back(d);
 	}
 
-	void update_or_add(std::vector<MappedKnob> &v, const MappedKnob &d) {
+	static void update_or_add(std::vector<MappedKnob> &v, const MappedKnob &d) {
 		for (auto &el : v) {
 			if (el.maps_to_same_as(d)) {
 				el = d;
@@ -1222,7 +1222,7 @@ private:
 		v.push_back(d);
 	}
 
-	void update_or_add(std::vector<JackMidi> &v, const Jack &d, uint32_t midi_chan = 0) {
+	static void update_or_add(std::vector<JackMidi> &v, const Jack &d, uint32_t midi_chan = 0) {
 		for (auto &el : v) {
 			if (el.module_id == d.module_id && el.jack_id == d.jack_id) {
 				el.midi_chan = midi_chan;
@@ -1249,7 +1249,8 @@ private:
 			CatchupParam f{};
 			f.mode = catchup_manager.get_default_mode();
 			knob_maps[knob_set][k.panel_knob_id].push_back({k, f});
-		}
+		} else
+			pr_err("Cannot map panel knob id %u\n", k.panel_knob_id);
 	}
 
 	//Remove a mapping
