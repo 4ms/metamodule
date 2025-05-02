@@ -69,7 +69,8 @@ struct MetaParams {
 	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
 	// For buttons: moves events from `that` to `this`, removing them from `this`
 	// Copies non-event signals (CV, audio)
-	// Used with write_sync()
+	// Used with write_sync() (audio->syncparams)
+	// this:syncparams.metaparams.update_with(that: audio.metaparams)
 	void update_with(MetaParams &that) {
 		for (auto [but, thatbut] : zip(meta_buttons, that.meta_buttons))
 			but.transfer_events(thatbut);
@@ -79,9 +80,11 @@ struct MetaParams {
 		rotary_pushed.add_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
 
-		// Check this:
-		ext_buttons_low_events = that.ext_buttons_low_events;
-		ext_buttons_high_events = that.ext_buttons_high_events;
+		// add events to syncparams without clearing
+		ext_buttons_low_events |= that.ext_buttons_low_events;
+		ext_buttons_high_events |= that.ext_buttons_high_events;
+		// audio already used the events, so clear them in `that`
+		// But -- we don't need to do this? Because controls will clear them?
 		that.ext_buttons_low_events = 0;
 		that.ext_buttons_high_events = 0;
 
@@ -98,7 +101,8 @@ struct MetaParams {
 	// Moves rotary motion events from `that` to `this` (removing them from `that`, and adding them to existing events
 	// in `this`
 	// Copies non-event signals (CV, audio)
-	// Used with read_sync()
+	// Used with read_sync() (syncparams->GUI)
+	// this:ui.metaparams.transfer(that: syncparams.metaparams);
 	void transfer(MetaParams &that) {
 		for (auto [but, thatbut] : zip(meta_buttons, that.meta_buttons))
 			but.transfer_events(thatbut);
@@ -108,9 +112,10 @@ struct MetaParams {
 		rotary_pushed.transfer_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
 
-		// Check this:
+		// add events to GUI
 		ext_buttons_low_events |= that.ext_buttons_low_events;
 		ext_buttons_high_events |= that.ext_buttons_high_events;
+		// Clear from sync params, GUI consumes them
 		that.ext_buttons_low_events = 0;
 		that.ext_buttons_high_events = 0;
 
