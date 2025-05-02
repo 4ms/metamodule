@@ -137,6 +137,7 @@ struct AddMapPopUp {
 				}
 
 				if (auto firstbit = std::countr_zero(metaparams.ext_buttons_high_events); firstbit < 32) {
+					metaparams.ext_buttons_high_events = 0;
 					selected_knob = firstbit + FirstButton;
 					lv_label_set_text_fmt(ui_MapDetected, "Button: %u", firstbit + 1);
 				}
@@ -192,7 +193,7 @@ struct AddMapPopUp {
 					.min = 0.f,
 					.max = 1.f,
 				};
-				if (map.is_panel_knob()) {
+				if (map.is_panel_knob() || map.is_button()) {
 					// TODO: just have AddMapping type (not AddMidiMap) and use set_id to indicate MidiMap?
 					page->patch_mod_queue.put(AddMapping{.map = map, .set_id = page->set_id});
 
