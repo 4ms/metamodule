@@ -173,15 +173,18 @@ struct KnobSetViewPage : PageBase {
 				auto value = patch_playloader.param_value(map.module_id, map.param_id);
 
 				auto arc_val = map.unmap_val(value) * 120.f;
-				lv_arc_set_value(arcs[idx], arc_val);
+				if (arcs[idx])
+					lv_arc_set_value(arcs[idx], arc_val);
 
 				if (map.is_panel_knob()) {
 					auto phys_val = params.knobs[map.panel_knob_id].val;
 					auto mapped_phys_val = map.get_mapped_val(phys_val);
 
 					auto is_tracking = patch_playloader.is_param_tracking(map.module_id, map.param_id);
-					update_indicator(indicators[idx], is_tracking, mapped_phys_val);
-					update_knob(arcs[idx], is_tracking, arc_val);
+					if (indicators[idx])
+						update_indicator(indicators[idx], is_tracking, mapped_phys_val);
+					if (arcs[idx])
+						update_knob(arcs[idx], is_tracking, arc_val);
 				}
 
 				idx++;
@@ -507,15 +510,6 @@ private:
 
 	lv_obj_t *get_container(unsigned panel_knob_id) {
 		return containers[panel_knob_id];
-	}
-
-	lv_obj_t *get_knob(unsigned panel_knob_id) {
-		if (panel_knob_id >= 12)
-			return nullptr;
-		if (panel_knob_id >= 6)
-			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINER_KNOB);
-		else
-			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINERBIG_KNOB);
 	}
 
 	lv_obj_t *get_knob(lv_obj_t *container) {
