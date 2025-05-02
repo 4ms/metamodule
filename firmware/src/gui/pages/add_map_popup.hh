@@ -6,6 +6,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "metaparams.hh"
 #include "midi/midi_message.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
@@ -91,7 +92,7 @@ struct AddMapPopUp {
 		}
 	}
 
-	void update(ParamsMidiState &params) {
+	void update(ParamsMidiState &params, MetaParams &metaparams) {
 		if (visible) {
 			auto last_selected_knob = selected_knob;
 
@@ -133,6 +134,11 @@ struct AddMapPopUp {
 						lv_label_set_text_fmt(ui_MapDetected, "Knob: %.4s", name.data());
 					}
 					i++;
+				}
+
+				if (auto firstbit = std::countr_zero(metaparams.ext_buttons_high_events); firstbit < 32) {
+					selected_knob = firstbit + FirstButton;
+					lv_label_set_text_fmt(ui_MapDetected, "Button: %u", firstbit + 1);
 				}
 			}
 
