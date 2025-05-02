@@ -19,7 +19,12 @@ std::string get_panel_name(const ParamElement &, uint16_t panel_id) {
 	if (mk.is_panel_knob())
 		name = PanelDef::get_map_param_name(panel_id);
 
-	else if (mk.is_midi_cc()) {
+	else if (auto butnum = mk.ext_button()) {
+		name = "B" + std::to_string(butnum.value() + 1);
+	}
+
+	else if (mk.is_midi_cc())
+	{
 		name = "CC" + std::to_string(mk.cc_num());
 		if (mk.midi_chan >= 1 && mk.midi_chan <= 16)
 			name += " Ch " + std::to_string(mk.midi_chan);
