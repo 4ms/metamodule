@@ -35,6 +35,9 @@ struct MappingPaneList {
 		if (map.is_panel_knob())
 			format_knob_map_circle(map.panel_knob_id, circle, label);
 
+		else if (map.is_button())
+			format_knob_map_circle(map.panel_knob_id, circle, label);
+
 		else if (map.is_midi_cc())
 			format_cc_map_circle(map.cc_num(), circle, label);
 
