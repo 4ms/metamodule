@@ -14,12 +14,12 @@ struct MappedParam {
 };
 //[0-11] knobs
 //[12-43] buttons
-using ParamSet = std::array<std::vector<MappedParam>, PanelDef::NumKnobs + ButtonExpander::NumTotalButtons>;
+using ParamSet = std::array<std::vector<MappedParam>, NumTotalParams>;
 
 class CatchupManager {
 
-	std::array<float, PanelDef::NumKnobs> panel_knobs{0.f};
-	std::array<bool, PanelDef::NumKnobs> catchup_inaccessible{false};
+	std::array<float, NumTotalParams> panel_knobs{0.f};
+	std::array<bool, NumTotalParams> catchup_inaccessible{false};
 
 	CatchupParam::Mode default_mode{CatchupParam::Mode::ResumeOnMotion};
 
