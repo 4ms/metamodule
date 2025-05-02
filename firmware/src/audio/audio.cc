@@ -265,6 +265,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		param_blocks[cur_block].params[idx].raw_msg = msg;
 
+		// Button Expander
+		if (param_block.metaparams.num_button_exp_connected > 0) {
+			handle_button_events(param_block.metaparams.ext_buttons_high_events, 1.f);
+			handle_button_events(param_block.metaparams.ext_buttons_low_events, 0.f);
+		}
+
 		// Run each module
 		player.update_patch();
 
@@ -350,8 +356,10 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 void AudioStream::handle_button_events(uint32_t event_bitmask, float param_val) {
 	unsigned i = 0;
 	while (event_bitmask) {
-		if (event_bitmask & 0b1)
+		if (event_bitmask & 0b1) {
 			player.set_panel_param(i + FirstButton, param_val);
+			pr_dbg("B%d %f\n", i + FirstButton, param_val);
+		}
 		event_bitmask >>= 1;
 		i++;
 	}
@@ -443,6 +451,9 @@ uint32_t AudioStream::get_audio_errors() {
 ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.midi_connected = param_blocks[block].metaparams.midi_connected;
 	local_params.metaparams.jack_senses = param_blocks[block].metaparams.jack_senses;
+	local_params.metaparams.num_button_exp_connected = param_blocks[block].metaparams.num_button_exp_connected;
+	local_params.metaparams.ext_buttons_high_events = param_blocks[block].metaparams.ext_buttons_high_events;
+	local_params.metaparams.ext_buttons_low_events = param_blocks[block].metaparams.ext_buttons_low_events;
 
 	for (auto i = 0u; i < block_size_; i++)
 		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt
