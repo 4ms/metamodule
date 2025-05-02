@@ -61,6 +61,7 @@ void FramebufferWidget::step() {
 }
 
 void FramebufferWidget::draw(const DrawArgs &args) {
+	Widget::draw(args);
 }
 
 void FramebufferWidget::render(math::Vec scale, math::Vec offsetF, math::Rect clipBox) {

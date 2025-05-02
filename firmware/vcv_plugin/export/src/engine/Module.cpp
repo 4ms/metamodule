@@ -327,6 +327,15 @@ bool Module::draw_graphic_display(int display_id) {
 		disp.widget->draw(disp.args);
 		disp.widget->drawLayer(disp.args, 1);
 
+		// Note: this doesn't work to draw the framebuffer (and its children), sometimes the whole module is blank
+		if (disp.widget == module_widget.get()) {
+			auto panel = module_widget->getPanel();
+			if (panel && panel->fb && panel->fb->children.size() > 0) {
+				panel->fb->draw(disp.args);
+				panel->fb->drawLayer(disp.args, 1);
+			}
+		}
+
 		nvgEndFrame(disp.args.vg);
 
 		return true;
