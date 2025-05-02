@@ -76,7 +76,7 @@ public:
 			}
 
 			case States::Pause: {
-				if ((HAL_GetTick() - tmr) > 50)
+				if ((HAL_GetTick() - tmr) > 10)
 					state = States::ReadButtons;
 				break;
 			}
@@ -120,7 +120,7 @@ private:
 	} state = States::ReadButtons;
 
 	void handle_error() {
-		pr_err("ControlExpander I2C Error!\n");
+		pr_dbg("ControlExpander I2C Error!\n");
 	}
 };
 
