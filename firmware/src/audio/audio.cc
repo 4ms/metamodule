@@ -358,7 +358,6 @@ void AudioStream::handle_button_events(uint32_t event_bitmask, float param_val) 
 	while (event_bitmask) {
 		if (event_bitmask & 0b1) {
 			player.set_panel_param(i + FirstButton, param_val);
-			pr_dbg("B%d %f\n", i + FirstButton, param_val);
 		}
 		event_bitmask >>= 1;
 		i++;
