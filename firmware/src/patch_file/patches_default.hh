@@ -5,6 +5,15 @@
 
 ///
 
+#include "../patches/default/Ensemble Wash.hh"
+#include "../patches/default/Karpeggiator.hh"
+#include "../patches/default/MorphingDrone.hh"
+#include "../patches/default/Oscillator Wash.hh"
+#include "../patches/default/Thunderbanshee.hh"
+#include "../patches/default/West Coast FM Madness.hh"
+#include "../patches/default/Wonky Bass.hh"
+#include "../patches/default/Wooden Groove.hh"
+
 #include "../patches/default/Djembe4verb.hh"
 #include "../patches/default/DualEnvEnosc.hh"
 #include "../patches/default/EnOscPoly4.hh"
@@ -22,6 +31,15 @@
 struct DefaultPatches {
 
 	static inline std::array patch_raw_data = std::to_array<std::span<const char>>({
+		patch_Ensemble_Wash,
+		patch_Karpeggiator,
+		patch_MorphingDrone,
+		patch_Oscillator_Wash,
+		patch_Thunderbanshee,
+		patch_West_Coast_FM_Madness,
+		patch_Wonky_Bass,
+		patch_Wooden_Groove,
+
 		Djembe4verb_patch, //
 		DualEnvEnOsc_patch,
 		EnOscPoly4_patch,
@@ -38,6 +56,15 @@ struct DefaultPatches {
 	});
 
 	static inline std::array patch_filenames = std::to_array<StaticString<63>>({
+		"Ensemble_Wash.yml",
+		"Karpeggiator.yml",
+		"MorphingDrone.yml",
+		"Oscillator_Wash.yml",
+		"Thunderbanshee.yml",
+		"West_Coast_FM_Madness.yml",
+		"Wonky_Bass.yml",
+		"Wooden_Groove.yml",
+
 		"Djembe4verb.yml",	//
 		"DualEnvEnOsc.yml", //
 		"EnOscPoly4.yml",	//
