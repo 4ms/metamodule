@@ -13,6 +13,7 @@
 #include "gui/pages/module_view_mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "metaparams.hh"
 #include "params/expanders.hh"
 #include "params/params_state.hh"
 
@@ -35,6 +36,7 @@ struct ModuleViewMappingPane {
 	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
 						  ParamsMidiState &params,
+						  MetaParams &metaparams,
 						  PageArguments &args,
 						  PageList &page_list,
 						  NotificationQueue &notify_queue,
@@ -43,6 +45,7 @@ struct ModuleViewMappingPane {
 		: pane_group(lv_group_create())
 		, patch{patches.get_view_patch()}
 		, params{params}
+		, metaparams{metaparams}
 		, args{args}
 		, page_list{page_list}
 		, notify_queue{notify_queue}
@@ -169,7 +172,7 @@ struct ModuleViewMappingPane {
 	}
 
 	void update() {
-		add_map_popup.update(params);
+		add_map_popup.update(params, metaparams);
 
 		if (midi_map_popup.is_visible())
 			midi_map_popup.update();
@@ -784,6 +787,7 @@ private:
 	bool should_close = false;
 	PatchData *patch;
 	ParamsMidiState &params;
+	MetaParams &metaparams;
 
 	PageArguments &args;
 	PageList &page_list;
