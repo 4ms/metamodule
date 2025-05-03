@@ -167,7 +167,7 @@ public:
 	}
 
 	bool request_reset_factory_patches() {
-		IntercoreStorageMessage message{.message_type = RequestFactoryResetPatches};
+		IntercoreStorageMessage message{.message_type = RequestFactoryReset};
 		return comm_.send_message(message);
 	}
 

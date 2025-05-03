@@ -51,8 +51,11 @@ struct IntercoreStorageMessage {
 		WriteFileFail,
 		WriteFileOK,
 
-		RequestFactoryResetPatches,
-		FactoryResetPatchesDone,
+		RequestFactoryReset,
+		FactoryResetDone,
+
+		RequestReloadDefaultPatches,
+		ReloadDefaultPatchesDone,
 
 		RequestPluginFileList,
 		PluginFileListOK,
