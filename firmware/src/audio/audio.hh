@@ -52,6 +52,7 @@ public:
 	uint32_t get_audio_errors();
 	void handle_overruns();
 	void step();
+	void pause_audio();
 
 private:
 	SyncParams &sync_params;

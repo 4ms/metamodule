@@ -128,6 +128,7 @@ extern "C" void run_audio() {
 	audio->start();
 
 	while (true) {
+		Debug::Pin2::high();
 		__NOP();
 
 		audio->handle_overruns();
@@ -136,30 +137,40 @@ extern "C" void run_audio() {
 			pr_err("Audio error\n");
 			audio->start();
 		}
+		Debug::Pin2::low();
 	}
 }
 
 extern "C" void kill_audio_thread(int type) {
 	using namespace MetaModule;
 
-	printf("Recovering from crash type %d\n", type);
+	Debug::Pin0::high();
+	// printf("Recovering from crash type %d\n", type);
 
 	GIC_EndInterrupt(DMA2_Stream1_IRQn);
 
 	if (auto audio = AudioThreadMinder::audio_stream()) {
-		printf("Stopping audio...\n");
+		Debug::Pin1::high();
+		// printf("Stopping audio...\n");
 		audio->stop();
-		printf("Stopped\n");
+		// printf("Stopped\n");
+		Debug::Pin1::low();
 	}
 
 	if (auto player = AudioThreadMinder::player()) {
+		Debug::Pin1::high();
 		printf("Unloading patch...\n");
 		player->unload_patch();
 		printf("Unloaded\n");
+		Debug::Pin1::low();
 	}
+	Debug::Pin0::low();
 
 	HAL_Delay(100);
 
-	printf("Restarting audio...\n");
-	run_audio();
+	// printf("Restarting audio...\n");
+	if (auto audio = AudioThreadMinder::audio_stream()) {
+		audio->pause_audio();
+		run_audio();
+	}
 }

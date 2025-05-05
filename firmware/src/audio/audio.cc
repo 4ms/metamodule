@@ -131,6 +131,12 @@ void AudioStream::start() {
 	codec_.start();
 }
 
+void AudioStream::pause_audio() {
+	patch_loader.stop_audio();
+	output_fade_amt = 0;
+	patch_loader.notify_audio_is_muted();
+}
+
 void AudioStream::stop() {
 	codec_.stop();
 	if (ext_audio_connected)
@@ -162,10 +168,13 @@ AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
 bool AudioStream::is_playing_patch() {
 	// Don't allow anyone to stop the patch while we are retrying to recover from an overrun:
 	// because core 0 has a lock on the player
-	if (overrun_handler.is_retrying())
+	if (overrun_handler.is_retrying()) {
+		printf("RT\n");
 		return true;
+	}
 
 	if (patch_loader.should_fade_down_audio()) {
+		printf("FD\n");
 		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt <= 0.f) {
 			output_fade_amt = 0.f;
@@ -174,6 +183,7 @@ bool AudioStream::is_playing_patch() {
 		}
 
 	} else if (patch_loader.should_fade_up_audio()) {
+		printf("FU\n");
 		patch_loader.notify_audio_not_muted();
 		output_fade_delta = 1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt >= 1.f) {
