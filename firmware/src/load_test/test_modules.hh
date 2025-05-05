@@ -77,35 +77,35 @@ inline std::string csv_header() {
 	std::string s;
 
 	// Header
-	s = "Module, ";
-	pr_info("Module, ");
+	s = "Module,";
+	pr_info("Module,");
 
 	for (unsigned int blocksize : ModuleEntry::blocksizes) {
-		s += "Isolated-" + std::to_string(blocksize) + ", ";
-		pr_info("Isolated-%u, ", blocksize);
+		s += "Isolated-" + std::to_string(blocksize) + ",";
+		pr_info("Isolated-%u,", blocksize);
 	}
 
 	for (unsigned int blocksize : ModuleEntry::blocksizes) {
-		s += "InputsZero-" + std::to_string(blocksize) + ", ";
-		pr_info("InputsZero-%u, ", blocksize);
+		s += "InputsZero-" + std::to_string(blocksize) + ",";
+		pr_info("InputsZero-%u,", blocksize);
 	}
 
 	for (unsigned int blocksize : ModuleEntry::blocksizes) {
-		s += "InputsLFOs-" + std::to_string(blocksize) + ", ";
-		pr_info("InputsLFOs-%u, ", blocksize);
+		s += "InputsLFOs-" + std::to_string(blocksize) + ",";
+		pr_info("InputsLFOs-%u,", blocksize);
 	}
 
 	for (unsigned int blocksize : ModuleEntry::blocksizes) {
-		s += "InputsAudio-" + std::to_string(blocksize) + ", ";
-		pr_info("InputsAudio-%u, ", blocksize);
+		s += "InputsAudio-" + std::to_string(blocksize) + ",";
+		pr_info("InputsAudio-%u,", blocksize);
 	}
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
-	s += "PeakStartupMem, PeakRunningMem, ";
+	s += "PeakStartupMem,PeakRunningMem,";
 	// Not accurate, but sometimes a hint:
-	s += "LeakedMem?, ";
+	s += "LeakedMem?,";
 	s += "DoubleFree?";
-	pr_info("PeakStartupMem, PeakRunningMem, LeakedMem, DoubleFree?, Valid");
+	pr_info("PeakStartupMem,PeakRunningMem,LeakedMem,DoubleFree?,Valid");
 #endif
 
 	s += "\n";
@@ -119,14 +119,14 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 
 	std::string s;
 
-	s = entry.slug + ", ";
-	pr_info("%s, ", entry.slug.c_str());
+	s = entry.slug + ",";
+	pr_info("%s,", entry.slug.c_str());
 
 	auto report_cpu = [&s](auto entryitem) {
 		char buf[16];
-		snprintf(buf, 16, "%.3f, ", entryitem.average_run_time / sampletime);
+		snprintf(buf, 16, "%.3f,", entryitem.average_run_time / sampletime);
 		s += buf;
-		pr_info("%.3f, ", entryitem.average_run_time / sampletime);
+		pr_info("%.3f,", entryitem.average_run_time / sampletime);
 	};
 
 	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
@@ -147,15 +147,15 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	if (entry.mem_usage.results_invalid) {
-		s += "CAN'T MEASURE, , , ";
+		s += "CAN'T MEASURE,,,";
 	} else {
-		s += std::to_string(entry.mem_usage.peak_mem_startup) + ", ";
-		s += std::to_string(entry.mem_usage.peak_running_mem) + ", ";
+		s += std::to_string(entry.mem_usage.peak_mem_startup) + ",";
+		s += std::to_string(entry.mem_usage.peak_running_mem) + ",";
 		// Not accurate, but sometimes a hint:
-		s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
+		s += std::to_string(entry.mem_usage.mem_leaked) + ",";
 		s += entry.mem_usage.double_free ? "YES" : "n";
 	}
-	pr_info("%zu, %zu, %zu, %d, %s\n",
+	pr_info("%zu,%zu,%zu,%d,%s\n",
 			entry.mem_usage.peak_mem_startup,
 			entry.mem_usage.peak_running_mem,
 			entry.mem_usage.mem_leaked,
@@ -163,7 +163,7 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 			entry.mem_usage.results_invalid ? "TOOMANYALLOCS" : "ok");
 #endif
 
-	if (s.ends_with(", ")) {
+	if (s.ends_with(",")) {
 		s.pop_back();
 		s.pop_back();
 	}
