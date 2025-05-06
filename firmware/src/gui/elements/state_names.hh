@@ -16,7 +16,20 @@ inline std::string get_element_value_string(Element const &element, float value,
 
 	std::visit(overloaded{
 				   [value = value, res = resolution, &s](Pot const &el) {
-					   if (el.min_value == 0 && el.max_value == 1 && el.display_mult == 1 && el.display_offset == 0 &&
+						if (el.integral) {
+							float clamped_value = std::clamp(value, 0.f, 1.f);
+
+							unsigned v = (clamped_value >= 1.f) ? 
+								el.num_pos - 1 : 
+								static_cast<unsigned>(std::floor(clamped_value * el.num_pos));
+							
+							if (v >= 0 && v < el.num_pos && el.pos_names[v].size())
+								s = el.pos_names[v];
+							else
+								s = std::to_string(v + 1) + std::string("/") + std::to_string(el.num_pos);
+						}
+
+					   else if (el.min_value == 0 && el.max_value == 1 && el.display_mult == 1 && el.display_offset == 0 &&
 						   el.display_base == 0 && el.units.length() == 0)
 					   {
 						   // No custom range or display: show it as a percentage

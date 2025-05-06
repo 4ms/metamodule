@@ -100,6 +100,17 @@ static Knob create_base_knob(rack::app::Knob *widget) {
 		element.display_offset = pq->displayOffset;
 		element.integral = pq->snapEnabled;
 		element.display_precision = pq->displayPrecision;
+
+		if (element.integral) {
+			auto switchPq = dynamic_cast<rack::engine::SwitchQuantity*>(pq);
+			if (switchPq) {
+				element.num_pos = pq->maxValue - pq->minValue + 1;
+
+				for (int i = 0; i < element.num_pos; i++) {
+					element.pos_names[i] = switchPq->labels[i];
+				}
+			}
+		}
 	}
 
 	return element;
@@ -203,8 +214,12 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 		element.num_pos = std::clamp<size_t>(element.num_pos, 2, element.pos_names.size());
 	}
 
-	for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
-		element.pos_names[i] = pq->labels[i];
+	// Check if pq is actually a SwitchQuantity with labels
+	auto switchPq = dynamic_cast<rack::engine::SwitchQuantity*>(pq);
+	if (switchPq) {
+		for (auto i = 0u; i < std::min<size_t>(element.num_pos, switchPq->labels.size()); i++) {
+			element.pos_names[i] = switchPq->labels[i];
+		}
 	}
 
 	// This seems to be the default for VCV?
