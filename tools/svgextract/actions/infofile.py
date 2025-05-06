@@ -101,7 +101,10 @@ def panel_to_components(tree):
         split = name.split("@")
         if len(split) == 2:
             name = split[0]
-            c['num_choices'] = int(split[1])
+            try:
+                c['num_choices'] = int(split[1])
+            except:
+                c['pos_names'] = split[1:]
         elif len(split) > 2:
             name = split[0]
             c['pos_names'] = split[1:]
