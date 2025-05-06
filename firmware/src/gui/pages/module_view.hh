@@ -809,6 +809,17 @@ private:
 		}
 	}
 
+	void send_param_value(float value, GuiElement const &gui_element) {
+		StaticParam sp{
+			.module_id = gui_element.module_idx,
+			.param_id = gui_element.idx.param_idx,
+			.value = value,
+		};
+		patch_mod_queue.put(SetStaticParam{.param = sp});
+
+		patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
+	}
+
 	static void roller_focus_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		if (page) {
