@@ -744,12 +744,24 @@ private:
 
 			} else {
 
-				page->mode = ViewMode::Mapping;
-				page->args.detail_mode = true;
-				lv_hide(ui_ElementRollerPanel);
-				page->roller_hover.hide();
+				auto is_action_param = std::visit(overloaded{[](BaseElement const &) { return false; },
+															 [](AltParamChoice const &el) {
+																 return (el.num_pos == 1);
+															 }},
+												  page->drawn_elements[*drawn_idx].element);
+				if (is_action_param) {
+					if (page->is_patch_playloaded) {
+						page->send_param_value(1, page->drawn_elements[*drawn_idx].gui_element);
+						page->send_param_value(0, page->drawn_elements[*drawn_idx].gui_element);
+					}
 
-				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+				} else {
+					page->mode = ViewMode::Mapping;
+					page->args.detail_mode = true;
+					lv_hide(ui_ElementRollerPanel);
+					page->roller_hover.hide();
+					page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+				}
 
 				if (page->full_screen_mode) {
 					// TODO: if fullscreen, then open Adjust pop up directly
@@ -771,6 +783,17 @@ private:
 				}
 			}
 		}
+	}
+
+	void send_param_value(float value, GuiElement const &gui_element) {
+		StaticParam sp{
+			.module_id = gui_element.module_idx,
+			.param_id = gui_element.idx.param_idx,
+			.value = value,
+		};
+		patch_mod_queue.put(SetStaticParam{.param = sp});
+
+		patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
 	}
 
 	static void roller_focus_cb(lv_event_t *event) {
