@@ -180,6 +180,9 @@ struct KnobMapPage : PageBase {
 					del_popup.show([this](bool ok) { save_knob_alias(ok); }, "Do you want to keep your edits?", "Keep");
 			} else if (del_popup.is_visible()) {
 				del_popup.hide();
+			} else if (lv_dropdown_is_open(ui_EditMapMidiChannelDropdown)) {
+				lv_dropdown_close(ui_EditMapMidiChannelDropdown);
+				lv_group_set_editing(group, false);
 			} else {
 				page_list.request_last_page();
 			}
