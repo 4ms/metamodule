@@ -11,6 +11,7 @@ namespace MetaModule::LoadTest
 struct ModuleEntry {
 	static constexpr std::array<unsigned, 5> blocksizes{32, 64, 128, 256, 512};
 	std::string slug;
+	uint64_t load_time;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> isolated;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> patched;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> cv_modulated;
@@ -49,6 +50,9 @@ inline void test_all_modules(auto append_file) {
 				ModuleLoadTester tester(entry.slug);
 
 				pr_info("Block size %u\n", blocksize);
+
+				pr_info("Timing module construction\n");
+				entry.load_time = tester.measure_construction_time();
 
 				pr_info("Running all unpatched test\n");
 				entry.isolated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::NonePatched);
@@ -99,6 +103,8 @@ inline std::string csv_header() {
 		s += "InputsAudio-" + std::to_string(blocksize) + ",";
 		pr_info("InputsAudio-%u,", blocksize);
 	}
+	s += "ConstructionTime(ms),FirstRunTime(ms)";
+	pr_info("Construction Time(ms),FirstRunTime(ms)");
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	s += "PeakStartupMem,PeakRunningMem,";
@@ -124,9 +130,9 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 
 	auto report_cpu = [&s](auto entryitem) {
 		char buf[16];
-		snprintf(buf, 16, "%.3f,", entryitem.average_run_time / sampletime);
+		snprintf(buf, 16, "%.3f,", entryitem.average_run_time_after_first / sampletime);
 		s += buf;
-		pr_info("%.3f,", entryitem.average_run_time / sampletime);
+		pr_info("%.3f,", entryitem.average_run_time_after_first / sampletime);
 	};
 
 	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
@@ -144,6 +150,25 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
 		report_cpu(entry.audio_modulated[i]);
 	}
+
+	char buf[16];
+	snprintf(buf, 16, "%llu,", entry.load_time);
+	s += buf;
+	pr_info("%llu,", entry.load_time);
+
+	float avg_first_run_time = 0;
+	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
+		avg_first_run_time += entry.isolated[i].first_run_time;
+		avg_first_run_time += entry.patched[i].first_run_time;
+		avg_first_run_time += entry.cv_modulated[i].first_run_time;
+		avg_first_run_time += entry.audio_modulated[i].first_run_time;
+	}
+	avg_first_run_time /= 4.f * ModuleEntry::blocksizes.size();
+	avg_first_run_time /= 1000.f; // us => ms
+
+	snprintf(buf, 16, "%.3f,", avg_first_run_time);
+	s += buf;
+	pr_info("%.3f,", avg_first_run_time);
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	if (entry.mem_usage.results_invalid) {
