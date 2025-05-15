@@ -5,7 +5,6 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "patch_play/modules_helpers.hh"
 #include "src/core/lv_obj_pos.h"
 #include "src/misc/lv_timer.h"
 
@@ -33,20 +32,52 @@ struct ModuleListPage : PageBase {
 	}
 
 private:
+	struct ListEntry {
+		std::string_view brand_slug;
+		std::string_view module_slug;
+		std::string_view module_display_name;
+	};
+	std::vector<ListEntry> entries;
+
 	void populate_modules() {
+		auto all_brand_slugs = ModuleFactory::getBrandSlugsWithDisplayName(sel_brand_display_name);
 
-		auto all_slugs = ModuleFactory::getAllModuleDisplayNames(selected_brand_slug);
-		std::ranges::sort(all_slugs, less_ci);
+		entries.clear();
 
+		// Populate brand/module list
+		for (auto const &brand_slug : all_brand_slugs) {
+			auto all_slugs = ModuleFactory::getAllModuleSlugs(brand_slug);
+			for (auto const &module_slug : all_slugs) {
+				auto combined_slug = std::string(brand_slug) + ":" + std::string(module_slug);
+				auto display_name = ModuleFactory::getModuleDisplayName(combined_slug);
+
+				entries.push_back(
+					{.brand_slug = brand_slug, .module_slug = module_slug, .module_display_name = display_name});
+			}
+		}
+
+		// Remove 4ms Hub
+		std::erase_if(entries, [](auto const &entry) {
+			return (entry.brand_slug == "4msCompany" &&
+					(entry.module_slug == "HubMedium" || entry.module_slug == "Panel"));
+		});
+
+		// Sort
+		std::ranges::sort(entries,
+						  [](auto a, auto b) { return less_ci(a.module_display_name, b.module_display_name); });
+
+		// Create roller entries
 		std::string slugs_str;
-		slugs_str.reserve(all_slugs.size() * (sizeof(ModuleTypeSlug) + 1));
-		for (auto slug : all_slugs) {
-			if (selected_brand_slug == "4msCompany" && (slug == "HubMedium" || slug == "Panel"))
-				continue;
-			slugs_str += slug;
+		slugs_str.reserve(entries.size() * (sizeof(ModuleTypeSlug) + 1));
+
+		for (auto entry : entries) {
+			slugs_str += entry.module_display_name;
 			slugs_str += "\n";
 		}
-		slugs_str.pop_back();
+
+		if (slugs_str.length())
+			slugs_str.pop_back();
+
 		lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_selected(ui_ModuleListRoller, 0, LV_ANIM_OFF);
 	}
@@ -61,7 +92,7 @@ private:
 		for (unsigned i = 0; auto const &item : all_brands) {
 			roller_str += item;
 			roller_str += "\n";
-			if (selected_brand == item)
+			if (sel_brand_display_name == item)
 				sel_idx = i;
 			i++;
 		}
@@ -71,7 +102,7 @@ private:
 	}
 
 	void roller_module_list() {
-		lv_label_set_text(ui_ModuleListRollerTitle, selected_brand.data());
+		lv_label_set_text(ui_ModuleListRollerTitle, sel_brand_display_name.data());
 		populate_modules();
 		drawn_module_idx = -1; //force redraw
 		draw_module();
@@ -158,16 +189,11 @@ private:
 		if (!page)
 			return;
 
-		ModuleTypeSlug selected_str;
-		lv_roller_get_selected_str(event->target, selected_str._data, selected_str.capacity);
-
 		if (page->view == View::BrandRoller) {
 			page->view = View::ModuleRoller;
-			page->selected_brand = selected_str.c_str();
-			page->selected_brand_slug = ModuleFactory::getBrandSlug(page->selected_brand);
-			if (!page->selected_brand_slug.length()) {
-				pr_err("Brand not found with display name %s\n", page->selected_brand.data());
-			}
+			ModuleTypeSlug selected_str;
+			lv_roller_get_selected_str(event->target, selected_str._data, selected_str.capacity);
+			page->sel_brand_display_name = selected_str.c_str();
 			page->roller_module_list();
 
 		} else if (page->view == View::ModuleRoller) {
@@ -175,9 +201,13 @@ private:
 			page->hide_roller();
 
 		} else {
-			std::string slug = std::string{page->selected_brand_slug} + ":" + page->selected_module_slug;
-			page->add_module(slug);
-			page->load_page(PageId::PatchView, page->args);
+			auto cur_idx = lv_roller_get_selected(ui_ModuleListRoller);
+			if (auto slug = page->get_selected_combined_slug(cur_idx); slug.length()) {
+				page->add_module(slug);
+				page->load_page(PageId::PatchView, page->args);
+			} else {
+				page->notify_queue.put({"Cannot add module, slug is empty"});
+			}
 		}
 	}
 
@@ -208,17 +238,24 @@ private:
 		patches.mark_view_patch_modified();
 	}
 
+	std::string get_selected_combined_slug(unsigned selected_idx) {
+		std::string slug;
+		if (selected_idx >= 0 && selected_idx < entries.size()) {
+			auto const &entry = entries[selected_idx];
+			slug = std::string{entry.brand_slug} + ":" + std::string{entry.module_slug};
+		}
+		return slug;
+	}
+
 	void draw_module() {
 		if (view == View::ModuleOnly || view == View::ModuleRoller) {
 			auto cur_idx = lv_roller_get_selected(ui_ModuleListRoller);
 			if (cur_idx != drawn_module_idx) {
-				drawn_module_idx = cur_idx;
-				ModuleTypeSlug module_display_name;
-				lv_roller_get_selected_str(
-					ui_ModuleListRoller, module_display_name._data, module_display_name.capacity);
-				selected_module_slug = ModuleFactory::getModuleSlug(selected_brand_slug, module_display_name);
-				std::string slug = std::string{selected_brand_slug} + ":" + selected_module_slug;
-				draw_module(slug.c_str());
+
+				if (auto slug = get_selected_combined_slug(cur_idx); slug.length()) {
+					drawn_module_idx = cur_idx;
+					draw_module(slug.c_str());
+				}
 			}
 		}
 	}
@@ -249,8 +286,7 @@ private:
 	lv_timer_t *draw_timer{};
 	unsigned drawn_module_idx = -1;
 	bool do_redraw = false;
-	std::string selected_brand{"4msCompany"};
-	std::string selected_brand_slug{"4msCompany"};
+	std::string sel_brand_display_name{"4msCompany"};
 	std::string selected_module_slug;
 
 	RollerHoverText roller_hover;
