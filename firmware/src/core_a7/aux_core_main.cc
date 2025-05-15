@@ -80,7 +80,12 @@ extern "C" void aux_core_main() {
 		Debug::Pin0::high();
 
 		using namespace mdrivlib;
-		if (Pin{ControlPins::but0, PinMode::Input, PinPull::Up, PinPolarity::Inverted}.is_on()) {
+
+		std::string should_run;
+		FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
+
+		if (should_run == "all\n" || Pin{ControlPins::but0, PinMode::Input, PinPull::Up, PinPolarity::Inverted}.is_on())
+		{
 			pr_info("A7 Core 2 running CPU load tests\n");
 			LoadTest::test_all_modules([&file_storage_proxy, &ui](std::string_view csv_line) {
 				FS::append_file(file_storage_proxy, csv_line, {"cpu_test.csv", Volume::USB});
