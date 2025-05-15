@@ -176,6 +176,12 @@ public:
 		return comm_.send_message(message);
 	}
 
+	// Query the patch file cache (faster than reading from disk)
+	bool request_patchfile_info(Volume vol, std::string_view path) {
+		IntercoreStorageMessage message{.message_type = RequestPatchFileInfo, .vol_id = vol, .filename = path};
+		return comm_.send_message(message);
+	}
+
 	bool request_file_info(Volume vol, std::string_view path) {
 		IntercoreStorageMessage message{.message_type = RequestFileInfo, .vol_id = vol, .filename = path};
 		return comm_.send_message(message);
