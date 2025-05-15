@@ -104,13 +104,19 @@ struct ModuleLoadTester {
 		return {};
 	}
 
-	bool load_patch() {
-		auto res = player.load_patch(patch);
+	std::optional<float> load_patch() {
+		Result res;
+
+		auto tm = measure([&]() {
+			res = player.load_patch(patch);
+			player.update_patch_singlecore();
+		});
+
 		if (res.success == false) {
 			pr_err("Test failed to load patch: %s\n", res.error_string.c_str());
-			return false;
+			return std::nullopt;
 		}
-		return true;
+		return tm;
 	}
 
 	Measurements run_patch(auto control_func, size_t block_size) {
