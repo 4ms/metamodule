@@ -104,7 +104,7 @@ inline std::string csv_header() {
 		pr_info("InputsAudio-%u,", blocksize);
 	}
 	s += "ConstructionTime(ms),FirstRunTime(ms)";
-	pr_info("Construction Time(ms),FirstRunTime(ms)");
+	pr_info("ConstructionTime(ms),FirstRunTime(ms)");
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	s += "PeakStartupMem,PeakRunningMem,";
@@ -151,24 +151,23 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 		report_cpu(entry.audio_modulated[i]);
 	}
 
-	char buf[16];
-	snprintf(buf, 16, "%llu,", entry.load_time);
+	char buf[32];
+	snprintf(buf, 32, "%llu,", entry.load_time / 1000);
 	s += buf;
-	pr_info("%llu,", entry.load_time);
+	pr_info("%llu,", entry.load_time / 1000);
 
-	float avg_first_run_time = 0;
+	uint64_t worst_first_run_time = 0;
 	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-		avg_first_run_time += entry.isolated[i].first_run_time;
-		avg_first_run_time += entry.patched[i].first_run_time;
-		avg_first_run_time += entry.cv_modulated[i].first_run_time;
-		avg_first_run_time += entry.audio_modulated[i].first_run_time;
+		worst_first_run_time = std::max(worst_first_run_time, entry.isolated[i].first_run_time);
+		worst_first_run_time = std::max(worst_first_run_time, entry.patched[i].first_run_time);
+		worst_first_run_time = std::max(worst_first_run_time, entry.cv_modulated[i].first_run_time);
+		worst_first_run_time = std::max(worst_first_run_time, entry.audio_modulated[i].first_run_time);
 	}
-	avg_first_run_time /= 4.f * ModuleEntry::blocksizes.size();
-	avg_first_run_time /= 1000.f; // us => ms
+	worst_first_run_time /= 1000; // us => ms
 
-	snprintf(buf, 16, "%.3f,", avg_first_run_time);
+	snprintf(buf, 32, "%llu,", worst_first_run_time);
 	s += buf;
-	pr_info("%.3f,", avg_first_run_time);
+	pr_info("%llu,", worst_first_run_time);
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	if (entry.mem_usage.results_invalid) {

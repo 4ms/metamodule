@@ -21,9 +21,11 @@ struct ModuleLoadTester {
 		Measurements() = default;
 		Measurements(std::span<uint64_t> update_times)
 			: first_run_time(update_times[0])
+			, worst_run_time_after_first(*std::max_element(std::next(update_times.begin()), update_times.end()))
 			, average_run_time(std::accumulate(update_times.begin(), update_times.end(), 0.f) /
-							   (float)update_times.size()) {
-			worst_run_time_after_first = *std::max_element(std::next(update_times.begin()), update_times.end());
+							   (float)update_times.size())
+			, average_run_time_after_first(std::accumulate(std::next(update_times.begin()), update_times.end(), 0.f) /
+										   (float)update_times.size()) {
 		}
 	};
 
@@ -137,10 +139,14 @@ struct ModuleLoadTester {
 			}
 
 			auto current = Measurements{times};
+
 			worst.first_run_time = std::max(worst.first_run_time, current.first_run_time);
 			worst.average_run_time = std::max(worst.average_run_time, current.average_run_time);
 			worst.worst_run_time_after_first =
 				std::max(worst.worst_run_time_after_first, current.worst_run_time_after_first);
+			worst.average_run_time_after_first =
+				std::max(worst.average_run_time_after_first, current.average_run_time_after_first);
+
 			pr_dump("it %d: avg:%f first:%f worst(>1):%f\n",
 					iterations,
 					worst.average_run_time,
