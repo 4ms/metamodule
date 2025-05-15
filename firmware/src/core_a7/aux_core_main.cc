@@ -76,6 +76,9 @@ extern "C" void aux_core_main() {
 
 #ifdef CPU_TEST_ALL_MODULES
 	{
+		// Start Tests
+		Debug::Pin0::high();
+
 		using namespace mdrivlib;
 		if (Pin{ControlPins::but0, PinMode::Input, PinPull::Up, PinPolarity::Inverted}.is_on()) {
 			pr_info("A7 Core 2 running CPU load tests\n");
@@ -84,6 +87,9 @@ extern "C" void aux_core_main() {
 				ui.update_screen();
 			});
 		}
+
+		// Finish Tests
+		Debug::Pin0::low();
 	}
 #endif
 

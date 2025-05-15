@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
+#include "delay.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "memory_tester.hh"
@@ -24,8 +25,13 @@ struct ModuleEntry {
 inline std::string csv_header();
 inline std::string entry_to_csv(ModuleEntry const &entry);
 
-inline void test_all_modules(auto append_file) {
+inline void send_gpio_pulse() {
+	Debug::Pin1::high();
+	delay_ms(1);
+	Debug::Pin1::low();
+}
 
+inline void test_all_modules(auto append_file) {
 	lv_show(ui_MainMenuNowPlayingPanel);
 	lv_show(ui_MainMenuNowPlaying);
 
@@ -51,21 +57,33 @@ inline void test_all_modules(auto append_file) {
 
 				pr_info("Block size %u\n", blocksize);
 
+				send_gpio_pulse();
+
 				pr_info("Timing module construction\n");
 				entry.load_time = tester.measure_construction_time();
+
+				send_gpio_pulse();
 
 				pr_info("Running all unpatched test\n");
 				entry.isolated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::NonePatched);
 
+				send_gpio_pulse();
+
 				pr_info("Running Zero'ed inputs test\n");
 				entry.patched[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsZero);
+
+				send_gpio_pulse();
 
 				pr_info("Running LFO test\n");
 				entry.cv_modulated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsLFO);
 
+				send_gpio_pulse();
+
 				pr_info("Running audio-rate test\n");
 				entry.audio_modulated[i] =
 					tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsAudio);
+
+				send_gpio_pulse();
 
 				i++;
 			}
