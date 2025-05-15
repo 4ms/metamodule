@@ -15,7 +15,7 @@ namespace MetaModule
 struct PluginPopup {
 	PluginPopup()
 		: group{lv_group_create()} {
-		auto p = create_labeled_check_obj(ui_DelMapPopUpPanel, "Autoload");
+		auto p = create_labeled_check_obj(ui_DelMapPopUpPanel, "Pre-load");
 		lv_obj_move_to_index(p, 1);
 		check = lv_obj_get_child(p, -1);
 		lv_obj_add_event_cb(check, toggle_callback, LV_EVENT_VALUE_CHANGED, this);

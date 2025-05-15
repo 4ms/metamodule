@@ -32,10 +32,10 @@ inline void test_all_modules(auto append_file) {
 
 	auto brands = ModuleFactory::getAllBrands();
 	for (auto brand : brands) {
-		auto slugs = ModuleFactory::getAllSlugs(brand);
+		auto slugs = ModuleFactory::getAllModuleSlugs(brand);
 		for (auto slug : slugs) {
 			ModuleEntry entry;
-			entry.slug = brand + ":" + slug;
+			entry.slug = std::string(brand) + ":" + std::string(slug);
 			pr_info("Testing %s\n", entry.slug.c_str());
 			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
 
