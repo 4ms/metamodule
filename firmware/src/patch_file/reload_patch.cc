@@ -18,7 +18,7 @@ std::optional<ReloadPatch::FileTimeSize> ReloadPatch::get_file_info(PatchLocatio
 
 	auto start = get_time();
 
-	while (!patch_storage.request_file_info(patch_loc.vol, patch_loc.filename)) {
+	while (!patch_storage.request_patchfile_info(patch_loc.vol, patch_loc.filename)) {
 		if (get_time() - start > 5000) {
 			pr_err("ReloadPatch::get_file_info timeout making request\n");
 			return {};
@@ -28,11 +28,11 @@ std::optional<ReloadPatch::FileTimeSize> ReloadPatch::get_file_info(PatchLocatio
 	while (true) {
 		auto msg = patch_storage.get_message();
 
-		if (msg.message_type == FileStorageProxy::FileInfoSuccess) {
+		if (msg.message_type == FileStorageProxy::PatchFileInfoSuccess) {
 			return FileTimeSize{.timestamp = msg.timestamp, .filesize = msg.length};
 		}
 
-		if (msg.message_type == FileStorageProxy::FileInfoFailed) {
+		if (msg.message_type == FileStorageProxy::PatchFileInfoFailed) {
 			pr_trace("ReloadPatch::get_file_info: get file info for '%s' failed \n", patch_loc.filename.c_str());
 			return {};
 		}

@@ -166,13 +166,24 @@ public:
 		return comm_.send_message(message) ? WriteResult::Success : WriteResult::Busy;
 	}
 
-	bool request_reset_factory_patches() {
+	bool request_factory_reset() {
 		IntercoreStorageMessage message{.message_type = RequestFactoryReset};
+		return comm_.send_message(message);
+	}
+
+	bool request_reload_factory_patches() {
+		IntercoreStorageMessage message{.message_type = RequestReloadDefaultPatches};
 		return comm_.send_message(message);
 	}
 
 	bool request_plugin_file_list(PluginFileList *plugin_file_list) {
 		IntercoreStorageMessage message{.message_type = RequestPluginFileList, .plugin_file_list = plugin_file_list};
+		return comm_.send_message(message);
+	}
+
+	// Query the patch file cache (faster than reading from disk)
+	bool request_patchfile_info(Volume vol, std::string_view path) {
+		IntercoreStorageMessage message{.message_type = RequestPatchFileInfo, .vol_id = vol, .filename = path};
 		return comm_.send_message(message);
 	}
 

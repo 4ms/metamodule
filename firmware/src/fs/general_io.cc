@@ -5,7 +5,9 @@
 
 namespace MetaModule::FS
 {
-static bool wait_response(FileStorageProxy &proxy);
+static std::optional<IntercoreStorageMessage> wait_response(FileStorageProxy &proxy,
+															IntercoreStorageMessage::MessageType MessageOK,
+															IntercoreStorageMessage::MessageType MessageFail);
 
 bool write_file(FileStorageProxy &proxy, std::string_view filedata, PatchLocation location) {
 	return write_file(proxy, std::span<const char>{filedata.data(), filedata.size()}, location);
@@ -29,7 +31,7 @@ bool write_file(FileStorageProxy &proxy, std::span<const char> filedata, PatchLo
 		}
 	}
 
-	return wait_response(proxy);
+	return wait_response(proxy, FileStorageProxy::WriteFileOK, FileStorageProxy::WriteFileFail).has_value();
 }
 
 bool append_file(FileStorageProxy &proxy, std::string_view filedata, PatchLocation location) {
@@ -46,30 +48,77 @@ bool append_file(FileStorageProxy &proxy, std::string_view filedata, PatchLocati
 		}
 	}
 
-	return wait_response(proxy);
+	return wait_response(proxy, FileStorageProxy::WriteFileOK, FileStorageProxy::WriteFileFail).has_value();
 }
 
-static bool wait_response(FileStorageProxy &proxy) {
+unsigned read_file(FileStorageProxy &proxy, std::string &filedata, PatchLocation location) {
+
 	uint32_t timeout = get_time();
-	while (true) {
-		auto msg = proxy.get_message();
-
-		if (msg.message_type == FileStorageProxy::WriteFileOK) {
-			pr_dbg("File written\n");
-			return true;
-
-		} else if (msg.message_type == FileStorageProxy::WriteFileFail) {
-			pr_err("File write failed\n");
-			return false;
-		}
-
-		if (get_time() - timeout > 4000) {
-			pr_err("File write request not responded to in 4 seconds\n");
+	while (proxy.request_file_info(location.vol, location.filename) == false) {
+		if (get_time() - timeout > 1000) {
+			pr_err("File info request not made in 1 second\n");
 			return false;
 		}
 	}
 
-	return true;
+	if (auto msg = wait_response(proxy, FileStorageProxy::FileInfoSuccess, FileStorageProxy::FileInfoFailed)) {
+		auto filesize = msg->length;
+
+		// Read into non-cacheable RAM:
+		auto buffer = get_ram_buffer();
+		auto bufferc = std::span<char>{(char *)buffer.data(), filesize};
+
+		uint32_t timeout = get_time();
+		while (proxy.request_load_file(location.filename, location.vol, bufferc) == false) {
+			if (get_time() - timeout > 3000) {
+				pr_err("File read request not made in 3 seconds\n");
+				return false;
+			}
+		}
+
+		if (auto msg = wait_response(proxy, FileStorageProxy::LoadFileOK, FileStorageProxy::LoadFileFailed)) {
+			if (msg->bytes_read != filesize) {
+				pr_warn("File '%s' was read for %u bytes, but file size is %u bytes\n",
+						location.filename.c_str(),
+						msg->bytes_read,
+						filesize);
+			}
+			filedata.clear();
+			filedata.append(std::string_view{bufferc});
+			filedata.append("\0"); // fail safe
+
+			return msg->bytes_read;
+		}
+
+		else
+			return 0;
+
+	} else
+		return 0;
+}
+
+static std::optional<IntercoreStorageMessage> wait_response(FileStorageProxy &proxy,
+															IntercoreStorageMessage::MessageType MessageOK,
+															IntercoreStorageMessage::MessageType MessageFail) {
+	uint32_t timeout = get_time();
+	while (true) {
+		auto msg = proxy.get_message();
+
+		if (msg.message_type == MessageOK) {
+			return msg;
+
+		} else if (msg.message_type == MessageFail) {
+			pr_err("File request failed (%u)\n", (unsigned)msg.message_type);
+			return {};
+		}
+
+		if (get_time() - timeout > 4000) {
+			pr_err("File request not responded to in 4 seconds\n");
+			return {};
+		}
+	}
+
+	return {};
 }
 
 } // namespace MetaModule::FS
