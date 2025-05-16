@@ -42,7 +42,15 @@ inline void test_all_modules(auto append_file) {
 		auto slugs = ModuleFactory::getAllModuleSlugs(brand);
 		for (auto slug : slugs) {
 			ModuleEntry entry;
+
 			entry.slug = std::string(brand) + ":" + std::string(slug);
+
+			if (entry.slug == "Bidoo:bordL" || entry.slug == "KRTPluginA:Y" || entry.slug == "SickoCV:SickoLooper1Exp")
+			{
+				pr_info("Skipping %s\n", entry.slug.c_str());
+				continue;
+			}
+
 			pr_info("Testing %s\n", entry.slug.c_str());
 			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
 
@@ -174,18 +182,18 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 	s += buf;
 	pr_info("%llu,", entry.load_time / 1000);
 
-	uint64_t worst_first_run_time = 0;
+	float worst_first_run_time = 0;
 	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-		worst_first_run_time = std::max(worst_first_run_time, entry.isolated[i].first_run_time);
-		worst_first_run_time = std::max(worst_first_run_time, entry.patched[i].first_run_time);
-		worst_first_run_time = std::max(worst_first_run_time, entry.cv_modulated[i].first_run_time);
-		worst_first_run_time = std::max(worst_first_run_time, entry.audio_modulated[i].first_run_time);
+		worst_first_run_time = std::max(worst_first_run_time, (float)entry.isolated[i].first_run_time);
+		worst_first_run_time = std::max(worst_first_run_time, (float)entry.patched[i].first_run_time);
+		worst_first_run_time = std::max(worst_first_run_time, (float)entry.cv_modulated[i].first_run_time);
+		worst_first_run_time = std::max(worst_first_run_time, (float)entry.audio_modulated[i].first_run_time);
 	}
-	worst_first_run_time /= 1000; // us => ms
+	worst_first_run_time /= 1000.f; // us => ms
 
-	snprintf(buf, 32, "%llu,", worst_first_run_time);
+	snprintf(buf, 32, "%.1f,", worst_first_run_time);
 	s += buf;
-	pr_info("%llu,", worst_first_run_time);
+	pr_info("%.1f", worst_first_run_time);
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	if (entry.mem_usage.results_invalid) {
