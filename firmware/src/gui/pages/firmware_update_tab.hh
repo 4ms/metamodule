@@ -7,6 +7,7 @@
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+#include "reboot.hh"
 #include "util/poll_event.hh"
 
 namespace MetaModule
@@ -110,6 +111,7 @@ struct FirmwareUpdateTab : SystemMenuTab {
 			} break;
 
 			case State::Success: {
+				reboot_system();
 			} break;
 
 			case State::Failed: {

@@ -2,17 +2,13 @@
 #include "calibrate/cal_check.hh"
 #include "calibrate/calibration_routine.hh"
 #include "expanders.hh"
-#include "fs/norflash_layout.hh"
-#include "git_version.h"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/hardware_test_popup.hh"
-#include "gui/pages/page_list.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
-#include "util/calibrator.hh"
+#include "gui/slsexport/ui_local.h"
+#include "reboot.hh"
 
 namespace MetaModule
 {
@@ -28,7 +24,8 @@ struct SystemTab : SystemMenuTab {
 		, patch_playloader{patch_playloader}
 		, cal_routine{params, storage, patch_mod_queue}
 		, cal_check{params}
-		, hw_check{params, metaparams} {
+		, hw_check{params, metaparams}
+		, reboot_button{create_button(ui_SystemResetInternalPatchesCont, "Reboot")} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemExpCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
@@ -38,6 +35,10 @@ struct SystemTab : SystemMenuTab {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SystemExpCalibrationButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
+
+		lv_obj_add_flag(reboot_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_set_style_bg_color(reboot_button, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_add_event_cb(reboot_button, reboot_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -50,6 +51,7 @@ struct SystemTab : SystemMenuTab {
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_show(ui_SystemHardwareCheckCont);
+		lv_show(reboot_button);
 
 		lv_group_remove_obj(ui_SystemCalCheckButton);
 		lv_group_remove_obj(ui_SystemCalibrationButton);
@@ -58,6 +60,7 @@ struct SystemTab : SystemMenuTab {
 		lv_group_remove_obj(ui_CalibrationNextButton);
 		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
 		lv_group_remove_obj(ui_CheckHardwareButton);
+		lv_group_remove_obj(reboot_button);
 
 		lv_group_add_obj(group, ui_SystemCalCheckButton);
 		lv_group_add_obj(group, ui_SystemCalibrationButton);
@@ -66,6 +69,7 @@ struct SystemTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_ResetFactoryPatchesButton);
 		lv_group_add_obj(group, ui_CalibrationCancelButton);
 		lv_group_add_obj(group, ui_CalibrationNextButton);
+		lv_group_add_obj(group, reboot_button);
 
 		lv_group_focus_obj(ui_SystemCalCheckButton);
 		confirm_popup.init(ui_SystemMenu, group);
@@ -145,6 +149,21 @@ private:
 		page->hw_check.show(page->group);
 	}
 
+	static void reboot_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<SystemTab *>(event->user_data);
+
+		page->confirm_popup.show(
+			[](bool ok) {
+				if (ok) {
+					reboot_system();
+				}
+			},
+			"Do you really want to reboot immediately? All unsaved work will be lost",
+			"Reboot");
+	}
+
 	static void resetbut_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -172,6 +191,8 @@ private:
 	CalibrationRoutine cal_routine;
 	CalCheck cal_check;
 	HardwareCheckPopup hw_check;
+
+	lv_obj_t *reboot_button = nullptr;
 
 	lv_group_t *group = nullptr;
 };
