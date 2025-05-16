@@ -217,7 +217,6 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 
 	if (s.ends_with(",")) {
 		s.pop_back();
-		s.pop_back();
 	}
 	s += "\n";
 	pr_info("\n");
