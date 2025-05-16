@@ -19,6 +19,8 @@ struct ModuleEntry {
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> audio_modulated;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> knob_tweak;
 
+	int32_t raw_mem_used{};
+
 	ModuleMemoryTester::Measurements mem_usage{};
 };
 
@@ -56,6 +58,7 @@ inline void test_all_modules(auto append_file) {
 			pr_info("Testing %s\n", entry.slug.c_str());
 			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
 
+			struct mallinfo mem_start = mallinfo();
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 			auto mem_tester = ModuleMemoryTester{entry.slug};
 			pr_info("Running memory test\n");
@@ -65,31 +68,31 @@ inline void test_all_modules(auto append_file) {
 			for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
 				ModuleLoadTester tester(entry.slug);
 
-				pr_info("Block size %u\n", blocksize);
+				pr_trace("Block size %u\n", blocksize);
 
 				send_gpio_pulse();
 
-				pr_info("Timing module construction\n");
+				pr_trace("Timing module construction\n");
 				entry.load_time = tester.measure_construction_time();
 
 				send_gpio_pulse();
 
-				pr_info("Running all unpatched test\n");
+				pr_trace("Running all unpatched test\n");
 				entry.isolated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::NonePatched);
 
 				send_gpio_pulse();
 
-				pr_info("Running Zero'ed inputs test\n");
+				pr_trace("Running Zero'ed inputs test\n");
 				entry.patched[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsZero);
 
 				send_gpio_pulse();
 
-				pr_info("Running LFO test\n");
+				pr_trace("Running LFO test\n");
 				entry.cv_modulated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsLFO);
 
 				send_gpio_pulse();
 
-				pr_info("Running audio-rate test\n");
+				pr_trace("Running audio-rate test\n");
 				entry.audio_modulated[i] =
 					tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsAudio);
 
@@ -97,6 +100,11 @@ inline void test_all_modules(auto append_file) {
 
 				i++;
 			}
+
+			struct mallinfo mem_end = mallinfo();
+
+			entry.raw_mem_used = (int32_t)mem_end.uordblks - (int32_t)mem_start.uordblks;
+			pr_info("Mem used: %d\n", entry.raw_mem_used);
 
 			append_file(entry_to_csv(entry));
 		}
