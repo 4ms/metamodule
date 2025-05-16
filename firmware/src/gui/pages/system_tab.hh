@@ -25,16 +25,20 @@ struct SystemTab : SystemMenuTab {
 		, cal_routine{params, storage, patch_mod_queue}
 		, cal_check{params}
 		, hw_check{params, metaparams}
+		, reload_patches_button{create_button(ui_SystemResetInternalPatchesCont, "Restore factory patches")}
 		, reboot_button{create_button(ui_SystemResetInternalPatchesCont, "Reboot")} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemExpCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemCalCheckButton, cal_check_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, factory_resetbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CheckHardwareButton, hwcheck_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SystemExpCalibrationButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
+
+		lv_obj_add_flag(reload_patches_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_add_event_cb(reload_patches_button, reload_patches_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_flag(reboot_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		lv_obj_set_style_bg_color(reboot_button, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -51,6 +55,7 @@ struct SystemTab : SystemMenuTab {
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_show(ui_SystemHardwareCheckCont);
+		lv_show(reload_patches_button);
 		lv_show(reboot_button);
 
 		lv_group_remove_obj(ui_SystemCalCheckButton);
@@ -60,6 +65,7 @@ struct SystemTab : SystemMenuTab {
 		lv_group_remove_obj(ui_CalibrationNextButton);
 		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
 		lv_group_remove_obj(ui_CheckHardwareButton);
+		lv_group_remove_obj(reload_patches_button);
 		lv_group_remove_obj(reboot_button);
 
 		lv_group_add_obj(group, ui_SystemCalCheckButton);
@@ -69,6 +75,7 @@ struct SystemTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_ResetFactoryPatchesButton);
 		lv_group_add_obj(group, ui_CalibrationCancelButton);
 		lv_group_add_obj(group, ui_CalibrationNextButton);
+		lv_group_add_obj(group, reload_patches_button);
 		lv_group_add_obj(group, reboot_button);
 
 		lv_group_focus_obj(ui_SystemCalCheckButton);
@@ -164,7 +171,7 @@ private:
 			"Reboot");
 	}
 
-	static void resetbut_cb(lv_event_t *event) {
+	static void factory_resetbut_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 
@@ -172,17 +179,45 @@ private:
 		page->confirm_popup.show(
 			[page](bool ok) {
 				if (ok) {
-					page->storage.request_reset_factory_patches();
-					while (true) {
+					page->storage.request_factory_reset();
+					uint32_t timeout = get_time();
+					while (get_time() - timeout < 10'000) {
 						auto msg = page->storage.get_message();
-						if (msg.message_type == FileStorageProxy::FactoryResetDone)
+						if (msg.message_type == FileStorageProxy::FactoryResetDone) {
+							reboot_system();
 							break;
+						}
 					}
 				}
 			},
 			"Do you really want to PERMANENTLY DELETE all settings and all patches stored internally? The "
-			"factory default patches will be restored. You must reboot.\n",
+			"factory default patches will be restored. The system will reboot when done.\n",
 			"Delete");
+	}
+
+	static void reload_patches_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<SystemTab *>(event->user_data);
+		page->confirm_popup.show(
+			[page](bool ok) {
+				if (ok) {
+					page->storage.request_reload_factory_patches();
+					uint32_t timeout = get_time();
+					while (get_time() - timeout < 10'000) {
+						auto msg = page->storage.get_message();
+						if (msg.message_type == FileStorageProxy::ReloadDefaultPatchesDone) {
+							reboot_system();
+							break;
+						}
+					}
+				}
+			},
+			"This will restore the factory patches on the internal drive, overwriting any changes you've made to those "
+			"patches. "
+			"The system will reboot when done.\n",
+			"Restore");
 	}
 
 	FileStorageProxy &storage;
@@ -192,6 +227,7 @@ private:
 	CalCheck cal_check;
 	HardwareCheckPopup hw_check;
 
+	lv_obj_t *reload_patches_button = nullptr;
 	lv_obj_t *reboot_button = nullptr;
 
 	lv_group_t *group = nullptr;
