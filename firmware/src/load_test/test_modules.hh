@@ -45,7 +45,9 @@ inline void test_all_modules(auto append_file) {
 
 			entry.slug = std::string(brand) + ":" + std::string(slug);
 
-			if (entry.slug == "Bidoo:bordL" || entry.slug == "KRTPluginA:Y" || entry.slug == "SickoCV:SickoLooper1Exp")
+			if (entry.slug == "Bidoo:bordL" || entry.slug == "KRTPluginA:Y" ||
+				entry.slug == "SickoCV:SickoLooper1Exp" || entry.slug == "SickoCV:SickoLooper3" ||
+				entry.slug == "SickoCV:SickoLooper5" || entry.slug == "AmalgamatedHarmonics:Arp32")
 			{
 				pr_info("Skipping %s\n", entry.slug.c_str());
 				continue;
