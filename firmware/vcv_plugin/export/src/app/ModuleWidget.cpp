@@ -93,6 +93,7 @@ void ModuleWidget::setPanel(app::SvgPanel *newpanel) {
 			if (first_panel) {
 				internal->adaptor->addModuleWidget(internal->graphic_display_idx, this);
 				internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
+				printf("Panel graphic_display_idx %d\n", internal->graphic_display_idx);
 				internal->graphic_display_idx++;
 			}
 		}
@@ -200,8 +201,8 @@ void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
 			internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
 			internal->graphic_display_idx++;
 
-			pr_trace("Add drawable (light) at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
-			pr_trace("idx %d (firstLightId = %d)\n", internal->graphic_display_idx - 1, widget->firstLightId);
+			pr_dbg("Add drawable (light) at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+			pr_dbg("idx %d (firstLightId = %d)\n", internal->graphic_display_idx - 1, widget->firstLightId);
 		}
 	}
 }
@@ -266,8 +267,8 @@ void ModuleWidget::addChild(Widget *widget) {
 	internal->graphic_display_idx++;
 
 	auto box = widget->box;
-	pr_trace("Add drawable at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
-	pr_trace("idx %d\n", internal->graphic_display_idx - 1);
+	pr_dbg("Add drawable at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+	pr_dbg("idx %d\n", internal->graphic_display_idx - 1);
 }
 
 void ModuleWidget::addChild(MetaModule::VCVTextDisplay *widget) {
@@ -377,6 +378,21 @@ std::vector<PortWidget *> ModuleWidget::getOutputs() {
 }
 
 void ModuleWidget::populate_elements_indices(rack::plugin::Model *model) {
+	// 
+	if (auto panel = getPanel()) {
+		for (auto *child : panel->fb->children) {
+			// Move panel->fb children to mw children
+			child->parent = nullptr;
+			if (auto svg = dynamic_cast<widget::SvgWidget*>(child)) {
+				printf("Add fb child svgwidget %f,%f\n", svg->box.pos.x, svg->box.pos.y);
+				addChild(svg);
+			} else {
+				printf("Add fb child widget %f,%f\n", child->box.pos.x, child->box.pos.y);
+				addChild(child);
+			}
+		}
+		panel->fb->children.clear();
+	}
 	internal->adaptor->populate_elements_indices(model->elements, model->indices);
 }
 
