@@ -131,6 +131,7 @@ struct ModuleWidgetAdaptor {
 
 	void addImage(rack::widget::SvgWidget *widget) {
 		if (widget) {
+			printf("addImage %s\n", widget->svg->filename().data());
 			Element element = make_element(widget);
 			assign_element_fields(widget, "", element);
 
