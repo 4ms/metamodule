@@ -131,6 +131,7 @@ struct ModuleWidgetAdaptor {
 
 	void addImage(rack::widget::SvgWidget *widget) {
 		if (widget) {
+			printf("addImage %s\n", widget->svg->filename().data());
 			Element element = make_element(widget);
 			assign_element_fields(widget, "", element);
 
@@ -222,7 +223,7 @@ struct ModuleWidgetAdaptor {
 			Element element = DynamicGraphicDisplay{};
 
 			if (widget->box.size.y > 400 || widget->box.size.y == 0) {
-				pr_trace("Widget graph_disp_idx %d @ %f box size y invalid: %f. Fix=>%f - @\n",
+				pr_dbg("Widget graph_disp_idx %d @ %f box size y invalid: %f. Fix=>%f - @\n",
 						 graphic_display_idx,
 						 widget->box.pos.y,
 						 widget->box.size.y,
@@ -230,7 +231,7 @@ struct ModuleWidgetAdaptor {
 				widget->box.size.y = widget->parent->box.size.y - widget->box.pos.y;
 			}
 			if (widget->box.size.x > 400 || widget->box.size.x == 0) {
-				pr_trace("Widget graph_disp_idx %d @ %f box size x invalid: %f. Fix=>%f - @\n",
+				pr_dbg("Widget graph_disp_idx %d @ %f box size x invalid: %f. Fix=>%f - @\n",
 						 graphic_display_idx,
 						 widget->box.pos.x,
 						 widget->box.size.x,
