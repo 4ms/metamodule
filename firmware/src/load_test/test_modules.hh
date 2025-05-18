@@ -3,7 +3,9 @@
 #include "delay.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
+#ifdef MM_LOADTEST_MEASURE_MEMORY
 #include "memory_tester.hh"
+#endif
 #include "tester.hh"
 
 namespace MetaModule::LoadTest
@@ -21,7 +23,9 @@ struct ModuleEntry {
 
 	int32_t raw_mem_used{};
 
+#ifdef MM_LOADTEST_MEASURE_MEMORY
 	ModuleMemoryTester::Measurements mem_usage{};
+#endif
 };
 
 inline std::string csv_header();
@@ -33,7 +37,7 @@ inline void send_gpio_pulse() {
 	Debug::Pin1::low();
 }
 
-inline void test_all_modules(auto append_file) {
+inline void test_module_brand(std::string_view only_brand, auto append_file) {
 	lv_show(ui_MainMenuNowPlayingPanel);
 	lv_show(ui_MainMenuNowPlaying);
 
@@ -41,6 +45,10 @@ inline void test_all_modules(auto append_file) {
 
 	auto brands = ModuleFactory::getAllBrands();
 	for (auto brand : brands) {
+
+		if (only_brand != "all" && only_brand != "" && only_brand != brand)
+			continue;
+
 		auto slugs = ModuleFactory::getAllModuleSlugs(brand);
 		for (auto slug : slugs) {
 			ModuleEntry entry;
@@ -58,7 +66,9 @@ inline void test_all_modules(auto append_file) {
 			pr_info("Testing %s\n", entry.slug.c_str());
 			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
 
+#ifndef SIMULATOR
 			struct mallinfo mem_start = mallinfo();
+#endif
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 			auto mem_tester = ModuleMemoryTester{entry.slug};
 			pr_info("Running memory test\n");
@@ -101,16 +111,22 @@ inline void test_all_modules(auto append_file) {
 				i++;
 			}
 
+#ifndef SIMULATOR
 			struct mallinfo mem_end = mallinfo();
 
 			entry.raw_mem_used = (int32_t)mem_end.uordblks - (int32_t)mem_start.uordblks;
 			pr_info("Mem used: %d\n", entry.raw_mem_used);
+#endif
 
 			append_file(entry_to_csv(entry));
 		}
 	}
 
 	lv_label_set_text(ui_MainMenuNowPlaying, "Finished load tests");
+}
+
+inline void test_all_modules(auto append_file) {
+	test_module_brand("", append_file);
 }
 
 inline std::string csv_header() {
