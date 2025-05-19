@@ -55,10 +55,10 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 
 			entry.slug = std::string(brand) + ":" + std::string(slug);
 
-			// if (entry.slug == "KRTPluginA:Y" || entry.slug == "AmalgamatedHarmonics:Arp32") {
-			// 	pr_info("Skipping %s\n", entry.slug.c_str());
-			// 	continue;
-			// }
+			if (entry.slug == "AmalgamatedHarmonics:Arp32") {
+				pr_info("Skipping %s\n", entry.slug.c_str());
+				continue;
+			}
 
 			pr_info("Testing %s\n", entry.slug.c_str());
 			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
