@@ -4,8 +4,13 @@
 #include "gui/elements/context.hh"
 #include "gui/images/paths.hh"
 #include "lvgl.h"
+#include "midi/midi_message.hh"
+#include "midi/midi_router.hh"
+#include "patch/midi_def.hh"
+#include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
+#include <algorithm>
 #include <cmath>
 
 namespace MetaModule
@@ -174,6 +179,40 @@ inline bool redraw_param(DrawnElement &drawn_el, float value) {
 	if (drawn_el.gui_element.count.num_params > 0) {
 		was_redrawn =
 			std::visit([&](auto &el) { return redraw_element(el, drawn_el.gui_element, value); }, drawn_el.element);
+		
+		// Send MIDI CC for mapped elements if they were redrawn
+		if (was_redrawn && drawn_el.gui_element.mapped_panel_id.has_value()) {
+			auto panel_id = drawn_el.gui_element.mapped_panel_id.value();
+			
+			// Check if this is a MIDI CC mapping using the Midi::midi_cc function
+			if (auto cc_opt = Midi::midi_cc(panel_id)) {
+				// Get the CC number from the optional result
+				uint8_t cc_num = *cc_opt;
+				
+				// Extract the MIDI channel from the panel_id
+				uint8_t midi_chan = MetaModule::Midi::midi_channel(panel_id);
+				// Scale the parameter value (0-1) to MIDI CC value (0-127)
+				uint8_t cc_value = std::clamp(static_cast<int>(value * 127.0f), 0, 127);
+				
+				// Create MIDI CC message
+				MidiMessage cc_msg;
+				cc_msg.status = MidiStatusByte{MidiCommand::ControlChange, midi_chan};
+				cc_msg.data.byte[0] = cc_num;
+				cc_msg.data.byte[1] = cc_value;
+				pr_dbg("Sending MIDI CC: %d %d\n", cc_num, cc_value);
+				
+				// Send via MIDI queue instead of directly to router
+				static thread_local MetaModule::MidiQueue midi_out_queue;
+				static thread_local bool queue_subscribed = false;
+				
+				if (!queue_subscribed) {
+					MetaModule::MidiRouter::subscribe_tx(&midi_out_queue);
+					queue_subscribed = true;
+				}
+				
+				midi_out_queue.put(cc_msg);
+			}
+		}
 	}
 	return was_redrawn;
 }
