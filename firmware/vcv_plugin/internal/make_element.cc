@@ -102,13 +102,16 @@ static Knob create_base_knob(rack::app::Knob *widget) {
 		element.display_precision = pq->displayPrecision;
 
 		if (element.integral) {
-			auto switchPq = dynamic_cast<rack::engine::SwitchQuantity*>(pq);
-			if (switchPq) {
-				element.num_pos = pq->maxValue - pq->minValue + 1;
+			element.num_pos = pq->maxValue - pq->minValue + 1;
 
-				for (int i = 0; i < element.num_pos; i++) {
-					element.pos_names[i] = switchPq->labels[i];
-				}
+			auto clamped_num_pos = std::clamp<size_t>(element.num_pos, 2, pq->labels.size());
+
+			if (clamped_num_pos < element.num_pos) {
+				pr_warn("Warning: Knob has %d positions, but only %d labels\n", element.num_pos, clamped_num_pos);
+			}
+
+			for (auto i = 0u; i < clamped_num_pos; i++) {
+				element.pos_names[i] = pq->labels[i];
 			}
 		}
 	}
@@ -214,11 +217,9 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 		element.num_pos = std::clamp<size_t>(element.num_pos, 2, element.pos_names.size());
 	}
 
-	// Check if pq is actually a SwitchQuantity with labels
-	auto switchPq = dynamic_cast<rack::engine::SwitchQuantity*>(pq);
-	if (switchPq) {
-		for (auto i = 0u; i < std::min<size_t>(element.num_pos, switchPq->labels.size()); i++) {
-			element.pos_names[i] = switchPq->labels[i];
+	if (pq) {
+		for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
+			element.pos_names[i] = pq->labels[i];
 		}
 	}
 

@@ -16,12 +16,10 @@ inline std::string get_element_value_string(Element const &element, float value,
 
 	std::visit(overloaded{
 				   [value = value, res = resolution, &s](Pot const &el) {
-						if (el.integral) {
+						if (el.integral && el.units.length() == 0) {
 							float clamped_value = std::clamp(value, 0.f, 1.f);
 
-							unsigned v = (clamped_value >= 1.f) ? 
-								el.num_pos - 1 : 
-								static_cast<unsigned>(std::floor(clamped_value * el.num_pos));
+							unsigned v = std::round(clamped_value * (float)(el.num_pos - 1));
 							
 							if (v >= 0 && v < el.num_pos && el.pos_names[v].size())
 								s = el.pos_names[v];
