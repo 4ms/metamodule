@@ -1,0 +1,602 @@
+// Automatically generated, do not edit
+static const char patch_Thunderbanshee[] =
+	R"(
+PatchData:
+  patch_name: Thunderbanshee
+  description: 'A deep kick and a howling noise source slammed into distortion, a bunch of filters, and a reverb.'
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:MultiLFO'
+    2: 'Befaco:Kickall'
+    3: '4msCompany:Noise'
+    4: '4msCompany:BPF'
+    5: '4msCompany:StMix'
+    6: '4msCompany:DEV'
+    7: '4msCompany:PI'
+    8: '4msCompany:Atvert2'
+    9: 'Befaco:Bandit'
+    10: '4msCompany:MultiLFO'
+    11: 'AudibleInstruments:Rings'
+    12: '4msCompany:Freeverb'
+    13: '4msCompany:Freeverb'
+  int_cables:
+    - out:
+        module_id: 8
+        jack_id: 1
+      ins:
+        - module_id: 12
+          jack_id: 0
+        - module_id: 13
+          jack_id: 0
+      color: 64934
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 1
+      color: 1453
+    - out:
+        module_id: 1
+        jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 0
+        - module_id: 6
+          jack_id: 3
+      color: 1453
+    - out:
+        module_id: 6
+        jack_id: 4
+      ins:
+        - module_id: 10
+          jack_id: 2
+        - module_id: 6
+          jack_id: 8
+        - module_id: 11
+          jack_id: 0
+        - module_id: 11
+          jack_id: 2
+        - module_id: 11
+          jack_id: 3
+        - module_id: 11
+          jack_id: 4
+      color: 1453
+    - out:
+        module_id: 5
+        jack_id: 0
+      ins:
+        - module_id: 7
+          jack_id: 0
+      color: 13501
+    - out:
+        module_id: 4
+        jack_id: 0
+      ins:
+        - module_id: 6
+          jack_id: 7
+      color: 1453
+    - out:
+        module_id: 8
+        jack_id: 0
+      ins:
+        - module_id: 9
+          jack_id: 12
+      color: 61865
+    - out:
+        module_id: 10
+        jack_id: 1
+      ins:
+        - module_id: 11
+          jack_id: 5
+      color: 64934
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 5
+          jack_id: 0
+      color: 64934
+    - out:
+        module_id: 6
+        jack_id: 3
+      ins:
+        - module_id: 5
+          jack_id: 2
+      color: 35419
+    - out:
+        module_id: 11
+        jack_id: 0
+      ins:
+        - module_id: 5
+          jack_id: 4
+      color: 61865
+    - out:
+        module_id: 7
+        jack_id: 3
+      ins:
+        - module_id: 8
+          jack_id: 0
+      color: 64934
+    - out:
+        module_id: 9
+        jack_id: 4
+      ins:
+        - module_id: 8
+          jack_id: 1
+      color: 13501
+  mapped_ins: []
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 13
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 12
+        jack_id: 0
+  static_knobs:
+    - module_id: 2
+      param_id: 0
+      value: 0.0815602
+    - module_id: 2
+      param_id: 1
+      value: 0
+    - module_id: 2
+      param_id: 2
+      value: 0
+    - module_id: 2
+      param_id: 3
+      value: 1
+    - module_id: 2
+      param_id: 4
+      value: 0.5725
+    - module_id: 2
+      param_id: 5
+      value: 0.105
+    - module_id: 5
+      param_id: 0
+      value: 0.449398
+    - module_id: 5
+      param_id: 1
+      value: 0.616867
+    - module_id: 5
+      param_id: 2
+      value: 0.320482
+    - module_id: 5
+      param_id: 3
+      value: 0.875
+    - module_id: 5
+      param_id: 4
+      value: 0.5
+    - module_id: 5
+      param_id: 5
+      value: 0.606024
+    - module_id: 5
+      param_id: 6
+      value: 0.606024
+    - module_id: 5
+      param_id: 7
+      value: 0.5
+    - module_id: 4
+      param_id: 0
+      value: 0.595947
+    - module_id: 4
+      param_id: 1
+      value: 0.572289
+    - module_id: 4
+      param_id: 2
+      value: 1
+    - module_id: 7
+      param_id: 0
+      value: 0.118072
+    - module_id: 7
+      param_id: 1
+      value: 0.5
+    - module_id: 7
+      param_id: 2
+      value: 0.298795
+    - module_id: 7
+      param_id: 3
+      value: 0.5
+    - module_id: 7
+      param_id: 4
+      value: 0.298795
+    - module_id: 7
+      param_id: 5
+      value: 1
+    - module_id: 7
+      param_id: 6
+      value: 0
+    - module_id: 9
+      param_id: 0
+      value: 0.878313
+    - module_id: 9
+      param_id: 1
+      value: 0.284337
+    - module_id: 9
+      param_id: 2
+      value: 0.980723
+    - module_id: 9
+      param_id: 3
+      value: 0.203615
+    - module_id: 1
+      param_id: 0
+      value: 0.631665
+    - module_id: 1
+      param_id: 1
+      value: 0
+    - module_id: 1
+      param_id: 2
+      value: 0.5
+    - module_id: 1
+      param_id: 3
+      value: 1
+    - module_id: 10
+      param_id: 0
+      value: 0
+    - module_id: 10
+      param_id: 1
+      value: 0
+    - module_id: 10
+      param_id: 2
+      value: 0.5
+    - module_id: 10
+      param_id: 3
+      value: 0
+    - module_id: 6
+      param_id: 0
+      value: 0.5
+    - module_id: 6
+      param_id: 1
+      value: 1
+    - module_id: 6
+      param_id: 2
+      value: 0
+    - module_id: 6
+      param_id: 3
+      value: 0
+    - module_id: 6
+      param_id: 4
+      value: 0.5
+    - module_id: 6
+      param_id: 5
+      value: 0.5
+    - module_id: 6
+      param_id: 6
+      value: 0.024
+    - module_id: 6
+      param_id: 7
+      value: 0.328
+    - module_id: 6
+      param_id: 8
+      value: 0.245783
+    - module_id: 6
+      param_id: 9
+      value: 1
+    - module_id: 6
+      param_id: 10
+      value: 0.877108
+    - module_id: 6
+      param_id: 11
+      value: 0.5
+    - module_id: 6
+      param_id: 12
+      value: 0.5
+    - module_id: 6
+      param_id: 13
+      value: 0.5
+    - module_id: 6
+      param_id: 14
+      value: 1
+    - module_id: 6
+      param_id: 15
+      value: 1
+    - module_id: 6
+      param_id: 16
+      value: 1
+    - module_id: 6
+      param_id: 17
+      value: 1
+    - module_id: 8
+      param_id: 0
+      value: 0.525301
+    - module_id: 8
+      param_id: 1
+      value: 0.817234
+    - module_id: 12
+      param_id: 0
+      value: 0.349398
+    - module_id: 12
+      param_id: 1
+      value: 0.386468
+    - module_id: 12
+      param_id: 2
+      value: 0.427436
+    - module_id: 12
+      param_id: 3
+      value: 0.525301
+    - module_id: 13
+      param_id: 0
+      value: 0.356868
+    - module_id: 13
+      param_id: 1
+      value: 0.374699
+    - module_id: 13
+      param_id: 2
+      value: 0.407027
+    - module_id: 13
+      param_id: 3
+      value: 0.525301
+    - module_id: 11
+      param_id: 0
+      value: 0
+    - module_id: 11
+      param_id: 1
+      value: 0
+    - module_id: 11
+      param_id: 2
+      value: 0.5
+    - module_id: 11
+      param_id: 3
+      value: 0.263573
+    - module_id: 11
+      param_id: 4
+      value: 0.366466
+    - module_id: 11
+      param_id: 5
+      value: 0.639321
+    - module_id: 11
+      param_id: 6
+      value: 0.36506
+    - module_id: 11
+      param_id: 7
+      value: 0.841359
+    - module_id: 11
+      param_id: 8
+      value: 0.42
+    - module_id: 11
+      param_id: 9
+      value: 0.764465
+    - module_id: 11
+      param_id: 10
+      value: 0.216277
+    - module_id: 11
+      param_id: 11
+      value: 0.667226
+  mapped_knobs:
+    - name: 'Macros '
+      set:
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0.498
+          max: 1
+          alias_name: Speed
+        - panel_knob_id: 1
+          module_id: 2
+          param_id: 0
+          curve_type: 0
+          min: 0.042
+          max: 0.207
+          alias_name: Thunder Pitch
+        - panel_knob_id: 2
+          module_id: 4
+          param_id: 0
+          curve_type: 0
+          min: 0.51
+          max: 0.806
+          alias_name: Screetch
+        - panel_knob_id: 3
+          module_id: 11
+          param_id: 4
+          curve_type: 0
+          min: 0.177
+          max: 0.696
+          alias_name: Tubular
+        - panel_knob_id: 3
+          module_id: 11
+          param_id: 5
+          curve_type: 0
+          min: 1
+          max: 0.0119999
+          alias_name: Tubular
+        - panel_knob_id: 3
+          module_id: 11
+          param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Tubular
+        - panel_knob_id: 3
+          module_id: 11
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 0.722
+          alias_name: Tubular
+        - panel_knob_id: 4
+          module_id: 11
+          param_id: 10
+          curve_type: 0
+          min: 0.493
+          max: 0.058
+          alias_name: Tubular Mod
+        - panel_knob_id: 4
+          module_id: 11
+          param_id: 11
+          curve_type: 0
+          min: 0.533
+          max: 0.744
+          alias_name: Tubular Mod
+        - panel_knob_id: 4
+          module_id: 11
+          param_id: 9
+          curve_type: 0
+          min: 0.531
+          max: 0.898
+          alias_name: Tubular Mod
+        - panel_knob_id: 4
+          module_id: 11
+          param_id: 7
+          curve_type: 0
+          min: 0.564
+          max: 1
+          alias_name: Tubular Mod
+        - panel_knob_id: 5
+          module_id: 9
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Bass
+        - panel_knob_id: 6
+          module_id: 5
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Thunder Volume
+        - panel_knob_id: 7
+          module_id: 5
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Noise Volume
+        - panel_knob_id: 8
+          module_id: 5
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Tubular Volume
+        - panel_knob_id: 9
+          module_id: 9
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Treble
+        - panel_knob_id: 10
+          module_id: 9
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: High Mid
+        - panel_knob_id: 11
+          module_id: 9
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Low Mid
+    - name: Master
+      set:
+        - panel_knob_id: 0
+          module_id: 12
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Reverb Size
+        - panel_knob_id: 0
+          module_id: 13
+          param_id: 0
+          curve_type: 0
+          min: 0.019
+          max: 0.986
+          alias_name: Reverb Size
+        - panel_knob_id: 1
+          module_id: 12
+          param_id: 1
+          curve_type: 0
+          min: 0.035
+          max: 0.973
+          alias_name: Reverb Decay
+        - panel_knob_id: 1
+          module_id: 13
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Reverb Decay
+        - panel_knob_id: 2
+          module_id: 12
+          param_id: 2
+          curve_type: 0
+          min: 0.012
+          max: 1
+          alias_name: Reverb Damping
+        - panel_knob_id: 2
+          module_id: 13
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 0.968
+          alias_name: Reverb Damping
+        - panel_knob_id: 3
+          module_id: 12
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Reverb Dry/Wet
+        - panel_knob_id: 3
+          module_id: 13
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+          alias_name: Reverb Dry/Wet
+        - panel_knob_id: 4
+          module_id: 5
+          param_id: 5
+          curve_type: 0
+          min: 1
+          max: 0
+          alias_name: Noise Volume
+        - panel_knob_id: 4
+          module_id: 5
+          param_id: 6
+          curve_type: 0
+          min: 1
+          max: 0
+          alias_name: Noise Volume
+        - panel_knob_id: 5
+          module_id: 8
+          param_id: 1
+          curve_type: 0
+          min: 0.501
+          max: 1
+          alias_name: Master Volume
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates:
+    - module_id: 9
+      data: |-
+        {"applySaturation":true}
+    - module_id: 11
+      data: |-
+        {"polyphony":0,"model":1,"easterEgg":false}
+)";
+

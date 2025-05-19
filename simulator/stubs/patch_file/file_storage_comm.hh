@@ -175,7 +175,11 @@ struct SimulatorFileStorageComm {
 					}
 				} break;
 
-				case RequestFactoryResetPatches: {
+				case RequestFactoryReset: {
+					pr_info("Factory reset = no action\n");
+				} break;
+
+				case RequestReloadDefaultPatches: {
 					pr_info("Reset to factory patches = no action. (simulator default patches are read-only)\n");
 				} break;
 

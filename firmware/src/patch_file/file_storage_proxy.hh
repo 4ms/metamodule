@@ -166,8 +166,13 @@ public:
 		return comm_.send_message(message) ? WriteResult::Success : WriteResult::Busy;
 	}
 
-	bool request_reset_factory_patches() {
-		IntercoreStorageMessage message{.message_type = RequestFactoryResetPatches};
+	bool request_factory_reset() {
+		IntercoreStorageMessage message{.message_type = RequestFactoryReset};
+		return comm_.send_message(message);
+	}
+
+	bool request_reload_factory_patches() {
+		IntercoreStorageMessage message{.message_type = RequestReloadDefaultPatches};
 		return comm_.send_message(message);
 	}
 
