@@ -57,6 +57,12 @@ CXXFLAGS = 	-Wall \
 
 ### Boilerplate below here:
 
+ifdef SYSTEMROOT
+RUNTESTS := $(BUILDDIR)/runtests.exe
+else
+RUNTESTS := $(BUILDDIR)/runtests
+endif
+
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
 DEPDIR := $(BUILDDIR)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
@@ -84,11 +90,11 @@ $(BUILDDIR)/%.o: %.cpp
 	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
 
-tests: $(BUILDDIR)/runtests 
-	@$(BUILDDIR)/runtests --out=$(TMPFILE) && echo "[√] Unit tests passed: $(notdir $(PWD))" || cat $(TMPFILE)
+tests: $(RUNTESTS) 
+	@$(RUNTESTS) -m && echo "[√] Unit tests passed: $(notdir $(PWD))"
 
-$(BUILDDIR)/runtests: $(OBJECTS)
-	$(info Building $(BUILDDIR)/runtests) 
+$(RUNTESTS): $(OBJECTS)
+	$(info Building $(RUNTESTS)) 
 	@$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
 
 clean:
