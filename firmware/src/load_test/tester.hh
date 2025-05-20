@@ -135,7 +135,7 @@ struct ModuleLoadTester {
 		while (iterations < min_total_iterations) {
 			for (auto &tm : times) {
 				control_func();
-				tm = measure([&]() { player.update_patch_singlecore(); });
+				tm = measure([&]() { player.step_module(module_id); });
 			}
 
 			auto current = Measurements{times};
