@@ -64,7 +64,7 @@ jobs:
           cd firmware
           git submodule update --init --recursive metamodule-plugin-sdk
           git submodule update --init lib/CoreModules
-          git submodule update --init lib/patch-serial
+          git submodule update --init --recursive lib/patch-serial
           git submodule update --init lib/cpputil
           make -f tests/Makefile
 
@@ -90,7 +90,7 @@ jobs:
           cd firmware
           git submodule update --init --recursive metamodule-plugin-sdk
           git submodule update --init lib/CoreModules
-          git submodule update --init lib/patch-serial
+          git submodule update --init --recursive lib/patch-serial
           git submodule update --init lib/cpputil
           make -f tests/Makefile
 
@@ -122,7 +122,7 @@ jobs:
           cd firmware
           git submodule update --init --recursive metamodule-plugin-sdk
           git submodule update --init lib/CoreModules
-          git submodule update --init lib/patch-serial
+          git submodule update --init --recursive lib/patch-serial
           git submodule update --init lib/cpputil
           make -f tests/Makefile
 
@@ -149,7 +149,7 @@ jobs:
           cd firmware
           git submodule update --init --recursive metamodule-plugin-sdk
           git submodule update --init lib/CoreModules
-          git submodule update --init lib/patch-serial
+          git submodule update --init --recursive lib/patch-serial
           git submodule update --init lib/cpputil
           make -f tests/Makefile
 
