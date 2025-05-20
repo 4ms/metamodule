@@ -52,13 +52,9 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 		auto slugs = ModuleFactory::getAllModuleSlugs(brand);
 		for (auto slug : slugs) {
 			ModuleEntry entry;
-
 			entry.slug = std::string(brand) + ":" + std::string(slug);
 
-			if (entry.slug == "Bidoo:bordL" || entry.slug == "KRTPluginA:Y" ||
-				entry.slug == "SickoCV:SickoLooper1Exp" || entry.slug == "SickoCV:SickoLooper3" ||
-				entry.slug == "SickoCV:SickoLooper5" || entry.slug == "AmalgamatedHarmonics:Arp32")
-			{
+			if (entry.slug == "AmalgamatedHarmonics:Arp32") {
 				pr_info("Skipping %s\n", entry.slug.c_str());
 				continue;
 			}
