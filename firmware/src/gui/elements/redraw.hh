@@ -16,6 +16,9 @@
 namespace MetaModule
 {
 
+static MetaModule::MidiQueue midi_out_queue;
+static bool queue_subscribed = false;
+
 inline bool redraw_element(const Knob &el, const GuiElement &gui_el, float val) {
 	bool did_update_position = false;
 
@@ -188,13 +191,17 @@ inline bool redraw_param(DrawnElement &drawn_el, float value) {
 	if (drawn_el.gui_element.count.num_params > 0) {
 		was_redrawn =
 			std::visit([&](auto &el) { return redraw_element(el, drawn_el.gui_element, value); }, drawn_el.element);
-		
+
+		if (was_redrawn) {
+			pr_dbg("Param was drawn %s\n", drawn_el);
+		}
+	
 		// Send MIDI CC for mapped elements if they were redrawn
 		if (was_redrawn && drawn_el.gui_element.mapped_panel_id.has_value()) {
 			auto panel_id = drawn_el.gui_element.mapped_panel_id.value();
 			
 			// Check if this is a MIDI CC mapping using the Midi::midi_cc function
-			if (auto cc_opt = Midi::midi_cc(panel_id)) {
+			if (auto cc_opt = MetaModule::Midi::midi_cc(panel_id)) {
 				// Get the CC number from the optional result
 				uint8_t cc_num = *cc_opt;
 				
@@ -211,9 +218,6 @@ inline bool redraw_param(DrawnElement &drawn_el, float value) {
 				pr_dbg("Sending MIDI CC: %d %d\n", cc_num, cc_value);
 				
 				// Send via MIDI queue instead of directly to router
-				static thread_local MetaModule::MidiQueue midi_out_queue;
-				static thread_local bool queue_subscribed = false;
-				
 				if (!queue_subscribed) {
 					MetaModule::MidiRouter::subscribe_tx(&midi_out_queue);
 					queue_subscribed = true;
