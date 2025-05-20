@@ -72,10 +72,10 @@ struct ModuleLoadTester {
 
 			if (load_patch()) {
 				set_all_params(0.25f);
-				auto oscs = make_oscs<2, 10>();
+				auto oscs = make_oscs<2, 10>(counts.num_inputs);
 				return run_patch(
 					[&, this] {
-						for (uint16_t i = 0; i < counts.num_inputs; i++) {
+						for (uint16_t i = 0; i < oscs.size(); i++) {
 							auto lfo = oscs[i].process_float() * 10.f - 5.f;
 							player.modules[module_id]->set_input(i, lfo);
 						}
@@ -92,10 +92,10 @@ struct ModuleLoadTester {
 
 			if (load_patch()) {
 				set_all_params(0.25f);
-				auto oscs = make_oscs<400, 6000>();
+				auto oscs = make_oscs<400, 6000>(counts.num_inputs);
 				return run_patch(
 					[&, this] {
-						for (uint16_t i = 0; i < counts.num_inputs; i++) {
+						for (uint16_t i = 0; i < oscs.size(); i++) {
 							auto lfo = oscs[i].process_float() * 10.f - 5.f;
 							player.modules[module_id]->set_input(i, lfo);
 						}
@@ -224,9 +224,9 @@ struct ModuleLoadTester {
 	}
 
 	template<unsigned low_hz, unsigned high_hz>
-	std::vector<TriangleOscillator<48000>> make_oscs() {
+	static std::vector<TriangleOscillator<48000>> make_oscs(unsigned num_oscs) {
 
-		std::vector<TriangleOscillator<48000>> oscs(counts.num_inputs);
+		std::vector<TriangleOscillator<48000>> oscs(num_oscs);
 
 		float freq = low_hz;
 		uint32_t phase = 0;
@@ -234,8 +234,8 @@ struct ModuleLoadTester {
 		for (auto &osc : oscs) {
 			osc.set_frequency(freq);
 			osc.set_phase(phase);
-			freq += float(high_hz - low_hz) / float(counts.num_inputs);
-			phase += UINT32_MAX / counts.num_inputs;
+			freq += float(high_hz - low_hz) / float(num_oscs);
+			phase += UINT32_MAX / num_oscs;
 		}
 
 		return oscs;
