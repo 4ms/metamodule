@@ -184,6 +184,9 @@ private:
 		if (pot.display_mult > 1 && pot.display_mult != 100 && pot.display_base == 0 && pot.units == "") {
 			lv_arc_set_range(ui_ControlArc, 0, pot.display_mult);
 			hide_resolution_text();
+		} else if (pot.integral) {
+			lv_arc_set_range(ui_ControlArc, pot.min_value, pot.max_value);
+			hide_resolution_text();
 		} else {
 			lv_arc_set_range(ui_ControlArc, 0, arc_range_value[arc_range_idx]);
 			show_resolution_text();

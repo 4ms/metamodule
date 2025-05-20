@@ -100,6 +100,24 @@ static Knob create_base_knob(rack::app::Knob *widget) {
 		element.display_offset = pq->displayOffset;
 		element.integral = pq->snapEnabled;
 		element.display_precision = pq->displayPrecision;
+
+		if (element.integral) {
+			element.num_pos = pq->maxValue - pq->minValue + 1;
+
+			auto clamped_num_pos = std::min<size_t>(element.num_pos, pq->labels.size());
+
+			if (clamped_num_pos < element.num_pos) {
+				pr_warn("Warning: Snapped knob has %d positions, but only %d labels\n", element.num_pos, clamped_num_pos);
+			}
+
+			if (clamped_num_pos == 0) {
+				pr_warn("Warning: Snapped knob has no labels\n");
+			}
+
+			for (auto i = 0u; i < clamped_num_pos; i++) {
+				element.pos_names[i] = pq->labels[i];
+			}
+		}
 	}
 
 	return element;
@@ -203,8 +221,10 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 		element.num_pos = std::clamp<size_t>(element.num_pos, 2, element.pos_names.size());
 	}
 
-	for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
-		element.pos_names[i] = pq->labels[i];
+	if (pq) {
+		for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
+			element.pos_names[i] = pq->labels[i];
+		}
 	}
 
 	// This seems to be the default for VCV?
