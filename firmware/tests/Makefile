@@ -91,9 +91,13 @@ $(BUILDDIR)/%.o: %.cpp
 	$(info Building $<)
 	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
-
-tests: $(RUNTESTS) 
+ifdef SYSTEMROOT
+tests: $(RUNTESTS)
+	$(RUNTESTS)
+else
+tests: $(RUNTESTS)
 	$Q$(RUNTESTS) -m && echo "[√] Unit tests passed: $(notdir $(PWD))"
+endif
 
 $(RUNTESTS): $(OBJECTS)
 	$(info Building $(RUNTESTS)) 
