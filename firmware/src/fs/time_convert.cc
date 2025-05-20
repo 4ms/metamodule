@@ -18,7 +18,11 @@ static std::tm default_poweron_tm = {
 };
 
 static inline time_t mktime_(std::tm *t) {
+#ifdef __MINGW32__
+	return time_t(0);
+#else
 	return mktime(t);
+#endif
 }
 
 static time_t poweron_sec_since_epoch = mktime_(&default_poweron_tm);
@@ -109,7 +113,7 @@ void time_tests() {
 		.tm_mon = 11,
 		.tm_year = 2022,
 	};
-	time_t poweron_time = mktime(&poweron_tm);
+	time_t poweron_time = mktime_(&poweron_tm);
 	printf_("poweron_time: secs since epoch = %llu", poweron_time);
 	printf_(" = %u/%u/%u %u:%u:%u\n",
 			poweron_tm.tm_year,
