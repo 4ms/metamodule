@@ -51,13 +51,30 @@ bool append_file(FileStorageProxy &proxy, std::string_view filedata, PatchLocati
 	return wait_response(proxy, FileStorageProxy::WriteFileOK, FileStorageProxy::WriteFileFail).has_value();
 }
 
-unsigned read_file(FileStorageProxy &proxy, std::string &filedata, PatchLocation location) {
-
+std::optional<unsigned> file_size(FileStorageProxy &proxy, PatchLocation location) {
 	uint32_t timeout = get_time();
 	while (proxy.request_file_info(location.vol, location.filename) == false) {
 		if (get_time() - timeout > 1000) {
 			pr_err("File info request not made in 1 second\n");
 			return false;
+		}
+	}
+
+	const auto resp = wait_response(proxy, FileStorageProxy::FileInfoSuccess, FileStorageProxy::FileInfoFailed);
+	if (resp) {
+		return resp->length;
+	} else {
+		return {};
+	}
+}
+
+std::optional<unsigned> read_file(FileStorageProxy &proxy, std::string &filedata, PatchLocation location) {
+
+	uint32_t timeout = get_time();
+	while (proxy.request_file_info(location.vol, location.filename) == false) {
+		if (get_time() - timeout > 1000) {
+			pr_err("File info request not made in 1 second\n");
+			return {};
 		}
 	}
 
@@ -72,7 +89,7 @@ unsigned read_file(FileStorageProxy &proxy, std::string &filedata, PatchLocation
 		while (proxy.request_load_file(location.filename, location.vol, bufferc) == false) {
 			if (get_time() - timeout > 3000) {
 				pr_err("File read request not made in 3 seconds\n");
-				return false;
+				return {};
 			}
 		}
 
@@ -91,10 +108,10 @@ unsigned read_file(FileStorageProxy &proxy, std::string &filedata, PatchLocation
 		}
 
 		else
-			return 0;
+			return {};
 
 	} else
-		return 0;
+		return {};
 }
 
 static std::optional<IntercoreStorageMessage> wait_response(FileStorageProxy &proxy,
