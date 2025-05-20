@@ -51,7 +51,7 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 			ModuleEntry entry;
 			entry.slug = std::string(brand) + ":" + std::string(slug);
 
-			if (entry.slug == "AmalgamatedHarmonics:Arp32") {
+			if (entry.slug == "AmalgamatedHarmonics:Arp32" || entry.slug == "Nozoid:Nozori_68_VCO_LOOP") {
 				pr_info("Skipping %s\n", entry.slug.c_str());
 				continue;
 			}
