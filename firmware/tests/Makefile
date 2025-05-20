@@ -59,8 +59,10 @@ CXXFLAGS = 	-Wall \
 
 ifdef SYSTEMROOT
 RUNTESTS := $(BUILDDIR)/runtests.exe
+Q :=
 else
 RUNTESTS := $(BUILDDIR)/runtests
+Q := @
 endif
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
@@ -91,7 +93,7 @@ $(BUILDDIR)/%.o: %.cpp
 
 
 tests: $(RUNTESTS) 
-	@$(RUNTESTS) -m && echo "[√] Unit tests passed: $(notdir $(PWD))"
+	$Q$(RUNTESTS) -m && echo "[√] Unit tests passed: $(notdir $(PWD))"
 
 $(RUNTESTS): $(OBJECTS)
 	$(info Building $(RUNTESTS)) 
