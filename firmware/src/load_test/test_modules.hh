@@ -14,7 +14,6 @@ namespace MetaModule::LoadTest
 struct ModuleEntry {
 	static constexpr std::array<unsigned, 5> blocksizes{32, 64, 128, 256, 512};
 	std::string slug;
-	uint64_t load_time;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> isolated;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> patched;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> cv_modulated;
@@ -31,10 +30,8 @@ struct ModuleEntry {
 inline std::string csv_header();
 inline std::string entry_to_csv(ModuleEntry const &entry);
 
-inline void send_gpio_pulse() {
-	Debug::Pin1::high();
-	delay_ms(1);
-	Debug::Pin1::low();
+inline void send_heartbeat() {
+	printf("*\n");
 }
 
 inline void test_module_brand(std::string_view only_brand, auto append_file) {
@@ -76,33 +73,28 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 
 				pr_trace("Block size %u\n", blocksize);
 
-				send_gpio_pulse();
-
-				pr_trace("Timing module construction\n");
-				entry.load_time = tester.measure_construction_time();
-
-				send_gpio_pulse();
+				send_heartbeat();
 
 				pr_trace("Running all unpatched test\n");
 				entry.isolated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::NonePatched);
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				pr_trace("Running Zero'ed inputs test\n");
 				entry.patched[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsZero);
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				pr_trace("Running LFO test\n");
 				entry.cv_modulated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsLFO);
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				pr_trace("Running audio-rate test\n");
 				entry.audio_modulated[i] =
 					tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsAudio);
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				i++;
 			}
@@ -151,8 +143,6 @@ inline std::string csv_header() {
 		s += "InputsAudio-" + std::to_string(blocksize) + ",";
 		pr_info("InputsAudio-%u,", blocksize);
 	}
-	s += "ConstructionTime(ms),FirstRunTime(ms)";
-	pr_info("ConstructionTime(ms),FirstRunTime(ms)");
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	s += "PeakStartupMem,PeakRunningMem,";
@@ -198,24 +188,6 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
 		report_cpu(entry.audio_modulated[i]);
 	}
-
-	char buf[32];
-	snprintf(buf, 32, "%llu,", entry.load_time / 1000);
-	s += buf;
-	pr_info("%llu,", entry.load_time / 1000);
-
-	float worst_first_run_time = 0;
-	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-		worst_first_run_time = std::max(worst_first_run_time, (float)entry.isolated[i].first_run_time);
-		worst_first_run_time = std::max(worst_first_run_time, (float)entry.patched[i].first_run_time);
-		worst_first_run_time = std::max(worst_first_run_time, (float)entry.cv_modulated[i].first_run_time);
-		worst_first_run_time = std::max(worst_first_run_time, (float)entry.audio_modulated[i].first_run_time);
-	}
-	worst_first_run_time /= 1000.f; // us => ms
-
-	snprintf(buf, 32, "%.1f,", worst_first_run_time);
-	s += buf;
-	pr_info("%.1f", worst_first_run_time);
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	if (entry.mem_usage.results_invalid) {

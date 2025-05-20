@@ -72,13 +72,10 @@ extern "C" void aux_core_main() {
 	ui.preload_plugins();
 
 	// Signal that we're ready
-	pr_info("A7 Core 2 initialized\n");
+	printf("A7 Core 2 initialized\n");
 
 #ifdef CPU_TEST_ALL_MODULES
 	{
-		// Start Tests
-		Debug::Pin0::high();
-
 		using namespace mdrivlib;
 
 		std::string should_run;
@@ -100,9 +97,6 @@ extern "C" void aux_core_main() {
 			});
 			FS::write_file(file_storage_proxy, results, {"cpu_test.csv", Volume::USB});
 		}
-
-		// Finish Tests
-		Debug::Pin0::low();
 	}
 #endif
 
