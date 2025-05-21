@@ -182,6 +182,7 @@ private:
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
 					   [](const AltParamChoice &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
 					   [](const AltParamContinuous &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
+					   [](const AltParamAction &) {},
 				   },
 				   drawn_el->element);
 
