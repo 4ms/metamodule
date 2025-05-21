@@ -87,6 +87,7 @@ struct KnobSetViewPage : PageBase {
 		indicators.resize(knobset->set.size());
 
 		lv_obj_t *focus{};
+		params.param_watcher.stop_watching_all();
 
 		for (auto [idx, map] : enumerate(knobset->set)) {
 			if (!map.is_panel_knob())
@@ -111,6 +112,7 @@ struct KnobSetViewPage : PageBase {
 				}
 			}
 
+			params.param_watcher.start_watching_param(map.module_id, map.param_id);
 			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), 0);
 
 			set_for_knob(cont, map.panel_knob_id);

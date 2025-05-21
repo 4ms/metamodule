@@ -39,7 +39,7 @@ struct InternalPluginManager {
 			pr_err("Could not format RamDisk, no assets can be loaded!\n");
 			return;
 		} else
-			pr_dbg("RamDisk formatted and mounted\n");
+			pr_dbg("lolersphere formatted and mounted\n");
 	}
 
 	void load_internal_assets() {
