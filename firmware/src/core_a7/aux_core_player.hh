@@ -1,4 +1,8 @@
 #pragma once
+#include "midi.hpp"
+#include "midi/midi_queue.hh"
+#include "midi/midi_router.hh"
+#include "midi/midi_sync.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
@@ -12,12 +16,18 @@ namespace MetaModule
 
 struct AuxPlayer {
 	PatchPlayer &patch_player;
+	OpenPatchManager &open_patch_manager;
 	Ui &ui;
 
 	FixedVector<unsigned, 64> module_ids;
+	unsigned midi_throttle_counter = 0;
+	
+	// MIDI sync instance
+	MidiSync midi_sync;
 
-	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
+	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui)
 		: patch_player{patch_player}
+		, open_patch_manager{open_patch_manager}
 		, ui{ui} {
 		using namespace mdrivlib;
 
@@ -31,7 +41,6 @@ struct AuxPlayer {
 		InterruptManager::register_and_start_isr(ProcessCablesIRQn, 1, 0, [this]() { process_cables(); });
 
 		constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchGuiElements);
-		printf("ReadPatchLightsIRQn: %d\n", ReadPatchLightsIRQn);
 		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [this]() { read_patch_gui_elements(); });
 	}
 
@@ -70,7 +79,6 @@ struct AuxPlayer {
 	}
 
 	void read_patch_gui_elements() {
-		printf("read_patch_gui_elements\n");
 		if (ui.new_patch_data.load() == false) {
 
 			for (auto &d : ui.displays().watch_displays) {
@@ -81,12 +89,18 @@ struct AuxPlayer {
 				}
 			}
 
-			auto midi_maps = patch_player.patch_query.get_midi_maps();
-			printf("midi_maps: %d\n", midi_maps.set.size());
-
-			// for (auto &p : midi_maps.set) {
-			// 	printf("midi_map: %d %d %d\n", p.module_id, p.param_id, p.cc_num);
-			// }
+			for (auto &p : ui.watched_params().active_watched_params()) {
+				if (p.is_active()) {
+					auto value = patch_player.get_param(p.module_id, p.param_id);
+					PatchData *patch = open_patch_manager.get_playing_patch();
+					if (patch) {
+						const MappedKnob *mapped_knob = patch->find_midi_map(p.module_id, p.param_id);
+						if (mapped_knob) {
+							midi_sync.sync_param_to_midi(value, mapped_knob->midi_chan, static_cast<uint8_t>(mapped_knob->cc_num()));
+						}
+					}
+				}
+			}
 
 			ui.new_patch_data.store(true, std::memory_order_release);
 		}
