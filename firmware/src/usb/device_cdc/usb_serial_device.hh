@@ -4,6 +4,8 @@
 #include "usbd_core.h"
 #include "util/circular_buffer_ext.hh"
 #include <vector>
+#include <functional>
+#include <string>
 
 class UsbSerialDevice {
 
@@ -14,6 +16,32 @@ public:
 	void stop();
 
 	void forward_to_uart();
+	
+	// Send a specific command to the serial port
+	bool send_command(const std::vector<uint8_t>& command);
+	
+	// Write hex data directly to a specific buffer
+	bool write_hex_to_buffer(const std::vector<uint8_t>& data, size_t buffer_index);
+	
+	// Set a callback to be called when data is received
+	void set_receive_callback(std::function<void(const uint8_t*, uint32_t)> callback);
+	
+	// Get firmware version command helper with simplified callback
+	bool get_firmware_version(std::function<void(bool success)> callback);
+	
+	// Start config update command helper
+	bool start_config_update(std::function<void(bool success)> callback);
+	
+	// End config update command helper
+	bool end_config_update(std::function<void(bool success)> callback);
+	
+	// Set knob control configuration
+	bool set_knob_control_config(uint8_t setup_index, uint8_t control_index, uint8_t control_mode,
+	                            uint8_t control_channel, uint8_t control_param, uint16_t nrpn_address,
+	                            uint16_t min_value, uint16_t max_value, const std::string& control_name,
+	                            uint8_t color_scheme, uint8_t haptic_mode, uint8_t indent_pos1, uint8_t indent_pos2,
+	                            uint8_t haptic_steps, const std::vector<std::string>& step_names,
+	                            std::function<void(bool success)> callback);
 
 private:
 	USBD_HandleTypeDef *pdev;
@@ -22,6 +50,7 @@ private:
 	std::array<unsigned, 3> current_read_pos{};
 
 	std::vector<uint8_t> rx_buffer{}; // force to be on heap
+	std::function<void(const uint8_t*, uint32_t)> receive_callback = nullptr;
 
 	bool is_transmitting = false;
 	uint32_t last_transmission_tm = 0;

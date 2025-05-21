@@ -45,6 +45,233 @@ void UsbSerialDevice::stop() {
 	USBD_DeInit(pdev);
 }
 
+bool UsbSerialDevice::send_command(const std::vector<uint8_t>& command) {
+    // Check current time first to avoid potential race condition
+    uint32_t current_time = HAL_GetTick();
+    
+    // Check if we're still in transmission state
+    if (is_transmitting) {
+        // If timeout has occurred, reset the transmission state
+        if (current_time - last_transmission_tm > 200) { // Increased timeout for more reliability
+            pr_dbg("USB transmission timeout - resetting state\n");
+            is_transmitting = false;
+        } else {
+            pr_dbg("USB busy - command rejected\n");
+            return false; // Still transmitting previous data
+        }
+    }
+    
+    // Safety check for empty commands
+    if (command.empty()) {
+        pr_dbg("Attempted to send empty command\n");
+        return false;
+    }
+    
+    // Set buffer with proper error handling
+    if (command.size() > 512) { // Add reasonable size limit
+        pr_dbg("Command too large: %d bytes\n", command.size());
+        return false;
+    }
+    
+    // Use a local copy of the data to avoid const_cast issues
+    static std::vector<uint8_t> tx_buffer;
+    tx_buffer = command;
+    
+    // Set the transmit buffer
+    USBD_CDC_SetTxBuffer(pdev, tx_buffer.data(), tx_buffer.size());
+    
+    // Send the data with proper error handling
+    auto err = USBD_CDC_TransmitPacket(pdev);
+    if (err == USBD_OK) {
+        is_transmitting = true;
+        last_transmission_tm = current_time;
+        return true;
+    } else if (err == USBD_BUSY) {
+        pr_dbg("USB CDC Busy\n");
+        return false;
+    } else {
+        pr_dbg("USB CDC Transmit Error: %d\n", err);
+        // Reset transmission state on error
+        is_transmitting = false;
+        return false;
+    }
+}
+
+// New method to write hex data directly to a buffer
+bool UsbSerialDevice::write_hex_to_buffer(const std::vector<uint8_t>& data, size_t buffer_index) {
+    // Validate buffer index
+    if (buffer_index >= console_buffers.size()) {
+        pr_dbg("Invalid buffer index: %zu\n", buffer_index);
+        return false;
+    }
+    
+    // Get the buffer
+    auto* buffer = console_buffers[buffer_index];
+    
+    // Check if buffer is available for writing
+    if (buffer->writer_ref_count > 0) {
+        pr_dbg("Buffer %zu is currently in use\n", buffer_index);
+        return false;
+    }
+    
+    // Write data to the buffer using span for efficient batch writing
+    buffer->write(std::span<const uint8_t>(data.data(), data.size()));
+    
+    return true;
+}
+
+void UsbSerialDevice::set_receive_callback(std::function<void(const uint8_t*, uint32_t)> callback) {
+    receive_callback = callback;
+}
+
+bool UsbSerialDevice::get_firmware_version(std::function<void(bool success)> callback) {
+    // Format: 5A 01 01 00 00
+    std::vector<uint8_t> cmd = {0x5A, 0x01, 0x01, 0x00, 0x00};
+    
+    // Use write_hex_to_buffer instead of send_command
+    if (write_hex_to_buffer(cmd, 0)) {
+        // Set up a callback to parse the response
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool UsbSerialDevice::start_config_update(std::function<void(bool success)> callback) {
+    // Format: 5A 01 04 00 00
+    std::vector<uint8_t> cmd = {0x5A, 0x01, 0x04, 0x00, 0x00};
+    
+    // Set up a callback to parse the response
+    set_receive_callback([callback](const uint8_t* data, uint32_t len) {
+        // Response format: A5 <RC>
+        if (len >= 2 && data[0] == 0xA5) {
+            // Success if response code is 0
+            bool success = (data[1] == 0);
+            callback(success);
+        } else {
+            // Invalid response format
+            callback(false);
+        }
+    });
+    
+    return send_command(cmd);
+}
+
+bool UsbSerialDevice::end_config_update(std::function<void(bool success)> callback) {
+    // Format: 5A 01 05 00 00
+    std::vector<uint8_t> cmd = {0x5A, 0x01, 0x05, 0x00, 0x00};
+    
+    // Set up a callback to parse the response
+    set_receive_callback([callback](const uint8_t* data, uint32_t len) {
+        // Response format: A5 <RC>
+        if (len >= 2 && data[0] == 0xA5) {
+            // Success if response code is 0
+            bool success = (data[1] == 0);
+            callback(success);
+        } else {
+            // Invalid response format
+            callback(false);
+        }
+    });
+    
+    return send_command(cmd);
+}
+
+bool UsbSerialDevice::set_knob_control_config(uint8_t setup_index, uint8_t control_index, uint8_t control_mode,
+                                           uint8_t control_channel, uint8_t control_param, uint16_t nrpn_address,
+                                           uint16_t min_value, uint16_t max_value, const std::string& control_name,
+                                           uint8_t color_scheme, uint8_t haptic_mode, uint8_t indent_pos1, uint8_t indent_pos2,
+                                           uint8_t haptic_steps, const std::vector<std::string>& step_names,
+                                           std::function<void(bool success)> callback) {
+    // Calculate command length: 0x1D + (haptic_steps * 0x0D)
+    uint16_t cmd_data_len = 0x1D + (haptic_steps * 0x0D);
+    
+    // Create command vector with initial size
+    std::vector<uint8_t> cmd = {
+        0x5A, 0x02, 0x07,         // Command header
+        static_cast<uint8_t>(cmd_data_len >> 8),  // Command length MSB
+        static_cast<uint8_t>(cmd_data_len & 0xFF) // Command length LSB
+    };
+    
+    // Add command parameters
+    cmd.push_back(setup_index);         // SI = Setup index
+    cmd.push_back(control_index);       // CI = Control index
+    cmd.push_back(control_mode);        // CM = Control mode
+    cmd.push_back(control_channel);     // CC = Control channel
+    cmd.push_back(control_param);       // CP = Control param
+    
+    // NRPN address (2 bytes)
+    cmd.push_back(static_cast<uint8_t>(nrpn_address >> 8));
+    cmd.push_back(static_cast<uint8_t>(nrpn_address & 0xFF));
+    
+    // Min value (2 bytes)
+    cmd.push_back(static_cast<uint8_t>(min_value >> 8));
+    cmd.push_back(static_cast<uint8_t>(min_value & 0xFF));
+    
+    // Max value (2 bytes)
+    cmd.push_back(static_cast<uint8_t>(max_value >> 8));
+    cmd.push_back(static_cast<uint8_t>(max_value & 0xFF));
+    
+    // Control name (13 bytes, null-terminated, padded with zeros)
+    size_t name_len = std::min(control_name.length(), static_cast<size_t>(12)); // Max 12 chars + null
+    for (size_t i = 0; i < name_len; i++) {
+        cmd.push_back(control_name[i]);
+    }
+    // Pad with zeros to 13 bytes total (including null terminator)
+    for (size_t i = name_len; i < 13; i++) {
+        cmd.push_back(0);
+    }
+    
+    // Color scheme
+    cmd.push_back(color_scheme);
+    
+    // Haptic mode
+    cmd.push_back(haptic_mode);
+    
+    // Indent positions (only used for KNOB_300 mode)
+    cmd.push_back(indent_pos1);
+    cmd.push_back(indent_pos2);
+    
+    // Haptic steps
+    cmd.push_back(haptic_steps);
+    
+    // Step names (each 13 bytes, null-terminated, padded with zeros)
+    for (size_t i = 0; i < step_names.size() && i < haptic_steps; i++) {
+        const std::string& step_name = step_names[i];
+        size_t step_name_len = std::min(step_name.length(), static_cast<size_t>(12)); // Max 12 chars + null
+        
+        for (size_t j = 0; j < step_name_len; j++) {
+            cmd.push_back(step_name[j]);
+        }
+        // Pad with zeros to 13 bytes total (including null terminator)
+        for (size_t j = step_name_len; j < 13; j++) {
+            cmd.push_back(0);
+        }
+    }
+    
+    // If fewer step names were provided than haptic_steps, add empty strings
+    for (size_t i = step_names.size(); i < haptic_steps; i++) {
+        for (size_t j = 0; j < 13; j++) {
+            cmd.push_back(0);
+        }
+    }
+    
+    // Set up a callback to parse the response
+    set_receive_callback([callback](const uint8_t* data, uint32_t len) {
+        // Response format: A5 <RC>
+        if (len >= 2 && data[0] == 0xA5) {
+            // Success if response code is 0
+            bool success = (data[1] == 0);
+            callback(success);
+        } else {
+            // Invalid response format
+            callback(false);
+        }
+    });
+    
+    return send_command(cmd);
+}
+
 void UsbSerialDevice::transmit_buffers(Destination dest) {
 	auto transmit = [this, dest = dest](uint8_t *ptr, int len) {
 		if (dest == Destination::USB) {
@@ -145,6 +372,11 @@ int8_t UsbSerialDevice::CDC_Itf_Receive(uint8_t *Buf, uint32_t *Len) {
 	while (len--)
 		pr_dbg("%c", *Buf++);
 	pr_dbg("\n");
+    
+    // Call the user-provided callback if set
+    if (_instance->receive_callback) {
+        _instance->receive_callback(Buf - *Len, *Len);
+    }
 
 	// Indicate that we're ready to receive more
 	USBD_CDC_ReceivePacket(_instance->pdev);

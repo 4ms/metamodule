@@ -8,6 +8,7 @@
 #include "usb/device_cdc/usb_serial_device.hh"
 #include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
+#include <functional>
 
 namespace MetaModule
 {
@@ -118,6 +119,44 @@ public:
 
 	FatFileIO &get_msc_fileio() {
 		return usb_host.get_msc_fileio();
+	}
+	
+	// Send a custom command to the serial port
+	bool send_serial_command(const std::vector<uint8_t>& command) {
+		return usb_device.get_serial_device().send_command(command);
+	}
+	
+	// Get firmware version from connected device with simplified callback
+	bool get_firmware_version(std::function<void(bool success)> callback) {
+		return usb_device.get_serial_device().get_firmware_version(callback);
+	}
+	
+	// Start config update command
+	bool start_config_update(std::function<void(bool success)> callback) {
+		return usb_device.get_serial_device().start_config_update(callback);
+	}
+	
+	// End config update command
+	bool end_config_update(std::function<void(bool success)> callback) {
+		return usb_device.get_serial_device().end_config_update(callback);
+	}
+	
+	// Set knob control configuration
+	bool set_knob_control_config(uint8_t setup_index, uint8_t control_index, uint8_t control_mode,
+	                            uint8_t control_channel, uint8_t control_param, uint16_t nrpn_address,
+	                            uint16_t min_value, uint16_t max_value, const std::string& control_name,
+	                            uint8_t color_scheme, uint8_t haptic_mode, uint8_t indent_pos1, uint8_t indent_pos2,
+	                            uint8_t haptic_steps, const std::vector<std::string>& step_names,
+	                            std::function<void(bool success)> callback) {
+		return usb_device.get_serial_device().set_knob_control_config(
+			setup_index, control_index, control_mode, control_channel, control_param, nrpn_address,
+			min_value, max_value, control_name, color_scheme, haptic_mode, indent_pos1, indent_pos2,
+			haptic_steps, step_names, callback);
+	}
+	
+	// Get access to the serial device for more advanced operations
+	UsbSerialDevice& get_serial_device() {
+		return usb_device.get_serial_device();
 	}
 };
 } // namespace MetaModule

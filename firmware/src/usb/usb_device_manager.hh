@@ -43,6 +43,11 @@ struct UsbDeviceManager {
 		// Still process serial because we if USB is not connected, we forward console messages to UART
 		serial.forward_to_uart();
 	}
+	
+	// Get access to the serial device
+	UsbSerialDevice& get_serial_device() {
+		return serial;
+	}
 
 #ifdef USE_RAMDISK_USB
 	RamDiskOps ramdiskops;

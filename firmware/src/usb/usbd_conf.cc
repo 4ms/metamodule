@@ -21,6 +21,7 @@
 #include "drivers/stm32xx.h"
 #include "usbd_core.h"
 #include "usbd_msc.h"
+#include "stm32mp1xx_hal_pwr_ex.h"
 
 PCD_HandleTypeDef hpcd;
 

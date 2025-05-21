@@ -3,6 +3,7 @@
 #include "console/concurrent_buffer.hh"
 #include "intercore_modulefs_message.hh"
 #include "params/param_block.hh"
+#include "usb/usb_manager.hh"
 
 namespace MetaModule
 {
@@ -20,6 +21,7 @@ struct SharedMemoryS {
 		ConcurrentBuffer *console_a7_0_buff;
 		ConcurrentBuffer *console_a7_1_buff;
 		ConcurrentBuffer *console_m4_buff;
+		UsbManager *usb_manager;
 	};
 
 	static Ptrs ptrs;

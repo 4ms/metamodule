@@ -48,6 +48,9 @@ int main() {
 					SharedMemoryS::ptrs.console_m4_buff}};
 	usb.start();
 
+	// Add USB manager to shared memory
+	SharedMemoryS::ptrs.usb_manager = &usb;
+
 	// SD Card
 	SDCardHost sd;
 

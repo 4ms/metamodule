@@ -10,6 +10,9 @@ enable_logging()
 
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(LIBDIR ${FWDIR}/lib)
+set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
+set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
+set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp1)
 
 set_arch_flags()
 
@@ -111,6 +114,30 @@ add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 #
 add_executable(
   main.elf
+  ${HALDIR}/src/stm32mp1xx_hal.c
+  ${HALDIR}/src/stm32mp1xx_hal_adc.c
+  ${HALDIR}/src/stm32mp1xx_hal_adc_ex.c
+  ${HALDIR}/src/stm32mp1xx_hal_cortex.c
+  ${HALDIR}/src/stm32mp1xx_hal_dma.c
+  ${HALDIR}/src/stm32mp1xx_hal_hcd.c
+  ${HALDIR}/src/stm32mp1xx_hal_i2c.c
+  ${HALDIR}/src/stm32mp1xx_hal_i2c_ex.c
+  ${HALDIR}/src/stm32mp1xx_hal_mdma.c
+  ${HALDIR}/src/stm32mp1xx_hal_pcd.c
+  ${HALDIR}/src/stm32mp1xx_hal_pcd_ex.c
+  ${HALDIR}/src/stm32mp1xx_hal_pwr_ex.c
+  ${HALDIR}/src/stm32mp1xx_hal_qspi.c
+  ${HALDIR}/src/stm32mp1xx_hal_rcc.c
+  ${HALDIR}/src/stm32mp1xx_hal_rcc_ex.c
+  ${HALDIR}/src/stm32mp1xx_hal_sd.c
+  ${HALDIR}/src/stm32mp1xx_hal_sd_ex.c
+  ${HALDIR}/src/stm32mp1xx_hal_uart.c
+  ${HALDIR}/src/stm32mp1xx_hal_usart.c
+  ${HALDIR}/src/stm32mp1xx_ll_rcc.c
+  ${HALDIR}/src/stm32mp1xx_ll_sdmmc.c
+  ${HALDIR}/src/stm32mp1xx_ll_tim.c
+  ${HALDIR}/src/stm32mp1xx_ll_usb.c
+  ${HALDIR}/src/stm32mp1xx_ll_usb_phy.c
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
@@ -207,6 +234,30 @@ add_executable(
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
+
+  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc.c
+  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_bot.c
+  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_data.c
+  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_scsi.c
+  ${USBDEV_LIBDIR}/Class/CDC/Src/usbd_cdc.c
+
+  ${USBDEV_LIBDIR}/Core/Src/usbd_core.c
+  ${USBDEV_LIBDIR}/Core/Src/usbd_ctlreq.c
+  ${USBDEV_LIBDIR}/Core/Src/usbd_ioreq.c
+
+  ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc.c
+  ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_bot.c
+  ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_scsi.c
+  ${USBHOST_LIBDIR}/Core/Src/usbh_core.c
+  ${USBHOST_LIBDIR}/Core/Src/usbh_ctlreq.c
+  ${USBHOST_LIBDIR}/Core/Src/usbh_ioreq.c
+  ${USBHOST_LIBDIR}/Core/Src/usbh_pipes.c
+
+  ${FWDIR}/src/usb/usbd_conf.cc
+  # ${FWDIR}/src/usb/usbh_conf.cc
+  # ${FWDIR}/src/usb/usbh_midi.cc
+  ${FWDIR}/src/usb/device_cdc/usb_serial_device.cc
+  # ${FWDIR}/src/usb/device_cdc/usbd_desc.c
 )
 
 
@@ -237,6 +288,7 @@ target_include_directories(
           ${FWDIR}/src/fs
           ${FWDIR}/src/core_a7
           ${FWDIR}/src/medium
+          ${FWDIR}/src/usb
           ${FWDIR}/lib/mdrivlib
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
@@ -246,6 +298,12 @@ target_include_directories(
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
           #
           ${CMAKE_BINARY_DIR}/checkgit
+          ${USBHOST_LIBDIR}/Core/Inc
+          ${USBHOST_LIBDIR}/Class/MSC/Inc
+          ${USBDEV_LIBDIR}/Core/Inc
+          ${USBDEV_LIBDIR}/Class/MSC/Inc
+          ${USBDEV_LIBDIR}/Class/CDC/Inc
+          ${HALDIR}/include
 )
 
 if (NOT TARGET cpputil::cpputil)

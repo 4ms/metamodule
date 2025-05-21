@@ -10,6 +10,7 @@
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include "user_settings/audio_settings.hh"
+#include "core_intercom/shared_memory.hh"
 #include <atomic>
 
 size_t get_heap_size();
@@ -91,6 +92,11 @@ struct PatchPlayLoader {
 		starting_audio_ = true;
 		clear_audio_overrun();
 		resume_module_threads();
+		
+		// Configure knobs if USB manager is available
+		if (SharedMemoryS::ptrs.usb_manager) {
+			configure_knobs();
+		}
 	}
 
 	void request_load_view_patch() {
@@ -337,6 +343,70 @@ struct PatchPlayLoader {
 		// } else {
 		player_.set_catchup_mode(mode, allow_jump_outofrange);
 		// }
+	}
+
+	// Configure knobs based on the current patch
+	void configure_knobs() {
+		UsbManager* usb_manager = SharedMemoryS::ptrs.usb_manager;
+		if (!usb_manager) return;
+  
+		usb_manager->get_firmware_version([](bool success) {
+			return;
+		});
+		
+		// // Use captured pointers safely with null checks at each stage
+		// usb_manager->start_config_update([](bool success) {
+		// 	// Get the latest pointer in each callback to avoid using stale references
+		// 	UsbManager* usb_manager = SharedMemoryS::ptrs.usb_manager;
+		// 	if (!usb_manager) return;
+			
+		// 	if (success) {
+		// 		pr_dbg("Config update session started\n");
+				
+		// 		// Example knob configuration
+		// 		usb_manager->set_knob_control_config(
+		// 			0x00,                // setup_index
+		// 			0x01,                // control_index
+		// 			0x00,                // control_mode (CC-7BIT)
+		// 			0x01,                // control_channel
+		// 			0xFF,                // control_param (unused)
+		// 			0x0000,              // nrpn_address
+		// 			0x0000,              // min_value
+		// 			0x007F,              // max_value
+		// 			"MetaModule",        // control_name
+		// 			0x00,                // color_scheme
+		// 			0x00,                // haptic_mode (KNOB_300)
+		// 			0xFF,                // indent_pos1 (unused)
+		// 			0xFF,                // indent_pos2 (unused)
+		// 			0x00,                // haptic_steps (not used for KNOB_300)
+		// 			{},                  // step_names (empty for KNOB_300)
+		// 			[](bool success) {
+		// 				// Get latest pointer again
+		// 				UsbManager* usb_manager = SharedMemoryS::ptrs.usb_manager;
+		// 				if (!usb_manager) return;
+						
+		// 				if (success) {
+		// 					pr_dbg("Knob configuration successful\n");
+							
+		// 					// End the configuration session
+		// 					usb_manager->end_config_update([](bool success) {
+		// 						if (success) {
+		// 							pr_dbg("Config update session ended\n");
+		// 						} else {
+		// 							pr_err("Failed to end config update session\n");
+		// 						}
+		// 					});
+		// 				} else {
+		// 					pr_err("Failed to configure knob\n");
+		// 					// Clean up on failure
+		// 					usb_manager->end_config_update([](bool) {});
+		// 				}
+		// 			}
+		// 		);
+		// 	} else {
+		// 		pr_err("Failed to start config update session\n");
+		// 	}
+		// });
 	}
 
 private:
