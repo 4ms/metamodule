@@ -82,6 +82,8 @@ inline std::string get_element_value_string(Element const &element, float value,
 
 				   [value = value, &s](AltParamContinuous const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
 
+				   [&s](AltParamAction const &) { s = "Off"; },
+
 				   [value = value, &s](AltParamChoice const &el) {
 					   auto v = StateConversion::convertState(el, value);
 					   s = std::to_string(v + 1) + std::string("/") + std::to_string(el.num_pos);
