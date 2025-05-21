@@ -815,7 +815,7 @@ private:
 				page->click_cable_destination(*drawn_idx);
 			} else {
 
-				auto drawn_element = page->drawn_elements[*drawn_idx];
+				auto &drawn_element = page->drawn_elements[*drawn_idx];
 
 				if (std::get_if<AltParamAction>(&drawn_element.element)) {
 					if (page->is_patch_playloaded) {
