@@ -135,6 +135,8 @@ inline std::string get_element_value_string(Element const &element, float value,
 					s = std::to_string(v + 1) + std::string("/") + std::to_string(el.num_pos);
 			},
 
+			[&s](AltParamAction const &) { s = "Off"; },
+
 			[](BaseElement const &) {},
 		},
 		element);
