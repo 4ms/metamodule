@@ -325,6 +325,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
+		// Back button
 		if (gui_state.back_button.is_just_released()) {
 
 			if (action_menu.is_visible()) {
@@ -349,6 +350,7 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		// File Browser
 		if (gui_state.file_browser_visible.just_went_low()) {
 			// File Browser detected as just closed
 			if (mode == ViewMode::ModuleContextMenu) {
@@ -356,12 +358,14 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		// Mapping pane
 		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
 				show_roller();
 			}
 
+			// Right-click menu
 		} else if (mode == ViewMode::ModuleContextMenu) {
 			module_context_menu.update();
 			if (module_context_menu.wants_to_close()) {
@@ -369,10 +373,12 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		// Action menu
 		if (action_menu.is_visible()) {
 			action_menu.update();
 		}
 
+		// Knobset changed
 		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
@@ -382,6 +388,7 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.refresh();
 		}
 
+		// Settings changed
 		if (page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
@@ -389,8 +396,8 @@ struct ModuleViewPage : PageBase {
 			update_graphic_throttle_setting();
 		}
 
+		// Patch file changed via wifi/disk
 		poll_patch_file_changed();
-
 		if (gui_state.force_redraw_patch || gui_state.view_patch_file_changed) {
 
 			abort_cable(gui_state, notify_queue);
@@ -412,16 +419,18 @@ struct ModuleViewPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 		}
 
-		// if (is_patch_playloaded) {
+		// Draw the on-screen elements (knobs, lights, etc)
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			redraw_elements();
 		}
 
+		// Handle patch modification requests
 		if (handle_patch_mods()) {
 			redraw_module();
 			mapping_pane.refresh();
 		}
 
+		// Hover text
 		roller_hover.update();
 
 		// Hide the hover text if we are on one of the action buttons
@@ -430,6 +439,13 @@ struct ModuleViewPage : PageBase {
 			lv_group_get_focused(group) == ui_ModuleViewHideBut)
 		{
 			roller_hover.hide();
+		}
+
+		// Handle "action" alt params, which were set high when the user clicked them, and now need to be set low
+		if (pending_action_param_clear) {
+			printf("=>low\n");
+			send_param_value(0, *pending_action_param_clear);
+			pending_action_param_clear = std::nullopt;
 		}
 	}
 
@@ -798,7 +814,30 @@ private:
 			if (page->gui_state.new_cable) {
 				page->click_cable_destination(*drawn_idx);
 			} else {
-				page->click_normal_element(*drawn_idx);
+
+				auto drawn_element = page->drawn_elements[*drawn_idx];
+
+				if (std::get_if<AltParamAction>(&drawn_element.element)) {
+					if (page->is_patch_playloaded) {
+						// Set the param high now, and make a pending request to set it low on the next update()
+						page->send_param_value(1, drawn_element.gui_element);
+						page->pending_action_param_clear = drawn_element.gui_element;
+					}
+
+				} else {
+					page->mode = ViewMode::Mapping;
+					page->args.detail_mode = true;
+					lv_hide(ui_ElementRollerPanel);
+					page->roller_hover.hide();
+					page->mapping_pane.show(drawn_element);
+				}
+
+				if (page->full_screen_mode) {
+					// TODO: if fullscreen, then open Adjust pop up directly
+					// But keep it hidden?
+					// If it's a button, the just immediately toggle state
+					// page->mapping_pane.control_popup.show(page->drawn_element);
+				}
 			}
 
 			//Not an element: Is it the Extra Menu?
@@ -923,7 +962,9 @@ private:
 
 	bool full_screen_mode = false;
 
-	enum { ContextMenuTag = -2 };
+	std::optional<GuiElement> pending_action_param_clear{};
+
+	enum { ExtraMenuTag = -2 };
 };
 
 } // namespace MetaModule
