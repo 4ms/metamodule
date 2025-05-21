@@ -54,6 +54,10 @@ struct PatchQuery {
 		return params;
 	}
 
+	MappedKnobSet get_midi_maps() {
+		return pd.midi_maps;
+	}
+
 private:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> &modules;
 	PatchData &pd;

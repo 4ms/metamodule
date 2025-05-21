@@ -31,6 +31,7 @@ struct AuxPlayer {
 		InterruptManager::register_and_start_isr(ProcessCablesIRQn, 1, 0, [this]() { process_cables(); });
 
 		constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchGuiElements);
+		printf("ReadPatchLightsIRQn: %d\n", ReadPatchLightsIRQn);
 		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [this]() { read_patch_gui_elements(); });
 	}
 
@@ -69,6 +70,7 @@ struct AuxPlayer {
 	}
 
 	void read_patch_gui_elements() {
+		printf("read_patch_gui_elements\n");
 		if (ui.new_patch_data.load() == false) {
 
 			for (auto &d : ui.displays().watch_displays) {
@@ -79,6 +81,13 @@ struct AuxPlayer {
 						d.text._data[sz] = '\0';
 				}
 			}
+
+			auto midi_maps = patch_player.patch_query.get_midi_maps();
+			printf("midi_maps: %d\n", midi_maps.set.size());
+
+			// for (auto &p : midi_maps.set) {
+			// 	printf("midi_map: %d %d %d\n", p.module_id, p.param_id, p.cc_num);
+			// }
 
 			ui.new_patch_data.store(true, std::memory_order_release);
 		}

@@ -138,6 +138,10 @@ public:
 
 		return true;
 	}
+	
+	ParamWatcher &watched_params() {
+		return params.param_watcher;
+	}
 
 	void preload_plugins() {
 		lv_show(ui_MainMenuNowPlayingPanel);
