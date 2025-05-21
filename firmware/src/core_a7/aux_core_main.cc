@@ -60,7 +60,7 @@ extern "C" void aux_core_main() {
 		ui.notify_error("Graphic assets are corrupted!\nRe-install firmware.");
 	}
 
-	AuxPlayer aux_player{*A7SharedMemoryS::ptrs.patch_player, ui};
+	AuxPlayer aux_player{*A7SharedMemoryS::ptrs.patch_player, *A7SharedMemoryS::ptrs.open_patch_manager, ui};
 
 	// Wait for M4 to be ready (so USB and SD are available)
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
