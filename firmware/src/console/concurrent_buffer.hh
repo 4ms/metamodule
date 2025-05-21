@@ -9,6 +9,7 @@ struct ConcurrentBuffer {
 	int writer_ref_count{0};
 	int current_write_pos{0};
 	bool use_color = false;
+	bool is_binary_data = false;
 
 	void write(std::span<const uint8_t> data) {
 		auto start = current_write_pos;

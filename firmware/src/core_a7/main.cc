@@ -25,6 +25,50 @@ namespace MetaModule
 struct SystemInit : AppStartup, UartLog, Debug, Hardware {
 } _sysinit;
 
+// Binary command handling for firmware version
+void send_fw_version() {
+	// Command format: 0x5A 0x01 0x01 0x00 0x00
+	// Where:
+	// 0x5A = start byte
+	// 0x01 = command type (GENERAL)
+	// 0x01 = command subtype (GET FW VERSION)
+	// 0x00 0x00 = command length (2 bytes, MSB first)
+	
+	// Make sure there's a small gap before binary data
+	HAL_Delay(50);
+	
+	uint8_t command[5] = {0x5A, 0x01, 0x01, 0x00, 0x00};
+	
+	// Send the command directly without using printf before/after
+	UartLog::write_binary_usb(command, sizeof(command));
+	
+	// Add a small delay after binary data
+	HAL_Delay(50);
+}
+
+// SET MODE command
+void send_set_mode() {
+	// Command format: 0x5A 0x01 0x03 0x00 0x02 0x01 0x00
+	// Where:
+	// 0x5A = start byte
+	// 0x01 = command type (GENERAL)
+	// 0x03 = command subtype (SET MODE)
+	// 0x00 0x02 = command length (2 bytes, MSB first) = 2 bytes
+	// 0x01 = mode: PLUGIN (01)
+	// 0x00 = page index: 00 = Page 1
+	
+	// Make sure there's a small gap before binary data
+	HAL_Delay(50);
+	
+	uint8_t command[7] = {0x5A, 0x01, 0x03, 0x00, 0x02, 0x01, 0x00};
+	
+	// Send the command directly without using printf before/after
+	UartLog::write_binary_usb(command, sizeof(command));
+	
+	// Add a small delay after binary data
+	HAL_Delay(50);
+}
+
 } // namespace MetaModule
 
 int main() {
@@ -99,6 +143,17 @@ int main() {
 	printf("Stopping UART buffer\n");
 	UartLog::use_usb(&StaticBuffers::console_a7_0_buff);
 	printf("Using USB buffer\n");
+	
+	// Add a delay to make sure text output is complete
+	HAL_Delay(100);
+	
+	// Send binary commands
+	send_fw_version();
+	send_set_mode();
+	
+	// Return to normal text output
+	HAL_Delay(100);
+	printf("Binary commands sent\n");
 #endif
 
 	// Tell other cores we're done with init

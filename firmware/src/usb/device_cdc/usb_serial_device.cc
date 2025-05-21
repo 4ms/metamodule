@@ -66,14 +66,28 @@ void UsbSerialDevice::transmit_buffers(Destination dest) {
 	};
 
 
-	// Don't transmit if we already are transmitting
-	// But have a 100ms timeout in case of a USB error
-	if (is_transmitting) {
-		if (HAL_GetTick() - last_transmission_tm > 100) {
-			is_transmitting = false;
-			last_transmission_tm = HAL_GetTick();
-		} else
-			return;
+	// Check for binary data in any buffer
+	bool has_binary_data = false;
+	for (auto *buff : console_buffers) {
+		if (buff->is_binary_data) {
+			has_binary_data = true;
+			break;
+		}
+	}
+
+	// If we have binary data, we need to force transmission even if we're currently transmitting
+	if (has_binary_data) {
+		is_transmitting = false;
+	} else {
+		// Don't transmit if we already are transmitting
+		// But have a 100ms timeout in case of a USB error
+		if (is_transmitting) {
+			if (HAL_GetTick() - last_transmission_tm > 100) {
+				is_transmitting = false;
+				last_transmission_tm = HAL_GetTick();
+			} else
+				return;
+		}
 	}
 
 	// Scan buffers for data to transmit, and exit after first transmission
@@ -90,11 +104,21 @@ void UsbSerialDevice::transmit_buffers(Destination dest) {
 				// Send the first chunk
 				transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
 				current_read_pos[i] = 0;
+				
+				// Clear binary data flag after transmission
+				if (buff->is_binary_data) {
+					buff->is_binary_data = false;
+				}
 				return;
 
 			} else if (start_pos < end_pos) {
 				transmit(&buff->buffer.data[start_pos], end_pos - start_pos);
 				current_read_pos[i] = end_pos;
+				
+				// Clear binary data flag after transmission
+				if (buff->is_binary_data) {
+					buff->is_binary_data = false;
+				}
 				return;
 			}
 		}

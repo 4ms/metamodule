@@ -86,4 +86,30 @@ extern "C" void _putchar(char c) {
 	UartLog::putchar(c);
 }
 
+void UartLog::write_binary_usb(const uint8_t *data, size_t len) {
+	auto core = core_id();
+	if (!log_usb[core])
+		return;
+
+	// For binary data, we want to make sure there's a complete separation from
+	// any surrounding text data, so wait a bit for the buffer to clear
+	for (int retry = 0; retry < 5 && log_usb[core]->writer_ref_count > 0; retry++)
+		HAL_Delay(10);
+
+	// Add buffer clearing flag to signal that this is binary data
+	log_usb[core]->is_binary_data = true;
+	
+	log_usb[core]->writer_ref_count++;
+	std::atomic_signal_fence(std::memory_order_release);
+	{
+		// Write binary data directly without any color formatting
+		log_usb[core]->write({data, len});
+	}
+	std::atomic_signal_fence(std::memory_order_release);
+	log_usb[core]->writer_ref_count--;
+	
+	// Wait a bit after writing to ensure the data is processed
+	HAL_Delay(10);
+}
+
 } // namespace MetaModule

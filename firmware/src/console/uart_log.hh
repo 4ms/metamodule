@@ -31,6 +31,8 @@ struct UartLog {
 	static void write_usb(const char *ptr, size_t len);
 	static void write_stdout(const char *ptr, size_t len);
 
+	static void write_binary_usb(const uint8_t *data, size_t len);
+
 	static void use_usb(ConcurrentBuffer *usb_buffer);
 	static void use_uart();
 };
