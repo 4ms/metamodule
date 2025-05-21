@@ -9,15 +9,15 @@ struct TestInfo : MetaModule::ModuleInfoBase {
 
 	using enum MetaModule::Coords;
 	static constexpr std::array<MetaModule::Element, 9> Elements{
-		MetaModule::Slider{{{{{1, 2, Center, "Slider1", ""}}}}},			//Param 0
-		MetaModule::GateJackInput4ms{{5, 6, Center, "Gate In 1", ""}},		//Input 0
-		MetaModule::RedLight{{5, 6, Center, "Gate In 1", ""}},				//Light 0
-		MetaModule::EncoderRGB{{{{{3, 4, Center, "Encoder RGB 1", ""}}}}},	//Param 1, Lights 1,2,3
-		MetaModule::AnalogJackOutput4ms{{5, 6, Center, "Audio Out 1", ""}}, //Output 0
-		MetaModule::AnalogJackOutput4ms{{5, 7, Center, "Audio Out 2", ""}}, //Output 1
-		MetaModule::AnalogJackInput4ms{{4, 6, Center, "Audio In 1", ""}},	//Input 1
-		MetaModule::RedBlueLight{{5, 6, Center, "", ""}},					//Lights 4,5
-		MetaModule::Slider25mmVertLED{{5, 6, Center, "Slider2", ""}},		//Param 2, Lights 6
+		MetaModule::Slider{{{{{1, 2, Center, "Slider1", ""}}}}},					//Param 0
+		MetaModule::GateJackInput4ms{{5, 6, Center, "Gate In 1", ""}},				//Input 0
+		MetaModule::RedLight{{5, 6, Center, "Gate In 1", ""}},						//Light 0
+		MetaModule::MomentaryButtonRGB{{{{{{3, 4, Center, "Button RGB 1", ""}}}}}}, //Param 1, Lights 1,2,3
+		MetaModule::AnalogJackOutput4ms{{5, 6, Center, "Audio Out 1", ""}},			//Output 0
+		MetaModule::AnalogJackOutput4ms{{5, 7, Center, "Audio Out 2", ""}},			//Output 1
+		MetaModule::AnalogJackInput4ms{{4, 6, Center, "Audio In 1", ""}},			//Input 1
+		MetaModule::RedBlueLight{{5, 6, Center, "", ""}},							//Lights 4,5
+		MetaModule::Slider25mmVertLED{{5, 6, Center, "Slider2", ""}},				//Param 2, Lights 6
 	};
 };
 
@@ -34,21 +34,21 @@ TEST_CASE("Can count elements") {
 
 TEST_CASE("Can get element index") {
 	constexpr auto Slider1 = get<MetaModule::Slider>(TestInfo::Elements[0]);
-	constexpr auto Encoder1 = get<MetaModule::EncoderRGB>(TestInfo::Elements[3]);
+	constexpr auto Button1 = get<MetaModule::MomentaryButtonRGB>(TestInfo::Elements[3]);
 
 	CHECK(ElementCount::get_element_id<TestInfo>(Slider1) == 0);
-	CHECK(ElementCount::get_element_id<TestInfo>(Encoder1) == 3);
+	CHECK(ElementCount::get_element_id<TestInfo>(Button1) == 3);
 
 	// Make sure it can be done at compile-time
 	static_assert(ElementCount::get_element_id<TestInfo>(Slider1) == 0);
-	static_assert(ElementCount::get_element_id<TestInfo>(Encoder1) == 3);
+	static_assert(ElementCount::get_element_id<TestInfo>(Button1) == 3);
 }
 
 TEST_CASE("Can get param index") {
 	constexpr auto Slider1 = get<MetaModule::Slider>(TestInfo::Elements[0]);
 	constexpr auto InJack1 = get<MetaModule::JackInput>(TestInfo::Elements[1]);
 	constexpr auto Light1 = get<MetaModule::MonoLight>(TestInfo::Elements[2]);
-	constexpr auto Encoder1 = get<MetaModule::EncoderRGB>(TestInfo::Elements[3]);
+	constexpr auto Button1 = get<MetaModule::MomentaryButtonRGB>(TestInfo::Elements[3]);
 	constexpr auto Out1 = get<MetaModule::JackOutput>(TestInfo::Elements[4]);
 	constexpr auto Out2 = get<MetaModule::JackOutput>(TestInfo::Elements[5]);
 	constexpr auto InJack2 = get<MetaModule::JackInput>(TestInfo::Elements[6]);
@@ -58,7 +58,7 @@ TEST_CASE("Can get param index") {
 	constexpr auto NonExistingKnob = MetaModule::EncoderRGB{{{{{1, 2, MetaModule::Coords::Center, "DNE", ""}}}}};
 
 	CHECK(ElementCount::get_indices<TestInfo>(Slider1).value().param_idx == 0);
-	CHECK(ElementCount::get_indices<TestInfo>(Encoder1).value().param_idx == 1);
+	CHECK(ElementCount::get_indices<TestInfo>(Button1).value().param_idx == 1);
 	CHECK(ElementCount::get_indices<TestInfo>(SliderLED).value().param_idx == 2);
 
 	CHECK(ElementCount::get_indices<TestInfo>(InJack1).value().input_idx == 0);
@@ -68,7 +68,7 @@ TEST_CASE("Can get param index") {
 	CHECK(ElementCount::get_indices<TestInfo>(Out2).value().output_idx == 1);
 
 	CHECK(ElementCount::get_indices<TestInfo>(Light1).value().light_idx == 0);
-	CHECK(ElementCount::get_indices<TestInfo>(Encoder1).value().light_idx == 1);
+	CHECK(ElementCount::get_indices<TestInfo>(Button1).value().light_idx == 1);
 	CHECK(ElementCount::get_indices<TestInfo>(Light2).value().light_idx == 4);
 	CHECK(ElementCount::get_indices<TestInfo>(SliderLED).value().light_idx == 6);
 
@@ -82,7 +82,7 @@ TEST_CASE("Can get param index") {
 
 	// Make sure it can be done at compile-time
 	static_assert(ElementCount::get_indices<TestInfo>(Slider1).value().param_idx == 0);
-	static_assert(ElementCount::get_indices<TestInfo>(Encoder1).value().param_idx == 1);
+	static_assert(ElementCount::get_indices<TestInfo>(Button1).value().param_idx == 1);
 	static_assert(ElementCount::get_indices<TestInfo>(SliderLED).value().param_idx == 2);
 
 	static_assert(ElementCount::get_indices<TestInfo>(InJack1).value().input_idx == 0);
@@ -92,7 +92,7 @@ TEST_CASE("Can get param index") {
 	static_assert(ElementCount::get_indices<TestInfo>(Out2).value().output_idx == 1);
 
 	static_assert(ElementCount::get_indices<TestInfo>(Light1).value().light_idx == 0);
-	static_assert(ElementCount::get_indices<TestInfo>(Encoder1).value().light_idx == 1);
+	static_assert(ElementCount::get_indices<TestInfo>(Button1).value().light_idx == 1);
 	static_assert(ElementCount::get_indices<TestInfo>(Light2).value().light_idx == 4);
 	static_assert(ElementCount::get_indices<TestInfo>(SliderLED).value().light_idx == 6);
 
