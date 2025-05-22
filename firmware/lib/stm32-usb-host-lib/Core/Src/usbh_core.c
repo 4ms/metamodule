@@ -918,6 +918,10 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       {
         USBH_UsrLog("PID: %xh", phost->device.DevDesc.idProduct);
         USBH_UsrLog("VID: %xh", phost->device.DevDesc.idVendor);
+        USBH_UsrLog("Device Class: %xh", phost->device.DevDesc.bDeviceClass);
+        USBH_UsrLog("Device SubClass: %xh", phost->device.DevDesc.bDeviceSubClass);
+        USBH_UsrLog("Device Protocol: %xh", phost->device.DevDesc.bDeviceProtocol);
+        USBH_UsrLog("Num Configurations: %d", phost->device.DevDesc.bNumConfigurations);
 
         phost->EnumState = ENUM_SET_ADDR;
       }
@@ -1024,6 +1028,26 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       ReqStatus = USBH_Get_CfgDesc(phost, phost->device.CfgDesc.wTotalLength);
       if (ReqStatus == USBH_OK)
       {
+        USBH_UsrLog("=== Configuration Descriptor ===");
+        USBH_UsrLog("Number of Interfaces: %d", phost->device.CfgDesc.bNumInterfaces);
+        
+        for (uint8_t i = 0; i < phost->device.CfgDesc.bNumInterfaces; i++)
+        {
+          USBH_UsrLog("--- Interface %d ---", i);
+          USBH_UsrLog("Interface Class: %xh", phost->device.CfgDesc.Itf_Desc[i].bInterfaceClass);
+          USBH_UsrLog("Interface SubClass: %xh", phost->device.CfgDesc.Itf_Desc[i].bInterfaceSubClass);
+          USBH_UsrLog("Interface Protocol: %xh", phost->device.CfgDesc.Itf_Desc[i].bInterfaceProtocol);
+          USBH_UsrLog("Number of Endpoints: %d", phost->device.CfgDesc.Itf_Desc[i].bNumEndpoints);
+          
+          for (uint8_t ep = 0; ep < phost->device.CfgDesc.Itf_Desc[i].bNumEndpoints; ep++)
+          {
+            USBH_UsrLog("    Endpoint %d:", ep);
+            USBH_UsrLog("    Address: %xh", phost->device.CfgDesc.Itf_Desc[i].Ep_Desc[ep].bEndpointAddress);
+            USBH_UsrLog("    Type: %xh", phost->device.CfgDesc.Itf_Desc[i].Ep_Desc[ep].bmAttributes);
+            USBH_UsrLog("    Max Packet Size: %d", phost->device.CfgDesc.Itf_Desc[i].Ep_Desc[ep].wMaxPacketSize);
+          }
+        }
+
         phost->EnumState = ENUM_GET_MFC_STRING_DESC;
       }
       else if (ReqStatus == USBH_NOT_SUPPORTED)
