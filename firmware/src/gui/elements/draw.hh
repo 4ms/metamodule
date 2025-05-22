@@ -256,12 +256,13 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 
 inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
 	auto label = draw_element(TextDisplay(el), canvas, module_h);
-	//LV_LABEL_LONG_DOT mode doesn't work with dynamic elements
-	//because we can't compare the new text with the existing text since it may contain dots
-	if (el.height_mm > 8)
-		lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
-	else
-		lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+	auto wrap_mode = el.wrap_mode == TextDisplay::WrapMode::Clip		 ? LV_LABEL_LONG_CLIP :
+					 el.wrap_mode == TextDisplay::WrapMode::Wrap		 ? LV_LABEL_LONG_WRAP :
+					 el.wrap_mode == TextDisplay::WrapMode::Scroll		 ? LV_LABEL_LONG_SCROLL_CIRCULAR :
+					 el.wrap_mode == TextDisplay::WrapMode::ScrollBounce ? LV_LABEL_LONG_SCROLL :
+																		   LV_LABEL_LONG_CLIP;
+
+	lv_label_set_long_mode(label, wrap_mode);
 	return label;
 }
 
