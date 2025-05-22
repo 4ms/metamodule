@@ -107,7 +107,7 @@ void resume_module_threads() {
 
 void resume_module_threads(unsigned core_id) {
 	auto &task_runner = core_id == 1 ? async_task_core1 : async_task_core0;
-	task_runner.start();
+	task_runner.unpause();
 }
 
 void kill_module_threads() {
