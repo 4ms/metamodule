@@ -49,8 +49,8 @@ public:
 			pr_err("Error init USB Host: %d\n", status);
 			return;
 		}
-		midi_host.init();
 		cdc_host.init();
+		midi_host.init();
 		msc_host.init();
 
 		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
@@ -95,23 +95,29 @@ public:
 		// Scan buffers for data to transmit, and exit after first transmission
 		auto *buff = _console_cdc_buff;
 
-		if (buff->writer_ref_count == 0) {
-			auto start_pos = _current_read_pos;
-			unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
-			end_pos = end_pos & buff->buffer.SIZEMASK;
+		auto start_pos = _current_read_pos;
+		unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
+		end_pos = end_pos & buff->buffer.SIZEMASK;
 
-			if (start_pos > end_pos) {
-				// Data to transmit spans the "seam" of the circular buffer,
-				// Send the first chunk
-				transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
-				_current_read_pos = 0;
-				return;
+		if (start_pos > end_pos) {
+			// Data to transmit spans the "seam" of the circular buffer,
+			// Send the first chunk
+			pr_dbg("Transmitting data from pos %d to %d: ", start_pos, buff->buffer.data.size());
+			for (size_t i = start_pos; i < buff->buffer.data.size(); i++)
+				pr_dbg("%02X ", buff->buffer.data[i]);
+			pr_dbg("\n");
+			transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
+			_current_read_pos = 0;
+			return;
 
-			} else if (start_pos < end_pos) {
-				transmit(&buff->buffer.data[start_pos], end_pos - start_pos);
-				_current_read_pos = end_pos;
-				return;
-			}
+		} else if (start_pos < end_pos) {
+			pr_dbg("Transmitting data from pos %d to %d: ", start_pos, end_pos);
+			for (size_t i = start_pos; i < end_pos; i++)
+				pr_dbg("%02X ", buff->buffer.data[i]);
+			pr_dbg("\n");
+			transmit(&buff->buffer.data[start_pos], end_pos - start_pos);
+			_current_read_pos = end_pos;
+			return;
 		}
 	}
 
@@ -130,14 +136,14 @@ public:
 
 			case HOST_USER_CLASS_SELECTED: {
 				connected_classcode = host.get_active_class_code();
-				pr_trace("Class selected: %d\n", connected_classcode);
+				pr_dbg("Class selected: %d\n", connected_classcode);
 			} break;
 
 			case HOST_USER_CLASS_ACTIVE: {
 				connected_classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
 
-				pr_trace("Class active: %.8s code %d\n", classname, connected_classcode);
+				pr_dbg("Class active: %.8s code %d\n", classname, connected_classcode);
 
 				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
 					_midihost_instance->connect();

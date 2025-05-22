@@ -76,6 +76,7 @@ public:
 
 	bool transmit(std::span<uint8_t> bytes) {
 		if (!_is_connected) {
+			pr_dbg("CDC Host: Not connected, cannot transmit\n");
 			return false;
 		}
 		return tx_stream.transmit(bytes);
