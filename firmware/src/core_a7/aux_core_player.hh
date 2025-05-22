@@ -18,17 +18,19 @@ struct AuxPlayer {
 	PatchPlayer &patch_player;
 	OpenPatchManager &open_patch_manager;
 	Ui &ui;
-
+	ConcurrentBuffer &console_cdc_buff;
 	FixedVector<unsigned, 64> module_ids;
 	unsigned midi_throttle_counter = 0;
+	unsigned gui_element_counter = 0;  // Add counter for tracking iterations
 	
 	// MIDI sync instance
 	MidiSync midi_sync;
 
-	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui)
+	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui, ConcurrentBuffer &console_cdc_buff)
 		: patch_player{patch_player}
 		, open_patch_manager{open_patch_manager}
-		, ui{ui} {
+		, ui{ui}
+		, console_cdc_buff{console_cdc_buff} {
 		using namespace mdrivlib;
 
 		constexpr auto NewModuleListIRQn = SMPControl::IRQn(SMPCommand::NewModuleList);
@@ -79,6 +81,17 @@ struct AuxPlayer {
 	}
 
 	void read_patch_gui_elements() {
+		gui_element_counter++;
+		
+		// Every 100 iterations, write our byte message
+		if (gui_element_counter >= 100) {
+			gui_element_counter = 0;
+			
+			// Write the byte message: 5A 01 03 00 02 00 00
+			const uint8_t message[] = {0x5A, 0x01, 0x03, 0x00, 0x02, 0x00, 0x00};
+			console_cdc_buff.write(std::span<const uint8_t>(message, sizeof(message)));
+		}
+
 		if (ui.new_patch_data.load() == false) {
 
 			for (auto &d : ui.displays().watch_displays) {

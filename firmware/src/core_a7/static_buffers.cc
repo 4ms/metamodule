@@ -40,6 +40,7 @@ __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSiz
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff{};
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_cdc_buff{};
 
 void init() {
 	for (auto &block : param_blocks) {

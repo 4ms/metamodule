@@ -1,4 +1,5 @@
 #pragma once
+#include "cdc_host.hh"
 #include "console/concurrent_buffer.hh"
 #include "usbd_cdc.h"
 #include "usbd_core.h"
@@ -8,7 +9,7 @@
 class UsbSerialDevice {
 
 public:
-	UsbSerialDevice(USBD_HandleTypeDef *pDevice, std::array<ConcurrentBuffer *, 3> console_buffers);
+	UsbSerialDevice(USBD_HandleTypeDef *pDevice, std::array<ConcurrentBuffer *, 3> console_buffers, ConcurrentBuffer *console_cdc_buff, CDCHost &cdc_host);
 	void process();
 	void start();
 	void stop();
@@ -19,6 +20,8 @@ private:
 	USBD_HandleTypeDef *pdev;
 
 	std::array<ConcurrentBuffer *, 3> console_buffers;
+	ConcurrentBuffer *console_cdc_buff;
+	CDCHost &cdc_host;
 	std::array<unsigned, 3> current_read_pos{};
 
 	std::vector<uint8_t> rx_buffer{}; // force to be on heap
@@ -40,6 +43,7 @@ private:
 
 	enum class Destination { UART, USB };
 	void transmit_buffers(Destination dest);
+	void transmit_cdc_buffer();
 
 	bool use_color = false;
 };

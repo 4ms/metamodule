@@ -8,6 +8,7 @@
 #include "usb/device_cdc/usb_serial_device.hh"
 #include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
+#include "usb/cdc_host.hh"
 
 namespace MetaModule
 {
@@ -27,8 +28,8 @@ class UsbManager {
 	// uint32_t tm;
 
 public:
-	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: usb_device{console_buffers}
+	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers, ConcurrentBuffer *console_cdc_buff)
+		: usb_device{console_buffers, console_cdc_buff, usb_host.get_cdc_host()}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		usb_device.start();
 		usb_host.init();
@@ -110,6 +111,10 @@ public:
 		// 		Debug::Pin0::low();
 		// }
 		// }
+	}
+
+	CDCHost &get_cdc_host() {
+		return usb_host.get_cdc_host();
 	}
 
 	MidiHost &get_midi_host() {
