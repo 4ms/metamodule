@@ -85,6 +85,11 @@ void init() {
 	console_m4_buff.current_write_pos = 0;
 	console_m4_buff.buffer.data[0] = 0;
 	console_m4_buff.use_color = false;
+
+	console_cdc_buff.writer_ref_count = 0;
+	console_cdc_buff.current_write_pos = 0;
+	console_cdc_buff.buffer.data[0] = 0;
+	console_cdc_buff.use_color = false;
 }
 
 }; // namespace StaticBuffers

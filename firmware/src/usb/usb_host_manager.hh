@@ -19,9 +19,11 @@ private:
 	static inline MidiHost *_midihost_instance;
 	static inline CDCHost *_cdchost_instance;
 	static inline MSCHost *_mschost_instance;
+	static inline ConcurrentBuffer *_console_cdc_buff;
+	static inline unsigned _current_read_pos;
 
 public:
-	UsbHostManager(mdrivlib::PinDef enable_5v)
+	UsbHostManager(mdrivlib::PinDef enable_5v, ConcurrentBuffer *console_cdc_buff)
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
 		usbhost.pActiveClass = nullptr;
 		for (auto &cls : usbhost.pClass) {
@@ -31,6 +33,8 @@ public:
 		_midihost_instance = &midi_host;
 		_cdchost_instance = &cdc_host;
 		_mschost_instance = &msc_host;
+		_console_cdc_buff = console_cdc_buff;
+		_current_read_pos = console_cdc_buff->current_write_pos;
 	}
 
 	void init() {
@@ -70,6 +74,45 @@ public:
 
 	void process() {
 		USBH_Process(&usbhost);
+		transmit_cdc_buffer();
+	}
+
+	void transmit_cdc_buffer() {
+		auto transmit = [this](uint8_t *ptr, int len) {
+			_cdchost_instance->transmit(std::span<uint8_t>(ptr, len));
+		};
+
+		// // Don't transmit if we already are transmitting
+		// // But have a 100ms timeout in case of a USB error
+		// if (is_transmitting) {
+		// 	if (HAL_GetTick() - last_transmission_tm > 100) {
+		// 		is_transmitting = false;
+		// 		last_transmission_tm = HAL_GetTick();
+		// 	} else
+		// 		return;
+		// }
+
+		// Scan buffers for data to transmit, and exit after first transmission
+		auto *buff = _console_cdc_buff;
+
+		if (buff->writer_ref_count == 0) {
+			auto start_pos = _current_read_pos;
+			unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
+			end_pos = end_pos & buff->buffer.SIZEMASK;
+
+			if (start_pos > end_pos) {
+				// Data to transmit spans the "seam" of the circular buffer,
+				// Send the first chunk
+				transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
+				_current_read_pos = 0;
+				return;
+
+			} else if (start_pos < end_pos) {
+				transmit(&buff->buffer.data[start_pos], end_pos - start_pos);
+				_current_read_pos = end_pos;
+				return;
+			}
+		}
 	}
 
 	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {

@@ -14,11 +14,9 @@ USBD_CDC_LineCodingTypeDef LineCoding = {
 };
 }
 
-UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice, std::array<ConcurrentBuffer *, 3> console_buffers, ConcurrentBuffer *console_cdc_buff, CDCHost &cdc_host)
+UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice, std::array<ConcurrentBuffer *, 3> console_buffers)
 	: pdev{pDevice}
-	, console_buffers{console_buffers}
-	, console_cdc_buff{console_cdc_buff}
-	, cdc_host{cdc_host} {
+	, console_buffers{console_buffers} {
 	rx_buffer.resize(256);
 	_instance = this;
 }
@@ -34,8 +32,6 @@ void UsbSerialDevice::start() {
 
 	for (auto i = 0u; auto const &buff : console_buffers)
 		current_read_pos[i++] = buff->current_write_pos;
-
-	current_read_pos[3] = console_cdc_buff->current_write_pos;
 
 	USBD_RegisterClass(pdev, USBD_CDC_CLASS);
 	USBD_CDC_RegisterInterface(pdev, &USBD_CDC_fops);
@@ -106,47 +102,8 @@ void UsbSerialDevice::transmit_buffers(Destination dest) {
 	}
 }
 
-void UsbSerialDevice::transmit_cdc_buffer() {
-	auto transmit = [this](uint8_t *ptr, int len) {
-		cdc_host.transmit(std::span<uint8_t>(ptr, len));
-	};
-
-	// // Don't transmit if we already are transmitting
-	// // But have a 100ms timeout in case of a USB error
-	// if (is_transmitting) {
-	// 	if (HAL_GetTick() - last_transmission_tm > 100) {
-	// 		is_transmitting = false;
-	// 		last_transmission_tm = HAL_GetTick();
-	// 	} else
-	// 		return;
-	// }
-
-	// Scan buffers for data to transmit, and exit after first transmission
-	auto *buff = console_cdc_buff;
-
-	if (buff->writer_ref_count == 0) {
-		auto start_pos = current_read_pos[3];
-		unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
-		end_pos = end_pos & buff->buffer.SIZEMASK;
-
-		if (start_pos > end_pos) {
-			// Data to transmit spans the "seam" of the circular buffer,
-			// Send the first chunk
-			transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
-			current_read_pos[3] = 0;
-			return;
-
-		} else if (start_pos < end_pos) {
-			transmit(&buff->buffer.data[start_pos], end_pos - start_pos);
-			current_read_pos[3] = end_pos;
-			return;
-		}
-	}
-}
-
 void UsbSerialDevice::process() {
 	transmit_buffers(Destination::USB);
-	transmit_cdc_buffer();
 }
 
 void UsbSerialDevice::forward_to_uart() {

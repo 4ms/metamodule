@@ -19,8 +19,8 @@ struct UsbDeviceManager {
 	UsbSerialDevice serial;
 
 #if !defined(USE_RAMDISK_USB)
-	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers, ConcurrentBuffer *console_cdc_buff, CDCHost &cdc_host)
-		: serial{&USBD_Device, console_buffers, console_cdc_buff, cdc_host} {
+	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers)
+		: serial{&USBD_Device, console_buffers} {
 	}
 #endif
 

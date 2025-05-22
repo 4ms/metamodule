@@ -14,7 +14,7 @@ namespace MetaModule
 {
 
 class UsbManager {
-	UsbHostManager usb_host{Usb5VSrcEnablePin};
+	UsbHostManager usb_host;
 	UsbDeviceManager usb_device;
 
 	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
@@ -29,7 +29,8 @@ class UsbManager {
 
 public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers, ConcurrentBuffer *console_cdc_buff)
-		: usb_device{console_buffers, console_cdc_buff, usb_host.get_cdc_host()}
+		: usb_device{console_buffers}
+		, usb_host{Usb5VSrcEnablePin, console_cdc_buff}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		usb_device.start();
 		usb_host.init();
@@ -111,10 +112,6 @@ public:
 		// 		Debug::Pin0::low();
 		// }
 		// }
-	}
-
-	CDCHost &get_cdc_host() {
-		return usb_host.get_cdc_host();
 	}
 
 	MidiHost &get_midi_host() {
