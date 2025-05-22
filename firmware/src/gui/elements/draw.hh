@@ -258,7 +258,10 @@ inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, ui
 	auto label = draw_element(TextDisplay(el), canvas, module_h);
 	//LV_LABEL_LONG_DOT mode doesn't work with dynamic elements
 	//because we can't compare the new text with the existing text since it may contain dots
-	lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+	if (el.height_mm > 8)
+		lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+	else
+		lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
 	return label;
 }
 
