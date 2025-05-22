@@ -1,6 +1,7 @@
 #include "drivers/interrupt.hh"
 #include "drivers/pin.hh"
 #include "midi_host.hh"
+#include "cdc_host.hh"
 #include "msc_host.hh"
 #include "pr_dbg.hh"
 #include <cstring>
@@ -11,10 +12,12 @@ private:
 	USBH_HandleTypeDef usbhost{};
 	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
+	CDCHost cdc_host{usbhost};
 	MSCHost msc_host{usbhost, MetaModule::Volume::USB};
 
 	// For access in C-style callback:
 	static inline MidiHost *_midihost_instance;
+	static inline CDCHost *_cdchost_instance;
 	static inline MSCHost *_mschost_instance;
 
 public:
@@ -26,6 +29,7 @@ public:
 		}
 		src_enable.low();
 		_midihost_instance = &midi_host;
+		_cdchost_instance = &cdc_host;
 		_mschost_instance = &msc_host;
 	}
 
@@ -42,6 +46,7 @@ public:
 			return;
 		}
 		midi_host.init();
+		cdc_host.init();
 		msc_host.init();
 
 		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
@@ -100,8 +105,13 @@ public:
 					}
 					USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				}
-
-				if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
+				else if (connected_classcode == USB_CDC_CLASS && !strcmp(classname, "CDC")) {
+					_cdchost_instance->connect();
+					// Start receiving data 
+					uint8_t rx_buffer[128];
+					USBH_CDC_Receive(phost, rx_buffer, 128);
+				}
+				else if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
 					pr_trace("MSC connected\n");
 					_mschost_instance->connect();
 				}
@@ -111,6 +121,8 @@ public:
 				pr_trace("Disconnected class code %d\n", connected_classcode);
 				if (connected_classcode == AudioClassCode)
 					_midihost_instance->disconnect();
+				else if (connected_classcode == USB_CDC_CLASS)
+					_cdchost_instance->disconnect();
 				else if (connected_classcode == USB_MSC_CLASS)
 					_mschost_instance->disconnect();
 				else
@@ -149,6 +161,10 @@ public:
 
 	MidiHost &get_midi_host() {
 		return midi_host;
+	}
+
+	CDCHost &get_cdc_host() {
+		return cdc_host;
 	}
 
 	FatFileIO &get_msc_fileio() {
