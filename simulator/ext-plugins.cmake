@@ -17,9 +17,6 @@
 # See docs/simulator-ext-plugins.md for instructions
 
 
-list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../mm-plugins/SickozellMM")
-list(APPEND ext_builtin_brand_libname "SickoCV")
-
 #
 # Asset dir
 #
