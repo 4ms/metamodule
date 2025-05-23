@@ -1,6 +1,7 @@
 #include "drivers/interrupt.hh"
 #include "drivers/pin.hh"
 #include "midi_host.hh"
+#include "cdc_host.hh"
 #include "msc_host.hh"
 #include "pr_dbg.hh"
 #include <cstring>
@@ -11,14 +12,18 @@ private:
 	USBH_HandleTypeDef usbhost{};
 	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
+	CDCHost cdc_host{usbhost};
 	MSCHost msc_host{usbhost, MetaModule::Volume::USB};
 
 	// For access in C-style callback:
 	static inline MidiHost *_midihost_instance;
+	static inline CDCHost *_cdchost_instance;
 	static inline MSCHost *_mschost_instance;
+	static inline ConcurrentBuffer *_console_cdc_buff;
+	static inline unsigned _current_read_pos;
 
 public:
-	UsbHostManager(mdrivlib::PinDef enable_5v)
+	UsbHostManager(mdrivlib::PinDef enable_5v, ConcurrentBuffer *console_cdc_buff)
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
 		usbhost.pActiveClass = nullptr;
 		for (auto &cls : usbhost.pClass) {
@@ -26,7 +31,10 @@ public:
 		}
 		src_enable.low();
 		_midihost_instance = &midi_host;
+		_cdchost_instance = &cdc_host;
 		_mschost_instance = &msc_host;
+		_console_cdc_buff = console_cdc_buff;
+		_current_read_pos = console_cdc_buff->current_write_pos;
 	}
 
 	void init() {
@@ -41,6 +49,7 @@ public:
 			pr_err("Error init USB Host: %d\n", status);
 			return;
 		}
+		cdc_host.init();
 		midi_host.init();
 		msc_host.init();
 
@@ -65,6 +74,48 @@ public:
 
 	void process() {
 		USBH_Process(&usbhost);
+		transmit_cdc_buffer();
+	}
+
+	void transmit_cdc_buffer() {
+		// Don't try to transmit if CDC host is not ready
+		if (!_cdchost_instance->is_ready_to_transmit()) {
+			return;
+		}
+		
+		auto transmit = [this](uint8_t *ptr, int len) {
+			return _cdchost_instance->transmit(std::span<uint8_t>(ptr, len));
+		};
+
+		// Scan buffers for data to transmit, and exit after first transmission
+		auto *buff = _console_cdc_buff;
+
+		auto start_pos = _current_read_pos;
+		unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
+		end_pos = end_pos & buff->buffer.SIZEMASK;
+
+		if (start_pos > end_pos) {
+			// Data to transmit spans the "seam" of the circular buffer,
+			// Send the first chunk
+			pr_dbg("Transmitting data from pos %d to %d: ", start_pos, buff->buffer.data.size());
+			for (size_t i = start_pos; i < buff->buffer.data.size(); i++)
+				pr_dbg("%02X ", buff->buffer.data[i]);
+			pr_dbg("\n");
+			if (transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos)) {
+				_current_read_pos = 0;
+			}
+			return;
+
+		} else if (start_pos < end_pos) {
+			pr_dbg("Transmitting data from pos %d to %d: ", start_pos, end_pos);
+			for (size_t i = start_pos; i < end_pos; i++)
+				pr_dbg("%02X ", buff->buffer.data[i]);
+			pr_dbg("\n");
+			if (transmit(&buff->buffer.data[start_pos], end_pos - start_pos)) {
+				_current_read_pos = end_pos;
+			}
+			return;
+		}
 	}
 
 	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {
@@ -82,14 +133,14 @@ public:
 
 			case HOST_USER_CLASS_SELECTED: {
 				connected_classcode = host.get_active_class_code();
-				pr_trace("Class selected: %d\n", connected_classcode);
+				pr_dbg("Class selected: %d\n", connected_classcode);
 			} break;
 
 			case HOST_USER_CLASS_ACTIVE: {
 				connected_classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
 
-				pr_trace("Class active: %.8s code %d\n", classname, connected_classcode);
+				pr_dbg("Class active: %.8s code %d\n", classname, connected_classcode);
 
 				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
 					_midihost_instance->connect();
@@ -100,8 +151,45 @@ public:
 					}
 					USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				}
-
-				if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
+				else if (connected_classcode == USB_CDC_CLASS && !strcmp(classname, "CDC")) {
+					_cdchost_instance->connect();
+					
+					// Configure UART parameters for 115200 8N1
+					if (!_cdchost_instance->set_uart_115200_8N1()) {
+						pr_err("Failed to set CDC line coding to 115200 8N1\n");
+					} else {
+						pr_trace("CDC line coding set to 115200 8N1\n");
+					}
+					
+					// Set DTR and RTS high - many devices require this to start communication
+					if (!_cdchost_instance->set_control_line_state(true, true)) {
+						pr_warn("CDC device does not support control line state (DTR/RTS) - this is often normal\n");
+					} else {
+						pr_trace("CDC control lines DTR/RTS set high\n");
+					}
+					
+					// Give the device time to initialize after configuration
+					HAL_Delay(100);
+					
+					// Set up receive callback to handle incoming UART data
+					_cdchost_instance->set_rx_callback([](uint8_t *data, uint32_t len) {
+						pr_dbg("CDC received %d bytes: ", len);
+						for (uint32_t i = 0; i < len; i++) {
+							pr_dbg("%02X ", data[i]);
+						}
+						pr_dbg("\n");
+						
+						// TODO: Process your UART binary data here
+						// For example, you might want to:
+						// - Parse the data according to your protocol
+						// - Forward it to another component
+						// - Store it in a buffer for later processing
+					});
+					
+					// Start receiving data 
+					_cdchost_instance->receive();
+				}
+				else if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
 					pr_trace("MSC connected\n");
 					_mschost_instance->connect();
 				}
@@ -111,6 +199,8 @@ public:
 				pr_trace("Disconnected class code %d\n", connected_classcode);
 				if (connected_classcode == AudioClassCode)
 					_midihost_instance->disconnect();
+				else if (connected_classcode == USB_CDC_CLASS)
+					_cdchost_instance->disconnect();
 				else if (connected_classcode == USB_MSC_CLASS)
 					_mschost_instance->disconnect();
 				else
@@ -151,7 +241,46 @@ public:
 		return midi_host;
 	}
 
+	CDCHost &get_cdc_host() {
+		return cdc_host;
+	}
+
 	FatFileIO &get_msc_fileio() {
 		return msc_host.get_fileio();
 	}
+
+	// Friend function declaration to allow access to private members
+	friend void USBH_CDC_ReceiveCallback(USBH_HandleTypeDef *phost);
+	friend void USBH_CDC_TransmitCallback(USBH_HandleTypeDef *phost);
 };
+
+// USB Host CDC Transmit Callback - called by the USB stack when CDC data has been sent
+extern "C" void USBH_CDC_TransmitCallback(USBH_HandleTypeDef *phost) {
+	pr_dbg("CDC Host: Transmit completed\n");
+	// Notify the CDC host that transmission is complete
+	auto *cdc_instance = UsbHostManager::_cdchost_instance;
+	if (cdc_instance && cdc_instance->is_connected()) {
+		cdc_instance->tx_done_callback();
+	}
+}
+
+// USB Host CDC Receive Callback - called by the USB stack when CDC data is received
+extern "C" void USBH_CDC_ReceiveCallback(USBH_HandleTypeDef *phost) {
+	auto *cdc_instance = UsbHostManager::_cdchost_instance;
+	if (cdc_instance && cdc_instance->is_connected()) {
+		// Get the received data from the CDC handle
+		CDC_HandleTypeDef *CDCHandle = (CDC_HandleTypeDef *)phost->pActiveClass->pData;
+		if (CDCHandle && CDCHandle->pRxData) {
+			// Get the actual received data length
+			uint32_t len = USBH_CDC_GetLastReceivedDataSize(phost);
+			if (len > 0) {
+				// Process the received data through the CDCHost
+				// The data is in the buffer that was passed to USBH_CDC_Receive
+				cdc_instance->process_rx_data(CDCHandle->pRxData, len);
+				
+				// Re-arm the receive to get more data
+				cdc_instance->receive();
+			}
+		}
+	}
+}
