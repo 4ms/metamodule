@@ -9,6 +9,13 @@ static rack::engine::Module *get_rack_plugin_module(std::unique_ptr<CoreProcesso
 	return dynamic_cast<rack::engine::Module *>(module.get());
 }
 
+void plugin_module_init(std::unique_ptr<CoreProcessor> &module) {
+	if (auto rack_module = get_rack_plugin_module(module)) {
+		rack::engine::Module::AddEvent a{};
+		rack_module->onAdd(a);
+	}
+}
+
 void plugin_module_deinit(std::unique_ptr<CoreProcessor> &module) {
 	if (auto rack_module = get_rack_plugin_module(module)) {
 		rack::engine::Module::RemoveEvent rm{};
