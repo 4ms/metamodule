@@ -9,13 +9,8 @@
 #include "fs/syscall/filesystem.hh"
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
+#include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
-
-#ifdef CPU_TEST_ALL_MODULES
-#include "conf/pin_conf.hh"
-#include "fs/general_io.hh"
-#include "load_test/test_modules.hh"
-#endif
 
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
@@ -74,31 +69,7 @@ extern "C" void aux_core_main() {
 	// Signal that we're ready
 	printf("A7 Core 2 initialized\n");
 
-#ifdef CPU_TEST_ALL_MODULES
-	{
-		using namespace mdrivlib;
-
-		std::string should_run;
-		FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
-
-		if (should_run == "all\n" || Pin{ControlPins::but0, PinMode::Input, PinPull::Up, PinPolarity::Inverted}.is_on())
-		{
-			pr_info("A7 Core 2 running CPU load tests\n");
-
-			// clear previous results files
-			FS::write_file(file_storage_proxy, std::string("In progress"), {"cpu_test.csv", Volume::USB});
-			FS::write_file(file_storage_proxy, std::string(""), {"cpu_test_in_progress.csv", Volume::USB});
-
-			std::string results;
-			LoadTest::test_all_modules([&file_storage_proxy, &ui, &results](std::string_view csv_line) {
-				results += csv_line;
-				FS::append_file(file_storage_proxy, csv_line, {"cpu_test_in_progress.csv", Volume::USB});
-				ui.update_screen();
-			});
-			FS::write_file(file_storage_proxy, results, {"cpu_test.csv", Volume::USB});
-		}
-	}
-#endif
+	CpuLoadTest::run_tests(file_storage_proxy, ui);
 
 	HWSemaphore<AuxCoreReady>::unlock();
 
