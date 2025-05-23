@@ -12,6 +12,7 @@ struct Settings {
 	std::string flash_path = "../patches/default/";
 	std::string asset_file = "build/assets.uimg";
 	int audioout_dev = 0;
+	std::string test_brand = "";
 
 	void parse(int argc, char *argv[]) {
 
@@ -37,6 +38,9 @@ struct Settings {
 								  "Location of assets.uimg file (built by firmware project)",
 								  cxxopts::value<std::string>()->default_value("../firmware/build/assets.uimg"));
 
+			options.add_options()(
+				"t,test_brand", "Brand slug to run tests on", cxxopts::value<std::string>()->default_value(""));
+
 			options.add_options()("h,help", "Print help");
 
 			auto args = options.parse(argc, argv);
@@ -52,6 +56,9 @@ struct Settings {
 
 			if (args.count("assets") > 0)
 				asset_file = args["assets"].as<std::string>();
+
+			if (args.count("test_brand") > 0)
+				test_brand = args["test_brand"].as<std::string>();
 
 			if (args.count("audioout") > 0)
 				audioout_dev = args["audioout"].as<int>();

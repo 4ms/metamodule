@@ -9,13 +9,8 @@
 #include "fs/syscall/filesystem.hh"
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
+#include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
-
-#ifdef CPU_TEST_ALL_MODULES
-#include "conf/pin_conf.hh"
-#include "fs/general_io.hh"
-#include "load_test/test_modules.hh"
-#endif
 
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
@@ -72,20 +67,9 @@ extern "C" void aux_core_main() {
 	ui.preload_plugins();
 
 	// Signal that we're ready
-	pr_info("A7 Core 2 initialized\n");
+	printf("A7 Core 2 initialized\n");
 
-#ifdef CPU_TEST_ALL_MODULES
-	{
-		using namespace mdrivlib;
-		if (Pin{ControlPins::but0, PinMode::Input, PinPull::Up, PinPolarity::Inverted}.is_on()) {
-			pr_info("A7 Core 2 running CPU load tests\n");
-			LoadTest::test_all_modules([&file_storage_proxy, &ui](std::string_view csv_line) {
-				FS::append_file(file_storage_proxy, csv_line, {"cpu_test.csv", Volume::USB});
-				ui.update_screen();
-			});
-		}
-	}
-#endif
+	CpuLoadTest::run_tests(file_storage_proxy, ui);
 
 	HWSemaphore<AuxCoreReady>::unlock();
 

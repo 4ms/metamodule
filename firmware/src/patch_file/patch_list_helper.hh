@@ -54,7 +54,7 @@ public:
 		return false;
 	}
 
-	PatchFile *find_fileinfo(Volume vol, std::string_view filename) {
+	PatchFile *find_patchfileinfo(Volume vol, std::string_view filename) {
 		auto &tree = base_dir(vol, filename);
 		filename = file_name(filename);
 
