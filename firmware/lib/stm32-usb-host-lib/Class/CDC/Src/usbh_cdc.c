@@ -152,8 +152,8 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
 {
   USBH_StatusTypeDef status;
   CDC_HandleTypeDef *CDC_Handle;
-  uint8_t control_interface_num = 2;
-  uint8_t data_interface_num = 3;
+  uint8_t control_interface_num = 0;
+  uint8_t data_interface_num = 1;
 
   // Explicitly use interface 2 for CDC Control
   // uint8_t interface = 2; // Original hardcoding

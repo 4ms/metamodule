@@ -78,19 +78,14 @@ public:
 	}
 
 	void transmit_cdc_buffer() {
+		// Don't try to transmit if CDC host is not ready
+		if (!_cdchost_instance->is_ready_to_transmit()) {
+			return;
+		}
+		
 		auto transmit = [this](uint8_t *ptr, int len) {
-			_cdchost_instance->transmit(std::span<uint8_t>(ptr, len));
+			return _cdchost_instance->transmit(std::span<uint8_t>(ptr, len));
 		};
-
-		// // Don't transmit if we already are transmitting
-		// // But have a 100ms timeout in case of a USB error
-		// if (is_transmitting) {
-		// 	if (HAL_GetTick() - last_transmission_tm > 100) {
-		// 		is_transmitting = false;
-		// 		last_transmission_tm = HAL_GetTick();
-		// 	} else
-		// 		return;
-		// }
 
 		// Scan buffers for data to transmit, and exit after first transmission
 		auto *buff = _console_cdc_buff;
@@ -106,8 +101,9 @@ public:
 			for (size_t i = start_pos; i < buff->buffer.data.size(); i++)
 				pr_dbg("%02X ", buff->buffer.data[i]);
 			pr_dbg("\n");
-			transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
-			_current_read_pos = 0;
+			if (transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos)) {
+				_current_read_pos = 0;
+			}
 			return;
 
 		} else if (start_pos < end_pos) {
@@ -115,8 +111,9 @@ public:
 			for (size_t i = start_pos; i < end_pos; i++)
 				pr_dbg("%02X ", buff->buffer.data[i]);
 			pr_dbg("\n");
-			transmit(&buff->buffer.data[start_pos], end_pos - start_pos);
-			_current_read_pos = end_pos;
+			if (transmit(&buff->buffer.data[start_pos], end_pos - start_pos)) {
+				_current_read_pos = end_pos;
+			}
 			return;
 		}
 	}
@@ -156,9 +153,41 @@ public:
 				}
 				else if (connected_classcode == USB_CDC_CLASS && !strcmp(classname, "CDC")) {
 					_cdchost_instance->connect();
+					
+					// Configure UART parameters for 115200 8N1
+					if (!_cdchost_instance->set_uart_115200_8N1()) {
+						pr_err("Failed to set CDC line coding to 115200 8N1\n");
+					} else {
+						pr_trace("CDC line coding set to 115200 8N1\n");
+					}
+					
+					// Set DTR and RTS high - many devices require this to start communication
+					if (!_cdchost_instance->set_control_line_state(true, true)) {
+						pr_warn("CDC device does not support control line state (DTR/RTS) - this is often normal\n");
+					} else {
+						pr_trace("CDC control lines DTR/RTS set high\n");
+					}
+					
+					// Give the device time to initialize after configuration
+					HAL_Delay(100);
+					
+					// Set up receive callback to handle incoming UART data
+					_cdchost_instance->set_rx_callback([](uint8_t *data, uint32_t len) {
+						pr_dbg("CDC received %d bytes: ", len);
+						for (uint32_t i = 0; i < len; i++) {
+							pr_dbg("%02X ", data[i]);
+						}
+						pr_dbg("\n");
+						
+						// TODO: Process your UART binary data here
+						// For example, you might want to:
+						// - Parse the data according to your protocol
+						// - Forward it to another component
+						// - Store it in a buffer for later processing
+					});
+					
 					// Start receiving data 
-					uint8_t rx_buffer[128];
-					USBH_CDC_Receive(phost, rx_buffer, 128);
+					_cdchost_instance->receive();
 				}
 				else if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
 					pr_trace("MSC connected\n");
@@ -219,4 +248,39 @@ public:
 	FatFileIO &get_msc_fileio() {
 		return msc_host.get_fileio();
 	}
+
+	// Friend function declaration to allow access to private members
+	friend void USBH_CDC_ReceiveCallback(USBH_HandleTypeDef *phost);
+	friend void USBH_CDC_TransmitCallback(USBH_HandleTypeDef *phost);
 };
+
+// USB Host CDC Transmit Callback - called by the USB stack when CDC data has been sent
+extern "C" void USBH_CDC_TransmitCallback(USBH_HandleTypeDef *phost) {
+	pr_dbg("CDC Host: Transmit completed\n");
+	// Notify the CDC host that transmission is complete
+	auto *cdc_instance = UsbHostManager::_cdchost_instance;
+	if (cdc_instance && cdc_instance->is_connected()) {
+		cdc_instance->tx_done_callback();
+	}
+}
+
+// USB Host CDC Receive Callback - called by the USB stack when CDC data is received
+extern "C" void USBH_CDC_ReceiveCallback(USBH_HandleTypeDef *phost) {
+	auto *cdc_instance = UsbHostManager::_cdchost_instance;
+	if (cdc_instance && cdc_instance->is_connected()) {
+		// Get the received data from the CDC handle
+		CDC_HandleTypeDef *CDCHandle = (CDC_HandleTypeDef *)phost->pActiveClass->pData;
+		if (CDCHandle && CDCHandle->pRxData) {
+			// Get the actual received data length
+			uint32_t len = USBH_CDC_GetLastReceivedDataSize(phost);
+			if (len > 0) {
+				// Process the received data through the CDCHost
+				// The data is in the buffer that was passed to USBH_CDC_Receive
+				cdc_instance->process_rx_data(CDCHandle->pRxData, len);
+				
+				// Re-arm the receive to get more data
+				cdc_instance->receive();
+			}
+		}
+	}
+}
