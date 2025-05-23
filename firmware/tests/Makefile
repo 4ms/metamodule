@@ -46,6 +46,7 @@ CXXFLAGS = 	-Wall \
 			-Ilib/cpputil \
 			-Ilib/patch-serial \
 			-Ilib/patch-serial/ryml \
+			-Ilib/patch-serial/ryml/rapidyaml/src \
 			-Ilib/CoreModules \
 			-Imetamodule-plugin-sdk/metamodule-core-interface \
 			-Imetamodule-plugin-sdk/metamodule-rack-interface/dep/include \
