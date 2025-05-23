@@ -15,6 +15,7 @@ struct ModuleEntry {
 	static constexpr std::array<unsigned, 5> blocksizes{32, 64, 128, 256, 512};
 	std::string slug;
 	uint64_t load_time;
+
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> isolated;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> patched;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> cv_modulated;
@@ -31,10 +32,8 @@ struct ModuleEntry {
 inline std::string csv_header();
 inline std::string entry_to_csv(ModuleEntry const &entry);
 
-inline void send_gpio_pulse() {
-	Debug::Pin1::high();
-	delay_ms(1);
-	Debug::Pin1::low();
+inline void send_heartbeat() {
+	pr_silent("*\n");
 }
 
 inline void test_module_brand(std::string_view only_brand, auto append_file) {
@@ -52,7 +51,6 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 		auto slugs = ModuleFactory::getAllModuleSlugs(brand);
 		for (auto slug : slugs) {
 			ModuleEntry entry;
-
 			entry.slug = std::string(brand) + ":" + std::string(slug);
 
 			if (entry.slug == "AmalgamatedHarmonics:Arp32") {
@@ -77,33 +75,33 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 
 				pr_trace("Block size %u\n", blocksize);
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				pr_trace("Timing module construction\n");
 				entry.load_time = tester.measure_construction_time();
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				pr_trace("Running all unpatched test\n");
 				entry.isolated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::NonePatched);
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				pr_trace("Running Zero'ed inputs test\n");
 				entry.patched[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsZero);
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				pr_trace("Running LFO test\n");
 				entry.cv_modulated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsLFO);
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				pr_trace("Running audio-rate test\n");
 				entry.audio_modulated[i] =
 					tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsAudio);
 
-				send_gpio_pulse();
+				send_heartbeat();
 
 				i++;
 			}
@@ -152,6 +150,7 @@ inline std::string csv_header() {
 		s += "InputsAudio-" + std::to_string(blocksize) + ",";
 		pr_info("InputsAudio-%u,", blocksize);
 	}
+
 	s += "ConstructionTime(ms),FirstRunTime(ms)";
 	pr_info("ConstructionTime(ms),FirstRunTime(ms)");
 
