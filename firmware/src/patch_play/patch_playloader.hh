@@ -19,7 +19,9 @@ namespace MetaModule
 
 // PatchLoader handles loading of patches from storage into PatchPlayer
 struct PatchPlayLoader {
-	PatchPlayLoader(FileStorageProxy &patch_storage, OpenPatchManager &patches, PatchPlayer &patchplayer)
+	PatchPlayLoader(FileStorageProxy &patch_storage,
+					OpenPatchManager &patches,
+					PatchPlayer &patchplayer)
 		: player_{patchplayer}
 		, storage_{patch_storage}
 		, patches_{patches} {
@@ -59,6 +61,7 @@ struct PatchPlayLoader {
 				else {
 					patches_.start_viewing(initial_patch_loc);
 					next_patch = patches_.get_view_patch();
+
 					load_patch();
 				}
 

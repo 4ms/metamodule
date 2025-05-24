@@ -109,6 +109,9 @@ USBH_StatusTypeDef USBH_Init(USBH_HandleTypeDef *phost,
   /* Unlink class*/
   phost->pActiveClass = NULL;
   phost->ClassNumber = 0U;
+  
+  /* Initialize class preference to auto-select */
+  phost->PreferredClassName = NULL;
 
   /* Restore default states and prepare EP0 */
   (void)DeInitStateMachine(phost);
@@ -704,6 +707,9 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       else
       {
         phost->pActiveClass = NULL;
+        
+        // Check if we have a preferred class name set
+        char *preferred_class = phost->PreferredClassName;
 
         for (idx = 0U; idx < USBH_MAX_NUM_SUPPORTED_CLASS; idx++)
         {
@@ -713,18 +719,31 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
           }
 			
           USBH_UsrLog("Looking for classcode %x (%.16s)", phost->pClass[idx]->ClassCode, phost->pClass[idx]->Name);
+          
+          // If we have a preference, check if this class matches
+          if (preferred_class != NULL && strcmp(phost->pClass[idx]->Name, preferred_class) != 0) {
+            continue; // Skip non-preferred classes
+          }
+          
           for (unsigned itf = 0U; itf < phost->device.CfgDesc.bNumInterfaces; itf++)
           {
 			USBH_UsrLog("Found interface with %x classcode", phost->device.CfgDesc.Itf_Desc[itf].bInterfaceClass);
-			// TODO: keep a user preference table of phost->device.DevDesc.idVendor, idDevice and which itf to choose
-			// Double-check the chosen itf matches, otherwise fall back to picking the first one
-			// Also report back to A7 all the matching itf found
             if (phost->pClass[idx]->ClassCode == phost->device.CfgDesc.Itf_Desc[itf].bInterfaceClass)
             {
-			  if (phost->pActiveClass == NULL)
+			  if (phost->pActiveClass == NULL || 
+			      (preferred_class != NULL && strcmp(phost->pClass[idx]->Name, preferred_class) == 0))
+              {
 				  phost->pActiveClass = phost->pClass[idx];
-              // break; // DEBUG: don't break on the first one found
+                  if (preferred_class != NULL) {
+                      break; // Found our preferred class, stop looking
+                  }
+              }
             }
+          }
+          
+          // If we found our preferred class, stop looking at other classes
+          if (phost->pActiveClass != NULL && preferred_class != NULL) {
+              break;
           }
         }
 
@@ -918,6 +937,10 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       {
         USBH_UsrLog("PID: %xh", phost->device.DevDesc.idProduct);
         USBH_UsrLog("VID: %xh", phost->device.DevDesc.idVendor);
+        USBH_UsrLog("Device Class: %xh", phost->device.DevDesc.bDeviceClass);
+        USBH_UsrLog("Device SubClass: %xh", phost->device.DevDesc.bDeviceSubClass);
+        USBH_UsrLog("Device Protocol: %xh", phost->device.DevDesc.bDeviceProtocol);
+        USBH_UsrLog("Num Configurations: %d", phost->device.DevDesc.bNumConfigurations);
 
         phost->EnumState = ENUM_SET_ADDR;
       }

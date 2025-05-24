@@ -4,12 +4,14 @@
 #include "midi/midi_router.hh"
 #include "midi/midi_sync.hh"
 #include "core_a7/smp_api.hh"
+#include "core_a7/rotocontrol.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
 #include "gui/ui.hh"
 #include "patch_play/patch_player.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>
+#include <functional>
 
 namespace MetaModule
 {
@@ -18,17 +20,17 @@ struct AuxPlayer {
 	PatchPlayer &patch_player;
 	OpenPatchManager &open_patch_manager;
 	Ui &ui;
-
+	ConcurrentBuffer &console_cdc_buff;
 	FixedVector<unsigned, 64> module_ids;
-	unsigned midi_throttle_counter = 0;
 	
 	// MIDI sync instance
 	MidiSync midi_sync;
 
-	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui)
+	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui, ConcurrentBuffer &console_cdc_buff)
 		: patch_player{patch_player}
 		, open_patch_manager{open_patch_manager}
-		, ui{ui} {
+		, ui{ui}
+		, console_cdc_buff{console_cdc_buff} {
 		using namespace mdrivlib;
 
 		constexpr auto NewModuleListIRQn = SMPControl::IRQn(SMPCommand::NewModuleList);

@@ -50,8 +50,8 @@ enum { HOST_HS = 0, HOST_FS = 1 };
 
 void *msc_malloc(size_t);
 void msc_free(void *);
-#define USBH_malloc msc_malloc
-#define USBH_free msc_free
+#define USBH_malloc malloc
+#define USBH_free   free
 #define USBH_memset memset
 #define USBH_memcpy memcpy
 

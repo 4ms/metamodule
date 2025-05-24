@@ -129,7 +129,8 @@ if __name__ == "__main__":
                 if i != j:
                     a = target_areas[i]
                     b = target_areas[j]
-                    if (a[1] >= b[0] and a[1] <= b[1]) or (b[1] >= a[0] and b[1] <= a[1]):
+                    # Overlap exists if start of A is before end of B AND start of B is before end of A
+                    if a[0] < b[1] and b[0] < a[1]:
                         raise ValueError("Sections 0x{:08x}-0x{:08x} and 0x{:08x}-0x{:08x} overlap".format(a[0], a[1], b[0], b[1]))
 
 
