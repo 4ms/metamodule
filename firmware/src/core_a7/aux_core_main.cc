@@ -66,57 +66,10 @@ extern "C" void aux_core_main() {
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
 
-	[&]() {
-		using namespace mdrivlib;
+	printf("*ready\n");
 
-		if (!FS::file_size(file_storage_proxy, {"autoupdate_fw", Volume::USB})) {
-			return;
-		}
-
-		const auto manifest_size =
-			FS::file_size(file_storage_proxy, {"metamodule-firmware/metamodule.json", Volume::USB});
-		if (!manifest_size) {
-			pr_err("unable to read update manifest file\n");
-			return;
-		}
-
-		FirmwareUpdaterProxy updater{file_storage_proxy, true};
-		if (!updater.start("metamodule-firmware/metamodule.json", Volume::USB, manifest_size.value())) {
-			pr_err("could not load manifest file\n");
-			return;
-		}
-
-		std::size_t prev_prog{};
-
-		auto print_prog = [&prev_prog](const FirmwareUpdaterProxy::Status &status) {
-			const auto state = status.state == FirmwareUpdaterProxy::Verifying ? "verifying" : "writing";
-
-			if (status.bytes_completed != prev_prog) {
-				prev_prog = status.bytes_completed;
-				printf("*%u*%u*%s*%s\n", status.bytes_completed, status.file_size, state, status.name.c_str());
-			}
-		};
-
-		printf("*updating\n");
-
-		while (true) {
-			const auto status = updater.process();
-			if (status.state == FirmwareUpdaterProxy::Verifying || status.state == FirmwareUpdaterProxy::Writing) {
-				print_prog(status);
-			} else if (status.state == FirmwareUpdaterProxy::Success) {
-				printf("*success\n\n");
-				break;
-			} else if (status.state == FirmwareUpdaterProxy::Error) {
-				printf("*failure\n");
-				pr_err("%s\n", status.message.c_str());
-				break;
-			}
-		}
-
-		while (true) {
-			__NOP();
-		}
-	}();
+	AutoUpdater::run(file_storage_proxy, ui);
+	CpuLoadTest::run_tests(file_storage_proxy, ui);
 
 	printf("*initialized\n");
 
@@ -124,8 +77,6 @@ extern "C" void aux_core_main() {
 
 	// Signal that we're ready
 	printf("A7 Core 2 initialized\n");
-
-	CpuLoadTest::run_tests(file_storage_proxy, ui);
 
 	HWSemaphore<AuxCoreReady>::unlock();
 
