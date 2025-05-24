@@ -1452,7 +1452,7 @@ inline void PatchPlayer::update_all_roto_controls() {
                                 next_midi_roto_control_index_, // RotoControl's own knob/control index
                                 ControlMode::CC_7BIT, 
                                 k.midi_chan == 0 ? 1 : k.midi_chan, 
-                                next_midi_roto_control_index_, // RotoControl's parameter index
+                                k.cc_num(), // RotoControl's parameter index
                                 0, // nrpn_address
                                 min_val_u16,
                                 max_val_u16,
