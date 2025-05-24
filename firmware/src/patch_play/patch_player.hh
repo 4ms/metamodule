@@ -27,6 +27,12 @@
 #include <string_view>
 #include <vector>
 
+// Added includes for RotoControl
+#include "core_a7/rotocontrol.hh"
+#include "console/concurrent_buffer.hh"
+#include "CoreModules/elements/element_info_view.hh" // Already included via moduleFactory.hh typically, but explicit is fine
+#include "CoreModules/elements/elements.hh"
+
 #include "debug.hh"
 
 namespace MetaModule
@@ -43,6 +49,8 @@ public:
 	PatchQuery patch_query{modules, pd};
 
 private:
+	ConcurrentBuffer& roto_control_buffer_;
+	uint8_t next_midi_roto_control_index_ = 0; // Added for sequential RotoControl MIDI mapping
 	// Out1-Out8 + Ext Out1-8
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
@@ -103,7 +111,8 @@ private:
 	static inline ModuleTypeSlug no_patch_loaded{"(Not Loaded)"};
 
 public:
-	PatchPlayer() {
+	PatchPlayer(ConcurrentBuffer& console_buffer) 
+		: roto_control_buffer_{console_buffer} { // Updated constructor
 		clear_cache();
 	}
 
@@ -178,6 +187,7 @@ public:
 		for (auto const &mm : pd.midi_maps.set) {
 			cache_midi_mapping(mm);
 		}
+		update_all_roto_controls(); // Update RotoControls after all MIDI maps are cached
 
 		// Load module states
 		for (auto const &ms : pd.module_states) {
@@ -606,9 +616,10 @@ public:
 
 	void remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
 		if (pd.remove_mapping(knobset_id, map)) {
-			if (knobset_id == PatchData::MIDIKnobSet)
+			if (knobset_id == PatchData::MIDIKnobSet) {
 				uncache_midi_mapping(map);
-			else
+				update_all_roto_controls();
+			} else
 				uncache_knob_mapping(knobset_id, map);
 		}
 	}
@@ -616,6 +627,7 @@ public:
 	void add_midi_mapped_knob(const MappedKnob &map) {
 		if (pd.add_update_midi_map(map)) {
 			cache_midi_mapping(map);
+			update_all_roto_controls();
 		}
 	}
 
@@ -982,6 +994,7 @@ public:
 	std::optional<unsigned> panel_knob_catchup_inaccessible();
 
 private:
+	void update_all_roto_controls(); // Declaration of the new method
 	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
 
 	// Cache functions:
@@ -1246,7 +1259,104 @@ private:
 
 		} else {
 			pr_warn("Bad Midi Map: panel_knob_id:%d to m:%d p:%d\n", k.panel_knob_id, k.module_id, k.param_id);
+			return; // Don't configure RotoControl if mapping is bad
 		}
+
+		// RotoControl configuration for the MIDI mapped knob
+		// THIS BLOCK IS MOVED TO update_all_roto_controls()
+		/*
+		if (k.module_id < pd.module_slugs.size() && k.module_id < num_modules) {
+			const auto& slug = pd.module_slugs[k.module_id];
+			auto& module_info = ModuleFactory::getModuleInfo(slug);
+
+			// Find the element corresponding to k.param_id
+			// This assumes module_info.indices maps element index to param_id correctly.
+			// And that elements are iterated in order of their param_ids for this to work robustly
+			// or that k.param_id can directly be used as an index into module_info.elements IF it's guaranteed.
+			// A safer way is to find the element whose `param_idx` in `module_info.indices` matches `k.param_id`.
+			for (uint16_t el_idx = 0; el_idx < module_info.elements.size(); ++el_idx) {
+				bool is_target_param = false;
+				// Check if this element is the one we are mapping
+				// Need to know how module_info.indices relates element_idx to k.param_id
+				// For now, assuming Element directly corresponds to a param_id if it's a ParamElement derived type.
+				// This part might need refinement based on how `module_info.indices` works.
+				// A common pattern is module_info.indices[element_index_in_elements_array].param_idx
+				if (el_idx < module_info.indices.size() && module_info.indices[el_idx].param_idx == k.param_id) {
+                     is_target_param = true;
+                }
+
+				if (is_target_param) {
+					const auto &element_variant = module_info.elements[el_idx];
+					std::visit([&](auto &&arg) {
+						using T = std::decay_t<decltype(arg)>;
+						if constexpr (std::is_base_of_v<ParamElement, T>) {
+							const ParamElement &param_el = arg;
+							std::string_view control_name = param_el.short_name;
+							if (control_name.empty()) control_name = param_el.long_name;
+							if (control_name.empty()) control_name = "Unnamed MIDI Param";
+
+							uint16_t min_val_u16 = 0;
+							uint16_t max_val_u16 = 1000;
+							HapticMode haptic_mode = HapticMode::KNOB_300;
+							uint8_t haptic_steps = 2;
+							const char* const* step_names_ptr = nullptr;
+
+							if constexpr (std::is_base_of_v<Pot, T>) {
+								const Pot &pot_el = arg;
+								min_val_u16 = static_cast<uint16_t>(k.min * 1000.f); // Use MappedKnob min/max
+								max_val_u16 = static_cast<uint16_t>(k.max * 1000.f); // Use MappedKnob min/max
+								if (pot_el.integral) {
+									haptic_mode = HapticMode::KNOB_N_STEP;
+									haptic_steps = 128; // Default for integral Pot
+								} else {
+									haptic_mode = HapticMode::KNOB_300;
+									haptic_steps = 255;
+								}
+							} else if constexpr (std::is_base_of_v<Switch, T>) {
+								const Switch &switch_el = arg;
+								min_val_u16 = 0;
+								max_val_u16 = switch_el.num_pos > 0 ? switch_el.num_pos - 1 : 0;
+								haptic_mode = HapticMode::KNOB_N_STEP;
+								haptic_steps = switch_el.num_pos > 0 ? switch_el.num_pos : 1;
+								// Placeholder for step_names for FlipSwitch/SlideSwitch if needed
+							} else if constexpr (std::is_base_of_v<Button, T>) {
+								min_val_u16 = 0;
+								max_val_u16 = 1;
+								haptic_mode = HapticMode::KNOB_N_STEP;
+								haptic_steps = 2;
+							}
+
+							// Using sequential index for RotoControl
+							uint8_t current_roto_idx = next_midi_roto_control_index_;
+
+							RotoControl::configure_knob_control(
+								roto_control_buffer_,
+								0, // setup_index
+								current_roto_idx, // RotoControl's own knob/control index
+								ControlMode::CC_7BIT, // Default, or derive from MappedKnob if possible
+								k.midi_chan == 0 ? 1 : k.midi_chan, // control_channel (ensure not 0 if 0 means omni)
+								current_roto_idx, // RotoControl's parameter index (which param on the device this configures)
+								0, // nrpn_address
+								min_val_u16,
+								max_val_u16,
+								control_name.data(),
+								0, // color_scheme
+								haptic_mode,
+								0xFF, // indent_pos1
+								0xFF, // indent_pos2
+								haptic_steps,
+								step_names_ptr
+							);
+							// Increment for the next MIDI mapping, if successful
+							// Add error checking for configure_knob_control if it returns status
+							next_midi_roto_control_index_++; 
+						}
+					}, element_variant);
+					break; // Found and processed the target element
+				}
+			}
+		}
+		*/
 	}
 
 	void uncache_midi_mapping(const MappedKnob &k) {
@@ -1331,4 +1441,131 @@ public:
 
 #endif
 };
+
+// Implementation of the new method
+inline void PatchPlayer::update_all_roto_controls() {
+    next_midi_roto_control_index_ = 0; // Reset for fresh batch configuration
+    RotoControl::start_config_update(roto_control_buffer_);
+
+    for (const auto& k : pd.midi_maps.set) {
+        if (!(k.is_midi_cc() || k.is_midi_notegate())) {
+            // Only configure RotoControl for valid MIDI CC or NoteGate types handled by original logic
+			pr_warn("RotoControl: Skipping MIDI map for module_id %u (num_modules: %u, slug_count: %zu, module_ptr: %p)\n", 
+				k.module_id, num_modules, pd.module_slugs.size(), 
+				(k.module_id < modules.size() ? modules[k.module_id].get() : nullptr) );
+            continue;
+        }
+
+		pr_dbg("RotoControl: Processing MIDI map for module_id %u (num_modules: %u, slug_count: %zu, module_ptr: %p)\n", 
+			k.module_id, num_modules, pd.module_slugs.size(), 
+			(k.module_id < modules.size() ? modules[k.module_id].get() : nullptr) );
+
+        if (k.module_id < pd.module_slugs.size() && k.module_id < num_modules && modules[k.module_id]) {
+            const auto& slug = pd.module_slugs[k.module_id];
+            // Assuming ModuleFactory::getModuleInfo is safe if module exists and slug is valid.
+            // A ModuleFactory::hasModuleInfo check could be added if getModuleInfo can fail.
+            auto& module_info = ModuleFactory::getModuleInfo(slug);
+
+            for (uint16_t el_idx = 0; el_idx < module_info.elements.size(); ++el_idx) {
+                bool is_target_param = false;
+                if (el_idx < module_info.indices.size() && module_info.indices[el_idx].param_idx == k.param_id) {
+                     is_target_param = true;
+                }
+
+                if (is_target_param) {
+                    const auto &element_variant = module_info.elements[el_idx];
+                    std::visit([&](auto &&arg) {
+                        using T = std::decay_t<decltype(arg)>;
+                        if constexpr (std::is_base_of_v<ParamElement, T>) {
+                            const ParamElement &param_el = arg;
+                            std::string_view control_name_sv = param_el.short_name;
+                            if (control_name_sv.empty()) control_name_sv = param_el.long_name;
+                            
+                            // Create a std::string for null termination if necessary, or ensure control_name_sv is suitable
+                            std::string control_name_str;
+                            const char* control_name_ptr;
+
+                            if (control_name_sv.empty()) {
+                                control_name_str = "Unnamed MIDI Param";
+                                control_name_ptr = control_name_str.c_str();
+                            } else {
+                                // If string_view might not be null-terminated and RotoControl needs it
+                                // control_name_str = std::string(control_name_sv);
+                                // control_name_ptr = control_name_str.c_str();
+                                // For now, assume .data() on string_view from module_info is safe if non-empty
+                                 control_name_ptr = control_name_sv.data();
+
+                                 // Safety: if control_name_sv.data() could point to memory that isn't null-terminated
+                                 // and RotoControl expects null-termination, we MUST copy to std::string first.
+                                 // Given it's from `param_el.short_name` or `long_name` (often string literals or fixed buffers),
+                                 // it might be okay. If issues arise, convert to `std::string` first.
+                            }
+
+
+                            uint16_t min_val_u16 = 0;
+                            uint16_t max_val_u16 = 1000;
+                            HapticMode haptic_mode = HapticMode::KNOB_300;
+                            uint8_t haptic_steps = 2;
+                            const char* const* step_names_ptr = nullptr; // Currently not populated, as per original
+
+                            if constexpr (std::is_base_of_v<Pot, T>) {
+                                const Pot &pot_el = arg;
+                                min_val_u16 = static_cast<uint16_t>(k.min * 1000.f);
+                                max_val_u16 = static_cast<uint16_t>(k.max * 1000.f);
+                                if (pot_el.integral) {
+                                    haptic_mode = HapticMode::KNOB_N_STEP;
+                                    haptic_steps = 128; 
+                                } else {
+                                    haptic_mode = HapticMode::KNOB_300;
+                                    haptic_steps = 255;
+                                }
+                            } else if constexpr (std::is_base_of_v<Switch, T>) {
+                                const Switch &switch_el = arg;
+                                min_val_u16 = 0;
+                                max_val_u16 = switch_el.num_pos > 0 ? switch_el.num_pos - 1 : 0;
+                                haptic_mode = HapticMode::KNOB_N_STEP;
+                                haptic_steps = switch_el.num_pos > 0 ? switch_el.num_pos : 1;
+                            } else if constexpr (std::is_base_of_v<Button, T>) {
+                                min_val_u16 = 0;
+                                max_val_u16 = 1;
+                                haptic_mode = HapticMode::KNOB_N_STEP;
+                                haptic_steps = 2;
+                            }
+
+                            RotoControl::set_knob_control_config( // Use set_knob_control_config
+                                roto_control_buffer_,
+                                0, // setup_index
+                                next_midi_roto_control_index_, // RotoControl's own knob/control index
+                                ControlMode::CC_7BIT, 
+                                k.midi_chan == 0 ? 1 : k.midi_chan, 
+                                next_midi_roto_control_index_, // RotoControl's parameter index
+                                0, // nrpn_address
+                                min_val_u16,
+                                max_val_u16,
+                                control_name_ptr,
+                                0, // color_scheme
+                                haptic_mode,
+                                0xFF, // indent_pos1
+                                0xFF, // indent_pos2
+                                haptic_steps,
+                                step_names_ptr
+                            );
+                            next_midi_roto_control_index_++; 
+                        }
+                    }, element_variant);
+                    break; 
+                }
+            }
+        } else {
+             // Optional: Log if module_id is out of bounds or module not loaded for a MIDI map entry.
+             if (k.is_midi_cc() || k.is_midi_notegate()) { // Only warn for types we'd otherwise process
+                pr_warn("RotoControl: Skipping MIDI map for module_id %u (num_modules: %u, slug_count: %zu, module_ptr: %p)\n", 
+                    k.module_id, num_modules, pd.module_slugs.size(), 
+                    (k.module_id < modules.size() ? modules[k.module_id].get() : nullptr) );
+             }
+        }
+    }
+    RotoControl::end_config_update(roto_control_buffer_);
+}
+
 } // namespace MetaModule

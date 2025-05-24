@@ -7,6 +7,14 @@
 #include <cstring>
 
 class UsbHostManager {
+public:
+	enum class PreferredClass {
+		AUTO,    // Pick first available (default behavior)
+		MIDI,    // Prefer MIDI class
+		CDC,     // Prefer CDC class  
+		MSC      // Prefer MSC class
+	};
+
 private:
 	mdrivlib::Pin src_enable;
 	USBH_HandleTypeDef usbhost{};
@@ -14,6 +22,10 @@ private:
 	MidiHost midi_host{usbhost};
 	CDCHost cdc_host{usbhost};
 	MSCHost msc_host{usbhost, MetaModule::Volume::USB};
+	
+	PreferredClass preferred_class = PreferredClass::MIDI;
+	static inline bool did_init = false;
+	static inline unsigned inflight_cdc_commands = 0;
 
 	// For access in C-style callback:
 	static inline MidiHost *_midihost_instance;
@@ -21,6 +33,8 @@ private:
 	static inline MSCHost *_mschost_instance;
 	static inline ConcurrentBuffer *_console_cdc_buff;
 	static inline unsigned _current_read_pos;
+	static inline PreferredClass *_preferred_class_ptr;
+	static inline UsbHostManager *_manager_instance;
 
 public:
 	UsbHostManager(mdrivlib::PinDef enable_5v, ConcurrentBuffer *console_cdc_buff)
@@ -35,6 +49,8 @@ public:
 		_mschost_instance = &msc_host;
 		_console_cdc_buff = console_cdc_buff;
 		_current_read_pos = console_cdc_buff->current_write_pos;
+		_preferred_class_ptr = &preferred_class;
+		_manager_instance = this;
 	}
 
 	void init() {
@@ -49,6 +65,25 @@ public:
 			pr_err("Error init USB Host: %d\n", status);
 			return;
 		}
+		
+		// Set the preferred class if specified
+		if (preferred_class != PreferredClass::AUTO) {
+			switch (preferred_class) {
+				case PreferredClass::MIDI:
+					usbhost.PreferredClassName = "MIDI";
+					break;
+				case PreferredClass::CDC:
+					usbhost.PreferredClassName = "CDC";
+					break;
+				case PreferredClass::MSC:
+					usbhost.PreferredClassName = "MSC";
+					break;
+				default:
+					usbhost.PreferredClassName = nullptr;
+					break;
+			}
+		}
+		
 		cdc_host.init();
 		midi_host.init();
 		msc_host.init();
@@ -63,6 +98,8 @@ public:
 		// HAL_Delay(500);
 	}
 	void stop() {
+		did_init = false;
+		inflight_cdc_commands = 0; // Reset inflight counter on stop
 		src_enable.low();
 		HAL_Delay(250);
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
@@ -78,21 +115,62 @@ public:
 	}
 
 	void transmit_cdc_buffer() {
-		// Don't try to transmit if CDC host is not ready
-		if (!_cdchost_instance->is_ready_to_transmit()) {
-			return;
-		}
-		
-		auto transmit = [this](uint8_t *ptr, int len) {
-			return _cdchost_instance->transmit(std::span<uint8_t>(ptr, len));
-		};
-
 		// Scan buffers for data to transmit, and exit after first transmission
 		auto *buff = _console_cdc_buff;
 
 		auto start_pos = _current_read_pos;
 		unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
 		end_pos = end_pos & buff->buffer.SIZEMASK;
+
+		// Find first terminator (FF FF) to determine actual end position
+		if (start_pos != end_pos) {
+			unsigned scan_pos = start_pos;
+			bool found_terminator = false;
+			
+			while (scan_pos != end_pos && !found_terminator) {
+				unsigned next_pos = (scan_pos + 1) & buff->buffer.SIZEMASK;
+				if (next_pos != end_pos) {
+					if (buff->buffer.data[scan_pos] == 0xF0 && buff->buffer.data[next_pos] == 0xF1) {
+						// Found terminator, stop transmission before it
+						end_pos = scan_pos;
+						found_terminator = true;
+					}
+				}
+				scan_pos = next_pos;
+			}
+		}
+
+		if (start_pos == end_pos) {
+			return;
+		}
+
+		if (preferred_class != PreferredClass::CDC) {
+			pr_dbg("Switching to CDC\n");
+			did_init = false;
+			
+			stop();	
+			set_preferred_class(PreferredClass::CDC);
+			start();
+			return;
+		}
+
+		if (!did_init) {
+			return;
+		}
+
+		pr_dbg("Transmitting CDC data, did_init is true\n");
+
+		// Don't try to transmit if CDC host is not ready
+		if (!_cdchost_instance->is_ready_to_transmit()) {
+			return;
+		}
+
+		pr_dbg("Transmitting CDC data, cdc host is ready\n");
+		
+		auto transmit = [this](uint8_t *ptr, int len) {
+			inflight_cdc_commands++;
+			return _cdchost_instance->transmit(std::span<uint8_t>(ptr, len));
+		};
 
 		if (start_pos > end_pos) {
 			// Data to transmit spans the "seam" of the circular buffer,
@@ -103,6 +181,7 @@ public:
 			pr_dbg("\n");
 			if (transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos)) {
 				_current_read_pos = 0;
+				// Note: For wraparound case, terminator logic is handled in the scanning phase
 			}
 			return;
 
@@ -113,6 +192,14 @@ public:
 			pr_dbg("\n");
 			if (transmit(&buff->buffer.data[start_pos], end_pos - start_pos)) {
 				_current_read_pos = end_pos;
+				// If we stopped at a terminator, skip over the FF FF
+				if (end_pos < (buff->current_write_pos & buff->buffer.SIZEMASK)) {
+					unsigned check_pos = end_pos;
+					unsigned next_check = (check_pos + 1) & buff->buffer.SIZEMASK;
+					if (buff->buffer.data[check_pos] == 0xFF && buff->buffer.data[next_check] == 0xFF) {
+						_current_read_pos = (next_check + 1) & buff->buffer.SIZEMASK;
+					}
+				}
 			}
 			return;
 		}
@@ -134,6 +221,30 @@ public:
 			case HOST_USER_CLASS_SELECTED: {
 				connected_classcode = host.get_active_class_code();
 				pr_dbg("Class selected: %d\n", connected_classcode);
+				
+				// Check if this matches our preference
+				if (_preferred_class_ptr && *_preferred_class_ptr != PreferredClass::AUTO) {
+					bool should_accept = false;
+					switch (*_preferred_class_ptr) {
+						case PreferredClass::MIDI:
+							should_accept = (connected_classcode == AudioClassCode);
+							break;
+						case PreferredClass::CDC:
+							should_accept = (connected_classcode == USB_CDC_CLASS);
+							break;
+						case PreferredClass::MSC:
+							should_accept = (connected_classcode == USB_MSC_CLASS);
+							break;
+						default:
+							should_accept = true;
+					}
+					
+					if (!should_accept) {
+						pr_dbg("Skipping class %d, waiting for preferred class\n", connected_classcode);
+						// TODO: Need to implement a way to reject this class and try another
+						// For now, we'll just log the mismatch
+					}
+				}
 			} break;
 
 			case HOST_USER_CLASS_ACTIVE: {
@@ -193,6 +304,8 @@ public:
 					pr_trace("MSC connected\n");
 					_mschost_instance->connect();
 				}
+
+				did_init = true;
 			} break;
 
 			case HOST_USER_DISCONNECTION: {
@@ -249,6 +362,10 @@ public:
 		return msc_host.get_fileio();
 	}
 
+	void set_preferred_class(PreferredClass pref) {
+		preferred_class = pref;
+	}
+
 	// Friend function declaration to allow access to private members
 	friend void USBH_CDC_ReceiveCallback(USBH_HandleTypeDef *phost);
 	friend void USBH_CDC_TransmitCallback(USBH_HandleTypeDef *phost);
@@ -257,10 +374,29 @@ public:
 // USB Host CDC Transmit Callback - called by the USB stack when CDC data has been sent
 extern "C" void USBH_CDC_TransmitCallback(USBH_HandleTypeDef *phost) {
 	pr_dbg("CDC Host: Transmit completed\n");
+	
+	// Decrement inflight commands counter
+	if (UsbHostManager::inflight_cdc_commands > 0) {
+		UsbHostManager::inflight_cdc_commands--;
+	}
+	
 	// Notify the CDC host that transmission is complete
 	auto *cdc_instance = UsbHostManager::_cdchost_instance;
 	if (cdc_instance && cdc_instance->is_connected()) {
 		cdc_instance->tx_done_callback();
+	}
+	
+	// Switch back to MIDI mode only when all CDC transmissions are complete
+	auto *manager = UsbHostManager::_manager_instance;
+	if (manager && 
+		UsbHostManager::_preferred_class_ptr && 
+		*UsbHostManager::_preferred_class_ptr == UsbHostManager::PreferredClass::CDC && 
+		UsbHostManager::inflight_cdc_commands == 0) {
+		
+		pr_dbg("Switching back to MIDI mode after all CDC transmissions complete (inflight: %u)\n", UsbHostManager::inflight_cdc_commands);
+		manager->stop();
+		manager->set_preferred_class(UsbHostManager::PreferredClass::MIDI);
+		manager->start();
 	}
 }
 
