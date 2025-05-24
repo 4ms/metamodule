@@ -4,6 +4,7 @@
 #include <functional>
 #include <initializer_list>
 #include <span>
+#include <vector>
 
 namespace MetaModule
 {
@@ -23,7 +24,6 @@ enum class HapticMode : uint8_t {
 class RotoControl {
 public:
 	static void set_knob_control_config(
-		ConcurrentBuffer &console_cdc_buff,
 		uint8_t setup_index,
 		uint8_t control_index,
 		ControlMode control_mode,
@@ -40,13 +40,14 @@ public:
 		uint8_t haptic_steps = 2,
 		const char* const* step_names = nullptr);
 
-	static void start_config_update(ConcurrentBuffer &console_cdc_buff);
+	static void start_config_update();
 
-	static void end_config_update(ConcurrentBuffer &console_cdc_buff);
+	static void end_config_update();
 
-	static void queue_config_commands(
-		ConcurrentBuffer &console_cdc_buff,
-		std::initializer_list<std::function<void()>> commands);
+	static void send_all_commands(ConcurrentBuffer &console_cdc_buff);
+
+private:
+	static std::vector<uint8_t> command_buffer_;
 };
 
 } // namespace MetaModule 

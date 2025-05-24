@@ -35,6 +35,7 @@ private:
 	static inline unsigned _current_read_pos;
 	static inline PreferredClass *_preferred_class_ptr;
 	static inline UsbHostManager *_manager_instance;
+	unsigned int process_counter_ = 0;
 
 public:
 	UsbHostManager(mdrivlib::PinDef enable_5v, ConcurrentBuffer *console_cdc_buff)
@@ -111,7 +112,11 @@ public:
 
 	void process() {
 		USBH_Process(&usbhost);
-		transmit_cdc_buffer();
+		process_counter_++;
+		if (process_counter_ >= 10000) {
+			transmit_cdc_buffer();
+			process_counter_ = 0;
+		}
 	}
 
 	void transmit_cdc_buffer() {
@@ -121,6 +126,8 @@ public:
 		auto start_pos = _current_read_pos;
 		unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
 		end_pos = end_pos & buff->buffer.SIZEMASK;
+
+		pr_dbg("Transmit CDC buffer: start_pos=%d, end_pos=%d\n", start_pos, end_pos);
 
 		// Find first terminator (FF FF) to determine actual end position
 		if (start_pos != end_pos) {
@@ -134,13 +141,40 @@ public:
 						// Found terminator, stop transmission before it
 						end_pos = scan_pos;
 						found_terminator = true;
+						pr_dbg("Transmit CDC buffer: found terminator at pos %d\n", scan_pos);
 					}
 				}
 				scan_pos = next_pos;
 			}
+
+			if (!found_terminator) {
+				pr_err("Transmit CDC buffer: no terminator found\n");
+				return;
+			}
+		}
+
+		// Hex dump of what would have been sent
+		pr_dbg("Data that would have been sent:\n");
+		if (start_pos > end_pos) {
+			// Data to transmit spans the "seam" of the circular buffer
+			pr_dbg("Part 1 (pos %d to %d): ", start_pos, buff->buffer.data.size());
+			for (size_t i = start_pos; i < buff->buffer.data.size(); i++)
+				pr_dbg("%02X ", buff->buffer.data[i]);
+			pr_dbg("\n");
+			// The second part (from 0 to end_pos) would normally be handled in a subsequent call
+			// or if the transmit function could handle scatter-gather.
+			// For debugging a single attempt, showing the first part is most relevant.
+		} else if (start_pos < end_pos) {
+			pr_dbg("Data (pos %d to %d): ", start_pos, end_pos);
+			for (size_t i = start_pos; i < end_pos; i++)
+				pr_dbg("%02X ", buff->buffer.data[i]);
+			pr_dbg("\n");
+		} else {
+			pr_dbg("No data to send (start_pos == end_pos)\n");
 		}
 
 		if (start_pos == end_pos) {
+			pr_dbg("Transmit CDC buffer: start_pos == end_pos, skipping transmission\n");
 			return;
 		}
 
@@ -155,6 +189,7 @@ public:
 		}
 
 		if (!did_init) {
+			pr_dbg("CDC host not initialized, skipping transmission\n");
 			return;
 		}
 
@@ -162,13 +197,14 @@ public:
 
 		// Don't try to transmit if CDC host is not ready
 		if (!_cdchost_instance->is_ready_to_transmit()) {
+			pr_dbg("CDC host not ready to transmit, skipping transmission\n");
 			return;
 		}
 
 		pr_dbg("Transmitting CDC data, cdc host is ready\n");
 		
 		auto transmit = [this](uint8_t *ptr, int len) {
-			inflight_cdc_commands++;
+			inflight_cdc_commands+= 2;
 			return _cdchost_instance->transmit(std::span<uint8_t>(ptr, len));
 		};
 
@@ -196,7 +232,7 @@ public:
 				if (end_pos < (buff->current_write_pos & buff->buffer.SIZEMASK)) {
 					unsigned check_pos = end_pos;
 					unsigned next_check = (check_pos + 1) & buff->buffer.SIZEMASK;
-					if (buff->buffer.data[check_pos] == 0xFF && buff->buffer.data[next_check] == 0xFF) {
+					if (buff->buffer.data[check_pos] == 0xF0 && buff->buffer.data[next_check] == 0xF1) {
 						_current_read_pos = (next_check + 1) & buff->buffer.SIZEMASK;
 					}
 				}
