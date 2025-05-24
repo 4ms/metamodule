@@ -60,7 +60,7 @@ inline void pr_dump(auto... args) {
 
 // silent: print only if log level is silent
 inline void pr_silent(auto... args) {
-#if LOG_LEVEL == 0
+#if LOG_LEVEL
 	_do_printf_impl(args...);
 #endif
 }
