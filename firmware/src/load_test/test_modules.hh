@@ -33,7 +33,7 @@ inline std::string csv_header();
 inline std::string entry_to_csv(ModuleEntry const &entry);
 
 inline void send_heartbeat() {
-	pr_silent("*\n");
+	pr_silent("*ok\n");
 }
 
 inline void test_module_brand(std::string_view only_brand, auto append_file) {
