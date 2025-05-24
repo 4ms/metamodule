@@ -618,7 +618,6 @@ public:
 		if (pd.remove_mapping(knobset_id, map)) {
 			if (knobset_id == PatchData::MIDIKnobSet) {
 				uncache_midi_mapping(map);
-				update_all_roto_controls();
 			} else
 				uncache_knob_mapping(knobset_id, map);
 		}
@@ -627,7 +626,6 @@ public:
 	void add_midi_mapped_knob(const MappedKnob &map) {
 		if (pd.add_update_midi_map(map)) {
 			cache_midi_mapping(map);
-			update_all_roto_controls();
 		}
 	}
 
