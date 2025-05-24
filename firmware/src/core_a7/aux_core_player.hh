@@ -1,4 +1,8 @@
 #pragma once
+#include "midi.hpp"
+#include "midi/midi_queue.hh"
+#include "midi/midi_router.hh"
+#include "midi/midi_sync.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
@@ -12,12 +16,18 @@ namespace MetaModule
 
 struct AuxPlayer {
 	PatchPlayer &patch_player;
+	OpenPatchManager &open_patch_manager;
 	Ui &ui;
 
 	FixedVector<unsigned, 64> module_ids;
+	unsigned midi_throttle_counter = 0;
+	
+	// MIDI sync instance
+	MidiSync midi_sync;
 
-	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
+	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui)
 		: patch_player{patch_player}
+		, open_patch_manager{open_patch_manager}
 		, ui{ui} {
 		using namespace mdrivlib;
 
@@ -76,6 +86,19 @@ struct AuxPlayer {
 					auto text = std::span<char>(d.text._data, d.text.capacity);
 					auto sz = patch_player.get_display_text(d.module_id, d.light_id, text);
 					d.text._data[sz] = '\0';
+				}
+			}
+
+			for (auto &p : ui.watched_params().active_watched_params()) {
+				if (p.is_active()) {
+					auto value = patch_player.get_param(p.module_id, p.param_id);
+					PatchData *patch = open_patch_manager.get_playing_patch();
+					if (patch) {
+						const MappedKnob *mapped_knob = patch->find_midi_map(p.module_id, p.param_id);
+						if (mapped_knob) {
+							midi_sync.sync_param_to_midi(value, mapped_knob->midi_chan, static_cast<uint8_t>(mapped_knob->cc_num()));
+						}
+					}
 				}
 			}
 

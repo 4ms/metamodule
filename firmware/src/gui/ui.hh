@@ -99,6 +99,10 @@ public:
 		return params.text_displays;
 	}
 
+	ParamWatcher &watched_params() {
+		return params.param_watcher;
+	}
+
 	void preload_plugins() {
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
