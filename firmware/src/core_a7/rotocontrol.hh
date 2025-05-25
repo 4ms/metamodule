@@ -23,6 +23,8 @@ enum class HapticMode : uint8_t {
 
 class RotoControl {
 public:
+	static void init(ConcurrentBuffer* buffer);
+
 	static void set_knob_control_config(
 		uint8_t setup_index,
 		uint8_t control_index,
@@ -38,16 +40,16 @@ public:
 		uint8_t indent_pos1 = 0xFF,
 		uint8_t indent_pos2 = 0xFF,
 		uint8_t haptic_steps = 2,
-		const char* const* step_names = nullptr);
+		const char* const* step_names = nullptr
+	);
 
 	static void start_config_update();
-
 	static void end_config_update();
-
-	static void send_all_commands(ConcurrentBuffer &console_cdc_buff);
+	static void send_all_commands();
 
 private:
 	static std::vector<uint8_t> command_buffer_;
+	static ConcurrentBuffer* internal_buffer_;
 };
 
-} // namespace MetaModule 
+} // namespace MetaModule

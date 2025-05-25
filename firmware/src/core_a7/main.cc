@@ -37,7 +37,7 @@ int main() {
 	pr_info("Build: %s (%s)\n", GIT_HASH.data(), GIT_COMMIT_TIME.data());
 	pr_info("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
 
-	PatchPlayer patch_player{StaticBuffers::console_cdc_buff};
+	PatchPlayer patch_player;
 	FileStorageComm patch_comm{StaticBuffers::icc_shared_message};
 	FileStorageProxy file_storage_proxy{StaticBuffers::raw_patch_data, patch_comm, StaticBuffers::patch_dir_list};
 	OpenPatchManager open_patches_manager;

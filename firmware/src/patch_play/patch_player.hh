@@ -27,11 +27,7 @@
 #include <string_view>
 #include <vector>
 
-// Added includes for RotoControl
 #include "core_a7/rotocontrol.hh"
-#include "console/concurrent_buffer.hh"
-#include "CoreModules/elements/element_info_view.hh" // Already included via moduleFactory.hh typically, but explicit is fine
-#include "CoreModules/elements/elements.hh"
 
 #include "debug.hh"
 
@@ -49,7 +45,7 @@ public:
 	PatchQuery patch_query{modules, pd};
 
 private:
-	ConcurrentBuffer& roto_control_buffer_;
+	// ConcurrentBuffer& roto_control_buffer_; // Removed
 	uint8_t next_midi_roto_control_index_ = 0; // Added for sequential RotoControl MIDI mapping
 	// Out1-Out8 + Ext Out1-8
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
@@ -111,8 +107,7 @@ private:
 	static inline ModuleTypeSlug no_patch_loaded{"(Not Loaded)"};
 
 public:
-	PatchPlayer(ConcurrentBuffer& console_buffer) 
-		: roto_control_buffer_{console_buffer} { // Updated constructor
+	PatchPlayer() {
 		clear_cache();
 	}
 
@@ -1478,7 +1473,7 @@ inline void PatchPlayer::update_all_roto_controls() {
         }
     }
     RotoControl::end_config_update(/*roto_control_buffer_*/); // Argument removed
-	RotoControl::send_all_commands(roto_control_buffer_);
+	RotoControl::send_all_commands(/*roto_control_buffer_*/); // Argument removed
 }
 
 } // namespace MetaModule

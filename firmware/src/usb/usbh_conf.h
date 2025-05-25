@@ -26,7 +26,7 @@ extern "C" {
 
 #include "stm32mp1xx.h"
 // #include <stdio.h>
-// #include <stdlib.h>
+#include <stdlib.h>
 #include <string.h> //for memset/memcpy
 
 static inline void Error_Handler() {

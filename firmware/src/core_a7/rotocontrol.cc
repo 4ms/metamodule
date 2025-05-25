@@ -7,8 +7,14 @@ namespace MetaModule
 
 // Initialize static command buffer
 std::vector<uint8_t> RotoControl::command_buffer_;
+// Initialize static ConcurrentBuffer pointer
+ConcurrentBuffer* RotoControl::internal_buffer_ = nullptr;
 
 // const uint8_t terminator[] = {0xF0, 0xF1}; // Keep for reference or local use if needed
+
+void RotoControl::init(ConcurrentBuffer* buffer) { // New init method definition
+    internal_buffer_ = buffer;
+}
 
 void RotoControl::set_knob_control_config(
 	// ConcurrentBuffer &console_cdc_buff, // Removed
@@ -112,42 +118,29 @@ void RotoControl::set_knob_control_config(
 	
 	// Append to main command buffer
 	command_buffer_.insert(command_buffer_.end(), command_segment, command_segment + pos);
-    // pr_dbg("RotoControl: Set knob control config, appended command to internal buffer"); // Optional debug
 }
 
 void RotoControl::start_config_update(/* ConcurrentBuffer &console_cdc_buff */) { // Removed param
 	// Command: 5A 01 04 00 00 F0 F1
 	const uint8_t command[] = {0x5A, 0x01, 0x04, 0x00, 0x00, 0xF0, 0xF1};
 	command_buffer_.insert(command_buffer_.end(), std::begin(command), std::end(command));
-    // pr_dbg("RotoControl: Start config update, appended command to internal buffer"); // Optional debug
 }
 
 void RotoControl::end_config_update(/* ConcurrentBuffer &console_cdc_buff */) { // Removed param
 	// Command: 5A 01 05 00 00 F0 F1
 	const uint8_t command[] = {0x5A, 0x01, 0x05, 0x00, 0x00, 0xF0, 0xF1};
 	command_buffer_.insert(command_buffer_.end(), std::begin(command), std::end(command));
-    // pr_dbg("RotoControl: End config update, appended command to internal buffer"); // Optional debug
 }
 
-void RotoControl::send_all_commands(ConcurrentBuffer &console_cdc_buff) {
-	if (!command_buffer_.empty()) {
-		console_cdc_buff.write(std::span<const uint8_t>(command_buffer_.data(), command_buffer_.size()));
+void RotoControl::send_all_commands() { // Param removed
+	if (internal_buffer_ && !command_buffer_.empty()) { // Check if internal_buffer_ is set
+		internal_buffer_->write(std::span<const uint8_t>(command_buffer_.data(), command_buffer_.size()));
 		command_buffer_.clear();
 		// pr_dbg("RotoControl: Sent all commands and cleared buffer"); // Optional debug
-	}
+	} else if (!internal_buffer_) {
+        // Optionally log an error or handle the case where the buffer isn't initialized
+        pr_err("RotoControl: internal_buffer_ not initialized before send_all_commands call.");
+    }
 }
-
-// Removed queue_config_commands method as it's no longer needed.
-// void RotoControl::queue_config_commands(
-// ConcurrentBuffer &console_cdc_buff,
-// std::initializer_list<std::function<void()>> commands) {
-// 
-// for (auto& command_func : commands) {
-// // Execute the command
-// command_func();
-// // Add terminator after each command
-// console_cdc_buff.write(std::span<const uint8_t>(terminator, sizeof(terminator)));
-// }
-// }
 
 } // namespace MetaModule 

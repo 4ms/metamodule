@@ -20,17 +20,15 @@ struct AuxPlayer {
 	PatchPlayer &patch_player;
 	OpenPatchManager &open_patch_manager;
 	Ui &ui;
-	ConcurrentBuffer &console_cdc_buff;
 	FixedVector<unsigned, 64> module_ids;
 	
 	// MIDI sync instance
 	MidiSync midi_sync;
 
-	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui, ConcurrentBuffer &console_cdc_buff)
+	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui)
 		: patch_player{patch_player}
 		, open_patch_manager{open_patch_manager}
-		, ui{ui}
-		, console_cdc_buff{console_cdc_buff} {
+		, ui{ui} {
 		using namespace mdrivlib;
 
 		constexpr auto NewModuleListIRQn = SMPControl::IRQn(SMPCommand::NewModuleList);

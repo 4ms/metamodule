@@ -10,7 +10,7 @@
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
 #include "ramdisk_ops.hh"
-
+#include "rotocontrol.hh"
 #ifdef CPU_TEST_ALL_MODULES
 #include "conf/pin_conf.hh"
 #include "fs/general_io.hh"
@@ -64,7 +64,9 @@ extern "C" void aux_core_main() {
 		ui.notify_error("Graphic assets are corrupted!\nRe-install firmware.");
 	}
 
-	AuxPlayer aux_player{*A7SharedMemoryS::ptrs.patch_player, *A7SharedMemoryS::ptrs.open_patch_manager, ui, *A7SharedMemoryS::ptrs.console_cdc_buff};
+	RotoControl::init(A7SharedMemoryS::ptrs.console_cdc_buff);
+
+	AuxPlayer aux_player{*A7SharedMemoryS::ptrs.patch_player, *A7SharedMemoryS::ptrs.open_patch_manager, ui};
 
 	// Wait for M4 to be ready (so USB and SD are available)
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
