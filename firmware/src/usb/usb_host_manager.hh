@@ -25,6 +25,7 @@ private:
 	
 	PreferredClass preferred_class = PreferredClass::MIDI;
 	static inline bool did_init = false;
+	static inline unsigned inflight_cdc_tx_count = 0;
 
 	// For access in C-style callback:
 	static inline MidiHost *_midihost_instance;
@@ -140,7 +141,7 @@ public:
 		}
 
 		if (start_pos == end_pos) {
-			if (preferred_class != PreferredClass::MIDI) {
+			if (preferred_class != PreferredClass::MIDI && inflight_cdc_tx_count == 0) {
 				pr_dbg("Transmit CDC buffer: start_pos == end_pos, skipping transmission\n");
 				pr_dbg("Switching to MIDI\n");
 				HAL_Delay(50);
@@ -187,6 +188,7 @@ public:
 				pr_dbg("%02X ", buff->buffer.data[i]);
 			pr_dbg("\n");
 			if (transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos)) {
+				inflight_cdc_tx_count++;
 				_current_read_pos = 0;
 				// Note: For wraparound case, terminator logic is handled in the scanning phase
 			}
@@ -198,6 +200,7 @@ public:
 				pr_dbg("%02X ", buff->buffer.data[i]);
 			pr_dbg("\n");
 			if (transmit(&buff->buffer.data[start_pos], end_pos - start_pos)) {
+				inflight_cdc_tx_count++;
 				_current_read_pos = end_pos;
 				// If we stopped at a terminator, skip over the FF FF
 				if (end_pos < (buff->current_write_pos & buff->buffer.SIZEMASK)) {
@@ -387,6 +390,8 @@ extern "C" void USBH_CDC_TransmitCallback(USBH_HandleTypeDef *phost) {
 	if (cdc_instance && cdc_instance->is_connected()) {
 		cdc_instance->tx_done_callback();
 	}
+
+	UsbHostManager::inflight_cdc_tx_count--;
 }
 
 // USB Host CDC Receive Callback - called by the USB stack when CDC data is received
