@@ -21,6 +21,36 @@ class CDCHost {
 	DoubleBufferStream<uint8_t, 128> tx_stream;
 	bool tx_pending = false;
 
+private:
+	// Helper function to create the transmit lambda
+	std::function<bool(std::span<uint8_t>)> make_transmit_lambda() {
+		return [this](std::span<uint8_t> bytes) {
+			auto res = USBH_CDC_Transmit(&usbhost, bytes.data(), bytes.size());
+
+			if (res == USBH_BUSY) {
+				pr_dbg("CDC Host: USBH is busy, cannot send (state might not be ready)\n");
+				// Check the current CDC state for debugging
+				CDC_HandleTypeDef *active_cdc_handle = (CDC_HandleTypeDef *)usbhost.pActiveClass->pData;
+				if (active_cdc_handle) {
+					pr_dbg("CDC Host: Current state=%d, tx_state=%d\n", active_cdc_handle->state, active_cdc_handle->data_tx_state);
+				}
+				return false;  // Important: return false when busy
+			} else if (res == USBH_OK) {
+				pr_dbg("CDC Host: Queued %zu bytes for transmission\n", bytes.size());
+				// Debug print the state after queuing
+				CDC_HandleTypeDef *active_cdc_handle = (CDC_HandleTypeDef *)usbhost.pActiveClass->pData;
+				if (active_cdc_handle) {
+					pr_dbg("CDC Host: After queue - state=%d, tx_state=%d\n",
+						active_cdc_handle->state, active_cdc_handle->data_tx_state);
+				}
+				return true;
+			} else {
+				pr_err("CDC Host: Transmit failed with error %d\n", res);
+				return false;
+			}
+		};
+	}
+
 public:
 	using CDCRxCallbackType = std::function<void(uint8_t *data, uint32_t len)>;
 	void set_rx_callback(CDCRxCallbackType rx_callback) {
@@ -30,31 +60,7 @@ public:
 
 	CDCHost(USBH_HandleTypeDef &usbhh)
 		: usbhost{usbhh}
-		, tx_stream{[this](std::span<uint8_t> bytes) {
-			auto res = USBH_CDC_Transmit(&usbhost, bytes.data(), bytes.size());
-
-			if (res == USBH_BUSY) {
-				pr_dbg("CDC Host: USBH is busy, cannot send (state might not be ready)\n");
-				// Check the current CDC state for debugging
-				CDC_HandleTypeDef *CDCHandle = (CDC_HandleTypeDef *)usbhost.pActiveClass->pData;
-				if (CDCHandle) {
-					pr_dbg("CDC Host: Current state=%d, tx_state=%d\n", CDCHandle->state, CDCHandle->data_tx_state);
-				}
-				return false;  // Important: return false when busy
-			} else if (res == USBH_OK) {
-				pr_dbg("CDC Host: Queued %zu bytes for transmission\n", bytes.size());
-				// Debug print the state after queuing
-				CDC_HandleTypeDef *CDCHandle = (CDC_HandleTypeDef *)usbhost.pActiveClass->pData;
-				if (CDCHandle) {
-					pr_dbg("CDC Host: After queue - state=%d, tx_state=%d\n", 
-						CDCHandle->state, CDCHandle->data_tx_state);
-				}
-				return true;
-			} else {
-				pr_err("CDC Host: Transmit failed with error %d\n", res);
-				return false;
-			}
-		}} {
+		, tx_stream{make_transmit_lambda()} {
 		
 		cdc_class_ops->pData = &CDCHandle;
 	}
@@ -62,6 +68,11 @@ public:
 	bool init() {
 		pr_info("Listening as a CDC Host\n");
 		USBH_RegisterClass(&usbhost, cdc_class_ops);
+		
+		// Re-initialize tx_stream by constructing a new one with the lambda
+		tx_stream = DoubleBufferStream<uint8_t, 128>{make_transmit_lambda()};
+		tx_pending = false;
+		
 		return true;
 	}
 

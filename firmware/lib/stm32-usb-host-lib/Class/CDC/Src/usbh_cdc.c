@@ -47,7 +47,6 @@ EndBSPDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_cdc.h"
-
 /** @addtogroup USBH_LIB
   * @{
   */
@@ -322,7 +321,6 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
 static USBH_StatusTypeDef USBH_CDC_InterfaceDeInit(USBH_HandleTypeDef *phost)
 {
   CDC_HandleTypeDef *CDC_Handle = (CDC_HandleTypeDef *) phost->pActiveClass->pData;
-
   if ((CDC_Handle->CommItf.NotifPipe) != 0U)
   {
     (void)USBH_ClosePipe(phost, CDC_Handle->CommItf.NotifPipe);
@@ -446,6 +444,7 @@ static USBH_StatusTypeDef USBH_CDC_Process(USBH_HandleTypeDef *phost)
       break;
 
     case CDC_TRANSFER_DATA:
+      USBH_UsrLog("CDC_TRANSFER_DATA: case in USBH_CDC_Process. data_tx_state: %d, data_rx_state: %d\n", CDC_Handle->data_tx_state, CDC_Handle->data_rx_state);
       CDC_ProcessTransmission(phost);
       CDC_ProcessReception(phost);
       break;
@@ -689,6 +688,8 @@ static void CDC_ProcessTransmission(USBH_HandleTypeDef *phost)
 {
   CDC_HandleTypeDef *CDC_Handle = (CDC_HandleTypeDef *) phost->pActiveClass->pData;
   USBH_URBStateTypeDef URB_Status = USBH_URB_IDLE;
+
+  USBH_UsrLog("CDC_ProcessTransmission: data_tx_state: %d, data_rx_state: %d\n", CDC_Handle->data_tx_state, CDC_Handle->data_rx_state);
 
   switch (CDC_Handle->data_tx_state)
   {
