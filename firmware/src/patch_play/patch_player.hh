@@ -1357,7 +1357,7 @@ inline void PatchPlayer::update_all_roto_controls() {
 			k.module_id, num_modules, pd.module_slugs.size(), 
 			(k.module_id < modules.size() ? modules[k.module_id].get() : nullptr) );
 
-        if (k.module_id < pd.module_slugs.size() && k.module_id < num_modules && modules[k.module_id]) {
+        if (k.module_id > 0 && k.module_id < pd.module_slugs.size() && k.module_id < num_modules && modules[k.module_id]) {
             const auto& slug = pd.module_slugs[k.module_id];
             // Assuming ModuleFactory::getModuleInfo is safe if module exists and slug is valid.
             // A ModuleFactory::hasModuleInfo check could be added if getModuleInfo can fail.
@@ -1376,10 +1376,12 @@ inline void PatchPlayer::update_all_roto_controls() {
                         if constexpr (std::is_base_of_v<ParamElement, T>) {
                             const ParamElement &param_el = arg;
                             std::string_view control_name_sv = param_el.short_name;
-                            if (control_name_sv.empty()) control_name_sv = param_el.long_name;
+							if (control_name_sv.empty()) control_name_sv = param_el.long_name;
                             
                             std::string control_name_str;
                             const char* control_name_ptr;
+
+							pr_dbg("control_name_sv: %s\n", control_name_sv.data());
 
                             if (control_name_sv.empty()) {
                                 control_name_str = "Unnamed MIDI"; // Max 12 chars + null
