@@ -10,6 +10,7 @@
 #include "pr_dbg.hh"
 #include "usb/usbh_midi.hh"
 #include "util/doublebuf_stream.hh"
+#include <functional>
 
 class MidiHost {
 	MidiStreamingHandle MSHandle;
@@ -28,10 +29,9 @@ class MidiHost {
 
 	DoubleBufferStream<uint8_t, 64> tx_stream;
 
-public:
-	MidiHost(USBH_HandleTypeDef &usbhh)
-		: usbhost{usbhh}
-		, tx_stream{[this](std::span<uint8_t> bytes) {
+private:
+	std::function<bool(std::span<uint8_t>)> make_transmit_lambda() {
+		return [this](std::span<uint8_t> bytes) {
 			auto res = USBH_MIDI_Transmit(&usbhost, bytes.data(), bytes.size());
 
 			if (res == USBH_BUSY) {
@@ -39,7 +39,13 @@ public:
 				pr_err("MIDI Host: USBH is busy, cannot send\n");
 			}
 			return res == USBH_OK;
-		}} {
+		};
+	}
+
+public:
+	MidiHost(USBH_HandleTypeDef &usbhh)
+		: usbhost{usbhh}
+		, tx_stream{make_transmit_lambda()} {
 
 		MSHandle.tx_callback = [this]() {
 			tx_stream.tx_done_callback();
@@ -53,6 +59,7 @@ public:
 	bool init() {
 		pr_info("Listening as a MIDI Host\n");
 		USBH_RegisterClass(&usbhost, &midi_class_ops);
+		tx_stream = DoubleBufferStream<uint8_t, 64>{make_transmit_lambda()};
 		return true;
 	}
 
