@@ -1406,6 +1406,7 @@ inline void PatchPlayer::update_all_roto_controls() {
 
                             if constexpr (std::is_base_of_v<Pot, T>) {
                                 const Pot &pot_el = arg;
+								pr_dbg("Pot: %s\n", control_name_str.c_str());
                                 if (pot_el.integral) {
                                     haptic_mode = HapticMode::KNOB_N_STEP;
                                     haptic_steps = 128; 
@@ -1413,32 +1414,58 @@ inline void PatchPlayer::update_all_roto_controls() {
                                     haptic_mode = HapticMode::KNOB_300;
                                     haptic_steps = 255;
                                 }
-                            } else if constexpr (std::is_base_of_v<Switch, T>) {
-                                const Switch &switch_el = arg;
+                            } else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T>) {
+								pr_dbg("Switch: %s\n", control_name_str.c_str());
+                                const auto &switch_el = arg;
                                 min_val_u16 = 0;
                                 max_val_u16 = switch_el.num_pos > 0 ? switch_el.num_pos - 1 : 0;
                                 haptic_mode = HapticMode::KNOB_N_STEP;
                                 haptic_steps = switch_el.num_pos > 0 ? switch_el.num_pos : 1;
                             } else if constexpr (std::is_base_of_v<Button, T>) {
+								pr_dbg("Button: %s\n", control_name_str.c_str());
                                 min_val_u16 = 0;
                                 max_val_u16 = 1;
                                 haptic_mode = HapticMode::KNOB_N_STEP;
                                 haptic_steps = 2;
                             }
 
-                            if (haptic_steps > 0) {
-                                dummy_step_names_storage.reserve(haptic_steps);
-                                dummy_step_names_ptrs.reserve(haptic_steps);
-                                for (uint8_t i = 0; i < haptic_steps; ++i) {
-                                    // Create reasonably sized dummy names
-                                    std::string name = "S" + std::to_string(i);
-                                    if (name.length() > 7) { // Max 7 chars for RotoControl step names + null
-                                       name = name.substr(0, 7);
-                                    }
-                                    dummy_step_names_storage.push_back(name);
-                                    dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
-                                }
-                                step_names_ptr = dummy_step_names_ptrs.data();
+							pr_dbg("haptic_steps: %d\n", haptic_steps);
+							if (step_names_ptr) {
+								pr_dbg("step_names contents:\n");
+								for (uint8_t i = 0; i < haptic_steps; ++i) {
+									pr_dbg("  [%d]: %s\n", i, step_names_ptr[i]);
+								}
+							} else {
+								pr_dbg("step_names_ptr: nullptr\n");
+							}
+
+                            if (haptic_steps) {
+								if (haptic_steps == 2) {
+									for (uint8_t i = 0; i < haptic_steps; ++i) {
+										dummy_step_names_storage.push_back(control_name_str);
+										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
+									}
+								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T>) {	
+									const auto &switch_el = arg;
+									for (uint8_t i = 0; i < haptic_steps; ++i) {
+										dummy_step_names_storage.push_back(std::string(switch_el.pos_names[i]));
+										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
+									}
+								} else {
+									pr_dbg("Creating dummy step names\n");
+									dummy_step_names_storage.reserve(haptic_steps);
+									dummy_step_names_ptrs.reserve(haptic_steps);
+									for (uint8_t i = 0; i < haptic_steps; ++i) {
+										// Create reasonably sized dummy names
+										std::string name = "S" + std::to_string(i);
+										if (name.length() > 12) { // Max 12 chars for RotoControl step names + null
+										name = name.substr(0, 12);
+										}
+										dummy_step_names_storage.push_back(name);
+										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
+									}
+								}
+								step_names_ptr = dummy_step_names_ptrs.data();
                             }
 
                             RotoControl::set_knob_control_config( // Use set_knob_control_config
