@@ -7,7 +7,7 @@
 #include "dynload/plugin_manager.hh"
 #include "fs/norflash_layout.hh"
 #include "fs/syscall/filesystem.hh"
-#include "fw_update/updater_proxy.hh"
+#include "fw_update/auto_updater.hh"
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
 #include "load_test/test_manager.hh"
