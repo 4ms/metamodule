@@ -109,7 +109,7 @@ public:
 			// Get outputs
 			for (auto [i, outjack] : enumerate(out.chan)) {
 				if (param_state.is_output_plugged(i)) {
-					outjack = player.get_panel_output(i);
+					outjack = player.get_panel_output(i) / 5.f;
 					player.set_output_jack_patched_status(i, true);
 				} else {
 					outjack = 0;
