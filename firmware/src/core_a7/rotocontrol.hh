@@ -16,9 +16,18 @@ enum class ControlMode : uint8_t {
 	NRPN_14BIT = 0x03
 };
 
+enum class ControlType : uint8_t {
+	KNOB = 0x07,
+	SWITCH = 0x08
+};
+
 enum class HapticMode : uint8_t {
+	// Knob modes
 	KNOB_300 = 0x00,
-	KNOB_N_STEP = 0x01
+	KNOB_N_STEP = 0x01,
+	// Switch modes  
+	PUSH = 0x00,
+	TOGGLE = 0x01
 };
 
 class RotoControl {
@@ -43,8 +52,47 @@ public:
 		const char* const* step_names = nullptr
 	);
 
+	static void set_control_config(
+		ControlType control_type,
+		uint8_t setup_index,
+		uint8_t control_index,
+		ControlMode control_mode,
+		uint8_t control_channel,
+		uint8_t control_param,
+		uint16_t nrpn_address,
+		uint16_t min_value,
+		uint16_t max_value,
+		const char* control_name,
+		uint8_t color_scheme,
+		HapticMode haptic_mode,
+		uint8_t param1 = 0xFF,  // indent_pos1 for knob, led_on_color for switch
+		uint8_t param2 = 0xFF,  // indent_pos2 for knob, led_off_color for switch
+		uint8_t haptic_steps = 2,
+		const char* const* step_names = nullptr
+	);
+
+	// Convenience method for switch configuration
+	static void set_switch_control_config(
+		uint8_t setup_index,
+		uint8_t control_index,
+		ControlMode control_mode,
+		uint8_t control_channel,
+		uint8_t control_param,
+		uint16_t nrpn_address,
+		uint16_t min_value,
+		uint16_t max_value,
+		const char* control_name,
+		uint8_t color_scheme,
+		uint8_t led_on_color,
+		uint8_t led_off_color,
+		HapticMode haptic_mode,
+		uint8_t haptic_steps = 0,
+		const char* const* step_names = nullptr
+	);
+
 	static void start_config_update();
 	static void end_config_update();
+	static void clear_midi_setup(uint8_t setup_index);
 	static void send_all_commands();
 
 private:

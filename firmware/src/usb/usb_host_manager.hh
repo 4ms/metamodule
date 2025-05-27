@@ -177,6 +177,7 @@ public:
 		}
 		
 		auto transmit = [this](uint8_t *ptr, int len) {
+			pr_dbg("Transmitting %d bytes in lambda\n", len);
 			return _cdchost_instance->transmit(std::span<uint8_t>(ptr, len));
 		};
 

@@ -18,7 +18,7 @@ class CDCHost {
 	USBH_ClassTypeDef *cdc_class_ops = USBH_CDC_CLASS;
 	bool _is_connected = false;
 
-	DoubleBufferStream<uint8_t, 128> tx_stream;
+	DoubleBufferStream<uint8_t, 256> tx_stream;
 	bool tx_pending = false;
 
 private:
@@ -70,7 +70,7 @@ public:
 		USBH_RegisterClass(&usbhost, cdc_class_ops);
 		
 		// Re-initialize tx_stream by constructing a new one with the lambda
-		tx_stream = DoubleBufferStream<uint8_t, 128>{make_transmit_lambda()};
+		tx_stream = DoubleBufferStream<uint8_t, 256>{make_transmit_lambda()};
 		tx_pending = false;
 		
 		return true;

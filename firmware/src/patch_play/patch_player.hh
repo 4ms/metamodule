@@ -46,7 +46,8 @@ public:
 
 private:
 	// ConcurrentBuffer& roto_control_buffer_; // Removed
-	uint8_t next_midi_roto_control_index_ = 0; // Added for sequential RotoControl MIDI mapping
+	uint8_t next_midi_roto_knob_index_ = 0; // Separate index for knobs
+	uint8_t next_midi_roto_switch_index_ = 0; // Separate index for switches
 	// Out1-Out8 + Ext Out1-8
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
@@ -1341,8 +1342,11 @@ public:
 
 // Implementation of the new method
 inline void PatchPlayer::update_all_roto_controls() {
-    next_midi_roto_control_index_ = 0; // Reset for fresh batch configuration
+    next_midi_roto_knob_index_ = 0; // Reset for fresh batch configuration
+    next_midi_roto_switch_index_ = 0; // Reset for fresh batch configuration
     RotoControl::start_config_update(/*roto_control_buffer_*/); // Argument removed
+
+	RotoControl::clear_midi_setup(0x00); // Clear all MIDI setup
 
     for (const auto& k : pd.midi_maps.set) {
         if (!(k.is_midi_cc() || k.is_midi_notegate())) {
@@ -1385,12 +1389,16 @@ inline void PatchPlayer::update_all_roto_controls() {
 
                             if (control_name_sv.empty()) {
                                 control_name_str = "Unnamed MIDI"; // Max 12 chars + null
+                                // Pad with null bytes to make it exactly 12 characters
+                                control_name_str.resize(12, '\0');
                                 control_name_ptr = control_name_str.c_str();
                             } else {
                                 if (control_name_sv.length() > 12) {
                                     control_name_str = std::string(control_name_sv.substr(0, 12));
                                 } else {
                                     control_name_str = std::string(control_name_sv);
+                                    // Pad with null bytes to make it exactly 12 characters
+                                    control_name_str.resize(12, '\0');
                                 }
                                 control_name_ptr = control_name_str.c_str();
                             }
@@ -1399,56 +1407,70 @@ inline void PatchPlayer::update_all_roto_controls() {
                             uint16_t min_val_u16 = 0;
                             uint16_t max_val_u16 = 127;
                             HapticMode haptic_mode = HapticMode::KNOB_300;
-                            uint8_t haptic_steps = 2;
+                            uint8_t haptic_steps = 0;
                             const char* const* step_names_ptr = nullptr;
                             std::vector<std::string> dummy_step_names_storage;
                             std::vector<const char*> dummy_step_names_ptrs;
+							bool is_toggle_switch = false;
 
                             if constexpr (std::is_base_of_v<Pot, T>) {
                                 const Pot &pot_el = arg;
 								pr_dbg("Pot: %s\n", control_name_str.c_str());
-                                if (pot_el.integral) {
+								const uint8_t num_pos = pot_el.max_value - pot_el.min_value + 1;
+                                if (pot_el.integral && num_pos > 0 && num_pos <= 16) {
                                     haptic_mode = HapticMode::KNOB_N_STEP;
-                                    haptic_steps = 128; 
+                                    haptic_steps = num_pos; 
                                 } else {
                                     haptic_mode = HapticMode::KNOB_300;
-                                    haptic_steps = 255;
                                 }
-                            } else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T>) {
+                            } else if constexpr (std::is_base_of_v<Switch, T>) {
 								pr_dbg("Switch: %s\n", control_name_str.c_str());
                                 const auto &switch_el = arg;
                                 min_val_u16 = 0;
                                 max_val_u16 = switch_el.num_pos > 0 ? switch_el.num_pos - 1 : 0;
                                 haptic_mode = HapticMode::KNOB_N_STEP;
                                 haptic_steps = switch_el.num_pos > 0 ? switch_el.num_pos : 1;
+								is_toggle_switch = true;
                             } else if constexpr (std::is_base_of_v<Button, T>) {
 								pr_dbg("Button: %s\n", control_name_str.c_str());
                                 min_val_u16 = 0;
                                 max_val_u16 = 1;
                                 haptic_mode = HapticMode::KNOB_N_STEP;
                                 haptic_steps = 2;
+
+								if constexpr (std::is_same_v<T, MomentaryButton> ||
+											  std::is_same_v<T, MomentaryButtonLight> ||
+											  std::is_same_v<T, MomentaryButtonRGB>) {
+									is_toggle_switch = false;
+								} else if constexpr (std::is_same_v<T, LatchingButton>) {
+									is_toggle_switch = true; // It's a toggle/latching button
+								} else {
+									pr_warn("RotoControl: Encountered an unhandled Button-derived type for param_id %u", k.param_id);
+								}
                             }
 
-							pr_dbg("haptic_steps: %d\n", haptic_steps);
-							if (step_names_ptr) {
-								pr_dbg("step_names contents:\n");
-								for (uint8_t i = 0; i < haptic_steps; ++i) {
-									pr_dbg("  [%d]: %s\n", i, step_names_ptr[i]);
-								}
-							} else {
-								pr_dbg("step_names_ptr: nullptr\n");
-							}
-
-                            if (haptic_steps) {
+							if (haptic_steps) {
 								if (haptic_steps == 2) {
 									for (uint8_t i = 0; i < haptic_steps; ++i) {
-										dummy_step_names_storage.push_back(control_name_str);
+										std::string step_name = control_name_str;
+										// Ensure step name is exactly 13 bytes (0x0D) with null padding
+										if (step_name.length() > 12) {
+											step_name = step_name.substr(0, 12);
+										}
+										step_name.resize(13, '\0');
+										dummy_step_names_storage.push_back(step_name);
 										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
 									}
 								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T>) {	
 									const auto &switch_el = arg;
 									for (uint8_t i = 0; i < haptic_steps; ++i) {
-										dummy_step_names_storage.push_back(std::string(switch_el.pos_names[i]));
+										std::string step_name = std::string(switch_el.pos_names[i]);
+										// Ensure step name is exactly 13 bytes (0x0D) with null padding
+										if (step_name.length() > 12) {
+											step_name = step_name.substr(0, 12);
+										}
+										step_name.resize(13, '\0');
+										dummy_step_names_storage.push_back(step_name);
 										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
 									}
 								} else {
@@ -1458,9 +1480,11 @@ inline void PatchPlayer::update_all_roto_controls() {
 									for (uint8_t i = 0; i < haptic_steps; ++i) {
 										// Create reasonably sized dummy names
 										std::string name = "S" + std::to_string(i);
-										if (name.length() > 12) { // Max 12 chars for RotoControl step names + null
-										name = name.substr(0, 12);
+										// Ensure step name is exactly 13 bytes (0x0D) with null padding
+										if (name.length() > 12) {
+											name = name.substr(0, 12);
 										}
+										name.resize(13, '\0');
 										dummy_step_names_storage.push_back(name);
 										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
 									}
@@ -1468,25 +1492,48 @@ inline void PatchPlayer::update_all_roto_controls() {
 								step_names_ptr = dummy_step_names_ptrs.data();
                             }
 
-                            RotoControl::set_knob_control_config( // Use set_knob_control_config
-                                // roto_control_buffer_, // Argument removed
-                                0, // setup_index
-                                next_midi_roto_control_index_, // RotoControl's own knob/control index
-                                ControlMode::CC_7BIT, 
-                                k.midi_chan == 0 ? 1 : k.midi_chan, 
-                                k.cc_num(), // RotoControl's parameter index
-                                0, // nrpn_address
-                                min_val_u16,
-                                max_val_u16,
-                                control_name_ptr,
-                                0, // color_scheme
-                                haptic_mode,
-                                0xFF, // indent_pos1
-                                0xFF, // indent_pos2
-                                haptic_steps,
-                                step_names_ptr
-                            );
-                            next_midi_roto_control_index_++; 
+							if (haptic_steps == 2) {
+								RotoControl::set_switch_control_config(
+									0, // setup_index
+									next_midi_roto_switch_index_, // RotoControl's own knob/control index
+									ControlMode::CC_7BIT, 
+									k.midi_chan == 0 ? 1 : k.midi_chan, 
+									k.cc_num(), // RotoControl's parameter index
+									0, // nrpn_address
+									min_val_u16,
+									max_val_u16,
+									control_name_ptr,
+									0, // color_scheme
+									0x00, // led_on_color
+									0x01, // led_off_color
+									is_toggle_switch ? HapticMode::KNOB_N_STEP : HapticMode::PUSH, // haptic_mode for switch
+									haptic_steps,
+									step_names_ptr
+								);
+								next_midi_roto_switch_index_++;
+							} else {
+								pr_dbg("Setting knob control config, setup_index: %d, control_index: %d, haptic_mode: %d, haptic_steps: %d\n min_val_u16: %d, max_val_u16: %d, control_name: %s\n step_names_ptr: %p\n", 
+									0, next_midi_roto_knob_index_, haptic_mode, haptic_steps, min_val_u16, max_val_u16, control_name_ptr);
+								RotoControl::set_knob_control_config(
+									0, // setup_index
+									next_midi_roto_knob_index_, // RotoControl's own knob/control index
+									ControlMode::CC_7BIT, 
+									k.midi_chan == 0 ? 1 : k.midi_chan, 
+									k.cc_num(), // RotoControl's parameter index
+									0, // nrpn_address
+									min_val_u16,
+									max_val_u16,
+									control_name_ptr,
+									0, // color_scheme
+									haptic_mode,
+									0xFF, // indent_pos1
+									0xFF, // indent_pos2
+									haptic_steps,
+									step_names_ptr
+								);
+								next_midi_roto_knob_index_++;
+							}
+                            
                         }
                     }, element_variant);
                     break; 
