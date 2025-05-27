@@ -106,12 +106,8 @@ static Knob create_base_knob(rack::app::Knob *widget) {
 
 			auto clamped_num_pos = std::min<size_t>(element.num_pos, pq->labels.size());
 
-			if (clamped_num_pos < element.num_pos) {
+			if (clamped_num_pos < element.num_pos && element.num_pos > 0) {
 				pr_warn("Warning: Snapped knob has %d positions, but only %d labels\n", element.num_pos, clamped_num_pos);
-			}
-
-			if (clamped_num_pos == 0) {
-				pr_warn("Warning: Snapped knob has no labels\n");
 			}
 
 			for (auto i = 0u; i < clamped_num_pos; i++) {
