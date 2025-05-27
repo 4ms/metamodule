@@ -15,17 +15,24 @@ struct CpuLoadTest {
 		std::string should_run;
 		FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
 
+		bool do_tests = false;
+
 		const auto run_all = should_run.starts_with("all\n");
 		const auto run_hil = should_run.starts_with("hil\n");
 		if (run_hil) {
-			/// auto load all plugins on USB drive
+			// TODO: auto load all plugins on USB drive
+			do_tests = true;
 		}
 
-		if (run_all || run_hil) {
-			// TODO: if not "all" then check file contents and only test brands that are in the file
-			// "Brand1\nBrand2\n" => only test Brand1 and Brand2
-			// "all\n" => test all builtin and preloaded plugins
+		if (run_all) {
+			ui.preload_plugins();
+			do_tests = true;
+		}
 
+		// TODO: check file contents and only test brands that are in the file
+		// "Brand1\nBrand2\n" => only test Brand1 and Brand2
+
+		if (do_tests) {
 			pr_info("A7 Core 2 running CPU load tests\n");
 
 			hil_message("*loadtesting\n");
