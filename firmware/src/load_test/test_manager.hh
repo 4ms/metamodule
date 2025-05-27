@@ -21,7 +21,10 @@ struct CpuLoadTest {
 		const auto run_hil = should_run.starts_with("hil\n");
 		if (run_hil) {
 			// TODO: auto load all plugins on USB drive
-			ui.preload_all_plugins();
+			if (!ui.preload_all_plugins()) {
+				hil_message("*failure\n");
+				return;
+			}
 			do_tests = true;
 		}
 
