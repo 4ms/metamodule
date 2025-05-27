@@ -443,7 +443,6 @@ struct ModuleViewPage : PageBase {
 
 		// Handle "action" alt params, which were set high when the user clicked them, and now need to be set low
 		if (pending_action_param_clear) {
-			printf("=>low\n");
 			send_param_value(0, *pending_action_param_clear);
 			pending_action_param_clear = std::nullopt;
 		}
