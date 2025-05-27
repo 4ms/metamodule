@@ -21,7 +21,7 @@ public:
 		std::string message{};
 	};
 
-	FirmwareUpdaterProxy(FileStorageProxy &file_storage);
+	FirmwareUpdaterProxy(FileStorageProxy &file_storage, bool force = false);
 
 	bool start(std::string_view manifest_filename, Volume manifest_file_vol, uint32_t manifest_filesize);
 
@@ -37,6 +37,8 @@ private:
 	State state;
 	std::string error_message;
 	bool justEnteredState{};
+
+	bool force_update;
 
 	Volume vol;
 	std::span<char> manifestBuffer;

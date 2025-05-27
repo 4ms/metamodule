@@ -7,6 +7,7 @@
 #include "dynload/plugin_manager.hh"
 #include "fs/norflash_layout.hh"
 #include "fs/syscall/filesystem.hh"
+#include "fw_update/auto_updater.hh"
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
 #include "load_test/test_manager.hh"
@@ -64,12 +65,21 @@ extern "C" void aux_core_main() {
 	// Wait for M4 to be ready (so USB and SD are available)
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
-	ui.preload_plugins();
+
+	hil_message("*ready\n");
+
+	AutoUpdater::run(file_storage_proxy, ui);
+
+	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
+		CpuLoadTest::run_tests(file_storage_proxy, ui);
+	} else {
+		ui.preload_plugins();
+	}
+
+	hil_message("*initialized\n");
 
 	// Signal that we're ready
 	printf("A7 Core 2 initialized\n");
-
-	CpuLoadTest::run_tests(file_storage_proxy, ui);
 
 	HWSemaphore<AuxCoreReady>::unlock();
 
