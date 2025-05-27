@@ -99,6 +99,17 @@ public:
 		return params.text_displays;
 	}
 
+	void preload_all_plugins() {
+		plugin_manager.start_loading_plugin_list();
+		while (!plugin_manager.is_idle()) {
+		}
+
+		auto list = plugin_manager.found_plugin_list();
+		for (auto i = 0u; i < list->size(); ++i) {
+			plugin_manager.load_plugin(i);
+		}
+	}
+
 	void preload_plugins() {
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
