@@ -66,12 +66,13 @@ extern "C" void aux_core_main() {
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
 
-	printf("*ready\n");
+	hil_message("*ready\n");
 
 	AutoUpdater::run(file_storage_proxy, ui);
+
 	CpuLoadTest::run_tests(file_storage_proxy, ui);
 
-	printf("*initialized\n");
+	hil_message("*initialized\n");
 
 	ui.preload_plugins();
 

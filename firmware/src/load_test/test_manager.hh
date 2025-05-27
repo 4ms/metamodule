@@ -1,4 +1,5 @@
 #pragma once
+#include "console/pr_dbg.hh"
 #include "general_io.hh"
 #include "gui/ui.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -27,7 +28,7 @@ struct CpuLoadTest {
 
 			pr_info("A7 Core 2 running CPU load tests\n");
 
-			printf("*loadtesting\n");
+			hil_message("*loadtesting\n");
 
 			// clear previous results files
 			FS::write_file(file_storage_proxy, std::string("In progress"), {"cpu_test.csv", Volume::USB});
@@ -40,7 +41,7 @@ struct CpuLoadTest {
 				ui.update_screen();
 			});
 			FS::write_file(file_storage_proxy, results, {"cpu_test.csv", Volume::USB});
-			printf("*success\n");
+			hil_message("*success\n");
 		}
 	};
 };

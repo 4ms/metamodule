@@ -29,19 +29,20 @@ struct AutoUpdater {
 			return;
 		}
 
-		printf("*updating\n");
+		hil_message("*updating\n");
 		lv_label_set_text(ui_MainMenuNowPlaying, "Updating firmware...");
 
 		while (true) {
 			const auto status = updater.process();
 			if (status.state == FirmwareUpdaterProxy::Success) {
-				printf("*success\n");
+				hil_message("*success\n");
 				lv_label_set_text(ui_MainMenuNowPlaying, "Succeess!");
 				break;
 			} else if (status.state == FirmwareUpdaterProxy::Error) {
-				printf("*failure\n");
-				lv_label_set_text(ui_MainMenuNowPlaying, "failure :(");
+				hil_message("*failure\n");
 				pr_err("%s\n", status.message.c_str());
+
+				lv_label_set_text(ui_MainMenuNowPlaying, "failure :(");
 				break;
 			}
 		}
