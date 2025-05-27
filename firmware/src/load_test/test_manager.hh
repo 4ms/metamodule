@@ -9,9 +9,11 @@ namespace MetaModule
 {
 
 struct CpuLoadTest {
-	static void run_tests(FileStorageProxy &file_storage_proxy, Ui &ui) {
-		using namespace mdrivlib;
+	static bool should_run_tests(FileStorageProxy &file_storage_proxy) {
+		return FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value();
+	}
 
+	static void run_tests(FileStorageProxy &file_storage_proxy, Ui &ui) {
 		std::string should_run;
 		FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
 

@@ -70,11 +70,13 @@ extern "C" void aux_core_main() {
 
 	AutoUpdater::run(file_storage_proxy, ui);
 
-	CpuLoadTest::run_tests(file_storage_proxy, ui);
+	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
+		CpuLoadTest::run_tests(file_storage_proxy, ui);
+	} else {
+		ui.preload_plugins();
+	}
 
 	hil_message("*initialized\n");
-
-	ui.preload_plugins();
 
 	// Signal that we're ready
 	printf("A7 Core 2 initialized\n");
