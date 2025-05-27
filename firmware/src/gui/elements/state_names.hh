@@ -34,9 +34,13 @@ inline std::string get_element_value_string(Element const &element, float value,
 						   el.display_base == 0 && el.units.length() == 0) {
 						   unsigned v = std::round(std::clamp(value, 0.f, 1.f) * (float)(el.num_pos - 1));
 
-						   if (v >= 0 && v < el.pos_names.size()) {
+						   if (v >= 0 && v < el.pos_names.size() && el.num_pos <= el.pos_names.size()) {
 							   s = el.pos_names[v];
-						   }
+						   } else {
+								s.resize(16, '\0');
+								auto sz = std::snprintf(s.data(), s.size(), "#%u/%u", v + 1, el.num_pos);
+								s.resize(sz);
+							}
 						} 
 						
 						if (!s.size()) {
