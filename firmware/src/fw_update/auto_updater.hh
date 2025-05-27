@@ -31,18 +31,23 @@ struct AutoUpdater {
 
 		hil_message("*updating\n");
 		lv_label_set_text(ui_MainMenuNowPlaying, "Updating firmware...");
+		ui.update_screen();
 
 		while (true) {
 			const auto status = updater.process();
 			if (status.state == FirmwareUpdaterProxy::Success) {
 				hil_message("*success\n");
+
 				lv_label_set_text(ui_MainMenuNowPlaying, "Succeess!");
+				ui.update_screen();
 				break;
+
 			} else if (status.state == FirmwareUpdaterProxy::Error) {
 				hil_message("*failure\n");
 				pr_err("%s\n", status.message.c_str());
 
 				lv_label_set_text(ui_MainMenuNowPlaying, "failure :(");
+				ui.update_screen();
 				break;
 			}
 		}
