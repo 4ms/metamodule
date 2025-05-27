@@ -82,7 +82,6 @@ struct PluginModuleMenu {
 	void blur() {
 		if (plugin_menu) {
 			plugin_menu->close();
-			pr_dbg("plugin_menu.reset()\n");
 			plugin_menu.reset();
 		}
 	}
