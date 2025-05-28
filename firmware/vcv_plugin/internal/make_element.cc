@@ -107,7 +107,10 @@ static Knob create_base_knob(rack::app::Knob *widget) {
 			auto clamped_num_pos = std::min<size_t>(pq->labels.size(), element.pos_names.size());
 
 			if (clamped_num_pos < pq->labels.size()) {
-				pr_warn("Warning: Snapped knob has %u labels, but only %u were used\n", pq->labels.size(), clamped_num_pos);
+				pr_warn("Warning: Snapped knob '%s' has %u labels, but only %u were used\n",
+						pq->name.c_str(),
+						pq->labels.size(),
+						clamped_num_pos);
 			}
 
 			for (auto i = 0u; i < clamped_num_pos; i++) {
