@@ -21,6 +21,10 @@ static void log_make_element_notes(std::string_view note1, std::string_view note
 	}
 }
 
+static const char *module_name(rack::app::ParamWidget *widget) {
+	return (widget && widget->module && widget->module->getModel()) ? widget->module->getModel()->slug.c_str() : "?";
+}
+
 static float getScaledDefaultValue(rack::app::ParamWidget *widget);
 static unsigned getDefaultValue(rack::app::ParamWidget *widget);
 
@@ -104,8 +108,9 @@ static void set_pot_display_params(Pot &element, rack::app::ParamWidget *widget)
 			auto clamped_num_pos = std::min<size_t>(pq->labels.size(), element.pos_names.size());
 
 			if (clamped_num_pos < pq->labels.size()) {
-				pr_warn("Warning: Snapped knob '%s' has %u labels, but only %u were used\n",
+				pr_warn("Warning: Snapped knob '%s' in module '%s' has %u labels, but only %u were used\n",
 						pq->name.c_str(),
+						module_name(widget),
 						pq->labels.size(),
 						clamped_num_pos);
 			}
@@ -225,7 +230,7 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 	element.num_pos = pq->maxValue - pq->minValue + 1;
 
 	if (element.num_pos < 2 || element.num_pos > element.pos_names.size()) {
-		pr_warn("Warning: SvgSlider (max - min + 1) is %d, but must be 2..8\n", element.num_pos);
+		pr_warn("Warning: %s: SvgSlider max-min+1 is %d, but must be 2..8\n", module_name(widget), element.num_pos);
 		element.num_pos = std::clamp<size_t>(element.num_pos, 2, element.pos_names.size());
 	}
 
@@ -308,7 +313,7 @@ static MomentaryButton make_momentary(rack::app::SvgSwitch *widget) {
 			pr_info("Excess momentary button frames ignored\n");
 
 	} else {
-		pr_warn("Warning: SvgSwitch has no image frames\n");
+		pr_warn("Warning: In %s, SvgSwitch has no image frames\n", module_name(widget));
 	}
 
 	return element;
@@ -322,7 +327,9 @@ static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
 		element.num_pos = pq->maxValue - pq->minValue + 1;
 
 		if (element.num_pos < 2 || element.num_pos > element.pos_names.size()) {
-			pr_warn("Warning: SvgSwitch as SlideSwitch (max - min + 1) is %d, but must be 2 - 8\n", element.num_pos);
+			pr_warn("Warning: In %s, SvgSwitch as SlideSwitch (max-min+1) is %d, but must be 2-8\n",
+					module_name(widget),
+					element.num_pos);
 			element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, element.pos_names.size());
 		}
 
@@ -333,7 +340,8 @@ static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
 	} else {
 		// Gracefully handle an unconfigured param:
 		element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, element.pos_names.size());
-		pr_warn("Warning: SvgSwitch as SlideSwitch not configured with configParam or configSwitch\n");
+		pr_warn("Warning: In %s SvgSwitch as SlideSwitch not configured with configParam or configSwitch\n",
+				module_name(widget));
 	}
 
 	element.image_handle = "no-image";
@@ -350,7 +358,9 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 		element.num_pos = pq->maxValue - pq->minValue + 1;
 
 		if (element.num_pos < 2 || element.num_pos > FlipSwitch::MaxPositions) {
-			pr_warn("Warning: SvgSwitch (max - min + 1) is %d, but must be 2 - 4\n", element.num_pos);
+			pr_warn("Warning: In %s, SvgSwitch (max-min+1) is %d, but must be 2-10\n",
+					module_name(widget),
+					element.num_pos);
 			element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, FlipSwitch::MaxPositions);
 		}
 
@@ -360,7 +370,7 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 	} else {
 		// Gracefully handle an unconfigured param:
 		element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, element.pos_names.size());
-		pr_warn("Warning: SvgSwitch not configured with configParam or configSwitch\n");
+		pr_warn("Warning: In %s SvgSwitch not configured with configParam or configSwitch\n", module_name(widget));
 	}
 
 	for (unsigned i = 0; i < std::min<size_t>(FlipSwitch::MaxPositions, widget->frames.size()); i++) {
@@ -434,11 +444,12 @@ Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *
 		getScaledDefaultValue(widget) > 0.5f ? LatchingButton::State_t::UP : LatchingButton::State_t::DOWN;
 
 	if (light->getNumColors() != 1 && light->getNumColors() != 3) {
-		pr_warn("SvgSwitch with MultiLightWidget with %d colors: only 1 and 3 colors are supported.\n",
+		pr_warn("In %s, SvgSwitch with MultiLightWidget with %d colors: only 1 and 3 colors are supported.\n",
+				module_name(widget),
 				light->getNumColors());
 	}
 	if (widget->frames.size() == 0) {
-		pr_err("Error: SvgSwitch with no frames\n");
+		pr_err("Error: In %s, SvgSwitch with no frames\n", module_name(widget));
 		widget->addFrame({});
 	}
 
@@ -588,7 +599,9 @@ Element make_element(rack::widget::Widget *widget) {
 }
 
 Element make_element(rack::app::ParamWidget *widget) {
-	pr_warn("ParamWidget (param id %d) without an SVG, using a blank ParamElement\n", widget->paramId);
+	pr_warn("In %s ParamWidget (param id %d) without an SVG, using a blank ParamElement\n",
+			module_name(widget),
+			widget->paramId);
 	ParamElement element{};
 	element.width_mm = to_mm(widget->box.size.x);
 	element.height_mm = to_mm(widget->box.size.y);
