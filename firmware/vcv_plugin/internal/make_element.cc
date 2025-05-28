@@ -2,6 +2,7 @@
 #include "CoreModules/elements/base_element.hh"
 #include "CoreModules/elements/units.hh"
 #include "console/pr_dbg.hh"
+#include "util/overloaded.hh"
 #include <concepts>
 
 namespace MetaModule
@@ -89,6 +90,33 @@ static float radians_to_degrees(float radians) {
 	return radians / (M_PI / 180.f);
 };
 
+template<typename T>
+static void set_snapped_pot_display_params(T &element, rack::app::ParamWidget *widget) {
+	if (!widget)
+		return;
+
+	if (auto pq = widget->getParamQuantity()) {
+
+		set_pot_display_params(element, widget);
+
+		element.num_pos = pq->maxValue - pq->minValue + 1;
+
+		auto clamped_num_pos = std::min<size_t>(pq->labels.size(), element.pos_names.size());
+
+		if (clamped_num_pos < pq->labels.size()) {
+			pr_warn("Warning: Snapped knob '%s' in module '%s' has %u labels, but only %u were used\n",
+					pq->name.c_str(),
+					module_name(widget),
+					pq->labels.size(),
+					clamped_num_pos);
+		}
+
+		for (auto i = 0u; i < clamped_num_pos; i++) {
+			element.pos_names[i] = pq->labels[i];
+		}
+	}
+}
+
 static void set_pot_display_params(Pot &element, rack::app::ParamWidget *widget) {
 	if (!widget)
 		return;
@@ -99,38 +127,29 @@ static void set_pot_display_params(Pot &element, rack::app::ParamWidget *widget)
 		element.display_base = pq->displayBase;
 		element.display_mult = pq->displayMultiplier;
 		element.display_offset = pq->displayOffset;
-		element.integral = pq->snapEnabled;
 		element.display_precision = pq->displayPrecision;
-
-		if (element.integral) {
-			element.num_pos = pq->maxValue - pq->minValue + 1;
-
-			auto clamped_num_pos = std::min<size_t>(pq->labels.size(), element.pos_names.size());
-
-			if (clamped_num_pos < pq->labels.size()) {
-				pr_warn("Warning: Snapped knob '%s' in module '%s' has %u labels, but only %u were used\n",
-						pq->name.c_str(),
-						module_name(widget),
-						pq->labels.size(),
-						clamped_num_pos);
-			}
-
-			for (auto i = 0u; i < clamped_num_pos; i++) {
-				element.pos_names[i] = pq->labels[i];
-			}
-		}
 	}
 }
 
-static Knob create_base_knob(rack::app::Knob *widget) {
-	Knob element{};
-	element.default_value = getScaledDefaultValue(widget);
-	element.min_angle = radians_to_degrees(widget->minAngle);
-	element.max_angle = radians_to_degrees(widget->maxAngle);
+static Element create_base_knob(rack::app::Knob *widget) {
+	if (widget->getParamQuantity() && widget->getParamQuantity()->snapEnabled) {
+		KnobSnapped element{};
+		element.default_value = getScaledDefaultValue(widget);
+		element.min_angle = radians_to_degrees(widget->minAngle);
+		element.max_angle = radians_to_degrees(widget->maxAngle);
 
-	set_pot_display_params(element, widget);
+		set_snapped_pot_display_params(element, widget);
+		return element;
 
-	return element;
+	} else {
+		Knob element{};
+		element.default_value = getScaledDefaultValue(widget);
+		element.min_angle = radians_to_degrees(widget->minAngle);
+		element.max_angle = radians_to_degrees(widget->maxAngle);
+
+		set_pot_display_params(element, widget);
+		return element;
+	}
 }
 
 Element make_element(rack::app::Knob *widget) {
@@ -139,13 +158,29 @@ Element make_element(rack::app::Knob *widget) {
 	return create_base_knob(widget);
 }
 
+void set_image(Element &element, std::string_view image) {
+	std::visit(overloaded{[](BaseElement &) {},
+						  [&image](ImageElement &el) {
+							  el.image = image;
+						  }},
+			   element);
+}
+
+void set_slider_handle_image(Element &element, std::string_view image) {
+	std::visit(overloaded{[](BaseElement &) {},
+						  [&image](Slider &el) {
+							  el.image_handle = image;
+						  }},
+			   element);
+}
+
 Element make_element(rack::componentlibrary::Rogan *widget) {
 	log_make_element("Rogan", widget->paramId);
 
-	Knob element = create_base_knob(widget);
+	Element element = create_base_knob(widget);
 
 	if (widget->sw->svg->filename().size()) {
-		element.image = widget->sw->svg->filename();
+		set_image(element, widget->sw->svg->filename());
 
 	} else {
 		pr_err("make_element(Rogan): No svg was set\n");
@@ -157,7 +192,7 @@ Element make_element(rack::componentlibrary::Rogan *widget) {
 Element make_element(rack::app::SvgKnob *widget) {
 	log_make_element("SvgKnob", widget->paramId);
 
-	Knob element = create_base_knob(widget);
+	Element element = create_base_knob(widget);
 
 	// Hack to support BefacoTinyKnobs:
 	// The main SVG is just the dot, either BefacoTinyPointWhite or BefacoTinyPointBlack.
@@ -184,12 +219,12 @@ Element make_element(rack::app::SvgKnob *widget) {
 
 	if (auto inner_img = find_inner_svg_widget(widget->fb); inner_img.size() > 0) {
 		log_make_element_notes("...found SvgWidget child of fb with an SVG %s\n", inner_img.data());
-		element.image = inner_img;
+		set_image(element, inner_img);
 
 	} else if (widget->sw->svg->filename().size() && widget->sw->box.size.isFinite() && !widget->sw->box.size.isZero())
 	{
 		log_make_element_notes("...use sw->svg %s\n", widget->sw->svg->filename().data());
-		element.image = widget->sw->svg->filename();
+		set_image(element, widget->sw->svg->filename());
 
 	} else {
 		pr_trace("SvgKnob with no sw->svg or inner child of fb at %f, %f\n", widget->box.pos.x, widget->box.pos.y);
@@ -209,7 +244,6 @@ Element make_element(rack::app::SliderKnob *widget) {
 	element.default_value = getScaledDefaultValue(widget);
 
 	set_pot_display_params(element, widget);
-
 	return element;
 }
 
@@ -259,15 +293,12 @@ Element make_element(rack::app::SvgSlider *widget) {
 	{
 		log_make_element("SvgSlider slider", widget->paramId);
 
-		Slider element{};
-		element.default_value = getScaledDefaultValue(widget);
+		auto element = make_element((rack::app::SliderKnob *)widget);
 
-		set_pot_display_params(element, widget);
-
-		element.image_handle = widget->handle->svg->filename();
+		set_slider_handle_image(element, widget->handle->svg->filename());
 
 		if (widget->background->svg->filename().length()) {
-			element.image = widget->background->svg->filename();
+			set_image(element, widget->background->svg->filename());
 			// Modify the widget's box to match the background
 			widget->box.pos = widget->box.pos + widget->background->box.pos;
 		}
@@ -279,6 +310,9 @@ Element make_element(rack::app::SvgSlider *widget) {
 Element make_element(rack::app::SvgSlider *widget, rack::app::MultiLightWidget *light) {
 	log_make_element("SvgSlider, Light", widget->paramId);
 
+	if (widget->snap || (widget->getParamQuantity() && widget->getParamQuantity()->snapEnabled)) {
+		pr_warn("Warning: in '%s', snapped sliders with lights are not supported\n", module_name(widget));
+	}
 	SliderLight element;
 
 	element.default_value = getScaledDefaultValue(widget);
