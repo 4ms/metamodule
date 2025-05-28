@@ -21,9 +21,11 @@ struct ModuleLoadTester {
 		Measurements() = default;
 		Measurements(std::span<uint64_t> update_times)
 			: first_run_time(update_times[0])
+			, worst_run_time_after_first(*std::max_element(std::next(update_times.begin()), update_times.end()))
 			, average_run_time(std::accumulate(update_times.begin(), update_times.end(), 0.f) /
-							   (float)update_times.size()) {
-			worst_run_time_after_first = *std::max_element(std::next(update_times.begin()), update_times.end());
+							   (float)update_times.size())
+			, average_run_time_after_first(std::accumulate(std::next(update_times.begin()), update_times.end(), 0.f) /
+										   (float)update_times.size()) {
 		}
 	};
 
@@ -70,10 +72,10 @@ struct ModuleLoadTester {
 
 			if (load_patch()) {
 				set_all_params(0.25f);
-				auto oscs = make_oscs<2, 10>();
+				auto oscs = make_oscs<2, 10>(counts.num_inputs);
 				return run_patch(
 					[&, this] {
-						for (uint16_t i = 0; i < counts.num_inputs; i++) {
+						for (uint16_t i = 0; i < oscs.size(); i++) {
 							auto lfo = oscs[i].process_float() * 10.f - 5.f;
 							player.modules[module_id]->set_input(i, lfo);
 						}
@@ -90,10 +92,10 @@ struct ModuleLoadTester {
 
 			if (load_patch()) {
 				set_all_params(0.25f);
-				auto oscs = make_oscs<400, 6000>();
+				auto oscs = make_oscs<400, 6000>(counts.num_inputs);
 				return run_patch(
 					[&, this] {
-						for (uint16_t i = 0; i < counts.num_inputs; i++) {
+						for (uint16_t i = 0; i < oscs.size(); i++) {
 							auto lfo = oscs[i].process_float() * 10.f - 5.f;
 							player.modules[module_id]->set_input(i, lfo);
 						}
@@ -104,13 +106,19 @@ struct ModuleLoadTester {
 		return {};
 	}
 
-	bool load_patch() {
-		auto res = player.load_patch(patch);
+	std::optional<float> load_patch() {
+		Result res;
+
+		auto tm = measure([&]() {
+			res = player.load_patch(patch);
+			player.update_patch_singlecore();
+		});
+
 		if (res.success == false) {
 			pr_err("Test failed to load patch: %s\n", res.error_string.c_str());
-			return false;
+			return std::nullopt;
 		}
-		return true;
+		return tm;
 	}
 
 	Measurements run_patch(auto control_func, size_t block_size) {
@@ -127,14 +135,18 @@ struct ModuleLoadTester {
 		while (iterations < min_total_iterations) {
 			for (auto &tm : times) {
 				control_func();
-				tm = measure([&]() { player.update_patch_singlecore(); });
+				tm = measure([&]() { player.step_module(module_id); });
 			}
 
 			auto current = Measurements{times};
+
 			worst.first_run_time = std::max(worst.first_run_time, current.first_run_time);
 			worst.average_run_time = std::max(worst.average_run_time, current.average_run_time);
 			worst.worst_run_time_after_first =
 				std::max(worst.worst_run_time_after_first, current.worst_run_time_after_first);
+			worst.average_run_time_after_first =
+				std::max(worst.average_run_time_after_first, current.average_run_time_after_first);
+
 			pr_dump("it %d: avg:%f first:%f worst(>1):%f\n",
 					iterations,
 					worst.average_run_time,
@@ -212,9 +224,9 @@ struct ModuleLoadTester {
 	}
 
 	template<unsigned low_hz, unsigned high_hz>
-	std::vector<TriangleOscillator<48000>> make_oscs() {
+	static std::vector<TriangleOscillator<48000>> make_oscs(unsigned num_oscs) {
 
-		std::vector<TriangleOscillator<48000>> oscs(counts.num_inputs);
+		std::vector<TriangleOscillator<48000>> oscs(num_oscs);
 
 		float freq = low_hz;
 		uint32_t phase = 0;
@@ -222,8 +234,8 @@ struct ModuleLoadTester {
 		for (auto &osc : oscs) {
 			osc.set_frequency(freq);
 			osc.set_phase(phase);
-			freq += float(high_hz - low_hz) / float(counts.num_inputs);
-			phase += UINT32_MAX / counts.num_inputs;
+			freq += float(high_hz - low_hz) / float(num_oscs);
+			phase += UINT32_MAX / num_oscs;
 		}
 
 		return oscs;

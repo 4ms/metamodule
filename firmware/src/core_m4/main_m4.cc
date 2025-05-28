@@ -74,9 +74,13 @@ int main() {
 	uint32_t startup_delay = 0x10000;
 	while (startup_delay--) {
 		controls.process();
+		usb.process();
+		sd.process();
 	}
 
 	pr_info("M4 initialized\n");
+
+	HAL_Delay(100);
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
 	while (true) {

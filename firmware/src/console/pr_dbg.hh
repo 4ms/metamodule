@@ -58,4 +58,12 @@ inline void pr_dump(auto... args) {
 #endif
 }
 
+// print a message to HIL tester
+// For now, goes to same UART output as printf
+inline void hil_message(auto... args) {
+#ifndef SUPPRESS_HIL_MESSAGES
+	_do_printf_impl(args...);
+#endif
+}
+
 } // namespace

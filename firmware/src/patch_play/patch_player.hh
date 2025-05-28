@@ -163,6 +163,7 @@ public:
 				pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
 				modules[i]->id = i;
+				plugin_module_init(modules[i]);
 				modules[i]->mark_all_inputs_unpatched();
 				modules[i]->mark_all_outputs_unpatched();
 				modules[i]->set_samplerate(samplerate);
@@ -745,6 +746,7 @@ public:
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
 		modules[module_idx]->id = module_idx;
+		plugin_module_init(modules[module_idx]);
 		modules[module_idx]->mark_all_inputs_unpatched();
 		modules[module_idx]->mark_all_outputs_unpatched();
 		modules[module_idx]->set_samplerate(samplerate);

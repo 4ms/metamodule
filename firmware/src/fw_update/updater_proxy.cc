@@ -19,9 +19,10 @@ auto GetTargetForUpdateType = [](UpdateType val) -> std::optional<IntercoreStora
 	}
 };
 
-FirmwareUpdaterProxy::FirmwareUpdaterProxy(FileStorageProxy &file_storage)
+FirmwareUpdaterProxy::FirmwareUpdaterProxy(FileStorageProxy &file_storage, bool force)
 	: file_storage{file_storage}
 	, state(Idle)
+	, force_update{force}
 	, sharedMem(nullptr)
 	, allocator(get_ram_buffer()) {
 }
@@ -182,8 +183,10 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 			} else {
 				switch (file_storage.get_message().message_type) {
 					case FileStorageProxy::ChecksumMatch:
-						proceedWithNextFile();
-						break;
+						if (!force_update) {
+							proceedWithNextFile();
+							break;
+						}
 
 					case FileStorageProxy::ChecksumMismatch:
 						moveToState(Writing);

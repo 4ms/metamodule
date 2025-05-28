@@ -1,0 +1,160 @@
+name: Firmware Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      lin_clang:
+        description: 'Build Test on Linux clang'
+        required: true
+        default: true
+        type: boolean
+      lin_gcc:
+        description: 'Build Test on Linux gcc'
+        required: true
+        default: true
+        type: boolean
+      win_gcc:
+        description: 'Build Test on Windows gcc'
+        required: true
+        default: true
+        type: boolean
+      mac_clang:
+        description: 'Build Test on Mac clang'
+        required: true
+        default: true
+        type: boolean
+  push:
+    branches:
+      - main
+    paths:
+      - 'simulator/**'
+      - 'firmware/vcv_ports/**'
+      - 'firmware/vcv_plugin/**'
+      - 'firmware/metamodule-plugin-sdk/**'
+      - 'firmware/lib/CoreModules/**'
+      - 'firmware/lib/patch-serial/**'
+      - 'firmware/lib/lvgl/**'
+      - 'firmware/src/gui/**'
+      - 'firmware/src/patch**'
+      - 'firmware/src/params/**'
+      - 'firmware/src/console/**'
+      - '!**.md' # Skip docs
+        
+jobs:
+
+  build-lin-gcc:
+    if: ${{ github.event_name == 'push' || inputs.lin_gcc }}
+    name: linux-gcc
+    strategy:
+      fail-fast: false
+    runs-on: 'ubuntu-24.04'
+    defaults:
+      run:
+        shell: 'bash {0}'
+    env:
+      CC: gcc
+      CXX: g++
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: ''
+      - name: 'Build'
+        run: |
+          cd firmware
+          git submodule update --init --recursive metamodule-plugin-sdk
+          git submodule update --init lib/CoreModules
+          git submodule update --init --recursive lib/patch-serial
+          git submodule update --init lib/cpputil
+          git submodule update --init lib/mdrivlib
+          make -f tests/Makefile
+
+  build-lin-clang:
+    if: ${{ github.event_name == 'push' || inputs.lin_clang }}
+    name: linux-clang
+    strategy:
+      fail-fast: false
+    runs-on: 'ubuntu-24.04'
+    defaults:
+      run:
+        shell: 'bash {0}'
+    env:
+      CC: clang
+      CXX: clang++
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: ''
+      - name: 'Build'
+        run: |
+          cd firmware
+          git submodule update --init --recursive metamodule-plugin-sdk
+          git submodule update --init lib/CoreModules
+          git submodule update --init --recursive lib/patch-serial
+          git submodule update --init lib/cpputil
+          git submodule update --init lib/mdrivlib
+          make -f tests/Makefile
+
+  build-win-gcc:
+    if: ${{ github.event_name == 'push' || inputs.win_gcc }}
+    name: win-gcc
+    strategy:
+      fail-fast: false
+    runs-on: 'windows-latest'
+    defaults:
+      run:
+        shell: 'msys2 {0}'
+    env:
+      CC: gcc
+      CXX: g++
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: ''
+      - name: Install windows dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git make mingw-w64-x86_64-gcc 
+      - name: 'Build'
+        run: |
+          cd firmware
+          git submodule update --init --recursive metamodule-plugin-sdk
+          git submodule update --init lib/CoreModules
+          git submodule update --init --recursive lib/patch-serial
+          git submodule update --init lib/cpputil
+          git submodule update --init lib/mdrivlib
+          make -f tests/Makefile
+
+
+  build-mac-clang:
+    if: ${{ github.event_name == 'push' || inputs.mac_clang }}
+    name: mac-clang
+    strategy:
+      fail-fast: false
+    runs-on: 'macos-latest'
+    defaults:
+      run:
+        shell: 'bash {0}'
+    env:
+      CC: clang
+      CXX: clang++
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: ''
+      - name: 'Build'
+        run: |
+          cd firmware
+          git submodule update --init --recursive metamodule-plugin-sdk
+          git submodule update --init lib/CoreModules
+          git submodule update --init --recursive lib/patch-serial
+          git submodule update --init lib/cpputil
+          git submodule update --init lib/mdrivlib
+          make -f tests/Makefile
+
+

@@ -11,7 +11,9 @@ bool write_file(FileStorageProxy &proxy, std::string_view filedata, PatchLocatio
 bool append_file(FileStorageProxy &proxy, std::string_view filedata, PatchLocation location);
 
 // TODO:
-// unsigned read_file(FileStorageProxy &proxy, std::string &filedata, PatchLocation location);	   //unbounded
+std::optional<unsigned> read_file(FileStorageProxy &proxy, std::string &filedata, PatchLocation location);
 // unsigned read_file(FileStorageProxy &proxy, std::span<char> filedata, PatchLocation location); //bounded
+
+std::optional<unsigned> file_size(FileStorageProxy &, PatchLocation);
 
 } // namespace MetaModule::FS
