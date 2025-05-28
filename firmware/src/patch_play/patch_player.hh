@@ -1391,17 +1391,17 @@ inline void PatchPlayer::update_all_roto_controls() {
 
                             if (control_name_sv.empty()) {
                                 control_name_str = "Unnamed MIDI"; // Max 12 chars + null
-                                // Pad with null bytes to make it exactly 12 characters
-                                control_name_str.resize(12, '\0');
+                                // Pad with null bytes to make it exactly 13 characters
+                                control_name_str.resize(13, '\0');
                                 control_name_ptr = control_name_str.c_str();
                             } else {
                                 if (control_name_sv.length() > 12) {
                                     control_name_str = std::string(control_name_sv.substr(0, 12));
                                 } else {
                                     control_name_str = std::string(control_name_sv);
-                                    // Pad with null bytes to make it exactly 12 characters
-                                    control_name_str.resize(12, '\0');
                                 }
+                                // Pad with null bytes to make it exactly 13 characters
+                                control_name_str.resize(13, '\0');
                                 control_name_ptr = control_name_str.c_str();
                             }
 
@@ -1451,50 +1451,47 @@ inline void PatchPlayer::update_all_roto_controls() {
 								}
                             }
 
-							if (haptic_steps) {
+							if (haptic_steps > 0) { // MODIFIED: Ensure check is > 0 explicitly
+								dummy_step_names_storage.reserve(haptic_steps); // ADDED: Reserve storage
+
 								if (haptic_steps == 2) {
-									for (uint8_t i = 0; i < haptic_steps; ++i) {
-										std::string step_name = control_name_str;
-										// Ensure step name is exactly 13 bytes (0x0D) with null padding
-										if (step_name.length() > 12) {
-											step_name = step_name.substr(0, 12);
-										}
-										step_name.resize(13, '\0');
-										dummy_step_names_storage.push_back(step_name);
-										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
-									}
+									// This branch is typically for buttons or simple 2-state controls using the main control name.
+									// control_name_str is already padded to 13 bytes.
+									dummy_step_names_storage.push_back(control_name_str);
+									dummy_step_names_storage.push_back(control_name_str);
 								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T> || std::is_base_of_v<Pot, T>) {	
 									const auto &el = arg;
 									for (uint8_t i = 0; i < haptic_steps; ++i) {
 										std::string step_name = std::string(el.pos_names[i]);
-										// Ensure step name is exactly 13 bytes (0x0D) with null padding
 										if (step_name.length() > 12) {
 											step_name = step_name.substr(0, 12);
 										}
 										step_name.resize(13, '\0');
 										dummy_step_names_storage.push_back(step_name);
-										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
 									}
 								} else {
 									pr_dbg("Creating dummy step names\n");
-									dummy_step_names_storage.reserve(haptic_steps);
-									dummy_step_names_ptrs.reserve(haptic_steps);
 									for (uint8_t i = 0; i < haptic_steps; ++i) {
-										// Create reasonably sized dummy names
 										std::string name = "S" + std::to_string(i);
-										// Ensure step name is exactly 13 bytes (0x0D) with null padding
 										if (name.length() > 12) {
 											name = name.substr(0, 12);
 										}
 										name.resize(13, '\0');
 										dummy_step_names_storage.push_back(name);
-										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
 									}
 								}
-								step_names_ptr = dummy_step_names_ptrs.data();
+								
+								// MODIFIED: Populate dummy_step_names_ptrs AFTER dummy_step_names_storage is complete
+								if (!dummy_step_names_storage.empty()) {
+									dummy_step_names_ptrs.reserve(dummy_step_names_storage.size());
+									for (const auto& s_str : dummy_step_names_storage) {
+										dummy_step_names_ptrs.push_back(s_str.c_str());
+									}
+									step_names_ptr = dummy_step_names_ptrs.data();
+								}
                             }
 
-							if (haptic_steps == 2) {
+							if (haptic_steps == 2) { // This condition was for calling set_switch_control_config
 								RotoControl::set_switch_control_config(
 									0, // setup_index
 									next_midi_roto_switch_index_, // RotoControl's own knob/control index
