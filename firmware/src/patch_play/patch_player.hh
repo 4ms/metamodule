@@ -1419,9 +1419,10 @@ inline void PatchPlayer::update_all_roto_controls() {
                                 const Pot &pot_el = arg;
 								pr_dbg("Pot: %s\n", control_name_str.c_str());
 								const uint8_t num_pos = pot_el.max_value - pot_el.min_value + 1;
+								// TODO: Move to RotoControl constants
                                 if (pot_el.integral && num_pos > 0 && num_pos <= 16) {
                                     haptic_mode = HapticMode::KNOB_N_STEP;
-                                    haptic_steps = num_pos; 
+                                    haptic_steps = num_pos;
                                 } else {
                                     haptic_mode = HapticMode::KNOB_300;
                                 }
@@ -1437,16 +1438,15 @@ inline void PatchPlayer::update_all_roto_controls() {
 								pr_dbg("Button: %s\n", control_name_str.c_str());
                                 min_val_u16 = 0;
                                 max_val_u16 = 1;
-                                haptic_mode = HapticMode::KNOB_N_STEP;
                                 haptic_steps = 2;
 
 								if constexpr (std::is_same_v<T, MomentaryButton> ||
 											  std::is_same_v<T, MomentaryButtonLight> ||
 											  std::is_same_v<T, MomentaryButtonRGB>) {
-									is_toggle_switch = false;
+									haptic_mode = HapticMode::PUSH;
 								} else if constexpr (std::is_same_v<T, LatchingButton>) {
-									is_toggle_switch = true; // It's a toggle/latching button
-								} else {
+									haptic_mode = HapticMode::KNOB_N_STEP;
+								} else {	
 									pr_warn("RotoControl: Encountered an unhandled Button-derived type for param_id %u", k.param_id);
 								}
                             }
@@ -1463,10 +1463,10 @@ inline void PatchPlayer::update_all_roto_controls() {
 										dummy_step_names_storage.push_back(step_name);
 										dummy_step_names_ptrs.push_back(dummy_step_names_storage.back().c_str());
 									}
-								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T>) {	
-									const auto &switch_el = arg;
+								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T> || std::is_base_of_v<Pot, T>) {	
+									const auto &el = arg;
 									for (uint8_t i = 0; i < haptic_steps; ++i) {
-										std::string step_name = std::string(switch_el.pos_names[i]);
+										std::string step_name = std::string(el.pos_names[i]);
 										// Ensure step name is exactly 13 bytes (0x0D) with null padding
 										if (step_name.length() > 12) {
 											step_name = step_name.substr(0, 12);

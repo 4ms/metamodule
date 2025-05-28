@@ -49,12 +49,22 @@ public:
     void sync_param_to_midi(float value, uint8_t midi_chan, uint8_t cc_num) {
         uint8_t cc_value = std::clamp(static_cast<int>(value * 127.0f), 0, 127);
         
-        MidiMessage cc_msg;
-        cc_msg.status = MidiStatusByte{MidiCommand::ControlChange, midi_chan};
-        cc_msg.data.byte[0] = cc_num;
-        cc_msg.data.byte[1] = cc_value;
+        // Check if value has changed
+        SyncKey key(midi_chan, cc_num);
+        auto it = last_values.find(key);
         
-        midi_out_queue.put(cc_msg);
+        // If no previous value or value has changed, send MIDI message
+        if (it == last_values.end() || it->second != cc_value) {
+            MidiMessage cc_msg;
+            cc_msg.status = MidiStatusByte{MidiCommand::ControlChange, midi_chan};
+            cc_msg.data.byte[0] = cc_num;
+            cc_msg.data.byte[1] = cc_value;
+            
+            midi_out_queue.put(cc_msg);
+            
+            // Update stored value
+            last_values[key] = cc_value;
+        }
     }
 };
 
