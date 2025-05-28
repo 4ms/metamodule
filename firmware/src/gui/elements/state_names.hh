@@ -57,7 +57,7 @@ inline std::string get_element_value_string(Element const &element, float value,
 							   auto sz = std::snprintf(s.data(), s.size(), "%.*g", el.display_precision, v);
 							   s.resize(sz);
 						   } else {
-							   auto res = std::to_chars(s.data(), s.data() + s.size(), v); // automatic precision
+							   auto res = std::to_chars(s.data(), s.data() + s.size(), v, std::chars_format::general, 5);
 							   *res.ptr = '\0';
 							   s.resize(res.ptr - s.data());
 						   }
