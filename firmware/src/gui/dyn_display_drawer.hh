@@ -38,6 +38,22 @@ struct DynamicDisplayDrawer {
 		}
 	}
 
+	DynamicDisplayDrawer(PatchPlayLoader &patch_playloader, DrawnElement const &drawn_el)
+		: patch_playloader{patch_playloader}
+		, module_id{drawn_el.gui_element.module_idx} {
+
+		// Copy useful data from the DynamicGraphicDisplays
+		std::visit(overloaded{
+					   [](BaseElement const &e) {},
+					   [&drawn_el, this](DynamicGraphicDisplay const &e) {
+						   displays.push_back({.id = drawn_el.gui_element.idx.light_idx,
+											   .element = e,
+											   .lv_canvas = drawn_el.gui_element.obj});
+					   },
+				   },
+				   drawn_el.element);
+	}
+
 	void prepare(lv_obj_t *module_canvas) {
 		parent_canvas = module_canvas;
 
