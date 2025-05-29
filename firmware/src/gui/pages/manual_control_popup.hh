@@ -76,6 +76,14 @@ struct ManualControlPopUp {
 	}
 
 private:
+	void increment_value() {
+		auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
+		if (new_value > lv_arc_get_max_value(ui_ControlArc))
+			new_value = lv_arc_get_min_value(ui_ControlArc);
+		lv_arc_set_value(ui_ControlArc, new_value);
+		arc_change_value();
+	}
+
 	void press() {
 		if (!drawn_el)
 			return;
@@ -90,26 +98,36 @@ private:
 						   arc_change_value();
 					   },
 
-					   [this](const Pot &pot) {
+					   [this](const Slider &pot) {
 						   float cur_value = lv_arc_get_value(ui_ControlArc);
 						   auto cur_arc_range = lv_arc_get_max_value(ui_ControlArc);
 						   arc_range_idx = (arc_range_idx + 1) % arc_range_value.size();
 
-						   set_pot_range(pot);
+						   set_continuous_range(pot);
 
 						   auto new_arc_range = lv_arc_get_max_value(ui_ControlArc);
 						   lv_arc_set_value(ui_ControlArc,
 											std::round(cur_value / (float)cur_arc_range * (float)new_arc_range));
 					   },
 
-					   // switches: increment value, wrapping
-					   [this](const Switch &) {
-						   auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
-						   if (new_value > lv_arc_get_max_value(ui_ControlArc))
-							   new_value = lv_arc_get_min_value(ui_ControlArc);
-						   lv_arc_set_value(ui_ControlArc, new_value);
-						   arc_change_value();
+					   [this](const Knob &pot) {
+						   if (pot.num_pos > 0) {
+							   increment_value();
+						   } else {
+							   float cur_value = lv_arc_get_value(ui_ControlArc);
+							   auto cur_arc_range = lv_arc_get_max_value(ui_ControlArc);
+							   arc_range_idx = (arc_range_idx + 1) % arc_range_value.size();
+
+							   set_continuous_range(pot);
+
+							   auto new_arc_range = lv_arc_get_max_value(ui_ControlArc);
+							   lv_arc_set_value(ui_ControlArc,
+												std::round(cur_value / (float)cur_arc_range * (float)new_arc_range));
+						   }
 					   },
+
+					   // switches: increment value, wrapping
+					   [this](const Switch &) { increment_value(); },
 
 					   // latching button: toggle state
 					   [this](const LatchingButton &) {
@@ -123,13 +141,7 @@ private:
 						   arc_change_value();
 					   },
 
-					   [this](const AltParamChoice &el) {
-						   auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
-						   if (new_value > lv_arc_get_max_value(ui_ControlArc))
-							   new_value = lv_arc_get_min_value(ui_ControlArc);
-						   lv_arc_set_value(ui_ControlArc, new_value);
-						   arc_change_value();
-					   },
+					   [this](const AltParamChoice &el) { increment_value(); },
 				   },
 				   drawn_el->element);
 		lv_group_focus_obj(ui_ControlArc);
@@ -163,7 +175,8 @@ private:
 		std::visit(overloaded{
 					   [](const BaseElement &) {},
 					   [](const ParamElement &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
-					   [this](const Pot &pot) { set_pot_range(pot); },
+					   [this](const Knob &knob) { set_knob_range(knob); },
+					   [this](const Slider &slider) { set_continuous_range(slider); },
 					   [](const Button &el) { lv_arc_set_range(ui_ControlArc, 0, 1); },
 					   [](const FlipSwitch &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
@@ -179,17 +192,23 @@ private:
 		lv_label_set_text(ui_ControlAlertAmount, "");
 	}
 
-	void set_pot_range(Pot const &pot) {
+	void set_continuous_range(Pot const &pot) {
 		// Use coarse/fine/ultrafine unless value is displayed what we are guessing is an integer with no units
 		if (pot.display_mult > 1 && pot.display_mult != 100 && pot.display_base == 0 && pot.units == "") {
 			lv_arc_set_range(ui_ControlArc, 0, pot.display_mult);
 			hide_resolution_text();
-		} else if (pot.integral) {
-			lv_arc_set_range(ui_ControlArc, pot.min_value, pot.max_value);
-			hide_resolution_text();
 		} else {
 			lv_arc_set_range(ui_ControlArc, 0, arc_range_value[arc_range_idx]);
 			show_resolution_text();
+		}
+	}
+
+	void set_knob_range(Knob const &knob) {
+		if (knob.num_pos > 0) {
+			lv_arc_set_range(ui_ControlArc, knob.min_value, knob.max_value);
+			hide_resolution_text();
+		} else {
+			set_continuous_range(knob);
 		}
 	}
 
