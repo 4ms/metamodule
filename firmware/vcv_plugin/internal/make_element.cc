@@ -85,12 +85,9 @@ static float radians_to_degrees(float radians) {
 	return radians / (M_PI / 180.f);
 };
 
-static Knob create_base_knob(rack::app::Knob *widget) {
-	Knob element{};
-	element.default_value = getScaledDefaultValue(widget);
-	element.min_angle = radians_to_degrees(widget->minAngle);
-	element.max_angle = radians_to_degrees(widget->maxAngle);
-
+static void set_pot_display_params(Pot &element, rack::app::ParamWidget *widget) {
+	if (!widget)
+		return;
 	if (auto pq = widget->getParamQuantity()) {
 		element.min_value = pq->minValue;
 		element.max_value = pq->maxValue;
@@ -98,21 +95,29 @@ static Knob create_base_knob(rack::app::Knob *widget) {
 		element.display_base = pq->displayBase;
 		element.display_mult = pq->displayMultiplier;
 		element.display_offset = pq->displayOffset;
-		element.integral = pq->snapEnabled;
 		element.display_precision = pq->displayPrecision;
+	}
+}
 
-		if (element.integral) {
-			element.num_pos = pq->maxValue - pq->minValue + 1;
+static Knob create_base_knob(rack::app::Knob *widget) {
+	Knob element{};
+	element.default_value = getScaledDefaultValue(widget);
+	element.min_angle = radians_to_degrees(widget->minAngle);
+	element.max_angle = radians_to_degrees(widget->maxAngle);
 
-			auto clamped_num_pos = std::min<size_t>(pq->labels.size(), element.pos_names.size());
+	set_pot_display_params(element, widget);
 
-			if (clamped_num_pos < pq->labels.size()) {
-				pr_warn("Warning: Snapped knob has %u labels, but only %u were used\n", pq->labels.size(), clamped_num_pos);
-			}
+	if (auto pq = widget->getParamQuantity(); pq && pq->snapEnabled) {
+		element.num_pos = pq->maxValue - pq->minValue + 1;
 
-			for (auto i = 0u; i < clamped_num_pos; i++) {
-				element.pos_names[i] = pq->labels[i];
-			}
+		auto clamped_num_pos = std::min<size_t>(pq->labels.size(), element.pos_names.size());
+
+		if (clamped_num_pos < pq->labels.size()) {
+			pr_warn("Warning: Snapped knob has %u labels, but only %u were used\n", pq->labels.size(), clamped_num_pos);
+		}
+
+		for (auto i = 0u; i < clamped_num_pos; i++) {
+			element.pos_names[i] = pq->labels[i];
 		}
 	}
 
@@ -193,6 +198,8 @@ Element make_element(rack::app::SliderKnob *widget) {
 
 	Slider element{};
 	element.default_value = getScaledDefaultValue(widget);
+
+	set_pot_display_params(element, widget);
 	return element;
 }
 
@@ -244,6 +251,9 @@ Element make_element(rack::app::SvgSlider *widget) {
 
 		Slider element{};
 		element.default_value = getScaledDefaultValue(widget);
+
+		set_pot_display_params(element, widget);
+
 		element.image_handle = widget->handle->svg->filename();
 
 		if (widget->background->svg->filename().length()) {
@@ -260,8 +270,12 @@ Element make_element(rack::app::SvgSlider *widget, rack::app::MultiLightWidget *
 	log_make_element("SvgSlider, Light", widget->paramId);
 
 	SliderLight element;
+
 	element.default_value = getScaledDefaultValue(widget);
+	set_pot_display_params(element, widget);
+
 	element.image_handle = widget->handle->svg->filename();
+
 	auto color = light->baseColors.size() ? light->baseColors[0] : light->color;
 	element.color = RGB565{color.r, color.g, color.b};
 
