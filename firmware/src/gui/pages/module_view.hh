@@ -246,7 +246,7 @@ struct ModuleViewPage : PageBase {
 				opts += Gui::orange_text("Options:") + "\n";
 				opts += " >>>\n";
 				roller_drawn_el_idx.push_back(-1);
-				roller_drawn_el_idx.push_back(ExtraMenuTag);
+				roller_drawn_el_idx.push_back(ContextMenuTag);
 				roller_idx += 2;
 			}
 		}
@@ -573,6 +573,8 @@ private:
 			lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 			lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
 			lv_obj_set_size(b, std::round(x_size), std::round(y_size));
+
+			printf("Button: %f x %f\n", x_size, y_size);
 		} else {
 			lv_obj_set_pos(b, 0, 0);
 			lv_obj_set_size(b, 0, 0);
@@ -623,7 +625,7 @@ private:
 		auto cur_idx = page->roller_drawn_el_idx[cur_sel];
 
 		// Extra menu:
-		if (cur_idx == ExtraMenuTag) {
+		if (cur_idx == ContextMenuTag) {
 			page->unhighlight_component(prev_sel);
 			page->cur_selected = cur_sel;
 			page->roller_hover.hide();
@@ -698,81 +700,86 @@ private:
 		}
 	}
 
+	void click_cable_destination(unsigned drawn_idx) {
+		// Determine id and type of this element
+		std::optional<Jack> this_jack{};
+		ElementType this_jack_type{};
+		auto idx = drawn_elements[drawn_idx].gui_element.idx;
+
+		std::visit(overloaded{[](auto const &) {},
+							  [&](const JackInput &) {
+								  this_jack_type = ElementType::Input;
+								  this_jack = Jack{.module_id = this_module_id, .jack_id = idx.input_idx};
+							  },
+							  [&](const JackOutput &) {
+								  this_jack_type = ElementType::Output;
+								  this_jack = Jack{.module_id = this_module_id, .jack_id = idx.output_idx};
+							  }},
+				   drawn_elements[drawn_idx].element);
+
+		if (this_jack) {
+			make_cable(gui_state.new_cable.value(), patch, module_mods, notify_queue, *this_jack, this_jack_type);
+
+			handle_patch_mods();
+
+			gui_state.new_cable = std::nullopt;
+
+			// Do not show instructions again this session
+			gui_state.already_displayed_cable_instructions = true;
+
+			gui_state.force_redraw_patch = true;
+			PageArguments nextargs = {.patch_loc = args.patch_loc,
+									  .patch_loc_hash = args.patch_loc_hash,
+									  .module_id = args.module_id,
+									  .detail_mode = false};
+			page_list.request_new_page(PageId::PatchView, nextargs);
+			roller_hover.hide();
+		} else
+			pr_err("Error completing cable\n");
+	}
+
+	void click_normal_element(unsigned drawn_idx) {
+		mode = ViewMode::Mapping;
+		args.detail_mode = true;
+		lv_hide(ui_ElementRollerPanel);
+		roller_hover.hide();
+
+		mapping_pane.show(drawn_elements[drawn_idx]);
+
+		if (full_screen_mode) {
+			// TODO: if fullscreen, then open Adjust pop up directly
+			// But keep it hidden?
+			// If it's a button, the just immediately toggle state
+			// page->mapping_pane.control_popup.show(page->drawn_element);
+		}
+	}
+
+	void show_context_menu() {
+		// Ignore clicking on Context Menu when in full_screen_mode
+		if (!full_screen_mode) {
+			mode = ViewMode::ModuleContextMenu;
+			lv_hide(ui_ElementRoller);
+			roller_hover.hide();
+			module_context_menu.show();
+		}
+	}
+
 	static void roller_click_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		auto roller_idx = page->cur_selected;
 
 		if (auto drawn_idx = page->get_drawn_idx(roller_idx)) {
+
 			if (page->gui_state.new_cable) {
-				// Determine id and type of this element
-				std::optional<Jack> this_jack{};
-				ElementType this_jack_type{};
-				auto idx = page->drawn_elements[*drawn_idx].gui_element.idx;
-
-				std::visit(overloaded{[](auto const &) {},
-									  [&](const JackInput &) {
-										  this_jack_type = ElementType::Input;
-										  this_jack = Jack{.module_id = page->this_module_id, .jack_id = idx.input_idx};
-									  },
-									  [&](const JackOutput &) {
-										  this_jack_type = ElementType::Output;
-										  this_jack =
-											  Jack{.module_id = page->this_module_id, .jack_id = idx.output_idx};
-									  }},
-						   page->drawn_elements[*drawn_idx].element);
-
-				if (this_jack) {
-					make_cable(page->gui_state.new_cable.value(),
-							   page->patch,
-							   page->module_mods,
-							   page->notify_queue,
-							   *this_jack,
-							   this_jack_type);
-
-					page->handle_patch_mods();
-
-					page->gui_state.new_cable = std::nullopt;
-
-					// Do not show instructions again this session
-					page->gui_state.already_displayed_cable_instructions = true;
-
-					page->gui_state.force_redraw_patch = true;
-					PageArguments args = {.patch_loc = page->args.patch_loc,
-										  .patch_loc_hash = page->args.patch_loc_hash,
-										  .module_id = page->args.module_id,
-										  .detail_mode = false};
-					page->page_list.request_new_page(PageId::PatchView, args);
-					page->roller_hover.hide();
-				} else
-					pr_err("Error completing cable\n");
-
+				page->click_cable_destination(*drawn_idx);
 			} else {
-
-				page->mode = ViewMode::Mapping;
-				page->args.detail_mode = true;
-				lv_hide(ui_ElementRollerPanel);
-				page->roller_hover.hide();
-
-				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
-
-				if (page->full_screen_mode) {
-					// TODO: if fullscreen, then open Adjust pop up directly
-					// But keep it hidden?
-					// If it's a button, the just immediately toggle state
-					// page->mapping_pane.control_popup.show(page->drawn_element);
-				}
+				page->click_normal_element(*drawn_idx);
 			}
 
 			//Not an element: Is it the Extra Menu?
 		} else if (roller_idx < page->roller_drawn_el_idx.size()) {
-			if (page->roller_drawn_el_idx[roller_idx] == ExtraMenuTag) {
-				// Just ignore clicking on Extra Menu when in full_screen_mode
-				if (!page->full_screen_mode) {
-					page->mode = ViewMode::ModuleContextMenu;
-					lv_hide(ui_ElementRoller);
-					page->roller_hover.hide();
-					page->module_context_menu.show();
-				}
+			if (page->roller_drawn_el_idx[roller_idx] == ContextMenuTag) {
+				page->show_context_menu();
 			}
 		}
 	}
@@ -880,7 +887,7 @@ private:
 
 	bool full_screen_mode = false;
 
-	enum { ExtraMenuTag = -2 };
+	enum { ContextMenuTag = -2 };
 };
 
 } // namespace MetaModule

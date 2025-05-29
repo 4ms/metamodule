@@ -11,6 +11,7 @@
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/settings_file.hh"
 
+#include "gui/pages/fullscreen_graphic.hh"
 #include "gui/pages/jackmaps.hh"
 #include "gui/pages/knobmap.hh"
 #include "gui/pages/knobset_view.hh"
@@ -50,6 +51,7 @@ class PageManager {
 	SystemMenuPage page_systemmenu{info};
 	ModuleListPage page_modulelist{info};
 	JackMapViewPage page_jackmap{info};
+	FullscreenGraphicPage page_fullscreen_graphic{info};
 
 public:
 	PageBase *cur_page = &page_mainmenu;
