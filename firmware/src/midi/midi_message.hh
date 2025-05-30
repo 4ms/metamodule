@@ -169,6 +169,16 @@ struct MidiMessage {
 		return ((int16_t)data.byte[0] | ((int16_t)data.byte[1] << 7)) - 8192;
 	}
 
+	unsigned message_size() const {
+		if (is_timing_transport()) {
+			return 1;
+		} else if (status.command == MidiCommand::ChannelPressure) {
+			return 2;
+		} else {
+			return 3;
+		}
+	}
+
 	static void print(MidiMessage msg) {
 #if defined(MIDIDEBUG)
 		using enum MidiCommand;
