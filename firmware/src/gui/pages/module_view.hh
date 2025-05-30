@@ -275,8 +275,13 @@ struct ModuleViewPage : PageBase {
 		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
 		if (cur_selected > 0 && cur_selected < button.size()) {
-			if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < button.size())
-				lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < button.size()) {
+				if (lv_obj_get_height(button[idx]) > 100 || lv_obj_get_width(button[idx]) > 100) {
+					lv_obj_add_style(button[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+				} else {
+					lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+				}
+			}
 		} else {
 			pr_err("Current selected is not in range (%d/%zu)\n", cur_selected, button.size());
 		}
@@ -569,8 +574,6 @@ private:
 			lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 			lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
 			lv_obj_set_size(b, std::round(x_size), std::round(y_size));
-
-			printf("Button: %f x %f\n", x_size, y_size);
 		} else {
 			lv_obj_set_pos(b, 0, 0);
 			lv_obj_set_size(b, 0, 0);
@@ -669,14 +672,23 @@ private:
 
 	void unhighlight_component(uint32_t prev_sel) {
 		if (auto prev_idx = get_drawn_idx(prev_sel)) {
-			lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			if (lv_obj_get_height(button[*prev_idx]) > 100 || lv_obj_get_width(button[*prev_idx]) > 100) {
+				lv_obj_remove_style(button[*prev_idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+			} else {
+				lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			}
 			lv_event_send(button[*prev_idx], LV_EVENT_REFRESH, nullptr);
 		}
 	}
 
 	void highlight_component(size_t idx) {
 		if (idx < button.size()) {
-			lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+
+			if (lv_obj_get_height(button[idx]) > 100 || lv_obj_get_width(button[idx]) > 100) {
+				lv_obj_add_style(button[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+			} else {
+				lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			}
 			lv_event_send(button[idx], LV_EVENT_REFRESH, nullptr);
 			lv_obj_scroll_to_view(button[idx], LV_ANIM_ON);
 		}
