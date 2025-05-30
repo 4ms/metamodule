@@ -2,6 +2,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "debug.hh"
 #include "gui/elements/context.hh"
+#include "gui/helpers/lv_helpers.hh"
 #include "gui/styles.hh"
 #include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
@@ -51,8 +52,9 @@ struct DynamicDisplayDrawer {
 		displays.push_back({.id = light_idx, .width_mm = width, .height_mm = height, .lv_canvas = canvas});
 	}
 
-	void prepare(lv_obj_t *module_canvas) {
-		parent_canvas = module_canvas;
+	// TODO: do we need to proivde the parent object?
+	void prepare(lv_obj_t *parent_obj) {
+		parent_canvas = parent_obj;
 
 		for (auto &disp : displays) {
 			// If size is 0, then don't make a buffer for it

@@ -21,6 +21,9 @@ struct FullscreenGraphicPage : PageBase {
 		lv_obj_set_style_outline_width(screen, 0, LV_PART_MAIN);
 
 		canvas = lv_canvas_create(screen);
+		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_set_style_bg_color(canvas, lv_color_black(), LV_PART_MAIN);
+		lv_obj_set_style_bg_opa(canvas, LV_OPA_100, LV_PART_MAIN);
 
 		init_bg(screen);
 	}
@@ -47,7 +50,15 @@ struct FullscreenGraphicPage : PageBase {
 		uint16_t h = (ratio <= screen_ratio) ? 240 : std::round(320 / ratio);
 
 		lv_obj_set_size(canvas, w, h);
+
+		// Debug border:
+		// lv_obj_set_style_border_width(canvas, 1, LV_PART_MAIN);
+		// lv_obj_set_style_border_color(canvas, lv_color_hex(0xff0000), LV_PART_MAIN);
+		// lv_obj_set_style_border_opa(canvas, LV_OPA_50, LV_PART_MAIN);
+
 		lv_obj_align(canvas, LV_ALIGN_CENTER, 0, 0);
+		lv_obj_refr_size(canvas);
+		lv_obj_update_layout(canvas);
 
 		dyn_drawer = std::make_unique<DynamicDisplayDrawer>(
 			patch_playloader, *args.module_id, args.element_indices->light_idx, width_mm, height_mm, canvas);
@@ -66,8 +77,20 @@ struct FullscreenGraphicPage : PageBase {
 	}
 
 	void blur() final {
-		if (dyn_drawer)
+		if (dyn_drawer) {
 			dyn_drawer->blur();
+
+			if (canvas && lv_obj_is_valid(canvas)) {
+				lv_foreach_child(canvas, [](lv_obj_t *child, unsigned id) {
+					if (child && lv_obj_is_valid(child))
+						lv_obj_del_async(child);
+				});
+
+				if (lv_canvas_get_img(canvas)) {
+					lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_100);
+				}
+			}
+		}
 	}
 
 private:
