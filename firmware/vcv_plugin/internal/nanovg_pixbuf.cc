@@ -205,8 +205,10 @@ float renderText(
 			pr_dbg("Text xform %f, %f\n", fs->xform[4], fs->xform[5]);
 		}
 
-		if (!(fs->textAlign & NVG_ALIGN_TOP))
+		if (context->px_per_3U <= 240)
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+		else
+			lv_obj_clear_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
 		label = lv_label_create(canvas);
 		lv_obj_set_pos(label, lv_x, align_lv_y);
@@ -220,8 +222,6 @@ float renderText(
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
 		auto letter_space = to_lv_coord(fs->letterSpacing, context->px_per_3U);
 		lv_obj_set_style_text_letter_space(label, letter_space, LV_PART_MAIN);
-
-		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
 		// Debug positions with red borders around labels
 		// lv_obj_set_style_border_color(label, lv_color_hex(0xFF0000), LV_PART_MAIN);
