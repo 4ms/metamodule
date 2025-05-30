@@ -106,6 +106,10 @@ void renderStroke(void *uptr,
 
 	// Scale by ratio of 1 Rack pixel to 1 MM pixel
 	auto scaling = mm_to_px(to_mm(1.), context->px_per_3U);
+	//
+	// @pp3U=811 => scaling = 2.1
+	// @pp3U=240 => scaling = 0.633
+	// @pp3U=180 => scaling = 0.474
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Stroke path: #strokes %d = count:%d + closed:%d\n", path.nstroke, path.count, path.closed);
@@ -122,10 +126,13 @@ void renderStroke(void *uptr,
 		auto [r, g, b, a] = to_tvg_color(paint->innerColor);
 		poly->strokeFill(r, g, b, a);
 
-		auto stroke_width = std::round(to_lv_coord(strokeWidth, context->px_per_3U));
-
-		constexpr float MinStroke = 1.3f;
-		poly->strokeWidth(std::max<lv_coord_t>(stroke_width, MinStroke / scaling));
+		float stroke_width = strokeWidth;
+		if (scaling < 1) {
+			constexpr float MinStroke = 1.3f;
+			// Divide by /scaling so that when the rendering engine scales, it results in MinStroke
+			stroke_width = std::max(mm_to_px(to_mm(strokeWidth), context->px_per_3U), MinStroke / scaling);
+		}
+		poly->strokeWidth(stroke_width);
 
 		// Clip/Scissor
 		if (scissor->extent[0] >= 0 && scissor->extent[1] >= 0) {
