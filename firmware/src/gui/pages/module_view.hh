@@ -421,11 +421,15 @@ struct ModuleViewPage : PageBase {
 			mapping_pane.refresh();
 		}
 
-		if (lv_group_get_focused(group) == ui_ModuleViewActionBut ||
-			lv_group_get_focused(group) == ui_ModuleViewSettingsBut)
-			roller_hover.hide();
-
 		roller_hover.update();
+
+		// Hide the hover text if we are on one of the action buttons
+		if (lv_group_get_focused(group) == ui_ModuleViewActionBut ||
+			lv_group_get_focused(group) == ui_ModuleViewSettingsBut ||
+			lv_group_get_focused(group) == ui_ModuleViewHideBut)
+		{
+			roller_hover.hide();
+		}
 	}
 
 	void redraw_elements() {
