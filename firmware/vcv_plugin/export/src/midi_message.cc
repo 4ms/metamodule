@@ -83,6 +83,11 @@ std::string toPrettyMultilineString(std::span<uint8_t, 3> bytes) {
 		s = "Stop";
 	}
 
+	else if (msg.is_system_realtime<TimingClock>())
+	{
+		// Do not print clock
+	}
+
 	else
 	{
 		// s += std::to_string(bytes[0]) + " " + std::to_string(bytes[1]) + "\n" + std::to_string(bytes[2]);

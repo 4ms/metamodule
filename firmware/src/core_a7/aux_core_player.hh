@@ -85,7 +85,8 @@ struct AuxPlayer {
 				if (d.is_active()) {
 					auto text = std::span<char>(d.text._data, d.text.capacity);
 					auto sz = patch_player.get_display_text(d.module_id, d.light_id, text);
-					d.text._data[sz] = '\0';
+					if (sz)
+						d.text._data[sz] = '\0';
 				}
 			}
 
