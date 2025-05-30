@@ -44,6 +44,24 @@ struct FullscreenGraphicPage : PageBase {
 	}
 
 	void prepare_focus() final {
+		if (!patch_is_playing(args.patch_loc_hash))
+			return;
+
+		// if (!args.module_id.has_value() || !args.element_indices.has_value())
+		// 	return;
+
+		// if (args.element_indices->light_idx == ElementCount::Indices::NoElementMarker)
+		// 	return;
+
+		// auto patch = patches.get_playing_patch();
+		// if (!patch)
+		// 	return;
+
+		// if (*args.module_id >= patch->module_slugs.size())
+		// 	return;
+
+		// auto const &slug = patch->module_slugs[*args.module_id];
+		// auto const &info = ModuleFactory::getModuleInfo(slug);
 	}
 
 	void update() final {

@@ -310,13 +310,9 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {
-		auto gui_el = drawn_element.gui_element;
-		std::visit(overloaded{[&](DynamicTextDisplay const &el) {
-								  params.text_displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
-							  },
-							  [](auto const &el) {
-							  }},
-				   drawn_element.element);
+		if (std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
+			params.text_displays.start_watching_display(this_module_id, drawn_element.gui_element.idx.light_idx);
+		}
 	}
 
 	bool is_creating_map() const {
@@ -739,18 +735,30 @@ private:
 	}
 
 	void click_normal_element(unsigned drawn_idx) {
-		mode = ViewMode::Mapping;
-		args.detail_mode = true;
-		lv_hide(ui_ElementRollerPanel);
-		roller_hover.hide();
+		auto &drawn_element = drawn_elements[drawn_idx];
 
-		mapping_pane.show(drawn_elements[drawn_idx]);
+		if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
+			PageArguments nextargs = {
+				.patch_loc_hash = args.patch_loc_hash,
+				.module_id = this_module_id,
+				.element_indices = drawn_element.gui_element.idx,
+				.element = *el,
+			};
+			page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
+			roller_hover.hide();
 
-		if (full_screen_mode) {
-			// TODO: if fullscreen, then open Adjust pop up directly
-			// But keep it hidden?
-			// If it's a button, the just immediately toggle state
-			// page->mapping_pane.control_popup.show(page->drawn_element);
+		} else {
+			//TODO: sometimes open manual popup immediately. (alt params, performance mode)
+			// sometimes keep it hidden, but act as if it were open (full screen mode, performance mode with buttons)
+			if (full_screen_mode) {
+				//...
+			}
+			mode = ViewMode::Mapping;
+			args.detail_mode = true;
+			lv_hide(ui_ElementRollerPanel);
+			roller_hover.hide();
+
+			mapping_pane.show(drawn_element);
 		}
 	}
 

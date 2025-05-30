@@ -16,6 +16,7 @@ struct PageArguments {
 	std::optional<ElementCount::Counts> element_counts{};
 	std::optional<ElementCount::Indices> element_indices{};
 	std::optional<bool> detail_mode{};
+	std::optional<Element> element{};
 
 	bool operator==(PageArguments const &that) const = default;
 };
