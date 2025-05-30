@@ -25,43 +25,33 @@ struct FullscreenGraphicPage : PageBase {
 		init_bg(screen);
 	}
 
-	void init(float width_mm, float height_mm) {
-		if (args.module_id && args.element_indices) {
-			if (args.element_indices->light_idx != ElementCount::Indices::NoElementMarker) {
-
-				const float ratio = width_mm / height_mm;
-				const float screen_ratio = 320.f / 240.f;
-				uint16_t w = (ratio >= screen_ratio) ? 320 : std::round(240 * ratio);
-				uint16_t h = (ratio <= screen_ratio) ? 240 : std::round(320 / ratio);
-
-				lv_obj_set_size(canvas, w, h);
-
-				dyn_drawer = std::make_unique<DynamicDisplayDrawer>(
-					patch_playloader, *args.module_id, args.element_indices->light_idx, width_mm, height_mm, canvas);
-			}
-		}
-		dynamic_elements_prepared = false;
-	}
-
 	void prepare_focus() final {
 		if (!patch_is_playing(args.patch_loc_hash))
 			return;
 
-		// if (!args.module_id.has_value() || !args.element_indices.has_value())
-		// 	return;
+		if (!args.module_id.has_value() || !args.element_indices.has_value())
+			return;
 
-		// if (args.element_indices->light_idx == ElementCount::Indices::NoElementMarker)
-		// 	return;
+		if (args.element_indices->light_idx == ElementCount::Indices::NoElementMarker)
+			return;
 
-		// auto patch = patches.get_playing_patch();
-		// if (!patch)
-		// 	return;
+		if (!args.element_mm)
+			return;
 
-		// if (*args.module_id >= patch->module_slugs.size())
-		// 	return;
+		auto width_mm = args.element_mm->first;
+		auto height_mm = args.element_mm->second;
 
-		// auto const &slug = patch->module_slugs[*args.module_id];
-		// auto const &info = ModuleFactory::getModuleInfo(slug);
+		const float ratio = width_mm / height_mm;
+		const float screen_ratio = 320.f / 240.f;
+		uint16_t w = (ratio >= screen_ratio) ? 320 : std::round(240 * ratio);
+		uint16_t h = (ratio <= screen_ratio) ? 240 : std::round(320 / ratio);
+
+		lv_obj_set_size(canvas, w, h);
+		lv_obj_align(canvas, LV_ALIGN_CENTER, 0, 0);
+
+		dyn_drawer = std::make_unique<DynamicDisplayDrawer>(
+			patch_playloader, *args.module_id, args.element_indices->light_idx, width_mm, height_mm, canvas);
+		dynamic_elements_prepared = false;
 	}
 
 	void update() final {
