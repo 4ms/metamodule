@@ -123,7 +123,8 @@ struct MIDI_CV : Module {
 		midi::Message msg;
 		while (midiInput.tryPop(&msg, args.frame)) {
 			//METAMODULE
-			if (msg.getStatus() >= 0x8)
+			// Do not put Timing clock or Active Sending messages in the history window
+			if (msg.bytes[0] & 0x80 && msg.bytes[0] != 0xf8 && msg.bytes[0] != 0xfe)
 				msg_history.put(msg);
 			////////
 			processMessage(msg);
@@ -490,9 +491,12 @@ struct MIDI_CV : Module {
 
 		for (auto i = 0u; i < msg_history.count(); i++) {
 			auto msg = msg_history.peek(i);
-			if (i != 0)
-				chars += "\n\n";
-			chars += MetaModule::Midi::toPrettyMultilineString(msg.bytes);
+			auto s = MetaModule::Midi::toPrettyMultilineString(msg.bytes);
+			if (s.length()) {
+				if (i != 0)
+					chars += "\n\n";
+				chars += s;
+			}
 		}
 
 		size_t chars_to_copy = std::min(text.size(), chars.length());
