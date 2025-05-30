@@ -1,9 +1,7 @@
 #pragma once
-#include "gui/dyn_display.hh"
-#include "gui/helpers/lv_helpers.hh"
+#include "gui/dyn_display_drawer.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/slsexport/meta5/ui.h"
 
 namespace MetaModule
 {
@@ -11,8 +9,7 @@ namespace MetaModule
 struct FullscreenGraphicPage : PageBase {
 
 	FullscreenGraphicPage(PatchContext info)
-		: PageBase{info, PageId::FullscreenGraphic}
-		, dyn_draw{patch_playloader} {
+		: PageBase{info, PageId::FullscreenGraphic} {
 
 		screen = lv_obj_create(NULL);
 		lv_obj_clear_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
@@ -23,11 +20,26 @@ struct FullscreenGraphicPage : PageBase {
 		lv_obj_set_style_border_width(screen, 0, LV_PART_MAIN);
 		lv_obj_set_style_outline_width(screen, 0, LV_PART_MAIN);
 
+		canvas = lv_canvas_create(screen);
+
 		init_bg(screen);
 	}
 
-	void init(DrawnElement const &el) {
-		drawn_el = &el;
+	void init(float width_mm, float height_mm) {
+		if (args.module_id && args.element_indices) {
+			if (args.element_indices->light_idx != ElementCount::Indices::NoElementMarker) {
+
+				const float ratio = width_mm / height_mm;
+				const float screen_ratio = 320.f / 240.f;
+				uint16_t w = (ratio >= screen_ratio) ? 320 : std::round(240 * ratio);
+				uint16_t h = (ratio <= screen_ratio) ? 240 : std::round(320 / ratio);
+
+				lv_obj_set_size(canvas, w, h);
+
+				dyn_drawer = std::make_unique<DynamicDisplayDrawer>(
+					patch_playloader, *args.module_id, args.element_indices->light_idx, width_mm, height_mm, canvas);
+			}
+		}
 		dynamic_elements_prepared = false;
 	}
 
@@ -39,26 +51,29 @@ struct FullscreenGraphicPage : PageBase {
 			page_list.request_last_page();
 		}
 
-		prepare_dynamic_elements();
-		dyn_draw.draw();
+		if (dyn_drawer) {
+			prepare_dynamic_elements();
+			dyn_drawer->draw();
+		}
 	}
 
 	void blur() final {
-		dyn_draw.blur();
+		if (dyn_drawer)
+			dyn_drawer->blur();
 	}
 
 private:
 	void prepare_dynamic_elements() {
 		if (!dynamic_elements_prepared) {
-			dyn_draw.prepare_display(*drawn_el, canvas);
+			dyn_drawer->prepare(screen);
 			dynamic_elements_prepared = true;
 		}
 	}
 
 	lv_obj_t *screen;
 	lv_obj_t *canvas;
-	DynamicDisplay dyn_draw;
-	DrawnElement const *drawn_el;
+
+	std::unique_ptr<DynamicDisplayDrawer> dyn_drawer{};
 
 	bool dynamic_elements_prepared = false;
 };

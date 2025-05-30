@@ -26,23 +26,6 @@ public:
 		return false;
 	}
 
-	bool prepare_display(DrawnElement const &drawn_el, lv_obj_t *module_canvas) {
-
-		auto module_id = drawn_el.gui_element.module_idx;
-
-		pr_trace("DynamicDisplay: Prepare canvas for display %u (module %u)\n",
-				 drawn_el.gui_element.idx.light_idx,
-				 module_id);
-
-		if (patch_playloader.get_plugin_module(module_id)) {
-			drawer = std::make_unique<DynamicDisplayDrawer>(patch_playloader, drawn_el);
-			drawer->prepare(module_canvas);
-			return true;
-		}
-
-		return false;
-	}
-
 	void draw() {
 		if (drawer) {
 			drawer->draw();
