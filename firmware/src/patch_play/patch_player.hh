@@ -1415,14 +1415,13 @@ inline void PatchPlayer::update_all_roto_controls() {
                             std::vector<const char*> dummy_step_names_ptrs;
 							bool is_toggle_switch = false;
 
-                            if constexpr (std::is_base_of_v<Pot, T>) {
-                                const Pot &pot_el = arg;
-								pr_dbg("Pot: %s\n", control_name_str.c_str());
-								const uint8_t num_pos = pot_el.max_value - pot_el.min_value + 1;
-								// TODO: Move to RotoControl constants
-                                if (pot_el.integral && num_pos > 0 && num_pos <= 16) {
+                            if constexpr (std::is_base_of_v<Knob, T>) {
+                                const Knob &knob_el = arg;
+								pr_dbg("Knob: %s\n", control_name_str.c_str());
+								// TODO: Move to RotoControl constants, 16 is the max number of steps RotoControl can support
+                                if (knob_el.num_pos > 0 && knob_el.num_pos <= 16) {
                                     haptic_mode = HapticMode::KNOB_N_STEP;
-                                    haptic_steps = num_pos;
+                                    haptic_steps = knob_el.num_pos;
                                 } else {
                                     haptic_mode = HapticMode::KNOB_300;
                                 }
@@ -1459,7 +1458,7 @@ inline void PatchPlayer::update_all_roto_controls() {
 									// control_name_str is already padded to 13 bytes.
 									dummy_step_names_storage.push_back(control_name_str);
 									dummy_step_names_storage.push_back(control_name_str);
-								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T> || std::is_base_of_v<Pot, T>) {	
+								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T> || std::is_base_of_v<Knob, T>) {	
 									const auto &el = arg;
 									for (uint8_t i = 0; i < haptic_steps; ++i) {
 										std::string step_name = std::string(el.pos_names[i]);
