@@ -20,6 +20,7 @@
 #include "result_t.hh"
 #include "util/countzip.hh"
 #include "util/oscs.hh"
+#include "util/overloaded.hh"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -1377,21 +1378,18 @@ inline void PatchPlayer::update_all_roto_controls() {
 
                 if (is_target_param) {
                     const auto &element_variant = module_info.elements[el_idx];
-                    std::visit([&](auto &&arg) {
-                        using T = std::decay_t<decltype(arg)>;
-                        if constexpr (std::is_base_of_v<ParamElement, T>) {
-                            const ParamElement &param_el = arg;
-                            std::string_view control_name_sv = param_el.short_name;
-							if (control_name_sv.empty()) control_name_sv = param_el.long_name;
+                    std::visit(overloaded{
+                        [&](Knob const &knob_el) {
+                            std::string_view control_name_sv = knob_el.short_name;
+                            if (control_name_sv.empty()) control_name_sv = knob_el.long_name;
                             
                             std::string control_name_str;
                             const char* control_name_ptr;
 
-							pr_dbg("control_name_sv: %s\n", control_name_sv.data());
+                            pr_dbg("control_name_sv: %s\n", control_name_sv.data());
 
                             if (control_name_sv.empty()) {
-                                control_name_str = "Unnamed MIDI"; // Max 12 chars + null
-                                // Pad with null bytes to make it exactly 13 characters
+                                control_name_str = "Unnamed MIDI";
                                 control_name_str.resize(13, '\0');
                                 control_name_ptr = control_name_str.c_str();
                             } else {
@@ -1400,11 +1398,9 @@ inline void PatchPlayer::update_all_roto_controls() {
                                 } else {
                                     control_name_str = std::string(control_name_sv);
                                 }
-                                // Pad with null bytes to make it exactly 13 characters
                                 control_name_str.resize(13, '\0');
                                 control_name_ptr = control_name_str.c_str();
                             }
-
 
                             uint16_t min_val_u16 = 0;
                             uint16_t max_val_u16 = 127;
@@ -1413,125 +1409,330 @@ inline void PatchPlayer::update_all_roto_controls() {
                             const char* const* step_names_ptr = nullptr;
                             std::vector<std::string> dummy_step_names_storage;
                             std::vector<const char*> dummy_step_names_ptrs;
-							bool is_toggle_switch = false;
 
-                            if constexpr (std::is_base_of_v<Knob, T>) {
-                                const Knob &knob_el = arg;
-								pr_dbg("Knob: %s\n", control_name_str.c_str());
-								// TODO: Move to RotoControl constants, 16 is the max number of steps RotoControl can support
-                                if (knob_el.num_pos > 0 && knob_el.num_pos <= 16) {
-                                    haptic_mode = HapticMode::KNOB_N_STEP;
-                                    haptic_steps = knob_el.num_pos;
-                                } else {
-                                    haptic_mode = HapticMode::KNOB_300;
-                                }
-                            } else if constexpr (std::is_base_of_v<Switch, T>) {
-								pr_dbg("Switch: %s\n", control_name_str.c_str());
-                                const auto &switch_el = arg;
-                                min_val_u16 = 0;
-                                max_val_u16 = switch_el.num_pos > 0 ? switch_el.num_pos - 1 : 0;
+                            pr_dbg("Knob: %s\n", control_name_str.c_str());
+                            if (knob_el.num_pos > 0 && knob_el.num_pos <= 16) {
                                 haptic_mode = HapticMode::KNOB_N_STEP;
-                                haptic_steps = switch_el.num_pos > 0 ? switch_el.num_pos : 1;
-								is_toggle_switch = true;
-                            } else if constexpr (std::is_base_of_v<Button, T>) {
-								pr_dbg("Button: %s\n", control_name_str.c_str());
-                                min_val_u16 = 0;
-                                max_val_u16 = 1;
-                                haptic_steps = 2;
-
-								if constexpr (std::is_same_v<T, MomentaryButton> ||
-											  std::is_same_v<T, MomentaryButtonLight> ||
-											  std::is_same_v<T, MomentaryButtonRGB>) {
-									haptic_mode = HapticMode::PUSH;
-								} else if constexpr (std::is_same_v<T, LatchingButton>) {
-									haptic_mode = HapticMode::KNOB_N_STEP;
-								} else {	
-									pr_warn("RotoControl: Encountered an unhandled Button-derived type for param_id %u", k.param_id);
-								}
+                                haptic_steps = knob_el.num_pos;
+                                
+                                if (haptic_steps > 0) {
+                                    dummy_step_names_storage.reserve(haptic_steps);
+                                    for (uint8_t i = 0; i < haptic_steps; ++i) {
+                                        std::string step_name = std::string(knob_el.pos_names[i]);
+                                        if (step_name.length() > 12) {
+                                            step_name = step_name.substr(0, 12);
+                                        }
+                                        step_name.resize(13, '\0');
+                                        dummy_step_names_storage.push_back(step_name);
+                                    }
+                                    
+                                    if (!dummy_step_names_storage.empty()) {
+                                        dummy_step_names_ptrs.reserve(dummy_step_names_storage.size());
+                                        for (const auto& s_str : dummy_step_names_storage) {
+                                            dummy_step_names_ptrs.push_back(s_str.c_str());
+                                        }
+                                        step_names_ptr = dummy_step_names_ptrs.data();
+                                    }
+                                }
+                            } else {
+                                haptic_mode = HapticMode::KNOB_300;
                             }
 
-							if (haptic_steps > 0) { // MODIFIED: Ensure check is > 0 explicitly
-								dummy_step_names_storage.reserve(haptic_steps); // ADDED: Reserve storage
+                            pr_dbg("Setting knob control config, control_index: %d, haptic_mode: %d, haptic_steps: %d\n", 
+                                next_midi_roto_knob_index_, haptic_mode, haptic_steps);
+                            RotoControl::set_knob_control_config(
+                                0, // setup_index
+                                next_midi_roto_knob_index_,
+                                ControlMode::CC_7BIT, 
+                                k.midi_chan == 0 ? 1 : k.midi_chan, 
+                                k.cc_num(),
+                                0, // nrpn_address
+                                min_val_u16,
+                                max_val_u16,
+                                control_name_ptr,
+                                0, // color_scheme
+                                haptic_mode,
+                                0xFF, // indent_pos1
+                                0xFF, // indent_pos2
+                                haptic_steps,
+                                step_names_ptr
+                            );
+                            next_midi_roto_knob_index_++;
+                        },
 
-								if (haptic_steps == 2) {
-									// This branch is typically for buttons or simple 2-state controls using the main control name.
-									// control_name_str is already padded to 13 bytes.
-									dummy_step_names_storage.push_back(control_name_str);
-									dummy_step_names_storage.push_back(control_name_str);
-								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T> || std::is_base_of_v<Knob, T>) {	
-									const auto &el = arg;
-									for (uint8_t i = 0; i < haptic_steps; ++i) {
-										std::string step_name = std::string(el.pos_names[i]);
-										if (step_name.length() > 12) {
-											step_name = step_name.substr(0, 12);
-										}
-										step_name.resize(13, '\0');
-										dummy_step_names_storage.push_back(step_name);
-									}
-								} else {
-									pr_dbg("Creating dummy step names\n");
-									for (uint8_t i = 0; i < haptic_steps; ++i) {
-										std::string name = "S" + std::to_string(i);
-										if (name.length() > 12) {
-											name = name.substr(0, 12);
-										}
-										name.resize(13, '\0');
-										dummy_step_names_storage.push_back(name);
-									}
-								}
-								
-								// MODIFIED: Populate dummy_step_names_ptrs AFTER dummy_step_names_storage is complete
-								if (!dummy_step_names_storage.empty()) {
-									dummy_step_names_ptrs.reserve(dummy_step_names_storage.size());
-									for (const auto& s_str : dummy_step_names_storage) {
-										dummy_step_names_ptrs.push_back(s_str.c_str());
-									}
-									step_names_ptr = dummy_step_names_ptrs.data();
-								}
-                            }
-
-							if (haptic_steps == 2) { // This condition was for calling set_switch_control_config
-								RotoControl::set_switch_control_config(
-									0, // setup_index
-									next_midi_roto_switch_index_, // RotoControl's own knob/control index
-									ControlMode::CC_7BIT, 
-									k.midi_chan == 0 ? 1 : k.midi_chan, 
-									k.cc_num(), // RotoControl's parameter index
-									0, // nrpn_address
-									min_val_u16,
-									max_val_u16,
-									control_name_ptr,
-									0, // color_scheme
-									0x00, // led_on_color
-									0x01, // led_off_color
-									is_toggle_switch ? HapticMode::KNOB_N_STEP : HapticMode::PUSH, // haptic_mode for switch
-									haptic_steps,
-									step_names_ptr
-								);
-								next_midi_roto_switch_index_++;
-							} else {
-								pr_dbg("Setting knob control config, setup_index: %d, control_index: %d, haptic_mode: %d, haptic_steps: %d\n min_val_u16: %d, max_val_u16: %d, control_name: %s\n step_names_ptr: %p\n", 
-									0, next_midi_roto_knob_index_, haptic_mode, haptic_steps, min_val_u16, max_val_u16, control_name_ptr);
-								RotoControl::set_knob_control_config(
-									0, // setup_index
-									next_midi_roto_knob_index_, // RotoControl's own knob/control index
-									ControlMode::CC_7BIT, 
-									k.midi_chan == 0 ? 1 : k.midi_chan, 
-									k.cc_num(), // RotoControl's parameter index
-									0, // nrpn_address
-									min_val_u16,
-									max_val_u16,
-									control_name_ptr,
-									0, // color_scheme
-									haptic_mode,
-									0xFF, // indent_pos1
-									0xFF, // indent_pos2
-									haptic_steps,
-									step_names_ptr
-								);
-								next_midi_roto_knob_index_++;
-							}
+                        [&](SlideSwitch const &switch_el) {
+                            std::string_view control_name_sv = switch_el.short_name;
+                            if (control_name_sv.empty()) control_name_sv = switch_el.long_name;
                             
+                            std::string control_name_str;
+                            if (control_name_sv.empty()) {
+                                control_name_str = "Unnamed MIDI";
+                            } else {
+                                control_name_str = control_name_sv.length() > 12 ? 
+                                    std::string(control_name_sv.substr(0, 12)) : 
+                                    std::string(control_name_sv);
+                            }
+                            control_name_str.resize(13, '\0');
+
+                            uint16_t min_val_u16 = 0;
+                            uint16_t max_val_u16 = switch_el.num_pos > 0 ? switch_el.num_pos - 1 : 0;
+                            uint8_t haptic_steps = switch_el.num_pos > 0 ? switch_el.num_pos : 1;
+                            const char* const* step_names_ptr = nullptr;
+                            std::vector<std::string> dummy_step_names_storage;
+                            std::vector<const char*> dummy_step_names_ptrs;
+
+                            pr_dbg("SlideSwitch: %s\n", control_name_str.c_str());
+
+                            if (haptic_steps > 0) {
+                                dummy_step_names_storage.reserve(haptic_steps);
+                                for (uint8_t i = 0; i < haptic_steps; ++i) {
+                                    std::string step_name = std::string(switch_el.pos_names[i]);
+                                    if (step_name.length() > 12) {
+                                        step_name = step_name.substr(0, 12);
+                                    }
+                                    step_name.resize(13, '\0');
+                                    dummy_step_names_storage.push_back(step_name);
+                                }
+                                
+                                if (!dummy_step_names_storage.empty()) {
+                                    dummy_step_names_ptrs.reserve(dummy_step_names_storage.size());
+                                    for (const auto& s_str : dummy_step_names_storage) {
+                                        dummy_step_names_ptrs.push_back(s_str.c_str());
+                                    }
+                                    step_names_ptr = dummy_step_names_ptrs.data();
+                                }
+                            }
+
+                            RotoControl::set_switch_control_config(
+                                0, // setup_index
+                                next_midi_roto_switch_index_,
+                                ControlMode::CC_7BIT, 
+                                k.midi_chan == 0 ? 1 : k.midi_chan, 
+                                k.cc_num(),
+                                0, // nrpn_address
+                                min_val_u16,
+                                max_val_u16,
+                                control_name_str.c_str(),
+                                0, // color_scheme
+                                0x00, // led_on_color
+                                0x01, // led_off_color
+                                HapticMode::KNOB_N_STEP,
+                                haptic_steps,
+                                step_names_ptr
+                            );
+                            next_midi_roto_switch_index_++;
+                        },
+
+                        [&](FlipSwitch const &switch_el) {
+                            std::string_view control_name_sv = switch_el.short_name;
+                            if (control_name_sv.empty()) control_name_sv = switch_el.long_name;
+                            
+                            std::string control_name_str;
+                            if (control_name_sv.empty()) {
+                                control_name_str = "Unnamed MIDI";
+                            } else {
+                                control_name_str = control_name_sv.length() > 12 ? 
+                                    std::string(control_name_sv.substr(0, 12)) : 
+                                    std::string(control_name_sv);
+                            }
+                            control_name_str.resize(13, '\0');
+
+                            uint16_t min_val_u16 = 0;
+                            uint16_t max_val_u16 = switch_el.num_pos > 0 ? switch_el.num_pos - 1 : 0;
+                            uint8_t haptic_steps = switch_el.num_pos > 0 ? switch_el.num_pos : 1;
+                            const char* const* step_names_ptr = nullptr;
+                            std::vector<std::string> dummy_step_names_storage;
+                            std::vector<const char*> dummy_step_names_ptrs;
+
+                            pr_dbg("FlipSwitch: %s\n", control_name_str.c_str());
+
+                            if (haptic_steps > 0) {
+                                dummy_step_names_storage.reserve(haptic_steps);
+                                for (uint8_t i = 0; i < haptic_steps; ++i) {
+                                    std::string step_name = std::string(switch_el.pos_names[i]);
+                                    if (step_name.length() > 12) {
+                                        step_name = step_name.substr(0, 12);
+                                    }
+                                    step_name.resize(13, '\0');
+                                    dummy_step_names_storage.push_back(step_name);
+                                }
+                                
+                                if (!dummy_step_names_storage.empty()) {
+                                    dummy_step_names_ptrs.reserve(dummy_step_names_storage.size());
+                                    for (const auto& s_str : dummy_step_names_storage) {
+                                        dummy_step_names_ptrs.push_back(s_str.c_str());
+                                    }
+                                    step_names_ptr = dummy_step_names_ptrs.data();
+                                }
+                            }
+
+                            RotoControl::set_switch_control_config(
+                                0, // setup_index
+                                next_midi_roto_switch_index_,
+                                ControlMode::CC_7BIT, 
+                                k.midi_chan == 0 ? 1 : k.midi_chan, 
+                                k.cc_num(),
+                                0, // nrpn_address
+                                min_val_u16,
+                                max_val_u16,
+                                control_name_str.c_str(),
+                                0, // color_scheme
+                                0x00, // led_on_color
+                                0x01, // led_off_color
+                                HapticMode::KNOB_N_STEP,
+                                haptic_steps,
+                                step_names_ptr
+                            );
+                            next_midi_roto_switch_index_++;
+                        },
+
+                        [&](MomentaryButton const &button_el) {
+                            std::string_view control_name_sv = button_el.short_name;
+                            if (control_name_sv.empty()) control_name_sv = button_el.long_name;
+                            
+                            std::string control_name_str;
+                            if (control_name_sv.empty()) {
+                                control_name_str = "Unnamed MIDI";
+                            } else {
+                                control_name_str = control_name_sv.length() > 12 ? 
+                                    std::string(control_name_sv.substr(0, 12)) : 
+                                    std::string(control_name_sv);
+                            }
+                            control_name_str.resize(13, '\0');
+
+                            pr_dbg("MomentaryButton: %s\n", control_name_str.c_str());
+
+                            RotoControl::set_switch_control_config(
+                                0, // setup_index
+                                next_midi_roto_switch_index_,
+                                ControlMode::CC_7BIT, 
+                                k.midi_chan == 0 ? 1 : k.midi_chan, 
+                                k.cc_num(),
+                                0, // nrpn_address
+                                0, // min_val_u16
+                                1, // max_val_u16
+                                control_name_str.c_str(),
+                                0, // color_scheme
+                                0x00, // led_on_color
+                                0x01, // led_off_color
+                                HapticMode::PUSH,
+                                2, // haptic_steps
+                                nullptr // step_names_ptr
+                            );
+                            next_midi_roto_switch_index_++;
+                        },
+
+                        [&](MomentaryButtonLight const &button_el) {
+                            std::string_view control_name_sv = button_el.short_name;
+                            if (control_name_sv.empty()) control_name_sv = button_el.long_name;
+                            
+                            std::string control_name_str;
+                            if (control_name_sv.empty()) {
+                                control_name_str = "Unnamed MIDI";
+                            } else {
+                                control_name_str = control_name_sv.length() > 12 ? 
+                                    std::string(control_name_sv.substr(0, 12)) : 
+                                    std::string(control_name_sv);
+                            }
+                            control_name_str.resize(13, '\0');
+
+                            pr_dbg("MomentaryButtonLight: %s\n", control_name_str.c_str());
+
+                            RotoControl::set_switch_control_config(
+                                0, // setup_index
+                                next_midi_roto_switch_index_,
+                                ControlMode::CC_7BIT, 
+                                k.midi_chan == 0 ? 1 : k.midi_chan, 
+                                k.cc_num(),
+                                0, // nrpn_address
+                                0, // min_val_u16
+                                1, // max_val_u16
+                                control_name_str.c_str(),
+                                0, // color_scheme
+                                0x00, // led_on_color
+                                0x01, // led_off_color
+                                HapticMode::PUSH,
+                                2, // haptic_steps
+                                nullptr // step_names_ptr
+                            );
+                            next_midi_roto_switch_index_++;
+                        },
+
+                        [&](MomentaryButtonRGB const &button_el) {
+                            std::string_view control_name_sv = button_el.short_name;
+                            if (control_name_sv.empty()) control_name_sv = button_el.long_name;
+                            
+                            std::string control_name_str;
+                            if (control_name_sv.empty()) {
+                                control_name_str = "Unnamed MIDI";
+                            } else {
+                                control_name_str = control_name_sv.length() > 12 ? 
+                                    std::string(control_name_sv.substr(0, 12)) : 
+                                    std::string(control_name_sv);
+                            }
+                            control_name_str.resize(13, '\0');
+
+                            pr_dbg("MomentaryButtonRGB: %s\n", control_name_str.c_str());
+
+                            RotoControl::set_switch_control_config(
+                                0, // setup_index
+                                next_midi_roto_switch_index_,
+                                ControlMode::CC_7BIT, 
+                                k.midi_chan == 0 ? 1 : k.midi_chan, 
+                                k.cc_num(),
+                                0, // nrpn_address
+                                0, // min_val_u16
+                                1, // max_val_u16
+                                control_name_str.c_str(),
+                                0, // color_scheme
+                                0x00, // led_on_color
+                                0x01, // led_off_color
+                                HapticMode::PUSH,
+                                2, // haptic_steps
+                                nullptr // step_names_ptr
+                            );
+                            next_midi_roto_switch_index_++;
+                        },
+
+                        [&](LatchingButton const &button_el) {
+                            std::string_view control_name_sv = button_el.short_name;
+                            if (control_name_sv.empty()) control_name_sv = button_el.long_name;
+                            
+                            std::string control_name_str;
+                            if (control_name_sv.empty()) {
+                                control_name_str = "Unnamed MIDI";
+                            } else {
+                                control_name_str = control_name_sv.length() > 12 ? 
+                                    std::string(control_name_sv.substr(0, 12)) : 
+                                    std::string(control_name_sv);
+                            }
+                            control_name_str.resize(13, '\0');
+
+                            pr_dbg("LatchingButton: %s\n", control_name_str.c_str());
+
+                            RotoControl::set_switch_control_config(
+                                0, // setup_index
+                                next_midi_roto_switch_index_,
+                                ControlMode::CC_7BIT, 
+                                k.midi_chan == 0 ? 1 : k.midi_chan, 
+                                k.cc_num(),
+                                0, // nrpn_address
+                                0, // min_val_u16
+                                1, // max_val_u16
+                                control_name_str.c_str(),
+                                0, // color_scheme
+                                0x00, // led_on_color
+                                0x01, // led_off_color
+                                HapticMode::KNOB_N_STEP,
+                                2, // haptic_steps
+                                nullptr // step_names_ptr
+                            );
+                            next_midi_roto_switch_index_++;
+                        },
+
+                        [&](auto const &) {
+                            // Default case for unhandled types
+                            pr_warn("RotoControl: Encountered unhandled element type for param_id %u", k.param_id);
                         }
                     }, element_variant);
                     break; 

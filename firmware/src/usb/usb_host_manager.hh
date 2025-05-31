@@ -26,6 +26,7 @@ private:
 	PreferredClass preferred_class = PreferredClass::MIDI;
 	static inline bool did_init = false;
 	static inline unsigned inflight_cdc_tx_count = 0;
+	static inline unsigned process_iteration_count = 0;
 
 	// For access in C-style callback:
 	static inline MidiHost *_midihost_instance;
@@ -110,7 +111,13 @@ public:
 
 	void process() {
 		USBH_Process(&usbhost);
-		transmit_cdc_buffer();
+		
+		// Only transmit CDC buffer every 5 iterations
+		process_iteration_count++;
+		if (process_iteration_count >= 5) {
+			transmit_cdc_buffer();
+			process_iteration_count = 0;
+		}
 	}
 
 	void transmit_cdc_buffer() {
