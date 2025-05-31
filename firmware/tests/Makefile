@@ -29,6 +29,7 @@ TEST_SOURCES += tests/resampler_tests.cc
 TEST_SOURCES += vcv_plugin/export/src/resampler.cc
 TEST_SOURCES += tests/stubs/plugin_module.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
+TEST_SOURCES += src/core_a7/rotocontrol.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
@@ -46,6 +47,7 @@ CXXFLAGS = 	-Wall \
 			-Ilib/cpputil \
 			-Ilib/patch-serial \
 			-Ilib/patch-serial/ryml \
+			-Ilib/patch-serial/ryml/rapidyaml/src \
 			-Ilib/CoreModules \
 			-Imetamodule-plugin-sdk/metamodule-core-interface \
 			-Imetamodule-plugin-sdk/metamodule-rack-interface/dep/include \

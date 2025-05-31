@@ -4,6 +4,7 @@
 #include "dynload/plugin_manager.hh"
 #include "user_settings/plugin_preload_settings.hh"
 #include "util/version_tools.hh"
+#include <optional>
 
 namespace MetaModule
 {

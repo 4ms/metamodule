@@ -183,6 +183,23 @@ struct SimulatorFileStorageComm {
 					pr_info("Reset to factory patches = no action. (simulator default patches are read-only)\n");
 				} break;
 
+				case RequestPatchFileInfo: {
+					reply = {PatchFileInfoFailed};
+
+					if (msg.vol_id == Volume::SDCard) {
+						reply.length = storage.sd_hostfs.get_file_size(msg.filename);
+						reply.timestamp = storage.sd_hostfs.get_file_timestamp(msg.filename);
+						reply.message_type = PatchFileInfoSuccess;
+					}
+
+					if (msg.vol_id == Volume::NorFlash) {
+						reply.length = storage.flash_hostfs.get_file_size(msg.filename);
+						reply.timestamp = storage.flash_hostfs.get_file_timestamp(msg.filename);
+						reply.message_type = PatchFileInfoSuccess;
+					}
+
+				} break;
+
 				case RequestFileInfo: {
 					reply = {FileInfoFailed};
 

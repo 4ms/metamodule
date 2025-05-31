@@ -24,7 +24,6 @@ struct Module::Internal {
 
 Module::Module()
 	: internal{new Internal} {
-	onReset();
 }
 
 Module::~Module() {

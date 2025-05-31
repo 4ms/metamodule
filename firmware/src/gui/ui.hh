@@ -1,5 +1,6 @@
 #pragma once
 #include "debug.hh"
+#include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "gui/notify/notification.hh"
@@ -101,6 +102,45 @@ public:
 
 	ParamWatcher &watched_params() {
 		return params.param_watcher;
+	}
+	
+	bool preload_all_plugins() {
+		plugin_manager.start_loading_plugin_list();
+
+		while (true) {
+			auto result = plugin_manager.process_loading();
+
+			if (result.state == PluginFileLoader::State::GotList) {
+				break;
+			}
+
+			if (result.state == PluginFileLoader::State::Error) {
+				return false;
+			}
+		}
+
+		auto list = plugin_manager.found_plugin_list();
+
+		for (auto i = 0u; i < list->size(); ++i) {
+			plugin_manager.load_plugin(i);
+			auto load = true;
+			while (load) {
+				switch (plugin_manager.process_loading().state) {
+					using enum PluginFileLoader::State;
+					case Success:
+						load = false;
+						break;
+					case RamDiskFull:
+					case InvalidPlugin:
+					case Error:
+						return false;
+					default:
+						continue;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	void preload_plugins() {

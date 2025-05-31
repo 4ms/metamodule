@@ -237,12 +237,25 @@ public:
 			return result;
 		}
 
+		if (message.message_type == RequestPatchFileInfo) {
+			IntercoreStorageMessage result{.message_type = PatchFileInfoFailed};
+
+			if (auto *patchfile = patch_list_helper_.find_patchfileinfo(message.vol_id, message.filename)) {
+				result.timestamp = patchfile->timestamp;
+				result.length = patchfile->filesize;
+				result.message_type = PatchFileInfoSuccess;
+			}
+
+			return result;
+		}
+
 		if (message.message_type == RequestFileInfo) {
 			IntercoreStorageMessage result{.message_type = FileInfoFailed};
 
-			if (auto *patchfile = patch_list_helper_.find_fileinfo(message.vol_id, message.filename)) {
-				result.timestamp = patchfile->timestamp;
-				result.length = patchfile->filesize;
+			auto [filesize, timestamp] = get_filesize_timestamp(message.vol_id, message.filename);
+			if (timestamp > 0 || filesize > 0) {
+				result.timestamp = timestamp;
+				result.length = filesize;
 				result.message_type = FileInfoSuccess;
 			}
 
@@ -332,8 +345,7 @@ public:
 	}
 
 private:
-	// returns timestamp
-	uint32_t add_or_replace_file(Volume vol, std::string_view filename, std::string_view header) {
+	std::pair<uint32_t, uint32_t> get_filesize_timestamp(Volume vol, std::string_view filename) {
 		uint32_t filesize{};
 		uint32_t timestamp{};
 
@@ -349,6 +361,13 @@ private:
 			filesize = norflash_.get_file_size(filename);
 			timestamp = norflash_.get_file_timestamp(filename);
 		}
+
+		return {filesize, timestamp};
+	}
+
+	// returns timestamp
+	uint32_t add_or_replace_file(Volume vol, std::string_view filename, std::string_view header) {
+		auto [filesize, timestamp] = get_filesize_timestamp(vol, filename);
 
 		auto patchname = PatchFileIO::extract_patch_name(header);
 		patch_list_helper_.add_file(vol, filename, patchname, filesize, timestamp);

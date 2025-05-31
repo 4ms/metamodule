@@ -45,7 +45,8 @@ int main() {
 	// USB
 	UsbManager usb{{SharedMemoryS::ptrs.console_a7_0_buff,
 					SharedMemoryS::ptrs.console_a7_1_buff,
-					SharedMemoryS::ptrs.console_m4_buff}};
+					SharedMemoryS::ptrs.console_m4_buff},
+					SharedMemoryS::ptrs.console_cdc_buff};
 	usb.start();
 
 	// SD Card
@@ -73,9 +74,13 @@ int main() {
 	uint32_t startup_delay = 0x10000;
 	while (startup_delay--) {
 		controls.process();
+		usb.process();
+		sd.process();
 	}
 
 	pr_info("M4 initialized\n");
+
+	HAL_Delay(100);
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
 	while (true) {
