@@ -172,9 +172,12 @@ float renderText(
 	}
 
 	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName), context->px_per_3U);
+	lv_font_size = std::min(lv_font_size, 48);
 	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
-	if (!font)
+	if (!font) {
+		pr_err("Could not load font %s, sz %u\n", fs->fontName, lv_font_size);
 		return 0;
+	}
 
 	// Create or find existing label (match on X,Y pos and alignment)
 	lv_obj_t *label{};
@@ -205,8 +208,8 @@ float renderText(
 			pr_dbg("Text xform %f, %f\n", fs->xform[4], fs->xform[5]);
 		}
 
-		if (!(fs->textAlign & NVG_ALIGN_TOP))
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+		// if (!(fs->textAlign & NVG_ALIGN_TOP))
+		// 	lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
 		label = lv_label_create(canvas);
 		lv_obj_set_pos(label, lv_x, align_lv_y);
