@@ -71,7 +71,7 @@ void RotoControl::set_control_config(
 	
 	// Calculate command data length: 0x001D base + (HS * 0x0D) for step names
 	uint16_t data_length = 0x001D;
-	if (haptic_mode == HapticMode::KNOB_N_STEP) {
+	if (haptic_steps > 0) {
 		data_length += haptic_steps * 0x0D;
 	}
 	
@@ -137,7 +137,7 @@ void RotoControl::set_control_config(
 	command_segment[pos++] = haptic_steps;
 	
 	// Step names (for KNOB_N_STEP or switch with haptic strings)
-	if (haptic_mode == HapticMode::KNOB_N_STEP) {
+	if (haptic_steps > 0) {
 		for (int step = 0; step < haptic_steps; ++step) {
 			for (int i = 0; i < 13; ++i) {
 				if (step_names != nullptr) {

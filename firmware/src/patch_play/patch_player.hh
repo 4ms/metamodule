@@ -1413,7 +1413,6 @@ inline void PatchPlayer::update_all_roto_controls() {
                             const char* const* step_names_ptr = nullptr;
                             std::vector<std::string> dummy_step_names_storage;
                             std::vector<const char*> dummy_step_names_ptrs;
-							bool is_toggle_switch = false;
 
                             if constexpr (std::is_base_of_v<Knob, T>) {
                                 const Knob &knob_el = arg;
@@ -1432,7 +1431,6 @@ inline void PatchPlayer::update_all_roto_controls() {
                                 max_val_u16 = switch_el.num_pos > 0 ? switch_el.num_pos - 1 : 0;
                                 haptic_mode = HapticMode::KNOB_N_STEP;
                                 haptic_steps = switch_el.num_pos > 0 ? switch_el.num_pos : 1;
-								is_toggle_switch = true;
                             } else if constexpr (std::is_base_of_v<Button, T>) {
 								pr_dbg("Button: %s\n", control_name_str.c_str());
                                 min_val_u16 = 0;
@@ -1498,13 +1496,13 @@ inline void PatchPlayer::update_all_roto_controls() {
 									k.midi_chan == 0 ? 1 : k.midi_chan, 
 									k.cc_num(), // RotoControl's parameter index
 									0, // nrpn_address
-									min_val_u16,
-									max_val_u16,
+									0,
+									127,
 									control_name_ptr,
 									0, // color_scheme
 									0x00, // led_on_color
 									0x01, // led_off_color
-									is_toggle_switch ? HapticMode::KNOB_N_STEP : HapticMode::PUSH, // haptic_mode for switch
+									haptic_mode,
 									haptic_steps,
 									step_names_ptr
 								);
