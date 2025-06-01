@@ -764,46 +764,42 @@ private:
 			pr_err("Error completing cable\n");
 	}
 
-	void click_normal_element(unsigned drawn_idx) {
-		auto &drawn_element = drawn_elements[drawn_idx];
+	void click_altparam_action(DrawnElement const &drawn_element) {
 		args.element_indices = drawn_element.gui_element.idx;
 
-		if (std::get_if<AltParamAction>(&drawn_element.element)) {
-			if (is_patch_playloaded) {
-				// Set the param high now, and make a pending request to set it low on the next update()
-				send_param_value(1, drawn_element.gui_element);
-				pending_action_param_clear = drawn_element.gui_element;
-			}
-		}
-
-		if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
-			PageArguments nextargs = {
-				.patch_loc_hash = args.patch_loc_hash,
-				.module_id = this_module_id,
-				.element_indices = drawn_element.gui_element.idx,
-				.element_mm = std::pair<float, float>{el->width_mm, el->height_mm},
-			};
-			page_list.update_state(PageId::ModuleView, nextargs);
-			page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
-			roller_hover.hide();
-
-		} else {
-			//TODO: sometimes open manual popup immediately. (alt params, performance mode)
-			// sometimes keep it hidden, but act as if it were open (full screen mode, performance mode with buttons)
-			if (full_screen_mode) {
-				//...
-			}
-			mode = ViewMode::Mapping;
-			args.detail_mode = true;
-			lv_hide(ui_ElementRollerPanel);
-			roller_hover.hide();
-
-			mapping_pane.show(drawn_element);
+		if (is_patch_playloaded) {
+			// Set the param high now, and make a pending request to set it low on the next update()
+			send_param_value(1, drawn_element.gui_element);
+			pending_action_param_clear = drawn_element.gui_element;
 		}
 	}
 
+	void click_graphic_display(DrawnElement const &drawn_element, DynamicGraphicDisplay const *el) {
+		args.element_indices = drawn_element.gui_element.idx;
+
+		PageArguments nextargs = {
+			.patch_loc_hash = args.patch_loc_hash,
+			.module_id = this_module_id,
+			.element_indices = drawn_element.gui_element.idx,
+			.element_mm = std::pair<float, float>{el->width_mm, el->height_mm},
+		};
+		page_list.update_state(PageId::ModuleView, nextargs);
+		page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
+		roller_hover.hide();
+	}
+
+	void click_normal_element(DrawnElement const &drawn_element) {
+		args.element_indices = drawn_element.gui_element.idx;
+
+		mode = ViewMode::Mapping;
+		args.detail_mode = true;
+		lv_hide(ui_ElementRollerPanel);
+		roller_hover.hide();
+
+		mapping_pane.show(drawn_element);
+	}
+
 	void show_context_menu() {
-		// Ignore clicking on Context Menu when in full_screen_mode
 		if (!full_screen_mode) {
 			mode = ViewMode::ModuleContextMenu;
 			lv_hide(ui_ElementRoller);
@@ -818,36 +814,26 @@ private:
 
 		if (auto drawn_idx = page->get_drawn_idx(roller_idx)) {
 
+			auto &drawn_element = page->drawn_elements[*drawn_idx];
+
 			if (page->gui_state.new_cable) {
 				page->click_cable_destination(*drawn_idx);
+
+			} else if (std::get_if<AltParamAction>(&drawn_element.element)) {
+				page->click_altparam_action(drawn_element);
+
+			} else if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
+				page->click_graphic_display(drawn_element, el);
+
+				// } else if (page->full_screen_mode) {
+				// TODO: sometimes open manual popup immediately. (alt params, performance mode)
+				// sometimes keep it hidden, but act as if it were open (full screen mode, performance mode with buttons)
+
 			} else {
-
-				auto &drawn_element = page->drawn_elements[*drawn_idx];
-
-				if (std::get_if<AltParamAction>(&drawn_element.element)) {
-					if (page->is_patch_playloaded) {
-						// Set the param high now, and make a pending request to set it low on the next update()
-						page->send_param_value(1, drawn_element.gui_element);
-						page->pending_action_param_clear = drawn_element.gui_element;
-					}
-
-				} else {
-					page->mode = ViewMode::Mapping;
-					page->args.detail_mode = true;
-					lv_hide(ui_ElementRollerPanel);
-					page->roller_hover.hide();
-					page->mapping_pane.show(drawn_element);
-				}
-
-				if (page->full_screen_mode) {
-					// TODO: if fullscreen, then open Adjust pop up directly
-					// But keep it hidden?
-					// If it's a button, the just immediately toggle state
-					// page->mapping_pane.control_popup.show(page->drawn_element);
-				}
+				page->click_normal_element(drawn_element);
 			}
 
-			//Not an element: Is it the Extra Menu?
+			//Not an element: Is it the Context Menu?
 		} else if (roller_idx < page->roller_drawn_el_idx.size()) {
 			if (page->roller_drawn_el_idx[roller_idx] == ContextMenuTag) {
 				page->show_context_menu();
