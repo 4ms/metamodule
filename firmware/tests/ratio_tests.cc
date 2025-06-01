@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <utility>
 
