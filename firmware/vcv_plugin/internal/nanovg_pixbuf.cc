@@ -172,7 +172,7 @@ float renderText(
 	}
 
 	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName), context->px_per_3U);
-	lv_font_size = std::min<int>(lv_font_size, 48);
+	lv_font_size = std::min<int>(lv_font_size, 60);
 	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
 	if (!font) {
 		pr_err("Could not load font %s, sz %u\n", fs->fontName, lv_font_size);
