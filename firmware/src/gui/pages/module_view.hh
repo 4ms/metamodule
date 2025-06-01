@@ -398,6 +398,7 @@ struct ModuleViewPage : PageBase {
 
 		// Patch file changed via wifi/disk
 		poll_patch_file_changed();
+
 		if (gui_state.force_redraw_patch || gui_state.view_patch_file_changed) {
 
 			abort_cable(gui_state, notify_queue);
@@ -766,6 +767,14 @@ private:
 	void click_normal_element(unsigned drawn_idx) {
 		auto &drawn_element = drawn_elements[drawn_idx];
 		args.element_indices = drawn_element.gui_element.idx;
+
+		if (std::get_if<AltParamAction>(&drawn_element.element)) {
+			if (is_patch_playloaded) {
+				// Set the param high now, and make a pending request to set it low on the next update()
+				send_param_value(1, drawn_element.gui_element);
+				pending_action_param_clear = drawn_element.gui_element;
+			}
+		}
 
 		if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
 			PageArguments nextargs = {
