@@ -1,12 +1,9 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
-#include "debug.hh"
 #include "gui/elements/context.hh"
-#include "gui/helpers/lv_helpers.hh"
 #include "gui/styles.hh"
 #include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
-#include "util/overloaded.hh"
 #include <cmath>
 
 namespace MetaModule

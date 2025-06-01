@@ -15,6 +15,7 @@ struct ModuleWidget::Internal {
 	std::unique_ptr<MetaModule::ModuleWidgetAdaptor> adaptor;
 	std::vector<ModuleWidget::WidgetElement> drawable_widgets;
 
+	unsigned first_graphic_idx = 0;
 	unsigned graphic_display_idx = 200;
 };
 
@@ -56,6 +57,7 @@ void ModuleWidget::setModule(engine::Module *m) {
 	this->module = m;
 
 	internal->graphic_display_idx = std::max(m->lights.size(), m->lightInfos.size());
+	internal->first_graphic_idx = internal->graphic_display_idx;
 
 	if (model && model->slug.size())
 		pr_trace("setModule for %s\n", model->slug.c_str());
@@ -194,7 +196,7 @@ void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
 			internal->adaptor->addLight(widget);
 		} else {
 			auto box = widget->box;
-			internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
+			internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, internal->first_graphic_idx, widget);
 			internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
 			internal->graphic_display_idx++;
 
@@ -259,7 +261,7 @@ void ModuleWidget::addChild(Widget *widget) {
 	log_widget("addChild(unknown Widget)", widget);
 	Widget::addChild(widget);
 
-	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, widget);
+	internal->adaptor->addGraphicDisplay(internal->graphic_display_idx, internal->first_graphic_idx, widget);
 	internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
 	internal->graphic_display_idx++;
 

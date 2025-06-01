@@ -217,7 +217,7 @@ struct ModuleWidgetAdaptor {
 		log_widget("ModuleWidget:", graphic_display_idx, mw, element);
 	}
 
-	void addGraphicDisplay(int graphic_display_idx, rack::widget::Widget *widget) {
+	void addGraphicDisplay(int graphic_display_idx, int first_graphic_idx, rack::widget::Widget *widget) {
 		if (widget) {
 			Element element = DynamicGraphicDisplay{};
 
@@ -238,7 +238,7 @@ struct ModuleWidgetAdaptor {
 				widget->box.size.x = widget->parent->box.size.x - widget->box.pos.x;
 			}
 
-			auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx));
+			auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx - first_graphic_idx));
 			assign_element_fields(widget, name, element);
 
 			ElementCount::Indices indices = clear();

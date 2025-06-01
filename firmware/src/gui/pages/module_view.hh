@@ -574,6 +574,8 @@ private:
 			lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 			lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
 			lv_obj_set_size(b, std::round(x_size), std::round(y_size));
+			lv_obj_refr_size(b);
+			lv_obj_refr_pos(b);
 		} else {
 			lv_obj_set_pos(b, 0, 0);
 			lv_obj_set_size(b, 0, 0);
