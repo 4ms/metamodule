@@ -748,6 +748,7 @@ private:
 
 	void click_normal_element(unsigned drawn_idx) {
 		auto &drawn_element = drawn_elements[drawn_idx];
+		args.element_indices = drawn_element.gui_element.idx;
 
 		if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
 			PageArguments nextargs = {
@@ -756,6 +757,7 @@ private:
 				.element_indices = drawn_element.gui_element.idx,
 				.element_mm = std::pair<float, float>{el->width_mm, el->height_mm},
 			};
+			page_list.update_state(PageId::ModuleView, nextargs);
 			page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
 			roller_hover.hide();
 
