@@ -962,7 +962,7 @@ private:
 
 	std::optional<GuiElement> pending_action_param_clear{};
 
-	enum { ExtraMenuTag = -2 };
+	enum { ContextMenuTag = -2 };
 };
 
 } // namespace MetaModule
