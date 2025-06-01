@@ -187,7 +187,7 @@ struct ModuleWidgetAdaptor {
 
 #endif
 
-		Element element = DynamicGraphicDisplay{};
+		Element element = DynamicGraphicDisplay{.full_module = true};
 
 		if (has_custom_draw) {
 			// Use a blank name for the entire module widget so that it doesn't show up in the element roller

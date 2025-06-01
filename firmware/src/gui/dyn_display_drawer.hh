@@ -27,28 +27,22 @@ struct DynamicDisplayDrawer {
 				continue;
 
 			// Copy useful data from the DynamicGraphicDisplays
-			std::visit(overloaded{
-						   [](BaseElement const &e) {},
-						   [&drawn_el, this](DynamicGraphicDisplay const &e) {
-							   displays.push_back({.id = drawn_el.gui_element.idx.light_idx,
-												   .width_mm = e.width_mm,
-												   .height_mm = e.height_mm,
-												   .lv_canvas = drawn_el.gui_element.obj});
-						   },
-					   },
-					   drawn_el.element);
+			if (auto *graphic = std::get_if<DynamicGraphicDisplay>(&drawn_el.element)) {
+				add_display(drawn_el.gui_element.idx.light_idx,
+							graphic->width_mm,
+							graphic->height_mm,
+							drawn_el.gui_element.obj);
+			}
 		}
 	}
 
-	DynamicDisplayDrawer(PatchPlayLoader &patch_playloader,
-						 unsigned module_id,
-						 unsigned light_idx,
-						 float width,
-						 float height,
-						 lv_obj_t *canvas)
+	DynamicDisplayDrawer(PatchPlayLoader &patch_playloader, unsigned module_id)
 		: patch_playloader{patch_playloader}
 		, module_id{module_id} {
+	}
 
+	void add_display(unsigned light_idx, float width, float height, lv_obj_t *canvas) {
+		pr_trace("Add display light_idx %u, w %f h %f, canvas %p\n", light_idx, width, height, canvas);
 		displays.push_back({.id = light_idx, .width_mm = width, .height_mm = height, .lv_canvas = canvas});
 	}
 

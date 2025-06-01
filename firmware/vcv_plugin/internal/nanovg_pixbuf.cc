@@ -172,7 +172,7 @@ float renderText(
 	}
 
 	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName), context->px_per_3U);
-	lv_font_size = std::min(lv_font_size, 48);
+	lv_font_size = std::min<int>(lv_font_size, 48);
 	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
 	if (!font) {
 		pr_err("Could not load font %s, sz %u\n", fs->fontName, lv_font_size);
@@ -231,7 +231,9 @@ float renderText(
 		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
-		pr_trace("Creating label at %d,%d a:0x%x sz:%g sp:%d\n", lv_x, lv_y, fs->textAlign, fs->fontSize, letter_space);
+		pr_dbg(
+			"Creating label at %d,%d a:0x%x sz:%g (lv: %u)\n", lv_x, lv_y, fs->textAlign, fs->fontSize, lv_font_size);
+
 		context->labels.push_back({(float)lv_x, (float)lv_y, fs->textAlign, label, context->draw_frame_ctr});
 	}
 

@@ -26,6 +26,10 @@ struct FullscreenGraphicPage : PageBase {
 		lv_obj_set_style_bg_opa(canvas, LV_OPA_100, LV_PART_MAIN);
 
 		init_bg(screen);
+
+		base_canvas = lv_canvas_create(screen);
+		lv_obj_set_size(base_canvas, 1, 1);
+		lv_show(base_canvas, false);
 	}
 
 	void prepare_focus() final {
@@ -60,8 +64,12 @@ struct FullscreenGraphicPage : PageBase {
 		lv_obj_refr_size(canvas);
 		lv_obj_update_layout(canvas);
 
-		dyn_drawer = std::make_unique<DynamicDisplayDrawer>(
-			patch_playloader, *args.module_id, args.element_indices->light_idx, width_mm, height_mm, canvas);
+		dyn_drawer = std::make_unique<DynamicDisplayDrawer>(patch_playloader, *args.module_id);
+
+		find_base_module(*args.module_id);
+
+		dyn_drawer->add_display(args.element_indices->light_idx, width_mm, height_mm, canvas);
+
 		dynamic_elements_prepared = false;
 	}
 
@@ -101,8 +109,28 @@ private:
 		}
 	}
 
+	void find_base_module(unsigned module_id) {
+		if (patch_is_playing(args.patch_loc_hash)) {
+			auto patch = patches.get_playing_patch();
+			auto slug = module_id < patch->module_slugs.size() ? patch->module_slugs[module_id] : "";
+
+			auto const &info = ModuleFactory::getModuleInfo(slug);
+
+			for (auto i = 0u; auto const &el : info.elements) {
+				if (auto *graphic = std::get_if<DynamicGraphicDisplay>(&el)) {
+					if (graphic->full_module) {
+						dyn_drawer->add_display(info.indices[i].light_idx, 0, 0, base_canvas);
+					}
+				}
+				i++;
+			}
+		}
+	}
+
 	lv_obj_t *screen;
 	lv_obj_t *canvas;
+
+	lv_obj_t *base_canvas;
 
 	std::unique_ptr<DynamicDisplayDrawer> dyn_drawer{};
 
