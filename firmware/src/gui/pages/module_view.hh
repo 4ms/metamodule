@@ -315,7 +315,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {
-		if (std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
+		if (std::get_if<DynamicTextDisplay>(&drawn_element.element)) {
 			params.text_displays.start_watching_display(this_module_id, drawn_element.gui_element.idx.light_idx);
 		}
 	}
