@@ -112,9 +112,9 @@ public:
 	void process() {
 		USBH_Process(&usbhost);
 		
-		// Only transmit CDC buffer every 5 iterations
+		// Only transmit CDC buffer every 10 iterations
 		process_iteration_count++;
-		if (process_iteration_count >= 5) {
+		if (process_iteration_count >= 10) {
 			transmit_cdc_buffer();
 			process_iteration_count = 0;
 		}
