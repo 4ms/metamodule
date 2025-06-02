@@ -95,7 +95,7 @@ struct ModuleDrawer {
 		unsigned i = 0;
 		for (const auto &element : moduleinfo.elements) {
 			auto &indices = moduleinfo.indices[i];
-			auto element_ctx = std::visit(
+			auto gui_element = std::visit(
 				[height = height, &patch, &indices, module_idx, canvas, active_knob_set](auto &el) -> GuiElement {
 					auto obj = ElementDrawer::draw_element(el, canvas, height);
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, indices);
@@ -104,13 +104,11 @@ struct ModuleDrawer {
 					auto count = ElementCount::count(el);
 					auto el_idx = ElementCount::mark_unused_indices(indices, count);
 
-					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, el_idx, mapping_id};
-
-					return element_ctx;
+					return GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, el_idx, mapping_id};
 				},
 				element);
 			i++;
-			drawn_elements.push_back({element_ctx, element});
+			drawn_elements.push_back({gui_element, element});
 		}
 	}
 

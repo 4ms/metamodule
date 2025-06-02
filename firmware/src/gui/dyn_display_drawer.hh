@@ -1,11 +1,9 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
-#include "debug.hh"
 #include "gui/elements/context.hh"
 #include "gui/styles.hh"
 #include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
-#include "util/overloaded.hh"
 #include <cmath>
 
 namespace MetaModule
@@ -26,26 +24,34 @@ struct DynamicDisplayDrawer {
 				continue;
 
 			// Copy useful data from the DynamicGraphicDisplays
-			std::visit(overloaded{
-						   [](BaseElement const &e) {},
-						   [&drawn_el, this](DynamicGraphicDisplay const &e) {
-							   displays.push_back({.id = drawn_el.gui_element.idx.light_idx,
-												   .element = e,
-												   .lv_canvas = drawn_el.gui_element.obj});
-						   },
-					   },
-					   drawn_el.element);
+			if (auto *graphic = std::get_if<DynamicGraphicDisplay>(&drawn_el.element)) {
+				add_display(drawn_el.gui_element.idx.light_idx,
+							graphic->width_mm,
+							graphic->height_mm,
+							drawn_el.gui_element.obj);
+			}
 		}
 	}
 
-	void prepare(lv_obj_t *module_canvas) {
-		parent_canvas = module_canvas;
+	DynamicDisplayDrawer(PatchPlayLoader &patch_playloader, unsigned module_id)
+		: patch_playloader{patch_playloader}
+		, module_id{module_id} {
+	}
+
+	void add_display(unsigned light_idx, float width, float height, lv_obj_t *canvas) {
+		pr_trace("Add display light_idx %u, w %f h %f, canvas %p\n", light_idx, width, height, canvas);
+		displays.push_back({.id = light_idx, .width_mm = width, .height_mm = height, .lv_canvas = canvas});
+	}
+
+	// TODO: do we need to proivde the parent object?
+	void prepare(lv_obj_t *parent_obj) {
+		parent_canvas = parent_obj;
 
 		for (auto &disp : displays) {
 			// If size is 0, then don't make a buffer for it
 			// This is done intentionally by rack::Module to create non-drawable elements
 			// that need to be stepped
-			if (disp.element.width_mm == 0 || disp.element.height_mm == 0) {
+			if (disp.width_mm == 0 || disp.height_mm == 0) {
 				pr_trace("DynDraw::prepare() Graphic display %u has zero size, will not draw\n", disp.id);
 				disp.fullcolor_buffer.clear();
 				disp.lv_canvas = nullptr;
@@ -156,7 +162,8 @@ private:
 
 	struct Display {
 		unsigned id{};
-		DynamicGraphicDisplay element{};
+		float width_mm;
+		float height_mm;
 		lv_obj_t *lv_canvas{};
 		std::vector<char> lv_buffer;
 		std::vector<uint32_t> fullcolor_buffer;

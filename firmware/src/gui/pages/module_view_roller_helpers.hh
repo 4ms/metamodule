@@ -19,9 +19,7 @@ inline bool is_light_only(DrawnElement const &drawn_el) {
 											(gui_el.count.num_outputs == 0) && (gui_el.count.num_inputs == 0);
 								 },
 								 [](DynamicGraphicDisplay const &el) {
-									 return true;
-									 // TODO: display these so we can click them to zoom in
-									 // return false;
+									 return false;
 								 }},
 					  drawn_el.element);
 }
@@ -56,7 +54,10 @@ inline bool should_skip_for_cable_mode(std::optional<GuiState::CableBeginning> c
 
 inline bool append_header(std::string &opts, ElementCount::Counts last_type, ElementCount::Counts this_type) {
 	if (last_type.num_params == 0 && this_type.num_params > 0) {
-		opts += Gui::orange_text("Params:") + "\n";
+		if (last_type.num_outputs || last_type.num_inputs || last_type.num_lights)
+			opts += Gui::orange_text("Options:") + "\n";
+		else
+			opts += Gui::orange_text("Params:") + "\n";
 		return true;
 
 	} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
@@ -66,7 +67,7 @@ inline bool append_header(std::string &opts, ElementCount::Counts last_type, Ele
 		return true;
 
 	} else if (last_type.num_lights == 0 && this_type.num_lights > 0 && this_type.num_params == 0) {
-		opts += Gui::orange_text("Lights:") + "\n";
+		opts += Gui::orange_text("Displays:") + "\n";
 		return true;
 	} else {
 		return false;

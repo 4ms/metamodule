@@ -187,7 +187,7 @@ struct ModuleWidgetAdaptor {
 
 #endif
 
-		Element element = DynamicGraphicDisplay{};
+		Element element = DynamicGraphicDisplay{.full_module = true};
 
 		if (has_custom_draw) {
 			// Use a blank name for the entire module widget so that it doesn't show up in the element roller
@@ -217,7 +217,7 @@ struct ModuleWidgetAdaptor {
 		log_widget("ModuleWidget:", graphic_display_idx, mw, element);
 	}
 
-	void addGraphicDisplay(int graphic_display_idx, rack::widget::Widget *widget) {
+	void addGraphicDisplay(int graphic_display_idx, int first_graphic_idx, rack::widget::Widget *widget) {
 		if (widget) {
 			Element element = DynamicGraphicDisplay{};
 
@@ -238,7 +238,7 @@ struct ModuleWidgetAdaptor {
 				widget->box.size.x = widget->parent->box.size.x - widget->box.pos.x;
 			}
 
-			auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx));
+			auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx - first_graphic_idx));
 			assign_element_fields(widget, name, element);
 
 			ElementCount::Indices indices = clear();
