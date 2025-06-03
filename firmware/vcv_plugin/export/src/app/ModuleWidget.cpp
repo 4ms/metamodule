@@ -91,10 +91,11 @@ void ModuleWidget::setPanel(app::SvgPanel *newpanel) {
 				pr_err("Error: In ModuleWidget::setPanel, new panel's svg->getSize() != box.size\n");
 
 			if (first_panel) {
-				internal->adaptor->addModuleWidget(internal->graphic_display_idx, this);
-				internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
-				printf("Panel graphic_display_idx %d\n", internal->graphic_display_idx);
-				internal->graphic_display_idx++;
+				if (internal->adaptor->addModuleWidget(internal->graphic_display_idx, this)) {
+					internal->drawable_widgets.push_back({internal->graphic_display_idx, this});
+					pr_trace("Added full-module graphic_display_idx %d\n", internal->graphic_display_idx);
+					internal->graphic_display_idx++;
+				}
 			}
 		}
 	}
