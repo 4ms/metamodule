@@ -21,7 +21,8 @@ enum class PageId {
 	KnobMap,
 	SystemMenu,
 	ModuleList,
-	JackMapView
+	JackMapView,
+	FullscreenGraphic,
 };
 
 struct PageWithArgs {

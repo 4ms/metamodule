@@ -39,6 +39,7 @@ struct Gui {
 
 	// highlight a selected knob, jack, etc on a faceplate
 	static inline lv_style_t panel_highlight_style;
+	static inline lv_style_t panel_large_highlight_style;
 
 	// module selected in patch view
 	static inline lv_style_t selected_module_style;
@@ -273,6 +274,15 @@ struct Gui {
 		lv_style_set_border_opa(&panel_highlight_style, LV_OPA_70);
 		lv_style_set_border_width(&panel_highlight_style, 1);
 		lv_style_set_border_color(&panel_highlight_style, orange_highlight);
+
+		// panel_large_highlight_style
+		lv_style_init(&panel_large_highlight_style);
+		lv_style_set_radius(&panel_large_highlight_style, 4);
+		lv_style_set_bg_color(&panel_large_highlight_style, orange_highlight);
+		lv_style_set_bg_opa(&panel_large_highlight_style, LV_OPA_10);
+		lv_style_set_border_opa(&panel_large_highlight_style, LV_OPA_70);
+		lv_style_set_border_width(&panel_large_highlight_style, 2);
+		lv_style_set_border_color(&panel_large_highlight_style, orange_highlight);
 
 		// selected_module_style
 		lv_style_init(&selected_module_style);

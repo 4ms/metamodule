@@ -246,7 +246,7 @@ struct ModuleViewPage : PageBase {
 				opts += Gui::orange_text("Options:") + "\n";
 				opts += " >>>\n";
 				roller_drawn_el_idx.push_back(-1);
-				roller_drawn_el_idx.push_back(ExtraMenuTag);
+				roller_drawn_el_idx.push_back(ContextMenuTag);
 				roller_idx += 2;
 			}
 		}
@@ -275,8 +275,13 @@ struct ModuleViewPage : PageBase {
 		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
 		if (cur_selected > 0 && cur_selected < button.size()) {
-			if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < button.size())
-				lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < button.size()) {
+				if (lv_obj_get_height(button[idx]) > 100 || lv_obj_get_width(button[idx]) > 100) {
+					lv_obj_add_style(button[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+				} else {
+					lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+				}
+			}
 		} else {
 			pr_err("Current selected is not in range (%d/%zu)\n", cur_selected, button.size());
 		}
@@ -311,15 +316,11 @@ struct ModuleViewPage : PageBase {
 
 	void watch_element(DrawnElement const &drawn_element) {
 		auto gui_el = drawn_element.gui_element;
-		std::visit(overloaded{[&](DynamicTextDisplay const &el) {
-								  	params.text_displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
-							  	},
-							  	[&](auto const &el) {
-									if (gui_el.count.num_params > 0) {
-										params.param_watcher.start_watching_param(this_module_id, gui_el.idx.param_idx);
-									}
-								}},
-				   drawn_element.element);
+		if (std::get_if<DynamicTextDisplay>(&drawn_element.element)) {
+			params.text_displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
+		} else if (gui_el.count.num_params > 0) {
+			params.param_watcher.start_watching_param(this_module_id, gui_el.idx.param_idx);
+		}
 	}
 
 	bool is_creating_map() const {
@@ -424,11 +425,15 @@ struct ModuleViewPage : PageBase {
 			mapping_pane.refresh();
 		}
 
-		if (lv_group_get_focused(group) == ui_ModuleViewActionBut ||
-			lv_group_get_focused(group) == ui_ModuleViewSettingsBut)
-			roller_hover.hide();
-
 		roller_hover.update();
+
+		// Hide the hover text if we are on one of the action buttons
+		if (lv_group_get_focused(group) == ui_ModuleViewActionBut ||
+			lv_group_get_focused(group) == ui_ModuleViewSettingsBut ||
+			lv_group_get_focused(group) == ui_ModuleViewHideBut)
+		{
+			roller_hover.hide();
+		}
 	}
 
 	void redraw_elements() {
@@ -573,6 +578,8 @@ private:
 			lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 			lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
 			lv_obj_set_size(b, std::round(x_size), std::round(y_size));
+			lv_obj_refr_size(b);
+			lv_obj_refr_pos(b);
 		} else {
 			lv_obj_set_pos(b, 0, 0);
 			lv_obj_set_size(b, 0, 0);
@@ -623,7 +630,7 @@ private:
 		auto cur_idx = page->roller_drawn_el_idx[cur_sel];
 
 		// Extra menu:
-		if (cur_idx == ExtraMenuTag) {
+		if (cur_idx == ContextMenuTag) {
 			page->unhighlight_component(prev_sel);
 			page->cur_selected = cur_sel;
 			page->roller_hover.hide();
@@ -671,14 +678,23 @@ private:
 
 	void unhighlight_component(uint32_t prev_sel) {
 		if (auto prev_idx = get_drawn_idx(prev_sel)) {
-			lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			if (lv_obj_get_height(button[*prev_idx]) > 100 || lv_obj_get_width(button[*prev_idx]) > 100) {
+				lv_obj_remove_style(button[*prev_idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+			} else {
+				lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			}
 			lv_event_send(button[*prev_idx], LV_EVENT_REFRESH, nullptr);
 		}
 	}
 
 	void highlight_component(size_t idx) {
 		if (idx < button.size()) {
-			lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+
+			if (lv_obj_get_height(button[idx]) > 100 || lv_obj_get_width(button[idx]) > 100) {
+				lv_obj_add_style(button[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+			} else {
+				lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			}
 			lv_event_send(button[idx], LV_EVENT_REFRESH, nullptr);
 			lv_obj_scroll_to_view(button[idx], LV_ANIM_ON);
 		}
@@ -698,81 +714,100 @@ private:
 		}
 	}
 
+	void click_cable_destination(unsigned drawn_idx) {
+		// Determine id and type of this element
+		std::optional<Jack> this_jack{};
+		ElementType this_jack_type{};
+		auto idx = drawn_elements[drawn_idx].gui_element.idx;
+
+		std::visit(overloaded{[](auto const &) {},
+							  [&](const JackInput &) {
+								  this_jack_type = ElementType::Input;
+								  this_jack = Jack{.module_id = this_module_id, .jack_id = idx.input_idx};
+							  },
+							  [&](const JackOutput &) {
+								  this_jack_type = ElementType::Output;
+								  this_jack = Jack{.module_id = this_module_id, .jack_id = idx.output_idx};
+							  }},
+				   drawn_elements[drawn_idx].element);
+
+		if (this_jack) {
+			make_cable(gui_state.new_cable.value(), patch, module_mods, notify_queue, *this_jack, this_jack_type);
+
+			handle_patch_mods();
+
+			gui_state.new_cable = std::nullopt;
+
+			// Do not show instructions again this session
+			gui_state.already_displayed_cable_instructions = true;
+
+			gui_state.force_redraw_patch = true;
+			PageArguments nextargs = {.patch_loc = args.patch_loc,
+									  .patch_loc_hash = args.patch_loc_hash,
+									  .module_id = args.module_id,
+									  .detail_mode = false};
+			page_list.request_new_page(PageId::PatchView, nextargs);
+			roller_hover.hide();
+		} else
+			pr_err("Error completing cable\n");
+	}
+
+	void click_normal_element(unsigned drawn_idx) {
+		auto &drawn_element = drawn_elements[drawn_idx];
+		args.element_indices = drawn_element.gui_element.idx;
+
+		if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
+			PageArguments nextargs = {
+				.patch_loc_hash = args.patch_loc_hash,
+				.module_id = this_module_id,
+				.element_indices = drawn_element.gui_element.idx,
+				.element_mm = std::pair<float, float>{el->width_mm, el->height_mm},
+			};
+			page_list.update_state(PageId::ModuleView, nextargs);
+			page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
+			roller_hover.hide();
+
+		} else {
+			//TODO: sometimes open manual popup immediately. (alt params, performance mode)
+			// sometimes keep it hidden, but act as if it were open (full screen mode, performance mode with buttons)
+			if (full_screen_mode) {
+				//...
+			}
+			mode = ViewMode::Mapping;
+			args.detail_mode = true;
+			lv_hide(ui_ElementRollerPanel);
+			roller_hover.hide();
+
+			mapping_pane.show(drawn_element);
+		}
+	}
+
+	void show_context_menu() {
+		// Ignore clicking on Context Menu when in full_screen_mode
+		if (!full_screen_mode) {
+			mode = ViewMode::ModuleContextMenu;
+			lv_hide(ui_ElementRoller);
+			roller_hover.hide();
+			module_context_menu.show();
+		}
+	}
+
 	static void roller_click_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		auto roller_idx = page->cur_selected;
 
 		if (auto drawn_idx = page->get_drawn_idx(roller_idx)) {
+
 			if (page->gui_state.new_cable) {
-				// Determine id and type of this element
-				std::optional<Jack> this_jack{};
-				ElementType this_jack_type{};
-				auto idx = page->drawn_elements[*drawn_idx].gui_element.idx;
-
-				std::visit(overloaded{[](auto const &) {},
-									  [&](const JackInput &) {
-										  this_jack_type = ElementType::Input;
-										  this_jack = Jack{.module_id = page->this_module_id, .jack_id = idx.input_idx};
-									  },
-									  [&](const JackOutput &) {
-										  this_jack_type = ElementType::Output;
-										  this_jack =
-											  Jack{.module_id = page->this_module_id, .jack_id = idx.output_idx};
-									  }},
-						   page->drawn_elements[*drawn_idx].element);
-
-				if (this_jack) {
-					make_cable(page->gui_state.new_cable.value(),
-							   page->patch,
-							   page->module_mods,
-							   page->notify_queue,
-							   *this_jack,
-							   this_jack_type);
-
-					page->handle_patch_mods();
-
-					page->gui_state.new_cable = std::nullopt;
-
-					// Do not show instructions again this session
-					page->gui_state.already_displayed_cable_instructions = true;
-
-					page->gui_state.force_redraw_patch = true;
-					PageArguments args = {.patch_loc = page->args.patch_loc,
-										  .patch_loc_hash = page->args.patch_loc_hash,
-										  .module_id = page->args.module_id,
-										  .detail_mode = false};
-					page->page_list.request_new_page(PageId::PatchView, args);
-					page->roller_hover.hide();
-				} else
-					pr_err("Error completing cable\n");
-
+				page->click_cable_destination(*drawn_idx);
 			} else {
-
-				page->mode = ViewMode::Mapping;
-				page->args.detail_mode = true;
-				lv_hide(ui_ElementRollerPanel);
-				page->roller_hover.hide();
-
-				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
-
-				if (page->full_screen_mode) {
-					// TODO: if fullscreen, then open Adjust pop up directly
-					// But keep it hidden?
-					// If it's a button, the just immediately toggle state
-					// page->mapping_pane.control_popup.show(page->drawn_element);
-				}
+				page->click_normal_element(*drawn_idx);
 			}
 
 			//Not an element: Is it the Extra Menu?
 		} else if (roller_idx < page->roller_drawn_el_idx.size()) {
-			if (page->roller_drawn_el_idx[roller_idx] == ExtraMenuTag) {
-				// Just ignore clicking on Extra Menu when in full_screen_mode
-				if (!page->full_screen_mode) {
-					page->mode = ViewMode::ModuleContextMenu;
-					lv_hide(ui_ElementRoller);
-					page->roller_hover.hide();
-					page->module_context_menu.show();
-				}
+			if (page->roller_drawn_el_idx[roller_idx] == ContextMenuTag) {
+				page->show_context_menu();
 			}
 		}
 	}
@@ -880,7 +915,7 @@ private:
 
 	bool full_screen_mode = false;
 
-	enum { ExtraMenuTag = -2 };
+	enum { ContextMenuTag = -2 };
 };
 
 } // namespace MetaModule

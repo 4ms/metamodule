@@ -71,7 +71,8 @@ inline std::string snapped_value_string(Knob const &el, float value) {
 }
 
 inline bool has_custom_display(Pot const &el) {
-	return el.display_mult != 1 || el.display_offset != 0 || el.display_base != 0 || el.units.length() > 0;
+	return el.display_mult != 1 || el.display_offset != 0 || el.display_base != 0 || el.units.length() > 0 ||
+		   el.min_value != 0 || el.max_value != 1;
 }
 
 inline std::string get_element_value_string(Element const &element, float value, float resolution) {
@@ -80,19 +81,21 @@ inline std::string get_element_value_string(Element const &element, float value,
 	std::visit(
 		overloaded{
 			[value = value, res = resolution, &s](Slider const &el) {
-				if (has_custom_display(el) || el.min_value != 0 || el.max_value != 1)
+				if (has_custom_display(el))
 					s = custom_display_value_string(el, value);
 				else
 					s = percent_value_string(value, res);
 			},
 
-			[value = value, &s](Knob const &el) {
+			[value = value, res = resolution, &s](Knob const &el) {
 				bool snap = el.num_pos > 0;
-				if (has_custom_display(el) || !snap) {
+
+				if (has_custom_display(el))
 					s = custom_display_value_string(el, value, snap);
-				} else {
+				else if (snap)
 					s = snapped_value_string(el, value);
-				}
+				else
+					s = percent_value_string(value, res);
 			},
 
 			[value = value, res = resolution, &s](ParamElement const &) { s = percent_value_string(value, res); },
