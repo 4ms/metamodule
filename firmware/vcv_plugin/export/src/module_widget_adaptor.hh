@@ -161,8 +161,9 @@ struct ModuleWidgetAdaptor {
 			pr_err("Error: can't add a null VCVTextDisplay\n");
 	}
 
-	void addModuleWidget(int graphic_display_idx, rack::app::ModuleWidget *mw) {
+	bool addModuleWidget(int graphic_display_idx, rack::app::ModuleWidget *mw) {
 		bool has_custom_draw = true;
+		bool has_custom_step = true;
 
 #if defined(__GNUC__) && !defined(__clang__)
 		// See if the the Widget overrides draw() or drawLayer().
@@ -182,10 +183,7 @@ struct ModuleWidgetAdaptor {
 
 		has_custom_draw = custom_draw_func || custom_drawLayer_func || derives_from_leddisplay;
 
-		if (has_custom_draw) {
-			pr_trace("ModuleWidget has_custom_draw\n");
-		}
-
+		has_custom_step = (void *)((*mw).*(&rack::app::ModuleWidget::step)) != (void *)(&rack::app::ModuleWidget::step);
 #endif
 
 		Element element = DynamicGraphicDisplay{.full_module = true};
@@ -197,9 +195,10 @@ struct ModuleWidgetAdaptor {
 			mw->box.size.y = std::max(1.f, mw->box.size.y);
 			assign_element_fields(mw, "", element);
 
-			pr_trace("Widget with size %g x %g has a custom draw() or drawLayer()\n", mw->box.size.x, mw->box.size.y);
+			pr_trace(
+				"ModuleWidget with size %g x %g has a custom draw() or drawLayer()\n", mw->box.size.x, mw->box.size.y);
 
-		} else {
+		} else if (has_custom_step) {
 			// Set element's box a 0 size if it has no custom draw
 			// This will ensure we call step() but don't allocate a pixel buffer
 
@@ -207,8 +206,14 @@ struct ModuleWidgetAdaptor {
 			zero_size_widget.box = {{0, 0}, {0, 0}};
 			assign_element_fields(&zero_size_widget, "", element);
 
-			pr_trace(
-				"Widget with size %g x %g has no draw() or drawLayer() override\n", mw->box.size.x, mw->box.size.y);
+			pr_trace("ModuleWidget with size %g x %g has step() override but no draw() or drawLayer() override\n",
+					 mw->box.size.x,
+					 mw->box.size.y);
+		} else {
+			pr_trace("ModuleWidget with size %g x %g has no step(), draw(), or drawLayer() override\n",
+					 mw->box.size.x,
+					 mw->box.size.y);
+			return false;
 		}
 
 		ElementCount::Indices indices = clear();
@@ -216,6 +221,8 @@ struct ModuleWidgetAdaptor {
 		elem_idx.emplace_back(element, indices);
 
 		log_widget("ModuleWidget:", graphic_display_idx, mw, element);
+
+		return true;
 	}
 
 	void addGraphicDisplay(int graphic_display_idx, int first_graphic_idx, rack::widget::Widget *widget) {
