@@ -379,21 +379,6 @@ std::vector<PortWidget *> ModuleWidget::getOutputs() {
 }
 
 void ModuleWidget::populate_elements_indices(rack::plugin::Model *model) {
-	// 
-	if (auto panel = getPanel()) {
-		for (auto *child : panel->fb->children) {
-			// Move panel->fb children to mw children
-			child->parent = nullptr;
-			if (auto svg = dynamic_cast<widget::SvgWidget*>(child)) {
-				printf("Add fb child svgwidget %f,%f\n", svg->box.pos.x, svg->box.pos.y);
-				addChild(svg);
-			} else {
-				printf("Add fb child widget %f,%f\n", child->box.pos.x, child->box.pos.y);
-				addChild(child);
-			}
-		}
-		panel->fb->children.clear();
-	}
 	internal->adaptor->populate_elements_indices(model->elements, model->indices);
 }
 
