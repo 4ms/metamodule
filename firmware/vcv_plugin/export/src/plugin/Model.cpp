@@ -32,7 +32,7 @@ void Model::move_strings() {
 				   element);
 
 		std::visit(overloaded{[](BaseElement &el) {},
-							  [this](Knob &el) {
+							  [this](KnobSnapped &el) {
 								  for (auto &pos_name : el.pos_names) {
 									  pos_name = strings.emplace_back(pos_name);
 								  }

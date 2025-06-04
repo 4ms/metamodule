@@ -59,13 +59,22 @@ inline std::string percent_value_string(float value, float res) {
 	return s;
 }
 
-inline bool has_pos_label(Knob const &el, float value) {
-	unsigned v = std::round(std::clamp(value, 0.f, 1.f) * (float)(el.num_pos - 1));
-
-	return (v >= 0 && v < el.pos_names.size() && el.pos_names[v].length());
+inline bool has_custom_display(Pot const &el) {
+	return el.display_mult != 1 || el.display_offset != 0 || el.display_base != 0 || el.units.length() > 0 ||
+		   el.min_value != 0 || el.max_value != 1;
 }
 
-inline std::string snapped_value_string(Knob const &el, float value) {
+inline bool has_pos_label(KnobSnapped const &el, float value) {
+	if (el.num_pos == 0 || el.num_pos > 1000) {
+		return false;
+
+	} else {
+		unsigned v = std::round(std::clamp(value, 0.f, 1.f) * (float)(el.num_pos - 1));
+		return (v >= 0 && v < el.pos_names.size() && el.pos_names[v].length() > 0 && el.pos_names[v].length() < 256);
+	}
+}
+
+inline std::string snapped_value_string(KnobSnapped const &el, float value) {
 	std::string s;
 	unsigned v = std::round(std::clamp(value, 0.f, 1.f) * (float)(el.num_pos - 1));
 
@@ -76,7 +85,7 @@ inline std::string snapped_value_string(Knob const &el, float value) {
 	return s;
 }
 
-inline std::string snapped_value_fallback_string(Knob const &el, float value) {
+inline std::string snapped_value_fallback_string(KnobSnapped const &el, float value) {
 	std::string s;
 	unsigned v = std::round(std::clamp(value, 0.f, 1.f) * (float)(el.num_pos - 1));
 
@@ -85,11 +94,6 @@ inline std::string snapped_value_fallback_string(Knob const &el, float value) {
 	s.resize(sz);
 
 	return s;
-}
-
-inline bool has_custom_display(Pot const &el) {
-	return el.display_mult != 1 || el.display_offset != 0 || el.display_base != 0 || el.units.length() > 0 ||
-		   el.min_value != 0 || el.max_value != 1;
 }
 
 inline std::string get_element_value_string(Element const &element, float value, float resolution) {
@@ -105,7 +109,14 @@ inline std::string get_element_value_string(Element const &element, float value,
 			},
 
 			[value = value, res = resolution, &s](Knob const &el) {
-				bool snap = el.num_pos > 0;
+				if (has_custom_display(el))
+					s = custom_display_value_string(el, value);
+				else
+					s = percent_value_string(value, res);
+			},
+
+			[value = value, res = resolution, &s](KnobSnapped const &el) {
+				bool snap = el.num_pos > 0 && el.num_pos < 1000;
 
 				if (has_pos_label(el, value))
 					s = snapped_value_string(el, value);
