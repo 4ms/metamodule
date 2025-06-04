@@ -26,9 +26,13 @@ void Model::move_strings() {
 				   element);
 
 		std::visit(overloaded{[](BaseElement &el) {},
-							  [this](Knob &el) {
+							  [this](Pot &el) {
 								  el.units = strings.emplace_back(el.units);
+							  }},
+				   element);
 
+		std::visit(overloaded{[](BaseElement &el) {},
+							  [this](Knob &el) {
 								  for (auto &pos_name : el.pos_names) {
 									  pos_name = strings.emplace_back(pos_name);
 								  }
