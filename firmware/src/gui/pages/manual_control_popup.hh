@@ -111,19 +111,20 @@ private:
 					   },
 
 					   [this](const Knob &pot) {
-						   if (pot.num_pos > 0) {
+						   float cur_value = lv_arc_get_value(ui_ControlArc);
+						   auto cur_arc_range = lv_arc_get_max_value(ui_ControlArc);
+						   arc_range_idx = (arc_range_idx + 1) % arc_range_value.size();
+
+						   set_continuous_range(pot);
+
+						   auto new_arc_range = lv_arc_get_max_value(ui_ControlArc);
+						   lv_arc_set_value(ui_ControlArc,
+											std::round(cur_value / (float)cur_arc_range * (float)new_arc_range));
+					   },
+
+					   [this](const KnobSnapped &pot) {
+						   if (pot.num_pos > 0)
 							   increment_value();
-						   } else {
-							   float cur_value = lv_arc_get_value(ui_ControlArc);
-							   auto cur_arc_range = lv_arc_get_max_value(ui_ControlArc);
-							   arc_range_idx = (arc_range_idx + 1) % arc_range_value.size();
-
-							   set_continuous_range(pot);
-
-							   auto new_arc_range = lv_arc_get_max_value(ui_ControlArc);
-							   lv_arc_set_value(ui_ControlArc,
-												std::round(cur_value / (float)cur_arc_range * (float)new_arc_range));
-						   }
 					   },
 
 					   // switches: increment value, wrapping
@@ -175,8 +176,9 @@ private:
 		std::visit(overloaded{
 					   [](const BaseElement &) {},
 					   [](const ParamElement &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
-					   [this](const Knob &knob) { set_knob_range(knob); },
+					   [this](const Knob &knob) { set_continuous_range(knob); },
 					   [this](const Slider &slider) { set_continuous_range(slider); },
+					   [this](const KnobSnapped &knob) { set_snapped_range(knob); },
 					   [](const Button &el) { lv_arc_set_range(ui_ControlArc, 0, 1); },
 					   [](const FlipSwitch &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
@@ -203,7 +205,7 @@ private:
 		}
 	}
 
-	void set_knob_range(Knob const &knob) {
+	void set_snapped_range(KnobSnapped const &knob) {
 		if (knob.num_pos > 0) {
 			lv_arc_set_range(ui_ControlArc, knob.min_value, knob.max_value);
 			hide_resolution_text();
