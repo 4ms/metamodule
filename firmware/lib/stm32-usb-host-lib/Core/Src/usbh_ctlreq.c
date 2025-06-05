@@ -149,12 +149,19 @@ USBH_StatusTypeDef USBH_Get_CfgDesc(USBH_HandleTypeDef *phost, uint16_t length)
     /* Commands successfully sent and Response Received  */
 
     /* Try "fixing" the audio subclass interface descriptor length */
-    status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_FIX_AUDIO_SUBCLASS);
-    if (status == USBH_NOT_SUPPORTED)
-    {
-      /* If that fails, try parsing normally */
-      status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_NORMAL);
-    }
+	if (phost->device.DevDesc.idVendor == 0x17CC) //Native Instruments
+	{
+        status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_NORMAL);
+	} else {
+      status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_FIX_AUDIO_SUBCLASS);
+      if (status == USBH_NOT_SUPPORTED)
+      {
+        /* If that fails, try parsing normally */
+        status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_NORMAL);
+      }
+	}
+
+	USBH_UsrLog("Configuration parsing complete. status = %u", status);
   }
 
   return status;
@@ -497,6 +504,10 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
         {
           pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
 
+		  if (pdesc->bLength == 0) {
+			  USBH_UsrLog("Descriptor invalid (length 0), aborting");
+			  break;
+		  }
           if (pdesc->bDescriptorType == USB_DESC_TYPE_ENDPOINT)
           {
             /* Check if the endpoint is appartening to an audio streaming interface */
