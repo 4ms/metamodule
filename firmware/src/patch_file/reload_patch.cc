@@ -33,7 +33,7 @@ std::optional<ReloadPatch::FileTimeSize> ReloadPatch::get_file_info(PatchLocatio
 		}
 
 		if (msg.message_type == FileStorageProxy::PatchFileInfoFailed) {
-			pr_trace("ReloadPatch::get_file_info: get file info for '%s' failed \n", patch_loc.filename.c_str());
+			pr_dump("ReloadPatch::get_file_info: get file info for '%s' failed \n", patch_loc.filename.c_str());
 			return {};
 		}
 
