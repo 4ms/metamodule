@@ -1419,23 +1419,23 @@ inline void PatchPlayer::update_all_roto_controls() {
                                 const Knob &knob_el = arg;
 								pr_dbg("Knob: %s\n", control_name_str.c_str());
 								// TODO: Move to RotoControl constants, 16 is the max number of steps RotoControl can support
-                                if (knob_el.num_pos > 0 && knob_el.num_pos <= 16) {
+                                if (knob_el.pos_names.size() > 0 && knob_el.num_pos == knob_el.pos_names.size()) {
                                     haptic_mode = HapticMode::KNOB_N_STEP;
-                                    haptic_steps = knob_el.num_pos;
+                                    haptic_steps = knob_el.pos_names.size();
                                 } else {
                                     haptic_mode = HapticMode::KNOB_300;
                                 }
                             } else if constexpr (std::is_base_of_v<Switch, T>) {
 								pr_dbg("Switch: %s\n", control_name_str.c_str());
                                 const auto &switch_el = arg;
-                                min_val_u16 = 0;
-                                max_val_u16 = switch_el.num_pos > 0 ? switch_el.num_pos - 1 : 0;
-                                haptic_mode = HapticMode::KNOB_N_STEP;
-                                haptic_steps = switch_el.num_pos > 0 ? switch_el.num_pos : 1;
+								if (switch_el.num_pos > 0 && switch_el.num_pos <= 16) {
+									haptic_mode = HapticMode::KNOB_N_STEP;
+									haptic_steps = switch_el.num_pos;
+								} else {
+									haptic_mode = HapticMode::KNOB_300;
+								}
                             } else if constexpr (std::is_base_of_v<Button, T>) {
 								pr_dbg("Button: %s\n", control_name_str.c_str());
-                                min_val_u16 = 0;
-                                max_val_u16 = 127;
                                 haptic_steps = 2;
 
 								if constexpr (std::is_same_v<T, MomentaryButton> ||
@@ -1448,6 +1448,9 @@ inline void PatchPlayer::update_all_roto_controls() {
 									pr_warn("RotoControl: Encountered an unhandled Button-derived type for param_id %u", k.param_id);
 								}
                             }
+							pr_dbg("haptic_steps: %d\n", haptic_steps);
+							pr_dbg("haptic_mode: %d\n", haptic_mode);
+							pr_dbg("control_name_str: %s\n", control_name_str.c_str());
 
 							if (haptic_steps > 0) { // MODIFIED: Ensure check is > 0 explicitly
 								dummy_step_names_storage.reserve(haptic_steps); // ADDED: Reserve storage
@@ -1459,6 +1462,7 @@ inline void PatchPlayer::update_all_roto_controls() {
 									dummy_step_names_storage.push_back(control_name_str);
 								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T> || std::is_base_of_v<Knob, T>) {	
 									const auto &el = arg;
+									pr_dbg("el.pos_names.size(): %zu\n", el.pos_names.size());
 									for (uint8_t i = 0; i < haptic_steps; ++i) {
 										std::string step_name = std::string(el.pos_names[i]);
 										if (step_name.length() > 12) {
@@ -1497,8 +1501,8 @@ inline void PatchPlayer::update_all_roto_controls() {
 									k.midi_chan == 0 ? 1 : k.midi_chan, 
 									k.cc_num(), // RotoControl's parameter index
 									0, // nrpn_address
-									min_val_u16,
-									max_val_u16,
+									0,
+									127,
 									control_name_ptr,
 									0, // color_scheme
 									0x00, // led_on_color

@@ -12,7 +12,17 @@ public:
 		AUTO,    // Pick first available (default behavior)
 		MIDI,    // Prefer MIDI class
 		CDC,     // Prefer CDC class  
-		MSC      // Prefer MSC class
+		MSC,     // Prefer MSC class
+		COMPOSITE // Support multiple classes simultaneously
+	};
+
+	// New: Interface tracking for composite devices
+	struct ActiveInterface {
+		uint8_t interface_number;
+		uint8_t class_code;
+		USBH_ClassTypeDef* class_driver;
+		void* class_data;
+		bool is_active;
 	};
 
 private:
@@ -36,6 +46,23 @@ private:
 	static inline unsigned _current_read_pos;
 	static inline PreferredClass *_preferred_class_ptr;
 	static inline UsbHostManager *_manager_instance;
+
+	// New: Track multiple active interfaces
+	static constexpr size_t MAX_INTERFACES = 8;
+	ActiveInterface active_interfaces[MAX_INTERFACES];
+	size_t num_active_interfaces = 0;
+	
+	// New: Hub support
+	struct HubPortInfo {
+		uint8_t port_number;
+		bool device_connected;
+		uint8_t device_address;
+		USBH_HandleTypeDef* port_host;
+	};
+	
+	static constexpr size_t MAX_HUB_PORTS = 4;
+	HubPortInfo hub_ports[MAX_HUB_PORTS];
+	bool is_hub_device = false;
 
 public:
 	UsbHostManager(mdrivlib::PinDef enable_5v, ConcurrentBuffer *console_cdc_buff)
@@ -387,6 +414,18 @@ public:
 	// Friend function declaration to allow access to private members
 	friend void USBH_CDC_ReceiveCallback(USBH_HandleTypeDef *phost);
 	friend void USBH_CDC_TransmitCallback(USBH_HandleTypeDef *phost);
+
+	// New: Methods for composite device support
+	bool register_interface(uint8_t interface_num, uint8_t class_code, USBH_ClassTypeDef* driver);
+	bool unregister_interface(uint8_t interface_num);
+	ActiveInterface* find_interface_by_class(uint8_t class_code);
+	ActiveInterface* find_interface_by_number(uint8_t interface_num);
+	
+	// New: Hub management methods
+	bool enumerate_hub_ports();
+	bool connect_hub_device(uint8_t port, uint8_t device_address);
+	bool disconnect_hub_device(uint8_t port);
+	HubPortInfo* get_hub_port_info(uint8_t port);
 };
 
 // USB Host CDC Transmit Callback - called by the USB stack when CDC data has been sent
