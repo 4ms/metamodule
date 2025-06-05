@@ -288,7 +288,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 }
 
 void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
-	player.sync();
+	handle_patch_mod_queue();
+
 	param_state.jack_senses = param_block.metaparams.jack_senses;
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
@@ -383,15 +384,17 @@ void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 }
 
 void AudioStream::handle_patch_mod_queue() {
-	std::optional<bool> new_cal_state = std::nullopt;
+	if (player.is_loaded) {
+		std::optional<bool> new_cal_state = std::nullopt;
 
-	handle_patch_mods(patch_mod_queue, player, {&cal_stash, &ext_cal_stash}, new_cal_state);
+		handle_patch_mods(patch_mod_queue, player, {&cal_stash, &ext_cal_stash}, new_cal_state);
 
-	if (new_cal_state.has_value() && *new_cal_state == true)
-		re_enable_calibration();
+		if (new_cal_state.has_value() && *new_cal_state == true)
+			re_enable_calibration();
 
-	else if (new_cal_state == false)
-		disable_calibration();
+		else if (new_cal_state == false)
+			disable_calibration();
+	}
 }
 
 void AudioStream::disable_calibration() {
