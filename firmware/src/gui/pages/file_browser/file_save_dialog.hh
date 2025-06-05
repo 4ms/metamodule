@@ -107,6 +107,8 @@ struct FileSaveDialog {
 		should_show_path = fullpath;
 		should_show_ext = ext;
 
+		base_group = nullptr;
+
 		should_show = true;
 	}
 
@@ -178,7 +180,9 @@ private:
 			lv_hide(ui_SaveDialogLeftCont);
 			lv_hide(ui_Keyboard);
 
-			base_group = lv_indev_get_next(nullptr)->group;
+			// Set the base group if we didn't do it with the call to show()
+			if (!base_group)
+				base_group = lv_indev_get_next(nullptr)->group;
 			lv_group_activate(group);
 			lv_group_focus_obj(ui_SaveDialogFilename);
 			lv_group_set_editing(group, false);
