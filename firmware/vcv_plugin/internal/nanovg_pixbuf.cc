@@ -106,6 +106,10 @@ void renderStroke(void *uptr,
 
 	// Scale by ratio of 1 Rack pixel to 1 MM pixel
 	auto scaling = mm_to_px(to_mm(1.), context->px_per_3U);
+	//
+	// @pp3U=811 => scaling = 2.1
+	// @pp3U=240 => scaling = 0.633
+	// @pp3U=180 => scaling = 0.474
 
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Stroke path: #strokes %d = count:%d + closed:%d\n", path.nstroke, path.count, path.closed);
@@ -122,10 +126,13 @@ void renderStroke(void *uptr,
 		auto [r, g, b, a] = to_tvg_color(paint->innerColor);
 		poly->strokeFill(r, g, b, a);
 
-		auto stroke_width = std::round(to_lv_coord(strokeWidth, context->px_per_3U));
-
-		constexpr float MinStroke = 1.3f;
-		poly->strokeWidth(std::max<lv_coord_t>(stroke_width, MinStroke / scaling));
+		float stroke_width = strokeWidth;
+		if (scaling < 1) {
+			constexpr float MinStroke = 1.3f;
+			// Divide by /scaling so that when the rendering engine scales, it results in MinStroke
+			stroke_width = std::max(mm_to_px(to_mm(strokeWidth), context->px_per_3U), MinStroke / scaling);
+		}
+		poly->strokeWidth(stroke_width);
 
 		// Clip/Scissor
 		if (scissor->extent[0] >= 0 && scissor->extent[1] >= 0) {
@@ -165,9 +172,12 @@ float renderText(
 	}
 
 	auto lv_font_size = to_lv_coord(Fonts::corrected_ttf_size(fs->fontSize, fs->fontName), context->px_per_3U);
+	lv_font_size = std::min<int>(lv_font_size, 60);
 	auto font = Fonts::get_ttf_font(std::string(fs->fontName), lv_font_size);
-	if (!font)
+	if (!font) {
+		pr_err("Could not load font %s, sz %u\n", fs->fontName, lv_font_size);
 		return 0;
+	}
 
 	// Create or find existing label (match on X,Y pos and alignment)
 	lv_obj_t *label{};
@@ -198,8 +208,8 @@ float renderText(
 			pr_dbg("Text xform %f, %f\n", fs->xform[4], fs->xform[5]);
 		}
 
-		if (!(fs->textAlign & NVG_ALIGN_TOP))
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+		// if (!(fs->textAlign & NVG_ALIGN_TOP))
+		// 	lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
 		label = lv_label_create(canvas);
 		lv_obj_set_pos(label, lv_x, align_lv_y);
@@ -221,7 +231,9 @@ float renderText(
 		// lv_obj_set_style_border_opa(label, LV_OPA_50, LV_PART_MAIN);
 		// lv_obj_set_style_border_width(label, 1, LV_PART_MAIN);
 
-		pr_trace("Creating label at %d,%d a:0x%x sz:%g sp:%d\n", lv_x, lv_y, fs->textAlign, fs->fontSize, letter_space);
+		pr_dbg(
+			"Creating label at %d,%d a:0x%x sz:%g (lv: %u)\n", lv_x, lv_y, fs->textAlign, fs->fontSize, lv_font_size);
+
 		context->labels.push_back({(float)lv_x, (float)lv_y, fs->textAlign, label, context->draw_frame_ctr});
 	}
 

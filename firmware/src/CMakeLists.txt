@@ -1,7 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
-option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" OFF)
+option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" ON)
 option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
 
 
@@ -125,6 +125,7 @@ add_executable(
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
+  ${FWDIR}/src/core_a7/rotocontrol.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/audio/audio.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc

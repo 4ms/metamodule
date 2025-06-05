@@ -72,13 +72,6 @@
       }
     },
     {
-      "name": "cpu-test",
-      "inherits": "full",
-      "cacheVariables": {
-        "CPU_TEST_ALL_MODULES": { "type": "BOOL", "value": "ON" }
-      }
-    },
-    {
       "name": "usb-log",
       "inherits": "full",
       "cacheVariables": {
@@ -99,10 +92,6 @@
     {
       "name": "dyn-plugins",
       "configurePreset": "dyn-plugins"
-    },
-    {
-      "name": "cpu-test",
-      "configurePreset": "cpu-test"
     },
     {
       "name": "usb-log",

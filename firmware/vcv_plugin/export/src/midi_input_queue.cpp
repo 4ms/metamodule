@@ -27,10 +27,14 @@ void InputQueue::onMessage(const Message &message) {
 }
 
 bool InputQueue::tryPop(rack::midi::Message *messageOut, int64_t maxFrame) {
+	if (!messageOut)
+		return false;
+
 	if (auto msg = internal->queue.get()) {
 		// Convert to rack::midi::Message
 		if (msg->status & 0x80) { // status byte
 			if (channel < 0 || (channel == msg->status.channel)) {
+				messageOut->setSize(msg->message_size());
 				messageOut->bytes[0] = msg->status;
 				messageOut->bytes[1] = msg->data.byte[0];
 				messageOut->bytes[2] = msg->data.byte[1];
