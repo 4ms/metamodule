@@ -24,6 +24,7 @@
  */
 
 #include "usbh_midi.hh"
+#include "usbh_midi_jacks.hh"
 
 static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost);
 static void MIDI_ProcessReception(USBH_HandleTypeDef *phost);
@@ -75,6 +76,9 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost)
 	if (status != USBH_OK)
 		return USBH_FAIL;
 
+	// Print info about class-specific descriptors
+	// Here is where we could store the various jacks found
+	// scan_all_descriptors(phost);
 	if (host.is_in_ep(interface, 0))
 		host.link_endpoint_pipe(MSHandle->DataItf.InEP, interface, 0);
 	else

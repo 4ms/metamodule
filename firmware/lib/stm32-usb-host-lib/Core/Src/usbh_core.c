@@ -711,19 +711,30 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
           {
             continue;
           }
-			
-          USBH_UsrLog("Looking for classcode %x (%.16s)", phost->pClass[idx]->ClassCode, phost->pClass[idx]->Name);
+
+          USBH_UsrLog("Looking for classcode 0x%x (%.16s)", phost->pClass[idx]->ClassCode, phost->pClass[idx]->Name);
           for (unsigned itf = 0U; itf < phost->device.CfgDesc.bNumInterfaces; itf++)
           {
-			USBH_UsrLog("Found interface with %x classcode", phost->device.CfgDesc.Itf_Desc[itf].bInterfaceClass);
-			// TODO: keep a user preference table of phost->device.DevDesc.idVendor, idDevice and which itf to choose
-			// Double-check the chosen itf matches, otherwise fall back to picking the first one
-			// Also report back to A7 all the matching itf found
-            if (phost->pClass[idx]->ClassCode == phost->device.CfgDesc.Itf_Desc[itf].bInterfaceClass)
+            USBH_InterfaceDescTypeDef *interface = &phost->device.CfgDesc.Itf_Desc[itf]; 
+
+            // TODO: keep a user preference table of phost->device.DevDesc.idVendor, idDevice and which itf to choose
+            // Double-check the chosen itf matches, otherwise fall back to picking the first one
+            // Also report back to A7 all the matching itf found
+
+            if (phost->pClass[idx]->ClassCode == interface->bInterfaceClass)
             {
-			  if (phost->pActiveClass == NULL)
-				  phost->pActiveClass = phost->pClass[idx];
-              // break; // DEBUG: don't break on the first one found
+              USBH_UsrLog("Found interface #%u with same classcode, and %u endpoints", itf, interface->bNumEndpoints);
+              if (interface->bNumEndpoints > 0)
+              {
+                if (phost->pActiveClass == NULL)
+                  phost->pActiveClass = phost->pClass[idx];
+                  // break; // DEBUG: don't break on the first one found
+                else 
+                {
+                  USBH_UsrLog("Found multiple interfaces of classes we can host, with > 0 endpoints. Picked the first one");
+                  // phost->pActiveClass = phost->pClass[idx];
+                }
+              }
             }
           }
         }
