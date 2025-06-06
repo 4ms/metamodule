@@ -496,6 +496,8 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
 
         pif = &cfg_desc->Itf_Desc[if_ix];
         USBH_ParseInterfaceDesc(pif, (uint8_t *)(void *)pdesc);
+		USBH_UsrLog("Found interface %u: class %u, sub-class %u, protocol %u, endpts %u", 
+				if_ix, pif->bInterfaceClass, pif->bInterfaceSubClass, pif->bInterfaceProtocol, pif->bNumEndpoints);
 
         ep_ix = 0U;
         pep = (USBH_EpDescTypeDef *)NULL;
@@ -504,18 +506,22 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
         {
           pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
 
+		  USBH_UsrLog("Found descriptor type %u (5=EP), len %u", pdesc->bDescriptorType, pdesc->bLength);
+
 		  if (pdesc->bLength == 0) {
 			  USBH_UsrLog("Descriptor invalid (length 0), aborting");
 			  break;
 		  }
+
           if (pdesc->bDescriptorType == USB_DESC_TYPE_ENDPOINT)
           {
+
             /* Check if the endpoint is appartening to an audio streaming interface */
             if (fix_audio_subclass_length && (pif->bInterfaceClass == 0x01U) &&
                 ((pif->bInterfaceSubClass == 0x02U) || (pif->bInterfaceSubClass == 0x03U)))
             {
               /* Check if it is supporting the USB AUDIO 01 class specification */
-              if ((pif->bInterfaceProtocol == 0x00U) && (pdesc->bLength != 0x09U))
+              if ((pif->bInterfaceProtocol == 0x00U) && (pdesc->bLength != 0x09U) && (pdesc->bLength != 0x07U))
               {
 				USBH_ErrLog("Setting audio streaming subclass length to 9 (was %d) for ep %d\n", pdesc->bLength, ep_ix);
                 pdesc->bLength = 0x09U;
