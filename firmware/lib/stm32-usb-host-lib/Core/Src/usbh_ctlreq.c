@@ -160,8 +160,6 @@ USBH_StatusTypeDef USBH_Get_CfgDesc(USBH_HandleTypeDef *phost, uint16_t length)
         status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_NORMAL);
       }
 	}
-
-	USBH_UsrLog("Configuration parsing complete. status = %u", status);
   }
 
   return status;
@@ -496,7 +494,7 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
 
         pif = &cfg_desc->Itf_Desc[if_ix];
         USBH_ParseInterfaceDesc(pif, (uint8_t *)(void *)pdesc);
-		USBH_UsrLog("Found interface %u: class %u, sub-class %u, protocol %u, endpts %u", 
+		USBH_DbgLog("Found interface %u: class %u, sub-class %u, protocol %u, endpts %u", 
 				if_ix, pif->bInterfaceClass, pif->bInterfaceSubClass, pif->bInterfaceProtocol, pif->bNumEndpoints);
 
         ep_ix = 0U;
@@ -506,10 +504,8 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
         {
           pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
 
-		  USBH_UsrLog("Found descriptor type %u (5=EP), len %u", pdesc->bDescriptorType, pdesc->bLength);
-
 		  if (pdesc->bLength == 0) {
-			  USBH_UsrLog("Descriptor invalid (length 0), aborting");
+			  USBH_DbgLog("Descriptor invalid (length 0), aborting");
 			  break;
 		  }
 
@@ -523,7 +519,7 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
               /* Check if it is supporting the USB AUDIO 01 class specification */
               if ((pif->bInterfaceProtocol == 0x00U) && (pdesc->bLength != 0x09U) && (pdesc->bLength != 0x07U))
               {
-				USBH_ErrLog("Setting audio streaming subclass length to 9 (was %d) for ep %d\n", pdesc->bLength, ep_ix);
+				USBH_UsrLog("Setting audio streaming subclass length to 9 (was %d) for ep %d\n", pdesc->bLength, ep_ix);
                 pdesc->bLength = 0x09U;
               }
             }
