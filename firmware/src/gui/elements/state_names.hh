@@ -70,7 +70,14 @@ inline bool has_pos_label(KnobSnapped const &el, float value) {
 
 	} else {
 		unsigned v = std::round(std::clamp(value, 0.f, 1.f) * (float)(el.num_pos - 1));
-		return (v >= 0 && v < el.pos_names.size() && el.pos_names[v].length() > 0 && el.pos_names[v].length() < 256);
+		if (v < 0 || v >= el.pos_names.size())
+			return false;
+
+		if (el.pos_names[v] == nullptr)
+			return false;
+
+		auto len = std::string_view{el.pos_names[v]}.length();
+		return (len > 0 && len < 256);
 	}
 }
 
