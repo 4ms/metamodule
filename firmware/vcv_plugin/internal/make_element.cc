@@ -123,7 +123,7 @@ static Element create_base_knob(rack::app::Knob *widget) {
 		}
 
 		for (auto i = 0u; i < clamped_num_pos; i++) {
-			snapped_knob.pos_names[i] = pq->labels[i];
+			snapped_knob.pos_names[i] = pq->labels[i].c_str();
 		}
 		return snapped_knob;
 	}
