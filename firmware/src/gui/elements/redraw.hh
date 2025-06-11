@@ -40,6 +40,15 @@ inline bool redraw_element(const Knob &el, const GuiElement &gui_el, float val) 
 	return did_update_position;
 }
 
+inline bool redraw_element(const KnobSnapped &el, const GuiElement &gui_el, float val) {
+	if (el.num_pos > 0) {
+		float num_pos = el.num_pos - 1;
+		val = std::round(val * num_pos) / num_pos;
+	}
+
+	return redraw_element(static_cast<const Knob>(el), gui_el, val);
+}
+
 // Slider update
 inline bool redraw_element(const Slider &element, const GuiElement &gui_el, float val) {
 	bool did_update_position = false;
