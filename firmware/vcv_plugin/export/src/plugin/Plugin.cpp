@@ -33,7 +33,6 @@ void Plugin::addModel(Model *model) {
 	auto modulewidget = model->createModuleWidget(module);
 
 	modulewidget->populate_elements_indices(model);
-	printf("done populate_elements_indices\n");
 	model->move_strings();
 
 	std::string panelsvg;
