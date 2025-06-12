@@ -27,7 +27,12 @@
   - cmake v3.24 or later
   - ninja (not required on MinGW or if you configure cmake to use a different generator) 
   - gcc/g++ 12, or clang 16 or later (for unit tests)
-  - arm-none-eabi-gcc toolchain 12.2 or later
+  - arm-none-eabi-gcc toolchain 12.2 or later. 
+     - Versions 12.2, 12.3, and 14.1 have been extensively tested.
+     - Note that to compile plugins using the SDK, you **must** use 12.3 of the
+       arm-none-eabi-gcc toolchain. So if you are compiling plugins and also
+       firmware on the same maching, it's often easiest to just use 12.3 for
+       both.
   - xxd
   - python3
   - optional: flatc according to version of flatbuffers submodule
@@ -37,11 +42,6 @@
   - ninja (not required if configure cmake to use a different generator)
   - gcc/g++ 12, or clang 16 or later
   - SDL2.x
-
-- VCV Plugin:
-  - gcc/g++ 12 or later, clang 16 or later
-  - jq
-  - rsync
 
 ### MacOS
 
@@ -56,9 +56,6 @@ Monterey (12.5) and Ventura (13.4 and 13.5) have been tested and are known to wo
  - For building the simulator, sdl is additionally needed:
    - `brew install sdl2`
 
- - For the building the VCV plugin, this is needed:
-   - `brew install jq rsync`
-
 ### Linux
 For Ubuntu (tested with 22.04):
 
@@ -71,8 +68,6 @@ For Ubuntu (tested with 22.04):
  - To use the simulator GUI, you need to also install sdl2:
    - `sudo apt-get install libsdl2-dev`
 
-TODO: other distros
- 
 ### Windows
 
 To get started, you will want to follow the development environment guide for

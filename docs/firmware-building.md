@@ -69,6 +69,4 @@ change your PATH for this project, you can set the TOOLCHAIN_BASE_DIR var like t
 export TOOLCHAIN_BASE_DIR=/path/to/arm-gnu-toolchain-12.x-relX/bin/
 ```
 
-Remember that arm-none-eabi-gcc v12.2 or v12.3 is required.
-
 
