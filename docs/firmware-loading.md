@@ -23,7 +23,6 @@ The instructions are here: [MetaModule Docs](https://metamodule.info/docs/gettin
 
 ### Load in RAM over SWD/JTAG
 
-![PCB header locations](./images/pcb-headers.png)
 
 This is the preferred method for active firmware development. It requires a
 JTAG programmer. 
@@ -39,12 +38,12 @@ If you need to load new firmware and then debug it, then follow the guide in
 [Debugging with gdb](firmware-debugging.md).
 
 
-1) Install a "Freeze jumper" :
+#### Freeze Jumper
 
 To load firmware (without debugging) with a JLink programmer, you need to install a "Freeze Jumper".
 
 There are two bootloader versions. If you see a blue light flash when you start up normally,
-then you have the later bootloader. If not, then you have the earlier bootloader.
+then you have the current bootloader. If not, then you have the earlier bootloader.
 
 1a) Current bootloader: The jumper goes on the two left-most pins of the 2x4 debug header. 
 This is the header located next to the SWD/JTAG header that contains the connections for 
@@ -76,9 +75,11 @@ you intentionally installed a newer one.
 Updating the bootloaders is done via loading a release file that has "-bl-" in the name,
 where the release tag is `firmware-v2.0.0-dev-2` or later.
 
-2) Power off and back on (full power-cycle is required).
+#### Loading firmware
 
-The console will show:
+Power off and back on (full power-cycle is required).
+
+The UART console will show:
 
 ```
 Freeze pin detected active: booting from DDR
@@ -93,7 +94,8 @@ Connect a Jlink programmer and run this:
 make jprog
 ```
 
-This should take 8-30 seconds.
+This should take 8-30 seconds. The firmware should boot automatically.
+
  
 ### Load into NOR Flash over USB DFU
 
