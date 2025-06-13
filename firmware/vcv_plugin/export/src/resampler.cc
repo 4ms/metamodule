@@ -4,7 +4,7 @@
 #include <cstring>
 #include <speex/speex_resampler.h>
 
-// TODO: use coreproc_plugin/resampler.cc
+// TODO: use core-interface/dsp/resampler.hh
 
 struct SpeexResamplerChan {
 	bool flush{true};
