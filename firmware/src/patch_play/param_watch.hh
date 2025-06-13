@@ -67,36 +67,13 @@ struct ParamWatcher {
 		return std::span<WatchedParam>{&watched_params[lowest_active_idx], &watched_params[highest_active_idx + 1]};
 	}
 
-	void start_watching_param(uint16_t module_id, uint16_t param_id, const MappedKnob *mapped_knob = nullptr) {
+	void start_watching_param(const MappedKnob *mapped_knob) {
 		for (auto idx = 0u; auto &w : watched_params) {
-			if (!w.is_active()) {
-				w.activate(module_id, param_id);
-				if (mapped_knob) {
-					w.set_midi_mapping(mapped_knob);
-				}
+			if (!w.is_active()) {	
+				w.activate(mapped_knob->module_id, mapped_knob->param_id);
+				w.set_midi_mapping(mapped_knob);
 				add(idx);
 				return;
-			}
-			idx++;
-		}
-	}
-
-	void stop_watching_param(uint16_t module_id, uint16_t param_id) {
-		for (auto idx = 0u; auto &w : watched_params) {
-			if (w.module_id == module_id && w.param_id == param_id) {
-				w.deactivate();
-				remove(idx);
-				return;
-			}
-			idx++;
-		}
-	}
-
-	void stop_watching_module(uint16_t module_id) {
-		for (auto idx = 0u; auto &w : watched_params) {
-			if (w.module_id == module_id) {
-				w.deactivate();
-				remove(idx);
 			}
 			idx++;
 		}

@@ -144,6 +144,7 @@ struct KnobMapPage : PageBase {
 		lv_dropdown_set_selected(ui_EditMapMidiChannelDropdown, map.midi_chan);
 
 		// Knob arc
+		
 		float knob_val = static_param ? map.unmap_val(static_param->value) : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
 

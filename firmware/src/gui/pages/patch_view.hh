@@ -285,6 +285,7 @@ struct PatchViewPage : PageBase {
 		settings_menu.hide();
 		desc_panel.hide();
 		file_menu.hide();
+		params.text_displays.stop_watching_all();
 
 		dyn_draws.clear();
 

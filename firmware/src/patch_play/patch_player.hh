@@ -186,7 +186,7 @@ public:
 		param_watcher.stop_watching_all();
 		for (auto const &mm : pd.midi_maps.set) {
 			cache_midi_mapping(mm);
-			param_watcher.start_watching_param(mm.module_id, mm.param_id, &mm);
+			param_watcher.start_watching_param(&mm);
 		}
 
 		// Load module states

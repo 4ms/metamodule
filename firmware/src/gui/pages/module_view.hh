@@ -537,6 +537,7 @@ struct ModuleViewPage : PageBase {
 	void blur() final {
 		module_context_menu.blur();
 		dyn_draw.blur();
+		params.text_displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}
@@ -573,6 +574,8 @@ private:
 			lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 			lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
 			lv_obj_set_size(b, std::round(x_size), std::round(y_size));
+			lv_obj_refr_size(b);
+			lv_obj_refr_pos(b);
 		} else {
 			lv_obj_set_pos(b, 0, 0);
 			lv_obj_set_size(b, 0, 0);
@@ -739,6 +742,7 @@ private:
 									  .patch_loc_hash = args.patch_loc_hash,
 									  .module_id = args.module_id,
 									  .detail_mode = false};
+			page_list.update_state(PageId::ModuleView, nextargs);
 			page_list.request_new_page(PageId::PatchView, nextargs);
 			roller_hover.hide();
 		} else
@@ -747,6 +751,7 @@ private:
 
 	void click_normal_element(unsigned drawn_idx) {
 		auto &drawn_element = drawn_elements[drawn_idx];
+		args.element_indices = drawn_element.gui_element.idx;
 
 		if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
 			PageArguments nextargs = {

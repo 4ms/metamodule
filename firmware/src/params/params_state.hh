@@ -3,7 +3,6 @@
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
 #include "patch/midi_def.hh"
-#include "patch_play/param_watch.hh"
 #include "patch_play/text_display.hh"
 #include "util/debouncer.hh"
 #include "util/filter.hh"
