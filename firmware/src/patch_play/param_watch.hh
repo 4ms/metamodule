@@ -1,6 +1,6 @@
 #pragma once
-#include "util/static_string.hh"
 #include "patch/patch.hh"
+#include "util/static_string.hh"
 #include <array>
 #include <atomic>
 #include <cstdint>
@@ -17,11 +17,7 @@ struct WatchedParam {
 
 	// MIDI mapping info
 	uint8_t midi_chan{0};
-	uint8_t midi_cc_num{0};
-	uint8_t midi_notegate_num{0};
-	bool is_midi_cc{false};
-	bool is_midi_notegate{false};
-	bool is_midi_pitchwheel{false};
+	uint16_t panel_knob_id{};
 
 	void activate(uint16_t module_id, uint16_t param_id) {
 		this->module_id = module_id;
@@ -31,23 +27,11 @@ struct WatchedParam {
 
 	void set_midi_mapping(const MappedKnob *mapped_knob) {
 		if (mapped_knob) {
-			midi_chan = mapped_knob->midi_chan;
-			if (mapped_knob->is_midi_cc()) {
-				is_midi_cc = true;
-				midi_cc_num = mapped_knob->cc_num();
-			} else if (mapped_knob->is_midi_notegate()) {
-				is_midi_notegate = true;
-				midi_notegate_num = mapped_knob->notegate_num();
-			} else if (mapped_knob->panel_knob_id == MidiPitchWheelJack) {
-				is_midi_pitchwheel = true;
-			}
+			midi_chan = mapped_knob->midi_chan > 0 ? mapped_knob->midi_chan - 1 : 0;
+			panel_knob_id = mapped_knob->panel_knob_id;
 		} else {
 			midi_chan = 0;
-			midi_cc_num = 0;
-			midi_notegate_num = 0;
-			is_midi_cc = false;
-			is_midi_notegate = false;
-			is_midi_pitchwheel = false;
+			panel_knob_id = 0;
 		}
 	}
 
@@ -69,7 +53,7 @@ struct ParamWatcher {
 
 	void start_watching_param(const MappedKnob *mapped_knob) {
 		for (auto idx = 0u; auto &w : watched_params) {
-			if (!w.is_active()) {	
+			if (!w.is_active()) {
 				w.activate(mapped_knob->module_id, mapped_knob->param_id);
 				w.set_midi_mapping(mapped_knob);
 				add(idx);
