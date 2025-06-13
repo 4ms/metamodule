@@ -288,6 +288,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 }
 
 void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
+	player.sync();
 	handle_patch_mod_queue();
 
 	param_state.jack_senses = param_block.metaparams.jack_senses;
