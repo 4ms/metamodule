@@ -285,8 +285,6 @@ struct PatchViewPage : PageBase {
 		settings_menu.hide();
 		desc_panel.hide();
 		file_menu.hide();
-		params.text_displays.stop_watching_all();
-		params.param_watcher.stop_watching_all();
 
 		dyn_draws.clear();
 
@@ -475,12 +473,7 @@ private:
 				auto &gui_el = drawn_element.gui_element;
 
 				std::visit(overloaded{
-							   [&](auto const &el) {
-								   if (gui_el.count.num_params > 0) {
-									   params.param_watcher.start_watching_param(gui_el.module_idx,
-																				 gui_el.idx.param_idx);
-								   }
-							   },
+							   [](auto const &el) {},
 							   [&](DynamicTextDisplay const &el) {
 								   params.text_displays.start_watching_display(gui_el.module_idx, gui_el.idx.light_idx);
 							   },

@@ -1,5 +1,6 @@
 #pragma once
 #include "util/static_string.hh"
+#include "patch/patch.hh"
 #include <array>
 #include <atomic>
 #include <cstdint>
@@ -14,10 +15,40 @@ struct WatchedParam {
 	float value;
 	std::atomic<bool> active{false};
 
+	// MIDI mapping info
+	uint8_t midi_chan{0};
+	uint8_t midi_cc_num{0};
+	uint8_t midi_notegate_num{0};
+	bool is_midi_cc{false};
+	bool is_midi_notegate{false};
+	bool is_midi_pitchwheel{false};
+
 	void activate(uint16_t module_id, uint16_t param_id) {
 		this->module_id = module_id;
 		this->param_id = param_id;
 		active.store(true, std::memory_order_release); //all stores before this will not get moved after this
+	}
+
+	void set_midi_mapping(const MappedKnob *mapped_knob) {
+		if (mapped_knob) {
+			midi_chan = mapped_knob->midi_chan;
+			if (mapped_knob->is_midi_cc()) {
+				is_midi_cc = true;
+				midi_cc_num = mapped_knob->cc_num();
+			} else if (mapped_knob->is_midi_notegate()) {
+				is_midi_notegate = true;
+				midi_notegate_num = mapped_knob->notegate_num();
+			} else if (mapped_knob->panel_knob_id == MidiPitchWheelJack) {
+				is_midi_pitchwheel = true;
+			}
+		} else {
+			midi_chan = 0;
+			midi_cc_num = 0;
+			midi_notegate_num = 0;
+			is_midi_cc = false;
+			is_midi_notegate = false;
+			is_midi_pitchwheel = false;
+		}
 	}
 
 	void deactivate() {
@@ -30,17 +61,19 @@ struct WatchedParam {
 };
 
 struct ParamWatcher {
-	static constexpr size_t MaxParamsToWatch = 256;
+	static constexpr size_t MaxParamsToWatch = 257; // 128 cc + 128 notegate + 1 pitchwheel
 
 	std::span<WatchedParam> active_watched_params() {
 		return std::span<WatchedParam>{&watched_params[lowest_active_idx], &watched_params[highest_active_idx + 1]};
 	}
 
-	void start_watching_param(uint16_t module_id, uint16_t param_id) {
-		// Add to first empty slot:
+	void start_watching_param(uint16_t module_id, uint16_t param_id, const MappedKnob *mapped_knob = nullptr) {
 		for (auto idx = 0u; auto &w : watched_params) {
 			if (!w.is_active()) {
 				w.activate(module_id, param_id);
+				if (mapped_knob) {
+					w.set_midi_mapping(mapped_knob);
+				}
 				add(idx);
 				return;
 			}

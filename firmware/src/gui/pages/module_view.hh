@@ -315,16 +315,9 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {
-		auto gui_el = drawn_element.gui_element;
-		std::visit(overloaded{[&](DynamicTextDisplay const &el) {
-								  	params.text_displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
-							  	},
-							  	[&](auto const &el) {
-									if (gui_el.count.num_params > 0) {
-										params.param_watcher.start_watching_param(this_module_id, gui_el.idx.param_idx);
-									}
-								}},
-				   drawn_element.element);
+		if (std::get_if<DynamicTextDisplay>(&drawn_element.element)) {
+			params.text_displays.start_watching_display(this_module_id, drawn_element.gui_element.idx.light_idx);
+		}
 	}
 
 	bool is_creating_map() const {
@@ -544,8 +537,6 @@ struct ModuleViewPage : PageBase {
 	void blur() final {
 		module_context_menu.blur();
 		dyn_draw.blur();
-		params.text_displays.stop_watching_all();
-		params.param_watcher.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}
@@ -582,8 +573,6 @@ private:
 			lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 			lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
 			lv_obj_set_size(b, std::round(x_size), std::round(y_size));
-			lv_obj_refr_size(b);
-			lv_obj_refr_pos(b);
 		} else {
 			lv_obj_set_pos(b, 0, 0);
 			lv_obj_set_size(b, 0, 0);
@@ -758,7 +747,6 @@ private:
 
 	void click_normal_element(unsigned drawn_idx) {
 		auto &drawn_element = drawn_elements[drawn_idx];
-		args.element_indices = drawn_element.gui_element.idx;
 
 		if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
 			PageArguments nextargs = {
@@ -767,7 +755,6 @@ private:
 				.element_indices = drawn_element.gui_element.idx,
 				.element_mm = std::pair<float, float>{el->width_mm, el->height_mm},
 			};
-			page_list.update_state(PageId::ModuleView, nextargs);
 			page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
 			roller_hover.hide();
 

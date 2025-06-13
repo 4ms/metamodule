@@ -15,6 +15,7 @@
 #include "patch_play/cable_cache.hh"
 #include "patch_play/multicore_play.hh"
 #include "patch_play/patch_player_query_patch.hh"
+#include "patch_play/param_watch.hh"
 #include "patch_play/plugin_module.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
@@ -54,6 +55,8 @@ private:
 
 	// MIDI
 	bool midi_connected = false;
+
+	ParamWatcher param_watcher;
 
 	struct JackMidi : Jack {
 		uint32_t midi_chan = 0; //0: Omni
@@ -105,6 +108,10 @@ private:
 public:
 	PatchPlayer() {
 		clear_cache();
+	}
+
+	ParamWatcher &watched_params() {
+		return param_watcher;
 	}
 
 	void copy_patch_data(const PatchData &patchdata) {
@@ -176,8 +183,10 @@ public:
 
 		pd.update_midi_poly_num();
 
+		param_watcher.stop_watching_all();
 		for (auto const &mm : pd.midi_maps.set) {
 			cache_midi_mapping(mm);
+			param_watcher.start_watching_param(mm.module_id, mm.param_id, &mm);
 		}
 
 		// Load module states

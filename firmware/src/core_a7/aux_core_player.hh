@@ -16,7 +16,6 @@ namespace MetaModule
 
 struct AuxPlayer {
 	PatchPlayer &patch_player;
-	OpenPatchManager &open_patch_manager;
 	Ui &ui;
 
 	FixedVector<unsigned, 64> module_ids;
@@ -25,9 +24,8 @@ struct AuxPlayer {
 	// MIDI sync instance
 	MidiSync midi_sync;
 
-	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui)
+	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
 		: patch_player{patch_player}
-		, open_patch_manager{open_patch_manager}
 		, ui{ui} {
 		using namespace mdrivlib;
 
@@ -90,15 +88,15 @@ struct AuxPlayer {
 				}
 			}
 
-			for (auto &p : ui.watched_params().active_watched_params()) {
+			for (auto &p : patch_player.watched_params().active_watched_params()) {
 				if (p.is_active()) {
 					auto value = patch_player.get_param(p.module_id, p.param_id);
-					PatchData *patch = open_patch_manager.get_playing_patch();
-					if (patch) {
-						const MappedKnob *mapped_knob = patch->find_midi_map(p.module_id, p.param_id);
-						if (mapped_knob) {
-							midi_sync.sync_param_to_midi(value, mapped_knob->midi_chan, static_cast<uint8_t>(mapped_knob->cc_num()));
-						}
+					if (p.is_midi_cc) {
+						midi_sync.sync_param_to_midi(value, p.midi_chan, p.midi_cc_num);
+					} else if (p.is_midi_notegate) {
+						midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, p.midi_notegate_num);
+					} else if (p.is_midi_pitchwheel) {
+						midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
 					}
 				}
 			}
