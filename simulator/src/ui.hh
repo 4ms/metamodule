@@ -7,6 +7,7 @@
 #include "gui/pages/page_manager.hh"
 #include "internal_plugin_manager.hh"
 #include "lv_port_indev.h"
+#include "midi/midi_sync.hh"
 #include "patch_file/file_storage_proxy.hh"
 
 namespace MetaModule
@@ -51,6 +52,8 @@ private:
 	OpenPatchManager open_patches_manager;
 	PatchPlayLoader patch_playloader{file_storage_proxy, open_patches_manager, patch_player};
 	PatchModQueue patch_mod_queue;
+
+	MidiSync midi_sync;
 
 	UserSettings settings;
 	Screensaver screensaver{settings.screensaver};
