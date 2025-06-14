@@ -2,8 +2,10 @@
 
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/elements.hh"
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/panel_conf.hh"
 #include "console/pr_dbg.hh"
+#include "expanders.hh"
 #include "gui/elements/element_name.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/patch_mod_queue.hh"
@@ -123,9 +125,12 @@ public:
 			return std::nullopt;
 		}
 
+		unsigned num_jacks = PanelDef::NumUserFacingInJacks;
+		num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumInJacks : 0;
+
 		// Find first unmapped panel input jack
 		// Note: we ignore Gate In jacks here, since we have no way to know if a jack is audio/CV or gate
-		for (uint16_t panel_jack_id = 0; panel_jack_id < PanelDef::NumAudioIn; panel_jack_id++) {
+		for (uint16_t panel_jack_id = 0; panel_jack_id < num_jacks; panel_jack_id++) {
 			if (patch.find_mapped_injack(panel_jack_id) == nullptr) {
 				patch.add_mapped_injack(panel_jack_id, jack);
 				patch_mod_queue.put(
@@ -151,8 +156,11 @@ public:
 			return std::nullopt;
 		}
 
+		unsigned num_jacks = PanelDef::NumUserFacingInJacks;
+		num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumOutJacks : 0;
+
 		// Map to first unmapped panel output jack
-		for (uint16_t panel_jack_id = 0; panel_jack_id < PanelDef::NumAudioOut; panel_jack_id++) {
+		for (uint16_t panel_jack_id = 0; panel_jack_id < num_jacks; panel_jack_id++) {
 			if (patch.find_mapped_outjack(panel_jack_id) == nullptr) {
 				patch.add_mapped_outjack(panel_jack_id, jack);
 				patch_mod_queue.put(
