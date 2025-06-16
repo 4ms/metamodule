@@ -94,6 +94,7 @@ jobs:
           git submodule update --init --recursive lib/patch-serial
           git submodule update --init lib/cpputil
           git submodule update --init lib/mdrivlib
+          git submodule update --init lib/lvgl/lvgl
           make -f tests/Makefile
 
   build-win-gcc:
@@ -127,6 +128,7 @@ jobs:
           git submodule update --init --recursive lib/patch-serial
           git submodule update --init lib/cpputil
           git submodule update --init lib/mdrivlib
+          git submodule update --init lib/lvgl/lvgl
           make -f tests/Makefile
 
 
