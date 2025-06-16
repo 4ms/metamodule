@@ -1,6 +1,5 @@
 #include "element_name.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "gui/elements/context.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/styles.hh"
 #include "patch/patch.hh"
@@ -61,15 +60,18 @@ void append_panel_name(std::string &opts, Element const &el, uint16_t mapped_pan
 	opts += Gui::color_text(name, color);
 }
 
-void append_connected_jack_name(std::string &opts, GuiElement const &drawn, PatchData const &patch) {
+void append_connected_jack_name(std::string &opts,
+								ElementCount::Indices indices,
+								uint16_t module_idx,
+								PatchData const &patch) {
 
 	auto append = [&opts, &patch](Jack jack, ElementType type) {
 		FullElementName name = get_full_element_name(jack.module_id, jack.jack_id, type, patch);
 		opts = opts + " [" + std::string(name.module_name) + " " + std::string(name.element_name) + "] ";
 	};
 
-	if (drawn.idx.input_idx != ElementCount::Indices::NoElementMarker) {
-		Jack in_jack = {.module_id = drawn.module_idx, .jack_id = drawn.idx.input_idx};
+	if (indices.input_idx != ElementCount::Indices::NoElementMarker) {
+		Jack in_jack = {.module_id = module_idx, .jack_id = indices.input_idx};
 
 		if (auto *cable = patch.find_internal_cable_with_injack(in_jack)) {
 			if (auto out_map = patch.find_mapped_outjack(cable->out)) {
@@ -87,9 +89,9 @@ void append_connected_jack_name(std::string &opts, GuiElement const &drawn, Patc
 		}
 	}
 
-	else if (drawn.idx.output_idx != ElementCount::Indices::NoElementMarker)
+	else if (indices.output_idx != ElementCount::Indices::NoElementMarker)
 	{
-		Jack out_jack = {.module_id = drawn.module_idx, .jack_id = drawn.idx.output_idx};
+		Jack out_jack = {.module_id = module_idx, .jack_id = indices.output_idx};
 
 		if (auto *cable = patch.find_internal_cable_with_outjack(out_jack)) {
 			for (auto &in : cable->ins)
