@@ -1,4 +1,5 @@
 #pragma once
+#include "debug.hh"
 #include "midi_message.hh"
 #include "midi_queue.hh"
 #include "midi_router.hh"
@@ -63,6 +64,7 @@ public:
 		auto it = cc_values.find(key);
 
 		if (it == cc_values.end() || it->second != cc_value) {
+			Debug::Pin2::high();
 			MidiMessage cc_msg;
 			cc_msg.status = MidiStatusByte{MidiCommand::ControlChange, midi_chan};
 			cc_msg.data.byte[0] = cc_num;
@@ -72,6 +74,7 @@ public:
 
 			// Update stored value, or create entry
 			cc_values[key] = cc_value;
+			Debug::Pin2::low();
 		}
 	}
 
