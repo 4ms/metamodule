@@ -304,6 +304,9 @@ public:
 
 	void trigger_reading_gui_elements() {
 		smp.read_patch_gui_elements();
+	}
+
+	void sync() {
 		smp.join();
 	}
 
