@@ -14,8 +14,8 @@
 #include "patch_play/balance_modules.hh"
 #include "patch_play/cable_cache.hh"
 #include "patch_play/multicore_play.hh"
-#include "patch_play/patch_player_query_patch.hh"
 #include "patch_play/param_watch.hh"
+#include "patch_play/patch_player_query_patch.hh"
 #include "patch_play/plugin_module.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
@@ -313,6 +313,9 @@ public:
 
 	void trigger_reading_gui_elements() {
 		smp.read_patch_gui_elements();
+	}
+
+	void sync() {
 		smp.join();
 	}
 
