@@ -1,16 +1,11 @@
 #pragma once
-
 #include "CoreModules/elements/element_counter.hh"
-#include "CoreModules/elements/elements.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
-#include "conf/panel_conf.hh"
 #include "console/pr_dbg.hh"
-#include "expanders.hh"
 #include "gui/elements/element_name.hh"
+#include "params/expanders.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/patch_mod_queue.hh"
-#include <ranges>
-#include <span>
 
 namespace MetaModule
 {

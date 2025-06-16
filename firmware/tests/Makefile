@@ -28,6 +28,9 @@ TEST_SOURCES += lib/CoreModules/moduleFactory.cc
 TEST_SOURCES += tests/resampler_tests.cc
 TEST_SOURCES += vcv_plugin/export/src/resampler.cc
 TEST_SOURCES += tests/stubs/plugin_module.cc
+TEST_SOURCES += src/params/expanders.cc
+TEST_SOURCES += src/gui/elements/element_name.cc
+TEST_SOURCES += src/gui/elements/panel_name.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
 
 CXXFLAGS = 	-Wall \
@@ -42,7 +45,7 @@ CXXFLAGS = 	-Wall \
 			-Isrc \
 			-Isrc/medium \
 			-Ilib \
-			-Ilib \
+			-Ilib/lvgl/lvgl \
 			-Ilib/cpputil \
 			-Ilib/patch-serial \
 			-Ilib/patch-serial/ryml \

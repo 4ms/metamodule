@@ -202,7 +202,9 @@ TEST_CASE("Map jacks") {
 
 	// Test input mapping:
 
-	for (auto i = 0u; i < PanelDef::NumAudioIn; i++) {
+	unsigned num_jacks = PanelDef::NumUserFacingInJacks;
+	num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumInJacks : 0;
+	for (auto i = 0u; i < num_jacks; i++) {
 		test_map_injack(mod2, i);
 	}
 
