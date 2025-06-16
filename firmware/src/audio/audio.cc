@@ -194,6 +194,7 @@ void AudioStream::handle_patch_just_loaded() {
 }
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
+	player.sync();
 	handle_patch_mod_queue();
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
@@ -287,6 +288,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 }
 
 void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
+	player.sync();
 	param_state.jack_senses = param_block.metaparams.jack_senses;
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
