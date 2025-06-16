@@ -1095,11 +1095,11 @@ public:
 
 		if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_pitch_conns[num.value()], input_jack, chan);
-			pr_dbg("MIDI note (poly %d) ch: %u", num.value(), chan);
+			pr_dbg("MIDI note (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_gate(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_gate_conns[num.value()], input_jack, chan);
-			pr_dbg("MIDI gate (poly %d) ch:% ch:%uu", num.value(), chan);
+			pr_dbg("MIDI gate (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_vel(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_vel_conns[num.value()], input_jack, chan);
