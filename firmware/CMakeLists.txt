@@ -1,18 +1,20 @@
 cmake_minimum_required(VERSION 3.22)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
+set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
-set(BOARD_SELECT "mm-p11" CACHE STRING "Select board" ON)
+
+set(BOARD_SELECT "mm-p11" CACHE STRING "Select board")
 set_property(CACHE BOARD_SELECT PROPERTY STRINGS "mm-p11" "handheld-p1")
 
 if (BOARD_SELECT STREQUAL "mm-p11")
-    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/medium)
+    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/euro26hp)
 else()
     set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/handheld)
 endif()
+message("BOARD_SELECT: ${BOARD_SELECT}")
 
 
-set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
 
 project(
   MetaModule

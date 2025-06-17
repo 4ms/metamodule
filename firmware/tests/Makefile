@@ -34,6 +34,7 @@ TEST_SOURCES += src/gui/elements/panel_name.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
 
 CXXFLAGS = 	-Wall \
+			-Wno-deprecated-anon-enum-enum-conversion \
 		 	-std=gnu++2b \
 			-I$(DOCTEST_DIR) \
 			-I$(TEST_DIR) \
@@ -43,7 +44,7 @@ CXXFLAGS = 	-Wall \
 			-I. \
 			-I.. \
 			-Isrc \
-			-Isrc/boards/medium \
+			-Isrc/boards/euro26hp \
 			-Ilib \
 			-Ilib/lvgl/lvgl \
 			-Ilib/cpputil \
