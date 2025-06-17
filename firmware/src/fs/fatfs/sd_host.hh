@@ -1,5 +1,5 @@
 #pragma once
-#include "debug.hh"
+#include "conf/debug.hh"
 #include "fat_file_io.hh"
 #include "sdcard_ops.hh"
 

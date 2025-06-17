@@ -1,4 +1,3 @@
-#include "medium/debug_raw.h"
 #include <algorithm>
 #include <array>
 #include <cstdio>

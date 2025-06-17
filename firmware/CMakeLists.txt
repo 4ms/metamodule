@@ -5,6 +5,13 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
 set(BOARD_SELECT "mm-p11" CACHE STRING "Select board" ON)
 set_property(CACHE BOARD_SELECT PROPERTY STRINGS "mm-p11" "handheld-p1")
 
+if (BOARD_SELECT STREQUAL "mm-p11")
+    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/medium)
+else()
+    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/handheld)
+endif()
+
+
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 project(
@@ -40,8 +47,8 @@ get_target_property(CoreProcPluginBinDir coreproc_plugin_export BINARY_DIR)
 set(SYMBOLS_BINFILE_DIRS
   --objdir ${VcvPluginBinDir} 
   --objdir ${CoreProcPluginBinDir} 
-  --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
-  --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/fs/dirent/
+  --objdir ${A7_BIN_PATH}/CMakeFiles/main.elf.dir/vcv_hardware/
+  --objdir ${A7_BIN_PATH}/CMakeFiles/main.elf.dir/fs/dirent/
 
 )
 

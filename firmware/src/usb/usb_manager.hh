@@ -1,7 +1,7 @@
 #pragma once
+#include "conf/debug.hh"
 #include "conf/fusb30x_conf.hh"
 #include "console/concurrent_buffer.hh"
-#include "debug.hh"
 #include "drivers/fusb302.hh"
 #include "drivers/pin_change.hh"
 #include "fs/fatfs/ramdisk_ops.hh"

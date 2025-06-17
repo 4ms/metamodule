@@ -43,7 +43,7 @@ CXXFLAGS = 	-Wall \
 			-I. \
 			-I.. \
 			-Isrc \
-			-Isrc/medium \
+			-Isrc/boards/medium \
 			-Ilib \
 			-Ilib/lvgl/lvgl \
 			-Ilib/cpputil \

@@ -1,6 +1,6 @@
 #include "controls.hh"
+#include "conf/debug.hh"
 #include "conf/hsem_conf.hh"
-#include "debug.hh"
 #include "drivers/hsem.hh"
 #include "hsem_handler.hh"
 #include "midi_controls.hh"

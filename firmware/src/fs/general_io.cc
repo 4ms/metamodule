@@ -1,5 +1,4 @@
 #include "general_io.hh"
-#include "debug.hh"
 #include "delay.hh"
 #include "memory/ram_buffer.hh"
 

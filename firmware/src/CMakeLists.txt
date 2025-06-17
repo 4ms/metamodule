@@ -4,7 +4,6 @@ include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" ON)
 option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
 
-
 include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
 enable_logging()
 
@@ -236,7 +235,7 @@ target_include_directories(
           ${FWDIR}/src/vcv_hardware
           ${FWDIR}/src/fs
           ${FWDIR}/src/core_a7
-          ${FWDIR}/src/medium
+          ${BOARD_SUPPORT_DIR}
           ${FWDIR}/lib/mdrivlib
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7

@@ -1,6 +1,5 @@
 #pragma once
 #include "conf/hsem_conf.hh"
-#include "debug.hh"
 #include "drivers/eeprom_i2c_m24c.hh"
 #include "drivers/hsem.hh"
 #include "pr_dbg.hh"

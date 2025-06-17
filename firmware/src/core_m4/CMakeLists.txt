@@ -115,7 +115,7 @@ target_include_directories(
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${FWDIR}/src/medium
+          ${BOARD_SUPPORT_DIR}
           ${M4DIR}
           ${FWDIR}
           ${FWDIR}/lib

@@ -1,5 +1,4 @@
 #pragma once
-#include "debug.hh"
 #include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"

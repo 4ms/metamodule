@@ -1,7 +1,6 @@
 #pragma once
 #include "conf/hsem_conf.hh"
 #include "conf/screen_conf.hh"
-#include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "drivers/memory_transfer.hh"
@@ -159,9 +158,7 @@ public:
 					mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
 					mem_xfer.register_callback([&]() {
 						config_dma_transfer(dst_addr, HalfFrameSize);
-						start_dma_transfer([&]() {
-							HWSemaphore<ScreenFrameWriteLock>::unlock();
-						});
+						start_dma_transfer([&]() { HWSemaphore<ScreenFrameWriteLock>::unlock(); });
 					});
 					mem_xfer.start_transfer();
 				});
