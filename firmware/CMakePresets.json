@@ -48,7 +48,9 @@
         "BUILD_DYN_PLUGIN_Befaco":             { "type": "BOOL", "value": "ON" }, 
         "BUILD_DYN_PLUGIN_hetrickcv":          { "type": "BOOL", "value": "ON" },
         "BUILD_DYN_PLUGIN_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_eightfold":          { "type": "BOOL", "value": "ON" }
+        "BUILD_DYN_PLUGIN_eightfold":          { "type": "BOOL", "value": "ON" },
+        "BUILD_DYN_PLUGIN_Valley":             { "type": "BOOL", "value": "ON" },
+        "BUILD_DYN_PLUGIN_RackCore":           { "type": "BOOL", "value": "ON" }
       }
     },
     {
@@ -78,7 +80,17 @@
         "CONSOLE_USE_USB": { "type": "BOOL", "value": "ON" },
         "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
       }
+    },
+    {
+      "name": "handheld-p1",
+      "inherits": "min-brands",
+      "cacheVariables": {
+        "BOARD_SELECT": { "type": "STRING", "value": "handheld-p1" },
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "ON" },
+        "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
+      }
     }
+
   ],
   "buildPresets": [
     {
@@ -100,6 +112,10 @@
     {
       "name": "min-brands",
       "configurePreset": "min-brands"
+    },
+    {
+      "name": "handheld-p1",
+      "configurePreset": "handheld-p1"
     }
   ]
 }

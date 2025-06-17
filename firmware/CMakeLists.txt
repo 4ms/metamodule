@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.22)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
 
+set(BOARD_SELECT "mm-p11" CACHE STRING "Select board" ON)
+set_property(CACHE BOARD_SELECT PROPERTY STRINGS "mm-p11" "handheld-p1")
+
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 project(
