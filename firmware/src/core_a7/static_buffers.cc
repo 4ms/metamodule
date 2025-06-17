@@ -55,20 +55,20 @@ void init() {
 			frame = StreamConf::Audio::AudioOutFrame{};
 	}
 
-	for (auto &buff : audio_out_dma_block.ext_codec) {
-		for (auto &frame : buff)
-			frame = StreamConf::Audio::AudioOutFrame{};
-	}
+	// for (auto &buff : audio_out_dma_block.ext_codec) {
+	// 	for (auto &frame : buff)
+	// 		frame = StreamConf::Audio::AudioOutFrame{};
+	// }
 
 	for (auto &buff : audio_in_dma_block.codec) {
 		for (auto &frame : buff)
 			frame = StreamConf::Audio::AudioInFrame{};
 	}
 
-	for (auto &buff : audio_in_dma_block.ext_codec) {
-		for (auto &frame : buff)
-			frame = StreamConf::Audio::AudioInFrame{};
-	}
+	// for (auto &buff : audio_in_dma_block.ext_codec) {
+	// 	for (auto &frame : buff)
+	// 		frame = StreamConf::Audio::AudioInFrame{};
+	// }
 
 	console_a7_0_buff.writer_ref_count = 0;
 	console_a7_0_buff.current_write_pos = 0;

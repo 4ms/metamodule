@@ -23,7 +23,7 @@ public:
 		while (mdrivlib::HWSemaphore<SharedI2CLock>::lock() == mdrivlib::HWSemaphoreFlag::LockFailed) {
 		}
 
-		i2c.enable_IT(a7m4_shared_i2c_codec_conf.priority1, a7m4_shared_i2c_codec_conf.priority2);
+		i2c.enable_IT(a7m4_shared_i2c_conf.priority1, a7m4_shared_i2c_conf.priority2);
 
 		if (!main_jacksense_reader.is_present()) {
 			pr_err("Main Jack sense GPIO Expander failed be found\n");
@@ -107,13 +107,13 @@ public:
 	void reinit() {
 		i2c.disable_IT();
 		i2c.deinit();
-		i2c.init(a7m4_shared_i2c_codec_conf);
-		i2c.enable_IT(a7m4_shared_i2c_codec_conf.priority1, a7m4_shared_i2c_codec_conf.priority2);
+		i2c.init(a7m4_shared_i2c_conf);
+		i2c.enable_IT(a7m4_shared_i2c_conf.priority1, a7m4_shared_i2c_conf.priority2);
 		num_errors = 0;
 	}
 
 private:
-	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
+	I2CPeriph i2c{a7m4_shared_i2c_conf};
 
 	GPIOExpander ext_jacksense_reader{i2c, extaudio_gpio_expander_conf};
 	GPIOExpander main_jacksense_reader{i2c, mainboard_gpio_expander_conf};

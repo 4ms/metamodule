@@ -52,6 +52,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_rx_buffer(audio_blocks[0].in_codec, block_size_);
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
+#if METAMODULE_SUPPORT_EXT_CODEC
 		ext_audio_connected = true;
 		Expanders::ext_audio_found(true);
 		codec_ext_.set_tx_buffer(audio_blocks[0].out_ext_codec, block_size_);
@@ -62,6 +63,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			ext_cal.reset_to_default();
 			Hardware::codec_ext_memory.write(ext_cal);
 		}
+#endif
 		ext_cal_stash = ext_cal;
 
 		pr_info("Audio Expander detected\n");
@@ -202,8 +204,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
-		auto &ext_out = audio_block.out_ext_codec[idx];
-		auto const &ext_in = audio_block.in_ext_codec[idx];
 
 		// Audio inputs
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
@@ -220,6 +220,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
 		}
 
+#if METAMODULE_SUPPORT_EXT_CODEC
+		auto &ext_out = audio_block.out_ext_codec[idx];
+		auto const &ext_in = audio_block.in_ext_codec[idx];
 		if (ext_audio_connected) {
 			for (auto [exp_panel_jack_i, inchan] : zip(AudioExpander::in_order, ext_in.chan)) {
 
@@ -237,6 +240,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 				param_state.smoothed_ins[smooth_idx].add_val(calibrated_input);
 			}
 		}
+#endif
 
 		// Gate inputs
 		for (auto [i, sync_gatein] : enumerate(param_state.gate_ins)) {
@@ -275,10 +279,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			outchan = get_audio_output(i);
 
 		// Ext audio modules:
-		if (ext_audio_connected) {
-			for (auto [i, extoutchan] : countzip(ext_out.chan))
-				extoutchan = get_ext_audio_output(i);
-		}
+		// if (ext_audio_connected) {
+		// 	for (auto [i, extoutchan] : countzip(ext_out.chan))
+		// 		extoutchan = get_ext_audio_output(i);
+		// }
 
 		idx++;
 	}
@@ -293,8 +297,6 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
-		auto &ext_out = audio_block.out_ext_codec[idx];
-		auto const &ext_in = audio_block.in_ext_codec[idx];
 		auto &params = param_block.params[idx];
 		idx++;
 
@@ -306,6 +308,9 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			param_state.smoothed_ins[panel_jack_i].add_val(scaled_input);
 		}
 
+#if METAMODULE_SUPPORT_EXT_CODEC
+		auto &ext_out = audio_block.out_ext_codec[idx];
+		auto const &ext_in = audio_block.in_ext_codec[idx];
 		if (ext_audio_connected) {
 			for (auto [exp_panel_jack_i, inchan] : zip(AudioExpander::in_order, ext_in.chan)) {
 				// Skip unpatched jacks
@@ -321,6 +326,7 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 				param_state.smoothed_ins[smooth_idx].add_val(calibrated_input);
 			}
 		}
+#endif
 
 		// Pass Knob values to modules
 		for (auto [i, knob_val, knob_state] : countzip(params.knobs, param_state.knobs)) {
@@ -338,8 +344,8 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		for (auto &outchan : out.chan)
 			outchan = 0;
 
-		for (auto &extoutchan : ext_out.chan)
-			extoutchan = 0;
+		// for (auto &extoutchan : ext_out.chan)
+		// 	extoutchan = 0;
 	}
 
 	player.trigger_reading_gui_elements();
@@ -448,11 +454,13 @@ void AudioStream::set_block_spans() {
 	audio_blocks[0].out_codec = {audio_out_block.codec[0].data(), block_size_};
 	audio_blocks[1].out_codec = {std::next(audio_out_block.codec[0].begin(), block_size_), block_size_};
 
+#if METAMODULE_SUPPORT_EXT_CODEC
 	audio_blocks[0].in_ext_codec = {audio_in_block.ext_codec[0].data(), block_size_};
 	audio_blocks[1].in_ext_codec = {std::next(audio_in_block.ext_codec[0].begin(), block_size_), block_size_};
 
 	audio_blocks[0].out_ext_codec = {audio_out_block.ext_codec[0].data(), block_size_};
 	audio_blocks[1].out_ext_codec = {std::next(audio_out_block.ext_codec[0].begin(), block_size_), block_size_};
+#endif
 }
 
 void AudioStream::update_audio_settings() {
@@ -462,9 +470,9 @@ void AudioStream::update_audio_settings() {
 
 	if (sample_rate != sample_rate_ || block_size != block_size_) {
 
-		auto ok = (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
+		auto ok = (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecBase::CODEC_NO_ERR);
 		if (ok && ext_audio_connected)
-			ok = (codec_ext_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
+			ok = (codec_ext_.change_samplerate_blocksize(sample_rate, block_size) == CodecBase::CODEC_NO_ERR);
 
 		if (ok) {
 			codec_ext_.start();

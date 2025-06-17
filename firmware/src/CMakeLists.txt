@@ -193,7 +193,6 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/drivers/timekeeper.cc
   ${FWDIR}/lib/mdrivlib/drivers/i2c.cc
   ${FWDIR}/lib/mdrivlib/drivers/qspi_flash_driver.cc
-  ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3168.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1/drivers/sai_tdm.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/system_ca7.c
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
@@ -208,6 +207,11 @@ add_executable(
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
+if (BOARD_SELECT STREQUAL "mm-p11")
+target_sources(main.elf PRIVATE ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3168.cc)
+else()
+target_sources(main.elf PRIVATE ${FWDIR}/lib/mdrivlib/drivers/codec_TAC5211.cc)
+endif()
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(

@@ -547,10 +547,12 @@ private:
 		if (state == State::StartReadingCal) {
 
 			if (is_expander) {
+#if METAMODULE_SUPPORT_EXT_CODEC
 				auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
 				if (Hardware::codec_ext_memory.read(0, caldata_span)) {
 					state = is_reading_to_verify ? State::Verify : State::CalibratingIns;
 				}
+#endif
 			} else {
 
 				auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
@@ -600,11 +602,13 @@ private:
 			// Wait for Next button
 			if (next_step) {
 				if (is_expander) {
+#if METAMODULE_SUPPORT_EXT_CODEC
 					if (Hardware::codec_ext_memory.write(cal_data, 0)) {
 						success = true;
 					} else {
 						failure = true;
 					}
+#endif
 				} else {
 					mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(PaddedCalData));
 

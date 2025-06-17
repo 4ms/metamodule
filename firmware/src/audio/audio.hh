@@ -3,24 +3,15 @@
 #include "calibrate/calibration_data.hh"
 #include "conf/board_codec_conf.hh"
 #include "conf/stream_conf.hh"
-#include "drivers/codec.hh"
-#include "drivers/codec_PCM3168.hh"
 #include "drivers/cycle_counter.hh"
-#include "drivers/stm32xx.h"
 #include "overrun_handler.hh"
 #include "param_block.hh"
-#include "params.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
-#include "processors/tools/kneeCompress.h"
 #include "sync_params.hh"
-#include "util/calibrator.hh"
 #include "util/edge_detector.hh"
-#include "util/filter.hh"
-#include "util/math.hh"
-#include <array>
 
 namespace MetaModule
 {
@@ -68,7 +59,7 @@ private:
 
 	// Hardware interface
 	CodecT &codec_;
-	CodecT &codec_ext_;
+	ExtCodecT &codec_ext_;
 	uint32_t sample_rate_;
 	uint32_t block_size_;
 

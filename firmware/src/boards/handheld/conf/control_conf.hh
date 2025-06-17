@@ -10,8 +10,8 @@ namespace MetaModule
 {
 
 struct FrameRatePinChangeConf : mdrivlib::DefaultPinChangeConf {
-	static constexpr uint32_t pin = 12;
-	static constexpr mdrivlib::GPIO port = mdrivlib::GPIO::D;
+	static constexpr uint32_t pin = 4;
+	static constexpr mdrivlib::GPIO port = mdrivlib::GPIO::E;
 	static constexpr bool on_rising_edge = true;
 	static constexpr bool on_falling_edge = false;
 	static constexpr uint32_t priority1 = 0;
@@ -41,24 +41,11 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 };
 
 using mdrivlib::AdcChannelConf;
-enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotU, PotV, PotW, PotX, PotY, PotZ };
+enum Pots : uint32_t {};
 constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_2Cycles;
-constexpr auto PotConfs = std::to_array({
-	AdcChannelConf{{GPIO::B, PinNum::_1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_2}, mdrivlib::AdcChanNum::_14, PotB, AdcSampTime},
-	AdcChannelConf{{GPIO::B, PinNum::_0}, mdrivlib::AdcChanNum::_9, PotC, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_1}, mdrivlib::AdcChanNum::_11, PotD, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_2}, mdrivlib::AdcChanNum::_12, PotE, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_5}, mdrivlib::AdcChanNum::_19, PotF, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_6}, mdrivlib::AdcChanNum::_3, PotU, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_7}, mdrivlib::AdcChanNum::_7, PotV, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_5}, mdrivlib::AdcChanNum::_8, PotW, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_3}, mdrivlib::AdcChanNum::_15, PotX, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_3}, mdrivlib::AdcChanNum::_13, PotY, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_4}, mdrivlib::AdcChanNum::_18, PotZ, AdcSampTime},
-});
+constexpr std::array<AdcChannelConf, 0> PotConfs;
 
-constexpr int32_t MinPotValue = 72; // more like 69, actually 0x3D = 61
+constexpr int32_t MinPotValue = 72;
 constexpr float MaxPotValue = 4095.f - (float)MinPotValue - 4.f;
 
 } // namespace MetaModule

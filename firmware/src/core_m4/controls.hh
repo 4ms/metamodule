@@ -57,7 +57,7 @@ private:
 	bool _rotary_moved_while_pressed = false;
 
 	// Analog controls (pots)
-	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
+	static constexpr size_t NumPotAdcs = PotConfs.size();
 	std::array<uint16_t, NumPotAdcs> pot_vals{};
 	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
