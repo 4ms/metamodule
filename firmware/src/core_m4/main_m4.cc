@@ -59,8 +59,10 @@ int main() {
 	ModuleFSMessageHandler module_fs_messages{SharedMemoryS::ptrs.icc_modulefs_message_core0,
 											  SharedMemoryS::ptrs.icc_modulefs_message_core1};
 
+#if METAMODULE_ENABLE_WIFI
 	WifiInterface::init(&fs_messages.get_patch_storage());
 	WifiInterface::start();
+#endif
 
 	// Controls
 	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host()};
@@ -92,6 +94,8 @@ int main() {
 
 		module_fs_messages.process();
 
+#if METAMODULE_ENABLE_WIFI
 		WifiInterface::run();
+#endif
 	}
 }
