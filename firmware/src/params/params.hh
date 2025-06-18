@@ -14,11 +14,9 @@ struct Params {
 	Midi::Event midi_event{}; //6B
 	MidiMessage raw_msg{};	  //3B
 	uint8_t gate_ins{};
-	Toggler button{};
 
 	void clear() {
 		gate_ins = 0;
-		button.reset();
 
 		for (float &knob : knobs)
 			knob = 0.f;
