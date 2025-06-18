@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
-#include "CoreModules/hub/audio_expander_defs.hh"
+#include "conf/panel_conf.hh"
 #include "console/pr_dbg.hh"
 #include "gui/elements/element_name.hh"
 #include "params/expanders.hh"

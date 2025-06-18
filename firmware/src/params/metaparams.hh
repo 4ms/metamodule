@@ -1,5 +1,4 @@
 #pragma once
-#include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
 #include "util/debouncer.hh"

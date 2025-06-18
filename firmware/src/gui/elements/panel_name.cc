@@ -1,5 +1,5 @@
 #include "CoreModules/elements/base_element.hh"
-#include "CoreModules/hub/audio_expander_defs.hh"
+#include "conf/panel_conf.hh"
 #include "midi/midi_message.hh"
 #include "patch/patch.hh"
 #include <string>

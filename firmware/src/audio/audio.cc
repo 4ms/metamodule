@@ -1,5 +1,4 @@
 #include "audio/audio.hh"
-#include "CoreModules/hub/audio_expander_defs.hh"
 #include "calibrate/calibration_data_reader.hh"
 #include "conf/debug.hh"
 #include "conf/hsem_conf.hh"
