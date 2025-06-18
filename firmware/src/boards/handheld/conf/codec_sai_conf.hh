@@ -9,9 +9,9 @@ using mdrivlib::PinNum;
 using mdrivlib::SaiConfig;
 
 const SaiConfig codec_mainPCB_sai_conf = {
-	.sai = SAI1,
-	.tx_block = SAI1_Block_A,
-	.rx_block = SAI1_Block_B,
+	.sai = SAI2,
+	.tx_block = SAI2_Block_A,
+	.rx_block = SAI2_Block_B,
 
 	.mode = SaiConfig::TXMaster,
 
@@ -19,7 +19,7 @@ const SaiConfig codec_mainPCB_sai_conf = {
 		{
 			.DMAx = DMA2,
 			.stream = DMA2_Stream1,
-			.channel = DMA_REQUEST_SAI1_A,
+			.channel = DMA_REQUEST_SAI2_A,
 			.IRQn = DMA2_Stream1_IRQn,
 			.pri = 1,
 			.subpri = 1,
@@ -28,7 +28,7 @@ const SaiConfig codec_mainPCB_sai_conf = {
 		{
 			.DMAx = DMA2,
 			.stream = DMA2_Stream2,
-			.channel = DMA_REQUEST_SAI1_B,
+			.channel = DMA_REQUEST_SAI2_B,
 			.IRQn = DMA2_Stream2_IRQn,
 			.pri = 1,
 			.subpri = 1,
@@ -39,10 +39,10 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.samplerate = MetaModule::AudioSettings::DefaultSampleRate,
 
 	.MCLK = {GPIO::Unused}, //not connected
-	.SCLK = {GPIO::E, PinNum::_5, PinAF::AltFunc6},
-	.LRCLK = {GPIO::E, PinNum::_4, PinAF::AltFunc6},
-	.SD_DAC = {GPIO::B, PinNum::_2, PinAF::AltFunc6}, // SD A
-	.SD_ADC = {GPIO::F, PinNum::_6, PinAF::AltFunc6}, // SD B
+	.SCLK = {GPIO::D, PinNum::_13, PinAF::AltFunc10},
+	.LRCLK = {GPIO::D, PinNum::_12, PinAF::AltFunc10},
+	.SD_DAC = {GPIO::D, PinNum::_11, PinAF::AltFunc10}, // SD A
+	.SD_ADC = {GPIO::G, PinNum::_10, PinAF::AltFunc10}, // SD B
 
 	.reset_pin = {GPIO::Unused},
 
