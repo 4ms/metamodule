@@ -214,17 +214,19 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 
 	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
 	// TODO: _new_adc_data_ready is written from multiple threads, but is not thread-safe. Use atomic? Or accept dropped/duplicate ADC values?
-	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
-		uint32_t tmp = ADC1->ISR;
-		if (tmp & ADC_ISR_EOS) {
-			ADC1->ISR = tmp | ADC_ISR_EOS;
-			_new_adc_data_ready = true;
-		}
-	});
+	if constexpr (PotConfs.size() > 0) {
+		InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
+			uint32_t tmp = ADC1->ISR;
+			if (tmp & ADC_ISR_EOS) {
+				ADC1->ISR = tmp | ADC_ISR_EOS;
+				_new_adc_data_ready = true;
+			}
+		});
 
-	set_samplerate(sample_rate);
+		set_samplerate(sample_rate);
 
-	pot_adc.start();
+		pot_adc.start();
+	}
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen
