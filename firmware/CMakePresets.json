@@ -86,7 +86,7 @@
       "inherits": "min-brands",
       "cacheVariables": {
         "BOARD_SELECT": { "type": "STRING", "value": "handheld-p1" },
-        "CONSOLE_USE_USB": { "type": "BOOL", "value": "ON" },
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
         "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
       }
     }
