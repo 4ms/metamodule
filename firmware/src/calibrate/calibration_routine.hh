@@ -744,8 +744,6 @@ private:
 	struct PaddedCalData {
 		CalData cal_data{};
 		char padding[128 - sizeof(cal_data)]{};
-
-		static_assert(sizeof(CalData) >= 64 && sizeof(CalData) < 128);
 	};
 	alignas(64) PaddedCalData padded_cal_data{};
 	static_assert(sizeof padded_cal_data % 64 == 0, "CalData must not share cache lines with other data");
@@ -772,12 +770,14 @@ private:
 	std::array<bool, MaxJacks> jack_plugged{};
 	std::array<JackCalStatus, MaxJacks> jack_status{};
 
-	std::array<AnalyzedSig, NumInputs> in_signals{coef, coef, coef, coef, coef, coef};
+	// FIXME: this is hardset for 6 inputs
+	std::array<AnalyzedSig, 6> in_signals{coef, coef, coef, coef, coef, coef};
 
 	unsigned delay_measurement = 0;
 	std::optional<unsigned> current_output = 0;
 
-	std::array<lv_obj_t *, NumInputs> input_status_labels{
+	// FIXME: this is hardset for 6 inputs
+	std::array<lv_obj_t *, 6> input_status_labels{
 		ui_CalibrationIn1Label,
 		ui_CalibrationIn2Label,
 		ui_CalibrationIn3Label,
@@ -785,7 +785,9 @@ private:
 		ui_CalibrationIn5Label,
 		ui_CalibrationIn6Label,
 	};
-	std::array<lv_obj_t *, NumOutputs> output_status_labels{
+
+	// FIXME: this is hardset for 8 outputs
+	std::array<lv_obj_t *, 8> output_status_labels{
 		ui_CalibrationOut1Label,
 		ui_CalibrationOut2Label,
 		ui_CalibrationOut3Label,

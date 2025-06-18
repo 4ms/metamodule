@@ -137,11 +137,10 @@ private:
 
 	std::array<bool, PanelDef::NumAudioIn + AudioExpander::NumInJacks> jack_plugged{};
 
+	// FIXME: this is hard-set for 12 inputs
 	static constexpr float coef = 1.f / 2.f;
-	std::array<AnalyzedSig, PanelDef::NumAudioIn + AudioExpander::NumInJacks> in_signals{
-		coef, coef, coef, coef, coef, coef, coef, coef, coef, coef, coef, coef};
-
-	std::array<lv_obj_t *, PanelDef::NumAudioIn + AudioExpander::NumInJacks> input_status_labels{
+	std::array<AnalyzedSig, 12> in_signals{coef, coef, coef, coef, coef, coef, coef, coef, coef, coef, coef, coef};
+	std::array<lv_obj_t *, 12> input_status_labels{
 		ui_CalibrationIn1Label,
 		ui_CalibrationIn2Label,
 		ui_CalibrationIn3Label,
