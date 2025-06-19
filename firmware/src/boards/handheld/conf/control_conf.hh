@@ -48,4 +48,6 @@ constexpr std::array<AdcChannelConf, 0> PotConfs;
 constexpr int32_t MinPotValue = 72;
 constexpr float MaxPotValue = 4095.f - (float)MinPotValue - 4.f;
 
+constexpr bool UseGpioExpanderForSensePins = false;
+
 } // namespace MetaModule

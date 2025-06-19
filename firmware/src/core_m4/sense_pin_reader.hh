@@ -4,7 +4,6 @@
 #include "conf/i2c_codec_conf.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/hsem.hh"
-#include "params.hh"
 #include "pr_dbg.hh"
 
 namespace MetaModule
@@ -18,7 +17,9 @@ class SensePinReader {
 	using I2CPeriph = mdrivlib::I2CPeriph;
 
 public:
-	SensePinReader() {
+	SensePinReader() = default;
+
+	void init() {
 		//Spin until we get the lock
 		while (mdrivlib::HWSemaphore<SharedI2CLock>::lock() == mdrivlib::HWSemaphoreFlag::LockFailed) {
 		}

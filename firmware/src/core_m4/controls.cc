@@ -196,7 +196,9 @@ void Controls::start() {
 }
 
 void Controls::process() {
-	sense_pin_reader.update();
+	if constexpr (UseGpioExpanderForSensePins) {
+		sense_pin_reader.update();
+	}
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
@@ -226,6 +228,10 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 		set_samplerate(sample_rate);
 
 		pot_adc.start();
+	}
+
+	if constexpr (UseGpioExpanderForSensePins) {
+		sense_pin_reader.init();
 	}
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
