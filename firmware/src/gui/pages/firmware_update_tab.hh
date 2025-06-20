@@ -83,6 +83,9 @@ struct FirmwareUpdateTab : SystemMenuTab {
 			} break;
 
 			case State::Updating: {
+				// Prevent screen saver:
+				lv_disp_trig_activity(nullptr);
+
 				auto status = updater.process();
 
 				if (status.state != FirmwareUpdaterProxy::Error && status.message.length())
