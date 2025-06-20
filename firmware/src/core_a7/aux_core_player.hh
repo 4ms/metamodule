@@ -1,4 +1,8 @@
 #pragma once
+#include "midi.hpp"
+#include "midi/midi_queue.hh"
+#include "midi/midi_router.hh"
+#include "midi/midi_sync.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
@@ -15,6 +19,10 @@ struct AuxPlayer {
 	Ui &ui;
 
 	FixedVector<unsigned, 64> module_ids;
+	unsigned midi_throttle_counter = 0;
+	
+	// MIDI sync instance
+	MidiSync midi_sync;
 
 	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
 		: patch_player{patch_player}
@@ -77,6 +85,20 @@ struct AuxPlayer {
 					auto sz = patch_player.get_display_text(d.module_id, d.light_id, text);
 					if (sz)
 						d.text._data[sz] = '\0';
+				}
+			}
+
+			for (auto &p : patch_player.watched_params().active_watched_params()) {
+				if (p.is_active()) {
+					auto value = patch_player.get_param(p.module_id, p.param_id);
+					auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
+					if (map.is_midi_cc()) {
+						midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
+					} else if (map.is_midi_notegate()) {
+						midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
+					} else if (p.panel_knob_id == MidiPitchWheelJack) {
+						midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
+					}
 				}
 			}
 
