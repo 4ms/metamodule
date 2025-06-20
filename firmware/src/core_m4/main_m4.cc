@@ -1,3 +1,4 @@
+#include "battery_guage.hh"
 #include "conf/hsem_conf.hh"
 #include "controls.hh"
 #include "core_intercom/shared_memory.hh"
@@ -62,6 +63,11 @@ int main() {
 #if METAMODULE_ENABLE_WIFI
 	WifiInterface::init(&fs_messages.get_patch_storage());
 	WifiInterface::start();
+#endif
+
+#if 1
+	BatteryGuage batt{battery_guage_conf, 0xaa};
+	batt.init();
 #endif
 
 	// Controls
