@@ -28,10 +28,10 @@ const mdrivlib::I2CConfig battery_guage_conf = {
 	.SDA = {GPIO::B, PinNum::_11, PinAF::AltFunc4},
 	.timing =
 		{
-			.PRESC = 0x40,
+			.PRESC = 0x10,
 			.SCLDEL_SDADEL = 0xFF,
-			.SCLH = 0x90,
-			.SCLL = 0x90,
+			.SCLH = 0x35, //0x36: 391kHz
+			.SCLL = 0x35,
 		},
 	.priority1 = 2,
 	.priority2 = 1,
