@@ -2,18 +2,6 @@ cmake_minimum_required(VERSION 3.22)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
-
-set(BOARD_SELECT "mm-p11" CACHE STRING "Select board")
-set_property(CACHE BOARD_SELECT PROPERTY STRINGS "mm-p11" "handheld-p1")
-
-if (BOARD_SELECT STREQUAL "mm-p11")
-    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/euro26hp)
-else()
-    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/handheld)
-endif()
-message("BOARD_SELECT: ${BOARD_SELECT}")
-
-
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
 
 project(
@@ -22,6 +10,26 @@ project(
   DESCRIPTION "MetaModule"
   LANGUAGES C CXX ASM
 )
+
+
+#
+# Board Select
+#
+set(BOARD_SELECT "mm-p11" CACHE STRING "Select board")
+set_property(CACHE BOARD_SELECT PROPERTY STRINGS "mm-p11" "handheld-p1" "devboard-v01")
+
+if (BOARD_SELECT STREQUAL "handheld-p1")
+    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/handheld)
+
+elseif(BOARD_SELECT STREQUAL "devboard-v01")
+    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/devboard-01)
+
+else()
+    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/euro26hp)
+endif()
+
+message("BOARD_SELECT: ${BOARD_SELECT}")
+
 
 #
 # Git commit hash
@@ -243,12 +251,17 @@ else()
 	set(BOOTLOADER_TOOLCHAIN_OPT "TOOLCHAIN_DIR=${TOOLCHAIN_BASE_DIR}/")
 endif()
 
-if (BOARD_SELECT STREQUAL "mm-p11")
-    set(bootloader_conf "../board_conf/mmp11_with_expanders_conf.hh")
-    set(dfu_bootloader_conf "board_conf/mmp11_conf.hh")
-else()
+if (BOARD_SELECT STREQUAL "handheld-p1")
     set(bootloader_conf "../board_conf/handheld-p1.hh")
     set(dfu_bootloader_conf "../../board_conf/dfu-handheld-p1.hh")
+
+elseif(BOARD_SELECT STREQUAL "devboard-v01")
+    set(bootloader_conf "../board_conf/devboard-v0.1.hh")
+    set(dfu_bootloader_conf "../../board_conf/dfu-devboard-v0.1.hh")
+
+else()
+    set(bootloader_conf "../board_conf/mmp11_with_expanders_conf.hh")
+    set(dfu_bootloader_conf "board_conf/mmp11_conf.hh")
 endif()
 
 add_custom_target(

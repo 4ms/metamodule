@@ -89,6 +89,15 @@
         "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
         "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
       }
+    },
+    {
+      "name": "devboard-v01",
+      "inherits": "full",
+      "cacheVariables": {
+        "BOARD_SELECT": { "type": "STRING", "value": "devboard-v01" },
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
+        "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
+      }
     }
 
   ],
@@ -116,6 +125,10 @@
     {
       "name": "handheld-p1",
       "configurePreset": "handheld-p1"
+    },
+    {
+      "name": "devboard-v01",
+      "configurePreset": "devboard-v01"
     }
   ]
 }
