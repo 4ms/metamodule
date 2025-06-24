@@ -1,7 +1,7 @@
-#include "battery_guage.hh"
 #include "conf/hsem_conf.hh"
 #include "controls.hh"
 #include "core_intercom/shared_memory.hh"
+#include "drivers/battery_guage_bq27441.hh"
 #include "drivers/hsem.hh"
 #include "drivers/system_clocks.hh"
 #include "fs/fatfs/sd_host.hh"
@@ -99,6 +99,10 @@ int main() {
 		fs_messages.process();
 
 		module_fs_messages.process();
+
+#if 1
+		batt.update();
+#endif
 
 #if METAMODULE_ENABLE_WIFI
 		WifiInterface::run();
