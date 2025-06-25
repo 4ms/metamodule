@@ -343,8 +343,10 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		for (auto &outchan : out.chan)
 			outchan = 0;
 
-		// for (auto &extoutchan : ext_out.chan)
-		// 	extoutchan = 0;
+#if METAMODULE_SUPPORT_EXT_CODEC
+		for (auto &extoutchan : ext_out.chan)
+			extoutchan = 0;
+#endif
 	}
 
 	player.trigger_reading_gui_elements();
