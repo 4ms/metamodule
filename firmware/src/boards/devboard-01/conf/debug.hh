@@ -10,11 +10,10 @@ struct Debug {
 		}
 	};
 
-	// First pin is Freeze jumper
-	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::D, 3, mdrivlib::PinMode::Output>;  //Second pin
-	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::B, 14, mdrivlib::PinMode::Output>; //Third pin
-	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::E, 1, mdrivlib::PinMode::Output>;  //Fourth pin
+	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::B, 9, mdrivlib::PinMode::Output>;  //Third pin
+	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::E, 11, mdrivlib::PinMode::Output>; //Fourth pin
 
+	using Pin2 = NoPin;
 	using Pin3 = NoPin;
 	using Pin4 = NoPin;
 	using Pin5 = NoPin;
