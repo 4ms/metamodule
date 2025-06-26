@@ -225,7 +225,7 @@ struct ModuleViewPage : PageBase {
 				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
 			}
 
-			append_connected_jack_name(opts, gui_el, *patch);
+			append_connected_jack_name(opts, gui_el.idx, gui_el.module_idx, *patch);
 
 			opts += "\n";
 			roller_drawn_el_idx.push_back(drawn_el_idx);

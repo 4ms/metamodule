@@ -11,8 +11,6 @@ The following guides are available:
 
 - [Loading firmware](../docs/firmware-loading.md)
 
-- [User instructions to upgrading firmware](../docs/user-firmware-update.md)
-
 - [Debugging](../docs/firmware-debugging.md)
 
 - [Firmware Boot Process](../docs/Firmware-Boot.md)

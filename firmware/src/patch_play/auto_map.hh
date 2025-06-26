@@ -1,13 +1,11 @@
 #pragma once
-
 #include "CoreModules/elements/element_counter.hh"
-#include "CoreModules/elements/elements.hh"
-#include "conf/panel_conf.hh"
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "console/pr_dbg.hh"
+#include "gui/elements/element_name.hh"
+#include "params/expanders.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/patch_mod_queue.hh"
-#include <ranges>
-#include <span>
 
 namespace MetaModule
 {
@@ -84,6 +82,10 @@ public:
 	std::optional<MappingDest>
 	map_param_single_knobset(uint16_t module_id, uint16_t param_idx, PatchData &patch, uint16_t set_i) {
 
+		// When forcing a single knobset, set the alias name to the param name since the entire knobset will be for the same module
+		// This avoids the automatic display name of "ModuleName - ParamName"
+		const auto fullname = get_full_element_name(module_id, param_idx, ElementType::Param, patch);
+
 		for (uint16_t panel_knob_id = 0; panel_knob_id < PanelDef::NumKnobs; panel_knob_id++) {
 			if (patch.find_mapped_knob(set_i, panel_knob_id) == nullptr) {
 
@@ -92,7 +94,7 @@ public:
 									  .param_id = param_idx,
 									  .min = 0,
 									  .max = 1,
-									  .alias_name = ""};
+									  .alias_name = fullname.element_name};
 
 				if (patch.add_update_mapped_knob(set_i, map)) {
 					patch_mod_queue.put(AddMapping{.map = map, .set_id = set_i});
@@ -118,9 +120,12 @@ public:
 			return std::nullopt;
 		}
 
+		unsigned num_jacks = PanelDef::NumUserFacingInJacks;
+		num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumInJacks : 0;
+
 		// Find first unmapped panel input jack
 		// Note: we ignore Gate In jacks here, since we have no way to know if a jack is audio/CV or gate
-		for (uint16_t panel_jack_id = 0; panel_jack_id < PanelDef::NumAudioIn; panel_jack_id++) {
+		for (uint16_t panel_jack_id = 0; panel_jack_id < num_jacks; panel_jack_id++) {
 			if (patch.find_mapped_injack(panel_jack_id) == nullptr) {
 				patch.add_mapped_injack(panel_jack_id, jack);
 				patch_mod_queue.put(
@@ -146,8 +151,11 @@ public:
 			return std::nullopt;
 		}
 
+		unsigned num_jacks = PanelDef::NumUserFacingInJacks;
+		num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumOutJacks : 0;
+
 		// Map to first unmapped panel output jack
-		for (uint16_t panel_jack_id = 0; panel_jack_id < PanelDef::NumAudioOut; panel_jack_id++) {
+		for (uint16_t panel_jack_id = 0; panel_jack_id < num_jacks; panel_jack_id++) {
 			if (patch.find_mapped_outjack(panel_jack_id) == nullptr) {
 				patch.add_mapped_outjack(panel_jack_id, jack);
 				patch_mod_queue.put(

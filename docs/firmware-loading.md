@@ -1,32 +1,3 @@
--------------------------------------------------------
-
-## Important breaking change!
-Firmware releases 0.6.0 and later require a new bootloader.
-If you received your hardware unit prior to Dec 12, 2023 
-then you have the old bootloader and you MUST update your bootloader in order to run new firmware.
-
-If you are booting from Flash (not SD Card), do this:
-- Go to the (GitHub Releases page)[https://github.com/4ms/metamodule/releases]
-- Look for Firmware Version 0.6.0. 
-- Download the `flash_loader.uimg` file.
-- Use Web-DFU or command-line dfu-util to upload this to your device as if it were a normal firmware update. 
-- Reboot so that the flash loader can run once. When the lights blink green and blue, power off.
-- Now download the latest normal firmware update (`main.uimg`) file from GitHub Releases and load it using Web DFU or dfu-util.
-- For instructions using Web-DFU, see the [user firmware update page](../docs/user-firmware-update.md)
-- For more instructions on the Flash Loader, see its [README](src/flash_loader/README.md)
-
-If you are booting from SD Card (not flash), then you need to copy the new bootloader to the SD Card.
-```
-sudo dd if=firmware/src/flash_loader/fsbl.stm32 of=/dev/diskXs1
-sudo dd if=firmware/src/flash_loader/fsbl.stm32 of=/dev/diskXs2
-```
-... where `/dev/diskXs1` and `/dev/diskXs2` are the first and second partitions of your SD Card.
-
-Alternatively, you could create a new SD Card by following the 
-Boot from SD Card instructions below.
-
--------------------------------------------------------
-
 ## Loading firmware onto the MetaModule
 
 You have several choices for how to load the firmware applcation. Each one is covered 
@@ -43,16 +14,18 @@ in a section below:
 
 ### Load via in-app updater
 
-This method is primarily used for users or those porting modules from VCV Rack to MetaModule.
-The instructions are here: [MetaModule Users Guide](./user-firmware-update.md)
+This method is easy and the recommended way for infrequent updates.
+
+If you built the firmware yourself, the .zip files are located in the `build/` dir.
+
+The instructions are here: [MetaModule Docs](https://metamodule.info/docs/getting_started.html#how-to-update-firmware)
 
 
 ### Load in RAM over SWD/JTAG
 
-![PCB header locations](./images/pcb-headers.png)
 
 This is the preferred method for active firmware development. It requires a
-JTAG programmer.
+JTAG programmer. 
 
 Attach a JTAG debugger to the 10-pin connector at the top of the module labeled
 "SWD". The protocol is actually JTAG, despite the header's name, though SWD may
@@ -65,14 +38,25 @@ If you need to load new firmware and then debug it, then follow the guide in
 [Debugging with gdb](firmware-debugging.md).
 
 
-1) Install a "Freeze jumper" :
+#### Freeze Jumper
 
 To load firmware (without debugging) with a JLink programmer, you need to install a "Freeze Jumper".
 
 There are two bootloader versions. If you see a blue light flash when you start up normally,
-then you have the later bootloader. If not, then you have the earlier bootloader.
+then you have the current bootloader. If not, then you have the earlier bootloader.
 
-1a) Earlier bootloader: The jumper goes on the `Control Expander` header
+1a) Current bootloader: The jumper goes on the two left-most pins of the 2x4 debug header. 
+This is the header located next to the SWD/JTAG header that contains the connections for 
+the UART (RX/TX).
+
+```
+     _      RX  TX 
+    |o|  o   o   o
+    |o|  o   o   o
+     -
+```
+
+1b) Early bootloader (pre-Nov 2024): The jumper goes on the `Control Expander` header
 that bridges the top-left pin and the pin just to the right of it. Make sure
 you use the right header, it's the one above the Wifi header, near the `y` and
 `z` pots. The jumper should be horizontal, not vertical, on the top row of pins
@@ -85,25 +69,17 @@ all the way to the left:
            o  o  o  o
 ```
 
-1b) Later bootloader: The jumper goes on the two left-most pins of the 2x4 debug header. 
-This is the header located next to the SWD/JTAG header that contains the connections for 
-the UART (RX/TX).
-
-```
-     _      RX  TX 
-    |o|  o   o   o
-    |o|  o   o   o
-     -
-```
 
 Up until Nov 1, 2024 all shipped units had the older bootloader unless
 you intentionally installed a newer one. 
 Updating the bootloaders is done via loading a release file that has "-bl-" in the name,
 where the release tag is `firmware-v2.0.0-dev-2` or later.
 
-2) Power off and back on (full power-cycle is required).
+#### Loading firmware
 
-The console will show:
+Power off and back on (full power-cycle is required).
+
+The UART console will show:
 
 ```
 Freeze pin detected active: booting from DDR
@@ -118,15 +94,22 @@ Connect a Jlink programmer and run this:
 make jprog
 ```
 
-This should take 8-30 seconds.
+This should take 8-30 seconds. The firmware should boot automatically.
+
  
 ### Load into NOR Flash over USB DFU
+
+Simplified instructions here: [MetaModule Docs: USB-DFU Bootloader](https://metamodule.info/docs/troubleshooting.html#usb-dfu-bootloader)
+
+#### More detailed instructions
 
 Loading onto NOR Flash will flash the firmware into the on-board FLASH chip so
 you can boot normally without a computer connected. It takes a minute or two,
 so this is a good way to flash firmware infrequently, for example, flashing the
 latest stable firwmare version. This is not recommended if you're doing active
 firmware development since it's slow (use SWD/JTAG in that case).
+
+First make sure the Freeze jumper is not installed.
 
 Power cycle the module while holding down the rotary encoder button. This
 forces an alt firmware to be loaded from NOR Flash (which is a USB-DFU

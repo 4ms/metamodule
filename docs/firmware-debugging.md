@@ -1,23 +1,32 @@
 
 # Debugging 
 
+
+Refer to this image to locate pins and pads on the PCB:
+![PCB header locations](./images/pcb-headers.png)
+
+
+## Attaching the JTAG debugger
+
 1) Attach a JTAG debugger to the 10-pin connector at the top of the module labeled
 "SWD". The protocol is actually JTAG, despite the header's name, though SWD may
 work since the only difference is the tRST pin instead of NRST.
 
-2) Install a "Freeze jumper" on `Control Expander` header that bridges the top-left pin
-and the pin just to the right of it. Make sure you use the right header, it's
-the one above the Wifi header, near the `y` and `z` pots. The jumper should be
-horizontal, not vertical, on the top row of pins all the way to the left:
+
+2. Install a "Freeze jumper" on the two left-most pins of the 2x4 debug header. 
+This is the header located next to the SWD/JTAG header that contains the connections for 
+the UART (RX/TX).
 
 ```
-  Control
- Expander
-          [====] o  o 
-           o  o  o  o
+     _      RX  TX 
+    |o|  o   o   o
+    |o|  o   o   o
+     -
 ```
 
-See image above for reference.
+See [Loading Firmware](./firmware-loading.md) if you have a unit with an older bootloader -- or just
+update your bootloader by using the in-app installer with any recent firmware zip file that has `-bl-` in 
+the name (v2.0.0 or later).
 
 3) Power off and back on (full power-cycle is required).
 
@@ -131,8 +140,9 @@ You can toggle some GPIO pins to indicate states from firmware with minimal
 impact on firmware timing. Typically you would read the pins using an
 oscilloscope or logic probe.
 
-There are 6 header pins and two SMD pads on the PCB dedicated to this. They can
-be used like this:
+There are 4 header pins on the PCB dedicated to this. See photo at the top of this document for
+the location of "Debug Pin 0" through "Debug Pin 3".
+They can be used like this:
 
 ```
 #include "debug.hh"   // Found in firmware/src/medium/
@@ -143,8 +153,16 @@ Debug::Pin1::set(true); //same as ::high()
 Debug::Pin1::set(false); //same as ::low()
 ```
 
-The pins and pads are located on the PCB as shown here:
-![PCB header locations](./images/pcb-headers.png)
+
+If you need to toggle debug pins from a plugin or from a C file (not C++) then you 
+can use the `debug_raw.h` header like this:
+
+```
+#include "debug_raw.h"     // You might need to specify a complete relative path to this
+
+DebugPin0High();
+DebugPin0Low();
+```
 
 
 ## Console output (printf debugging)
@@ -166,7 +184,8 @@ Make sure to set the console log level equal or lower to what you want to see. T
 - TRACE (pr_trace and above)
 - DUMP (pr_dump and above)
 
-To set the log level, configure with cmake like this:
+If ran `make configure` to configure your build, then the log level will be set
+to DEBUG. To set the log level, configure with cmake like this:
 
 ```
 cmake --fresh --preset full -G Ninja -DLOG_LEVEL=TRACE

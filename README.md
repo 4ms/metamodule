@@ -28,13 +28,17 @@ Next, setup your development environment by [following the instructions on this 
 
 ## Next Steps
 
-The MetaModule environment is built using three separate components: The VCV Rack Plugin (which includes the MetaModule patch exporter module), the Firmware for the MetaModule hardware, and the Firmware Simulator that allows you to run the firmware locally to test changes.
+The MetaModule environment is built using three separate components: The VCV
+Rack Plugin (which includes the MetaModule patch exporter module), the firmware
+for the MetaModule hardware, and the firmware simulator that allows you to run
+the firmware locally to test changes. The VCV Rack plugin is part of the 4ms-vcv repo,
+and the firmware and simulator are part of this repo.
 
 For information about building and using these components, please follow the separate guides:
 
-- [VCV Rack Plugin](https://github.com/4ms/4ms-vcv/blob/main/README.md)
 - [Simulator](./simulator/README.md)
 - [Firmware](./firmware/README.md)
+- [VCV Rack Plugin](https://github.com/4ms/4ms-vcv/blob/main/README.md)
 
 ## Usage
 
