@@ -58,7 +58,7 @@ public:
 
 		uint8_t cc_value = std::clamp(static_cast<int>(value * 127.0f), 0, 127);
 
-		auto &cc_val = cc_values[cc_num][midi_chan];
+		auto &cc_val = cc_values[midi_chan][cc_num];
 
 		if (cc_val != cc_value) {
 			MidiMessage cc_msg;
@@ -78,7 +78,7 @@ public:
 			return;
 
 		bool gate_on = value > 0.5f;
-		auto &note_val = note_gate_values[note_num][midi_chan];
+		auto &note_val = note_gate_values[midi_chan][note_num];
 
 		if (note_val != gate_on) {
 			if (gate_on) {
