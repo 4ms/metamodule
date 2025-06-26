@@ -3,6 +3,7 @@
 #include "catchup_settings.hh"
 #include "fs/volumes.hh"
 #include "user_settings/fs_settings.hh"
+#include "user_settings/midi_settings.hh"
 #include "user_settings/plugin_preload_settings.hh"
 #include "user_settings/screensaver_settings.hh"
 #include "user_settings/view_settings.hh"
@@ -20,6 +21,7 @@ struct UserSettings {
 	ScreensaverSettings screensaver{};
 	CatchupSettings catchup{};
 	FilesystemSettings filesystem{};
+	MidiSettings midi{};
 };
 
 } // namespace MetaModule
