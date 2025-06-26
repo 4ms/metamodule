@@ -100,6 +100,10 @@ public:
 		return params.text_displays;
 	}
 
+	ParamWatcher &watched_params() {
+		return params.param_watcher;
+	}
+	
 	bool preload_all_plugins() {
 		plugin_manager.start_loading_plugin_list();
 
