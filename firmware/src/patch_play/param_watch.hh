@@ -63,6 +63,26 @@ struct ParamWatcher {
 		}
 	}
 
+	void update_watched_param(const MappedKnob *mapped_knob) {
+		for (auto &w : watched_params) {
+			if (w.is_active() && w.module_id == mapped_knob->module_id && w.param_id == mapped_knob->param_id) {
+				w.set_midi_mapping(mapped_knob);
+				return;
+			}
+		}
+	}
+
+	void stop_watching_param(const MappedKnob *mapped_knob) {
+		for (auto idx = 0u; auto &w : watched_params) {
+			if (w.is_active() && w.module_id == mapped_knob->module_id && w.param_id == mapped_knob->param_id) {
+				w.deactivate();
+				remove(idx);
+				return;
+			}
+			idx++;
+		}
+	}
+
 	void stop_watching_all() {
 		for (auto &w : watched_params) {
 			if (w.is_active()) {
