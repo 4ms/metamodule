@@ -2,17 +2,10 @@
 #include "midi_message.hh"
 #include "midi_queue.hh"
 #include "midi_router.hh"
-<<<<<<< HEAD
-#include <cstdint>
-#include <algorithm>
-#include <unordered_map>
-#include <utility>
-=======
 #include <algorithm>
 #include <array>
 #include <cstdint>
 #include <optional>
->>>>>>> origin/eric/bidirectional-midi
 
 namespace MetaModule
 {

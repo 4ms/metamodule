@@ -21,10 +21,7 @@ struct AuxPlayer {
 	OpenPatchManager &open_patch_manager;
 	Ui &ui;
 	FixedVector<unsigned, 64> module_ids;
-<<<<<<< HEAD
-=======
 	unsigned midi_throttle_counter = 0;
->>>>>>> origin/eric/bidirectional-midi
 	
 	// MIDI sync instance
 	MidiSync midi_sync;

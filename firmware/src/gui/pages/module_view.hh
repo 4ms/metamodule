@@ -315,11 +315,8 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {
-		auto gui_el = drawn_element.gui_element;
 		if (std::get_if<DynamicTextDisplay>(&drawn_element.element)) {
-			params.text_displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
-		} else if (gui_el.count.num_params > 0) {
-			params.param_watcher.start_watching_param(this_module_id, gui_el.idx.param_idx);
+			params.text_displays.start_watching_display(this_module_id, drawn_element.gui_element.idx.light_idx);
 		}
 	}
 
@@ -541,7 +538,6 @@ struct ModuleViewPage : PageBase {
 		module_context_menu.blur();
 		dyn_draw.blur();
 		params.text_displays.stop_watching_all();
-		params.param_watcher.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}

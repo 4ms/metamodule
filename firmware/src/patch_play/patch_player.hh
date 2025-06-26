@@ -1436,9 +1436,14 @@ inline void PatchPlayer::update_all_roto_controls() {
                                 const Knob &knob_el = arg;
 								pr_dbg("Knob: %s\n", control_name_str.c_str());
 								// TODO: Move to RotoControl constants, 16 is the max number of steps RotoControl can support
-                                if (knob_el.pos_names.size() > 0 && knob_el.num_pos == knob_el.pos_names.size()) {
-                                    haptic_mode = HapticMode::KNOB_N_STEP;
-                                    haptic_steps = knob_el.pos_names.size();
+                                if constexpr (std::is_same_v<T, KnobSnapped>) {
+                                    const KnobSnapped &snapped_knob = static_cast<const KnobSnapped&>(arg);
+                                    if (snapped_knob.num_pos > 0 && snapped_knob.num_pos <= KnobSnapped::MaxPosNames) {
+                                        haptic_mode = HapticMode::KNOB_N_STEP;
+                                        haptic_steps = snapped_knob.num_pos;
+                                    } else {
+                                        haptic_mode = HapticMode::KNOB_300;
+                                    }
                                 } else {
                                     haptic_mode = HapticMode::KNOB_300;
                                 }
@@ -1477,7 +1482,7 @@ inline void PatchPlayer::update_all_roto_controls() {
 									// control_name_str is already padded to 13 bytes.
 									dummy_step_names_storage.push_back(control_name_str);
 									dummy_step_names_storage.push_back(control_name_str);
-								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T> || std::is_base_of_v<Knob, T>) {	
+								} else if constexpr (std::is_base_of_v<FlipSwitch, T> || std::is_base_of_v<SlideSwitch, T> || std::is_base_of_v<KnobSnapped, T>) {	
 									const auto &el = arg;
 									pr_dbg("el.pos_names.size(): %zu\n", el.pos_names.size());
 									for (uint8_t i = 0; i < haptic_steps; ++i) {
