@@ -2,6 +2,7 @@
 #include "CoreModules/elements/base_element.hh"
 #include "CoreModules/elements/units.hh"
 #include "console/pr_dbg.hh"
+#include "util/overloaded.hh"
 #include <concepts>
 
 namespace MetaModule
@@ -103,29 +104,31 @@ static void set_pot_display_params(Pot &element, rack::app::ParamWidget *widget)
 	}
 }
 
-static Knob create_base_knob(rack::app::Knob *widget) {
-	Knob element{};
-	element.default_value = getScaledDefaultValue(widget);
-	element.min_angle = radians_to_degrees(widget->minAngle);
-	element.max_angle = radians_to_degrees(widget->maxAngle);
+static Element create_base_knob(rack::app::Knob *widget) {
+	Knob knob{};
+	knob.default_value = getScaledDefaultValue(widget);
+	knob.min_angle = radians_to_degrees(widget->minAngle);
+	knob.max_angle = radians_to_degrees(widget->maxAngle);
 
-	set_pot_display_params(element, widget);
+	set_pot_display_params(knob, widget);
 
 	if (auto pq = widget->getParamQuantity(); pq && pq->snapEnabled) {
-		element.num_pos = pq->maxValue - pq->minValue + 1;
+		KnobSnapped snapped_knob{knob};
+		snapped_knob.num_pos = pq->maxValue - pq->minValue + 1;
 
-		auto clamped_num_pos = std::min<size_t>(pq->labels.size(), element.pos_names.size());
+		auto clamped_num_pos = std::min<size_t>(pq->labels.size(), snapped_knob.pos_names.size());
 
 		if (clamped_num_pos < pq->labels.size()) {
 			pr_warn("Warning: Snapped knob has %u labels, but only %u were used\n", pq->labels.size(), clamped_num_pos);
 		}
 
 		for (auto i = 0u; i < clamped_num_pos; i++) {
-			element.pos_names[i] = pq->labels[i];
+			snapped_knob.pos_names[i] = pq->labels[i].c_str();
 		}
+		return snapped_knob;
 	}
 
-	return element;
+	return knob;
 }
 
 Element make_element(rack::app::Knob *widget) {
@@ -134,13 +137,21 @@ Element make_element(rack::app::Knob *widget) {
 	return create_base_knob(widget);
 }
 
+void set_image(Element &element, std::string_view image) {
+	std::visit(overloaded{[](BaseElement &) {},
+						  [image](ImageElement &el) {
+							  el.image = image;
+						  }},
+			   element);
+}
+
 Element make_element(rack::componentlibrary::Rogan *widget) {
 	log_make_element("Rogan", widget->paramId);
 
-	Knob element = create_base_knob(widget);
+	Element element = create_base_knob(widget);
 
 	if (widget->sw->svg->filename().size()) {
-		element.image = widget->sw->svg->filename();
+		set_image(element, widget->sw->svg->filename());
 
 	} else {
 		pr_err("make_element(Rogan): No svg was set\n");
@@ -152,7 +163,7 @@ Element make_element(rack::componentlibrary::Rogan *widget) {
 Element make_element(rack::app::SvgKnob *widget) {
 	log_make_element("SvgKnob", widget->paramId);
 
-	Knob element = create_base_knob(widget);
+	Element element = create_base_knob(widget);
 
 	// Hack to support BefacoTinyKnobs:
 	// The main SVG is just the dot, either BefacoTinyPointWhite or BefacoTinyPointBlack.
@@ -179,12 +190,12 @@ Element make_element(rack::app::SvgKnob *widget) {
 
 	if (auto inner_img = find_inner_svg_widget(widget->fb); inner_img.size() > 0) {
 		log_make_element_notes("...found SvgWidget child of fb with an SVG %s\n", inner_img.data());
-		element.image = inner_img;
+		set_image(element, inner_img);
 
 	} else if (widget->sw->svg->filename().size() && widget->sw->box.size.isFinite() && !widget->sw->box.size.isZero())
 	{
 		log_make_element_notes("...use sw->svg %s\n", widget->sw->svg->filename().data());
-		element.image = widget->sw->svg->filename();
+		set_image(element, widget->sw->svg->filename());
 
 	} else {
 		pr_trace("SvgKnob with no sw->svg or inner child of fb at %f, %f\n", widget->box.pos.x, widget->box.pos.y);

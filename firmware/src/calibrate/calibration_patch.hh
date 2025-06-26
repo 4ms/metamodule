@@ -123,10 +123,10 @@ struct CalibrationPatch {
 
 			// Each output is an octave higher, starting from 40Hz
 			patch.set_or_add_static_knob_value(
-				v, std::to_underlying(FMInfo::Elem::RatioCKnob), std::min(octave / 7.f + 1.f / 14.f, 1.f));
+				v, std::to_underlying(FMInfo::Elem::RatioCoarseKnob), std::min(octave / 7.f + 1.f / 14.f, 1.f));
 			// Expanders are higher by a fifth or so
 			patch.set_or_add_static_knob_value(
-				v, std::to_underlying(FMInfo::Elem::RatioFKnob), panel_out_idx < 8 ? 0.f : 0.25f);
+				v, std::to_underlying(FMInfo::Elem::RatioFineKnob), panel_out_idx < 8 ? 0.f : 0.25f);
 
 			// Output
 			patch.add_mapped_outjack(panel_out_idx, {.module_id = v, .jack_id = 0}); //OutputOut

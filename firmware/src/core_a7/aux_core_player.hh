@@ -21,6 +21,10 @@ struct AuxPlayer {
 	OpenPatchManager &open_patch_manager;
 	Ui &ui;
 	FixedVector<unsigned, 64> module_ids;
+<<<<<<< HEAD
+=======
+	unsigned midi_throttle_counter = 0;
+>>>>>>> origin/eric/bidirectional-midi
 	
 	// MIDI sync instance
 	MidiSync midi_sync;
@@ -90,15 +94,16 @@ struct AuxPlayer {
 				}
 			}
 
-			for (auto &p : ui.watched_params().active_watched_params()) {
+			for (auto &p : patch_player.watched_params().active_watched_params()) {
 				if (p.is_active()) {
 					auto value = patch_player.get_param(p.module_id, p.param_id);
-					PatchData *patch = open_patch_manager.get_playing_patch();
-					if (patch) {
-						const MappedKnob *mapped_knob = patch->find_midi_map(p.module_id, p.param_id);
-						if (mapped_knob) {
-							midi_sync.sync_param_to_midi(value, mapped_knob->midi_chan, static_cast<uint8_t>(mapped_knob->cc_num()));
-						}
+					auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
+					if (map.is_midi_cc()) {
+						midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
+					} else if (map.is_midi_notegate()) {
+						midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
+					} else if (p.panel_knob_id == MidiPitchWheelJack) {
+						midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
 					}
 				}
 			}

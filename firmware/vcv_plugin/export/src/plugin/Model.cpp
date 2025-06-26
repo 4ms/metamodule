@@ -4,7 +4,7 @@
 namespace rack::plugin
 {
 
-// Transfer ownership of a model's strings from the Module and ModuleWidget (as VCV does) to the Model/Pluin (which is what MetaModule wants)
+// Transfer ownership of a model's strings from the Module and ModuleWidget (as VCV does) to the Model/Plugin (which is what MetaModule wants)
 // This is done by copying the strings that elements[] string_views point to, and putting the copy in strings[] (which is a member of Model)
 // Then point the elements[] string_views to strings[].
 
@@ -26,11 +26,16 @@ void Model::move_strings() {
 				   element);
 
 		std::visit(overloaded{[](BaseElement &el) {},
-							  [this](Knob &el) {
+							  [this](Pot &el) {
 								  el.units = strings.emplace_back(el.units);
+							  }},
+				   element);
 
+		std::visit(overloaded{[](BaseElement &el) {},
+							  [this](KnobSnapped &el) {
 								  for (auto &pos_name : el.pos_names) {
-									  pos_name = strings.emplace_back(pos_name);
+									  if (pos_name != nullptr)
+										  pos_name = strings.emplace_back(pos_name).c_str();
 								  }
 							  }},
 				   element);

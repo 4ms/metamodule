@@ -11,9 +11,9 @@
 #include "usbh_core.h"
 
 struct EndPoint {
-	uint8_t addr;
-	uint8_t size;
-	uint8_t pipe;
+	uint16_t addr;
+	uint16_t size;
+	uint16_t pipe;
 };
 
 enum class EndPointType : uint8_t {

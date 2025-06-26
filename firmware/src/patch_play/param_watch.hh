@@ -1,4 +1,5 @@
 #pragma once
+#include "patch/patch.hh"
 #include "util/static_string.hh"
 #include <array>
 #include <atomic>
@@ -14,10 +15,24 @@ struct WatchedParam {
 	float value;
 	std::atomic<bool> active{false};
 
+	// MIDI mapping info
+	uint8_t midi_chan{0};
+	uint16_t panel_knob_id{};
+
 	void activate(uint16_t module_id, uint16_t param_id) {
 		this->module_id = module_id;
 		this->param_id = param_id;
 		active.store(true, std::memory_order_release); //all stores before this will not get moved after this
+	}
+
+	void set_midi_mapping(const MappedKnob *mapped_knob) {
+		if (mapped_knob) {
+			midi_chan = mapped_knob->midi_chan > 0 ? mapped_knob->midi_chan - 1 : 0;
+			panel_knob_id = mapped_knob->panel_knob_id;
+		} else {
+			midi_chan = 0;
+			panel_knob_id = 0;
+		}
 	}
 
 	void deactivate() {
@@ -30,17 +45,17 @@ struct WatchedParam {
 };
 
 struct ParamWatcher {
-	static constexpr size_t MaxParamsToWatch = 256;
+	static constexpr size_t MaxParamsToWatch = 257; // 128 cc + 128 notegate + 1 pitchwheel
 
 	std::span<WatchedParam> active_watched_params() {
 		return std::span<WatchedParam>{&watched_params[lowest_active_idx], &watched_params[highest_active_idx + 1]};
 	}
 
-	void start_watching_param(uint16_t module_id, uint16_t param_id) {
-		// Add to first empty slot:
+	void start_watching_param(const MappedKnob *mapped_knob) {
 		for (auto idx = 0u; auto &w : watched_params) {
 			if (!w.is_active()) {
-				w.activate(module_id, param_id);
+				w.activate(mapped_knob->module_id, mapped_knob->param_id);
+				w.set_midi_mapping(mapped_knob);
 				add(idx);
 				return;
 			}
@@ -48,22 +63,21 @@ struct ParamWatcher {
 		}
 	}
 
-	void stop_watching_param(uint16_t module_id, uint16_t param_id) {
-		for (auto idx = 0u; auto &w : watched_params) {
-			if (w.module_id == module_id && w.param_id == param_id) {
-				w.deactivate();
-				remove(idx);
+	void update_watched_param(const MappedKnob *mapped_knob) {
+		for (auto &w : watched_params) {
+			if (w.is_active() && w.module_id == mapped_knob->module_id && w.param_id == mapped_knob->param_id) {
+				w.set_midi_mapping(mapped_knob);
 				return;
 			}
-			idx++;
 		}
 	}
 
-	void stop_watching_module(uint16_t module_id) {
+	void stop_watching_param(const MappedKnob *mapped_knob) {
 		for (auto idx = 0u; auto &w : watched_params) {
-			if (w.module_id == module_id) {
+			if (w.is_active() && w.module_id == mapped_knob->module_id && w.param_id == mapped_knob->param_id) {
 				w.deactivate();
 				remove(idx);
+				return;
 			}
 			idx++;
 		}

@@ -14,6 +14,7 @@
 #include "patch_play/balance_modules.hh"
 #include "patch_play/cable_cache.hh"
 #include "patch_play/multicore_play.hh"
+#include "patch_play/param_watch.hh"
 #include "patch_play/patch_player_query_patch.hh"
 #include "patch_play/plugin_module.hh"
 #include "pr_dbg.hh"
@@ -60,6 +61,8 @@ private:
 
 	// MIDI
 	bool midi_connected = false;
+
+	ParamWatcher param_watcher;
 
 	struct JackMidi : Jack {
 		uint32_t midi_chan = 0; //0: Omni
@@ -111,6 +114,10 @@ private:
 public:
 	PatchPlayer() {
 		clear_cache();
+	}
+
+	ParamWatcher &watched_params() {
+		return param_watcher;
 	}
 
 	void copy_patch_data(const PatchData &patchdata) {
@@ -182,8 +189,10 @@ public:
 
 		pd.update_midi_poly_num();
 
+		param_watcher.stop_watching_all();
 		for (auto const &mm : pd.midi_maps.set) {
 			cache_midi_mapping(mm);
+			param_watcher.start_watching_param(&mm);
 		}
 		update_all_roto_controls(); // Update RotoControls after all MIDI maps are cached
 
@@ -311,6 +320,9 @@ public:
 
 	void trigger_reading_gui_elements() {
 		smp.read_patch_gui_elements();
+	}
+
+	void sync() {
 		smp.join();
 	}
 
@@ -597,6 +609,8 @@ public:
 					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
 			}
 
+			param_watcher.update_watched_param(&map);
+
 		} else {
 			auto &knobconn = knob_maps[knobset_id][map.panel_knob_id];
 			auto found = std::ranges::find_if(knobconn, [&map](auto m) {
@@ -616,14 +630,17 @@ public:
 		if (pd.remove_mapping(knobset_id, map)) {
 			if (knobset_id == PatchData::MIDIKnobSet) {
 				uncache_midi_mapping(map);
-			} else
+				param_watcher.stop_watching_param(&map);
+			} else {
 				uncache_knob_mapping(knobset_id, map);
+			}
 		}
 	}
 
 	void add_midi_mapped_knob(const MappedKnob &map) {
 		if (pd.add_update_midi_map(map)) {
 			cache_midi_mapping(map);
+			param_watcher.start_watching_param(&map);
 		}
 	}
 
