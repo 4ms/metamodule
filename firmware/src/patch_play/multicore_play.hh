@@ -18,8 +18,8 @@ public:
 			for (auto i = 2u; auto module_id : module_ids) { // regs 2 and up are the module ids
 				mdrivlib::SMPControl::write(i++, module_id);
 			}
+			mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
 		}
-		mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
 	}
 
 	void update_modules() {
@@ -34,7 +34,15 @@ public:
 		}
 	}
 
+	void refresh_patch_gui_elements() {
+		mdrivlib::SMPControl::write(SMPRegister::RefreshPatchElements, 1);
+		if constexpr (NumCores > 1) {
+			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchGuiElements>();
+		}
+	}
+
 	void read_patch_gui_elements() {
+		mdrivlib::SMPControl::write(SMPRegister::RefreshPatchElements, 0);
 		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchGuiElements>();
 		}

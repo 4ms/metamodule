@@ -102,8 +102,8 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 	audio_stream.process(in_buffer, out_buffer);
 
-	if (mdrivlib::SMPControl::is_notified(SMPCommand::NewModuleList)) {
-		mdrivlib::SMPControl::clear_notification(SMPCommand::NewModuleList);
+	if (mdrivlib::SMPControl::read<SMPRegister::RefreshPatchElements>() == 1) {
+		mdrivlib::SMPControl::write<SMPRegister::RefreshPatchElements>(0);
 		midi_sync.clear_last_values();
 	}
 

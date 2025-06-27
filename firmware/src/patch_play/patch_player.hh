@@ -318,6 +318,10 @@ public:
 		smp.join();
 	}
 
+	void notify_audio_resumed() {
+		smp.refresh_patch_gui_elements();
+	}
+
 	void unload_patch() {
 		param_watcher.stop_watching_all();
 

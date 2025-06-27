@@ -75,6 +75,11 @@ struct AuxPlayer {
 	}
 
 	void read_patch_gui_elements() {
+
+		if (SMPControl::read<SMPRegister::RefreshPatchElements>() > 0) {
+			midi_sync.clear_last_values();
+		}
+
 		if (ui.new_patch_data.load() == false) {
 
 			for (auto &d : ui.displays().watch_displays) {

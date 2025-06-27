@@ -14,5 +14,6 @@ namespace SMPRegister
 enum : uint32_t {
 	DoneZero,
 	NumModulesInPatch,
+	RefreshPatchElements,
 };
 } // namespace SMPRegister
