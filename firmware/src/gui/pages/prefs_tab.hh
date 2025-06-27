@@ -123,9 +123,10 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_SystemPrefsCatchupModeDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck);
 		lv_group_add_obj(group, ui_SystemPrefsFSMaxPatchesDropdown);
+		lv_group_add_obj(group, ui_SystemPrefsMidiFeedbackCheck);
+
 		lv_group_add_obj(group, ui_SystemPrefsRevertButton);
 		lv_group_add_obj(group, ui_SystemPrefsSaveButton);
-		lv_group_add_obj(group, ui_SystemPrefsMidiFeedbackCheck);
 
 		lv_dropdown_close(ui_SystemPrefsAudioSampleRateDropdown);
 		lv_dropdown_close(ui_SystemPrefsAudioBlocksizeDropdown);
