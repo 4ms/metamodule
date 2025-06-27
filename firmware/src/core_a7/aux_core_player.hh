@@ -69,6 +69,8 @@ struct AuxPlayer {
 		} else
 			pr_err("Error: %u modules requested to run on core 2, max is %z\n", num_modules, module_ids.size());
 
+		midi_sync.clear_last_values();
+
 		SMPThread::signal_done();
 	}
 
