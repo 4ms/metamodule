@@ -185,7 +185,7 @@ public:
 
 		for (auto const &mm : pd.midi_maps.set) {
 			cache_midi_mapping(mm);
-			param_watcher.start_watching_param(&mm);
+			param_watcher.start_watching_param(mm);
 		}
 
 		// Load module states
@@ -603,7 +603,7 @@ public:
 					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
 			}
 
-			param_watcher.update_watched_param(&map);
+			param_watcher.update_watched_param(map);
 
 		} else {
 			auto &knobconn = knob_maps[knobset_id][map.panel_knob_id];
@@ -624,7 +624,7 @@ public:
 		if (pd.remove_mapping(knobset_id, map)) {
 			if (knobset_id == PatchData::MIDIKnobSet) {
 				uncache_midi_mapping(map);
-				param_watcher.stop_watching_param(&map);
+				param_watcher.stop_watching_param(map);
 			} else {
 				uncache_knob_mapping(knobset_id, map);
 			}
@@ -634,7 +634,7 @@ public:
 	void add_midi_mapped_knob(const MappedKnob &map) {
 		if (pd.add_update_midi_map(map)) {
 			cache_midi_mapping(map);
-			param_watcher.start_watching_param(&map);
+			param_watcher.start_watching_param(map);
 		}
 	}
 

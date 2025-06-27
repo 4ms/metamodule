@@ -16,7 +16,6 @@ struct AuxPlayer {
 	Ui &ui;
 
 	FixedVector<unsigned, 64> module_ids;
-	unsigned midi_throttle_counter = 0;
 
 	// MIDI sync instance
 	MidiSync midi_sync;
