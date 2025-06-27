@@ -13,7 +13,6 @@ namespace MetaModule
 class MidiSync {
 private:
 	MidiQueue midi_out_queue;
-	bool queue_subscribed = false;
 
 	// cc_values[midichan][ccnum]: valueless => not set, otherwise value is last value sent
 	std::array<std::array<std::optional<uint8_t>, 128>, 16> cc_values{};
@@ -26,16 +25,11 @@ private:
 
 public:
 	MidiSync() {
-		if (!queue_subscribed) {
-			MetaModule::MidiRouter::subscribe_tx(&midi_out_queue);
-			queue_subscribed = true;
-		}
+		MetaModule::MidiRouter::subscribe_tx(&midi_out_queue);
 	}
 
 	~MidiSync() {
-		if (queue_subscribed) {
-			MetaModule::MidiRouter::unsubscribe_tx(&midi_out_queue);
-		}
+		MetaModule::MidiRouter::unsubscribe_tx(&midi_out_queue);
 	}
 
 	// Clear all stored last values
