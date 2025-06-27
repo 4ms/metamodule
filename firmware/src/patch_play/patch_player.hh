@@ -183,7 +183,6 @@ public:
 
 		pd.update_midi_poly_num();
 
-		param_watcher.stop_watching_all();
 		for (auto const &mm : pd.midi_maps.set) {
 			cache_midi_mapping(mm);
 			param_watcher.start_watching_param(&mm);
@@ -320,6 +319,8 @@ public:
 	}
 
 	void unload_patch() {
+		param_watcher.stop_watching_all();
+
 		smp.join();
 		is_loaded = false;
 		for (size_t i = 0; i < num_modules; i++) {
