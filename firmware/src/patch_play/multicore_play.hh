@@ -34,7 +34,15 @@ public:
 		}
 	}
 
+	void refresh_patch_gui_elements() {
+		mdrivlib::SMPControl::write(SMPRegister::RefreshPatchElements, 1);
+		if constexpr (NumCores > 1) {
+			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchGuiElements>();
+		}
+	}
+
 	void read_patch_gui_elements() {
+		mdrivlib::SMPControl::write(SMPRegister::RefreshPatchElements, 0);
 		if constexpr (NumCores > 1) {
 			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchGuiElements>();
 		}

@@ -5,6 +5,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/prefs_pane_catchup.hh"
 #include "gui/slsexport/prefs_pane_fs.hh"
+#include "gui/slsexport/prefs_pane_midi.hh"
 #include "patch_play/patch_playloader.hh"
 #include "src/core/lv_obj_scroll.h"
 #include "user_settings/audio_settings.hh"
@@ -18,15 +19,18 @@ struct PrefsTab : SystemMenuTab {
 			 ScreensaverSettings &screensaver,
 			 CatchupSettings &catchup,
 			 FilesystemSettings &fs,
+			 MidiSettings &midi,
 			 GuiState &gui_state)
 		: patch_playloader{patch_playloader}
 		, audio_settings{audio_settings}
 		, screensaver{screensaver}
 		, catchup{catchup}
 		, gui_state{gui_state}
-		, fs{fs} {
+		, fs{fs}
+		, midi{midi} {
 		init_SystemPrefsCatchupPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsFSPane(ui_SystemMenuPrefsTab);
+		init_SystemPrefsMidiPane(ui_SystemMenuPrefsTab);
 
 		lv_obj_add_event_cb(ui_SystemPrefsSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsRevertButton, revert_cb, LV_EVENT_CLICKED, this);
@@ -39,6 +43,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupModeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_SystemPrefsMidiFeedbackCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioOverrunRetriesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
@@ -48,6 +53,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupModeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
+		lv_obj_add_event_cb(ui_SystemPrefsMidiFeedbackCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 
 		lv_obj_move_foreground(ui_SystemPrefsButtonCont);
 
@@ -104,6 +110,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_remove_obj(ui_SystemPrefsCatchupModeDropdown);
 		lv_group_remove_obj(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck);
 		lv_group_remove_obj(ui_SystemPrefsFSMaxPatchesDropdown);
+		lv_group_remove_obj(ui_SystemPrefsMidiFeedbackCheck);
 
 		lv_group_remove_obj(ui_SystemPrefsRevertButton);
 		lv_group_remove_obj(ui_SystemPrefsSaveButton);
@@ -116,6 +123,8 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_SystemPrefsCatchupModeDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck);
 		lv_group_add_obj(group, ui_SystemPrefsFSMaxPatchesDropdown);
+		lv_group_add_obj(group, ui_SystemPrefsMidiFeedbackCheck);
+
 		lv_group_add_obj(group, ui_SystemPrefsRevertButton);
 		lv_group_add_obj(group, ui_SystemPrefsSaveButton);
 
@@ -176,6 +185,8 @@ private:
 		lv_dropdown_set_selected(ui_SystemPrefsFSMaxPatchesDropdown, maxpatches_item >= 0 ? maxpatches_item : 3);
 
 		lv_show(ui_SystemPrefsCatchupAllowJumpOutofRangeCont, catchup.mode == CatchupParam::Mode::ResumeOnEqual);
+
+		lv_check(ui_SystemPrefsMidiFeedbackCheck, midi.midi_feedback == MidiSettings::MidiFeedback::Enabled);
 
 		gui_state.do_write_settings = false;
 
@@ -244,6 +255,12 @@ private:
 		return val > 0 ? val : FilesystemSettings::DefaultMaxOpenPatches;
 	}
 
+	auto read_midi_feedback_check() {
+		return lv_obj_has_state(ui_SystemPrefsMidiFeedbackCheck, LV_STATE_CHECKED) ?
+				   MidiSettings::MidiFeedback::Enabled :
+				   MidiSettings::MidiFeedback::Disabled;
+	}
+
 	void update_settings_from_dropdown() {
 		auto block_size = read_blocksize_dropdown();
 		auto sample_rate = read_samplerate_dropdown();
@@ -284,6 +301,12 @@ private:
 
 		if (fs.max_open_patches != max_open_patches) {
 			fs.max_open_patches = max_open_patches;
+			gui_state.do_write_settings = true;
+		}
+
+		auto midi_feedback = read_midi_feedback_check();
+		if (midi.midi_feedback != midi_feedback) {
+			midi.midi_feedback = midi_feedback;
 			gui_state.do_write_settings = true;
 		}
 
@@ -367,12 +390,13 @@ private:
 		auto catchupmode = page->read_catchup_mode_dropdown();
 		auto catchup_exclude_buttons = page->read_catchup_exclude_check();
 		auto fs_max_patches = page->read_fs_max_open_patches();
+		auto midi_feedback = page->read_midi_feedback_check();
 
 		if (block_size == page->audio_settings.block_size && sample_rate == page->audio_settings.sample_rate &&
 			overrun_retries == page->audio_settings.max_overrun_retries && timeout == page->screensaver.timeout_ms &&
 			knobwake == page->screensaver.knobs_can_wake && catchupmode == page->catchup.mode &&
 			catchup_exclude_buttons == page->catchup.allow_jump_outofrange &&
-			fs_max_patches == page->fs.max_open_patches)
+			fs_max_patches == page->fs.max_open_patches && midi_feedback == page->midi.midi_feedback)
 		{
 			lv_disable(ui_SystemPrefsSaveButton);
 			lv_disable(ui_SystemPrefsRevertButton);
@@ -392,7 +416,7 @@ private:
 
 		// scroll to bottom if we select last items
 		// if (target == ui_SystemPrefsCatchupModeDropdown || target == ui_SystemPrefsCatchupExcludeButtonsCheck ||
-		if (target == ui_SystemPrefsFSMaxPatchesDropdown) {
+		if (target == ui_SystemPrefsMidiFeedbackCheck) {
 			lv_obj_scroll_to_view_recursive(ui_SystemPrefsSaveButton, LV_ANIM_ON);
 
 			// scroll to top if we select first items
@@ -407,6 +431,7 @@ private:
 	CatchupSettings &catchup;
 	GuiState &gui_state;
 	FilesystemSettings &fs;
+	MidiSettings &midi;
 
 	lv_group_t *group = nullptr;
 };

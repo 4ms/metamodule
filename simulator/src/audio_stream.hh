@@ -69,6 +69,13 @@ public:
 				i++;
 			}
 
+			// MIDI output: print to console
+			{
+				if (auto msg = MidiRouter::pop_outgoing_message()) {
+					printf("MIDI TX: %06x\n", msg->raw());
+				}
+			}
+
 			// MIDI: random stream
 			{
 				static unsigned random_midi_ctr = 0;

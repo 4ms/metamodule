@@ -102,11 +102,35 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 	audio_stream.process(in_buffer, out_buffer);
 
+	if (mdrivlib::SMPControl::read<SMPRegister::RefreshPatchElements>() == 1) {
+		mdrivlib::SMPControl::write<SMPRegister::RefreshPatchElements>(0);
+		midi_sync.clear_last_values();
+	}
+
 	for (auto &d : params.text_displays.watch_displays) {
 		if (d.is_active()) {
 			auto text = std::span<char>(d.text._data, d.text.capacity);
 			auto sz = patch_player.get_display_text(d.module_id, d.light_id, text);
 			d.text._data[sz] = 0;
+		}
+	}
+
+	if (settings.midi.midi_feedback == MidiSettings::MidiFeedback::Enabled) {
+		for (auto &p : patch_player.watched_params().active_watched_params()) {
+			if (p.is_active()) {
+				auto value = patch_player.get_param(p.module_id, p.param_id);
+				auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
+
+				if (map.is_midi_cc()) {
+					midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
+
+				} else if (map.is_midi_notegate()) {
+					midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
+
+				} else if (p.panel_knob_id == MidiPitchWheelJack) {
+					midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
+				}
+			}
 		}
 	}
 

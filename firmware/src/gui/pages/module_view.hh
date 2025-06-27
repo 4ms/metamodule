@@ -742,6 +742,7 @@ private:
 									  .patch_loc_hash = args.patch_loc_hash,
 									  .module_id = args.module_id,
 									  .detail_mode = false};
+			page_list.update_state(PageId::ModuleView, nextargs);
 			page_list.request_new_page(PageId::PatchView, nextargs);
 			roller_hover.hide();
 		} else
