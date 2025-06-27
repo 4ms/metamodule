@@ -9,9 +9,11 @@ struct SMPControl {
 
 	template<uint32_t channel>
 	static void notify() {
+		channel_bitset |= (1 << channel);
 	}
 
 	static void notify(uint32_t channel) {
+		channel_bitset |= (1 << channel);
 	}
 
 	template<uint32_t reg_num = 0>
@@ -29,6 +31,16 @@ struct SMPControl {
 	static uint32_t read(uint32_t reg_num) {
 		return 0;
 	}
+
+	static bool is_notified(uint32_t channel) {
+		return channel_bitset & (1 << channel);
+	}
+
+	static void clear_notification(uint32_t channel) {
+		channel_bitset &= ~(1 << channel);
+	}
+
+	static inline uint32_t channel_bitset = 0;
 };
 
 struct SMPThread {

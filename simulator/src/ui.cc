@@ -102,6 +102,11 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 	audio_stream.process(in_buffer, out_buffer);
 
+	if (mdrivlib::SMPControl::is_notified(SMPCommand::NewModuleList)) {
+		mdrivlib::SMPControl::clear_notification(SMPCommand::NewModuleList);
+		midi_sync.clear_last_values();
+	}
+
 	for (auto &d : params.text_displays.watch_displays) {
 		if (d.is_active()) {
 			auto text = std::span<char>(d.text._data, d.text.capacity);

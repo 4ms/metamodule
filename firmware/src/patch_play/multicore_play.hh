@@ -18,8 +18,8 @@ public:
 			for (auto i = 2u; auto module_id : module_ids) { // regs 2 and up are the module ids
 				mdrivlib::SMPControl::write(i++, module_id);
 			}
-			mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
 		}
+		mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
 	}
 
 	void update_modules() {
