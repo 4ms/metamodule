@@ -127,6 +127,7 @@ void Controls::update_control_expander() {
 	cur_metaparams->ext_buttons_high_events = 0;
 	cur_metaparams->ext_buttons_low_events = 0;
 	for (auto [i, extbut] : enumerate(ext_buttons)) {
+
 		extbut.register_state(buttons_state & (1 << i));
 		if (extbut.just_went_high())
 			cur_metaparams->ext_buttons_high_events |= (1 << i);
