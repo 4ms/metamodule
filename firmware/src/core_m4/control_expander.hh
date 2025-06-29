@@ -57,6 +57,8 @@ public:
 				auto err = buttonexp_gpio_chip.read_inputs();
 				if (err != GPIOExpander::Error::None)
 					handle_error();
+				else
+					num_errors = 0;
 				state = States::SetLEDs;
 				break;
 			}
@@ -111,8 +113,16 @@ private:
 		FinishSending,
 	} state = States::ReadButtons;
 
+	uint32_t num_errors = 0;
+
 	void handle_error() {
+		num_errors++;
 		pr_dbg("ControlExpander I2C Error!\n");
+		if (num_errors > 8) {
+			auxi2c.init(ButtonExpander::i2c_conf);
+			tmr = HAL_GetTick();
+			state = States::Pause;
+		}
 	}
 };
 
