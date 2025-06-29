@@ -62,13 +62,9 @@ public:
 			}
 
 			case States::SetLEDs: {
-				buttons = buttonexp_gpio_chip.collect_last_reading() & 0xFF;
-
-				// Testing (loopback)
-				// TODO: Remove this
-				// set_leds(buttons);
-
-				// buttonexp_gpio_chip.set_output_values(leds.load());
+				auto raw = buttonexp_gpio_chip.collect_last_reading();
+				auto ordered = ButtonExpander::order_buttons(raw);
+				buttons.store(ordered);
 
 				tmr = HAL_GetTick();
 				state = States::Pause;
@@ -86,10 +82,6 @@ public:
 				state = States::Pause;
 				break;
 		}
-	}
-
-	void set_leds(uint32_t led_bitmask) {
-		// leds.store(ButtonExpander::calc_output_data(led_bitmask));
 	}
 
 	uint32_t get_buttons() {
