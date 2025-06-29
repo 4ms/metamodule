@@ -24,49 +24,64 @@ public:
 
 	void scan_for_button_expanders() {
 		// Scan for attached
-		const auto base_addr = ButtonExpander::gpio_chip_conf.addr;
-		auto addr = base_addr;
+		const int base_addr = ButtonExpander::gpio_chip_conf.addr;
+		int addr = base_addr + ButtonExpander::MaxAddresses - 1;
+		size_t num_expanders_found = 0;
 
-		//TODO: record all button expanders found, up to 4
-		while (!expander_found) {
-			if (buttonexp_gpio_chip.is_present()) {
-				buttonexp_gpio_chip.start();
+		while ((addr >= base_addr) && (num_expanders_found < all_button_exps.size())) {
+			auto *buttonexp = &all_button_exps[num_expanders_found];
+			buttonexp->set_address(addr);
+
+			if (buttonexp->is_present()) {
+				buttonexp->start();
 				pr_info("Button Expander found at addr 0x%x\n", addr);
-				expander_found = true;
+				num_expanders_found++;
+				addr--;
 			} else {
-				pr_trace("Button Expander not found at addr 0x%x\n", addr);
-				buttonexp_gpio_chip.set_address(addr++);
-				if (addr - base_addr >= 8) {
-					pr_dbg("No Button Expander found\n");
-					break; //not found
-				}
+				pr_info("Button Expander not found at addr 0x%x\n", addr);
+				addr--;
 			}
 		}
+
+		found_button_exps = std::span{all_button_exps.begin(), num_expanders_found};
 	}
 
 	void update() {
-		if (!auxi2c.is_ready())
+		if (found_button_exps.size() == 0)
+			// TODO: periodically scan
 			return;
 
-		if (!expander_found)
+		if (!auxi2c.is_ready())
 			return;
 
 		switch (state) {
 
 			case States::ReadButtons: {
-				auto err = buttonexp_gpio_chip.read_inputs();
-				if (err != GPIOExpander::Error::None)
-					handle_error();
-				else
-					num_errors = 0;
-				state = States::SetLEDs;
+				if (cur_reading_exp >= found_button_exps.size()) {
+					state = States::CollectReadings;
+
+				} else {
+					auto err = found_button_exps[cur_reading_exp].read_inputs();
+					if (err != GPIOExpander::Error::None)
+						handle_error();
+					else
+						num_errors = 0;
+
+					cur_reading_exp++;
+				}
 				break;
 			}
 
-			case States::SetLEDs: {
-				auto raw = buttonexp_gpio_chip.collect_last_reading();
-				auto ordered = ButtonExpander::order_buttons(raw);
-				buttons.store(ordered);
+			case States::CollectReadings: {
+				uint32_t readings = 0;
+				for (auto i = 0u; auto &exp : found_button_exps) {
+					auto this_reading = ButtonExpander::order_buttons(exp.collect_last_reading());
+					// Firt expander in the span will be in the LSByte
+					readings |= this_reading << (i * 8);
+					i++;
+				}
+
+				latest_reading.store(readings);
 
 				tmr = HAL_GetTick();
 				state = States::Pause;
@@ -74,8 +89,10 @@ public:
 			}
 
 			case States::Pause: {
-				if ((HAL_GetTick() - tmr) > 10)
+				if ((HAL_GetTick() - tmr) > 10) {
+					cur_reading_exp = 0;
 					state = States::ReadButtons;
+				}
 				break;
 			}
 
@@ -87,29 +104,35 @@ public:
 	}
 
 	uint32_t get_buttons() {
-		return buttons.load();
+		return latest_reading.load();
 	}
 
 	uint32_t num_button_expanders_connected() {
-		return expander_found ? 1 : 0;
+		return found_button_exps.size();
 	}
 
 private:
 	I2CPeriph auxi2c{ButtonExpander::i2c_conf};
-	//TODO: array of 4 buttonexp_gpio_chip
-	GPIOExpander buttonexp_gpio_chip{auxi2c, ButtonExpander::gpio_chip_conf};
 
-	uint32_t tmr{0};
-	bool expander_found = false;
+	std::array<GPIOExpander, 4> all_button_exps{{
+		{auxi2c, ButtonExpander::gpio_chip_conf},
+		{auxi2c, ButtonExpander::gpio_chip_conf},
+		{auxi2c, ButtonExpander::gpio_chip_conf},
+		{auxi2c, ButtonExpander::gpio_chip_conf},
+	}};
 
-	// Each Expander has 8 buttons, 8 LEDs, so we can support max 4 expander modules
-	// std::atomic<uint32_t> leds;
-	std::atomic<uint32_t> buttons;
+	std::span<GPIOExpander> found_button_exps{all_button_exps};
+
+	uint32_t cur_reading_exp = 0;
+
+	uint32_t tmr = 0;
+
+	std::atomic<uint32_t> latest_reading;
 
 	enum class States {
 		Pause,
 		ReadButtons,
-		SetLEDs,
+		CollectReadings,
 		FinishSending,
 	} state = States::ReadButtons;
 
@@ -120,7 +143,7 @@ private:
 		pr_dbg("ControlExpander I2C Error!\n");
 		if (num_errors > 8) {
 			auxi2c.init(ButtonExpander::i2c_conf);
-			tmr = HAL_GetTick();
+			tmr = std::max<uint32_t>(HAL_GetTick(), 500u) - 500;
 			state = States::Pause;
 		}
 	}
