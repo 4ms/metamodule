@@ -11,7 +11,7 @@ struct SDCardConf : mdrivlib::DefaultSDCardConf {
 
 	static constexpr auto SDPeriphNum = 1;
 	static constexpr auto speed_hz = 32'000'000;
-	static constexpr auto width = Wide4;
+	static constexpr auto width = Single;
 	static constexpr mdrivlib::PinDef D0{C, _8, AltFunc12};
 	static constexpr mdrivlib::PinDef D1{C, _9, AltFunc12};
 	static constexpr mdrivlib::PinDef D2{C, _10, AltFunc12};
