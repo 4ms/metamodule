@@ -253,6 +253,8 @@ if (NOT TARGET cpputil::cpputil)
 endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
+target_compile_definitions(main.elf PRIVATE ${BOARD_m4_defines})
+
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports ThorVG)
 target_link_libraries(main.elf PUBLIC vcv_plugin)

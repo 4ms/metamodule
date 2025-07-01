@@ -65,7 +65,8 @@ int main() {
 	WifiInterface::start();
 #endif
 
-#if 1
+#if METAMODULE_USE_BATTERY_GUAGE
+	//TODO: put this in controls
 	BatteryGuage batt{battery_guage_conf, 0xaa};
 	batt.init();
 #endif
@@ -100,7 +101,7 @@ int main() {
 
 		module_fs_messages.process();
 
-#if 1
+#if METAMODULE_USE_BATTERY_GUAGE
 		batt.update();
 #endif
 
