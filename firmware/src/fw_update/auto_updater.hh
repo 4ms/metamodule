@@ -30,7 +30,7 @@ struct AutoUpdater {
 		}
 
 		hil_message("*updating\n");
-		lv_label_set_text(ui_MainMenuNowPlaying, "Updating firmware...");
+		ui.notify_now_playing("Updating firmware...");
 		ui.update_screen();
 
 		while (true) {
@@ -38,7 +38,7 @@ struct AutoUpdater {
 			if (status.state == FirmwareUpdaterProxy::Success) {
 				hil_message("*success\n");
 
-				lv_label_set_text(ui_MainMenuNowPlaying, "Succeess!");
+				ui.notify_now_playing("Firmware updated!");
 				ui.update_screen();
 				break;
 
@@ -46,7 +46,7 @@ struct AutoUpdater {
 				hil_message("*failure\n");
 				pr_err("%s\n", status.message.c_str());
 
-				lv_label_set_text(ui_MainMenuNowPlaying, "failure :(");
+				ui.notify_now_playing("Failed to update firmware");
 				ui.update_screen();
 				break;
 			}
