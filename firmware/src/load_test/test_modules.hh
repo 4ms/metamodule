@@ -1,12 +1,14 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
-#include "delay.hh"
-#include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "tester.hh"
+
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 #include "memory_tester.hh"
 #endif
-#include "tester.hh"
+
+#ifndef SIMULATOR
+#include <malloc.h>
+#endif
 
 namespace MetaModule::LoadTest
 {
@@ -36,10 +38,7 @@ inline void send_heartbeat() {
 	hil_message("*ok\n");
 }
 
-inline void test_module_brand(std::string_view only_brand, auto append_file) {
-	lv_show(ui_MainMenuNowPlayingPanel);
-	lv_show(ui_MainMenuNowPlaying);
-
+inline void test_module_brand(std::string_view only_brand, auto append_file, auto show_module_name) {
 	append_file(csv_header());
 
 	auto brands = ModuleFactory::getAllBrands();
@@ -59,7 +58,8 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 			}
 
 			pr_info("Testing %s\n", entry.slug.c_str());
-			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
+
+			show_module_name(entry.slug);
 
 #ifndef SIMULATOR
 			struct mallinfo mem_start = mallinfo();
@@ -116,12 +116,6 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 			append_file(entry_to_csv(entry));
 		}
 	}
-
-	lv_label_set_text(ui_MainMenuNowPlaying, "Finished load tests");
-}
-
-inline void test_all_modules(auto append_file) {
-	test_module_brand("", append_file);
 }
 
 inline std::string csv_header() {

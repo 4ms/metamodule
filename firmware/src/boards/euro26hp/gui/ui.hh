@@ -73,6 +73,9 @@ public:
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 
 		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
+
+		lv_show(ui_MainMenuNowPlayingPanel);
+		lv_show(ui_MainMenuNowPlaying);
 	}
 
 	void update_screen() {
@@ -180,6 +183,10 @@ public:
 
 	void notify_error(std::string const &message) {
 		notify_queue.put({message, Notification::Priority::Error, 2000});
+	}
+
+	void notify_now_playing(std::string const &message) {
+		lv_label_set_text(ui_MainMenuNowPlaying, message.c_str());
 	}
 
 	std::atomic<bool> new_patch_data = false;

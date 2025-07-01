@@ -48,11 +48,18 @@ struct CpuLoadTest {
 			FS::write_file(file_storage_proxy, std::string(""), {"cpu_test_in_progress.csv", Volume::USB});
 
 			std::string results;
-			LoadTest::test_all_modules([&file_storage_proxy, &ui, &results](std::string_view csv_line) {
-				results += csv_line;
-				FS::append_file(file_storage_proxy, csv_line, {"cpu_test_in_progress.csv", Volume::USB});
-				ui.update_screen();
-			});
+
+			LoadTest::test_module_brand(
+				"",
+				[&file_storage_proxy, &ui, &results](std::string_view csv_line) {
+					results += csv_line;
+					FS::append_file(file_storage_proxy, csv_line, {"cpu_test_in_progress.csv", Volume::USB});
+					ui.update_screen();
+				},
+				[&ui](std::string const &module_name) {
+					ui.notify_now_playing(std::string("Testing ") + module_name);
+				});
+
 			FS::write_file(file_storage_proxy, results, {"cpu_test.csv", Volume::USB});
 			hil_message("*success\n");
 		}
