@@ -9,6 +9,7 @@ namespace MetaModule
 {
 
 static inline constexpr bool LogWidgetTypeIds = false;
+static inline constexpr bool LogMakeElement = false;
 
 static void log_make_element(std::string_view type, unsigned id) {
 	if constexpr (LogWidgetTypeIds) {
@@ -19,6 +20,12 @@ static void log_make_element(std::string_view type, unsigned id) {
 static void log_make_element_notes(std::string_view note1, std::string_view note2) {
 	if constexpr (LogWidgetTypeIds) {
 		pr_dbg("%s %s\n", note1.data(), note2.data());
+	}
+}
+
+static void log_make_element_warn(auto... args) {
+	if constexpr (LogMakeElement) {
+		printf(args...);
 	}
 }
 
@@ -154,7 +161,7 @@ Element make_element(rack::componentlibrary::Rogan *widget) {
 		set_image(element, widget->sw->svg->filename());
 
 	} else {
-		pr_err("make_element(Rogan): No svg was set\n");
+		pr_warn("make_element(Rogan): No svg was set\n");
 	}
 
 	return element;
@@ -198,7 +205,8 @@ Element make_element(rack::app::SvgKnob *widget) {
 		set_image(element, widget->sw->svg->filename());
 
 	} else {
-		pr_trace("SvgKnob with no sw->svg or inner child of fb at %f, %f\n", widget->box.pos.x, widget->box.pos.y);
+		log_make_element_warn(
+			"SvgKnob with no sw->svg or inner child of fb at %f, %f\n", widget->box.pos.x, widget->box.pos.y);
 	}
 
 	return element;
@@ -318,7 +326,7 @@ static MomentaryButton make_momentary(rack::app::SvgSwitch *widget) {
 			element.pressed_image = widget->frames[1]->filename();
 
 		if (widget->frames.size() > 2)
-			pr_info("Excess momentary button frames ignored\n");
+			pr_warn("Excess momentary button frames ignored\n");
 
 	} else {
 		pr_warn("Warning: In %s, SvgSwitch has no image frames\n", module_name(widget));
@@ -457,7 +465,7 @@ Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *
 				light->getNumColors());
 	}
 	if (widget->frames.size() == 0) {
-		pr_err("Error: In %s, SvgSwitch with no frames\n", module_name(widget));
+		pr_warn("Error: In %s, SvgSwitch with no frames\n", module_name(widget));
 		widget->addFrame({});
 	}
 
@@ -567,7 +575,7 @@ Element make_element(rack::app::MultiLightWidget *widget, std::string_view image
 
 Element make_element(rack::widget::SvgWidget *widget) {
 	if (widget->svg->filename().size()) {
-		pr_trace("SvgWidget: using image as a ImageElement\n");
+		log_make_element_notes("SvgWidget: using image as a ImageElement", "");
 		ImageElement element{};
 		element.image = widget->svg->filename();
 		return element;
@@ -597,12 +605,11 @@ Element make_element(MetaModule::VCVTextDisplay *widget) {
 //
 
 Element make_element(rack::app::SvgScrew *widget) {
-	// pr_trace("make_element(SvgScrew): skip\n");
 	return NullElement{};
 }
 
 Element make_element(rack::widget::Widget *widget) {
-	pr_trace("Unknown widget at %f, %f: skip\n", widget->getBox().pos.x, widget->getBox().pos.y);
+	log_make_element_warn("Unknown widget at %f, %f: skip\n", widget->getBox().pos.x, widget->getBox().pos.y);
 	return NullElement{};
 }
 
