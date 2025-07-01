@@ -8,15 +8,11 @@
 #include "fs/norflash_layout.hh"
 #include "fs/syscall/filesystem.hh"
 #include "fw_update/auto_updater.hh"
+#include "gui/display.hh"
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
-
-using FrameBufferT =
-	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
-static inline FrameBufferT framebuf1 alignas(64);
-static inline FrameBufferT framebuf2 alignas(64);
 
 extern "C" void aux_core_main() {
 	using namespace MetaModule;
@@ -37,7 +33,7 @@ extern "C" void aux_core_main() {
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
 #endif
 
-	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
+	init_gui();
 
 	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};

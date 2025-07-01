@@ -61,4 +61,6 @@ constexpr auto PotConfs = std::to_array({
 constexpr int32_t MinPotValue = 72; // more like 69, actually 0x3D = 61
 constexpr float MaxPotValue = 4095.f - (float)MinPotValue - 4.f;
 
+constexpr bool UseGpioExpanderForSensePins = true;
+
 } // namespace MetaModule

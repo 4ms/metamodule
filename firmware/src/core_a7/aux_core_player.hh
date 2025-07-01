@@ -83,7 +83,7 @@ struct AuxPlayer {
 			ui.new_patch_data.store(true, std::memory_order_release);
 		}
 
-		SMPThread::signal_done();
+		mdrivlib::SMPThread::signal_done();
 	}
 };
 
