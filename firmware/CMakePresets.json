@@ -25,7 +25,10 @@
     },
     {
       "name": "full",
-      "inherits": "base"
+      "inherits": "base",
+      "cacheVariables": {
+        "BOARD_SELECT": { "type": "STRING", "value": "mm-p11" }
+	  }
     },
     {
       "name": "min-brands",
@@ -83,7 +86,7 @@
     },
     {
       "name": "handheld-p1",
-      "inherits": "min-brands",
+      "inherits": "base",
       "cacheVariables": {
         "BOARD_SELECT": { "type": "STRING", "value": "handheld-p1" },
         "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
@@ -92,7 +95,7 @@
     },
     {
       "name": "devboard-v01",
-      "inherits": "full",
+      "inherits": "base",
       "cacheVariables": {
         "BOARD_SELECT": { "type": "STRING", "value": "devboard-v01" },
         "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
