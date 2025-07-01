@@ -38,13 +38,13 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.framesize = 256, //24bit extends to 32bits * max(num_tdm_outs, num_td_ins) = 256
 	.samplerate = MetaModule::AudioSettings::DefaultSampleRate,
 
-	.MCLK = {GPIO::Unused}, //not connected
+	.MCLK = {GPIO::E, PinNum::_0, PinAF::AltFunc10},
 	.SCLK = {GPIO::D, PinNum::_13, PinAF::AltFunc10},
 	.LRCLK = {GPIO::D, PinNum::_12, PinAF::AltFunc10},
 	.SD_DAC = {GPIO::D, PinNum::_11, PinAF::AltFunc10}, // SD A
 	.SD_ADC = {GPIO::G, PinNum::_10, PinAF::AltFunc10}, // SD B
 
-	.reset_pin = {GPIO::Unused},
+	.reset_pin = {GPIO::A, PinNum::_10},
 
 	.bus_address = 0b00,
 

@@ -41,12 +41,17 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 };
 
 using mdrivlib::AdcChannelConf;
-enum Pots : uint32_t {};
 constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_2Cycles;
-constexpr std::array<AdcChannelConf, 0> PotConfs;
 
-constexpr int32_t MinPotValue = 72;
-constexpr float MaxPotValue = 4095.f - (float)MinPotValue - 4.f;
+enum Pots : uint32_t { TestPot1, TestJack1 };
+
+constexpr std::array<AdcChannelConf, 2> PotConfs{
+	AdcChannelConf{{GPIO::A, PinNum::_6}, mdrivlib::AdcChanNum::_3, TestPot1, AdcSampTime},
+	AdcChannelConf{{GPIO::A, PinNum::_0}, mdrivlib::AdcChanNum::_16, TestJack1, AdcSampTime},
+};
+
+constexpr int32_t MinPotValue = 0;
+constexpr float MaxPotValue = 4095.f - (float)MinPotValue;
 
 constexpr bool UseGpioExpanderForSensePins = false;
 

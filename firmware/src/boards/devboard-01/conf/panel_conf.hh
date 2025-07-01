@@ -6,15 +6,15 @@
 #include <string_view>
 
 struct PanelDef {
-	static constexpr uint32_t PanelID = 2;
-	static constexpr char typeID[20] = "Handheld-p1";
+	static constexpr uint32_t PanelID = 3;
+	static constexpr char typeID[20] = "Devboard-p1";
 
 	static constexpr uint32_t NumAudioIn = 2;
 	static constexpr uint32_t NumAudioOut = 2;
 	static constexpr uint32_t NumDACOut = 0;
-	static constexpr uint32_t NumPot = 0;
+	static constexpr uint32_t NumPot = 2;
 	static constexpr uint32_t NumCVIn = 0;
-	static constexpr uint32_t NumGateIn = 2;
+	static constexpr uint32_t NumGateIn = 1;
 	static constexpr uint32_t NumGateOut = 0;
 	static constexpr uint32_t NumMetaCV = 0;
 	static constexpr uint32_t NumRgbButton = 0;

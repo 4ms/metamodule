@@ -1,13 +1,13 @@
 #pragma once
 #include "conf/codec_sai_conf.hh"
 #include "conf/i2c_codec_conf.hh"
-#include "drivers/codec_TAC5211.hh"
+#include "drivers/codec_PCM3060.hh"
 #include "drivers/codec_null.hh"
 
 namespace MetaModule
 {
 
-using CodecT = mdrivlib::CodecTAC5211;
+using CodecT = mdrivlib::CodecPCM3060;
 using ExtCodecT = mdrivlib::CodecNull;
 
 struct Hardware {
