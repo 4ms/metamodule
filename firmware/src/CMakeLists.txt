@@ -124,7 +124,7 @@ add_executable(
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
-  ${BOARD_SUPPORT_DIR}/gui/ui.cc
+  ${BOARD_SUPPORT_DIR}/gui/display.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/audio/audio.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
