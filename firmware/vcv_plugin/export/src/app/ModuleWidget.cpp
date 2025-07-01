@@ -58,11 +58,6 @@ void ModuleWidget::setModule(engine::Module *m) {
 
 	internal->graphic_display_idx = std::max(m->lights.size(), m->lightInfos.size());
 	internal->first_graphic_idx = internal->graphic_display_idx;
-
-	if (model && model->slug.size())
-		pr_trace("setModule for %s\n", model->slug.c_str());
-	else if (m->model && m->model->slug.size())
-		pr_trace("setModule for %s\n", m->model->slug.c_str());
 }
 
 app::SvgPanel *ModuleWidget::getPanel() {
