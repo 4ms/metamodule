@@ -11,13 +11,15 @@ project(
   LANGUAGES C CXX ASM
 )
 
+set(FWDIR ${CMAKE_CURRENT_LIST_DIR})
 
-#
-# Board Select
-#
-set(BOARD_SELECT "mm-p11" CACHE STRING "Select board")
+
+############################
+
+## Add new board names here:
 set_property(CACHE BOARD_SELECT PROPERTY STRINGS "mm-p11" "handheld-p1" "devboard-v01")
 
+## Add the path to the config dir here:
 if (BOARD_SELECT STREQUAL "handheld-p1")
     set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/handheld)
 
@@ -28,7 +30,13 @@ else()
     set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/euro26hp)
 endif()
 
+############################3
+
+# Default is mm-p11
+set(BOARD_SELECT "mm-p11" CACHE STRING "Select board")
+
 message("BOARD_SELECT: ${BOARD_SELECT}")
+include(${BOARD_SUPPORT_DIR}/CMakeLists.txt)
 
 
 #
@@ -251,22 +259,9 @@ else()
 	set(BOOTLOADER_TOOLCHAIN_OPT "TOOLCHAIN_DIR=${TOOLCHAIN_BASE_DIR}/")
 endif()
 
-if (BOARD_SELECT STREQUAL "handheld-p1")
-    set(bootloader_conf "../board_conf/handheld-p1.hh")
-    set(dfu_bootloader_conf "../../board_conf/dfu-handheld-p1.hh")
-
-elseif(BOARD_SELECT STREQUAL "devboard-v01")
-    set(bootloader_conf "../board_conf/devboard-v0.1.hh")
-    set(dfu_bootloader_conf "../../board_conf/dfu-devboard-v0.1.hh")
-
-else()
-    set(bootloader_conf "../board_conf/mmp11_with_expanders_conf.hh")
-    set(dfu_bootloader_conf "board_conf/mmp11_conf.hh")
-endif()
-
 add_custom_target(
   bootloader
-  COMMAND make --no-print-directory BOARD_CONF=${bootloader_conf} ${BOOTLOADER_TOOLCHAIN_OPT}
+  COMMAND make --no-print-directory BOARD_CONF=${BOARD_bootloader_conf} ${BOOTLOADER_TOOLCHAIN_OPT}
   COMMENT "Building MP1-Boot (FSBL)"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot
   VERBATIM
@@ -274,7 +269,7 @@ add_custom_target(
 
 add_custom_target(
   bootloader-dfu
-  COMMAND make --no-print-directory BOARD_CONF=${dfu_bootloader_conf} ${BOOTLOADER_TOOLCHAIN_OPT}
+  COMMAND make --no-print-directory BOARD_CONF=${BOARD_dfu_bootloader_conf} ${BOOTLOADER_TOOLCHAIN_OPT}
   COMMENT "Building DFU Bootloader"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu
   VERBATIM

@@ -207,11 +207,7 @@ add_executable(
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
-if (BOARD_SELECT STREQUAL "mm-p11")
-target_sources(main.elf PRIVATE ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3168.cc)
-else()
-target_sources(main.elf PRIVATE ${FWDIR}/lib/mdrivlib/drivers/codec_TAC5211.cc)
-endif()
+target_sources(main.elf PRIVATE ${BOARD_a7_sources})
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
