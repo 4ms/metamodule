@@ -43,8 +43,12 @@ struct ConfirmPopup {
 
 		callback = std::move(cb);
 
+		lv_group_add_obj(group, ui_CancelButton);
+
 		if (choice2_text.size() > 0) {
 			lv_show(ui_Choice2Button);
+			lv_obj_clear_state(ui_Choice2Button, LV_STATE_FOCUSED);
+			lv_obj_clear_state(ui_Choice2Button, LV_STATE_FOCUS_KEY);
 			lv_label_set_text_fmt(ui_Choice2Label, "%.*s", (int)choice2_text.size(), choice2_text.data());
 			lv_group_add_obj(group, ui_Choice2Button);
 		} else {
@@ -54,17 +58,23 @@ struct ConfirmPopup {
 		if (choice1_text == "Trash") {
 			lv_hide(ui_ConfirmButton);
 			lv_show(ui_TrashButton2);
+			lv_obj_clear_state(ui_TrashButton2, LV_STATE_FOCUSED);
+			lv_obj_clear_state(ui_TrashButton2, LV_STATE_FOCUS_KEY);
 			lv_group_add_obj(group, ui_TrashButton2);
 		} else {
 			lv_show(ui_ConfirmButton);
+			lv_obj_clear_state(ui_ConfirmButton, LV_STATE_FOCUSED);
+			lv_obj_clear_state(ui_ConfirmButton, LV_STATE_FOCUS_KEY);
 			lv_hide(ui_TrashButton2);
 			lv_label_set_text_fmt(ui_ConfirmLabel, "%.*s", (int)choice1_text.size(), choice1_text.data());
 			lv_group_add_obj(group, ui_ConfirmButton);
 		}
 
-		lv_group_add_obj(group, ui_CancelButton);
 		lv_indev_set_group(lv_indev_get_next(nullptr), group);
+
 		lv_group_focus_obj(ui_CancelButton);
+
+		lv_group_set_wrap(group, false);
 
 		visible = true;
 	}

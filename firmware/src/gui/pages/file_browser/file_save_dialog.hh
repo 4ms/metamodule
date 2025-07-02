@@ -19,6 +19,7 @@ struct FileSaveDialog {
 		lv_group_add_obj(group, ui_SaveDialogDir);
 		lv_group_add_obj(group, ui_SaveDialogCancelBut);
 		lv_group_add_obj(group, ui_SaveDialogSaveBut);
+		lv_group_set_wrap(group, false);
 
 		lv_obj_add_event_cb(ui_SaveDialogFilename, click_filename_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SaveDialogDir, click_location_cb, LV_EVENT_CLICKED, this);

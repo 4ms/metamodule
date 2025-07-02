@@ -74,6 +74,8 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_style_radius(indicator, 0, LV_PART_MAIN);
 		lv_obj_set_style_transform_pivot_x(indicator, 0, LV_PART_MAIN);
 		lv_obj_set_style_transform_pivot_y(indicator, 23, LV_PART_MAIN);
+
+		lv_group_set_wrap(group, false);
 	}
 
 	void prepare_focus() override {
