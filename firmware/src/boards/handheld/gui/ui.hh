@@ -154,6 +154,10 @@ public:
 		printf("%s\n", message.c_str());
 	}
 
+	void notify_now_playing(std::string const &message) {
+		printf("%s\n", message.c_str());
+	}
+
 	std::atomic<bool> new_patch_data = false;
 
 private:

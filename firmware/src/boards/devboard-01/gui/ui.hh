@@ -20,12 +20,9 @@ private:
 	PatchPlayLoader &patch_playloader;
 	PluginManager &plugin_manager;
 
-	// NotificationQueue notify_queue;
-	// PageManager page_manager;
 	ParamsMidiState params;
 	MetaParams metaparams;
 	UserSettings settings;
-	// Screensaver screensaver{settings.screensaver};
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
@@ -53,7 +50,7 @@ public:
 		// settings.last_patch_vol = Volume::NorFlash;
 		// settings.last_patch_opened = "/West_Coast_FM_Madness.yml";
 		settings.last_patch_vol = Volume::SDCard;
-		settings.last_patch_opened = "/eo3-hh.yml";
+		settings.last_patch_opened = "/patch.yml";
 
 		patch_playloader.request_new_audio_settings(
 			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);
@@ -151,6 +148,10 @@ public:
 	}
 
 	void notify_error(std::string const &message) {
+		printf("%s\n", message.c_str());
+	}
+
+	void notify_now_playing(std::string const &message) {
 		printf("%s\n", message.c_str());
 	}
 
