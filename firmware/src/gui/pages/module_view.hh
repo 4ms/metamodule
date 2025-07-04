@@ -325,6 +325,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
+		// Back button
 		if (gui_state.back_button.is_just_released()) {
 
 			if (action_menu.is_visible()) {
@@ -349,6 +350,7 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		// File Browser
 		if (gui_state.file_browser_visible.just_went_low()) {
 			// File Browser detected as just closed
 			if (mode == ViewMode::ModuleContextMenu) {
@@ -356,12 +358,14 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		// Mapping pane
 		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
 				show_roller();
 			}
 
+			// Right-click menu
 		} else if (mode == ViewMode::ModuleContextMenu) {
 			module_context_menu.update();
 			if (module_context_menu.wants_to_close()) {
@@ -369,10 +373,12 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		// Action menu
 		if (action_menu.is_visible()) {
 			action_menu.update();
 		}
 
+		// Knobset changed
 		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
@@ -382,6 +388,7 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.refresh();
 		}
 
+		// Settings changed
 		if (page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
@@ -389,6 +396,7 @@ struct ModuleViewPage : PageBase {
 			update_graphic_throttle_setting();
 		}
 
+		// Patch file changed via wifi/disk
 		poll_patch_file_changed();
 
 		if (gui_state.force_redraw_patch || gui_state.view_patch_file_changed) {
@@ -412,16 +420,18 @@ struct ModuleViewPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 		}
 
-		// if (is_patch_playloaded) {
+		// Draw the on-screen elements (knobs, lights, etc)
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			redraw_elements();
 		}
 
+		// Handle patch modification requests
 		if (handle_patch_mods()) {
 			redraw_module();
 			mapping_pane.refresh();
 		}
 
+		// Hover text
 		roller_hover.update();
 
 		// Hide the hover text if we are on one of the action buttons
@@ -430,6 +440,12 @@ struct ModuleViewPage : PageBase {
 			lv_group_get_focused(group) == ui_ModuleViewHideBut)
 		{
 			roller_hover.hide();
+		}
+
+		// Handle "action" alt params, which were set high when the user clicked them, and now need to be set low
+		if (pending_action_param_clear) {
+			send_param_value(0, *pending_action_param_clear);
+			pending_action_param_clear = std::nullopt;
 		}
 	}
 
@@ -749,38 +765,42 @@ private:
 			pr_err("Error completing cable\n");
 	}
 
-	void click_normal_element(unsigned drawn_idx) {
-		auto &drawn_element = drawn_elements[drawn_idx];
+	void click_altparam_action(DrawnElement const &drawn_element) {
 		args.element_indices = drawn_element.gui_element.idx;
 
-		if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
-			PageArguments nextargs = {
-				.patch_loc_hash = args.patch_loc_hash,
-				.module_id = this_module_id,
-				.element_indices = drawn_element.gui_element.idx,
-				.element_mm = std::pair<float, float>{el->width_mm, el->height_mm},
-			};
-			page_list.update_state(PageId::ModuleView, nextargs);
-			page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
-			roller_hover.hide();
-
-		} else {
-			//TODO: sometimes open manual popup immediately. (alt params, performance mode)
-			// sometimes keep it hidden, but act as if it were open (full screen mode, performance mode with buttons)
-			if (full_screen_mode) {
-				//...
-			}
-			mode = ViewMode::Mapping;
-			args.detail_mode = true;
-			lv_hide(ui_ElementRollerPanel);
-			roller_hover.hide();
-
-			mapping_pane.show(drawn_element);
+		if (is_patch_playloaded) {
+			// Set the param high now, and make a pending request to set it low on the next update()
+			send_param_value(1, drawn_element.gui_element);
+			pending_action_param_clear = drawn_element.gui_element;
 		}
 	}
 
+	void click_graphic_display(DrawnElement const &drawn_element, DynamicGraphicDisplay const *el) {
+		args.element_indices = drawn_element.gui_element.idx;
+
+		PageArguments nextargs = {
+			.patch_loc_hash = args.patch_loc_hash,
+			.module_id = this_module_id,
+			.element_indices = drawn_element.gui_element.idx,
+			.element_mm = std::pair<float, float>{el->width_mm, el->height_mm},
+		};
+		page_list.update_state(PageId::ModuleView, nextargs);
+		page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
+		roller_hover.hide();
+	}
+
+	void click_normal_element(DrawnElement const &drawn_element) {
+		args.element_indices = drawn_element.gui_element.idx;
+
+		mode = ViewMode::Mapping;
+		args.detail_mode = true;
+		lv_hide(ui_ElementRollerPanel);
+		roller_hover.hide();
+
+		mapping_pane.show(drawn_element);
+	}
+
 	void show_context_menu() {
-		// Ignore clicking on Context Menu when in full_screen_mode
 		if (!full_screen_mode) {
 			mode = ViewMode::ModuleContextMenu;
 			lv_hide(ui_ElementRoller);
@@ -795,18 +815,42 @@ private:
 
 		if (auto drawn_idx = page->get_drawn_idx(roller_idx)) {
 
+			auto &drawn_element = page->drawn_elements[*drawn_idx];
+
 			if (page->gui_state.new_cable) {
 				page->click_cable_destination(*drawn_idx);
+
+			} else if (std::get_if<AltParamAction>(&drawn_element.element)) {
+				page->click_altparam_action(drawn_element);
+
+			} else if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
+				page->click_graphic_display(drawn_element, el);
+
+				// } else if (page->full_screen_mode) {
+				// TODO: sometimes open manual popup immediately. (alt params, performance mode)
+				// sometimes keep it hidden, but act as if it were open (full screen mode, performance mode with buttons)
+
 			} else {
-				page->click_normal_element(*drawn_idx);
+				page->click_normal_element(drawn_element);
 			}
 
-			//Not an element: Is it the Extra Menu?
+			//Not an element: Is it the Context Menu?
 		} else if (roller_idx < page->roller_drawn_el_idx.size()) {
 			if (page->roller_drawn_el_idx[roller_idx] == ContextMenuTag) {
 				page->show_context_menu();
 			}
 		}
+	}
+
+	void send_param_value(float value, GuiElement const &gui_element) {
+		StaticParam sp{
+			.module_id = gui_element.module_idx,
+			.param_id = gui_element.idx.param_idx,
+			.value = value,
+		};
+		patch_mod_queue.put(SetStaticParam{.param = sp});
+
+		patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
 	}
 
 	static void roller_focus_cb(lv_event_t *event) {
@@ -911,6 +955,8 @@ private:
 	unsigned dyn_draw_throttle = 16;
 
 	bool full_screen_mode = false;
+
+	std::optional<GuiElement> pending_action_param_clear{};
 
 	enum { ContextMenuTag = -2 };
 };
