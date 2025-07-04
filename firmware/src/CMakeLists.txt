@@ -95,14 +95,6 @@ endif()
 #
 add_subdirectory(${FWDIR}/src/gui/slsexport)
 
-#
-# Core Interface
-#
-
-if (NOT TARGET metamodule::core-interface)
-  add_subdirectory(${FWDIR}/metamodule-plugin-sdk/metamodule-core-interface metamodule-core-interface)
-endif()
-
 # CoreModules sources
 add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 

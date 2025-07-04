@@ -259,7 +259,7 @@ add_custom_target(
   COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
   COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/lib/CoreModules/tests all
   COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests all
-  COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/metamodule-core-interface/tests all
+  COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/core-interface/tests all
   COMMENT "Running unit tests"
   VERBATIM USES_TERMINAL
 )
@@ -272,7 +272,7 @@ file(
   "${PROJECT_SOURCE_DIR}/lib/CoreModules/tests/build"
   "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests/build"
   "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper/tests/build/*"
-  "${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/metamodule-core-interface/tests/build"
+  "${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/core-interface/tests/build"
 )
 set_target_properties(tests PROPERTIES ADDITIONAL_CLEAN_FILES "${tests_clean_files}")
 
@@ -294,7 +294,7 @@ set_property(
            ${LIBDIR}/patch-serial/tests/build
            ${PROJECT_SOURCE_DIR}/lib/CoreModules/tests/build
            ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests/build
-           ${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/metamodule-core-interface/tests/build
+           ${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/core-interface/tests/build
 )
 
 #
