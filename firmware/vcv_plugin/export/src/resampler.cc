@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <array>
-#include <cstdio>
+#include <cstdint>
 #include <cstring>
 #include <speex/speex_resampler.h>
 
