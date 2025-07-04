@@ -101,7 +101,10 @@ def panel_to_components(tree):
         split = name.split("@")
         if len(split) == 2:
             name = split[0]
-            c['num_choices'] = int(split[1])
+            try:
+                c['num_choices'] = int(split[1])
+            except:
+                c['pos_names'] = split[1:]
         elif len(split) > 2:
             name = split[0]
             c['pos_names'] = split[1:]
@@ -261,9 +264,12 @@ def panel_to_components(tree):
         #Medium grey: AltParam
         elif color.startswith('#8080'):
             if len(c['pos_names']) > 0:
-                set_class_if_not_set(c, "AltParamChoiceLabeled")
-                c['num_choices'] = len(c['pos_names'])
-                c['default_val'] = str(max(0, min(c['num_choices'], default_val_int - 128)))
+                if c['pos_names'][0] == "action":
+                    set_class_if_not_set(c, "AltParamAction")
+                else:
+                    set_class_if_not_set(c, "AltParamChoiceLabeled")
+                    c['num_choices'] = len(c['pos_names'])
+                    c['default_val'] = str(max(0, min(c['num_choices'], default_val_int - 128)))
 
             elif c['num_choices'] > 0:
                 set_class_if_not_set(c, "AltParamChoice")
@@ -272,7 +278,7 @@ def panel_to_components(tree):
 
             elif c['num_choices'] == 0:
                 set_class_if_not_set(c, "AltParamContinuous")
-                if default_val_int == 255:
+                if default_val_int >= 254: #8080fe is max, because #8080ff is a gate out jack
                     default_val_int = 256
                 c['default_val'] = str(default_val_int / 256) + "f"
 
@@ -331,7 +337,6 @@ def components_to_infofile(components, brand="4ms"):
 
     if brand == "4ms":
         source += f"""#include "CoreModules/4ms/4ms_elements.hh"\n"""
-        source += f"""#include "CoreModules/4ms/4ms_element_state_conversions.hh"\n"""
     else:
         source += f"""#include "{brand}/{brand}_elements.hh"\n"""
 
@@ -354,14 +359,20 @@ struct {slug}Info : ModuleInfoBase {{
 
     enum class Elem {{{list_elem_names(components['elements'])}
     }};
+"""
 
-    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
-    {make_legacy_enum("Knob", components['legacy_knobs'])}
-    {make_legacy_enum("Switch", components['legacy_switches'])}
-    {make_legacy_enum("Input", components['legacy_inputs'])}
-    {make_legacy_enum("Output", components['legacy_outputs'])}
-    {make_legacy_enum("Led", components['lights'])}
-    {make_legacy_enum("AltParam", components['alt_params'])}
+    # source += f"""
+    # // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
+    # {make_legacy_enum("Knob", components['legacy_knobs'])}
+    # {make_legacy_enum("Switch", components['legacy_switches'])}
+    # {make_legacy_enum("Input", components['legacy_inputs'])}
+    # {make_legacy_enum("Output", components['legacy_outputs'])}
+    # {make_legacy_enum("Led", components['lights'])}
+    # {make_legacy_enum("AltParam", components['alt_params'])}
+# """
+
+
+    source += f"""
 }};
 }} // namespace MetaModule
 """
