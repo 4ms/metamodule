@@ -51,13 +51,15 @@ CXXFLAGS = 	-Wall \
 			-Ilib/patch-serial/ryml \
 			-Ilib/patch-serial/ryml/rapidyaml/src \
 			-Ilib/CoreModules \
-			-Imetamodule-plugin-sdk/metamodule-core-interface \
-			-Imetamodule-plugin-sdk/metamodule-rack-interface/dep/include \
+			-Imetamodule-plugin-sdk/core-interface \
+			-Imetamodule-plugin-sdk/rack-interface/dep/include \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
 			-isystem $(TEST_DIR) \
 			-DTESTPROJECT \
 			-g3 -O0 \
+
+$(BUILDDIR)/src/gui/elements/element_name.o: CXXFLAGS += -Wno-deprecated-anon-enum-enum-conversion
 
 ### Boilerplate below here:
 
