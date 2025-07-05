@@ -4,6 +4,7 @@
 #include "gui/pages/patch_selector_subdir_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "patch_file/file_storage_proxy.hh"
+#include <atomic>
 
 namespace MetaModule
 {
@@ -31,6 +32,11 @@ struct FileSaveDialog {
 	}
 
 	void update() {
+		if (should_show) {
+			do_show(should_show_vol, should_show_path, should_show_ext);
+			should_show = false;
+		}
+
 		if (mode == Mode::EditDir) {
 
 			//TODO: this state logic should be in PatchSelectorSubdirPanel
@@ -82,17 +88,29 @@ struct FileSaveDialog {
 			  std::string_view ext,
 			  lv_group_t *parent_group,
 			  std::function<void(Volume, std::string_view)> action) {
-		this->vcv_save_action = {};
-		this->save_action = action;
-		show(vol, fullpath, ext);
+		vcv_save_action = {};
+		save_action = action;
+		should_show_vol = vol;
+		should_show_path = fullpath;
+		should_show_ext = ext;
+
+		// TODO: this only has an effect if mode != Hidden when show is called
 		base_group = parent_group;
+
+		should_show = true;
 	}
 
 	void show(std::string_view fullpath, std::string_view ext, std::function<void(char *)> action) {
-		this->vcv_save_action = action;
-		this->save_action = {};
-		auto [path, vol] = split_volume(fullpath);
-		show(vol, fullpath, ext);
+		vcv_save_action = action;
+		save_action = {};
+		auto [_, vol] = split_volume(fullpath);
+		should_show_vol = vol;
+		should_show_path = fullpath;
+		should_show_ext = ext;
+
+		base_group = nullptr;
+
+		should_show = true;
 	}
 
 	void hide() {
@@ -112,7 +130,7 @@ struct FileSaveDialog {
 	}
 
 	bool is_visible() {
-		return mode != Mode::Hidden;
+		return should_show || (mode != Mode::Hidden);
 	}
 
 	void back_event() {
@@ -130,7 +148,7 @@ struct FileSaveDialog {
 	}
 
 private:
-	void show(Volume vol, std::string_view fullpath, std::string_view ext) {
+	void do_show(Volume vol, std::string_view fullpath, std::string_view ext) {
 
 		if (mode == Mode::Hidden) {
 
@@ -163,7 +181,9 @@ private:
 			lv_hide(ui_SaveDialogLeftCont);
 			lv_hide(ui_Keyboard);
 
-			base_group = lv_indev_get_act()->group;
+			// Set the base group if we didn't do it with the call to show()
+			if (!base_group)
+				base_group = lv_indev_get_next(nullptr)->group;
 			lv_group_activate(group);
 			lv_group_focus_obj(ui_SaveDialogFilename);
 			lv_group_set_editing(group, false);
@@ -337,6 +357,11 @@ private:
 
 	std::function<void(char *)> vcv_save_action;
 	std::function<void(Volume, std::string_view)> save_action;
+
+	std::atomic<bool> should_show = false;
+	Volume should_show_vol{};
+	StaticString<255> should_show_path{};
+	StaticString<8> should_show_ext{};
 };
 
 } // namespace MetaModule
