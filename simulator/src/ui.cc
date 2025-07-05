@@ -89,6 +89,10 @@ bool Ui::update() {
 	return keep_running;
 }
 
+void Ui::set_audio_fullscale(float volts_peak) {
+	audio_stream.volts_peak = volts_peak;
+}
+
 void Ui::play_patch(std::span<Frame> soundcard_out) {
 	// assert(soundcard_out.size() == out_buffer.size());
 
