@@ -111,10 +111,10 @@ size_t BlockResampler::process(uint32_t channel_index, std::span<const float> in
 		}
 	}
 
-	return outpos - output_stride; //index of last output written
+	return outpos; // - channel_index; // - output_stride; //index of last output written
 }
 
-void BlockResampler::set_sample_rate_in_out(uint32_t input_rate, uint32_t output_rate) {
+void BlockResampler::set_samplerate_in_out(uint32_t input_rate, uint32_t output_rate) {
 	for (auto &chan : chans) {
 		auto cur_ratio = (float)input_rate / (float)output_rate;
 
