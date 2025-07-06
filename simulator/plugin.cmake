@@ -33,7 +33,7 @@ function(create_plugin)
 		VERBATIM
 	)
 
-	add_custom_target(${PLUGIN_OPTIONS_SOURCE_LIB}-assets
+	add_custom_target(${PLUGIN_OPTIONS_SOURCE_LIB}-assets ALL
 		DEPENDS "${ASSET_DIR}/${PLUGIN_OPTIONS_PLUGIN_NAME}" 
 	)
 
