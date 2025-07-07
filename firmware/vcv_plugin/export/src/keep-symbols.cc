@@ -3,6 +3,9 @@
 #include "app/ModuleWidget.hpp"
 #include "app/SvgSlider.hpp"
 #include "app/SvgSwitch.hpp"
+#include "dsp/block_resampler.hh"
+#include "dsp/stream_resampler.hh"
+#include "graphics/waveform_display.hh"
 #include "history.hpp"
 #include "random.hpp"
 #include "string.hpp"
@@ -15,6 +18,7 @@
 #include "dirent.h"
 #include "jansson.h"
 #include "pffft.h"
+#include "system/random.hh"
 #include <cmath>
 #include <cstring>
 #include <ctime>
@@ -133,4 +137,12 @@ void keep_dirent() {
 	[[maybe_unused]] auto x4 = scandir({}, {}, {}, {});
 	seekdir(d, 0);
 	telldir(d);
+}
+
+void keep_coreproc() {
+	MetaModule::StreamResampler res{2};
+	MetaModule::BlockResampler res2{2};
+	MetaModule::StreamingWaveformDisplay disp{1, 1};
+	[[maybe_unused]] auto x1 = MetaModule::hardware_random();
+	[[maybe_unused]] auto x2 = MetaModule::random();
 }
