@@ -9,14 +9,12 @@ target_sources(coreproc_plugin_export PRIVATE
 	dsp/block_resampler.cc
 	dsp/stream_resampler.cc
 	graphics/waveform_display.cc
-	system/random.cc
 )
 
 target_link_libraries(coreproc_plugin_export PRIVATE 
 	cpputil 
 	metamodule::core-interface
 	CoreModules
-	mdrivlib_interface
 )
 
 

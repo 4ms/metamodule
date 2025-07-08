@@ -99,6 +99,7 @@ set(HOST ON)
 add_subdirectory(${FWDIR}/lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
 # #################### Application ############################################
+add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_CURRENT_BINARY_DIR}/coreproc_plugin)
 
 add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 add_subdirectory(${LIBDIR}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
@@ -118,8 +119,6 @@ if(HEADLESS)
 		stubs/drivers/time.cc
 
 		${FWDIR}/src/midi/midi_router.cc
-
-		${FWDIR}/coreproc_plugin/create.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
@@ -165,9 +164,6 @@ else()
 		${FWDIR}/src/user_settings/settings_file.cc
 		${FWDIR}/src/user_settings/settings_parse.cc
 		${FWDIR}/src/user_settings/settings_serialize.cc
-
-		${FWDIR}/coreproc_plugin/create.cc
-		${FWDIR}/coreproc_plugin/async_thread.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
@@ -220,7 +216,9 @@ endif()
 target_link_libraries(simulator PRIVATE 
 	metamodule::patch-serial
 	vcv_ports
+	coreproc_plugin_export
 )
+
 if(NOT HEADLESS)
 	target_link_libraries(simulator PRIVATE 
 		${SDL2_LIBRARIES}
