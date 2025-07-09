@@ -19,6 +19,7 @@
 #include "jansson.h"
 #include "pffft.h"
 #include "system/random.hh"
+#include "wav/wav_file_stream.hh"
 #include <cmath>
 #include <cstring>
 #include <ctime>
@@ -96,17 +97,16 @@ void keep_async() {
 }
 
 void __attribute__((optimize("-O0"))) keep_math(float x) {
-	auto y = log1pl(x);
-	auto z = expm1l(y);
-	printf("%f%Lf%Lf\n", x, y, z);
+	[[maybe_unused]] auto y = log1pl(x);
+	[[maybe_unused]] auto z = expm1l(y);
 }
 
-void __attribute__((optimize("-O0"))) keep_register_module() {
+void keep_register_module() {
 	static auto addr = &MetaModule::register_module;
 	printf("%p\n", addr);
 }
 
-void __attribute__((optimize("-O0"))) keep_rack_widgets() {
+void keep_rack_widgets() {
 	{
 		rack::app::LightWidget x;
 		printf("%p\n", &x);
@@ -145,4 +145,5 @@ void keep_coreproc() {
 	MetaModule::StreamingWaveformDisplay disp{1, 1};
 	[[maybe_unused]] auto x1 = MetaModule::hardware_random();
 	[[maybe_unused]] auto x2 = MetaModule::random();
+	[[maybe_unused]] MetaModule::WavFileStream stream{8};
 }
