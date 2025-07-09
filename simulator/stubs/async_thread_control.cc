@@ -51,13 +51,13 @@ void start_module_threads() {
 	pr_trace("Starting module async thread\n");
 
 	async_task_runner = std::thread([=]() {
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
 		while (true) {
 			if (kill_signal) {
 				printf("Got kill signal\n");
 				return;
 			}
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 			for (auto &task : tasks) {
 				if (task.enabled && !pause_signal) {
