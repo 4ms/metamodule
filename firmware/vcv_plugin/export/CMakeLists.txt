@@ -99,6 +99,7 @@ target_sources(
          src/color.cpp
          src/common.cpp
          src/resampler.cc
+         src/random.cpp
          src/midi_message.cc
          src/system.cc
 

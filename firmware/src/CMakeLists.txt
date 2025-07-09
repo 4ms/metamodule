@@ -74,7 +74,6 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
-target_include_directories(CoreModules-4ms PRIVATE ${FWDIR}/src/vcv_hardware)
 
 target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
 
@@ -196,8 +195,6 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
   #
-  ${FWDIR}/src/vcv_hardware/random.cpp
-  #
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
@@ -227,7 +224,6 @@ target_include_directories(
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${FWDIR}/src/vcv_hardware
           ${FWDIR}/src/fs
           ${FWDIR}/src/core_a7
           ${FWDIR}/src/medium
