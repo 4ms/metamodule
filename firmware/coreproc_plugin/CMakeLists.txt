@@ -9,6 +9,8 @@ target_sources(coreproc_plugin_export PRIVATE
 	dsp/block_resampler.cc
 	dsp/stream_resampler.cc
 	graphics/waveform_display.cc
+	wav/wav_file_stream.cc
+	wav/dr_wav.c
 )
 
 target_link_libraries(coreproc_plugin_export PRIVATE 

@@ -33,6 +33,7 @@ TEST_SOURCES += src/gui/elements/element_name.cc
 TEST_SOURCES += src/gui/elements/panel_name.cc
 TEST_SOURCES += coreproc_plugin/dsp/stream_resampler.cc
 TEST_SOURCES += coreproc_plugin/dsp/block_resampler.cc
+TEST_SOURCES += coreproc_plugin/wav/wav_file_stream.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
 
 CXXFLAGS = 	-Wall \
