@@ -6,6 +6,7 @@ add_library(hardware_support STATIC)
 target_sources(hardware_support PRIVATE
 	random.cc
 	time.cc
+	memory.cc
 )
 
 target_link_libraries(hardware_support PRIVATE 
