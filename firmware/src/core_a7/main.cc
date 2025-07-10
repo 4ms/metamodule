@@ -14,7 +14,7 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
-#include "system/time.hh"
+#include "system/print_time.hh"
 #include "uart_log.hh"
 
 #include "fs/norflash_layout.hh"

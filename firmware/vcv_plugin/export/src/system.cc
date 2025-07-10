@@ -247,7 +247,7 @@ std::string getStackTrace() {
 }
 
 double getTime() {
-	auto ticks = get_ticks();
+	auto ticks = MetaModule::get_ticks();
 	return (double)ticks / 1000.0;
 }
 
