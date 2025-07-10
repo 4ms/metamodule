@@ -15,7 +15,6 @@
 
 namespace MetaModule
 {
-void register_settings(UserSettings const *user_settings);
 
 class Ui {
 private:
@@ -68,8 +67,6 @@ public:
 			}
 		}
 
-		register_settings(&settings);
-
 		patch_playloader.request_new_audio_settings(
 			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);
 		patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.allow_jump_outofrange);
@@ -77,6 +74,10 @@ public:
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 
 		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
+	}
+
+	UserSettings &get_settings() {
+		return settings;
 	}
 
 	void update_screen() {

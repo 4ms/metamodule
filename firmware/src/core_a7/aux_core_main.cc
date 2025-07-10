@@ -9,6 +9,7 @@
 #include "fs/syscall/filesystem.hh"
 #include "fw_update/auto_updater.hh"
 #include "gui/ui.hh"
+#include "internal_interface/plugin_interface.hh"
 #include "internal_plugin_manager.hh"
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
@@ -54,6 +55,9 @@ extern "C" void aux_core_main() {
 		  ramdisk};
 	ui.update_screen();
 	ui.update_page();
+
+	PluginInterface plugin_interface{ui.get_settings(), *A7SharedMemoryS::ptrs.patch_playloader};
+	plugin_interface.register_interface();
 
 	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
 	if (!internal_plugin_manager.asset_fs_valid) {

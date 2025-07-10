@@ -18,12 +18,13 @@
 #include "CoreModules/async_thread.hh"
 #include "dirent.h"
 #include "jansson.h"
-#include "patch/audio.hh"
+#include "metamodule-plugin-sdk/core-interface/patch/audio.hh"
+#include "metamodule-plugin-sdk/core-interface/patch/patch.hh"
+#include "metamodule-plugin-sdk/core-interface/system/memory.hh"
+#include "metamodule-plugin-sdk/core-interface/system/random.hh"
+#include "metamodule-plugin-sdk/core-interface/system/time.hh"
+#include "metamodule-plugin-sdk/core-interface/wav/wav_file_stream.hh"
 #include "pffft.h"
-#include "system/memory.hh"
-#include "system/random.hh"
-#include "system/time.hh"
-#include "wav/wav_file_stream.hh"
 
 #include <cmath>
 #include <cstring>
@@ -154,4 +155,6 @@ void keep_coreproc() {
 	[[maybe_unused]] auto x3 = MetaModule::total_memory();
 	[[maybe_unused]] auto x4 = MetaModule::free_memory();
 	[[maybe_unused]] auto x5 = MetaModule::get_ticks();
+	[[maybe_unused]] auto x6 = MetaModule::get_block_size();
+	MetaModule::mark_patch_modified();
 }

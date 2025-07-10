@@ -13,9 +13,11 @@ target_sources(coreproc_plugin_export PRIVATE
 	graphics/waveform_display.cc
 	
 	patch/audio.cc
+	patch/patch.cc
 
 	wav/wav_file_stream.cc
 	wav/dr_wav.c
+
 )
 
 target_link_libraries(coreproc_plugin_export PRIVATE 
