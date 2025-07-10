@@ -1,4 +1,5 @@
 // These must be inluded so the symbols are not dropped by the linker:
+// VCV:
 #include "app/ModuleLightWidget.hpp"
 #include "app/ModuleWidget.hpp"
 #include "app/SvgSlider.hpp"
@@ -17,9 +18,13 @@
 #include "CoreModules/async_thread.hh"
 #include "dirent.h"
 #include "jansson.h"
+#include "patch/audio.hh"
 #include "pffft.h"
+#include "system/memory.hh"
 #include "system/random.hh"
+#include "system/time.hh"
 #include "wav/wav_file_stream.hh"
+
 #include <cmath>
 #include <cstring>
 #include <ctime>
@@ -146,4 +151,7 @@ void keep_coreproc() {
 	[[maybe_unused]] auto x1 = MetaModule::hardware_random();
 	[[maybe_unused]] auto x2 = MetaModule::random();
 	[[maybe_unused]] MetaModule::WavFileStream stream{8};
+	[[maybe_unused]] auto x3 = MetaModule::total_memory();
+	[[maybe_unused]] auto x4 = MetaModule::free_memory();
+	[[maybe_unused]] auto x5 = MetaModule::get_ticks();
 }

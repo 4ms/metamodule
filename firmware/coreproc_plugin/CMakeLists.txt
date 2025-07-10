@@ -6,9 +6,14 @@ add_library(coreproc_plugin_export STATIC)
 target_sources(coreproc_plugin_export PRIVATE
 	create.cc
 	async_thread.cc
+
 	dsp/block_resampler.cc
 	dsp/stream_resampler.cc
+
 	graphics/waveform_display.cc
+	
+	patch/audio.cc
+
 	wav/wav_file_stream.cc
 	wav/dr_wav.c
 )

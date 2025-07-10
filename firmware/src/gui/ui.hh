@@ -15,6 +15,7 @@
 
 namespace MetaModule
 {
+void register_settings(UserSettings const *user_settings);
 
 class Ui {
 private:
@@ -66,6 +67,8 @@ public:
 				pr_err("Failed to write settings file\n");
 			}
 		}
+
+		register_settings(&settings);
 
 		patch_playloader.request_new_audio_settings(
 			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);
