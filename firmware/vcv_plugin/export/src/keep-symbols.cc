@@ -20,7 +20,7 @@
 #include "jansson.h"
 #include "metamodule-plugin-sdk/core-interface/audio/settings.hh"
 #include "metamodule-plugin-sdk/core-interface/gui/notification.hh"
-#include "metamodule-plugin-sdk/core-interface/patch/patch.hh"
+#include "metamodule-plugin-sdk/core-interface/patch/patch_file.hh"
 #include "metamodule-plugin-sdk/core-interface/system/memory.hh"
 #include "metamodule-plugin-sdk/core-interface/system/random.hh"
 #include "metamodule-plugin-sdk/core-interface/system/time.hh"
