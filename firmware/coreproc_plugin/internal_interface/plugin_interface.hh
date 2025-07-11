@@ -1,32 +1,30 @@
 #pragma once
-#include "gui/notify/queue.hh"
 #include <memory>
 
 namespace MetaModule
 {
 
-struct UserSettings;
-struct PatchPlayLoader;
+class PluginAppInterface {
+public:
+	// Audio
+	static uint32_t get_block_size();
 
-struct PluginInterface {
+	// Patch
+	static void mark_patch_modified();
 
-	PluginInterface(UserSettings &settings, PatchPlayLoader &playloader, NotificationQueue &notify_queue);
-	~PluginInterface();
+	// Gui
+	static void notify_user(std::string_view message, int duration_ms);
 
-	// Plugin side:
-	uint32_t get_block_size() const;
-	void mark_patch_modified();
-	void notify_user(std::string_view message, int duration_ms);
-
-	static PluginInterface *instance;
-
-	// Firmware side:
-	void register_interface() {
-		instance = this;
-	}
+	struct Internal;
 
 private:
-	struct Internal;
 	std::unique_ptr<Internal> internal;
+	static PluginAppInterface *instance;
+
+public:
+	PluginAppInterface(Internal &internal);
+	~PluginAppInterface();
+
+	void register_interface();
 };
 } // namespace MetaModule
