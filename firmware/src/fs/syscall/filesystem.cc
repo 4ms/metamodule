@@ -86,13 +86,13 @@ int open(const char *filename, int flags, int mode) {
 					fatfs_modes |= FA_OPEN_ALWAYS;
 			}
 
-			if (fs_proxy.open(path, file->fatfil, fatfs_modes)) {
+			if (fs_proxy.open(filename, file->fatfil, fatfs_modes)) {
 				file->vol = volume;
 				return *fd;
 			}
 		}
 
-		pr_err("Opening file %s on vol %d with flags %d mode %d failed\n", filename, (int)volume, flags, mode);
+		pr_err("Opening file '%s' on vol %d with flags %d mode %d failed\n", filename, (int)volume, flags, mode);
 		FileDescManager::dealloc_file(*fd);
 		return -1;
 
