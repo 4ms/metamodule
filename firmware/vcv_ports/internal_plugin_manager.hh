@@ -64,6 +64,8 @@ struct InternalPluginManager {
 		ramdisk.debug_print_disk_info();
 
 		Fonts::init_fonts(ramdisk);
+
+		ramdisk.make_dir("/usr");
 	}
 
 	void load_internal_plugins() {
