@@ -76,10 +76,6 @@ public:
 		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 	}
 
-	UserSettings &get_settings() {
-		return settings;
-	}
-
 	void update_screen() {
 		auto now = HAL_GetTick();
 		if ((now - last_lv_update_tm) > 2) {
@@ -189,6 +185,14 @@ public:
 
 	bool midi_feedback_enabled() const {
 		return settings.midi.midi_feedback == MidiSettings::MidiFeedback::Enabled;
+	}
+
+	UserSettings &get_settings() {
+		return settings;
+	}
+
+	NotificationQueue &get_notify_queue() {
+		return notify_queue;
 	}
 
 	std::atomic<bool> new_patch_data = false;

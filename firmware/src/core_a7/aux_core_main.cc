@@ -56,7 +56,7 @@ extern "C" void aux_core_main() {
 	ui.update_screen();
 	ui.update_page();
 
-	PluginInterface plugin_interface{ui.get_settings(), *A7SharedMemoryS::ptrs.patch_playloader};
+	PluginInterface plugin_interface{ui.get_settings(), *A7SharedMemoryS::ptrs.patch_playloader, ui.get_notify_queue()};
 	plugin_interface.register_interface();
 
 	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
