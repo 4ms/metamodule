@@ -1,3 +1,4 @@
+#include "fs/helpers.hh"
 #include "plugin_app_if_internal.hh"
 
 namespace MetaModule
@@ -29,6 +30,15 @@ void PluginAppInterface::mark_patch_modified() {
 
 void PluginAppInterface::notify_user(std::string_view message, int duration_ms) {
 	instance->internal->notify_queue.put({std::string{message}, Notification::Priority::Status, duration_ms});
+}
+
+StaticString<7> PluginAppInterface::get_volume() {
+	return volume_string(instance->internal->patches.get_playing_patch_loc().vol);
+}
+
+std::string PluginAppInterface::get_path() {
+	auto [path, vol] = instance->internal->patches.get_playing_patch_loc();
+	return make_full_path(vol, path);
 }
 
 } // namespace MetaModule
