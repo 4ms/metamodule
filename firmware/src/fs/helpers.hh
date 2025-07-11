@@ -46,7 +46,7 @@ constexpr auto volume_labels = std::array{
 
 constexpr Volume string_to_volume(std::string_view str) {
 	for (auto const &label : volume_labels) {
-		if (str == label.first) {
+		if (str.starts_with(label.first)) {
 			return label.second;
 		}
 	}
@@ -66,8 +66,8 @@ inline std::string make_full_path(Volume vol, std::string_view path, std::string
 }
 
 // Cleans up the path
-inline std::string make_full_path(Volume vol, std::string_view fullpath) {
-	auto path = std::string(volume_string(vol)) + std::string(fullpath);
+inline std::string make_full_path(Volume vol, std::string_view path) {
+	auto fullpath = std::string(volume_string(vol)) + std::string(path);
 	return std::filesystem::path(fullpath).lexically_normal().string();
 }
 
