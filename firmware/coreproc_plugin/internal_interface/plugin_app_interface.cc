@@ -1,4 +1,4 @@
-#include "plugin_internal.hh"
+#include "plugin_app_if_internal.hh"
 
 namespace MetaModule
 {

@@ -1,4 +1,4 @@
-#include "internal_interface/plugin_interface.hh"
+#include "internal_interface/plugin_app_interface.hh"
 
 namespace MetaModule::Patch
 {

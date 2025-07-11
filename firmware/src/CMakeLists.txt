@@ -197,7 +197,7 @@ add_executable(
   #
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #
-  ${FWDIR}/coreproc_plugin/internal_interface/plugin_interface.cc
+  ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
