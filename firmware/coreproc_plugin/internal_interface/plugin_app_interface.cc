@@ -24,7 +24,7 @@ uint32_t PluginAppInterface::get_block_size() {
 }
 
 void PluginAppInterface::mark_patch_modified() {
-	instance->internal->patch_playloader.mark_playing_patch_modified();
+	instance->internal->patches.mark_playing_patch_modified();
 }
 
 void PluginAppInterface::notify_user(std::string_view message, int duration_ms) {

@@ -339,10 +339,6 @@ struct PatchPlayLoader {
 		// }
 	}
 
-	void mark_playing_patch_modified() {
-		patches_.mark_playing_patch_modified();
-	}
-
 private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;
