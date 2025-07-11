@@ -14,9 +14,9 @@ void init() {
 	uint32_t nums[4] = {0, 0, 0, 0};
 
 	for (auto &num : nums) {
-		while (!MetaModule::hardware_random_ready()) {
+		while (!MetaModule::System::hardware_random_ready()) {
 		}
-		num = MetaModule::hardware_random();
+		num = MetaModule::System::hardware_random();
 	}
 
 	uint64_t seed1 = ((uint64_t)(nums[0])) << 32;

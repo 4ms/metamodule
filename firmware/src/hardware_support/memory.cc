@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <malloc.h>
 
-namespace MetaModule
+namespace MetaModule::System
 {
 
 uint32_t total_memory() {
@@ -15,4 +15,4 @@ uint32_t free_memory() {
 	return total_memory() - mi.uordblks;
 }
 
-} // namespace MetaModule
+} // namespace MetaModule::System

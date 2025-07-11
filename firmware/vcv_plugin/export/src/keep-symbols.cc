@@ -18,7 +18,8 @@
 #include "CoreModules/async_thread.hh"
 #include "dirent.h"
 #include "jansson.h"
-#include "metamodule-plugin-sdk/core-interface/patch/audio.hh"
+#include "metamodule-plugin-sdk/core-interface/audio/settings.hh"
+#include "metamodule-plugin-sdk/core-interface/gui/notification.hh"
 #include "metamodule-plugin-sdk/core-interface/patch/patch.hh"
 #include "metamodule-plugin-sdk/core-interface/system/memory.hh"
 #include "metamodule-plugin-sdk/core-interface/system/random.hh"
@@ -149,12 +150,15 @@ void keep_coreproc() {
 	MetaModule::StreamResampler res{2};
 	MetaModule::BlockResampler res2{2};
 	MetaModule::StreamingWaveformDisplay disp{1, 1};
-	[[maybe_unused]] auto x1 = MetaModule::hardware_random();
-	[[maybe_unused]] auto x2 = MetaModule::random();
 	[[maybe_unused]] MetaModule::WavFileStream stream{8};
-	[[maybe_unused]] auto x3 = MetaModule::total_memory();
-	[[maybe_unused]] auto x4 = MetaModule::free_memory();
-	[[maybe_unused]] auto x5 = MetaModule::get_ticks();
-	[[maybe_unused]] auto x6 = MetaModule::get_block_size();
-	MetaModule::mark_patch_modified();
+
+	[[maybe_unused]] auto x1 = MetaModule::System::hardware_random();
+	[[maybe_unused]] auto x2 = MetaModule::System::random();
+	[[maybe_unused]] auto x3 = MetaModule::System::total_memory();
+	[[maybe_unused]] auto x4 = MetaModule::System::free_memory();
+	[[maybe_unused]] auto x5 = MetaModule::System::get_ticks();
+
+	[[maybe_unused]] auto x6 = MetaModule::Audio::get_block_size();
+	MetaModule::Patch::mark_patch_modified();
+	MetaModule::Gui::notify_user("", 0);
 }

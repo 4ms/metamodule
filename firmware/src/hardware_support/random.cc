@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <cstdlib>
 
-namespace MetaModule
+namespace MetaModule::System
 {
 
 bool hardware_random_ready() {
@@ -29,4 +29,4 @@ __attribute__((visibility("hidden"))) bool hardware_random_init() {
 // globally init the random peripheral once
 static auto s_hardware_random_init = hardware_random_init();
 
-} // namespace MetaModule
+} // namespace MetaModule::System

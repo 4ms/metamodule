@@ -1,12 +1,10 @@
 #include "internal_interface/plugin_interface.hh"
 
-namespace MetaModule
+namespace MetaModule::Patch
 {
 
 void mark_patch_modified() {
-	if (PluginInterface::instance) {
-		PluginInterface::instance->mark_patch_modified();
-	}
+	PluginAppInterface::mark_patch_modified();
 }
 
-} // namespace MetaModule
+} // namespace MetaModule::Patch
