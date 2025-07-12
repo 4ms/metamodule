@@ -1,8 +1,10 @@
 #pragma once
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/hub/button_expander_defs.hh"
 #include "catchup_param.hh"
 #include "conf/panel_conf.hh"
 #include "patch-serial/patch/patch.hh"
+#include "toggle_param.hh"
 #include <vector>
 
 namespace MetaModule
@@ -34,6 +36,11 @@ public:
 
 		for (auto &knob_map : active_knob_maps[panel_knob_id]) {
 			auto &map = knob_map.map;
+
+			if (is_toggle(map)) {
+				toggle_button(modules[map.module_id], map, val);
+				return;
+			}
 
 			// Note: if needed, for performance we could check the catchup mode here, and
 			// if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
