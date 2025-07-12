@@ -136,7 +136,7 @@ struct KnobMapPage : PageBase {
 		lv_slider_set_value(ui_MinSlider, intmin, LV_ANIM_OFF);
 		lv_slider_set_value(ui_MaxSlider, intmax, LV_ANIM_OFF);
 
-		if (map.is_midi_notegate()) {
+		if (map.is_midi_notegate() || map.is_button()) {
 			lv_show(ui_ModuleMapToggleSwitchCont);
 			lv_check(ui_ModuleMapToggleSwitch, map.curve_type == MappedKnob::CurveType::Toggle);
 			lv_label_set_text(ui_ModuleMapToggleSwitchLabel, "Button Behavior: Toggle");
