@@ -444,18 +444,8 @@ public:
 				continue;
 
 			auto normal_val = volts / 10.f;
-			if (mm.curve_type == MappedKnob::CurveType::Toggle) {
-				// Latching: toggle
-				if (normal_val > 0.5f) { //rising edge
-					auto cur_val = modules[mm.module_id]->get_param(mm.param_id);
-
-					// if param is currently closer to min, then set it to max (and vice-versa)
-					if (std::abs(cur_val - mm.min) < std::abs(cur_val - mm.max)) {
-						modules[mm.module_id]->set_param(mm.param_id, mm.max);
-					} else {
-						modules[mm.module_id]->set_param(mm.param_id, mm.min);
-					}
-				}
+			if (is_toggle(mm)) {
+				toggle_button(modules[mm.module_id], mm, normal_val);
 
 			} else {
 				// Momentary (follow)
