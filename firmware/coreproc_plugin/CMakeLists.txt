@@ -4,7 +4,6 @@ project(CoreProc-Plugin)
 add_library(coreproc_plugin_export STATIC)
 
 target_sources(coreproc_plugin_export PRIVATE
-	create.cc
 	async_thread.cc
 	
 	audio/settings.cc
