@@ -421,7 +421,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		// Draw the on-screen elements (knobs, lights, etc)
-		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
+		if (is_patch_playloaded) {
 			redraw_elements();
 		}
 
