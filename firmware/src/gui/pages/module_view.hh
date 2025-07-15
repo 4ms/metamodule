@@ -770,8 +770,10 @@ private:
 
 		if (is_patch_playloaded) {
 			// Set the param high now, and make a pending request to set it low on the next update()
-			send_param_value(1, drawn_element.gui_element);
-			pending_action_param_clear = drawn_element.gui_element;
+			auto value = patch_playloader.param_value(drawn_element.gui_element.module_idx,
+													  drawn_element.gui_element.idx.param_idx);
+			send_param_value(1 - value, drawn_element.gui_element);
+			// pending_action_param_clear = drawn_element.gui_element;
 		}
 	}
 
