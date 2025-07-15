@@ -182,42 +182,28 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
     CDC_Handle->CommItf.NotifEp = phost->device.CfgDesc.Itf_Desc[control_interface_num].Ep_Desc[0].bEndpointAddress;
     CDC_Handle->CommItf.NotifEpSize  = phost->device.CfgDesc.Itf_Desc[control_interface_num].Ep_Desc[0].wMaxPacketSize;
   }
-  else
-  {
-    USBH_ErrLog("CDC_Init: Notification endpoint on Itf %d is not an IN endpoint!", control_interface_num);
-    CDC_Handle->CommItf.NotifEp = 0xFF; 
-    CDC_Handle->CommItf.NotifEpSize = 0;
-  }
-  USBH_UsrLog("CDC_Init: NotifEp=0x%02X, NotifEpSize=%d from Interface %d", CDC_Handle->CommItf.NotifEp, CDC_Handle->CommItf.NotifEpSize, control_interface_num);
 
+  /*Allocate the length for host channel number in*/
   CDC_Handle->CommItf.NotifPipe = USBH_AllocPipe(phost, CDC_Handle->CommItf.NotifEp);
-  if (CDC_Handle->CommItf.NotifPipe == 0U)
-  {
-    USBH_ErrLog("CDC_Init: Failed to allocate NotifPipe for Ep 0x%02X", CDC_Handle->CommItf.NotifEp);
-    USBH_free(phost->pActiveClass->pData);
-    phost->pActiveClass->pData = NULL;
-    return USBH_FAIL;
-  }
-  USBH_UsrLog("CDC_Init: NotifPipe=0x%02X", CDC_Handle->CommItf.NotifPipe);
 
-  status = USBH_OpenPipe(phost, CDC_Handle->CommItf.NotifPipe, CDC_Handle->CommItf.NotifEp,
+  /* Open pipe for Notification endpoint */
+  (void)USBH_OpenPipe(phost, CDC_Handle->CommItf.NotifPipe, CDC_Handle->CommItf.NotifEp,
                       phost->device.address, phost->device.speed, USB_EP_TYPE_INTR,
                       CDC_Handle->CommItf.NotifEpSize);
-  if (status != USBH_OK)
-  {
-    USBH_ErrLog("CDC_Init: Failed to open NotifPipe for Ep 0x%02X", CDC_Handle->CommItf.NotifEp);
-    USBH_FreePipe(phost, CDC_Handle->CommItf.NotifPipe);
-    USBH_free(phost->pActiveClass->pData);
-    phost->pActiveClass->pData = NULL;
-    return USBH_FAIL;
-  }
-  (void)USBH_LL_SetToggle(phost, CDC_Handle->CommItf.NotifPipe, 0U);
 
-  // Explicitly use interface 3 for CDC Data
-  // interface = 3; // Original hardcoding
-  USBH_UsrLog("CDC_Init: Using Interface %d for Data", data_interface_num);
+  // TODO: Restore this
+  // (void)USBH_LL_SetToggle(phost, CDC_Handle->CommItf.NotifPipe, 0U);
 
-  // Use data_interface_num for Data Endpoints setup
+  // interface = USBH_FindInterface(phost, DATA_INTERFACE_CLASS_CODE,
+  //                                  RESERVED, NO_CLASS_SPECIFIC_PROTOCOL_CODE);
+
+  // if ((interface == 0xFFU) || (interface >= USBH_MAX_NUM_INTERFACES)) /* No Valid Interface */
+  // {
+  //   USBH_DbgLog("Cannot Find the interface for Data Interface Class.", phost->pActiveClass->Name);
+  //   return USBH_FAIL;
+  // }
+
+  /*Collect the class specific endpoint address and length*/
   if ((phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[0].bEndpointAddress & 0x80U) != 0U)
   {
     CDC_Handle->DataItf.InEp = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[0].bEndpointAddress;
@@ -228,6 +214,7 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
     CDC_Handle->DataItf.OutEp = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[0].bEndpointAddress;
     CDC_Handle->DataItf.OutEpSize  = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[0].wMaxPacketSize;
   }
+
   if ((phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[1].bEndpointAddress & 0x80U) != 0U)
   {
     CDC_Handle->DataItf.InEp = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[1].bEndpointAddress;
@@ -238,71 +225,24 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
     CDC_Handle->DataItf.OutEp = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[1].bEndpointAddress;
     CDC_Handle->DataItf.OutEpSize = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[1].wMaxPacketSize;
   }
-  USBH_UsrLog("CDC_Init: DataItf InEp=0x%02X, InEpSize=%d, OutEp=0x%02X, OutEpSize=%d from Interface %d", 
-              CDC_Handle->DataItf.InEp, CDC_Handle->DataItf.InEpSize, 
-              CDC_Handle->DataItf.OutEp, CDC_Handle->DataItf.OutEpSize, data_interface_num);
 
+  /*Allocate the length for host channel number out*/
   CDC_Handle->DataItf.OutPipe = USBH_AllocPipe(phost, CDC_Handle->DataItf.OutEp);
-  if (CDC_Handle->DataItf.OutPipe == 0U)
-  {
-    USBH_ErrLog("CDC_Init: Failed to allocate OutPipe for Ep 0x%02X", CDC_Handle->DataItf.OutEp);
-    USBH_ClosePipe(phost, CDC_Handle->CommItf.NotifPipe);
-    USBH_FreePipe(phost, CDC_Handle->CommItf.NotifPipe);
-    USBH_free(phost->pActiveClass->pData);
-    phost->pActiveClass->pData = NULL;
-    return USBH_FAIL;
-  }
-  USBH_UsrLog("CDC_Init: DataOutPipe=0x%02X", CDC_Handle->DataItf.OutPipe);
 
+  /*Allocate the length for host channel number in*/
   CDC_Handle->DataItf.InPipe = USBH_AllocPipe(phost, CDC_Handle->DataItf.InEp);
-  if (CDC_Handle->DataItf.InPipe == 0U)
-  {
-    USBH_ErrLog("CDC_Init: Failed to allocate InPipe for Ep 0x%02X", CDC_Handle->DataItf.InEp);
-    USBH_ClosePipe(phost, CDC_Handle->DataItf.OutPipe);
-    USBH_FreePipe(phost, CDC_Handle->DataItf.OutPipe);
-    USBH_ClosePipe(phost, CDC_Handle->CommItf.NotifPipe);
-    USBH_FreePipe(phost, CDC_Handle->CommItf.NotifPipe);
-    USBH_free(phost->pActiveClass->pData);
-    phost->pActiveClass->pData = NULL;
-    return USBH_FAIL;
-  }
-  USBH_UsrLog("CDC_Init: DataInPipe=0x%02X", CDC_Handle->DataItf.InPipe);
 
-  status = USBH_OpenPipe(phost, CDC_Handle->DataItf.OutPipe, CDC_Handle->DataItf.OutEp,
+  /* Open channel for OUT endpoint */
+  (void)USBH_OpenPipe(phost, CDC_Handle->DataItf.OutPipe, CDC_Handle->DataItf.OutEp,
                       phost->device.address, phost->device.speed, USB_EP_TYPE_BULK,
                       CDC_Handle->DataItf.OutEpSize);
-  if (status != USBH_OK)
-  {
-    USBH_ErrLog("CDC_Init: Failed to open OutPipe for Ep 0x%02X", CDC_Handle->DataItf.OutEp);
-    USBH_FreePipe(phost, CDC_Handle->DataItf.InPipe);
-    USBH_ClosePipe(phost, CDC_Handle->DataItf.OutPipe);
-    USBH_FreePipe(phost, CDC_Handle->DataItf.OutPipe);
-    USBH_ClosePipe(phost, CDC_Handle->CommItf.NotifPipe);
-    USBH_FreePipe(phost, CDC_Handle->CommItf.NotifPipe);
-    USBH_free(phost->pActiveClass->pData);
-    phost->pActiveClass->pData = NULL;
-    return USBH_FAIL;
-  }
 
-  status = USBH_OpenPipe(phost, CDC_Handle->DataItf.InPipe, CDC_Handle->DataItf.InEp,
+  /* Open channel for IN endpoint */
+  (void)USBH_OpenPipe(phost, CDC_Handle->DataItf.InPipe, CDC_Handle->DataItf.InEp,
                       phost->device.address, phost->device.speed, USB_EP_TYPE_BULK,
                       CDC_Handle->DataItf.InEpSize);
-  if (status != USBH_OK)
-  {
-    USBH_ErrLog("CDC_Init: Failed to open InPipe for Ep 0x%02X", CDC_Handle->DataItf.InEp);
-    USBH_ClosePipe(phost, CDC_Handle->DataItf.InPipe);
-    USBH_FreePipe(phost, CDC_Handle->DataItf.InPipe);
-    USBH_ClosePipe(phost, CDC_Handle->DataItf.OutPipe);
-    USBH_FreePipe(phost, CDC_Handle->DataItf.OutPipe);
-    USBH_ClosePipe(phost, CDC_Handle->CommItf.NotifPipe);
-    USBH_FreePipe(phost, CDC_Handle->CommItf.NotifPipe);
-    USBH_free(phost->pActiveClass->pData);
-    phost->pActiveClass->pData = NULL;
-    return USBH_FAIL;
-  }
 
   CDC_Handle->state = CDC_IDLE_STATE;
-  USBH_UsrLog("CDC_Init: Successfully initialized CDC Data Itf %d and Control Itf %d", data_interface_num, control_interface_num);
 
   (void)USBH_LL_SetToggle(phost, CDC_Handle->DataItf.OutPipe, 0U);
   (void)USBH_LL_SetToggle(phost, CDC_Handle->DataItf.InPipe, 0U);
@@ -321,6 +261,7 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
 static USBH_StatusTypeDef USBH_CDC_InterfaceDeInit(USBH_HandleTypeDef *phost)
 {
   CDC_HandleTypeDef *CDC_Handle = (CDC_HandleTypeDef *) phost->pActiveClass->pData;
+
   if ((CDC_Handle->CommItf.NotifPipe) != 0U)
   {
     (void)USBH_ClosePipe(phost, CDC_Handle->CommItf.NotifPipe);
@@ -444,7 +385,6 @@ static USBH_StatusTypeDef USBH_CDC_Process(USBH_HandleTypeDef *phost)
       break;
 
     case CDC_TRANSFER_DATA:
-      USBH_UsrLog("CDC_TRANSFER_DATA: case in USBH_CDC_Process. data_tx_state: %d, data_rx_state: %d\n", CDC_Handle->data_tx_state, CDC_Handle->data_rx_state);
       CDC_ProcessTransmission(phost);
       CDC_ProcessReception(phost);
       break;
@@ -689,8 +629,6 @@ static void CDC_ProcessTransmission(USBH_HandleTypeDef *phost)
   CDC_HandleTypeDef *CDC_Handle = (CDC_HandleTypeDef *) phost->pActiveClass->pData;
   USBH_URBStateTypeDef URB_Status = USBH_URB_IDLE;
 
-  USBH_UsrLog("CDC_ProcessTransmission: data_tx_state: %d, data_rx_state: %d\n", CDC_Handle->data_tx_state, CDC_Handle->data_rx_state);
-
   switch (CDC_Handle->data_tx_state)
   {
     case CDC_SEND_DATA:
@@ -889,3 +827,4 @@ __weak void USBH_CDC_LineCodingChanged(USBH_HandleTypeDef *phost)
 /**
   * @}
   */
+
