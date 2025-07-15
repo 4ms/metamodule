@@ -1,5 +1,4 @@
 #include "../../internal/make_element.hh"
-#include "CoreModules/elements/element_sort.hh"
 #include "CoreModules/elements/units.hh"
 #include "console/pr_dbg.hh"
 #include "make_element_names.hh"
@@ -12,7 +11,12 @@ struct ModuleWidgetAdaptor {
 
 	static constexpr inline bool LogWidgetNames = false;
 
-	std::vector<std::pair<MetaModule::Element, ElementCount::Indices>> elem_idx;
+	using WidgetType = std::variant<rack::app::ParamWidget *,
+									rack::app::PortWidget *,
+									rack::app::ModuleLightWidget *,
+									rack::widget::Widget *>;
+
+	std::vector<std::tuple<MetaModule::Element, ElementCount::Indices, WidgetType>> elem_idx;
 
 	std::deque<std::string> temp_names;
 
@@ -37,11 +41,10 @@ struct ModuleWidgetAdaptor {
 	{
 		if (widget) {
 			Element element = make_element(widget);
-			assign_element_fields(widget, getParamName(widget->module, widget->paramId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.param_idx = widget->paramId;
-			elem_idx.emplace_back(element, indices);
+			elem_idx.emplace_back(element, indices, widget);
 
 			log_widget("param", indices.param_idx, widget, element);
 		} else
@@ -53,11 +56,10 @@ struct ModuleWidgetAdaptor {
 	{
 		if (widget) {
 			Element element = make_element(widget);
-			assign_element_fields(widget, getInputName(widget->module, widget->portId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.input_idx = widget->portId;
-			elem_idx.emplace_back(element, indices);
+			elem_idx.emplace_back(element, indices, widget);
 
 			log_widget("input", indices.input_idx, widget, element);
 		} else
@@ -69,11 +71,10 @@ struct ModuleWidgetAdaptor {
 	{
 		if (widget) {
 			Element element = make_element(widget);
-			assign_element_fields(widget, getOutputName(widget->module, widget->portId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.output_idx = widget->portId;
-			elem_idx.emplace_back(element, indices);
+			elem_idx.emplace_back(element, indices, widget);
 
 			log_widget("output", indices.output_idx, widget, element);
 		} else
@@ -85,11 +86,10 @@ struct ModuleWidgetAdaptor {
 	{
 		if (widget) {
 			Element element = make_element(widget);
-			assign_element_fields(widget, getLightName(widget->module, widget->firstLightId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = widget->firstLightId;
-			elem_idx.emplace_back(element, indices);
+			elem_idx.emplace_back(element, indices, widget);
 
 			log_widget("light", indices.light_idx, widget, element);
 		} else
@@ -102,12 +102,11 @@ struct ModuleWidgetAdaptor {
 	{
 		if (widget) {
 			Element element = make_element(widget, light);
-			assign_element_fields(widget, getParamName(widget->module, widget->paramId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = light->firstLightId;
 			indices.param_idx = widget->paramId;
-			elem_idx.emplace_back(element, indices);
+			elem_idx.emplace_back(element, indices, widget);
 
 			log_widget("light param: param", indices.param_idx, widget, element);
 			log_widget("light param: light", indices.light_idx, widget, element);
@@ -118,11 +117,10 @@ struct ModuleWidgetAdaptor {
 	void addSvgLight(rack::app::ModuleLightWidget *widget, std::string_view image) {
 		if (widget) {
 			Element element = make_element(widget, image);
-			assign_element_fields(widget, getLightName(widget->module, widget->firstLightId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = widget->firstLightId;
-			elem_idx.emplace_back(element, indices);
+			elem_idx.emplace_back(element, indices, widget);
 
 			log_widget("SvgLight:", indices.light_idx, widget, element);
 		} else
@@ -132,10 +130,9 @@ struct ModuleWidgetAdaptor {
 	void addImage(rack::widget::SvgWidget *widget) {
 		if (widget) {
 			Element element = make_element(widget);
-			assign_element_fields(widget, "", element);
 
 			ElementCount::Indices indices = clear();
-			elem_idx.emplace_back(element, indices);
+			elem_idx.emplace_back(element, indices, widget);
 
 			log_widget("SvgWidget (image):", 0, widget, element);
 		} else
@@ -146,11 +143,10 @@ struct ModuleWidgetAdaptor {
 		if (widget) {
 			if (widget->firstLightId >= 0) {
 				Element element = make_element(widget);
-				assign_element_fields(widget, "", element);
 
 				ElementCount::Indices indices = clear();
 				indices.light_idx = widget->firstLightId;
-				elem_idx.emplace_back(element, indices);
+				elem_idx.emplace_back(element, indices, widget);
 
 				log_widget("VCVTextDisplay:", widget->firstLightId, widget, element);
 			} else {
@@ -160,8 +156,9 @@ struct ModuleWidgetAdaptor {
 			pr_err("Error: can't add a null VCVTextDisplay\n");
 	}
 
-	void addModuleWidget(int graphic_display_idx, rack::app::ModuleWidget *mw) {
+	bool addModuleWidget(int graphic_display_idx, rack::app::ModuleWidget *mw) {
 		bool has_custom_draw = true;
+		bool has_custom_step = true;
 
 #if defined(__GNUC__) && !defined(__clang__)
 		// See if the the Widget overrides draw() or drawLayer().
@@ -181,10 +178,7 @@ struct ModuleWidgetAdaptor {
 
 		has_custom_draw = custom_draw_func || custom_drawLayer_func || derives_from_leddisplay;
 
-		if (has_custom_draw) {
-			pr_trace("ModuleWidget has_custom_draw\n");
-		}
-
+		has_custom_step = (void *)((*mw).*(&rack::app::ModuleWidget::step)) != (void *)(&rack::app::ModuleWidget::step);
 #endif
 
 		Element element = DynamicGraphicDisplay{.full_module = true};
@@ -194,27 +188,42 @@ struct ModuleWidgetAdaptor {
 			// Make sure widget width or height is not 0, or else it won't be drawn.
 			mw->box.size.x = std::max(1.f, mw->box.size.x);
 			mw->box.size.y = std::max(1.f, mw->box.size.y);
-			assign_element_fields(mw, "", element);
 
-			pr_trace("Widget with size %g x %g has a custom draw() or drawLayer()\n", mw->box.size.x, mw->box.size.y);
+			ElementCount::Indices indices = clear();
+			indices.light_idx = graphic_display_idx;
+			elem_idx.emplace_back(element, indices, mw);
 
-		} else {
+			pr_trace(
+				"ModuleWidget with size %g x %g has a custom draw() or drawLayer()\n", mw->box.size.x, mw->box.size.y);
+
+		} else if (has_custom_step) {
 			// Set element's box a 0 size if it has no custom draw
 			// This will ensure we call step() but don't allocate a pixel buffer
 
 			rack::widget::Widget zero_size_widget;
 			zero_size_widget.box = {{0, 0}, {0, 0}};
-			assign_element_fields(&zero_size_widget, "", element);
 
-			pr_trace(
-				"Widget with size %g x %g has no draw() or drawLayer() override\n", mw->box.size.x, mw->box.size.y);
+			ElementCount::Indices indices = clear();
+			indices.light_idx = graphic_display_idx;
+
+			// Assign a zero sized box
+			assign_element_fields(&zero_size_widget, "", element);
+			// nullptr ==> Do not call assign_element_fields later, we already did it
+			elem_idx.emplace_back(element, indices, (rack::widget::Widget *)nullptr);
+
+			pr_trace("ModuleWidget with size %g x %g has step() override but no draw() or drawLayer() override\n",
+					 mw->box.size.x,
+					 mw->box.size.y);
+		} else {
+			pr_trace("ModuleWidget with size %g x %g has no step(), draw(), or drawLayer() override\n",
+					 mw->box.size.x,
+					 mw->box.size.y);
+			return false;
 		}
 
-		ElementCount::Indices indices = clear();
-		indices.light_idx = graphic_display_idx;
-		elem_idx.emplace_back(element, indices);
-
 		log_widget("ModuleWidget:", graphic_display_idx, mw, element);
+
+		return true;
 	}
 
 	void addGraphicDisplay(int graphic_display_idx, int first_graphic_idx, rack::widget::Widget *widget) {
@@ -231,11 +240,12 @@ struct ModuleWidgetAdaptor {
 			}
 
 			auto &name = temp_names.emplace_back("Display " + std::to_string(graphic_display_idx - first_graphic_idx));
+			// Set the name now, because it won't be set later
 			assign_element_fields(widget, name, element);
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = graphic_display_idx;
-			elem_idx.emplace_back(element, indices);
+			elem_idx.emplace_back(element, indices, widget);
 
 			log_widget("Widget (as Graphic Display buffer):", graphic_display_idx, widget, element);
 		}
@@ -244,10 +254,73 @@ struct ModuleWidgetAdaptor {
 	void populate_elements_indices(std::vector<MetaModule::Element> &elements,
 								   std::vector<ElementCount::Indices> &indices) {
 
-		populate_sorted_elements_indices(elem_idx, elements, indices);
+		for (auto &[element, idx, widget] : elem_idx) {
+			std::visit(overloaded{
+						   [&](rack::app::ParamWidget *w) {
+							   assign_element_fields(w, getParamName(w->module, w->paramId), element);
+						   },
+						   [&](rack::app::PortWidget *w) {
+							   if (w->type == rack::engine::Port::Type::INPUT)
+								   assign_element_fields(w, getInputName(w->module, w->portId), element);
+
+							   else if (w->type == rack::engine::Port::Type::OUTPUT)
+								   assign_element_fields(w, getOutputName(w->module, w->portId), element);
+						   },
+						   [&](rack::app::ModuleLightWidget *w) {
+							   assign_element_fields(w, getLightName(w->module, w->firstLightId), element);
+						   },
+						   [&](rack::widget::Widget *w) {
+							   if (w) {
+								   // Don't change the name: Graphic displays already set their name and all others have no name
+								   assign_element_fields(w, std::nullopt, element);
+							   }
+						   },
+					   },
+					   widget);
+		}
+
+		// populate_sorted_elements_indices(elem_idx, elements, indices);
+		std::sort(elem_idx.begin(), elem_idx.end(), [](auto const &a, auto const &b) {
+			auto const &aidx = std::get<1>(a);
+			auto const &bidx = std::get<1>(b);
+
+			if (aidx.param_idx < bidx.param_idx)
+				return true;
+			else if (aidx.param_idx > bidx.param_idx)
+				return false;
+
+			else if (aidx.input_idx < bidx.input_idx)
+				return true;
+			else if (aidx.input_idx > bidx.input_idx)
+				return false;
+
+			else if (aidx.output_idx < bidx.output_idx)
+				return true;
+			else if (aidx.output_idx > bidx.output_idx)
+				return false;
+
+			else if (aidx.light_idx < bidx.light_idx)
+				return true;
+
+			else
+				return false;
+		});
+
+		elements.clear();
+		indices.clear();
+
+		auto num_elems = elem_idx.size();
+		elements.reserve(num_elems);
+		indices.reserve(num_elems);
+
+		for (auto &elemidx : elem_idx) {
+			elements.push_back(std::get<0>(elemidx));
+			indices.push_back(std::get<1>(elemidx));
+		}
 	}
 
-	static void assign_element_fields(rack::widget::Widget *widget, std::string_view name, Element &element) {
+	static void
+	assign_element_fields(rack::widget::Widget const *widget, std::optional<std::string_view> name, Element &element) {
 		std::visit(
 			[&name, &widget](BaseElement &el) {
 				el.x_mm = to_mm(widget->box.pos.x);
@@ -255,8 +328,11 @@ struct ModuleWidgetAdaptor {
 				el.width_mm = to_mm(widget->box.size.x);
 				el.height_mm = to_mm(widget->box.size.y);
 				el.coords = Coords::TopLeft;
-				el.short_name = name;
-				el.long_name = name;
+
+				if (name) {
+					el.short_name = *name;
+					el.long_name = *name;
+				}
 			},
 			element);
 	}

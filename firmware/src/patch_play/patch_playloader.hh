@@ -84,11 +84,11 @@ struct PatchPlayLoader {
 	}
 
 	void start_audio() {
-		pr_dbg("PatchPlayLoader::start_audio\n");
 		loading_new_patch_ = false;
 		audio_is_muted_ = false;
 		stopping_audio_ = false;
 		starting_audio_ = true;
+		player_.notify_audio_resumed();
 		clear_audio_overrun();
 		resume_module_threads();
 	}

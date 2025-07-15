@@ -17,7 +17,7 @@ static void remove_extended_chars(std::string &name) {
 
 inline std::string_view getParamName(rack::engine::Module *module, int id) {
 	if (auto pq = module->getParamQuantity(id)) {
-		if (pq->name.size()) {
+		if (pq->name.size() && pq->name != " ") {
 			remove_extended_chars(pq->name);
 			return pq->name;
 		} else {

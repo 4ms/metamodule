@@ -187,6 +187,10 @@ public:
 		notify_queue.put({message, Notification::Priority::Error, 2000});
 	}
 
+	bool midi_feedback_enabled() const {
+		return settings.midi.midi_feedback == MidiSettings::MidiFeedback::Enabled;
+	}
+
 	std::atomic<bool> new_patch_data = false;
 
 private:
