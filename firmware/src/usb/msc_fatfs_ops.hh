@@ -27,10 +27,10 @@ public:
 		auto ready = msc_isready();
 		if (ready) {
 			if (!is_mounted_)
-				USBH_UsrLog("MSC is ready, mounting\n");
+				USBH_UsrLog("MSC is ready, mounting");
 			is_mounted_ = true;
 		} else
-			USBH_ErrLog("MSC is not ready, cannot initialize\n");
+			USBH_DbgLog("MSC is not ready, cannot initialize");
 
 		DSTATUS status = is_mounted_ ? 0 : STA_NODISK;
 		status |= ready ? 0 : STA_NOINIT;
