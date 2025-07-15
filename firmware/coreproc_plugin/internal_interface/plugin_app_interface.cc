@@ -29,7 +29,7 @@ void PluginAppInterface::mark_patch_modified() {
 }
 
 void PluginAppInterface::notify_user(std::string_view message, int duration_ms) {
-	instance->internal->notify_queue.put({std::string{message}, Notification::Priority::Status, duration_ms});
+	instance->internal->notify_queue.put({message, Notification::Priority::Status, duration_ms});
 }
 
 StaticString<7> PluginAppInterface::get_volume() {
