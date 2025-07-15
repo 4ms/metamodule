@@ -60,15 +60,13 @@ struct PluginPopup {
 
 		lv_group_add_obj(group, check);
 
-		lv_group_add_obj(group, ui_CancelButton);
-		lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		lv_group_focus_obj(ui_CancelButton);
-
 		lv_show(ui_ConfirmButton);
 		lv_label_set_text_fmt(ui_ConfirmLabel, "%.*s", (int)choice1_text.size(), choice1_text.data());
 		lv_group_add_obj(group, ui_ConfirmButton);
 
-		lv_group_set_wrap(group, false);
+		lv_group_add_obj(group, ui_CancelButton);
+		lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		lv_group_focus_obj(ui_CancelButton);
 
 		visible = true;
 	}

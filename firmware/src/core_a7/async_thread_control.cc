@@ -67,10 +67,7 @@ void start_module_threads() {
 		.priority2 = 3,
 	};
 
-	task_runner.init(task_config, [current_core = current_core]() {
-		auto &task_runner = current_core == 1 ? async_task_core1 : async_task_core0;
-		task_runner.pause();
-
+	task_runner.init(task_config, [=]() {
 		// if (current_core == 0)
 		// 	Debug::Pin2::high();
 		// else
@@ -89,8 +86,6 @@ void start_module_threads() {
 		// 	Debug::Pin2::low();
 		// else
 		// 	Debug::Pin1::low();
-
-		task_runner.resume();
 	});
 	task_runner.start();
 }
@@ -102,7 +97,7 @@ void pause_module_threads() {
 
 void pause_module_threads(unsigned core_id) {
 	auto &task_runner = core_id == 1 ? async_task_core1 : async_task_core0;
-	task_runner.pause();
+	task_runner.stop();
 }
 
 void resume_module_threads() {
@@ -112,7 +107,7 @@ void resume_module_threads() {
 
 void resume_module_threads(unsigned core_id) {
 	auto &task_runner = core_id == 1 ? async_task_core1 : async_task_core0;
-	task_runner.resume();
+	task_runner.start();
 }
 
 void kill_module_threads() {

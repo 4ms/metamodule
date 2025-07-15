@@ -75,12 +75,6 @@ static void write(ryml::NodeRef *n, FilesystemSettings const &s) {
 	n->append_child() << ryml::key("max_open_patches") << s.max_open_patches;
 }
 
-[[maybe_unused]] static void write(ryml::NodeRef *n, MidiSettings const &s) {
-	*n |= ryml::MAP;
-
-	n->append_child() << ryml::key("midi_feedback") << std::to_underlying(s.midi_feedback);
-}
-
 namespace Settings
 {
 
@@ -103,7 +97,6 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["screensaver"] << settings.screensaver;
 	data["catchup"] << settings.catchup;
 	data["filesystem"] << settings.filesystem;
-	data["midi"] << settings.midi;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();

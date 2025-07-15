@@ -7,7 +7,6 @@ target_link_libraries(ui_lvgl PUBLIC ui)
 target_sources(ui_lvgl PRIVATE
   prefs_pane_catchup.cc
   prefs_pane_fs.cc
-  prefs_pane_midi.cc
 
   filebrowser/ui.c
   filebrowser/screens/ui_FileBrowserPage.c
@@ -16,6 +15,5 @@ target_sources(ui_lvgl PRIVATE
 set_source_files_properties(
   prefs_pane_catchup.cc
   prefs_pane_fs.cc
-  prefs_pane_midi.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )

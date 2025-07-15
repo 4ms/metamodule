@@ -9,7 +9,7 @@ std::vector<std::string> parse_extensions(std::string_view str, std::string cons
 
 	// Matching *.* means no filtering: return an empty vector
 	if (str.contains("*.*")) {
-		pr_trace("M4: filter contains *.*, ignoring filter\n");
+		// pr_dbg("M4: filter contains *.*, ignoring filter\n");
 		return tokens;
 	}
 
@@ -23,7 +23,7 @@ std::vector<std::string> parse_extensions(std::string_view str, std::string cons
 		if (str[last_pos] == ' ')
 			last_pos++;
 		auto s = std::string(str.substr(last_pos, pos - last_pos));
-		pr_trace("M4: filter on '%s'\n", s.c_str());
+		pr_dbg("M4: filter on '%s'\n", s.c_str());
 		tokens.push_back(s);
 
 		// Skip delimiters.

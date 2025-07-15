@@ -109,7 +109,7 @@ public:
 			// Get outputs
 			for (auto [i, outjack] : enumerate(out.chan)) {
 				if (param_state.is_output_plugged(i)) {
-					outjack = player.get_panel_output(i) / volts_peak;
+					outjack = player.get_panel_output(i);
 					player.set_output_jack_patched_status(i, true);
 				} else {
 					outjack = 0;
@@ -181,7 +181,6 @@ public:
 	float output_fade_amt = -1.f;
 	float output_fade_delta = 0.f;
 	float sample_rate_ = 48000.f;
-	float volts_peak = 5.f;
 };
 
 } // namespace MetaModule

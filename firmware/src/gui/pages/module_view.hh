@@ -219,7 +219,7 @@ struct ModuleViewPage : PageBase {
 
 			opts.append(" ");
 			// Display up to the first newline (if any)
-			opts.append(base.short_name.substr(0, base.short_name.find_first_of("\0\n")));
+			opts.append(base.short_name.substr(0, base.short_name.find_first_of('\n')));
 
 			if (gui_el.mapped_panel_id) {
 				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());

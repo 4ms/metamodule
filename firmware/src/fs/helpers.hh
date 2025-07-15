@@ -64,11 +64,11 @@ get_dir_entries(auto &drive, std::string_view path, std::string_view filter_exts
 					for (auto const &ext : exts) {
 						if (name.ends_with(ext)) {
 							dir_tree->files.push_back({std::string(name), (uint32_t)size, (uint32_t)tm});
-							pr_trace("Match: %s ends in %s\n", name.data(), ext.data());
+							pr_dbg("Match: %s ends in %s\n", name.data(), ext.data());
 							break;
 						}
 					}
-					pr_trace("No match: %s\n", name.data());
+					pr_dbg("No match: %s\n", name.data());
 				}
 			}
 		});

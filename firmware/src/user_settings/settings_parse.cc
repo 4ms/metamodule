@@ -129,23 +129,6 @@ static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
 	return true;
 }
 
-[[maybe_unused]] static bool read(ryml::ConstNodeRef const &node, MidiSettings *settings) {
-	if (!node.is_map())
-		return false;
-
-	using enum MidiSettings::MidiFeedback;
-
-	if (node.has_child("midi_feedback")) {
-		settings->midi_feedback = node["midi_feedback"].val() == "1" ? Enabled : Disabled;
-	} else {
-		settings->midi_feedback = MidiSettings{}.midi_feedback;
-	}
-
-	settings->make_valid();
-
-	return true;
-}
-
 namespace Settings
 {
 
@@ -172,7 +155,6 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
 	read_or_default(node, "catchup", settings, &UserSettings::catchup);
 	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
-	read_or_default(node, "midi", settings, &UserSettings::midi);
 
 	// TODO: cleaner way to parse an enum and reject out of range?
 	if (node.is_map() && node.has_child("last_patch_vol")) {

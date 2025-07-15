@@ -81,7 +81,6 @@ struct PatchSelectorSubdirPanel {
 
 			lv_enable(vol_cont);
 			lv_enable_all_children(vol_cont);
-			lv_group_set_wrap(group, false);
 		}
 	}
 

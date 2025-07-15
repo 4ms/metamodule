@@ -8,7 +8,6 @@
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
 #include "gui/ui.hh"
-#include "midi/midi_sync.hh"
 #include "patch_play/patch_player.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>
@@ -27,10 +26,7 @@ struct AuxPlayer {
 	// MIDI sync instance
 	MidiSync midi_sync;
 
-	// MIDI sync instance
-	MidiSync midi_sync;
-
-	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
+	AuxPlayer(PatchPlayer &patch_player, OpenPatchManager &open_patch_manager, Ui &ui)
 		: patch_player{patch_player}
 		, open_patch_manager{open_patch_manager}
 		, ui{ui} {
@@ -80,17 +76,10 @@ struct AuxPlayer {
 		} else
 			pr_err("Error: %u modules requested to run on core 2, max is %z\n", num_modules, module_ids.size());
 
-		midi_sync.clear_last_values();
-
 		SMPThread::signal_done();
 	}
 
 	void read_patch_gui_elements() {
-
-		if (SMPControl::read<SMPRegister::RefreshPatchElements>() > 0) {
-			midi_sync.clear_last_values();
-		}
-
 		if (ui.new_patch_data.load() == false) {
 
 			for (auto &d : ui.displays().watch_displays) {
@@ -102,21 +91,16 @@ struct AuxPlayer {
 				}
 			}
 
-			if (ui.midi_feedback_enabled()) {
-				for (auto &p : patch_player.watched_params().active_watched_params()) {
-					if (p.is_active()) {
-						auto value = patch_player.get_param(p.module_id, p.param_id);
-						auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
-
-						if (map.is_midi_cc()) {
-							midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
-
-						} else if (map.is_midi_notegate()) {
-							midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
-
-						} else if (p.panel_knob_id == MidiPitchWheelJack) {
-							midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
-						}
+			for (auto &p : patch_player.watched_params().active_watched_params()) {
+				if (p.is_active()) {
+					auto value = patch_player.get_param(p.module_id, p.param_id);
+					auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
+					if (map.is_midi_cc()) {
+						midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
+					} else if (map.is_midi_notegate()) {
+						midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
+					} else if (p.panel_knob_id == MidiPitchWheelJack) {
+						midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
 					}
 				}
 			}

@@ -37,9 +37,8 @@
         "OMIT_BRAND_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
         "OMIT_BRAND_eightfold":          { "type": "BOOL", "value": "ON" },
         "OMIT_BRAND_Valley":             { "type": "BOOL", "value": "ON" },
-        "OMIT_BRAND_RackCore":           { "type": "BOOL", "value": "ON" },
-		"LOG_LEVEL":                     { "type": "STRING", "value": "DEBUG" }
-	  }
+        "OMIT_BRAND_RackCore":           { "type": "BOOL", "value": "ON" }
+      }
     },
     {
       "name": "dyn-plugins",

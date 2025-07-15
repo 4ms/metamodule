@@ -33,7 +33,6 @@ public:
 
 	bool update();
 	void play_patch(std::span<Frame> buffer);
-	void set_audio_fullscale(float volts_peak);
 
 private:
 	PatchDirList patch_dir_list;

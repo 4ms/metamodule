@@ -53,29 +53,15 @@ struct FileBrowserDialog {
 		}
 	}
 
-	// Flags the browser to be shown.
-	// Safe to call from audio or AsyncThread context
 	void show(std::string_view start_dir, const std::function<void(char *)> action) {
-		should_show = true;
-		this->action = action;
-		should_show_path.copy(start_dir);
-	}
-
-	// Actually shows the browser. Only called in the GUI context
-	void do_show() {
-		if (auto indev = lv_indev_get_next(nullptr))
-			parent_group = indev->group;
-
+		parent_group = lv_indev_get_act()->group;
 		lv_group_activate(group);
 		lv_group_set_editing(group, true);
-		lv_obj_set_parent(ui_FileBrowserCont, lv_layer_top());
-		lv_show(ui_FileBrowserCont);
+		this->action = std::move(action);
 
 		visible = true;
 
 		refresh_state = RefreshState::TryingToRequest;
-
-		auto start_dir = std::string_view{should_show_path};
 
 		if (start_dir.length()) {
 			auto [start_path, start_vol] = split_volume(start_dir);
@@ -96,6 +82,9 @@ struct FileBrowserDialog {
 				show_path = std::filesystem::path(show_path).parent_path().string() + "/";
 			}
 		}
+
+		lv_obj_set_parent(ui_FileBrowserCont, lv_layer_top());
+		lv_show(ui_FileBrowserCont);
 	}
 
 	void back_event() {
@@ -113,11 +102,6 @@ struct FileBrowserDialog {
 	}
 
 	void update() {
-		if (should_show) {
-			do_show();
-			should_show = false;
-		}
-
 		switch (refresh_state) {
 			case RefreshState::Idle: {
 				//nothing
@@ -162,7 +146,7 @@ struct FileBrowserDialog {
 	}
 
 	bool is_visible() {
-		return should_show || visible;
+		return visible;
 	}
 
 private:
@@ -304,18 +288,17 @@ private:
 	}
 
 	static void roller_click_cb(lv_event_t *event) {
-		if (auto page = static_cast<FileBrowserDialog *>(event->user_data))
-			page->roller_click();
+		auto page = static_cast<FileBrowserDialog *>(event->user_data);
+		if (!page)
+			return;
+		page->roller_click();
 	}
 
 	FileStorageProxy &file_storage;
+	// NotificationQueue &notify_queue;
 
 	lv_group_t *group;
 	lv_group_t *parent_group = nullptr;
-
-	// Flag to indicate a non-GUI thread requested we show the browser
-	bool should_show = false;
-	StaticString<255> should_show_path = "";
 
 	std::function<void(char *)> action;
 

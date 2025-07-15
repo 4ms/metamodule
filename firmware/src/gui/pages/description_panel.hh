@@ -24,7 +24,6 @@ struct PatchDescriptionPanel {
 		lv_group_add_obj(group, ui_DescriptionEditSaveButton);
 		lv_group_add_obj(group, ui_DescriptionEditCancelButton);
 
-		lv_group_set_wrap(group, false);
 		lv_group_set_editing(group, false);
 
 		lv_obj_add_event_cb(ui_DescriptionClose, closebut_cb, LV_EVENT_CLICKED, this);

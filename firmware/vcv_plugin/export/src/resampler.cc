@@ -1,10 +1,11 @@
+#include "medium/debug_raw.h"
 #include <algorithm>
 #include <array>
-#include <cstdint>
+#include <cstdio>
 #include <cstring>
+#include <span>
 #include <speex/speex_resampler.h>
-
-// TODO: use core-interface/dsp/resampler.hh
+#include <vector>
 
 struct SpeexResamplerChan {
 	bool flush{true};
@@ -112,7 +113,7 @@ int speex_resampler_process_float(SpeexResamplerState *st,
 	}
 
 	*out_len = outpos / stc.output_stride;
-	*in_len = inpos / stc.input_stride;
+	*in_len = inpos / stc.output_stride;
 
 	return 0;
 }

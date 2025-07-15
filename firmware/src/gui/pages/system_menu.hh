@@ -23,7 +23,6 @@ struct SystemMenuPage : PageBase {
 					info.settings.screensaver,
 					info.settings.catchup,
 					info.settings.filesystem,
-					info.settings.midi,
 					gui_state}
 		, system_tab{patch_storage, params, metaparams, patch_playloader, patch_mod_queue}
 		, fwupdate_tab{patch_storage, patch_playloader}

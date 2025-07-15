@@ -4,7 +4,6 @@
 #include "gui/pages/patch_selector_subdir_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "patch_file/file_storage_proxy.hh"
-#include <atomic>
 
 namespace MetaModule
 {
@@ -20,7 +19,6 @@ struct FileSaveDialog {
 		lv_group_add_obj(group, ui_SaveDialogDir);
 		lv_group_add_obj(group, ui_SaveDialogCancelBut);
 		lv_group_add_obj(group, ui_SaveDialogSaveBut);
-		lv_group_set_wrap(group, false);
 
 		lv_obj_add_event_cb(ui_SaveDialogFilename, click_filename_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SaveDialogDir, click_location_cb, LV_EVENT_CLICKED, this);
@@ -32,11 +30,6 @@ struct FileSaveDialog {
 	}
 
 	void update() {
-		if (should_show) {
-			do_show(should_show_vol, should_show_path, should_show_ext);
-			should_show = false;
-		}
-
 		if (mode == Mode::EditDir) {
 
 			//TODO: this state logic should be in PatchSelectorSubdirPanel
@@ -88,29 +81,17 @@ struct FileSaveDialog {
 			  std::string_view ext,
 			  lv_group_t *parent_group,
 			  std::function<void(Volume, std::string_view)> action) {
-		vcv_save_action = {};
-		save_action = action;
-		should_show_vol = vol;
-		should_show_path = fullpath;
-		should_show_ext = ext;
-
-		// TODO: this only has an effect if mode != Hidden when show is called
+		this->vcv_save_action = {};
+		this->save_action = action;
+		show(vol, fullpath, ext);
 		base_group = parent_group;
-
-		should_show = true;
 	}
 
 	void show(std::string_view fullpath, std::string_view ext, std::function<void(char *)> action) {
-		vcv_save_action = action;
-		save_action = {};
-		auto [_, vol] = split_volume(fullpath);
-		should_show_vol = vol;
-		should_show_path = fullpath;
-		should_show_ext = ext;
-
-		base_group = nullptr;
-
-		should_show = true;
+		this->vcv_save_action = action;
+		this->save_action = {};
+		auto [path, vol] = split_volume(fullpath);
+		show(vol, fullpath, ext);
 	}
 
 	void hide() {
@@ -130,7 +111,7 @@ struct FileSaveDialog {
 	}
 
 	bool is_visible() {
-		return should_show || (mode != Mode::Hidden);
+		return mode != Mode::Hidden;
 	}
 
 	void back_event() {
@@ -148,7 +129,7 @@ struct FileSaveDialog {
 	}
 
 private:
-	void do_show(Volume vol, std::string_view fullpath, std::string_view ext) {
+	void show(Volume vol, std::string_view fullpath, std::string_view ext) {
 
 		if (mode == Mode::Hidden) {
 
@@ -181,9 +162,7 @@ private:
 			lv_hide(ui_SaveDialogLeftCont);
 			lv_hide(ui_Keyboard);
 
-			// Set the base group if we didn't do it with the call to show()
-			if (!base_group)
-				base_group = lv_indev_get_next(nullptr)->group;
+			base_group = lv_indev_get_act()->group;
 			lv_group_activate(group);
 			lv_group_focus_obj(ui_SaveDialogFilename);
 			lv_group_set_editing(group, false);
@@ -357,11 +336,6 @@ private:
 
 	std::function<void(char *)> vcv_save_action;
 	std::function<void(Volume, std::string_view)> save_action;
-
-	std::atomic<bool> should_show = false;
-	Volume should_show_vol{};
-	StaticString<255> should_show_path{};
-	StaticString<8> should_show_ext{};
 };
 
 } // namespace MetaModule

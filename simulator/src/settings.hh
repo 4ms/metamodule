@@ -13,7 +13,6 @@ struct Settings {
 	std::string asset_file = "build/assets.uimg";
 	int audioout_dev = 0;
 	std::string test_brand = "";
-	float fullscale_volts = 5;
 
 	void parse(int argc, char *argv[]) {
 
@@ -42,10 +41,6 @@ struct Settings {
 			options.add_options()(
 				"t,test_brand", "Brand slug to run tests on", cxxopts::value<std::string>()->default_value(""));
 
-			options.add_options()("l,fullScaleVolts",
-								  "Volts (peak) which corresponds to full-scale signal sent to sound card",
-								  cxxopts::value<float>()->default_value("5"));
-
 			options.add_options()("h,help", "Print help");
 
 			auto args = options.parse(argc, argv);
@@ -67,9 +62,6 @@ struct Settings {
 
 			if (args.count("audioout") > 0)
 				audioout_dev = args["audioout"].as<int>();
-
-			if (args.count("fullScaleVolts") > 0)
-				fullscale_volts = args["fullScaleVolts"].as<float>();
 
 			if (args.count("help") || args.count("?") || args.count("h")) {
 				std::cout << options.help() << std::endl;

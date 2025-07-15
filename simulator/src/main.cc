@@ -33,7 +33,6 @@ int main(int argc, char *argv[]) {
 		MetaModule::LoadTest::test_module_brand(settings.test_brand, [](std::string_view csv_line) {});
 	}
 
-	ui.set_audio_fullscale(settings.fullscale_volts);
 	audio_out.set_callback([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
 	audio_out.unpause();
 

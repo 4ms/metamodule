@@ -91,7 +91,7 @@ struct PatchFileChangeChecker {
 				}
 			}
 		} else {
-			pr_dump("check_playing_patch: file on disk matches file in memory\n");
+			pr_trace("check_playing_patch: file on disk matches file in memory\n");
 		}
 		return Status::OK;
 	}
