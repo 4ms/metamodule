@@ -388,9 +388,10 @@ struct PatchViewPage : PageBase {
 			lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
 		}
 
-		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
+		if (is_patch_playloaded)
 			redraw_elements();
 
+		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			lv_obj_set_style_border_width(ui_PlayButton, 0, LV_PART_MAIN);
 
 			if (!lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
@@ -422,7 +423,7 @@ private:
 		if (patch_playloader.is_loading_patch())
 			return;
 
-		if (!is_patch_playloaded || patch_playloader.is_audio_muted())
+		if (!is_patch_playloaded)
 			return;
 
 		for (auto &canvas : module_canvases) {
