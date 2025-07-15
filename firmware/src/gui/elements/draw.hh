@@ -246,7 +246,8 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 	}
 	if (el.coords == Coords::Center) {
 		lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-		lv_label_set_long_mode(label, LV_LABEL_LONG_DOT); //CLIP will clip start and end
+		//can't use CLIP mode when center aligned (clips both ends), so use DOT mode
+		lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
 	} else {
 		lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
 		lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
