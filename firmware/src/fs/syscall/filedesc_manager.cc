@@ -1,8 +1,11 @@
 #include "filedesc_manager.hh"
+#include "util/pool.hh"
 #include <algorithm>
 #include <array>
+#include <cstdio>
 #include <cstring>
 #include <optional>
+#include <reent.h>
 #include <unistd.h>
 
 namespace MetaModule::FileDescManager
@@ -19,6 +22,9 @@ static_assert(FirstFileFD > STDERR_FILENO);
 
 static std::array<FileDesc, MaxOpenFiles> descriptors{};
 static std::array<DirDesc, MaxOpenDirs> dir_scriptors{};
+
+static cpputil::Pool<FIL, MaxOpenFiles> fatfil_pool{};
+static cpputil::Pool<DIR, MaxOpenDirs> dir_pool{};
 
 static int index(size_t fd) {
 	return fd - FirstFileFD;
@@ -49,7 +55,11 @@ std::optional<int> alloc_file() {
 
 	if (it != descriptors.end()) {
 		auto fd_idx = std::distance(descriptors.begin(), it);
-		descriptors[fd_idx].fatfil = new FIL;
+		descriptors[fd_idx].fatfil = fatfil_pool.create();
+		if (!descriptors[fd_idx].fatfil) {
+			printf("Too many files open: Failed to open another\n");
+			// Note: caller must check if .fatfil is nullptr;
+		}
 		return fd_idx + FirstFileFD;
 	} else {
 		return {};
@@ -58,7 +68,7 @@ std::optional<int> alloc_file() {
 
 void dealloc_file(size_t fd) {
 	if (fd_is_file(fd)) {
-		delete descriptors[index(fd)].fatfil;
+		fatfil_pool.destroy(descriptors[index(fd)].fatfil);
 		descriptors[index(fd)].fatfil = nullptr;
 		descriptors[index(fd)].vol = Volume::MaxVolumes;
 	}
@@ -77,7 +87,11 @@ DirDesc *alloc_dir() {
 
 	if (it != dir_scriptors.end()) {
 		auto d_idx = std::distance(dir_scriptors.begin(), it);
-		dir_scriptors[d_idx].dir = new DIR;
+		dir_scriptors[d_idx].dir = dir_pool.create();
+		if (!dir_scriptors[d_idx].dir) {
+			printf("Too many directories open: Failed to open another\n");
+			// Note: caller must check if .dir is nullptr;
+		}
 		return &dir_scriptors[d_idx];
 	} else {
 		return nullptr;
@@ -93,7 +107,7 @@ bool dealloc_dir(DIR *dir) {
 	if (it != dir_scriptors.end()) {
 		auto d_idx = std::distance(dir_scriptors.begin(), it);
 		if (d_idx >= 0 && d_idx < (int)dir_scriptors.size()) {
-			delete dir_scriptors[d_idx].dir;
+			dir_pool.destroy(dir_scriptors[d_idx].dir);
 			dir_scriptors[d_idx].dir = nullptr;
 			dir_scriptors[d_idx].vol = Volume::MaxVolumes;
 			dir_scriptors[d_idx].cur_entry.d_name[0] = '\0';
