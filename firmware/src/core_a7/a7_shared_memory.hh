@@ -22,6 +22,7 @@ struct A7SharedMemoryS {
 		PatchModQueue *patch_mod_queue{};
 		RamDrive *ramdrive{};
 		ConcurrentBuffer *console_buffer{};
+		ConcurrentBuffer *console_cdc_buff{};
 	};
 
 	static Ptrs ptrs;
