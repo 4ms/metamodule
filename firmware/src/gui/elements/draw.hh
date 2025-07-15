@@ -225,8 +225,9 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t 
 inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
 	float ox = mm_to_px(el.x_mm, module_h);
 	float oy = mm_to_px(el.y_mm, module_h);
-	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h));
-	lv_coord_t h = std::round(mm_to_px(el.height_mm, module_h));
+	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h) * (240.f / module_h));
+	lv_coord_t h = std::round(mm_to_px(el.height_mm, module_h) * (240.f / module_h));
+
 	//If TopLeft coords are used, skip the "fix" for zoomed coords (lv_label objects don't need the fix for some reason)
 	lv_coord_t x = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, ox, w, module_h / 240.f) : std::round(ox);
 	lv_coord_t y = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, oy, h, module_h / 240.f) : std::round(oy);
@@ -262,6 +263,7 @@ inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, ui
 					 el.wrap_mode == TextDisplay::WrapMode::ScrollBounce ? LV_LABEL_LONG_SCROLL :
 																		   LV_LABEL_LONG_CLIP;
 
+	lv_obj_set_scroll_dir(label, LV_DIR_HOR);
 	lv_label_set_long_mode(label, wrap_mode);
 	return label;
 }
