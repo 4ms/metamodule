@@ -441,12 +441,6 @@ struct ModuleViewPage : PageBase {
 		{
 			roller_hover.hide();
 		}
-
-		// Handle "action" alt params, which were set high when the user clicked them, and now need to be set low
-		if (pending_action_param_clear) {
-			send_param_value(0, *pending_action_param_clear);
-			pending_action_param_clear = std::nullopt;
-		}
 	}
 
 	void redraw_elements() {
@@ -769,11 +763,7 @@ private:
 		args.element_indices = drawn_element.gui_element.idx;
 
 		if (is_patch_playloaded) {
-			// Set the param high now, and make a pending request to set it low on the next update()
-			auto value = patch_playloader.param_value(drawn_element.gui_element.module_idx,
-													  drawn_element.gui_element.idx.param_idx);
-			send_param_value(1 - value, drawn_element.gui_element);
-			// pending_action_param_clear = drawn_element.gui_element;
+			send_param_value(1, drawn_element.gui_element);
 		}
 	}
 
