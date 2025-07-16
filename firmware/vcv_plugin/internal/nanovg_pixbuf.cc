@@ -95,7 +95,7 @@ void renderStroke(void *uptr,
 
 	auto context = get_drawcontext(uptr);
 
-	if (npaths < 0 || npaths > 1024) {
+	if (npaths <= 0 || npaths > 1024) {
 		// pr_dbg("Invalid number of paths in renderStroke: %d\n", npaths);
 		return;
 	}
