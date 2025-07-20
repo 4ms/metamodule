@@ -115,8 +115,9 @@ if(HEADLESS)
 		src/headless/audio_files.cc 
 		src/headless/nanovg.cc
 		stubs/svg.cc
-		stubs/random.cpp
-		stubs/drivers/time.cc
+		hardware_support/random.cc
+		hardware_support/time.cc
+		hardware_support/memory.cc
 
 		${FWDIR}/src/midi/midi_router.cc
 
@@ -126,12 +127,13 @@ else()
 	add_executable(simulator 
 		src/main.cc 
 		src/ui.cc
-		stubs/random.cpp
 		stubs/memory/heap.cc
 		stubs/fs/fs_proxy.cc
 		stubs/async_thread_control.cc
-		stubs/drivers/time.cc
 		stubs/static_buffers.cc
+		hardware_support/random.cc
+		hardware_support/time.cc
+		hardware_support/memory.cc
 
 		${FWDIR}/src/gui/elements/element_name.cc
 		${FWDIR}/src/gui/elements/panel_name.cc
@@ -166,6 +168,8 @@ else()
 		${FWDIR}/src/user_settings/settings_serialize.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
+
+		${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
 		)
 
 # see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html

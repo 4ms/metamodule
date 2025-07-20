@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <cstdlib>
 
-namespace MetaModule
+namespace MetaModule::System
 {
 
 bool hardware_random_ready() {
@@ -16,4 +16,4 @@ uint32_t random() {
 	return std::rand();
 }
 
-} // namespace MetaModule
+} // namespace MetaModule::System
