@@ -142,6 +142,8 @@ else()
 		# ${FWDIR}/src/gui/slsexport/prefs_menu.cc
 		${FWDIR}/src/gui/fonts/fonts.cc
 		${FWDIR}/src/gui/fonts/ttf.cc
+		${FWDIR}/src/gui/pages/module_view/element_roller.cc
+		${FWDIR}/src/gui/pages/module_view/draw_module.cc
 		${FWDIR}/src/fw_update/updater_proxy.cc
 		${FWDIR}/src/patch_play/modules_helpers.cc
 		${FWDIR}/src/midi/midi_router.cc

@@ -147,190 +147,6 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
-	unsigned resize_module_image(unsigned max) {
-		lv_obj_refr_size(canvas);
-		auto width_px = lv_obj_get_width(canvas);
-		//module img + padding is no more than 190px wide
-		auto display_widthpx = std::min<lv_coord_t>(width_px + 4, max);
-		lv_obj_set_width(ui_ModuleImage, display_widthpx);
-		lv_obj_refr_size(ui_ModuleImage);
-		if (lv_obj_get_width(ui_ModuleImage) > width_px) {
-			lv_obj_clear_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
-		} else {
-			lv_obj_add_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
-		}
-
-		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
-
-		auto roller_width = std::min<lv_coord_t>(320 - display_widthpx, 220); //roller is no more than 220px wide
-		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
-		if (max == 320) {
-			lv_obj_set_x(ui_ElementRollerPanel, 320);
-		} else {
-			lv_obj_set_x(ui_ElementRollerPanel, 0);
-		}
-
-		return display_widthpx;
-	}
-
-	void redraw_module() {
-		reset_module_page();
-
-		size_t num_elements = moduleinfo.elements.size();
-		opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
-		button.reserve(num_elements);
-		drawn_elements.reserve(num_elements);
-
-		auto module_drawer = ModuleDrawer{.container = ui_ModuleImage, .height = 240};
-
-		auto [faceplate, width] = module_drawer.read_faceplate(slug);
-		canvas = module_drawer.draw_faceplate(faceplate, width, buffer);
-
-		active_knobset = page_list.get_active_knobset();
-
-		module_drawer.draw_mapped_elements(
-			*patch, this_module_id, active_knobset, canvas, drawn_elements, is_patch_playloaded);
-
-		lv_obj_update_layout(canvas);
-
-		// Populate Roller and highlighter buttons
-		unsigned roller_idx = 0;
-		DrawnElement const *cur_el = nullptr;
-		ElementCount::Counts last_type{};
-
-		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
-			auto &gui_el = drawn_element.gui_element;
-
-			watch_element(drawn_element);
-
-			add_button(gui_el.obj);
-
-			auto base = base_element(drawn_element.element);
-
-			if (base.short_name.size() == 0) {
-				pr_info("Element roller: Skipping element with no name\n");
-				continue;
-			}
-
-			if (ModView::is_light_only(drawn_element))
-				continue;
-
-			if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
-				continue;
-
-			if (ModView::append_header(opts, last_type, gui_el.count)) {
-				roller_idx++;
-				roller_drawn_el_idx.push_back(-1);
-			}
-			last_type = gui_el.count;
-
-			opts.append(" ");
-			// Display up to the first newline (if any)
-			opts.append(base.short_name.substr(0, base.short_name.find_first_of("\0\n")));
-
-			if (gui_el.mapped_panel_id) {
-				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
-			}
-
-			append_connected_jack_name(opts, gui_el.idx, gui_el.module_idx, *patch);
-
-			opts += "\n";
-			roller_drawn_el_idx.push_back(drawn_el_idx);
-
-			// Pre-select an element
-			if (args.element_indices.has_value()) {
-				if (ElementCount::matched(*args.element_indices, gui_el.idx)) {
-					cur_selected = roller_idx;
-					cur_el = &drawn_element;
-				}
-			}
-
-			roller_idx++;
-		}
-
-		if (is_patch_playloaded) {
-			if (has_context_menu) {
-				opts += Gui::orange_text("Options:") + "\n";
-				opts += " >>>\n";
-				roller_drawn_el_idx.push_back(-1);
-				roller_drawn_el_idx.push_back(ContextMenuTag);
-				roller_idx += 2;
-			}
-		}
-
-		if (roller_idx <= 1) {
-			if (gui_state.new_cable) {
-				opts.append("No available jacks to patch\n");
-			}
-		}
-
-		// remove final \n
-		if (opts.length() > 0)
-			opts.pop_back();
-
-		//Size Module Image and Roller
-		lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
-
-		resize_module_image(190);
-		full_screen_mode = false;
-
-		lv_show(ui_ElementRollerPanel);
-
-		// Add text list to roller options
-		lv_roller_set_options(ui_ElementRoller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
-
-		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
-
-		if (cur_selected > 0 && cur_selected < button.size()) {
-			if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < button.size()) {
-				if (lv_obj_get_height(button[idx]) > 100 || lv_obj_get_width(button[idx]) > 100) {
-					lv_obj_add_style(button[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
-				} else {
-					lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-				}
-			}
-		} else {
-			pr_err("Current selected is not in range (%d/%zu)\n", cur_selected, button.size());
-		}
-
-		update_map_ring_style();
-
-		cable_drawer.set_height(240);
-		update_cable_style(true);
-
-		lv_obj_refr_size(ui_ElementRollerPanel);
-		auto roller_width = lv_obj_get_width(ui_ElementRollerPanel);
-		mapping_pane.prepare_focus(group, roller_width, is_patch_playloaded);
-
-		if (cur_el && args.detail_mode == true) {
-			mode = ViewMode::Mapping;
-			mapping_pane.hide();
-			mapping_pane.show(*cur_el);
-		} else {
-			show_roller();
-		}
-
-		dynamic_elements_prepared = false;
-		update_graphic_throttle_setting();
-	}
-
-	void prepare_dynamic_elements() {
-		if (!dynamic_elements_prepared) {
-			dyn_draw.prepare_module(drawn_elements, this_module_id, canvas);
-			dynamic_elements_prepared = true;
-		}
-	}
-
-	void watch_element(DrawnElement const &drawn_element) {
-		if (std::get_if<DynamicTextDisplay>(&drawn_element.element)) {
-			params.text_displays.start_watching_display(this_module_id, drawn_element.gui_element.idx.light_idx);
-		}
-	}
-
-	bool is_creating_map() const {
-		return mapping_pane.is_creating_map();
-	}
-
 	void update() override {
 		// Back button
 		if (gui_state.back_button.is_just_released()) {
@@ -453,41 +269,6 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
-	void redraw_elements() {
-		for (auto &drawn_el : drawn_elements) {
-			auto &gui_el = drawn_el.gui_element;
-
-			auto value =
-				patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
-			auto was_redrawn = redraw_param(drawn_el, value);
-
-			if (was_redrawn && page_settings.map_ring_flash_active) {
-				map_ring_display.flash_once(gui_el.map_ring, true);
-			}
-
-			if (auto num_light_elements = gui_el.count.num_lights) {
-
-				std::array<float, 3> storage{};
-				auto light_vals = std::span{storage.data(), std::min(storage.size(), num_light_elements)};
-
-				for (auto i = 0u; auto &val : light_vals) {
-					val = patch_playloader.light_value(gui_el.module_idx, gui_el.idx.light_idx + i);
-					i++;
-				}
-
-				update_light(drawn_el, light_vals);
-			}
-
-			redraw_text_display(drawn_el, this_module_id, params.text_displays.watch_displays);
-		}
-
-		if (dyn_draw_throttle && (++dyn_draw_throttle_ctr >= dyn_draw_throttle)) {
-			dyn_draw_throttle_ctr = 0;
-			prepare_dynamic_elements();
-			dyn_draw.draw();
-		}
-	}
-
 	bool handle_patch_mods() {
 		bool refresh = false;
 
@@ -525,35 +306,6 @@ struct ModuleViewPage : PageBase {
 		return refresh;
 	}
 
-	// This gets called after map_ring_style changes
-	void update_map_ring_style() {
-		for (auto &drawn_el : drawn_elements) {
-			map_ring_display.update(drawn_el, true, is_patch_playloaded);
-		}
-	}
-
-	void update_cable_style(bool force = false) {
-		static MapRingStyle last_cable_style;
-
-		cable_drawer.set_opacity(page_settings.cable_style.opa);
-
-		if (force || page_settings.cable_style.mode != last_cable_style.mode) {
-			if (page_settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
-				cable_drawer.draw_single_module(*patch, this_module_id);
-			else
-				cable_drawer.clear();
-		}
-		last_cable_style = page_settings.cable_style;
-	}
-
-	void update_graphic_throttle_setting() {
-		if (page_settings.show_graphic_screens) {
-			dyn_draw_throttle = std::max(page_settings.graphic_screen_throttle, 1u);
-		} else {
-			dyn_draw_throttle = 0;
-		}
-	}
-
 	void blur() final {
 		module_context_menu.blur();
 		dyn_draw.blur();
@@ -563,45 +315,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 private:
-	void show_roller() {
-		module_context_menu.hide();
-		mode = ViewMode::List;
-		mapping_pane.hide();
-		lv_show(ui_ElementRoller);
-		lv_show(ui_ElementRollerPanel);
-		lv_group_focus_obj(ui_ElementRoller);
-		lv_group_set_editing(group, true);
-		lv_group_set_wrap(group, false);
-		args.detail_mode = false;
-	}
-
-	void add_button(lv_obj_t *obj) {
-
-		auto &b = button.emplace_back();
-		b = lv_btn_create(ui_ModuleImage);
-		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
-
-		if (obj) {
-			float width = lv_obj_get_width(obj);
-			float height = lv_obj_get_height(obj);
-			float c_x = (float)lv_obj_get_x(obj) + width / 2.f;
-			float c_y = (float)lv_obj_get_y(obj) + height / 2.f;
-
-			auto x_padding = std::min(width * 0.75f, 12.f);
-			auto y_padding = std::min(height * 0.75f, 12.f);
-			auto x_size = x_padding + width;
-			auto y_size = y_padding + height;
-			lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-			lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
-			lv_obj_set_size(b, std::round(x_size), std::round(y_size));
-			lv_obj_refr_size(b);
-			lv_obj_refr_pos(b);
-		} else {
-			lv_obj_set_pos(b, 0, 0);
-			lv_obj_set_size(b, 0, 0);
-		}
-	}
-
 	void reset_module_page() {
 		for (auto &b : button)
 			lv_obj_del(b);
@@ -633,259 +346,12 @@ private:
 		return true;
 	}
 
-	static void roller_scrolled_cb(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
-
-		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
-		if (cur_sel >= page->roller_drawn_el_idx.size()) {
-			page->roller_hover.hide();
-			return;
-		}
-
-		auto prev_sel = page->cur_selected;
-		auto cur_idx = page->roller_drawn_el_idx[cur_sel];
-
-		// Extra menu:
-		if (cur_idx == ContextMenuTag) {
-			page->unhighlight_component(prev_sel);
-			page->cur_selected = cur_sel;
-			page->roller_hover.hide();
-			return;
-		}
-
-		// Skip over headers by scrolling over them in the same direction we just scrolled
-		if (cur_idx == -1) {
-			if (prev_sel < cur_sel) {
-				if (cur_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
-					cur_sel++;
-				else
-					// Don't scroll off the end of the roller
-					cur_sel = prev_sel;
-
-			} else {
-				if (cur_sel)
-					cur_sel--;
-
-				else if (!page->full_screen_mode) {
-					//Scrolling up from first header -> defocus roller and focus button bar
-					page->focus_button_bar();
-					page->roller_hover.hide();
-					return;
-				} else {
-					// stay on the first item in the roller
-					return;
-				}
-			}
-			// cur_sel changed, so we need to update the roller position and our drawn_el idx
-			lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_ON);
-			cur_idx = page->roller_drawn_el_idx[cur_sel];
-		}
-
-		page->cur_selected = cur_sel;
-
-		// Save current select in args so we can navigate back to this item
-		page->args.element_indices = page->drawn_elements[cur_idx].gui_element.idx;
-
-		page->unhighlight_component(prev_sel);
-		page->highlight_component(cur_idx);
-
-		page->roller_hover.hide();
-	}
-
-	void unhighlight_component(uint32_t prev_sel) {
-		if (auto prev_idx = get_drawn_idx(prev_sel)) {
-			if (lv_obj_get_height(button[*prev_idx]) > 100 || lv_obj_get_width(button[*prev_idx]) > 100) {
-				lv_obj_remove_style(button[*prev_idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
-			} else {
-				lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-			}
-			lv_event_send(button[*prev_idx], LV_EVENT_REFRESH, nullptr);
-		}
-	}
-
-	void highlight_component(size_t idx) {
-		if (idx < button.size()) {
-
-			if (lv_obj_get_height(button[idx]) > 100 || lv_obj_get_width(button[idx]) > 100) {
-				lv_obj_add_style(button[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
-			} else {
-				lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-			}
-			lv_event_send(button[idx], LV_EVENT_REFRESH, nullptr);
-			lv_obj_scroll_to_view(button[idx], LV_ANIM_ON);
-		}
-	}
-
-	void focus_button_bar() {
-		if (!full_screen_mode) {
-			if (gui_state.new_cable)
-				lv_group_focus_obj(ui_ModuleViewCableCancelBut);
-			else
-				lv_group_focus_obj(ui_ModuleViewSettingsBut);
-
-			lv_group_set_editing(group, false);
-			cur_selected = 1;
-			lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
-			unhighlight_component(cur_selected);
-		}
-	}
-
-	void click_cable_destination(unsigned drawn_idx) {
-		// Determine id and type of this element
-		std::optional<Jack> this_jack{};
-		ElementType this_jack_type{};
-		auto idx = drawn_elements[drawn_idx].gui_element.idx;
-
-		std::visit(overloaded{[](auto const &) {},
-							  [&](const JackInput &) {
-								  this_jack_type = ElementType::Input;
-								  this_jack = Jack{.module_id = this_module_id, .jack_id = idx.input_idx};
-							  },
-							  [&](const JackOutput &) {
-								  this_jack_type = ElementType::Output;
-								  this_jack = Jack{.module_id = this_module_id, .jack_id = idx.output_idx};
-							  }},
-				   drawn_elements[drawn_idx].element);
-
-		if (this_jack) {
-			make_cable(gui_state.new_cable.value(), patch, module_mods, notify_queue, *this_jack, this_jack_type);
-
-			handle_patch_mods();
-
-			gui_state.new_cable = std::nullopt;
-
-			// Do not show instructions again this session
-			gui_state.already_displayed_cable_instructions = true;
-
-			gui_state.force_redraw_patch = true;
-			PageArguments nextargs = {.patch_loc = args.patch_loc,
-									  .patch_loc_hash = args.patch_loc_hash,
-									  .module_id = args.module_id,
-									  .detail_mode = false};
-			page_list.update_state(PageId::ModuleView, nextargs);
-			page_list.request_new_page(PageId::PatchView, nextargs);
-			roller_hover.hide();
-		} else
-			pr_err("Error completing cable\n");
-	}
-
-	void click_altparam_action(DrawnElement const &drawn_element) {
-		args.element_indices = drawn_element.gui_element.idx;
-
-		if (is_patch_playloaded) {
-			send_param_value(1, drawn_element.gui_element);
-		}
-	}
-
-	void click_altparam(DrawnElement const &drawn_element) {
-		args.element_indices = drawn_element.gui_element.idx;
-
-		if (is_patch_playloaded) {
-			mapping_pane.show_control_popup(group, ui_ElementRollerPanel, drawn_element);
-		}
-	}
-
-	void click_graphic_display(DrawnElement const &drawn_element, DynamicGraphicDisplay const *el) {
-		args.element_indices = drawn_element.gui_element.idx;
-
-		PageArguments nextargs = {
-			.patch_loc_hash = args.patch_loc_hash,
-			.module_id = this_module_id,
-			.element_indices = drawn_element.gui_element.idx,
-			.element_mm = std::pair<float, float>{el->width_mm, el->height_mm},
-		};
-		page_list.update_state(PageId::ModuleView, nextargs);
-		page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
-		roller_hover.hide();
-	}
-
-	void click_normal_element(DrawnElement const &drawn_element) {
-		args.element_indices = drawn_element.gui_element.idx;
-
-		mode = ViewMode::Mapping;
-		args.detail_mode = true;
-		lv_hide(ui_ElementRollerPanel);
-		roller_hover.hide();
-
-		mapping_pane.show(drawn_element);
-	}
-
 	void show_context_menu() {
 		if (!full_screen_mode) {
 			mode = ViewMode::ModuleContextMenu;
 			lv_hide(ui_ElementRoller);
 			roller_hover.hide();
 			module_context_menu.show();
-		}
-	}
-
-	static void roller_click_cb(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto roller_idx = page->cur_selected;
-
-		if (auto drawn_idx = page->get_drawn_idx(roller_idx)) {
-
-			auto &drawn_element = page->drawn_elements[*drawn_idx];
-
-			if (page->gui_state.new_cable) {
-				page->click_cable_destination(*drawn_idx);
-
-			} else if (std::get_if<AltParamAction>(&drawn_element.element)) {
-				page->click_altparam_action(drawn_element);
-
-			} else if (std::get_if<AltParamContinuous>(&drawn_element.element) ||
-					   std::get_if<AltParamChoice>(&drawn_element.element) ||
-					   std::get_if<AltParamChoiceLabeled>(&drawn_element.element))
-			{
-				page->click_altparam(drawn_element);
-
-			} else if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
-				page->click_graphic_display(drawn_element, el);
-
-				// } else if (page->full_screen_mode) {
-				// TODO: sometimes open manual popup immediately. (alt params, performance mode)
-				// sometimes keep it hidden, but act as if it were open (full screen mode, performance mode with buttons)
-
-			} else {
-				page->click_normal_element(drawn_element);
-			}
-
-			//Not an element: Is it the Context Menu?
-		} else if (roller_idx < page->roller_drawn_el_idx.size()) {
-			if (page->roller_drawn_el_idx[roller_idx] == ContextMenuTag) {
-				page->show_context_menu();
-			}
-		}
-	}
-
-	void send_param_value(float value, GuiElement const &gui_element) {
-		StaticParam sp{
-			.module_id = gui_element.module_idx,
-			.param_id = gui_element.idx.param_idx,
-			.value = value,
-		};
-		patch_mod_queue.put(SetStaticParam{.param = sp});
-
-		patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
-	}
-
-	static void roller_focus_cb(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		if (page) {
-			if (page->roller_drawn_el_idx.size() <= 1) {
-				page->focus_button_bar();
-				page->roller_hover.hide();
-				return;
-			}
-
-			if (event->param != page) {
-				lv_group_set_editing(page->group, true);
-				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
-
-				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-					page->highlight_component(*drawn_idx);
-				}
-			}
 		}
 	}
 
@@ -908,24 +374,34 @@ private:
 		page->full_screen_mode = true;
 	}
 
-	static void jump_to_roller_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		if (page->full_screen_mode) {
-			lv_group_focus_obj(ui_ElementRoller);
-		}
-	}
+	// Defined in module_view/element_roller.cc:
+	void show_roller();
+	void populate_roller();
+	void add_button(lv_obj_t *obj);
+	void unhighlight_component(uint32_t prev_sel);
+	void highlight_component(size_t idx);
+	void focus_button_bar();
+	void click_cable_destination(unsigned drawn_idx);
+	void click_altparam_action(DrawnElement const &drawn_element);
+	void click_altparam(DrawnElement const &drawn_element);
+	void send_param_value(float value, GuiElement const &gui_element);
+	void click_graphic_display(DrawnElement const &drawn_element, DynamicGraphicDisplay const *el);
+	void click_normal_element(DrawnElement const &drawn_element);
+	static void roller_scrolled_cb(lv_event_t *event);
+	static void roller_click_cb(lv_event_t *event);
+	static void roller_focus_cb(lv_event_t *event);
+	static void jump_to_roller_cb(lv_event_t *event);
+	std::optional<unsigned> get_drawn_idx(unsigned roller_idx);
 
-	std::optional<unsigned> get_drawn_idx(unsigned roller_idx) {
-		if (roller_idx < roller_drawn_el_idx.size()) {
-			auto drawn_idx = roller_drawn_el_idx[roller_idx];
-			if ((size_t)drawn_idx < drawn_elements.size()) {
-				return drawn_idx;
-			}
-		}
-		return std::nullopt;
-	}
+	// Defined in module_view/draw_module.cc
+	void prepare_dynamic_elements();
+	unsigned resize_module_image(unsigned max);
+	void redraw_module();
+	void watch_element(DrawnElement const &drawn_element);
+	void redraw_elements();
+	void update_map_ring_style();
+	void update_cable_style(bool force = false);
+	void update_graphic_throttle_setting();
 
 	CableDrawer<240> cable_drawer;
 
