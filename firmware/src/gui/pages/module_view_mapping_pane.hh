@@ -121,6 +121,7 @@ struct ModuleViewMappingPane {
 
 		add_map_popup.prepare_focus(pane_group, ui_MappingParameters);
 		control_popup.prepare_focus(pane_group);
+		lv_obj_set_parent(ui_ControlAlert, ui_MappingParameters);
 
 		lv_group_set_wrap(pane_group, false);
 
@@ -129,6 +130,21 @@ struct ModuleViewMappingPane {
 		is_visible = true;
 
 		lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_OFF);
+	}
+
+	void show_control_popup(lv_group_t *parent_group, lv_obj_t *parent, const DrawnElement &drawn_el) {
+		lv_obj_set_parent(ui_ControlAlert, parent);
+		control_popup.prepare_focus(parent_group);
+		lv_obj_clear_state(ui_ControlButton, LV_STATE_PRESSED);
+		control_popup.show(&drawn_el);
+	}
+
+	void hide_control_popup() {
+		control_popup.hide();
+	}
+
+	bool control_popup_visible() {
+		return control_popup.is_visible();
 	}
 
 	void refresh() {

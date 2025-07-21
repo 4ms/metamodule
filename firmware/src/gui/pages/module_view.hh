@@ -344,6 +344,9 @@ struct ModuleViewPage : PageBase {
 				full_screen_mode = false;
 				resize_module_image(190);
 
+			} else if (mapping_pane.control_popup_visible()) {
+				mapping_pane.hide_control_popup();
+
 			} else if (mode == ViewMode::List) {
 				args.module_id = this_module_id;
 				load_prev_page();
@@ -767,6 +770,14 @@ private:
 		}
 	}
 
+	void click_altparam(DrawnElement const &drawn_element) {
+		args.element_indices = drawn_element.gui_element.idx;
+
+		if (is_patch_playloaded) {
+			mapping_pane.show_control_popup(group, ui_ElementRollerPanel, drawn_element);
+		}
+	}
+
 	void click_graphic_display(DrawnElement const &drawn_element, DynamicGraphicDisplay const *el) {
 		args.element_indices = drawn_element.gui_element.idx;
 
@@ -814,6 +825,12 @@ private:
 
 			} else if (std::get_if<AltParamAction>(&drawn_element.element)) {
 				page->click_altparam_action(drawn_element);
+
+			} else if (std::get_if<AltParamContinuous>(&drawn_element.element) ||
+					   std::get_if<AltParamChoice>(&drawn_element.element) ||
+					   std::get_if<AltParamChoiceLabeled>(&drawn_element.element))
+			{
+				page->click_altparam(drawn_element);
 
 			} else if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
 				page->click_graphic_display(drawn_element, el);

@@ -75,6 +75,10 @@ struct ManualControlPopUp {
 		}
 	}
 
+	bool is_visible() const {
+		return visible;
+	}
+
 private:
 	void increment_value() {
 		auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
