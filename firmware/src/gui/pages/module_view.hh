@@ -19,6 +19,13 @@
 
 namespace MetaModule
 {
+
+// TODO: make this .hh file have just declarations
+// make gui/module_view/*.cc:
+// - module_view.cc (show/hide/prepare_focus)
+// - draw_module.cc
+//  - create_cable.cc
+//  - element_roller.cc
 struct ModuleViewPage : PageBase {
 
 	ModuleViewPage(PatchContext context)
