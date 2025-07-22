@@ -17,7 +17,7 @@
 #include "gui/pages/knobset_view.hh"
 #include "gui/pages/main_menu.hh"
 #include "gui/pages/module_list.hh"
-#include "gui/pages/module_view.hh"
+#include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"

@@ -1,4 +1,4 @@
-#include "gui/pages/module_view.hh"
+#include "gui/pages/module_view/module_view.hh"
 
 namespace MetaModule
 {
