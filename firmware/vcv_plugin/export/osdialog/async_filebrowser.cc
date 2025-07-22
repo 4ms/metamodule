@@ -28,12 +28,12 @@ void async_open_file(std::string_view initial_path,
 					 std::string_view title,
 					 std::function<void(char *path)> &&action) {
 	using namespace MetaModule;
-	show_file_browser(browser, filter_extension_list.data(), initial_path.data(), title.data(), action);
+	show_file_browser(browser, filter_extension_list.data(), initial_path, title.data(), action);
 }
 
 void async_open_dir(std::string_view initial_path, std::string_view title, std::function<void(char *path)> &&action) {
 	using namespace MetaModule;
-	show_file_browser(browser, "*/", initial_path.data(), title.data(), action);
+	show_file_browser(browser, "*/", initial_path, title.data(), action);
 }
 
 void async_save_file(std::string_view initial_path,
