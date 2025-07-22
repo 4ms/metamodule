@@ -1,3 +1,7 @@
+#include "gui/elements/module_drawer.hh"
+#include "gui/elements/redraw.hh"
+#include "gui/elements/redraw_display.hh"
+#include "gui/elements/redraw_light.hh"
 #include "gui/pages/module_view/module_view.hh"
 
 namespace MetaModule

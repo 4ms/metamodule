@@ -1,4 +1,5 @@
 #include "gui/pages/module_view/module_view.hh"
+#include "gui/pages/module_view/roller_helpers.hh"
 
 namespace MetaModule
 {
