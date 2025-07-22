@@ -80,17 +80,17 @@ struct PatchPlayLoader {
 	void stop_audio() {
 		starting_audio_ = false;
 		stopping_audio_ = true;
-		pause_module_threads();
 	}
 
 	void start_audio() {
+		resume_module_threads();
+
 		loading_new_patch_ = false;
 		audio_is_muted_ = false;
 		stopping_audio_ = false;
 		starting_audio_ = true;
 		player_.notify_audio_resumed();
 		clear_audio_overrun();
-		resume_module_threads();
 	}
 
 	void request_load_view_patch() {
@@ -139,6 +139,8 @@ struct PatchPlayLoader {
 	void notify_audio_is_muted() {
 		stopping_audio_ = false;
 		audio_is_muted_ = true;
+		// Pause threads once audio has confirmed it's no longer playing the patch
+		pause_module_threads();
 	}
 
 	void notify_audio_overrun() {
