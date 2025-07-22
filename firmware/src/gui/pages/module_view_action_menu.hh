@@ -283,7 +283,6 @@ private:
 				if (choice == 1) {
 					page->delete_state = DeleteState::TryRequest;
 				}
-				page->hide_menu();
 			},
 			confirm_msg.c_str(),
 			"Delete");
