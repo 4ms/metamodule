@@ -1,31 +1,19 @@
 #pragma once
 #include "gui/dyn_display.hh"
-#include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
-#include "gui/elements/module_drawer.hh"
-#include "gui/elements/redraw.hh"
-#include "gui/elements/redraw_display.hh"
-#include "gui/elements/redraw_light.hh"
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/module_menu/plugin_module_menu.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/module_view/action_menu.hh"
 #include "gui/pages/module_view/mapping_pane.hh"
-#include "gui/pages/module_view/roller_helpers.hh"
 #include "gui/pages/module_view/settings_menu.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/styles.hh"
 
 namespace MetaModule
 {
 
-// TODO: make this .hh file have just declarations
-// make gui/module_view/*.cc:
-// - module_view.cc (show/hide/prepare_focus)
-// - draw_module.cc
-//  - create_cable.cc
-//  - element_roller.cc
 struct ModuleViewPage : PageBase {
 
 	ModuleViewPage(PatchContext context)
