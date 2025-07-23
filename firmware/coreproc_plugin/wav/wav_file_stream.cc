@@ -7,12 +7,14 @@
 
 namespace MetaModule
 {
-
-static constexpr bool PRINT_ERRORS = true;
+namespace
+{
 void print_message(auto... args) {
-	if constexpr (PRINT_ERRORS)
+	constexpr bool WAV_FILE_STREAM_PRINT_ERRORS = true;
+	if constexpr (WAV_FILE_STREAM_PRINT_ERRORS)
 		printf(args...);
 }
+} // namespace
 
 WavFileStream::WavFileStream(size_t max_samples)
 	: MaxSamples{MathTools::next_power_of_2(max_samples)}
@@ -26,6 +28,10 @@ void WavFileStream::resize(size_t max_samples) {
 	pre_buff.resize(MaxSamples);
 	if (MaxSamples != max_samples)
 		print_message("WavFileStream must be resized with a power of 2. %zu will be used\n", MaxSamples);
+}
+
+size_t WavFileStream::size() const {
+	return MaxSamples;
 }
 
 bool WavFileStream::load(std::string_view sample_path) {
