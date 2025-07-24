@@ -17,21 +17,32 @@ void print_message(auto... args) {
 } // namespace
 
 WavFileStream::WavFileStream(size_t max_samples)
-	: MaxSamples{MathTools::next_power_of_2(max_samples)}
-	, pre_buff{MaxSamples} {
-	if (MaxSamples != max_samples)
-		print_message("WavFileStream must be constructed with a power of 2. %zu will be used\n", MaxSamples);
+	: max_samples{max_samples}
+	, pre_buff{max_samples} {
 }
 
-void WavFileStream::resize(size_t max_samples) {
-	MaxSamples = MathTools::next_power_of_2(max_samples);
-	pre_buff.resize(MaxSamples);
-	if (MaxSamples != max_samples)
-		print_message("WavFileStream must be resized with a power of 2. %zu will be used\n", MaxSamples);
+bool WavFileStream::resize(size_t max_samples) {
+	this->max_samples = max_samples;
+	if (!loaded)
+		return false;
+	auto buffsize = std::min<uint32_t>(max_samples, wav.totalPCMFrameCount * wav.channels);
+
+	if (pre_buff.max_size() != buffsize) {
+		pre_buff.resize(buffsize);
+		reset_prebuff();
+
+		return true;
+	} else {
+		return false;
+	}
 }
 
-size_t WavFileStream::size() const {
-	return MaxSamples;
+size_t WavFileStream::max_size() const {
+	return max_samples;
+}
+
+size_t WavFileStream::buffer_size() const {
+	return pre_buff.max_size();
 }
 
 bool WavFileStream::load(std::string_view sample_path) {
@@ -41,6 +52,8 @@ bool WavFileStream::load(std::string_view sample_path) {
 
 	loaded = drwav_init_file(&wav, sample_path.data(), nullptr);
 	frames_in_buffer = 0;
+
+	resize(max_samples);
 	return loaded;
 }
 
@@ -99,7 +112,7 @@ void WavFileStream::read_frames_from_file(int num_frames) {
 				next_frame_to_write.store(next_frame_to_write.load() + 1);
 
 				auto f = frames_in_buffer.load();
-				if (f < MaxSamples / wav.channels)
+				if (f < max_samples / wav.channels)
 					frames_in_buffer.store(f + 1);
 			}
 		}
