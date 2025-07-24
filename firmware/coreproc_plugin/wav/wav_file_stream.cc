@@ -135,6 +135,10 @@ bool WavFileStream::is_stereo() const {
 	return loaded ? wav.channels > 1 : false;
 }
 
+float WavFileStream::sample_seconds() const {
+	return (float)wav.totalPCMFrameCount / (float)wav.sampleRate;
+}
+
 unsigned WavFileStream::samples_available() const {
 	return pre_buff.num_filled();
 }
