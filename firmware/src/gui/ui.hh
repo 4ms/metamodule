@@ -176,7 +176,14 @@ public:
 	}
 
 	void load_initial_patch() {
-		patch_playloader.load_initial_patch(settings.last_patch_opened, settings.last_patch_vol);
+		if (settings.load_initial_patch) {
+			pr_dbg("Loading initial patch '%s' on vol %u\n",
+				   settings.initial_patch_name.c_str(),
+				   settings.initial_patch_vol);
+			patch_playloader.load_initial_patch(settings.initial_patch_name, settings.initial_patch_vol);
+		} else {
+			pr_dbg("Not loading initial patch (disabled in settings)\n");
+		}
 	}
 
 	void notify_error(std::string const &message) {
