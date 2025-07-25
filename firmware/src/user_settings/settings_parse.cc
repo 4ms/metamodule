@@ -168,7 +168,6 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "module_view", settings, &UserSettings::module_view);
 	read_or_default(node, "audio", settings, &UserSettings::audio);
 	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_preload);
-	read_or_default(node, "last_patch_opened", settings, &UserSettings::last_patch_opened);
 	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
 	read_or_default(node, "catchup", settings, &UserSettings::catchup);
 	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
@@ -179,10 +178,12 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 		unsigned t = 0;
 		node["last_patch_vol"] >> t;
 		if (t < static_cast<unsigned>(Volume::MaxVolumes))
-			settings->last_patch_vol = static_cast<Volume>(t);
+			settings->initial_patch_vol = static_cast<Volume>(t);
 	} else {
-		settings->last_patch_vol = UserSettings{}.last_patch_vol;
+		settings->initial_patch_vol = UserSettings{}.initial_patch_vol;
 	}
+	read_or_default(node, "last_patch_opened", settings, &UserSettings::initial_patch_name);
+	read_or_default(node, "load_initial_patch", settings, &UserSettings::load_initial_patch);
 
 	return true;
 }

@@ -16,8 +16,12 @@ struct UserSettings {
 	ModuleDisplaySettings module_view{};
 	AudioSettings audio{};
 	PluginPreloadSettings plugin_preload{};
-	std::string last_patch_opened{};
-	Volume last_patch_vol{Volume::NorFlash};
+
+	// Initial patch
+	std::string initial_patch_name{};
+	Volume initial_patch_vol{Volume::NorFlash};
+	bool load_initial_patch = true;
+
 	ScreensaverSettings screensaver{};
 	CatchupSettings catchup{};
 	FilesystemSettings filesystem{};

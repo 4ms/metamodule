@@ -19,13 +19,15 @@ struct PatchViewFileMenu {
 					  FileSaveDialog &file_save_dialog,
 					  NotificationQueue &notify_queue,
 					  PageList &page_list,
-					  GuiState &gui_state)
+					  GuiState &gui_state,
+					  UserSettings &settings)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
 		, patches{patches}
 		, notify_queue{notify_queue}
 		, page_list{page_list}
 		, gui_state{gui_state}
+		, settings{settings}
 		, patch_save_dialog{patch_storage, patches, play_loader, file_save_dialog, notify_queue, page_list}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
@@ -226,6 +228,8 @@ struct PatchViewFileMenu {
 
 	bool did_filesystem_change() {
 		bool result = patch_save_dialog.did_save();
+		if (result)
+			save_last_opened_patch_in_settings();
 		result |= filesystem_changed;
 		filesystem_changed = false;
 		return result;
@@ -240,6 +244,20 @@ private:
 		visible = false;
 
 		patch_save_dialog.show(base_group);
+	}
+
+	void save_last_opened_patch_in_settings() {
+		if (settings.initial_patch_vol != patches.get_view_patch_vol() ||
+			settings.initial_patch_name != patches.get_view_patch_filename())
+		{
+			settings.initial_patch_vol = patches.get_view_patch_vol();
+			settings.initial_patch_name = patches.get_view_patch_filename();
+			pr_info("Will set last_patch opened to %s on %d\n",
+					settings.initial_patch_name.c_str(),
+					settings.initial_patch_vol);
+
+			gui_state.do_write_settings = get_time();
+		}
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -266,6 +284,7 @@ private:
 			saveas_but_cb(event);
 		} else {
 			page->play_loader.request_save_patch();
+			page->save_last_opened_patch_in_settings();
 			page->filesystem_changed = true;
 			page->hide_menu();
 		}
@@ -335,6 +354,7 @@ private:
 	NotificationQueue &notify_queue;
 	PageList &page_list;
 	GuiState &gui_state;
+	UserSettings &settings;
 
 	PatchSaveDialog patch_save_dialog;
 	ConfirmPopup confirm_popup;
