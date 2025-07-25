@@ -310,35 +310,14 @@ struct PatchPlayLoader {
 	}
 
 	void set_all_param_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange) {
-		// if (exclude_buttons) {
-
-		// 	for (auto module_id = 0u; auto slug : patches_.get_view_patch()->module_slugs) {
-		// 		auto info = ModuleFactory::getModuleInfo(slug);
-
-		// 		for (unsigned i = 0; auto const &element : info.elements) {
-		// 			auto param_id = info.indices[i].param_idx;
-		// 			enum { Ignore, Enable, Disable };
-		// 			auto action = std::visit(overloaded{
-		// 										 [](Pot const &el) { return el.integral ? Disable : Enable; },
-		// 										 [](Switch const &el) { return Disable; },
-		// 										 [](Button const &el) { return Disable; },
-		// 										 [](ParamElement const &el) { return Enable; },
-		// 										 [](BaseElement const &el) { return Ignore; },
-		// 									 },
-		// 									 element);
-		// 			if (action == Enable)
-		// 				player_.set_catchup_mode(module_id, param_id, mode);
-		// 			else if (action == Disable)
-		// 				player_.set_catchup_mode(module_id, param_id, CatchupParam::Mode::ResumeOnMotion);
-
-		// 			i++;
-		// 		}
-		// 		module_id++;
-		// 	}
-
-		// } else {
 		player_.set_catchup_mode(mode, allow_jump_outofrange);
-		// }
+	}
+
+	void get_module_states() {
+		if (auto playing_patch = patches_.get_playing_patch()) {
+			playing_patch->module_states = player_.patch_query.get_module_states();
+			playing_patch->static_knobs = player_.patch_query.get_all_params();
+		}
 	}
 
 private:
@@ -372,8 +351,7 @@ private:
 		auto view_patch = patches_.get_view_patch();
 
 		if (view_patch && view_patch == patches_.get_playing_patch()) {
-			view_patch->module_states = player_.patch_query.get_module_states();
-			view_patch->static_knobs = player_.patch_query.get_all_params();
+			get_module_states();
 		}
 
 		std::span<char> filedata = storage_.get_patch_data();
