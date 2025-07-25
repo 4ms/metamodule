@@ -17,7 +17,11 @@ void ModuleViewPage::show_roller() {
 }
 
 void ModuleViewPage::populate_roller() {
-	// Populate Roller and highlighter buttons
+	size_t num_elements = moduleinfo.elements.size();
+	opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
+	element_highlights.reserve(num_elements);
+
+	// Populate Roller and element highlights
 	unsigned roller_idx = 0;
 	DrawnElement const *cur_el = nullptr;
 	ElementCount::Counts last_type{};
@@ -27,7 +31,7 @@ void ModuleViewPage::populate_roller() {
 
 		watch_element(drawn_element);
 
-		add_button(gui_el.obj);
+		add_element_highlight(gui_el.obj);
 
 		auto base = base_element(drawn_element.element);
 
@@ -101,16 +105,16 @@ void ModuleViewPage::populate_roller() {
 
 	lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
-	if (cur_selected > 0 && cur_selected < button.size()) {
-		if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < button.size()) {
-			if (lv_obj_get_height(button[idx]) > 100 || lv_obj_get_width(button[idx]) > 100) {
-				lv_obj_add_style(button[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+	if (cur_selected > 0 && cur_selected < element_highlights.size()) {
+		if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < element_highlights.size()) {
+			if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
+				lv_obj_add_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 			} else {
-				lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+				lv_obj_add_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 			}
 		}
 	} else {
-		pr_err("Current selected is not in range (%d/%zu)\n", cur_selected, button.size());
+		pr_err("Current selected is not in range (%d/%zu)\n", cur_selected, element_highlights.size());
 	}
 
 	/////////
@@ -124,8 +128,8 @@ void ModuleViewPage::populate_roller() {
 	}
 }
 
-void ModuleViewPage::add_button(lv_obj_t *obj) {
-	auto &b = button.emplace_back();
+void ModuleViewPage::add_element_highlight(lv_obj_t *obj) {
+	auto &b = element_highlights.emplace_back();
 	b = lv_btn_create(ui_ModuleImage);
 	lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 
@@ -152,26 +156,43 @@ void ModuleViewPage::add_button(lv_obj_t *obj) {
 
 void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
 	if (auto prev_idx = get_drawn_idx(prev_sel)) {
-		if (lv_obj_get_height(button[*prev_idx]) > 100 || lv_obj_get_width(button[*prev_idx]) > 100) {
-			lv_obj_remove_style(button[*prev_idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+		lv_obj_remove_style(element_highlights[*prev_idx], &Gui::panel_bright_highlight_style, LV_PART_MAIN);
+		if (lv_obj_get_height(element_highlights[*prev_idx]) > 100 ||
+			lv_obj_get_width(element_highlights[*prev_idx]) > 100)
+		{
+			lv_obj_remove_style(element_highlights[*prev_idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 		} else {
-			lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			lv_obj_remove_style(element_highlights[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
-		lv_event_send(button[*prev_idx], LV_EVENT_REFRESH, nullptr);
+		lv_obj_set_style_border_width(element_highlights[*prev_idx], 0, LV_PART_MAIN);
+		lv_event_send(element_highlights[*prev_idx], LV_EVENT_REFRESH, nullptr);
 	}
 }
 
 void ModuleViewPage::highlight_component(size_t idx) {
-	if (idx < button.size()) {
-
-		if (lv_obj_get_height(button[idx]) > 100 || lv_obj_get_width(button[idx]) > 100) {
-			lv_obj_add_style(button[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+	if (idx < element_highlights.size()) {
+		lv_obj_remove_style(element_highlights[idx], &Gui::panel_bright_highlight_style, LV_PART_MAIN);
+		if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
+			lv_obj_add_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 		} else {
-			lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			lv_obj_add_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
-		lv_event_send(button[idx], LV_EVENT_REFRESH, nullptr);
-		lv_obj_scroll_to_view(button[idx], LV_ANIM_ON);
+		lv_obj_set_style_border_width(element_highlights[idx], 0, LV_PART_MAIN);
+		lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
+		lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
 	}
+}
+
+void ModuleViewPage::outline_component(size_t idx) {
+	lv_obj_add_style(element_highlights[idx], &Gui::panel_bright_highlight_style, LV_PART_MAIN);
+	lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
+	lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
+}
+
+void ModuleViewPage::unoutline_component(size_t idx) {
+	lv_obj_remove_style(element_highlights[idx], &Gui::panel_bright_highlight_style, LV_PART_MAIN);
+	lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
+	lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
 }
 
 void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
@@ -227,8 +248,10 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 	// Save current select in args so we can navigate back to this item
 	page->args.element_indices = page->drawn_elements[cur_idx].gui_element.idx;
 
-	page->unhighlight_component(prev_sel);
-	page->highlight_component(cur_idx);
+	if (page->get_drawn_idx(prev_sel) != cur_idx) {
+		page->unhighlight_component(prev_sel);
+		page->highlight_component(cur_idx);
+	}
 
 	page->roller_hover.hide();
 }
@@ -305,6 +328,9 @@ void ModuleViewPage::manual_control_popup(DrawnElement const &drawn_element) {
 	args.element_indices = drawn_element.gui_element.idx;
 
 	if (is_patch_playloaded) {
+		if (auto drawn_idx = get_drawn_idx(cur_selected)) {
+			outline_component(*drawn_idx);
+		}
 		mapping_pane.show_control_popup(group, ui_ElementRollerPanel, drawn_element);
 	}
 }

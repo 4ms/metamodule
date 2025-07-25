@@ -36,8 +36,6 @@ void ModuleViewPage::redraw_module() {
 	reset_module_page();
 
 	size_t num_elements = moduleinfo.elements.size();
-	opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
-	button.reserve(num_elements);
 	drawn_elements.reserve(num_elements);
 
 	auto module_drawer = ModuleDrawer{.container = ui_ModuleImage, .height = 240};

@@ -38,7 +38,7 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
 
-		button.clear();
+		element_highlights.clear();
 
 		auto roller_label = lv_obj_get_child(ui_ElementRoller, 0);
 		lv_label_set_recolor(roller_label, true);
@@ -152,6 +152,9 @@ struct ModuleViewPage : PageBase {
 				module_context_menu.back_event();
 
 			} else if (mapping_pane.control_popup_visible()) {
+				if (auto drawn_idx = get_drawn_idx(cur_selected)) {
+					unoutline_component(*drawn_idx);
+				}
 				mapping_pane.hide_control_popup();
 
 			} else if (full_screen_mode) {
@@ -304,9 +307,9 @@ struct ModuleViewPage : PageBase {
 
 private:
 	void reset_module_page() {
-		for (auto &b : button)
+		for (auto &b : element_highlights)
 			lv_obj_del(b);
-		button.clear();
+		element_highlights.clear();
 
 		dyn_draw.blur();
 
@@ -365,9 +368,11 @@ private:
 	// Defined in module_view/element_roller.cc:
 	void show_roller();
 	void populate_roller();
-	void add_button(lv_obj_t *obj);
+	void add_element_highlight(lv_obj_t *obj);
 	void unhighlight_component(uint32_t prev_sel);
 	void highlight_component(size_t idx);
+	void outline_component(size_t idx);
+	void unoutline_component(size_t idx);
 	void focus_button_bar();
 	void click_cable_destination(unsigned drawn_idx);
 	void click_altparam_action(DrawnElement const &drawn_element);
@@ -410,7 +415,7 @@ private:
 
 	unsigned active_knobset = 0;
 
-	std::vector<lv_obj_t *> button;
+	std::vector<lv_obj_t *> element_highlights;
 	std::vector<DrawnElement> drawn_elements;
 	std::vector<int> roller_drawn_el_idx;
 
