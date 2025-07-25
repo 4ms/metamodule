@@ -301,7 +301,7 @@ void ModuleViewPage::click_altparam_action(DrawnElement const &drawn_element) {
 	}
 }
 
-void ModuleViewPage::click_altparam(DrawnElement const &drawn_element) {
+void ModuleViewPage::manual_control_popup(DrawnElement const &drawn_element) {
 	args.element_indices = drawn_element.gui_element.idx;
 
 	if (is_patch_playloaded) {
@@ -352,14 +352,16 @@ void ModuleViewPage::roller_click_cb(lv_event_t *event) {
 				   std::get_if<AltParamChoice>(&drawn_element.element) ||
 				   std::get_if<AltParamChoiceLabeled>(&drawn_element.element))
 		{
-			page->click_altparam(drawn_element);
+			page->manual_control_popup(drawn_element);
 
 		} else if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
 			page->click_graphic_display(drawn_element, el);
 
-			// } else if (page->full_screen_mode) {
-			// TODO: sometimes open manual popup immediately. (alt params, performance mode)
-			// sometimes keep it hidden, but act as if it were open (full screen mode, performance mode with buttons)
+		} else if (page->full_screen_mode && !std::get_if<JackInput>(&drawn_element.element) &&
+				   !std::get_if<JackOutput>(&drawn_element.element))
+		{
+			// Allow immediate manual control in full-screen mode (popup is hidden but still works)
+			page->manual_control_popup(drawn_element);
 
 		} else {
 			page->click_normal_element(drawn_element);

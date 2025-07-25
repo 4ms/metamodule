@@ -151,12 +151,12 @@ struct ModuleViewPage : PageBase {
 			} else if (mode == ViewMode::ModuleContextMenu) {
 				module_context_menu.back_event();
 
+			} else if (mapping_pane.control_popup_visible()) {
+				mapping_pane.hide_control_popup();
+
 			} else if (full_screen_mode) {
 				full_screen_mode = false;
 				resize_module_image(190);
-
-			} else if (mapping_pane.control_popup_visible()) {
-				mapping_pane.hide_control_popup();
 
 			} else if (mode == ViewMode::List) {
 				args.module_id = this_module_id;
@@ -371,7 +371,7 @@ private:
 	void focus_button_bar();
 	void click_cable_destination(unsigned drawn_idx);
 	void click_altparam_action(DrawnElement const &drawn_element);
-	void click_altparam(DrawnElement const &drawn_element);
+	void manual_control_popup(DrawnElement const &drawn_element);
 	void send_param_value(float value, GuiElement const &gui_element);
 	void click_graphic_display(DrawnElement const &drawn_element, DynamicGraphicDisplay const *el);
 	void click_normal_element(DrawnElement const &drawn_element);
