@@ -101,7 +101,9 @@ private:
 				notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
 			}
 
-		} else { //Duplicate
+		} else if (action == Action::Duplicate) {
+			// update module state for current patch
+			patch_playloader.get_module_states();
 			if (patches.duplicate_view_patch(fullpath, file_vol)) {
 				patches.get_view_patch()->patch_name = patchname;
 				patch_playloader.request_save_patch();
