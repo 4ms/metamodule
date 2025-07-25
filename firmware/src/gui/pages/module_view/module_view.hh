@@ -362,6 +362,12 @@ private:
 
 		page->resize_module_image(320);
 		lv_obj_scroll_to_x(ui_ModuleImage, 0, LV_ANIM_ON);
+
+		page->cur_selected = 1;
+		lv_group_focus_obj(ui_ElementRoller);
+		lv_roller_set_selected(ui_ElementRoller, page->cur_selected, LV_ANIM_OFF);
+		lv_event_send(ui_ElementRoller, LV_EVENT_SCROLL, nullptr);
+
 		page->full_screen_mode = true;
 	}
 
@@ -443,7 +449,7 @@ private:
 
 	std::optional<GuiElement> pending_action_param_clear{};
 
-	enum { ContextMenuTag = -2 };
+	enum { RollerHeaderTag = -1, ContextMenuTag = -2 };
 };
 
 } // namespace MetaModule

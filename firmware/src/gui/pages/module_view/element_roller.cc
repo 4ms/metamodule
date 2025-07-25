@@ -48,7 +48,7 @@ void ModuleViewPage::populate_roller() {
 
 		if (ModView::append_header(opts, last_type, gui_el.count)) {
 			roller_idx++;
-			roller_drawn_el_idx.push_back(-1);
+			roller_drawn_el_idx.push_back(RollerHeaderTag);
 		}
 		last_type = gui_el.count;
 
@@ -80,7 +80,7 @@ void ModuleViewPage::populate_roller() {
 		if (has_context_menu) {
 			opts += Gui::orange_text("Options:") + "\n";
 			opts += " >>>\n";
-			roller_drawn_el_idx.push_back(-1);
+			roller_drawn_el_idx.push_back(RollerHeaderTag);
 			roller_drawn_el_idx.push_back(ContextMenuTag);
 			roller_idx += 2;
 		}
@@ -216,7 +216,7 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 	}
 
 	// Skip over headers by scrolling over them in the same direction we just scrolled
-	if (cur_idx == -1) {
+	if (cur_idx == RollerHeaderTag) {
 		if (prev_sel < cur_sel) {
 			if (cur_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
 				cur_sel++;
@@ -235,7 +235,7 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 				return;
 			} else {
 				// stay on the first item in the roller
-				return;
+				cur_sel = 1;
 			}
 		}
 		// cur_sel changed, so we need to update the roller position and our drawn_el idx
