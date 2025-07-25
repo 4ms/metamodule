@@ -207,14 +207,6 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 	auto prev_sel = page->cur_selected;
 	auto cur_idx = page->roller_drawn_el_idx[cur_sel];
 
-	// Extra menu:
-	if (cur_idx == ContextMenuTag) {
-		page->unhighlight_component(prev_sel);
-		page->cur_selected = cur_sel;
-		page->roller_hover.hide();
-		return;
-	}
-
 	// Skip over headers by scrolling over them in the same direction we just scrolled
 	if (cur_idx == RollerHeaderTag) {
 		if (prev_sel < cur_sel) {
@@ -241,6 +233,20 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 		// cur_sel changed, so we need to update the roller position and our drawn_el idx
 		lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_ON);
 		cur_idx = page->roller_drawn_el_idx[cur_sel];
+	}
+
+	// Context menu:
+	if (cur_idx == ContextMenuTag) {
+		if (page->full_screen_mode) {
+			// Not allowed in full screen mode: go back to previous item
+			cur_sel = prev_sel;
+			lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_ON);
+		} else {
+			page->unhighlight_component(prev_sel);
+			page->cur_selected = cur_sel;
+			page->roller_hover.hide();
+		}
+		return;
 	}
 
 	page->cur_selected = cur_sel;
