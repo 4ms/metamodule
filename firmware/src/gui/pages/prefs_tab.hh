@@ -14,20 +14,15 @@ namespace MetaModule
 {
 
 struct PrefsTab : SystemMenuTab {
-	PrefsTab(PatchPlayLoader &patch_playloader,
-			 AudioSettings &audio_settings,
-			 ScreensaverSettings &screensaver,
-			 CatchupSettings &catchup,
-			 FilesystemSettings &fs,
-			 MidiSettings &midi,
-			 GuiState &gui_state)
+	PrefsTab(PatchPlayLoader &patch_playloader, UserSettings &settings, GuiState &gui_state)
 		: patch_playloader{patch_playloader}
-		, audio_settings{audio_settings}
-		, screensaver{screensaver}
-		, catchup{catchup}
+		, audio_settings{settings.audio}
+		, screensaver{settings.screensaver}
+		, catchup{settings.catchup}
 		, gui_state{gui_state}
-		, fs{fs}
-		, midi{midi} {
+		, fs{settings.filesystem}
+		, midi{settings.midi}
+		, settings{settings} {
 		init_SystemPrefsCatchupPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsFSPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsMidiPane(ui_SystemMenuPrefsTab);
@@ -42,6 +37,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupModeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_SystemPrefsFSStartupPatchCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsMidiFeedbackCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
@@ -52,6 +48,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsScreensaverKnobsCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupModeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
+		lv_obj_add_event_cb(ui_SystemPrefsFSStartupPatchCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsMidiFeedbackCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 
@@ -109,6 +106,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_remove_obj(ui_SystemPrefsScreensaverKnobsCheck);
 		lv_group_remove_obj(ui_SystemPrefsCatchupModeDropdown);
 		lv_group_remove_obj(ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck);
+		lv_group_remove_obj(ui_SystemPrefsFSStartupPatchCheck);
 		lv_group_remove_obj(ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_remove_obj(ui_SystemPrefsMidiFeedbackCheck);
 
@@ -122,6 +120,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverKnobsCheck);
 		lv_group_add_obj(group, ui_SystemPrefsCatchupModeDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsCatchupAllowJumpOutOfRangeCheck);
+		lv_group_add_obj(group, ui_SystemPrefsFSStartupPatchCheck);
 		lv_group_add_obj(group, ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsMidiFeedbackCheck);
 
@@ -137,6 +136,10 @@ struct PrefsTab : SystemMenuTab {
 
 		lv_group_focus_obj(ui_SystemPrefsAudioSampleRateDropdown);
 		lv_group_set_editing(group, true);
+
+		std::string startup_patch =
+			std::string{volume_string(settings.initial_patch_vol)} + settings.initial_patch_name;
+		lv_label_set_text(ui_SystemPrefsFSStartupPatchName, startup_patch.c_str());
 
 		lv_show(ui_SystemPrefsCatchupAllowJumpOutofRangeCont);
 
@@ -183,6 +186,8 @@ private:
 		auto maxpatches_item = get_index(std::array{2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25},
 										 [this](uint32_t t) { return t == fs.max_open_patches; });
 		lv_dropdown_set_selected(ui_SystemPrefsFSMaxPatchesDropdown, maxpatches_item >= 0 ? maxpatches_item : 3);
+
+		lv_check(ui_SystemPrefsFSStartupPatchCheck, settings.load_initial_patch);
 
 		lv_show(ui_SystemPrefsCatchupAllowJumpOutofRangeCont, catchup.mode == CatchupParam::Mode::ResumeOnEqual);
 
@@ -297,6 +302,11 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		if (settings.load_initial_patch != lv_obj_has_state(ui_SystemPrefsFSStartupPatchCheck, LV_STATE_CHECKED)) {
+			settings.load_initial_patch = lv_obj_has_state(ui_SystemPrefsFSStartupPatchCheck, LV_STATE_CHECKED);
+			gui_state.do_write_settings = true;
+		}
+
 		auto max_open_patches = read_fs_max_open_patches();
 
 		if (fs.max_open_patches != max_open_patches) {
@@ -391,12 +401,14 @@ private:
 		auto catchup_exclude_buttons = page->read_catchup_exclude_check();
 		auto fs_max_patches = page->read_fs_max_open_patches();
 		auto midi_feedback = page->read_midi_feedback_check();
+		auto load_initial_patch = lv_obj_has_state(ui_SystemPrefsFSStartupPatchCheck, LV_STATE_CHECKED);
 
 		if (block_size == page->audio_settings.block_size && sample_rate == page->audio_settings.sample_rate &&
 			overrun_retries == page->audio_settings.max_overrun_retries && timeout == page->screensaver.timeout_ms &&
 			knobwake == page->screensaver.knobs_can_wake && catchupmode == page->catchup.mode &&
 			catchup_exclude_buttons == page->catchup.allow_jump_outofrange &&
-			fs_max_patches == page->fs.max_open_patches && midi_feedback == page->midi.midi_feedback)
+			load_initial_patch == page->settings.load_initial_patch && fs_max_patches == page->fs.max_open_patches &&
+			midi_feedback == page->midi.midi_feedback)
 		{
 			lv_disable(ui_SystemPrefsSaveButton);
 			lv_disable(ui_SystemPrefsRevertButton);
@@ -432,6 +444,7 @@ private:
 	GuiState &gui_state;
 	FilesystemSettings &fs;
 	MidiSettings &midi;
+	UserSettings &settings;
 
 	lv_group_t *group = nullptr;
 };

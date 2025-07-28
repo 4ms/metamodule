@@ -6,6 +6,7 @@
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
@@ -42,14 +43,19 @@ struct PatchViewFileMenu {
 		lv_obj_add_event_cb(ui_PatchFileDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileRevertBut, revert_but_cb, LV_EVENT_CLICKED, this);
 
+		make_default_patch_menu = create_file_menu_item(ui_PatchFileMenu, "Startup patch");
+		lv_obj_move_to_index(make_default_patch_menu, 6);
+		lv_obj_add_event_cb(make_default_patch_menu, make_startup_patch, LV_EVENT_CLICKED, this);
+
 		lv_group_add_obj(group, ui_PatchFileMenuCloseButton);
 		lv_group_add_obj(group, ui_PatchFileSaveBut);
 		lv_group_add_obj(group, ui_PatchFileDuplicateBut);
 		lv_group_add_obj(group, ui_PatchFileRenameBut);
 		lv_group_add_obj(group, ui_PatchFileRevertBut);
+		lv_group_add_obj(group, make_default_patch_menu);
 		lv_group_add_obj(group, ui_PatchFileDeleteBut);
 
-		lv_obj_set_width(ui_PatchFileMenu, 126);
+		lv_obj_set_width(ui_PatchFileMenu, 140);
 		lv_label_set_text(ui_PatchFileRenameLabel, "Move/Rename");
 	}
 
@@ -96,12 +102,19 @@ struct PatchViewFileMenu {
 			lv_disable(ui_PatchFileDuplicateBut);
 			lv_disable(ui_PatchFileRenameBut);
 			lv_enable(ui_PatchFileDeleteBut);
+			lv_label_set_text(lv_obj_get_child(make_default_patch_menu, 0), "Startup Patch");
 		} else {
 			lv_group_focus_obj(ui_PatchFileSaveBut);
 			lv_enable(ui_PatchFileDuplicateBut);
 			lv_enable(ui_PatchFileRenameBut);
 			lv_enable(ui_PatchFileDeleteBut);
 			lv_enable(ui_PatchFileRevertBut);
+
+			if (is_viewpatch_default()) {
+				lv_label_set_text(lv_obj_get_child(make_default_patch_menu, 0), "\xEF\x80\x8C Startup Patch");
+			} else {
+				lv_label_set_text(lv_obj_get_child(make_default_patch_menu, 0), "Startup Patch");
+			}
 
 			lv_label_set_text(ui_PatchFileRevertLabel,
 							  patches.get_view_patch_modification_count() == 0 ? "Reload" : "Revert");
@@ -229,7 +242,7 @@ struct PatchViewFileMenu {
 	bool did_filesystem_change() {
 		bool result = patch_save_dialog.did_save();
 		if (result)
-			save_last_opened_patch_in_settings();
+			make_viewpatch_default();
 		result |= filesystem_changed;
 		filesystem_changed = false;
 		return result;
@@ -240,24 +253,32 @@ private:
 		current_action = method;
 		patch_save_dialog.prepare_focus(method);
 
-		lv_obj_set_x(ui_PatchFileMenu, 220);
+		lv_obj_set_x(ui_PatchFileMenu, 200);
 		visible = false;
 
 		patch_save_dialog.show(base_group);
 	}
 
-	void save_last_opened_patch_in_settings() {
-		if (settings.initial_patch_vol != patches.get_view_patch_vol() ||
-			settings.initial_patch_name != patches.get_view_patch_filename())
-		{
+	bool is_viewpatch_default() {
+		return (settings.load_initial_patch == true && settings.initial_patch_vol == patches.get_view_patch_vol() &&
+				settings.initial_patch_name == patches.get_view_patch_filename());
+	}
+
+	bool make_viewpatch_default() {
+		if (!is_viewpatch_default()) {
+			settings.load_initial_patch = true;
 			settings.initial_patch_vol = patches.get_view_patch_vol();
 			settings.initial_patch_name = patches.get_view_patch_filename();
+
 			pr_info("Will set last_patch opened to %s on %d\n",
 					settings.initial_patch_name.c_str(),
 					settings.initial_patch_vol);
 
 			gui_state.do_write_settings = get_time();
-		}
+			return true;
+		} else
+			// already is the default
+			return false;
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -284,7 +305,7 @@ private:
 			saveas_but_cb(event);
 		} else {
 			page->play_loader.request_save_patch();
-			page->save_last_opened_patch_in_settings();
+			// page->make_viewpatch_default();
 			page->filesystem_changed = true;
 			page->hide_menu();
 		}
@@ -348,6 +369,20 @@ private:
 			"Revert");
 	}
 
+	static void make_startup_patch(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+
+		if (page->make_viewpatch_default()) {
+			lv_label_set_text(lv_obj_get_child(page->make_default_patch_menu, 0), "\xEF\x80\x8C Startup Patch");
+		} else {
+			page->settings.load_initial_patch = false;
+			page->gui_state.do_write_settings = true;
+			lv_label_set_text(lv_obj_get_child(page->make_default_patch_menu, 0), "Startup Patch");
+		}
+	}
+
 	PatchPlayLoader &play_loader;
 	FileStorageProxy &patch_storage;
 	OpenPatchManager &patches;
@@ -358,6 +393,8 @@ private:
 
 	PatchSaveDialog patch_save_dialog;
 	ConfirmPopup confirm_popup;
+
+	lv_obj_t *make_default_patch_menu = nullptr;
 
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;

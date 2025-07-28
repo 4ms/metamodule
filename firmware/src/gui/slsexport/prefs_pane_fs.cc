@@ -9,8 +9,14 @@ lv_obj_t *ui_SystemPrefsFSMaxPatchesCont;
 lv_obj_t *ui_SystemPrefsFSMaxPatchesLabel;
 lv_obj_t *ui_SystemPrefsFSMaxPatchesDropdown;
 
+lv_obj_t *ui_SystemPrefsFSStartupPatchCont;
+lv_obj_t *ui_SystemPrefsFSStartupPatchLabel;
+lv_obj_t *ui_SystemPrefsFSStartupPatchCheck;
+lv_obj_t *ui_SystemPrefsFSStartupPatchName;
+
 void init_SystemPrefsFSPane(lv_obj_t *parentTab) {
 
+	// Header
 	ui_SystemPrefsFSTitle = lv_label_create(parentTab);
 	lv_obj_set_width(ui_SystemPrefsFSTitle, lv_pct(100));
 	lv_obj_set_height(ui_SystemPrefsFSTitle, LV_SIZE_CONTENT);
@@ -27,6 +33,86 @@ void init_SystemPrefsFSPane(lv_obj_t *parentTab) {
 	lv_obj_set_style_pad_right(ui_SystemPrefsFSTitle, 0, LV_PART_MAIN);
 	lv_obj_set_style_pad_top(ui_SystemPrefsFSTitle, 6, LV_PART_MAIN);
 	lv_obj_set_style_pad_bottom(ui_SystemPrefsFSTitle, 2, LV_PART_MAIN);
+
+	// Startup Patch
+	ui_SystemPrefsFSStartupPatchCont = lv_obj_create(parentTab);
+	lv_obj_remove_style_all(ui_SystemPrefsFSStartupPatchCont);
+	lv_obj_set_width(ui_SystemPrefsFSStartupPatchCont, lv_pct(100));
+	lv_obj_set_height(ui_SystemPrefsFSStartupPatchCont, LV_SIZE_CONTENT);
+	lv_obj_set_align(ui_SystemPrefsFSStartupPatchCont, LV_ALIGN_CENTER);
+	lv_obj_set_flex_flow(ui_SystemPrefsFSStartupPatchCont, LV_FLEX_FLOW_ROW);
+	lv_obj_set_flex_align(
+		ui_SystemPrefsFSStartupPatchCont, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+	lv_obj_clear_flag(ui_SystemPrefsFSStartupPatchCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+	lv_obj_set_style_pad_left(ui_SystemPrefsFSStartupPatchCont, 2, LV_PART_MAIN);
+	lv_obj_set_style_pad_right(ui_SystemPrefsFSStartupPatchCont, 4, LV_PART_MAIN);
+	lv_obj_set_style_pad_top(ui_SystemPrefsFSStartupPatchCont, 4, LV_PART_MAIN);
+	lv_obj_set_style_pad_bottom(ui_SystemPrefsFSStartupPatchCont, 4, LV_PART_MAIN);
+
+	ui_SystemPrefsFSStartupPatchLabel = lv_label_create(ui_SystemPrefsFSStartupPatchCont);
+	lv_obj_set_width(ui_SystemPrefsFSStartupPatchLabel, LV_SIZE_CONTENT);
+	lv_obj_set_height(ui_SystemPrefsFSStartupPatchLabel, LV_SIZE_CONTENT);
+	lv_obj_set_align(ui_SystemPrefsFSStartupPatchLabel, LV_ALIGN_CENTER);
+	lv_label_set_text(ui_SystemPrefsFSStartupPatchLabel, "Start Patch:");
+	lv_obj_set_style_text_font(ui_SystemPrefsFSStartupPatchLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN);
+
+	ui_SystemPrefsFSStartupPatchCheck = lv_switch_create(ui_SystemPrefsFSStartupPatchCont);
+	lv_obj_set_width(ui_SystemPrefsFSStartupPatchCheck, 35);
+	lv_obj_set_height(ui_SystemPrefsFSStartupPatchCheck, 20);
+	lv_obj_set_align(ui_SystemPrefsFSStartupPatchCheck, LV_ALIGN_TOP_RIGHT);
+	lv_obj_add_flag(ui_SystemPrefsFSStartupPatchCheck, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+	lv_obj_clear_flag(ui_SystemPrefsFSStartupPatchCheck,
+					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
+						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
+	lv_obj_set_style_radius(ui_SystemPrefsFSStartupPatchCheck, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(
+		ui_SystemPrefsFSStartupPatchCheck, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui_SystemPrefsFSStartupPatchCheck, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_color(
+		ui_SystemPrefsFSStartupPatchCheck, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_opa(ui_SystemPrefsFSStartupPatchCheck, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_width(ui_SystemPrefsFSStartupPatchCheck, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_pad(ui_SystemPrefsFSStartupPatchCheck, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_color(
+		ui_SystemPrefsFSStartupPatchCheck, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_opa(ui_SystemPrefsFSStartupPatchCheck, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_width(ui_SystemPrefsFSStartupPatchCheck, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_pad(ui_SystemPrefsFSStartupPatchCheck, 1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+
+	lv_obj_set_style_bg_color(
+		ui_SystemPrefsFSStartupPatchCheck, lv_color_hex(0x4067D3), LV_PART_INDICATOR | LV_STATE_CHECKED);
+	lv_obj_set_style_bg_opa(ui_SystemPrefsFSStartupPatchCheck, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
+
+	lv_obj_set_style_bg_color(
+		ui_SystemPrefsFSStartupPatchCheck, lv_color_hex(0xFFFFFF), LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui_SystemPrefsFSStartupPatchCheck, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui_SystemPrefsFSStartupPatchCheck, -4, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui_SystemPrefsFSStartupPatchCheck, -6, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui_SystemPrefsFSStartupPatchCheck, -5, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui_SystemPrefsFSStartupPatchCheck, -5, LV_PART_KNOB | LV_STATE_DEFAULT);
+
+	ui_SystemPrefsFSStartupPatchName = lv_label_create(ui_SystemPrefsFSStartupPatchCont);
+	lv_obj_set_height(ui_SystemPrefsFSStartupPatchName, LV_SIZE_CONTENT);
+	lv_obj_set_width(ui_SystemPrefsFSStartupPatchName, LV_SIZE_CONTENT);
+	lv_obj_add_flag(ui_SystemPrefsFSStartupPatchName, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+
+	lv_label_set_text(ui_SystemPrefsFSStartupPatchName, "");
+	lv_obj_set_style_text_color(ui_SystemPrefsFSStartupPatchName, lv_color_hex(0xBBBBBB), LV_PART_MAIN);
+	lv_obj_set_style_text_opa(ui_SystemPrefsFSStartupPatchName, 255, LV_PART_MAIN);
+	lv_obj_set_style_text_font(ui_SystemPrefsFSStartupPatchName, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+	lv_obj_set_style_border_width(ui_SystemPrefsFSStartupPatchName, 0, LV_PART_MAIN);
+	lv_obj_set_style_pad_left(ui_SystemPrefsFSStartupPatchName, 0, LV_PART_MAIN);
+	lv_obj_set_style_pad_right(ui_SystemPrefsFSStartupPatchName, 0, LV_PART_MAIN);
+	lv_obj_set_style_pad_top(ui_SystemPrefsFSStartupPatchName, 0, LV_PART_MAIN);
+	lv_obj_set_style_pad_bottom(ui_SystemPrefsFSStartupPatchName, 0, LV_PART_MAIN);
+
+	lv_obj_t *spacer2 = lv_obj_create(ui_SystemPrefsFSStartupPatchCont);
+	lv_obj_set_size(spacer2, 1, 1);
+	lv_obj_set_style_bg_opa(spacer2, LV_OPA_0, LV_PART_MAIN);
+	lv_obj_set_style_border_opa(spacer2, LV_OPA_0, LV_PART_MAIN);
+	lv_obj_set_style_outline_opa(spacer2, LV_OPA_0, LV_PART_MAIN);
+
+	// Max Open Patches:
 
 	ui_SystemPrefsFSMaxPatchesCont = lv_obj_create(parentTab);
 	lv_obj_remove_style_all(ui_SystemPrefsFSMaxPatchesCont);
