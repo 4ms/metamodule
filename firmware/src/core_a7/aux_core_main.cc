@@ -14,6 +14,7 @@
 #include "internal_plugin_manager.hh"
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
+#include "system/print_time.hh"
 
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
@@ -87,6 +88,7 @@ extern "C" void aux_core_main() {
 
 	// Signal that we're ready
 	printf("A7 Core 2 initialized\n");
+	print_time();
 
 	HWSemaphore<AuxCoreReady>::unlock();
 

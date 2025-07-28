@@ -112,8 +112,6 @@ int main() {
 
 	audio.start();
 
-	print_time();
-
 	while (true) {
 		__NOP();
 
