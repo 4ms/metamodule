@@ -3,6 +3,7 @@
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "util/fixed_vector.hh"
+#include <atomic>
 #include <optional>
 
 namespace MetaModule
@@ -17,6 +18,8 @@ static FixedVector<Async::Task, MAX_TASKS> tasks;
 
 mdrivlib::Timekeeper async_task_core0;
 mdrivlib::Timekeeper async_task_core1;
+
+std::array<std::atomic<bool>, 2> is_paused = {false, false};
 
 uint32_t core() {
 	uint32_t raw = __get_MPIDR();
@@ -90,12 +93,15 @@ void start_module_threads() {
 		// else
 		// 	Debug::Pin1::low();
 
-		task_runner.resume();
+		if (!is_paused[current_core])
+			task_runner.resume();
 	});
 	task_runner.start();
 }
 
 void pause_module_threads() {
+	is_paused[0] = true;
+	is_paused[1] = true;
 	pause_module_threads(0);
 	pause_module_threads(1);
 }
@@ -106,6 +112,8 @@ void pause_module_threads(unsigned core_id) {
 }
 
 void resume_module_threads() {
+	is_paused[0] = false;
+	is_paused[1] = false;
 	resume_module_threads(0);
 	resume_module_threads(1);
 }
