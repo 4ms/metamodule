@@ -28,7 +28,7 @@ struct ModuleViewPage : PageBase {
 		, page_settings{settings.module_view}
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
-		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state, patch_playloader}
+		, mapping_pane{patches, module_mods, params, metaparams, args, page_list, notify_queue, gui_state, patch_playloader}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
 		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
 		, module_context_menu{patch_playloader}
@@ -217,15 +217,16 @@ struct ModuleViewPage : PageBase {
 			}
 			last_type = gui_el.count;
 
-			opts.append(" ");
-			// Display up to the first newline (if any)
-			opts.append(base.short_name.substr(0, base.short_name.find_first_of("\0\n")));
-
+			// Show mapped values first, then parameter name
 			if (gui_el.mapped_panel_id) {
 				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
 			}
 
 			append_connected_jack_name(opts, gui_el.idx, gui_el.module_idx, *patch);
+			
+			// Add separator and parameter name
+			opts.append(" ");
+			opts.append(base.short_name.substr(0, base.short_name.find_first_of("\0\n")));
 
 			opts += "\n";
 			roller_drawn_el_idx.push_back(drawn_el_idx);
@@ -356,6 +357,11 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		// Only check for quick assign when in main list view (not when mapping pane or menus are open)
+		if (mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible()) {
+			handle_quick_assign();
+		}
+		
 		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
@@ -417,9 +423,16 @@ struct ModuleViewPage : PageBase {
 			redraw_elements();
 		}
 
-		if (handle_patch_mods()) {
+		bool had_patch_mods = handle_patch_mods();
+		if (had_patch_mods) {
 			redraw_module();
 			mapping_pane.refresh();
+		}
+		
+		// Always update mapping rings when encoder is pressed to ensure
+		// immediate visual feedback during quick assign operations
+		if (metaparams.rotary_button.is_pressed()) {
+			update_map_ring_style();
 		}
 
 		roller_hover.update();
@@ -617,6 +630,7 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
+		
 		if (cur_sel >= page->roller_drawn_el_idx.size()) {
 			page->roller_hover.hide();
 			return;
@@ -665,6 +679,7 @@ private:
 
 		// Save current select in args so we can navigate back to this item
 		page->args.element_indices = page->drawn_elements[cur_idx].gui_element.idx;
+
 
 		page->unhighlight_component(prev_sel);
 		page->highlight_component(cur_idx);
@@ -913,6 +928,158 @@ private:
 	bool full_screen_mode = false;
 
 	enum { ContextMenuTag = -2 };
+
+	// Quick assign state
+	uint16_t selected_input_port = 0;
+	uint16_t selected_output_port = 0;
+
+	void handle_quick_assign() {
+		// Get the currently highlighted element
+		const DrawnElement *current_element = get_highlighted_element();
+		
+		if (!current_element) {
+			return;
+		}
+		
+		// Check for all parameter types (not just ParamElement)
+		bool is_param = std::holds_alternative<ParamElement>(current_element->element) ||
+		                std::holds_alternative<Knob>(current_element->element) ||
+		                std::holds_alternative<Slider>(current_element->element) ||
+		                std::holds_alternative<SliderLight>(current_element->element) ||
+		                std::holds_alternative<FlipSwitch>(current_element->element) ||
+		                std::holds_alternative<SlideSwitch>(current_element->element) ||
+		                std::holds_alternative<MomentaryButton>(current_element->element) ||
+		                std::holds_alternative<MomentaryButtonLight>(current_element->element) ||
+		                std::holds_alternative<MomentaryButtonRGB>(current_element->element) ||
+		                std::holds_alternative<LatchingButton>(current_element->element) ||
+		                std::holds_alternative<Encoder>(current_element->element) ||
+		                std::holds_alternative<EncoderRGB>(current_element->element) ||
+		                std::holds_alternative<AltParamContinuous>(current_element->element) ||
+		                std::holds_alternative<AltParamChoice>(current_element->element) ||
+		                std::holds_alternative<AltParamChoiceLabeled>(current_element->element) ||
+		                std::holds_alternative<KnobSnapped>(current_element->element);
+		                
+		bool is_input_jack = std::holds_alternative<JackInput>(current_element->element);
+		bool is_output_jack = std::holds_alternative<JackOutput>(current_element->element);
+		
+		bool is_jack = is_input_jack || is_output_jack;
+		
+		if (!is_param && !is_jack) {
+			return;
+		}
+		
+		// Detect encoder button press
+		bool encoder_is_pressed = metaparams.rotary_button.is_pressed();
+		
+		if (encoder_is_pressed) {
+			// Parameter quick assign: hold encoder + wiggle knob
+			if (is_param) {
+				for (unsigned i = 0; auto &knob : params.knobs) {
+					if (knob.did_change()) {
+						perform_quick_assign(i, current_element);
+						return;
+					}
+					i++;
+				}
+			}
+			
+			// Jack quick assign: hold encoder + turn encoder
+			if (is_jack) {
+				if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
+					if (is_input_jack) {
+						cycle_input_port_selection(motion);
+						perform_input_jack_assign(current_element);
+					}
+					// TODO: output jack quick assign
+					return;
+				}
+			}
+		}
+	}
+
+	const DrawnElement* get_highlighted_element() {
+		if (auto drawn_idx = get_drawn_idx(cur_selected)) {
+			return &drawn_elements[*drawn_idx];
+		}
+		return nullptr;
+	}
+
+	void perform_quick_assign(uint16_t knob_id, const DrawnElement *element) {
+		if (!element) {
+			return;
+		}
+
+		// Determine which knobset to assign to (use currently active knobset)
+		uint32_t target_knobset = page_list.get_active_knobset();
+		
+		uint16_t module_id = (uint16_t)element->gui_element.module_idx;
+		uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
+		
+		// Remove ALL existing knob mappings for this parameter in this knobset (non-MIDI)
+		if (target_knobset != PatchData::MIDIKnobSet && target_knobset < patch->knob_sets.size()) {
+			auto &knobset = patch->knob_sets[target_knobset];
+			
+			// Iterate through all mappings in this knobset
+			for (const auto &mapping : knobset.set) {
+				// If this mapping is for our parameter, queue it for removal
+				if (mapping.module_id == module_id && mapping.param_id == param_id) {
+					module_mods.put(RemoveMapping{.map = mapping, .set_id = target_knobset});
+				}
+			}
+		}
+
+		// Create the new mapping
+		auto map = MappedKnob{
+			.panel_knob_id = knob_id,
+			.module_id = module_id,
+			.param_id = param_id,
+			.min = 0.f,
+			.max = 1.f,
+		};
+
+		// Queue the modification - this will be processed by handle_patch_mods() which will
+		// update the patch data and call refresh() automatically
+		module_mods.put(AddMapping{.map = map, .set_id = target_knobset});
+	}
+
+	void cycle_input_port_selection(int motion) {
+		// Get total number of input ports (main panel + expander if connected)
+		unsigned total_inputs = PanelDef::NumUserFacingInJacks;
+		if (Expanders::get_connected().ext_audio_connected) {
+			total_inputs += AudioExpander::NumInJacks;
+		}
+		
+		// Apply motion with wrapping
+		if (motion > 0) {
+			selected_input_port = (selected_input_port + 1) % total_inputs;
+		} else {
+			selected_input_port = (selected_input_port + total_inputs - 1) % total_inputs;
+		}
+	}
+
+	void perform_input_jack_assign(const DrawnElement *element) {
+		if (!element) {
+			return;
+		}
+
+		// Create the jack mapping
+		Jack module_jack = {
+			.module_id = (uint16_t)element->gui_element.module_idx,
+			.jack_id = (uint16_t)element->gui_element.idx.input_idx
+		};
+
+		module_mods.put(DisconnectJack{.jack = module_jack, .type = ElementType::Input});
+
+		AddJackMapping mapping{
+			.panel_jack_id = selected_input_port,
+			.jack = module_jack,
+			.type = ElementType::Input
+		};
+
+		// Queue the modification - this will be processed by handle_patch_mods() which will
+		// update the patch data and call refresh() automatically
+		module_mods.put(mapping);
+	}
 };
 
 } // namespace MetaModule

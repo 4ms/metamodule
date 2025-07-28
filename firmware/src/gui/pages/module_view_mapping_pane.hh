@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements_index.hh"
+#include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/gui_state.hh"
@@ -15,6 +16,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "params/expanders.hh"
 #include "params/params_state.hh"
+#include <cmath>
 
 namespace MetaModule
 {
@@ -35,6 +37,7 @@ struct ModuleViewMappingPane {
 	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
 						  ParamsMidiState &params,
+						  MetaParams &metaparams,
 						  PageArguments &args,
 						  PageList &page_list,
 						  NotificationQueue &notify_queue,
@@ -43,6 +46,7 @@ struct ModuleViewMappingPane {
 		: pane_group(lv_group_create())
 		, patch{patches.get_view_patch()}
 		, params{params}
+		, metaparams{metaparams}
 		, args{args}
 		, page_list{page_list}
 		, notify_queue{notify_queue}
@@ -226,6 +230,8 @@ private:
 		}
 		map_list_items.clear();
 	}
+
+
 
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_CableAddButton);
@@ -768,6 +774,7 @@ private:
 	bool should_close = false;
 	PatchData *patch;
 	ParamsMidiState &params;
+	MetaParams &metaparams;
 
 	PageArguments &args;
 	PageList &page_list;
