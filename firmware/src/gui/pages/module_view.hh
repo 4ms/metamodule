@@ -357,11 +357,6 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		// Only check for quick assign when in main list view (not when mapping pane or menus are open)
-		if (mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible()) {
-			handle_quick_assign();
-		}
-		
 		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
@@ -423,16 +418,9 @@ struct ModuleViewPage : PageBase {
 			redraw_elements();
 		}
 
-		bool had_patch_mods = handle_patch_mods();
-		if (had_patch_mods) {
+		if (handle_patch_mods()) {
 			redraw_module();
 			mapping_pane.refresh();
-		}
-		
-		// Always update mapping rings when encoder is pressed to ensure
-		// immediate visual feedback during quick assign operations
-		if (metaparams.rotary_button.is_pressed()) {
-			update_map_ring_style();
 		}
 
 		roller_hover.update();
@@ -443,6 +431,10 @@ struct ModuleViewPage : PageBase {
 			lv_group_get_focused(group) == ui_ModuleViewHideBut)
 		{
 			roller_hover.hide();
+		}
+
+		if (mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible()) {
+			handle_quick_assign();
 		}
 	}
 
@@ -994,6 +986,11 @@ private:
 					return;
 				}
 			}
+		}
+
+		if (handle_patch_mods()) {
+			redraw_module();
+			mapping_pane.refresh();
 		}
 	}
 
