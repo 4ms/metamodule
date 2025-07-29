@@ -75,10 +75,18 @@ void StreamingWaveformDisplay::set_wave_color(uint8_t r, uint8_t g, uint8_t b) {
 	wave_b = b;
 }
 
+void StreamingWaveformDisplay::set_wave_color(std::span<const float, 3> rgb) {
+	set_wave_color(255.f * rgb[0], 255.f * rgb[1], 255.f * rgb[2]);
+}
+
 void StreamingWaveformDisplay::set_bar_color(uint8_t r, uint8_t g, uint8_t b) {
 	bar_r = r;
 	bar_g = g;
 	bar_b = b;
+}
+
+void StreamingWaveformDisplay::set_bar_color(std::span<const float, 3> rgb) {
+	set_bar_color(255.f * rgb[0], 255.f * rgb[1], 255.f * rgb[2]);
 }
 
 void StreamingWaveformDisplay::set_cursor_width(unsigned width) {
