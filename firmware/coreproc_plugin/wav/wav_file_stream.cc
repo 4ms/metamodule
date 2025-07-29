@@ -49,6 +49,7 @@ bool WavFileStream::load(std::string_view sample_path) {
 	unload();
 
 	eof = false;
+	file_error = false;
 
 	loaded = drwav_init_file(&wav, sample_path.data(), nullptr);
 	frames_in_buffer = 0;
@@ -64,6 +65,7 @@ void WavFileStream::unload() {
 		drwav_uninit(&wav);
 		loaded = false;
 	}
+	file_error = false;
 }
 
 bool WavFileStream::is_loaded() const {
@@ -76,7 +78,7 @@ void WavFileStream::read_frames_from_file() {
 }
 
 void WavFileStream::read_frames_from_file(int num_frames) {
-	if (!loaded || eof)
+	if (!loaded || eof || file_error)
 		return;
 
 	while (num_frames > 0) {
@@ -85,9 +87,12 @@ void WavFileStream::read_frames_from_file(int num_frames) {
 
 		auto frames_read = drwav_read_pcm_frames_f32(&wav, frames_to_read, read_buff.data());
 
-		// This is not correct, if we happen to read up to the end of the file
-		// (but don't attempt to go past, then we'll be at the EOF but eof will be false
-		eof = (frames_read != frames_to_read) || (wav.readCursorInPCMFrames == wav.totalPCMFrameCount);
+		eof = (wav.readCursorInPCMFrames == wav.totalPCMFrameCount);
+
+		if (!eof && frames_read != frames_to_read) {
+			file_error = true;
+			break;
+		}
 
 		if (frames_read > frames_to_read) {
 			printf("WavFileStream: Internal error: drwav read more frames than requested\n");
@@ -149,6 +154,10 @@ unsigned WavFileStream::frames_available() const {
 
 bool WavFileStream::is_eof() const {
 	return eof;
+}
+
+bool WavFileStream::is_file_error() const {
+	return file_error;
 }
 
 unsigned WavFileStream::current_playback_frame() const {
