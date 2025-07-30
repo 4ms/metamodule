@@ -16,6 +16,7 @@
 #include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/styles.hh"
+#include "patch/midi_def.hh"
 
 namespace MetaModule
 {
@@ -416,12 +417,6 @@ struct ModuleViewPage : PageBase {
 		if (handle_patch_mods()) {
 			redraw_module();
 			mapping_pane.refresh();
-			roller_hover.force_redraw();
-			
-			// Update visual elements to reflect current parameter values after redraw
-			if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
-				redraw_elements();
-			}
 		}
 
 		// if (is_patch_playloaded) {
@@ -502,6 +497,10 @@ struct ModuleViewPage : PageBase {
 						   [&, this](DisconnectJack &mod) {
 							   mod.type == ElementType::Output ? patch->disconnect_outjack(mod.jack) :
 																 patch->disconnect_injack(mod.jack);
+							   refresh = true;
+						   },
+						   [&, this](RemoveMapping &mod) {
+							   patch->remove_mapping(mod.set_id, mod.map);
 							   refresh = true;
 						   },
 						   [&](auto &m) { refresh = false; },
@@ -927,19 +926,16 @@ private:
 
 	enum { ContextMenuTag = -2 };
 
-	// Quick assign state
 	uint16_t selected_input_port = 0;
 	uint16_t selected_output_port = 0;
 
 	void handle_quick_assign() {
-		// Get the currently highlighted element
 		const DrawnElement *current_element = get_highlighted_element();
 		
 		if (!current_element) {
 			return;
 		}
 		
-		// Check for all parameter types (not just ParamElement)
 		bool is_param = std::visit(overloaded{
 		    [](BaseElement const &el) { return false; },
 		    [](ParamElement const &el) { return true; },
@@ -956,7 +952,6 @@ private:
 			return;
 		}
 		
-		// Detect encoder button press
 		bool encoder_is_pressed = metaparams.rotary_button.is_pressed();
 		
 		if (encoder_is_pressed) {
@@ -964,10 +959,36 @@ private:
 			if (is_param) {
 				for (unsigned i = 0; auto &knob : params.knobs) {
 					if (knob.did_change()) {
-						perform_quick_assign(i, current_element);
+						perform_knob_assign(i, current_element);
 						return;
 					}
 					i++;
+				}
+				
+				// MIDI CC quick assign: hold encoder + send MIDI CC
+				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
+					if (cc.changed) {
+						cc.changed = 0; // Clear the flag
+						perform_midi_assign(MidiCC0 + ccnum, current_element);
+						return;
+					}
+					ccnum++;
+				}
+				
+				// MIDI Note quick assign: hold encoder + send MIDI note
+				auto &note = params.last_midi_note;
+				if (note.changed) {
+					note.changed = 0; // Clear the flag
+					perform_midi_assign(MidiGateNote0 + note.val, current_element);
+					return;
+				}
+				
+				// Parameter mapping removal: hold encoder + turn encoder (no knobs/MIDI are active at this point)
+				if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
+					uint16_t module_id = (uint16_t)current_element->gui_element.module_idx;
+					uint16_t param_id = (uint16_t)current_element->gui_element.idx.param_idx;
+					remove_existing_mappings_for_param(module_id, param_id);
+					return;
 				}
 			}
 			
@@ -980,6 +1001,8 @@ private:
 					return;
 				}
 			}
+
+			roller_hover.force_redraw();
 		}
 	}
 
@@ -990,31 +1013,47 @@ private:
 		return nullptr;
 	}
 
-	void perform_quick_assign(uint16_t knob_id, const DrawnElement *element) {
-		if (!element) {
-			return;
-		}
-
-		// Determine which knobset to assign to (use currently active knobset)
+	void remove_existing_mappings_for_param(uint16_t module_id, uint16_t param_id) {
 		uint32_t target_knobset = page_list.get_active_knobset();
-		
-		uint16_t module_id = (uint16_t)element->gui_element.module_idx;
-		uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
 		
 		// Remove ALL existing knob mappings for this parameter in this knobset (non-MIDI)
 		if (target_knobset != PatchData::MIDIKnobSet && target_knobset < patch->knob_sets.size()) {
 			auto &knobset = patch->knob_sets[target_knobset];
 			
-			// Iterate through all mappings in this knobset
 			for (const auto &mapping : knobset.set) {
-				// If this mapping is for our parameter, queue it for removal
 				if (mapping.module_id == module_id && mapping.param_id == param_id) {
 					module_mods.put(RemoveMapping{.map = mapping, .set_id = target_knobset});
 				}
 			}
 		}
 
-		// Create the new mapping
+		// Remove ALL existing MIDI mappings for this parameter
+		auto &midi_knobset = patch->midi_maps.set;
+		for (auto &mapping : midi_knobset) {
+			if (mapping.module_id == module_id && mapping.param_id == param_id) {
+				module_mods.put(RemoveMapping{.map = mapping, .set_id = PatchData::MIDIKnobSet});
+			}
+		}
+	}
+
+	void perform_knob_assign(uint16_t knob_id, const DrawnElement *element) {
+		if (!element) {
+			return;
+		}
+
+		uint16_t module_id = (uint16_t)element->gui_element.module_idx;
+		uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
+
+		// Check to see if the knob is already mapped to this parameter
+		// Toggle it off if so
+		for (auto &mapping : patch->knob_sets[page_list.get_active_knobset()].set) {
+			if (mapping.panel_knob_id == knob_id && mapping.module_id == module_id && mapping.param_id == param_id) {
+				module_mods.put(RemoveMapping{.map = mapping, .set_id = page_list.get_active_knobset()});
+			}
+		}
+		
+		remove_existing_mappings_for_param(module_id, param_id);
+
 		auto map = MappedKnob{
 			.panel_knob_id = knob_id,
 			.module_id = module_id,
@@ -1025,7 +1064,31 @@ private:
 
 		// Queue the modification - this will be processed by handle_patch_mods() which will
 		// update the patch data and call refresh() automatically
+		uint32_t target_knobset = page_list.get_active_knobset();
 		module_mods.put(AddMapping{.map = map, .set_id = target_knobset});
+	}
+
+	void perform_midi_assign(uint16_t midi_id, const DrawnElement *element) {
+		if (!element) {
+			return;
+		}
+
+		uint16_t module_id = (uint16_t)element->gui_element.module_idx;
+		uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
+
+		remove_existing_mappings_for_param(module_id, param_id);
+
+		auto map = MappedKnob{
+			.panel_knob_id = midi_id,
+			.module_id = module_id,
+			.param_id = param_id,
+			.curve_type = MappedKnob::Normal,
+			.midi_chan = 0, // 0 = all channels
+			.min = 0.f,
+			.max = 1.f,
+		};
+
+		module_mods.put(AddMidiMap{.map = map});
 	}
 
 	void cycle_port_selection(int motion, ElementType jack_type) {
@@ -1045,16 +1108,24 @@ private:
 			}
 		}
 		
+		// Add 1 to total_ports to include the disconnect option (at position total_ports)
+		unsigned total_options = total_ports + 1;
+		
 		// For output jacks, find the next unassigned port to prevent collision
 		if (jack_type == ElementType::Output) {
 			uint16_t start_port = *selected_port;
 			
 			do {
-				// Apply motion with wrapping
+				// Apply motion with wrapping (including disconnect option)
 				if (motion > 0) {
-					*selected_port = (*selected_port + 1) % total_ports;
+					*selected_port = (*selected_port + 1) % total_options;
 				} else {
-					*selected_port = (*selected_port + total_ports - 1) % total_ports;
+					*selected_port = (*selected_port + total_options - 1) % total_options;
+				}
+				
+				// If we selected disconnect (position total_ports), that's always available
+				if (*selected_port == total_ports) {
+					break;
 				}
 				
 				// Check if this port is available (not already mapped)
@@ -1062,7 +1133,7 @@ private:
 					break; // Found an available port
 				}
 				
-				// If we've cycled through all ports and returned to start, break to avoid infinite loop
+				// If we've cycled through all options and returned to start, break to avoid infinite loop
 				if (*selected_port == start_port) {
 					break;
 				}
@@ -1070,11 +1141,11 @@ private:
 			} while (true);
 			
 		} else {
-			// For input jacks, use the original simple logic (no collision avoidance needed)
+			// For input jacks, include disconnect option but no collision avoidance needed
 			if (motion > 0) {
-				*selected_port = (*selected_port + 1) % total_ports;
+				*selected_port = (*selected_port + 1) % total_options;
 			} else {
-				*selected_port = (*selected_port + total_ports - 1) % total_ports;
+				*selected_port = (*selected_port + total_options - 1) % total_options;
 			}
 		}
 	}
@@ -1082,6 +1153,20 @@ private:
 	void perform_jack_assign(const DrawnElement *element, ElementType jack_type) {
 		if (!element) {
 			return;
+		}
+
+		// Get total number of ports to determine disconnect position
+		unsigned total_ports;
+		if (jack_type == ElementType::Input) {
+			total_ports = PanelDef::NumUserFacingInJacks;
+			if (Expanders::get_connected().ext_audio_connected) {
+				total_ports += AudioExpander::NumInJacks;
+			}
+		} else {
+			total_ports = PanelDef::NumUserFacingOutJacks;
+			if (Expanders::get_connected().ext_audio_connected) {
+				total_ports += AudioExpander::NumOutJacks;
+			}
 		}
 
 		Jack module_jack;
@@ -1101,17 +1186,21 @@ private:
 			selected_port = selected_output_port;
 		}
 
+		// Always disconnect existing connection first
 		module_mods.put(DisconnectJack{.jack = module_jack, .type = jack_type});
 
-		// Create new mapping
+		// If user selected disconnect option (position total_ports), we're done - just disconnect
+		if (selected_port == total_ports) {
+			return;
+		}
+
+		// Otherwise, create new mapping to the selected port
 		AddJackMapping mapping{
 			.panel_jack_id = selected_port,
 			.jack = module_jack,
 			.type = jack_type
 		};
 
-		// Queue the modification - this will be processed by handle_patch_mods() which will
-		// update the patch data and call refresh() automatically
 		module_mods.put(mapping);
 	}
 };
