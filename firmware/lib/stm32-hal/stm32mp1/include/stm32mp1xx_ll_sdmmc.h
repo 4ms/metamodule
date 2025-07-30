@@ -304,7 +304,7 @@ typedef struct
 // SDMMC_DATATIMEOUT: units is clock bus periods: max time DPSM can be in Wait_R or Busy before timeout status flag is set
 #define SDMMC_DATATIMEOUT                  ((uint32_t)0x09300000)  // about 200ms
 // SDMMC_DATATIMEOUT_TICKS: units is ticks (1ms by default) 
-#define SDMMC_DATATIMEOUT_TICKS            ((uint32_t)1000U)       // 1 second
+#define SDMMC_DATATIMEOUT_TICKS            ((uint32_t)4000U)       // 4 seconds
 ///////////////////
 
 #define SDMMC_0TO7BITS                     ((uint32_t)0x000000FFU)
