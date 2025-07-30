@@ -28,7 +28,7 @@ struct ModuleViewPage : PageBase {
 		, page_settings{settings.module_view}
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
-		, mapping_pane{patches, module_mods, params, metaparams, args, page_list, notify_queue, gui_state, patch_playloader}
+		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state, patch_playloader}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
 		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
 		, module_context_menu{patch_playloader}
@@ -413,14 +413,20 @@ struct ModuleViewPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 		}
 
-		// if (is_patch_playloaded) {
-		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
-			redraw_elements();
-		}
-
 		if (handle_patch_mods()) {
 			redraw_module();
 			mapping_pane.refresh();
+			roller_hover.force_redraw();
+			
+			// Update visual elements to reflect current parameter values after redraw
+			if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
+				redraw_elements();
+			}
+		}
+
+		// if (is_patch_playloaded) {
+		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
+			redraw_elements();
 		}
 
 		roller_hover.update();
@@ -934,22 +940,12 @@ private:
 		}
 		
 		// Check for all parameter types (not just ParamElement)
-		bool is_param = std::holds_alternative<ParamElement>(current_element->element) ||
-		                std::holds_alternative<Knob>(current_element->element) ||
-		                std::holds_alternative<Slider>(current_element->element) ||
-		                std::holds_alternative<SliderLight>(current_element->element) ||
-		                std::holds_alternative<FlipSwitch>(current_element->element) ||
-		                std::holds_alternative<SlideSwitch>(current_element->element) ||
-		                std::holds_alternative<MomentaryButton>(current_element->element) ||
-		                std::holds_alternative<MomentaryButtonLight>(current_element->element) ||
-		                std::holds_alternative<MomentaryButtonRGB>(current_element->element) ||
-		                std::holds_alternative<LatchingButton>(current_element->element) ||
-		                std::holds_alternative<Encoder>(current_element->element) ||
-		                std::holds_alternative<EncoderRGB>(current_element->element) ||
-		                std::holds_alternative<AltParamContinuous>(current_element->element) ||
-		                std::holds_alternative<AltParamChoice>(current_element->element) ||
-		                std::holds_alternative<AltParamChoiceLabeled>(current_element->element) ||
-		                std::holds_alternative<KnobSnapped>(current_element->element);
+		bool is_param = std::visit(overloaded{
+		    [](BaseElement const &el) { return false; },
+		    [](ParamElement const &el) { return true; },
+		    [](AltParamElement const &el) { return false; },
+	        },
+	        current_element->element);
 		                
 		bool is_input_jack = std::holds_alternative<JackInput>(current_element->element);
 		bool is_output_jack = std::holds_alternative<JackOutput>(current_element->element);
@@ -978,19 +974,12 @@ private:
 			// Jack quick assign: hold encoder + turn encoder
 			if (is_jack) {
 				if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
-					if (is_input_jack) {
-						cycle_input_port_selection(motion);
-						perform_input_jack_assign(current_element);
-					}
-					// TODO: output jack quick assign
+					ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
+					cycle_port_selection(motion, jack_type);
+					perform_jack_assign(current_element, jack_type);
 					return;
 				}
 			}
-		}
-
-		if (handle_patch_mods()) {
-			redraw_module();
-			mapping_pane.refresh();
 		}
 	}
 
@@ -1039,38 +1028,86 @@ private:
 		module_mods.put(AddMapping{.map = map, .set_id = target_knobset});
 	}
 
-	void cycle_input_port_selection(int motion) {
-		// Get total number of input ports (main panel + expander if connected)
-		unsigned total_inputs = PanelDef::NumUserFacingInJacks;
-		if (Expanders::get_connected().ext_audio_connected) {
-			total_inputs += AudioExpander::NumInJacks;
+	void cycle_port_selection(int motion, ElementType jack_type) {
+		uint16_t *selected_port = (jack_type == ElementType::Input) ? &selected_input_port : &selected_output_port;
+		
+		// Get total number of ports (main panel + expander if connected)
+		unsigned total_ports;
+		if (jack_type == ElementType::Input) {
+			total_ports = PanelDef::NumUserFacingInJacks;
+			if (Expanders::get_connected().ext_audio_connected) {
+				total_ports += AudioExpander::NumInJacks;
+			}
+		} else {
+			total_ports = PanelDef::NumUserFacingOutJacks;
+			if (Expanders::get_connected().ext_audio_connected) {
+				total_ports += AudioExpander::NumOutJacks;
+			}
 		}
 		
-		// Apply motion with wrapping
-		if (motion > 0) {
-			selected_input_port = (selected_input_port + 1) % total_inputs;
+		// For output jacks, find the next unassigned port to prevent collision
+		if (jack_type == ElementType::Output) {
+			uint16_t start_port = *selected_port;
+			
+			do {
+				// Apply motion with wrapping
+				if (motion > 0) {
+					*selected_port = (*selected_port + 1) % total_ports;
+				} else {
+					*selected_port = (*selected_port + total_ports - 1) % total_ports;
+				}
+				
+				// Check if this port is available (not already mapped)
+				if (!patch->find_mapped_outjack(*selected_port)) {
+					break; // Found an available port
+				}
+				
+				// If we've cycled through all ports and returned to start, break to avoid infinite loop
+				if (*selected_port == start_port) {
+					break;
+				}
+				
+			} while (true);
+			
 		} else {
-			selected_input_port = (selected_input_port + total_inputs - 1) % total_inputs;
+			// For input jacks, use the original simple logic (no collision avoidance needed)
+			if (motion > 0) {
+				*selected_port = (*selected_port + 1) % total_ports;
+			} else {
+				*selected_port = (*selected_port + total_ports - 1) % total_ports;
+			}
 		}
 	}
 
-	void perform_input_jack_assign(const DrawnElement *element) {
+	void perform_jack_assign(const DrawnElement *element, ElementType jack_type) {
 		if (!element) {
 			return;
 		}
 
-		// Create the jack mapping
-		Jack module_jack = {
-			.module_id = (uint16_t)element->gui_element.module_idx,
-			.jack_id = (uint16_t)element->gui_element.idx.input_idx
-		};
+		Jack module_jack;
+		uint16_t selected_port;
+		
+		if (jack_type == ElementType::Input) {
+			module_jack = {
+				.module_id = (uint16_t)element->gui_element.module_idx,
+				.jack_id = (uint16_t)element->gui_element.idx.input_idx
+			};
+			selected_port = selected_input_port;
+		} else {
+			module_jack = {
+				.module_id = (uint16_t)element->gui_element.module_idx,
+				.jack_id = (uint16_t)element->gui_element.idx.output_idx
+			};
+			selected_port = selected_output_port;
+		}
 
-		module_mods.put(DisconnectJack{.jack = module_jack, .type = ElementType::Input});
+		module_mods.put(DisconnectJack{.jack = module_jack, .type = jack_type});
 
+		// Create new mapping
 		AddJackMapping mapping{
-			.panel_jack_id = selected_input_port,
+			.panel_jack_id = selected_port,
 			.jack = module_jack,
-			.type = ElementType::Input
+			.type = jack_type
 		};
 
 		// Queue the modification - this will be processed by handle_patch_mods() which will
