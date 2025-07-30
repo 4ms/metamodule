@@ -113,7 +113,8 @@ struct PluginLoadUntar {
 		}
 
 		if (so_buffer.size() == 0) {
-			return {PluginFileLoaderState::InvalidPlugin, "Error: no plugin .so file found. Plugin is corrupted?"};
+			return {PluginFileLoaderState::InvalidPlugin,
+					"Error: no plugin .so file found. Plugin is >20MB or corrupted."};
 		}
 
 		auto vers_pos = plugin_vers_filename.find_last_of("/SDK-");
