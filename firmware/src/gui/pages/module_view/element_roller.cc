@@ -410,18 +410,23 @@ void ModuleViewPage::roller_click_cb(lv_event_t *event) {
 void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 	auto page = static_cast<ModuleViewPage *>(event->user_data);
 	if (page) {
-		if (page->roller_drawn_el_idx.size() <= 1) {
-			page->focus_button_bar();
-			page->roller_hover.hide();
-			return;
-		}
+		if (event->code == LV_EVENT_PRESSED) {
+			auto roller = (lv_roller_t *)ui_ElementRoller;
+			roller->sel_opt_id_ori = roller->sel_opt_id;
+		} else {
+			if (page->roller_drawn_el_idx.size() <= 1) {
+				page->focus_button_bar();
+				page->roller_hover.hide();
+				return;
+			}
 
-		if (event->param != page) {
-			lv_group_set_editing(page->group, true);
-			lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
+			if (event->param != page) {
+				lv_group_set_editing(page->group, true);
+				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
 
-			if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-				page->highlight_component(*drawn_idx);
+				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
+					page->highlight_component(*drawn_idx);
+				}
 			}
 		}
 	}
