@@ -164,6 +164,10 @@ unsigned WavFileStream::current_playback_frame() const {
 	return next_sample_to_read.load() / wav.channels;
 }
 
+unsigned WavFileStream::latest_buffered_frame() const {
+	return next_frame_to_write.load();
+}
+
 unsigned WavFileStream::total_frames() const {
 	return loaded ? (unsigned)wav.totalPCMFrameCount : 0;
 }
