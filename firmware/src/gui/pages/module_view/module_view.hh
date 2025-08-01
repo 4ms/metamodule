@@ -10,6 +10,7 @@
 #include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/module_view/settings_menu.hh"
 #include "gui/pages/page_list.hh"
+#include "patch/midi_def.hh"
 
 namespace MetaModule
 {
@@ -146,6 +147,9 @@ struct ModuleViewPage : PageBase {
 			} else if (settings_menu.is_visible()) {
 				settings_menu.hide();
 
+			} else if (metaparams.rotary_button.is_pressed() && mode == ViewMode::List) {
+				handle_encoder_back_removal();
+
 			} else if (mode == ViewMode::Mapping) {
 				mapping_pane.back_event();
 
@@ -238,15 +242,15 @@ struct ModuleViewPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 		}
 
-		// Draw the on-screen elements (knobs, lights, etc)
-		if (is_patch_playloaded) {
-			redraw_elements();
-		}
-
 		// Handle patch modification requests
 		if (handle_patch_mods()) {
 			redraw_module();
 			mapping_pane.refresh();
+		}
+
+		// Draw the on-screen elements (knobs, lights, etc)
+		if (is_patch_playloaded) {
+			redraw_elements();
 		}
 
 		// Hover text
@@ -258,6 +262,10 @@ struct ModuleViewPage : PageBase {
 			lv_group_get_focused(group) == ui_ModuleViewHideBut)
 		{
 			roller_hover.hide();
+		}
+
+		if (mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible()) {
+			handle_quick_assign();
 		}
 	}
 
@@ -284,6 +292,10 @@ struct ModuleViewPage : PageBase {
 						   [&, this](DisconnectJack &mod) {
 							   mod.type == ElementType::Output ? patch->disconnect_outjack(mod.jack) :
 																 patch->disconnect_injack(mod.jack);
+							   refresh = true;
+						   },
+						   [&, this](RemoveMapping &mod) {
+							   patch->remove_mapping(mod.set_id, mod.map);
 							   refresh = true;
 						   },
 						   [&](auto &m) { refresh = false; },
@@ -403,6 +415,16 @@ private:
 	void update_cable_style(bool force = false);
 	void update_graphic_throttle_setting();
 
+	// Defined in module_view/quick_assign.cc
+	void handle_quick_assign();
+	void handle_encoder_back_removal();
+	const DrawnElement *get_highlighted_element();
+	void remove_existing_mappings_for_param(uint16_t module_id, uint16_t param_id);
+	void perform_knob_assign(uint16_t knob_id, const DrawnElement *element);
+	void perform_midi_assign(uint16_t midi_id, const DrawnElement *element);
+	void perform_jack_assign(const DrawnElement *element, ElementType jack_type);
+	void cycle_port_selection(int motion, ElementType jack_type);
+
 	CableDrawer<240> cable_drawer;
 
 	ModuleInfoView moduleinfo;
@@ -451,6 +473,11 @@ private:
 	std::optional<GuiElement> pending_action_param_clear{};
 
 	enum { RollerHeaderTag = -1, ContextMenuTag = -2 };
+
+	uint16_t selected_input_port = 0;
+	uint16_t selected_output_port = 0;
+
+	bool suppress_next_click = false;
 };
 
 } // namespace MetaModule
