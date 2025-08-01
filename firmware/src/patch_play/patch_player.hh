@@ -724,6 +724,18 @@ public:
 		cables.build(pd.int_cables, core_balancer.cores.parts);
 	}
 
+	void remove_injack_mappings(Jack jack) {
+		for (auto &ins : in_conns)
+			std::erase(ins, jack);
+
+		if (pd.find_internal_cable_with_injack(jack) == nullptr) {
+			// unpatch the module's jack if it has no cables connected
+			safe_unpatch_input(jack);
+		}
+
+		pd.remove_injack_mappings(jack);
+	}
+
 	void disconnect_outjack(Jack jack) {
 		for (auto &out : out_conns) {
 			if (out == jack) {
@@ -742,6 +754,21 @@ public:
 		pd.disconnect_outjack(jack);
 
 		cables.build(pd.int_cables, core_balancer.cores.parts);
+	}
+
+	void remove_outjack_mappings(Jack jack) {
+		for (auto &out : out_conns) {
+			if (out == jack) {
+				out = disconnected_jack;
+			}
+		}
+
+		if (pd.find_internal_cable_with_outjack(jack) == nullptr) {
+			// unpatch the module's jack if it has no cables connected
+			safe_unpatch_output(jack);
+		}
+
+		pd.remove_outjack_mappings(jack);
 	}
 
 	void reset_module(uint16_t module_id, std::string_view data = "") {
