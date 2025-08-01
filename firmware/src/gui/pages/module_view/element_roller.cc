@@ -356,6 +356,17 @@ void ModuleViewPage::click_graphic_display(DrawnElement const &drawn_element, Dy
 }
 
 void ModuleViewPage::click_normal_element(DrawnElement const &drawn_element) {
+	if (metaparams.rotary_button.is_pressed()) {
+		///????
+		return;
+	}
+
+	// Ignore click if we just did a quick assignment (prevents unwanted mapping pane opening)
+	if (suppress_next_click) {
+		suppress_next_click = false;
+		return;
+	}
+
 	args.element_indices = drawn_element.gui_element.idx;
 
 	mode = ViewMode::Mapping;
