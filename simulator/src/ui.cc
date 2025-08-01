@@ -84,6 +84,8 @@ bool Ui::update() {
 	tm = lv_tick_get();
 	if (tm - last_page_task_tm >= 16) {
 		transfer_aux_button_events();
+		metaparams.rotary_pushed.add_motion({.abs_pos = {}, .motion = input_driver.rotary_push_turn_motion()});
+
 		transfer_params();
 		change_knobset();
 		update_channel_selections();
