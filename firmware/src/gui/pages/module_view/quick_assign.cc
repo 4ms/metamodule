@@ -109,7 +109,7 @@ void ModuleViewPage::handle_encoder_back_removal() {
 						   .jack_id = (uint16_t)current_element->gui_element.idx.output_idx};
 		}
 
-		module_mods.put(DisconnectJack{.jack = module_jack, .type = jack_type});
+		module_mods.put(RemoveJackMappings{.jack = module_jack, .type = jack_type});
 	}
 
 	suppress_next_click = true;
@@ -277,7 +277,7 @@ void ModuleViewPage::perform_jack_assign(const DrawnElement *element, ElementTyp
 	}
 
 	// Always disconnect existing connection first
-	module_mods.put(DisconnectJack{.jack = module_jack, .type = jack_type});
+	module_mods.put(RemoveJackMappings{.jack = module_jack, .type = jack_type});
 
 	// Create new mapping to the selected port
 	AddJackMapping mapping{.panel_jack_id = selected_port, .jack = module_jack, .type = jack_type};
