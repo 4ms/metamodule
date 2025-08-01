@@ -1,5 +1,6 @@
 #include "filedesc_manager.hh"
 #include "util/pool.hh"
+#include "util/thread_safe_pool.hh"
 #include <algorithm>
 #include <array>
 #include <cstdio>
@@ -20,11 +21,11 @@ static_assert(FirstFileFD > STDIN_FILENO);
 static_assert(FirstFileFD > STDOUT_FILENO);
 static_assert(FirstFileFD > STDERR_FILENO);
 
-static std::array<FileDesc, MaxOpenFiles> descriptors{};
-static std::array<DirDesc, MaxOpenDirs> dir_scriptors{};
+static cpputil::ThreadSafePool<FileDesc, MaxOpenFiles> descriptors{};
+static std::array<FIL, MaxOpenFiles> fatfil_pool{};
 
-static cpputil::Pool<FIL, MaxOpenFiles> fatfil_pool{};
-static cpputil::Pool<DIR, MaxOpenDirs> dir_pool{};
+static cpputil::ThreadSafePool<DirDesc, MaxOpenDirs> dir_scriptors{};
+static std::array<DIR, MaxOpenDirs> dir_pool{};
 
 static int index(size_t fd) {
 	return fd - FirstFileFD;
@@ -39,36 +40,28 @@ int isatty(int fd) {
 }
 
 void init() {
-	for (auto &f : descriptors) {
-		f.fatfil = nullptr;
-		f.vol = Volume::MaxVolumes;
-	}
-
-	for (auto &d : dir_scriptors) {
-		d.dir = nullptr;
-		d.cur_entry.d_name[0] = '\0';
-	}
+	descriptors.clear();
+	dir_scriptors.clear();
 }
 
 std::optional<int> alloc_file() {
-	auto it = std::ranges::find_if(descriptors, [](auto &f) { return f.fatfil == nullptr; });
-
-	if (it != descriptors.end()) {
-		auto fd_idx = std::distance(descriptors.begin(), it);
-		descriptors[fd_idx].fatfil = fatfil_pool.create();
-		if (!descriptors[fd_idx].fatfil) {
-			printf("Too many files open: Failed to open another\n");
-			// Note: caller must check if .fatfil is nullptr;
-		}
-		return fd_idx + FirstFileFD;
-	} else {
+	// Thread-safe way to find first empty descriptor
+	if (auto fd_idx = descriptors.create()) {
+		// Default-init a FIL
+		fatfil_pool[*fd_idx] = FIL{};
+		descriptors[*fd_idx].fatfil = &fatfil_pool[*fd_idx];
+		return static_cast<int>(*fd_idx + FirstFileFD);
+	} else
 		return {};
-	}
 }
 
 void dealloc_file(size_t fd) {
 	if (fd_is_file(fd)) {
-		fatfil_pool.destroy(descriptors[index(fd)].fatfil);
+		if (!descriptors.destroy(index(fd))) {
+			printf("FileDescManager error: descriptor %zu was already dealloced\n", index(fd));
+		}
+
+		fatfil_pool[index(fd)].obj.fs = nullptr;
 		descriptors[index(fd)].fatfil = nullptr;
 		descriptors[index(fd)].vol = Volume::MaxVolumes;
 	}
@@ -83,38 +76,33 @@ FileDesc *filedesc(size_t fd) {
 }
 
 DirDesc *alloc_dir() {
-	auto it = std::ranges::find(dir_scriptors, nullptr, &DirDesc::dir);
-
-	if (it != dir_scriptors.end()) {
-		auto d_idx = std::distance(dir_scriptors.begin(), it);
-		dir_scriptors[d_idx].dir = dir_pool.create();
-		if (!dir_scriptors[d_idx].dir) {
-			printf("Too many directories open: Failed to open another\n");
-			// Note: caller must check if .dir is nullptr;
-		}
-		return &dir_scriptors[d_idx];
-	} else {
+	// Thread-safe way to find first empty descriptor
+	if (auto d_idx = dir_scriptors.create()) {
+		// Default-init a FIL
+		dir_pool[*d_idx] = DIR{};
+		dir_scriptors[*d_idx].dir = &dir_pool[*d_idx];
+		return &dir_scriptors[*d_idx];
+	} else
 		return nullptr;
-	}
 }
 
 bool dealloc_dir(DIR *dir) {
 	if (!dir)
 		return false;
 
-	auto it = std::ranges::find(dir_scriptors, dir, &DirDesc::dir);
-
-	if (it != dir_scriptors.end()) {
-		auto d_idx = std::distance(dir_scriptors.begin(), it);
-		if (d_idx >= 0 && d_idx < (int)dir_scriptors.size()) {
-			dir_pool.destroy(dir_scriptors[d_idx].dir);
-			dir_scriptors[d_idx].dir = nullptr;
-			dir_scriptors[d_idx].vol = Volume::MaxVolumes;
-			dir_scriptors[d_idx].cur_entry.d_name[0] = '\0';
-			return true;
+	for (auto i = 0u; i < dir_scriptors.size(); i++) {
+		if (dir_scriptors[i].dir == dir) {
+			if (dir_scriptors.destroy(i)) {
+				dir_scriptors[i].dir = nullptr;
+				dir_scriptors[i].vol = Volume::MaxVolumes;
+				dir_scriptors[i].cur_entry.d_name[0] = '\0';
+				return true;
+			}
+			// else keep trying
 		}
 	}
 
+	printf("FileDescManager error: dir was already dealloced\n");
 	return false;
 }
 
@@ -129,12 +117,10 @@ DirDesc *dirdesc(DIR *dir) {
 	if (!dir)
 		return nullptr;
 
-	auto it = std::ranges::find(dir_scriptors, dir, &DirDesc::dir);
-
-	if (it != dir_scriptors.end()) {
-		auto d_idx = std::distance(dir_scriptors.begin(), it);
-		if (d_idx >= 0 && d_idx < (int)dir_scriptors.size())
-			return &dir_scriptors[d_idx];
+	for (auto i = 0u; i < dir_scriptors.size(); i++) {
+		if (dir_scriptors[i].dir == dir) {
+			return &dir_scriptors[i];
+		}
 	}
 
 	return nullptr;
