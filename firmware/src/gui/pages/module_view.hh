@@ -1061,7 +1061,7 @@ private:
 				};
 			}
 			
-			module_mods.put(DisconnectJack{.jack = module_jack, .type = jack_type});
+			module_mods.put(RemoveJackMappings{.jack = module_jack, .type = jack_type});
 		}
 
 		suppress_next_click = true;
@@ -1233,7 +1233,7 @@ private:
 		}
 
 		// Always disconnect existing connection first
-		module_mods.put(DisconnectJack{.jack = module_jack, .type = jack_type});
+		module_mods.put(RemoveJackMappings{.jack = module_jack, .type = jack_type});
 
 		// Create new mapping to the selected port
 		AddJackMapping mapping{
