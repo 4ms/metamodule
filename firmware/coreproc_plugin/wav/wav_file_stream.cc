@@ -117,7 +117,7 @@ void WavFileStream::read_frames_from_file(int num_frames) {
 				next_frame_to_write.store(next_frame_to_write.load() + 1);
 
 				auto f = frames_in_buffer.load();
-				if (f < max_samples / wav.channels)
+				if (f < buffer_size() / wav.channels)
 					frames_in_buffer.store(f + 1);
 			}
 		}
