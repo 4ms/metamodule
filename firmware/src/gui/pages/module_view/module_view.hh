@@ -294,6 +294,11 @@ struct ModuleViewPage : PageBase {
 																 patch->disconnect_injack(mod.jack);
 							   refresh = true;
 						   },
+						   [&, this](RemoveJackMappings &mod) {
+							   mod.type == ElementType::Output ? patch->remove_outjack_mappings(mod.jack) :
+																 patch->remove_injack_mappings(mod.jack);
+							   refresh = true;
+						   },
 						   [&, this](RemoveMapping &mod) {
 							   patch->remove_mapping(mod.set_id, mod.map);
 							   refresh = true;
