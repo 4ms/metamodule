@@ -772,10 +772,6 @@ private:
 	}
 
 	void click_normal_element(unsigned drawn_idx) {
-		if (metaparams.rotary_button.is_pressed()) {
-			return;
-		}
-		
 		// Ignore click if we just did a quick assignment (prevents unwanted mapping pane opening)
 		if (suppress_next_click) {
 			suppress_next_click = false;
@@ -1026,7 +1022,11 @@ private:
 			}
 
 			roller_hover.force_redraw();
+
+		} else {
+			suppress_next_click = false;
 		}
+		
 	}
 
 	void handle_encoder_back_removal() {
