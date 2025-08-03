@@ -69,6 +69,8 @@ void ModuleViewPage::handle_quick_assign() {
 		}
 
 		roller_hover.force_redraw();
+	} else {
+		suppress_next_click = false;
 	}
 }
 
