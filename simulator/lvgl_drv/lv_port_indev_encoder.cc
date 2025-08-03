@@ -25,6 +25,7 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 	auto &rotary_pressed = _instance->rotary_pressed;
 	auto &aux_pressed = _instance->aux_pressed;
 	auto &rotary_push_turn = _instance->rotary_push_turn;
+	auto &rotary_turn = _instance->rotary_turn;
 
 	SDL_Event e;
 
@@ -50,15 +51,19 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 			if (e.key.keysym.sym == keys.turn_cw) {
 				if (rotary_pressed == ButtonEvent::Pressed)
 					rotary_push_turn++;
-				else
+				else {
 					data->enc_diff += 1;
+					rotary_turn++;
+				}
 			}
 
 			if (e.key.keysym.sym == keys.turn_ccw) {
 				if (rotary_pressed == ButtonEvent::Pressed)
 					rotary_push_turn--;
-				else
+				else {
 					data->enc_diff -= 1;
+					rotary_turn--;
+				}
 			}
 		}
 
@@ -178,6 +183,16 @@ int LvglEncoderSimulatorDriver::rotary_push_turn_motion() {
 	auto t = rotary_push_turn;
 	rotary_push_turn = 0;
 	return t;
+}
+
+int LvglEncoderSimulatorDriver::rotary_turn_motion() {
+	auto t = rotary_turn;
+	rotary_turn = 0;
+	return t;
+}
+
+bool LvglEncoderSimulatorDriver::rotary_is_pressed() {
+	return rotary_pressed == ButtonEvent::Pressed;
 }
 
 bool LvglEncoderSimulatorDriver::param_inc() {

@@ -35,7 +35,9 @@ struct LvglEncoderSimulatorDriver {
 	QuitEvent get_quit();
 	bool aux_button_just_pressed();
 	bool aux_button_just_released();
+	int rotary_turn_motion();
 	int rotary_push_turn_motion();
+	bool rotary_is_pressed();
 
 	bool param_inc();
 	bool param_dec();
@@ -61,6 +63,7 @@ private:
 	ButtonEvent aux_pressed = ButtonEvent::None;
 
 	int rotary_push_turn = 0;
+	int rotary_turn = 0;
 
 	bool param_inc_pressed = false;
 	bool param_dec_pressed = false;
