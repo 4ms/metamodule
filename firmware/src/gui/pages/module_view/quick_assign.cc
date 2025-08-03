@@ -56,6 +56,13 @@ void ModuleViewPage::handle_quick_assign() {
 				perform_midi_assign(MidiGateNote0 + note.val, current_element);
 				return;
 			}
+
+			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
+				mapping_pane.show_control_popup(group, ui_ElementRollerPanel, *current_element);
+				auto newval = lv_arc_get_value(ui_ControlArc) + motion;
+				lv_arc_set_value(ui_ControlArc, newval);
+				lv_event_send(ui_ControlArc, LV_EVENT_VALUE_CHANGED, nullptr);
+			}
 		}
 
 		// Jack quick assign: hold encoder + turn encoder
@@ -69,8 +76,12 @@ void ModuleViewPage::handle_quick_assign() {
 		}
 
 		roller_hover.force_redraw();
+
 	} else {
 		suppress_next_click = false;
+		if (mapping_pane.control_popup_visible()) {
+			mapping_pane.hide_control_popup();
+		}
 	}
 }
 

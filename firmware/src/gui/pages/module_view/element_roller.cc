@@ -5,6 +5,7 @@ namespace MetaModule
 {
 
 void ModuleViewPage::show_roller() {
+	metaparams.rotary_pushed.use_motion();
 	module_context_menu.hide();
 	mode = ViewMode::List;
 	mapping_pane.hide();
