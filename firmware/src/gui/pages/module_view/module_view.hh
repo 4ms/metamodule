@@ -72,6 +72,8 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		lv_disable_long_press();
+
 		roller_hover.hide();
 
 		patch = patches.get_view_patch();
@@ -321,6 +323,7 @@ struct ModuleViewPage : PageBase {
 		params.text_displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
+		lv_enable_long_press();
 	}
 
 private:
