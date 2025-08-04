@@ -857,13 +857,14 @@ private:
 				return;
 			}
 
-			if (event->param != page) {
+			if (lv_group_get_editing(page->group) == false) {
+				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, page);
+				// This sends another FOCUSED event:
 				lv_group_set_editing(page->group, true);
-				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
+			}
 
-				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-					page->highlight_component(*drawn_idx);
-				}
+			if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
+				page->highlight_component(*drawn_idx);
 			}
 		}
 	}
@@ -1023,13 +1024,7 @@ private:
 					return;
 				}
 			}
-
-			roller_hover.force_redraw();
-
-		} else {
-			suppress_next_click = false;
 		}
-		
 	}
 
 	void handle_encoder_back_removal() {
@@ -1049,7 +1044,10 @@ private:
 		bool is_input_jack = std::holds_alternative<JackInput>(current_element->element);
 		bool is_output_jack = std::holds_alternative<JackOutput>(current_element->element);
 		bool is_jack = is_input_jack || is_output_jack;
-		
+
+		if (!is_jack && !is_param)
+			return;
+
 		if (is_param) {
 			// Remove parameter mappings
 			uint16_t module_id = (uint16_t)current_element->gui_element.module_idx;
