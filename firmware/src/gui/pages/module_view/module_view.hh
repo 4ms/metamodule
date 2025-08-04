@@ -62,7 +62,7 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_SHORT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_pressed_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewHideBut, fullscreen_but_cb, LV_EVENT_CLICKED, this);
 
@@ -410,6 +410,7 @@ private:
 	static void roller_scrolled_cb(lv_event_t *event);
 	static void roller_click_cb(lv_event_t *event);
 	static void roller_focus_cb(lv_event_t *event);
+	static void roller_pressed_cb(lv_event_t *event);
 	static void jump_to_roller_cb(lv_event_t *event);
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx);
 
