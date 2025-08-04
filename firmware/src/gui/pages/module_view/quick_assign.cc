@@ -75,10 +75,7 @@ void ModuleViewPage::handle_quick_assign() {
 			}
 		}
 
-		roller_hover.force_redraw();
-
 	} else {
-		suppress_next_click = false;
 		if (mapping_pane.control_popup_visible()) {
 			mapping_pane.hide_control_popup();
 		}
@@ -123,7 +120,8 @@ void ModuleViewPage::handle_encoder_back_removal() {
 		}
 
 		module_mods.put(RemoveJackMappings{.jack = module_jack, .type = jack_type});
-	}
+	} else
+		return;
 
 	suppress_next_click = true;
 	roller_hover.force_redraw();

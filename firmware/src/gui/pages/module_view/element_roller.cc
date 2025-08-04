@@ -427,13 +427,16 @@ void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 				return;
 			}
 
-			if (event->param != page) {
-				lv_group_set_editing(page->group, true);
+			// Change to "edit" mode if not already editting
+			if (lv_group_get_editing(page->group) == false) {
+				// Must send a PRESS event to enter "edit" mode
 				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
+				// This sends another FOCUSED event:
+				lv_group_set_editing(page->group, true);
+			}
 
-				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-					page->highlight_component(*drawn_idx);
-				}
+			if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
+				page->highlight_component(*drawn_idx);
 			}
 		}
 	}
