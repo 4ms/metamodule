@@ -65,8 +65,9 @@ struct ModuleViewPage : PageBase {
 		lv_group_set_wrap(group, false);
 
 		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_SHORT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_pressed_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewHideBut, fullscreen_but_cb, LV_EVENT_CLICKED, this);
 
@@ -837,6 +838,14 @@ private:
 			if (page->roller_drawn_el_idx[roller_idx] == ContextMenuTag) {
 				page->show_context_menu();
 			}
+		}
+	}
+
+	static void roller_pressed_cb(lv_event_t *event) {
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		if (page) {
+			auto roller = (lv_roller_t *)ui_ElementRoller;
+			roller->sel_opt_id_ori = roller->sel_opt_id;
 		}
 	}
 
