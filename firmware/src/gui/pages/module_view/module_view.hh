@@ -432,7 +432,7 @@ private:
 	void perform_knob_assign(uint16_t knob_id, const DrawnElement *element);
 	void perform_midi_assign(uint16_t midi_id, const DrawnElement *element);
 	void perform_jack_assign(const DrawnElement *element, ElementType jack_type);
-	void cycle_port_selection(int motion, ElementType jack_type);
+	bool cycle_port_selection(int motion, ElementType jack_type);
 
 	CableDrawer<240> cable_drawer;
 
