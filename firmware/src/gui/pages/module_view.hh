@@ -1121,10 +1121,10 @@ private:
 		uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
 
 		// Check to see if the knob is already mapped to this parameter
-		// Toggle it off if so
+		// Ignore it if so
 		for (auto &mapping : patch->knob_sets[page_list.get_active_knobset()].set) {
 			if (mapping.panel_knob_id == knob_id && mapping.module_id == module_id && mapping.param_id == param_id) {
-				module_mods.put(RemoveMapping{.map = mapping, .set_id = page_list.get_active_knobset()});
+				return;
 			}
 		}
 		
