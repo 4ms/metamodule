@@ -414,30 +414,34 @@ void ModuleViewPage::roller_click_cb(lv_event_t *event) {
 	}
 }
 
+void ModuleViewPage::roller_pressed_cb(lv_event_t *event) {
+	auto page = static_cast<ModuleViewPage *>(event->user_data);
+	if (page) {
+		auto roller = (lv_roller_t *)ui_ElementRoller;
+		roller->sel_opt_id_ori = roller->sel_opt_id;
+		page->roller_hover.force_redraw();
+	}
+}
+
 void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 	auto page = static_cast<ModuleViewPage *>(event->user_data);
 	if (page) {
-		if (event->code == LV_EVENT_PRESSED) {
-			auto roller = (lv_roller_t *)ui_ElementRoller;
-			roller->sel_opt_id_ori = roller->sel_opt_id;
-		} else {
-			if (page->roller_drawn_el_idx.size() <= 1) {
-				page->focus_button_bar();
-				page->roller_hover.hide();
-				return;
-			}
+		if (page->roller_drawn_el_idx.size() <= 1) {
+			page->focus_button_bar();
+			page->roller_hover.hide();
+			return;
+		}
 
-			// Change to "edit" mode if not already editting
-			if (lv_group_get_editing(page->group) == false) {
-				// Must send a PRESS event to enter "edit" mode
-				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
-				// This sends another FOCUSED event:
-				lv_group_set_editing(page->group, true);
-			}
+		// Change to "edit" mode if not already editting
+		if (lv_group_get_editing(page->group) == false) {
+			// Must send a PRESS event to enter "edit" mode
+			lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
+			// This sends another FOCUSED event:
+			lv_group_set_editing(page->group, true);
+		}
 
-			if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-				page->highlight_component(*drawn_idx);
-			}
+		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
+			page->highlight_component(*drawn_idx);
 		}
 	}
 }

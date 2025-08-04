@@ -34,6 +34,7 @@ void ModuleViewPage::handle_quick_assign() {
 			for (unsigned i = 0; auto &knob : params.knobs) {
 				if (knob.did_change()) {
 					perform_knob_assign(i, current_element);
+					roller_hover.force_redraw();
 					return;
 				}
 				i++;
@@ -44,6 +45,7 @@ void ModuleViewPage::handle_quick_assign() {
 				if (cc.changed) {
 					cc.changed = 0; // Clear the flag
 					perform_midi_assign(MidiCC0 + ccnum, current_element);
+					roller_hover.force_redraw();
 					return;
 				}
 				ccnum++;
@@ -54,6 +56,7 @@ void ModuleViewPage::handle_quick_assign() {
 			if (note.changed) {
 				note.changed = 0; // Clear the flag
 				perform_midi_assign(MidiGateNote0 + note.val, current_element);
+				roller_hover.force_redraw();
 				return;
 			}
 
@@ -71,6 +74,7 @@ void ModuleViewPage::handle_quick_assign() {
 				ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
 				cycle_port_selection(motion, jack_type);
 				perform_jack_assign(current_element, jack_type);
+				roller_hover.force_redraw();
 				return;
 			}
 		}
