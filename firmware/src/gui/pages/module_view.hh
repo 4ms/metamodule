@@ -1023,8 +1023,8 @@ private:
 			if (is_jack) {
 				if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
 					ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
-					cycle_port_selection(motion, jack_type);
-					perform_jack_assign(current_element, jack_type);
+					if (cycle_port_selection(motion, jack_type))
+						perform_jack_assign(current_element, jack_type);
 					return;
 				}
 			}
@@ -1173,55 +1173,42 @@ private:
 		suppress_next_click = true;
 	}
 
-	void cycle_port_selection(int motion, ElementType jack_type) {
-		uint16_t *selected_port = (jack_type == ElementType::Input) ? &selected_input_port : &selected_output_port;
-		
-		// Get total number of ports (main panel + expander if connected)
-		unsigned total_ports;
+	bool cycle_port_selection(int motion, ElementType jack_type) {
+		if (motion != 1 && motion != -1)
+			return false;
+
 		if (jack_type == ElementType::Input) {
-			total_ports = PanelDef::NumUserFacingInJacks;
+			unsigned total_ports = PanelDef::NumUserFacingInJacks;
 			if (Expanders::get_connected().ext_audio_connected) {
 				total_ports += AudioExpander::NumInJacks;
 			}
-		} else {
-			total_ports = PanelDef::NumUserFacingOutJacks;
+
+			selected_input_port = ((int)selected_input_port + motion) % total_ports;
+
+		} else if (jack_type == ElementType::Output) {
+			unsigned total_ports = PanelDef::NumUserFacingOutJacks;
 			if (Expanders::get_connected().ext_audio_connected) {
 				total_ports += AudioExpander::NumOutJacks;
 			}
-		}
-		
-		// For output jacks, find the next unassigned port to prevent collision
-		if (jack_type == ElementType::Output) {
-			uint16_t start_port = *selected_port;
-			
+
+			uint16_t start_port = selected_output_port;
+
 			do {
-				// Apply motion with wrapping through actual ports only
-				if (motion > 0) {
-					*selected_port = (*selected_port + 1) % total_ports;
-				} else {
-					*selected_port = (*selected_port + total_ports - 1) % total_ports;
-				}
-				
+				selected_output_port = ((int)selected_output_port + motion) % total_ports;
+
 				// Check if this port is available (not already mapped)
-				if (!patch->find_mapped_outjack(*selected_port)) {
-					break; // Found an available port
+				if (!patch->find_mapped_outjack(selected_output_port)) {
+					return true;
 				}
-				
+
 				// If we've cycled through all options and returned to start, break to avoid infinite loop
-				if (*selected_port == start_port) {
-					break;
+				if (selected_output_port == start_port) {
+					return false;
 				}
-				
+
 			} while (true);
-			
-		} else {
-			// For input jacks, simple cycling through actual ports
-			if (motion > 0) {
-				*selected_port = (*selected_port + 1) % total_ports;
-			} else {
-				*selected_port = (*selected_port + total_ports - 1) % total_ports;
-			}
 		}
+		return true;
 	}
 
 	void perform_jack_assign(const DrawnElement *element, ElementType jack_type) {
