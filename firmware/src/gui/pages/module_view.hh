@@ -845,6 +845,7 @@ private:
 		if (page) {
 			auto roller = (lv_roller_t *)ui_ElementRoller;
 			roller->sel_opt_id_ori = roller->sel_opt_id;
+			page->roller_hover.force_redraw();
 		}
 	}
 
@@ -990,6 +991,7 @@ private:
 				for (unsigned i = 0; auto &knob : params.knobs) {
 					if (knob.did_change()) {
 						perform_knob_assign(i, current_element);
+						roller_hover.force_redraw();
 						return;
 					}
 					i++;
@@ -1000,6 +1002,7 @@ private:
 					if (cc.changed) {
 						cc.changed = 0; // Clear the flag
 						perform_midi_assign(MidiCC0 + ccnum, current_element);
+						roller_hover.force_redraw();
 						return;
 					}
 					ccnum++;
@@ -1010,6 +1013,7 @@ private:
 				if (note.changed) {
 					note.changed = 0; // Clear the flag
 					perform_midi_assign(MidiGateNote0 + note.val, current_element);
+					roller_hover.force_redraw();
 					return;
 				}
 				
