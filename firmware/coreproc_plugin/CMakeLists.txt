@@ -28,6 +28,10 @@ target_link_libraries(coreproc_plugin_export PRIVATE
 	CoreModules
 )
 
+if (NOT HEADLESS)
+	target_link_libraries(coreproc_plugin_export PRIVATE ThorVG)
+endif()
+
 
 target_include_directories(coreproc_plugin_export PUBLIC
 	./
