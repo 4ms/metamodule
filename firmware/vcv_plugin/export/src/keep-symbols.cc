@@ -40,8 +40,8 @@ namespace MetaModule
 {
 bool register_module(std::string_view brand_name,
 					 std::string_view typeslug,
-					 MetaModule::ModuleFactory::CreateModuleFunc funcCreate,
-					 MetaModule::ModuleInfoView const &info,
+					 ModuleFactory::CreateModuleFunc funcCreate,
+					 ModuleInfoView const &info,
 					 std::string_view faceplate_filename);
 }
 
@@ -108,7 +108,7 @@ void __attribute__((optimize("-O0"))) keep_math(float x) {
 	[[maybe_unused]] auto z = expm1l(y);
 }
 
-void keep_register_module() {
+void __attribute__((optimize("-O0"))) keep_register_module() {
 	static auto addr = &MetaModule::register_module;
 	printf("%p\n", addr);
 }
