@@ -12,6 +12,7 @@ namespace MetaModule
 struct StreamingWaveformDisplay::Internal {
 	tvg::SwCanvas *canvas = nullptr;
 	tvg::Shape *bar_cursor = nullptr;
+	tvg::Shape *bar_highlight = nullptr;
 	tvg::Shape *wave = nullptr;
 };
 
@@ -89,10 +90,24 @@ void StreamingWaveformDisplay::set_bar_color(std::span<const float, 3> rgb) {
 	set_bar_color(255.f * rgb[0], 255.f * rgb[1], 255.f * rgb[2]);
 }
 
+void StreamingWaveformDisplay::set_highlight_color(uint8_t r, uint8_t g, uint8_t b) {
+	hilite_r = r;
+	hilite_g = g;
+	hilite_b = b;
+}
+
+void StreamingWaveformDisplay::set_highlight_color(std::span<const float, 3> rgb) {
+	set_highlight_color(255.f * rgb[0], 255.f * rgb[1], 255.f * rgb[2]);
+}
+
 void StreamingWaveformDisplay::set_cursor_width(unsigned width) {
 	cursor_width = width;
 }
 
+void StreamingWaveformDisplay::set_highlighted_begin_end(float begin, float end) {
+	highlight_begin = begin;
+	highlight_end = end;
+}
 // Functions below here run in the GUI thread and may get interrupted by the functions above
 
 void StreamingWaveformDisplay::show_graphic_display(std::span<uint32_t> pix_buffer,
@@ -111,6 +126,15 @@ void StreamingWaveformDisplay::show_graphic_display(std::span<uint32_t> pix_buff
 	bar->appendRect(0, display_height - bar_height / scaling, display_width, bar_height / scaling);
 	bar->fill(bar_r, bar_g, bar_b, 0xFF);
 	scene->push(bar);
+
+	// Highlight
+	internal->bar_highlight = tvg::Shape::gen();
+	internal->bar_highlight->appendRect(highlight_begin * display_width,
+										display_height - bar_height / scaling,
+										(highlight_end - highlight_begin) * display_width,
+										bar_height / scaling);
+	internal->bar_highlight->fill(hilite_r, hilite_g, hilite_b, 0xFF);
+	scene->push(internal->bar_highlight);
 
 	// Trolley to indicate position
 	internal->bar_cursor = tvg::Shape::gen();
@@ -138,6 +162,26 @@ void StreamingWaveformDisplay::show_graphic_display(std::span<uint32_t> pix_buff
 bool StreamingWaveformDisplay::draw_graphic_display() {
 	if (!internal->canvas)
 		return false;
+
+	internal->bar_highlight->reset();
+	if (highlight_begin < highlight_end) {
+		internal->bar_highlight->appendRect(highlight_begin * display_width,
+											display_height - bar_height / scaling,
+											(highlight_end - highlight_begin) * display_width,
+											bar_height / scaling);
+	} else {
+		// [0, end]
+		internal->bar_highlight->appendRect(
+			0, display_height - bar_height / scaling, highlight_end * display_width, bar_height / scaling);
+		// [begin, max]
+		internal->bar_highlight->appendRect(highlight_begin * display_width,
+											display_height - bar_height / scaling,
+											(1.f - highlight_begin) * display_width,
+											bar_height / scaling);
+	}
+	internal->bar_highlight->fill(hilite_r, hilite_g, hilite_b, 0xFF);
+	internal->bar_highlight->scale(scaling);
+	internal->canvas->update(internal->bar_highlight);
 
 	internal->bar_cursor->translate(scaling * cursor_pos * (display_width - cursor_width), 0);
 	internal->bar_cursor->scale(scaling);
