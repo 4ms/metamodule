@@ -105,6 +105,8 @@ add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 add_subdirectory(${LIBDIR}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
+target_link_libraries(CoreModules-4ms PUBLIC coreproc_plugin_export)
+
 if (NOT HEADLESS)
 	target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
 endif()
@@ -222,7 +224,6 @@ endif()
 target_link_libraries(simulator PRIVATE 
 	metamodule::patch-serial
 	vcv_ports
-	coreproc_plugin_export
 )
 
 if(NOT HEADLESS)
