@@ -164,7 +164,7 @@ bool StreamingWaveformDisplay::draw_graphic_display() {
 		return false;
 
 	internal->bar_highlight->reset();
-	if (highlight_begin < highlight_end) {
+	if (highlight_begin <= highlight_end) {
 		internal->bar_highlight->appendRect(highlight_begin * display_width,
 											display_height - bar_height / scaling,
 											(highlight_end - highlight_begin) * display_width,
