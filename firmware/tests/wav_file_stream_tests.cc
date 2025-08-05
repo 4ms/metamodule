@@ -1,9 +1,13 @@
 #include "doctest.h"
+#include "wav/dr_wav.h"
 #include "wav/wav_file_stream.hh"
+#include <array>
 
 constexpr std::array<float, 16> wavfil{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-
 constexpr std::array<float, 10> wavfil2{100, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+constexpr std::array<int16_t, 16> wavfil_s16{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+constexpr std::array<int16_t, 10> wavfil2_s16{100, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 static unsigned fil_select = 1;
 
@@ -41,6 +45,31 @@ drwav_uint64 drwav_read_pcm_frames_f32(drwav *pWav, drwav_uint64 framesToRead, f
 		} else if (pWav->channels == 2) {
 			*pBufferOut++ = fil_select == 2 ? wavfil2[pos * 2] : wavfil[pos * 2];
 			*pBufferOut++ = fil_select == 2 ? wavfil2[pos * 2 + 1] : wavfil[pos * 2 + 1];
+		}
+
+		numRead++;
+
+		pWav->readCursorInPCMFrames++;
+	}
+
+	return numRead;
+}
+
+drwav_uint64 drwav_read_pcm_frames_s16(drwav *pWav, drwav_uint64 framesToRead, drwav_int16 *pBufferOut) {
+
+	drwav_uint64 numRead = 0;
+
+	while (framesToRead--) {
+		auto pos = pWav->readCursorInPCMFrames;
+		if (pos >= pWav->totalPCMFrameCount)
+			break;
+
+		if (pWav->channels == 1) {
+			*pBufferOut++ = fil_select == 2 ? wavfil2_s16[pos] : wavfil_s16[pos];
+
+		} else if (pWav->channels == 2) {
+			*pBufferOut++ = fil_select == 2 ? wavfil2_s16[pos * 2] : wavfil_s16[pos * 2];
+			*pBufferOut++ = fil_select == 2 ? wavfil2_s16[pos * 2 + 1] : wavfil_s16[pos * 2 + 1];
 		}
 
 		numRead++;
@@ -93,6 +122,11 @@ TEST_CASE("Test our mocks") {
 	CHECK(num == 0);
 }
 
+auto sampleval = [](float x) {
+	//convert s16 to float
+	return doctest::Approx(x / INT16_MAX);
+};
+
 TEST_CASE("Looping when wavfil fits in buffer") {
 	fil_select = 1;
 	MetaModule::WavFileStream stream{256};
@@ -107,20 +141,20 @@ TEST_CASE("Looping when wavfil fits in buffer") {
 	CHECK(stream.frames_available() == 4);
 
 	CHECK(stream.current_playback_frame() == 0);
-	CHECK(stream.pop_sample() == 1.f);
-	CHECK(stream.pop_sample() == 2.f);
+	CHECK(stream.pop_sample() == doctest::Approx(1.f / INT16_MAX));
+	CHECK(stream.pop_sample() == doctest::Approx(2.f / INT16_MAX));
 	CHECK(stream.frames_available() == 3);
 	CHECK(stream.current_playback_frame() == 1);
-	CHECK(stream.pop_sample() == 3.f);
-	CHECK(stream.pop_sample() == 4.f);
+	CHECK(stream.pop_sample() == sampleval(3.f));
+	CHECK(stream.pop_sample() == sampleval(4.f));
 	CHECK(stream.frames_available() == 2);
 	CHECK(stream.current_playback_frame() == 2);
-	CHECK(stream.pop_sample() == 5.f);
-	CHECK(stream.pop_sample() == 6.f);
+	CHECK(stream.pop_sample() == sampleval(5.f));
+	CHECK(stream.pop_sample() == sampleval(6.f));
 	CHECK(stream.frames_available() == 1);
 	CHECK(stream.current_playback_frame() == 3);
-	CHECK(stream.pop_sample() == 7.f);
-	CHECK(stream.pop_sample() == 8.f);
+	CHECK(stream.pop_sample() == sampleval(7.f));
+	CHECK(stream.pop_sample() == sampleval(8.f));
 	CHECK(stream.frames_available() == 0);
 	CHECK(stream.current_playback_frame() == 4);
 
@@ -131,13 +165,13 @@ TEST_CASE("Looping when wavfil fits in buffer") {
 	CHECK(stream.frames_available() == 4);
 	CHECK(stream.current_playback_frame() == 4);
 
-	CHECK(stream.pop_sample() == 9.f);
-	CHECK(stream.pop_sample() == 10.f);
+	CHECK(stream.pop_sample() == sampleval(9.f));
+	CHECK(stream.pop_sample() == sampleval(10.f));
 	CHECK(stream.frames_available() == 3);
 	CHECK(stream.current_playback_frame() == 5);
 
-	CHECK(stream.pop_sample() == 11.f);
-	CHECK(stream.pop_sample() == 12.f);
+	CHECK(stream.pop_sample() == sampleval(11.f));
+	CHECK(stream.pop_sample() == sampleval(12.f));
 	CHECK(stream.frames_available() == 2);
 	CHECK(stream.current_playback_frame() == 6);
 
@@ -145,13 +179,13 @@ TEST_CASE("Looping when wavfil fits in buffer") {
 	stream.seek_frame_in_file(0);
 
 	// audio thread:
-	CHECK(stream.pop_sample() == 13.f);
-	CHECK(stream.pop_sample() == 14.f);
+	CHECK(stream.pop_sample() == sampleval(13.f));
+	CHECK(stream.pop_sample() == sampleval(14.f));
 	CHECK(stream.frames_available() == 1);
 	CHECK(stream.current_playback_frame() == 7);
 
-	CHECK(stream.pop_sample() == 15.f);
-	CHECK(stream.pop_sample() == 16.f);
+	CHECK(stream.pop_sample() == sampleval(15.f));
+	CHECK(stream.pop_sample() == sampleval(16.f));
 	CHECK(stream.frames_available() == 0);
 	CHECK(stream.current_playback_frame() == 8);
 
@@ -160,8 +194,8 @@ TEST_CASE("Looping when wavfil fits in buffer") {
 
 	CHECK(stream.current_playback_frame() == 0);
 	CHECK(stream.frames_available() == 8);
-	CHECK(stream.pop_sample() == 1.f);
-	CHECK(stream.pop_sample() == 2.f);
+	CHECK(stream.pop_sample() == sampleval(1.f));
+	CHECK(stream.pop_sample() == sampleval(2.f));
 
 	CHECK(stream.frames_available() == 7);
 	CHECK(stream.current_playback_frame() == 1);
@@ -182,23 +216,23 @@ TEST_CASE("Looping when wavfile is larger than buffer") {
 
 	// Audio thread pops 4 frames
 	CHECK(stream.current_playback_frame() == 0);
-	CHECK(stream.pop_sample() == 100.f);
-	CHECK(stream.pop_sample() == 2.f);
+	CHECK(stream.pop_sample() == sampleval(100.f));
+	CHECK(stream.pop_sample() == sampleval(2.f));
 	CHECK(stream.frames_available() == 3);
 	CHECK(stream.current_playback_frame() == 1);
 
-	CHECK(stream.pop_sample() == 3.f);
-	CHECK(stream.pop_sample() == 4.f);
+	CHECK(stream.pop_sample() == sampleval(3.f));
+	CHECK(stream.pop_sample() == sampleval(4.f));
 	CHECK(stream.frames_available() == 2);
 	CHECK(stream.current_playback_frame() == 2);
 
-	CHECK(stream.pop_sample() == 5.f);
-	CHECK(stream.pop_sample() == 6.f);
+	CHECK(stream.pop_sample() == sampleval(5.f));
+	CHECK(stream.pop_sample() == sampleval(6.f));
 	CHECK(stream.frames_available() == 1);
 	CHECK(stream.current_playback_frame() == 3);
 
-	CHECK(stream.pop_sample() == 7.f);
-	CHECK(stream.pop_sample() == 8.f);
+	CHECK(stream.pop_sample() == sampleval(7.f));
+	CHECK(stream.pop_sample() == sampleval(8.f));
 	CHECK(stream.frames_available() == 0);
 	CHECK(stream.current_playback_frame() == 4);
 
@@ -220,8 +254,8 @@ TEST_CASE("Looping when wavfile is larger than buffer") {
 
 	SUBCASE("Audio gets ahead of FS") {
 		// Audio thread pops the last frame
-		CHECK(stream.pop_sample() == 9.f);
-		CHECK(stream.pop_sample() == 10.f);
+		CHECK(stream.pop_sample() == sampleval(9.f));
+		CHECK(stream.pop_sample() == sampleval(10.f));
 		CHECK(stream.frames_available() == 0);
 		CHECK(stream.current_playback_frame() == 5);
 
@@ -253,8 +287,8 @@ TEST_CASE("Looping when wavfile is larger than buffer") {
 		// new frames are available.
 		CHECK(stream.frames_available() == 3);
 
-		CHECK(stream.pop_sample() == 9.f);
-		CHECK(stream.pop_sample() == 10.f);
+		CHECK(stream.pop_sample() == sampleval(9.f));
+		CHECK(stream.pop_sample() == sampleval(10.f));
 		CHECK(stream.frames_available() == 2);
 		CHECK(stream.current_playback_frame() == 5);
 
@@ -270,8 +304,8 @@ TEST_CASE("Looping when wavfile is larger than buffer") {
 		CHECK(stream.frames_available() == 4);
 	}
 
-	CHECK(stream.pop_sample() == 100.f);
-	CHECK(stream.pop_sample() == 2.f);
+	CHECK(stream.pop_sample() == sampleval(100.f));
+	CHECK(stream.pop_sample() == sampleval(2.f));
 
 	CHECK(stream.frames_available() == 3);
 	CHECK(stream.current_playback_frame() == 1);
@@ -372,13 +406,13 @@ TEST_CASE("Looping and stopping/restarting when wavfile is larger than buffer") 
 	// These pass, but use private vars:
 	// CHECK(stream.next_frame_to_write.load() == 2);
 
-	CHECK(stream.pop_sample() == 100.f);
-	CHECK(stream.pop_sample() == 2.f);
+	CHECK(stream.pop_sample() == sampleval(100.f));
+	CHECK(stream.pop_sample() == sampleval(2.f));
 	//          W
 	// |---3|401-|
 	//         R
-	CHECK(stream.pop_sample() == 3.f);
-	CHECK(stream.pop_sample() == 4.f);
+	CHECK(stream.pop_sample() == sampleval(3.f));
+	CHECK(stream.pop_sample() == sampleval(4.f));
 	//          W
 	// |---3|401-|
 	//          R
@@ -415,8 +449,8 @@ TEST_CASE("Looping and stopping/restarting when wavfile is larger than buffer") 
 
 	// Next frame read is the first frame's values (100,2)
 	stream.read_frames_from_file(1);
-	CHECK(stream.pop_sample() == 100.f);
-	CHECK(stream.pop_sample() == 2.f);
+	CHECK(stream.pop_sample() == sampleval(100.f));
+	CHECK(stream.pop_sample() == sampleval(2.f));
 }
 
 TEST_CASE("Looping and stopping/restarting when wavfile is smaller than buffer") {
@@ -463,6 +497,6 @@ TEST_CASE("Looping and stopping/restarting when wavfile is smaller than buffer")
 	CHECK(stream.current_playback_frame() == 0);
 
 	CHECK(stream.frames_available() == 5);
-	CHECK(stream.pop_sample() == 100.f);
-	CHECK(stream.pop_sample() == 2.f);
+	CHECK(stream.pop_sample() == sampleval(100.f));
+	CHECK(stream.pop_sample() == sampleval(2.f));
 }
