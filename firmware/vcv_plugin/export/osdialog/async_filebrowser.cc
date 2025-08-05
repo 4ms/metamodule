@@ -41,7 +41,7 @@ void async_save_file(std::string_view initial_path,
 					 std::string_view extension,
 					 std::function<void(char *path)> &&action) {
 	using namespace MetaModule;
-	show_file_save_dialog(save_dialog, initial_path, filename, extension, action);
+	show_file_save_dialog(save_dialog, initial_path.data(), filename.data(), extension.data(), action);
 }
 
 ///// Rack-like API:
@@ -57,10 +57,10 @@ void async_osdialog_file(osdialog_file_action action,
 	if (!action_function || !browser)
 		return;
 
-	if (action == OSDIALOG_SAVE) {
+	if (!path)
+		path = "";
 
-		if (!path)
-			path = "";
+	if (action == OSDIALOG_SAVE) {
 
 		auto clean_filename = filename ? std::filesystem::path(filename).stem().string() : "Untitled";
 
@@ -69,7 +69,7 @@ void async_osdialog_file(osdialog_file_action action,
 			extension = "." + std::string(filters->patterns->pattern);
 		}
 
-		show_file_save_dialog(save_dialog, std::string_view(path), clean_filename, extension, action_function);
+		show_file_save_dialog(save_dialog, path, clean_filename, extension, action_function);
 
 	} else if (action == OSDIALOG_OPEN) {
 		auto filter_string = stringify_osdialog_filters(filters);
@@ -90,13 +90,15 @@ void async_dialog_filebrowser(const bool saving,
 	if (!action || !browser)
 		return;
 
-	auto path = startDir ? std::string_view{startDir} : "";
-
 	if (saving) {
+		auto path = startDir ? std::string_view{startDir} : "";
 		auto filename = nameOrExtensions ? std::filesystem::path(nameOrExtensions).stem().string() : "Untitled";
 		auto extension = nameOrExtensions ? std::filesystem::path(nameOrExtensions).extension().string() : "";
 		show_file_save_dialog(save_dialog, path, filename, extension, action);
 	} else {
-		show_file_browser(browser, nameOrExtensions, path.data(), title, action);
+		auto path = startDir ? startDir : "";
+		auto ext = nameOrExtensions ? nameOrExtensions : "";
+		auto title_v = title ? title : "";
+		show_file_browser(browser, ext, path, title_v, action);
 	}
 }
