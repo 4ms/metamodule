@@ -55,7 +55,6 @@ struct WavFileStream::Internal {
 		if (pre_buff.max_size() != buffsize) {
 			pre_buff.resize(buffsize);
 			reset_prebuff();
-			printf("Buffer resized to %x (%u)\n", buffsize, buffsize);
 
 			return true;
 		} else {
