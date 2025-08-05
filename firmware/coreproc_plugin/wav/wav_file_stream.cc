@@ -229,6 +229,9 @@ struct WavFileStream::Internal {
 	}
 
 	bool is_frame_in_buffer(uint32_t frame_num) const {
+		if (frames_in_buffer == 0)
+			return false;
+
 		auto first = first_frame_in_buffer();
 		auto last = next_frame_to_write.load();
 
