@@ -200,7 +200,7 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 	}
 
 	char buf[32];
-	snprintf(buf, 32, "%llu,", entry.load_time / 1000);
+	snprintf(buf, 32, "%llu,", (unsigned long long)(entry.load_time / 1000u));
 	s += buf;
 	pr_info("%llu,", entry.load_time / 1000);
 
