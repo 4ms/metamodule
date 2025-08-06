@@ -960,8 +960,6 @@ private:
 	
 	bool suppress_next_click = false;
 
-	bool suppress_next_click = false;
-
 	void handle_quick_assign() {
 		const DrawnElement *current_element = get_highlighted_element();
 
@@ -1032,51 +1030,6 @@ private:
 			}
 
 			roller_hover.force_redraw();
-		}
-	}
-
-	void handle_encoder_back_removal() {
-		const DrawnElement *current_element = get_highlighted_element();
-		
-		if (!current_element) {
-			return;
-		}
-		
-		bool is_param = std::visit(overloaded{
-		    [](BaseElement const &el) { return false; },
-		    [](ParamElement const &el) { return true; },
-		    [](AltParamElement const &el) { return false; },
-	        },
-	        current_element->element);
-		                
-		bool is_input_jack = std::holds_alternative<JackInput>(current_element->element);
-		bool is_output_jack = std::holds_alternative<JackOutput>(current_element->element);
-		bool is_jack = is_input_jack || is_output_jack;
-		
-		if (is_param) {
-			// Remove parameter mappings
-			uint16_t module_id = (uint16_t)current_element->gui_element.module_idx;
-			uint16_t param_id = (uint16_t)current_element->gui_element.idx.param_idx;
-			remove_existing_mappings_for_param(module_id, param_id);
-			
-		} else if (is_jack) {
-			// Remove jack mappings
-			ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
-			
-			Jack module_jack;
-			if (jack_type == ElementType::Input) {
-				module_jack = {
-					.module_id = (uint16_t)current_element->gui_element.module_idx,
-					.jack_id = (uint16_t)current_element->gui_element.idx.input_idx
-				};
-			} else {
-				module_jack = {
-					.module_id = (uint16_t)current_element->gui_element.module_idx,
-					.jack_id = (uint16_t)current_element->gui_element.idx.output_idx
-				};
-			}
-			
-			module_mods.put(DisconnectJack{.jack = module_jack, .type = jack_type});
 		}
 	}
 
