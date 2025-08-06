@@ -1,11 +1,26 @@
-#include "async_thread_control.hh"
-#include "console/uart_log.hh"
 #include "drivers/interrupt_control.hh"
 #include "reent_mm.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>
 #include <sys/lock.h>
 #include <utility>
+
+// #define MM_DEBUG_LOCKS
+
+#ifdef MM_DEBUG_LOCKS
+#include "console/uart_log.hh"
+void dbg_putc(char c) {
+	MetaModule::UartLog::putchar(c);
+}
+#else
+void dbg_putc(char c) {
+}
+#endif
+
+// template<typename T>
+// void dbg_putc(T c...) {
+// 	MetaModule::UartLog::putchar(c);
+// }
 
 extern "C" {
 
@@ -135,11 +150,13 @@ static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
 	// If count == 0 then we claim the lock, otherwise see if we already own it
 	if (lock->count.compare_exchange_strong(expected, 1, std::memory_order_seq_cst)) {
 		lock->proc_id = proc_id;
-		MetaModule::UartLog::putchar(proc_name(proc_id));
-		MetaModule::UartLog::putchar('^');
-		MetaModule::UartLog::putchar('1');
-		MetaModule::UartLog::putchar(lock_name(lock));
-		MetaModule::UartLog::putchar('\n');
+		if (lock_name(lock) != 'm') {
+			dbg_putc(proc_name(proc_id));
+			dbg_putc('^');
+			dbg_putc('1');
+			dbg_putc(lock_name(lock));
+			dbg_putc('\n');
+		}
 		return 1;
 	}
 
@@ -148,11 +165,11 @@ static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
 		// We own the lock, so increment the count
 		// memory model can be relaxed since we are the only process allowed to write
 		lock->count = lock->count + 1;
-		MetaModule::UartLog::putchar(proc_name(proc_id));
-		MetaModule::UartLog::putchar('^');
-		MetaModule::UartLog::putchar('0' + lock->count.load());
-		MetaModule::UartLog::putchar(lock_name(lock));
-		MetaModule::UartLog::putchar('\n');
+		dbg_putc(proc_name(proc_id));
+		dbg_putc('^');
+		dbg_putc('0' + lock->count.load());
+		dbg_putc(lock_name(lock));
+		dbg_putc('\n');
 		return 1;
 	}
 
@@ -181,11 +198,11 @@ int __retarget_lock_try_acquire(_LOCK_T lock) {
 	// If count == 0 then we claim the lock, otherwise fail
 	if (lock->count.compare_exchange_strong(expected, 1, std::memory_order_seq_cst)) {
 		lock->proc_id = MetaModule::get_current_proc_id();
-		MetaModule::UartLog::putchar(proc_name(lock->proc_id));
-		MetaModule::UartLog::putchar('n');
-		MetaModule::UartLog::putchar('0' + lock->count.load());
-		MetaModule::UartLog::putchar(lock_name(lock));
-		MetaModule::UartLog::putchar('\n');
+		dbg_putc(proc_name(lock->proc_id));
+		dbg_putc('n');
+		dbg_putc('0' + lock->count.load());
+		dbg_putc(lock_name(lock));
+		dbg_putc('\n');
 		return 1;
 	} else {
 		return 0;
@@ -219,17 +236,17 @@ void __retarget_lock_release(_LOCK_T lock) {
 
 	// If we own the lock, release it
 	if (proc_id == lock->proc_id) {
-		MetaModule::UartLog::putchar(proc_name(lock->proc_id));
-		MetaModule::UartLog::putchar('v');
-		MetaModule::UartLog::putchar('0' + lock->count.load());
-		MetaModule::UartLog::putchar(lock_name(lock));
-		MetaModule::UartLog::putchar('\n');
+		dbg_putc(proc_name(lock->proc_id));
+		dbg_putc('v');
+		dbg_putc('0' + lock->count.load());
+		dbg_putc(lock_name(lock));
+		dbg_putc('\n');
 		lock->count = 0;
 		lock->proc_id = -1;
 		return;
 	} else {
-		MetaModule::UartLog::putchar('y');
-		MetaModule::UartLog::putchar('\n');
+		dbg_putc('y');
+		dbg_putc('\n');
 	}
 }
 
@@ -238,8 +255,8 @@ void __retarget_lock_release_recursive(_LOCK_T lock) {
 		return;
 
 	if (lock->count <= 0) {
-		MetaModule::UartLog::putchar('X');
-		MetaModule::UartLog::putchar('\n');
+		dbg_putc('X');
+		dbg_putc('\n');
 		return;
 	}
 
@@ -249,25 +266,27 @@ void __retarget_lock_release_recursive(_LOCK_T lock) {
 	if (proc_id == lock->proc_id) {
 		// If count == 1 then we need to release to lock atomically
 		if (lock->count == 1) {
-			MetaModule::UartLog::putchar(proc_name(lock->proc_id));
-			MetaModule::UartLog::putchar('_');
-			MetaModule::UartLog::putchar('0');
-			MetaModule::UartLog::putchar(lock_name(lock));
-			MetaModule::UartLog::putchar('\n');
+			if (lock_name(lock) != 'm') {
+				dbg_putc(proc_name(lock->proc_id));
+				dbg_putc('_');
+				dbg_putc('0');
+				dbg_putc(lock_name(lock));
+				dbg_putc('\n');
+			}
 			lock->proc_id = -1;
 			lock->count.store(0, std::memory_order_release);
 		} else {
 			// count > 1, so decrement it
 			lock->count = lock->count - 1;
-			MetaModule::UartLog::putchar(proc_name(lock->proc_id));
-			MetaModule::UartLog::putchar('_');
-			MetaModule::UartLog::putchar('0' + lock->count.load());
-			MetaModule::UartLog::putchar(lock_name(lock));
-			MetaModule::UartLog::putchar('\n');
+			dbg_putc(proc_name(lock->proc_id));
+			dbg_putc('_');
+			dbg_putc('0' + lock->count.load());
+			dbg_putc(lock_name(lock));
+			dbg_putc('\n');
 		}
 	} else {
-		MetaModule::UartLog::putchar('x');
-		MetaModule::UartLog::putchar('\n');
+		dbg_putc('x');
+		dbg_putc('\n');
 	}
 }
 }
