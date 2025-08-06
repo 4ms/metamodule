@@ -13,12 +13,13 @@ namespace MetaModule
 
 struct ModuleViewSettingsMenu {
 
-	ModuleViewSettingsMenu(ModuleDisplaySettings &settings, GuiState &gui_state)
+	ModuleViewSettingsMenu(ModuleDisplaySettings &settings, GuiState &gui_state, UserSettings &user_settings)
 		: settings_menu_group(lv_group_create())
 		, settings{settings}
-		, gui_state{gui_state} {
+		, gui_state{gui_state}
+		, user_settings{user_settings} {
 
-		auto title = create_settings_menu_title(ui_MVSettingsMenu, "GRAPHICS");
+		auto graphics_title = create_settings_menu_title(ui_MVSettingsMenu, "GRAPHICS");
 
 		auto graphics_settings = create_settings_menu_switch(ui_MVSettingsMenu, "Draw Screens");
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
@@ -34,9 +35,16 @@ struct ModuleViewSettingsMenu {
 		lv_slider_set_value(
 			graphics_update_rate_slider, ModuleDisplaySettings::ThrottleAmounts.size() - 2, LV_ANIM_OFF);
 
-		lv_obj_move_to_index(title, 1);
+		auto midi_title = create_settings_menu_title(ui_MVSettingsMenu, "MIDI");
+
+		auto midi_quick_mapping_settings = create_settings_menu_switch(ui_MVSettingsMenu, "Quick Mapping");
+		midi_quick_mapping_check = lv_obj_get_child(midi_quick_mapping_settings, 1);
+
+		lv_obj_move_to_index(graphics_title, 1);
 		lv_obj_move_to_index(graphics_settings, 2);
 		lv_obj_move_to_index(graphics_update_rate_label, 3);
+		lv_obj_move_to_index(midi_title, 4);
+		lv_obj_move_to_index(midi_quick_mapping_settings, 5);
 
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, settings_button_cb, LV_EVENT_CLICKED, this);
 
@@ -58,6 +66,8 @@ struct ModuleViewSettingsMenu {
 		lv_obj_add_event_cb(
 			graphics_update_rate_slider, graphics_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
+		lv_obj_add_event_cb(midi_quick_mapping_check, midi_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+
 		lv_obj_add_event_cb(graphics_show_check, scroll_menu_down_cb, LV_EVENT_FOCUSED, this);
 
 		lv_obj_set_x(ui_MVSettingsMenu, 220);
@@ -73,6 +83,8 @@ struct ModuleViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, graphics_show_check);
 		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
+
+		lv_group_add_obj(settings_menu_group, midi_quick_mapping_check);
 
 		lv_group_add_obj(settings_menu_group, ui_MVShowControlMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVControlMapTranspSlider);
@@ -95,6 +107,7 @@ struct ModuleViewSettingsMenu {
 		lv_check(ui_MVFlashMapCheck, settings.map_ring_flash_active);
 
 		lv_check(graphics_show_check, settings.show_graphic_screens);
+		lv_check(midi_quick_mapping_check, user_settings.midi.midi_quick_mapping);
 
 		lv_check(ui_MVShowMapsAlwaysCheck,
 				 settings.param_style.mode == ShowAll || settings.paneljack_style.mode == ShowAll);
@@ -299,6 +312,18 @@ private:
 		page->changed_while_visible = true;
 	}
 
+	static void midi_settings_value_change_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+
+		auto midi_quick_mapping_enabled = lv_obj_has_state(page->midi_quick_mapping_check, LV_STATE_CHECKED);
+		page->user_settings.midi.midi_quick_mapping = midi_quick_mapping_enabled;
+
+		page->changed_while_visible = true;
+	}
+
 	static void scroll_menu_down_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -314,11 +339,13 @@ private:
 	lv_obj_t *graphics_show_check;
 	lv_obj_t *graphics_update_rate_label;
 	lv_obj_t *graphics_update_rate_slider;
+	lv_obj_t *midi_quick_mapping_check;
 
 	bool visible = false;
 	bool changed_while_visible = false;
 	ModuleDisplaySettings &settings;
 	GuiState &gui_state;
+	UserSettings &user_settings;
 };
 
 } // namespace MetaModule

@@ -79,6 +79,7 @@ static void write(ryml::NodeRef *n, FilesystemSettings const &s) {
 	*n |= ryml::MAP;
 
 	n->append_child() << ryml::key("midi_feedback") << std::to_underlying(s.midi_feedback);
+	n->append_child() << ryml::key("midi_quick_mapping") << s.midi_quick_mapping;
 }
 
 namespace Settings

@@ -27,7 +27,7 @@ struct ModuleViewPage : PageBase {
 		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings.module_view}
 		, page_settings{settings.module_view}
-		, settings_menu{settings.module_view, gui_state}
+		, settings_menu{settings.module_view, gui_state, settings}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state, patch_playloader}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
@@ -999,23 +999,25 @@ private:
 				}
 
 				// MIDI CC quick assign: hold encoder + send MIDI CC
-				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
-					if (cc.changed) {
-						cc.changed = 0; // Clear the flag
-						perform_midi_assign(MidiCC0 + ccnum, current_element);
+				if (settings.midi.midi_quick_mapping) {
+					for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
+						if (cc.changed) {
+							cc.changed = 0; // Clear the flag
+							perform_midi_assign(MidiCC0 + ccnum, current_element);
+							roller_hover.force_redraw();
+							return;
+						}
+						ccnum++;
+					}
+
+					// MIDI Note quick assign: hold encoder + send MIDI note
+					auto &note = params.last_midi_note;
+					if (note.changed) {
+						note.changed = 0; // Clear the flag
+						perform_midi_assign(MidiGateNote0 + note.val, current_element);
 						roller_hover.force_redraw();
 						return;
 					}
-					ccnum++;
-				}
-
-				// MIDI Note quick assign: hold encoder + send MIDI note
-				auto &note = params.last_midi_note;
-				if (note.changed) {
-					note.changed = 0; // Clear the flag
-					perform_midi_assign(MidiGateNote0 + note.val, current_element);
-					roller_hover.force_redraw();
-					return;
 				}
 			}
 
