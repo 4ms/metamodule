@@ -1552,7 +1552,7 @@ inline void PatchPlayer::update_all_roto_controls() {
 									0x00, // led_on_color
 									0x01, // led_off_color
 									haptic_mode, // haptic_mode for switch
-									haptic_steps,
+									0,
 									step_names_ptr
 								);
 								next_midi_roto_switch_index_++;
