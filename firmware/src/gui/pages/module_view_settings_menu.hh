@@ -13,11 +13,10 @@ namespace MetaModule
 
 struct ModuleViewSettingsMenu {
 
-	ModuleViewSettingsMenu(ModuleDisplaySettings &settings, GuiState &gui_state, UserSettings &user_settings)
+	ModuleViewSettingsMenu(ModuleDisplaySettings &settings, GuiState &gui_state)
 		: settings_menu_group(lv_group_create())
 		, settings{settings}
-		, gui_state{gui_state}
-		, user_settings{user_settings} {
+		, gui_state{gui_state} {
 
 		auto graphics_title = create_settings_menu_title(ui_MVSettingsMenu, "GRAPHICS");
 
@@ -107,7 +106,7 @@ struct ModuleViewSettingsMenu {
 		lv_check(ui_MVFlashMapCheck, settings.map_ring_flash_active);
 
 		lv_check(graphics_show_check, settings.show_graphic_screens);
-		lv_check(midi_quick_mapping_check, user_settings.midi.midi_quick_mapping);
+		lv_check(midi_quick_mapping_check, settings.midi_quick_mapping);
 
 		lv_check(ui_MVShowMapsAlwaysCheck,
 				 settings.param_style.mode == ShowAll || settings.paneljack_style.mode == ShowAll);
@@ -319,8 +318,9 @@ private:
 		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
 
 		auto midi_quick_mapping_enabled = lv_obj_has_state(page->midi_quick_mapping_check, LV_STATE_CHECKED);
-		page->user_settings.midi.midi_quick_mapping = midi_quick_mapping_enabled;
+		page->settings.midi_quick_mapping = midi_quick_mapping_enabled;
 
+		page->settings.changed = true;
 		page->changed_while_visible = true;
 	}
 
@@ -345,7 +345,6 @@ private:
 	bool changed_while_visible = false;
 	ModuleDisplaySettings &settings;
 	GuiState &gui_state;
-	UserSettings &user_settings;
 };
 
 } // namespace MetaModule

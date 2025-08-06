@@ -25,6 +25,7 @@ struct ModuleDisplaySettings {
 	unsigned view_height_px = 180;
 	bool changed = true; //???unused but keep for backward compat
 	bool show_graphic_screens = true;
+	bool midi_quick_mapping = true; // Enable MIDI quick mapping by default
 
 	constexpr static std::array<unsigned, 6> ThrottleAmounts = {32, 16, 8, 4, 2, 1};
 	unsigned graphic_screen_throttle = 1;

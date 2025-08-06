@@ -32,6 +32,7 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("cable_style") << s.cable_style;
 	n->append_child() << ryml::key("show_graphic_screens") << s.show_graphic_screens;
 	n->append_child() << ryml::key("graphic_screen_throttle") << s.graphic_screen_throttle;
+	n->append_child() << ryml::key("midi_quick_mapping") << s.midi_quick_mapping;
 }
 
 static void write(ryml::NodeRef *n, AudioSettings const &s) {
@@ -79,7 +80,6 @@ static void write(ryml::NodeRef *n, FilesystemSettings const &s) {
 	*n |= ryml::MAP;
 
 	n->append_child() << ryml::key("midi_feedback") << std::to_underlying(s.midi_feedback);
-	n->append_child() << ryml::key("midi_quick_mapping") << s.midi_quick_mapping;
 }
 
 namespace Settings
