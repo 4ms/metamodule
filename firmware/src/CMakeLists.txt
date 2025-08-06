@@ -106,6 +106,7 @@ add_executable(
   main.elf
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/reent_mm.cc
+  ${FWDIR}/system/mlock.cc
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
