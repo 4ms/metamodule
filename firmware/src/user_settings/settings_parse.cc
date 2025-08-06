@@ -141,6 +141,12 @@ static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
 		settings->midi_feedback = MidiSettings{}.midi_feedback;
 	}
 
+	if (node.has_child("midi_quick_mapping")) {
+		settings->midi_quick_mapping = node["midi_quick_mapping"].val() == "true";
+	} else {
+		settings->midi_quick_mapping = MidiSettings{}.midi_quick_mapping;
+	}
+
 	settings->make_valid();
 
 	return true;

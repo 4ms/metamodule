@@ -27,7 +27,7 @@ struct ModuleViewPage : PageBase {
 		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings.module_view}
 		, page_settings{settings.module_view}
-		, settings_menu{settings.module_view, gui_state}
+		, settings_menu{settings.module_view, gui_state, settings}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state, patch_playloader}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
@@ -65,8 +65,9 @@ struct ModuleViewPage : PageBase {
 		lv_group_set_wrap(group, false);
 
 		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_SHORT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_pressed_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewHideBut, fullscreen_but_cb, LV_EVENT_CLICKED, this);
 
@@ -76,6 +77,8 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		lv_disable_long_press();
+
 		roller_hover.hide();
 
 		patch = patches.get_view_patch();
@@ -224,7 +227,7 @@ struct ModuleViewPage : PageBase {
 			}
 
 			append_connected_jack_name(opts, gui_el.idx, gui_el.module_idx, *patch);
-			
+
 			// Add separator and parameter name
 			opts.append(" ");
 			opts.append(base.short_name.substr(0, base.short_name.find_first_of("\0\n")));
@@ -328,10 +331,12 @@ struct ModuleViewPage : PageBase {
 
 	void update() override {
 		if (gui_state.back_button.is_just_released()) {
-			
+
 			// If encoder is pressed, handle removal shortcuts directly here
 			bool encoder_is_pressed = metaparams.rotary_button.is_pressed();
-			if (encoder_is_pressed && mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible()) {
+			if (encoder_is_pressed && mode == ViewMode::List && !action_menu.is_visible() &&
+				!settings_menu.is_visible())
+			{
 				handle_encoder_back_removal();
 			} else if (action_menu.is_visible()) {
 				action_menu.back();
@@ -503,6 +508,11 @@ struct ModuleViewPage : PageBase {
 																 patch->disconnect_injack(mod.jack);
 							   refresh = true;
 						   },
+						   [&, this](RemoveJackMappings &mod) {
+							   mod.type == ElementType::Output ? patch->remove_outjack_mappings(mod.jack) :
+																 patch->remove_injack_mappings(mod.jack);
+							   refresh = true;
+						   },
 						   [&, this](RemoveMapping &mod) {
 							   patch->remove_mapping(mod.set_id, mod.map);
 							   refresh = true;
@@ -554,6 +564,7 @@ struct ModuleViewPage : PageBase {
 		params.text_displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
+		lv_enable_long_press();
 	}
 
 private:
@@ -631,7 +642,7 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
-		
+
 		if (cur_sel >= page->roller_drawn_el_idx.size()) {
 			page->roller_hover.hide();
 			return;
@@ -680,7 +691,6 @@ private:
 
 		// Save current select in args so we can navigate back to this item
 		page->args.element_indices = page->drawn_elements[cur_idx].gui_element.idx;
-
 
 		page->unhighlight_component(prev_sel);
 		page->highlight_component(cur_idx);
@@ -766,16 +776,11 @@ private:
 	}
 
 	void click_normal_element(unsigned drawn_idx) {
-		if (metaparams.rotary_button.is_pressed()) {
-			return;
-		}
-		
 		// Ignore click if we just did a quick assignment (prevents unwanted mapping pane opening)
 		if (suppress_next_click) {
 			suppress_next_click = false;
 			return;
 		}
-		
 		auto &drawn_element = drawn_elements[drawn_idx];
 		args.element_indices = drawn_element.gui_element.idx;
 
@@ -835,6 +840,15 @@ private:
 		}
 	}
 
+	static void roller_pressed_cb(lv_event_t *event) {
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		if (page) {
+			auto roller = (lv_roller_t *)ui_ElementRoller;
+			roller->sel_opt_id_ori = roller->sel_opt_id;
+			page->roller_hover.force_redraw();
+		}
+	}
+
 	static void roller_focus_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		if (page) {
@@ -844,13 +858,14 @@ private:
 				return;
 			}
 
-			if (event->param != page) {
+			if (lv_group_get_editing(page->group) == false) {
+				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, page);
+				// This sends another FOCUSED event:
 				lv_group_set_editing(page->group, true);
-				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
+			}
 
-				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-					page->highlight_component(*drawn_idx);
-				}
+			if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
+				page->highlight_component(*drawn_idx);
 			}
 		}
 	}
@@ -945,68 +960,73 @@ private:
 	
 	bool suppress_next_click = false;
 
+	bool suppress_next_click = false;
+
 	void handle_quick_assign() {
 		const DrawnElement *current_element = get_highlighted_element();
-		
+
 		if (!current_element) {
 			return;
 		}
-		
+
 		bool is_param = std::visit(overloaded{
-		    [](BaseElement const &el) { return false; },
-		    [](ParamElement const &el) { return true; },
-		    [](AltParamElement const &el) { return false; },
-	        },
-	        current_element->element);
-		                
+									   [](BaseElement const &el) { return false; },
+									   [](ParamElement const &el) { return true; },
+									   [](AltParamElement const &el) { return false; },
+								   },
+								   current_element->element);
+
 		bool is_input_jack = std::holds_alternative<JackInput>(current_element->element);
 		bool is_output_jack = std::holds_alternative<JackOutput>(current_element->element);
-		
+
 		bool is_jack = is_input_jack || is_output_jack;
-		
+
 		if (!is_param && !is_jack) {
 			return;
 		}
-		
 		bool encoder_is_pressed = metaparams.rotary_button.is_pressed();
-		
+
 		if (encoder_is_pressed) {
 			// Parameter quick assign: hold encoder + wiggle knob
 			if (is_param) {
 				for (unsigned i = 0; auto &knob : params.knobs) {
 					if (knob.did_change()) {
 						perform_knob_assign(i, current_element);
+						roller_hover.force_redraw();
 						return;
 					}
 					i++;
 				}
-				
+
 				// MIDI CC quick assign: hold encoder + send MIDI CC
-				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
-					if (cc.changed) {
-						cc.changed = 0; // Clear the flag
-						perform_midi_assign(MidiCC0 + ccnum, current_element);
+				if (settings.midi.midi_quick_mapping) {
+					for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
+						if (cc.changed) {
+							cc.changed = 0; // Clear the flag
+							perform_midi_assign(MidiCC0 + ccnum, current_element);
+							roller_hover.force_redraw();
+							return;
+						}
+						ccnum++;
+					}
+
+					// MIDI Note quick assign: hold encoder + send MIDI note
+					auto &note = params.last_midi_note;
+					if (note.changed) {
+						note.changed = 0; // Clear the flag
+						perform_midi_assign(MidiGateNote0 + note.val, current_element);
+						roller_hover.force_redraw();
 						return;
 					}
-					ccnum++;
 				}
-				
-				// MIDI Note quick assign: hold encoder + send MIDI note
-				auto &note = params.last_midi_note;
-				if (note.changed) {
-					note.changed = 0; // Clear the flag
-					perform_midi_assign(MidiGateNote0 + note.val, current_element);
-					return;
-				}
-				
 			}
-			
+
 			// Jack quick assign: hold encoder + turn encoder
 			if (is_jack) {
 				if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
 					ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
-					cycle_port_selection(motion, jack_type);
-					perform_jack_assign(current_element, jack_type);
+					if (cycle_port_selection(motion, jack_type))
+						perform_jack_assign(current_element, jack_type);
 					return;
 				}
 			}
@@ -1058,12 +1078,56 @@ private:
 			
 			module_mods.put(DisconnectJack{.jack = module_jack, .type = jack_type});
 		}
+	}
+
+	void handle_encoder_back_removal() {
+		const DrawnElement *current_element = get_highlighted_element();
+
+		if (!current_element) {
+			return;
+		}
+
+		bool is_param = std::visit(overloaded{
+									   [](BaseElement const &el) { return false; },
+									   [](ParamElement const &el) { return true; },
+									   [](AltParamElement const &el) { return false; },
+								   },
+								   current_element->element);
+
+		bool is_input_jack = std::holds_alternative<JackInput>(current_element->element);
+		bool is_output_jack = std::holds_alternative<JackOutput>(current_element->element);
+		bool is_jack = is_input_jack || is_output_jack;
+
+		if (!is_jack && !is_param)
+			return;
+
+		if (is_param) {
+			// Remove parameter mappings
+			uint16_t module_id = (uint16_t)current_element->gui_element.module_idx;
+			uint16_t param_id = (uint16_t)current_element->gui_element.idx.param_idx;
+			remove_existing_mappings_for_param(module_id, param_id);
+
+		} else if (is_jack) {
+			// Remove jack mappings
+			ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
+
+			Jack module_jack;
+			if (jack_type == ElementType::Input) {
+				module_jack = {.module_id = (uint16_t)current_element->gui_element.module_idx,
+							   .jack_id = (uint16_t)current_element->gui_element.idx.input_idx};
+			} else {
+				module_jack = {.module_id = (uint16_t)current_element->gui_element.module_idx,
+							   .jack_id = (uint16_t)current_element->gui_element.idx.output_idx};
+			}
+
+			module_mods.put(RemoveJackMappings{.jack = module_jack, .type = jack_type});
+		}
 
 		suppress_next_click = true;
 		roller_hover.force_redraw();
 	}
 
-	const DrawnElement* get_highlighted_element() {
+	const DrawnElement *get_highlighted_element() {
 		if (auto drawn_idx = get_drawn_idx(cur_selected)) {
 			return &drawn_elements[*drawn_idx];
 		}
@@ -1072,11 +1136,11 @@ private:
 
 	void remove_existing_mappings_for_param(uint16_t module_id, uint16_t param_id) {
 		uint32_t target_knobset = page_list.get_active_knobset();
-		
+
 		// Remove ALL existing knob mappings for this parameter in this knobset (non-MIDI)
 		if (target_knobset != PatchData::MIDIKnobSet && target_knobset < patch->knob_sets.size()) {
 			auto &knobset = patch->knob_sets[target_knobset];
-			
+
 			for (const auto &mapping : knobset.set) {
 				if (mapping.module_id == module_id && mapping.param_id == param_id) {
 					module_mods.put(RemoveMapping{.map = mapping, .set_id = target_knobset});
@@ -1102,13 +1166,13 @@ private:
 		uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
 
 		// Check to see if the knob is already mapped to this parameter
-		// Toggle it off if so
+		// Ignore it if so
 		for (auto &mapping : patch->knob_sets[page_list.get_active_knobset()].set) {
 			if (mapping.panel_knob_id == knob_id && mapping.module_id == module_id && mapping.param_id == param_id) {
-				module_mods.put(RemoveMapping{.map = mapping, .set_id = page_list.get_active_knobset()});
+				return;
 			}
 		}
-		
+
 		remove_existing_mappings_for_param(module_id, param_id);
 
 		auto map = MappedKnob{
@@ -1123,7 +1187,6 @@ private:
 		// update the patch data and call refresh() automatically
 		uint32_t target_knobset = page_list.get_active_knobset();
 		module_mods.put(AddMapping{.map = map, .set_id = target_knobset});
-		
 		// Suppress the next click to prevent unwanted mapping pane opening
 		suppress_next_click = true;
 	}
@@ -1149,60 +1212,47 @@ private:
 		};
 
 		module_mods.put(AddMidiMap{.map = map});
-		
+
 		// Suppress the next click to prevent unwanted mapping pane opening
 		suppress_next_click = true;
 	}
 
-	void cycle_port_selection(int motion, ElementType jack_type) {
-		uint16_t *selected_port = (jack_type == ElementType::Input) ? &selected_input_port : &selected_output_port;
-		
-		// Get total number of ports (main panel + expander if connected)
-		unsigned total_ports;
+	bool cycle_port_selection(int motion, ElementType jack_type) {
+		if (motion != 1 && motion != -1)
+			return false;
+
 		if (jack_type == ElementType::Input) {
-			total_ports = PanelDef::NumUserFacingInJacks;
+			unsigned total_ports = PanelDef::NumUserFacingInJacks;
 			if (Expanders::get_connected().ext_audio_connected) {
 				total_ports += AudioExpander::NumInJacks;
 			}
-		} else {
-			total_ports = PanelDef::NumUserFacingOutJacks;
+
+			selected_input_port = ((int)selected_input_port + motion) % total_ports;
+
+		} else if (jack_type == ElementType::Output) {
+			unsigned total_ports = PanelDef::NumUserFacingOutJacks;
 			if (Expanders::get_connected().ext_audio_connected) {
 				total_ports += AudioExpander::NumOutJacks;
 			}
-		}
-		
-		// For output jacks, find the next unassigned port to prevent collision
-		if (jack_type == ElementType::Output) {
-			uint16_t start_port = *selected_port;
-			
+
+			uint16_t start_port = selected_output_port;
+
 			do {
-				// Apply motion with wrapping through actual ports only
-				if (motion > 0) {
-					*selected_port = (*selected_port + 1) % total_ports;
-				} else {
-					*selected_port = (*selected_port + total_ports - 1) % total_ports;
-				}
-				
+				selected_output_port = ((int)selected_output_port + motion) % total_ports;
+
 				// Check if this port is available (not already mapped)
-				if (!patch->find_mapped_outjack(*selected_port)) {
-					break; // Found an available port
+				if (!patch->find_mapped_outjack(selected_output_port)) {
+					return true;
 				}
-				
+
 				// If we've cycled through all options and returned to start, break to avoid infinite loop
-				if (*selected_port == start_port) {
-					break;
+				if (selected_output_port == start_port) {
+					return false;
 				}
-				
+
 			} while (true);
-			
-		} else {
-			// For input jacks, simple cycling through actual ports
-			if (motion > 0) {
-				*selected_port = (*selected_port + 1) % total_ports;
-			} else {
-				*selected_port = (*selected_port + total_ports - 1) % total_ports;
-			}
 		}
+		return true;
 	}
 
 	void perform_jack_assign(const DrawnElement *element, ElementType jack_type) {
@@ -1212,33 +1262,25 @@ private:
 
 		Jack module_jack;
 		uint16_t selected_port;
-		
+
 		if (jack_type == ElementType::Input) {
-			module_jack = {
-				.module_id = (uint16_t)element->gui_element.module_idx,
-				.jack_id = (uint16_t)element->gui_element.idx.input_idx
-			};
+			module_jack = {.module_id = (uint16_t)element->gui_element.module_idx,
+						   .jack_id = (uint16_t)element->gui_element.idx.input_idx};
 			selected_port = selected_input_port;
 		} else {
-			module_jack = {
-				.module_id = (uint16_t)element->gui_element.module_idx,
-				.jack_id = (uint16_t)element->gui_element.idx.output_idx
-			};
+			module_jack = {.module_id = (uint16_t)element->gui_element.module_idx,
+						   .jack_id = (uint16_t)element->gui_element.idx.output_idx};
 			selected_port = selected_output_port;
 		}
 
 		// Always disconnect existing connection first
-		module_mods.put(DisconnectJack{.jack = module_jack, .type = jack_type});
+		module_mods.put(RemoveJackMappings{.jack = module_jack, .type = jack_type});
 
 		// Create new mapping to the selected port
-		AddJackMapping mapping{
-			.panel_jack_id = selected_port,
-			.jack = module_jack,
-			.type = jack_type
-		};
+		AddJackMapping mapping{.panel_jack_id = selected_port, .jack = module_jack, .type = jack_type};
 
 		module_mods.put(mapping);
-		
+
 		// Suppress the next click to prevent unwanted mapping pane opening
 		suppress_next_click = true;
 	}
