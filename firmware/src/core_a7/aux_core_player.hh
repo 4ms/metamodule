@@ -35,8 +35,7 @@ struct AuxPlayer {
 		InterruptManager::register_and_start_isr(ProcessCablesIRQn, 1, 0, [this]() { process_cables(); });
 
 		constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchGuiElements);
-		// Same interrupt priority as Async Threads. See note in system/mlock.cc
-		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 3, 3, [this]() { read_patch_gui_elements(); });
+		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [this]() { read_patch_gui_elements(); });
 	}
 
 	void play_modules() {
