@@ -308,10 +308,6 @@ USBH_StatusTypeDef USBH_SelectInterface(USBH_HandleTypeDef *phost, uint8_t inter
   if (interface < phost->device.CfgDesc.bNumInterfaces)
   {
     phost->device.current_interface = interface;
-    USBH_UsrLog("Switching to Interface (#%d)", interface);
-    USBH_UsrLog("Class    : %xh", phost->device.CfgDesc.Itf_Desc[interface].bInterfaceClass);
-    USBH_UsrLog("SubClass : %xh", phost->device.CfgDesc.Itf_Desc[interface].bInterfaceSubClass);
-    USBH_UsrLog("Protocol : %xh", phost->device.CfgDesc.Itf_Desc[interface].bInterfaceProtocol);
   }
   else
   {
@@ -495,8 +491,6 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
 
       if ((phost->device.is_connected) != 0U)
       {
-        USBH_UsrLog("USB Device Connected");
-
         /* Wait for 200 ms after connection */
         phost->gState = HOST_DEV_WAIT_FOR_ATTACHMENT;
         USBH_Delay(200U);
@@ -521,7 +515,6 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
 
       if (phost->device.PortEnabled == 1U)
       {
-        USBH_UsrLog("USB Device Reset Completed");
         phost->device.RstCnt = 0U;
         phost->gState = HOST_DEV_ATTACHED;
       }
@@ -600,13 +593,10 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       if (status == USBH_OK)
       {
         /* The function shall return USBH_OK when full enumeration is complete */
-        USBH_UsrLog("Enumeration done.");
-
         phost->device.current_interface = 0U;
 
         if (phost->device.DevDesc.bNumConfigurations == 1U)
         {
-          USBH_UsrLog("This device has only 1 configuration.");
           phost->gState = HOST_SET_CONFIGURATION;
         }
         else
@@ -649,7 +639,6 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       if (USBH_SetCfg(phost, (uint16_t)phost->device.CfgDesc.bConfigurationValue) == USBH_OK)
       {
         phost->gState = HOST_SET_WAKEUP_FEATURE;
-        USBH_UsrLog("Default configuration set.");
       }
 
 #if (USBH_USE_OS == 1U)
@@ -670,12 +659,10 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
 
         if (status == USBH_OK)
         {
-          USBH_UsrLog("Device remote wakeup enabled");
           phost->gState = HOST_CHECK_CLASS;
         }
         else if (status == USBH_NOT_SUPPORTED)
         {
-          USBH_UsrLog("Remote wakeup not supported by the device");
           phost->gState = HOST_CHECK_CLASS;
         }
         else
@@ -718,7 +705,7 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
             continue;
           }
 
-          USBH_UsrLog("Looking for classcode 0x%x (%.16s)", phost->pClass[idx]->ClassCode, phost->pClass[idx]->Name);
+
 
           // If we have a preference, check if this class matches
           if (preferred_class != NULL && strcmp(phost->pClass[idx]->Name, preferred_class) != 0) {
@@ -735,7 +722,6 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
 
             if (phost->pClass[idx]->ClassCode == interface->bInterfaceClass)
             {
-              USBH_UsrLog("Found interface #%u with same classcode, and %u endpoints", itf, interface->bNumEndpoints);
               if (interface->bNumEndpoints > 0)
               {
                 if (phost->pActiveClass == NULL)
@@ -743,7 +729,6 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
                   // break; // DEBUG: don't break on the first one found
                 else 
                 {
-                  USBH_UsrLog("Found multiple interfaces of classes we can host, with > 0 endpoints. Picked the first one");
                   // phost->pActiveClass = phost->pClass[idx];
                 }
               }
@@ -761,7 +746,6 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
           if (phost->pActiveClass->Init(phost) == USBH_OK)
           {
             phost->gState = HOST_CLASS_REQUEST;
-            USBH_UsrLog("%s class started.", phost->pActiveClass->Name);
 
             /* Inform user that a class has been activated */
             phost->pUser(phost, HOST_USER_CLASS_SELECTED);
@@ -848,7 +832,6 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       {
         phost->pUser(phost, HOST_USER_DISCONNECTION);
       }
-      USBH_UsrLog("USB Device disconnected");
 
       if (phost->device.is_ReEnumerated == 1U)
       {
@@ -930,6 +913,7 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
           (void)USBH_FreePipe(phost, phost->Control.pipe_in);
 
           /* Reset the USB Device */
+          phost->EnumState = ENUM_IDLE;
           phost->gState = HOST_IDLE;
         }
       }
@@ -944,13 +928,6 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       ReqStatus = USBH_Get_DevDesc(phost, USB_DEVICE_DESC_SIZE);
       if (ReqStatus == USBH_OK)
       {
-        USBH_UsrLog("PID: %xh", phost->device.DevDesc.idProduct);
-        USBH_UsrLog("VID: %xh", phost->device.DevDesc.idVendor);
-        USBH_UsrLog("Device Class: %xh", phost->device.DevDesc.bDeviceClass);
-        USBH_UsrLog("Device SubClass: %xh", phost->device.DevDesc.bDeviceSubClass);
-        USBH_UsrLog("Device Protocol: %xh", phost->device.DevDesc.bDeviceProtocol);
-        USBH_UsrLog("Num Configurations: %d", phost->device.DevDesc.bNumConfigurations);
-
         phost->EnumState = ENUM_SET_ADDR;
       }
       else if (ReqStatus == USBH_NOT_SUPPORTED)
@@ -989,7 +966,6 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
         phost->device.address = USBH_DEVICE_ADDRESS;
 
         /* user callback for device address assigned */
-        USBH_UsrLog("Address (#%d) assigned.", phost->device.address);
         phost->EnumState = ENUM_GET_CFG_DESC;
 
         /* modify control channels to update device address */
@@ -1094,7 +1070,6 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
         if (ReqStatus == USBH_OK)
         {
           /* User callback for Manufacturing string */
-          USBH_UsrLog("Manufacturer : %s", (char *)(void *)phost->device.Data);
           phost->EnumState = ENUM_GET_PRODUCT_STRING_DESC;
 
 #if (USBH_USE_OS == 1U)
@@ -1108,7 +1083,6 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
         }
         else if (ReqStatus == USBH_NOT_SUPPORTED)
         {
-          USBH_UsrLog("Manufacturer : N/A");
           phost->EnumState = ENUM_GET_PRODUCT_STRING_DESC;
 
 #if (USBH_USE_OS == 1U)
@@ -1127,7 +1101,6 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       }
       else
       {
-        USBH_UsrLog("Manufacturer : N/A");
         phost->EnumState = ENUM_GET_PRODUCT_STRING_DESC;
 
 #if (USBH_USE_OS == 1U)
@@ -1150,12 +1123,10 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
         if (ReqStatus == USBH_OK)
         {
           /* User callback for Product string */
-          USBH_UsrLog("Product : %s", (char *)(void *)phost->device.Data);
           phost->EnumState = ENUM_GET_SERIALNUM_STRING_DESC;
         }
         else if (ReqStatus == USBH_NOT_SUPPORTED)
         {
-          USBH_UsrLog("Product : N/A");
           phost->EnumState = ENUM_GET_SERIALNUM_STRING_DESC;
 
 #if (USBH_USE_OS == 1U)
@@ -1174,7 +1145,6 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       }
       else
       {
-        USBH_UsrLog("Product : N/A");
         phost->EnumState = ENUM_GET_SERIALNUM_STRING_DESC;
 
 #if (USBH_USE_OS == 1U)
@@ -1197,12 +1167,10 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
         if (ReqStatus == USBH_OK)
         {
           /* User callback for Serial number string */
-          USBH_UsrLog("Serial Number : %s", (char *)(void *)phost->device.Data);
           Status = USBH_OK;
         }
         else if (ReqStatus == USBH_NOT_SUPPORTED)
         {
-          USBH_UsrLog("Serial Number : N/A");
           Status = USBH_OK;
         }
         else
@@ -1212,7 +1180,6 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       }
       else
       {
-        USBH_UsrLog("Serial Number : N/A");
         Status = USBH_OK;
       }
       break;
