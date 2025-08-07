@@ -5,7 +5,7 @@ namespace MetaModule
 static constexpr unsigned NUM_PROCESSES = 8;
 
 enum class Processes {
-	Core0Main = 0, // startup
+	Core0Main = 0, // main startup, audio overload recovery
 	Core0AsyncThread = 1,
 	Core0Audio = 2, // AudioStream
 
