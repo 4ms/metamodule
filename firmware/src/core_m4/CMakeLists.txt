@@ -101,6 +101,7 @@ add_executable(
   ${USBHOST_LIBDIR}/Core/Src/usbh_ctlreq.c
   ${USBHOST_LIBDIR}/Core/Src/usbh_ioreq.c
   ${USBHOST_LIBDIR}/Core/Src/usbh_pipes.c
+  ${USBHOST_LIBDIR}/Class/CDC/Src/usbh_cdc.c
 )
 
 target_include_directories(
@@ -126,6 +127,7 @@ target_include_directories(
           ${FWDIR}/src/usb
           ${USBHOST_LIBDIR}/Core/Inc
           ${USBHOST_LIBDIR}/Class/MSC/Inc
+          ${USBHOST_LIBDIR}/Class/CDC/Inc
           ${USBDEV_LIBDIR}/Core/Inc
           ${USBDEV_LIBDIR}/Class/MSC/Inc
           ${USBDEV_LIBDIR}/Class/CDC/Inc
@@ -161,4 +163,3 @@ add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
 
 
 set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
-

@@ -47,7 +47,6 @@ EndBSPDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_cdc.h"
-
 /** @addtogroup USBH_LIB
   * @{
   */
@@ -150,24 +149,19 @@ USBH_ClassTypeDef  CDC_Class =
   */
 static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
 {
-
   USBH_StatusTypeDef status;
-  uint8_t interface;
   CDC_HandleTypeDef *CDC_Handle;
+  uint8_t control_interface_num = 0;
+  uint8_t data_interface_num = 1;
 
-  interface = USBH_FindInterface(phost, COMMUNICATION_INTERFACE_CLASS_CODE,
-                                   ABSTRACT_CONTROL_MODEL, COMMON_AT_COMMAND);
+  // Explicitly use interface 2 for CDC Control
+  // uint8_t interface = 2; // Original hardcoding
+  USBH_UsrLog("CDC_Init: Using Interface %d for Control", control_interface_num);
 
-  if ((interface == 0xFFU) || (interface >= USBH_MAX_NUM_INTERFACES)) /* No Valid Interface */
-  {
-    USBH_DbgLog("Cannot Find the interface for Communication Interface Class.", phost->pActiveClass->Name);
-    return USBH_FAIL;
-  }
-
-  status = USBH_SelectInterface(phost, interface);
-
+  status = USBH_SelectInterface(phost, control_interface_num);
   if (status != USBH_OK)
   {
+    USBH_ErrLog("CDC_Init: Failed to select interface %d", control_interface_num);
     return USBH_FAIL;
   }
 
@@ -176,18 +170,17 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
 
   if (CDC_Handle == NULL)
   {
-    USBH_DbgLog("Cannot allocate memory for CDC Handle");
+    USBH_ErrLog("CDC_Init: Cannot allocate memory for CDC Handle");
     return USBH_FAIL;
   }
 
-  /* Initialize cdc handler */
   (void)USBH_memset(CDC_Handle, 0, sizeof(CDC_HandleTypeDef));
 
-  /*Collect the notification endpoint address and length*/
-  if ((phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[0].bEndpointAddress & 0x80U) != 0U)
+  // Use control_interface_num for Notification Endpoint setup
+  if ((phost->device.CfgDesc.Itf_Desc[control_interface_num].Ep_Desc[0].bEndpointAddress & 0x80U) != 0U)
   {
-    CDC_Handle->CommItf.NotifEp = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[0].bEndpointAddress;
-    CDC_Handle->CommItf.NotifEpSize  = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[0].wMaxPacketSize;
+    CDC_Handle->CommItf.NotifEp = phost->device.CfgDesc.Itf_Desc[control_interface_num].Ep_Desc[0].bEndpointAddress;
+    CDC_Handle->CommItf.NotifEpSize  = phost->device.CfgDesc.Itf_Desc[control_interface_num].Ep_Desc[0].wMaxPacketSize;
   }
 
   /*Allocate the length for host channel number in*/
@@ -198,38 +191,39 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
                       phost->device.address, phost->device.speed, USB_EP_TYPE_INTR,
                       CDC_Handle->CommItf.NotifEpSize);
 
-  (void)USBH_LL_SetToggle(phost, CDC_Handle->CommItf.NotifPipe, 0U);
+  // TODO: Restore this
+  // (void)USBH_LL_SetToggle(phost, CDC_Handle->CommItf.NotifPipe, 0U);
 
-  interface = USBH_FindInterface(phost, DATA_INTERFACE_CLASS_CODE,
-                                   RESERVED, NO_CLASS_SPECIFIC_PROTOCOL_CODE);
+  // interface = USBH_FindInterface(phost, DATA_INTERFACE_CLASS_CODE,
+  //                                  RESERVED, NO_CLASS_SPECIFIC_PROTOCOL_CODE);
 
-  if ((interface == 0xFFU) || (interface >= USBH_MAX_NUM_INTERFACES)) /* No Valid Interface */
-  {
-    USBH_DbgLog("Cannot Find the interface for Data Interface Class.", phost->pActiveClass->Name);
-    return USBH_FAIL;
-  }
+  // if ((interface == 0xFFU) || (interface >= USBH_MAX_NUM_INTERFACES)) /* No Valid Interface */
+  // {
+  //   USBH_DbgLog("Cannot Find the interface for Data Interface Class.", phost->pActiveClass->Name);
+  //   return USBH_FAIL;
+  // }
 
   /*Collect the class specific endpoint address and length*/
-  if ((phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[0].bEndpointAddress & 0x80U) != 0U)
+  if ((phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[0].bEndpointAddress & 0x80U) != 0U)
   {
-    CDC_Handle->DataItf.InEp = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[0].bEndpointAddress;
-    CDC_Handle->DataItf.InEpSize  = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[0].wMaxPacketSize;
+    CDC_Handle->DataItf.InEp = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[0].bEndpointAddress;
+    CDC_Handle->DataItf.InEpSize  = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[0].wMaxPacketSize;
   }
   else
   {
-    CDC_Handle->DataItf.OutEp = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[0].bEndpointAddress;
-    CDC_Handle->DataItf.OutEpSize  = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[0].wMaxPacketSize;
+    CDC_Handle->DataItf.OutEp = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[0].bEndpointAddress;
+    CDC_Handle->DataItf.OutEpSize  = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[0].wMaxPacketSize;
   }
 
-  if ((phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[1].bEndpointAddress & 0x80U) != 0U)
+  if ((phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[1].bEndpointAddress & 0x80U) != 0U)
   {
-    CDC_Handle->DataItf.InEp = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[1].bEndpointAddress;
-    CDC_Handle->DataItf.InEpSize  = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[1].wMaxPacketSize;
+    CDC_Handle->DataItf.InEp = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[1].bEndpointAddress;
+    CDC_Handle->DataItf.InEpSize  = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[1].wMaxPacketSize;
   }
   else
   {
-    CDC_Handle->DataItf.OutEp = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[1].bEndpointAddress;
-    CDC_Handle->DataItf.OutEpSize = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[1].wMaxPacketSize;
+    CDC_Handle->DataItf.OutEp = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[1].bEndpointAddress;
+    CDC_Handle->DataItf.OutEpSize = phost->device.CfgDesc.Itf_Desc[data_interface_num].Ep_Desc[1].wMaxPacketSize;
   }
 
   /*Allocate the length for host channel number out*/
