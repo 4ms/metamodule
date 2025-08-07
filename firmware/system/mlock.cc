@@ -1,4 +1,5 @@
 #include "drivers/interrupt_control.hh"
+#include "medium/debug.hh"
 #include "reent_mm.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>
@@ -13,8 +14,7 @@ void dbg_putc(char c) {
 	MetaModule::UartLog::putchar(c);
 }
 #else
-void dbg_putc(char c) {
-}
+#define dbg_putc(x)
 #endif
 
 // template<typename T>
@@ -27,22 +27,20 @@ extern "C" {
 struct __lock {
 	int proc_id = -1;
 	std::atomic<unsigned> count = 0;
+	FixedVector<IRQn_Type, 4> irqs_to_reenable;
 };
 
 struct __lock __lock___sfp_recursive_mutex;
 struct __lock __lock___atexit_recursive_mutex;
-// struct __lock __lock___at_quick_exit_mutex;
 struct __lock __lock___malloc_recursive_mutex;
 struct __lock __lock___env_recursive_mutex;
 struct __lock __lock___tz_mutex;
+// Not used:
+// struct __lock __lock___at_quick_exit_mutex;
 // struct __lock __lock___dd_hash_mutex;
 // struct __lock __lock___arc4random_mutex;
 
-// __LOCK_INIT(static,malloc_handler) expands to:
-// extern struct __lock __lock_malloc_handler;
-// static _LOCK_T malloc_handler = &__lock_malloc_handler;
-
-char lock_name(_LOCK_T lock) {
+static char lock_name(_LOCK_T lock) {
 	if (lock == &__lock___sfp_recursive_mutex)
 		return 'f';
 	if (lock == &__lock___atexit_recursive_mutex)
@@ -56,7 +54,7 @@ char lock_name(_LOCK_T lock) {
 	return '?';
 }
 
-char proc_name(int proc_id) {
+static char proc_name(int proc_id) {
 	if (proc_id == 0)
 		return 'M';
 	if (proc_id == 1)
@@ -84,6 +82,7 @@ void __retarget_lock_init_recursive(_LOCK_T *lock) {
 	if (lock && (*lock)) {
 		(*lock)->proc_id = -1;
 		(*lock)->count = 0;
+		(*lock)->irqs_to_reenable.clear();
 	}
 }
 
@@ -95,50 +94,53 @@ void __retarget_lock_close_recursive(_LOCK_T lock) {
 	if (lock) {
 		lock->proc_id = -1;
 		lock->count = 0;
+		lock->irqs_to_reenable.clear();
 	}
 }
 
-static FixedVector<IRQn_Type, 2> disable_higher_priority_irqs(MetaModule::Processes cur_proc) {
-	FixedVector<IRQn_Type, 2> should_reenable_irqs;
-
-	// To avoid deadlock, Core0Main must pause AsyncThread0 since the latter runs on the same CPU at a higher priority.
-	// Otherwise AsyncThread0 might spin forever waiting for Core0Main to release a lock.
-	// Likewise for Core1Main and AsyncThread1.
-	// We don't need to consider any of the Audio threads because they are not permitted to use locking newlib functions.
-	// ReadPatchGuiElements runs at the same priority as AsyncThread1, so they cannot interrupt each other.
+static void disable_higher_priority_irqs(MetaModule::Processes cur_proc, _LOCK_T lock) {
+	// To avoid deadlock, lower-priority processes must disable higher-priority interrupts before taking a lock.
+	// Otherwise, the higher-priority interrupt might spin forever waiting for a lock which the lower-priority
+	// interrupt is holding.
+	//
+	// We don't need to consider any of the Audio interrupts because they are not permitted to use locking newlib functions.
 	//
 	// We can get away with mutexes without a scheduler because all processes (interrupts/threads)
 	// start and run fully -- thus they should always return the lock before returning back to the previous context.
 	// So we only need to be concerned with an interrupt that might need a lock that a lower process has.
+	//
+	// We will only spin-wait if the other core is holding a lock, regardless of anything related to interrupts.
 
-	// Core0Main must pause AsyncThread1 since it runs on the same CPU at a higher priority.
-	// This avoids deadlock. Likewise for Core1Main and AsyncThread1
-	// In general, lower-priority threads must not be interrupted by higher-priority threads
-	// but since we don't want to block audio threads, we must forbid use of locks in them.
 	if (cur_proc == MetaModule::Processes::Core0Main) {
+		// Disable AsyncThread0
 		if (mdrivlib::InterruptControl::is_enabled_irq(TIM7_IRQn)) {
 			mdrivlib::InterruptControl::disable_irq(TIM7_IRQn);
-			should_reenable_irqs.push_back(TIM7_IRQn);
+			lock->irqs_to_reenable.push_back(TIM7_IRQn);
 		}
 	}
+
 	if (cur_proc == MetaModule::Processes::Core1Main) {
+		// Disable AsyncThread1
 		if (mdrivlib::InterruptControl::is_enabled_irq(TIM6_IRQn)) {
 			mdrivlib::InterruptControl::disable_irq(TIM6_IRQn);
-			should_reenable_irqs.push_back(TIM6_IRQn);
-		}
-		if (mdrivlib::InterruptControl::is_enabled_irq(SGI4_IRQn)) {
-			mdrivlib::InterruptControl::disable_irq(SGI4_IRQn);
-			should_reenable_irqs.push_back(SGI4_IRQn);
+			lock->irqs_to_reenable.push_back(TIM6_IRQn);
 		}
 	}
 
-	return should_reenable_irqs;
+	if (cur_proc == MetaModule::Processes::Core1AsyncThread || cur_proc == MetaModule::Processes::Core1Main) {
+		// Disable ReadPatchGuiElements
+		if (mdrivlib::InterruptControl::is_enabled_irq(SGI1_IRQn)) {
+			mdrivlib::InterruptControl::disable_irq(SGI1_IRQn);
+			lock->irqs_to_reenable.push_back(SGI1_IRQn);
+		}
+	}
 }
 
-static void reenable_irqs(FixedVector<IRQn_Type, 2> &should_reenable_irqs) {
-	for (auto irq : should_reenable_irqs) {
+static void reenable_irqs(_LOCK_T lock) {
+	for (auto irq : lock->irqs_to_reenable) {
 		mdrivlib::InterruptControl::reenable_irq(irq);
 	}
+	lock->irqs_to_reenable.clear();
 }
 
 static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
@@ -150,13 +152,13 @@ static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
 	// If count == 0 then we claim the lock, otherwise see if we already own it
 	if (lock->count.compare_exchange_strong(expected, 1, std::memory_order_seq_cst)) {
 		lock->proc_id = proc_id;
-		if (lock_name(lock) != 'm') {
-			dbg_putc(proc_name(proc_id));
-			dbg_putc('^');
-			dbg_putc('1');
-			dbg_putc(lock_name(lock));
-			dbg_putc('\n');
-		}
+		// if (lock_name(lock) != 'm') {
+		// 	dbg_putc(proc_name(proc_id));
+		// 	dbg_putc('^');
+		// 	dbg_putc('1');
+		// 	dbg_putc(lock_name(lock));
+		// 	dbg_putc('\n');
+		// }
 		return 1;
 	}
 
@@ -165,11 +167,11 @@ static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
 		// We own the lock, so increment the count
 		// memory model can be relaxed since we are the only process allowed to write
 		lock->count = lock->count + 1;
-		dbg_putc(proc_name(proc_id));
-		dbg_putc('^');
-		dbg_putc('0' + lock->count.load());
-		dbg_putc(lock_name(lock));
-		dbg_putc('\n');
+		// dbg_putc(proc_name(lock->proc_id));
+		// dbg_putc('^');
+		// dbg_putc('0' + lock->count.load());
+		// dbg_putc(lock_name(lock));
+		// dbg_putc('\n');
 		return 1;
 	}
 
@@ -180,15 +182,16 @@ void __retarget_lock_acquire(_LOCK_T lock) {
 	if (!lock)
 		return;
 
-	auto irqs_to_reenable = disable_higher_priority_irqs(MetaModule::get_current_proc());
+	disable_higher_priority_irqs(MetaModule::get_current_proc(), lock);
 
 	//spin until we can claim the lock
-	while (__retarget_lock_try_acquire(lock) == 0)
-		;
-
-	reenable_irqs(irqs_to_reenable);
+	while (__retarget_lock_try_acquire(lock) == 0) {
+		// Debug::Pin0::high();
+		// Debug::Pin0::low();
+	}
 }
 
+// Only non-recursive lock seen so far is lock_tz_mutex, on Core1Main
 int __retarget_lock_try_acquire(_LOCK_T lock) {
 	if (!lock)
 		return 0;
@@ -198,11 +201,11 @@ int __retarget_lock_try_acquire(_LOCK_T lock) {
 	// If count == 0 then we claim the lock, otherwise fail
 	if (lock->count.compare_exchange_strong(expected, 1, std::memory_order_seq_cst)) {
 		lock->proc_id = MetaModule::get_current_proc_id();
-		dbg_putc(proc_name(lock->proc_id));
-		dbg_putc('n');
-		dbg_putc('0' + lock->count.load());
-		dbg_putc(lock_name(lock));
-		dbg_putc('\n');
+		// dbg_putc(proc_name(lock->proc_id));
+		// dbg_putc('n');
+		// dbg_putc('0' + lock->count.load());
+		// dbg_putc(lock_name(lock));
+		// dbg_putc('\n');
 		return 1;
 	} else {
 		return 0;
@@ -214,18 +217,39 @@ int __retarget_lock_try_acquire_recursive(_LOCK_T lock) {
 }
 
 void __retarget_lock_acquire_recursive(_LOCK_T lock) {
+	// can take 200ns to get current proc, plus 200-700ns to acquire lock
+	// So max is ~1us
 	if (!lock)
 		return;
 
 	auto cur_proc = MetaModule::get_current_proc();
+	if (cur_proc == MetaModule::Processes::Core0Audio || cur_proc == MetaModule::Processes::Core1Audio)
+		Debug::Pin0::high();
+	// else if (cur_proc == MetaModule::Processes::Core0Main)
+	// 	Debug::Pin1::high();
+	else if (cur_proc == MetaModule::Processes::Core0AsyncThread)
+		Debug::Pin2::high();
+	else if (cur_proc == MetaModule::Processes::Core1AsyncThread)
+		Debug::Pin3::high();
+	else if (cur_proc != MetaModule::Processes::Core1Main)
+		Debug::Pin1::high();
 
-	auto irqs_to_reenable = disable_higher_priority_irqs(cur_proc);
+	disable_higher_priority_irqs(cur_proc, lock);
 
 	//spin until we can claim the lock
-	while (try_acquire_recursive(lock, std::to_underlying(cur_proc)) == 0)
-		;
+	while (try_acquire_recursive(lock, std::to_underlying(cur_proc)) == 0) {
+	}
 
-	reenable_irqs(irqs_to_reenable);
+	if (cur_proc == MetaModule::Processes::Core0Audio || cur_proc == MetaModule::Processes::Core1Audio)
+		Debug::Pin0::low();
+	// else if (cur_proc == MetaModule::Processes::Core0Main)
+	// 	Debug::Pin1::low();
+	else if (cur_proc == MetaModule::Processes::Core0AsyncThread)
+		Debug::Pin2::low(); // TSP 1 loads a sample
+	else if (cur_proc == MetaModule::Processes::Core1AsyncThread)
+		Debug::Pin3::low(); // TSP 2 loads a sample
+	else if (cur_proc != MetaModule::Processes::Core1Main)
+		Debug::Pin1::low(); // Core0Main, Core1ReadPatchElements
 }
 
 void __retarget_lock_release(_LOCK_T lock) {
@@ -236,17 +260,18 @@ void __retarget_lock_release(_LOCK_T lock) {
 
 	// If we own the lock, release it
 	if (proc_id == lock->proc_id) {
-		dbg_putc(proc_name(lock->proc_id));
-		dbg_putc('v');
-		dbg_putc('0' + lock->count.load());
-		dbg_putc(lock_name(lock));
-		dbg_putc('\n');
-		lock->count = 0;
+		// dbg_putc(proc_name(lock->proc_id));
+		// dbg_putc('v');
+		// dbg_putc('0' + lock->count.load());
+		// dbg_putc(lock_name(lock));
+		// dbg_putc('\n');
 		lock->proc_id = -1;
+		lock->count.store(0, std::memory_order_release);
+		reenable_irqs(lock);
 		return;
-	} else {
-		dbg_putc('y');
-		dbg_putc('\n');
+		// } else {
+		// 	dbg_putc('y');
+		// 	dbg_putc('\n');
 	}
 }
 
@@ -255,8 +280,8 @@ void __retarget_lock_release_recursive(_LOCK_T lock) {
 		return;
 
 	if (lock->count <= 0) {
-		dbg_putc('X');
-		dbg_putc('\n');
+		// dbg_putc('X');
+		// dbg_putc('\n');
 		return;
 	}
 
@@ -266,27 +291,28 @@ void __retarget_lock_release_recursive(_LOCK_T lock) {
 	if (proc_id == lock->proc_id) {
 		// If count == 1 then we need to release to lock atomically
 		if (lock->count == 1) {
-			if (lock_name(lock) != 'm') {
-				dbg_putc(proc_name(lock->proc_id));
-				dbg_putc('_');
-				dbg_putc('0');
-				dbg_putc(lock_name(lock));
-				dbg_putc('\n');
-			}
+			// if (lock_name(lock) != 'm') {
+			// 	dbg_putc(proc_name(lock->proc_id));
+			// 	dbg_putc('_');
+			// 	dbg_putc('0');
+			// 	dbg_putc(lock_name(lock));
+			// 	dbg_putc('\n');
+			// }
 			lock->proc_id = -1;
 			lock->count.store(0, std::memory_order_release);
+			reenable_irqs(lock);
 		} else {
 			// count > 1, so decrement it
 			lock->count = lock->count - 1;
-			dbg_putc(proc_name(lock->proc_id));
-			dbg_putc('_');
-			dbg_putc('0' + lock->count.load());
-			dbg_putc(lock_name(lock));
-			dbg_putc('\n');
+			// dbg_putc(proc_name(lock->proc_id));
+			// dbg_putc('_');
+			// dbg_putc('0' + lock->count.load());
+			// dbg_putc(lock_name(lock));
+			// dbg_putc('\n');
 		}
-	} else {
-		dbg_putc('x');
-		dbg_putc('\n');
+		// } else {
+		// 	dbg_putc('x');
+		// 	dbg_putc('\n');
 	}
 }
 }
