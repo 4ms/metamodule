@@ -14,6 +14,7 @@
 #include "patch_play/randomize_param.hh"
 #include "patch_play/reset_param.hh"
 #include <algorithm>
+#include <functional>
 #include <vector>
 
 namespace MetaModule
@@ -58,11 +59,13 @@ public:
 		lv_obj_add_event_cb(ui_ModuleViewActionRandomBut, random_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionPresetBut, preset_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionResetBut, reset_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionMidiBut, midi_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
 		lv_group_add_obj(group, ui_ModuleViewActionResetBut);
+		lv_group_add_obj(group, ui_ModuleViewActionMidiBut);
 		lv_group_add_obj(group, moduleViewActionPresetBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
@@ -162,6 +165,18 @@ public:
 	void update() {
 		process_delete_module();
 		auto_map.update();
+	}
+
+	std::function<void()> midi_toggle_callback;
+	
+	void update_midi_button_state(bool midi_mode) {
+		if (midi_mode) {
+			lv_obj_add_state(ui_ModuleViewActionMidiBut, LV_STATE_CHECKED);
+			lv_label_set_text(ui_ModuleViewActionMidiLabel, "MIDI Assign: On");
+		} else {
+			lv_obj_clear_state(ui_ModuleViewActionMidiBut, LV_STATE_CHECKED);
+			lv_label_set_text(ui_ModuleViewActionMidiLabel, "MIDI Assign: Off");
+		}
 	}
 
 private:
@@ -288,6 +303,16 @@ private:
 			"Delete");
 	}
 
+	static void midi_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		
+		if (page->midi_toggle_callback) {
+			page->midi_toggle_callback();
+		}
+	}
+
 	FatFileIO &ramdisk;
 	OpenPatchManager &patches;
 	PageList &page_list;
@@ -304,6 +329,12 @@ private:
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
+
+	// Forward declaration
+	struct ModuleViewPage;
+	ModuleViewPage *parent_page = nullptr;
+
+	void set_parent_page(ModuleViewPage *page) { parent_page = page; }
 
 	lv_obj_t *moduleViewActionPresetBut;
 	std::string preset_path{};

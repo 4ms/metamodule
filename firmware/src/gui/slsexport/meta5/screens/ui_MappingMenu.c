@@ -570,6 +570,30 @@ lv_obj_set_height( ui_ModuleViewActionResetLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_ModuleViewActionResetLabel, LV_ALIGN_LEFT_MID );
 lv_label_set_text(ui_ModuleViewActionResetLabel,"Initialize");
 
+ui_ModuleViewActionMidiBut = lv_btn_create(ui_ModuleViewActionMenu);
+lv_obj_set_height( ui_ModuleViewActionMidiBut, 25);
+lv_obj_set_width( ui_ModuleViewActionMidiBut, lv_pct(100));
+lv_obj_set_align( ui_ModuleViewActionMidiBut, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_ModuleViewActionMidiBut, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_ModuleViewActionMidiBut, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_radius(ui_ModuleViewActionMidiBut, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewActionMidiBut, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ModuleViewActionMidiBut, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewActionMidiBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_bg_opa(ui_ModuleViewActionMidiBut, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_bg_color(ui_ModuleViewActionMidiBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_CHECKED );
+lv_obj_set_style_bg_opa(ui_ModuleViewActionMidiBut, 255, LV_PART_MAIN| LV_STATE_CHECKED);
+lv_obj_set_style_outline_width(ui_ModuleViewActionMidiBut, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ModuleViewActionMidiBut, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ModuleViewActionMidiBut, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_ModuleViewActionMidiBut, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_ModuleViewActionMidiLabel = lv_label_create(ui_ModuleViewActionMidiBut);
+lv_obj_set_width( ui_ModuleViewActionMidiLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_ModuleViewActionMidiLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_ModuleViewActionMidiLabel, LV_ALIGN_LEFT_MID );
+lv_label_set_text(ui_ModuleViewActionMidiLabel,"MIDI Assign: Off");
+
 ui_ModuleViewActionDeleteBut = lv_btn_create(ui_ModuleViewActionMenu);
 lv_obj_set_height( ui_ModuleViewActionDeleteBut, 25);
 lv_obj_set_width( ui_ModuleViewActionDeleteBut, lv_pct(100));

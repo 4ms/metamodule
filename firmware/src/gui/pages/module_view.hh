@@ -85,6 +85,12 @@ struct ModuleViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
+		// Reset MIDI mapping mode when switching to a different patch
+		if (current_patch_hash != args.patch_loc_hash) {
+			midi_mapping_mode = false;
+			current_patch_hash = args.patch_loc_hash;
+		}
+
 		this_module_id = args.module_id.value_or(this_module_id);
 
 		if (args.patch_loc_hash) {
@@ -116,6 +122,12 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_AutoMapSelectPanel);
 		lv_hide(ui_MIDIMapPanel);
 
+		// Set up MIDI mode callback for action menu
+		action_menu.midi_toggle_callback = [this]() {
+			midi_mapping_mode = !midi_mapping_mode;
+			action_menu.update_midi_button_state(midi_mapping_mode);
+		};
+
 		if (gui_state.new_cable) {
 			lv_hide(ui_ModuleViewHideBut);
 			lv_hide(ui_ModuleViewActionBut);
@@ -141,6 +153,9 @@ struct ModuleViewPage : PageBase {
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 			settings_menu.prepare_focus(group);
 			action_menu.prepare_focus(group, this_module_id);
+			
+			// Initialize MIDI button state in action menu
+			action_menu.update_midi_button_state(midi_mapping_mode);
 		}
 	}
 
@@ -954,6 +969,10 @@ private:
 
 	bool full_screen_mode = false;
 
+	// MIDI mapping mode - only persists for the duration of the patch
+	bool midi_mapping_mode = false;
+	std::optional<PatchLocHash> current_patch_hash;
+
 	enum { ContextMenuTag = -2 };
 
 	uint16_t selected_input_port = 0;
@@ -998,24 +1017,27 @@ private:
 					i++;
 				}
 
-				// MIDI CC quick assign: hold encoder + send MIDI CC
-				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
-					if (cc.changed) {
-						cc.changed = 0; // Clear the flag
-						perform_midi_assign(MidiCC0 + ccnum, current_element);
+				// MIDI assignment only available in MIDI mapping mode
+				if (midi_mapping_mode) {
+					// MIDI CC quick assign: hold encoder + send MIDI CC
+					for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
+						if (cc.changed) {
+							cc.changed = 0; // Clear the flag
+							perform_midi_assign(MidiCC0 + ccnum, current_element);
+							roller_hover.force_redraw();
+							return;
+						}
+						ccnum++;
+					}
+
+					// MIDI Note quick assign: hold encoder + send MIDI note
+					auto &note = params.last_midi_note;
+					if (note.changed) {
+						note.changed = 0; // Clear the flag
+						perform_midi_assign(MidiGateNote0 + note.val, current_element);
 						roller_hover.force_redraw();
 						return;
 					}
-					ccnum++;
-				}
-
-				// MIDI Note quick assign: hold encoder + send MIDI note
-				auto &note = params.last_midi_note;
-				if (note.changed) {
-					note.changed = 0; // Clear the flag
-					perform_midi_assign(MidiGateNote0 + note.val, current_element);
-					roller_hover.force_redraw();
-					return;
 				}
 			}
 
