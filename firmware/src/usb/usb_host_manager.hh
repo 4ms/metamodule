@@ -4,6 +4,7 @@
 #include "cdc_host.hh"
 #include "msc_host.hh"
 #include "pr_dbg.hh"
+#include "core_intercom/shared_memory.hh"
 #include <cstring>
 
 class UsbHostManager {
@@ -38,18 +39,21 @@ private:
 	static inline unsigned inflight_cdc_tx_count = 0;
 	static inline unsigned process_iteration_count = 0;
 
-	// For access in C-style callback:
-	static inline MidiHost *_midihost_instance;
-	static inline CDCHost *_cdchost_instance;
-	static inline MSCHost *_mschost_instance;
-	static inline ConcurrentBuffer *_console_cdc_buff;
-	static inline unsigned _current_read_pos;
-	static inline PreferredClass *_preferred_class_ptr;
-	static inline UsbHostManager *_manager_instance;
-	static inline unsigned _last_seen_write_pos;
+			// For access in C-style callback:
+		static inline MidiHost *_midihost_instance;
+		static inline CDCHost *_cdchost_instance;
+		static inline MSCHost *_mschost_instance;
+		static inline ConcurrentBuffer *_console_cdc_buff;
+		static inline unsigned _current_read_pos;
+		static inline PreferredClass *_preferred_class_ptr;
+		static inline UsbHostManager *_manager_instance;
+		static inline unsigned _last_seen_write_pos;
 
-	// New: Track multiple active interfaces
-	static constexpr size_t MAX_INTERFACES = 8;
+		// One-shot CDC scanning: armed at boot or when new data arrives, disarmed after drain
+		static inline bool _cdc_scan_armed;
+
+		// New: Track multiple active interfaces
+		static constexpr size_t MAX_INTERFACES = 8;
 	ActiveInterface active_interfaces[MAX_INTERFACES];
 	size_t num_active_interfaces = 0;
 	
@@ -81,6 +85,7 @@ public:
 		_preferred_class_ptr = &preferred_class;
 		_manager_instance = this;
 		_last_seen_write_pos = _current_read_pos;
+		_cdc_scan_armed = false; // only arm when A7 requests via SharedMemory flag
 	}
 
 	void init() {
@@ -143,7 +148,19 @@ public:
 		
 		// Only transmit CDC buffer every 10 iterations
 		process_iteration_count++;
-		if (process_iteration_count >= 100) {
+		if (process_iteration_count >= 10) {
+			// If disarmed, only arm when A7 sets the shared flag; avoid any buffer reads
+			if (!_cdc_scan_armed) {
+				auto flag_ptr = MetaModule::SharedMemoryS::ptrs.cdc_arm_flag;
+				if (flag_ptr && *flag_ptr) {
+					*flag_ptr = 0;
+					_cdc_scan_armed = true;
+				} else {
+					process_iteration_count = 0;
+					return;
+				}
+			}
+
 			// Determine if there is new data relative to the read cursor
 			bool has_new_data = false;
 			unsigned current_write_pos = 0;
@@ -163,6 +180,8 @@ public:
 				stop();
 				set_preferred_class(PreferredClass::MIDI);
 				start();
+				// After draining and switching back, disarm until new data arrives
+				_cdc_scan_armed = false;
 			}
 			process_iteration_count = 0;
 		}
@@ -201,9 +220,11 @@ public:
 				pr_dbg("Switching to MIDI\n");
 				HAL_Delay(50);
 				did_init = false;
-				stop();	
+				stop();
 				set_preferred_class(PreferredClass::MIDI);
 				start();
+				// Buffer drained: disarm scanning until new data arrives
+				_cdc_scan_armed = false;
 				return;
 			} else {
 				return;

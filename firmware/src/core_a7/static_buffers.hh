@@ -5,11 +5,13 @@
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
 #include "patch_file/patch_dir_list.hh"
-#include "sync_params.hh"
 #include <array>
 
 namespace MetaModule
 {
+
+// Forward declaration to avoid including sync_params.hh here
+struct SyncParams;
 
 // StaticBuffers sets up our regions of memory that have specific requirements in the target chip architecture.
 namespace StaticBuffers
@@ -32,6 +34,7 @@ extern ConcurrentBuffer console_a7_0_buff;
 extern ConcurrentBuffer console_a7_1_buff;
 extern ConcurrentBuffer console_m4_buff;
 extern ConcurrentBuffer console_cdc_buff;
+extern volatile uint8_t cdc_arm_flag; // New: arm signal for CDC scanning
 
 void init();
 

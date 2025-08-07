@@ -63,6 +63,7 @@ int main() {
 		&StaticBuffers::console_a7_1_buff,
 		&StaticBuffers::console_m4_buff,
 		&StaticBuffers::console_cdc_buff,
+		&StaticBuffers::cdc_arm_flag,
 	};
 
 	A7SharedMemoryS::ptrs = {
@@ -73,7 +74,7 @@ int main() {
 		&StaticBuffers::sync_params,
 		&patch_mod_queue,
 		&StaticBuffers::virtdrive,
-		&StaticBuffers::console_a7_1_buff,
+		&StaticBuffers::console_a7_0_buff,
 		&StaticBuffers::console_cdc_buff,
 	};
 

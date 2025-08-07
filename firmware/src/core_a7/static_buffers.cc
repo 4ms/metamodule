@@ -41,6 +41,7 @@ __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_cdc_buff{};
+__attribute__((section(".sysram"))) volatile uint8_t cdc_arm_flag{0};
 
 void init() {
 	for (auto &block : param_blocks) {
@@ -90,6 +91,8 @@ void init() {
 	console_cdc_buff.current_write_pos = 0;
 	console_cdc_buff.buffer.data[0] = 0;
 	console_cdc_buff.use_color = false;
+
+	cdc_arm_flag = 0;
 }
 
 }; // namespace StaticBuffers

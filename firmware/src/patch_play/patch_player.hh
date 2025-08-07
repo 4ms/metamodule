@@ -31,6 +31,9 @@
 
 #include "debug.hh"
 
+// Forward declare the shared arm flag without including heavy headers
+namespace MetaModule { namespace StaticBuffers { extern volatile uint8_t cdc_arm_flag; } }
+
 namespace MetaModule
 {
 
@@ -1632,8 +1635,12 @@ inline void PatchPlayer::update_all_roto_controls() {
              }
         }
     }
-    RotoControl::end_config_update();
+    	RotoControl::end_config_update();
 	RotoControl::set_setup(0x00);
+	// Arm CDC scan on M4 to transmit this config once
+	#if !defined(TESTPROJECT)
+	MetaModule::StaticBuffers::cdc_arm_flag = 1;
+	#endif
 	RotoControl::send_all_commands();
 	
 }

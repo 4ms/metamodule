@@ -21,6 +21,7 @@ struct SharedMemoryS {
 		ConcurrentBuffer *console_a7_1_buff;
 		ConcurrentBuffer *console_m4_buff;
 		ConcurrentBuffer *console_cdc_buff;
+		volatile uint8_t *cdc_arm_flag; // New: A7->M4 arm signal for CDC scan
 	};
 
 	static Ptrs ptrs;
