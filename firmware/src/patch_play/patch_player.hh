@@ -1494,12 +1494,14 @@ inline void PatchPlayer::update_all_roto_controls() {
 											// KnobSnapped uses const char* - check for nullptr
 											if (el.pos_names[i] != nullptr) {
 												step_name = std::string(el.pos_names[i]);
+												pr_dbg("step_name knobsnapped: %s\n", step_name.c_str());
 												is_valid_name = true;
 											}
 										} else {
 											// FlipSwitch and SlideSwitch use std::string_view - check for empty
 											if (!el.pos_names[i].empty()) {
 												step_name = std::string(el.pos_names[i]);
+												pr_dbg("step_name flipswitch: %s\n", step_name.c_str());
 												is_valid_name = true;
 											}
 										}
@@ -1510,6 +1512,7 @@ inline void PatchPlayer::update_all_roto_controls() {
 											}
 											step_name.resize(13, '\0');
 											dummy_step_names_storage.push_back(step_name);
+											pr_dbg("dummy_step_names_storage: %s\n", step_name.c_str());
 										}
 									}
 									// Update haptic_steps to match actual number of valid names collected
@@ -1557,8 +1560,17 @@ inline void PatchPlayer::update_all_roto_controls() {
 								);
 								next_midi_roto_switch_index_++;
 							} else {
-								pr_dbg("Setting knob control config, setup_index: %d, control_index: %d, haptic_mode: %d, haptic_steps: %d\n min_val_u16: %d, max_val_u16: %d, control_name: %s\n step_names_ptr: %p\n", 
+								pr_dbg("Setting knob control config, setup_index: %d, control_index: %d, haptic_mode: %d, haptic_steps: %d\n min_val_u16: %d, max_val_u16: %d, control_name: %s\n", 
 									0, next_midi_roto_knob_index_, haptic_mode, haptic_steps, min_val_u16, max_val_u16, control_name_ptr);
+								if (step_names_ptr && haptic_steps > 0) {
+									pr_dbg("step_names: [");
+									for (uint8_t i = 0; i < haptic_steps; ++i) {
+										pr_dbg("%s'%s'", (i > 0 ? ", " : ""), step_names_ptr[i] ? step_names_ptr[i] : "null");
+									}
+									pr_dbg("]\n");
+								} else {
+									pr_dbg("step_names: null or empty\n");
+								}
 								RotoControl::set_knob_control_config(
 									0, // setup_index
 									next_midi_roto_knob_index_, // RotoControl's own knob/control index
@@ -1594,7 +1606,9 @@ inline void PatchPlayer::update_all_roto_controls() {
         }
     }
     RotoControl::end_config_update();
+	RotoControl::set_setup(0x00);
 	RotoControl::send_all_commands();
+	
 }
 
 } // namespace MetaModule

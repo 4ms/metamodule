@@ -92,6 +92,7 @@ public:
 
 	static void start_config_update();
 	static void end_config_update();
+	static void set_setup(uint8_t setup_index);
 	static void clear_midi_setup(uint8_t setup_index);
 	static void send_all_commands();
 

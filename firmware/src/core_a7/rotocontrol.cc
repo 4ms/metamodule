@@ -209,6 +209,14 @@ void RotoControl::end_config_update(/* ConcurrentBuffer &console_cdc_buff */) { 
 	command_buffer_.insert(command_buffer_.end(), std::begin(command), std::end(command));
 }
 
+void RotoControl::set_setup(uint8_t setup_index) {
+	// Command: 5A 02 03 00 01 SI F0 F1
+	// CL = Command data length = 0001 (MSB, LSB)
+	// SI = Setup index (00-3F)
+	const uint8_t command[] = {0x5A, 0x02, 0x03, 0x00, 0x01, setup_index, 0xF0, 0xF1};
+	command_buffer_.insert(command_buffer_.end(), std::begin(command), std::end(command));
+}
+
 void RotoControl::clear_midi_setup(uint8_t setup_index) {
 	// Command: 5A 02 0A 00 01 SI F0 F1
 	// CL = Command data length = 0001 (MSB, LSB)
