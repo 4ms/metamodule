@@ -46,6 +46,7 @@ private:
 	static inline unsigned _current_read_pos;
 	static inline PreferredClass *_preferred_class_ptr;
 	static inline UsbHostManager *_manager_instance;
+	static inline unsigned _last_seen_write_pos;
 
 	// New: Track multiple active interfaces
 	static constexpr size_t MAX_INTERFACES = 8;
@@ -79,6 +80,7 @@ public:
 		_current_read_pos = console_cdc_buff->current_write_pos;
 		_preferred_class_ptr = &preferred_class;
 		_manager_instance = this;
+		_last_seen_write_pos = _current_read_pos;
 	}
 
 	void init() {
@@ -141,8 +143,27 @@ public:
 		
 		// Only transmit CDC buffer every 10 iterations
 		process_iteration_count++;
-		if (process_iteration_count >= 10) {
-			transmit_cdc_buffer();
+		if (process_iteration_count >= 100) {
+			// Determine if there is new data relative to the read cursor
+			bool has_new_data = false;
+			unsigned current_write_pos = 0;
+			if (_console_cdc_buff) {
+				current_write_pos = _console_cdc_buff->current_write_pos & _console_cdc_buff->buffer.SIZEMASK;
+				has_new_data = (current_write_pos != _current_read_pos);
+			}
+
+			if (has_new_data || (inflight_cdc_tx_count > 0)) {
+				_last_seen_write_pos = current_write_pos;
+				transmit_cdc_buffer();
+			} else if (!has_new_data && (preferred_class != PreferredClass::MIDI) && (inflight_cdc_tx_count == 0)) {
+				// Preserve prior behavior: switch back to MIDI when empty without running transmit path
+				pr_dbg("Transmit CDC buffer: empty buffer, switching back to MIDI\n");
+				HAL_Delay(50);
+				did_init = false;
+				stop();
+				set_preferred_class(PreferredClass::MIDI);
+				start();
+			}
 			process_iteration_count = 0;
 		}
 	}
