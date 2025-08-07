@@ -6,21 +6,20 @@
 #include <sys/lock.h>
 #include <utility>
 
-// #define MM_DEBUG_LOCKS
+#define MM_DEBUG_LOCKS
 
 #ifdef MM_DEBUG_LOCKS
 #include "console/uart_log.hh"
 void dbg_putc(char c) {
 	MetaModule::UartLog::putchar(c);
 }
+void dbg_puts(const char *s) {
+	MetaModule::UartLog::puts(s);
+}
 #else
 #define dbg_putc(x)
+#define dbg_puts(x)
 #endif
-
-// template<typename T>
-// void dbg_putc(T c...) {
-// 	MetaModule::UartLog::putchar(c);
-// }
 
 extern "C" {
 
@@ -74,6 +73,14 @@ static char proc_name(int proc_id) {
 	return '?';
 }
 
+static void print_proclock(char c, _LOCK_T lock) {
+	dbg_putc(proc_name(lock->proc_id));
+	dbg_putc(c);
+	dbg_putc('0' + lock->count);
+	dbg_putc(lock_name(lock));
+	dbg_putc('\n');
+}
+
 void __retarget_lock_init(_LOCK_T *lock) {
 	__retarget_lock_init_recursive(lock);
 }
@@ -83,6 +90,7 @@ void __retarget_lock_init_recursive(_LOCK_T *lock) {
 		(*lock)->proc_id = -1;
 		(*lock)->count = 0;
 		(*lock)->irqs_to_reenable.clear();
+		print_proclock('@', *lock);
 	}
 }
 
@@ -152,13 +160,8 @@ static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
 	// If count == 0 then we claim the lock, otherwise see if we already own it
 	if (lock->count.compare_exchange_strong(expected, 1, std::memory_order_seq_cst)) {
 		lock->proc_id = proc_id;
-		// if (lock_name(lock) != 'm') {
-		// 	dbg_putc(proc_name(proc_id));
-		// 	dbg_putc('^');
-		// 	dbg_putc('1');
-		// 	dbg_putc(lock_name(lock));
-		// 	dbg_putc('\n');
-		// }
+		// if (lock_name(lock) != 'm')
+		//	print_proclock('^', lock);
 		return 1;
 	}
 
@@ -167,11 +170,8 @@ static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
 		// We own the lock, so increment the count
 		// memory model can be relaxed since we are the only process allowed to write
 		lock->count = lock->count + 1;
-		// dbg_putc(proc_name(lock->proc_id));
-		// dbg_putc('^');
-		// dbg_putc('0' + lock->count.load());
-		// dbg_putc(lock_name(lock));
-		// dbg_putc('\n');
+		// if (lock_name(lock) != 'm')
+		//	print_proclock('^', lock);
 		return 1;
 	}
 
@@ -186,8 +186,8 @@ void __retarget_lock_acquire(_LOCK_T lock) {
 
 	//spin until we can claim the lock
 	while (__retarget_lock_try_acquire(lock) == 0) {
-		// Debug::Pin0::high();
-		// Debug::Pin0::low();
+		Debug::Pin1::high();
+		Debug::Pin1::low();
 	}
 }
 
@@ -201,11 +201,7 @@ int __retarget_lock_try_acquire(_LOCK_T lock) {
 	// If count == 0 then we claim the lock, otherwise fail
 	if (lock->count.compare_exchange_strong(expected, 1, std::memory_order_seq_cst)) {
 		lock->proc_id = MetaModule::get_current_proc_id();
-		// dbg_putc(proc_name(lock->proc_id));
-		// dbg_putc('n');
-		// dbg_putc('0' + lock->count.load());
-		// dbg_putc(lock_name(lock));
-		// dbg_putc('\n');
+		// print_proclock('n', lock);
 		return 1;
 	} else {
 		return 0;
@@ -217,39 +213,18 @@ int __retarget_lock_try_acquire_recursive(_LOCK_T lock) {
 }
 
 void __retarget_lock_acquire_recursive(_LOCK_T lock) {
-	// can take 200ns to get current proc, plus 200-700ns to acquire lock
-	// So max is ~1us
 	if (!lock)
 		return;
 
 	auto cur_proc = MetaModule::get_current_proc();
-	if (cur_proc == MetaModule::Processes::Core0Audio || cur_proc == MetaModule::Processes::Core1Audio)
-		Debug::Pin0::high();
-	// else if (cur_proc == MetaModule::Processes::Core0Main)
-	// 	Debug::Pin1::high();
-	else if (cur_proc == MetaModule::Processes::Core0AsyncThread)
-		Debug::Pin2::high();
-	else if (cur_proc == MetaModule::Processes::Core1AsyncThread)
-		Debug::Pin3::high();
-	else if (cur_proc != MetaModule::Processes::Core1Main)
-		Debug::Pin1::high();
 
 	disable_higher_priority_irqs(cur_proc, lock);
 
 	//spin until we can claim the lock
 	while (try_acquire_recursive(lock, std::to_underlying(cur_proc)) == 0) {
+		Debug::Pin2::high();
+		Debug::Pin2::low();
 	}
-
-	if (cur_proc == MetaModule::Processes::Core0Audio || cur_proc == MetaModule::Processes::Core1Audio)
-		Debug::Pin0::low();
-	// else if (cur_proc == MetaModule::Processes::Core0Main)
-	// 	Debug::Pin1::low();
-	else if (cur_proc == MetaModule::Processes::Core0AsyncThread)
-		Debug::Pin2::low(); // TSP 1 loads a sample
-	else if (cur_proc == MetaModule::Processes::Core1AsyncThread)
-		Debug::Pin3::low(); // TSP 2 loads a sample
-	else if (cur_proc != MetaModule::Processes::Core1Main)
-		Debug::Pin1::low(); // Core0Main, Core1ReadPatchElements
 }
 
 void __retarget_lock_release(_LOCK_T lock) {
@@ -260,18 +235,13 @@ void __retarget_lock_release(_LOCK_T lock) {
 
 	// If we own the lock, release it
 	if (proc_id == lock->proc_id) {
-		// dbg_putc(proc_name(lock->proc_id));
-		// dbg_putc('v');
-		// dbg_putc('0' + lock->count.load());
-		// dbg_putc(lock_name(lock));
-		// dbg_putc('\n');
+		// print_proclock('v', lock);
 		lock->proc_id = -1;
 		lock->count.store(0, std::memory_order_release);
 		reenable_irqs(lock);
 		return;
-		// } else {
-		// 	dbg_putc('y');
-		// 	dbg_putc('\n');
+	} else {
+		dbg_puts("Error: release on not our lock\n");
 	}
 }
 
@@ -280,8 +250,7 @@ void __retarget_lock_release_recursive(_LOCK_T lock) {
 		return;
 
 	if (lock->count <= 0) {
-		// dbg_putc('X');
-		// dbg_putc('\n');
+		dbg_puts("Error: recursive release on unowned lock\n");
 		return;
 	}
 
@@ -291,28 +260,18 @@ void __retarget_lock_release_recursive(_LOCK_T lock) {
 	if (proc_id == lock->proc_id) {
 		// If count == 1 then we need to release to lock atomically
 		if (lock->count == 1) {
-			// if (lock_name(lock) != 'm') {
-			// 	dbg_putc(proc_name(lock->proc_id));
-			// 	dbg_putc('_');
-			// 	dbg_putc('0');
-			// 	dbg_putc(lock_name(lock));
-			// 	dbg_putc('\n');
-			// }
+			// if (lock_name(lock) != 'm')
+			//	print_proclock('_', lock);
 			lock->proc_id = -1;
 			lock->count.store(0, std::memory_order_release);
 			reenable_irqs(lock);
 		} else {
 			// count > 1, so decrement it
 			lock->count = lock->count - 1;
-			// dbg_putc(proc_name(lock->proc_id));
-			// dbg_putc('_');
-			// dbg_putc('0' + lock->count.load());
-			// dbg_putc(lock_name(lock));
-			// dbg_putc('\n');
+			// print_proclock('_', lock);
 		}
-		// } else {
-		// 	dbg_putc('x');
-		// 	dbg_putc('\n');
+	} else {
+		dbg_puts("Error: recursive release on not our lock\n");
 	}
 }
 }
