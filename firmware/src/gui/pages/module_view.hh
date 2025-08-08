@@ -125,6 +125,11 @@ struct ModuleViewPage : PageBase {
 		// Set up MIDI mode callback for action menu
 		action_menu.midi_toggle_callback = [this]() {
 			midi_mapping_mode = !midi_mapping_mode;
+			if (midi_mapping_mode) {
+				notify_queue.put({"Send MIDI events while clicking on a control to create MIDI maps",
+								  Notification::Priority::Status,
+								  4000});
+			}
 			action_menu.update_midi_button_state(midi_mapping_mode);
 		};
 
@@ -153,7 +158,7 @@ struct ModuleViewPage : PageBase {
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 			settings_menu.prepare_focus(group);
 			action_menu.prepare_focus(group, this_module_id);
-			
+
 			// Initialize MIDI button state in action menu
 			action_menu.update_midi_button_state(midi_mapping_mode);
 		}
