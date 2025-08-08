@@ -30,15 +30,15 @@ struct __lock {
 	FixedVector<IRQn_Type, 4> irqs_to_reenable;
 };
 
-struct __lock __lock___sfp_recursive_mutex;
-struct __lock __lock___atexit_recursive_mutex;
-struct __lock __lock___malloc_recursive_mutex;
-struct __lock __lock___env_recursive_mutex;
+struct __lock __lock___sfp_recursive_mutex{};
+struct __lock __lock___atexit_recursive_mutex{};
+struct __lock __lock___malloc_recursive_mutex{};
+struct __lock __lock___env_recursive_mutex{};
 struct __lock __lock___tz_mutex;
 // Not used, but newlib wants them:
-struct __lock __lock___at_quick_exit_mutex;
-struct __lock __lock___dd_hash_mutex;
-struct __lock __lock___arc4random_mutex;
+struct __lock __lock___at_quick_exit_mutex{};
+struct __lock __lock___dd_hash_mutex{};
+struct __lock __lock___arc4random_mutex{};
 
 // Debug helpers:
 static char lock_name(_LOCK_T lock);
