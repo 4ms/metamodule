@@ -50,6 +50,7 @@ std::optional<int> alloc_file() {
 		// Default-init a FIL
 		fatfil_pool[*fd_idx] = FIL{};
 		descriptors[*fd_idx].fatfil = &fatfil_pool[*fd_idx];
+		printf("FileDescManager: alloc fd %zu\n", *fd_idx + FirstFileFD);
 		return static_cast<int>(*fd_idx + FirstFileFD);
 	} else
 		return {};
@@ -58,8 +59,9 @@ std::optional<int> alloc_file() {
 void dealloc_file(size_t fd) {
 	if (fd_is_file(fd)) {
 		if (!descriptors.destroy(index(fd))) {
-			printf("FileDescManager error: descriptor %zu was already dealloced\n", index(fd));
-		}
+			printf("FileDescManager error: descriptor %zu was already dealloced\n", fd);
+		} else
+			printf("FileDescManager: dealloc fd %zu\n", fd);
 
 		fatfil_pool[index(fd)].obj.fs = nullptr;
 		descriptors[index(fd)].fatfil = nullptr;

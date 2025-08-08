@@ -52,7 +52,7 @@ std::optional<uint32_t> create_async_task(CoreProcessor *module) {
 
 void destroy_async_task(uint32_t id) {
 	if (auto idx = task_index(id)) {
-		pr_trace("Erase task id %u (index %u)\n", (unsigned)id, (unsigned)(*idx));
+		pr_dbg("Erase task id %u (index %u)\n", (unsigned)id, (unsigned)(*idx));
 		tasks.erase(*idx);
 	}
 }

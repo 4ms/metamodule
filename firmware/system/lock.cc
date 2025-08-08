@@ -206,6 +206,7 @@ void __retarget_lock_release(_LOCK_T lock) {
 		return;
 	} else {
 		dbg_puts("Error: release on not our lock\n");
+		log_proclock('#', lock);
 	}
 }
 
@@ -236,7 +237,11 @@ void __retarget_lock_release_recursive(_LOCK_T lock) {
 			log_proclock('-', lock); //-2 means recursive lock lowered 3=>2
 		}
 	} else {
-		dbg_puts("Error: recursive release on not our lock\n");
+		dbg_puts("Error: recursive release on not our lock: us lock lockproc\n");
+		dbg_putc(proc_name(proc_id));
+		dbg_putc(lock_name(lock));
+		dbg_putc(proc_name(lock->proc_id));
+		log_proclock('*', lock);
 	}
 }
 

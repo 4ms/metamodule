@@ -56,7 +56,7 @@ void AsyncThread::stop() {
 		if (auto task = get_task(*internal->id)) {
 			task->enabled = false;
 
-			pr_trace("Stop task id %u on core %u\n", *internal->id, task->core_id);
+			pr_dbg("Stop task id %u on core %u\n", *internal->id, task->core_id);
 		} else
 			pr_err("Can't stop unknown task id %u\n", *internal->id);
 	}
