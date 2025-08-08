@@ -29,6 +29,10 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 						   mod.type == ElementType::Input ? player.disconnect_injack(mod.jack) :
 															player.disconnect_outjack(mod.jack);
 					   },
+					   [&player](RemoveJackMappings &mod) {
+						   mod.type == ElementType::Input ? player.remove_injack_mappings(mod.jack) :
+															player.remove_outjack_mappings(mod.jack);
+					   },
 					   [&](SetMidiPolyNum mod) { player.set_midi_poly_num(mod.poly_num); },
 
 					   [&caldatas](SetChanCalibration &mod) {

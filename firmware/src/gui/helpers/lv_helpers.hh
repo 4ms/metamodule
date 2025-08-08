@@ -140,4 +140,19 @@ inline void trim_color_string(std::string &text) {
 		}
 	}
 }
+
+inline void lv_disable_long_press() {
+	if (auto indev = lv_indev_get_next(nullptr)) {
+		indev->driver->long_press_time = 0xFFFF;
+		indev->driver->long_press_repeat_time = 0xFFFF;
+	}
+}
+
+inline void lv_enable_long_press() {
+	if (auto indev = lv_indev_get_next(nullptr)) {
+		indev->driver->long_press_time = LV_INDEV_DEF_LONG_PRESS_TIME;
+		indev->driver->long_press_repeat_time = LV_INDEV_DEF_LONG_PRESS_REP_TIME;
+	}
+}
+
 } // namespace MetaModule
