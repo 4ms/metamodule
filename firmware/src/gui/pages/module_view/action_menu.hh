@@ -310,6 +310,7 @@ private:
 		
 		if (page->midi_toggle_callback) {
 			page->midi_toggle_callback();
+			page->hide();
 		}
 	}
 
