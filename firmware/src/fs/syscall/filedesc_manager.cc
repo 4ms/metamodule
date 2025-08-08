@@ -52,8 +52,11 @@ std::optional<int> alloc_file() {
 		descriptors[*fd_idx].fatfil = &fatfil_pool[*fd_idx];
 		printf("FileDescManager: alloc fd %zu\n", *fd_idx + FirstFileFD);
 		return static_cast<int>(*fd_idx + FirstFileFD);
-	} else
+	} else {
+		asm("bkpt");
+		printf("alloc_file failed to create a file\n");
 		return {};
+	}
 }
 
 void dealloc_file(size_t fd) {

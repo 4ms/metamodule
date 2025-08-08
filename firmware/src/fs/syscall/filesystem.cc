@@ -119,6 +119,8 @@ int lseek(int fd, int offset, int whence) {
 			return fs_proxy.seek(file->fatfil, offset, whence);
 		}
 	}
+	printf("lseek bad fd\n");
+	asm("bkpt");
 	return -1;
 }
 
