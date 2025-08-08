@@ -168,13 +168,11 @@ public:
 	}
 
 	std::function<void()> midi_toggle_callback;
-	
+
 	void update_midi_button_state(bool midi_mode) {
 		if (midi_mode) {
-			lv_obj_add_state(ui_ModuleViewActionMidiBut, LV_STATE_CHECKED);
-			lv_label_set_text(ui_ModuleViewActionMidiLabel, "MIDI Assign: On");
+			lv_label_set_text(ui_ModuleViewActionMidiLabel, "\xEF\x80\x8CMIDI Assign: On");
 		} else {
-			lv_obj_clear_state(ui_ModuleViewActionMidiBut, LV_STATE_CHECKED);
 			lv_label_set_text(ui_ModuleViewActionMidiLabel, "MIDI Assign: Off");
 		}
 	}
@@ -307,7 +305,7 @@ private:
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
-		
+
 		if (page->midi_toggle_callback) {
 			page->midi_toggle_callback();
 			page->hide();
