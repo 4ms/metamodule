@@ -24,7 +24,7 @@ struct WavFileStream::Internal {
 
 	bool eof = true;
 	bool file_error = false;
-	bool loaded = false;
+	std::atomic<bool> loaded = false;
 
 	std::atomic<uint32_t> frames_in_buffer = 0;
 	std::atomic<uint32_t> next_frame_to_write = 0;
@@ -88,9 +88,9 @@ struct WavFileStream::Internal {
 	void unload() {
 		reset_prebuff();
 
-		if (loaded) {
+		bool expected = true;
+		if (loaded.compare_exchange_strong(expected, true, std::memory_order_seq_cst)) {
 			drwav_uninit(&wav);
-			loaded = false;
 		}
 		file_error = false;
 	}
@@ -185,6 +185,9 @@ struct WavFileStream::Internal {
 	}
 
 	bool is_file_error() const {
+		if (!loaded)
+			return false;
+
 		return file_error;
 	}
 
