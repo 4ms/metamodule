@@ -330,12 +330,6 @@ private:
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
 
-	// Forward declaration
-	struct ModuleViewPage;
-	ModuleViewPage *parent_page = nullptr;
-
-	void set_parent_page(ModuleViewPage *page) { parent_page = page; }
-
 	lv_obj_t *moduleViewActionPresetBut;
 	std::string preset_path{};
 	uint16_t cur_preset_idx{};
