@@ -1,6 +1,7 @@
 #include "drivers/interrupt_control.hh"
 #include "medium/debug.hh"
 #include "reent_mm.hh"
+#include "util/circular_buffer.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>
 #include <sys/lock.h>
@@ -34,52 +35,16 @@ struct __lock __lock___atexit_recursive_mutex;
 struct __lock __lock___malloc_recursive_mutex;
 struct __lock __lock___env_recursive_mutex;
 struct __lock __lock___tz_mutex;
-// Not used:
-// struct __lock __lock___at_quick_exit_mutex;
-// struct __lock __lock___dd_hash_mutex;
-// struct __lock __lock___arc4random_mutex;
+// Not used, but newlib wants them:
+struct __lock __lock___at_quick_exit_mutex;
+struct __lock __lock___dd_hash_mutex;
+struct __lock __lock___arc4random_mutex;
 
-static char lock_name(_LOCK_T lock) {
-	if (lock == &__lock___sfp_recursive_mutex)
-		return 'f';
-	if (lock == &__lock___atexit_recursive_mutex)
-		return 'x';
-	if (lock == &__lock___malloc_recursive_mutex)
-		return 'm';
-	if (lock == &__lock___env_recursive_mutex)
-		return 'e';
-	if (lock == &__lock___tz_mutex)
-		return 't';
-	return '?';
-}
-
-static char proc_name(int proc_id) {
-	if (proc_id == 0)
-		return 'M';
-	if (proc_id == 1)
-		return 'A'; //async0
-	if (proc_id == 2)
-		return 'P'; //patch player
-
-	if (proc_id == 3)
-		return 'g'; //core1main (gui)
-	if (proc_id == 4)
-		return 'a'; //async1
-	if (proc_id == 5)
-		return 't'; //patch read elements (text_displays)
-	if (proc_id == 6)
-		return 'p'; //core1 audio
-
-	return '?';
-}
-
-static void print_proclock(char c, _LOCK_T lock) {
-	dbg_putc(proc_name(lock->proc_id));
-	dbg_putc(c);
-	dbg_putc('0' + lock->count);
-	dbg_putc(lock_name(lock));
-	dbg_putc('\n');
-}
+// Debug helpers:
+static char lock_name(_LOCK_T lock);
+static char proc_name(int proc_id);
+static void print_proclock(char c, _LOCK_T lock);
+static void log_proclock(char c, _LOCK_T lock);
 
 void __retarget_lock_init(_LOCK_T *lock) {
 	__retarget_lock_init_recursive(lock);
@@ -160,8 +125,7 @@ static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
 	// If count == 0 then we claim the lock, otherwise see if we already own it
 	if (lock->count.compare_exchange_strong(expected, 1, std::memory_order_seq_cst)) {
 		lock->proc_id = proc_id;
-		// if (lock_name(lock) != 'm')
-		//	print_proclock('^', lock);
+		log_proclock('^', lock); //^1 means recursive acquired
 		return 1;
 	}
 
@@ -170,8 +134,7 @@ static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
 		// We own the lock, so increment the count
 		// memory model can be relaxed since we are the only process allowed to write
 		lock->count = lock->count + 1;
-		// if (lock_name(lock) != 'm')
-		//	print_proclock('^', lock);
+		log_proclock('^', lock); //^2 means 1=>2
 		return 1;
 	}
 
@@ -201,7 +164,7 @@ int __retarget_lock_try_acquire(_LOCK_T lock) {
 	// If count == 0 then we claim the lock, otherwise fail
 	if (lock->count.compare_exchange_strong(expected, 1, std::memory_order_seq_cst)) {
 		lock->proc_id = MetaModule::get_current_proc_id();
-		// print_proclock('n', lock);
+		log_proclock('n', lock); //n1 means acquired
 		return 1;
 	} else {
 		return 0;
@@ -235,9 +198,10 @@ void __retarget_lock_release(_LOCK_T lock) {
 
 	// If we own the lock, release it
 	if (proc_id == lock->proc_id) {
-		// print_proclock('v', lock);
+		log_proclock('v', lock); //v with count==1 will be printed as v0
 		lock->proc_id = -1;
-		lock->count.store(0, std::memory_order_release);
+		lock->count.store(0, std::memory_order_seq_cst);
+
 		reenable_irqs(lock);
 		return;
 	} else {
@@ -260,18 +224,89 @@ void __retarget_lock_release_recursive(_LOCK_T lock) {
 	if (proc_id == lock->proc_id) {
 		// If count == 1 then we need to release to lock atomically
 		if (lock->count == 1) {
-			// if (lock_name(lock) != 'm')
-			//	print_proclock('_', lock);
+			log_proclock('_', lock); //_ with count==1 will be printed as _0
+
 			lock->proc_id = -1;
-			lock->count.store(0, std::memory_order_release);
+			lock->count.store(0, std::memory_order_seq_cst);
+
 			reenable_irqs(lock);
 		} else {
-			// count > 1, so decrement it
+			// if count > 1, we keep the lock and decrement the count
 			lock->count = lock->count - 1;
-			// print_proclock('_', lock);
+			log_proclock('-', lock); //-2 means recursive lock lowered 3=>2
 		}
 	} else {
 		dbg_puts("Error: recursive release on not our lock\n");
 	}
 }
+
+///////////// Debugging:
+static char lock_name(_LOCK_T lock) {
+	if (lock == &__lock___sfp_recursive_mutex)
+		return 'f';
+	if (lock == &__lock___atexit_recursive_mutex)
+		return 'x';
+	if (lock == &__lock___malloc_recursive_mutex)
+		return 'm';
+	if (lock == &__lock___env_recursive_mutex)
+		return 'e';
+	if (lock == &__lock___tz_mutex)
+		return 't';
+	return '?';
+}
+
+static char proc_name(int proc_id) {
+	if (proc_id == 0)
+		return 'M';
+	if (proc_id == 1)
+		return 'A'; //async0
+	if (proc_id == 2)
+		return 'P'; //patch player
+
+	if (proc_id == 3)
+		return 'g'; //core1main (gui)
+	if (proc_id == 4)
+		return 'a'; //async1
+	if (proc_id == 5)
+		return 't'; //patch read elements (text_displays)
+	if (proc_id == 6)
+		return 'p'; //core1 audio
+
+	return '?';
+}
+
+static void print_proclock(char c, _LOCK_T lock) {
+	dbg_putc(proc_name(lock->proc_id));
+	dbg_putc(c);
+	dbg_putc('0' + lock->count);
+	dbg_putc(lock_name(lock));
+	dbg_putc('\n');
+}
+
+struct LockEntry {
+	uint32_t tm;
+	char lock_id;
+	uint8_t proc_id;
+	char event;
+	uint8_t count;
+};
+
+CircularBuffer<LockEntry, 4 * 8192> core0_lock_log;
+CircularBuffer<LockEntry, 4 * 8192> core1_lock_log;
+CircularBuffer<LockEntry, 4 * 8192> gui_malloc_log;
+
+static void log_proclock(char c, _LOCK_T lock) {
+	char name = lock_name(lock);
+
+	auto &log = (lock->proc_id == 3 && name == 'm') ? gui_malloc_log :
+				(lock->proc_id < 3)					? core0_lock_log :
+													  core1_lock_log;
+
+	log.put({.tm = (uint32_t)PL1_GetCurrentPhysicalValue(),
+			 .lock_id = name,
+			 .proc_id = uint8_t(lock->proc_id),
+			 .event = c,
+			 .count = (c == '_' || c == 'v') ? uint8_t(0) : uint8_t(lock->count)});
+}
+//
 }
