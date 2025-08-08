@@ -984,6 +984,7 @@ private:
 	uint16_t selected_output_port = 0;
 
 	bool suppress_next_click = false;
+	Toggler quickmap_rotary_button;
 
 	void handle_quick_assign() {
 		const DrawnElement *current_element = get_highlighted_element();
@@ -1008,9 +1009,9 @@ private:
 			return;
 		}
 
-		bool encoder_is_pressed = metaparams.rotary_button.is_pressed();
+		quickmap_rotary_button.register_state(metaparams.rotary_button.is_pressed());
 
-		if (encoder_is_pressed) {
+		if (quickmap_rotary_button.is_pressed()) {
 			// Parameter quick assign: hold encoder + wiggle knob
 			if (is_param) {
 				for (unsigned i = 0; auto &knob : params.knobs) {
@@ -1024,6 +1025,16 @@ private:
 
 				// MIDI assignment only available in MIDI mapping mode
 				if (midi_mapping_mode) {
+
+					// Clear all MIDI events when the button is first pressed
+					if (quickmap_rotary_button.is_just_pressed()) {
+						if (midi_mapping_mode) {
+							for (auto &cc : params.midi_ccs)
+								cc.changed = false;
+							params.last_midi_note.changed = false;
+						}
+					}
+
 					// MIDI CC quick assign: hold encoder + send MIDI CC
 					for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
 						if (cc.changed) {
