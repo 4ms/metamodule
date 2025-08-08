@@ -117,6 +117,9 @@ struct WavFileStream::Internal {
 			eof = (wav.readCursorInPCMFrames == wav.totalPCMFrameCount);
 
 			if (!eof && frames_read != frames_to_read) {
+#ifndef TESTPROJECT
+				asm("bkpt 20");
+#endif
 				file_error = true;
 				break;
 			}
