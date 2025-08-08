@@ -1,3 +1,4 @@
+#include <cerrno>
 #include <cstdio>
 
 static char *heap_end = nullptr;
@@ -9,6 +10,14 @@ size_t get_heap_size() {
 }
 
 extern "C" size_t _sbrk(int incr) {
+
+	struct __lock;
+	extern struct __lock __lock__malloc_recursive_mutex;
+	auto proc_id = (int *)(&__lock__malloc_recursive_mutex);
+	if (*proc_id != -1) {
+		printf("Malloc not locked! held by proc_id %d\n", *proc_id);
+	}
+
 	// Defined by the linker
 	extern char _eheap;
 
@@ -21,7 +30,8 @@ extern "C" size_t _sbrk(int incr) {
 
 	if (heap_end + incr > &_eheap) {
 		printf("Out of memory\n");
-		return 0;
+		errno = -ENOMEM;
+		return -1;
 		// OOM!!!
 		// while (true)
 		// 	;
