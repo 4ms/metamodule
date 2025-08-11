@@ -85,12 +85,6 @@ struct ModuleViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
-		// Reset MIDI mapping mode when switching to a different patch
-		if (current_patch_hash != args.patch_loc_hash) {
-			midi_mapping_mode = false;
-			current_patch_hash = args.patch_loc_hash;
-		}
-
 		this_module_id = args.module_id.value_or(this_module_id);
 
 		if (args.patch_loc_hash) {
@@ -124,13 +118,13 @@ struct ModuleViewPage : PageBase {
 
 		// Set up MIDI mode callback for action menu
 		action_menu.midi_toggle_callback = [this]() {
-			midi_mapping_mode = !midi_mapping_mode;
-			if (midi_mapping_mode) {
+			gui_state.midi_quick_mapping_mode = !gui_state.midi_quick_mapping_mode;
+			if (gui_state.midi_quick_mapping_mode) {
 				notify_queue.put({"Send MIDI events while clicking on a control to create MIDI maps",
 								  Notification::Priority::Status,
 								  4000});
 			}
-			action_menu.update_midi_button_state(midi_mapping_mode);
+			action_menu.update_midi_button_state(gui_state.midi_quick_mapping_mode);
 		};
 
 		if (gui_state.new_cable) {
@@ -160,7 +154,7 @@ struct ModuleViewPage : PageBase {
 			action_menu.prepare_focus(group, this_module_id);
 
 			// Initialize MIDI button state in action menu
-			action_menu.update_midi_button_state(midi_mapping_mode);
+			action_menu.update_midi_button_state(gui_state.midi_quick_mapping_mode);
 		}
 	}
 
@@ -974,10 +968,6 @@ private:
 
 	bool full_screen_mode = false;
 
-	// MIDI mapping mode - only persists for the duration of the patch
-	bool midi_mapping_mode = false;
-	std::optional<PatchLocHash> current_patch_hash;
-
 	enum { ContextMenuTag = -2 };
 
 	uint16_t selected_input_port = 0;
@@ -1024,11 +1014,11 @@ private:
 				}
 
 				// MIDI assignment only available in MIDI mapping mode
-				if (midi_mapping_mode) {
+				if (gui_state.midi_quick_mapping_mode) {
 
 					// Clear all MIDI events when the button is first pressed
 					if (quickmap_rotary_button.is_just_pressed()) {
-						if (midi_mapping_mode) {
+						if (gui_state.midi_quick_mapping_mode) {
 							for (auto &cc : params.midi_ccs)
 								cc.changed = false;
 							params.last_midi_note.changed = false;
