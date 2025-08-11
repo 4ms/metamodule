@@ -1,4 +1,5 @@
 #include "filedesc_manager.hh"
+#include "pr_dbg.hh"
 #include "util/pool.hh"
 #include "util/thread_safe_pool.hh"
 #include <algorithm>
@@ -50,16 +51,20 @@ std::optional<int> alloc_file() {
 		// Default-init a FIL
 		fatfil_pool[*fd_idx] = FIL{};
 		descriptors[*fd_idx].fatfil = &fatfil_pool[*fd_idx];
+		pr_trace("FileDescManager: alloc fd %zu\n", *fd_idx + FirstFileFD);
 		return static_cast<int>(*fd_idx + FirstFileFD);
-	} else
+	} else {
+		pr_err("FileDescManager::alloc_file failed to create a file\n");
 		return {};
+	}
 }
 
 void dealloc_file(size_t fd) {
 	if (fd_is_file(fd)) {
 		if (!descriptors.destroy(index(fd))) {
-			printf("FileDescManager error: descriptor %zu was already dealloced\n", index(fd));
-		}
+			pr_err("FileDescManager error: descriptor %zu was already dealloced\n", fd);
+		} else
+			pr_trace("FileDescManager: dealloc fd %zu\n", fd);
 
 		fatfil_pool[index(fd)].obj.fs = nullptr;
 		descriptors[index(fd)].fatfil = nullptr;
@@ -102,7 +107,7 @@ bool dealloc_dir(DIR *dir) {
 		}
 	}
 
-	printf("FileDescManager error: dir was already dealloced\n");
+	pr_warn("FileDescManager error: dir was already dealloced\n");
 	return false;
 }
 
