@@ -22,9 +22,8 @@ struct WavFileStream::Internal {
 
 	drwav wav;
 
-	bool eof = true;
-	bool file_error = false;
-	bool loaded = false;
+	enum class State { NotLoaded, Loaded, LoadedEof, FileError };
+	std::atomic<State> state;
 
 	std::atomic<uint32_t> frames_in_buffer = 0;
 	std::atomic<uint32_t> next_frame_to_write = 0;
@@ -49,7 +48,8 @@ struct WavFileStream::Internal {
 	bool resize(size_t max_samples) {
 		this->max_samples = max_samples;
 
-		if (!loaded)
+		// TODO: is it really OK to resize if state is FileError?
+		if (state.load(std::memory_order_seq_cst) == State::NotLoaded)
 			return false;
 
 		auto buffsize = std::min<uint32_t>(max_samples, wav.totalPCMFrameCount * wav.channels);
@@ -75,28 +75,28 @@ struct WavFileStream::Internal {
 	bool load(std::string_view sample_path) {
 		unload();
 
-		eof = false;
-		file_error = false;
-
-		loaded = drwav_init_file(&wav, sample_path.data(), nullptr);
-		frames_in_buffer = 0;
-
-		resize(max_samples);
-		return loaded;
+		if (drwav_init_file(&wav, sample_path.data(), nullptr)) {
+			state.store(State::Loaded, std::memory_order_seq_cst);
+			resize(max_samples);
+			return true;
+		} else {
+			state.store(State::NotLoaded, std::memory_order_seq_cst);
+			return false;
+		}
 	}
 
+	// Called by destructor (GUI thread) and async process
 	void unload() {
 		reset_prebuff();
 
-		if (loaded) {
+		if (state.load(std::memory_order_seq_cst) != State::NotLoaded) {
 			drwav_uninit(&wav);
-			loaded = false;
 		}
-		file_error = false;
 	}
 
 	bool is_loaded() const {
-		return loaded;
+		auto s = state.load(std::memory_order_seq_cst);
+		return s == State::Loaded || s == State::LoadedEof;
 	}
 
 	void read_frames_from_file() {
@@ -105,7 +105,7 @@ struct WavFileStream::Internal {
 	}
 
 	void read_frames_from_file(int num_frames) {
-		if (!loaded || eof || file_error)
+		if (state.load(std::memory_order_seq_cst) != State::Loaded)
 			return;
 
 		while (num_frames > 0) {
@@ -114,15 +114,15 @@ struct WavFileStream::Internal {
 
 			auto frames_read = drwav_read_pcm_frames_s16(&wav, frames_to_read, read_buff.data());
 
-			eof = (wav.readCursorInPCMFrames == wav.totalPCMFrameCount);
-
-			if (!eof && frames_read != frames_to_read) {
-				file_error = true;
+			if (wav.readCursorInPCMFrames == wav.totalPCMFrameCount) {
+				state = State::LoadedEof;
+			} else if (frames_read < frames_to_read) {
+				state = State::FileError;
 				break;
 			}
 
 			if (frames_read > frames_to_read) {
-				printf("WavFileStream: Internal error: drwav read more frames than requested\n");
+				print_message("WavFileStream: Internal error: drwav read more frames than requested\n");
 				frames_read = frames_to_read;
 			}
 
@@ -132,7 +132,7 @@ struct WavFileStream::Internal {
 			unsigned frame_ctr = 0;
 			for (auto out : samples) {
 				if (!pre_buff.put(out)) {
-					// printf("WavFileStream: Buffer overflow\n");
+					print_message("WavFileStream: Buffer overflow\n");
 					// TODO: Handle buffer overflow: we read too much from disk and the audio thread
 					// is not consuming the samples fast enough to make room.
 					// Set drwav read cursor back to this position, pop back if we're not a frame boundary,
@@ -151,7 +151,7 @@ struct WavFileStream::Internal {
 
 			num_frames -= frames_read;
 
-			if (eof) {
+			if (state == State::LoadedEof) {
 				break;
 			}
 		}
@@ -165,7 +165,7 @@ struct WavFileStream::Internal {
 	}
 
 	bool is_stereo() const {
-		return loaded ? wav.channels > 1 : false;
+		return is_loaded() ? wav.channels > 1 : false;
 	}
 
 	float sample_seconds() const {
@@ -181,11 +181,11 @@ struct WavFileStream::Internal {
 	}
 
 	bool is_eof() const {
-		return eof;
+		return state.load(std::memory_order_seq_cst) == State::LoadedEof;
 	}
 
 	bool is_file_error() const {
-		return file_error;
+		return state.load(std::memory_order_seq_cst) == State::FileError;
 	}
 
 	unsigned current_playback_frame() const {
@@ -197,7 +197,7 @@ struct WavFileStream::Internal {
 	}
 
 	unsigned total_frames() const {
-		return loaded ? (unsigned)wav.totalPCMFrameCount : 0;
+		return is_loaded() ? (unsigned)wav.totalPCMFrameCount : 0;
 	}
 
 	// Must only be called by audio thread
@@ -218,13 +218,14 @@ struct WavFileStream::Internal {
 		} else {
 			drwav_seek_to_pcm_frame(&wav, frame_num);
 			next_frame_to_write = frame_num;
-
-			eof = false;
+			if (state.load() == State::LoadedEof) {
+				state.store(State::Loaded);
+			}
 		}
 	}
 
 	std::optional<uint32_t> wav_sample_rate() const {
-		if (loaded)
+		if (is_loaded())
 			return wav.sampleRate;
 		else
 			return {};
@@ -238,11 +239,11 @@ struct WavFileStream::Internal {
 		auto last = next_frame_to_write.load();
 
 		if (last >= first) {
-			// Not wrapping: check if it's in [F, L)
+			// Not wrapping: check if it's in [first, last)
 			if (frame_num >= first && frame_num < last)
 				return true;
 		} else {
-			// Wrapping: check [0, L) and [F, max)
+			// Wrapping: check [0, lastL) or [first, max)
 			if (frame_num < last || frame_num >= first)
 				return true;
 		}
