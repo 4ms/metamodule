@@ -41,7 +41,13 @@ struct AddInternalCable {
 	Jack in;
 };
 
+// Removes all mappings and cables
 struct DisconnectJack {
+	Jack jack;
+	ElementType type;
+};
+
+struct RemoveJackMappings {
 	Jack jack;
 	ElementType type;
 };
@@ -81,6 +87,7 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 AddInternalCable,
 									 AddJackMapping,
 									 DisconnectJack,
+									 RemoveJackMappings,
 									 CalibrationOnOff,
 									 SetChanCalibration,
 									 SetMidiPolyNum,

@@ -84,8 +84,10 @@ struct PatchViewPage : PageBase {
 			needs_refresh = true;
 		if (patch_revision != patches.get_view_patch_modification_count())
 			needs_refresh = true;
-		if (displayed_patch_loc_hash != args.patch_loc_hash)
+		if (displayed_patch_loc_hash != args.patch_loc_hash) {
 			needs_refresh = true;
+			gui_state.midi_quick_mapping_mode = false;
+		}
 
 		file_change_poll.force_next_poll(); // avoid 500ms delay before refreshing the patch
 		poll_patch_file_changed();
