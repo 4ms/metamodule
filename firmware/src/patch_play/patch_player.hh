@@ -4,6 +4,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "conf/patch_conf.hh"
 #include "coreproc_plugin/async_thread_control.hh"
+#include "delay.hh"
 #include "null_module.hh"
 #include "params/catchup_manager.hh"
 #include "params/catchup_param.hh"
@@ -207,7 +208,10 @@ public:
 
 		rebalance_modules();
 
-		resume_module_threads();
+		resume_module_threads(0);
+		// Some delay to reduce simultaneous load on both cores
+		delay_ms(100);
+		resume_module_threads(1);
 
 		is_loaded = true;
 		if (num_not_found == 1)

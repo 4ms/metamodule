@@ -1,6 +1,5 @@
 #include "async_thread_control.hh"
 #include "console/pr_dbg.hh"
-#include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>
