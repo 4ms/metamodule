@@ -32,11 +32,13 @@ struct WavFileStream::Internal {
 
 	LockFreeFifoSpscDyn<int16_t> pre_buff;
 
-	// assume 4kB is an efficient size to read from an SD Card or USB Drive
-	static constexpr unsigned ReadBlockBytes = 8912;
+	// 4kB is an efficient size to read from an SD Card or USB Drive
+	// but the gaps between reads due to async thread timing is too large.
+	// 8kB has a better ratio (16kB is better but makes GUI too laggy)
+	static constexpr unsigned ReadBlockBytes = 8192;
 
 	// read_buff needs to be big enough to hold 8kB of any data converted to int16_t
-	// Worst case: 8kB of 8-bit mono data will convert to 8912 ints
+	// Worst case: 8kB of 8-bit mono data will convert to 8192 ints
 	std::array<int16_t, ReadBlockBytes> read_buff;
 
 	Internal(size_t max_samples)
