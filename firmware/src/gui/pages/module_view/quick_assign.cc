@@ -20,15 +20,11 @@ void ModuleViewPage::handle_quick_assign() {
 	bool is_input_jack = std::holds_alternative<JackInput>(current_element->element);
 	bool is_output_jack = std::holds_alternative<JackOutput>(current_element->element);
 
-	if (!is_param && !is_input_jack && !is_output_jack) {
-		return;
-	}
-
 	quickmap_rotary_button.register_state(metaparams.rotary_button.is_pressed());
 
 	if (quickmap_rotary_button.is_pressed()) {
-		// Parameter quick assign: hold encoder + wiggle knob
 		if (is_param) {
+			// Parameter quick assign: hold encoder + wiggle knob
 			for (unsigned i = 0; auto &knob : params.knobs) {
 				if (knob.did_change()) {
 					perform_knob_assign(i, current_element);
@@ -36,6 +32,14 @@ void ModuleViewPage::handle_quick_assign() {
 					return;
 				}
 				i++;
+			}
+
+			// Push+turn to adjust param manually
+			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
+				mapping_pane.show_control_popup(group, ui_ElementRollerPanel, *current_element);
+				lv_arc_set_value(ui_ControlArc, lv_arc_get_value(ui_ControlArc) + motion);
+				lv_event_send(ui_ControlArc, LV_EVENT_VALUE_CHANGED, nullptr);
+				suppress_next_click = true;
 			}
 
 			if (gui_state.midi_quick_mapping_mode) {
@@ -68,18 +72,12 @@ void ModuleViewPage::handle_quick_assign() {
 					roller_hover.force_redraw();
 					return;
 				}
-
-				if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
-					mapping_pane.show_control_popup(group, ui_ElementRollerPanel, *current_element);
-					auto newval = lv_arc_get_value(ui_ControlArc) + motion;
-					lv_arc_set_value(ui_ControlArc, newval);
-					lv_event_send(ui_ControlArc, LV_EVENT_VALUE_CHANGED, nullptr);
-				}
 			}
 		}
 
-		// Jack quick assign: hold encoder + turn encoder
-		if (is_input_jack || is_output_jack) {
+		// Jack quick assign: push+turn encoder
+		else if (is_input_jack || is_output_jack)
+		{
 			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
 				ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
 				if (cycle_port_selection(current_element, motion, jack_type))
