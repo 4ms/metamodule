@@ -113,13 +113,13 @@ struct ModuleViewPage : PageBase {
 
 		// Set up MIDI mode callback for action menu
 		action_menu.midi_toggle_callback = [this]() {
-			midi_mapping_mode = !midi_mapping_mode;
-			if (midi_mapping_mode) {
+			gui_state.midi_quick_mapping_mode = !gui_state.midi_quick_mapping_mode;
+			if (gui_state.midi_quick_mapping_mode) {
 				notify_queue.put({"Send MIDI events while clicking on a control to create MIDI maps",
 								  Notification::Priority::Status,
 								  4000});
 			}
-			action_menu.update_midi_button_state(midi_mapping_mode);
+			action_menu.update_midi_button_state(gui_state.midi_quick_mapping_mode);
 		};
 
 		if (gui_state.new_cable) {
@@ -149,7 +149,7 @@ struct ModuleViewPage : PageBase {
 			action_menu.prepare_focus(group, this_module_id);
 
 			// Initialize MIDI button state in action menu
-			action_menu.update_midi_button_state(midi_mapping_mode);
+			action_menu.update_midi_button_state(gui_state.midi_quick_mapping_mode);
 		}
 	}
 
@@ -492,8 +492,6 @@ private:
 	unsigned dyn_draw_throttle = 16;
 
 	bool full_screen_mode = false;
-
-	bool midi_mapping_mode = false;
 
 	std::optional<GuiElement> pending_action_param_clear{};
 

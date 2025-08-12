@@ -40,11 +40,11 @@ void ModuleViewPage::handle_quick_assign() {
 				i++;
 			}
 
-			if (midi_mapping_mode) {
+			if (gui_state.midi_quick_mapping_mode) {
 
 				// Clear all MIDI events when the button is first pressed
 				if (quickmap_rotary_button.is_just_pressed()) {
-					if (midi_mapping_mode) {
+					if (gui_state.midi_quick_mapping_mode) {
 						for (auto &cc : params.midi_ccs)
 							cc.changed = false;
 						params.last_midi_note.changed = false;

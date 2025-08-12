@@ -28,7 +28,9 @@ struct GuiState {
 
 	Toggler back_button{};
 
-	Toggler file_browser_visible;
+	Toggler file_browser_visible{};
+
+	bool midi_quick_mapping_mode = false;
 };
 
 } // namespace MetaModule
