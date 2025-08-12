@@ -40,31 +40,33 @@ void ModuleViewPage::handle_quick_assign() {
 				i++;
 			}
 
-			// MIDI CC quick assign: hold encoder + send MIDI CC
-			for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
-				if (cc.changed) {
-					cc.changed = 0; // Clear the flag
-					perform_midi_assign(MidiCC0 + ccnum, current_element);
+			if (midi_mapping_mode) {
+				// MIDI CC quick assign: hold encoder + send MIDI CC
+				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
+					if (cc.changed) {
+						cc.changed = 0; // Clear the flag
+						perform_midi_assign(MidiCC0 + ccnum, current_element);
+						roller_hover.force_redraw();
+						return;
+					}
+					ccnum++;
+				}
+
+				// MIDI Note quick assign: hold encoder + send MIDI note
+				auto &note = params.last_midi_note;
+				if (note.changed) {
+					note.changed = 0; // Clear the flag
+					perform_midi_assign(MidiGateNote0 + note.val, current_element);
 					roller_hover.force_redraw();
 					return;
 				}
-				ccnum++;
-			}
 
-			// MIDI Note quick assign: hold encoder + send MIDI note
-			auto &note = params.last_midi_note;
-			if (note.changed) {
-				note.changed = 0; // Clear the flag
-				perform_midi_assign(MidiGateNote0 + note.val, current_element);
-				roller_hover.force_redraw();
-				return;
-			}
-
-			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
-				mapping_pane.show_control_popup(group, ui_ElementRollerPanel, *current_element);
-				auto newval = lv_arc_get_value(ui_ControlArc) + motion;
-				lv_arc_set_value(ui_ControlArc, newval);
-				lv_event_send(ui_ControlArc, LV_EVENT_VALUE_CHANGED, nullptr);
+				if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
+					mapping_pane.show_control_popup(group, ui_ElementRollerPanel, *current_element);
+					auto newval = lv_arc_get_value(ui_ControlArc) + motion;
+					lv_arc_set_value(ui_ControlArc, newval);
+					lv_event_send(ui_ControlArc, LV_EVENT_VALUE_CHANGED, nullptr);
+				}
 			}
 		}
 

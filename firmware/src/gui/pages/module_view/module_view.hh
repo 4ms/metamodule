@@ -479,6 +479,8 @@ private:
 
 	bool full_screen_mode = false;
 
+	bool midi_mapping_mode = false;
+
 	std::optional<GuiElement> pending_action_param_clear{};
 
 	enum { RollerHeaderTag = -1, ContextMenuTag = -2 };
