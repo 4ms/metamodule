@@ -32,6 +32,7 @@ TEST_SOURCES += src/params/expanders.cc
 TEST_SOURCES += src/gui/elements/element_name.cc
 TEST_SOURCES += src/gui/elements/panel_name.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
+TEST_SOURCES += src/core_a7/rotocontrol.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \

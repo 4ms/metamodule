@@ -471,6 +471,7 @@ typedef struct _USBH_HandleTypeDef
   USBH_ClassTypeDef    *pClass[USBH_MAX_NUM_SUPPORTED_CLASS];
   USBH_ClassTypeDef    *pActiveClass;
   uint32_t              ClassNumber;
+  const char           *PreferredClassName;  /* Preferred class name for selection */
   uint32_t              Pipes[16];
   uint32_t         Timer;
   uint32_t              Timeout;
@@ -506,5 +507,4 @@ typedef struct _USBH_HandleTypeDef
 #endif
 
 #endif /* USBH_DEF_H */
-
 

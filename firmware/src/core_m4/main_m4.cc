@@ -45,7 +45,8 @@ int main() {
 	// USB
 	UsbManager usb{{SharedMemoryS::ptrs.console_a7_0_buff,
 					SharedMemoryS::ptrs.console_a7_1_buff,
-					SharedMemoryS::ptrs.console_m4_buff}};
+					SharedMemoryS::ptrs.console_m4_buff}, 
+					SharedMemoryS::ptrs.console_cdc_buff};
 	usb.start();
 
 	// SD Card

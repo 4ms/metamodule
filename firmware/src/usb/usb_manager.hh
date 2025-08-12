@@ -8,12 +8,13 @@
 #include "usb/device_cdc/usb_serial_device.hh"
 #include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
+#include "usb/cdc_host.hh"
 
 namespace MetaModule
 {
 
 class UsbManager {
-	UsbHostManager usb_host{Usb5VSrcEnablePin};
+	UsbHostManager usb_host;
 	UsbDeviceManager usb_device;
 
 	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
@@ -27,8 +28,9 @@ class UsbManager {
 	// uint32_t tm;
 
 public:
-	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: usb_device{console_buffers}
+	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers, ConcurrentBuffer *console_cdc_buff)
+		: usb_host{Usb5VSrcEnablePin, console_cdc_buff}
+		, usb_device{console_buffers}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		usb_device.start();
 		usb_host.init();

@@ -1,4 +1,5 @@
 #pragma once
+#include "cdc_host.hh"
 #include "console/concurrent_buffer.hh"
 #include "usbd_cdc.h"
 #include "usbd_core.h"
