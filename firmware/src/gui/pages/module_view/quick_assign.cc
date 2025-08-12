@@ -84,7 +84,7 @@ void ModuleViewPage::handle_quick_assign() {
 		if (is_jack) {
 			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
 				ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
-				if (cycle_port_selection(motion, jack_type))
+				if (cycle_port_selection(current_element, motion, jack_type))
 					perform_jack_assign(current_element, jack_type);
 				roller_hover.force_redraw();
 				return;
@@ -234,11 +234,19 @@ void ModuleViewPage::perform_midi_assign(uint16_t midi_id, const DrawnElement *e
 	suppress_next_click = true;
 }
 
-bool ModuleViewPage::cycle_port_selection(int motion, ElementType jack_type) {
+bool ModuleViewPage::cycle_port_selection(const DrawnElement *element, int motion, ElementType jack_type) {
 	if (motion != 1 && motion != -1)
 		return false;
 
 	if (jack_type == ElementType::Input) {
+		// Check if this jack has an internal cable attached
+		// In that case, do not allow mapping to a panel jack since that violates the One Output rule
+		if (patch->find_internal_cable_with_injack(
+				Jack{.module_id = element->gui_element.module_idx, .jack_id = element->gui_element.idx.input_idx}))
+		{
+			return false;
+		}
+
 		unsigned total_ports = PanelDef::NumUserFacingInJacks;
 		if (Expanders::get_connected().ext_audio_connected) {
 			total_ports += AudioExpander::NumInJacks;
