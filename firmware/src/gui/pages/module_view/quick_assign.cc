@@ -20,9 +20,7 @@ void ModuleViewPage::handle_quick_assign() {
 	bool is_input_jack = std::holds_alternative<JackInput>(current_element->element);
 	bool is_output_jack = std::holds_alternative<JackOutput>(current_element->element);
 
-	bool is_jack = is_input_jack || is_output_jack;
-
-	if (!is_param && !is_jack) {
+	if (!is_param && !is_input_jack && !is_output_jack) {
 		return;
 	}
 
@@ -81,7 +79,7 @@ void ModuleViewPage::handle_quick_assign() {
 		}
 
 		// Jack quick assign: hold encoder + turn encoder
-		if (is_jack) {
+		if (is_input_jack || is_output_jack) {
 			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
 				ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
 				if (cycle_port_selection(current_element, motion, jack_type))
@@ -114,28 +112,30 @@ void ModuleViewPage::handle_encoder_back_removal() {
 
 	bool is_input_jack = std::holds_alternative<JackInput>(current_element->element);
 	bool is_output_jack = std::holds_alternative<JackOutput>(current_element->element);
-	bool is_jack = is_input_jack || is_output_jack;
+
+	Jack module_jack;
 
 	if (is_param) {
 		// Remove parameter mappings
 		uint16_t module_id = (uint16_t)current_element->gui_element.module_idx;
 		uint16_t param_id = (uint16_t)current_element->gui_element.idx.param_idx;
+
 		remove_existing_mappings_for_param(module_id, param_id);
 
-	} else if (is_jack) {
-		// Remove jack mappings
-		ElementType jack_type = is_input_jack ? ElementType::Input : ElementType::Output;
+	} else if (is_input_jack) {
+		// Remove Input jack mappings
+		module_jack = {.module_id = (uint16_t)current_element->gui_element.module_idx,
+					   .jack_id = (uint16_t)current_element->gui_element.idx.input_idx};
 
-		Jack module_jack;
-		if (jack_type == ElementType::Input) {
-			module_jack = {.module_id = (uint16_t)current_element->gui_element.module_idx,
-						   .jack_id = (uint16_t)current_element->gui_element.idx.input_idx};
-		} else {
-			module_jack = {.module_id = (uint16_t)current_element->gui_element.module_idx,
-						   .jack_id = (uint16_t)current_element->gui_element.idx.output_idx};
-		}
+		module_mods.put(RemoveJackMappings{.jack = module_jack, .type = ElementType::Input});
 
-		module_mods.put(RemoveJackMappings{.jack = module_jack, .type = jack_type});
+	} else if (is_output_jack) {
+		// Remove output jack mappings
+		module_jack = {.module_id = (uint16_t)current_element->gui_element.module_idx,
+					   .jack_id = (uint16_t)current_element->gui_element.idx.output_idx};
+
+		module_mods.put(RemoveJackMappings{.jack = module_jack, .type = ElementType::Output});
+
 	} else
 		return;
 
