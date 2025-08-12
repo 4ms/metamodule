@@ -503,6 +503,7 @@ private:
 	uint16_t selected_output_port = 0;
 
 	bool suppress_next_click = false;
+	Toggler quickmap_rotary_button;
 };
 
 } // namespace MetaModule

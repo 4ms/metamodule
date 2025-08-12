@@ -26,9 +26,9 @@ void ModuleViewPage::handle_quick_assign() {
 		return;
 	}
 
-	bool encoder_is_pressed = metaparams.rotary_button.is_pressed();
+	quickmap_rotary_button.register_state(metaparams.rotary_button.is_pressed());
 
-	if (encoder_is_pressed) {
+	if (quickmap_rotary_button.is_pressed()) {
 		// Parameter quick assign: hold encoder + wiggle knob
 		if (is_param) {
 			for (unsigned i = 0; auto &knob : params.knobs) {
@@ -41,6 +41,16 @@ void ModuleViewPage::handle_quick_assign() {
 			}
 
 			if (midi_mapping_mode) {
+
+				// Clear all MIDI events when the button is first pressed
+				if (quickmap_rotary_button.is_just_pressed()) {
+					if (midi_mapping_mode) {
+						for (auto &cc : params.midi_ccs)
+							cc.changed = false;
+						params.last_midi_note.changed = false;
+					}
+				}
+
 				// MIDI CC quick assign: hold encoder + send MIDI CC
 				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
 					if (cc.changed) {
