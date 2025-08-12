@@ -158,9 +158,6 @@ struct ModuleViewPage : PageBase {
 				module_context_menu.back_event();
 
 			} else if (mapping_pane.control_popup_visible()) {
-				if (auto drawn_idx = get_drawn_idx(cur_selected)) {
-					unoutline_component(*drawn_idx);
-				}
 				mapping_pane.hide_control_popup();
 
 			} else if (full_screen_mode) {
@@ -397,8 +394,6 @@ private:
 	void add_element_highlight(lv_obj_t *obj);
 	void unhighlight_component(uint32_t prev_sel);
 	void highlight_component(size_t idx);
-	void outline_component(size_t idx);
-	void unoutline_component(size_t idx);
 	void focus_button_bar();
 	void click_cable_destination(unsigned drawn_idx);
 	void click_altparam_action(DrawnElement const &drawn_element);

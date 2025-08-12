@@ -157,7 +157,6 @@ void ModuleViewPage::add_element_highlight(lv_obj_t *obj) {
 
 void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
 	if (auto prev_idx = get_drawn_idx(prev_sel)) {
-		lv_obj_remove_style(element_highlights[*prev_idx], &Gui::panel_bright_highlight_style, LV_PART_MAIN);
 		if (lv_obj_get_height(element_highlights[*prev_idx]) > 100 ||
 			lv_obj_get_width(element_highlights[*prev_idx]) > 100)
 		{
@@ -165,35 +164,20 @@ void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
 		} else {
 			lv_obj_remove_style(element_highlights[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
-		lv_obj_set_style_border_width(element_highlights[*prev_idx], 0, LV_PART_MAIN);
 		lv_event_send(element_highlights[*prev_idx], LV_EVENT_REFRESH, nullptr);
 	}
 }
 
 void ModuleViewPage::highlight_component(size_t idx) {
 	if (idx < element_highlights.size()) {
-		lv_obj_remove_style(element_highlights[idx], &Gui::panel_bright_highlight_style, LV_PART_MAIN);
 		if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
 			lv_obj_add_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 		} else {
 			lv_obj_add_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
-		lv_obj_set_style_border_width(element_highlights[idx], 0, LV_PART_MAIN);
 		lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
 		lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
 	}
-}
-
-void ModuleViewPage::outline_component(size_t idx) {
-	lv_obj_add_style(element_highlights[idx], &Gui::panel_bright_highlight_style, LV_PART_MAIN);
-	lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
-	lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
-}
-
-void ModuleViewPage::unoutline_component(size_t idx) {
-	lv_obj_remove_style(element_highlights[idx], &Gui::panel_bright_highlight_style, LV_PART_MAIN);
-	lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
-	lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
 }
 
 void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
@@ -335,9 +319,6 @@ void ModuleViewPage::manual_control_popup(DrawnElement const &drawn_element) {
 	args.element_indices = drawn_element.gui_element.idx;
 
 	if (is_patch_playloaded) {
-		if (auto drawn_idx = get_drawn_idx(cur_selected)) {
-			outline_component(*drawn_idx);
-		}
 		mapping_pane.show_control_popup(group, ui_ElementRollerPanel, drawn_element);
 	}
 }
@@ -395,12 +376,6 @@ void ModuleViewPage::roller_click_cb(lv_event_t *event) {
 
 		} else if (auto el = std::get_if<DynamicGraphicDisplay>(&drawn_element.element)) {
 			page->click_graphic_display(drawn_element, el);
-
-		} else if (page->full_screen_mode && !std::get_if<JackInput>(&drawn_element.element) &&
-				   !std::get_if<JackOutput>(&drawn_element.element))
-		{
-			// Allow immediate manual control in full-screen mode (popup is hidden but still works)
-			page->manual_control_popup(drawn_element);
 
 		} else {
 			page->click_normal_element(drawn_element);
