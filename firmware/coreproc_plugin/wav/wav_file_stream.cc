@@ -13,7 +13,7 @@ namespace
 void print_message(auto... args) {
 	constexpr bool WAV_FILE_STREAM_PRINT_ERRORS = true;
 	if constexpr (WAV_FILE_STREAM_PRINT_ERRORS)
-		printf(args...);
+		printf("%s", args...);
 }
 } // namespace
 
