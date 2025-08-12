@@ -10,7 +10,6 @@
 #include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/module_view/settings_menu.hh"
 #include "gui/pages/page_list.hh"
-#include "patch/midi_def.hh"
 
 namespace MetaModule
 {
@@ -25,7 +24,7 @@ struct ModuleViewPage : PageBase {
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state, patch_playloader}
-		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
+		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk, gui_state}
 		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
 		, module_context_menu{patch_playloader}
 		, dyn_draw{patch_playloader} {
@@ -111,17 +110,6 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_AutoMapSelectPanel);
 		lv_hide(ui_MIDIMapPanel);
 
-		// Set up MIDI mode callback for action menu
-		action_menu.midi_toggle_callback = [this]() {
-			gui_state.midi_quick_mapping_mode = !gui_state.midi_quick_mapping_mode;
-			if (gui_state.midi_quick_mapping_mode) {
-				notify_queue.put({"Send MIDI events while clicking on a control to create MIDI maps",
-								  Notification::Priority::Status,
-								  4000});
-			}
-			action_menu.update_midi_button_state(gui_state.midi_quick_mapping_mode);
-		};
-
 		if (gui_state.new_cable) {
 			lv_hide(ui_ModuleViewHideBut);
 			lv_hide(ui_ModuleViewActionBut);
@@ -147,9 +135,6 @@ struct ModuleViewPage : PageBase {
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 			settings_menu.prepare_focus(group);
 			action_menu.prepare_focus(group, this_module_id);
-
-			// Initialize MIDI button state in action menu
-			action_menu.update_midi_button_state(gui_state.midi_quick_mapping_mode);
 		}
 	}
 
