@@ -127,10 +127,13 @@ public:
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	Result load_patch(const PatchData &patchdata) {
 
-		// load_patch must only be called from the GUI context -- which ASyncThreads will interrupt
-		// Otherwise, if load_patch is interrupting an AsyncThread, then the AsyncThread
-		// will crash since its module * is no longer valid
+		// load_patch must only be called from the GUI context (Core 1, not in an interrupt).
+		// AsyncThreads will interrupt the GUI context on Core 1, and run concurrently on Core 0.
+		// Otherwise if the current context blocks AsyncThreads, then is_any_thread_executing() may hang forever
+		// and/or an AsyncThread could crash since its module * is no longer valid after we call unload_patch
 		pause_module_threads();
+		while (is_any_thread_executing()) {
+		}
 
 		if (patchdata.patch_name.length() == 0)
 			return {false, "Cannot load: patch does not have a name"};
@@ -728,6 +731,18 @@ public:
 		cables.build(pd.int_cables, core_balancer.cores.parts);
 	}
 
+	void remove_injack_mappings(Jack jack) {
+		for (auto &ins : in_conns)
+			std::erase(ins, jack);
+
+		if (pd.find_internal_cable_with_injack(jack) == nullptr) {
+			// unpatch the module's jack if it has no cables connected
+			safe_unpatch_input(jack);
+		}
+
+		pd.remove_injack_mappings(jack);
+	}
+
 	void disconnect_outjack(Jack jack) {
 		for (auto &out : out_conns) {
 			if (out == jack) {
@@ -746,6 +761,21 @@ public:
 		pd.disconnect_outjack(jack);
 
 		cables.build(pd.int_cables, core_balancer.cores.parts);
+	}
+
+	void remove_outjack_mappings(Jack jack) {
+		for (auto &out : out_conns) {
+			if (out == jack) {
+				out = disconnected_jack;
+			}
+		}
+
+		if (pd.find_internal_cable_with_outjack(jack) == nullptr) {
+			// unpatch the module's jack if it has no cables connected
+			safe_unpatch_output(jack);
+		}
+
+		pd.remove_outjack_mappings(jack);
 	}
 
 	void reset_module(uint16_t module_id, std::string_view data = "") {

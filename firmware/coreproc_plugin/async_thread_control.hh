@@ -18,6 +18,8 @@ void destroy_async_task(uint32_t id);
 
 void peg_task_to_core(uint32_t module_id, uint32_t core_id);
 
+bool is_any_thread_executing();
+
 namespace Async
 {
 

@@ -18,4 +18,8 @@ void resume_module_threads() {
 void resume_module_threads(unsigned) {
 }
 
+bool is_any_thread_executing() {
+	return false;
+}
+
 } // namespace MetaModule

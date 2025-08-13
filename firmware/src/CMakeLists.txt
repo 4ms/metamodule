@@ -136,6 +136,7 @@ add_executable(
   ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
   ${FWDIR}/src/gui/pages/module_view/element_roller.cc
   ${FWDIR}/src/gui/pages/module_view/draw_module.cc
+  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
@@ -215,6 +216,7 @@ set_source_files_properties(
   ${FWDIR}/src/gui/slsexport/ui_local.cc
   ${FWDIR}/src/gui/pages/module_view/draw_module.cc
   ${FWDIR}/src/gui/pages/module_view/element_roller.cc
+  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
   ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc

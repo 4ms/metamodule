@@ -1,5 +1,6 @@
 #pragma once
 #include "fat_file_io.hh"
+#include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/module_view/automap.hh"
@@ -7,8 +8,6 @@
 #include "gui/pages/roller_popup.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
-#include "gui/styles.hh"
-#include "lvgl.h"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "patch_play/randomize_param.hh"
@@ -31,12 +30,15 @@ public:
 						 PageList &page_list,
 						 PatchPlayLoader &patch_playloader,
 						 NotificationQueue &notify_queue,
-						 FatFileIO &ramdisk)
+						 FatFileIO &ramdisk,
+						 GuiState &gui_state)
 		: ramdisk{ramdisk}
 		, patches{patches}
 		, page_list{page_list}
 		, patch_playloader{patch_playloader}
 		, patch_mod_queue{patch_mod_queue}
+		, gui_state{gui_state}
+		, notify_queue{notify_queue}
 		, auto_map{patch_mod_queue, patches, notify_queue}
 		, randomizer{patch_mod_queue}
 		, reset_params_{patch_mod_queue}
@@ -58,11 +60,13 @@ public:
 		lv_obj_add_event_cb(ui_ModuleViewActionRandomBut, random_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionPresetBut, preset_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionResetBut, reset_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionMidiBut, midi_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
 		lv_group_add_obj(group, ui_ModuleViewActionResetBut);
+		lv_group_add_obj(group, ui_ModuleViewActionMidiBut);
 		lv_group_add_obj(group, moduleViewActionPresetBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
@@ -112,6 +116,8 @@ public:
 			lv_disable(moduleViewActionPresetBut);
 		}
 		preset_popup.init(lv_layer_sys(), group);
+
+		update_midi_map_text();
 	}
 
 	void back() {
@@ -165,6 +171,14 @@ public:
 	}
 
 private:
+	void update_midi_map_text() {
+		if (gui_state.midi_quick_mapping_mode) {
+			lv_label_set_text(ui_ModuleViewActionMidiLabel, "\xEF\x80\x8CMIDI Assign: On");
+		} else {
+			lv_label_set_text(ui_ModuleViewActionMidiLabel, "MIDI Assign: Off");
+		}
+	}
+
 	void process_delete_module() {
 		if (delete_state == DeleteState::TryRequest) {
 			patches.get_view_patch()->remove_module(module_idx);
@@ -288,11 +302,28 @@ private:
 			"Delete");
 	}
 
+	static void midi_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+
+		page->gui_state.midi_quick_mapping_mode = !page->gui_state.midi_quick_mapping_mode;
+		if (page->gui_state.midi_quick_mapping_mode) {
+			page->notify_queue.put({"Send a MIDI event while clicking and holding on a control to create a MIDI map.",
+									Notification::Priority::Status,
+									4000});
+		}
+		page->update_midi_map_text();
+		page->hide();
+	}
+
 	FatFileIO &ramdisk;
 	OpenPatchManager &patches;
 	PageList &page_list;
 	PatchPlayLoader &patch_playloader;
 	PatchModQueue &patch_mod_queue;
+	GuiState &gui_state;
+	NotificationQueue &notify_queue;
 
 	ConfirmPopup confirm_popup;
 

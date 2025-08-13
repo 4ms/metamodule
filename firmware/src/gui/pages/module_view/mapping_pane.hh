@@ -133,10 +133,12 @@ struct ModuleViewMappingPane {
 	}
 
 	void show_control_popup(lv_group_t *parent_group, lv_obj_t *parent, const DrawnElement &drawn_el) {
-		lv_obj_set_parent(ui_ControlAlert, parent);
-		control_popup.prepare_focus(parent_group);
-		lv_obj_clear_state(ui_ControlButton, LV_STATE_PRESSED);
-		control_popup.show(&drawn_el);
+		if (!control_popup.is_visible()) {
+			lv_obj_set_parent(ui_ControlAlert, parent);
+			control_popup.prepare_focus(parent_group);
+			lv_obj_clear_state(ui_ControlButton, LV_STATE_PRESSED);
+			control_popup.show(&drawn_el);
+		}
 	}
 
 	void hide_control_popup() {

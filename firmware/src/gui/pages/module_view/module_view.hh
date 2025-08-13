@@ -24,7 +24,7 @@ struct ModuleViewPage : PageBase {
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state, patch_playloader}
-		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
+		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk, gui_state}
 		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
 		, module_context_menu{patch_playloader}
 		, dyn_draw{patch_playloader} {
@@ -61,7 +61,7 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_SHORT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_pressed_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewHideBut, fullscreen_but_cb, LV_EVENT_CLICKED, this);
 
@@ -71,6 +71,8 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		lv_disable_long_press();
+
 		roller_hover.hide();
 
 		patch = patches.get_view_patch();
@@ -146,6 +148,9 @@ struct ModuleViewPage : PageBase {
 			} else if (settings_menu.is_visible()) {
 				settings_menu.hide();
 
+			} else if (metaparams.rotary_button.is_pressed() && mode == ViewMode::List) {
+				handle_encoder_back_removal();
+
 			} else if (mode == ViewMode::Mapping) {
 				mapping_pane.back_event();
 
@@ -153,9 +158,6 @@ struct ModuleViewPage : PageBase {
 				module_context_menu.back_event();
 
 			} else if (mapping_pane.control_popup_visible()) {
-				if (auto drawn_idx = get_drawn_idx(cur_selected)) {
-					unoutline_component(*drawn_idx);
-				}
 				mapping_pane.hide_control_popup();
 
 			} else if (full_screen_mode) {
@@ -238,15 +240,15 @@ struct ModuleViewPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 		}
 
-		// Draw the on-screen elements (knobs, lights, etc)
-		if (is_patch_playloaded) {
-			redraw_elements();
-		}
-
 		// Handle patch modification requests
 		if (handle_patch_mods()) {
 			redraw_module();
 			mapping_pane.refresh();
+		}
+
+		// Draw the on-screen elements (knobs, lights, etc)
+		if (is_patch_playloaded) {
+			redraw_elements();
 		}
 
 		// Hover text
@@ -258,6 +260,10 @@ struct ModuleViewPage : PageBase {
 			lv_group_get_focused(group) == ui_ModuleViewHideBut)
 		{
 			roller_hover.hide();
+		}
+
+		if (mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible()) {
+			handle_quick_assign();
 		}
 	}
 
@@ -286,6 +292,15 @@ struct ModuleViewPage : PageBase {
 																 patch->disconnect_injack(mod.jack);
 							   refresh = true;
 						   },
+						   [&, this](RemoveJackMappings &mod) {
+							   mod.type == ElementType::Output ? patch->remove_outjack_mappings(mod.jack) :
+																 patch->remove_injack_mappings(mod.jack);
+							   refresh = true;
+						   },
+						   [&, this](RemoveMapping &mod) {
+							   patch->remove_mapping(mod.set_id, mod.map);
+							   refresh = true;
+						   },
 						   [&](auto &m) { refresh = false; },
 					   },
 					   patch_mod.value());
@@ -304,6 +319,7 @@ struct ModuleViewPage : PageBase {
 		params.text_displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
+		lv_enable_long_press();
 	}
 
 private:
@@ -378,8 +394,6 @@ private:
 	void add_element_highlight(lv_obj_t *obj);
 	void unhighlight_component(uint32_t prev_sel);
 	void highlight_component(size_t idx);
-	void outline_component(size_t idx);
-	void unoutline_component(size_t idx);
 	void focus_button_bar();
 	void click_cable_destination(unsigned drawn_idx);
 	void click_altparam_action(DrawnElement const &drawn_element);
@@ -390,6 +404,7 @@ private:
 	static void roller_scrolled_cb(lv_event_t *event);
 	static void roller_click_cb(lv_event_t *event);
 	static void roller_focus_cb(lv_event_t *event);
+	static void roller_pressed_cb(lv_event_t *event);
 	static void jump_to_roller_cb(lv_event_t *event);
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx);
 
@@ -402,6 +417,16 @@ private:
 	void update_map_ring_style();
 	void update_cable_style(bool force = false);
 	void update_graphic_throttle_setting();
+
+	// Defined in module_view/quick_assign.cc
+	void handle_quick_assign();
+	void handle_encoder_back_removal();
+	const DrawnElement *get_highlighted_element();
+	void remove_existing_mappings_for_param(uint16_t module_id, uint16_t param_id);
+	void perform_knob_assign(uint16_t knob_id, const DrawnElement *element);
+	void perform_midi_assign(uint16_t midi_id, const DrawnElement *element);
+	void perform_jack_assign(const DrawnElement *element, ElementType jack_type);
+	bool cycle_port_selection(const DrawnElement *element, int motion, ElementType jack_type);
 
 	CableDrawer<240> cable_drawer;
 
@@ -451,6 +476,12 @@ private:
 	std::optional<GuiElement> pending_action_param_clear{};
 
 	enum { RollerHeaderTag = -1, ContextMenuTag = -2 };
+
+	uint16_t selected_input_port = 0;
+	uint16_t selected_output_port = 0;
+
+	bool suppress_next_click = false;
+	Toggler quickmap_rotary_button;
 };
 
 } // namespace MetaModule
