@@ -127,10 +127,13 @@ public:
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	Result load_patch(const PatchData &patchdata) {
 
-		// load_patch must only be called from the GUI context -- which ASyncThreads will interrupt
-		// Otherwise, if load_patch is interrupting an AsyncThread, then the AsyncThread
-		// will crash since its module * is no longer valid
+		// load_patch must only be called from the GUI context (Core 1, not in an interrupt).
+		// AsyncThreads will interrupt the GUI context on Core 1, and run concurrently on Core 0.
+		// Otherwise if the current context blocks AsyncThreads, then is_any_thread_executing() may hang forever
+		// and/or an AsyncThread could crash since its module * is no longer valid after we call unload_patch
 		pause_module_threads();
+		while (is_any_thread_executing()) {
+		}
 
 		if (patchdata.patch_name.length() == 0)
 			return {false, "Cannot load: patch does not have a name"};
