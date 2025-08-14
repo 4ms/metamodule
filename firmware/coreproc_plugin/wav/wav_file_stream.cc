@@ -34,7 +34,7 @@ struct WavFileStream::Internal {
 	// 4kB is an efficient size to read from an SD Card or USB Drive
 	// but the gaps between reads due to async thread timing is too large.
 	// 8kB has a better ratio (16kB is better but makes GUI too laggy)
-	static constexpr unsigned ReadBlockBytes = 8192;
+	static constexpr unsigned ReadBlockBytes = 4096;
 
 	// read_buff needs to be big enough to hold 8kB of any data converted to int16_t
 	// Worst case: 8kB of 8-bit mono data will convert to 8192 ints
