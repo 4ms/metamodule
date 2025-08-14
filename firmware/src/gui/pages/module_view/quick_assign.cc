@@ -40,6 +40,7 @@ void ModuleViewPage::handle_quick_assign() {
 				lv_arc_set_value(ui_ControlArc, lv_arc_get_value(ui_ControlArc) + motion);
 				lv_event_send(ui_ControlArc, LV_EVENT_VALUE_CHANGED, nullptr);
 				suppress_next_click = true;
+				quick_control_mode = true;
 			}
 
 			if (gui_state.midi_quick_mapping_mode) {
@@ -88,7 +89,8 @@ void ModuleViewPage::handle_quick_assign() {
 		}
 
 	} else {
-		if (mapping_pane.control_popup_visible()) {
+		if (quick_control_mode && mapping_pane.control_popup_visible()) {
+			quick_control_mode = false;
 			mapping_pane.hide_control_popup();
 		}
 	}

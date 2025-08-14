@@ -136,6 +136,9 @@ struct ModuleViewPage : PageBase {
 			settings_menu.prepare_focus(group);
 			action_menu.prepare_focus(group, this_module_id);
 		}
+
+		quick_control_mode = false;
+		suppress_next_click = false;
 	}
 
 	void update() override {
@@ -481,6 +484,7 @@ private:
 	uint16_t selected_output_port = 0;
 
 	bool suppress_next_click = false;
+	bool quick_control_mode = false;
 	Toggler quickmap_rotary_button;
 };
 

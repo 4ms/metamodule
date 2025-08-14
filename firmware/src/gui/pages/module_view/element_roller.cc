@@ -319,6 +319,7 @@ void ModuleViewPage::manual_control_popup(DrawnElement const &drawn_element) {
 	args.element_indices = drawn_element.gui_element.idx;
 
 	if (is_patch_playloaded) {
+		quick_control_mode = false;
 		mapping_pane.show_control_popup(group, ui_ElementRollerPanel, drawn_element);
 	}
 }
