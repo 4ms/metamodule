@@ -68,6 +68,8 @@ extern "C" {
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #endif
 
+#define LE8(addr)         ((uint16_t)(addr)[0])
+
 #define LE16(addr)        (((uint16_t)(addr)[0]) | \
                            ((uint16_t)(((uint32_t)(addr)[1]) << 8)))
 
@@ -99,6 +101,13 @@ extern "C" {
 #endif
 
 #define USBH_MAX_EP_PACKET_SIZE                            0x400U
+
+#define HOSTDEV_DEFAULT_HUBADDR 0
+#define HOSTDEV_DEFAULT_PRTADDR 0
+
+#define USBH_ADDRESS_DEFAULT                     0x00U
+#define USBH_MPS_DEFAULT                         0x40U
+#define USBH_MPS_LOWSPEED                        0x08U
 
 #define  USB_LEN_DESC_HDR                                  0x02U
 #define  USB_LEN_DEV_DESC                                  0x12U
@@ -148,6 +157,7 @@ extern "C" {
 #define  USB_DESC_TYPE_DEVICE_QUALIFIER                    0x06U
 #define  USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION           0x07U
 #define  USB_DESC_TYPE_INTERFACE_POWER                     0x08U
+#define	 USB_DESC_TYPE_ASSOC							   0x0BU
 #define  USB_DESC_TYPE_HID                                 0x21U
 #define  USB_DESC_TYPE_HID_REPORT                          0x22U
 
@@ -224,6 +234,7 @@ uint16_t_uint8_t;
 
 typedef union _USB_Setup
 {
+// TODO: Align this to 4k?
   uint32_t d8[2];
 
   struct _SetupPkt_Struc
@@ -308,6 +319,18 @@ typedef struct _ConfigurationDescriptor
 USBH_CfgDescTypeDef;
 
 
+typedef struct _InterfaceAssocDescriptor
+{
+  uint8_t   bLength;
+  uint8_t   bDescriptorType;
+  uint8_t	bFirstInterface;
+  uint8_t   bInterfaceCount;       /* Number of Interfaces */
+  uint8_t   bFunctionClass;
+  uint8_t   bFunctionSubClass;
+  uint8_t   bFunctionProtocol;
+  uint8_t   iConfiguration;       /*Index of String Descriptor Describing this configuration */
+} USBH_IfAssocDescTypeDef;
+
 /* Following USB Host status */
 typedef enum
 {
@@ -317,6 +340,7 @@ typedef enum
   USBH_NOT_SUPPORTED,
   USBH_UNRECOVERED_ERROR,
   USBH_ERROR_SPEED_UNKNOWN,
+  USBH_HUB_REQ_REENUMERATE,
 } USBH_StatusTypeDef;
 
 
@@ -336,7 +360,11 @@ typedef enum
 typedef enum
 {
   HOST_IDLE = 0U,
+  HOST_DEV_BUS_RESET_OFF,
+  HOST_DEV_BUS_RESET_ON,
   HOST_DEV_WAIT_FOR_ATTACHMENT,
+  HOST_DEV_BEFORE_ATTACHED,
+  HOST_DEV_ATTACHED_WAITSPEED,
   HOST_DEV_ATTACHED,
   HOST_DEV_DISCONNECTED,
   HOST_DETECT_DEVICE_SPEED,
@@ -349,6 +377,7 @@ typedef enum
   HOST_CLASS,
   HOST_SUSPENDED,
   HOST_ABORT_STATE,
+  HOST_DELAY
 } HOST_StateTypeDef;
 
 /* Following states are used for EnumerationState */
@@ -430,10 +459,12 @@ typedef struct
 /* Attached device structure */
 typedef struct
 {
+// TODO: Align these both to 4k?
   uint8_t                           CfgDesc_Raw[USBH_MAX_SIZE_CONFIGURATION];
   uint8_t                           Data[USBH_MAX_DATA_BUFFER];
-  uint8_t                           address;
-  uint8_t                           speed;
+  // Removed when adding hub support:
+  // uint8_t                           address;
+  // uint8_t                           speed;
   uint8_t                           EnumCnt;
   uint8_t                           RstCnt;
   __IO uint8_t                      is_connected;
@@ -445,6 +476,15 @@ typedef struct
   USBH_CfgDescTypeDef               CfgDesc;
 } USBH_DeviceTypeDef;
 
+typedef struct
+{
+  uint8_t speed;
+  uint8_t dev_address;
+  uint8_t tt_hubaddr;
+  uint8_t tt_prtaddr;
+
+} USBH_TargetTypeDef;
+
 struct _USBH_HandleTypeDef;
 
 /* USB Host Class structure */
@@ -452,7 +492,7 @@ typedef struct
 {
   const char          *Name;
   uint8_t              ClassCode;
-  USBH_StatusTypeDef(*Init)(struct _USBH_HandleTypeDef *phost);
+  USBH_StatusTypeDef(*Init)(struct _USBH_HandleTypeDef *phost, const USBH_TargetTypeDef * dev_target);
   USBH_StatusTypeDef(*DeInit)(struct _USBH_HandleTypeDef *phost);
   USBH_StatusTypeDef(*Requests)(struct _USBH_HandleTypeDef *phost);
   USBH_StatusTypeDef(*BgndProcess)(struct _USBH_HandleTypeDef *phost);
@@ -463,20 +503,28 @@ typedef struct
 /* USB Host handle structure */
 typedef struct _USBH_HandleTypeDef
 {
-  HOST_StateTypeDef     gState;       /*  Host State Machine Value */
+  __IO HOST_StateTypeDef     gState;       /*  Host State Machine Value */
+  __IO HOST_StateTypeDef     gPushState;       /*  Host State Machine Value */
+  uint32_t tickstart;
+  uint32_t wait;
   ENUM_StateTypeDef     EnumState;    /* Enumeration state Machine */
   CMD_StateTypeDef      RequestState;
   USBH_CtrlTypeDef      Control;
   USBH_DeviceTypeDef    device;
-  USBH_ClassTypeDef    *pClass[USBH_MAX_NUM_SUPPORTED_CLASS];
+  USBH_TargetTypeDef	rootTarget;		/* Enumeration target */
+  USBH_TargetTypeDef   *currentTarget;	/* Enumeration target */
+
   USBH_ClassTypeDef    *pActiveClass;
-  uint32_t              ClassNumber;
+  uint32_t              ClassNumber;	/* number of registered classes */
+  USBH_ClassTypeDef    *pClass[USBH_MAX_NUM_SUPPORTED_CLASS];
+
   uint32_t              Pipes[16];
-  uint32_t         Timer;
+  __IO uint32_t         Timer;
   uint32_t              Timeout;
-  uint8_t               id;
+  // Removed when added support for hubs:
+  // uint8_t               id;
   void                 *pData;
-  void (* pUser)(struct _USBH_HandleTypeDef *pHandle, uint8_t id);
+  void (*pUser)(struct _USBH_HandleTypeDef *pHandle, uint8_t id);
 
 #if (USBH_USE_OS == 1U)
 #if osCMSIS < 0x20000
@@ -489,6 +537,10 @@ typedef struct _USBH_HandleTypeDef
   uint32_t              os_msg;
 #endif
 
+  uint8_t hubInstances;
+  void *hubDatas[USBH_MAX_NUM_INTERFACES];
+
+  uint8_t allocaddress;
 } USBH_HandleTypeDef;
 
 
