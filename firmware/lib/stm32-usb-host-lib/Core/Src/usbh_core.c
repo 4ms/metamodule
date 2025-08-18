@@ -488,8 +488,8 @@ static void USBH_ProcessDelay(
 	unsigned delayMS
 	)
 {
-	phost->tickstart = sys_now();
-	phost->wait = ulmax32(delayMS, 1000 / TICKS_FREQUENCY);
+	phost->tickstart = HAL_GetTick();
+	phost->wait = delayMS < 1000 ? delayMS : 1000;
 	phost->gState = HOST_DELAY;
 	phost->gPushState = state;
 }
