@@ -186,6 +186,7 @@ typedef struct {
 	uint32_t xfer_len; /*!< Current transfer length.                                                   */
 
 	uint32_t xfer_count; /*!< Partial transfer length in case of multi packet transfer.                  */
+	uint32_t fifo_count; /*! from tinyusb */
 
 	uint8_t toggle_in; /*!< IN transfer current toggle flag.
 									 This parameter must be a number between Min_Data = 0 and Max_Data = 1      */
@@ -202,6 +203,12 @@ typedef struct {
 
 	USB_OTG_HCStateTypeDef state; /*!< Host Channel state.
 											This parameter can be any value of @ref USB_OTG_HCStateTypeDef  */
+
+	// SPLIT:
+	uint8_t xact_pos;		  //transaction position in microframe
+	uint8_t split_compl;	  //0=start split, 1=split complete
+	uint8_t split_en;		  //enable split transactions
+	uint8_t nyet_retry_count; // NYET retry counter
 } USB_OTG_HCTypeDef;
 #endif /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */
 
@@ -480,6 +487,7 @@ void USB_ClearInterrupts(USB_OTG_GlobalTypeDef *USBx, uint32_t interrupt);
 HAL_StatusTypeDef USB_HostInit(USB_OTG_GlobalTypeDef *USBx, USB_OTG_CfgTypeDef cfg);
 HAL_StatusTypeDef USB_InitFSLSPClkSel(USB_OTG_GlobalTypeDef *USBx, uint8_t freq);
 HAL_StatusTypeDef USB_ResetPort(USB_OTG_GlobalTypeDef *USBx);
+HAL_StatusTypeDef USB_ResetPort2(USB_OTG_GlobalTypeDef *USBx, uint8_t resetActiveState);
 HAL_StatusTypeDef USB_DriveVbus(USB_OTG_GlobalTypeDef *USBx, uint8_t state);
 uint32_t USB_GetHostSpeed(USB_OTG_GlobalTypeDef *USBx);
 uint32_t USB_GetCurrentFrame(USB_OTG_GlobalTypeDef *USBx);
@@ -489,7 +497,9 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 							  uint8_t dev_address,
 							  uint8_t speed,
 							  uint8_t ep_type,
-							  uint16_t mps);
+							  uint16_t mps,
+							  uint8_t tt_hubaddr,
+							  uint8_t tt_prtaddr); // last two params added by hftrx
 HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDef *hc, uint8_t dma);
 
 uint32_t USB_HC_ReadInterrupt(USB_OTG_GlobalTypeDef *USBx);
@@ -498,6 +508,10 @@ HAL_StatusTypeDef USB_DoPing(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num);
 HAL_StatusTypeDef USB_StopHost(USB_OTG_GlobalTypeDef *USBx);
 HAL_StatusTypeDef USB_ActivateRemoteWakeup(USB_OTG_GlobalTypeDef *USBx);
 HAL_StatusTypeDef USB_DeActivateRemoteWakeup(USB_OTG_GlobalTypeDef *USBx);
+
+void USB_HC_EnableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num, uint8_t tt_hubaddr, uint8_t tt_prtaddr);
+void USB_HC_DisableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num);
+uint8_t USB_HC_ShouldSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t speed);
 
 uint_fast8_t USB_Is_OTG_HS(USB_OTG_GlobalTypeDef *USBx);
 #endif /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */

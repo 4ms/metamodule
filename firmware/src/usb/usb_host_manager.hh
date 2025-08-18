@@ -3,15 +3,30 @@
 #include "midi_host.hh"
 #include "msc_host.hh"
 #include "pr_dbg.hh"
+#include "stm32-usb-host-lib/Class/HUB/usbh_hub.h"
 #include <cstring>
+
+#include "debug.hh"
 
 class UsbHostManager {
 private:
 	mdrivlib::Pin src_enable;
-	USBH_HandleTypeDef usbhost{};
+
+	USBH_HandleTypeDef host_handles[9]{};
+	// root_host_handle (aka host_handles[0]) handles the device directly attached to the MM
+	// the other host_handles[1-8] handle the devices attached to hub ports
+	USBH_HandleTypeDef &root_host_handle = host_handles[0];
+
+	// Host handle currently being processed (round-robin)
+	USBH_HandleTypeDef *cur_host_handle = nullptr;
+	int cur_host_idx = -1;
+
 	static inline HCD_HandleTypeDef hhcd;
-	MidiHost midi_host{usbhost};
-	MSCHost msc_host{usbhost, MetaModule::Volume::USB};
+
+	MidiHost midi_host{};
+	MSCHost msc_host{MetaModule::Volume::USB};
+
+	uint32_t host_pipes[USBH_MAX_PIPES_NBR];
 
 	// For access in C-style callback:
 	static inline MidiHost *_midihost_instance;
@@ -20,8 +35,8 @@ private:
 public:
 	UsbHostManager(mdrivlib::PinDef enable_5v)
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
-		usbhost.pActiveClass = nullptr;
-		for (auto &cls : usbhost.pClass) {
+		root_host_handle.pActiveClass = nullptr;
+		for (auto &cls : root_host_handle.pClass) {
 			cls = nullptr;
 		}
 		src_enable.low();
@@ -30,22 +45,26 @@ public:
 	}
 
 	void init() {
-		init_hhcd();
+		reset_handles();
+		init_handles();
 	}
 
 	void start() {
-		init_hhcd();
+		reset_handles();
 
-		auto status = USBH_Init(&usbhost, usbh_state_change_callback, 0);
+		for (auto i = 0; i < 9; i++)
+			pr_info("&host_handle[%d] = %p\n", i, &host_handles[i]);
+
+		auto status = USBH_Init(&root_host_handle, usbh_state_change_callback, 0);
 		if (status != USBH_OK) {
 			pr_err("Error init USB Host: %d\n", status);
 			return;
 		}
-		midi_host.init();
-		msc_host.init();
+
+		init_handles();
 
 		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
-		auto err = USBH_Start(&usbhost);
+		auto err = USBH_Start(&root_host_handle);
 		if (err != USBH_OK)
 			pr_err("Error starting host\n");
 
@@ -53,18 +72,67 @@ public:
 		pr_trace("VBus high, starting host\n");
 		// HAL_Delay(500);
 	}
+
 	void stop() {
+		pr_dbg("Stopping USB Host\n");
+
 		src_enable.low();
 		HAL_Delay(250);
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		HAL_Delay(250);
-		USBH_Stop(&usbhost);
-		usbhost.pData = nullptr;
-		USBH_DeInit(&usbhost); //sets hhcd to NULL?
+
+		// TODO: stop all handles
+		USBH_LL_Disconnect(&root_host_handle);
+		USBH_Process(&root_host_handle);
+
+		root_host_handle.pData = nullptr;
+
+		USBH_DeInit(&root_host_handle); //sets hhcd to NULL?
 	}
 
 	void process() {
-		USBH_Process(&usbhost);
+		if (cur_host_handle != nullptr && cur_host_handle->valid == 1) {
+			if (cur_host_handle == &host_handles[0])
+				Debug::Pin0::high();
+			else if (cur_host_handle == &host_handles[1])
+				Debug::Pin1::high();
+			else if (cur_host_handle == &host_handles[2])
+				Debug::Pin2::high();
+			else if (cur_host_handle == &host_handles[3])
+				Debug::Pin3::high();
+
+			USBH_Process(cur_host_handle);
+
+			Debug::Pin0::low();
+			Debug::Pin1::low();
+			Debug::Pin2::low();
+			Debug::Pin3::low();
+
+			// Keep processing this host until it's no longer busy
+			if (cur_host_handle->busy)
+				return;
+		}
+
+		// scan for next host
+		for (auto tries = 0; tries < MAX_HUB_PORTS; tries++) {
+
+			if (++cur_host_idx > MAX_HUB_PORTS)
+				cur_host_idx = 0;
+
+			if (host_handles[cur_host_idx].valid) {
+				cur_host_handle = &host_handles[cur_host_idx];
+				// pr_dbg("Setup EP0 for host idx %d", cur_host_idx);
+				USBH_LL_SetupEP0(cur_host_handle);
+
+				if (cur_host_handle->valid == 3) {
+					pr_dbg("PROCESSING ATTACH %d\n", cur_host_handle->hubPortAddress);
+					cur_host_handle->valid = 1;
+					cur_host_handle->busy = 1;
+				}
+
+				break;
+			}
+		}
 	}
 
 	static inline uint8_t connected_classcode = 0xFF;
@@ -74,58 +142,101 @@ public:
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
-				pr_trace("Select config\n");
+				pr_dbg("UsbHostManager: Select config %p\n", phost);
 				break;
 
 			case HOST_USER_CONNECTION:
-				pr_trace("Connected\n");
+				pr_dbg("UsbHostManager: Connected host %p\n", phost);
 				break;
 
 			case HOST_USER_CLASS_SELECTED: {
 				connected_classcode = host.get_active_class_code();
-				pr_trace("Class selected: %d\n", connected_classcode);
+				pr_dbg("UsbHostManager: Class selected: %d for %p\n", connected_classcode, phost);
+				if (connected_classcode == HubClassCode) {
+					//
+				} else if (connected_classcode == MscClassCode) {
+					_mschost_instance->set_handle(phost);
+
+				} else if (connected_classcode == AudioClassCode) {
+					_midihost_instance->connect(phost);
+				}
 			} break;
 
 			case HOST_USER_CLASS_ACTIVE: {
 				connected_classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
 
-				pr_trace("Class active: %.8s code %d\n", classname, connected_classcode);
+				pr_dbg("UsbHostManager: Class active: %.8s code %d for %p\n", classname, connected_classcode, phost);
 
 				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
-					_midihost_instance->connect();
 					auto mshandle = host.get_class_handle<MidiStreamingHandle>();
 					if (!mshandle) {
-						pr_err("Error, no MSHandle\n");
+						pr_err("UsbHostManager: Error, no MidiStreamingHandle\n");
 						return;
 					}
+					// Start receiving
 					USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				}
 
-				if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
-					pr_trace("MSC connected\n");
+				if (connected_classcode == MscClassCode && !strcmp(classname, "MSC")) {
+					pr_dbg("UsbHostManager: MSC connected\n");
 					_mschost_instance->connect();
 				}
 			} break;
 
 			case HOST_USER_DISCONNECTION: {
-				pr_trace("Disconnected class code %d\n", connected_classcode);
+				pr_dbg("Disconnected class code %d\n", connected_classcode);
+
 				if (connected_classcode == AudioClassCode)
 					_midihost_instance->disconnect();
-				else if (connected_classcode == USB_MSC_CLASS)
+				else if (connected_classcode == MscClassCode)
 					_mschost_instance->disconnect();
+				else if (connected_classcode == HubClassCode)
+					; // no action needed
 				else
-					pr_warn("Unknown disconnected class code %d\n", connected_classcode);
+					pr_warn("UsbHostManager: Unknown disconnected class code %d\n", connected_classcode);
+
 				connected_classcode = 0xFF;
 			} break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
-				pr_err("USB Host Manager Error\n");
+				pr_err("UsbHostManager: USB Host Manager Error for host %p\n", phost);
 				break;
 		}
 	}
 
-	void init_hhcd() {
+	void init_handles() {
+		for (auto &handle : host_handles) {
+			// All handles reference the host controller (OTG host driver)
+			handle.pData = &hhcd;
+
+			// All handles have a pointer to the array of all handles
+			handle.handles = host_handles;
+
+			// All handles listen for all classes we are capable of hosting
+			handle.ClassNumber = 0;
+			midi_host.init(&handle);
+			msc_host.init(&handle);
+
+			handle.currentTarget = &handle.rootTarget;
+
+			handle.Pipes = host_pipes;
+
+			handle.valid = 0;
+			handle.busy = 0;
+		}
+
+		root_host_handle.valid = 1;
+		root_host_handle.rootTarget.dev_address = USBH_DEVICE_ADDRESS;
+		root_host_handle.rootTarget.speed = USBH_HS_SPEED;
+
+		cur_host_idx = -1;
+
+		pr_info("Listening for Hub devices on root host handle\n");
+		USBH_RegisterClass(&root_host_handle, USBH_HUB_CLASS);
+	}
+
+	void reset_handles() {
 		memset(&hhcd, 0, sizeof(HCD_HandleTypeDef));
 
 		hhcd.Instance = USB_OTG_HS;
@@ -143,9 +254,8 @@ public:
 		hhcd.Init.ep0_mps = EP_MPS_64;			 // Max packet size. Doesnt seem to be used?
 		hhcd.Init.use_dedicated_ep1 = DISABLE;
 
-		// Link The driver to the stack
-		hhcd.pData = &usbhost;
-		usbhost.pData = &hhcd;
+		// Link the driver to the root host handle
+		hhcd.pData = &root_host_handle;
 	}
 
 	MidiHost &get_midi_host() {

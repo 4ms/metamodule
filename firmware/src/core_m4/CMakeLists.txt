@@ -97,6 +97,9 @@ add_executable(
   ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc.c
   ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_bot.c
   ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_scsi.c
+
+  ${USBHOST_LIBDIR}/Class/Hub/usbh_hub.c
+
   ${USBHOST_LIBDIR}/Core/Src/usbh_core.c
   ${USBHOST_LIBDIR}/Core/Src/usbh_ctlreq.c
   ${USBHOST_LIBDIR}/Core/Src/usbh_ioreq.c

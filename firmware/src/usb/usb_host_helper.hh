@@ -39,10 +39,8 @@ public:
 	template<typename HandleType>
 	HandleType *get_class_handle() {
 		if (phost) {
-			if (phost->pActiveClass) {
-				if (phost->pActiveClass->pData) {
-					return static_cast<HandleType *>(phost->pActiveClass->pData);
-				}
+			if (phost->classData[0]) { // TODO: why [0] and not something else?
+				return static_cast<HandleType *>(phost->classData[0]);
 			}
 		}
 		return nullptr;
@@ -83,14 +81,8 @@ public:
 		ep.pipe = USBH_AllocPipe(phost, ep.addr);
 	}
 
-	USBH_StatusTypeDef open_pipe(const EndPoint &ep, EndPointType ep_type) {
-		return USBH_OpenPipe(phost,
-							 ep.pipe,
-							 ep.addr,
-							 phost->device.address,
-							 phost->device.speed,
-							 static_cast<uint8_t>(ep_type),
-							 ep.size);
+	USBH_StatusTypeDef open_pipe(const EndPoint &ep, EndPointType ep_type, const USBH_TargetTypeDef *target) {
+		return USBH_OpenPipe(phost, ep.pipe, ep.addr, target, static_cast<uint8_t>(ep_type), ep.size);
 	}
 
 	void set_toggle(const EndPoint &ep, uint8_t toggle_val) {

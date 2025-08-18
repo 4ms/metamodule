@@ -43,6 +43,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32mp1xx_hal.h"
 #include "stm32mp1xx_ll_usb_phy.h" //for USB_HS_PHYC_Init()
+#include "usbh_conf.h"
 
 /** @addtogroup STM32MP1xx_LL_USB_DRIVER
  * @{
@@ -1428,6 +1429,30 @@ HAL_StatusTypeDef USB_ResetPort(USB_OTG_GlobalTypeDef *USBx)
 	return HAL_OK;
 }
 
+
+/**
+ * @brief  USB_ResetPort2 : Reset Host Port without long delay
+ * @param  USBx  Selected device
+ * @retval HAL status
+ * @note (1)The application must wait at least 10 ms
+ *   before clearing the reset bit.
+ */
+HAL_StatusTypeDef USB_ResetPort2(USB_OTG_GlobalTypeDef *USBx, uint8_t resetActiveState)
+{
+	uint32_t USBx_BASE = (uint32_t)USBx;
+
+	__IO uint32_t hprt0 = 0U;
+
+	hprt0 = USBx_HPRT0;
+
+	hprt0 &=
+		~(USB_OTG_HPRT_PENA | USB_OTG_HPRT_PCDET | USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG | USB_OTG_HPRT_PRST);
+
+	USBx_HPRT0 = (!!resetActiveState * USB_OTG_HPRT_PRST | hprt0);
+
+	return HAL_OK;
+}
+
 /**
  * @brief  USB_DriveVbus : activate or de-activate vbus
  * @param  state  VBUS state
@@ -1514,7 +1539,12 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 							  uint8_t dev_address,
 							  uint8_t speed,
 							  uint8_t ep_type,
-							  uint16_t mps) {
+							  uint16_t mps,
+							  uint8_t tt_hubaddr,
+							  uint8_t tt_prtaddr)
+{
+	printf("Init Host Channel/pipe %u, dev_address %u, epnum %u (type %u), hub/port %u/%u\n", ch_num, dev_address, epnum, ep_type, tt_hubaddr, tt_prtaddr);
+
 	HAL_StatusTypeDef ret = HAL_OK;
 	uint32_t USBx_BASE = (uint32_t)USBx;
 	uint32_t HCcharEpDir;
@@ -1602,7 +1632,40 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 		USBx_HC((uint32_t)ch_num)->HCCHAR |= USB_OTG_HCCHAR_ODDFRM;
 	}
 
+
 	return ret;
+}
+
+uint8_t USB_HC_ShouldSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t speed) {
+	uint32_t HostCoreSpeed = USB_GetHostSpeed(USBx);
+	if ((speed != HPRT0_PRTSPD_HIGH_SPEED) && (HostCoreSpeed == HPRT0_PRTSPD_HIGH_SPEED)) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+void USB_HC_EnableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num, uint8_t tt_hubaddr, uint8_t tt_prtaddr)
+{
+	// full or low speed plugged into high-speed hub
+	USBH_DbgLog("Enable split for hub addr %u, port %u", tt_hubaddr, tt_prtaddr);
+
+	uint32_t USBx_BASE = (uint32_t)USBx;
+	// uint32_t hcsplit = USBx_HC(ch_num)->HCSPLT;
+	// hcsplit &= ~(USB_OTG_HCSPLT_HUBADDR_Msk | USB_OTG_HCSPLT_PRTADDR_Msk);
+	uint32_t hcsplit = 0;
+	hcsplit |= (uint32_t)tt_hubaddr << USB_OTG_HCSPLT_HUBADDR_Pos;
+	hcsplit |= (uint32_t)tt_prtaddr << USB_OTG_HCSPLT_PRTADDR_Pos;
+	hcsplit |= USB_OTG_HCSPLT_SPLITEN;
+	USBx_HC(ch_num)->HCSPLT = hcsplit;
+}
+
+void USB_HC_DisableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num)
+{
+	USBH_DbgLog("Disable split for host chnum %u", ch_num);
+
+	uint32_t USBx_BASE = (uint32_t)USBx;
+	USBx_HC(ch_num)->HCSPLT = 0;
 }
 
 /**
@@ -1634,10 +1697,15 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 		}
 
 		if ((dma == 0U) && (hc->do_ping == 1U)) {
+            printf("StartXfer: ping first\n");
 			(void)USB_DoPing(USBx, hc->ch_num);
 			return HAL_OK;
-		}
+        }
 	}
+
+    if (dma == 0 && hc->split_en) {
+        USBx_HC((uint32_t)ch_num)->HCINTMSK |= USB_OTG_HCINTMSK_NYET | USB_OTG_HCINTMSK_ACKM | USB_OTG_HCINTMSK_NAKM;
+    }
 
 	/* Compute the expected number of packets associated to the transfer */
 	if (hc->xfer_len > 0U) {
@@ -1660,6 +1728,20 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 	} else {
 		hc->XferSize = hc->xfer_len;
 	}
+
+
+    uint32_t hcsplt = USBx_HC(ch_num)->HCSPLT;
+
+    if ((hc->split_en ? 1 : 0) != ((hcsplt & USB_OTG_HCSPLT_SPLITEN) ? 1 : 0)) {
+        USBH_ErrLog("Host channel split enable not set properly");
+    }
+    if (hc->split_en) {
+        hcsplt = hcsplt & ~USB_OTG_HCSPLT_COMPLSPLT;
+        USBx_HC(ch_num)->HCSPLT = hcsplt;
+    }
+
+    USBH_XFERLog("StartXfer ch %u: XferSize: %u, pid %u, packets %u, hcsplit %08x HAINMSK=%08x GINTMSK=%08x HCINTMSK=%08x",
+                ch_num, hc->XferSize, hc->data_pid, num_packets, hcsplt , USBx_HOST->HAINTMSK, USBx->GINTMSK, USBx_HC(ch_num)->HCINTMSK);
 
 	/* Initialize the HCTSIZn register */
 	USBx_HC(ch_num)->HCTSIZ = (hc->XferSize & USB_OTG_HCTSIZ_XFRSIZ) |
@@ -1704,6 +1786,7 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 				if (len_words > (USBx->HNPTXSTS & 0xFFFFU)) {
 					/* need to process data in nptxfempty interrupt */
 					USBx->GINTMSK |= USB_OTG_GINTMSK_NPTXFEM;
+                    USBH_UsrLog("Warning: need to process data in nptxfempty interrupt\n");
 				}
 				break;
 
@@ -1723,7 +1806,13 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 		}
 
 		/* Write packet into the Tx FIFO. */
-		(void)USB_WritePacket(USBx, hc->xfer_buff, hc->ch_num, (uint16_t)hc->xfer_len, 0);
+
+        USBH_XFERLog("Write to USB TX %u len ", hc->xfer_len);
+#if USBH_XFER_TRACE_OUTPUT
+        print_mem(hc->xfer_buff, hc->xfer_len, 2);
+#endif
+
+		USB_WritePacket(USBx, hc->xfer_buff, hc->ch_num, (uint16_t)hc->xfer_len, 0);
 	}
 
 	return HAL_OK;

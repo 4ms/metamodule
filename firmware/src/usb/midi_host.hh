@@ -11,9 +11,12 @@
 #include "usb/usbh_midi.hh"
 #include "util/doublebuf_stream.hh"
 
+extern MidiStreamingHandle s_MIDIHandle;
+
 class MidiHost {
-	MidiStreamingHandle MSHandle;
-	USBH_HandleTypeDef &usbhost;
+	// MidiStreamingHandle MSHandle;
+	USBH_HandleTypeDef *usbhost = nullptr;
+
 	USBH_ClassTypeDef midi_class_ops = {
 		"MIDI",
 		AudioClassCode,
@@ -22,17 +25,20 @@ class MidiHost {
 		USBH_MIDI_ClassRequest,
 		USBH_MIDI_Process,
 		USBH_MIDI_SOFProcess,
-		&MSHandle,
+		// &MSHandle,
 	};
+
 	bool _is_connected = false;
 
 	DoubleBufferStream<uint8_t, 64> tx_stream;
 
 public:
-	MidiHost(USBH_HandleTypeDef &usbhh)
-		: usbhost{usbhh}
-		, tx_stream{[this](std::span<uint8_t> bytes) {
-			auto res = USBH_MIDI_Transmit(&usbhost, bytes.data(), bytes.size());
+	MidiHost()
+		: tx_stream{[this](std::span<uint8_t> bytes) {
+			if (!usbhost)
+				return false;
+
+			auto res = USBH_MIDI_Transmit(usbhost, bytes.data(), bytes.size());
 
 			if (res == USBH_BUSY) {
 				// TODO: how to handle?
@@ -41,44 +47,41 @@ public:
 			return res == USBH_OK;
 		}} {
 
-		MSHandle.tx_callback = [this]() {
+		s_MIDIHandle.tx_callback = [this]() {
 			tx_stream.tx_done_callback();
 		};
 	}
 
 	void set_rx_callback(MidiStreamRxCallbackType rx_callback) {
-		MSHandle.rx_callback = rx_callback;
+		s_MIDIHandle.rx_callback = rx_callback;
 	}
 
-	bool init() {
-		pr_info("Listening as a MIDI Host\n");
-		USBH_RegisterClass(&usbhost, &midi_class_ops);
+	bool init(USBH_HandleTypeDef *usbhost_root) {
+		pr_info("Listening for MIDI devices on host handle %p\n", usbhost_root);
+		USBH_RegisterClass(usbhost_root, &midi_class_ops);
 		return true;
-	}
-
-	bool start() {
-		return USBH_Start(&usbhost) == USBH_OK;
-	}
-
-	bool stop() {
-		return USBH_Stop(&usbhost) == USBH_OK;
 	}
 
 	bool is_connected() {
 		return _is_connected;
 	}
 
-	void connect() {
+	void connect(USBH_HandleTypeDef *usbhost) {
+		this->usbhost = usbhost;
 		_is_connected = true;
 	}
 
 	void disconnect() {
 		_is_connected = false;
+		this->usbhost = nullptr;
 	}
 
 	USBH_StatusTypeDef receive() {
+		if (!usbhost)
+			return USBH_FAIL;
+
 		//TODO: if we use double-buffers, swap buffers here
-		return USBH_MIDI_Receive(&usbhost, MSHandle.rx_buffer, 128);
+		return USBH_MIDI_Receive(usbhost, s_MIDIHandle.rx_buffer, 128);
 	}
 
 	bool transmit(std::span<uint8_t> bytes) {

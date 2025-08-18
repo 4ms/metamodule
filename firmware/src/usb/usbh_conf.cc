@@ -19,10 +19,13 @@
 
 #include "usbh_core.h"
 #include "usbh_msc.h"
+#include <ctype.h>
 
 /*******************************************************************************
 					   HCD BSP Routines
 *******************************************************************************/
+static USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status);
+
 /**
  * @brief  Initializes the HCD MSP.
  * @param  hhcd: HCD handle
@@ -138,8 +141,8 @@ USBH_StatusTypeDef USBH_LL_Init(USBH_HandleTypeDef *phost) {
  * @retval USBH Status
  */
 USBH_StatusTypeDef USBH_LL_DeInit(USBH_HandleTypeDef *phost) {
-	HAL_HCD_DeInit((HCD_HandleTypeDef *)phost->pData);
-	return USBH_OK;
+	auto status = HAL_HCD_DeInit((HCD_HandleTypeDef *)phost->pData);
+	return USBH_Get_USB_Status(status);
 }
 
 /**
@@ -148,8 +151,8 @@ USBH_StatusTypeDef USBH_LL_DeInit(USBH_HandleTypeDef *phost) {
  * @retval USBH Status
  */
 USBH_StatusTypeDef USBH_LL_Start(USBH_HandleTypeDef *phost) {
-	HAL_HCD_Start((HCD_HandleTypeDef *)phost->pData);
-	return USBH_OK;
+	auto status = HAL_HCD_Start((HCD_HandleTypeDef *)phost->pData);
+	return USBH_Get_USB_Status(status);
 }
 
 /**
@@ -158,8 +161,8 @@ USBH_StatusTypeDef USBH_LL_Start(USBH_HandleTypeDef *phost) {
  * @retval USBH Status
  */
 USBH_StatusTypeDef USBH_LL_Stop(USBH_HandleTypeDef *phost) {
-	HAL_HCD_Stop((HCD_HandleTypeDef *)phost->pData);
-	return USBH_OK;
+	auto status = HAL_HCD_Stop((HCD_HandleTypeDef *)phost->pData);
+	return USBH_Get_USB_Status(status);
 }
 
 /**
@@ -196,8 +199,13 @@ USBH_SpeedTypeDef USBH_LL_GetSpeed(USBH_HandleTypeDef *phost) {
  * @retval USBH Status
  */
 USBH_StatusTypeDef USBH_LL_ResetPort(USBH_HandleTypeDef *phost) {
-	HAL_HCD_ResetPort((HCD_HandleTypeDef *)phost->pData);
-	return USBH_OK;
+	auto status = HAL_HCD_ResetPort((HCD_HandleTypeDef *)phost->pData);
+	return USBH_Get_USB_Status(status);
+}
+
+USBH_StatusTypeDef USBH_LL_ResetPort2(USBH_HandleTypeDef *phost, unsigned resetIsActive) {
+	auto status = HAL_HCD_ResetPort2((HCD_HandleTypeDef *)phost->pData, resetIsActive);
+	return USBH_Get_USB_Status(status);
 }
 
 /**
@@ -207,7 +215,25 @@ USBH_StatusTypeDef USBH_LL_ResetPort(USBH_HandleTypeDef *phost) {
  * @retval Packet Size
  */
 uint32_t USBH_LL_GetLastXferSize(USBH_HandleTypeDef *phost, uint8_t pipe) {
-	return HAL_HCD_HC_GetXferCount((HCD_HandleTypeDef *)phost->pData, pipe);
+	uint32_t size2 = HAL_HCD_HC_GetXferCount((HCD_HandleTypeDef *)phost->pData, pipe);
+	uint32_t size;
+	do {
+		size = size2;
+		size2 = HAL_HCD_HC_GetXferCount((HCD_HandleTypeDef *)phost->pData, pipe);
+	} while (size != size2);
+	return size2;
+}
+
+/**
+  * @brief  Return the maximum possible transferred packet size.
+  * @param  phost: Host handle
+  * @param  pipe: Pipe index
+  * @param  size: expectes transfer packet size
+  * @retval Packet size
+  */
+uint32_t USBH_LL_GetAdjXferSize(USBH_HandleTypeDef *phost, uint8_t pipe, uint32_t size) {
+	uint32_t maxpack = HAL_HCD_HC_GetMaxPacket((HCD_HandleTypeDef *)phost->pData, pipe); // Default implementation
+	return (maxpack < size) ? maxpack : size;
 }
 
 /**
@@ -222,14 +248,22 @@ uint32_t USBH_LL_GetLastXferSize(USBH_HandleTypeDef *phost, uint8_t pipe) {
  * @retval USBH Status
  */
 USBH_StatusTypeDef USBH_LL_OpenPipe(USBH_HandleTypeDef *phost,
-									uint8_t pipe,
+									uint8_t pipe_num,
 									uint8_t epnum,
-									uint8_t dev_address,
-									uint8_t speed,
+									const USBH_TargetTypeDef *dev_target,
 									uint8_t ep_type,
 									uint16_t mps) {
-	HAL_HCD_HC_Init((HCD_HandleTypeDef *)phost->pData, pipe, epnum, dev_address, speed, ep_type, mps);
-	return USBH_OK;
+	auto hal_status = HAL_HCD_HC_Init((HCD_HandleTypeDef *)phost->pData,
+									  pipe_num,
+									  epnum,
+									  dev_target->dev_address,
+									  dev_target->speed,
+									  ep_type,
+									  mps,
+									  dev_target->tt_hubaddr,
+									  dev_target->tt_prtaddr);
+
+	return USBH_Get_USB_Status(hal_status);
 }
 
 /**
@@ -239,8 +273,8 @@ USBH_StatusTypeDef USBH_LL_OpenPipe(USBH_HandleTypeDef *phost,
  * @retval USBH Status
  */
 USBH_StatusTypeDef USBH_LL_ClosePipe(USBH_HandleTypeDef *phost, uint8_t pipe) {
-	HAL_HCD_HC_Halt((HCD_HandleTypeDef *)phost->pData, pipe);
-	return USBH_OK;
+	auto hal_status = HAL_HCD_HC_Halt((HCD_HandleTypeDef *)phost->pData, pipe);
+	return USBH_Get_USB_Status(hal_status);
 }
 
 /**
@@ -276,11 +310,11 @@ USBH_StatusTypeDef USBH_LL_SubmitURB(USBH_HandleTypeDef *phost,
 									 uint8_t ep_type,
 									 uint8_t token,
 									 uint8_t *pbuff,
-									 uint16_t length,
+									 uint32_t length,
 									 uint8_t do_ping) {
-	HAL_HCD_HC_SubmitRequest(
+	auto hal_status = HAL_HCD_HC_SubmitRequest(
 		(HCD_HandleTypeDef *)phost->pData, pipe, direction, ep_type, token, pbuff, length, do_ping);
-	return USBH_OK;
+	return USBH_Get_USB_Status(hal_status);
 }
 
 /**
@@ -299,6 +333,16 @@ USBH_StatusTypeDef USBH_LL_SubmitURB(USBH_HandleTypeDef *phost,
  */
 USBH_URBStateTypeDef USBH_LL_GetURBState(USBH_HandleTypeDef *phost, uint8_t pipe) {
 	return (USBH_URBStateTypeDef)HAL_HCD_HC_GetURBState((HCD_HandleTypeDef *)phost->pData, pipe);
+}
+
+USBH_SpeedTypeDef USBH_LL_GetPipeSpeed(USBH_HandleTypeDef *phost, uint8_t pipe_num) {
+	HCD_HandleTypeDef *hhcd = (HCD_HandleTypeDef *)phost->pData;
+
+	return (USBH_SpeedTypeDef)hhcd->hc[pipe_num].speed;
+}
+
+uint_fast8_t USBH_LL_GetSpeedReady(USBH_HandleTypeDef *phost) {
+	return HAL_HCD_GetCurrentSpeedReady((HCD_HandleTypeDef *)phost->pData);
 }
 
 /**
@@ -365,13 +409,145 @@ void USBH_Delay(uint32_t Delay) {
 	HAL_Delay(Delay);
 }
 
-void *msc_malloc(size_t sz) {
-	static MSC_HandleTypeDef hmsc;
-	if (sz == sizeof(MSC_HandleTypeDef))
-		return &hmsc;
-	else
-		return nullptr;
+/**
+  * From mori:
+  * @brief  USBH_LL_SetupEP0
+  *         Setup endpoint with selected device info
+  * @param  phost: Host handle
+  * @retval Status
+  */
+HAL_StatusTypeDef USBH_LL_SetupEP0(USBH_HandleTypeDef *phost) {
+	auto p_hhcd = (HCD_HandleTypeDef *)phost->pData;
+
+	__HAL_LOCK(p_hhcd);
+
+	p_hhcd->hc[phost->Control.pipe_out].dev_addr = phost->rootTarget.dev_address; //device.address;
+	p_hhcd->hc[phost->Control.pipe_out].max_packet = phost->Control.pipe_size;
+	p_hhcd->hc[phost->Control.pipe_out].speed = phost->rootTarget.speed; //device.speed;
+
+	//phHCD->hc[phost->Control.pipe_out].ch_num     = phost->Control.pipe_out;
+	//phHCD->hc[phost->Control.pipe_out].toggle_out = phost->Control.toggle_out;
+	//phHCD->hc[phost->Control.pipe_out].data_pid = phost->Control.data_pid_out;
+
+	p_hhcd->hc[phost->Control.pipe_in].dev_addr = phost->rootTarget.dev_address;
+	p_hhcd->hc[phost->Control.pipe_in].max_packet = phost->Control.pipe_size;
+	p_hhcd->hc[phost->Control.pipe_in].speed = phost->rootTarget.speed;
+
+	//phHCD->hc[phost->Control.pipe_in].ch_num      = phost->Control.pipe_in;
+	//phHCD->hc[phost->Control.pipe_in].toggle_in   = phost->Control.toggle_in;
+	//phHCD->hc[phost->Control.pipe_in].data_pid   = phost->Control.data_pid_in;
+
+	p_hhcd->pData = phost;
+	phost->pData = p_hhcd;
+
+	__HAL_UNLOCK(p_hhcd);
+
+	return HAL_OK;
 }
 
-void msc_free(void *) {
+/**
+ * @brief  Returns the USB status depending on the HAL status:
+ * @param  hal_status: HAL status
+ * @retval USB status
+ */
+static USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status) {
+	USBH_StatusTypeDef usb_status = USBH_OK;
+
+	switch (hal_status) {
+		case HAL_OK:
+			usb_status = USBH_OK;
+			break;
+		case HAL_ERROR:
+			usb_status = USBH_FAIL;
+			break;
+		case HAL_BUSY:
+			usb_status = USBH_BUSY;
+			break;
+		case HAL_TIMEOUT:
+			usb_status = USBH_FAIL;
+			break;
+		default:
+			usb_status = USBH_FAIL;
+			break;
+	}
+	return usb_status;
+}
+
+extern MSC_HandleTypeDef s_MSCHandle;
+
+void *msc_malloc(size_t sz) {
+	if (sz == sizeof(MSC_HandleTypeDef))
+		return &s_MSCHandle;
+	else {
+		USBH_ErrLog("usbh_malloc only can be called for MSC");
+		return nullptr;
+	}
+}
+
+void msc_free(void *ptr) {
+	if (ptr == &s_MSCHandle) {
+		ptr = nullptr;
+	} else
+		USBH_ErrLog("usbh_free only can be called for MSC");
+}
+
+// Prints memory dump like:
+// 0000:  09 02 65 00 02 01 00 80 32 09 04 00 00 00 01 01  |..e.....2.......|
+// 0010:  00 00 09 24 01 00 01 09 00 01 01 09 04 01 00 02  |...$............|
+static void dump_str_line(uint8_t const *buf, uint16_t count) {
+	printf("  |");
+	// each line is 16 bytes
+	for (uint16_t i = 0; i < count; i++) {
+		int ch = buf[i];
+		printf("%c", isprint(ch) ? ch : '.');
+	}
+	printf("|\r\n");
+}
+
+// From tinyusb:
+void print_mem(void const *buf, uint32_t count, uint8_t indent) {
+	uint8_t const size = 1;
+	if (!buf || !count) {
+		printf("NULL\r\n");
+		return;
+	}
+
+	uint8_t const *buf8 = (uint8_t const *)buf;
+	char format[] = "%00X";
+	format[2] += (uint8_t)(2 * size); // 1 byte = 2 hex digits
+	const uint8_t item_per_line = 16 / size;
+
+	for (unsigned int i = 0; i < count; i++) {
+		unsigned int value = 0;
+
+		if (i % item_per_line == 0) {
+			// Print Ascii
+			if (i != 0)
+				dump_str_line(buf8 - 16, 16);
+			for (uint8_t s = 0; s < indent; s++)
+				printf(" ");
+			// print offset or absolute address
+			printf("%04X: ", 16 * i / item_per_line);
+		}
+
+		// memcpy(&value, sizeof(value), buf8, size);
+		memcpy(&value, buf8, size);
+		buf8 += size;
+
+		printf(" ");
+		printf(format, value);
+	}
+
+	// fill up last row to 16 for printing ascii
+	const uint32_t remain = count % 16;
+	uint8_t nback = (uint8_t)(remain ? remain : 16);
+	if (remain) {
+		for (uint32_t i = 0; i < 16 - remain; i++) {
+			printf(" ");
+			for (int j = 0; j < 2 * size; j++)
+				printf(" ");
+		}
+	}
+
+	dump_str_line(buf8 - nback, nback);
 }

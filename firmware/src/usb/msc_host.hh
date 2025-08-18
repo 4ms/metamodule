@@ -10,21 +10,23 @@
 #include <string_view>
 
 class MSCHost {
-	USBH_HandleTypeDef &usbhost;
-	MSCOps msc_ops{usbhost};
+	MSCOps msc_ops;
 	FatFileIO msc;
 
 public:
-	MSCHost(USBH_HandleTypeDef &usbhost, MetaModule::Volume vol)
-		: usbhost{usbhost}
-		, msc{&msc_ops, vol} {
+	MSCHost(MetaModule::Volume vol)
+		: msc{&msc_ops, vol} {
 	}
 
-	bool init() {
-		pr_trace("Registered MSC with USB Host\n");
-		USBH_RegisterClass(&usbhost, USBH_MSC_CLASS);
+	bool init(USBH_HandleTypeDef *root_host) {
+		pr_info("Listening for MSC devices on host %p\n", root_host);
+		USBH_RegisterClass(root_host, USBH_MSC_CLASS);
 
 		return true;
+	}
+
+	void set_handle(USBH_HandleTypeDef *usbhost) {
+		msc_ops.set_handle(usbhost);
 	}
 
 	void connect() {
@@ -35,6 +37,7 @@ public:
 	void disconnect() {
 		pr_trace("USB MSC disconnect()\n");
 		msc.unmount_disk();
+		msc_ops.set_handle(nullptr);
 	}
 
 	FatFileIO &get_fileio() {
