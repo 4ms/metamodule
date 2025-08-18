@@ -217,9 +217,8 @@ uint32_t USBH_LL_GetLastXferSize(USBH_HandleTypeDef *phost, uint8_t pipe) {
   * @param  size: expectes transfer packet size
   * @retval Packet size
   */
-uint32_t USBH_LL_GetAdjXferSize(USBH_HandleTypeDef *phost, uint8_t pipe, uint32_t size)
-{
-	uint32_t maxpack = HAL_HCD_HC_GetMaxPacket(phost->pData, pipe); // Default implementation
+uint32_t USBH_LL_GetAdjXferSize(USBH_HandleTypeDef *phost, uint8_t pipe, uint32_t size) {
+	uint32_t maxpack = HAL_HCD_HC_GetMaxPacket((HCD_HandleTypeDef *)phost->pData, pipe); // Default implementation
 	return (maxpack < size) ? maxpack : size;
 }
 
