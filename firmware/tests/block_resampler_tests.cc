@@ -213,7 +213,7 @@ TEST_CASE("ResamplingInterleavedBuffer") {
 
 	SUBCASE("1:1 ratio") {
 		res.set_samplerate_in_out(48000, 48000);
-		auto out = res.process_block(2, in);
+		auto out = res.process_block(in);
 		unsigned i = 0;
 		for (auto o : out) {
 			CHECK(o == in[i++]);
@@ -223,7 +223,7 @@ TEST_CASE("ResamplingInterleavedBuffer") {
 	SUBCASE("upsample 0.5") {
 		res.set_samplerate_in_out(24000, 48000);
 
-		auto out = res.process_block(2, in);
+		auto out = res.process_block(in);
 		CHECK(out.size() == 24);
 
 		CHECK(out[0] == doctest::Approx(0.0));
@@ -251,7 +251,7 @@ TEST_CASE("ResamplingInterleavedBuffer") {
 		CHECK(out[22] == doctest::Approx(5.5));
 		CHECK(out[23] == doctest::Approx(13.25));
 
-		out = res.process_block(2, in);
+		out = res.process_block(in);
 		CHECK(out.size() == 32);
 
 		CHECK(out[0] == doctest::Approx(6.0));

@@ -30,7 +30,7 @@ size_t BlockResampler::process(uint32_t channel_index, std::span<const float> in
 	in = in.subspan(channel_index);
 	out = out.subspan(channel_index);
 
-	if (chan.ratio == 1.f) {
+	if (_ratio == 1.f) {
 		// copy with strides
 		auto o = 0u;
 		for (auto i = 0u; i < in_size && o < out_size; i += input_stride, o += output_stride) {
@@ -107,7 +107,7 @@ size_t BlockResampler::process(uint32_t channel_index, std::span<const float> in
 			out[outpos] = (((a * chan.frac_pos) + b) * chan.frac_pos + c) * chan.frac_pos + chan.x0;
 			outpos += output_stride;
 
-			chan.frac_pos += chan.ratio;
+			chan.frac_pos += _ratio;
 		}
 	}
 
@@ -115,11 +115,10 @@ size_t BlockResampler::process(uint32_t channel_index, std::span<const float> in
 }
 
 void BlockResampler::set_samplerate_in_out(uint32_t input_rate, uint32_t output_rate) {
-	for (auto &chan : chans) {
-		auto cur_ratio = (float)input_rate / (float)output_rate;
-
-		if (chan.ratio != cur_ratio) {
-			chan.ratio = (float)input_rate / (float)output_rate;
+	auto cur_ratio = (float)input_rate / (float)output_rate;
+	if (_ratio != cur_ratio) {
+		_ratio = (float)input_rate / (float)output_rate;
+		for (auto &chan : chans) {
 			chan.flush = true;
 		}
 	}
@@ -133,8 +132,8 @@ void BlockResampler::set_output_stride(uint32_t stride) {
 	output_stride = stride;
 }
 
-float BlockResampler::ratio(unsigned chan) const {
-	return chans[chan].ratio;
+float BlockResampler::ratio() const {
+	return _ratio;
 }
 
 void BlockResampler::flush() {
