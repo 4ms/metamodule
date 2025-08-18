@@ -87,8 +87,7 @@ public:
 		return USBH_OpenPipe(phost,
 							 ep.pipe,
 							 ep.addr,
-							 phost->device.address,
-							 phost->device.speed,
+							 phost->currentTarget, //is this right?
 							 static_cast<uint8_t>(ep_type),
 							 ep.size);
 	}
