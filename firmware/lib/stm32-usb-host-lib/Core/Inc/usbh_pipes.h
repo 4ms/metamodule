@@ -76,8 +76,7 @@ extern "C" {
 USBH_StatusTypeDef USBH_OpenPipe(USBH_HandleTypeDef *phost,
                                  uint8_t pipe_num,
                                  uint8_t epnum,
-                                 uint8_t dev_address,
-                                 uint8_t speed,
+                                 const USBH_TargetTypeDef * dev_target,
                                  uint8_t ep_type,
                                  uint16_t mps);
 
