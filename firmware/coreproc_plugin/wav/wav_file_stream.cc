@@ -112,6 +112,13 @@ struct WavFileStream::Internal {
 			// Read blocks of maximum 4kB at a time
 			unsigned frames_to_read = std::min(ReadBlockBytes / wav.fmt.blockAlign, (unsigned)num_frames);
 
+			if (auto num_free = pre_buff.num_free(); num_free == 0)
+				return;
+			else if (num_free < frames_to_read) {
+				frames_to_read = pre_buff.num_free() / wav.channels;
+				num_frames = frames_to_read; // abort after this read
+			}
+
 			auto frames_read = drwav_read_pcm_frames_s16(&wav, frames_to_read, read_buff.data());
 
 			if (wav.readCursorInPCMFrames == wav.totalPCMFrameCount) {
@@ -133,10 +140,6 @@ struct WavFileStream::Internal {
 			for (auto out : samples) {
 				if (!pre_buff.put(out)) {
 					print_message("WavFileStream: Buffer overflow\n");
-					// TODO: Handle buffer overflow: we read too much from disk and the audio thread
-					// is not consuming the samples fast enough to make room.
-					// Set drwav read cursor back to this position, pop back if we're not a frame boundary,
-					// set next_frame_to_write, and abort
 				}
 				if (++frame_ctr >= wav.channels) {
 					frame_ctr = 0;
@@ -165,7 +168,8 @@ struct WavFileStream::Internal {
 	}
 
 	bool is_stereo() const {
-		return is_loaded() ? wav.channels > 1 : false;
+		return wav.channels > 1;
+		// return is_loaded() ? wav.channels > 1 : false;
 	}
 
 	float sample_seconds() const {
