@@ -210,7 +210,7 @@ struct WavFileStream::Internal {
 			pre_buff.set_read_offset((next_frame_to_write.load() - frame_num) * wav.channels);
 		} else {
 			// requested frame is not in the buffer, so we need to start pre-buffering
-			pre_buff.reset();
+			reset_prebuff();
 		}
 		next_sample_to_read = frame_num * wav.channels;
 	}
