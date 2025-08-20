@@ -490,7 +490,9 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 							  uint8_t dev_address,
 							  uint8_t speed,
 							  uint8_t ep_type,
-							  uint16_t mps);
+							  uint16_t mps,
+							  uint8_t tt_hubaddr,
+							  uint8_t tt_prtaddr); // last two params added by hftrx
 HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDef *hc, uint8_t dma);
 
 uint32_t USB_HC_ReadInterrupt(USB_OTG_GlobalTypeDef *USBx);
