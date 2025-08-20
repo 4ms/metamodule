@@ -111,6 +111,10 @@ void kill_module_threads() {
 void peg_task_to_core(uint32_t, uint32_t) {
 }
 
+bool is_any_thread_executing() {
+	return false;
+}
+
 Async::Task *get_task(unsigned id) {
 	if (auto idx = task_index(id))
 		return &tasks[*idx];
