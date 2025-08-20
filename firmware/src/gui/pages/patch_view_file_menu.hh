@@ -13,6 +13,7 @@ namespace MetaModule
 {
 
 struct PatchViewFileMenu {
+	static constexpr bool SavingMakesStartupPatch = false;
 
 	PatchViewFileMenu(PatchPlayLoader &play_loader,
 					  FileStorageProxy &patch_storage,
@@ -241,7 +242,7 @@ struct PatchViewFileMenu {
 
 	bool did_filesystem_change() {
 		bool result = patch_save_dialog.did_save();
-		if (result)
+		if (SavingMakesStartupPatch && result)
 			make_viewpatch_default();
 		result |= filesystem_changed;
 		filesystem_changed = false;
@@ -305,7 +306,8 @@ private:
 			saveas_but_cb(event);
 		} else {
 			page->play_loader.request_save_patch();
-			// page->make_viewpatch_default();
+			if (SavingMakesStartupPatch)
+				page->make_viewpatch_default();
 			page->filesystem_changed = true;
 			page->hide_menu();
 		}
