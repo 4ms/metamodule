@@ -309,7 +309,7 @@ USBH_StatusTypeDef USBH_LL_SubmitURB(USBH_HandleTypeDef *phost,
 									 uint8_t ep_type,
 									 uint8_t token,
 									 uint8_t *pbuff,
-									 uint16_t length,
+									 uint32_t length,
 									 uint8_t do_ping) {
 	auto hal_status = HAL_HCD_HC_SubmitRequest(
 		(HCD_HandleTypeDef *)phost->pData, pipe, direction, ep_type, token, pbuff, length, do_ping);

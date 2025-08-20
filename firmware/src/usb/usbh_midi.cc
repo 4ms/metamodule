@@ -35,7 +35,7 @@ static void MIDI_ProcessReception(USBH_HandleTypeDef *phost);
  * @param  phost: Host handle
  * @retval USBH Status
  */
-USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, USBH_TargetTypeDef *target) 
+USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, const USBH_TargetTypeDef *target) 
 {
 	USBH_StatusTypeDef status;
 	uint8_t interface;
@@ -61,7 +61,7 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, USBH_Targe
 	} else {
 		USBH_DbgLog("Found Audio Control subclass\n");
 		host.link_endpoint_pipe(MSHandle->ControlItf.ControlEP, interface, 0);
-		host.open_pipe(MSHandle->ControlItf.ControlEP, EndPointType::Intr); // TODO: Is it an Intr EP type?
+		host.open_pipe(MSHandle->ControlItf.ControlEP, EndPointType::Intr, target); // TODO: Is it an Intr EP type?
 		host.set_toggle(MSHandle->ControlItf.ControlEP, 0);
 	}
 
