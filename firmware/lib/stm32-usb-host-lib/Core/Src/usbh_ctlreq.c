@@ -487,7 +487,16 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
     while ((if_ix < USBH_MAX_NUM_INTERFACES) && (ptr < cfg_desc->wTotalLength))
     {
       pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
-      if (pdesc->bDescriptorType == USB_DESC_TYPE_INTERFACE)
+
+	  if (pdesc->bDescriptorType == USB_DESC_TYPE_ASSOC) {
+		// iadmode = 1;
+		USBH_IfAssocDescTypeDef *piad = (USBH_IfAssocDescTypeDef *)pdesc;
+		USBH_DbgLog("USBH_ParseCfgDesc: USB_DESC_TYPE_ASSOC: 0x%02X/x%02X, nif=%d, firstIf=%d",
+					piad->bFunctionClass,
+					piad->bFunctionSubClass,
+					piad->bInterfaceCount,
+					piad->bFirstInterface);
+	  } else if (pdesc->bDescriptorType == USB_DESC_TYPE_INTERFACE)
       {
         /* Make sure that the interface descriptor's bLength is equal to USB_INTERFACE_DESC_SIZE */
         if (pdesc->bLength != USB_INTERFACE_DESC_SIZE)
@@ -608,6 +617,7 @@ static USBH_StatusTypeDef USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDes
       (ep_descriptor->wMaxPacketSize > USBH_MAX_DATA_BUFFER))
   {
     status = USBH_NOT_SUPPORTED;
+	USBH_UsrLog("ep_descriptor->wMaxPacketSize %u not supported", ep_descriptor->wMaxPacketSize);
   }
 
   if (phost->currentTarget->speed == (uint8_t)USBH_SPEED_HIGH)
