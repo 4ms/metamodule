@@ -180,7 +180,7 @@ USBH_StatusTypeDef USBH_BulkSendData(USBH_HandleTypeDef *phost,
                                      uint8_t pipe_num,
                                      uint8_t do_ping)
 {
-  if (phost->device.speed != USBH_SPEED_HIGH)
+  if (USBH_LL_GetPipeSpeed(phost, pipe_num) != USBH_SPEED_HIGH) 
   {
     do_ping = 0U;
   }

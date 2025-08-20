@@ -334,6 +334,19 @@ USBH_URBStateTypeDef USBH_LL_GetURBState(USBH_HandleTypeDef *phost, uint8_t pipe
 	return (USBH_URBStateTypeDef)HAL_HCD_HC_GetURBState((HCD_HandleTypeDef *)phost->pData, pipe);
 }
 
+USBH_SpeedTypeDef USBH_LL_GetPipeSpeed(USBH_HandleTypeDef *phost, uint8_t pipe_num)
+{
+	HCD_HandleTypeDef *hhcd = (HCD_HandleTypeDef*)phost->pData;
+
+	return (USBH_SpeedTypeDef)hhcd->hc[pipe_num].speed;
+}
+
+uint_fast8_t USBH_LL_GetSpeedReady(USBH_HandleTypeDef *phost) { 
+	return HAL_HCD_GetCurrentSpeedReady((HCD_HandleTypeDef*)phost->pData); 
+}
+
+
+
 /**
  * @brief  USBH_LL_DriverVBUS
  *         Drive VBUS.
