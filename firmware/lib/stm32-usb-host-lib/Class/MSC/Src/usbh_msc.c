@@ -94,7 +94,7 @@ EndBSPDependencies */
   * @{
   */
 
-static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost);
+static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost, const USBH_TargetTypeDef *target);
 static USBH_StatusTypeDef USBH_MSC_InterfaceDeInit(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_MSC_Process(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_MSC_ClassRequest(USBH_HandleTypeDef *phost);
@@ -134,7 +134,7 @@ USBH_ClassTypeDef  USBH_msc =
   * @param  phost: Host handle
   * @retval USBH Status
   */
-static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost)
+static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost, const USBH_TargetTypeDef *target)
 {
   USBH_StatusTypeDef status;
   uint8_t interface;
@@ -201,8 +201,7 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost)
   if ((MSC_Handle->OutEp != 0U) && (MSC_Handle->OutEpSize != 0U))
   {
     (void)USBH_OpenPipe(phost, MSC_Handle->OutPipe, MSC_Handle->OutEp,
-                        phost->device.address, phost->device.speed,
-                        USB_EP_TYPE_BULK, MSC_Handle->OutEpSize);
+                        target, USB_EP_TYPE_BULK, MSC_Handle->OutEpSize);
   }
   else
   {
@@ -212,8 +211,7 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost)
   if ((MSC_Handle->InEp != 0U) && (MSC_Handle->InEpSize != 0U))
   {
     (void)USBH_OpenPipe(phost, MSC_Handle->InPipe, MSC_Handle->InEp,
-                        phost->device.address, phost->device.speed, USB_EP_TYPE_BULK,
-                        MSC_Handle->InEpSize);
+                        target, USB_EP_TYPE_BULK, MSC_Handle->InEpSize);
   }
   else
   {
