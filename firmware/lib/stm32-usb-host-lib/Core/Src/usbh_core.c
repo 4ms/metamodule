@@ -75,6 +75,7 @@ osThreadAttr_t USBH_Thread_Atrr;
 static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost);
 static void USBH_HandleSof(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef DeInitStateMachine(USBH_HandleTypeDef *phost);
+static uint8_t USBH_GetNextAddress(USBH_HandleTypeDef *phost, uint8_t modify);
 
 #if (USBH_USE_OS == 1U)
 #if (osCMSIS < 0x20000U)
@@ -946,7 +947,7 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       break;
 
 	case HOST_DELAY:
-		if  ((sys_now() - phost->tickstart) >= phost->wait)
+		if  ((HAL_GetTick() - phost->tickstart) >= phost->wait)
 			phost->gState = phost->gPushState;
 		break;
 
@@ -1295,8 +1296,7 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
 }
 
 /* return 1..126 as address */
-uint8_t USBH_GetNextAddress(USBH_HandleTypeDef *phost,
-                                   uint8_t modify)
+uint8_t USBH_GetNextAddress(USBH_HandleTypeDef *phost, uint8_t modify)
 {
 	uint8_t v = phost->allocaddress;
 	phost->allocaddress = (phost->allocaddress + modify) % 125;
@@ -1430,7 +1430,7 @@ USBH_StatusTypeDef USBH_LL_Disconnect(USBH_HandleTypeDef *phost)
 
 	// MORI - Always select the root device, mainly if its a hub
 	//USBH_HandleTypeDef *pphost = &hUSBHost[0];
-	USBH_HandleTypeDef *pphost = &hUsbHostHS;
+	// USBH_HandleTypeDef *pphost = &hUsbHostHS;
 	//HCD_HandleTypeDef *phHCD   = &_hHCD[pphost->id];
 
   /* update device connection states */
