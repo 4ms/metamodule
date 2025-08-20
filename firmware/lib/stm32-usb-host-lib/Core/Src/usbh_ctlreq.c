@@ -386,8 +386,10 @@ static USBH_StatusTypeDef USBH_ParseDevDesc(USBH_HandleTypeDef *phost, uint8_t *
   dev_desc->bDeviceProtocol    = *(uint8_t *)(buf +  6U);
   dev_desc->bMaxPacketSize     = *(uint8_t *)(buf +  7U);
 
-  if ((phost->device.speed == (uint8_t)USBH_SPEED_HIGH) ||
-      (phost->device.speed == (uint8_t)USBH_SPEED_FULL))
+  uint8_t speed = phost->currentTarget->speed;
+
+  if ((speed == (uint8_t)USBH_SPEED_HIGH) ||
+      (speed == (uint8_t)USBH_SPEED_FULL))
   {
     /* Make sure that the max packet size is either 8, 16, 32, 64 or force it to minimum allowed value */
     switch (dev_desc->bMaxPacketSize)
@@ -404,7 +406,7 @@ static USBH_StatusTypeDef USBH_ParseDevDesc(USBH_HandleTypeDef *phost, uint8_t *
         break;
     }
   }
-  else if (phost->device.speed == (uint8_t)USBH_SPEED_LOW)
+  else if (speed == (uint8_t)USBH_SPEED_LOW)
   {
     if (dev_desc->bMaxPacketSize != 8U)
     {
@@ -458,6 +460,7 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
     return USBH_FAIL;
   }
 
+  // uint8_t iadmode = 0;
   pdesc = (USBH_DescHeader_t *)(void *)buf;
 
   /* Make sure that the Configuration descriptor's bLength is equal to USB_CONFIGURATION_DESC_SIZE */
@@ -607,7 +610,7 @@ static USBH_StatusTypeDef USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDes
     status = USBH_NOT_SUPPORTED;
   }
 
-  if (phost->device.speed == (uint8_t)USBH_SPEED_HIGH)
+  if (phost->currentTarget->speed == (uint8_t)USBH_SPEED_HIGH)
   {
     if ((ep_descriptor->bmAttributes & EP_TYPE_MSK) == EP_TYPE_BULK)
     {
@@ -637,7 +640,7 @@ static USBH_StatusTypeDef USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDes
       status = USBH_NOT_SUPPORTED;
     }
   }
-  else if (phost->device.speed == (uint8_t)USBH_SPEED_FULL)
+  else if (phost->currentTarget->speed == (uint8_t)USBH_SPEED_FULL)
   {
     if (((ep_descriptor->bmAttributes & EP_TYPE_MSK) == EP_TYPE_BULK) ||
         ((ep_descriptor->bmAttributes & EP_TYPE_MSK) == EP_TYPE_CTRL))
@@ -670,7 +673,7 @@ static USBH_StatusTypeDef USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDes
       status = USBH_NOT_SUPPORTED;
     }
   }
-  else if (phost->device.speed == (uint8_t)USBH_SPEED_LOW)
+  else if (phost->currentTarget->speed == (uint8_t)USBH_SPEED_LOW)
   {
     if ((ep_descriptor->bmAttributes & EP_TYPE_MSK) == EP_TYPE_CTRL)
     {
