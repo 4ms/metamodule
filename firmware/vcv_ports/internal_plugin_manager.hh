@@ -71,6 +71,24 @@ struct InternalPluginManager {
 	void load_internal_plugins() {
 		rack::contextSet(nullptr);
 
+		// Set 4ms display names
+		// TODO: read from plugin-mm.json
+		ModuleFactory::setModuleDisplayName("4msCompany:TSP", "Basic Sample Player");
+		ModuleFactory::setModuleDisplayName("4msCompany:L4", "Listen Four");
+		ModuleFactory::setModuleDisplayName("4msCompany:DEV", "Dual EnvVCA");
+		ModuleFactory::setModuleDisplayName("4msCompany:SHEV", "Shaped Dual EnvVCA");
+		ModuleFactory::setModuleDisplayName("4msCompany:DLD", "Dual Looping Delay");
+		ModuleFactory::setModuleDisplayName("4msCompany:KPLS", "Karplus");
+		ModuleFactory::setModuleDisplayName("4msCompany:KPLS", "Percussion Interface");
+		ModuleFactory::setModuleDisplayName("4msCompany:SH", "Sample/Hold");
+		ModuleFactory::setModuleDisplayName("4msCompany:StMix", "Stereo Mixed");
+		ModuleFactory::setModuleDisplayName("4msCompany:Switch14", "Stereo 1 to 4");
+		ModuleFactory::setModuleDisplayName("4msCompany:Switch41", "Stereo 4 to 1");
+		ModuleFactory::setModuleDisplayName("4msCompany:VCAM", "VCA Matrix");
+		ModuleFactory::setModuleDisplayName("4msCompany:Tapo", "Tapographic Delay");
+		ModuleFactory::setModuleDisplayName("4msCompany:CLKD", "Clock Divider");
+		ModuleFactory::setModuleDisplayName("4msCompany:CLKM", "Clock Multiplier");
+
 		//Load internal plugins
 		// TODO: use the glue/BRAND/plugin.cpp::init() function for each brand...
 		// 		 But, somehow get around the issue of multiple definitions of global symbol pluginInstance
