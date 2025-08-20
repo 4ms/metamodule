@@ -83,11 +83,11 @@ public:
 		ep.pipe = USBH_AllocPipe(phost, ep.addr);
 	}
 
-	USBH_StatusTypeDef open_pipe(const EndPoint &ep, EndPointType ep_type) {
+	USBH_StatusTypeDef open_pipe(const EndPoint &ep, EndPointType ep_type, USBH_TargetTypeDef *target) {
 		return USBH_OpenPipe(phost,
 							 ep.pipe,
 							 ep.addr,
-							 phost->currentTarget, //is this right?
+							 target,
 							 static_cast<uint8_t>(ep_type),
 							 ep.size);
 	}

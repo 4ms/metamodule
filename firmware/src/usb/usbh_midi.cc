@@ -35,7 +35,7 @@ static void MIDI_ProcessReception(USBH_HandleTypeDef *phost);
  * @param  phost: Host handle
  * @retval USBH Status
  */
-USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost)
+USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, USBH_TargetTypeDef *target) 
 {
 	USBH_StatusTypeDef status;
 	uint8_t interface;
@@ -89,8 +89,8 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost)
 	else
 		host.link_endpoint_pipe(MSHandle->DataItf.OutEP, interface, 1);
 
-	host.open_pipe(MSHandle->DataItf.OutEP, EndPointType::Bulk);
-	host.open_pipe(MSHandle->DataItf.InEP, EndPointType::Bulk);
+	host.open_pipe(MSHandle->DataItf.OutEP, EndPointType::Bulk, target);
+	host.open_pipe(MSHandle->DataItf.InEP, EndPointType::Bulk, target);
 
 	MSHandle->state = MidiStreamingState::Idle;
 

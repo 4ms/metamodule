@@ -142,7 +142,7 @@ struct MidiStreamingHandle {
 	uint8_t rx_buffer[MidiStreamingBufferSize];
 };
 
-USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost);
+USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, USBH_TargetTypeDef *target);
 USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef USBH_MIDI_SOFProcess(USBH_HandleTypeDef *phost);
