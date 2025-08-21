@@ -139,6 +139,8 @@ struct KnobMapPage : PageBase {
 		if (map.is_midi_notegate()) {
 			lv_show(ui_ModuleMapToggleSwitchCont);
 			lv_check(ui_ModuleMapToggleSwitch, map.curve_type == MappedKnob::CurveType::Toggle);
+			lv_label_set_text(ui_ModuleMapToggleSwitchLabel, "Button Behavior: Toggle");
+
 		} else {
 			lv_hide(ui_ModuleMapToggleSwitchCont);
 			lv_check(ui_ModuleMapToggleSwitch, false);
