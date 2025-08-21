@@ -558,7 +558,7 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       {
         USBH_UsrLog("USB Device Reset Completed");
         phost->device.RstCnt = 0U;
-        phost->gState = HOST_DEV_ATTACHED;
+        phost->gState = HOST_DEV_ATTACHED_WAITSPEED;
         phost->hubInstances = 0;
         phost->allocaddress = 0;
         phost->rootTarget.dev_address = USBH_ADDRESS_DEFAULT;
@@ -600,16 +600,19 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       break;
 
     case HOST_DEV_ATTACHED_WAITSPEED:
-    	/* todo: переделать - сперва ждём, потом проверяем скорость */
+    	/* todo: переделать - сперва ждём, потом проверяем скорость (redo - first we wait, then we check the speed) */
+	    USBH_DbgLog("DEV_ATTACHED_WAITSPEED");
     	if (USBH_LL_GetSpeedReady(phost))
     	{
-            /* Wait for 100 ms after Reset */
-    		USBH_ProcessDelay(phost, HOST_DEV_ATTACHED, 100);
+			/* Wait for 100 ms after Reset */
+			USBH_ProcessDelay(phost, HOST_DEV_ATTACHED, 100);
 
-    	      phost->rootTarget.speed = (uint8_t)USBH_LL_GetSpeed(phost);
-    	      phost->rootTarget.tt_hubaddr = HOSTDEV_DEFAULT_HUBADDR;
-    	      phost->rootTarget.tt_prtaddr = HOSTDEV_DEFAULT_PRTADDR;
-    	}
+			phost->rootTarget.speed = (uint8_t)USBH_LL_GetSpeed(phost);
+			phost->rootTarget.tt_hubaddr = HOSTDEV_DEFAULT_HUBADDR;
+			phost->rootTarget.tt_prtaddr = HOSTDEV_DEFAULT_PRTADDR;
+		} else { 
+			USBH_ErrLog("Speed not ready");
+		}
  		break;
 
  	// С этого состояния начинается повторная енуменация для устройств на HUB

@@ -3,6 +3,7 @@
 #include "midi_host.hh"
 #include "msc_host.hh"
 #include "pr_dbg.hh"
+#include "stm32-usb-host-lib/Class/HUB/usbh_hub.h"
 #include <cstring>
 
 class UsbHostManager {
@@ -43,6 +44,8 @@ public:
 		}
 		midi_host.init();
 		msc_host.init();
+
+		USBH_RegisterClass(&usbhost, USBH_HUB_CLASS);
 
 		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
 		auto err = USBH_Start(&usbhost);
