@@ -16,4 +16,8 @@ std::string get_path() {
 	return PluginAppInterface::get_path();
 }
 
+std::string get_dir() {
+	return PluginAppInterface::get_dir();
+}
+
 } // namespace MetaModule::Patch

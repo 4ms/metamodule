@@ -15,6 +15,7 @@ public:
 	static void mark_patch_modified();
 	static StaticString<7> get_volume();
 	static std::string get_path();
+	static std::string get_dir();
 
 	// Gui
 	static void notify_user(std::string_view message, int duration_ms);

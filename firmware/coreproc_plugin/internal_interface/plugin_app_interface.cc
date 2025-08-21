@@ -41,4 +41,12 @@ std::string PluginAppInterface::get_path() {
 	return make_full_path(vol, path);
 }
 
+std::string PluginAppInterface::get_dir() {
+	auto p = std::filesystem::path{get_path()};
+	if (p.has_parent_path())
+		return p.parent_path().string() + "/";
+	else
+		return "/";
+}
+
 } // namespace MetaModule
