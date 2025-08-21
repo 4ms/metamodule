@@ -279,6 +279,7 @@ struct PatchPlayLoader {
 			while (!is_audio_muted())
 				;
 			player_.unload_patch();
+			// TODO: can we force it to reload from disk, but not forget its location?
 			patches_.close_playing_patch();
 		}
 	}
@@ -422,15 +423,26 @@ private:
 
 		pr_trace("Attempting play patch: %.31s\n", next_patch->patch_name.data());
 
+		// Change the currently playing patch to point to the new patch
+		// This ensures that modules that use the patch location during
+		// construction will be given the right path.
+		if (next_patch == patches_.get_view_patch()) {
+			patches_.play_view_patch();
+		} else if (next_patch != patches_.get_playing_patch()) {
+			// This happens when loading calibration patches
+			// It might also happen if we implement MIDI PC -> patch load
+			pr_warn("Open patch manager does is not tracking the playing patch\n");
+		}
+
 		auto result = player_.load_patch(*next_patch);
 		if (result.success) {
 			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
-			if (next_patch == patches_.get_view_patch())
-				patches_.play_view_patch();
 
 			if (start_audio_immediately)
 				start_audio();
+		} else {
+			patches_.close_playing_patch();
 		}
 
 		loading_new_patch_ = false;
