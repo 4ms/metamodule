@@ -1132,7 +1132,7 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       }
       else if (ReqStatus == USBH_NOT_SUPPORTED)
       {
-        USBH_ErrLog("Control error: Get Device configuration descriptor request failed");
+        USBH_ErrLog("Control error: Get Device full configuration descriptor request failed");
         phost->device.EnumCnt++;
         if (phost->device.EnumCnt > 3U)
         {

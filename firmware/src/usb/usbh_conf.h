@@ -43,7 +43,7 @@ static inline void Error_Handler() {
 
 #define USBH_USER_LOG_OUTPUT 1
 #define USBH_ERR_LOG_OUTPUT 1
-#define USBH_DBG_LOG_OUTPUT 0
+#define USBH_DBG_LOG_OUTPUT 1
 
 enum { MidiStreamingBufferSize = 256 };
 enum { HOST_HS = 0, HOST_FS = 1 };

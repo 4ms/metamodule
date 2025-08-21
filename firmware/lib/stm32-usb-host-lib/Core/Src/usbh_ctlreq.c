@@ -553,6 +553,7 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
         /* Check if the required endpoint(s) data are parsed */
         if (ep_ix < pif->bNumEndpoints)
         {
+          USBH_UsrLog("Expected %u endpoints, found %u. Not Supported", pif->bNumEndpoints, ep_ix);
           return USBH_NOT_SUPPORTED;
         }
 
@@ -657,6 +658,7 @@ static USBH_StatusTypeDef USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDes
     {
       if (ep_descriptor->wMaxPacketSize > 64U)
       {
+		USBH_ErrLog("Not supported: fullspeed bulk or ctrl EP with wMaxPacketSize > 64 (is %u)", ep_descriptor->wMaxPacketSize);
         status = USBH_NOT_SUPPORTED;
       }
     }
