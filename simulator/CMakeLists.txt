@@ -120,6 +120,7 @@ if(HEADLESS)
 		hardware_support/random.cc
 		hardware_support/time.cc
 		hardware_support/memory.cc
+		hardware_support/filesystem_helpers.cc
 
 		${FWDIR}/src/midi/midi_router.cc
 
@@ -136,6 +137,7 @@ else()
 		hardware_support/random.cc
 		hardware_support/time.cc
 		hardware_support/memory.cc
+		hardware_support/filesystem_helpers.cc
 
 		${FWDIR}/src/gui/elements/element_name.cc
 		${FWDIR}/src/gui/elements/panel_name.cc
