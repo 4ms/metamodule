@@ -7,6 +7,7 @@ target_sources(hardware_support PRIVATE
 	random.cc
 	time.cc
 	memory.cc
+    filesystem_helpers.cc
 )
 
 target_link_libraries(hardware_support PRIVATE 

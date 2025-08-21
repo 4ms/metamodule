@@ -11,8 +11,6 @@ target_sources(coreproc_plugin_export PRIVATE
 	dsp/block_resampler.cc
 	dsp/stream_resampler.cc
 
-    filesystem/helpers.cc
-
 	graphics/waveform_display.cc
 
 	gui/notification.cc
