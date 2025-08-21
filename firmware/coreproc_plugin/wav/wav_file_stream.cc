@@ -112,6 +112,8 @@ struct WavFileStream::Internal {
 	void read_frames_from_file(int num_frames) {
 		if (state.load(std::memory_order_seq_cst) != State::Loaded)
 			return;
+		if (wav.channels == 0)
+			return;
 
 		while (num_frames > 0) {
 			// Read blocks of maximum 4kB at a time
@@ -186,6 +188,8 @@ struct WavFileStream::Internal {
 	}
 
 	unsigned frames_available() const {
+		if (wav.channels == 0)
+			return 0;
 		return samples_available() / wav.channels;
 	}
 
@@ -198,6 +202,8 @@ struct WavFileStream::Internal {
 	}
 
 	unsigned current_playback_frame() const {
+		if (wav.channels == 0)
+			return 0;
 		return next_sample_to_read.load() / wav.channels;
 	}
 
