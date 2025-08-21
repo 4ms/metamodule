@@ -33,11 +33,11 @@ void PluginAppInterface::notify_user(std::string_view message, int duration_ms) 
 }
 
 StaticString<7> PluginAppInterface::get_volume() {
-	return volume_string(instance->internal->patches.get_playing_patch_loc().vol);
+	return volume_string(instance->internal->patches.get_view_patch_loc().vol);
 }
 
 std::string PluginAppInterface::get_path() {
-	auto [path, vol] = instance->internal->patches.get_playing_patch_loc();
+	auto [path, vol] = instance->internal->patches.get_view_patch_loc();
 	return make_full_path(vol, path);
 }
 
