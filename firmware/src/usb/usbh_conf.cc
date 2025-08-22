@@ -141,7 +141,7 @@ USBH_StatusTypeDef USBH_LL_Init(USBH_HandleTypeDef *phost) {
  */
 USBH_StatusTypeDef USBH_LL_DeInit(USBH_HandleTypeDef *phost) {
 	auto status = HAL_HCD_DeInit((HCD_HandleTypeDef *)phost->pData);
-    return USBH_Get_USB_Status(status);
+	return USBH_Get_USB_Status(status);
 }
 
 /**
@@ -151,7 +151,7 @@ USBH_StatusTypeDef USBH_LL_DeInit(USBH_HandleTypeDef *phost) {
  */
 USBH_StatusTypeDef USBH_LL_Start(USBH_HandleTypeDef *phost) {
 	auto status = HAL_HCD_Start((HCD_HandleTypeDef *)phost->pData);
-    return USBH_Get_USB_Status(status);
+	return USBH_Get_USB_Status(status);
 }
 
 /**
@@ -161,7 +161,7 @@ USBH_StatusTypeDef USBH_LL_Start(USBH_HandleTypeDef *phost) {
  */
 USBH_StatusTypeDef USBH_LL_Stop(USBH_HandleTypeDef *phost) {
 	auto status = HAL_HCD_Stop((HCD_HandleTypeDef *)phost->pData);
-    return USBH_Get_USB_Status(status);
+	return USBH_Get_USB_Status(status);
 }
 
 /**
@@ -199,12 +199,12 @@ USBH_SpeedTypeDef USBH_LL_GetSpeed(USBH_HandleTypeDef *phost) {
  */
 USBH_StatusTypeDef USBH_LL_ResetPort(USBH_HandleTypeDef *phost) {
 	auto status = HAL_HCD_ResetPort((HCD_HandleTypeDef *)phost->pData);
-    return USBH_Get_USB_Status(status);
+	return USBH_Get_USB_Status(status);
 }
 
 USBH_StatusTypeDef USBH_LL_ResetPort2(USBH_HandleTypeDef *phost, unsigned resetIsActive) {
 	auto status = HAL_HCD_ResetPort2((HCD_HandleTypeDef *)phost->pData, resetIsActive);
-    return USBH_Get_USB_Status(status);
+	return USBH_Get_USB_Status(status);
 }
 
 /**
@@ -214,11 +214,11 @@ USBH_StatusTypeDef USBH_LL_ResetPort2(USBH_HandleTypeDef *phost, unsigned resetI
  * @retval Packet Size
  */
 uint32_t USBH_LL_GetLastXferSize(USBH_HandleTypeDef *phost, uint8_t pipe) {
-    uint32_t size2 = HAL_HCD_HC_GetXferCount((HCD_HandleTypeDef *)phost->pData, pipe);
+	uint32_t size2 = HAL_HCD_HC_GetXferCount((HCD_HandleTypeDef *)phost->pData, pipe);
 	uint32_t size;
 	do {
 		size = size2;
-        size2 = HAL_HCD_HC_GetXferCount((HCD_HandleTypeDef *)phost->pData, pipe);
+		size2 = HAL_HCD_HC_GetXferCount((HCD_HandleTypeDef *)phost->pData, pipe);
 	} while (size != size2);
 	return size2;
 }
@@ -252,15 +252,15 @@ USBH_StatusTypeDef USBH_LL_OpenPipe(USBH_HandleTypeDef *phost,
 									const USBH_TargetTypeDef *dev_target,
 									uint8_t ep_type,
 									uint16_t mps) {
-	auto hal_status = HAL_HCD_HC_Init((HCD_HandleTypeDef*)phost->pData,
-								 pipe_num,
-								 epnum,
-								 dev_target->dev_address,
-								 dev_target->speed,
-								 ep_type,
-								 mps,
-								 dev_target->tt_hubaddr,
-								 dev_target->tt_prtaddr);
+	auto hal_status = HAL_HCD_HC_Init((HCD_HandleTypeDef *)phost->pData,
+									  pipe_num,
+									  epnum,
+									  dev_target->dev_address,
+									  dev_target->speed,
+									  ep_type,
+									  mps,
+									  dev_target->tt_hubaddr,
+									  dev_target->tt_prtaddr);
 
 	return USBH_Get_USB_Status(hal_status);
 }
@@ -334,18 +334,15 @@ USBH_URBStateTypeDef USBH_LL_GetURBState(USBH_HandleTypeDef *phost, uint8_t pipe
 	return (USBH_URBStateTypeDef)HAL_HCD_HC_GetURBState((HCD_HandleTypeDef *)phost->pData, pipe);
 }
 
-USBH_SpeedTypeDef USBH_LL_GetPipeSpeed(USBH_HandleTypeDef *phost, uint8_t pipe_num)
-{
-	HCD_HandleTypeDef *hhcd = (HCD_HandleTypeDef*)phost->pData;
+USBH_SpeedTypeDef USBH_LL_GetPipeSpeed(USBH_HandleTypeDef *phost, uint8_t pipe_num) {
+	HCD_HandleTypeDef *hhcd = (HCD_HandleTypeDef *)phost->pData;
 
 	return (USBH_SpeedTypeDef)hhcd->hc[pipe_num].speed;
 }
 
-uint_fast8_t USBH_LL_GetSpeedReady(USBH_HandleTypeDef *phost) { 
-	return HAL_HCD_GetCurrentSpeedReady((HCD_HandleTypeDef*)phost->pData); 
+uint_fast8_t USBH_LL_GetSpeedReady(USBH_HandleTypeDef *phost) {
+	return HAL_HCD_GetCurrentSpeedReady((HCD_HandleTypeDef *)phost->pData);
 }
-
-
 
 /**
  * @brief  USBH_LL_DriverVBUS
@@ -412,12 +409,47 @@ void USBH_Delay(uint32_t Delay) {
 }
 
 /**
+  * From mori:
+  * @brief  USBH_LL_SetupEP0
+  *         Setup endpoint with selected device info
+  * @param  phost: Host handle
+  * @retval Status
+  */
+HAL_StatusTypeDef USBH_LL_SetupEP0(USBH_HandleTypeDef *phost) {
+	auto p_hhcd = (HCD_HandleTypeDef *)phost->pData;
+
+	__HAL_LOCK(p_hhcd);
+
+	p_hhcd->hc[phost->Control.pipe_out].dev_addr = phost->currentTarget->dev_address; //device.address;
+	p_hhcd->hc[phost->Control.pipe_out].max_packet = phost->Control.pipe_size;
+	p_hhcd->hc[phost->Control.pipe_out].speed = phost->currentTarget->speed; //device.speed;
+
+	//phHCD->hc[phost->Control.pipe_out].ch_num     = phost->Control.pipe_out;
+	//phHCD->hc[phost->Control.pipe_out].toggle_out = phost->Control.toggle_out;
+	//phHCD->hc[phost->Control.pipe_out].data_pid = phost->Control.data_pid_out;
+
+	p_hhcd->hc[phost->Control.pipe_in].dev_addr = phost->currentTarget->dev_address;
+	p_hhcd->hc[phost->Control.pipe_in].max_packet = phost->Control.pipe_size;
+	p_hhcd->hc[phost->Control.pipe_in].speed = phost->currentTarget->speed;
+
+	//phHCD->hc[phost->Control.pipe_in].ch_num      = phost->Control.pipe_in;
+	//phHCD->hc[phost->Control.pipe_in].toggle_in   = phost->Control.toggle_in;
+	//phHCD->hc[phost->Control.pipe_in].data_pid   = phost->Control.data_pid_in;
+
+	p_hhcd->pData = phost;
+	phost->pData = p_hhcd;
+
+	__HAL_UNLOCK(p_hhcd);
+
+	return HAL_OK;
+}
+
+/**
  * @brief  Returns the USB status depending on the HAL status:
  * @param  hal_status: HAL status
  * @retval USB status
  */
-static USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status)
-{
+static USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status) {
 	USBH_StatusTypeDef usb_status = USBH_OK;
 
 	switch (hal_status) {

@@ -172,6 +172,9 @@ void USBH_LL_IncTimer(USBH_HandleTypeDef *phost);
 
 void USBH_Delay(uint32_t Delay);
 
+// From mori:
+HAL_StatusTypeDef USBH_LL_SetupEP0(USBH_HandleTypeDef *phost);
+
 /**
   * @}
   */
