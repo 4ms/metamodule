@@ -601,7 +601,6 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
 
     case HOST_DEV_ATTACHED_WAITSPEED:
     	/* todo: переделать - сперва ждём, потом проверяем скорость (redo - first we wait, then we check the speed) */
-	    USBH_DbgLog("DEV_ATTACHED_WAITSPEED");
     	if (USBH_LL_GetSpeedReady(phost))
     	{
 			/* Wait for 100 ms after Reset */
@@ -616,6 +615,7 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
  		break;
 
  	// С этого состояния начинается повторная енуменация для устройств на HUB
+	// (This state starts re-enumeration for devices on the HUB)
     case HOST_DEV_ATTACHED :
 
       if (phost->pUser != NULL)

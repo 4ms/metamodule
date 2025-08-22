@@ -9,10 +9,15 @@
 class UsbHostManager {
 private:
 	mdrivlib::Pin src_enable;
-	USBH_HandleTypeDef usbhost{};
+
+	USBH_HandleTypeDef usbhosts[8]{};
+	//usbhost_root handles the device directly attached (i.e. the hub itself, or the device)
+	USBH_HandleTypeDef &usbhost_root = usbhosts[0];
+
 	static inline HCD_HandleTypeDef hhcd;
-	MidiHost midi_host{usbhost};
-	MSCHost msc_host{usbhost, MetaModule::Volume::USB};
+
+	MidiHost midi_host{usbhost_root};
+	MSCHost msc_host{usbhost_root, MetaModule::Volume::USB};
 
 	// For access in C-style callback:
 	static inline MidiHost *_midihost_instance;
@@ -21,8 +26,8 @@ private:
 public:
 	UsbHostManager(mdrivlib::PinDef enable_5v)
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
-		usbhost.pActiveClass = nullptr;
-		for (auto &cls : usbhost.pClass) {
+		usbhost_root.pActiveClass = nullptr;
+		for (auto &cls : usbhost_root.pClass) {
 			cls = nullptr;
 		}
 		src_enable.low();
@@ -37,18 +42,19 @@ public:
 	void start() {
 		init_hhcd();
 
-		auto status = USBH_Init(&usbhost, usbh_state_change_callback, 0);
+		auto status = USBH_Init(&usbhost_root, usbh_state_change_callback, 0);
 		if (status != USBH_OK) {
 			pr_err("Error init USB Host: %d\n", status);
 			return;
 		}
-		midi_host.init();
+		midi_host.init(&usbhost_root);
 		msc_host.init();
 
-		USBH_RegisterClass(&usbhost, USBH_HUB_CLASS);
+		// hub_host.init():
+		USBH_RegisterClass(&usbhost_root, USBH_HUB_CLASS);
 
 		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
-		auto err = USBH_Start(&usbhost);
+		auto err = USBH_Start(&usbhost_root);
 		if (err != USBH_OK)
 			pr_err("Error starting host\n");
 
@@ -61,13 +67,13 @@ public:
 		HAL_Delay(250);
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		HAL_Delay(250);
-		USBH_Stop(&usbhost);
-		usbhost.pData = nullptr;
-		USBH_DeInit(&usbhost); //sets hhcd to NULL?
+		USBH_Stop(&usbhost_root);
+		usbhost_root.pData = nullptr;
+		USBH_DeInit(&usbhost_root); //sets hhcd to NULL?
 	}
 
 	void process() {
-		USBH_Process(&usbhost);
+		USBH_Process(&usbhost_root);
 	}
 
 	static inline uint8_t connected_classcode = 0xFF;
@@ -96,7 +102,7 @@ public:
 				pr_trace("Class active: %.8s code %d\n", classname, connected_classcode);
 
 				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
-					_midihost_instance->connect();
+					_midihost_instance->connect(phost);
 					auto mshandle = host.get_class_handle<MidiStreamingHandle>();
 					if (!mshandle) {
 						pr_err("Error, no MSHandle\n");
@@ -147,8 +153,8 @@ public:
 		hhcd.Init.use_dedicated_ep1 = DISABLE;
 
 		// Link The driver to the stack
-		hhcd.pData = &usbhost;
-		usbhost.pData = &hhcd;
+		hhcd.pData = &usbhost_root;
+		usbhost_root.pData = &hhcd;
 	}
 
 	MidiHost &get_midi_host() {
