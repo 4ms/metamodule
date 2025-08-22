@@ -86,20 +86,23 @@ public:
 
 	void process() {
 		if (cur_host_handle != nullptr && cur_host_handle->valid == 1) {
-			pr_dbg("Process\n");
+
 			USBH_Process(cur_host_handle);
+
 			if (cur_host_handle->busy)
 				return;
 		}
 
-		auto first_idx = cur_host_idx;
-		while (true) {
-			pr_dbg("Check host idx %d\n", cur_host_idx);
+		// scan for next host
+		for (auto tries = 0; tries < MAX_HUB_PORTS; tries++) {
+
+			if (++cur_host_idx > MAX_HUB_PORTS)
+				cur_host_idx = 0;
 
 			if (host_handles[cur_host_idx].valid) {
 				cur_host_handle = &host_handles[cur_host_idx];
-				pr_dbg("Setup EP0 for host idx %d", cur_host_idx);
-				// USBH_LL_SetupEP0(cur_host_handle);
+				// pr_dbg("Setup EP0 for host idx %d", cur_host_idx);
+				USBH_LL_SetupEP0(cur_host_handle);
 
 				if (cur_host_handle->valid == 3) {
 					pr_dbg("PROCESSING ATTACH %d", cur_host_handle->hubPortAddress);
@@ -109,12 +112,6 @@ public:
 
 				break;
 			}
-
-			if (++cur_host_idx > MAX_HUB_PORTS)
-				cur_host_idx = 0;
-
-			if (cur_host_idx == first_idx)
-				return;
 		}
 	}
 
@@ -207,8 +204,15 @@ public:
 			handle.pClass[0] = USBH_MSC_CLASS;
 			handle.pClass[1] = midi_host.usb_class();
 			handle.ClassNumber = 2;
+
+			handle.currentTarget = &handle.rootTarget;
 		}
-		cur_host_idx = 0;
+		host_handles[0].valid = 1;
+		host_handles[0].rootTarget.dev_address = USBH_DEVICE_ADDRESS;
+		host_handles[0].rootTarget.speed = USBH_HS_SPEED;
+		// host_handles[0].Pipes = USBH_malloc(sizeof(uint32_t) * USBH_MAX_PIPES_NBR);
+
+		cur_host_idx = -1;
 	}
 
 	MidiHost &get_midi_host() {
