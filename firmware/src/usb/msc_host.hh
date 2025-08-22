@@ -21,7 +21,7 @@ public:
 	}
 
 	bool init() {
-		pr_trace("Registered MSC with USB Host\n");
+		pr_info("Listening for MSC devices\n");
 		USBH_RegisterClass(&usbhost, USBH_MSC_CLASS);
 
 		return true;

@@ -31,7 +31,7 @@ class MidiHost {
 	DoubleBufferStream<uint8_t, 64> tx_stream;
 
 public:
-	MidiHost(USBH_HandleTypeDef &usbhh)
+	MidiHost()
 		: tx_stream{[this](std::span<uint8_t> bytes) {
 			if (!usbhost)
 				return false;
@@ -55,7 +55,7 @@ public:
 	}
 
 	bool init(USBH_HandleTypeDef *usbhost_root) {
-		pr_info("Listening as a MIDI Host\n");
+		pr_info("Listening for MIDI devices\n");
 		USBH_RegisterClass(usbhost_root, &midi_class_ops);
 		return true;
 	}
@@ -92,5 +92,9 @@ public:
 
 	bool transmit(std::span<uint8_t> bytes) {
 		return tx_stream.transmit(bytes);
+	}
+
+	USBH_ClassTypeDef *usb_class() {
+		return &midi_class_ops;
 	}
 };
