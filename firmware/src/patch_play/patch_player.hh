@@ -111,6 +111,12 @@ public:
 		clear_cache();
 	}
 
+	~PatchPlayer() {
+		if (is_loaded) {
+			unload_patch();
+		}
+	}
+
 	ParamWatcher &watched_params() {
 		return param_watcher;
 	}
