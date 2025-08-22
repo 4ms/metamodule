@@ -29,8 +29,9 @@ struct ModuleLoadTester {
 		}
 	};
 
-	ModuleLoadTester(std::string_view slug)
+	ModuleLoadTester(PatchPlayer &player, std::string_view slug)
 		: slug{slug}
+		, player{player}
 		, info{ModuleFactory::getModuleInfo(slug)}
 		, counts{ElementCount::count(info.elements)} {
 	}
@@ -253,10 +254,10 @@ struct ModuleLoadTester {
 	}
 
 private:
-	PatchPlayer player;
 	PatchData patch;
 
 	BrandModuleSlug slug;
+	PatchPlayer &player;
 	ModuleInfoView info;
 	uint16_t module_id{};
 	ElementCount::Counts counts;

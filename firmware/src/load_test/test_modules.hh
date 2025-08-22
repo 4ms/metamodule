@@ -42,6 +42,8 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 
 	append_file(csv_header());
 
+	PatchPlayer player;
+
 	auto brands = ModuleFactory::getAllBrands();
 	for (auto brand : brands) {
 
@@ -71,7 +73,7 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 #endif
 
 			for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
-				ModuleLoadTester tester(entry.slug);
+				ModuleLoadTester tester(player, entry.slug);
 
 				pr_trace("Block size %u\n", blocksize);
 
