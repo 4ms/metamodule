@@ -190,13 +190,13 @@ typedef struct _HUB_Process
 
   uint8_t              InPipe;
   HUB_StateTypeDef     state;
-  uint8_t  hubClassRequestPort; //added hftrx
-  uint8_t detectedPorts; //added hftrx
+  uint8_t              hubClassRequestPort; //added hftrx
+  uint8_t              detectedPorts; //added hftrx
   uint8_t              InEp;
   HUB_CtlStateTypeDef  ctl_state;
   HUB_CtlStateTypeDef  ctl_state_push; //added hftrx
-  uint32_t 			tickstart; //added hftrx
-  uint32_t 			wait; //added hftrx
+  uint32_t             tickstart; //added hftrx
+  uint32_t             wait; //added hftrx
   uint8_t              buffer[20]; //align???
   uint16_t             length;
   uint8_t              ep_addr;
