@@ -216,7 +216,8 @@ void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 		pphost->device.Data[i] = 0;
 	}
 
-	for (unsigned i = 0; i < pphost->hubInstances; ++i) {
+	// Do not free hubdata[0], it's static
+	for (unsigned i = 1; i < pphost->hubInstances; ++i) {
 		if (pphost->hubDatas[i]) {
 			USBH_free(pphost->hubDatas[i]);
 			pphost->hubDatas[i] = NULL;
@@ -260,7 +261,7 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t lowspeed) {
 	pphost->rootTarget.dev_address = USBH_ADDRESS_DEFAULT;
 	pphost->rootTarget.speed = lowspeed ? USBH_SPEED_LOW : USBH_SPEED_FULL;
 	// Do we do this here?
-	// pphost->currentTarget = &pphost->rootTarget;
+	pphost->currentTarget = &pphost->rootTarget;
 	pphost->device.is_connected = 1;
 
 	HCD_HandleTypeDef *phHCD = (HCD_HandleTypeDef *)(pphost->pData);
@@ -312,12 +313,13 @@ static void debug_port(uint8_t *buff, __IO USB_HUB_PORT_STATUS *info) {
 }
 
 static USBH_StatusTypeDef USBH_HUB_InterfaceInit(USBH_HandleTypeDef *phost, const USBH_TargetTypeDef *target) {
-	//USBH_DbgLog ("USBH_HUB_InterfaceInit.");
+	USBH_DbgLog("USBH_HUB_InterfaceInit");
 	uint8_t interface;
 
 	USBH_StatusTypeDef status = USBH_FAIL;
 
 	interface = USBH_FindInterface(phost, phost->pActiveClass->ClassCode, 0x00, 0xFF);
+	USBH_DbgLog("USBH_HUB_InterfaceInit: found interface %u", interface);
 
 	if (interface == 0xFF) /* No Valid Interface */ {
 		status = USBH_FAIL;
@@ -328,15 +330,20 @@ static USBH_StatusTypeDef USBH_HUB_InterfaceInit(USBH_HandleTypeDef *phost, cons
 		USBH_DbgLog("Too many hubs in chain.");
 	} else {
 		// check USBH_free
+		asm("bkpt");
 		static HUB_HandleTypeDef staticHUB_Handle;
-		phost->pActiveClass->pData = &staticHUB_Handle;
+		HUB_HandleTypeDef *HUB_Handle = &staticHUB_Handle;
 
-		//
-		phost->hubDatas[0] = USBH_malloc(sizeof(HUB_HandleTypeDef));
-		HUB_HandleTypeDef *HUB_Handle = (HUB_HandleTypeDef *)phost->hubDatas[0];
+		phost->pActiveClass->pData = HUB_Handle;
+		USBH_DbgLog("USBH_HUB_InterfaceInit: assigned pData to static hub handle");
+
+		// phost->hubDatas[0] = USBH_malloc(sizeof(HUB_HandleTypeDef));
+		// HUB_HandleTypeDef *HUB_Handle = (HUB_HandleTypeDef *)phost->hubDatas[0];
 		memset((void *)HUB_Handle, 0, sizeof(HUB_HandleTypeDef));
+
 		phost->hubInstances = 1;
 
+		phost->pActiveClass->pData = HUB_Handle;
 		// hftrx:
 		// HUB_Handle = (HUB_HandleTypeDef *)phost->pActiveClass->pData;
 		// phost->hubDatas[phost->hubInstances] = HUB_Handle;
@@ -407,7 +414,7 @@ static USBH_StatusTypeDef USBH_HUB_InterfaceDeInit(USBH_HandleTypeDef *phost) {
 			HUB_Handle->InPipe = 0; // Reset the pipe as Free
 		}
 
-		USBH_free(phost->hubDatas[0]);
+		// USBH_free(phost->hubDatas[0]);
 	} else {
 		USBH_UsrLog("USBH_HUB_InterfaceDeInit failed: hubDatas[0] not allocated");
 	}
@@ -855,7 +862,7 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 }
 
 static USBH_StatusTypeDef USBH_HUB_SOFProcess(USBH_HandleTypeDef *phost) {
-	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->hubDatas[0];
+	// HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->hubDatas[0];
 	/*if(!phost->hub)
 {
 USBH_UsrLog("EEEERRRRRRROOORRRRRRR");

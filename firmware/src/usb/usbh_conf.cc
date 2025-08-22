@@ -420,17 +420,17 @@ HAL_StatusTypeDef USBH_LL_SetupEP0(USBH_HandleTypeDef *phost) {
 
 	__HAL_LOCK(p_hhcd);
 
-	p_hhcd->hc[phost->Control.pipe_out].dev_addr = phost->currentTarget->dev_address; //device.address;
+	p_hhcd->hc[phost->Control.pipe_out].dev_addr = phost->rootTarget.dev_address; //device.address;
 	p_hhcd->hc[phost->Control.pipe_out].max_packet = phost->Control.pipe_size;
-	p_hhcd->hc[phost->Control.pipe_out].speed = phost->currentTarget->speed; //device.speed;
+	p_hhcd->hc[phost->Control.pipe_out].speed = phost->rootTarget.speed; //device.speed;
 
 	//phHCD->hc[phost->Control.pipe_out].ch_num     = phost->Control.pipe_out;
 	//phHCD->hc[phost->Control.pipe_out].toggle_out = phost->Control.toggle_out;
 	//phHCD->hc[phost->Control.pipe_out].data_pid = phost->Control.data_pid_out;
 
-	p_hhcd->hc[phost->Control.pipe_in].dev_addr = phost->currentTarget->dev_address;
+	p_hhcd->hc[phost->Control.pipe_in].dev_addr = phost->rootTarget.dev_address;
 	p_hhcd->hc[phost->Control.pipe_in].max_packet = phost->Control.pipe_size;
-	p_hhcd->hc[phost->Control.pipe_in].speed = phost->currentTarget->speed;
+	p_hhcd->hc[phost->Control.pipe_in].speed = phost->rootTarget.speed;
 
 	//phHCD->hc[phost->Control.pipe_in].ch_num      = phost->Control.pipe_in;
 	//phHCD->hc[phost->Control.pipe_in].toggle_in   = phost->Control.toggle_in;
