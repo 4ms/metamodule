@@ -31,42 +31,41 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_core.h"
 
-#define USB_HUB_CLASS     					 0x09
-#define HUB_MIN_POLL	  					 200
+#define USB_HUB_CLASS 0x09
+#define HUB_MIN_POLL 200
 
-#define MAX_HUB_PORTS 						 8   // was 4 in mori
+#define MAX_HUB_PORTS 8 // was 4 in mori
 
-#define USB_DESCRIPTOR_HUB                   0x29
-#define USB_REQUEST_GET_DESCRIPTOR           0x06
-#define HUB_FEATURE_SEL_PORT_POWER           0x08
+#define USB_DESCRIPTOR_HUB 0x29
+#define USB_REQUEST_GET_DESCRIPTOR 0x06
+#define HUB_FEATURE_SEL_PORT_POWER 0x08
 
-#define USB_DEVICE_REQUEST_SET   			 0x00
-#define USB_DEVICE_REQUEST_GET   			 0x01
-#define USB_REQUEST_CLEAR_FEATURE   		 0x01
-#define USB_REQUEST_SET_FEATURE     		 0x03
-#define USB_REQUEST_GET_STATUS          	 0x00
+#define USB_DEVICE_REQUEST_SET 0x00
+#define USB_DEVICE_REQUEST_GET 0x01
+#define USB_REQUEST_CLEAR_FEATURE 0x01
+#define USB_REQUEST_SET_FEATURE 0x03
+#define USB_REQUEST_GET_STATUS 0x00
 
-#define HUB_FEAT_SEL_PORT_CONNECTION 		 0x00
-#define HUB_FEAT_SEL_C_HUB_LOCAL_POWER       0x00
-#define HUB_FEAT_SEL_C_HUB_OVER_CURRENT      0x01
+#define HUB_FEAT_SEL_PORT_CONNECTION 0x00
+#define HUB_FEAT_SEL_C_HUB_LOCAL_POWER 0x00
+#define HUB_FEAT_SEL_C_HUB_OVER_CURRENT 0x01
 
-#define HUB_FEAT_SEL_PORT_CONN         		 0x00
-#define HUB_FEAT_SEL_PORT_ENABLE             0x01
-#define HUB_FEAT_SEL_PORT_SUSPEND            0x02
-#define HUB_FEAT_SEL_PORT_OVER_CURRENT       0x03
-#define HUB_FEAT_SEL_PORT_RESET              0x04
-#define HUB_FEAT_SEL_PORT_POWER              0x08
-#define HUB_FEAT_SEL_PORT_LOW_SPEED          0x09
-#define HUB_FEAT_SEL_C_PORT_CONNECTION       0x10
-#define HUB_FEAT_SEL_C_PORT_ENABLE           0x11
-#define HUB_FEAT_SEL_C_PORT_SUSPEND          0x12
-#define HUB_FEAT_SEL_C_PORT_OVER_CURRENT     0x13
-#define HUB_FEAT_SEL_C_PORT_RESET            0x14
-#define HUB_FEAT_SEL_PORT_INDICATOR          0x16
+#define HUB_FEAT_SEL_PORT_CONN 0x00
+#define HUB_FEAT_SEL_PORT_ENABLE 0x01
+#define HUB_FEAT_SEL_PORT_SUSPEND 0x02
+#define HUB_FEAT_SEL_PORT_OVER_CURRENT 0x03
+#define HUB_FEAT_SEL_PORT_RESET 0x04
+#define HUB_FEAT_SEL_PORT_POWER 0x08
+#define HUB_FEAT_SEL_PORT_LOW_SPEED 0x09
+#define HUB_FEAT_SEL_C_PORT_CONNECTION 0x10
+#define HUB_FEAT_SEL_C_PORT_ENABLE 0x11
+#define HUB_FEAT_SEL_C_PORT_SUSPEND 0x12
+#define HUB_FEAT_SEL_C_PORT_OVER_CURRENT 0x13
+#define HUB_FEAT_SEL_C_PORT_RESET 0x14
+#define HUB_FEAT_SEL_PORT_INDICATOR 0x16
 
-typedef enum
-{
-	HUB_IDLE= 0,
+typedef enum {
+	HUB_IDLE = 0,
 	HUB_SYNC,
 	HUB_BUSY,
 	HUB_GET_DATA,
@@ -85,141 +84,126 @@ typedef enum
 
 } HUB_StateTypeDef;
 
-typedef enum
-{
+typedef enum {
 	HUB_REQ_IDLE = 0,
 	// HUB_REQ_GET_DESCRIPTOR,  //removed hftrx
 	HUB_REQ_SET_POWER,
 	HUB_WAIT_PWRGOOD,
-	HUB_WAIT_PWRGOOD_DONE, 		//added hftrx
+	HUB_WAIT_PWRGOOD_DONE, //added hftrx
 	HUB_REQ_DONE,
 	HUB_REQ_RESETS,				//added hftrx
 	HUB_REQ_RESETS_DONE,		//added hftrx
 	HUB_REQ_SCAN_STATUSES,		//added hftrx
-	HUB_REQ_SCAN_STATUSES_DONE,	//added hftrx
+	HUB_REQ_SCAN_STATUSES_DONE, //added hftrx
 	HUB_DELAY,					//added hftrx
 	HUB_ALREADY_INITED			//added hftrx
-}
-HUB_CtlStateTypeDef;
+} HUB_CtlStateTypeDef;
 
-typedef struct __attribute__ ((packed)) _USB_HUB_DESCRIPTOR
-{
-	uint8_t  bLength;               // Length of this descriptor.
-	uint8_t  bDescriptorType;       // Descriptor Type, value: 29H for hub descriptor
-	uint8_t  bNbrPorts;             // Number of downstream facing ports that this hub supports
-	uint16_t wHubCharacteristics;   //
-    uint8_t  bPwrOn2PwrGood;        // Time (in 2 ms intervals) from the time the power-on sequence begins on a port until power is good on that port
-    uint8_t  bHubContrCurrent;      // Maximum current requirements of the Hub Controller electronics in mA
-    // hftrx: Next two fields one byte or more depend on bNbrPorts value
-    // See bNbrPorts specs at '11.23.2.1 Hub Descriptor' of usb_20.pdf
-    //uint8_t  DeviceRemovable;       // Indicates if a port has a removable device attached. removed hftrx
-    //uint8_t  PortPwrCtrlMask;       // This field exists for reasons of compatibility with software written for 1.0 compliant devices. removed hftrx
+typedef struct __attribute__((packed)) _USB_HUB_DESCRIPTOR {
+	uint8_t bLength;			  // Length of this descriptor.
+	uint8_t bDescriptorType;	  // Descriptor Type, value: 29H for hub descriptor
+	uint8_t bNbrPorts;			  // Number of downstream facing ports that this hub supports
+	uint16_t wHubCharacteristics; //
+	uint8_t
+		bPwrOn2PwrGood; // Time (in 2 ms intervals) from the time the power-on sequence begins on a port until power is good on that port
+	uint8_t bHubContrCurrent; // Maximum current requirements of the Hub Controller electronics in mA
+							  // hftrx: Next two fields one byte or more depend on bNbrPorts value
+							  // See bNbrPorts specs at '11.23.2.1 Hub Descriptor' of usb_20.pdf
+	//uint8_t  DeviceRemovable;       // Indicates if a port has a removable device attached. removed hftrx
+	//uint8_t  PortPwrCtrlMask;       // This field exists for reasons of compatibility with software written for 1.0 compliant devices. removed hftrx
 } USB_HUB_DESCRIPTOR;
 
-typedef struct __attribute__ ((packed)) _USB_HUB_PORT_STATUS
-{
-    union
-    {
-        struct
-        {
-        	uint8_t     PORT_CONNECTION      : 1;
-        	uint8_t     PORT_ENABLE          : 1;
-        	uint8_t     PORT_SUSPEND         : 1;
-        	uint8_t     PORT_OVER_CURRENT    : 1;
-        	uint8_t     PORT_RESET           : 1;
-        	uint8_t     RESERVED_1           : 3;
-        	uint8_t     PORT_POWER           : 1;
-        	uint8_t     PORT_LOW_SPEED       : 1;
-        	uint8_t     PORT_HIGH_SPEED      : 1;
-        	uint8_t     PORT_TEST            : 1;
-        	uint8_t     PORT_INDICATOR       : 1;
-        	uint8_t     RESERVED_2           : 3;
-        };
+typedef struct __attribute__((packed)) _USB_HUB_PORT_STATUS {
+	union {
+		struct {
+			uint8_t PORT_CONNECTION : 1;
+			uint8_t PORT_ENABLE : 1;
+			uint8_t PORT_SUSPEND : 1;
+			uint8_t PORT_OVER_CURRENT : 1;
+			uint8_t PORT_RESET : 1;
+			uint8_t RESERVED_1 : 3;
+			uint8_t PORT_POWER : 1;
+			uint8_t PORT_LOW_SPEED : 1;
+			uint8_t PORT_HIGH_SPEED : 1;
+			uint8_t PORT_TEST : 1;
+			uint8_t PORT_INDICATOR : 1;
+			uint8_t RESERVED_2 : 3;
+		};
 
-        uint16_t val;
+		uint16_t val;
 
-    }   wPortStatus;
+	} wPortStatus;
 
-    union
-    {
-        struct
-        {
-        	uint8_t     C_PORT_CONNECTION    : 1;
-        	uint8_t     C_PORT_ENABLE        : 1;
-        	uint8_t     C_PORT_SUSPEND       : 1;
-        	uint8_t     C_PORT_OVER_CURRENT  : 1;
-        	uint8_t     C_PORT_RESET         : 1;
-        	uint16_t    RESERVED             : 11;
-        };
+	union {
+		struct {
+			uint8_t C_PORT_CONNECTION : 1;
+			uint8_t C_PORT_ENABLE : 1;
+			uint8_t C_PORT_SUSPEND : 1;
+			uint8_t C_PORT_OVER_CURRENT : 1;
+			uint8_t C_PORT_RESET : 1;
+			uint16_t RESERVED : 11;
+		};
 
-        uint16_t val;
+		uint16_t val;
 
-    }   wPortChange;
+	} wPortChange;
 
 } USB_HUB_PORT_STATUS;
 
+typedef struct __attribute__((packed)) _USB_PORT_CHANGE {
+	union {
+		struct {
+			uint8_t PORT_1 : 1;
+			uint8_t PORT_2 : 1;
+			uint8_t PORT_3 : 1;
+			uint8_t PORT_4 : 1;
+			uint8_t PORT_5 : 1;
+			uint8_t PORT_6 : 1;
+			uint8_t PORT_7 : 1;
+			uint8_t PORT_8 : 1;
 
-typedef struct __attribute__ ((packed)) _USB_PORT_CHANGE
-{
-    union
-    {
-        struct
-        {
-			uint8_t     PORT_1    : 1;
-			uint8_t     PORT_2    : 1;
-			uint8_t     PORT_3    : 1;
-			uint8_t     PORT_4    : 1;
-			uint8_t     PORT_5    : 1;
-			uint8_t     PORT_6    : 1;
-			uint8_t     PORT_7    : 1;
-			uint8_t     PORT_8    : 1;
+		} bPorts;
 
-        } bPorts;
-
-        uint8_t val;
-    };
+		uint8_t val;
+	};
 
 } USB_PORT_CHANGE;
 
 /* Structure for HUB process */
-typedef struct _HUB_Process
-{
-  // added hftrx:
-  USBH_TargetTypeDef   target;
-  USBH_TargetTypeDef   Targets [MAX_HUB_PORTS];	/* Enumeration targets */
+typedef struct _HUB_Process {
+	// added hftrx:
+	USBH_TargetTypeDef target;
+	USBH_TargetTypeDef Targets[MAX_HUB_PORTS]; /* Enumeration targets */
 
-  uint8_t              InPipe;
-  HUB_StateTypeDef     state;
-  uint8_t              hubClassRequestPort; //added hftrx
-  uint8_t              detectedPorts; //added hftrx
-  uint8_t              InEp;
-  HUB_CtlStateTypeDef  ctl_state;
-  HUB_CtlStateTypeDef  ctl_state_push; //added hftrx
-  uint32_t             tickstart; //added hftrx
-  uint32_t             wait; //added hftrx
-  uint8_t              buffer[20]; //align???
-  uint16_t             length;
-  uint8_t              ep_addr;
-  uint16_t             poll;
-  uint32_t             timer;
-  uint8_t              DataReady;
-  // added hftrx:
-  uint8_t address;	// USB bus addres of this hub
-  struct _HUB_Process * parent;	/* parent hub of this hub. NULL for root. */
+	uint8_t InPipe;
+	HUB_StateTypeDef state;
+	uint8_t hubClassRequestPort; //added hftrx
+	uint8_t detectedPorts;		 //added hftrx
+	uint8_t InEp;
+	HUB_CtlStateTypeDef ctl_state;
+	HUB_CtlStateTypeDef ctl_state_push; //added hftrx
+	uint32_t tickstart;					//added hftrx
+	uint32_t wait;						//added hftrx
+	uint8_t buffer[20];					//align???
+	uint16_t length;
+	uint8_t ep_addr;
+	uint16_t poll;
+	uint32_t timer;
+	uint8_t DataReady;
+	// added hftrx:
+	uint8_t address;			 // USB bus addres of this hub
+	struct _HUB_Process *parent; /* parent hub of this hub. NULL for root. TODO: remove this?*/
 
-  uint8_t  NumPorts;	// See bNbrPorts specs
-  uint16_t pwrGoodDelay;
+	uint8_t NumPorts; // See bNbrPorts specs
+	uint16_t pwrGoodDelay;
 
-
-  __IO USB_PORT_CHANGE HUB_Change;
-  __IO uint8_t HUB_CurPort;
-  __IO USB_HUB_PORT_STATUS *pChangeInfo;
+	__IO USB_PORT_CHANGE HUB_Change;
+	__IO uint8_t HUB_CurPort;
+	__IO USB_HUB_PORT_STATUS *pChangeInfo;
 
 } HUB_HandleTypeDef;
 
+extern USBH_ClassTypeDef HUB_Class;
+#define USBH_HUB_CLASS &HUB_Class
 
-extern USBH_ClassTypeDef  HUB_Class;
-#define USBH_HUB_CLASS    &HUB_Class
-
-
-#endif	// __USBH_HUB_H
+#endif // __USBH_HUB_H

@@ -450,7 +450,12 @@ typedef struct {
 	USBH_StatusTypeDef (*SOFProcess)(struct _USBH_HandleTypeDef *phost);
 	// mori: seems to be only used for HID
 	// USBH_StatusTypeDef  (*Parameter)   (struct _USBH_HandleTypeDef *phost, uint8_t param, uint8_t *data, uint16_t *length);
-	void *pData;
+
+	// pData: class handle. e.g. MidiStreamingHandle
+	// This contains realtime info specific to the actual connection, so probably shouldn't be the
+	// same for all instances of the class. But I see no issue if we have max 1 of any class connected at a time
+	// mori does not have this, but instead seems to store this in USBH_ClassTypeDef_pData, which is hubDatas[]
+	// void *pData;
 } USBH_ClassTypeDef;
 
 /* USB Host handle structure */
@@ -475,7 +480,12 @@ typedef struct _USBH_HandleTypeDef {
 	uint32_t Timeout;
 	// Not in hftrx, but in mori:
 	uint8_t id;
+
+	//Pointer to HCD peripheral
 	void *pData;
+
+	// function passed in USBH_Init (usbh_state_change_callback)
+	// is called when connection, enumeration, interface, etc. changes
 	void (*pUser)(struct _USBH_HandleTypeDef *pHandle, uint8_t id);
 
 #if (USBH_USE_OS == 1U)
@@ -498,8 +508,10 @@ typedef struct _USBH_HandleTypeDef {
 	// uint8_t prescaler;
 	// uint8_t interfaces;
 
-	uint8_t hubInstances;
-	void *hubDatas[USBH_MAX_NUM_INTERFACES]; //in mori this is USBH_ClassTypeDef_pData (?)
+	uint8_t hubInstances; // was # of cascaded hubs. But we don't suppor that, so it's 1 if hub, 0 if not.
+	// void *hubDatas[USBH_MAX_NUM_INTERFACES]; //used by hftrx, not sure if this is the same as mori's USBH_ClassTypeDef_pData??
+
+	void *classData[USBH_MAX_NUM_INTERFACES]; //in mori this is USBH_ClassTypeDef_pData (?)
 
 	uint8_t allocaddress;
 

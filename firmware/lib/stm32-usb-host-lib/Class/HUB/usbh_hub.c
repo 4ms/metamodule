@@ -27,7 +27,8 @@
 */
 
 #include "usbh_hub.h"
-#include "usbh_msc.h"
+// #include "usbh_msc.h"
+#include <stdlib.h>
 
 static USBH_StatusTypeDef set_hub_port_power(USBH_HandleTypeDef *phost, uint8_t hub_port);
 static USBH_StatusTypeDef hub_request(USBH_HandleTypeDef *phost,
@@ -216,13 +217,14 @@ void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 		pphost->device.Data[i] = 0;
 	}
 
+	USBH_DbgLog("hub detach: not freeing any allocated classData. OK?");
 	// Do not free hubdata[0], it's static
-	for (unsigned i = 1; i < pphost->hubInstances; ++i) {
-		if (pphost->hubDatas[i]) {
-			USBH_free(pphost->hubDatas[i]);
-			pphost->hubDatas[i] = NULL;
-		}
-	}
+	// for (unsigned i = 1; i < pphost->hubInstances; ++i) {
+	// 	if (pphost->classData[i]) {
+	// 		free(pphost->classData[i]);
+	// 		pphost->classData[i] = NULL;
+	// 	}
+	// }
 
 	pphost->hubInstances = 0;
 	pphost->device.is_connected = 0;
@@ -278,8 +280,10 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t lowspeed) {
 	pphost->Control.pipe_out = phost->Control.pipe_out;
 	pphost->Control.pipe_in = phost->Control.pipe_in;
 
-	for (unsigned i = 0; i < USBH_MAX_NUM_INTERFACES; ++i)
-		pphost->hubDatas[i] = NULL;
+	// Why do we null all the classData? mori does this too
+	for (unsigned i = 0; i < USBH_MAX_NUM_INTERFACES; ++i) {
+		pphost->classData[i] = NULL;
+	}
 
 	pphost->hubInstances = 0;
 	pphost->busy = 0;
@@ -322,89 +326,69 @@ static USBH_StatusTypeDef USBH_HUB_InterfaceInit(USBH_HandleTypeDef *phost, cons
 	USBH_DbgLog("USBH_HUB_InterfaceInit: found interface %u", interface);
 
 	if (interface == 0xFF) /* No Valid Interface */ {
-		status = USBH_FAIL;
 		USBH_DbgLog("Cannot Find the interface for %s class.", phost->pActiveClass->Name);
+		return USBH_FAIL;
 	}
-	if (phost->hubInstances >= USBH_MAX_NUM_INTERFACES) {
-		status = USBH_FAIL;
-		USBH_DbgLog("Too many hubs in chain.");
-	} else {
-		// check USBH_free
-		asm("bkpt");
-		static HUB_HandleTypeDef staticHUB_Handle;
-		HUB_HandleTypeDef *HUB_Handle = &staticHUB_Handle;
 
-		phost->pActiveClass->pData = HUB_Handle;
-		USBH_DbgLog("USBH_HUB_InterfaceInit: assigned pData to static hub handle");
+	static HUB_HandleTypeDef staticHUB_Handle;
+	HUB_HandleTypeDef *HUB_Handle = &staticHUB_Handle;
 
-		// phost->hubDatas[0] = USBH_malloc(sizeof(HUB_HandleTypeDef));
-		// HUB_HandleTypeDef *HUB_Handle = (HUB_HandleTypeDef *)phost->hubDatas[0];
-		memset((void *)HUB_Handle, 0, sizeof(HUB_HandleTypeDef));
+	USBH_DbgLog("USBH_HUB_InterfaceInit: assigned pData to static hub handle");
+	phost->classData[0] = &HUB_Handle;
+	memset((void *)HUB_Handle, 0, sizeof(HUB_HandleTypeDef));
 
-		phost->hubInstances = 1;
+	phost->hubInstances = 1;
+	HUB_Handle->parent = NULL; //DG: cascaded hubs not supported
 
-		phost->pActiveClass->pData = HUB_Handle;
-		// hftrx:
-		// HUB_Handle = (HUB_HandleTypeDef *)phost->pActiveClass->pData;
-		// phost->hubDatas[phost->hubInstances] = HUB_Handle;
-		// phost->hubInstances += 1;
+	// hftrx:
+	HUB_Handle->target.speed = target->speed;
+	HUB_Handle->target.dev_address = target->dev_address;
+	HUB_Handle->target.tt_hubaddr = target->tt_hubaddr;
+	HUB_Handle->target.tt_prtaddr = target->tt_prtaddr;
 
-		HUB_Handle->target.speed = target->speed;
-		HUB_Handle->target.dev_address = target->dev_address;
-		HUB_Handle->target.tt_hubaddr = target->tt_hubaddr;
-		HUB_Handle->target.tt_prtaddr = target->tt_prtaddr;
+	HUB_Handle->NumPorts = 0;
+	HUB_Handle->pwrGoodDelay = 0;
 
-		HUB_Handle->parent = NULL; //DG: cascaded hubs not supported
-		// HUB_Handle->parent =
-		// 	(HUB_HandleTypeDef *)(phost->hubInstances == 1 ?
-		// 							  NULL :
-		// 							  phost->hubDatas[phost->hubInstances - 1]); /* todo: fix for chans */
+	HUB_Handle->pChangeInfo = NULL;
+	HUB_Handle->HUB_CurPort = 0;
+	HUB_Handle->HUB_Change.val = 0;
 
-		HUB_Handle->NumPorts = 0;
-		HUB_Handle->pwrGoodDelay = 0;
+	HUB_Handle->detectedPorts = 0;
+	///////// end hftrx
 
-		HUB_Handle->pChangeInfo = NULL;
-		HUB_Handle->HUB_CurPort = 0;
-		HUB_Handle->HUB_Change.val = 0;
+	USBH_SelectInterface(phost, interface);
 
-		HUB_Handle->detectedPorts = 0;
-		///////// end hftrx
+	HUB_Handle->state = HUB_IDLE;
+	HUB_Handle->ctl_state = HUB_REQ_IDLE;
+	HUB_Handle->ep_addr = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bEndpointAddress;
+	HUB_Handle->length = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].wMaxPacketSize;
+	HUB_Handle->poll = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bInterval;
 
-		USBH_SelectInterface(phost, interface);
+	if (HUB_Handle->poll < HUB_MIN_POLL)
+		HUB_Handle->poll = HUB_MIN_POLL;
 
-		HUB_Handle->state = HUB_IDLE;
-		HUB_Handle->ctl_state = HUB_REQ_IDLE;
-		HUB_Handle->ep_addr =
-			phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bEndpointAddress;
-		HUB_Handle->length = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].wMaxPacketSize;
-		HUB_Handle->poll = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bInterval;
+	USBH_UsrLog("USBH_HUB_InterfaceInit: device poll=%d, length=%d", HUB_Handle->poll, HUB_Handle->length);
 
-		if (HUB_Handle->poll < HUB_MIN_POLL)
-			HUB_Handle->poll = HUB_MIN_POLL;
+	if (phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bEndpointAddress & 0x80) {
+		HUB_Handle->InEp =
+			(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bEndpointAddress);
+		HUB_Handle->InPipe = USBH_AllocPipe(phost, HUB_Handle->InEp);
 
-		USBH_UsrLog("USBH_HUB_InterfaceInit: device poll=%d, length=%d", HUB_Handle->poll, HUB_Handle->length);
-
-		if (phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bEndpointAddress & 0x80) {
-			HUB_Handle->InEp =
-				(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bEndpointAddress);
-			HUB_Handle->InPipe = USBH_AllocPipe(phost, HUB_Handle->InEp);
-
-			// Open pipe for IN endpoint
-			USBH_OpenPipe(
-				phost, HUB_Handle->InPipe, HUB_Handle->InEp, &HUB_Handle->target, USB_EP_TYPE_INTR, HUB_Handle->length);
-			USBH_LL_SetToggle(phost, HUB_Handle->InPipe, 0);
-		}
-
-		status = USBH_OK;
+		// Open pipe for IN endpoint
+		USBH_OpenPipe(
+			phost, HUB_Handle->InPipe, HUB_Handle->InEp, &HUB_Handle->target, USB_EP_TYPE_INTR, HUB_Handle->length);
+		USBH_LL_SetToggle(phost, HUB_Handle->InPipe, 0);
 	}
+
+	status = USBH_OK;
 
 	return status;
 }
 
 static USBH_StatusTypeDef USBH_HUB_InterfaceDeInit(USBH_HandleTypeDef *phost) {
-	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->hubDatas[0];
+	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->classData[0];
 
-	if (phost->hubDatas[0]) {
+	if (phost->classData[0]) {
 		USBH_UsrLog("USBH_HUB_InterfaceDeInit");
 
 		if (HUB_Handle->InPipe != 0x00) {
@@ -432,7 +416,7 @@ static void USBH_HUB_ProcessDelay(HUB_HandleTypeDef *HUB_Handle, HUB_CtlStateTyp
 // state machine - for each hub port...
 static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 	USBH_StatusTypeDef status = USBH_BUSY;
-	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->hubDatas[0];
+	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->classData[0];
 
 	switch (HUB_Handle->ctl_state) {
 		case HUB_REQ_IDLE:
@@ -526,6 +510,7 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 									 sizeof(USB_HUB_PORT_STATUS));
 			if (status == USBH_OK) {
 				/* Enumeration target */
+				// We will store
 				USBH_TargetTypeDef *const tg = &HUB_Handle->Targets[HUB_Handle->hubClassRequestPort - 1];
 				// if (HUB_Handle->hubClassRequestPort < 1)
 				// 	USBH_ErrLog("ASSERT FAILED: hubClassRequestPort == %u", HUB_Handle->hubClassRequestPort);
@@ -673,11 +658,12 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 }
 
 static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
-	printf(".\n");
-	USBH_StatusTypeDef status = USBH_BUSY; /* не требуется, но по стилю = чтобы продолжались вызовы */
-	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->hubDatas[0];
-	//ASSERT(HUB_Handle != NULL);
-	//
+	/* не требуется, но по стилю = чтобы продолжались вызовы */
+	// (not required, but in style = to keep the calls going)
+	USBH_StatusTypeDef status = USBH_BUSY;
+
+	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->classData[0];
+
 	switch (HUB_Handle->state) {
 		case HUB_IDLE:
 			HUB_Handle->HUB_CurPort = 0;

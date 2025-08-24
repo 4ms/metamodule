@@ -122,23 +122,23 @@ public:
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
-				pr_trace("Select config\n");
+				pr_dbg("Select config\n");
 				break;
 
 			case HOST_USER_CONNECTION:
-				pr_trace("Connected\n");
+				pr_dbg("Connected\n");
 				break;
 
 			case HOST_USER_CLASS_SELECTED: {
 				connected_classcode = host.get_active_class_code();
-				pr_trace("Class selected: %d\n", connected_classcode);
+				pr_dbg("Class selected: %d\n", connected_classcode);
 			} break;
 
 			case HOST_USER_CLASS_ACTIVE: {
 				connected_classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
 
-				pr_trace("Class active: %.8s code %d\n", classname, connected_classcode);
+				pr_dbg("Class active: %.8s code %d\n", classname, connected_classcode);
 
 				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
 					_midihost_instance->connect(phost);
@@ -151,13 +151,13 @@ public:
 				}
 
 				if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
-					pr_trace("MSC connected\n");
+					pr_dbg("MSC connected\n");
 					_mschost_instance->connect();
 				}
 			} break;
 
 			case HOST_USER_DISCONNECTION: {
-				pr_trace("Disconnected class code %d\n", connected_classcode);
+				pr_dbg("Disconnected class code %d\n", connected_classcode);
 				if (connected_classcode == AudioClassCode)
 					_midihost_instance->disconnect();
 				else if (connected_classcode == USB_MSC_CLASS)
