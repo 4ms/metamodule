@@ -177,7 +177,7 @@ typedef struct _HUB_Process {
 
 	uint8_t InPipe;
 	HUB_StateTypeDef state;
-	uint8_t hubClassRequestPort; //added hftrx
+	uint8_t hubClassRequestPort; //added hftrx: used during hub init to iterate the ports
 	uint8_t detectedPorts;		 //added hftrx
 	uint8_t InEp;
 	HUB_CtlStateTypeDef ctl_state;
@@ -197,6 +197,7 @@ typedef struct _HUB_Process {
 	uint8_t NumPorts; // See bNbrPorts specs
 	uint16_t pwrGoodDelay;
 
+	// Added by hftrx (they were static vars in mori)
 	__IO USB_PORT_CHANGE HUB_Change;
 	__IO uint8_t HUB_CurPort;
 	__IO USB_HUB_PORT_STATUS *pChangeInfo;

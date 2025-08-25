@@ -22,7 +22,9 @@ private:
 	static inline HCD_HandleTypeDef hhcd;
 
 	MidiHost midi_host{};
-	MSCHost msc_host{root_host_handle, MetaModule::Volume::USB};
+	MSCHost msc_host{MetaModule::Volume::USB};
+
+	uint32_t host_pipes[USBH_MAX_PIPES_NBR];
 
 	// For access in C-style callback:
 	static inline MidiHost *_midihost_instance;
@@ -55,8 +57,9 @@ public:
 			pr_err("Error init USB Host: %d\n", status);
 			return;
 		}
+		// Listen for MSC and MIDI devices directly connected to port (no hub):
 		midi_host.init(&root_host_handle);
-		msc_host.init();
+		msc_host.init(&root_host_handle);
 
 		// hub_host.init():
 		pr_info("Listening for Hub devices\n");
@@ -89,9 +92,18 @@ public:
 
 	void process() {
 		if (cur_host_handle != nullptr && cur_host_handle->valid == 1) {
-
+			if (cur_host_handle == &host_handles[0])
+				Debug::Pin0::high();
+			else if (cur_host_handle == &host_handles[1])
+				Debug::Pin1::high();
+			else if (cur_host_handle == &host_handles[2])
+				Debug::Pin2::high();
 			USBH_Process(cur_host_handle);
+			Debug::Pin0::low();
+			Debug::Pin1::low();
+			Debug::Pin2::low();
 
+			// Keep processing this host until it's no longer busy
 			if (cur_host_handle->busy)
 				return;
 		}
@@ -108,7 +120,7 @@ public:
 				USBH_LL_SetupEP0(cur_host_handle);
 
 				if (cur_host_handle->valid == 3) {
-					pr_dbg("PROCESSING ATTACH %d", cur_host_handle->hubPortAddress);
+					pr_dbg("PROCESSING ATTACH %d\n", cur_host_handle->hubPortAddress);
 					cur_host_handle->valid = 1;
 					cur_host_handle->busy = 1;
 				}
@@ -125,23 +137,27 @@ public:
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
-				pr_dbg("UsbHostManager: Select config\n");
+				pr_dbg("UsbHostManager: Select config %p\n", phost);
 				break;
 
 			case HOST_USER_CONNECTION:
-				pr_dbg("UsbHostManager: Connected\n");
+				pr_dbg("UsbHostManager: Connected host %p\n", phost);
 				break;
 
 			case HOST_USER_CLASS_SELECTED: {
 				connected_classcode = host.get_active_class_code();
-				pr_dbg("UsbHostManager: Class selected: %d\n", connected_classcode);
+				pr_dbg("UsbHostManager: Class selected: %d for %p\n", connected_classcode, phost);
+				if (connected_classcode == HubClassCode) {
+					//
+				}
 			} break;
 
 			case HOST_USER_CLASS_ACTIVE: {
+				// Why doesn't this get called for Hub?
 				connected_classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
 
-				pr_dbg("UsbHostManager: Class active: %.8s code %d\n", classname, connected_classcode);
+				pr_dbg("UsbHostManager: Class active: %.8s code %d for %p\n", classname, connected_classcode, phost);
 
 				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
 					_midihost_instance->connect(phost);
@@ -171,7 +187,7 @@ public:
 			} break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
-				pr_err("UsbHostManager: USB Host Manager Error\n");
+				pr_err("UsbHostManager: USB Host Manager Error for host %p\n", phost);
 				break;
 		}
 	}
@@ -203,17 +219,20 @@ public:
 			// All handles have a pointer to the array of all handles
 			handle.handles = host_handles;
 
-			// All handles reference all classes we are capable of hosting
-			handle.pClass[0] = USBH_MSC_CLASS;
-			handle.pClass[1] = midi_host.usb_class();
-			handle.ClassNumber = 2;
+			// All non-root handles reference all classes we are capable of hosting
+			if (&handle != &root_host_handle) {
+				handle.pClass[0] = USBH_MSC_CLASS;
+				handle.pClass[1] = midi_host.usb_class();
+				handle.ClassNumber = 2;
+			}
 
 			handle.currentTarget = &handle.rootTarget;
+
+			handle.Pipes = host_pipes;
 		}
 		host_handles[0].valid = 1;
 		host_handles[0].rootTarget.dev_address = USBH_DEVICE_ADDRESS;
 		host_handles[0].rootTarget.speed = USBH_HS_SPEED;
-		// host_handles[0].Pipes = USBH_malloc(sizeof(uint32_t) * USBH_MAX_PIPES_NBR);
 
 		cur_host_idx = -1;
 	}

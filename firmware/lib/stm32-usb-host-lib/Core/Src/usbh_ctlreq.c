@@ -919,6 +919,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       {
         if ((URB_Status == USBH_URB_ERROR) || (URB_Status == USBH_URB_NOTREADY))
         {
+			USBH_ErrLog("CTRL_SETUP_WAIT -> %d error", URB_Status);
           phost->Control.state = CTRL_ERROR;
 
 #if (USBH_USE_OS == 1U)
@@ -981,6 +982,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
         if (URB_Status == USBH_URB_ERROR)
         {
           /* Device error */
+			USBH_ErrLog("CTRL_DATA_IN_WAIT -> error");
           phost->Control.state = CTRL_ERROR;
 
 #if (USBH_USE_OS == 1U)
@@ -1058,6 +1060,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
         if (URB_Status == USBH_URB_ERROR)
         {
           /* device error */
+			USBH_ErrLog("CTRL_DATA_OUT_WAIT -> error");
           phost->Control.state = CTRL_ERROR;
           status = USBH_FAIL;
 
@@ -1103,6 +1106,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       }
       else if (URB_Status == USBH_URB_ERROR)
       {
+		  USBH_ErrLog("CTRL_STATUS_IN_WAIT -> error");
         phost->Control.state = CTRL_ERROR;
 
 #if (USBH_USE_OS == 1U)
@@ -1174,6 +1178,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
         if (URB_Status == USBH_URB_ERROR)
         {
           phost->Control.state = CTRL_ERROR;
+		  USBH_ErrLog("CTRL_STATUS_OUT_WAIT -> error");
 
 #if (USBH_USE_OS == 1U)
           phost->os_msg = (uint32_t)USBH_CONTROL_EVENT;

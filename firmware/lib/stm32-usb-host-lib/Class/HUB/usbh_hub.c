@@ -46,7 +46,7 @@ static USBH_StatusTypeDef set_port_feature(USBH_HandleTypeDef *phost, uint8_t fe
 
 static void clear_port_changed(HUB_HandleTypeDef *HUB_Handle, uint8_t port);
 static uint8_t get_port_changed(HUB_HandleTypeDef *HUB_Handle);
-static uint8_t port_changed(HUB_HandleTypeDef *HUB_Handle, const uint8_t *b, unsigned len);
+static uint8_t port_changed(HUB_HandleTypeDef *HUB_Handle, const uint8_t *b);
 
 static void detach(USBH_HandleTypeDef *phost, uint16_t idx);
 static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t lowspeed);
@@ -153,7 +153,7 @@ static uint8_t get_port_changed(HUB_HandleTypeDef *HUB_Handle) {
 	return 0;
 }
 
-static uint8_t port_changed(HUB_HandleTypeDef *HUB_Handle, const uint8_t *b, unsigned len) {
+static uint8_t port_changed(HUB_HandleTypeDef *HUB_Handle, const uint8_t *b) {
 	HUB_Handle->HUB_Change.val = 0x00;
 	if (b[0] != 0x00) {
 
@@ -249,8 +249,8 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t lowspeed) {
 
 	// #warning Then use HUB class. investigane Pipes usage.
 	// Taken from https://github.com/mori-br/STM32F4HUB
-	//pphost->Pipes 				= phost->Pipes;
-	memcpy(pphost->Pipes, phost->Pipes, sizeof pphost->Pipes);
+	// memcpy(pphost->Pipes, phost->Pipes, sizeof pphost->Pipes);
+	pphost->Pipes = phost->Pipes;
 
 	pphost->pUser = phost->pUser;
 	pphost->EnumState = ENUM_IDLE;
@@ -333,7 +333,7 @@ static USBH_StatusTypeDef USBH_HUB_InterfaceInit(USBH_HandleTypeDef *phost, cons
 	static HUB_HandleTypeDef staticHUB_Handle;
 	HUB_HandleTypeDef *HUB_Handle = &staticHUB_Handle;
 
-	USBH_DbgLog("USBH_HUB_InterfaceInit: assigned host handle->classData[0] to static hub handle %p", &HUB_Handle);
+	USBH_DbgLog("USBH_HUB_InterfaceInit: assigned host handle->classData[0] to static hub handle %p", HUB_Handle);
 	phost->classData[0] = HUB_Handle;
 	memset((void *)HUB_Handle, 0, sizeof(HUB_HandleTypeDef));
 
@@ -469,7 +469,8 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 						HUB_Handle->pwrGoodDelay);
 			USBH_UsrLog("=============================================");
 			HUB_Handle->hubClassRequestPort = 1;
-			HUB_Handle->ctl_state = HUB_REQ_RESETS;
+			// HUB_Handle->ctl_state = HUB_REQ_RESETS;
+			HUB_Handle->ctl_state = HUB_ALREADY_INITED;
 			break;
 
 		case HUB_REQ_RESETS:
@@ -648,6 +649,7 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 
 		case HUB_ALREADY_INITED:
 			USBH_DbgLog("Hub already init");
+			phost->busy = 0;
 			status = USBH_OK;
 			break;
 
@@ -703,7 +705,7 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 
 				if (HUB_Handle->DataReady == 0) {
 					HUB_Handle->DataReady = 1;
-					if (port_changed(HUB_Handle, HUB_Handle->buffer, HUB_Handle->length))
+					if (port_changed(HUB_Handle, HUB_Handle->buffer))
 						HUB_Handle->state = HUB_LOOP_PORT_CHANGED;
 					else
 						HUB_Handle->state = HUB_GET_DATA;
@@ -727,7 +729,7 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 			if (HUB_Handle->HUB_CurPort > 0) {
 				USBH_UsrLog("LOOP PORT CHANGED: HUB_CurPort %d", HUB_Handle->HUB_CurPort);
 
-				//phost->hubBusy = 1; //commented out hftrx
+				phost->busy = 1; //commented out hftrx
 				clear_port_changed(HUB_Handle, HUB_Handle->HUB_CurPort);
 				HUB_Handle->state = HUB_PORT_CHANGED;
 			} else
@@ -826,7 +828,7 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 
 			HUB_Handle->state = HUB_LOOP_PORT_WAIT;
 			attach(phost, HUB_Handle->HUB_CurPort, HUB_Handle->pChangeInfo->wPortStatus.PORT_LOW_SPEED);
-			//phost->hubBusy = 0;
+			phost->busy = 0;
 			break;
 
 		case HUB_DEV_DETACHED:
@@ -834,7 +836,7 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 
 			HUB_Handle->state = HUB_LOOP_PORT_WAIT;
 			detach(phost, HUB_Handle->HUB_CurPort);
-			//phost->hubBusy = 0;
+			phost->busy = 0;
 			break;
 
 		case HUB_LOOP_PORT_WAIT:

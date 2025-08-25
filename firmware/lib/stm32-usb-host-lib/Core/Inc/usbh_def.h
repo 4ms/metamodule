@@ -475,7 +475,7 @@ typedef struct _USBH_HandleTypeDef {
 	uint32_t ClassNumber; /* number of registered classes */
 	USBH_ClassTypeDef *pClass[USBH_MAX_NUM_SUPPORTED_CLASS];
 
-	uint32_t Pipes[16]; //mori: *Pipes
+	uint32_t *Pipes; //st: [16]; //mori: *Pipes
 	__IO uint32_t Timer;
 	uint32_t Timeout;
 	// Not in hftrx, but in mori:

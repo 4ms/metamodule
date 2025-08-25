@@ -136,6 +136,8 @@ USBH_ClassTypeDef  USBH_msc =
   */
 static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost, const USBH_TargetTypeDef *target)
 {
+  USBH_UsrLog("USBH_MSC_InterfaceInit(%p, ...)", phost);
+
   USBH_StatusTypeDef status;
   uint8_t interface;
   MSC_HandleTypeDef *MSC_Handle;
@@ -276,6 +278,7 @@ static USBH_StatusTypeDef USBH_MSC_ClassRequest(USBH_HandleTypeDef *phost)
     case MSC_REQ_IDLE:
     case MSC_REQ_GET_MAX_LUN:
 
+	  USBH_UsrLog("USBH_MSC_ClassRequest for GET_MAX_LUN, phost=%p", phost);
       /* Issue GetMaxLUN request */
       status = USBH_MSC_BOT_REQ_GetMaxLUN(phost, &MSC_Handle->max_lun);
 

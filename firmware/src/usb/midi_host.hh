@@ -55,7 +55,7 @@ public:
 	}
 
 	bool init(USBH_HandleTypeDef *usbhost_root) {
-		pr_info("Listening for MIDI devices\n");
+		pr_info("Listening for MIDI devices on host handle %p\n", usbhost_root);
 		USBH_RegisterClass(usbhost_root, &midi_class_ops);
 		return true;
 	}

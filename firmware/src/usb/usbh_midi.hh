@@ -28,6 +28,7 @@
 constexpr uint8_t AudioClassCode = 0x01;
 constexpr uint8_t AudioControlSubclassCode = 0x01;
 constexpr uint8_t MidiStreamingSubClass = 0x03;
+constexpr uint8_t HubClassCode = 0x09;
 
 constexpr uint8_t AnyProtocol = 0xFF;
 constexpr uint8_t NoValidInterfaceFound = 0xFF;

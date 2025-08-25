@@ -36,6 +36,7 @@ static void MIDI_ProcessReception(USBH_HandleTypeDef *phost);
  * @retval USBH Status
  */
 USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, const USBH_TargetTypeDef *target) {
+	USBH_UsrLog("USBH_MIDI_InterfaceInit(%p,...)", phost);
 	USBH_StatusTypeDef status;
 	uint8_t interface;
 
@@ -45,10 +46,15 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, const USBH
 	// This allows the app to own the class handle, managing its memory as it likes
 	// without requiring either dynamic memory or static/globals/singletons
 
-	if (phost->classData[0] == nullptr) {
-		USBH_DbgLog("There should be a static MIDI Handle");
-		return USBH_FAIL;
-	}
+	static MidiStreamingHandle staticMIDIHandle;
+
+	// if (phost->classData[0] == nullptr) {
+	phost->classData[0] = &staticMIDIHandle;
+	USBH_DbgLog("Using static MIDI Handle %p for classData", phost->classData[0]);
+	// } else {
+	// 	USBH_ErrLog("Class data is not empty: %p", phost->classData[0]);
+	// 	return USBH_FAIL;
+	// }
 
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
