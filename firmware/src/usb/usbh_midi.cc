@@ -35,8 +35,7 @@ static void MIDI_ProcessReception(USBH_HandleTypeDef *phost);
  * @param  phost: Host handle
  * @retval USBH Status
  */
-USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, const USBH_TargetTypeDef *target) 
-{
+USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, const USBH_TargetTypeDef *target) {
 	USBH_StatusTypeDef status;
 	uint8_t interface;
 
@@ -106,8 +105,7 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, const USBH
  * @param  phost: Host handle
  * @retval USBH Status
  */
-USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit(USBH_HandleTypeDef *phost)
-{
+USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit(USBH_HandleTypeDef *phost) {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 	if (!MSHandle)
@@ -130,8 +128,7 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit(USBH_HandleTypeDef *phost)
  * @param  phost: Host handle
  * @retval USBH Status
  */
-USBH_StatusTypeDef USBH_MIDI_ClassRequest(USBH_HandleTypeDef *phost)
-{
+USBH_StatusTypeDef USBH_MIDI_ClassRequest(USBH_HandleTypeDef *phost) {
 	if (phost->pUser)
 		phost->pUser(phost, HOST_USER_CLASS_ACTIVE);
 
@@ -144,8 +141,7 @@ USBH_StatusTypeDef USBH_MIDI_ClassRequest(USBH_HandleTypeDef *phost)
  * @param  phost: Host handle
  * @retval USBH Status
  */
-USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost)
-{
+USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost) {
 	USBH_StatusTypeDef status = USBH_BUSY;
 
 	USBHostHelper host{phost};
@@ -183,8 +179,7 @@ USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost)
  * @param  phost: Host handle
  * @retval USBH Status
  */
-USBH_StatusTypeDef USBH_MIDI_SOFProcess(USBH_HandleTypeDef *phost)
-{
+USBH_StatusTypeDef USBH_MIDI_SOFProcess(USBH_HandleTypeDef *phost) {
 	UNUSED(phost);
 	return USBH_OK;
 }
@@ -195,8 +190,7 @@ USBH_StatusTypeDef USBH_MIDI_SOFProcess(USBH_HandleTypeDef *phost)
  * @param  phost: Host handle
  * @retval USBH Status
  */
-USBH_StatusTypeDef USBH_MIDI_Stop(USBH_HandleTypeDef *phost)
-{
+USBH_StatusTypeDef USBH_MIDI_Stop(USBH_HandleTypeDef *phost) {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 	if (!MSHandle)
@@ -217,8 +211,7 @@ USBH_StatusTypeDef USBH_MIDI_Stop(USBH_HandleTypeDef *phost)
  * @param  None
  * @retval None
  */
-uint16_t USBH_MIDI_GetLastReceivedDataSize(USBH_HandleTypeDef *phost)
-{
+uint16_t USBH_MIDI_GetLastReceivedDataSize(USBH_HandleTypeDef *phost) {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 	if (!MSHandle)
@@ -240,8 +233,7 @@ uint16_t USBH_MIDI_GetLastReceivedDataSize(USBH_HandleTypeDef *phost)
  * @param  None
  * @retval None
  */
-USBH_StatusTypeDef USBH_MIDI_Transmit(USBH_HandleTypeDef *phost, uint8_t *pbuff, uint32_t length)
-{
+USBH_StatusTypeDef USBH_MIDI_Transmit(USBH_HandleTypeDef *phost, uint8_t *pbuff, uint32_t length) {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 	if (!MSHandle)
@@ -269,8 +261,7 @@ USBH_StatusTypeDef USBH_MIDI_Transmit(USBH_HandleTypeDef *phost, uint8_t *pbuff,
  * @param  None
  * @retval None
  */
-USBH_StatusTypeDef USBH_MIDI_Receive(USBH_HandleTypeDef *phost, uint8_t *pbuff, uint32_t length)
-{
+USBH_StatusTypeDef USBH_MIDI_Receive(USBH_HandleTypeDef *phost, uint8_t *pbuff, uint32_t length) {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 	if (!MSHandle)
@@ -298,8 +289,7 @@ USBH_StatusTypeDef USBH_MIDI_Receive(USBH_HandleTypeDef *phost, uint8_t *pbuff, 
  *  @param  pdev: Selected device
  * @retval None
  */
-static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost)
-{
+static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost) {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 	if (!MSHandle)
@@ -366,8 +356,7 @@ static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost)
  * @retval None
  */
 
-static void MIDI_ProcessReception(USBH_HandleTypeDef *phost)
-{
+static void MIDI_ProcessReception(USBH_HandleTypeDef *phost) {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 	if (!MSHandle) {
