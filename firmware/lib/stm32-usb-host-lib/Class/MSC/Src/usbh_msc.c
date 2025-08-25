@@ -110,7 +110,7 @@ USBH_ClassTypeDef  USBH_msc =
   USBH_MSC_ClassRequest,
   USBH_MSC_Process,
   USBH_MSC_SOFProcess,
-  NULL,
+  // NULL,
 };
 
 /**
@@ -155,8 +155,8 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost, cons
     return USBH_FAIL;
   }
 
-  phost->pActiveClass->pData = (MSC_HandleTypeDef *)USBH_malloc(sizeof(MSC_HandleTypeDef));
-  MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  phost->classData[0] = (MSC_HandleTypeDef *)USBH_malloc(sizeof(MSC_HandleTypeDef));
+  MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
 
   if (MSC_Handle == NULL)
   {
@@ -232,7 +232,7 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost, cons
   */
 static USBH_StatusTypeDef USBH_MSC_InterfaceDeInit(USBH_HandleTypeDef *phost)
 {
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
 
   if ((MSC_Handle->OutPipe) != 0U)
   {
@@ -248,10 +248,10 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceDeInit(USBH_HandleTypeDef *phost)
     MSC_Handle->InPipe = 0U;     /* Reset the Channel as Free */
   }
 
-  if ((phost->pActiveClass->pData) != NULL)
+  if ((phost->classData[0]) != NULL)
   {
-    USBH_free(phost->pActiveClass->pData);
-    phost->pActiveClass->pData = 0U;
+    USBH_free(phost->classData[0]);
+    phost->classData[0] = 0U;
   }
 
   return USBH_OK;
@@ -266,7 +266,7 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceDeInit(USBH_HandleTypeDef *phost)
   */
 static USBH_StatusTypeDef USBH_MSC_ClassRequest(USBH_HandleTypeDef *phost)
 {
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
   USBH_StatusTypeDef status = USBH_BUSY;
   uint8_t lun_idx;
 
@@ -323,7 +323,7 @@ static USBH_StatusTypeDef USBH_MSC_ClassRequest(USBH_HandleTypeDef *phost)
   */
 static USBH_StatusTypeDef USBH_MSC_Process(USBH_HandleTypeDef *phost)
 {
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
   USBH_StatusTypeDef error = USBH_BUSY;
   USBH_StatusTypeDef scsi_status = USBH_BUSY;
   USBH_StatusTypeDef ready_status = USBH_BUSY;
@@ -579,7 +579,7 @@ static USBH_StatusTypeDef USBH_MSC_SOFProcess(USBH_HandleTypeDef *phost)
   */
 static USBH_StatusTypeDef USBH_MSC_RdWrProcess(USBH_HandleTypeDef *phost, uint8_t lun)
 {
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
   USBH_StatusTypeDef error = USBH_BUSY;
   USBH_StatusTypeDef scsi_status = USBH_BUSY;
 
@@ -699,7 +699,7 @@ static USBH_StatusTypeDef USBH_MSC_RdWrProcess(USBH_HandleTypeDef *phost, uint8_
   */
 uint8_t USBH_MSC_IsReady(USBH_HandleTypeDef *phost)
 {
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
   uint8_t res;
 
   if ((phost->gState == HOST_CLASS) && (MSC_Handle->state == MSC_IDLE))
@@ -722,7 +722,7 @@ uint8_t USBH_MSC_IsReady(USBH_HandleTypeDef *phost)
   */
 uint8_t USBH_MSC_GetMaxLUN(USBH_HandleTypeDef *phost)
 {
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
 
   if ((phost->gState == HOST_CLASS) && (MSC_Handle->state == MSC_IDLE))
   {
@@ -741,7 +741,7 @@ uint8_t USBH_MSC_GetMaxLUN(USBH_HandleTypeDef *phost)
   */
 uint8_t USBH_MSC_UnitIsReady(USBH_HandleTypeDef *phost, uint8_t lun)
 {
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
   uint8_t res;
 
   /* Store the current lun */
@@ -768,7 +768,7 @@ uint8_t USBH_MSC_UnitIsReady(USBH_HandleTypeDef *phost, uint8_t lun)
   */
 USBH_StatusTypeDef USBH_MSC_GetLUNInfo(USBH_HandleTypeDef *phost, uint8_t lun, MSC_LUNTypeDef *info)
 {
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
 
   /* Store the current lun */
   MSC_Handle->current_lun = lun;
@@ -801,7 +801,7 @@ USBH_StatusTypeDef USBH_MSC_Read(USBH_HandleTypeDef *phost,
                                  uint32_t length)
 {
   uint32_t timeout;
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
 
   /* Store the current lun */
   MSC_Handle->current_lun = lun;
@@ -847,7 +847,7 @@ USBH_StatusTypeDef USBH_MSC_Write(USBH_HandleTypeDef *phost,
                                   uint32_t length)
 {
   uint32_t timeout;
-  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+  MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
 
   /* Store the current lun */
   MSC_Handle->current_lun = lun;

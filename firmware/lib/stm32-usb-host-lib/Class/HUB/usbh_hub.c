@@ -317,7 +317,7 @@ static void debug_port(uint8_t *buff, __IO USB_HUB_PORT_STATUS *info) {
 }
 
 static USBH_StatusTypeDef USBH_HUB_InterfaceInit(USBH_HandleTypeDef *phost, const USBH_TargetTypeDef *target) {
-	USBH_DbgLog("USBH_HUB_InterfaceInit");
+	USBH_DbgLog("USBH_HUB_InterfaceInit (host handle %p)", phost);
 	uint8_t interface;
 
 	USBH_StatusTypeDef status = USBH_FAIL;
@@ -333,8 +333,8 @@ static USBH_StatusTypeDef USBH_HUB_InterfaceInit(USBH_HandleTypeDef *phost, cons
 	static HUB_HandleTypeDef staticHUB_Handle;
 	HUB_HandleTypeDef *HUB_Handle = &staticHUB_Handle;
 
-	USBH_DbgLog("USBH_HUB_InterfaceInit: assigned pData to static hub handle");
-	phost->classData[0] = &HUB_Handle;
+	USBH_DbgLog("USBH_HUB_InterfaceInit: assigned host handle->classData[0] to static hub handle %p", &HUB_Handle);
+	phost->classData[0] = HUB_Handle;
 	memset((void *)HUB_Handle, 0, sizeof(HUB_HandleTypeDef));
 
 	phost->hubInstances = 1;
@@ -386,6 +386,7 @@ static USBH_StatusTypeDef USBH_HUB_InterfaceInit(USBH_HandleTypeDef *phost, cons
 }
 
 static USBH_StatusTypeDef USBH_HUB_InterfaceDeInit(USBH_HandleTypeDef *phost) {
+	USBH_DbgLog("USBH_HUB_InterfaceDeInit (host handle %p)", phost);
 	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->classData[0];
 
 	if (phost->classData[0]) {
@@ -415,6 +416,7 @@ static void USBH_HUB_ProcessDelay(HUB_HandleTypeDef *HUB_Handle, HUB_CtlStateTyp
 
 // state machine - for each hub port...
 static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
+	// USBH_DbgLog("USBH_HUB_ClassRequest (host handle %p)", phost);
 	USBH_StatusTypeDef status = USBH_BUSY;
 	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->classData[0];
 
@@ -660,6 +662,7 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 	/* не требуется, но по стилю = чтобы продолжались вызовы */
 	// (not required, but in style = to keep the calls going)
+	// USBH_DbgLog("USBH_HUB_Process (host handle %p)", phost);
 	USBH_StatusTypeDef status = USBH_BUSY;
 
 	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->classData[0];
@@ -877,5 +880,5 @@ USBH_ClassTypeDef HUB_Class = {
 	USBH_HUB_ClassRequest,
 	USBH_HUB_Process,
 	USBH_HUB_SOFProcess,
-	NULL,
+	// NULL,
 };

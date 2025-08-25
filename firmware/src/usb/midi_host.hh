@@ -23,7 +23,7 @@ class MidiHost {
 		USBH_MIDI_ClassRequest,
 		USBH_MIDI_Process,
 		USBH_MIDI_SOFProcess,
-		&MSHandle,
+		// &MSHandle,
 	};
 
 	bool _is_connected = false;
