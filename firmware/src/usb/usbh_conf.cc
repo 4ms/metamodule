@@ -476,8 +476,10 @@ void *msc_malloc(size_t sz) {
 	static MSC_HandleTypeDef hmsc;
 	if (sz == sizeof(MSC_HandleTypeDef))
 		return &hmsc;
-	else
+	else {
+		USBH_ErrLog("usbh_malloc only can be called for MSC");
 		return nullptr;
+	}
 }
 
 void msc_free(void *) {

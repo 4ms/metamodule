@@ -47,6 +47,9 @@ public:
 	void start() {
 		init_hhcd();
 
+		for (auto i = 0; i < 9; i++)
+			pr_info("&host_handle[%d] = %p\n", i, &host_handles[i]);
+
 		auto status = USBH_Init(&root_host_handle, usbh_state_change_callback, 0);
 		if (status != USBH_OK) {
 			pr_err("Error init USB Host: %d\n", status);
@@ -122,36 +125,36 @@ public:
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
-				pr_dbg("Select config\n");
+				pr_dbg("UsbHostManager: Select config\n");
 				break;
 
 			case HOST_USER_CONNECTION:
-				pr_dbg("Connected\n");
+				pr_dbg("UsbHostManager: Connected\n");
 				break;
 
 			case HOST_USER_CLASS_SELECTED: {
 				connected_classcode = host.get_active_class_code();
-				pr_dbg("Class selected: %d\n", connected_classcode);
+				pr_dbg("UsbHostManager: Class selected: %d\n", connected_classcode);
 			} break;
 
 			case HOST_USER_CLASS_ACTIVE: {
 				connected_classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
 
-				pr_dbg("Class active: %.8s code %d\n", classname, connected_classcode);
+				pr_dbg("UsbHostManager: Class active: %.8s code %d\n", classname, connected_classcode);
 
 				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
 					_midihost_instance->connect(phost);
 					auto mshandle = host.get_class_handle<MidiStreamingHandle>();
 					if (!mshandle) {
-						pr_err("Error, no MSHandle\n");
+						pr_err("UsbHostManager: Error, no MSHandle\n");
 						return;
 					}
 					USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				}
 
 				if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
-					pr_dbg("MSC connected\n");
+					pr_dbg("UsbHostManager: MSC connected\n");
 					_mschost_instance->connect();
 				}
 			} break;
@@ -163,12 +166,12 @@ public:
 				else if (connected_classcode == USB_MSC_CLASS)
 					_mschost_instance->disconnect();
 				else
-					pr_warn("Unknown disconnected class code %d\n", connected_classcode);
+					pr_warn("UsbHostManager: Unknown disconnected class code %d\n", connected_classcode);
 				connected_classcode = 0xFF;
 			} break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
-				pr_err("USB Host Manager Error\n");
+				pr_err("UsbHostManager: USB Host Manager Error\n");
 				break;
 		}
 	}
