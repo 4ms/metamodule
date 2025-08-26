@@ -111,6 +111,12 @@ public:
 		clear_cache();
 	}
 
+	~PatchPlayer() {
+		if (is_loaded) {
+			unload_patch();
+		}
+	}
+
 	ParamWatcher &watched_params() {
 		return param_watcher;
 	}
@@ -339,12 +345,16 @@ public:
 			modules[i].reset(nullptr);
 		}
 		cables.clear();
+
+		pd.module_slugs.clear();
 		pd.int_cables.clear();
 		pd.mapped_ins.clear();
-		pd.knob_sets.clear();
 		pd.mapped_outs.clear();
 		pd.static_knobs.clear();
+		pd.knob_sets.clear();
 		pd.module_slugs.clear();
+		pd.mapped_lights.clear();
+		pd.module_states.clear();
 		pd.midi_maps.set.clear();
 		pd.midi_maps.name = "";
 

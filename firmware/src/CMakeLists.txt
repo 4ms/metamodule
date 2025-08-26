@@ -3,6 +3,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
 option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" ON)
 option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
+option(SUPPRESS_HIL_MESSAGES    "Suppress HIL messages" OFF)
 
 
 include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
@@ -264,6 +265,9 @@ target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,hardware_sup
 if (CPU_TEST_ALL_MODULES)
   target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)
   # target_compile_definitions(main.elf PRIVATE MM_LOADTEST_MEASURE_MEMORY=1)
+endif()
+if (SUPPRESS_HIL_MESSAGES)
+  target_compile_definitions(main.elf PRIVATE SUPPRESS_HIL_MESSAGES=1)
 endif()
 
 if (CONSOLE_USE_USB)
