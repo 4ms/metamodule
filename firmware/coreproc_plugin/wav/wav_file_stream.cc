@@ -27,7 +27,7 @@ struct WavFileStream::Internal {
 
 	std::atomic<uint32_t> frames_in_buffer = 0;
 	std::atomic<uint32_t> next_frame_to_write = 0;
-	std::atomic<uint32_t> next_sample_to_read = 0;
+	uint32_t next_sample_to_read = 0;
 
 	LockFreeFifoSpscDyn<int16_t> pre_buff;
 
@@ -168,10 +168,12 @@ struct WavFileStream::Internal {
 	}
 
 	float pop_sample() {
-		auto p = pre_buff.get().value_or(0);
-		float f = p / (float)INT16_MIN;
-		next_sample_to_read.store(next_sample_to_read.load() + 1);
-		return -f;
+		if (auto p = pre_buff.get(); p.has_value()) {
+			float f = p.value() / (float)INT16_MIN;
+			next_sample_to_read++;
+			return -f;
+		} else
+			return 0;
 	}
 
 	unsigned num_channels() const {
@@ -203,7 +205,7 @@ struct WavFileStream::Internal {
 	unsigned current_playback_frame() const {
 		if (wav.channels == 0)
 			return 0;
-		return next_sample_to_read.load() / wav.channels;
+		return next_sample_to_read / wav.channels;
 	}
 
 	unsigned latest_buffered_frame() const {
@@ -268,6 +270,8 @@ struct WavFileStream::Internal {
 		next_frame_to_write = 0;
 		next_sample_to_read = 0;
 		frames_in_buffer = 0;
+		// Need a fence because next_sample_to_read is not atomic
+		std::atomic_signal_fence(std::memory_order_seq_cst);
 	}
 
 	unsigned first_frame_in_buffer() const {
