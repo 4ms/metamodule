@@ -40,15 +40,17 @@ struct ModuleLoadTester {
 		patch.blank_patch(slug);
 		module_id = patch.add_module(slug);
 
+		Measurements result{};
+
 		if (knob_test == KnobTestType::Bare && jack_test == JackTestType::NonePatched) {
-			return test_bare();
+			result = test_bare();
 
 		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::NonePatched) {
 			patch_all_knobs_static();
 			if (load_patch()) {
 				set_all_params(0.25f);
 				send_to_all_inputs(0.f);
-				return run_patch([] {}, block_size);
+				result = run_patch([] {}, block_size);
 			}
 
 		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllInputsZero) {
@@ -61,7 +63,7 @@ struct ModuleLoadTester {
 			if (load_patch()) {
 				set_all_params(0.25f);
 				send_to_all_inputs(0.f);
-				return run_patch([] {}, block_size);
+				result = run_patch([] {}, block_size);
 			}
 
 		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllInputsLFO) {
@@ -74,7 +76,7 @@ struct ModuleLoadTester {
 			if (load_patch()) {
 				set_all_params(0.25f);
 				auto oscs = make_oscs<2, 10>(counts.num_inputs);
-				return run_patch(
+				result = run_patch(
 					[&, this] {
 						for (uint16_t i = 0; i < oscs.size(); i++) {
 							auto lfo = oscs[i].process_float() * 10.f - 5.f;
@@ -94,7 +96,7 @@ struct ModuleLoadTester {
 			if (load_patch()) {
 				set_all_params(0.25f);
 				auto oscs = make_oscs<400, 6000>(counts.num_inputs);
-				return run_patch(
+				result = run_patch(
 					[&, this] {
 						for (uint16_t i = 0; i < oscs.size(); i++) {
 							auto lfo = oscs[i].process_float() * 10.f - 5.f;
@@ -104,7 +106,12 @@ struct ModuleLoadTester {
 					block_size);
 			}
 		}
-		return {};
+
+		if (player.is_loaded) {
+			player.unload_patch();
+		}
+
+		return result;
 	}
 
 	std::optional<float> load_patch() {
@@ -161,16 +168,23 @@ struct ModuleLoadTester {
 	}
 
 	uint64_t measure_construction_time() {
-		std::unique_ptr<CoreProcessor> module;
-		return measure([&]() { module = ModuleFactory::create(slug); });
+		auto time = measure([&]() {
+			if (auto module = ModuleFactory::create(slug)) {
+				plugin_module_init(module);
+				plugin_module_deinit(module);
+			}
+		});
+		return time;
 	}
 
 	Measurements test_bare() {
 		if (auto module = ModuleFactory::create(slug)) {
+			plugin_module_init(module);
 			std::array<uint64_t, 64> update_times{};
 			for (auto &tm : update_times)
 				tm = measure([&]() { module->update(); });
 
+			plugin_module_deinit(module);
 			return Measurements{update_times};
 		}
 
