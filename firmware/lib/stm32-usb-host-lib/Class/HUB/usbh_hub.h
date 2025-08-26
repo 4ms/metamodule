@@ -32,7 +32,7 @@
 #include "usbh_core.h"
 
 #define USB_HUB_CLASS 0x09
-#define HUB_MIN_POLL 200
+#define HUB_MIN_POLL 10 //200
 
 #define MAX_HUB_PORTS 8 // was 4 in mori
 

@@ -6,6 +6,8 @@
 #include "stm32-usb-host-lib/Class/HUB/usbh_hub.h"
 #include <cstring>
 
+#include "debug.hh"
+
 class UsbHostManager {
 private:
 	mdrivlib::Pin src_enable;

@@ -285,9 +285,9 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t lowspeed) {
 		pphost->classData[i] = NULL;
 	}
 
-	pphost->hubInstances = 0;
+	pphost->hubInstances = 0; // not a hub
 	pphost->busy = 0;
-	pphost->valid = 3;
+	pphost->valid = 3; // needs to be init
 }
 
 static void debug_port(uint8_t *buff, __IO USB_HUB_PORT_STATUS *info) {
@@ -861,23 +861,20 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 }
 
 static USBH_StatusTypeDef USBH_HUB_SOFProcess(USBH_HandleTypeDef *phost) {
-	// HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->hubDatas[0];
-	/*if(!phost->hub)
-{
-USBH_UsrLog("EEEERRRRRRROOORRRRRRR");
-return USBH_OK;
-}*/
+	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->classData[0];
+	if (!phost->hubInstances) {
+		USBH_ErrLog("HUB_SOFProcess: Not a hub!");
+		return USBH_OK;
+	}
 
-	//if(HUB_Handle->poll != 255)
-	//USBH_UsrLog("ERR %d %d", HUB_Handle->poll, HUB_Handle->length);
-	//
-	//	if(HUB_Handle->state == HUB_POLL)
-	//	{
-	//		if((phost->Timer - HUB_Handle->timer) >= HUB_Handle->poll)
-	//	    {
-	//			HUB_Handle->state = HUB_GET_DATA;
-	//	    }
-	//	}
+	if (HUB_Handle->poll < HUB_POLL)
+		USBH_UsrLog("ERR %d %d", HUB_Handle->poll, HUB_Handle->length);
+
+	if (HUB_Handle->state == HUB_POLL) {
+		if ((phost->Timer - HUB_Handle->timer) >= HUB_Handle->poll) {
+			HUB_Handle->state = HUB_GET_DATA;
+		}
+	}
 
 	return USBH_OK;
 }
