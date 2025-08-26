@@ -468,11 +468,12 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 						HUB_Handle->NumPorts,
 						HUB_Handle->pwrGoodDelay);
 			USBH_UsrLog("=============================================");
-			HUB_Handle->hubClassRequestPort = 1;
+			// HUB_Handle->hubClassRequestPort = 1;
 			// HUB_Handle->ctl_state = HUB_REQ_RESETS;
-			HUB_Handle->ctl_state = HUB_ALREADY_INITED;
+			HUB_Handle->ctl_state = HUB_REQ_DONE;
 			break;
 
+			//////////////////////////////////////////////
 		case HUB_REQ_RESETS:
 			// Выполняем сброс всех портов (We reset all ports)
 			status = set_port_feature(phost, HUB_FEAT_SEL_PORT_RESET, HUB_Handle->hubClassRequestPort);
@@ -652,6 +653,13 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 			phost->busy = 0;
 			status = USBH_OK;
 			break;
+			//////////////////////////////////////
+
+		case HUB_REQ_DONE:
+			USBH_DbgLog("Hub done init");
+			phost->busy = 0;
+			status = USBH_OK;
+			break;
 
 		default:
 			status = USBH_OK;
@@ -665,7 +673,7 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 	/* не требуется, но по стилю = чтобы продолжались вызовы */
 	// (not required, but in style = to keep the calls going)
 	// USBH_DbgLog("USBH_HUB_Process (host handle %p)", phost);
-	USBH_StatusTypeDef status = USBH_BUSY;
+	USBH_StatusTypeDef status = USBH_OK; //hftrx USBH_BUSY
 
 	HUB_HandleTypeDef *const HUB_Handle = (HUB_HandleTypeDef *)phost->classData[0];
 

@@ -98,7 +98,9 @@ public:
 				Debug::Pin1::high();
 			else if (cur_host_handle == &host_handles[2])
 				Debug::Pin2::high();
+
 			USBH_Process(cur_host_handle);
+
 			Debug::Pin0::low();
 			Debug::Pin1::low();
 			Debug::Pin2::low();
