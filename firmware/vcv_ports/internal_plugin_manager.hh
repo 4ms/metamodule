@@ -73,7 +73,7 @@ struct InternalPluginManager {
 
 		// Set 4ms display names
 		// TODO: read from plugin-mm.json
-		ModuleFactory::setModuleDisplayName("4msCompany:TSP", "Basic Sample Player");
+		ModuleFactory::setModuleDisplayName("4msCompany:TSP", "Basic Wav Player");
 		ModuleFactory::setModuleDisplayName("4msCompany:L4", "Listen Four");
 		ModuleFactory::setModuleDisplayName("4msCompany:DEV", "Dual EnvVCA");
 		ModuleFactory::setModuleDisplayName("4msCompany:SHEV", "Shaped Dual EnvVCA");
