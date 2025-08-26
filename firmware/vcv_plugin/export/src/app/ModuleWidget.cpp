@@ -202,8 +202,8 @@ void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
 			internal->drawable_widgets.push_back({internal->graphic_display_idx, widget});
 			internal->graphic_display_idx++;
 
-			pr_dbg("Add drawable (light) at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
-			pr_dbg("idx %d (firstLightId = %d)\n", internal->graphic_display_idx - 1, widget->firstLightId);
+			pr_trace("Add drawable (light) at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+			pr_trace("idx %d (firstLightId = %d)\n", internal->graphic_display_idx - 1, widget->firstLightId);
 		}
 	}
 }
@@ -268,8 +268,8 @@ void ModuleWidget::addChild(Widget *widget) {
 	internal->graphic_display_idx++;
 
 	auto box = widget->box;
-	pr_dbg("Add drawable at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
-	pr_dbg("idx %d\n", internal->graphic_display_idx - 1);
+	pr_trace("Add drawable at (%f, %f) size (%f, %f) ", box.pos.x, box.pos.y, box.size.x, box.size.y);
+	pr_trace("idx %d\n", internal->graphic_display_idx - 1);
 }
 
 void ModuleWidget::addChild(MetaModule::VCVTextDisplay *widget) {
