@@ -174,9 +174,8 @@ struct WavFileStream::Internal {
 		return -f;
 	}
 
-	bool is_stereo() const {
-		return wav.channels > 1;
-		// return is_loaded() ? wav.channels > 1 : false;
+	unsigned num_channels() const {
+		return wav.channels;
 	}
 
 	float sample_seconds() const {
@@ -239,11 +238,8 @@ struct WavFileStream::Internal {
 		}
 	}
 
-	std::optional<uint32_t> wav_sample_rate() const {
-		if (is_loaded())
-			return wav.sampleRate;
-		else
-			return {};
+	unsigned wav_sample_rate() const {
+		return is_loaded() ? wav.sampleRate : 0;
 	}
 
 	bool is_frame_in_buffer(uint32_t frame_num) const {
@@ -274,7 +270,7 @@ struct WavFileStream::Internal {
 		frames_in_buffer = 0;
 	}
 
-	uint32_t first_frame_in_buffer() const {
+	unsigned first_frame_in_buffer() const {
 		// TODO:  frames_in_buffer == 0 returns next_frame_to_write, try std::nullopt?
 		if (next_frame_to_write >= frames_in_buffer)
 			return next_frame_to_write - frames_in_buffer;
@@ -308,12 +304,12 @@ bool WavFileStream::is_eof() const{ return internal->is_eof(); }
 bool WavFileStream::is_file_error() const{ return internal->is_file_error(); }
 unsigned WavFileStream::current_playback_frame() const{ return internal->current_playback_frame(); }
 unsigned WavFileStream::latest_buffered_frame() const{ return internal->latest_buffered_frame(); }
-uint32_t WavFileStream::first_frame_in_buffer() const{ return internal->first_frame_in_buffer(); }
+unsigned WavFileStream::first_frame_in_buffer() const{ return internal->first_frame_in_buffer(); }
 void WavFileStream::reset_playback_to_frame(uint32_t frame_num){ internal->reset_playback_to_frame(frame_num); }
 void WavFileStream::seek_frame_in_file(uint32_t frame_num){ internal->seek_frame_in_file(frame_num); }
-bool WavFileStream::is_stereo() const{ return internal->is_stereo(); }
+unsigned WavFileStream::num_channels() const{ return internal->num_channels(); }
 unsigned WavFileStream::total_frames() const{ return internal->total_frames(); }
-std::optional<uint32_t> WavFileStream::wav_sample_rate() const{ return internal->wav_sample_rate(); }
+unsigned WavFileStream::wav_sample_rate() const{ return internal->wav_sample_rate(); }
 // clang-format on
 
 } // namespace MetaModule
