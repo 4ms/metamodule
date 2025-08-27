@@ -1551,11 +1551,6 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 	/* Clear old interrupt conditions for this host channel. */
 	USBx_HC((uint32_t)ch_num)->HCINT = 0xFFFFFFFFU;
 
-	// Modification here: from hftrx:
-	USBx_HC((uint32_t)ch_num)->HCSPLT =
-		(USBx_HC((uint32_t)ch_num)->HCSPLT & ~(USB_OTG_HCSPLT_HUBADDR_Msk | USB_OTG_HCSPLT_PRTADDR_Msk)) |
-		((uint32_t)tt_hubaddr < USB_OTG_HCSPLT_HUBADDR_Pos) | ((uint32_t)tt_prtaddr < USB_OTG_HCSPLT_PRTADDR_Pos) | 0;
-
 	/* Enable channel interrupts required for this transfer. */
 	switch (ep_type) {
 		case EP_TYPE_CTRL:
@@ -1633,6 +1628,13 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 	if ((ep_type == EP_TYPE_INTR) || (ep_type == EP_TYPE_ISOC)) {
 		USBx_HC((uint32_t)ch_num)->HCCHAR |= USB_OTG_HCCHAR_ODDFRM;
 	}
+
+	// Modification here: from hftrx:
+	USBx_HC((uint32_t)ch_num)->HCSPLT =
+		(USBx_HC((uint32_t)ch_num)->HCSPLT & ~(USB_OTG_HCSPLT_HUBADDR_Msk | USB_OTG_HCSPLT_PRTADDR_Msk)) |
+		((uint32_t)tt_hubaddr << USB_OTG_HCSPLT_HUBADDR_Pos) | ((uint32_t)tt_prtaddr << USB_OTG_HCSPLT_PRTADDR_Pos);
+	//COMPSPLT?
+	//XACTPOS?
 
 	return ret;
 }
