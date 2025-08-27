@@ -43,6 +43,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32mp1xx_hal.h"
 #include "stm32mp1xx_ll_usb_phy.h" //for USB_HS_PHYC_Init()
+#include "usbh_conf.h"
 
 /** @addtogroup STM32MP1xx_LL_USB_DRIVER
  * @{
@@ -1632,11 +1633,19 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 	}
 
 	// Modification here: from hftrx:
-	USBx_HC((uint32_t)ch_num)->HCSPLT =
-		(USBx_HC((uint32_t)ch_num)->HCSPLT & ~(USB_OTG_HCSPLT_HUBADDR_Msk | USB_OTG_HCSPLT_PRTADDR_Msk)) |
-		((uint32_t)tt_hubaddr << USB_OTG_HCSPLT_HUBADDR_Pos) | ((uint32_t)tt_prtaddr << USB_OTG_HCSPLT_PRTADDR_Pos);
-	//COMPSPLT?
-	//XACTPOS?
+	// full or low speed plugged into high-speed hub
+	if ((speed != HPRT0_PRTSPD_HIGH_SPEED) && (HostCoreSpeed == HPRT0_PRTSPD_HIGH_SPEED)) {
+		USBH_DbgLog("Enable split for hub addr %u, port %u", tt_hubaddr, tt_prtaddr);
+		uint32_t hcsplit = USBx_HC(ch_num)->HCSPLT;
+		hcsplit &= ~(USB_OTG_HCSPLT_HUBADDR_Msk | USB_OTG_HCSPLT_PRTADDR_Msk);
+		hcsplit |= (uint32_t)tt_hubaddr << USB_OTG_HCSPLT_HUBADDR_Pos;
+		hcsplit |= (uint32_t)tt_prtaddr << USB_OTG_HCSPLT_PRTADDR_Pos;
+		// hcsplit |= USB_OTG_HCSPLT_SPLITEN;
+		hcsplit |= USB_OTG_HCSPLT_XACTPOS_0;
+		hcsplit |= USB_OTG_HCSPLT_COMPLSPLT;
+		USBx_HC(ch_num)->HCSPLT = hcsplit;
+	}
+
 
 
 	return ret;
