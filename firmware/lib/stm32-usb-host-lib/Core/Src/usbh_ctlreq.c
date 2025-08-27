@@ -795,6 +795,7 @@ USBH_StatusTypeDef USBH_CtlReq(USBH_HandleTypeDef *phost, uint8_t *buff,
   switch (phost->RequestState)
   {
     case CMD_SEND:
+		USBH_UsrLog("CtlReq CMD_SEND %p", phost);
       /* Start a SETUP transfer */
       phost->Control.buff = buff;
       phost->Control.length = length;
@@ -865,6 +866,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       (void)USBH_CtlSendSetup(phost, (uint8_t *)(void *)phost->Control.setup.d8,
                               phost->Control.pipe_out);
 
+	  USBH_UsrLog("USBH_HandleControl: send SETUP packet: host: %p, data: %04x %04x, pipe out: %d", phost, phost->Control.setup.d8[0], phost->Control.setup.d8[1], phost->Control.pipe_out);
       phost->Control.state = CTRL_SETUP_WAIT;
       break;
 
