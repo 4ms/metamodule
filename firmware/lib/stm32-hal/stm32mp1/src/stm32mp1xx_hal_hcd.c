@@ -56,6 +56,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "host_ll_usb.h"
 #include "stm32mp1xx_hal.h"
+#include "usbh_conf.h"
 
 /** @addtogroup STM32MP1xx_HAL_Driver
   * @{
@@ -356,7 +357,7 @@ __weak void  HAL_HCD_MspDeInit(HCD_HandleTypeDef *hhcd)
   *            EP_TYPE_INTR: Interrupt type/
   * @param  token Endpoint Type.
   *          This parameter can be one of these values:
-  *            0: HC_PID_SETUP / 1: HC_PID_DATA1
+  *            0: HC_PID_SETUP / 1: HC_PID_DATA1 <<< ??? USBH_PID_SETUP == 0 but HC_PID_SETUP == 3
   * @param  pbuff pointer to URB data
   * @param  length Length of URB data
   * @param  do_ping activate do ping protocol (for high speed only).
@@ -376,7 +377,7 @@ HAL_StatusTypeDef HAL_HCD_HC_SubmitRequest(HCD_HandleTypeDef *hhcd,
   hhcd->hc[ch_num].ep_is_in = direction;
   hhcd->hc[ch_num].ep_type  = ep_type;
 
-  if (token == 0U)
+  if (token == 0U) // USBH_PID_SETUP
   {
     hhcd->hc[ch_num].data_pid = HC_PID_SETUP;
     hhcd->hc[ch_num].do_ping = do_ping;
