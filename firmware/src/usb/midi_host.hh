@@ -62,14 +62,6 @@ public:
 		return true;
 	}
 
-	// bool start() {
-	// 	return USBH_Start(usbhost) == USBH_OK;
-	// }
-
-	// bool stop() {
-	// 	return USBH_Stop(usbhost) == USBH_OK;
-	// }
-
 	bool is_connected() {
 		return _is_connected;
 	}
