@@ -795,7 +795,6 @@ USBH_StatusTypeDef USBH_CtlReq(USBH_HandleTypeDef *phost, uint8_t *buff,
   switch (phost->RequestState)
   {
     case CMD_SEND:
-		USBH_UsrLog("CtlReq CMD_SEND %p", phost);
       /* Start a SETUP transfer */
       phost->Control.buff = buff;
       phost->Control.length = length;

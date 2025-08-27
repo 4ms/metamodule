@@ -11,8 +11,10 @@
 #include "usb/usbh_midi.hh"
 #include "util/doublebuf_stream.hh"
 
+extern MidiStreamingHandle s_MIDIHandle;
+
 class MidiHost {
-	MidiStreamingHandle MSHandle;
+	// MidiStreamingHandle MSHandle;
 	USBH_HandleTypeDef *usbhost = nullptr;
 
 	USBH_ClassTypeDef midi_class_ops = {
@@ -45,13 +47,13 @@ public:
 			return res == USBH_OK;
 		}} {
 
-		MSHandle.tx_callback = [this]() {
+		s_MIDIHandle.tx_callback = [this]() {
 			tx_stream.tx_done_callback();
 		};
 	}
 
 	void set_rx_callback(MidiStreamRxCallbackType rx_callback) {
-		MSHandle.rx_callback = rx_callback;
+		s_MIDIHandle.rx_callback = rx_callback;
 	}
 
 	bool init(USBH_HandleTypeDef *usbhost_root) {
@@ -79,6 +81,7 @@ public:
 
 	void disconnect() {
 		_is_connected = false;
+		this->usbhost->classData[0] = nullptr;
 		this->usbhost = nullptr;
 	}
 
@@ -87,7 +90,7 @@ public:
 			return USBH_FAIL;
 
 		//TODO: if we use double-buffers, swap buffers here
-		return USBH_MIDI_Receive(usbhost, MSHandle.rx_buffer, 128);
+		return USBH_MIDI_Receive(usbhost, s_MIDIHandle.rx_buffer, 128);
 	}
 
 	bool transmit(std::span<uint8_t> bytes) {

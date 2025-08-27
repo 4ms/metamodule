@@ -26,6 +26,8 @@
 #include "usbh_midi.hh"
 #include "usbh_midi_jacks.hh"
 
+MidiStreamingHandle s_MIDIHandle;
+
 static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost);
 static void MIDI_ProcessReception(USBH_HandleTypeDef *phost);
 
@@ -46,10 +48,8 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, const USBH
 	// This allows the app to own the class handle, managing its memory as it likes
 	// without requiring either dynamic memory or static/globals/singletons
 
-	static MidiStreamingHandle staticMIDIHandle;
-
 	// if (phost->classData[0] == nullptr) {
-	phost->classData[0] = &staticMIDIHandle;
+	phost->classData[0] = &s_MIDIHandle;
 	USBH_DbgLog("Using static MIDI Handle %p for classData", phost->classData[0]);
 	// } else {
 	// 	USBH_ErrLog("Class data is not empty: %p", phost->classData[0]);
