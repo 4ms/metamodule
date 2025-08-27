@@ -49,8 +49,8 @@ static uint8_t get_port_changed(HUB_HandleTypeDef *HUB_Handle);
 static uint8_t port_changed(HUB_HandleTypeDef *HUB_Handle, const uint8_t *b);
 
 static void detach(USBH_HandleTypeDef *phost, uint16_t idx);
-static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t lowspeed);
-static void debug_port(uint8_t *buff, __IO USB_HUB_PORT_STATUS *info);
+static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t speed);
+static void debug_port(uint8_t curport, uint8_t *buff, __IO USB_HUB_PORT_STATUS *info);
 
 static USBH_StatusTypeDef hub_request(USBH_HandleTypeDef *phost,
 									  uint8_t request,
@@ -232,7 +232,7 @@ void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 
 // phost is the hub host handle
 // idx is the hub port index that was attached
-static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t lowspeed) {
+static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t speed) {
 	USBH_UsrLog("attach hub port %d", idx);
 
 	USBH_HandleTypeDef *pphost = &phost->handles[idx];
@@ -258,22 +258,21 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t lowspeed) {
 	pphost->Timer = 0;
 	pphost->Control.errorcount = 0;
 	pphost->Control.state = CTRL_SETUP;
-	pphost->Control.pipe_size = lowspeed ? USBH_MPS_LOWSPEED : USBH_MPS_DEFAULT;
+	pphost->Control.pipe_size = speed == USBH_SPEED_LOW ? USBH_MPS_LOWSPEED : USBH_MPS_DEFAULT;
 
 	pphost->rootTarget.dev_address = USBH_ADDRESS_DEFAULT;
-	pphost->rootTarget.speed = lowspeed ? USBH_SPEED_LOW : USBH_SPEED_FULL;
+	pphost->rootTarget.speed = speed;
+	pphost->rootTarget.tt_hubaddr = phost->currentTarget->dev_address; // hub address is always 1?
+	pphost->rootTarget.tt_prtaddr = idx;							   // hub port address
+
 	// Do we do this here?
 	pphost->currentTarget = &pphost->rootTarget;
 	pphost->device.is_connected = 1;
 
+	pphost->allocaddress = phost->allocaddress;
+
 	HCD_HandleTypeDef *phHCD = (HCD_HandleTypeDef *)(pphost->pData);
 	USBH_LL_SetTimer(pphost, HAL_HCD_GetCurrentFrame(phHCD));
-
-	/* link the class to the USB Host handle */
-	// This is done in the usb host manager
-	// pphost->ClassNumber = 0;
-	// pphost->pClass[pphost->ClassNumber++] = USBH_HID_CLASS;
-	// pphost->pClass[pphost->ClassNumber++] = USBH_MSC_CLASS;
 
 	pphost->gState = HOST_ENUMERATION;
 
@@ -290,10 +289,10 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t lowspeed) {
 	pphost->valid = 3; // needs to be init
 }
 
-static void debug_port(uint8_t *buff, __IO USB_HUB_PORT_STATUS *info) {
+static void debug_port(uint8_t curport, uint8_t *buff, __IO USB_HUB_PORT_STATUS *info) {
 #if 1
 	// clang-format off
-    printf("PORT STATUS [%02X %02X %02X %02X] ", buff[0], buff[1], buff[2], buff[3]);
+    printf("PORT %d STATUS [%02X %02X %02X %02X] ", curport, buff[0], buff[1], buff[2], buff[3]);
 
     if(info->wPortStatus.PORT_CONNECTION)       printf("PORT_CONNECTION ");
     if(info->wPortStatus.PORT_ENABLE)           printf("PORT_ENABLE ");
@@ -364,10 +363,10 @@ static USBH_StatusTypeDef USBH_HUB_InterfaceInit(USBH_HandleTypeDef *phost, cons
 	HUB_Handle->length = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].wMaxPacketSize;
 	HUB_Handle->poll = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bInterval;
 
+	USBH_UsrLog("USBH_HUB_InterfaceInit: device poll=%d, length=%d", HUB_Handle->poll, HUB_Handle->length);
+
 	if (HUB_Handle->poll < HUB_MIN_POLL)
 		HUB_Handle->poll = HUB_MIN_POLL;
-
-	USBH_UsrLog("USBH_HUB_InterfaceInit: device poll=%d, length=%d", HUB_Handle->poll, HUB_Handle->length);
 
 	if (phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bEndpointAddress & 0x80) {
 		HUB_Handle->InEp =
@@ -725,7 +724,7 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 					HUB_Handle->state = HUB_GET_DATA;
 				}
 			} else if (urbState == USBH_URB_ERROR) {
-				USBH_ErrLog("=");
+				USBH_ErrLog("=urb error=");
 			} else {
 				// URB_IDLE
 			}
@@ -756,7 +755,7 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 			{
 				HUB_Handle->pChangeInfo = (USB_HUB_PORT_STATUS *)HUB_Handle->buffer;
 
-				debug_port(HUB_Handle->buffer, HUB_Handle->pChangeInfo);
+				debug_port(HUB_Handle->HUB_CurPort, HUB_Handle->buffer, HUB_Handle->pChangeInfo);
 
 				if (HUB_Handle->pChangeInfo->wPortStatus.PORT_POWER) {
 					if (HUB_Handle->pChangeInfo->wPortChange.C_PORT_OVER_CURRENT) {
@@ -830,12 +829,18 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost) {
 			break;
 
 		case HUB_DEV_ATTACHED:
-			USBH_UsrLog("HUB_DEV_ATTACHED %d, lowspeed? %d",
+			USBH_UsrLog("HUB_DEV_ATTACHED %d, lowspeed? %d highspeed? %d",
 						HUB_Handle->HUB_CurPort,
-						HUB_Handle->pChangeInfo->wPortStatus.PORT_LOW_SPEED);
+						HUB_Handle->pChangeInfo->wPortStatus.PORT_LOW_SPEED,
+						HUB_Handle->pChangeInfo->wPortStatus.PORT_HIGH_SPEED);
 
 			HUB_Handle->state = HUB_LOOP_PORT_WAIT;
-			attach(phost, HUB_Handle->HUB_CurPort, HUB_Handle->pChangeInfo->wPortStatus.PORT_LOW_SPEED);
+			{
+				uint8_t speed = HUB_Handle->pChangeInfo->wPortStatus.PORT_LOW_SPEED	 ? USBH_SPEED_LOW :
+								HUB_Handle->pChangeInfo->wPortStatus.PORT_HIGH_SPEED ? USBH_SPEED_HIGH :
+																					   USBH_SPEED_FULL;
+				attach(phost, HUB_Handle->HUB_CurPort, speed);
+			}
 			phost->busy = 0;
 			break;
 
