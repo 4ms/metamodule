@@ -100,12 +100,15 @@ public:
 				Debug::Pin1::high();
 			else if (cur_host_handle == &host_handles[2])
 				Debug::Pin2::high();
+			else if (cur_host_handle == &host_handles[3])
+				Debug::Pin3::high();
 
 			USBH_Process(cur_host_handle);
 
 			Debug::Pin0::low();
 			Debug::Pin1::low();
 			Debug::Pin2::low();
+			Debug::Pin3::low();
 
 			// Keep processing this host until it's no longer busy
 			if (cur_host_handle->busy)
