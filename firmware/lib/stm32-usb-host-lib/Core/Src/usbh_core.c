@@ -984,6 +984,8 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
 
         phost->EnumState = ENUM_GET_FULL_DEV_DESC;
 
+		printf("HandleEnum: open pipe in %u\n", phost->Control.pipe_in);
+		printf("HandleEnum: open pipe out %u\n", phost->Control.pipe_out);
         /* modify control channels configuration for MaxPacket size */
         (void)USBH_OpenPipe(phost, phost->Control.pipe_in, 0x80U, phost->currentTarget, USBH_EP_CONTROL,
                             (uint16_t)phost->Control.pipe_size);
@@ -1430,29 +1432,30 @@ USBH_StatusTypeDef USBH_LL_Connect(USBH_HandleTypeDef *phost)
   */
 USBH_StatusTypeDef USBH_LL_Disconnect(USBH_HandleTypeDef *phost)
 {
+  // This only is called when the root is disconnected
 
-	// MORI - Always select the root device, mainly if its a hub
-	//USBH_HandleTypeDef *pphost = &hUSBHost[0];
-	// USBH_HandleTypeDef *pphost = &hUsbHostHS;
-	//HCD_HandleTypeDef *phHCD   = &_hHCD[pphost->id];
+  // MORI - Always select the root device, mainly if its a hub
+  USBH_HandleTypeDef *root_host = &phost->handles[0];
+  // USBH_HandleTypeDef *pphost = &hUsbHostHS;
+  //HCD_HandleTypeDef *phHCD   = &_hHCD[pphost->id];
 
   /* update device connection states */
-  phost->device.is_disconnected = 1U;
-  phost->device.is_connected = 0U;
-  phost->device.PortEnabled = 0U;
+  root_host->device.is_disconnected = 1U;
+  root_host->device.is_connected = 0U;
+  root_host->device.PortEnabled = 0U;
 
   /* Stop Host */
-  (void)USBH_LL_Stop(phost);
+  (void)USBH_LL_Stop(root_host);
 
   /* FRee Control Pipes */
-  (void)USBH_FreePipe(phost, phost->Control.pipe_in);
-  (void)USBH_FreePipe(phost, phost->Control.pipe_out);
+  (void)USBH_FreePipe(root_host, root_host->Control.pipe_in);
+  (void)USBH_FreePipe(root_host, root_host->Control.pipe_out);
 #if (USBH_USE_OS == 1U)
   phost->os_msg = (uint32_t)USBH_PORT_EVENT;
 #if (osCMSIS < 0x20000U)
-  (void)osMessagePut(phost->os_event, phost->os_msg, 0U);
+  (void)osMessagePut(root_host->os_event, root_host->os_msg, 0U);
 #else
-  (void)osMessageQueuePut(phost->os_event, &phost->os_msg, 0U, 0U);
+  (void)osMessageQueuePut(root_host->os_event, &root_host->os_msg, 0U, 0U);
 #endif
 #endif
 
