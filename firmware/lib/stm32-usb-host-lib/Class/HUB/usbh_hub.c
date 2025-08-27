@@ -188,7 +188,7 @@ static uint8_t port_changed(HUB_HandleTypeDef *HUB_Handle, const uint8_t *b) {
 	return HUB_Handle->HUB_Change.val > 0;
 }
 
-// _phost is the port's host handle or is it the hub's????
+// _phost is the port's host handle
 void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 	USBH_UsrLog("detach hub port %d", idx);
 
@@ -228,6 +228,19 @@ void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 
 	pphost->hubInstances = 0;
 	pphost->device.is_connected = 0;
+
+	if (pphost->Control.pipe_out > 0) {
+		USBH_ClosePipe(pphost, pphost->Control.pipe_out);
+		USBH_FreePipe(pphost, pphost->Control.pipe_out);
+	} else {
+		USBH_ErrLog("Not freeing device Control.pipe_out since it's 0");
+	}
+	if (pphost->Control.pipe_in > 0) {
+		USBH_ClosePipe(pphost, pphost->Control.pipe_in);
+		USBH_FreePipe(pphost, pphost->Control.pipe_in);
+	} else {
+		USBH_ErrLog("Not freeing device Control.pipe_in since it's 0");
+	}
 }
 
 // phost is the hub host handle
@@ -239,7 +252,7 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t speed) {
 
 	if (pphost->valid) {
 		USBH_UsrLog("ATTACH ERROR, ALREADY ATTACHED");
-		detach(pphost, idx); // FIXME: shouldn't this be: detach(phost, idx)
+		detach(phost, idx); // mori: was pphost
 	}
 
 	//pphost->id 					= 0;//hUSBHost[0].id; // seems to be selecting the USB peripheral
