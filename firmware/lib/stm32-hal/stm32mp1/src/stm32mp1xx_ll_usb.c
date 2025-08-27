@@ -1542,6 +1542,8 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 							  uint8_t tt_hubaddr,
 							  uint8_t tt_prtaddr)
 {
+	printf("Init Host Channel/pipe %u, dev_address %u, epnum %u (type %u), hub/port %u/%u\n", ch_num, dev_address, epnum, ep_type, tt_hubaddr, tt_prtaddr);
+
 	HAL_StatusTypeDef ret = HAL_OK;
 	uint32_t USBx_BASE = (uint32_t)USBx;
 	uint32_t HCcharEpDir;
@@ -1635,6 +1637,7 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 		((uint32_t)tt_hubaddr << USB_OTG_HCSPLT_HUBADDR_Pos) | ((uint32_t)tt_prtaddr << USB_OTG_HCSPLT_PRTADDR_Pos);
 	//COMPSPLT?
 	//XACTPOS?
+
 
 	return ret;
 }

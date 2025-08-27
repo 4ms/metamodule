@@ -122,6 +122,7 @@ uint8_t USBH_AllocPipe(USBH_HandleTypeDef *phost, uint8_t ep_addr)
   if (pipe != 0xFFFFU)
   {
     phost->Pipes[pipe & 0xFU] = (uint32_t)(0x8000U | ep_addr);
+	printf("Alloc pipe %u to ep %u\n", pipe, ep_addr);
   }
 
   return (uint8_t)pipe;
@@ -140,6 +141,7 @@ USBH_StatusTypeDef USBH_FreePipe(USBH_HandleTypeDef *phost, uint8_t idx)
   if (idx < USBH_MAX_PIPES_NBR)
   {
     phost->Pipes[idx] &= 0x7FFFU;
+	printf("Free pipe %u\n", idx);
   }
 
   return USBH_OK;

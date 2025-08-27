@@ -866,7 +866,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       (void)USBH_CtlSendSetup(phost, (uint8_t *)(void *)phost->Control.setup.d8,
                               phost->Control.pipe_out);
 
-	  USBH_UsrLog("USBH_HandleControl: send SETUP packet: host: %p, data: %04x %04x, pipe out: %d", phost, phost->Control.setup.d8[0], phost->Control.setup.d8[1], phost->Control.pipe_out);
+	  USBH_UsrLog("USBH_HandleControl: send SETUP packet: host: %p, data(8b): %08x %08x, pipe_num(out): %d, ep type control, no ping", phost, phost->Control.setup.d8[0], phost->Control.setup.d8[1], phost->Control.pipe_out);
       phost->Control.state = CTRL_SETUP_WAIT;
       break;
 
