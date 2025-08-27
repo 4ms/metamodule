@@ -156,6 +156,8 @@ public:
 				pr_dbg("UsbHostManager: Class selected: %d for %p\n", connected_classcode, phost);
 				if (connected_classcode == HubClassCode) {
 					//
+				} else if (connected_classcode == USB_MSC_CLASS) {
+					_mschost_instance->set_handle(phost);
 				}
 			} break;
 

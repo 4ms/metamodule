@@ -10,7 +10,6 @@
 #include <string_view>
 
 class MSCHost {
-	USBH_HandleTypeDef *usbhost;
 	MSCOps msc_ops;
 	FatFileIO msc;
 
@@ -19,13 +18,16 @@ public:
 		: msc{&msc_ops, vol} {
 	}
 
-	bool init(USBH_HandleTypeDef *usbhost) {
-		pr_info("Listening for MSC devices on host %p\n", usbhost);
-		this->usbhost = usbhost;
-		msc_ops.set_handle(usbhost);
-		USBH_RegisterClass(usbhost, USBH_MSC_CLASS);
+	bool init(USBH_HandleTypeDef *root_host) {
+		pr_info("Listening for MSC devices on host %p\n", root_host);
+		msc_ops.set_handle(root_host);
+		USBH_RegisterClass(root_host, USBH_MSC_CLASS);
 
 		return true;
+	}
+
+	void set_handle(USBH_HandleTypeDef *usbhost) {
+		msc_ops.set_handle(usbhost);
 	}
 
 	void connect() {
