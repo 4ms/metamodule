@@ -274,7 +274,8 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t speed) {
 	HCD_HandleTypeDef *phHCD = (HCD_HandleTypeDef *)(pphost->pData);
 	USBH_LL_SetTimer(pphost, HAL_HCD_GetCurrentFrame(phHCD));
 
-	pphost->gState = HOST_ENUMERATION;
+	// pphost->gState = HOST_ENUMERATION; //mori
+	pphost->gState = HOST_DEV_ATTACHED;
 
 	pphost->Control.pipe_out = phost->Control.pipe_out;
 	pphost->Control.pipe_in = phost->Control.pipe_in;
