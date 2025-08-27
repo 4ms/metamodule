@@ -160,6 +160,7 @@ USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost) {
 	switch (MSHandle->state) {
 		case MidiStreamingState::Idle:
 			status = USBH_OK;
+			phost->busy = 0;
 			break;
 
 		case MidiStreamingState::TransferData:

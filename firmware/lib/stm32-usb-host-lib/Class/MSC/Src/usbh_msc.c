@@ -537,6 +537,7 @@ static USBH_StatusTypeDef USBH_MSC_Process(USBH_HandleTypeDef *phost)
       {
         MSC_Handle->lun = 0U;
         MSC_Handle->state = MSC_IDLE;
+		phost->busy = 0;
       }
 
 #if (USBH_USE_OS == 1U)
