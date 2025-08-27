@@ -212,8 +212,7 @@ typedef union {
 } uint16_t_uint8_t;
 
 typedef union _USB_Setup {
-	// TODO: Align this to 4k?
-	uint32_t d8[2];
+	uint32_t d8[2] __attribute__((aligned(4)));
 
 	struct _SetupPkt_Struc {
 		uint8_t bmRequestType;
@@ -221,8 +220,8 @@ typedef union _USB_Setup {
 		uint16_t_uint8_t wValue;
 		uint16_t_uint8_t wIndex;
 		uint16_t_uint8_t wLength;
-	} b;
-} USB_Setup_TypeDef;
+	} __attribute__((aligned(4))) b;
+} __attribute__((aligned(4))) USB_Setup_TypeDef;
 
 typedef struct _DescHeader {
 	uint8_t bLength;
