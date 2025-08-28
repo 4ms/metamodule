@@ -1651,8 +1651,9 @@ void USB_HC_EnableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num, uint8_t tt_
 	USBH_DbgLog("Enable split for hub addr %u, port %u", tt_hubaddr, tt_prtaddr);
 
 	uint32_t USBx_BASE = (uint32_t)USBx;
-	uint32_t hcsplit = USBx_HC(ch_num)->HCSPLT;
-	hcsplit &= ~(USB_OTG_HCSPLT_HUBADDR_Msk | USB_OTG_HCSPLT_PRTADDR_Msk);
+	// uint32_t hcsplit = USBx_HC(ch_num)->HCSPLT;
+	// hcsplit &= ~(USB_OTG_HCSPLT_HUBADDR_Msk | USB_OTG_HCSPLT_PRTADDR_Msk);
+	uint32_t hcsplit = 0;
 	hcsplit |= (uint32_t)tt_hubaddr << USB_OTG_HCSPLT_HUBADDR_Pos;
 	hcsplit |= (uint32_t)tt_prtaddr << USB_OTG_HCSPLT_PRTADDR_Pos;
 	hcsplit |= USB_OTG_HCSPLT_SPLITEN;
