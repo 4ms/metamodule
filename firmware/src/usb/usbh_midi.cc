@@ -159,6 +159,10 @@ USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost) {
 		case MidiStreamingState::TransferData:
 			MIDI_ProcessTransmission(phost);
 			MIDI_ProcessReception(phost);
+			if ((MSHandle->data_rx_state == MidiStreamingDataState::Idle ||
+				 MSHandle->data_rx_state == MidiStreamingDataState::ReceiveDataWait) &&
+				MSHandle->data_tx_state == MidiStreamingDataState::Idle)
+				phost->busy = 0; // yield to another device
 			break;
 
 		case MidiStreamingState::Error: {
@@ -167,7 +171,12 @@ USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost) {
 			if (req_status == USBH_OK) {
 				MSHandle->state = MidiStreamingState::Idle;
 			}
+			phost->busy = 0;
 		} break;
+
+		default:
+			USBH_UsrLog("Unknown MIDI state %u", MSHandle->state);
+			break;
 	}
 
 	return status;
