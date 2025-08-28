@@ -472,15 +472,21 @@ static USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status) {
 	return usb_status;
 }
 
+extern MSC_HandleTypeDef s_MSCHandle;
+
 void *msc_malloc(size_t sz) {
-	static MSC_HandleTypeDef hmsc;
 	if (sz == sizeof(MSC_HandleTypeDef))
-		return &hmsc;
+		return &s_MSCHandle;
 	else {
 		USBH_ErrLog("usbh_malloc only can be called for MSC");
 		return nullptr;
 	}
 }
 
-void msc_free(void *) {
+void msc_free(void *ptr) {
+	if (ptr == &s_MSCHandle) {
+		ptr = nullptr;
+	}
+	else
+		USBH_ErrLog("usbh_free only can be called for MSC");
 }

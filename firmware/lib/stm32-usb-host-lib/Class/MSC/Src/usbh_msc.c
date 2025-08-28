@@ -44,6 +44,7 @@ EndBSPDependencies */
 #include "usbh_msc_bot.h"
 #include "usbh_msc_scsi.h"
 
+MSC_HandleTypeDef s_MSCHandle;
 
 /** @addtogroup USBH_LIB
   * @{
@@ -157,17 +158,19 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost, cons
     return USBH_FAIL;
   }
 
-  phost->classData[0] = (MSC_HandleTypeDef *)USBH_malloc(sizeof(MSC_HandleTypeDef));
-  MSC_Handle = (MSC_HandleTypeDef *) phost->classData[0];
-
-  if (MSC_Handle == NULL)
+  if (phost->classData[0] != NULL)
   {
-    USBH_DbgLog("Cannot allocate memory for MSC Handle");
+    USBH_DbgLog("Only one MSC device is allowed");
+	// TODO: GUI notification
     return USBH_FAIL;
   }
 
+  MSC_Handle = &s_MSCHandle;
+  phost->classData[0] = MSC_Handle;
+
+
   /* Initialize msc handler */
-  (void)USBH_memset(MSC_Handle, 0, sizeof(MSC_HandleTypeDef));
+  memset(MSC_Handle, 0, sizeof(MSC_HandleTypeDef));
 
   if ((phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[0].bEndpointAddress & 0x80U) != 0U)
   {
@@ -250,11 +253,7 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceDeInit(USBH_HandleTypeDef *phost)
     MSC_Handle->InPipe = 0U;     /* Reset the Channel as Free */
   }
 
-  if ((phost->classData[0]) != NULL)
-  {
-    USBH_free(phost->classData[0]);
-    phost->classData[0] = 0U;
-  }
+  phost->classData[0] = NULL;
 
   return USBH_OK;
 }

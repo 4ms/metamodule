@@ -42,19 +42,13 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, const USBH
 	USBH_StatusTypeDef status;
 	uint8_t interface;
 
-	// In most STM Host Lib Classes, we USBH_malloc() a class handle here.
-	// But in this class, we already specified it by passing it in the pData field
-	// of the USBH_ClassTypeDef struct passed to USBH_RegisterClass
-	// This allows the app to own the class handle, managing its memory as it likes
-	// without requiring either dynamic memory or static/globals/singletons
+	if (phost->classData[0] != nullptr) {
+		USBH_ErrLog("Only one MIDI device attached at a time (classData[0] is not null %p)", phost->classData[0]);
+		return USBH_FAIL;
+	}
 
-	// if (phost->classData[0] == nullptr) {
 	phost->classData[0] = &s_MIDIHandle;
 	USBH_DbgLog("Using static MIDI Handle %p for classData", phost->classData[0]);
-	// } else {
-	// 	USBH_ErrLog("Class data is not empty: %p", phost->classData[0]);
-	// 	return USBH_FAIL;
-	// }
 
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
@@ -121,8 +115,7 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit(USBH_HandleTypeDef *phost) {
 	host.close_and_free_pipe(MSHandle->DataItf.InEP);
 	host.close_and_free_pipe(MSHandle->DataItf.OutEP);
 
-	// USBH_free(phost->pActiveClass->pData);
-	// phost->pActiveClass->pData = nullptr;
+	phost->classData[0] = nullptr;
 
 	return USBH_OK;
 }
@@ -153,7 +146,7 @@ USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost) {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 	if (!MSHandle) {
-		USBH_DbgLog("no mshandle");
+		USBH_ErrLog("No MidiStreamingHandle!");
 		return USBH_FAIL;
 	}
 

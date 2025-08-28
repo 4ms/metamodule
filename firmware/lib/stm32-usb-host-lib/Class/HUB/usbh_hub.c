@@ -190,9 +190,9 @@ static uint8_t port_changed(HUB_HandleTypeDef *HUB_Handle, const uint8_t *b) {
 
 // _phost is the port's host handle
 void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
-	USBH_UsrLog("detach hub port %d", idx);
-
 	USBH_HandleTypeDef *pphost = &_phost->handles[idx];
+
+	USBH_UsrLog("Detach hub port %d: handle %p", idx, pphost);
 
 	if (!pphost->valid) {
 		USBH_UsrLog("DETACH ERROR, ALREADY DETACHED");
@@ -206,40 +206,36 @@ void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 	if (pphost->pActiveClass != NULL) {
 		pphost->pActiveClass->DeInit(pphost);
 		pphost->pActiveClass = NULL;
+	} else {
+		USBH_ErrLog("No active class for host %p", pphost);
 	}
 
 	pphost->hubPortAddress = 0;
 	pphost->busy = 0;
-	// pphost->ClassNumber = 0;
 	pphost->valid = 0;
 
 	for (unsigned i = 0; i < USBH_MAX_DATA_BUFFER; i++) {
 		pphost->device.Data[i] = 0;
 	}
 
-	USBH_DbgLog("hub detach: not freeing any allocated classData. OK?");
-	// Do not free hubdata[0], it's static
-	// for (unsigned i = 1; i < pphost->hubInstances; ++i) {
-	// 	if (pphost->classData[i]) {
-	// 		free(pphost->classData[i]);
-	// 		pphost->classData[i] = NULL;
-	// 	}
-	// }
+	for (unsigned i = 0; i < USBH_MAX_NUM_INTERFACES; ++i) {
+		if (pphost->classData[i]) {
+			USBH_DbgLog("Detach: set phost(%p) classData[%d] to NULL", pphost, i);
+			pphost->classData[i] = NULL;
+		}
+	}
 
 	pphost->hubInstances = 0;
 	pphost->device.is_connected = 0;
 
+	// Close the control pipes if they're still open
 	if (pphost->Control.pipe_out > 0) {
 		USBH_ClosePipe(pphost, pphost->Control.pipe_out);
 		USBH_FreePipe(pphost, pphost->Control.pipe_out);
-	} else {
-		USBH_ErrLog("Not freeing device Control.pipe_out since it's 0");
 	}
 	if (pphost->Control.pipe_in > 0) {
 		USBH_ClosePipe(pphost, pphost->Control.pipe_in);
 		USBH_FreePipe(pphost, pphost->Control.pipe_in);
-	} else {
-		USBH_ErrLog("Not freeing device Control.pipe_in since it's 0");
 	}
 }
 
