@@ -433,6 +433,12 @@ typedef struct {
 	uint8_t dev_address;
 	uint8_t tt_hubaddr;
 	uint8_t tt_prtaddr;
+	// SPLIT:
+	// uint8_t xact_pos;		  //transaction position in microframe
+	// uint8_t split_compl;	  //0=start split, 1=split complete
+	// uint8_t split_en;		  //enable split transactions
+	// uint8_t nyet_retry_count; // NYET retry counter
+	// uint8_t split_pending;	  // Split transaction in progress
 
 } USBH_TargetTypeDef;
 
