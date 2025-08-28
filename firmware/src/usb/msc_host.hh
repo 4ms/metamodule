@@ -20,7 +20,6 @@ public:
 
 	bool init(USBH_HandleTypeDef *root_host) {
 		pr_info("Listening for MSC devices on host %p\n", root_host);
-		msc_ops.set_handle(root_host);
 		USBH_RegisterClass(root_host, USBH_MSC_CLASS);
 
 		return true;

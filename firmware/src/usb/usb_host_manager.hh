@@ -45,11 +45,12 @@ public:
 	}
 
 	void init() {
-		init_hhcd();
+		reset_handles();
+		init_handles();
 	}
 
 	void start() {
-		init_hhcd();
+		reset_handles();
 
 		for (auto i = 0; i < 9; i++)
 			pr_info("&host_handle[%d] = %p\n", i, &host_handles[i]);
@@ -59,14 +60,8 @@ public:
 			pr_err("Error init USB Host: %d\n", status);
 			return;
 		}
-		// Listen for MSC and MIDI devices directly connected to port (no hub):
-		midi_host.init(&root_host_handle);
-		msc_host.init(&root_host_handle);
 
-		// hub_host.init():
-		pr_info("Listening for Hub devices\n");
-		USBH_RegisterClass(&root_host_handle, USBH_HUB_CLASS);
-		/////
+		init_handles();
 
 		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
 		auto err = USBH_Start(&root_host_handle);
@@ -156,29 +151,31 @@ public:
 				pr_dbg("UsbHostManager: Class selected: %d for %p\n", connected_classcode, phost);
 				if (connected_classcode == HubClassCode) {
 					//
-				} else if (connected_classcode == USB_MSC_CLASS) {
+				} else if (connected_classcode == MscClassCode) {
 					_mschost_instance->set_handle(phost);
+
+				} else if (connected_classcode == AudioClassCode) {
+					_midihost_instance->connect(phost);
 				}
 			} break;
 
 			case HOST_USER_CLASS_ACTIVE: {
-				// Why doesn't this get called for Hub?
 				connected_classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
 
 				pr_dbg("UsbHostManager: Class active: %.8s code %d for %p\n", classname, connected_classcode, phost);
 
 				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
-					_midihost_instance->connect(phost);
 					auto mshandle = host.get_class_handle<MidiStreamingHandle>();
 					if (!mshandle) {
-						pr_err("UsbHostManager: Error, no MSHandle\n");
+						pr_err("UsbHostManager: Error, no MidiStreamingHandle\n");
 						return;
 					}
+					// Start receiving
 					USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				}
 
-				if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
+				if (connected_classcode == MscClassCode && !strcmp(classname, "MSC")) {
 					pr_dbg("UsbHostManager: MSC connected\n");
 					_mschost_instance->connect();
 				}
@@ -186,12 +183,16 @@ public:
 
 			case HOST_USER_DISCONNECTION: {
 				pr_dbg("Disconnected class code %d\n", connected_classcode);
+
 				if (connected_classcode == AudioClassCode)
 					_midihost_instance->disconnect();
-				else if (connected_classcode == USB_MSC_CLASS)
+				else if (connected_classcode == MscClassCode)
 					_mschost_instance->disconnect();
+				else if (connected_classcode == HubClassCode)
+					; // no action needed
 				else
 					pr_warn("UsbHostManager: Unknown disconnected class code %d\n", connected_classcode);
+
 				connected_classcode = 0xFF;
 			} break;
 
@@ -201,7 +202,38 @@ public:
 		}
 	}
 
-	void init_hhcd() {
+	void init_handles() {
+		for (auto &handle : host_handles) {
+			// All handles reference the host controller (OTG host driver)
+			handle.pData = &hhcd;
+
+			// All handles have a pointer to the array of all handles
+			handle.handles = host_handles;
+
+			// All handles listen for all classes we are capable of hosting
+			handle.ClassNumber = 0;
+			midi_host.init(&handle);
+			msc_host.init(&handle);
+
+			handle.currentTarget = &handle.rootTarget;
+
+			handle.Pipes = host_pipes;
+
+			handle.valid = 0;
+			handle.busy = 0;
+		}
+
+		root_host_handle.valid = 1;
+		root_host_handle.rootTarget.dev_address = USBH_DEVICE_ADDRESS;
+		root_host_handle.rootTarget.speed = USBH_HS_SPEED;
+
+		cur_host_idx = -1;
+
+		pr_info("Listening for Hub devices on root host handle\n");
+		USBH_RegisterClass(&root_host_handle, USBH_HUB_CLASS);
+	}
+
+	void reset_handles() {
 		memset(&hhcd, 0, sizeof(HCD_HandleTypeDef));
 
 		hhcd.Instance = USB_OTG_HS;
@@ -219,31 +251,8 @@ public:
 		hhcd.Init.ep0_mps = EP_MPS_64;			 // Max packet size. Doesnt seem to be used?
 		hhcd.Init.use_dedicated_ep1 = DISABLE;
 
-		// Link The driver to the stack
+		// Link the driver to the root host handle
 		hhcd.pData = &root_host_handle;
-
-		for (auto &handle : host_handles) {
-			// All handles reference the host controller (OTG host driver)
-			handle.pData = &hhcd;
-			// All handles have a pointer to the array of all handles
-			handle.handles = host_handles;
-
-			// All non-root handles reference all classes we are capable of hosting
-			if (&handle != &root_host_handle) {
-				handle.pClass[0] = USBH_MSC_CLASS;
-				handle.pClass[1] = midi_host.usb_class();
-				handle.ClassNumber = 2;
-			}
-
-			handle.currentTarget = &handle.rootTarget;
-
-			handle.Pipes = host_pipes;
-		}
-		host_handles[0].valid = 1;
-		host_handles[0].rootTarget.dev_address = USBH_DEVICE_ADDRESS;
-		host_handles[0].rootTarget.speed = USBH_HS_SPEED;
-
-		cur_host_idx = -1;
 	}
 
 	MidiHost &get_midi_host() {

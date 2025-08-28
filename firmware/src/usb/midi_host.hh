@@ -88,8 +88,4 @@ public:
 	bool transmit(std::span<uint8_t> bytes) {
 		return tx_stream.transmit(bytes);
 	}
-
-	USBH_ClassTypeDef *usb_class() {
-		return &midi_class_ops;
-	}
 };
