@@ -104,7 +104,7 @@ USBH_StatusTypeDef USBH_Init(USBH_HandleTypeDef *phost,
     return USBH_FAIL;
   }
 
-  phost->allocaddress = 0;
+  phost->handles[0].allocaddress = 0;
   phost->currentTarget = & phost->rootTarget;
 
   /* HUB related initialization */
@@ -255,7 +255,7 @@ static USBH_StatusTypeDef DeInitStateMachine(USBH_HandleTypeDef *phost)
   phost->device.RstCnt = 0U;
   phost->device.EnumCnt = 0U;
 
-  phost->allocaddress = 0;
+  phost->handles[0].allocaddress = 0;
   phost->currentTarget = & phost->rootTarget;
   phost->rootTarget.dev_address = USBH_ADDRESS_DEFAULT;
 
@@ -1303,8 +1303,8 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
 /* return 1..126 as address */
 uint8_t USBH_GetNextAddress(USBH_HandleTypeDef *phost, uint8_t modify)
 {
-	uint8_t v = phost->allocaddress;
-	phost->allocaddress = (phost->allocaddress + modify) % 125;
+	uint8_t v = phost->handles[0].allocaddress;
+	phost->handles[0].allocaddress = (phost->handles[0].allocaddress + modify) % 125;
 	return v + 1;
 }
 
