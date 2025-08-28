@@ -235,6 +235,15 @@ HAL_StatusTypeDef HAL_HCD_HC_Init(HCD_HandleTypeDef *hhcd,
                         speed,
                         ep_type,
 						mps, tt_hubaddr, tt_prtaddr);
+
+  if (USB_HC_ShouldSplit(hhcd->Instance, speed)) {
+	  USB_HC_EnableSplit(hhcd->Instance, ch_num, tt_hubaddr, tt_prtaddr);
+	  hhcd->hc[ch_num].xact_pos = 0;
+	  hhcd->hc[ch_num].split_compl = 0;
+	  hhcd->hc[ch_num].split_en = 1;
+	  hhcd->hc[ch_num].nyet_retry_count = 0;
+	  hhcd->hc[ch_num].split_pending = 0;
+  }
   __HAL_UNLOCK(hhcd);
 
   return status;

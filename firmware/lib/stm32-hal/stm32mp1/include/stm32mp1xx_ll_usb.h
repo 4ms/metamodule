@@ -202,6 +202,13 @@ typedef struct {
 
 	USB_OTG_HCStateTypeDef state; /*!< Host Channel state.
 											This parameter can be any value of @ref USB_OTG_HCStateTypeDef  */
+
+	// SPLIT:
+	uint8_t xact_pos;		  //transaction position in microframe
+	uint8_t split_compl;	  //0=start split, 1=split complete
+	uint8_t split_en;		  //enable split transactions
+	uint8_t nyet_retry_count; // NYET retry counter
+	uint8_t split_pending;	  // Split transaction in progress
 } USB_OTG_HCTypeDef;
 #endif /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */
 
@@ -501,6 +508,9 @@ HAL_StatusTypeDef USB_DoPing(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num);
 HAL_StatusTypeDef USB_StopHost(USB_OTG_GlobalTypeDef *USBx);
 HAL_StatusTypeDef USB_ActivateRemoteWakeup(USB_OTG_GlobalTypeDef *USBx);
 HAL_StatusTypeDef USB_DeActivateRemoteWakeup(USB_OTG_GlobalTypeDef *USBx);
+
+void USB_HC_EnableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num, uint8_t tt_hubaddr, uint8_t tt_prtaddr);
+uint8_t USB_HC_ShouldSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t speed);
 
 uint_fast8_t USB_Is_OTG_HS(USB_OTG_GlobalTypeDef *USBx);
 #endif /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */

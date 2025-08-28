@@ -1632,23 +1632,31 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx,
 		USBx_HC((uint32_t)ch_num)->HCCHAR |= USB_OTG_HCCHAR_ODDFRM;
 	}
 
-	// Modification here: from hftrx:
-	// full or low speed plugged into high-speed hub
-	if ((speed != HPRT0_PRTSPD_HIGH_SPEED) && (HostCoreSpeed == HPRT0_PRTSPD_HIGH_SPEED)) {
-		USBH_DbgLog("Enable split for hub addr %u, port %u", tt_hubaddr, tt_prtaddr);
-		uint32_t hcsplit = USBx_HC(ch_num)->HCSPLT;
-		hcsplit &= ~(USB_OTG_HCSPLT_HUBADDR_Msk | USB_OTG_HCSPLT_PRTADDR_Msk);
-		hcsplit |= (uint32_t)tt_hubaddr << USB_OTG_HCSPLT_HUBADDR_Pos;
-		hcsplit |= (uint32_t)tt_prtaddr << USB_OTG_HCSPLT_PRTADDR_Pos;
-		// hcsplit |= USB_OTG_HCSPLT_SPLITEN;
-		hcsplit |= USB_OTG_HCSPLT_XACTPOS_0;
-		hcsplit |= USB_OTG_HCSPLT_COMPLSPLT;
-		USBx_HC(ch_num)->HCSPLT = hcsplit;
-	}
-
-
 
 	return ret;
+}
+
+uint8_t USB_HC_ShouldSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t speed) {
+	uint32_t HostCoreSpeed = USB_GetHostSpeed(USBx);
+	if ((speed != HPRT0_PRTSPD_HIGH_SPEED) && (HostCoreSpeed == HPRT0_PRTSPD_HIGH_SPEED)) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+void USB_HC_EnableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num, uint8_t tt_hubaddr, uint8_t tt_prtaddr)
+{
+	// full or low speed plugged into high-speed hub
+	USBH_DbgLog("Enable split for hub addr %u, port %u", tt_hubaddr, tt_prtaddr);
+
+	uint32_t USBx_BASE = (uint32_t)USBx;
+	uint32_t hcsplit = USBx_HC(ch_num)->HCSPLT;
+	hcsplit &= ~(USB_OTG_HCSPLT_HUBADDR_Msk | USB_OTG_HCSPLT_PRTADDR_Msk);
+	hcsplit |= (uint32_t)tt_hubaddr << USB_OTG_HCSPLT_HUBADDR_Pos;
+	hcsplit |= (uint32_t)tt_prtaddr << USB_OTG_HCSPLT_PRTADDR_Pos;
+	hcsplit |= USB_OTG_HCSPLT_SPLITEN;
+	USBx_HC(ch_num)->HCSPLT = hcsplit;
 }
 
 /**
