@@ -200,13 +200,12 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost, cons
   MSC_Handle->OutPipe = USBH_AllocPipe(phost, MSC_Handle->OutEp);
   MSC_Handle->InPipe = USBH_AllocPipe(phost, MSC_Handle->InEp);
 
-  (void)USBH_MSC_BOT_Init(phost);
+  USBH_MSC_BOT_Init(phost);
 
   /* Open the new channels */
   if ((MSC_Handle->OutEp != 0U) && (MSC_Handle->OutEpSize != 0U))
   {
-    (void)USBH_OpenPipe(phost, MSC_Handle->OutPipe, MSC_Handle->OutEp,
-                        target, USB_EP_TYPE_BULK, MSC_Handle->OutEpSize);
+    USBH_OpenPipe(phost, MSC_Handle->OutPipe, MSC_Handle->OutEp, target, USB_EP_TYPE_BULK, MSC_Handle->OutEpSize);
   }
   else
   {
@@ -215,7 +214,7 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost, cons
 
   if ((MSC_Handle->InEp != 0U) && (MSC_Handle->InEpSize != 0U))
   {
-    (void)USBH_OpenPipe(phost, MSC_Handle->InPipe, MSC_Handle->InEp,
+    USBH_OpenPipe(phost, MSC_Handle->InPipe, MSC_Handle->InEp,
                         target, USB_EP_TYPE_BULK, MSC_Handle->InEpSize);
   }
   else
@@ -223,8 +222,8 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost, cons
     return USBH_NOT_SUPPORTED;
   }
 
-  (void)USBH_LL_SetToggle(phost, MSC_Handle->InPipe, 0U);
-  (void)USBH_LL_SetToggle(phost, MSC_Handle->OutPipe, 0U);
+  USBH_LL_SetToggle(phost, MSC_Handle->InPipe, 0U);
+  USBH_LL_SetToggle(phost, MSC_Handle->OutPipe, 0U);
 
   return USBH_OK;
 }
@@ -241,15 +240,15 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceDeInit(USBH_HandleTypeDef *phost)
 
   if ((MSC_Handle->OutPipe) != 0U)
   {
-    (void)USBH_ClosePipe(phost, MSC_Handle->OutPipe);
-    (void)USBH_FreePipe(phost, MSC_Handle->OutPipe);
+    USBH_ClosePipe(phost, MSC_Handle->OutPipe);
+    USBH_FreePipe(phost, MSC_Handle->OutPipe);
     MSC_Handle->OutPipe = 0U;     /* Reset the Channel as Free */
   }
 
   if ((MSC_Handle->InPipe != 0U))
   {
-    (void)USBH_ClosePipe(phost, MSC_Handle->InPipe);
-    (void)USBH_FreePipe(phost, MSC_Handle->InPipe);
+    USBH_ClosePipe(phost, MSC_Handle->InPipe);
+    USBH_FreePipe(phost, MSC_Handle->InPipe);
     MSC_Handle->InPipe = 0U;     /* Reset the Channel as Free */
   }
 

@@ -24,10 +24,10 @@
 #include "usbh_core.h"
 #include <span>
 
-
 constexpr uint8_t AudioClassCode = 0x01;
 constexpr uint8_t AudioControlSubclassCode = 0x01;
 constexpr uint8_t MidiStreamingSubClass = 0x03;
+constexpr uint8_t MscClassCode = 0x08;
 constexpr uint8_t HubClassCode = 0x09;
 
 constexpr uint8_t AnyProtocol = 0xFF;
@@ -52,16 +52,16 @@ struct MidiInJackDesc {
 
 struct MidiOutJackDesc {
 	constexpr static size_t MAX_SOURCES = 16;
-	uint8_t bLength;			 // Size of this descriptor = 6 + 2*p, where p is number of pins
-	uint8_t bDescriptorType;	 // CS_INTERFACE (0x24)
-	uint8_t bDescriptorSubType;	 // MIDI_OUT_JACK
-	uint8_t bJackType;			 // EMBEDDED or EXTERNAL
-	uint8_t bJackID;			 // Unique ID for the MIDI OUT Jack
-	uint8_t bNrInputPins;		 // Number of Input Pins of this MIDI OUT Jack: p
-	struct Source {				 //
-		uint8_t bSourceID;		 // ID of the Entity to which this Input Pin is connected.
-		uint8_t bSourcePin;		 // Output Pin number of the Entity to which this Input Pin is connected.
-	};							 //
+	uint8_t bLength;			// Size of this descriptor = 6 + 2*p, where p is number of pins
+	uint8_t bDescriptorType;	// CS_INTERFACE (0x24)
+	uint8_t bDescriptorSubType; // MIDI_OUT_JACK
+	uint8_t bJackType;			// EMBEDDED or EXTERNAL
+	uint8_t bJackID;			// Unique ID for the MIDI OUT Jack
+	uint8_t bNrInputPins;		// Number of Input Pins of this MIDI OUT Jack: p
+	struct Source {				//
+		uint8_t bSourceID;		// ID of the Entity to which this Input Pin is connected.
+		uint8_t bSourcePin;		// Output Pin number of the Entity to which this Input Pin is connected.
+	}; //
 	Source aSource[MAX_SOURCES]; // Array of SourceID and SourcePin, with p entries
 	uint8_t iJack;				 // index of string descriptor
 };
@@ -69,15 +69,15 @@ struct MidiOutJackDesc {
 struct MidiElementDesc {
 	constexpr static size_t MAX_SOURCES = 16;
 	constexpr static size_t MAX_CAPS = 16;
-	uint8_t bLength;				 // Size of this descriptor = 10 + 2*p + n, where p is number of pins
-	uint8_t bDescriptorType;		 // CS_INTERFACE (0x24)
-	uint8_t bDescriptorSubType;		 // ELEMENT
-	uint8_t bElementID;				 // Unique ID for the Element
-	uint8_t bNrInputPins;			 // Number of Input Pins of this Element: p
-	struct Source {					 //
-		uint8_t bSourceID;			 // ID of the Entity to which this Input Pin is connected.
-		uint8_t bSourcePin;			 // Output Pin number of the Entity to which this Input Pin is connected.
-	};								 //
+	uint8_t bLength;			// Size of this descriptor = 10 + 2*p + n, where p is number of pins
+	uint8_t bDescriptorType;	// CS_INTERFACE (0x24)
+	uint8_t bDescriptorSubType; // ELEMENT
+	uint8_t bElementID;			// Unique ID for the Element
+	uint8_t bNrInputPins;		// Number of Input Pins of this Element: p
+	struct Source {				//
+		uint8_t bSourceID;		// ID of the Entity to which this Input Pin is connected.
+		uint8_t bSourcePin;		// Output Pin number of the Entity to which this Input Pin is connected.
+	}; //
 	Source aSource[MAX_SOURCES];	 // Array of SourceID and SourcePin, with p entries
 	uint8_t bNrOutputPins;			 // Number of Output Pins of this Element: q
 	uint8_t bInTerminalLink;		 // The Terminal ID of the Input Terminal to which this Element is connected
