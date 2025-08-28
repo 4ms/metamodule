@@ -269,7 +269,7 @@ struct WavFileStream::Internal {
 		pre_buff.set_read_pos(0);
 		next_frame_to_write = 0;
 		next_sample_to_read = 0;
-		frames_in_buffer = 0;
+		frames_in_buffer.store(0, std::memory_order_release);
 		// Need a fence because next_sample_to_read is not atomic
 		std::atomic_signal_fence(std::memory_order_seq_cst);
 	}
