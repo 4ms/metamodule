@@ -1445,7 +1445,14 @@ static void HCD_HC_OUT_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
   {
     __HAL_HCD_CLEAR_HC_INT(ch_num, USB_OTG_HCINT_ACK);
 
-    if (hhcd->hc[ch_num].do_ping == 1U)
+	uint32_t hcsplt = USBx_HC(ch_num)->HCSPLT;
+	if (hcsplt & USB_OTG_HCSPLT_SPLITEN) {
+		if ((hcsplt & USB_OTG_HCSPLT_COMPLSPLT) == 0) {
+			USBx_HC(ch_num)->HCSPLT = hcsplt | USB_OTG_HCSPLT_COMPLSPLT;
+			// ??? hhcd->hc[ch_num].split_compl = 1;
+		}
+	} 
+	if (hhcd->hc[ch_num].do_ping == 1U)
     {
       hhcd->hc[ch_num].do_ping = 0U;
       hhcd->hc[ch_num].urb_state  = URB_NOTREADY;
