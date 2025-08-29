@@ -186,6 +186,7 @@ typedef struct {
 	uint32_t xfer_len; /*!< Current transfer length.                                                   */
 
 	uint32_t xfer_count; /*!< Partial transfer length in case of multi packet transfer.                  */
+	uint32_t fifo_count; /*! from tinyusb */
 
 	uint8_t toggle_in; /*!< IN transfer current toggle flag.
 									 This parameter must be a number between Min_Data = 0 and Max_Data = 1      */
