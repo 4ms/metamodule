@@ -1445,14 +1445,19 @@ static void HCD_HC_OUT_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
   {
     __HAL_HCD_CLEAR_HC_INT(ch_num, USB_OTG_HCINT_ACK);
 
-	uint32_t hcsplt = USBx_HC(ch_num)->HCSPLT;
-	if (hcsplt & USB_OTG_HCSPLT_SPLITEN) {
-		if ((hcsplt & USB_OTG_HCSPLT_COMPLSPLT) == 0) {
-			USBx_HC(ch_num)->HCSPLT = hcsplt | USB_OTG_HCSPLT_COMPLSPLT;
-			// ??? hhcd->hc[ch_num].split_compl = 1;
-		}
-	} 
-	if (hhcd->hc[ch_num].do_ping == 1U)
+    // Advance from Start Split phase to Complete Split phase
+    uint32_t hcsplt = USBx_HC(ch_num)->HCSPLT;
+    if (hcsplt & USB_OTG_HCSPLT_SPLITEN) {
+      if ((hcsplt & USB_OTG_HCSPLT_COMPLSPLT) == 0) {
+        USBx_HC(ch_num)->HCSPLT = hcsplt | USB_OTG_HCSPLT_COMPLSPLT;
+        tmpreg = USBx_HC(ch_num)->HCCHAR;
+        tmpreg &= ~USB_OTG_HCCHAR_CHDIS; // tinyusb does not do this
+        tmpreg |= USB_OTG_HCCHAR_CHENA;
+        USBx_HC(ch_num)->HCCHAR = tmpreg;
+      }
+    } 
+
+    if (hhcd->hc[ch_num].do_ping == 1U)
     {
       hhcd->hc[ch_num].do_ping = 0U;
       hhcd->hc[ch_num].urb_state  = URB_NOTREADY;
@@ -1483,11 +1488,22 @@ static void HCD_HC_OUT_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
   }
   else if ((USBx_HC(ch_num)->HCINT & USB_OTG_HCINT_NYET) == USB_OTG_HCINT_NYET)
   {
-    hhcd->hc[ch_num].state = HC_NYET;
-    hhcd->hc[ch_num].do_ping = 1U;
+    // xfer->err_count = 0;
     hhcd->hc[ch_num].ErrCnt = 0U;
-    __HAL_HCD_UNMASK_HALT_HC_INT(ch_num);
-    (void)USB_HC_Halt(hhcd->Instance, (uint8_t)ch_num);
+    if (USBx_HC(ch_num)->HCSPLT & USB_OTG_HCSPLT_SPLITEN) {
+      // retry complete split
+      USBx_HC(ch_num)->HCSPLT |= USB_OTG_HCSPLT_COMPLSPLT;
+      USBx_HC(ch_num)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
+    } else {
+      // edpt->next_do_ping = 1;
+      hhcd->hc[ch_num].do_ping = 1U;
+      // channel_xfer_out_wrapup(dwc2, ch_id);
+      // channel_disable(dwc2, channel);
+      __HAL_HCD_UNMASK_HALT_HC_INT(ch_num);
+      (void)USB_HC_Halt(hhcd->Instance, (uint8_t)ch_num);
+    }
+
+    hhcd->hc[ch_num].state = HC_NYET;
     __HAL_HCD_CLEAR_HC_INT(ch_num, USB_OTG_HCINT_NYET);
   }
   else if ((USBx_HC(ch_num)->HCINT & USB_OTG_HCINT_STALL) == USB_OTG_HCINT_STALL)
