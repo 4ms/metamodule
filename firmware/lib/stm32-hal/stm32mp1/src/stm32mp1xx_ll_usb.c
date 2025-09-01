@@ -1660,6 +1660,14 @@ void USB_HC_EnableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num, uint8_t tt_
 	USBx_HC(ch_num)->HCSPLT = hcsplit;
 }
 
+void USB_HC_DisableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num)
+{
+	USBH_DbgLog("Disable split for host chnum %u", ch_num);
+
+	uint32_t USBx_BASE = (uint32_t)USBx;
+	USBx_HC(ch_num)->HCSPLT = 0;
+}
+
 /**
  * @brief  Start a transfer over a host channel
  * @param  USBx  Selected device
@@ -1689,6 +1697,7 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 		}
 
 		if ((dma == 0U) && (hc->do_ping == 1U)) {
+            printf("StartXfer: ping first\n");
 			(void)USB_DoPing(USBx, hc->ch_num);
 			return HAL_OK;
 		}
@@ -1716,6 +1725,7 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 		hc->XferSize = hc->xfer_len;
 	}
 
+    printf("StartXfer ch %u: XferSize: %u, pid %u, packets %u, hcsplit %08x\n", ch_num, hc->XferSize, hc->data_pid, num_packets, USBx_HC(ch_num)->HCSPLT);
 	/* Initialize the HCTSIZn register */
 	USBx_HC(ch_num)->HCTSIZ = (hc->XferSize & USB_OTG_HCTSIZ_XFRSIZ) |
 							  (((uint32_t)num_packets << 19) & USB_OTG_HCTSIZ_PKTCNT) |
@@ -1759,6 +1769,7 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 				if (len_words > (USBx->HNPTXSTS & 0xFFFFU)) {
 					/* need to process data in nptxfempty interrupt */
 					USBx->GINTMSK |= USB_OTG_GINTMSK_NPTXFEM;
+                    printf("need to process data in nptxfempty interrupt\n");
 				}
 				break;
 
@@ -1778,7 +1789,11 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 		}
 
 		/* Write packet into the Tx FIFO. */
-		(void)USB_WritePacket(USBx, hc->xfer_buff, hc->ch_num, (uint16_t)hc->xfer_len, 0);
+        printf("Write to USB TX %u len ", hc->xfer_len);
+        for (unsigned i = 0; i < hc->xfer_len; i++)
+            printf("%02x ", hc->xfer_buff[i]);
+        printf("\n");
+		USB_WritePacket(USBx, hc->xfer_buff, hc->ch_num, (uint16_t)hc->xfer_len, 0);
 	}
 
 	return HAL_OK;
