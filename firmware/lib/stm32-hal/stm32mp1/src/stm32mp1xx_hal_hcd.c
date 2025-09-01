@@ -234,15 +234,18 @@ HAL_StatusTypeDef HAL_HCD_HC_Init(HCD_HandleTypeDef *hhcd,
                         dev_address,
                         speed,
                         ep_type,
-						mps, tt_hubaddr, tt_prtaddr);
+                        mps, tt_hubaddr, tt_prtaddr);
 
   if (USB_HC_ShouldSplit(hhcd->Instance, speed)) {
-	  USB_HC_EnableSplit(hhcd->Instance, ch_num, tt_hubaddr, tt_prtaddr);
-	  hhcd->hc[ch_num].xact_pos = 0;
-	  hhcd->hc[ch_num].split_compl = 0;
-	  hhcd->hc[ch_num].split_en = 1;
-	  hhcd->hc[ch_num].nyet_retry_count = 0;
-	  hhcd->hc[ch_num].split_pending = 0;
+      USB_HC_EnableSplit(hhcd->Instance, ch_num, tt_hubaddr, tt_prtaddr);
+      hhcd->hc[ch_num].xact_pos = 0;
+      hhcd->hc[ch_num].split_en = 1;
+      hhcd->hc[ch_num].split_compl = 0;
+      hhcd->hc[ch_num].nyet_retry_count = 0;
+  } else {
+      hhcd->hc[ch_num].split_compl = 0;
+      hhcd->hc[ch_num].split_en = 0;
+      USB_HC_DisableSplit(hhcd->Instance, ch_num);
   }
   __HAL_UNLOCK(hhcd);
 
@@ -380,7 +383,7 @@ HAL_StatusTypeDef HAL_HCD_HC_SubmitRequest(HCD_HandleTypeDef *hhcd,
                                            uint8_t ep_type,
                                            uint8_t token,
                                            uint8_t *pbuff,
-										   uint32_t length,
+                                           uint32_t length,
                                            uint8_t do_ping)
 {
   hhcd->hc[ch_num].ep_is_in = direction;
@@ -513,7 +516,7 @@ void HAL_HCD_IRQHandler(HCD_HandleTypeDef *hhcd)
   if (LL_USB_GetMode(USBx) == USB_OTG_MODE_HOST)
   {
 
-	uint32_t flags = LL_USB_ReadInterrupts(USBx);
+    uint32_t flags = LL_USB_ReadInterrupts(USBx);
 
     /* Avoid spurious interrupt */
     if (flags == 0)
@@ -1204,6 +1207,21 @@ uint_fast8_t HAL_HCD_GetCurrentSpeedReady(HCD_HandleTypeDef *hhcd)
 /**
   * @}
   */
+static inline void print_hcint(uint32_t hcint) {
+  const char* str[] = {
+    "XFRC", "HALTED", "AHBERR", "STALL",
+    "NAK", "ACK", "NYET", "XERR",
+    "BBLERR", "FRMOR", "DTERR", "BNA",
+    "XCSERR", "DESC_LST"
+  };
+
+  for(uint32_t i=0; i<14; i++) {
+    if (hcint & (1<<i)) {
+      printf("%s ", str[i]);
+    }
+  }
+  printf("\n");
+}
 
 /** @addtogroup HCD_Private_Functions
   * @{
@@ -1222,6 +1240,18 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
   uint32_t ch_num = (uint32_t)chnum;
 
   uint32_t tmpreg;
+  static uint32_t nakctr = 0;
+  uint32_t hcint = USBx_HC(ch_num)->HCINT;
+  uint32_t hcsplt = USBx_HC(chnum)->HCSPLT;
+  if (hcint != 0x10 && hcint != 0x02){
+      nakctr = 0;
+  } else
+      nakctr++;
+
+  if (nakctr < 4) {
+    printf("in_irq: Frame %08x, ch %u: ep %u complsplit %x hcint 0x%04X ", USBx_HOST->HFNUM, chnum, hhcd->hc[chnum].ep_num, hcsplt & USB_OTG_HCSPLT_COMPLSPLT, hcint);
+    print_hcint(hcint);
+  }
 
   // Bus Error
   if ((USBx_HC(ch_num)->HCINT & USB_OTG_HCINT_AHBERR) == USB_OTG_HCINT_AHBERR)
@@ -1246,13 +1276,23 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
 
     hhcd->hc[ch_num].ErrCnt = 0;
 
-    uint32_t hcsplt = USBx_HC(chnum)->HCSPLT;
-    if ((hcsplt & USB_OTG_HCSPLT_SPLITEN) && (hcsplt & USB_OTG_HCSPLT_COMPLSPLT) == 0) {
-      // start split is ACK --> do complete split
-      USBx_HC(chnum)->HCSPLT = hcsplt | USB_OTG_HCSPLT_COMPLSPLT;
-      USBx_HC(chnum)->HCINTMSK |= USB_OTG_HCINTMSK_NYET;
-      // channel_send_in_token(dwc2, channel);
-      USBx_HC(chnum)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
+    if ((hcsplt & USB_OTG_HCSPLT_SPLITEN)) {
+      if ((hcsplt & USB_OTG_HCSPLT_COMPLSPLT) == 0) {
+        // start split is ACK --> do complete split
+        USBx_HC(chnum)->HCSPLT = hcsplt | USB_OTG_HCSPLT_COMPLSPLT;
+        USBx_HC(chnum)->HCINTMSK |= USB_OTG_HCINTMSK_NYET;
+        // channel_send_in_token(dwc2, channel);
+        USBx_HC(chnum)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
+      }
+    } else {
+      const uint16_t remain_packets = (USBx_HC(chnum)->HCTSIZ & USB_OTG_HCTSIZ_PKTCNT_Msk) >> USB_OTG_HCTSIZ_PKTCNT_Pos;
+      if (remain_packets) {
+        // still more packet to receive, also reset to start split
+        printf("in_irq: ACK with split disabled, clear split_compl\n");
+        USBx_HC(chnum)->HCSPLT = hcsplt & ~USB_OTG_HCSPLT_COMPLSPLT;
+        USBx_HC(chnum)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
+      }
+
     }
 
   }
@@ -1322,12 +1362,13 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
         // uint32_t ep_size = USBx_HC(ch_num)->HCCHAR & USB_OTG_HCCHAR_MPSIZ;
         // TODO: if (xfer->fifo_count == ep_size) {
         // Split can only complete 1 transaction (up to 1 packet) at a time, schedule more
+          printf("remain_packets but not sure if fifo and ep_size match... clearing COMPLSPLT\n");
         USBx_HC(ch_num)->HCSPLT &= ~USB_OTG_HCSPLT_COMPLSPLT;
         // }
       }
     }
 
-	// Transfer Complete for Control or Bulk
+    // Transfer Complete for Control or Bulk
     if ((hhcd->hc[ch_num].ep_type == EP_TYPE_CTRL) ||
         (hhcd->hc[ch_num].ep_type == EP_TYPE_BULK))
     {
@@ -1335,7 +1376,7 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
       (void)USB_HC_Halt(hhcd->Instance, (uint8_t)ch_num);
       __HAL_HCD_CLEAR_HC_INT(ch_num, USB_OTG_HCINT_NAK);
     }
-	// Transfer Complete for Interrupt
+    // Transfer Complete for Interrupt
     else if (hhcd->hc[ch_num].ep_type == EP_TYPE_INTR)
     {
       USBx_HC(ch_num)->HCCHAR |= USB_OTG_HCCHAR_ODDFRM;
@@ -1347,7 +1388,7 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
       HAL_HCD_HC_NotifyURBChange_Callback(hhcd, (uint8_t)ch_num, hhcd->hc[ch_num].urb_state);
 #endif /* USE_HAL_HCD_REGISTER_CALLBACKS */
     }
-	// Transfer Complete for Isochronous
+    // Transfer Complete for Isochronous
     else if (hhcd->hc[ch_num].ep_type == EP_TYPE_ISOC)
     {
       hhcd->hc[ch_num].urb_state = URB_DONE;
@@ -1364,7 +1405,7 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
       /* ... */
     }
 
-	// Toggle bit
+    // Toggle bit
     if (hhcd->Init.dma_enable == 1U)
     {
       if (((hhcd->hc[ch_num].XferSize / hhcd->hc[ch_num].max_packet) & 1U) != 0U)
@@ -1497,6 +1538,11 @@ static void HCD_HC_OUT_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
   uint32_t tmpreg;
   uint32_t num_packets;
 
+  uint32_t hcint = USBx_HC(ch_num)->HCINT;
+  uint32_t hcsplt = USBx_HC(chnum)->HCSPLT;
+  printf("out_irq: Frame %u, ch %u: ep %u complsplit %u hcint 0x%04X ", USBx_HOST->HFNUM, chnum, hhcd->hc[chnum].ep_num, hcsplt & USB_OTG_HCSPLT_COMPLSPLT, hcint);
+  print_hcint(hcint);
+
   if ((USBx_HC(ch_num)->HCINT & USB_OTG_HCINT_AHBERR) == USB_OTG_HCINT_AHBERR)
   {
     printf("AHBERR\n");
@@ -1519,8 +1565,15 @@ static void HCD_HC_OUT_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
         // USBx_HC(ch_num)->HCCHAR = tmpreg;
         USBx_HC(ch_num)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
       }
-      else
-        printf("ACK COMPL SPLIT\n");
+      else {
+        printf("ACK COMPL SPLIT: do nothing\n");//halt channel change state to XFRC\n");
+        // __HAL_HCD_CLEAR_HC_INT(ch_num, USB_OTG_HCINT_XFRC);
+        // hhcd->hc[ch_num].ErrCnt = 0U;
+
+        // hhcd->hc[ch_num].state = HC_XFRC; //
+        // __HAL_HCD_UNMASK_HALT_HC_INT(ch_num); //
+        // USB_HC_Halt(hhcd->Instance, ch_num); //
+      }
     } 
 
     if (hhcd->hc[ch_num].do_ping == 1U)
