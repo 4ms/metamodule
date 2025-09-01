@@ -232,6 +232,7 @@ USBH_StatusTypeDef USBH_GetDescriptor(USBH_HandleTypeDef *phost, uint8_t req_typ
     phost->Control.setup.b.wLength.w = length;
   }
 
+  printf("USBH_GetDescriptor: len %u make request\n", length);
   return USBH_CtlReq(phost, buff, length);
 }
 
@@ -257,7 +258,7 @@ USBH_StatusTypeDef USBH_SetAddress(USBH_HandleTypeDef *phost,
     phost->Control.setup.b.wIndex.w = 0U;
     phost->Control.setup.b.wLength.w = 0U;
   }
-
+  printf("USBH_SetAddress: make request\n");
   return USBH_CtlReq(phost, NULL, 0U);
 }
 
@@ -862,10 +863,11 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
   {
     case CTRL_SETUP:
       /* send a SETUP packet */
+	  USBH_UsrLog("USBH_HandleControl: send SETUP: host: %p, data(8b): %08x %08x, pipe_num(out): %d", phost, phost->Control.setup.d8[0], phost->Control.setup.d8[1], phost->Control.pipe_out);
       (void)USBH_CtlSendSetup(phost, (uint8_t *)(void *)phost->Control.setup.d8,
                               phost->Control.pipe_out);
+	  USBH_UsrLog("USBH_HandleControl: sent, waiting..");
 
-	  USBH_UsrLog("USBH_HandleControl: send SETUP packet: host: %p, data(8b): %08x %08x, pipe_num(out): %d, ep type control, no ping", phost, phost->Control.setup.d8[0], phost->Control.setup.d8[1], phost->Control.pipe_out);
       phost->Control.state = CTRL_SETUP_WAIT;
       break;
 
@@ -875,6 +877,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       /* case SETUP packet sent successfully */
       if (URB_Status == USBH_URB_DONE)
       {
+	    USBH_UsrLog("USBH_HandleControl: waited, done.");
         direction = (phost->Control.setup.b.bmRequestType & USB_REQ_DIR_MASK);
 
         /* check if there is a data stage */
@@ -935,12 +938,14 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       }
       break;
 
-    case CTRL_DATA_IN:
+    case CTRL_DATA_IN: 
       /* Issue an IN token */
+	  USBH_UsrLog("USBH_HandleControl: state=CTRL_DATA_IN, request receive data");
       phost->Control.timer = (uint16_t)phost->Timer;
-      (void)USBH_CtlReceiveData(phost, phost->Control.buff,
+      USBH_CtlReceiveData(phost, phost->Control.buff,
                                 phost->Control.length, phost->Control.pipe_in);
 
+	  USBH_UsrLog("USBH_HandleControl: state=>CTRL_DATA_IN_WAIT");
       phost->Control.state = CTRL_DATA_IN_WAIT;
       break;
 
@@ -951,6 +956,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       /* check is DATA packet transferred successfully */
       if (URB_Status == USBH_URB_DONE)
       {
+	    USBH_UsrLog("USBH_HandleControl: CTRL_DATA_IN_WAIT => urb done");
         phost->Control.state = CTRL_STATUS_OUT;
 
 #if (USBH_USE_OS == 1U)
@@ -1000,9 +1006,10 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
 
     case CTRL_DATA_OUT:
 
-      (void)USBH_CtlSendData(phost, phost->Control.buff, phost->Control.length,
-                             phost->Control.pipe_out, 1U);
+	  USBH_UsrLog("USBH_HandleControl: CTRL_DATA_OUT sending data");
+      USBH_CtlSendData(phost, phost->Control.buff, phost->Control.length, phost->Control.pipe_out, 1U);
 
+	  USBH_UsrLog("USBH_HandleControl: CTRL_DATA_OUT sent data");
       phost->Control.timer = (uint16_t)phost->Timer;
       phost->Control.state = CTRL_DATA_OUT_WAIT;
       break;

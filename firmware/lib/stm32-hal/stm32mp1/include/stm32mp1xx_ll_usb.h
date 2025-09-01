@@ -209,7 +209,6 @@ typedef struct {
 	uint8_t split_compl;	  //0=start split, 1=split complete
 	uint8_t split_en;		  //enable split transactions
 	uint8_t nyet_retry_count; // NYET retry counter
-	uint8_t split_pending;	  // Split transaction in progress
 } USB_OTG_HCTypeDef;
 #endif /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */
 
@@ -511,6 +510,7 @@ HAL_StatusTypeDef USB_ActivateRemoteWakeup(USB_OTG_GlobalTypeDef *USBx);
 HAL_StatusTypeDef USB_DeActivateRemoteWakeup(USB_OTG_GlobalTypeDef *USBx);
 
 void USB_HC_EnableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num, uint8_t tt_hubaddr, uint8_t tt_prtaddr);
+void USB_HC_DisableSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num);
 uint8_t USB_HC_ShouldSplit(USB_OTG_GlobalTypeDef *USBx, uint8_t speed);
 
 uint_fast8_t USB_Is_OTG_HS(USB_OTG_GlobalTypeDef *USBx);
