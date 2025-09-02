@@ -1367,6 +1367,10 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
           printf("        %u remain_packets: clear complsplt, state=>NYET\n", remain_packets);
           hhcd->hc[ch_num].state = HC_NYET;
           USBx_HC(ch_num)->HCSPLT &= ~USB_OTG_HCSPLT_COMPLSPLT;
+
+          __HAL_HCD_UNMASK_HALT_HC_INT(ch_num);
+          USB_HC_Halt(hhcd->Instance, ch_num);
+          return;
       }
     }
 
@@ -1407,19 +1411,17 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
       /* ... */
     }
 
-    if (!hhcd->hc[ch_num].split_en) {
-      // Toggle bit
-      if (hhcd->Init.dma_enable == 1U)
-      {
-        if (((hhcd->hc[ch_num].XferSize / hhcd->hc[ch_num].max_packet) & 1U) != 0U)
-        {
-          hhcd->hc[ch_num].toggle_in ^= 1U;
-        }
-      }
-      else
+    // Toggle bit
+    if (hhcd->Init.dma_enable == 1U)
+    {
+      if (((hhcd->hc[ch_num].XferSize / hhcd->hc[ch_num].max_packet) & 1U) != 0U)
       {
         hhcd->hc[ch_num].toggle_in ^= 1U;
       }
+    }
+    else
+    {
+      hhcd->hc[ch_num].toggle_in ^= 1U;
     }
   }
   // Channel halted
