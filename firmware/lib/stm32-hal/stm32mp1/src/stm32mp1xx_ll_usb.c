@@ -1740,8 +1740,8 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
         USBx_HC(ch_num)->HCSPLT = hcsplt;
     }
 
-    USBH_XFERLog("StartXfer ch %u: XferSize: %u, pid %u, packets %u, hcsplit %08x ", ch_num, hc->XferSize, hc->data_pid, num_packets, hcsplt);
-    USBH_XFERLog("HAINMSK=%08x GINTMSK=%08x HCINTMSK=%08x\n", USBx_HOST->HAINTMSK, USBx->GINTMSK, USBx_HC(ch_num)->HCINTMSK);
+    USBH_XFERLog("StartXfer ch %u: XferSize: %u, pid %u, packets %u, hcsplit %08x HAINMSK=%08x GINTMSK=%08x HCINTMSK=%08x",
+                ch_num, hc->XferSize, hc->data_pid, num_packets, hcsplt , USBx_HOST->HAINTMSK, USBx->GINTMSK, USBx_HC(ch_num)->HCINTMSK);
 
 	/* Initialize the HCTSIZn register */
 	USBx_HC(ch_num)->HCTSIZ = (hc->XferSize & USB_OTG_HCTSIZ_XFRSIZ) |
