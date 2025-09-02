@@ -1729,13 +1729,20 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 		hc->XferSize = hc->xfer_len;
 	}
 
-    printf("StartXfer ch %u: XferSize: %u, pid %u, packets %u, hcsplit %08x\n", ch_num, hc->XferSize, hc->data_pid, num_packets, USBx_HC(ch_num)->HCSPLT);
+
     uint32_t hcsplt = USBx_HC(ch_num)->HCSPLT;
 
+    if ((hc->split_en ? 1 : 0) != ((hcsplt & USB_OTG_HCSPLT_SPLITEN) ? 1 : 0)) {
+        USBH_ErrLog("Host channel split enable not set properly");
+    }
     if (hc->split_en) {
         hcsplt = hcsplt & ~USB_OTG_HCSPLT_COMPLSPLT;
         USBx_HC(ch_num)->HCSPLT = hcsplt;
     }
+
+    USBH_XFERLog("StartXfer ch %u: XferSize: %u, pid %u, packets %u, hcsplit %08x ", ch_num, hc->XferSize, hc->data_pid, num_packets, hcsplt);
+    USBH_XFERLog("HAINMSK=%08x GINTMSK=%08x HCINTMSK=%08x\n", USBx_HOST->HAINTMSK, USBx->GINTMSK, USBx_HC(ch_num)->HCINTMSK);
+
 	/* Initialize the HCTSIZn register */
 	USBx_HC(ch_num)->HCTSIZ = (hc->XferSize & USB_OTG_HCTSIZ_XFRSIZ) |
 							  (((uint32_t)num_packets << 19) & USB_OTG_HCTSIZ_PKTCNT) |
@@ -1779,7 +1786,7 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 				if (len_words > (USBx->HNPTXSTS & 0xFFFFU)) {
 					/* need to process data in nptxfempty interrupt */
 					USBx->GINTMSK |= USB_OTG_GINTMSK_NPTXFEM;
-                    printf("need to process data in nptxfempty interrupt\n");
+                    USBH_UsrLog("Warning: need to process data in nptxfempty interrupt\n");
 				}
 				break;
 
@@ -1799,10 +1806,12 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 		}
 
 		/* Write packet into the Tx FIFO. */
-        printf("Write to USB TX %u len ", hc->xfer_len);
-        for (unsigned i = 0; i < hc->xfer_len; i++)
-            printf("%02x ", hc->xfer_buff[i]);
-        printf("\n");
+
+        USBH_XFERLog("Write to USB TX %u len ", hc->xfer_len);
+#if USBH_XFER_TRACE_OUTPUT
+        print_mem(hc->xfer_buff, hc->xfer_len, 2);
+#endif
+
 		USB_WritePacket(USBx, hc->xfer_buff, hc->ch_num, (uint16_t)hc->xfer_len, 0);
 	}
 
