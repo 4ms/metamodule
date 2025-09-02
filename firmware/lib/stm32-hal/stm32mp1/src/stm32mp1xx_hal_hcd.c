@@ -1283,6 +1283,13 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
         USBx_HC(chnum)->HCINTMSK |= USB_OTG_HCINTMSK_NYET;
         // channel_send_in_token(dwc2, channel);
         USBx_HC(chnum)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
+      } else {
+        USBx_HC(chnum)->HCSPLT = hcsplt & ~USB_OTG_HCSPLT_COMPLSPLT;
+
+        const uint16_t remain_packets = (USBx_HC(chnum)->HCTSIZ & USB_OTG_HCTSIZ_PKTCNT_Msk) >> USB_OTG_HCTSIZ_PKTCNT_Pos;
+        if (remain_packets) {
+          USBx_HC(chnum)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
+        }
       }
     } else {
       const uint16_t remain_packets = (USBx_HC(chnum)->HCTSIZ & USB_OTG_HCTSIZ_PKTCNT_Msk) >> USB_OTG_HCTSIZ_PKTCNT_Pos;
@@ -1363,7 +1370,7 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
         // TODO: if (xfer->fifo_count == ep_size) {
         // Split can only complete 1 transaction (up to 1 packet) at a time, schedule more
           printf("remain_packets but not sure if fifo and ep_size match... clearing COMPLSPLT\n");
-        USBx_HC(ch_num)->HCSPLT &= ~USB_OTG_HCSPLT_COMPLSPLT;
+          // USBx_HC(ch_num)->HCSPLT &= ~USB_OTG_HCSPLT_COMPLSPLT;
         // }
       }
     }
@@ -1426,6 +1433,10 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
     if (hhcd->hc[ch_num].state == HC_XFRC)
     {
       hhcd->hc[ch_num].urb_state = URB_DONE;
+      if (hhcd->hc[ch_num].split_en) {
+         // next transaction restarts from start split phase
+         USBx_HC(ch_num)->HCSPLT &= ~USB_OTG_HCSPLT_COMPLSPLT;
+      }
     }
     else if (hhcd->hc[ch_num].state == HC_STALL)
     {
