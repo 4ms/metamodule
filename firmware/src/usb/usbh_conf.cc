@@ -486,7 +486,67 @@ void *msc_malloc(size_t sz) {
 void msc_free(void *ptr) {
 	if (ptr == &s_MSCHandle) {
 		ptr = nullptr;
-	}
-	else
+	} else
 		USBH_ErrLog("usbh_free only can be called for MSC");
+}
+
+// Prints memory dump like:
+// 0000:  09 02 65 00 02 01 00 80 32 09 04 00 00 00 01 01  |..e.....2.......|
+// 0010:  00 00 09 24 01 00 01 09 00 01 01 09 04 01 00 02  |...$............|
+static void dump_str_line(uint8_t const *buf, uint16_t count) {
+	printf("  |");
+	// each line is 16 bytes
+	for (uint16_t i = 0; i < count; i++) {
+		int ch = buf[i];
+		printf("%c", isprint(ch) ? ch : '.');
+	}
+	printf("|\r\n");
+}
+
+// From tinyusb:
+void print_mem(void const *buf, uint32_t count, uint8_t indent) {
+	uint8_t const size = 1;
+	if (!buf || !count) {
+		printf("NULL\r\n");
+		return;
+	}
+
+	uint8_t const *buf8 = (uint8_t const *)buf;
+	char format[] = "%00X";
+	format[2] += (uint8_t)(2 * size); // 1 byte = 2 hex digits
+	const uint8_t item_per_line = 16 / size;
+
+	for (unsigned int i = 0; i < count; i++) {
+		unsigned int value = 0;
+
+		if (i % item_per_line == 0) {
+			// Print Ascii
+			if (i != 0)
+				dump_str_line(buf8 - 16, 16);
+			for (uint8_t s = 0; s < indent; s++)
+				printf(" ");
+			// print offset or absolute address
+			printf("%04X: ", 16 * i / item_per_line);
+		}
+
+		// memcpy(&value, sizeof(value), buf8, size);
+		memcpy(&value, buf8, size);
+		buf8 += size;
+
+		printf(" ");
+		printf(format, value);
+	}
+
+	// fill up last row to 16 for printing ascii
+	const uint32_t remain = count % 16;
+	uint8_t nback = (uint8_t)(remain ? remain : 16);
+	if (remain) {
+		for (uint32_t i = 0; i < 16 - remain; i++) {
+			printf(" ");
+			for (int j = 0; j < 2 * size; j++)
+				printf(" ");
+		}
+	}
+
+	dump_str_line(buf8 - nback, nback);
 }

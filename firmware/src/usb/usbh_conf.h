@@ -98,6 +98,15 @@ void msc_free(void *);
 	} while (0)
 #endif
 
+
+
+/* Print out memory contents
+ *  - buf   : buffer
+ *  - count : number of item
+ *  - indent: prefix spaces on every line
+ */
+void print_mem(void const* buf, uint32_t count, uint8_t indent);
+
 #ifdef __cplusplus
 }
 #endif
