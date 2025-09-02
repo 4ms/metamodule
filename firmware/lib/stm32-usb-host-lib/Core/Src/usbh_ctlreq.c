@@ -232,7 +232,7 @@ USBH_StatusTypeDef USBH_GetDescriptor(USBH_HandleTypeDef *phost, uint8_t req_typ
     phost->Control.setup.b.wLength.w = length;
   }
 
-  printf("USBH_GetDescriptor: len %u make request\n", length);
+  // printf("USBH_GetDescriptor: len %u make request\n", length);
   return USBH_CtlReq(phost, buff, length);
 }
 
