@@ -1700,8 +1700,12 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
             printf("StartXfer: ping first\n");
 			(void)USB_DoPing(USBx, hc->ch_num);
 			return HAL_OK;
-		}
+        }
 	}
+
+    if (dma == 0 && hc->split_en) {
+        USBx_HC((uint32_t)ch_num)->HCINTMSK |= USB_OTG_HCINTMSK_NYET | USB_OTG_HCINTMSK_ACKM | USB_OTG_HCINTMSK_NAKM;
+    }
 
 	/* Compute the expected number of packets associated to the transfer */
 	if (hc->xfer_len > 0U) {
@@ -1726,6 +1730,12 @@ HAL_StatusTypeDef USB_HC_StartXfer(USB_OTG_GlobalTypeDef *USBx, USB_OTG_HCTypeDe
 	}
 
     printf("StartXfer ch %u: XferSize: %u, pid %u, packets %u, hcsplit %08x\n", ch_num, hc->XferSize, hc->data_pid, num_packets, USBx_HC(ch_num)->HCSPLT);
+    uint32_t hcsplt = USBx_HC(ch_num)->HCSPLT;
+
+    if (hc->split_en) {
+        hcsplt = hcsplt & ~USB_OTG_HCSPLT_COMPLSPLT;
+        USBx_HC(ch_num)->HCSPLT = hcsplt;
+    }
 	/* Initialize the HCTSIZn register */
 	USBx_HC(ch_num)->HCTSIZ = (hc->XferSize & USB_OTG_HCTSIZ_XFRSIZ) |
 							  (((uint32_t)num_packets << 19) & USB_OTG_HCTSIZ_PKTCNT) |
