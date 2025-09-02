@@ -149,17 +149,17 @@ USBH_StatusTypeDef USBH_Get_CfgDesc(USBH_HandleTypeDef *phost, uint16_t length)
     /* Commands successfully sent and Response Received  */
 
     /* Try "fixing" the audio subclass interface descriptor length */
-	if (phost->device.DevDesc.idVendor == 0x17CC) //Native Instruments
-	{
+    if (phost->device.DevDesc.idVendor == 0x17CC) //Native Instruments
+    {
         status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_NORMAL);
-	} else {
+    } else {
       status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_FIX_AUDIO_SUBCLASS);
       if (status == USBH_NOT_SUPPORTED)
       {
         /* If that fails, try parsing normally */
         status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_NORMAL);
       }
-	}
+    }
   }
 
   return status;
@@ -232,7 +232,7 @@ USBH_StatusTypeDef USBH_GetDescriptor(USBH_HandleTypeDef *phost, uint8_t req_typ
     phost->Control.setup.b.wLength.w = length;
   }
 
-  // printf("USBH_GetDescriptor: len %u make request\n", length);
+  USBH_CTLREQLog("GetDescriptor: len %u", length);
   return USBH_CtlReq(phost, buff, length);
 }
 
@@ -258,7 +258,7 @@ USBH_StatusTypeDef USBH_SetAddress(USBH_HandleTypeDef *phost,
     phost->Control.setup.b.wIndex.w = 0U;
     phost->Control.setup.b.wLength.w = 0U;
   }
-  printf("USBH_SetAddress: make request\n");
+  USBH_CTLREQLog("SetAddress");
   return USBH_CtlReq(phost, NULL, 0U);
 }
 
@@ -283,6 +283,7 @@ USBH_StatusTypeDef USBH_SetCfg(USBH_HandleTypeDef *phost, uint16_t cfg_idx)
     phost->Control.setup.b.wLength.w = 0U;
   }
 
+  USBH_CTLREQLog("SetCfg");
   return USBH_CtlReq(phost, NULL, 0U);
 }
 
@@ -307,6 +308,7 @@ USBH_StatusTypeDef USBH_SetInterface(USBH_HandleTypeDef *phost, uint8_t ep_num, 
     phost->Control.setup.b.wLength.w = 0U;
   }
 
+  USBH_CTLREQLog("SetInterface");
   return USBH_CtlReq(phost, NULL, 0U);
 }
 
@@ -331,6 +333,7 @@ USBH_StatusTypeDef USBH_SetFeature(USBH_HandleTypeDef *phost, uint8_t wValue)
     phost->Control.setup.b.wLength.w = 0U;
   }
 
+  USBH_CTLREQLog("SetFeature");
   return USBH_CtlReq(phost, NULL, 0U);
 }
 
@@ -356,6 +359,7 @@ USBH_StatusTypeDef USBH_ClrFeature(USBH_HandleTypeDef *phost, uint8_t ep_num)
     phost->Control.setup.b.wLength.w = 0U;
   }
 
+  USBH_CTLREQLog("ClrFeature");
   return USBH_CtlReq(phost, NULL, 0U);
 }
 
@@ -489,15 +493,15 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
     {
       pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
 
-	  if (pdesc->bDescriptorType == USB_DESC_TYPE_ASSOC) {
-		// iadmode = 1;
-		USBH_IfAssocDescTypeDef *piad = (USBH_IfAssocDescTypeDef *)pdesc;
-		USBH_DbgLog("USBH_ParseCfgDesc: USB_DESC_TYPE_ASSOC: 0x%02X/x%02X, nif=%d, firstIf=%d",
-					piad->bFunctionClass,
-					piad->bFunctionSubClass,
-					piad->bInterfaceCount,
-					piad->bFirstInterface);
-	  } else if (pdesc->bDescriptorType == USB_DESC_TYPE_INTERFACE)
+      if (pdesc->bDescriptorType == USB_DESC_TYPE_ASSOC) {
+        // iadmode = 1;
+        USBH_IfAssocDescTypeDef *piad = (USBH_IfAssocDescTypeDef *)pdesc;
+        USBH_DbgLog("USBH_ParseCfgDesc: USB_DESC_TYPE_ASSOC: 0x%02X/x%02X, nif=%d, firstIf=%d",
+                    piad->bFunctionClass,
+                    piad->bFunctionSubClass,
+                    piad->bInterfaceCount,
+                    piad->bFirstInterface);
+      } else if (pdesc->bDescriptorType == USB_DESC_TYPE_INTERFACE)
       {
         /* Make sure that the interface descriptor's bLength is equal to USB_INTERFACE_DESC_SIZE */
         if (pdesc->bLength != USB_INTERFACE_DESC_SIZE)
@@ -507,8 +511,8 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
 
         pif = &cfg_desc->Itf_Desc[if_ix];
         USBH_ParseInterfaceDesc(pif, (uint8_t *)(void *)pdesc);
-		USBH_DbgLog("Found interface %u: class %u, sub-class %u, protocol %u, endpts %u", 
-				if_ix, pif->bInterfaceClass, pif->bInterfaceSubClass, pif->bInterfaceProtocol, pif->bNumEndpoints);
+        USBH_DbgLog("Found interface %u: class %u, sub-class %u, protocol %u, endpts %u", 
+                if_ix, pif->bInterfaceClass, pif->bInterfaceSubClass, pif->bInterfaceProtocol, pif->bNumEndpoints);
 
         ep_ix = 0U;
         pep = (USBH_EpDescTypeDef *)NULL;
@@ -517,10 +521,10 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
         {
           pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
 
-		  if (pdesc->bLength == 0) {
-			  USBH_DbgLog("Descriptor invalid (length 0), aborting");
-			  break;
-		  }
+          if (pdesc->bLength == 0) {
+              USBH_DbgLog("Descriptor invalid (length 0), aborting");
+              break;
+          }
 
           if (pdesc->bDescriptorType == USB_DESC_TYPE_ENDPOINT)
           {
@@ -532,7 +536,7 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
               /* Check if it is supporting the USB AUDIO 01 class specification */
               if ((pif->bInterfaceProtocol == 0x00U) && (pdesc->bLength != 0x09U) && (pdesc->bLength != 0x07U))
               {
-				USBH_UsrLog("Setting audio streaming subclass length to 9 (was %d) for ep %d\n", pdesc->bLength, ep_ix);
+                USBH_UsrLog("Setting audio streaming subclass length to 9 (was %d) for ep %d", pdesc->bLength, ep_ix);
                 pdesc->bLength = 0x09U;
               }
             }
@@ -619,7 +623,7 @@ static USBH_StatusTypeDef USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDes
       (ep_descriptor->wMaxPacketSize > USBH_MAX_DATA_BUFFER))
   {
     status = USBH_NOT_SUPPORTED;
-	USBH_UsrLog("ep_descriptor->wMaxPacketSize %u not supported", ep_descriptor->wMaxPacketSize);
+    USBH_UsrLog("ep_descriptor->wMaxPacketSize %u not supported", ep_descriptor->wMaxPacketSize);
   }
 
   if (phost->currentTarget->speed == (uint8_t)USBH_SPEED_HIGH)
@@ -659,7 +663,7 @@ static USBH_StatusTypeDef USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDes
     {
       if (ep_descriptor->wMaxPacketSize > 64U)
       {
-		USBH_ErrLog("Not supported: fullspeed bulk or ctrl EP with wMaxPacketSize > 64 (is %u)", ep_descriptor->wMaxPacketSize);
+        USBH_ErrLog("Not supported: fullspeed bulk or ctrl EP with wMaxPacketSize > 64 (is %u)", ep_descriptor->wMaxPacketSize);
         status = USBH_NOT_SUPPORTED;
       }
     }
@@ -863,10 +867,10 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
   {
     case CTRL_SETUP:
       /* send a SETUP packet */
-	  USBH_UsrLog("USBH_HandleControl: send SETUP: host: %p, data(8b): %08x %08x, pipe_num(out): %d", phost, phost->Control.setup.d8[0], phost->Control.setup.d8[1], phost->Control.pipe_out);
+      USBH_CTLREQLog("[CTRL_STEUP}: send SETUP: host: %p, data(8b): %08x %08x, pipe_num(out): %d", phost, phost->Control.setup.d8[0], phost->Control.setup.d8[1], phost->Control.pipe_out);
       (void)USBH_CtlSendSetup(phost, (uint8_t *)(void *)phost->Control.setup.d8,
                               phost->Control.pipe_out);
-	  USBH_UsrLog("USBH_HandleControl: sent, waiting..");
+      USBH_CTLREQLog("[CTRL_SETUP]: sent, waiting...");
 
       phost->Control.state = CTRL_SETUP_WAIT;
       break;
@@ -877,7 +881,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       /* case SETUP packet sent successfully */
       if (URB_Status == USBH_URB_DONE)
       {
-	    USBH_UsrLog("USBH_HandleControl: waited, done.");
+        USBH_CTLREQLog("[CTRL_SETUP_WAIT]: waited => done.");
         direction = (phost->Control.setup.b.bmRequestType & USB_REQ_DIR_MASK);
 
         /* check if there is a data stage */
@@ -923,7 +927,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       {
         if ((URB_Status == USBH_URB_ERROR) || (URB_Status == USBH_URB_NOTREADY))
         {
-			USBH_ErrLog("CTRL_SETUP_WAIT -> %d error", URB_Status);
+          USBH_ErrLog("CTRL_SETUP_WAIT -> %d error", URB_Status);
           phost->Control.state = CTRL_ERROR;
 
 #if (USBH_USE_OS == 1U)
@@ -940,12 +944,12 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
 
     case CTRL_DATA_IN: 
       /* Issue an IN token */
-	  USBH_UsrLog("USBH_HandleControl: state=CTRL_DATA_IN, request receive data");
+      USBH_CTLREQLog("[CTRL_DATA_IN]: request receive data");
       phost->Control.timer = (uint16_t)phost->Timer;
       USBH_CtlReceiveData(phost, phost->Control.buff,
                                 phost->Control.length, phost->Control.pipe_in);
 
-	  USBH_UsrLog("USBH_HandleControl: state=>CTRL_DATA_IN_WAIT");
+      USBH_CTLREQLog("=> CTRL_DATA_IN_WAIT");
       phost->Control.state = CTRL_DATA_IN_WAIT;
       break;
 
@@ -956,7 +960,10 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       /* check is DATA packet transferred successfully */
       if (URB_Status == USBH_URB_DONE)
       {
-	    USBH_UsrLog("USBH_HandleControl: CTRL_DATA_IN_WAIT => urb done");
+        USBH_CTLREQLog("[CTRL_DATA_IN_WAIT]: urb done");
+#if USBH_CTLREQ_TRACE_OUTPUT
+        print_mem(phost->Control.buff, phost->Control.length, 2);
+#endif
         phost->Control.state = CTRL_STATUS_OUT;
 
 #if (USBH_USE_OS == 1U)
@@ -989,7 +996,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
         if (URB_Status == USBH_URB_ERROR)
         {
           /* Device error */
-			USBH_ErrLog("CTRL_DATA_IN_WAIT -> error");
+          USBH_ErrLog("CTRL_DATA_IN_WAIT -> error");
           phost->Control.state = CTRL_ERROR;
 
 #if (USBH_USE_OS == 1U)
@@ -1006,10 +1013,10 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
 
     case CTRL_DATA_OUT:
 
-	  USBH_UsrLog("USBH_HandleControl: CTRL_DATA_OUT sending data");
+      USBH_CTLREQLog("[CTRL_DATA_OUT]: sending data");
       USBH_CtlSendData(phost, phost->Control.buff, phost->Control.length, phost->Control.pipe_out, 1U);
 
-	  USBH_UsrLog("USBH_HandleControl: CTRL_DATA_OUT sent data");
+      USBH_CTLREQLog("[CTRL_DATA_OUT]: sent data");
       phost->Control.timer = (uint16_t)phost->Timer;
       phost->Control.state = CTRL_DATA_OUT_WAIT;
       break;
@@ -1068,7 +1075,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
         if (URB_Status == USBH_URB_ERROR)
         {
           /* device error */
-			USBH_ErrLog("CTRL_DATA_OUT_WAIT -> error");
+          USBH_ErrLog("CTRL_DATA_OUT_WAIT -> error");
           phost->Control.state = CTRL_ERROR;
           status = USBH_FAIL;
 
@@ -1086,7 +1093,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
 
     case CTRL_STATUS_IN:
       /* Send 0 bytes out packet */
-      (void)USBH_CtlReceiveData(phost, NULL, 0U, phost->Control.pipe_in);
+      USBH_CtlReceiveData(phost, NULL, 0U, phost->Control.pipe_in);
 
       phost->Control.timer = (uint16_t)phost->Timer;
       phost->Control.state = CTRL_STATUS_IN_WAIT;
@@ -1114,7 +1121,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       }
       else if (URB_Status == USBH_URB_ERROR)
       {
-		  USBH_ErrLog("CTRL_STATUS_IN_WAIT -> error");
+        USBH_ErrLog("CTRL_STATUS_IN_WAIT -> error");
         phost->Control.state = CTRL_ERROR;
 
 #if (USBH_USE_OS == 1U)
@@ -1146,7 +1153,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
       break;
 
     case CTRL_STATUS_OUT:
-      (void)USBH_CtlSendData(phost, NULL, 0U, phost->Control.pipe_out, 1U);
+      USBH_CtlSendData(phost, NULL, 0U, phost->Control.pipe_out, 1U);
 
       phost->Control.timer = (uint16_t)phost->Timer;
       phost->Control.state = CTRL_STATUS_OUT_WAIT;
@@ -1186,7 +1193,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
         if (URB_Status == USBH_URB_ERROR)
         {
           phost->Control.state = CTRL_ERROR;
-		  USBH_ErrLog("CTRL_STATUS_OUT_WAIT -> error");
+          USBH_ErrLog("CTRL_STATUS_OUT_WAIT -> error");
 
 #if (USBH_USE_OS == 1U)
           phost->os_msg = (uint32_t)USBH_CONTROL_EVENT;
@@ -1222,8 +1229,8 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
         USBH_ErrLog("Control error: Device not responding");
 
         /* Free control pipes */
-        (void)USBH_FreePipe(phost, phost->Control.pipe_out);
-        (void)USBH_FreePipe(phost, phost->Control.pipe_in);
+        USBH_FreePipe(phost, phost->Control.pipe_out);
+        USBH_FreePipe(phost, phost->Control.pipe_in);
 
         phost->gState = HOST_IDLE;
         status = USBH_FAIL;

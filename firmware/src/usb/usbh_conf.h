@@ -25,8 +25,6 @@ extern "C" {
 #endif
 
 #include "stm32mp1xx.h"
-// #include <stdio.h>
-// #include <stdlib.h>
 #include <string.h> //for memset/memcpy
 
 static inline void Error_Handler() {
@@ -44,6 +42,7 @@ static inline void Error_Handler() {
 #define USBH_USER_LOG_OUTPUT 1
 #define USBH_ERR_LOG_OUTPUT 1
 #define USBH_DBG_LOG_OUTPUT 1
+#define USBH_CTLREQ_TRACE_OUTPUT 1
 
 enum { MidiStreamingBufferSize = 256 };
 enum { HOST_HS = 0, HOST_FS = 1 };
@@ -98,6 +97,11 @@ void msc_free(void *);
 	} while (0)
 #endif
 
+#if USBH_CTLREQ_TRACE_OUTPUT
+#define USBH_CTLREQLog(...) printf("CTLREQ: "); printf(__VA_ARGS__); printf("\n")
+#else
+#define USBH_CTLREQLog(...) do {} while(0)
+#endif
 
 
 /* Print out memory contents

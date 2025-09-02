@@ -19,6 +19,7 @@
 
 #include "usbh_core.h"
 #include "usbh_msc.h"
+#include <ctype.h>
 
 /*******************************************************************************
 					   HCD BSP Routines
