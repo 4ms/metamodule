@@ -1279,23 +1279,18 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
     if ((hcsplt & USB_OTG_HCSPLT_SPLITEN)) {
       if ((hcsplt & USB_OTG_HCSPLT_COMPLSPLT) == 0) {
         // start split is ACK --> do complete split
+        USBH_IRQLog("        ACK'ed Start Split ---> Move to Complete Split and re-enable channel\n");
         USBx_HC(chnum)->HCSPLT = hcsplt | USB_OTG_HCSPLT_COMPLSPLT;
         USBx_HC(chnum)->HCINTMSK |= USB_OTG_HCINTMSK_NYET;
-        // channel_send_in_token(dwc2, channel);
         USBx_HC(chnum)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
       } else {
-        USBx_HC(chnum)->HCSPLT = hcsplt & ~USB_OTG_HCSPLT_COMPLSPLT;
-
-        const uint16_t remain_packets = (USBx_HC(chnum)->HCTSIZ & USB_OTG_HCTSIZ_PKTCNT_Msk) >> USB_OTG_HCTSIZ_PKTCNT_Pos;
-        if (remain_packets) {
-          USBx_HC(chnum)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
-        }
+        USBH_IRQLog("        ACK'ed Complete Split ---> do nothing\n");
       }
     } else {
       const uint16_t remain_packets = (USBx_HC(chnum)->HCTSIZ & USB_OTG_HCTSIZ_PKTCNT_Msk) >> USB_OTG_HCTSIZ_PKTCNT_Pos;
       if (remain_packets) {
         // still more packet to receive, also reset to start split
-        printf("in_irq: ACK with split disabled, clear split_compl\n");
+        USBH_IRQLog("        ACK with split disabled, clear split_compl. Have %u remain_packets: Enable channel\n", remain_packets);
         USBx_HC(chnum)->HCSPLT = hcsplt & ~USB_OTG_HCSPLT_COMPLSPLT;
         USBx_HC(chnum)->HCCHAR |= USB_OTG_HCCHAR_CHENA;
       }
@@ -1361,17 +1356,15 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
     hhcd->hc[ch_num].ErrCnt = 0U;
     __HAL_HCD_CLEAR_HC_INT(ch_num, USB_OTG_HCINT_XFRC);
 
-    // tinyusb:
-    // const uint16_t remain_packets = hctsiz.packet_count;
-    if (USBx_HC(ch_num)->HCSPLT & USB_OTG_HCSPLT_SPLITEN) {
+    if (hhcd->hc[ch_num].split_en) {
       const uint32_t remain_packets = (USBx_HC(ch_num)->HCTSIZ & USB_OTG_HCTSIZ_PKTCNT_Msk) >> USB_OTG_HCTSIZ_PKTCNT_Pos;
-      if (remain_packets) {
-        // uint32_t ep_size = USBx_HC(ch_num)->HCCHAR & USB_OTG_HCCHAR_MPSIZ;
-        // TODO: if (xfer->fifo_count == ep_size) {
+      // FIXME: why does this work?? 
+      uint32_t ep_size = USBx_HC(ch_num)->HCCHAR & USB_OTG_HCCHAR_MPSIZ;
+      if (remain_packets && ep_size == hhcd->hc[ch_num].fifo_count) {
         // Split can only complete 1 transaction (up to 1 packet) at a time, schedule more
-          printf("remain_packets but not sure if fifo and ep_size match... clearing COMPLSPLT\n");
-          // USBx_HC(ch_num)->HCSPLT &= ~USB_OTG_HCSPLT_COMPLSPLT;
-        // }
+          printf("        %u remain_packets: clear complsplt, state=>NYET\n", remain_packets);
+          hhcd->hc[ch_num].state = HC_NYET;
+          USBx_HC(ch_num)->HCSPLT &= ~USB_OTG_HCSPLT_COMPLSPLT;
       }
     }
 
@@ -1412,6 +1405,7 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
       /* ... */
     }
 
+    if (!hhcd->hc[ch_num].split_en) {
     // Toggle bit
     if (hhcd->Init.dma_enable == 1U)
     {
@@ -1423,6 +1417,7 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
     else
     {
       hhcd->hc[ch_num].toggle_in ^= 1U;
+      }
     }
   }
   // Channel halted
@@ -1469,6 +1464,19 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
       /* re-activate the channel */
       tmpreg = USBx_HC(ch_num)->HCCHAR;
       tmpreg &= ~USB_OTG_HCCHAR_CHDIS;
+      tmpreg |= USB_OTG_HCCHAR_CHENA;
+      USBx_HC(ch_num)->HCCHAR = tmpreg;
+    }
+    else if (hhcd->hc[ch_num].state == HC_NYET)
+    {
+      /* For split transactions the TT can reply NYET; report NOTREADY and
+         re-activate the channel to continue with the next complete-split. */
+      // USBH_UsrLog("TT responded NYET: reporting NOTREADY");
+      hhcd->hc[ch_num].urb_state  = URB_NOTREADY;
+
+      /* re-activate the channel */
+      tmpreg = USBx_HC(ch_num)->HCCHAR;
+      // tmpreg &= ~USB_OTG_HCCHAR_CHDIS;
       tmpreg |= USB_OTG_HCCHAR_CHENA;
       USBx_HC(ch_num)->HCCHAR = tmpreg;
     }
@@ -1809,8 +1817,7 @@ static void HCD_RXQLVL_IRQHandler(HCD_HandleTypeDef *hhcd)
       {
         if ((hhcd->hc[ch_num].xfer_count + pktcnt) <= hhcd->hc[ch_num].xfer_len)
         {
-          (void)USB_ReadPacket(hhcd->Instance,
-                               hhcd->hc[ch_num].xfer_buff, (uint16_t)pktcnt);
+          USB_ReadPacket(hhcd->Instance, hhcd->hc[ch_num].xfer_buff, pktcnt);
 
           /* manage multiple Xfer */
           hhcd->hc[ch_num].xfer_buff += pktcnt;
@@ -1822,12 +1829,14 @@ static void HCD_RXQLVL_IRQHandler(HCD_HandleTypeDef *hhcd)
 
           if ((hhcd->hc[ch_num].max_packet == pktcnt) && (xferSizePktCnt > 0U))
           {
+            if (!hhcd->hc[ch_num].split_en) {
             /* re-activate the channel when more packets are expected */
             tmpreg = USBx_HC(ch_num)->HCCHAR;
             tmpreg &= ~USB_OTG_HCCHAR_CHDIS;
             tmpreg |= USB_OTG_HCCHAR_CHENA;
             USBx_HC(ch_num)->HCCHAR = tmpreg;
             hhcd->hc[ch_num].toggle_in ^= 1U;
+            }
           }
         }
         else
