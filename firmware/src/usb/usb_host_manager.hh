@@ -82,8 +82,11 @@ public:
 		HAL_Delay(250);
 
 		// TODO: stop all handles
-		USBH_Stop(&root_host_handle);
+		USBH_LL_Disconnect(&root_host_handle);
+		USBH_Process(&root_host_handle);
+
 		root_host_handle.pData = nullptr;
+
 		USBH_DeInit(&root_host_handle); //sets hhcd to NULL?
 	}
 
