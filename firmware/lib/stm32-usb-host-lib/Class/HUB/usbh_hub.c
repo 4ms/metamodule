@@ -207,7 +207,6 @@ void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 		USBH_ErrLog("No active class for host %p", pphost);
 	}
 
-	pphost->hubPortAddress = 0;
 	// Inform Host Handle of disconnection
 	if (pphost->pUser != NULL) {
 		pphost->pUser(pphost, HOST_USER_DISCONNECTION);
@@ -255,14 +254,8 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t speed) {
 		detach(phost, idx); // mori: was pphost
 	}
 
-	//pphost->id 					= 0;//hUSBHost[0].id; // seems to be selecting the USB peripheral
-	pphost->hubPortAddress = idx;
-
 	pphost->pActiveClass = NULL;
 
-	// #warning Then use HUB class. investigane Pipes usage.
-	// Taken from https://github.com/mori-br/STM32F4HUB
-	// memcpy(pphost->Pipes, phost->Pipes, sizeof pphost->Pipes);
 	pphost->Pipes = phost->Pipes;
 
 	pphost->pUser = phost->pUser;
@@ -275,7 +268,7 @@ static void attach(USBH_HandleTypeDef *phost, uint16_t idx, uint8_t speed) {
 
 	pphost->rootTarget.dev_address = USBH_ADDRESS_DEFAULT;
 	pphost->rootTarget.speed = speed;
-	pphost->rootTarget.tt_hubaddr = phost->currentTarget->dev_address; // hub address is always 1?
+	pphost->rootTarget.tt_hubaddr = phost->currentTarget->dev_address; // hub address is always 1
 	pphost->rootTarget.tt_prtaddr = idx;							   // hub port address
 
 	// Do we do this here?
@@ -517,8 +510,6 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 			break;
 
 		case HUB_REQ_SCAN_STATUSES:
-			// if (HUB_Handle->hubClassRequestPort < 1)
-			// 	USBH_ErrLog("ASSERT FAILED: hubClassRequestPort == %u", HUB_Handle->hubClassRequestPort);
 			status = get_hub_request(phost,
 									 USB_REQUEST_GET_STATUS,
 									 HUB_FEAT_SEL_PORT_CONN,
@@ -526,18 +517,8 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 									 HUB_Handle->buffer,
 									 sizeof(USB_HUB_PORT_STATUS));
 			if (status == USBH_OK) {
-				/* Enumeration target */
-				// We will store
 				USBH_TargetTypeDef *const tg = &HUB_Handle->Targets[HUB_Handle->hubClassRequestPort - 1];
-				// if (HUB_Handle->hubClassRequestPort < 1)
-				// 	USBH_ErrLog("ASSERT FAILED: hubClassRequestPort == %u", HUB_Handle->hubClassRequestPort);
-
-				//printhex(HUB_Handle->buffer, HUB_Handle->buffer, sizeof (USB_HUB_PORT_STATUS));
 				USB_HUB_PORT_STATUS *const st = (USB_HUB_PORT_STATUS *)HUB_Handle->buffer;
-				// ИНтерпретируем результаты (Interpreting the results)
-				// debug_port(HUB_Handle->buffer, st);
-				// TODO: если выбрана енумерация LOW SPEED устройста, при установленной HIGH SPEED flash не проходит енумерация.
-				// (TODO: if LOW SPEED device enumeration is selected, enumeration does not pass when HIGH SPEED flash is installed)
 				if (st->wPortStatus.PORT_ENABLE /* && HUB_Handle->hubClassRequestPort > 1 */) {
 					if (st->wPortStatus.PORT_LOW_SPEED) {
 						// LOW SPEED, мышка - нашлась. (mouse found)
@@ -612,7 +593,6 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 
 				// Reach last port
 				if (HUB_Handle->NumPorts <= HUB_Handle->hubClassRequestPort) {
-					// выходим из цикла (exit the loop)
 					HUB_Handle->ctl_state = HUB_REQ_SCAN_STATUSES_DONE;
 					status = USBH_BUSY;
 
@@ -624,7 +604,6 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 			} else if (status == USBH_BUSY) {
 
 			} else {
-				// выходим по ошибке (we leave by mistake)
 				HUB_Handle->ctl_state = HUB_REQ_IDLE;
 				status = USBH_OK;
 			}
@@ -647,9 +626,9 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 
 			/* free control pipes */
 			USBH_ClosePipe(phost, phost->Control.pipe_out);
-			(void)USBH_FreePipe(phost, phost->Control.pipe_out);
+			USBH_FreePipe(phost, phost->Control.pipe_out);
 			USBH_ClosePipe(phost, phost->Control.pipe_in);
-			(void)USBH_FreePipe(phost, phost->Control.pipe_in);
+			USBH_FreePipe(phost, phost->Control.pipe_in);
 
 			HUB_Handle->ctl_state = HUB_ALREADY_INITED;
 			status = USBH_HUB_REQ_REENUMERATE;

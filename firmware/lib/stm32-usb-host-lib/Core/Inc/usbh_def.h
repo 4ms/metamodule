@@ -433,12 +433,6 @@ typedef struct {
 	uint8_t dev_address;
 	uint8_t tt_hubaddr;
 	uint8_t tt_prtaddr;
-	// SPLIT:
-	// uint8_t xact_pos;		  //transaction position in microframe
-	// uint8_t split_compl;	  //0=start split, 1=split complete
-	// uint8_t split_en;		  //enable split transactions
-	// uint8_t nyet_retry_count; // NYET retry counter
-	// uint8_t split_pending;	  // Split transaction in progress
 
 } USBH_TargetTypeDef;
 
@@ -453,14 +447,6 @@ typedef struct {
 	USBH_StatusTypeDef (*Requests)(struct _USBH_HandleTypeDef *phost);
 	USBH_StatusTypeDef (*BgndProcess)(struct _USBH_HandleTypeDef *phost);
 	USBH_StatusTypeDef (*SOFProcess)(struct _USBH_HandleTypeDef *phost);
-	// mori: seems to be only used for HID
-	// USBH_StatusTypeDef  (*Parameter)   (struct _USBH_HandleTypeDef *phost, uint8_t param, uint8_t *data, uint16_t *length);
-
-	// pData: class handle. e.g. MidiStreamingHandle
-	// This contains realtime info specific to the actual connection, so probably shouldn't be the
-	// same for all instances of the class. But I see no issue if we have max 1 of any class connected at a time
-	// mori does not have this, but instead seems to store this in USBH_ClassTypeDef_pData, which I changed to classData[]
-	// void *pData;
 } USBH_ClassTypeDef;
 
 /* USB Host handle structure */
@@ -483,8 +469,6 @@ typedef struct _USBH_HandleTypeDef {
 	uint32_t *Pipes; //st: [16]; //mori: *Pipes
 	__IO uint32_t Timer;
 	uint32_t Timeout;
-	// Not in hftrx, but in mori:
-	uint8_t id;
 
 	//Pointer to HCD peripheral
 	void *pData;
@@ -498,22 +482,14 @@ typedef struct _USBH_HandleTypeDef {
 	osThreadId_t thread;
 	uint32_t os_msg;
 #endif
-	// MORI
 	uint8_t valid; //0: not connected. 1: connected. 3: just connected
 	uint8_t busy;
 
-	// MORI
-	// uint8_t hub;
-	uint8_t hubPortAddress; // mori calls this "address". It's which port the cable is plugged into on a hub
-	// uint8_t prescaler;
-	// uint8_t interfaces;
-
 	uint8_t hubInstances; // was # of cascaded hubs. But we don't support that, so it's 1 if hub, 0 if not.
 
-	// void *hubDatas[USBH_MAX_NUM_INTERFACES]; //used by hftrx, not sure if this is the same as mori's USBH_ClassTypeDef_pData??
 	void *classData[USBH_MAX_NUM_INTERFACES]; //in mori this is USBH_ClassTypeDef_pData (?)
 
-	uint8_t allocaddress; // I think this is the usb address (unique to each device in the tree?)
+	uint8_t allocaddress; // latest allocated device address
 
 	//DG: An array of all host handles. handles[0] is the hub handle, [1]-[8] are connected devices
 	struct _USBH_HandleTypeDef *handles;

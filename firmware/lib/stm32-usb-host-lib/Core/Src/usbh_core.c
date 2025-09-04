@@ -562,10 +562,10 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
         phost->hubInstances = 0;
         phost->allocaddress = 0;
         phost->rootTarget.dev_address = USBH_ADDRESS_DEFAULT;
-        phost->rootTarget.speed = (uint8_t)USBH_SPEED_FULL;
+        phost->rootTarget.speed = USBH_SPEED_FULL;
         phost->rootTarget.tt_hubaddr = HOSTDEV_DEFAULT_HUBADDR;
         phost->rootTarget.tt_prtaddr = HOSTDEV_DEFAULT_PRTADDR;
-        phost->currentTarget = & phost->rootTarget;
+        phost->currentTarget = &phost->rootTarget;
       }
       else
       {
@@ -987,12 +987,10 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
 		printf("HandleEnum: open pipe in %u\n", phost->Control.pipe_in);
 		printf("HandleEnum: open pipe out %u\n", phost->Control.pipe_out);
         /* modify control channels configuration for MaxPacket size */
-        (void)USBH_OpenPipe(phost, phost->Control.pipe_in, 0x80U, phost->currentTarget, USBH_EP_CONTROL,
-                            (uint16_t)phost->Control.pipe_size);
+        USBH_OpenPipe(phost, phost->Control.pipe_in, 0x80U, phost->currentTarget, USBH_EP_CONTROL, phost->Control.pipe_size);
 
         /* Open Control pipes */
-        (void)USBH_OpenPipe(phost, phost->Control.pipe_out, 0x00U, phost->currentTarget, USBH_EP_CONTROL,
-                            (uint16_t)phost->Control.pipe_size);
+        USBH_OpenPipe(phost, phost->Control.pipe_out, 0x00U, phost->currentTarget, USBH_EP_CONTROL, phost->Control.pipe_size);
       }
       else if (ReqStatus == USBH_NOT_SUPPORTED)
       {
