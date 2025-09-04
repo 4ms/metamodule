@@ -412,7 +412,7 @@ static USBH_StatusTypeDef USBH_HUB_InterfaceDeInit(USBH_HandleTypeDef *phost) {
 			HUB_Handle->InPipe = 0; // Reset the pipe as Free
 		}
 
-		// USBH_free(phost->hubDatas[0]);
+		phost->classData[0] = NULL;
 	} else {
 		USBH_UsrLog("USBH_HUB_InterfaceDeInit failed: hubDatas[0] not allocated");
 	}
