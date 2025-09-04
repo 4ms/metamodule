@@ -155,9 +155,9 @@ USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost) {
 		case MidiStreamingState::TransferData:
 			MIDI_ProcessTransmission(phost);
 			MIDI_ProcessReception(phost);
-			if ((MSHandle->data_rx_state == MidiStreamingDataState::Idle ||
-				 MSHandle->data_rx_state == MidiStreamingDataState::ReceiveDataWait) &&
-				MSHandle->data_tx_state == MidiStreamingDataState::Idle)
+			using enum MidiStreamingDataState;
+			if ((MSHandle->data_rx_state == Idle || MSHandle->data_rx_state == ReceiveDataWait) &&
+				(MSHandle->data_tx_state == Idle || MSHandle->data_tx_state == SendDataWait))
 				phost->busy = 0; // yield to another device
 			break;
 
