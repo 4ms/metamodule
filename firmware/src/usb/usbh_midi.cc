@@ -56,12 +56,9 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost, const USBH
 	// Look for an optional Audio Control interface
 	interface = USBH_FindInterface(phost, AudioClassCode, AudioControlSubclassCode, AnyProtocol);
 	if ((interface == NoValidInterfaceFound) || (interface >= USBH_MAX_NUM_INTERFACES)) {
-		USBH_DbgLog("Did not find an audio control interface, continuing\n");
+		USBH_DbgLog("Did not find an audio control interface, continuing");
 	} else {
-		USBH_DbgLog("Found Audio Control subclass\n");
-		host.link_endpoint_pipe(MSHandle->ControlItf.ControlEP, interface, 0);
-		host.open_pipe(MSHandle->ControlItf.ControlEP, EndPointType::Intr, target); // TODO: Is it an Intr EP type?
-		host.set_toggle(MSHandle->ControlItf.ControlEP, 0);
+		USBH_DbgLog("Found Audio Control subclass");
 	}
 
 	// Look for MidiStreamingSubClass
@@ -111,7 +108,6 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit(USBH_HandleTypeDef *phost) {
 	if (!MSHandle)
 		return USBH_FAIL;
 
-	host.close_and_free_pipe(MSHandle->ControlItf.ControlEP);
 	host.close_and_free_pipe(MSHandle->DataItf.InEP);
 	host.close_and_free_pipe(MSHandle->DataItf.OutEP);
 
@@ -175,7 +171,7 @@ USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost) {
 		} break;
 
 		default:
-			USBH_UsrLog("Unknown MIDI state %u", MSHandle->state);
+			USBH_UsrLog("Unknown MIDI state %u", (unsigned)MSHandle->state);
 			break;
 	}
 
@@ -208,7 +204,6 @@ USBH_StatusTypeDef USBH_MIDI_Stop(USBH_HandleTypeDef *phost) {
 	if (phost->gState == HOST_CLASS) {
 		MSHandle->state = MidiStreamingState::Idle;
 
-		USBH_ClosePipe(phost, MSHandle->ControlItf.ControlEP.pipe);
 		USBH_ClosePipe(phost, MSHandle->DataItf.InEP.pipe);
 		USBH_ClosePipe(phost, MSHandle->DataItf.OutEP.pipe);
 	}

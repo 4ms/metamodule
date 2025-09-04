@@ -123,7 +123,6 @@ using MidiStreamRxCallbackType = Function<void(std::span<uint8_t>)>;
 using MidiStreamTxCallbackType = Callback;
 
 struct MidiStreamingHandle {
-	AudioControlItf ControlItf;
 	MidiStreamingItf DataItf;
 	uint8_t *pTxData;
 	uint8_t *pRxData;
