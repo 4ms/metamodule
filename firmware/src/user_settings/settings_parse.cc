@@ -173,6 +173,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
 	read_or_default(node, "midi", settings, &UserSettings::midi);
 
+	read_or_default(node, "last_patch_opened", settings, &UserSettings::initial_patch_name);
 	// TODO: cleaner way to parse an enum and reject out of range?
 	if (node.is_map() && node.has_child("last_patch_vol")) {
 		unsigned t = 0;
@@ -182,8 +183,14 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	} else {
 		settings->initial_patch_vol = UserSettings{}.initial_patch_vol;
 	}
-	read_or_default(node, "last_patch_opened", settings, &UserSettings::initial_patch_name);
-	read_or_default(node, "load_initial_patch", settings, &UserSettings::load_initial_patch);
+
+	// load_initial_patch: Be backwards compatible when upgrading from v2.0.x to v2.1
+	// If the settings file doesn't have this field, then make it true if last_patch_opened was set
+	if (node.is_map() && node.has_child("load_initial_patch")) {
+		node["load_initial_patch"] >> settings->load_initial_patch;
+	} else {
+		settings->load_initial_patch = (settings->initial_patch_name.length() > 0);
+	}
 
 	return true;
 }
