@@ -772,10 +772,6 @@ lv_obj_t *create_file_menu_item(lv_obj_t *parent, std::string_view text) {
 	lv_obj_set_style_radius(button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_color(button, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_border_color(button, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_border_opa(button, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_border_width(button, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_border_side(button, LV_BORDER_SIDE_TOP, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(button, 13, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(button, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
