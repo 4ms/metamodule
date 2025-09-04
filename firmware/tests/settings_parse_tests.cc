@@ -100,6 +100,7 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.initial_patch_name == "/somedir/SomePatch.yml");
 	CHECK(settings.initial_patch_vol == MetaModule::Volume::SDCard);
+	CHECK(settings.load_initial_patch == true);
 
 	CHECK(settings.screensaver.timeout_ms == 3);
 	CHECK(settings.screensaver.knobs_can_wake == true);
@@ -231,6 +232,8 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.initial_patch_name == "");
 	CHECK(settings.initial_patch_vol == MetaModule::Volume::NorFlash);
+	if (should_parse)
+		CHECK(settings.load_initial_patch == false);
 
 	CHECK(settings.screensaver.timeout_ms == MetaModule::ScreensaverSettings::defaultTimeout);
 	CHECK(settings.screensaver.knobs_can_wake == true);
