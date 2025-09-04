@@ -199,10 +199,7 @@ void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 		return;
 	}
 
-	if (pphost->pUser != NULL) {
-		pphost->pUser(pphost, HOST_USER_DISCONNECTION);
-	}
-
+	// Call Class->DeInit()
 	if (pphost->pActiveClass != NULL) {
 		pphost->pActiveClass->DeInit(pphost);
 		pphost->pActiveClass = NULL;
@@ -211,6 +208,13 @@ void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 	}
 
 	pphost->hubPortAddress = 0;
+	// Inform Host Handle of disconnection
+	if (pphost->pUser != NULL) {
+		pphost->pUser(pphost, HOST_USER_DISCONNECTION);
+	} else {
+		USBH_ErrLog("No host handle for host %p", pphost);
+	}
+
 	pphost->busy = 0;
 	pphost->valid = 0;
 
