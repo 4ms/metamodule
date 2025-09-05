@@ -73,7 +73,6 @@ public:
 
 	void disconnect() {
 		_is_connected = false;
-		this->usbhost->classData[0] = nullptr;
 		this->usbhost = nullptr;
 	}
 
