@@ -74,20 +74,24 @@ struct InternalPluginManager {
 		// Set 4ms display names
 		// TODO: read from plugin-mm.json
 		ModuleFactory::setModuleDisplayName("4msCompany:TSP", "Basic Wav Player");
+		ModuleFactory::setModuleDisplayName("4msCompany:BWAVP", "Basic Wav Player");
 		ModuleFactory::setModuleDisplayName("4msCompany:L4", "Listen Four");
 		ModuleFactory::setModuleDisplayName("4msCompany:DEV", "Dual EnvVCA");
 		ModuleFactory::setModuleDisplayName("4msCompany:SHEV", "Shaped Dual EnvVCA");
 		ModuleFactory::setModuleDisplayName("4msCompany:DLD", "Dual Looping Delay");
 		ModuleFactory::setModuleDisplayName("4msCompany:KPLS", "Karplus");
-		ModuleFactory::setModuleDisplayName("4msCompany:KPLS", "Percussion Interface");
+		ModuleFactory::setModuleDisplayName("4msCompany:PI", "Percussion Interface");
 		ModuleFactory::setModuleDisplayName("4msCompany:SH", "Sample/Hold");
-		ModuleFactory::setModuleDisplayName("4msCompany:StMix", "Stereo Mixed");
-		ModuleFactory::setModuleDisplayName("4msCompany:Switch14", "Stereo 1 to 4");
-		ModuleFactory::setModuleDisplayName("4msCompany:Switch41", "Stereo 4 to 1");
-		ModuleFactory::setModuleDisplayName("4msCompany:VCAM", "VCA Matrix");
+		ModuleFactory::setModuleDisplayName("4msCompany:StMix", "Stereo Mixer");
+		ModuleFactory::setModuleDisplayName("4msCompany:Switch14", "Switch 1 to 4");
+		ModuleFactory::setModuleDisplayName("4msCompany:Switch41", "Switch 4 to 1");
+		ModuleFactory::setModuleDisplayName("4msCompany:VCAM", "VCAMatrix");
 		ModuleFactory::setModuleDisplayName("4msCompany:Tapo", "Tapographic Delay");
 		ModuleFactory::setModuleDisplayName("4msCompany:CLKD", "Clock Divider");
 		ModuleFactory::setModuleDisplayName("4msCompany:CLKM", "Clock Multiplier");
+		ModuleFactory::setModuleDisplayName("4msCompany:MPEG", "Mini PEG");
+		ModuleFactory::setModuleDisplayName("4msCompany:MNMX", "Min/Max");
+		ModuleFactory::setModuleDisplayName("4msCompany:Atvert2", "Attenuverter");
 
 		//Load internal plugins
 		// TODO: use the glue/BRAND/plugin.cpp::init() function for each brand...
