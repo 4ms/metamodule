@@ -90,15 +90,15 @@ void async_dialog_filebrowser(const bool saving,
 	if (!action || !browser)
 		return;
 
-	auto path = startDir ? std::string_view{startDir} : "";
+	std::string_view path = startDir ? std::string_view{startDir} : "";
 
 	if (saving) {
 		auto filename = nameOrExtensions ? std::filesystem::path(nameOrExtensions).stem().string() : "Untitled";
 		auto extension = nameOrExtensions ? std::filesystem::path(nameOrExtensions).extension().string() : "";
 		show_file_save_dialog(save_dialog, path, filename, extension, action);
 	} else {
-		auto ext = nameOrExtensions ? std::string_view{nameOrExtensions} : "";
-		auto title_sv = title ? std::string_view{title} : "";
+		std::string_view ext = nameOrExtensions ? std::string_view{nameOrExtensions} : "";
+		std::string_view title_sv = title ? std::string_view{title} : "";
 		show_file_browser(browser, ext, path, title_sv, action);
 	}
 }
