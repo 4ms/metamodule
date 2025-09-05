@@ -121,5 +121,19 @@ public:
 	FatFileIO &get_msc_fileio() {
 		return usb_host.get_msc_fileio();
 	}
+
+	bool is_drive_detected() {
+		if (state == FUSB302::Device::ConnectedState::AsHost) {
+			return usb_host.is_msc_connected();
+		} else
+			return false;
+	}
+
+	bool is_drive_mounted() {
+		if (state == FUSB302::Device::ConnectedState::AsHost) {
+			return usb_host.is_msc_mounted();
+		} else
+			return false;
+	}
 };
 } // namespace MetaModule

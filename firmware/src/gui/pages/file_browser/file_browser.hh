@@ -234,28 +234,12 @@ private:
 		show_path = t.string();
 	}
 
-	std::string volstr(Volume vol) {
-		if (vol == Volume::USB)
-			return "usb:/";
-		else if (vol == Volume::SDCard)
-			return "sdc:/";
-		else if (vol == Volume::NorFlash)
-			return "nor:/";
-		else
+	static std::string volstr(Volume vol) {
+		auto str = volume_string(vol);
+		if (str == "" || str == "ram:/")
 			return "Disks:";
-	}
-
-	Volume strvol(std::string_view str) {
-		if (str.starts_with("usb:") || str.starts_with("USB:"))
-			return Volume::USB;
-
-		if (str.starts_with("sdc:") || str.starts_with("SD Card:"))
-			return Volume::SDCard;
-
-		if (str.starts_with("nor:") || str.starts_with("Internal:"))
-			return Volume::NorFlash;
-
-		return Volume::MaxVolumes;
+		else
+			return std::string(str);
 	}
 
 	void choose(std::string_view file) {
@@ -287,7 +271,7 @@ private:
 
 		} else if (text.ends_with(":/")) {
 			// Clicked a volume:
-			show_vol = strvol(text);
+			show_vol = string_to_volume(text);
 			show_path = "";
 		} else if (text.ends_with("/")) {
 			// Clicked a dir:

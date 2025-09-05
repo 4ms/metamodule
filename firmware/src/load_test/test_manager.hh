@@ -48,6 +48,7 @@ struct CpuLoadTest {
 			FS::write_file(file_storage_proxy, std::string(""), {"cpu_test_in_progress.csv", Volume::USB});
 
 			std::string results;
+			results.reserve(1024 * 1024); // reserve a 1MB to reduce memory fragmentation
 			LoadTest::test_all_modules([&file_storage_proxy, &ui, &results](std::string_view csv_line) {
 				results += csv_line;
 				FS::append_file(file_storage_proxy, csv_line, {"cpu_test_in_progress.csv", Volume::USB});

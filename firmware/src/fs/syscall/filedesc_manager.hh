@@ -13,9 +13,15 @@ struct FileDesc {
 };
 
 struct DirDesc {
-	DIR *dir = nullptr;
-	Volume vol{Volume::MaxVolumes};
+	DIR *dir;
+	Volume vol;
 	struct dirent cur_entry;
+
+	DirDesc()
+		: dir{nullptr}
+		, vol{Volume::MaxVolumes} {
+		cur_entry.d_name[0] = '\0';
+	}
 };
 
 namespace FileDescManager

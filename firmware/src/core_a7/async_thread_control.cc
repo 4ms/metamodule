@@ -3,6 +3,7 @@
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "util/fixed_vector.hh"
+#include <atomic>
 #include <optional>
 
 namespace MetaModule
@@ -15,8 +16,10 @@ constexpr int MAX_TASKS = 64;
 
 static FixedVector<Async::Task, MAX_TASKS> tasks;
 
-mdrivlib::Timekeeper async_task_core0;
-mdrivlib::Timekeeper async_task_core1;
+std::array<mdrivlib::Timekeeper, 2> async_task_timer;
+
+std::array<std::atomic<bool>, 2> is_paused = {false, false};
+std::array<std::atomic<bool>, 2> is_executing = {false, false};
 
 uint32_t core() {
 	uint32_t raw = __get_MPIDR();
@@ -58,7 +61,7 @@ void start_module_threads() {
 	const uint32_t current_core = core();
 	pr_trace("Start module threads on core %u\n", (unsigned)current_core);
 
-	auto &task_runner = current_core == 1 ? async_task_core1 : async_task_core0;
+	auto &task_runner = async_task_timer[current_core];
 
 	mdrivlib::TimekeeperConfig task_config{
 		.TIMx = current_core == 0 ? TIM7 : TIM6,
@@ -68,14 +71,11 @@ void start_module_threads() {
 	};
 
 	task_runner.init(task_config, [current_core = current_core]() {
-		auto &task_runner = current_core == 1 ? async_task_core1 : async_task_core0;
-		task_runner.pause();
+		async_task_timer[current_core].pause();
 
-		// if (current_core == 0)
-		// 	Debug::Pin2::high();
-		// else
-		// 	Debug::Pin1::high();
+		// current_core == 0 ? Debug::Pin2::high() : Debug::Pin1::high();
 
+		is_executing[current_core].store(true, std::memory_order_seq_cst);
 		for (auto &task : tasks) {
 			if (task.enabled && task.core_id == current_core) {
 				task.action();
@@ -83,14 +83,16 @@ void start_module_threads() {
 				if (task.one_shot)
 					task.enabled = false;
 			}
+			// Stop running tasks if another core sent a pause request while we were executing a task
+			if (is_paused[current_core].load(std::memory_order_seq_cst))
+				break;
 		}
+		is_executing[current_core].store(false, std::memory_order_seq_cst);
 
-		// if (current_core == 0)
-		// 	Debug::Pin2::low();
-		// else
-		// 	Debug::Pin1::low();
+		// current_core == 0 ? Debug::Pin2::low() : Debug::Pin1::low();
 
-		task_runner.resume();
+		if (!is_paused[current_core].load(std::memory_order_seq_cst))
+			async_task_timer[current_core].resume();
 	});
 	task_runner.start();
 }
@@ -100,8 +102,13 @@ void pause_module_threads() {
 	pause_module_threads(1);
 }
 
+bool is_any_thread_executing() {
+	return is_executing[0].load(std::memory_order_acquire) || is_executing[1].load(std::memory_order_acquire);
+}
+
 void pause_module_threads(unsigned core_id) {
-	auto &task_runner = core_id == 1 ? async_task_core1 : async_task_core0;
+	is_paused[core_id & 1].store(true, std::memory_order_seq_cst);
+	auto &task_runner = async_task_timer[core_id & 1];
 	task_runner.pause();
 }
 
@@ -111,19 +118,20 @@ void resume_module_threads() {
 }
 
 void resume_module_threads(unsigned core_id) {
-	auto &task_runner = core_id == 1 ? async_task_core1 : async_task_core0;
+	is_paused[core_id & 1].store(false, std::memory_order_seq_cst);
+	auto &task_runner = async_task_timer[core_id & 1];
 	task_runner.resume();
 }
 
 void kill_module_threads() {
-	async_task_core0.stop();
-	async_task_core1.stop();
+	async_task_timer[0].stop();
+	async_task_timer[1].stop();
 }
 
 void peg_task_to_core(uint32_t module_id, uint32_t core_id) {
 	for (auto &task : tasks) {
 		if (task.module && task.module->id == module_id) {
-			pr_info("Peg task for module id %u: task id %u -> core %u\n", module_id, task.id, core_id);
+			pr_dbg("Peg task for module id %u: task id %u -> core %u\n", module_id, task.id, core_id);
 			task.core_id = core_id;
 		}
 	}

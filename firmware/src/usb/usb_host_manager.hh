@@ -292,9 +292,10 @@ public:
 		}
 	}
 
+	static inline uint8_t connected_classcode = 0xFF;
+
 	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {
 		USBHostHelper host{phost};
-		static uint8_t connected_classcode = 0xFF;
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
@@ -468,6 +469,14 @@ public:
 	bool connect_hub_device(uint8_t port, uint8_t device_address);
 	bool disconnect_hub_device(uint8_t port);
 	HubPortInfo* get_hub_port_info(uint8_t port);
+	
+	bool is_msc_connected() {
+		return connected_classcode == USB_MSC_CLASS;
+	}
+
+	bool is_msc_mounted() {
+		return msc_host.is_mounted();
+	}
 };
 
 // USB Host CDC Transmit Callback - called by the USB stack when CDC data has been sent

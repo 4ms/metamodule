@@ -65,6 +65,10 @@ def str_to_identifier(s):
     s = re.sub(r'\|', '_OR_', s)
     # Remove spaces
     s = re.sub(r' ', '', s)
+    # Remove periods
+    s = re.sub(r'\.', '', s)
+    # Remove commas
+    s = re.sub(r'\,', '', s)
     # Replace other special characters with underscore
     s = re.sub(r'\W', '_', s)
     return s

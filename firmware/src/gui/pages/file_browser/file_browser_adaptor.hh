@@ -9,9 +9,9 @@ struct FileBrowserDialog;
 struct FileSaveDialog;
 
 void show_file_browser(FileBrowserDialog *browser,
-					   const char *const nameOrExtensions,
-					   const char *const startDir,
-					   const char *const title,
+					   std::string_view nameOrExtensions,
+					   std::string_view startDir,
+					   std::string_view title,
 					   const std::function<void(char *)> action);
 
 void show_file_save_dialog(FileSaveDialog *save_dialog,

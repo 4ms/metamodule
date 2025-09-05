@@ -31,6 +31,9 @@ TEST_SOURCES += tests/stubs/plugin_module.cc
 TEST_SOURCES += src/params/expanders.cc
 TEST_SOURCES += src/gui/elements/element_name.cc
 TEST_SOURCES += src/gui/elements/panel_name.cc
+TEST_SOURCES += coreproc_plugin/dsp/stream_resampler.cc
+TEST_SOURCES += coreproc_plugin/dsp/block_resampler.cc
+TEST_SOURCES += coreproc_plugin/wav/wav_file_stream.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
 TEST_SOURCES += src/core_a7/rotocontrol.cc
 
@@ -52,13 +55,15 @@ CXXFLAGS = 	-Wall \
 			-Ilib/patch-serial/ryml \
 			-Ilib/patch-serial/ryml/rapidyaml/src \
 			-Ilib/CoreModules \
-			-Imetamodule-plugin-sdk/metamodule-core-interface \
-			-Imetamodule-plugin-sdk/metamodule-rack-interface/dep/include \
+			-Imetamodule-plugin-sdk/core-interface \
+			-Imetamodule-plugin-sdk/rack-interface/dep/include \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
 			-isystem $(TEST_DIR) \
 			-DTESTPROJECT \
 			-g3 -O0 \
+
+$(BUILDDIR)/src/gui/elements/element_name.o: CXXFLAGS += -Wno-deprecated-anon-enum-enum-conversion
 
 ### Boilerplate below here:
 

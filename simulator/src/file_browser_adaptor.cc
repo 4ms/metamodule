@@ -2,24 +2,23 @@
 #include "gui/pages/file_browser/file_save_dialog.hh"
 #include "patch_file/file_storage_comm.hh"
 #include <functional>
+#include <string_view>
 
 namespace MetaModule
 {
 
 void show_file_browser(FileBrowserDialog *browser,
-					   const char *const nameOrExtensions,
-					   const char *const startDir,
-					   const char *const title,
+					   std::string_view nameOrExtensions,
+					   std::string_view startDir,
+					   std::string_view title,
 					   const std::function<void(char *)> action) {
-	if (title)
+	if (title.data())
 		browser->set_title(title);
 
-	if (nameOrExtensions)
+	if (nameOrExtensions.data())
 		browser->filter_extensions(nameOrExtensions);
 
-	std::string start_dir = (startDir) ? SimulatorPatchStorage::convert_path_to_mm(startDir) : "";
-
-	browser->show(start_dir, [=](char *path) {
+	browser->show(startDir, [=](char *path) {
 		auto host_path = SimulatorPatchStorage::convert_path_to_host(path);
 
 		// Need to allocate char* because action() is expecting to free() it

@@ -34,10 +34,11 @@ set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
 set(API_SYMBOL_NAMES_FILE ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugin-sdk/api-symbols.txt)
 get_target_property(VcvPluginBinDir vcv_plugin_export BINARY_DIR)
 get_target_property(CoreProcPluginBinDir coreproc_plugin_export BINARY_DIR)
+get_target_property(HardwareSupportBinDir hardware_support BINARY_DIR)
 set(SYMBOLS_BINFILE_DIRS
   --objdir ${VcvPluginBinDir} 
   --objdir ${CoreProcPluginBinDir} 
-  --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
+  --objdir ${HardwareSupportBinDir} 
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/fs/dirent/
 
 )
@@ -257,8 +258,9 @@ add_custom_target(
   COMMAND cd ${PROJECT_SOURCE_DIR} && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${LIBDIR}/patch-serial && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
-  COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/tests && make all
-  COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests && make all
+  COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/lib/CoreModules/tests all
+  COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests all
+  COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/core-interface/tests all
   COMMENT "Running unit tests"
   VERBATIM USES_TERMINAL
 )
@@ -271,6 +273,7 @@ file(
   "${PROJECT_SOURCE_DIR}/lib/CoreModules/tests/build"
   "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests/build"
   "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper/tests/build/*"
+  "${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/core-interface/tests/build"
 )
 set_target_properties(tests PROPERTIES ADDITIONAL_CLEAN_FILES "${tests_clean_files}")
 
@@ -289,6 +292,10 @@ set_property(
            ${PROJECT_SOURCE_DIR}/tests/build
            ${PROJECT_SOURCE_DIR}/lib/mdrivlib/tests/build
            ${LIBDIR}/cpputil/tests/build
+           ${LIBDIR}/patch-serial/tests/build
+           ${PROJECT_SOURCE_DIR}/lib/CoreModules/tests/build
+           ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests/build
+           ${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/core-interface/tests/build
 )
 
 #

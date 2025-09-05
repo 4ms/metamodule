@@ -61,15 +61,7 @@ int open(const char *filename, int flags, int mode) {
 
 		auto [path, volume] = split_volume(filename);
 
-		if (volume == Volume::RamDisk && mRamdisk) {
-			if (mRamdisk->open(path, file->fatfil)) {
-				file->vol = volume;
-				return *fd;
-			}
-		}
-
-		else if (volume == Volume::SDCard || volume == Volume::USB)
-		{
+		if (volume == Volume::RamDisk || volume == Volume::SDCard || volume == Volume::USB) {
 			uint8_t fatfs_modes = 0;
 
 			if ((flags & O_ACCMODE) == O_RDWR)
@@ -86,13 +78,26 @@ int open(const char *filename, int flags, int mode) {
 					fatfs_modes |= FA_OPEN_ALWAYS;
 			}
 
-			if (fs_proxy.open(path, file->fatfil, fatfs_modes)) {
-				file->vol = volume;
-				return *fd;
+			if (volume == Volume::RamDisk) {
+				if (mRamdisk && mRamdisk->open(path, file->fatfil, fatfs_modes)) {
+					file->vol = volume;
+					return *fd;
+				}
+			} else {
+				// SDCard or USB:
+				if (fs_proxy.open(filename, file->fatfil, fatfs_modes)) {
+					file->vol = volume;
+					return *fd;
+				}
 			}
 		}
 
-		pr_err("Opening file %s on vol %d with flags %d mode %d failed\n", filename, (int)volume, flags, mode);
+		else if (volume == Volume::NorFlash)
+		{
+			pr_err("Filesystem access to internal NorFlash drive not permitted\n");
+		}
+
+		pr_err("Opening file '%s' on vol %d with flags %d mode %d failed\n", filename, (int)volume, flags, mode);
 		FileDescManager::dealloc_file(*fd);
 		return -1;
 

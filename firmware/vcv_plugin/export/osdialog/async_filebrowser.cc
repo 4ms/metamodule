@@ -28,12 +28,12 @@ void async_open_file(std::string_view initial_path,
 					 std::string_view title,
 					 std::function<void(char *path)> &&action) {
 	using namespace MetaModule;
-	show_file_browser(browser, filter_extension_list.data(), initial_path.data(), title.data(), action);
+	show_file_browser(browser, filter_extension_list, initial_path, title, action);
 }
 
 void async_open_dir(std::string_view initial_path, std::string_view title, std::function<void(char *path)> &&action) {
 	using namespace MetaModule;
-	show_file_browser(browser, "*/", initial_path.data(), title.data(), action);
+	show_file_browser(browser, "*/", initial_path, title, action);
 }
 
 void async_save_file(std::string_view initial_path,
@@ -41,7 +41,7 @@ void async_save_file(std::string_view initial_path,
 					 std::string_view extension,
 					 std::function<void(char *path)> &&action) {
 	using namespace MetaModule;
-	show_file_save_dialog(save_dialog, initial_path.data(), filename.data(), extension.data(), action);
+	show_file_save_dialog(save_dialog, initial_path, filename, extension, action);
 }
 
 ///// Rack-like API:
@@ -73,7 +73,7 @@ void async_osdialog_file(osdialog_file_action action,
 
 	} else if (action == OSDIALOG_OPEN) {
 		auto filter_string = stringify_osdialog_filters(filters);
-		show_file_browser(browser, filter_string.c_str(), path, "Open File:", action_function);
+		show_file_browser(browser, filter_string, path, "Open File:", action_function);
 
 	} else if (action == OSDIALOG_OPEN_DIR) {
 		show_file_browser(browser, "*/", path, "Open Folder:", action_function);
@@ -90,15 +90,15 @@ void async_dialog_filebrowser(const bool saving,
 	if (!action || !browser)
 		return;
 
+	std::string_view path = startDir ? std::string_view{startDir} : "";
+
 	if (saving) {
-		auto path = startDir ? std::string_view{startDir} : "";
 		auto filename = nameOrExtensions ? std::filesystem::path(nameOrExtensions).stem().string() : "Untitled";
 		auto extension = nameOrExtensions ? std::filesystem::path(nameOrExtensions).extension().string() : "";
 		show_file_save_dialog(save_dialog, path, filename, extension, action);
 	} else {
-		auto path = startDir ? startDir : "";
-		auto ext = nameOrExtensions ? nameOrExtensions : "";
-		auto title_v = title ? title : "";
-		show_file_browser(browser, ext, path, title_v, action);
+		std::string_view ext = nameOrExtensions ? std::string_view{nameOrExtensions} : "";
+		std::string_view title_sv = title ? std::string_view{title} : "";
+		show_file_browser(browser, ext, path, title_sv, action);
 	}
 }

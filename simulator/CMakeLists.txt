@@ -99,10 +99,13 @@ set(HOST ON)
 add_subdirectory(${FWDIR}/lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
 # #################### Application ############################################
+add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_CURRENT_BINARY_DIR}/coreproc_plugin)
 
 add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 add_subdirectory(${LIBDIR}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
+
+target_link_libraries(CoreModules-4ms PUBLIC coreproc_plugin_export)
 
 if (NOT HEADLESS)
 	target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
@@ -114,12 +117,12 @@ if(HEADLESS)
 		src/headless/audio_files.cc 
 		src/headless/nanovg.cc
 		stubs/svg.cc
-		stubs/random.cpp
-		stubs/drivers/time.cc
+		hardware_support/random.cc
+		hardware_support/time.cc
+		hardware_support/memory.cc
+		hardware_support/filesystem_helpers.cc
 
 		${FWDIR}/src/midi/midi_router.cc
-
-		${FWDIR}/coreproc_plugin/create.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
@@ -127,12 +130,14 @@ else()
 	add_executable(simulator 
 		src/main.cc 
 		src/ui.cc
-		stubs/random.cpp
 		stubs/memory/heap.cc
 		stubs/fs/fs_proxy.cc
 		stubs/async_thread_control.cc
-		stubs/drivers/time.cc
 		stubs/static_buffers.cc
+		hardware_support/random.cc
+		hardware_support/time.cc
+		hardware_support/memory.cc
+		hardware_support/filesystem_helpers.cc
 
 		${FWDIR}/src/gui/elements/element_name.cc
 		${FWDIR}/src/gui/elements/panel_name.cc
@@ -141,6 +146,9 @@ else()
 		# ${FWDIR}/src/gui/slsexport/prefs_menu.cc
 		${FWDIR}/src/gui/fonts/fonts.cc
 		${FWDIR}/src/gui/fonts/ttf.cc
+		${FWDIR}/src/gui/pages/module_view/element_roller.cc
+		${FWDIR}/src/gui/pages/module_view/quick_assign.cc
+		${FWDIR}/src/gui/pages/module_view/draw_module.cc
 		${FWDIR}/src/fw_update/updater_proxy.cc
 		${FWDIR}/src/patch_play/modules_helpers.cc
 		${FWDIR}/src/midi/midi_router.cc
@@ -166,10 +174,9 @@ else()
 		${FWDIR}/src/user_settings/settings_parse.cc
 		${FWDIR}/src/user_settings/settings_serialize.cc
 
-		${FWDIR}/coreproc_plugin/create.cc
-		${FWDIR}/coreproc_plugin/async_thread.cc
-
 		${FWDIR}/metamodule-plugin-sdk/version.cc
+
+		${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
 		)
 
 # see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
@@ -221,6 +228,7 @@ target_link_libraries(simulator PRIVATE
 	metamodule::patch-serial
 	vcv_ports
 )
+
 if(NOT HEADLESS)
 	target_link_libraries(simulator PRIVATE 
 		${SDL2_LIBRARIES}

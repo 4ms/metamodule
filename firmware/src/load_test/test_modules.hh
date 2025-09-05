@@ -42,6 +42,8 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 
 	append_file(csv_header());
 
+	PatchPlayer player;
+
 	auto brands = ModuleFactory::getAllBrands();
 	for (auto brand : brands) {
 
@@ -71,7 +73,7 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 #endif
 
 			for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
-				ModuleLoadTester tester(entry.slug);
+				ModuleLoadTester tester(player, entry.slug);
 
 				pr_trace("Block size %u\n", blocksize);
 
@@ -111,6 +113,14 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 
 			entry.raw_mem_used = (int32_t)mem_end.uordblks - (int32_t)mem_start.uordblks;
 			pr_info("Mem used: %d\n", entry.raw_mem_used);
+
+			// pr_info("    arena    %zu (total space allocated so far via sbrk)\n", mem_end.arena);
+			// pr_info("    ordblks  %zu (number of non-inuse chunks)\n", mem_end.ordblks);
+			// pr_info("    hblks    %zu (number of mmapped regions)\n", mem_end.hblks);
+			// pr_info("    hblkhd   %zu (total space in mmapped regions)\n", mem_end.hblkhd);
+			// pr_info("    uordblks %zu (total allocated space)\n", mem_end.uordblks);
+			// pr_info("    fordblks %zu (total non-inuse space)\n", mem_end.fordblks);
+			// pr_info("    keepcost %zu (top-most, releasable via malloc_trim space)\n", mem_end.keepcost);
 #endif
 
 			append_file(entry_to_csv(entry));
@@ -200,7 +210,7 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 	}
 
 	char buf[32];
-	snprintf(buf, 32, "%llu,", entry.load_time / 1000);
+	snprintf(buf, 32, "%llu,", (unsigned long long)(entry.load_time / 1000u));
 	s += buf;
 	pr_info("%llu,", entry.load_time / 1000);
 
