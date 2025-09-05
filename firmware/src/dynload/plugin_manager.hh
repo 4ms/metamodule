@@ -30,6 +30,7 @@ public:
 	void unload_plugin(std::string_view name) {
 		for (unsigned i = 0; auto const &plugin : loaded_plugin_list) {
 			if (plugin.fileinfo.plugin_name == name) {
+				ModuleFactory::unregisterBrand(name);
 
 				// Cleanup files we copied to the ramdisk
 				for (auto const &file : plugin.loaded_files) {
@@ -55,6 +56,7 @@ public:
 				for (auto &x : code) {
 					x = 0xEAFFFFFE; //bl .
 				}
+
 				break;
 			}
 			i++;

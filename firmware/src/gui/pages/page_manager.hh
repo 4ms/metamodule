@@ -17,7 +17,7 @@
 #include "gui/pages/knobset_view.hh"
 #include "gui/pages/main_menu.hh"
 #include "gui/pages/module_list.hh"
-#include "gui/pages/module_view.hh"
+#include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"
@@ -208,8 +208,10 @@ public:
 			DisplayNotification::show(*msg);
 		}
 
+		// Handle audio overload flashing red
 		DisplayNotification::flash_overload(info.metaparams.audio_overruns);
 
+		// Handle catchup notification from patch player
 		if (auto panel_knob_id = info.patch_playloader.is_panel_knob_catchup_inaccessible()) {
 			std::string msg =
 				"Knob " + std::string(PanelDef::get_map_param_name(*panel_knob_id)) +
@@ -233,20 +235,6 @@ public:
 				pr_info("Wrote settings\n");
 
 			gui_state.do_write_settings = false;
-			gui_state.write_settings_after_ms = 0;
-		}
-
-		if (gui_state.write_settings_after_ms > 0) {
-			if (get_time() >= gui_state.write_settings_after_ms) {
-
-				if (!Settings::write_settings(info.patch_storage, info.settings)) {
-					pr_err("Failed to write settings file (timer)\n");
-				} else {
-					pr_info("Wrote settings (timer)\n");
-				}
-
-				gui_state.write_settings_after_ms = 0;
-			}
 		}
 	}
 

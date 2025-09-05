@@ -3,6 +3,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
 option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" ON)
 option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
+option(SUPPRESS_HIL_MESSAGES    "Suppress HIL messages" OFF)
 
 
 include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
@@ -29,6 +30,8 @@ target_include_directories(
             ${FWDIR}/src/core_a7
 )
 target_compile_options(mdrivlib_interface INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
+
+add_subdirectory(hardware_support)
 
 #
 # LVGL
@@ -72,7 +75,6 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
-target_include_directories(CoreModules-4ms PRIVATE ${FWDIR}/src/vcv_hardware)
 
 target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
 
@@ -104,6 +106,8 @@ add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 add_executable(
   main.elf
   ${FWDIR}/system/libc_stub.c
+  ${FWDIR}/system/reent_mm.cc
+  ${FWDIR}/system/lock.cc
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
@@ -131,6 +135,9 @@ add_executable(
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
   ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
+  ${FWDIR}/src/gui/pages/module_view/element_roller.cc
+  ${FWDIR}/src/gui/pages/module_view/draw_module.cc
+  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
@@ -194,9 +201,9 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
   #
-  ${FWDIR}/src/vcv_hardware/random.cpp
-  #
   ${FWDIR}/src/patch_play/modules_helpers.cc
+  #
+  ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
@@ -208,6 +215,9 @@ set_source_files_properties(
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
+  ${FWDIR}/src/gui/pages/module_view/draw_module.cc
+  ${FWDIR}/src/gui/pages/module_view/element_roller.cc
+  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
   ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
@@ -225,7 +235,6 @@ target_include_directories(
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${FWDIR}/src/vcv_hardware
           ${FWDIR}/src/fs
           ${FWDIR}/src/core_a7
           ${FWDIR}/src/medium
@@ -251,10 +260,14 @@ target_link_libraries(main.elf PUBLIC vcv_plugin)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
+target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,hardware_support>")
 
 if (CPU_TEST_ALL_MODULES)
   target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)
   # target_compile_definitions(main.elf PRIVATE MM_LOADTEST_MEASURE_MEMORY=1)
+endif()
+if (SUPPRESS_HIL_MESSAGES)
+  target_compile_definitions(main.elf PRIVATE SUPPRESS_HIL_MESSAGES=1)
 endif()
 
 if (CONSOLE_USE_USB)

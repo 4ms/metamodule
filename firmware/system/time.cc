@@ -1,5 +1,5 @@
+#include "drivers/stm32xx.h"
 #include "pr_dbg.hh"
-#include "stm32mp1xx.h"
 #include <ctime>
 
 void print_time() {
@@ -14,10 +14,6 @@ void print_time() {
 			tm->tm_sec,
 			(unsigned long)HAL_GetTick(),
 			secs);
-}
-
-uint32_t get_ticks() {
-	return HAL_GetTick();
 }
 
 extern "C" clock_t _times(struct tms *buf) {

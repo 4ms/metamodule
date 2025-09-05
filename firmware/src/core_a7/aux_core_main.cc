@@ -9,9 +9,12 @@
 #include "fs/syscall/filesystem.hh"
 #include "fw_update/auto_updater.hh"
 #include "gui/ui.hh"
+#include "internal_interface/plugin_app_if_internal.hh"
+#include "internal_interface/plugin_app_interface.hh"
 #include "internal_plugin_manager.hh"
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
+#include "system/print_time.hh"
 
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
@@ -55,6 +58,11 @@ extern "C" void aux_core_main() {
 	ui.update_screen();
 	ui.update_page();
 
+	PluginAppInterface::Internal plugin_internal{
+		ui.get_settings(), *A7SharedMemoryS::ptrs.open_patch_manager, ui.get_notify_queue()};
+	PluginAppInterface plugin_interface{plugin_internal};
+	plugin_interface.register_interface();
+
 	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
 	if (!internal_plugin_manager.asset_fs_valid) {
 		ui.notify_error("Graphic assets are corrupted!\nRe-install firmware.");
@@ -80,6 +88,7 @@ extern "C" void aux_core_main() {
 
 	// Signal that we're ready
 	printf("A7 Core 2 initialized\n");
+	print_time();
 
 	HWSemaphore<AuxCoreReady>::unlock();
 

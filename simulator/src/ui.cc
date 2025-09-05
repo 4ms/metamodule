@@ -1,6 +1,8 @@
 #include "ui.hh"
 #include "dynload/preload_plugins.hh"
 #include "gui/notify/queue.hh"
+#include "internal_interface/plugin_app_if_internal.hh"
+#include "internal_interface/plugin_app_interface.hh"
 #include "stubs/fs/fs_proxy.hh"
 #include "thorvg.h"
 
@@ -28,6 +30,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 				   settings,
 				   screensaver,
 				   ramdisk}
+	, plugin_internal{settings, open_patches_manager, notify_queue}
+	, plugin_interface{plugin_internal}
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
 
@@ -63,6 +67,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 	params.set_output_plugged(cur_outchan_right, true);
 
 	patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.allow_jump_outofrange);
+
+	plugin_interface.register_interface();
 }
 
 // "Scheduler" for UI tasks
@@ -78,6 +84,11 @@ bool Ui::update() {
 	tm = lv_tick_get();
 	if (tm - last_page_task_tm >= 16) {
 		transfer_aux_button_events();
+
+		metaparams.rotary_pushed.add_motion({.abs_pos = {}, .motion = input_driver.rotary_push_turn_motion()});
+		metaparams.rotary.add_motion({.abs_pos = {}, .motion = input_driver.rotary_turn_motion()});
+		metaparams.rotary_button.register_state(input_driver.rotary_is_pressed());
+
 		transfer_params();
 		change_knobset();
 		update_channel_selections();

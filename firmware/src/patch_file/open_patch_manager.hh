@@ -201,6 +201,11 @@ public:
 			view_patch_->filesize = filesize;
 	}
 
+	void mark_playing_patch_modified() {
+		if (playing_patch_)
+			playing_patch_->modification_count++;
+	}
+
 	unsigned get_playing_patch_modification_count() {
 		return playing_patch_ ? playing_patch_->modification_count : 0;
 	}

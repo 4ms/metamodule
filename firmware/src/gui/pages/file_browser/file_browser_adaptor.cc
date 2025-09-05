@@ -6,20 +6,19 @@ namespace MetaModule
 {
 
 void show_file_browser(FileBrowserDialog *browser,
-					   const char *const nameOrExtensions,
-					   const char *const startDir,
-					   const char *const title,
+					   std::string_view nameOrExtensions,
+					   std::string_view startDir,
+					   std::string_view title,
 					   const std::function<void(char *)> action) {
 	if (!browser)
 		return;
 
-	if (title)
+	if (title.data())
 		browser->set_title(title);
-	if (nameOrExtensions)
+	if (nameOrExtensions.data())
 		browser->filter_extensions(nameOrExtensions);
 
-	std::string_view start_dir = (startDir) ? std::string_view{startDir} : std::string_view{};
-	browser->show(start_dir, action);
+	browser->show(startDir, action);
 }
 
 void show_file_save_dialog(FileSaveDialog *save_dialog,

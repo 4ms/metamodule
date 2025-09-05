@@ -67,9 +67,10 @@ public:
 		USBH_Process(&usbhost);
 	}
 
+	static inline uint8_t connected_classcode = 0xFF;
+
 	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {
 		USBHostHelper host{phost};
-		static uint8_t connected_classcode = 0xFF;
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
@@ -153,5 +154,13 @@ public:
 
 	FatFileIO &get_msc_fileio() {
 		return msc_host.get_fileio();
+	}
+
+	bool is_msc_connected() {
+		return connected_classcode == USB_MSC_CLASS;
+	}
+
+	bool is_msc_mounted() {
+		return msc_host.is_mounted();
 	}
 };

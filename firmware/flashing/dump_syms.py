@@ -69,8 +69,6 @@ def GetLibcSymbols():
          "__atexit",
          "__aeabi_atexit",
          "__atexit_recursive_mutex",
-
-         "_Z9get_ticksv",
     ]
     return libc_syms
 

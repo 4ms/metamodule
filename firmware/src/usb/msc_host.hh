@@ -40,4 +40,8 @@ public:
 	FatFileIO &get_fileio() {
 		return msc;
 	}
+
+	bool is_mounted() {
+		return msc.is_mounted();
+	}
 };

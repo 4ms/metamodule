@@ -30,7 +30,14 @@ struct PatchViewPage : PageBase {
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
-		, file_menu{patch_playloader, patch_storage, patches, file_save_dialog, notify_queue, page_list, gui_state}
+		, file_menu{patch_playloader,
+					patch_storage,
+					patches,
+					file_save_dialog,
+					notify_queue,
+					page_list,
+					gui_state,
+					settings}
 		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
@@ -390,9 +397,10 @@ struct PatchViewPage : PageBase {
 			lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
 		}
 
-		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
+		if (is_patch_playloaded)
 			redraw_elements();
 
+		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			lv_obj_set_style_border_width(ui_PlayButton, 0, LV_PART_MAIN);
 
 			if (!lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
@@ -424,7 +432,7 @@ private:
 		if (patch_playloader.is_loading_patch())
 			return;
 
-		if (!is_patch_playloaded || patch_playloader.is_audio_muted())
+		if (!is_patch_playloaded)
 			return;
 
 		for (auto &canvas : module_canvases) {
@@ -680,28 +688,10 @@ private:
 		page->redraw_modulename();
 	}
 
-	void save_last_opened_patch_in_settings() {
-		if (settings.last_patch_vol != patches.get_view_patch_vol() ||
-			settings.last_patch_opened != patches.get_view_patch_filename())
-		{
-			settings.last_patch_vol = patches.get_view_patch_vol();
-			settings.last_patch_opened = patches.get_view_patch_filename();
-			pr_info("Will set last_patch opened to %s on %d\n",
-					settings.last_patch_opened.c_str(),
-					settings.last_patch_vol);
-
-			if (gui_state.write_settings_after_ms == 0) {
-				gui_state.write_settings_after_ms = get_time() + 60 * 1000; //1 minute delay
-				pr_info("Setting timer...\n");
-			}
-		}
-	}
-
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page->is_patch_playloaded) {
 			page->patch_playloader.request_load_view_patch();
-			page->save_last_opened_patch_in_settings();
 			page->gui_state.playing_patch_needs_manual_reload = false;
 
 		} else {

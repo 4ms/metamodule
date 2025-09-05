@@ -20,7 +20,7 @@ struct TarEntry {
 };
 
 class Archive {
-	static constexpr size_t MaxEntrySizeBytes = 10 * 1024 * 1024;
+	static constexpr size_t MaxEntrySizeBytes = 20 * 1024 * 1024;
 
 	std::span<const char> filedata;
 	unsigned read_pos = 0;
