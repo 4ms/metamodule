@@ -49,7 +49,7 @@ struct JackMapViewPage : PageBase {
 	}
 
 	void onJackMapClick(unsigned idx, JackMapType type) {
-		pr_dbg("%s Jack: %d\n", type == JackMapType::Input ? "Input" : "Output", idx);
+		pr_trace("%s Jack: %d\n", type == JackMapType::Input ? "Input" : "Output", idx);
 
 		if (type == JackMapType::Input) {
 			const auto &i = patch->mapped_ins[idx];
