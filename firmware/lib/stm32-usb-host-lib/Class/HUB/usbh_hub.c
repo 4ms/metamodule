@@ -223,7 +223,7 @@ void detach(USBH_HandleTypeDef *_phost, uint16_t idx) {
 
 	for (unsigned i = 0; i < USBH_MAX_NUM_INTERFACES; ++i) {
 		if (pphost->classData[i]) {
-			USBH_DbgLog("Detach: set phost(%p) classData[%d] to NULL", pphost, i);
+			USBH_DbgLog("Detach: set pphost(%p) classData[%d] to NULL", pphost, i);
 			pphost->classData[i] = NULL;
 		}
 	}
@@ -474,9 +474,8 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 						HUB_Handle->NumPorts,
 						HUB_Handle->pwrGoodDelay);
 			USBH_UsrLog("=============================================");
-			// HUB_Handle->hubClassRequestPort = 1;
-			// HUB_Handle->ctl_state = HUB_REQ_RESETS;
-			HUB_Handle->ctl_state = HUB_REQ_DONE;
+			HUB_Handle->ctl_state = HUB_REQ_RESETS; //reset all ports
+			// HUB_Handle->ctl_state = HUB_REQ_DONE; //skip to the end
 			break;
 
 			//////////////////////////////////////////////
@@ -519,77 +518,33 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost) {
 			if (status == USBH_OK) {
 				USBH_TargetTypeDef *const tg = &HUB_Handle->Targets[HUB_Handle->hubClassRequestPort - 1];
 				USB_HUB_PORT_STATUS *const st = (USB_HUB_PORT_STATUS *)HUB_Handle->buffer;
+
 				if (st->wPortStatus.PORT_ENABLE /* && HUB_Handle->hubClassRequestPort > 1 */) {
-					if (st->wPortStatus.PORT_LOW_SPEED) {
-						// LOW SPEED, мышка - нашлась. (mouse found)
-						HUB_Handle->detectedPorts += 1;
+					HUB_Handle->detectedPorts++;
+					tg->tt_hubaddr = phost->currentTarget->dev_address;
+					tg->dev_address = USBH_ADDRESS_DEFAULT;
+					tg->tt_prtaddr = HUB_Handle->hubClassRequestPort;
+					tg->speed = (st->wPortStatus.PORT_LOW_SPEED)  ? USBH_SPEED_LOW :
+								(st->wPortStatus.PORT_HIGH_SPEED) ? USBH_SPEED_HIGH :
+																	USBH_SPEED_FULL;
+					phost->currentTarget = tg;
 
-						tg->tt_hubaddr = phost->currentTarget->dev_address;
-						tg->dev_address = USBH_ADDRESS_DEFAULT;
-						tg->speed = USBH_SPEED_LOW;
-						tg->tt_prtaddr = HUB_Handle->hubClassRequestPort;
-
-						USBH_UsrLog("port %d status val=%04X: conn=%d, ena=%d, pwr=%d, hs=%d, ls=%d - LS device",
-									HUB_Handle->hubClassRequestPort,
-									st->wPortStatus.val,
-									st->wPortStatus.PORT_CONNECTION,
-									st->wPortStatus.PORT_ENABLE,
-									st->wPortStatus.PORT_POWER,
-									st->wPortStatus.PORT_HIGH_SPEED,
-									st->wPortStatus.PORT_LOW_SPEED);
-
-						phost->currentTarget = tg;
-					} else if (st->wPortStatus.PORT_HIGH_SPEED) {
-						// HIGH SPEED, флешка - нашлась.
-						HUB_Handle->detectedPorts += 1;
-
-						tg->tt_hubaddr = phost->currentTarget->dev_address;
-						tg->dev_address = USBH_ADDRESS_DEFAULT;
-						tg->speed = USBH_SPEED_HIGH;
-						tg->tt_prtaddr = HUB_Handle->hubClassRequestPort;
-
-						USBH_UsrLog("port %d status val=%04X: conn=%d, ena=%d, pwr=%d, hs=%d, ls=%d - HS device",
-									HUB_Handle->hubClassRequestPort,
-									st->wPortStatus.val,
-									st->wPortStatus.PORT_CONNECTION,
-									st->wPortStatus.PORT_ENABLE,
-									st->wPortStatus.PORT_POWER,
-									st->wPortStatus.PORT_HIGH_SPEED,
-									st->wPortStatus.PORT_LOW_SPEED);
-
-						phost->currentTarget = tg;
-					} else {
-						// FULL SPEED
-						HUB_Handle->detectedPorts += 1;
-
-						tg->tt_hubaddr = phost->currentTarget->dev_address;
-						tg->dev_address = USBH_ADDRESS_DEFAULT;
-						tg->speed = USBH_SPEED_FULL;
-						tg->tt_prtaddr = HUB_Handle->hubClassRequestPort;
-
-						USBH_UsrLog("port %d status val=%04X: conn=%d, ena=%d, pwr=%d, hs=%d, ls=%d - FS device",
-									HUB_Handle->hubClassRequestPort,
-									st->wPortStatus.val,
-									st->wPortStatus.PORT_CONNECTION,
-									st->wPortStatus.PORT_ENABLE,
-									st->wPortStatus.PORT_POWER,
-									st->wPortStatus.PORT_HIGH_SPEED,
-									st->wPortStatus.PORT_LOW_SPEED);
-
-						phost->currentTarget = tg;
-					}
 				} else {
 					USBH_memset(tg, 0, sizeof *tg);
-
-					USBH_UsrLog("port %d status val=%04X: conn=%d, ena=%d, pwr=%d, hs=%d, ls=%d",
-								HUB_Handle->hubClassRequestPort,
-								st->wPortStatus.val,
-								st->wPortStatus.PORT_CONNECTION,
-								st->wPortStatus.PORT_ENABLE,
-								st->wPortStatus.PORT_POWER,
-								st->wPortStatus.PORT_HIGH_SPEED,
-								st->wPortStatus.PORT_LOW_SPEED);
 				}
+
+				USBH_UsrLog("port %d status val=%04X: conn=%d, ena=%d, pwr=%d, hs=%d, ls=%d%s",
+							HUB_Handle->hubClassRequestPort,
+							st->wPortStatus.val,
+							st->wPortStatus.PORT_CONNECTION,
+							st->wPortStatus.PORT_ENABLE,
+							st->wPortStatus.PORT_POWER,
+							st->wPortStatus.PORT_HIGH_SPEED,
+							st->wPortStatus.PORT_LOW_SPEED,
+							!(st->wPortStatus.PORT_ENABLE)	? "" :
+							st->wPortStatus.PORT_LOW_SPEED	? " - LS device" :
+							st->wPortStatus.PORT_HIGH_SPEED ? " - HS device" :
+															  " - FS device");
 
 				// Reach last port
 				if (HUB_Handle->NumPorts <= HUB_Handle->hubClassRequestPort) {
