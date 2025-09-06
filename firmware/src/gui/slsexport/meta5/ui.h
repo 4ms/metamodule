@@ -199,6 +199,8 @@ extern lv_obj_t *ui_ModuleViewActionRandomBut;
 extern lv_obj_t *ui_ModuleViewActionRandomLabel;
 extern lv_obj_t *ui_ModuleViewActionResetBut;
 extern lv_obj_t *ui_ModuleViewActionResetLabel;
+extern lv_obj_t *ui_ModuleViewActionMidiBut;
+extern lv_obj_t *ui_ModuleViewActionMidiLabel;
 extern lv_obj_t *ui_ModuleViewActionDeleteBut;
 extern lv_obj_t *ui_ModuleViewActionDeleteLabel;
 extern lv_obj_t *ui_MappingParameters;

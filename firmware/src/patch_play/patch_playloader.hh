@@ -65,7 +65,7 @@ struct PatchPlayLoader {
 				break;
 			}
 			if (message.message_type == FileStorageProxy::LoadFileFailed) {
-				pr_err("ERROR: initial patch failed to load from NOR flash\n");
+				pr_err("ERROR: initial patch '%s' failed to load from vol %u\n", patchname.data(), patch_vol);
 				break;
 			}
 
@@ -80,17 +80,17 @@ struct PatchPlayLoader {
 	void stop_audio() {
 		starting_audio_ = false;
 		stopping_audio_ = true;
-		pause_module_threads();
 	}
 
 	void start_audio() {
+		resume_module_threads();
+
 		loading_new_patch_ = false;
 		audio_is_muted_ = false;
 		stopping_audio_ = false;
 		starting_audio_ = true;
 		player_.notify_audio_resumed();
 		clear_audio_overrun();
-		resume_module_threads();
 	}
 
 	void request_load_view_patch() {
@@ -139,6 +139,8 @@ struct PatchPlayLoader {
 	void notify_audio_is_muted() {
 		stopping_audio_ = false;
 		audio_is_muted_ = true;
+		// Pause threads once audio has confirmed it's no longer playing the patch
+		pause_module_threads();
 	}
 
 	void notify_audio_overrun() {
@@ -277,6 +279,7 @@ struct PatchPlayLoader {
 			while (!is_audio_muted())
 				;
 			player_.unload_patch();
+			// TODO: can we force it to reload from disk, but not forget its location?
 			patches_.close_playing_patch();
 		}
 	}
@@ -308,35 +311,14 @@ struct PatchPlayLoader {
 	}
 
 	void set_all_param_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange) {
-		// if (exclude_buttons) {
-
-		// 	for (auto module_id = 0u; auto slug : patches_.get_view_patch()->module_slugs) {
-		// 		auto info = ModuleFactory::getModuleInfo(slug);
-
-		// 		for (unsigned i = 0; auto const &element : info.elements) {
-		// 			auto param_id = info.indices[i].param_idx;
-		// 			enum { Ignore, Enable, Disable };
-		// 			auto action = std::visit(overloaded{
-		// 										 [](Pot const &el) { return el.integral ? Disable : Enable; },
-		// 										 [](Switch const &el) { return Disable; },
-		// 										 [](Button const &el) { return Disable; },
-		// 										 [](ParamElement const &el) { return Enable; },
-		// 										 [](BaseElement const &el) { return Ignore; },
-		// 									 },
-		// 									 element);
-		// 			if (action == Enable)
-		// 				player_.set_catchup_mode(module_id, param_id, mode);
-		// 			else if (action == Disable)
-		// 				player_.set_catchup_mode(module_id, param_id, CatchupParam::Mode::ResumeOnMotion);
-
-		// 			i++;
-		// 		}
-		// 		module_id++;
-		// 	}
-
-		// } else {
 		player_.set_catchup_mode(mode, allow_jump_outofrange);
-		// }
+	}
+
+	void get_module_states() {
+		if (auto playing_patch = patches_.get_playing_patch()) {
+			playing_patch->module_states = player_.patch_query.get_module_states();
+			playing_patch->static_knobs = player_.patch_query.get_all_params();
+		}
 	}
 
 private:
@@ -370,8 +352,7 @@ private:
 		auto view_patch = patches_.get_view_patch();
 
 		if (view_patch && view_patch == patches_.get_playing_patch()) {
-			view_patch->module_states = player_.patch_query.get_module_states();
-			view_patch->static_knobs = player_.patch_query.get_all_params();
+			get_module_states();
 		}
 
 		std::span<char> filedata = storage_.get_patch_data();
@@ -442,15 +423,26 @@ private:
 
 		pr_trace("Attempting play patch: %.31s\n", next_patch->patch_name.data());
 
+		// Change the currently playing patch to point to the new patch
+		// This ensures that modules that use the patch location during
+		// construction will be given the right path.
+		if (next_patch == patches_.get_view_patch()) {
+			patches_.play_view_patch();
+		} else if (next_patch != patches_.get_playing_patch()) {
+			// This happens when loading calibration patches
+			// It might also happen if we implement MIDI PC -> patch load
+			pr_warn("Open patch manager does is not tracking the playing patch\n");
+		}
+
 		auto result = player_.load_patch(*next_patch);
 		if (result.success) {
 			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
-			if (next_patch == patches_.get_view_patch())
-				patches_.play_view_patch();
 
 			if (start_audio_immediately)
 				start_audio();
+		} else {
+			patches_.close_playing_patch();
 		}
 
 		loading_new_patch_ = false;

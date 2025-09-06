@@ -5,6 +5,8 @@
 #include "gui/elements/screensaver.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_manager.hh"
+#include "internal_interface/plugin_app_if_internal.hh"
+#include "internal_interface/plugin_app_interface.hh"
 #include "internal_plugin_manager.hh"
 #include "lv_port_indev.h"
 #include "midi/midi_sync.hh"
@@ -65,6 +67,9 @@ private:
 	MetaParams metaparams;
 	AudioStream audio_stream{params, patch_player, patch_playloader, patch_mod_queue};
 	LvglEncoderSimulatorDriver input_driver{keys};
+
+	PluginAppInterface::Internal plugin_internal;
+	PluginAppInterface plugin_interface;
 
 	std::vector<StreamConfSim::Audio::AudioInFrame> in_buffer;
 	std::vector<StreamConfSim::Audio::AudioOutFrame> out_buffer;

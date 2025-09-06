@@ -1600,13 +1600,13 @@ lv_obj_set_style_text_font(ui_DescriptionCloseLabel, &ui_font_MuseoSansRounded50
 
 ui_PatchFileMenu = lv_obj_create(ui_PatchViewPage);
 lv_obj_set_width( ui_PatchFileMenu, 118);
-lv_obj_set_height( ui_PatchFileMenu, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_height( ui_PatchFileMenu, 240);   /// 1
 lv_obj_set_x( ui_PatchFileMenu, 0 );
 lv_obj_set_y( ui_PatchFileMenu, -2 );
 lv_obj_set_align( ui_PatchFileMenu, LV_ALIGN_TOP_RIGHT );
 lv_obj_set_flex_flow(ui_PatchFileMenu,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_PatchFileMenu, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_add_flag( ui_PatchFileMenu, LV_OBJ_FLAG_IGNORE_LAYOUT | LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_add_flag( ui_PatchFileMenu, LV_OBJ_FLAG_IGNORE_LAYOUT | LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_SCROLLABLE);   /// Flags
 lv_obj_clear_flag( ui_PatchFileMenu, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
 lv_obj_set_scroll_dir(ui_PatchFileMenu, LV_DIR_VER);
 lv_obj_set_style_radius(ui_PatchFileMenu, 0, LV_PART_MAIN| LV_STATE_DEFAULT);

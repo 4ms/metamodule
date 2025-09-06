@@ -182,14 +182,14 @@ public:
 		return get_file_info(filename).size;
 	}
 
-	bool open(const std::string_view filename, FIL *out) {
+	bool open(const std::string_view filename, FIL *out, uint8_t modes) {
 		f_chdrive(_fatvol);
 
-		if (f_open(out, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK) {
+		if (f_open(out, filename.data(), modes) != FR_OK) {
 			if (!mount_disk())
 				return false;
 
-			if (f_open(out, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK)
+			if (f_open(out, filename.data(), modes) != FR_OK)
 				return false;
 		}
 

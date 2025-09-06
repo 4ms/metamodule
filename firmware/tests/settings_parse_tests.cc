@@ -98,8 +98,9 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.plugin_preload.slug.at(0) == "Plugin One");
 	CHECK(settings.plugin_preload.slug.at(1) == "Plugin Two");
 
-	CHECK(settings.last_patch_opened == "/somedir/SomePatch.yml");
-	CHECK(settings.last_patch_vol == MetaModule::Volume::SDCard);
+	CHECK(settings.initial_patch_name == "/somedir/SomePatch.yml");
+	CHECK(settings.initial_patch_vol == MetaModule::Volume::SDCard);
+	CHECK(settings.load_initial_patch == true);
 
 	CHECK(settings.screensaver.timeout_ms == 3);
 	CHECK(settings.screensaver.knobs_can_wake == true);
@@ -229,8 +230,10 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.plugin_preload.slug.size() == 0);
 
-	CHECK(settings.last_patch_opened == "");
-	CHECK(settings.last_patch_vol == MetaModule::Volume::NorFlash);
+	CHECK(settings.initial_patch_name == "");
+	CHECK(settings.initial_patch_vol == MetaModule::Volume::NorFlash);
+	if (should_parse)
+		CHECK(settings.load_initial_patch == false);
 
 	CHECK(settings.screensaver.timeout_ms == MetaModule::ScreensaverSettings::defaultTimeout);
 	CHECK(settings.screensaver.knobs_can_wake == true);
@@ -277,8 +280,8 @@ TEST_CASE("Serialize settings") {
 	settings.plugin_preload.slug.emplace_back("Plugin One");
 	settings.plugin_preload.slug.emplace_back("Plugin Two");
 
-	settings.last_patch_vol = MetaModule::Volume::SDCard;
-	settings.last_patch_opened = "SomePatch.yml";
+	settings.initial_patch_vol = MetaModule::Volume::SDCard;
+	settings.initial_patch_name = "SomePatch.yml";
 
 	settings.screensaver.knobs_can_wake = false;
 	settings.screensaver.timeout_ms = 2;
@@ -332,6 +335,7 @@ TEST_CASE("Serialize settings") {
     - Plugin Two
   last_patch_opened: SomePatch.yml
   last_patch_vol: 1
+  load_initial_patch: 1
   screensaver:
     index: 2
     knobs_can_wake: 0

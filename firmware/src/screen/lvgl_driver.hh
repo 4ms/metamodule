@@ -151,21 +151,15 @@ public:
 			data->continue_reading = true;
 		}
 #else
-		if (_screensaver->is_active()) {
-			if (m->rotary_button.is_just_released() || m->rotary.use_motion())
-				_screensaver->wake();
-			return;
-		} else
-			m->rotary_button.clear_events();
 
 		if (m->meta_buttons[0].is_pressed()) {
 			if (m->rotary.motion != 0) {
 				m->ignore_metabutton_release = true;
 				m->rotary_with_metabutton.transfer_motion(m->rotary);
-				_screensaver->wake();
 			}
-		} else
-			data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+		}
+
+		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
 #endif
 
 #ifdef MONKEYROTARY
@@ -180,8 +174,17 @@ public:
 #else
 		data->enc_diff = m->rotary.use_motion();
 
-		if (data->state || data->enc_diff)
-			_screensaver->wake();
+		// Wake screensaver on any motion, clearing events from the GUI
+		if (_screensaver->is_active()) {
+			if (m->rotary_button.is_just_released() || data->enc_diff || m->meta_buttons[0].is_just_released()) {
+				_screensaver->wake();
+			}
+			m->meta_buttons[0].clear_events();
+			m->rotary_button.clear_events();
+			data->enc_diff = 0;
+			data->state = LV_INDEV_STATE_RELEASED;
+		}
+
 #endif
 	}
 };

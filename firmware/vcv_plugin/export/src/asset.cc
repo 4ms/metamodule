@@ -47,7 +47,8 @@ std::string system(std::string filename) {
 }
 
 std::string user(std::string filename) {
-	auto path = std::string("usr/") + std::string(filename);
+	// TODO: get volume plugin was loaded from
+	auto path = std::string("ram:/usr/") + std::string(filename);
 	svg_to_png(path);
 	set_drive(path);
 	return path;

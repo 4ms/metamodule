@@ -26,6 +26,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_compile_options(
   ${MCU_FLAGS}
+  -nostdlib
   "SHELL:--param l1-cache-size=32"
   "SHELL:--param l1-cache-line-size=64"
   "SHELL:--param l2-cache-size=256"
@@ -47,5 +48,12 @@ add_compile_options(
   "$<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>"
 )
 
-add_link_options(${MCU_FLAGS})
+set(LINK_OPTIONS
+    -L${CMAKE_CURRENT_LIST_DIR}/../system/newlib
+    -lc
+    -lg
+    -lm
+)
+
+add_link_options(${MCU_FLAGS} ${LINK_OPTIONS})
 endmacro()

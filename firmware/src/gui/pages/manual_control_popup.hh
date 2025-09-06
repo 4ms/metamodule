@@ -75,6 +75,10 @@ struct ManualControlPopUp {
 		}
 	}
 
+	bool is_visible() const {
+		return visible;
+	}
+
 private:
 	void increment_value() {
 		auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
@@ -184,6 +188,7 @@ private:
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
 					   [](const AltParamChoice &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
 					   [](const AltParamContinuous &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
+					   [](const AltParamAction &) {},
 				   },
 				   drawn_el->element);
 

@@ -36,26 +36,6 @@ std::vector<std::string> parse_extensions(std::string_view str, std::string cons
 	return tokens;
 }
 
-constexpr auto volume_labels = std::array{
-	std::pair<std::string_view, Volume>{{"ram:"}, {Volume::RamDisk}},
-	std::pair<std::string_view, Volume>{{"usb:"}, {Volume::USB}},
-	std::pair<std::string_view, Volume>{{"sdc:"}, {Volume::SDCard}},
-	std::pair<std::string_view, Volume>{{"nor:"}, {Volume::NorFlash}},
-	// Alternative labels:
-	std::pair<std::string_view, Volume>{{"USB:"}, {Volume::USB}},
-	std::pair<std::string_view, Volume>{{"SD Card:"}, {Volume::SDCard}},
-	std::pair<std::string_view, Volume>{{"Internal:"}, {Volume::NorFlash}},
-};
-
-constexpr std::string_view vol_label(Volume vol) {
-	for (auto &label : volume_labels) {
-		if (vol == label.second) {
-			return label.first;
-		}
-	}
-	return "";
-}
-
 std::pair<std::string_view, Volume> split_volume(const char *filename) {
 	auto sv = std::string_view{filename};
 	return split_volume(sv);

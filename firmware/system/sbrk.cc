@@ -1,3 +1,4 @@
+#include <cerrno>
 #include <cstdio>
 
 static char *heap_end = nullptr;
@@ -21,10 +22,9 @@ extern "C" size_t _sbrk(int incr) {
 
 	if (heap_end + incr > &_eheap) {
 		printf("Out of memory\n");
-		return 0;
+		errno = ENOMEM;
+		return -1;
 		// OOM!!!
-		// while (true)
-		// 	;
 	}
 
 	heap_end += incr;

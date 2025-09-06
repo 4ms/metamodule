@@ -70,17 +70,23 @@ int main() {
 
 	controls.start();
 
-	// Read controls a few times before letting A7 start
-	uint32_t startup_delay = 0x10000;
+	// Read controls and allow time for USB drive to be detected before letting A7 start
+	uint32_t startup_delay = 0x4'0000;
 	while (startup_delay--) {
 		controls.process();
 		usb.process();
 		sd.process();
 	}
 
+	// Wait until drive is mounted
+	if (usb.is_drive_detected()) {
+		while (!usb.is_drive_mounted()) {
+			usb.process();
+		}
+	}
+
 	pr_info("M4 initialized\n");
 
-	HAL_Delay(100);
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
 	while (true) {
