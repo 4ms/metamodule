@@ -97,8 +97,6 @@ void ModuleViewPage::populate_roller() {
 	if (opts.length() > 0)
 		opts.pop_back();
 
-	/////////////////
-
 	lv_show(ui_ElementRollerPanel);
 
 	// Add text list to roller options
@@ -106,19 +104,10 @@ void ModuleViewPage::populate_roller() {
 
 	lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
-	if (cur_selected > 0 && cur_selected < element_highlights.size()) {
-		if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < element_highlights.size()) {
-			if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
-				lv_obj_add_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
-			} else {
-				lv_obj_add_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-			}
-		}
-	} else {
-		pr_err("Current selected is not in range (%d/%zu)\n", cur_selected, element_highlights.size());
+	// Highlight the selected component
+	if (auto drawn_idx = get_drawn_idx(cur_selected)) {
+		highlight_component(*drawn_idx);
 	}
-
-	/////////
 
 	if (cur_el && args.detail_mode == true) {
 		mode = ViewMode::Mapping;
