@@ -128,12 +128,12 @@ lv_obj_set_style_bg_opa(ui_SystemMenuInfoTab, 128, LV_PART_SCROLLBAR| LV_STATE_D
 ui_SystemInfoCont = lv_obj_create(ui_SystemMenuInfoTab);
 lv_obj_remove_style_all(ui_SystemInfoCont);
 lv_obj_set_width( ui_SystemInfoCont, lv_pct(100));
-lv_obj_set_height( ui_SystemInfoCont, LV_SIZE_CONTENT);   /// 50
+lv_obj_set_height( ui_SystemInfoCont, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemInfoCont, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_SystemInfoCont,LV_FLEX_FLOW_COLUMN);
-lv_obj_set_flex_align(ui_SystemInfoCont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_add_flag( ui_SystemInfoCont, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
-lv_obj_clear_flag( ui_SystemInfoCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_flex_align(ui_SystemInfoCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_add_flag( ui_SystemInfoCont, LV_OBJ_FLAG_EVENT_BUBBLE );   /// Flags
+lv_obj_clear_flag( ui_SystemInfoCont, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
 lv_obj_set_style_pad_row(ui_SystemInfoCont, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_SystemInfoCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -152,7 +152,19 @@ lv_obj_set_style_pad_right(ui_SystemMenuMetaModule, 0, LV_PART_MAIN| LV_STATE_DE
 lv_obj_set_style_pad_top(ui_SystemMenuMetaModule, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_SystemMenuMetaModule, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuInfoHardware = lv_label_create(ui_SystemInfoCont);
+ui_SystemMenuMainModuleCont = lv_obj_create(ui_SystemInfoCont);
+lv_obj_remove_style_all(ui_SystemMenuMainModuleCont);
+lv_obj_set_width( ui_SystemMenuMainModuleCont, lv_pct(100));
+lv_obj_set_height( ui_SystemMenuMainModuleCont, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemMenuMainModuleCont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_SystemMenuMainModuleCont,LV_FLEX_FLOW_COLUMN);
+lv_obj_set_flex_align(ui_SystemMenuMainModuleCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_add_flag( ui_SystemMenuMainModuleCont, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_SystemMenuMainModuleCont, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_pad_row(ui_SystemMenuMainModuleCont, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_SystemMenuMainModuleCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemMenuInfoHardware = lv_label_create(ui_SystemMenuMainModuleCont);
 lv_obj_set_width( ui_SystemMenuInfoHardware, lv_pct(100));
 lv_obj_set_height( ui_SystemMenuInfoHardware, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuInfoHardware, LV_ALIGN_CENTER );
@@ -172,21 +184,34 @@ lv_obj_set_style_pad_right(ui_SystemMenuInfoHardware, 0, LV_PART_MAIN| LV_STATE_
 lv_obj_set_style_pad_top(ui_SystemMenuInfoHardware, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_SystemMenuInfoHardware, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuPCBversion = lv_label_create(ui_SystemInfoCont);
+ui_SystemMenuPCBversion = lv_label_create(ui_SystemMenuMainModuleCont);
 lv_obj_set_width( ui_SystemMenuPCBversion, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_SystemMenuPCBversion, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuPCBversion, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemMenuPCBversion,"PCB version p11");
 lv_obj_set_style_text_font(ui_SystemMenuPCBversion, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuFWversion = lv_label_create(ui_SystemInfoCont);
-lv_obj_set_width( ui_SystemMenuFWversion, LV_SIZE_CONTENT);  /// 1
+ui_SystemMenuFWversion = lv_label_create(ui_SystemMenuMainModuleCont);
+lv_obj_set_width( ui_SystemMenuFWversion, lv_pct(100));
 lv_obj_set_height( ui_SystemMenuFWversion, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuFWversion, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SystemMenuFWversion,"Firmware version 0.5.1");
+lv_label_set_text(ui_SystemMenuFWversion,"Firmware version 2.0.0\nRAM: 0% (0/290MB)");
+lv_obj_clear_flag( ui_SystemMenuFWversion, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_SystemMenuFWversion, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuInfoExpanders = lv_label_create(ui_SystemInfoCont);
+ui_SystemMenuExpandersCont = lv_obj_create(ui_SystemInfoCont);
+lv_obj_remove_style_all(ui_SystemMenuExpandersCont);
+lv_obj_set_width( ui_SystemMenuExpandersCont, lv_pct(100));
+lv_obj_set_height( ui_SystemMenuExpandersCont, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemMenuExpandersCont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_SystemMenuExpandersCont,LV_FLEX_FLOW_COLUMN);
+lv_obj_set_flex_align(ui_SystemMenuExpandersCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_add_flag( ui_SystemMenuExpandersCont, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_SystemMenuExpandersCont, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_pad_row(ui_SystemMenuExpandersCont, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_SystemMenuExpandersCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemMenuInfoExpanders = lv_label_create(ui_SystemMenuExpandersCont);
 lv_obj_set_width( ui_SystemMenuInfoExpanders, lv_pct(100));
 lv_obj_set_height( ui_SystemMenuInfoExpanders, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuInfoExpanders, LV_ALIGN_CENTER );
@@ -207,7 +232,7 @@ lv_obj_set_style_pad_right(ui_SystemMenuInfoExpanders, 0, LV_PART_MAIN| LV_STATE
 lv_obj_set_style_pad_top(ui_SystemMenuInfoExpanders, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_SystemMenuInfoExpanders, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuExpanders = lv_label_create(ui_SystemInfoCont);
+ui_SystemMenuExpanders = lv_label_create(ui_SystemMenuExpandersCont);
 lv_obj_set_width( ui_SystemMenuExpanders, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_SystemMenuExpanders, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuExpanders, LV_ALIGN_CENTER );
@@ -215,7 +240,7 @@ lv_label_set_text(ui_SystemMenuExpanders,"No Wi-Fi Expander detected");
 lv_obj_clear_flag( ui_SystemMenuExpanders, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_SystemMenuExpanders, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuAudioExpanders = lv_label_create(ui_SystemInfoCont);
+ui_SystemMenuAudioExpanders = lv_label_create(ui_SystemMenuExpandersCont);
 lv_obj_set_width( ui_SystemMenuAudioExpanders, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_SystemMenuAudioExpanders, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuAudioExpanders, LV_ALIGN_CENTER );
@@ -224,7 +249,7 @@ lv_obj_add_flag( ui_SystemMenuAudioExpanders, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_SystemMenuAudioExpanders, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_SystemMenuAudioExpanders, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuButExpander = lv_label_create(ui_SystemInfoCont);
+ui_SystemMenuButExpander = lv_label_create(ui_SystemMenuExpandersCont);
 lv_obj_set_width( ui_SystemMenuButExpander, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_SystemMenuButExpander, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuButExpander, LV_ALIGN_CENTER );
@@ -233,7 +258,7 @@ lv_obj_add_flag( ui_SystemMenuButExpander, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_SystemMenuButExpander, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_SystemMenuButExpander, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuKnobExpanders = lv_label_create(ui_SystemInfoCont);
+ui_SystemMenuKnobExpanders = lv_label_create(ui_SystemMenuExpandersCont);
 lv_obj_set_width( ui_SystemMenuKnobExpanders, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_SystemMenuKnobExpanders, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuKnobExpanders, LV_ALIGN_CENTER );

@@ -51,14 +51,11 @@ struct InfoTab : SystemMenuTab {
 #endif
 
 		lv_label_set_text_fmt(ui_SystemMenuFWversion,
-							  "Firmware version: %s\nRAM: %d%% (%zu/%u MB)",
+							  "Firmware: %s\nRAM: %d%% (%zu/%u MB)",
 							  fw_version.data(),
 							  memory_percent_used,
 							  memory_used,
 							  memory_total);
-		lv_label_set_long_mode(ui_SystemMenuFWversion, LV_LABEL_LONG_WRAP);
-		lv_obj_set_height(ui_SystemMenuFWversion, LV_SIZE_CONTENT);
-		lv_obj_set_width(ui_SystemMenuFWversion, LV_PCT(100));
 
 		lv_hide(ui_SystemMenuExpanders);
 
@@ -72,6 +69,32 @@ struct InfoTab : SystemMenuTab {
 
 		detect_wifi.start();
 		detect_wifi.new_wifi_status_available(lv_tick_get());
+
+		lv_group_remove_obj(ui_SystemMenuMainModuleCont);
+		lv_group_remove_obj(ui_SystemMenuExpandersCont);
+		lv_group_add_obj(group, ui_SystemMenuMainModuleCont);
+		lv_group_add_obj(group, ui_SystemMenuExpandersCont);
+		lv_group_focus_obj(ui_SystemMenuMainModuleCont);
+
+		lv_group_add_obj(group, ui_SystemMenuExpandersCont);
+
+
+		lv_obj_add_event_cb(ui_SystemMenuMainModuleCont, scroll_cb, LV_EVENT_FOCUSED, nullptr);
+		lv_obj_add_event_cb(ui_SystemMenuExpandersCont, scroll_cb, LV_EVENT_FOCUSED, nullptr);
+
+		lv_obj_scroll_to_y(ui_SystemMenuInfoTab, 0, LV_ANIM_ON);
+	}
+
+	static void scroll_cb(lv_event_t *event) {
+		if (!event)
+			return;
+
+		if (event->target == ui_SystemMenuMainModuleCont) {
+			lv_obj_scroll_to_y(ui_SystemMenuInfoTab, 0, LV_ANIM_ON);
+
+		} else if (event->target == ui_SystemMenuExpandersCont) {
+			lv_obj_scroll_to_y(ui_SystemMenuInfoTab, lv_obj_get_height(ui_SystemInfoCont), LV_ANIM_ON);
+		}
 	}
 
 	void update() override {
