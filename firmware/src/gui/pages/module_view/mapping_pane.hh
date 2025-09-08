@@ -255,12 +255,6 @@ private:
 		lv_hide(ui_MappedPanel);
 	}
 
-	void make_nonselectable_item(lv_obj_t *obj) {
-		map_list_items.push_back(obj);
-		lv_group_add_obj(pane_group, obj);
-		lv_group_focus_obj(obj);
-	}
-
 	//
 	// Jacks
 	//
@@ -334,7 +328,7 @@ private:
 			lv_hide(ui_CablePanelAddButton);
 			lv_hide(ui_CableMidiAddButton);
 
-			auto obj = list.create_panel_incable_item(panel_jack->panel_jack_id, ui_MapList);
+			auto obj = list.create_panel_incable_item(panel_jack->panel_jack_id, ui_MapList, panel_jack->alias_name);
 			make_nonselectable_item(obj);
 
 			for (auto &mappedin : panel_jack->ins) {
@@ -350,7 +344,8 @@ private:
 		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_CableMidiAddButton);
 
-		auto obj = list.create_panel_outcable_item(panel_jack_id, ui_MapList);
+		const auto al = patch->find_mapped_outjack(panel_jack_id)->alias_name;
+		auto obj = list.create_panel_outcable_item(panel_jack_id, ui_MapList, al);
 		make_nonselectable_item(obj);
 	}
 
@@ -378,6 +373,12 @@ private:
 		lv_group_add_obj(pane_group, ui_CableMidiAddButton);
 		lv_group_add_obj(pane_group, ui_CableRemoveButton);
 		lv_group_focus_obj(ui_CableAddButton);
+	}
+
+	void make_nonselectable_item(lv_obj_t *obj) {
+		map_list_items.push_back(obj);
+		lv_group_add_obj(pane_group, obj);
+		lv_group_focus_obj(obj);
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {

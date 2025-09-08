@@ -1,0 +1,189 @@
+PatchData:
+  patch_name: JackAliasTest
+  description: Every 3rd in and out jack has an alias
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: 'Fundamental:Mutes'
+    2: 'Fundamental:Mutes'
+  int_cables: []
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+      alias_name: ai1
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 1
+    - panel_jack_id: 3
+      ins:
+        - module_id: 1
+          jack_id: 3
+      alias_name: ai2
+    - panel_jack_id: 4
+      ins:
+        - module_id: 1
+          jack_id: 4
+    - panel_jack_id: 6
+      ins:
+        - module_id: 1
+          jack_id: 6
+      alias_name: ai3
+    - panel_jack_id: 7
+      ins:
+        - module_id: 1
+          jack_id: 7
+    - panel_jack_id: 10
+      ins:
+        - module_id: 2
+          jack_id: 2
+    - panel_jack_id: 12
+      ins:
+        - module_id: 2
+          jack_id: 4
+      alias_name: ai5
+    - panel_jack_id: 13
+      ins:
+        - module_id: 2
+          jack_id: 5
+    - panel_jack_id: 9
+      ins:
+        - module_id: 2
+          jack_id: 1
+      alias_name: ai4
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+      alias_name: ao1
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 1
+    - panel_jack_id: 3
+      out:
+        module_id: 1
+        jack_id: 3
+      alias_name: ao2
+    - panel_jack_id: 4
+      out:
+        module_id: 1
+        jack_id: 4
+    - panel_jack_id: 7
+      out:
+        module_id: 1
+        jack_id: 7
+    - panel_jack_id: 9
+      out:
+        module_id: 2
+        jack_id: 1
+      alias_name: ao4
+    - panel_jack_id: 10
+      out:
+        module_id: 2
+        jack_id: 2
+    - panel_jack_id: 12
+      out:
+        module_id: 2
+        jack_id: 4
+      alias_name: ao5
+    - panel_jack_id: 13
+      out:
+        module_id: 2
+        jack_id: 5
+    - panel_jack_id: 15
+      out:
+        module_id: 2
+        jack_id: 7
+      alias_name: ao6
+    - panel_jack_id: 6
+      out:
+        module_id: 1
+        jack_id: 6
+      alias_name: ao3
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0
+    - module_id: 1
+      param_id: 1
+      value: 0
+    - module_id: 1
+      param_id: 2
+      value: 0
+    - module_id: 1
+      param_id: 3
+      value: 0
+    - module_id: 1
+      param_id: 4
+      value: 0
+    - module_id: 1
+      param_id: 5
+      value: 0
+    - module_id: 1
+      param_id: 6
+      value: 0
+    - module_id: 1
+      param_id: 7
+      value: 0
+    - module_id: 1
+      param_id: 8
+      value: 0
+    - module_id: 1
+      param_id: 9
+      value: 0
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 0
+    - module_id: 2
+      param_id: 2
+      value: 0
+    - module_id: 2
+      param_id: 3
+      value: 0
+    - module_id: 2
+      param_id: 4
+      value: 0
+    - module_id: 2
+      param_id: 5
+      value: 0
+    - module_id: 2
+      param_id: 6
+      value: 0
+    - module_id: 2
+      param_id: 7
+      value: 0
+    - module_id: 2
+      param_id: 8
+      value: 0
+    - module_id: 2
+      param_id: 9
+      value: 0
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  mapped_lights: []
+  vcvModuleStates: []

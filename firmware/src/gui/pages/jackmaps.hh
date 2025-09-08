@@ -48,6 +48,36 @@ struct JackMapViewPage : PageBase {
 		}
 	}
 
+	void onJackMapClick(unsigned idx, JackMapType type) {
+		pr_trace("%s Jack: %d\n", type == JackMapType::Input ? "Input" : "Output", idx);
+
+		if (type == JackMapType::Input) {
+			const auto &i = patch->mapped_ins[idx];
+			if (!i.ins.size()) {
+				return;
+			}
+			args.module_id = i.ins[0].module_id;
+			args.element_indices = ElementCount::mark_unused_indices(
+				{.input_idx = static_cast<uint8_t>(i.ins[0].jack_id)}, {.num_inputs = 1});
+		} else {
+			const auto &o = patch->mapped_outs[idx];
+			args.module_id = o.out.module_id;
+			args.element_indices = ElementCount::mark_unused_indices(
+				{.output_idx = static_cast<uint8_t>(o.out.jack_id)}, {.num_outputs = 1});
+		}
+
+		args.detail_mode = true;
+		page_list.request_new_page(PageId::ModuleView, args);
+	}
+
+	template<JackMapType type>
+	static void onJackMapClick(lv_event_t *event) {
+		if (const auto page = static_cast<JackMapViewPage *>(event->user_data); page) {
+			const auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
+			page->onJackMapClick(idx, type);
+		}
+	}
+
 	void prepare_focus() override {
 		redraw();
 		lv_group_activate(group);
@@ -63,35 +93,48 @@ struct JackMapViewPage : PageBase {
 		for (unsigned i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
 			if (lv_obj_get_child_cnt(in_conts[i]) > 1)
 				lv_label_set_text(lv_obj_get_child(in_conts[i], 1), "");
+			lv_obj_remove_event_cb(in_conts[i], NULL);
 		}
 		for (unsigned i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
 			if (lv_obj_get_child_cnt(out_conts[i]) > 1)
 				lv_label_set_text(lv_obj_get_child(out_conts[i], 1), "");
+			lv_obj_remove_event_cb(out_conts[i], NULL);
 		}
 
 		//Populate new text
-		for (auto map : patch->mapped_ins) {
+		for (auto [i, map] : enumerate(patch->mapped_ins)) {
 			for (auto &jack : map.ins) {
-				if (map.panel_jack_id >= in_conts.size())
-					continue;
-				if (auto cont = in_conts[map.panel_jack_id]) {
-					if (lv_obj_get_child_cnt(cont) > 1) {
-						auto name = get_full_element_name(jack.module_id, jack.jack_id, ElementType::Input, *patch);
-						auto label = lv_obj_get_child(cont, 1);
-						lv_label_set_text_fmt(label, "%s %s", name.module_name.data(), name.element_name.data());
+				if (map.panel_jack_id < in_conts.size()) {
+					if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
+						lv_obj_set_user_data(in_conts[map.panel_jack_id], (void *)((uintptr_t)i));
+						lv_obj_add_event_cb(
+							in_conts[map.panel_jack_id], onJackMapClick<JackMapType::Input>, LV_EVENT_CLICKED, this);
+						auto label = lv_obj_get_child(in_conts[map.panel_jack_id], 1);
+						if (!map.alias_name.size()) {
+							auto name = get_full_element_name(jack.module_id, jack.jack_id, ElementType::Input, *patch);
+							lv_label_set_text_fmt(label, "%s %s", name.module_name.data(), name.element_name.data());
+						} else {
+							lv_label_set_text_fmt(label, "%s", map.alias_name.data());
+						}
 					}
 				}
 			}
 		}
 
-		for (auto map : patch->mapped_outs) {
-			if (map.panel_jack_id >= out_conts.size())
-				continue;
-			if (auto cont = out_conts[map.panel_jack_id]) {
-				if (lv_obj_get_child_cnt(cont) > 1) {
-					auto name = get_full_element_name(map.out.module_id, map.out.jack_id, ElementType::Output, *patch);
-					auto label = lv_obj_get_child(cont, 1);
-					lv_label_set_text_fmt(label, "%s %s", name.module_name.data(), name.element_name.data());
+		for (auto [i, map] : enumerate(patch->mapped_outs)) {
+			if (map.panel_jack_id < out_conts.size()) {
+				if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
+					lv_obj_set_user_data(out_conts[map.panel_jack_id], (void *)((uintptr_t)i));
+					lv_obj_add_event_cb(
+						out_conts[map.panel_jack_id], onJackMapClick<JackMapType::Output>, LV_EVENT_CLICKED, this);
+					auto label = lv_obj_get_child(out_conts[map.panel_jack_id], 1);
+					if (!map.alias_name.size()) {
+						auto name =
+							get_full_element_name(map.out.module_id, map.out.jack_id, ElementType::Output, *patch);
+						lv_label_set_text_fmt(label, "%s %s", name.module_name.data(), name.element_name.data());
+					} else {
+						lv_label_set_text_fmt(label, "%s", map.alias_name.data());
+					}
 				}
 			}
 		}
