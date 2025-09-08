@@ -252,7 +252,9 @@ bool ModuleViewPage::cycle_port_selection(const DrawnElement *element, int motio
 			total_ports += AudioExpander::NumInJacks;
 		}
 
-		selected_input_port = ((int)selected_input_port + motion) % total_ports;
+		if (selected_input_port == 0)
+			selected_input_port += total_ports;
+		selected_input_port = (selected_input_port + motion) % total_ports;
 
 	} else if (jack_type == ElementType::Output) {
 		unsigned total_ports = PanelDef::NumUserFacingOutJacks;
@@ -263,7 +265,8 @@ bool ModuleViewPage::cycle_port_selection(const DrawnElement *element, int motio
 		uint16_t start_port = selected_output_port;
 
 		do {
-			selected_output_port = ((int)selected_output_port + motion) % total_ports;
+			int cur = selected_output_port;
+			selected_output_port = int(cur + motion) % total_ports;
 
 			// Check if this port is available (not already mapped)
 			if (!patch->find_mapped_outjack(selected_output_port)) {
@@ -276,6 +279,10 @@ bool ModuleViewPage::cycle_port_selection(const DrawnElement *element, int motio
 			}
 
 		} while (true);
+
+		if (selected_output_port == 0)
+			selected_output_port += total_ports;
+		selected_output_port = ((int)selected_output_port + motion) % total_ports;
 	}
 	return true;
 }
