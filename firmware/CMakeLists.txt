@@ -17,7 +17,7 @@ set(FWDIR ${CMAKE_CURRENT_LIST_DIR})
 ############################
 
 ## Add new board names here:
-set_property(CACHE BOARD_SELECT PROPERTY STRINGS "mm-p11" "handheld-p1" "devboard-v01")
+set_property(CACHE BOARD_SELECT PROPERTY STRINGS "mm-p11" "handheld-p1" "devboard-v01" "devboard-v02")
 
 ## Add the path to the config dir here:
 if (BOARD_SELECT STREQUAL "handheld-p1")
@@ -25,6 +25,9 @@ if (BOARD_SELECT STREQUAL "handheld-p1")
 
 elseif(BOARD_SELECT STREQUAL "devboard-v01")
     set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/devboard-01)
+
+elseif(BOARD_SELECT STREQUAL "devboard-v02")
+    set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/devboard-02)
 
 else()
     set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/euro26hp)

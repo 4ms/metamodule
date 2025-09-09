@@ -101,6 +101,15 @@
         "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
         "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
       }
+    },
+    {
+      "name": "devboard-v02",
+      "inherits": "base",
+      "cacheVariables": {
+        "BOARD_SELECT": { "type": "STRING", "value": "devboard-v02" },
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
+        "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
+      }
     }
 
   ],
@@ -132,6 +141,10 @@
     {
       "name": "devboard-v01",
       "configurePreset": "devboard-v01"
+    },
+    {
+      "name": "devboard-v02",
+      "configurePreset": "devboard-v02"
     }
   ]
 }
