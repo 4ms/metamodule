@@ -110,6 +110,15 @@
         "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
         "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
       }
+    },
+    {
+      "name": "devboard-rgbtest",
+      "inherits": "base",
+      "cacheVariables": {
+        "BOARD_SELECT": { "type": "STRING", "value": "devboard-rgbtest" },
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
+        "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
+      }
     }
 
   ],
@@ -145,6 +154,10 @@
     {
       "name": "devboard-v02",
       "configurePreset": "devboard-v02"
+    },
+    {
+      "name": "devboard-rgbtest",
+      "configurePreset": "devboard-rgbtest"
     }
   ]
 }
