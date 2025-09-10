@@ -9,8 +9,10 @@ using FrameBufferT = std::array<lv_color_t, MetaModule::ScreenBufferConf::width 
 static inline FrameBufferT framebuf1 alignas(64);
 static inline FrameBufferT framebuf2 alignas(64);
 
+FrameBufferT *first_framebuf = &framebuf1;
+
 void init_gui() {
-	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
+	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, framebuf1, framebuf2};
 }
 
 } // namespace MetaModule

@@ -8,6 +8,7 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
+#include "screen/lvgl_driver.hh"
 #include "user_settings/settings.hh"
 #include "user_settings/settings_file.hh"
 
@@ -25,6 +26,7 @@ private:
 	UserSettings settings;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
+	Screensaver screensaver{settings.screensaver};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
@@ -39,6 +41,10 @@ public:
 		, plugin_manager{plugin_manager} {
 		params.clear();
 		metaparams.clear();
+
+		extern std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height>
+			*first_framebuf;
+		MMDisplay::init(metaparams, screensaver, *first_framebuf);
 
 		if (!Settings::read_settings(patch_storage, &settings)) {
 			settings = UserSettings{};

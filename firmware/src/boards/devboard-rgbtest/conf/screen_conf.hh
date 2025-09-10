@@ -1,9 +1,7 @@
 #pragma once
-#include "conf/screen_buffer_conf.hh"
-#include "drivers/dma_config_struct.hh"
-#include "drivers/dma_transfer.hh"
-#include "drivers/interrupt.hh"
 #include "drivers/ltdc_screen_config_struct.hh"
+#include "drivers/parallel_writer_conf.hh"
+#include "drivers/screen_9bit_setup.hh"
 
 namespace MetaModule
 {
@@ -14,7 +12,7 @@ using mdrivlib::PinDef;
 using mdrivlib::PinMode;
 using mdrivlib::PinNum;
 
-struct MMScreenConf : mdrivlib::LTDCScreenConf {
+struct ScreenConf : mdrivlib::LTDCScreenConf {
 
 	static constexpr PinDef r[8]{
 		{},										 //0
@@ -58,6 +56,9 @@ struct MMScreenConf : mdrivlib::LTDCScreenConf {
 	static constexpr uint32_t rowstart = 80;
 	static constexpr uint32_t colstart = 0;
 
+	static constexpr uint32_t viewWidth = 400;
+	static constexpr uint32_t viewHeight = 960;
+
 	enum Rotation { NoRotation, CW90, Flip180, CCW90 };
 	static constexpr Rotation rotation = NoRotation;
 
@@ -70,12 +71,24 @@ struct MMScreenConf : mdrivlib::LTDCScreenConf {
 	static constexpr uint32_t VSyncWidth = 0;
 	static constexpr uint32_t VBackPorch = 0;
 	static constexpr uint32_t VFrontPorch = 0;
+};
 
-	// bit-banged
-	static constexpr PinDef SCLK = {GPIO::C, PinNum::_10};
-	static constexpr PinDef COPI = {GPIO::C, PinNum::_11};
-	static constexpr PinDef CS0 = {GPIO::D, PinNum::_2};
-	static constexpr PinDef ResetPin{GPIO::C, PinNum::_11};
+struct ScreenControlConf : mdrivlib::ParallelWriterConf {
+	static constexpr size_t BusWidth = 1;
+
+	static constexpr PinDef data[BusWidth]{{GPIO::C, PinNum::_11}};
+
+	static constexpr PinDef chip_sel{GPIO::D, PinNum::_2};
+
+	static constexpr PinDef write_latch{GPIO::C, PinNum::_10};
+
+	static constexpr PinDef reset{GPIO::C, PinNum::_11};
+
+	// Use data pin for dc
+	static constexpr PinDef datacmd_sel{GPIO::C, PinNum::_11};
+
+	static constexpr uint32_t DataSetupTime = 2;
+	static constexpr uint32_t WriteLatchAfterDelay = 2;
 };
 
 } // namespace MetaModule

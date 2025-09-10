@@ -1,12 +1,9 @@
+#include "../conf/screen_conf.hh"
 #include "conf/screen_buffer_conf.hh"
-#include "conf/screen_conf.hh"
-#include "drivers/screen_ST77XX.hh"
-#include "drivers/timekeeper.hh"
+#include "drivers/screen_ltdc.hh"
+#include "drivers/ss7701s_lcd_init.hh"
 #include "gui/elements/screensaver.hh"
-#include "lvgl.h"
 #include "params/metaparams.hh"
-#include "params/params.hh"
-#include "screen/screen_writer.hh"
 #include "uart_log.hh"
 #include <span>
 
@@ -25,18 +22,13 @@ class LVGLDriver {
 	// Callbacks
 	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
 	using indev_cb_t = void(lv_indev_drv_t *indev, lv_indev_data_t *data);
-	using wait_cb_t = void(lv_disp_drv_t *);
 
 	// Display driver
 	lv_disp_drv_t disp_drv;
 	lv_disp_t *display;
 
 public:
-	LVGLDriver(flush_cb_t flush_cb,
-			   indev_cb_t indev_cb,
-			   wait_cb_t wait_cb,
-			   std::span<lv_color_t> buffer1,
-			   std::span<lv_color_t> buffer2) {
+	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb, std::span<lv_color_t> buffer1, std::span<lv_color_t> buffer2) {
 		UartLog::log("LVGLDriver started\n");
 
 		lv_init();
@@ -44,7 +36,6 @@ public:
 		lv_disp_drv_init(&disp_drv);
 		disp_drv.draw_buf = &disp_buf;
 		disp_drv.flush_cb = flush_cb;
-		disp_drv.wait_cb = wait_cb;
 		disp_drv.hor_res = ScreenWidth;
 		disp_drv.ver_res = ScreenHeight;
 		display = lv_disp_drv_register(&disp_drv); // NOLINT
@@ -67,64 +58,45 @@ public:
 };
 
 class MMDisplay {
-	static inline lv_disp_drv_t *last_used_disp_drv;
 	static inline MetaParams *m;
 	static inline Screensaver *_screensaver;
 	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
 
-	static inline ScreenFrameWriter _spi_driver;
+	static inline ScreenParallelWriter<ScreenConf> ltdc_driver;
+	static inline mdrivlib::LTDCParallelSetup<ScreenControlConf> screen_setup;
 
 	static inline std::array<lv_color_t, BufferSize> testbuf;
 
 public:
-	static void init(MetaParams &metaparams, Screensaver &screensaver) {
+	static void init(MetaParams &metaparams, Screensaver &screensaver, std::span<lv_color_t> buf) {
 		m = &metaparams;
 		_screensaver = &screensaver;
 
-		_spi_driver.init();
-		_spi_driver.register_partial_frame_cb(end_flush);
-		_spi_driver.clear_overrun_on_interrupt();
-	}
+		screen_setup.setup_driver_chip(mdrivlib::ST7701S::InitCmds);
+		ltdc_driver.init(buf.data());
 
-	static inline uint32_t last_transfer_start_time = 0;
-	static inline lv_area_t last_area{0, 0, 0, 0};
-	static inline uint16_t *last_pixbuf = nullptr;
-
-	static void end_flush() {
-		lv_disp_flush_ready(last_used_disp_drv);
-	}
-
-	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
-		last_used_disp_drv = disp_drv;
-		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
-		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
-
-		last_transfer_start_time = HAL_GetTick();
-		last_area = *area;
-		last_pixbuf = pixbuf;
-	}
-
-	static void wait_cb(lv_disp_drv_t *disp_drv) {
-		if (disp_drv->draw_buf->flushing) {
-			if (_spi_driver.had_transfer_error()) {
-				disp_drv->draw_buf->flushing = 0;
-			}
-
-			if (_spi_driver.had_fifo_error()) {
-				HAL_Delay(1);
-			}
-
-			//Timeout
-			if (HAL_GetTick() - last_transfer_start_time > 20) {
-				disp_drv->draw_buf->flushing = 0;
-				// Doesn't seem to matter:
-				// _spi_driver.reinit();
-				// HAL_Delay(1);
-				// Doesn't work at all (screen is still expecting data from previous command):
-				// _spi_driver.transfer_partial_frame(last_area.x1, last_area.y1, last_area.x2, last_area.y2, last_pixbuf);
-			}
+		for (int i = 0; i < 16; i++) {
+			for (auto &px : buf)
+				px.full = (1 << i);
+			ltdc_driver.set_buffer(buf.data());
+			__BKPT();
 		}
 	}
+
+	// static inline uint32_t last_transfer_start_time = 0;
+	// static inline lv_area_t last_area{0, 0, 0, 0};
+	// static inline uint16_t *last_pixbuf = nullptr;
+
+	// static void end_flush() {
+	// }
+
+	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
+		ltdc_driver.set_buffer(color_p);
+		lv_disp_flush_ready(disp_drv);
+	}
+
+	// static void wait_cb(lv_disp_drv_t *disp_drv) {
+	// }
 
 	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
 		data->continue_reading = false;
