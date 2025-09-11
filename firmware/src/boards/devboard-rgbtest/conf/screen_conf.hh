@@ -69,7 +69,7 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 
 	static constexpr uint32_t HSyncWidth = 16;
 	static constexpr uint32_t HBackPorch = 20;
-	static constexpr uint32_t HFrontPorch = 160;
+	static constexpr uint32_t HFrontPorch = 160; //toysynth: 28, was 160
 
 	static constexpr uint32_t VSyncWidth = 3;
 	static constexpr uint32_t VBackPorch = 20;
