@@ -61,6 +61,9 @@ public:
 void start_pixel_clock();
 
 class MMDisplay {
+	static constexpr uint32_t ScreenWidth = ScreenBufferConf::viewWidth;
+	static constexpr uint32_t ScreenHeight = ScreenBufferConf::viewHeight;
+
 	static inline MetaParams *m;
 	static inline Screensaver *_screensaver;
 	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
@@ -85,29 +88,29 @@ public:
 	}
 
 	static void test_pattern(unsigned id, std::span<lv_color_t> buf) {
-		if (buf.size() != 400 * 960)
+		if (buf.size() != ScreenWidth * ScreenHeight)
 			printf("WRONG BUFFER SIZE\n");
 
 		// test pattern
 		if (id == 0) {
-			for (auto y = 0; y < 400; y++) {
-				for (auto x = 0; x < 960; x++) {
-					unsigned i = x + y * 960;
+			for (auto y = 0u; y < ScreenHeight; y++) {
+				for (auto x = 0u; x < ScreenWidth; x++) {
+					unsigned i = x + y * ScreenWidth;
 
-					if (x >= (480 + 240) && y < 200)
+					if (x >= (ScreenWidth * 0.75) && y < ScreenHeight / 2)
 						buf[i].full = Colors565::White;
 
-					else if (x >= 480 && y < 200)
+					else if (x >= ScreenWidth / 2 && y < ScreenHeight / 2)
 						buf[i].full = Colors565::Red;
 
-					else if (x < 480 && y < 200)
-						buf[i].full = Colors565::Grey;
-
-					else if (x < 480 && y >= 200)
-						buf[i].full = Colors565::Orange;
-
-					else if (x >= 480 && y >= 200)
+					else if (x >= ScreenWidth / 2 && y >= ScreenHeight / 2)
 						buf[i].full = Colors565::Blue;
+
+					else if (x < ScreenWidth / 2 && y < ScreenHeight / 2)
+						buf[i].full = Colors565::Green;
+
+					else if (x < ScreenWidth / 2 && y >= ScreenHeight / 2)
+						buf[i].full = Colors565::Yellow;
 				}
 			}
 		}
