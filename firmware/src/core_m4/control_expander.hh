@@ -23,12 +23,23 @@ public:
 	}
 
 	void scan_for_button_expanders() {
-		// Scan for attached
-		const int base_addr = ButtonExpander::gpio_chip_conf.addr;
-		int addr = base_addr + ButtonExpander::MaxAddresses - 1;
+		// This order means that jumper in pos 1 will be the first Button Expander, pos 2 is second, pos 3 is third, no jumper is fourth
+		constexpr std::array<int, ButtonExpander::MaxAddresses> addresses{
+			ButtonExpander::gpio_chip_conf.addr + 6, // Jumper pos 1
+			ButtonExpander::gpio_chip_conf.addr + 5, // Jumper pos 2
+			ButtonExpander::gpio_chip_conf.addr + 3, // Jumper pos 3
+			ButtonExpander::gpio_chip_conf.addr + 7, // No jumpers
+			// Undocumented but valid positions:
+			ButtonExpander::gpio_chip_conf.addr + 4, // (jumpers pos 1+2)
+			ButtonExpander::gpio_chip_conf.addr + 2, // (jumpers pos 1+3)
+			ButtonExpander::gpio_chip_conf.addr + 1, // (jumpers pos 2+3)
+			ButtonExpander::gpio_chip_conf.addr + 0, // (all jumpers)
+		};
+
 		size_t num_expanders_found = 0;
 
-		while ((addr >= base_addr) && (num_expanders_found < all_button_exps.size())) {
+		// Scan for attached
+		for (auto addr : addresses) {
 			auto *buttonexp = &all_button_exps[num_expanders_found];
 			buttonexp->set_address(addr);
 
@@ -36,10 +47,10 @@ public:
 				buttonexp->start();
 				pr_info("Button Expander found at addr 0x%x\n", addr);
 				num_expanders_found++;
-				addr--;
+				if (num_expanders_found >= all_button_exps.size())
+					break;
 			} else {
 				pr_info("Button Expander not found at addr 0x%x\n", addr);
-				addr--;
 			}
 		}
 
