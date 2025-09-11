@@ -53,19 +53,19 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 	static constexpr PinDef vsync{GPIO::A, PinNum::_4, PinAF::AltFunc14};
 	static constexpr PinDef hsync{GPIO::C, PinNum::_6, PinAF::AltFunc14};
 
-	static constexpr uint32_t width = 960;
-	static constexpr uint32_t height = 400;
-	static constexpr uint32_t rowstart = 0;
-	static constexpr uint32_t colstart = 0;
+	// static constexpr uint32_t width = 960;
+	// static constexpr uint32_t height = 400;
+	// static constexpr uint32_t rowstart = 0;
+	// static constexpr uint32_t colstart = 0;
 
 	static constexpr uint32_t viewWidth = 960;
 	static constexpr uint32_t viewHeight = 400;
 
-	enum Rotation { NoRotation, CW90, Flip180, CCW90 };
-	static constexpr Rotation rotation = NoRotation;
+	// enum Rotation { NoRotation, CW90, Flip180, CCW90 };
+	// static constexpr Rotation rotation = NoRotation;
 
-	enum ColorFormat { RGBA8888, RGB888, RGB565 };
-	static constexpr ColorFormat color_format = RGB565;
+	// enum ColorFormat { RGBA8888, RGB888, RGB565 };
+	// static constexpr ColorFormat color_format = RGB565;
 
 	static constexpr uint32_t HSyncWidth = 16;
 	static constexpr uint32_t HBackPorch = 20;
