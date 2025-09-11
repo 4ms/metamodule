@@ -115,14 +115,7 @@ void Controls::update_midi_connected() {
 void Controls::update_control_expander() {
 	// Control expander
 	cur_metaparams->num_button_exp_connected = control_expander.num_button_expanders_connected();
-	// Method 1:
-	// cur_metaparams->ext_button_states = control_expander.get_buttons();
-	// Method 2:
-	// uint32_t buttons_state = control_expander.get_buttons();
-	// for (auto [i, extbut, mp_extbut] : enumerate(ext_buttons, cur_metaparams->ext_buttons)) {
-	// 	extbut.register_state(buttons_state & (1 << i));
-	// 	mp_extbut.transfer_events(extbut);
-	// }
+
 	uint32_t buttons_state = control_expander.get_buttons();
 	cur_metaparams->ext_buttons_high_events = 0;
 	cur_metaparams->ext_buttons_low_events = 0;
@@ -240,7 +233,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {
 
 	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
-	// TODO: _new_adc_data_ready is written from multiple threads, but is not thread-safe. Use atomic? Or accept dropped/duplicate ADC values?
+	// TODO: _new_adc_data_ready is set true here (pri 2) and set false in read_controls_task (pri 0)
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {
