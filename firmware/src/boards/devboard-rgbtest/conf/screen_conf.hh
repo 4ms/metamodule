@@ -47,8 +47,9 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 		{GPIO::B, PinNum::_9, PinAF::AltFunc14},  //7
 	};
 	static constexpr PinDef de{GPIO::E, PinNum::_13, PinAF::AltFunc14};
-	static constexpr PinDef clk{GPIO::E, PinNum::_14, PinAF::AltFunc14};	  //not connected
-	static constexpr PinDef actual_clk{GPIO::C, PinNum::_8, PinAF::AltFunc2}; //TIM3_CH3
+	static constexpr PinDef clk{GPIO::E, PinNum::_14, PinAF::AltFunc14}; //not connected on mp153-devboard-v0.2
+	static constexpr PinDef actual_clk{
+		GPIO::C, PinNum::_8, PinAF::AltFunc2}; //TIM3_CH3: actually connected to LCD clk pin
 	static constexpr PinDef vsync{GPIO::A, PinNum::_4, PinAF::AltFunc14};
 	static constexpr PinDef hsync{GPIO::C, PinNum::_6, PinAF::AltFunc14};
 
