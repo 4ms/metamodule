@@ -5,6 +5,7 @@
 #include "gui/elements/screensaver.hh"
 #include "params/metaparams.hh"
 #include "uart_log.hh"
+#include "util/colors_rgb565.hh"
 #include <span>
 
 // #define MONKEYROTARY
@@ -57,13 +58,15 @@ public:
 	}
 };
 
+void start_pixel_clock();
+
 class MMDisplay {
 	static inline MetaParams *m;
 	static inline Screensaver *_screensaver;
 	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
 
 	static inline ScreenParallelWriter<ScreenConf> ltdc_driver;
-	static inline mdrivlib::LTDCParallelSetup<ScreenControlConf> screen_setup;
+	static inline mdrivlib::LTDCSerial9BitSetup<ScreenControlConf> screen_setup{ScreenControlConf::reset};
 
 	static inline std::array<lv_color_t, BufferSize> testbuf;
 
@@ -73,30 +76,32 @@ public:
 		_screensaver = &screensaver;
 
 		screen_setup.setup_driver_chip(mdrivlib::ST7701S::InitCmds);
+
+		start_pixel_clock();
+		HAL_Delay(1);
 		ltdc_driver.init(buf.data());
 
-		for (int i = 0; i < 16; i++) {
-			for (auto &px : buf)
-				px.full = (1 << i);
-			ltdc_driver.set_buffer(buf.data());
-			__BKPT();
+		for (auto y = 0; y < 400; y++) {
+			for (auto x = 0; x < 960; x++) {
+				unsigned i = x + y * 960;
+				if (x < 480 && y < 200)
+					buf[i].full = Colors565::Green; //never
+				else if (x >= 480 && y < 200)
+					buf[i].full = Colors565::Red;
+				else if (x < 480 && y >= 200)
+					buf[i].full = Colors565::Yellow; //never
+				else if (x >= 480 && y >= 200)
+					buf[i].full = Colors565::Blue;
+			}
 		}
+
+		ltdc_driver.set_buffer(buf.data());
 	}
-
-	// static inline uint32_t last_transfer_start_time = 0;
-	// static inline lv_area_t last_area{0, 0, 0, 0};
-	// static inline uint16_t *last_pixbuf = nullptr;
-
-	// static void end_flush() {
-	// }
 
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
 		ltdc_driver.set_buffer(color_p);
 		lv_disp_flush_ready(disp_drv);
 	}
-
-	// static void wait_cb(lv_disp_drv_t *disp_drv) {
-	// }
 
 	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
 		data->continue_reading = false;
