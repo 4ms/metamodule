@@ -81,20 +81,62 @@ public:
 		HAL_Delay(1);
 		ltdc_driver.init(buf.data());
 
-		for (auto y = 0; y < 400; y++) {
-			for (auto x = 0; x < 960; x++) {
-				unsigned i = x + y * 960;
-				if (x < 480 && y < 200)
-					buf[i].full = Colors565::Green; //never
-				else if (x >= 480 && y < 200)
-					buf[i].full = Colors565::Red;
-				else if (x < 480 && y >= 200)
-					buf[i].full = Colors565::Yellow; //never
-				else if (x >= 480 && y >= 200)
-					buf[i].full = Colors565::Blue;
+		test_pattern(0, buf);
+	}
+
+	static void test_pattern(unsigned id, std::span<lv_color_t> buf) {
+		if (buf.size() != 400 * 960)
+			printf("WRONG BUFFER SIZE\n");
+
+		// test pattern
+		if (id == 0) {
+			for (auto y = 0; y < 400; y++) {
+				for (auto x = 0; x < 960; x++) {
+					unsigned i = x + y * 960;
+
+					if (x >= (480 + 240) && y < 200)
+						buf[i].full = Colors565::White;
+
+					else if (x >= 480 && y < 200)
+						buf[i].full = Colors565::Red;
+
+					else if (x < 480 && y < 200)
+						buf[i].full = Colors565::Grey;
+
+					else if (x < 480 && y >= 200)
+						buf[i].full = Colors565::Orange;
+
+					else if (x >= 480 && y >= 200)
+						buf[i].full = Colors565::Blue;
+				}
 			}
 		}
 
+		if (id == 1) {
+			for (auto y = 0; y < 400; y++) {
+				for (auto x = 0; x < 960; x++) {
+					unsigned i = x + y * 960;
+
+					if (x >= (480 + 240 + 120) && y < 200)
+						buf[i].full = Colors565::White;
+
+					else if (x >= (480 + 240) && y < 200)
+						buf[i].full = Colors565::Green;
+
+					else if (x >= 480 && y < 200)
+						buf[i].full = Colors565::Red;
+
+					else if (x < 480 && y >= 200)
+						buf[i].full = Colors565::Yellow; //never
+
+					else if (x >= (480 + 120) && y >= 200)
+						buf[i].full = Colors565::Grey;
+
+					else if (x >= 480 && y >= 200)
+						buf[i].full = Colors565::Blue;
+				}
+			}
+		}
 		ltdc_driver.set_buffer(buf.data());
 	}
 

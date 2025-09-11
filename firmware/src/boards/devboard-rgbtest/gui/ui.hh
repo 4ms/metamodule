@@ -15,6 +15,8 @@
 namespace MetaModule
 {
 
+extern std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height> *first_framebuf;
+
 class Ui {
 private:
 	SyncParams &sync_params;
@@ -42,8 +44,6 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		extern std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height>
-			*first_framebuf;
 		MMDisplay::init(metaparams, screensaver, *first_framebuf);
 
 		if (!Settings::read_settings(patch_storage, &settings)) {
@@ -65,8 +65,14 @@ public:
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 	}
 
+	uint32_t pat = 1;
 	void update_screen() {
-		// no screen
+		auto now = HAL_GetTick();
+		if ((now - last_screen_update_tm) > 2000) {
+			last_screen_update_tm = now;
+			// MMDisplay::test_pattern(pat, *first_framebuf);
+			pat = 1 - pat;
+		}
 	}
 
 	void update_page() {
@@ -181,6 +187,7 @@ private:
 	}
 
 	uint32_t last_page_update_tm = 0;
+	uint32_t last_screen_update_tm = 0;
 };
 
 } // namespace MetaModule
