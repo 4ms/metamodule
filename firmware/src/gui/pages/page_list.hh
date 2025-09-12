@@ -22,6 +22,7 @@ enum class PageId {
 	SystemMenu,
 	ModuleList,
 	JackMapView,
+	MidiMapView,
 	FullscreenGraphic,
 };
 

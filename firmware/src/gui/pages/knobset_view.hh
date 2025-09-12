@@ -6,6 +6,7 @@
 #include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "src/core/lv_event.h"
 #include "src/widgets/lv_textarea.h"
@@ -30,6 +31,13 @@ struct KnobSetViewPage : PageBase {
 		lv_obj_add_event_cb(ui_PreviousKnobSet, goto_jackmap_cb, LV_EVENT_CLICKED, this);
 		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
 		lv_label_set_text(ui_PreviousKnobSetLabel, "Jacks");
+
+		// Add MIDI Maps button next to Jacks
+		midi_map_button = create_button(ui_KnobSetPageHeader, "MIDI");
+		lv_obj_set_height(midi_map_button, 18);
+		lv_obj_add_event_cb(midi_map_button, goto_midimap_cb, LV_EVENT_CLICKED, this);
+		// Place immediately after the Jacks button in header
+		lv_obj_move_to_index(midi_map_button, 1);
 
 		lv_obj_add_event_cb(ui_KnobSetNameText, rename_knobset_cb, LV_EVENT_CLICKED, this);
 
@@ -65,6 +73,8 @@ struct KnobSetViewPage : PageBase {
 			lv_hide(ui_NextKnobSet);
 		}
 		lv_group_add_obj(group, ui_PreviousKnobSet);
+		if (midi_map_button)
+			lv_group_add_obj(group, midi_map_button);
 		lv_group_add_obj(group, ui_KnobSetNameText);
 		lv_group_add_obj(group, ui_ActivateKnobSet);
 		lv_group_add_obj(group, ui_NextKnobSet);
@@ -459,6 +469,13 @@ private:
 		page->page_list.request_new_page_no_history(PageId::JackMapView, page->args);
 	}
 
+	static void goto_midimap_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		page->page_list.request_new_page_no_history(PageId::MidiMapView, page->args);
+	}
+
 	static void activate_knobset_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -492,6 +509,7 @@ private:
 	}
 
 	lv_obj_t *base = nullptr;
+	lv_obj_t *midi_map_button = nullptr;
 	MappedKnobSet *knobset = nullptr;
 	PatchData *patch;
 	ButtonExpanderMapsView button_exp;
