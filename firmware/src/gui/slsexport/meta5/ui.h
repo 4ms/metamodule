@@ -567,6 +567,13 @@ extern lv_obj_t *ui_JackMapLeftColumn;
 extern lv_obj_t *ui_JackMapInputsTitle;
 extern lv_obj_t *ui_JackMapRightColumn;
 extern lv_obj_t *ui_JackMapOutputsTitle;
+void ui_MidiMapViewPage_screen_init(void);
+extern lv_obj_t *ui_MidiMapViewPage;
+extern lv_obj_t *ui_MidiMapViewCont;
+extern lv_obj_t *ui_MidiMapLeftColumn;
+extern lv_obj_t *ui_MidiMapInputsTitle;
+extern lv_obj_t *ui_MidiMapRightColumn;
+extern lv_obj_t *ui_MidiMapOutputsTitle;
 // SCREEN: ui_HwTestPage
 void ui_HwTestPage_screen_init(void);
 extern lv_obj_t *ui_HwTestPage;

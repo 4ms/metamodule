@@ -594,6 +594,15 @@ lv_obj_t *ui_JackMapInputsTitle;
 lv_obj_t *ui_JackMapRightColumn;
 lv_obj_t *ui_JackMapOutputsTitle;
 
+// SCREEN: ui_MidiMapViewPage
+void ui_MidiMapViewPage_screen_init(void);
+lv_obj_t *ui_MidiMapViewPage;
+lv_obj_t *ui_MidiMapViewCont;
+lv_obj_t *ui_MidiMapLeftColumn;
+lv_obj_t *ui_MidiMapInputsTitle;
+lv_obj_t *ui_MidiMapRightColumn;
+lv_obj_t *ui_MidiMapOutputsTitle;
+
 // SCREEN: ui_HwTestPage
 void ui_HwTestPage_screen_init(void);
 lv_obj_t *ui_HwTestPage;
@@ -792,6 +801,7 @@ ui_DeleteMappingPopUp_screen_init();
 ui_ModuleListPage_screen_init();
 ui_SystemMenu_screen_init();
 ui_JackMapViewPage_screen_init();
+ui_MidiMapViewPage_screen_init();
 ui_HwTestPage_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_MainMenu);

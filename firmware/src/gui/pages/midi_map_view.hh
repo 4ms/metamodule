@@ -2,7 +2,6 @@
 #include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "patch-serial/patch/midi_def.hh"
@@ -15,34 +14,35 @@ struct MidiMapViewPage : PageBase {
 
 	MidiMapViewPage(PatchContext info)
 		: PageBase{info, PageId::MidiMapView}
-		, base{ui_JackMapViewPage}
+		, base{ui_MidiMapViewPage}
 		, patch{patches.get_view_patch()}
 		, group{lv_group_create()} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
-		// Retitle columns for MIDI
-		lv_label_set_text(ui_JackMapInputsTitle, "MIDI Jacks");
-		lv_label_set_text(ui_JackMapOutputsTitle, "MIDI Params");
+		lv_label_set_text(ui_MidiMapInputsTitle, "MIDI Jacks");
+		lv_label_set_text(ui_MidiMapOutputsTitle, "MIDI Params");
 	}
 
 	void prepare_focus() override {
 		redraw();
 		lv_group_activate(group);
-		lv_obj_scroll_to_y(ui_JackMapLeftColumn, 0, LV_ANIM_OFF);
-		lv_obj_scroll_to_y(ui_JackMapRightColumn, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(ui_MidiMapLeftColumn, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(ui_MidiMapRightColumn, 0, LV_ANIM_OFF);
 	}
 
 	void redraw() {
 		patch = patches.get_view_patch();
 
 		// Clear existing items
-		lv_obj_clean(ui_JackMapLeftColumn);
-		lv_obj_clean(ui_JackMapRightColumn);
+		lv_obj_clean(ui_MidiMapLeftColumn);
+		lv_obj_clean(ui_MidiMapRightColumn);
 
 		left_items.clear();
 		right_items.clear();
+
+		lv_group_remove_all_objs(group);
 
 		// MIDI jack maps (inputs): any mapped_in whose panel_jack_id is a MIDI mapping
 		for (auto [i, map] : enumerate(patch->mapped_ins)) {
@@ -59,7 +59,7 @@ struct MidiMapViewPage : PageBase {
 				label_text = label_storage.c_str();
 			}
 
-			auto cont = create_jack_map_item(ui_JackMapLeftColumn, JackMapType::Input, map.panel_jack_id, label_text);
+			auto cont = create_jack_map_item(ui_MidiMapLeftColumn, JackMapType::Input, map.panel_jack_id, label_text);
 			lv_obj_set_user_data(cont, (void *)((uintptr_t)i));
 			lv_obj_add_event_cb(cont, on_midi_jack_click, LV_EVENT_CLICKED, this);
 			lv_group_add_obj(group, cont);
@@ -70,7 +70,8 @@ struct MidiMapViewPage : PageBase {
 		for (auto [i, mk] : enumerate(patch->midi_maps.set)) {
 			auto fullname = get_full_element_name(mk.module_id, mk.param_id, ElementType::Param, *patch);
 			std::string label = std::string(fullname.module_name) + " " + std::string(fullname.element_name);
-			auto cont = create_jack_map_item(ui_JackMapRightColumn, JackMapType::Input, mk.panel_knob_id, label.c_str());
+			auto cont =
+				create_jack_map_item(ui_MidiMapRightColumn, JackMapType::Input, mk.panel_knob_id, label.c_str());
 			lv_obj_set_user_data(cont, (void *)((uintptr_t)i));
 			lv_obj_add_event_cb(cont, on_param_map_click, LV_EVENT_CLICKED, this);
 			lv_group_add_obj(group, cont);
