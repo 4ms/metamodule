@@ -1,4 +1,5 @@
 #include "conf/screen_buffer_conf.hh"
+#include "conf/screen_conf.hh"
 #include "drivers/tim_pwm.hh"
 #include "screen/lvgl_driver.hh"
 #include <array>
@@ -17,19 +18,20 @@ void start_pixel_clock() {
 		.pin = ScreenConf::actual_clk,
 		.TIM = TIM3_BASE,
 		.channum = mdrivlib::TimChannelNum::_3,
-		.period = 23,
+		// .period = 5,
+		.period = 11,
+		// .period = 23, //doubles
 		// .period = 2, //period+1 = 3, so PLLQ must be 12 if pres=1 or 6 if prescaler is 0
 		// .period = 4,	//period+1 = 5, so PLLQ must be 20 (pres = 1)
 		.prescaler = 0, // divide by 1+prescaler
 		.clock_div = 0,
 	};
 	mdrivlib::TimPwmChan<conf> rgbclk;
-	rgbclk.set(12);
+	rgbclk.set(2);
 }
 
 void init_gui() {
-	mdrivlib::Pin backlight{
-		{mdrivlib::GPIO::E, mdrivlib::PinNum::_4}, mdrivlib::PinMode::Output, {}, mdrivlib::PinPolarity::Normal};
+	mdrivlib::Pin backlight{{mdrivlib::GPIO::E, mdrivlib::PinNum::_4}, mdrivlib::PinMode::Output};
 
 	backlight.on();
 
