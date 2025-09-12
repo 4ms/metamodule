@@ -1,15 +1,9 @@
 #pragma once
-#include "CoreModules/elements/element_info.hh"
 #include "gui/elements/element_name.hh"
-#include "gui/elements/map_ring_animate.hh"
-#include "gui/elements/module_drawer.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/knob_arc.hh"
 #include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
-#include "src/core/lv_obj_tree.h"
 
 namespace MetaModule
 {
