@@ -96,8 +96,7 @@ public:
 		if (buf.size() != ScreenWidth * ScreenHeight)
 			printf("WRONG BUFFER SIZE\n");
 
-		// mdrivlib::SystemCache::invalidate_dcache_by_range(buf.data(), sizeof(buf));
-		// mdrivlib::SystemCache::invalidate_dcache_by_range(buf.data(), buf.size_bytes());
+		mdrivlib::SystemCache::invalidate_dcache_by_range(buf.data(), buf.size_bytes());
 		// test pattern
 		if (id == 0) {
 			for (auto &b : buf) {
@@ -151,8 +150,7 @@ public:
 			}
 		}
 
-		// mdrivlib::SystemCache::clean_dcache_by_range(buf.data(), sizeof(buf));
-		// mdrivlib::SystemCache::clean_dcache_by_range(buf.data(), buf.size_bytes());
+		mdrivlib::SystemCache::clean_dcache_by_range(buf.data(), buf.size_bytes());
 
 		ltdc_driver.set_buffer(buf.data());
 	}
