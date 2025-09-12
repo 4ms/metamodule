@@ -79,22 +79,28 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 		circle_bgcolor = Gui::jack_palette[panel_jack_id % Gui::jack_palette.size()];
 		circle_bordercolor = lv_color_black();
 		circle_borderwidth = 0;
-	} else {
+	} else if (type == JackMapType::Output) {
 		circle_bgcolor = lv_color_make_rgb565(0x88, 0x88, 0x88);
 		circle_bordercolor = Gui::jack_palette[panel_jack_id % Gui::jack_palette.size()];
 		circle_borderwidth = 2;
+	} else if (type == JackMapType::MIDI) {
+		circle_bgcolor = Gui::jack_palette[panel_jack_id % Gui::jack_palette.size()];
+		circle_bordercolor = lv_color_black();
+		circle_borderwidth = 0;
 	}
 
 	auto letter_color = panel_jack_id == 6 ? lv_color_white() : lv_color_make_rgb565(0x11, 0x11, 0x11);
 
 	std::string letterchar = "";
-	if (type == JackMapType::Input) {
+	if (type == JackMapType::Input || type == JackMapType::MIDI) {
 		letterchar = get_panel_brief_name(JackInput{}, panel_jack_id);
 	} else if (type == JackMapType::Output) {
 		letterchar = get_panel_brief_name(JackOutput{}, panel_jack_id);
 	}
 
-	auto font = letterchar.size() > 1 ? &ui_font_MuseoSansRounded70014 : &ui_font_MuseoSansRounded70016;
+	auto font = letterchar.size() > 2 ? &ui_font_MuseoSansRounded50012 :
+				letterchar.size() > 1 ? &ui_font_MuseoSansRounded70014 :
+										&ui_font_MuseoSansRounded70016;
 
 	lv_obj_t *cont = lv_obj_create(parent);
 	lv_obj_remove_style_all(cont);
@@ -118,7 +124,7 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_obj_set_style_outline_width(cont, 1, LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(cont, 2, LV_STATE_FOCUSED);
 
-	auto circle_width = letterchar.length() > 1 ? 30 : 20;
+	auto circle_width = letterchar.length() > 2 ? 40 : letterchar.length() > 1 ? 30 : 20;
 	lv_obj_t *circle = lv_btn_create(cont);
 	lv_obj_set_width(circle, circle_width);
 	lv_obj_set_height(circle, 20);
