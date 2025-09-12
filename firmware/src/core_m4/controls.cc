@@ -114,7 +114,7 @@ void Controls::update_midi_connected() {
 
 void Controls::update_control_expander() {
 	// Control expander
-	cur_metaparams->num_button_exp_connected = control_expander.num_button_expanders_connected();
+	cur_metaparams->button_exp_connected = control_expander.button_expanders_connected();
 
 	uint32_t buttons_state = control_expander.get_buttons();
 	cur_metaparams->ext_buttons_high_events = 0;

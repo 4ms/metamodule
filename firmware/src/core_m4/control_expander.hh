@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/hub/button_expander_defs.hh"
 #include "conf/button_expander_conf.hh"
 #include "conf/i2c_codec_conf.hh"
 #include "drivers/gpio_expander.hh"
@@ -23,43 +24,44 @@ public:
 	}
 
 	void scan_for_button_expanders() {
-		// This order means that jumper in pos 1 will be the first Button Expander, pos 2 is second, pos 3 is third, no jumper is fourth
-		constexpr std::array<int, ButtonExpander::MaxAddresses> addresses{
+		constexpr std::array<int, ButtonExpander::MaxExpanders> addresses{
 			ButtonExpander::gpio_chip_conf.addr + 6, // Jumper pos 1
 			ButtonExpander::gpio_chip_conf.addr + 5, // Jumper pos 2
 			ButtonExpander::gpio_chip_conf.addr + 3, // Jumper pos 3
 			ButtonExpander::gpio_chip_conf.addr + 7, // No jumpers
-			// Undocumented but valid positions:
-			ButtonExpander::gpio_chip_conf.addr + 4, // (jumpers pos 1+2)
-			ButtonExpander::gpio_chip_conf.addr + 2, // (jumpers pos 1+3)
-			ButtonExpander::gpio_chip_conf.addr + 1, // (jumpers pos 2+3)
-			ButtonExpander::gpio_chip_conf.addr + 0, // (all jumpers)
+
+			// Invalid positions:
+			// ButtonExpander::gpio_chip_conf.addr + 4, // (jumpers pos 1+2)
+			// ButtonExpander::gpio_chip_conf.addr + 2, // (jumpers pos 1+3)
+			// ButtonExpander::gpio_chip_conf.addr + 1, // (jumpers pos 2+3)
+			// ButtonExpander::gpio_chip_conf.addr + 0, // (all jumpers)
 		};
 
-		size_t num_expanders_found = 0;
+		auto num_expanders_found = 0u;
 
-		// Scan for attached
-		for (auto addr : addresses) {
-			auto *buttonexp = &all_button_exps[num_expanders_found];
-			buttonexp->set_address(addr);
+		for (unsigned i = 0; auto &buttonexp : found_button_exps) {
+			auto addr = addresses[i++];
 
-			if (buttonexp->is_present()) {
-				buttonexp->start();
+			buttonexp.found = false;
+			buttonexp.driver.set_address(addr);
+
+			if (buttonexp.driver.is_present()) {
+				buttonexp.found = true;
+				buttonexp.driver.start();
 				pr_info("Button Expander found at addr 0x%x\n", addr);
 				num_expanders_found++;
-				if (num_expanders_found >= all_button_exps.size())
+				if (num_expanders_found >= ButtonExpander::MaxExpanders)
 					break;
+
 			} else {
-				pr_info("Button Expander not found at addr 0x%x\n", addr);
+				pr_dbg("Button Expander not found at addr 0x%x\n", addr);
 			}
 		}
-
-		found_button_exps = std::span{all_button_exps.begin(), num_expanders_found};
 	}
 
 	void update() {
 		if (found_button_exps.size() == 0)
-			// TODO: periodically scan
+			// TODO: periodically scan?
 			return;
 
 		if (!auxi2c.is_ready())
@@ -69,14 +71,17 @@ public:
 
 			case States::ReadButtons: {
 				if (cur_reading_exp >= found_button_exps.size()) {
+					cur_reading_exp = 0;
 					state = States::CollectReadings;
 
 				} else {
-					auto err = found_button_exps[cur_reading_exp].read_inputs();
-					if (err != GPIOExpander::Error::None)
-						handle_error();
-					else
-						num_errors = 0;
+					if (found_button_exps[cur_reading_exp].found) {
+						auto err = found_button_exps[cur_reading_exp].driver.read_inputs();
+						if (err != GPIOExpander::Error::None)
+							handle_error();
+						else
+							num_errors[cur_reading_exp] = 0;
+					}
 
 					cur_reading_exp++;
 				}
@@ -86,9 +91,11 @@ public:
 			case States::CollectReadings: {
 				uint32_t readings = 0;
 				for (auto i = 0u; auto &exp : found_button_exps) {
-					auto this_reading = ButtonExpander::order_buttons(exp.collect_last_reading());
-					// Firt expander in the span will be in the LSByte
-					readings |= this_reading << (i * 8);
+					if (exp.found) {
+						auto this_reading = ButtonExpander::order_buttons(exp.driver.collect_last_reading());
+						// Firt expander will be in the LSByte
+						readings |= this_reading << (i * 8);
+					}
 					i++;
 				}
 
@@ -101,7 +108,6 @@ public:
 
 			case States::Pause: {
 				if ((HAL_GetTick() - tmr) > 10) {
-					cur_reading_exp = 0;
 					state = States::ReadButtons;
 				}
 				break;
@@ -119,20 +125,35 @@ public:
 	}
 
 	uint32_t num_button_expanders_connected() {
-		return found_button_exps.size();
+		return std::ranges::count_if(found_button_exps, [](const FoundButtonExpander &exp) { return exp.found; });
+	}
+
+	uint32_t button_expanders_connected() {
+		uint32_t bitfield = 0u;
+
+		for (auto i = 0u; auto &exp : found_button_exps) {
+			if (exp.found)
+				bitfield |= 1 << i;
+			i++;
+		}
+
+		return bitfield;
 	}
 
 private:
 	I2CPeriph auxi2c{ButtonExpander::i2c_conf};
 
-	std::array<GPIOExpander, 4> all_button_exps{{
-		{auxi2c, ButtonExpander::gpio_chip_conf},
-		{auxi2c, ButtonExpander::gpio_chip_conf},
-		{auxi2c, ButtonExpander::gpio_chip_conf},
-		{auxi2c, ButtonExpander::gpio_chip_conf},
-	}};
+	struct FoundButtonExpander {
+		bool found = false;
+		GPIOExpander driver;
+	};
 
-	std::span<GPIOExpander> found_button_exps{all_button_exps};
+	std::array<FoundButtonExpander, ButtonExpander::MaxExpanders> found_button_exps{{
+		{false, {auxi2c, ButtonExpander::gpio_chip_conf}},
+		{false, {auxi2c, ButtonExpander::gpio_chip_conf}},
+		{false, {auxi2c, ButtonExpander::gpio_chip_conf}},
+		{false, {auxi2c, ButtonExpander::gpio_chip_conf}},
+	}};
 
 	uint32_t cur_reading_exp = 0;
 
@@ -147,12 +168,21 @@ private:
 		FinishSending,
 	} state = States::ReadButtons;
 
-	uint32_t num_errors = 0;
+	std::array<uint32_t, ButtonExpander::MaxExpanders> num_errors{};
+	std::array<uint32_t, ButtonExpander::MaxExpanders> num_error_retries{};
 
 	void handle_error() {
-		num_errors++;
-		pr_dbg("ControlExpander I2C Error!\n");
-		if (num_errors > 8) {
+		num_errors[cur_reading_exp]++;
+		pr_dbg("ControlExpander %u I2C Error!\n", cur_reading_exp);
+
+		if (num_errors[cur_reading_exp] > 8) {
+			num_error_retries[cur_reading_exp]++;
+
+			if (num_error_retries[cur_reading_exp] > 10) {
+				pr_dbg("ControlExpander: too many errors on button exp %u, disabling\n", cur_reading_exp);
+				found_button_exps[cur_reading_exp].found = false;
+				cur_reading_exp = 0;
+			}
 			auxi2c.init(ButtonExpander::i2c_conf);
 			tmr = std::max<uint32_t>(HAL_GetTick(), 500u) - 500;
 			state = States::Pause;

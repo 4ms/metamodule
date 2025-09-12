@@ -31,7 +31,7 @@ struct MetaParams {
 	// Controls -> Audio
 	bool midi_connected = false;
 
-	uint8_t num_button_exp_connected = 0;
+	uint32_t button_exp_connected = 0; //bitmap
 	uint32_t ext_buttons_high_events{};
 	uint32_t ext_buttons_low_events{};
 
@@ -64,6 +64,7 @@ struct MetaParams {
 		jack_senses = 0;
 		ext_buttons_high_events = 0;
 		ext_buttons_low_events = 0;
+		button_exp_connected = 0;
 	}
 
 	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
@@ -87,6 +88,8 @@ struct MetaParams {
 		// But -- we don't need to do this? Because controls will clear them?
 		that.ext_buttons_low_events = 0;
 		that.ext_buttons_high_events = 0;
+
+		button_exp_connected = that.button_exp_connected;
 
 		audio_overruns = std::max(that.audio_overruns, audio_overruns);
 
@@ -118,6 +121,8 @@ struct MetaParams {
 		// Clear from sync params, GUI consumes them
 		that.ext_buttons_low_events = 0;
 		that.ext_buttons_high_events = 0;
+
+		button_exp_connected = that.button_exp_connected;
 
 		// transfer
 		if (that.audio_overruns > 0) {
