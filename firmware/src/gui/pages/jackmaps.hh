@@ -1,9 +1,10 @@
 #pragma once
 #include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
+#include "params/expanders.hh"
 
 namespace MetaModule
 {
@@ -33,12 +34,10 @@ struct JackMapViewPage : PageBase {
 
 		for (unsigned i = 0; i < num_inputs; i++) {
 			in_conts[i] = create_jack_map_item(ui_JackMapLeftColumn, JackMapType::Input, i, "");
-			lv_group_add_obj(group, in_conts[i]);
 		}
 
 		for (unsigned i = 0; i < num_outputs; i++) {
 			out_conts[i] = create_jack_map_item(ui_JackMapRightColumn, JackMapType::Output, i, "");
-			lv_group_add_obj(group, out_conts[i]);
 		}
 	}
 
@@ -83,6 +82,8 @@ struct JackMapViewPage : PageBase {
 	void redraw() {
 		patch = patches.get_view_patch();
 
+		lv_group_remove_all_objs(group);
+
 		// Clear old text
 		for (unsigned i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
 			if (lv_obj_get_child_cnt(in_conts[i]) > 1)
@@ -100,6 +101,7 @@ struct JackMapViewPage : PageBase {
 			for (auto &jack : map.ins) {
 				if (map.panel_jack_id < in_conts.size()) {
 					if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
+						lv_group_add_obj(group, in_conts[map.panel_jack_id]);
 						lv_obj_set_user_data(in_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 						lv_obj_add_event_cb(
 							in_conts[map.panel_jack_id], onJackMapClick<JackMapType::Input>, LV_EVENT_CLICKED, this);
@@ -118,6 +120,7 @@ struct JackMapViewPage : PageBase {
 		for (auto [i, map] : enumerate(patch->mapped_outs)) {
 			if (map.panel_jack_id < out_conts.size()) {
 				if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
+					lv_group_add_obj(group, out_conts[map.panel_jack_id]);
 					lv_obj_set_user_data(out_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 					lv_obj_add_event_cb(
 						out_conts[map.panel_jack_id], onJackMapClick<JackMapType::Output>, LV_EVENT_CLICKED, this);
