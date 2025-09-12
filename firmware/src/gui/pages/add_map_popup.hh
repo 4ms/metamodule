@@ -16,9 +16,10 @@ namespace MetaModule
 
 struct AddMapPopUp {
 
-	AddMapPopUp(PatchModQueue &patch_mod_queue)
+	AddMapPopUp(PatchModQueue &patch_mod_queue, MetaParams const &metaparams)
 		: patch_mod_queue{patch_mod_queue}
-		, popup_group(lv_group_create()) {
+		, popup_group(lv_group_create())
+		, metaparams{metaparams} {
 
 		midi_channel_dropdown = create_midi_map_dropdown(
 			ui_AddMapPopUp,
@@ -58,7 +59,11 @@ struct AddMapPopUp {
 			lv_label_set_text(ui_AddMappingTitle, "Add a map: Send MIDI Note or CC");
 			lv_show(midi_channel_dropdown);
 		} else {
-			lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob");
+			if (metaparams.button_exp_connected != 0) {
+				lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob or press a button");
+			} else {
+				lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob");
+			}
 			lv_hide(midi_channel_dropdown);
 		}
 		lv_label_set_text(ui_MapDetected, "");
@@ -223,6 +228,7 @@ struct AddMapPopUp {
 	lv_group_t *base_group = nullptr;
 	lv_group_t *popup_group = nullptr;
 	lv_obj_t *midi_channel_dropdown;
+	MetaParams const &metaparams;
 	bool midi_learn_channel = true;
 
 	PatchData *patch = nullptr;

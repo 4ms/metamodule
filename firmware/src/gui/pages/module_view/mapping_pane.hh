@@ -50,7 +50,7 @@ struct ModuleViewMappingPane {
 		, page_list{page_list}
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
-		, add_map_popup{patch_mod_queue}
+		, add_map_popup{patch_mod_queue, metaparams}
 		, control_popup{patches, patch_mod_queue, playloader}
 		, midi_map_popup{params}
 		, patch_mod_queue{patch_mod_queue}
