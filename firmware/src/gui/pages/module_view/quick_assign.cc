@@ -45,7 +45,7 @@ void ModuleViewPage::handle_quick_assign() {
 
 			if (auto firstbit = std::countr_zero(metaparams.ext_buttons_high_events); firstbit < 32) {
 				metaparams.ext_buttons_high_events = 0;
-				printf("Map but %u\n", firstbit + FirstButton);
+				perform_knob_assign(firstbit + FirstButton, current_element);
 			}
 
 			if (gui_state.midi_quick_mapping_mode) {
