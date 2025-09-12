@@ -1,5 +1,6 @@
 #include "../conf/screen_conf.hh"
 #include "conf/screen_buffer_conf.hh"
+#include "drivers/cache.hh"
 #include "drivers/screen_ltdc.hh"
 #include "drivers/ss7701s_lcd_init.hh"
 #include "gui/elements/screensaver.hh"
@@ -63,10 +64,10 @@ void start_pixel_clock();
 class MMDisplay {
 	static constexpr uint32_t ScreenWidth = ScreenBufferConf::viewWidth;
 	static constexpr uint32_t ScreenHeight = ScreenBufferConf::viewHeight;
+	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
 
 	static inline MetaParams *m;
 	static inline Screensaver *_screensaver;
-	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
 
 	static inline ScreenParallelWriter<ScreenConf> ltdc_driver;
 	static inline mdrivlib::LTDCSerial9BitSetup<ScreenControlConf> screen_setup{ScreenControlConf::reset};
@@ -82,20 +83,32 @@ public:
 
 		start_pixel_clock();
 		HAL_Delay(1);
-		ltdc_driver.init(buf.data());
 
-		test_pattern(0, buf);
+		// ltdc_driver.init(testbuf.data());
+		// test_pattern(1);
+		ltdc_driver.init(buf.data());
+		test_pattern(1, buf);
 	}
 
 	static void test_pattern(unsigned id, std::span<lv_color_t> buf) {
+		// auto buf = std::span<lv_color_t>(testbuf);
+
 		if (buf.size() != ScreenWidth * ScreenHeight)
 			printf("WRONG BUFFER SIZE\n");
 
+		// mdrivlib::SystemCache::invalidate_dcache_by_range(buf.data(), sizeof(buf));
+		// mdrivlib::SystemCache::invalidate_dcache_by_range(buf.data(), buf.size_bytes());
 		// test pattern
 		if (id == 0) {
+			for (auto &b : buf) {
+				b.full = Colors565::Yellow;
+			}
+		}
+
+		if (id == 1) {
 			for (auto y = 0u; y < ScreenHeight; y++) {
 				for (auto x = 0u; x < ScreenWidth; x++) {
-					unsigned i = x + y * ScreenWidth;
+					unsigned i = y + x * ScreenHeight;
 
 					if (x >= (ScreenWidth * 0.75) && y < ScreenHeight / 2)
 						buf[i].full = Colors565::White;
@@ -115,31 +128,32 @@ public:
 			}
 		}
 
-		if (id == 1) {
-			for (auto y = 0; y < 400; y++) {
-				for (auto x = 0; x < 960; x++) {
-					unsigned i = x + y * 960;
+		if (id == 2) {
+			for (auto y = 0u; y < ScreenHeight; y++) {
+				for (auto x = 0u; x < ScreenWidth; x++) {
+					unsigned i = y + x * ScreenHeight;
 
-					if (x >= (480 + 240 + 120) && y < 200)
-						buf[i].full = Colors565::White;
-
-					else if (x >= (480 + 240) && y < 200)
+					if (x >= (ScreenWidth * 0.75) && y < ScreenHeight / 2)
 						buf[i].full = Colors565::Green;
 
-					else if (x >= 480 && y < 200)
-						buf[i].full = Colors565::Red;
+					else if (x >= ScreenWidth / 2 && y < ScreenHeight / 2)
+						buf[i].full = Colors565::Orange;
 
-					else if (x < 480 && y >= 200)
-						buf[i].full = Colors565::Yellow; //never
-
-					else if (x >= (480 + 120) && y >= 200)
+					else if (x >= ScreenWidth / 2 && y >= ScreenHeight / 2)
 						buf[i].full = Colors565::Grey;
 
-					else if (x >= 480 && y >= 200)
-						buf[i].full = Colors565::Blue;
+					else if (x < ScreenWidth / 2 && y < ScreenHeight / 2)
+						buf[i].full = Colors565::White;
+
+					else if (x < ScreenWidth / 2 && y >= ScreenHeight / 2)
+						buf[i].full = Colors565::Black;
 				}
 			}
 		}
+
+		// mdrivlib::SystemCache::clean_dcache_by_range(buf.data(), sizeof(buf));
+		// mdrivlib::SystemCache::clean_dcache_by_range(buf.data(), buf.size_bytes());
+
 		ltdc_driver.set_buffer(buf.data());
 	}
 

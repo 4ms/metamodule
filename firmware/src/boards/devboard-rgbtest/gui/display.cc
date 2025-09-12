@@ -1,5 +1,4 @@
 #include "conf/screen_buffer_conf.hh"
-#include "conf/screen_conf.hh"
 #include "drivers/tim_pwm.hh"
 #include "screen/lvgl_driver.hh"
 #include <array>
@@ -27,11 +26,13 @@ void start_pixel_clock() {
 		.clock_div = 0,
 	};
 	mdrivlib::TimPwmChan<conf> rgbclk;
-	rgbclk.set(2);
+	TIM3->CR1 |= TIM_CR1_DIR; //down counter
+	rgbclk.set(9);
 }
 
 void init_gui() {
-	mdrivlib::Pin backlight{{mdrivlib::GPIO::E, mdrivlib::PinNum::_4}, mdrivlib::PinMode::Output};
+	mdrivlib::Pin backlight{
+		{mdrivlib::GPIO::E, mdrivlib::PinNum::_4}, mdrivlib::PinMode::Output, {}, mdrivlib::PinPolarity::Normal};
 
 	backlight.on();
 
