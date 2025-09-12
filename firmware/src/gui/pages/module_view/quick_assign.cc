@@ -43,8 +43,12 @@ void ModuleViewPage::handle_quick_assign() {
 				quick_control_mode = true;
 			}
 
-			if (gui_state.midi_quick_mapping_mode) {
+			if (auto firstbit = std::countr_zero(metaparams.ext_buttons_high_events); firstbit < 32) {
+				metaparams.ext_buttons_high_events = 0;
+				printf("Map but %u\n", firstbit + FirstButton);
+			}
 
+			if (gui_state.midi_quick_mapping_mode) {
 				// Clear all MIDI events when the button is first pressed
 				if (quickmap_rotary_button.is_just_pressed()) {
 					if (gui_state.midi_quick_mapping_mode) {
