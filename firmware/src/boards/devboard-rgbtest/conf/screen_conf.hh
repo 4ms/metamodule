@@ -1,4 +1,5 @@
 #pragma once
+#include "drivers/bit_bang_spi_conf.hh"
 #include "drivers/ltdc_screen_config_struct.hh"
 #include "drivers/spi_config_struct.hh"
 
@@ -79,6 +80,22 @@ struct ScreenControlConf : mdrivlib::DefaultSpiConf {
 	static constexpr uint16_t clock_division = 64;
 	static constexpr uint16_t data_size = 16;
 	static constexpr mdrivlib::SpiDataDir data_dir = mdrivlib::SpiDataDir::TXOnly;
+};
+
+struct ScreenBitBangControlConf : mdrivlib::BitBangSpiTxConf {
+	static constexpr PinDef data{GPIO::C, PinNum::_12};
+	static constexpr PinDef chip_sel{GPIO::D, PinNum::_2};
+	static constexpr PinDef clock{GPIO::C, PinNum::_10};
+
+	static constexpr PinPolarity clk_polarity = PinPolarity::Normal;
+
+	static constexpr uint32_t DataSetupTime = 100;
+	static constexpr uint32_t ClockLowTime = 100;
+	static constexpr uint32_t ClockHighTime = 100;
+	static constexpr uint32_t ChipSelectSetupTime = 100;
+	static constexpr uint32_t WriteLatchAfterDelay = 100;
+
+	static constexpr PinDef reset{GPIO::C, PinNum::_11};
 };
 
 } // namespace MetaModule
