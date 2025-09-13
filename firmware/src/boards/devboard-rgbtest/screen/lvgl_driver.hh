@@ -1,6 +1,7 @@
 #include "../conf/screen_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "drivers/cache.hh"
+#include "drivers/screen_9bit_spi_setup.hh"
 #include "drivers/screen_ltdc.hh"
 #include "drivers/ss7701s_lcd_init.hh"
 #include "gui/elements/screensaver.hh"
@@ -70,7 +71,7 @@ class MMDisplay {
 	static inline Screensaver *_screensaver;
 
 	static inline ScreenParallelWriter<ScreenConf> ltdc_driver;
-	static inline mdrivlib::LTDCSerial9BitSetup<ScreenControlConf> screen_setup{ScreenControlConf::reset};
+	static inline mdrivlib::LTDCSerial9BitSpiSetup<ScreenControlConf> screen_setup{ScreenControlConf::reset};
 
 	static inline std::array<lv_color_t, BufferSize> testbuf;
 
