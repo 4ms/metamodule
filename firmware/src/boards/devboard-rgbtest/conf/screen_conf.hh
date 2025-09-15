@@ -77,8 +77,11 @@ struct ScreenControlConf : mdrivlib::DefaultSpiConf {
 	static constexpr PinDef reset{GPIO::C, PinNum::_11};
 
 	static constexpr bool use_hardware_ss = false;
-	static constexpr uint16_t clock_division = 64;
-	static constexpr uint16_t data_size = 16;
+	static constexpr uint16_t clock_division = 128;
+	static constexpr uint16_t data_size = 9;
+	static constexpr uint8_t FifoThreshold = 1;
+	static constexpr uint32_t NumClocksToggleSSInterData = 4;
+
 	static constexpr mdrivlib::SpiDataDir data_dir = mdrivlib::SpiDataDir::TXOnly;
 };
 
