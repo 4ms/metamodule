@@ -12,11 +12,11 @@ struct SDCardConf : mdrivlib::DefaultSDCardConf {
 	static constexpr auto SDPeriphNum = 1;
 	static constexpr auto speed_hz = 32'000'000;
 	static constexpr auto width = Single;
-	static constexpr mdrivlib::PinDef D0{C, _8, AltFunc12};
-	static constexpr mdrivlib::PinDef D1{C, _9, AltFunc12};
-	static constexpr mdrivlib::PinDef D2{C, _10, AltFunc12};
-	static constexpr mdrivlib::PinDef D3{C, _11, AltFunc12};
-	static constexpr mdrivlib::PinDef SCLK{C, _12, AltFunc12};
-	static constexpr mdrivlib::PinDef CMD{D, _2, AltFunc12};
+	static constexpr mdrivlib::PinDef D0{Unused};
+	static constexpr mdrivlib::PinDef D1{Unused};
+	static constexpr mdrivlib::PinDef D2{Unused};
+	static constexpr mdrivlib::PinDef D3{Unused};
+	static constexpr mdrivlib::PinDef SCLK{Unused};
+	static constexpr mdrivlib::PinDef CMD{Unused};
 };
 } // namespace MetaModule
