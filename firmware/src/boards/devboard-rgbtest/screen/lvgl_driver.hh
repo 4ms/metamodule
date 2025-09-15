@@ -91,7 +91,11 @@ public:
 		HAL_Delay(1);
 
 		ltdc_driver.init(buf.data());
-		test_pattern(1, buf);
+		// test_pattern(2, buf);
+	}
+
+	static void set_buffer(auto *buff) {
+		ltdc_driver.set_buffer(buff);
 	}
 
 	static void test_pattern(unsigned id, std::span<lv_color_t> buf) {

@@ -16,6 +16,7 @@ namespace MetaModule
 {
 
 extern std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height> *first_framebuf;
+extern std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height> *second_framebuf;
 
 class Ui {
 private:
@@ -65,12 +66,15 @@ public:
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 	}
 
-	uint32_t pat = 1;
+	uint32_t pat = 0;
+	bool first_buf = false;
 	void update_screen() {
 		auto now = HAL_GetTick();
-		if ((now - last_screen_update_tm) > 200) {
-			MMDisplay::test_pattern(pat, *first_framebuf);
+		if ((now - last_screen_update_tm) > 50) {
+			MMDisplay::test_pattern(pat, first_buf ? *first_framebuf : *second_framebuf);
 			pat = (pat + 1) % 3;
+
+			first_buf = !first_buf;
 			last_screen_update_tm = now;
 		}
 	}

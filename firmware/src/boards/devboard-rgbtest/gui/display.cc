@@ -7,10 +7,11 @@ namespace MetaModule
 {
 
 using FrameBufferT = std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height>;
-__attribute__((section(".ddma"))) FrameBufferT framebuf1 alignas(64);
-static inline FrameBufferT framebuf2 alignas(64);
+FrameBufferT framebuf1 alignas(64);
+FrameBufferT framebuf2 alignas(64);
 
 FrameBufferT *first_framebuf = &framebuf1;
+FrameBufferT *second_framebuf = &framebuf2;
 
 void start_pixel_clock() {
 	constexpr mdrivlib::TimChanConf conf{
