@@ -46,7 +46,7 @@ struct MidiMapViewPage : PageBase {
 
 		// MIDI jack maps (inputs): any mapped_in whose panel_jack_id is a MIDI mapping
 		for (auto [i, map] : enumerate(patch->mapped_ins)) {
-			if (!is_midi_panel_id(map.panel_jack_id))
+			if (!Midi::is_midi_panel_id(map.panel_jack_id))
 				continue;
 
 			const char *label_text = "";
@@ -93,15 +93,6 @@ struct MidiMapViewPage : PageBase {
 	}
 
 private:
-	static bool is_midi_panel_id(uint32_t id) {
-		auto sid = Midi::strip_midi_channel(id);
-		return Midi::midi_note_pitch(sid).has_value() || Midi::midi_note_gate(sid).has_value() ||
-			   Midi::midi_note_vel(sid).has_value() || Midi::midi_note_aft(sid).has_value() ||
-			   Midi::midi_note_retrig(sid).has_value() || Midi::midi_gate(sid).has_value() ||
-			   Midi::midi_cc(sid).has_value() || Midi::midi_clk(sid).has_value() ||
-			   Midi::midi_divclk(sid).has_value() || Midi::midi_transport(sid).has_value();
-	}
-
 	static void on_midi_jack_click(lv_event_t *event) {
 		if (const auto page = static_cast<MidiMapViewPage *>(event->user_data); page) {
 			const auto idx = (uintptr_t)lv_obj_get_user_data(event->target);

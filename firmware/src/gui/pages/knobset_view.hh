@@ -26,18 +26,19 @@ struct KnobSetViewPage : PageBase {
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
-		// Use Prev button for Jack Map
-		lv_show(ui_PreviousKnobSet);
-		lv_obj_add_event_cb(ui_PreviousKnobSet, goto_jackmap_cb, LV_EVENT_CLICKED, this);
-		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
-		lv_label_set_text(ui_PreviousKnobSetLabel, "Jacks");
+		lv_hide(ui_PreviousKnobSet);
+
+		jacks_button = create_button(ui_KnobSetPageHeader, "Jacks");
+		lv_obj_set_height(jacks_button, 18);
+		lv_obj_add_event_cb(jacks_button, goto_jackmap_cb, LV_EVENT_CLICKED, this);
+		lv_obj_move_to_index(jacks_button, 1);
 
 		// Add MIDI Maps button next to Jacks
 		midi_map_button = create_button(ui_KnobSetPageHeader, "MIDI");
 		lv_obj_set_height(midi_map_button, 18);
 		lv_obj_add_event_cb(midi_map_button, goto_midimap_cb, LV_EVENT_CLICKED, this);
 		// Place immediately after the Jacks button in header
-		lv_obj_move_to_index(midi_map_button, 1);
+		lv_obj_move_to_index(midi_map_button, 2);
 
 		lv_obj_add_event_cb(ui_KnobSetNameText, rename_knobset_cb, LV_EVENT_CLICKED, this);
 
@@ -72,9 +73,8 @@ struct KnobSetViewPage : PageBase {
 		} else {
 			lv_hide(ui_NextKnobSet);
 		}
-		lv_group_add_obj(group, ui_PreviousKnobSet);
-		if (midi_map_button)
-			lv_group_add_obj(group, midi_map_button);
+		lv_group_add_obj(group, jacks_button);
+		lv_group_add_obj(group, midi_map_button);
 		lv_group_add_obj(group, ui_KnobSetNameText);
 		lv_group_add_obj(group, ui_ActivateKnobSet);
 		lv_group_add_obj(group, ui_NextKnobSet);
@@ -124,6 +124,19 @@ struct KnobSetViewPage : PageBase {
 			} else {
 				if (idx == args.mappedknob_id)
 					focus = cont;
+			}
+		}
+
+		// Show midi button only if there are midi maps
+		lv_hide(midi_map_button);
+		if (patch->midi_maps.set.size() > 0)
+			lv_show(midi_map_button);
+		else {
+			for (auto const &map : patch->mapped_ins) {
+				if (Midi::is_midi_panel_id(map.panel_jack_id)) {
+					lv_show(midi_map_button);
+					break;
+				}
 			}
 		}
 
@@ -509,6 +522,7 @@ private:
 	}
 
 	lv_obj_t *base = nullptr;
+	lv_obj_t *jacks_button = nullptr;
 	lv_obj_t *midi_map_button = nullptr;
 	MappedKnobSet *knobset = nullptr;
 	PatchData *patch;
@@ -583,6 +597,18 @@ private:
 
 	lv_obj_t *get_indicator(lv_obj_t *container) {
 		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_INDICATOR);
+	}
+
+	lv_obj_t *get_button_label(lv_obj_t *container) {
+		return lv_obj_get_child(container, 1);
+	}
+
+	lv_obj_t *get_button_circle(lv_obj_t *container) {
+		return lv_obj_get_child(container, 0);
+	}
+
+	lv_obj_t *get_button_circle_number(lv_obj_t *container) {
+		return lv_obj_get_child(get_button_circle(container), 0);
 	}
 
 	void update_enabled_status(lv_obj_t *container, unsigned knob_i, bool actively_playing) {
