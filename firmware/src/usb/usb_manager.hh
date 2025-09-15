@@ -36,14 +36,12 @@ public:
 	}
 
 	void start() {
-		if (found_fusb)
+		if (found_fusb) {
 			pr_dbg("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
-		else
+			pr_dbg("Starting DRP polling\n");
+			usbctl.start_drp_polling();
+		} else
 			pr_err("Can't communicate with FUSB302\n");
-
-		// tm = HAL_GetTick();
-		pr_dbg("Starting DRP polling\n");
-		usbctl.start_drp_polling();
 	}
 
 	void handle_fusb_int() {
