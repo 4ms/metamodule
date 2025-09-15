@@ -68,7 +68,7 @@ public:
 	uint32_t pat = 1;
 	void update_screen() {
 		auto now = HAL_GetTick();
-		if ((now - last_screen_update_tm) > 1000) {
+		if ((now - last_screen_update_tm) > 200) {
 			MMDisplay::test_pattern(pat, *first_framebuf);
 			pat = (pat + 1) % 3;
 			last_screen_update_tm = now;
