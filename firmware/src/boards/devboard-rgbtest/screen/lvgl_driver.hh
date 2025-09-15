@@ -83,9 +83,7 @@ public:
 		m = &metaparams;
 		_screensaver = &screensaver;
 
-		// Screen9BitSpiSetup<SpiTransferDriver<ScreenControlConf>> screen_setup{ScreenControlConf::reset};
-
-		Screen9BitSpiSetup<BitBang9Bit<ScreenBitBangControlConf>> screen_setup{ScreenControlConf::reset};
+		Screen9BitSpiSetup<SpiTransferDriver<ScreenControlConf>> screen_setup{ScreenControlConf::reset};
 
 		screen_setup.setup_driver_chip(mdrivlib::ST7701S::InitCmds);
 
