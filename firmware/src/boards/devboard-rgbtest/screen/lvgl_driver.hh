@@ -72,7 +72,7 @@ class MMDisplay {
 	static inline ScreenParallelWriter<ScreenConf> ltdc_driver;
 	static inline mdrivlib::LTDCSerial9BitSetup<ScreenControlConf> screen_setup{ScreenControlConf::reset};
 
-	static inline std::array<lv_color_t, BufferSize> testbuf;
+	// static inline std::array<lv_color_t, BufferSize> testbuf;
 
 public:
 	static void init(MetaParams &metaparams, Screensaver &screensaver, std::span<lv_color_t> buf) {
