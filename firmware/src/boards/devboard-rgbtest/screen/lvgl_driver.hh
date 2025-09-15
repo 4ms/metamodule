@@ -1,7 +1,10 @@
 #include "../conf/screen_conf.hh"
 #include "conf/screen_buffer_conf.hh"
+#include "drivers/bit_bang.hh"
 #include "drivers/cache.hh"
+#include "drivers/screen_9bit_spi_setup.hh"
 #include "drivers/screen_ltdc.hh"
+#include "drivers/spi_transfer.hh"
 #include "drivers/ss7701s_lcd_init.hh"
 #include "gui/elements/screensaver.hh"
 #include "params/metaparams.hh"
@@ -70,22 +73,25 @@ class MMDisplay {
 	static inline Screensaver *_screensaver;
 
 	static inline ScreenParallelWriter<ScreenConf> ltdc_driver;
-	static inline mdrivlib::LTDCSerial9BitSetup<ScreenControlConf> screen_setup{ScreenControlConf::reset};
 
 	// static inline std::array<lv_color_t, BufferSize> testbuf;
 
 public:
 	static void init(MetaParams &metaparams, Screensaver &screensaver, std::span<lv_color_t> buf) {
+		using namespace mdrivlib;
+
 		m = &metaparams;
 		_screensaver = &screensaver;
+
+		// Screen9BitSpiSetup<SpiTransferDriver<ScreenControlConf>> screen_setup{ScreenControlConf::reset};
+
+		Screen9BitSpiSetup<BitBang9Bit<ScreenBitBangControlConf>> screen_setup{ScreenControlConf::reset};
 
 		screen_setup.setup_driver_chip(mdrivlib::ST7701S::InitCmds);
 
 		start_pixel_clock();
 		HAL_Delay(1);
 
-		// ltdc_driver.init(testbuf.data());
-		// test_pattern(1);
 		ltdc_driver.init(buf.data());
 		test_pattern(1, buf);
 	}
