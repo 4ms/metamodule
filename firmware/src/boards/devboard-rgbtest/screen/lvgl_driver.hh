@@ -104,7 +104,21 @@ public:
 		// test pattern
 		if (id == 0) {
 			for (auto &b : buf) {
-				b.full = Colors565::Yellow;
+				b.full = Colors565::Black;
+			}
+			for (auto y = 0u; y < ScreenHeight; y++) {
+				unsigned i = y + (0 * ScreenHeight);
+				buf[i].full = Colors565::Red;
+				i = y + (ScreenWidth - 1) * ScreenHeight;
+				buf[i].full = Colors565::Green;
+			}
+			for (auto x = 0u; x < ScreenWidth; x++) {
+				unsigned i = 0 + (x * ScreenHeight);
+				buf[i].full = Colors565::Blue;
+
+				i = (ScreenHeight - 1) + (x * ScreenHeight);
+
+				buf[i].full = Colors565::White;
 			}
 		}
 
