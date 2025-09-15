@@ -17,17 +17,14 @@ void start_pixel_clock() {
 		.pin = ScreenConf::actual_clk,
 		.TIM = TIM3_BASE,
 		.channum = mdrivlib::TimChannelNum::_3,
-		// .period = 5,
-		.period = 11,
-		// .period = 23, //doubles
-		// .period = 2, //period+1 = 3, so PLLQ must be 12 if pres=1 or 6 if prescaler is 0
-		// .period = 4,	//period+1 = 5, so PLLQ must be 20 (pres = 1)
+		.period = 5, //~60Hz refresh (with RCC PLLQ = 12)
+		// .period = 11, //~30Hz refresh (with rcc PLLQ = 24)
 		.prescaler = 0, // divide by 1+prescaler
 		.clock_div = 0,
 	};
 	mdrivlib::TimPwmChan<conf> rgbclk;
 	TIM3->CR1 |= TIM_CR1_DIR; //down counter
-	rgbclk.set(9);
+	rgbclk.set(3);
 }
 
 void init_gui() {
