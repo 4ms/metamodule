@@ -2,6 +2,7 @@
 #include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
+#include "general_io.hh"
 #include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
@@ -19,6 +20,7 @@ private:
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
 	PluginManager &plugin_manager;
+	FileStorageProxy &file_storage_proxy;
 
 	ParamsMidiState params;
 	MetaParams metaparams;
@@ -28,7 +30,7 @@ private:
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
-	   FileStorageProxy &patch_storage,
+	   FileStorageProxy &file_storage_proxy,
 	   OpenPatchManager &open_patch_manager,
 	   SyncParams &sync_params,
 	   PatchModQueue &patch_mod_queue,
@@ -36,19 +38,18 @@ public:
 	   FatFileIO &ramdisk)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
-		, plugin_manager{plugin_manager} {
+		, plugin_manager{plugin_manager}
+		, file_storage_proxy{file_storage_proxy} {
 		params.clear();
 		metaparams.clear();
 
-		if (!Settings::read_settings(patch_storage, &settings)) {
+		if (!Settings::read_settings(file_storage_proxy, &settings)) {
 			settings = UserSettings{};
-			if (!Settings::write_settings(patch_storage, settings)) {
+			if (!Settings::write_settings(file_storage_proxy, settings)) {
 				pr_err("Failed to write settings file\n");
 			}
 		}
 
-		// settings.last_patch_vol = Volume::NorFlash;
-		// settings.last_patch_opened = "/West_Coast_FM_Madness.yml";
 		settings.last_patch_vol = Volume::SDCard;
 		settings.last_patch_opened = "/patch.yml";
 
@@ -118,26 +119,34 @@ public:
 	}
 
 	void preload_plugins() {
-		auto preloader = PreLoader{plugin_manager, settings.plugin_preload};
+		if (FS::file_size(file_storage_proxy, {"preload_all_plugins", Volume::SDCard}) ||
+			FS::file_size(file_storage_proxy, {"preload_all_plugins", Volume::USB}))
+		{
+			pr_info("Preloading all plugins\n");
+			preload_all_plugins();
+		} else {
 
-		if (settings.plugin_preload.slug.size())
-			delay_ms(600); //allow time for ???
+			auto preloader = PreLoader{plugin_manager, settings.plugin_preload};
 
-		while (true) {
-			auto status = preloader.process();
+			if (settings.plugin_preload.slug.size())
+				delay_ms(600); //allow time for ???
 
-			if (status.state == PreLoader::State::Error) {
-				break;
+			while (true) {
+				auto status = preloader.process();
 
-			} else if (status.state == PreLoader::State::Warning) {
-				// continue
+				if (status.state == PreLoader::State::Error) {
+					break;
 
-			} else if (status.state == PreLoader::State::Done) {
-				break;
+				} else if (status.state == PreLoader::State::Warning) {
+					// continue
 
-			} else {
-				if (status.message.length()) {
-					printf("%s\n", status.message.c_str());
+				} else if (status.state == PreLoader::State::Done) {
+					break;
+
+				} else {
+					if (status.message.length()) {
+						printf("%s\n", status.message.c_str());
+					}
 				}
 			}
 		}
