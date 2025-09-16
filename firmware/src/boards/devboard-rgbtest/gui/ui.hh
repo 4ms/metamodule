@@ -70,7 +70,7 @@ public:
 	bool first_buf = false;
 	void update_screen() {
 		auto now = HAL_GetTick();
-		if ((now - last_screen_update_tm) > 50) {
+		if ((now - last_screen_update_tm) > 200) {
 			MMDisplay::test_pattern(pat, first_buf ? *first_framebuf : *second_framebuf);
 			pat = (pat + 1) % 3;
 
