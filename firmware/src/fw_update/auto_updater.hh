@@ -12,19 +12,22 @@ struct AutoUpdater {
 	static void run(FileStorageProxy &file_storage_proxy, Ui &ui) {
 		using namespace mdrivlib;
 
-		if (!FS::file_size(file_storage_proxy, {"autoupdate_fw", Volume::USB})) {
-			return;
-		}
+		auto usbauto = FS::file_size(file_storage_proxy, {"autoupdate_fw", Volume::USB});
+		auto sdauto = FS::file_size(file_storage_proxy, {"autoupdate_fw", Volume::USB});
 
-		const auto manifest_size =
-			FS::file_size(file_storage_proxy, {"metamodule-firmware/metamodule.json", Volume::USB});
+		Volume vol = usbauto ? Volume::USB : sdauto ? Volume::SDCard : Volume::MaxVolumes;
+
+		if (vol == Volume::MaxVolumes)
+			return;
+
+		const auto manifest_size = FS::file_size(file_storage_proxy, {"metamodule-firmware/metamodule.json", vol});
 		if (!manifest_size) {
 			pr_err("unable to read update manifest file\n");
 			return;
 		}
 
 		FirmwareUpdaterProxy updater{file_storage_proxy, true};
-		if (!updater.start("metamodule-firmware/metamodule.json", Volume::USB, manifest_size.value())) {
+		if (!updater.start("metamodule-firmware/metamodule.json", vol, manifest_size.value())) {
 			pr_err("could not load manifest file\n");
 			return;
 		}
