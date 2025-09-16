@@ -571,6 +571,8 @@ void ui_MidiMapViewPage_screen_init(void);
 extern lv_obj_t *ui_MidiMapViewPage;
 extern lv_obj_t *ui_MidiMapViewCont;
 extern lv_obj_t *ui_MidiMapLeftColumn;
+extern lv_obj_t *ui_MidiMapLeftItems;
+extern lv_obj_t *ui_MidiMapRightItems;
 extern lv_obj_t *ui_MidiMapInputsTitle;
 extern lv_obj_t *ui_MidiMapRightColumn;
 extern lv_obj_t *ui_MidiMapOutputsTitle;

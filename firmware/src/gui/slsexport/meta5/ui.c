@@ -598,6 +598,8 @@ lv_obj_t *ui_JackMapOutputsTitle;
 void ui_MidiMapViewPage_screen_init(void);
 lv_obj_t *ui_MidiMapViewPage;
 lv_obj_t *ui_MidiMapViewCont;
+lv_obj_t *ui_MidiMapLeftItems;
+lv_obj_t *ui_MidiMapRightItems;
 lv_obj_t *ui_MidiMapLeftColumn;
 lv_obj_t *ui_MidiMapInputsTitle;
 lv_obj_t *ui_MidiMapRightColumn;

@@ -53,10 +53,9 @@ void ui_MidiMapViewPage_screen_init(void) {
 	lv_obj_set_flex_flow(ui_MidiMapLeftColumn, LV_FLEX_FLOW_COLUMN);
 	lv_obj_set_flex_align(ui_MidiMapLeftColumn, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 	lv_obj_add_flag(ui_MidiMapLeftColumn, LV_OBJ_FLAG_OVERFLOW_VISIBLE); /// Flags
-	lv_obj_add_flag(ui_MidiMapLeftColumn, LV_OBJ_FLAG_SCROLLABLE);		 /// Flags
 	lv_obj_clear_flag(ui_MidiMapLeftColumn,
-					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
-						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
+					  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK |
+						  LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
 	lv_obj_set_style_pad_left(ui_MidiMapLeftColumn, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_MidiMapLeftColumn, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui_MidiMapLeftColumn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -78,6 +77,24 @@ void ui_MidiMapViewPage_screen_init(void) {
 	lv_obj_set_style_pad_right(ui_MidiMapInputsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui_MidiMapInputsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(ui_MidiMapInputsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	ui_MidiMapLeftItems = lv_obj_create(ui_MidiMapLeftColumn);
+	lv_obj_remove_style_all(ui_MidiMapLeftItems);
+	lv_obj_set_width(ui_MidiMapLeftItems, lv_pct(100));
+	lv_obj_set_height(ui_MidiMapLeftItems, lv_pct(100));
+	lv_obj_set_align(ui_MidiMapLeftItems, LV_ALIGN_CENTER);
+	lv_obj_set_flex_flow(ui_MidiMapLeftItems, LV_FLEX_FLOW_COLUMN);
+	lv_obj_set_flex_align(ui_MidiMapLeftItems, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+	lv_obj_add_flag(ui_MidiMapLeftItems, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+	lv_obj_clear_flag(ui_MidiMapLeftItems,
+					  LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK |
+						  LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
+	lv_obj_set_style_pad_left(ui_MidiMapLeftItems, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui_MidiMapLeftItems, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui_MidiMapLeftItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui_MidiMapLeftItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_row(ui_MidiMapLeftItems, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_column(ui_MidiMapLeftItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	ui_MidiMapRightColumn = lv_obj_create(ui_MidiMapViewCont);
 	lv_obj_remove_style_all(ui_MidiMapRightColumn);
@@ -105,4 +122,22 @@ void ui_MidiMapViewPage_screen_init(void) {
 	lv_obj_set_style_pad_right(ui_MidiMapOutputsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui_MidiMapOutputsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(ui_MidiMapOutputsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	ui_MidiMapRightItems = lv_obj_create(ui_MidiMapRightColumn);
+	lv_obj_remove_style_all(ui_MidiMapRightItems);
+	lv_obj_set_width(ui_MidiMapRightItems, lv_pct(100));
+	lv_obj_set_height(ui_MidiMapRightItems, lv_pct(100));
+	lv_obj_set_align(ui_MidiMapRightItems, LV_ALIGN_CENTER);
+	lv_obj_set_flex_flow(ui_MidiMapRightItems, LV_FLEX_FLOW_COLUMN);
+	lv_obj_set_flex_align(ui_MidiMapRightItems, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+	lv_obj_add_flag(ui_MidiMapRightItems, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+	lv_obj_clear_flag(ui_MidiMapRightItems,
+					  LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK |
+						  LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
+	lv_obj_set_style_pad_left(ui_MidiMapRightItems, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui_MidiMapRightItems, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui_MidiMapRightItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui_MidiMapRightItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_row(ui_MidiMapRightItems, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_column(ui_MidiMapRightItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 }

@@ -98,7 +98,7 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 		letterchar = get_panel_brief_name(JackOutput{}, panel_jack_id);
 	}
 
-	auto font = letterchar.size() > 2 ? &ui_font_MuseoSansRounded50012 :
+	auto font = letterchar.size() > 2 ? &ui_font_MuseoSansRounded50014 :
 				letterchar.size() > 1 ? &ui_font_MuseoSansRounded70014 :
 										&ui_font_MuseoSansRounded70016;
 
@@ -109,9 +109,7 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_obj_set_align(cont, LV_ALIGN_CENTER);
 	lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_ROW);
 	lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
-	lv_obj_add_flag(cont,
-					LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_OVERFLOW_VISIBLE |
-						LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+	lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 	lv_obj_clear_flag(cont,
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
@@ -124,17 +122,18 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_obj_set_style_outline_width(cont, 1, LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(cont, 2, LV_STATE_FOCUSED);
 
-	auto circle_width = letterchar.length() > 2 ? 40 : letterchar.length() > 1 ? 30 : 20;
+	auto circle_width = letterchar.length() > 2 ? 35 : letterchar.length() > 1 ? 30 : 20;
 	lv_obj_t *circle = lv_btn_create(cont);
 	lv_obj_set_width(circle, circle_width);
 	lv_obj_set_height(circle, 20);
 	lv_obj_set_x(circle, 0);
 	lv_obj_set_y(circle, 31);
 	lv_obj_set_align(circle, LV_ALIGN_TOP_MID);
+	lv_obj_add_flag(circle, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 	lv_obj_clear_flag(circle,
 					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
 						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE |
-						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
+						  LV_OBJ_FLAG_SCROLL_CHAIN);
 	lv_obj_set_style_radius(circle, 6, LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_color(circle, circle_bgcolor, LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(circle, 255, LV_STATE_DEFAULT);
@@ -149,8 +148,7 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_label_set_text(letter, letterchar.data());
 	lv_obj_clear_flag(letter,
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
-						  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
-						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
+						  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_text_color(letter, letter_color, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(letter, 255, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(letter, LV_TEXT_ALIGN_CENTER, LV_STATE_DEFAULT);
@@ -166,6 +164,7 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_obj_set_align(label, LV_ALIGN_CENTER);
 	lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL);
 	lv_label_set_text(label, name);
+	lv_obj_add_flag(label, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 	return cont;
 }
