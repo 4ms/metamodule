@@ -22,18 +22,18 @@ struct AutoUpdater {
 
 		const auto manifest_size = FS::file_size(file_storage_proxy, {"metamodule-firmware/metamodule.json", vol});
 		if (!manifest_size) {
-			pr_err("unable to read update manifest file\n");
+			pr_err("AutoUpdater: Unable to read update manifest file\n");
 			return;
 		}
 
 		FirmwareUpdaterProxy updater{file_storage_proxy, true};
 		if (!updater.start("metamodule-firmware/metamodule.json", vol, manifest_size.value())) {
-			pr_err("could not load manifest file\n");
+			pr_err("AutoUpdater: Could not load manifest file\n");
 			return;
 		}
 
 		hil_message("*updating\n");
-		ui.notify_now_playing("Updating firmware...");
+		ui.notify_now_playing("AutoUpdater: Updating firmware...");
 		ui.update_screen();
 
 		while (true) {
@@ -41,7 +41,7 @@ struct AutoUpdater {
 			if (status.state == FirmwareUpdaterProxy::Success) {
 				hil_message("*success\n");
 
-				ui.notify_now_playing("Firmware updated!");
+				ui.notify_now_playing("AutoUpdater: Firmware updated!");
 				ui.update_screen();
 				break;
 
@@ -49,7 +49,7 @@ struct AutoUpdater {
 				hil_message("*failure\n");
 				pr_err("%s\n", status.message.c_str());
 
-				ui.notify_now_playing("Failed to update firmware");
+				ui.notify_now_playing("AutoUpdater: Failed to update firmware");
 				ui.update_screen();
 				break;
 			}

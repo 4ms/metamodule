@@ -65,7 +65,7 @@ struct PatchPlayLoader {
 				break;
 			}
 			if (message.message_type == FileStorageProxy::LoadFileFailed) {
-				pr_err("ERROR: initial patch failed to load from NOR flash\n");
+				pr_err("ERROR: initial patch failed to load\n");
 				break;
 			}
 
