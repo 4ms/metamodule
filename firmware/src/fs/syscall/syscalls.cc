@@ -1,5 +1,6 @@
 #include "filesystem.hh"
 #include <cstdio>
+#include <sys/unistd.h>
 
 // These are used by newlib to provide libc filesystem and io functions
 
@@ -34,5 +35,17 @@ int _stat(const char *filename, struct stat *st) {
 
 int _write(int fd, const char *ptr, int len) {
 	return MetaModule::Filesystem::write(fd, ptr, len);
+}
+
+int _link(const char *oldname, const char *newname) {
+	return MetaModule::Filesystem::link(oldname, newname);
+}
+
+int _rename(const char *oldname, const char *newname) {
+	return MetaModule::Filesystem::rename(oldname, newname);
+}
+
+int _unlink(const char *path) {
+	return MetaModule::Filesystem::unlink(path);
 }
 }

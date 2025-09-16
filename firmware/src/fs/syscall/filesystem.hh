@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdio>
 #include <string_view>
 
 struct DIR;
@@ -24,6 +25,10 @@ int write(int fd, const char *ptr, int len);
 int isatty(int fd);
 int fstat(int fd, struct stat *st);
 int stat(const char *filename, struct stat *st);
+
+int link(const char *oldname, const char *newname);
+int unlink(const char *path);
+int rename(const char *oldname, const char *newname);
 
 DIR *opendir(std::string_view fullpath);
 dirent *readdir(DIR *dir);

@@ -268,12 +268,26 @@ bool FsSyscallProxy::unlink(std::string_view path) {
 	return false;
 }
 
-// TODO: implement these and provide a public API
-
 bool FsSyscallProxy::rename(std::string_view old_path, std::string_view new_path) {
-	pr_err("FsSyscallProxy::rename not implemented\n");
+	if (new_path.length() == 0 || old_path.length() == 0)
+		return false;
+
+	auto msg = IntercoreModuleFS::Rename{
+		.old_path = old_path,
+		.new_path = new_path,
+	};
+
+	fs_trace("A7: rename %.*s to %.*s\n", old_path.data(), old_path.size(), new_path.data(), new_path.size());
+
+	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Rename>(msg, 2000)) {
+		return response->res == FR_OK;
+	}
+
+	pr_err("Failed to send rename request\n");
 	return false;
 }
+
+// TODO: implement these and provide a public API
 
 bool FsSyscallProxy::findfirst(DIR *dir, FILINFO *info, std::string_view path, std::string_view pattern) {
 	pr_err("FsSyscallProxy::findfirst not implemented\n");

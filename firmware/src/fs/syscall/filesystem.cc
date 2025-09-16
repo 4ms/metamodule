@@ -213,6 +213,41 @@ int stat(const char *filename, struct stat *st) {
 	return -1;
 }
 
+int link(const char *oldname, const char *newname) {
+	pr_err("link not supported (%s=>%s), using rename\n", oldname, newname);
+	return rename(oldname, newname);
+}
+
+int unlink(const char *path) {
+	auto [filename, volume] = split_volume(path);
+
+	bool ok = false;
+	if (volume == Volume::RamDisk && mRamdisk)
+		ok = mRamdisk->delete_file(filename);
+	else
+		ok = fs_proxy.unlink(path);
+
+	return ok ? 0 : -1;
+}
+
+int rename(const char *oldname, const char *newname) {
+	auto [oldfilename, oldvolume] = split_volume(oldname);
+	auto [newfilename, newvolume] = split_volume(newname);
+
+	if (oldvolume != newvolume) {
+		pr_err("Renaming across volumes not permitted\n");
+		return -1;
+	}
+
+	bool ok = false;
+	if (oldvolume == Volume::RamDisk && mRamdisk)
+		ok = false; //mRamdisk->rename(oldname, newname);
+	else
+		ok = fs_proxy.rename(oldname, newname);
+
+	return ok ? 0 : -1;
+}
+
 DIR *opendir(std::string_view fullpath) {
 	if (auto dirdesc = FileDescManager::alloc_dir()) {
 
