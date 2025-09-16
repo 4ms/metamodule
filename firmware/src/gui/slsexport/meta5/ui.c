@@ -359,6 +359,11 @@ lv_obj_t *ui_KnobPanelY;
 lv_obj_t *ui_KnobContainerY;
 lv_obj_t *ui_KnobPanelZ;
 lv_obj_t *ui_KnobContainerZ;
+lv_obj_t *ui_KnobSetButtonCont;
+lv_obj_t *ui_KnobSetButtonExp1Cont;
+lv_obj_t *ui_KnobSetButtonExp2Cont;
+lv_obj_t *ui_KnobSetButtonExp3Cont;
+lv_obj_t *ui_KnobSetButtonExp4Cont;
 
 
 // SCREEN: ui_EditMappingPage

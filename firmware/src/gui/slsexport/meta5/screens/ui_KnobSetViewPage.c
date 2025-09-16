@@ -11,6 +11,10 @@ ui_KnobSetViewPage = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_KnobSetViewPage, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
 lv_obj_set_scrollbar_mode(ui_KnobSetViewPage, LV_SCROLLBAR_MODE_ACTIVE);
 lv_obj_set_scroll_dir(ui_KnobSetViewPage, LV_DIR_VER);
+lv_obj_set_flex_flow(ui_KnobSetViewPage,LV_FLEX_FLOW_ROW_WRAP);
+lv_obj_set_flex_align(ui_KnobSetViewPage, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_set_style_bg_color(ui_KnobSetViewPage, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_KnobSetViewPage, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_color(ui_KnobSetViewPage, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_shadow_opa(ui_KnobSetViewPage, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_width(ui_KnobSetViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -22,33 +26,7 @@ lv_obj_set_style_pad_bottom(ui_KnobSetViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_row(ui_KnobSetViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_KnobSetViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_KnobSetContainer = lv_obj_create(ui_KnobSetViewPage);
-lv_obj_set_width( ui_KnobSetContainer, lv_pct(100));
-lv_obj_set_height( ui_KnobSetContainer, lv_pct(100));
-lv_obj_set_align( ui_KnobSetContainer, LV_ALIGN_CENTER );
-lv_obj_set_flex_flow(ui_KnobSetContainer,LV_FLEX_FLOW_ROW_WRAP);
-lv_obj_set_flex_align(ui_KnobSetContainer, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
-lv_obj_add_flag( ui_KnobSetContainer, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
-lv_obj_clear_flag( ui_KnobSetContainer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_style_radius(ui_KnobSetContainer, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_KnobSetContainer, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_KnobSetContainer, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_img_opa(ui_KnobSetContainer, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_img_recolor(ui_KnobSetContainer, lv_color_hex(0x666666), LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_img_recolor_opa(ui_KnobSetContainer, 100, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_color(ui_KnobSetContainer, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_border_opa(ui_KnobSetContainer, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_width(ui_KnobSetContainer, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_ofs_x(ui_KnobSetContainer, 5, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_ofs_y(ui_KnobSetContainer, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_KnobSetContainer, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_KnobSetPageHeader = lv_obj_create(ui_KnobSetContainer);
+ui_KnobSetPageHeader = lv_obj_create(ui_KnobSetViewPage);
 lv_obj_remove_style_all(ui_KnobSetPageHeader);
 lv_obj_set_width( ui_KnobSetPageHeader, lv_pct(100));
 lv_obj_set_height( ui_KnobSetPageHeader, LV_SIZE_CONTENT);   /// 1
@@ -281,6 +259,30 @@ lv_obj_set_style_pad_left(ui_NextKnobSetLabel, 5, LV_PART_MAIN| LV_STATE_DEFAULT
 lv_obj_set_style_pad_right(ui_NextKnobSetLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_NextKnobSetLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_NextKnobSetLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_KnobSetContainer = lv_obj_create(ui_KnobSetViewPage);
+lv_obj_set_width( ui_KnobSetContainer, lv_pct(100));
+lv_obj_set_height( ui_KnobSetContainer, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_KnobSetContainer, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_KnobSetContainer,LV_FLEX_FLOW_ROW_WRAP);
+lv_obj_set_flex_align(ui_KnobSetContainer, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+lv_obj_clear_flag( ui_KnobSetContainer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
+lv_obj_set_scroll_dir(ui_KnobSetContainer, LV_DIR_VER);
+lv_obj_set_style_radius(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_KnobSetContainer, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_KnobSetContainer, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_img_opa(ui_KnobSetContainer, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_img_recolor(ui_KnobSetContainer, lv_color_hex(0x666666), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_img_recolor_opa(ui_KnobSetContainer, 100, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_shadow_ofs_x(ui_KnobSetContainer, 5, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_shadow_ofs_y(ui_KnobSetContainer, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_KnobSetContainer, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_KnobSetContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_KnobSetPanelLeft = lv_obj_create(ui_KnobSetContainer);
 lv_obj_set_width( ui_KnobSetPanelLeft, 50);
@@ -885,8 +887,82 @@ ui_KnobContainerZ = ui_KnobContainer_create(ui_KnobPanelZ);
 lv_obj_set_x( ui_KnobContainerZ, 0 );
 lv_obj_set_y( ui_KnobContainerZ, 0 );
 
+ui_KnobSetButtonCont = lv_obj_create(ui_KnobSetContainer);
+lv_obj_remove_style_all(ui_KnobSetButtonCont);
+lv_obj_set_width( ui_KnobSetButtonCont, lv_pct(100));
+lv_obj_set_height( ui_KnobSetButtonCont, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_KnobSetButtonCont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_KnobSetButtonCont,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_KnobSetButtonCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_clear_flag( ui_KnobSetButtonCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_bg_color(ui_KnobSetButtonCont, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_KnobSetButtonCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_KnobSetButtonCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_KnobSetButtonCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_KnobSetButtonCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_KnobSetButtonCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_KnobSetButtonCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_KnobSetButtonCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_KnobSetButtonExp1Cont = lv_obj_create(ui_KnobSetButtonCont);
+lv_obj_remove_style_all(ui_KnobSetButtonExp1Cont);
+lv_obj_set_height( ui_KnobSetButtonExp1Cont, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_flex_grow( ui_KnobSetButtonExp1Cont, 1);
+lv_obj_set_align( ui_KnobSetButtonExp1Cont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_KnobSetButtonExp1Cont,LV_FLEX_FLOW_COLUMN);
+lv_obj_set_flex_align(ui_KnobSetButtonExp1Cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_clear_flag( ui_KnobSetButtonExp1Cont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_pad_left(ui_KnobSetButtonExp1Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_KnobSetButtonExp1Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_KnobSetButtonExp1Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_KnobSetButtonExp1Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_KnobSetButtonExp1Cont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_KnobSetButtonExp1Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_KnobSetButtonExp2Cont = lv_obj_create(ui_KnobSetButtonCont);
+lv_obj_remove_style_all(ui_KnobSetButtonExp2Cont);
+lv_obj_set_height( ui_KnobSetButtonExp2Cont, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_flex_grow( ui_KnobSetButtonExp2Cont, 1);
+lv_obj_set_align( ui_KnobSetButtonExp2Cont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_KnobSetButtonExp2Cont,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_KnobSetButtonExp2Cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_clear_flag( ui_KnobSetButtonExp2Cont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_pad_left(ui_KnobSetButtonExp2Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_KnobSetButtonExp2Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_KnobSetButtonExp2Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_KnobSetButtonExp2Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_KnobSetButtonExp2Cont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_KnobSetButtonExp2Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_KnobSetButtonExp3Cont = lv_obj_create(ui_KnobSetButtonCont);
+lv_obj_remove_style_all(ui_KnobSetButtonExp3Cont);
+lv_obj_set_height( ui_KnobSetButtonExp3Cont, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_flex_grow( ui_KnobSetButtonExp3Cont, 1);
+lv_obj_set_align( ui_KnobSetButtonExp3Cont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_KnobSetButtonExp3Cont,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_KnobSetButtonExp3Cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_clear_flag( ui_KnobSetButtonExp3Cont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_pad_left(ui_KnobSetButtonExp3Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_KnobSetButtonExp3Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_KnobSetButtonExp3Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_KnobSetButtonExp3Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_KnobSetButtonExp3Cont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_KnobSetButtonExp3Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_KnobSetButtonExp4Cont = lv_obj_create(ui_KnobSetButtonCont);
+lv_obj_remove_style_all(ui_KnobSetButtonExp4Cont);
+lv_obj_set_height( ui_KnobSetButtonExp4Cont, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_flex_grow( ui_KnobSetButtonExp4Cont, 1);
+lv_obj_set_align( ui_KnobSetButtonExp4Cont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_KnobSetButtonExp4Cont,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_KnobSetButtonExp4Cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_clear_flag( ui_KnobSetButtonExp4Cont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_pad_left(ui_KnobSetButtonExp4Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_KnobSetButtonExp4Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_KnobSetButtonExp4Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_KnobSetButtonExp4Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_KnobSetButtonExp4Cont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_KnobSetButtonExp4Cont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 
 

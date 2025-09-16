@@ -343,6 +343,11 @@ extern lv_obj_t *ui_KnobPanelY;
 extern lv_obj_t *ui_KnobContainerY;
 extern lv_obj_t *ui_KnobPanelZ;
 extern lv_obj_t *ui_KnobContainerZ;
+extern lv_obj_t *ui_KnobSetButtonCont;
+extern lv_obj_t *ui_KnobSetButtonExp1Cont;
+extern lv_obj_t *ui_KnobSetButtonExp2Cont;
+extern lv_obj_t *ui_KnobSetButtonExp3Cont;
+extern lv_obj_t *ui_KnobSetButtonExp4Cont;
 // SCREEN: ui_EditMappingPage
 void ui_EditMappingPage_screen_init(void);
 extern lv_obj_t *ui_EditMappingPage;

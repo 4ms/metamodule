@@ -89,37 +89,17 @@ struct KnobSetViewPage : PageBase {
 		lv_obj_t *focus{};
 
 		for (auto [idx, map] : enumerate(knobset->set)) {
-			if (!map.is_panel_knob())
-				continue;
 
 			lv_obj_t *cont{};
-			if (num_maps[map.panel_knob_id] == 0) {
-				cont = get_container(map.panel_knob_id);
+
+			if (map.is_panel_knob()) {
+				cont = create_knob_item(idx, map);
+
+			} else if (map.is_button()) {
+
 			} else {
-				cont = (map.panel_knob_id < 6) ? ui_KnobContainerBig_create(panes[map.panel_knob_id]) :
-												 ui_KnobContainer_create(panes[map.panel_knob_id]);
+				continue;
 			}
-			num_maps[map.panel_knob_id]++;
-
-			if (auto label = get_label(cont)) {
-				std::string_view name = map.alias_name;
-				if (name.length()) {
-					lv_label_set_text(label, name.data());
-				} else {
-					auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
-					lv_label_set_text_fmt(label, "%s - %s", fullname.element_name.data(), fullname.module_name.data());
-				}
-			}
-
-			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), 0);
-
-			set_for_knob(cont, map.panel_knob_id);
-
-			lv_obj_remove_event_cb(cont, mapping_cb);
-			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
-
-			arcs[idx] = get_knob(cont);
-			indicators[idx] = get_indicator(cont);
 
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx));
 
@@ -145,6 +125,71 @@ struct KnobSetViewPage : PageBase {
 		lv_group_set_editing(group, false);
 
 		display_active_status();
+	}
+
+	lv_obj_t *create_knob_item(unsigned idx, MappedKnob const &map) {
+		lv_obj_t *cont;
+
+		if (num_maps[map.panel_knob_id] == 0) {
+			cont = get_container(map.panel_knob_id);
+		} else {
+			cont = (map.panel_knob_id < 6) ? ui_KnobContainerBig_create(panes[map.panel_knob_id]) :
+											 ui_KnobContainer_create(panes[map.panel_knob_id]);
+		}
+		num_maps[map.panel_knob_id]++;
+
+		if (auto label = get_label(cont)) {
+			std::string_view name = map.alias_name;
+			if (name.length()) {
+				lv_label_set_text(label, name.data());
+			} else {
+				auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
+				lv_label_set_text_fmt(label, "%s - %s", fullname.element_name.data(), fullname.module_name.data());
+			}
+		}
+
+		lv_obj_remove_event_cb(cont, mapping_cb);
+		lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
+
+		set_knob_arc<min_arc, max_arc>(map, get_knob(cont), 0);
+		set_for_knob(cont, map.panel_knob_id);
+		arcs[idx] = get_knob(cont);
+		indicators[idx] = get_indicator(cont);
+
+		return cont;
+	}
+
+	lv_obj_t *create_button_item(unsigned idx, MappedKnob const &map) {
+		lv_obj_t *cont;
+
+		if (!map.ext_button().has_value())
+			return nullptr;
+		auto button_id = map.ext_button().value();
+
+		cont = create_button_expander_item(butexp_containers[button_id]);
+
+		// ???
+		// num_maps[map.panel_knob_id]++;
+
+		if (auto label = get_button_label(cont)) {
+			std::string_view name = map.alias_name;
+			if (name.length()) {
+				lv_label_set_text(label, name.data());
+			} else {
+				auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
+				lv_label_set_text_fmt(label, "%s - %s", fullname.element_name.data(), fullname.module_name.data());
+			}
+		}
+
+		lv_obj_remove_event_cb(cont, mapping_cb);
+		lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
+
+		set_knob_arc<min_arc, max_arc>(map, get_knob(cont), 0);
+		set_for_knob(cont, map.panel_knob_id);
+		arcs[idx] = get_knob(cont);
+		indicators[idx] = get_indicator(cont);
+
+		return cont;
 	}
 
 	void update() override {
@@ -234,6 +279,11 @@ struct KnobSetViewPage : PageBase {
 				if (child != cont)
 					lv_obj_del_async(child);
 			}
+		}
+
+		for (auto but : butexp_containers) {
+			if (but && lv_obj_is_valid(but))
+				lv_obj_del_async(but);
 		}
 	}
 
@@ -508,6 +558,8 @@ private:
 										  ui_KnobContainerY,
 										  ui_KnobContainerZ};
 
+	std::array<lv_obj_t *, 32> butexp_containers{};
+
 	lv_obj_t *get_container(unsigned panel_knob_id) {
 		return containers[panel_knob_id];
 	}
@@ -530,6 +582,18 @@ private:
 
 	lv_obj_t *get_indicator(lv_obj_t *container) {
 		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_INDICATOR);
+	}
+
+	lv_obj_t *get_button_label(lv_obj_t *container) {
+		return lv_obj_get_child(container, 1);
+	}
+
+	lv_obj_t *get_button_circle(lv_obj_t *container) {
+		return lv_obj_get_child(container, 0);
+	}
+
+	lv_obj_t *get_button_circle_number(lv_obj_t *container) {
+		return lv_obj_get_child(get_button_circle(container), 0);
 	}
 
 	void update_enabled_status(lv_obj_t *container, unsigned knob_i, bool actively_playing) {
