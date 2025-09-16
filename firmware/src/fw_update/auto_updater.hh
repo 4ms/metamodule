@@ -1,8 +1,10 @@
 #pragma once
 
+#include "fs/syscall/fs_syscall_proxy.hh"
 #include "general_io.hh"
 #include "gui/ui.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "reboot.hh"
 #include "updater_proxy.hh"
 
 namespace MetaModule
@@ -13,7 +15,7 @@ struct AutoUpdater {
 		using namespace mdrivlib;
 
 		auto usbauto = FS::file_size(file_storage_proxy, {"autoupdate_fw", Volume::USB});
-		auto sdauto = FS::file_size(file_storage_proxy, {"autoupdate_fw", Volume::USB});
+		auto sdauto = FS::file_size(file_storage_proxy, {"autoupdate_fw", Volume::SDCard});
 
 		Volume vol = usbauto ? Volume::USB : sdauto ? Volume::SDCard : Volume::MaxVolumes;
 
@@ -42,6 +44,14 @@ struct AutoUpdater {
 				hil_message("*success\n");
 
 				ui.notify_now_playing("AutoUpdater: Firmware updated!");
+
+				if (vol == Volume::USB)
+					rename("usb:/autoupdate_fw", "usb:/done_autoupdate_fw");
+				else if (vol == Volume::SDCard)
+					rename("sdc:/autoupdate_fw", "sdc:/done_autoupdate_fw");
+
+				pr_info("AutoUpdater: Renamed autoupdate file\n");
+
 				ui.update_screen();
 				break;
 
@@ -55,8 +65,11 @@ struct AutoUpdater {
 			}
 		}
 
+		int64_t tm = HAL_GetTick();
 		while (true) {
-			__NOP();
+			int64_t now = HAL_GetTick();
+			if (now - tm > 10'000)
+				reboot_system();
 		}
 	}
 };
