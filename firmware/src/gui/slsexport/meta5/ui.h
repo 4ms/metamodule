@@ -567,6 +567,8 @@ extern lv_obj_t *ui_JackMapLeftColumn;
 extern lv_obj_t *ui_JackMapInputsTitle;
 extern lv_obj_t *ui_JackMapRightColumn;
 extern lv_obj_t *ui_JackMapOutputsTitle;
+extern lv_obj_t *ui_JackMapLeftItems;
+extern lv_obj_t *ui_JackMapRightItems;
 void ui_MidiMapViewPage_screen_init(void);
 extern lv_obj_t *ui_MidiMapViewPage;
 extern lv_obj_t *ui_MidiMapViewCont;

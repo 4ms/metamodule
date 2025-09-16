@@ -70,6 +70,17 @@ lv_obj_t *create_plugin_list_version_item(lv_obj_t *parent, const char *name) {
 	return obj;
 }
 
+static void scroll_fully_viewed_cb(lv_event_t *event) {
+	if (!event->target)
+		return;
+
+	const auto parent = lv_obj_get_parent(event->target);
+	if (!parent)
+		return;
+
+	lv_obj_scroll_to_view(event->target, LV_ANIM_ON);
+}
+
 lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned panel_jack_id, const char *name) {
 	lv_color_t circle_bgcolor;
 	lv_color_t circle_bordercolor;
@@ -104,7 +115,7 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 
 	lv_obj_t *cont = lv_obj_create(parent);
 	lv_obj_remove_style_all(cont);
-	lv_obj_set_width(cont, 142);
+	lv_obj_set_width(cont, 140);
 	lv_obj_set_height(cont, LV_SIZE_CONTENT);
 	lv_obj_set_align(cont, LV_ALIGN_CENTER);
 	lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_ROW);
@@ -119,6 +130,7 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_obj_set_style_outline_opa(cont, 255, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(cont, 2, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(cont, 2, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY);
+	lv_obj_add_event_cb(cont, scroll_fully_viewed_cb, LV_EVENT_FOCUSED, nullptr);
 
 	auto circle_width = letterchar.length() > 2 ? 35 : letterchar.length() > 1 ? 30 : 20;
 	lv_obj_t *circle = lv_btn_create(cont);

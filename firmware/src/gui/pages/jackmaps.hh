@@ -24,21 +24,6 @@ struct JackMapViewPage : PageBase {
 
 		//TODO:Back button
 		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
-
-		unsigned num_inputs = PanelDef::NumUserFacingInJacks;
-		unsigned num_outputs = PanelDef::NumUserFacingOutJacks;
-		if (Expanders::get_connected().ext_audio_connected) {
-			num_inputs += AudioExpander::NumInJacks;
-			num_outputs += AudioExpander::NumOutJacks;
-		}
-
-		for (unsigned i = 0; i < num_inputs; i++) {
-			in_conts[i] = create_jack_map_item(ui_JackMapLeftColumn, JackMapType::Input, i, "");
-		}
-
-		for (unsigned i = 0; i < num_outputs; i++) {
-			out_conts[i] = create_jack_map_item(ui_JackMapRightColumn, JackMapType::Output, i, "");
-		}
 	}
 
 	void onJackMapClick(unsigned idx, JackMapType type) {
@@ -72,11 +57,13 @@ struct JackMapViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		init_jack_items();
+
 		redraw();
 		lv_group_activate(group);
 
-		lv_obj_scroll_to_y(ui_JackMapLeftColumn, 0, LV_ANIM_OFF);
-		lv_obj_scroll_to_y(ui_JackMapRightColumn, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(ui_JackMapLeftItems, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(ui_JackMapRightItems, 0, LV_ANIM_OFF);
 	}
 
 	void redraw() {
@@ -101,7 +88,6 @@ struct JackMapViewPage : PageBase {
 			for (auto &jack : map.ins) {
 				if (map.panel_jack_id < in_conts.size()) {
 					if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
-						lv_group_add_obj(group, in_conts[map.panel_jack_id]);
 						lv_obj_set_user_data(in_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 						lv_obj_add_event_cb(
 							in_conts[map.panel_jack_id], onJackMapClick<JackMapType::Input>, LV_EVENT_CLICKED, this);
@@ -119,8 +105,7 @@ struct JackMapViewPage : PageBase {
 
 		for (auto [i, map] : enumerate(patch->mapped_outs)) {
 			if (map.panel_jack_id < out_conts.size()) {
-				if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
-					lv_group_add_obj(group, out_conts[map.panel_jack_id]);
+				if (lv_obj_get_child_cnt(out_conts[map.panel_jack_id]) > 1) {
 					lv_obj_set_user_data(out_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 					lv_obj_add_event_cb(
 						out_conts[map.panel_jack_id], onJackMapClick<JackMapType::Output>, LV_EVENT_CLICKED, this);
@@ -134,6 +119,38 @@ struct JackMapViewPage : PageBase {
 					}
 				}
 			}
+		}
+
+		for (auto *cont : in_conts) {
+			if (cont && lv_obj_get_child_cnt(cont) > 1) {
+				if (lv_label_get_text(lv_obj_get_child(cont, 1))[0] != '\0')
+					lv_group_add_obj(group, cont);
+			}
+		}
+		for (auto *cont : out_conts) {
+			if (cont && lv_obj_get_child_cnt(cont) > 1) {
+				if (lv_label_get_text(lv_obj_get_child(cont, 1))[0] != '\0')
+					lv_group_add_obj(group, cont);
+			}
+		}
+	}
+
+	void init_jack_items() {
+		unsigned num_inputs = PanelDef::NumUserFacingInJacks;
+		unsigned num_outputs = PanelDef::NumUserFacingOutJacks;
+		if (Expanders::get_connected().ext_audio_connected) {
+			num_inputs += AudioExpander::NumInJacks;
+			num_outputs += AudioExpander::NumOutJacks;
+		}
+
+		for (unsigned i = 0; i < num_inputs; i++) {
+			if (in_conts[i] == nullptr)
+				in_conts[i] = create_jack_map_item(ui_JackMapLeftItems, JackMapType::Input, i, "");
+		}
+
+		for (unsigned i = 0; i < num_outputs; i++) {
+			if (out_conts[i] == nullptr)
+				out_conts[i] = create_jack_map_item(ui_JackMapRightItems, JackMapType::Output, i, "");
 		}
 	}
 

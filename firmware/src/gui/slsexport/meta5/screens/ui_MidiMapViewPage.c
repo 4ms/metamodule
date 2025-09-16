@@ -13,11 +13,9 @@ void ui_MidiMapViewPage_screen_init(void) {
 	ui_MidiMapViewCont = lv_obj_create(ui_MidiMapViewPage);
 	lv_obj_set_width(ui_MidiMapViewCont, 312);
 	lv_obj_set_height(ui_MidiMapViewCont, 232);
-	lv_obj_set_x(ui_MidiMapViewCont, 0);
-	lv_obj_set_y(ui_MidiMapViewCont, 6);
 	lv_obj_set_align(ui_MidiMapViewCont, LV_ALIGN_CENTER);
 	lv_obj_set_flex_flow(ui_MidiMapViewCont, LV_FLEX_FLOW_ROW);
-	lv_obj_set_flex_align(ui_MidiMapViewCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+	lv_obj_set_flex_align(ui_MidiMapViewCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 	lv_obj_clear_flag(ui_MidiMapViewCont,
 					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
 						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE |
@@ -40,27 +38,22 @@ void ui_MidiMapViewPage_screen_init(void) {
 	lv_obj_set_style_shadow_ofs_y(ui_MidiMapViewCont, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_MidiMapViewCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_MidiMapViewCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_top(ui_MidiMapViewCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_bottom(ui_MidiMapViewCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui_MidiMapViewCont, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui_MidiMapViewCont, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(ui_MidiMapViewCont, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_column(ui_MidiMapViewCont, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_column(ui_MidiMapViewCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	ui_MidiMapLeftColumn = lv_obj_create(ui_MidiMapViewCont);
 	lv_obj_remove_style_all(ui_MidiMapLeftColumn);
 	lv_obj_set_width(ui_MidiMapLeftColumn, 152);
-	lv_obj_set_height(ui_MidiMapLeftColumn, lv_pct(100));
+	lv_obj_set_height(ui_MidiMapLeftColumn, 228);
 	lv_obj_set_align(ui_MidiMapLeftColumn, LV_ALIGN_CENTER);
 	lv_obj_set_flex_flow(ui_MidiMapLeftColumn, LV_FLEX_FLOW_COLUMN);
 	lv_obj_set_flex_align(ui_MidiMapLeftColumn, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-	lv_obj_add_flag(ui_MidiMapLeftColumn, LV_OBJ_FLAG_OVERFLOW_VISIBLE); /// Flags
-	lv_obj_clear_flag(ui_MidiMapLeftColumn,
-					  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK |
-						  LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
-	lv_obj_set_style_pad_left(ui_MidiMapLeftColumn, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_right(ui_MidiMapLeftColumn, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_top(ui_MidiMapLeftColumn, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_bottom(ui_MidiMapLeftColumn, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_row(ui_MidiMapLeftColumn, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_clear_flag(ui_MidiMapLeftColumn, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
+	lv_obj_set_style_pad_hor(ui_MidiMapLeftColumn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_ver(ui_MidiMapLeftColumn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_row(ui_MidiMapLeftColumn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(ui_MidiMapLeftColumn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	ui_MidiMapInputsTitle = lv_label_create(ui_MidiMapLeftColumn);
@@ -81,31 +74,30 @@ void ui_MidiMapViewPage_screen_init(void) {
 	ui_MidiMapLeftItems = lv_obj_create(ui_MidiMapLeftColumn);
 	lv_obj_remove_style_all(ui_MidiMapLeftItems);
 	lv_obj_set_width(ui_MidiMapLeftItems, lv_pct(100));
-	lv_obj_set_height(ui_MidiMapLeftItems, lv_pct(100));
+	lv_obj_set_height(ui_MidiMapLeftItems, 208);
 	lv_obj_set_align(ui_MidiMapLeftItems, LV_ALIGN_CENTER);
 	lv_obj_set_flex_flow(ui_MidiMapLeftItems, LV_FLEX_FLOW_COLUMN);
 	lv_obj_set_flex_align(ui_MidiMapLeftItems, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 	lv_obj_add_flag(ui_MidiMapLeftItems, LV_OBJ_FLAG_SCROLLABLE); /// Flags
 	lv_obj_clear_flag(ui_MidiMapLeftItems,
-					  LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK |
-						  LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
-	lv_obj_set_style_pad_left(ui_MidiMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_right(ui_MidiMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_top(ui_MidiMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_bottom(ui_MidiMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
+					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
+						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
+	lv_obj_set_style_pad_hor(ui_MidiMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_ver(ui_MidiMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(ui_MidiMapLeftItems, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(ui_MidiMapLeftItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	ui_MidiMapRightColumn = lv_obj_create(ui_MidiMapViewCont);
 	lv_obj_remove_style_all(ui_MidiMapRightColumn);
-	lv_obj_set_width(ui_MidiMapRightColumn, 150);
-	lv_obj_set_height(ui_MidiMapRightColumn, lv_pct(100));
+	lv_obj_set_width(ui_MidiMapRightColumn, 154);
+	lv_obj_set_height(ui_MidiMapRightColumn, 228);
 	lv_obj_set_align(ui_MidiMapRightColumn, LV_ALIGN_CENTER);
 	lv_obj_set_flex_flow(ui_MidiMapRightColumn, LV_FLEX_FLOW_COLUMN);
 	lv_obj_set_flex_align(ui_MidiMapRightColumn, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-	lv_obj_clear_flag(ui_MidiMapRightColumn, LV_OBJ_FLAG_CLICKABLE); /// Flags
-	lv_obj_add_flag(ui_MidiMapRightColumn, LV_OBJ_FLAG_SCROLLABLE);	 /// Flags
-	lv_obj_set_style_pad_row(ui_MidiMapRightColumn, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_clear_flag(ui_MidiMapRightColumn, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE); /// Flags
+	lv_obj_set_style_pad_hor(ui_MidiMapRightColumn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_ver(ui_MidiMapRightColumn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_row(ui_MidiMapRightColumn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(ui_MidiMapRightColumn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	ui_MidiMapOutputsTitle = lv_label_create(ui_MidiMapRightColumn);
@@ -126,7 +118,7 @@ void ui_MidiMapViewPage_screen_init(void) {
 	ui_MidiMapRightItems = lv_obj_create(ui_MidiMapRightColumn);
 	lv_obj_remove_style_all(ui_MidiMapRightItems);
 	lv_obj_set_width(ui_MidiMapRightItems, lv_pct(100));
-	lv_obj_set_height(ui_MidiMapRightItems, lv_pct(100));
+	lv_obj_set_height(ui_MidiMapRightItems, 208);
 	lv_obj_set_align(ui_MidiMapRightItems, LV_ALIGN_CENTER);
 	lv_obj_set_flex_flow(ui_MidiMapRightItems, LV_FLEX_FLOW_COLUMN);
 	lv_obj_set_flex_align(ui_MidiMapRightItems, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -140,4 +132,24 @@ void ui_MidiMapViewPage_screen_init(void) {
 	lv_obj_set_style_pad_bottom(ui_MidiMapRightItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(ui_MidiMapRightItems, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(ui_MidiMapRightItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_scrollbar_mode(ui_MidiMapLeftItems, LV_SCROLLBAR_MODE_AUTO);
+	lv_obj_set_scroll_dir(ui_MidiMapLeftItems, LV_DIR_VER);
+	lv_obj_set_style_bg_color(ui_MidiMapLeftItems, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui_MidiMapLeftItems, 128, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui_MidiMapLeftItems, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui_MidiMapLeftItems, 1, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui_MidiMapLeftItems, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui_MidiMapLeftItems, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_width(ui_MidiMapLeftItems, 2, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+
+	lv_obj_set_scrollbar_mode(ui_MidiMapRightItems, LV_SCROLLBAR_MODE_ON);
+	lv_obj_set_scroll_dir(ui_MidiMapRightItems, LV_DIR_VER);
+	lv_obj_set_style_bg_color(ui_MidiMapRightItems, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui_MidiMapRightItems, 128, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(ui_MidiMapRightItems, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui_MidiMapRightItems, 3, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui_MidiMapRightItems, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui_MidiMapRightItems, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_width(ui_MidiMapRightItems, 2, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 }
