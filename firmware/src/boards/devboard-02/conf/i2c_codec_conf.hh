@@ -5,11 +5,10 @@ using mdrivlib::GPIO;
 using mdrivlib::PinAF;
 using mdrivlib::PinNum;
 
-// I2C for codec -- PC9 is shared with SDMMC!!!
 const mdrivlib::I2CConfig a7m4_shared_i2c_conf = {
-	.I2Cx = I2C3,
-	.SCL = {GPIO::A, PinNum::_8, PinAF::AltFunc4},
-	.SDA = {GPIO::C, PinNum::_9, PinAF::AltFunc4},
+	.I2Cx = I2C6,
+	.SCL = {GPIO::A, PinNum::_11, PinAF::AltFunc2},
+	.SDA = {GPIO::A, PinNum::_12, PinAF::AltFunc2},
 	.timing =
 		{
 			.PRESC = 0x40,
