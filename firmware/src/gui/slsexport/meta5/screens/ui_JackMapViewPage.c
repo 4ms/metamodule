@@ -49,7 +49,7 @@ lv_obj_set_style_pad_column(ui_JackMapViewCont, 8, LV_PART_MAIN| LV_STATE_DEFAUL
 
 ui_JackMapLeftColumn = lv_obj_create(ui_JackMapViewCont);
 lv_obj_remove_style_all(ui_JackMapLeftColumn);
-lv_obj_set_width( ui_JackMapLeftColumn, lv_pct(49));
+lv_obj_set_width( ui_JackMapLeftColumn, 152);
 lv_obj_set_height( ui_JackMapLeftColumn, lv_pct(100));
 lv_obj_set_align( ui_JackMapLeftColumn, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_JackMapLeftColumn,LV_FLEX_FLOW_COLUMN);
@@ -81,7 +81,7 @@ lv_obj_set_style_pad_bottom(ui_JackMapInputsTitle, 0, LV_PART_MAIN| LV_STATE_DEF
 
 ui_JackMapRightColumn = lv_obj_create(ui_JackMapViewCont);
 lv_obj_remove_style_all(ui_JackMapRightColumn);
-lv_obj_set_width( ui_JackMapRightColumn, lv_pct(49));
+lv_obj_set_width( ui_JackMapRightColumn, 152);
 lv_obj_set_height( ui_JackMapRightColumn, lv_pct(100));
 lv_obj_set_align( ui_JackMapRightColumn, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_JackMapRightColumn,LV_FLEX_FLOW_COLUMN);
@@ -90,6 +90,7 @@ lv_obj_clear_flag( ui_JackMapRightColumn, LV_OBJ_FLAG_CLICKABLE );    /// Flags
 lv_obj_add_flag( ui_JackMapRightColumn, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_pad_row(ui_JackMapRightColumn, 5, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_JackMapRightColumn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_JackMapRightColumn, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_JackMapOutputsTitle = lv_label_create(ui_JackMapRightColumn);
 lv_obj_set_width( ui_JackMapOutputsTitle, LV_SIZE_CONTENT);  /// 1

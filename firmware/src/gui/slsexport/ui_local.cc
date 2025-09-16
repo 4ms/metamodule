@@ -104,23 +104,21 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 
 	lv_obj_t *cont = lv_obj_create(parent);
 	lv_obj_remove_style_all(cont);
-	lv_obj_set_width(cont, 148);
+	lv_obj_set_width(cont, 142);
 	lv_obj_set_height(cont, LV_SIZE_CONTENT);
 	lv_obj_set_align(cont, LV_ALIGN_CENTER);
 	lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_ROW);
 	lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
 	lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-	lv_obj_clear_flag(cont,
-					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
-						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
-						  LV_OBJ_FLAG_SCROLL_CHAIN);
+	lv_obj_clear_flag(cont, LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_CHAIN);
 	lv_obj_set_style_radius(cont, 2, LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_left(cont, 1, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(cont, 0, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(cont, 4, LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_color(cont, lv_color_hex(0xFD8B18), LV_STATE_FOCUSED);
-	lv_obj_set_style_outline_opa(cont, 255, LV_STATE_FOCUSED);
-	lv_obj_set_style_outline_width(cont, 1, LV_STATE_FOCUSED);
-	lv_obj_set_style_outline_pad(cont, 2, LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_color(cont, lv_color_hex(0xFD8B18), LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_opa(cont, 255, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_width(cont, 2, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_pad(cont, 2, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY);
 
 	auto circle_width = letterchar.length() > 2 ? 35 : letterchar.length() > 1 ? 30 : 20;
 	lv_obj_t *circle = lv_btn_create(cont);
