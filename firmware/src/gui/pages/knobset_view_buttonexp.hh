@@ -132,15 +132,16 @@ private:
 	static void focus_cb(lv_event_t *event) {
 		lv_obj_scroll_to_y(ui_KnobSetContainer, 210, LV_ANIM_ON);
 
-		if (auto text_label = get_button_label(event->target)) {
-			lv_label_set_long_mode(text_label, LV_LABEL_LONG_SCROLL);
-		}
+		// Can we do vertical scroll?
+		// if (auto text_label = get_button_label(event->target)) {
+		// 	lv_label_set_long_mode(text_label, LV_LABEL_LONG_SCROLL);
+		// }
 	}
 
 	static void defocus_cb(lv_event_t *event) {
-		if (auto text_label = get_button_label(event->target)) {
-			lv_label_set_long_mode(text_label, LV_LABEL_LONG_WRAP);
-		}
+		// if (auto text_label = get_button_label(event->target)) {
+		// 	lv_label_set_long_mode(text_label, LV_LABEL_LONG_WRAP);
+		// }
 	}
 
 	void enable(lv_obj_t *cont, unsigned button_id) {
