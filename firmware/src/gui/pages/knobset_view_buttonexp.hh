@@ -91,7 +91,7 @@ struct ButtonExpanderMapsView {
 			num = 0;
 	}
 
-	void update_button(unsigned idx, float value) { //, MappedKnobSet const &knobset) {
+	void update_button(unsigned idx, float value) {
 		//find the container
 		lv_obj_t *cont{};
 		for (auto *pane : panes) {
@@ -105,11 +105,12 @@ struct ButtonExpanderMapsView {
 		if (!cont)
 			return;
 
-		auto circle = get_button_circle(cont);
-		lv_obj_set_style_outline_color(circle, lv_color_hex(0xFF0000), LV_PART_MAIN);
-		lv_obj_set_style_outline_opa(circle, 255.f * value, LV_PART_MAIN);
-		lv_obj_set_style_outline_width(circle, 2, LV_PART_MAIN);
-		lv_obj_set_style_outline_pad(circle, 0, LV_PART_MAIN);
+		auto grey = std::clamp<unsigned>(255.f * value, 0, 255);
+		uint32_t color = grey | (grey << 8) | (grey << 16);
+		lv_obj_set_style_bg_color(get_button_circle(cont), lv_color_hex(color), LV_PART_MAIN);
+
+		auto textcolor = grey > 0x80 ? lv_color_black() : lv_color_white();
+		lv_obj_set_style_text_color(get_button_circle_number(cont), textcolor, LV_PART_MAIN);
 	}
 
 private:
@@ -151,6 +152,8 @@ private:
 		auto circle = get_button_circle(cont);
 		lv_enable(circle);
 		lv_obj_set_style_bg_color(circle, lv_color_white(), LV_PART_MAIN);
+		lv_obj_set_style_border_opa(circle, LV_OPA_100, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_border_color(circle, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
 	}
 
 	void disable(lv_obj_t *cont, unsigned button_id) {
@@ -158,6 +161,7 @@ private:
 		auto circle = get_button_circle(cont);
 		lv_disable(circle);
 		lv_obj_set_style_bg_color(circle, lv_color_hex(0x888888), LV_PART_MAIN);
+		lv_obj_set_style_border_opa(circle, LV_OPA_0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	}
 
 	MetaParams const &metaparams;

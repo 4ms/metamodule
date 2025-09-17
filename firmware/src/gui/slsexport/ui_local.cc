@@ -835,6 +835,9 @@ lv_obj_t *create_button_expander_item(lv_obj_t *parent) {
 	lv_obj_set_style_pad_bottom(circle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_bg_opa(circle, LV_OPA_30, LV_PART_MAIN | LV_STATE_DISABLED);
+	lv_obj_set_style_border_opa(circle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_border_width(circle, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(circle, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	auto number_label = lv_label_create(circle);
 	lv_obj_set_width(number_label, LV_SIZE_CONTENT);  /// 1
