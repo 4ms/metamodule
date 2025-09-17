@@ -107,13 +107,13 @@ struct KnobSetViewPage : PageBase {
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx + 1));
 
 			// Focus on the previously focussed object (if any), or the Next>> button if it's visible
-			if (idx == args.mappedknob_id)
-				focus = cont;
-			else if (idx == 0 && !args.mappedknob_id) {
-				if (lv_obj_has_flag(ui_NextKnobSet, LV_OBJ_FLAG_HIDDEN))
+			if (!args.mappedknob_id) {
+				if (idx == 0) { //only need to do this once
+					focus = (lv_obj_has_flag(ui_NextKnobSet, LV_OBJ_FLAG_HIDDEN)) ? cont : ui_NextKnobSet;
+				}
+			} else {
+				if (idx == args.mappedknob_id)
 					focus = cont;
-				else
-					focus = ui_NextKnobSet;
 			}
 		}
 
@@ -200,7 +200,7 @@ struct KnobSetViewPage : PageBase {
 						update_knob(arcs[idx], is_tracking, arc_val);
 
 				} else if (map.is_button()) {
-					button_exp.update_button(idx, map.unmap_val(value));
+					button_exp.update_button(idx, value);
 				}
 
 				idx++;
@@ -291,9 +291,10 @@ private:
 		// jump to the new active knobset
 		if (last_known_active_knobset != page_list.get_active_knobset()) {
 
-			page_list.request_new_page_no_history(
-				PageId::KnobSetView,
-				{.patch_loc_hash = args.patch_loc_hash, .view_knobset_id = page_list.get_active_knobset()});
+			page_list.request_new_page_no_history(PageId::KnobSetView,
+												  {.patch_loc_hash = args.patch_loc_hash,
+												   .mappedknob_id = args.mappedknob_id,
+												   .view_knobset_id = page_list.get_active_knobset()});
 
 			last_known_active_knobset = page_list.get_active_knobset();
 		}
@@ -407,7 +408,7 @@ private:
 			return;
 
 		page->args.mappedknob_id = map_idx;
-		page->page_list.request_new_page(PageId::KnobMap, page->args);
+		page->load_page(PageId::KnobMap, page->args);
 	}
 
 	static void scroll_to_knobs(lv_event_t *event) {
