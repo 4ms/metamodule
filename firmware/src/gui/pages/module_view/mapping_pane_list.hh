@@ -36,7 +36,7 @@ struct MappingPaneList {
 			format_knob_map_circle(map.panel_knob_id, circle, label);
 
 		else if (map.is_button())
-			format_knob_map_circle(map.panel_knob_id, circle, label);
+			format_button_map_circle(map.panel_knob_id, circle, label);
 
 		else if (map.is_midi_cc())
 			format_cc_map_circle(map.cc_num(), circle, label);
@@ -153,7 +153,14 @@ private:
 		//workaround for lowercase letter positions off-center
 		if (panel_knob_id >= 6 && panel_knob_id < 12)
 			lv_obj_set_style_pad_bottom(label, 3, LV_STATE_DEFAULT);
+
 		format_label(label, 0, &ui_font_MuseoSansRounded90018);
+		format_circle(circle, Gui::get_knob_color(panel_knob_id), 22);
+	}
+
+	static void format_button_map_circle(uint16_t panel_knob_id, lv_obj_t *circle, lv_obj_t *label) {
+		format_label(label, 0, &ui_font_MuseoSansRounded70014);
+		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
 		format_circle(circle, Gui::get_knob_color(panel_knob_id), 22);
 	}
 
@@ -176,6 +183,7 @@ private:
 	static void format_label(lv_obj_t *label, lv_coord_t line_spacing, const lv_font_t *font) {
 		lv_obj_set_style_text_font(label, font, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_line_space(label, line_spacing, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_color(label, lv_color_black(), LV_STATE_DEFAULT);
 	}
 };
 } // namespace MetaModule
