@@ -91,6 +91,27 @@ struct ButtonExpanderMapsView {
 			num = 0;
 	}
 
+	void update_button(unsigned idx, float value) { //, MappedKnobSet const &knobset) {
+		//find the container
+		lv_obj_t *cont{};
+		for (auto *pane : panes) {
+			lv_foreach_child(pane, [idx, &cont](lv_obj_t *child, int) {
+				if (idx == reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child))) {
+					cont = child;
+					return;
+				}
+			});
+		}
+		if (!cont)
+			return;
+
+		auto circle = get_button_circle(cont);
+		lv_obj_set_style_outline_color(circle, lv_color_hex(0xFF0000), LV_PART_MAIN);
+		lv_obj_set_style_outline_opa(circle, 255.f * value, LV_PART_MAIN);
+		lv_obj_set_style_outline_width(circle, 2, LV_PART_MAIN);
+		lv_obj_set_style_outline_pad(circle, 0, LV_PART_MAIN);
+	}
+
 private:
 	static void set_button_number(lv_obj_t *cont, unsigned button_id) {
 		lv_label_set_text_fmt(get_button_circle_number(cont), "%u", button_id + 1);
@@ -129,15 +150,14 @@ private:
 		lv_enable(cont);
 		auto circle = get_button_circle(cont);
 		lv_enable(circle);
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[button_id % 6], LV_PART_MAIN);
+		lv_obj_set_style_bg_color(circle, lv_color_white(), LV_PART_MAIN);
 	}
 
 	void disable(lv_obj_t *cont, unsigned button_id) {
 		lv_disable(cont);
-
 		auto circle = get_button_circle(cont);
 		lv_disable(circle);
-		lv_obj_set_style_bg_color(circle, Gui::knob_disabled_palette[button_id % 6], LV_PART_MAIN);
+		lv_obj_set_style_bg_color(circle, lv_color_hex(0x888888), LV_PART_MAIN);
 	}
 
 	MetaParams const &metaparams;

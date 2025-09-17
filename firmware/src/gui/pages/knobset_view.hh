@@ -199,6 +199,8 @@ struct KnobSetViewPage : PageBase {
 					if (arcs[idx])
 						update_knob(arcs[idx], is_tracking, arc_val);
 
+				} else if (map.is_button()) {
+					button_exp.update_button(idx, value);
 				}
 
 				idx++;
