@@ -166,7 +166,9 @@ struct KnobMapPage : PageBase {
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
 		if (map.is_button())
-			lv_obj_set_style_text_color(ui_EditMappingLetter, Gui::get_buttonexp_textcolor(0), LV_PART_MAIN);
+			lv_obj_set_style_text_color(ui_EditMappingLetter, lv_color_white(), LV_PART_MAIN);
+		else
+			lv_obj_set_style_text_color(ui_EditMappingLetter, lv_color_black(), LV_PART_MAIN);
 
 		lv_obj_set_style_bg_color(indicator, Gui::get_knob_indicator_color(map.panel_knob_id), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
