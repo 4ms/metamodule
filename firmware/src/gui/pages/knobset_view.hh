@@ -245,10 +245,7 @@ struct KnobSetViewPage : PageBase {
 			}
 		}
 
-		// for (auto but : butexp_containers) {
-		// 	if (but && lv_obj_is_valid(but))
-		// 		lv_obj_del_async(but);
-		// }
+		button_exp.blur();
 	}
 
 private:

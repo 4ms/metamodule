@@ -80,6 +80,17 @@ struct ButtonExpanderMapsView {
 		}
 	}
 
+	void blur() {
+		// Clear all containers except for the original ones
+		for (auto pane : butexp_panes) {
+			if (auto num_children = lv_obj_get_child_cnt(pane); num_children > 1) {
+				for (auto i = 1u; i < num_children; i++) {
+					lv_obj_del_async(lv_obj_get_child(pane, i));
+				}
+			}
+		}
+	}
+
 private:
 	static void set_for_button(lv_obj_t *cont, unsigned button_id) {
 		lv_label_set_text_fmt(get_button_circle_number(cont), "%u", button_id + 1);
