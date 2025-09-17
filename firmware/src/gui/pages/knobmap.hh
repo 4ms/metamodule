@@ -167,7 +167,7 @@ struct KnobMapPage : PageBase {
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
-		lv_obj_set_style_bg_color(indicator, Gui::knob_palette[(map.panel_knob_id + 1) % 6], LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_color(indicator, Gui::knob_indicator_palette[map.panel_knob_id % 6], LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
 
 		update_active_status();

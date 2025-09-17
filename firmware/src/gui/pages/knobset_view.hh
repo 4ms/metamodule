@@ -478,7 +478,7 @@ private:
 		lv_label_set_text(circle_letter, PanelDef::get_map_param_name(knob_i).data());
 
 		auto indicator = get_indicator(cont);
-		lv_obj_set_style_bg_color(indicator, Gui::knob_palette[(knob_i + 1) % 6], LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_color(indicator, Gui::knob_indicator_palette[knob_i % 6], LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
 	}
 

@@ -274,6 +274,17 @@ struct Gui {
 		palette_main[LV_PALETTE_BLUE_GREY], //?
 	};
 
+	static inline std::array<lv_color_t, 8> knob_indicator_palette{
+		lv_color_black(), //RED
+		lv_color_black(), //YELLOW
+		lv_color_black(), //CYAN
+		lv_color_black(), //PINK
+		lv_color_black(), //ORANGE
+		lv_color_black(), //GREEN
+		lv_color_white(), //black
+		lv_color_black(), //white
+	};
+
 	static inline std::array<lv_color_t, 8> jack_palette{
 		lv_color_make_rgb565(0xEA, 0x1C, 0x25),
 		lv_color_make_rgb565(0xFF, 0xF2, 0x00),
