@@ -159,16 +159,16 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
 		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
 		lv_label_set_text(ui_EditMappingLetter, panel_name.c_str());
-		if (map.is_midi())
-			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
 
-		else if (panel_name.size() > 3)
+		if (map.is_midi() || map.is_button() || panel_name.size() > 3)
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
-
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
-		lv_obj_set_style_bg_color(indicator, Gui::knob_indicator_palette[map.panel_knob_id % 6], LV_STATE_DEFAULT);
+		if (map.is_button())
+			lv_obj_set_style_text_color(ui_EditMappingLetter, Gui::get_buttonexp_textcolor(0), LV_PART_MAIN);
+
+		lv_obj_set_style_bg_color(indicator, Gui::get_knob_indicator_color(map.panel_knob_id), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
 
 		update_active_status();
