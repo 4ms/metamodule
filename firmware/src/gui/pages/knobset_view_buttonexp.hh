@@ -21,8 +21,7 @@ struct ButtonExpanderMapsView {
 			auto cont = create_button_expander_item(but_pane);
 			lv_label_set_text(get_button_label(cont), "");
 			set_button_number(cont, i);
-			disable(cont, i);
-			lv_obj_set_style_bg_opa(get_button_circle(cont), LV_OPA_30, LV_STATE_DISABLED);
+			disable(cont);
 		}
 	}
 
@@ -80,9 +79,16 @@ struct ButtonExpanderMapsView {
 	void blur() {
 		// Clear all objects from all panes except for the original ones (which are used to display an empty slot)
 		for (auto *pane : panes) {
-			if (auto num_children = lv_obj_get_child_cnt(pane); num_children > 1) {
-				for (auto i = 1u; i < num_children; i++) {
-					lv_obj_del_async(lv_obj_get_child(pane, i));
+			if (auto num_children = lv_obj_get_child_cnt(pane)) {
+				if (num_children > 0) {
+					auto cont = lv_obj_get_child(pane, 0);
+					lv_label_set_text(get_button_label(cont), "");
+					disable(cont);
+				}
+				if (num_children > 1) {
+					for (auto i = 1u; i < num_children; i++) {
+						lv_obj_del_async(lv_obj_get_child(pane, i));
+					}
 				}
 			}
 		}
@@ -153,12 +159,13 @@ private:
 		lv_obj_set_style_border_color(circle, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
 	}
 
-	void disable(lv_obj_t *cont, unsigned button_id) {
+	void disable(lv_obj_t *cont) {
 		lv_disable(cont);
 		auto circle = get_button_circle(cont);
 		lv_disable(circle);
 		lv_obj_set_style_bg_color(circle, lv_color_hex(0x888888), LV_PART_MAIN);
 		lv_obj_set_style_border_opa(circle, LV_OPA_0, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(circle, LV_OPA_30, LV_STATE_DISABLED);
 	}
 
 	MetaParams const &metaparams;
