@@ -104,7 +104,7 @@ struct KnobSetViewPage : PageBase {
 			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
 
 			// Use user_data to connect the mapping to the lvgl object (via index in the knobset->set)
-			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx));
+			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx + 1));
 
 			// Focus on the previously focussed object (if any), or the Next>> button if it's visible
 			if (idx == args.mappedknob_id)
@@ -200,7 +200,7 @@ struct KnobSetViewPage : PageBase {
 						update_knob(arcs[idx], is_tracking, arc_val);
 
 				} else if (map.is_button()) {
-					button_exp.update_button(idx, value);
+					button_exp.update_button(idx, map.unmap_val(value));
 				}
 
 				idx++;

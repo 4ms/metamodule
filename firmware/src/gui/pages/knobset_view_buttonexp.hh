@@ -92,25 +92,21 @@ struct ButtonExpanderMapsView {
 	}
 
 	void update_button(unsigned idx, float value) {
-		//find the container
-		lv_obj_t *cont{};
+		// Find the container
 		for (auto *pane : panes) {
-			lv_foreach_child(pane, [idx, &cont](lv_obj_t *child, int) {
-				if (idx == reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child))) {
-					cont = child;
+			lv_foreach_child(pane, [value, idx](lv_obj_t *child, int) {
+				if (idx == reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child)) - 1) {
+
+					auto color = Gui::get_buttonexp_color(value);
+					lv_obj_set_style_bg_color(get_button_circle(child), color, LV_PART_MAIN);
+
+					auto textcolor = Gui::get_buttonexp_textcolor(value);
+					lv_obj_set_style_text_color(get_button_circle_number(child), textcolor, LV_PART_MAIN);
+
 					return;
 				}
 			});
 		}
-		if (!cont)
-			return;
-
-		auto grey = std::clamp<unsigned>(255.f * value, 0, 255);
-		uint32_t color = grey | (grey << 8) | (grey << 16);
-		lv_obj_set_style_bg_color(get_button_circle(cont), lv_color_hex(color), LV_PART_MAIN);
-
-		auto textcolor = grey > 0x80 ? lv_color_black() : lv_color_white();
-		lv_obj_set_style_text_color(get_button_circle_number(cont), textcolor, LV_PART_MAIN);
 	}
 
 private:
