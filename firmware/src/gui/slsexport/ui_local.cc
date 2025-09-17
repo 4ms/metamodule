@@ -788,9 +788,13 @@ lv_obj_t *create_file_menu_item(lv_obj_t *parent, std::string_view text) {
 
 lv_obj_t *create_button_expander_item(lv_obj_t *parent) {
 	auto cont = lv_obj_create(parent);
-	lv_obj_set_width(cont, 48);
+	lv_obj_set_width(cont, lv_pct(100));
 	lv_obj_set_height(cont, 24);
-	lv_obj_set_align(cont, LV_ALIGN_TOP_MID);
+
+	lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_ROW);
+	lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+	lv_obj_set_align(cont, LV_ALIGN_LEFT_MID);
 	lv_obj_add_flag(cont, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
 	lv_obj_clear_flag(cont,
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
@@ -818,9 +822,9 @@ lv_obj_t *create_button_expander_item(lv_obj_t *parent) {
 	auto circle = lv_btn_create(cont);
 	lv_obj_set_width(circle, 24);
 	lv_obj_set_height(circle, 18);
-	lv_obj_set_x(circle, -10);
+	lv_obj_set_x(circle, 0);
 	lv_obj_set_y(circle, 0);
-	lv_obj_set_align(circle, LV_ALIGN_CENTER);
+	lv_obj_set_align(circle, LV_ALIGN_LEFT_MID);
 	lv_obj_clear_flag(circle,
 					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
 						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE |
@@ -844,7 +848,7 @@ lv_obj_t *create_button_expander_item(lv_obj_t *parent) {
 	lv_label_set_text(number_label, "1");
 	lv_obj_set_style_text_color(number_label, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(number_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_text_align(number_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_align(number_label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(number_label, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(number_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(number_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -852,11 +856,12 @@ lv_obj_t *create_button_expander_item(lv_obj_t *parent) {
 	lv_obj_set_style_pad_bottom(number_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	auto text_label = lv_label_create(cont);
-	lv_obj_set_width(text_label, 49);
+	lv_obj_set_flex_grow(text_label, 1);
+	// lv_obj_set_width(text_label, lv_pct(100));
 	lv_obj_set_height(text_label, 22);
 	lv_obj_set_x(text_label, 27);
 	lv_obj_set_y(text_label, -2);
-	lv_obj_set_align(text_label, LV_ALIGN_TOP_MID);
+	lv_obj_set_align(text_label, LV_ALIGN_LEFT_MID);
 	lv_label_set_text(text_label, "");
 	lv_obj_clear_flag(text_label,
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
@@ -871,7 +876,42 @@ lv_obj_t *create_button_expander_item(lv_obj_t *parent) {
 	lv_obj_set_style_text_color(text_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DISABLED);
 	lv_obj_set_style_text_opa(text_label, 128, LV_PART_MAIN | LV_STATE_DISABLED);
 
+	// lv_obj_set_style_border_opa(cont, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+	// lv_obj_set_style_border_width(cont, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+	// lv_obj_set_style_border_color(cont, lv_color_hex(0x00FF00), LV_PART_MAIN | LV_STATE_DEFAULT);
+
 	return cont;
+}
+
+lv_obj_t *create_button_expander_pane(lv_obj_t *parent) {
+	auto obj = lv_obj_create(parent);
+
+	lv_obj_set_height(obj, 24);
+	lv_obj_set_width(obj, lv_pct(100));
+
+	lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW);
+	lv_obj_set_flex_align(obj, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+	lv_obj_add_flag(obj, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+	lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE);
+	lv_obj_set_scroll_dir(obj, LV_DIR_HOR);
+	lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_hor(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_ver(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_row(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_column(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	// lv_obj_set_style_border_opa(obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+	// lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+	// lv_obj_set_style_border_color(obj, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_style_radius(obj, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(obj, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(obj, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_hor(obj, 2, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(obj, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(obj, -1, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+
+	return obj;
 }
 
 } // namespace MetaModule
