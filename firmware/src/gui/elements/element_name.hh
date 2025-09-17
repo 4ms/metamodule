@@ -2,6 +2,7 @@
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/element_type.hh"
+#include "lvgl.h"
 #include "patch/patch_data.hh"
 
 namespace MetaModule
@@ -23,5 +24,7 @@ void append_connected_jack_name(std::string &opts,
 								PatchData const &patch);
 
 void append_panel_name(std::string &opts, Element const &el, uint16_t panel_jack_id);
+
+void set_param_item_name(lv_obj_t *label, MappedKnob const &map, PatchData *patch);
 
 } // namespace MetaModule

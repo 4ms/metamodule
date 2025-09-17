@@ -100,4 +100,17 @@ void append_connected_jack_name(std::string &opts,
 	}
 }
 
+void set_param_item_name(lv_obj_t *label, MappedKnob const &map, PatchData *patch) {
+	if (!label)
+		return;
+
+	std::string_view name = map.alias_name;
+	if (name.length()) {
+		lv_label_set_text(label, name.data());
+	} else {
+		auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
+		lv_label_set_text_fmt(label, "%s - %s", fullname.element_name.data(), fullname.module_name.data());
+	}
+}
+
 } // namespace MetaModule
