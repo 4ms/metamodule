@@ -152,6 +152,18 @@ public:
 		}
 #else
 
+#ifdef BUTTONEXPANDER_NAV
+		if (m->ext_buttons_high_events & (1 << 4))
+			m->meta_buttons[0].register_rising_edge();
+		if (m->ext_buttons_low_events & (1 << 4))
+			m->meta_buttons[0].register_falling_edge();
+
+		if (m->ext_buttons_high_events & (1 << 7))
+			m->rotary.motion--;
+		if (m->ext_buttons_high_events & (1 << 6))
+			m->rotary.motion++;
+#endif
+
 		if (m->meta_buttons[0].is_pressed()) {
 			if (m->rotary.motion != 0) {
 				m->ignore_metabutton_release = true;
@@ -159,7 +171,21 @@ public:
 			}
 		}
 
+#ifdef BUTTONEXPANDER_NAV
+		if (m->ext_buttons_high_events & (1 << 5))
+			data->state = LV_INDEV_STATE_PRESSED;
+		else if (m->ext_buttons_low_events & (1 << 5))
+			data->state = LV_INDEV_STATE_RELEASED;
+		else
+			data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+
+		m->ext_buttons_high_events = 0;
+		m->ext_buttons_low_events = 0;
+
+#else
 		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+#endif
+
 #endif
 
 #ifdef MONKEYROTARY
