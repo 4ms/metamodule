@@ -899,18 +899,19 @@ lv_obj_t *create_button_expander_pane(lv_obj_t *parent) {
 	lv_obj_set_style_pad_hor(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_ver(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_column(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_column(obj, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	// Scrollbar:
 	lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_AUTO);
 	lv_obj_set_scroll_dir(obj, LV_DIR_HOR);
-	lv_obj_set_style_radius(obj, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(obj, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_opa(obj, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_hor(obj, 2, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_ver(obj, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_set_style_radius(obj, 1, LV_PART_SCROLLBAR);
+	lv_obj_set_style_bg_color(obj, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR);
+	lv_obj_set_style_bg_opa(obj, 127, LV_PART_SCROLLBAR);
+	lv_obj_set_style_pad_hor(obj, 2, LV_PART_SCROLLBAR);
+	lv_obj_set_style_pad_ver(obj, -2, LV_PART_SCROLLBAR);
 
-	lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	// Debug border
 	lv_obj_set_style_border_opa(obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_color(obj, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);

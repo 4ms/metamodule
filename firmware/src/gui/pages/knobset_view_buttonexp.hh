@@ -16,13 +16,12 @@ struct ButtonExpanderMapsView {
 	ButtonExpanderMapsView(MetaParams const &metaparams)
 		: metaparams{metaparams} {
 
-		for (auto [i, but_pane] : enumerate(butexp_panes)) {
-			but_pane = create_button_expander_pane(butexp_columns[i / 8]);
+		for (auto [i, but_pane] : enumerate(panes)) {
+			but_pane = create_button_expander_pane(columns[i / 8]);
 			auto cont = create_button_expander_item(but_pane);
 			lv_label_set_text(get_button_label(cont), "");
-			set_for_button(cont, i);
-			lv_disable(cont);
-			lv_disable(get_button_circle(cont));
+			set_button_number(cont, i);
+			disable(cont, i);
 			lv_obj_set_style_bg_opa(get_button_circle(cont), LV_OPA_30, LV_STATE_DISABLED);
 		}
 	}
@@ -34,39 +33,34 @@ struct ButtonExpanderMapsView {
 			return nullptr;
 		auto button_id = map.ext_button().value();
 
-		if (lv_obj_get_child_cnt(butexp_panes[button_id]) == 1) {
-			cont = lv_obj_get_child(butexp_panes[button_id], 0);
+		if (num_maps[button_id] == 0) {
+			cont = lv_obj_get_child(panes[button_id], 0);
 		} else {
-			cont = create_button_expander_item(butexp_panes[button_id]);
+			cont = create_button_expander_item(panes[button_id]);
 		}
-		lv_enable(cont);
-		lv_enable(get_button_circle(cont));
+
+		enable(cont, button_id);
 
 		set_param_item_name(get_button_label(cont), map, patch);
-		set_for_button(cont, button_id);
+		set_button_number(cont, button_id);
 
 		lv_obj_add_event_cb(cont, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(cont, defocus_cb, LV_EVENT_DEFOCUSED, this);
 
-		// ???
-		// num_maps[map.panel_knob_id]++;
-		// set_knob_arc<min_arc, max_arc>(map, get_knob(cont), 0);
-		// set_for_knob(cont, map.panel_knob_id);
-		// arcs[idx] = get_knob(cont);
-		// indicators[idx] = get_indicator(cont);
+		num_maps[button_id]++;
 
 		return cont;
 	}
 
 	void add_to_group(lv_group_t *group) {
-		for (auto *pane : butexp_panes) {
+		for (auto *pane : panes) {
 			if (pane)
 				lv_foreach_child(pane, [group](lv_obj_t *cont, int idx) { lv_group_add_obj(group, cont); });
 		}
 	}
 
 	void hide_unused_columns() {
-		for (unsigned i = 0; auto *col : butexp_columns) {
+		for (unsigned i = 0; auto *col : columns) {
 			bool exp_connected = (1 << i) & metaparams.button_exp_connected;
 			i++;
 
@@ -81,20 +75,22 @@ struct ButtonExpanderMapsView {
 	}
 
 	void blur() {
-		// Clear all containers except for the original ones
-		for (auto pane : butexp_panes) {
+		// Clear all objects from all panes except for the original ones (which are used to display an empty slot)
+		for (auto *pane : panes) {
 			if (auto num_children = lv_obj_get_child_cnt(pane); num_children > 1) {
 				for (auto i = 1u; i < num_children; i++) {
 					lv_obj_del_async(lv_obj_get_child(pane, i));
 				}
 			}
 		}
+
+		for (auto &num : num_maps)
+			num = 0;
 	}
 
 private:
-	static void set_for_button(lv_obj_t *cont, unsigned button_id) {
+	static void set_button_number(lv_obj_t *cont, unsigned button_id) {
 		lv_label_set_text_fmt(get_button_circle_number(cont), "%u", button_id + 1);
-		lv_obj_set_style_bg_color(get_button_circle(cont), Gui::knob_palette[button_id % 6], LV_PART_MAIN);
 	}
 
 	static lv_obj_t *get_button_label(lv_obj_t *container) {
@@ -126,16 +122,36 @@ private:
 		}
 	}
 
+	void enable(lv_obj_t *cont, unsigned button_id) {
+		lv_enable(cont);
+		auto circle = get_button_circle(cont);
+		lv_enable(circle);
+		lv_obj_set_style_bg_color(circle, Gui::knob_palette[button_id % 6], LV_PART_MAIN);
+	}
+
+	void disable(lv_obj_t *cont, unsigned button_id) {
+		lv_disable(cont);
+
+		auto circle = get_button_circle(cont);
+		lv_disable(circle);
+		lv_obj_set_style_bg_color(circle, Gui::knob_disabled_palette[button_id % 6], LV_PART_MAIN);
+	}
+
 	MetaParams const &metaparams;
 
-	std::array<lv_obj_t *, 4> butexp_columns{
+	// Four columns, one for each expander (unattached expander columnss are hidden)
+	std::array<lv_obj_t *, 4> columns{
 		ui_KnobSetButtonExp1Cont,
 		ui_KnobSetButtonExp2Cont,
 		ui_KnobSetButtonExp3Cont,
 		ui_KnobSetButtonExp4Cont,
 	};
 
-	std::array<lv_obj_t *, 32> butexp_panes{};
+	// Each possible button has a "pane" which contains all the mappings for that button
+	std::array<lv_obj_t *, 32> panes{};
+
+	// Number of mappings for each pane
+	std::array<int, 32> num_maps{};
 };
 
 } // namespace MetaModule
