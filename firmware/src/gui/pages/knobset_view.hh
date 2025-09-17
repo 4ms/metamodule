@@ -1,12 +1,8 @@
 #pragma once
-#include <algorithm>
-
-#include "CoreModules/elements/element_info.hh"
 #include "gui/elements/element_name.hh"
-#include "gui/elements/map_ring_animate.hh"
-#include "gui/elements/module_drawer.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/knob_arc.hh"
+#include "gui/pages/knobset_view_buttonexp.hh"
 #include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -25,7 +21,7 @@ struct KnobSetViewPage : PageBase {
 		: PageBase{info, PageId::KnobSetView}
 		, base{ui_KnobSetViewPage}
 		, patch{patches.get_view_patch()}
-		, metaparams{info.metaparams} {
+		, button_exp{info.metaparams} {
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
@@ -41,10 +37,6 @@ struct KnobSetViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ActivateKnobSet, activate_knobset_cb, LV_EVENT_CLICKED, this);
 
 		lv_hide(ui_KnobSetDescript);
-
-		for (auto [i, but_pane] : enumerate(butexp_panes)) {
-			but_pane = create_button_expander_pane(butexp_columns[i / 8]);
-		}
 
 		kb_popup.init(base, group);
 	}
@@ -100,11 +92,14 @@ struct KnobSetViewPage : PageBase {
 			if (map.is_panel_knob()) {
 				cont = create_knob_item(idx, map);
 			} else if (map.is_button()) {
-				cont = create_button_item(idx, map);
+				cont = button_exp.create_button_item(idx, map, patch);
 			}
 
 			if (!cont)
 				continue;
+
+			lv_obj_remove_event_cb(cont, mapping_cb);
+			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
 
 			// Use user_data to connect the mapping to the lvgl object (via index in the knobset->set)
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx));
@@ -125,29 +120,16 @@ struct KnobSetViewPage : PageBase {
 			if (num_maps[idx])
 				lv_foreach_child(pane, [this](lv_obj_t *cont, int idx) { lv_group_add_obj(group, cont); });
 		}
-		for (auto *pane : butexp_panes) {
-			if (pane)
-				lv_foreach_child(pane, [this](lv_obj_t *cont, int idx) { lv_group_add_obj(group, cont); });
-		}
+		button_exp.add_to_group(group);
+
+		// Hide button expander columns for expanders that aren't physically connected,
+		// unless there are mappings
 
 		lv_group_focus_obj(focus);
 
 		lv_group_set_editing(group, false);
 
 		display_active_status();
-	}
-
-	void set_item_name(lv_obj_t *label, MappedKnob const &map) {
-		if (!label)
-			return;
-
-		std::string_view name = map.alias_name;
-		if (name.length()) {
-			lv_label_set_text(label, name.data());
-		} else {
-			auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
-			lv_label_set_text_fmt(label, "%s - %s", fullname.element_name.data(), fullname.module_name.data());
-		}
 	}
 
 	lv_obj_t *create_knob_item(unsigned idx, MappedKnob const &map) {
@@ -161,42 +143,14 @@ struct KnobSetViewPage : PageBase {
 		}
 		num_maps[map.panel_knob_id]++;
 
-		set_item_name(get_label(cont), map);
+		set_param_item_name(get_label(cont), map, patch);
 
-		lv_obj_remove_event_cb(cont, mapping_cb);
-		lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(cont, scroll_to_knobs, LV_EVENT_FOCUSED, this);
 
 		set_knob_arc<min_arc, max_arc>(map, get_knob(cont), 0);
 		set_for_knob(cont, map.panel_knob_id);
 		arcs[idx] = get_knob(cont);
 		indicators[idx] = get_indicator(cont);
-
-		return cont;
-	}
-
-	lv_obj_t *create_button_item(unsigned idx, MappedKnob const &map) {
-		lv_obj_t *cont;
-
-		if (!map.ext_button().has_value())
-			return nullptr;
-		auto button_id = map.ext_button().value();
-
-		cont = create_button_expander_item(butexp_panes[button_id]);
-
-		set_item_name(get_button_label(cont), map);
-		lv_label_set_text_fmt(get_button_circle_number(cont), "%u", button_id + 1);
-		lv_obj_set_style_bg_color(get_button_circle(cont), Gui::knob_palette[button_id % 6], LV_PART_MAIN);
-
-		lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(cont, scroll_to_buttons, LV_EVENT_FOCUSED, this);
-
-		// ???
-		// num_maps[map.panel_knob_id]++;
-		// set_knob_arc<min_arc, max_arc>(map, get_knob(cont), 0);
-		// set_for_knob(cont, map.panel_knob_id);
-		// arcs[idx] = get_knob(cont);
-		// indicators[idx] = get_indicator(cont);
 
 		return cont;
 	}
@@ -451,10 +405,6 @@ private:
 		page->page_list.request_new_page(PageId::KnobMap, page->args);
 	}
 
-	static void scroll_to_buttons(lv_event_t *event) {
-		lv_obj_scroll_to_y(ui_KnobSetContainer, 210, LV_ANIM_ON);
-	}
-
 	static void scroll_to_knobs(lv_event_t *event) {
 		lv_obj_scroll_to_y(ui_KnobSetContainer, 0, LV_ANIM_ON);
 	}
@@ -537,7 +487,7 @@ private:
 	lv_obj_t *base = nullptr;
 	MappedKnobSet *knobset = nullptr;
 	PatchData *patch;
-	MetaParams &metaparams;
+	ButtonExpanderMapsView button_exp;
 	ConfirmPopup kb_popup;
 	bool is_actively_playing = false;
 
@@ -584,15 +534,6 @@ private:
 		ui_KnobContainerZ,
 	};
 
-	std::array<lv_obj_t *, 4> butexp_columns{
-		ui_KnobSetButtonExp1Cont,
-		ui_KnobSetButtonExp2Cont,
-		ui_KnobSetButtonExp3Cont,
-		ui_KnobSetButtonExp4Cont,
-	};
-
-	std::array<lv_obj_t *, 32> butexp_panes{};
-
 	//////////// Helpers
 
 	lv_obj_t *get_container(unsigned panel_knob_id) {
@@ -617,18 +558,6 @@ private:
 
 	lv_obj_t *get_indicator(lv_obj_t *container) {
 		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_INDICATOR);
-	}
-
-	lv_obj_t *get_button_label(lv_obj_t *container) {
-		return lv_obj_get_child(container, 1);
-	}
-
-	lv_obj_t *get_button_circle(lv_obj_t *container) {
-		return lv_obj_get_child(container, 0);
-	}
-
-	lv_obj_t *get_button_circle_number(lv_obj_t *container) {
-		return lv_obj_get_child(get_button_circle(container), 0);
 	}
 
 	void update_enabled_status(lv_obj_t *container, unsigned knob_i, bool actively_playing) {
