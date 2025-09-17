@@ -124,6 +124,7 @@ struct KnobSetViewPage : PageBase {
 
 		// Hide button expander columns for expanders that aren't physically connected,
 		// unless there are mappings
+		button_exp.hide_unused_columns();
 
 		lv_group_focus_obj(focus);
 

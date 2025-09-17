@@ -45,10 +45,8 @@ struct ButtonExpanderMapsView {
 		set_param_item_name(get_button_label(cont), map, patch);
 		set_for_button(cont, button_id);
 
-		// TODO: attach this event in knobset_view.hh
-		// lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
-
-		lv_obj_add_event_cb(cont, scroll_to_buttons, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(cont, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(cont, defocus_cb, LV_EVENT_DEFOCUSED, this);
 
 		// ???
 		// num_maps[map.panel_knob_id]++;
@@ -83,25 +81,38 @@ struct ButtonExpanderMapsView {
 	}
 
 private:
-	void set_for_button(lv_obj_t *cont, unsigned button_id) {
+	static void set_for_button(lv_obj_t *cont, unsigned button_id) {
 		lv_label_set_text_fmt(get_button_circle_number(cont), "%u", button_id + 1);
 		lv_obj_set_style_bg_color(get_button_circle(cont), Gui::knob_palette[button_id % 6], LV_PART_MAIN);
 	}
 
-	lv_obj_t *get_button_label(lv_obj_t *container) {
-		return lv_obj_get_child(container, 1);
+	static lv_obj_t *get_button_label(lv_obj_t *container) {
+		if (container && lv_obj_get_child_cnt(container) > 1)
+			return lv_obj_get_child(container, 1);
+		else
+			return nullptr;
 	}
 
-	lv_obj_t *get_button_circle(lv_obj_t *container) {
+	static lv_obj_t *get_button_circle(lv_obj_t *container) {
 		return lv_obj_get_child(container, 0);
 	}
 
-	lv_obj_t *get_button_circle_number(lv_obj_t *container) {
+	static lv_obj_t *get_button_circle_number(lv_obj_t *container) {
 		return lv_obj_get_child(get_button_circle(container), 0);
 	}
 
-	static void scroll_to_buttons(lv_event_t *event) {
+	static void focus_cb(lv_event_t *event) {
 		lv_obj_scroll_to_y(ui_KnobSetContainer, 210, LV_ANIM_ON);
+
+		if (auto text_label = get_button_label(event->target)) {
+			lv_label_set_long_mode(text_label, LV_LABEL_LONG_SCROLL);
+		}
+	}
+
+	static void defocus_cb(lv_event_t *event) {
+		if (auto text_label = get_button_label(event->target)) {
+			lv_label_set_long_mode(text_label, LV_LABEL_LONG_WRAP);
+		}
 	}
 
 	MetaParams const &metaparams;
