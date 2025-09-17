@@ -402,7 +402,7 @@ private:
 		if (view_set_idx >= page->patch->knob_sets.size())
 			return;
 
-		auto map_idx = reinterpret_cast<uintptr_t>(obj->user_data);
+		unsigned map_idx = reinterpret_cast<uintptr_t>(obj->user_data) - 1;
 		if (map_idx >= page->patch->knob_sets[view_set_idx].set.size())
 			return;
 
@@ -476,16 +476,16 @@ private:
 
 	void set_for_knob(lv_obj_t *cont, unsigned knob_i) {
 		auto knob = get_knob(cont);
-		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
+		lv_obj_set_style_arc_color(knob, Gui::get_knob_color(knob_i), LV_PART_INDICATOR);
 
 		auto circle = get_circle(cont);
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[knob_i % 6], LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_color(circle, Gui::get_knob_color(knob_i), LV_STATE_DEFAULT);
 
 		auto circle_letter = get_circle_letter(cont);
 		lv_label_set_text(circle_letter, PanelDef::get_map_param_name(knob_i).data());
 
 		auto indicator = get_indicator(cont);
-		lv_obj_set_style_bg_color(indicator, Gui::knob_indicator_palette[knob_i % 6], LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_color(indicator, Gui::get_knob_indicator_color(knob_i), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
 	}
 
@@ -595,7 +595,7 @@ private:
 			return;
 		lv_obj_clear_state(circle, LV_STATE_DISABLED);
 
-		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
+		lv_obj_set_style_arc_color(knob, Gui::get_knob_color(knob_i), LV_PART_INDICATOR);
 		lv_obj_set_style_opa(knob, LV_OPA_100, LV_PART_KNOB);
 
 		auto indicator = get_indicator(container);

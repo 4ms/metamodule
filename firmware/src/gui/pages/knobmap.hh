@@ -154,7 +154,8 @@ struct KnobMapPage : PageBase {
 
 		lv_obj_set_style_opa(ui_EditMappingArc, is_actively_playing ? LV_OPA_100 : LV_OPA_50, LV_PART_KNOB);
 
-		auto color = Gui::knob_palette[map.panel_knob_id % 6];
+		auto color = Gui::get_knob_color(map.panel_knob_id);
+
 		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
 		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
 		lv_label_set_text(ui_EditMappingLetter, panel_name.c_str());

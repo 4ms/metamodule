@@ -2,6 +2,7 @@
 #include "lvgl.h"
 #include "patch-serial/patch/mapping_ids.hh"
 #include "patch-serial/patch/midi_def.hh"
+#include "patch-serial/patch/patch.hh"
 #include "slsexport/meta5/ui.h"
 #include <array>
 #include <charconv>
@@ -100,26 +101,6 @@ struct Gui {
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
-
-	static inline std::array<const char *, 6> knob_html{
-		"^F40000 ", // RED
-		"^FFF100 ", // YELLOW
-		"^00ADEE ", // CYAN
-		"^F06392 ", // PINK
-		"^FAA629 ", // ORANGE
-		"^00A551 ", // GREEN
-	};
-
-	static inline std::array<const char *, 8> jack_html{
-		"^EA1C25 ", // RED
-		"^FFF200 ", // YELLOW
-		"^00AEEE ", // CYAN
-		"^F66194 ", // PINK
-		"^FAB500 ", // ORANGE
-		"^00A552 ", // GREEN
-		"^000000 ", // dark grey/black
-		"^FFFFFF ", // light gray/white
-	};
 
 	static inline const lv_color_t palette[][5] = {
 		{LV_COLOR_MAKE(0xEF, 0x53, 0x50),
@@ -263,6 +244,32 @@ struct Gui {
 		palette_main[LV_PALETTE_BLUE_GREY], //?
 	};
 
+	static lv_color_t get_knob_color(uint16_t panel_id) {
+		MappedKnob map{.panel_knob_id = panel_id};
+
+		if (map.is_panel_knob())
+			return knob_palette[panel_id % 6];
+
+		if (map.is_button())
+			return lv_color_black();
+
+		return knob_palette[panel_id % 6];
+	}
+
+	static lv_color_t get_jack_color(uint16_t panel_id) {
+		return knob_palette[panel_id % 8];
+	}
+
+	static lv_color_t get_buttonexp_color(float value) {
+		auto red = std::clamp<unsigned>(255.f * value, 0, 255);
+		return lv_color_make(red, 0, 0);
+	}
+
+	static lv_color_t get_buttonexp_textcolor(float value) {
+		auto grey = std::clamp<unsigned>(255.f * value, 0, 255);
+		return (grey > 0xC0) ? lv_color_black() : lv_color_white();
+	}
+
 	static inline std::array<lv_color_t, 8> knob_disabled_palette{
 		palette_main[LV_PALETTE_RED],
 		palette_main[LV_PALETTE_YELLOW],
@@ -284,6 +291,10 @@ struct Gui {
 		lv_color_white(), //black
 		lv_color_black(), //white
 	};
+
+	static lv_color_t get_knob_indicator_color(uint16_t panel_id) {
+		return knob_indicator_palette[panel_id % 6];
+	}
 
 	static inline std::array<lv_color_t, 8> jack_palette{
 		lv_color_make_rgb565(0xEA, 0x1C, 0x25),
