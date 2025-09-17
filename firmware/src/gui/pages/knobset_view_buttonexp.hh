@@ -41,7 +41,10 @@ struct ButtonExpanderMapsView {
 
 		enable(cont, button_id);
 
-		set_param_item_name(get_button_label(cont), map, patch);
+		std::string s;
+		param_item_name(s, map, patch);
+		lv_label_set_text(get_button_label(cont), s.c_str());
+
 		set_button_number(cont, button_id);
 
 		lv_obj_add_event_cb(cont, focus_cb, LV_EVENT_FOCUSED, this);

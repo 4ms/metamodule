@@ -36,6 +36,8 @@ struct KnobSetViewPage : PageBase {
 		lv_obj_add_event_cb(ui_NextKnobSet, next_knobset_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ActivateKnobSet, activate_knobset_cb, LV_EVENT_CLICKED, this);
 
+		lv_obj_add_event_cb(ui_PreviousKnobSet, scroll_to_knobs, LV_EVENT_FOCUSED, this);
+
 		lv_hide(ui_KnobSetDescript);
 
 		kb_popup.init(base, group);
@@ -144,7 +146,9 @@ struct KnobSetViewPage : PageBase {
 		}
 		num_maps[map.panel_knob_id]++;
 
-		set_param_item_name(get_label(cont), map, patch);
+		std::string s;
+		param_item_name(s, map, patch);
+		lv_label_set_text(get_label(cont), s.c_str());
 
 		lv_obj_add_event_cb(cont, scroll_to_knobs, LV_EVENT_FOCUSED, this);
 
@@ -194,6 +198,7 @@ struct KnobSetViewPage : PageBase {
 						update_indicator(indicators[idx], is_tracking, mapped_phys_val);
 					if (arcs[idx])
 						update_knob(arcs[idx], is_tracking, arc_val);
+
 				}
 
 				idx++;
