@@ -6,7 +6,6 @@ namespace MetaModule
 
 void ModuleViewPage::show_roller() {
 	metaparams.rotary_pushed.use_motion();
-	metaparams.ext_buttons_high_events = 0;
 	module_context_menu.hide();
 	mode = ViewMode::List;
 	mapping_pane.hide();
