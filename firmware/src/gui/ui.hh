@@ -3,6 +3,7 @@
 #include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
+#include "gui/button_exp_nav.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params_dbg_print.hh"
@@ -212,6 +213,9 @@ private:
 		}
 
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
+
+		// Experimental?
+		// button_expander_nav(metaparams);
 
 		page_manager.update_current_page();
 
