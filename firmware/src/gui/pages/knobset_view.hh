@@ -291,6 +291,7 @@ private:
 		// jump to the new active knobset
 		if (last_known_active_knobset != page_list.get_active_knobset()) {
 
+			page_list.update_state(PageId::KnobSetView, args);
 			page_list.request_new_page_no_history(PageId::KnobSetView,
 												  {.patch_loc_hash = args.patch_loc_hash,
 												   .mappedknob_id = args.mappedknob_id,
