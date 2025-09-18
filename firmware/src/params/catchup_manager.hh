@@ -37,13 +37,20 @@ public:
 		for (auto &knob_map : active_knob_maps[panel_knob_id]) {
 			auto &map = knob_map.map;
 
-			if (is_toggle(map)) {
-				toggle_button(modules[map.module_id], map, val);
-				return;
+			// For performance if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
+			if (knob_map.catchup.mode == CatchupParam::Mode::ResumeOnMotion) {
+				modules[map.module_id]->set_param(map.param_id, map.get_mapped_val(val));
+				continue;
 			}
 
-			// Note: if needed, for performance we could check the catchup mode here, and
-			// if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
+			if (map.is_button()) {
+				if (is_toggle(map)) {
+					toggle_button(modules[map.module_id], map, val);
+				} else {
+					modules[map.module_id]->set_param(map.param_id, map.get_mapped_val(val));
+				}
+				continue;
+			}
 
 			auto module_val = modules[map.module_id]->get_param(map.param_id);
 			auto scaled_phys_val = map.get_mapped_val(val); //0.501 to 0
