@@ -117,7 +117,7 @@ struct ButtonExpanderMapsView {
 
 private:
 	static void set_button_number(lv_obj_t *cont, unsigned button_id) {
-		lv_label_set_text_fmt(get_button_circle_number(cont), "%u", button_id + 1);
+		lv_label_set_text_fmt(get_button_circle_number(cont), "%u-%u", (button_id / 8) + 1, (button_id % 8) + 1);
 	}
 
 	static lv_obj_t *get_button_label(lv_obj_t *container) {

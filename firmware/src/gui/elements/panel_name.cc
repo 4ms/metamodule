@@ -12,7 +12,9 @@ std::string get_panel_name(const BaseElement &, uint16_t) {
 }
 
 std::string get_panel_name(const ParamElement &, uint16_t panel_id) {
-	std::string name{8};
+	std::string name;
+	name.reserve(8);
+
 	auto mk = MappedKnob{.panel_knob_id = (uint16_t)Midi::strip_midi_channel(panel_id),
 						 .midi_chan = (uint8_t)Midi::midi_channel(panel_id)};
 
@@ -20,7 +22,9 @@ std::string get_panel_name(const ParamElement &, uint16_t panel_id) {
 		name = PanelDef::get_map_param_name(panel_id);
 
 	else if (auto butnum = mk.ext_button()) {
-		name = "B" + std::to_string(butnum.value() + 1);
+		name = "B1-1";
+		name[1] = '1' + unsigned(*butnum / 8);
+		name[3] = '1' + unsigned(*butnum % 8);
 	}
 
 	else if (mk.is_midi_cc())

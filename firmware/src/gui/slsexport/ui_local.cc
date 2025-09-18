@@ -849,7 +849,8 @@ lv_obj_t *create_button_expander_item(lv_obj_t *parent) {
 	lv_obj_set_style_text_color(number_label, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(number_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(number_label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_text_font(number_label, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_font(number_label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(number_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(number_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(number_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(number_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
