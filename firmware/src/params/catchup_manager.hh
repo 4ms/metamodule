@@ -39,6 +39,7 @@ public:
 
 			// For performance if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
 			if (knob_map.catchup.mode == CatchupParam::Mode::ResumeOnMotion) {
+				knob_map.catchup.update(map.get_mapped_val(val), {});
 				modules[map.module_id]->set_param(map.param_id, map.get_mapped_val(val));
 				continue;
 			}
