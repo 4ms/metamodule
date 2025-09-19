@@ -23,7 +23,8 @@ struct InfoTab : SystemMenuTab {
 	InfoTab(FileStorageProxy &storage, MetaParams const &metaparams)
 		: detect_wifi{storage}
 		, metaparams{metaparams} {
-		lv_label_set_text(ui_SystemMenuExpanders, "No wifi module found");
+		lv_label_set_text(ui_SystemMenuExpanders, "No Wi-Fi module found");
+		lv_show(ui_SystemMenuExpanders);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -59,7 +60,7 @@ struct InfoTab : SystemMenuTab {
 							  memory_used,
 							  memory_total);
 
-		lv_hide(ui_SystemMenuExpanders);
+		lv_show(ui_SystemMenuExpanders);
 
 		if (Expanders::get_connected().ext_audio_connected) {
 			lv_label_set_text(ui_SystemMenuAudioExpanders, "MetaAIO connected");
@@ -72,13 +73,13 @@ struct InfoTab : SystemMenuTab {
 			std::string s;
 			s = "MetaButtons found: ";
 			if (metaparams.button_exp_connected & 0b0001)
-				s += "#1 (1-8), ";
+				s += "#1, ";
 			if (metaparams.button_exp_connected & 0b0010)
-				s += "#2 (9-16), ";
+				s += "#2, ";
 			if (metaparams.button_exp_connected & 0b0100)
-				s += "#3 (17-24), ";
+				s += "#3, ";
 			if (metaparams.button_exp_connected & 0b1000)
-				s += "#4 (25-32)";
+				s += "#4";
 			if (s.ends_with(", "))
 				s = s.substr(0, s.length() - 2);
 
@@ -131,8 +132,9 @@ struct InfoTab : SystemMenuTab {
 		lv_label_set_text(ui_SystemMenuExpanders, "Wi-Fi: http://192.168.1.23");
 		return;
 #endif
-		if (!detect_wifi.new_wifi_status_available(lv_tick_get()))
+		if (!detect_wifi.new_wifi_status_available(lv_tick_get())) {
 			return;
+		}
 
 		lv_show(ui_SystemMenuExpanders);
 
