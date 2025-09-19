@@ -49,7 +49,7 @@ sudo sgdisk --resize-table=128 -a 1 \
 	-n 1:34:545 -c 1:fsbl1 \
 	-n 2:546:1057 -c 2:fsbl2 \
 	-n 3:1058:17441 -c 3:ssbl \
-	-n 4:17442:33825 -c 4:prog \
+	-n 4:17442:50209 -c 4:prog \
 	-N 5 -c 5:fatfs \
 	-t 5:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
 	-p $DISK || exit
