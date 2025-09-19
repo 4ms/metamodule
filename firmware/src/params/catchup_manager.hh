@@ -37,19 +37,19 @@ public:
 		for (auto &knob_map : active_knob_maps[panel_knob_id]) {
 			auto &map = knob_map.map;
 
-			// For performance if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
-			if (knob_map.catchup.mode == CatchupParam::Mode::ResumeOnMotion) {
-				knob_map.catchup.update(map.get_mapped_val(val), {});
-				modules[map.module_id]->set_param(map.param_id, map.get_mapped_val(val));
-				continue;
-			}
-
 			if (map.is_button()) {
 				if (is_toggle(map)) {
 					toggle_button(modules[map.module_id], map, val);
 				} else {
 					modules[map.module_id]->set_param(map.param_id, map.get_mapped_val(val));
 				}
+				continue;
+			}
+
+			// For performance if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
+			if (knob_map.catchup.mode == CatchupParam::Mode::ResumeOnMotion) {
+				knob_map.catchup.update(map.get_mapped_val(val), {});
+				modules[map.module_id]->set_param(map.param_id, map.get_mapped_val(val));
 				continue;
 			}
 
