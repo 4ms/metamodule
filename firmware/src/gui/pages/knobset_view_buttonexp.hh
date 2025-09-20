@@ -1,4 +1,5 @@
 #pragma once
+#include "console/pr_dbg.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -34,8 +35,10 @@ struct ButtonExpanderMapsView {
 
 		if (num_maps[button_id] == 0) {
 			cont = lv_obj_get_child(panes[button_id], 0);
+			pr_dbg("Button %d has %u maps, using first child of panes[] %p\n", button_id, 0, cont);
 		} else {
 			cont = create_button_expander_item(panes[button_id]);
+			pr_dbg("Button %d has %u maps, creating new child of panes[] %p\n", button_id, num_maps[button_id], cont);
 		}
 
 		enable(cont, button_id);
@@ -73,6 +76,11 @@ struct ButtonExpanderMapsView {
 			});
 
 			lv_show(col, (exp_connected || has_mappings));
+
+			if (!exp_connected && has_mappings)
+				lv_obj_set_style_bg_opa(col, LV_OPA_50, LV_PART_MAIN);
+			else
+				lv_obj_set_style_bg_opa(col, LV_OPA_0, LV_PART_MAIN);
 		}
 	}
 
@@ -80,14 +88,19 @@ struct ButtonExpanderMapsView {
 		// Clear all objects from all panes except for the original ones (which are used to display an empty slot)
 		for (auto *pane : panes) {
 			if (auto num_children = lv_obj_get_child_cnt(pane)) {
-				if (num_children > 0) {
+				if (num_children > 0) { // should always be true
 					auto cont = lv_obj_get_child(pane, 0);
+					pr_dbg("Disable and clear text of pane %p child 0 %p\n", pane, cont);
 					lv_label_set_text(get_button_label(cont), "");
 					disable(cont);
+				} else {
+					pr_err("No children of pane %p\n", pane);
 				}
 				if (num_children > 1) {
 					for (auto i = 1u; i < num_children; i++) {
-						lv_obj_del_async(lv_obj_get_child(pane, i));
+						auto cont = lv_obj_get_child(pane, i);
+						lv_obj_del_async(cont);
+						pr_dbg("Disable and clear text of pane %p child %d %p\n", pane, i, cont);
 					}
 				}
 			}
@@ -103,6 +116,7 @@ struct ButtonExpanderMapsView {
 			lv_foreach_child(pane, [value, idx](lv_obj_t *child, int) {
 				if (idx == reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child)) - 1) {
 
+					pr_dbg("%u %f %p\n", idx, value, child);
 					auto color = Gui::get_buttonexp_color(value);
 					lv_obj_set_style_bg_color(get_button_circle(child), color, LV_PART_MAIN);
 
