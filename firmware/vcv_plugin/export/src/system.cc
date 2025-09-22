@@ -15,13 +15,15 @@ std::string join(const std::string &path1, const std::string &path2) {
 
 static void appendEntries(std::vector<std::string> &entries, const fs::path &path, int depth) {
 	DIR *dir = opendir(path.c_str());
-	if (!dir)
+	if (!dir) {
+		pr_err("Failed to open dir '%s'\n", path.c_str());
 		return;
+	}
 
 	struct dirent *entry;
 	while ((entry = readdir(dir)) != nullptr) {
-		// Skip "." and ".." entries
-		if (std::string(entry->d_name) == "." || std::string(entry->d_name) == "..") {
+		// Skip entries that start with "."
+		if (std::string(entry->d_name)[0] == '.') {
 			continue;
 		}
 		entries.emplace_back(path / entry->d_name);
