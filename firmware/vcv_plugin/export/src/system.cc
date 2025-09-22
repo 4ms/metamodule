@@ -24,7 +24,7 @@ static void appendEntries(std::vector<std::string> &entries, const fs::path &pat
 		if (std::string(entry->d_name) == "." || std::string(entry->d_name) == "..") {
 			continue;
 		}
-		entries.emplace_back(entry->d_name);
+		entries.emplace_back(path / entry->d_name);
 	}
 
 	closedir(dir);
