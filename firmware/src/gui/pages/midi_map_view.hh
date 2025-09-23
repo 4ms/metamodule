@@ -32,6 +32,31 @@ struct MidiMapViewPage : PageBase {
 		lv_obj_scroll_to_y(ui_MidiMapRightItems, 0, LV_ANIM_OFF);
 	}
 
+	struct IndexedJackMap {
+		unsigned idx;
+		MappedInputJack jack;
+	};
+
+	std::vector<IndexedJackMap> sort_jack_maps(std::vector<MappedInputJack> mapped_ins) {
+		std::vector<IndexedJackMap> jack_maps;
+		jack_maps.reserve(patch->mapped_ins.size());
+		for (auto [i, map] : enumerate(patch->mapped_ins)) {
+			jack_maps.push_back({(unsigned)i, map});
+		}
+		std::ranges::sort(jack_maps, [](const IndexedJackMap &a, const IndexedJackMap &b) {
+			auto polyA = Midi::polychan(a.jack.panel_jack_id).value_or(0xFF);
+			auto polyB = Midi::polychan(b.jack.panel_jack_id).value_or(0xFF);
+			if (polyA == polyB)
+				return a.jack.panel_jack_id < b.jack.panel_jack_id;
+			else
+				return (polyA < polyB);
+		});
+		return jack_maps;
+	}
+
+	static_assert(std::optional<int>{std::nullopt} < std::optional<int>{2});
+	static_assert(std::optional<int>{std::nullopt} == std::optional<int>{std::nullopt});
+
 	void redraw() {
 		patch = patches.get_view_patch();
 
@@ -44,8 +69,10 @@ struct MidiMapViewPage : PageBase {
 
 		lv_group_remove_all_objs(group);
 
+		const auto sorted_jack_maps = sort_jack_maps(patch->mapped_ins);
+
 		// MIDI jack maps (inputs): any mapped_in whose panel_jack_id is a MIDI mapping
-		for (auto [i, map] : enumerate(patch->mapped_ins)) {
+		for (auto const &[i, map] : sorted_jack_maps) {
 			if (!Midi::is_midi_panel_id(map.panel_jack_id))
 				continue;
 
