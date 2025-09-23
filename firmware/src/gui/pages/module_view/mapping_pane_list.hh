@@ -35,6 +35,9 @@ struct MappingPaneList {
 		if (map.is_panel_knob())
 			format_knob_map_circle(map.panel_knob_id, circle, label);
 
+		else if (map.is_button())
+			format_button_map_circle(map.panel_knob_id, circle, label);
+
 		else if (map.is_midi_cc())
 			format_cc_map_circle(map.cc_num(), circle, label);
 
@@ -83,24 +86,16 @@ struct MappingPaneList {
 
 		auto name = get_panel_name(JackInput{}, panel_jack_id);
 
-		if (panel_jack_id < PanelDef::NumUserFacingInJacks) {
-			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
-			if (alias_name.size()) {
-				lv_label_set_text_fmt(setname, "%.16s", alias_name.data());
-			} else {
-				lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
-			}
-			if (panel_jack_id < 6)
-				lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
-			else
-				lv_label_set_text_fmt(label, "G%d", panel_jack_id - 5);
-			lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
-
+		lv_obj_set_style_border_color(circle, Gui::get_jack_color(panel_jack_id), LV_STATE_DEFAULT);
+		if (alias_name.size()) {
+			lv_label_set_text_fmt(setname, "%.16s", alias_name.data());
 		} else {
-			lv_obj_set_style_border_color(circle, Gui::palette_main[LV_PALETTE_GREY], LV_STATE_DEFAULT);
-			lv_label_set_text(setname, name.c_str());
-			lv_label_set_text(label, "");
+			lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
 		}
+
+		lv_label_set_text(label, get_panel_brief_name(JackInput{}, panel_jack_id).c_str());
+
+		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
 
 		format_panel_cable_circle(circle);
 	}
@@ -115,8 +110,7 @@ struct MappingPaneList {
 
 		auto name = get_panel_name(JackOutput{}, panel_jack_id);
 
-		if (panel_jack_id < Gui::knob_palette.size())
-			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
+		lv_obj_set_style_border_color(circle, Gui::get_jack_color(panel_jack_id), LV_STATE_DEFAULT);
 
 		if (alias_name.size()) {
 			lv_label_set_text_fmt(setname, "%.16s", alias_name.data());
@@ -157,10 +151,17 @@ private:
 
 	static void format_knob_map_circle(uint16_t panel_knob_id, lv_obj_t *circle, lv_obj_t *label) {
 		//workaround for lowercase letter positions off-center
-		if (panel_knob_id >= 6)
+		if (panel_knob_id >= 6 && panel_knob_id < 12)
 			lv_obj_set_style_pad_bottom(label, 3, LV_STATE_DEFAULT);
+
 		format_label(label, 0, &ui_font_MuseoSansRounded90018);
-		format_circle(circle, Gui::knob_palette[panel_knob_id % 6], 22);
+		format_circle(circle, Gui::get_knob_color(panel_knob_id), 22);
+	}
+
+	static void format_button_map_circle(uint16_t panel_knob_id, lv_obj_t *circle, lv_obj_t *label) {
+		format_label(label, 0, &ui_font_MuseoSansRounded70014);
+		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
+		format_circle(circle, Gui::get_knob_color(panel_knob_id), 22);
 	}
 
 	static void format_cc_map_circle(uint16_t cc_num, lv_obj_t *circle, lv_obj_t *label) {
@@ -182,6 +183,7 @@ private:
 	static void format_label(lv_obj_t *label, lv_coord_t line_spacing, const lv_font_t *font) {
 		lv_obj_set_style_text_font(label, font, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_line_space(label, line_spacing, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_color(label, lv_color_black(), LV_STATE_DEFAULT);
 	}
 };
 } // namespace MetaModule

@@ -54,6 +54,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 		}
 	}
 
+	metaparams.button_exp_connected = 0b0001;
+
 	preload_plugins();
 
 	patch_playloader.notify_audio_is_muted();

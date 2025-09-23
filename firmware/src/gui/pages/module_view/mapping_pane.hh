@@ -13,6 +13,7 @@
 #include "gui/pages/module_view/mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "metaparams.hh"
 #include "params/expanders.hh"
 #include "params/params_state.hh"
 
@@ -35,6 +36,7 @@ struct ModuleViewMappingPane {
 	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
 						  ParamsMidiState &params,
+						  MetaParams &metaparams,
 						  PageArguments &args,
 						  PageList &page_list,
 						  NotificationQueue &notify_queue,
@@ -43,11 +45,12 @@ struct ModuleViewMappingPane {
 		: pane_group(lv_group_create())
 		, patch{patches.get_view_patch()}
 		, params{params}
+		, metaparams{metaparams}
 		, args{args}
 		, page_list{page_list}
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
-		, add_map_popup{patch_mod_queue}
+		, add_map_popup{patch_mod_queue, metaparams}
 		, control_popup{patches, patch_mod_queue, playloader}
 		, midi_map_popup{params}
 		, patch_mod_queue{patch_mod_queue}
@@ -171,7 +174,7 @@ struct ModuleViewMappingPane {
 	}
 
 	void update() {
-		add_map_popup.update(params);
+		add_map_popup.update(params, metaparams);
 
 		if (midi_map_popup.is_visible())
 			midi_map_popup.update();
@@ -741,6 +744,8 @@ private:
 
 		auto module_id = page->drawn_element->gui_element.module_idx;
 		auto param_id = page->drawn_element->gui_element.idx.param_idx;
+		page->metaparams.ext_buttons_high_events = 0;
+		page->metaparams.ext_buttons_low_events = 0;
 		page->add_map_popup.show(knobset_id, param_id, module_id, page->patch);
 	}
 
@@ -787,6 +792,7 @@ private:
 	bool should_close = false;
 	PatchData *patch;
 	ParamsMidiState &params;
+	MetaParams &metaparams;
 
 	PageArguments &args;
 	PageList &page_list;

@@ -24,4 +24,6 @@ void append_connected_jack_name(std::string &opts,
 
 void append_panel_name(std::string &opts, Element const &el, uint16_t panel_jack_id);
 
+void param_item_name(std::string &s, MappedKnob const &map, PatchData const *patch);
+
 } // namespace MetaModule

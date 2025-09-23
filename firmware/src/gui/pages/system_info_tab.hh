@@ -5,6 +5,7 @@
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "ld.h"
+#include "metaparams.hh"
 #include "params/expanders.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "wifi/detection.hh"
@@ -19,8 +20,9 @@ namespace MetaModule
 
 struct InfoTab : SystemMenuTab {
 
-	InfoTab(FileStorageProxy &storage)
-		: detect_wifi{storage} {
+	InfoTab(FileStorageProxy &storage, MetaParams const &metaparams)
+		: detect_wifi{storage}
+		, metaparams{metaparams} {
 		lv_label_set_text(ui_SystemMenuExpanders, "No wifi module found");
 	}
 
@@ -60,12 +62,31 @@ struct InfoTab : SystemMenuTab {
 		lv_hide(ui_SystemMenuExpanders);
 
 		if (Expanders::get_connected().ext_audio_connected) {
-			lv_label_set_text(ui_SystemMenuAudioExpanders, "Audio/CV Expander connected");
-			lv_show(ui_SystemMenuAudioExpanders);
+			lv_label_set_text(ui_SystemMenuAudioExpanders, "MetaAIO connected");
 		} else {
-			lv_label_set_text(ui_SystemMenuAudioExpanders, "Audio/CV Expander not found");
-			lv_show(ui_SystemMenuAudioExpanders);
+			lv_label_set_text(ui_SystemMenuAudioExpanders, "MetaAIO not found");
 		}
+		lv_show(ui_SystemMenuAudioExpanders);
+
+		if (metaparams.button_exp_connected != 0) {
+			std::string s;
+			s = "MetaButtons found: ";
+			if (metaparams.button_exp_connected & 0b0001)
+				s += "#1 (1-8), ";
+			if (metaparams.button_exp_connected & 0b0010)
+				s += "#2 (9-16), ";
+			if (metaparams.button_exp_connected & 0b0100)
+				s += "#3 (17-24), ";
+			if (metaparams.button_exp_connected & 0b1000)
+				s += "#4 (25-32)";
+			if (s.ends_with(", "))
+				s = s.substr(0, s.length() - 2);
+
+			lv_label_set_text(ui_SystemMenuButExpander, s.c_str());
+		} else {
+			lv_label_set_text(ui_SystemMenuButExpander, "No MetaButtons found");
+		}
+		lv_show(ui_SystemMenuButExpander);
 
 		detect_wifi.start();
 		detect_wifi.new_wifi_status_available(lv_tick_get());
@@ -77,7 +98,6 @@ struct InfoTab : SystemMenuTab {
 		lv_group_focus_obj(ui_SystemMenuMainModuleCont);
 
 		lv_group_add_obj(group, ui_SystemMenuExpandersCont);
-
 
 		lv_obj_add_event_cb(ui_SystemMenuMainModuleCont, scroll_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemMenuExpandersCont, scroll_cb, LV_EVENT_FOCUSED, nullptr);
@@ -146,5 +166,6 @@ struct InfoTab : SystemMenuTab {
 private:
 	lv_group_t *group = nullptr;
 	WifiInterface::DetectExpander detect_wifi;
+	MetaParams const &metaparams;
 };
 } // namespace MetaModule

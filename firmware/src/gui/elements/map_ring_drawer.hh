@@ -38,7 +38,7 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 		gap = 3;
 		color = Gui::palette_main[4];
 	} else {
-		color = Gui::knob_palette[panel_id % 6];
+		color = Gui::get_knob_color(panel_id);
 		if (module_height == 240) {
 			ring_thickness = (panel_id >= 6) ? 2 : 5;
 			gap = 2;

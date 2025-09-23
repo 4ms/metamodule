@@ -136,7 +136,7 @@ struct KnobMapPage : PageBase {
 		lv_slider_set_value(ui_MinSlider, intmin, LV_ANIM_OFF);
 		lv_slider_set_value(ui_MaxSlider, intmax, LV_ANIM_OFF);
 
-		if (map.is_midi_notegate()) {
+		if (map.is_midi_notegate() || map.is_button()) {
 			lv_show(ui_ModuleMapToggleSwitchCont);
 			lv_check(ui_ModuleMapToggleSwitch, map.curve_type == MappedKnob::CurveType::Toggle);
 			lv_label_set_text(ui_ModuleMapToggleSwitchLabel, "Button Behavior: Toggle");
@@ -154,20 +154,23 @@ struct KnobMapPage : PageBase {
 
 		lv_obj_set_style_opa(ui_EditMappingArc, is_actively_playing ? LV_OPA_100 : LV_OPA_50, LV_PART_KNOB);
 
-		auto color = Gui::knob_palette[map.panel_knob_id % 6];
+		auto color = Gui::get_knob_color(map.panel_knob_id);
+
 		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
 		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
 		lv_label_set_text(ui_EditMappingLetter, panel_name.c_str());
-		if (map.is_midi())
-			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
 
-		else if (panel_name.size() > 3)
+		if (map.is_midi() || map.is_button() || panel_name.size() > 3)
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
-
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
-		lv_obj_set_style_bg_color(indicator, Gui::knob_palette[(map.panel_knob_id + 1) % 6], LV_STATE_DEFAULT);
+		if (map.is_button())
+			lv_obj_set_style_text_color(ui_EditMappingLetter, lv_color_white(), LV_PART_MAIN);
+		else
+			lv_obj_set_style_text_color(ui_EditMappingLetter, lv_color_black(), LV_PART_MAIN);
+
+		lv_obj_set_style_bg_color(indicator, Gui::get_knob_indicator_color(map.panel_knob_id), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
 
 		update_active_status();

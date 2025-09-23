@@ -22,6 +22,19 @@ void ModuleViewPage::handle_quick_assign() {
 
 	quickmap_rotary_button.register_state(metaparams.rotary_button.is_pressed());
 
+	// Clear events when the button is first pressed
+	if (quickmap_rotary_button.is_just_pressed()) {
+		metaparams.ext_buttons_high_events = 0;
+
+		if (gui_state.midi_quick_mapping_mode) {
+			if (gui_state.midi_quick_mapping_mode) {
+				for (auto &cc : params.midi_ccs)
+					cc.changed = false;
+				params.last_midi_note.changed = false;
+			}
+		}
+	}
+
 	if (quickmap_rotary_button.is_pressed()) {
 		if (is_param) {
 			// Parameter quick assign: hold encoder + wiggle knob
@@ -34,6 +47,12 @@ void ModuleViewPage::handle_quick_assign() {
 				i++;
 			}
 
+			// Button expander quick assign
+			if (auto firstbit = std::countr_zero(metaparams.ext_buttons_high_events); firstbit < 32) {
+				metaparams.ext_buttons_high_events = 0;
+				perform_knob_assign(firstbit + FirstButton, current_element);
+			}
+
 			// Push+turn to adjust param manually
 			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
 				mapping_pane.show_control_popup(group, ui_ElementRollerPanel, *current_element);
@@ -44,16 +63,6 @@ void ModuleViewPage::handle_quick_assign() {
 			}
 
 			if (gui_state.midi_quick_mapping_mode) {
-
-				// Clear all MIDI events when the button is first pressed
-				if (quickmap_rotary_button.is_just_pressed()) {
-					if (gui_state.midi_quick_mapping_mode) {
-						for (auto &cc : params.midi_ccs)
-							cc.changed = false;
-						params.last_midi_note.changed = false;
-					}
-				}
-
 				// MIDI CC quick assign: hold encoder + send MIDI CC
 				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
 					if (cc.changed) {

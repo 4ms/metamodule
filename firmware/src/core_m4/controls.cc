@@ -57,6 +57,8 @@ void Controls::update_params() {
 
 		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
 
+		update_control_expander();
+
 		update_rotary();
 
 		// Meta button
@@ -108,6 +110,23 @@ void Controls::update_midi_connected() {
 
 	if (cur_metaparams->midi_poly_chans > 0)
 		_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
+}
+
+void Controls::update_control_expander() {
+	// Control expander
+	cur_metaparams->button_exp_connected = control_expander.button_expanders_connected();
+
+	uint32_t buttons_state = control_expander.get_buttons();
+	cur_metaparams->ext_buttons_high_events = 0;
+	cur_metaparams->ext_buttons_low_events = 0;
+	for (auto [i, extbut] : enumerate(ext_buttons)) {
+
+		extbut.register_state(buttons_state & (1 << i));
+		if (extbut.just_went_high())
+			cur_metaparams->ext_buttons_high_events |= (1 << i);
+		if (extbut.just_went_low())
+			cur_metaparams->ext_buttons_low_events |= (1 << i);
+	}
 }
 
 void Controls::parse_midi() {
@@ -197,6 +216,7 @@ void Controls::start() {
 
 void Controls::process() {
 	sense_pin_reader.update();
+	control_expander.update();
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
@@ -213,7 +233,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {
 
 	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
-	// TODO: _new_adc_data_ready is written from multiple threads, but is not thread-safe. Use atomic? Or accept dropped/duplicate ADC values?
+	// TODO: _new_adc_data_ready is set true here (pri 2) and set false in read_controls_task (pri 0)
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {

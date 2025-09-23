@@ -137,20 +137,20 @@ lv_obj_clear_flag( ui_SystemInfoCont, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTU
 lv_obj_set_style_pad_row(ui_SystemInfoCont, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_SystemInfoCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuMetaModule = lv_label_create(ui_SystemInfoCont);
-lv_obj_set_width( ui_SystemMenuMetaModule, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_SystemMenuMetaModule, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_SystemMenuMetaModule, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SystemMenuMetaModule,"MetaModule");
-lv_obj_set_style_text_color(ui_SystemMenuMetaModule, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_SystemMenuMetaModule, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_SystemMenuMetaModule, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_SystemMenuMetaModule, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_SystemMenuMetaModule, &ui_font_MuseoSansRounded90018, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_SystemMenuMetaModule, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_SystemMenuMetaModule, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_SystemMenuMetaModule, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_SystemMenuMetaModule, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+// ui_SystemMenuMetaModule = lv_label_create(ui_SystemInfoCont);
+// lv_obj_set_width( ui_SystemMenuMetaModule, LV_SIZE_CONTENT);  /// 1
+// lv_obj_set_height( ui_SystemMenuMetaModule, LV_SIZE_CONTENT);   /// 1
+// lv_obj_set_align( ui_SystemMenuMetaModule, LV_ALIGN_CENTER );
+// lv_label_set_text(ui_SystemMenuMetaModule,"MetaModule");
+// lv_obj_set_style_text_color(ui_SystemMenuMetaModule, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+// lv_obj_set_style_text_opa(ui_SystemMenuMetaModule, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_text_letter_space(ui_SystemMenuMetaModule, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_text_line_space(ui_SystemMenuMetaModule, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_text_font(ui_SystemMenuMetaModule, &ui_font_MuseoSansRounded90018, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_pad_left(ui_SystemMenuMetaModule, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_pad_right(ui_SystemMenuMetaModule, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_pad_top(ui_SystemMenuMetaModule, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_pad_bottom(ui_SystemMenuMetaModule, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SystemMenuMainModuleCont = lv_obj_create(ui_SystemInfoCont);
 lv_obj_remove_style_all(ui_SystemMenuMainModuleCont);
@@ -169,7 +169,7 @@ lv_obj_set_width( ui_SystemMenuInfoHardware, lv_pct(100));
 lv_obj_set_height( ui_SystemMenuInfoHardware, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuInfoHardware, LV_ALIGN_CENTER );
 lv_label_set_long_mode(ui_SystemMenuInfoHardware,LV_LABEL_LONG_CLIP);
-lv_label_set_text(ui_SystemMenuInfoHardware,"MAIN MODULE");
+lv_label_set_text(ui_SystemMenuInfoHardware,"MetaModule");
 lv_obj_set_style_text_color(ui_SystemMenuInfoHardware, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_SystemMenuInfoHardware, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_SystemMenuInfoHardware, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -250,13 +250,14 @@ lv_obj_clear_flag( ui_SystemMenuAudioExpanders, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_
 lv_obj_set_style_text_font(ui_SystemMenuAudioExpanders, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SystemMenuButExpander = lv_label_create(ui_SystemMenuExpandersCont);
-lv_obj_set_width( ui_SystemMenuButExpander, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_width( ui_SystemMenuButExpander, LV_PCT(100));  /// 1
 lv_obj_set_height( ui_SystemMenuButExpander, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuButExpander, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SystemMenuButExpander,"No Button Expanders detected");
+lv_label_set_text(ui_SystemMenuButExpander,"No MetaButton detected");
 lv_obj_add_flag( ui_SystemMenuButExpander, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_SystemMenuButExpander, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_SystemMenuButExpander, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_long_mode(ui_SystemMenuButExpander,LV_LABEL_LONG_WRAP);
 
 ui_SystemMenuKnobExpanders = lv_label_create(ui_SystemMenuExpandersCont);
 lv_obj_set_width( ui_SystemMenuKnobExpanders, LV_SIZE_CONTENT);  /// 1

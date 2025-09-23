@@ -199,6 +199,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
+	// Button Expander
+	if (param_block.metaparams.button_exp_connected != 0) {
+		handle_button_events(param_block.metaparams.ext_buttons_high_events, 1.f);
+		handle_button_events(param_block.metaparams.ext_buttons_low_events, 0.f);
+	}
+
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
@@ -347,6 +353,17 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 	player.trigger_reading_gui_elements();
 }
 
+void AudioStream::handle_button_events(uint32_t event_bitmask, float param_val) {
+	unsigned i = 0;
+	while (event_bitmask) {
+		if (event_bitmask & 0b1) {
+			player.set_panel_param(i + FirstButton, param_val);
+		}
+		event_bitmask >>= 1;
+		i++;
+	}
+}
+
 void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 	for (unsigned i = 0; auto &plug_detect : plug_detects) {
 		bool sense = jack_is_patched(jack_senses, i);
@@ -433,6 +450,9 @@ uint32_t AudioStream::get_audio_errors() {
 ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.midi_connected = param_blocks[block].metaparams.midi_connected;
 	local_params.metaparams.jack_senses = param_blocks[block].metaparams.jack_senses;
+	local_params.metaparams.button_exp_connected = param_blocks[block].metaparams.button_exp_connected;
+	local_params.metaparams.ext_buttons_high_events = param_blocks[block].metaparams.ext_buttons_high_events;
+	local_params.metaparams.ext_buttons_low_events = param_blocks[block].metaparams.ext_buttons_low_events;
 
 	for (auto i = 0u; i < block_size_; i++)
 		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt

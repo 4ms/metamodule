@@ -160,6 +160,7 @@ public:
 		}
 
 		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+
 #endif
 
 #ifdef MONKEYROTARY
