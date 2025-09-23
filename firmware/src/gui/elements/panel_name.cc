@@ -144,6 +144,8 @@ std::string get_panel_brief_name(const JackOutput &, uint16_t panel_id) {
 std::string get_panel_brief_name(const JackInput &, uint16_t panel_id) {
 	std::string name{6}; //longest: MG127\0
 
+	panel_id = Midi::strip_midi_channel(panel_id);
+
 	if (panel_id < PanelDef::NumAudioIn)
 		name = std::to_string(panel_id + 1);
 
@@ -189,7 +191,7 @@ std::string get_panel_brief_name(const JackInput &, uint16_t panel_id) {
 		name = "PW";
 
 	else if (panel_id >= MidiGateNote0 && panel_id <= MidiGateNote127)
-		name = "GN" + std::to_string(panel_id - MidiGateNote0); //TODO: C4
+		name = MidiMessage::note_name(panel_id - MidiGateNote0);
 
 	else if (panel_id == MidiClockJack || panel_id == MidiClockDiv1Jack)
 		name = "CK";
