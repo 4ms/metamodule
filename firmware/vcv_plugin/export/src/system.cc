@@ -1,4 +1,5 @@
 #include "console/pr_dbg.hh"
+#include "filesystem/dirent.h"
 #include "system/time.hh"
 #include <filesystem>
 #include <system.hpp>
@@ -12,16 +13,23 @@ std::string join(const std::string &path1, const std::string &path2) {
 	return (fs::path(path1) / fs::path(path2)).string();
 }
 
-static void appendEntries(std::vector<std::string> &entries, const fs::path &dir, int depth) {
-	for (const auto &entry : fs::directory_iterator(dir)) {
-		entries.push_back(entry.path().string());
-		// Recurse if depth > 0 (limited recursion) or depth < 0 (infinite recursion).
-		if (depth != 0) {
-			if (entry.is_directory()) {
-				appendEntries(entries, entry.path(), depth - 1);
-			}
-		}
+static void appendEntries(std::vector<std::string> &entries, const fs::path &path, int depth) {
+	DIR *dir = opendir(path.c_str());
+	if (!dir) {
+		pr_err("Failed to open dir '%s'\n", path.c_str());
+		return;
 	}
+
+	struct dirent *entry;
+	while ((entry = readdir(dir)) != nullptr) {
+		// Skip entries that start with "."
+		if (std::string(entry->d_name)[0] == '.') {
+			continue;
+		}
+		entries.emplace_back(path / entry->d_name);
+	}
+
+	closedir(dir);
 }
 
 std::vector<std::string> getEntries(const std::string &dirPath, int depth) {
@@ -118,14 +126,12 @@ std::string getTempDirectory() {
 }
 
 std::string getAbsolute(const std::string &path) {
-	// TODO: use fatfs to resolve path
 	printf("Warning: rack::system::getAbsolute() not supported\n");
 	return path;
 	// return fs::absolute(fs::path(path)).string();
 }
 
 std::string getCanonical(const std::string &path) {
-	// TODO: use fatfs to resolve path
 	printf("Warning: rack::system::getCanonical() not supported\n");
 	return path;
 	// return fs::canonical(fs::path(path)).string();
