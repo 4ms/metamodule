@@ -308,6 +308,8 @@ private:
 	}
 
 	void list_cable_nodes(InternalCable const *cable) {
+		lv_hide(ui_CableMidiAddButton);
+
 		// Each cable has an output:
 		if (!(cable->out == this_jack && this_jack_type == ElementType::Output)) {
 			auto obj = list.create_cable_item(cable->out, ElementType::Output, *patch, ui_MapList);
