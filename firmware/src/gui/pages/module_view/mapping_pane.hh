@@ -368,7 +368,7 @@ private:
 			lv_show(ui_CableRemoveButton);
 			lv_hide(ui_MappedItemHeader);
 			lv_label_set_text(ui_MappedListTitle, "Connected To:");
-			lv_label_set_text(ui_CableAddLabel, "New connection");
+			lv_label_set_text(ui_CableAddLabel, "New cable");
 
 		} else {
 			lv_hide(ui_MappedPanel);
