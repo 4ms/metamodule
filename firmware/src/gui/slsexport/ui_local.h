@@ -9,8 +9,9 @@ namespace MetaModule
 lv_obj_t *create_plugin_list_item(lv_obj_t *parent, const char *name);
 lv_obj_t *create_plugin_list_version_item(lv_obj_t *parent, const char *name);
 
-enum class JackMapType { Input, Output, MIDI };
-lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned panel_jack_id, const char *name);
+enum class MapButtonType { Input, Output, MIDIJack, MIDIParam };
+lv_obj_t *create_mapping_circle_item(lv_obj_t *parent, MapButtonType type, unsigned panel_jack_id, const char *name);
+void format_mapping_circle(lv_obj_t *parent, MapButtonType type, unsigned panel_jack_id);
 
 lv_obj_t *create_automap_item(lv_obj_t *parent, std::string_view name);
 

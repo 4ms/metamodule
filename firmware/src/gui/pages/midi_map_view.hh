@@ -82,11 +82,15 @@ struct MidiMapViewPage : PageBase {
 				label_text = map.alias_name.c_str();
 			} else if (!map.ins.empty()) {
 				auto name = get_full_element_name(map.ins[0].module_id, map.ins[0].jack_id, ElementType::Input, *patch);
-				label_storage = std::string(name.module_name) + " " + std::string(name.element_name);
+				if (patch->module_slugs.size() <= 2) // 2 slugs means 1 module in patch because Hub counts as a module
+					label_storage = std::string(name.element_name);
+				else
+					label_storage = std::string(name.module_name) + " " + std::string(name.element_name);
 				label_text = label_storage.c_str();
 			}
 
-			auto cont = create_jack_map_item(ui_MidiMapLeftItems, JackMapType::MIDI, map.panel_jack_id, label_text);
+			auto cont =
+				create_mapping_circle_item(ui_MidiMapLeftItems, MapButtonType::MIDIJack, map.panel_jack_id, label_text);
 			lv_obj_set_user_data(cont, (void *)((uintptr_t)i));
 			lv_obj_add_event_cb(cont, on_midi_jack_click, LV_EVENT_CLICKED, this);
 			lv_group_add_obj(group, cont);
@@ -96,8 +100,14 @@ struct MidiMapViewPage : PageBase {
 		// MIDI param maps (right): entries from pd.midi_maps.set
 		for (auto [i, mk] : enumerate(patch->midi_maps.set)) {
 			auto fullname = get_full_element_name(mk.module_id, mk.param_id, ElementType::Param, *patch);
-			std::string label = std::string(fullname.module_name) + " " + std::string(fullname.element_name);
-			auto cont = create_jack_map_item(ui_MidiMapRightItems, JackMapType::MIDI, mk.panel_knob_id, label.c_str());
+			std::string label;
+			if (patch->module_slugs.size() <= 2) // 2 slugs means 1 module in patch because Hub counts as a module
+				label = std::string(fullname.element_name);
+			else
+				label = std::string(fullname.module_name) + " " + std::string(fullname.element_name);
+
+			auto cont = create_mapping_circle_item(
+				ui_MidiMapRightItems, MapButtonType::MIDIParam, mk.panel_knob_id, label.c_str());
 			lv_obj_set_user_data(cont, (void *)((uintptr_t)i));
 			lv_obj_add_event_cb(cont, on_param_map_click, LV_EVENT_CLICKED, this);
 			lv_group_add_obj(group, cont);

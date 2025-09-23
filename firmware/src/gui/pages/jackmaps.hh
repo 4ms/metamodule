@@ -26,10 +26,10 @@ struct JackMapViewPage : PageBase {
 		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
 	}
 
-	void onJackMapClick(unsigned idx, JackMapType type) {
-		pr_trace("%s Jack: %d\n", type == JackMapType::Input ? "Input" : "Output", idx);
+	void onJackMapClick(unsigned idx, MapButtonType type) {
+		pr_trace("%s Jack: %d\n", type == MapButtonType::Input ? "Input" : "Output", idx);
 
-		if (type == JackMapType::Input) {
+		if (type == MapButtonType::Input) {
 			const auto &i = patch->mapped_ins[idx];
 			if (!i.ins.size()) {
 				return;
@@ -48,7 +48,7 @@ struct JackMapViewPage : PageBase {
 		page_list.request_new_page(PageId::ModuleView, args);
 	}
 
-	template<JackMapType type>
+	template<MapButtonType type>
 	static void onJackMapClick(lv_event_t *event) {
 		if (const auto page = static_cast<JackMapViewPage *>(event->user_data); page) {
 			const auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
@@ -90,7 +90,7 @@ struct JackMapViewPage : PageBase {
 					if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
 						lv_obj_set_user_data(in_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 						lv_obj_add_event_cb(
-							in_conts[map.panel_jack_id], onJackMapClick<JackMapType::Input>, LV_EVENT_CLICKED, this);
+							in_conts[map.panel_jack_id], onJackMapClick<MapButtonType::Input>, LV_EVENT_CLICKED, this);
 						auto label = lv_obj_get_child(in_conts[map.panel_jack_id], 1);
 						if (!map.alias_name.size()) {
 							auto name = get_full_element_name(jack.module_id, jack.jack_id, ElementType::Input, *patch);
@@ -108,7 +108,7 @@ struct JackMapViewPage : PageBase {
 				if (lv_obj_get_child_cnt(out_conts[map.panel_jack_id]) > 1) {
 					lv_obj_set_user_data(out_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 					lv_obj_add_event_cb(
-						out_conts[map.panel_jack_id], onJackMapClick<JackMapType::Output>, LV_EVENT_CLICKED, this);
+						out_conts[map.panel_jack_id], onJackMapClick<MapButtonType::Output>, LV_EVENT_CLICKED, this);
 					auto label = lv_obj_get_child(out_conts[map.panel_jack_id], 1);
 					if (!map.alias_name.size()) {
 						auto name =
@@ -145,12 +145,12 @@ struct JackMapViewPage : PageBase {
 
 		for (unsigned i = 0; i < num_inputs; i++) {
 			if (in_conts[i] == nullptr)
-				in_conts[i] = create_jack_map_item(ui_JackMapLeftItems, JackMapType::Input, i, "");
+				in_conts[i] = create_mapping_circle_item(ui_JackMapLeftItems, MapButtonType::Input, i, "");
 		}
 
 		for (unsigned i = 0; i < num_outputs; i++) {
 			if (out_conts[i] == nullptr)
-				out_conts[i] = create_jack_map_item(ui_JackMapRightItems, JackMapType::Output, i, "");
+				out_conts[i] = create_mapping_circle_item(ui_JackMapRightItems, MapButtonType::Output, i, "");
 		}
 	}
 
