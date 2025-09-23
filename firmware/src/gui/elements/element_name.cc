@@ -41,6 +41,7 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 }
 
 static std::string get_mapped_color(Element const &element, uint16_t panel_id) {
+	panel_id = Midi::strip_midi_channel(panel_id);
 	return std::visit(
 		overloaded{
 			[=](ParamElement const &el) { return std::string(Gui::color_to_html(Gui::get_knob_color(panel_id))); },

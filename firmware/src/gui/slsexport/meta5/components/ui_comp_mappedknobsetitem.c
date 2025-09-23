@@ -12,7 +12,7 @@ lv_obj_t *ui_MappedKnobsetitem_create(lv_obj_t *comp_parent) {
 
 lv_obj_t *cui_MappedKnobsetitem;
 cui_MappedKnobsetitem = lv_btn_create(comp_parent);
-lv_obj_set_height( cui_MappedKnobsetitem, 28);
+lv_obj_set_height( cui_MappedKnobsetitem, LV_SIZE_CONTENT);
 lv_obj_set_width( cui_MappedKnobsetitem, lv_pct(100));
 lv_obj_set_align( cui_MappedKnobsetitem, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(cui_MappedKnobsetitem,LV_FLEX_FLOW_ROW_WRAP);

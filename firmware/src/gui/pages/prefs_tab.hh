@@ -7,7 +7,6 @@
 #include "gui/slsexport/prefs_pane_fs.hh"
 #include "gui/slsexport/prefs_pane_midi.hh"
 #include "patch_play/patch_playloader.hh"
-#include "src/core/lv_obj_scroll.h"
 #include "user_settings/audio_settings.hh"
 
 namespace MetaModule

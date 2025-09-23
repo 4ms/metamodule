@@ -56,7 +56,7 @@ void ModuleViewPage::redraw_module() {
 	//Size Module Image and Roller
 	lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
 
-	resize_module_image(190);
+	resize_module_image(170);
 	full_screen_mode = false;
 
 	update_map_ring_style();

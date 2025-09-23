@@ -1,9 +1,10 @@
 #pragma once
 #include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
+#include "params/expanders.hh"
 
 namespace MetaModule
 {
@@ -23,29 +24,12 @@ struct JackMapViewPage : PageBase {
 
 		//TODO:Back button
 		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
-
-		unsigned num_inputs = PanelDef::NumUserFacingInJacks;
-		unsigned num_outputs = PanelDef::NumUserFacingOutJacks;
-		if (Expanders::get_connected().ext_audio_connected) {
-			num_inputs += AudioExpander::NumInJacks;
-			num_outputs += AudioExpander::NumOutJacks;
-		}
-
-		for (unsigned i = 0; i < num_inputs; i++) {
-			in_conts[i] = create_jack_map_item(ui_JackMapLeftColumn, JackMapType::Input, i, "");
-			lv_group_add_obj(group, in_conts[i]);
-		}
-
-		for (unsigned i = 0; i < num_outputs; i++) {
-			out_conts[i] = create_jack_map_item(ui_JackMapRightColumn, JackMapType::Output, i, "");
-			lv_group_add_obj(group, out_conts[i]);
-		}
 	}
 
-	void onJackMapClick(unsigned idx, JackMapType type) {
-		pr_trace("%s Jack: %d\n", type == JackMapType::Input ? "Input" : "Output", idx);
+	void onJackMapClick(unsigned idx, MapButtonType type) {
+		pr_trace("%s Jack: %d\n", type == MapButtonType::Input ? "Input" : "Output", idx);
 
-		if (type == JackMapType::Input) {
+		if (type == MapButtonType::Input) {
 			const auto &i = patch->mapped_ins[idx];
 			if (!i.ins.size()) {
 				return;
@@ -64,7 +48,7 @@ struct JackMapViewPage : PageBase {
 		page_list.request_new_page(PageId::ModuleView, args);
 	}
 
-	template<JackMapType type>
+	template<MapButtonType type>
 	static void onJackMapClick(lv_event_t *event) {
 		if (const auto page = static_cast<JackMapViewPage *>(event->user_data); page) {
 			const auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
@@ -73,15 +57,19 @@ struct JackMapViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		init_jack_items();
+
 		redraw();
 		lv_group_activate(group);
 
-		lv_obj_scroll_to_y(ui_JackMapLeftColumn, 0, LV_ANIM_OFF);
-		lv_obj_scroll_to_y(ui_JackMapRightColumn, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(ui_JackMapLeftItems, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(ui_JackMapRightItems, 0, LV_ANIM_OFF);
 	}
 
 	void redraw() {
 		patch = patches.get_view_patch();
+
+		lv_group_remove_all_objs(group);
 
 		// Clear old text
 		for (unsigned i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
@@ -102,7 +90,7 @@ struct JackMapViewPage : PageBase {
 					if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
 						lv_obj_set_user_data(in_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 						lv_obj_add_event_cb(
-							in_conts[map.panel_jack_id], onJackMapClick<JackMapType::Input>, LV_EVENT_CLICKED, this);
+							in_conts[map.panel_jack_id], onJackMapClick<MapButtonType::Input>, LV_EVENT_CLICKED, this);
 						auto label = lv_obj_get_child(in_conts[map.panel_jack_id], 1);
 						if (!map.alias_name.size()) {
 							auto name = get_full_element_name(jack.module_id, jack.jack_id, ElementType::Input, *patch);
@@ -117,10 +105,10 @@ struct JackMapViewPage : PageBase {
 
 		for (auto [i, map] : enumerate(patch->mapped_outs)) {
 			if (map.panel_jack_id < out_conts.size()) {
-				if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
+				if (lv_obj_get_child_cnt(out_conts[map.panel_jack_id]) > 1) {
 					lv_obj_set_user_data(out_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 					lv_obj_add_event_cb(
-						out_conts[map.panel_jack_id], onJackMapClick<JackMapType::Output>, LV_EVENT_CLICKED, this);
+						out_conts[map.panel_jack_id], onJackMapClick<MapButtonType::Output>, LV_EVENT_CLICKED, this);
 					auto label = lv_obj_get_child(out_conts[map.panel_jack_id], 1);
 					if (!map.alias_name.size()) {
 						auto name =
@@ -131,6 +119,38 @@ struct JackMapViewPage : PageBase {
 					}
 				}
 			}
+		}
+
+		for (auto *cont : in_conts) {
+			if (cont && lv_obj_get_child_cnt(cont) > 1) {
+				if (lv_label_get_text(lv_obj_get_child(cont, 1))[0] != '\0')
+					lv_group_add_obj(group, cont);
+			}
+		}
+		for (auto *cont : out_conts) {
+			if (cont && lv_obj_get_child_cnt(cont) > 1) {
+				if (lv_label_get_text(lv_obj_get_child(cont, 1))[0] != '\0')
+					lv_group_add_obj(group, cont);
+			}
+		}
+	}
+
+	void init_jack_items() {
+		unsigned num_inputs = PanelDef::NumUserFacingInJacks;
+		unsigned num_outputs = PanelDef::NumUserFacingOutJacks;
+		if (Expanders::get_connected().ext_audio_connected) {
+			num_inputs += AudioExpander::NumInJacks;
+			num_outputs += AudioExpander::NumOutJacks;
+		}
+
+		for (unsigned i = 0; i < num_inputs; i++) {
+			if (in_conts[i] == nullptr)
+				in_conts[i] = create_mapping_circle_item(ui_JackMapLeftItems, MapButtonType::Input, i, "");
+		}
+
+		for (unsigned i = 0; i < num_outputs; i++) {
+			if (out_conts[i] == nullptr)
+				out_conts[i] = create_mapping_circle_item(ui_JackMapRightItems, MapButtonType::Output, i, "");
 		}
 	}
 

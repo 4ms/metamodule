@@ -64,6 +64,9 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_CablePanelAddButton, add_panel_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableMidiAddButton, add_midi_cable_button_cb, LV_EVENT_CLICKED, this);
 
+		lv_obj_set_style_pad_hor(ui_MapList, 3, LV_PART_MAIN);
+		lv_obj_set_style_pad_ver(ui_MapList, 3, LV_PART_MAIN);
+
 		lv_hide(ui_ResetButton);
 	}
 
@@ -305,6 +308,8 @@ private:
 	}
 
 	void list_cable_nodes(InternalCable const *cable) {
+		lv_hide(ui_CableMidiAddButton);
+
 		// Each cable has an output:
 		if (!(cable->out == this_jack && this_jack_type == ElementType::Output)) {
 			auto obj = list.create_cable_item(cable->out, ElementType::Output, *patch, ui_MapList);
@@ -363,7 +368,7 @@ private:
 			lv_show(ui_CableRemoveButton);
 			lv_hide(ui_MappedItemHeader);
 			lv_label_set_text(ui_MappedListTitle, "Connected To:");
-			lv_label_set_text(ui_CableAddLabel, "New connection");
+			lv_label_set_text(ui_CableAddLabel, "New cable");
 
 		} else {
 			lv_hide(ui_MappedPanel);
@@ -624,7 +629,7 @@ private:
 			if (map.module_id > 0 && map.module_id < patch->module_slugs.size()) {
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					bool is_active = is_patch_playing && set_i == page_list.get_active_knobset();
-					auto obj = list.create_map_list_item(map, setname, ui_MapList, is_active);
+					auto obj = list.create_param_map_list_item(map, setname, ui_MapList, is_active);
 					make_selectable_knobset_item(obj, set_i, map.panel_knob_id);
 					lv_obj_add_event_cb(obj, edit_map_button_cb, LV_EVENT_CLICKED, this);
 					added_list_item = true;
