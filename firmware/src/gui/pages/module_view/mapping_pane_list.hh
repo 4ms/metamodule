@@ -67,6 +67,7 @@ struct MappingPaneList {
 			}
 			lv_obj_set_style_pad_hor(obj, 1, LV_PART_MAIN);
 			lv_obj_set_style_pad_ver(obj, 1, LV_PART_MAIN);
+			lv_obj_set_width(obj, lv_pct(100));
 			return obj;
 
 		} else {
@@ -92,8 +93,6 @@ struct MappingPaneList {
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		// lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
-		// lv_obj_set_style_pad_right(obj, 4, LV_STATE_DEFAULT);
 		lv_show(circle);
 
 		auto name = get_panel_name(JackInput{}, panel_jack_id);
@@ -116,8 +115,6 @@ struct MappingPaneList {
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		// lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
-		// lv_obj_set_style_pad_right(obj, 4, LV_STATE_DEFAULT);
 		lv_show(circle);
 
 		auto name = get_panel_name(JackOutput{}, panel_jack_id);
@@ -138,7 +135,6 @@ struct MappingPaneList {
 
 	static void style_unmappedcable_item(Jack jack, ElementType dir, PatchData const &patch, lv_obj_t *obj) {
 		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
-		lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
 		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, patch);
 		lv_label_set_text_fmt(label, "%.16s %.16s", name.module_name.data(), name.element_name.data());
