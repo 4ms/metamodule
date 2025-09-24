@@ -3,6 +3,7 @@
 #include "conf/panel_conf.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/helpers/units_conversion.hh"
+#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "patch/midi_def.hh"
@@ -86,7 +87,7 @@ draw_mapped_jack(const JackElement &, lv_obj_t *element_obj, lv_obj_t *canvas, s
 	if (!panel_el_id.has_value() || !element_obj)
 		return nullptr;
 
-	auto circle = Gui::create_map_circle(canvas);
+	auto circle = create_map_circle(canvas);
 
 	lv_obj_refr_size(element_obj);
 	lv_obj_refr_pos(element_obj);

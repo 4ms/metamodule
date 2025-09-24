@@ -13,6 +13,8 @@ enum class MapButtonType { Input, Output, MIDIJack, MIDIParam };
 lv_obj_t *create_mapping_circle_item(lv_obj_t *parent, MapButtonType type, unsigned panel_jack_id, const char *name);
 void format_mapping_circle(lv_obj_t *parent, MapButtonType type, unsigned panel_jack_id);
 
+lv_obj_t *create_map_circle(lv_obj_t *parent);
+
 lv_obj_t *create_automap_item(lv_obj_t *parent, std::string_view name);
 
 lv_obj_t *create_labeled_check_obj(lv_obj_t *parent, const char *name);

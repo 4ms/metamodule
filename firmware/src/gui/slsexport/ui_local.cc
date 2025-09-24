@@ -245,6 +245,25 @@ lv_obj_t *create_automap_item(lv_obj_t *parent, std::string_view name) {
 	return obj;
 }
 
+lv_obj_t *create_map_circle(lv_obj_t *parent) {
+	lv_obj_t *circle = lv_btn_create(parent);
+	lv_obj_set_align(circle, LV_ALIGN_TOP_LEFT);
+	lv_obj_add_flag(circle, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+	lv_obj_clear_flag(circle,
+					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE |
+						  LV_OBJ_FLAG_SCROLL_CHAIN);
+	lv_obj_add_style(circle, &Gui::mapped_circle_style, LV_PART_MAIN);
+
+	lv_obj_t *label = lv_label_create(circle);
+	lv_obj_set_width(label, LV_SIZE_CONTENT);
+	lv_obj_set_height(label, LV_SIZE_CONTENT);
+	lv_obj_set_align(label, LV_ALIGN_CENTER);
+
+	lv_obj_add_style(label, &Gui::mapped_jack_circle_label_style, LV_PART_MAIN);
+
+	return circle;
+}
+
 lv_obj_t *create_labeled_check_obj(lv_obj_t *parent, const char *name) {
 	auto check_panel = lv_obj_create(parent);
 	lv_obj_set_height(check_panel, 20);
