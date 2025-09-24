@@ -119,6 +119,8 @@ public:
 		auto list = plugin_manager.found_plugin_list();
 
 		for (auto i = 0u; i < list->size(); ++i) {
+			printf("Loading plugin: '%s'\n", plugin_manager.plugin_name(i).c_str());
+
 			plugin_manager.load_plugin(i);
 			auto load = true;
 			while (load) {

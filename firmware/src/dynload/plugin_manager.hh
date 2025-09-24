@@ -76,6 +76,10 @@ public:
 		return plugin_file_loader.is_idle();
 	}
 
+	StaticString<255> plugin_name(unsigned idx) {
+		return plugin_file_loader.plugin_name(idx);
+	}
+
 	PluginFileList const *found_plugin_list() {
 		return plugin_file_loader.found_plugin_list();
 	}
