@@ -16,6 +16,7 @@ struct GuiElement {
 	ElementCount::Counts count{};			 //Number elements of each category in module
 	ElementCount::Indices idx;				 //index within cateogry in module: param_idx, injack_idx, etc
 	std::optional<uint16_t> mapped_panel_id; //patch mapping
+	std::optional<uint16_t> midi_mapped_id;	 //midi map panel_id
 };
 
 // Element and its context in a patch, drawn on the screen

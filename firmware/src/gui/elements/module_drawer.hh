@@ -99,12 +99,14 @@ struct ModuleDrawer {
 				[height = height, &patch, &indices, module_idx, canvas, active_knob_set](auto &el) -> GuiElement {
 					auto obj = ElementDrawer::draw_element(el, canvas, height);
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, indices);
+					auto midi_map_id =
+						ElementMapping::find_mapping(el, patch, module_idx, PatchData::MIDIKnobSet, indices);
 					auto mapped_ring = MapRingDrawer::draw_mapped_ring(el, obj, canvas, mapping_id, height);
 
 					auto count = ElementCount::count(el);
 					auto el_idx = ElementCount::mark_unused_indices(indices, count);
 
-					return GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, el_idx, mapping_id};
+					return GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, el_idx, mapping_id, midi_map_id};
 				},
 				element);
 			i++;
@@ -126,7 +128,10 @@ struct ModuleDrawer {
 		gui_el.map_ring = std::visit(
 			[&](auto &el) {
 				auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, gui_el.idx);
+				auto midi_map = ElementMapping::find_mapping(el, patch, module_idx, PatchData::MIDIKnobSet, gui_el.idx);
 				gui_el.mapped_panel_id = mapping_id;
+				gui_el.midi_mapped_id = midi_map;
+
 				return MapRingDrawer::draw_mapped_ring(el, gui_el.obj, canvas, mapping_id, height);
 			},
 			drawn.element);
