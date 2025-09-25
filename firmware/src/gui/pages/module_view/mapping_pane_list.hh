@@ -52,6 +52,7 @@ struct MappingPaneList {
 
 	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name, lv_obj_t *parent, bool is_active) {
 		auto obj = ui_UnmappedSetItem_create(parent);
+		lv_obj_set_style_pad_left(obj, 32, LV_PART_MAIN | LV_STATE_DEFAULT);
 		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
 		lv_label_set_text(setname, knobset_name.data());
 		lv_obj_set_style_text_color(obj, is_active ? lv_color_hex(0xFF8918) : lv_color_white(), LV_STATE_DEFAULT);
