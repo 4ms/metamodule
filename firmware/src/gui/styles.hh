@@ -259,11 +259,9 @@ struct Gui {
 
 		else if (panel_id <= MidiGateNote127) {
 			auto sz = palette_main.size();
-			// [0 * N, 12 * N) => [0, sz)
+			// Space out colors in the palette (12 notes, 19 colors): [0 * N, 12 * N) => [0, sz)
 			auto idx = unsigned(sz * (float(panel_id) / 12.f)) % sz;
 			return palette_main[idx];
-			// return palette_main[unsigned(panel_id * (float(palette_main.size()) / 12.f)) % palette_main.size()];
-			// return palette_main[7 + (panel_id % 12)];
 		}
 
 		else if (panel_id <= MidiClockDiv96Jack)

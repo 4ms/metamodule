@@ -28,16 +28,16 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 		return nullptr;
 
 	auto panel_id = panel_el_id.value();
+	panel_id = Midi::strip_midi_channel(panel_id);
 
 	//TODO: color and thickness set by variant type
 	lv_color_t color;
 	uint16_t gap;
 	float ring_thickness;
 
-	panel_id = Midi::strip_midi_channel(panel_id);
 	if (Midi::is_midi_panel_id(panel_id)) {
-		ring_thickness = 1;
-		gap = 3;
+		ring_thickness = 3;
+		gap = module_height == 240 ? 2 : 0;
 	} else {
 		if (module_height == 240) {
 			ring_thickness = (panel_id >= 6) ? 2 : 5;
