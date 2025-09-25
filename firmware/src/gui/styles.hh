@@ -102,124 +102,21 @@ struct Gui {
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
 
-	static inline const lv_color_t palette[][5] = {
-		{LV_COLOR_MAKE(0xEF, 0x53, 0x50),
-		 LV_COLOR_MAKE(0xE5, 0x73, 0x73),
-		 LV_COLOR_MAKE(0xEF, 0x9A, 0x9A),
-		 LV_COLOR_MAKE(0xFF, 0xCD, 0xD2),
-		 LV_COLOR_MAKE(0xFF, 0xEB, 0xEE)},
-		{LV_COLOR_MAKE(0xEC, 0x40, 0x7A),
-		 LV_COLOR_MAKE(0xF0, 0x62, 0x92),
-		 LV_COLOR_MAKE(0xF4, 0x8F, 0xB1),
-		 LV_COLOR_MAKE(0xF8, 0xBB, 0xD0),
-		 LV_COLOR_MAKE(0xFC, 0xE4, 0xEC)},
-		{LV_COLOR_MAKE(0xAB, 0x47, 0xBC),
-		 LV_COLOR_MAKE(0xBA, 0x68, 0xC8),
-		 LV_COLOR_MAKE(0xCE, 0x93, 0xD8),
-		 LV_COLOR_MAKE(0xE1, 0xBE, 0xE7),
-		 LV_COLOR_MAKE(0xF3, 0xE5, 0xF5)},
-		{LV_COLOR_MAKE(0x7E, 0x57, 0xC2),
-		 LV_COLOR_MAKE(0x95, 0x75, 0xCD),
-		 LV_COLOR_MAKE(0xB3, 0x9D, 0xDB),
-		 LV_COLOR_MAKE(0xD1, 0xC4, 0xE9),
-		 LV_COLOR_MAKE(0xED, 0xE7, 0xF6)},
-		{LV_COLOR_MAKE(0x5C, 0x6B, 0xC0),
-		 LV_COLOR_MAKE(0x79, 0x86, 0xCB),
-		 LV_COLOR_MAKE(0x9F, 0xA8, 0xDA),
-		 LV_COLOR_MAKE(0xC5, 0xCA, 0xE9),
-		 LV_COLOR_MAKE(0xE8, 0xEA, 0xF6)},
-		{LV_COLOR_MAKE(0x42, 0xA5, 0xF5),
-		 LV_COLOR_MAKE(0x64, 0xB5, 0xF6),
-		 LV_COLOR_MAKE(0x90, 0xCA, 0xF9),
-		 LV_COLOR_MAKE(0xBB, 0xDE, 0xFB),
-		 LV_COLOR_MAKE(0xE3, 0xF2, 0xFD)},
-		{LV_COLOR_MAKE(0x29, 0xB6, 0xF6),
-		 LV_COLOR_MAKE(0x4F, 0xC3, 0xF7),
-		 LV_COLOR_MAKE(0x81, 0xD4, 0xFA),
-		 LV_COLOR_MAKE(0xB3, 0xE5, 0xFC),
-		 LV_COLOR_MAKE(0xE1, 0xF5, 0xFE)},
-		{LV_COLOR_MAKE(0x26, 0xC6, 0xDA),
-		 LV_COLOR_MAKE(0x4D, 0xD0, 0xE1),
-		 LV_COLOR_MAKE(0x80, 0xDE, 0xEA),
-		 LV_COLOR_MAKE(0xB2, 0xEB, 0xF2),
-		 LV_COLOR_MAKE(0xE0, 0xF7, 0xFA)},
-		{LV_COLOR_MAKE(0x26, 0xA6, 0x9A),
-		 LV_COLOR_MAKE(0x4D, 0xB6, 0xAC),
-		 LV_COLOR_MAKE(0x80, 0xCB, 0xC4),
-		 LV_COLOR_MAKE(0xB2, 0xDF, 0xDB),
-		 LV_COLOR_MAKE(0xE0, 0xF2, 0xF1)},
-		{LV_COLOR_MAKE(0x66, 0xBB, 0x6A),
-		 LV_COLOR_MAKE(0x81, 0xC7, 0x84),
-		 LV_COLOR_MAKE(0xA5, 0xD6, 0xA7),
-		 LV_COLOR_MAKE(0xC8, 0xE6, 0xC9),
-		 LV_COLOR_MAKE(0xE8, 0xF5, 0xE9)},
-		{LV_COLOR_MAKE(0x9C, 0xCC, 0x65),
-		 LV_COLOR_MAKE(0xAE, 0xD5, 0x81),
-		 LV_COLOR_MAKE(0xC5, 0xE1, 0xA5),
-		 LV_COLOR_MAKE(0xDC, 0xED, 0xC8),
-		 LV_COLOR_MAKE(0xF1, 0xF8, 0xE9)},
-		{LV_COLOR_MAKE(0xD4, 0xE1, 0x57),
-		 LV_COLOR_MAKE(0xDC, 0xE7, 0x75),
-		 LV_COLOR_MAKE(0xE6, 0xEE, 0x9C),
-		 LV_COLOR_MAKE(0xF0, 0xF4, 0xC3),
-		 LV_COLOR_MAKE(0xF9, 0xFB, 0xE7)},
-		{LV_COLOR_MAKE(0xFF, 0xEE, 0x58),
-		 LV_COLOR_MAKE(0xFF, 0xF1, 0x76),
-		 LV_COLOR_MAKE(0xFF, 0xF5, 0x9D),
-		 LV_COLOR_MAKE(0xFF, 0xF9, 0xC4),
-		 LV_COLOR_MAKE(0xFF, 0xFD, 0xE7)},
-		{LV_COLOR_MAKE(0xFF, 0xCA, 0x28),
-		 LV_COLOR_MAKE(0xFF, 0xD5, 0x4F),
-		 LV_COLOR_MAKE(0xFF, 0xE0, 0x82),
-		 LV_COLOR_MAKE(0xFF, 0xEC, 0xB3),
-		 LV_COLOR_MAKE(0xFF, 0xF8, 0xE1)},
-		{LV_COLOR_MAKE(0xFF, 0xA7, 0x26),
-		 LV_COLOR_MAKE(0xFF, 0xB7, 0x4D),
-		 LV_COLOR_MAKE(0xFF, 0xCC, 0x80),
-		 LV_COLOR_MAKE(0xFF, 0xE0, 0xB2),
-		 LV_COLOR_MAKE(0xFF, 0xF3, 0xE0)},
-		{LV_COLOR_MAKE(0xFF, 0x70, 0x43),
-		 LV_COLOR_MAKE(0xFF, 0x8A, 0x65),
-		 LV_COLOR_MAKE(0xFF, 0xAB, 0x91),
-		 LV_COLOR_MAKE(0xFF, 0xCC, 0xBC),
-		 LV_COLOR_MAKE(0xFB, 0xE9, 0xE7)},
-		{LV_COLOR_MAKE(0x8D, 0x6E, 0x63),
-		 LV_COLOR_MAKE(0xA1, 0x88, 0x7F),
-		 LV_COLOR_MAKE(0xBC, 0xAA, 0xA4),
-		 LV_COLOR_MAKE(0xD7, 0xCC, 0xC8),
-		 LV_COLOR_MAKE(0xEF, 0xEB, 0xE9)},
-		{LV_COLOR_MAKE(0x78, 0x90, 0x9C),
-		 LV_COLOR_MAKE(0x90, 0xA4, 0xAE),
-		 LV_COLOR_MAKE(0xB0, 0xBE, 0xC5),
-		 LV_COLOR_MAKE(0xCF, 0xD8, 0xDC),
-		 LV_COLOR_MAKE(0xEC, 0xEF, 0xF1)},
-		{LV_COLOR_MAKE(0xBD, 0xBD, 0xBD),
-		 LV_COLOR_MAKE(0xE0, 0xE0, 0xE0),
-		 LV_COLOR_MAKE(0xEE, 0xEE, 0xEE),
-		 LV_COLOR_MAKE(0xF5, 0xF5, 0xF5),
-		 LV_COLOR_MAKE(0xFA, 0xFA, 0xFA)},
-	};
-
-	static inline std::array<lv_color_t, 8> cable_palette{
-		palette[LV_PALETTE_RED][0],
-		palette[LV_PALETTE_BLUE][0],
-		palette[LV_PALETTE_GREEN][0],
-		palette[LV_PALETTE_GREY][0],
-		palette[LV_PALETTE_YELLOW][0],
-		palette[LV_PALETTE_ORANGE][0],
-		palette[LV_PALETTE_PINK][0],
-		palette[LV_PALETTE_PURPLE][0],
-	};
-
 	static constexpr std::array<lv_color_t, 19> palette_main = {
 		lv_color_make_rgb565(0xF4, 0x00, 0x00), // RED
 		lv_color_make_rgb565(0xF0, 0x63, 0xB2), // PINK
 		lv_color_make_rgb565(0x9C, 0x27, 0xB0), // PURPLE,
 		lv_color_make_rgb565(0x67, 0x3A, 0xB7), // DEEP_PURPLE,
 		lv_color_make_rgb565(0x3F, 0x51, 0xB5), // INDIGO,
-		lv_color_make_rgb565(0x21, 0x96, 0xF3), // BLUE,
-		lv_color_make_rgb565(0x03, 0xA9, 0xF4), // LIGHT_BLUE,
-		lv_color_make_rgb565(0x00, 0xAD, 0xEE), // CYAN, 00ADEE
+		// lv_color_make_rgb565(0x21, 0x96, 0xF3), // BLUE,
+		lv_color_make_rgb565(0x42, 0xA5, 0xF5), // BLUE,
+
+		// lv_color_make_rgb565(0x03, 0xA9, 0xF4), // LIGHT_BLUE,
+		lv_color_make_rgb565(0xBB, 0xDE, 0xFB),
+
+		// lv_color_make_rgb565(0x00, 0xAD, 0xEE), // CYAN, 00ADEE
+		lv_color_make_rgb565(0x26, 0xC6, 0xDA),
+
 		lv_color_make_rgb565(0x00, 0x96, 0x88), // TEAL,
 		lv_color_make_rgb565(0x00, 0xA5, 0x51), // GREEN, 00A551
 		lv_color_make_rgb565(0x8B, 0xC3, 0x4A), // LIGHT_GREEN,
@@ -228,9 +125,31 @@ struct Gui {
 		lv_color_make_rgb565(0xFF, 0xC1, 0x07), // AMBER,
 		lv_color_make_rgb565(0xFA, 0xA6, 0x29), // ORANGE, FAA629
 		lv_color_make_rgb565(0xFF, 0x57, 0x22), // DEEP_ORANGE,
-		lv_color_make_rgb565(0x79, 0x55, 0x48), // BROWN,
+		lv_color_make_rgb565(0x89, 0x65, 0x58), // BROWN,
 		lv_color_make_rgb565(0x60, 0x7D, 0x8B), // BLUE_GREY,
 		lv_color_make_rgb565(0x9E, 0x9E, 0x9E), // GREY
+	};
+
+	static inline std::array<lv_color_t, 8> jack_palette{
+		lv_color_make_rgb565(0xEA, 0x1C, 0x25),
+		lv_color_make_rgb565(0xFF, 0xF2, 0x00),
+		lv_color_make_rgb565(0x00, 0xAE, 0xEE),
+		lv_color_make_rgb565(0xF6, 0x61, 0x94),
+		lv_color_make_rgb565(0xFF, 0xA5, 0x29),
+		lv_color_make_rgb565(0x00, 0xA5, 0x52),
+		lv_color_make_rgb565(0x00, 0x00, 0x00),
+		lv_color_make_rgb565(0xFF, 0xFF, 0xFF),
+	};
+
+	static inline std::array<lv_color_t, 8> cable_palette{
+		palette_main[LV_PALETTE_RED],
+		palette_main[LV_PALETTE_BLUE],
+		palette_main[LV_PALETTE_GREEN],
+		palette_main[LV_PALETTE_GREY],
+		palette_main[LV_PALETTE_YELLOW],
+		palette_main[LV_PALETTE_ORANGE],
+		palette_main[LV_PALETTE_PINK],
+		palette_main[LV_PALETTE_PURPLE],
 	};
 
 	static inline std::array<lv_color_t, 8> knob_palette{
@@ -244,6 +163,28 @@ struct Gui {
 		palette_main[LV_PALETTE_BLUE_GREY], //?
 	};
 
+	static inline std::array<lv_color_t, 8> knob_disabled_palette{
+		palette_main[LV_PALETTE_RED],
+		palette_main[LV_PALETTE_YELLOW],
+		palette_main[LV_PALETTE_CYAN],
+		palette_main[LV_PALETTE_PINK],
+		palette_main[LV_PALETTE_ORANGE],
+		palette_main[LV_PALETTE_GREEN],
+		palette_main[LV_PALETTE_GREY],		//?
+		palette_main[LV_PALETTE_BLUE_GREY], //?
+	};
+
+	static inline std::array<lv_color_t, 8> knob_indicator_palette{
+		lv_color_black(),
+		lv_color_black(),
+		lv_color_black(),
+		lv_color_black(),
+		lv_color_black(),
+		lv_color_black(),
+		lv_color_white(),
+		lv_color_black(),
+	};
+
 	static lv_color_t get_knob_color(uint16_t panel_id) {
 		MappedKnob map{.panel_knob_id = panel_id};
 
@@ -253,7 +194,8 @@ struct Gui {
 		if (map.is_button())
 			return lv_color_black();
 
-		return knob_palette[panel_id % 6];
+		// MIDI mappings:
+		return mapped_jack_color(panel_id);
 	}
 
 	static lv_color_t get_jack_color(uint16_t panel_id) {
@@ -270,42 +212,9 @@ struct Gui {
 		return (grey > 0xC0) ? lv_color_black() : lv_color_white();
 	}
 
-	static inline std::array<lv_color_t, 8> knob_disabled_palette{
-		palette_main[LV_PALETTE_RED],
-		palette_main[LV_PALETTE_YELLOW],
-		palette_main[LV_PALETTE_CYAN],
-		palette_main[LV_PALETTE_PINK],
-		palette_main[LV_PALETTE_ORANGE],
-		palette_main[LV_PALETTE_GREEN],
-		palette_main[LV_PALETTE_GREY],		//?
-		palette_main[LV_PALETTE_BLUE_GREY], //?
-	};
-
-	static inline std::array<lv_color_t, 8> knob_indicator_palette{
-		lv_color_black(), //RED
-		lv_color_black(), //YELLOW
-		lv_color_black(), //CYAN
-		lv_color_black(), //PINK
-		lv_color_black(), //ORANGE
-		lv_color_black(), //GREEN
-		lv_color_white(), //black
-		lv_color_black(), //white
-	};
-
 	static lv_color_t get_knob_indicator_color(uint16_t panel_id) {
 		return knob_indicator_palette[panel_id % 6];
 	}
-
-	static inline std::array<lv_color_t, 8> jack_palette{
-		lv_color_make_rgb565(0xEA, 0x1C, 0x25),
-		lv_color_make_rgb565(0xFF, 0xF2, 0x00),
-		lv_color_make_rgb565(0x00, 0xAE, 0xEE),
-		lv_color_make_rgb565(0xF6, 0x61, 0x94),
-		lv_color_make_rgb565(0xFF, 0xA5, 0x29),
-		lv_color_make_rgb565(0x00, 0xA5, 0x52),
-		lv_color_make_rgb565(0x00, 0x00, 0x00),
-		lv_color_make_rgb565(0xFF, 0xFF, 0xFF),
-	};
 
 	// Slider Handle Style
 	static constexpr lv_style_const_prop_t slider_handle_style_props[9] = {
@@ -322,6 +231,8 @@ struct Gui {
 	static inline auto slider_handle_style = LV_STYLE_CONST_CPP(slider_handle_style_props);
 
 	static lv_color_t mapped_jack_color(unsigned panel_id) {
+		panel_id = Midi::strip_midi_channel(panel_id);
+
 		if (panel_id <= LastPossibleKnob)
 			return jack_palette[panel_id % jack_palette.size()];
 
@@ -341,13 +252,19 @@ struct Gui {
 			return palette_main[4];
 
 		else if (panel_id <= MidiCC127)
-			return palette_main[5];
+			return palette_main[panel_id % palette_main.size()];
 
 		else if (panel_id <= MidiPitchWheelJack)
 			return palette_main[6];
 
-		else if (panel_id <= MidiGateNote127)
-			return palette_main[7];
+		else if (panel_id <= MidiGateNote127) {
+			auto sz = palette_main.size();
+			// [0 * N, 12 * N) => [0, sz)
+			auto idx = unsigned(sz * (float(panel_id) / 12.f)) % sz;
+			return palette_main[idx];
+			// return palette_main[unsigned(panel_id * (float(palette_main.size()) / 12.f)) % palette_main.size()];
+			// return palette_main[7 + (panel_id % 12)];
+		}
 
 		else if (panel_id <= MidiClockDiv96Jack)
 			return palette_main[8];
