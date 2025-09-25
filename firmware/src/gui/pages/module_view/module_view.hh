@@ -433,7 +433,8 @@ private:
 	void handle_quick_assign();
 	void handle_encoder_back_removal();
 	const DrawnElement *get_highlighted_element();
-	void remove_existing_mappings_for_param(uint16_t module_id, uint16_t param_id);
+	void remove_nonmidi_mappings(uint16_t module_id, uint16_t param_id);
+	void remove_mappings(uint16_t module_id, uint16_t param_id, unsigned target_knobset);
 	void perform_knob_assign(uint16_t knob_id, const DrawnElement *element);
 	void perform_midi_assign(uint16_t midi_id, const DrawnElement *element);
 	void perform_jack_assign(const DrawnElement *element, ElementType jack_type);

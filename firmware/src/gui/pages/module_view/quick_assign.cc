@@ -129,7 +129,8 @@ void ModuleViewPage::handle_encoder_back_removal() {
 		uint16_t module_id = (uint16_t)current_element->gui_element.module_idx;
 		uint16_t param_id = (uint16_t)current_element->gui_element.idx.param_idx;
 
-		remove_existing_mappings_for_param(module_id, param_id);
+		remove_mappings(module_id, param_id, PatchData::MIDIKnobSet);
+		remove_mappings(module_id, param_id, active_knobset);
 
 	} else if (is_input_jack) {
 		// Remove Input jack mappings
@@ -159,46 +160,38 @@ const DrawnElement *ModuleViewPage::get_highlighted_element() {
 	return nullptr;
 }
 
-void ModuleViewPage::remove_existing_mappings_for_param(uint16_t module_id, uint16_t param_id) {
-	uint32_t target_knobset = page_list.get_active_knobset();
+void ModuleViewPage::remove_mappings(uint16_t module_id, uint16_t param_id, unsigned target_knobset) {
 
-	// Remove ALL existing knob mappings for this parameter in this knobset (non-MIDI)
-	if (target_knobset != PatchData::MIDIKnobSet && target_knobset < patch->knob_sets.size()) {
-		auto &knobset = patch->knob_sets[target_knobset];
+	auto *knob_set = (target_knobset == PatchData::MIDIKnobSet) ? &patch->midi_maps.set :
+					 (target_knobset < patch->knob_sets.size()) ? &patch->knob_sets[target_knobset].set :
+																  nullptr;
 
-		for (const auto &mapping : knobset.set) {
+	if (knob_set) {
+		for (auto const &mapping : *knob_set) {
 			if (mapping.module_id == module_id && mapping.param_id == param_id) {
 				module_mods.put(RemoveMapping{.map = mapping, .set_id = target_knobset});
 			}
 		}
 	}
-
-	// Remove ALL existing MIDI mappings for this parameter
-	auto &midi_knobset = patch->midi_maps.set;
-	for (auto &mapping : midi_knobset) {
-		if (mapping.module_id == module_id && mapping.param_id == param_id) {
-			module_mods.put(RemoveMapping{.map = mapping, .set_id = PatchData::MIDIKnobSet});
-		}
-	}
 }
 
 void ModuleViewPage::perform_knob_assign(uint16_t knob_id, const DrawnElement *element) {
-	if (!element) {
+	if (!element)
 		return;
-	}
 
-	uint16_t module_id = (uint16_t)element->gui_element.module_idx;
-	uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
+	auto module_id = (uint16_t)element->gui_element.module_idx;
+	auto param_id = (uint16_t)element->gui_element.idx.param_idx;
 
 	// Check to see if the knob is already mapped to this parameter
 	// Ignore it if so
-	for (auto &mapping : patch->knob_sets[page_list.get_active_knobset()].set) {
+	for (auto const &mapping : patch->knob_sets[active_knobset].set) {
 		if (mapping.panel_knob_id == knob_id && mapping.module_id == module_id && mapping.param_id == param_id) {
 			return;
 		}
 	}
 
-	remove_existing_mappings_for_param(module_id, param_id);
+	// Remove all non-midi mappings to this param
+	remove_mappings(module_id, param_id, active_knobset);
 
 	auto map = MappedKnob{
 		.panel_knob_id = knob_id,
@@ -210,8 +203,7 @@ void ModuleViewPage::perform_knob_assign(uint16_t knob_id, const DrawnElement *e
 
 	// Queue the modification - this will be processed by handle_patch_mods() which will
 	// update the patch data and call refresh() automatically
-	uint32_t target_knobset = page_list.get_active_knobset();
-	module_mods.put(AddMapping{.map = map, .set_id = target_knobset});
+	module_mods.put(AddMapping{.map = map, .set_id = active_knobset});
 
 	// Suppress the next click to prevent unwanted mapping pane opening
 	suppress_next_click = true;
@@ -225,7 +217,8 @@ void ModuleViewPage::perform_midi_assign(uint16_t midi_id, const DrawnElement *e
 	uint16_t module_id = (uint16_t)element->gui_element.module_idx;
 	uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
 
-	remove_existing_mappings_for_param(module_id, param_id);
+	// Remove all MIDI mappings to this param
+	remove_mappings(module_id, param_id, PatchData::MIDIKnobSet);
 
 	auto map = MappedKnob{
 		.panel_knob_id = midi_id,
