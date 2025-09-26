@@ -21,11 +21,12 @@ struct MappingPaneList {
 
 	static lv_obj_t *
 	create_param_map_list_item(MappedKnob const &map, std::string_view knobset_name, lv_obj_t *parent, bool is_active) {
-		auto obj = ui_MappedKnobsetitem_create(parent);
+		auto obj = ui_MappedKnobsetitem_create(parent, false);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
-		lv_label_set_text(setname, knobset_name.data());
+		if (lv_obj_has_class(setname, &lv_label_class))
+			lv_label_set_text(setname, knobset_name.data());
 		lv_show(circle);
 		lv_obj_set_style_text_color(obj, is_active ? lv_color_hex(0xFF8918) : lv_color_white(), LV_STATE_DEFAULT);
 
@@ -59,7 +60,7 @@ struct MappingPaneList {
 		return obj;
 	}
 
-	static lv_obj_t *create_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *parent, std::string_view alias_name) {
+	static lv_obj_t *create_panel_in_item(uint16_t panel_jack_id, lv_obj_t *parent, std::string_view alias_name) {
 		if (Midi::is_midi_panel_id(panel_jack_id)) {
 			auto obj = create_mapping_circle_item(parent, MapButtonType::MIDIJack, panel_jack_id, alias_name.data());
 			if (!alias_name.length()) {
@@ -72,14 +73,16 @@ struct MappingPaneList {
 			return obj;
 
 		} else {
-			auto obj = ui_MappedKnobsetitem_create(parent);
+			// TODO: create item with textarea/label
+			auto obj = ui_MappedKnobsetitem_create(parent, true);
 			style_panel_incable_item(panel_jack_id, obj, alias_name);
 			return obj;
 		}
 	}
 
-	static lv_obj_t *create_panel_outcable_item(uint16_t panel_jack_id, lv_obj_t *parent, std::string_view name) {
-		auto obj = ui_MappedKnobsetitem_create(parent);
+	static lv_obj_t *create_panel_out_item(uint16_t panel_jack_id, lv_obj_t *parent, std::string_view name) {
+		// TODO: create item with textarea/label
+		auto obj = ui_MappedKnobsetitem_create(parent, true);
 		style_panel_outcable_item(panel_jack_id, obj, name);
 		return obj;
 	}
@@ -96,14 +99,15 @@ struct MappingPaneList {
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		lv_show(circle);
 
-		auto name = get_panel_name(JackInput{}, panel_jack_id);
-
 		lv_obj_set_style_border_color(circle, Gui::get_jack_color(panel_jack_id), LV_STATE_DEFAULT);
-		if (alias_name.size()) {
-			lv_label_set_text_fmt(setname, "%.16s", alias_name.data());
-		} else {
-			lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
-		}
+
+		std::string text =
+			alias_name.length() ? std::string(alias_name) : "Panel " + get_panel_name(JackInput{}, panel_jack_id);
+
+		if (lv_obj_has_class(setname, &lv_textarea_class))
+			lv_textarea_set_text(setname, text.c_str());
+		else
+			lv_label_set_text(setname, text.c_str());
 
 		lv_label_set_text(label, get_panel_brief_name(JackInput{}, panel_jack_id).c_str());
 
@@ -118,15 +122,15 @@ struct MappingPaneList {
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		lv_show(circle);
 
-		auto name = get_panel_name(JackOutput{}, panel_jack_id);
-
 		lv_obj_set_style_border_color(circle, Gui::get_jack_color(panel_jack_id), LV_STATE_DEFAULT);
 
-		if (alias_name.size()) {
-			lv_label_set_text_fmt(setname, "%.16s", alias_name.data());
-		} else {
-			lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
-		}
+		std::string text =
+			alias_name.length() ? std::string(alias_name) : "Panel " + get_panel_name(JackOutput{}, panel_jack_id);
+
+		if (lv_obj_has_class(setname, &lv_textarea_class))
+			lv_textarea_set_text(setname, text.c_str());
+		else
+			lv_label_set_text(setname, text.c_str());
 
 		lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
 		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);

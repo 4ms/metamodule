@@ -192,8 +192,7 @@ struct KnobSetViewPage : PageBase {
 				if (knobset->name.is_equal(lv_textarea_get_text(ui_KnobSetNameText))) {
 					save_knobset_name(false);
 				} else {
-					kb_popup.show(
-						[this](bool ok) { save_knobset_name(ok); }, "Do you want to keep your edits?", "Keep");
+					kb_popup.show([this](bool ok) { save_knobset_name(ok); }, "Do you want to keep your edits?", "Keep");
 				}
 			} else if (page_list.request_last_page()) {
 				blur();

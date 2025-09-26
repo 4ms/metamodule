@@ -8,7 +8,7 @@
 #include "gui/pages/add_map_popup.hh"
 #include "gui/pages/choice_popup.hh"
 #include "gui/pages/confirm_popup.hh"
-#include "gui/pages/jack_alias.hh"
+#include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/manual_control_popup.hh"
 #include "gui/pages/midi_map_input.hh"
 #include "gui/pages/module_view/mapping_pane_list.hh"
@@ -76,7 +76,7 @@ struct ModuleViewMappingPane {
 		, midi_map_popup{params}
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches}
-		, jack_alias_editor{gui_state} {
+		, keyboard_entry{gui_state} {
 
 		lv_obj_add_event_cb(ui_ResetButton, reset_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
@@ -102,7 +102,7 @@ struct ModuleViewMappingPane {
 		add_cable_popup.init(ui_MappingMenu, pane_group);
 		panel_cable_popup.init(ui_MappingMenu, pane_group);
 		midi_map_popup.init(ui_MappingMenu, pane_group);
-		jack_alias_editor.prepare_focus(ui_MappingMenu, pane_group);
+		keyboard_entry.prepare_focus(ui_MappingMenu, pane_group);
 	}
 
 	void show(const DrawnElement &drawn_el) {
@@ -258,9 +258,9 @@ struct ModuleViewMappingPane {
 				midi_map_popup.hide();
 		}
 
-		else if (jack_alias_editor.is_visible())
+		else if (keyboard_entry.is_visible())
 		{
-			jack_alias_editor.back();
+			keyboard_entry.back();
 		}
 
 		else
@@ -316,8 +316,9 @@ private:
 
 			if (this_jack_type == ElementType::Input)
 				list_panel_in_cable(this_jack);
-			else
-				list_panel_out_cable(*panel_jack_id);
+			else if (auto panel_jack = patch->find_mapped_outjack(*panel_jack_id)) {
+				list_panel_out_cable(panel_jack);
+			}
 		}
 
 		this_jack_has_connections = has_connections;
@@ -342,7 +343,7 @@ private:
 
 		// Output might be connected to the panel
 		if (auto panel_jack = patch->find_mapped_outjack(cable->out)) {
-			list_panel_out_cable(panel_jack->panel_jack_id);
+			list_panel_out_cable(panel_jack);
 		}
 
 		// Each cable has 1 or more inputs:
@@ -360,7 +361,7 @@ private:
 			lv_hide(ui_CablePanelAddButton);
 			lv_hide(ui_CableMidiAddButton);
 
-			auto obj = list.create_panel_incable_item(panel_jack->panel_jack_id, ui_MapList, panel_jack->alias_name);
+			auto obj = list.create_panel_in_item(panel_jack->panel_jack_id, ui_MapList, panel_jack->alias_name);
 			make_selectable_panel_jack_item(obj, panel_jack);
 
 			for (auto &mappedin : panel_jack->ins) {
@@ -372,12 +373,11 @@ private:
 		}
 	}
 
-	void list_panel_out_cable(uint16_t panel_jack_id) {
+	void list_panel_out_cable(const MappedOutputJack *panel_jack) {
 		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_CableMidiAddButton);
 
-		auto panel_jack = patch->find_mapped_outjack(panel_jack_id);
-		auto obj = list.create_panel_outcable_item(panel_jack_id, ui_MapList, panel_jack->alias_name);
+		auto obj = list.create_panel_out_item(panel_jack->panel_jack_id, ui_MapList, panel_jack->alias_name);
 		make_selectable_panel_jack_item(obj, panel_jack);
 	}
 
@@ -422,6 +422,7 @@ private:
 
 	void make_selectable_panel_jack_item(lv_obj_t *obj, const MappedInputJack *panel_jack) {
 		map_list_items.push_back(obj);
+
 		lv_group_add_obj(pane_group, obj);
 
 		lv_obj_add_event_cb(obj, rename_jackalias_cb, LV_EVENT_CLICKED, this);
@@ -837,13 +838,47 @@ private:
 			return;
 
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-		if (lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN)) {
-			if (auto userdata = lv_obj_get_user_data(event->target)) {
-				if (auto panelmap = PanelJackMapUserData(reinterpret_cast<uintptr_t>(userdata)); panelmap.is_valid) {
-					page->jack_alias_editor.show_keyboard(panelmap.panel_jack_id, panelmap.is_input, page->patch);
-				}
+		if (!lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN))
+			return;
+
+		auto userdata = lv_obj_get_user_data(event->target);
+		if (!userdata)
+			return;
+
+		auto panelmap = PanelJackMapUserData(reinterpret_cast<uintptr_t>(userdata));
+		if (!panelmap.is_valid)
+			return;
+
+		page->show_jack_alias_keyboard(panelmap, event->target);
+	}
+
+	void show_jack_alias_keyboard(PanelJackMapUserData panelmap, lv_obj_t *obj) {
+		std::string alias;
+		if (panelmap.is_input) {
+			if (auto map = patch->find_mapped_injack(panelmap.panel_jack_id)) {
+				if (map->alias_name.length())
+					alias = std::string_view{map->alias_name};
+				else
+					alias = "Panel In " + std::to_string(panelmap.panel_jack_id + 1);
+			}
+		} else {
+			if (auto map = patch->find_mapped_outjack(panelmap.panel_jack_id)) {
+				if (map->alias_name.length())
+					alias = std::string_view{map->alias_name};
+				else
+					alias = "Panel Out " + std::to_string(panelmap.panel_jack_id + 1);
 			}
 		}
+
+		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+
+		lv_obj_set_y(ui_Keyboard, 144);
+		keyboard_entry.show_keyboard(setname, alias, [panelmap = panelmap, this](std::string_view text) {
+			if (panelmap.is_input)
+				patch->set_panel_in_alias(panelmap.panel_jack_id, text);
+			else
+				patch->set_panel_out_alias(panelmap.panel_jack_id, text);
+		});
 	}
 
 	static inline std::array<MapKnobUserData, MaxKnobSets + 1> mapped_item_user_data{};
@@ -889,7 +924,7 @@ private:
 
 	bool is_visible = false;
 
-	JackAliasNameEdit jack_alias_editor;
+	KeyboardEntry keyboard_entry;
 };
 
 } // namespace MetaModule
