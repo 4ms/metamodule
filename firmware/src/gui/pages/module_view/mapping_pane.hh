@@ -102,6 +102,8 @@ struct ModuleViewMappingPane {
 		panel_cable_popup.init(ui_MappingMenu, pane_group);
 		midi_map_popup.init(ui_MappingMenu, pane_group);
 		keyboard_entry.prepare_focus(ui_MappingMenu, pane_group);
+
+		lv_obj_set_y(ui_Keyboard, 144);
 	}
 
 	void show(const DrawnElement &drawn_el) {
@@ -258,9 +260,7 @@ struct ModuleViewMappingPane {
 		}
 
 		else if (keyboard_entry.is_visible())
-		{
 			keyboard_entry.back();
-		}
 
 		else
 			should_close = true;
@@ -853,8 +853,6 @@ private:
 
 	void show_jack_alias_keyboard(PanelJackMapUserData panelmap, lv_obj_t *obj) {
 		auto alias_text_obj = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-
-		lv_obj_set_y(ui_Keyboard, 144);
 
 		keyboard_entry.show_keyboard(alias_text_obj, [panelmap = panelmap, this](std::string_view text) {
 			if (panelmap.is_input)

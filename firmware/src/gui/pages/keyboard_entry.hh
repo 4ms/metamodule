@@ -67,6 +67,16 @@ struct KeyboardEntry {
 		}
 	}
 
+	void hide() {
+		lv_obj_clear_state(text_field, LV_STATE_USER_1);
+		lv_group_focus_obj(text_field);
+		lv_group_remove_obj(ui_Keyboard);
+		lv_hide(ui_Keyboard);
+		kb_visible = false;
+
+		lv_group_activate(parent_group);
+	}
+
 private:
 	void reset_keyboard() {
 		while (lv_obj_remove_event_cb(ui_Keyboard, nullptr))
@@ -76,16 +86,6 @@ private:
 		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
 
 		lv_hide(ui_Keyboard);
-	}
-
-	void hide() {
-		lv_obj_clear_state(text_field, LV_STATE_USER_1);
-		lv_group_focus_obj(text_field);
-		lv_group_remove_obj(ui_Keyboard);
-		lv_hide(ui_Keyboard);
-		kb_visible = false;
-
-		lv_group_activate(parent_group);
 	}
 
 	void save() {
