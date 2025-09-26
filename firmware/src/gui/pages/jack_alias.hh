@@ -3,6 +3,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "patch/patch_data.hh"
 
 namespace MetaModule
 {
@@ -12,7 +13,7 @@ struct JackAliasNameEdit {
 	JackAliasNameEdit(GuiState &gui_state)
 		: group{lv_group_create()}
 		, text_field_popup{lv_obj_create(lv_layer_top())}
-		, text_field{lv_label_create(text_field_popup)}
+		, text_field{lv_textarea_create(text_field_popup)}
 		, gui_state{gui_state} {
 		lv_hide(text_field_popup);
 		lv_hide(text_field);
@@ -98,7 +99,7 @@ struct JackAliasNameEdit {
 		lv_group_activate(parent_group);
 	}
 
-	void show_keyboard(uint32_t panel_jack_id, bool is_input) {
+	void show_keyboard(uint32_t panel_jack_id, bool is_input, PatchData *patch) {
 		lv_show(text_field_popup);
 		lv_show(text_field);
 		lv_show(ui_Keyboard);
@@ -111,6 +112,24 @@ struct JackAliasNameEdit {
 
 		lv_keyboard_set_textarea(ui_Keyboard, text_field);
 		lv_obj_add_state(text_field, LV_STATE_USER_1);
+
+		if (is_input) {
+			if (auto map = patch->find_mapped_injack(panel_jack_id)) {
+				if (map->alias_name.length())
+					alias = std::string_view{map->alias_name};
+				else
+					alias = "In Jack " + std::to_string(panel_jack_id + 1);
+			}
+		} else {
+			if (auto map = patch->find_mapped_outjack(panel_jack_id)) {
+				if (map->alias_name.length())
+					alias = std::string_view{map->alias_name};
+				else
+					alias = "Out Jack " + std::to_string(panel_jack_id + 1);
+			}
+		}
+
+		lv_textarea_set_text(text_field, alias.c_str());
 
 		kb_visible = true;
 	}

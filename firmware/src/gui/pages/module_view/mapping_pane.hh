@@ -258,6 +258,11 @@ struct ModuleViewMappingPane {
 				midi_map_popup.hide();
 		}
 
+		else if (jack_alias_editor.is_visible())
+		{
+			jack_alias_editor.back();
+		}
+
 		else
 			should_close = true;
 	}
@@ -835,7 +840,7 @@ private:
 		if (lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN)) {
 			if (auto userdata = lv_obj_get_user_data(event->target)) {
 				if (auto panelmap = PanelJackMapUserData(reinterpret_cast<uintptr_t>(userdata)); panelmap.is_valid) {
-					page->jack_alias_editor.show_keyboard(panelmap.panel_jack_id, panelmap.is_input);
+					page->jack_alias_editor.show_keyboard(panelmap.panel_jack_id, panelmap.is_input, page->patch);
 				}
 			}
 		}
