@@ -75,8 +75,7 @@ struct ModuleViewMappingPane {
 		, control_popup{patches, patch_mod_queue, playloader}
 		, midi_map_popup{params}
 		, patch_mod_queue{patch_mod_queue}
-		, patches{patches}
-		, keyboard_entry{gui_state} {
+		, patches{patches} {
 
 		lv_obj_add_event_cb(ui_ResetButton, reset_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
@@ -412,7 +411,7 @@ private:
 
 		lv_group_add_obj(pane_group, obj);
 
-		lv_obj_add_event_cb(obj, rename_jackalias_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(obj, click_panelmap_item_cb, LV_EVENT_CLICKED, this);
 
 		PanelJackMapUserData val;
 		val.is_input = false;
@@ -425,7 +424,7 @@ private:
 
 		lv_group_add_obj(pane_group, obj);
 
-		lv_obj_add_event_cb(obj, rename_jackalias_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(obj, click_panelmap_item_cb, LV_EVENT_CLICKED, this);
 
 		PanelJackMapUserData val;
 		val.is_input = true;
@@ -833,7 +832,7 @@ private:
 		}
 	}
 
-	static void rename_jackalias_cb(lv_event_t *event) {
+	static void click_panelmap_item_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 
@@ -853,24 +852,11 @@ private:
 	}
 
 	void show_jack_alias_keyboard(PanelJackMapUserData panelmap, lv_obj_t *obj) {
-		std::string alias;
-		if (panelmap.is_input) {
-			if (auto map = patch->find_mapped_injack(panelmap.panel_jack_id)) {
-				alias = map->alias_name.length() ? std::string(map->alias_name) :
-												   "Panel " + get_panel_name(JackInput{}, panelmap.panel_jack_id);
-			}
-		} else {
-			if (auto map = patch->find_mapped_outjack(panelmap.panel_jack_id)) {
-				alias = map->alias_name.length() ? std::string(map->alias_name) :
-												   "Panel " + get_panel_name(JackOutput{}, panelmap.panel_jack_id);
-			}
-		}
-
-		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		auto alias_text_obj = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 
 		lv_obj_set_y(ui_Keyboard, 144);
 
-		keyboard_entry.show_keyboard(setname, alias, [panelmap = panelmap, this](std::string_view text) {
+		keyboard_entry.show_keyboard(alias_text_obj, [panelmap = panelmap, this](std::string_view text) {
 			if (panelmap.is_input)
 				patch->set_panel_in_alias(panelmap.panel_jack_id, text);
 			else

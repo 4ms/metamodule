@@ -10,7 +10,7 @@ namespace MetaModule
 
 struct KeyboardEntry {
 
-	KeyboardEntry(GuiState &gui_state)
+	KeyboardEntry()
 		: group{lv_group_create()} {
 	}
 
@@ -21,9 +21,7 @@ struct KeyboardEntry {
 		kb_popup.init(parent_obj, parent_group);
 	}
 
-	void show_keyboard(lv_obj_t *textarea_field,
-					   std::string_view text,
-					   FunctionSized<16, void(std::string_view)> save_callback) {
+	void show_keyboard(lv_obj_t *textarea_field, FunctionSized<16, void(std::string_view)> save_callback) {
 		text_field = textarea_field;
 		save_cb = save_callback;
 
@@ -38,8 +36,7 @@ struct KeyboardEntry {
 		lv_keyboard_set_textarea(ui_Keyboard, text_field);
 		lv_obj_add_state(text_field, LV_STATE_USER_1);
 
-		text_value = text;
-		lv_textarea_set_text(text_field, text_value.c_str());
+		text_value = lv_textarea_get_text(text_field);
 
 		kb_visible = true;
 	}
