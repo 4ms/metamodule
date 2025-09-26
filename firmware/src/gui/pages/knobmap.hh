@@ -5,6 +5,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/knob_arc.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -25,8 +26,7 @@ struct KnobMapPage : PageBase {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
-		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_PRESSED, this);
-		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_RELEASED, this);
+		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MinSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MaxSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_ModuleMapToggleSwitch, slider_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -79,17 +79,8 @@ struct KnobMapPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		// remove all callbacks
-		while (lv_obj_remove_event_cb(ui_Keyboard, nullptr))
-			;
-		lv_obj_add_event_cb(ui_Keyboard, lv_keyboard_def_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
-		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
-		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
-
-		lv_obj_set_parent(ui_Keyboard, ui_EditMappingPage);
+		keyboard_entry.prepare_focus(ui_EditMappingPage, group);
 		lv_obj_set_y(ui_Keyboard, 1);
-
-		lv_hide(ui_Keyboard);
 
 		patch = patches.get_view_patch();
 
@@ -180,16 +171,17 @@ struct KnobMapPage : PageBase {
 
 	void update() override {
 		if (gui_state.back_button.is_just_released()) {
-			if (kb_visible) {
-				if (map.alias_name.is_equal(lv_textarea_get_text(ui_AliasTextArea)))
-					save_knob_alias(false);
-				else
-					del_popup.show([this](bool ok) { save_knob_alias(ok); }, "Do you want to keep your edits?", "Keep");
+
+			if (keyboard_entry.is_visible()) {
+				keyboard_entry.back();
+
 			} else if (del_popup.is_visible()) {
 				del_popup.hide();
+
 			} else if (lv_dropdown_is_open(ui_EditMapMidiChannelDropdown)) {
 				lv_dropdown_close(ui_EditMapMidiChannelDropdown);
 				lv_group_set_editing(group, false);
+
 			} else {
 				page_list.request_last_page();
 			}
@@ -286,25 +278,19 @@ struct KnobMapPage : PageBase {
 			return;
 		auto page = static_cast<KnobMapPage *>(event->user_data);
 
-		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
-		if (kb_hidden) {
-			lv_show(ui_Keyboard);
-			lv_keyboard_set_textarea(ui_Keyboard, ui_AliasTextArea);
-			page->kb_visible = true;
-			lv_obj_add_state(ui_AliasTextArea, LV_STATE_USER_1);
-			lv_group_add_obj(page->group, ui_Keyboard);
-			lv_group_focus_obj(ui_Keyboard);
-		}
-	}
-
-	static void keyboard_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN))
 			return;
 
-		auto page = static_cast<KnobMapPage *>(event->user_data);
-		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
-			page->save_knob_alias(event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL);
-		}
+		page->show_keyboard();
+	}
+
+	void show_keyboard() {
+		keyboard_entry.show_keyboard(ui_AliasTextArea, [this](std::string_view text) {
+			map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
+			patch->add_update_mapped_knob(view_set_idx, map);
+			patches.mark_view_patch_modified();
+		});
+		kb_visible = true;
 	}
 
 	static void edit_cb(lv_event_t *event) {
@@ -381,22 +367,6 @@ struct KnobMapPage : PageBase {
 		page->patches.mark_view_patch_modified();
 	}
 
-	void save_knob_alias(bool save) {
-		lv_obj_clear_state(ui_AliasTextArea, LV_STATE_USER_1);
-		lv_group_focus_obj(ui_AliasTextArea);
-		lv_group_remove_obj(ui_Keyboard);
-		lv_hide(ui_Keyboard);
-		kb_visible = false;
-
-		if (save) {
-			map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
-			patch->add_update_mapped_knob(view_set_idx, map);
-			patches.mark_view_patch_modified();
-		}
-
-		update_alias_text_area();
-	}
-
 	void update_alias_text_area() {
 		const auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
 		if (map.alias_name.length()) {
@@ -418,14 +388,14 @@ private:
 
 	ConfirmPopup del_popup;
 
-	// AddMapPopUp add_map_popup;
-
 	bool kb_visible = false;
 
 	uint32_t view_set_idx = 0;
 
 	bool is_actively_playing = false;
 	bool is_patch_playing = false;
+
+	KeyboardEntry keyboard_entry;
 };
 
 } // namespace MetaModule
