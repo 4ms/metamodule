@@ -439,8 +439,18 @@ private:
 			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
 
+			auto sugg_sr = next_patch->suggested_samplerate;
+			auto sugg_bs = next_patch->suggested_blocksize;
+			auto [cur_sr, cur_bs, _] = get_audio_settings();
+			pr_dbg("Patch file: %u/%u, current: %u/%u\n", sugg_sr, sugg_bs, cur_sr, cur_bs);
+			if ((sugg_sr > 0 && sugg_sr != cur_sr) || (sugg_bs > 0 && sugg_sr != cur_sr)) {
+				pr_dbg("Request new audio settings %u/%u\n", sugg_sr ? sugg_sr : cur_sr, sugg_bs ? sugg_bs : cur_bs);
+				request_new_audio_settings(sugg_sr ? sugg_sr : cur_sr, sugg_bs ? sugg_bs : cur_bs, 1);
+			}
+
 			if (start_audio_immediately)
 				start_audio();
+
 		} else {
 			patches_.close_playing_patch();
 		}
