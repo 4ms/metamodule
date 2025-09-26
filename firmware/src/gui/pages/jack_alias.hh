@@ -11,13 +11,22 @@ struct JackAliasNameEdit {
 
 	JackAliasNameEdit(GuiState &gui_state)
 		: group{lv_group_create()}
-		, text_field{lv_label_create(nullptr)}
+		, text_field_popup{lv_obj_create(lv_layer_top())}
+		, text_field{lv_label_create(text_field_popup)}
 		, gui_state{gui_state} {
+		lv_hide(text_field_popup);
 		lv_hide(text_field);
-		lv_obj_set_x(text_field, 100);
-		lv_obj_set_y(text_field, 100);
-		lv_obj_set_size(text_field, 200, 28);
+
+		lv_obj_set_align(text_field_popup, LV_ALIGN_TOP_MID);
+		lv_obj_set_pos(text_field_popup, 0, 0);
+		lv_obj_set_size(text_field_popup, lv_pct(100), lv_pct(80));
 		lv_obj_set_style_bg_color(text_field, lv_color_hex(0x333333), 0);
+		lv_obj_set_style_bg_opa(text_field, LV_OPA_100, 0);
+
+		lv_obj_set_pos(text_field, 0, 0);
+		lv_obj_set_size(text_field, 160, 28);
+		lv_obj_set_align(text_field, LV_ALIGN_TOP_MID);
+		lv_obj_set_style_bg_color(text_field, lv_color_hex(0x666666), 0);
 		lv_obj_set_style_bg_opa(text_field, LV_OPA_100, 0);
 
 		lv_obj_set_style_border_color(text_field, lv_color_hex(0x999999), 0);
@@ -26,30 +35,33 @@ struct JackAliasNameEdit {
 		lv_group_add_obj(group, text_field);
 	}
 
-	void prepare_focus(lv_obj_t *parent_obj, lv_group_t *group) {
+	void prepare_focus(lv_obj_t *, lv_group_t *group) {
 		parent_group = group;
-		reset_keyboard(parent_obj);
-		kb_popup.init(parent_obj, parent_group);
+		reset_keyboard(text_field_popup);
+		kb_popup.init(text_field_popup, parent_group);
 	}
 
 	void update() {
-		if (!kb_visible)
-			lv_group_set_editing(group, false);
+		// if (!kb_visible)
+		// 	lv_group_set_editing(group, false);
 
-		if (!text_field)
-			return;
+		// if (!text_field)
+		// 	return;
+	}
 
-		if (gui_state.back_button.is_just_released()) {
-			if (kb_visible) {
-				if (alias == lv_textarea_get_text(text_field)) {
-					save_jackalias_name(false);
-				} else {
-					kb_popup.show(
-						[this](bool ok) { save_jackalias_name(ok); }, "Do you want to keep your edits?", "Keep");
-				}
-			} else if (kb_popup.is_visible()) {
-				kb_popup.hide();
+	bool is_visible() const {
+		return kb_visible;
+	}
+
+	void back() {
+		if (kb_visible) {
+			if (alias == lv_textarea_get_text(text_field)) {
+				save_jackalias_name(false);
+			} else {
+				kb_popup.show([this](bool ok) { save_jackalias_name(ok); }, "Do you want to keep your edits?", "Keep");
 			}
+		} else if (kb_popup.is_visible()) {
+			kb_popup.hide();
 		}
 	}
 
@@ -64,7 +76,7 @@ struct JackAliasNameEdit {
 		lv_obj_set_y(ui_Keyboard, 40);
 
 		lv_hide(ui_Keyboard);
-		lv_hide(text_field);
+		lv_hide(text_field_popup);
 	}
 
 	void save_jackalias_name(bool save = true) {
@@ -76,21 +88,31 @@ struct JackAliasNameEdit {
 
 		if (save) {
 			alias = lv_textarea_get_text(text_field);
+			printf("Save alias: %s\n", alias.c_str());
+
 			// patches.mark_view_patch_modified();
 		}
 
 		// update_knobset_text_area();
+
+		lv_group_activate(parent_group);
 	}
 
 	void show_keyboard(uint32_t panel_jack_id, bool is_input) {
-		lv_show(ui_Keyboard);
+		lv_show(text_field_popup);
 		lv_show(text_field);
+		lv_show(ui_Keyboard);
+
 		lv_group_add_obj(group, ui_Keyboard);
 		lv_group_focus_obj(ui_Keyboard);
 		lv_group_set_editing(group, true);
+
+		lv_group_activate(group);
+
 		lv_keyboard_set_textarea(ui_Keyboard, text_field);
-		kb_visible = true;
 		lv_obj_add_state(text_field, LV_STATE_USER_1);
+
+		kb_visible = true;
 	}
 
 	static void keyboard_cb(lv_event_t *event) {
@@ -106,7 +128,10 @@ struct JackAliasNameEdit {
 private:
 	lv_group_t *group = nullptr;
 	lv_group_t *parent_group = nullptr;
+
+	lv_obj_t *text_field_popup;
 	lv_obj_t *text_field;
+
 	bool kb_visible = false;
 	GuiState &gui_state;
 	ConfirmPopup kb_popup;

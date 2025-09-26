@@ -33,11 +33,11 @@ struct MapCableUserData {
 struct PanelJackMapUserData {
 	uint32_t panel_jack_id;
 	bool is_input;
-	bool is_valid;
+	bool is_valid = true;
 
 	PanelJackMapUserData() = default;
 
-	PanelJackMapUserData(uint32_t raw) {
+	PanelJackMapUserData(uintptr_t raw) {
 		is_input = raw & (1 << 31);
 		panel_jack_id = raw & ~(1 << 31);
 
@@ -45,7 +45,7 @@ struct PanelJackMapUserData {
 		panel_jack_id = panel_jack_id - 1;
 	}
 
-	operator uint32_t() {
+	operator uintptr_t() {
 		return (panel_jack_id + 1) | (is_input << 31);
 	}
 };
@@ -410,10 +410,9 @@ private:
 		lv_obj_add_event_cb(obj, rename_jackalias_cb, LV_EVENT_CLICKED, this);
 
 		PanelJackMapUserData val;
-		val.is_valid = true;
 		val.is_input = false;
 		val.panel_jack_id = panel_jack->panel_jack_id;
-		lv_obj_set_user_data(obj, reinterpret_cast<void *>((uint32_t)val));
+		lv_obj_set_user_data(obj, reinterpret_cast<void *>((uintptr_t)val));
 	}
 
 	void make_selectable_panel_jack_item(lv_obj_t *obj, const MappedInputJack *panel_jack) {
@@ -423,10 +422,9 @@ private:
 		lv_obj_add_event_cb(obj, rename_jackalias_cb, LV_EVENT_CLICKED, this);
 
 		PanelJackMapUserData val;
-		val.is_valid = true;
 		val.is_input = true;
 		val.panel_jack_id = panel_jack->panel_jack_id;
-		lv_obj_set_user_data(obj, reinterpret_cast<void *>((uint32_t)val));
+		lv_obj_set_user_data(obj, reinterpret_cast<void *>((uintptr_t)val));
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
@@ -832,14 +830,13 @@ private:
 	static void rename_jackalias_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
+
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 		if (lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN)) {
-			// send input/output and id
-			auto userdata = lv_obj_get_user_data(event->target);
-			if (userdata) {
-				auto panelmap = PanelJackMapUserData(reinterpret_cast<uint32_t>(userdata));
-				if (panelmap.is_valid)
+			if (auto userdata = lv_obj_get_user_data(event->target)) {
+				if (auto panelmap = PanelJackMapUserData(reinterpret_cast<uintptr_t>(userdata)); panelmap.is_valid) {
 					page->jack_alias_editor.show_keyboard(panelmap.panel_jack_id, panelmap.is_input);
+				}
 			}
 		}
 	}
