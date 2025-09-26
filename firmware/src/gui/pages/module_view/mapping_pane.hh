@@ -856,28 +856,26 @@ private:
 		std::string alias;
 		if (panelmap.is_input) {
 			if (auto map = patch->find_mapped_injack(panelmap.panel_jack_id)) {
-				if (map->alias_name.length())
-					alias = std::string_view{map->alias_name};
-				else
-					alias = "Panel In " + std::to_string(panelmap.panel_jack_id + 1);
+				alias = map->alias_name.length() ? std::string(map->alias_name) :
+												   "Panel " + get_panel_name(JackInput{}, panelmap.panel_jack_id);
 			}
 		} else {
 			if (auto map = patch->find_mapped_outjack(panelmap.panel_jack_id)) {
-				if (map->alias_name.length())
-					alias = std::string_view{map->alias_name};
-				else
-					alias = "Panel Out " + std::to_string(panelmap.panel_jack_id + 1);
+				alias = map->alias_name.length() ? std::string(map->alias_name) :
+												   "Panel " + get_panel_name(JackOutput{}, panelmap.panel_jack_id);
 			}
 		}
 
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 
 		lv_obj_set_y(ui_Keyboard, 144);
+
 		keyboard_entry.show_keyboard(setname, alias, [panelmap = panelmap, this](std::string_view text) {
 			if (panelmap.is_input)
 				patch->set_panel_in_alias(panelmap.panel_jack_id, text);
 			else
 				patch->set_panel_out_alias(panelmap.panel_jack_id, text);
+			patches.mark_view_patch_modified();
 		});
 	}
 
