@@ -19,8 +19,6 @@ struct KnobMapPage : PageBase {
 	constexpr static unsigned min_arc = 160;
 	constexpr static unsigned max_arc = 20;
 
-	// TODO: use KeyboardEntry
-
 	KnobMapPage(PatchContext info)
 		: PageBase{info, PageId::KnobMap}
 		, base{ui_EditMappingPage}
