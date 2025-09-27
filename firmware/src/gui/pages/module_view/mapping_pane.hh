@@ -191,6 +191,7 @@ struct ModuleViewMappingPane {
 		lv_hide(ui_ControlAlert);
 		add_map_popup.hide();
 		control_popup.hide();
+		keyboard_entry.hide();
 
 		if (base_group) {
 			lv_indev_set_group(lv_indev_get_next(nullptr), base_group);
