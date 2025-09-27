@@ -6,6 +6,7 @@
 #include "gui/slsexport/prefs_pane_catchup.hh"
 #include "gui/slsexport/prefs_pane_fs.hh"
 #include "gui/slsexport/prefs_pane_midi.hh"
+#include "gui/slsexport/prefs_pane_patch_suggested_audio.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/audio_settings.hh"
 
@@ -25,6 +26,7 @@ struct PrefsTab : SystemMenuTab {
 		init_SystemPrefsCatchupPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsFSPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsMidiPane(ui_SystemMenuPrefsTab);
+		init_SystemPrefsPatchSuggestedAudioPane(ui_SystemMenuPrefsTab);
 
 		lv_obj_add_event_cb(ui_SystemPrefsSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsRevertButton, revert_cb, LV_EVENT_CLICKED, this);
@@ -39,6 +41,8 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsFSStartupPatchCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsMidiFeedbackCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_SystemPrefsPatchSuggestSampleRateCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_SystemPrefsPatchSuggestBlocksizeCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioOverrunRetriesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
@@ -50,6 +54,8 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsFSStartupPatchCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsFSMaxPatchesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsMidiFeedbackCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
+		lv_obj_add_event_cb(ui_SystemPrefsPatchSuggestSampleRateCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
+		lv_obj_add_event_cb(ui_SystemPrefsPatchSuggestBlocksizeCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 
 		lv_obj_move_foreground(ui_SystemPrefsButtonCont);
 
@@ -108,6 +114,8 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_remove_obj(ui_SystemPrefsFSStartupPatchCheck);
 		lv_group_remove_obj(ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_remove_obj(ui_SystemPrefsMidiFeedbackCheck);
+		lv_group_remove_obj(ui_SystemPrefsPatchSuggestSampleRateCheck);
+		lv_group_remove_obj(ui_SystemPrefsPatchSuggestBlocksizeCheck);
 
 		lv_group_remove_obj(ui_SystemPrefsRevertButton);
 		lv_group_remove_obj(ui_SystemPrefsSaveButton);
@@ -122,6 +130,8 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_SystemPrefsFSStartupPatchCheck);
 		lv_group_add_obj(group, ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsMidiFeedbackCheck);
+		lv_group_add_obj(group, ui_SystemPrefsPatchSuggestSampleRateCheck);
+		lv_group_add_obj(group, ui_SystemPrefsPatchSuggestBlocksizeCheck);
 
 		lv_group_add_obj(group, ui_SystemPrefsRevertButton);
 		lv_group_add_obj(group, ui_SystemPrefsSaveButton);
@@ -192,6 +202,10 @@ private:
 
 		lv_check(ui_SystemPrefsMidiFeedbackCheck, midi.midi_feedback == MidiSettings::MidiFeedback::Enabled);
 
+		// Patch suggested audio toggles
+		lv_check(ui_SystemPrefsPatchSuggestSampleRateCheck, settings.patch_suggested_audio.apply_samplerate);
+		lv_check(ui_SystemPrefsPatchSuggestBlocksizeCheck, settings.patch_suggested_audio.apply_blocksize);
+
 		gui_state.do_write_settings = false;
 
 		lv_disable(ui_SystemPrefsSaveButton);
@@ -223,6 +237,14 @@ private:
 			return AudioSettings::ValidOverrunRetries[ovr_item];
 		else
 			return AudioSettings::DefaultOverrunRetries;
+	}
+
+	bool read_patch_suggest_samplerate_check() {
+		return lv_obj_has_state(ui_SystemPrefsPatchSuggestSampleRateCheck, LV_STATE_CHECKED);
+	}
+
+	bool read_patch_suggest_blocksize_check() {
+		return lv_obj_has_state(ui_SystemPrefsPatchSuggestBlocksizeCheck, LV_STATE_CHECKED);
 	}
 
 	uint32_t read_timeout_dropdown() {
@@ -319,6 +341,18 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		// Patch suggested audio toggles
+		auto apply_sr = read_patch_suggest_samplerate_check();
+		auto apply_bs = read_patch_suggest_blocksize_check();
+		if (settings.patch_suggested_audio.apply_samplerate != apply_sr ||
+			settings.patch_suggested_audio.apply_blocksize != apply_bs)
+		{
+			settings.patch_suggested_audio.apply_samplerate = apply_sr;
+			settings.patch_suggested_audio.apply_blocksize = apply_bs;
+			patch_playloader.set_apply_suggested_audio(apply_sr, apply_bs);
+			gui_state.do_write_settings = true;
+		}
+
 		lv_disable(ui_SystemPrefsSaveButton);
 		lv_disable(ui_SystemPrefsRevertButton);
 	}
@@ -400,6 +434,8 @@ private:
 		auto catchup_exclude_buttons = page->read_catchup_exclude_check();
 		auto fs_max_patches = page->read_fs_max_open_patches();
 		auto midi_feedback = page->read_midi_feedback_check();
+		auto apply_sr = page->read_patch_suggest_samplerate_check();
+		auto apply_bs = page->read_patch_suggest_blocksize_check();
 		auto load_initial_patch = lv_obj_has_state(ui_SystemPrefsFSStartupPatchCheck, LV_STATE_CHECKED);
 
 		if (block_size == page->audio_settings.block_size && sample_rate == page->audio_settings.sample_rate &&
@@ -407,7 +443,9 @@ private:
 			knobwake == page->screensaver.knobs_can_wake && catchupmode == page->catchup.mode &&
 			catchup_exclude_buttons == page->catchup.allow_jump_outofrange &&
 			load_initial_patch == page->settings.load_initial_patch && fs_max_patches == page->fs.max_open_patches &&
-			midi_feedback == page->midi.midi_feedback)
+			midi_feedback == page->midi.midi_feedback &&
+			apply_sr == page->settings.patch_suggested_audio.apply_samplerate &&
+			apply_bs == page->settings.patch_suggested_audio.apply_blocksize)
 		{
 			lv_disable(ui_SystemPrefsSaveButton);
 			lv_disable(ui_SystemPrefsRevertButton);
@@ -426,8 +464,7 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		// if (target == ui_SystemPrefsCatchupModeDropdown || target == ui_SystemPrefsCatchupExcludeButtonsCheck ||
-		if (target == ui_SystemPrefsMidiFeedbackCheck) {
+		if (target == ui_SystemPrefsPatchSuggestSampleRateCheck || target == ui_SystemPrefsPatchSuggestBlocksizeCheck) {
 			lv_obj_scroll_to_view_recursive(ui_SystemPrefsSaveButton, LV_ANIM_ON);
 
 			// scroll to top if we select first items

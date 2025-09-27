@@ -690,42 +690,37 @@ lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slide
 	return slider_label;
 }
 
-lv_obj_t *create_midi_map_check(lv_obj_t *parent) {
+lv_obj_t *create_prefs_check(lv_obj_t *parent) {
 	auto check = lv_switch_create(parent);
-	lv_obj_set_width(check, 19);
-	lv_obj_set_height(check, 18);
-	lv_obj_set_align(check, LV_ALIGN_CENTER);
-	lv_obj_add_flag(check, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK); /// Flags
+
+	lv_obj_set_width(check, 35);
+	lv_obj_set_height(check, 20);
+	lv_obj_set_align(check, LV_ALIGN_TOP_RIGHT);
+	lv_obj_add_flag(check, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+	lv_obj_clear_flag(check,
+					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
+						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE);
 	lv_obj_set_style_radius(check, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(check, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(check, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(check, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_color(check, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_opa(check, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_width(check, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_pad(check, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_color(check, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_opa(check, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_width(check, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_pad(check, 1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 
-	lv_obj_set_style_bg_color(check, lv_color_hex(0xDDDDDD), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_opa(check, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_color(check, lv_color_hex(0x333333), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_opa(check, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_width(check, 2, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_pad(check, 1, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(check, lv_color_hex(0xDDDDDD), LV_PART_INDICATOR | LV_STATE_CHECKED);
+	lv_obj_set_style_bg_color(check, lv_color_hex(0x4067D3), LV_PART_INDICATOR | LV_STATE_CHECKED);
 	lv_obj_set_style_bg_opa(check, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
-	lv_obj_set_style_outline_color(check, lv_color_hex(0xFD8B18), LV_PART_INDICATOR | LV_STATE_FOCUS_KEY);
-	lv_obj_set_style_outline_opa(check, 255, LV_PART_INDICATOR | LV_STATE_FOCUS_KEY);
-	lv_obj_set_style_outline_width(check, 2, LV_PART_INDICATOR | LV_STATE_FOCUS_KEY);
-	lv_obj_set_style_outline_pad(check, 2, LV_PART_INDICATOR | LV_STATE_FOCUS_KEY);
 
-	lv_obj_set_style_radius(check, 20, LV_PART_KNOB | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(check, lv_color_hex(0x333333), LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(check, lv_color_hex(0xFFFFFF), LV_PART_KNOB | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(check, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(check, lv_color_hex(0xFD8B18), LV_PART_KNOB | LV_STATE_CHECKED);
-	lv_obj_set_style_bg_opa(check, 255, LV_PART_KNOB | LV_STATE_CHECKED);
-	lv_obj_set_style_outline_width(check, 0, LV_PART_KNOB | LV_STATE_CHECKED);
-	lv_obj_set_style_outline_pad(check, 0, LV_PART_KNOB | LV_STATE_CHECKED);
-	lv_obj_set_style_shadow_color(check, lv_color_hex(0xFD8B18), LV_PART_KNOB | LV_STATE_CHECKED);
-	lv_obj_set_style_shadow_opa(check, 255, LV_PART_KNOB | LV_STATE_CHECKED);
-	lv_obj_set_style_shadow_width(check, 1, LV_PART_KNOB | LV_STATE_CHECKED);
-	lv_obj_set_style_shadow_spread(check, 1, LV_PART_KNOB | LV_STATE_CHECKED);
-	lv_obj_set_style_shadow_ofs_x(check, -1, LV_PART_KNOB | LV_STATE_CHECKED);
-	lv_obj_set_style_shadow_ofs_y(check, 0, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_pad_left(check, -4, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(check, -6, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(check, -5, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(check, -5, LV_PART_KNOB | LV_STATE_DEFAULT);
 
 	return check;
 }
