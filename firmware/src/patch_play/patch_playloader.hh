@@ -25,6 +25,11 @@ struct PatchPlayLoader {
 		, patches_{patches} {
 	}
 
+	void set_apply_suggested_audio(bool apply_sr, bool apply_bs) {
+		apply_suggested_samplerate_ = apply_sr;
+		apply_suggested_blocksize_ = apply_bs;
+	}
+
 	struct AudioSRBlock {
 		uint32_t sample_rate;
 		uint32_t block_size;
@@ -339,6 +344,10 @@ private:
 	bool stopped_because_of_overrun_ = false;
 	bool should_play_when_loaded_ = true;
 
+	// Preferences: whether to apply suggested audio params from patch files
+	bool apply_suggested_samplerate_ = true;
+	bool apply_suggested_blocksize_ = true;
+
 	PatchLocation new_loc{};
 	PatchLocation old_loc{};
 	enum class RenameState { Idle, RequestSaveNew, SavingNew, RequestDeleteOld, DeletingOld };
@@ -443,9 +452,13 @@ private:
 			auto sugg_bs = next_patch->suggested_blocksize;
 			auto [cur_sr, cur_bs, _] = get_audio_settings();
 			pr_dbg("Patch file: %u/%u, current: %u/%u\n", sugg_sr, sugg_bs, cur_sr, cur_bs);
-			if ((sugg_sr > 0 && sugg_sr != cur_sr) || (sugg_bs > 0 && sugg_sr != cur_sr)) {
-				pr_dbg("Request new audio settings %u/%u\n", sugg_sr ? sugg_sr : cur_sr, sugg_bs ? sugg_bs : cur_bs);
-				request_new_audio_settings(sugg_sr ? sugg_sr : cur_sr, sugg_bs ? sugg_bs : cur_bs, 1);
+			bool change_sr = apply_suggested_samplerate_ && (sugg_sr > 0 && sugg_sr != cur_sr);
+			bool change_bs = apply_suggested_blocksize_ && (sugg_bs > 0 && sugg_bs != cur_bs);
+			if (change_sr || change_bs) {
+				uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
+				uint32_t new_bs = change_bs ? sugg_bs : cur_bs;
+				pr_dbg("Request new audio settings %u/%u\n", new_sr, new_bs);
+				request_new_audio_settings(new_sr, new_bs, 1);
 			}
 
 			if (start_audio_immediately)
