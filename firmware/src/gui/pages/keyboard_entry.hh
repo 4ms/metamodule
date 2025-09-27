@@ -46,7 +46,10 @@ struct KeyboardEntry {
 	}
 
 	void back() {
-		if (kb_visible) {
+		if (kb_popup.is_visible()) {
+			kb_popup.hide();
+
+		} else if (kb_visible && text_field) {
 			if (text_value == lv_textarea_get_text(text_field)) {
 				hide();
 			} else {
@@ -62,8 +65,6 @@ struct KeyboardEntry {
 					"Do you want to keep your edits?",
 					"Keep");
 			}
-		} else if (kb_popup.is_visible()) {
-			kb_popup.hide();
 		}
 	}
 
