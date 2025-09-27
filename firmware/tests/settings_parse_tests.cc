@@ -62,6 +62,9 @@ TEST_CASE("Parse settings file") {
 
   midi:
     midi_feedback: 1
+  patch_suggested_audio:
+    apply_samplerate: 0
+    apply_blocksize: 1
 )";
 	// clang-format on
 
@@ -112,6 +115,9 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.filesystem.max_open_patches == 7);
 
 	CHECK(settings.midi.midi_feedback == MetaModule::MidiSettings::MidiFeedback::Enabled);
+
+	CHECK(settings.patch_suggested_audio.apply_samplerate == false);
+	CHECK(settings.patch_suggested_audio.apply_blocksize == true);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -245,6 +251,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.filesystem.max_open_patches == 15);
 
 	CHECK(settings.midi.midi_feedback == MetaModule::MidiSettings::MidiFeedback::Enabled);
+
+	CHECK(settings.patch_suggested_audio.apply_samplerate == true);
+	CHECK(settings.patch_suggested_audio.apply_blocksize == true);
 }
 
 TEST_CASE("Serialize settings") {
@@ -293,6 +302,9 @@ TEST_CASE("Serialize settings") {
 	settings.filesystem.auto_reload_patch_file = false;
 
 	settings.midi.midi_feedback = MetaModule::MidiSettings::MidiFeedback::Disabled;
+
+	settings.patch_suggested_audio.apply_samplerate = false;
+	settings.patch_suggested_audio.apply_blocksize = true;
 
 	// clang format-off
 	std::string expected = R"(Settings:
@@ -347,6 +359,9 @@ TEST_CASE("Serialize settings") {
     max_open_patches: 8
   midi:
     midi_feedback: 0
+  patch_suggested_audio:
+    apply_samplerate: 0
+    apply_blocksize: 1
 )";
 	// clang format-on
 

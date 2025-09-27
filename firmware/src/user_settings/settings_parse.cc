@@ -146,6 +146,17 @@ static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, PatchSuggestedAudioSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	read_or_default(node, "apply_samplerate", settings, &PatchSuggestedAudioSettings::apply_samplerate);
+	read_or_default(node, "apply_blocksize", settings, &PatchSuggestedAudioSettings::apply_blocksize);
+	settings->make_valid();
+
+	return true;
+}
+
 namespace Settings
 {
 
@@ -172,6 +183,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "catchup", settings, &UserSettings::catchup);
 	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
 	read_or_default(node, "midi", settings, &UserSettings::midi);
+	read_or_default(node, "patch_suggested_audio", settings, &UserSettings::patch_suggested_audio);
 
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::initial_patch_name);
 	// TODO: cleaner way to parse an enum and reject out of range?
