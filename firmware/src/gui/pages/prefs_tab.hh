@@ -28,6 +28,11 @@ struct PrefsTab : SystemMenuTab {
 		init_SystemPrefsMidiPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsPatchSuggestedAudioPane(ui_SystemMenuPrefsTab);
 
+		auto sr_idx = lv_obj_get_child_id(ui_SystemPrefsAudioSamplerateCont);
+		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestSampleRateCont, sr_idx + 1);
+		auto bs_idx = lv_obj_get_child_id(ui_SystemPrefsAudioBlocksizeCont);
+		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestBlocksizeCont, bs_idx + 1);
+
 		lv_obj_add_event_cb(ui_SystemPrefsSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsRevertButton, revert_cb, LV_EVENT_CLICKED, this);
 
@@ -105,7 +110,9 @@ struct PrefsTab : SystemMenuTab {
 		this->group = group;
 
 		lv_group_remove_obj(ui_SystemPrefsAudioSampleRateDropdown);
+		lv_group_remove_obj(ui_SystemPrefsPatchSuggestSampleRateCheck);
 		lv_group_remove_obj(ui_SystemPrefsAudioBlocksizeDropdown);
+		lv_group_remove_obj(ui_SystemPrefsPatchSuggestBlocksizeCheck);
 		lv_group_remove_obj(ui_SystemPrefsAudioOverrunRetriesDropdown);
 		lv_group_remove_obj(ui_SystemPrefsScreensaverTimeDropdown);
 		lv_group_remove_obj(ui_SystemPrefsScreensaverKnobsCheck);
@@ -114,14 +121,14 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_remove_obj(ui_SystemPrefsFSStartupPatchCheck);
 		lv_group_remove_obj(ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_remove_obj(ui_SystemPrefsMidiFeedbackCheck);
-		lv_group_remove_obj(ui_SystemPrefsPatchSuggestSampleRateCheck);
-		lv_group_remove_obj(ui_SystemPrefsPatchSuggestBlocksizeCheck);
 
 		lv_group_remove_obj(ui_SystemPrefsRevertButton);
 		lv_group_remove_obj(ui_SystemPrefsSaveButton);
 
 		lv_group_add_obj(group, ui_SystemPrefsAudioSampleRateDropdown);
+		lv_group_add_obj(group, ui_SystemPrefsPatchSuggestSampleRateCheck);
 		lv_group_add_obj(group, ui_SystemPrefsAudioBlocksizeDropdown);
+		lv_group_add_obj(group, ui_SystemPrefsPatchSuggestBlocksizeCheck);
 		lv_group_add_obj(group, ui_SystemPrefsAudioOverrunRetriesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverTimeDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsScreensaverKnobsCheck);
@@ -130,8 +137,6 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_SystemPrefsFSStartupPatchCheck);
 		lv_group_add_obj(group, ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsMidiFeedbackCheck);
-		lv_group_add_obj(group, ui_SystemPrefsPatchSuggestSampleRateCheck);
-		lv_group_add_obj(group, ui_SystemPrefsPatchSuggestBlocksizeCheck);
 
 		lv_group_add_obj(group, ui_SystemPrefsRevertButton);
 		lv_group_add_obj(group, ui_SystemPrefsSaveButton);
@@ -349,7 +354,6 @@ private:
 		{
 			settings.patch_suggested_audio.apply_samplerate = apply_sr;
 			settings.patch_suggested_audio.apply_blocksize = apply_bs;
-			patch_playloader.set_apply_suggested_audio(apply_sr, apply_bs);
 			gui_state.do_write_settings = true;
 		}
 
@@ -464,7 +468,7 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == ui_SystemPrefsPatchSuggestSampleRateCheck || target == ui_SystemPrefsPatchSuggestBlocksizeCheck) {
+		if (target == ui_SystemPrefsMidiFeedbackCheck) {
 			lv_obj_scroll_to_view_recursive(ui_SystemPrefsSaveButton, LV_ANIM_ON);
 
 			// scroll to top if we select first items
