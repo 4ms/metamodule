@@ -58,6 +58,9 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 
 	preload_plugins();
 
+	patch_playloader.connect_user_settings(&settings);
+	patch_playloader.update_param_catchup_mode();
+
 	patch_playloader.notify_audio_is_muted();
 	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";
 
@@ -67,8 +70,6 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 
 	params.set_output_plugged(cur_outchan_left, true);
 	params.set_output_plugged(cur_outchan_right, true);
-
-	patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.allow_jump_outofrange);
 
 	plugin_interface.register_interface();
 }

@@ -324,7 +324,7 @@ private:
 		if (catchup.mode != catchupmode || catchup.allow_jump_outofrange != catchup_exclude_buttons) {
 			catchup.mode = catchupmode;
 			catchup.allow_jump_outofrange = catchup_exclude_buttons;
-			patch_playloader.set_all_param_catchup_mode(catchup.mode, catchup.allow_jump_outofrange);
+			patch_playloader.update_param_catchup_mode();
 			gui_state.do_write_settings = true;
 		}
 

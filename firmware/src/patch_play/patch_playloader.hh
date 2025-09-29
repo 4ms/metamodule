@@ -9,7 +9,7 @@
 #include "patch_to_yaml.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
-#include "user_settings/audio_settings.hh"
+#include "user_settings/settings.hh"
 #include <atomic>
 
 size_t get_heap_size();
@@ -24,16 +24,6 @@ struct PatchPlayLoader {
 		, storage_{patch_storage}
 		, patches_{patches} {
 	}
-
-	void set_apply_suggested_audio(bool apply_sr, bool apply_bs) {
-		apply_suggested_samplerate_ = apply_sr;
-		apply_suggested_blocksize_ = apply_bs;
-	}
-
-	struct AudioSRBlock {
-		uint32_t sample_rate;
-		uint32_t block_size;
-	};
 
 	void load_initial_patch(std::string_view patchname, Volume patch_vol) {
 		uint32_t tries = 10000;
@@ -289,6 +279,11 @@ struct PatchPlayLoader {
 		}
 	}
 
+	struct AudioSRBlock {
+		uint32_t sample_rate;
+		uint32_t block_size;
+	};
+
 	void request_new_audio_settings(uint32_t sample_rate, uint32_t block_size, uint32_t max_retries) {
 		new_audio_settings_.store(AudioSRBlock{.sample_rate = sample_rate, .block_size = block_size});
 		max_audio_retries = max_retries;
@@ -297,6 +292,10 @@ struct PatchPlayLoader {
 	AudioSettings get_audio_settings() {
 		auto [sr, bs] = new_audio_settings_.load();
 		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
+	}
+
+	void connect_user_settings(UserSettings *settings) {
+		settings_ = settings;
 	}
 
 	template<typename PluginModuleType>
@@ -315,8 +314,8 @@ struct PatchPlayLoader {
 		return player_.is_param_tracking(module_id, param_id);
 	}
 
-	void set_all_param_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange) {
-		player_.set_catchup_mode(mode, allow_jump_outofrange);
+	void update_param_catchup_mode() {
+		player_.set_catchup_mode(settings_->catchup.mode, settings_->catchup.allow_jump_outofrange);
 	}
 
 	void get_module_states() {
@@ -344,18 +343,15 @@ private:
 	bool stopped_because_of_overrun_ = false;
 	bool should_play_when_loaded_ = true;
 
-	// Preferences: whether to apply suggested audio params from patch files
-	bool apply_suggested_samplerate_ = true;
-	bool apply_suggested_blocksize_ = true;
+	UserSettings *settings_ = nullptr;
+	std::atomic<AudioSRBlock> new_audio_settings_ = {};
+	unsigned max_audio_retries = 0;
 
 	PatchLocation new_loc{};
 	PatchLocation old_loc{};
 	enum class RenameState { Idle, RequestSaveNew, SavingNew, RequestDeleteOld, DeletingOld };
 	RenameState rename_state_{RenameState::Idle};
 	uint32_t attempts = 0;
-
-	std::atomic<AudioSRBlock> new_audio_settings_ = {};
-	unsigned max_audio_retries = 0;
 
 	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
@@ -440,7 +436,7 @@ private:
 		} else if (next_patch != patches_.get_playing_patch()) {
 			// This happens when loading calibration patches
 			// It might also happen if we implement MIDI PC -> patch load
-			pr_warn("Open patch manager does is not tracking the playing patch\n");
+			pr_warn("Open patch manager is not tracking the playing patch\n");
 		}
 
 		auto result = player_.load_patch(*next_patch);
@@ -448,17 +444,26 @@ private:
 			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
 
-			auto sugg_sr = next_patch->suggested_samplerate;
-			auto sugg_bs = next_patch->suggested_blocksize;
-			auto [cur_sr, cur_bs, _] = get_audio_settings();
-			pr_dbg("Patch file: %u/%u, current: %u/%u\n", sugg_sr, sugg_bs, cur_sr, cur_bs);
-			bool change_sr = apply_suggested_samplerate_ && (sugg_sr > 0 && sugg_sr != cur_sr);
-			bool change_bs = apply_suggested_blocksize_ && (sugg_bs > 0 && sugg_bs != cur_bs);
-			if (change_sr || change_bs) {
-				uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
-				uint32_t new_bs = change_bs ? sugg_bs : cur_bs;
-				pr_dbg("Request new audio settings %u/%u\n", new_sr, new_bs);
-				request_new_audio_settings(new_sr, new_bs, 1);
+			if (settings_) {
+				auto sugg_sr = next_patch->suggested_samplerate;
+				auto sugg_bs = next_patch->suggested_blocksize;
+				auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
+
+				bool change_sr =
+					settings_->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
+				bool change_bs = settings_->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
+
+				if (change_sr || change_bs) {
+					uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
+					uint32_t new_bs = change_bs ? sugg_bs : cur_bs;
+					pr_dbg("Request new audio settings %u/%u\n", new_sr, new_bs);
+					request_new_audio_settings(new_sr, new_bs, max_retries);
+
+					settings_->audio.block_size = new_bs;
+					settings_->audio.sample_rate = new_sr;
+				}
+			} else {
+				pr_err("Patch Play Loader not initialized with user settings\n");
 			}
 
 			if (start_audio_immediately)
