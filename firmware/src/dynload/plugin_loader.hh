@@ -63,6 +63,13 @@ public:
 		return &plugin_files;
 	}
 
+	StaticString<255> plugin_name(unsigned idx) {
+		if (idx < plugin_files.size())
+			return plugin_files[idx].plugin_name;
+		else
+			return "";
+	}
+
 	Status process(LoadedPluginList &loaded_plugins) {
 		if (!plugin_file_list)
 			status.state = State::NotInit;

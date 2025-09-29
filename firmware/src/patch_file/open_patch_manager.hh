@@ -29,6 +29,7 @@ public:
 
 			pr_dbg("Open patch found already, will replace the patch data: is_playing=%d\n", patch_is_playing);
 			patch = existing_patch;
+			patch->patch = PatchData{};
 
 		} else {
 			pr_dbg("Adding new patch '%s' on vol:%d\n", patch_loc.filename.data(), patch_loc.vol);

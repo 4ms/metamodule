@@ -22,6 +22,19 @@ void ModuleViewPage::handle_quick_assign() {
 
 	quickmap_rotary_button.register_state(metaparams.rotary_button.is_pressed());
 
+	// Clear events when the button is first pressed
+	if (quickmap_rotary_button.is_just_pressed()) {
+		metaparams.ext_buttons_high_events = 0;
+
+		if (gui_state.midi_quick_mapping_mode) {
+			if (gui_state.midi_quick_mapping_mode) {
+				for (auto &cc : params.midi_ccs)
+					cc.changed = false;
+				params.last_midi_note.changed = false;
+			}
+		}
+	}
+
 	if (quickmap_rotary_button.is_pressed()) {
 		if (is_param) {
 			// Parameter quick assign: hold encoder + wiggle knob
@@ -34,6 +47,12 @@ void ModuleViewPage::handle_quick_assign() {
 				i++;
 			}
 
+			// Button expander quick assign
+			if (auto firstbit = std::countr_zero(metaparams.ext_buttons_high_events); firstbit < 32) {
+				metaparams.ext_buttons_high_events = 0;
+				perform_knob_assign(firstbit + FirstButton, current_element);
+			}
+
 			// Push+turn to adjust param manually
 			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
 				mapping_pane.show_control_popup(group, ui_ElementRollerPanel, *current_element);
@@ -44,16 +63,6 @@ void ModuleViewPage::handle_quick_assign() {
 			}
 
 			if (gui_state.midi_quick_mapping_mode) {
-
-				// Clear all MIDI events when the button is first pressed
-				if (quickmap_rotary_button.is_just_pressed()) {
-					if (gui_state.midi_quick_mapping_mode) {
-						for (auto &cc : params.midi_ccs)
-							cc.changed = false;
-						params.last_midi_note.changed = false;
-					}
-				}
-
 				// MIDI CC quick assign: hold encoder + send MIDI CC
 				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
 					if (cc.changed) {
@@ -120,7 +129,8 @@ void ModuleViewPage::handle_encoder_back_removal() {
 		uint16_t module_id = (uint16_t)current_element->gui_element.module_idx;
 		uint16_t param_id = (uint16_t)current_element->gui_element.idx.param_idx;
 
-		remove_existing_mappings_for_param(module_id, param_id);
+		remove_mappings(module_id, param_id, PatchData::MIDIKnobSet);
+		remove_mappings(module_id, param_id, active_knobset);
 
 	} else if (is_input_jack) {
 		// Remove Input jack mappings
@@ -150,46 +160,38 @@ const DrawnElement *ModuleViewPage::get_highlighted_element() {
 	return nullptr;
 }
 
-void ModuleViewPage::remove_existing_mappings_for_param(uint16_t module_id, uint16_t param_id) {
-	uint32_t target_knobset = page_list.get_active_knobset();
+void ModuleViewPage::remove_mappings(uint16_t module_id, uint16_t param_id, unsigned target_knobset) {
 
-	// Remove ALL existing knob mappings for this parameter in this knobset (non-MIDI)
-	if (target_knobset != PatchData::MIDIKnobSet && target_knobset < patch->knob_sets.size()) {
-		auto &knobset = patch->knob_sets[target_knobset];
+	auto *knob_set = (target_knobset == PatchData::MIDIKnobSet) ? &patch->midi_maps.set :
+					 (target_knobset < patch->knob_sets.size()) ? &patch->knob_sets[target_knobset].set :
+																  nullptr;
 
-		for (const auto &mapping : knobset.set) {
+	if (knob_set) {
+		for (auto const &mapping : *knob_set) {
 			if (mapping.module_id == module_id && mapping.param_id == param_id) {
 				module_mods.put(RemoveMapping{.map = mapping, .set_id = target_knobset});
 			}
 		}
 	}
-
-	// Remove ALL existing MIDI mappings for this parameter
-	auto &midi_knobset = patch->midi_maps.set;
-	for (auto &mapping : midi_knobset) {
-		if (mapping.module_id == module_id && mapping.param_id == param_id) {
-			module_mods.put(RemoveMapping{.map = mapping, .set_id = PatchData::MIDIKnobSet});
-		}
-	}
 }
 
 void ModuleViewPage::perform_knob_assign(uint16_t knob_id, const DrawnElement *element) {
-	if (!element) {
+	if (!element)
 		return;
-	}
 
-	uint16_t module_id = (uint16_t)element->gui_element.module_idx;
-	uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
+	auto module_id = (uint16_t)element->gui_element.module_idx;
+	auto param_id = (uint16_t)element->gui_element.idx.param_idx;
 
 	// Check to see if the knob is already mapped to this parameter
 	// Ignore it if so
-	for (auto &mapping : patch->knob_sets[page_list.get_active_knobset()].set) {
+	for (auto const &mapping : patch->knob_sets[active_knobset].set) {
 		if (mapping.panel_knob_id == knob_id && mapping.module_id == module_id && mapping.param_id == param_id) {
 			return;
 		}
 	}
 
-	remove_existing_mappings_for_param(module_id, param_id);
+	// Remove all non-midi mappings to this param
+	remove_mappings(module_id, param_id, active_knobset);
 
 	auto map = MappedKnob{
 		.panel_knob_id = knob_id,
@@ -201,8 +203,7 @@ void ModuleViewPage::perform_knob_assign(uint16_t knob_id, const DrawnElement *e
 
 	// Queue the modification - this will be processed by handle_patch_mods() which will
 	// update the patch data and call refresh() automatically
-	uint32_t target_knobset = page_list.get_active_knobset();
-	module_mods.put(AddMapping{.map = map, .set_id = target_knobset});
+	module_mods.put(AddMapping{.map = map, .set_id = active_knobset});
 
 	// Suppress the next click to prevent unwanted mapping pane opening
 	suppress_next_click = true;
@@ -216,7 +217,8 @@ void ModuleViewPage::perform_midi_assign(uint16_t midi_id, const DrawnElement *e
 	uint16_t module_id = (uint16_t)element->gui_element.module_idx;
 	uint16_t param_id = (uint16_t)element->gui_element.idx.param_idx;
 
-	remove_existing_mappings_for_param(module_id, param_id);
+	// Remove all MIDI mappings to this param
+	remove_mappings(module_id, param_id, PatchData::MIDIKnobSet);
 
 	auto map = MappedKnob{
 		.panel_knob_id = midi_id,
@@ -252,7 +254,9 @@ bool ModuleViewPage::cycle_port_selection(const DrawnElement *element, int motio
 			total_ports += AudioExpander::NumInJacks;
 		}
 
-		selected_input_port = ((int)selected_input_port + motion) % total_ports;
+		if (selected_input_port == 0)
+			selected_input_port += total_ports;
+		selected_input_port = (selected_input_port + motion) % total_ports;
 
 	} else if (jack_type == ElementType::Output) {
 		unsigned total_ports = PanelDef::NumUserFacingOutJacks;
@@ -263,7 +267,8 @@ bool ModuleViewPage::cycle_port_selection(const DrawnElement *element, int motio
 		uint16_t start_port = selected_output_port;
 
 		do {
-			selected_output_port = ((int)selected_output_port + motion) % total_ports;
+			int cur = selected_output_port;
+			selected_output_port = int(cur + motion) % total_ports;
 
 			// Check if this port is available (not already mapped)
 			if (!patch->find_mapped_outjack(selected_output_port)) {
@@ -276,6 +281,10 @@ bool ModuleViewPage::cycle_port_selection(const DrawnElement *element, int motio
 			}
 
 		} while (true);
+
+		if (selected_output_port == 0)
+			selected_output_port += total_ports;
+		selected_output_port = ((int)selected_output_port + motion) % total_ports;
 	}
 	return true;
 }

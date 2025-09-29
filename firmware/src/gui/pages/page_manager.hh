@@ -16,6 +16,7 @@
 #include "gui/pages/knobmap.hh"
 #include "gui/pages/knobset_view.hh"
 #include "gui/pages/main_menu.hh"
+#include "gui/pages/midi_map_view.hh"
 #include "gui/pages/module_list.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/page_list.hh"
@@ -51,6 +52,7 @@ class PageManager {
 	SystemMenuPage page_systemmenu{info};
 	ModuleListPage page_modulelist{info};
 	JackMapViewPage page_jackmap{info};
+	MidiMapViewPage page_midimap{info};
 	FullscreenGraphicPage page_fullscreen_graphic{info};
 
 public:

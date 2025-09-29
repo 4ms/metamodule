@@ -3,6 +3,7 @@
 #include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
+#include "gui/button_exp_nav.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params_dbg_print.hh"
@@ -118,6 +119,8 @@ public:
 		auto list = plugin_manager.found_plugin_list();
 
 		for (auto i = 0u; i < list->size(); ++i) {
+			printf("Loading plugin: '%s'\n", plugin_manager.plugin_name(i).c_str());
+
 			plugin_manager.load_plugin(i);
 			auto load = true;
 			while (load) {
@@ -212,6 +215,9 @@ private:
 		}
 
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
+
+		// Experimental?
+		// button_expander_nav(metaparams);
 
 		page_manager.update_current_page();
 

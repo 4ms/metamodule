@@ -359,6 +359,11 @@ lv_obj_t *ui_KnobPanelY;
 lv_obj_t *ui_KnobContainerY;
 lv_obj_t *ui_KnobPanelZ;
 lv_obj_t *ui_KnobContainerZ;
+lv_obj_t *ui_KnobSetButtonCont;
+lv_obj_t *ui_KnobSetButtonExp1Cont;
+lv_obj_t *ui_KnobSetButtonExp2Cont;
+lv_obj_t *ui_KnobSetButtonExp3Cont;
+lv_obj_t *ui_KnobSetButtonExp4Cont;
 
 
 // SCREEN: ui_EditMappingPage
@@ -474,9 +479,11 @@ lv_obj_t *ui_SystemMenuTabView;
 lv_obj_t *ui_SystemMenuInfoTab;
 lv_obj_t *ui_SystemInfoCont;
 lv_obj_t *ui_SystemMenuMetaModule;
+lv_obj_t *ui_SystemMenuMainModuleCont;
 lv_obj_t *ui_SystemMenuInfoHardware;
 lv_obj_t *ui_SystemMenuPCBversion;
 lv_obj_t *ui_SystemMenuFWversion;
+lv_obj_t *ui_SystemMenuExpandersCont;
 lv_obj_t *ui_SystemMenuInfoExpanders;
 lv_obj_t *ui_SystemMenuExpanders;
 lv_obj_t *ui_SystemMenuAudioExpanders;
@@ -586,6 +593,19 @@ lv_obj_t *ui_JackMapLeftColumn;
 lv_obj_t *ui_JackMapInputsTitle;
 lv_obj_t *ui_JackMapRightColumn;
 lv_obj_t *ui_JackMapOutputsTitle;
+lv_obj_t *ui_JackMapLeftItems;
+lv_obj_t *ui_JackMapRightItems;
+
+// SCREEN: ui_MidiMapViewPage
+void ui_MidiMapViewPage_screen_init(void);
+lv_obj_t *ui_MidiMapViewPage;
+lv_obj_t *ui_MidiMapViewCont;
+lv_obj_t *ui_MidiMapLeftItems;
+lv_obj_t *ui_MidiMapRightItems;
+lv_obj_t *ui_MidiMapLeftColumn;
+lv_obj_t *ui_MidiMapInputsTitle;
+lv_obj_t *ui_MidiMapRightColumn;
+lv_obj_t *ui_MidiMapOutputsTitle;
 
 // SCREEN: ui_HwTestPage
 void ui_HwTestPage_screen_init(void);
@@ -785,6 +805,7 @@ ui_DeleteMappingPopUp_screen_init();
 ui_ModuleListPage_screen_init();
 ui_SystemMenu_screen_init();
 ui_JackMapViewPage_screen_init();
+ui_MidiMapViewPage_screen_init();
 ui_HwTestPage_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_MainMenu);

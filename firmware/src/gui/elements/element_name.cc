@@ -41,12 +41,14 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 }
 
 static std::string get_mapped_color(Element const &element, uint16_t panel_id) {
-	return std::visit(overloaded{
-						  [=](ParamElement const &el) { return std::string(Gui::knob_html[panel_id % 6]); },
-						  [=](JackElement const &el) { return Gui::color_to_html(Gui::mapped_jack_color(panel_id)); },
-						  [](BaseElement const &) { return std::string(""); },
-					  },
-					  element);
+	panel_id = Midi::strip_midi_channel(panel_id);
+	return std::visit(
+		overloaded{
+			[=](ParamElement const &el) { return std::string(Gui::color_to_html(Gui::get_knob_color(panel_id))); },
+			[=](JackElement const &el) { return Gui::color_to_html(Gui::mapped_jack_color(panel_id)); },
+			[](BaseElement const &) { return std::string(""); },
+		},
+		element);
 }
 
 void append_panel_name(std::string &opts, Element const &el, uint16_t mapped_panel_id) {
@@ -97,6 +99,17 @@ void append_connected_jack_name(std::string &opts,
 			for (auto &in : cable->ins)
 				append(in, ElementType::Input);
 		}
+	}
+}
+
+void param_item_name(std::string &s, MappedKnob const &map, PatchData const *patch) {
+	if (map.alias_name.length()) {
+		s = std::string_view{map.alias_name};
+	} else {
+		auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
+		s = fullname.element_name;
+		s.append(" - ");
+		s.append(fullname.module_name);
 	}
 }
 

@@ -6,6 +6,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "metaparams.hh"
 #include "midi/midi_message.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
@@ -15,9 +16,10 @@ namespace MetaModule
 
 struct AddMapPopUp {
 
-	AddMapPopUp(PatchModQueue &patch_mod_queue)
+	AddMapPopUp(PatchModQueue &patch_mod_queue, MetaParams const &metaparams)
 		: patch_mod_queue{patch_mod_queue}
-		, popup_group(lv_group_create()) {
+		, popup_group(lv_group_create())
+		, metaparams{metaparams} {
 
 		midi_channel_dropdown = create_midi_map_dropdown(
 			ui_AddMapPopUp,
@@ -57,7 +59,11 @@ struct AddMapPopUp {
 			lv_label_set_text(ui_AddMappingTitle, "Add a map: Send MIDI Note or CC");
 			lv_show(midi_channel_dropdown);
 		} else {
-			lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob");
+			if (metaparams.button_exp_connected != 0) {
+				lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob or press a button");
+			} else {
+				lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob");
+			}
 			lv_hide(midi_channel_dropdown);
 		}
 		lv_label_set_text(ui_MapDetected, "");
@@ -91,7 +97,7 @@ struct AddMapPopUp {
 		}
 	}
 
-	void update(ParamsMidiState &params) {
+	void update(ParamsMidiState &params, MetaParams &metaparams) {
 		if (visible) {
 			auto last_selected_knob = selected_knob;
 
@@ -133,6 +139,12 @@ struct AddMapPopUp {
 						lv_label_set_text_fmt(ui_MapDetected, "Knob: %.4s", name.data());
 					}
 					i++;
+				}
+
+				if (auto firstbit = std::countr_zero(metaparams.ext_buttons_high_events); firstbit < 32) {
+					metaparams.ext_buttons_high_events = 0;
+					selected_knob = firstbit + FirstButton;
+					lv_label_set_text_fmt(ui_MapDetected, "Button: %u", firstbit + 1);
 				}
 			}
 
@@ -186,7 +198,7 @@ struct AddMapPopUp {
 					.min = 0.f,
 					.max = 1.f,
 				};
-				if (map.is_panel_knob()) {
+				if (map.is_panel_knob() || map.is_button()) {
 					// TODO: just have AddMapping type (not AddMidiMap) and use set_id to indicate MidiMap?
 					page->patch_mod_queue.put(AddMapping{.map = map, .set_id = page->set_id});
 
@@ -216,6 +228,7 @@ struct AddMapPopUp {
 	lv_group_t *base_group = nullptr;
 	lv_group_t *popup_group = nullptr;
 	lv_obj_t *midi_channel_dropdown;
+	MetaParams const &metaparams;
 	bool midi_learn_channel = true;
 
 	PatchData *patch = nullptr;

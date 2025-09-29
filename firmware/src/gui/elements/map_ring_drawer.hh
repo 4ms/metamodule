@@ -28,17 +28,17 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 		return nullptr;
 
 	auto panel_id = panel_el_id.value();
+	panel_id = Midi::strip_midi_channel(panel_id);
 
 	//TODO: color and thickness set by variant type
 	lv_color_t color;
 	uint16_t gap;
 	float ring_thickness;
-	if (panel_id >= MidiCC0) {
-		ring_thickness = 1;
-		gap = 3;
-		color = Gui::palette_main[4];
+
+	if (Midi::is_midi_panel_id(panel_id)) {
+		ring_thickness = 3;
+		gap = module_height == 240 ? 2 : 0;
 	} else {
-		color = Gui::knob_palette[panel_id % 6];
 		if (module_height == 240) {
 			ring_thickness = (panel_id >= 6) ? 2 : 5;
 			gap = 2;
@@ -48,6 +48,7 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 			gap = 0;
 		}
 	}
+	color = Gui::get_knob_color(panel_id);
 
 	lv_obj_refr_size(element_obj);
 	lv_obj_refr_pos(element_obj);
@@ -92,7 +93,8 @@ draw_mapped_jack(const JackElement &, lv_obj_t *element_obj, lv_obj_t *canvas, s
 	lv_obj_set_pos(circle, lv_obj_get_x(element_obj), lv_obj_get_y(element_obj));
 	lv_obj_set_size(circle, lv_obj_get_width(element_obj), lv_obj_get_height(element_obj));
 
-	auto color = Gui::mapped_jack_color(panel_el_id.value());
+	auto panel_id = Midi::strip_midi_channel(panel_el_id.value());
+	auto color = Gui::mapped_jack_color(panel_id);
 	lv_obj_set_style_outline_color(circle, color, LV_STATE_DEFAULT);
 	lv_obj_set_style_border_color(circle, color, LV_STATE_DEFAULT);
 

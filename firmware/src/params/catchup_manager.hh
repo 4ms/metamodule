@@ -1,8 +1,10 @@
 #pragma once
+#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/hub/button_expander_defs.hh"
 #include "catchup_param.hh"
 #include "conf/panel_conf.hh"
 #include "patch-serial/patch/patch.hh"
-#include "util/countzip.hh"
+#include "toggle_param.hh"
 #include <vector>
 
 namespace MetaModule
@@ -12,12 +14,14 @@ struct MappedParam {
 	MappedKnob map;
 	CatchupParam catchup;
 };
-using ParamSet = std::array<std::vector<MappedParam>, PanelDef::NumKnobs>;
+//[0-11] knobs
+//[12-43] buttons
+using ParamSet = std::array<std::vector<MappedParam>, NumTotalParams>;
 
 class CatchupManager {
 
-	std::array<float, PanelDef::NumKnobs> panel_knobs{0.f};
-	std::array<bool, PanelDef::NumKnobs> catchup_inaccessible{false};
+	std::array<float, NumTotalParams> panel_knobs{0.f};
+	std::array<bool, NumTotalParams> catchup_inaccessible{false};
 
 	CatchupParam::Mode default_mode{CatchupParam::Mode::ResumeOnMotion};
 
@@ -33,8 +37,21 @@ public:
 		for (auto &knob_map : active_knob_maps[panel_knob_id]) {
 			auto &map = knob_map.map;
 
-			// Note: if needed, for performance we could check the catchup mode here, and
-			// if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
+			if (map.is_button()) {
+				if (is_toggle(map)) {
+					toggle_button(modules[map.module_id], map, val);
+				} else {
+					modules[map.module_id]->set_param(map.param_id, map.get_mapped_val(val));
+				}
+				continue;
+			}
+
+			// For performance if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
+			if (knob_map.catchup.mode == CatchupParam::Mode::ResumeOnMotion) {
+				knob_map.catchup.update(map.get_mapped_val(val), {});
+				modules[map.module_id]->set_param(map.param_id, map.get_mapped_val(val));
+				continue;
+			}
 
 			auto module_val = modules[map.module_id]->get_param(map.param_id);
 			auto scaled_phys_val = map.get_mapped_val(val); //0.501 to 0

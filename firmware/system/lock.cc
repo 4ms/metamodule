@@ -255,7 +255,7 @@ static char lock_name(_LOCK_T lock) {
 	return '?';
 }
 
-static char proc_name(int proc_id) {
+[[maybe_unused]] static char proc_name(int proc_id) {
 	if (proc_id == 0)
 		return 'M';
 	if (proc_id == 1)
