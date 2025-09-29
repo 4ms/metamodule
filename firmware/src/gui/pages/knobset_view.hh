@@ -118,6 +118,7 @@ struct KnobSetViewPage : PageBase {
 			if (!args.mappedknob_id) {
 				if (idx == 0) { //only need to do this once
 					focus = (lv_obj_has_flag(ui_NextKnobSet, LV_OBJ_FLAG_HIDDEN)) ? cont : ui_NextKnobSet;
+					lv_obj_scroll_to_y(ui_KnobSetContainer, 0, LV_ANIM_ON);
 				}
 			} else {
 				if (map.panel_knob_id == args.mappedknob_id)
