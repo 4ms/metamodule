@@ -5,6 +5,7 @@
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 #include "src/core/lv_event.h"
+#include <string>
 
 namespace MetaModule
 {
@@ -34,6 +35,10 @@ struct PatchDescriptionPanel {
 
 		lv_obj_add_event_cb(ui_DescriptionEditSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_DescriptionEditCancelButton, cancel_cb, LV_EVENT_CLICKED, this);
+
+		ui_DescSuggestedAudioLabel = lv_label_create(ui_DescriptionPanel);
+		lv_obj_set_width(ui_DescSuggestedAudioLabel, LV_SIZE_CONTENT);
+		lv_obj_set_height(ui_DescSuggestedAudioLabel, LV_SIZE_CONTENT);
 	}
 
 	void prepare_focus(lv_group_t *base_group) {
@@ -91,6 +96,21 @@ struct PatchDescriptionPanel {
 			lv_label_set_text_fmt(ui_DescMIDIPolyNumLabel, "MIDI Poly Chans: %u", (unsigned)patch->midi_poly_num);
 		else
 			lv_label_set_text(ui_DescMIDIPolyNumLabel, "");
+
+		std::string sugg_txt;
+		if (patch->suggested_samplerate) {
+			sugg_txt += "Suggested Samplerate: ";
+			sugg_txt += std::to_string(patch->suggested_samplerate);
+			sugg_txt += " Hz";
+		}
+		if (patch->suggested_blocksize) {
+			if (!sugg_txt.empty())
+				sugg_txt += ", ";
+			sugg_txt += "Suggested Blocksize: ";
+			sugg_txt += std::to_string(patch->suggested_blocksize);
+		}
+
+		lv_label_set_text(ui_DescSuggestedAudioLabel, sugg_txt.c_str());
 
 		set_content_max_height(ui_DescriptionPanel, 230);
 	}
@@ -223,6 +243,9 @@ private:
 	bool edit_panel_visible = false;
 	bool kb_visible = false;
 	bool did_save = false;
+
+	// Created on demand inside show()
+	lv_obj_t *ui_DescSuggestedAudioLabel = nullptr;
 };
 
 } // namespace MetaModule
