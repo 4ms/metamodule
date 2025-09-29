@@ -86,15 +86,17 @@ struct ButtonExpanderMapsView {
 		// Clear all objects from all panes except for the original ones (which are used to display an empty slot)
 		for (auto *pane : panes) {
 			if (auto num_children = lv_obj_get_child_cnt(pane)) {
-				if (num_children > 0) { // should always be true
-					auto cont = lv_obj_get_child(pane, 0);
-					lv_label_set_text(get_button_label(cont), "");
-					disable(cont);
-				} else {
-					pr_err("No children of pane %p\n", pane);
+
+				if (num_children == 0) {
+					pr_err("Error: No children of button expander knobset view pane %p\n", pane);
 				}
-				if (num_children > 1) {
-					for (auto i = 1u; i < num_children; i++) {
+
+				for (auto i = 0u; i < num_children; i++) {
+					if (i == 0) {
+						auto cont = lv_obj_get_child(pane, 0);
+						lv_label_set_text(get_button_label(cont), "");
+						disable(cont);
+					} else {
 						auto cont = lv_obj_get_child(pane, i);
 						lv_obj_del_async(cont);
 					}
@@ -106,11 +108,11 @@ struct ButtonExpanderMapsView {
 			num = 0;
 	}
 
-	void update_button(unsigned idx, float value) {
+	void update_button(unsigned panel_id, float value) {
 		// Find the container
 		for (auto *pane : panes) {
-			lv_foreach_child(pane, [value, idx](lv_obj_t *child, int) {
-				if (idx == reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child)) - 1) {
+			lv_foreach_child(pane, [value, panel_id](lv_obj_t *child, int) {
+				if (panel_id == reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child)) - 1) {
 
 					auto color = Gui::get_buttonexp_color(value);
 					lv_obj_set_style_bg_color(get_button_circle(child), color, LV_PART_MAIN);

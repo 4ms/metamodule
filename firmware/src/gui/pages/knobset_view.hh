@@ -111,8 +111,8 @@ struct KnobSetViewPage : PageBase {
 			lv_obj_remove_event_cb(cont, mapping_cb);
 			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
 
-			// Use user_data to connect the mapping to the lvgl object (via index in the knobset->set)
-			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx + 1));
+			// Use user_data to connect the mapping to the lvgl object
+			lv_obj_set_user_data(cont, reinterpret_cast<void *>(map.panel_knob_id + 1));
 
 			// Focus on the previously focussed object (if any), or the Next>> button if it's visible
 			if (!args.mappedknob_id) {
@@ -120,7 +120,7 @@ struct KnobSetViewPage : PageBase {
 					focus = (lv_obj_has_flag(ui_NextKnobSet, LV_OBJ_FLAG_HIDDEN)) ? cont : ui_NextKnobSet;
 				}
 			} else {
-				if (idx == args.mappedknob_id)
+				if (map.panel_knob_id == args.mappedknob_id)
 					focus = cont;
 			}
 		}
@@ -182,10 +182,6 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void update() override {
-		// if (!kb_visible)
-		// 	lv_group_set_editing(group, false);
-		// save_knobset_name(false);
-
 		if (gui_state.back_button.is_just_released()) {
 			if (keyboard_entry.is_visible()) {
 				keyboard_entry.back();
@@ -215,7 +211,7 @@ struct KnobSetViewPage : PageBase {
 						update_knob(arcs[idx], is_tracking, arc_val);
 
 				} else if (map.is_button()) {
-					button_exp.update_button(idx, value);
+					button_exp.update_button(map.panel_knob_id, value);
 				}
 
 				idx++;
@@ -228,6 +224,13 @@ struct KnobSetViewPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 			if (keyboard_entry.is_visible())
 				keyboard_entry.hide();
+
+			if (auto selected_obj = lv_group_get_focused(group)) {
+				if (auto userdata = lv_obj_get_user_data(selected_obj)) {
+					args.mappedknob_id = reinterpret_cast<uintptr_t>(userdata) - 1;
+				}
+			}
+
 			prepare_focus();
 		}
 	}
@@ -286,6 +289,8 @@ private:
 			i++;
 		}
 		lv_group_remove_all_objs(group);
+
+		button_exp.blur();
 	}
 
 	void jump_to_active_knobset() {
@@ -383,11 +388,7 @@ private:
 		if (view_set_idx >= page->patch->knob_sets.size())
 			return;
 
-		unsigned map_idx = reinterpret_cast<uintptr_t>(obj->user_data) - 1;
-		if (map_idx >= page->patch->knob_sets[view_set_idx].set.size())
-			return;
-
-		page->args.mappedknob_id = map_idx;
+		page->args.mappedknob_id = reinterpret_cast<uintptr_t>(obj->user_data) - 1;
 		page->load_page(PageId::KnobMap, page->args);
 	}
 
