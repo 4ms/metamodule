@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/helpers.hh"
 #include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/knob_arc.hh"
 #include "gui/pages/knobset_view_buttonexp.hh"
@@ -112,16 +113,16 @@ struct KnobSetViewPage : PageBase {
 			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
 
 			// Use user_data to connect the mapping to the lvgl object
-			lv_obj_set_user_data(cont, reinterpret_cast<void *>(map.panel_knob_id + 1));
+			lv_obj_set_user_data(cont, pack_user_data_from_module_param(map.module_id, map.param_id));
 
 			// Focus on the previously focussed object (if any), or the Next>> button if it's visible
-			if (!args.mappedknob_id) {
+			if (!args.mappedknob_id || !args.module_id) {
 				if (idx == 0) { //only need to do this once
 					focus = (lv_obj_has_flag(ui_NextKnobSet, LV_OBJ_FLAG_HIDDEN)) ? cont : ui_NextKnobSet;
 					lv_obj_scroll_to_y(ui_KnobSetContainer, 0, LV_ANIM_ON);
 				}
 			} else {
-				if (map.panel_knob_id == args.mappedknob_id)
+				if (map.param_id == *args.mappedknob_id && map.module_id == *args.module_id)
 					focus = cont;
 			}
 		}
@@ -226,9 +227,12 @@ struct KnobSetViewPage : PageBase {
 			if (keyboard_entry.is_visible())
 				keyboard_entry.hide();
 
+			// Before refreshing, store the args
 			if (auto selected_obj = lv_group_get_focused(group)) {
 				if (auto userdata = lv_obj_get_user_data(selected_obj)) {
-					args.mappedknob_id = reinterpret_cast<uintptr_t>(userdata) - 1;
+					auto [module_id, param_id] = unpack_user_data_to_module_param(userdata);
+					args.mappedknob_id = param_id;
+					args.module_id = module_id;
 				}
 			}
 
@@ -302,6 +306,7 @@ private:
 			page_list.update_state(PageId::KnobSetView, args);
 			page_list.request_new_page_no_history(PageId::KnobSetView,
 												  {.patch_loc_hash = args.patch_loc_hash,
+												   .module_id = args.module_id,
 												   .mappedknob_id = args.mappedknob_id,
 												   .view_knobset_id = page_list.get_active_knobset()});
 
@@ -389,7 +394,9 @@ private:
 		if (view_set_idx >= page->patch->knob_sets.size())
 			return;
 
-		page->args.mappedknob_id = reinterpret_cast<uintptr_t>(obj->user_data) - 1;
+		auto [module_id, param_id] = unpack_user_data_to_module_param(obj->user_data);
+		page->args.mappedknob_id = param_id;
+		page->args.module_id = module_id;
 		page->load_page(PageId::KnobMap, page->args);
 	}
 

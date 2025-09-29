@@ -766,6 +766,7 @@ private:
 			page->page_list.update_state(PageId::ModuleView, page->args);
 			page->page_list.request_new_page(PageId::KnobMap,
 											 {.patch_loc_hash = page->args.patch_loc_hash,
+											  .module_id = page->this_module_id,
 											  .mappedknob_id = data.mappedknob_idx,
 											  .view_knobset_id = data.set_i});
 		}
