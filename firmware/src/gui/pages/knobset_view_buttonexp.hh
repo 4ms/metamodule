@@ -75,10 +75,27 @@ struct ButtonExpanderMapsView {
 
 			lv_show(col, (exp_connected || has_mappings));
 
-			if (!exp_connected && has_mappings)
-				lv_obj_set_style_bg_opa(col, LV_OPA_50, LV_PART_MAIN);
-			else
-				lv_obj_set_style_bg_opa(col, LV_OPA_0, LV_PART_MAIN);
+			if (!exp_connected && has_mappings) {
+				lv_foreach_child(col, [](lv_obj_t *cont, int idx) {
+					lv_foreach_child(cont, [](lv_obj_t *child, int idx) {
+						lv_obj_set_style_bg_color(get_button_circle(child), lv_color_hex(0x444444), LV_PART_MAIN);
+						lv_obj_set_style_border_color(get_button_circle(child), lv_color_hex(0x444444), LV_PART_MAIN);
+						lv_obj_set_style_text_color(get_button_circle_number(child), lv_color_hex(0xaaaaaa), 0);
+						lv_obj_set_style_text_color(get_button_label(child), lv_color_hex(0x888888), LV_PART_MAIN);
+					});
+				});
+			} else {
+				lv_foreach_child(col, [](lv_obj_t *cont, int idx) {
+					lv_foreach_child(cont, [](lv_obj_t *child, int idx) {
+						lv_obj_set_style_bg_color(get_button_circle(child), Gui::get_buttonexp_color(0), LV_PART_MAIN);
+						lv_obj_set_style_border_color(
+							get_button_circle(child), Gui::get_buttonexp_color(0), LV_PART_MAIN);
+						lv_obj_set_style_text_color(
+							get_button_circle_number(child), Gui::get_buttonexp_textcolor(0), 0);
+						lv_obj_set_style_text_color(get_button_label(child), lv_color_white(), LV_PART_MAIN);
+					});
+				});
+			}
 		}
 	}
 
@@ -110,16 +127,21 @@ struct ButtonExpanderMapsView {
 
 	void update_button(unsigned panel_id, float value) {
 		// Find the container
-		for (auto *pane : panes) {
+		for (unsigned i = 0; auto *pane : panes) {
+			bool exp_connected = (1 << (i++ / 8)) & metaparams.button_exp_connected;
+			if (!exp_connected)
+				continue;
 			lv_foreach_child(pane, [value, panel_id](lv_obj_t *child, int) {
 				if (panel_id == reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child)) - 1) {
 
 					auto color = Gui::get_buttonexp_color(value);
 					lv_obj_set_style_bg_color(get_button_circle(child), color, LV_PART_MAIN);
+					lv_obj_set_style_border_color(get_button_circle(child), color, LV_PART_MAIN);
 
 					auto textcolor = Gui::get_buttonexp_textcolor(value);
 					lv_obj_set_style_text_color(get_button_circle_number(child), textcolor, LV_PART_MAIN);
 
+					lv_obj_set_style_text_color(get_button_label(child), lv_color_white(), 0);
 					return;
 				}
 			});
@@ -148,17 +170,9 @@ private:
 
 	static void focus_cb(lv_event_t *event) {
 		lv_obj_scroll_to_y(ui_KnobSetContainer, 210, LV_ANIM_ON);
-
-		// Can we do vertical scroll?
-		// if (auto text_label = get_button_label(event->target)) {
-		// 	lv_label_set_long_mode(text_label, LV_LABEL_LONG_SCROLL);
-		// }
 	}
 
 	static void defocus_cb(lv_event_t *event) {
-		// if (auto text_label = get_button_label(event->target)) {
-		// 	lv_label_set_long_mode(text_label, LV_LABEL_LONG_WRAP);
-		// }
 	}
 
 	void enable(lv_obj_t *cont, unsigned button_id) {
