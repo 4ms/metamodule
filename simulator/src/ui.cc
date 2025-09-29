@@ -59,6 +59,7 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 	preload_plugins();
 
 	patch_playloader.connect_user_settings(&settings);
+	patch_playloader.connect_notification_queue(&notify_queue);
 	patch_playloader.update_param_catchup_mode();
 
 	patch_playloader.notify_audio_is_muted();

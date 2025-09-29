@@ -69,6 +69,7 @@ public:
 		}
 
 		patch_playloader.connect_user_settings(&settings);
+		patch_playloader.connect_notification_queue(&notify_queue);
 
 		patch_playloader.request_new_audio_settings(
 			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);

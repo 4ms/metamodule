@@ -1,6 +1,7 @@
 #pragma once
 #include "calibrate/calibration_patch.hh"
 #include "delay.hh"
+#include "gui/notify/queue.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
@@ -295,7 +296,11 @@ struct PatchPlayLoader {
 	}
 
 	void connect_user_settings(UserSettings *settings) {
-		settings_ = settings;
+		this->settings = settings;
+	}
+
+	void connect_notification_queue(NotificationQueue *notification_queue) {
+		notify_queue = notification_queue;
 	}
 
 	template<typename PluginModuleType>
@@ -315,7 +320,7 @@ struct PatchPlayLoader {
 	}
 
 	void update_param_catchup_mode() {
-		player_.set_catchup_mode(settings_->catchup.mode, settings_->catchup.allow_jump_outofrange);
+		player_.set_catchup_mode(settings->catchup.mode, settings->catchup.allow_jump_outofrange);
 	}
 
 	void get_module_states() {
@@ -343,9 +348,11 @@ private:
 	bool stopped_because_of_overrun_ = false;
 	bool should_play_when_loaded_ = true;
 
-	UserSettings *settings_ = nullptr;
+	UserSettings *settings = nullptr;
 	std::atomic<AudioSRBlock> new_audio_settings_ = {};
 	unsigned max_audio_retries = 0;
+
+	NotificationQueue *notify_queue = nullptr;
 
 	PatchLocation new_loc{};
 	PatchLocation old_loc{};
@@ -444,27 +451,7 @@ private:
 			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
 
-			if (settings_) {
-				auto sugg_sr = next_patch->suggested_samplerate;
-				auto sugg_bs = next_patch->suggested_blocksize;
-				auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
-
-				bool change_sr =
-					settings_->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
-				bool change_bs = settings_->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
-
-				if (change_sr || change_bs) {
-					uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
-					uint32_t new_bs = change_bs ? sugg_bs : cur_bs;
-					pr_dbg("Request new audio settings %u/%u\n", new_sr, new_bs);
-					request_new_audio_settings(new_sr, new_bs, max_retries);
-
-					settings_->audio.block_size = new_bs;
-					settings_->audio.sample_rate = new_sr;
-				}
-			} else {
-				pr_err("Patch Play Loader not initialized with user settings\n");
-			}
+			apply_suggested_audio_settings();
 
 			if (start_audio_immediately)
 				start_audio();
@@ -475,6 +462,39 @@ private:
 
 		loading_new_patch_ = false;
 		return result;
+	}
+
+	void apply_suggested_audio_settings() {
+		if (settings) {
+			auto sugg_sr = next_patch->suggested_samplerate;
+			auto sugg_bs = next_patch->suggested_blocksize;
+			auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
+
+			bool change_sr = settings->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
+			bool change_bs = settings->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
+
+			if (change_sr || change_bs) {
+				uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
+				uint32_t new_bs = change_bs ? sugg_bs : cur_bs;
+
+				if (notify_queue) {
+					std::string message{};
+					if (change_sr)
+						message += "Sample-rate changed to " + std::to_string(new_sr);
+					if (change_sr && change_bs)
+						message += "\n";
+					if (change_bs)
+						message += "Block-size changed to " + std::to_string(new_bs);
+					notify_queue->put({message, Notification::Priority::Info, 2000});
+				}
+				request_new_audio_settings(new_sr, new_bs, max_retries);
+
+				settings->audio.block_size = new_bs;
+				settings->audio.sample_rate = new_sr;
+			}
+		} else {
+			pr_err("Patch Play Loader not initialized with user settings\n");
+		}
 	}
 
 	Result process_renaming() {
