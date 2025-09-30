@@ -10,4 +10,4 @@ target_compile_definitions(nanovg PRIVATE METAMODULE)
 
 target_link_libraries(nanovg PRIVATE ThorVG)
 
-target_compile_options(nanovg PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-stringop-overflow>)
+target_compile_options(nanovg PRIVATE $<$<CXX_COMPILER_ID:GNU>: $<$<COMPILE_LANGUAGE:C>:-Wno-stringop-overflow> >)
