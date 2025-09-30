@@ -38,6 +38,7 @@ void init_SystemPrefsPatchSuggestedAudioPane(lv_obj_t *parentTab) {
 	lv_obj_set_align(ui_SystemPrefsPatchSuggestSampleRateLabel, LV_ALIGN_CENTER);
 	lv_label_set_text(ui_SystemPrefsPatchSuggestSampleRateLabel, "Allow patch to override:");
 	lv_obj_set_style_text_font(ui_SystemPrefsPatchSuggestSampleRateLabel, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+	lv_label_set_recolor(ui_SystemPrefsPatchSuggestSampleRateLabel, 1);
 
 	ui_SystemPrefsPatchSuggestSampleRateCheck = create_prefs_check(ui_SystemPrefsPatchSuggestSampleRateCont);
 
@@ -64,6 +65,7 @@ void init_SystemPrefsPatchSuggestedAudioPane(lv_obj_t *parentTab) {
 	lv_obj_set_align(ui_SystemPrefsPatchSuggestBlocksizeLabel, LV_ALIGN_CENTER);
 	lv_label_set_text(ui_SystemPrefsPatchSuggestBlocksizeLabel, "Allow patch to override:");
 	lv_obj_set_style_text_font(ui_SystemPrefsPatchSuggestBlocksizeLabel, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+	lv_label_set_recolor(ui_SystemPrefsPatchSuggestBlocksizeLabel, 1);
 
 	ui_SystemPrefsPatchSuggestBlocksizeCheck = create_prefs_check(ui_SystemPrefsPatchSuggestBlocksizeCont);
 }

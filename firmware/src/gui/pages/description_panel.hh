@@ -39,6 +39,7 @@ struct PatchDescriptionPanel {
 		ui_DescSuggestedAudioLabel = lv_label_create(ui_DescriptionPanel);
 		lv_obj_set_width(ui_DescSuggestedAudioLabel, LV_SIZE_CONTENT);
 		lv_obj_set_height(ui_DescSuggestedAudioLabel, LV_SIZE_CONTENT);
+		lv_obj_set_style_text_font(ui_DescSuggestedAudioLabel, &ui_font_MuseoSansRounded50016, LV_PART_MAIN);
 	}
 
 	void prepare_focus(lv_group_t *base_group) {
@@ -105,7 +106,7 @@ struct PatchDescriptionPanel {
 		}
 		if (patch->suggested_blocksize) {
 			if (!sugg_txt.empty())
-				sugg_txt += ", ";
+				sugg_txt += "\n";
 			sugg_txt += "Suggested Blocksize: ";
 			sugg_txt += std::to_string(patch->suggested_blocksize);
 		}

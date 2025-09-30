@@ -28,9 +28,9 @@ struct PrefsTab : SystemMenuTab {
 		init_SystemPrefsMidiPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsPatchSuggestedAudioPane(ui_SystemMenuPrefsTab);
 
-		auto sr_idx = lv_obj_get_child_id(ui_SystemPrefsAudioSamplerateCont);
+		auto sr_idx = lv_obj_get_index(ui_SystemPrefsAudioSamplerateCont);
 		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestSampleRateCont, sr_idx + 1);
-		auto bs_idx = lv_obj_get_child_id(ui_SystemPrefsAudioBlocksizeCont);
+		auto bs_idx = lv_obj_get_index(ui_SystemPrefsAudioBlocksizeCont);
 		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestBlocksizeCont, bs_idx + 1);
 
 		lv_obj_add_event_cb(ui_SystemPrefsSaveButton, save_cb, LV_EVENT_CLICKED, this);
@@ -127,6 +127,7 @@ struct PrefsTab : SystemMenuTab {
 
 		lv_group_add_obj(group, ui_SystemPrefsAudioSampleRateDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsPatchSuggestSampleRateCheck);
+		// TODO: clear overrides button
 		lv_group_add_obj(group, ui_SystemPrefsAudioBlocksizeDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsPatchSuggestBlocksizeCheck);
 		lv_group_add_obj(group, ui_SystemPrefsAudioOverrunRetriesDropdown);
@@ -215,6 +216,23 @@ private:
 
 		lv_disable(ui_SystemPrefsSaveButton);
 		lv_disable(ui_SystemPrefsRevertButton);
+
+		auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
+		if (cur_sr >= 0 && cur_sr != settings.audio.sample_rate) {
+			std::string msg = "Allow patch to override:\n";
+			std::string current = "Current: " + std::to_string(cur_sr);
+			msg += Gui::orange_text(current);
+			lv_label_set_text(ui_SystemPrefsPatchSuggestSampleRateLabel, msg.c_str());
+		} else
+			lv_label_set_text(ui_SystemPrefsPatchSuggestSampleRateLabel, "Allow patch to override:");
+
+		if (cur_bs > 0 && cur_bs != settings.audio.block_size) {
+			std::string msg = "Allow patch to override:\n";
+			std::string current = "Current: " + std::to_string(cur_bs);
+			msg += Gui::orange_text(current);
+			lv_label_set_text(ui_SystemPrefsPatchSuggestBlocksizeLabel, msg.c_str());
+		} else
+			lv_label_set_text(ui_SystemPrefsPatchSuggestBlocksizeLabel, "Allow patch to override:");
 	}
 
 	uint32_t read_samplerate_dropdown() {
