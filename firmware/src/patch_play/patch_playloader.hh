@@ -331,35 +331,6 @@ struct PatchPlayLoader {
 	}
 
 private:
-	PatchPlayer &player_;
-	FileStorageProxy &storage_;
-	OpenPatchManager &patches_;
-
-	PatchData *next_patch = nullptr;
-	CalibrationPatch calibration;
-
-	std::atomic<bool> loading_new_patch_ = false;
-	std::atomic<bool> audio_is_muted_ = false;
-	std::atomic<bool> stopping_audio_ = false;
-	std::atomic<bool> starting_audio_ = false;
-	std::atomic<bool> saving_patch_ = false;
-	std::atomic<bool> should_save_patch_ = false;
-	std::atomic<bool> audio_overrun_ = false;
-	bool stopped_because_of_overrun_ = false;
-	bool should_play_when_loaded_ = true;
-
-	UserSettings *settings = nullptr;
-	std::atomic<AudioSRBlock> new_audio_settings_ = {};
-	unsigned max_audio_retries = 0;
-
-	NotificationQueue *notify_queue = nullptr;
-
-	PatchLocation new_loc{};
-	PatchLocation old_loc{};
-	enum class RenameState { Idle, RequestSaveNew, SavingNew, RequestDeleteOld, DeletingOld };
-	RenameState rename_state_{RenameState::Idle};
-	uint32_t attempts = 0;
-
 	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
 
@@ -542,5 +513,34 @@ private:
 
 		return {true, ""};
 	}
+
+	PatchPlayer &player_;
+	FileStorageProxy &storage_;
+	OpenPatchManager &patches_;
+
+	PatchData *next_patch = nullptr;
+	CalibrationPatch calibration;
+
+	std::atomic<bool> loading_new_patch_ = false;
+	std::atomic<bool> audio_is_muted_ = false;
+	std::atomic<bool> stopping_audio_ = false;
+	std::atomic<bool> starting_audio_ = false;
+	std::atomic<bool> saving_patch_ = false;
+	std::atomic<bool> should_save_patch_ = false;
+	std::atomic<bool> audio_overrun_ = false;
+	bool stopped_because_of_overrun_ = false;
+	bool should_play_when_loaded_ = true;
+
+	UserSettings *settings = nullptr;
+	std::atomic<AudioSRBlock> new_audio_settings_ = {};
+	unsigned max_audio_retries = 0;
+
+	NotificationQueue *notify_queue = nullptr;
+
+	PatchLocation new_loc{};
+	PatchLocation old_loc{};
+	enum class RenameState { Idle, RequestSaveNew, SavingNew, RequestDeleteOld, DeletingOld };
+	RenameState rename_state_{RenameState::Idle};
+	uint32_t attempts = 0;
 };
 } // namespace MetaModule
