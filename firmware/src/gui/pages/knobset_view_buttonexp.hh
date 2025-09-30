@@ -2,6 +2,7 @@
 #include "console/pr_dbg.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/pages/helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -125,14 +126,16 @@ struct ButtonExpanderMapsView {
 			num = 0;
 	}
 
-	void update_button(unsigned panel_id, float value) {
+	void update_button(unsigned module_id, unsigned param_id, float value) {
 		// Find the container
 		for (unsigned i = 0; auto *pane : panes) {
 			bool exp_connected = (1 << (i++ / 8)) & metaparams.button_exp_connected;
 			if (!exp_connected)
 				continue;
-			lv_foreach_child(pane, [value, panel_id](lv_obj_t *child, int) {
-				if (panel_id == reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child)) - 1) {
+			lv_foreach_child(pane, [value, module_id, param_id](lv_obj_t *child, int) {
+				auto [m_id, p_id] = unpack_user_data_to_module_param(lv_obj_get_user_data(child));
+
+				if (module_id == m_id && param_id == p_id) {
 
 					auto color = Gui::get_buttonexp_color(value);
 					lv_obj_set_style_bg_color(get_button_circle(child), color, LV_PART_MAIN);
