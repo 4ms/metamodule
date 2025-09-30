@@ -602,9 +602,10 @@ lv_obj_set_height( ui_SystemPrefsAudioSampleRateLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemPrefsAudioSampleRateLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemPrefsAudioSampleRateLabel,"Sample Rate:");
 lv_obj_set_style_text_font(ui_SystemPrefsAudioSampleRateLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_recolor(ui_SystemPrefsAudioSampleRateLabel, 1);
 
 ui_SystemPrefsAudioSampleRateDropdown = lv_dropdown_create(ui_SystemPrefsAudioSamplerateCont);
-lv_dropdown_set_options( ui_SystemPrefsAudioSampleRateDropdown, "24kHz\n48kHz\n96kHz" );
+lv_dropdown_set_options( ui_SystemPrefsAudioSampleRateDropdown, "24kHz\n32kHz\n48kHz\n96kHz" );
 lv_obj_set_width( ui_SystemPrefsAudioSampleRateDropdown, 90);
 lv_obj_set_height( ui_SystemPrefsAudioSampleRateDropdown, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemPrefsAudioSampleRateDropdown, LV_ALIGN_CENTER );
@@ -652,6 +653,7 @@ lv_obj_set_height( ui_SystemPrefsAudioBlocksizeLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemPrefsAudioBlocksizeLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemPrefsAudioBlocksizeLabel,"Block Size:");
 lv_obj_set_style_text_font(ui_SystemPrefsAudioBlocksizeLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_recolor(ui_SystemPrefsAudioBlocksizeLabel, 1);
 
 ui_SystemPrefsAudioBlocksizeDropdown = lv_dropdown_create(ui_SystemPrefsAudioBlocksizeCont);
 lv_dropdown_set_options( ui_SystemPrefsAudioBlocksizeDropdown, "32\n64\n128\n256\n512" );

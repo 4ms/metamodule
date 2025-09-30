@@ -29,9 +29,14 @@ struct PrefsTab : SystemMenuTab {
 		init_SystemPrefsPatchSuggestedAudioPane(ui_SystemMenuPrefsTab);
 
 		auto sr_idx = lv_obj_get_index(ui_SystemPrefsAudioSamplerateCont);
-		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestSampleRateCont, sr_idx + 1);
+		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestSROverrideCont, sr_idx + 1);
+		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestSampleRateCont, sr_idx + 2);
+		lv_hide(ui_SystemPrefsPatchSuggestSROverrideCont);
+
 		auto bs_idx = lv_obj_get_index(ui_SystemPrefsAudioBlocksizeCont);
-		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestBlocksizeCont, bs_idx + 1);
+		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestBSOverrideCont, bs_idx + 1);
+		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestBlocksizeCont, bs_idx + 2);
+		lv_hide(ui_SystemPrefsPatchSuggestBSOverrideCont);
 
 		lv_obj_add_event_cb(ui_SystemPrefsSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsRevertButton, revert_cb, LV_EVENT_CLICKED, this);
@@ -83,10 +88,11 @@ struct PrefsTab : SystemMenuTab {
 							   });
 
 		lv_dropdown_set_options(ui_SystemPrefsAudioOverrunRetriesDropdown, opts.c_str());
+		lv_obj_set_width(ui_SystemPrefsAudioSampleRateDropdown, 80);
 
 		opts = "";
 		for (auto item : AudioSettings::ValidSampleRates) {
-			opts += std::to_string(item) + "\n";
+			opts += samplerate_string(item) + "\n";
 		}
 		if (opts.length())
 			opts.pop_back();
@@ -166,6 +172,10 @@ struct PrefsTab : SystemMenuTab {
 	}
 
 private:
+	static std::string samplerate_string(uint32_t sr) {
+		return std::to_string(sr / 1000) + "kHz";
+	}
+
 	void update_dropdowns_from_settings() {
 		auto get_index = [](auto dataset, auto test) {
 			int idx = -1;
@@ -218,21 +228,35 @@ private:
 		lv_disable(ui_SystemPrefsRevertButton);
 
 		auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
+
 		if (cur_sr >= 0 && cur_sr != settings.audio.sample_rate) {
-			std::string msg = "Allow patch to override:\n";
-			std::string current = "Current: " + std::to_string(cur_sr);
-			msg += Gui::orange_text(current);
-			lv_label_set_text(ui_SystemPrefsPatchSuggestSampleRateLabel, msg.c_str());
-		} else
-			lv_label_set_text(ui_SystemPrefsPatchSuggestSampleRateLabel, "Allow patch to override:");
+			std::string msg = "Sample Rate:\n(default)";
+			lv_label_set_text(ui_SystemPrefsAudioSampleRateLabel, msg.c_str());
+			lv_obj_set_style_text_font(ui_SystemPrefsAudioSampleRateLabel, &ui_font_MuseoSansRounded70014, 0);
+
+			lv_show(ui_SystemPrefsPatchSuggestSROverrideCont);
+			// lv_obj_set_style_text_color(ui_SystemPrefsPatchSuggestSROverrideLabel, Gui::orange_highlight, 0);
+			lv_label_set_text(ui_SystemPrefsPatchSuggestSROverrideLabel, samplerate_string(cur_sr).c_str());
+
+		} else {
+			lv_label_set_text(ui_SystemPrefsAudioSampleRateLabel, "Sample Rate:");
+			lv_obj_set_style_text_font(ui_SystemPrefsAudioSampleRateLabel, &ui_font_MuseoSansRounded70016, 0);
+			lv_hide(ui_SystemPrefsPatchSuggestSROverrideCont);
+		}
 
 		if (cur_bs > 0 && cur_bs != settings.audio.block_size) {
-			std::string msg = "Allow patch to override:\n";
-			std::string current = "Current: " + std::to_string(cur_bs);
-			msg += Gui::orange_text(current);
-			lv_label_set_text(ui_SystemPrefsPatchSuggestBlocksizeLabel, msg.c_str());
-		} else
-			lv_label_set_text(ui_SystemPrefsPatchSuggestBlocksizeLabel, "Allow patch to override:");
+			std::string msg = "Block Size:\n(default)";
+			lv_label_set_text(ui_SystemPrefsAudioBlocksizeLabel, msg.c_str());
+			lv_obj_set_style_text_font(ui_SystemPrefsAudioBlocksizeLabel, &ui_font_MuseoSansRounded70014, 0);
+
+			lv_show(ui_SystemPrefsPatchSuggestBSOverrideCont);
+			// lv_obj_set_style_text_color(ui_SystemPrefsPatchSuggestBSOverrideLabel, Gui::orange_highlight, 0);
+			lv_label_set_text_fmt(ui_SystemPrefsPatchSuggestBSOverrideLabel, "%u", cur_bs);
+		} else {
+			lv_label_set_text(ui_SystemPrefsAudioBlocksizeLabel, "Block size:");
+			lv_obj_set_style_text_font(ui_SystemPrefsAudioBlocksizeLabel, &ui_font_MuseoSansRounded70016, 0);
+			lv_hide(ui_SystemPrefsPatchSuggestBSOverrideCont);
+		}
 	}
 
 	uint32_t read_samplerate_dropdown() {
@@ -477,6 +501,31 @@ private:
 		}
 
 		lv_show(ui_SystemPrefsCatchupAllowJumpOutofRangeCont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
+
+		// If user flips Allow Patch to Override switch off, then change current audio settings to remove the override
+		auto &settings = page->settings;
+		auto &audio_settings = page->audio_settings;
+		auto &patch_playloader = page->patch_playloader;
+		if (!apply_sr && settings.patch_suggested_audio.apply_samplerate) {
+			// Change samplerate back to default:
+			auto [cur_sr, cur_bs, cur_mr] = patch_playloader.get_audio_settings();
+			patch_playloader.request_new_audio_settings(audio_settings.sample_rate, cur_bs, cur_mr);
+
+			// Reload page:
+			settings.patch_suggested_audio.apply_samplerate = apply_sr;
+			settings.patch_suggested_audio.apply_blocksize = apply_bs;
+			page->update_dropdowns_from_settings();
+		}
+		if (!apply_bs && settings.patch_suggested_audio.apply_blocksize) {
+			// Change blocksize back to default:
+			auto [cur_sr, cur_bs, cur_mr] = patch_playloader.get_audio_settings();
+			patch_playloader.request_new_audio_settings(cur_sr, audio_settings.block_size, cur_mr);
+
+			// Reload page:
+			settings.patch_suggested_audio.apply_samplerate = apply_sr;
+			settings.patch_suggested_audio.apply_blocksize = apply_bs;
+			page->update_dropdowns_from_settings();
+		}
 	}
 
 	static void focus_cb(lv_event_t *event) {
