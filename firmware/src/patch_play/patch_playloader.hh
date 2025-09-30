@@ -281,17 +281,19 @@ struct PatchPlayLoader {
 	}
 
 	struct AudioSRBlock {
-		uint32_t sample_rate;
-		uint32_t block_size;
+		uint16_t sample_rate;
+		uint16_t block_size;
 	};
 
-	void request_new_audio_settings(uint32_t sample_rate, uint32_t block_size, uint32_t max_retries) {
-		new_audio_settings_.store(AudioSRBlock{.sample_rate = sample_rate, .block_size = block_size});
+	void request_new_audio_settings(uint32_t sample_rate, uint16_t block_size, uint32_t max_retries) {
+		uint16_t sr_div100 = sample_rate / 100;
+		current_audio_settings_.store(AudioSRBlock{.sample_rate = sr_div100, .block_size = block_size});
 		max_audio_retries = max_retries;
 	}
 
 	AudioSettings get_audio_settings() {
-		auto [sr, bs] = new_audio_settings_.load();
+		auto [sr_div100, bs] = current_audio_settings_.load();
+		uint32_t sr = sr_div100 * 100;
 		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
 	}
 
@@ -446,7 +448,7 @@ private:
 
 			if (change_sr || change_bs) {
 				uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
-				uint32_t new_bs = change_bs ? sugg_bs : cur_bs;
+				uint16_t new_bs = change_bs ? sugg_bs : cur_bs;
 
 				if (notify_queue) {
 					std::string message{};
@@ -532,7 +534,7 @@ private:
 	bool should_play_when_loaded_ = true;
 
 	UserSettings *settings = nullptr;
-	std::atomic<AudioSRBlock> new_audio_settings_ = {};
+	std::atomic<AudioSRBlock> current_audio_settings_ = {};
 	unsigned max_audio_retries = 0;
 
 	NotificationQueue *notify_queue = nullptr;
