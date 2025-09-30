@@ -76,27 +76,27 @@ struct ButtonExpanderMapsView {
 
 			lv_show(col, (exp_connected || has_mappings));
 
+			lv_color_t bg;
+			lv_color_t num;
+			lv_color_t label;
 			if (!exp_connected && has_mappings) {
-				lv_foreach_child(col, [](lv_obj_t *cont, int idx) {
-					lv_foreach_child(cont, [](lv_obj_t *child, int idx) {
-						lv_obj_set_style_bg_color(get_button_circle(child), lv_color_hex(0x444444), LV_PART_MAIN);
-						lv_obj_set_style_border_color(get_button_circle(child), lv_color_hex(0x444444), LV_PART_MAIN);
-						lv_obj_set_style_text_color(get_button_circle_number(child), lv_color_hex(0xaaaaaa), 0);
-						lv_obj_set_style_text_color(get_button_label(child), lv_color_hex(0x888888), LV_PART_MAIN);
-					});
-				});
+				bg = lv_color_hex(0x444444);
+				num = lv_color_hex(0xaaaaaa);
+				label = lv_color_hex(0x888888);
 			} else {
-				lv_foreach_child(col, [](lv_obj_t *cont, int idx) {
-					lv_foreach_child(cont, [](lv_obj_t *child, int idx) {
-						lv_obj_set_style_bg_color(get_button_circle(child), Gui::get_buttonexp_color(0), LV_PART_MAIN);
-						lv_obj_set_style_border_color(
-							get_button_circle(child), Gui::get_buttonexp_color(0), LV_PART_MAIN);
-						lv_obj_set_style_text_color(
-							get_button_circle_number(child), Gui::get_buttonexp_textcolor(0), 0);
-						lv_obj_set_style_text_color(get_button_label(child), lv_color_white(), LV_PART_MAIN);
-					});
-				});
+				bg = Gui::get_buttonexp_color(0);
+				num = Gui::get_buttonexp_textcolor(0);
+				label = lv_color_white();
 			}
+
+			lv_foreach_child(col, [=](lv_obj_t *cont, int idx) {
+				lv_foreach_child(cont, [=](lv_obj_t *child, int idx) {
+					lv_obj_set_style_bg_color(get_button_circle(child), bg, LV_PART_MAIN);
+					lv_obj_set_style_border_color(get_button_circle(child), bg, LV_PART_MAIN);
+					lv_obj_set_style_text_color(get_button_circle_number(child), num, 0);
+					lv_obj_set_style_text_color(get_button_label(child), label, LV_PART_MAIN);
+				});
+			});
 		}
 	}
 
@@ -113,6 +113,7 @@ struct ButtonExpanderMapsView {
 					if (i == 0) {
 						auto cont = lv_obj_get_child(pane, 0);
 						lv_label_set_text(get_button_label(cont), "");
+						lv_obj_set_user_data(cont, nullptr);
 						disable(cont);
 					} else {
 						auto cont = lv_obj_get_child(pane, i);
