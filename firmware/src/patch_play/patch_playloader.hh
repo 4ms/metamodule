@@ -299,6 +299,8 @@ struct PatchPlayLoader {
 
 	void connect_user_settings(UserSettings *settings) {
 		this->settings = settings;
+		request_new_audio_settings(
+			settings->audio.sample_rate, settings->audio.block_size, settings->audio.max_overrun_retries);
 	}
 
 	void connect_notification_queue(NotificationQueue *notification_queue) {
@@ -461,9 +463,6 @@ private:
 					notify_queue->put({message, Notification::Priority::Info, 2000});
 				}
 				request_new_audio_settings(new_sr, new_bs, max_retries);
-
-				settings->audio.block_size = new_bs;
-				settings->audio.sample_rate = new_sr;
 			}
 		} else {
 			pr_err("Patch Play Loader not initialized with user settings\n");
