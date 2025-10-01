@@ -1,7 +1,6 @@
 #pragma once
-#include "gui/elements/map_ring_animate.hh"
+#include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/pages/base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "lvgl.h"
@@ -37,6 +36,11 @@ struct PatchViewSettingsMenu {
 		lv_obj_move_to_index(graphics_settings, 2);
 		lv_obj_move_to_index(graphics_update_rate_label, 3);
 
+		auto show_samplerate_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show Audio Settings");
+		show_samplerate_check = lv_obj_get_child(show_samplerate_cont, 1);
+
+		lv_obj_move_to_index(show_samplerate_cont, 4);
+
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
 
@@ -63,12 +67,16 @@ struct PatchViewSettingsMenu {
 
 		lv_obj_add_event_cb(graphics_show_check, scroll_menu_down_cb, LV_EVENT_FOCUSED, this);
 
+		lv_obj_add_event_cb(show_samplerate_check, show_titlebar_cb, LV_EVENT_VALUE_CHANGED, this);
+
 		lv_group_remove_all_objs(settings_menu_group);
 		lv_group_set_editing(settings_menu_group, false);
 		lv_group_add_obj(settings_menu_group, ui_PVSettingsCloseButton);
 
 		lv_group_add_obj(settings_menu_group, graphics_show_check);
 		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
+
+		lv_group_add_obj(settings_menu_group, show_samplerate_check);
 
 		lv_group_add_obj(settings_menu_group, ui_PVShowControlMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_PVControlMapTranspSlider);
@@ -348,12 +356,31 @@ private:
 		lv_obj_scroll_to_view_recursive(page->graphics_update_rate_slider, LV_ANIM_ON);
 	}
 
+	static void show_titlebar_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
+
+		auto show_samplerate = lv_obj_has_state(page->show_samplerate_check, LV_STATE_CHECKED);
+		page->settings.show_samplerate = show_samplerate;
+
+		// auto show_knobset_name = lv_obj_has_state(page->show_knobset_name_check, LV_STATE_CHECKED);
+		// page->settings.show_knobset_name = show_knobset_name;
+
+		page->settings.changed = true;
+		page->changed_while_visible = true;
+	}
+
 	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
 
 	lv_obj_t *graphics_show_check;
 	lv_obj_t *graphics_update_rate_label;
 	lv_obj_t *graphics_update_rate_slider;
+
+	lv_obj_t *show_samplerate_check;
+	// lv_obj_t *show_knobset_name_check;
 
 	bool visible = false;
 	bool changed_while_visible = false;
