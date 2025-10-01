@@ -440,13 +440,23 @@ private:
 	}
 
 	void apply_suggested_audio_settings() {
-		if (settings) {
-			auto sugg_sr = next_patch->suggested_samplerate;
-			auto sugg_bs = next_patch->suggested_blocksize;
-			auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
+		if (!settings) {
+			pr_err("Error: PatchPlayLoader not initialized with user settings\n");
+			return;
+		}
 
-			bool change_sr = settings->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
-			bool change_bs = settings->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
+		auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
+
+		auto sugg_sr = next_patch->suggested_samplerate;
+		if (!sugg_sr)
+			sugg_sr = settings->audio.sample_rate;
+
+		auto sugg_bs = next_patch->suggested_blocksize;
+		if (!sugg_bs)
+			sugg_bs = settings->audio.block_size;
+
+		bool change_sr = settings->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
+		bool change_bs = settings->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
 
 			if (change_sr || change_bs) {
 				uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
@@ -463,9 +473,6 @@ private:
 					notify_queue->put({message, Notification::Priority::Info, 2000});
 				}
 				request_new_audio_settings(new_sr, new_bs, max_retries);
-			}
-		} else {
-			pr_err("Patch Play Loader not initialized with user settings\n");
 		}
 	}
 
