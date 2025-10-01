@@ -114,6 +114,8 @@ struct PatchViewSettingsMenu {
 
 		lv_check(graphics_show_check, settings.show_graphic_screens);
 
+		lv_check(show_samplerate_check, settings.show_samplerate);
+
 		update_interactive_states();
 
 		// 0..100 => 0..255

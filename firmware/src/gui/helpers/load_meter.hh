@@ -16,7 +16,7 @@ inline void update_load_text(MetaParams const &metaparams,
 
 	if (settings.show_samplerate) {
 		auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
-		lv_label_set_text_fmt(meter, "%d%% [%u/%u]", metaparams.audio_load, cur_sr / 1000, cur_bs);
+		lv_label_set_text_fmt(meter, "%d%% [%uk/%u]", metaparams.audio_load, cur_sr / 1000, cur_bs);
 	} else {
 		lv_label_set_text_fmt(meter, "%d%%", metaparams.audio_load);
 	}
