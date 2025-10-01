@@ -60,6 +60,8 @@ struct Gui {
 	// General outline for focused objects (FOCUS and FOCUS_KEY)
 	static inline lv_style_t focus_style;
 
+	static inline lv_style_t debug_border;
+
 	// COLORS
 	static inline std::string color_text(std::string_view txt, std::string_view color) {
 		return std::string{color} + std::string{txt} + LV_TXT_COLOR_CMD + " ";
@@ -293,6 +295,13 @@ struct Gui {
 			auto hsv = lv_color_to_hsv(color);
 			color = lv_color_hsv_to_rgb(hsv.h, hsv.s / 2, hsv.v / 2);
 		}
+
+		// debug border
+		lv_style_init(&debug_border);
+		lv_style_set_radius(&debug_border, 0);
+		lv_style_set_border_color(&debug_border, lv_color_hex(0xff0000));
+		lv_style_set_border_opa(&debug_border, LV_OPA_70);
+		lv_style_set_border_width(&debug_border, 1);
 
 		// invisible_style
 		lv_style_init(&invisible_style);

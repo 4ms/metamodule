@@ -40,4 +40,6 @@ lv_obj_t *create_midi_map_dropdown(lv_obj_t *parent, std::string const &options)
 lv_obj_t *create_button_expander_item(lv_obj_t *parent);
 lv_obj_t *create_button_expander_pane(lv_obj_t *parent);
 
+lv_obj_t *create_labeled_dropdown(lv_obj_t *parent);
+
 } // namespace MetaModule

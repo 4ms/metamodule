@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/patch_playloader.hh"
@@ -17,7 +18,18 @@ struct PatchDescriptionPanel {
 	PatchDescriptionPanel()
 		: group(lv_group_create()) {
 
-		lv_group_add_obj(group, ui_DescriptionEditButton);
+		auto desc_cont = lv_obj_get_parent(ui_Description);
+		lv_group_add_obj(group, desc_cont);
+		lv_obj_add_style(desc_cont, &Gui::focus_style, LV_STATE_FOCUSED);
+		lv_obj_add_style(desc_cont, &Gui::focus_style, LV_STATE_FOCUS_KEY);
+
+		create_suggested_audio_controls();
+		lv_group_add_obj(group, ui_DescSuggestSRDrop);
+		lv_group_add_obj(group, ui_DescSuggestBSDrop);
+		lv_obj_move_to_index(ui_DescSuggestSRCont, lv_obj_get_index(desc_cont) + 1);
+		lv_obj_move_to_index(ui_DescSuggestBSCont, lv_obj_get_index(desc_cont) + 2);
+
+		lv_hide(ui_DescriptionEditButton);
 		lv_group_add_obj(group, ui_DescriptionClose);
 
 		lv_hide(ui_DescriptionEditPanel);
@@ -31,19 +43,15 @@ struct PatchDescriptionPanel {
 		lv_group_set_editing(group, false);
 
 		lv_obj_add_event_cb(ui_DescriptionClose, closebut_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_DescriptionEditButton, editbut_cb, LV_EVENT_CLICKED, this);
+
+		lv_obj_add_event_cb(desc_cont, editbut_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(desc_cont, scroll_top, LV_EVENT_FOCUSED, this);
 
 		lv_obj_add_event_cb(ui_DescriptionEditTextArea, textarea_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_DescriptionEditSaveButton, save_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_DescriptionEditCancelButton, cancel_cb, LV_EVENT_CLICKED, this);
-
-		create_suggested_audio_controls();
-		lv_group_add_obj(group, ui_DescSuggestSRDrop);
-		lv_group_add_obj(group, ui_DescSuggestBSDrop);
-		lv_obj_move_to_index(ui_DescSuggestSRCont, lv_obj_get_index(ui_Description) + 1);
-		lv_obj_move_to_index(ui_DescSuggestBSCont, lv_obj_get_index(ui_Description) + 2);
 	}
 
 	void prepare_focus(lv_group_t *base_group) {
@@ -74,10 +82,20 @@ struct PatchDescriptionPanel {
 	}
 
 	void back_event() {
-		if (kb_visible) {
+		if (lv_dropdown_is_open(ui_DescSuggestSRDrop)) {
+			lv_dropdown_close(ui_DescSuggestSRDrop);
+			lv_group_set_editing(group, false);
+
+		} else if (lv_dropdown_is_open(ui_DescSuggestBSDrop)) {
+			lv_dropdown_close(ui_DescSuggestBSDrop);
+			lv_group_set_editing(group, false);
+
+		} else if (kb_visible) {
 			hide_keyboard();
+
 		} else if (edit_panel_visible) {
 			show();
+
 		} else {
 			hide();
 		}
@@ -140,11 +158,17 @@ private:
 		lv_obj_move_background(ui_DescPanelPatchName);
 
 		lv_textarea_set_text(ui_DescriptionEditTextArea, lv_label_get_text(ui_Description));
-		lv_group_set_editing(page->group, false);
+		lv_group_set_editing(page->group, true);
+		lv_group_focus_obj(ui_DescriptionEditTextArea);
+		lv_event_send(ui_DescriptionEditTextArea, LV_EVENT_CLICKED, nullptr);
 
 		set_content_max_height(ui_DescriptionEditPanel, 230);
 
 		page->edit_panel_visible = true;
+	}
+
+	static void scroll_top(lv_event_t *event) {
+		lv_obj_scroll_to_y(ui_DescriptionPanel, 0, LV_ANIM_ON);
 	}
 
 	// Any text area: show keyboard
@@ -161,7 +185,6 @@ private:
 				set_content_max_height(ui_DescriptionEditPanel, 128);
 				set_content_max_height(event->target, 128);
 				lv_obj_scroll_to_view_recursive(event->target, LV_ANIM_ON);
-				page->active_ta = event->target;
 			}
 		}
 	}
@@ -186,8 +209,7 @@ private:
 
 	void hide_keyboard() {
 		lv_obj_clear_state(ui_DescriptionEditTextArea, LV_STATE_USER_1);
-		if (active_ta)
-			lv_group_focus_obj(active_ta);
+		lv_group_focus_obj(ui_DescriptionEditTextArea);
 		lv_group_remove_obj(ui_Keyboard);
 		lv_hide(ui_Keyboard);
 
@@ -229,8 +251,6 @@ private:
 	lv_group_t *group;
 	lv_group_t *parent_group = nullptr;
 
-	lv_obj_t *active_ta = nullptr;
-
 	PatchData *patch = nullptr;
 
 	std::string filename;
@@ -251,86 +271,66 @@ private:
 	PatchPlayLoader *patch_playloader = nullptr;
 
 	void create_suggested_audio_controls() {
-		if (!ui_DescSuggestSRCont) {
-			ui_DescSuggestSRCont = lv_obj_create(ui_DescriptionPanel);
-			lv_obj_remove_style_all(ui_DescSuggestSRCont);
-			lv_obj_set_width(ui_DescSuggestSRCont, lv_pct(100));
-			lv_obj_set_height(ui_DescSuggestSRCont, LV_SIZE_CONTENT);
-			lv_obj_set_align(ui_DescSuggestSRCont, LV_ALIGN_CENTER);
-			lv_obj_set_flex_flow(ui_DescSuggestSRCont, LV_FLEX_FLOW_ROW);
-			lv_obj_set_flex_align(
-				ui_DescSuggestSRCont, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-			lv_obj_clear_flag(ui_DescSuggestSRCont, LV_OBJ_FLAG_SCROLLABLE);
+		ui_DescSuggestSRCont = create_labeled_dropdown(ui_DescriptionPanel);
+		ui_DescSuggestSRLabel = lv_obj_get_child(ui_DescSuggestSRCont, 0);
+		ui_DescSuggestSRDrop = lv_obj_get_child(ui_DescSuggestSRCont, 1);
 
-			ui_DescSuggestSRLabel = lv_label_create(ui_DescSuggestSRCont);
-			lv_label_set_text(ui_DescSuggestSRLabel, "Samplerate:");
+		ui_DescSuggestBSCont = create_labeled_dropdown(ui_DescriptionPanel);
+		ui_DescSuggestBSLabel = lv_obj_get_child(ui_DescSuggestBSCont, 0);
+		ui_DescSuggestBSDrop = lv_obj_get_child(ui_DescSuggestBSCont, 1);
+		lv_obj_set_style_pad_ver(ui_DescSuggestSRCont, 4, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(ui_DescSuggestBSCont, 4, LV_STATE_DEFAULT);
 
-			ui_DescSuggestSRDrop = lv_dropdown_create(ui_DescSuggestSRCont);
-			lv_obj_add_event_cb(ui_DescSuggestSRDrop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
-		}
-		if (!ui_DescSuggestBSCont) {
-			ui_DescSuggestBSCont = lv_obj_create(ui_DescriptionPanel);
-			lv_obj_remove_style_all(ui_DescSuggestBSCont);
-			lv_obj_set_width(ui_DescSuggestBSCont, lv_pct(100));
-			lv_obj_set_height(ui_DescSuggestBSCont, LV_SIZE_CONTENT);
-			lv_obj_set_align(ui_DescSuggestBSCont, LV_ALIGN_CENTER);
-			lv_obj_set_flex_flow(ui_DescSuggestBSCont, LV_FLEX_FLOW_ROW);
-			lv_obj_set_flex_align(
-				ui_DescSuggestBSCont, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-			lv_obj_clear_flag(ui_DescSuggestBSCont, LV_OBJ_FLAG_SCROLLABLE);
+		lv_label_set_text(ui_DescSuggestSRLabel, "Sample Rate:");
+		lv_label_set_text(ui_DescSuggestBSLabel, "Block Size:");
+		lv_obj_set_style_text_font(ui_DescSuggestSRLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(ui_DescSuggestBSLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
 
-			ui_DescSuggestBSLabel = lv_label_create(ui_DescSuggestBSCont);
-			lv_label_set_text(ui_DescSuggestBSLabel, "Blocksize:");
+		lv_obj_set_style_pad_left(ui_DescSuggestSRDrop, 10, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(ui_DescSuggestSRDrop, 6, LV_STATE_DEFAULT);
+		lv_obj_set_width(ui_DescSuggestSRDrop, 90);
 
-			ui_DescSuggestBSDrop = lv_dropdown_create(ui_DescSuggestBSCont);
-			lv_obj_add_event_cb(ui_DescSuggestBSDrop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
-		}
+		lv_obj_set_style_pad_left(ui_DescSuggestBSDrop, 10, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(ui_DescSuggestBSDrop, 6, LV_STATE_DEFAULT);
+		lv_obj_set_width(ui_DescSuggestBSDrop, 90);
 	}
 
 	void set_suggested_audio_dropdowns() {
-		// Build options with 'None' + valid values
-		auto build_opts = [](auto const &ValidOptions) {
-			std::string opts = "None\n";
-			for (auto v : ValidOptions) {
-				opts += std::to_string(v);
-				opts += "\n";
-			}
-			if (!opts.empty())
-				opts.pop_back();
-			return opts;
-		};
-
 		// Samplerate dropdown
-		if (ui_DescSuggestSRDrop) {
-			std::string sr_opts = build_opts(AudioSettings::ValidSampleRates);
-			lv_dropdown_set_options(ui_DescSuggestSRDrop, sr_opts.c_str());
-			int sel = 0; // None
-			if (patch && patch->suggested_samplerate) {
-				for (size_t i = 0; i < AudioSettings::ValidSampleRates.size(); ++i) {
-					if (AudioSettings::ValidSampleRates[i] == patch->suggested_samplerate) {
-						sel = static_cast<int>(i) + 1; // shift by 1 due to None
-						break;
-					}
+		std::string opts = "None\n";
+		for (auto item : AudioSettings::ValidSampleRates) {
+			opts += std::to_string(item / 1000) + "kHz\n";
+		}
+		opts.pop_back();
+		lv_dropdown_set_options(ui_DescSuggestSRDrop, opts.c_str());
+		size_t sel = 0; // None
+		if (patch && patch->suggested_samplerate) {
+			for (size_t i = 0; i < AudioSettings::ValidSampleRates.size(); i++) {
+				if (AudioSettings::ValidSampleRates[i] == patch->suggested_samplerate) {
+					sel = i + 1; // shift by 1 due to None
+					break;
 				}
 			}
-			lv_dropdown_set_selected(ui_DescSuggestSRDrop, sel);
 		}
+		lv_dropdown_set_selected(ui_DescSuggestSRDrop, sel);
 
 		// Blocksize dropdown
-		if (ui_DescSuggestBSDrop) {
-			std::string bs_opts = build_opts(AudioSettings::ValidBlockSizes);
-			lv_dropdown_set_options(ui_DescSuggestBSDrop, bs_opts.c_str());
-			int sel = 0; // None
-			if (patch && patch->suggested_blocksize) {
-				for (size_t i = 0; i < AudioSettings::ValidBlockSizes.size(); ++i) {
-					if (AudioSettings::ValidBlockSizes[i] == patch->suggested_blocksize) {
-						sel = static_cast<int>(i) + 1; // shift by 1 due to None
-						break;
-					}
+		opts = "";
+		for (auto item : AudioSettings::ValidBlockSizes) {
+			opts += std::to_string(item) + "\n";
+		}
+		opts.pop_back();
+		lv_dropdown_set_options(ui_DescSuggestBSDrop, opts.c_str());
+		sel = 0; // None
+		if (patch && patch->suggested_blocksize) {
+			for (size_t i = 0; i < AudioSettings::ValidBlockSizes.size(); i++) {
+				if (AudioSettings::ValidBlockSizes[i] == patch->suggested_blocksize) {
+					sel = i + 1; // shift by 1 due to None
+					break;
 				}
 			}
-			lv_dropdown_set_selected(ui_DescSuggestBSDrop, sel);
 		}
+		lv_dropdown_set_selected(ui_DescSuggestBSDrop, sel);
 	}
 
 	static void suggested_audio_changed_cb(lv_event_t *event) {

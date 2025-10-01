@@ -1467,7 +1467,7 @@ lv_obj_set_style_outline_opa(ui_DescriptionPanel, 255, LV_PART_MAIN| LV_STATE_DE
 lv_obj_set_style_outline_width(ui_DescriptionPanel, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_pad(ui_DescriptionPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_DescriptionPanel, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_DescriptionPanel, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_DescriptionPanel, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_DescriptionPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_DescriptionPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -1525,12 +1525,17 @@ lv_obj_set_style_text_color(ui_DescPanelFileName, lv_color_hex(0xFFFFFF), LV_PAR
 lv_obj_set_style_text_opa(ui_DescPanelFileName, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_DescPanelFileName, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_Description = lv_label_create(ui_DescriptionPanel);
+lv_obj_t *ui_DescriptionCont = lv_btn_create(ui_DescriptionPanel);
+lv_obj_remove_style_all(ui_DescriptionCont);
+lv_obj_set_width( ui_DescriptionCont, lv_pct(100));
+lv_obj_set_height( ui_DescriptionCont, LV_SIZE_CONTENT);
+lv_obj_set_style_pad_ver(ui_DescriptionCont, 4, LV_STATE_DEFAULT);
+lv_obj_set_style_pad_hor(ui_DescriptionCont, 4, LV_STATE_DEFAULT);
+
+ui_Description = lv_label_create(ui_DescriptionCont);
 lv_obj_set_width( ui_Description, lv_pct(100));
-lv_obj_set_height( ui_Description, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_Description, -8 );
-lv_obj_set_y( ui_Description, -16 );
-lv_obj_set_align( ui_Description, LV_ALIGN_TOP_MID );
+lv_obj_set_height( ui_Description, LV_SIZE_CONTENT);
+lv_obj_set_align( ui_Description, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Description,"Patch Description: This patch has a description that can go on and on and on....");
 lv_obj_add_flag( ui_Description, LV_OBJ_FLAG_CLICKABLE );   /// Flags
 lv_obj_clear_flag( ui_Description, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
@@ -2054,7 +2059,7 @@ ui_SaveDialogFileNameLabel = lv_label_create(ui_SaveDialogRightCont);
 lv_obj_set_width( ui_SaveDialogFileNameLabel, lv_pct(100));
 lv_obj_set_height( ui_SaveDialogFileNameLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SaveDialogFileNameLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SaveDialogFileNameLabel,"Save file as:");
+lv_label_set_text(ui_SaveDialogFileNameLabel,"File:");
 lv_obj_set_style_text_color(ui_SaveDialogFileNameLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_SaveDialogFileNameLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_SaveDialogFileNameLabel, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
