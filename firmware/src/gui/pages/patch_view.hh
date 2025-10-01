@@ -328,12 +328,14 @@ struct PatchViewPage : PageBase {
 			page_list.set_active_knobset(active_knobset);
 			patch_mod_queue.put(ChangeKnobSet{active_knobset});
 			redraw_map_rings();
+			update_title_bar();
 		}
 
 		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
 			redraw_map_rings();
+			update_title_bar();
 		}
 
 		if (gui_state.force_redraw_patch) {
