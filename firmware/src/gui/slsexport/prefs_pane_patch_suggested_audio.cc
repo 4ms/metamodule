@@ -63,8 +63,8 @@ void init_SystemPrefsPatchSuggestedAudioPane(lv_obj_t *parentTab) {
 					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE); /// Flags
 	lv_obj_set_style_pad_left(ui_SystemPrefsPatchSuggestSROverrideCont, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_SystemPrefsPatchSuggestSROverrideCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_top(ui_SystemPrefsPatchSuggestSROverrideCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_bottom(ui_SystemPrefsPatchSuggestSROverrideCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui_SystemPrefsPatchSuggestSROverrideCont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui_SystemPrefsPatchSuggestSROverrideCont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	auto sr_title = lv_label_create(ui_SystemPrefsPatchSuggestSROverrideCont);
 	lv_obj_set_width(sr_title, LV_SIZE_CONTENT);  /// 1
@@ -125,8 +125,8 @@ void init_SystemPrefsPatchSuggestedAudioPane(lv_obj_t *parentTab) {
 					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE); /// Flags
 	lv_obj_set_style_pad_left(ui_SystemPrefsPatchSuggestBSOverrideCont, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_SystemPrefsPatchSuggestBSOverrideCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_top(ui_SystemPrefsPatchSuggestBSOverrideCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_bottom(ui_SystemPrefsPatchSuggestBSOverrideCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui_SystemPrefsPatchSuggestBSOverrideCont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui_SystemPrefsPatchSuggestBSOverrideCont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	auto bs_title = lv_label_create(ui_SystemPrefsPatchSuggestBSOverrideCont);
 	lv_obj_set_width(bs_title, LV_SIZE_CONTENT);  /// 1

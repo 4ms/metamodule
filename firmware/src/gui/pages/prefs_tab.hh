@@ -32,11 +32,13 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestSROverrideCont, sr_idx + 1);
 		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestSampleRateCont, sr_idx + 2);
 		lv_hide(ui_SystemPrefsPatchSuggestSROverrideCont);
+		lv_obj_set_style_text_color(ui_SystemPrefsPatchSuggestSROverrideCont, Gui::orange_highlight, 0);
 
 		auto bs_idx = lv_obj_get_index(ui_SystemPrefsAudioBlocksizeCont);
 		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestBSOverrideCont, bs_idx + 1);
 		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestBlocksizeCont, bs_idx + 2);
 		lv_hide(ui_SystemPrefsPatchSuggestBSOverrideCont);
+		lv_obj_set_style_text_color(ui_SystemPrefsPatchSuggestBSOverrideCont, Gui::orange_highlight, 0);
 
 		lv_obj_add_event_cb(ui_SystemPrefsSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsRevertButton, revert_cb, LV_EVENT_CLICKED, this);
