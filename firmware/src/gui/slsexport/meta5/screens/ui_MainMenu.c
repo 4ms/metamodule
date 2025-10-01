@@ -304,7 +304,7 @@ lv_obj_set_style_pad_top(ui_MenuLabelSettings, 12, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_bottom(ui_MenuLabelSettings, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_MainMenuLoadMeter = lv_label_create(ui_MainMenu);
-lv_obj_set_width( ui_MainMenuLoadMeter, 89);
+lv_obj_set_width( ui_MainMenuLoadMeter, LV_SIZE_CONTENT);
 lv_obj_set_height( ui_MainMenuLoadMeter, 20);
 lv_obj_set_x( ui_MainMenuLoadMeter, -4 );
 lv_obj_set_y( ui_MainMenuLoadMeter, 217 );

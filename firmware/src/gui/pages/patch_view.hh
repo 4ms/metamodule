@@ -77,8 +77,7 @@ struct PatchViewPage : PageBase {
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
-			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
-			lv_show(ui_LoadMeter2);
+			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
 			lv_label_set_text(ui_LoadMeter2, "");
@@ -408,10 +407,7 @@ struct PatchViewPage : PageBase {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 			}
 
-			update_load_text(metaparams, ui_LoadMeter2);
-			auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
-			lv_label_set_text_fmt(ui_LoadMeter2, "%uk/%u %d%%", cur_sr / 1000, cur_bs, metaparams.audio_load);
-			lv_obj_set_width(ui_LoadMeter2, LV_SIZE_CONTENT);
+			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
