@@ -458,21 +458,21 @@ private:
 		bool change_sr = settings->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
 		bool change_bs = settings->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
 
-			if (change_sr || change_bs) {
-				uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
-				uint16_t new_bs = change_bs ? sugg_bs : cur_bs;
+		if (change_sr || change_bs) {
+			uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
+			uint16_t new_bs = change_bs ? sugg_bs : cur_bs;
 
-				if (notify_queue) {
-					std::string message{};
-					if (change_sr)
-						message += "Sample-rate changed to " + std::to_string(new_sr);
-					if (change_sr && change_bs)
-						message += "\n";
-					if (change_bs)
-						message += "Block-size changed to " + std::to_string(new_bs);
-					notify_queue->put({message, Notification::Priority::Info, 2000});
-				}
-				request_new_audio_settings(new_sr, new_bs, max_retries);
+			// if (notify_queue) {
+			// 	std::string message{};
+			// 	if (change_sr)
+			// 		message += "Sample-rate: " + std::to_string(new_sr);
+			// 	if (change_sr && change_bs)
+			// 		message += "\n";
+			// 	if (change_bs)
+			// 		message += "Block-size: " + std::to_string(new_bs);
+			// 	notify_queue->put({message, Notification::Priority::Info, change_bs * 1000 + change_sr * 1000});
+			// }
+			request_new_audio_settings(new_sr, new_bs, max_retries);
 		}
 	}
 

@@ -408,6 +408,9 @@ struct PatchViewPage : PageBase {
 			}
 
 			update_load_text(metaparams, ui_LoadMeter2);
+			auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
+			lv_label_set_text_fmt(ui_LoadMeter2, "%uk/%u %d%%", cur_sr / 1000, cur_bs, metaparams.audio_load);
+			lv_obj_set_width(ui_LoadMeter2, LV_SIZE_CONTENT);
 
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
