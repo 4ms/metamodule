@@ -482,37 +482,23 @@ private:
 	}
 
 	void update_title_bar() {
+		lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
+
 		if (settings.patch_view.show_knobset_name) {
-			lv_obj_set_style_text_font(ui_PatchName, &ui_font_MuseoSansRounded70014, LV_STATE_DEFAULT);
-			lv_obj_set_style_text_font(ui_KnobSetName, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
-
-			// Vertical:
-			// std::string txt = patch->patch_name;
-			// txt.append("\n");
-			// txt.append(std::string_view(patch->knob_sets[active_knobset].name));
-			// lv_label_set_text(ui_PatchName, txt.c_str());
-			// lv_obj_set_height(ui_PatchName, LV_SIZE_CONTENT);
-			// lv_hide(ui_KnobSetName);
-
-			// Horizontal:
-			lv_label_set_text(ui_KnobSetName, patch->knob_sets[active_knobset].name.c_str());
+			lv_label_set_text(ui_KnobSetName, patch->valid_knob_set_name(active_knobset));
 			lv_show(ui_KnobSetName);
 		} else {
-			lv_obj_set_style_text_font(ui_PatchName, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
-			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
-
-			// Vertical:
-			// lv_obj_set_height(ui_PatchName, 20);
-
-			// Horizontal:
 			lv_hide(ui_KnobSetName);
 		}
 
 		if (settings.patch_view.float_loadmeter) {
+			lv_show(ui_LoadMeter2);
 			lv_obj_set_parent(ui_LoadMeter2, lv_layer_sys());
 			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, 0);
 		} else {
-			lv_obj_set_parent(ui_LoadMeter2, lv_obj_get_parent(ui_PatchName));
+			lv_show(ui_LoadMeter2);
+			lv_obj_set_parent(ui_LoadMeter2, ui_PatchViewPage);
+			lv_obj_move_to_index(ui_LoadMeter2, 2);
 			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_0, 0);
 		}
 	}
