@@ -113,7 +113,7 @@ struct KnobSetViewPage : PageBase {
 			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
 
 			// Use user_data to connect the mapping to the lvgl object
-			lv_obj_set_user_data(cont, pack_user_data_from_module_param(map.module_id, map.param_id));
+			lv_obj_set_user_data(cont, ModuleParamUserData{map.module_id, map.param_id});
 
 			// Focus on the previously focussed object (if any), or the Next>> button if it's visible
 			if (!args.mappedknob_id || !args.module_id) {
@@ -230,9 +230,9 @@ struct KnobSetViewPage : PageBase {
 			// Before refreshing, store the args
 			if (auto selected_obj = lv_group_get_focused(group)) {
 				if (auto userdata = lv_obj_get_user_data(selected_obj)) {
-					auto [module_id, param_id] = unpack_user_data_to_module_param(userdata);
-					args.mappedknob_id = param_id;
-					args.module_id = module_id;
+					auto unpacked = ModuleParamUserData::unpack(userdata);
+					args.mappedknob_id = unpacked.param_id;
+					args.module_id = unpacked.module_id;
 				}
 			}
 
@@ -394,9 +394,10 @@ private:
 		if (view_set_idx >= page->patch->knob_sets.size())
 			return;
 
-		auto [module_id, param_id] = unpack_user_data_to_module_param(obj->user_data);
-		page->args.mappedknob_id = param_id;
-		page->args.module_id = module_id;
+		auto unpacked = ModuleParamUserData::unpack(obj->user_data);
+		page->args.mappedknob_id = unpacked.param_id;
+		page->args.module_id = unpacked.module_id;
+
 		page->load_page(PageId::KnobMap, page->args);
 	}
 

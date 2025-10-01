@@ -110,7 +110,7 @@ struct MidiMapViewPage : PageBase {
 			auto cont = create_mapping_circle_item(
 				ui_MidiMapRightItems, MapButtonType::MIDIParam, mk.panel_knob_id, label.c_str());
 
-			lv_obj_set_user_data(cont, pack_user_data_from_module_param(mk.module_id, mk.param_id));
+			lv_obj_set_user_data(cont, ModuleParamUserData{mk.module_id, mk.param_id});
 
 			lv_obj_add_event_cb(cont, midi_param_map_click, LV_EVENT_CLICKED, this);
 			lv_group_add_obj(group, cont);
@@ -150,9 +150,9 @@ private:
 	static void midi_param_map_click(lv_event_t *event) {
 		if (const auto page = static_cast<MidiMapViewPage *>(event->user_data); page) {
 			if (const auto user_data = lv_obj_get_user_data(event->target)) {
-				auto [module_id, param_id] = unpack_user_data_to_module_param(user_data);
-				page->args.mappedknob_id = param_id;
-				page->args.module_id = module_id;
+				auto unpacked = ModuleParamUserData::unpack(user_data);
+				page->args.mappedknob_id = unpacked.param_id;
+				page->args.module_id = unpacked.module_id;
 				page->args.view_knobset_id = PatchData::MIDIKnobSet;
 				page->page_list.request_new_page(PageId::KnobMap, page->args);
 			}
