@@ -8,6 +8,7 @@
 #include "gui/pages/add_map_popup.hh"
 #include "gui/pages/choice_popup.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/helpers.hh"
 #include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/manual_control_popup.hh"
 #include "gui/pages/midi_map_input.hh"
@@ -25,12 +26,14 @@ struct MapKnobUserData {
 	uint32_t set_i{};
 	std::optional<uint16_t> mappedknob_idx{};
 };
+
 struct MapCableUserData {
 	uint16_t module_id;
 	ElementCount::Indices idx;
 };
 
 struct PanelJackMapUserData {
+	// Store info about a panel jack in the gui object's user_data field
 	uint32_t panel_jack_id;
 	bool is_input;
 	bool is_valid = true;
@@ -51,8 +54,6 @@ struct PanelJackMapUserData {
 };
 
 //TODO: Separate this into CableMappingPane, ParamMappingPane
-
-//TODO: remove ui_CableFinishButton button and associated logic
 struct ModuleViewMappingPane {
 	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
@@ -412,7 +413,7 @@ private:
 
 		lv_group_add_obj(pane_group, obj);
 
-		lv_obj_add_event_cb(obj, click_panelmap_item_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(obj, click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
 
 		PanelJackMapUserData val;
 		val.is_input = false;
@@ -425,7 +426,7 @@ private:
 
 		lv_group_add_obj(pane_group, obj);
 
-		lv_obj_add_event_cb(obj, click_panelmap_item_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(obj, click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
 
 		PanelJackMapUserData val;
 		val.is_input = true;
@@ -453,7 +454,7 @@ private:
 			lv_obj_set_user_data(obj, &(mapped_cable_user_data[displayed_cable_endpts]));
 			displayed_cable_endpts++;
 		} else {
-			pr_err("Cannot display more than %d cables\n", mapped_item_user_data.size());
+			pr_err("Cannot display more than %d cables\n", mapped_cable_user_data.size());
 			lv_obj_set_user_data(obj, nullptr);
 		}
 	}
@@ -581,9 +582,7 @@ private:
 				page->patch_mod_queue.put(mapping);
 				page->gui_state.new_cable = std::nullopt;
 				page->should_close = true;
-
-			} else
-				pr_dbg("Cancel making MIDI signal\n");
+			}
 		});
 	}
 
@@ -694,22 +693,9 @@ private:
 		map_list_items.push_back(obj);
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
-		if (displayed_knobsets < mapped_item_user_data.size()) {
-			mapped_item_user_data[displayed_knobsets].set_i = set_i;
-			if (auto mapped_knob =
-					patch->find_mapped_knob_idx(set_i, this_module_id, drawn_element->gui_element.idx.param_idx))
 
-				mapped_item_user_data[displayed_knobsets].mappedknob_idx = mapped_knob.value();
-			else
-				mapped_item_user_data[displayed_knobsets].mappedknob_idx = std::nullopt;
-
-			lv_obj_set_user_data(obj, &(mapped_item_user_data[displayed_knobsets]));
-
-			displayed_knobsets++;
-		} else {
-			pr_err("Cannot display more than %d knobsets\n", mapped_item_user_data.size());
-			lv_obj_set_user_data(obj, nullptr);
-		}
+		auto user_data = pack_user_data_from_module_param(set_i, drawn_element->gui_element.idx.param_idx);
+		lv_obj_set_user_data(obj, user_data);
 	}
 
 	//
@@ -757,18 +743,16 @@ private:
 		if (!event->target)
 			return;
 
-		if (auto objdata = lv_obj_get_user_data(event->target)) {
+		if (auto user_data = lv_obj_get_user_data(event->target)) {
 
-			auto data = *static_cast<MapKnobUserData *>(objdata);
-			if (!data.mappedknob_idx.has_value())
-				return;
+			auto [set_id, param_id] = unpack_user_data_to_module_param(user_data);
 
 			page->page_list.update_state(PageId::ModuleView, page->args);
 			page->page_list.request_new_page(PageId::KnobMap,
 											 {.patch_loc_hash = page->args.patch_loc_hash,
 											  .module_id = page->this_module_id,
-											  .mappedknob_id = data.mappedknob_idx,
-											  .view_knobset_id = data.set_i});
+											  .mappedknob_id = param_id,
+											  .view_knobset_id = set_id});
 		}
 	}
 
@@ -834,7 +818,7 @@ private:
 		}
 	}
 
-	static void click_panelmap_item_cb(lv_event_t *event) {
+	static void click_panel_jack_item_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 
@@ -865,7 +849,6 @@ private:
 		});
 	}
 
-	static inline std::array<MapKnobUserData, MaxKnobSets + 1> mapped_item_user_data{};
 	static inline std::array<MapCableUserData, 12> mapped_cable_user_data{};
 	static inline FixedVector<PanelJackMapUserData, 16> mapped_paneljack_user_data{};
 	uint32_t last_active_knobset = 0;
