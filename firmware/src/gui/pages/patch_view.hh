@@ -756,6 +756,7 @@ private:
 
 	void show_desc_panel() {
 		desc_panel.set_patch(patch);
+		desc_panel.set_patch_loader(patch_playloader);
 		desc_panel.set_filename(patches.get_view_patch_filename());
 		desc_panel.show();
 	}

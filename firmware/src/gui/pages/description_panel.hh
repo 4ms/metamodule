@@ -3,8 +3,10 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "patch/patch_data.hh"
+#include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
 #include "src/core/lv_event.h"
+#include "user_settings/audio_settings.hh"
 #include <string>
 
 namespace MetaModule
@@ -34,12 +36,14 @@ struct PatchDescriptionPanel {
 		lv_obj_add_event_cb(ui_DescriptionEditTextArea, textarea_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_DescriptionEditSaveButton, save_cb, LV_EVENT_CLICKED, this);
+
 		lv_obj_add_event_cb(ui_DescriptionEditCancelButton, cancel_cb, LV_EVENT_CLICKED, this);
 
-		ui_DescSuggestedAudioLabel = lv_label_create(ui_DescriptionPanel);
-		lv_obj_set_width(ui_DescSuggestedAudioLabel, LV_SIZE_CONTENT);
-		lv_obj_set_height(ui_DescSuggestedAudioLabel, LV_SIZE_CONTENT);
-		lv_obj_set_style_text_font(ui_DescSuggestedAudioLabel, &ui_font_MuseoSansRounded50016, LV_PART_MAIN);
+		create_suggested_audio_controls();
+		lv_group_add_obj(group, ui_DescSuggestSRDrop);
+		lv_group_add_obj(group, ui_DescSuggestBSDrop);
+		lv_obj_move_to_index(ui_DescSuggestSRCont, lv_obj_get_index(ui_Description) + 1);
+		lv_obj_move_to_index(ui_DescSuggestBSCont, lv_obj_get_index(ui_Description) + 2);
 	}
 
 	void prepare_focus(lv_group_t *base_group) {
@@ -49,6 +53,10 @@ struct PatchDescriptionPanel {
 
 	void set_patch(PatchData *cur_patch) {
 		patch = cur_patch;
+	}
+
+	void set_patch_loader(PatchPlayLoader &pl) {
+		patch_playloader = &pl;
 	}
 
 	void set_filename(std::string_view name) {
@@ -98,20 +106,7 @@ struct PatchDescriptionPanel {
 		else
 			lv_label_set_text(ui_DescMIDIPolyNumLabel, "");
 
-		std::string sugg_txt;
-		if (patch->suggested_samplerate) {
-			sugg_txt += "Suggested Samplerate: ";
-			sugg_txt += std::to_string(patch->suggested_samplerate);
-			sugg_txt += " Hz";
-		}
-		if (patch->suggested_blocksize) {
-			if (!sugg_txt.empty())
-				sugg_txt += "\n";
-			sugg_txt += "Suggested Blocksize: ";
-			sugg_txt += std::to_string(patch->suggested_blocksize);
-		}
-
-		lv_label_set_text(ui_DescSuggestedAudioLabel, sugg_txt.c_str());
+		set_suggested_audio_dropdowns();
 
 		set_content_max_height(ui_DescriptionPanel, 230);
 	}
@@ -245,8 +240,124 @@ private:
 	bool kb_visible = false;
 	bool did_save = false;
 
-	// Created on demand inside show()
-	lv_obj_t *ui_DescSuggestedAudioLabel = nullptr;
+	lv_obj_t *ui_DescSuggestSRCont = nullptr;
+	lv_obj_t *ui_DescSuggestSRLabel = nullptr;
+	lv_obj_t *ui_DescSuggestSRDrop = nullptr;
+
+	lv_obj_t *ui_DescSuggestBSCont = nullptr;
+	lv_obj_t *ui_DescSuggestBSLabel = nullptr;
+	lv_obj_t *ui_DescSuggestBSDrop = nullptr;
+
+	PatchPlayLoader *patch_playloader = nullptr;
+
+	void create_suggested_audio_controls() {
+		if (!ui_DescSuggestSRCont) {
+			ui_DescSuggestSRCont = lv_obj_create(ui_DescriptionPanel);
+			lv_obj_remove_style_all(ui_DescSuggestSRCont);
+			lv_obj_set_width(ui_DescSuggestSRCont, lv_pct(100));
+			lv_obj_set_height(ui_DescSuggestSRCont, LV_SIZE_CONTENT);
+			lv_obj_set_align(ui_DescSuggestSRCont, LV_ALIGN_CENTER);
+			lv_obj_set_flex_flow(ui_DescSuggestSRCont, LV_FLEX_FLOW_ROW);
+			lv_obj_set_flex_align(
+				ui_DescSuggestSRCont, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+			lv_obj_clear_flag(ui_DescSuggestSRCont, LV_OBJ_FLAG_SCROLLABLE);
+
+			ui_DescSuggestSRLabel = lv_label_create(ui_DescSuggestSRCont);
+			lv_label_set_text(ui_DescSuggestSRLabel, "Samplerate:");
+
+			ui_DescSuggestSRDrop = lv_dropdown_create(ui_DescSuggestSRCont);
+			lv_obj_add_event_cb(ui_DescSuggestSRDrop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		}
+		if (!ui_DescSuggestBSCont) {
+			ui_DescSuggestBSCont = lv_obj_create(ui_DescriptionPanel);
+			lv_obj_remove_style_all(ui_DescSuggestBSCont);
+			lv_obj_set_width(ui_DescSuggestBSCont, lv_pct(100));
+			lv_obj_set_height(ui_DescSuggestBSCont, LV_SIZE_CONTENT);
+			lv_obj_set_align(ui_DescSuggestBSCont, LV_ALIGN_CENTER);
+			lv_obj_set_flex_flow(ui_DescSuggestBSCont, LV_FLEX_FLOW_ROW);
+			lv_obj_set_flex_align(
+				ui_DescSuggestBSCont, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+			lv_obj_clear_flag(ui_DescSuggestBSCont, LV_OBJ_FLAG_SCROLLABLE);
+
+			ui_DescSuggestBSLabel = lv_label_create(ui_DescSuggestBSCont);
+			lv_label_set_text(ui_DescSuggestBSLabel, "Blocksize:");
+
+			ui_DescSuggestBSDrop = lv_dropdown_create(ui_DescSuggestBSCont);
+			lv_obj_add_event_cb(ui_DescSuggestBSDrop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		}
+	}
+
+	void set_suggested_audio_dropdowns() {
+		// Build options with 'None' + valid values
+		auto build_opts = [](auto const &ValidOptions) {
+			std::string opts = "None\n";
+			for (auto v : ValidOptions) {
+				opts += std::to_string(v);
+				opts += "\n";
+			}
+			if (!opts.empty())
+				opts.pop_back();
+			return opts;
+		};
+
+		// Samplerate dropdown
+		if (ui_DescSuggestSRDrop) {
+			std::string sr_opts = build_opts(AudioSettings::ValidSampleRates);
+			lv_dropdown_set_options(ui_DescSuggestSRDrop, sr_opts.c_str());
+			int sel = 0; // None
+			if (patch && patch->suggested_samplerate) {
+				for (size_t i = 0; i < AudioSettings::ValidSampleRates.size(); ++i) {
+					if (AudioSettings::ValidSampleRates[i] == patch->suggested_samplerate) {
+						sel = static_cast<int>(i) + 1; // shift by 1 due to None
+						break;
+					}
+				}
+			}
+			lv_dropdown_set_selected(ui_DescSuggestSRDrop, sel);
+		}
+
+		// Blocksize dropdown
+		if (ui_DescSuggestBSDrop) {
+			std::string bs_opts = build_opts(AudioSettings::ValidBlockSizes);
+			lv_dropdown_set_options(ui_DescSuggestBSDrop, bs_opts.c_str());
+			int sel = 0; // None
+			if (patch && patch->suggested_blocksize) {
+				for (size_t i = 0; i < AudioSettings::ValidBlockSizes.size(); ++i) {
+					if (AudioSettings::ValidBlockSizes[i] == patch->suggested_blocksize) {
+						sel = static_cast<int>(i) + 1; // shift by 1 due to None
+						break;
+					}
+				}
+			}
+			lv_dropdown_set_selected(ui_DescSuggestBSDrop, sel);
+		}
+	}
+
+	static void suggested_audio_changed_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		if (!page->patch_playloader)
+			return;
+
+		auto current = page->patch_playloader->get_audio_settings();
+
+		if (event->target == page->ui_DescSuggestSRDrop) {
+			int sel = lv_dropdown_get_selected(page->ui_DescSuggestSRDrop);
+			if (sel <= 0)
+				return; // None
+			uint32_t new_sr = AudioSettings::ValidSampleRates[sel - 1];
+			page->patch_playloader->request_new_audio_settings(new_sr, current.block_size, current.max_overrun_retries);
+
+		} else if (event->target == page->ui_DescSuggestBSDrop) {
+			int sel = lv_dropdown_get_selected(page->ui_DescSuggestBSDrop);
+			if (sel <= 0)
+				return; // None
+			uint32_t new_bs = AudioSettings::ValidBlockSizes[sel - 1];
+			page->patch_playloader->request_new_audio_settings(
+				current.sample_rate, new_bs, current.max_overrun_retries);
+		}
+	}
 };
 
 } // namespace MetaModule
