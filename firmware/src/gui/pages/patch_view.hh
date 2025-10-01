@@ -30,6 +30,7 @@ struct PatchViewPage : PageBase {
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
+		, desc_panel{patch_playloader, patches}
 		, file_menu{patch_playloader,
 					patch_storage,
 					patches,
@@ -756,7 +757,6 @@ private:
 
 	void show_desc_panel() {
 		desc_panel.set_patch(patch);
-		desc_panel.set_patch_loader(patch_playloader);
 		desc_panel.set_filename(patches.get_view_patch_filename());
 		desc_panel.show();
 	}

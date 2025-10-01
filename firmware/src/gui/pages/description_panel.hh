@@ -15,8 +15,10 @@ namespace MetaModule
 
 struct PatchDescriptionPanel {
 
-	PatchDescriptionPanel()
-		: group(lv_group_create()) {
+	PatchDescriptionPanel(PatchPlayLoader &patch_playloader, OpenPatchManager &patches)
+		: group(lv_group_create())
+		, patch_playloader{patch_playloader}
+		, patches{patches} {
 
 		auto desc_cont = lv_obj_get_parent(ui_Description);
 		lv_group_add_obj(group, desc_cont);
@@ -61,10 +63,6 @@ struct PatchDescriptionPanel {
 
 	void set_patch(PatchData *cur_patch) {
 		patch = cur_patch;
-	}
-
-	void set_patch_loader(PatchPlayLoader &pl) {
-		patch_playloader = &pl;
 	}
 
 	void set_filename(std::string_view name) {
@@ -114,7 +112,11 @@ struct PatchDescriptionPanel {
 		is_showing = true;
 		edit_panel_visible = false;
 
-		lv_label_set_text(ui_Description, patch->description.c_str());
+		if (patch->description.length() == 0)
+			lv_label_set_text(ui_Description, "Patch Description");
+		else
+			lv_label_set_text(ui_Description, patch->description.c_str());
+
 		lv_label_set_text(ui_DescPanelPatchName, patch->patch_name.c_str());
 
 		lv_label_set_text(ui_DescPanelFileName, filename.c_str());
@@ -141,6 +143,102 @@ struct PatchDescriptionPanel {
 	}
 
 private:
+	void create_suggested_audio_controls() {
+		ui_DescSuggestSRCont = create_labeled_dropdown(ui_DescriptionPanel);
+		ui_DescSuggestSRLabel = lv_obj_get_child(ui_DescSuggestSRCont, 0);
+		ui_DescSuggestSRDrop = lv_obj_get_child(ui_DescSuggestSRCont, 1);
+
+		ui_DescSuggestBSCont = create_labeled_dropdown(ui_DescriptionPanel);
+		ui_DescSuggestBSLabel = lv_obj_get_child(ui_DescSuggestBSCont, 0);
+		ui_DescSuggestBSDrop = lv_obj_get_child(ui_DescSuggestBSCont, 1);
+		lv_obj_set_style_pad_ver(ui_DescSuggestSRCont, 4, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(ui_DescSuggestBSCont, 4, LV_STATE_DEFAULT);
+
+		lv_label_set_text(ui_DescSuggestSRLabel, "Sample Rate:");
+		lv_label_set_text(ui_DescSuggestBSLabel, "Block Size:");
+		lv_obj_set_style_text_font(ui_DescSuggestSRLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(ui_DescSuggestBSLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+
+		lv_obj_set_style_pad_left(ui_DescSuggestSRDrop, 10, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(ui_DescSuggestSRDrop, 6, LV_STATE_DEFAULT);
+		lv_obj_set_width(ui_DescSuggestSRDrop, 90);
+
+		lv_obj_set_style_pad_left(ui_DescSuggestBSDrop, 10, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(ui_DescSuggestBSDrop, 6, LV_STATE_DEFAULT);
+		lv_obj_set_width(ui_DescSuggestBSDrop, 90);
+	}
+
+	void set_suggested_audio_dropdowns() {
+		// Samplerate dropdown
+		std::string opts = "None\n";
+		for (auto item : AudioSettings::ValidSampleRates) {
+			opts += std::to_string(item / 1000) + "kHz\n";
+		}
+		opts.pop_back();
+		lv_dropdown_set_options(ui_DescSuggestSRDrop, opts.c_str());
+		size_t sel = 0; // None
+		if (patch && patch->suggested_samplerate) {
+			for (size_t i = 0; i < AudioSettings::ValidSampleRates.size(); i++) {
+				if (AudioSettings::ValidSampleRates[i] == patch->suggested_samplerate) {
+					sel = i + 1; // shift by 1 due to None
+					break;
+				}
+			}
+		}
+		lv_dropdown_set_selected(ui_DescSuggestSRDrop, sel);
+
+		// Blocksize dropdown
+		opts = "";
+		for (auto item : AudioSettings::ValidBlockSizes) {
+			opts += std::to_string(item) + "\n";
+		}
+		opts.pop_back();
+		lv_dropdown_set_options(ui_DescSuggestBSDrop, opts.c_str());
+		sel = 0; // None
+		if (patch && patch->suggested_blocksize) {
+			for (size_t i = 0; i < AudioSettings::ValidBlockSizes.size(); i++) {
+				if (AudioSettings::ValidBlockSizes[i] == patch->suggested_blocksize) {
+					sel = i + 1; // shift by 1 due to None
+					break;
+				}
+			}
+		}
+		lv_dropdown_set_selected(ui_DescSuggestBSDrop, sel);
+	}
+
+	static void suggested_audio_changed_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+
+		auto current = page->patch_playloader.get_audio_settings();
+
+		if (event->target == page->ui_DescSuggestSRDrop) {
+			int sel = lv_dropdown_get_selected(page->ui_DescSuggestSRDrop);
+			uint32_t new_sr = sel > 0 ? AudioSettings::ValidSampleRates[sel - 1] : 0;
+			if (page->patch->suggested_samplerate != new_sr) {
+				page->patches.mark_view_patch_modified();
+				page->patch->suggested_samplerate = new_sr;
+			}
+
+			if (new_sr && new_sr != current.sample_rate)
+				page->patch_playloader.request_new_audio_settings(
+					new_sr, current.block_size, current.max_overrun_retries);
+
+		} else if (event->target == page->ui_DescSuggestBSDrop) {
+			int sel = lv_dropdown_get_selected(page->ui_DescSuggestBSDrop);
+			uint32_t new_bs = sel > 0 ? AudioSettings::ValidBlockSizes[sel - 1] : 0;
+			if (page->patch->suggested_blocksize != new_bs) {
+				page->patches.mark_view_patch_modified();
+				page->patch->suggested_blocksize = new_bs;
+			}
+
+			if (new_bs && new_bs != current.block_size)
+				page->patch_playloader.request_new_audio_settings(
+					current.sample_rate, new_bs, current.max_overrun_retries);
+		}
+	}
+
 	static void closebut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
 		page->hide();
@@ -268,96 +366,8 @@ private:
 	lv_obj_t *ui_DescSuggestBSLabel = nullptr;
 	lv_obj_t *ui_DescSuggestBSDrop = nullptr;
 
-	PatchPlayLoader *patch_playloader = nullptr;
-
-	void create_suggested_audio_controls() {
-		ui_DescSuggestSRCont = create_labeled_dropdown(ui_DescriptionPanel);
-		ui_DescSuggestSRLabel = lv_obj_get_child(ui_DescSuggestSRCont, 0);
-		ui_DescSuggestSRDrop = lv_obj_get_child(ui_DescSuggestSRCont, 1);
-
-		ui_DescSuggestBSCont = create_labeled_dropdown(ui_DescriptionPanel);
-		ui_DescSuggestBSLabel = lv_obj_get_child(ui_DescSuggestBSCont, 0);
-		ui_DescSuggestBSDrop = lv_obj_get_child(ui_DescSuggestBSCont, 1);
-		lv_obj_set_style_pad_ver(ui_DescSuggestSRCont, 4, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(ui_DescSuggestBSCont, 4, LV_STATE_DEFAULT);
-
-		lv_label_set_text(ui_DescSuggestSRLabel, "Sample Rate:");
-		lv_label_set_text(ui_DescSuggestBSLabel, "Block Size:");
-		lv_obj_set_style_text_font(ui_DescSuggestSRLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(ui_DescSuggestBSLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
-
-		lv_obj_set_style_pad_left(ui_DescSuggestSRDrop, 10, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(ui_DescSuggestSRDrop, 6, LV_STATE_DEFAULT);
-		lv_obj_set_width(ui_DescSuggestSRDrop, 90);
-
-		lv_obj_set_style_pad_left(ui_DescSuggestBSDrop, 10, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(ui_DescSuggestBSDrop, 6, LV_STATE_DEFAULT);
-		lv_obj_set_width(ui_DescSuggestBSDrop, 90);
-	}
-
-	void set_suggested_audio_dropdowns() {
-		// Samplerate dropdown
-		std::string opts = "None\n";
-		for (auto item : AudioSettings::ValidSampleRates) {
-			opts += std::to_string(item / 1000) + "kHz\n";
-		}
-		opts.pop_back();
-		lv_dropdown_set_options(ui_DescSuggestSRDrop, opts.c_str());
-		size_t sel = 0; // None
-		if (patch && patch->suggested_samplerate) {
-			for (size_t i = 0; i < AudioSettings::ValidSampleRates.size(); i++) {
-				if (AudioSettings::ValidSampleRates[i] == patch->suggested_samplerate) {
-					sel = i + 1; // shift by 1 due to None
-					break;
-				}
-			}
-		}
-		lv_dropdown_set_selected(ui_DescSuggestSRDrop, sel);
-
-		// Blocksize dropdown
-		opts = "";
-		for (auto item : AudioSettings::ValidBlockSizes) {
-			opts += std::to_string(item) + "\n";
-		}
-		opts.pop_back();
-		lv_dropdown_set_options(ui_DescSuggestBSDrop, opts.c_str());
-		sel = 0; // None
-		if (patch && patch->suggested_blocksize) {
-			for (size_t i = 0; i < AudioSettings::ValidBlockSizes.size(); i++) {
-				if (AudioSettings::ValidBlockSizes[i] == patch->suggested_blocksize) {
-					sel = i + 1; // shift by 1 due to None
-					break;
-				}
-			}
-		}
-		lv_dropdown_set_selected(ui_DescSuggestBSDrop, sel);
-	}
-
-	static void suggested_audio_changed_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
-		if (!page->patch_playloader)
-			return;
-
-		auto current = page->patch_playloader->get_audio_settings();
-
-		if (event->target == page->ui_DescSuggestSRDrop) {
-			int sel = lv_dropdown_get_selected(page->ui_DescSuggestSRDrop);
-			if (sel <= 0)
-				return; // None
-			uint32_t new_sr = AudioSettings::ValidSampleRates[sel - 1];
-			page->patch_playloader->request_new_audio_settings(new_sr, current.block_size, current.max_overrun_retries);
-
-		} else if (event->target == page->ui_DescSuggestBSDrop) {
-			int sel = lv_dropdown_get_selected(page->ui_DescSuggestBSDrop);
-			if (sel <= 0)
-				return; // None
-			uint32_t new_bs = AudioSettings::ValidBlockSizes[sel - 1];
-			page->patch_playloader->request_new_audio_settings(
-				current.sample_rate, new_bs, current.max_overrun_retries);
-		}
-	}
+	PatchPlayLoader &patch_playloader;
+	OpenPatchManager &patches;
 };
 
 } // namespace MetaModule
