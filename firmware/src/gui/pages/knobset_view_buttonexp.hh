@@ -134,19 +134,21 @@ struct ButtonExpanderMapsView {
 			if (!exp_connected)
 				continue;
 			lv_foreach_child(pane, [value, module_id, param_id](lv_obj_t *child, int) {
-				auto [m_id, p_id] = unpack_user_data_to_module_param(lv_obj_get_user_data(child));
+				if (auto userdata = lv_obj_get_user_data(child)) {
+					auto [m_id, p_id] = ModuleParamUserData::unpack(userdata);
 
-				if (module_id == m_id && param_id == p_id) {
+					if (module_id == m_id && param_id == p_id) {
 
-					auto color = Gui::get_buttonexp_color(value);
-					lv_obj_set_style_bg_color(get_button_circle(child), color, LV_PART_MAIN);
-					lv_obj_set_style_border_color(get_button_circle(child), color, LV_PART_MAIN);
+						auto color = Gui::get_buttonexp_color(value);
+						lv_obj_set_style_bg_color(get_button_circle(child), color, LV_PART_MAIN);
+						lv_obj_set_style_border_color(get_button_circle(child), color, LV_PART_MAIN);
 
-					auto textcolor = Gui::get_buttonexp_textcolor(value);
-					lv_obj_set_style_text_color(get_button_circle_number(child), textcolor, LV_PART_MAIN);
+						auto textcolor = Gui::get_buttonexp_textcolor(value);
+						lv_obj_set_style_text_color(get_button_circle_number(child), textcolor, LV_PART_MAIN);
 
-					lv_obj_set_style_text_color(get_button_label(child), lv_color_white(), 0);
-					return;
+						lv_obj_set_style_text_color(get_button_label(child), lv_color_white(), 0);
+						return;
+					}
 				}
 			});
 		}

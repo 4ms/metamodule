@@ -8,6 +8,7 @@
 #include "gui/pages/add_map_popup.hh"
 #include "gui/pages/choice_popup.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/helpers.hh"
 #include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/manual_control_popup.hh"
 #include "gui/pages/midi_map_input.hh"
@@ -21,38 +22,7 @@
 namespace MetaModule
 {
 
-struct MapKnobUserData {
-	uint32_t set_i{};
-	std::optional<uint16_t> mappedknob_idx{};
-};
-struct MapCableUserData {
-	uint16_t module_id;
-	ElementCount::Indices idx;
-};
-
-struct PanelJackMapUserData {
-	uint32_t panel_jack_id;
-	bool is_input;
-	bool is_valid = true;
-
-	PanelJackMapUserData() = default;
-
-	PanelJackMapUserData(uintptr_t raw) {
-		is_input = raw & (1 << 31);
-		panel_jack_id = raw & ~(1 << 31);
-
-		is_valid = (panel_jack_id > 0);
-		panel_jack_id = panel_jack_id - 1;
-	}
-
-	operator uintptr_t() {
-		return (panel_jack_id + 1) | (is_input << 31);
-	}
-};
-
 //TODO: Separate this into CableMappingPane, ParamMappingPane
-
-//TODO: remove ui_CableFinishButton button and associated logic
 struct ModuleViewMappingPane {
 	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
@@ -412,12 +382,9 @@ private:
 
 		lv_group_add_obj(pane_group, obj);
 
-		lv_obj_add_event_cb(obj, click_panelmap_item_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(obj, click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
 
-		PanelJackMapUserData val;
-		val.is_input = false;
-		val.panel_jack_id = panel_jack->panel_jack_id;
-		lv_obj_set_user_data(obj, reinterpret_cast<void *>((uintptr_t)val));
+		lv_obj_set_user_data(obj, PanelJackMapUserData{panel_jack->panel_jack_id, ElementType::Output});
 	}
 
 	void make_selectable_panel_jack_item(lv_obj_t *obj, const MappedInputJack *panel_jack) {
@@ -425,12 +392,9 @@ private:
 
 		lv_group_add_obj(pane_group, obj);
 
-		lv_obj_add_event_cb(obj, click_panelmap_item_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(obj, click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
 
-		PanelJackMapUserData val;
-		val.is_input = true;
-		val.panel_jack_id = panel_jack->panel_jack_id;
-		lv_obj_set_user_data(obj, reinterpret_cast<void *>((uintptr_t)val));
+		lv_obj_set_user_data(obj, PanelJackMapUserData{panel_jack->panel_jack_id, ElementType::Input});
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
@@ -446,16 +410,9 @@ private:
 	void make_selectable_jack_item(lv_obj_t *obj, uint16_t module_id, ElementCount::Indices idx) {
 		map_list_items.push_back(obj);
 		lv_group_add_obj(pane_group, obj);
-		// lv_group_focus_obj(obj);
+
 		lv_obj_add_event_cb(obj, follow_cable_button_cb, LV_EVENT_CLICKED, this);
-		if (displayed_cable_endpts < mapped_cable_user_data.size()) {
-			mapped_cable_user_data[displayed_cable_endpts] = {module_id, idx};
-			lv_obj_set_user_data(obj, &(mapped_cable_user_data[displayed_cable_endpts]));
-			displayed_cable_endpts++;
-		} else {
-			pr_err("Cannot display more than %d cables\n", mapped_item_user_data.size());
-			lv_obj_set_user_data(obj, nullptr);
-		}
+		lv_obj_set_user_data(obj, CableEndpointUserData{module_id, idx});
 	}
 
 	void start_new_cable() {
@@ -581,9 +538,7 @@ private:
 				page->patch_mod_queue.put(mapping);
 				page->gui_state.new_cable = std::nullopt;
 				page->should_close = true;
-
-			} else
-				pr_dbg("Cancel making MIDI signal\n");
+			}
 		});
 	}
 
@@ -606,8 +561,8 @@ private:
 		if (!event->target)
 			return;
 
-		if (auto objdata = lv_obj_get_user_data(event->target)) {
-			auto endpoint = *static_cast<MapCableUserData *>(objdata);
+		if (auto userdata = lv_obj_get_user_data(event->target)) {
+			auto endpoint = CableEndpointUserData{userdata};
 			page->page_list.request_new_page(PageId::ModuleView,
 											 {.patch_loc_hash = page->args.patch_loc_hash,
 											  .module_id = endpoint.module_id,
@@ -690,26 +645,13 @@ private:
 		lv_obj_add_event_cb(obj, add_map_button_cb, LV_EVENT_CLICKED, this);
 	}
 
-	void make_selectable_knobset_item(lv_obj_t *obj, uint32_t set_i, std::optional<uint16_t> mapped_panel_id) {
+	void make_selectable_knobset_item(lv_obj_t *obj, uint16_t set_i, std::optional<uint16_t> mapped_panel_id) {
 		map_list_items.push_back(obj);
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
-		if (displayed_knobsets < mapped_item_user_data.size()) {
-			mapped_item_user_data[displayed_knobsets].set_i = set_i;
-			if (auto mapped_knob =
-					patch->find_mapped_knob_idx(set_i, this_module_id, drawn_element->gui_element.idx.param_idx))
 
-				mapped_item_user_data[displayed_knobsets].mappedknob_idx = mapped_knob.value();
-			else
-				mapped_item_user_data[displayed_knobsets].mappedknob_idx = std::nullopt;
-
-			lv_obj_set_user_data(obj, &(mapped_item_user_data[displayed_knobsets]));
-
-			displayed_knobsets++;
-		} else {
-			pr_err("Cannot display more than %d knobsets\n", mapped_item_user_data.size());
-			lv_obj_set_user_data(obj, nullptr);
-		}
+		auto user_data = ModuleParamUserData{set_i, drawn_element->gui_element.idx.param_idx};
+		lv_obj_set_user_data(obj, user_data);
 	}
 
 	//
@@ -757,18 +699,16 @@ private:
 		if (!event->target)
 			return;
 
-		if (auto objdata = lv_obj_get_user_data(event->target)) {
+		if (auto user_data = lv_obj_get_user_data(event->target)) {
 
-			auto data = *static_cast<MapKnobUserData *>(objdata);
-			if (!data.mappedknob_idx.has_value())
-				return;
+			auto [set_id, param_id] = ModuleParamUserData::unpack(user_data);
 
 			page->page_list.update_state(PageId::ModuleView, page->args);
 			page->page_list.request_new_page(PageId::KnobMap,
 											 {.patch_loc_hash = page->args.patch_loc_hash,
 											  .module_id = page->this_module_id,
-											  .mappedknob_id = data.mappedknob_idx,
-											  .view_knobset_id = data.set_i});
+											  .mappedknob_id = param_id,
+											  .view_knobset_id = set_id});
 		}
 	}
 
@@ -834,7 +774,7 @@ private:
 		}
 	}
 
-	static void click_panelmap_item_cb(lv_event_t *event) {
+	static void click_panel_jack_item_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 
@@ -846,14 +786,12 @@ private:
 		if (!userdata)
 			return;
 
-		auto panelmap = PanelJackMapUserData(reinterpret_cast<uintptr_t>(userdata));
-		if (!panelmap.is_valid)
-			return;
-
-		page->show_jack_alias_keyboard(panelmap, event->target);
+		page->show_jack_alias_keyboard(PanelJackMapUserData(userdata), event->target);
 	}
 
 	void show_jack_alias_keyboard(PanelJackMapUserData panelmap, lv_obj_t *obj) {
+		if (!panelmap.is_valid)
+			return;
 		auto alias_text_obj = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 
 		keyboard_entry.show_keyboard(alias_text_obj, [panelmap = panelmap, this](std::string_view text) {
@@ -865,9 +803,6 @@ private:
 		});
 	}
 
-	static inline std::array<MapKnobUserData, MaxKnobSets + 1> mapped_item_user_data{};
-	static inline std::array<MapCableUserData, 12> mapped_cable_user_data{};
-	static inline FixedVector<PanelJackMapUserData, 16> mapped_paneljack_user_data{};
 	uint32_t last_active_knobset = 0;
 
 	lv_group_t *base_group = nullptr;
