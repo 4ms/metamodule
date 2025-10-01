@@ -152,8 +152,8 @@ private:
 		lv_obj_set_style_pad_ver(ui_DescSuggestSRCont, 4, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_ver(ui_DescSuggestBSCont, 4, LV_STATE_DEFAULT);
 
-		lv_label_set_text(ui_DescSuggestSRLabel, "Sample Rate:");
-		lv_label_set_text(ui_DescSuggestBSLabel, "Block Size:");
+		lv_label_set_text(ui_DescSuggestSRLabel, "Patch Sample Rate:");
+		lv_label_set_text(ui_DescSuggestBSLabel, "Patch Block Size:");
 		lv_obj_set_style_text_font(ui_DescSuggestSRLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_font(ui_DescSuggestBSLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
 
@@ -168,7 +168,7 @@ private:
 
 	void set_suggested_audio_dropdowns() {
 		// Samplerate dropdown
-		std::string opts = "None\n";
+		std::string opts = "Any\n";
 		for (auto item : AudioSettings::ValidSampleRates) {
 			opts += std::to_string(item / 1000) + "kHz\n";
 		}
@@ -178,7 +178,7 @@ private:
 		if (patch && patch->suggested_samplerate) {
 			for (size_t i = 0; i < AudioSettings::ValidSampleRates.size(); i++) {
 				if (AudioSettings::ValidSampleRates[i] == patch->suggested_samplerate) {
-					sel = i + 1; // shift by 1 due to None
+					sel = i + 1; // shift by 1 due to Any
 					break;
 				}
 			}
@@ -186,7 +186,7 @@ private:
 		lv_dropdown_set_selected(ui_DescSuggestSRDrop, sel);
 
 		// Blocksize dropdown
-		opts = "None\n";
+		opts = "Any\n";
 		for (auto item : AudioSettings::ValidBlockSizes) {
 			opts += std::to_string(item) + "\n";
 		}
@@ -196,7 +196,7 @@ private:
 		if (patch && patch->suggested_blocksize) {
 			for (size_t i = 0; i < AudioSettings::ValidBlockSizes.size(); i++) {
 				if (AudioSettings::ValidBlockSizes[i] == patch->suggested_blocksize) {
-					sel = i + 1; // shift by 1 due to None
+					sel = i + 1; // shift by 1 due to Any
 					break;
 				}
 			}
