@@ -21,6 +21,9 @@ TEST_CASE("Parse settings file") {
       mode: ShowAll
       opa: 100
     view_height_px: 180
+    show_knobset_name: 1
+    show_samplerate: 0
+    float_loadmeter: 1
 
   module_view:
     map_ring_flash_active: false
@@ -35,6 +38,8 @@ TEST_CASE("Parse settings file") {
       mode: HideAlways
       opa: 0
     view_height_px: 240
+    show_samplerate: 1
+    float_loadmeter: 0
 
   audio:
     sample_rate: 96000
@@ -118,6 +123,14 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.patch_suggested_audio.apply_samplerate == false);
 	CHECK(settings.patch_suggested_audio.apply_blocksize == true);
+
+	CHECK(settings.patch_view.show_samplerate == false);
+	CHECK(settings.patch_view.float_loadmeter == true);
+	CHECK(settings.patch_view.show_knobset_name == true);
+
+	CHECK(settings.module_view.show_samplerate == true);
+	CHECK(settings.module_view.float_loadmeter == false);
+	CHECK(settings.module_view.show_knobset_name == false);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -324,6 +337,7 @@ TEST_CASE("Serialize settings") {
     show_graphic_screens: 1
     graphic_screen_throttle: 1
     show_samplerate: 1
+    float_loadmeter: 0
     show_knobset_name: 0
   module_view:
     map_ring_flash_active: 0
@@ -341,6 +355,7 @@ TEST_CASE("Serialize settings") {
     show_graphic_screens: 1
     graphic_screen_throttle: 1
     show_samplerate: 1
+    float_loadmeter: 0
     show_knobset_name: 0
   audio:
     sample_rate: 24000

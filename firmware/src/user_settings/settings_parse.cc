@@ -82,6 +82,7 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	read_or_default(node, "show_graphic_screens", s, &ModuleDisplaySettings::show_graphic_screens);
 	read_or_default(node, "graphic_screen_throttle", s, &ModuleDisplaySettings::graphic_screen_throttle);
 	read_or_default(node, "show_samplerate", s, &ModuleDisplaySettings::show_samplerate);
+	read_or_default(node, "float_loadmeter", s, &ModuleDisplaySettings::float_loadmeter);
 	read_or_default(node, "show_knobset_name", s, &ModuleDisplaySettings::show_knobset_name);
 
 	return true;

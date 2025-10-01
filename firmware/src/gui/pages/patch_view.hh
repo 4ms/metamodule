@@ -138,6 +138,8 @@ struct PatchViewPage : PageBase {
 
 		patch_revision = patches.get_view_patch_modification_count();
 
+		lv_show(ui_LoadMeter2);
+
 		redraw_patch();
 	}
 
@@ -159,7 +161,7 @@ struct PatchViewPage : PageBase {
 		if (patch->patch_name.length() == 0)
 			return;
 
-		lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
+		update_title_bar();
 
 		module_canvases.reserve(patch->module_slugs.size());
 		module_ids.reserve(patch->module_slugs.size());
@@ -299,6 +301,8 @@ struct PatchViewPage : PageBase {
 		dyn_draws.clear();
 
 		dynamic_elements_prepared = false;
+
+		lv_hide(ui_LoadMeter2);
 	}
 
 	void update() override {
@@ -316,6 +320,7 @@ struct PatchViewPage : PageBase {
 			update_cable_style();
 			update_graphic_throttle_setting();
 			watch_modules();
+			update_title_bar();
 		}
 
 		if (is_patch_playloaded != last_is_patch_playloaded) {
@@ -388,13 +393,13 @@ struct PatchViewPage : PageBase {
 
 		if (desc_panel.did_update_names()) {
 			patches.mark_view_patch_modified();
-			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
+			update_title_bar();
 		}
 
 		if (file_menu.did_filesystem_change()) {
 			displayed_patch_loc_hash = patches.get_view_patch_loc_hash();
 			args.patch_loc_hash = patches.get_view_patch_loc_hash();
-			lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
+			update_title_bar();
 		}
 
 		if (is_patch_playloaded)
@@ -473,6 +478,42 @@ private:
 				dyn_module_idx = 0;
 
 			dyn_draws[dyn_module_idx].draw();
+		}
+	}
+
+	void update_title_bar() {
+		if (settings.patch_view.show_knobset_name) {
+			lv_obj_set_style_text_font(ui_PatchName, &ui_font_MuseoSansRounded70014, LV_STATE_DEFAULT);
+			lv_obj_set_style_text_font(ui_KnobSetName, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+
+			// Vertical:
+			// std::string txt = patch->patch_name;
+			// txt.append("\n");
+			// txt.append(std::string_view(patch->knob_sets[active_knobset].name));
+			// lv_label_set_text(ui_PatchName, txt.c_str());
+			// lv_obj_set_height(ui_PatchName, LV_SIZE_CONTENT);
+			// lv_hide(ui_KnobSetName);
+
+			// Horizontal:
+			lv_label_set_text(ui_KnobSetName, patch->knob_sets[active_knobset].name.c_str());
+			lv_show(ui_KnobSetName);
+		} else {
+			lv_obj_set_style_text_font(ui_PatchName, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
+			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
+
+			// Vertical:
+			// lv_obj_set_height(ui_PatchName, 20);
+
+			// Horizontal:
+			lv_hide(ui_KnobSetName);
+		}
+
+		if (settings.patch_view.float_loadmeter) {
+			lv_obj_set_parent(ui_LoadMeter2, lv_layer_sys());
+			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, 0);
+		} else {
+			lv_obj_set_parent(ui_LoadMeter2, lv_obj_get_parent(ui_PatchName));
+			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_0, 0);
 		}
 	}
 
@@ -723,7 +764,7 @@ private:
 		if (event->target == ui_SaveButton) {
 			lv_label_set_text(ui_PatchName, page->patches.get_view_patch_filename().c_str());
 		} else {
-			lv_label_set_text(ui_PatchName, page->patch->patch_name.c_str());
+			page->update_title_bar();
 		}
 	}
 

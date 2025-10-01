@@ -79,6 +79,31 @@ lv_obj_set_style_pad_bottom(ui_PatchName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_KnobSetName = lv_label_create(ui_PatchViewPage);
+lv_obj_set_flex_grow(ui_KnobSetName, 1);
+lv_obj_set_height( ui_KnobSetName, 20);
+lv_obj_set_x( ui_KnobSetName, 0 );
+lv_obj_set_y( ui_KnobSetName, 60 );
+lv_obj_set_align( ui_KnobSetName, LV_ALIGN_CENTER );
+lv_label_set_long_mode(ui_KnobSetName,LV_LABEL_LONG_SCROLL);
+lv_label_set_text(ui_KnobSetName,"Patch Name Here");
+lv_obj_clear_flag( ui_KnobSetName, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
+lv_obj_set_scroll_dir(ui_KnobSetName, LV_DIR_HOR);
+lv_obj_set_style_text_color(ui_KnobSetName, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_KnobSetName, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_KnobSetName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_line_space(ui_KnobSetName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_align(ui_KnobSetName, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_decor(ui_KnobSetName, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_KnobSetName, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_KnobSetName, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_KnobSetName, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_KnobSetName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_KnobSetName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_KnobSetName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_KnobSetName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_add_flag(ui_KnobSetName, LV_OBJ_FLAG_HIDDEN);
+
 ui_LoadMeter2 = lv_label_create(ui_PatchViewPage);
 lv_obj_set_width( ui_LoadMeter2, LV_SIZE_CONTENT);
 lv_obj_set_height( ui_LoadMeter2, 20);

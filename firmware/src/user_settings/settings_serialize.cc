@@ -33,6 +33,7 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("show_graphic_screens") << s.show_graphic_screens;
 	n->append_child() << ryml::key("graphic_screen_throttle") << s.graphic_screen_throttle;
 	n->append_child() << ryml::key("show_samplerate") << s.show_samplerate;
+	n->append_child() << ryml::key("float_loadmeter") << s.float_loadmeter;
 	n->append_child() << ryml::key("show_knobset_name") << s.show_knobset_name;
 }
 

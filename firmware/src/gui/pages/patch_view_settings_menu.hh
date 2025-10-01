@@ -38,8 +38,15 @@ struct PatchViewSettingsMenu {
 
 		auto show_samplerate_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show Audio Settings");
 		show_samplerate_check = lv_obj_get_child(show_samplerate_cont, 1);
-
 		lv_obj_move_to_index(show_samplerate_cont, 4);
+
+		auto float_samplerate_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Keep Status on top");
+		float_audioload_check = lv_obj_get_child(float_samplerate_cont, 1);
+		lv_obj_move_to_index(float_samplerate_cont, 5);
+
+		auto show_knobset_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show KnobSet Name");
+		show_knobset_name_check = lv_obj_get_child(show_knobset_cont, 1);
+		lv_obj_move_to_index(show_knobset_cont, 6);
 
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
@@ -68,6 +75,8 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(graphics_show_check, scroll_menu_down_cb, LV_EVENT_FOCUSED, this);
 
 		lv_obj_add_event_cb(show_samplerate_check, show_titlebar_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(float_audioload_check, show_titlebar_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(show_knobset_name_check, show_titlebar_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_group_remove_all_objs(settings_menu_group);
 		lv_group_set_editing(settings_menu_group, false);
@@ -77,6 +86,8 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
 
 		lv_group_add_obj(settings_menu_group, show_samplerate_check);
+		lv_group_add_obj(settings_menu_group, float_audioload_check);
+		lv_group_add_obj(settings_menu_group, show_knobset_name_check);
 
 		lv_group_add_obj(settings_menu_group, ui_PVShowControlMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_PVControlMapTranspSlider);
@@ -115,6 +126,8 @@ struct PatchViewSettingsMenu {
 		lv_check(graphics_show_check, settings.show_graphic_screens);
 
 		lv_check(show_samplerate_check, settings.show_samplerate);
+		lv_check(float_audioload_check, settings.float_loadmeter);
+		lv_check(show_knobset_name_check, settings.show_knobset_name);
 
 		update_interactive_states();
 
@@ -364,11 +377,9 @@ private:
 
 		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
 
-		auto show_samplerate = lv_obj_has_state(page->show_samplerate_check, LV_STATE_CHECKED);
-		page->settings.show_samplerate = show_samplerate;
-
-		// auto show_knobset_name = lv_obj_has_state(page->show_knobset_name_check, LV_STATE_CHECKED);
-		// page->settings.show_knobset_name = show_knobset_name;
+		page->settings.show_samplerate = lv_obj_has_state(page->show_samplerate_check, LV_STATE_CHECKED);
+		page->settings.float_loadmeter = lv_obj_has_state(page->float_audioload_check, LV_STATE_CHECKED);
+		page->settings.show_knobset_name = lv_obj_has_state(page->show_knobset_name_check, LV_STATE_CHECKED);
 
 		page->settings.changed = true;
 		page->changed_while_visible = true;
@@ -382,7 +393,8 @@ private:
 	lv_obj_t *graphics_update_rate_slider;
 
 	lv_obj_t *show_samplerate_check;
-	// lv_obj_t *show_knobset_name_check;
+	lv_obj_t *float_audioload_check;
+	lv_obj_t *show_knobset_name_check;
 
 	bool visible = false;
 	bool changed_while_visible = false;
