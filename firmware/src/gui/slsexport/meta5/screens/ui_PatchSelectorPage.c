@@ -125,6 +125,7 @@ lv_obj_set_style_pad_left(ui_LoadMeter, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_LoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_LoadMeter, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_LoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_recolor(ui_LoadMeter, 1);
 
 ui_DrivesPanel = lv_obj_create(ui_PatchSelectorPage);
 lv_obj_set_width( ui_DrivesPanel, 103);

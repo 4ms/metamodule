@@ -125,6 +125,7 @@ lv_obj_set_style_pad_left(ui_LoadMeter2, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_LoadMeter2, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_recolor(ui_LoadMeter2, 1);
 
 ui_ButtonsContainer = lv_obj_create(ui_PatchViewPage);
 lv_obj_set_height( ui_ButtonsContainer, 50);

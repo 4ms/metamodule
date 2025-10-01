@@ -99,7 +99,9 @@ struct Gui {
 		return color_text(txt, "^cccccc ");
 	}
 
-	static inline const char *brown_highlight_html = "^A26E3E ";
+	static inline std::string_view grey_color_html = "^aaaaaa ";
+	static inline std::string_view brown_highlight_html = "^A26E3E ";
+	static inline std::string_view orange_highlight_html = "^fd8b18 ";
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;

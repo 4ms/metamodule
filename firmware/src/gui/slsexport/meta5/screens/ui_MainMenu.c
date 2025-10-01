@@ -325,5 +325,6 @@ lv_obj_set_style_pad_left(ui_MainMenuLoadMeter, 1, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_right(ui_MainMenuLoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MainMenuLoadMeter, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MainMenuLoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_recolor(ui_MainMenuLoadMeter, 1);
 
 }
