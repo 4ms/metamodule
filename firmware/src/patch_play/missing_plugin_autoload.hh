@@ -23,8 +23,10 @@ struct MissingPluginAutoload {
 		modules.clear();
 		skipped.clear();
 
-		if (!patch)
+		if (!patch) {
+			pr_err("MissingPluginAutoload got null patch\n");
 			return;
+		}
 
 		for (std::string_view slug : patch->module_slugs) {
 			if (!ModuleFactory::isValidSlug(slug)) {
