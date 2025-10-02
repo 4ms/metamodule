@@ -394,18 +394,6 @@ extern lv_obj_t *ui_TrashLabel;
 extern lv_obj_t *ui_Keyboard;
 // SCREEN: ui_DeleteMappingPopUp
 void ui_DeleteMappingPopUp_screen_init(void);
-extern lv_obj_t *ui_DeleteMappingPopUp;
-extern lv_obj_t *ui_DelMapPopUpPanel;
-extern lv_obj_t *ui_DelMapLabel;
-extern lv_obj_t *ui_DelMapButtonPanel;
-extern lv_obj_t *ui_CancelButton;
-extern lv_obj_t *ui_CancelLabel;
-extern lv_obj_t *ui_TrashButton2;
-extern lv_obj_t *ui_TrashLabel2;
-extern lv_obj_t *ui_Choice2Button;
-extern lv_obj_t *ui_Choice2Label;
-extern lv_obj_t *ui_ConfirmButton;
-extern lv_obj_t *ui_ConfirmLabel;
 extern lv_obj_t *ui_MessagePanel;
 extern lv_obj_t *ui_MessageLabel;
 extern lv_obj_t *ui_Panel2;
