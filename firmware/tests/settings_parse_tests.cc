@@ -103,8 +103,8 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.audio.block_size == 128);
 	CHECK(settings.audio.max_overrun_retries == 4);
 
-	CHECK(settings.plugin_preload.slug.at(0) == "Plugin One");
-	CHECK(settings.plugin_preload.slug.at(1) == "Plugin Two");
+	CHECK(settings.plugin_preload.slugs.at(0) == "Plugin One");
+	CHECK(settings.plugin_preload.slugs.at(1) == "Plugin Two");
 
 	CHECK(settings.initial_patch_name == "/somedir/SomePatch.yml");
 	CHECK(settings.initial_patch_vol == MetaModule::Volume::SDCard);
@@ -247,7 +247,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.audio.block_size == 64);
 	CHECK(settings.audio.max_overrun_retries == 2);
 
-	CHECK(settings.plugin_preload.slug.size() == 0);
+	CHECK(settings.plugin_preload.slugs.size() == 0);
 
 	CHECK(settings.initial_patch_name == "");
 	CHECK(settings.initial_patch_vol == MetaModule::Volume::NorFlash);
@@ -299,8 +299,8 @@ TEST_CASE("Serialize settings") {
 	settings.audio.block_size = 512;
 	settings.audio.max_overrun_retries = 4;
 
-	settings.plugin_preload.slug.emplace_back("Plugin One");
-	settings.plugin_preload.slug.emplace_back("Plugin Two");
+	settings.plugin_preload.slugs.emplace_back("Plugin One");
+	settings.plugin_preload.slugs.emplace_back("Plugin Two");
 
 	settings.initial_patch_vol = MetaModule::Volume::SDCard;
 	settings.initial_patch_name = "SomePatch.yml";
