@@ -18,6 +18,7 @@ inline void update_load_text(MetaParams const &metaparams,
 	if (settings.show_samplerate) {
 		auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
 
+		// 68% ^aaaaaa48k/64^
 		lv_label_set_text_fmt(meter,
 							  "%d%% %s%uk/%u%c",
 							  metaparams.audio_load,
