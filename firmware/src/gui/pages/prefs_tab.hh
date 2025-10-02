@@ -253,7 +253,7 @@ private:
 
 			lv_show(ui_SystemPrefsPatchSuggestBSOverrideCont);
 			// lv_obj_set_style_text_color(ui_SystemPrefsPatchSuggestBSOverrideLabel, Gui::orange_highlight, 0);
-			lv_label_set_text_fmt(ui_SystemPrefsPatchSuggestBSOverrideLabel, "%u", cur_bs);
+			lv_label_set_text_fmt(ui_SystemPrefsPatchSuggestBSOverrideLabel, "%u", (unsigned)cur_bs);
 		} else {
 			lv_label_set_text(ui_SystemPrefsAudioBlocksizeLabel, "Block size:");
 			lv_obj_set_style_text_font(ui_SystemPrefsAudioBlocksizeLabel, &ui_font_MuseoSansRounded70016, 0);
