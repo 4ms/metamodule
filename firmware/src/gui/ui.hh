@@ -107,10 +107,10 @@ public:
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
 
-		auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
-
 		if (settings.plugin_preload.slugs.size())
 			delay_ms(600); //allow time for ???
+
+		auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
 
 		while (true) {
 			auto status = preloader.process();
