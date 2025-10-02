@@ -21,7 +21,6 @@ struct ConfirmPopup {
 
 	ConfirmPopup(lv_obj_t *parent = ui_MainMenu)
 		: group(lv_group_create()) {
-		printf("ConfirmPopup(parent)\n");
 		init_widgets(parent);
 	}
 
@@ -82,7 +81,7 @@ struct ConfirmPopup {
 			lv_group_add_obj(group, confirm_button);
 		}
 
-		lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		lv_group_activate(group);
 
 		lv_group_focus_obj(cancel_button);
 
@@ -92,10 +91,8 @@ struct ConfirmPopup {
 	}
 
 	void hide() {
-		printf("ConfirmPopup:hide\n");
 		lv_hide(panel);
-		if (orig_group)
-			lv_indev_set_group(lv_indev_get_next(nullptr), orig_group);
+		lv_group_activate(orig_group);
 		visible = false;
 	}
 
