@@ -95,7 +95,7 @@ private:
 
 			slug_idx++;
 			preload_state = State::LoadingPlugin;
-			return {preload_state, "Loaded " + s};
+			return {preload_state, ""};
 		}
 
 		if (result.state == PluginFileLoader::State::RamDiskFull) {
