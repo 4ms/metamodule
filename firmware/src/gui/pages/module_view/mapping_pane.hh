@@ -719,10 +719,12 @@ private:
 
 		uint32_t knobset_id = 0;
 		auto obj = event->target;
-		if (auto knobset_ptr = lv_obj_get_user_data(obj)) {
-			knobset_id = *static_cast<uint32_t *>(knobset_ptr);
+
+		if (auto user_data = lv_obj_get_user_data(obj)) {
+			auto [set_i, _] = ModuleParamUserData::unpack(user_data);
+			knobset_id = set_i == 0xFFFF ? PatchData::MIDIKnobSet : set_i;
 		} else {
-			pr_err("Knob set id not set\n");
+			pr_err("Knob set id not set in item userdata\n");
 			return;
 		}
 
