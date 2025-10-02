@@ -42,7 +42,8 @@ struct PatchViewPage : PageBase {
 					settings}
 		, map_ring_display{settings.patch_view}
 		, missing_plugin_loader{info.plugin_manager}
-		, missing_plugin_popup{ui_PatchViewPage} {
+		, missing_plugin_popup{ui_PatchViewPage}
+		, spinner{create_spinner(ui_PatchViewPage)} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -69,6 +70,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		lv_hide(spinner);
 
 		is_ready = false;
 
@@ -123,6 +125,7 @@ struct PatchViewPage : PageBase {
 		}
 
 		gui_state.force_redraw_patch = false;
+		newly_opened_patch = false;
 
 		// Prepare the knobset menu with the actively playing patch's knobset
 		if (is_patch_playloaded)
@@ -131,10 +134,10 @@ struct PatchViewPage : PageBase {
 		else {
 			// Check is this is a newly viewed patch (not the last patch we viewed)
 			if (displayed_patch_loc_hash != args.patch_loc_hash) {
+				newly_opened_patch = true;
+
 				// Reset to first knobset
 				args.view_knobset_id = 0;
-
-				check_missing_plugins();
 			}
 			active_knobset = args.view_knobset_id.value_or(0);
 		}
@@ -150,9 +153,10 @@ struct PatchViewPage : PageBase {
 	}
 
 	void check_missing_plugins() {
-		if (missing_plugin_loader.scan(patches.get_view_patch())) {
-			auto missing_brands = missing_plugin_loader.missing_brands();
+		missing_plugin_loader.scan(patches.get_view_patch());
+		auto missing_brands = missing_plugin_loader.missing_brands();
 
+		if (missing_brands.size() > 0) {
 			std::string brand_list =
 				"Load missing brands?" + std::accumulate(missing_brands.begin(),
 														 missing_brands.end(),
@@ -161,18 +165,31 @@ struct PatchViewPage : PageBase {
 															 return sum + "\n" + std::string(next);
 														 });
 
-			pr_dbg("Init Popup: '%s'\n", brand_list.c_str());
-			missing_plugin_popup.init(lv_layer_top(), group);
 			missing_plugin_popup.show(
-				[this](bool ok) {
-					if (ok) {
-						missing_plugin_loader.load_missing();
+				[this](unsigned choice) {
+					if (choice == 1) { //confirm button
+						lv_show(spinner);
+						missing_plugin_loader.start_loading_missing();
 					}
 				},
 				brand_list.c_str(),
 				"Load");
 		}
 	}
+
+	// Scan again
+	// missing_plugin_loader.scan(patch);
+	// if (auto missing_modules = missing_plugin_loader.missing_modules(); missing_modules.size()) {
+	// 	std::string missing =
+	// 		"Did not find:" + std::accumulate(missing_modules.begin(),
+	// 										  missing_modules.end(),
+	// 										  std::string(""),
+	// 										  [](std::string const &sum, std::string_view next) {
+	// 											  return sum + "\n" + std::string(next);
+	// 										  });
+	// 	pr_dbg("Init Popup again: '%s'\n", missing.c_str());
+	// 	missing_plugin_popup.show([](unsigned) {}, missing.c_str(), "OK");
+	// }
 
 	void redraw_patch() {
 		lv_group_remove_all_objs(group);
@@ -227,6 +244,8 @@ struct PatchViewPage : PageBase {
 
 		patch = patches.get_view_patch();
 		desc_panel.prepare_focus(group);
+
+		missing_plugin_popup.init(ui_PatchViewPage, group);
 
 		dyn_module_idx = 0;
 		// FIXME: is this needed here?
@@ -295,7 +314,10 @@ struct PatchViewPage : PageBase {
 		if (initial_selected_module) {
 			lv_obj_refr_size(base);
 			lv_obj_refr_pos(base);
-			lv_group_focus_obj(initial_selected_module);
+			if (!missing_plugin_loader.is_processing()) {
+				printf("Focus on module %p in group %p\n", initial_selected_module, group);
+				lv_group_focus_obj(initial_selected_module);
+			}
 			lv_obj_scroll_to_view_recursive(initial_selected_module, LV_ANIM_OFF);
 		} else {
 			lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
@@ -337,6 +359,25 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
+
+		if (newly_opened_patch) {
+			check_missing_plugins();
+			newly_opened_patch = false;
+		}
+
+		if (missing_plugin_loader.is_processing()) {
+			auto status = missing_plugin_loader.process_loading();
+			if (status.message.length()) {
+				lv_label_set_text(ui_PatchName, status.message.c_str());
+			}
+
+			if (!missing_plugin_loader.is_processing()) {
+				lv_hide(spinner);
+			}
+
+			return;
+		}
+
 		bool last_is_patch_playloaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
@@ -416,10 +457,10 @@ struct PatchViewPage : PageBase {
 				abort_cable(gui_state, notify_queue);
 
 			} else if (missing_plugin_popup.is_visible()) {
-				pr_dbg("Hide popup\n");
 				missing_plugin_popup.hide();
 
 			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
+				printf("Focus on play but %p in group %p\n", ui_PlayButton, group);
 				lv_group_focus_obj(ui_PlayButton);
 
 			} else {
@@ -865,6 +906,9 @@ private:
 	unsigned dyn_draw_throttle = 2;
 	unsigned dyn_module_idx = 0;
 	bool dynamic_elements_prepared = false;
+
+	lv_obj_t *spinner;
+	bool newly_opened_patch = true;
 };
 
 } // namespace MetaModule
