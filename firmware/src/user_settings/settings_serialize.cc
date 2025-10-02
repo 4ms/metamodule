@@ -50,7 +50,7 @@ static void write(ryml::NodeRef *n, AudioSettings const &s) {
 static void write(ryml::NodeRef *n, PluginPreloadSettings const &s) {
 	*n |= ryml::SEQ;
 
-	for (auto const &s : s.slug)
+	for (auto const &s : s.slugs)
 		n->append_child() << s;
 }
 

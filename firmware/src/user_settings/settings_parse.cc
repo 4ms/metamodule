@@ -61,10 +61,10 @@ static bool read(ryml::ConstNodeRef const &node, PluginPreloadSettings *autoload
 	if (!node.is_seq())
 		return false;
 
-	autoload->slug.resize(node.num_children());
+	autoload->slugs.resize(node.num_children());
 	auto pos = 0u;
 	for (auto const ch : node.children())
-		ch >> autoload->slug[pos++];
+		ch >> autoload->slugs[pos++];
 
 	return true;
 }

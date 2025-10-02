@@ -7,7 +7,7 @@ namespace MetaModule
 {
 
 struct PluginPreloadSettings {
-	std::vector<std::string> slug;
+	std::vector<std::string> slugs;
 };
 
 } // namespace MetaModule

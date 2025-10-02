@@ -152,7 +152,7 @@ public:
 
 		auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
 
-		if (settings.plugin_preload.slug.size())
+		if (settings.plugin_preload.slugs.size())
 			delay_ms(600); //allow time for ???
 
 		while (true) {
