@@ -177,20 +177,6 @@ struct PatchViewPage : PageBase {
 		}
 	}
 
-	// Scan again
-	// missing_plugin_loader.scan(patch);
-	// if (auto missing_modules = missing_plugin_loader.missing_modules(); missing_modules.size()) {
-	// 	std::string missing =
-	// 		"Did not find:" + std::accumulate(missing_modules.begin(),
-	// 										  missing_modules.end(),
-	// 										  std::string(""),
-	// 										  [](std::string const &sum, std::string_view next) {
-	// 											  return sum + "\n" + std::string(next);
-	// 										  });
-	// 	pr_dbg("Init Popup again: '%s'\n", missing.c_str());
-	// 	missing_plugin_popup.show([](unsigned) {}, missing.c_str(), "OK");
-	// }
-
 	void redraw_patch() {
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -314,10 +300,7 @@ struct PatchViewPage : PageBase {
 		if (initial_selected_module) {
 			lv_obj_refr_size(base);
 			lv_obj_refr_pos(base);
-			if (!missing_plugin_loader.is_processing()) {
-				printf("Focus on module %p in group %p\n", initial_selected_module, group);
-				lv_group_focus_obj(initial_selected_module);
-			}
+			lv_group_focus_obj(initial_selected_module);
 			lv_obj_scroll_to_view_recursive(initial_selected_module, LV_ANIM_OFF);
 		} else {
 			lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
@@ -360,10 +343,10 @@ struct PatchViewPage : PageBase {
 
 	void update() override {
 
-		if (newly_opened_patch) {
-			check_missing_plugins();
-			newly_opened_patch = false;
-		}
+		// if (newly_opened_patch) {
+		// 	check_missing_plugins();
+		// 	newly_opened_patch = false;
+		// }
 
 		if (missing_plugin_loader.is_processing()) {
 			auto status = missing_plugin_loader.process_loading();
