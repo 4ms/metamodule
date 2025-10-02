@@ -16,12 +16,17 @@ struct MissingPluginAutoload {
 	bool scan(PatchData *patch) {
 		missing_brands.clear();
 
+		if (!patch)
+			return false;
+
 		for (std::string_view slug : patch->module_slugs) {
 			if (!ModuleFactory::isValidSlug(slug)) {
 				pr_info("Missing module: %.*s\n", slug.size(), slug.data());
 
 				if (auto colon = slug.find_first_of(':'); colon != slug.npos) {
-					missing_brands.insert(slug.substr(0, colon));
+					auto [_, ok] = missing_brands.insert(slug.substr(0, colon));
+					if (ok)
+						pr_info("Will look for brand %.*s\n", colon, slug.substr(0, colon));
 				}
 			}
 		}

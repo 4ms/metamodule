@@ -16,6 +16,7 @@
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/styles.hh"
+#include "patch_play/missing_plugin_autoload.hh"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 
@@ -39,7 +40,8 @@ struct PatchViewPage : PageBase {
 					page_list,
 					gui_state,
 					settings}
-		, map_ring_display{settings.patch_view} {
+		, map_ring_display{settings.patch_view}
+		, missing_plugin_loader{info.plugin_manager} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -126,9 +128,13 @@ struct PatchViewPage : PageBase {
 			active_knobset = page_list.get_active_knobset();
 
 		else {
-			// Reset to first knobset when we view a different patch than previously viewed
+			// Check is this is a newly viewed patch (not the last patch we viewed)
 			if (displayed_patch_loc_hash != args.patch_loc_hash) {
+				// Reset to first knobset
 				args.view_knobset_id = 0;
+
+				// Check for missing plugins
+				missing_plugin_loader.scan(patches.get_view_patch());
 			}
 			active_knobset = args.view_knobset_id.value_or(0);
 		}
@@ -801,6 +807,8 @@ private:
 	PatchViewFileMenu file_menu;
 
 	MapRingDisplay map_ring_display;
+
+	MissingPluginAutoload missing_plugin_loader;
 
 	std::optional<uint32_t> highlighted_module_id{};
 	lv_obj_t *highlighted_module_obj = nullptr;
