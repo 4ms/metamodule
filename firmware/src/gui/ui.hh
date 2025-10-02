@@ -150,7 +150,7 @@ public:
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
 
-		auto preloader = PreLoader{plugin_manager, settings.plugin_preload};
+		auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
 
 		if (settings.plugin_preload.slug.size())
 			delay_ms(600); //allow time for ???
