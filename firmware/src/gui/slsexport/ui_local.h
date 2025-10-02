@@ -42,4 +42,6 @@ lv_obj_t *create_button_expander_pane(lv_obj_t *parent);
 
 lv_obj_t *create_labeled_dropdown(lv_obj_t *parent);
 
+lv_obj_t *create_spinner(lv_obj_t *parent);
+
 } // namespace MetaModule

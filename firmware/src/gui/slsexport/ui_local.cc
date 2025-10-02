@@ -1018,4 +1018,24 @@ lv_obj_t *create_labeled_dropdown(lv_obj_t *parent) {
 	return cont;
 }
 
+lv_obj_t *create_spinner(lv_obj_t *parent) {
+	auto spinner = lv_spinner_create(parent, 1000, 90);
+	lv_obj_set_width(spinner, 64);
+	lv_obj_set_height(spinner, 64);
+	lv_obj_set_align(spinner, LV_ALIGN_CENTER);
+	lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING); /// Flags
+	lv_obj_clear_flag(spinner,
+					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
+						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
+	lv_obj_set_style_arc_color(spinner, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_arc_opa(spinner, 64, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_arc_width(spinner, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_style_arc_color(spinner, lv_color_hex(0xFD8B18), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_set_style_arc_opa(spinner, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_set_style_arc_width(spinner, 12, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+	return spinner;
+}
+
 } // namespace MetaModule
