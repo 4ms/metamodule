@@ -110,7 +110,7 @@ struct PluginTab : SystemMenuTab {
 		show_ramdisk_free();
 
 		pr_dbg("Pre-loaded list:\n");
-		for (auto const &slug : settings.slug) {
+		for (auto const &slug : settings.slugs) {
 			pr_dbg("'%s'\n", slug.c_str());
 		}
 
@@ -196,7 +196,7 @@ private:
 		lv_group_add_obj(group, current_autoloads_button);
 
 		// Show "autoload none" only if there are plugins to be autoloaded
-		lv_show(clear_autoloads_button, settings.slug.size() > 0);
+		lv_show(clear_autoloads_button, settings.slugs.size() > 0);
 
 		// Show "autoload current" only if there are plugins currently loaded
 		lv_show(current_autoloads_button, (lv_obj_get_child_cnt(ui_PluginsLoadedCont) > 0));
@@ -365,7 +365,7 @@ private:
 		while (plugin_name.back() == ' ')
 			plugin_name.pop_back();
 
-		const auto is_autoloaded = std::ranges::find(page->settings.slug, plugin_name) != page->settings.slug.end();
+		const auto is_autoloaded = std::ranges::find(page->settings.slugs, plugin_name) != page->settings.slugs.end();
 		pr_dbg("%s found %s in slugs\n", is_autoloaded ? "Did" : "Did not", plugin_name.c_str());
 
 		page->plugin_state_popup.show(
@@ -387,12 +387,12 @@ private:
 				if (toggle) {
 					if (*toggle) {
 						pr_info("Pre-load Enabled: %s\n", plugin_name.data());
-						page->settings.slug.push_back(plugin_name);
+						page->settings.slugs.push_back(plugin_name);
 					} else {
-						const auto autoload_slot = std::ranges::find(page->settings.slug, plugin_name);
-						if (autoload_slot != page->settings.slug.end()) {
+						const auto autoload_slot = std::ranges::find(page->settings.slugs, plugin_name);
+						if (autoload_slot != page->settings.slugs.end()) {
 							pr_info("Pre-load Disabled: %s\n", plugin_name.data());
-							page->settings.slug.erase(autoload_slot);
+							page->settings.slugs.erase(autoload_slot);
 						} else {
 							pr_err("Error: can't disable pre-load for %s: not found in settings pre-load list\n",
 								   plugin_name.data());
@@ -453,7 +453,7 @@ private:
 		page->confirm_popup.show(
 			[page](unsigned ok) {
 				if (ok) {
-					page->settings.slug.clear();
+					page->settings.slugs.clear();
 					page->gui_state.do_write_settings = true;
 				}
 			},
@@ -469,11 +469,11 @@ private:
 		page->confirm_popup.show(
 			[page](unsigned ok) {
 				if (ok) {
-					page->settings.slug.clear();
+					page->settings.slugs.clear();
 					auto const &current = page->plugin_manager.loaded_plugins();
 					for (auto const &plugin : current) {
 						std::string name = plugin.fileinfo.plugin_name;
-						page->settings.slug.push_back(name);
+						page->settings.slugs.push_back(name);
 					}
 
 					page->gui_state.do_write_settings = true;

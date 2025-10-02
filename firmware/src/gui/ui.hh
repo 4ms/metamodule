@@ -179,7 +179,7 @@ public:
 		}
 
 		lv_label_set_text(ui_MainMenuNowPlaying, "");
-		page_manager.init();
+		// page_manager.init();
 	}
 
 	void load_initial_patch() {
