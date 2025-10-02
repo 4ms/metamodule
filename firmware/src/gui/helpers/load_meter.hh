@@ -23,8 +23,8 @@ inline void update_load_text(MetaParams const &metaparams,
 							  "%d%% %s%uk/%u%c",
 							  metaparams.audio_load,
 							  Gui::grey_color_html.data(),
-							  cur_sr / 1000,
-							  cur_bs,
+							  unsigned(cur_sr / 1000u),
+							  unsigned(cur_bs),
 							  LV_TXT_COLOR_CMD[0]);
 	} else {
 		lv_label_set_text_fmt(meter, "%d%%", metaparams.audio_load);
