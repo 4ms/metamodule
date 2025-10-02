@@ -72,21 +72,25 @@ struct JackMapViewPage : PageBase {
 		lv_group_remove_all_objs(group);
 
 		// Clear old text
-		for (unsigned i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
-			if (lv_obj_get_child_cnt(in_conts[i]) > 1)
-				lv_label_set_text(lv_obj_get_child(in_conts[i], 1), "");
-			lv_obj_remove_event_cb(in_conts[i], NULL);
+		for (auto *in_cont : in_conts) {
+			if (!in_cont)
+				continue;
+			if (lv_obj_get_child_cnt(in_cont) > 1)
+				lv_label_set_text(lv_obj_get_child(in_cont, 1), "");
+			lv_obj_remove_event_cb(in_cont, NULL);
 		}
-		for (unsigned i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
-			if (lv_obj_get_child_cnt(out_conts[i]) > 1)
-				lv_label_set_text(lv_obj_get_child(out_conts[i], 1), "");
-			lv_obj_remove_event_cb(out_conts[i], NULL);
+		for (auto *out_cont : out_conts) {
+			if (!out_cont)
+				continue;
+			if (lv_obj_get_child_cnt(out_cont) > 1)
+				lv_label_set_text(lv_obj_get_child(out_cont, 1), "");
+			lv_obj_remove_event_cb(out_cont, NULL);
 		}
 
 		//Populate new text
 		for (auto [i, map] : enumerate(patch->mapped_ins)) {
 			for (auto &jack : map.ins) {
-				if (map.panel_jack_id < in_conts.size()) {
+				if (map.panel_jack_id < in_conts.size() && in_conts[map.panel_jack_id]) {
 					if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
 						lv_obj_set_user_data(in_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 						lv_obj_add_event_cb(
@@ -104,7 +108,7 @@ struct JackMapViewPage : PageBase {
 		}
 
 		for (auto [i, map] : enumerate(patch->mapped_outs)) {
-			if (map.panel_jack_id < out_conts.size()) {
+			if (map.panel_jack_id < out_conts.size() && out_conts[map.panel_jack_id]) {
 				if (lv_obj_get_child_cnt(out_conts[map.panel_jack_id]) > 1) {
 					lv_obj_set_user_data(out_conts[map.panel_jack_id], (void *)((uintptr_t)i));
 					lv_obj_add_event_cb(
@@ -121,6 +125,7 @@ struct JackMapViewPage : PageBase {
 			}
 		}
 
+		// Add all populated items to group
 		for (auto *cont : in_conts) {
 			if (cont && lv_obj_get_child_cnt(cont) > 1) {
 				if (lv_label_get_text(lv_obj_get_child(cont, 1))[0] != '\0')
@@ -136,8 +141,11 @@ struct JackMapViewPage : PageBase {
 	}
 
 	void init_jack_items() {
+		// Calculate number of inputs and outputs to display
 		unsigned num_inputs = PanelDef::NumUserFacingInJacks;
 		unsigned num_outputs = PanelDef::NumUserFacingOutJacks;
+
+		// Show all expander jacks if an expander is connected
 		if (Expanders::get_connected().ext_audio_connected) {
 			num_inputs += AudioExpander::NumInJacks;
 			num_outputs += AudioExpander::NumOutJacks;
