@@ -40,7 +40,7 @@ struct PreLoader {
 private:
 	Status start() {
 		if (slugs.size()) {
-			pr_trace("Pre-load: Scanning...\n");
+			pr_trace("Scanning for plugins...\n");
 
 			plugins.start_loading_plugin_list();
 
@@ -50,8 +50,7 @@ private:
 			return {preload_state, "Scanning disks"};
 
 		} else {
-
-			pr_info("Pre-load: No plugins to load\n");
+			pr_info("No plugin to pre-load\n");
 			preload_state = State::Done;
 			return {preload_state, "No plugins to pre-load"};
 		}
@@ -60,19 +59,19 @@ private:
 	Status start_loading_plugin() {
 		if (slug_idx >= slugs.size()) {
 			preload_state = State::Done;
-			return {State::Done, "Pre-loading done"};
+			return {State::Done, "Loading plugins done"};
 		}
 
 		auto &s = slugs[slug_idx];
 		// trim leading and trailing whitespace on plugin name:
 		s = s.substr(0, s.find_last_not_of(" \t\n") + 1);
 		s = s.substr(s.find_first_not_of(" \t\n"));
-		pr_trace("Pre-load: Looking for plugin: '%s'\n", s.c_str());
+		pr_trace("Looking for plugin: '%s'\n", s.c_str());
 
 		preload_state = State::Processing;
 
 		if (load_plugin(s)) {
-			return {State::Processing, "Pre-loading " + s};
+			return {State::Processing, "Loading " + s};
 		} else {
 			return {State::Processing, "Can't find " + s};
 		}
@@ -127,7 +126,7 @@ private:
 				preload_state = State::Error;
 				return {State::Error, "Error: " + result.error_message};
 			} else
-				return {State::Error, "Error pre-loading"};
+				return {State::Error, "Error loading"};
 		}
 
 		return {preload_state, ""};
@@ -174,7 +173,7 @@ private:
 			return true;
 
 		} else {
-			pr_info("Pre-load: Can't find plugin: '%.*s'\n", (int)s.size(), s.data());
+			pr_info("Can't find plugin: '%.*s'\n", (int)s.size(), s.data());
 			return false;
 		}
 	}
