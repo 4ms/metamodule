@@ -41,7 +41,8 @@ struct PatchViewPage : PageBase {
 					gui_state,
 					settings}
 		, map_ring_display{settings.patch_view}
-		, missing_plugin_loader{info.plugin_manager} {
+		, missing_plugin_loader{info.plugin_manager}
+		, missing_plugin_popup{ui_PatchViewPage} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -133,8 +134,7 @@ struct PatchViewPage : PageBase {
 				// Reset to first knobset
 				args.view_knobset_id = 0;
 
-				// Check for missing plugins
-				missing_plugin_loader.scan(patches.get_view_patch());
+				check_missing_plugins();
 			}
 			active_knobset = args.view_knobset_id.value_or(0);
 		}
@@ -147,6 +147,31 @@ struct PatchViewPage : PageBase {
 		lv_show(ui_LoadMeter2);
 
 		redraw_patch();
+	}
+
+	void check_missing_plugins() {
+		if (missing_plugin_loader.scan(patches.get_view_patch())) {
+			auto missing_brands = missing_plugin_loader.missing_brands();
+
+			std::string brand_list =
+				"Load missing brands?" + std::accumulate(missing_brands.begin(),
+														 missing_brands.end(),
+														 std::string(""),
+														 [](std::string const &sum, std::string_view next) {
+															 return sum + "\n" + std::string(next);
+														 });
+
+			pr_dbg("Init Popup: '%s'\n", brand_list.c_str());
+			missing_plugin_popup.init(lv_layer_top(), group);
+			missing_plugin_popup.show(
+				[this](bool ok) {
+					if (ok) {
+						missing_plugin_loader.load_missing();
+					}
+				},
+				brand_list.c_str(),
+				"Load");
+		}
 	}
 
 	void redraw_patch() {
@@ -389,6 +414,10 @@ struct PatchViewPage : PageBase {
 
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
+
+			} else if (missing_plugin_popup.is_visible()) {
+				pr_dbg("Hide popup\n");
+				missing_plugin_popup.hide();
 
 			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
 				lv_group_focus_obj(ui_PlayButton);
@@ -809,6 +838,7 @@ private:
 	MapRingDisplay map_ring_display;
 
 	MissingPluginAutoload missing_plugin_loader;
+	ConfirmPopup missing_plugin_popup;
 
 	std::optional<uint32_t> highlighted_module_id{};
 	lv_obj_t *highlighted_module_obj = nullptr;
@@ -829,8 +859,6 @@ private:
 		PatchViewPage *page;
 		uint32_t selected_module_id;
 	};
-
-	// std::vector<std::vector<float>> light_vals;
 
 	std::vector<DynamicDisplay> dyn_draws;
 	unsigned dyn_draw_throttle_ctr = 1;
