@@ -2,13 +2,13 @@
 #include "console/pr_dbg.hh"
 #include "dynload/plugin_file_list.hh"
 #include "dynload/plugin_manager.hh"
-#include "user_settings/plugin_preload_settings.hh"
 #include "util/version_tools.hh"
 #include <optional>
 
 namespace MetaModule
 {
 
+// Loads a list of plugins
 struct PreLoader {
 	enum class State { NotStarted, Done, Warning, Error, Processing, LoadingPlugin };
 	struct Status {
@@ -16,8 +16,8 @@ struct PreLoader {
 		std::string message;
 	};
 
-	PreLoader(PluginManager &plugins, PluginPreloadSettings &plugin_settings)
-		: plugin_settings{plugin_settings}
+	PreLoader(PluginManager &plugins, std::vector<std::string> &slugs_to_load)
+		: slugs{slugs_to_load}
 		, plugins{plugins} {
 	}
 
@@ -39,7 +39,7 @@ struct PreLoader {
 
 private:
 	Status start() {
-		if (plugin_settings.slug.size()) {
+		if (slugs.size()) {
 			pr_trace("Pre-load: Scanning...\n");
 
 			plugins.start_loading_plugin_list();
@@ -58,12 +58,12 @@ private:
 	}
 
 	Status start_loading_plugin() {
-		if (slug_idx >= plugin_settings.slug.size()) {
+		if (slug_idx >= slugs.size()) {
 			preload_state = State::Done;
 			return {State::Done, "Pre-loading done"};
 		}
 
-		auto &s = plugin_settings.slug[slug_idx];
+		auto &s = slugs[slug_idx];
 		// trim leading and trailing whitespace on plugin name:
 		s = s.substr(0, s.find_last_not_of(" \t\n") + 1);
 		s = s.substr(s.find_first_not_of(" \t\n"));
@@ -90,7 +90,7 @@ private:
 		}
 
 		if (result.state == PluginFileLoader::State::Idle || result.state == PluginFileLoader::State::Success) {
-			auto &s = plugin_settings.slug[slug_idx];
+			auto &s = slugs[slug_idx];
 			pr_trace("Pre-load: Done with plugin: %s\n", s.c_str());
 
 			slug_idx++;
@@ -112,7 +112,7 @@ private:
 			} else {
 				pr_warn("Pre-load: Warning: %s\n", result.error_message.c_str());
 				slug_idx++;
-				if (slug_idx >= plugin_settings.slug.size()) {
+				if (slug_idx >= slugs.size()) {
 					preload_state = State::Done;
 				} else {
 					preload_state = State::LoadingPlugin;
@@ -179,7 +179,7 @@ private:
 		}
 	}
 
-	PluginPreloadSettings &plugin_settings;
+	std::span<std::string> slugs;
 	PluginManager &plugins;
 	PluginFileList const *found_plugins = nullptr;
 	unsigned slug_idx = 0;
