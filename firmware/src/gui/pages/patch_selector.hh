@@ -405,12 +405,14 @@ struct PatchSelectorPage : PageBase {
 		load_patch();
 
 		if (missing_plugins.scan(patches.get_view_patch())) {
-			missing_plugins.ask([this](bool ok) {
-				if (ok)
-					state = State::CheckMissingPlugins;
-				else
-					view_loaded_patch();
-			});
+			missing_plugins.ask(
+				[this](bool ok) {
+					if (ok)
+						state = State::CheckMissingPlugins;
+					else
+						view_loaded_patch();
+				},
+				group);
 		} else {
 			view_loaded_patch();
 		}
