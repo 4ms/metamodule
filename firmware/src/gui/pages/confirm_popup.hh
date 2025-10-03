@@ -22,7 +22,6 @@ struct ConfirmPopup {
 	ConfirmPopup(lv_obj_t *parent = ui_MainMenu)
 		: group(lv_group_create()) {
 		init_widgets(parent);
-		printf("Popup: group %p\n", group);
 	}
 
 	void init(lv_obj_t *page_base, lv_group_t *current_group) {
@@ -102,8 +101,6 @@ struct ConfirmPopup {
 		if (lv_obj_get_height(message_label) > 200) {
 			lv_obj_set_style_text_font(message_label, &ui_font_MuseoSansRounded50014, 0);
 		}
-
-		printf("Popup group %p, active group %p\n", group, lv_indev_get_next(nullptr)->group);
 
 		visible = true;
 	}
