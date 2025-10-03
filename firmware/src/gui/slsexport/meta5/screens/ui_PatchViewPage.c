@@ -56,7 +56,7 @@ lv_obj_set_style_pad_row(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOCUS_
 lv_obj_set_style_pad_column(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOCUS_KEY);
 
 ui_PatchName = lv_label_create(ui_PatchViewPage);
-lv_obj_set_width( ui_PatchName, 260);
+lv_obj_set_flex_grow(ui_PatchName, 1);
 lv_obj_set_height( ui_PatchName, 20);
 lv_obj_set_x( ui_PatchName, 0 );
 lv_obj_set_y( ui_PatchName, 60 );
@@ -67,7 +67,7 @@ lv_obj_clear_flag( ui_PatchName, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCU
 lv_obj_set_scroll_dir(ui_PatchName, LV_DIR_HOR);
 lv_obj_set_style_text_color(ui_PatchName, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_PatchName, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_PatchName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_PatchName, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_decor(ui_PatchName, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -79,15 +79,37 @@ lv_obj_set_style_pad_bottom(ui_PatchName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_KnobSetName = lv_label_create(ui_PatchViewPage);
+lv_obj_set_flex_grow(ui_KnobSetName, 1);
+lv_obj_set_height( ui_KnobSetName, 20);
+lv_obj_set_x( ui_KnobSetName, 0 );
+lv_obj_set_y( ui_KnobSetName, 60 );
+lv_obj_set_align( ui_KnobSetName, LV_ALIGN_CENTER );
+lv_label_set_long_mode(ui_KnobSetName,LV_LABEL_LONG_SCROLL);
+lv_label_set_text(ui_KnobSetName,"Patch Name Here");
+lv_obj_clear_flag( ui_KnobSetName, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
+lv_obj_set_scroll_dir(ui_KnobSetName, LV_DIR_HOR);
+lv_obj_set_style_text_color(ui_KnobSetName, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_KnobSetName, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_KnobSetName, -1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_line_space(ui_KnobSetName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_align(ui_KnobSetName, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_decor(ui_KnobSetName, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_KnobSetName, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_KnobSetName, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_KnobSetName, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_KnobSetName, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_KnobSetName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_KnobSetName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_KnobSetName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_add_flag(ui_KnobSetName, LV_OBJ_FLAG_HIDDEN);
+
 ui_LoadMeter2 = lv_label_create(ui_PatchViewPage);
-lv_obj_set_width( ui_LoadMeter2, 40);
+lv_obj_set_width( ui_LoadMeter2, LV_SIZE_CONTENT);
 lv_obj_set_height( ui_LoadMeter2, 20);
 lv_obj_set_x( ui_LoadMeter2, 0 );
 lv_obj_set_y( ui_LoadMeter2, 2 );
 lv_obj_set_align( ui_LoadMeter2, LV_ALIGN_TOP_RIGHT );
-lv_obj_set_flex_flow(ui_LoadMeter2,LV_FLEX_FLOW_ROW);
-lv_obj_set_flex_align(ui_LoadMeter2, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_SPACE_EVENLY);
-lv_label_set_text(ui_LoadMeter2,"100%");
 lv_obj_clear_flag( ui_LoadMeter2, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_LoadMeter2, LV_SCROLLBAR_MODE_OFF);
 lv_obj_set_style_text_color(ui_LoadMeter2, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -98,11 +120,12 @@ lv_obj_set_style_text_align(ui_LoadMeter2, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| L
 lv_obj_set_style_text_font(ui_LoadMeter2, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_LoadMeter2, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_LoadMeter2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_LoadMeter2, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_LoadMeter2, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_recolor(ui_LoadMeter2, 1);
 
 ui_ButtonsContainer = lv_obj_create(ui_PatchViewPage);
 lv_obj_set_height( ui_ButtonsContainer, 50);
@@ -1467,7 +1490,7 @@ lv_obj_set_style_outline_opa(ui_DescriptionPanel, 255, LV_PART_MAIN| LV_STATE_DE
 lv_obj_set_style_outline_width(ui_DescriptionPanel, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_pad(ui_DescriptionPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_DescriptionPanel, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_DescriptionPanel, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_DescriptionPanel, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_DescriptionPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_DescriptionPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -1525,12 +1548,19 @@ lv_obj_set_style_text_color(ui_DescPanelFileName, lv_color_hex(0xFFFFFF), LV_PAR
 lv_obj_set_style_text_opa(ui_DescPanelFileName, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_DescPanelFileName, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_Description = lv_label_create(ui_DescriptionPanel);
+lv_obj_t *ui_DescriptionCont = lv_btn_create(ui_DescriptionPanel);
+lv_obj_remove_style_all(ui_DescriptionCont);
+lv_obj_set_width( ui_DescriptionCont, lv_pct(100));
+lv_obj_set_height( ui_DescriptionCont, LV_SIZE_CONTENT);
+lv_obj_set_style_pad_ver(ui_DescriptionCont, 4, LV_STATE_DEFAULT);
+lv_obj_set_style_pad_hor(ui_DescriptionCont, 4, LV_STATE_DEFAULT);
+lv_obj_set_style_border_color(ui_DescriptionCont, lv_color_hex(0x888888), LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_DescriptionCont, 1, LV_STATE_DEFAULT);
+
+ui_Description = lv_label_create(ui_DescriptionCont);
 lv_obj_set_width( ui_Description, lv_pct(100));
-lv_obj_set_height( ui_Description, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_Description, -8 );
-lv_obj_set_y( ui_Description, -16 );
-lv_obj_set_align( ui_Description, LV_ALIGN_TOP_MID );
+lv_obj_set_height( ui_Description, LV_SIZE_CONTENT);
+lv_obj_set_align( ui_Description, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Description,"Patch Description: This patch has a description that can go on and on and on....");
 lv_obj_add_flag( ui_Description, LV_OBJ_FLAG_CLICKABLE );   /// Flags
 lv_obj_clear_flag( ui_Description, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
@@ -2054,7 +2084,7 @@ ui_SaveDialogFileNameLabel = lv_label_create(ui_SaveDialogRightCont);
 lv_obj_set_width( ui_SaveDialogFileNameLabel, lv_pct(100));
 lv_obj_set_height( ui_SaveDialogFileNameLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SaveDialogFileNameLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SaveDialogFileNameLabel,"Save file as:");
+lv_label_set_text(ui_SaveDialogFileNameLabel,"File:");
 lv_obj_set_style_text_color(ui_SaveDialogFileNameLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_SaveDialogFileNameLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_SaveDialogFileNameLabel, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);

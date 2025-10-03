@@ -4,6 +4,7 @@
 #include "fs/volumes.hh"
 #include "user_settings/fs_settings.hh"
 #include "user_settings/midi_settings.hh"
+#include "user_settings/patch_suggested_audio_settings.hh"
 #include "user_settings/plugin_preload_settings.hh"
 #include "user_settings/screensaver_settings.hh"
 #include "user_settings/view_settings.hh"
@@ -26,6 +27,7 @@ struct UserSettings {
 	CatchupSettings catchup{};
 	FilesystemSettings filesystem{};
 	MidiSettings midi{};
+	PatchSuggestedAudioSettings patch_suggested_audio{};
 };
 
 } // namespace MetaModule

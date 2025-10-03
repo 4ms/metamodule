@@ -69,6 +69,7 @@ lv_obj_t *ui_waitspinner;
 void ui_PatchViewPage_screen_init(void);
 lv_obj_t *ui_PatchViewPage;
 lv_obj_t *ui_PatchName;
+lv_obj_t *ui_KnobSetName;
 lv_obj_t *ui_LoadMeter2;
 lv_obj_t *ui_ButtonsContainer;
 lv_obj_t *ui_PlayButton;

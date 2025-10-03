@@ -32,6 +32,9 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("cable_style") << s.cable_style;
 	n->append_child() << ryml::key("show_graphic_screens") << s.show_graphic_screens;
 	n->append_child() << ryml::key("graphic_screen_throttle") << s.graphic_screen_throttle;
+	n->append_child() << ryml::key("show_samplerate") << s.show_samplerate;
+	n->append_child() << ryml::key("float_loadmeter") << s.float_loadmeter;
+	n->append_child() << ryml::key("show_knobset_name") << s.show_knobset_name;
 }
 
 static void write(ryml::NodeRef *n, AudioSettings const &s) {
@@ -81,6 +84,13 @@ static void write(ryml::NodeRef *n, FilesystemSettings const &s) {
 	n->append_child() << ryml::key("midi_feedback") << std::to_underlying(s.midi_feedback);
 }
 
+static void write(ryml::NodeRef *n, PatchSuggestedAudioSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("apply_samplerate") << s.apply_samplerate;
+	n->append_child() << ryml::key("apply_blocksize") << s.apply_blocksize;
+}
+
 namespace Settings
 {
 
@@ -105,6 +115,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["catchup"] << settings.catchup;
 	data["filesystem"] << settings.filesystem;
 	data["midi"] << settings.midi;
+	data["patch_suggested_audio"] << settings.patch_suggested_audio;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();

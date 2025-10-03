@@ -73,6 +73,7 @@ extern lv_obj_t *ui_waitspinner;
 void ui_PatchViewPage_screen_init(void);
 extern lv_obj_t *ui_PatchViewPage;
 extern lv_obj_t *ui_PatchName;
+extern lv_obj_t *ui_KnobSetName;
 extern lv_obj_t *ui_LoadMeter2;
 extern lv_obj_t *ui_ButtonsContainer;
 extern lv_obj_t *ui_PlayButton;

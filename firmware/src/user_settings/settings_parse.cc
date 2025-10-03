@@ -81,6 +81,9 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	read_or_default(node, "cable_style", s, &ModuleDisplaySettings::cable_style);
 	read_or_default(node, "show_graphic_screens", s, &ModuleDisplaySettings::show_graphic_screens);
 	read_or_default(node, "graphic_screen_throttle", s, &ModuleDisplaySettings::graphic_screen_throttle);
+	read_or_default(node, "show_samplerate", s, &ModuleDisplaySettings::show_samplerate);
+	read_or_default(node, "float_loadmeter", s, &ModuleDisplaySettings::float_loadmeter);
+	read_or_default(node, "show_knobset_name", s, &ModuleDisplaySettings::show_knobset_name);
 
 	return true;
 }
@@ -146,6 +149,17 @@ static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, PatchSuggestedAudioSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	read_or_default(node, "apply_samplerate", settings, &PatchSuggestedAudioSettings::apply_samplerate);
+	read_or_default(node, "apply_blocksize", settings, &PatchSuggestedAudioSettings::apply_blocksize);
+	settings->make_valid();
+
+	return true;
+}
+
 namespace Settings
 {
 
@@ -172,6 +186,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "catchup", settings, &UserSettings::catchup);
 	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
 	read_or_default(node, "midi", settings, &UserSettings::midi);
+	read_or_default(node, "patch_suggested_audio", settings, &UserSettings::patch_suggested_audio);
 
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::initial_patch_name);
 	// TODO: cleaner way to parse an enum and reject out of range?

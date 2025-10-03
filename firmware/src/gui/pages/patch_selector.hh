@@ -72,7 +72,8 @@ struct PatchSelectorPage : PageBase {
 			lv_label_set_text(ui_LoadMeter, "");
 		} else {
 			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", playing_patch->patch_name.c_str());
-			lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
+
+			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
 		}
 
 		is_populating_subdir_panel = true;
@@ -299,7 +300,7 @@ struct PatchSelectorPage : PageBase {
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
 
-					update_load_text(metaparams, ui_LoadMeter);
+					update_load_text(metaparams, patch_playloader, settings.module_view, ui_LoadMeter);
 				} else {
 					// Poll for patch file changes in between polling for patch list updates
 					poll_patch_file_changed();
