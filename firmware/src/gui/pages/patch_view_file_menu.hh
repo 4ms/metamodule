@@ -128,6 +128,8 @@ struct PatchViewFileMenu {
 				lv_indev_set_group(indev, group);
 			visible = true;
 		}
+
+		reverted_patch = false;
 	}
 
 	bool is_visible() {
@@ -226,6 +228,8 @@ struct PatchViewFileMenu {
 
 					gui_state.force_redraw_patch = true;
 					revert_state = RevertState::Idle;
+					reverted_patch = true;
+
 					hide_menu();
 				} else {
 					notify_queue.put({"Error reverting patch", Notification::Priority::Error, 1000});
@@ -238,6 +242,12 @@ struct PatchViewFileMenu {
 				hide_menu();
 			}
 		}
+	}
+
+	bool did_reload() {
+		auto t = reverted_patch;
+		reverted_patch = false;
+		return t;
 	}
 
 	bool did_filesystem_change() {
@@ -357,7 +367,8 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		std::string confirm_msg = "Revert " + page->patches.get_view_patch_filename() +
+		std::string confirm_msg = std::string(lv_label_get_text(ui_PatchFileRevertLabel)) + " " +
+								  page->patches.get_view_patch_filename() +
 								  " to last saved version on disk? This cannot be undone.";
 
 		page->patch_loc = {page->patches.get_view_patch_filename(), page->patches.get_view_patch_vol()};
@@ -408,6 +419,7 @@ private:
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 	enum class RevertState { Idle, TryRequest, Requested } revert_state = RevertState::Idle;
+	bool reverted_patch = false;
 
 	PatchSaveDialog::Action current_action{};
 };

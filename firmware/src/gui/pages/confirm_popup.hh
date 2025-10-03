@@ -22,6 +22,7 @@ struct ConfirmPopup {
 	ConfirmPopup(lv_obj_t *parent = ui_MainMenu)
 		: group(lv_group_create()) {
 		init_widgets(parent);
+		printf("Popup: group %p\n", group);
 	}
 
 	void init(lv_obj_t *page_base, lv_group_t *current_group) {
@@ -56,6 +57,8 @@ struct ConfirmPopup {
 
 		lv_group_add_obj(group, cancel_button);
 
+		lv_group_activate(group);
+
 		if (choice2_text.size() > 0) {
 			lv_show(choice2_button);
 			lv_obj_clear_state(choice2_button, LV_STATE_FOCUSED);
@@ -73,24 +76,24 @@ struct ConfirmPopup {
 			lv_obj_clear_state(trash_button, LV_STATE_FOCUS_KEY);
 			lv_group_add_obj(group, trash_button);
 			lv_show(cancel_button);
+			lv_group_focus_obj(cancel_button);
 		} else {
-			if (choice1_text.length() == 0) {
-				lv_label_set_text(confirm_label, "OK");
-				lv_hide(cancel_button);
-			} else {
-				lv_label_set_text_fmt(confirm_label, "%.*s", (int)choice1_text.size(), choice1_text.data());
-				lv_show(cancel_button);
-			}
 			lv_show(confirm_button);
 			lv_obj_clear_state(confirm_button, LV_STATE_FOCUSED);
 			lv_obj_clear_state(confirm_button, LV_STATE_FOCUS_KEY);
 			lv_hide(trash_button);
 			lv_group_add_obj(group, confirm_button);
+
+			if (choice1_text.length() == 0) {
+				lv_label_set_text(confirm_label, "OK");
+				lv_hide(cancel_button);
+				lv_group_focus_obj(confirm_button);
+			} else {
+				lv_label_set_text_fmt(confirm_label, "%.*s", (int)choice1_text.size(), choice1_text.data());
+				lv_show(cancel_button);
+				lv_group_focus_obj(cancel_button);
+			}
 		}
-
-		lv_group_activate(group);
-
-		lv_group_focus_obj(cancel_button);
 
 		lv_group_set_wrap(group, false);
 
@@ -99,6 +102,8 @@ struct ConfirmPopup {
 		if (lv_obj_get_height(message_label) > 200) {
 			lv_obj_set_style_text_font(message_label, &ui_font_MuseoSansRounded50014, 0);
 		}
+
+		printf("Popup group %p, active group %p\n", group, lv_indev_get_next(nullptr)->group);
 
 		visible = true;
 	}

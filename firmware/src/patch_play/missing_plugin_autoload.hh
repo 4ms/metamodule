@@ -22,6 +22,7 @@ struct MissingPluginAutoload {
 		brands.clear();
 		modules.clear();
 		skipped.clear();
+		processing = false;
 
 		if (!patch) {
 			pr_err("MissingPluginAutoload got null patch\n");

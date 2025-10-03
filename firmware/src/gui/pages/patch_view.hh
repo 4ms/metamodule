@@ -12,11 +12,11 @@
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
 #include "gui/pages/make_cable.hh"
+#include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/styles.hh"
-#include "patch_play/missing_plugin_autoload.hh"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 
@@ -41,9 +41,7 @@ struct PatchViewPage : PageBase {
 					gui_state,
 					settings}
 		, map_ring_display{settings.patch_view}
-		, missing_plugin_loader{info.plugin_manager}
-		, missing_plugin_popup{ui_PatchViewPage}
-		, spinner{create_spinner(ui_PatchViewPage)} {
+		, missing_plugins{info.plugin_manager, ui_PatchViewPage, group} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -70,8 +68,6 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		lv_hide(spinner);
-
 		is_ready = false;
 
 		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
@@ -125,7 +121,6 @@ struct PatchViewPage : PageBase {
 		}
 
 		gui_state.force_redraw_patch = false;
-		newly_opened_patch = false;
 
 		// Prepare the knobset menu with the actively playing patch's knobset
 		if (is_patch_playloaded)
@@ -134,8 +129,6 @@ struct PatchViewPage : PageBase {
 		else {
 			// Check is this is a newly viewed patch (not the last patch we viewed)
 			if (displayed_patch_loc_hash != args.patch_loc_hash) {
-				newly_opened_patch = true;
-
 				// Reset to first knobset
 				args.view_knobset_id = 0;
 			}
@@ -150,31 +143,6 @@ struct PatchViewPage : PageBase {
 		lv_show(ui_LoadMeter2);
 
 		redraw_patch();
-	}
-
-	void check_missing_plugins() {
-		missing_plugin_loader.scan(patches.get_view_patch());
-		auto missing_brands = missing_plugin_loader.missing_brands();
-
-		if (missing_brands.size() > 0) {
-			std::string brand_list =
-				"Load missing brands?" + std::accumulate(missing_brands.begin(),
-														 missing_brands.end(),
-														 std::string(""),
-														 [](std::string const &sum, std::string_view next) {
-															 return sum + "\n" + std::string(next);
-														 });
-
-			missing_plugin_popup.show(
-				[this](unsigned choice) {
-					if (choice == 1) { //confirm button
-						lv_show(spinner);
-						missing_plugin_loader.start_loading_missing();
-					}
-				},
-				brand_list.c_str(),
-				"Load");
-		}
 	}
 
 	void redraw_patch() {
@@ -231,7 +199,7 @@ struct PatchViewPage : PageBase {
 		patch = patches.get_view_patch();
 		desc_panel.prepare_focus(group);
 
-		missing_plugin_popup.init(ui_PatchViewPage, group);
+		// missing_plugin_popup.init(ui_PatchViewPage, group);
 
 		dyn_module_idx = 0;
 		// FIXME: is this needed here?
@@ -342,22 +310,22 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
-
-		// if (newly_opened_patch) {
-		// 	check_missing_plugins();
-		// 	newly_opened_patch = false;
-		// }
-
-		if (missing_plugin_loader.is_processing()) {
-			auto status = missing_plugin_loader.process_loading();
-			if (status.message.length()) {
-				lv_label_set_text(ui_PatchName, status.message.c_str());
+		// Revert/Reload checks for missing plugins:
+		if (file_menu.did_reload()) {
+			if (missing_plugins.scan(patch)) {
+				missing_plugins.ask([](bool) {}, group);
 			}
+		}
 
-			if (!missing_plugin_loader.is_processing()) {
-				lv_hide(spinner);
+		missing_plugins.process();
+
+		if (missing_plugins.just_finished_processing()) {
+			if (missing_plugins.has_missing(patch)) {
+				missing_plugins.show_missing([] {});
 			}
+		}
 
+		if (!missing_plugins.is_done_processing()) {
 			return;
 		}
 
@@ -439,8 +407,8 @@ struct PatchViewPage : PageBase {
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
 
-			} else if (missing_plugin_popup.is_visible()) {
-				missing_plugin_popup.hide();
+			} else if (missing_plugins.is_visible()) {
+				missing_plugins.hide();
 
 			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
 				printf("Focus on play but %p in group %p\n", ui_PlayButton, group);
@@ -861,9 +829,6 @@ private:
 
 	MapRingDisplay map_ring_display;
 
-	MissingPluginAutoload missing_plugin_loader;
-	ConfirmPopup missing_plugin_popup;
-
 	std::optional<uint32_t> highlighted_module_id{};
 	lv_obj_t *highlighted_module_obj = nullptr;
 
@@ -890,8 +855,7 @@ private:
 	unsigned dyn_module_idx = 0;
 	bool dynamic_elements_prepared = false;
 
-	lv_obj_t *spinner;
-	bool newly_opened_patch = true;
+	MissingPluginScanner missing_plugins;
 };
 
 } // namespace MetaModule
