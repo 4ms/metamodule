@@ -33,7 +33,25 @@ struct MissingPluginScanner {
 		lv_label_set_text(status_label, "");
 		lv_hide(status_label);
 
+		title = lv_label_create(missing_plugin_popup.panel);
+		lv_obj_move_to_index(title, lv_obj_get_index(missing_plugin_popup.message_label));
+		lv_obj_set_width(title, 180);
+		lv_obj_set_height(title, LV_SIZE_CONTENT);
+		lv_label_set_text(title, "");
+		lv_obj_set_align(title, LV_ALIGN_TOP_LEFT);
+		lv_obj_set_style_text_color(title, Gui::orange_highlight, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_opa(title, 255, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_LEFT, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(title, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(title, LV_OPA_0, LV_STATE_DEFAULT);
+		lv_obj_set_style_outline_width(title, 0, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_hor(title, 0, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(title, 2, LV_STATE_DEFAULT);
+		lv_obj_set_style_border_width(title, 0, LV_STATE_DEFAULT);
+
 		lv_hide(waitspinner);
+
+		lv_obj_set_style_text_font(missing_plugin_popup.message_label, &ui_font_MuseoSansRounded50014, 0);
 	}
 
 	bool scan(PatchData *patch) {
@@ -46,9 +64,26 @@ struct MissingPluginScanner {
 
 		auto missing_brands = missing_plugin_loader.missing_brands();
 
-		std::string message = "Load missing brands?";
-		for (auto &mod : missing_brands)
-			message += "\n" + mod;
+		lv_label_set_text(title, "Load missing plugins?");
+
+		std::string message;
+
+		for (size_t i = 0; auto const &mod : missing_brands) {
+			constexpr size_t max_lines = 6;
+			i++;
+			if (i > max_lines)
+				break;
+
+			if (i == max_lines && i != missing_brands.size()) {
+				message += "   ...and ";
+				message += std::to_string(missing_brands.size() - max_lines + 1);
+				message += " more";
+			} else {
+				message += "- " + mod + "\n";
+			}
+		}
+		if (message.ends_with('\n'))
+			message.pop_back();
 
 		missing_plugin_popup.show(
 			[this, callback = should_load](unsigned choice) {
@@ -67,22 +102,18 @@ struct MissingPluginScanner {
 	void process() {
 		if (missing_plugin_loader.is_processing()) {
 			lv_show(waitspinner);
-			// lv_label_set_text(status_label, "Searching for plugins");
 			lv_show(status_label);
 
 			auto status = missing_plugin_loader.process_loading();
 
-			if (!missing_plugin_loader.is_processing())
-				just_done = true;
-
-			if (status.message.length()) {
-				lv_label_set_text(status_label, status.message.c_str());
-				pr_dbg("msg: %s\n", status.message.c_str());
-			}
-
 			if (!missing_plugin_loader.is_processing()) {
+				just_done = true;
 				lv_hide(waitspinner);
 				lv_hide(status_label);
+
+			} else if (status.message.length()) {
+				lv_label_set_text(status_label, status.message.c_str());
+				pr_dbg("msg: %s\n", status.message.c_str());
 			}
 		}
 	}
@@ -100,9 +131,26 @@ struct MissingPluginScanner {
 
 	void show_missing(auto callback) {
 		auto skipped = missing_plugin_loader.skipped_modules();
-		std::string message = "Not found:";
-		for (auto &mod : skipped)
-			message += "\n" + mod;
+
+		lv_label_set_text_fmt(title, "%u Not found:", skipped.size());
+
+		std::string message;
+		for (size_t i = 0; auto const &mod : skipped) {
+			constexpr size_t max_lines = 6;
+			i++;
+			if (i > max_lines)
+				break;
+
+			if (i == max_lines && i != skipped.size()) {
+				message += "   ...and ";
+				message += std::to_string(skipped.size() - max_lines + 1);
+				message += " more";
+			} else {
+				message += "- " + mod + "\n";
+			}
+		}
+		if (message.ends_with('\n'))
+			message.pop_back();
 
 		missing_plugin_popup.show([callback](unsigned) { callback(); }, message.c_str(), "");
 	}
@@ -126,6 +174,7 @@ private:
 	lv_obj_t *status_label;
 	lv_obj_t *waitspinner;
 	lv_obj_t *parent;
+	lv_obj_t *title;
 	bool just_done;
 };
 
