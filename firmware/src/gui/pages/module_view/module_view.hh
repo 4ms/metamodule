@@ -193,7 +193,10 @@ struct ModuleViewPage : PageBase {
 		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
-				show_roller();
+				if (mapping_pane.modified_elements())
+					populate_roller();
+				else
+					show_roller();
 			}
 
 			// Right-click menu
@@ -225,6 +228,7 @@ struct ModuleViewPage : PageBase {
 			update_map_ring_style();
 			update_cable_style();
 			update_graphic_throttle_setting();
+			populate_roller();
 		}
 
 		// Patch file changed via wifi/disk
@@ -402,6 +406,7 @@ private:
 	// Defined in module_view/element_roller.cc:
 	void show_roller();
 	void populate_roller();
+	void populate_element_objects();
 	void add_element_highlight(lv_obj_t *obj);
 	void unhighlight_component(uint32_t prev_sel);
 	void highlight_component(size_t idx);

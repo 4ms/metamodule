@@ -51,6 +51,7 @@ void ModuleViewPage::redraw_module() {
 	lv_obj_update_layout(canvas);
 
 	// Populate Roller and highlighter buttons
+	populate_element_objects();
 	populate_roller();
 
 	//Size Module Image and Roller
