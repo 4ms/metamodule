@@ -76,6 +76,9 @@ void ModuleViewPage::populate_roller() {
 		if (settings.module_view.show_jack_aliases) {
 			append_jack_alias(opts, drawn_element.gui_element, patch);
 		}
+		if (settings.module_view.show_knob_aliases) {
+			append_param_alias(opts, drawn_element.gui_element, patch, active_knobset);
+		}
 
 		append_connected_jack_name(opts, gui_el.idx, gui_el.module_idx, *patch);
 

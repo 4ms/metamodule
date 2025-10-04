@@ -27,6 +27,8 @@ void append_panel_name(std::string &opts, Element const &el, uint16_t panel_jack
 
 void append_jack_alias(std::string &opts, GuiElement const &gui_element, PatchData *patch);
 
+void append_param_alias(std::string &opts, GuiElement const &gui_element, PatchData *patch, unsigned knob_set);
+
 void param_item_name(std::string &s, MappedKnob const &map, PatchData const *patch);
 
 } // namespace MetaModule

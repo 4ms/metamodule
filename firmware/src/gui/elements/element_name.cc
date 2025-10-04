@@ -126,6 +126,16 @@ void append_jack_alias(std::string &opts, GuiElement const &gui_element, PatchDa
 	}
 }
 
+void append_param_alias(std::string &opts, GuiElement const &gui_element, PatchData *patch, unsigned knob_set) {
+	if (gui_element.idx.param_idx != ElementCount::Indices::NoElementMarker) {
+		if (auto map = patch->find_mapped_knob(knob_set, gui_element.module_idx, gui_element.idx.param_idx)) {
+			const auto color = get_mapped_color(ParamElement{}, map->panel_knob_id);
+			opts += " ";
+			opts += Gui::color_text(map->alias_name, color);
+		}
+	}
+}
+
 void param_item_name(std::string &s, MappedKnob const &map, PatchData const *patch) {
 	if (map.alias_name.length()) {
 		s = std::string_view{map.alias_name};
