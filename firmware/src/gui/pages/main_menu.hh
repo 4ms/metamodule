@@ -73,7 +73,7 @@ struct MainMenuPage : PageBase {
 				load_patch_view_page();
 		}
 
-		update_load_text(metaparams, ui_MainMenuLoadMeter);
+		update_load_text(metaparams, patch_playloader, settings.patch_view, ui_MainMenuLoadMeter);
 
 		poll_patch_file_changed();
 	}

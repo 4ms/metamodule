@@ -1,6 +1,7 @@
 #pragma once
 #include "calibrate/calibration_patch.hh"
 #include "delay.hh"
+#include "gui/notify/queue.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
@@ -9,7 +10,7 @@
 #include "patch_to_yaml.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
-#include "user_settings/audio_settings.hh"
+#include "user_settings/settings.hh"
 #include <atomic>
 
 size_t get_heap_size();
@@ -24,11 +25,6 @@ struct PatchPlayLoader {
 		, storage_{patch_storage}
 		, patches_{patches} {
 	}
-
-	struct AudioSRBlock {
-		uint32_t sample_rate;
-		uint32_t block_size;
-	};
 
 	void load_initial_patch(std::string_view patchname, Volume patch_vol) {
 		uint32_t tries = 10000;
@@ -284,14 +280,31 @@ struct PatchPlayLoader {
 		}
 	}
 
-	void request_new_audio_settings(uint32_t sample_rate, uint32_t block_size, uint32_t max_retries) {
-		new_audio_settings_.store(AudioSRBlock{.sample_rate = sample_rate, .block_size = block_size});
+	struct AudioSRBlock {
+		uint16_t sample_rate;
+		uint16_t block_size;
+	};
+
+	void request_new_audio_settings(uint32_t sample_rate, uint16_t block_size, uint32_t max_retries) {
+		uint16_t sr_div100 = sample_rate / 100;
+		current_audio_settings_.store(AudioSRBlock{.sample_rate = sr_div100, .block_size = block_size});
 		max_audio_retries = max_retries;
 	}
 
 	AudioSettings get_audio_settings() {
-		auto [sr, bs] = new_audio_settings_.load();
+		auto [sr_div100, bs] = current_audio_settings_.load();
+		uint32_t sr = sr_div100 * 100;
 		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
+	}
+
+	void connect_user_settings(UserSettings *settings) {
+		this->settings = settings;
+		request_new_audio_settings(
+			settings->audio.sample_rate, settings->audio.block_size, settings->audio.max_overrun_retries);
+	}
+
+	void connect_notification_queue(NotificationQueue *notification_queue) {
+		notify_queue = notification_queue;
 	}
 
 	template<typename PluginModuleType>
@@ -310,8 +323,8 @@ struct PatchPlayLoader {
 		return player_.is_param_tracking(module_id, param_id);
 	}
 
-	void set_all_param_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange) {
-		player_.set_catchup_mode(mode, allow_jump_outofrange);
+	void update_param_catchup_mode() {
+		player_.set_catchup_mode(settings->catchup.mode, settings->catchup.allow_jump_outofrange);
 	}
 
 	void get_module_states() {
@@ -322,32 +335,6 @@ struct PatchPlayLoader {
 	}
 
 private:
-	PatchPlayer &player_;
-	FileStorageProxy &storage_;
-	OpenPatchManager &patches_;
-
-	PatchData *next_patch = nullptr;
-	CalibrationPatch calibration;
-
-	std::atomic<bool> loading_new_patch_ = false;
-	std::atomic<bool> audio_is_muted_ = false;
-	std::atomic<bool> stopping_audio_ = false;
-	std::atomic<bool> starting_audio_ = false;
-	std::atomic<bool> saving_patch_ = false;
-	std::atomic<bool> should_save_patch_ = false;
-	std::atomic<bool> audio_overrun_ = false;
-	bool stopped_because_of_overrun_ = false;
-	bool should_play_when_loaded_ = true;
-
-	PatchLocation new_loc{};
-	PatchLocation old_loc{};
-	enum class RenameState { Idle, RequestSaveNew, SavingNew, RequestDeleteOld, DeletingOld };
-	RenameState rename_state_{RenameState::Idle};
-	uint32_t attempts = 0;
-
-	std::atomic<AudioSRBlock> new_audio_settings_ = {};
-	unsigned max_audio_retries = 0;
-
 	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
 
@@ -431,7 +418,7 @@ private:
 		} else if (next_patch != patches_.get_playing_patch()) {
 			// This happens when loading calibration patches
 			// It might also happen if we implement MIDI PC -> patch load
-			pr_warn("Open patch manager does is not tracking the playing patch\n");
+			pr_warn("Open patch manager is not tracking the playing patch\n");
 		}
 
 		auto result = player_.load_patch(*next_patch);
@@ -439,14 +426,54 @@ private:
 			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
 
+			apply_suggested_audio_settings();
+
 			if (start_audio_immediately)
 				start_audio();
+
 		} else {
 			patches_.close_playing_patch();
 		}
 
 		loading_new_patch_ = false;
 		return result;
+	}
+
+	void apply_suggested_audio_settings() {
+		if (!settings) {
+			pr_err("Error: PatchPlayLoader not initialized with user settings\n");
+			return;
+		}
+
+		auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
+
+		auto sugg_sr = next_patch->suggested_samplerate;
+		if (!sugg_sr)
+			sugg_sr = settings->audio.sample_rate;
+
+		auto sugg_bs = next_patch->suggested_blocksize;
+		if (!sugg_bs)
+			sugg_bs = settings->audio.block_size;
+
+		bool change_sr = settings->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
+		bool change_bs = settings->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
+
+		if (change_sr || change_bs) {
+			uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
+			uint16_t new_bs = change_bs ? sugg_bs : cur_bs;
+
+			// if (notify_queue) {
+			// 	std::string message{};
+			// 	if (change_sr)
+			// 		message += "Sample-rate: " + std::to_string(new_sr);
+			// 	if (change_sr && change_bs)
+			// 		message += "\n";
+			// 	if (change_bs)
+			// 		message += "Block-size: " + std::to_string(new_bs);
+			// 	notify_queue->put({message, Notification::Priority::Info, change_bs * 1000 + change_sr * 1000});
+			// }
+			request_new_audio_settings(new_sr, new_bs, max_retries);
+		}
 	}
 
 	Result process_renaming() {
@@ -494,5 +521,34 @@ private:
 
 		return {true, ""};
 	}
+
+	PatchPlayer &player_;
+	FileStorageProxy &storage_;
+	OpenPatchManager &patches_;
+
+	PatchData *next_patch = nullptr;
+	CalibrationPatch calibration;
+
+	std::atomic<bool> loading_new_patch_ = false;
+	std::atomic<bool> audio_is_muted_ = false;
+	std::atomic<bool> stopping_audio_ = false;
+	std::atomic<bool> starting_audio_ = false;
+	std::atomic<bool> saving_patch_ = false;
+	std::atomic<bool> should_save_patch_ = false;
+	std::atomic<bool> audio_overrun_ = false;
+	bool stopped_because_of_overrun_ = false;
+	bool should_play_when_loaded_ = true;
+
+	UserSettings *settings = nullptr;
+	std::atomic<AudioSRBlock> current_audio_settings_ = {};
+	unsigned max_audio_retries = 0;
+
+	NotificationQueue *notify_queue = nullptr;
+
+	PatchLocation new_loc{};
+	PatchLocation old_loc{};
+	enum class RenameState { Idle, RequestSaveNew, SavingNew, RequestDeleteOld, DeletingOld };
+	RenameState rename_state_{RenameState::Idle};
+	uint32_t attempts = 0;
 };
 } // namespace MetaModule

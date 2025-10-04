@@ -26,9 +26,9 @@ struct ChoicePopup : ConfirmPopup {
 	void show(
 		auto cb, const char *message, std::string_view confirm_text, const char *options, const unsigned init_idx = 0) {
 		ConfirmPopup::show(std::move(cb), message, confirm_text, "");
-		lv_obj_set_width(ui_DelMapLabel, 220);
+		lv_obj_set_width(message_label, 220);
 
-		dropdown = lv_dropdown_create(ui_DelMapPopUpPanel);
+		dropdown = lv_dropdown_create(panel);
 		lv_obj_move_to_index(dropdown, 1);
 		lv_dropdown_clear_options(dropdown);
 		lv_obj_add_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
@@ -41,26 +41,26 @@ struct ChoicePopup : ConfirmPopup {
 		lv_dropdown_set_options(dropdown, options);
 		lv_dropdown_set_selected(dropdown, init_idx);
 
-		remove_all_event_cb(ui_CancelButton);
-		lv_obj_add_event_cb(ui_CancelButton, button_callback, LV_EVENT_CLICKED, this);
-		remove_all_event_cb(ui_ConfirmButton);
-		lv_obj_add_event_cb(ui_ConfirmButton, button_callback, LV_EVENT_CLICKED, this);
+		remove_all_event_cb(cancel_button);
+		lv_obj_add_event_cb(cancel_button, button_callback, LV_EVENT_CLICKED, this);
+		remove_all_event_cb(confirm_button);
+		lv_obj_add_event_cb(confirm_button, button_callback, LV_EVENT_CLICKED, this);
 
 		lv_group_remove_all_objs(group);
 
 		lv_group_add_obj(group, dropdown);
-		lv_group_add_obj(group, ui_CancelButton);
-		lv_group_add_obj(group, ui_ConfirmButton);
-		lv_group_focus_obj(ui_ConfirmButton);
+		lv_group_add_obj(group, cancel_button);
+		lv_group_add_obj(group, confirm_button);
+		lv_group_focus_obj(confirm_button);
 
-		lv_label_set_text(ui_CancelLabel, "Cancel");
+		lv_label_set_text(cancel_label, "Cancel");
 
 		lv_group_set_wrap(group, false);
 	}
 
 	void hide() {
 		ConfirmPopup::hide();
-		lv_obj_set_width(ui_DelMapLabel, 180);
+		lv_obj_set_width(message_label, 180);
 		lv_obj_del(dropdown);
 	}
 
@@ -76,10 +76,10 @@ struct ChoicePopup : ConfirmPopup {
 			return;
 
 		if (page->callback) {
-			if (event->target == ui_CancelButton)
+			if (event->target == page->cancel_button)
 				page->callback(0);
 
-			else if (event->target == ui_ConfirmButton) {
+			else if (event->target == page->confirm_button) {
 				auto selected = lv_dropdown_get_selected(page->dropdown) + 1;
 				page->callback(selected);
 			}

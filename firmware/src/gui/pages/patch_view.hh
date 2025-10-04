@@ -12,6 +12,7 @@
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
 #include "gui/pages/make_cable.hh"
+#include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
@@ -30,6 +31,7 @@ struct PatchViewPage : PageBase {
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
+		, desc_panel{patch_playloader, patches}
 		, file_menu{patch_playloader,
 					patch_storage,
 					patches,
@@ -38,7 +40,8 @@ struct PatchViewPage : PageBase {
 					page_list,
 					gui_state,
 					settings}
-		, map_ring_display{settings.patch_view} {
+		, map_ring_display{settings.patch_view}
+		, missing_plugins{info.plugin_manager, ui_PatchViewPage, group} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -65,7 +68,6 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-
 		is_ready = false;
 
 		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
@@ -76,8 +78,7 @@ struct PatchViewPage : PageBase {
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
-			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
-			lv_show(ui_LoadMeter2);
+			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
 			lv_label_set_text(ui_LoadMeter2, "");
@@ -126,8 +127,9 @@ struct PatchViewPage : PageBase {
 			active_knobset = page_list.get_active_knobset();
 
 		else {
-			// Reset to first knobset when we view a different patch than previously viewed
+			// Check is this is a newly viewed patch (not the last patch we viewed)
 			if (displayed_patch_loc_hash != args.patch_loc_hash) {
+				// Reset to first knobset
 				args.view_knobset_id = 0;
 			}
 			active_knobset = args.view_knobset_id.value_or(0);
@@ -137,6 +139,8 @@ struct PatchViewPage : PageBase {
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
 		patch_revision = patches.get_view_patch_modification_count();
+
+		lv_show(ui_LoadMeter2);
 
 		redraw_patch();
 	}
@@ -159,7 +163,7 @@ struct PatchViewPage : PageBase {
 		if (patch->patch_name.length() == 0)
 			return;
 
-		lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
+		update_title_bar();
 
 		module_canvases.reserve(patch->module_slugs.size());
 		module_ids.reserve(patch->module_slugs.size());
@@ -194,6 +198,8 @@ struct PatchViewPage : PageBase {
 
 		patch = patches.get_view_patch();
 		desc_panel.prepare_focus(group);
+
+		// missing_plugin_popup.init(ui_PatchViewPage, group);
 
 		dyn_module_idx = 0;
 		// FIXME: is this needed here?
@@ -299,9 +305,30 @@ struct PatchViewPage : PageBase {
 		dyn_draws.clear();
 
 		dynamic_elements_prepared = false;
+
+		lv_hide(ui_LoadMeter2);
 	}
 
 	void update() override {
+		// Revert/Reload checks for missing plugins:
+		if (file_menu.did_reload()) {
+			if (missing_plugins.scan(patch)) {
+				missing_plugins.ask([](bool) {}, group);
+			}
+		}
+
+		missing_plugins.process();
+
+		if (missing_plugins.just_finished_processing()) {
+			if (missing_plugins.has_missing(patch)) {
+				missing_plugins.show_missing([] {});
+			}
+		}
+
+		if (!missing_plugins.is_done_processing()) {
+			return;
+		}
+
 		bool last_is_patch_playloaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
@@ -316,6 +343,7 @@ struct PatchViewPage : PageBase {
 			update_cable_style();
 			update_graphic_throttle_setting();
 			watch_modules();
+			update_title_bar();
 		}
 
 		if (is_patch_playloaded != last_is_patch_playloaded) {
@@ -323,12 +351,14 @@ struct PatchViewPage : PageBase {
 			page_list.set_active_knobset(active_knobset);
 			patch_mod_queue.put(ChangeKnobSet{active_knobset});
 			redraw_map_rings();
+			update_title_bar();
 		}
 
 		if (is_patch_playloaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
 			redraw_map_rings();
+			update_title_bar();
 		}
 
 		if (gui_state.force_redraw_patch) {
@@ -377,7 +407,11 @@ struct PatchViewPage : PageBase {
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
 
+			} else if (missing_plugins.is_visible()) {
+				missing_plugins.hide();
+
 			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
+				printf("Focus on play but %p in group %p\n", ui_PlayButton, group);
 				lv_group_focus_obj(ui_PlayButton);
 
 			} else {
@@ -388,13 +422,13 @@ struct PatchViewPage : PageBase {
 
 		if (desc_panel.did_update_names()) {
 			patches.mark_view_patch_modified();
-			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
+			update_title_bar();
 		}
 
 		if (file_menu.did_filesystem_change()) {
 			displayed_patch_loc_hash = patches.get_view_patch_loc_hash();
 			args.patch_loc_hash = patches.get_view_patch_loc_hash();
-			lv_label_set_text(ui_PatchName, patches.get_view_patch_filename().data());
+			update_title_bar();
 		}
 
 		if (is_patch_playloaded)
@@ -407,7 +441,7 @@ struct PatchViewPage : PageBase {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 			}
 
-			update_load_text(metaparams, ui_LoadMeter2);
+			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 
 		} else {
 			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
@@ -473,6 +507,28 @@ private:
 				dyn_module_idx = 0;
 
 			dyn_draws[dyn_module_idx].draw();
+		}
+	}
+
+	void update_title_bar() {
+		lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
+
+		if (settings.patch_view.show_knobset_name) {
+			lv_label_set_text(ui_KnobSetName, patch->valid_knob_set_name(active_knobset));
+			lv_show(ui_KnobSetName);
+		} else {
+			lv_hide(ui_KnobSetName);
+		}
+
+		if (settings.patch_view.float_loadmeter) {
+			lv_show(ui_LoadMeter2);
+			lv_obj_set_parent(ui_LoadMeter2, lv_layer_sys());
+			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, 0);
+		} else {
+			lv_show(ui_LoadMeter2);
+			lv_obj_set_parent(ui_LoadMeter2, ui_PatchViewPage);
+			lv_obj_move_to_index(ui_LoadMeter2, 2);
+			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_0, 0);
 		}
 	}
 
@@ -723,7 +779,7 @@ private:
 		if (event->target == ui_SaveButton) {
 			lv_label_set_text(ui_PatchName, page->patches.get_view_patch_filename().c_str());
 		} else {
-			lv_label_set_text(ui_PatchName, page->patch->patch_name.c_str());
+			page->update_title_bar();
 		}
 	}
 
@@ -793,13 +849,13 @@ private:
 		uint32_t selected_module_id;
 	};
 
-	// std::vector<std::vector<float>> light_vals;
-
 	std::vector<DynamicDisplay> dyn_draws;
 	unsigned dyn_draw_throttle_ctr = 1;
 	unsigned dyn_draw_throttle = 2;
 	unsigned dyn_module_idx = 0;
 	bool dynamic_elements_prepared = false;
+
+	MissingPluginScanner missing_plugins;
 };
 
 } // namespace MetaModule
