@@ -4,17 +4,23 @@
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "patch_play/missing_plugin_autoload.hh"
+#include "user_settings/missing_plugin_settings.hh"
 
 namespace MetaModule
 {
 
 struct MissingPluginScanner {
 
-	MissingPluginScanner(PluginManager &plugin_manager, lv_obj_t *parent, lv_group_t *group)
+	MissingPluginScanner(PluginManager &plugin_manager,
+						 lv_obj_t *parent,
+						 lv_group_t *group,
+						 MissingPluginSettings &settings)
 		: missing_plugin_loader{plugin_manager}
 		, missing_plugin_popup{parent}
 		, waitspinner{create_spinner(parent)}
-		, parent{parent} {
+		, parent{parent}
+		, settings{settings}
+		, just_done{false} {
 
 		status_label = lv_label_create(parent);
 		lv_obj_set_align(status_label, LV_ALIGN_TOP_MID);
@@ -59,44 +65,52 @@ struct MissingPluginScanner {
 		return missing_plugin_loader.missing_brands().size() > 0;
 	}
 
-	void ask(auto should_load, lv_group_t *parent_group) {
-		missing_plugin_popup.init(parent, parent_group);
-
-		auto missing_brands = missing_plugin_loader.missing_brands();
-
-		lv_label_set_text(title, "Load missing plugins?");
-
-		std::string message;
-
-		for (size_t i = 0; auto const &mod : missing_brands) {
-			constexpr size_t max_lines = 6;
-			i++;
-			if (i > max_lines)
-				break;
-
-			if (i == max_lines && i != missing_brands.size()) {
-				message += "   ...and ";
-				message += std::to_string(missing_brands.size() - max_lines + 1);
-				message += " more";
-			} else {
-				message += "- " + mod + "\n";
+	void ask(auto callback, lv_group_t *parent_group) {
+		// Action to be performed after the popup:
+		auto do_loading = [this, callback = callback](unsigned should_load) {
+			if (should_load) {
+				lv_show(waitspinner);
+				just_done = false;
+				missing_plugin_loader.start_loading_missing();
 			}
-		}
-		if (message.ends_with('\n'))
-			message.pop_back();
+			callback(should_load);
+		};
 
-		missing_plugin_popup.show(
-			[this, callback = should_load](unsigned choice) {
-				if (choice == 1) { //confirm button
-					lv_show(ui_waitspinner);
-					just_done = false;
-					missing_plugin_loader.start_loading_missing();
+		if (settings.autoload == MissingPluginSettings::Autoload::Always) {
+			// Skip the popup, proceed as if the user clicked OK
+			do_loading(true);
+
+		} else if (settings.autoload == MissingPluginSettings::Autoload::Never) {
+			// Skip the popup, proceed as if the user clicked Cancel
+			do_loading(false);
+
+		} else if (settings.autoload == MissingPluginSettings::Autoload::Ask) {
+			missing_plugin_popup.init(parent, parent_group);
+
+			// Populate the list of brands, showing "...and X more" if needed
+			std::string message;
+			auto missing_brands = missing_plugin_loader.missing_brands();
+			for (size_t i = 0; auto const &mod : missing_brands) {
+				constexpr size_t max_lines = 6;
+				i++;
+				if (i > max_lines)
+					break;
+
+				if (i == max_lines && i != missing_brands.size()) {
+					message += "   ...and ";
+					message += std::to_string(missing_brands.size() - max_lines + 1);
+					message += " more";
+				} else {
+					message += "- " + mod + "\n";
 				}
+			}
+			if (message.ends_with('\n'))
+				message.pop_back();
 
-				callback(choice);
-			},
-			message.c_str(),
-			"Load");
+			lv_label_set_text(title, "Load missing plugins?");
+
+			missing_plugin_popup.show(do_loading, message.c_str(), "Load");
+		}
 	}
 
 	void process() {
@@ -113,7 +127,6 @@ struct MissingPluginScanner {
 
 			} else if (status.message.length()) {
 				lv_label_set_text(status_label, status.message.c_str());
-				pr_dbg("msg: %s\n", status.message.c_str());
 			}
 		}
 	}
@@ -132,7 +145,7 @@ struct MissingPluginScanner {
 	void show_missing(auto callback) {
 		auto skipped = missing_plugin_loader.skipped_modules();
 
-		lv_label_set_text_fmt(title, "%u Not found:", skipped.size());
+		lv_label_set_text_fmt(title, "Not found:");
 
 		std::string message;
 		for (size_t i = 0; auto const &mod : skipped) {
@@ -175,6 +188,9 @@ private:
 	lv_obj_t *waitspinner;
 	lv_obj_t *parent;
 	lv_obj_t *title;
+
+	MissingPluginSettings &settings;
+
 	bool just_done;
 };
 

@@ -25,10 +25,13 @@ struct ModuleDisplaySettings {
 	unsigned view_height_px = 180;
 	bool changed = true; //???unused but keep for backward compat
 	bool show_graphic_screens = true;
+
+	// Status bar:
 	bool show_samplerate = true;
 	bool float_loadmeter = false;
 	bool show_knobset_name = false;
-	// When enabled, the element roller can display jack aliases.
+
+	// Show aliases on element roller:
 	bool show_jack_aliases = false;
 	bool show_knob_aliases = false;
 

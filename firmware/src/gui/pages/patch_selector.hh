@@ -26,7 +26,7 @@ struct PatchSelectorPage : PageBase {
 		, subdir_panel{subdir_panel}
 		, patchfiles{patch_storage.get_patch_list()}
 		, patchloader{patch_storage, patches, settings.filesystem}
-		, missing_plugins{info.plugin_manager, ui_PatchSelectorPage, group}
+		, missing_plugins{info.plugin_manager, ui_PatchSelectorPage, group, settings.missing_plugins}
 		, roller_hover(ui_PatchSelectorPage, ui_PatchListRoller, [this] { redraw_cb(); }) {
 
 		init_bg(ui_PatchSelectorPage);
@@ -363,8 +363,8 @@ struct PatchSelectorPage : PageBase {
 
 					if (result.success) {
 						gui_state.playing_patch_needs_manual_reload = false;
-						check_missing_plugins();
 						state = State::Closing;
+						check_missing_plugins();
 
 					} else {
 						lv_group_set_editing(group, true);

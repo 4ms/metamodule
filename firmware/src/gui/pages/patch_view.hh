@@ -41,7 +41,7 @@ struct PatchViewPage : PageBase {
 					gui_state,
 					settings}
 		, map_ring_display{settings.patch_view}
-		, missing_plugins{info.plugin_manager, ui_PatchViewPage, group} {
+		, missing_plugins{info.plugin_manager, ui_PatchViewPage, group, settings.missing_plugins} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
