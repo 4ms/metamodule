@@ -19,6 +19,12 @@
 
 #include "fs/norflash_layout.hh"
 
+#define A7_OWNS_SDCARD
+
+#if defined A7_OWNS_SDCARD
+#include "fs/fatfs/sd_host.hh"
+#endif
+
 namespace MetaModule
 {
 
@@ -101,6 +107,19 @@ int main() {
 	printf("Using USB buffer\n");
 #endif
 
+#if defined A7_OWNS_SDCARD
+	SDCardHost sd;
+	std::array<ConcurrentBuffer *, 3> console_buffers;
+	std::array<unsigned, 3> current_read_pos{};
+
+	auto end_tm = HAL_GetTick() + 2000;
+	while (HAL_GetTick() < end_tm) {
+		sd.process();
+	}
+
+	sd.get_fileio().write_file("log.txt", "\n\nLOG BEGIN\n", FA_OPEN_APPEND);
+#endif
+
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
@@ -121,5 +140,34 @@ int main() {
 			pr_err("Audio error\n");
 			audio.start();
 		}
+
+#if defined A7_OWNS_SDCARD
+		sd.process();
+
+		for (auto i = 0u; auto *buff : console_buffers) {
+			if (buff->writer_ref_count == 0) {
+				auto start_pos = current_read_pos[i];
+				unsigned end_pos = buff->current_write_pos;
+				end_pos = end_pos & buff->buffer.SIZEMASK;
+
+				if (start_pos > end_pos) {
+					// Data to transmit spans the "seam" of the circular buffer,
+					// Send the first chunk
+					sd.get_fileio().write_file(
+						"log.txt",
+						{(char *)&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos},
+						FA_OPEN_APPEND);
+					current_read_pos[i] = 0;
+
+				} else if (start_pos < end_pos) {
+					sd.get_fileio().write_file(
+						"log.txt", {(char *)&buff->buffer.data[start_pos], end_pos - start_pos}, FA_OPEN_APPEND);
+					current_read_pos[i] = end_pos;
+				}
+			}
+			i++;
+		}
+
+#endif
 	}
 }

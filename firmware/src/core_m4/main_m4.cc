@@ -3,13 +3,20 @@
 #include "core_intercom/shared_memory.hh"
 #include "drivers/hsem.hh"
 #include "drivers/system_clocks.hh"
-#include "fs/fatfs/sd_host.hh"
 #include "fs/fs_messages.hh"
 #include "fs/module_fs_message_handler.hh"
 #include "hsem_handler.hh"
 #include "usb/usb_manager.hh"
 
 #include <wifi_interface.hh>
+
+#define A7_OWNS_SDCARD
+
+#if defined A7_OWNS_SDCARD
+#include "fs/null_sd_host.hh"
+#else
+#include "fs/fatfs/sd_host.hh"
+#endif
 
 namespace MetaModule
 {
@@ -49,7 +56,11 @@ int main() {
 	usb.start();
 
 	// SD Card
+#if defined A7_OWNS_SDCARD
+	NullFatFSHost sd;
+#else
 	SDCardHost sd;
+#endif
 
 	FilesystemMessages fs_messages{usb.get_msc_fileio(), sd.get_fileio(), SharedMemoryS::ptrs.icc_message};
 

@@ -5,7 +5,7 @@
 #include <span>
 
 struct ConcurrentBuffer {
-	CircularBufferBlock<uint8_t, 256 * 1024> buffer{};
+	CircularBufferBlock<uint8_t, 512 * 1024> buffer{};
 	int writer_ref_count{0};
 	int current_write_pos{0};
 	bool use_color = false;

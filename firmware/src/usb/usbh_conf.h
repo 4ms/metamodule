@@ -42,7 +42,7 @@ static inline void Error_Handler() {
 #define USBH_USER_LOG_OUTPUT 1
 #define USBH_ERR_LOG_OUTPUT 1
 #define USBH_DBG_LOG_OUTPUT 1
-#define USBH_CTLREQ_TRACE_OUTPUT 0
+#define USBH_CTLREQ_TRACE_OUTPUT 1
 #define USBH_XFER_TRACE_OUTPUT 0
 #define USBH_IRQ_TRACE_OUTPUT 0
 

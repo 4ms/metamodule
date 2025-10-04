@@ -84,6 +84,17 @@ void UartLog::write_stdout(const char *ptr, size_t len) {
 	} else if (UartLog::port[core_id()] == UartLog::Port::USB) {
 		if (UartLog::log_usb[core_id()])
 			UartLog::write_usb(ptr, len);
+
+	} else if (UartLog::port[core_id()] == UartLog::Port::File) {
+		auto core = core_id();
+		log_usb[core]->writer_ref_count++;
+		std::atomic_signal_fence(std::memory_order_release);
+		log_usb[core]->write({ptr, len});
+		std::atomic_signal_fence(std::memory_order_release);
+		log_usb[core]->writer_ref_count--;
+
+		// copy to uart
+		UartLog::write_uart(ptr, len);
 	}
 }
 

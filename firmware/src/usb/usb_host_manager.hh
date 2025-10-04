@@ -125,7 +125,7 @@ public:
 				USBH_LL_SetupEP0(cur_host_handle);
 
 				if (cur_host_handle->valid == 3) {
-					pr_dbg("PROCESSING ATTACH %d\n", cur_host_handle->hubPortAddress);
+					// pr_dbg("PROCESSING ATTACH %d\n", cur_host_handle->hubPortAddress);
 					cur_host_handle->valid = 1;
 					cur_host_handle->busy = 1;
 				}
