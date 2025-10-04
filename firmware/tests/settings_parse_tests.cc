@@ -339,6 +339,8 @@ TEST_CASE("Serialize settings") {
     show_samplerate: 1
     float_loadmeter: 0
     show_knobset_name: 0
+    show_jack_aliases: 0
+    show_knob_aliases: 0
   module_view:
     map_ring_flash_active: 0
     scroll_to_active_param: 1
@@ -357,6 +359,8 @@ TEST_CASE("Serialize settings") {
     show_samplerate: 1
     float_loadmeter: 0
     show_knobset_name: 0
+    show_jack_aliases: 0
+    show_knob_aliases: 0
   audio:
     sample_rate: 24000
     block_size: 512

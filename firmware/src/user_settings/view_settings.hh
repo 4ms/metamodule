@@ -28,6 +28,9 @@ struct ModuleDisplaySettings {
 	bool show_samplerate = true;
 	bool float_loadmeter = false;
 	bool show_knobset_name = false;
+	// When enabled, the element roller can display jack aliases.
+	bool show_jack_aliases = false;
+	bool show_knob_aliases = false;
 
 	constexpr static std::array<unsigned, 6> ThrottleAmounts = {32, 16, 8, 4, 2, 1};
 	unsigned graphic_screen_throttle = 1;

@@ -35,6 +35,8 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("show_samplerate") << s.show_samplerate;
 	n->append_child() << ryml::key("float_loadmeter") << s.float_loadmeter;
 	n->append_child() << ryml::key("show_knobset_name") << s.show_knobset_name;
+	n->append_child() << ryml::key("show_jack_aliases") << s.show_jack_aliases;
+	n->append_child() << ryml::key("show_knob_aliases") << s.show_knob_aliases;
 }
 
 static void write(ryml::NodeRef *n, AudioSettings const &s) {

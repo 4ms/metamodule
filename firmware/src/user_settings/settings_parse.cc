@@ -84,6 +84,8 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	read_or_default(node, "show_samplerate", s, &ModuleDisplaySettings::show_samplerate);
 	read_or_default(node, "float_loadmeter", s, &ModuleDisplaySettings::float_loadmeter);
 	read_or_default(node, "show_knobset_name", s, &ModuleDisplaySettings::show_knobset_name);
+	read_or_default(node, "show_jack_aliases", s, &ModuleDisplaySettings::show_jack_aliases);
+	read_or_default(node, "show_knob_aliases", s, &ModuleDisplaySettings::show_knob_aliases);
 
 	return true;
 }
