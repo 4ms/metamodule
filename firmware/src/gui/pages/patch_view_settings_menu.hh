@@ -16,7 +16,7 @@ struct PatchViewSettingsMenu {
 		, settings{settings}
 		, gui_state{gui_state} {
 
-		auto title = create_settings_menu_title(ui_PVSettingsMenu, "GRAPHICS");
+		auto graphics_title = create_settings_menu_title(ui_PVSettingsMenu, "GRAPHICS");
 
 		auto graphics_settings = create_settings_menu_switch(ui_PVSettingsMenu, "Draw Screens");
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
@@ -32,21 +32,26 @@ struct PatchViewSettingsMenu {
 		lv_slider_set_value(
 			graphics_update_rate_slider, ModuleDisplaySettings::ThrottleAmounts.size() - 2, LV_ANIM_OFF);
 
-		lv_obj_move_to_index(title, 1);
+		lv_obj_move_to_index(graphics_title, 1);
 		lv_obj_move_to_index(graphics_settings, 2);
 		lv_obj_move_to_index(graphics_update_rate_label, 3);
 
+		auto bar_title = create_settings_menu_title(ui_PVSettingsMenu, "STATUS BAR");
+
 		auto show_samplerate_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show Audio Settings");
 		show_samplerate_check = lv_obj_get_child(show_samplerate_cont, 1);
-		lv_obj_move_to_index(show_samplerate_cont, 4);
 
 		auto float_samplerate_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Keep Status on top");
+		lv_obj_set_style_border_width(float_samplerate_cont, 0, 0);
 		float_audioload_check = lv_obj_get_child(float_samplerate_cont, 1);
-		lv_obj_move_to_index(float_samplerate_cont, 5);
 
 		auto show_knobset_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show KnobSet Name");
 		show_knobset_name_check = lv_obj_get_child(show_knobset_cont, 1);
-		lv_obj_move_to_index(show_knobset_cont, 6);
+
+		lv_obj_move_to_index(bar_title, 4);
+		lv_obj_move_to_index(show_samplerate_cont, 5);
+		lv_obj_move_to_index(float_samplerate_cont, 6);
+		lv_obj_move_to_index(show_knobset_cont, 7);
 
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
