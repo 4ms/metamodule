@@ -6,6 +6,7 @@
 #include "gui/slsexport/prefs_pane_catchup.hh"
 #include "gui/slsexport/prefs_pane_fs.hh"
 #include "gui/slsexport/prefs_pane_midi.hh"
+#include "gui/slsexport/prefs_pane_missing_plugins.hh"
 #include "gui/slsexport/prefs_pane_patch_suggested_audio.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/audio_settings.hh"
@@ -22,11 +23,13 @@ struct PrefsTab : SystemMenuTab {
 		, gui_state{gui_state}
 		, fs{settings.filesystem}
 		, midi{settings.midi}
+		, missing_plugins{settings.missing_plugins}
 		, settings{settings} {
 		init_SystemPrefsCatchupPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsFSPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsMidiPane(ui_SystemMenuPrefsTab);
 		init_SystemPrefsPatchSuggestedAudioPane(ui_SystemMenuPrefsTab);
+		init_SystemPrefsMissingPluginsPane(ui_SystemMenuPrefsTab);
 
 		auto sr_idx = lv_obj_get_index(ui_SystemPrefsAudioSamplerateCont);
 		lv_obj_move_to_index(ui_SystemPrefsPatchSuggestSROverrideCont, sr_idx + 1);
@@ -55,6 +58,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsMidiFeedbackCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsPatchSuggestSampleRateCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsPatchSuggestBlocksizeCheck, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_SystemPrefsMissingPluginsDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioOverrunRetriesDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
@@ -68,6 +72,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemPrefsMidiFeedbackCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsPatchSuggestSampleRateCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
 		lv_obj_add_event_cb(ui_SystemPrefsPatchSuggestBlocksizeCheck, focus_cb, LV_EVENT_FOCUSED, nullptr);
+		lv_obj_add_event_cb(ui_SystemPrefsMissingPluginsDropdown, focus_cb, LV_EVENT_FOCUSED, nullptr);
 
 		lv_obj_move_foreground(ui_SystemPrefsButtonCont);
 
@@ -129,6 +134,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_remove_obj(ui_SystemPrefsFSStartupPatchCheck);
 		lv_group_remove_obj(ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_remove_obj(ui_SystemPrefsMidiFeedbackCheck);
+		lv_group_remove_obj(ui_SystemPrefsMissingPluginsDropdown);
 
 		lv_group_remove_obj(ui_SystemPrefsRevertButton);
 		lv_group_remove_obj(ui_SystemPrefsSaveButton);
@@ -146,6 +152,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_SystemPrefsFSStartupPatchCheck);
 		lv_group_add_obj(group, ui_SystemPrefsFSMaxPatchesDropdown);
 		lv_group_add_obj(group, ui_SystemPrefsMidiFeedbackCheck);
+		lv_group_add_obj(group, ui_SystemPrefsMissingPluginsDropdown);
 
 		lv_group_add_obj(group, ui_SystemPrefsRevertButton);
 		lv_group_add_obj(group, ui_SystemPrefsSaveButton);
@@ -156,6 +163,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_dropdown_close(ui_SystemPrefsScreensaverTimeDropdown);
 		lv_dropdown_close(ui_SystemPrefsCatchupModeDropdown);
 		lv_dropdown_close(ui_SystemPrefsFSMaxPatchesDropdown);
+		lv_dropdown_close(ui_SystemPrefsMissingPluginsDropdown);
 
 		lv_group_focus_obj(ui_SystemPrefsAudioSampleRateDropdown);
 		lv_group_set_editing(group, true);
@@ -223,6 +231,14 @@ private:
 		// Patch suggested audio toggles
 		lv_check(ui_SystemPrefsPatchSuggestSampleRateCheck, settings.patch_suggested_audio.apply_samplerate);
 		lv_check(ui_SystemPrefsPatchSuggestBlocksizeCheck, settings.patch_suggested_audio.apply_blocksize);
+
+		// Missing plugin autoload mode
+		{
+			int idx = settings.missing_plugins.autoload == MissingPluginSettings::Autoload::Ask	   ? 0 :
+					  settings.missing_plugins.autoload == MissingPluginSettings::Autoload::Always ? 1 :
+																									 2;
+			lv_dropdown_set_selected(ui_SystemPrefsMissingPluginsDropdown, idx);
+		}
 
 		gui_state.do_write_settings = false;
 
@@ -336,6 +352,15 @@ private:
 				   MidiSettings::MidiFeedback::Disabled;
 	}
 
+	MissingPluginSettings::Autoload read_missing_plugins_dropdown() {
+		auto item = lv_dropdown_get_selected(ui_SystemPrefsMissingPluginsDropdown);
+		if (item == 1)
+			return MissingPluginSettings::Autoload::Always;
+		if (item == 2)
+			return MissingPluginSettings::Autoload::Never;
+		return MissingPluginSettings::Autoload::Ask;
+	}
+
 	void update_settings_from_dropdown() {
 		auto block_size = read_blocksize_dropdown();
 		auto sample_rate = read_samplerate_dropdown();
@@ -401,6 +426,13 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		// Missing plugin autoload mode
+		auto mp_mode = read_missing_plugins_dropdown();
+		if (missing_plugins.autoload != mp_mode) {
+			missing_plugins.autoload = mp_mode;
+			gui_state.do_write_settings = true;
+		}
+
 		lv_disable(ui_SystemPrefsSaveButton);
 		lv_disable(ui_SystemPrefsRevertButton);
 	}
@@ -440,6 +472,12 @@ private:
 		} else if (lv_dropdown_is_open(ui_SystemPrefsFSMaxPatchesDropdown)) {
 			lv_dropdown_close(ui_SystemPrefsFSMaxPatchesDropdown);
 			lv_group_focus_obj(ui_SystemPrefsFSMaxPatchesDropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
+		} else if (lv_dropdown_is_open(ui_SystemPrefsMissingPluginsDropdown)) {
+			lv_dropdown_close(ui_SystemPrefsMissingPluginsDropdown);
+			lv_group_focus_obj(ui_SystemPrefsMissingPluginsDropdown);
 			lv_group_set_editing(group, false);
 			return true;
 
@@ -486,12 +524,14 @@ private:
 		auto apply_bs = page->read_patch_suggest_blocksize_check();
 		auto load_initial_patch = lv_obj_has_state(ui_SystemPrefsFSStartupPatchCheck, LV_STATE_CHECKED);
 
+		auto mp_mode = page->read_missing_plugins_dropdown();
+
 		if (block_size == page->audio_settings.block_size && sample_rate == page->audio_settings.sample_rate &&
 			overrun_retries == page->audio_settings.max_overrun_retries && timeout == page->screensaver.timeout_ms &&
 			knobwake == page->screensaver.knobs_can_wake && catchupmode == page->catchup.mode &&
 			catchup_exclude_buttons == page->catchup.allow_jump_outofrange &&
 			load_initial_patch == page->settings.load_initial_patch && fs_max_patches == page->fs.max_open_patches &&
-			midi_feedback == page->midi.midi_feedback &&
+			midi_feedback == page->midi.midi_feedback && mp_mode == page->missing_plugins.autoload &&
 			apply_sr == page->settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == page->settings.patch_suggested_audio.apply_blocksize)
 		{
@@ -528,6 +568,12 @@ private:
 			settings.patch_suggested_audio.apply_blocksize = apply_bs;
 			page->update_dropdowns_from_settings();
 		}
+
+		// Update missing plugin autoload if changed
+		if (mp_mode != page->missing_plugins.autoload) {
+			page->missing_plugins.autoload = mp_mode;
+			page->gui_state.do_write_settings = true;
+		}
 	}
 
 	static void focus_cb(lv_event_t *event) {
@@ -537,7 +583,7 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == ui_SystemPrefsMidiFeedbackCheck) {
+		if (target == ui_SystemPrefsMissingPluginsDropdown) {
 			lv_obj_scroll_to_view_recursive(ui_SystemPrefsSaveButton, LV_ANIM_ON);
 
 			// scroll to top if we select first items
@@ -553,6 +599,7 @@ private:
 	GuiState &gui_state;
 	FilesystemSettings &fs;
 	MidiSettings &midi;
+	MissingPluginSettings &missing_plugins;
 	UserSettings &settings;
 
 	lv_group_t *group = nullptr;

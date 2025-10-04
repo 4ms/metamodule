@@ -9,6 +9,7 @@ target_sources(ui_lvgl PRIVATE
   prefs_pane_fs.cc
   prefs_pane_midi.cc
   prefs_pane_patch_suggested_audio.cc
+  prefs_pane_missing_plugins.cc
 
   filebrowser/ui.c
   filebrowser/screens/ui_FileBrowserPage.c
@@ -19,5 +20,6 @@ set_source_files_properties(
   prefs_pane_fs.cc
   prefs_pane_midi.cc
   prefs_pane_patch_suggested_audio.cc
+  prefs_pane_missing_plugins.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
