@@ -162,6 +162,22 @@ static bool read(ryml::ConstNodeRef const &node, PatchSuggestedAudioSettings *se
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, MissingPluginSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	using enum MissingPluginSettings::Autoload;
+
+	if (node.has_child("autoload")) {
+		auto v = node["autoload"].val();
+		settings->autoload = v == "Always" ? Always : v == "Never" ? Never : Ask;
+	} else {
+		settings->autoload = MissingPluginSettings{}.autoload;
+	}
+
+	return true;
+}
+
 namespace Settings
 {
 
@@ -184,6 +200,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "module_view", settings, &UserSettings::module_view);
 	read_or_default(node, "audio", settings, &UserSettings::audio);
 	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_preload);
+	read_or_default(node, "missing_plugins", settings, &UserSettings::missing_plugins);
 	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
 	read_or_default(node, "catchup", settings, &UserSettings::catchup);
 	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);

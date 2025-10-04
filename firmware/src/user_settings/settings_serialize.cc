@@ -93,6 +93,15 @@ static void write(ryml::NodeRef *n, PatchSuggestedAudioSettings const &s) {
 	n->append_child() << ryml::key("apply_blocksize") << s.apply_blocksize;
 }
 
+static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {
+	*n |= ryml::MAP;
+
+	using enum MissingPluginSettings::Autoload;
+	ryml::csubstr mode_string = s.autoload == Always ? "Always" : s.autoload == Never ? "Never" : "Ask";
+
+	n->append_child() << ryml::key("autoload") << mode_string;
+}
+
 namespace Settings
 {
 
@@ -110,6 +119,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["module_view"] << settings.module_view;
 	data["audio"] << settings.audio;
 	data["plugin_autoload"] << settings.plugin_preload;
+	data["missing_plugins"] << settings.missing_plugins;
 	data["last_patch_opened"] << settings.initial_patch_name;
 	data["last_patch_vol"] << static_cast<unsigned>(settings.initial_patch_vol);
 	data["load_initial_patch"] << settings.load_initial_patch;

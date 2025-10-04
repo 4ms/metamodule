@@ -6,6 +6,7 @@
 #include "user_settings/midi_settings.hh"
 #include "user_settings/patch_suggested_audio_settings.hh"
 #include "user_settings/plugin_preload_settings.hh"
+#include "user_settings/missing_plugin_settings.hh"
 #include "user_settings/screensaver_settings.hh"
 #include "user_settings/view_settings.hh"
 
@@ -17,6 +18,7 @@ struct UserSettings {
 	ModuleDisplaySettings module_view{};
 	AudioSettings audio{};
 	PluginPreloadSettings plugin_preload{};
+	MissingPluginSettings missing_plugins{};
 
 	// Initial patch
 	std::string initial_patch_name{};
