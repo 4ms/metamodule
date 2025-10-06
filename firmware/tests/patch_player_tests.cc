@@ -781,6 +781,8 @@ PatchData:
   midi_pitchwheel_range: 1
   mapped_lights: []
   vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
 )"
 		  // clang-format off
 		 );
@@ -1070,6 +1072,8 @@ PatchData:
   midi_pitchwheel_range: 1
   mapped_lights: []
   vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
 )");
 	// clang-format on
 }
