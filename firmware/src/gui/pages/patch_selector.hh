@@ -69,13 +69,14 @@ struct PatchSelectorPage : PageBase {
 		lv_group_set_wrap(group, false);
 
 		auto playing_patch = patches.get_playing_patch();
-		if (!playing_patch || playing_patch->patch_name.length() == 0) {
-			lv_label_set_text(ui_NowPlayingName, "none");
-			lv_label_set_text(ui_LoadMeter, "");
-		} else {
-			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", playing_patch->patch_name.c_str());
+		is_patch_playloaded = playing_patch && playing_patch->patch_name.length() > 0;
 
-			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
+		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
+
+		if (is_patch_playloaded) {
+			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", playing_patch->patch_name.c_str());
+		} else {
+			lv_label_set_text(ui_NowPlayingName, "none");
 		}
 
 		is_populating_subdir_panel = true;
@@ -306,7 +307,8 @@ struct PatchSelectorPage : PageBase {
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
 
-					update_load_text(metaparams, patch_playloader, settings.module_view, ui_LoadMeter);
+					update_load_text(
+						is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
 				} else {
 					// Poll for patch file changes in between polling for patch list updates
 					poll_patch_file_changed();
@@ -561,6 +563,8 @@ private:
 	uint32_t last_refresh_check_tm = 0;
 
 	RollerHoverText roller_hover;
+
+	bool is_patch_playloaded = false;
 };
 
 } // namespace MetaModule

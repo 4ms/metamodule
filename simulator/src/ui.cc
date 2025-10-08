@@ -109,6 +109,7 @@ void Ui::set_audio_fullscale(float volts_peak) {
 }
 
 void Ui::play_patch(std::span<Frame> soundcard_out) {
+
 	// assert(soundcard_out.size() == out_buffer.size());
 
 	//TODO: enable soundcard audio input
@@ -119,7 +120,14 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 	// 	frame.chan[cur_inchan_right] = in.r;
 	// }
 
+	// load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
+	// metaparams.audio_load = load_lpf * 100.f;
+	// load_measure.start_measurement();
+	metaparams.audio_load = 1;
+
 	audio_stream.process(in_buffer, out_buffer);
+
+	// load_measure.end_measurement();
 
 	if (mdrivlib::SMPControl::read<SMPRegister::RefreshPatchElements>() == 1) {
 		mdrivlib::SMPControl::write<SMPRegister::RefreshPatchElements>(0);

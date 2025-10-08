@@ -77,12 +77,11 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
+		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
-			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
-			lv_label_set_text(ui_LoadMeter2, "");
-			lv_hide(ui_LoadMeter2);
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
@@ -139,8 +138,6 @@ struct PatchViewPage : PageBase {
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
 		patch_revision = patches.get_view_patch_modification_count();
-
-		lv_show(ui_LoadMeter2);
 
 		redraw_patch();
 	}
@@ -441,14 +438,11 @@ struct PatchViewPage : PageBase {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 			}
 
-			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
-
-		} else {
-			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
-				lv_hide(ui_LoadMeter2);
-				lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
-			}
+		} else if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
+			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
+
+		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 
 		file_menu.update();
 
@@ -459,7 +453,6 @@ struct PatchViewPage : PageBase {
 
 private:
 	void prepare_dynamic_elements() {
-
 		if (dynamic_elements_prepared)
 			return;
 
@@ -520,12 +513,12 @@ private:
 			lv_hide(ui_KnobSetName);
 		}
 
+		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+
 		if (settings.patch_view.float_loadmeter) {
-			lv_show(ui_LoadMeter2);
 			lv_obj_set_parent(ui_LoadMeter2, lv_layer_sys());
 			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, 0);
 		} else {
-			lv_show(ui_LoadMeter2);
 			lv_obj_set_parent(ui_LoadMeter2, ui_PatchViewPage);
 			lv_obj_move_to_index(ui_LoadMeter2, 2);
 			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_0, 0);

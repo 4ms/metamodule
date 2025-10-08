@@ -10,26 +10,44 @@
 namespace MetaModule
 {
 
-inline void update_load_text(MetaParams const &metaparams,
+inline void update_load_text(bool is_patch_playloaded,
+							 MetaParams const &metaparams,
 							 PatchPlayLoader &patch_playloader,
 							 ModuleDisplaySettings const &settings,
 							 lv_obj_t *meter) {
 
-	if (settings.show_samplerate) {
-		auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
+	auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
 
-		// 68% ^aaaaaa48k/64^
+	if (metaparams.audio_load > 0 && is_patch_playloaded && !patch_playloader.is_audio_muted()) {
+		// Playing: show load regardless of other settings
+		lv_show(meter);
+		if (settings.show_samplerate) {
+			lv_label_set_text_fmt(meter,
+								  "%d%% %s%uk/%u%c",
+								  metaparams.audio_load,
+								  Gui::grey_color_html.data(),
+								  unsigned(cur_sr / 1000u),
+								  unsigned(cur_bs),
+								  LV_TXT_COLOR_CMD[0]);
+
+		} else {
+			lv_label_set_text_fmt(meter, "%d%%", metaparams.audio_load);
+		}
+
+	} else if (settings.show_samplerate) {
+		// Not playing, but show_samplerate is enabled: hide load but show samplerate/blocksize
+		lv_show(meter);
 		lv_label_set_text_fmt(meter,
-							  "%d%% %s%uk/%u%c",
-							  metaparams.audio_load,
+							  "%s%uk/%u%c",
 							  Gui::grey_color_html.data(),
 							  unsigned(cur_sr / 1000u),
 							  unsigned(cur_bs),
 							  LV_TXT_COLOR_CMD[0]);
+
 	} else {
-		lv_label_set_text_fmt(meter, "%d%%", metaparams.audio_load);
+		// Not playing and not showing samplerate: hide meter
+		lv_hide(meter);
 	}
-	lv_show(meter);
 }
 
 } // namespace MetaModule
