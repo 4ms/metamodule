@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
 
+option(DEBUG_LOG_TO_SD_CARD  "Log console output to SD card. Disables normal SD card usage." OFF)
+
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 project(

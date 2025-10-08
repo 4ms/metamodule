@@ -144,6 +144,10 @@ target_link_script(
   -L${FWDIR}
 )
 
+if (DEBUG_LOG_TO_SD_CARD)
+    target_compile_definitions(main_m4.elf PUBLIC A7_OWNS_SDCARD)
+endif()
+
 target_link_libraries(main_m4.elf PRIVATE cpputil)
 target_compile_definitions(main_m4.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 

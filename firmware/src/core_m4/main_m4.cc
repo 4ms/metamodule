@@ -10,10 +10,9 @@
 
 #include <wifi_interface.hh>
 
-#define A7_OWNS_SDCARD
-
 #if defined A7_OWNS_SDCARD
 #include "fs/null_sd_host.hh"
+#include "uart_log.hh"
 #else
 #include "fs/fatfs/sd_host.hh"
 #endif
@@ -58,6 +57,7 @@ int main() {
 	// SD Card
 #if defined A7_OWNS_SDCARD
 	NullFatFSHost sd;
+	UartLog::use_file_log(SharedMemoryS::ptrs.console_m4_buff);
 #else
 	SDCardHost sd;
 #endif

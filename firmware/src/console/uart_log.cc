@@ -43,6 +43,11 @@ void UartLog::use_uart() {
 	port[core_id()] = UartLog::Port::Uart;
 }
 
+void UartLog::use_file_log(ConcurrentBuffer *log_buffer) {
+	log_usb[core_id()] = log_buffer;
+	port[core_id()] = UartLog::Port::File;
+}
+
 void UartLog::puts(const char *ptr) {
 	while (*ptr) {
 		UartLog::putchar(*ptr++);

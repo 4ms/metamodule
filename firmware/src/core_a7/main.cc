@@ -19,8 +19,6 @@
 
 #include "fs/norflash_layout.hh"
 
-#define A7_OWNS_SDCARD
-
 #if defined A7_OWNS_SDCARD
 #include "fs/fatfs/sd_host.hh"
 #endif
@@ -108,8 +106,11 @@ int main() {
 #endif
 
 #if defined A7_OWNS_SDCARD
+
 	SDCardHost sd;
-	std::array<ConcurrentBuffer *, 3> console_buffers;
+	std::array<ConcurrentBuffer *, 3> console_buffers{SharedMemoryS::ptrs.console_m4_buff,
+													  SharedMemoryS::ptrs.console_a7_0_buff,
+													  SharedMemoryS::ptrs.console_a7_1_buff};
 	std::array<unsigned, 3> current_read_pos{};
 
 	auto end_tm = HAL_GetTick() + 2000;
@@ -118,6 +119,8 @@ int main() {
 	}
 
 	sd.get_fileio().write_file("log.txt", "\n\nLOG BEGIN\n", FA_OPEN_APPEND);
+
+	UartLog::use_file_log(SharedMemoryS::ptrs.console_a7_0_buff);
 #endif
 
 	// Tell other cores we're done with init

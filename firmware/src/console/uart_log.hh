@@ -35,5 +35,6 @@ struct UartLog {
 
 	static void use_usb(ConcurrentBuffer *usb_buffer);
 	static void use_uart();
+	static void use_file_log(ConcurrentBuffer *usb_buffer);
 };
 } // namespace MetaModule

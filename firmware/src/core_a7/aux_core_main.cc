@@ -1,6 +1,7 @@
 #include "aux_core_player.hh"
 #include "conf/hsem_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_intercom/shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
@@ -38,6 +39,10 @@ extern "C" void aux_core_main() {
 
 #ifdef CONSOLE_USE_USB
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
+#endif
+
+#if defined A7_OWNS_SDCARD
+	UartLog::use_file_log(SharedMemoryS::ptrs.console_a7_1_buff);
 #endif
 
 	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};

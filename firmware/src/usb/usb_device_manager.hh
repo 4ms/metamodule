@@ -40,8 +40,10 @@ struct UsbDeviceManager {
 	}
 
 	void process_disconnected() {
+#if !defined(A7_OWNS_SDCARD)
 		// Still process serial because we if USB is not connected, we forward console messages to UART
 		serial.forward_to_uart();
+#endif
 	}
 
 #ifdef USE_RAMDISK_USB

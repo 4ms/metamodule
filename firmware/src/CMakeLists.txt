@@ -275,6 +275,10 @@ if (CONSOLE_USE_USB)
   target_compile_definitions(main.elf PRIVATE CONSOLE_USE_USB=1)
 endif()
 
+if (DEBUG_LOG_TO_SD_CARD)
+    target_compile_definitions(main.elf PUBLIC A7_OWNS_SDCARD)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
 foreach(brand ${brands})
 	if (DEFINED BUILD_DYN_PLUGIN_${brand})
