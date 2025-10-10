@@ -105,8 +105,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		if (phase.load() != 2) {
 			param_blocks[0].metaparams.audio_overruns = 10;
+			overrun_handler.start_retrying();
+			handle_overruns();
 			// pr_err("OVR: phase!=2\n");
-			overrun_ctr++;
 		}
 	});
 	mdrivlib::InterruptManager::register_and_start_isr(SGI1_IRQn, 2, 0, [this] {
@@ -120,8 +121,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		if (phase.load() != 4) {
 			param_blocks[1].metaparams.audio_overruns = 10;
 			// pr_err("OVR: phase!=4\n");
-			overrun_ctr++;
-			// if (overrun_ctr > settings.max_retries)
+			overrun_handler.start_retrying();
+			handle_overruns();
 		}
 	});
 
@@ -183,13 +184,17 @@ void AudioStream::start() {
 }
 
 void AudioStream::handle_overruns() {
+	// TODO: this should just count overruns, then stop audio (patch_loader.notify_audio_overrun()) if it exceeds max
+	// when audio is stopped, the SGI will run faster.
+	// then... TODO: it needs to switch back to non-overrun?
+
 	if (overrun_handler.is_retrying()) {
 		Debug::Pin3::high();
 
 		overrun_handler.mark_overrun();
 
 		if (overrun_handler.can_retry()) {
-			step();
+			// step();
 		} else {
 			// overrun count exceeded max_retries: stop audio
 			patch_loader.notify_audio_overrun();
