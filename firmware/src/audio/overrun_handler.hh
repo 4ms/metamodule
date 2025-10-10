@@ -24,8 +24,12 @@ struct AudioOverrunHandler {
 		max_retries = max_times;
 	}
 
-	bool handle() {
-		// if we've gone 1 sec without overrunning, then consider this a new overrun
+	bool can_retry() const {
+		return (overrun_count < max_retries);
+	}
+
+	void mark_overrun() {
+		// if we've gone a bit of time without overrunning, then consider this a new overrun
 		uint64_t tm = PL1_GetCurrentPhysicalValue();
 		if (tm - last_overrun < 2'400'000) {
 			overrun_count++;
@@ -34,8 +38,6 @@ struct AudioOverrunHandler {
 			// pr_dbg("Reset count from %u\n", overrun_count);
 			overrun_count = 0;
 		}
-
-		return (overrun_count < max_retries);
 	}
 
 private:

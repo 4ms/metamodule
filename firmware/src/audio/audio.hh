@@ -107,7 +107,7 @@ private:
 	void handle_midi(Midi::Event const &event, unsigned poly_num);
 	void handle_button_events(uint32_t event_bitmask, float param_val);
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
-	bool is_playing_patch();
+	void update_fade_inout();
 	void handle_patch_just_loaded();
 	void disable_calibration();
 	void re_enable_calibration();
