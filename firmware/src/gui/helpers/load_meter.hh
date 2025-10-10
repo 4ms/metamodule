@@ -23,12 +23,12 @@ inline void update_load_text(bool is_patch_playloaded,
 		lv_show(meter);
 		if (settings.show_samplerate) {
 			lv_label_set_text_fmt(meter,
-								  "%d%% %s%uk/%u%c",
-								  metaparams.audio_load,
+								  "%s%uk/%u%c %d%%",
 								  Gui::grey_color_html.data(),
 								  unsigned(cur_sr / 1000u),
 								  unsigned(cur_bs),
-								  LV_TXT_COLOR_CMD[0]);
+								  LV_TXT_COLOR_CMD[0],
+								  metaparams.audio_load);
 
 		} else {
 			lv_label_set_text_fmt(meter, "%d%%", metaparams.audio_load);
