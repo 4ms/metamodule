@@ -115,7 +115,7 @@ int main() {
 	while (true) {
 		__NOP();
 
-		audio.handle_overruns();
+		// audio.handle_overruns();
 
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");

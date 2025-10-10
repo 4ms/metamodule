@@ -75,50 +75,101 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	cal.reset_to_default();
 	cal_stash.reset_to_default();
 
-	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin0::high();
+	// codec_.set_callbacks([this] { process_audio<0>(); }, [this] { process_audio<1>(); });
+	codec_.set_callbacks(
+		[this] {
+			// if (phase.load() != 4)
+			// 	pr_err("CB: phase!=4\n");
 
-		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
-		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
-		load_measure.start_measurement();
+			phase.store(1);
 
-		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
-		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
+			Debug::Pin1::high();
+			GIC_SendSGI(SGI0_IRQn, 1 << 0, 0b00);
+		},
+		[this] {
+			// if (phase.load() != 2)
+			// 	pr_err("CB: phase!=2\n");
 
-		auto &params = cache_params(block);
-		// Debug::Pin0::low();
+			phase.store(3);
 
-		cur_block = block;
-		if (!overrun_handler.is_retrying() && is_playing_patch())
-			process(audio_blocks[1 - block], params);
-		else
-			process_nopatch(audio_blocks[1 - block], params);
+			Debug::Pin1::high();
+			GIC_SendSGI(SGI1_IRQn, 1 << 0, 0b00);
+		});
 
-		return_cached_params(block);
+	mdrivlib::InterruptManager::register_and_start_isr(SGI0_IRQn, 2, 0, [this] {
+		// if (phase.load() != 1)
+		// 	pr_err("OVR: phase!=1\n");
+		phase.store(2);
 
-		load_measure.end_measurement();
+		audio_callback(0);
 
-		if (load_measure.get_last_measurement_load_percent() >= 98) {
-			overrun_handler.start_retrying();
-			param_blocks[block].metaparams.audio_overruns = 10;
-		} else
-			param_blocks[block].metaparams.audio_overruns = 0;
+		if (phase.load() != 2) {
+			param_blocks[0].metaparams.audio_overruns = 10;
+			// pr_err("OVR: phase!=2\n");
+			overrun_ctr++;
+		}
+	});
+	mdrivlib::InterruptManager::register_and_start_isr(SGI1_IRQn, 2, 0, [this] {
+		// if (phase.load() != 3)
+		// 	pr_err("OVR: phase!=3\n");
 
-		// 3.5us w/both MIDIs
-		sync_params.write_sync(param_state, param_blocks[block].metaparams);
-		param_state.reset_change_flags();
+		phase.store(4);
 
-		update_audio_settings();
+		audio_callback(1);
 
-		// Debug::Pin0::low();
-	};
+		if (phase.load() != 4) {
+			param_blocks[1].metaparams.audio_overruns = 10;
+			// pr_err("OVR: phase!=4\n");
+			overrun_ctr++;
+			// if (overrun_ctr > settings.max_retries)
+		}
+	});
 
-	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
-						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
 
 	for (auto &s : param_state.smoothed_ins)
 		s.set_size(block_size_);
+}
+
+void AudioStream::audio_callback(unsigned block) {
+	Debug::Pin1::low();
+	Debug::Pin0::high();
+
+	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
+	param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
+	load_measure.start_measurement();
+
+	if (block == 0) {
+		HWSemaphore<ParamsBuf1Lock>::lock();
+		HWSemaphore<ParamsBuf2Lock>::unlock();
+	} else {
+		HWSemaphore<ParamsBuf2Lock>::lock();
+		HWSemaphore<ParamsBuf1Lock>::unlock();
+	}
+
+	auto &params = cache_params(block);
+	// Debug::Pin0::low();
+
+	cur_block = block;
+
+	if (patch_loader.is_playing()) {
+		process(audio_blocks[1 - block], params);
+	} else {
+		Debug::Pin2::high();
+		process_nopatch(audio_blocks[1 - block], params);
+		Debug::Pin2::low();
+	}
+
+	return_cached_params(block);
+
+	load_measure.end_measurement();
+
+	sync_params.write_sync(param_state, param_blocks[block].metaparams);
+	param_state.reset_change_flags();
+
+	update_audio_settings();
+
+	Debug::Pin0::low();
 }
 
 void AudioStream::step() {
@@ -133,12 +184,18 @@ void AudioStream::start() {
 
 void AudioStream::handle_overruns() {
 	if (overrun_handler.is_retrying()) {
-		if (overrun_handler.handle()) {
+		Debug::Pin3::high();
+
+		overrun_handler.mark_overrun();
+
+		if (overrun_handler.can_retry()) {
 			step();
 		} else {
+			// overrun count exceeded max_retries: stop audio
 			patch_loader.notify_audio_overrun();
 		}
 		overrun_handler.reset();
+		Debug::Pin3::low();
 	}
 }
 
@@ -153,12 +210,7 @@ AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
 	return MathTools::signed_saturate(ext_cal.out_cal[output_id].adjust(output_volts), 24);
 }
 
-bool AudioStream::is_playing_patch() {
-	// Don't allow anyone to stop the patch while we are retrying to recover from an overrun:
-	// because core 0 has a lock on the player
-	if (overrun_handler.is_retrying())
-		return true;
-
+void AudioStream::update_fade_inout() {
 	if (patch_loader.should_fade_down_audio()) {
 		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt <= 0.f) {
@@ -177,8 +229,6 @@ bool AudioStream::is_playing_patch() {
 			handle_patch_just_loaded();
 		}
 	}
-
-	return patch_loader.is_playing();
 }
 
 void AudioStream::handle_patch_just_loaded() {
@@ -486,11 +536,16 @@ void AudioStream::update_audio_settings() {
 
 	if (sample_rate != sample_rate_ || block_size != block_size_) {
 
+		// pr_dbg("Audio: change audio settings...\n");
+
 		auto ok = (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
 		if (ok && ext_audio_connected)
 			ok = (codec_ext_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
 
 		if (ok) {
+			// pr_dbg("...ok\n");
+			// Debug::Pin2::high();
+
 			codec_ext_.start();
 			codec_.start();
 
@@ -509,12 +564,17 @@ void AudioStream::update_audio_settings() {
 				for (auto &s : param_state.smoothed_ins)
 					s.set_size(block_size_);
 			}
+
+			step();
+			// Debug::Pin2::low();
 		} else {
 			pr_err("FAIL TO CHANGE SR/BS: %d/%d\n", sample_rate_, block_size_);
 			codec_ext_.start();
 			codec_.start();
 		}
 	}
+
+	patch_loader.notify_audio_settings_activated();
 }
 
 } // namespace MetaModule

@@ -98,6 +98,9 @@ private:
 
 	bool ext_audio_connected = false;
 
+	std::atomic<uint32_t> phase = 0;
+	unsigned overrun_ctr = 0;
+
 	AudioConf::SampleT get_audio_output(int output_id);
 	AudioConf::SampleT get_ext_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
@@ -119,6 +122,7 @@ private:
 
 public:
 	void set_calibration(CalData const &caldata);
+	void audio_callback(unsigned block_num);
 
 private:
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
