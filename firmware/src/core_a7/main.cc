@@ -110,12 +110,17 @@ int main() {
 
 	StaticBuffers::sync_params.clear();
 
+	// mdrivlib::InterruptManager::register_and_start_isr(SGI0_IRQn, 0, 0, [&audio] { audio.audio_callback(0); });
+	// mdrivlib::InterruptManager::register_and_start_isr(SGI1_IRQn, 0, 0, [&audio] { audio.audio_callback(1); });
+
 	audio.start();
 
 	while (true) {
 		__NOP();
 
-		audio.handle_overruns();
+		audio.process_if_needed();
+
+		// audio.handle_overruns();
 
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");

@@ -75,50 +75,88 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	cal.reset_to_default();
 	cal_stash.reset_to_default();
 
-	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin0::high();
+	// codec_.set_callbacks([this] { process_audio<0>(); }, [this] { process_audio<1>(); });
+	// codec_.set_callbacks([] { GIC_SendSGI(SGI0_IRQn, 1 << 0, 0b00); }, [] { GIC_SendSGI(SGI1_IRQn, 1 << 0, 0b00); });
 
-		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
-		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
-		load_measure.start_measurement();
+	codec_.set_callbacks(
+		[this] {
+			// 1ms latency from here to audio_callback()
+			Debug::Pin1::high();
+			ready.store(1);
+		},
+		[this] {
+			Debug::Pin1::high();
+			ready.store(2);
+		});
 
-		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
-		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
-
-		auto &params = cache_params(block);
-		// Debug::Pin0::low();
-
-		cur_block = block;
-		if (!overrun_handler.is_retrying() && is_playing_patch())
-			process(audio_blocks[1 - block], params);
-		else
-			process_nopatch(audio_blocks[1 - block], params);
-
-		return_cached_params(block);
-
-		load_measure.end_measurement();
-
-		if (load_measure.get_last_measurement_load_percent() >= 98) {
-			overrun_handler.start_retrying();
-			param_blocks[block].metaparams.audio_overruns = 10;
-		} else
-			param_blocks[block].metaparams.audio_overruns = 0;
-
-		// 3.5us w/both MIDIs
-		sync_params.write_sync(param_state, param_blocks[block].metaparams);
-		param_state.reset_change_flags();
-
-		update_audio_settings();
-
-		// Debug::Pin0::low();
-	};
-
-	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
-						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
 
 	for (auto &s : param_state.smoothed_ins)
 		s.set_size(block_size_);
+}
+
+void AudioStream::process_if_needed() {
+	auto r = ready.load();
+	if (r > 0) {
+		ready.store(0);
+		audio_callback(r - 1);
+		if (ready.load() > 0) {
+			param_blocks[r - 1].metaparams.audio_overruns = 10;
+		} else {
+			// param_blocks[r - 1].metaparams.audio_overruns = 0;
+		}
+	}
+}
+
+void AudioStream::audio_callback(unsigned block) {
+	Debug::Pin1::low();
+	Debug::Pin0::high();
+
+	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
+	param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
+	load_measure.start_measurement();
+
+	if (block == 0) {
+		HWSemaphore<ParamsBuf1Lock>::lock();
+		HWSemaphore<ParamsBuf2Lock>::unlock();
+	} else {
+		HWSemaphore<ParamsBuf2Lock>::lock();
+		HWSemaphore<ParamsBuf1Lock>::unlock();
+	}
+
+	auto &params = cache_params(block);
+	// Debug::Pin0::low();
+
+	cur_block = block;
+	if (!overrun_handler.is_retrying() && is_playing_patch()) {
+		process(audio_blocks[1 - block], params);
+	} else {
+		Debug::Pin2::high();
+		process_nopatch(audio_blocks[1 - block], params);
+		Debug::Pin2::low();
+	}
+
+	return_cached_params(block);
+
+	load_measure.end_measurement();
+
+	// if (load_measure.get_last_measurement_load_percent() >= 98) {
+	// 	Debug::Pin2::high();
+	// 	Debug::Pin0::high();
+	// 	overrun_handler.start_retrying();
+	// 	Debug::Pin2::low();
+	// 	Debug::Pin0::low();
+	// 	param_blocks[block].metaparams.audio_overruns = 10;
+	// } else
+	// param_blocks[block].metaparams.audio_overruns = 0;
+
+	// 3.5us w/both MIDIs
+	sync_params.write_sync(param_state, param_blocks[block].metaparams);
+	param_state.reset_change_flags();
+
+	update_audio_settings();
+
+	Debug::Pin0::low();
 }
 
 void AudioStream::step() {
@@ -133,12 +171,15 @@ void AudioStream::start() {
 
 void AudioStream::handle_overruns() {
 	if (overrun_handler.is_retrying()) {
+		Debug::Pin3::high();
 		if (overrun_handler.handle()) {
-			step();
+			// step();
 		} else {
+			// overrun count exceeded max_retries:
 			patch_loader.notify_audio_overrun();
 		}
 		overrun_handler.reset();
+		Debug::Pin3::low();
 	}
 }
 
@@ -486,11 +527,16 @@ void AudioStream::update_audio_settings() {
 
 	if (sample_rate != sample_rate_ || block_size != block_size_) {
 
+		// pr_dbg("Audio: change audio settings...\n");
+
 		auto ok = (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
 		if (ok && ext_audio_connected)
 			ok = (codec_ext_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
 
 		if (ok) {
+			// pr_dbg("...ok\n");
+			// Debug::Pin2::high();
+
 			codec_ext_.start();
 			codec_.start();
 
@@ -509,12 +555,17 @@ void AudioStream::update_audio_settings() {
 				for (auto &s : param_state.smoothed_ins)
 					s.set_size(block_size_);
 			}
+
+			step();
+			// Debug::Pin2::low();
 		} else {
 			pr_err("FAIL TO CHANGE SR/BS: %d/%d\n", sample_rate_, block_size_);
 			codec_ext_.start();
 			codec_.start();
 		}
 	}
+
+	patch_loader.notify_audio_settings_activated();
 }
 
 } // namespace MetaModule
