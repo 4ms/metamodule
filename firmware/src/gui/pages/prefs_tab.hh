@@ -222,6 +222,10 @@ private:
 		lv_disable(save_button);
 		lv_disable(revert_button);
 
+		update_audio_override_status();
+	}
+
+	void update_audio_override_status() {
 		auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
 
 		if (cur_sr >= 0 && cur_sr != settings.audio.sample_rate) {
@@ -349,6 +353,10 @@ private:
 			audio_settings.max_overrun_retries = max_overrun_retries;
 
 			patch_playloader.request_new_audio_settings(sample_rate, block_size, max_overrun_retries);
+
+			// hide/show overrides
+			update_audio_override_status();
+
 			gui_state.do_write_settings = true;
 		}
 
