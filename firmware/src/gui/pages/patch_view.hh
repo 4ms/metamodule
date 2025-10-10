@@ -749,6 +749,7 @@ private:
 					page->patch_playloader.request_load_view_patch();
 					page->gui_state.playing_patch_needs_manual_reload = false;
 				} else {
+					page->patch_playloader.apply_suggested_audio_settings();
 					page->patch_playloader.start_audio();
 				}
 			} else {

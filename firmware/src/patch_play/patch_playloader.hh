@@ -310,6 +310,36 @@ struct PatchPlayLoader {
 		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
 	}
 
+	void apply_suggested_audio_settings() {
+		if (!settings) {
+			pr_err("Error: PatchPlayLoader not initialized with user settings\n");
+			return;
+		}
+
+		auto patch = patches_.get_playing_patch();
+		if (!patch)
+			return;
+
+		auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
+
+		auto sugg_sr = patch->suggested_samplerate;
+		if (!sugg_sr)
+			sugg_sr = settings->audio.sample_rate;
+
+		auto sugg_bs = patch->suggested_blocksize;
+		if (!sugg_bs)
+			sugg_bs = settings->audio.block_size;
+
+		bool change_sr = settings->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
+		bool change_bs = settings->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
+
+		if (change_sr || change_bs) {
+			uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
+			uint16_t new_bs = change_bs ? sugg_bs : cur_bs;
+			request_new_audio_settings(new_sr, new_bs, max_retries);
+		}
+	}
+
 	void connect_user_settings(UserSettings *settings) {
 		this->settings = settings;
 		request_new_audio_settings(
@@ -450,43 +480,6 @@ private:
 
 		loading_new_patch_ = false;
 		return result;
-	}
-
-	void apply_suggested_audio_settings() {
-		if (!settings) {
-			pr_err("Error: PatchPlayLoader not initialized with user settings\n");
-			return;
-		}
-
-		auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
-
-		auto sugg_sr = next_patch->suggested_samplerate;
-		if (!sugg_sr)
-			sugg_sr = settings->audio.sample_rate;
-
-		auto sugg_bs = next_patch->suggested_blocksize;
-		if (!sugg_bs)
-			sugg_bs = settings->audio.block_size;
-
-		bool change_sr = settings->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
-		bool change_bs = settings->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
-
-		if (change_sr || change_bs) {
-			uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
-			uint16_t new_bs = change_bs ? sugg_bs : cur_bs;
-
-			// if (notify_queue) {
-			// 	std::string message{};
-			// 	if (change_sr)
-			// 		message += "Sample-rate: " + std::to_string(new_sr);
-			// 	if (change_sr && change_bs)
-			// 		message += "\n";
-			// 	if (change_bs)
-			// 		message += "Block-size: " + std::to_string(new_bs);
-			// 	notify_queue->put({message, Notification::Priority::Info, change_bs * 1000 + change_sr * 1000});
-			// }
-			request_new_audio_settings(new_sr, new_bs, max_retries);
-		}
 	}
 
 	Result process_renaming() {
