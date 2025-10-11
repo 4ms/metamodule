@@ -286,22 +286,22 @@ struct PatchPlayLoader {
 	};
 
 	void request_new_audio_settings(uint32_t sample_rate, uint16_t block_size, uint32_t max_retries) {
-		bool should_play = is_playing();
-		if (should_play) {
-			stop_audio();
-			while (!is_audio_muted())
-				;
-		}
+		// bool should_play = is_playing();
+		// if (should_play) {
+		// 	stop_audio();
+		// 	while (!is_audio_muted())
+		// 		;
+		// }
 
 		uint16_t sr_div100 = sample_rate / 100;
 		current_audio_settings_.store(AudioSRBlock{.sample_rate = sr_div100, .block_size = block_size});
 		max_audio_retries = max_retries;
 
-		if (should_play) {
-			start_audio();
-			while (starting_audio_)
-				;
-		}
+		// if (should_play) {
+		// 	start_audio();
+		// 	while (starting_audio_)
+		// 		;
+		// }
 	}
 
 	AudioSettings get_audio_settings() {
