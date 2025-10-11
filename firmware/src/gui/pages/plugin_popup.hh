@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/pages/confirm_popup.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "lvgl.h"
@@ -12,10 +13,10 @@
 namespace MetaModule
 {
 
-struct PluginPopup {
+struct PluginPopup : ConfirmPopup {
 	PluginPopup()
 		: group{lv_group_create()} {
-		auto p = create_labeled_check_obj(ui_DelMapPopUpPanel, "Pre-load");
+		auto p = create_labeled_check_obj(panel, "Pre-load");
 		lv_obj_move_to_index(p, 1);
 		check = lv_obj_get_child(p, -1);
 		lv_obj_add_event_cb(check, toggle_callback, LV_EVENT_VALUE_CHANGED, this);
@@ -27,27 +28,27 @@ struct PluginPopup {
 	void init(lv_obj_t *page_base, lv_group_t *current_group) {
 		base = page_base;
 		orig_group = current_group;
-		lv_hide(ui_DelMapPopUpPanel);
+		lv_hide(panel);
 	}
 
 	void show(auto callback, const char *message, std::string_view choice1_text, bool state) {
-		lv_hide(ui_TrashButton2);
-		lv_hide(ui_Choice2Button);
+		lv_hide(trash_button);
+		lv_hide(choice2_button);
 
-		remove_all_event_cb(ui_CancelButton);
-		lv_obj_add_event_cb(ui_CancelButton, button_callback, LV_EVENT_CLICKED, this);
+		remove_all_event_cb(cancel_button);
+		lv_obj_add_event_cb(cancel_button, button_callback, LV_EVENT_CLICKED, this);
 
-		remove_all_event_cb(ui_ConfirmButton);
-		lv_obj_add_event_cb(ui_ConfirmButton, button_callback, LV_EVENT_CLICKED, this);
+		remove_all_event_cb(confirm_button);
+		lv_obj_add_event_cb(confirm_button, button_callback, LV_EVENT_CLICKED, this);
 
 		lv_group_remove_all_objs(group);
 
-		lv_obj_set_parent(ui_DelMapPopUpPanel, base);
+		lv_obj_set_parent(panel, base);
 
-		lv_show(ui_DelMapPopUpPanel);
+		lv_show(panel);
 
-		lv_label_set_text(ui_CancelLabel, "Close");
-		lv_label_set_text(ui_DelMapLabel, message);
+		lv_label_set_text(cancel_label, "Close");
+		lv_label_set_text(message_label, message);
 
 		_callback = std::move(callback);
 
@@ -60,13 +61,13 @@ struct PluginPopup {
 
 		lv_group_add_obj(group, check);
 
-		lv_group_add_obj(group, ui_CancelButton);
+		lv_group_add_obj(group, cancel_button);
 		lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		lv_group_focus_obj(ui_CancelButton);
+		lv_group_focus_obj(cancel_button);
 
-		lv_show(ui_ConfirmButton);
-		lv_label_set_text_fmt(ui_ConfirmLabel, "%.*s", (int)choice1_text.size(), choice1_text.data());
-		lv_group_add_obj(group, ui_ConfirmButton);
+		lv_show(confirm_button);
+		lv_label_set_text_fmt(confirm_label, "%.*s", (int)choice1_text.size(), choice1_text.data());
+		lv_group_add_obj(group, confirm_button);
 
 		lv_group_set_wrap(group, false);
 
@@ -79,7 +80,7 @@ struct PluginPopup {
 		lv_hide(p);
 		lv_hide(lv_obj_get_child(p, 0));
 
-		lv_hide(ui_DelMapPopUpPanel);
+		lv_hide(panel);
 		if (orig_group)
 			lv_indev_set_group(lv_indev_get_next(nullptr), orig_group);
 		visible = false;
@@ -97,9 +98,9 @@ struct PluginPopup {
 			return;
 
 		if (page->_callback) {
-			if (event->target == ui_CancelButton)
+			if (event->target == page->cancel_button)
 				page->_callback(0, {});
-			else if (event->target == ui_ConfirmButton)
+			else if (event->target == page->confirm_button)
 				page->_callback(1, {});
 		}
 

@@ -27,11 +27,9 @@ void ModuleViewPage::handle_quick_assign() {
 		metaparams.ext_buttons_high_events = 0;
 
 		if (gui_state.midi_quick_mapping_mode) {
-			if (gui_state.midi_quick_mapping_mode) {
-				for (auto &cc : params.midi_ccs)
-					cc.changed = false;
-				params.last_midi_note.changed = false;
-			}
+			for (auto &cc : params.midi_ccs)
+				cc.changed = false;
+			params.last_midi_note.changed = false;
 		}
 	}
 

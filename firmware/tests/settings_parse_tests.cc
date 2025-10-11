@@ -50,6 +50,9 @@ TEST_CASE("Parse settings file") {
     - Plugin One
     - Plugin Two
 
+  missing_plugins:
+    autoload: Never
+
   last_patch_opened: '/somedir/SomePatch.yml'
   last_patch_vol: 1
 
@@ -103,8 +106,8 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.audio.block_size == 128);
 	CHECK(settings.audio.max_overrun_retries == 4);
 
-	CHECK(settings.plugin_preload.slug.at(0) == "Plugin One");
-	CHECK(settings.plugin_preload.slug.at(1) == "Plugin Two");
+	CHECK(settings.plugin_preload.slugs.at(0) == "Plugin One");
+	CHECK(settings.plugin_preload.slugs.at(1) == "Plugin Two");
 
 	CHECK(settings.initial_patch_name == "/somedir/SomePatch.yml");
 	CHECK(settings.initial_patch_vol == MetaModule::Volume::SDCard);
@@ -131,6 +134,8 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.module_view.show_samplerate == true);
 	CHECK(settings.module_view.float_loadmeter == false);
 	CHECK(settings.module_view.show_knobset_name == false);
+
+	CHECK(settings.missing_plugins.autoload == MetaModule::MissingPluginSettings::Autoload::Never);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -214,6 +219,12 @@ TEST_CASE("Get default settings if file is missing fields") {
     max_open_patches: INvalID
 )";
 	}
+	SUBCASE("Bad catchup settings:") {
+		yaml = R"(Settings:
+  missing_plugins:
+    autoload: Invalid
+)";
+	}
 
 	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
@@ -247,7 +258,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.audio.block_size == 64);
 	CHECK(settings.audio.max_overrun_retries == 2);
 
-	CHECK(settings.plugin_preload.slug.size() == 0);
+	CHECK(settings.plugin_preload.slugs.size() == 0);
 
 	CHECK(settings.initial_patch_name == "");
 	CHECK(settings.initial_patch_vol == MetaModule::Volume::NorFlash);
@@ -267,6 +278,8 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.patch_suggested_audio.apply_samplerate == true);
 	CHECK(settings.patch_suggested_audio.apply_blocksize == true);
+
+	CHECK(settings.missing_plugins.autoload == MetaModule::MissingPluginSettings::Autoload::Ask);
 }
 
 TEST_CASE("Serialize settings") {
@@ -299,8 +312,8 @@ TEST_CASE("Serialize settings") {
 	settings.audio.block_size = 512;
 	settings.audio.max_overrun_retries = 4;
 
-	settings.plugin_preload.slug.emplace_back("Plugin One");
-	settings.plugin_preload.slug.emplace_back("Plugin Two");
+	settings.plugin_preload.slugs.emplace_back("Plugin One");
+	settings.plugin_preload.slugs.emplace_back("Plugin Two");
 
 	settings.initial_patch_vol = MetaModule::Volume::SDCard;
 	settings.initial_patch_name = "SomePatch.yml";
@@ -339,6 +352,8 @@ TEST_CASE("Serialize settings") {
     show_samplerate: 1
     float_loadmeter: 0
     show_knobset_name: 0
+    show_jack_aliases: 0
+    show_knob_aliases: 0
   module_view:
     map_ring_flash_active: 0
     scroll_to_active_param: 1
@@ -357,6 +372,8 @@ TEST_CASE("Serialize settings") {
     show_samplerate: 1
     float_loadmeter: 0
     show_knobset_name: 0
+    show_jack_aliases: 0
+    show_knob_aliases: 0
   audio:
     sample_rate: 24000
     block_size: 512
@@ -364,6 +381,8 @@ TEST_CASE("Serialize settings") {
   plugin_autoload:
     - Plugin One
     - Plugin Two
+  missing_plugins:
+    autoload: Ask
   last_patch_opened: SomePatch.yml
   last_patch_vol: 1
   load_initial_patch: 1

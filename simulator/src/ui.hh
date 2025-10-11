@@ -84,6 +84,9 @@ private:
 	unsigned cur_inchan_left = 0;
 	unsigned cur_inchan_right = 1;
 
+	// float load_lpf = 0;
+	// mdrivlib::CycleCounter load_measure;
+
 	void lvgl_update_task();
 	void page_update_task();
 	void transfer_aux_button_events();

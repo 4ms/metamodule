@@ -12,6 +12,7 @@
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
 #include "gui/pages/make_cable.hh"
+#include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
@@ -39,7 +40,8 @@ struct PatchViewPage : PageBase {
 					page_list,
 					gui_state,
 					settings}
-		, map_ring_display{settings.patch_view} {
+		, map_ring_display{settings.patch_view}
+		, missing_plugins{info.plugin_manager, ui_PatchViewPage, group, settings.missing_plugins} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -66,7 +68,6 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-
 		is_ready = false;
 
 		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
@@ -76,12 +77,11 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
+		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
-			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
-			lv_label_set_text(ui_LoadMeter2, "");
-			lv_hide(ui_LoadMeter2);
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
@@ -126,8 +126,9 @@ struct PatchViewPage : PageBase {
 			active_knobset = page_list.get_active_knobset();
 
 		else {
-			// Reset to first knobset when we view a different patch than previously viewed
+			// Check is this is a newly viewed patch (not the last patch we viewed)
 			if (displayed_patch_loc_hash != args.patch_loc_hash) {
+				// Reset to first knobset
 				args.view_knobset_id = 0;
 			}
 			active_knobset = args.view_knobset_id.value_or(0);
@@ -137,8 +138,6 @@ struct PatchViewPage : PageBase {
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
 		patch_revision = patches.get_view_patch_modification_count();
-
-		lv_show(ui_LoadMeter2);
 
 		redraw_patch();
 	}
@@ -196,6 +195,8 @@ struct PatchViewPage : PageBase {
 
 		patch = patches.get_view_patch();
 		desc_panel.prepare_focus(group);
+
+		// missing_plugin_popup.init(ui_PatchViewPage, group);
 
 		dyn_module_idx = 0;
 		// FIXME: is this needed here?
@@ -306,6 +307,25 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
+		// Revert/Reload checks for missing plugins:
+		if (file_menu.did_reload()) {
+			if (missing_plugins.scan(patch)) {
+				missing_plugins.ask([](bool) {}, group);
+			}
+		}
+
+		missing_plugins.process();
+
+		if (missing_plugins.just_finished_processing()) {
+			if (missing_plugins.has_missing(patch)) {
+				missing_plugins.show_missing([] {});
+			}
+		}
+
+		if (!missing_plugins.is_done_processing()) {
+			return;
+		}
+
 		bool last_is_patch_playloaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
@@ -384,7 +404,11 @@ struct PatchViewPage : PageBase {
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
 
+			} else if (missing_plugins.is_visible()) {
+				missing_plugins.hide();
+
 			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
+				printf("Focus on play but %p in group %p\n", ui_PlayButton, group);
 				lv_group_focus_obj(ui_PlayButton);
 
 			} else {
@@ -414,14 +438,11 @@ struct PatchViewPage : PageBase {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 			}
 
-			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
-
-		} else {
-			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
-				lv_hide(ui_LoadMeter2);
-				lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
-			}
+		} else if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
+			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
+
+		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 
 		file_menu.update();
 
@@ -432,7 +453,6 @@ struct PatchViewPage : PageBase {
 
 private:
 	void prepare_dynamic_elements() {
-
 		if (dynamic_elements_prepared)
 			return;
 
@@ -493,12 +513,12 @@ private:
 			lv_hide(ui_KnobSetName);
 		}
 
+		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+
 		if (settings.patch_view.float_loadmeter) {
-			lv_show(ui_LoadMeter2);
 			lv_obj_set_parent(ui_LoadMeter2, lv_layer_sys());
 			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, 0);
 		} else {
-			lv_show(ui_LoadMeter2);
 			lv_obj_set_parent(ui_LoadMeter2, ui_PatchViewPage);
 			lv_obj_move_to_index(ui_LoadMeter2, 2);
 			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_0, 0);
@@ -729,6 +749,7 @@ private:
 					page->patch_playloader.request_load_view_patch();
 					page->gui_state.playing_patch_needs_manual_reload = false;
 				} else {
+					page->patch_playloader.apply_suggested_audio_settings();
 					page->patch_playloader.start_audio();
 				}
 			} else {
@@ -822,13 +843,13 @@ private:
 		uint32_t selected_module_id;
 	};
 
-	// std::vector<std::vector<float>> light_vals;
-
 	std::vector<DynamicDisplay> dyn_draws;
 	unsigned dyn_draw_throttle_ctr = 1;
 	unsigned dyn_draw_throttle = 2;
 	unsigned dyn_module_idx = 0;
 	bool dynamic_elements_prepared = false;
+
+	MissingPluginScanner missing_plugins;
 };
 
 } // namespace MetaModule

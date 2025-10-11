@@ -6,6 +6,7 @@
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/make_cable.hh"
+#include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_subdir_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -25,6 +26,7 @@ struct PatchSelectorPage : PageBase {
 		, subdir_panel{subdir_panel}
 		, patchfiles{patch_storage.get_patch_list()}
 		, patchloader{patch_storage, patches, settings.filesystem}
+		, missing_plugins{info.plugin_manager, ui_PatchSelectorPage, group, settings.missing_plugins}
 		, roller_hover(ui_PatchSelectorPage, ui_PatchListRoller, [this] { redraw_cb(); }) {
 
 		init_bg(ui_PatchSelectorPage);
@@ -67,13 +69,14 @@ struct PatchSelectorPage : PageBase {
 		lv_group_set_wrap(group, false);
 
 		auto playing_patch = patches.get_playing_patch();
-		if (!playing_patch || playing_patch->patch_name.length() == 0) {
-			lv_label_set_text(ui_NowPlayingName, "none");
-			lv_label_set_text(ui_LoadMeter, "");
-		} else {
-			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", playing_patch->patch_name.c_str());
+		is_patch_playloaded = playing_patch && playing_patch->patch_name.length() > 0;
 
-			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
+		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
+
+		if (is_patch_playloaded) {
+			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", playing_patch->patch_name.c_str());
+		} else {
+			lv_label_set_text(ui_NowPlayingName, "none");
 		}
 
 		is_populating_subdir_panel = true;
@@ -277,10 +280,14 @@ struct PatchSelectorPage : PageBase {
 		}
 
 		if (gui_state.back_button.is_just_released()) {
-			if (!lv_obj_has_state(ui_PatchListRoller, LV_STATE_DISABLED)) {
+			if (missing_plugins.is_visible()) {
+				missing_plugins.hide();
+
+			} else if (!lv_obj_has_state(ui_PatchListRoller, LV_STATE_DISABLED)) {
 				lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
 				lv_obj_clear_state(ui_PatchListRoller, LV_STATE_FOCUSED);
 				subdir_panel.focus();
+
 			} else {
 				page_list.request_new_page_no_history(PageId::MainMenu, args);
 			}
@@ -300,7 +307,8 @@ struct PatchSelectorPage : PageBase {
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
 
-					update_load_text(metaparams, patch_playloader, settings.module_view, ui_LoadMeter);
+					update_load_text(
+						is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
 				} else {
 					// Poll for patch file changes in between polling for patch list updates
 					poll_patch_file_changed();
@@ -341,6 +349,7 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::LoadPatchFile: {
+
 				bool file_needs_loading =
 					patchloader.is_not_open_or_has_changed_on_disk(selected_patch) &&
 					patches.get_modification_count(selected_patch) == 0; //don't load if we have unsaved changes
@@ -356,23 +365,58 @@ struct PatchSelectorPage : PageBase {
 
 					if (result.success) {
 						gui_state.playing_patch_needs_manual_reload = false;
-						view_loaded_patch();
+						state = State::Closing;
+						check_missing_plugins();
 
 					} else {
 						lv_group_set_editing(group, true);
-						state = State::Idle;
 						notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
+						state = State::Idle;
 					}
 				} else {
+					load_patch();
 					view_loaded_patch();
+					state = State::Closing;
 				}
 
 				hide_spinner();
-				state = State::Idle;
+			} break;
+
+			case State::CheckMissingPlugins: {
+				missing_plugins.process();
+
+				if (missing_plugins.is_done_processing()) {
+					if (missing_plugins.has_missing(patches.get_view_patch())) {
+
+						missing_plugins.show_missing([this] { view_loaded_patch(); });
+						state = State::Closing;
+
+					} else {
+						view_loaded_patch();
+						state = State::Closing;
+					}
+				}
 			} break;
 
 			case State::Closing:
 				break;
+		}
+	}
+
+	void check_missing_plugins() {
+		load_patch();
+
+		if (missing_plugins.scan(patches.get_view_patch())) {
+			missing_plugins.ask(
+				[this](bool ok) {
+					if (ok)
+						state = State::CheckMissingPlugins;
+					else
+						view_loaded_patch();
+				},
+				group);
+		} else {
+			view_loaded_patch();
 		}
 	}
 
@@ -399,8 +443,11 @@ struct PatchSelectorPage : PageBase {
 	}
 
 private:
-	void view_loaded_patch() {
+	void load_patch() {
 		patches.start_viewing(selected_patch);
+	}
+
+	void view_loaded_patch() {
 		args.patch_loc_hash = PatchLocHash{selected_patch};
 		gui_state.force_redraw_patch = true;
 		page_list.request_new_page(PageId::PatchView, args);
@@ -492,6 +539,8 @@ private:
 	bool patchfiles_locked = true;
 	ReloadPatch patchloader;
 
+	MissingPluginScanner missing_plugins;
+
 	bool is_populating_subdir_panel = false;
 
 	static constexpr uint32_t spinner_lag_ms = 200;
@@ -506,12 +555,16 @@ private:
 
 		LoadPatchFile,
 
+		CheckMissingPlugins,
+
 		Closing,
 	} state{State::TryingToRequestPatchList};
 
 	uint32_t last_refresh_check_tm = 0;
 
 	RollerHoverText roller_hover;
+
+	bool is_patch_playloaded = false;
 };
 
 } // namespace MetaModule

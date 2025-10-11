@@ -1,5 +1,6 @@
 #include "element_name.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "gui/elements/context.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/styles.hh"
 #include "patch/patch.hh"
@@ -98,6 +99,39 @@ void append_connected_jack_name(std::string &opts,
 		if (auto *cable = patch.find_internal_cable_with_outjack(out_jack)) {
 			for (auto &in : cable->ins)
 				append(in, ElementType::Input);
+		}
+	}
+}
+
+void append_jack_alias(std::string &opts, GuiElement const &gui_element, PatchData *patch) {
+	if (gui_element.idx.input_idx != ElementCount::Indices::NoElementMarker) {
+		if (auto panel_jack = patch->find_mapped_injack(
+				Jack{.module_id = gui_element.module_idx, .jack_id = gui_element.idx.input_idx}))
+		{
+			const auto color = get_mapped_color(JackInput{}, panel_jack->panel_jack_id);
+			opts += " ";
+			opts += Gui::color_text(panel_jack->alias_name, color);
+		}
+	}
+
+	else if (gui_element.idx.output_idx != ElementCount::Indices::NoElementMarker)
+	{
+		if (auto panel_jack = patch->find_mapped_outjack(
+				Jack{.module_id = gui_element.module_idx, .jack_id = gui_element.idx.output_idx}))
+		{
+			const auto color = get_mapped_color(JackOutput{}, panel_jack->panel_jack_id);
+			opts += " ";
+			opts += Gui::color_text(panel_jack->alias_name, color);
+		}
+	}
+}
+
+void append_param_alias(std::string &opts, GuiElement const &gui_element, PatchData *patch, unsigned knob_set) {
+	if (gui_element.idx.param_idx != ElementCount::Indices::NoElementMarker) {
+		if (auto map = patch->find_mapped_knob(knob_set, gui_element.module_idx, gui_element.idx.param_idx)) {
+			const auto color = get_mapped_color(ParamElement{}, map->panel_knob_id);
+			opts += " ";
+			opts += Gui::color_text(map->alias_name, color);
 		}
 	}
 }

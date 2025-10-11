@@ -38,8 +38,17 @@ struct ModuleViewSettingsMenu {
 		lv_obj_move_to_index(graphics_settings, 2);
 		lv_obj_move_to_index(graphics_update_rate_label, 3);
 
-		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, settings_button_cb, LV_EVENT_CLICKED, this);
+		auto show_knob_aliases_cont = create_settings_menu_switch(ui_MVSettingsMenu, "Show Control Aliases");
+		lv_obj_set_style_border_width(show_knob_aliases_cont, 0, 0);
+		show_knob_aliases_check = lv_obj_get_child(show_knob_aliases_cont, 1);
+		lv_obj_move_to_index(show_knob_aliases_cont, 8);
 
+		auto show_jack_aliases_cont = create_settings_menu_switch(ui_MVSettingsMenu, "Show Jack Aliases");
+		lv_obj_set_style_border_width(show_jack_aliases_cont, 0, 0);
+		show_jack_aliases_check = lv_obj_get_child(show_jack_aliases_cont, 1);
+		lv_obj_move_to_index(show_jack_aliases_cont, 11);
+
+		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, settings_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MVSettingsCloseButton, settings_button_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_MVShowControlMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -60,6 +69,9 @@ struct ModuleViewSettingsMenu {
 
 		lv_obj_add_event_cb(graphics_show_check, scroll_menu_down_cb, LV_EVENT_FOCUSED, this);
 
+		lv_obj_add_event_cb(show_jack_aliases_check, aliases_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(show_knob_aliases_check, aliases_cb, LV_EVENT_VALUE_CHANGED, this);
+
 		lv_obj_set_x(ui_MVSettingsMenu, 220);
 	}
 
@@ -78,8 +90,12 @@ struct ModuleViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_MVControlMapTranspSlider);
 		lv_group_add_obj(settings_menu_group, ui_MVFlashMapCheck);
 
+		lv_group_add_obj(settings_menu_group, show_knob_aliases_check);
+
 		lv_group_add_obj(settings_menu_group, ui_MVShowJackMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVJackMapTranspSlider);
+
+		lv_group_add_obj(settings_menu_group, show_jack_aliases_check);
 
 		lv_group_add_obj(settings_menu_group, ui_MVShowMapsAlwaysCheck);
 
@@ -98,6 +114,9 @@ struct ModuleViewSettingsMenu {
 
 		lv_check(ui_MVShowMapsAlwaysCheck,
 				 settings.param_style.mode == ShowAll || settings.paneljack_style.mode == ShowAll);
+
+		lv_check(show_jack_aliases_check, settings.show_jack_aliases);
+		lv_check(show_knob_aliases_check, settings.show_knob_aliases);
 
 		update_interactive_states();
 
@@ -308,12 +327,26 @@ private:
 		lv_obj_scroll_to_view_recursive(page->graphics_update_rate_slider, LV_ANIM_ON);
 	}
 
+	static void aliases_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+
+		page->settings.show_jack_aliases = lv_obj_has_state(page->show_jack_aliases_check, LV_STATE_CHECKED);
+		page->settings.show_knob_aliases = lv_obj_has_state(page->show_knob_aliases_check, LV_STATE_CHECKED);
+
+		page->settings.changed = true;
+		page->changed_while_visible = true;
+	}
+
 	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
 
 	lv_obj_t *graphics_show_check;
 	lv_obj_t *graphics_update_rate_label;
 	lv_obj_t *graphics_update_rate_slider;
+	lv_obj_t *show_jack_aliases_check;
+	lv_obj_t *show_knob_aliases_check;
 
 	bool visible = false;
 	bool changed_while_visible = false;

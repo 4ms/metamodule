@@ -46,11 +46,11 @@ public:
 				PatchModQueue &patch_mod_queue);
 
 	void start();
-	void start_playing();
-	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 	uint32_t get_audio_errors();
 	void handle_overruns();
-	void step();
+
+	void set_calibration(CalData const &caldata);
+	void update_audio_settings();
 
 private:
 	SyncParams &sync_params;
@@ -71,6 +71,7 @@ private:
 	CodecT &codec_ext_;
 	uint32_t sample_rate_;
 	uint32_t block_size_;
+	uint32_t audio_period_;
 
 	// Calibration
 	CalData cal;
@@ -98,6 +99,9 @@ private:
 
 	bool ext_audio_connected = false;
 
+	void step();
+	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
+
 	AudioConf::SampleT get_audio_output(int output_id);
 	AudioConf::SampleT get_ext_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
@@ -107,18 +111,15 @@ private:
 	void handle_midi(Midi::Event const &event, unsigned poly_num);
 	void handle_button_events(uint32_t event_bitmask, float param_val);
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
-	bool is_playing_patch();
+	void handle_fade_inout();
 	void handle_patch_just_loaded();
 	void disable_calibration();
 	void re_enable_calibration();
 	void handle_patch_mod_queue();
-	void update_audio_settings();
+	uint32_t calc_audio_period();
 	void set_block_spans();
 	ParamBlock &cache_params(unsigned block);
 	void return_cached_params(unsigned block);
-
-public:
-	void set_calibration(CalData const &caldata);
 
 private:
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
