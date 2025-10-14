@@ -212,32 +212,15 @@ struct PatchViewFileMenu {
 			case RevertState::Idle:
 				break;
 
-			case RevertState::LoadMissingPlugins: {
-				if (auto patch = patches.get_view_patch()) {
-					revert_state = RevertState::Idle;
+			case RevertState::LoadMissingPlugins:
+				missing_plugins.start();
+				revert_state = RevertState::ProcessMissingPlugins;
+				break;
 
-					if (missing_plugins.scan(patch)) {
-						missing_plugins.ask([](bool ok) {}, group);
-						revert_state = RevertState::ProcessMissingPlugins;
-					} else {
-						// No missing plugins
-						revert_state = RevertState::TryRequest;
-					}
-				}
-
-			} break;
-
-			case RevertState::ProcessMissingPlugins: {
-				missing_plugins.process();
-
-				if (missing_plugins.just_finished_processing()) {
-					if (missing_plugins.has_missing(patches.get_view_patch())) {
-						missing_plugins.show_missing([this] { revert_state = RevertState::TryRequest; });
-					} else {
-						revert_state = RevertState::TryRequest;
-					}
-				}
-			} break;
+			case RevertState::ProcessMissingPlugins:
+				missing_plugins.process(
+					patches.get_view_patch(), group, [this] { revert_state = RevertState::TryRequest; });
+				break;
 
 			case RevertState::TryRequest: {
 				if (patch_storage.request_load_patch(patch_loc)) {

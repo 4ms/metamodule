@@ -350,12 +350,9 @@ struct PatchSelectorPage : PageBase {
 
 			case State::LoadPatchFile: {
 
-				bool file_needs_loading =
-					patchloader.is_not_open_or_has_changed_on_disk(selected_patch) &&
-					patches.get_modification_count(selected_patch) == 0; //don't load if we have unsaved changes
-
-				if (file_needs_loading) {
-
+				// If the patch is not open, or if it's opened but modified on disk only
+				// then (re)load it from disk, checking for missing plugins
+				if (patchloader.needs_reloading(selected_patch)) {
 					show_spinner();
 
 					auto result = patchloader.reload_patch_file(selected_patch, [this] {
@@ -365,7 +362,6 @@ struct PatchSelectorPage : PageBase {
 
 					if (result.success) {
 						gui_state.playing_patch_needs_manual_reload = false;
-						state = State::Closing;
 						check_missing_plugins();
 
 					} else {
@@ -374,28 +370,24 @@ struct PatchSelectorPage : PageBase {
 						state = State::Idle;
 					}
 				} else {
-					load_patch();
-					view_loaded_patch();
-					state = State::Closing;
+					// Here we know the patch is open already.
+
+					// If patch is unmodifed in RAM, then check for missing plugins
+					if (patches.find_open_patch(selected_patch)->modification_count == 0) {
+						check_missing_plugins();
+
+					} else {
+						// Otherwise the patch has unsaved changes so just view it, don't reload/load anything
+						patches.start_viewing(selected_patch);
+						open_patch_view_page();
+					}
 				}
 
 				hide_spinner();
 			} break;
 
 			case State::CheckMissingPlugins: {
-				missing_plugins.process();
-
-				if (missing_plugins.is_done_processing()) {
-					if (missing_plugins.has_missing(patches.get_view_patch())) {
-
-						missing_plugins.show_missing([this] { view_loaded_patch(); });
-						state = State::Closing;
-
-					} else {
-						view_loaded_patch();
-						state = State::Closing;
-					}
-				}
+				missing_plugins.process(patches.get_view_patch(), group, [this] { open_patch_view_page(); });
 			} break;
 
 			case State::Closing:
@@ -404,20 +396,11 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void check_missing_plugins() {
-		load_patch();
+		patches.start_viewing(selected_patch);
 
-		if (missing_plugins.scan(patches.get_view_patch())) {
-			missing_plugins.ask(
-				[this](bool ok) {
-					if (ok)
-						state = State::CheckMissingPlugins;
-					else
-						view_loaded_patch();
-				},
-				group);
-		} else {
-			view_loaded_patch();
-		}
+		state = State::CheckMissingPlugins;
+
+		missing_plugins.start();
 	}
 
 	void blur() final {
@@ -443,11 +426,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 private:
-	void load_patch() {
-		patches.start_viewing(selected_patch);
-	}
-
-	void view_loaded_patch() {
+	void open_patch_view_page() {
 		args.patch_loc_hash = PatchLocHash{selected_patch};
 		gui_state.force_redraw_patch = true;
 		page_list.request_new_page(PageId::PatchView, args);

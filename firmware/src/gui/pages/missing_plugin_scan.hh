@@ -60,6 +60,53 @@ struct MissingPluginScanner {
 		lv_obj_set_style_text_font(missing_plugin_popup.message_label, &ui_font_MuseoSansRounded50014, 0);
 	}
 
+	bool init_handling = false;
+
+	void start() {
+		init_handling = true;
+	}
+
+	void process(PatchData *patch, lv_group_t *group, auto completed_cb) {
+		if (init_handling) {
+			if (scan(patch)) {
+				ask(
+					[=](bool ok) {
+						if (!ok)
+							completed_cb();
+					},
+					group);
+			} else {
+				completed_cb();
+			}
+
+			init_handling = false;
+		}
+
+		process();
+
+		if (just_finished_processing()) {
+			if (has_missing(patch)) {
+				show_missing(completed_cb);
+			} else {
+				completed_cb();
+			}
+		}
+	}
+
+	bool is_visible() {
+		return missing_plugin_popup.is_visible();
+	}
+
+	bool is_done_processing() {
+		return !missing_plugin_loader.is_processing();
+	}
+
+	void hide() {
+		missing_plugin_popup.hide();
+		lv_hide(waitspinner);
+	}
+
+private:
 	bool scan(PatchData *patch) {
 		missing_plugin_loader.scan(patch);
 		return missing_plugin_loader.missing_brands().size() > 0;
@@ -166,19 +213,6 @@ struct MissingPluginScanner {
 			message.pop_back();
 
 		missing_plugin_popup.show([callback](unsigned) { callback(); }, message.c_str(), "");
-	}
-
-	bool is_done_processing() {
-		return !missing_plugin_loader.is_processing();
-	}
-
-	bool is_visible() {
-		return missing_plugin_popup.is_visible();
-	}
-
-	void hide() {
-		missing_plugin_popup.hide();
-		lv_hide(waitspinner);
 	}
 
 private:
