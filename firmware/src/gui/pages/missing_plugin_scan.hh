@@ -11,10 +11,7 @@ namespace MetaModule
 
 struct MissingPluginScanner {
 
-	MissingPluginScanner(PluginManager &plugin_manager,
-						 lv_obj_t *parent,
-						 lv_group_t *group,
-						 MissingPluginSettings &settings)
+	MissingPluginScanner(PluginManager &plugin_manager, lv_obj_t *parent, MissingPluginSettings &settings)
 		: missing_plugin_loader{plugin_manager}
 		, missing_plugin_popup{parent}
 		, waitspinner{create_spinner(parent)}

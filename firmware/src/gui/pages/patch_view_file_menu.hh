@@ -24,7 +24,8 @@ struct PatchViewFileMenu {
 					  PageList &page_list,
 					  GuiState &gui_state,
 					  UserSettings &settings,
-					  PluginManager &plugin_manager)
+					  PluginManager &plugin_manager,
+					  MissingPluginScanner &missing_plugins)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
 		, patches{patches}
@@ -34,7 +35,7 @@ struct PatchViewFileMenu {
 		, settings{settings}
 		, patch_save_dialog{patch_storage, patches, play_loader, file_save_dialog, notify_queue, page_list}
 		, group(lv_group_create())
-		, missing_plugins{plugin_manager, lv_layer_sys(), group, settings.missing_plugins} {
+		, missing_plugins{missing_plugins} {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
 		lv_obj_set_x(ui_PatchFileMenu, 140);
@@ -459,7 +460,7 @@ private:
 
 	PatchSaveDialog::Action current_action{};
 
-	MissingPluginScanner missing_plugins;
+	MissingPluginScanner &missing_plugins;
 };
 
 } // namespace MetaModule

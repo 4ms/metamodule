@@ -3,6 +3,7 @@
 #include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages//file_browser/file_browser.hh"
+#include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
 #include "params/metaparams.hh"
@@ -57,6 +58,8 @@ struct PageBase {
 
 	PageId id;
 
+	MissingPluginScanner missing_plugins;
+
 	static constexpr uint32_t MaxBufferWidth = 320;
 	//Note: LVGL cannot deal with canvas larger than 2047 because there are only 11 bits for the height. 2047 / 180 = 11.4
 	static constexpr uint32_t MaxBufferHeight = 11 * 180;
@@ -79,7 +82,8 @@ struct PageBase {
 		, settings{info.settings}
 		, file_browser{info.file_browser}
 		, file_change_checker{info.file_change_checker}
-		, id{id} {
+		, id{id}
+		, missing_plugins{info.plugin_manager, lv_layer_sys(), settings.missing_plugins} {
 		page_list.register_page(this, id);
 	}
 
@@ -137,13 +141,20 @@ struct PageBase {
 
 	// Each page calls this periodically.
 	// TODO: Try running this automatically, and have pages opt-out of it when ICC bus is busy or patch should not be reloaded?
+	bool is_checking_missing_plugins = false;
+
 	void poll_patch_file_changed() {
 
 		file_change_poll.poll(get_time(), [this] {
 			auto playing_patch = patches.get_playing_patch();
 
 			if (playing_patch) {
-				auto status = file_change_checker.check_playing_patch();
+				const auto status = file_change_checker.check_patch(patches.get_playing_patch_loc());
+
+				if (status == PatchFileChangeChecker::Status::DidReload) {
+					missing_plugins.start();
+					is_checking_missing_plugins = true;
+				}
 
 				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
 					pr_err("Error: Failed to load playing patch file: '%s')\n",
@@ -153,7 +164,13 @@ struct PageBase {
 
 			auto view_patch = patches.get_view_patch();
 			if (view_patch && view_patch != playing_patch) {
-				auto status = file_change_checker.check_view_patch();
+				const auto status = file_change_checker.check_patch(patches.get_view_patch_loc());
+
+				if (status == PatchFileChangeChecker::Status::DidReload) {
+					notify_queue.put({"New patch file detected, refreshed", Notification::Priority::Status, 800});
+					//gui_state.force_redraw_patch = true;// do we need to do this???
+					gui_state.view_patch_file_changed = true;
+				}
 
 				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
 					pr_err("Error: File failed to auto reload\n");
@@ -162,6 +179,19 @@ struct PageBase {
 
 			return false; //ignored
 		});
+
+		if (is_checking_missing_plugins) {
+			missing_plugins.process(patches.get_playing_patch(), group, [this] {
+				patch_playloader.request_reload_playing_patch(false);
+
+				if (patches.get_playing_patch() == patches.get_view_patch()) {
+					gui_state.force_redraw_patch = true;
+					gui_state.view_patch_file_changed = true;
+				}
+
+				is_checking_missing_plugins = false;
+			});
+		}
 	}
 };
 } // namespace MetaModule

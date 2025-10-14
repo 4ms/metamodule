@@ -26,7 +26,6 @@ struct PatchSelectorPage : PageBase {
 		, subdir_panel{subdir_panel}
 		, patchfiles{patch_storage.get_patch_list()}
 		, patchloader{patch_storage, patches, settings.filesystem}
-		, missing_plugins{info.plugin_manager, ui_PatchSelectorPage, group, settings.missing_plugins}
 		, roller_hover(ui_PatchSelectorPage, ui_PatchListRoller, [this] { redraw_cb(); }) {
 
 		init_bg(ui_PatchSelectorPage);
@@ -511,8 +510,6 @@ private:
 	PatchDirList &patchfiles;
 	bool patchfiles_locked = true;
 	ReloadPatch patchloader;
-
-	MissingPluginScanner missing_plugins;
 
 	bool is_populating_subdir_panel = false;
 

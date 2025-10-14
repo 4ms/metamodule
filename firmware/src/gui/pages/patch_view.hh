@@ -39,7 +39,8 @@ struct PatchViewPage : PageBase {
 					page_list,
 					gui_state,
 					settings,
-					info.plugin_manager}
+					info.plugin_manager,
+					missing_plugins}
 		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
