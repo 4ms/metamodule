@@ -140,12 +140,15 @@ struct PatchViewFileMenu {
 	}
 
 	bool is_visible() {
-		return confirm_popup.is_visible() || patch_save_dialog.is_visible() || missing_plugins.is_visible() ||
-			   !missing_plugins.is_done_processing() || visible;
+		return confirm_popup.is_visible() || patch_save_dialog.is_visible() || missing_plugins.is_visible() || visible;
+	}
+
+	bool is_active() {
+		return is_visible() || !missing_plugins.is_done_processing();
 	}
 
 	void update() {
-		if (is_visible()) {
+		if (is_active()) {
 			process_delete_file();
 			process_revert_patch();
 		} else {

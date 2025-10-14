@@ -3,16 +3,12 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/reload_patch.hh"
-#include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
 {
 
 struct PatchFileChangeChecker {
-	FileStorageProxy &patch_storage;
 	OpenPatchManager &open_patch_manager;
-	PatchPlayLoader &patch_playloader;
-	GuiState &gui_state;
 	NotificationQueue &notify_queue;
 	ReloadPatch patch_loader;
 
@@ -21,14 +17,9 @@ struct PatchFileChangeChecker {
 	// Handle user modifying patch file disk via wifi or usb/sdcard
 	PatchFileChangeChecker(FileStorageProxy &patch_storage,
 						   OpenPatchManager &open_patch_manager,
-						   PatchPlayLoader &patch_playloader,
-						   GuiState &gui_state,
 						   NotificationQueue &notify_queue,
 						   FilesystemSettings &fs_settings)
-		: patch_storage{patch_storage}
-		, open_patch_manager{open_patch_manager}
-		, patch_playloader{patch_playloader}
-		, gui_state{gui_state}
+		: open_patch_manager{open_patch_manager}
 		, notify_queue{notify_queue}
 		, patch_loader{patch_storage, open_patch_manager, fs_settings} {
 	}
@@ -50,7 +41,6 @@ struct PatchFileChangeChecker {
 				// Patch changed on disk, but not in memory, so reload it
 				if (auto result = patch_loader.reload_patch_file(loc); result.success) {
 					return Status::DidReload;
-
 				} else {
 					return Status::FailLoadFile;
 				}
