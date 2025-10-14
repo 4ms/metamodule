@@ -26,6 +26,9 @@ struct ConfirmPopup {
 
 	void init(lv_obj_t *page_base, lv_group_t *current_group) {
 		base = page_base;
+		if (base != nullptr)
+			lv_obj_set_parent(panel, base);
+
 		orig_group = current_group;
 		lv_hide(panel);
 	}
@@ -45,7 +48,8 @@ struct ConfirmPopup {
 
 		lv_group_remove_all_objs(group);
 
-		lv_obj_set_parent(panel, base);
+		if (base != nullptr)
+			lv_obj_set_parent(panel, base);
 
 		lv_show(panel);
 
