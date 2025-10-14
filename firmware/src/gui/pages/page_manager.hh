@@ -231,7 +231,7 @@ public:
 
 	void handle_write_settings() {
 		if (gui_state.do_write_settings) {
-			if (!Settings::write_settings(info.patch_storage, info.settings)) {
+			if (!Settings::write_settings(info.patch_storage, info.settings, Volume::NorFlash)) {
 				pr_err("Failed to write settings file\n");
 			} else
 				pr_info("Wrote settings\n");

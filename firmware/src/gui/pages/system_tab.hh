@@ -9,6 +9,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "reboot.hh"
+#include "user_settings/settings_file.hh"
 
 namespace MetaModule
 {
@@ -19,14 +20,17 @@ struct SystemTab : SystemMenuTab {
 			  ParamsMidiState &params,
 			  MetaParams &metaparams,
 			  PatchPlayLoader &patch_playloader,
-			  PatchModQueue &patch_mod_queue)
+			  PatchModQueue &patch_mod_queue,
+			  UserSettings &settings)
 		: storage{patch_storage}
 		, patch_playloader{patch_playloader}
 		, cal_routine{params, storage, patch_mod_queue}
 		, cal_check{params}
 		, hw_check{params, metaparams}
+		, settings{settings}
 		, reload_patches_button{create_button(ui_SystemResetInternalPatchesCont, "Restore factory patches")}
-		, reboot_button{create_button(ui_SystemResetInternalPatchesCont, "Reboot")} {
+		, reboot_button{create_button(ui_SystemResetInternalPatchesCont, "Reboot")}
+		, dumpsettings_button{create_button(ui_SystemResetInternalPatchesCont, "Backup Settings")} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemExpCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
@@ -43,6 +47,9 @@ struct SystemTab : SystemMenuTab {
 		lv_obj_add_flag(reboot_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		lv_obj_set_style_bg_color(reboot_button, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_add_event_cb(reboot_button, reboot_cb, LV_EVENT_CLICKED, this);
+
+		lv_obj_add_flag(dumpsettings_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_add_event_cb(dumpsettings_button, dump_settings_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -57,6 +64,7 @@ struct SystemTab : SystemMenuTab {
 		lv_show(ui_SystemHardwareCheckCont);
 		lv_show(reload_patches_button);
 		lv_show(reboot_button);
+		lv_show(dumpsettings_button);
 
 		lv_group_remove_obj(ui_SystemCalCheckButton);
 		lv_group_remove_obj(ui_SystemCalibrationButton);
@@ -67,6 +75,7 @@ struct SystemTab : SystemMenuTab {
 		lv_group_remove_obj(ui_CheckHardwareButton);
 		lv_group_remove_obj(reload_patches_button);
 		lv_group_remove_obj(reboot_button);
+		lv_group_remove_obj(dumpsettings_button);
 
 		lv_group_add_obj(group, ui_SystemCalCheckButton);
 		lv_group_add_obj(group, ui_SystemCalibrationButton);
@@ -77,6 +86,7 @@ struct SystemTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_CalibrationNextButton);
 		lv_group_add_obj(group, reload_patches_button);
 		lv_group_add_obj(group, reboot_button);
+		lv_group_add_obj(group, dumpsettings_button);
 
 		lv_group_focus_obj(ui_SystemCalCheckButton);
 		confirm_popup.init(ui_SystemMenu, group);
@@ -220,15 +230,32 @@ private:
 			"Restore");
 	}
 
+	static void dump_settings_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<SystemTab *>(event->user_data);
+
+		page->confirm_popup.show(
+			[page = page](unsigned res) {
+				if (res == 1 || res == 2)
+					Settings::write_settings(page->storage, page->settings, res == 1 ? Volume::USB : Volume::SDCard);
+			},
+			"Where do you want to save the settings.yml file?",
+			"USB",
+			"SD card");
+	}
+
 	FileStorageProxy &storage;
 	PatchPlayLoader &patch_playloader;
 	ConfirmPopup confirm_popup;
 	CalibrationRoutine cal_routine;
 	CalCheck cal_check;
 	HardwareCheckPopup hw_check;
+	UserSettings &settings;
 
 	lv_obj_t *reload_patches_button = nullptr;
 	lv_obj_t *reboot_button = nullptr;
+	lv_obj_t *dumpsettings_button = nullptr;
 
 	lv_group_t *group = nullptr;
 };

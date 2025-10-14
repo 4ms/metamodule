@@ -59,9 +59,9 @@ public:
 		Gui::init_lvgl_styles();
 		page_manager.init();
 
-		if (!Settings::read_settings(patch_storage, &settings)) {
+		if (!Settings::read_settings(patch_storage, &settings, Volume::NorFlash)) {
 			settings = UserSettings{};
-			if (!Settings::write_settings(patch_storage, settings)) {
+			if (!Settings::write_settings(patch_storage, settings, Volume::NorFlash)) {
 				pr_err("Failed to write settings file\n");
 			}
 		}
