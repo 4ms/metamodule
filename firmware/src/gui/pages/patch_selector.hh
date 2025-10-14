@@ -361,7 +361,6 @@ struct PatchSelectorPage : PageBase {
 					});
 
 					if (result.success) {
-						gui_state.playing_patch_needs_manual_reload = false;
 						check_missing_plugins();
 
 					} else {

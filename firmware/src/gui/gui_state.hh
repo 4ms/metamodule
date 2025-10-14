@@ -17,7 +17,6 @@ struct GuiState {
 	bool already_displayed_cable_instructions = false;
 
 	bool force_redraw_patch{};
-	bool playing_patch_needs_manual_reload{};
 	bool view_patch_file_changed{};
 
 	// Setting this to true will keep page manager from

@@ -333,7 +333,6 @@ private:
 				lv_group_focus_obj(plugin_obj);
 
 			load_in_progress_obj = nullptr;
-			gui_state.playing_patch_needs_manual_reload = true;
 			gui_state.force_redraw_patch = true;
 		}
 	}

@@ -717,22 +717,16 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+
 		if (!page->is_patch_playloaded) {
 			page->patch_playloader.request_load_view_patch();
-			page->gui_state.playing_patch_needs_manual_reload = false;
+
+		} else if (page->patch_playloader.is_audio_muted()) {
+			page->patch_playloader.apply_suggested_audio_settings();
+			page->patch_playloader.start_audio();
 
 		} else {
-			if (page->patch_playloader.is_audio_muted()) {
-				if (page->gui_state.playing_patch_needs_manual_reload) {
-					page->patch_playloader.request_load_view_patch();
-					page->gui_state.playing_patch_needs_manual_reload = false;
-				} else {
-					page->patch_playloader.apply_suggested_audio_settings();
-					page->patch_playloader.start_audio();
-				}
-			} else {
-				page->patch_playloader.stop_audio();
-			}
+			page->patch_playloader.stop_audio();
 		}
 	}
 
