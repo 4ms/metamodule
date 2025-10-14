@@ -3,6 +3,7 @@
 #include "gui/notify/queue.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/make_cable.hh"
+#include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -22,7 +23,8 @@ struct PatchViewFileMenu {
 					  NotificationQueue &notify_queue,
 					  PageList &page_list,
 					  GuiState &gui_state,
-					  UserSettings &settings)
+					  UserSettings &settings,
+					  PluginManager &plugin_manager)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
 		, patches{patches}
@@ -31,7 +33,8 @@ struct PatchViewFileMenu {
 		, gui_state{gui_state}
 		, settings{settings}
 		, patch_save_dialog{patch_storage, patches, play_loader, file_save_dialog, notify_queue, page_list}
-		, group(lv_group_create()) {
+		, group(lv_group_create())
+		, missing_plugins{plugin_manager, lv_layer_sys(), group, settings.missing_plugins} {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
 		lv_obj_set_x(ui_PatchFileMenu, 140);
@@ -66,13 +69,13 @@ struct PatchViewFileMenu {
 	}
 
 	void back() {
-		// if (patch_save_dialog.is_visible()) {
-		// 	patch_save_dialog.back_event();
-
-		// } else
-
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
+			hide_menu();
+
+		} else if (missing_plugins.is_visible()) {
+			missing_plugins.hide();
+			hide_menu();
 
 		} else if (visible) {
 			hide();
@@ -87,10 +90,13 @@ struct PatchViewFileMenu {
 
 	void hide_menu() {
 		if (visible) {
-			DropOutToRight_Animation(ui_PatchFileMenu, 0);
+			if (lv_obj_get_x(ui_PatchFileMenu) <= 180)
+				DropOutToRight_Animation(ui_PatchFileMenu, 0);
+
 			auto indev = lv_indev_get_next(nullptr);
 			if (indev && base_group)
 				lv_indev_set_group(indev, base_group);
+
 			visible = false;
 		}
 	}
@@ -133,7 +139,8 @@ struct PatchViewFileMenu {
 	}
 
 	bool is_visible() {
-		return patch_save_dialog.is_visible() || visible;
+		return confirm_popup.is_visible() || patch_save_dialog.is_visible() || missing_plugins.is_visible() ||
+			   !missing_plugins.is_done_processing() || visible;
 	}
 
 	void update() {
@@ -201,46 +208,80 @@ struct PatchViewFileMenu {
 	}
 
 	void process_revert_patch() {
-		if (revert_state == RevertState::TryRequest) {
-			if (patch_storage.request_load_patch(patch_loc)) {
-				revert_state = RevertState::Requested;
+		switch (revert_state) {
+			case RevertState::Idle:
+				break;
 
-				if (patches.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
-					was_playing = true;
-					play_loader.stop_audio();
-				} else
-					was_playing = false;
-			}
-
-		} else if (revert_state == RevertState::Requested) {
-			auto message = patch_storage.get_message();
-
-			if (message.message_type == FileStorageProxy::LoadFileOK) {
-				auto data = patch_storage.get_patch_data(message.bytes_read);
-
-				if (patches.open_patch(data, patch_loc, message.timestamp)) {
-					if (was_playing) {
-						play_loader.request_load_view_patch();
-					}
-
-					page_list.request_new_page_no_history(
-						PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
-
-					gui_state.force_redraw_patch = true;
+			case RevertState::LoadMissingPlugins: {
+				if (auto patch = patches.get_view_patch()) {
 					revert_state = RevertState::Idle;
-					reverted_patch = true;
 
-					hide_menu();
-				} else {
-					notify_queue.put({"Error reverting patch", Notification::Priority::Error, 1000});
+					if (missing_plugins.scan(patch)) {
+						missing_plugins.ask([](bool ok) {}, group);
+						revert_state = RevertState::ProcessMissingPlugins;
+					} else {
+						// No missing plugins
+						revert_state = RevertState::TryRequest;
+					}
 				}
-			}
 
-			if (message.message_type == FileStorageProxy::LoadFileFailed) {
-				notify_queue.put({"Error opening file, not reverted.", Notification::Priority::Error});
-				revert_state = RevertState::Idle;
-				hide_menu();
-			}
+			} break;
+
+			case RevertState::ProcessMissingPlugins: {
+				missing_plugins.process();
+
+				if (missing_plugins.just_finished_processing()) {
+					if (missing_plugins.has_missing(patches.get_view_patch())) {
+						missing_plugins.show_missing([this] { revert_state = RevertState::TryRequest; });
+					} else {
+						revert_state = RevertState::TryRequest;
+					}
+				}
+			} break;
+
+			case RevertState::TryRequest: {
+				if (patch_storage.request_load_patch(patch_loc)) {
+					revert_state = RevertState::Requested;
+
+					if (patches.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
+						was_playing = true;
+						play_loader.stop_audio();
+					} else
+						was_playing = false;
+				}
+
+			} break;
+
+			case RevertState::Requested: {
+				auto message = patch_storage.get_message();
+
+				if (message.message_type == FileStorageProxy::LoadFileOK) {
+					auto data = patch_storage.get_patch_data(message.bytes_read);
+
+					if (patches.open_patch(data, patch_loc, message.timestamp)) {
+						if (was_playing) {
+							play_loader.request_load_view_patch();
+						}
+
+						page_list.request_new_page_no_history(
+							PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
+
+						gui_state.force_redraw_patch = true;
+						revert_state = RevertState::Idle;
+						reverted_patch = true;
+
+						hide_menu();
+					} else {
+						notify_queue.put({"Error reverting patch", Notification::Priority::Error, 1000});
+					}
+				}
+
+				if (message.message_type == FileStorageProxy::LoadFileFailed) {
+					notify_queue.put({"Error opening file, not reverted.", Notification::Priority::Error});
+					revert_state = RevertState::Idle;
+					hide_menu();
+				}
+			} break;
 		}
 	}
 
@@ -267,6 +308,7 @@ private:
 		lv_obj_set_x(ui_PatchFileMenu, 200);
 		visible = false;
 
+		hide_menu();
 		patch_save_dialog.show(base_group);
 	}
 
@@ -352,10 +394,13 @@ private:
 			"Delete " + page->patches.get_view_patch_filename() + " on disk? This cannot be undone.";
 
 		page->patch_loc = {page->patches.get_view_patch_filename(), page->patches.get_view_patch_vol()};
+
 		page->confirm_popup.show(
 			[page](unsigned choice) {
 				if (choice == 1) {
 					page->delete_state = DeleteState::TryRequest;
+				} else {
+					page->hide_menu();
 				}
 			},
 			confirm_msg.c_str(),
@@ -369,17 +414,19 @@ private:
 
 		std::string confirm_msg = std::string(lv_label_get_text(ui_PatchFileRevertLabel)) + " " +
 								  page->patches.get_view_patch_filename() +
-								  " to last saved version on disk? This cannot be undone.";
+								  " to last saved version? This cannot be undone.";
 
 		page->patch_loc = {page->patches.get_view_patch_filename(), page->patches.get_view_patch_vol()};
 		page->confirm_popup.show(
 			[page](unsigned choice) {
 				if (choice == 1) {
-					page->revert_state = RevertState::TryRequest;
+					page->revert_state = RevertState::LoadMissingPlugins;
+				} else {
+					page->hide_menu();
 				}
 			},
 			confirm_msg.c_str(),
-			"Revert");
+			lv_label_get_text(ui_PatchFileRevertLabel));
 	}
 
 	static void make_startup_patch(lv_event_t *event) {
@@ -418,10 +465,18 @@ private:
 	PatchLocation patch_loc;
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
-	enum class RevertState { Idle, TryRequest, Requested } revert_state = RevertState::Idle;
+	enum class RevertState {
+		Idle,
+		LoadMissingPlugins,
+		ProcessMissingPlugins,
+		TryRequest,
+		Requested
+	} revert_state = RevertState::Idle;
 	bool reverted_patch = false;
 
 	PatchSaveDialog::Action current_action{};
+
+	MissingPluginScanner missing_plugins;
 };
 
 } // namespace MetaModule

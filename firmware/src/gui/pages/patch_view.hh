@@ -12,7 +12,6 @@
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
 #include "gui/pages/make_cable.hh"
-#include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
@@ -39,9 +38,9 @@ struct PatchViewPage : PageBase {
 					notify_queue,
 					page_list,
 					gui_state,
-					settings}
-		, map_ring_display{settings.patch_view}
-		, missing_plugins{info.plugin_manager, ui_PatchViewPage, group, settings.missing_plugins} {
+					settings,
+					info.plugin_manager}
+		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -307,24 +306,6 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
-		// Revert/Reload checks for missing plugins:
-		if (file_menu.did_reload()) {
-			if (missing_plugins.scan(patch)) {
-				missing_plugins.ask([](bool) {}, group);
-			}
-		}
-
-		missing_plugins.process();
-
-		if (missing_plugins.just_finished_processing()) {
-			if (missing_plugins.has_missing(patch)) {
-				missing_plugins.show_missing([] {});
-			}
-		}
-
-		if (!missing_plugins.is_done_processing()) {
-			return;
-		}
 
 		bool last_is_patch_playloaded = is_patch_playloaded;
 
@@ -403,9 +384,6 @@ struct PatchViewPage : PageBase {
 
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
-
-			} else if (missing_plugins.is_visible()) {
-				missing_plugins.hide();
 
 			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
 				printf("Focus on play but %p in group %p\n", ui_PlayButton, group);
@@ -848,8 +826,6 @@ private:
 	unsigned dyn_draw_throttle = 2;
 	unsigned dyn_module_idx = 0;
 	bool dynamic_elements_prepared = false;
-
-	MissingPluginScanner missing_plugins;
 };
 
 } // namespace MetaModule
