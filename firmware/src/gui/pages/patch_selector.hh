@@ -361,7 +361,9 @@ struct PatchSelectorPage : PageBase {
 					});
 
 					if (result.success) {
-						check_missing_plugins();
+						patches.start_viewing(selected_patch);
+						missing_plugins.start();
+						state = State::CheckMissingPlugins;
 
 					} else {
 						lv_group_set_editing(group, true);
@@ -370,14 +372,15 @@ struct PatchSelectorPage : PageBase {
 					}
 				} else {
 					// Here we know the patch is open already.
+					patches.start_viewing(selected_patch);
 
 					// If patch is unmodifed in RAM, then check for missing plugins
 					if (patches.find_open_patch(selected_patch)->modification_count == 0) {
-						check_missing_plugins();
+						missing_plugins.start();
+						state = State::CheckMissingPlugins;
 
 					} else {
 						// Otherwise the patch has unsaved changes so just view it, don't reload/load anything
-						patches.start_viewing(selected_patch);
 						open_patch_view_page();
 					}
 				}
@@ -392,14 +395,6 @@ struct PatchSelectorPage : PageBase {
 			case State::Closing:
 				break;
 		}
-	}
-
-	void check_missing_plugins() {
-		patches.start_viewing(selected_patch);
-
-		state = State::CheckMissingPlugins;
-
-		missing_plugins.start();
 	}
 
 	void blur() final {
