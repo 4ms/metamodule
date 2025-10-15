@@ -131,6 +131,9 @@ public:
 
 				gui_state.file_browser_visible.register_state(true);
 
+			} else if (missing_plugins.is_active()) {
+				missing_plugins.process();
+
 			} else {
 				gui_state.file_browser_visible.register_state(false);
 

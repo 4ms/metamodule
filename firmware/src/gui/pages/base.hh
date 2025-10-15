@@ -140,10 +140,7 @@ struct PageBase {
 		}
 	}
 
-	// Each page calls this periodically.
-	// TODO: Try running this automatically, and have pages opt-out of it when ICC bus is busy or patch should not be reloaded?
-	bool is_checking_missing_plugins = false;
-
+	// Some pages call this periodically
 	void poll_patch_file_changed() {
 
 		file_change_poll.poll(get_time(), [this] {
@@ -153,8 +150,17 @@ struct PageBase {
 				const auto status = file_change_checker.check_patch(patches.get_playing_patch_loc());
 
 				if (status == PatchFileChangeChecker::Status::DidReload) {
-					missing_plugins.start();
-					is_checking_missing_plugins = true;
+					notify_queue.put({"New patch file detected, refreshed", Notification::Priority::Status, 800});
+
+					// patch file was reloaded from disk: start missing plugin scan procedure
+					missing_plugins.start(playing_patch, group, [this] {
+						patch_playloader.request_reload_playing_patch(false);
+
+						if (patches.get_playing_patch() == patches.get_view_patch()) {
+							gui_state.force_redraw_patch = true;
+							gui_state.view_patch_file_changed = true;
+						}
+					});
 				}
 
 				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
@@ -169,8 +175,11 @@ struct PageBase {
 
 				if (status == PatchFileChangeChecker::Status::DidReload) {
 					notify_queue.put({"New patch file detected, refreshed", Notification::Priority::Status, 800});
-					//gui_state.force_redraw_patch = true;// do we need to do this???
-					gui_state.view_patch_file_changed = true;
+
+					missing_plugins.start(view_patch, group, [this] {
+						gui_state.force_redraw_patch = true;
+						gui_state.view_patch_file_changed = true;
+					});
 				}
 
 				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
@@ -180,19 +189,6 @@ struct PageBase {
 
 			return false; //ignored
 		});
-
-		if (is_checking_missing_plugins) {
-			missing_plugins.process(patches.get_playing_patch(), group, [this] {
-				patch_playloader.request_reload_playing_patch(false);
-
-				if (patches.get_playing_patch() == patches.get_view_patch()) {
-					gui_state.force_redraw_patch = true;
-					gui_state.view_patch_file_changed = true;
-				}
-
-				is_checking_missing_plugins = false;
-			});
-		}
 	}
 };
 } // namespace MetaModule

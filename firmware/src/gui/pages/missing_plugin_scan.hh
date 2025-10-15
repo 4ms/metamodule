@@ -57,37 +57,57 @@ struct MissingPluginScanner {
 		lv_obj_set_style_text_font(missing_plugin_popup.message_label, &ui_font_MuseoSansRounded50014, 0);
 	}
 
-	bool init_handling = false;
-
-	void start() {
+	// Call start() to begin the async process of finding and loading missing plugins.
+	// completed_cb is called when the process is done whether it succeeds or not, and
+	// GUI focus will be restored to the parent_group as well.
+	void start(PatchData *patch, lv_group_t *parent_group, auto completed_cb) {
 		init_handling = true;
+		just_done = false;
+
+		this->completion_callback = completed_cb;
+		this->patch = patch;
+		this->parent_group = parent_group;
 	}
 
-	void process(PatchData *patch, lv_group_t *group, auto completed_cb) {
+	void process() {
+		if (!patch || !completion_callback) {
+			//recover from error state
+			init_handling = false;
+			return;
+		}
+
+		// First time: scan patch to see if there are any missing plugins
+		// Show a pop-up confirmation (if user chose "Ask" preference)
 		if (init_handling) {
 			if (scan(patch)) {
 				ask(
-					[=](bool ok) {
+					[this](bool ok) {
 						if (!ok)
-							completed_cb();
+							completion_callback();
 					},
-					group);
+					parent_group);
 			} else {
-				completed_cb();
+				completion_callback();
 			}
 
 			init_handling = false;
 		}
 
-		process();
+		// main processing
+		process_loading();
 
+		// processing is done: show pop-up with missing plugins
 		if (just_finished_processing()) {
 			if (has_missing(patch)) {
-				show_missing(completed_cb);
+				show_missing(completion_callback);
 			} else {
-				completed_cb();
+				completion_callback();
 			}
 		}
+	}
+
+	bool is_active() {
+		return init_handling || missing_plugin_loader.is_processing();
 	}
 
 	bool is_visible() {
@@ -157,7 +177,7 @@ private:
 		}
 	}
 
-	void process() {
+	void process_loading() {
 		if (missing_plugin_loader.is_processing()) {
 			lv_show(waitspinner);
 			lv_show(status_label);
@@ -215,6 +235,7 @@ private:
 private:
 	MissingPluginAutoload missing_plugin_loader;
 	ConfirmPopup missing_plugin_popup;
+
 	lv_obj_t *status_label;
 	lv_obj_t *waitspinner;
 	lv_obj_t *parent;
@@ -222,7 +243,12 @@ private:
 
 	MissingPluginSettings &settings;
 
-	bool just_done;
+	std::function<void()> completion_callback;
+	PatchData *patch;
+	lv_group_t *parent_group;
+
+	bool init_handling = false;
+	bool just_done = false;
 };
 
 } // namespace MetaModule

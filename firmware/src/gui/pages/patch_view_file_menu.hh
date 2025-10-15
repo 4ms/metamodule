@@ -217,13 +217,9 @@ struct PatchViewFileMenu {
 				break;
 
 			case RevertState::LoadMissingPlugins:
-				missing_plugins.start();
-				revert_state = RevertState::ProcessMissingPlugins;
-				break;
-
-			case RevertState::ProcessMissingPlugins:
-				missing_plugins.process(
+				missing_plugins.start(
 					patches.get_view_patch(), group, [this] { revert_state = RevertState::TryRequest; });
+				revert_state = RevertState::Idle;
 				break;
 
 			case RevertState::TryRequest: {
@@ -452,13 +448,7 @@ private:
 	PatchLocation patch_loc;
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
-	enum class RevertState {
-		Idle,
-		LoadMissingPlugins,
-		ProcessMissingPlugins,
-		TryRequest,
-		Requested
-	} revert_state = RevertState::Idle;
+	enum class RevertState { Idle, LoadMissingPlugins, TryRequest, Requested } revert_state = RevertState::Idle;
 	bool reverted_patch = false;
 
 	PatchSaveDialog::Action current_action{};
