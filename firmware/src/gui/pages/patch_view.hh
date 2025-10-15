@@ -77,7 +77,7 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
-		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
@@ -421,7 +421,7 @@ struct PatchViewPage : PageBase {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
-		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 
 		file_menu.update();
 
@@ -492,7 +492,7 @@ private:
 			lv_hide(ui_KnobSetName);
 		}
 
-		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 
 		if (settings.patch_view.float_loadmeter) {
 			lv_obj_set_parent(ui_LoadMeter2, lv_layer_sys());

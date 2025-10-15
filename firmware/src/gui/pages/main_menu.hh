@@ -74,7 +74,8 @@ struct MainMenuPage : PageBase {
 		}
 
 		bool is_patch_playloaded = patches.get_playing_patch() ? true : false;
-		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_MainMenuLoadMeter);
+		update_audio_meter(
+			is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_MainMenuLoadMeter);
 
 		poll_patch_file_changed();
 	}

@@ -10,11 +10,11 @@
 namespace MetaModule
 {
 
-inline void update_load_text(bool is_patch_playloaded,
-							 MetaParams const &metaparams,
-							 PatchPlayLoader &patch_playloader,
-							 ModuleDisplaySettings const &settings,
-							 lv_obj_t *meter) {
+inline void update_audio_meter(bool is_patch_playloaded,
+							   MetaParams const &metaparams,
+							   PatchPlayLoader &patch_playloader,
+							   ModuleDisplaySettings const &settings,
+							   lv_obj_t *meter) {
 
 	auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
 

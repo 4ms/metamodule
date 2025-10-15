@@ -70,7 +70,7 @@ struct PatchSelectorPage : PageBase {
 		auto playing_patch = patches.get_playing_patch();
 		is_patch_playloaded = playing_patch && playing_patch->patch_name.length() > 0;
 
-		update_load_text(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
 
 		if (is_patch_playloaded) {
 			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", playing_patch->patch_name.c_str());
@@ -306,7 +306,7 @@ struct PatchSelectorPage : PageBase {
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
 
-					update_load_text(
+					update_audio_meter(
 						is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
 				} else {
 					// Poll for patch file changes in between polling for patch list updates
@@ -380,7 +380,7 @@ struct PatchSelectorPage : PageBase {
 
 					} else {
 						// Otherwise the patch has unsaved changes so just view it, don't reload/load anything
-						open_patch_view_page();
+						exit_to_patch_view_page();
 					}
 				}
 
@@ -388,7 +388,7 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::CheckMissingPlugins: {
-				missing_plugins.process(patches.get_view_patch(), group, [this] { open_patch_view_page(); });
+				missing_plugins.process(patches.get_view_patch(), group, [this] { exit_to_patch_view_page(); });
 			} break;
 
 			case State::Closing:
@@ -419,7 +419,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 private:
-	void open_patch_view_page() {
+	void exit_to_patch_view_page() {
 		args.patch_loc_hash = PatchLocHash{selected_patch};
 		gui_state.force_redraw_patch = true;
 		page_list.request_new_page(PageId::PatchView, args);
