@@ -81,7 +81,6 @@ struct MainMenuPage : PageBase {
 	}
 
 	void blur() final {
-		;
 	}
 
 private:
@@ -97,7 +96,8 @@ private:
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		page->load_patch_view_page();
+		page->missing_plugins.start(
+			page->patches.get_view_patch(), page->group, [page = page] { page->load_patch_view_page(); });
 	}
 
 	static void now_playing_cb(lv_event_t *event) {
@@ -105,8 +105,10 @@ private:
 		if (!page)
 			return;
 		if (page->patches.get_playing_patch()) {
-			page->patches.view_playing_patch();
-			page->load_patch_view_page();
+			page->missing_plugins.start(page->patches.get_playing_patch(), page->group, [page = page] {
+				page->patches.view_playing_patch();
+				page->load_patch_view_page();
+			});
 		}
 	}
 
