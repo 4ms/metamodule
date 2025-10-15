@@ -1324,4 +1324,21 @@ lv_obj_t *create_save_revert_buttons(lv_obj_t *parent) {
 	return cont;
 }
 
+lv_obj_t *create_settings_cont(lv_obj_t *parent) {
+	auto cont = lv_obj_create(parent);
+	lv_obj_remove_style_all(cont);
+	lv_obj_set_width(cont, lv_pct(100));
+	lv_obj_set_height(cont, LV_SIZE_CONTENT);
+	lv_obj_set_align(cont, LV_ALIGN_CENTER);
+	lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_ROW_WRAP);
+	lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+	lv_obj_clear_flag(cont, LV_OBJ_FLAG_SCROLLABLE);
+	lv_obj_set_style_pad_hor(cont, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(cont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(cont, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_row(cont, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_column(cont, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+	return cont;
+}
+
 } // namespace MetaModule

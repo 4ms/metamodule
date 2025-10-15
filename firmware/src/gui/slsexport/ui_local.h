@@ -53,4 +53,6 @@ void prefs_cont_justify_multiline(lv_obj_t *cont);
 lv_obj_t *create_aligned_text_row(lv_obj_t *parent, std::string_view title_text);
 lv_obj_t *create_save_revert_buttons(lv_obj_t *parent);
 
+lv_obj_t *create_settings_cont(lv_obj_t *parent);
+
 } // namespace MetaModule
