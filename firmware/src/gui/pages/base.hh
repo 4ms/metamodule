@@ -36,6 +36,7 @@ struct PatchContext {
 	FatFileIO &ramdisk;
 	PatchFileChangeChecker &file_change_checker;
 	FileBrowserDialog &file_browser;
+	MissingPluginScanner &missing_plugins;
 };
 
 struct PageBase {
@@ -56,9 +57,9 @@ struct PageBase {
 	PatchFileChangeChecker &file_change_checker;
 	PollChange file_change_poll{500};
 
-	PageId id;
+	MissingPluginScanner &missing_plugins;
 
-	MissingPluginScanner missing_plugins;
+	PageId id;
 
 	static constexpr uint32_t MaxBufferWidth = 320;
 	//Note: LVGL cannot deal with canvas larger than 2047 because there are only 11 bits for the height. 2047 / 180 = 11.4
@@ -82,8 +83,8 @@ struct PageBase {
 		, settings{info.settings}
 		, file_browser{info.file_browser}
 		, file_change_checker{info.file_change_checker}
-		, id{id}
-		, missing_plugins{info.plugin_manager, lv_layer_sys(), settings.missing_plugins} {
+		, missing_plugins{info.missing_plugins}
+		, id{id} {
 		page_list.register_page(this, id);
 	}
 

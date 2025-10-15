@@ -32,16 +32,17 @@ class PageManager {
 	SlsComponentInit sls_comp_init;
 
 	PatchFileChangeChecker file_change_checker;
+	MissingPluginScanner missing_plugins;
+
+	PatchSelectorSubdirPanel subdir_panel;
+	FileBrowserDialog file_browser;
+	FileSaveDialog file_save_dialog;
 
 	PatchContext info;
 	PageList page_list;
 	GuiState gui_state;
 	ButtonLight button_light;
 	Screensaver &screensaver;
-
-	PatchSelectorSubdirPanel subdir_panel;
-	FileBrowserDialog file_browser;
-	FileSaveDialog file_save_dialog{info.patch_storage, subdir_panel};
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info, subdir_panel};
@@ -70,6 +71,9 @@ public:
 				Screensaver &screensaver,
 				FatFileIO &ramdisk)
 		: file_change_checker{patch_storage, open_patch_manager, notify_queue, settings.filesystem}
+		, missing_plugins{plugin_manager, lv_layer_sys(), settings.missing_plugins}
+		, file_browser{patch_storage, notify_queue}
+		, file_save_dialog{patch_storage, subdir_panel}
 		, info{.patch_storage = patch_storage,
 			   .open_patch_manager = open_patch_manager,
 			   .patch_playloader = patch_playloader,
@@ -83,9 +87,9 @@ public:
 			   .plugin_manager = plugin_manager,
 			   .ramdisk = ramdisk,
 			   .file_change_checker = file_change_checker,
-			   .file_browser = file_browser}
-		, screensaver{screensaver}
-		, file_browser{patch_storage, notify_queue} {
+			   .file_browser = file_browser,
+			   .missing_plugins = missing_plugins}
+		, screensaver{screensaver} {
 
 		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
 		register_file_browser_vcv(file_browser, file_save_dialog);
