@@ -130,6 +130,7 @@ struct PatchViewFileMenu {
 
 		if (!visible) {
 			DropInFromLeft_Animation(ui_PatchFileMenu, 0);
+			lv_obj_scroll_to_y(ui_PatchFileMenu, 0, LV_ANIM_OFF);
 			auto indev = lv_indev_get_next(nullptr);
 			if (indev && group)
 				lv_indev_set_group(indev, group);

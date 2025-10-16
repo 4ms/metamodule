@@ -1533,7 +1533,7 @@ ui_DescPanelFileNameTitle = lv_label_create(ui_DescPanelFilenameCont);
 lv_obj_set_width( ui_DescPanelFileNameTitle, 78);
 lv_obj_set_height( ui_DescPanelFileNameTitle, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_DescPanelFileNameTitle, LV_ALIGN_CENTER );
-lv_label_set_text(ui_DescPanelFileNameTitle,"Save file as:");
+lv_label_set_text(ui_DescPanelFileNameTitle,"File name:");
 lv_obj_set_style_text_color(ui_DescPanelFileNameTitle, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_DescPanelFileNameTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
