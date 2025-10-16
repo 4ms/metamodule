@@ -281,6 +281,12 @@ struct PatchSelectorPage : PageBase {
 		if (gui_state.back_button.is_just_released()) {
 			if (missing_plugins.is_visible()) {
 				missing_plugins.hide();
+				lv_obj_clear_state(ui_PatchListRoller, LV_STATE_DISABLED);
+				lv_group_focus_obj(ui_PatchListRoller);
+				if (group) {
+					lv_group_activate(group);
+					lv_group_set_editing(group, true);
+				}
 
 			} else if (!lv_obj_has_state(ui_PatchListRoller, LV_STATE_DISABLED)) {
 				lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);

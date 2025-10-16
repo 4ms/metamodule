@@ -80,12 +80,10 @@ struct MissingPluginScanner {
 		// Show a pop-up confirmation (if user chose "Ask" preference)
 		if (init_handling) {
 			if (scan(patch)) {
-				ask(
-					[this](bool ok) {
-						if (!ok)
-							completion_callback();
-					},
-					parent_group);
+				ask([this](bool ok) {
+					if (!ok)
+						completion_callback();
+				});
 			} else {
 				completion_callback();
 			}
@@ -129,7 +127,7 @@ private:
 		return missing_plugin_loader.missing_brands().size() > 0;
 	}
 
-	void ask(auto callback, lv_group_t *parent_group) {
+	void ask(auto callback) {
 		// Action to be performed after the popup:
 		auto do_loading = [this, callback = callback](unsigned should_load) {
 			if (should_load) {
@@ -229,6 +227,7 @@ private:
 		if (message.ends_with('\n'))
 			message.pop_back();
 
+		missing_plugin_popup.init(parent, parent_group);
 		missing_plugin_popup.show([callback](unsigned) { callback(); }, message.c_str(), "");
 	}
 
