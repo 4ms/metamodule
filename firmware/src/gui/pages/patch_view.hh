@@ -30,7 +30,7 @@ struct PatchViewPage : PageBase {
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
-		, desc_panel{patch_playloader, patches}
+		, desc_panel{patch_playloader, patches, settings.patch_suggested_audio}
 		, file_menu{patch_playloader,
 					patch_storage,
 					patches,
@@ -396,6 +396,7 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
+		desc_panel.update();
 		if (desc_panel.did_update_names()) {
 			patches.mark_view_patch_modified();
 			update_title_bar();
