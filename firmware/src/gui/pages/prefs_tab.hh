@@ -339,6 +339,8 @@ private:
 		return MissingPluginSettings::Autoload::Ask;
 	}
 
+	// Update the settings structure from the dropdown and checkbox selections
+	// This is called when the user clicks "Apply" or exits the prefs page
 	void update_settings_from_dropdown() {
 		auto block_size = read_blocksize_dropdown();
 		auto sample_rate = read_samplerate_dropdown();
@@ -491,45 +493,43 @@ private:
 	static void changed_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
-		auto page = static_cast<PrefsTab *>(event->user_data);
+		if (auto page = static_cast<PrefsTab *>(event->user_data))
+			page->do_changed_cb();
+	}
 
-		auto block_size = page->read_blocksize_dropdown();
-		auto sample_rate = page->read_samplerate_dropdown();
-		auto overrun_retries = page->read_overrun_dropdown();
-		auto timeout = page->read_timeout_dropdown();
-		auto knobwake = page->read_knobwake_check();
-		auto catchupmode = page->read_catchup_mode_dropdown();
-		auto catchup_exclude_buttons = page->read_catchup_exclude_check();
-		auto fs_max_patches = page->read_fs_max_open_patches();
-		auto midi_feedback = page->read_midi_feedback_check();
-		auto apply_sr = page->read_patch_suggest_samplerate_check();
-		auto apply_bs = page->read_patch_suggest_blocksize_check();
-		auto load_initial_patch = lv_obj_has_state(page->fs_section.startup_patch_check, LV_STATE_CHECKED);
+	void do_changed_cb() {
+		auto block_size = read_blocksize_dropdown();
+		auto sample_rate = read_samplerate_dropdown();
+		auto overrun_retries = read_overrun_dropdown();
+		auto timeout = read_timeout_dropdown();
+		auto knobwake = read_knobwake_check();
+		auto catchupmode = read_catchup_mode_dropdown();
+		auto catchup_exclude_buttons = read_catchup_exclude_check();
+		auto fs_max_patches = read_fs_max_open_patches();
+		auto midi_feedback = read_midi_feedback_check();
+		auto apply_sr = read_patch_suggest_samplerate_check();
+		auto apply_bs = read_patch_suggest_blocksize_check();
+		auto load_initial_patch = lv_obj_has_state(fs_section.startup_patch_check, LV_STATE_CHECKED);
+		auto mp_mode = read_missing_plugins_dropdown();
 
-		auto mp_mode = page->read_missing_plugins_dropdown();
+		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 
-		if (block_size == page->audio_settings.block_size && sample_rate == page->audio_settings.sample_rate &&
-			overrun_retries == page->audio_settings.max_overrun_retries && timeout == page->screensaver.timeout_ms &&
-			knobwake == page->screensaver.knobs_can_wake && catchupmode == page->catchup.mode &&
-			catchup_exclude_buttons == page->catchup.allow_jump_outofrange &&
-			load_initial_patch == page->settings.load_initial_patch && fs_max_patches == page->fs.max_open_patches &&
-			midi_feedback == page->midi.midi_feedback && mp_mode == page->missing_plugins.autoload &&
-			apply_sr == page->settings.patch_suggested_audio.apply_samplerate &&
-			apply_bs == page->settings.patch_suggested_audio.apply_blocksize)
+		if (block_size == audio_settings.block_size && sample_rate == audio_settings.sample_rate &&
+			overrun_retries == audio_settings.max_overrun_retries && timeout == screensaver.timeout_ms &&
+			knobwake == screensaver.knobs_can_wake && catchupmode == catchup.mode &&
+			catchup_exclude_buttons == catchup.allow_jump_outofrange &&
+			load_initial_patch == settings.load_initial_patch && fs_max_patches == fs.max_open_patches &&
+			midi_feedback == midi.midi_feedback && mp_mode == missing_plugins.autoload)
+		// Note: apply_bs and apply_sr are handled below, not here
 		{
-			lv_disable(page->save_button);
-			lv_disable(page->revert_button);
+			lv_disable(save_button);
+			lv_disable(revert_button);
 		} else {
-			lv_enable(page->save_button);
-			lv_enable(page->revert_button);
+			lv_enable(save_button);
+			lv_enable(revert_button);
 		}
 
-		lv_show(page->catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
-
-		// If user flips Allow Patch to Override switch off, then change current audio settings to remove the override
-		auto &settings = page->settings;
-		auto &audio_settings = page->audio_settings;
-		auto &patch_playloader = page->patch_playloader;
+		// If user flips Allow Patch to Override switch off, then change current audio settings
 		if (!apply_sr && settings.patch_suggested_audio.apply_samplerate) {
 			// Change samplerate back to default:
 			auto [cur_sr, cur_bs, cur_mr] = patch_playloader.get_audio_settings();
@@ -538,7 +538,10 @@ private:
 			// Reload page:
 			settings.patch_suggested_audio.apply_samplerate = apply_sr;
 			settings.patch_suggested_audio.apply_blocksize = apply_bs;
-			page->update_dropdowns_from_settings();
+
+			update_dropdowns_from_settings();
+			lv_enable(save_button);
+			lv_enable(revert_button);
 		}
 		if (!apply_bs && settings.patch_suggested_audio.apply_blocksize) {
 			// Change blocksize back to default:
@@ -548,13 +551,9 @@ private:
 			// Reload page:
 			settings.patch_suggested_audio.apply_samplerate = apply_sr;
 			settings.patch_suggested_audio.apply_blocksize = apply_bs;
-			page->update_dropdowns_from_settings();
-		}
-
-		// Update missing plugin autoload if changed
-		if (mp_mode != page->missing_plugins.autoload) {
-			page->missing_plugins.autoload = mp_mode;
-			page->gui_state.do_write_settings = true;
+			update_dropdowns_from_settings();
+			lv_enable(save_button);
+			lv_enable(revert_button);
 		}
 	}
 
