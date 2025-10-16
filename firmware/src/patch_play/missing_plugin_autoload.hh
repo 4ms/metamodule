@@ -1,9 +1,7 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
-#include "delay.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
-#include "lvgl.h"
 #include "patch/patch_data.hh"
 #include <string>
 #include <vector>
@@ -32,8 +30,11 @@ struct MissingPluginAutoload {
 		for (std::string_view slug : patch->module_slugs) {
 			if (!ModuleFactory::isValidSlug(slug)) {
 
-				pr_info("Missing module: %.*s\n", slug.size(), slug.data());
-				modules.emplace_back(slug);
+				// Collect unique modules names
+				if (std::ranges::find(modules, slug) == modules.end()) {
+					pr_info("Missing module: %.*s\n", slug.size(), slug.data());
+					modules.emplace_back(slug);
+				}
 
 				if (auto colon = slug.find_first_of(':'); colon != slug.npos) {
 					auto brand = std::string(slug.substr(0, colon));
@@ -41,12 +42,15 @@ struct MissingPluginAutoload {
 					if (ModuleFactory::isValidBrand(brand)) {
 						// Brand plugin is loaded, but module is just not known.
 						// We could unload the plugin and scan for newer versions,
-						// but for now we just ignore this (users shouldn't have multiple versions present)
-						pr_info("Brand is already loaded, ignoring this\n");
-						skipped.emplace_back(slug);
+						// and/or tell the user to look for new versions.
+						// But for now we just report the module as missing
+						if (std::ranges::find(skipped, slug) == skipped.end()) {
+							skipped.emplace_back(slug);
+						}
 
 					} else {
 
+						// Collect unique brand names
 						if (std::ranges::find(brands, brand) == brands.end())
 							brands.push_back(brand);
 					}
