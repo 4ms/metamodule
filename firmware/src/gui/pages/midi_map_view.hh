@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/helpers.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
@@ -92,7 +93,7 @@ struct MidiMapViewPage : PageBase {
 			auto cont =
 				create_mapping_circle_item(ui_MidiMapLeftItems, MapButtonType::MIDIJack, map.panel_jack_id, label_text);
 			lv_obj_set_user_data(cont, (void *)((uintptr_t)i));
-			lv_obj_add_event_cb(cont, on_midi_jack_click, LV_EVENT_CLICKED, this);
+			lv_obj_add_event_cb(cont, midi_jack_map_click, LV_EVENT_CLICKED, this);
 			lv_group_add_obj(group, cont);
 			left_items.push_back(cont);
 		}
@@ -108,8 +109,10 @@ struct MidiMapViewPage : PageBase {
 
 			auto cont = create_mapping_circle_item(
 				ui_MidiMapRightItems, MapButtonType::MIDIParam, mk.panel_knob_id, label.c_str());
-			lv_obj_set_user_data(cont, (void *)((uintptr_t)i));
-			lv_obj_add_event_cb(cont, on_param_map_click, LV_EVENT_CLICKED, this);
+
+			lv_obj_set_user_data(cont, ModuleParamUserData{mk.module_id, mk.param_id});
+
+			lv_obj_add_event_cb(cont, midi_param_map_click, LV_EVENT_CLICKED, this);
 			lv_group_add_obj(group, cont);
 			right_items.push_back(cont);
 		}
@@ -130,7 +133,7 @@ struct MidiMapViewPage : PageBase {
 	}
 
 private:
-	static void on_midi_jack_click(lv_event_t *event) {
+	static void midi_jack_map_click(lv_event_t *event) {
 		if (const auto page = static_cast<MidiMapViewPage *>(event->user_data); page) {
 			const auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
 			if (idx < page->patch->mapped_ins.size() && !page->patch->mapped_ins[idx].ins.empty()) {
@@ -144,11 +147,12 @@ private:
 		}
 	}
 
-	static void on_param_map_click(lv_event_t *event) {
+	static void midi_param_map_click(lv_event_t *event) {
 		if (const auto page = static_cast<MidiMapViewPage *>(event->user_data); page) {
-			const auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
-			if (idx < page->patch->midi_maps.set.size()) {
-				page->args.mappedknob_id = static_cast<uint32_t>(idx);
+			if (const auto user_data = lv_obj_get_user_data(event->target)) {
+				auto unpacked = ModuleParamUserData::unpack(user_data);
+				page->args.mappedknob_id = unpacked.param_id;
+				page->args.module_id = unpacked.module_id;
 				page->args.view_knobset_id = PatchData::MIDIKnobSet;
 				page->page_list.request_new_page(PageId::KnobMap, page->args);
 			}

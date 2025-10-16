@@ -60,11 +60,8 @@ void Plugin::addModel(Model *model) {
 	// 	}
 	// }
 
-	ModuleInfoView info;
-	info.elements = model->elements;
-	info.description = slug;
-	info.width_hp = 1; //TODO: deprecate width_hp
-	info.indices = model->indices;
+	ModuleInfoView info{
+		.description = "", .width_hp = 1, .elements = model->elements, .indices = model->indices, .bypass_routes = {}};
 
 	ModuleFactory::registerModuleType(brand, slug, model->creation_func, info, panel_filename);
 

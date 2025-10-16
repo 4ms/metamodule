@@ -2,6 +2,7 @@
 #include "console/pr_dbg.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/pages/helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -75,10 +76,27 @@ struct ButtonExpanderMapsView {
 
 			lv_show(col, (exp_connected || has_mappings));
 
-			if (!exp_connected && has_mappings)
-				lv_obj_set_style_bg_opa(col, LV_OPA_50, LV_PART_MAIN);
-			else
-				lv_obj_set_style_bg_opa(col, LV_OPA_0, LV_PART_MAIN);
+			lv_color_t bg;
+			lv_color_t num;
+			lv_color_t label;
+			if (!exp_connected && has_mappings) {
+				bg = lv_color_hex(0x444444);
+				num = lv_color_hex(0xaaaaaa);
+				label = lv_color_hex(0x888888);
+			} else {
+				bg = Gui::get_buttonexp_color(0);
+				num = Gui::get_buttonexp_textcolor(0);
+				label = lv_color_white();
+			}
+
+			lv_foreach_child(col, [=](lv_obj_t *cont, int idx) {
+				lv_foreach_child(cont, [=](lv_obj_t *child, int idx) {
+					lv_obj_set_style_bg_color(get_button_circle(child), bg, LV_PART_MAIN);
+					lv_obj_set_style_border_color(get_button_circle(child), bg, LV_PART_MAIN);
+					lv_obj_set_style_text_color(get_button_circle_number(child), num, 0);
+					lv_obj_set_style_text_color(get_button_label(child), label, LV_PART_MAIN);
+				});
+			});
 		}
 	}
 
@@ -86,15 +104,18 @@ struct ButtonExpanderMapsView {
 		// Clear all objects from all panes except for the original ones (which are used to display an empty slot)
 		for (auto *pane : panes) {
 			if (auto num_children = lv_obj_get_child_cnt(pane)) {
-				if (num_children > 0) { // should always be true
-					auto cont = lv_obj_get_child(pane, 0);
-					lv_label_set_text(get_button_label(cont), "");
-					disable(cont);
-				} else {
-					pr_err("No children of pane %p\n", pane);
+
+				if (num_children == 0) {
+					pr_err("Error: No children of button expander knobset view pane %p\n", pane);
 				}
-				if (num_children > 1) {
-					for (auto i = 1u; i < num_children; i++) {
+
+				for (auto i = 0u; i < num_children; i++) {
+					if (i == 0) {
+						auto cont = lv_obj_get_child(pane, 0);
+						lv_label_set_text(get_button_label(cont), "");
+						lv_obj_set_user_data(cont, nullptr);
+						disable(cont);
+					} else {
 						auto cont = lv_obj_get_child(pane, i);
 						lv_obj_del_async(cont);
 					}
@@ -106,19 +127,28 @@ struct ButtonExpanderMapsView {
 			num = 0;
 	}
 
-	void update_button(unsigned idx, float value) {
+	void update_button(unsigned module_id, unsigned param_id, float value) {
 		// Find the container
-		for (auto *pane : panes) {
-			lv_foreach_child(pane, [value, idx](lv_obj_t *child, int) {
-				if (idx == reinterpret_cast<uintptr_t>(lv_obj_get_user_data(child)) - 1) {
+		for (unsigned i = 0; auto *pane : panes) {
+			bool exp_connected = (1 << (i++ / 8)) & metaparams.button_exp_connected;
+			if (!exp_connected)
+				continue;
+			lv_foreach_child(pane, [value, module_id, param_id](lv_obj_t *child, int) {
+				if (auto userdata = lv_obj_get_user_data(child)) {
+					auto [m_id, p_id] = ModuleParamUserData::unpack(userdata);
 
-					auto color = Gui::get_buttonexp_color(value);
-					lv_obj_set_style_bg_color(get_button_circle(child), color, LV_PART_MAIN);
+					if (module_id == m_id && param_id == p_id) {
 
-					auto textcolor = Gui::get_buttonexp_textcolor(value);
-					lv_obj_set_style_text_color(get_button_circle_number(child), textcolor, LV_PART_MAIN);
+						auto color = Gui::get_buttonexp_color(value);
+						lv_obj_set_style_bg_color(get_button_circle(child), color, LV_PART_MAIN);
+						lv_obj_set_style_border_color(get_button_circle(child), color, LV_PART_MAIN);
 
-					return;
+						auto textcolor = Gui::get_buttonexp_textcolor(value);
+						lv_obj_set_style_text_color(get_button_circle_number(child), textcolor, LV_PART_MAIN);
+
+						lv_obj_set_style_text_color(get_button_label(child), lv_color_white(), 0);
+						return;
+					}
 				}
 			});
 		}
@@ -146,17 +176,9 @@ private:
 
 	static void focus_cb(lv_event_t *event) {
 		lv_obj_scroll_to_y(ui_KnobSetContainer, 210, LV_ANIM_ON);
-
-		// Can we do vertical scroll?
-		// if (auto text_label = get_button_label(event->target)) {
-		// 	lv_label_set_long_mode(text_label, LV_LABEL_LONG_SCROLL);
-		// }
 	}
 
 	static void defocus_cb(lv_event_t *event) {
-		// if (auto text_label = get_button_label(event->target)) {
-		// 	lv_label_set_long_mode(text_label, LV_LABEL_LONG_WRAP);
-		// }
 	}
 
 	void enable(lv_obj_t *cont, unsigned button_id) {

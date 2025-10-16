@@ -197,7 +197,7 @@ public:
 	}
 
 	static ModuleTypeSlug extract_patch_name(std::string_view header) {
-		std::string_view name_tag{"patch_name"};
+		const std::string_view name_tag = "patch_name";
 
 		auto startpos = header.find(name_tag);
 		if (startpos == header.npos) {

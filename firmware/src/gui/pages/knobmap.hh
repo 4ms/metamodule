@@ -100,13 +100,23 @@ struct KnobMapPage : PageBase {
 			lv_hide(ui_EditMapMidiChannelCont);
 		}
 
-		//mappedknob_id is the index of the MappedKnob in the MappedKnobSet::set vector
-		auto map_idx = args.mappedknob_id;
-		if (!map_idx.has_value() || map_idx.value() >= knobset.size()) {
-			pr_err("Mapping not found for set %d, panel_knob_id %d\n", view_set_idx, map_idx);
+		auto param_id = args.mappedknob_id;
+		auto module_id = args.module_id;
+		if (!param_id.has_value() || !module_id.has_value()) {
+			pr_err("KnobMapPage: No mapped module/param in page args (set %d)\n", view_set_idx);
 			return;
 		}
-		map = knobset[map_idx.value()];
+		if (auto it = std::ranges::find_if(knobset,
+										   [mid = *module_id, pid = *param_id](MappedKnob const &m) {
+											   return (m.module_id == mid && m.param_id == pid);
+										   });
+			it != knobset.end())
+		{
+			map = *it;
+		} else {
+			pr_err("KnobMapPage: Panel knob %u not found in knob set %d\n", param_id.value(), view_set_idx);
+			return;
+		}
 
 		// Title
 		auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);

@@ -16,6 +16,7 @@ struct KeyboardEntry {
 
 	void prepare_focus(lv_obj_t *parent_obj, lv_group_t *group) {
 		parent_group = group;
+		text_field = nullptr;
 		reset_keyboard();
 		lv_obj_set_parent(ui_Keyboard, parent_obj);
 		kb_popup.init(parent_obj, parent_group);
@@ -23,7 +24,11 @@ struct KeyboardEntry {
 
 	void show_keyboard(lv_obj_t *textarea_field, FunctionSized<16, void(std::string_view)> save_callback) {
 		text_field = textarea_field;
+
 		save_cb = save_callback;
+
+		if (!text_field)
+			return;
 
 		lv_show(ui_Keyboard);
 
@@ -46,7 +51,10 @@ struct KeyboardEntry {
 	}
 
 	void back() {
-		if (kb_visible) {
+		if (kb_popup.is_visible()) {
+			kb_popup.hide();
+
+		} else if (kb_visible && text_field) {
 			if (text_value == lv_textarea_get_text(text_field)) {
 				hide();
 			} else {
@@ -62,19 +70,22 @@ struct KeyboardEntry {
 					"Do you want to keep your edits?",
 					"Keep");
 			}
-		} else if (kb_popup.is_visible()) {
-			kb_popup.hide();
 		}
 	}
 
 	void hide() {
-		lv_obj_clear_state(text_field, LV_STATE_USER_1);
-		lv_group_focus_obj(text_field);
-		lv_group_remove_obj(ui_Keyboard);
-		lv_hide(ui_Keyboard);
-		kb_visible = false;
+		if (kb_visible) {
+			if (text_field) {
+				lv_obj_clear_state(text_field, LV_STATE_USER_1);
+				lv_group_focus_obj(text_field);
+			}
+			lv_group_remove_obj(ui_Keyboard);
+			lv_hide(ui_Keyboard);
+			kb_visible = false;
+			text_field = nullptr;
 
-		lv_group_activate(parent_group);
+			lv_group_activate(parent_group);
+		}
 	}
 
 private:
@@ -89,7 +100,8 @@ private:
 	}
 
 	void save() {
-		text_value = lv_textarea_get_text(text_field);
+		if (text_field)
+			text_value = lv_textarea_get_text(text_field);
 		if (save_cb)
 			save_cb(text_value.c_str());
 	}
@@ -108,7 +120,7 @@ private:
 	lv_group_t *group = nullptr;
 	lv_group_t *parent_group = nullptr;
 
-	lv_obj_t *text_field;
+	lv_obj_t *text_field = nullptr;
 
 	bool kb_visible = false;
 	ConfirmPopup kb_popup;

@@ -102,7 +102,7 @@ lv_obj_set_style_pad_top(ui_NowPlayingName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_NowPlayingName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_LoadMeter = lv_label_create(ui_PatchSelectorTitlePanel);
-lv_obj_set_width( ui_LoadMeter, 38);
+lv_obj_set_width( ui_LoadMeter, LV_SIZE_CONTENT);
 lv_obj_set_height( ui_LoadMeter, 20);
 lv_obj_set_x( ui_LoadMeter, 0 );
 lv_obj_set_y( ui_LoadMeter, 2 );
@@ -120,11 +120,12 @@ lv_obj_set_style_text_align(ui_LoadMeter, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV
 lv_obj_set_style_text_font(ui_LoadMeter, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_LoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_LoadMeter, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_LoadMeter, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_LoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_LoadMeter, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_LoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_LoadMeter, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_LoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_recolor(ui_LoadMeter, 1);
 
 ui_DrivesPanel = lv_obj_create(ui_PatchSelectorPage);
 lv_obj_set_width( ui_DrivesPanel, 103);
