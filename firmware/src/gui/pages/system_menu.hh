@@ -19,7 +19,13 @@ struct SystemMenuPage : PageBase {
 		, info_tab{patch_storage, info.metaparams}
 		, plugin_tab{info.plugin_manager, info.settings.plugin_preload, info.notify_queue, gui_state, patch_playloader}
 		, prefs_tab{info.patch_playloader, info.settings, gui_state}
-		, system_tab{patch_storage, params, metaparams, patch_playloader, patch_mod_queue, info.settings}
+		, system_tab{patch_storage,
+					 params,
+					 metaparams,
+					 patch_playloader,
+					 patch_mod_queue,
+					 info.settings,
+					 info.notify_queue}
 		, fwupdate_tab{patch_storage, patch_playloader}
 		, tab_bar(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 

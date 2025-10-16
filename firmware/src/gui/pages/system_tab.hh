@@ -21,13 +21,15 @@ struct SystemTab : SystemMenuTab {
 			  MetaParams &metaparams,
 			  PatchPlayLoader &patch_playloader,
 			  PatchModQueue &patch_mod_queue,
-			  UserSettings &settings)
+			  UserSettings &settings,
+			  NotificationQueue &notify_queue)
 		: storage{patch_storage}
 		, patch_playloader{patch_playloader}
 		, cal_routine{params, storage, patch_mod_queue}
 		, cal_check{params}
 		, hw_check{params, metaparams}
 		, settings{settings}
+		, notify_queue{notify_queue}
 		, reload_patches_button{create_button(ui_SystemResetInternalPatchesCont, "Restore factory patches")}
 		, reboot_button{create_button(ui_SystemResetInternalPatchesCont, "Reboot")} {
 
@@ -246,8 +248,15 @@ private:
 
 		page->confirm_popup.show(
 			[page = page](unsigned res) {
-				if (res == 1 || res == 2)
-					Settings::write_settings(page->storage, page->settings, res == 1 ? Volume::USB : Volume::SDCard);
+				if (res == 1 || res == 2) {
+					if (Settings::write_settings(
+							page->storage, page->settings, res == 1 ? Volume::USB : Volume::SDCard))
+						page->notify_queue.put(
+							{"Successfully saved settings.yml file to disk", Notification::Priority::Info, 2000});
+					else
+						page->notify_queue.put(
+							{"Failed to save settings.yml file to disk", Notification::Priority::Error, 2000});
+				}
 			},
 			"Where do you want to save the settings.yml file?",
 			"USB",
@@ -266,12 +275,15 @@ private:
 					if (Settings::read_settings(page->storage, &tmp, res == 1 ? Volume::USB : Volume::SDCard)) {
 						page->settings = tmp;
 						if (Settings::write_settings(page->storage, tmp, Volume::NorFlash)) {
-							pr_info("Wrote loaded settings to flash OK\n");
+							page->notify_queue.put(
+								{"Successfully loaded file and updated settings", Notification::Priority::Info, 2000});
 						} else {
-							pr_info("Failed to write loaded settings to flash\n");
+							page->notify_queue.put(
+								{"Failed to update settings from the file", Notification::Priority::Error, 2000});
 						}
 					} else {
-						pr_info("Failed to read settings file\n");
+						page->notify_queue.put(
+							{"Failed to read settings.yml file", Notification::Priority::Error, 2000});
 					}
 				}
 			},
@@ -287,6 +299,7 @@ private:
 	CalCheck cal_check;
 	HardwareCheckPopup hw_check;
 	UserSettings &settings;
+	NotificationQueue &notify_queue;
 
 	lv_obj_t *reload_patches_button = nullptr;
 	lv_obj_t *reboot_button = nullptr;
@@ -294,5 +307,7 @@ private:
 	lv_obj_t *load_settings_button = nullptr;
 
 	lv_group_t *group = nullptr;
+
+	std::string settings_error = "";
 };
 } // namespace MetaModule
