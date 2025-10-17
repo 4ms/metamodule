@@ -429,6 +429,8 @@ private:
 			settings.patch_suggested_audio.apply_samplerate = apply_sr;
 			settings.patch_suggested_audio.apply_blocksize = apply_bs;
 			gui_state.do_write_settings = true;
+
+			update_audio_override_status();
 		}
 
 		// Missing plugin autoload mode
