@@ -405,6 +405,27 @@ private:
 		if (settings.patch_suggested_audio.apply_samplerate != apply_sr ||
 			settings.patch_suggested_audio.apply_blocksize != apply_bs)
 		{
+
+			auto [cur_sr, cur_bs, cur_mr] = patch_playloader.get_audio_settings();
+
+			// If user flipped one or both overrides off, then undo the override by applying the current settings
+			bool flipped_sr_off = !apply_sr && settings.patch_suggested_audio.apply_samplerate;
+			bool flipped_bs_off = !apply_bs && settings.patch_suggested_audio.apply_blocksize;
+
+			if (flipped_sr_off && flipped_bs_off) {
+				// Change both samplerate and blocksize back to default setting
+				patch_playloader.request_new_audio_settings(
+					audio_settings.sample_rate, audio_settings.block_size, cur_mr);
+
+			} else if (flipped_sr_off) {
+				// Change just samplerate back to default setting:
+				patch_playloader.request_new_audio_settings(audio_settings.sample_rate, cur_bs, cur_mr);
+
+			} else if (flipped_bs_off) {
+				// Change just blocksize back to default:
+				patch_playloader.request_new_audio_settings(cur_sr, audio_settings.block_size, cur_mr);
+			}
+
 			settings.patch_suggested_audio.apply_samplerate = apply_sr;
 			settings.patch_suggested_audio.apply_blocksize = apply_bs;
 			gui_state.do_write_settings = true;
@@ -526,34 +547,6 @@ private:
 			lv_disable(save_button);
 			lv_disable(revert_button);
 		} else {
-			lv_enable(save_button);
-			lv_enable(revert_button);
-		}
-
-		// If user flips Allow Patch to Override switch off, then change current audio settings
-		if (!apply_sr && settings.patch_suggested_audio.apply_samplerate) {
-			// Change samplerate back to default:
-			auto [cur_sr, cur_bs, cur_mr] = patch_playloader.get_audio_settings();
-			patch_playloader.request_new_audio_settings(audio_settings.sample_rate, cur_bs, cur_mr);
-
-			// Reload page:
-			settings.patch_suggested_audio.apply_samplerate = apply_sr;
-			settings.patch_suggested_audio.apply_blocksize = apply_bs;
-
-			update_dropdowns_from_settings();
-			lv_enable(save_button);
-			lv_enable(revert_button);
-		}
-		if (!apply_bs && settings.patch_suggested_audio.apply_blocksize) {
-			// Change blocksize back to default:
-			auto [cur_sr, cur_bs, cur_mr] = patch_playloader.get_audio_settings();
-			patch_playloader.request_new_audio_settings(cur_sr, audio_settings.block_size, cur_mr);
-
-			// Reload page:
-			settings.patch_suggested_audio.apply_samplerate = apply_sr;
-			settings.patch_suggested_audio.apply_blocksize = apply_bs;
-
-			update_dropdowns_from_settings();
 			lv_enable(save_button);
 			lv_enable(revert_button);
 		}
