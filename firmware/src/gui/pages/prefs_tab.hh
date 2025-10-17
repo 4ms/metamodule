@@ -39,8 +39,8 @@ struct PrefsTab : SystemMenuTab {
 		missingplugins_section.create(ui_SystemMenuPrefsTab);
 
 		auto btns = create_save_revert_buttons(ui_SystemMenuPrefsTab);
-		save_button = lv_obj_get_child(btns, 0);
-		revert_button = lv_obj_get_child(btns, 1);
+		save_button = lv_obj_get_child(btns, 1);
+		revert_button = lv_obj_get_child(btns, 0);
 
 		lv_hide(audio_section.sr_override_cont);
 		lv_obj_set_style_text_color(audio_section.sr_override_cont, Gui::orange_highlight, 0);
