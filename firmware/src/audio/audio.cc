@@ -146,19 +146,17 @@ void AudioStream::start() {
 
 void AudioStream::handle_overruns() {
 	if (overrun_handler.is_retrying()) {
-		Debug::Pin3::high();
+		// Debug::Pin3::high();
 		if (overrun_handler.handle()) {
 			// resume here? so that gui stays active in case step() takes a really long time
 			// codec_.resume_irq();
-			pr_dbg("ovr:step\n");
 			step();
 		} else {
-			pr_dbg("ovr:too many\n");
 			patch_loader.notify_audio_overrun();
 			// codec_.resume_irq();
 		}
 		overrun_handler.reset();
-		Debug::Pin3::low();
+		// Debug::Pin3::low();
 	}
 }
 
@@ -498,7 +496,7 @@ void AudioStream::update_audio_settings() {
 	overrun_handler.set_max_retry(max_retries);
 
 	if (sample_rate != sample_rate_ || block_size != block_size_) {
-		Debug::Pin1::high();
+		// Debug::Pin1::high();
 
 		codec_.stop();
 
@@ -534,7 +532,7 @@ void AudioStream::update_audio_settings() {
 			codec_ext_.start();
 			codec_.start();
 		}
-		Debug::Pin1::low();
+		// Debug::Pin1::low();
 	}
 }
 
