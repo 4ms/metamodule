@@ -208,7 +208,7 @@ public:
 		auto msg = info.notify_queue.get();
 		if (msg) {
 			screensaver.wake();
-			pr_info("Notify: %s\n", msg->message.c_str());
+			pr_info("Notify: %s (%u)\n", msg->message.c_str(), msg->duration_ms);
 			DisplayNotification::show(*msg);
 		}
 
