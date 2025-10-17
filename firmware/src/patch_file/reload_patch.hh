@@ -31,6 +31,11 @@ public:
 
 	Result reload_patch_file(PatchLocation const &loc, Function<void()> &&wait_func = [] {});
 
+	// Returns true if the patch file needs to be loaded or reloaded from disk.
+	// If the patch has unsaved changes then this returns false.
+	// Otherwise, it's true if the file is not already open or it has changed on disk (via wifi).
+	bool needs_reloading(PatchLocation const &loc);
+
 	bool is_not_open_or_has_changed_on_disk(PatchLocation const &loc);
 };
 } // namespace MetaModule

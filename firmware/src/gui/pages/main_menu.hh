@@ -73,13 +73,14 @@ struct MainMenuPage : PageBase {
 				load_patch_view_page();
 		}
 
-		update_load_text(metaparams, patch_playloader, settings.patch_view, ui_MainMenuLoadMeter);
+		bool is_patch_playloaded = patches.get_playing_patch() ? true : false;
+		update_audio_meter(
+			is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_MainMenuLoadMeter);
 
 		poll_patch_file_changed();
 	}
 
 	void blur() final {
-		;
 	}
 
 private:
@@ -95,7 +96,8 @@ private:
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		page->load_patch_view_page();
+		page->missing_plugins.start(
+			page->patches.get_view_patch(), page->group, [page = page] { page->load_patch_view_page(); });
 	}
 
 	static void now_playing_cb(lv_event_t *event) {
@@ -103,8 +105,10 @@ private:
 		if (!page)
 			return;
 		if (page->patches.get_playing_patch()) {
-			page->patches.view_playing_patch();
-			page->load_patch_view_page();
+			page->missing_plugins.start(page->patches.get_playing_patch(), page->group, [page = page] {
+				page->patches.view_playing_patch();
+				page->load_patch_view_page();
+			});
 		}
 	}
 

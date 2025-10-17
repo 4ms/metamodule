@@ -3,6 +3,7 @@
 #include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages//file_browser/file_browser.hh"
+#include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
 #include "params/metaparams.hh"
@@ -35,6 +36,7 @@ struct PatchContext {
 	FatFileIO &ramdisk;
 	PatchFileChangeChecker &file_change_checker;
 	FileBrowserDialog &file_browser;
+	MissingPluginScanner &missing_plugins;
 };
 
 struct PageBase {
@@ -54,6 +56,8 @@ struct PageBase {
 
 	PatchFileChangeChecker &file_change_checker;
 	PollChange file_change_poll{500};
+
+	MissingPluginScanner &missing_plugins;
 
 	PageId id;
 
@@ -79,6 +83,7 @@ struct PageBase {
 		, settings{info.settings}
 		, file_browser{info.file_browser}
 		, file_change_checker{info.file_change_checker}
+		, missing_plugins{info.missing_plugins}
 		, id{id} {
 		page_list.register_page(this, id);
 	}
@@ -135,15 +140,28 @@ struct PageBase {
 		}
 	}
 
-	// Each page calls this periodically.
-	// TODO: Try running this automatically, and have pages opt-out of it when ICC bus is busy or patch should not be reloaded?
+	// Some pages call this periodically
 	void poll_patch_file_changed() {
 
 		file_change_poll.poll(get_time(), [this] {
 			auto playing_patch = patches.get_playing_patch();
 
 			if (playing_patch) {
-				auto status = file_change_checker.check_playing_patch();
+				const auto status = file_change_checker.check_patch(patches.get_playing_patch_loc());
+
+				if (status == PatchFileChangeChecker::Status::DidReload) {
+					notify_queue.put({"New patch file detected, refreshed", Notification::Priority::Status, 800});
+
+					// patch file was reloaded from disk: start missing plugin scan procedure
+					missing_plugins.start(playing_patch, group, [this] {
+						patch_playloader.request_reload_playing_patch(false);
+
+						if (patches.get_playing_patch() == patches.get_view_patch()) {
+							gui_state.force_redraw_patch = true;
+							gui_state.view_patch_file_changed = true;
+						}
+					});
+				}
 
 				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
 					pr_err("Error: Failed to load playing patch file: '%s')\n",
@@ -153,7 +171,16 @@ struct PageBase {
 
 			auto view_patch = patches.get_view_patch();
 			if (view_patch && view_patch != playing_patch) {
-				auto status = file_change_checker.check_view_patch();
+				const auto status = file_change_checker.check_patch(patches.get_view_patch_loc());
+
+				if (status == PatchFileChangeChecker::Status::DidReload) {
+					notify_queue.put({"New patch file detected, refreshed", Notification::Priority::Status, 800});
+
+					missing_plugins.start(view_patch, group, [this] {
+						gui_state.force_redraw_patch = true;
+						gui_state.view_patch_file_changed = true;
+					});
+				}
 
 				if (status == PatchFileChangeChecker::Status::FailLoadFile) {
 					pr_err("Error: File failed to auto reload\n");

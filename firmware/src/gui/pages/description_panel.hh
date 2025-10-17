@@ -15,30 +15,39 @@ namespace MetaModule
 
 struct PatchDescriptionPanel {
 
-	PatchDescriptionPanel(PatchPlayLoader &patch_playloader, OpenPatchManager &patches)
+	PatchDescriptionPanel(PatchPlayLoader &patch_playloader,
+						  OpenPatchManager &patches,
+						  PatchSuggestedAudioSettings &settings)
 		: group(lv_group_create())
 		, patch_playloader{patch_playloader}
-		, patches{patches} {
+		, patches{patches}
+		, settings{settings} {
 
 		// Description
 		auto desc_cont = lv_obj_get_parent(ui_Description);
 		lv_obj_add_style(desc_cont, &Gui::focus_style, LV_STATE_FOCUSED);
 		lv_obj_add_style(desc_cont, &Gui::focus_style, LV_STATE_FOCUS_KEY);
+
 		lv_obj_add_event_cb(desc_cont, editbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(desc_cont, scroll_top, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(ui_DescriptionClose, closebut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_DescriptionEditTextArea, textarea_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_DescriptionEditSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_DescriptionEditCancelButton, cancel_cb, LV_EVENT_CLICKED, this);
 
 		// Patch suggested audio settings
 		create_suggested_audio_controls();
-		lv_obj_move_to_index(ui_DescSuggestSRCont, lv_obj_get_index(desc_cont) + 1);
-		lv_obj_move_to_index(ui_DescSuggestBSCont, lv_obj_get_index(desc_cont) + 2);
-		lv_obj_add_event_cb(ui_DescSuggestSRDrop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_DescSuggestBSDrop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_move_to_index(suggest_sr_cont, lv_obj_get_index(desc_cont) + 1);
+		lv_obj_move_to_index(suggest_bs_cont, lv_obj_get_index(desc_cont) + 2);
+		lv_obj_add_event_cb(suggest_sr_drop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(suggest_bs_drop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(apply_settings_button, apply_settings_cb, LV_EVENT_CLICKED, this);
+		lv_obj_move_to_index(suggest_bs_cont, lv_obj_get_index(desc_cont) + 3);
 
-		lv_hide(ui_DescriptionEditButton);
+		lv_obj_set_style_pad_row(ui_DescriptionPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_column(ui_DescriptionPanel, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+		lv_obj_add_event_cb(close_button, closebut_cb, LV_EVENT_CLICKED, this);
+
 		lv_hide(ui_DescriptionEditPanel);
 		lv_hide(ui_PatchNameEditTextArea);
 
@@ -46,12 +55,13 @@ struct PatchDescriptionPanel {
 		lv_group_set_wrap(group, false);
 		lv_group_set_editing(group, false);
 		lv_group_add_obj(group, desc_cont);
-		lv_group_add_obj(group, ui_DescSuggestSRDrop);
-		lv_group_add_obj(group, ui_DescSuggestBSDrop);
+		lv_group_add_obj(group, suggest_sr_drop);
+		lv_group_add_obj(group, suggest_bs_drop);
 		lv_group_add_obj(group, ui_DescriptionEditTextArea);
 		lv_group_add_obj(group, ui_DescriptionEditSaveButton);
 		lv_group_add_obj(group, ui_DescriptionEditCancelButton);
-		lv_group_add_obj(group, ui_DescriptionClose);
+		lv_group_add_obj(group, close_button);
+		lv_group_add_obj(group, apply_settings_button);
 	}
 
 	void prepare_focus(lv_group_t *base_group) {
@@ -71,6 +81,22 @@ struct PatchDescriptionPanel {
 		return is_showing;
 	}
 
+	void update() {
+		bool show_manual_apply = false;
+
+		if (patch && patches.get_playing_patch() == patches.get_view_patch()) {
+			auto current = patch_playloader.get_audio_settings();
+
+			if ((!settings.apply_samplerate && patch->suggested_samplerate != current.sample_rate) ||
+				(!settings.apply_blocksize && patch->suggested_blocksize != current.block_size))
+			{
+				show_manual_apply = true;
+			}
+		}
+
+		lv_show(apply_settings_button, show_manual_apply);
+	}
+
 	bool did_update_names() {
 		bool temp = did_save;
 		did_save = false;
@@ -78,12 +104,12 @@ struct PatchDescriptionPanel {
 	}
 
 	void back_event() {
-		if (lv_dropdown_is_open(ui_DescSuggestSRDrop)) {
-			lv_dropdown_close(ui_DescSuggestSRDrop);
+		if (lv_dropdown_is_open(suggest_sr_drop)) {
+			lv_dropdown_close(suggest_sr_drop);
 			lv_group_set_editing(group, false);
 
-		} else if (lv_dropdown_is_open(ui_DescSuggestBSDrop)) {
-			lv_dropdown_close(ui_DescSuggestBSDrop);
+		} else if (lv_dropdown_is_open(suggest_bs_drop)) {
+			lv_dropdown_close(suggest_bs_drop);
 			lv_group_set_editing(group, false);
 
 		} else if (kb_visible) {
@@ -105,7 +131,8 @@ struct PatchDescriptionPanel {
 		lv_obj_move_background(ui_DescPanelPatchName);
 
 		lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		lv_group_focus_obj(ui_DescriptionClose);
+		lv_group_focus_obj(close_button);
+		lv_obj_scroll_to_view_recursive(close_button, LV_ANIM_OFF);
 		lv_group_set_editing(group, false);
 		is_showing = true;
 		edit_panel_visible = false;
@@ -126,6 +153,8 @@ struct PatchDescriptionPanel {
 
 		set_suggested_audio_dropdowns();
 
+		lv_hide(apply_settings_button);
+
 		set_content_max_height(ui_DescriptionPanel, 230);
 	}
 
@@ -142,28 +171,32 @@ struct PatchDescriptionPanel {
 
 private:
 	void create_suggested_audio_controls() {
-		ui_DescSuggestSRCont = create_labeled_dropdown(ui_DescriptionPanel);
-		ui_DescSuggestSRLabel = lv_obj_get_child(ui_DescSuggestSRCont, 0);
-		ui_DescSuggestSRDrop = lv_obj_get_child(ui_DescSuggestSRCont, 1);
+		suggest_sr_cont = create_labeled_dropdown(ui_DescriptionPanel);
+		suggest_sr_label = lv_obj_get_child(suggest_sr_cont, 0);
+		suggest_sr_drop = lv_obj_get_child(suggest_sr_cont, 1);
+		lv_obj_set_style_pad_ver(suggest_sr_cont, 4, LV_STATE_DEFAULT);
 
-		ui_DescSuggestBSCont = create_labeled_dropdown(ui_DescriptionPanel);
-		ui_DescSuggestBSLabel = lv_obj_get_child(ui_DescSuggestBSCont, 0);
-		ui_DescSuggestBSDrop = lv_obj_get_child(ui_DescSuggestBSCont, 1);
-		lv_obj_set_style_pad_ver(ui_DescSuggestSRCont, 4, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(ui_DescSuggestBSCont, 4, LV_STATE_DEFAULT);
+		suggest_bs_cont = create_labeled_dropdown(ui_DescriptionPanel);
+		suggest_bs_label = lv_obj_get_child(suggest_bs_cont, 0);
+		suggest_bs_drop = lv_obj_get_child(suggest_bs_cont, 1);
+		lv_obj_set_style_pad_ver(suggest_bs_cont, 4, LV_STATE_DEFAULT);
 
-		lv_label_set_text(ui_DescSuggestSRLabel, "Patch Sample Rate:");
-		lv_label_set_text(ui_DescSuggestBSLabel, "Patch Block Size:");
-		lv_obj_set_style_text_font(ui_DescSuggestSRLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(ui_DescSuggestBSLabel, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+		lv_label_set_text(suggest_sr_label, "Patch Sample Rate:");
+		lv_label_set_text(suggest_bs_label, "Patch Block Size:");
+		lv_obj_set_style_text_font(suggest_sr_label, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(suggest_bs_label, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
 
-		lv_obj_set_style_pad_left(ui_DescSuggestSRDrop, 10, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(ui_DescSuggestSRDrop, 6, LV_STATE_DEFAULT);
-		lv_obj_set_width(ui_DescSuggestSRDrop, 90);
+		lv_obj_set_style_pad_left(suggest_sr_drop, 10, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(suggest_sr_drop, 6, LV_STATE_DEFAULT);
+		lv_obj_set_width(suggest_sr_drop, 90);
 
-		lv_obj_set_style_pad_left(ui_DescSuggestBSDrop, 10, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(ui_DescSuggestBSDrop, 6, LV_STATE_DEFAULT);
-		lv_obj_set_width(ui_DescSuggestBSDrop, 90);
+		lv_obj_set_style_pad_left(suggest_bs_drop, 10, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(suggest_bs_drop, 6, LV_STATE_DEFAULT);
+		lv_obj_set_width(suggest_bs_drop, 90);
+
+		close_button = create_button(ui_DescriptionPanel, "Close");
+
+		apply_settings_button = create_button(ui_DescriptionPanel, "Apply Settings");
 	}
 
 	void set_suggested_audio_dropdowns() {
@@ -173,7 +206,7 @@ private:
 			opts += std::to_string(item / 1000) + "kHz\n";
 		}
 		opts.pop_back();
-		lv_dropdown_set_options(ui_DescSuggestSRDrop, opts.c_str());
+		lv_dropdown_set_options(suggest_sr_drop, opts.c_str());
 		size_t sel = 0;
 		if (patch && patch->suggested_samplerate) {
 			for (size_t i = 0; i < AudioSettings::ValidSampleRates.size(); i++) {
@@ -183,7 +216,7 @@ private:
 				}
 			}
 		}
-		lv_dropdown_set_selected(ui_DescSuggestSRDrop, sel);
+		lv_dropdown_set_selected(suggest_sr_drop, sel);
 
 		// Blocksize dropdown
 		opts = "Any\n";
@@ -191,7 +224,7 @@ private:
 			opts += std::to_string(item) + "\n";
 		}
 		opts.pop_back();
-		lv_dropdown_set_options(ui_DescSuggestBSDrop, opts.c_str());
+		lv_dropdown_set_options(suggest_bs_drop, opts.c_str());
 		sel = 0;
 		if (patch && patch->suggested_blocksize) {
 			for (size_t i = 0; i < AudioSettings::ValidBlockSizes.size(); i++) {
@@ -201,7 +234,7 @@ private:
 				}
 			}
 		}
-		lv_dropdown_set_selected(ui_DescSuggestBSDrop, sel);
+		lv_dropdown_set_selected(suggest_bs_drop, sel);
 	}
 
 	static void suggested_audio_changed_cb(lv_event_t *event) {
@@ -210,35 +243,60 @@ private:
 		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
 
 		auto current = page->patch_playloader.get_audio_settings();
+		auto new_sr = current.sample_rate;
+		auto new_bs = current.block_size;
 
-		if (event->target == page->ui_DescSuggestSRDrop) {
-			int sel = lv_dropdown_get_selected(page->ui_DescSuggestSRDrop);
-			uint32_t new_sr = sel > 0 ? AudioSettings::ValidSampleRates[sel - 1] : 0;
+		if (event->target == page->suggest_sr_drop) {
+			int sel = lv_dropdown_get_selected(page->suggest_sr_drop);
+			// Update patch settings. index 0 is "Any"
+			new_sr = sel > 0 ? AudioSettings::ValidSampleRates[sel - 1] : 0;
 			if (page->patch->suggested_samplerate != new_sr) {
-				page->patches.mark_view_patch_modified();
 				page->patch->suggested_samplerate = new_sr;
-			}
-
-			if (new_sr && new_sr != current.sample_rate) {
-				if (page->patches.get_playing_patch() == page->patches.get_view_patch())
-					page->patch_playloader.request_new_audio_settings(
-						new_sr, current.block_size, current.max_overrun_retries);
-			}
-
-		} else if (event->target == page->ui_DescSuggestBSDrop) {
-			int sel = lv_dropdown_get_selected(page->ui_DescSuggestBSDrop);
-			uint32_t new_bs = sel > 0 ? AudioSettings::ValidBlockSizes[sel - 1] : 0;
-			if (page->patch->suggested_blocksize != new_bs) {
 				page->patches.mark_view_patch_modified();
-				page->patch->suggested_blocksize = new_bs;
 			}
 
-			if (new_bs && new_bs != current.block_size) {
-				if (page->patches.get_playing_patch() == page->patches.get_view_patch())
-					page->patch_playloader.request_new_audio_settings(
-						current.sample_rate, new_bs, current.max_overrun_retries);
+		} else if (event->target == page->suggest_bs_drop) {
+			int sel = lv_dropdown_get_selected(page->suggest_bs_drop);
+			// Update patch settings. index 0 is "Any"
+			new_bs = sel > 0 ? AudioSettings::ValidBlockSizes[sel - 1] : 0;
+			if (page->patch->suggested_blocksize != new_bs) {
+				page->patch->suggested_blocksize = new_bs;
+				page->patches.mark_view_patch_modified();
 			}
 		}
+
+		if (page->patches.get_playing_patch() != page->patches.get_view_patch())
+			return;
+
+		// If prefs allow patch to override audio sr/bs, and it changed to something other than "Any", then update it
+		if ((page->settings.apply_samplerate && new_sr && new_sr != current.sample_rate) ||
+			(page->settings.apply_blocksize && new_bs && new_bs != current.block_size))
+		{
+			page->patch_playloader.request_new_audio_settings(new_sr, new_bs, current.max_overrun_retries);
+		}
+	}
+
+	static void apply_settings_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+
+		if (page->patches.get_playing_patch() != page->patches.get_view_patch())
+			return;
+
+		// Update the current samplerate/blocksize to whatever the patch overrides are set to.
+		// If the override is "Any" then don't change that setting.
+		// Ignore the user preference for "allow overrides" since this is a manual override
+
+		auto current = page->patch_playloader.get_audio_settings();
+
+		auto sr_sel = lv_dropdown_get_selected(page->suggest_sr_drop);
+		auto sr = sr_sel > 0 ? AudioSettings::ValidSampleRates[sr_sel - 1] : current.sample_rate;
+
+		auto bs_sel = lv_dropdown_get_selected(page->suggest_bs_drop);
+		auto bs = bs_sel > 0 ? AudioSettings::ValidBlockSizes[bs_sel - 1] : current.block_size;
+
+		page->patch_playloader.request_new_audio_settings(sr, bs, current.max_overrun_retries);
 	}
 
 	static void closebut_cb(lv_event_t *event) {
@@ -360,16 +418,20 @@ private:
 	bool kb_visible = false;
 	bool did_save = false;
 
-	lv_obj_t *ui_DescSuggestSRCont = nullptr;
-	lv_obj_t *ui_DescSuggestSRLabel = nullptr;
-	lv_obj_t *ui_DescSuggestSRDrop = nullptr;
+	lv_obj_t *suggest_sr_cont = nullptr;
+	lv_obj_t *suggest_sr_label = nullptr;
+	lv_obj_t *suggest_sr_drop = nullptr;
 
-	lv_obj_t *ui_DescSuggestBSCont = nullptr;
-	lv_obj_t *ui_DescSuggestBSLabel = nullptr;
-	lv_obj_t *ui_DescSuggestBSDrop = nullptr;
+	lv_obj_t *suggest_bs_cont = nullptr;
+	lv_obj_t *suggest_bs_label = nullptr;
+	lv_obj_t *suggest_bs_drop = nullptr;
+
+	lv_obj_t *apply_settings_button = nullptr;
+	lv_obj_t *close_button = nullptr;
 
 	PatchPlayLoader &patch_playloader;
 	OpenPatchManager &patches;
+	PatchSuggestedAudioSettings &settings;
 };
 
 } // namespace MetaModule

@@ -5,11 +5,11 @@ TEST_CASE("Versions") {
 	MetaModule::PluginManager plugins;
 
 	// User requested to auto load these plugins:
-	MetaModule::PluginPreloadSettings settings;
-	settings.slug.push_back("b1");
-	settings.slug.push_back("b2");
-	settings.slug.push_back("b3");
-	settings.slug.push_back("z9");
+	std::vector<std::string> slugs;
+	slugs.push_back("b1");
+	slugs.push_back("b2");
+	slugs.push_back("b3");
+	slugs.push_back("z9");
 
 	// Found these file names on disk (filename is `plugin_name`-v`version.mmplugin`)
 	MetaModule::PluginFileList plugin_list;
@@ -27,7 +27,7 @@ TEST_CASE("Versions") {
 
 	plugins.fake_plugin_list = &plugin_list;
 
-	MetaModule::PreLoader autoloader{plugins, settings};
+	MetaModule::PreLoader autoloader{plugins, slugs};
 
 	// Load the plugin list (first process())
 	CHECK(plugins.spy_loaded.size() == 0);

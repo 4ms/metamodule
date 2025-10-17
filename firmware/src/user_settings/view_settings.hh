@@ -25,9 +25,15 @@ struct ModuleDisplaySettings {
 	unsigned view_height_px = 180;
 	bool changed = true; //???unused but keep for backward compat
 	bool show_graphic_screens = true;
+
+	// Status bar:
 	bool show_samplerate = true;
 	bool float_loadmeter = false;
 	bool show_knobset_name = false;
+
+	// Show aliases on element roller:
+	bool show_jack_aliases = false;
+	bool show_knob_aliases = false;
 
 	constexpr static std::array<unsigned, 6> ThrottleAmounts = {32, 16, 8, 4, 2, 1};
 	unsigned graphic_screen_throttle = 1;

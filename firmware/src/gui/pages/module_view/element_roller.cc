@@ -17,10 +17,21 @@ void ModuleViewPage::show_roller() {
 	args.detail_mode = false;
 }
 
+void ModuleViewPage::populate_element_objects() {
+	size_t num_elements = moduleinfo.elements.size();
+	element_highlights.reserve(num_elements);
+
+	for (auto drawn_element : drawn_elements) {
+		auto &gui_el = drawn_element.gui_element;
+		watch_element(drawn_element);
+		add_element_highlight(gui_el.obj);
+	}
+}
+
 void ModuleViewPage::populate_roller() {
 	size_t num_elements = moduleinfo.elements.size();
+	opts = "";
 	opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
-	element_highlights.reserve(num_elements);
 
 	// Populate Roller and element highlights
 	unsigned roller_idx = 0;
@@ -29,10 +40,6 @@ void ModuleViewPage::populate_roller() {
 
 	for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 		auto &gui_el = drawn_element.gui_element;
-
-		watch_element(drawn_element);
-
-		add_element_highlight(gui_el.obj);
 
 		auto base = base_element(drawn_element.element);
 
@@ -64,6 +71,13 @@ void ModuleViewPage::populate_roller() {
 		if (gui_el.midi_mapped_id && gui_el.midi_mapped_id != gui_el.mapped_panel_id) {
 			opts.append("/");
 			append_panel_name(opts, drawn_element.element, gui_el.midi_mapped_id.value());
+		}
+
+		if (settings.module_view.show_jack_aliases) {
+			append_jack_alias(opts, drawn_element.gui_element, patch);
+		}
+		if (settings.module_view.show_knob_aliases) {
+			append_param_alias(opts, drawn_element.gui_element, patch, active_knobset);
 		}
 
 		append_connected_jack_name(opts, gui_el.idx, gui_el.module_idx, *patch);

@@ -1,33 +1,31 @@
 #include "settings_file.hh"
 #include "delay.hh"
-#include "drivers/cache.hh"
 #include "fs/general_io.hh"
 #include "memory/ram_buffer.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "settings_parse.hh"
 #include "settings_serialize.hh"
-#include "util/monotonic_allocator.hh"
 
 namespace MetaModule::Settings
 {
 
-bool write_settings(FileStorageProxy &proxy, UserSettings const &settings) {
+bool write_settings(FileStorageProxy &proxy, UserSettings const &settings, Volume vol) {
 	std::array<char, 2048> buffer{};
 
 	auto sz = serialize(settings, buffer);
 
 	auto yaml_clean = std::span<char>{buffer.data(), sz};
 
-	return FS::write_file(proxy, yaml_clean, {.filename = "settings.yml", .vol = Volume::NorFlash});
+	return FS::write_file(proxy, yaml_clean, {.filename = "settings.yml", .vol = vol});
 }
 
-bool read_settings(FileStorageProxy &proxy, UserSettings *settings) {
+bool read_settings(FileStorageProxy &proxy, UserSettings *settings, Volume vol) {
 
 	auto rawmem = get_ram_buffer();
 	auto buffer = std::span{(char *)rawmem.data(), 2048};
 
 	uint32_t timeout = get_time();
-	while (!proxy.request_load_file("settings.yml", Volume::NorFlash, buffer)) {
+	while (!proxy.request_load_file("settings.yml", vol, buffer)) {
 		if (get_time() - timeout > 1000) {
 			pr_err("Settings file read request not made in 1 second\n");
 			return false;
@@ -39,7 +37,8 @@ bool read_settings(FileStorageProxy &proxy, UserSettings *settings) {
 		auto msg = proxy.get_message();
 
 		if (msg.message_type == FileStorageProxy::LoadFileOK) {
-			pr_dbg("Settings file loaded, %zu bytes, beginning parsing\n", msg.bytes_read);
+			pr_dbg(
+				"Settings file loaded in %ums, %zu bytes, beginning parsing\n", get_time() - timeout, msg.bytes_read);
 
 			auto yaml = std::span<char>{buffer.data(), msg.bytes_read};
 
@@ -52,8 +51,8 @@ bool read_settings(FileStorageProxy &proxy, UserSettings *settings) {
 			return false;
 		}
 
-		if (get_time() - timeout > 1000) {
-			pr_err("Settings file read request not responded to in 1 second\n");
+		if (get_time() - timeout > 3000) {
+			pr_err("Settings file read request not responded to in 3 seconds\n");
 			return false;
 		}
 	}
