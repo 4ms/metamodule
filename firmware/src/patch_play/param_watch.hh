@@ -41,8 +41,9 @@ struct WatchedParam {
 struct ParamWatcher {
 	static constexpr size_t MaxParamsToWatch = 257; // 128 cc + 128 notegate + 1 pitchwheel
 
-	std::span<WatchedParam> active_watched_params() {
-		return std::span<WatchedParam>{&watched_params[lowest_active_idx], &watched_params[highest_active_idx + 1]};
+	std::span<const WatchedParam> active_watched_params() const {
+		return std::span<const WatchedParam>{&watched_params[lowest_active_idx],
+											 &watched_params[highest_active_idx + 1]};
 	}
 
 	void start_watching_param(const MappedKnob &mapped_knob) {
