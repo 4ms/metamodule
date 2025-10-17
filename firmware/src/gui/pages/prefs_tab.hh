@@ -519,8 +519,9 @@ private:
 			knobwake == screensaver.knobs_can_wake && catchupmode == catchup.mode &&
 			catchup_exclude_buttons == catchup.allow_jump_outofrange &&
 			load_initial_patch == settings.load_initial_patch && fs_max_patches == fs.max_open_patches &&
-			midi_feedback == midi.midi_feedback && mp_mode == missing_plugins.autoload)
-		// Note: apply_bs and apply_sr are handled below, not here
+			midi_feedback == midi.midi_feedback && mp_mode == missing_plugins.autoload &&
+			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
+			apply_bs == settings.patch_suggested_audio.apply_blocksize)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
@@ -551,6 +552,7 @@ private:
 			// Reload page:
 			settings.patch_suggested_audio.apply_samplerate = apply_sr;
 			settings.patch_suggested_audio.apply_blocksize = apply_bs;
+
 			update_dropdowns_from_settings();
 			lv_enable(save_button);
 			lv_enable(revert_button);
