@@ -42,8 +42,8 @@ public:
 			pr_err("Can't communicate with FUSB302\n");
 
 		// tm = HAL_GetTick();
-		pr_dbg("Starting DRP polling\n");
-		usbctl.start_drp_polling();
+		pr_dbg("Starting Host polling\n");
+		usbctl.start_host_polling();
 	}
 
 	void handle_fusb_int() {
