@@ -110,23 +110,12 @@ int main() {
 
 	StaticBuffers::sync_params.clear();
 
-	Debug::Pin0::high();
-	Debug::Pin0::low();
-	Debug::Pin1::high();
-	Debug::Pin1::low();
-	Debug::Pin2::high();
-	Debug::Pin2::low();
-	Debug::Pin3::high();
-	Debug::Pin3::low();
-
 	audio.start();
 
 	while (true) {
 		__NOP();
 
 		audio.handle_overruns();
-
-		// audio.update_audio_settings();
 
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");

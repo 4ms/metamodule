@@ -77,7 +77,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		Debug::Pin0::high();
+		// Debug::Pin0::high();
 
 		load_measure.start_simple_measurement();
 		{
@@ -117,15 +117,12 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 
 		if (duty > 0.985f) {
-			Debug::Pin2::high();
-			// codec_.pause_irq();
 			overrun_handler.start_retrying();
 			param_blocks[block].metaparams.audio_overruns = 10;
-			Debug::Pin2::low();
 		} else
 			param_blocks[block].metaparams.audio_overruns = 0;
 
-		Debug::Pin0::low();
+		// Debug::Pin0::low();
 		update_audio_settings();
 	};
 
