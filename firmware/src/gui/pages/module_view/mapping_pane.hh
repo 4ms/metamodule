@@ -711,12 +711,14 @@ private:
 
 			auto [set_id, param_id] = ModuleParamUserData::unpack(user_data);
 
+			uint32_t knobset_id = set_id == 0xFFFF ? PatchData::MIDIKnobSet : set_id;
+
 			page->page_list.update_state(PageId::ModuleView, page->args);
 			page->page_list.request_new_page(PageId::KnobMap,
 											 {.patch_loc_hash = page->args.patch_loc_hash,
 											  .module_id = page->this_module_id,
 											  .mappedknob_id = param_id,
-											  .view_knobset_id = set_id});
+											  .view_knobset_id = knobset_id});
 		}
 	}
 
