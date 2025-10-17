@@ -45,7 +45,7 @@ struct SlsComponentInit {
 		lv_obj_set_parent(ui_MessagePanel, lv_layer_top());
 		lv_obj_set_y(ui_MessagePanel, -80);
 
-		lv_obj_set_parent(ui_OverloadMsgLabel, lv_layer_top());
+		lv_obj_set_parent(ui_OverloadMsgLabel, lv_layer_sys());
 		lv_hide(ui_OverloadMsgLabel);
 	}
 

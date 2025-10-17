@@ -497,6 +497,7 @@ private:
 
 		if (settings.patch_view.float_loadmeter) {
 			lv_obj_set_parent(ui_LoadMeter2, lv_layer_sys());
+			lv_obj_move_foreground(ui_OverloadMsgLabel);
 			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, 0);
 		} else {
 			lv_obj_set_parent(ui_LoadMeter2, ui_PatchViewPage);
