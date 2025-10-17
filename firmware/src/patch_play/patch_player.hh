@@ -117,7 +117,7 @@ public:
 		}
 	}
 
-	ParamWatcher &watched_params() {
+	ParamWatcher const &watched_params() {
 		return param_watcher;
 	}
 
@@ -329,10 +329,6 @@ public:
 
 	void sync() {
 		smp.join();
-	}
-
-	void notify_audio_resumed() {
-		smp.refresh_patch_gui_elements();
 	}
 
 	void unload_patch() {

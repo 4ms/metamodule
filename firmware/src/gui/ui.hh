@@ -6,6 +6,7 @@
 #include "gui/button_exp_nav.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
+#include "midi/midi_sync.hh"
 #include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
@@ -154,10 +155,6 @@ public:
 		notify_queue.put({message, Notification::Priority::Error, 2000});
 	}
 
-	bool midi_feedback_enabled() const {
-		return settings.midi.midi_feedback == MidiSettings::MidiFeedback::Enabled;
-	}
-
 	UserSettings &get_settings() {
 		return settings;
 	}
@@ -190,6 +187,34 @@ private:
 
 		} else if (load_status.error_string.size()) {
 			notify_queue.put({load_status.error_string, Notification::Priority::Info, 3000});
+		}
+	}
+
+	MidiSync midi_sync;
+
+	void handle_midi_feedback() {
+		if (settings.midi.midi_feedback == MidiSettings::MidiFeedback::Enabled) {
+
+			if (patch_playloader.should_clear_param_watches()) {
+				midi_sync.clear_last_values();
+			}
+
+			for (auto const &p : patch_playloader.watched_params().active_watched_params()) {
+				if (p.is_active()) {
+					auto value = patch_playloader.param_value(p.module_id, p.param_id);
+					auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
+
+					if (map.is_midi_cc()) {
+						midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
+
+					} else if (map.is_midi_notegate()) {
+						midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
+
+					} else if (p.panel_knob_id == MidiPitchWheelJack) {
+						midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
+					}
+				}
+			}
 		}
 	}
 
