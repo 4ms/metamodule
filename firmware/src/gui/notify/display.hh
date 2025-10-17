@@ -34,20 +34,22 @@ struct DisplayNotification {
 		}
 	}
 
-	static inline ui_anim_user_data_t user_data{};
+	static void slide_down_up_animation(lv_obj_t *obj, int hold_time) {
+		ui_anim_user_data_t *user_data = (ui_anim_user_data_t *)lv_mem_alloc(sizeof(ui_anim_user_data_t));
+		user_data->target = obj;
+		user_data->val = -1;
+		lv_obj_refr_size(obj);
+		int startpos = lv_obj_get_height(obj) * 2 + 10;
 
-	static void slide_down_up_animation(lv_obj_t *TargetObject, int hold_time) {
-		user_data.target = TargetObject;
-		user_data.val = -1;
 		lv_anim_t anim;
 		lv_anim_init(&anim);
 		lv_anim_set_time(&anim, 400);
-		lv_anim_set_user_data(&anim, &user_data);
+		lv_anim_set_user_data(&anim, user_data);
 		lv_anim_set_custom_exec_cb(&anim, _ui_anim_callback_set_y);
-		lv_anim_set_values(&anim, -240, 0);
+		lv_anim_set_values(&anim, -1 * startpos, 0);
 		lv_anim_set_path_cb(&anim, lv_anim_path_ease_in_out);
 		lv_anim_set_delay(&anim, 0);
-		// lv_anim_set_deleted_cb(&anim, _ui_anim_callback_free_user_data);
+		lv_anim_set_deleted_cb(&anim, _ui_anim_callback_free_user_data);
 		lv_anim_set_playback_time(&anim, 400);
 		lv_anim_set_playback_delay(&anim, hold_time + 400);
 		lv_anim_set_repeat_count(&anim, 0);
