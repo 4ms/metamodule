@@ -205,11 +205,12 @@ public:
 	}
 
 	void handle_notifications() {
-		auto msg = info.notify_queue.get();
-		if (msg) {
-			screensaver.wake();
-			pr_info("Notify: %s (%u)\n", msg->message.c_str(), msg->duration_ms);
-			DisplayNotification::show(*msg);
+		if (lv_obj_get_y(ui_MessagePanel) < -30) {
+			if (auto msg = info.notify_queue.get()) {
+				screensaver.wake();
+				pr_info("Notify: %s (%u)\n", msg->message.c_str(), msg->duration_ms);
+				DisplayNotification::show(*msg);
+			}
 		}
 
 		// Handle audio overload flashing red
@@ -220,7 +221,7 @@ public:
 			std::string msg =
 				"Knob " + std::string(PanelDef::get_map_param_name(*panel_knob_id)) +
 				" cannot reach the mapped parameter's value. Adjust the Min/Max or your Knob Catchup preferences.";
-			DisplayNotification::show({msg, Notification::Priority::Info, 3000});
+			info.notify_queue.put({msg, Notification::Priority::Info, 3000});
 		}
 	}
 
