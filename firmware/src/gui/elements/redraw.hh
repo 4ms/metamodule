@@ -181,8 +181,14 @@ inline bool redraw_param(DrawnElement &drawn_el, float value) {
 	bool was_redrawn = false;
 
 	if (drawn_el.gui_element.count.num_params > 0) {
-		was_redrawn =
-			std::visit([&](auto &el) { return redraw_element(el, drawn_el.gui_element, value); }, drawn_el.element);
+		was_redrawn = std::visit(
+			[&](auto &el) {
+				if (drawn_el.gui_element.obj)
+					return redraw_element(el, drawn_el.gui_element, value);
+				else
+					return false;
+			},
+			drawn_el.element);
 	}
 	return was_redrawn;
 }
