@@ -75,7 +75,7 @@ public:
 	void prepare_focus(lv_group_t *parent_group, unsigned module_idx) {
 		this->module_idx = module_idx;
 		base_group = parent_group;
-		confirm_popup.init(lv_layer_top(), base_group);
+		confirm_popup.init(lv_layer_top(), group);
 
 		const auto module_slug = std::string{patches.get_view_patch()->module_slugs[module_idx]};
 		const auto module_name = module_slug.substr(module_slug.find_first_of(':') + 1);
