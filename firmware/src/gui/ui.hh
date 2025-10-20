@@ -174,6 +174,8 @@ private:
 
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
+		handle_midi_feedback();
+
 		// Experimental?
 		// button_expander_nav(metaparams);
 
@@ -200,19 +202,22 @@ private:
 			}
 
 			for (auto const &p : patch_playloader.watched_params().active_watched_params()) {
-				if (p.is_active()) {
-					auto value = patch_playloader.param_value(p.module_id, p.param_id);
-					auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
+				if (!p.is_active())
+					continue;
 
-					if (map.is_midi_cc()) {
+				auto value = patch_playloader.param_value(p.module_id, p.param_id);
+				auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
+
+				if (map.is_midi_cc()) {
+					// Don't send MIDI feedback for CCs that sent an updated value since the last UI update
+					if (!params.midi_ccs[map.cc_num()].changed)
 						midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
 
-					} else if (map.is_midi_notegate()) {
-						midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
+				} else if (map.is_midi_notegate()) {
+					midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
 
-					} else if (p.panel_knob_id == MidiPitchWheelJack) {
-						midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
-					}
+				} else if (p.panel_knob_id == MidiPitchWheelJack) {
+					midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
 				}
 			}
 		}
