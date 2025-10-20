@@ -11,7 +11,6 @@ namespace MetaModule
 struct WatchedParam {
 	uint16_t module_id{};
 	uint16_t param_id{};
-	float value;
 	std::atomic<bool> active{false};
 
 	// MIDI mapping info
