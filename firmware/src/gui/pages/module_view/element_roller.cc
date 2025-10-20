@@ -5,16 +5,19 @@ namespace MetaModule
 {
 
 void ModuleViewPage::show_roller() {
-	metaparams.rotary_pushed.use_motion();
-	module_context_menu.hide();
-	mode = ViewMode::List;
-	mapping_pane.hide();
-	lv_show(ui_ElementRoller);
-	lv_show(ui_ElementRollerPanel);
-	lv_group_focus_obj(ui_ElementRoller);
-	lv_group_set_editing(group, true);
-	lv_group_set_wrap(group, false);
-	args.detail_mode = false;
+	// 322 when closed, 102 when open
+	if (lv_obj_get_x(ui_MVSettingsMenu) > 200) {
+		metaparams.rotary_pushed.use_motion();
+		module_context_menu.hide();
+		mode = ViewMode::List;
+		mapping_pane.hide();
+		lv_show(ui_ElementRoller);
+		lv_show(ui_ElementRollerPanel);
+		lv_group_focus_obj(ui_ElementRoller);
+		lv_group_set_editing(group, true);
+		lv_group_set_wrap(group, false);
+		args.detail_mode = false;
+	}
 }
 
 void ModuleViewPage::populate_element_objects() {
