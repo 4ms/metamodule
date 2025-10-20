@@ -36,6 +36,7 @@ namespace MetaModule
 
 class PatchPlayer {
 public:
+	// TODO: modules should be a FixedVector, and then num_modules is replaced by modules.size()
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 	CableCache<MulticorePlayer::NumCores> cables;
 
@@ -175,7 +176,6 @@ public:
 				pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
 				modules[i]->id = i;
-				plugin_module_init(modules[i]);
 				modules[i]->mark_all_inputs_unpatched();
 				modules[i]->mark_all_outputs_unpatched();
 				modules[i]->set_samplerate(samplerate);
@@ -198,12 +198,15 @@ public:
 			param_watcher.start_watching_param(mm);
 		}
 
-		// Load module states
-		for (auto const &ms : pd.module_states) {
-			if (ms.module_id >= num_modules)
-				continue;
+		// Init modules
+		for (size_t module_idx = 1; module_idx < num_modules; module_idx++) {
+			// Load module state (for vcv modules, this calls dataFromJson)
+			// To mimic VCV, this must be done before plugin_module_init (which calls onAdd)
+			auto ms = std::ranges::find(pd.module_states, module_idx, &ModuleInitState::module_id);
+			if (ms != pd.module_states.end())
+				modules[module_idx]->load_state(ms->state_data);
 
-			modules[ms.module_id]->load_state(ms.state_data);
+			plugin_module_init(modules[module_idx]);
 		}
 
 		// Set static (non-mapped) knobs
@@ -792,12 +795,14 @@ public:
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
 		modules[module_idx]->id = module_idx;
+
+		// Match order that VCV does: fromJson (via load_state), then onAdd (via plugin_module_init)
+		reset_module(module_idx);
 		plugin_module_init(modules[module_idx]);
+
 		modules[module_idx]->mark_all_inputs_unpatched();
 		modules[module_idx]->mark_all_outputs_unpatched();
 		modules[module_idx]->set_samplerate(samplerate);
-
-		reset_module(module_idx);
 
 		rebalance_modules();
 	}
