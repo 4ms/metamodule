@@ -2487,35 +2487,43 @@ void nvgStroke(NVGcontext* ctx)
 // Add fonts
 int nvgCreateFont(NVGcontext* ctx, const char* name, const char* filename)
 {
-	return fonsAddFont(ctx->fontContext->fs, name, filename, 0);
+	// return fonsAddFont(ctx->fontContext->fs, name, filename, 0);
+
+	// Use the global static fons context
+	return fonsAddFont(fonsCreateInternal(), name, filename, 0);
 }
 
 int nvgCreateFontAtIndex(NVGcontext* ctx, const char* name, const char* filename, const int fontIndex)
 {
-	return fonsAddFont(ctx->fontContext->fs, name, filename, fontIndex);
+	// return fonsAddFont(ctx->fontContext->fs, name, filename, fontIndex);
+	return fonsAddFont(fonsCreateInternal(), name, filename, fontIndex);
 }
 
 int nvgCreateFontMem(NVGcontext* ctx, const char* name, unsigned char* data, int ndata, int freeData)
 {
-	return fonsAddFontMem(ctx->fontContext->fs, name, data, ndata, freeData, 0);
+	// return fonsAddFontMem(ctx->fontContext->fs, name, data, ndata, freeData, 0);
+	return fonsAddFontMem(fonsCreateInternal(), name, data, ndata, freeData, 0);
 }
 
 int nvgCreateFontMemAtIndex(NVGcontext* ctx, const char* name, unsigned char* data, int ndata, int freeData, const int fontIndex)
 {
-	return fonsAddFontMem(ctx->fontContext->fs, name, data, ndata, freeData, fontIndex);
+	// return fonsAddFontMem(ctx->fontContext->fs, name, data, ndata, freeData, fontIndex);
+	return fonsAddFontMem(fonsCreateInternal(), name, data, ndata, freeData, fontIndex);
 }
 
 int nvgFindFont(NVGcontext* ctx, const char* name)
 {
 	if (name == NULL) return -1;
-	return fonsGetFontByName(ctx->fontContext->fs, name);
+	// return fonsGetFontByName(ctx->fontContext->fs, name);
+	return fonsGetFontByName(fonsCreateInternal(), name);
 }
 
 
 int nvgAddFallbackFontId(NVGcontext* ctx, int baseFont, int fallbackFont)
 {
 	if(baseFont == -1 || fallbackFont == -1) return 0;
-	return fonsAddFallbackFont(ctx->fontContext->fs, baseFont, fallbackFont);
+	// return fonsAddFallbackFont(ctx->fontContext->fs, baseFont, fallbackFont);
+	return fonsAddFallbackFont(fonsCreateInternal(), baseFont, fallbackFont);
 }
 
 int nvgAddFallbackFont(NVGcontext* ctx, const char* baseFont, const char* fallbackFont)
@@ -2525,7 +2533,8 @@ int nvgAddFallbackFont(NVGcontext* ctx, const char* baseFont, const char* fallba
 
 void nvgResetFallbackFontsId(NVGcontext* ctx, int baseFont)
 {
-	fonsResetFallbackFont(ctx->fontContext->fs, baseFont);
+	// fonsResetFallbackFont(ctx->fontContext->fs, baseFont);
+	fonsResetFallbackFont(fonsCreateInternal(), baseFont);
 }
 
 void nvgResetFallbackFonts(NVGcontext* ctx, const char* baseFont)
@@ -2573,7 +2582,8 @@ void nvgFontFaceId(NVGcontext* ctx, int font)
 void nvgFontFace(NVGcontext* ctx, const char* font)
 {
 	NVGstate* state = nvg__getState(ctx);
-	state->fontId = fonsGetFontByName(ctx->fontContext->fs, font);
+	// state->fontId = fonsGetFontByName(ctx->fontContext->fs, font);
+	state->fontId = fonsGetFontByName(fonsCreateInternal(), font);
 }
 
 static float nvg__quantize(float a, float d)
@@ -2671,7 +2681,8 @@ float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char*
 	fs.textAlign = state->textAlign;
 	fs.paint = &state->fill;
 	fs.xform = state->xform;
-	fs.fontName = fonsGetFontNameByHandle(ctx->fontContext->fs, state->fontId);
+	// fs.fontName = fonsGetFontNameByHandle(ctx->fontContext->fs, state->fontId);
+	fs.fontName = fonsGetFontNameByHandle(fonsCreateInternal(), state->fontId);
 
 	if (end == NULL && string != NULL)
 		end = string + strlen(string);
@@ -2692,7 +2703,8 @@ void nvgTextBox(NVGcontext* ctx, float x, float y, float breakRowWidth, const ch
 	fs.textAlign = state->textAlign;
 	fs.paint = &state->fill;
 	fs.xform = state->xform;
-	fs.fontName = fonsGetFontNameByHandle(ctx->fontContext->fs, state->fontId);
+	// fs.fontName = fonsGetFontNameByHandle(ctx->fontContext->fs, state->fontId);
+	fs.fontName = fonsGetFontNameByHandle(fonsCreateInternal(), state->fontId);
 
 	if (end == NULL && string != NULL)
 		end = string + strlen(string);
