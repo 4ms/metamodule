@@ -249,6 +249,7 @@ struct KnobMapPage : PageBase {
 	void blur() final {
 	}
 
+private:
 	static void slider_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;

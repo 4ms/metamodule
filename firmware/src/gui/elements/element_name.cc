@@ -147,4 +147,12 @@ void param_item_name(std::string &s, MappedKnob const &map, PatchData const *pat
 	}
 }
 
+void param_item_short_name(std::string &s, MappedKnob const &map, PatchData const *patch) {
+	if (map.alias_name.length()) {
+		s = std::string_view{map.alias_name};
+	} else {
+		s = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch).element_name;
+	}
+}
+
 } // namespace MetaModule
