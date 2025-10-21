@@ -58,7 +58,6 @@ public:
 
 		MMDisplay::init(metaparams, screensaver);
 		Gui::init_lvgl_styles();
-		page_manager.init();
 
 		if (!Settings::read_settings(patch_storage, &settings, Volume::NorFlash)) {
 			settings = UserSettings{};
@@ -137,10 +136,11 @@ public:
 		}
 
 		lv_label_set_text(ui_MainMenuNowPlaying, "");
-		// page_manager.init();
 	}
 
 	void load_initial_patch() {
+		page_manager.init();
+
 		if (settings.load_initial_patch) {
 			pr_dbg("Loading initial patch '%s' on vol %u\n",
 				   settings.initial_patch_name.c_str(),
