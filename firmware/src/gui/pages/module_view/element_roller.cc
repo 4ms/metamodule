@@ -66,7 +66,9 @@ void ModuleViewPage::populate_roller() {
 		opts.append(" ");
 
 		// Handle names that contain a newline or null char
-		opts.append(base.short_name.substr(0, base.short_name.find_first_of("\0\n")));
+		// Must use sv literal so the trailing \0 is considered a char, not a terminator
+		using namespace std::literals;
+		opts.append(base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv)));
 
 		if (gui_el.mapped_panel_id) {
 			append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
