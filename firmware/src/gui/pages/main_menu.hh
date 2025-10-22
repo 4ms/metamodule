@@ -96,8 +96,9 @@ private:
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		page->missing_plugins.start(
-			page->patches.get_view_patch(), page->group, [page = page] { page->load_patch_view_page(); });
+		page->missing_plugins.start(page->patches.get_view_patch(), page->group, [page = page](bool did_load) {
+			page->load_patch_view_page();
+		});
 	}
 
 	static void now_playing_cb(lv_event_t *event) {
@@ -105,7 +106,10 @@ private:
 		if (!page)
 			return;
 		if (page->patches.get_playing_patch()) {
-			page->missing_plugins.start(page->patches.get_playing_patch(), page->group, [page = page] {
+			page->missing_plugins.start(page->patches.get_playing_patch(), page->group, [page = page](bool did_load) {
+				if (did_load) {
+					page->patch_playloader.request_reload_playing_patch(false);
+				}
 				page->patches.view_playing_patch();
 				page->load_patch_view_page();
 			});

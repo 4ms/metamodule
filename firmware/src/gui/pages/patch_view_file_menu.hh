@@ -219,7 +219,7 @@ struct PatchViewFileMenu {
 
 			case RevertState::LoadMissingPlugins:
 				missing_plugins.start(
-					patches.get_view_patch(), group, [this] { revert_state = RevertState::TryRequest; });
+					patches.get_view_patch(), group, [this](bool) { revert_state = RevertState::TryRequest; });
 				revert_state = RevertState::Idle;
 				break;
 

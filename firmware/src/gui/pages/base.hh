@@ -153,7 +153,7 @@ struct PageBase {
 					notify_queue.put({"New patch file detected, refreshed", Notification::Priority::Status, 800});
 
 					// patch file was reloaded from disk: start missing plugin scan procedure
-					missing_plugins.start(playing_patch, group, [this] {
+					missing_plugins.start(playing_patch, group, [this](bool) {
 						patch_playloader.request_reload_playing_patch(false);
 
 						if (patches.get_playing_patch() == patches.get_view_patch()) {
@@ -176,7 +176,7 @@ struct PageBase {
 				if (status == PatchFileChangeChecker::Status::DidReload) {
 					notify_queue.put({"New patch file detected, refreshed", Notification::Priority::Status, 800});
 
-					missing_plugins.start(view_patch, group, [this] {
+					missing_plugins.start(view_patch, group, [this](bool) {
 						gui_state.force_redraw_patch = true;
 						gui_state.view_patch_file_changed = true;
 					});

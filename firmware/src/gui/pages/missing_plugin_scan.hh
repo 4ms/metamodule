@@ -10,6 +10,7 @@ namespace MetaModule
 {
 
 struct MissingPluginScanner {
+	// need P
 
 	MissingPluginScanner(PluginManager &plugin_manager, lv_obj_t *parent, MissingPluginSettings &settings)
 		: missing_plugin_loader{plugin_manager}
@@ -60,7 +61,7 @@ struct MissingPluginScanner {
 	// Call start() to begin the async process of finding and loading missing plugins.
 	// completed_cb is called when the process is done whether it succeeds or not, and
 	// GUI focus will be restored to the parent_group as well.
-	void start(PatchData *patch, lv_group_t *parent_group, auto completed_cb) {
+	void start(PatchData *patch, lv_group_t *parent_group, std::function<void(bool)> completed_cb) {
 		init_handling = true;
 		just_done = false;
 
@@ -81,11 +82,12 @@ struct MissingPluginScanner {
 		if (init_handling) {
 			if (scan(patch)) {
 				ask([this](bool ok) {
-					if (!ok)
-						completion_callback();
+					if (!ok) {
+						completion_callback(false); // user declined to load missing modules
+					}
 				});
 			} else {
-				completion_callback();
+				completion_callback(false); // no missing modules
 			}
 
 			init_handling = false;
@@ -99,7 +101,7 @@ struct MissingPluginScanner {
 			if (has_missing(patch)) {
 				show_missing(completion_callback);
 			} else {
-				completion_callback();
+				completion_callback(true);
 			}
 		}
 	}
@@ -228,7 +230,7 @@ private:
 			message.pop_back();
 
 		missing_plugin_popup.init(parent, parent_group);
-		missing_plugin_popup.show([callback](unsigned) { callback(); }, message.c_str(), "");
+		missing_plugin_popup.show([callback](unsigned) { callback(true); }, message.c_str(), "");
 	}
 
 private:
@@ -242,7 +244,7 @@ private:
 
 	MissingPluginSettings &settings;
 
-	std::function<void()> completion_callback;
+	std::function<void(bool)> completion_callback;
 	PatchData *patch;
 	lv_group_t *parent_group;
 

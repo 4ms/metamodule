@@ -367,7 +367,8 @@ struct PatchSelectorPage : PageBase {
 
 					if (result.success) {
 						patches.start_viewing(selected_patch);
-						missing_plugins.start(patches.get_view_patch(), group, [this] { exit_to_patch_view_page(); });
+						missing_plugins.start(
+							patches.get_view_patch(), group, [this](bool) { exit_to_patch_view_page(); });
 						state = State::Closing;
 
 					} else {
@@ -381,7 +382,11 @@ struct PatchSelectorPage : PageBase {
 
 					// If patch is unmodifed in RAM, then check for missing plugins
 					if (patches.find_open_patch(selected_patch)->modification_count == 0) {
-						missing_plugins.start(patches.get_view_patch(), group, [this] { exit_to_patch_view_page(); });
+						missing_plugins.start(patches.get_view_patch(), group, [this](bool did_reload) {
+							if (did_reload)
+								patch_playloader.request_reload_playing_patch(false);
+							exit_to_patch_view_page();
+						});
 						state = State::Closing;
 
 					} else {
