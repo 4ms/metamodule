@@ -18,7 +18,7 @@ set(WIFI_DIR ${FWDIR}/src/wifi)
 
 add_executable(
   main_m4.elf
-  ${M4DIR}/controls.cc
+  ${BOARD_SUPPORT_DIR}/controls.cc
   ${M4DIR}/main_m4.cc
   ${M4DIR}/write.cc
   ${M4DIR}/system_stm32mp1xx.c

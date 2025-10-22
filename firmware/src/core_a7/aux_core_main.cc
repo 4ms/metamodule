@@ -1,6 +1,7 @@
 #include "aux_core_player.hh"
 #include "conf/debug.hh"
 #include "conf/hsem_conf.hh"
+#include "console/uart_log.hh"
 #include "core_a7/a7_shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "drivers/hsem.hh"
