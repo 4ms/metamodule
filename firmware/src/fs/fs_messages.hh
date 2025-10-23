@@ -8,7 +8,10 @@
 #include "fw_update/firmware_file_finder.hh"
 #include "fw_update/firmware_writer.hh"
 #include "patch_file/patch_storage.hh"
+
+#ifdef METAMODULE_ENABLE_WIFI
 #include "wifi/app_request_handler.hh"
+#endif
 
 namespace MetaModule
 {
@@ -43,7 +46,9 @@ struct FilesystemMessages {
 			process_receiver(firmware_writer);
 			process_receiver(plugin_files);
 			process_receiver(calibration_handler);
+#ifdef METAMODULE_ENABLE_WIFI
 			process_receiver(wifi_app_handler);
+#endif
 
 			if (message.message_type != IntercoreStorageMessage::MessageType::None) {
 				pr_err("ICC message of type %u not handled\n", message.message_type);
@@ -72,7 +77,9 @@ private:
 	FirmwareWriter firmware_writer{sd_fileio, usb_fileio, flash_loader};
 	PluginFileFinder plugin_files{sd_fileio, usb_fileio};
 	CalibrationMessageHandler calibration_handler{flash_loader};
+#ifdef METAMODULE_ENABLE_WIFI
 	WifiAppRequestHandler wifi_app_handler{};
+#endif
 };
 
 } // namespace MetaModule

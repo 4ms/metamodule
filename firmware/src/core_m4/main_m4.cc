@@ -10,7 +10,9 @@
 #include "hsem_handler.hh"
 #include "usb/usb_manager.hh"
 
+#ifdef METAMODULE_ENABLE_WIFI
 #include <wifi_interface.hh>
+#endif
 
 namespace MetaModule
 {

@@ -1,7 +1,10 @@
 #include "firmware_writer.hh"
 #include "hash/hash_processor.hh"
+
+#ifdef METAMODULE_ENABLE_WIFI
 #include "wifi/comm/wifi_interface.hh"
 #include "wifi/flasher/flasher.h"
+#endif
 
 namespace MetaModule
 {
@@ -50,6 +53,7 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 	}
 }
 
+#ifdef METAMODULE_ENABLE_WIFI
 IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, uint32_t length, Checksum_t checksum) {
 	IntercoreStorageMessage returnValue;
 
@@ -143,12 +147,15 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer,
 
 	return returnValue;
 }
+#endif
 
 IntercoreStorageMessage
 FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum, uint32_t &bytesChecked) {
 
+#ifdef METAMODULE_ENABLE_WIFI
 	// Stop wifi reception before long running operation
 	WifiInterface::stop();
+#endif
 
 	MD5Processor processor;
 
@@ -182,8 +189,10 @@ FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_
 
 IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uint32_t address, uint32_t &bytesWritten) {
 
+#ifdef METAMODULE_ENABLE_WIFI
 	// Stop wifi reception before long running operation
 	WifiInterface::stop();
+#endif
 
 	const uint32_t FlashSectorSize = 64 * 1024;
 	const std::size_t BatchSize = FlashSectorSize;
