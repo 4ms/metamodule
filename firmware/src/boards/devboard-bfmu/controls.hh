@@ -3,8 +3,9 @@
 #include "conf/control_conf.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/pin_conf.hh"
-#include "metaparams.hh"
-#include "params.hh"
+#include "drivers/uart.hh"
+#include "params/metaparams.hh"
+#include "params/params.hh"
 
 //
 #include "drivers/adc_builtin.hh"
@@ -61,6 +62,8 @@ private:
 	DebouncedPin<ControlPins::rec_gate_in, PinPolarity::Inverted> rec_gate_in;
 
 	// MIDI UART
+	mdrivlib::Uart<ControlPins::MIDI_Uart> uart_midi;
+
 	// DAC OUTS
 
 	// NEOPIXEL OUTS: handle with TIM periph?
@@ -81,11 +84,12 @@ private:
 	bool _new_adc_data_ready = false;
 
 	// MIDI
-	MidiHost &_midi_host;
-	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
-	Midi::MessageParser _midi_parser;
-	EdgeStateDetector _midi_connected_raw;
-	bool _midi_connected = false;
+	MidiHost &usb_midi_host;
+	LockFreeFifoSpsc<MidiMessage, 256> usb_midi_rx_buf;
+	LockFreeFifoSpsc<MidiMessage, 256> uart_midi_rx_buf;
+
+	EdgeStateDetector usb_midi_connected_raw;
+	bool usb_midi_connected = false;
 
 	// Params
 	DoubleBufParamBlock &param_blocks;

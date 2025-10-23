@@ -55,12 +55,10 @@ void Controls::update_params() {
 
 		update_midi_connected();
 
-		cur_metaparams->midi_connected = _midi_connected;
+		cur_metaparams->usb_midi_connected = usb_midi_connected;
 
-		update_rotary();
-
-		// Meta button
-		cur_metaparams->meta_buttons[0].transfer_events(button0);
+		cur_metaparams->encoder[0].motion = encoder1.read();
+		cur_metaparams->encoder[1].motion = encoder2.read();
 	}
 
 	parse_midi();
@@ -71,75 +69,37 @@ void Controls::update_params() {
 }
 
 void Controls::update_rotary() {
-	// Rotary button
-	if (rotary_button.is_just_pressed()) {
-		_rotary_moved_while_pressed = false;
-		cur_metaparams->rotary_button.register_rising_edge();
-	}
-
-	if (rotary_button.is_just_released()) {
-		if (_rotary_moved_while_pressed) {
-			cur_metaparams->rotary_button.reset();
-		} else {
-			cur_metaparams->rotary_button.register_falling_edge();
-		}
-	}
-	cur_metaparams->rotary_button.set_state_no_events(rotary_button.is_pressed());
-
 	// Rotary turning
-	int new_rotary_motion = rotary.read();
-	bool pressed = rotary_button.is_pressed();
-	cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
-	cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
-	//"If rotary was turned at any point since button was pressed" --> logical OR of all (pressed AND new_motion)
-	_rotary_moved_while_pressed |= pressed && (new_rotary_motion != 0);
 }
 
 void Controls::update_midi_connected() {
-	_midi_connected_raw.update(_midi_host.is_connected());
+	usb_midi_connected_raw.update(usb_midi_host.is_connected());
 
-	if (_midi_connected_raw.went_low()) {
-		_midi_parser.start_all_notes_off_sequence();
+	if (usb_midi_connected_raw.went_high()) {
+		usb_midi_connected = true;
 	}
-
-	if (_midi_connected_raw.went_high()) {
-		_midi_connected = true;
-	}
-
-	if (cur_metaparams->midi_poly_chans > 0)
-		_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
 }
 
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected
-	if (cur_params->raw_msg.raw() != MidiMessage{}.raw()) {
-		if (_midi_connected_raw.is_high()) {
+	if (cur_params->usb_raw_midi.raw() != MidiMessage{}.raw()) {
+		if (usb_midi_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
-			cur_params->raw_msg.make_usb_msg(bytes);
-			_midi_host.transmit(bytes);
+			cur_params->usb_raw_midi.make_usb_msg(bytes);
+			usb_midi_host.transmit(bytes);
 		}
 	}
 
-	// Parse a MIDI message if available
-	if (auto msg = _midi_rx_buf.get(); msg.has_value()) {
-		cur_params->raw_msg = msg.value();
-		cur_params->midi_event = _midi_parser.parse(msg.value());
-
-	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence()) {
-		if (noteoff->type == Midi::Event::Type::None) {
-			_midi_connected = false;
-			cur_metaparams->midi_connected = _midi_connected;
-			cur_params->raw_msg = MidiMessage{};
-			cur_params->midi_event.type = Midi::Event::Type::None;
-		} else {
-			cur_params->midi_event = *noteoff;
-			cur_params->raw_msg = {0x80, noteoff->note, 0};
-		}
-
-	} else {
-		cur_params->raw_msg = MidiMessage{};
-		cur_params->midi_event.type = Midi::Event::Type::None;
+	auto uart_midi_raw = cur_params->uart_raw_midi.raw();
+	if (uart_midi_raw != MidiMessage{}.raw()) {
+		uart_midi.transmit(uart_midi_raw >> 16); //status
+		uart_midi.transmit(uart_midi_raw >> 8);	 //data[0]
+		uart_midi.transmit(uart_midi_raw >> 0);	 //data[1]
 	}
+
+	// Parse incoming MIDI messages if available
+	cur_params->usb_raw_midi = usb_midi_rx_buf.get().value_or(MidiMessage{});
+	cur_params->uart_raw_midi = uart_midi_rx_buf.get().value_or(MidiMessage{});
 }
 
 template<size_t block_num>

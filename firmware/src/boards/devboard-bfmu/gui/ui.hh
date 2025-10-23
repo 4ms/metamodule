@@ -22,7 +22,7 @@ private:
 	PluginManager &plugin_manager;
 	FileStorageProxy &file_storage_proxy;
 
-	ParamsMidiState params;
+	ParamsState params;
 	MetaParams metaparams;
 	UserSettings settings;
 
