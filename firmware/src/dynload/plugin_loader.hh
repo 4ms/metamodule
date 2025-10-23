@@ -194,6 +194,15 @@ public:
 						}
 					}
 
+					for (auto const &m : metadata.module_extras) {
+						if (!m.slug.empty()) {
+							if (!m.description.empty())
+								ModuleFactory::setModuleDescription(metadata.brand_slug + ":" + m.slug, m.description);
+							if (!m.tags.empty())
+								ModuleFactory::setModuleTags(metadata.brand_slug + ":" + m.slug, m.tags);
+						}
+					}
+
 					status.state = State::Success;
 				} else {
 					status.state = State::InvalidPlugin;
