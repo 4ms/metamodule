@@ -16,7 +16,9 @@ struct MetaParams {
 	uint16_t haptic_out{}; //Haptic PWM value
 
 	bool usb_midi_connected = false;
-	bool uart_midi_connected = true;
+
+	uint32_t sample_rate = 48000;
+	uint32_t audio_load = 0;
 
 	MetaParams() {
 		clear();
@@ -29,7 +31,6 @@ struct MetaParams {
 		}
 		haptic_out = 0;
 		usb_midi_connected = false;
-		uart_midi_connected = true;
 	}
 
 	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
@@ -42,7 +43,6 @@ struct MetaParams {
 
 		haptic_out = that.haptic_out;
 		usb_midi_connected = that.usb_midi_connected;
-		uart_midi_connected = that.uart_midi_connected;
 	}
 
 	// Moves rotary motion events from `that` to `this` (removing them from `that`,
@@ -56,7 +56,6 @@ struct MetaParams {
 
 		haptic_out = that.haptic_out;
 		usb_midi_connected = that.usb_midi_connected;
-		uart_midi_connected = that.uart_midi_connected;
 	}
 };
 

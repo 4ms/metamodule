@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/stream_conf.hh"
-#include "metaparams.hh"
-#include "params.hh"
+#include "params/metaparams.hh"
+#include "params/params.hh"
 
 namespace MetaModule
 {

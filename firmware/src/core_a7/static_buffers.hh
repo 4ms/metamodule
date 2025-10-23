@@ -4,8 +4,8 @@
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
+#include "params/sync_params.hh"
 #include "patch_file/patch_dir_list.hh"
-#include "sync_params.hh"
 #include <array>
 
 namespace MetaModule
