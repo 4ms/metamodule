@@ -20,11 +20,14 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 
 	if (message.message_type == StartChecksumCompare) {
 
+#ifdef METAMODULE_ENABLE_WIFI
 		if (message.flashTarget == WIFI) {
 			pr_trace("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 			return compareChecksumWifi(message.address, message.length, {message.checksum.data()});
-
-		} else if (message.flashTarget == QSPI) {
+		} else
+#endif
+			if (message.flashTarget == QSPI)
+		{
 			return compareChecksumQSPI(
 				message.address, message.length, {message.checksum.data()}, *message.bytes_processed);
 
@@ -37,10 +40,14 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 		pr_trace("-> Start flashing %u bytes to 0x%08x\n", message.buffer.size(), message.address);
 		auto buf = std::span<uint8_t>{(uint8_t *)message.buffer.data(), message.buffer.size()};
 
+#ifdef METAMODULE_ENABLE_WIFI
 		if (message.flashTarget == WIFI) {
 			return flashWifi(buf, message.address, message.uncompressed_size, *message.bytes_processed);
 
-		} else if (message.flashTarget == QSPI) {
+		} else
+#endif
+			if (message.flashTarget == QSPI)
+		{
 			return flashQSPI(buf, message.address, *message.bytes_processed);
 
 		} else {

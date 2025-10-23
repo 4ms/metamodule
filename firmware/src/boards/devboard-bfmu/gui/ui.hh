@@ -75,10 +75,6 @@ public:
 		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
-	TextDisplayWatcher &displays() {
-		return params.text_displays;
-	}
-
 	bool preload_all_plugins() {
 		plugin_manager.start_loading_plugin_list();
 
