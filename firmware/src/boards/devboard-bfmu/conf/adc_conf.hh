@@ -8,6 +8,8 @@
 namespace MetaModule
 {
 
+namespace ADCs
+{
 using mdrivlib::AdcChannelConf;
 using mdrivlib::GPIO;
 using mdrivlib::PinDef;
@@ -17,17 +19,17 @@ constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_2Cycles;
 
 enum Adcs : uint32_t { Mux1, Mux2, Mux3, Mux4, Mux5, VOct, CV1, CV2, CV3, CV4 };
 
-constexpr inline auto PotConfs = std::array{
+constexpr inline auto AdcPins = std::array{
 	AdcChannelConf{{GPIO::A, PinNum::_0}, mdrivlib::AdcChanNum::_16, Mux1, AdcSampTime},
 	AdcChannelConf{{GPIO::A, PinNum::_3}, mdrivlib::AdcChanNum::_15, Mux2, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_3}, mdrivlib::AdcChanNum::_13, Mux2, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_2}, mdrivlib::AdcChanNum::_12, Mux2, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_1}, mdrivlib::AdcChanNum::_11, Mux2, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_1}, mdrivlib::AdcChanNum::_17, Mux2, AdcSampTime},
-	AdcChannelConf{{GPIO::B, PinNum::_0}, mdrivlib::AdcChanNum::_9, Mux2, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_2}, mdrivlib::AdcChanNum::_14, Mux2, AdcSampTime},
-	AdcChannelConf{{GPIO::B, PinNum::_1}, mdrivlib::AdcChanNum::_5, Mux2, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_5}, mdrivlib::AdcChanNum::_8, Mux2, AdcSampTime},
+	AdcChannelConf{{GPIO::C, PinNum::_3}, mdrivlib::AdcChanNum::_13, Mux3, AdcSampTime},
+	AdcChannelConf{{GPIO::C, PinNum::_2}, mdrivlib::AdcChanNum::_12, Mux4, AdcSampTime},
+	AdcChannelConf{{GPIO::C, PinNum::_1}, mdrivlib::AdcChanNum::_11, Mux5, AdcSampTime},
+	AdcChannelConf{{GPIO::A, PinNum::_1}, mdrivlib::AdcChanNum::_17, VOct, AdcSampTime},
+	AdcChannelConf{{GPIO::B, PinNum::_0}, mdrivlib::AdcChanNum::_9, CV1, AdcSampTime},
+	AdcChannelConf{{GPIO::A, PinNum::_2}, mdrivlib::AdcChanNum::_14, CV2, AdcSampTime},
+	AdcChannelConf{{GPIO::B, PinNum::_1}, mdrivlib::AdcChanNum::_5, CV3, AdcSampTime},
+	AdcChannelConf{{GPIO::C, PinNum::_5}, mdrivlib::AdcChanNum::_8, CV4, AdcSampTime},
 };
 
 // Mux select
@@ -58,5 +60,7 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 		static constexpr auto dma_priority = Low;
 	};
 };
+
+} // namespace ADCs
 
 } // namespace MetaModule

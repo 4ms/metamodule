@@ -57,7 +57,8 @@ struct ScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr auto periph_burst = Single;
 	};
 
-	using DCPin = FPin<GPIO::C, PinNum::_6, PinMode::Output>;
+	static constexpr PinDef DCPinDef{GPIO::C, PinNum::_6};
+	using DCPin = mdrivlib::PinF<DCPinDef, PinMode::Output>;
 	static constexpr PinDef ResetPin{GPIO::E, PinNum::_13};
 
 	static constexpr bool IsInverted = false;

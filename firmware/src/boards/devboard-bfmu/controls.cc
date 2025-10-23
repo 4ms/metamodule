@@ -7,6 +7,8 @@
 #include "patch/midi_def.hh"
 #include "util/countzip.hh"
 
+#include "hardware-test.hh"
+
 namespace MetaModule
 {
 
@@ -131,7 +133,7 @@ void Controls::start() {
 
 	read_controls_task.start();
 
-	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
+	usb_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
 		bool ignore = false;
 
 		while (rxbuffer.size() >= 4) {
@@ -146,19 +148,16 @@ void Controls::start() {
 				ignore = false;
 
 			if (!ignore)
-				_midi_rx_buf.put(msg);
+				usb_midi_rx_buf.put(msg);
 
 			rxbuffer = rxbuffer.subspan(4);
 			// msg.print();
 		}
-		_midi_host.receive();
+		usb_midi_host.receive();
 	});
 }
 
 void Controls::process() {
-	if constexpr (UseGpioExpanderForSensePins) {
-		sense_pin_reader.update();
-	}
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
@@ -169,30 +168,26 @@ void Controls::set_samplerate(unsigned sample_rate) {
 }
 
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
-	: _midi_host{midi_host}
+	: usb_midi_host{midi_host}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {
 
-	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
-	// TODO: _new_adc_data_ready is written from multiple threads, but is not thread-safe. Use atomic? Or accept dropped/duplicate ADC values?
-	if constexpr (PotConfs.size() > 0) {
-		InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
-			uint32_t tmp = ADC1->ISR;
-			if (tmp & ADC_ISR_EOS) {
-				ADC1->ISR = tmp | ADC_ISR_EOS;
-				_new_adc_data_ready = true;
-			}
-		});
+	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
+		uint32_t tmp = ADC1->ISR;
+		if (tmp & ADC_ISR_EOS) {
+			ADC1->ISR = tmp | ADC_ISR_EOS;
+			_new_adc_data_ready = true;
+		}
+	});
 
-		set_samplerate(sample_rate);
+	set_samplerate(sample_rate);
 
-		pot_adc.start();
-	}
+	pot_adc.start();
 
-	if constexpr (UseGpioExpanderForSensePins) {
-		sense_pin_reader.init();
-	}
+	uart_midi.init();
+
+	test_pins();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen
@@ -210,8 +205,8 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 float Controls::get_pot_reading(uint32_t pot_id) {
 	if (pot_id < pot_vals.size()) {
 		auto raw = (int32_t)pot_vals[pot_id];
-		float val = raw - MinPotValue;
-		return std::clamp(val / MaxPotValue, 0.f, 1.f);
+		float val = raw - ADCs::MinPotValue;
+		return std::clamp(val / ADCs::MaxPotValue, 0.f, 1.f);
 	}
 	return 0;
 }

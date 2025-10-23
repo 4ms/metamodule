@@ -1,7 +1,7 @@
 #pragma once
 #include "drivers/gpio_expander.hh"
 
-namespace MetaModule::GPIOExpander
+namespace MetaModule::ButtonLedExpander
 {
 using mdrivlib::GPIO_expander_conf;
 
@@ -51,6 +51,9 @@ const mdrivlib::I2CConfig i2c_conf = {
 	.analog_filter = true,
 	.digital_filter = mdrivlib::I2CConfig::DigitalFilterLevel::_8,
 };
+
+constexpr mdrivlib::PinDef irq_pin{mdrivlib::GPIO::B, mdrivlib::PinNum::_2, mdrivlib::PinAF::AFNone};
+
 constexpr uint8_t MaxAddresses = 8; // Number of addresses the chip supports
 
 // Each of these represents a physical chip. Set the addresses used and whether each pin is input or output
@@ -187,4 +190,4 @@ constexpr GPIO_expander_conf gpio_chip_conf_6 = {
 	}),
 };
 
-} // namespace MetaModule::GPIOExpander
+} // namespace MetaModule::ButtonLedExpander

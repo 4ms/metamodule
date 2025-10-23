@@ -26,7 +26,6 @@ namespace MetaModule
 {
 
 using mdrivlib::DebouncedPin;
-using mdrivlib::GPIOExpander;
 using mdrivlib::PinPolarity;
 
 struct Controls {
@@ -50,6 +49,8 @@ private:
 	void update_midi_connected();
 	void update_rotary();
 
+	void test_pins();
+
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
 	// Digital controls: Rotary, Buttons and Gate jacks
@@ -65,19 +66,20 @@ private:
 	mdrivlib::Uart<ControlPins::MIDI_Uart> uart_midi;
 
 	// DAC OUTS
+	// TODO
 
 	// NEOPIXEL OUTS: handle with TIM periph?
+	// TODO
 
 	// GATE OUTS
 	mdrivlib::PinF<ControlPins::clock_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted> clock_out;
-
-	// PWM OUT:
+	//TODO: PWM OUT
 	mdrivlib::PinF<ControlPins::haptic_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Normal> haptic_out;
 
 	// Analog inputs (ignoring MUX for now)
-	static constexpr size_t NumPotAdcs = PotConfs.size();
-	std::array<uint16_t, NumPotAdcs> pot_vals{};
-	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
+	static constexpr size_t NumAdcPins = ADCs::AdcPins.size();
+	std::array<uint16_t, NumAdcPins> pot_vals{};
+	mdrivlib::AdcDmaPeriph<ADCs::PotAdcConf> pot_adc{pot_vals, ADCs::AdcPins};
 
 	std::array<InterpParamVariable<float>, PanelDef::NumPot> knobs;
 	static constexpr uint32_t AdcReadFrequency = 580; //571
