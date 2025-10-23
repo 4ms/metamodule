@@ -18,7 +18,7 @@ struct AudioStreamMidi {
 		, sync_params{sync_params} {
 	}
 
-	void process(bool is_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg) {
+	void process(bool is_connected, MidiMessage *raw_msg) {
 
 		if (!player.is_loaded)
 			return;
@@ -47,9 +47,6 @@ struct AudioStreamMidi {
 		} else {
 			*raw_msg = MidiMessage{};
 		}
-
-		if (event.type == Midi::Event::Type::None)
-			return;
 	}
 };
 
