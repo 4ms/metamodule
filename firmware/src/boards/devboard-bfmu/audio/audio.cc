@@ -6,10 +6,10 @@
 #include "drivers/hsem.hh"
 #include "expanders.hh"
 #include "param_block.hh"
+#include "params/sync_params.hh"
 #include "patch_play/patch_mods.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
-#include "sync_params.hh"
 #include "user_settings/audio_settings.hh"
 #include "util/countzip.hh"
 #include "util/zip.hh"
@@ -105,7 +105,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		} else
 			param_blocks[block].metaparams.audio_overruns = 0;
 
-		// 3.5us w/both MIDIs
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
 

@@ -6,11 +6,11 @@
 #include "drivers/cycle_counter.hh"
 #include "overrun_handler.hh"
 #include "param_block.hh"
-#include "params_state.hh"
+#include "params/params_state.hh"
+#include "params/sync_params.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
-#include "sync_params.hh"
 #include "util/edge_detector.hh"
 
 namespace MetaModule
