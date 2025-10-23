@@ -191,6 +191,25 @@ public:
 
 	std::atomic<bool> new_patch_data = false;
 
+	void read_patch_gui_elements() {
+		if (new_patch_data.load() == false) {
+
+			for (auto &d : displays().watch_displays) {
+				if (d.is_active()) {
+					auto text = std::span<char>(d.text._data, d.text.capacity);
+					// FIXME: add patch_playloader.get_display_text() that does this:
+					// auto sz = player.get_display_text(d.module_id, d.light_id, text);
+					// if (sz)
+					// 	d.text._data[sz] = '\0';
+				}
+			}
+
+			new_patch_data.store(true, std::memory_order_release);
+		}
+
+		mdrivlib::SMPThread::signal_done();
+	}
+
 private:
 	void page_update_task() {
 		// Clear all accumulated knob change events

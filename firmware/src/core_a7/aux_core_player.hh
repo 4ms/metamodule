@@ -31,7 +31,8 @@ struct AuxPlayer {
 		InterruptManager::register_and_start_isr(ProcessCablesIRQn, 1, 0, [this]() { process_cables(); });
 
 		constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchGuiElements);
-		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [this]() { read_patch_gui_elements(); });
+		InterruptManager::register_and_start_isr(
+			ReadPatchLightsIRQn, 2, 0, [this]() { this->ui.read_patch_gui_elements(); });
 	}
 
 	void play_modules() {
@@ -66,24 +67,6 @@ struct AuxPlayer {
 			pr_err("Error: %u modules requested to run on core 2, max is %z\n", num_modules, module_ids.size());
 
 		SMPThread::signal_done();
-	}
-
-	void read_patch_gui_elements() {
-		if (ui.new_patch_data.load() == false) {
-
-			for (auto &d : ui.displays().watch_displays) {
-				if (d.is_active()) {
-					auto text = std::span<char>(d.text._data, d.text.capacity);
-					auto sz = patch_player.get_display_text(d.module_id, d.light_id, text);
-					if (sz)
-						d.text._data[sz] = '\0';
-				}
-			}
-
-			ui.new_patch_data.store(true, std::memory_order_release);
-		}
-
-		mdrivlib::SMPThread::signal_done();
 	}
 };
 

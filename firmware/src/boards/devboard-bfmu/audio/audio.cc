@@ -21,7 +21,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioOutBlock &audio_out_block,
 						 SyncParams &sync_p,
 						 PatchPlayLoader &patchloader,
-						 DoubleBufParamBlock &pblk)
+						 DoubleBufParamBlock &pblk,
+						 PatchModQueue &)
 	: sync_params{sync_p}
 	, patch_loader{patchloader}
 	, param_blocks{pblk}
@@ -202,6 +203,9 @@ void AudioStream::update_audio_settings() {
 			codec_.start();
 		}
 	}
+}
+
+void AudioStream::handle_overruns() {
 }
 
 } // namespace MetaModule

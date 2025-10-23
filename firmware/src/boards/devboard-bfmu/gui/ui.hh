@@ -64,6 +64,9 @@ public:
 		// no screen
 	}
 
+	void read_patch_gui_elements() {
+	}
+
 	void update_page() {
 		auto now = HAL_GetTick();
 		if ((now - last_page_update_tm) > 16) {

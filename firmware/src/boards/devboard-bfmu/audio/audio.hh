@@ -10,7 +10,6 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
-#include "util/edge_detector.hh"
 
 namespace MetaModule
 {
@@ -32,12 +31,14 @@ public:
 				AudioOutBlock &audio_out_block,
 				SyncParams &sync_params,
 				PatchPlayLoader &patchloader,
-				DoubleBufParamBlock &p);
+				DoubleBufParamBlock &p,
+				PatchModQueue &);
 
 	void start();
 	void start_playing();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 	uint32_t get_audio_errors();
+	void handle_overruns();
 
 private:
 	SyncParams &sync_params;
