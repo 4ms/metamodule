@@ -1,16 +1,13 @@
 #pragma once
-#include "conf/adc_conf.hh"
 #include "conf/control_conf.hh"
-#include "conf/gpio_expander_conf.hh"
 #include "conf/pin_conf.hh"
+#include "drivers/lis2hh12_accel.hh"
 #include "drivers/uart.hh"
 #include "params/metaparams.hh"
 #include "params/params.hh"
 
 //
-#include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
-#include "drivers/gpio_expander.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
@@ -25,8 +22,10 @@
 namespace MetaModule
 {
 
+using mdrivlib::DebouncedButton;
 using mdrivlib::DebouncedPin;
 using mdrivlib::PinPolarity;
+using mdrivlib::RotaryEnc;
 
 struct Controls {
 	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host);
@@ -51,45 +50,24 @@ private:
 
 	void test_pins();
 
-	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
+	RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::encoders[0].A, ControlPins::encoders[0].B> encoder1;
+	RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::encoders[1].A, ControlPins::encoders[1].B> encoder2;
 
-	// Digital controls: Rotary, Buttons and Gate jacks
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::encoders[0].A, ControlPins::encoders[0].B> encoder1;
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::encoders[1].A, ControlPins::encoders[1].B> encoder2;
+	DebouncedButton<ControlPins::encoder_but_1, PinPolarity::Inverted> encoder1_but;
+	DebouncedButton<ControlPins::encoder_but_2, PinPolarity::Inverted> encoder2_but;
+	DebouncedButton<ControlPins::button_1, PinPolarity::Inverted> button_1;
+	DebouncedButton<ControlPins::button_2, PinPolarity::Inverted> button_2;
+	DebouncedButton<ControlPins::button_3, PinPolarity::Inverted> button_3;
+	DebouncedButton<ControlPins::button_4, PinPolarity::Inverted> button_4;
 
-	DebouncedPin<ControlPins::random_gate_in, PinPolarity::Inverted> random_gate_in;
-	DebouncedPin<ControlPins::trig_in, PinPolarity::Inverted> trig_in;
-	DebouncedPin<ControlPins::sync_in, PinPolarity::Inverted> sync_in;
-	DebouncedPin<ControlPins::rec_gate_in, PinPolarity::Inverted> rec_gate_in;
+	DebouncedPin<ControlPins::sense_injack, PinPolarity::Inverted> sense_in_jack;
+	DebouncedPin<ControlPins::sense_outjack, PinPolarity::Inverted> sense_out_jack;
 
-	// MIDI UART
-	mdrivlib::Uart<ControlPins::MIDI_Uart> uart_midi;
-
-	// DAC OUTS
-	// TODO
-
-	// NEOPIXEL OUTS: handle with TIM periph?
-	// TODO
-
-	// GATE OUTS
-	mdrivlib::PinF<ControlPins::clock_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted> clock_out;
-	//TODO: PWM OUT
-	mdrivlib::PinF<ControlPins::haptic_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Normal> haptic_out;
-
-	// Analog inputs (ignoring MUX for now)
-	static constexpr size_t NumAdcPins = ADCs::AdcPins.size();
-	std::array<uint16_t, NumAdcPins> pot_vals{};
-	mdrivlib::AdcDmaPeriph<ADCs::PotAdcConf> pot_adc{pot_vals, ADCs::AdcPins};
-
-	std::array<InterpParamVariable<float>, PanelDef::NumPot> knobs;
-	static constexpr uint32_t AdcReadFrequency = 580; //571
-	bool _new_adc_data_ready = false;
+	mdrivlib::LIS2HH12accelerometer accel{ControlPins::sensor_i2c_conf};
 
 	// MIDI
 	MidiHost &usb_midi_host;
 	LockFreeFifoSpsc<MidiMessage, 256> usb_midi_rx_buf;
-	LockFreeFifoSpsc<MidiMessage, 256> uart_midi_rx_buf;
-
 	EdgeStateDetector usb_midi_connected_raw;
 	bool usb_midi_connected = false;
 
@@ -97,6 +75,8 @@ private:
 	DoubleBufParamBlock &param_blocks;
 	Params *cur_params;
 	MetaParams *cur_metaparams;
+
+	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 	bool _buffer_full = false;
 	bool _first_param = true;
 

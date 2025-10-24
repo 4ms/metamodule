@@ -1,6 +1,7 @@
 #pragma once
+#include "conf/i2c_codec_conf.hh"
+#include "drivers/i2c_config_struct.hh"
 #include "drivers/pin.hh"
-#include "drivers/uart_conf.hh"
 #include <array>
 
 namespace MetaModule
@@ -21,41 +22,42 @@ struct EncoderPins {
 };
 
 constexpr inline auto encoders = std::array{
-	EncoderPins{{GPIO::E, PinNum::_3}, {GPIO::D, PinNum::_10}}, //ENCODER 1
-	EncoderPins{{GPIO::G, PinNum::_6}, {GPIO::D, PinNum::_3}},	//ENCODER 2
+	EncoderPins{{GPIO::C, PinNum::_2}, {GPIO::C, PinNum::_3}}, //pull-up
+	EncoderPins{{GPIO::A, PinNum::_1}, {GPIO::C, PinNum::_1}}, //pull-up
 };
 
-// GPIO outs:
-constexpr inline PinDef haptic_out{GPIO::B, PinNum::_9}; //PWM
-//constexpr inline PinDef clock_out{GPIO::C, PinNum::_7};	 //inverted
-constexpr inline PinDef clock_out{GPIO::C, PinNum::_7}; //inverted
+constexpr inline PinDef encoder_but_1{GPIO::G, PinNum::_13}; // pull-up
+constexpr inline PinDef encoder_but_2{GPIO::A, PinNum::_0};	 // pull-up
 
-// GPIO ins:
-constexpr inline PinDef random_gate_in{GPIO::B, PinNum::_10}; //inverted, no pullup
-constexpr inline PinDef trig_in{GPIO::G, PinNum::_15};		  //inverted, no pullup
-constexpr inline PinDef sync_in{GPIO::C, PinNum::_4};		  //inverted, no pullup
-constexpr inline PinDef rec_gate_in{GPIO::C, PinNum::_0};	  //inverted, no pullup
+constexpr inline PinDef button_1{GPIO::A, PinNum::_2}; // pull-up
+constexpr inline PinDef button_2{GPIO::C, PinNum::_5}; // pull-up
+constexpr inline PinDef button_3{GPIO::C, PinNum::_4}; // pull-up
+constexpr inline PinDef button_4{GPIO::A, PinNum::_7}; // pull-up
 
-// Neopixels (Driver TODO)
-constexpr inline PinDef neopixel_a{GPIO::A, PinNum::_7};
-constexpr inline PinDef neopixel_b{GPIO::E, PinNum::_10};
-constexpr inline PinDef neopixel_vu{GPIO::A, PinNum::_6};
+// Jack sense
+constexpr inline PinDef sense_injack{GPIO::E, PinNum::_3};	// pull-up
+constexpr inline PinDef sense_outjack{GPIO::B, PinNum::_4}; // pull-up
 
-// DAC out (driver TODO)
-constexpr inline PinDef cv_out_1{GPIO::A, PinNum::_4};
-constexpr inline PinDef cv_out_2{GPIO::A, PinNum::_5};
+//TODO
+// MIC (in audio)
 
-// MIDI IN Uart:
-constexpr inline UartConf MIDI_Uart{
-	.base_addr = UART7_BASE,
-	.TXPin = {GPIO::B, PinNum::_4, PinAF::AltFunc13},
-	.RXPin = {GPIO::A, PinNum::_8, PinAF::AltFunc13},
-	.mode = UartConf::Mode::TXRX,
-	.baud = 31250,
-	.wordlen = 8,
-	.parity = UartConf::Parity::None,
-	.stopbits = UartConf::StopBits::_1,
+// Accelerometer and touch sensor
+const inline mdrivlib::I2CConfig sensor_i2c_conf{
+	.I2Cx = I2C3,
+	.SCL = {GPIO::A, PinNum::_8, PinAF::AltFunc4},
+	.SDA = {GPIO::C, PinNum::_9, PinAF::AltFunc4},
+	.timing =
+		{
+			.PRESC = 0x40,
+			.SCLDEL_SDADEL = 0xFF,
+			.SCLH = 0x90,
+			.SCLL = 0x90,
+		},
+	.priority1 = 2,
+	.priority2 = 1,
 };
+
+const inline mdrivlib::I2CConfig battery_guage_conf = a7m4_shared_i2c_conf;
 
 } // namespace ControlPins
 

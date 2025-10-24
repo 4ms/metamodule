@@ -1,27 +1,14 @@
 #pragma once
+#include "conf/i2c_codec_conf.hh"
 #include "drivers/i2c_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change_conf.hh"
 
 namespace MetaModule
 {
-// I2C for usb-c chip
-const mdrivlib::I2CConfig usb_i2c_conf = {
-	.I2Cx = I2C6,
-	.SCL = {mdrivlib::GPIO::A, mdrivlib::PinNum::_11, mdrivlib::PinAF::AltFunc2},
-	.SDA = {mdrivlib::GPIO::A, mdrivlib::PinNum::_12, mdrivlib::PinAF::AltFunc2},
-	.timing =
-		{
-			.PRESC = 0x10, //0x20 is 100k
-			.SCLDEL_SDADEL = 0x50,
-			.SCLH = 0x58,
-			.SCLL = 0x58,
-		},
-	.priority1 = 2,
-	.priority2 = 2,
-	.analog_filter = true,
-	.digital_filter = mdrivlib::I2CConfig::DigitalFilterLevel::Max,
-};
+// I2C for usb-c chip, which is used by m4 in UsbManager
+// shared with codec (a7 only on init) and battery fuel guage (m4 controls)
+const mdrivlib::I2CConfig usb_i2c_conf = a7m4_shared_i2c_conf;
 
 struct FUSBPinChangeConf : mdrivlib::DefaultPinChangeConf {
 	static constexpr uint32_t pin = 10;

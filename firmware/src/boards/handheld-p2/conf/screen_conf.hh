@@ -1,8 +1,7 @@
 #pragma once
-#include "conf/screen_buffer_conf.hh"
-#include "drivers/dma_config_struct.hh"
-#include "drivers/dma_transfer.hh"
-#include "drivers/spi_screen_config_struct.hh"
+#include "drivers/bit_bang_spi_conf.hh"
+#include "drivers/ltdc_screen_config_struct.hh"
+#include "drivers/spi_config_struct.hh"
 
 namespace MetaModule
 {
@@ -12,71 +11,94 @@ using mdrivlib::PinAF;
 using mdrivlib::PinDef;
 using mdrivlib::PinMode;
 using mdrivlib::PinNum;
-using mdrivlib::SpiDataDir;
+using mdrivlib::PinPolarity;
 
-struct ScreenConf : mdrivlib::DefaultSpiScreenConf {
-	struct ScreenSpiConf : mdrivlib::DefaultSpiConf {
-		static constexpr uint16_t PeriphNum = 4; // SPI4
-		static constexpr uint16_t NumChips = 1;
-		static constexpr IRQn_Type IRQn = SPI4_IRQn;
-		static constexpr uint16_t priority1 = 2;
-		static constexpr uint16_t priority2 = 3;
-		static constexpr PinDef SCLK = {GPIO::E, PinNum::_12, PinAF::AltFunc5};
-		static constexpr PinDef COPI = {GPIO::E, PinNum::_6, PinAF::AltFunc5};
-		static constexpr PinDef CIPO = {GPIO::Unused, PinNum::_0};
-		static constexpr PinDef CS0 = {GPIO::E, PinNum::_11, PinAF::AltFunc5};
-		static constexpr bool use_hardware_ss = true;
-		static constexpr uint16_t clock_division = 8;
-		static constexpr uint16_t data_size = 8;
-		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
-		static constexpr uint8_t FifoThreshold = 2;
-		static constexpr bool LSBfirst = false;
+struct ScreenConf : mdrivlib::LTDCScreenConf {
 
-		static constexpr bool pulse_hardware_ss = true;
+	static constexpr PinDef r[8]{
+		{},										 //0
+		{},										 //1
+		{},										 //2
+		{GPIO::B, PinNum::_0, PinAF::AltFunc9},	 //3
+		{GPIO::A, PinNum::_5, PinAF::AltFunc14}, //4
+		{GPIO::C, PinNum::_0, PinAF::AltFunc14}, //5
+		{GPIO::B, PinNum::_1, PinAF::AltFunc9},	 //6
+		{GPIO::G, PinNum::_6, PinAF::AltFunc14}, //7
 	};
 
-	struct DMAConf : mdrivlib::DefaultDMAConf {
-		static constexpr auto DMAx = 1;
-		static constexpr auto StreamNum = 0;
-		static constexpr auto RequestNum = DMA_REQUEST_SPI4_TX;
-		static constexpr auto IRQn = DMA1_Stream0_IRQn;
-		static constexpr auto pri = 0;
-		static constexpr auto subpri = 0;
-		static constexpr auto dir = Mem2Periph;
-		static constexpr auto circular = false;
-		static constexpr auto periph_flow = false;
-		static constexpr auto transfer_size_mem = HalfWord;
-		static constexpr auto transfer_size_periph = HalfWord;
-		static constexpr auto dma_priority = High;
-		static constexpr auto mem_inc = true;
-		static constexpr auto periph_inc = false;
-		static constexpr auto half_transfer_interrupt_enable = false;
-		static constexpr auto enable_fifo = true;
-		static constexpr auto fifo_threshold = FifoHalfFull;
-		static constexpr auto mem_burst = Single;
-		static constexpr auto periph_burst = Single;
+	static constexpr PinDef g[8]{
+		{},										  //0
+		{},										  //1
+		{GPIO::A, PinNum::_6, PinAF::AltFunc14},  //2
+		{GPIO::E, PinNum::_11, PinAF::AltFunc14}, //3
+		{GPIO::B, PinNum::_10, PinAF::AltFunc14}, //4
+		{GPIO::F, PinNum::_11, PinAF::AltFunc14}, //5
+		{GPIO::C, PinNum::_7, PinAF::AltFunc14},  //6
+		{GPIO::D, PinNum::_3, PinAF::AltFunc14},  //7
 	};
 
-	static constexpr PinDef DCPinDef{GPIO::C, PinNum::_6};
-	using DCPin = mdrivlib::PinF<DCPinDef, PinMode::Output>;
-	static constexpr PinDef ResetPin{GPIO::E, PinNum::_13};
+	static constexpr PinDef b[8]{
+		{},										  //0
+		{},										  //1
+		{},										  //2
+		{GPIO::D, PinNum::_10, PinAF::AltFunc14}, //3
+		{GPIO::E, PinNum::_12, PinAF::AltFunc14}, //4
+		{GPIO::A, PinNum::_3, PinAF::AltFunc14},  //5
+		{GPIO::B, PinNum::_8, PinAF::AltFunc14},  //6
+		{GPIO::B, PinNum::_9, PinAF::AltFunc14},  //7
+	};
+	static constexpr PinDef de{GPIO::E, PinNum::_13, PinAF::AltFunc14};
+	static constexpr PinDef clk{GPIO::E, PinNum::_14, PinAF::AltFunc14}; //not connected on mp153-devboard-v0.2
+	static constexpr PinDef actual_clk{
+		GPIO::C, PinNum::_8, PinAF::AltFunc2}; //TIM3_CH3: actually connected to LCD clk pin
+	static constexpr PinDef vsync{GPIO::A, PinNum::_4, PinAF::AltFunc14};
+	static constexpr PinDef hsync{GPIO::C, PinNum::_6, PinAF::AltFunc14};
 
-	static constexpr bool IsInverted = false;
-	static constexpr uint32_t rowstart = 0;
-	static constexpr uint32_t colstart = 0;
+	static constexpr uint32_t viewWidth = 400;
+	static constexpr uint32_t viewHeight = 960;
 
-	static constexpr uint32_t width = ScreenBufferConf::width;
-	static constexpr uint32_t height = ScreenBufferConf::height;
-	enum Rotation { None, CW90, Flip180, CCW90 };
-	static constexpr Rotation rotation = CW90; // Todo: set this from ScreenBufferConfT
+	static constexpr uint32_t HSyncWidth = 16;
+	static constexpr uint32_t HBackPorch = 20;
+	static constexpr uint32_t HFrontPorch = 160; //toysynth: 28, was 160
 
-	using FrameBufferT = std::array<uint8_t, width * height / 8>; //one bit per pixel
-	using HalfFrameBufferT = std::array<uint8_t, width * height / 16>;
-
-	static constexpr uint32_t FrameBytes = sizeof(FrameBufferT);
-	static constexpr uint32_t HalfFrameBytes = sizeof(HalfFrameBufferT);
+	static constexpr uint32_t VSyncWidth = 3;
+	static constexpr uint32_t VBackPorch = 20;
+	static constexpr uint32_t VFrontPorch = 12;
 };
 
-using ScreenTransferDriverT = mdrivlib::DMATransfer<typename ScreenConf::DMAConf>;
+struct ScreenControlConf : mdrivlib::DefaultSpiConf {
+	static constexpr uint16_t PeriphNum = 3;
+
+	static constexpr PinDef SCLK = {GPIO::C, PinNum::_10, PinAF::AltFunc6};
+	static constexpr PinDef COPI = {GPIO::C, PinNum::_12, PinAF::AltFunc6};
+	static constexpr PinDef CS0 = {GPIO::D, PinNum::_2, PinAF::AFNone};
+
+	// Not SPI:
+	static constexpr PinDef reset{GPIO::C, PinNum::_11};
+
+	static constexpr bool use_hardware_ss = false;
+	static constexpr uint16_t clock_division = 128;
+	static constexpr uint16_t data_size = 9;
+	static constexpr uint8_t FifoThreshold = 1;
+	static constexpr uint32_t NumClocksToggleSSInterData = 4;
+
+	static constexpr mdrivlib::SpiDataDir data_dir = mdrivlib::SpiDataDir::TXOnly;
+};
+
+struct ScreenBitBangControlConf : mdrivlib::BitBangSpiTxConf {
+	static constexpr PinDef data{GPIO::C, PinNum::_12};
+	static constexpr PinDef chip_sel{GPIO::D, PinNum::_2};
+	static constexpr PinDef clock{GPIO::C, PinNum::_10};
+
+	static constexpr PinPolarity clk_polarity = PinPolarity::Normal;
+
+	static constexpr uint32_t DataSetupTime = 100;
+	static constexpr uint32_t ClockLowTime = 100;
+	static constexpr uint32_t ClockHighTime = 100;
+	static constexpr uint32_t ChipSelectSetupTime = 100;
+	static constexpr uint32_t WriteLatchAfterDelay = 100;
+
+	static constexpr PinDef reset{GPIO::C, PinNum::_11};
+};
 
 } // namespace MetaModule

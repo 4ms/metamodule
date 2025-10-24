@@ -17,40 +17,23 @@ using namespace mdrivlib;
 void Controls::update_debouncers() {
 	encoder1.update();
 	encoder2.update();
-	random_gate_in.update();
-	trig_in.update();
-	sync_in.update();
-	rec_gate_in.update();
+	encoder1_but.update();
+	encoder2_but.update();
+	button_1.update();
+	button_2.update();
+	button_3.update();
+	button_4.update();
+	sense_in_jack.update();
+	sense_out_jack.update();
+
+	accel.update();
 }
 
 void Controls::update_params() {
-	cur_params->gate_ins = random_gate_in.is_high() ? 0b0001 : 0b00;
-	cur_params->gate_ins |= trig_in.is_high() ? 0b0010 : 0b00;
-	cur_params->gate_ins |= sync_in.is_high() ? 0b0100 : 0b00;
-	cur_params->gate_ins |= rec_gate_in.is_high() ? 0b1000 : 0b00;
-
-	// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
-	if (_new_adc_data_ready) {
-		for (unsigned i = 0; i < knobs.size(); i++) {
-			knobs[i].set_new_value(get_pot_reading(i));
-			num_pot_updates = 0;
-		}
-		_new_adc_data_ready = false;
-	}
-
-	num_pot_updates++;
-	if (num_pot_updates >= knobs[0].get_num_updates()) {
-		for (unsigned i = 0; i < knobs.size(); i++) {
-			auto val = knobs[i].target_val;
-			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
-			knobs[i].cur_val = knobs[i].target_val;
-		}
-	} else {
-		for (unsigned i = 0; i < knobs.size(); i++) {
-			auto val = knobs[i].next();
-			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
-		}
-	}
+	// cur_params->gate_ins = random_gate_in.is_high() ? 0b0001 : 0b00;
+	// cur_params->gate_ins |= trig_in.is_high() ? 0b0010 : 0b00;
+	// cur_params->gate_ins |= sync_in.is_high() ? 0b0100 : 0b00;
+	// cur_params->gate_ins |= rec_gate_in.is_high() ? 0b1000 : 0b00;
 
 	if (_first_param) {
 		_first_param = false;
@@ -91,17 +74,8 @@ void Controls::parse_midi() {
 			usb_midi_host.transmit(bytes);
 		}
 	}
-
-	auto uart_midi_raw = cur_params->uart_raw_midi.raw();
-	if (uart_midi_raw != MidiMessage{}.raw()) {
-		uart_midi.transmit(uart_midi_raw >> 16); //status
-		uart_midi.transmit(uart_midi_raw >> 8);	 //data[0]
-		uart_midi.transmit(uart_midi_raw >> 0);	 //data[1]
-	}
-
 	// Parse incoming MIDI messages if available
 	cur_params->usb_raw_midi = usb_midi_rx_buf.get().value_or(MidiMessage{});
-	cur_params->uart_raw_midi = uart_midi_rx_buf.get().value_or(MidiMessage{});
 }
 
 template<size_t block_num>
@@ -162,9 +136,6 @@ void Controls::process() {
 
 void Controls::set_samplerate(unsigned sample_rate) {
 	this->sample_rate = sample_rate;
-	for (auto &_knob : knobs) {
-		_knob.set_num_updates(sample_rate / AdcReadFrequency);
-	}
 }
 
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
@@ -173,19 +144,9 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {
 
-	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
-		uint32_t tmp = ADC1->ISR;
-		if (tmp & ADC_ISR_EOS) {
-			ADC1->ISR = tmp | ADC_ISR_EOS;
-			_new_adc_data_ready = true;
-		}
-	});
-
 	set_samplerate(sample_rate);
 
-	pot_adc.start();
-
-	uart_midi.init();
+	accel.init();
 
 	test_pins();
 
@@ -200,15 +161,6 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 		update_debouncers();
 		update_params();
 	});
-}
-
-float Controls::get_pot_reading(uint32_t pot_id) {
-	if (pot_id < pot_vals.size()) {
-		auto raw = (int32_t)pot_vals[pot_id];
-		float val = raw - ADCs::MinPotValue;
-		return std::clamp(val / ADCs::MaxPotValue, 0.f, 1.f);
-	}
-	return 0;
 }
 
 } // namespace MetaModule

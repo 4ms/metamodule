@@ -19,6 +19,3 @@ const mdrivlib::I2CConfig a7m4_shared_i2c_conf = {
 	.priority1 = 2,
 	.priority2 = 1,
 };
-
-// Disabled
-const mdrivlib::I2CConfig battery_guage_conf = {.I2Cx = nullptr};
