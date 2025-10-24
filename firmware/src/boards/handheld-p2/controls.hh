@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/control_conf.hh"
 #include "conf/pin_conf.hh"
+#include "drivers/battery_guage_bq27441.hh"
 #include "drivers/lis2hh12_accel.hh"
 #include "drivers/uart.hh"
 #include "params/metaparams.hh"
@@ -64,6 +65,8 @@ private:
 	DebouncedPin<ControlPins::sense_outjack, PinPolarity::Inverted> sense_out_jack;
 
 	mdrivlib::LIS2HH12accelerometer accel{ControlPins::sensor_i2c_conf};
+
+	BatteryGuage batt{ControlPins::battery_guage_conf, 0xaa};
 
 	// MIDI
 	MidiHost &usb_midi_host;

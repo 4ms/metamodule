@@ -67,12 +67,6 @@ int main() {
 	WifiInterface::start();
 #endif
 
-#if METAMODULE_USE_BATTERY_GUAGE
-	//TODO: put this in controls
-	BatteryGuage batt{battery_guage_conf, 0xaa};
-	batt.init();
-#endif
-
 	// Controls
 	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host()};
 
@@ -102,10 +96,6 @@ int main() {
 		fs_messages.process();
 
 		module_fs_messages.process();
-
-#if METAMODULE_USE_BATTERY_GUAGE
-		batt.update();
-#endif
 
 #if METAMODULE_ENABLE_WIFI
 		WifiInterface::run();

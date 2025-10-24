@@ -147,6 +147,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	set_samplerate(sample_rate);
 
 	accel.init();
+	batt.init();
 
 	test_pins();
 

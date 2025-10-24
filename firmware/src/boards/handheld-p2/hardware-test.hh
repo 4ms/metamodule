@@ -69,9 +69,10 @@ void Controls::test_pins() {
 			printf("In jack sense: %d\n", (int)sense_in_jack.is_pressed());
 			printf("Out jack sense: %d\n", (int)sense_out_jack.is_pressed());
 
-			// auto xyz = accel.read_xyz();
 			auto xyz = accel.get_latest();
 			printf("Accel: x:%d y:%d z:%d\n", xyz.x, xyz.y, xyz.z);
+
+			batt.dump_registers();
 
 			printf("\n");
 		}
