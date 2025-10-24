@@ -110,23 +110,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
 		}
 
-		// Gate inputs
-		for (auto [i, sync_gatein] : enumerate(param_state.gate_ins)) {
-			bool gate = (params.gate_ins >> i) & 1;
-
-			sync_gatein.register_state(gate);
-
-			if (sync_gatein.just_went_low())
-				player.set_panel_input(i + FirstGateInput, 0.f);
-			else if (sync_gatein.just_went_high())
-				player.set_panel_input(i + FirstGateInput, 8.f);
-		}
-
 		// Pass Knob values to modules
-		for (auto [i, knob_val, knob_state] : countzip(params.knobs, param_state.knobs)) {
-			if (knob_state.store_changed(knob_val))
-				player.set_panel_param(i, knob_val);
-		}
+		// for (auto [i, knob_val, knob_state] : countzip(params.knobs, param_state.knobs)) {
+		// 	if (knob_state.store_changed(knob_val))
+		// 		player.set_panel_param(i, knob_val);
+		// }
 
 		// USB MIDI
 		MidiMessage msg = params.usb_raw_midi;
