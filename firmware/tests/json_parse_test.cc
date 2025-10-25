@@ -30,7 +30,6 @@ TEST_CASE("Brand overrides name") {
 	CHECK(metadata.brand_slug == "ThisSlug");
 	// brand overrides name
 	CHECK(metadata.display_name == "4msCompany");
-
 }
 
 TEST_CASE("No brand, use name") {
