@@ -2,6 +2,7 @@
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"
+#include "util/fixed_vector.hh"
 #include <algorithm>
 #include <span>
 #include <string>
@@ -25,16 +26,48 @@ struct Metadata {
 		std::string display_name;
 	};
 
+	std::vector<ModuleDisplayName> module_display_names;
+
 	// From the Rack plugin.json: Description and tag for each module
-	struct ModuleExtra {
+	struct ModuleMetaData {
 		std::string slug;
 		std::string description;
-		std::vector<std::string> tags;
+		// FIXME: possible ryml issue with vector of vector of strings. Use FixedVector<>
+		// Using std::vector hard-faults
+		FixedVector<std::string, 16> tags;
 	};
 
-	std::vector<ModuleExtra> module_extras;
-	std::vector<ModuleDisplayName> module_aliases;
+	std::vector<ModuleMetaData> module_extras;
 };
+
+static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
+	if (!n.is_map())
+		return false;
+
+	if (n.has_child("slug") && n.has_child("displayName")) {
+		n["slug"] >> s->slug;
+		n["displayName"] >> s->display_name;
+	}
+	return true;
+}
+
+static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleMetaData *s) {
+	if (!n.is_map())
+		return false;
+
+	if (n.has_child("slug"))
+		n["slug"] >> s->slug;
+
+	if (n.has_child("description"))
+		n["description"] >> s->description;
+
+	if (n.has_child("tags")) {
+		for (auto const &tag : n["tags"].children())
+			s->tags.push_back(std::string{std::string_view{tag.val()}});
+	}
+
+	return true;
+}
 
 inline bool parse_json(std::span<char> file_data, Metadata *metadata) {
 	RymlInit::init_once();
@@ -62,37 +95,9 @@ inline bool parse_json(std::span<char> file_data, Metadata *metadata) {
 		root["brand"] >> metadata->display_name;
 	}
 
-	// Modules array: capture description and tags for each module
 	if (root.has_child("modules")) {
 		root["modules"] >> metadata->module_extras;
 	}
-
-	return true;
-}
-
-static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
-	if (!n.is_map())
-		return false;
-
-	if (n.has_child("slug") && n.has_child("displayName")) {
-		n["slug"] >> s->slug;
-		n["displayName"] >> s->display_name;
-	}
-	return true;
-}
-
-static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleExtra *s) {
-	if (!n.is_map())
-		return false;
-
-	if (n.has_child("slug"))
-		n["slug"] >> s->slug;
-
-	if (n.has_child("description"))
-		n["description"] >> s->description;
-
-	if (n.has_child("tags"))
-		n["tags"] >> s->tags;
 
 	return true;
 }
@@ -124,11 +129,7 @@ inline bool parse_mm_json(std::span<char> file_data, Metadata *metadata) {
 	}
 
 	if (root.has_child("MetaModuleIncludedModules")) {
-		root["MetaModuleIncludedModules"] >> metadata->module_aliases;
-		printf("size = %zu\n", metadata->module_aliases.size());
-		for (auto &e : metadata->module_aliases) {
-			printf("'%s' - '%s'\n", e.slug.c_str(), e.display_name.c_str());
-		}
+		root["MetaModuleIncludedModules"] >> metadata->module_display_names;
 	}
 
 	return true;
