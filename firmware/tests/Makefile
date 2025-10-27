@@ -29,8 +29,8 @@ TEST_SOURCES += tests/resampler_tests.cc
 TEST_SOURCES += vcv_plugin/export/src/resampler.cc
 TEST_SOURCES += tests/stubs/plugin_module.cc
 TEST_SOURCES += src/params/expanders.cc
-TEST_SOURCES += src/gui/elements/element_name.cc
-TEST_SOURCES += src/gui/elements/panel_name.cc
+# TEST_SOURCES += src/boards/euro26hp/gui/elements/element_name.cc
+TEST_SOURCES += src/boards/euro26hp/gui/elements/panel_name.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
 
 CXXFLAGS = 	-Wall \
@@ -43,7 +43,11 @@ CXXFLAGS = 	-Wall \
 			-I../stubs \
 			-I. \
 			-I.. \
+			-I../.. \
+			-I../../.. \
 			-Isrc \
+			-I../../src/boards/euro26hp \
+			-I../src/boards/euro26hp \
 			-Isrc/boards/euro26hp \
 			-Ilib \
 			-Ilib/lvgl/lvgl \
@@ -81,7 +85,7 @@ $(BUILDDIR)/%.o: %.c
 $(BUILDDIR)/%.o: %.cc
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
