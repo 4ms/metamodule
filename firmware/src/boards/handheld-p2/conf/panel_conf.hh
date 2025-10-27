@@ -6,26 +6,29 @@
 #include <string_view>
 
 struct PanelDef {
-	static constexpr uint32_t PanelID = 4;
-	static constexpr char typeID[] = "Devboard-bfmu";
+	static constexpr uint32_t PanelID = 6;
+	static constexpr char typeID[] = "handheld-p2";
 
 	// These are used for numbering the jacks and controls and outputs
 	static constexpr uint32_t NumAudioIn = 2;
 	static constexpr uint32_t NumAudioOut = 2;
-	static constexpr uint32_t NumDACOut = 2;
+	static constexpr uint32_t NumDACOut = 0;
 
-	// 37 pots + 1 Exp pedal => 5 MUXes
-	static constexpr uint32_t NumPot = 38;
-	static constexpr uint32_t NumCVIn = 5;
+	static constexpr uint32_t NumPot = 2;
+	static constexpr uint32_t NumCVIn = 0;
 
-	static constexpr uint32_t NumGateIn = 4;
-	static constexpr uint32_t NumGateOut = 2;
+	static constexpr uint32_t NumGateIn = 0;
+	static constexpr uint32_t NumGateOut = 0;
+
+	static constexpr uint32_t NumEncoders = 2;
+	static constexpr uint32_t NumEncoderButtons = 2;
+	static constexpr uint32_t NumButtons = 4;
 
 	static constexpr uint32_t NumMetaCV = 0;
 	static constexpr uint32_t NumRgbButton = 0;
 	static constexpr uint32_t NumMetaRgbButton = 0;
 
-	static constexpr uint32_t NumKnobs = NumPot;
+	static constexpr uint32_t NumKnobs = NumPot + NumEncoders;
 	static constexpr int NumUserFacingInJacks = NumAudioIn + NumCVIn + NumGateIn;
 	static constexpr int NumUserFacingOutJacks = NumAudioOut + NumDACOut + NumGateOut;
 	static constexpr char NumJacks = NumUserFacingInJacks + NumUserFacingOutJacks + NumMetaCV;

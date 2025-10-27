@@ -1,5 +1,4 @@
 #include "audio/audio.hh"
-#include "conf/debug.hh"
 #include "conf/hsem_conf.hh"
 #include "drivers/hsem.hh"
 #include "param_block.hh"
@@ -74,9 +73,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
 						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
-
-	for (auto &s : param_state.smoothed_ins)
-		s.set_size(block_size_);
 }
 
 void AudioStream::start() {
@@ -105,9 +101,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			float calibrated_input = cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
 
 			player.set_panel_input(panel_jack_i, calibrated_input);
-
-			// Send smoothed sigals to other core
-			param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
 		}
 
 		// Pass Knob values to modules
@@ -120,8 +113,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		MidiMessage msg = params.usb_raw_midi;
 		midi.process(param_block.metaparams.usb_midi_connected, &msg);
 		param_blocks[cur_block].params[idx].usb_raw_midi = msg;
-
-		// TODO UART MIDI
 
 		// Run each module
 		player.update_patch();
@@ -182,9 +173,6 @@ void AudioStream::update_audio_settings() {
 				block_size_ = block_size;
 
 				set_block_spans();
-
-				for (auto &s : param_state.smoothed_ins)
-					s.set_size(block_size_);
 			}
 		} else {
 			pr_err("FAIL TO CHANGE SR/BS: %d/%d\n", sample_rate_, block_size_);
