@@ -50,7 +50,7 @@ public:
 			}
 		}
 
-		settings.last_patch_vol = Volume::SDCard;
+		settings.last_patch_vol = Volume::USB;
 		settings.last_patch_opened = "/patch.yml";
 
 		patch_playloader.request_new_audio_settings(
