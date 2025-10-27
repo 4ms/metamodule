@@ -1,4 +1,10 @@
+## Example:
+## make config-board BOARD=handheld
+## make all
+
 PRESET ?= full
+
+BOARD ?= 
 
 # Detect MinGW and use Make
 ifdef SYSTEMROOT
@@ -9,6 +15,9 @@ endif
 
 all:
 	cmake --build build
+
+config-board:
+	cmake --fresh --preset min-brands -G ${GEN} -DLOG_LEVEL=DEBUG -DBOARD=src/boards/$(BOARD)
 
 configure:
 	cmake --fresh --preset ${PRESET} -G ${GEN} -DLOG_LEVEL=DEBUG
