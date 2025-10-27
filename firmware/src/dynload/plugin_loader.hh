@@ -198,7 +198,7 @@ public:
 						if (!m.slug.empty()) {
 							if (!m.description.empty())
 								ModuleFactory::setModuleDescription(metadata.brand_slug + ":" + m.slug, m.description);
-							if (!m.tags.empty())
+							if (m.tags.size() > 0)
 								ModuleFactory::setModuleTags(metadata.brand_slug + ":" + m.slug, m.tags);
 						}
 					}
