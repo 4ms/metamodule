@@ -1,5 +1,6 @@
 #pragma once
 #include "convert_plugins.hh"
+#include "dynload/json_parse.hh"
 #include "ext_plugin_builtin.hh"
 #include "fat_file_io.hh"
 #include "fs/asset_drive/asset_fs.hh"
@@ -288,6 +289,55 @@ struct InternalPluginManager {
 		pluginInstance->addModel(rack::core::modelMIDI_CV);
 		pluginInstance->addModel(rack::core::modelCV_MIDI);
 #endif
+
+		for (auto &p : internal_plugins) {
+			parse_jsons(p.getBrand());
+		}
+	}
+
+	void parse_jsons(std::string const &plugin_name) {
+		Plugin::Metadata metadata;
+		std::vector<char> buffer;
+
+		std::string filename = plugin_name + "/plugin.json";
+		auto sz = ramdisk.get_file_size(filename);
+		pr_dbg("%s %u\n", filename.c_str(), sz);
+		if (sz > 0) {
+			buffer.resize(sz);
+			if (ramdisk.read_file(filename, buffer) > 0) {
+				Plugin::parse_json(buffer, &metadata);
+			}
+		}
+
+		filename = plugin_name + "/plugin-mm.json";
+		sz = ramdisk.get_file_size(filename);
+		pr_dbg("%s %u\n", filename.c_str(), sz);
+		if (sz > 0) {
+			buffer.resize(sz);
+			if (ramdisk.read_file(filename, buffer) > 0) {
+				Plugin::parse_mm_json(buffer, &metadata);
+			}
+		}
+
+		ModuleFactory::setBrandDisplayName(metadata.brand_slug, metadata.display_name);
+
+		for (auto const &alias : metadata.brand_aliases)
+			ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
+
+		for (auto const &alias : metadata.module_display_names) {
+			if (alias.display_name.length() && alias.slug.length()) {
+				ModuleFactory::setModuleDisplayName(metadata.brand_slug + ":" + alias.slug, alias.display_name);
+			}
+		}
+
+		for (auto const &m : metadata.module_extras) {
+			if (!m.slug.empty()) {
+				if (!m.description.empty())
+					ModuleFactory::setModuleDescription(metadata.brand_slug + ":" + m.slug, m.description);
+				if (m.tags.size() > 0)
+					ModuleFactory::setModuleTags(metadata.brand_slug + ":" + m.slug, m.tags);
+			}
+		}
 	}
 };
 } // namespace MetaModule
