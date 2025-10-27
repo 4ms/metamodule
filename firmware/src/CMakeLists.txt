@@ -86,9 +86,9 @@ if(NOT TARGET jansson)
 endif()
 
 #
-# SLS Exported GUI (ui_lvgl)
+# GUI (ui_lvgl)
 #
-add_subdirectory(${FWDIR}/src/gui/slsexport)
+add_subdirectory(${BOARD_SUPPORT_DIR}/gui/ui_lvgl)
 
 #
 # Core Interface

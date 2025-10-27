@@ -16,3 +16,5 @@ set(USE_WIFI_MODULE 1)
 
 set(BOARD_a7_defines METAMODULE_ENABLE_WIFI=1)
 set(BOARD_m4_defines METAMODULE_ENABLE_WIFI=1)
+
+add_subdirectory(${FWDIR}/src/gui/slsexport)
