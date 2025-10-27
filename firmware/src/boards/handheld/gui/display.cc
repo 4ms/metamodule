@@ -35,7 +35,7 @@ void init_gui() {
 
 	backlight.on();
 
-	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, framebuf1, framebuf2};
+	static LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, framebuf1, framebuf2};
 }
 
 // TIM3 with prescaler = 1:

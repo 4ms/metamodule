@@ -64,6 +64,8 @@ public:
 
 		MMDisplay::init(metaparams, screensaver, *first_framebuf);
 
+		Gui::init_lvgl_styles();
+
 		if (!Settings::read_settings(file_storage_proxy, &settings)) {
 			settings = UserSettings{};
 			if (!Settings::write_settings(file_storage_proxy, settings)) {
@@ -91,12 +93,7 @@ public:
 	void update_screen() {
 		auto now = HAL_GetTick();
 		if ((now - last_screen_update_tm) > 3) {
-			// MMDisplay::test_pattern(pat, first_buf ? *first_framebuf : *second_framebuf);
-			// pat = (pat + 1) % 3;
-
-			// first_buf = !first_buf;
 			last_screen_update_tm = now;
-			printf("update screen\n");
 			lv_timer_handler();
 		}
 	}
