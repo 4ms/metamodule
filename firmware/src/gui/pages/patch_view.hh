@@ -722,11 +722,21 @@ private:
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 
 		if (!page->is_patch_playloaded) {
+			// Don't try to load missing plugins if we play the patch for the first time.
+			// Because in order to get here, the user just opened the patch and would have been asked a moment ago.
+			// page->missing_plugins.start(page->patches.get_view_patch(), page->group, [page = page](bool did_load) {
 			page->patch_playloader.request_load_view_patch();
+			// });
 
 		} else if (page->patch_playloader.is_audio_muted()) {
-			page->patch_playloader.apply_suggested_audio_settings();
-			page->patch_playloader.start_audio();
+			page->missing_plugins.start(page->patches.get_playing_patch(), page->group, [page = page](bool did_load) {
+				if (did_load) {
+					page->patch_playloader.request_reload_playing_patch(true);
+				} else {
+					page->patch_playloader.apply_suggested_audio_settings();
+					page->patch_playloader.start_audio();
+				}
+			});
 
 		} else {
 			page->patch_playloader.stop_audio();
