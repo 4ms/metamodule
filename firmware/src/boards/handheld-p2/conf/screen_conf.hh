@@ -64,6 +64,8 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 	static constexpr uint32_t VSyncWidth = 3;
 	static constexpr uint32_t VBackPorch = 20;
 	static constexpr uint32_t VFrontPorch = 12;
+
+	static constexpr PinDef PWMBackLight = {GPIO::E, PinNum::_4, PinAF::AltFunc6};
 };
 
 struct ScreenControlConf : mdrivlib::DefaultSpiConf {

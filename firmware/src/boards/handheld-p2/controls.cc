@@ -42,8 +42,8 @@ void Controls::update_params() {
 
 		cur_metaparams->usb_midi_connected = usb_midi_connected;
 
-		cur_metaparams->encoder[0].motion = encoder1.read();
-		cur_metaparams->encoder[1].motion = encoder2.read();
+		// cur_metaparams->encoder[0].motion = encoder1.read();
+		// cur_metaparams->encoder[1].motion = encoder2.read();
 	}
 
 	parse_midi();
@@ -149,7 +149,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	accel.init();
 	batt.init();
 
-	test_pins();
+	// test_pins();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen

@@ -92,6 +92,7 @@ public:
 
 		ltdc_driver.init(buf.data());
 		// test_pattern(2, buf);
+		printf("init\n");
 	}
 
 	static void set_buffer(auto *buff) {
@@ -207,21 +208,21 @@ public:
 			data->continue_reading = true;
 		}
 #else
-		if (_screensaver->is_active()) {
-			if (m->rotary_button.is_just_released() || m->rotary.use_motion())
-				_screensaver->wake();
-			return;
-		} else
-			m->rotary_button.clear_events();
+		// if (_screensaver->is_active()) {
+		// 	if (m->rotary_button.is_just_released() || m->rotary.use_motion())
+		// 		_screensaver->wake();
+		// 	return;
+		// } else
+		// 	m->rotary_button.clear_events();
 
-		if (m->meta_buttons[0].is_pressed()) {
-			if (m->rotary.motion != 0) {
-				m->ignore_metabutton_release = true;
-				m->rotary_with_metabutton.transfer_motion(m->rotary);
-				_screensaver->wake();
-			}
-		} else
-			data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+		// if (m->meta_buttons[0].is_pressed()) {
+		// 	if (m->rotary.motion != 0) {
+		// 		m->ignore_metabutton_release = true;
+		// 		m->rotary_with_metabutton.transfer_motion(m->rotary);
+		// 		_screensaver->wake();
+		// 	}
+		// } else
+		// 	data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
 #endif
 
 #ifdef MONKEYROTARY
@@ -234,10 +235,10 @@ public:
 		} else
 			data->enc_diff = m->rotary.use_motion();
 #else
-		data->enc_diff = m->rotary.use_motion();
+		// data->enc_diff = m->rotary.use_motion();
 
-		if (data->state || data->enc_diff)
-			_screensaver->wake();
+		// if (data->state || data->enc_diff)
+		// 	_screensaver->wake();
 #endif
 	}
 };

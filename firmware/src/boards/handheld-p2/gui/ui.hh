@@ -3,17 +3,20 @@
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "general_io.hh"
-#include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
+#include "screen/lvgl_driver.hh"
 #include "user_settings/settings.hh"
 #include "user_settings/settings_file.hh"
 
 namespace MetaModule
 {
+
+extern std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height> *first_framebuf;
+extern std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height> *second_framebuf;
 
 class Ui {
 private:
@@ -26,7 +29,7 @@ private:
 	MetaParams metaparams;
 	UserSettings settings;
 
-	ParamDbgPrint print_dbg_params{params, metaparams};
+	Screensaver screensaver{settings.screensaver};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
@@ -42,6 +45,8 @@ public:
 		, file_storage_proxy{file_storage_proxy} {
 		params.clear();
 		metaparams.clear();
+
+		MMDisplay::init(metaparams, screensaver, *first_framebuf);
 
 		if (!Settings::read_settings(file_storage_proxy, &settings)) {
 			settings = UserSettings{};
@@ -60,8 +65,18 @@ public:
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 	}
 
+	uint32_t pat = 0;
+	bool first_buf = false;
 	void update_screen() {
-		// no screen
+		auto now = HAL_GetTick();
+		if ((now - last_screen_update_tm) > 200) {
+			printf("Test\n");
+			MMDisplay::test_pattern(pat, first_buf ? *first_framebuf : *second_framebuf);
+			pat = (pat + 1) % 3;
+
+			first_buf = !first_buf;
+			last_screen_update_tm = now;
+		}
 	}
 
 	void read_patch_gui_elements() {
@@ -168,9 +183,9 @@ public:
 private:
 	void page_update_task() {
 		// Clear all accumulated knob change events
-		for (auto &knob : params.knobs) {
-			knob.changed = false;
-		}
+		// for (auto &knob : params.knobs) {
+		// 	knob.changed = false;
+		// }
 
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
@@ -183,6 +198,7 @@ private:
 	}
 
 	uint32_t last_page_update_tm = 0;
+	uint32_t last_screen_update_tm = 0;
 };
 
 } // namespace MetaModule
