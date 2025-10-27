@@ -3,6 +3,7 @@
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "general_io.hh"
+#include "gui/pages/page_manager.hh"
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -24,6 +25,9 @@ private:
 	PatchPlayLoader &patch_playloader;
 	PluginManager &plugin_manager;
 	FileStorageProxy &file_storage_proxy;
+	NotificationQueue notify_queue;
+
+	PageManager page_manager;
 
 	ParamsState params;
 	MetaParams metaparams;
@@ -42,7 +46,19 @@ public:
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
 		, plugin_manager{plugin_manager}
-		, file_storage_proxy{file_storage_proxy} {
+		, file_storage_proxy{file_storage_proxy}
+		, page_manager{file_storage_proxy,
+					   open_patch_manager,
+					   patch_playloader,
+					   params,
+					   metaparams,
+					   notify_queue,
+					   patch_mod_queue,
+					   plugin_manager,
+					   settings,
+					   screensaver,
+					   ramdisk} {
+
 		params.clear();
 		metaparams.clear();
 
@@ -63,19 +79,25 @@ public:
 		patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.allow_jump_outofrange);
 
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
+
+		auto d = lv_obj_create(nullptr);
+		lv_obj_set_style_bg_color(d, lv_color_hex(0x3377AA), 0);
+		lv_obj_set_style_bg_opa(d, LV_OPA_100, 0);
+		lv_scr_load(d);
 	}
 
-	uint32_t pat = 0;
-	bool first_buf = false;
+	// uint32_t pat = 0;
+	// bool first_buf = false;
 	void update_screen() {
 		auto now = HAL_GetTick();
-		if ((now - last_screen_update_tm) > 200) {
-			printf("Test\n");
-			MMDisplay::test_pattern(pat, first_buf ? *first_framebuf : *second_framebuf);
-			pat = (pat + 1) % 3;
+		if ((now - last_screen_update_tm) > 3) {
+			// MMDisplay::test_pattern(pat, first_buf ? *first_framebuf : *second_framebuf);
+			// pat = (pat + 1) % 3;
 
-			first_buf = !first_buf;
+			// first_buf = !first_buf;
 			last_screen_update_tm = now;
+			printf("update screen\n");
+			lv_timer_handler();
 		}
 	}
 
@@ -188,6 +210,8 @@ private:
 		// }
 
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
+
+		page_manager.update_current_page();
 
 		new_patch_data.store(false, std::memory_order_release);
 

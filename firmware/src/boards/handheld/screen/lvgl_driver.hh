@@ -34,7 +34,7 @@ class LVGLDriver {
 
 public:
 	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb, std::span<lv_color_t> buffer1, std::span<lv_color_t> buffer2) {
-		UartLog::log("LVGLDriver started\n");
+		UartLog::log("LVGLDriver started)\n");
 
 		lv_init();
 		lv_disp_draw_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
@@ -74,8 +74,6 @@ class MMDisplay {
 
 	static inline ScreenParallelWriter<ScreenConf> ltdc_driver;
 
-	// static inline std::array<lv_color_t, BufferSize> testbuf;
-
 public:
 	static void init(MetaParams &metaparams, Screensaver &screensaver, std::span<lv_color_t> buf) {
 		using namespace mdrivlib;
@@ -92,12 +90,12 @@ public:
 
 		ltdc_driver.init(buf.data());
 		// test_pattern(2, buf);
-		printf("init\n");
+		printf("MMDisplay::init\n");
 	}
 
-	static void set_buffer(auto *buff) {
-		ltdc_driver.set_buffer(buff);
-	}
+	// static void set_buffer(auto *buff) {
+	// 	ltdc_driver.set_buffer(buff);
+	// }
 
 	static void test_pattern(unsigned id, std::span<lv_color_t> buf) {
 		// auto buf = std::span<lv_color_t>(testbuf);
@@ -179,6 +177,7 @@ public:
 	}
 
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
+		pr_dbg("flush\n");
 		ltdc_driver.set_buffer(color_p);
 		lv_disp_flush_ready(disp_drv);
 	}
