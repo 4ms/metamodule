@@ -85,7 +85,7 @@ $(BUILDDIR)/%.o: %.c
 $(BUILDDIR)/%.o: %.cc
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
