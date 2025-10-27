@@ -20,16 +20,22 @@ class CatchupParam {
 	float fade_coef_b{1.f};
 	float fade_offset_b{0.f};
 
+	float encoder_resolution{0.01f};
+
 	enum class State { Tracking, Catchup } state = State::Catchup;
 
 public:
-	enum class Mode { ResumeOnMotion, ResumeOnEqual, LinearFade } mode = Mode::ResumeOnMotion;
+	enum class Mode { ResumeOnMotion, ResumeOnEqual, LinearFade, Encoder } mode = Mode::ResumeOnMotion;
 
 	// Called when a physical knob changes value.
 	// - cur_phys_val is the new physical value of the knob.
 	// - cur_module_val is the value the module reports the knob is at.
 	// Returns the value that we should set the module param, or nullopt if we shouldn't set anything
 	std::optional<T> update(T cur_phys_val, T cur_module_val) {
+
+		if (mode == Mode::Encoder) {
+			return std::clamp<T>(cur_phys_val * encoder_resolution + cur_module_val, 0, 1);
+		}
 
 		last_phys_val = cur_phys_val;
 
