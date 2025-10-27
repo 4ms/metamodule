@@ -7,12 +7,11 @@
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
-#include "metaparams.hh"
 #include "midi/midi_message.hh"
 #include "midi_controls.hh"
 #include "param_block.hh"
-#include "params.hh"
-#include "sense_pin_reader.hh"
+#include "params/metaparams.hh"
+#include "params/params.hh"
 #include "usb/midi_host.hh"
 #include "util/edge_detector.hh"
 #include "util/interp_param.hh"
@@ -47,25 +46,6 @@ private:
 	void update_rotary();
 
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
-
-	// Digital controls: Rotary, Buttons and Gate jacks
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::rotA, ControlPins::rotB> rotary;
-	DebouncedPin<ControlPins::rotS, PinPolarity::Inverted> rotary_button;
-	DebouncedPin<ControlPins::but0, PinPolarity::Inverted> button0;
-	DebouncedPin<ControlPins::gate_in_1, PinPolarity::Normal> gate_in_1;
-	DebouncedPin<ControlPins::gate_in_2, PinPolarity::Normal> gate_in_2;
-	bool _rotary_moved_while_pressed = false;
-
-	// Analog controls (pots)
-	static constexpr size_t NumPotAdcs = PotConfs.size();
-	std::array<uint16_t, NumPotAdcs> pot_vals{};
-	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
-
-	InterpParamVariable<float> _knobs[PanelDef::NumPot]{};
-	static constexpr uint32_t AdcReadFrequency = 580; //571
-	bool _new_adc_data_ready = false;
-
-	SensePinReader sense_pin_reader;
 
 	// MIDI
 	MidiHost &_midi_host;

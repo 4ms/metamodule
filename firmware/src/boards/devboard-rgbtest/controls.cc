@@ -13,86 +13,12 @@ namespace MetaModule
 using namespace mdrivlib;
 
 void Controls::update_debouncers() {
-	rotary.update();
-	rotary_button.update();
-	button0.update();
-
-	gate_in_1.update();
-	gate_in_2.update();
 }
 
 void Controls::update_params() {
-	cur_params->gate_ins = gate_in_1.is_high() ? 0b01 : 0b00;
-	cur_params->gate_ins |= gate_in_2.is_high() ? 0b10 : 0b00;
-
-	// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
-	if (_new_adc_data_ready) {
-		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
-			_knobs[i].set_new_value(get_pot_reading(i));
-			num_pot_updates = 0;
-		}
-		_new_adc_data_ready = false;
-	}
-
-	num_pot_updates++;
-	if (num_pot_updates >= _knobs[0].get_num_updates()) {
-		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
-			auto val = _knobs[i].target_val;
-			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
-			_knobs[i].cur_val = _knobs[i].target_val;
-		}
-	} else {
-		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
-			auto val = _knobs[i].next();
-			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
-		}
-	}
-
-	if (_first_param) {
-		_first_param = false;
-
-		update_midi_connected();
-
-		cur_metaparams->midi_connected = _midi_connected;
-
-		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
-
-		update_rotary();
-
-		// Meta button
-		cur_metaparams->meta_buttons[0].transfer_events(button0);
-	}
-
-	parse_midi();
-
-	cur_params++;
-	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
-		_buffer_full = true;
 }
 
 void Controls::update_rotary() {
-	// Rotary button
-	if (rotary_button.is_just_pressed()) {
-		_rotary_moved_while_pressed = false;
-		cur_metaparams->rotary_button.register_rising_edge();
-	}
-
-	if (rotary_button.is_just_released()) {
-		if (_rotary_moved_while_pressed) {
-			cur_metaparams->rotary_button.reset();
-		} else {
-			cur_metaparams->rotary_button.register_falling_edge();
-		}
-	}
-	cur_metaparams->rotary_button.set_state_no_events(rotary_button.is_pressed());
-
-	// Rotary turning
-	int new_rotary_motion = rotary.read();
-	bool pressed = rotary_button.is_pressed();
-	cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
-	cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
-	//"If rotary was turned at any point since button was pressed" --> logical OR of all (pressed AND new_motion)
-	_rotary_moved_while_pressed |= pressed && (new_rotary_motion != 0);
 }
 
 void Controls::update_midi_connected() {
@@ -196,16 +122,9 @@ void Controls::start() {
 }
 
 void Controls::process() {
-	if constexpr (UseGpioExpanderForSensePins) {
-		sense_pin_reader.update();
-	}
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
-	this->sample_rate = sample_rate;
-	for (auto &_knob : _knobs) {
-		_knob.set_num_updates(sample_rate / AdcReadFrequency);
-	}
 }
 
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
@@ -213,26 +132,6 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {
-
-	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
-	// TODO: _new_adc_data_ready is written from multiple threads, but is not thread-safe. Use atomic? Or accept dropped/duplicate ADC values?
-	if constexpr (PotConfs.size() > 0) {
-		InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
-			uint32_t tmp = ADC1->ISR;
-			if (tmp & ADC_ISR_EOS) {
-				ADC1->ISR = tmp | ADC_ISR_EOS;
-				_new_adc_data_ready = true;
-			}
-		});
-
-		set_samplerate(sample_rate);
-
-		pot_adc.start();
-	}
-
-	if constexpr (UseGpioExpanderForSensePins) {
-		sense_pin_reader.init();
-	}
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen
@@ -248,11 +147,6 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 }
 
 float Controls::get_pot_reading(uint32_t pot_id) {
-	if (pot_id < pot_vals.size()) {
-		auto raw = (int32_t)pot_vals[pot_id];
-		float val = raw - MinPotValue;
-		return std::clamp(val / MaxPotValue, 0.f, 1.f);
-	}
 	return 0;
 }
 

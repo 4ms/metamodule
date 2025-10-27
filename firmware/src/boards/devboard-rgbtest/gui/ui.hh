@@ -2,7 +2,6 @@
 #include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
-#include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -28,7 +27,6 @@ private:
 	MetaParams metaparams;
 	UserSettings settings;
 
-	ParamDbgPrint print_dbg_params{params, metaparams};
 	Screensaver screensaver{settings.screensaver};
 
 public:
@@ -88,6 +86,10 @@ public:
 
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());
+	}
+
+	void read_patch_gui_elements() {
+		//
 	}
 
 	TextDisplayWatcher &displays() {
