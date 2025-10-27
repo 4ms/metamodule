@@ -10,9 +10,9 @@ namespace MetaModule::Settings
 {
 
 bool write_settings(FileStorageProxy &proxy, UserSettings const &settings, Volume vol) {
-	std::array<char, 2048> buffer{};
+	std::array<char, 16384> buffer{};
 
-	auto sz = serialize(settings, buffer);
+	auto sz = Settings::serialize(settings, buffer);
 
 	auto yaml_clean = std::span<char>{buffer.data(), sz};
 

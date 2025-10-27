@@ -31,4 +31,6 @@ void append_param_alias(std::string &opts, GuiElement const &gui_element, PatchD
 
 void param_item_name(std::string &s, MappedKnob const &map, PatchData const *patch);
 
+void param_item_short_name(std::string &s, MappedKnob const &map, PatchData const *patch);
+
 } // namespace MetaModule

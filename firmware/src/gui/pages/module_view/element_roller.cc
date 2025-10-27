@@ -5,16 +5,19 @@ namespace MetaModule
 {
 
 void ModuleViewPage::show_roller() {
-	metaparams.rotary_pushed.use_motion();
-	module_context_menu.hide();
-	mode = ViewMode::List;
-	mapping_pane.hide();
-	lv_show(ui_ElementRoller);
-	lv_show(ui_ElementRollerPanel);
-	lv_group_focus_obj(ui_ElementRoller);
-	lv_group_set_editing(group, true);
-	lv_group_set_wrap(group, false);
-	args.detail_mode = false;
+	// 322 when closed, 102 when open
+	if (lv_obj_get_x(ui_MVSettingsMenu) > 200) {
+		metaparams.rotary_pushed.use_motion();
+		module_context_menu.hide();
+		mode = ViewMode::List;
+		mapping_pane.hide();
+		lv_show(ui_ElementRoller);
+		lv_show(ui_ElementRollerPanel);
+		lv_group_focus_obj(ui_ElementRoller);
+		lv_group_set_editing(group, true);
+		lv_group_set_wrap(group, false);
+		args.detail_mode = false;
+	}
 }
 
 void ModuleViewPage::populate_element_objects() {
@@ -63,7 +66,9 @@ void ModuleViewPage::populate_roller() {
 		opts.append(" ");
 
 		// Handle names that contain a newline or null char
-		opts.append(base.short_name.substr(0, base.short_name.find_first_of("\0\n")));
+		// Must use sv literal so the trailing \0 is considered a char, not a terminator
+		using namespace std::literals;
+		opts.append(base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv)));
 
 		if (gui_el.mapped_panel_id) {
 			append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());

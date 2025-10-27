@@ -37,9 +37,10 @@ struct MissingPluginAutoload {
 				}
 
 				if (auto colon = slug.find_first_of(':'); colon != slug.npos) {
-					auto brand = std::string(slug.substr(0, colon));
+					auto brand = ModuleFactory::cleanupBrandName(slug.substr(0, colon));
 
-					if (ModuleFactory::isValidBrand(brand)) {
+					// Check if it the brand is already loaded
+					if (ModuleFactory::isRegisteredBrand(brand)) {
 						// Brand plugin is loaded, but module is just not known.
 						// We could unload the plugin and scan for newer versions,
 						// and/or tell the user to look for new versions.
