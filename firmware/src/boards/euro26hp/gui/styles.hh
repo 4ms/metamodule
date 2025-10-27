@@ -1,10 +1,9 @@
 #pragma once
+#include "gui/fonts/fonts.hh"
 #include "lvgl.h"
 #include "patch-serial/patch/mapping_ids.hh"
 #include "patch-serial/patch/midi_def.hh"
-#include "slsexport/meta5/ui.h"
 #include <array>
-#include <charconv>
 #include <string>
 
 // lvgl has prop1 and has_group fields out of order, thus not C++ friendly
