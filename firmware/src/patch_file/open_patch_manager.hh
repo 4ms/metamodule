@@ -29,6 +29,7 @@ public:
 
 			pr_dbg("Open patch found already, will replace the patch data: is_playing=%d\n", patch_is_playing);
 			patch = existing_patch;
+			patch->patch = PatchData{};
 
 		} else {
 			pr_dbg("Adding new patch '%s' on vol:%d\n", patch_loc.filename.data(), patch_loc.vol);
@@ -199,6 +200,11 @@ public:
 	void set_view_patch_filesize(uint32_t filesize) {
 		if (view_patch_)
 			view_patch_->filesize = filesize;
+	}
+
+	void mark_playing_patch_modified() {
+		if (playing_patch_)
+			playing_patch_->modification_count++;
 	}
 
 	unsigned get_playing_patch_modification_count() {
