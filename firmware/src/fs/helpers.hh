@@ -16,6 +16,7 @@ namespace MetaModule
 // creates a vector of extensions: {".wav", ".WAV", ".raw"}
 std::vector<std::string> parse_extensions(std::string_view str, std::string const &delimiters = ",");
 
+// give a file path, returns {"usb:", "subdir/patch.yml"}
 std::pair<std::string_view, Volume> split_volume(const char *filename);
 std::pair<std::string_view, Volume> split_volume(std::string_view filename);
 
@@ -32,13 +33,41 @@ inline std::string_view volume_string(Volume vol) {
 		return "";
 }
 
-inline std::string make_full_path(std::string_view path, std::string_view filename = "") {
+constexpr auto volume_labels = std::array{
+	std::pair<std::string_view, Volume>{{"ram:"}, {Volume::RamDisk}},
+	std::pair<std::string_view, Volume>{{"usb:"}, {Volume::USB}},
+	std::pair<std::string_view, Volume>{{"sdc:"}, {Volume::SDCard}},
+	std::pair<std::string_view, Volume>{{"nor:"}, {Volume::NorFlash}},
+	// Alternative labels:
+	std::pair<std::string_view, Volume>{{"USB:"}, {Volume::USB}},
+	std::pair<std::string_view, Volume>{{"SD Card:"}, {Volume::SDCard}},
+	std::pair<std::string_view, Volume>{{"Internal:"}, {Volume::NorFlash}},
+};
+
+constexpr Volume string_to_volume(std::string_view str) {
+	for (auto const &label : volume_labels) {
+		if (str.starts_with(label.first)) {
+			return label.second;
+		}
+	}
+	return Volume::MaxVolumes;
+}
+
+// Cleans up the path
+inline std::string make_full_path(std::string_view path, std::string_view filename) {
 	std::string fullpath = std::string(path) + std::string("/");
 	return std::filesystem::path(fullpath).lexically_normal().string() + std::string(filename);
 }
 
-inline std::string make_full_path(Volume vol, std::string_view path, std::string_view filename = "") {
+// Cleans up the path
+inline std::string make_full_path(Volume vol, std::string_view path, std::string_view filename) {
 	auto fullpath = std::string(volume_string(vol)) + make_full_path(path, filename);
+	return std::filesystem::path(fullpath).lexically_normal().string();
+}
+
+// Cleans up the path
+inline std::string make_full_path(Volume vol, std::string_view path) {
+	auto fullpath = std::string(volume_string(vol)) + std::string(path);
 	return std::filesystem::path(fullpath).lexically_normal().string();
 }
 
@@ -64,11 +93,11 @@ get_dir_entries(auto &drive, std::string_view path, std::string_view filter_exts
 					for (auto const &ext : exts) {
 						if (name.ends_with(ext)) {
 							dir_tree->files.push_back({std::string(name), (uint32_t)size, (uint32_t)tm});
-							pr_dbg("Match: %s ends in %s\n", name.data(), ext.data());
+							pr_trace("Match: %s ends in %s\n", name.data(), ext.data());
 							break;
 						}
 					}
-					pr_dbg("No match: %s\n", name.data());
+					pr_trace("No match: %s\n", name.data());
 				}
 			}
 		});

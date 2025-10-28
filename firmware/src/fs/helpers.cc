@@ -9,7 +9,7 @@ std::vector<std::string> parse_extensions(std::string_view str, std::string cons
 
 	// Matching *.* means no filtering: return an empty vector
 	if (str.contains("*.*")) {
-		// pr_dbg("M4: filter contains *.*, ignoring filter\n");
+		pr_trace("M4: filter contains *.*, ignoring filter\n");
 		return tokens;
 	}
 
@@ -23,7 +23,7 @@ std::vector<std::string> parse_extensions(std::string_view str, std::string cons
 		if (str[last_pos] == ' ')
 			last_pos++;
 		auto s = std::string(str.substr(last_pos, pos - last_pos));
-		pr_dbg("M4: filter on '%s'\n", s.c_str());
+		pr_trace("M4: filter on '%s'\n", s.c_str());
 		tokens.push_back(s);
 
 		// Skip delimiters.
@@ -34,26 +34,6 @@ std::vector<std::string> parse_extensions(std::string_view str, std::string cons
 	}
 
 	return tokens;
-}
-
-constexpr auto volume_labels = std::array{
-	std::pair<std::string_view, Volume>{{"ram:"}, {Volume::RamDisk}},
-	std::pair<std::string_view, Volume>{{"usb:"}, {Volume::USB}},
-	std::pair<std::string_view, Volume>{{"sdc:"}, {Volume::SDCard}},
-	std::pair<std::string_view, Volume>{{"nor:"}, {Volume::NorFlash}},
-	// Alternative labels:
-	std::pair<std::string_view, Volume>{{"USB:"}, {Volume::USB}},
-	std::pair<std::string_view, Volume>{{"SD Card:"}, {Volume::SDCard}},
-	std::pair<std::string_view, Volume>{{"Internal:"}, {Volume::NorFlash}},
-};
-
-constexpr std::string_view vol_label(Volume vol) {
-	for (auto &label : volume_labels) {
-		if (vol == label.second) {
-			return label.first;
-		}
-	}
-	return "";
 }
 
 std::pair<std::string_view, Volume> split_volume(const char *filename) {

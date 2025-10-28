@@ -11,6 +11,8 @@
 #include "fw_update/auto_updater.hh"
 #include "gui/display.hh"
 #include "gui/ui.hh"
+#include "internal_interface/plugin_app_if_internal.hh"
+#include "internal_interface/plugin_app_interface.hh"
 #include "internal_plugin_manager.hh"
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
@@ -52,6 +54,11 @@ extern "C" void aux_core_main() {
 	ui.update_screen();
 	ui.update_page();
 
+	PluginAppInterface::Internal plugin_internal{
+		ui.get_settings(), *A7SharedMemoryS::ptrs.open_patch_manager, ui.get_notify_queue()};
+	PluginAppInterface plugin_interface{plugin_internal};
+	plugin_interface.register_interface();
+
 	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
 	if (!internal_plugin_manager.asset_fs_valid) {
 		ui.notify_error("Graphic assets are corrupted!\nRe-install firmware.");
@@ -68,7 +75,7 @@ extern "C" void aux_core_main() {
 	AutoUpdater::run(file_storage_proxy, ui);
 
 	// allow time for USB drive to mount
-	HAL_Delay(2000);
+	HAL_Delay(4000);
 
 	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
 		CpuLoadTest::run_tests(file_storage_proxy, ui);
