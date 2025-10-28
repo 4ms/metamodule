@@ -290,6 +290,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(rack::core::modelCV_MIDI);
 #endif
 
+		parse_jsons("4ms");
 		for (auto &p : internal_plugins) {
 			parse_jsons(p.getBrand());
 		}
