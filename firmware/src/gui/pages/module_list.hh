@@ -138,14 +138,18 @@ private:
 		std::string roller_str;
 		roller_str += Gui::green_text("Sort by brand");
 		roller_str += "\n";
-		for (auto const &t : all_tags) {
+		unsigned sel_idx = 0;
+		for (unsigned i = 0; auto const &t : all_tags) {
 			roller_str += t;
 			roller_str += "\n";
+			if (sel_tag == t)
+				sel_idx = i + 1; // shift by 1
+			i++;
 		}
 		if (roller_str.size())
 			roller_str.pop_back();
 		lv_roller_set_options(ui_ModuleListRoller, roller_str.c_str(), LV_ROLLER_MODE_NORMAL);
-		lv_roller_set_selected(ui_ModuleListRoller, 0, LV_ANIM_OFF);
+		lv_roller_set_selected(ui_ModuleListRoller, sel_idx, LV_ANIM_OFF);
 	}
 
 	void roller_module_list() {
@@ -260,7 +264,11 @@ private:
 public:
 	void prepare_focus() final {
 		view = View::CategoryRoller;
-		roller_brand_list();
+		if (sort == Sort::Brand) {
+			roller_brand_list();
+		} else {
+			roller_tag_list();
+		}
 		roller_hover.hide();
 	}
 
