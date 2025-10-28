@@ -1,5 +1,6 @@
 #pragma once
 // #include "CoreModules/elements/element_counter.hh"
+#include "CoreModules/elements/element_counter.hh"
 #include "patch_file/patch_location.hh"
 #include <cstdint>
 #include <optional>

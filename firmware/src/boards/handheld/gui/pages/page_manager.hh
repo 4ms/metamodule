@@ -55,7 +55,11 @@ public:
 	}
 
 	void init() {
-		page_list.request_initial_page(PageId::FullscreenGraphic, {});
+		PageArguments args;
+		args.module_id = 1;
+		args.element_indices = ElementCount::Indices{.light_idx = 5};
+		args.element_mm = {45.72f, 21.219f};
+		page_list.request_initial_page(PageId::FullscreenGraphic, args);
 	}
 
 	void update_current_page() {

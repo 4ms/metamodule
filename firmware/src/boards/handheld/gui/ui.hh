@@ -10,6 +10,7 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
+#include "thorvg.h"
 #include "user_settings/settings.hh"
 #include "user_settings/settings_file.hh"
 
@@ -83,9 +84,11 @@ public:
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 
 		auto d = lv_obj_create(nullptr);
-		lv_obj_set_style_bg_color(d, lv_color_hex(0x3377AA), 0);
+		lv_obj_set_style_bg_color(d, lv_color_hex(0xAAAAAA), 0);
 		lv_obj_set_style_bg_opa(d, LV_OPA_100, 0);
 		lv_scr_load(d);
+
+		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 	}
 
 	// uint32_t pat = 0;
@@ -187,6 +190,8 @@ public:
 
 	void load_initial_patch() {
 		patch_playloader.load_initial_patch(settings.last_patch_opened, settings.last_patch_vol);
+
+		page_manager.init();
 	}
 
 	void notify_error(std::string const &message) {

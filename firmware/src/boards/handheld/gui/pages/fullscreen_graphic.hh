@@ -22,14 +22,14 @@ struct FullscreenGraphicPage : PageBase {
 
 		canvas = lv_canvas_create(screen);
 		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_set_style_bg_color(canvas, lv_color_black(), LV_PART_MAIN);
+		lv_obj_set_style_bg_color(canvas, lv_color_hex(0xFF00FF), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(canvas, LV_OPA_100, LV_PART_MAIN);
 
 		init_bg(screen);
 
 		base_canvas = lv_canvas_create(screen);
 		lv_obj_set_size(base_canvas, 1, 1);
-		lv_show(base_canvas, false);
+		lv_show(base_canvas, true);
 	}
 
 	void prepare_focus() final {
@@ -71,9 +71,9 @@ struct FullscreenGraphicPage : PageBase {
 	}
 
 	void update() final {
-		if (gui_state.back_button.is_just_released()) {
-			page_list.request_last_page();
-		}
+		// if (gui_state.back_button.is_just_released()) {
+		// 	page_list.request_last_page();
+		// }
 
 		if (dyn_drawer) {
 			prepare_dynamic_elements();

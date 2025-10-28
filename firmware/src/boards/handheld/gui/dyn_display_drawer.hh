@@ -39,7 +39,7 @@ struct DynamicDisplayDrawer {
 	}
 
 	void add_display(unsigned light_idx, float width, float height, lv_obj_t *canvas) {
-		pr_trace("Add display light_idx %u, w %f h %f, canvas %p\n", light_idx, width, height, canvas);
+		pr_dbg("Add display light_idx %u, w %f h %f, canvas %p\n", light_idx, width, height, canvas);
 		displays.push_back({.id = light_idx, .width_mm = width, .height_mm = height, .lv_canvas = canvas});
 	}
 
