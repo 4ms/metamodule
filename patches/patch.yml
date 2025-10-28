@@ -1,0 +1,185 @@
+PatchData:
+  patch_name: patch
+  description: Patch Description
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: 'Fundamental:ADSR'
+    2: '4msCompany:MultiLFO'
+    3: '4msCompany:EnOsc'
+    4: 'Fundamental:LFO'
+  int_cables:
+    - out:
+        module_id: 4
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 3
+      color: 61865
+    - out:
+        module_id: 2
+        jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 4
+      color: 35419
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 8
+      color: 61865
+  mapped_ins: []
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 3
+        jack_id: 0
+  static_knobs:
+    - module_id: 3
+      param_id: 0
+      value: 0.444444
+    - module_id: 3
+      param_id: 1
+      value: 0.375
+    - module_id: 3
+      param_id: 2
+      value: 0.5
+    - module_id: 3
+      param_id: 3
+      value: 0.5
+    - module_id: 3
+      param_id: 4
+      value: 0.5
+    - module_id: 3
+      param_id: 5
+      value: 0
+    - module_id: 3
+      param_id: 6
+      value: 0
+    - module_id: 3
+      param_id: 7
+      value: 0
+    - module_id: 3
+      param_id: 8
+      value: 0
+    - module_id: 3
+      param_id: 9
+      value: 1
+    - module_id: 3
+      param_id: 10
+      value: 1
+    - module_id: 3
+      param_id: 11
+      value: 0
+    - module_id: 3
+      param_id: 12
+      value: 1
+    - module_id: 3
+      param_id: 13
+      value: 0
+    - module_id: 3
+      param_id: 14
+      value: 0
+    - module_id: 3
+      param_id: 15
+      value: 0
+    - module_id: 3
+      param_id: 16
+      value: 0
+    - module_id: 3
+      param_id: 17
+      value: 0.5
+    - module_id: 3
+      param_id: 18
+      value: 1
+    - module_id: 3
+      param_id: 19
+      value: 0.5
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0.5
+    - module_id: 1
+      param_id: 2
+      value: 0.5
+    - module_id: 1
+      param_id: 3
+      value: 0.5
+    - module_id: 1
+      param_id: 4
+      value: 0.5
+    - module_id: 1
+      param_id: 5
+      value: 0.5
+    - module_id: 1
+      param_id: 6
+      value: 0.749333
+    - module_id: 1
+      param_id: 7
+      value: 0.729333
+    - module_id: 1
+      param_id: 8
+      value: 0
+    - module_id: 4
+      param_id: 0
+      value: 1
+    - module_id: 4
+      param_id: 1
+      value: 0
+    - module_id: 4
+      param_id: 2
+      value: 0.33253
+    - module_id: 4
+      param_id: 3
+      value: 0.5
+    - module_id: 4
+      param_id: 4
+      value: 0
+    - module_id: 4
+      param_id: 5
+      value: 0.5
+    - module_id: 4
+      param_id: 6
+      value: 0.5
+    - module_id: 2
+      param_id: 0
+      value: 0.173333
+    - module_id: 2
+      param_id: 1
+      value: 0
+    - module_id: 2
+      param_id: 2
+      value: 0.5
+    - module_id: 2
+      param_id: 3
+      value: 0
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: -1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 24000
+  suggested_blocksize: 512
