@@ -4,6 +4,7 @@
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/tags.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "src/core/lv_obj_pos.h"
 #include "src/misc/lv_timer.h"
@@ -113,32 +114,31 @@ private:
 
 	void populate_tags() {
 		// Gather unique tags from all modules
-		std::vector<std::string> tags;
+		std::vector<std::string> all_tags;
 
 		for (auto const &brand : ModuleFactory::getAllBrands()) {
 			for (auto const &slug : ModuleFactory::getAllModuleSlugs(brand)) {
-				auto tspan = ModuleFactory::getModuleTags(brand, slug);
-				for (auto const &t : tspan) {
-					if (t.empty())
+				auto tags = ModuleFactory::getModuleTags(brand, slug);
+				for (auto const &tag : tags) {
+					if (tag.empty())
 						continue;
 
-					// convert to 'Sentence case'
-					std::string sc = t;
-					std::transform(sc.begin(), sc.end(), sc.begin(), [](unsigned char c) { return std::tolower(c); });
-					sc[0] = std::toupper(sc[0]);
+					// Normalize tag aliases:
+					auto t = std::string(ModuleTags::normalize_tag(tag));
 
-					if (std::ranges::find(tags, sc) == tags.end()) {
-						tags.emplace_back(sc);
+					// Populate unique values
+					if (std::ranges::find(all_tags, t) == all_tags.end()) {
+						all_tags.emplace_back(t);
 					}
 				}
 			}
 		}
-		std::ranges::sort(tags, [](std::string const &a, std::string const &b) { return less_ci(a, b); });
+		std::ranges::sort(all_tags, [](std::string const &a, std::string const &b) { return less_ci(a, b); });
 
 		std::string roller_str;
 		roller_str += Gui::green_text("Sort by brand");
 		roller_str += "\n";
-		for (auto const &t : tags) {
+		for (auto const &t : all_tags) {
 			roller_str += t;
 			roller_str += "\n";
 		}
@@ -186,8 +186,12 @@ private:
 
 				// pr_dbg("'%s': ", slug.data());
 				for (auto const &tag : tags) {
+
+					// Normalize tag aliases:
+					auto t = std::string(ModuleTags::normalize_tag(tag));
+
 					// pr_dbg("'%s'", tag.c_str());
-					if (equal_ci(tag, sel_tag)) {
+					if (equal_ci(t, sel_tag)) {
 						// pr_dbg("Y ");
 						auto combined_slug = std::string(brand) + ":" + std::string(slug);
 						auto display_name = ModuleFactory::getModuleDisplayName(combined_slug);
