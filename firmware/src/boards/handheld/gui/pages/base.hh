@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/screen_buffer_conf.hh"
 #include "dynload/plugin_manager.hh"
 #include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
@@ -44,10 +45,9 @@ struct PageBase {
 
 	PageId id;
 
-	static constexpr uint32_t MaxBufferWidth = 960;
-	static constexpr uint32_t MaxBufferHeight = 400;
-
-	static inline std::array<lv_color_t, MaxBufferHeight * MaxBufferWidth> page_pixel_buffer;
+	// static constexpr uint32_t MaxBufferWidth = ScreenBufferConf::viewWidth;
+	// static constexpr uint32_t MaxBufferHeight = ScreenBufferConf::viewHeight;
+	// static inline std::array<lv_color_t, MaxBufferHeight * MaxBufferWidth> page_pixel_buffer;
 
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;
@@ -71,7 +71,8 @@ struct PageBase {
 	void init_bg(lv_obj_t *screen_ptr) {
 		group = lv_group_create();
 		screen = screen_ptr;
-		lv_obj_set_size(screen, 960, 400); //TODO: use Screen Conf, not hard-set values
+		// lv_obj_set_size(screen, 960, 400); //TODO: use Screen Conf, not hard-set values
+		lv_obj_set_size(screen, ScreenBufferConf::viewWidth, ScreenBufferConf::viewHeight);
 		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_STATE_DEFAULT);
 	}
 

@@ -1,6 +1,6 @@
 #include "../conf/screen_conf.hh"
+#include "conf/debug.hh"
 #include "conf/screen_buffer_conf.hh"
-#include "drivers/bit_bang.hh"
 #include "drivers/cache.hh"
 #include "drivers/screen_9bit_spi_setup.hh"
 #include "drivers/screen_ltdc.hh"
@@ -34,15 +34,33 @@ class LVGLDriver {
 
 public:
 	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb, std::span<lv_color_t> buffer1, std::span<lv_color_t> buffer2) {
-		UartLog::log("LVGLDriver started)\n");
+		UartLog::log("LVGLDriver started. Buffers %p %p\n", buffer1.data(), buffer2.data());
+		if (buffer1.size() != ScreenWidth * ScreenHeight)
+			UartLog::log("Wrong buffer size!\n");
 
 		lv_init();
 		lv_disp_draw_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
 		lv_disp_drv_init(&disp_drv);
 		disp_drv.draw_buf = &disp_buf;
 		disp_drv.flush_cb = flush_cb;
-		disp_drv.hor_res = ScreenWidth;
-		disp_drv.ver_res = ScreenHeight;
+		disp_drv.full_refresh = 1;
+		disp_drv.direct_mode = 1;
+
+		// Works: bottom is towards the cable
+		// disp_drv.hor_res = ScreenBufferConf::height;
+		// disp_drv.ver_res = ScreenBufferConf::width;
+		// disp_drv.rotated = LV_DISP_ROT_180;
+
+		// Works: bottom is towards cable
+		// disp_drv.hor_res = ScreenBufferConf::height;
+		// disp_drv.ver_res = ScreenBufferConf::width;
+		// disp_drv.rotated = LV_DISP_ROT_NONE;
+
+		// Works: bottom is towards cable
+		disp_drv.hor_res = ScreenBufferConf::width;
+		disp_drv.ver_res = ScreenBufferConf::height;
+		disp_drv.rotated = LV_DISP_ROT_90;
+
 		display = lv_disp_drv_register(&disp_drv); // NOLINT
 
 		lv_indev_drv_init(&indev_drv);
@@ -177,8 +195,26 @@ public:
 	}
 
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
-		pr_dbg("flush\n");
+		Debug::Pin0::high();
+		// test_pattern(1, std::span{color_p, ScreenWidth * ScreenHeight});
+
+		if (color_p == disp_drv->draw_buf->buf2) {
+			// clean the buffer that LVGL is done writing into, and we want to pass to the LTDC driver
+			mdrivlib::SystemCache::clean_dcache_by_range(disp_drv->draw_buf->buf1, ScreenWidth * ScreenHeight * 2);
+
+			// invalidate the buffer LVGL will write into next
+			mdrivlib::SystemCache::invalidate_dcache_by_range(disp_drv->draw_buf->buf2, ScreenWidth * ScreenHeight * 2);
+
+		} else if (color_p == disp_drv->draw_buf->buf1) {
+			mdrivlib::SystemCache::clean_dcache_by_range(disp_drv->draw_buf->buf2, ScreenWidth * ScreenHeight * 2);
+			mdrivlib::SystemCache::invalidate_dcache_by_range(disp_drv->draw_buf->buf1, ScreenWidth * ScreenHeight * 2);
+		} else {
+			pr_dbg("flush?\n");
+		}
+
 		ltdc_driver.set_buffer(color_p);
+
+		Debug::Pin0::low();
 		lv_disp_flush_ready(disp_drv);
 	}
 

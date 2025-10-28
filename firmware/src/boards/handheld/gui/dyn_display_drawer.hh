@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
+#include "conf/debug.hh"
 #include "gui/elements/context.hh"
 #include "gui/styles.hh"
 #include "patch_play/patch_playloader.hh"
@@ -52,7 +53,7 @@ struct DynamicDisplayDrawer {
 			// This is done intentionally by rack::Module to create non-drawable elements
 			// that need to be stepped
 			if (disp.width_mm == 0 || disp.height_mm == 0) {
-				pr_trace("DynDraw::prepare() Graphic display %u has zero size, will not draw\n", disp.id);
+				pr_dbg("DynDraw::prepare() Graphic display %u has zero size, will not draw\n", disp.id);
 				disp.fullcolor_buffer.clear();
 				disp.lv_canvas = nullptr;
 				if (auto module = patch_playloader.get_plugin_module(module_id))
@@ -66,7 +67,7 @@ struct DynamicDisplayDrawer {
 				auto w = lv_obj_get_width(disp.lv_canvas);
 				auto h = lv_obj_get_height(disp.lv_canvas);
 
-				pr_trace("DynDraw: id:%d Create buffer %u*%u lvgl px: %u bytes\n", disp.id, w, h, w * h * 3);
+				pr_dbg("DynDraw: id:%d Create buffer %u*%u lvgl px: %u bytes\n", disp.id, w, h, w * h * 3);
 
 				// Create pixel buffers:
 				disp.fullcolor_buffer.resize(w * h, 0);
@@ -86,32 +87,59 @@ struct DynamicDisplayDrawer {
 		}
 	}
 
+	char anim = 0;
+	char anim_color = 0x22;
 	void draw() {
 		auto module = patch_playloader.get_plugin_module(module_id);
 
-		if (!module || !parent_canvas || !lv_obj_is_valid(parent_canvas) || !lv_obj_is_visible(parent_canvas))
+		if (!module || !parent_canvas || !lv_obj_is_valid(parent_canvas) || !lv_obj_is_visible(parent_canvas)) {
+			pr_dbg("Invalid Dyn::draw\n");
 			return;
+		}
 
 		for (auto &disp : displays) {
-			// Debug::Pin2::high();
+			Debug::Pin0::high();
 
 			// Draw all displays:
 			// The module draws into fullcolor_buffer, and then we compare it against
 			// lv_buffer to detect if any pixels changed.
 			// If not, then we save a lot of time by not re-drawing the lv_canvas object.
-			if (module->draw_graphic_display(disp.id)) {
-				if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
-					lv_obj_invalidate(disp.lv_canvas);
-			}
+			// if (module->draw_graphic_display(disp.id)) {
+			// 	if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
+			// 		lv_obj_invalidate(disp.lv_canvas);
+			// }
 
-			// Debug::Pin2::low();
+			// for (auto &px : disp.fullcolor_buffer) {
+			// 	px = 0xFF2288AA;
+			// }
+			// if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
+			// lv_obj_invalidate(disp.lv_canvas);
+
+			for (auto &px : disp.lv_buffer) {
+				px = 0x55;
+			}
+			lv_obj_invalidate(disp.lv_canvas);
+
+			// module->draw_graphic_display(disp.id);
+			// for (auto &c : disp.lv_buffer) {
+			// 	c = anim_color;
+			// }
+			// anim++;
+			// if (anim < 0x7F)
+			// 	anim_color = 0x88;
+			// else
+			// 	anim_color = 0x22;
+
+			// lv_obj_invalidate(disp.lv_canvas);
+
+			Debug::Pin0::low();
 		}
 	}
 
 	void blur() {
 
 		for (auto &disp : displays) {
-			pr_trace("DynDraw::blur() Release graphic display id %u\n", disp.id);
+			pr_dbg("DynDraw::blur() Release graphic display id %u\n", disp.id);
 
 			if (auto module = patch_playloader.get_plugin_module(module_id))
 				module->hide_graphic_display(disp.id);
@@ -126,7 +154,7 @@ struct DynamicDisplayDrawer {
 	}
 
 private:
-	bool copy_and_compare_buffer(std::span<char> lv_buffer, std::span<uint32_t> fullcolor_buffer) {
+	bool copy_and_compare_buffer(std::span<char> lv_buffer, std::span<const uint32_t> fullcolor_buffer) {
 		if ((fullcolor_buffer.size() * 3) > lv_buffer.size()) {
 			pr_err("DynDraw buffer size error\n");
 			return false;

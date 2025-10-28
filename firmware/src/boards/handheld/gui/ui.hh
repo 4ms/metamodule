@@ -95,7 +95,7 @@ public:
 	// bool first_buf = false;
 	void update_screen() {
 		auto now = HAL_GetTick();
-		if ((now - last_screen_update_tm) > 3) {
+		if ((now - last_screen_update_tm) > 6) {
 			last_screen_update_tm = now;
 			lv_timer_handler();
 		}
@@ -200,6 +200,14 @@ public:
 
 	void notify_now_playing(std::string const &message) {
 		printf("%s\n", message.c_str());
+	}
+
+	UserSettings &get_settings() {
+		return settings;
+	}
+
+	NotificationQueue &get_notify_queue() {
+		return notify_queue;
 	}
 
 	std::atomic<bool> new_patch_data = false;

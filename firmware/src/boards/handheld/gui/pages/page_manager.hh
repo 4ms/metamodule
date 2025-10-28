@@ -56,9 +56,12 @@ public:
 
 	void init() {
 		PageArguments args;
-		args.module_id = 1;
+		args.module_id = 2;
 		args.element_indices = ElementCount::Indices{.light_idx = 5};
 		args.element_mm = {45.72f, 21.219f};
+		// args.module_id = 1;
+		// args.element_indices = ElementCount::Indices{.light_idx = 4};
+		// args.element_mm = {to_mm<72>(67.938), to_mm<72>(66.398)};
 		page_list.request_initial_page(PageId::FullscreenGraphic, args);
 	}
 
