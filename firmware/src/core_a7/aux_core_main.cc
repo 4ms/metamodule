@@ -67,6 +67,9 @@ extern "C" void aux_core_main() {
 
 	AutoUpdater::run(file_storage_proxy, ui);
 
+	// allow time for USB drive to mount
+	HAL_Delay(2000);
+
 	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
 		CpuLoadTest::run_tests(file_storage_proxy, ui);
 	} else {
