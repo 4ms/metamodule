@@ -90,7 +90,9 @@ private:
 		std::ranges::sort(all_brands, less_ci);
 
 		std::string roller_str = "";
-		roller_str += Gui::green_text("Sort by tag");
+		roller_str += Gui::orange_text("Sort by tag " LV_SYMBOL_RIGHT);
+		roller_str += "\n";
+		roller_str += Gui::orange_text("Brands:" LV_SYMBOL_DOWN);
 		roller_str += "\n";
 
 		roller_str.reserve(roller_str.size() + all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
@@ -102,7 +104,7 @@ private:
 			roller_str += item;
 			roller_str += "\n";
 			if (sel_brand_display_name == item)
-				sel_idx = i + 1; // shift by 1
+				sel_idx = i + 2; // shift by 1
 			i++;
 		}
 		// Remove last newline
@@ -136,14 +138,16 @@ private:
 		std::ranges::sort(all_tags, [](std::string const &a, std::string const &b) { return less_ci(a, b); });
 
 		std::string roller_str;
-		roller_str += Gui::green_text("Sort by brand");
+		roller_str += Gui::orange_text("Sort by brand " LV_SYMBOL_RIGHT);
+		roller_str += "\n";
+		roller_str += Gui::orange_text("Tags:");
 		roller_str += "\n";
 		unsigned sel_idx = 0;
 		for (unsigned i = 0; auto const &t : all_tags) {
 			roller_str += t;
 			roller_str += "\n";
 			if (sel_tag == t)
-				sel_idx = i + 1; // shift by 1
+				sel_idx = i + 2; // shift by 1
 			i++;
 		}
 		if (roller_str.size())
@@ -181,31 +185,23 @@ private:
 	void populate_modules_by_tag() {
 		entries.clear();
 
-		pr_dbg("Populate for tag '%s'\n", sel_tag.c_str());
-
 		// Iterate all modules and filter by selected tag
 		for (auto const &brand : ModuleFactory::getAllBrands()) {
 			for (auto const &slug : ModuleFactory::getAllModuleSlugs(brand)) {
 				auto tags = ModuleFactory::getModuleTags(brand, slug);
 
-				// pr_dbg("'%s': ", slug.data());
 				for (auto const &tag : tags) {
-
 					// Normalize tag aliases:
 					auto t = std::string(ModuleTags::normalize_tag(tag));
 
-					// pr_dbg("'%s'", tag.c_str());
 					if (equal_ci(t, sel_tag)) {
-						// pr_dbg("Y ");
 						auto combined_slug = std::string(brand) + ":" + std::string(slug);
 						auto display_name = ModuleFactory::getModuleDisplayName(combined_slug);
 						entries.push_back(
 							{.brand_slug = brand, .module_slug = slug, .module_display_name = display_name});
 						break;
 					}
-					// else pr_dbg("N ");
 				}
-				// pr_dbg("\n");
 			}
 		}
 
@@ -321,7 +317,7 @@ private:
 		if (page->view == View::CategoryRoller) {
 			if (page->sort == Sort::Brand) {
 				auto idx = lv_roller_get_selected(event->target);
-				if (idx == 0) {
+				if (idx == 0 || idx == 1) {
 					page->sort = Sort::Tag;
 					page->roller_tag_list();
 				} else {
@@ -334,7 +330,7 @@ private:
 
 			} else if (page->sort == Sort::Tag) {
 				auto idx = lv_roller_get_selected(event->target);
-				if (idx == 0) {
+				if (idx == 0 || idx == 1) {
 					page->sort = Sort::Brand;
 					page->roller_brand_list();
 				} else {
