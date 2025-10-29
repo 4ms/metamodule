@@ -3,6 +3,7 @@
 #include "gui/notify/display.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/status_bar.hh"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -21,6 +22,7 @@ class PageManager {
 	PageList page_list;
 	GuiState gui_state;
 	Screensaver &screensaver;
+	StatusBar statusbar;
 
 	// MainMenuPage page_mainmenu{info};
 	FullscreenGraphicPage page_fullscreen_graphic;
@@ -59,10 +61,8 @@ public:
 
 		args.module_id = 1;
 
-		// args.module_id = 1;
-		// args.element_indices = ElementCount::Indices{.light_idx = 4};
-		// args.element_mm = {to_mm<72>(67.938), to_mm<72>(66.398)};
 		page_list.request_initial_page(PageId::FullscreenGraphic, args);
+		statusbar.show();
 	}
 
 	void update_current_page() {
@@ -81,6 +81,8 @@ public:
 		} else {
 			cur_page->update();
 		}
+
+		statusbar.show_battery(info.metaparams.battery_status);
 
 		handle_audio_errors();
 
