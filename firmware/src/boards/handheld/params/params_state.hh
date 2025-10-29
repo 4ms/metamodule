@@ -1,4 +1,6 @@
 #pragma once
+#include "conf/panel_conf.hh"
+#include "util/debouncer.hh"
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -9,8 +11,9 @@ namespace MetaModule
 // TODO: put all fields that the GUI needs to see here
 
 struct ParamsState {
-	// std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
-	// std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
+	std::array<float, 3> accel{};
+
+	// std::array<Toggler, PanelDef::NumEncoderButtons + PanelDef::NumButtons> buttons{};
 
 	// std::array<ResizingOversampler, PanelDef::NumAudioIn + AudioExpander::NumInJacks> smoothed_ins;
 

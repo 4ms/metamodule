@@ -91,6 +91,17 @@ void AudioStream::handle_patch_just_loaded() {
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	player.sync();
 
+	for (auto i = 3u; auto &but : param_block.metaparams.buttons) {
+		if (but.just_went_high()) {
+			player.set_panel_param(i, 1.f);
+		}
+
+		else if (but.just_went_low())
+			player.set_panel_param(i, 0.f);
+
+		i++;
+	}
+
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
@@ -104,10 +115,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// Pass Knob values to modules
-		// for (auto [i, knob_val, knob_state] : countzip(params.knobs, param_state.knobs)) {
-		// 	if (knob_state.store_changed(knob_val))
-		// 		player.set_panel_param(i, knob_val);
-		// }
+		for (auto [i, knob_val] : countzip(params.accel)) {
+			// TODO: if changed:
+			player.set_panel_param(i, knob_val);
+		}
+		// TODO params.buttons
 
 		// USB MIDI
 		MidiMessage msg = params.usb_raw_midi;
@@ -135,7 +147,10 @@ uint32_t AudioStream::get_audio_errors() {
 
 // It's measurably faster to copy params into cacheable ram
 ParamBlock &AudioStream::cache_params(unsigned block) {
+	local_params.metaparams.battery_status = param_blocks[block].metaparams.battery_status;
 	local_params.metaparams.usb_midi_connected = param_blocks[block].metaparams.usb_midi_connected;
+	local_params.metaparams.buttons = param_blocks[block].metaparams.buttons;
+
 	for (auto i = 0u; i < block_size_; i++)
 		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt
 

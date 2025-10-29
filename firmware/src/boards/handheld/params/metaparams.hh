@@ -1,4 +1,7 @@
 #pragma once
+#include "conf/panel_conf.hh"
+#include "util/debouncer.hh"
+#include "util/zip.hh"
 #include <cmath>
 #include <cstdint>
 
@@ -6,7 +9,7 @@ namespace MetaModule
 {
 
 struct BatteryStatus {
-	float level{};
+	uint16_t level{};
 	bool is_charging{};
 };
 
@@ -16,6 +19,8 @@ struct MetaParams {
 	BatteryStatus battery_status{};
 
 	bool usb_midi_connected = false;
+
+	std::array<Toggler, PanelDef::NumEncoderButtons + PanelDef::NumButtons> buttons{};
 
 	uint32_t sample_rate = 48000;
 	uint32_t audio_load = 0;
@@ -32,7 +37,11 @@ struct MetaParams {
 		// 	this_enc.add_motion(that_enc);
 		// }
 
+		battery_status = that.battery_status;
 		usb_midi_connected = that.usb_midi_connected;
+		for (auto [this_but, that_but] : zip(this->buttons, that.buttons)) {
+			this_but.transfer_events(that_but);
+		}
 	}
 
 	// Moves rotary motion events from `that` to `this` (removing them from `that`,
@@ -44,7 +53,11 @@ struct MetaParams {
 		// 	this_enc.transfer_motion(that_enc);
 		// }
 
+		battery_status = that.battery_status;
 		usb_midi_connected = that.usb_midi_connected;
+		for (auto [this_but, that_but] : zip(this->buttons, that.buttons)) {
+			this_but.transfer_events(that_but);
+		}
 	}
 };
 

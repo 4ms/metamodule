@@ -25,16 +25,9 @@ void Controls::update_debouncers() {
 	button_4.update();
 	sense_in_jack.update();
 	sense_out_jack.update();
-
-	accel.update();
 }
 
 void Controls::update_params() {
-	// cur_params->gate_ins = random_gate_in.is_high() ? 0b0001 : 0b00;
-	// cur_params->gate_ins |= trig_in.is_high() ? 0b0010 : 0b00;
-	// cur_params->gate_ins |= sync_in.is_high() ? 0b0100 : 0b00;
-	// cur_params->gate_ins |= rec_gate_in.is_high() ? 0b1000 : 0b00;
-
 	if (_first_param) {
 		_first_param = false;
 
@@ -42,9 +35,21 @@ void Controls::update_params() {
 
 		cur_metaparams->usb_midi_connected = usb_midi_connected;
 
-		// cur_metaparams->encoder[0].motion = encoder1.read();
-		// cur_metaparams->encoder[1].motion = encoder2.read();
+		cur_metaparams->buttons[0].process(button_1.is_high());
+		cur_metaparams->buttons[1].process(button_2.is_high());
+		cur_metaparams->buttons[2].process(button_3.is_high());
+		cur_metaparams->buttons[3].process(button_4.is_high());
+		cur_metaparams->buttons[4].process(encoder1_but.is_high());
+		cur_metaparams->buttons[5].process(encoder2_but.is_high());
+
+		cur_metaparams->battery_status.level = batt.battery_percent_remaining();
+		cur_metaparams->battery_status.is_charging = batt.is_charging();
 	}
+
+	auto xyz = accel.get_latest();
+	cur_params->accel[0] = std::clamp(((int32_t)xyz.x + 32768) / 65536.f, 0.f, 1.f);
+	cur_params->accel[1] = std::clamp(((int32_t)xyz.y + 32768) / 65536.f, 0.f, 1.f);
+	cur_params->accel[2] = std::clamp(((int32_t)xyz.z + 32768) / 65536.f, 0.f, 1.f);
 
 	parse_midi();
 
@@ -82,7 +87,6 @@ template<size_t block_num>
 void Controls::start_param_block() {
 	static_assert(block_num <= 1, "There is only block 0 and block 1");
 
-	// 28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
 	cur_metaparams = &param_blocks[block_num].metaparams;
 	cur_params = param_blocks[block_num].params.begin();
 	_first_param = true;
@@ -132,6 +136,8 @@ void Controls::start() {
 }
 
 void Controls::process() {
+	accel.update();
+	batt.update();
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
