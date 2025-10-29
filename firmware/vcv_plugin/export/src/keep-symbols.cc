@@ -1,8 +1,12 @@
 // These must be inluded so the symbols are not dropped by the linker:
+// VCV:
 #include "app/ModuleLightWidget.hpp"
 #include "app/ModuleWidget.hpp"
 #include "app/SvgSlider.hpp"
 #include "app/SvgSwitch.hpp"
+#include "dsp/block_resampler.hh"
+#include "dsp/stream_resampler.hh"
+#include "graphics/waveform_display.hh"
 #include "history.hpp"
 #include "random.hpp"
 #include "string.hpp"
@@ -14,7 +18,15 @@
 #include "CoreModules/async_thread.hh"
 #include "dirent.h"
 #include "jansson.h"
+#include "metamodule-plugin-sdk/core-interface/audio/settings.hh"
+#include "metamodule-plugin-sdk/core-interface/gui/notification.hh"
+#include "metamodule-plugin-sdk/core-interface/patch/patch_file.hh"
+#include "metamodule-plugin-sdk/core-interface/system/memory.hh"
+#include "metamodule-plugin-sdk/core-interface/system/random.hh"
+#include "metamodule-plugin-sdk/core-interface/system/time.hh"
+#include "metamodule-plugin-sdk/core-interface/wav/wav_file_stream.hh"
 #include "pffft.h"
+
 #include <cmath>
 #include <cstring>
 #include <ctime>
@@ -28,8 +40,8 @@ namespace MetaModule
 {
 bool register_module(std::string_view brand_name,
 					 std::string_view typeslug,
-					 MetaModule::ModuleFactory::CreateModuleFunc funcCreate,
-					 MetaModule::ModuleInfoView const &info,
+					 ModuleFactory::CreateModuleFunc funcCreate,
+					 ModuleInfoView const &info,
 					 std::string_view faceplate_filename);
 }
 
@@ -92,9 +104,8 @@ void keep_async() {
 }
 
 void __attribute__((optimize("-O0"))) keep_math(float x) {
-	auto y = log1pl(x);
-	auto z = expm1l(y);
-	printf("%f%Lf%Lf\n", x, y, z);
+	[[maybe_unused]] auto y = log1pl(x);
+	[[maybe_unused]] auto z = expm1l(y);
 }
 
 void __attribute__((optimize("-O0"))) keep_register_module() {
@@ -102,7 +113,7 @@ void __attribute__((optimize("-O0"))) keep_register_module() {
 	printf("%p\n", addr);
 }
 
-void __attribute__((optimize("-O0"))) keep_rack_widgets() {
+void keep_rack_widgets() {
 	{
 		rack::app::LightWidget x;
 		printf("%p\n", &x);
@@ -133,4 +144,21 @@ void keep_dirent() {
 	[[maybe_unused]] auto x4 = scandir({}, {}, {}, {});
 	seekdir(d, 0);
 	telldir(d);
+}
+
+void keep_coreproc() {
+	MetaModule::StreamResampler res{2};
+	MetaModule::BlockResampler res2{2};
+	MetaModule::StreamingWaveformDisplay disp{1, 1};
+	[[maybe_unused]] MetaModule::WavFileStream stream{8};
+
+	[[maybe_unused]] auto x1 = MetaModule::System::hardware_random();
+	[[maybe_unused]] auto x2 = MetaModule::System::random();
+	[[maybe_unused]] auto x3 = MetaModule::System::total_memory();
+	[[maybe_unused]] auto x4 = MetaModule::System::free_memory();
+	[[maybe_unused]] auto x5 = MetaModule::System::get_ticks();
+
+	[[maybe_unused]] auto x6 = MetaModule::Audio::get_block_size();
+	MetaModule::Patch::mark_patch_modified();
+	MetaModule::Gui::notify_user("", 0);
 }
