@@ -44,7 +44,6 @@ struct DynamicDisplayDrawer {
 		displays.push_back({.id = light_idx, .width_mm = width, .height_mm = height, .lv_canvas = canvas});
 	}
 
-	// TODO: do we need to proivde the parent object?
 	void prepare(lv_obj_t *parent_obj) {
 		parent_canvas = parent_obj;
 
@@ -87,8 +86,6 @@ struct DynamicDisplayDrawer {
 		}
 	}
 
-	char anim = 0;
-	char anim_color = 0x22;
 	void draw() {
 		auto module = patch_playloader.get_plugin_module(module_id);
 
@@ -98,41 +95,18 @@ struct DynamicDisplayDrawer {
 		}
 
 		for (auto &disp : displays) {
-			Debug::Pin0::high();
+			Debug::Pin2::high();
 
 			// Draw all displays:
 			// The module draws into fullcolor_buffer, and then we compare it against
 			// lv_buffer to detect if any pixels changed.
 			// If not, then we save a lot of time by not re-drawing the lv_canvas object.
-			// if (module->draw_graphic_display(disp.id)) {
-			// 	if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
-			// 		lv_obj_invalidate(disp.lv_canvas);
-			// }
-
-			// for (auto &px : disp.fullcolor_buffer) {
-			// 	px = 0xFF2288AA;
-			// }
-			// if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
-			// lv_obj_invalidate(disp.lv_canvas);
-
-			for (auto &px : disp.lv_buffer) {
-				px = 0x55;
+			if (module->draw_graphic_display(disp.id)) {
+				if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
+					lv_obj_invalidate(disp.lv_canvas);
 			}
-			lv_obj_invalidate(disp.lv_canvas);
 
-			// module->draw_graphic_display(disp.id);
-			// for (auto &c : disp.lv_buffer) {
-			// 	c = anim_color;
-			// }
-			// anim++;
-			// if (anim < 0x7F)
-			// 	anim_color = 0x88;
-			// else
-			// 	anim_color = 0x22;
-
-			// lv_obj_invalidate(disp.lv_canvas);
-
-			Debug::Pin0::low();
+			Debug::Pin2::low();
 		}
 	}
 

@@ -17,8 +17,8 @@
 namespace MetaModule
 {
 
-extern std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height> *first_framebuf;
-extern std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height> *second_framebuf;
+extern std::array<lv_color_t, ScreenBufferConf::NumPixels> *first_framebuf;
+extern std::array<lv_color_t, ScreenBufferConf::NumPixels> *second_framebuf;
 
 class Ui {
 private:
@@ -106,7 +106,7 @@ public:
 
 	void update_page() {
 		auto now = HAL_GetTick();
-		if ((now - last_page_update_tm) > 16) {
+		if ((now - last_page_update_tm) > 8) {
 			last_page_update_tm = now;
 			page_update_task();
 		}

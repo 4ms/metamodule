@@ -7,7 +7,7 @@
 namespace MetaModule
 {
 
-using FrameBufferT = std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height>;
+using FrameBufferT = std::array<lv_color_t, MetaModule::ScreenBufferConf::NumPixels>;
 FrameBufferT framebuf1 alignas(64);
 FrameBufferT framebuf2 alignas(64);
 

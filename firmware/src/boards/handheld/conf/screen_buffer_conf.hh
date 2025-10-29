@@ -12,10 +12,14 @@ struct ScreenBufferConf {
 
 	//The rotation we must to do hardware coordinates to get the view coordinates
 	enum Rotation { None, CW90, Flip180, CCW90 };
-	static constexpr Rotation rotation = None;
+	static constexpr Rotation rotation = CW90;
 
 	//The width x height as viewed by the User:
 	static constexpr uint32_t viewWidth = 960;
 	static constexpr uint32_t viewHeight = 400;
+	// static constexpr uint32_t viewWidth = 400;
+	// static constexpr uint32_t viewHeight = 960;
+
+	static constexpr uint32_t NumPixels = 960 * 400;
 };
 } // namespace MetaModule
