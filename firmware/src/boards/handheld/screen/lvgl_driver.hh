@@ -44,22 +44,10 @@ public:
 		disp_drv.draw_buf = &disp_buf;
 		disp_drv.flush_cb = flush_cb;
 		disp_drv.full_refresh = 1;
-		disp_drv.direct_mode = 1;
 
-		// Works: bottom is towards the cable
-		// disp_drv.hor_res = ScreenBufferConf::height;
-		// disp_drv.ver_res = ScreenBufferConf::width;
-		// disp_drv.rotated = LV_DISP_ROT_180;
-
-		// Works: bottom is towards cable
-		// disp_drv.hor_res = ScreenBufferConf::height;
-		// disp_drv.ver_res = ScreenBufferConf::width;
-		// disp_drv.rotated = LV_DISP_ROT_NONE;
-
-		// Works: bottom is towards cable
-		disp_drv.hor_res = ScreenBufferConf::width;
-		disp_drv.ver_res = ScreenBufferConf::height;
-		disp_drv.rotated = LV_DISP_ROT_90;
+		disp_drv.hor_res = ScreenBufferConf::width;	 //960
+		disp_drv.ver_res = ScreenBufferConf::height; //400
+		disp_drv.rotated = LV_DISP_ROT_NONE;
 
 		display = lv_disp_drv_register(&disp_drv); // NOLINT
 
@@ -85,7 +73,6 @@ void start_pixel_clock();
 class MMDisplay {
 	static constexpr uint32_t ScreenWidth = ScreenBufferConf::viewWidth;
 	static constexpr uint32_t ScreenHeight = ScreenBufferConf::viewHeight;
-	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
 
 	static inline MetaParams *m;
 	static inline Screensaver *_screensaver;
@@ -106,14 +93,11 @@ public:
 		start_pixel_clock();
 		HAL_Delay(1);
 
+		TIM3->CNT = 0;
 		ltdc_driver.init(buf.data());
-		// test_pattern(2, buf);
+
 		printf("MMDisplay::init\n");
 	}
-
-	// static void set_buffer(auto *buff) {
-	// 	ltdc_driver.set_buffer(buff);
-	// }
 
 	static void test_pattern(unsigned id, std::span<lv_color_t> buf) {
 		// auto buf = std::span<lv_color_t>(testbuf);
@@ -144,8 +128,8 @@ public:
 		}
 
 		if (id == 1) {
-			for (auto y = 0u; y < ScreenHeight; y++) {
-				for (auto x = 0u; x < ScreenWidth; x++) {
+			for (auto y = 0u; y < ScreenHeight; y++) {	  // 0..400
+				for (auto x = 0u; x < ScreenWidth; x++) { // 0..960
 					unsigned i = y + x * ScreenHeight;
 
 					if (x >= (ScreenWidth * 0.75) && y < ScreenHeight / 2)
@@ -194,27 +178,53 @@ public:
 		ltdc_driver.set_buffer(buf.data());
 	}
 
+	using FrameBufferT = std::array<lv_color_t, MetaModule::ScreenBufferConf::NumPixels>;
+	static inline FrameBufferT rot_framebuf1 alignas(64);
+	static inline FrameBufferT rot_framebuf2 alignas(64);
+
+	template<size_t W, size_t H>
+	static void transpose(auto const *const a, auto *b) {
+		// Naive method x then y: 10.0ms
+		// Naive method y then x: 11.2ms
+		// TODO: try loading uint32_t at a time, or try writing uint32_t at a time
+		// TODO: load 32 u16s into an array, then write it out as one cacheline
+		// TODO: use NEON to load 8 x u16 at a time
+		for (unsigned x = 0; x < W; x++) {
+			for (unsigned y = 0; y < H; y++) {
+				b[y * W + x] = a[x * H + y];
+			}
+		}
+	}
+
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
-		Debug::Pin0::high();
 		// test_pattern(1, std::span{color_p, ScreenWidth * ScreenHeight});
 
-		if (color_p == disp_drv->draw_buf->buf2) {
+		if (color_p == disp_drv->draw_buf->buf1) {
+			// Debug::Pin0::high();
+			transpose<ScreenHeight, ScreenWidth>(color_p, rot_framebuf1.data());
+
 			// clean the buffer that LVGL is done writing into, and we want to pass to the LTDC driver
-			mdrivlib::SystemCache::clean_dcache_by_range(disp_drv->draw_buf->buf1, ScreenWidth * ScreenHeight * 2);
+			mdrivlib::SystemCache::clean_dcache_by_range(rot_framebuf1.data(), ScreenWidth * ScreenHeight * 2);
 
 			// invalidate the buffer LVGL will write into next
 			mdrivlib::SystemCache::invalidate_dcache_by_range(disp_drv->draw_buf->buf2, ScreenWidth * ScreenHeight * 2);
 
-		} else if (color_p == disp_drv->draw_buf->buf1) {
-			mdrivlib::SystemCache::clean_dcache_by_range(disp_drv->draw_buf->buf2, ScreenWidth * ScreenHeight * 2);
+			// Debug::Pin0::low();
+			ltdc_driver.set_buffer(rot_framebuf1.data());
+
+		} else if (color_p == disp_drv->draw_buf->buf2) {
+			// Debug::Pin0::high();
+			transpose<ScreenHeight, ScreenWidth>(color_p, rot_framebuf2.data());
+			//1.25ms
+			mdrivlib::SystemCache::clean_dcache_by_range(rot_framebuf2.data(), ScreenWidth * ScreenHeight * 2);
 			mdrivlib::SystemCache::invalidate_dcache_by_range(disp_drv->draw_buf->buf1, ScreenWidth * ScreenHeight * 2);
+			// Debug::Pin0::low();
+
+			ltdc_driver.set_buffer(rot_framebuf2.data());
 		} else {
 			pr_dbg("flush?\n");
 		}
 
-		ltdc_driver.set_buffer(color_p);
-
-		Debug::Pin0::low();
 		lv_disp_flush_ready(disp_drv);
 	}
 
