@@ -72,10 +72,10 @@ extern "C" void aux_core_main() {
 
 	hil_message("*ready\n");
 
-	AutoUpdater::run(file_storage_proxy, ui);
-
 	// allow time for USB drive to mount
 	HAL_Delay(3000);
+
+	AutoUpdater::run(file_storage_proxy, ui);
 
 	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
 		CpuLoadTest::run_tests(file_storage_proxy, ui);
@@ -91,6 +91,8 @@ extern "C" void aux_core_main() {
 	HWSemaphore<AuxCoreReady>::unlock();
 
 	ui.load_initial_patch();
+
+	Debug::Pin2 init_dbg_pin;
 
 	while (true) {
 		ui.update_screen();

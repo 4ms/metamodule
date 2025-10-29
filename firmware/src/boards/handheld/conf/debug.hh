@@ -11,8 +11,9 @@ struct Debug {
 
 	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::D, 7, mdrivlib::PinMode::Output>; //Third pin
 	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::E, 5, mdrivlib::PinMode::Output>; //Fourth pin
+	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::D, 0, mdrivlib::PinMode::Output>; // Uart RX
 
-	using Pin2 = NoPin;
+	// using Pin2 = NoPin;
 	using Pin3 = NoPin;
 	using Pin4 = NoPin;
 	using Pin5 = NoPin;
