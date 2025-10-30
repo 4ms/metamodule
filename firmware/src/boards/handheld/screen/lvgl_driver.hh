@@ -191,7 +191,12 @@ public:
 		// TODO: use NEON to load 8 x u16 at a time
 		for (unsigned x = 0; x < W; x++) {
 			for (unsigned y = 0; y < H; y++) {
-				b[y * W + x] = a[x * H + y];
+				// b[(H - y - 1) * W + x] = a[x * H + y]; //ML = 1: mirrored across horizontal axis
+
+				b[y * W + (W + 1 - x)] = a[x * H + y]; // ML = 1: mirrorred across vertical axis
+													   // ML = 0: correct
+
+				// b[y * W + x] = a[x * H + y];		   //ML = 1: rotated 180
 			}
 		}
 	}
@@ -199,31 +204,29 @@ public:
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
 		// test_pattern(1, std::span{color_p, ScreenWidth * ScreenHeight});
 
+		// Debug::Pin0::high();
+
 		if (color_p == disp_drv->draw_buf->buf1) {
-			// Debug::Pin0::high();
 			transpose<ScreenHeight, ScreenWidth>(color_p, rot_framebuf1.data());
 
 			// clean the buffer that LVGL is done writing into, and we want to pass to the LTDC driver
 			mdrivlib::SystemCache::clean_dcache_by_range(rot_framebuf1.data(), ScreenWidth * ScreenHeight * 2);
-
 			// invalidate the buffer LVGL will write into next
 			mdrivlib::SystemCache::invalidate_dcache_by_range(disp_drv->draw_buf->buf2, ScreenWidth * ScreenHeight * 2);
 
-			// Debug::Pin0::low();
 			ltdc_driver.set_buffer(rot_framebuf1.data());
 
 		} else if (color_p == disp_drv->draw_buf->buf2) {
-			// Debug::Pin0::high();
 			transpose<ScreenHeight, ScreenWidth>(color_p, rot_framebuf2.data());
 			//1.25ms
 			mdrivlib::SystemCache::clean_dcache_by_range(rot_framebuf2.data(), ScreenWidth * ScreenHeight * 2);
 			mdrivlib::SystemCache::invalidate_dcache_by_range(disp_drv->draw_buf->buf1, ScreenWidth * ScreenHeight * 2);
-			// Debug::Pin0::low();
 
 			ltdc_driver.set_buffer(rot_framebuf2.data());
 		} else {
 			pr_dbg("flush?\n");
 		}
+		// Debug::Pin0::low();
 
 		lv_disp_flush_ready(disp_drv);
 	}
