@@ -29,7 +29,7 @@ struct StatusBar {
 		lv_obj_set_style_text_letter_space(label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded50016, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_left(label, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_right(label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
