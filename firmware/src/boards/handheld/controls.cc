@@ -44,8 +44,12 @@ void Controls::update_params() {
 
 		cur_metaparams->battery_status.level = batt.battery_percent_remaining();
 		cur_metaparams->battery_status.is_charging = batt.is_charging();
+
+		cur_metaparams->encoders[0].motion = encoder1.read();
+		cur_metaparams->encoders[1].motion = encoder2.read();
 	}
 
+	// TODO: smooth these
 	auto xyz = accel.get_latest();
 	cur_params->accel[0] = std::clamp(((int32_t)xyz.x + 32768) / 65536.f, 0.f, 1.f);
 	cur_params->accel[1] = std::clamp(((int32_t)xyz.y + 32768) / 65536.f, 0.f, 1.f);
@@ -56,10 +60,6 @@ void Controls::update_params() {
 	cur_params++;
 	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
 		_buffer_full = true;
-}
-
-void Controls::update_rotary() {
-	// Rotary turning
 }
 
 void Controls::update_midi_connected() {
@@ -135,9 +135,14 @@ void Controls::start() {
 	});
 }
 
+static unsigned last_dump = 0;
 void Controls::process() {
 	accel.update();
 	batt.update();
+	if (HAL_GetTick() - last_dump > 5000) {
+		last_dump = HAL_GetTick();
+		batt.dump_registers();
+	}
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {

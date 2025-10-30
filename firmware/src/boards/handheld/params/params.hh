@@ -7,9 +7,6 @@ namespace MetaModule
 {
 
 struct Params {
-	uint32_t buttons{}; // bitmask for all buttons
-	std::array<int32_t, 2> rotary_motion{};
-
 	std::array<float, 3> accel{};
 
 	Midi::Event usb_midi_event{}; //6B
@@ -19,10 +16,10 @@ struct Params {
 		for (auto &a : accel)
 			a = 0.f;
 
-		for (auto &rot : rotary_motion)
-			rot = 0;
+		// for (auto &rot : rotary_motion)
+		// 	rot = 0;
 
-		buttons = 0;
+		// buttons = 0;
 
 		usb_midi_event = Midi::Event{};
 		usb_raw_midi = {};

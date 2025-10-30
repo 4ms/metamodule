@@ -46,8 +46,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	cal.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin0::high();
-
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 		load_measure.start_measurement();
@@ -80,7 +78,7 @@ void AudioStream::start() {
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
-	float output_volts = player.get_panel_output(output_id);
+	float output_volts = player.get_panel_output(output_id) * 0.5f; //16Vpp clips little, so make 20Vpp => 16Vpp
 	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
 }
 
@@ -91,13 +89,20 @@ void AudioStream::handle_patch_just_loaded() {
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	player.sync();
 
-	for (auto i = 3u; auto &but : param_block.metaparams.buttons) {
-		if (but.just_went_high()) {
+	// Buttons (param id 44-)
+	for (auto i = (int)FirstButton; auto &but : param_block.metaparams.buttons) {
+		if (but.just_went_high())
 			player.set_panel_param(i, 1.f);
-		}
-
 		else if (but.just_went_low())
 			player.set_panel_param(i, 0.f);
+
+		i++;
+	}
+
+	// Encoders (param id 0, 1)
+	for (auto i = 0u; auto &enc : param_block.metaparams.encoders) {
+		if (auto motion = enc.use_motion())
+			player.set_panel_param(i, motion);
 
 		i++;
 	}
@@ -114,12 +119,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			player.set_panel_input(panel_jack_i, calibrated_input);
 		}
 
-		// Pass Knob values to modules
+		// Accelerometer: param_id 2, 3, 4
 		for (auto [i, knob_val] : countzip(params.accel)) {
 			// TODO: if changed:
-			player.set_panel_param(i, knob_val);
+			player.set_panel_param(i + 2, knob_val);
 		}
-		// TODO params.buttons
 
 		// USB MIDI
 		MidiMessage msg = params.usb_raw_midi;
@@ -147,9 +151,10 @@ uint32_t AudioStream::get_audio_errors() {
 
 // It's measurably faster to copy params into cacheable ram
 ParamBlock &AudioStream::cache_params(unsigned block) {
-	local_params.metaparams.battery_status = param_blocks[block].metaparams.battery_status;
-	local_params.metaparams.usb_midi_connected = param_blocks[block].metaparams.usb_midi_connected;
-	local_params.metaparams.buttons = param_blocks[block].metaparams.buttons;
+	// local_params.metaparams.battery_status = param_blocks[block].metaparams.battery_status;
+	// local_params.metaparams.usb_midi_connected = param_blocks[block].metaparams.usb_midi_connected;
+	// local_params.metaparams.buttons = param_blocks[block].metaparams.buttons;
+	local_params.metaparams = param_blocks[block].metaparams;
 
 	for (auto i = 0u; i < block_size_; i++)
 		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt

@@ -40,6 +40,10 @@ struct PanelDef {
 
 	static constexpr std::array<std::string_view, NumUserFacingOutJacks> OutJackAbbrevs{"L", "R"};
 
+	static constexpr bool is_encoder(uint32_t id) {
+		return false;
+	}
+
 	static constexpr std::string_view get_map_param_name(uint32_t id) {
 		if (id < KnobNames.size())
 			return KnobNames[id];

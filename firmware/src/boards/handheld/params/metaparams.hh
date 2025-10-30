@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/panel_conf.hh"
 #include "util/debouncer.hh"
+#include "util/rotary_motion.hh"
 #include "util/zip.hh"
 #include <cmath>
 #include <cstdint>
@@ -10,6 +11,7 @@ namespace MetaModule
 
 struct BatteryStatus {
 	uint16_t level{};
+	uint16_t maLoad{};
 	bool is_charging{};
 };
 
@@ -21,6 +23,7 @@ struct MetaParams {
 	bool usb_midi_connected = false;
 
 	std::array<Toggler, PanelDef::NumEncoderButtons + PanelDef::NumButtons> buttons{};
+	std::array<RotaryMotion, PanelDef::NumEncoders> encoders{};
 
 	uint32_t sample_rate = 48000;
 	uint32_t audio_load = 0;
@@ -33,9 +36,9 @@ struct MetaParams {
 	// Copies non-event signals (CV, audio)
 	// Used with write_sync()
 	void update_with(MetaParams &that) {
-		// for (auto [this_enc, that_enc] : zip(this->encoder, that.encoder)) {
-		// 	this_enc.add_motion(that_enc);
-		// }
+		for (auto [this_enc, that_enc] : zip(this->encoders, that.encoders)) {
+			this_enc.add_motion(that_enc);
+		}
 
 		battery_status = that.battery_status;
 		usb_midi_connected = that.usb_midi_connected;
@@ -49,9 +52,9 @@ struct MetaParams {
 	// Copies non-event signals (CV, audio)
 	// Used with read_sync()
 	void transfer(MetaParams &that) {
-		// for (auto [this_enc, that_enc] : zip(this->encoder, that.encoder)) {
-		// 	this_enc.transfer_motion(that_enc);
-		// }
+		for (auto [this_enc, that_enc] : zip(this->encoders, that.encoders)) {
+			this_enc.transfer_motion(that_enc);
+		}
 
 		battery_status = that.battery_status;
 		usb_midi_connected = that.usb_midi_connected;

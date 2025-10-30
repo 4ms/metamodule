@@ -47,7 +47,6 @@ private:
 
 	void parse_midi();
 	void update_midi_connected();
-	void update_rotary();
 
 	void test_pins();
 

@@ -14,7 +14,8 @@ struct PanelDef {
 	static constexpr uint32_t NumAudioOut = 2;
 	static constexpr uint32_t NumDACOut = 0;
 
-	static constexpr uint32_t NumPot = 2;
+	static constexpr uint32_t NumPot = 3; // XYZ accelerometer
+
 	static constexpr uint32_t NumCVIn = 0;
 
 	static constexpr uint32_t NumGateIn = 0;
@@ -29,6 +30,7 @@ struct PanelDef {
 	static constexpr uint32_t NumMetaRgbButton = 0;
 
 	static constexpr uint32_t NumKnobs = NumPot + NumEncoders;
+
 	static constexpr int NumUserFacingInJacks = NumAudioIn + NumCVIn + NumGateIn;
 	static constexpr int NumUserFacingOutJacks = NumAudioOut + NumDACOut + NumGateOut;
 	static constexpr char NumJacks = NumUserFacingInJacks + NumUserFacingOutJacks + NumMetaCV;
@@ -42,6 +44,14 @@ struct PanelDef {
 	static constexpr std::array<std::string_view, NumUserFacingOutJacks> OutJackNames{"OutL", "OutR"};
 
 	static constexpr std::array<std::string_view, NumUserFacingOutJacks> OutJackAbbrevs{"L", "R"};
+
+	static constexpr bool is_encoder(uint32_t id) {
+		return id == 0 || id == 1;
+	}
+
+	static constexpr bool is_accelerometer(uint32_t id) {
+		return id == 2 || id == 3 || id == 4;
+	}
 
 	static constexpr std::string_view get_map_param_name(uint32_t id) {
 		if (id < KnobNames.size())
