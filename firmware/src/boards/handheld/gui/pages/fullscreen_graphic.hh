@@ -41,6 +41,9 @@ struct FullscreenGraphicPage : PageBase {
 
 		// Get first graphic display
 		auto patch = patches.get_playing_patch();
+		if (!patch || patch->module_slugs.size() <= args.module_id.value())
+			return;
+
 		auto slug = patch->module_slugs[args.module_id.value()];
 		auto info = ModuleFactory::getModuleInfo(slug);
 		for (auto [idx, el] : zip(info.indices, info.elements)) {
