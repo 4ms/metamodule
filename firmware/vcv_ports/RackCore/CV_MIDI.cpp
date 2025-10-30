@@ -1,4 +1,4 @@
-#include "CoreModules/midi/midi_message.hh"
+#include "midi/midi_message.hh"
 #include "plugin.hpp"
 #include "util/circular_buffer.hh"
 
