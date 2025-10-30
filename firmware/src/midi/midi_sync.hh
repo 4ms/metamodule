@@ -50,20 +50,21 @@ public:
 		if (midi_chan >= cc_values.size() || cc_num >= cc_values[midi_chan].size())
 			return;
 
-		uint8_t cc_value = std::clamp(static_cast<int>(value * 127.0f), 0, 127);
+		uint8_t new_val = std::clamp(static_cast<int>(value * 127.0f), 0, 127);
 
-		auto &cc_val = cc_values[midi_chan][cc_num];
+		auto &prev_val = cc_values[midi_chan][cc_num];
 
-		if (cc_val != cc_value) {
+		if (prev_val != new_val) {
 			MidiMessage cc_msg;
 			cc_msg.status = MidiStatusByte{MidiCommand::ControlChange, midi_chan};
 			cc_msg.data.byte[0] = cc_num;
-			cc_msg.data.byte[1] = cc_value;
+			cc_msg.data.byte[1] = new_val;
 
+			// printf("o: CC%d %d => %d\n", cc_num, prev_val.value_or(-1), new_val);
 			midi_out_queue.put(cc_msg);
 
 			// Update stored value
-			cc_val = cc_value;
+			prev_val = new_val;
 		}
 	}
 
