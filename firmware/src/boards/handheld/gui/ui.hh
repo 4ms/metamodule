@@ -73,8 +73,11 @@ public:
 				pr_err("Failed to write settings file\n");
 			}
 		}
+		// Hard-set settings for now
+		settings.audio.sample_rate = 24000;
+		settings.audio.block_size = 512;
 
-		settings.last_patch_vol = Volume::USB;
+		settings.last_patch_vol = Volume::NorFlash;
 		settings.last_patch_opened = "/patch.yml";
 
 		patch_playloader.request_new_audio_settings(
@@ -84,7 +87,7 @@ public:
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 
 		auto d = lv_obj_create(nullptr);
-		lv_obj_set_style_bg_color(d, lv_color_hex(0xAAAAAA), 0);
+		lv_obj_set_style_bg_color(d, lv_color_hex(0x335533), 0);
 		lv_obj_set_style_bg_opa(d, LV_OPA_100, 0);
 		lv_scr_load(d);
 
@@ -189,6 +192,22 @@ public:
 	}
 
 	void load_initial_patch() {
+		// Copy patch.yml on USB drive if present, to NOR flash
+		// That way we don't need the USB drive installed every boot
+		if (auto sz = FS::file_size(file_storage_proxy, {"patch.yml", Volume::USB}); sz && *sz > 0) {
+			pr_info("Found usb:/patch.yml, %zu bytes\n", *sz);
+			std::string buf;
+			if (auto bytes_read = FS::read_file(file_storage_proxy, buf, {"patch.yml", Volume::USB}); bytes_read) {
+				auto ok = FS::write_file(file_storage_proxy, buf, {"patch.yml", Volume::NorFlash});
+				if (!ok)
+					pr_err("Error copying usb:/patch.yml to nor:/patch.yml\n");
+				else
+					pr_info("Wrote nor:/patch.yml, %zu bytes\n", *bytes_read);
+			}
+		}
+
+		settings.last_patch_vol = Volume::NorFlash;
+		settings.last_patch_opened = "patch.yml";
 		patch_playloader.load_initial_patch(settings.last_patch_opened, settings.last_patch_vol);
 
 		page_manager.init();
