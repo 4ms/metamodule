@@ -365,7 +365,7 @@ private:
 			plugin_name.pop_back();
 
 		const auto is_autoloaded = std::ranges::find(page->settings.slugs, plugin_name) != page->settings.slugs.end();
-		pr_dbg("%s found %s in slugs\n", is_autoloaded ? "Did" : "Did not", plugin_name.c_str());
+		pr_dbg("%s %s in autoload slugs\n", is_autoloaded ? "Found" : "Did not find", plugin_name.c_str());
 
 		page->plugin_state_popup.show(
 			[page, plugin_name, target](std::optional<uint8_t> button, std::optional<bool> toggle) {
