@@ -152,6 +152,42 @@ extern rack::plugin::Model *modelTripleSloth;
 
 extern rack::plugin::Model *modelSDOrcasHeartV2;
 
+
+extern rack::plugin::Model *modelAdd5;
+extern rack::plugin::Model *modelAbcdSeq;
+extern rack::plugin::Model *modelArrange;
+extern rack::plugin::Model *modelArrange16;
+extern rack::plugin::Model *modelBouncyBalls;
+extern rack::plugin::Model *modelSimpleClock;
+extern rack::plugin::Model *modelStr1ker;
+extern rack::plugin::Model *modelD1v1de;
+extern rack::plugin::Model *modelPres1t;
+extern rack::plugin::Model *modelMinMax;
+extern rack::plugin::Model *modelQuantizer;
+extern rack::plugin::Model *modelNoteSeq;
+extern rack::plugin::Model *modelNoteSeqFu;
+extern rack::plugin::Model *modelNoteSeq16;
+extern rack::plugin::Model *modelOnePattern;
+extern rack::plugin::Model *modelPatterns;
+extern rack::plugin::Model *modelWavHead;
+extern rack::plugin::Model *modelXYPad;
+extern rack::plugin::Model *modelFullScope;
+extern rack::plugin::Model *modelGridSeq;
+extern rack::plugin::Model *modelEightSeq;
+extern rack::plugin::Model *modelDivSeq;
+extern rack::plugin::Model *modelThingThing;
+extern rack::plugin::Model *modelCat;
+extern rack::plugin::Model *modelTree;
+extern rack::plugin::Model *modelTrigs;
+extern rack::plugin::Model *modelBlankPanel1hp;
+extern rack::plugin::Model *modelBlankPanelSmall;
+extern rack::plugin::Model *modelBlankPanelMedium;
+extern rack::plugin::Model *modelBlankPanelLarge;
+extern rack::plugin::Model *modelCoolBreeze;
+extern rack::plugin::Model *modelPete;
+extern rack::plugin::Model *modelTimer;
+
+
 // These can be used by the plugin if they need to load from their plugin files after startup
 extern rack::plugin::Plugin *befacoPluginInstance;
 extern rack::plugin::Plugin *audibleInstrumentsPluginInstance;
@@ -160,3 +196,4 @@ extern rack::plugin::Plugin *nonlinearcircuitsPluginInstance;
 extern rack::plugin::Plugin *eightfoldPluginInstance;
 extern rack::plugin::Plugin *valleyPluginInstance;
 extern rack::plugin::Plugin *rackCorePluginInstance;
+extern rack::plugin::Plugin *jwmodulesPluginInstance;

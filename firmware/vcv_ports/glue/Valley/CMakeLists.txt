@@ -51,10 +51,6 @@ if (BUILD_DYN_PLUGIN)
         ${SOURCE_DIR}/src/Terrorform/Terrorform.cpp
         plugin.cpp 
     )
-
-    target_compile_definitions(ValleyLibrary PRIVATE
-        USE_SINGLE_FLOAT=1
-    )
 endif()
 
 target_include_directories(ValleyLibrary PRIVATE 

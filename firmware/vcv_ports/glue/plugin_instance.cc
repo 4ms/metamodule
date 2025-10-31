@@ -17,3 +17,4 @@ rack::plugin::Plugin *nonlinearcircuitsPluginInstance;
 rack::plugin::Plugin *eightfoldPluginInstance;
 rack::plugin::Plugin *valleyPluginInstance;
 rack::plugin::Plugin *rackCorePluginInstance;
+rack::plugin::Plugin *jwmodulesPluginInstance;

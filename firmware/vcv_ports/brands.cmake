@@ -1,9 +1,10 @@
 set(brands
-	Befaco
-	hetrickcv
-	AudibleInstruments
-	nonlinearcircuits
+    Befaco
+    hetrickcv
+    AudibleInstruments
+    nonlinearcircuits
     eightfold
-	Valley
+    Valley
     RackCore
+    JWModules
 )

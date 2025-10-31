@@ -264,6 +264,45 @@ struct InternalPluginManager {
 		pluginInstance->addModel(rack::core::modelMIDI_CV);
 		pluginInstance->addModel(rack::core::modelCV_MIDI);
 #endif
+
+#ifdef BUILD_INTERNAL_JWModules
+		pluginInstance = &internal_plugins.emplace_back("JWModules");
+		jwmodulesPluginInstance = pluginInstance;
+		pluginInstance->addModel(modelTree);
+		pluginInstance->addModel(modelAdd5);
+		pluginInstance->addModel(modelAbcdSeq);
+		pluginInstance->addModel(modelArrange);
+		pluginInstance->addModel(modelArrange16);
+		pluginInstance->addModel(modelBouncyBalls);
+		pluginInstance->addModel(modelSimpleClock);
+		pluginInstance->addModel(modelStr1ker);
+		pluginInstance->addModel(modelD1v1de);
+		pluginInstance->addModel(modelPres1t);
+		pluginInstance->addModel(modelMinMax);
+		pluginInstance->addModel(modelQuantizer);
+		pluginInstance->addModel(modelNoteSeq);
+		pluginInstance->addModel(modelNoteSeqFu);
+		pluginInstance->addModel(modelNoteSeq16);
+		pluginInstance->addModel(modelOnePattern);
+		pluginInstance->addModel(modelPatterns);
+		pluginInstance->addModel(modelWavHead);
+		pluginInstance->addModel(modelXYPad);
+		pluginInstance->addModel(modelFullScope);
+		pluginInstance->addModel(modelGridSeq);
+		pluginInstance->addModel(modelEightSeq);
+		pluginInstance->addModel(modelDivSeq);
+		pluginInstance->addModel(modelThingThing);
+		pluginInstance->addModel(modelCat);
+		pluginInstance->addModel(modelTree);
+		pluginInstance->addModel(modelTrigs);
+		pluginInstance->addModel(modelBlankPanel1hp);
+		pluginInstance->addModel(modelBlankPanelSmall);
+		pluginInstance->addModel(modelBlankPanelMedium);
+		pluginInstance->addModel(modelBlankPanelLarge);
+		pluginInstance->addModel(modelCoolBreeze);
+		pluginInstance->addModel(modelPete);
+		pluginInstance->addModel(modelTimer);
+#endif
 	}
 };
 } // namespace MetaModule

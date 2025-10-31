@@ -1,0 +1,142 @@
+{
+	"MetaModuleBrandName": "JWModules",
+	"MetaModuleBrandSlug": "JWModules",
+	"MetaModuleBrandAliases": ["JW-Modules", "JWModules"],
+	"MetaModulePluginMaintainer": "Jeremy Wentworth",
+	"MetaModulePluginMaintainerEmail": "jeremy@jeremywentworth.com",
+	"MetaModulePluginMaintainerUrl": "https://jeremywentworth.com",
+	"MetaModuleDescription": "JW-Modules ported from VCV Rack",
+	"MetaModuleIncludedModules":
+	[
+		{
+			"slug": "BlankPanel_1HP",
+			"name": "Blank Panel (1HP)"
+		},
+		{
+			"slug": "BlankPanel_SM",
+			"name": "Blank Panel (Small)"
+		},
+		{
+			"slug": "BlankPanel_MD",
+			"name": "Blank Panel (Medium)"
+		},
+		{
+			"slug": "BlankPanel_LG",
+			"name": "Blank Panel (Large)"
+		},
+		{
+			"slug": "CoolBreeze",
+			"name": "Cool Breeze"
+		},
+		{
+			"slug": "Pete",
+			"name": "Pete"
+		},
+		{
+			"slug": "Add5",
+			"name": "Add5"
+		},
+		{
+			"slug": "Arrange",
+			"name": "Arrange"
+		},
+		{
+			"slug": "BouncyBalls",
+			"name": "Bouncy Balls"
+		},
+        {
+			"slug": "0Cat",
+			"name": "0Cat"
+		},
+		{
+			"slug": "FullScope",
+			"name": "Full Scope"
+		},
+		{
+			"slug": "GridSeq",
+			"name": "GridSeq"
+		},
+		{
+			"slug": "8Seq",
+			"name": "8Seq"
+		},
+		{
+			"slug": "AbcdSeq",
+			"name": "AbcdSeq"
+		},
+		{
+			"slug": "DivSeq",
+			"name": "DivSeq"
+		},
+		{
+			"slug": "MinMax",
+			"name": "Min Max"
+		},
+        {
+			"slug": "NoteSeq",
+			"name": "NoteSeq"
+		},
+        {
+			"slug": "NoteSeqFu",
+			"name": "NoteSeqFu"
+		},
+        {
+			"slug": "NoteSeq16",
+			"name": "NoteSeq16"
+		},
+        {
+			"slug": "Trigs",
+			"name": "Trigs"
+		},
+        {
+			"slug": "Patterns",
+			"name": "Patterns"
+		},
+        {
+			"slug": "1Pattern",
+			"name": "1Pattern"
+		},
+		{
+			"slug": "Quantizer",
+			"name": "Quantizer"
+		},
+        {
+			"slug": "SimpleClock",
+			"name": "Simple Clock"
+		},
+        {
+			"slug": "Timer",
+			"name": "Timer"
+		},
+		{
+			"slug": "Str1ker",
+			"name": "Str1ker"
+		},
+		{
+			"slug": "D1v1de",
+			"name": "D1v1de",
+			"description": "Clock Divider"
+		},
+		{
+			"slug": "Pres1t",
+			"name": "Pres1t",
+			"description": "Voltage Storage"
+		},
+		{
+			"slug": "ThingThing",
+			"name": "Thing Thing"
+		},
+		{
+			"slug": "WavHead",
+			"name": "Wav Head"
+		},
+		{
+			"slug": "Tree",
+			"name": "Tree"
+		},
+		{
+			"slug": "XYPad",
+			"name": "XY Pad"
+		}
+	]
+  }
