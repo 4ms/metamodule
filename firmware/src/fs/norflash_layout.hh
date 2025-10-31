@@ -6,9 +6,9 @@
 //last 2MB is patches, minus 4k for Calibration data
 static constexpr uint32_t BootloaderSize = 512 * 1024;
 static constexpr uint32_t FirmwareSize = (10 * 1024 * 1024) - BootloaderSize;
-static constexpr uint32_t AssetVolFlashSize = 4 * 1024 * 1024;
+static constexpr uint32_t AssetVolFlashSize = 5 * 1024 * 1024;
 static constexpr uint32_t CalDataFlashSize = 4096;
-static constexpr uint32_t PatchVolFlashSize = (2 * 1024 * 1024) - CalDataFlashSize;
+static constexpr uint32_t PatchVolFlashSize = (1 * 1024 * 1024) - CalDataFlashSize;
 
 static constexpr uint32_t FirmwareOffset = BootloaderSize;
 static constexpr uint32_t AssetVolFlashOffset = FirmwareOffset + FirmwareSize;
