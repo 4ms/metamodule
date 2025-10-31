@@ -14,6 +14,8 @@
 #include "user_settings/settings.hh"
 #include "user_settings/settings_file.hh"
 
+LV_IMG_DECLARE(logo_4ms_black_h200px);
+
 namespace MetaModule
 {
 
@@ -87,8 +89,13 @@ public:
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 
 		auto d = lv_obj_create(nullptr);
-		lv_obj_set_style_bg_color(d, lv_color_hex(0x335533), 0);
+		lv_obj_set_style_bg_color(d, lv_color_hex(0x000000), 0);
 		lv_obj_set_style_bg_opa(d, LV_OPA_100, 0);
+
+		auto logo_img = lv_img_create(d);
+		lv_img_set_src(logo_img, &logo_4ms_black_h200px);
+		lv_obj_align(logo_img, LV_ALIGN_CENTER, 0, 0);
+
 		lv_scr_load(d);
 
 		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
