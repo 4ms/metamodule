@@ -135,13 +135,24 @@ void Controls::start() {
 	});
 }
 
-static unsigned last_dump = 0;
 void Controls::process() {
 	accel.update();
 	batt.update();
+
+	static unsigned last_dump = 0;
+#ifdef DUMP_BATT_STATUS_CONTINUALLY
 	if (HAL_GetTick() - last_dump > 5000) {
 		last_dump = HAL_GetTick();
 		batt.dump_registers();
+	}
+#endif
+
+	if (button_1.is_pressed() && button_4.is_pressed()) {
+		//limit to once per second
+		if (HAL_GetTick() - last_dump > 1000) {
+			last_dump = HAL_GetTick();
+			batt.dump_registers();
+		}
 	}
 }
 
