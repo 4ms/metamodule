@@ -81,19 +81,8 @@ struct PluginTab : SystemMenuTab {
 		lv_hide(ui_PluginsFoundCont);
 		lv_hide(ui_PluginTabSpinner);
 
-		const auto &loaded_plugins = plugin_manager.loaded_plugins();
-		if (!lv_obj_get_child_cnt(ui_PluginsLoadedCont) && loaded_plugins.size()) {
-			// plugins were autoloaded on startup, they need to be added to the loaded plugin list.
-			for (auto const &p : loaded_plugins) {
-				auto pluginname = std::string{p.fileinfo.plugin_name};
-				if (p.fileinfo.version_in_filename.length() > 0)
-					pluginname += "\n" + Gui::grey_text(std::string{p.fileinfo.version_in_filename});
-
-				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
-				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
-				lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
-			}
-		}
+		clear_loaded_list();
+		populate_loaded_list();
 
 		clear_found_list();
 		reset_group();
@@ -217,8 +206,14 @@ private:
 	void populate_loaded_list() {
 		auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
 		for (auto &plugin : loaded_plugin_list) {
-			auto plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
+			auto pluginname = std::string{plugin.fileinfo.plugin_name};
+			if (plugin.fileinfo.version_in_filename.length() > 0)
+				pluginname += "\n" + Gui::grey_text(std::string{plugin.fileinfo.version_in_filename});
+
+			lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
 			lv_group_add_obj(group, plugin_obj);
+			lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
+			lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 		}
 	}
 
