@@ -732,6 +732,7 @@ private:
 			page->missing_plugins.start(page->patches.get_playing_patch(), page->group, [page = page](bool did_load) {
 				if (did_load) {
 					page->patch_playloader.request_reload_playing_patch(true);
+					page->gui_state.force_redraw_patch = true;
 				} else {
 					page->patch_playloader.apply_suggested_audio_settings();
 					page->patch_playloader.start_audio();
