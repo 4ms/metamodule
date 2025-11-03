@@ -27,6 +27,51 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 	auto &rotary_push_turn = _instance->rotary_push_turn;
 	auto &rotary_turn = _instance->rotary_turn;
 
+#ifdef MONKEYROTARY
+
+	static bool is_pressed = false;
+
+	//1/16 chance of moving rotary:
+	if ((rand() & 0b1111) == 0b1111) {
+		data->enc_diff = rand() & 1 ? -1 : 1;
+		if (data->enc_diff == 1)
+			printf(">\n");
+		if (data->enc_diff == -1)
+			printf("<\n");
+	} else {
+		data->enc_diff = 0;
+	}
+
+	rotary_turn = data->enc_diff;
+
+	// 1/64 chance of clicking or releasing
+	if ((rand() & 0b111111) == 0b000000) {
+		is_pressed = !is_pressed;
+		rotary_pressed = is_pressed ? ButtonEvent::Pressed : ButtonEvent::Released;
+		if (is_pressed)
+			printf("PRESS\n");
+		else
+			printf("REL\n");
+	}
+
+	// 1/256 chance of pressing back
+	if ((rand() & 0xFF) == 0xAA) {
+		aux_pressed = ButtonEvent::Pressed;
+		printf("BACK (press)\n");
+	} else {
+		// Release the back button on the next time
+		if (aux_pressed == ButtonEvent::Pressed) {
+			aux_pressed = ButtonEvent::Released;
+			printf("BACK(release)\n");
+		}
+	}
+
+	data->state = is_pressed ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+
+	return;
+
+#endif
+
 	SDL_Event e;
 
 	data->continue_reading = false;
