@@ -19,6 +19,7 @@ struct PatchSelectorSubdirPanel {
 		for (auto vol_cont : vol_conts) {
 			auto vol_item = lv_obj_get_child(vol_cont, 0);
 
+			lv_obj_remove_style(vol_item, &Gui::subdir_panel_item_sel_blurred_style, LV_STATE_USER_2);
 			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_sel_blurred_style, LV_STATE_USER_2);
 
 			while (lv_obj_remove_event_cb(vol_item, nullptr)) {

@@ -12,12 +12,6 @@
 extern "C" {
 #endif
 
-// COMPONENT MappedKnobsetitem
-#define UI_COMP_MAPPEDKNOBSETITEM_MAPPEDKNOBSETITEM 0
-#define UI_COMP_MAPPEDKNOBSETITEM_CIRCLE 1
-#define UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER 2
-#define UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT 3
-#define _UI_COMP_MAPPEDKNOBSETITEM_NUM 4
 lv_obj_t *ui_MappedKnobsetitem_create(lv_obj_t *comp_parent, bool has_textarea);
 
 #ifdef __cplusplus

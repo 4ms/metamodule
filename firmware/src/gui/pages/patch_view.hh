@@ -656,6 +656,9 @@ private:
 		lv_group_add_obj(group, canvas);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SNAPPABLE);
 
+		lv_obj_remove_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
+		lv_obj_remove_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
+
 		lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
 		lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);

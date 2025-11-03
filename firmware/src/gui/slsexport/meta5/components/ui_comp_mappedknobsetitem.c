@@ -6,6 +6,9 @@
 #include "../ui.h"
 
 // COMPONENT MappedKnobsetitem
+// child 0: Cicle (btn)
+//    |-- child 0: KnobLetter (label)
+// child 1: KnobSetNameText (textarea or label)
 
 lv_obj_t *ui_MappedKnobsetitem_create(lv_obj_t *comp_parent, bool has_textarea) {
 
@@ -122,13 +125,5 @@ lv_obj_t *ui_MappedKnobsetitem_create(lv_obj_t *comp_parent, bool has_textarea) 
 	lv_obj_set_style_pad_top(cui_KnobSetNameText, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(cui_KnobSetNameText, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-	lv_obj_t **children = lv_mem_alloc(sizeof(lv_obj_t *) * _UI_COMP_MAPPEDKNOBSETITEM_NUM);
-	children[UI_COMP_MAPPEDKNOBSETITEM_MAPPEDKNOBSETITEM] = cui_MappedKnobsetitem;
-	children[UI_COMP_MAPPEDKNOBSETITEM_CIRCLE] = cui_Circle;
-	children[UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER] = cui_KnobLetter;
-	children[UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT] = cui_KnobSetNameText;
-	lv_obj_add_event_cb(cui_MappedKnobsetitem, get_component_child_event_cb, LV_EVENT_GET_COMP_CHILD, children);
-	lv_obj_add_event_cb(cui_MappedKnobsetitem, del_component_child_event_cb, LV_EVENT_DELETE, children);
-	ui_comp_MappedKnobsetitem_create_hook(cui_MappedKnobsetitem);
 	return cui_MappedKnobsetitem;
 }

@@ -55,6 +55,13 @@ struct MidiMapPopup {
 				lv_obj_add_event_cb(source.checkbox, check_callback, LV_EVENT_VALUE_CHANGED, this);
 
 			for (auto dropdown : source.dropdowns) {
+				lv_obj_remove_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
+				lv_obj_remove_style(dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);
+				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
+				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY | LV_STATE_PRESSED);
+				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_EDITED);
+
+
 				lv_obj_add_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
 				lv_obj_set_style_pad_ver(dropdown, 8, LV_PART_MAIN);
 				lv_obj_add_style(dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);

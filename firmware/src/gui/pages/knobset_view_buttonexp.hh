@@ -103,6 +103,7 @@ struct ButtonExpanderMapsView {
 	void blur() {
 		// Clear all objects from all panes except for the original ones (which are used to display an empty slot)
 		for (auto *pane : panes) {
+
 			if (auto num_children = lv_obj_get_child_cnt(pane)) {
 
 				if (num_children == 0) {
@@ -110,14 +111,17 @@ struct ButtonExpanderMapsView {
 				}
 
 				for (auto i = 0u; i < num_children; i++) {
+					auto cont = lv_obj_get_child(pane, i);
+					if (!cont) {
+						continue;
+					}
+
 					if (i == 0) {
-						auto cont = lv_obj_get_child(pane, 0);
 						lv_label_set_text(get_button_label(cont), "");
 						lv_obj_set_user_data(cont, nullptr);
 						disable(cont);
 					} else {
-						auto cont = lv_obj_get_child(pane, i);
-						lv_obj_del_async(cont);
+						lv_obj_del(cont);
 					}
 				}
 			}
