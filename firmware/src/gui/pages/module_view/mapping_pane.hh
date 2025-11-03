@@ -811,6 +811,9 @@ private:
 		}
 
 		auto alias_text_obj = lv_obj_get_child(obj, 1);
+		if (!lv_obj_has_class(alias_text_obj, &lv_textarea_class)) {
+			return;
+		}
 
 		keyboard_entry.show_keyboard(alias_text_obj, [panelmap = panelmap, this](std::string_view text) {
 			if (panelmap.is_input)

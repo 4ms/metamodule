@@ -76,6 +76,7 @@ struct MappingPaneList {
 
 	static lv_obj_t *create_panel_in_item(uint16_t panel_jack_id, lv_obj_t *parent, std::string_view alias_name) {
 		if (Midi::is_midi_panel_id(panel_jack_id)) {
+			// TODO: create item with textarea so we can add aliases to MIDI jack mappings
 			auto obj = create_mapping_circle_item(parent, MapButtonType::MIDIJack, panel_jack_id, alias_name.data());
 			if (!alias_name.length()) {
 				auto name = get_panel_name(JackInput{}, panel_jack_id);
@@ -87,8 +88,7 @@ struct MappingPaneList {
 			return obj;
 
 		} else {
-			// TODO: create item with textarea/label
-			auto obj = ui_MappedKnobsetitem_create(parent, true);
+			auto obj = ui_MappedKnobsetitem_create(parent, true); // true: has_textarea
 			style_panel_incable_item(panel_jack_id, obj, alias_name);
 			return obj;
 		}
