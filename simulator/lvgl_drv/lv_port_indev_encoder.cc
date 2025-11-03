@@ -20,6 +20,7 @@ LvglEncoderSimulatorDriver::LvglEncoderSimulatorDriver(RotaryEncoderKeys &keys)
 	lv_log("Starting LVGL\n");
 }
 
+#define MONKEYROTARY
 void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
 	auto &keys = _instance->keys;
 	auto &rotary_pressed = _instance->rotary_pressed;
@@ -29,44 +30,56 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 
 #ifdef MONKEYROTARY
 
-	static bool is_pressed = false;
+	static bool rot_is_pressed = false;
+	static bool back_is_pressed = false;
 
-	//1/16 chance of moving rotary:
-	if ((rand() & 0b1111) == 0b1111) {
-		data->enc_diff = rand() & 1 ? -1 : 1;
-		if (data->enc_diff == 1)
-			printf(">\n");
-		if (data->enc_diff == -1)
-			printf("<\n");
-	} else {
-		data->enc_diff = 0;
+	//1/8 chance of moving rotary if button not pressed
+	data->enc_diff = 0;
+	if (!rot_is_pressed) {
+		if ((rand() & 0b111) == 0b111) {
+			data->enc_diff = rand() & 1 ? -1 : 1;
+			if (data->enc_diff == 1)
+				printf(">\n");
+			if (data->enc_diff == -1)
+				printf("<\n");
+		}
 	}
-
 	rotary_turn = data->enc_diff;
 
-	// 1/64 chance of clicking or releasing
-	if ((rand() & 0b111111) == 0b000000) {
-		is_pressed = !is_pressed;
-		rotary_pressed = is_pressed ? ButtonEvent::Pressed : ButtonEvent::Released;
-		if (is_pressed)
+	// 1/32 chance of clicking
+	if (!rot_is_pressed) {
+		if ((rand() & 0b11'111) == 0b00'000) {
+			rot_is_pressed = true;
+			rotary_pressed = ButtonEvent::Pressed;
 			printf("PRESS\n");
-		else
-			printf("REL\n");
+		}
+	}
+
+	// if pressing rotary then 3/4 chance of releasing
+	else
+	{
+		if ((rand() & 0b11) != 0b00) {
+			rot_is_pressed = false;
+			rotary_pressed = ButtonEvent::Released;
+			printf("RELEASE\n");
+		}
 	}
 
 	// 1/256 chance of pressing back
 	if ((rand() & 0xFF) == 0xAA) {
 		aux_pressed = ButtonEvent::Pressed;
+		back_is_pressed = true;
 		printf("BACK (press)\n");
 	} else {
 		// Release the back button on the next time
-		if (aux_pressed == ButtonEvent::Pressed) {
+		if (back_is_pressed) {
+			back_is_pressed = false;
 			aux_pressed = ButtonEvent::Released;
 			printf("BACK(release)\n");
 		}
 	}
 
-	data->state = is_pressed ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+	data->state = rot_is_pressed ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
 
 	return;
 
