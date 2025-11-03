@@ -571,23 +571,26 @@ private:
 	}
 
 	lv_obj_t *get_knob(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_KNOB);
+		return (lv_obj_get_child_cnt(container) > 0) ? lv_obj_get_child(container, 0) : nullptr;
 	}
 
 	lv_obj_t *get_label(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_LABEL);
+		return (lv_obj_get_child_cnt(container) > 2) ? lv_obj_get_child(container, 2) : nullptr;
 	}
 
 	lv_obj_t *get_circle(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_CIRCLE);
+		return (lv_obj_get_child_cnt(container) > 1) ? lv_obj_get_child(container, 1) : nullptr;
 	}
 
 	lv_obj_t *get_circle_letter(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINERBIG_CIRCLE_KNOBLETTER);
+		if (auto circle = get_circle(container)) {
+			return (lv_obj_get_child_cnt(circle) > 0) ? lv_obj_get_child(circle, 0) : nullptr;
+		} else
+			return nullptr;
 	}
 
 	lv_obj_t *get_indicator(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_INDICATOR);
+		return (lv_obj_get_child_cnt(container) > 3) ? lv_obj_get_child(container, 3) : nullptr;
 	}
 
 	lv_obj_t *get_button_label(lv_obj_t *container) {
