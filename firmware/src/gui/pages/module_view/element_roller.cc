@@ -145,6 +145,7 @@ void ModuleViewPage::populate_roller() {
 void ModuleViewPage::add_element_highlight(lv_obj_t *obj) {
 	auto &b = element_highlights.emplace_back();
 	b = lv_btn_create(ui_ModuleImage);
+	lv_obj_remove_style(b, &Gui::invisible_style, LV_PART_MAIN);
 	lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 
 	if (obj) {
@@ -184,8 +185,10 @@ void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
 void ModuleViewPage::highlight_component(size_t idx) {
 	if (idx < element_highlights.size()) {
 		if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
+			lv_obj_remove_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 			lv_obj_add_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 		} else {
+			lv_obj_remove_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 			lv_obj_add_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
 		lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
