@@ -12,14 +12,6 @@
 extern "C" {
 #endif
 
-// COMPONENT KnobContainer
-#define UI_COMP_KNOBCONTAINER_KNOBCONTAINER 0
-#define UI_COMP_KNOBCONTAINER_KNOB 1
-#define UI_COMP_KNOBCONTAINER_CIRCLE 2
-#define UI_COMP_KNOBCONTAINER_CIRCLE_KNOBLETTER 3
-#define UI_COMP_KNOBCONTAINER_LABEL 4
-#define UI_COMP_KNOBCONTAINER_INDICATOR 5
-#define _UI_COMP_KNOBCONTAINER_NUM 6
 lv_obj_t *ui_KnobContainer_create(lv_obj_t *comp_parent);
 
 #ifdef __cplusplus

@@ -22,9 +22,19 @@ struct MappingPaneList {
 	static lv_obj_t *
 	create_param_map_list_item(MappedKnob const &map, std::string_view knobset_name, lv_obj_t *parent, bool is_active) {
 		auto obj = ui_MappedKnobsetitem_create(parent, false);
-		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
-		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
+
+		if (lv_obj_get_child_cnt(obj) < 2) {
+			pr_err("create_param_map_list_item(): object is corrupted\n");
+			return nullptr;
+		}
+		auto circle = lv_obj_get_child(obj, 0);
+		if (lv_obj_get_child_cnt(circle) == 0) {
+			pr_err("create_param_map_list_item(): object circle is corrupted\n");
+			return nullptr;
+		}
+		auto label = lv_obj_get_child(circle, 0);
+		auto setname = lv_obj_get_child(obj, 1);
+
 		if (lv_obj_has_class(setname, &lv_label_class))
 			lv_label_set_text(setname, knobset_name.data());
 		lv_show(circle);
@@ -54,7 +64,11 @@ struct MappingPaneList {
 	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name, lv_obj_t *parent, bool is_active) {
 		auto obj = ui_UnmappedSetItem_create(parent);
 		lv_obj_set_style_pad_left(obj, 32, LV_PART_MAIN | LV_STATE_DEFAULT);
-		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
+
+		if (lv_obj_get_child_cnt(obj) == 0)
+			return nullptr;
+		auto setname = lv_obj_get_child(obj, 0);
+
 		lv_label_set_text(setname, knobset_name.data());
 		lv_obj_set_style_text_color(obj, is_active ? lv_color_hex(0xFF8918) : lv_color_white(), LV_STATE_DEFAULT);
 		return obj;
@@ -94,9 +108,18 @@ struct MappingPaneList {
 	}
 
 	static void style_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *obj, std::string_view alias_name) {
-		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
-		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
-		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		if (lv_obj_get_child_cnt(obj) < 2) {
+			pr_err("style_panel_outcable_item(): object is corrupted\n");
+			return;
+		}
+		auto circle = lv_obj_get_child(obj, 0);
+		if (lv_obj_get_child_cnt(circle) == 0) {
+			pr_err("style_panel_outcable_item(): object circle is corrupted\n");
+			return;
+		}
+		auto label = lv_obj_get_child(circle, 0);
+		auto setname = lv_obj_get_child(obj, 1);
+
 		lv_show(circle);
 
 		lv_obj_set_style_border_color(circle, Gui::get_jack_color(panel_jack_id), LV_STATE_DEFAULT);
@@ -117,9 +140,18 @@ struct MappingPaneList {
 	}
 
 	static void style_panel_outcable_item(uint16_t panel_jack_id, lv_obj_t *obj, std::string_view alias_name) {
-		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
-		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
-		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		if (lv_obj_get_child_cnt(obj) < 2) {
+			pr_err("style_panel_outcable_item(): object is corrupted\n");
+			return;
+		}
+		auto circle = lv_obj_get_child(obj, 0);
+		if (lv_obj_get_child_cnt(circle) == 0) {
+			pr_err("style_panel_outcable_item(): object circle is corrupted\n");
+			return;
+		}
+		auto label = lv_obj_get_child(circle, 0);
+		auto setname = lv_obj_get_child(obj, 1);
+
 		lv_show(circle);
 
 		lv_obj_set_style_border_color(circle, Gui::get_jack_color(panel_jack_id), LV_STATE_DEFAULT);
@@ -139,7 +171,9 @@ struct MappingPaneList {
 	}
 
 	static void style_unmappedcable_item(Jack jack, ElementType dir, PatchData const &patch, lv_obj_t *obj) {
-		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
+		if (lv_obj_get_child_cnt(obj) == 0)
+			return;
+		auto label = lv_obj_get_child(obj, 0);
 		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
 		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, patch);
 		lv_label_set_text_fmt(label, "%.16s %.16s", name.module_name.data(), name.element_name.data());

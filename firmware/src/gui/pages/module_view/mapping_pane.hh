@@ -804,7 +804,13 @@ private:
 	void show_jack_alias_keyboard(PanelJackMapUserData panelmap, lv_obj_t *obj) {
 		if (!panelmap.is_valid)
 			return;
-		auto alias_text_obj = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+
+		if (lv_obj_get_child_cnt(obj) < 2) {
+			pr_err("show_jack_alias_keyboard(): object is corrupted\n");
+			return;
+		}
+
+		auto alias_text_obj = lv_obj_get_child(obj, 1);
 
 		keyboard_entry.show_keyboard(alias_text_obj, [panelmap = panelmap, this](std::string_view text) {
 			if (panelmap.is_input)
