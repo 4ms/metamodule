@@ -25,14 +25,13 @@ lv_obj_t *create_lv_labeled_popup(lv_obj_t *parent, const char *label_text);
 
 lv_obj_t *create_button(lv_obj_t *parent, const char *name);
 
+// Display settings menu:
 lv_obj_t *create_settings_menu_switch(lv_obj_t *parent, std::string const &onoff_label_text);
 lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slider_text);
-
 lv_obj_t *create_settings_menu_title(lv_obj_t *parent, std::string const &title_name);
 
+// Patch view File Menu:
 lv_obj_t *create_file_menu_item(lv_obj_t *parent, std::string_view text);
-
-lv_obj_t *create_prefs_check(lv_obj_t *parent);
 
 lv_obj_t *create_midi_map_label(lv_obj_t *parent, std::string const &title);
 lv_obj_t *create_midi_map_dropdown(lv_obj_t *parent, std::string const &options);
@@ -41,5 +40,19 @@ lv_obj_t *create_button_expander_item(lv_obj_t *parent);
 lv_obj_t *create_button_expander_pane(lv_obj_t *parent);
 
 lv_obj_t *create_labeled_dropdown(lv_obj_t *parent);
+
+lv_obj_t *create_spinner(lv_obj_t *parent);
+
+// Prefs tab:
+lv_obj_t *create_prefs_check(lv_obj_t *parent);
+lv_obj_t *create_prefs_section_title(lv_obj_t *parent, std::string_view text);
+lv_obj_t *create_prefs_labeled_dropdown(lv_obj_t *parent, std::string_view label_text, std::string_view options = "");
+lv_obj_t *create_prefs_labeled_check(lv_obj_t *parent, std::string_view label_text);
+lv_obj_t *create_prefs_note(lv_obj_t *parent, std::string_view label_text);
+void prefs_cont_justify_multiline(lv_obj_t *cont);
+lv_obj_t *create_aligned_text_row(lv_obj_t *parent, std::string_view title_text);
+lv_obj_t *create_save_revert_buttons(lv_obj_t *parent);
+
+lv_obj_t *create_settings_cont(lv_obj_t *parent);
 
 } // namespace MetaModule

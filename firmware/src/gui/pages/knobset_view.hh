@@ -50,6 +50,24 @@ struct KnobSetViewPage : PageBase {
 		lv_hide(ui_KnobSetDescript);
 	}
 
+	bool one_mapped_module_in_knobset(std::vector<MappedKnob> const &knobset) {
+		if (!patch)
+			return true;
+
+		if (knobset.size() == 0)
+			return true;
+
+		int first_module_id = knobset[0].module_id;
+
+		for (auto const &map : knobset) {
+			// If this module is different than the last module
+			if (map.module_id != first_module_id)
+				return false;
+		}
+
+		return true;
+	}
+
 	void prepare_focus() override {
 		lv_obj_set_y(ui_Keyboard, 40);
 		keyboard_entry.prepare_focus(ui_KnobSetViewPage, group);
@@ -95,6 +113,8 @@ struct KnobSetViewPage : PageBase {
 		indicators.resize(knobset->set.size());
 
 		lv_obj_t *focus{};
+
+		single_module_knobset = one_mapped_module_in_knobset(knobset->set);
 
 		for (auto [idx, map] : enumerate(knobset->set)) {
 
@@ -170,7 +190,11 @@ struct KnobSetViewPage : PageBase {
 		num_maps[map.panel_knob_id]++;
 
 		std::string s;
-		param_item_name(s, map, patch);
+		if (single_module_knobset)
+			param_item_short_name(s, map, patch);
+		else
+			param_item_name(s, map, patch);
+
 		lv_label_set_text(get_label(cont), s.c_str());
 
 		lv_obj_add_event_cb(cont, scroll_to_knobs, LV_EVENT_FOCUSED, this);
@@ -502,6 +526,8 @@ private:
 	std::vector<lv_obj_t *> indicators;
 	std::array<unsigned, PanelDef::NumKnobs> num_maps{};
 
+	bool single_module_knobset = false;
+
 	KeyboardEntry keyboard_entry;
 
 	// The panes are the areas where mapping containers go
@@ -545,23 +571,26 @@ private:
 	}
 
 	lv_obj_t *get_knob(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_KNOB);
+		return (lv_obj_get_child_cnt(container) > 0) ? lv_obj_get_child(container, 0) : nullptr;
 	}
 
 	lv_obj_t *get_label(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_LABEL);
+		return (lv_obj_get_child_cnt(container) > 2) ? lv_obj_get_child(container, 2) : nullptr;
 	}
 
 	lv_obj_t *get_circle(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_CIRCLE);
+		return (lv_obj_get_child_cnt(container) > 1) ? lv_obj_get_child(container, 1) : nullptr;
 	}
 
 	lv_obj_t *get_circle_letter(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINERBIG_CIRCLE_KNOBLETTER);
+		if (auto circle = get_circle(container)) {
+			return (lv_obj_get_child_cnt(circle) > 0) ? lv_obj_get_child(circle, 0) : nullptr;
+		} else
+			return nullptr;
 	}
 
 	lv_obj_t *get_indicator(lv_obj_t *container) {
-		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_INDICATOR);
+		return (lv_obj_get_child_cnt(container) > 3) ? lv_obj_get_child(container, 3) : nullptr;
 	}
 
 	lv_obj_t *get_button_label(lv_obj_t *container) {

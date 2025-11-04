@@ -7,11 +7,10 @@
 #include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay);
-void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay);
-void SlideDown_Animation( lv_obj_t *TargetObject, int delay);
-void SlideUp_Animation( lv_obj_t *TargetObject, int delay);
-
+void DropInFromLeft_Animation(lv_obj_t *TargetObject, int delay);
+void DropOutToRight_Animation(lv_obj_t *TargetObject, int delay);
+void SlideDown_Animation(lv_obj_t *TargetObject, int delay);
+void SlideUp_Animation(lv_obj_t *TargetObject, int delay);
 
 // SCREEN: ui_MainMenu
 void ui_MainMenu_screen_init(void);
@@ -34,7 +33,6 @@ lv_obj_t *ui_MenuPanelSettings;
 lv_obj_t *ui_MenuImageSettings;
 lv_obj_t *ui_MenuLabelSettings;
 lv_obj_t *ui_MainMenuLoadMeter;
-
 
 // SCREEN: ui_PatchSelectorPage
 void ui_PatchSelectorPage_screen_init(void);
@@ -63,7 +61,6 @@ lv_obj_t *ui_FlashIcon;
 lv_obj_t *ui_Flashlabel1;
 lv_obj_t *ui_PatchListRoller;
 lv_obj_t *ui_waitspinner;
-
 
 // SCREEN: ui_PatchViewPage
 void ui_PatchViewPage_screen_init(void);
@@ -124,10 +121,6 @@ lv_obj_t *ui_DescPanelFileNameTitle;
 lv_obj_t *ui_DescPanelFileName;
 lv_obj_t *ui_Description;
 lv_obj_t *ui_DescMIDIPolyNumLabel;
-lv_obj_t *ui_DescriptionEditButton;
-lv_obj_t *ui_DescriptionEditButtonLabel;
-lv_obj_t *ui_DescriptionClose;
-lv_obj_t *ui_DescriptionCloseLabel;
 lv_obj_t *ui_PatchFileMenu;
 lv_obj_t *ui_PatchFileClosePanel;
 lv_obj_t *ui_PatchFileMenuHeader;
@@ -165,7 +158,6 @@ lv_obj_t *ui_SaveDialogCancelBut;
 lv_obj_t *ui_SaveDialogCancelButLabel;
 lv_obj_t *ui_SaveDialogSaveBut;
 lv_obj_t *ui_SaveDialogSaveButLabel;
-
 
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
@@ -318,7 +310,6 @@ lv_obj_t *ui_MidiMapCancelButtonLabel;
 lv_obj_t *ui_MidiMapOKButton;
 lv_obj_t *ui_MidiMapOKButtonLabel;
 
-
 // SCREEN: ui_KnobSetViewPage
 void ui_KnobSetViewPage_screen_init(void);
 lv_obj_t *ui_KnobSetViewPage;
@@ -366,7 +357,6 @@ lv_obj_t *ui_KnobSetButtonExp2Cont;
 lv_obj_t *ui_KnobSetButtonExp3Cont;
 lv_obj_t *ui_KnobSetButtonExp4Cont;
 
-
 // SCREEN: ui_EditMappingPage
 void ui_EditMappingPage_screen_init(void);
 lv_obj_t *ui_EditMappingPage;
@@ -411,21 +401,8 @@ lv_obj_t *ui_TrashButton;
 lv_obj_t *ui_TrashLabel;
 lv_obj_t *ui_Keyboard;
 
-
 // SCREEN: ui_DeleteMappingPopUp
 void ui_DeleteMappingPopUp_screen_init(void);
-lv_obj_t *ui_DeleteMappingPopUp;
-lv_obj_t *ui_DelMapPopUpPanel;
-lv_obj_t *ui_DelMapLabel;
-lv_obj_t *ui_DelMapButtonPanel;
-lv_obj_t *ui_CancelButton;
-lv_obj_t *ui_CancelLabel;
-lv_obj_t *ui_TrashButton2;
-lv_obj_t *ui_TrashLabel2;
-lv_obj_t *ui_Choice2Button;
-lv_obj_t *ui_Choice2Label;
-lv_obj_t *ui_ConfirmButton;
-lv_obj_t *ui_ConfirmLabel;
 lv_obj_t *ui_MessagePanel;
 lv_obj_t *ui_MessageLabel;
 lv_obj_t *ui_Panel2;
@@ -463,7 +440,6 @@ lv_obj_t *ui_Button11;
 lv_obj_t *ui_Button12;
 lv_obj_t *ui_Panel1;
 
-
 // SCREEN: ui_ModuleListPage
 void ui_ModuleListPage_screen_init(void);
 lv_obj_t *ui_ModuleListPage;
@@ -471,7 +447,6 @@ lv_obj_t *ui_ModuleListImage;
 lv_obj_t *ui_ModuleListRollerPanel;
 lv_obj_t *ui_ModuleListRollerTitle;
 lv_obj_t *ui_ModuleListRoller;
-
 
 // SCREEN: ui_SystemMenu
 void ui_SystemMenu_screen_init(void);
@@ -507,28 +482,6 @@ lv_obj_t *ui_PluginsBuiltinTitle;
 lv_obj_t *ui_PluginsBuiltinListText;
 lv_obj_t *ui_PluginTabSpinner;
 lv_obj_t *ui_SystemMenuPrefsTab;
-lv_obj_t *ui_SystemPrefsAudioSettingsTitle;
-lv_obj_t *ui_SystemPrefsAudioSamplerateCont;
-lv_obj_t *ui_SystemPrefsAudioSampleRateLabel;
-lv_obj_t *ui_SystemPrefsAudioSampleRateDropdown;
-lv_obj_t *ui_SystemPrefsAudioBlocksizeCont;
-lv_obj_t *ui_SystemPrefsAudioBlocksizeLabel;
-lv_obj_t *ui_SystemPrefsAudioBlocksizeDropdown;
-lv_obj_t *ui_SystemPrefsAudioOverrunRetriesCont;
-lv_obj_t *ui_SystemPrefsAudioOverrunRetriesLabel;
-lv_obj_t *ui_SystemPrefsAudioOverrunRetriesDropdown;
-lv_obj_t *ui_SystemPrefsScreensaverSettingsTitle;
-lv_obj_t *ui_SystemPrefsScreensaverTimeCont;
-lv_obj_t *ui_SystemPrefsScreensaverTimeLabel;
-lv_obj_t *ui_SystemPrefsScreensaverTimeDropdown;
-lv_obj_t *ui_SystemPrefsScreensaverKnobsCont;
-lv_obj_t *ui_SystemPrefsScreensaverKnobsLabel;
-lv_obj_t *ui_SystemPrefsScreensaverKnobsCheck;
-lv_obj_t *ui_SystemPrefsButtonCont;
-lv_obj_t *ui_SystemPrefsRevertButton;
-lv_obj_t *ui_SystemPrefsRevertButtonLabel;
-lv_obj_t *ui_SystemPrefsSaveButton;
-lv_obj_t *ui_SystemPrefsSaveButtonLabel;
 lv_obj_t *ui_SystemMenuSystemTab;
 lv_obj_t *ui_SystemCalibrationCont;
 lv_obj_t *ui_SystemCalibrationTitle;
@@ -667,147 +620,137 @@ const lv_img_dsc_t *ui_imgset_settings[1] = {&ui_img_1x_settings1_png};
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
-    #error "LV_COLOR_DEPTH should be 16bit to match SquareLine Studio's settings"
+#error "LV_COLOR_DEPTH should be 16bit to match SquareLine Studio's settings"
 #endif
-#if LV_COLOR_16_SWAP !=0
-    #error "LV_COLOR_16_SWAP should be 0 to match SquareLine Studio's settings"
+#if LV_COLOR_16_SWAP != 0
+#error "LV_COLOR_16_SWAP should be 0 to match SquareLine Studio's settings"
 #endif
 
 ///////////////////// ANIMATIONS ////////////////////
-void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay)
-{
-ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
-PropertyAnimation_0_user_data->target = TargetObject;
-PropertyAnimation_0_user_data->val = -1;
-lv_anim_t PropertyAnimation_0;
-lv_anim_init(&PropertyAnimation_0);
-lv_anim_set_time(&PropertyAnimation_0, 250);
-lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
-lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_x );
-lv_anim_set_values(&PropertyAnimation_0, 230, 0 );
-lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_linear);
-lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
-lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
-lv_anim_set_playback_time(&PropertyAnimation_0, 0);
-lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
- lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
-lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
-lv_anim_set_early_apply( &PropertyAnimation_0, false );
-lv_anim_start(&PropertyAnimation_0);
-
+void DropInFromLeft_Animation(lv_obj_t *TargetObject, int delay) {
+	ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+	PropertyAnimation_0_user_data->target = TargetObject;
+	PropertyAnimation_0_user_data->val = -1;
+	lv_anim_t PropertyAnimation_0;
+	lv_anim_init(&PropertyAnimation_0);
+	lv_anim_set_time(&PropertyAnimation_0, 250);
+	lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+	lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_x);
+	lv_anim_set_values(&PropertyAnimation_0, 230, 0);
+	lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_linear);
+	lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
+	lv_anim_set_deleted_cb(&PropertyAnimation_0, _ui_anim_callback_free_user_data);
+	lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+	lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_early_apply(&PropertyAnimation_0, false);
+	lv_anim_start(&PropertyAnimation_0);
 }
-void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay)
-{
-ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
-PropertyAnimation_0_user_data->target = TargetObject;
-PropertyAnimation_0_user_data->val = -1;
-lv_anim_t PropertyAnimation_0;
-lv_anim_init(&PropertyAnimation_0);
-lv_anim_set_time(&PropertyAnimation_0, 250);
-lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
-lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_x );
-lv_anim_set_values(&PropertyAnimation_0, 0, 220 );
-lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_linear);
-lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
-lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
-lv_anim_set_playback_time(&PropertyAnimation_0, 0);
-lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
- lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
-lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
-lv_anim_set_early_apply( &PropertyAnimation_0, false );
-lv_anim_start(&PropertyAnimation_0);
-
+void DropOutToRight_Animation(lv_obj_t *TargetObject, int delay) {
+	ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+	PropertyAnimation_0_user_data->target = TargetObject;
+	PropertyAnimation_0_user_data->val = -1;
+	lv_anim_t PropertyAnimation_0;
+	lv_anim_init(&PropertyAnimation_0);
+	lv_anim_set_time(&PropertyAnimation_0, 250);
+	lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+	lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_x);
+	lv_anim_set_values(&PropertyAnimation_0, 0, 220);
+	lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_linear);
+	lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
+	lv_anim_set_deleted_cb(&PropertyAnimation_0, _ui_anim_callback_free_user_data);
+	lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+	lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_early_apply(&PropertyAnimation_0, false);
+	lv_anim_start(&PropertyAnimation_0);
 }
-void SlideDown_Animation( lv_obj_t *TargetObject, int delay)
-{
-ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
-PropertyAnimation_0_user_data->target = TargetObject;
-PropertyAnimation_0_user_data->val = -1;
-lv_anim_t PropertyAnimation_0;
-lv_anim_init(&PropertyAnimation_0);
-lv_anim_set_time(&PropertyAnimation_0, 400);
-lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
-lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_y );
-lv_anim_set_values(&PropertyAnimation_0, -40, 0 );
-lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_overshoot);
-lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
-lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
-lv_anim_set_playback_time(&PropertyAnimation_0, 0);
-lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
- lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
-lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
-lv_anim_set_early_apply( &PropertyAnimation_0, false );
-lv_anim_start(&PropertyAnimation_0);
-
+void SlideDown_Animation(lv_obj_t *TargetObject, int delay) {
+	ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+	PropertyAnimation_0_user_data->target = TargetObject;
+	PropertyAnimation_0_user_data->val = -1;
+	lv_anim_t PropertyAnimation_0;
+	lv_anim_init(&PropertyAnimation_0);
+	lv_anim_set_time(&PropertyAnimation_0, 400);
+	lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+	lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_y);
+	lv_anim_set_values(&PropertyAnimation_0, -40, 0);
+	lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_overshoot);
+	lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
+	lv_anim_set_deleted_cb(&PropertyAnimation_0, _ui_anim_callback_free_user_data);
+	lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+	lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_early_apply(&PropertyAnimation_0, false);
+	lv_anim_start(&PropertyAnimation_0);
 }
-void SlideUp_Animation( lv_obj_t *TargetObject, int delay)
-{
-ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
-PropertyAnimation_0_user_data->target = TargetObject;
-PropertyAnimation_0_user_data->val = -1;
-lv_anim_t PropertyAnimation_0;
-lv_anim_init(&PropertyAnimation_0);
-lv_anim_set_time(&PropertyAnimation_0, 250);
-lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
-lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_y );
-lv_anim_set_values(&PropertyAnimation_0, 0, -240 );
-lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_ease_in);
-lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
-lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
-lv_anim_set_playback_time(&PropertyAnimation_0, 0);
-lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
- lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
-lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
-lv_anim_set_early_apply( &PropertyAnimation_0, false );
- lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_y );
-lv_anim_start(&PropertyAnimation_0);
-
+void SlideUp_Animation(lv_obj_t *TargetObject, int delay) {
+	ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+	PropertyAnimation_0_user_data->target = TargetObject;
+	PropertyAnimation_0_user_data->val = -1;
+	lv_anim_t PropertyAnimation_0;
+	lv_anim_init(&PropertyAnimation_0);
+	lv_anim_set_time(&PropertyAnimation_0, 250);
+	lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+	lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_y);
+	lv_anim_set_values(&PropertyAnimation_0, 0, -240);
+	lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_ease_in);
+	lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
+	lv_anim_set_deleted_cb(&PropertyAnimation_0, _ui_anim_callback_free_user_data);
+	lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+	lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_early_apply(&PropertyAnimation_0, false);
+	lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_y);
+	lv_anim_start(&PropertyAnimation_0);
 }
-void Flashfade_Animation( lv_obj_t *TargetObject, int delay)
-{
-ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
-PropertyAnimation_0_user_data->target = TargetObject;
-PropertyAnimation_0_user_data->val = -1;
-lv_anim_t PropertyAnimation_0;
-lv_anim_init(&PropertyAnimation_0);
-lv_anim_set_time(&PropertyAnimation_0, 800);
-lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
-lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_opacity );
-lv_anim_set_values(&PropertyAnimation_0, 255, 0 );
-lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_linear);
-lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
-lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
-lv_anim_set_playback_time(&PropertyAnimation_0, 0);
-lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
- lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
-lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
-lv_anim_set_early_apply( &PropertyAnimation_0, false );
-lv_anim_start(&PropertyAnimation_0);
-
+void Flashfade_Animation(lv_obj_t *TargetObject, int delay) {
+	ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+	PropertyAnimation_0_user_data->target = TargetObject;
+	PropertyAnimation_0_user_data->val = -1;
+	lv_anim_t PropertyAnimation_0;
+	lv_anim_init(&PropertyAnimation_0);
+	lv_anim_set_time(&PropertyAnimation_0, 800);
+	lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+	lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_opacity);
+	lv_anim_set_values(&PropertyAnimation_0, 255, 0);
+	lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_linear);
+	lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
+	lv_anim_set_deleted_cb(&PropertyAnimation_0, _ui_anim_callback_free_user_data);
+	lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+	lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+	lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+	lv_anim_set_early_apply(&PropertyAnimation_0, false);
+	lv_anim_start(&PropertyAnimation_0);
 }
 
 ///////////////////// FUNCTIONS ////////////////////
 
 ///////////////////// SCREENS ////////////////////
 
-void ui_init( void )
-{LV_EVENT_GET_COMP_CHILD = lv_event_register_id();
+void ui_init(void) {
 
-lv_disp_t *dispp = lv_disp_get_default();
-lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), true, LV_FONT_DEFAULT);
-lv_disp_set_theme(dispp, theme);
-ui_MainMenu_screen_init();
-ui_PatchSelectorPage_screen_init();
-ui_PatchViewPage_screen_init();
-ui_MappingMenu_screen_init();
-ui_KnobSetViewPage_screen_init();
-ui_EditMappingPage_screen_init();
-ui_DeleteMappingPopUp_screen_init();
-ui_ModuleListPage_screen_init();
-ui_SystemMenu_screen_init();
-ui_JackMapViewPage_screen_init();
-ui_MidiMapViewPage_screen_init();
-ui_HwTestPage_screen_init();
-ui____initial_actions0 = lv_obj_create(NULL);
-lv_disp_load_scr( ui_MainMenu);
+	lv_disp_t *dispp = lv_disp_get_default();
+	lv_theme_t *theme = lv_theme_default_init(
+		dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), true, LV_FONT_DEFAULT);
+	lv_disp_set_theme(dispp, theme);
+	ui_MainMenu_screen_init();
+	ui_PatchSelectorPage_screen_init();
+	ui_PatchViewPage_screen_init();
+	ui_MappingMenu_screen_init();
+	ui_KnobSetViewPage_screen_init();
+	ui_EditMappingPage_screen_init();
+	ui_DeleteMappingPopUp_screen_init();
+	ui_ModuleListPage_screen_init();
+	ui_SystemMenu_screen_init();
+	ui_JackMapViewPage_screen_init();
+	ui_MidiMapViewPage_screen_init();
+	ui_HwTestPage_screen_init();
+	ui____initial_actions0 = lv_obj_create(NULL);
+	lv_disp_load_scr(ui_MainMenu);
 }

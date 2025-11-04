@@ -32,16 +32,17 @@ class PageManager {
 	SlsComponentInit sls_comp_init;
 
 	PatchFileChangeChecker file_change_checker;
+	MissingPluginScanner missing_plugins;
+
+	PatchSelectorSubdirPanel subdir_panel;
+	FileBrowserDialog file_browser;
+	FileSaveDialog file_save_dialog;
 
 	PatchContext info;
 	PageList page_list;
 	GuiState gui_state;
 	ButtonLight button_light;
 	Screensaver &screensaver;
-
-	PatchSelectorSubdirPanel subdir_panel;
-	FileBrowserDialog file_browser;
-	FileSaveDialog file_save_dialog{info.patch_storage, subdir_panel};
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info, subdir_panel};
@@ -69,12 +70,10 @@ public:
 				UserSettings &settings,
 				Screensaver &screensaver,
 				FatFileIO &ramdisk)
-		: file_change_checker{patch_storage,
-							  open_patch_manager,
-							  patch_playloader,
-							  gui_state,
-							  notify_queue,
-							  settings.filesystem}
+		: file_change_checker{patch_storage, open_patch_manager, notify_queue, settings.filesystem}
+		, missing_plugins{plugin_manager, lv_layer_sys(), settings.missing_plugins}
+		, file_browser{patch_storage, notify_queue}
+		, file_save_dialog{patch_storage, subdir_panel}
 		, info{.patch_storage = patch_storage,
 			   .open_patch_manager = open_patch_manager,
 			   .patch_playloader = patch_playloader,
@@ -88,9 +87,9 @@ public:
 			   .plugin_manager = plugin_manager,
 			   .ramdisk = ramdisk,
 			   .file_change_checker = file_change_checker,
-			   .file_browser = file_browser}
-		, screensaver{screensaver}
-		, file_browser{patch_storage, notify_queue} {
+			   .file_browser = file_browser,
+			   .missing_plugins = missing_plugins}
+		, screensaver{screensaver} {
 
 		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
 		register_file_browser_vcv(file_browser, file_save_dialog);
@@ -131,6 +130,9 @@ public:
 				file_save_dialog.update();
 
 				gui_state.file_browser_visible.register_state(true);
+
+			} else if (missing_plugins.is_active()) {
+				missing_plugins.process();
 
 			} else {
 				gui_state.file_browser_visible.register_state(false);
@@ -203,11 +205,12 @@ public:
 	}
 
 	void handle_notifications() {
-		auto msg = info.notify_queue.get();
-		if (msg) {
-			screensaver.wake();
-			pr_info("Notify: %s\n", msg->message.c_str());
-			DisplayNotification::show(*msg);
+		if (lv_obj_get_y(ui_MessagePanel) < -30) {
+			if (auto msg = info.notify_queue.get()) {
+				screensaver.wake();
+				pr_info("Notify: %s (%u)\n", msg->message.c_str(), msg->duration_ms);
+				DisplayNotification::show(*msg);
+			}
 		}
 
 		// Handle audio overload flashing red
@@ -218,7 +221,7 @@ public:
 			std::string msg =
 				"Knob " + std::string(PanelDef::get_map_param_name(*panel_knob_id)) +
 				" cannot reach the mapped parameter's value. Adjust the Min/Max or your Knob Catchup preferences.";
-			DisplayNotification::show({msg, Notification::Priority::Info, 3000});
+			info.notify_queue.put({msg, Notification::Priority::Info, 3000});
 		}
 	}
 
@@ -231,7 +234,7 @@ public:
 
 	void handle_write_settings() {
 		if (gui_state.do_write_settings) {
-			if (!Settings::write_settings(info.patch_storage, info.settings)) {
+			if (!Settings::write_settings(info.patch_storage, info.settings, Volume::NorFlash)) {
 				pr_err("Failed to write settings file\n");
 			} else
 				pr_info("Wrote settings\n");

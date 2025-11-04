@@ -5,22 +5,36 @@ namespace MetaModule
 {
 
 void ModuleViewPage::show_roller() {
-	metaparams.rotary_pushed.use_motion();
-	module_context_menu.hide();
-	mode = ViewMode::List;
-	mapping_pane.hide();
-	lv_show(ui_ElementRoller);
-	lv_show(ui_ElementRollerPanel);
-	lv_group_focus_obj(ui_ElementRoller);
-	lv_group_set_editing(group, true);
-	lv_group_set_wrap(group, false);
-	args.detail_mode = false;
+	// 322 when closed, 102 when open
+	if (lv_obj_get_x(ui_MVSettingsMenu) > 200) {
+		metaparams.rotary_pushed.use_motion();
+		module_context_menu.hide();
+		mode = ViewMode::List;
+		mapping_pane.hide();
+		lv_show(ui_ElementRoller);
+		lv_show(ui_ElementRollerPanel);
+		lv_group_focus_obj(ui_ElementRoller);
+		lv_group_set_editing(group, true);
+		lv_group_set_wrap(group, false);
+		args.detail_mode = false;
+	}
+}
+
+void ModuleViewPage::populate_element_objects() {
+	size_t num_elements = moduleinfo.elements.size();
+	element_highlights.reserve(num_elements);
+
+	for (auto drawn_element : drawn_elements) {
+		auto &gui_el = drawn_element.gui_element;
+		watch_element(drawn_element);
+		add_element_highlight(gui_el.obj);
+	}
 }
 
 void ModuleViewPage::populate_roller() {
 	size_t num_elements = moduleinfo.elements.size();
+	opts = "";
 	opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
-	element_highlights.reserve(num_elements);
 
 	// Populate Roller and element highlights
 	unsigned roller_idx = 0;
@@ -29,10 +43,6 @@ void ModuleViewPage::populate_roller() {
 
 	for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 		auto &gui_el = drawn_element.gui_element;
-
-		watch_element(drawn_element);
-
-		add_element_highlight(gui_el.obj);
 
 		auto base = base_element(drawn_element.element);
 
@@ -56,7 +66,9 @@ void ModuleViewPage::populate_roller() {
 		opts.append(" ");
 
 		// Handle names that contain a newline or null char
-		opts.append(base.short_name.substr(0, base.short_name.find_first_of("\0\n")));
+		// Must use sv literal so the trailing \0 is considered a char, not a terminator
+		using namespace std::literals;
+		opts.append(base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv)));
 
 		if (gui_el.mapped_panel_id) {
 			append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
@@ -64,6 +76,13 @@ void ModuleViewPage::populate_roller() {
 		if (gui_el.midi_mapped_id && gui_el.midi_mapped_id != gui_el.mapped_panel_id) {
 			opts.append("/");
 			append_panel_name(opts, drawn_element.element, gui_el.midi_mapped_id.value());
+		}
+
+		if (settings.module_view.show_jack_aliases) {
+			append_jack_alias(opts, drawn_element.gui_element, patch);
+		}
+		if (settings.module_view.show_knob_aliases) {
+			append_param_alias(opts, drawn_element.gui_element, patch, active_knobset);
 		}
 
 		append_connected_jack_name(opts, gui_el.idx, gui_el.module_idx, *patch);
@@ -126,6 +145,7 @@ void ModuleViewPage::populate_roller() {
 void ModuleViewPage::add_element_highlight(lv_obj_t *obj) {
 	auto &b = element_highlights.emplace_back();
 	b = lv_btn_create(ui_ModuleImage);
+	lv_obj_remove_style(b, &Gui::invisible_style, LV_PART_MAIN);
 	lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 
 	if (obj) {
@@ -165,8 +185,10 @@ void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
 void ModuleViewPage::highlight_component(size_t idx) {
 	if (idx < element_highlights.size()) {
 		if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
+			lv_obj_remove_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 			lv_obj_add_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 		} else {
+			lv_obj_remove_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 			lv_obj_add_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
 		lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);

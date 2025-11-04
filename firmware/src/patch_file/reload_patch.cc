@@ -101,6 +101,21 @@ Result ReloadPatch::reload_patch_file(PatchLocation const &loc, Function<void()>
 	return {false, "Timed out requesting to load patch"};
 }
 
+bool ReloadPatch::needs_reloading(PatchLocation const &loc) {
+	// If it's open, see if it changed on disk since we opened it
+	if (auto openpatch = patches.find_open_patch(loc)) {
+
+		// If it has unsaved changes, return false because we don't want to lose the unsaved changes
+		if (openpatch->modification_count > 0)
+			return false;
+
+		// Otherwise return true only if the file timestamps or sizes differ
+		return check_file_changed(loc, openpatch->timestamp, openpatch->filesize);
+	}
+
+	return true; //not found, return true because patch needs to be loaded from disk
+}
+
 // Returns true if timestamp/filesize on disk differs from the open patch (or there is no open patch)
 bool ReloadPatch::is_not_open_or_has_changed_on_disk(PatchLocation const &loc) {
 	if (auto openpatch = patches.find_open_patch(loc)) {

@@ -11,11 +11,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// COMPONENT UnmappedSetItem
-#define UI_COMP_UNMAPPEDSETITEM_UNMAPPEDSETITEM 0
-#define UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT 1
-#define _UI_COMP_UNMAPPEDSETITEM_NUM 2
 lv_obj_t *ui_UnmappedSetItem_create(lv_obj_t *comp_parent);
 
 #ifdef __cplusplus

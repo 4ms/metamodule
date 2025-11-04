@@ -21,7 +21,6 @@ class Ui {
 private:
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
-	PluginManager &plugin_manager;
 
 	NotificationQueue notify_queue;
 	PageManager page_manager;
@@ -42,7 +41,6 @@ public:
 	   FatFileIO &ramdisk)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
-		, plugin_manager{plugin_manager}
 		, page_manager{patch_storage,
 					   open_patch_manager,
 					   patch_playloader,
@@ -59,11 +57,10 @@ public:
 
 		MMDisplay::init(metaparams, screensaver);
 		Gui::init_lvgl_styles();
-		page_manager.init();
 
-		if (!Settings::read_settings(patch_storage, &settings)) {
+		if (!Settings::read_settings(patch_storage, &settings, Volume::NorFlash)) {
 			settings = UserSettings{};
-			if (!Settings::write_settings(patch_storage, settings)) {
+			if (!Settings::write_settings(patch_storage, settings, Volume::NorFlash)) {
 				pr_err("Failed to write settings file\n");
 			}
 		}
@@ -105,55 +102,14 @@ public:
 		return params.text_displays;
 	}
 
-	bool preload_all_plugins() {
-		plugin_manager.start_loading_plugin_list();
-
-		while (true) {
-			auto result = plugin_manager.process_loading();
-
-			if (result.state == PluginFileLoader::State::GotList) {
-				break;
-			}
-
-			if (result.state == PluginFileLoader::State::Error) {
-				return false;
-			}
-		}
-
-		auto list = plugin_manager.found_plugin_list();
-
-		for (auto i = 0u; i < list->size(); ++i) {
-			printf("Loading plugin: '%s'\n", plugin_manager.plugin_name(i).c_str());
-
-			plugin_manager.load_plugin(i);
-			auto load = true;
-			while (load) {
-				switch (plugin_manager.process_loading().state) {
-					using enum PluginFileLoader::State;
-					case Success:
-						load = false;
-						break;
-					case RamDiskFull:
-					case InvalidPlugin:
-					case Error:
-						return false;
-					default:
-						continue;
-				}
-			}
-		}
-
-		return true;
-	}
-
-	void preload_plugins() {
+	void preload_plugins(PluginManager &plugin_manager) {
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
 
-		auto preloader = PreLoader{plugin_manager, settings.plugin_preload};
-
-		if (settings.plugin_preload.slug.size())
+		if (settings.plugin_preload.slugs.size())
 			delay_ms(600); //allow time for ???
+
+		auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
 
 		while (true) {
 			auto status = preloader.process();
@@ -179,10 +135,11 @@ public:
 		}
 
 		lv_label_set_text(ui_MainMenuNowPlaying, "");
-		page_manager.init();
 	}
 
 	void load_initial_patch() {
+		page_manager.init();
+
 		if (settings.load_initial_patch) {
 			pr_dbg("Loading initial patch '%s' on vol %u\n",
 				   settings.initial_patch_name.c_str(),

@@ -1,5 +1,6 @@
 #include "element_name.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "gui/elements/context.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/styles.hh"
 #include "patch/patch.hh"
@@ -102,6 +103,39 @@ void append_connected_jack_name(std::string &opts,
 	}
 }
 
+void append_jack_alias(std::string &opts, GuiElement const &gui_element, PatchData *patch) {
+	if (gui_element.idx.input_idx != ElementCount::Indices::NoElementMarker) {
+		if (auto panel_jack = patch->find_mapped_injack(
+				Jack{.module_id = gui_element.module_idx, .jack_id = gui_element.idx.input_idx}))
+		{
+			const auto color = get_mapped_color(JackInput{}, panel_jack->panel_jack_id);
+			opts += " ";
+			opts += Gui::color_text(panel_jack->alias_name, color);
+		}
+	}
+
+	else if (gui_element.idx.output_idx != ElementCount::Indices::NoElementMarker)
+	{
+		if (auto panel_jack = patch->find_mapped_outjack(
+				Jack{.module_id = gui_element.module_idx, .jack_id = gui_element.idx.output_idx}))
+		{
+			const auto color = get_mapped_color(JackOutput{}, panel_jack->panel_jack_id);
+			opts += " ";
+			opts += Gui::color_text(panel_jack->alias_name, color);
+		}
+	}
+}
+
+void append_param_alias(std::string &opts, GuiElement const &gui_element, PatchData *patch, unsigned knob_set) {
+	if (gui_element.idx.param_idx != ElementCount::Indices::NoElementMarker) {
+		if (auto map = patch->find_mapped_knob(knob_set, gui_element.module_idx, gui_element.idx.param_idx)) {
+			const auto color = get_mapped_color(ParamElement{}, map->panel_knob_id);
+			opts += " ";
+			opts += Gui::color_text(map->alias_name, color);
+		}
+	}
+}
+
 void param_item_name(std::string &s, MappedKnob const &map, PatchData const *patch) {
 	if (map.alias_name.length()) {
 		s = std::string_view{map.alias_name};
@@ -110,6 +144,14 @@ void param_item_name(std::string &s, MappedKnob const &map, PatchData const *pat
 		s = fullname.element_name;
 		s.append(" - ");
 		s.append(fullname.module_name);
+	}
+}
+
+void param_item_short_name(std::string &s, MappedKnob const &map, PatchData const *patch) {
+	if (map.alias_name.length()) {
+		s = std::string_view{map.alias_name};
+	} else {
+		s = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch).element_name;
 	}
 }
 

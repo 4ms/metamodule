@@ -9,6 +9,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "reboot.hh"
+#include "user_settings/settings_file.hh"
 
 namespace MetaModule
 {
@@ -19,12 +20,16 @@ struct SystemTab : SystemMenuTab {
 			  ParamsMidiState &params,
 			  MetaParams &metaparams,
 			  PatchPlayLoader &patch_playloader,
-			  PatchModQueue &patch_mod_queue)
+			  PatchModQueue &patch_mod_queue,
+			  UserSettings &settings,
+			  NotificationQueue &notify_queue)
 		: storage{patch_storage}
 		, patch_playloader{patch_playloader}
 		, cal_routine{params, storage, patch_mod_queue}
 		, cal_check{params}
 		, hw_check{params, metaparams}
+		, settings{settings}
+		, notify_queue{notify_queue}
 		, reload_patches_button{create_button(ui_SystemResetInternalPatchesCont, "Restore factory patches")}
 		, reboot_button{create_button(ui_SystemResetInternalPatchesCont, "Reboot")} {
 
@@ -43,6 +48,16 @@ struct SystemTab : SystemMenuTab {
 		lv_obj_add_flag(reboot_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		lv_obj_set_style_bg_color(reboot_button, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_add_event_cb(reboot_button, reboot_cb, LV_EVENT_CLICKED, this);
+
+		auto settings_cont = create_settings_cont(ui_SystemMenuSystemTab);
+		create_prefs_section_title(settings_cont, "SETTINGS");
+		write_settings_button = create_button(settings_cont, "Backup settings to file");
+		lv_obj_add_flag(write_settings_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_add_event_cb(write_settings_button, write_settings_cb, LV_EVENT_CLICKED, this);
+
+		load_settings_button = create_button(settings_cont, "Load settings from file");
+		lv_obj_add_flag(load_settings_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_add_event_cb(load_settings_button, load_settings_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -57,6 +72,8 @@ struct SystemTab : SystemMenuTab {
 		lv_show(ui_SystemHardwareCheckCont);
 		lv_show(reload_patches_button);
 		lv_show(reboot_button);
+		lv_show(write_settings_button);
+		lv_show(load_settings_button);
 
 		lv_group_remove_obj(ui_SystemCalCheckButton);
 		lv_group_remove_obj(ui_SystemCalibrationButton);
@@ -67,6 +84,8 @@ struct SystemTab : SystemMenuTab {
 		lv_group_remove_obj(ui_CheckHardwareButton);
 		lv_group_remove_obj(reload_patches_button);
 		lv_group_remove_obj(reboot_button);
+		lv_group_remove_obj(write_settings_button);
+		lv_group_remove_obj(load_settings_button);
 
 		lv_group_add_obj(group, ui_SystemCalCheckButton);
 		lv_group_add_obj(group, ui_SystemCalibrationButton);
@@ -77,6 +96,8 @@ struct SystemTab : SystemMenuTab {
 		lv_group_add_obj(group, ui_CalibrationNextButton);
 		lv_group_add_obj(group, reload_patches_button);
 		lv_group_add_obj(group, reboot_button);
+		lv_group_add_obj(group, write_settings_button);
+		lv_group_add_obj(group, load_settings_button);
 
 		lv_group_focus_obj(ui_SystemCalCheckButton);
 		confirm_popup.init(ui_SystemMenu, group);
@@ -220,16 +241,73 @@ private:
 			"Restore");
 	}
 
+	static void write_settings_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<SystemTab *>(event->user_data);
+
+		page->confirm_popup.show(
+			[page = page](unsigned res) {
+				if (res == 1 || res == 2) {
+					if (Settings::write_settings(
+							page->storage, page->settings, res == 1 ? Volume::USB : Volume::SDCard))
+						page->notify_queue.put(
+							{"Successfully saved settings.yml file to disk", Notification::Priority::Info, 2000});
+					else
+						page->notify_queue.put(
+							{"Failed to save settings.yml file to disk", Notification::Priority::Error, 2000});
+				}
+			},
+			"Where do you want to save the settings.yml file?",
+			"USB",
+			"SD card");
+	}
+
+	static void load_settings_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<SystemTab *>(event->user_data);
+
+		page->confirm_popup.show(
+			[=](unsigned res) {
+				if (res == 1 || res == 2) {
+					UserSettings tmp;
+					if (Settings::read_settings(page->storage, &tmp, res == 1 ? Volume::USB : Volume::SDCard)) {
+						page->settings = tmp;
+						if (Settings::write_settings(page->storage, tmp, Volume::NorFlash)) {
+							page->notify_queue.put(
+								{"Successfully loaded file and updated settings", Notification::Priority::Info, 2000});
+						} else {
+							page->notify_queue.put(
+								{"Failed to update settings from the file", Notification::Priority::Error, 2000});
+						}
+					} else {
+						page->notify_queue.put(
+							{"Failed to read settings.yml file", Notification::Priority::Error, 2000});
+					}
+				}
+			},
+			"Where is the settings.yml file to load?",
+			"USB",
+			"SD card");
+	}
+
 	FileStorageProxy &storage;
 	PatchPlayLoader &patch_playloader;
 	ConfirmPopup confirm_popup;
 	CalibrationRoutine cal_routine;
 	CalCheck cal_check;
 	HardwareCheckPopup hw_check;
+	UserSettings &settings;
+	NotificationQueue &notify_queue;
 
 	lv_obj_t *reload_patches_button = nullptr;
 	lv_obj_t *reboot_button = nullptr;
+	lv_obj_t *write_settings_button = nullptr;
+	lv_obj_t *load_settings_button = nullptr;
 
 	lv_group_t *group = nullptr;
+
+	std::string settings_error = "";
 };
 } // namespace MetaModule

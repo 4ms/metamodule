@@ -25,13 +25,13 @@ struct AudioOverrunHandler {
 	}
 
 	bool handle() {
-		// if we've gone 1 sec without overrunning, then consider this a new overrun
+		// if we've gone 0.1 sec without overrunning, then consider this a new overrun
 		uint64_t tm = PL1_GetCurrentPhysicalValue();
 		if (tm - last_overrun < 2'400'000) {
 			overrun_count++;
 		} else {
 			last_overrun = tm;
-			// pr_dbg("Reset count from %u\n", overrun_count);
+			// pr_dbg("New group of overruns: last group counted up to %u\n", overrun_count);
 			overrun_count = 0;
 		}
 

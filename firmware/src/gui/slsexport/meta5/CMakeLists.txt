@@ -1,8 +1,8 @@
-SET(SOURCES components/ui_comp_knobcontainer.c
+set(SOURCES
+    components/ui_comp_knobcontainer.c
     components/ui_comp_knobcontainerbig.c
     components/ui_comp_mappedknobsetitem.c
     components/ui_comp_unmappedsetitem.c
-    components/ui_comp.c
     screens/ui_MainMenu.c
     screens/ui_PatchSelectorPage.c
     screens/ui_PatchViewPage.c
@@ -16,7 +16,6 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     screens/ui_MidiMapViewPage.c
     screens/ui_HwTestPage.c
     ui.c
-    components/ui_comp_hook.c
     ui_helpers.c
     ui_events.c
     images/ui_img_1x_play1_png.c
@@ -25,7 +24,8 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     images/ui_img_1x_info1_png.c
     images/ui_img_1x_knob1_png.c
     images/ui_img_1x_knob1pressed_png.c
-    images/ui_img_1x_infosmall2_png.c)
+    images/ui_img_1x_infosmall2_png.c
+)
 
 file(GLOB FONTS fonts/*.c)
 

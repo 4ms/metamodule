@@ -127,6 +127,8 @@ struct ModuleViewMappingPane {
 
 		should_close = false;
 
+		should_refresh_roller = false;
+
 		is_visible = true;
 
 		lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_OFF);
@@ -209,6 +211,12 @@ struct ModuleViewMappingPane {
 
 	bool wants_to_close() {
 		return should_close;
+	}
+
+	bool modified_elements() {
+		auto t = should_refresh_roller;
+		should_refresh_roller = false;
+		return t;
 	}
 
 	void back_event() {
@@ -703,12 +711,14 @@ private:
 
 			auto [set_id, param_id] = ModuleParamUserData::unpack(user_data);
 
+			uint32_t knobset_id = set_id == 0xFFFF ? PatchData::MIDIKnobSet : set_id;
+
 			page->page_list.update_state(PageId::ModuleView, page->args);
 			page->page_list.request_new_page(PageId::KnobMap,
 											 {.patch_loc_hash = page->args.patch_loc_hash,
 											  .module_id = page->this_module_id,
 											  .mappedknob_id = param_id,
-											  .view_knobset_id = set_id});
+											  .view_knobset_id = knobset_id});
 		}
 	}
 
@@ -794,13 +804,24 @@ private:
 	void show_jack_alias_keyboard(PanelJackMapUserData panelmap, lv_obj_t *obj) {
 		if (!panelmap.is_valid)
 			return;
-		auto alias_text_obj = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+
+		if (lv_obj_get_child_cnt(obj) < 2) {
+			pr_err("show_jack_alias_keyboard(): object is corrupted\n");
+			return;
+		}
+
+		auto alias_text_obj = lv_obj_get_child(obj, 1);
+		if (!lv_obj_has_class(alias_text_obj, &lv_textarea_class)) {
+			return;
+		}
 
 		keyboard_entry.show_keyboard(alias_text_obj, [panelmap = panelmap, this](std::string_view text) {
 			if (panelmap.is_input)
 				patch->set_panel_in_alias(panelmap.panel_jack_id, text);
 			else
 				patch->set_panel_out_alias(panelmap.panel_jack_id, text);
+
+			should_refresh_roller = true;
 			patches.mark_view_patch_modified();
 		});
 	}
@@ -844,6 +865,7 @@ private:
 	OpenPatchManager &patches;
 
 	bool is_visible = false;
+	bool should_refresh_roller = false;
 
 	KeyboardEntry keyboard_entry;
 };

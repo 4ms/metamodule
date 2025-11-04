@@ -30,7 +30,7 @@ struct PatchViewPage : PageBase {
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
-		, desc_panel{patch_playloader, patches}
+		, desc_panel{patch_playloader, patches, settings.patch_suggested_audio}
 		, file_menu{patch_playloader,
 					patch_storage,
 					patches,
@@ -38,7 +38,9 @@ struct PatchViewPage : PageBase {
 					notify_queue,
 					page_list,
 					gui_state,
-					settings}
+					settings,
+					info.plugin_manager,
+					missing_plugins}
 		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
@@ -66,7 +68,6 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-
 		is_ready = false;
 
 		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
@@ -76,12 +77,11 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
-			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
-			lv_label_set_text(ui_LoadMeter2, "");
-			lv_hide(ui_LoadMeter2);
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
@@ -126,8 +126,9 @@ struct PatchViewPage : PageBase {
 			active_knobset = page_list.get_active_knobset();
 
 		else {
-			// Reset to first knobset when we view a different patch than previously viewed
+			// Check is this is a newly viewed patch (not the last patch we viewed)
 			if (displayed_patch_loc_hash != args.patch_loc_hash) {
+				// Reset to first knobset
 				args.view_knobset_id = 0;
 			}
 			active_knobset = args.view_knobset_id.value_or(0);
@@ -137,8 +138,6 @@ struct PatchViewPage : PageBase {
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
 		patch_revision = patches.get_view_patch_modification_count();
-
-		lv_show(ui_LoadMeter2);
 
 		redraw_patch();
 	}
@@ -196,6 +195,8 @@ struct PatchViewPage : PageBase {
 
 		patch = patches.get_view_patch();
 		desc_panel.prepare_focus(group);
+
+		// missing_plugin_popup.init(ui_PatchViewPage, group);
 
 		dyn_module_idx = 0;
 		// FIXME: is this needed here?
@@ -306,6 +307,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
+
 		bool last_is_patch_playloaded = is_patch_playloaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
@@ -385,6 +387,7 @@ struct PatchViewPage : PageBase {
 				abort_cable(gui_state, notify_queue);
 
 			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
+				printf("Focus on play but %p in group %p\n", ui_PlayButton, group);
 				lv_group_focus_obj(ui_PlayButton);
 
 			} else {
@@ -393,6 +396,7 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
+		desc_panel.update();
 		if (desc_panel.did_update_names()) {
 			patches.mark_view_patch_modified();
 			update_title_bar();
@@ -414,14 +418,11 @@ struct PatchViewPage : PageBase {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 			}
 
-			update_load_text(metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
-
-		} else {
-			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
-				lv_hide(ui_LoadMeter2);
-				lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
-			}
+		} else if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
+			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
+
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
 
 		file_menu.update();
 
@@ -432,7 +433,6 @@ struct PatchViewPage : PageBase {
 
 private:
 	void prepare_dynamic_elements() {
-
 		if (dynamic_elements_prepared)
 			return;
 
@@ -493,12 +493,13 @@ private:
 			lv_hide(ui_KnobSetName);
 		}
 
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+
 		if (settings.patch_view.float_loadmeter) {
-			lv_show(ui_LoadMeter2);
 			lv_obj_set_parent(ui_LoadMeter2, lv_layer_sys());
+			lv_obj_move_foreground(ui_OverloadMsgLabel);
 			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, 0);
 		} else {
-			lv_show(ui_LoadMeter2);
 			lv_obj_set_parent(ui_LoadMeter2, ui_PatchViewPage);
 			lv_obj_move_to_index(ui_LoadMeter2, 2);
 			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_0, 0);
@@ -655,6 +656,9 @@ private:
 		lv_group_add_obj(group, canvas);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SNAPPABLE);
 
+		lv_obj_remove_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
+		lv_obj_remove_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
+
 		lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
 		lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -719,21 +723,27 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		if (!page->is_patch_playloaded) {
-			page->patch_playloader.request_load_view_patch();
-			page->gui_state.playing_patch_needs_manual_reload = false;
 
-		} else {
-			if (page->patch_playloader.is_audio_muted()) {
-				if (page->gui_state.playing_patch_needs_manual_reload) {
-					page->patch_playloader.request_load_view_patch();
-					page->gui_state.playing_patch_needs_manual_reload = false;
+		if (!page->is_patch_playloaded) {
+			// Don't try to load missing plugins if we play the patch for the first time.
+			// Because in order to get here, the user just opened the patch and would have been asked a moment ago.
+			// page->missing_plugins.start(page->patches.get_view_patch(), page->group, [page = page](bool did_load) {
+			page->patch_playloader.request_load_view_patch();
+			// });
+
+		} else if (page->patch_playloader.is_audio_muted()) {
+			page->missing_plugins.start(page->patches.get_playing_patch(), page->group, [page = page](bool did_load) {
+				if (did_load) {
+					page->patch_playloader.request_reload_playing_patch(true);
+					page->gui_state.force_redraw_patch = true;
 				} else {
+					page->patch_playloader.apply_suggested_audio_settings();
 					page->patch_playloader.start_audio();
 				}
-			} else {
-				page->patch_playloader.stop_audio();
-			}
+			});
+
+		} else {
+			page->patch_playloader.stop_audio();
 		}
 	}
 
@@ -821,8 +831,6 @@ private:
 		PatchViewPage *page;
 		uint32_t selected_module_id;
 	};
-
-	// std::vector<std::vector<float>> light_vals;
 
 	std::vector<DynamicDisplay> dyn_draws;
 	unsigned dyn_draw_throttle_ctr = 1;

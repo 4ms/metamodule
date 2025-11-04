@@ -19,11 +19,11 @@ struct DisplayNotification {
 	static void show(Notification const &msg) {
 		lv_label_set_text(ui_MessageLabel, msg.message.c_str());
 
-		if (lv_obj_get_y(ui_MessagePanel) <= -30) {
-			SlideDown_Animation(ui_MessagePanel, 0);
+		if (msg.duration_ms > 0) {
+			slide_down_up_animation(ui_MessagePanel, msg.duration_ms);
+		} else {
+			slide_down_up_animation(ui_MessagePanel, 10000);
 		}
-		if (msg.duration_ms > 0)
-			SlideUp_Animation(ui_MessagePanel, msg.duration_ms);
 	}
 
 	static void flash_overload(unsigned num_overruns) {
@@ -32,6 +32,30 @@ struct DisplayNotification {
 			lv_obj_set_style_opa(ui_OverloadMsgLabel, LV_OPA_100, LV_PART_MAIN);
 			Flashfade_Animation(ui_OverloadMsgLabel, 0);
 		}
+	}
+
+	static void slide_down_up_animation(lv_obj_t *obj, int hold_time) {
+		ui_anim_user_data_t *user_data = (ui_anim_user_data_t *)lv_mem_alloc(sizeof(ui_anim_user_data_t));
+		user_data->target = obj;
+		user_data->val = -1;
+		lv_obj_refr_size(obj);
+		int startpos = lv_obj_get_height(obj) * 2 + 10;
+
+		lv_anim_t anim;
+		lv_anim_init(&anim);
+		lv_anim_set_time(&anim, 400);
+		lv_anim_set_user_data(&anim, user_data);
+		lv_anim_set_custom_exec_cb(&anim, _ui_anim_callback_set_y);
+		lv_anim_set_values(&anim, -1 * startpos, 0);
+		lv_anim_set_path_cb(&anim, lv_anim_path_ease_in_out);
+		lv_anim_set_delay(&anim, 0);
+		lv_anim_set_deleted_cb(&anim, _ui_anim_callback_free_user_data);
+		lv_anim_set_playback_time(&anim, 400);
+		lv_anim_set_playback_delay(&anim, hold_time + 400);
+		lv_anim_set_repeat_count(&anim, 0);
+		lv_anim_set_repeat_delay(&anim, 0);
+		lv_anim_set_early_apply(&anim, false);
+		lv_anim_start(&anim);
 	}
 };
 

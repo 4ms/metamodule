@@ -13,7 +13,7 @@ struct CpuLoadTest {
 		return FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value();
 	}
 
-	static void run_tests(FileStorageProxy &file_storage_proxy, Ui &ui) {
+	static void run_tests(FileStorageProxy &file_storage_proxy, Ui &ui, PluginManager &plugin_manager) {
 		std::string should_run;
 		FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
 
@@ -23,7 +23,7 @@ struct CpuLoadTest {
 		const auto run_hil = should_run.starts_with("hil\n");
 		if (run_hil) {
 			// TODO: auto load all plugins on USB drive
-			if (!ui.preload_all_plugins()) {
+			if (!preload_all_plugins(plugin_manager)) {
 				hil_message("*failure\n");
 				return;
 			}
@@ -31,7 +31,7 @@ struct CpuLoadTest {
 		}
 
 		if (run_all) {
-			ui.preload_plugins();
+			ui.preload_plugins(plugin_manager);
 			do_tests = true;
 		}
 
@@ -57,7 +57,50 @@ struct CpuLoadTest {
 			FS::write_file(file_storage_proxy, results, {"cpu_test.csv", Volume::USB});
 			hil_message("*success\n");
 		}
-	};
+	}
+
+	static bool preload_all_plugins(PluginManager &plugin_manager) {
+		plugin_manager.start_loading_plugin_list();
+
+		while (true) {
+			auto result = plugin_manager.process_loading();
+
+			if (result.state == PluginFileLoader::State::GotList) {
+				break;
+			}
+
+			if (result.state == PluginFileLoader::State::Error) {
+				return false;
+			}
+		}
+
+		auto list = plugin_manager.found_plugin_list();
+
+		for (auto i = 0u; i < list->size(); ++i) {
+			printf("Loading plugin: '%s'\n", plugin_manager.plugin_name(i).c_str());
+
+			plugin_manager.load_plugin(i);
+			auto load = true;
+			while (load) {
+				switch (plugin_manager.process_loading().state) {
+					using enum PluginFileLoader::State;
+					case Success:
+						load = false;
+						break;
+
+					case RamDiskFull:
+					case InvalidPlugin:
+					case Error:
+						return false;
+
+					default:
+						continue;
+				}
+			}
+		}
+
+		return true;
+	}
 };
 
 } // namespace MetaModule

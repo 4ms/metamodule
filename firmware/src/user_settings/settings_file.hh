@@ -5,7 +5,7 @@
 namespace MetaModule::Settings
 {
 
-bool write_settings(FileStorageProxy &proxy, UserSettings const &settings);
-bool read_settings(FileStorageProxy &proxy, UserSettings *settings);
+bool write_settings(FileStorageProxy &proxy, UserSettings const &settings, Volume vol = Volume::NorFlash);
+bool read_settings(FileStorageProxy &proxy, UserSettings *settings, Volume vol = Volume::NorFlash);
 
 } // namespace MetaModule::Settings
