@@ -149,6 +149,9 @@ public:
 	}
 
 	void handle_write_settings() {
+		if (info.metaparams.buttons[3].is_just_pressed()) {
+			printf("Next patch\n");
+		}
 		// if (gui_state.do_write_settings) {
 		// 	if (!Settings::write_settings(info.patch_storage, info.settings)) {
 		// 		pr_err("Failed to write settings file\n");
