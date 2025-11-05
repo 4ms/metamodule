@@ -268,7 +268,6 @@ struct InternalPluginManager {
 #ifdef BUILD_INTERNAL_JWModules
 		pluginInstance = &internal_plugins.emplace_back("JWModules");
 		jwmodulesPluginInstance = pluginInstance;
-		pluginInstance->addModel(modelTree);
 		pluginInstance->addModel(modelAdd5);
 		pluginInstance->addModel(modelAbcdSeq);
 		pluginInstance->addModel(modelArrange);
