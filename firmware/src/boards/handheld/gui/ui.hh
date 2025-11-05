@@ -199,17 +199,37 @@ public:
 	}
 
 	void load_initial_patch() {
-		// Copy patch.yml on USB drive if present, to NOR flash
-		// That way we don't need the USB drive installed every boot
-		if (auto sz = FS::file_size(file_storage_proxy, {"patch.yml", Volume::USB}); sz && *sz > 0) {
-			pr_info("Found usb:/patch.yml, %zu bytes\n", *sz);
+		// Copy all patches on the USB drive to internal nor flash
+
+		auto copy_file = [this](std::string_view filename) {
+			pr_info("Copying usb:/%s to nor flash: ", filename.data());
 			std::string buf;
-			if (auto bytes_read = FS::read_file(file_storage_proxy, buf, {"patch.yml", Volume::USB}); bytes_read) {
-				auto ok = FS::write_file(file_storage_proxy, buf, {"patch.yml", Volume::NorFlash});
+			if (auto bytes_read = FS::read_file(file_storage_proxy, buf, {filename, Volume::USB}); bytes_read) {
+				auto ok = FS::write_file(file_storage_proxy, buf, {filename, Volume::NorFlash});
 				if (!ok)
-					pr_err("Error copying usb:/patch.yml to nor:/patch.yml\n");
+					pr_err("Error\n");
 				else
-					pr_info("Wrote nor:/patch.yml, %zu bytes\n", *bytes_read);
+					pr_info("read and wrote %zu bytes\n", *bytes_read);
+			}
+		};
+
+		while (file_storage_proxy.request_patchlist() == false)
+			;
+
+		while (true) {
+			auto message = file_storage_proxy.get_message();
+			if (message.message_type == FileStorageProxy::PatchListChanged) {
+				// copy files
+				auto &patchfiles = file_storage_proxy.get_patch_list();
+				auto &usb = patchfiles.volume_root(Volume::USB);
+				for (auto const &file : usb.files) {
+					copy_file(file.filename);
+				}
+				break;
+
+			} else if (message.message_type == FileStorageProxy::PatchListUnchanged) {
+				// do nothing: no patches
+				break;
 			}
 		}
 
