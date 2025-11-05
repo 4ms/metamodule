@@ -73,7 +73,10 @@ extern "C" void aux_core_main() {
 	hil_message("*ready\n");
 
 	// allow time for USB drive to mount
-	HAL_Delay(3000);
+	mdrivlib::Pin button_1{
+		{GPIO::A, PinNum::_2}, mdrivlib::PinMode::Input, mdrivlib::PinPull::Up, PinPolarity::Inverted};
+	if (button_1.is_on())
+		HAL_Delay(3000);
 
 	AutoUpdater::run(file_storage_proxy, ui);
 
