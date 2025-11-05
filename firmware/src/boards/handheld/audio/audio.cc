@@ -91,9 +91,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	// Buttons (param id 44-)
 	for (auto i = (int)FirstButton; auto &but : param_block.metaparams.buttons) {
-		if (but.just_went_high())
+		if (but.is_just_pressed()) {
 			player.set_panel_param(i, 1.f);
-		else if (but.just_went_low())
+		} else if (but.is_just_released())
 			player.set_panel_param(i, 0.f);
 
 		i++;

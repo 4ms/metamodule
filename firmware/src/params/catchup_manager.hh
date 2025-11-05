@@ -12,12 +12,12 @@ struct MappedParam {
 	MappedKnob map;
 	CatchupParam catchup;
 };
-using ParamSet = std::array<std::vector<MappedParam>, PanelDef::NumKnobs>;
+using ParamSet = std::array<std::vector<MappedParam>, NumTotalParams>; //PanelDef::NumKnobs>;
 
 class CatchupManager {
 
-	std::array<float, PanelDef::NumKnobs> panel_knobs{};
-	std::array<bool, PanelDef::NumKnobs> catchup_inaccessible{};
+	std::array<float, NumTotalParams> panel_knobs{};
+	std::array<bool, NumTotalParams> catchup_inaccessible{};
 
 	CatchupParam::Mode default_mode{CatchupParam::Mode::ResumeOnMotion};
 
@@ -25,8 +25,10 @@ class CatchupManager {
 
 public:
 	void set_panel_param(auto &modules, ParamSet &active_knob_maps, unsigned panel_knob_id, float val) {
-		if (panel_knob_id >= panel_knobs.size())
+		if (panel_knob_id >= panel_knobs.size()) {
+			printf("out of range: %u > %zu\n", panel_knob_id, panel_knobs.size());
 			return;
+		}
 
 		panel_knobs[panel_knob_id] = val;
 

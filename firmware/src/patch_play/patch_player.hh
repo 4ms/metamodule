@@ -586,8 +586,7 @@ public:
 				found->max = map.max;
 				found->curve_type = map.curve_type;
 				found->midi_chan = map.midi_chan;
-				if (map.panel_knob_id < PanelDef::NumKnobs)
-					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
+				catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
 			}
 
 		} else {
@@ -599,8 +598,7 @@ public:
 				found->map.min = map.min;
 				found->map.max = map.max;
 				found->map.curve_type = map.curve_type;
-				if (map.panel_knob_id < PanelDef::NumKnobs)
-					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
+				catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
 			}
 		}
 	}
@@ -1214,7 +1212,7 @@ private:
 		if (knob_set >= knob_maps.size())
 			return;
 
-		if (k.panel_knob_id < PanelDef::NumKnobs) {
+		if (k.panel_knob_id < knob_maps[knob_set].size()) {
 			// Update existing, if present
 			for (auto &el : knob_maps[knob_set][k.panel_knob_id]) {
 				if (el.map.maps_to_same_as(k)) {
