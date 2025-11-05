@@ -41,15 +41,20 @@ struct FullscreenGraphicPage : PageBase {
 
 		// Get first graphic display
 		auto patch = patches.get_playing_patch();
-		if (!patch || patch->module_slugs.size() <= args.module_id.value())
+		if (!patch || patch->module_slugs.size() <= args.module_id.value()) {
+			pr_err("No patch (%p) or module id (%u) > modules in patch (%u)\n",
+				   patch,
+				   args.module_id.value(),
+				   patch->module_slugs.size());
 			return;
+		}
 
 		auto slug = patch->module_slugs[args.module_id.value()];
 		auto info = ModuleFactory::getModuleInfo(slug);
 		for (auto [idx, el] : zip(info.indices, info.elements)) {
 			if (auto disp = std::get_if<DynamicGraphicDisplay>(&el)) {
 				if (disp->width_mm > 0 && disp->height_mm > 0) {
-					pr_dbg("Found DynamicGraphicDisplay idx %u x %f y %f\n",
+					pr_dbg("Found DynamicGraphicDisplay idx %u w:%f h:%f\n",
 						   idx.light_idx,
 						   disp->width_mm,
 						   disp->height_mm);
@@ -59,14 +64,20 @@ struct FullscreenGraphicPage : PageBase {
 			}
 		}
 
-		if (!args.element_indices.has_value())
+		if (!args.element_indices.has_value()) {
+			pr_err("No dynamic display found\n");
 			return;
+		}
 
-		if (args.element_indices->light_idx == ElementCount::Indices::NoElementMarker)
+		if (args.element_indices->light_idx == ElementCount::Indices::NoElementMarker) {
+			pr_err("No dynamic display found (2)\n");
 			return;
+		}
 
-		if (!args.element_mm)
+		if (!args.element_mm) {
+			pr_err("No dynamic display with size found\n");
 			return;
+		}
 
 		auto width_mm = args.element_mm->first;
 		auto height_mm = args.element_mm->second;
@@ -78,7 +89,7 @@ struct FullscreenGraphicPage : PageBase {
 		uint16_t h =
 			(ratio <= screen_ratio) ? ScreenBufferConf::viewHeight : std::round(ScreenBufferConf::viewWidth / ratio);
 
-		pr_dbg("Actual size (light_idx %u): %u x %u\n", args.element_indices.value(), w, h);
+		pr_dbg("Actual size (light_idx %u): %u x %u\n", args.element_indices->light_idx, w, h);
 		lv_obj_set_size(canvas, w, h);
 
 		// Debug border:
