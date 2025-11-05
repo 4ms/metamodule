@@ -2,22 +2,17 @@
 #include "conf/control_conf.hh"
 #include "conf/pin_conf.hh"
 #include "drivers/battery_guage_bq27441.hh"
-#include "drivers/lis2hh12_accel.hh"
-#include "drivers/uart.hh"
-#include "params/metaparams.hh"
-#include "params/params.hh"
-
-//
 #include "drivers/debounced_switch.hh"
+#include "drivers/lis2hh12_accel.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
 #include "midi/midi_message.hh"
-#include "midi_controls.hh"
 #include "param_block.hh"
+#include "params/metaparams.hh"
+#include "params/params.hh"
 #include "usb/midi_host.hh"
 #include "util/edge_detector.hh"
-#include "util/interp_param.hh"
 #include "util/lockfree_fifo_spsc.hh"
 
 namespace MetaModule

@@ -38,9 +38,6 @@ constexpr inline PinDef button_4{GPIO::A, PinNum::_7}; // pull-up
 constexpr inline PinDef sense_injack{GPIO::E, PinNum::_3};	// pull-up
 constexpr inline PinDef sense_outjack{GPIO::B, PinNum::_4}; // pull-up
 
-//TODO
-// MIC (in audio)
-
 // Accelerometer and touch sensor
 const inline mdrivlib::I2CConfig sensor_i2c_conf{
 	.I2Cx = I2C3,
