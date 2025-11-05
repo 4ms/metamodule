@@ -35,12 +35,12 @@ void Controls::update_params() {
 
 		cur_metaparams->usb_midi_connected = usb_midi_connected;
 
-		cur_metaparams->buttons[0].process(button_1.is_high());
-		cur_metaparams->buttons[1].process(button_2.is_high());
-		cur_metaparams->buttons[2].process(button_3.is_high());
-		cur_metaparams->buttons[3].process(button_4.is_high());
-		cur_metaparams->buttons[4].process(encoder1_but.is_high());
-		cur_metaparams->buttons[5].process(encoder2_but.is_high());
+		cur_metaparams->buttons[0].transfer_events(button_1);
+		cur_metaparams->buttons[1].transfer_events(button_2);
+		cur_metaparams->buttons[2].transfer_events(button_3);
+		cur_metaparams->buttons[3].transfer_events(button_4);
+		cur_metaparams->buttons[4].transfer_events(encoder1_but);
+		cur_metaparams->buttons[5].transfer_events(encoder2_but);
 
 		cur_metaparams->battery_status.level = batt.battery_percent_remaining();
 		cur_metaparams->battery_status.is_charging = batt.is_charging();
