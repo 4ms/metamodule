@@ -104,7 +104,7 @@ struct DynamicDisplayDrawer {
 
 			if (need_to_draw) {
 
-				Debug::Pin0::high();
+				// Debug::Pin0::high();
 
 				// ~8ms to just copy
 				copy_buffer(disp.lv_buffer, disp.fullcolor_buffer);
@@ -114,7 +114,7 @@ struct DynamicDisplayDrawer {
 				// if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
 				// 	lv_obj_invalidate(disp.lv_canvas);
 
-				Debug::Pin0::low();
+				// Debug::Pin0::low();
 			}
 		}
 	}
