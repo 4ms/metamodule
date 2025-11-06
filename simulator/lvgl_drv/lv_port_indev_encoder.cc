@@ -20,7 +20,7 @@ LvglEncoderSimulatorDriver::LvglEncoderSimulatorDriver(RotaryEncoderKeys &keys)
 	lv_log("Starting LVGL\n");
 }
 
-#define MONKEYROTARY
+// #define MONKEYROTARY
 void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
 	auto &keys = _instance->keys;
 	auto &rotary_pressed = _instance->rotary_pressed;
