@@ -51,9 +51,10 @@ void Controls::update_params() {
 
 	// TODO: smooth these
 	auto xyz = accel.get_latest();
-	cur_params->accel[0] = std::clamp(((int32_t)xyz.x + 32768) / 65536.f, 0.f, 1.f);
-	cur_params->accel[1] = std::clamp(((int32_t)xyz.y + 32768) / 65536.f, 0.f, 1.f);
-	cur_params->accel[2] = std::clamp(((int32_t)xyz.z + 32768) / 65536.f, 0.f, 1.f);
+	// -16384 to 16384 => 0 to 1
+	cur_params->accel[0] = std::clamp(((int32_t)xyz.x + 16384) / 32768.f, 0.f, 1.f);
+	cur_params->accel[1] = std::clamp(((int32_t)xyz.y + 16384) / 32768.f, 0.f, 1.f);
+	cur_params->accel[2] = std::clamp(((int32_t)xyz.z + 16384) / 32768.f, 0.f, 1.f);
 
 	parse_midi();
 
