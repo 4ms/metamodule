@@ -118,14 +118,6 @@ public:
 	}
 
 	void update_page() {
-		// auto now = HAL_GetTick();
-		// if ((now - last_page_update_tm) > 2) {
-		// 	last_page_update_tm = now;
-		// 	page_update_task();
-		// }
-
-		// print_dbg_params.output_debug_info(HAL_GetTick());
-		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
 	bool preload_all_plugins() {
