@@ -10,6 +10,7 @@
 #include "fs/volumes.hh"
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_list_helper.hh"
+#include "patches_default_create.hh"
 #include "pr_dbg.hh"
 #include "util/poll_change.hh"
 #include <optional>
@@ -51,6 +52,9 @@ public:
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
+
+		// status = norflash_.reformat();
+
 		if (status == PatchVolFileIO::Status::LFSError) {
 			status = norflash_.reformat();
 		}
@@ -65,12 +69,12 @@ public:
 	}
 
 	void reload_default_patches() {
-		PatchFileIO::create_default_patches(norflash_);
+		DefaultPatchList::create_default_patches(norflash_);
 	}
 
 	void reformat_norflash() {
 		norflash_.reformat();
-		PatchFileIO::create_default_patches(norflash_);
+		DefaultPatchList::create_default_patches(norflash_);
 	}
 
 	// returns timestamp
