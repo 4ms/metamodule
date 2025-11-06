@@ -102,12 +102,14 @@ public:
 		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 	}
 
-	// uint32_t pat = 0;
-	// bool first_buf = false;
 	void update_screen() {
 		auto now = HAL_GetTick();
-		if ((now - last_screen_update_tm) > 6) {
+		if ((now - last_screen_update_tm) > 16) { //30fps
 			last_screen_update_tm = now;
+			Debug::Pin2::high();
+			page_update_task();
+			Debug::Pin2::low();
+
 			lv_timer_handler();
 		}
 	}
@@ -116,11 +118,11 @@ public:
 	}
 
 	void update_page() {
-		auto now = HAL_GetTick();
-		if ((now - last_page_update_tm) > 8) {
-			last_page_update_tm = now;
-			page_update_task();
-		}
+		// auto now = HAL_GetTick();
+		// if ((now - last_page_update_tm) > 2) {
+		// 	last_page_update_tm = now;
+		// 	page_update_task();
+		// }
 
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());
