@@ -145,7 +145,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		param_blocks[cur_block].params[idx].usb_raw_midi = msg;
 
 		// Run each module
-		player.update_patch();
+		player.update_patch_singlecore();
 
 		// Get outputs from modules
 		for (auto [i, outchan] : countzip(out.chan))
