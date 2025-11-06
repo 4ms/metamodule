@@ -54,3 +54,40 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.sync_send = SaiConfig::NoSendSync,
 	.sync_receive_from = SaiConfig::NoReceiveSync,
 };
+
+const SaiConfig mic_sai_conf = {
+	.sai = SAI1,
+	.rx_block = SAI1_Block_A,
+
+	.mode = SaiConfig::RXMaster,
+
+	.dma_init_rx =
+		{
+			.DMAx = DMA2,
+			.stream = DMA2_Stream3,
+			.channel = DMA_REQUEST_SAI1_A,
+			.IRQn = DMA2_Stream3_IRQn,
+			.pri = 1,
+			.subpri = 1,
+		},
+
+	.datasize = SAI_DATASIZE_24,
+	.framesize = 64, //24bit extends to 32bits * 2 clock phases
+	.samplerate = MetaModule::AudioSettings::DefaultSampleRate,
+
+	.MCLK = {GPIO::Unused},
+	.SCLK = {GPIO::Unused},
+	.LRCLK = {GPIO::E, PinNum::_2, PinAF::AltFunc2}, // SAI1_CK1
+	.SD_DAC = {GPIO::Unused},
+	.SD_ADC = {GPIO::B, PinNum::_2, PinAF::AltFunc2}, // SAI1_D1
+
+	.reset_pin = {GPIO::Unused},
+
+	.bus_address = 0b00,
+
+	.num_tdm_ins = 1,
+	.num_tdm_outs = 0,
+
+	.sync_send = SaiConfig::NoSendSync,
+	.sync_receive_from = SaiConfig::NoReceiveSync,
+};
