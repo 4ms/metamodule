@@ -63,6 +63,8 @@ public:
 
 		page_list.request_initial_page(PageId::FullscreenGraphic, args);
 		statusbar.show();
+
+		Debug::Pin2 init;
 	}
 
 	void update_current_page() {
