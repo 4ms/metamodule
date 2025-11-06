@@ -221,12 +221,12 @@ struct ModuleWidgetAdaptor {
 		if (widget) {
 			Element element = DynamicGraphicDisplay{};
 
-			if (widget->box.size.y > 400 || widget->box.size.y == 0) {
-				pr_trace("Widget graph_disp_idx %d box size.y invalid: %f\n", graphic_display_idx, widget->box.size.y);
+			if (widget->box.size.y > 900 || widget->box.size.y == 0) {
+				pr_dbg("Widget graph_disp_idx %d box size.y invalid: %f\n", graphic_display_idx, widget->box.size.y);
 				widget->box.size.y = widget->parent->box.size.y - widget->box.pos.y;
 			}
-			if (widget->box.size.x > 400 || widget->box.size.x == 0) {
-				pr_trace("Widget graph_disp_idx %d box size.x invalid: %f\n", graphic_display_idx, widget->box.size.x);
+			if (widget->box.size.x > 900 || widget->box.size.x == 0) {
+				pr_dbg("Widget graph_disp_idx %d box size.x invalid: %f\n", graphic_display_idx, widget->box.size.x);
 				widget->box.size.x = widget->parent->box.size.x - widget->box.pos.x;
 			}
 
