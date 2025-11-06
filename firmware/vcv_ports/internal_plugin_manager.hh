@@ -302,7 +302,6 @@ struct InternalPluginManager {
 
 		std::string filename = plugin_name + "/plugin.json";
 		auto sz = ramdisk.get_file_size(filename);
-		pr_dbg("%s %u\n", filename.c_str(), sz);
 		if (sz > 0) {
 			buffer.resize(sz);
 			if (ramdisk.read_file(filename, buffer) > 0) {
@@ -312,7 +311,6 @@ struct InternalPluginManager {
 
 		filename = plugin_name + "/plugin-mm.json";
 		sz = ramdisk.get_file_size(filename);
-		pr_dbg("%s %u\n", filename.c_str(), sz);
 		if (sz > 0) {
 			buffer.resize(sz);
 			if (ramdisk.read_file(filename, buffer) > 0) {
