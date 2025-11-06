@@ -46,6 +46,7 @@ void renderFill(void *uptr,
 	// Scale by ratio of 1 Rack pixel to 1 MM pixel
 	auto scaling = mm_to_px(to_mm(1.), context->px_per_3U);
 
+	// DebugPin0High();
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Fill path: #fill %d = count:%d\n", path.nfill, path.count);
 		if (path.count < 3)
@@ -83,6 +84,7 @@ void renderFill(void *uptr,
 		// context->tvg_canvas->sync();
 		// context->tvg_canvas->remove();
 	}
+	// DebugPin0Low();
 }
 
 void renderStroke(void *uptr,
@@ -112,6 +114,7 @@ void renderStroke(void *uptr,
 	// @pp3U=240 => scaling = 0.633
 	// @pp3U=180 => scaling = 0.474
 
+	// DebugPin0High();
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		dump_draw("Stroke path: #strokes %d = count:%d + closed:%d\n", path.nstroke, path.count, path.closed);
 		if (path.count < 2)
@@ -156,6 +159,7 @@ void renderStroke(void *uptr,
 		// context->tvg_canvas->sync();
 		// context->tvg_canvas->remove();
 	}
+	// DebugPin0Low();
 }
 
 float renderText(
@@ -387,13 +391,13 @@ void renderCancel(void *uptr) {
 void renderFlush(void *uptr) {
 	auto context = get_drawcontext(uptr);
 
-	DebugPin0High();
+	// DebugPin0High();
 	//flowerpatch: 6ms
 	//smiley max: 36ms
 	context->tvg_canvas->draw();
 	context->tvg_canvas->sync();
 	context->tvg_canvas->remove();
-	DebugPin0Low();
+	// DebugPin0Low();
 
 	// Hide all labels that were not re-drawn since the last renderViewport() (via nvgBeginFrame())
 	for (auto &label : context->labels) {

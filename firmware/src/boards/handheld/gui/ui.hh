@@ -106,9 +106,9 @@ public:
 		auto now = HAL_GetTick();
 		if ((now - last_screen_update_tm) > 16) { //30fps
 			last_screen_update_tm = now;
-			Debug::Pin2::high();
+			// Debug::Pin2::high();
 			page_update_task();
-			Debug::Pin2::low();
+			// Debug::Pin2::low();
 
 			lv_timer_handler();
 		}
