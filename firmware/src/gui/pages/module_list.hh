@@ -90,9 +90,11 @@ private:
 		std::ranges::sort(all_brands, less_ci);
 
 		std::string roller_str = "";
-		roller_str += Gui::orange_text("Sort by tag " LV_SYMBOL_RIGHT);
+		roller_str += Gui::blue_text("Sort by tag " LV_SYMBOL_RIGHT);
 		roller_str += "\n";
-		roller_str += Gui::orange_text("Brands:" LV_SYMBOL_DOWN);
+		roller_str += "________________";
+		roller_str += "\n";
+		roller_str += Gui::orange_text("Brands:");
 		roller_str += "\n";
 
 		roller_str.reserve(roller_str.size() + all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
@@ -104,7 +106,7 @@ private:
 			roller_str += item;
 			roller_str += "\n";
 			if (sel_brand_display_name == item)
-				sel_idx = i + 2; // shift by 1
+				sel_idx = i + 3; // shift for headers
 			i++;
 		}
 		// Remove last newline
@@ -112,6 +114,7 @@ private:
 			roller_str.pop_back();
 		lv_roller_set_options(ui_ModuleListRoller, roller_str.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_selected(ui_ModuleListRoller, sel_idx, LV_ANIM_OFF);
+		cur_selected = sel_idx;
 	}
 
 	void populate_tags() {
@@ -138,7 +141,9 @@ private:
 		std::ranges::sort(all_tags, [](std::string const &a, std::string const &b) { return less_ci(a, b); });
 
 		std::string roller_str;
-		roller_str += Gui::orange_text("Sort by brand " LV_SYMBOL_RIGHT);
+		roller_str += Gui::blue_text("Sort by brand " LV_SYMBOL_RIGHT);
+		roller_str += "\n";
+		roller_str += "________________";
 		roller_str += "\n";
 		roller_str += Gui::orange_text("Tags:");
 		roller_str += "\n";
@@ -147,13 +152,14 @@ private:
 			roller_str += t;
 			roller_str += "\n";
 			if (sel_tag == t)
-				sel_idx = i + 2; // shift by 1
+				sel_idx = i + 3; // shift by 1
 			i++;
 		}
 		if (roller_str.size())
 			roller_str.pop_back();
 		lv_roller_set_options(ui_ModuleListRoller, roller_str.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_selected(ui_ModuleListRoller, sel_idx, LV_ANIM_OFF);
+		cur_selected = sel_idx;
 	}
 
 	void roller_module_list() {
@@ -357,6 +363,8 @@ private:
 		}
 	}
 
+	static inline unsigned cur_selected = 0;
+
 	static void scroll_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleListPage *>(event->user_data);
 		if (!page)
@@ -366,6 +374,23 @@ private:
 
 		if (page->view == View::ModuleOnly || page->view == View::ModuleRoller) {
 			lv_timer_reset(page->draw_timer);
+		}
+
+		if (page->view == View::CategoryRoller) {
+			auto cur_sel = lv_roller_get_selected(ui_ModuleListRoller);
+			auto prev_sel = page->cur_selected;
+
+			// Skip over headers
+			if (lv_roller_get_selected(ui_ModuleListRoller) < 3) {
+				// Scrolled down -> scroll past headers
+				if (prev_sel >= cur_sel) {
+					cur_sel = 0;
+				} else {
+					cur_sel = 3;
+				}
+				lv_roller_set_selected(ui_ModuleListRoller, cur_sel, LV_ANIM_ON);
+			}
+			page->cur_selected = cur_sel;
 		}
 	}
 
