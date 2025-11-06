@@ -308,6 +308,12 @@ struct InternalPluginManager {
 		playgroundPluginInstance = pluginInstance;
 		pluginInstance->addModel(modelSideScroller);
 #endif
+
+#ifdef BUILD_INTERNAL_CVfunk
+		pluginInstance = &internal_plugins.emplace_back("CVfunk");
+		cvFunkPluginInstance = pluginInstance;
+		pluginInstance->addModel(modelFlowerPatch);
+#endif
 	}
 };
 } // namespace MetaModule

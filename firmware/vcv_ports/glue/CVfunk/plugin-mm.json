@@ -1,0 +1,154 @@
+{
+	"MetaModuleBrandName": "CV funk",
+	"MetaModuleBrandSlug": "CVfunk",
+	"MetaModulePluginMaintainer": "4ms Company",
+	"MetaModulePluginMaintainerEmail": "4ms@4mscompany.com",
+	"MetaModulePluginMaintainerUrl": "https://metamodule.info",
+	"MetaModuleDescription": "CV funk modules ported from VCV",
+    "MetaModuleIncludedModules": [
+    {
+      "slug": "Steps",
+      "name": "Steps"
+    },
+    {
+      "slug": "EnvelopeArray",
+      "name": "Envelope Array"
+    },
+    {
+      "slug": "PentaSequencer",
+      "name": "Penta Sequencer"
+    },
+    {
+      "slug": "ImpulseController",
+      "name": "Impulse Controller"
+    },
+    {
+      "slug": "Signals",
+      "name": "Signals"
+    },
+    {
+      "slug": "Ranges",
+      "name": "Ranges"
+    },
+    {
+      "slug": "HexMod",
+      "name": "Hex Mod"
+    },
+    {
+      "slug": "Collatz",
+      "name": "Collatz"
+    },
+    {
+      "slug": "Strings",
+      "name": "Strings"
+    },
+    {
+      "slug": "Ouros",
+      "name": "Ouros"
+    },
+    {
+      "slug": "PressedDuck",
+      "name": "Pressed Duck"
+    },
+    {
+      "slug": "PreeeeeeeeeeessedDuck",
+      "name": "Preeeeeeeeeeessed Duck"
+    },
+    {
+      "slug": "FlowerPatch",
+      "name": "Flower Patch"
+    },
+    {
+      "slug": "Magnets",
+      "name": "Magnets"
+    },
+    {
+      "slug": "Syncro",
+      "name": "Syncro"
+    },
+    {
+      "slug": "Nona",
+      "name": "Nona"
+    },
+    {
+      "slug": "Decima",
+      "name": "Decima"
+    },
+    {
+      "slug": "Morta",
+      "name": "Morta"
+    },
+    {
+      "slug": "StepWave",
+      "name": "Step Wave"
+    },
+    {
+      "slug": "Arrange",
+      "name": "Arrange"
+    },
+    {
+      "slug": "TriDelay",
+      "name": "Tri Delay"
+    },
+    {
+      "slug": "Cartesia",
+      "name": "Cartesia"
+    },
+    {
+      "slug": "Tatami",
+      "name": "Tatami"
+    },
+    {
+      "slug": "JunkDNA",
+      "name": "Junk DNA"
+    },
+    {
+      "slug": "Picus",
+      "name": "Picus"
+    },
+    {
+      "slug": "Node",
+      "name": "Node"
+    },
+    {
+      "slug": "Wonk",
+      "name": "Wonk"
+    },
+    {
+      "slug": "Hammer",
+      "name": "Hammer"
+    },
+    {
+      "slug": "Hub",
+      "name": "Hub"
+    },
+    {
+      "slug": "CVfunkBlank",
+      "name": "CV funk Blank 8HP"
+    },
+    {
+      "slug": "CVfunkBlank4HP",
+      "name": "CV funk Blank 4HP"
+    },
+    {
+      "slug": "Rat",
+      "name": "Rat"
+    },
+    {
+      "slug": "Count",
+      "name": "Count"
+    },
+    {
+      "slug": "Clpy",
+      "name": "Clpy"
+    },
+    {
+      "slug": "Tuner",
+      "name": "Tuner"
+    },
+    {
+      "slug": "Alloy",
+      "name": "Alloy"
+    }
+    ]
+}

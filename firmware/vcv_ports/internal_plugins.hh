@@ -188,6 +188,46 @@ extern rack::plugin::Model *modelTimer;
 
 extern rack::plugin::Model *modelSideScroller;
 
+extern rack::plugin::Model* modelSteps;
+extern rack::plugin::Model* modelEnvelopeArray;
+extern rack::plugin::Model* modelPentaSequencer;
+extern rack::plugin::Model* modelImpulseController;
+extern rack::plugin::Model* modelSignals;
+extern rack::plugin::Model* modelRanges;
+extern rack::plugin::Model* modelHexMod;
+extern rack::plugin::Model* modelCollatz;
+extern rack::plugin::Model* modelStrings;
+extern rack::plugin::Model* modelMagnets;
+extern rack::plugin::Model* modelOuros;
+extern rack::plugin::Model* modelPressedDuck;
+extern rack::plugin::Model* modelFlowerPatch;
+extern rack::plugin::Model* modelSyncro;
+extern rack::plugin::Model* modelNona;
+extern rack::plugin::Model* modelDecima;
+extern rack::plugin::Model* modelMorta;
+extern rack::plugin::Model* modelStepWave;
+extern rack::plugin::Model* modelPreeeeeeeeeeessedDuck;
+extern rack::plugin::Model* modelArrange;
+extern rack::plugin::Model* modelTriDelay;
+extern rack::plugin::Model* modelTatami;
+extern rack::plugin::Model* modelCartesia;
+extern rack::plugin::Model* modelJunkDNA;
+extern rack::plugin::Model* modelPicus;
+extern rack::plugin::Model* modelNode;
+extern rack::plugin::Model* modelWeave;
+extern rack::plugin::Model* modelWonk;
+extern rack::plugin::Model* modelHammer;
+extern rack::plugin::Model* modelHub;
+// extern rack::plugin::Model* modelCVfunkBlank;
+// extern rack::plugin::Model* modelCVfunkBlank4HP;
+extern rack::plugin::Model* modelRat;
+extern rack::plugin::Model* modelCount;
+extern rack::plugin::Model* modelClpy;
+extern rack::plugin::Model* modelTuner;
+extern rack::plugin::Model* modelAlloy;
+extern rack::plugin::Model* modelOnion;
+
+
 // These can be used by the plugin if they need to load from their plugin files after startup
 extern rack::plugin::Plugin *befacoPluginInstance;
 extern rack::plugin::Plugin *audibleInstrumentsPluginInstance;
@@ -198,3 +238,4 @@ extern rack::plugin::Plugin *valleyPluginInstance;
 extern rack::plugin::Plugin *rackCorePluginInstance;
 extern rack::plugin::Plugin *jwmodulesPluginInstance;
 extern rack::plugin::Plugin *playgroundPluginInstance;
+extern rack::plugin::Plugin *cvFunkPluginInstance;

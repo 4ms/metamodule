@@ -19,3 +19,4 @@ rack::plugin::Plugin *valleyPluginInstance;
 rack::plugin::Plugin *rackCorePluginInstance;
 rack::plugin::Plugin *jwmodulesPluginInstance;
 rack::plugin::Plugin *playgroundPluginInstance;
+rack::plugin::Plugin *cvFunkPluginInstance;

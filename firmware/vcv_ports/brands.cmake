@@ -8,4 +8,5 @@ set(brands
     RackCore
     JWModules
     4msPlayground
+    CVfunk
 )
