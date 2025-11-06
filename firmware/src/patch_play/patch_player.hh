@@ -296,6 +296,8 @@ public:
 		}
 		process_outputs_samecore<0>();
 		process_outputs_diffcore<0>();
+		process_outputs_samecore<1>();
+		process_outputs_diffcore<1>();
 		update_midi_pulses();
 	}
 
