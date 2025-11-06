@@ -1,4 +1,5 @@
 #include "CoreModules/elements/units.hh"
+#include "conf/debug_raw.h"
 #include "gui/fonts/ttf.hh"
 #include "lvgl.h"
 #include "nanovg_pixbuf_drawctx.hh"
@@ -78,9 +79,9 @@ void renderFill(void *uptr,
 		scene->scale(scaling);
 
 		context->tvg_canvas->push(scene);
-		context->tvg_canvas->draw();
-		context->tvg_canvas->sync();
-		context->tvg_canvas->remove();
+		// context->tvg_canvas->draw();
+		// context->tvg_canvas->sync();
+		// context->tvg_canvas->remove();
 	}
 }
 
@@ -151,9 +152,9 @@ void renderStroke(void *uptr,
 		scene->scale(scaling);
 
 		context->tvg_canvas->push(scene);
-		context->tvg_canvas->draw();
-		context->tvg_canvas->sync();
-		context->tvg_canvas->remove();
+		// context->tvg_canvas->draw();
+		// context->tvg_canvas->sync();
+		// context->tvg_canvas->remove();
 	}
 }
 
@@ -385,6 +386,14 @@ void renderCancel(void *uptr) {
 
 void renderFlush(void *uptr) {
 	auto context = get_drawcontext(uptr);
+
+	DebugPin0High();
+	//flowerpatch: 6ms
+	//smiley max: 36ms
+	context->tvg_canvas->draw();
+	context->tvg_canvas->sync();
+	context->tvg_canvas->remove();
+	DebugPin0Low();
 
 	// Hide all labels that were not re-drawn since the last renderViewport() (via nvgBeginFrame())
 	for (auto &label : context->labels) {
