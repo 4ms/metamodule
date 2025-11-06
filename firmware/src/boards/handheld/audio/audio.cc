@@ -56,7 +56,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		auto &params = cache_params(block);
 
 		cur_block = block;
-		process(audio_blocks[1 - block], params);
+		if (is_playing_patch())
+			process(audio_blocks[1 - block], params);
 
 		return_cached_params(block);
 
@@ -71,6 +72,19 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
 						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
+}
+
+bool AudioStream::is_playing_patch() {
+	if (patch_loader.should_fade_down_audio()) {
+		patch_loader.notify_audio_is_muted();
+
+	} else if (patch_loader.should_fade_up_audio()) {
+		patch_loader.notify_audio_not_muted();
+		patch_loader.notify_audio_done_starting();
+		handle_patch_just_loaded();
+	}
+
+	return patch_loader.is_playing();
 }
 
 void AudioStream::start() {

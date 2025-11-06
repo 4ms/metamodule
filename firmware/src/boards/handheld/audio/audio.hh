@@ -72,6 +72,7 @@ private:
 	AudioConf::SampleT get_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 
+	bool is_playing_patch();
 	void handle_patch_just_loaded();
 	void update_audio_settings();
 	void set_block_spans();
