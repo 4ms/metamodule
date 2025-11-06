@@ -40,7 +40,7 @@ function(CheckGitVersion)
         )
 
     execute_process(
-        COMMAND bash -c "git describe --match firmware\\* --tags"
+        COMMAND bash -c "git describe  --tags"
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         OUTPUT_VARIABLE GIT_FIRMWARE_VERSION_TAG
         OUTPUT_STRIP_TRAILING_WHITESPACE
