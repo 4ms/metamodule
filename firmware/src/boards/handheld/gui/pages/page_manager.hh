@@ -69,8 +69,6 @@ public:
 
 		handle_knobset_change();
 
-		handle_back_event();
-
 		if (auto newpage = page_list.get_requested_page()) {
 			if (newpage->page) {
 				cur_page->blur();
@@ -94,42 +92,6 @@ public:
 	}
 
 	void handle_knobset_change() {
-		// if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
-		// 	if (auto patch = info.open_patch_manager.get_playing_patch(); patch != nullptr) {
-
-		// 		if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
-		// 			int cur_knobset = info.page_list.get_active_knobset();
-		// 			int next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
-
-		// 			info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
-		// 			info.page_list.set_active_knobset(next_knobset);
-		// 			std::string ks_name = patch->valid_knob_set_name(next_knobset);
-
-		// 			if (cur_page != page_list.page(PageId::KnobSetView))
-		// 				info.notify_queue.put(
-		// 					{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 600});
-
-		// 			button_light.display_knobset(next_knobset);
-		// 		}
-		// 	}
-		// }
-
-		// if (button_light.display_knobset() != info.page_list.get_active_knobset()) {
-		// 	button_light.display_knobset(info.page_list.get_active_knobset());
-		// }
-	}
-
-	void handle_back_event() {
-		// Interpret and pass on back button events
-		// if (info.metaparams.meta_buttons[0].is_just_released()) {
-		// 	if (!screensaver.is_active()) {
-		// 		if (!info.metaparams.ignore_metabutton_release)
-		// 			gui_state.back_button.register_falling_edge();
-		// 		else
-		// 			info.metaparams.ignore_metabutton_release = false;
-		// 	}
-		// 	screensaver.wake();
-		// }
 	}
 
 	void handle_notifications() {
@@ -149,31 +111,6 @@ public:
 	}
 
 	void handle_write_settings() {
-		if (info.metaparams.buttons[3].is_just_pressed()) {
-			printf("Next patch\n");
-		}
-		// if (gui_state.do_write_settings) {
-		// 	if (!Settings::write_settings(info.patch_storage, info.settings)) {
-		// 		pr_err("Failed to write settings file\n");
-		// 	} else
-		// 		pr_info("Wrote settings\n");
-
-		// 	gui_state.do_write_settings = false;
-		// 	gui_state.write_settings_after_ms = 0;
-		// }
-
-		// if (gui_state.write_settings_after_ms > 0) {
-		// 	if (get_time() >= gui_state.write_settings_after_ms) {
-
-		// 		if (!Settings::write_settings(info.patch_storage, info.settings)) {
-		// 			pr_err("Failed to write settings file (timer)\n");
-		// 		} else {
-		// 			pr_info("Wrote settings (timer)\n");
-		// 		}
-
-		// 		gui_state.write_settings_after_ms = 0;
-		// 	}
-		// }
 	}
 
 	void debug_print_args(auto newpage) {
