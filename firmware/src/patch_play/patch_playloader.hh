@@ -4,6 +4,7 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
+#include "patch_file/reload_patch.hh"
 #include "patch_play/modules_helpers.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_to_yaml.hh"
@@ -22,13 +23,29 @@ struct PatchPlayLoader {
 	PatchPlayLoader(FileStorageProxy &patch_storage, OpenPatchManager &patches, PatchPlayer &patchplayer)
 		: player_{patchplayer}
 		, storage_{patch_storage}
-		, patches_{patches} {
+		, patches_{patches}
+		, patch_reloader{patch_storage, patches, fs_settings} {
 	}
 
 	struct AudioSRBlock {
 		uint32_t sample_rate;
 		uint32_t block_size;
 	};
+
+	void load_and_play_patch(std::string_view patchname, Volume patch_vol) {
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		if (auto res = patch_reloader.reload_patch_file({patchname, patch_vol}); res.success) {
+			patches_.start_viewing({patchname, patch_vol});
+			next_patch = patches_.get_view_patch();
+			load_patch();
+			start_audio();
+		} else {
+			pr_err("Error loading and playing '%s': '%s'\n", patchname.data(), res.error_string.c_str());
+		}
+	}
 
 	void load_initial_patch(std::string_view patchname, Volume patch_vol) {
 		uint32_t tries = 10000;
@@ -365,6 +382,9 @@ private:
 
 	std::atomic<AudioSRBlock> new_audio_settings_ = {};
 	unsigned max_audio_retries = 0;
+
+	FilesystemSettings fs_settings{.max_open_patches = 999};
+	ReloadPatch patch_reloader;
 
 	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
