@@ -7,6 +7,7 @@
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "patch_file/reload_patch.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
@@ -198,10 +199,11 @@ public:
 		}
 	}
 
-	void load_initial_patch() {
-		// Copy all patches on the USB drive to internal nor flash
+	// Copy all patches on the USB drive to NOR Flash
+	// Populate available_patches as we go
+	void copy_patches() {
 
-		auto copy_file = [this](std::string_view filename) {
+		auto copy_file = [this](std::string_view filename) -> bool {
 			pr_info("Copying usb:/%s to nor flash: ", filename.data());
 			std::string buf;
 			if (auto bytes_read = FS::read_file(file_storage_proxy, buf, {filename, Volume::USB}); bytes_read) {
@@ -210,21 +212,38 @@ public:
 					pr_err("Error\n");
 				else
 					pr_info("read and wrote %zu bytes\n", *bytes_read);
+				return ok;
 			}
+			return false;
 		};
 
 		while (file_storage_proxy.request_patchlist() == false)
 			;
 
+		available_patches.clear();
+
 		while (true) {
 			auto message = file_storage_proxy.get_message();
 			if (message.message_type == FileStorageProxy::PatchListChanged) {
-				// copy files
-				auto &patchfiles = file_storage_proxy.get_patch_list();
-				auto &usb = patchfiles.volume_root(Volume::USB);
-				for (auto const &file : usb.files) {
-					copy_file(file.filename);
+				// Remove all patches on flash
+				// auto const &flash = file_storage_proxy.get_patch_list().volume_root(Volume::NorFlash);
+				// for (auto const &file : flash.files) {
+				// 	std::string n = "nor:/" + file.filename;
+				// 	remove(n.c_str());
+				// 	// std::string m = "nor:/" + file.filename + ".del";
+				// 	// rename(n.c_str(), m.c_str());
+				// }
+
+				// Copy files USB=>NOR, and populate available_patches
+				{
+					auto const &usb = file_storage_proxy.get_patch_list().volume_root(Volume::USB);
+					for (auto const &file : usb.files) {
+						if (copy_file(file.filename)) {
+							available_patches.push_back(file.filename);
+						}
+					}
 				}
+
 				break;
 
 			} else if (message.message_type == FileStorageProxy::PatchListUnchanged) {
@@ -233,8 +252,40 @@ public:
 			}
 		}
 
+		// Populate available_patches with any existing files on NOR flash
+		{
+			auto const &flash = file_storage_proxy.get_patch_list().volume_root(Volume::NorFlash);
+			for (auto const &file : flash.files) {
+				if (file.filename == "settings.yml")
+					continue;
+
+				if (std::ranges::find(available_patches, file.filename) == available_patches.end())
+					available_patches.push_back(file.filename);
+			}
+		}
+	}
+
+	void load_initial_patch() {
+		copy_patches();
+
 		settings.last_patch_vol = Volume::NorFlash;
-		settings.last_patch_opened = "patch.yml";
+
+		//TODO: save/restore last_patch_opened
+		if (available_patches.size() > cur_patch_idx)
+			settings.last_patch_opened = available_patches[cur_patch_idx];
+		else
+			settings.last_patch_opened = "patch.yml";
+
+		// Set cur_patch
+		cur_patch_idx = 0;
+		for (unsigned i = 0; auto const &p : available_patches) {
+			pr_dbg("nor:/%s\n", p.c_str());
+			if (p == settings.last_patch_opened) {
+				cur_patch_idx = i;
+			}
+			i++;
+		}
+
 		patch_playloader.load_initial_patch(settings.last_patch_opened, settings.last_patch_vol);
 
 		page_manager.init();
@@ -267,6 +318,13 @@ private:
 
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
+		if (metaparams.buttons[5].is_just_pressed()) {
+			next_patch();
+		}
+		if (metaparams.buttons[4].is_just_pressed()) {
+			prev_patch();
+		}
+
 		page_manager.update_current_page();
 
 		new_patch_data.store(false, std::memory_order_release);
@@ -277,8 +335,33 @@ private:
 		}
 	}
 
+	void next_patch() {
+		if (available_patches.size() == 0)
+			return;
+
+		cur_patch_idx = cur_patch_idx == available_patches.size() - 1 ? 0 : cur_patch_idx + 1;
+
+		printf("Load [%u] '%s'\n", cur_patch_idx, available_patches[cur_patch_idx].c_str());
+		patch_playloader.load_and_play_patch(available_patches[cur_patch_idx], Volume::NorFlash);
+		page_manager.init();
+	}
+
+	void prev_patch() {
+		if (available_patches.size() == 0)
+			return;
+
+		cur_patch_idx = cur_patch_idx == 0 ? available_patches.size() - 1 : cur_patch_idx - 1;
+
+		printf("Load [%u] '%s'\n", cur_patch_idx, available_patches[cur_patch_idx].c_str());
+		patch_playloader.load_and_play_patch(available_patches[cur_patch_idx], Volume::NorFlash);
+		page_manager.init();
+	}
+
 	uint32_t last_page_update_tm = 0;
 	uint32_t last_screen_update_tm = 0;
+
+	std::vector<std::string> available_patches;
+	unsigned cur_patch_idx = 0;
 };
 
 } // namespace MetaModule
