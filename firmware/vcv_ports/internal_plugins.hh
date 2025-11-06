@@ -152,7 +152,6 @@ extern rack::plugin::Model *modelTripleSloth;
 
 extern rack::plugin::Model *modelSDOrcasHeartV2;
 
-
 extern rack::plugin::Model *modelAdd5;
 extern rack::plugin::Model *modelAbcdSeq;
 extern rack::plugin::Model *modelArrange;
@@ -187,6 +186,7 @@ extern rack::plugin::Model *modelCoolBreeze;
 extern rack::plugin::Model *modelPete;
 extern rack::plugin::Model *modelTimer;
 
+extern rack::plugin::Model *modelSideScroller;
 
 // These can be used by the plugin if they need to load from their plugin files after startup
 extern rack::plugin::Plugin *befacoPluginInstance;
@@ -197,3 +197,4 @@ extern rack::plugin::Plugin *eightfoldPluginInstance;
 extern rack::plugin::Plugin *valleyPluginInstance;
 extern rack::plugin::Plugin *rackCorePluginInstance;
 extern rack::plugin::Plugin *jwmodulesPluginInstance;
+extern rack::plugin::Plugin *playgroundPluginInstance;

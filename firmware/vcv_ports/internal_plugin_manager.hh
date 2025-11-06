@@ -302,6 +302,12 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelPete);
 		pluginInstance->addModel(modelTimer);
 #endif
+
+#ifdef BUILD_INTERNAL_4msPlayground
+		pluginInstance = &internal_plugins.emplace_back("4ms-Playground");
+		playgroundPluginInstance = pluginInstance;
+		pluginInstance->addModel(modelSideScroller);
+#endif
 	}
 };
 } // namespace MetaModule

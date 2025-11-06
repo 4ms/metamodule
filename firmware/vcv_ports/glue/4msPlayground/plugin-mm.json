@@ -1,0 +1,29 @@
+{
+	"MetaModulePluginMaintainer": "4ms-Playground",
+	"MetaModuleBrandSlug": "4ms-Playground",
+	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerUrl": "",
+	"MetaModuleDescription": "",
+	"MetaModuleIncludedModules": [
+		{
+			"slug": "Pinwheel",
+			"name": "Pinwheel"
+		},
+		{
+			"slug": "Chimes",
+			"name": "Chimes"
+		},
+		{
+			"slug": "GraphicsLimit",
+			"name": "GraphicsLimit"
+		},
+		{
+			"slug": "Screen",
+			"name": "Screen"
+		},
+		{
+			"slug": "SideScroller",
+			"name": "SideScroller"
+		}
+	]
+}

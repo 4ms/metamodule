@@ -7,4 +7,5 @@ set(brands
     Valley
     RackCore
     JWModules
+    4msPlayground
 )

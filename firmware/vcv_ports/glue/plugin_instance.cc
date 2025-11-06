@@ -18,3 +18,4 @@ rack::plugin::Plugin *eightfoldPluginInstance;
 rack::plugin::Plugin *valleyPluginInstance;
 rack::plugin::Plugin *rackCorePluginInstance;
 rack::plugin::Plugin *jwmodulesPluginInstance;
+rack::plugin::Plugin *playgroundPluginInstance;
