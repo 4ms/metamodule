@@ -95,18 +95,27 @@ struct DynamicDisplayDrawer {
 		}
 
 		for (auto &disp : displays) {
-			Debug::Pin2::high();
 
 			// Draw all displays:
 			// The module draws into fullcolor_buffer, and then we compare it against
 			// lv_buffer to detect if any pixels changed.
 			// If not, then we save a lot of time by not re-drawing the lv_canvas object.
-			if (module->draw_graphic_display(disp.id)) {
-				if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
-					lv_obj_invalidate(disp.lv_canvas);
-			}
+			auto need_to_draw = module->draw_graphic_display(disp.id);
 
-			Debug::Pin2::low();
+			if (need_to_draw) {
+
+				Debug::Pin0::high();
+
+				// ~8ms to just copy
+				copy_buffer(disp.lv_buffer, disp.fullcolor_buffer);
+				lv_obj_invalidate(disp.lv_canvas);
+
+				// 20ms to compare and copy
+				// if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
+				// 	lv_obj_invalidate(disp.lv_canvas);
+
+				Debug::Pin0::low();
+			}
 		}
 	}
 
@@ -157,6 +166,24 @@ private:
 			buf_pos += 3;
 		}
 		return diff;
+	}
+
+	void copy_buffer(std::span<char> lv_buffer, std::span<const uint32_t> fullcolor_buffer) {
+		if ((fullcolor_buffer.size() * 3) > lv_buffer.size()) {
+			pr_err("DynDraw buffer size error\n");
+			return;
+		}
+
+		unsigned buf_pos = 0;
+		for (auto pixel : fullcolor_buffer) {
+
+			auto col = lv_color_make_rgb565(pixel >> 16, pixel >> 8, pixel);
+			lv_buffer[buf_pos] = col.full & 0xFF;
+			lv_buffer[buf_pos + 1] = col.full >> 8;
+			lv_buffer[buf_pos + 2] = (pixel >> 24) & 0xFF;
+
+			buf_pos += 3;
+		}
 	}
 
 	PatchPlayLoader &patch_playloader;
