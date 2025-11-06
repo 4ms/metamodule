@@ -41,48 +41,74 @@ struct DynamicDisplayDrawer {
 
 	void add_display(unsigned light_idx, float width, float height, lv_obj_t *canvas) {
 		pr_dbg("Add display light_idx %u, w %f h %f, canvas %p\n", light_idx, width, height, canvas);
-		displays.push_back({.id = light_idx, .width_mm = width, .height_mm = height, .lv_canvas = canvas});
+		displays.push_back({.id = light_idx, .width_mm = width, .height_mm = height});
 	}
 
 	void prepare(lv_obj_t *parent_obj) {
 		parent_canvas = parent_obj;
 
 		for (auto &disp : displays) {
+			if (disp.width_mm == 0 || disp.height_mm == 0) {
+				pr_dbg("DynDraw::prepare() Graphic display %u has zero size, will not draw\n", disp.id);
+				disp.rgb565x2_buffer.clear();
+				if (auto module = patch_playloader.get_plugin_module(module_id))
+					module->show_graphic_display(disp.id, disp.rgb565x2_buffer, 0, nullptr);
+			} else {
+				lv_obj_refr_size(parent_obj);
+				auto w = lv_obj_get_width(parent_obj);
+				auto h = lv_obj_get_height(parent_obj);
+				// can't have odd number of pixels
+				if ((w * h) & 0b1) {
+					if (w & 0b1)
+						w++;
+					else
+						h++;
+				}
+
+				pr_dbg("DynDraw: id:%d Create buffer w:%u*h:%u\n", disp.id, w, h);
+
+				// each element is two RGB565's
+				disp.rgb565x2_buffer.resize(w * h / 2);
+
+				if (auto module = patch_playloader.get_plugin_module(module_id))
+					module->show_graphic_display(disp.id, disp.rgb565x2_buffer, w, nullptr);
+			}
+
 			// If size is 0, then don't make a buffer for it
 			// This is done intentionally by rack::Module to create non-drawable elements
 			// that need to be stepped
-			if (disp.width_mm == 0 || disp.height_mm == 0) {
-				pr_dbg("DynDraw::prepare() Graphic display %u has zero size, will not draw\n", disp.id);
-				disp.fullcolor_buffer.clear();
-				disp.lv_canvas = nullptr;
-				if (auto module = patch_playloader.get_plugin_module(module_id))
-					module->show_graphic_display(disp.id, disp.fullcolor_buffer, 0, disp.lv_canvas);
+			// if (disp.width_mm == 0 || disp.height_mm == 0) {
+			// 	pr_dbg("DynDraw::prepare() Graphic display %u has zero size, will not draw\n", disp.id);
+			// 	disp.fullcolor_buffer.clear();
+			// 	disp.lv_canvas = nullptr;
+			// 	if (auto module = patch_playloader.get_plugin_module(module_id))
+			// 		module->show_graphic_display(disp.id, disp.fullcolor_buffer, 0, disp.lv_canvas);
 
-			} else if (disp.lv_canvas == nullptr || !lv_obj_is_valid(disp.lv_canvas)) {
-				pr_err("DynDraw::prepare(): id:%d lv object not valid\n", disp.id);
+			// } else if (disp.lv_canvas == nullptr || !lv_obj_is_valid(disp.lv_canvas)) {
+			// 	pr_err("DynDraw::prepare(): id:%d lv object not valid\n", disp.id);
 
-			} else {
-				lv_obj_refr_size(disp.lv_canvas);
-				auto w = lv_obj_get_width(disp.lv_canvas);
-				auto h = lv_obj_get_height(disp.lv_canvas);
+			// } else {
+			// 	lv_obj_refr_size(disp.lv_canvas);
+			// 	auto w = lv_obj_get_width(disp.lv_canvas);
+			// 	auto h = lv_obj_get_height(disp.lv_canvas);
 
-				pr_dbg("DynDraw: id:%d Create buffer %u*%u lvgl px: %u bytes\n", disp.id, w, h, w * h * 3);
+			// 	pr_dbg("DynDraw: id:%d Create buffer %u*%u lvgl px: %u bytes\n", disp.id, w, h, w * h * 3);
 
-				// Create pixel buffers:
-				disp.fullcolor_buffer.resize(w * h, 0);
+			// 	// Create pixel buffers:
+			// 	disp.fullcolor_buffer.resize(w * h, 0);
 
-				disp.lv_buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h), 0);
+			// 	disp.lv_buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h), 0);
 
-				lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+			// 	lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
-				// Debug border
-				// lv_obj_set_style_border_color(disp.lv_canvas, lv_color_hex(0xFFFF00), LV_PART_MAIN);
-				// lv_obj_set_style_border_opa(disp.lv_canvas, LV_OPA_50, LV_PART_MAIN);
-				// lv_obj_set_style_border_width(disp.lv_canvas, 1, LV_PART_MAIN);
+			// 	// Debug border
+			// 	// lv_obj_set_style_border_color(disp.lv_canvas, lv_color_hex(0xFFFF00), LV_PART_MAIN);
+			// 	// lv_obj_set_style_border_opa(disp.lv_canvas, LV_OPA_50, LV_PART_MAIN);
+			// 	// lv_obj_set_style_border_width(disp.lv_canvas, 1, LV_PART_MAIN);
 
-				if (auto module = patch_playloader.get_plugin_module(module_id))
-					module->show_graphic_display(disp.id, disp.fullcolor_buffer, w, disp.lv_canvas);
-			}
+			// 	if (auto module = patch_playloader.get_plugin_module(module_id))
+			// 		module->show_graphic_display(disp.id, disp.fullcolor_buffer, w, disp.lv_canvas);
+			// }
 		}
 	}
 
@@ -95,27 +121,9 @@ struct DynamicDisplayDrawer {
 		}
 
 		for (auto &disp : displays) {
-
-			// Draw all displays:
-			// The module draws into fullcolor_buffer, and then we compare it against
-			// lv_buffer to detect if any pixels changed.
-			// If not, then we save a lot of time by not re-drawing the lv_canvas object.
-			auto need_to_draw = module->draw_graphic_display(disp.id);
-
-			if (need_to_draw) {
-
-				Debug::Pin0::high();
-
-				// ~8ms to just copy
-				copy_buffer(disp.lv_buffer, disp.fullcolor_buffer);
-				lv_obj_invalidate(disp.lv_canvas);
-
-				// 20ms to compare and copy
-				// if (copy_and_compare_buffer(disp.lv_buffer, disp.fullcolor_buffer))
-				// 	lv_obj_invalidate(disp.lv_canvas);
-
-				Debug::Pin0::low();
-			}
+			Debug::Pin0::high();
+			module->draw_graphic_display(disp.id);
+			Debug::Pin0::low();
 		}
 	}
 
@@ -127,8 +135,9 @@ struct DynamicDisplayDrawer {
 			if (auto module = patch_playloader.get_plugin_module(module_id))
 				module->hide_graphic_display(disp.id);
 
-			disp.fullcolor_buffer.clear();
-			disp.lv_buffer.clear();
+			disp.rgb565x2_buffer.clear();
+			// disp.fullcolor_buffer.clear();
+			// disp.lv_buffer.clear();
 		}
 	}
 
@@ -193,9 +202,10 @@ private:
 		unsigned id{};
 		float width_mm;
 		float height_mm;
-		lv_obj_t *lv_canvas{};
-		std::vector<char> lv_buffer;
-		std::vector<uint32_t> fullcolor_buffer;
+		// lv_obj_t *lv_canvas{};
+		// std::vector<char> lv_buffer;
+		// std::vector<uint32_t> fullcolor_buffer;
+		std::vector<uint32_t> rgb565x2_buffer;
 	};
 	std::vector<Display> displays;
 

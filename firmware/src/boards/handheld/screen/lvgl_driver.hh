@@ -202,6 +202,11 @@ public:
 	}
 
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
+		//no-op
+		lv_disp_flush_ready(disp_drv);
+	}
+
+	static void flush_to_screen2(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
 		// test_pattern(1, std::span{color_p, ScreenWidth * ScreenHeight});
 
 		// Debug::Pin0::high();
