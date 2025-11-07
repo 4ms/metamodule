@@ -43,6 +43,16 @@ struct StreamConf {
 			AudioOutBuffer codec[NumDMAHalfTransfers];
 		};
 
+		// Mic
+		using MicSampleT = int8_t;
+		static constexpr int NumMics = 1;
+		static constexpr int MicBits = 8;
+		using MicInFrame = AudioFrame<MicSampleT, 8, NumMics>;
+		using MicInBuffer = std::array<MicInFrame, MaxBlockSize>;
+		struct alignas(64) MicInBlock {
+			MicInBuffer halfblock[NumDMAHalfTransfers];
+		};
+
 		// A handy struct used to call the audio process() function
 		// It's just a reference to the actual data.
 		// Since the memory layout for the DMA buffers is fixed, using
@@ -51,7 +61,7 @@ struct StreamConf {
 		struct CombinedAudioBlock {
 			std::span<AudioInFrame> in_codec;
 			std::span<AudioOutFrame> out_codec;
-			std::span<AudioInFrame> in_mic;
+			std::span<MicInFrame> in_mic;
 		};
 	};
 };

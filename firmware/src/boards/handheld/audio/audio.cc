@@ -16,7 +16,7 @@ namespace MetaModule
 
 using namespace mdrivlib;
 
-__attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock mic_dma_block{};
+__attribute__((section(".sysram"))) StreamConf::Audio::MicInBlock mic_dma_block{};
 
 AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
@@ -52,7 +52,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_tx_buffer(audio_blocks[0].out_codec, block_size_);
 	codec_.set_rx_buffer(audio_blocks[0].in_codec, block_size_);
 
-	mic_.set_rx_buffer(reinterpret_cast<uint8_t *>(audio_blocks[0].in_mic.data()), block_size_);
+	mic_.set_rx_buffer(reinterpret_cast<uint8_t *>(&audio_blocks[0].in_mic[0].chan[0]), block_size_);
 	mic_.set_callbacks(
 		[]() {
 			// Debug::Pin2::high();
@@ -172,6 +172,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, outchan] : countzip(out.chan))
 			outchan = get_audio_output(i);
 
+		out.chan[0] = MathTools::signed_saturate(cal.out_cal[0].adjust((float)mic.chan[0] / 128.f), 24);
+
 		idx++;
 	}
 }
@@ -207,8 +209,8 @@ void AudioStream::set_block_spans() {
 	audio_blocks[0].out_codec = {audio_out_block.codec[0].data(), block_size_};
 	audio_blocks[1].out_codec = {std::next(audio_out_block.codec[0].begin(), block_size_), block_size_};
 
-	audio_blocks[0].in_mic = {mic_dma_block.codec[0].data(), block_size_};
-	audio_blocks[1].in_mic = {mic_dma_block.codec[1].data(), block_size_};
+	audio_blocks[0].in_mic = {mic_dma_block.halfblock[0].data(), block_size_};
+	audio_blocks[1].in_mic = {mic_dma_block.halfblock[1].data(), block_size_};
 }
 
 void AudioStream::update_audio_settings() {
