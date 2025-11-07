@@ -31,15 +31,17 @@ struct PanelDef {
 
 	static constexpr uint32_t NumKnobs = NumPot + NumEncoders;
 
-	static constexpr int NumUserFacingInJacks = NumAudioIn + NumCVIn + NumGateIn;
+	static constexpr uint32_t NumMicIn = 1;
+
+	static constexpr int NumUserFacingInJacks = NumAudioIn + NumCVIn + NumGateIn + NumMicIn;
 	static constexpr int NumUserFacingOutJacks = NumAudioOut + NumDACOut + NumGateOut;
 	static constexpr char NumJacks = NumUserFacingInJacks + NumUserFacingOutJacks + NumMetaCV;
 
 	static constexpr std::array<std::string_view, NumKnobs> KnobNames{};
 
-	static constexpr std::array<std::string_view, NumUserFacingInJacks> InJackNames{"InL", "InR"};
+	static constexpr std::array<std::string_view, NumUserFacingInJacks> InJackNames{"InL", "InR", "Mic"};
 
-	static constexpr std::array<std::string_view, NumUserFacingInJacks> InJackAbbrev{"L", "R"};
+	static constexpr std::array<std::string_view, NumUserFacingInJacks> InJackAbbrev{"L", "R", "MC"};
 
 	static constexpr std::array<std::string_view, NumUserFacingOutJacks> OutJackNames{"OutL", "OutR"};
 

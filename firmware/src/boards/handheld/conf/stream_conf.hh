@@ -6,7 +6,7 @@
 namespace MetaModule
 {
 
-struct StreamConfSingleCodecStereo {
+struct StreamConf {
 	struct Audio {
 
 		// BlockSize: Number of Frames processed each time AudioStream::process() is called
@@ -51,12 +51,9 @@ struct StreamConfSingleCodecStereo {
 		struct CombinedAudioBlock {
 			std::span<AudioInFrame> in_codec;
 			std::span<AudioOutFrame> out_codec;
-			std::span<AudioInFrame> in_ext_codec;
-			std::span<AudioOutFrame> out_ext_codec;
+			std::span<AudioInFrame> in_mic;
 		};
 	};
 };
-
-using StreamConf = StreamConfSingleCodecStereo;
 
 } // namespace MetaModule

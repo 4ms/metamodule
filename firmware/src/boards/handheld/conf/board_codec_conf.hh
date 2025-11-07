@@ -3,6 +3,7 @@
 #include "conf/i2c_codec_conf.hh"
 #include "drivers/codec_PCM3060.hh"
 #include "drivers/codec_null.hh"
+#include "drivers/sai_pdm.hh"
 
 namespace MetaModule
 {
@@ -17,6 +18,8 @@ struct Hardware {
 	static inline CodecT codec{codec_i2c, codec_mainPCB_sai_conf};
 
 	static inline ExtCodecT codec_ext;
+
+	static inline mdrivlib::SaiPdmPeriph mic{mic_sai_conf};
 };
 
 } // namespace MetaModule

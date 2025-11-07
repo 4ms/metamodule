@@ -1,4 +1,5 @@
 #include "audio/audio.hh"
+#include "conf/debug.hh"
 #include "conf/hsem_conf.hh"
 #include "drivers/hsem.hh"
 #include "param_block.hh"
@@ -15,6 +16,8 @@ namespace MetaModule
 
 using namespace mdrivlib;
 
+__attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock mic_dma_block{};
+
 AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
@@ -30,6 +33,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, player{patchplayer}
 	, midi{patchplayer, sync_params}
 	, codec_{Hardware::codec}
+	, mic_{Hardware::mic}
 	, sample_rate_{AudioSettings::DefaultSampleRate}
 	, block_size_{AudioSettings::DefaultBlockSize} {
 
@@ -38,10 +42,24 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	else
 		pr_info("ERROR: No codec detected\n");
 
+	if (mic_.init() == SaiPdmPeriph::SAI_NO_ERR)
+		pr_info("Mic initialized\n");
+	else
+		pr_info("Mic not initialized\n");
+
 	set_block_spans();
 
 	codec_.set_tx_buffer(audio_blocks[0].out_codec, block_size_);
 	codec_.set_rx_buffer(audio_blocks[0].in_codec, block_size_);
+
+	mic_.set_rx_buffer(reinterpret_cast<uint8_t *>(audio_blocks[0].in_mic.data()), block_size_);
+	mic_.set_callbacks(
+		[]() {
+			// Debug::Pin2::high();
+		},
+		[]() {
+			// Debug::Pin2::low();
+		});
 
 	cal.reset_to_default();
 
@@ -89,6 +107,7 @@ bool AudioStream::is_playing_patch() {
 
 void AudioStream::start() {
 	codec_.start();
+	mic_.start();
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
@@ -121,7 +140,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		i++;
 	}
 
-	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
+	for (auto idx = 0u; auto const [in, mic] : zip(audio_block.in_codec, audio_block.in_mic)) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
 
@@ -132,6 +151,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 			player.set_panel_input(panel_jack_i, calibrated_input);
 		}
+
+		player.set_panel_input(2, mic.scale_input_chan(0));
 
 		// Accelerometer: param_id 2, 3, 4
 		for (auto [i, knob_val] : countzip(params.accel)) {
@@ -185,6 +206,9 @@ void AudioStream::set_block_spans() {
 
 	audio_blocks[0].out_codec = {audio_out_block.codec[0].data(), block_size_};
 	audio_blocks[1].out_codec = {std::next(audio_out_block.codec[0].begin(), block_size_), block_size_};
+
+	audio_blocks[0].in_mic = {mic_dma_block.codec[0].data(), block_size_};
+	audio_blocks[1].in_mic = {mic_dma_block.codec[1].data(), block_size_};
 }
 
 void AudioStream::update_audio_settings() {
@@ -192,9 +216,11 @@ void AudioStream::update_audio_settings() {
 
 	if (sample_rate != sample_rate_ || block_size != block_size_) {
 
+		mic_.change_samplerate_blocksize(sample_rate, block_size);
 		auto ok = (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecBase::CODEC_NO_ERR);
 		if (ok) {
 			codec_.start();
+			mic_.start();
 
 			if (sample_rate_ != sample_rate) {
 				sample_rate_ = sample_rate;
@@ -211,6 +237,7 @@ void AudioStream::update_audio_settings() {
 		} else {
 			pr_err("FAIL TO CHANGE SR/BS: %d/%d\n", sample_rate_, block_size_);
 			codec_.start();
+			mic_.start();
 		}
 	}
 }

@@ -57,6 +57,7 @@ private:
 
 	// Hardware interface
 	CodecT &codec_;
+	mdrivlib::SaiPdmPeriph &mic_;
 	uint32_t sample_rate_;
 	uint32_t block_size_;
 

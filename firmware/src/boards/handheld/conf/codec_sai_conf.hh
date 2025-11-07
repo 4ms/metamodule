@@ -51,7 +51,7 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.num_tdm_ins = 2,
 	.num_tdm_outs = 2,
 
-	.sync_send = SaiConfig::NoSendSync,
+	.sync_send = SaiConfig::BlockASendsSync,
 	.sync_receive_from = SaiConfig::NoReceiveSync,
 };
 
@@ -71,23 +71,16 @@ const SaiConfig mic_sai_conf = {
 			.subpri = 1,
 		},
 
-	.datasize = SAI_DATASIZE_24,
-	.framesize = 64, //24bit extends to 32bits * 2 clock phases
+	.datasize = SAI_DATASIZE_16, //DS
+	.framesize = 16,			 //FRL (one or two mics)
 	.samplerate = MetaModule::AudioSettings::DefaultSampleRate,
 
-	.MCLK = {GPIO::Unused},
-	.SCLK = {GPIO::Unused},
-	.LRCLK = {GPIO::E, PinNum::_2, PinAF::AltFunc2}, // SAI1_CK1
-	.SD_DAC = {GPIO::Unused},
+	.LRCLK = {GPIO::E, PinNum::_2, PinAF::AltFunc2},  // SAI1_CK1
 	.SD_ADC = {GPIO::B, PinNum::_2, PinAF::AltFunc2}, // SAI1_D1
 
-	.reset_pin = {GPIO::Unused},
-
-	.bus_address = 0b00,
-
-	.num_tdm_ins = 1,
+	.num_tdm_ins = 1, //NBSLOT (if 1 then datasize = SAI_DATASIZE_16. if 0 then datasize = SAI_DATASIZE_8)
 	.num_tdm_outs = 0,
 
 	.sync_send = SaiConfig::NoSendSync,
-	.sync_receive_from = SaiConfig::NoReceiveSync,
+	.sync_receive_from = SaiConfig::SyncToSAI2,
 };

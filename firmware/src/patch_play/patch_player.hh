@@ -40,13 +40,11 @@ public:
 	PatchQuery patch_query{modules, pd};
 
 private:
-	// Out1-Out8 + Ext Out1-8
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
 
 	std::array<Jack, NumOutJacks> out_conns __attribute__((aligned(4))) = {{{0, 0}}};
 
-	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
 
 	// MIDI

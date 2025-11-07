@@ -1,6 +1,7 @@
 #pragma once
 
 #include "drivers/stm32xx.h"
+#include "stm32mp1xx_hal_rcc_ex.h"
 
 const RCC_OscInitTypeDef rcc_osc_conf = {
 	.PLL3 =
@@ -47,14 +48,14 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 };
 
 const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
-	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_I2C35 | RCC_PERIPHCLK_SAI2 | RCC_PERIPHCLK_SAI3 |
+	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_I2C35 | RCC_PERIPHCLK_SAI1 | RCC_PERIPHCLK_SAI2 |
 							RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_UART35 | RCC_PERIPHCLK_UART78 |
 							RCC_PERIPHCLK_USART6 | RCC_PERIPHCLK_SDMMC12 | RCC_PERIPHCLK_CKPER | RCC_PERIPHCLK_RNG1 |
 							RCC_PERIPHCLK_STGEN | RCC_PERIPHCLK_ADC | RCC_PERIPHCLK_LTDC,
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_PCLK1,
 	.I2c35ClockSelection = RCC_I2C35CLKSOURCE_PCLK1,
+	.Sai1ClockSelection = RCC_SAI1CLKSOURCE_PLL3_Q,
 	.Sai2ClockSelection = RCC_SAI2CLKSOURCE_PLL3_Q,
-	.Sai3ClockSelection = RCC_SAI3CLKSOURCE_PLL3_Q,
 	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK2,
 	.Uart35ClockSelection = RCC_UART35CLKSOURCE_HSI,
 	.Usart6ClockSelection = RCC_USART6CLKSOURCE_HSI,
