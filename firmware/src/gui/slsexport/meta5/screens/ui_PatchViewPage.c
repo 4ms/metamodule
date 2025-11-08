@@ -1493,6 +1493,8 @@ lv_obj_set_style_pad_left(ui_DescriptionPanel, 10, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_right(ui_DescriptionPanel, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_DescriptionPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_DescriptionPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_DescriptionPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_DescriptionPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_set_style_radius(ui_DescriptionPanel, 4, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_DescriptionPanel, lv_color_hex(0xFF8918), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
@@ -1501,9 +1503,6 @@ lv_obj_set_style_bg_opa(ui_DescriptionPanel, 255, LV_PART_SCROLLBAR| LV_STATE_DE
 ui_DescPanelPatchName = lv_label_create(ui_DescriptionPanel);
 lv_obj_set_width( ui_DescPanelPatchName, lv_pct(100));
 lv_obj_set_height( ui_DescPanelPatchName, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_DescPanelPatchName, -8 );
-lv_obj_set_y( ui_DescPanelPatchName, -16 );
-lv_obj_set_align( ui_DescPanelPatchName, LV_ALIGN_TOP_MID );
 lv_label_set_long_mode(ui_DescPanelPatchName,LV_LABEL_LONG_SCROLL);
 lv_label_set_text(ui_DescPanelPatchName,"Patch Name");
 lv_obj_add_flag( ui_DescPanelPatchName, LV_OBJ_FLAG_CLICKABLE );   /// Flags
@@ -1518,12 +1517,13 @@ lv_obj_set_style_text_font(ui_DescPanelPatchName, &ui_font_MuseoSansRounded70016
 lv_obj_set_style_pad_left(ui_DescPanelPatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_DescPanelPatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_DescPanelPatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_DescPanelPatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_DescPanelPatchName, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_DescPanelFilenameCont = lv_obj_create(ui_DescriptionPanel);
 lv_obj_remove_style_all(ui_DescPanelFilenameCont);
 lv_obj_set_width( ui_DescPanelFilenameCont, lv_pct(100));
 lv_obj_set_height( ui_DescPanelFilenameCont, LV_SIZE_CONTENT);   /// 50
+lv_obj_set_style_pad_bottom(ui_DescPanelFilenameCont, 4, LV_PART_MAIN);
 lv_obj_set_align( ui_DescPanelFilenameCont, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_DescPanelFilenameCont,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_DescPanelFilenameCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -1567,10 +1567,11 @@ lv_obj_clear_flag( ui_Description, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_
 lv_obj_set_scrollbar_mode(ui_Description, LV_SCROLLBAR_MODE_ON);
 lv_obj_set_scroll_dir(ui_Description, LV_DIR_VER);
 lv_obj_set_style_text_font(ui_Description, &ui_font_MuseoSansRounded50016, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_Description, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_Description, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_Description, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_Description, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_Description, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_Description, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_Description, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_Description, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_Description, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_DescMIDIPolyNumLabel = lv_label_create(ui_DescriptionPanel);
 lv_obj_set_width( ui_DescMIDIPolyNumLabel, 141);
@@ -1581,6 +1582,7 @@ lv_obj_set_style_text_color(ui_DescMIDIPolyNumLabel, lv_color_hex(0x888888), LV_
 lv_obj_set_style_text_opa(ui_DescMIDIPolyNumLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_DescMIDIPolyNumLabel, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_DescMIDIPolyNumLabel, &ui_font_MuseoSansRounded50012, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_DescMIDIPolyNumLabel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_PatchFileMenu = lv_obj_create(ui_PatchViewPage);
 lv_obj_set_width( ui_PatchFileMenu, 118);
