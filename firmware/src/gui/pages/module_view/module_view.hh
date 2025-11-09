@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
+#include "gui/helpers/load_meter.hh"
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/module_menu/plugin_module_menu.hh"
 #include "gui/pages/base.hh"
@@ -76,6 +77,9 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ModuleViewHideBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
+
+		load_meter = create_load_meter(ui_ElementRollerButtonCont);
+		lv_obj_move_to_index(load_meter, 0);
 	}
 
 	void prepare_focus() override {
@@ -147,6 +151,16 @@ struct ModuleViewPage : PageBase {
 
 		quick_control_mode = false;
 		suppress_next_click = false;
+
+		if (settings.module_view.float_loadmeter) {
+			// lv_show(load_meter);
+			// lv_obj_set_parent(load_meter, lv_layer_sys());
+			// lv_obj_set_y(load_meter, 20);
+			// style_load_meter(settings.module_view, load_meter, ui_PatchViewPage);
+			update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.module_view, load_meter);
+		} else {
+			lv_hide(load_meter);
+		}
 	}
 
 	void update() override {
@@ -280,6 +294,8 @@ struct ModuleViewPage : PageBase {
 		if (mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible()) {
 			handle_quick_assign();
 		}
+
+			update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.module_view, load_meter);
 	}
 
 	bool handle_patch_mods() {
@@ -500,6 +516,8 @@ private:
 	bool suppress_next_click = false;
 	bool quick_control_mode = false;
 	Toggler quickmap_rotary_button;
+
+	lv_obj_t *load_meter;
 };
 
 } // namespace MetaModule
