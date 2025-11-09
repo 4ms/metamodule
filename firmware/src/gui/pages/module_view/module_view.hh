@@ -80,6 +80,9 @@ struct ModuleViewPage : PageBase {
 
 		load_meter = create_load_meter(ui_ElementRollerButtonCont);
 		lv_obj_move_to_index(load_meter, 0);
+
+		lv_obj_set_x(roller_hover.get_cont(), 8);
+		lv_obj_set_style_pad_left(lv_obj_get_child(roller_hover.get_cont(), 0), 14, 0);
 	}
 
 	void prepare_focus() override {
@@ -129,7 +132,6 @@ struct ModuleViewPage : PageBase {
 			lv_show(ui_ModuleViewCableCancelBut);
 			lv_show(ui_ModuleViewCableCreateLabel);
 			lv_label_set_text(ui_ModuleViewCableCreateLabel, "Creating a cable");
-			lv_obj_set_height(ui_ElementRoller, 132);
 			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_flex_align(
@@ -140,7 +142,6 @@ struct ModuleViewPage : PageBase {
 			lv_show(ui_ModuleViewSettingsBut);
 			lv_hide(ui_ModuleViewCableCancelBut);
 			lv_hide(ui_ModuleViewCableCreateLabel);
-			lv_obj_set_height(ui_ElementRoller, 186);
 			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 2, LV_PART_MAIN);
 			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, -4, LV_PART_MAIN);
 			lv_obj_set_flex_align(
@@ -153,10 +154,6 @@ struct ModuleViewPage : PageBase {
 		suppress_next_click = false;
 
 		if (settings.module_view.float_loadmeter) {
-			// lv_show(load_meter);
-			// lv_obj_set_parent(load_meter, lv_layer_sys());
-			// lv_obj_set_y(load_meter, 20);
-			// style_load_meter(settings.module_view, load_meter, ui_PatchViewPage);
 			update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.module_view, load_meter);
 		} else {
 			lv_hide(load_meter);
@@ -295,7 +292,14 @@ struct ModuleViewPage : PageBase {
 			handle_quick_assign();
 		}
 
+		if (settings.module_view.float_loadmeter) {
 			update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.module_view, load_meter);
+		} else {
+			lv_hide(load_meter);
+		}
+
+		auto ht = lv_obj_get_height(ui_ElementRollerButtonCont);
+		lv_obj_set_height(ui_ElementRoller, 240 - ht);
 	}
 
 	bool handle_patch_mods() {
