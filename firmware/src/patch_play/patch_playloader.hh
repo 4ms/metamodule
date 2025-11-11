@@ -85,7 +85,7 @@ struct PatchPlayLoader {
 		audio_is_muted_ = false;
 		stopping_audio_ = false;
 		starting_audio_ = true;
-		player_.notify_audio_resumed();
+		should_clear_param_watchers_ = true;
 		clear_audio_overrun();
 	}
 
@@ -366,6 +366,14 @@ struct PatchPlayLoader {
 		}
 	}
 
+	ParamWatcher const &watched_params() {
+		return player_.watched_params();
+	}
+
+	bool should_clear_param_watches() {
+		return should_clear_param_watchers_.exchange(false);
+	}
+
 private:
 	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
@@ -531,6 +539,7 @@ private:
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
 	std::atomic<bool> audio_overrun_ = false;
+	std::atomic<bool> should_clear_param_watchers_ = false;
 	bool stopped_because_of_overrun_ = false;
 	bool should_play_when_loaded_ = true;
 
