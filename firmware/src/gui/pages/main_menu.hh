@@ -38,6 +38,11 @@ struct MainMenuPage : PageBase {
 		lv_hide(ui_MainMenuLastViewedPanel);
 
 		lv_label_set_text(ui_MenuLabelPatches, "Load\nPatch");
+
+		load_meter = create_load_meter(ui_MainMenu);
+		lv_obj_set_x(load_meter, -4);
+		lv_obj_set_y(load_meter, 0);
+		lv_obj_set_align(load_meter, LV_ALIGN_BOTTOM_RIGHT);
 	}
 
 	void prepare_focus() final {
@@ -74,8 +79,7 @@ struct MainMenuPage : PageBase {
 		}
 
 		bool is_patch_playloaded = patches.get_playing_patch() ? true : false;
-		update_audio_meter(
-			is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_MainMenuLoadMeter);
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, load_meter);
 
 		poll_patch_file_changed();
 	}
@@ -150,6 +154,8 @@ private:
 			return;
 		page->load_page(PageId::SystemMenu, {});
 	}
+
+	lv_obj_t *load_meter;
 };
 
 } // namespace MetaModule

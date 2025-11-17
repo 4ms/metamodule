@@ -104,29 +104,6 @@ lv_obj_set_style_pad_row(ui_KnobSetName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_KnobSetName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_add_flag(ui_KnobSetName, LV_OBJ_FLAG_HIDDEN);
 
-ui_LoadMeter2 = lv_label_create(ui_PatchViewPage);
-lv_obj_set_width( ui_LoadMeter2, LV_SIZE_CONTENT);
-lv_obj_set_height( ui_LoadMeter2, 20);
-lv_obj_set_x( ui_LoadMeter2, 0 );
-lv_obj_set_y( ui_LoadMeter2, 2 );
-lv_obj_set_align( ui_LoadMeter2, LV_ALIGN_TOP_RIGHT );
-lv_obj_clear_flag( ui_LoadMeter2, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_scrollbar_mode(ui_LoadMeter2, LV_SCROLLBAR_MODE_OFF);
-lv_obj_set_style_text_color(ui_LoadMeter2, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_LoadMeter2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_align(ui_LoadMeter2, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_LoadMeter2, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_radius(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_LoadMeter2, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_LoadMeter2, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_LoadMeter2, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_label_set_recolor(ui_LoadMeter2, 1);
-
 ui_ButtonsContainer = lv_obj_create(ui_PatchViewPage);
 lv_obj_set_height( ui_ButtonsContainer, 50);
 lv_obj_set_width( ui_ButtonsContainer, lv_pct(100));
