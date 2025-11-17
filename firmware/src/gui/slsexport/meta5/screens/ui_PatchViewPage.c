@@ -120,7 +120,7 @@ lv_obj_set_style_text_align(ui_LoadMeter2, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| L
 lv_obj_set_style_text_font(ui_LoadMeter2, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_LoadMeter2, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_LoadMeter2, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_LoadMeter2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_LoadMeter2, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
