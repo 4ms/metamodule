@@ -1355,7 +1355,7 @@ lv_obj_t *create_load_meter(lv_obj_t *parent) {
 	lv_obj_set_style_text_font(load_meter, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(load_meter, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_color(load_meter, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_opa(load_meter, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(load_meter, LV_OPA_80, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(load_meter, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(load_meter, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(load_meter, 2, LV_PART_MAIN | LV_STATE_DEFAULT);

@@ -78,8 +78,9 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 
-		load_meter = create_load_meter(ui_ElementRollerButtonCont);
-		lv_obj_move_to_index(load_meter, 0);
+		load_meter = create_load_meter(lv_layer_sys());
+		lv_obj_set_align(load_meter, LV_ALIGN_TOP_LEFT);
+		lv_hide(load_meter);
 
 		lv_obj_set_x(roller_hover.get_cont(), 8);
 		lv_obj_set_style_pad_left(lv_obj_get_child(roller_hover.get_cont(), 0), 14, 0);
@@ -354,6 +355,7 @@ struct ModuleViewPage : PageBase {
 		params.text_displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
+		lv_hide(load_meter);
 		lv_enable_long_press();
 	}
 

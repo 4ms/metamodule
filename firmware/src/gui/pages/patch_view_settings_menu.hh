@@ -273,6 +273,7 @@ private:
 				lv_label_set_text(ui_PVMapsWillShowSelectedModuleNote, "Will only show on selected module");
 		}
 	}
+
 	static void settings_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
