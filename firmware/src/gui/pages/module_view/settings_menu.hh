@@ -48,6 +48,19 @@ struct ModuleViewSettingsMenu {
 		show_jack_aliases_check = lv_obj_get_child(show_jack_aliases_cont, 1);
 		lv_obj_move_to_index(show_jack_aliases_cont, 11);
 
+		auto bar_title = create_settings_menu_title(ui_MVSettingsMenu, "STATUS BAR");
+
+		auto float_samplerate_cont = create_settings_menu_switch(ui_MVSettingsMenu, "Show Status");
+		float_audioload_check = lv_obj_get_child(float_samplerate_cont, 1);
+
+		auto show_samplerate_cont = create_settings_menu_switch(ui_MVSettingsMenu, "Show Audio Settings");
+		lv_obj_set_style_border_width(show_samplerate_cont, 0, 0);
+		show_samplerate_check = lv_obj_get_child(show_samplerate_cont, 1);
+
+		lv_obj_move_to_index(bar_title, 4);
+		lv_obj_move_to_index(float_samplerate_cont, 5);
+		lv_obj_move_to_index(show_samplerate_cont, 6);
+
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, settings_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MVSettingsCloseButton, settings_button_cb, LV_EVENT_CLICKED, this);
 
@@ -72,19 +85,18 @@ struct ModuleViewSettingsMenu {
 		lv_obj_add_event_cb(show_jack_aliases_check, aliases_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(show_knob_aliases_check, aliases_cb, LV_EVENT_VALUE_CHANGED, this);
 
+		lv_obj_add_event_cb(show_samplerate_check, show_titlebar_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(float_audioload_check, show_titlebar_cb, LV_EVENT_VALUE_CHANGED, this);
+
 		lv_obj_set_x(ui_MVSettingsMenu, 220);
-	}
-
-	void prepare_focus(lv_group_t *group) {
-		base_group = group;
-
-		lv_group_remove_all_objs(settings_menu_group);
-		lv_group_set_editing(settings_menu_group, false);
 
 		lv_group_add_obj(settings_menu_group, ui_MVSettingsCloseButton);
 
 		lv_group_add_obj(settings_menu_group, graphics_show_check);
 		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
+
+		lv_group_add_obj(settings_menu_group, float_audioload_check);
+		lv_group_add_obj(settings_menu_group, show_samplerate_check);
 
 		lv_group_add_obj(settings_menu_group, ui_MVShowControlMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVControlMapTranspSlider);
@@ -101,6 +113,12 @@ struct ModuleViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, ui_MVShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVCablesTranspSlider);
+	}
+
+	void prepare_focus(lv_group_t *group) {
+		base_group = group;
+
+		lv_group_set_editing(settings_menu_group, false);
 
 		fix_forbidden_states();
 
@@ -117,6 +135,9 @@ struct ModuleViewSettingsMenu {
 
 		lv_check(show_jack_aliases_check, settings.show_jack_aliases);
 		lv_check(show_knob_aliases_check, settings.show_knob_aliases);
+
+		lv_check(show_samplerate_check, settings.show_samplerate);
+		lv_check(float_audioload_check, settings.float_loadmeter);
 
 		update_interactive_states();
 
@@ -206,6 +227,10 @@ private:
 		// Cables are either hidden or shown, no other states allowed
 		if (settings.cable_style.mode != HideAlways)
 			settings.cable_style.mode = ShowAll;
+
+		// In order to show sample rate/blocksize, must show cpu load
+		if (settings.show_samplerate)
+			settings.float_loadmeter = true;
 	}
 
 	void update_interactive_states() {
@@ -228,6 +253,12 @@ private:
 				lv_label_set_text(ui_MapsWillBeHiddenNote, "Maps will show even if not playing");
 			else
 				lv_label_set_text(ui_MapsWillBeHiddenNote, "Maps will only show when playing");
+		}
+
+		if (!lv_obj_has_state(float_audioload_check, LV_STATE_CHECKED)) {
+			lv_disable(show_samplerate_check);
+		} else {
+			lv_enable(show_samplerate_check);
 		}
 	}
 
@@ -339,6 +370,21 @@ private:
 		page->changed_while_visible = true;
 	}
 
+	static void show_titlebar_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+
+		page->settings.show_samplerate = lv_obj_has_state(page->show_samplerate_check, LV_STATE_CHECKED);
+		page->settings.float_loadmeter = lv_obj_has_state(page->float_audioload_check, LV_STATE_CHECKED);
+
+		page->update_interactive_states();
+
+		page->settings.changed = true;
+		page->changed_while_visible = true;
+	}
+
 	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
 
@@ -347,6 +393,9 @@ private:
 	lv_obj_t *graphics_update_rate_slider;
 	lv_obj_t *show_jack_aliases_check;
 	lv_obj_t *show_knob_aliases_check;
+
+	lv_obj_t *show_samplerate_check;
+	lv_obj_t *float_audioload_check;
 
 	bool visible = false;
 	bool changed_while_visible = false;
