@@ -41,7 +41,7 @@ struct PatchViewSettingsMenu {
 		auto show_samplerate_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show Audio Settings");
 		show_samplerate_check = lv_obj_get_child(show_samplerate_cont, 1);
 
-		auto float_samplerate_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Keep Status on top");
+		auto float_samplerate_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show Status on Top");
 		lv_obj_set_style_border_width(float_samplerate_cont, 0, 0);
 		float_audioload_check = lv_obj_get_child(float_samplerate_cont, 1);
 
