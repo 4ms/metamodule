@@ -9,7 +9,7 @@ void ui_PatchViewPage_screen_init(void)
 {
 ui_PatchViewPage = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_PatchViewPage, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
-lv_obj_set_scrollbar_mode(ui_PatchViewPage, LV_SCROLLBAR_MODE_OFF);
+lv_obj_set_scrollbar_mode(ui_PatchViewPage, LV_SCROLLBAR_MODE_AUTO);
 lv_obj_set_scroll_dir(ui_PatchViewPage, LV_DIR_VER);
 lv_obj_set_flex_flow(ui_PatchViewPage,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_PatchViewPage, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -21,7 +21,7 @@ lv_obj_set_style_shadow_opa(ui_PatchViewPage, 255, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_shadow_width(ui_PatchViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_spread(ui_PatchViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_PatchViewPage, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_PatchViewPage, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_PatchViewPage, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PatchViewPage, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_PatchViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_PatchViewPage, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -29,7 +29,7 @@ lv_obj_set_style_pad_column(ui_PatchViewPage, 2, LV_PART_MAIN| LV_STATE_DEFAULT)
 
 lv_obj_set_style_radius(ui_PatchViewPage, 3, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_PatchViewPage, lv_color_hex(0xDF7D1A), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_PatchViewPage, 255, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_PatchViewPage, 4, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PatchViewPage, 3, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
@@ -58,9 +58,6 @@ lv_obj_set_style_pad_column(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOC
 ui_PatchName = lv_label_create(ui_PatchViewPage);
 lv_obj_set_flex_grow(ui_PatchName, 1);
 lv_obj_set_height( ui_PatchName, 20);
-lv_obj_set_x( ui_PatchName, 0 );
-lv_obj_set_y( ui_PatchName, 60 );
-lv_obj_set_align( ui_PatchName, LV_ALIGN_CENTER );
 lv_label_set_long_mode(ui_PatchName,LV_LABEL_LONG_SCROLL);
 lv_label_set_text(ui_PatchName,"Patch Name Here");
 lv_obj_clear_flag( ui_PatchName, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
@@ -82,8 +79,6 @@ lv_obj_set_style_pad_column(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 ui_KnobSetName = lv_label_create(ui_PatchViewPage);
 lv_obj_set_flex_grow(ui_KnobSetName, 1);
 lv_obj_set_height( ui_KnobSetName, 20);
-lv_obj_set_x( ui_KnobSetName, 0 );
-lv_obj_set_y( ui_KnobSetName, 60 );
 lv_obj_set_align( ui_KnobSetName, LV_ALIGN_CENTER );
 lv_label_set_long_mode(ui_KnobSetName,LV_LABEL_LONG_SCROLL);
 lv_label_set_text(ui_KnobSetName,"Patch Name Here");

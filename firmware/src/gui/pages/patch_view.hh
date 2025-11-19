@@ -501,6 +501,8 @@ private:
 			lv_obj_set_parent(load_meter, lv_layer_sys());
 			lv_obj_move_foreground(ui_OverloadMsgLabel);
 			lv_obj_set_style_bg_opa(load_meter, LV_OPA_80, 0);
+			lv_obj_set_x(load_meter, -4);
+			lv_obj_set_y(load_meter, 4);
 		} else {
 			lv_obj_set_parent(load_meter, ui_PatchViewPage);
 			lv_obj_move_to_index(load_meter, 2);

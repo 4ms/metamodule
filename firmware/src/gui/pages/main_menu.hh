@@ -39,10 +39,7 @@ struct MainMenuPage : PageBase {
 
 		lv_label_set_text(ui_MenuLabelPatches, "Load\nPatch");
 
-		load_meter = create_load_meter(ui_MainMenu);
-		lv_obj_set_x(load_meter, -4);
-		lv_obj_set_y(load_meter, 0);
-		lv_obj_set_align(load_meter, LV_ALIGN_BOTTOM_RIGHT);
+		load_meter = create_load_meter(ui_MainMenuNowPlayingPanel);
 	}
 
 	void prepare_focus() final {
