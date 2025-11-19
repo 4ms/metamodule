@@ -35,6 +35,9 @@ struct PluginModuleMenu {
 
 		auto hover_label = lv_obj_get_child(roller_hover.get_cont(), 0);
 		lv_obj_set_style_text_font(hover_label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
+
+		lv_obj_set_x(roller_hover.get_cont(), 8);
+		lv_obj_set_style_pad_left(hover_label, 14, 0);
 	}
 
 	bool create_options_menu(unsigned this_module_id) {
@@ -56,6 +59,9 @@ struct PluginModuleMenu {
 
 	void show() {
 		populate_menu_items();
+
+		auto ht = lv_obj_get_height(ui_ElementRollerButtonCont);
+		lv_obj_set_height(ui_ModuleViewExtraMenuRoller, 240 - ht);
 
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 		lv_show(roller);

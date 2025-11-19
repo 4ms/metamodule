@@ -85,8 +85,8 @@ lv_obj_set_style_radius(ui_ElementRollerPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT
 lv_obj_set_style_bg_color(ui_ElementRollerPanel, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_ElementRollerPanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_ElementRollerPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_ElementRollerPanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_ElementRollerPanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_ElementRollerPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_ElementRollerPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_ElementRollerPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_ElementRollerPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_ElementRollerPanel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -94,7 +94,7 @@ lv_obj_set_style_pad_column(ui_ElementRollerPanel, 0, LV_PART_MAIN| LV_STATE_DEF
 
 ui_ElementRollerButtonCont = lv_obj_create(ui_ElementRollerPanel);
 lv_obj_remove_style_all(ui_ElementRollerButtonCont);
-lv_obj_set_width( ui_ElementRollerButtonCont, lv_pct(109));
+lv_obj_set_width( ui_ElementRollerButtonCont, lv_pct(100));
 lv_obj_set_height( ui_ElementRollerButtonCont, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_ElementRollerButtonCont, LV_ALIGN_TOP_MID );
 lv_obj_set_flex_flow(ui_ElementRollerButtonCont,LV_FLEX_FLOW_ROW_WRAP);
@@ -287,7 +287,7 @@ ui_ElementRoller = lv_roller_create(ui_ElementRollerPanel);
 lv_roller_set_options( ui_ElementRoller, "Params\nParameter 3\nParameter 4\nParameter Name 5\nParameter 6\nParameter 7\nParameter 8\nParameter 9\nParameter 10\nParameter 11\nParameter 12\nParameter 13\nParameter 14\nParameter 15\nParameter 16\nParameter 17\nParameter 18\nParameter 19\nParameter 20\nParameter 21\nParameter 22\nParameter 23\nParameter 24\nParameter 25\nParameter 26\nParameter 27\nParameter 28\nParameter 29\nParameter 28", LV_ROLLER_MODE_NORMAL );
 lv_roller_set_selected( ui_ElementRoller, 4, LV_ANIM_OFF);
 lv_obj_set_height( ui_ElementRoller, 186);
-lv_obj_set_width( ui_ElementRoller, lv_pct(109));
+lv_obj_set_width( ui_ElementRoller, lv_pct(100));
 lv_obj_set_align( ui_ElementRoller, LV_ALIGN_BOTTOM_MID );
 lv_obj_add_state( ui_ElementRoller, LV_STATE_FOCUSED );     /// States
 lv_obj_add_flag( ui_ElementRoller, LV_OBJ_FLAG_HIDDEN );   /// Flags
@@ -344,7 +344,7 @@ ui_ModuleViewExtraMenuRoller = lv_roller_create(ui_ElementRollerPanel);
 lv_roller_set_options( ui_ModuleViewExtraMenuRoller, "< Back", LV_ROLLER_MODE_NORMAL );
 lv_roller_set_selected( ui_ModuleViewExtraMenuRoller, 4, LV_ANIM_OFF);
 lv_obj_set_height( ui_ModuleViewExtraMenuRoller, 186);
-lv_obj_set_width( ui_ModuleViewExtraMenuRoller, lv_pct(109));
+lv_obj_set_width( ui_ModuleViewExtraMenuRoller, lv_pct(100));
 lv_obj_set_align( ui_ModuleViewExtraMenuRoller, LV_ALIGN_BOTTOM_MID );
 lv_obj_add_state( ui_ModuleViewExtraMenuRoller, LV_STATE_FOCUSED );     /// States
 lv_obj_clear_flag( ui_ModuleViewExtraMenuRoller, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE );    /// Flags

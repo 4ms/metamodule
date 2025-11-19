@@ -165,9 +165,15 @@ public:
 					info.page_list.set_active_knobset(next_knobset);
 					std::string ks_name = patch->valid_knob_set_name(next_knobset);
 
-					if (cur_page != page_list.page(PageId::KnobSetView))
+					bool patchview_knobset_visible = cur_page == page_list.page(PageId::PatchView) &&
+													 info.settings.patch_view.show_knobset_name &&
+													 lv_obj_get_scroll_y(ui_PatchViewPage) < 20;
+					bool knobsetview = cur_page == page_list.page(PageId::KnobSetView);
+
+					if (!patchview_knobset_visible && !knobsetview) {
 						info.notify_queue.put(
 							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 600});
+					}
 
 					button_light.display_knobset(next_knobset);
 				}
