@@ -1,7 +1,5 @@
 #pragma once
-#include "delay.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "metaparams.hh"
@@ -47,18 +45,6 @@ inline void update_audio_meter(bool is_patch_playloaded,
 	} else {
 		// Not playing and not showing samplerate: hide meter
 		lv_hide(meter);
-	}
-}
-
-inline void style_load_meter(ModuleDisplaySettings const &settings, lv_obj_t *meter, lv_obj_t *default_parent) {
-	if (settings.float_loadmeter) {
-		lv_obj_set_parent(meter, lv_layer_sys());
-		lv_obj_move_foreground(ui_OverloadMsgLabel);
-		lv_obj_set_style_bg_opa(meter, LV_OPA_80, 0);
-	} else {
-		lv_obj_set_parent(meter, default_parent);
-		lv_obj_move_to_index(meter, 2);
-		lv_obj_set_style_bg_opa(meter, LV_OPA_0, 0);
 	}
 }
 

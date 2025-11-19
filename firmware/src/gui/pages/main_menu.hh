@@ -40,6 +40,7 @@ struct MainMenuPage : PageBase {
 		lv_label_set_text(ui_MenuLabelPatches, "Load\nPatch");
 
 		load_meter = create_load_meter(ui_MainMenuNowPlayingPanel);
+		lv_obj_set_style_bg_opa(load_meter, LV_OPA_0, 0);
 	}
 
 	void prepare_focus() final {

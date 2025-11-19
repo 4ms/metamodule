@@ -80,6 +80,7 @@ struct ModuleViewPage : PageBase {
 
 		load_meter = create_load_meter(lv_layer_sys());
 		lv_obj_set_align(load_meter, LV_ALIGN_TOP_LEFT);
+		lv_obj_set_y(load_meter, -2);
 		lv_hide(load_meter);
 
 		lv_obj_set_x(roller_hover.get_cont(), 8);

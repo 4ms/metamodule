@@ -46,6 +46,7 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_set_align(hov, LV_ALIGN_RIGHT_MID);
 
 		load_meter = create_load_meter(ui_PatchSelectorTitlePanel);
+		lv_obj_set_style_bg_opa(load_meter, LV_OPA_0, 0);
 	}
 
 	void redraw_cb() {
