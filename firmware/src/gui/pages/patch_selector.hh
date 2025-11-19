@@ -44,6 +44,9 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_set_x(hov, 3);
 		lv_obj_set_width(hov, 210);
 		lv_obj_set_align(hov, LV_ALIGN_RIGHT_MID);
+
+		load_meter = create_load_meter(ui_PatchSelectorTitlePanel);
+		lv_obj_set_style_bg_opa(load_meter, LV_OPA_0, 0);
 	}
 
 	void redraw_cb() {
@@ -70,7 +73,7 @@ struct PatchSelectorPage : PageBase {
 		auto playing_patch = patches.get_playing_patch();
 		is_patch_playloaded = playing_patch && playing_patch->patch_name.length() > 0;
 
-		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, load_meter);
 
 		if (is_patch_playloaded) {
 			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", playing_patch->patch_name.c_str());
@@ -313,7 +316,7 @@ struct PatchSelectorPage : PageBase {
 					state = State::TryingToRequestPatchList;
 
 					update_audio_meter(
-						is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter);
+						is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, load_meter);
 				} else {
 					// Poll for patch file changes in between polling for patch list updates
 					poll_patch_file_changed();
@@ -540,6 +543,8 @@ private:
 	RollerHoverText roller_hover;
 
 	bool is_patch_playloaded = false;
+
+	lv_obj_t *load_meter;
 };
 
 } // namespace MetaModule

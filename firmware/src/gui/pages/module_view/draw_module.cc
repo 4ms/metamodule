@@ -10,7 +10,7 @@ unsigned ModuleViewPage::resize_module_image(unsigned max) {
 	lv_obj_refr_size(canvas);
 	auto width_px = lv_obj_get_width(canvas);
 	//module img + padding is no more than 190px wide
-	auto display_widthpx = std::min<lv_coord_t>(width_px + 4, max);
+	auto display_widthpx = std::min<lv_coord_t>(width_px, max);
 	lv_obj_set_width(ui_ModuleImage, display_widthpx);
 	lv_obj_refr_size(ui_ModuleImage);
 	if (lv_obj_get_width(ui_ModuleImage) > width_px) {

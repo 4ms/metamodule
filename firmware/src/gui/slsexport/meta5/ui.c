@@ -32,7 +32,6 @@ lv_obj_t *ui_MenuLabelSave;
 lv_obj_t *ui_MenuPanelSettings;
 lv_obj_t *ui_MenuImageSettings;
 lv_obj_t *ui_MenuLabelSettings;
-lv_obj_t *ui_MainMenuLoadMeter;
 
 // SCREEN: ui_PatchSelectorPage
 void ui_PatchSelectorPage_screen_init(void);
@@ -41,7 +40,6 @@ lv_obj_t *ui_PatchSelectorTitlePanel;
 lv_obj_t *ui_PatchSelectorTitle;
 lv_obj_t *ui_PlayIcon;
 lv_obj_t *ui_NowPlayingName;
-lv_obj_t *ui_LoadMeter;
 lv_obj_t *ui_DrivesPanel;
 lv_obj_t *ui_OpenFileCont;
 lv_obj_t *ui_OpenFilebut;
@@ -67,7 +65,6 @@ void ui_PatchViewPage_screen_init(void);
 lv_obj_t *ui_PatchViewPage;
 lv_obj_t *ui_PatchName;
 lv_obj_t *ui_KnobSetName;
-lv_obj_t *ui_LoadMeter2;
 lv_obj_t *ui_ButtonsContainer;
 lv_obj_t *ui_PlayButton;
 lv_obj_t *ui_InfoButton;
