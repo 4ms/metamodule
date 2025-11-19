@@ -149,6 +149,7 @@ else()
 		${FWDIR}/src/gui/pages/module_view/element_roller.cc
 		${FWDIR}/src/gui/pages/module_view/quick_assign.cc
 		${FWDIR}/src/gui/pages/module_view/draw_module.cc
+		${FWDIR}/src/gui/pages/tags.cc
 		${FWDIR}/src/fw_update/updater_proxy.cc
 		${FWDIR}/src/patch_play/modules_helpers.cc
 		${FWDIR}/src/midi/midi_router.cc

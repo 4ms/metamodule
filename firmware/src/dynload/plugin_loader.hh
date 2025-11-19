@@ -187,10 +187,19 @@ public:
 					for (auto const &alias : metadata.brand_aliases)
 						ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
 
-					for (auto const &alias : metadata.module_aliases) {
+					for (auto const &alias : metadata.module_display_names) {
 						if (alias.display_name.length() && alias.slug.length()) {
 							ModuleFactory::setModuleDisplayName(metadata.brand_slug + ":" + alias.slug,
 																alias.display_name);
+						}
+					}
+
+					for (auto const &m : metadata.module_extras) {
+						if (!m.slug.empty()) {
+							if (!m.description.empty())
+								ModuleFactory::setModuleDescription(metadata.brand_slug + ":" + m.slug, m.description);
+							if (m.tags.size() > 0)
+								ModuleFactory::setModuleTags(metadata.brand_slug + ":" + m.slug, m.tags);
 						}
 					}
 

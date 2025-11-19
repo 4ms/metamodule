@@ -1,0 +1,198 @@
+{
+	"MetaModuleBrandName": "4ms",
+	"MetaModulePluginMaintainer": "4ms Company",
+	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerUrl": "https://4mscompany.com",
+	"MetaModuleDescription": "",
+	"MetaModuleIncludedModules": [
+	{
+		"slug": "Atvert2",
+		"name": "Attenuverter 2"
+	},
+	{
+		"slug": "BPF",
+		"name": "BPF"
+	},
+	{
+		"slug": "BWAVP",
+		"name": "Basic WAV Player"
+	},
+	{
+		"slug": "CLKD",
+		"name": "CLK Divider"
+	},
+	{
+		"slug": "CLKM",
+		"name": "CLK Multiplier"
+	},
+	{
+		"slug": "ComplexEG",
+		"name": "ComplexEG"
+	},
+	{
+		"slug": "DEV",
+		"name": "Dual EnvVCA"
+	},
+	{
+		"slug": "DLD",
+		"name": "Dual Looping Delay"
+	},
+	{
+		"slug": "Detune",
+		"name": "Detune"
+	},
+	{
+		"slug": "Djembe",
+		"name": "Djembe"
+	},
+	{
+		"slug": "Drum",
+		"name": "Drum"
+	},
+	{
+		"slug": "ENVVCA",
+		"name": "EnvVCA"
+	},
+	{
+		"slug": "EnOsc",
+		"name": "Ensemble Oscillator"
+	},
+	{
+		"slug": "FM",
+		"name": "FM VCO"
+	},
+	{
+		"slug": "Follow",
+		"name": "Follow"
+	},
+	{
+		"slug": "Freeverb",
+		"name": "Freeverb"
+	},
+	{
+		"slug": "Gate",
+		"name": "Gate"
+	},
+	{
+		"slug": "HPF",
+		"name": "HPF"
+	},
+	{
+		"slug": "KPLS",
+		"name": "Karplus"
+	},
+	{
+		"slug": "L4",
+		"name": "Listen 4"
+	},
+	{
+		"slug": "LPG",
+		"name": "LPG"
+	},
+	{
+		"slug": "MNMX",
+		"name": "MinMax"
+	},
+	{
+		"slug": "MPEG",
+		"name": "Mini PEG"
+	},
+	{
+		"slug": "MultiLFO",
+		"name": "MultiLFO"
+	},
+	{
+		"slug": "Noise",
+		"name": "Noise"
+	},
+	{
+		"slug": "Octave",
+		"name": "Octave"
+	},
+	{
+		"slug": "PEG",
+		"name": "PEG"
+	},
+	{
+		"slug": "PI",
+		"name": "Percussion Interface"
+	},
+	{
+		"slug": "Pan",
+		"name": "Pan"
+	},
+	{
+		"slug": "PitchShift",
+		"name": "PitchShift"
+	},
+	{
+		"slug": "Prob8",
+		"name": "Prob8"
+	},
+	{
+		"slug": "QCD",
+		"name": "QCD"
+	},
+	{
+		"slug": "QPLFO",
+		"name": "QPLFO"
+	},
+	{
+		"slug": "RCD",
+		"name": "Rotating Clock Divider"
+	},
+	{
+		"slug": "SCM",
+		"name": "Shuffling Clock Multiplier"
+	},
+	{
+		"slug": "SHEV",
+		"name": "Shaped Dual EnvVCA"
+	},
+	{
+		"slug": "SH",
+		"name": "Sample/Hold"
+	},
+	{
+		"slug": "SISM",
+		"name": "SISM"
+	},
+	{
+		"slug": "Seq8",
+		"name": "Seq8"
+	},
+	{
+		"slug": "Slew",
+		"name": "Slew"
+	},
+	{
+		"slug": "Source",
+		"name": "Source"
+	},
+	{
+		"slug": "StMix",
+		"name": "Stereo Mixer"
+	},
+		{
+		"slug": "Switch14",
+		"name": "Switch 1 to 4"
+	},
+	{
+		"slug": "Switch41",
+		"name": "Switch 4 to 1"
+	},
+	{
+		"slug": "Tapo",
+		"name": "Tapographic Delay"
+	},
+	{
+		"slug": "VCAM",
+		"name": "VCAMatrix"
+	},
+	{
+		"slug": "Verb",
+		"name": "Verb"
+	}
+	]
+}
+
