@@ -7,7 +7,7 @@ namespace Handheld
 
 extern DrawState state_;
 
-void rect(int x, int y, unsigned w, unsigned h) {
+void rect(int x, int y, int w, int h) {
 	// Convert parameters based on rect mode
 	int rect_x, rect_y;
 	unsigned rect_w, rect_h;
@@ -63,7 +63,7 @@ void rect(int x, int y, unsigned w, unsigned h) {
 	auto x2 = std::min<int>(x + w, width);
 
 	// clamp bottom side
-	h = std::min(y + h, height - 1) - y;
+	h = std::min<int>(y + h, height - 1) - y;
 
 	// clamp left side
 	if (x < 0)

@@ -7,7 +7,7 @@ namespace Handheld
 
 extern DrawState state_;
 
-void ellipse(int x, int y, unsigned w, unsigned h) {
+void ellipse(int x, int y, int w, int h) {
 	// Convert parameters based on ellipse mode
 	int cx, cy;
 	float rx, ry;

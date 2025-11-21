@@ -46,8 +46,8 @@ void fill(float comp1, float comp2, float comp3);
 void fill(float grey);
 void noFill();
 
-void rect(int x, int y, unsigned w, unsigned h);
-void ellipse(int x, int y, unsigned w, unsigned h);
+void rect(int x, int y, int w, int h);
+void ellipse(int x, int y, int w, int h);
 
 enum ShapeMode { OPEN, CLOSE };
 void beginShape();
