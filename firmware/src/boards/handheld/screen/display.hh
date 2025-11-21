@@ -51,20 +51,22 @@ public:
 	}
 
 	static void swap() {
+		auto next_buf = (cur_buf == 1) ? 0 : 1;
+
 		// clean the buffer that we are done writing into, and we want to pass to the LTDC driver
 		mdrivlib::SystemCache::clean_dcache_by_range(framebuf[cur_buf].data(), ScreenWidth * ScreenHeight * 2);
+
+		// invalidate the buffer LVGL will write into next
+		mdrivlib::SystemCache::invalidate_dcache_by_range(framebuf[next_buf].data(), ScreenWidth * ScreenHeight * 2);
 
 		// Display the old buffer
 		ltdc_driver.set_buffer(framebuf[cur_buf].data());
 
-		// Swap
-		cur_buf = cur_buf ? 0 : 1;
-
-		// invalidate the buffer LVGL will write into next
-		mdrivlib::SystemCache::invalidate_dcache_by_range(framebuf[cur_buf].data(), ScreenWidth * ScreenHeight * 2);
-
 		// Draw into the new buffer
-		Handheld::set_buffer(framebuf[cur_buf]);
+		Handheld::set_buffer(framebuf[next_buf]);
+
+		// Swap
+		cur_buf = next_buf;
 	}
 };
 } // namespace MetaModule

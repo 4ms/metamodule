@@ -102,9 +102,12 @@ public:
 
 	void update_screen() {
 		if (LTDC->SRCR == 0) {
-			Display::swap();
 			Debug::Pin0::high();
 			page_update_task();
+			Debug::Pin0::low();
+
+			Debug::Pin0::high();
+			Display::swap();
 			Debug::Pin0::low();
 		}
 
