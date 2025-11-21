@@ -8,6 +8,48 @@ namespace Handheld
 extern DrawState state_;
 
 void rect(int x, int y, unsigned w, unsigned h) {
+	// Convert parameters based on rect mode
+	int rect_x, rect_y;
+	unsigned rect_w, rect_h;
+
+	switch (state_.rect_mode) {
+		case CORNER:
+		default:
+			// (x, y) is top-left corner, w and h are width and height
+			rect_x = x;
+			rect_y = y;
+			rect_w = w;
+			rect_h = h;
+			break;
+		case CENTER:
+			// (x, y) is center, w and h are width and height
+			rect_x = x - w / 2;
+			rect_y = y - h / 2;
+			rect_w = w;
+			rect_h = h;
+			break;
+		case RADIUS:
+			// (x, y) is center, w and h are radii (half width and height)
+			rect_x = x - w;
+			rect_y = y - h;
+			rect_w = w * 2;
+			rect_h = h * 2;
+			break;
+		case CORNERS:
+			// (x, y) is one corner, w and h are the opposite corner coordinates
+			rect_x = std::min(x, (int)w);
+			rect_y = std::min(y, (int)h);
+			rect_w = std::abs((int)w - x);
+			rect_h = std::abs((int)h - y);
+			break;
+	}
+
+	// Use converted coordinates
+	x = rect_x;
+	y = rect_y;
+	w = rect_w;
+	h = rect_h;
+
 	if (x >= (int)width || y >= (int)height)
 		return;
 
@@ -34,6 +76,7 @@ void rect(int x, int y, unsigned w, unsigned h) {
 	}
 
 	// Draw fill
+	// TODO: shrink size by stroke/2
 	if (state_.do_fill) {
 		for (int col = x; col < x2; col++) {
 			// Fill a column (buffer is rotated 90 degrees so columns of pixels are consectutive in memory)
