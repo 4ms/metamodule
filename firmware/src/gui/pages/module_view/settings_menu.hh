@@ -193,8 +193,9 @@ struct ModuleViewSettingsMenu {
 				lv_indev_set_group(indev, base_group);
 			visible = false;
 
-			if (changed_while_visible)
+			if (changed_while_visible) {
 				gui_state.do_write_settings = true;
+			}
 		}
 	}
 
@@ -227,10 +228,6 @@ private:
 		// Cables are either hidden or shown, no other states allowed
 		if (settings.cable_style.mode != HideAlways)
 			settings.cable_style.mode = ShowAll;
-
-		// In order to show sample rate/blocksize, must show cpu load
-		if (settings.show_samplerate)
-			settings.float_loadmeter = true;
 	}
 
 	void update_interactive_states() {
