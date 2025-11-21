@@ -21,8 +21,11 @@ void colorMode(ColorMode mode, float comp1, float comp2, float comp3);
 enum CoordMode { CORNER, CORNERS, CENTER, RADIUS };
 void rectMode(CoordMode);
 void ellipseMode(CoordMode);
+void shapeMode(CoordMode);
 
 void noStroke();
+void stroke(float comp1, float comp2, float comp3);
+void strokeWeight(float weight);
 
 void background(float color);
 
