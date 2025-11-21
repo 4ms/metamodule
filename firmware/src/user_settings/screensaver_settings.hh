@@ -1,8 +1,7 @@
 #pragma once
-
-#include "util/static_string.hh"
 #include <array>
 #include <cstdint>
+#include <string_view>
 
 namespace MetaModule
 {
