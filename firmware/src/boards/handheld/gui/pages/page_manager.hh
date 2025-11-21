@@ -1,18 +1,16 @@
 #pragma once
+#include "conf/debug.hh"
 #include "gui/elements/screensaver.hh"
 #include "gui/notify/display.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/status_bar.hh"
+#include "gui/pages/fullscreen_graphic.hh"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
-#include "user_settings/settings_file.hh"
-
-#include "gui/pages/fullscreen_graphic.hh"
-// #include "gui/pages/main_menu.hh"
+// #include "gui/pages/status_bar.hh"
 
 namespace MetaModule
 {
@@ -22,9 +20,8 @@ class PageManager {
 	PageList page_list;
 	GuiState gui_state;
 	Screensaver &screensaver;
-	StatusBar statusbar;
+	// StatusBar statusbar;
 
-	// MainMenuPage page_mainmenu{info};
 	FullscreenGraphicPage page_fullscreen_graphic;
 
 public:
@@ -62,7 +59,7 @@ public:
 		args.module_id = 1;
 
 		page_list.request_initial_page(PageId::FullscreenGraphic, args);
-		statusbar.show();
+		// statusbar.show();
 
 		Debug::Pin2 init;
 	}
@@ -82,7 +79,7 @@ public:
 			cur_page->update();
 		}
 
-		statusbar.show_battery(info.metaparams.battery_status);
+		// statusbar.show_battery(info.metaparams.battery_status);
 
 		handle_audio_errors();
 
@@ -97,19 +94,19 @@ public:
 	}
 
 	void handle_notifications() {
-		auto msg = info.notify_queue.get();
-		if (msg) {
-			screensaver.wake();
-			pr_info("Notify: %s\n", msg->message.c_str());
-			DisplayNotification::show(*msg);
-		}
+		// auto msg = info.notify_queue.get();
+		// if (msg) {
+		// 	screensaver.wake();
+		// 	pr_info("Notify: %s\n", msg->message.c_str());
+		// 	DisplayNotification::show(*msg);
+		// }
 	}
 
 	void handle_audio_errors() {
-		if (info.patch_playloader.did_audio_overrun()) {
-			info.notify_queue.put({"Audio stopped: patch load > 99%.", Notification::Priority::Error, 1000});
-			info.patch_playloader.clear_audio_overrun();
-		}
+		// if (info.patch_playloader.did_audio_overrun()) {
+		// 	info.notify_queue.put({"Audio stopped: patch load > 99%.", Notification::Priority::Error, 1000});
+		// 	info.patch_playloader.clear_audio_overrun();
+		// }
 	}
 
 	void handle_write_settings() {

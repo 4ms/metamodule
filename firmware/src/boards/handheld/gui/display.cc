@@ -1,18 +1,8 @@
-#include "conf/screen_buffer_conf.hh"
 #include "conf/screen_conf.hh"
 #include "drivers/tim_pwm.hh"
-#include "screen/lvgl_driver.hh"
-#include <array>
 
 namespace MetaModule
 {
-
-using FrameBufferT = std::array<lv_color_t, MetaModule::ScreenBufferConf::NumPixels>;
-FrameBufferT framebuf1 alignas(64);
-FrameBufferT framebuf2 alignas(64);
-
-FrameBufferT *first_framebuf = &framebuf1;
-FrameBufferT *second_framebuf = &framebuf2;
 
 void start_pixel_clock() {
 	constexpr mdrivlib::TimChanConf conf{
@@ -30,12 +20,10 @@ void start_pixel_clock() {
 }
 
 void init_gui() {
-	printf("init gui\n");
+	printf("init_gui()\n");
 	mdrivlib::Pin backlight{ScreenConf::PWMBackLight, mdrivlib::PinMode::Output, {}, mdrivlib::PinPolarity::Normal};
 
 	backlight.on();
-
-	static LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, framebuf1, framebuf2};
 }
 
 // TIM3 with prescaler = 1:

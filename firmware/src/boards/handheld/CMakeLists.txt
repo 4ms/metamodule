@@ -7,6 +7,7 @@ set(BOARD_a7_sources
     ${BOARD_SUPPORT_DIR}/gui/fonts/fonts.cc
     ${BOARD_SUPPORT_DIR}/gui/fonts/ttf.cc
     ${BOARD_SUPPORT_DIR}/gui/4ms-logo-black-h200px.c
+    ${BOARD_SUPPORT_DIR}/sketch/api.cc
 )
 
 unset(USE_WIFI_MODULE)

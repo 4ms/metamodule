@@ -1,5 +1,4 @@
 #pragma once
-#include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "general_io.hh"
@@ -7,10 +6,9 @@
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
 #include "patch_file/file_storage_proxy.hh"
-#include "patch_file/reload_patch.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
-#include "screen/lvgl_driver.hh"
+#include "screen/display.hh"
 #include "thorvg.h"
 #include "user_settings/settings.hh"
 #include "user_settings/settings_file.hh"
@@ -66,9 +64,9 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, screensaver, *first_framebuf);
+		Display::init();
 
-		Gui::init_lvgl_styles();
+		// Gui::init_lvgl_styles();
 
 		if (!Settings::read_settings(file_storage_proxy, &settings)) {
 			settings = UserSettings{};
@@ -89,43 +87,45 @@ public:
 
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 
-		auto d = lv_obj_create(nullptr);
-		lv_obj_set_style_bg_color(d, lv_color_hex(0x000000), 0);
-		lv_obj_set_style_bg_opa(d, LV_OPA_100, 0);
+		// auto d = lv_obj_create(nullptr);
+		// lv_obj_set_style_bg_color(d, lv_color_hex(0x000000), 0);
+		// lv_obj_set_style_bg_opa(d, LV_OPA_100, 0);
 
-		auto logo_img = lv_img_create(d);
-		lv_img_set_src(logo_img, &logo_4ms_black_h200px);
-		lv_obj_align(logo_img, LV_ALIGN_CENTER, 0, 0);
+		// auto logo_img = lv_img_create(d);
+		// lv_img_set_src(logo_img, &logo_4ms_black_h200px);
+		// lv_obj_align(logo_img, LV_ALIGN_CENTER, 0, 0);
 
-		lv_scr_load(d);
+		// lv_scr_load(d);
 
 		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 	}
 
 	void update_screen() {
-		auto now = HAL_GetTick();
-		if ((now - last_screen_update_tm) > 16) { //30fps
-			last_screen_update_tm = now;
-			Debug::Pin2::high();
+		if (LTDC->SRCR == 0) {
+			Display::swap();
+			Debug::Pin0::high();
 			page_update_task();
-			Debug::Pin2::low();
-
-			lv_timer_handler();
+			Debug::Pin0::low();
 		}
+
+		// auto now = HAL_GetTick();
+		// if ((now - last_screen_update_tm) > 33) { //60fps
+		// 	last_screen_update_tm = now;
+
+		// 	Debug::Pin0::high();
+		// 	Display::swap();
+		// 	Debug::Pin0::low();
+
+		// 	// Debug::Pin2::high();
+		// 	page_update_task();
+		// 	// Debug::Pin2::low();
+		// }
 	}
 
 	void read_patch_gui_elements() {
 	}
 
 	void update_page() {
-		// auto now = HAL_GetTick();
-		// if ((now - last_page_update_tm) > 2) {
-		// 	last_page_update_tm = now;
-		// 	page_update_task();
-		// }
-
-		// print_dbg_params.output_debug_info(HAL_GetTick());
-		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
 	bool preload_all_plugins() {
@@ -313,11 +313,6 @@ public:
 
 private:
 	void page_update_task() {
-		// Clear all accumulated knob change events
-		// for (auto &knob : params.knobs) {
-		// 	knob.changed = false;
-		// }
-
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		if (metaparams.buttons[5].is_just_pressed()) {
@@ -359,7 +354,6 @@ private:
 		page_manager.init();
 	}
 
-	uint32_t last_page_update_tm = 0;
 	uint32_t last_screen_update_tm = 0;
 
 	std::vector<std::string> available_patches;

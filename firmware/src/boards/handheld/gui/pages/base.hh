@@ -1,11 +1,9 @@
 #pragma once
-#include "conf/screen_buffer_conf.hh"
 #include "dynload/plugin_manager.hh"
 #include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
-#include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -45,13 +43,6 @@ struct PageBase {
 
 	PageId id;
 
-	// static constexpr uint32_t MaxBufferWidth = ScreenBufferConf::viewWidth;
-	// static constexpr uint32_t MaxBufferHeight = ScreenBufferConf::viewHeight;
-	// static inline std::array<lv_color_t, MaxBufferHeight * MaxBufferWidth> page_pixel_buffer;
-
-	lv_group_t *group = nullptr;
-	lv_obj_t *screen = nullptr;
-
 	PageBase(PatchContext info, PageId id)
 		: patch_storage{info.patch_storage}
 		, patches{info.open_patch_manager}
@@ -68,28 +59,16 @@ struct PageBase {
 
 	virtual ~PageBase() = default;
 
-	void init_bg(lv_obj_t *screen_ptr) {
-		group = lv_group_create();
-		screen = screen_ptr;
-		// lv_obj_set_size(screen, 960, 400); //TODO: use Screen Conf, not hard-set values
-		lv_obj_set_size(screen, ScreenBufferConf::viewWidth, ScreenBufferConf::viewHeight);
-		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_STATE_DEFAULT);
+	void init_bg() {
 	}
 
 	void focus(PageArguments const *args) {
 		gui_state.back_button.clear_events();
 
-		if (group) {
-			lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		}
-
 		// copy args to the PageBase instance
 		if (args)
 			this->args = *args;
 		prepare_focus();
-
-		if (screen)
-			lv_scr_load(screen);
 	}
 
 	void load_prev_page() {
