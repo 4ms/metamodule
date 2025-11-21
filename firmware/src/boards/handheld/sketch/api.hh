@@ -61,6 +61,10 @@ void rotate(float angle);
 void scale(float s);
 void scale(float x, float y);
 
+float noise(float x);
+float noise(float x, float y);
+float noise(float x, float y, float z);
+
 // clang-format off
 inline float map(float x, float in1, float in2, float out1, float out2) { return MathTools::map_value(x, in1, in2, out1, out2); }
 inline float constrain(float x, float min, float max) { return std::clamp(x, min, max); }
