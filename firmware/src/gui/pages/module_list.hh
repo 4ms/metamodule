@@ -130,6 +130,7 @@ private:
 
 					// Normalize tag aliases:
 					auto t = std::string(ModuleTags::normalize_tag(tag));
+					t[0] = toupper(t[0]);
 
 					// Populate unique values
 					if (std::ranges::find(all_tags, t) == all_tags.end()) {
@@ -199,6 +200,7 @@ private:
 				for (auto const &tag : tags) {
 					// Normalize tag aliases:
 					auto t = std::string(ModuleTags::normalize_tag(tag));
+					t[0] = toupper(t[0]);
 
 					if (equal_ci(t, sel_tag)) {
 						auto combined_slug = std::string(brand) + ":" + std::string(slug);
