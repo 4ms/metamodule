@@ -61,7 +61,7 @@ void stroke(float comp1, float comp2, float comp3) {
 	float c3 = comp3 / state_.color_range_3;
 
 	if (state_.color_mode == RGB) {
-		state_.stroke = Color{c1, c2, c3};
+		state_.stroke = Color{c3, c2, c1};
 	} else {
 		state_.stroke = hsv_to_rgb(c1, c2, c3);
 	}
@@ -87,7 +87,7 @@ void background(float comp1, float comp2, float comp3) {
 	float c2 = comp2 / state_.color_range_2;
 	float c3 = comp3 / state_.color_range_3;
 
-	auto color = (state_.color_mode == RGB) ? Color{c1, c2, c3} : hsv_to_rgb(c1, c2, c3);
+	auto color = (state_.color_mode == RGB) ? Color{c3, c2, c1} : hsv_to_rgb(c1, c2, c3);
 
 	std::fill_n(buf(0, 0), width * height, color);
 }
@@ -110,7 +110,7 @@ void fill(float comp1, float comp2, float comp3) {
 	float c3 = comp3 / state_.color_range_3;
 
 	if (state_.color_mode == RGB) {
-		state_.fill = Color{c1, c2, c3};
+		state_.fill = Color{c3, c2, c1};
 	} else {
 		state_.fill = hsv_to_rgb(c1, c2, c3);
 	}
