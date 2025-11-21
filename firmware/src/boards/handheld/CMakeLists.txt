@@ -8,6 +8,13 @@ set(BOARD_a7_sources
     ${BOARD_SUPPORT_DIR}/gui/fonts/ttf.cc
     ${BOARD_SUPPORT_DIR}/gui/4ms-logo-black-h200px.c
     ${BOARD_SUPPORT_DIR}/sketch/api.cc
+    ${BOARD_SUPPORT_DIR}/sketch/api/framebuffer.cc
+    ${BOARD_SUPPORT_DIR}/sketch/api/color_convert.cc
+    ${BOARD_SUPPORT_DIR}/sketch/api/color_mode.cc
+    ${BOARD_SUPPORT_DIR}/sketch/api/rect.cc
+    ${BOARD_SUPPORT_DIR}/sketch/api/ellipse.cc
+    ${BOARD_SUPPORT_DIR}/sketch/api/shape.cc
+    ${BOARD_SUPPORT_DIR}/sketch/api/matrix.cc
 )
 
 unset(USE_WIFI_MODULE)

@@ -6,14 +6,9 @@
 #include "drivers/screen_ltdc.hh"
 #include "drivers/spi_transfer.hh"
 #include "drivers/ss7701s_lcd_init.hh"
+#include "sketch/api/framebuffer.hh"
 #include "sketch/sketch.hh"
 #include <span>
-
-namespace Handheld
-{
-
-void set_buffer(std::span<Color>);
-}
 
 namespace MetaModule
 {

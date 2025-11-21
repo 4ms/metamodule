@@ -38,7 +38,7 @@ public:
 		float centerY = height / 2;
 
 		// Tunnel expansion driven ONLY by CV1In magnitude
-		float audioMag = std::abs(CV1In);
+		float audioMag = abs(CV1In);
 		float tunnelSpeed = map(audioMag, 0.f, 0.5f, 0.f, 0.2f);
 
 		// DIRECT ROTATION CONTROL (NEW)
@@ -46,8 +46,8 @@ public:
 		float angleFromCV2In = map(CV2In, -0.5f, 0.5f, -M_PI, M_PI); // layer1 rotation
 
 		// Morphing sources
-		float morphFromCV1In = std::clamp(map(CV1In, -0.5f, 0.5f, 0.f, 2.f), 0.f, 2.f);
-		float morphFromCV2In = std::clamp(map(CV2In, -0.5f, 0.5f, 0.f, 2.f), 0.f, 2.f);
+		float morphFromCV1In = constrain(map(CV1In, -0.5f, 0.5f, 0.f, 2.f), 0.f, 2.f);
+		float morphFromCV2In = constrain(map(CV2In, -0.5f, 0.5f, 0.f, 2.f), 0.f, 2.f);
 
 		// Color shift
 		float hueShift = map(CV2In, -0.5f, 0.5f, -2.f, 2.f);
@@ -67,11 +67,11 @@ public:
 			// Color logic
 			float h;
 			if (i % 2 == 0) {
-				hueEven = std::fmod(hueEven + hueShift, 360);
-				h = std::fmod(hueEven + i * 3, 360);
+				hueEven = mod((hueEven + hueShift), 360);
+				h = mod((hueEven + i * 3), 360);
 			} else {
-				hueOdd = std::fmod(hueOdd - hueShift, 360);
-				h = std::fmod(hueOdd + i * 3, 360);
+				hueOdd = mod((hueOdd - hueShift), 360);
+				h = mod((hueOdd + i * 3), 360);
 			}
 
 			// Morph per layer
@@ -101,20 +101,20 @@ public:
 			float t = map(i, 0, steps, 0, 2.f * M_PI);
 
 			// Circle
-			float cx = r * std::cos(t);
-			float cy = r * std::sin(t);
+			float cx = r * cos(t);
+			float cy = r * sin(t);
 
 			// Square
 			float exponentSquare = 20;
-			float sx = r * std::pow(std::abs(std::cos(t)), exponentSquare / 2) * sgn(std::cos(t));
-			float sy = r * std::pow(std::abs(std::sin(t)), exponentSquare / 2) * sgn(std::sin(t));
+			float sx = r * pow(abs(cos(t)), exponentSquare / 2) * sgn(cos(t));
+			float sy = r * pow(abs(sin(t)), exponentSquare / 2) * sgn(sin(t));
 
 			// Triangle
 			float triAngle = (2.f * M_PI / 3.f);
-			float angleMod = (fmod(t, triAngle));
-			float k = std::cos(angleMod) / std::cos(triAngle / 2);
-			float tx = r * k * std::cos(t);
-			float ty = r * k * std::sin(t);
+			float angleMod = mod(t, triAngle);
+			float k = cos(angleMod) / cos(triAngle / 2);
+			float tx = r * k * cos(t);
+			float ty = r * k * sin(t);
 
 			float x, y;
 			if (morph < 1) {
