@@ -16,7 +16,7 @@ const std::vector<std::vector<std::string>> vcvTagAliases = {
 	{"Controller"},
 	{"Delay"},
 	{"Digital"},
-	{"Distortion"},
+	{"Distortion", "ADistortion"},
 	{"Drum", "Drums", "Percussion"},
 	{"Dual"},
 	{"Dynamics"},
@@ -52,7 +52,7 @@ const std::vector<std::vector<std::string>> vcvTagAliases = {
 	{"Ring modulator"},
 	{"Sample and hold", "S&H", "Sample & hold"},
 	{"Sampler"},
-	{"Sequencer"},
+	{"Sequencer", "Drum sequencer"},
 	{"Slew limiter"},
 	{"Speech"},
 	{"Switch"},
@@ -87,8 +87,9 @@ std::string_view get_tag(int tag_id) {
 std::string_view normalize_tag(std::string_view tag) {
 	if (auto id = tag_id(tag); id >= 0) {
 		return get_tag(id);
-	} else
+	} else {
 		return tag;
+	}
 }
 
 } // namespace MetaModule::ModuleTags
