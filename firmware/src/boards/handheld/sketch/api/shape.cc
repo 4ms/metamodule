@@ -17,8 +17,8 @@ void vertex(float x, float y) {
 	state_.vertices.push_back({x, y});
 }
 
-// Helper function to draw a line between two points (for stroke)
-static void draw_line(int x0, int y0, int x1, int y1, Color color) {
+// Helper function to draw a single-pixel line using Bresenham's algorithm
+static void draw_thin_line(int x0, int y0, int x1, int y1, Color color) {
 	// Bresenham's line algorithm
 	int dx = std::abs(x1 - x0);
 	int dy = std::abs(y1 - y0);
@@ -44,6 +44,44 @@ static void draw_line(int x0, int y0, int x1, int y1, Color color) {
 			err += dx;
 			y0 += sy;
 		}
+	}
+}
+
+// Helper function to draw a thick line centered on the edge
+static void draw_thick_line(float x0, float y0, float x1, float y1, float thickness, Color color) {
+	if (thickness <= 1.0f) {
+		// For single-pixel lines, use the fast algorithm
+		draw_thin_line((int)x0, (int)y0, (int)x1, (int)y1, color);
+		return;
+	}
+
+	// Calculate line direction and perpendicular
+	float dx = x1 - x0;
+	float dy = y1 - y0;
+	float length = std::sqrt(dx * dx + dy * dy);
+
+	if (length < 0.001f)
+		return; // Degenerate line
+
+	// Perpendicular unit vector
+	float px = -dy / length;
+	float py = dx / length;
+
+	// Half thickness
+	float half_thick = thickness / 2.0f;
+
+	// Draw multiple parallel lines to create thickness
+	int num_lines = std::max(1, (int)(thickness + 0.5f));
+	for (int i = 0; i < num_lines; i++) {
+		// Offset from center line, ranging from -half_thick to +half_thick
+		float offset = -half_thick + (thickness * i) / (num_lines - 1);
+
+		int line_x0 = (int)(x0 + px * offset);
+		int line_y0 = (int)(y0 + py * offset);
+		int line_x1 = (int)(x1 + px * offset);
+		int line_y1 = (int)(y1 + py * offset);
+
+		draw_thin_line(line_x0, line_y0, line_x1, line_y1, color);
 	}
 }
 
@@ -108,22 +146,22 @@ void endShape(ShapeMode mode) {
 	if (state_.stroke_width > 0) {
 		// Draw lines between consecutive vertices
 		for (size_t i = 0; i < num_vertices - 1; i++) {
-			int x0 = (int)state_.vertices[i].x;
-			int y0 = (int)state_.vertices[i].y;
-			int x1 = (int)state_.vertices[i + 1].x;
-			int y1 = (int)state_.vertices[i + 1].y;
+			float x0 = state_.vertices[i].x;
+			float y0 = state_.vertices[i].y;
+			float x1 = state_.vertices[i + 1].x;
+			float y1 = state_.vertices[i + 1].y;
 
-			draw_line(x0, y0, x1, y1, state_.stroke);
+			draw_thick_line(x0, y0, x1, y1, state_.stroke_width, state_.stroke);
 		}
 
 		// Close the shape if requested
 		if (closed && num_vertices >= 2) {
-			int x0 = (int)state_.vertices[num_vertices - 1].x;
-			int y0 = (int)state_.vertices[num_vertices - 1].y;
-			int x1 = (int)state_.vertices[0].x;
-			int y1 = (int)state_.vertices[0].y;
+			float x0 = state_.vertices[num_vertices - 1].x;
+			float y0 = state_.vertices[num_vertices - 1].y;
+			float x1 = state_.vertices[0].x;
+			float y1 = state_.vertices[0].y;
 
-			draw_line(x0, y0, x1, y1, state_.stroke);
+			draw_thick_line(x0, y0, x1, y1, state_.stroke_width, state_.stroke);
 		}
 	}
 }
