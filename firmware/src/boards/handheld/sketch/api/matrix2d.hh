@@ -66,6 +66,14 @@ struct Matrix2D {
 		rot.d = std::cos(angle);
 		multiply(rot);
 	}
+
+	// Apply scale
+	void scale(float sx, float sy) {
+		Matrix2D scl;
+		scl.a = sx;
+		scl.d = sy;
+		multiply(scl);
+	}
 };
 
 } // namespace ProcessingAPI

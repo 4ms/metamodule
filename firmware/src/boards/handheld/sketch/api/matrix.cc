@@ -25,4 +25,12 @@ void rotate(float angle) {
 	state_.transform_matrix.rotate(angle);
 }
 
+void scale(float s) {
+	state_.transform_matrix.scale(s, s);
+}
+
+void scale(float x, float y) {
+	state_.transform_matrix.scale(x, y);
+}
+
 } // namespace Handheld
