@@ -2,6 +2,8 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "sketch/sketch.hh"
+
+#include "sketch/test1.hh"
 #include "sketch/test2.hh"
 
 namespace MetaModule
@@ -13,7 +15,9 @@ struct FullscreenGraphicPage : PageBase {
 
 	FullscreenGraphicPage(PatchContext info)
 		: PageBase{info, PageId::FullscreenGraphic} {
-		sketch = std::make_unique<Handheld::Test2>();
+
+		sketch = std::make_unique<Handheld::Test1>();
+		// sketch = std::make_unique<Handheld::Test2>();
 	}
 
 	void prepare_focus() final {

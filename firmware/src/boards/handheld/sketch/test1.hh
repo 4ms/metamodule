@@ -18,13 +18,16 @@ public:
 	void draw() {
 		background(0);
 
-		stroke(50, 10, 100);
+		// Test stroke width is centered:
+		stroke(0, 0, 255); //blue
 		fill(85);
 
 		strokeWeight(20);
+		fill(255, 0, 0); //red
 		ellipse(100, 100, 100, 100);
 
 		strokeWeight(0);
+		fill(0, 255, 0); //green
 		ellipse(100, 200, 100, 100);
 
 		// noStroke();
@@ -62,20 +65,34 @@ public:
 		// vertex(150 + ctr % width, 70);
 		// endShape(OPEN);
 
-		// // Draw a filled triangle
-		// fill(255, 0, 0);
-		// stroke(0, 0, 255);
-		// strokeWeight(2);
-		// pushMatrix();
-		// translate(width / 2, height / 2);
-		// rotate(((ctr % 120) / 120.f) * 2.f * 3.1416f);
-		// beginShape();
-		// vertex(50, 0);
-		// vertex(100, 100);
-		// vertex(50, 85 + (ctr % (height - 150)));
-		// vertex(0, 100);
-		// endShape(CLOSE);
-		// popMatrix();
+		// Draw a concave shape
+		fill(255, 0, 0);
+		stroke(0, 0, 255);
+		strokeWeight(40);
+		pushMatrix();
+		translate(width / 2, height / 2);
+		rotate(90.f / 360.f * TWO_PI);
+		beginShape();
+		vertex(0, -50);
+		vertex(50, 50);
+		vertex(0, 35);
+		vertex(-50, 50);
+		endShape(CLOSE);
+		popMatrix();
+
+		fill(255, 0, 0);
+		stroke(0, 0, 255);
+		strokeWeight(0);
+		pushMatrix();
+		translate(width / 2 + 100, height / 2);
+		rotate(90.f / 360.f * TWO_PI);
+		beginShape();
+		vertex(0, -50);
+		vertex(50, 50);
+		vertex(0, 35);
+		vertex(-50, 50);
+		endShape(CLOSE);
+		popMatrix();
 
 		// ctr += 4;
 	}
