@@ -3,6 +3,15 @@
 
 #if !defined(SIMULATOR)
 //C and C++
+static inline void DebugPin2High() {
+	volatile uint32_t *GPIOD_BSRR = (volatile uint32_t *)(0x50005018);
+	*GPIOD_BSRR = (1 << 0);
+}
+
+static inline void DebugPin2Low() {
+	volatile uint32_t *GPIOD_BSRR = (volatile uint32_t *)(0x50005018);
+	*GPIOD_BSRR = (1 << (0 + 16));
+}
 
 static inline void DebugPin1High() {
 	volatile uint32_t *GPIOD_BSRR = (volatile uint32_t *)(0x50005018);
