@@ -9,8 +9,8 @@ void start_pixel_clock() {
 		.pin = ScreenConf::actual_clk,
 		.TIM = TIM3_BASE,
 		.channum = mdrivlib::TimChannelNum::_3,
-		.period = 5, //~60Hz refresh (with RCC PLLQ = 12)
-		// .period = 11, //~30Hz refresh (with rcc PLLQ = 24)
+		// .period = 5, //~60Hz refresh (with RCC PLLQ = 12)
+		.period = 11,	//~30Hz refresh (with rcc PLLQ = 24)
 		.prescaler = 0, // divide by 1+prescaler
 		.clock_div = 0,
 	};
