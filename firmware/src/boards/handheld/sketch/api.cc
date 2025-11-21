@@ -2,9 +2,13 @@
 #include "conf/debug.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "sketch/sketch.hh"
+#include "util/math.hh"
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <span>
+#include <stack>
+#include <vector>
 
 namespace Handheld
 {
@@ -13,13 +17,83 @@ namespace Handheld
 //
 static std::span<Color> buffer{};
 
+static_assert(sizeof(Color) == 2);
+
 void set_buffer(std::span<Color> buf) {
 	buffer = buf;
+}
+
+static inline auto buf(unsigned x, unsigned y) {
+	return buffer.data() + x * height + y;
 }
 
 //
 // Internal State
 //
+struct Vertex {
+	float x, y;
+};
+
+// 2D affine transformation matrix
+// | a  c  tx |
+// | b  d  ty |
+struct Matrix2D {
+	float a, b, c, d, tx, ty;
+
+	// Identity matrix
+	Matrix2D()
+		: a(1)
+		, b(0)
+		, c(0)
+		, d(1)
+		, tx(0)
+		, ty(0) {
+	}
+
+	// Transform a point
+	void transform(float &x, float &y) const {
+		float x_new = a * x + c * y + tx;
+		float y_new = b * x + d * y + ty;
+		x = x_new;
+		y = y_new;
+	}
+
+	// Multiply this matrix by another (this = this * other)
+	void multiply(const Matrix2D &other) {
+		float new_a = a * other.a + c * other.b;
+		float new_b = b * other.a + d * other.b;
+		float new_c = a * other.c + c * other.d;
+		float new_d = b * other.c + d * other.d;
+		float new_tx = a * other.tx + c * other.ty + tx;
+		float new_ty = b * other.tx + d * other.ty + ty;
+
+		a = new_a;
+		b = new_b;
+		c = new_c;
+		d = new_d;
+		tx = new_tx;
+		ty = new_ty;
+	}
+
+	// Apply translation
+	void translate(float dx, float dy) {
+		Matrix2D trans;
+		trans.tx = dx;
+		trans.ty = dy;
+		multiply(trans);
+	}
+
+	// Apply rotation (angle in radians)
+	void rotate(float angle) {
+		Matrix2D rot;
+		rot.a = std::cos(angle);
+		rot.b = std::sin(angle);
+		rot.c = -std::sin(angle);
+		rot.d = std::cos(angle);
+		multiply(rot);
+	}
+};
+
 struct DrawState {
 	ColorMode color_mode = RGB;
 	float color_range_1 = 255;
@@ -37,6 +111,11 @@ struct DrawState {
 	CoordMode rect_mode = CORNER;
 	CoordMode shape_mode = CORNER;
 	CoordMode ellipse_mode = CORNER;
+
+	std::vector<Vertex> vertices;
+
+	Matrix2D transform_matrix;
+	std::stack<Matrix2D> matrix_stack;
 };
 
 DrawState state_{};
@@ -106,8 +185,22 @@ void strokeWeight(float weight) {
 	state_.stroke_width = weight;
 }
 
-void background(float color) {
-	state_.bg = color;
+void background(float comp1, float comp2, float comp3) {
+	float c1 = comp1 / state_.color_range_1;
+	float c2 = comp2 / state_.color_range_2;
+	float c3 = comp3 / state_.color_range_3;
+
+	auto color = (state_.color_mode == RGB) ? Color{c1, c2, c3} : hsv_to_rgb(c1, c2, c3);
+
+	std::fill_n(buf(0, 0), width * height, color);
+}
+
+void background(float grey) {
+	if (grey == 0)
+		std::memset(buffer.data(), 0, width * height * 2);
+	else
+		// FIXME: for HSV mode, should be 0, grey, 0?
+		background(grey, grey, grey);
 }
 
 void fill(float comp1, float comp2, float comp3) {
@@ -126,10 +219,6 @@ void fill(float comp1, float comp2, float comp3) {
 
 void noFill() {
 	state_.do_fill = false;
-}
-
-static inline auto buf(unsigned x, unsigned y) {
-	return buffer.data() + x * height + y;
 }
 
 void rect(int x, int y, unsigned w, unsigned h) {
@@ -227,6 +316,7 @@ void ellipse(int x, int y, unsigned w, unsigned h) {
 
 	switch (state_.ellipse_mode) {
 		case CORNER:
+		default:
 			// (x, y) is top-left corner, w and h are width and height
 			cx = x + w / 2;
 			cy = y + h / 2;
@@ -344,6 +434,127 @@ void ellipse(int x, int y, unsigned w, unsigned h) {
 	}
 }
 
+void beginShape() {
+	state_.vertices.clear();
+}
+
+void vertex(float x, float y) {
+	// Apply current transformation matrix
+	state_.transform_matrix.transform(x, y);
+	state_.vertices.push_back({x, y});
+}
+
+// Helper function to draw a line between two points (for stroke)
+static void draw_line(int x0, int y0, int x1, int y1, Color color) {
+	// Bresenham's line algorithm
+	int dx = std::abs(x1 - x0);
+	int dy = std::abs(y1 - y0);
+	int sx = x0 < x1 ? 1 : -1;
+	int sy = y0 < y1 ? 1 : -1;
+	int err = dx - dy;
+
+	while (true) {
+		// Draw pixel if within bounds
+		if (x0 >= 0 && x0 < (int)width && y0 >= 0 && y0 < (int)height) {
+			*buf(x0, y0) = color;
+		}
+
+		if (x0 == x1 && y0 == y1)
+			break;
+
+		int e2 = 2 * err;
+		if (e2 > -dy) {
+			err -= dy;
+			x0 += sx;
+		}
+		if (e2 < dx) {
+			err += dx;
+			y0 += sy;
+		}
+	}
+}
+
+void endShape(ShapeMode mode) {
+	if (state_.vertices.size() < 2)
+		return;
+
+	bool closed = (mode == CLOSE);
+	size_t num_vertices = state_.vertices.size();
+
+	// Draw fill using scan-line algorithm
+	if (state_.do_fill && num_vertices >= 3) {
+		// Find bounding box
+		float min_y = state_.vertices[0].y;
+		float max_y = state_.vertices[0].y;
+		for (const auto &v : state_.vertices) {
+			min_y = std::min(min_y, v.y);
+			max_y = std::max(max_y, v.y);
+		}
+
+		int y_start = std::max(0, (int)min_y);
+		int y_end = std::min((int)height - 1, (int)max_y);
+
+		// For each scan line
+		for (int scan_y = y_start; scan_y <= y_end; scan_y++) {
+			std::vector<float> intersections;
+
+			// Find intersections with polygon edges
+			for (size_t i = 0; i < num_vertices; i++) {
+				size_t j = (i + 1) % num_vertices;
+				if (!closed && j == 0)
+					break; // Don't connect last to first if open
+
+				const Vertex &v1 = state_.vertices[i];
+				const Vertex &v2 = state_.vertices[j];
+
+				// Check if edge crosses scan line
+				if ((v1.y <= scan_y && v2.y > scan_y) || (v2.y <= scan_y && v1.y > scan_y)) {
+					// Calculate intersection x coordinate
+					float t = (scan_y - v1.y) / (v2.y - v1.y);
+					float x_intersect = v1.x + t * (v2.x - v1.x);
+					intersections.push_back(x_intersect);
+				}
+			}
+
+			// Sort intersections
+			std::sort(intersections.begin(), intersections.end());
+
+			// Fill between pairs of intersections
+			for (size_t i = 0; i + 1 < intersections.size(); i += 2) {
+				int x_start = std::max(0, (int)intersections[i]);
+				int x_end = std::min((int)width - 1, (int)intersections[i + 1]);
+
+				for (int x = x_start; x <= x_end; x++) {
+					*buf(x, scan_y) = state_.fill;
+				}
+			}
+		}
+	}
+
+	// Draw stroke
+	if (state_.stroke_width > 0) {
+		// Draw lines between consecutive vertices
+		for (size_t i = 0; i < num_vertices - 1; i++) {
+			int x0 = (int)state_.vertices[i].x;
+			int y0 = (int)state_.vertices[i].y;
+			int x1 = (int)state_.vertices[i + 1].x;
+			int y1 = (int)state_.vertices[i + 1].y;
+
+			draw_line(x0, y0, x1, y1, state_.stroke);
+		}
+
+		// Close the shape if requested
+		if (closed && num_vertices >= 2) {
+			int x0 = (int)state_.vertices[num_vertices - 1].x;
+			int y0 = (int)state_.vertices[num_vertices - 1].y;
+			int x1 = (int)state_.vertices[0].x;
+			int y1 = (int)state_.vertices[0].y;
+
+			draw_line(x0, y0, x1, y1, state_.stroke);
+		}
+	}
+}
+
 Color hsv_to_rgb(float h01, float s01, float v01) {
 	// Convert to 8-bit normalized values
 	uint16_t h = h01 * 255;
@@ -397,6 +608,25 @@ Color hsv_to_rgb(float h01, float s01, float v01) {
 	}
 
 	return {r, g, b};
+}
+
+void pushMatrix() {
+	state_.matrix_stack.push(state_.transform_matrix);
+}
+
+void popMatrix() {
+	if (!state_.matrix_stack.empty()) {
+		state_.transform_matrix = state_.matrix_stack.top();
+		state_.matrix_stack.pop();
+	}
+}
+
+void translate(float x, float y) {
+	state_.transform_matrix.translate(x, y);
+}
+
+void rotate(float angle) {
+	state_.transform_matrix.rotate(angle);
 }
 
 } // namespace Handheld
