@@ -10,10 +10,13 @@ inline void set_buffer(std::span<Color> buf) {
 	buffer = buf;
 }
 
-inline auto buf(unsigned x, unsigned y) {
+inline auto buf(int x, int y) {
 	// Buffer is arranged in columns.
 	// That is, pixels touching each other vertically occupy consectutive memory addresses
-	return buffer.data() + x * height + (height - y + 1);
+	constexpr int HEIGHT = 400;
+	auto pos = (x + 1) * HEIGHT - 1 - y;
+
+	return buffer.data() + pos;
 }
 
 inline void draw_vline(unsigned y_start, unsigned height, unsigned x, Color color) {
