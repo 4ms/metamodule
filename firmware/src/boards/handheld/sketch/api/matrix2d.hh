@@ -51,7 +51,7 @@ struct Matrix2D {
 
 	// Apply translation
 	void translate(float dx, float dy) {
-		Matrix2D trans;
+		Matrix2D trans{};
 		trans.tx = dx;
 		trans.ty = dy;
 		multiply(trans);
@@ -59,7 +59,7 @@ struct Matrix2D {
 
 	// Apply rotation (angle in radians)
 	void rotate(float angle) {
-		Matrix2D rot;
+		Matrix2D rot{};
 		rot.a = std::cos(angle);
 		rot.b = std::sin(angle);
 		rot.c = -std::sin(angle);
@@ -69,7 +69,7 @@ struct Matrix2D {
 
 	// Apply scale
 	void scale(float sx, float sy) {
-		Matrix2D scl;
+		Matrix2D scl{};
 		scl.a = sx;
 		scl.d = sy;
 		multiply(scl);
