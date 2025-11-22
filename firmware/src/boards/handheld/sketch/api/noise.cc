@@ -12,7 +12,7 @@ namespace
 
 // Permutation table (repeated twice to avoid overflow)
 // clang-format off
-constexpr int permutation[512] = {
+constexpr int permutation[] = {
 	151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37,
 	240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177,
 	33, 88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27, 166, 77, 146,
@@ -39,16 +39,12 @@ constexpr int permutation[512] = {
 };
 
 // clang-format on
+static_assert(sizeof(permutation) == 512 * sizeof(int));
 
 // Fade function for smooth interpolation: 6t^5 - 15t^4 + 10t^3
 inline float fade(float t) {
 	return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
 }
-
-// // Linear interpolation
-// inline float lerp(float t, float a, float b) {
-// 	return a + t * (b - a);
-// }
 
 // Gradient for 1D noise
 inline float grad1d(int hash, float x) {
@@ -92,7 +88,7 @@ float noise(float x) {
 	int b = permutation[X + 1];
 
 	// Interpolate between gradients
-	float result = lerp(u, grad1d(a, x), grad1d(b, x - 1.0f));
+	float result = lerp(grad1d(a, x), grad1d(b, x - 1.0f), u);
 
 	// Map from [-1, 1] to [0, 1] for Processing compatibility
 	return (result + 1.0f) * 0.5f;
@@ -117,9 +113,9 @@ float noise(float x, float y) {
 
 	// Interpolate between gradients
 	float result =
-		lerp(v,
-			 lerp(u, grad2d(permutation[a], x, y), grad2d(permutation[b], x - 1.0f, y)),
-			 lerp(u, grad2d(permutation[a + 1], x, y - 1.0f), grad2d(permutation[b + 1], x - 1.0f, y - 1.0f)));
+		lerp(lerp(grad2d(permutation[a], x, y), grad2d(permutation[b], x - 1.0f, y), u),
+			 lerp(grad2d(permutation[a + 1], x, y - 1.0f), grad2d(permutation[b + 1], x - 1.0f, y - 1.0f), u),
+			 v);
 
 	// Map from [-1, 1] to [0, 1] for Processing compatibility
 	return (result + 1.0f) * 0.5f;
@@ -151,15 +147,15 @@ float noise(float x, float y, float z) {
 
 	// Interpolate between gradients
 	float result = lerp(
-		w,
-		lerp(v,
-			 lerp(u, grad3d(permutation[aa], x, y, z), grad3d(permutation[ba], x - 1.0f, y, z)),
-			 lerp(u, grad3d(permutation[ab], x, y - 1.0f, z), grad3d(permutation[bb], x - 1.0f, y - 1.0f, z))),
-		lerp(v,
-			 lerp(u, grad3d(permutation[aa + 1], x, y, z - 1.0f), grad3d(permutation[ba + 1], x - 1.0f, y, z - 1.0f)),
-			 lerp(u,
-				  grad3d(permutation[ab + 1], x, y - 1.0f, z - 1.0f),
-				  grad3d(permutation[bb + 1], x - 1.0f, y - 1.0f, z - 1.0f))));
+		lerp(lerp(grad3d(permutation[aa], x, y, z), grad3d(permutation[ba], x - 1.0f, y, z), u),
+			 lerp(grad3d(permutation[ab], x, y - 1.0f, z), grad3d(permutation[bb], x - 1.0f, y - 1.0f, z), u),
+			 v),
+		lerp(lerp(grad3d(permutation[aa + 1], x, y, z - 1.0f), grad3d(permutation[ba + 1], x - 1.0f, y, z - 1.0f), u),
+			 lerp(grad3d(permutation[ab + 1], x, y - 1.0f, z - 1.0f),
+				  grad3d(permutation[bb + 1], x - 1.0f, y - 1.0f, z - 1.0f),
+				  u),
+			 v),
+		w);
 
 	// Map from [-1, 1] to [0, 1] for Processing compatibility
 	return (result + 1.0f) * 0.5f;
