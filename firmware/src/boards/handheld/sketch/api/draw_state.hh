@@ -2,8 +2,8 @@
 #include "../api.hh"
 #include "../sketch.hh"
 #include "matrix2d.hh"
+#include "util/fixed_vector.hh"
 #include <stack>
-#include <vector>
 
 namespace Handheld
 {
@@ -28,7 +28,7 @@ struct DrawState {
 	CoordMode shape_mode = CORNER;
 	CoordMode ellipse_mode = CORNER;
 
-	std::vector<Vertex> vertices;
+	FixedVector<Vertex, 512> vertices;
 
 	Matrix2D transform_matrix;
 	std::stack<Matrix2D> matrix_stack;

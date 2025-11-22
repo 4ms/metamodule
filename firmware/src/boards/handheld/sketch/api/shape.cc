@@ -1,6 +1,7 @@
 #include "../api.hh"
 #include "draw_state.hh"
 #include "framebuffer.hh"
+#include "util/fixed_vector.hh"
 
 namespace Handheld
 {
@@ -86,6 +87,8 @@ static void draw_thick_line(float x0, float y0, float x1, float y1, float thickn
 }
 
 void endShape(ShapeMode mode) {
+	FixedVector<float, 960> intersections;
+
 	if (state_.vertices.size() < 2)
 		return;
 
@@ -107,7 +110,7 @@ void endShape(ShapeMode mode) {
 
 		// For each scan line
 		for (int scan_y = y_start; scan_y <= y_end; scan_y++) {
-			std::vector<float> intersections;
+			intersections.clear();
 
 			// Find intersections with polygon edges
 			for (size_t i = 0; i < num_vertices; i++) {
