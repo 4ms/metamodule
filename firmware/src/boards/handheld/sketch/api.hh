@@ -68,7 +68,7 @@ float noise(float x, float y, float z);
 // clang-format off
 inline float map(float x, float in1, float in2, float out1, float out2) { return MathTools::map_value(x, in1, in2, out1, out2); }
 inline float constrain(float x, float min, float max) { return std::clamp(x, min, max); }
-inline float lerp(float in1, float in2, float phase) { return std::lerp(in1, in2, phase); }
+inline float lerp(float a, float b, float t) { return a + t * (b - a);}  //naive is faster than std::lerp
 inline float abs(int x) { return std::abs(x); }
 inline float abs(float x) { return std::abs(x); }
 inline float cos(float x) { return std::cos(x); }
