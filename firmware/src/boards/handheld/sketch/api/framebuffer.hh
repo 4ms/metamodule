@@ -1,4 +1,5 @@
 #include "../sketch.hh"
+#include <cstdio>
 #include <cstring>
 #include <span>
 
@@ -14,25 +15,43 @@ inline void set_buffer(std::span<Color> buf) {
 inline auto buf(int x, int y) {
 	// Buffer is arranged in columns.
 	// That is, pixels touching each other vertically occupy consectutive memory addresses
-	// constexpr int HEIGHT = 400;
-	// auto pos = (x + 1) * HEIGHT - 1 - y;
 
 	auto pos = x * height + (height - 1 - y);
-
-	// auto pos = x * height + y;
+	// printf("[%d, %d] pos = %d\n", x, y, pos);
 
 	return buffer.data() + pos;
 }
 
 inline void draw_vline(int y_start, int h, int x, Color color) {
-	// uint32_t c = color << 16 | color;
-	// std::memset(buf(x, y_start), c, h / 2);
-	// if (h & 1) {
-	// 	*buf(x, y_start + h) = color;
-	// }
+	if ((uintptr_t(buffer.data()) & 0b11) != 0) {
+		printf("Error: buffer is not aligned to 4-byte boundary\n");
+		return;
+	}
 
-	std::fill_n(buf(x, y_start), h, color);
+	uint32_t color_32 = (uint16_t(color) << 16) | uint16_t(color);
+	// printf("Color is %x => %x\n", uint16_t(color), color_32);
+	while (h > 0) {
+		auto start_pos = x * height + (height - y_start - h);
 
+		// One pixel left to draw, or next pixel is not word-aligned:
+		// => draw one pixel
+		if (h == 1 || start_pos & 0b1) {
+			// printf("One pixel pos(x=%d, y=%d, h=%d) = [%d]\n", x, y_start, h, start_pos);
+			buffer[start_pos] = color;
+			h--;
+		} else {
+			// Two or more pixels to draw, starting with a word boundary
+			// => draw two pixels as a uint32_t
+			// printf("Two pixels pos(x=%d, y=%d, h=%d) = [%d]\n", x, y_start, h, start_pos);
+			*(uint32_t *)(&buffer[start_pos]) = color_32;
+			h -= 2;
+		}
+	}
+
+	// Works:
+	// std::fill_n(buf(x, y_start + h - 1), h, color);
+
+	// Works:
 	// for (int i = 0; i < h; i++) {
 	// 	*buf(x, y_start + i) = color;
 	// }
