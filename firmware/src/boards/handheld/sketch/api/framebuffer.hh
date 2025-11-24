@@ -28,30 +28,32 @@ inline void draw_vline(int y_start, int h, int x, Color color) {
 		return;
 	}
 
+	// 0.875us
 	uint32_t color_32 = (uint16_t(color) << 16) | uint16_t(color);
-	// printf("Color is %x => %x\n", uint16_t(color), color_32);
+	auto start_pos = x * height + (height - y_start - h);
 	while (h > 0) {
-		auto start_pos = x * height + (height - y_start - h);
 
-		// One pixel left to draw, or next pixel is not word-aligned:
-		// => draw one pixel
+		// One pixel left to draw, or next pixel is not word-aligned: => draw one pixel
 		if (h == 1 || start_pos & 0b1) {
 			// printf("One pixel pos(x=%d, y=%d, h=%d) = [%d]\n", x, y_start, h, start_pos);
 			buffer[start_pos] = color;
 			h--;
+			start_pos++;
 		} else {
-			// Two or more pixels to draw, starting with a word boundary
-			// => draw two pixels as a uint32_t
+			// Two or more pixels to draw, starting with a word boundary => draw two pixels as a uint32_t
 			// printf("Two pixels pos(x=%d, y=%d, h=%d) = [%d]\n", x, y_start, h, start_pos);
-			*(uint32_t *)(&buffer[start_pos]) = color_32;
-			h -= 2;
+			while (h >= 2) {
+				*(uint32_t *)(&buffer[start_pos]) = color_32;
+				h -= 2;
+				start_pos += 2;
+			}
 		}
 	}
 
-	// Works:
+	// 2.32ms
 	// std::fill_n(buf(x, y_start + h - 1), h, color);
 
-	// Works:
+	// 1.07ms
 	// for (int i = 0; i < h; i++) {
 	// 	*buf(x, y_start + i) = color;
 	// }
