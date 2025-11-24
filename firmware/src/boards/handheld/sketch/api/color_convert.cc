@@ -55,7 +55,7 @@ Color hsv_to_rgb(float h01, float s01, float v01) {
 			break;
 	}
 
-	return {b, g, r};
+	return {r, g, b};
 }
 
 } // namespace Handheld
