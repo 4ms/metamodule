@@ -78,8 +78,11 @@ void rect(int x, int y, int w, int h) {
 	// Draw fill
 	// TODO: shrink size by stroke/2
 	if (state_.do_fill) {
+		int inner_stroke = state_.stroke_width / 2;
+		x += inner_stroke;
+		x2 -= inner_stroke;
 		for (int col = x; col < x2; col++) {
-			// Fill a column (buffer is rotated 90 degrees so columns of pixels are consectutive in memory)
+			// Fill a column
 			draw_vline(y, h, col, state_.fill);
 		}
 	}
