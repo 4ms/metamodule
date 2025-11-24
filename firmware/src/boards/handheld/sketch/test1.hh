@@ -17,17 +17,18 @@ public:
 
 	void draw() {
 		background(0);
+		stroke(127, 127, 127);
 
 		strokeWeight(20);
-		fill(255, 0, 0); //red
+		fill(255, 0, 0); //grey stroked, red filled
 		rect(100, 100, 100, 100);
 
 		strokeWeight(0);
-		fill(0, 255, 0); //green
+		fill(0, 255, 0); //no-stroked, green filled
 		rect(100, 200, 100, 100);
 
-		strokeWeight(0);
-		fill(0, 255, 0); //green
+		strokeWeight(2);
+		fill(0, 0, 255); //thin-stroked, blue filled
 		rect(400, 200, 100, 100);
 
 		stroke(200, 200, 200);
