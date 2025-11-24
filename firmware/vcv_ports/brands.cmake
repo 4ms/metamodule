@@ -6,7 +6,4 @@ set(brands
     eightfold
     Valley
     RackCore
-    JWModules
-    4msPlayground
-    CVfunk
 )
