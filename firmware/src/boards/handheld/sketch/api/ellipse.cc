@@ -9,109 +9,161 @@ namespace Handheld
 extern DrawState state_;
 
 void ellipse(int x, int y, int w, int h) {
+	if (!state_.do_fill && state_.stroke_width == 0)
+		return;
 
-	// Convert parameters based on ellipse mode
 	convert_coords(state_.ellipse_mode, x, y, w, h);
 
-	// Skip if ellipse is outside screen bounds
-	if (x + w < 0 || x >= (int)Handheld::width || y + h < 0 || y >= (int)Handheld::height)
+	int x2 = x + w;
+	int y2 = y + h;
+
+	if (state_.transform_matrix.is_rotated()) {
+		// Not supported. FIXME... calculate a poly shape?
+		return;
+	}
+
+	if (x >= (int)Handheld::width || y >= (int)Handheld::height || x2 < 0 || y2 < 0)
 		return;
 
-	// Skip if ellipse is too small
-	if (w < 1 || h < 1)
-		return;
+	if (state_.transform_matrix.is_transformed()) {
+		float x1f = x;
+		float y1f = y;
+		float x2f = x2;
+		float y2f = y2;
+		state_.transform_matrix.transform(x1f, y1f);
+		state_.transform_matrix.transform(x2f, y2f);
+		x = std::round(x1f);
+		y = std::round(y1f);
+		x2 = std::round(x2f);
+		y2 = std::round(y2f);
+	}
 
-	float rx = w / 2.f;
-	float ry = h / 2.f;
+	float sw = (state_.stroke_width > 0) ? std::max<int>(1, state_.stroke_width) : 0;
 
-	int cx = x + rx;
-	int cy = y + ry;
+	// Calculate the start/stop for the stroke boundaries.
+	// The fill portion is inside this.
 
-	// For each y coordinate, calculate the x coordinates where the ellipse intersects
-	int y_start = std::max(0, (int)(cy - ry));
-	int y_end = std::min((int)height - 1, (int)(cy + ry));
+	// Top and bottom edges:
+	// For odd stroke width: draw more inner than outer on top
+	//                       draw more outer than inner on bottom
+	int stroke_top_start = y - sw / 2;
+	int stroke_top_end = stroke_top_start + state_.stroke_width;
+	int stroke_bottom_start = y2 - sw / 2;
+	int stroke_bottom_end = stroke_bottom_start + state_.stroke_width;
 
-	// Scan-line fill algorithm
-	if (state_.do_fill) {
-		for (int scan_y = y_start; scan_y <= y_end; scan_y++) {
-			// Calculate distance from center
-			float dy = scan_y - cy;
+	// Left edge: draw TL and BL corners, too
+	// For odd stroke width, draw more inner than outer
+	int stroke_left_start = x - sw / 2;
+	int stroke_left_end = stroke_left_start + sw;
 
-			// Calculate x offset using ellipse equation: (x/rx)^2 + (y/ry)^2 = 1
-			// Solving for x: x = rx * sqrt(1 - (y/ry)^2)
-			float y_ratio = dy / ry;
-			float discriminant = 1.0f - y_ratio * y_ratio;
+	// Right edge: draw TR and BR corners, too
+	// For odd stroke width, draw more outer than inner
+	int stroke_right_start = x2 - sw / 2;
+	int stroke_right_end = stroke_right_start + sw;
 
-			if (discriminant < 0)
-				continue;
+	float inner_rx = (stroke_right_start - stroke_left_end) / 2.f;
+	float inner_ry = (stroke_bottom_start - stroke_top_end) / 2.f;
+	float outer_rx = sw + inner_rx;
+	float outer_ry = sw + inner_ry;
 
-			float dx = rx * std::sqrt(discriminant);
+	// Clamp after doing start/end calculations
+	// or else height and width are not clipped properly
+	auto clamp = [](int &a, int max) {
+		a = std::clamp<int>(a, 0, max - 1);
+	};
+	clamp(stroke_top_start, Handheld::height);
+	clamp(stroke_top_end, Handheld::height);
+	clamp(stroke_bottom_start, Handheld::height);
+	clamp(stroke_bottom_end, Handheld::height);
 
-			// Calculate start and end x coordinates for this scan line
-			int x_start = std::max(0, (int)(cx - dx));
-			int x_end = std::min((int)width - 1, (int)(cx + dx));
+	clamp(stroke_left_start, Handheld::width);
+	clamp(stroke_left_end, Handheld::width);
+	clamp(stroke_right_start, Handheld::width);
+	clamp(stroke_right_end, Handheld::width);
 
-			// Fill the horizontal line
-			for (int scan_x = x_start; scan_x <= x_end; scan_x++) {
-				*buf(scan_x, scan_y) = state_.fill;
+	float cx = (x + x2) / 2.f;
+	float cy = (y + y2) / 2.f;
+
+	// Calculate the top and bottom y coordinates for the x column of an ellipse with radii rx, ry
+	auto ellipse_col = [&cx, &cy](int scan_x, float rx, float ry) {
+		float dx = scan_x - cx;
+
+		// Calculate y offset using ellipse equation: (y/yx)^2 + (x/rx)^2 = 1
+		// dy = ry * sqrt(1 - (x/rx)^2)
+		// cy - dy < y < cy + dy
+		float x_ratio = dx / rx;
+		float discriminant = 1.0f - x_ratio * x_ratio;
+
+		if (discriminant < 0)
+			return std::make_pair(0, 0);
+
+		float dy = ry * std::sqrt(discriminant);
+
+		// Calculate start and end y coordinates for this vert line
+		int y_start = std::clamp<int>(cy - dy, 0, Handheld::height - 1);
+		int y_end = std::clamp<int>(cy + dy, 0, Handheld::height - 1);
+		return std::make_pair(y_start, y_end);
+	};
+
+	for (int scan_x = stroke_left_start; scan_x < stroke_right_end; scan_x++) {
+		auto [y_inner_start, y_inner_end] = ellipse_col(scan_x, inner_rx, inner_ry);
+		auto [y_outer_start, y_outer_end] = ellipse_col(scan_x, outer_rx, outer_ry);
+
+		if (state_.do_fill && scan_x >= stroke_left_end && scan_x < stroke_right_start) {
+			// do fill
+			draw_vert_line(scan_x, y_inner_start, y_inner_end, state_.fill);
+
+			if (state_.stroke_width >= 1) {
+				draw_vert_line(scan_x, y_outer_start, y_inner_start, state_.stroke);
+				draw_vert_line(scan_x, y_inner_end, y_outer_end, state_.stroke);
 			}
 		}
 	}
 
 	// Draw stroke (centered on edge)
 	if (state_.stroke_width > 0) {
-		float sw = state_.stroke_width;
-		float half_sw = sw / 2.0f;
 
-		// Draw stroke using inner and outer ellipse, centered on the original ellipse boundary
-		// Outer ellipse has radii extended by half stroke width
-		// Inner ellipse has radii reduced by half stroke width
-		float rx_outer = rx + half_sw;
-		float ry_outer = ry + half_sw;
-		float rx_inner = std::max(0.0f, rx - half_sw);
-		float ry_inner = std::max(0.0f, ry - half_sw);
+		// 	// Expand scan range to cover the outer ellipse
+		// 	int stroke_y_start = std::max(0, (int)(cy - ry_outer));
+		// 	int stroke_y_end = std::min((int)height - 1, (int)(cy + ry_outer));
 
-		// Expand scan range to cover the outer ellipse
-		int stroke_y_start = std::max(0, (int)(cy - ry_outer));
-		int stroke_y_end = std::min((int)height - 1, (int)(cy + ry_outer));
+		// 	for (int scan_y = stroke_y_start; scan_y <= stroke_y_end; scan_y++) {
+		// 		float dy = scan_y - cy;
 
-		for (int scan_y = stroke_y_start; scan_y <= stroke_y_end; scan_y++) {
-			float dy = scan_y - cy;
+		// 		// Outer ellipse
+		// 		float y_ratio_outer = dy / ry_outer;
+		// 		float discriminant_outer = 1.0f - y_ratio_outer * y_ratio_outer;
 
-			// Outer ellipse
-			float y_ratio_outer = dy / ry_outer;
-			float discriminant_outer = 1.0f - y_ratio_outer * y_ratio_outer;
+		// 		if (discriminant_outer < 0)
+		// 			continue;
 
-			if (discriminant_outer < 0)
-				continue;
+		// 		float dx_outer = rx_outer * std::sqrt(discriminant_outer);
 
-			float dx_outer = rx_outer * std::sqrt(discriminant_outer);
+		// 		// Inner ellipse (if it exists)
+		// 		float dx_inner = 0;
+		// 		if (rx_inner > 0 && ry_inner > 0) {
+		// 			float y_ratio_inner = dy / ry_inner;
+		// 			float discriminant_inner = 1.0f - y_ratio_inner * y_ratio_inner;
 
-			// Inner ellipse (if it exists)
-			float dx_inner = 0;
-			if (rx_inner > 0 && ry_inner > 0) {
-				float y_ratio_inner = dy / ry_inner;
-				float discriminant_inner = 1.0f - y_ratio_inner * y_ratio_inner;
+		// 			if (discriminant_inner > 0) {
+		// 				dx_inner = rx_inner * std::sqrt(discriminant_inner);
+		// 			}
+		// 		}
 
-				if (discriminant_inner > 0) {
-					dx_inner = rx_inner * std::sqrt(discriminant_inner);
-				}
-			}
+		// 		// Draw left stroke edge
+		// 		int x_outer_left = std::max(0, (int)(cx - dx_outer));
+		// 		int x_inner_left = std::max(0, (int)(cx - dx_inner));
+		// 		for (int scan_x = x_outer_left; scan_x <= x_inner_left && scan_x < (int)width; scan_x++) {
+		// 			*buf(scan_x, scan_y) = state_.stroke;
+		// 		}
 
-			// Draw left stroke edge
-			int x_outer_left = std::max(0, (int)(cx - dx_outer));
-			int x_inner_left = std::max(0, (int)(cx - dx_inner));
-			for (int scan_x = x_outer_left; scan_x <= x_inner_left && scan_x < (int)width; scan_x++) {
-				*buf(scan_x, scan_y) = state_.stroke;
-			}
-
-			// Draw right stroke edge
-			int x_inner_right = std::min((int)width - 1, (int)(cx + dx_inner));
-			int x_outer_right = std::min((int)width - 1, (int)(cx + dx_outer));
-			for (int scan_x = x_inner_right + 1; scan_x <= x_outer_right; scan_x++) {
-				*buf(scan_x, scan_y) = state_.stroke;
-			}
-		}
+		// 		// Draw right stroke edge
+		// 		int x_inner_right = std::min((int)width - 1, (int)(cx + dx_inner));
+		// 		int x_outer_right = std::min((int)width - 1, (int)(cx + dx_outer));
+		// 		for (int scan_x = x_inner_right + 1; scan_x <= x_outer_right; scan_x++) {
+		// 			*buf(scan_x, scan_y) = state_.stroke;
+		// 		}
+		// 	}
 	}
 }
 } // namespace Handheld
