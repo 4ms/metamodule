@@ -37,6 +37,13 @@ struct Matrix2D {
 		y = y_new;
 	}
 
+	void transform(int &x, int &y) const {
+		float x_new = a * float(x) + c * float(y) + tx;
+		float y_new = b * float(x) + d * float(y) + ty;
+		x = std::round(x_new);
+		y = std::round(y_new);
+	}
+
 	// Multiply this matrix by another (this = this * other)
 	void multiply(const Matrix2D &other) {
 		float new_a = a * other.a + c * other.b;

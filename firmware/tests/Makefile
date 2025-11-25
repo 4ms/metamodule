@@ -29,9 +29,15 @@ TEST_SOURCES += tests/resampler_tests.cc
 TEST_SOURCES += vcv_plugin/export/src/resampler.cc
 TEST_SOURCES += tests/stubs/plugin_module.cc
 TEST_SOURCES += src/params/expanders.cc
-# TEST_SOURCES += src/boards/euro26hp/gui/elements/element_name.cc
 TEST_SOURCES += src/boards/euro26hp/gui/elements/panel_name.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
+TEST_SOURCES += src/boards/handheld/sketch/api/rect.cc
+TEST_SOURCES += src/boards/handheld/sketch/api/ellipse.cc
+TEST_SOURCES += src/boards/handheld/sketch/api/style.cc
+TEST_SOURCES += src/boards/handheld/sketch/api/matrix.cc
+TEST_SOURCES += src/boards/handheld/sketch/api/shape.cc
+TEST_SOURCES += src/boards/handheld/sketch/api/color_mode.cc
+TEST_SOURCES += src/boards/handheld/sketch/api/color_convert.cc
 
 CXXFLAGS = 	-Wall \
 			-Wno-deprecated-anon-enum-enum-conversion \
@@ -49,6 +55,7 @@ CXXFLAGS = 	-Wall \
 			-I../../src/boards/euro26hp \
 			-I../src/boards/euro26hp \
 			-Isrc/boards/euro26hp \
+			-Isrc/boards/handheld \
 			-Ilib \
 			-Ilib/lvgl/lvgl \
 			-Ilib/cpputil \

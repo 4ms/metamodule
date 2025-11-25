@@ -16,6 +16,7 @@ set(BOARD_a7_sources
     ${BOARD_SUPPORT_DIR}/sketch/api/shape.cc
     ${BOARD_SUPPORT_DIR}/sketch/api/matrix.cc
     ${BOARD_SUPPORT_DIR}/sketch/api/noise.cc
+    ${BOARD_SUPPORT_DIR}/sketch/api/style.cc
 )
 
 unset(USE_WIFI_MODULE)

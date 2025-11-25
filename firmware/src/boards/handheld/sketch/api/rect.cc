@@ -31,16 +31,8 @@ void rect(int x, int y, int w, int h) {
 		return;
 
 	if (state_.transform_matrix.is_transformed()) {
-		float x1f = x;
-		float y1f = y;
-		float x2f = x2;
-		float y2f = y2;
-		state_.transform_matrix.transform(x1f, y1f);
-		state_.transform_matrix.transform(x2f, y2f);
-		x = std::round(x1f);
-		y = std::round(y1f);
-		x2 = std::round(x2f);
-		y2 = std::round(y2f);
+		state_.transform_matrix.transform(x, y);
+		state_.transform_matrix.transform(x2, y2);
 	}
 
 	int sw = (state_.stroke_width > 0) ? std::max<int>(1, state_.stroke_width) : 0;
