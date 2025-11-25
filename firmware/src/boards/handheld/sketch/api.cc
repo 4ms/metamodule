@@ -79,7 +79,8 @@ void stroke(float grey) {
 }
 
 void strokeWeight(float weight) {
-	state_.stroke_width = weight;
+	// positive stroke only
+	state_.stroke_width = std::abs(weight);
 }
 
 void background(float comp1, float comp2, float comp3) {
