@@ -52,6 +52,11 @@ extern uint32_t _DMABUF[];
 extern uint32_t _DMABUF_SZ[];
 extern uint32_t _DMABUF_END[];
 
+//
+extern uint32_t _FRAMEBUF[];
+extern uint32_t _FRAMEBUF_SZ[];
+extern uint32_t _FRAMEBUF_END[];
+
 //SRAM1-3: Device-RW
 extern uint32_t _M4_CODE[];
 extern uint32_t _M4_CODE_A7[];
@@ -107,6 +112,9 @@ static const uint32_t A7_HEAP_SZ = (uint32_t)_A7_HEAP_SZ;
 
 static const uint32_t DMABUF = (uint32_t)_DMABUF;
 static const uint32_t DMABUF_SZ = (uint32_t)_DMABUF_SZ;
+
+static const uint32_t FRAMEBUF = (uint32_t)_FRAMEBUF;
+static const uint32_t FRAMEBUF_SZ = (uint32_t)_FRAMEBUF_SZ;
 
 static const uint32_t M4_VECT = (uint32_t)_M4_VECT;
 static const uint32_t M4_VECT_A7 = (uint32_t)_M4_VECT_A7;

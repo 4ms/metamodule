@@ -74,6 +74,7 @@ static uint32_t Sect_Device_RO;	 // device, non-shareable, non-executable, ro, d
 static uint32_t Sect_Device_RW;	 // as Sect_Device_RO, but writeable
 static uint32_t Sect_StronglyOrdered;
 static uint32_t Sect_Normal_NonCache;
+static uint32_t Sect_Normal_RW_Shared;
 
 static uint32_t Page_L1_4k = 0x0;	// generic
 static uint32_t Page_L1_64k = 0x0;	// generic
@@ -113,6 +114,7 @@ void MMU_CreateTranslationTable(void) {
 	section_device_rw(Sect_Device_RW, region);
 	section_so(Sect_StronglyOrdered, region);
 	section_normal_nc(Sect_Normal_NonCache, region);
+	section_normal_rw_shared(Sect_Normal_RW_Shared, region);
 	page64k_device_rw(Page_L1_64k, Page_64k_Device_RW, region);
 	page4k_device_rw(Page_L1_4k, Page_4k_Device_RW, region);
 
@@ -127,8 +129,10 @@ void MMU_CreateTranslationTable(void) {
 	// But section_normal_* supports unaligned access
 	create_aligned_section(TTB_BASE, DMABUF, DMABUF_SZ, Sect_Normal_NonCache);
 
+	create_aligned_section(TTB_BASE, FRAMEBUF, FRAMEBUF_SZ, Sect_Normal_NonCache);
+
 	//virtdrive and firmware loading buffer: non-cacheable
-	create_aligned_section(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ, Sect_Normal_RW); //NonCache);
+	create_aligned_section(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ, Sect_Normal_RW);
 	create_aligned_section(TTB_BASE, FWBUFFER, FWBUFFER_SZ, Sect_Normal_NonCache);
 
 	//

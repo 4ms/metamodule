@@ -22,7 +22,9 @@ class Display {
 	static inline ScreenParallelWriter<ScreenConf> ltdc_driver;
 
 	using FrameBufferT = std::array<Handheld::Color, MetaModule::ScreenBufferConf::NumPixels>;
-	static inline std::array<FrameBufferT, 2> framebuf alignas(64);
+	__attribute__((section(".framebuf"))) static inline std::array<FrameBufferT, 2> framebuf alignas(64);
+	// Cache maintenance is not needed since we are using Normal_NonCache mmu region
+#undef FRAMEBUFFER_CACHE_MAINTAIN
 	static inline unsigned cur_buf = 0;
 
 public:
@@ -42,17 +44,18 @@ public:
 		swap();
 		swap();
 
-		printf("MMDisplay::init\n");
+		printf("MMDisplay::init framebuffers: %p and %p\n", &framebuf[0], &framebuf[1]);
 	}
 
 	static void swap() {
 		auto next_buf = (cur_buf == 1) ? 0 : 1;
 
+#ifdef FRAMEBUFFER_CACHE_MAINTAIN
 		// clean the buffer that we are done writing into, and we want to pass to the LTDC driver
 		mdrivlib::SystemCache::clean_dcache_by_range(framebuf[cur_buf].data(), ScreenWidth * ScreenHeight * 2);
-
 		// invalidate the buffer LVGL will write into next
 		mdrivlib::SystemCache::invalidate_dcache_by_range(framebuf[next_buf].data(), ScreenWidth * ScreenHeight * 2);
+#endif
 
 		// Display the old buffer
 		ltdc_driver.set_buffer(framebuf[cur_buf].data());
