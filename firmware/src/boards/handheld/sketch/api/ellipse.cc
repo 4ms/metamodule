@@ -18,7 +18,28 @@ void ellipse(int x, int y, int w, int h) {
 	int y2 = y + h;
 
 	if (state_.transform_matrix.is_rotated()) {
-		// Not supported. FIXME... calculate a poly shape?
+		// Convert ellipse to polygon for rotation support
+		float cx = x + w / 2.f;
+		float cy = y + h / 2.f;
+		float rx = w / 2.f;
+		float ry = h / 2.f;
+
+		unsigned num_segments = state_.transform_resolution;
+		float angle_step = TWO_PI / num_segments;
+
+		auto restore_shape_mode = state_.shape_mode;
+		shapeMode(CoordMode::CORNER);
+		beginShape();
+
+		for (unsigned i = 0; i < num_segments; i++) {
+			float angle = i * angle_step;
+			float px = cx + rx * std::cos(angle);
+			float py = cy + ry * std::sin(angle);
+			vertex(px, py);
+		}
+
+		endShape(CLOSE);
+		shapeMode(restore_shape_mode);
 		return;
 	}
 

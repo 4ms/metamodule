@@ -34,4 +34,8 @@ void scale(float x, float y) {
 	state_.transform_matrix.scale(x, y);
 }
 
+void setTransformResolution(unsigned resolution) {
+	state_.transform_resolution = resolution;
+}
+
 } // namespace Handheld

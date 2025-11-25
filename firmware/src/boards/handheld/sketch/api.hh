@@ -60,6 +60,7 @@ void translate(float x, float y);
 void rotate(float angle);
 void scale(float s);
 void scale(float x, float y);
+void setTransformResolution(unsigned resolution);
 
 float noise(float x);
 float noise(float x, float y);

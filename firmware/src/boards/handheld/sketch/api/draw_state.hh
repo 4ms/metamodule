@@ -32,6 +32,7 @@ struct DrawState {
 
 	Matrix2D transform_matrix;
 	CircularStack<Matrix2D, 16> matrix_stack;
+	unsigned transform_resolution = 32; // Number of segments for ellipse/circle approximation when rotated
 };
 
 } // namespace Handheld
