@@ -104,10 +104,9 @@ public:
 		if (LTDC->SRCR == 0) {
 			Debug::Pin0::high();
 			page_update_task();
-			Debug::Pin0::low();
 
-			//0.8ms
 			Display::swap();
+			Debug::Pin0::low();
 		}
 
 		// auto now = HAL_GetTick();

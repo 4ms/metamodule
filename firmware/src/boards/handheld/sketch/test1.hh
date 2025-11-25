@@ -16,11 +16,13 @@ public:
 
 	void draw() {
 		background(0);
+		test_benchmark();
+
 		// test_rect_bounds();
 		// test_stroke_align();
 		// test_transformed_rect();
 
-		test_ellipses();
+		// test_ellipses();
 	}
 
 	void test_transformed_rect() {
@@ -93,6 +95,15 @@ public:
 
 	void test_benchmark() {
 		// Benchmark test:
+		// draw and swap:
+		// Normal_NonCache, with clear/inval: 1.51ms (looks perfect)
+		// Normal_NonCache, no clear/inval: 0.84ms (looks perfect) <<<<<<<<<<<<< best
+		// Normal, with clear/inval: 1.97ms (ants)
+		// Normal, no clear/inval: 0.96ms (bad streaking)
+		// Normal_RW_Shared, with clear/inval: 1.97 (ants)
+		// Normal_RW_Shared, no clear/inval: 0.96 (bad streaking)
+		// Normal_StronglyOrdered, with clear/inval: 1.7 (bad ants)
+		// Normal_StronglyOrdered, no clear/inval: 1.06 (bad ants)
 		stroke(127, 127, 127);
 
 		strokeWeight(20);
@@ -115,6 +126,31 @@ public:
 		strokeWeight(2.f);
 		fill(122, 76, 16);
 		rect(630, 60, 200, 100);
+
+		fill(255);
+		noStroke();
+		ellipseMode(Handheld::CENTER);
+		ellipse(10, 10, 9, 9);
+
+		ellipseMode(CENTER);
+		fill(255, 0, 0);
+		stroke(255);
+		strokeWeight(20.f);
+		ellipse(480, 150, 100, 50);
+
+		fill(255, 0, 0);
+		stroke(255);
+		strokeWeight(0.f);
+		ellipse(480, 250, 120, 70);
+
+		noFill();
+		stroke(255);
+		strokeWeight(1.f);
+		ellipse(480, 50, 120, 70);
+
+		strokeWeight(20.f);
+		fill(255, 0, 0);
+		ellipseMode(CORNER);
 	}
 
 	void test_rect_bounds() {
@@ -203,27 +239,42 @@ public:
 	}
 
 	void test_ellipses() {
+		Handheld::fill(255);
+		// Handheld::stroke(255);
+		// Handheld::strokeWeight(1);
+		Handheld::noStroke();
+		Handheld::ellipseMode(Handheld::CENTER);
+		Handheld::ellipse(10, 10, 9, 9);
+
 		// 50x50 ellipse + 20 stroke => 70x70 outer size
 		// is 30x30 inner size, 70x70 outer size
-		fill(255, 0, 0);
-		stroke(255);
-		strokeWeight(20.f);
 
 		// centered for reference
 		ellipseMode(CENTER);
+		fill(255, 0, 0);
+		stroke(255);
+		strokeWeight(20.f);
 		ellipse(480, 150, 100, 50);
 
+		fill(255, 0, 0);
+		stroke(255);
 		strokeWeight(0.f);
 		ellipse(480, 250, 120, 70);
 
+		noFill();
+		stroke(255);
+		strokeWeight(1.f);
+		ellipse(480, 50, 120, 70);
+
 		strokeWeight(20.f);
+		fill(255, 0, 0);
 		ellipseMode(CORNER);
 
 		// left side
-		ellipse(-40, 0, 50, 50);
-		ellipse(-30, 100, 50, 50);
-		ellipse(-20, 200, 50, 50);
-		ellipse(-10, 300, 50, 50);
+		// ellipse(-40, 0, 50, 50);
+		// ellipse(-30, 100, 50, 50);
+		// ellipse(-20, 200, 50, 50);
+		// ellipse(-10, 300, 50, 50);
 
 		// // right side
 		// ellipse(950, 0, 50, 50);
