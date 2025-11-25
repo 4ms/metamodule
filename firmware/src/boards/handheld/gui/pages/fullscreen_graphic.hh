@@ -5,6 +5,7 @@
 
 #include "sketch/test1.hh"
 #include "sketch/test2.hh"
+#include "sketch/test3.hh"
 
 namespace MetaModule
 {
@@ -18,6 +19,7 @@ struct FullscreenGraphicPage : PageBase {
 
 		sketch = std::make_unique<Handheld::Test1>();
 		// sketch = std::make_unique<Handheld::Test2>();
+		// sketch = std::make_unique<Handheld::Test3>();
 	}
 
 	void prepare_focus() final {
