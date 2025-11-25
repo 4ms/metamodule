@@ -7,14 +7,15 @@ namespace Handheld
 extern DrawState state_;
 
 void pushMatrix() {
-	state_.matrix_stack.push(state_.transform_matrix);
+	state_.matrix_stack.push_back(state_.transform_matrix);
+	if (state_.matrix_stack.size() == state_.matrix_stack.max_size()) {
+		printf("Error: maximum size of matrix stack exceeded\n");
+	}
 }
 
 void popMatrix() {
-	if (!state_.matrix_stack.empty()) {
-		state_.transform_matrix = state_.matrix_stack.top();
-		state_.matrix_stack.pop();
-	}
+	if (auto m = state_.matrix_stack.pop_back(); m.has_value())
+		state_.transform_matrix = m.value();
 }
 
 void translate(float x, float y) {

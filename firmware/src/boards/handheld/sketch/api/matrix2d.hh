@@ -12,16 +12,21 @@ struct Vertex {
 // | a  c  tx |
 // | b  d  ty |
 struct Matrix2D {
-	float a, b, c, d, tx, ty;
+	float a;
+	float b;
+	float c;
+	float d;
+	float tx;
+	float ty;
 
 	// Identity matrix
 	Matrix2D()
-		: a(1)
-		, b(0)
-		, c(0)
-		, d(1)
-		, tx(0)
-		, ty(0) {
+		: a{1}
+		, b{0}
+		, c{0}
+		, d{1}
+		, tx{0}
+		, ty{0} {
 	}
 
 	// Transform a point
@@ -38,15 +43,13 @@ struct Matrix2D {
 		float new_b = b * other.a + d * other.b;
 		float new_c = a * other.c + c * other.d;
 		float new_d = b * other.c + d * other.d;
-		float new_tx = a * other.tx + c * other.ty + tx;
-		float new_ty = b * other.tx + d * other.ty + ty;
+		tx += a * other.tx + c * other.ty;
+		ty += b * other.tx + d * other.ty;
 
 		a = new_a;
 		b = new_b;
 		c = new_c;
 		d = new_d;
-		tx = new_tx;
-		ty = new_ty;
 	}
 
 	// Apply translation
@@ -73,6 +76,14 @@ struct Matrix2D {
 		scl.a = sx;
 		scl.d = sy;
 		multiply(scl);
+	}
+
+	bool is_rotated() const {
+		return (b != 0 || c != 0);
+	}
+
+	bool is_transformed() const {
+		return (a != 1 || d != 1 || b != 0 || c != 0 || tx != 0 || ty != 0);
 	}
 };
 
