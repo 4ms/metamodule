@@ -78,7 +78,7 @@ void ellipse(int x, int y, int w, int h) {
 
 	// Calculate the top and bottom y coordinates for an x coordinate of an ellipse with radii rx, ry
 	auto ellipse_column = [&cx, &cy](int scan_x, float rx, float ry) {
-		float dx = scan_x - cx;
+		float dx = float(scan_x) - cx;
 
 		// Calculate y offset using ellipse equation: (y/yx)^2 + (x/rx)^2 = 1
 		// dy = ry * sqrt(1 - (x/rx)^2)
@@ -86,36 +86,44 @@ void ellipse(int x, int y, int w, int h) {
 		float x_ratio = dx / rx;
 		float discriminant = 1.0f - x_ratio * x_ratio;
 
-		if (discriminant < 0)
-			return std::make_pair(0, 0);
+		if (discriminant < 0) {
+			return std::make_pair(-1, -1);
+		}
 
 		float dy = ry * std::sqrt(discriminant);
 
 		// Calculate start and end y coordinates for this vert line
-		int y_start = std::clamp<int>(cy - dy, 0, Handheld::height - 1);
-		int y_end = std::clamp<int>(cy + dy, 0, Handheld::height - 1);
+		int y_start = std::clamp<int>(cy - dy + 0.5f, 0, Handheld::height - 1);
+		int y_end = std::clamp<int>(cy + dy + 0.5f, 0, Handheld::height - 1);
 		return std::make_pair(y_start, y_end);
 	};
 
 	for (int scan_x = stroke_left_start; scan_x < stroke_right_end; scan_x++) {
 		auto [y_outer_start, y_outer_end] = ellipse_column(scan_x, outer_rx, outer_ry);
+		if (y_outer_start < 0)
+			continue;
 
 		if (scan_x >= stroke_left_end && scan_x < stroke_right_start) {
 			auto [y_inner_start, y_inner_end] = ellipse_column(scan_x, inner_rx, inner_ry);
+			bool inner_valid = y_inner_start >= 0;
 
-			// Middle of ellipse: bottom and top stroke, and fill
-			if (state_.do_fill)
-				draw_vert_line(scan_x, y_inner_start, y_inner_end, state_.fill);
+			if (inner_valid) {
+				// Middle of ellipse: bottom and top stroke, and fill
+				if (state_.do_fill)
+					draw_vert_line(scan_x, y_inner_start, y_inner_end - 1, state_.fill);
 
-			if (state_.stroke_width >= 1) {
-				draw_vert_line(scan_x, y_outer_start, y_inner_start, state_.stroke);
-				draw_vert_line(scan_x, y_inner_end, y_outer_end, state_.stroke);
+				if (state_.stroke_width >= 1) {
+					draw_vert_line(scan_x, y_outer_start, y_inner_start - 1, state_.stroke);
+					draw_vert_line(scan_x, y_inner_end, y_outer_end - 1, state_.stroke);
+				}
+
+				continue;
 			}
-		} else {
-			// Left and right ends of ellipse: stroke only
-			if (state_.stroke_width >= 1) {
-				draw_vert_line(scan_x, y_outer_start, y_outer_end, state_.stroke);
-			}
+		}
+
+		// Left and right ends of ellipse: stroke only
+		if (state_.stroke_width >= 1 && y_outer_start >= 0) {
+			draw_vert_line(scan_x, y_outer_start, y_outer_end - 1, state_.stroke);
 		}
 	}
 }

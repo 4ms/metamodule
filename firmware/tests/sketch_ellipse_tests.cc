@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "sketch/api/draw_state.hh"
 #include "sketch/api/framebuffer.hh"
+#include <vector>
 
 namespace Handheld
 {
@@ -14,41 +15,49 @@ DrawState state_;
 
 TEST_CASE("draw ellipse") {
 	struct alignas(64) AlignedBuffer {
-		Handheld::Color data[20 * 20]{};
+		Handheld::Color data[8 * 8]{};
 	};
 	AlignedBuffer buf;
-	Handheld::height = 20;
-	Handheld::width = 20;
+	Handheld::height = 8;
+	Handheld::width = 8;
 
 	Handheld::set_buffer(buf.data);
 	for (auto &b : buf.data)
 		b = 0;
 
-	Handheld::fill(127);
-	Handheld::noStroke();
+	Handheld::noFill();
+	Handheld::stroke(255);
 	Handheld::ellipseMode(Handheld::CENTER);
-	Handheld::ellipse(3, 3, 4, 4);
+	Handheld::ellipse(3, 3, 5, 5);
 
-	/*
-	on screen:
-	   0 1 2 3 4 5 6
-	 0 . . . x . . . 
-	 1 . . x x x . .
-	 2 . x x c x x .
-	 3 . . x x x . .
-	 4 . . . . . . .
-	 5 . . . . . . .
-	 6 . . . . . . . 
-	 */
+	// Note, if ellipse algorithm changes,
+	// it's OK to modify this bitmap.
+	// A human must approve it "looks like" a small circle
+	std::vector<char> answer;
+	answer.resize(Handheld::width * Handheld::height);
+	strcpy(&answer[0x00], "........");
+	strcpy(&answer[0x08], "...xxx..");
+	strcpy(&answer[0x10], "..x...x.");
+	strcpy(&answer[0x18], "..x...x.");
+	strcpy(&answer[0x20], "..x...x.");
+	strcpy(&answer[0x28], "..xxxxx.");
+	strcpy(&answer[0x30], "........");
+	strcpy(&answer[0x38], "........");
 
 	for (unsigned i = 0; auto c : buf.data) {
-		if (i % Handheld::width == 0)
-			printf("\n");
+		// if (i % Handheld::width == 0)
+		// 	printf("\n");
+		// if (c == 0)
+		// 	printf(". ");
+		// else
+		// 	printf("x ");
+
 		if (c == 0)
-			printf(". ");
+			CHECK(answer[i] == '.');
 		else
-			printf("x ");
+			CHECK(answer[i] == 'x');
+
 		i++;
 	}
-	printf("\n");
+	// printf("\n");
 }
