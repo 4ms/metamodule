@@ -99,14 +99,8 @@ public:
 				float b = mod((n * 100 + hueShift), 255);
 
 				fill(r, g, b);
-				beginShape();
-				vertex(-len / 2, -1);
-				vertex(len / 2, -1);
-				vertex(len / 2, 1);
-				vertex(-len / 2, 1);
-				endShape(CLOSE);
-				// rectMode(CENTER);
-				// rect(0, 0, len, 2);
+				rectMode(CENTER);
+				rect(0, 0, len, 2);
 				popMatrix();
 			}
 		}
