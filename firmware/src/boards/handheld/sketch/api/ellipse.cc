@@ -51,6 +51,9 @@ void ellipse(int x, int y, int w, int h) {
 		state_.transform_matrix.transform(x2, y2);
 	}
 
+	float cx = (x + x2) / 2.f;
+	float cy = (y + y2) / 2.f;
+
 	float sw = (state_.stroke_width > 0) ? std::max<int>(1, state_.stroke_width) : 0;
 
 	// Calculate the start/stop for the stroke boundaries.
@@ -79,6 +82,9 @@ void ellipse(int x, int y, int w, int h) {
 	float outer_rx = sw + inner_rx;
 	float outer_ry = sw + inner_ry;
 
+	int unclamped_bounds_x = stroke_left_start;
+	int unclamped_bounds_x2 = stroke_right_end;
+
 	// Clamp after doing start/end calculations
 	// or else height and width are not clipped properly
 	auto clamp = [](int &a, int max) {
@@ -93,9 +99,6 @@ void ellipse(int x, int y, int w, int h) {
 	clamp(stroke_left_end, Handheld::width);
 	clamp(stroke_right_start, Handheld::width);
 	clamp(stroke_right_end, Handheld::width);
-
-	float cx = (x + x2) / 2.f;
-	float cy = (y + y2) / 2.f;
 
 	// Calculate the top and bottom y coordinates for an x coordinate of an ellipse with radii rx, ry
 	auto ellipse_column = [&cx, &cy](int scan_x, float rx, float ry) {
@@ -115,36 +118,71 @@ void ellipse(int x, int y, int w, int h) {
 
 		// Calculate start and end y coordinates for this vert line
 		int y_start = std::clamp<int>(cy - dy + 0.5f, 0, Handheld::height - 1);
-		int y_end = std::clamp<int>(cy + dy + 0.5f, 0, Handheld::height - 1);
-		return std::make_pair(y_start, y_end);
+		int y_end = std::clamp<int>(cy + dy + 0.5f, 0, Handheld::height) - 1;
+		if (y_end < y_start)
+			return std::make_pair(y_end, y_start);
+		else
+			return std::make_pair(y_start, y_end);
 	};
 
-	for (int scan_x = stroke_left_start; scan_x < stroke_right_end; scan_x++) {
+	// printf("cx:%g cy:%g\n", cx, cy);
+	// printf("inner_r: %g,%g, outer_r: %g,%g\n", inner_rx, inner_ry, outer_rx, outer_ry);
+	// printf("stroke_left:%d->%d, stroke_right:%d->%d\n",
+	// 	   stroke_left_start,
+	// 	   stroke_left_end,
+	// 	   stroke_right_start,
+	// 	   stroke_right_end);
+
+	auto center_x = std::clamp<int>(cx + 0.5f, 0, Handheld::width);
+
+	for (int scan_x = unclamped_bounds_x; scan_x < center_x; scan_x++) {
+		int mirror_x = unclamped_bounds_x2 - (scan_x - unclamped_bounds_x) - 1;
+		bool draw_mirror = mirror_x != scan_x;
+
 		auto [y_outer_start, y_outer_end] = ellipse_column(scan_x, outer_rx, outer_ry);
 		if (y_outer_start < 0)
 			continue;
 
-		if (scan_x >= stroke_left_end && scan_x < stroke_right_start) {
+		if (scan_x >= stroke_left_end && scan_x <= stroke_right_start) {
+			//TODO: if inner_rx == outer_rx and inner_ry== outer_ry, then y_inner_* = y_outer_*
 			auto [y_inner_start, y_inner_end] = ellipse_column(scan_x, inner_rx, inner_ry);
 			bool inner_valid = y_inner_start >= 0;
 
+			// printf("x: %d and %d: outer_y:%d->%d inner_y:%d->%d\n",
+			// 	   scan_x,
+			// 	   mirror_x,
+			// 	   y_outer_start,
+			// 	   y_outer_end,
+			// 	   y_inner_start,
+			// 	   y_inner_end);
+
 			if (inner_valid) {
 				// Middle of ellipse: bottom and top stroke, and fill
-				if (state_.do_fill)
-					draw_vert_line(scan_x, y_inner_start, y_inner_end - 1, state_.fill);
+				if (state_.do_fill) {
+					draw_vert_line(scan_x, y_inner_start, y_inner_end, state_.fill);
+					if (draw_mirror)
+						draw_vert_line(mirror_x, y_inner_start, y_inner_end, state_.fill);
+				}
 
-				if (state_.stroke_width >= 1) {
+				if (state_.stroke_width != 0) {
 					draw_vert_line(scan_x, y_outer_start, y_inner_start - 1, state_.stroke);
-					draw_vert_line(scan_x, y_inner_end, y_outer_end - 1, state_.stroke);
+					if (draw_mirror)
+						draw_vert_line(mirror_x, y_outer_start, y_inner_start - 1, state_.stroke);
+					draw_vert_line(scan_x, y_inner_end + 1, y_outer_end, state_.stroke);
+					if (draw_mirror)
+						draw_vert_line(mirror_x, y_inner_end + 1, y_outer_end, state_.stroke);
 				}
 
 				continue;
 			}
 		}
+		// printf("x: %d and %d: outer_y:%d->%d\n", scan_x, mirror_x, y_outer_start, y_outer_end);
 
 		// Left and right ends of ellipse: stroke only
-		if (state_.stroke_width >= 1 && y_outer_start >= 0) {
-			draw_vert_line(scan_x, y_outer_start, y_outer_end - 1, state_.stroke);
+		if (state_.stroke_width != 0) {
+			draw_vert_line(scan_x, y_outer_start, y_outer_end, state_.stroke);
+			if (draw_mirror)
+				draw_vert_line(mirror_x, y_outer_start, y_outer_end, state_.stroke);
 		}
 	}
 }

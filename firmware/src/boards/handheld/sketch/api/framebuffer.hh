@@ -26,6 +26,9 @@ inline void draw_vert_line(int x, int y_start, int y_end, const Color color) {
 	}
 #endif
 
+	if (x < 0 || x >= (int)Handheld::width)
+		return;
+
 	if (y_end == y_start) {
 		*buf(x, y_start) = color;
 		return;
