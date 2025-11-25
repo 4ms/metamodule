@@ -16,16 +16,153 @@ public:
 
 	void draw() {
 		background(0);
-		test_benchmark();
+		// test_benchmark();
 
 		// test_rect_bounds();
 		// test_stroke_align();
 		// test_transformed_rect();
+		// test_transformed_ellipses();
+		test_rotated_rects_ellipses();
 
 		// test_ellipses();
 	}
 
+	void test_rotated_rects_ellipses() {
+		rectMode(CENTER);
+		strokeWeight(1);
+		stroke(255, 0, 0);
+
+		pushMatrix();
+		translate(100, 50);
+		fill(0, 0, 255);
+		rect(0, 0, 100, 75);
+		popMatrix();
+
+		pushMatrix();
+		translate(100, 150);
+		rotate(1.0 / 360.0 * TWO_PI);
+		fill(0, 255, 255);
+		rect(0, 0, 100, 75);
+		popMatrix();
+
+		pushMatrix();
+		//green
+		fill(0, 255, 0);
+		translate(100, 250);
+		rotate(45.0 / 360.0 * TWO_PI);
+		rect(0, 0, 100, 75);
+		popMatrix();
+
+		pushMatrix();
+		fill(0, 255, 0);
+		translate(100, 349);
+		rotate(90.0 / 360.0 * TWO_PI);
+		rect(0, 0, 100, 75);
+		popMatrix();
+
+		// ellipses:
+		auto draw_ellipses = []() {
+			pushMatrix();
+			translate(100, 50);
+			fill(0, 0, 255);
+			ellipse(0, 0, 100, 75);
+			popMatrix();
+
+			pushMatrix();
+			translate(100, 150);
+			rotate(1.0 / 360.0 * TWO_PI);
+			fill(0, 255, 255);
+			ellipse(0, 0, 100, 75);
+			popMatrix();
+
+			pushMatrix();
+			fill(0, 255, 0);
+			translate(100, 250);
+			rotate(45.0 / 360.0 * TWO_PI);
+			ellipse(0, 0, 100, 75);
+			popMatrix();
+
+			pushMatrix();
+			fill(0, 255, 0);
+			translate(100, 349);
+			rotate(90.0 / 360.0 * TWO_PI);
+			ellipse(0, 0, 100, 75);
+			popMatrix();
+		};
+
+		// low res (diamond)
+		pushMatrix();
+		setTransformResolution(4);
+		translate(150, 0);
+		draw_ellipses();
+		popMatrix();
+
+		// med res
+		pushMatrix();
+		setTransformResolution(8);
+		translate(250, 0);
+		draw_ellipses();
+		popMatrix();
+
+		pushMatrix();
+		setTransformResolution(16);
+		translate(350, 0);
+		draw_ellipses();
+		popMatrix();
+
+		pushMatrix();
+		setTransformResolution(32);
+		translate(450, 0);
+		draw_ellipses();
+		popMatrix();
+
+		pushMatrix();
+		setTransformResolution(64);
+		translate(550, 0);
+		draw_ellipses();
+		popMatrix();
+
+		pushMatrix();
+		setTransformResolution(128);
+		translate(650, 0);
+		draw_ellipses();
+		popMatrix();
+
+		pushMatrix();
+		setTransformResolution(128);
+		translate(850, 100);
+		fill(200, 200, 63);
+		noStroke();
+		rotate(ctr * 2 / 360.0 * TWO_PI);
+		ellipse(0, 0, 100, 75);
+		popMatrix();
+
+		pushMatrix();
+		setTransformResolution(128);
+		translate(850, 200);
+		fill(127, 63, 0);
+		strokeWeight(1);
+		stroke(255);
+		rotate(ctr * 2 / 360.0 * TWO_PI);
+		ellipse(0, 0, 100, 75);
+		popMatrix();
+
+		pushMatrix();
+		setTransformResolution(128);
+		translate(850, 300);
+		noFill();
+		strokeWeight(4);
+		rotate(ctr * 2 / 360.0 * TWO_PI);
+		ellipse(0, 0, 100, 75);
+		popMatrix();
+
+		ctr++;
+		if (ctr >= 360)
+			ctr = 0;
+	}
+
 	void test_transformed_rect() {
+		rectMode(CORNER);
 		strokeWeight(0);
 
 		// green rect in upper left
@@ -90,6 +227,76 @@ public:
 		rect(400, 300, 50, 50);
 		popMatrix();
 		rect(400, 300, 50, 50);
+		popMatrix();
+	}
+
+	void test_transformed_ellipses() {
+		ellipseMode(CORNER);
+
+		strokeWeight(0);
+
+		// green rect in upper left
+		fill(0, 127, 0);
+		ellipse(0, 0, 100, 100);
+
+		// yellow square touching green's bottom-right corner
+		pushMatrix();
+		translate(100, 100);
+		fill(127, 127, 0);
+		ellipse(0, 0, 100, 100);
+		popMatrix();
+
+		// White ellipseangle nested between yellow and green
+		// 1px gap between yellow and white
+		// no gap between green and white
+		pushMatrix();
+		scale(2, 1.5);
+		fill(127, 127, 127);
+		ellipse(50, 33, 50, 33);
+		popMatrix();
+
+		// Cyan ellipse continues stair-case pattern
+		// 1px gap between cyan and yellow
+		// checks translate() then scale()
+		pushMatrix();
+		translate(101, 50);
+		scale(2, 1.5);
+		fill(0, 127, 127);
+		ellipse(50, 33, 50, 33);
+		popMatrix();
+
+		// purple ellipse, meets cyan ellipse like a half-height step.
+		// checks scale() then translate()
+		pushMatrix();
+		scale(2, 1.5);
+		translate(101, 50);
+		fill(127, 0, 127);
+		ellipse(50, 33, 50, 33);
+		popMatrix();
+
+		// Blue and gold 50x50 squares in checkerboard
+		// checks nested matrices
+		pushMatrix();
+		fill(0, 0, 127);
+		translate(-300, -100);
+		ellipse(300, 300, 50, 50);
+		pushMatrix();
+		translate(50, 50);
+		ellipse(300, 300, 50, 50);
+		pushMatrix();
+		translate(50, 50);
+		ellipse(300, 300, 50, 50);
+		pushMatrix();
+		translate(50, 50);
+		ellipse(300, 300, 50, 50);
+		fill(60, 60, 0);
+		ellipse(400, 300, 50, 50);
+		popMatrix();
+		ellipse(400, 300, 50, 50);
+		popMatrix();
+		ellipse(400, 300, 50, 50);
+		popMatrix();
+		ellipse(400, 300, 50, 50);
 		popMatrix();
 	}
 
@@ -239,12 +446,13 @@ public:
 	}
 
 	void test_ellipses() {
-		Handheld::fill(255);
-		// Handheld::stroke(255);
-		// Handheld::strokeWeight(1);
-		Handheld::noStroke();
-		Handheld::ellipseMode(Handheld::CENTER);
-		Handheld::ellipse(10, 10, 9, 9);
+		// small ellipse in top corner
+		fill(255);
+		noStroke();
+		ellipseMode(Handheld::CENTER);
+		ellipse(10, 10, 9, 9);
+
+		rectMode(CENTER);
 
 		// 50x50 ellipse + 20 stroke => 70x70 outer size
 		// is 30x30 inner size, 70x70 outer size
@@ -255,48 +463,59 @@ public:
 		stroke(255);
 		strokeWeight(20.f);
 		ellipse(480, 150, 100, 50);
+		// rect(480, 150, 100, 50);
 
 		fill(255, 0, 0);
 		stroke(255);
 		strokeWeight(0.f);
 		ellipse(480, 250, 120, 70);
+		// rect(480, 250, 120, 70);
 
 		noFill();
 		stroke(255);
 		strokeWeight(1.f);
 		ellipse(480, 50, 120, 70);
 
+		//thin stroke
+		fill(0, 255, 0);
+		stroke(255);
+		strokeWeight(1.f);
+		ellipse(480, 345, 120, 50);
+		// rect(480, 345, 120, 50);
+
+		// reset
 		strokeWeight(20.f);
 		fill(255, 0, 0);
 		ellipseMode(CORNER);
+		rectMode(CORNER);
 
 		// left side
-		// ellipse(-40, 0, 50, 50);
-		// ellipse(-30, 100, 50, 50);
-		// ellipse(-20, 200, 50, 50);
-		// ellipse(-10, 300, 50, 50);
+		ellipse(-40, 0, 50, 50);
+		ellipse(-30, 100, 50, 50);
+		ellipse(-20, 200, 50, 50);
+		ellipse(-10, 300, 50, 50);
 
-		// // right side
-		// ellipse(950, 0, 50, 50);
-		// ellipse(940, 100, 50, 50);
-		// ellipse(930, 200, 50, 50);
-		// ellipse(920, 300, 50, 50);
+		// right side
+		ellipse(950, 0, 50, 50);
+		ellipse(940, 100, 50, 50);
+		ellipse(930, 200, 50, 50);
+		ellipse(920, 300, 50, 50);
 
-		// // top side
-		// ellipse(100, -50, 50, 50);
-		// ellipse(200, -40, 50, 50);
-		// ellipse(300, -30, 50, 50);
-		// ellipse(400, -20, 50, 50);
-		// ellipse(500, -10, 50, 50);
-		// ellipse(600, 0, 50, 50);
+		// top side
+		ellipse(100, -50, 50, 50); // visible half of stroke
+		ellipse(200, -40, 50, 50); // visible all of stroke
+		ellipse(300, -30, 50, 50); // visible < half center
+		ellipse(600, -20, 50, 50); // visible > half center
+		ellipse(700, -10, 50, 50); // visible exactly entire filled portion
+		ellipse(800, 0, 50, 50);   // visible all but the top half of stroke
 
-		// // bottom side
-		// ellipse(100, 400, 50, 50);
-		// ellipse(200, 390, 50, 50);
-		// ellipse(300, 380, 50, 50);
-		// ellipse(400, 370, 50, 50);
-		// ellipse(500, 360, 50, 50);
-		// ellipse(600, 350, 50, 50);
+		// bottom side
+		ellipse(100, 400, 50, 50);
+		ellipse(200, 390, 50, 50);
+		ellipse(300, 380, 50, 50);
+		ellipse(600, 370, 50, 50);
+		ellipse(700, 360, 50, 50);
+		ellipse(800, 350, 50, 50);
 	}
 
 	void test_shapes() {
