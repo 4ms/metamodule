@@ -21,11 +21,12 @@ class Display {
 
 	static inline ScreenParallelWriter<ScreenConf> ltdc_driver;
 
+	static inline unsigned cur_buf = 0;
 	using FrameBufferT = std::array<Handheld::Color, MetaModule::ScreenBufferConf::NumPixels>;
-	__attribute__((section(".framebuf"))) static inline std::array<FrameBufferT, 2> framebuf alignas(64);
+
 	// Cache maintenance is not needed since we are using Normal_NonCache mmu region
 #undef FRAMEBUFFER_CACHE_MAINTAIN
-	static inline unsigned cur_buf = 0;
+	__attribute__((section(".framebuf"))) static inline std::array<FrameBufferT, 2> framebuf alignas(64);
 
 public:
 	static void init() {
