@@ -1,4 +1,5 @@
 #include "../api.hh"
+#include "coords.hh"
 #include "draw_state.hh"
 #include "framebuffer.hh"
 
@@ -8,49 +9,23 @@ namespace Handheld
 extern DrawState state_;
 
 void ellipse(int x, int y, int w, int h) {
-	// Convert parameters based on ellipse mode
-	int cx, cy;
-	float rx, ry;
 
-	switch (state_.ellipse_mode) {
-		case CORNER:
-		default:
-			// (x, y) is top-left corner, w and h are width and height
-			cx = x + w / 2;
-			cy = y + h / 2;
-			rx = w / 2.0f;
-			ry = h / 2.0f;
-			break;
-		case CENTER:
-			// (x, y) is center, w and h are width and height
-			cx = x;
-			cy = y;
-			rx = w / 2.0f;
-			ry = h / 2.0f;
-			break;
-		case RADIUS:
-			// (x, y) is center, w and h are radii
-			cx = x;
-			cy = y;
-			rx = w;
-			ry = h;
-			break;
-		case CORNERS:
-			// (x, y) is one corner, w and h are opposite corner coordinates
-			cx = (x + (int)w) / 2;
-			cy = (y + (int)h) / 2;
-			rx = std::abs((int)w - x) / 2.0f;
-			ry = std::abs((int)h - y) / 2.0f;
-			break;
-	}
+	// Convert parameters based on ellipse mode
+	convert_coords(state_.ellipse_mode, x, y, w, h);
 
 	// Skip if ellipse is outside screen bounds
-	if (cx + rx < 0 || cx - rx >= (int)width || cy + ry < 0 || cy - ry >= (int)height)
+	if (x + w < 0 || x >= (int)Handheld::width || y + h < 0 || y >= (int)Handheld::height)
 		return;
 
 	// Skip if ellipse is too small
-	if (rx < 0.5f || ry < 0.5f)
+	if (w < 1 || h < 1)
 		return;
+
+	float rx = w / 2.f;
+	float ry = h / 2.f;
+
+	int cx = x + rx;
+	int cy = y + ry;
 
 	// For each y coordinate, calculate the x coordinates where the ellipse intersects
 	int y_start = std::max(0, (int)(cy - ry));
@@ -126,7 +101,7 @@ void ellipse(int x, int y, int w, int h) {
 			// Draw left stroke edge
 			int x_outer_left = std::max(0, (int)(cx - dx_outer));
 			int x_inner_left = std::max(0, (int)(cx - dx_inner));
-			for (int scan_x = x_outer_left; scan_x < x_inner_left && scan_x < (int)width; scan_x++) {
+			for (int scan_x = x_outer_left; scan_x <= x_inner_left && scan_x < (int)width; scan_x++) {
 				*buf(scan_x, scan_y) = state_.stroke;
 			}
 
