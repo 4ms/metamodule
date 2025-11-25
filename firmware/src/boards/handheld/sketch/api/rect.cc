@@ -1,4 +1,5 @@
 #include "../api.hh"
+#include "coords.hh"
 #include "draw_state.hh"
 #include "framebuffer.hh"
 
@@ -8,142 +9,98 @@ namespace Handheld
 extern DrawState state_;
 
 void rect(int x, int y, int w, int h) {
-	// Convert parameters based on rect mode
-	int rect_x, rect_y;
-	unsigned rect_w, rect_h;
+	convert_coords(state_.rect_mode, x, y, w, h);
 
-	switch (state_.rect_mode) {
-		case CORNER:
-		default:
-			// (x, y) is top-left corner, w and h are width and height
-			rect_x = x;
-			rect_y = y;
-			rect_w = w;
-			rect_h = h;
-			break;
-		case CENTER:
-			// (x, y) is center, w and h are width and height
-			rect_x = x - w / 2;
-			rect_y = y - h / 2;
-			rect_w = w;
-			rect_h = h;
-			break;
-		case RADIUS:
-			// (x, y) is center, w and h are radii (half width and height)
-			rect_x = x - w;
-			rect_y = y - h;
-			rect_w = w * 2;
-			rect_h = h * 2;
-			break;
-		case CORNERS:
-			// (x, y) is one corner, w and h are the opposite corner coordinates
-			rect_x = std::min(x, (int)w);
-			rect_y = std::min(y, (int)h);
-			rect_w = std::abs((int)w - x);
-			rect_h = std::abs((int)h - y);
-			break;
+	int x2 = x + w;
+	int y2 = y + h;
+
+	if (state_.transform_matrix.is_rotated()) {
+		auto restore_shape_mode = state_.shape_mode;
+		shapeMode(CoordMode::CORNER);
+		beginShape();
+		vertex(x, y);
+		vertex(x2, y);
+		vertex(x2, y2);
+		vertex(x, y2);
+		endShape(CLOSE);
+		shapeMode(restore_shape_mode);
+		return;
 	}
 
-	// Use converted coordinates
-	x = rect_x;
-	y = rect_y;
-	w = rect_w;
-	h = rect_h;
-
-	if (x >= (int)width || y >= (int)height)
+	if (x >= (int)Handheld::width || y >= (int)Handheld::height || x2 < 0 || y2 < 0)
 		return;
 
-	// Store original bounds for stroke
-	int orig_x = x;
-	int orig_y = y;
-	int orig_w = w;
-	int orig_h = h;
-
-	// clamp right side
-	auto x2 = std::min<int>(x + w, width);
-
-	// clamp bottom side
-	h = std::min<int>(y + h, height - 1) - y;
-
-	// clamp left side
-	if (x < 0)
-		x = 0;
-
-	// clamp top side
-	if (y < 0) {
-		h += y;
-		y = 0;
+	if (state_.transform_matrix.is_transformed()) {
+		float x1f = x;
+		float y1f = y;
+		float x2f = x2;
+		float y2f = y2;
+		state_.transform_matrix.transform(x1f, y1f);
+		state_.transform_matrix.transform(x2f, y2f);
+		x = std::round(x1f);
+		y = std::round(y1f);
+		x2 = std::round(x2f);
+		y2 = std::round(y2f);
 	}
+
+	int sw = (state_.stroke_width > 0) ? std::max<int>(1, state_.stroke_width) : 0;
+
+	// Calculate the start/stop for the stroke boundaries.
+	// The fill portion is inside this.
+
+	// Top and bottom edges:
+	// For odd stroke width: draw more inner than outer on top
+	//                       draw more outer than inner on bottom
+	int stroke_top_start = y - sw / 2;
+	int stroke_top_end = stroke_top_start + state_.stroke_width;
+	int stroke_bottom_start = y2 - sw / 2;
+	int stroke_bottom_end = stroke_bottom_start + state_.stroke_width;
+
+	// Left edge: draw TL and BL corners, too
+	// For odd stroke width, draw more inner than outer
+	int stroke_left_start = x - sw / 2;
+	int stroke_left_end = stroke_left_start + sw;
+
+	// Right edge: draw TR and BR corners, too
+	// For odd stroke width, draw more outer than inner
+	int stroke_right_start = x2 - sw / 2;
+	int stroke_right_end = stroke_right_start + sw;
+
+	// Clamp after doing start/end calculations
+	// or else height and width are not clipped properly
+	auto clamp = [](int &a, int max) {
+		a = std::clamp<int>(a, 0, max - 1);
+	};
+	clamp(stroke_top_start, Handheld::height);
+	clamp(stroke_top_end, Handheld::height);
+	clamp(stroke_bottom_start, Handheld::height);
+	clamp(stroke_bottom_end, Handheld::height);
+
+	clamp(stroke_left_start, Handheld::width);
+	clamp(stroke_left_end, Handheld::width);
+	clamp(stroke_right_start, Handheld::width);
+	clamp(stroke_right_end, Handheld::width);
 
 	// Draw fill
-	// TODO: shrink size by stroke/2
 	if (state_.do_fill) {
-		int inner_stroke = state_.stroke_width / 2;
-		x += inner_stroke;
-		x2 -= inner_stroke;
-		for (int col = x; col < x2; col++) {
-			// Fill a column
-			draw_vline(y, h, col, state_.fill);
+		for (int col = stroke_left_end; col < stroke_right_start; col++) {
+			draw_vert_line(col, stroke_top_end, stroke_bottom_start - 1, state_.fill);
 		}
 	}
 
-	// Draw stroke (centered on edge)
+	// Draw stroke
 	if (state_.stroke_width > 0) {
-		int sw = std::max(1, (int)state_.stroke_width);
-		int half_sw = sw / 2;
-
-		// Top edge: centered at orig_y
-		int top_start = orig_y - half_sw;
-		int top_end = top_start + sw;
-		for (int sy = top_start; sy < top_end; sy++) {
-			if (sy >= 0 && sy < (int)height) {
-				int sx_start = std::max(0, orig_x - half_sw);
-				int sx_end = std::min((int)width, orig_x + (int)orig_w + half_sw);
-				for (int sx = sx_start; sx < sx_end; sx++) {
-					*buf(sx, sy) = state_.stroke;
-				}
-			}
+		for (int sx = stroke_left_end; sx < stroke_right_start; sx++) {
+			draw_vert_line(sx, stroke_top_start, stroke_top_end - 1, state_.stroke);
+			draw_vert_line(sx, stroke_bottom_start, stroke_bottom_end - 1, state_.stroke);
 		}
 
-		// Bottom edge: centered at orig_y + orig_h
-		int bottom_start = orig_y + orig_h - half_sw;
-		int bottom_end = bottom_start + sw;
-		for (int sy = bottom_start; sy < bottom_end; sy++) {
-			if (sy >= 0 && sy < (int)height) {
-				int sx_start = std::max(0, orig_x - half_sw);
-				int sx_end = std::min((int)width, orig_x + (int)orig_w + half_sw);
-				for (int sx = sx_start; sx < sx_end; sx++) {
-					*buf(sx, sy) = state_.stroke;
-				}
-			}
+		for (int sx = stroke_left_start; sx < stroke_left_end; sx++) {
+			draw_vert_line(sx, stroke_top_start, stroke_bottom_end - 1, state_.stroke);
 		}
 
-		// Left edge: centered at orig_x
-		int left_start = orig_x - half_sw;
-		int left_end = left_start + sw;
-		for (int sx = left_start; sx < left_end; sx++) {
-			if (sx >= 0 && sx < (int)width) {
-				// Don't redraw corners (already drawn by top/bottom edges)
-				int sy_start = std::max(0, orig_y + half_sw);
-				int sy_end = std::min((int)height, orig_y + (int)orig_h - half_sw);
-				for (int sy = sy_start; sy < sy_end; sy++) {
-					*buf(sx, sy) = state_.stroke;
-				}
-			}
-		}
-
-		// Right edge: centered at orig_x + orig_w
-		int right_start = orig_x + orig_w - half_sw;
-		int right_end = right_start + sw;
-		for (int sx = right_start; sx < right_end; sx++) {
-			if (sx >= 0 && sx < (int)width) {
-				// Don't redraw corners (already drawn by top/bottom edges)
-				int sy_start = std::max(0, orig_y + half_sw);
-				int sy_end = std::min((int)height, orig_y + (int)orig_h - half_sw);
-				for (int sy = sy_start; sy < sy_end; sy++) {
-					*buf(sx, sy) = state_.stroke;
-				}
-			}
+		for (int sx = stroke_right_start; sx < stroke_right_end; sx++) {
+			draw_vert_line(sx, stroke_top_start, stroke_bottom_end - 1, state_.stroke);
 		}
 	}
 }
