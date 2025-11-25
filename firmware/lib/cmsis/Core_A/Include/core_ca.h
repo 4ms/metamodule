@@ -1937,6 +1937,20 @@ typedef struct RegionStruct {
                                    region.user_t = RW; \
                                    region.sh_t = NON_SHARED; \
                                    MMU_GetSectionDescriptor(&descriptor_l1, region);
+//Sect_Normal_RW. Sect_Normal_Cod, but writeable and not executable
+#define section_normal_rw_shared(descriptor_l1, region) region.rg_t = SECTION; \
+                                   region.domain = 0x0; \
+                                   region.e_t = ECC_DISABLED; \
+                                   region.g_t = GLOBAL; \
+                                   region.inner_norm_t = WB_WA; \
+                                   region.outer_norm_t = WB_WA; \
+                                   region.mem_t = NORMAL; \
+                                   region.sec_t = SECURE; \
+                                   region.xn_t = NON_EXECUTE; \
+                                   region.priv_t = RW; \
+                                   region.user_t = RW; \
+                                   region.sh_t = SHARED; \
+                                   MMU_GetSectionDescriptor(&descriptor_l1, region);
 //Sect_SO. Strongly-ordered (therefore shareable), not executable, rw, domain 0, base addr 0
 #define section_so(descriptor_l1, region) region.rg_t = SECTION; \
                                    region.domain = 0x0; \
