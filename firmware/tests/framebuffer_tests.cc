@@ -63,7 +63,7 @@ TEST_CASE("draw vline") {
 	  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . x x x . . . . . . . . . . . . . . . 
    */
 		auto color = Handheld::Color(0x11AA55);
-		Handheld::draw_vline(1, 3, 4, color);
+		Handheld::draw_vert_line(4, 1, 3, color);
 
 		CHECK(uint16_t(buf.data[31]) == uint16_t(color));
 		CHECK(buf.data[32].raw() == color.raw());
@@ -109,7 +109,7 @@ TEST_CASE("draw vline") {
 	  . . . . . . . x x x x x x . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
    */
 		auto color = Handheld::Color(0x55AA);
-		Handheld::draw_vline(1, 6, 1, color);
+		Handheld::draw_vert_line(1, 1, 6, color);
 		for (unsigned i = 0; auto b : buf.data) {
 			if (i >= 7 && i <= 12) {
 				CHECK(uint16_t(b) == uint16_t(color));
@@ -122,7 +122,7 @@ TEST_CASE("draw vline") {
 
 	SUBCASE("dot at loweset memory address") {
 		auto color = Handheld::Color(0x5555);
-		Handheld::draw_vline(6, 1, 0, color);
+		Handheld::draw_vert_line(0, 6, 6, color);
 		for (unsigned i = 0; auto b : buf.data) {
 			if (i == 0) {
 				CHECK(uint16_t(b) == uint16_t(color));
