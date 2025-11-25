@@ -95,21 +95,21 @@ void endShape(ShapeMode mode) {
 	bool closed = (mode == CLOSE);
 	size_t num_vertices = state_.vertices.size();
 
-	// Draw fill using scan-line algorithm
+	// Draw fill using column-based scan algorithm (optimized for rotated framebuffer)
 	if (state_.do_fill && num_vertices >= 3) {
 		// Find bounding box
-		float min_y = state_.vertices[0].y;
-		float max_y = state_.vertices[0].y;
+		float min_x = state_.vertices[0].x;
+		float max_x = state_.vertices[0].x;
 		for (const auto &v : state_.vertices) {
-			min_y = std::min(min_y, v.y);
-			max_y = std::max(max_y, v.y);
+			min_x = std::min(min_x, v.x);
+			max_x = std::max(max_x, v.x);
 		}
 
-		int y_start = std::max(0, (int)min_y);
-		int y_end = std::min((int)height - 1, (int)max_y);
+		int x_start = std::max(0, (int)min_x);
+		int x_end = std::min((int)width - 1, (int)max_x);
 
-		// For each scan line
-		for (int scan_y = y_start; scan_y <= y_end; scan_y++) {
+		// For each column (scan along X axis)
+		for (int scan_x = x_start; scan_x <= x_end; scan_x++) {
 			intersections.clear();
 
 			// Find intersections with polygon edges
@@ -121,25 +121,25 @@ void endShape(ShapeMode mode) {
 				const Vertex &v1 = state_.vertices[i];
 				const Vertex &v2 = state_.vertices[j];
 
-				// Check if edge crosses scan line
-				if ((v1.y <= scan_y && v2.y > scan_y) || (v2.y <= scan_y && v1.y > scan_y)) {
-					// Calculate intersection x coordinate
-					float t = (scan_y - v1.y) / (v2.y - v1.y);
-					float x_intersect = v1.x + t * (v2.x - v1.x);
-					intersections.push_back(x_intersect);
+				// Check if edge crosses vertical scan line
+				if ((v1.x <= scan_x && v2.x > scan_x) || (v2.x <= scan_x && v1.x > scan_x)) {
+					// Calculate intersection y coordinate
+					float t = (scan_x - v1.x) / (v2.x - v1.x);
+					float y_intersect = v1.y + t * (v2.y - v1.y);
+					intersections.push_back(y_intersect);
 				}
 			}
 
 			// Sort intersections
 			std::sort(intersections.begin(), intersections.end());
 
-			// Fill between pairs of intersections
+			// Fill between pairs of intersections using optimized vertical line drawing
 			for (size_t i = 0; i + 1 < intersections.size(); i += 2) {
-				int x_start = std::max(0, (int)intersections[i]);
-				int x_end = std::min((int)width - 1, (int)intersections[i + 1]);
+				int y_start = std::clamp((int)intersections[i], 0, (int)height - 1);
+				int y_end = std::clamp((int)intersections[i + 1], 0, (int)height - 1);
 
-				for (int x = x_start; x <= x_end; x++) {
-					*buf(x, scan_y) = state_.fill;
+				if (y_end >= y_start) {
+					draw_vert_line(scan_x, y_start, y_end, state_.fill);
 				}
 			}
 		}
