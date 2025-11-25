@@ -211,24 +211,19 @@ public:
 
 		// centered for reference
 		ellipseMode(CENTER);
-		ellipse(480, 150, 50, 50);
-
-		rectMode(CENTER);
-		rect(480, 50, 50, 50);
+		ellipse(480, 150, 100, 50);
 
 		strokeWeight(0.f);
-		ellipse(480, 250, 70, 70);
-
-		rect(480, 350, 70, 70);
+		ellipse(480, 250, 120, 70);
 
 		strokeWeight(20.f);
 		ellipseMode(CORNER);
 
 		// left side
-		// ellipse(-40, 0, 50, 50);
-		// ellipse(-30, 100, 50, 50);
-		// ellipse(-20, 200, 50, 50);
-		// ellipse(-10, 300, 50, 50);
+		ellipse(-40, 0, 50, 50);
+		ellipse(-30, 100, 50, 50);
+		ellipse(-20, 200, 50, 50);
+		ellipse(-10, 300, 50, 50);
 
 		// // right side
 		// ellipse(950, 0, 50, 50);
