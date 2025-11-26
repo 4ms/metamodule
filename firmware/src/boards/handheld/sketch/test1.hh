@@ -20,11 +20,16 @@ public:
 
 		// test_rect_bounds();
 		// test_stroke_align();
+		// test_ellipses();
+
 		// test_transformed_rect();
 		// test_transformed_ellipses();
-		test_rotated_rects_ellipses();
 
-		// test_ellipses();
+		// test_rotated_rects_ellipses();
+
+		// test_rand_rects();
+
+		test_shapes();
 	}
 
 	void test_rotated_rects_ellipses() {
@@ -441,7 +446,12 @@ public:
 	void test_rand_rects() {
 		for (int i = 0; i < 100; i++) {
 			fill(std::rand() & 0xFF, std::rand() & 0xFF, std::rand() & 0xFF);
-			rect(std::rand() % 900, std::rand() % 400, std::rand() % 400, std::rand() % 200);
+			stroke(std::rand() & 0xFF, std::rand() & 0xFF, std::rand() & 0xFF);
+			strokeWeight(std::rand() & 0x1F);
+			if (std::rand() & 0b1)
+				rect(std::rand() % 900, std::rand() % 400, std::rand() % 400, std::rand() % 200);
+			else
+				ellipse(std::rand() % 900, std::rand() % 400, std::rand() % 400, std::rand() % 200);
 		}
 	}
 
@@ -519,29 +529,42 @@ public:
 	}
 
 	void test_shapes() {
-		// noFill();
-		// stroke(0, 255, 0);
-		// beginShape();
-		// vertex(10 + ctr % width, 10);
-		// vertex(50 + ctr % width, 50);
-		// vertex(100 + ctr % width, 30);
-		// vertex(150 + ctr % width, 70);
-		// endShape(OPEN);
+		noFill();
 
-		// Draw a concave shape
-		// fill(255, 0, 0);
-		// stroke(0, 0, 255);
-		// strokeWeight(40);
-		// pushMatrix();
-		// translate(width / 2, height / 2);
-		// rotate(90.f / 360.f * TWO_PI);
-		// beginShape();
-		// vertex(0, -50);
-		// vertex(50, 50);
-		// vertex(0, 35);
-		// vertex(-50, 50);
-		// endShape(CLOSE);
-		// popMatrix();
+		// open shape
+		strokeWeight(1);
+		stroke(0, 255, 0);
+		beginShape();
+		vertex(10, 10);
+		vertex(50, 50);
+		vertex(100, 30);
+		vertex(150, 70);
+		endShape(OPEN);
+
+		// open shape, thick stroke
+		strokeWeight(20);
+		stroke(0, 255, 0);
+		beginShape();
+		vertex(10, 110);
+		vertex(50, 150);
+		vertex(100, 130);
+		vertex(150, 170);
+		endShape(OPEN);
+
+		// filled, no stroke concave shape, rotated
+		fill(255, 0, 0);
+		stroke(0, 0, 255);
+		noStroke();
+		pushMatrix();
+		translate(width / 2.f, height / 2.f);
+		rotate(90.f / 360.f * TWO_PI);
+		beginShape();
+		vertex(0, -50);
+		vertex(50, 50);
+		vertex(0, 35);
+		vertex(-50, 50);
+		endShape(CLOSE);
+		popMatrix();
 
 		// fill(255, 0, 0);
 		// stroke(0, 0, 255);
