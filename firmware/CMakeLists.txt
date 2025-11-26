@@ -11,6 +11,24 @@ project(
   LANGUAGES C CXX ASM
 )
 
+set(FWDIR ${CMAKE_CURRENT_LIST_DIR})
+
+# Default to MetaModule (euro26hp)
+
+if(BOARD STREQUAL "")
+  set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/euro26hp)
+
+else()
+  # TODO check if dir exists, then try BOARD_SUPPORT_DIR as abs path, and try ./src/boards/BOARD_SUPPORT_DIR
+  set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/${BOARD})
+
+endif()
+
+# ###########################3
+
+message("BOARD_SUPPORT_DIR: ${BOARD_SUPPORT_DIR}")
+include(${BOARD_SUPPORT_DIR}/CMakeLists.txt)
+
 #
 # Git commit hash
 #
@@ -234,7 +252,7 @@ endif()
 
 add_custom_target(
   bootloader
-  COMMAND make --no-print-directory BOARD_CONF=../board_conf/mmp11_with_expanders_conf.hh ${BOOTLOADER_TOOLCHAIN_OPT}
+  COMMAND make --no-print-directory BOARD_CONF=${BOARD_bootloader_conf} ${BOOTLOADER_TOOLCHAIN_OPT}
   COMMENT "Building MP1-Boot (FSBL)"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot
   VERBATIM
@@ -242,7 +260,7 @@ add_custom_target(
 
 add_custom_target(
   bootloader-dfu
-  COMMAND make --no-print-directory BOARD_CONF=board_conf/mmp11_conf.hh ${BOOTLOADER_TOOLCHAIN_OPT}
+  COMMAND make --no-print-directory BOARD_CONF=${BOARD_dfu_bootloader_conf} ${BOOTLOADER_TOOLCHAIN_OPT}
   COMMENT "Building DFU Bootloader"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu
   VERBATIM
