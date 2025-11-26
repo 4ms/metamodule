@@ -61,7 +61,7 @@ public:
 		popMatrix();
 
 		// ellipses:
-		auto draw_ellipses = []() {
+		auto draw_ellipses = [this]() {
 			pushMatrix();
 			translate(100, 50);
 			fill(0, 0, 255);
@@ -70,7 +70,7 @@ public:
 
 			pushMatrix();
 			translate(100, 150);
-			rotate(1.0 / 360.0 * TWO_PI);
+			rotate(1 / 360.0 * TWO_PI);
 			fill(0, 255, 255);
 			ellipse(0, 0, 100, 75);
 			popMatrix();
@@ -78,7 +78,7 @@ public:
 			pushMatrix();
 			fill(0, 255, 0);
 			translate(100, 250);
-			rotate(45.0 / 360.0 * TWO_PI);
+			rotate(ctr / 360.0 * TWO_PI);
 			ellipse(0, 0, 100, 75);
 			popMatrix();
 
@@ -151,7 +151,7 @@ public:
 		setTransformResolution(128);
 		translate(850, 300);
 		noFill();
-		strokeWeight(4);
+		strokeWeight(20);
 		rotate(ctr * 2 / 360.0 * TWO_PI);
 		ellipse(0, 0, 100, 75);
 		popMatrix();
