@@ -48,7 +48,7 @@ static void draw_thin_line(int x0, int y0, int x1, int y1, Color color) {
 	}
 }
 
-// Helper function to draw a thick line centered on the edge
+// Helper function to draw a thick line centered on the edge using optimized vertical line drawing
 static void draw_thick_line(float x0, float y0, float x1, float y1, float thickness, Color color) {
 	if (thickness <= 1.0f) {
 		// For single-pixel lines, use the fast algorithm
@@ -71,18 +71,40 @@ static void draw_thick_line(float x0, float y0, float x1, float y1, float thickn
 	// Half thickness
 	float half_thick = thickness / 2.0f;
 
-	// Draw multiple parallel lines to create thickness
-	int num_lines = std::max(1, (int)(thickness + 0.5f));
-	for (int i = 0; i < num_lines; i++) {
-		// Offset from center line, ranging from -half_thick to +half_thick
-		float offset = -half_thick + (thickness * i) / (num_lines - 1);
+	// Calculate bounding box of the thick line
+	float min_x = std::min(x0, x1) - half_thick;
+	float max_x = std::max(x0, x1) + half_thick;
+	float min_y = std::min(y0, y1) - half_thick;
+	float max_y = std::max(y0, y1) + half_thick;
 
-		int line_x0 = (int)(x0 + px * offset);
-		int line_y0 = (int)(y0 + py * offset);
-		int line_x1 = (int)(x1 + px * offset);
-		int line_y1 = (int)(y1 + py * offset);
+	int x_start = std::clamp((int)min_x, 0, (int)width - 1);
+	int x_end = std::clamp((int)max_x, 0, (int)width - 1);
 
-		draw_thin_line(line_x0, line_y0, line_x1, line_y1, color);
+	// For each column, find the y range that intersects the thick line
+	for (int scan_x = x_start; scan_x <= x_end; scan_x++) {
+		// Find closest point on the line segment to this x coordinate
+		// Project (scan_x, y) onto the line segment
+		float t = ((scan_x - x0) * dx) / (length * length);
+		t = std::clamp(t, 0.0f, 1.0f);
+
+		// Point on the line closest to scan_x
+		float line_x = x0 + t * dx;
+		float line_y = y0 + t * dy;
+
+		// Distance from scan_x to the line
+		float dist_x = scan_x - line_x;
+		float remaining_thickness = half_thick * half_thick - dist_x * dist_x;
+
+		if (remaining_thickness > 0) {
+			// Calculate y extent at this x position
+			float y_extent = std::sqrt(remaining_thickness);
+			int y_start = std::clamp((int)(line_y - y_extent), 0, (int)height - 1);
+			int y_end = std::clamp((int)(line_y + y_extent), 0, (int)height - 1);
+
+			if (y_end >= y_start) {
+				draw_vert_line(scan_x, y_start, y_end, color);
+			}
+		}
 	}
 }
 
