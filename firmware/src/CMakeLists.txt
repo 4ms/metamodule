@@ -92,11 +92,6 @@ if (NOT TARGET jansson)
   add_subdirectory(${FWDIR}/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
 endif()
 
-#
-# SLS Exported GUI (ui_lvgl)
-#
-add_subdirectory(${FWDIR}/src/gui/slsexport)
-
 # CoreModules sources
 add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 
@@ -121,27 +116,18 @@ add_executable(
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
+  ${BOARD_SUPPORT_DIR}/gui/display.cc
   ${FWDIR}/src/console/uart_log.cc
-  ${FWDIR}/src/audio/audio.cc
+  ${BOARD_SUPPORT_DIR}/audio/audio.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fs/helpers.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
-  ${FWDIR}/src/gui/elements/element_name.cc
-  ${FWDIR}/src/gui/elements/panel_name.cc
-  ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/src/gui/fonts/fonts.cc
-  ${FWDIR}/src/gui/fonts/ttf.cc
-  ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
-  ${FWDIR}/src/gui/pages/module_view/element_roller.cc
-  ${FWDIR}/src/gui/pages/module_view/draw_module.cc
-  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
-  ${FWDIR}/src/midi/midi_router.cc
-  ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
+  ${FWDIR}/src/midi/midi_router.cc
 
   #
   ${FWDIR}/src/fs/syscall/syscalls.cc
@@ -193,7 +179,6 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/drivers/timekeeper.cc
   ${FWDIR}/lib/mdrivlib/drivers/i2c.cc
   ${FWDIR}/lib/mdrivlib/drivers/qspi_flash_driver.cc
-  ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3168.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1/drivers/sai_tdm.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/system_ca7.c
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
@@ -208,19 +193,12 @@ add_executable(
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
+target_sources(main.elf PRIVATE ${BOARD_a7_sources})
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
-  ${FWDIR}/src/gui/elements/element_name.cc
-  ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/src/gui/pages/module_view/draw_module.cc
-  ${FWDIR}/src/gui/pages/module_view/element_roller.cc
-  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
-  ${FWDIR}/src/gui/fonts/fonts.cc
-  ${FWDIR}/src/gui/fonts/ttf.cc
-  ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
 
   ${FWDIR}/vcv_plugin/export/osdialog/osdialog-mm.cc
 
@@ -237,7 +215,7 @@ target_include_directories(
           ${FWDIR}/src/params
           ${FWDIR}/src/fs
           ${FWDIR}/src/core_a7
-          ${FWDIR}/src/medium
+          ${BOARD_SUPPORT_DIR}
           ${FWDIR}/lib/mdrivlib
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
@@ -253,6 +231,8 @@ if (NOT TARGET cpputil::cpputil)
   add_subdirectory(${LIBDIR}/cpputil cpputil)
 endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
+
+target_compile_definitions(main.elf PRIVATE ${BOARD_a7_defines})
 
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports ThorVG)

@@ -8,6 +8,7 @@
 #include "fs/norflash_layout.hh"
 #include "fs/syscall/filesystem.hh"
 #include "fw_update/auto_updater.hh"
+#include "gui/display.hh"
 #include "gui/ui.hh"
 #include "internal_interface/plugin_app_if_internal.hh"
 #include "internal_interface/plugin_app_interface.hh"
@@ -40,7 +41,7 @@ extern "C" void aux_core_main() {
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
 #endif
 
-	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
+	init_gui();
 
 	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
