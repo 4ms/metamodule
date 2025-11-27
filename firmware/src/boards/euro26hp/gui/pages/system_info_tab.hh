@@ -3,10 +3,10 @@
 #include "git_version.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/system_menu_tab_base.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "ld.h"
-#include "metaparams.hh"
 #include "params/expanders.hh"
+#include "params/metaparams.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "wifi/detection.hh"
 #include <cmath>

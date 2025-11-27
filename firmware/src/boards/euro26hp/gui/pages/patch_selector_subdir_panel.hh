@@ -1,8 +1,8 @@
 #pragma once
 #include "gui/helpers/dir_entry_info.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "patch_file/patch_dir_list.hh"
 #include "pr_dbg.hh"
 #include <cstring>

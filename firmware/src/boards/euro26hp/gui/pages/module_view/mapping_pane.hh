@@ -14,9 +14,9 @@
 #include "gui/pages/midi_map_input.hh"
 #include "gui/pages/module_view/mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "metaparams.hh"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "params/expanders.hh"
+#include "params/metaparams.hh"
 #include "params/params_state.hh"
 
 namespace MetaModule

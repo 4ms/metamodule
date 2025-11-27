@@ -1,6 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/ui_local.h"
+#include "gui/ui_lvgl/ui_local.h"
 #include <functional>
 
 namespace MetaModule

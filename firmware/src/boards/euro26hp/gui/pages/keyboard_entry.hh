@@ -2,7 +2,7 @@
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/confirm_popup.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "util/callable.hh"
 
 namespace MetaModule

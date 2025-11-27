@@ -1,10 +1,8 @@
 #pragma once
-#include "delay.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
-#include "lvgl.h"
-#include "metaparams.hh"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "params/metaparams.hh"
 #include "patch_play/patch_playloader.hh"
 
 namespace MetaModule

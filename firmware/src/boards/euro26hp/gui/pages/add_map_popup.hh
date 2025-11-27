@@ -3,12 +3,12 @@
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
-#include "metaparams.hh"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "gui/ui_lvgl/ui_local.h"
 #include "midi/midi_message.hh"
-#include "params_state.hh"
+#include "params/metaparams.hh"
+#include "params/params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
 
 namespace MetaModule

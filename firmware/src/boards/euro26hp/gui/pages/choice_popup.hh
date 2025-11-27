@@ -1,7 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/confirm_popup.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "src/core/lv_group.h"

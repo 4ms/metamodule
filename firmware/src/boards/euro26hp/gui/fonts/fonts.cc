@@ -1,7 +1,7 @@
 #include "fonts.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "gui/images/paths.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include <cstdio>

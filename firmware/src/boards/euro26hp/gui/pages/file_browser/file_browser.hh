@@ -2,8 +2,8 @@
 #include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
-#include "gui/slsexport/filebrowser/ui.h"
 #include "gui/styles.hh"
+#include "gui/ui_lvgl/filebrowser/ui.h"
 #include "patch_file/file_storage_proxy.hh"
 #include "static_buffers.hh"
 #include <filesystem>

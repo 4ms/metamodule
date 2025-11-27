@@ -1,8 +1,8 @@
 #pragma once
-#include "expanders.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "params_state.hh"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "params/expanders.hh"
+#include "params/params_state.hh"
 #include "util/analyzed_signal.hh"
 
 namespace MetaModule

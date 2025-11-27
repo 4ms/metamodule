@@ -3,8 +3,8 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/helpers.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/ui_local.h"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "gui/ui_lvgl/ui_local.h"
 #include "patch-serial/patch/midi_def.hh"
 #include <optional>
 

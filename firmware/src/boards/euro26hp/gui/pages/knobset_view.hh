@@ -6,8 +6,8 @@
 #include "gui/pages/knob_arc.hh"
 #include "gui/pages/knobset_view_buttonexp.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/ui_local.h"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "gui/ui_lvgl/ui_local.h"
 #include "gui/styles.hh"
 #include "src/core/lv_event.h"
 

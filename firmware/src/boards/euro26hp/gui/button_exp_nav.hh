@@ -1,5 +1,5 @@
 #pragma once
-#include "metaparams.hh"
+#include "params/metaparams.hh"
 
 namespace MetaModule
 {

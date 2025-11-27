@@ -4,7 +4,7 @@
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "src/core/lv_obj_pos.h"
 #include "src/misc/lv_timer.h"
 

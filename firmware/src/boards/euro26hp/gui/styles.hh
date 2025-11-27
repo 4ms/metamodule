@@ -3,7 +3,7 @@
 #include "patch-serial/patch/mapping_ids.hh"
 #include "patch-serial/patch/midi_def.hh"
 #include "patch-serial/patch/patch.hh"
-#include "slsexport/meta5/ui.h"
+#include "ui_lvgl/meta5/ui.h"
 #include <array>
 #include <charconv>
 #include <string>

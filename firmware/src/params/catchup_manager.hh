@@ -3,8 +3,8 @@
 #include "CoreModules/hub/button_expander_defs.hh"
 #include "catchup_param.hh"
 #include "conf/panel_conf.hh"
+#include "params/toggle_param.hh"
 #include "patch-serial/patch/patch.hh"
-#include "toggle_param.hh"
 #include <vector>
 
 namespace MetaModule

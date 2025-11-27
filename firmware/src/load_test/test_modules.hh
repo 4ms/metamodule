@@ -2,7 +2,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "delay.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 #include "memory_tester.hh"
 #endif

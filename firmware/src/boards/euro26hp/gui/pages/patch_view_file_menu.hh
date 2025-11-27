@@ -6,8 +6,8 @@
 #include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_save_dialog.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/ui_local.h"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "gui/ui_lvgl/ui_local.h"
 #include "patch_play/patch_playloader.hh"
 
 namespace MetaModule

@@ -1,8 +1,8 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/confirm_popup.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/ui_local.h"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "gui/ui_lvgl/ui_local.h"
 #include "lvgl.h"
 #include "src/core/lv_obj.h"
 #include "src/core/lv_obj_tree.h"

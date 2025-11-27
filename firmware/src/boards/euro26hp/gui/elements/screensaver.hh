@@ -1,11 +1,8 @@
 #pragma once
 
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "pr_dbg.hh"
 #include "src/core/lv_disp.h"
 #include "user_settings/screensaver_settings.hh"
-#include <array>
 
 namespace MetaModule
 {

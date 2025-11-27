@@ -4,7 +4,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 
 namespace MetaModule
 {

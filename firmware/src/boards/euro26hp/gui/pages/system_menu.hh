@@ -7,7 +7,7 @@
 #include "gui/pages/prefs_tab.hh"
 #include "gui/pages/system_info_tab.hh"
 #include "gui/pages/system_tab.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 
 namespace MetaModule
 {

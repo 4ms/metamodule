@@ -5,11 +5,8 @@
 #include "gui/module_menu/base_plugin_menu.hh"
 #include "gui/module_menu/native_plugin_menu.hh"
 #include "gui/module_menu/vcv_plugin_menu.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "lvgl.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "patch_play/patch_playloader.hh"
-#include "util/overloaded.hh"
-#include <functional>
 
 namespace MetaModule
 {

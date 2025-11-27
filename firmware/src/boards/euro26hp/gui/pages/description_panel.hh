@@ -1,7 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/ui_local.h"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "gui/ui_lvgl/ui_local.h"
 #include "gui/styles.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/patch_playloader.hh"

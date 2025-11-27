@@ -2,7 +2,7 @@
 #include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/patch_selector_subdir_panel.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "patch_file/file_storage_proxy.hh"
 #include <atomic>
 

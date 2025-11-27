@@ -1,9 +1,9 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
-#include "params_state.hh"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "gui/ui_lvgl/ui_local.h"
+#include "params/params_state.hh"
 #include "patch-serial/patch/midi_def.hh"
 #include <functional>
 #include <optional>
@@ -60,7 +60,6 @@ struct MidiMapPopup {
 				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
 				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY | LV_STATE_PRESSED);
 				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_EDITED);
-
 
 				lv_obj_add_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
 				lv_obj_set_style_pad_ver(dropdown, 8, LV_PART_MAIN);

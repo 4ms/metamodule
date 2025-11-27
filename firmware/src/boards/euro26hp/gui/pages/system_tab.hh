@@ -1,13 +1,13 @@
 #pragma once
 #include "calibrate/cal_check.hh"
 #include "calibrate/calibration_routine.hh"
-#include "expanders.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/hardware_test_popup.hh"
 #include "gui/pages/system_menu_tab_base.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/ui_local.h"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "gui/ui_lvgl/ui_local.h"
+#include "params/expanders.hh"
 #include "reboot.hh"
 #include "user_settings/settings_file.hh"
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "gui/pages/confirm_popup.hh"
-#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "gui/ui_lvgl/ui_local.h"
 #include "lvgl.h"
 #include "patch_play/missing_plugin_autoload.hh"
 #include "user_settings/missing_plugin_settings.hh"

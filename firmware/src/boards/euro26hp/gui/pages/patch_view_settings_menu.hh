@@ -1,8 +1,8 @@
 #pragma once
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
-#include "gui/slsexport/ui_local.h"
+#include "gui/ui_lvgl/meta5/ui.h"
+#include "gui/ui_lvgl/ui_local.h"
 #include "lvgl.h"
 #include "user_settings/view_settings.hh"
 #include <algorithm>

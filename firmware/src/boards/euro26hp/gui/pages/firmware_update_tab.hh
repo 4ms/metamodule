@@ -3,7 +3,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/system_menu_tab_base.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/ui_lvgl/meta5/ui.h"
 #include "patch_play/patch_playloader.hh"
 #include "reboot.hh"
 #include "util/poll_event.hh"

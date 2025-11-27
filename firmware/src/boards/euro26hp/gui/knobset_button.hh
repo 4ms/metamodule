@@ -1,6 +1,6 @@
 #pragma once
 
-#include "button_led.hh"
+#include "conf/button_led.hh"
 
 namespace MetaModule
 {

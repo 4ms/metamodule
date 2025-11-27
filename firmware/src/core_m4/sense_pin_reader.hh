@@ -4,7 +4,6 @@
 #include "conf/i2c_codec_conf.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/hsem.hh"
-#include "params.hh"
 #include "pr_dbg.hh"
 
 namespace MetaModule
