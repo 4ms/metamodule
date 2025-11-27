@@ -115,7 +115,7 @@ target_include_directories(
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${FWDIR}/src/medium
+          ${BOARD_SUPPORT_DIR}
           ${M4DIR}
           ${FWDIR}
           ${FWDIR}/lib
@@ -151,14 +151,11 @@ set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIO
 target_link_options(main_m4.elf PUBLIC -Wno-stringop-overflow)
 
 
+if(USE_WIFI_MODULE)
 # Add wifi comm functionality
 add_subdirectory(${FWDIR}/src/wifi/comm ${CMAKE_BINARY_DIR}/wifi_comm)
 
 # Add wifi flashing
 add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
-
-
-
-
-set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
