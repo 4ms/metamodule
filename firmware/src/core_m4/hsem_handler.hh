@@ -1,6 +1,5 @@
 #pragma once
 #include "conf/hsem_conf.hh"
-#include "debug.hh"
 #include "drivers/hsem.hh"
 
 namespace MetaModule
