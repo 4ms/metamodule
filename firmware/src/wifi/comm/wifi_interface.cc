@@ -1,4 +1,6 @@
 #include "wifi_interface.hh"
+#include "console/pr_dbg.hh"
+#include "stm32mp1xx_hal.h"
 
 #include <all_generated.h>
 #include <flatbuffers/flatbuffers.h>
@@ -8,10 +10,6 @@
 #include "framing/Framer.h"
 #include "framing/StaticDeframer.h"
 using namespace Framing;
-
-#include <stm32mp1xx_hal.h>
-
-#include <console/pr_dbg.hh>
 
 namespace MetaModule::WifiInterface
 {
