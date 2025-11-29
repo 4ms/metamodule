@@ -28,9 +28,9 @@ TEST_SOURCES += lib/CoreModules/moduleFactory.cc
 TEST_SOURCES += tests/resampler_tests.cc
 TEST_SOURCES += vcv_plugin/export/src/resampler.cc
 TEST_SOURCES += tests/stubs/plugin_module.cc
-TEST_SOURCES += src/params/expanders.cc
-TEST_SOURCES += src/gui/elements/element_name.cc
-TEST_SOURCES += src/gui/elements/panel_name.cc
+TEST_SOURCES += src/boards/euro26hp/params/expanders.cc
+TEST_SOURCES += src/boards/euro26hp/gui/elements/element_name.cc
+TEST_SOURCES += src/boards/euro26hp/gui/elements/panel_name.cc
 TEST_SOURCES += coreproc_plugin/dsp/stream_resampler.cc
 TEST_SOURCES += coreproc_plugin/dsp/block_resampler.cc
 TEST_SOURCES += coreproc_plugin/wav/wav_file_stream.cc
@@ -46,7 +46,7 @@ CXXFLAGS = 	-Wall \
 			-I. \
 			-I.. \
 			-Isrc \
-			-Isrc/medium \
+			-Isrc/boards/euro26hp \
 			-Ilib \
 			-Ilib/lvgl/lvgl \
 			-Ilib/cpputil \
@@ -62,7 +62,7 @@ CXXFLAGS = 	-Wall \
 			-DTESTPROJECT \
 			-g3 -O0 \
 
-$(BUILDDIR)/src/gui/elements/element_name.o: CXXFLAGS += -Wno-deprecated-anon-enum-enum-conversion
+$(BUILDDIR)/src/boards/euro26hp/gui/elements/element_name.o: CXXFLAGS += -Wno-deprecated-anon-enum-enum-conversion
 
 ### Boilerplate below here:
 
