@@ -14,6 +14,9 @@ set(LIBDIR ${FWDIR}/lib)
 
 set_arch_flags()
 
+
+add_subdirectory(${BOARD_SUPPORT_DIR})
+
 #
 # Driver interface
 #
@@ -33,27 +36,7 @@ target_compile_options(mdrivlib_interface INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-W
 
 add_subdirectory(hardware_support)
 
-#
-# LVGL
-#
-set(LV_CONF_PATH
-    ${FWDIR}/lib/lvgl/lv_conf.h
-    CACHE STRING "" FORCE
-)
-add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
-target_link_libraries(lvgl PRIVATE mdrivlib_interface)
 
-target_include_directories(lvgl 
-    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source 
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs
-)
-
-target_sources(lvgl
-    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
-            ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/delete_node.cc
-)
 
 set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
 add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
@@ -116,7 +99,6 @@ add_executable(
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
-  ${BOARD_SUPPORT_DIR}/gui/display.cc
   ${FWDIR}/src/console/uart_log.cc
   ${BOARD_SUPPORT_DIR}/audio/audio.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
@@ -193,6 +175,8 @@ add_executable(
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
+message("Board sources:" ${BOARD_a7_sources})
+message("Board libs:" ${BOARD_a7_libraries})
 target_sources(main.elf PRIVATE ${BOARD_a7_sources})
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
@@ -235,12 +219,13 @@ target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING
 target_compile_definitions(main.elf PRIVATE ${BOARD_a7_defines})
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports ThorVG)
+target_link_libraries(main.elf PRIVATE mdrivlib_interface CoreModules metamodule::patch-serial cpputil vcv_ports ThorVG)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,hardware_support>")
+target_link_libraries(main.elf PUBLIC ${BOARD_a7_libraries})
 
 if (CPU_TEST_ALL_MODULES)
   target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)

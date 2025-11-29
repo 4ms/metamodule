@@ -5,6 +5,9 @@ set_arch_flags()
 include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
 enable_logging()
 
+#TODO: if dir exists...
+add_subdirectory(${BOARD_SUPPORT_DIR}/m4 ${CMAKE_CURRENT_BINARY_DIR}/board_m4)
+
 # set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 set(M4DIR ${CMAKE_CURRENT_SOURCE_DIR}) # /firmware/src/core_m4
@@ -151,7 +154,7 @@ set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIO
 target_link_options(main_m4.elf PUBLIC -Wno-stringop-overflow)
 
 
-if(USE_WIFI_MODULE)
+if(BOARD_USE_WIFI_MODULE)
 # Add wifi comm functionality
 add_subdirectory(${FWDIR}/src/wifi/comm ${CMAKE_BINARY_DIR}/wifi_comm)
 

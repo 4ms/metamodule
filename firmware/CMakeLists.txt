@@ -24,16 +24,15 @@ else()
 
 endif()
 
-# ###########################3
 
 message("BOARD_SUPPORT_DIR: ${BOARD_SUPPORT_DIR}")
-include(${BOARD_SUPPORT_DIR}/CMakeLists.txt)
 
 #
 # Git commit hash
 #
 include(cmake/CheckGit.cmake)
 CheckGitSetup()
+
 
 #
 # Main Application
@@ -249,6 +248,11 @@ if ("${TOOLCHAIN_BASE_DIR}" STREQUAL "")
 else()
 	set(BOOTLOADER_TOOLCHAIN_OPT "TOOLCHAIN_DIR=${TOOLCHAIN_BASE_DIR}/")
 endif()
+
+#
+# Bootloader
+# 
+include(${BOARD_SUPPORT_DIR}/bootloader.cmake)
 
 add_custom_target(
   bootloader

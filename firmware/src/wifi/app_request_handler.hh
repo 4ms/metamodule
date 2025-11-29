@@ -1,7 +1,7 @@
 #pragma once
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
-#include "wifi_interface.hh"
+#include "wifi/comm/wifi_interface.hh"
 #include <optional>
 
 namespace MetaModule

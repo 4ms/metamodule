@@ -8,8 +8,7 @@
 #include "fs/module_fs_message_handler.hh"
 #include "hsem_handler.hh"
 #include "usb/usb_manager.hh"
-
-#include <wifi_interface.hh>
+#include "wifi/comm/wifi_interface.hh"
 
 namespace MetaModule
 {

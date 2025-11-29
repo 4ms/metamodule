@@ -1,5 +1,5 @@
 #pragma once
-#include "fat_file_io.hh"
+#include "fs/fatfs/fat_file_io.hh"
 #include "fs/dir_tree.hh"
 #include "util/string_compare.hh"
 #include "volumes.hh"

@@ -1,5 +1,5 @@
 #pragma once
-#include "diskio.h"
+#include "fatfs/source/diskio.h"
 #include <cstdint>
 
 struct DiskOps {

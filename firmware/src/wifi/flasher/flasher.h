@@ -1,6 +1,6 @@
 #pragma once
 
-#include "esp_loader.h"
+#include "esp-serial-flasher/include/esp_loader.h"
 
 #include <cstdint>
 #include <span>
