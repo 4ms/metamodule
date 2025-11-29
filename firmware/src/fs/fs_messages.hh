@@ -2,6 +2,7 @@
 
 #include "calibrate/calibration_message_handler.hh"
 #include "core_intercom/intercore_message.hh"
+#include "core_intercom/shared_memory.hh"
 #include "drivers/inter_core_comm.hh"
 #include "dynload/plugin_file_finder.hh"
 #include "fs/fatfs/fat_file_io.hh"
@@ -15,6 +16,10 @@ namespace MetaModule
 
 struct FilesystemMessages {
 
+	FilesystemMessages(const FilesystemMessages &) = delete;
+	FilesystemMessages(FilesystemMessages &&) = delete;
+	FilesystemMessages &operator=(const FilesystemMessages &) = delete;
+	FilesystemMessages &operator=(FilesystemMessages &&) = delete;
 	FilesystemMessages(FatFileIO &usb_fileio, FatFileIO &sd_fileio, IntercoreStorageMessage *shared_message)
 		: usb_fileio{usb_fileio}
 		, sd_fileio{sd_fileio}
@@ -67,7 +72,7 @@ private:
 
 	FlashLoader flash_loader;
 
-	PatchStorage patch_storage{sd_fileio, usb_fileio};
+	PatchStorage patch_storage{sd_fileio, usb_fileio, SharedMemoryS::ptrs.ramdrive};
 	FirmwareFileFinder firmware_files{sd_fileio, usb_fileio};
 	FirmwareWriter firmware_writer{sd_fileio, usb_fileio, flash_loader};
 	PluginFileFinder plugin_files{sd_fileio, usb_fileio};

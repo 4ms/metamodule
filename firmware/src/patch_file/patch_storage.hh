@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/qspi_flash_conf.hh"
 #include "core_intercom/intercore_message.hh"
-#include "core_intercom/shared_memory.hh"
+// #include "core_intercom/shared_memory.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
@@ -33,8 +33,8 @@ class PatchStorage {
 	PollChange norflash_changes_{300};
 	PollChange sd_changes_{300};
 
-	RamDiskOps ramdisk_ops{*SharedMemoryS::ptrs.ramdrive};
-	FatFileIO ramdisk_{&ramdisk_ops, Volume::RamDisk};
+	RamDiskOps ramdisk_ops;
+	FatFileIO ramdisk_;
 
 	using enum IntercoreStorageMessage::MessageType;
 
@@ -44,9 +44,11 @@ class PatchStorage {
 	bool patch_list_changed_wifi_ = false;
 
 public:
-	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
+	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio, RamDrive *ramdrive)
 		: sdcard_{sdcard_fileio}
 		, usbdrive_{usb_fileio}
+		, ramdisk_ops{*ramdrive}
+		, ramdisk_{&ramdisk_ops, Volume::RamDisk}
 		, patch_list_helper_{patch_dir_list_} {
 
 		// NOR Flash: if it's unformatted, put default patches there
