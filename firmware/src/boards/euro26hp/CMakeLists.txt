@@ -30,7 +30,7 @@ target_sources(
 )
 
 set(BOARD_a7_libraries
-    lvgl::lvgl ui_lvgl
+    lvgl::lvgl ui_lvgl ThorVG
     PARENT_SCOPE
 )
 

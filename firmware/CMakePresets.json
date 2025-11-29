@@ -8,7 +8,7 @@
   "configurePresets": [
     {
       "name": "base",
-      "description": "Common settings for all projects",
+      "description": "Common settings for all projects (required to set toolchain)",
       "generator": "Ninja",
       "binaryDir": "build",
       "hidden": false,

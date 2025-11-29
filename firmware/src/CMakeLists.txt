@@ -42,7 +42,7 @@ set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
 add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
 #
-# ThorVG
+# ThorVG (required for CoreModules-4ms)
 #
 add_subdirectory(../lib/thorvg ${CMAKE_BINARY_DIR}/thorvg)
 
@@ -175,8 +175,6 @@ add_executable(
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
-message("Board sources:" ${BOARD_a7_sources})
-message("Board libs:" ${BOARD_a7_libraries})
 target_sources(main.elf PRIVATE ${BOARD_a7_sources})
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
@@ -219,7 +217,7 @@ target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING
 target_compile_definitions(main.elf PRIVATE ${BOARD_a7_defines})
 
 
-target_link_libraries(main.elf PRIVATE mdrivlib_interface CoreModules metamodule::patch-serial cpputil vcv_ports ThorVG)
+target_link_libraries(main.elf PRIVATE mdrivlib_interface CoreModules metamodule::patch-serial cpputil vcv_ports)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
