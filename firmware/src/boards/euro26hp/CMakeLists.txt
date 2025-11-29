@@ -37,6 +37,11 @@ set(BOARD_a7_libraries
 add_subdirectory(${BOARD_SUPPORT_DIR}/gui/ui_lvgl)
 
 #
+# ThorVG (required for CoreModules-4ms)
+#
+add_subdirectory(${FWDIR}/lib/thorvg ${CMAKE_BINARY_DIR}/thorvg)
+
+#
 # Board
 #
 

@@ -41,11 +41,6 @@ add_subdirectory(hardware_support)
 set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
 add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
-#
-# ThorVG (required for CoreModules-4ms)
-#
-add_subdirectory(../lib/thorvg ${CMAKE_BINARY_DIR}/thorvg)
-
 
 #
 # VCV Adaptor
@@ -58,8 +53,6 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
-
-target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
 
 #
 # Patch format and serialization
