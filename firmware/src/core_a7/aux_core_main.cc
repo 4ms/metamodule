@@ -17,11 +17,6 @@
 #include "ramdisk_ops.hh"
 #include "system/print_time.hh"
 
-using FrameBufferT =
-	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
-static inline FrameBufferT framebuf1 alignas(64);
-static inline FrameBufferT framebuf2 alignas(64);
-
 extern "C" void aux_core_main() {
 	using namespace MetaModule;
 	using namespace mdrivlib;
