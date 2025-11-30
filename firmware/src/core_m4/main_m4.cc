@@ -58,8 +58,9 @@ int main() {
 	ModuleFSMessageHandler module_fs_messages{SharedMemoryS::ptrs.icc_modulefs_message_core0,
 											  SharedMemoryS::ptrs.icc_modulefs_message_core1};
 
-	WifiInterface::init(&fs_messages.get_patch_storage());
-	WifiInterface::start();
+	board_m4_fs_init(&fs_messages.get_patch_storage());
+	// WifiInterface::init(&fs_messages.get_patch_storage());
+	// WifiInterface::start();
 
 	// Controls
 	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host()};
