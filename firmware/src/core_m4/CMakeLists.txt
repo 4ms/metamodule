@@ -15,7 +15,7 @@ set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
 set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
 set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
 
-include(${BOARD_SUPPORT_DIR}/m4/CMakeLists.txt)
+include(${BOARD_SUPPORT_DIR}/core_m4/CMakeLists.txt)
 
 add_executable(
   main_m4.elf
