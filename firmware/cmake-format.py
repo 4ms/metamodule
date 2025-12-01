@@ -95,3 +95,8 @@ with section("format"):
   # A dictionary mapping layout nodes to a list of wrap decisions. See the
   # documentation for more information.
   layout_passes = {}
+
+with section("markup"):
+
+  # enable comment markup parsing and reflow
+  enable_markup = False
