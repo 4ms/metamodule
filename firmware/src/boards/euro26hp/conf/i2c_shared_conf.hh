@@ -6,7 +6,7 @@ using mdrivlib::PinAF;
 using mdrivlib::PinNum;
 
 // I2C for main (internal) and aux (external/expander) codec, and internal and aux (ext/exp) GPIO Expander
-const mdrivlib::I2CConfig a7m4_shared_i2c_codec_conf = {
+const mdrivlib::I2CConfig a7m4_shared_i2c_conf = {
 	.I2Cx = I2C5,
 	.SCL = {GPIO::A, PinNum::_11, PinAF::AltFunc4},
 	.SDA = {GPIO::A, PinNum::_12, PinAF::AltFunc4},
