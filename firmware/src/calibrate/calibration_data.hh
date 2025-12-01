@@ -79,25 +79,8 @@ struct CalData {
 	}
 
 	void reset_to_default() {
-		in_cal = {{
-			{DefaultInput},
-			{DefaultInput},
-			{DefaultInput},
-			{DefaultInput},
-			{DefaultInput},
-			{DefaultInput},
-		}};
-
-		out_cal = {{
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-		}};
+		std::fill(in_cal.begin(), in_cal.end(), DefaultInput);
+		std::fill(out_cal.begin(), out_cal.end(), DefaultOutput);
 	}
 
 	void print_calibration() const {
