@@ -1,5 +1,5 @@
 #include "async_filebrowser.hh"
-#include "gui/pages/file_browser/file_browser_adaptor.hh"
+#include "file_browser_adaptor.hh"
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
