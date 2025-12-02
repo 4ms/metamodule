@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
-#include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "conf/panel_conf.hh"
 #include "conf/patch_conf.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "delay.hh"
@@ -28,8 +28,6 @@
 #include <cstdint>
 #include <string_view>
 #include <vector>
-
-#include "debug.hh"
 
 namespace MetaModule
 {

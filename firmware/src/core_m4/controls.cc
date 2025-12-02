@@ -1,9 +1,8 @@
 #include "controls.hh"
 #include "conf/hsem_conf.hh"
-#include "debug.hh"
+#include "conf/panel_conf.hh"
 #include "drivers/hsem.hh"
 #include "hsem_handler.hh"
-#include "util/countzip.hh"
 
 namespace MetaModule
 {

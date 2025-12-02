@@ -9,8 +9,6 @@
 namespace MetaModule
 {
 
-constexpr bool reload_default_patches = false;
-
 static void app_startup() {
 	using namespace mdrivlib;
 
@@ -37,13 +35,7 @@ int main() {
 
 	pr_info("M4 starting\n");
 
-	// SD Card
-	// SDCardHost sd;
-
 	FilesystemMessages fs_messages{SharedMemoryS::ptrs.icc_message};
-
-	// if (reload_default_patches)
-	// 	fs_messages.reload_default_patches();
 
 	// Controls
 	Controls controls{*SharedMemoryS::ptrs.param_block};

@@ -96,12 +96,12 @@ struct PanelDef {
 	//}
 };
 
-// namespace MetaModule::AudioExpander
-// {
-// static constexpr uint32_t NumInJacks = 0;
+namespace MetaModule::AudioExpander
+{
+static constexpr uint32_t NumInJacks = 0;
 
-// static constexpr uint32_t NumOutJacks = 0;
+static constexpr uint32_t NumOutJacks = 0;
 
-// static constexpr auto NumJacks = NumInJacks + NumOutJacks;
+static constexpr auto NumJacks = NumInJacks + NumOutJacks;
 
-// } // namespace MetaModule::AudioExpander
+} // namespace MetaModule::AudioExpander
