@@ -4,6 +4,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
 
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
+set(METAMODULE_HEADLESS 1)
+
 project(
   MetaModule
   VERSION 0.10
