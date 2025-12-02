@@ -1,26 +1,11 @@
 #pragma once
-#include "audio/midi.hh"
 #include "calibrate/calibration_data.hh"
 #include "conf/board_codec_conf.hh"
 #include "conf/stream_conf.hh"
-#include "drivers/codec.hh"
-#include "drivers/codec_PCM3168.hh"
 #include "drivers/cycle_counter.hh"
-#include "drivers/stm32xx.h"
-#include "overrun_handler.hh"
 #include "param_block.hh"
-#include "params.hh"
-#include "params_state.hh"
-#include "patch_play/patch_mod_queue.hh"
-#include "patch_play/patch_player.hh"
-#include "patch_play/patch_playloader.hh"
-#include "processors/tools/kneeCompress.h"
-#include "sync_params.hh"
-#include "util/calibrator.hh"
-#include "util/edge_detector.hh"
-#include "util/filter.hh"
-#include "util/math.hh"
-#include <array>
+#include "params/params_state.hh"
+#include "params/sync_params.hh"
 
 namespace MetaModule
 {
@@ -37,89 +22,54 @@ using CombinedAudioBlock = AudioConf::CombinedAudioBlock;
 
 class AudioStream {
 public:
-	AudioStream(PatchPlayer &patchplayer,
-				AudioInBlock &audio_in_block,
+	AudioStream(AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
 				SyncParams &sync_params,
-				PatchPlayLoader &patchloader,
-				DoubleBufParamBlock &p,
-				PatchModQueue &patch_mod_queue);
+				DoubleBufParamBlock &p);
 
 	void start();
+	void start_playing();
+	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 	uint32_t get_audio_errors();
 	void handle_overruns();
-
-	void set_calibration(CalData const &caldata);
-	void update_audio_settings();
 
 private:
 	SyncParams &sync_params;
 	ParamsState param_state;
-	PatchPlayLoader &patch_loader;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
-	PatchModQueue &patch_mod_queue;
+
 	AudioInBlock &audio_in_block;
 	AudioOutBlock &audio_out_block;
-	PatchPlayer &player;
 
-	AudioStreamMidi midi;
 	unsigned cur_block = 0;
 
 	// Hardware interface
-	CodecT &codec_;
-	CodecT &codec_ext_;
+	ListenClosely::CodecT &codec_;
 	uint32_t sample_rate_;
 	uint32_t block_size_;
-	uint32_t audio_period_;
-
-	// Calibration
-	CalData cal;
-	CalData cal_stash;
-	CalData ext_cal{};
-	CalData ext_cal_stash{};
-
-	// Plug detector
-	EdgeStateDetector plug_detects[PanelDef::NumJacks];
-	EdgeStateDetector ext_plug_detects[AudioExpander::NumJacks];
 
 	// Load measurement
 	mdrivlib::CycleCounter load_measure;
 	float load_lpf = 0.f;
 
-	// Start/Pause State
-	float output_fade_amt = -1.f;
-	float output_fade_delta = 0.f;
-	uint32_t halves_muted = 0;
-
-	AudioOverrunHandler overrun_handler;
+	CalData cal;
 
 	// Local
 	ParamBlock local_params;
 
-	bool ext_audio_connected = false;
-
-	void step();
-	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
-
 	AudioConf::SampleT get_audio_output(int output_id);
-	AudioConf::SampleT get_ext_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
-	bool check_patch_change(int motion);
-	void send_zeros_to_patch();
-	void propagate_sense_pins(uint32_t jack_senses);
-	void handle_midi(Midi::Event const &event, unsigned poly_num);
-	void handle_button_events(uint32_t event_bitmask, float param_val);
-	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
-	void handle_fade_inout();
+
+	bool is_playing_patch();
 	void handle_patch_just_loaded();
-	void disable_calibration();
-	void re_enable_calibration();
-	void handle_patch_mod_queue();
-	uint32_t calc_audio_period();
+	void update_audio_settings();
 	void set_block_spans();
 	ParamBlock &cache_params(unsigned block);
 	void return_cached_params(unsigned block);
+
+public:
+	void set_calibration(CalData const &caldata);
 
 private:
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;

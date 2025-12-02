@@ -3,8 +3,8 @@
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
+#include "params/sync_params.hh"
 #include "patch_file/patch_dir_list.hh"
-#include "sync_params.hh"
 #include <array>
 
 namespace MetaModule
@@ -55,17 +55,7 @@ void init() {
 			frame = StreamConf::Audio::AudioOutFrame{};
 	}
 
-	for (auto &buff : audio_out_dma_block.ext_codec) {
-		for (auto &frame : buff)
-			frame = StreamConf::Audio::AudioOutFrame{};
-	}
-
 	for (auto &buff : audio_in_dma_block.codec) {
-		for (auto &frame : buff)
-			frame = StreamConf::Audio::AudioInFrame{};
-	}
-
-	for (auto &buff : audio_in_dma_block.ext_codec) {
 		for (auto &frame : buff)
 			frame = StreamConf::Audio::AudioInFrame{};
 	}

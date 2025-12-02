@@ -1,7 +1,6 @@
 #pragma once
 #include "concurrent_buffer.hh"
 #include "conf/ramdisk_conf.hh"
-#include "patch_play/patch_mod_queue.hh"
 
 namespace MetaModule
 {
@@ -14,12 +13,8 @@ class OpenPatchManager;
 
 struct A7SharedMemoryS {
 	struct Ptrs {
-		PatchPlayer *patch_player{};
-		PatchPlayLoader *patch_playloader{};
 		FileStorageProxy *patch_storage{};
-		OpenPatchManager *open_patch_manager{};
 		SyncParams *sync_params{};
-		PatchModQueue *patch_mod_queue{};
 		RamDrive *ramdrive{};
 		ConcurrentBuffer *console_buffer{};
 	};

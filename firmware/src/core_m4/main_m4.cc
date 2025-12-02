@@ -3,13 +3,8 @@
 #include "core_intercom/shared_memory.hh"
 #include "drivers/hsem.hh"
 #include "drivers/system_clocks.hh"
-#include "fs/fatfs/sd_host.hh"
 #include "fs/fs_messages.hh"
-#include "fs/module_fs_message_handler.hh"
 #include "hsem_handler.hh"
-#include "usb/usb_manager.hh"
-
-#include <wifi_interface.hh>
 
 namespace MetaModule
 {
@@ -42,28 +37,16 @@ int main() {
 
 	pr_info("M4 starting\n");
 
-	// USB
-	UsbManager usb{{SharedMemoryS::ptrs.console_a7_0_buff,
-					SharedMemoryS::ptrs.console_a7_1_buff,
-					SharedMemoryS::ptrs.console_m4_buff}};
-	usb.start();
-
 	// SD Card
-	SDCardHost sd;
+	// SDCardHost sd;
 
-	FilesystemMessages fs_messages{usb.get_msc_fileio(), sd.get_fileio(), SharedMemoryS::ptrs.icc_message};
+	FilesystemMessages fs_messages{SharedMemoryS::ptrs.icc_message};
 
-	if (reload_default_patches)
-		fs_messages.reload_default_patches();
-
-	ModuleFSMessageHandler module_fs_messages{SharedMemoryS::ptrs.icc_modulefs_message_core0,
-											  SharedMemoryS::ptrs.icc_modulefs_message_core1};
-
-	WifiInterface::init(&fs_messages.get_patch_storage());
-	WifiInterface::start();
+	// if (reload_default_patches)
+	// 	fs_messages.reload_default_patches();
 
 	// Controls
-	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host()};
+	Controls controls{*SharedMemoryS::ptrs.param_block};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
@@ -73,15 +56,6 @@ int main() {
 	uint32_t startup_delay = 0x4'0000;
 	while (startup_delay--) {
 		controls.process();
-		usb.process();
-		sd.process();
-	}
-
-	// Wait until drive is mounted
-	if (usb.is_drive_detected()) {
-		while (!usb.is_drive_mounted()) {
-			usb.process();
-		}
 	}
 
 	pr_info("M4 initialized\n");
@@ -90,14 +64,6 @@ int main() {
 
 	while (true) {
 		controls.process();
-
-		usb.process();
-		sd.process();
-
 		fs_messages.process();
-
-		module_fs_messages.process();
-
-		WifiInterface::run();
 	}
 }

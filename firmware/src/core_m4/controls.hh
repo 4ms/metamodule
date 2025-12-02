@@ -1,34 +1,29 @@
 #pragma once
-#include "CoreModules/hub/button_expander_defs.hh"
 #include "conf/control_conf.hh"
 #include "conf/pin_conf.hh"
-#include "control_expander.hh"
+#include "core_m4/sense_pin_reader.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
-#include "drivers/rotary.hh"
-#include "metaparams.hh"
-#include "midi/midi_message.hh"
-#include "midi_controls.hh"
-#include "param_block.hh"
-#include "params.hh"
-#include "sense_pin_reader.hh"
-#include "usb/midi_host.hh"
-#include "util/edge_detector.hh"
+#include "params/metaparams.hh"
+#include "params/param_block.hh"
+#include "params/params.hh"
 #include "util/interp_param.hh"
-#include "util/lockfree_fifo_spsc.hh"
 
 namespace MetaModule
 {
 
+struct MidiHost;
+
+using mdrivlib::DebouncedButton;
 using mdrivlib::DebouncedPin;
 using mdrivlib::GPIOExpander;
 using mdrivlib::PinPolarity;
 
 struct Controls {
-	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host);
+	Controls(DoubleBufParamBlock &param_blocks_ref);
 
 	void start();
 	void process();
@@ -49,35 +44,28 @@ private:
 	void update_control_expander();
 	void update_rotary();
 
-	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
+	mdrivlib::PinChangeInt<ListenClosely::FrameRatePinChangeConf> read_controls_task;
 
-	// Digital controls: Rotary, Buttons and Gate jacks
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::rotA, ControlPins::rotB> rotary;
-	DebouncedPin<ControlPins::rotS, PinPolarity::Inverted> rotary_button;
-	DebouncedPin<ControlPins::but0, PinPolarity::Inverted> button0;
-	DebouncedPin<ControlPins::gate_in_1, PinPolarity::Normal> gate_in_1;
-	DebouncedPin<ControlPins::gate_in_2, PinPolarity::Normal> gate_in_2;
-	bool _rotary_moved_while_pressed = false;
+	mdrivlib::DebouncedSPDT3pos<ListenClosely::CompSwitch0, ListenClosely::CompSwitch1, mdrivlib::PinPolarity::Inverted>
+		comp_switch;
+
+	Debouncer<0b0001, 0b1110, 0b1111> eq_switch_pin0{};
+	Debouncer<0b0001, 0b1110, 0b1111> eq_switch_pin1{};
+
+	DebouncedButton<ListenClosely::LowSelBut, PinPolarity::Inverted> low_sel_button;
+	DebouncedButton<ListenClosely::MidSelBut, PinPolarity::Inverted> mid_sel_button;
+	DebouncedButton<ListenClosely::HighSelBut, PinPolarity::Inverted> high_sel_button;
 
 	// Analog controls (pots)
-	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
-	std::array<uint16_t, NumPotAdcs> pot_vals{};
-	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
+	static constexpr size_t NumAdcs = sizeof(ListenClosely::PotConfs) / sizeof(mdrivlib::AdcChannelConf);
+	std::array<uint16_t, NumAdcs> pot_vals{};
+	mdrivlib::AdcDmaPeriph<ListenClosely::PotAdcConf> pot_adc{pot_vals, ListenClosely::PotConfs};
 
-	InterpParamVariable<float> _knobs[PanelDef::NumPot]{};
+	InterpParamVariable<float> _adcs[NumAdcs]{};
 	static constexpr uint32_t AdcReadFrequency = 580; //571
 	bool _new_adc_data_ready = false;
 
-	SensePinReader sense_pin_reader;
-	ControlExpanderManager control_expander;
-	std::array<Toggler, ButtonExpander::NumTotalButtons> ext_buttons{};
-
-	// MIDI
-	MidiHost &_midi_host;
-	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
-	Midi::MessageParser _midi_parser;
-	EdgeStateDetector _midi_connected_raw;
-	bool _midi_connected = false;
+	SensePinReader sense_pin_reader; //also eq mode switch
 
 	// Params
 	DoubleBufParamBlock &param_blocks;
