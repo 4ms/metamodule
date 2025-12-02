@@ -1,10 +1,9 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
-option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" ON)
-option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
-option(SUPPRESS_HIL_MESSAGES    "Suppress HIL messages" OFF)
-
+option(CPU_TEST_ALL_MODULES "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" ON)
+option(CONSOLE_USE_USB "Send printf() to USB if connected" OFF)
+option(SUPPRESS_HIL_MESSAGES "Suppress HIL messages" OFF)
 
 include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
 enable_logging()
@@ -33,31 +32,8 @@ target_compile_options(mdrivlib_interface INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-W
 
 add_subdirectory(hardware_support)
 
-#
-# LVGL
-#
-set(LV_CONF_PATH
-    ${FWDIR}/lib/lvgl/lv_conf.h
-    CACHE STRING "" FORCE
-)
-add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
-target_link_libraries(lvgl PRIVATE mdrivlib_interface)
-
-target_include_directories(lvgl 
-    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source 
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs
-)
-
-target_sources(lvgl
-    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
-            ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/delete_node.cc
-)
-
 set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
 add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
-
 
 #
 # VCV Adaptor
@@ -74,15 +50,13 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_
 #
 add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
 
-
 #
 # Jansson
 #
 # TODO: replace this with for example fetchContent later
-if (NOT TARGET jansson)
+if(NOT TARGET jansson)
   add_subdirectory(${FWDIR}/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
 endif()
-
 
 # CoreModules sources
 add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
@@ -119,7 +93,6 @@ add_executable(
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
-
   #
   ${FWDIR}/src/fs/syscall/syscalls.cc
   ${FWDIR}/src/fs/syscall/fs_syscall_proxy.cc
@@ -127,7 +100,6 @@ add_executable(
   ${FWDIR}/src/fs/syscall/filesystem.cc
   ${FWDIR}/src/fs/fatfs/fatfs_adaptor.cc
   ${FWDIR}/src/fs/dirent/dirent.cc
-
   #
   ${FWDIR}/src/dynload/dynloader.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc
@@ -170,7 +142,7 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/drivers/timekeeper.cc
   ${FWDIR}/lib/mdrivlib/drivers/i2c.cc
   ${FWDIR}/lib/mdrivlib/drivers/qspi_flash_driver.cc
-  ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3168.cc
+  ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3060.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1/drivers/sai_tdm.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/system_ca7.c
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
@@ -185,22 +157,15 @@ add_executable(
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
-
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
-  ${FWDIR}/src/core_a7/main.cc
-  ${FWDIR}/src/core_a7/aux_core_main.cc
-
-  ${FWDIR}/vcv_plugin/export/osdialog/osdialog-mm.cc
-
+  ${FWDIR}/src/core_a7/main.cc ${FWDIR}/src/core_a7/aux_core_main.cc ${FWDIR}/vcv_plugin/export/osdialog/osdialog-mm.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 
-
 target_include_directories(
   main.elf
-  PRIVATE 
-          ${FWDIR}
+  PRIVATE ${FWDIR}
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
@@ -218,45 +183,49 @@ target_include_directories(
           ${CMAKE_BINARY_DIR}/checkgit
 )
 
-if (NOT TARGET cpputil::cpputil)
+if(NOT TARGET cpputil::cpputil)
   add_subdirectory(${LIBDIR}/cpputil cpputil)
 endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
-
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui_lvgl metamodule::patch-serial cpputil vcv_ports ThorVG)
+target_link_libraries(
+  main.elf
+  PRIVATE mdrivlib_interface
+          CoreModules
+          metamodule::patch-serial
+          cpputil
+          vcv_ports
+)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
-target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,hardware_support>")
 
-if (CPU_TEST_ALL_MODULES)
+if(CPU_TEST_ALL_MODULES)
   target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)
   # target_compile_definitions(main.elf PRIVATE MM_LOADTEST_MEASURE_MEMORY=1)
 endif()
-if (SUPPRESS_HIL_MESSAGES)
+if(SUPPRESS_HIL_MESSAGES)
   target_compile_definitions(main.elf PRIVATE SUPPRESS_HIL_MESSAGES=1)
 endif()
 
-if (CONSOLE_USE_USB)
+if(CONSOLE_USE_USB)
   message("USB serial device enabled for console logging")
   target_compile_definitions(main.elf PRIVATE CONSOLE_USE_USB=1)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
 foreach(brand ${brands})
-	if (DEFINED BUILD_DYN_PLUGIN_${brand})
-	target_compile_definitions(main.elf PRIVATE -DBUILD_DYN_PLUGIN_${brand})
+  if(DEFINED BUILD_DYN_PLUGIN_${brand})
+    target_compile_definitions(main.elf PRIVATE -DBUILD_DYN_PLUGIN_${brand})
 
-	elseif (DEFINED OMIT_BRAND_${brand})
-	target_compile_definitions(main.elf PRIVATE -DOMIT_BRAND_${brand})
+  elseif(DEFINED OMIT_BRAND_${brand})
+    target_compile_definitions(main.elf PRIVATE -DOMIT_BRAND_${brand})
 
-    else()
-	target_compile_definitions(main.elf PRIVATE -DBUILD_INTERNAL_${brand})
-	endif()
+  else()
+    target_compile_definitions(main.elf PRIVATE -DBUILD_INTERNAL_${brand})
+  endif()
 endforeach()
-
 
 target_link_script(
   main
@@ -266,4 +235,3 @@ target_link_script(
   -Wno-psabi
   -nostartfiles
 )
-
