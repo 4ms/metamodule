@@ -86,21 +86,15 @@ add_executable(
   ${FWDIR}/system/time.cc
   ${FWDIR}/system/startup_ca7.s
   ${FWDIR}/src/core_intercom/shared_memory.cc
-  ${FWDIR}/src/core_a7/a7_shared_memory.cc
   ${FWDIR}/src/core_a7/gettimeofday.cc
   ${FWDIR}/src/core_a7/async_thread_control.cc
-  ${FWDIR}/src/core_a7/main.cc
-  ${FWDIR}/src/core_a7/static_buffers.cc
-  ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/console/uart_log.cc
-  ${BOARD_SUPPORT_DIR}/audio/audio.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fs/helpers.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
-  ${FWDIR}/src/patch_play/patch_player_catchup.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
   ${FWDIR}/src/midi/midi_router.cc
 
@@ -164,6 +158,12 @@ add_executable(
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #
   ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
+  #
+  ${BOARD_SUPPORT_DIR}/core_a7/main.cc
+  ${BOARD_SUPPORT_DIR}/core_a7/aux_core_main.cc
+  ${BOARD_SUPPORT_DIR}/core_a7/static_buffers.cc
+  ${BOARD_SUPPORT_DIR}/core_a7/a7_shared_memory.cc
+  ${BOARD_SUPPORT_DIR}/audio/audio.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )

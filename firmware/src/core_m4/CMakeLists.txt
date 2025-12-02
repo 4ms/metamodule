@@ -20,7 +20,7 @@ include(${BOARD_SUPPORT_DIR}/core_m4/CMakeLists.txt)
 add_executable(
   main_m4.elf
   ${BOARD_SUPPORT_DIR}/controls.cc
-  ${M4DIR}/main_m4.cc
+  ${BOARD_SUPPORT_DIR}/core_m4/main_m4.cc
   ${M4DIR}/write.cc
   ${M4DIR}/system_stm32mp1xx.c
   ${FWDIR}/src/console/uart_log.cc

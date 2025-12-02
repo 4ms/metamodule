@@ -74,6 +74,7 @@ target_sources(
           ${BOARD_SUPPORT_DIR}/gui/pages/module_view/quick_assign.cc
           ${BOARD_SUPPORT_DIR}/params/expanders.cc
           ${BOARD_SUPPORT_DIR}/gui/display.cc
+          ${FWDIR}/src/patch_play/patch_player_catchup.cc
 )
 
 set_source_files_properties(
