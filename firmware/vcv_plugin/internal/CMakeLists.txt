@@ -20,7 +20,13 @@ target_link_libraries(vcv_plugin_internal PRIVATE
 	metamodule::rack-interface
 )
 
-if (NOT DEFINED METAMODULE_HEADLESS)
+if (DEFINED METAMODULE_HEADLESS)
+	target_sources(vcv_plugin_internal PRIVATE
+		svg_stubs.cc
+		nanovg_pixbuf_stubs.cc
+		fons-wrapper_stubs.cc
+	)
+else()
 	target_link_libraries(vcv_plugin_internal PRIVATE lvgl::lvgl)
 	target_link_libraries(vcv_plugin_internal PRIVATE ThorVG)
 
