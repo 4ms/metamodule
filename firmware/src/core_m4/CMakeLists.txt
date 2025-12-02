@@ -15,12 +15,10 @@ set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
 set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
 set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
 
-include(${BOARD_SUPPORT_DIR}/core_m4/CMakeLists.txt)
-
 add_executable(
   main_m4.elf
-  ${BOARD_SUPPORT_DIR}/controls.cc
-  ${BOARD_SUPPORT_DIR}/core_m4/main_m4.cc
+  ${M4DIR}/controls.cc
+  ${M4DIR}/core_m4/main_m4.cc
   ${M4DIR}/write.cc
   ${M4DIR}/system_stm32mp1xx.c
   ${FWDIR}/src/console/uart_log.cc
@@ -116,7 +114,7 @@ target_include_directories(
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${BOARD_SUPPORT_DIR}
+          ${FWDIR}/board
           ${M4DIR}
           ${FWDIR}
           ${FWDIR}/lib
@@ -143,7 +141,6 @@ target_link_script(
 )
 
 
-target_link_libraries(main_m4.elf PRIVATE cpputil ${BOARD_m4_libraries})
 target_compile_definitions(main_m4.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 # Fixup for compiler warning for LittleFS

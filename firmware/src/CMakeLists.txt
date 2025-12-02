@@ -15,8 +15,6 @@ set(LIBDIR ${FWDIR}/lib)
 set_arch_flags()
 
 
-add_subdirectory(${BOARD_SUPPORT_DIR})
-
 #
 # Driver interface
 #
@@ -154,21 +152,20 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
+  ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3060.cc 
   #
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #
   ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
   #
-  ${BOARD_SUPPORT_DIR}/core_a7/main.cc
-  ${BOARD_SUPPORT_DIR}/core_a7/aux_core_main.cc
-  ${BOARD_SUPPORT_DIR}/core_a7/static_buffers.cc
-  ${BOARD_SUPPORT_DIR}/core_a7/a7_shared_memory.cc
-  ${BOARD_SUPPORT_DIR}/audio/audio.cc
+  ${FWDIR}/core_a7/main.cc
+  ${FWDIR}/core_a7/aux_core_main.cc
+  ${FWDIR}/core_a7/static_buffers.cc
+  ${FWDIR}/core_a7/a7_shared_memory.cc
+  ${FWDIR}/audio/audio.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
-
-target_sources(main.elf PRIVATE ${BOARD_a7_sources})
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
@@ -190,7 +187,7 @@ target_include_directories(
           ${FWDIR}/src/params
           ${FWDIR}/src/fs
           ${FWDIR}/src/core_a7
-          ${BOARD_SUPPORT_DIR}
+          ${FWDIR}/board
           ${FWDIR}/lib/mdrivlib
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
@@ -207,8 +204,6 @@ if (NOT TARGET cpputil::cpputil)
 endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
-target_compile_definitions(main.elf PRIVATE ${BOARD_a7_defines})
-
 
 target_link_libraries(main.elf PRIVATE mdrivlib_interface CoreModules metamodule::patch-serial cpputil vcv_ports)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
@@ -216,7 +211,6 @@ add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,hardware_support>")
-target_link_libraries(main.elf PUBLIC ${BOARD_a7_libraries})
 
 if (CPU_TEST_ALL_MODULES)
   target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)

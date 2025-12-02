@@ -13,20 +13,6 @@ project(
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR})
 
-# Default to MetaModule (euro26hp)
-
-if(BOARD STREQUAL "")
-  set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/src/boards/euro26hp)
-
-else()
-  # TODO check if dir exists, then try BOARD_SUPPORT_DIR as abs path, and try ./src/boards/BOARD_SUPPORT_DIR
-  set(BOARD_SUPPORT_DIR ${CMAKE_CURRENT_LIST_DIR}/${BOARD})
-
-endif()
-
-
-message("BOARD_SUPPORT_DIR: ${BOARD_SUPPORT_DIR}")
-
 #
 # Git commit hash
 #
@@ -252,7 +238,7 @@ endif()
 #
 # Bootloader
 # 
-include(${BOARD_SUPPORT_DIR}/bootloader.cmake)
+include(board/bootloader.cmake)
 
 add_custom_target(
   bootloader
