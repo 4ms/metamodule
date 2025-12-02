@@ -32,7 +32,6 @@ add_executable(
   ${FWDIR}/src/fw_update/hash/md5_hash.c
   ${FWDIR}/src/fw_update/firmware_writer.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
-
   ${FWDIR}/src/usb/usbd_conf.cc
   ${FWDIR}/src/usb/usbh_conf.cc
   ${FWDIR}/src/usb/usbh_midi.cc
@@ -41,7 +40,6 @@ add_executable(
   ${FWDIR}/src/usb/device_cdc/usbd_desc.c
   # ${FWDIR}/src/usb/device_msc/usb_drive_device.cc
   # ${FWDIR}/src/usb/device_msc/usbd_desc.c
-
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
   ${FWDIR}/lib/littlefs/lfs.c
@@ -83,17 +81,14 @@ add_executable(
   ${HALDIR}/src/stm32mp1xx_ll_tim.c
   ${HALDIR}/src/stm32mp1xx_ll_usb.c
   ${HALDIR}/src/stm32mp1xx_ll_usb_phy.c
-
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc.c
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_bot.c
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_data.c
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_scsi.c
   ${USBDEV_LIBDIR}/Class/CDC/Src/usbd_cdc.c
-
   ${USBDEV_LIBDIR}/Core/Src/usbd_core.c
   ${USBDEV_LIBDIR}/Core/Src/usbd_ctlreq.c
   ${USBDEV_LIBDIR}/Core/Src/usbd_ioreq.c
-
   ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc.c
   ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_bot.c
   ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_scsi.c
@@ -115,7 +110,7 @@ target_include_directories(
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${FWDIR}/src/medium
+          ${FWDIR}/src/board
           ${M4DIR}
           ${FWDIR}
           ${FWDIR}/lib
@@ -135,11 +130,7 @@ target_link_libraries(main_m4.elf PUBLIC metamodule::core-interface)
 
 set_property(TARGET main_m4.elf PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-target_link_script(
-  main_m4
-  ${FWDIR}/system/linker/stm32mp15xx_m4.ld
-  -L${FWDIR}
-)
+target_link_script(main_m4 ${FWDIR}/system/linker/stm32mp15xx_m4.ld -L${FWDIR})
 
 target_link_libraries(main_m4.elf PRIVATE cpputil)
 target_compile_definitions(main_m4.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
@@ -150,15 +141,4 @@ set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIO
 # Fix for ff.c string overfow (false positive?)
 target_link_options(main_m4.elf PUBLIC -Wno-stringop-overflow)
 
-
-# Add wifi comm functionality
-add_subdirectory(${FWDIR}/src/wifi/comm ${CMAKE_BINARY_DIR}/wifi_comm)
-
-# Add wifi flashing
-add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
-
-
-
-
 set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
-
