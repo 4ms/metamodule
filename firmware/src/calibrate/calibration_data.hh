@@ -79,25 +79,8 @@ struct CalData {
 	}
 
 	void reset_to_default() {
-		in_cal = {{
-			{DefaultInput},
-			{DefaultInput},
-			{DefaultInput},
-			{DefaultInput},
-			{DefaultInput},
-			{DefaultInput},
-		}};
-
-		out_cal = {{
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-			{DefaultOutput},
-		}};
+		in_cal.fill(DefaultInput);
+		out_cal.fill(DefaultOutput);
 	}
 
 	void print_calibration() const {
