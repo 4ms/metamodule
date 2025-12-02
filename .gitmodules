@@ -1,54 +1,21 @@
 [submodule "firmware/lib/mdrivlib"]
 	path = firmware/lib/mdrivlib
 	url = https://github.com/4ms/mdrivlib.git
-[submodule "firmware/lib/lvgl/lvgl"]
-	path = firmware/lib/lvgl/lvgl
-	url = https://github.com/danngreen/lvgl.git
 [submodule "shared/cpputil"]
 	path = firmware/lib/cpputil
 	url = https://github.com/4ms/cpputil.git
 [submodule "firmware/bootloader/mp1-boot"]
 	path = firmware/bootloader/mp1-boot
 	url = https://github.com/4ms/mp1-boot.git
-[submodule "firmware/vcv_ports/AudibleInstruments"]
-	path = firmware/vcv_ports/AudibleInstruments
-	url = https://github.com/4ms/AudibleInstruments.git
-[submodule "firmware/vcv_ports/Befaco"]
-	path = firmware/vcv_ports/Befaco
-	url = https://github.com/hemmer/Befaco.git
-[submodule "firmware/vcv_ports/hetrickcv"]
-	path = firmware/vcv_ports/hetrickcv
-	url = https://github.com/mhetrick/hetrickcv.git
-[submodule "firmware/lib/esp-serial-flasher"]
-	path = firmware/lib/esp-serial-flasher
-	url = https://github.com/4ms/esp-serial-flasher.git
-[submodule "firmware/lib/flatbuffers"]
-	path = firmware/lib/flatbuffers
-	url = https://github.com/google/flatbuffers.git
-[submodule "firmware/vcv_ports/nonlinearcircuits"]
-	path = firmware/vcv_ports/nonlinearcircuits
-	url = https://github.com/mhetrick/nonlinearcircuits
 [submodule "firmware/bootloader/mp1-usb-dfu"]
 	path = firmware/bootloader/mp1-usb-dfu
 	url = https://github.com/4ms/mp1-usb-dfu
-[submodule "firmware/src/wifi/comm/flat"]
-	path = firmware/src/wifi/comm/flat
-	url = https://github.com/4ms/metamodule-bridge-protocol.git
-[submodule "firmware/vcv_ports/eightfold"]
-	path = firmware/vcv_ports/eightfold
-	url = https://github.com/scanner-darkly/eightfold.git
 [submodule "firmware/metamodule-plugin-sdk"]
 	path = firmware/metamodule-plugin-sdk
 	url = https://github.com/4ms/metamodule-plugin-sdk.git
-[submodule "firmware/vcv_ports/Valley"]
-	path = firmware/vcv_ports/Valley
-	url = https://github.com/4ms/ValleyRackFree
 [submodule "metamodule-patch-serial"]
 	path = firmware/lib/patch-serial
 	url = https://github.com/4ms/metamodule-patch-serial
 [submodule "firmware/lib/CoreModules"]
 	path = firmware/lib/CoreModules
 	url = https://github.com/4ms/metamodule-core-modules
-[submodule "firmware/lib/thorvg/thorvg"]
-	path = firmware/lib/thorvg/thorvg
-	url = https://github.com/4ms/thorvg.git
