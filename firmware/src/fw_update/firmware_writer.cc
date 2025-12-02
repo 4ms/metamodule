@@ -1,10 +1,18 @@
 #include "firmware_writer.hh"
 #include "hash/hash_processor.hh"
+#ifdef WIFI_MODULE
 #include "wifi/comm/wifi_interface.hh"
 #include "wifi/flasher/flasher.h"
+#endif
 
 namespace MetaModule
 {
+
+static void stopWifi() {
+#ifdef WIFI_MODULE
+	WifiInterface::stop();
+#endif
+}
 
 FirmwareWriter::FirmwareWriter(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio, FlashLoader &flash_loader)
 	: sdcard_{sdcard_fileio}
@@ -17,11 +25,15 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 
 	if (message.message_type == StartChecksumCompare) {
 
+#ifdef WIFI_MODULE
 		if (message.flashTarget == WIFI) {
 			pr_trace("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 			return compareChecksumWifi(message.address, message.length, {message.checksum.data()});
 
-		} else if (message.flashTarget == QSPI) {
+		} else
+#endif
+			if (message.flashTarget == QSPI)
+		{
 			return compareChecksumQSPI(
 				message.address, message.length, {message.checksum.data()}, *message.bytes_processed);
 
@@ -50,11 +62,12 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 	}
 }
 
+#ifdef WIFI_MODULE
 IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, uint32_t length, Checksum_t checksum) {
 	IntercoreStorageMessage returnValue;
 
 	// Stop wifi reception before long running operation
-	WifiInterface::stop();
+	stopWifi();
 
 	auto result = Flasher::init(230400);
 
@@ -91,7 +104,7 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer,
 	IntercoreStorageMessage returnValue;
 
 	// Stop wifi reception before long running operation
-	WifiInterface::stop();
+	stopWifi();
 
 	auto result = Flasher::init(230400);
 
@@ -143,12 +156,13 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer,
 
 	return returnValue;
 }
+#endif
 
 IntercoreStorageMessage
 FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum, uint32_t &bytesChecked) {
 
 	// Stop wifi reception before long running operation
-	WifiInterface::stop();
+	stopWifi();
 
 	MD5Processor processor;
 
@@ -183,7 +197,7 @@ FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_
 IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uint32_t address, uint32_t &bytesWritten) {
 
 	// Stop wifi reception before long running operation
-	WifiInterface::stop();
+	stopWifi();
 
 	const uint32_t FlashSectorSize = 64 * 1024;
 	const std::size_t BatchSize = FlashSectorSize;
