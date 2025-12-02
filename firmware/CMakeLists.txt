@@ -28,50 +28,6 @@ set(A7_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corea7/medium)
 add_subdirectory(src/core_m4 ${M4_BIN_PATH})
 add_subdirectory(src ${A7_BIN_PATH})
 
-#
-# Symbol table
-#
-
-set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
-set(API_SYMBOL_NAMES_FILE ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugin-sdk/api-symbols.txt)
-get_target_property(VcvPluginBinDir vcv_plugin_export BINARY_DIR)
-get_target_property(CoreProcPluginBinDir coreproc_plugin_export BINARY_DIR)
-get_target_property(HardwareSupportBinDir hardware_support BINARY_DIR)
-set(SYMBOLS_BINFILE_DIRS
-  --objdir ${VcvPluginBinDir} 
-  --objdir ${CoreProcPluginBinDir} 
-  --objdir ${HardwareSupportBinDir} 
-  --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/fs/dirent/
-
-)
-
-add_custom_target(
-  new-api-sym-list
-  COMMAND flashing/dump_syms.py
-          ${SYMBOLS_BINFILE_DIRS}
-          --text-out ${API_SYMBOL_NAMES_FILE}
-		  #-v
-  DEPENDS main.elf
-  COMMENT "Creating new API symbol list file in the SDK directory ${API_SYMBOL_NAMES_FILE}"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  VERBATIM USES_TERMINAL
-)
-
-add_custom_command(
-  OUTPUT ${SYMBOLS_FILE}
-  COMMAND flashing/find_syms.py
-          --symbols ${API_SYMBOL_NAMES_FILE}
-          --elf $<TARGET_FILE:main.elf>
-          --out ${SYMBOLS_FILE}
-          # -v
-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/flashing/zero-term.py
-          --in ${SYMBOLS_FILE} --out ${SYMBOLS_FILE}
-  COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
-  DEPENDS main.elf 
-  COMMENT "Generating table of API symbol addresses and installing in firmware binary"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  VERBATIM USES_TERMINAL
-)
 
 #
 # Asset Dir
@@ -259,7 +215,6 @@ add_custom_target(
   tests ALL
   COMMAND cd ${PROJECT_SOURCE_DIR} && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${LIBDIR}/patch-serial && make --no-print-directory -f tests/Makefile -j8
-  COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
   COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/lib/CoreModules/tests all
   COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests all
   COMMAND make --no-print-directory -C ${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/core-interface/tests all
@@ -274,7 +229,6 @@ file(
   "${LIBDIR}/patch-serial/tests/build/*"
   "${PROJECT_SOURCE_DIR}/lib/CoreModules/tests/build"
   "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests/build"
-  "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper/tests/build/*"
   "${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/core-interface/tests/build"
 )
 set_target_properties(tests PROPERTIES ADDITIONAL_CLEAN_FILES "${tests_clean_files}")
