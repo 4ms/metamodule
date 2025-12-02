@@ -117,12 +117,11 @@ target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,pf
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,osdialog>")
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,libsamplerate>")
 
-if(NOT METAMODULE_HEADLESS)
-	add_subdirectory(nanovg)
-	target_include_directories(nanovg PRIVATE ${MM_ROOT}/firmware/src)
-	target_link_libraries(nanovg PRIVATE metamodule::rack-interface)
-	target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,nanovg>")
-endif()
+# nanovg checks for METAMODULE_HEADLESS and includes stubs if necessary
+add_subdirectory(nanovg)
+target_include_directories(nanovg PRIVATE ${MM_ROOT}/firmware/src)
+target_link_libraries(nanovg PRIVATE metamodule::rack-interface)
+target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,nanovg>")
 
 target_include_directories( vcv_plugin_export PUBLIC
     src
