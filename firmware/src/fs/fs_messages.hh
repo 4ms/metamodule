@@ -54,7 +54,7 @@ private:
 	FatFileIO null_sd{&null_ops, Volume::SDCard};
 	FatFileIO null_usb{&null_ops, Volume::USB};
 
-	PatchStorage patch_storage{null_sd, null_usb, SharedMemoryS::ptrs.ramdrive};
+	PatchStorage patch_storage{null_sd, null_usb};
 	CalibrationMessageHandler calibration_handler{flash_loader};
 };
 
