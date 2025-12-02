@@ -58,25 +58,16 @@ target_sources(lvgl
 set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
 add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
-#
-# ThorVG
-#
-add_subdirectory(../lib/thorvg ${CMAKE_BINARY_DIR}/thorvg)
-
 
 #
 # VCV Adaptor
 #
 add_subdirectory(../vcv_plugin ${CMAKE_BINARY_DIR}/vcv_plugin)
-target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.cc)
 
 #
 # Brands
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
-add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
-
-target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
 
 #
 # Patch format and serialization
@@ -92,10 +83,6 @@ if (NOT TARGET jansson)
   add_subdirectory(${FWDIR}/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
 endif()
 
-#
-# SLS Exported GUI (ui_lvgl)
-#
-add_subdirectory(${FWDIR}/src/gui/slsexport)
 
 # CoreModules sources
 add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
@@ -129,18 +116,7 @@ add_executable(
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fs/helpers.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
-  ${FWDIR}/src/gui/elements/element_name.cc
-  ${FWDIR}/src/gui/elements/panel_name.cc
-  ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/src/gui/fonts/fonts.cc
-  ${FWDIR}/src/gui/fonts/ttf.cc
-  ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
-  ${FWDIR}/src/gui/pages/module_view/element_roller.cc
-  ${FWDIR}/src/gui/pages/module_view/draw_module.cc
-  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
-  ${FWDIR}/src/gui/pages/tags.cc
   ${FWDIR}/src/midi/midi_router.cc
-  ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
 
@@ -214,14 +190,6 @@ add_executable(
 set_source_files_properties(
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
-  ${FWDIR}/src/gui/elements/element_name.cc
-  ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/src/gui/pages/module_view/draw_module.cc
-  ${FWDIR}/src/gui/pages/module_view/element_roller.cc
-  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
-  ${FWDIR}/src/gui/fonts/fonts.cc
-  ${FWDIR}/src/gui/fonts/ttf.cc
-  ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
 
   ${FWDIR}/vcv_plugin/export/osdialog/osdialog-mm.cc
 
@@ -238,7 +206,7 @@ target_include_directories(
           ${FWDIR}/src/params
           ${FWDIR}/src/fs
           ${FWDIR}/src/core_a7
-          ${FWDIR}/src/medium
+          ${FWDIR}/src/board
           ${FWDIR}/lib/mdrivlib
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
