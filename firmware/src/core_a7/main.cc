@@ -81,6 +81,8 @@ int main() {
 	printf("Using USB buffer\n");
 #endif
 
+	InternalPluginManager internal_plugin_manager;
+
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
