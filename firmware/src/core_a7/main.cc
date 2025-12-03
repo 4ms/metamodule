@@ -9,11 +9,14 @@
 #include "drivers/cache.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
-#include "patch_file/file_storage_proxy.hh"
+#include "internal_plugin_manager.hh"
+#include "patch_file/patches_default.hh"
+#include "patch_play/patch_player.hh"
 #include "system/print_time.hh"
 #include "uart_log.hh"
 
 #include "fs/norflash_layout.hh"
+#include "yaml_to_patch.hh"
 
 namespace MetaModule
 {
@@ -33,8 +36,7 @@ int main() {
 	printf("Build: %s (%s)\n", GIT_HASH.data(), GIT_COMMIT_TIME.data());
 	printf("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
 
-	FileStorageComm patch_comm{StaticBuffers::icc_shared_message};
-	FileStorageProxy file_storage_proxy{StaticBuffers::raw_patch_data, patch_comm, StaticBuffers::patch_dir_list};
+	PatchPlayer patch_player;
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
@@ -53,15 +55,11 @@ int main() {
 	};
 
 	A7SharedMemoryS::ptrs = {
-		&file_storage_proxy,
 		&StaticBuffers::virtdrive,
 		&StaticBuffers::console_a7_1_buff,
 	};
 
-	{
-		CalibrationDataReader cal;
-		audio.set_calibration(cal.read_calibration_or_defaults(FlashLoader{}, CalDataFlashOffset));
-	}
+	audio.set_calibration(CalibrationDataReader::read_calibration_or_defaults(FlashLoader{}, CalDataFlashOffset));
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	mdrivlib::SystemCache::clean_dcache_by_range(&A7SharedMemoryS::ptrs, sizeof(A7SharedMemoryS::ptrs));
@@ -82,6 +80,12 @@ int main() {
 #endif
 
 	InternalPluginManager internal_plugin_manager;
+
+	// Load initial patch file
+	PatchData patch;
+	std::string p{LC100_patch};
+	yaml_raw_to_patch(p, patch);
+	patch_player.load_patch(patch);
 
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();

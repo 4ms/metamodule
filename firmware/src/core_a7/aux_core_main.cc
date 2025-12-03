@@ -30,8 +30,6 @@ extern "C" void aux_core_main() {
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 	Filesystem::init(ramdisk);
 
-	auto settings_file = fopen("nor:/settings.yml", "r");
-
 	// Wait for M4 to be ready (so USB and SD are available)
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;

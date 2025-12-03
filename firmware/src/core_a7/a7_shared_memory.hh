@@ -12,7 +12,7 @@ class OpenPatchManager;
 
 struct A7SharedMemoryS {
 	struct Ptrs {
-		FileStorageProxy *patch_storage{};
+		// FileStorageProxy *patch_storage{};
 		RamDrive *ramdrive{};
 		ConcurrentBuffer *console_buffer{};
 	};
