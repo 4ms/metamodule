@@ -8,7 +8,7 @@ namespace MetaModule
 
 class MulticorePlayer {
 public:
-	static constexpr unsigned NumCores = mdrivlib::SMPControl::NumCores;
+	static constexpr unsigned NumCores = 1; //mdrivlib::SMPControl::NumCores;
 
 	void assign_modules(std::span<unsigned> module_ids) {
 		if constexpr (NumCores > 1) {
