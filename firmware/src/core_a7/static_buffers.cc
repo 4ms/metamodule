@@ -3,7 +3,6 @@
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
-#include "params/sync_params.hh"
 #include "patch_file/patch_dir_list.hh"
 #include <array>
 
@@ -20,21 +19,26 @@ namespace StaticBuffers
 
 __attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock audio_in_dma_block{};
 __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block{};
+// TODO: get rid of this
 __attribute__((section(".ddma"))) std::array<char, 1024 * 1024> raw_patch_data;
 
 __attribute__((section(".ddma"))) IntercoreStorageMessage icc_shared_message;
+// TODO: get rid of this
 __attribute__((section(".ddma"))) IntercoreModuleFS::Message icc_module_fs_message_core0;
 __attribute__((section(".ddma"))) IntercoreModuleFS::Message icc_module_fs_message_core1;
+// TODO: get rid of this
 __attribute__((section(".ddma"))) std::array<uint8_t, 128 * 1024> module_fs_buffer_core0;
 __attribute__((section(".ddma"))) std::array<uint8_t, 128 * 1024> module_fs_buffer_core1;
 
+// TODO: get rid of this
 __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 
+// TODO: get rid of this
 __attribute__((section(".ddma"))) DirTree<FileEntry> dir_tree;
 
 __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};
-__attribute__((section(".sysram"))) SyncParams sync_params;
 
+// TODO: get rid of this
 __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};

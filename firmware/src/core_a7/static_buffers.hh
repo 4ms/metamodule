@@ -4,7 +4,6 @@
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "params/param_block.hh"
-#include "params/sync_params.hh"
 #include "patch_file/patch_dir_list.hh"
 #include <array>
 
@@ -26,7 +25,6 @@ extern std::array<uint8_t, 128 * 1024> module_fs_buffer_core1;
 extern PatchDirList patch_dir_list;
 extern DirTree<FileEntry> dir_tree;
 extern DoubleBufParamBlock param_blocks;
-extern SyncParams sync_params;
 extern RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 extern ConcurrentBuffer console_a7_0_buff;
 extern ConcurrentBuffer console_a7_1_buff;

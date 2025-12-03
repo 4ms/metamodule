@@ -36,9 +36,9 @@ int main() {
 	FileStorageComm patch_comm{StaticBuffers::icc_shared_message};
 	FileStorageProxy file_storage_proxy{StaticBuffers::raw_patch_data, patch_comm, StaticBuffers::patch_dir_list};
 
-	AudioStream audio{StaticBuffers::audio_in_dma_block,
+	AudioStream audio{patch_player,
+					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
-					  StaticBuffers::sync_params,
 					  StaticBuffers::param_blocks};
 
 	SharedMemoryS::ptrs = {
@@ -54,7 +54,6 @@ int main() {
 
 	A7SharedMemoryS::ptrs = {
 		&file_storage_proxy,
-		&StaticBuffers::sync_params,
 		&StaticBuffers::virtdrive,
 		&StaticBuffers::console_a7_1_buff,
 	};
@@ -88,8 +87,6 @@ int main() {
 	// wait for other cores to be ready: ~2400ms + more for preloading plugins
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked() || mdrivlib::HWSemaphore<AuxCoreReady>::is_locked())
 		;
-
-	StaticBuffers::sync_params.clear();
 
 	audio.start();
 
