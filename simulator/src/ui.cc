@@ -129,8 +129,7 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 	// load_measure.end_measurement();
 
-	if (mdrivlib::SMPControl::read<SMPRegister::RefreshPatchElements>() == 1) {
-		mdrivlib::SMPControl::write<SMPRegister::RefreshPatchElements>(0);
+	if (patch_playloader.should_clear_param_watches()) {
 		midi_sync.clear_last_values();
 	}
 
