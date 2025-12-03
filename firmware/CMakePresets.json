@@ -80,6 +80,14 @@
         "CONSOLE_USE_USB": { "type": "BOOL", "value": "ON" },
         "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
       }
+    },
+    {
+      "name": "uart-log",
+      "inherits": "full",
+      "cacheVariables": {
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
+        "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
+      }
     }
   ],
   "buildPresets": [
