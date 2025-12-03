@@ -78,17 +78,22 @@ def get_images_for_elf(filename, *, destination, loader):
                         type = UImg.image_type_kernel
                         entry_point = image_entry_point
 
-                print("Creating {} at 0x{:08x} with size {}".format(name, lma, lma_size))
-                if type == UImg.image_type_kernel:
-                    print("Contains entry point at 0x{:08x}".format(entry_point))
+                # Check if size is valid (e.g. if there's no symbol list then A7.symlist will be 1B and should be skipped
+                if lma_size > 1:
+                    print("Creating {} at 0x{:08x} with size {}".format(name, lma, lma_size))
+                    if type == UImg.image_type_kernel:
+                        print("Contains entry point at 0x{:08x}".format(entry_point))
 
-                header, payload = create_uimg_header(payload, loadaddr=lma, entryaddr=entry_point, name=name, type=type)
+                    header, payload = create_uimg_header(payload, loadaddr=lma, entryaddr=entry_point, name=name, type=type)
 
-                # Just concatenate generated images
-                output = output + header + payload
+                    # Just concatenate generated images
+                    output = output + header + payload
 
-                # Remember target area for overlap check later on
-                target_areas.append((lma, lma + len(payload)))
+                    # Remember target area for overlap check later on
+                    target_areas.append((lma, lma + len(payload)))
+                else:
+                    print("Skipping {} at 0x{:08x} with size {}".format(name, lma, lma_size))
+
                 
             else:
                 logger.debug("Skipping empty segment (VMA: 0x{:08x}-0x{:08x} Sections: {})".format(vma, vma+vma_size, ', '.join([s.name for s in contained_sections])))
