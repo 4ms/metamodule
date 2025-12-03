@@ -4,6 +4,7 @@
 namespace MetaModule
 {
 
+// Sample-rate parameters
 struct Params {
 	std::array<float, 8> knobs{};
 	float width_cv{};

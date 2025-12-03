@@ -52,9 +52,11 @@ private:
 	Debouncer<0b0001, 0b1110, 0b1111> eq_switch_pin0{};
 	Debouncer<0b0001, 0b1110, 0b1111> eq_switch_pin1{};
 
-	DebouncedButton<ListenClosely::LowSelBut, PinPolarity::Inverted> low_sel_button;
-	DebouncedButton<ListenClosely::MidSelBut, PinPolarity::Inverted> mid_sel_button;
-	DebouncedButton<ListenClosely::HighSelBut, PinPolarity::Inverted> high_sel_button;
+	DebouncedButton<ListenClosely::LowSelBut, PinPolarity::Normal> low_sel_button;
+	DebouncedButton<ListenClosely::MidSelBut, PinPolarity::Normal> mid_sel_button;
+	DebouncedButton<ListenClosely::HighSelBut, PinPolarity::Normal> high_sel_button;
+
+	Toggler jack_sense[5];
 
 	// Analog controls (pots)
 	static constexpr size_t NumAdcs = sizeof(ListenClosely::PotConfs) / sizeof(mdrivlib::AdcChannelConf);
