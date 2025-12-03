@@ -83,25 +83,26 @@ void AudioStream::handle_patch_just_loaded() {
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 
-	// params.knobs[X] or metaparams:
-	// comp switch: RATIO_PARAM, = 0
-	// 0(amount): PEAKREDUCTION_PARAM = 1
-	// 2: DRYWET_PARAM = 2
-	// 1: GAIN_PARAM = 3
-	// 3: LOWSHELF_PARAM = 4
-	// 5: HIGHSHELF_PARAM = 5
-	// 4: MID_PARAM = 6
-	// low_sel: LOWFREQSELECT_PARAM = 7
-	// high_sel: HIGHPASSFREQSELECT_PARAM = 8
-	// mid_sel: MIDFREQSELECT_PARAM = 9
-	// 6: WIDTH_PARAM = 10
-	// 7(eq level): OUTPUTVOL_PARAM = 11
-	// eq_switch: PREPOST_PARAM = 12
-	player.set_panel_param(0, param_block.metaparams.comp_switch);
-	player.set_panel_param(12, param_block.metaparams.eq_switch);
-	player.set_panel_param(7, param_block.metaparams.low_sel);
-	player.set_panel_param(9, param_block.metaparams.mid_sel);
-	player.set_panel_param(8, param_block.metaparams.high_sel);
+	// panel# | params.knobs[X] or metaparams: MODULE ENUM
+	// 9 | comp switch: RATIO_PARAM, = 0
+	// 6 | 0: PEAKREDUCTION_PARAM = 1 (amount)
+	// 8 | 2: DRYWET_PARAM = 2
+	// 7 | 1: GAIN_PARAM = 3
+	// 1 | 3: LOWSHELF_PARAM = 4
+	// 3 | 5: HIGHSHELF_PARAM = 5
+	// 2 | 4: MID_PARAM = 6
+	// 10 | low_sel: LOWFREQSELECT_PARAM = 7
+	// 12 | high_sel: HIGHPASSFREQSELECT_PARAM = 8
+	// 11 | mid_sel: MIDFREQSELECT_PARAM = 9
+	// 0 | 6: WIDTH_PARAM = 10
+	// 5 | 7(eq level): OUTPUTVOL_PARAM = 11
+	// 4 | eq_switch: PREPOST_PARAM = 12
+
+	player.set_panel_param(9, param_block.metaparams.comp_switch);
+	player.set_panel_param(4, param_block.metaparams.eq_switch);
+	player.set_panel_param(10, param_block.metaparams.low_sel);
+	player.set_panel_param(11, param_block.metaparams.mid_sel);
+	player.set_panel_param(12, param_block.metaparams.high_sel);
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
@@ -115,7 +116,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		player.set_panel_input(2, params.width_cv);
 
-		constexpr std::array ParamOrder = {1, 3, 2, 4, 6, 5, 10, 11};
+		constexpr std::array ParamOrder = {6, 7, 8, 1, 2, 3, 0, 5};
 		for (auto [i, knob_val] : zip(ParamOrder, params.knobs)) {
 			player.set_panel_param(i, knob_val);
 		}

@@ -1,3 +1,4 @@
+#include "../patches/default/LC100.hh"
 #include "app_startup.hh"
 #include "audio/audio.hh"
 #include "calibrate/calibration_data_reader.hh"
@@ -10,7 +11,6 @@
 #include "git_version.h"
 #include "hsem_handler.hh"
 #include "internal_plugin_manager.hh"
-#include "patch_file/patches_default.hh"
 #include "patch_play/patch_player.hh"
 #include "system/print_time.hh"
 #include "uart_log.hh"

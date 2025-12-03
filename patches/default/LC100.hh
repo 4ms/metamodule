@@ -147,19 +147,19 @@ PatchData:
           min: 0
           max: 1
           alias_name: Compressor Routing
-        - panel_knob_id: 44
+        - panel_knob_id: 10
           module_id: 1
           param_id: 7
           curve_type: 0
           min: 0
           max: 1
-        - panel_knob_id: 45
+        - panel_knob_id: 11
           module_id: 1
           param_id: 9
           curve_type: 0
           min: 0
           max: 1
-        - panel_knob_id: 46
+        - panel_knob_id: 12
           module_id: 1
           param_id: 8
           curve_type: 0
