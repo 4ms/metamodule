@@ -1,8 +1,8 @@
 #include "audio/audio.hh"
 #include "conf/hsem_conf.hh"
+#include "debug.hh"
 #include "drivers/hsem.hh"
 #include "param_block.hh"
-#include "params/sync_params.hh"
 #include "user_settings/audio_settings.hh"
 #include "util/countzip.hh"
 #include "util/zip.hh"
@@ -13,11 +13,11 @@ namespace MetaModule
 
 using namespace mdrivlib;
 
-AudioStream::AudioStream(AudioInBlock &audio_in_block,
+AudioStream::AudioStream(PatchPlayer &player,
+						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
-						 SyncParams &sync_p,
 						 DoubleBufParamBlock &pblk)
-	: sync_params{sync_p}
+	: player{player}
 	, param_blocks{pblk}
 	, audio_in_block{audio_in_block}
 	, audio_out_block{audio_out_block}
@@ -38,6 +38,8 @@ AudioStream::AudioStream(AudioInBlock &audio_in_block,
 	cal.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
+		Debug::Pin0::high();
+
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		// param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 		load_measure.start_measurement();
@@ -55,10 +57,7 @@ AudioStream::AudioStream(AudioInBlock &audio_in_block,
 
 		load_measure.end_measurement();
 
-		sync_params.write_sync(param_state, param_blocks[block].metaparams);
-		param_state.reset_change_flags();
-
-		update_audio_settings();
+		Debug::Pin0::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -75,7 +74,7 @@ void AudioStream::start() {
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
-	float output_volts = 0; //player.get_panel_output(output_id) * 0.5f; //16Vpp clips little, so make 20Vpp => 16Vpp
+	float output_volts = player.get_panel_output(output_id) * 0.5f; //16Vpp clips little, so make 20Vpp => 16Vpp
 	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
 }
 
@@ -83,51 +82,46 @@ void AudioStream::handle_patch_just_loaded() {
 }
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
-	// player.sync();
 
-	// Buttons (param id 44-)
-	// for (auto i = (int)FirstButton; auto &but : param_block.metaparams.buttons) {
-	// 	if (but.is_just_pressed()) {
-	// 		player.set_panel_param(i, 1.f);
-	// 	} else if (but.is_just_released())
-	// 		player.set_panel_param(i, 0.f);
-
-	// 	i++;
-	// }
-
-	// Encoders (param id 0, 1)
-	// for (auto i = 0u; auto &enc : param_block.metaparams.encoders) {
-	// 	if (auto motion = enc.use_motion())
-	// 		player.set_panel_param(i, motion);
-
-	// 	i++;
-	// }
+	// params.knobs[X] or metaparams:
+	// comp switch: RATIO_PARAM, = 0
+	// 0(amount): PEAKREDUCTION_PARAM = 1
+	// 2: DRYWET_PARAM = 2
+	// 1: GAIN_PARAM = 3
+	// 3: LOWSHELF_PARAM = 4
+	// 5: HIGHSHELF_PARAM = 5
+	// 4: MID_PARAM = 6
+	// low_sel: LOWFREQSELECT_PARAM = 7
+	// high_sel: HIGHPASSFREQSELECT_PARAM = 8
+	// mid_sel: MIDFREQSELECT_PARAM = 9
+	// 6: WIDTH_PARAM = 10
+	// 7(eq level): OUTPUTVOL_PARAM = 11
+	// eq_switch: PREPOST_PARAM = 12
+	player.set_panel_param(0, param_block.metaparams.comp_switch);
+	player.set_panel_param(12, param_block.metaparams.eq_switch);
+	player.set_panel_param(7, param_block.metaparams.low_sel);
+	player.set_panel_param(9, param_block.metaparams.mid_sel);
+	player.set_panel_param(8, param_block.metaparams.high_sel);
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
 
 		// Audio inputs
-		// for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
+		for (auto [i, inchan] : countzip(in.chan)) {
+			float calibrated_input = cal.in_cal[i].adjust(AudioInFrame::sign_extend(inchan));
+			player.set_panel_input(i, calibrated_input);
+		}
 
-		// 	float calibrated_input = cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
+		player.set_panel_input(2, params.width_cv);
 
-		// 	player.set_panel_input(panel_jack_i, calibrated_input);
-		// }
-
-		// Accelerometer: param_id 2, 3, 4
-		// for (auto [i, knob_val] : countzip(params.accel)) {
-		// 	// TODO: if changed:
-		// 	player.set_panel_param(i + 2, knob_val);
-		// }
-
-		// USB MIDI
-		// MidiMessage msg = params.usb_raw_midi;
-		// midi.process(param_block.metaparams.usb_midi_connected, &msg);
-		// param_blocks[cur_block].params[idx].usb_raw_midi = msg;
+		constexpr std::array ParamOrder = {1, 3, 2, 4, 6, 5, 10, 11};
+		for (auto [i, knob_val] : zip(ParamOrder, params.knobs)) {
+			player.set_panel_param(i, knob_val);
+		}
 
 		// Run each module
-		// player.update_patch_singlecore();
+		player.update_patch_singlecore();
 
 		// Get outputs from modules
 		for (auto [i, outchan] : countzip(out.chan))
@@ -147,9 +141,6 @@ uint32_t AudioStream::get_audio_errors() {
 
 // It's measurably faster to copy params into cacheable ram
 ParamBlock &AudioStream::cache_params(unsigned block) {
-	// local_params.metaparams.battery_status = param_blocks[block].metaparams.battery_status;
-	// local_params.metaparams.usb_midi_connected = param_blocks[block].metaparams.usb_midi_connected;
-	// local_params.metaparams.buttons = param_blocks[block].metaparams.buttons;
 	local_params.metaparams = param_blocks[block].metaparams;
 
 	for (auto i = 0u; i < block_size_; i++)

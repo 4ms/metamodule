@@ -5,7 +5,7 @@
 #include "drivers/cycle_counter.hh"
 #include "param_block.hh"
 #include "params/params_state.hh"
-#include "params/sync_params.hh"
+#include "patch_play/patch_player.hh"
 
 namespace MetaModule
 {
@@ -22,9 +22,9 @@ using CombinedAudioBlock = AudioConf::CombinedAudioBlock;
 
 class AudioStream {
 public:
-	AudioStream(AudioInBlock &audio_in_block,
+	AudioStream(PatchPlayer &player,
+				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
-				SyncParams &sync_params,
 				DoubleBufParamBlock &p);
 
 	void start();
@@ -34,7 +34,7 @@ public:
 	void handle_overruns();
 
 private:
-	SyncParams &sync_params;
+	PatchPlayer &player;
 	ParamsState param_state;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
