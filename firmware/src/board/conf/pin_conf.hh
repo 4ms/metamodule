@@ -41,7 +41,7 @@ constexpr inline PinDef ClipLeftLed{GPIO::B, PinNum::_4};	// LED24
 constexpr inline PinDef ClipRightLed{GPIO::B, PinNum::_14}; // LED25
 
 constexpr inline PinDef CompSwitch0{GPIO::E, PinNum::_3}; //pull-up
-constexpr inline PinDef CompSwitch1{GPIO::A, PinNum::_9}; //pull-up
+constexpr inline PinDef CompSwitch1{GPIO::D, PinNum::_10}; //pull-up
 
 // FIXME: need to add pull-ups to these:
 enum GpioExpBit {
@@ -54,9 +54,9 @@ enum GpioExpBit {
 	SenseInL = (1 << 12),
 };
 
-constexpr inline PinDef HighSelBut{GPIO::A, PinNum::_6}; // pull-up
-constexpr inline PinDef MidSelBut{GPIO::A, PinNum::_4};	 // pull-up
-constexpr inline PinDef LowSelBut{GPIO::G, PinNum::_13}; // pull-up
+constexpr inline PinDef HighSelBut{GPIO::A, PinNum::_6};
+constexpr inline PinDef MidSelBut{GPIO::A, PinNum::_4};
+constexpr inline PinDef LowSelBut{GPIO::G, PinNum::_13};
 
 ///// ADC
 
