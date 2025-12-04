@@ -1,26 +1,21 @@
 #pragma once
 #include "conf/gpio_expander_conf.hh"
-#include "conf/hsem_conf.hh"
 #include "conf/i2c_shared_conf.hh"
 #include "drivers/gpio_expander.hh"
-#include "drivers/hsem.hh"
 #include "pr_dbg.hh"
 
 namespace MetaModule
 {
 
-// I2C Bus shared between Codec, main GPIO Expander, and optional Audio Expander module
-// The Main PCB has a GPIO expander chip used to detect if jacks are plugged
-// The Audio Expander module also has a GPIO Expander chip for the same purpose
+// I2C Bus shared between Codec, GPIO Expander, and LED driver
 class SensePinReader {
 	using GPIOExpander = mdrivlib::GPIOExpander;
 	using I2CPeriph = mdrivlib::I2CPeriph;
 
 public:
-	SensePinReader() {
-		//Spin until we get the lock
-		while (mdrivlib::HWSemaphore<SharedI2CLock>::lock() == mdrivlib::HWSemaphoreFlag::LockFailed) {
-		}
+	SensePinReader(I2CPeriph &i2c)
+		: i2c{i2c}
+		, main_jacksense_reader{i2c, ListenClosely::gpio_expander_conf} {
 
 		i2c.enable_IT(a7m4_shared_i2c_conf.priority1, a7m4_shared_i2c_conf.priority2);
 
@@ -30,8 +25,6 @@ public:
 			pr_dbg("Main Jack sense GPIO Expander present\n");
 			main_jacksense_reader.start();
 		}
-
-		mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
 	}
 
 	void update() {
@@ -39,17 +32,9 @@ public:
 		if (!i2c.is_ready())
 			return;
 
-		// Our process is not using the bus, so release our lock:
-		mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
-
 		switch (state) {
 
 			case Read: {
-				if (mdrivlib::HWSemaphore<SharedI2CLock>::lock() == mdrivlib::HWSemaphoreFlag::LockFailed) {
-					// if we can't get the lock, abort and try again next time
-					return;
-				}
-
 				auto err = main_jacksense_reader.read_inputs();
 				if (err != GPIOExpander::Error::None)
 					handle_error();
@@ -96,11 +81,11 @@ public:
 	}
 
 private:
-	I2CPeriph i2c{a7m4_shared_i2c_conf};
+	I2CPeriph &i2c;
 
-	GPIOExpander main_jacksense_reader{i2c, ListenClosely::gpio_expander_conf};
+	GPIOExpander main_jacksense_reader;
 
-	uint32_t tmr{0};
+	uint32_t tmr = 0;
 
 	unsigned num_errors = 0;
 
@@ -111,8 +96,6 @@ private:
 	} state = Read;
 
 	void handle_error() {
-		mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
-
 		num_errors++;
 
 		if (num_errors < 3) {
