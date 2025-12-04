@@ -14,33 +14,33 @@ using mdrivlib::PinMode;
 using mdrivlib::PinNum;
 
 constexpr inline std::array LowSelLeds = {
-	PinDef{GPIO::B, PinNum::_8},  // LED9
 	PinDef{GPIO::E, PinNum::_2},  // LED10
 	PinDef{GPIO::B, PinNum::_2},  // LED11
+	PinDef{GPIO::B, PinNum::_8},  // LED9
 	PinDef{GPIO::F, PinNum::_11}, // LED12
 };
 
 constexpr inline std::array HighSelLeds = {
-	PinDef{GPIO::E, PinNum::_4},  // LED13
-	PinDef{GPIO::C, PinNum::_9},  // LED14
-	PinDef{GPIO::C, PinNum::_8},  // LED15
-	PinDef{GPIO::B, PinNum::_15}, // LED16
-	PinDef{GPIO::A, PinNum::_8},  // LED17
+	PinDef{GPIO::B, PinNum::_9}, // LED16
+	PinDef{GPIO::C, PinNum::_9}, // LED14
+	PinDef{GPIO::E, PinNum::_4}, // LED13
+	PinDef{GPIO::C, PinNum::_8}, // LED15
+	PinDef{GPIO::A, PinNum::_8}, // LED17
 };
 
 constexpr inline std::array MidSelLeds = {
 	PinDef{GPIO::E, PinNum::_13}, // LED18
-	PinDef{GPIO::C, PinNum::_5},  // LED19
 	PinDef{GPIO::A, PinNum::_5},  // LED20
 	PinDef{GPIO::A, PinNum::_7},  // LED21
 	PinDef{GPIO::C, PinNum::_0},  // LED22
 	PinDef{GPIO::C, PinNum::_4},  // LED23
+	PinDef{GPIO::C, PinNum::_5},  // LED19
 };
 
-constexpr inline PinDef ClipLeftLed{GPIO::B, PinNum::_4};	// LED24
-constexpr inline PinDef ClipRightLed{GPIO::B, PinNum::_14}; // LED25
+constexpr inline PinDef ClipLeftLed{GPIO::B, PinNum::_4};  // LED24
+constexpr inline PinDef ClipRightLed{GPIO::D, PinNum::_3}; // LED25
 
-constexpr inline PinDef CompSwitch0{GPIO::E, PinNum::_3}; //pull-up
+constexpr inline PinDef CompSwitch0{GPIO::E, PinNum::_3};  //pull-up
 constexpr inline PinDef CompSwitch1{GPIO::D, PinNum::_10}; //pull-up
 
 // FIXME: need to add pull-ups to these:
