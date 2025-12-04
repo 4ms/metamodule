@@ -12,8 +12,6 @@ set(FWDIR ${CMAKE_SOURCE_DIR}) # /firmware
 
 set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp1)
 set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
-set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
-set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
 set(WIFI_DIR ${FWDIR}/src/wifi)
 
 add_executable(
@@ -32,14 +30,6 @@ add_executable(
   ${FWDIR}/src/fw_update/hash/md5_hash.c
   ${FWDIR}/src/fw_update/firmware_writer.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
-  ${FWDIR}/src/usb/usbd_conf.cc
-  ${FWDIR}/src/usb/usbh_conf.cc
-  ${FWDIR}/src/usb/usbh_midi.cc
-  ${FWDIR}/src/usb/device_cdc/usb_serial_device.cc
-  # ${FWDIR}/src/usb/device_cdc/usbd_cdc_interface.c
-  ${FWDIR}/src/usb/device_cdc/usbd_desc.c
-  # ${FWDIR}/src/usb/device_msc/usb_drive_device.cc
-  # ${FWDIR}/src/usb/device_msc/usbd_desc.c
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
   ${FWDIR}/lib/littlefs/lfs.c
@@ -62,12 +52,9 @@ add_executable(
   ${HALDIR}/src/stm32mp1xx_hal_adc_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_cortex.c
   ${HALDIR}/src/stm32mp1xx_hal_dma.c
-  ${HALDIR}/src/stm32mp1xx_hal_hcd.c
   ${HALDIR}/src/stm32mp1xx_hal_i2c.c
   ${HALDIR}/src/stm32mp1xx_hal_i2c_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_mdma.c
-  ${HALDIR}/src/stm32mp1xx_hal_pcd.c
-  ${HALDIR}/src/stm32mp1xx_hal_pcd_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_pwr_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_qspi.c
   ${HALDIR}/src/stm32mp1xx_hal_rcc.c
@@ -79,23 +66,6 @@ add_executable(
   ${HALDIR}/src/stm32mp1xx_ll_rcc.c
   ${HALDIR}/src/stm32mp1xx_ll_sdmmc.c
   ${HALDIR}/src/stm32mp1xx_ll_tim.c
-  ${HALDIR}/src/stm32mp1xx_ll_usb.c
-  ${HALDIR}/src/stm32mp1xx_ll_usb_phy.c
-  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc.c
-  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_bot.c
-  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_data.c
-  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_scsi.c
-  ${USBDEV_LIBDIR}/Class/CDC/Src/usbd_cdc.c
-  ${USBDEV_LIBDIR}/Core/Src/usbd_core.c
-  ${USBDEV_LIBDIR}/Core/Src/usbd_ctlreq.c
-  ${USBDEV_LIBDIR}/Core/Src/usbd_ioreq.c
-  ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc.c
-  ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_bot.c
-  ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_scsi.c
-  ${USBHOST_LIBDIR}/Core/Src/usbh_core.c
-  ${USBHOST_LIBDIR}/Core/Src/usbh_ctlreq.c
-  ${USBHOST_LIBDIR}/Core/Src/usbh_ioreq.c
-  ${USBHOST_LIBDIR}/Core/Src/usbh_pipes.c
 )
 
 target_include_directories(
@@ -118,12 +88,6 @@ target_include_directories(
           ${FWDIR}/lib/patch-serial
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
-          ${FWDIR}/src/usb
-          ${USBHOST_LIBDIR}/Core/Inc
-          ${USBHOST_LIBDIR}/Class/MSC/Inc
-          ${USBDEV_LIBDIR}/Core/Inc
-          ${USBDEV_LIBDIR}/Class/MSC/Inc
-          ${USBDEV_LIBDIR}/Class/CDC/Inc
 )
 
 target_link_libraries(main_m4.elf PUBLIC metamodule::core-interface)

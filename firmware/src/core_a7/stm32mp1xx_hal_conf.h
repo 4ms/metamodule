@@ -47,7 +47,6 @@ extern "C" {
 /*#define HAL_FDCAN_MODULE_ENABLED   */
 /*#define HAL_HASH_MODULE_ENABLED   */
 #define HAL_HSEM_MODULE_ENABLED
-#define HAL_HCD_MODULE_ENABLED
 #define HAL_I2C_MODULE_ENABLED
 /*#define HAL_I2S_MODULE_ENABLED   */
 /*#define HAL_IPCC_MODULE_ENABLED   */
@@ -56,11 +55,9 @@ extern "C" {
 /*#define HAL_LTDC_MODULE_ENABLED   */
 /*#define HAL_NAND_MODULE_ENABLED   */
 /*#define HAL_NOR_MODULE_ENABLED   */
-#define HAL_PCD_MODULE_ENABLED
 #define HAL_QSPI_MODULE_ENABLED
 #define HAL_RNG_MODULE_ENABLED
 #define HAL_SAI_MODULE_ENABLED
-#define HAL_SD_MODULE_ENABLED
 /*#define HAL_RTC_MODULE_ENABLED   */
 /*#define HAL_SMBUS_MODULE_ENABLED   */
 /*#define HAL_SPDIFRX_MODULE_ENABLED   */
@@ -81,7 +78,6 @@ extern "C" {
 // #define HAL_CORTEX_MODULE_ENABLED
 
 /* User-created defines: (4ms/Dan Green) */
-#define HAL_LTDC_MODULE_ENABLED
 #define LL_DMA_MODULE_ENABLED
 // #define LL_BDMA_MODULE_ENABLED
 #define LL_TIM_MODULE_ENABLED
