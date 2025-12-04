@@ -3,7 +3,6 @@
 #include "dirent.h"
 #include "filedesc_manager.hh"
 #include "fs/helpers.hh"
-// #include "fs_syscall_proxy.hh"
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -18,13 +17,6 @@
 //    -> _open() (defined in fs/syscall/syscalls.cc)
 //       -> MetaModule::Filesystem::open (defined in this file)
 //
-//   Ramdisk -> RamDisk::open()
-//              -> FatFileIO::open()
-//                 -> f_open() (defined in fatfs/source/ff.c)
-//
-//   USB/SD  -> FSProxy::open()
-//              -> FSProxyImpl::get_response_or_timeout()
-//                 -> Core M4 handler calls f_open() (defined in fatfs/source/ff.c)
 
 // TODO: make FsSyscallProxy and FatFileIO derive from DiskDevice (see TODO in fileio_t.hh)
 // then for each function, we can get the device like:
