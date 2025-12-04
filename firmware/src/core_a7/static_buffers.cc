@@ -1,4 +1,3 @@
-#include "conf/ramdisk_conf.hh"
 #include "console/concurrent_buffer.hh"
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
@@ -37,9 +36,6 @@ __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 __attribute__((section(".ddma"))) DirTree<FileEntry> dir_tree;
 
 __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};
-
-// TODO: get rid of this
-__attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff{};

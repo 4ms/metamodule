@@ -45,7 +45,6 @@ int main() {
 
 	SharedMemoryS::ptrs = {
 		&StaticBuffers::param_blocks,
-		&StaticBuffers::virtdrive,
 		&StaticBuffers::icc_shared_message,
 		&StaticBuffers::icc_module_fs_message_core0,
 		&StaticBuffers::icc_module_fs_message_core1,
@@ -55,13 +54,11 @@ int main() {
 	};
 
 	A7SharedMemoryS::ptrs = {
-		&StaticBuffers::virtdrive,
 		&StaticBuffers::console_a7_1_buff,
 	};
 
 	audio.set_calibration(CalibrationDataReader::read_calibration_or_defaults(FlashLoader{}, CalDataFlashOffset));
 
-	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	mdrivlib::SystemCache::clean_dcache_by_range(&A7SharedMemoryS::ptrs, sizeof(A7SharedMemoryS::ptrs));
 	mdrivlib::SystemCache::clean_dcache_by_range(&SharedMemoryS::ptrs, sizeof(SharedMemoryS::ptrs));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);

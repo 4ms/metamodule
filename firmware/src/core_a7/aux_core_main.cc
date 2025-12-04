@@ -1,10 +1,7 @@
 #include "conf/hsem_conf.hh"
-#include "core_a7/a7_shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "drivers/hsem.hh"
-#include "fat_file_io.hh"
-#include "fs/syscall/filesystem.hh"
-#include "ramdisk_ops.hh"
+#include "pr_dbg.hh"
 #include "system/print_time.hh"
 
 extern "C" void aux_core_main() {
@@ -26,9 +23,7 @@ extern "C" void aux_core_main() {
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
 #endif
 
-	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};
-	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
-	Filesystem::init(ramdisk);
+	// Filesystem::init(ramdisk);
 
 	// Wait for M4 to be ready (so USB and SD are available)
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())

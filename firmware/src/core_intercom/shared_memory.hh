@@ -1,5 +1,4 @@
 #pragma once
-#include "conf/ramdisk_conf.hh"
 #include "console/concurrent_buffer.hh"
 #include "intercore_modulefs_message.hh"
 #include "params/param_block.hh"
@@ -13,7 +12,6 @@ class IntercoreStorageMessage;
 struct SharedMemoryS {
 	struct Ptrs {
 		DoubleBufParamBlock *param_block;
-		RamDrive *ramdrive;
 		IntercoreStorageMessage *icc_message;
 		IntercoreModuleFS::Message *icc_modulefs_message_core0;
 		IntercoreModuleFS::Message *icc_modulefs_message_core1;

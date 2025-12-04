@@ -127,8 +127,7 @@ void MMU_CreateTranslationTable(void) {
 	// But section_normal_* supports unaligned access
 	create_aligned_section(TTB_BASE, DMABUF, DMABUF_SZ, Sect_Normal_NonCache);
 
-	//virtdrive and firmware loading buffer: non-cacheable
-	create_aligned_section(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ, Sect_Normal_RW); //NonCache);
+	// firmware loading buffer: non-cacheable
 	create_aligned_section(TTB_BASE, FWBUFFER, FWBUFFER_SZ, Sect_Normal_NonCache);
 
 	//

@@ -32,9 +32,6 @@ extern uint32_t _M4_HEAP_SZ[];
 extern uint32_t _M4_HEAP_END[];
 
 //SO
-extern uint32_t _VIRTDRIVE[];
-extern uint32_t _VIRTDRIVE_SZ[];
-extern uint32_t _VIRTDRIVE_END[];
 extern uint32_t _CONSOLEBUF[];
 extern uint32_t _CONSOLEBUF_SZ[];
 extern uint32_t _CONSOLEBUF_END[];
@@ -92,9 +89,6 @@ static const uint32_t A7_RAM_SZ = (uint32_t)_A7_RAM_SZ;
 
 static const uint32_t M4_HEAP = (uint32_t)_M4_HEAP;
 static const uint32_t M4_HEAP_SZ = (uint32_t)_M4_HEAP_SZ;
-
-static const uint32_t VIRTDRIVE = (uint32_t)_VIRTDRIVE;
-static const uint32_t VIRTDRIVE_SZ = (uint32_t)_VIRTDRIVE_SZ;
 
 static const uint32_t CONSOLEBUF = (uint32_t)_CONSOLEBUF;
 static const uint32_t CONSOLEBUF_SZ = (uint32_t)_CONSOLEBUF_SZ;
