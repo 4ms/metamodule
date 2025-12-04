@@ -104,5 +104,3 @@ set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIO
 
 # Fix for ff.c string overfow (false positive?)
 target_link_options(main_m4.elf PUBLIC -Wno-stringop-overflow)
-
-set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
