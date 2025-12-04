@@ -78,13 +78,13 @@ add_executable(
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/core_a7/a7_shared_memory.cc
   ${FWDIR}/src/core_a7/gettimeofday.cc
-  ${FWDIR}/src/core_a7/async_thread_control.cc
+  # ${FWDIR}/src/core_a7/async_thread_control.cc
+  ${FWDIR}/tests/stubs/async_thread_control.cc
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/audio/audio.cc
-  # ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
@@ -94,11 +94,11 @@ add_executable(
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
   #
+  ${FWDIR}/lib/littlefs/lfs.c
+  ${FWDIR}/lib/littlefs/lfs_util.c
   ${FWDIR}/src/fs/syscall/syscalls.cc
-  # ${FWDIR}/src/fs/syscall/fs_syscall_proxy.cc
   ${FWDIR}/src/fs/syscall/filedesc_manager.cc
   ${FWDIR}/src/fs/syscall/filesystem.cc
-  # ${FWDIR}/src/fs/fatfs/fatfs_adaptor.cc
   ${FWDIR}/src/fs/dirent/dirent.cc
   #
   ${FWDIR}/metamodule-plugin-sdk/version.cc
