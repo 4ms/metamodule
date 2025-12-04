@@ -1,4 +1,5 @@
 #include "user_settings/settings.hh"
+#include <cstdint>
 #include <span>
 
 namespace MetaModule::Settings
