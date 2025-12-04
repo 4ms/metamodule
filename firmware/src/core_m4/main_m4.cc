@@ -3,7 +3,6 @@
 #include "core_intercom/shared_memory.hh"
 #include "drivers/hsem.hh"
 #include "drivers/system_clocks.hh"
-#include "fs/fs_messages.hh"
 #include "hsem_handler.hh"
 
 namespace MetaModule
@@ -35,8 +34,6 @@ int main() {
 
 	pr_info("M4 starting\n");
 
-	FilesystemMessages fs_messages{SharedMemoryS::ptrs.icc_message};
-
 	// Controls
 	Controls controls{*SharedMemoryS::ptrs.param_block};
 
@@ -55,7 +52,7 @@ int main() {
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
 	while (true) {
+		Debug::Pin2 init{};
 		controls.process();
-		fs_messages.process();
 	}
 }
