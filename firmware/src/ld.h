@@ -7,10 +7,6 @@ extern uint32_t _TTB[];
 extern uint32_t _TTB_SZ[];
 extern uint32_t _TTB_END[];
 
-extern uint32_t _A7_SYMS[];
-extern uint32_t _A7_SYMS_SZ[];
-extern uint32_t _A7_SYMS_END[];
-
 // SO
 extern uint32_t _M4_RODATA[];
 extern uint32_t _M4_RODATA_SZ[];
@@ -111,7 +107,3 @@ static const uint32_t M4_CODE = (uint32_t)_M4_CODE;
 static const uint32_t M4_CODE_A7 = (uint32_t)_M4_CODE_A7;
 static const uint32_t M4_CODE_SZ = (uint32_t)_M4_CODE_SZ;
 static const uint32_t M4_CODE_END = (uint32_t)_M4_CODE_END;
-
-static const uint32_t A7_SYMS = (uint32_t)_A7_SYMS;
-static const uint32_t A7_SYMS_SZ = (uint32_t)_A7_SYMS_SZ;
-static const uint32_t A7_SYMS_END = (uint32_t)_A7_SYMS_END;
