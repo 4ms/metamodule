@@ -56,11 +56,11 @@ void Controls::update_params() {
 		cur_metaparams->high_sel = high_sel_button.is_high();
 
 		auto gpio_exp = sense_pin_reader.last_reading();
-		cur_metaparams->inL_plugged = gpio_exp & ListenClosely::GpioExpBit::SenseInL;
-		cur_metaparams->inR_plugged = gpio_exp & ListenClosely::GpioExpBit::SenseInR;
+		cur_metaparams->inL_plugged = !(gpio_exp & ListenClosely::GpioExpBit::SenseInL);
+		cur_metaparams->inR_plugged = !(gpio_exp & ListenClosely::GpioExpBit::SenseInR);
 		cur_metaparams->outL_plugged = gpio_exp & ListenClosely::GpioExpBit::SenseOutL;
 		cur_metaparams->outR_plugged = gpio_exp & ListenClosely::GpioExpBit::SenseOutR;
-		cur_metaparams->cv_plugged = gpio_exp & ListenClosely::GpioExpBit::SenseInCV;
+		cur_metaparams->cv_plugged = !(gpio_exp & ListenClosely::GpioExpBit::SenseInCV); 
 
 		eq_switch_pin0.register_state(gpio_exp & ListenClosely::GpioExpBit::EQSwitch_0);
 		eq_switch_pin1.register_state(gpio_exp & ListenClosely::GpioExpBit::EQSwitch_1);

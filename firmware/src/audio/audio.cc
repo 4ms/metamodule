@@ -113,9 +113,9 @@ enum LightId {
 };
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
-	player.set_input_jack_patched_status(0, true);
-	player.set_input_jack_patched_status(1, true);
-	player.set_input_jack_patched_status(2, true);
+	player.set_input_jack_patched_status(0, param_block.metaparams.inL_plugged);
+	player.set_input_jack_patched_status(1, param_block.metaparams.inR_plugged);
+	player.set_input_jack_patched_status(2, param_block.metaparams.cv_plugged);
 	player.set_output_jack_patched_status(0, true);
 	player.set_output_jack_patched_status(1, true);
 
