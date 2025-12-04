@@ -1,13 +1,12 @@
 #pragma once
-#include <cmath>
 
 namespace MetaModule
 {
 
 // Block-rate parameters
 struct MetaParams {
-	unsigned eq_switch{};
-	unsigned comp_switch{};
+	float eq_switch{};
+	float comp_switch{};
 
 	bool low_sel{};
 	bool mid_sel{};

@@ -31,7 +31,7 @@ void Controls::update_params() {
 		for (unsigned i = 0; i < NumAdcs; i++) {
 			auto val = _adcs[i].target_val;
 			if (i < PanelDef::NumPot)
-				cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
+				cur_params->knobs[i] = std::clamp(1.f - val, 0.f, 1.f);
 			else
 				cur_params->width_cv = std::clamp(val * 5.f, 0.f, 5.f);
 
@@ -41,7 +41,7 @@ void Controls::update_params() {
 		for (unsigned i = 0; i < NumAdcs; i++) {
 			auto val = _adcs[i].next();
 			if (i < PanelDef::NumPot)
-				cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
+				cur_params->knobs[i] = std::clamp(1.f - val, 0.f, 1.f);
 			else
 				cur_params->width_cv = std::clamp(val * 5.f, 0.f, 5.f);
 		}
@@ -64,16 +64,12 @@ void Controls::update_params() {
 		eq_switch_pin0.register_state(gpio_exp & ListenClosely::GpioExpBit::EQSwitch_0);
 		eq_switch_pin1.register_state(gpio_exp & ListenClosely::GpioExpBit::EQSwitch_1);
 
-		// LH = 2
-		// HH = 1
-		// HL = 0
-		// LL = 0 (invalid)
 		auto eq0 = eq_switch_pin0.is_high();
 		auto eq1 = eq_switch_pin1.is_high();
-		cur_metaparams->eq_switch = (eq0 && eq1) ? 3 : (!eq0 && eq1) ? 0 : (eq0 && !eq1) ? 2 : 1;
+		cur_metaparams->eq_switch = (!eq0 && !eq1) ? 0.5f : (!eq0 && eq1) ? 0.f : (eq0 && !eq1) ? 1.f : 0.25f;
 
 		auto sw = comp_switch.state();
-		cur_metaparams->comp_switch = sw == comp_switch.Left ? 0 : sw == comp_switch.Center ? 1 : 2;
+		cur_metaparams->comp_switch = sw == comp_switch.Left ? 0.f : sw == comp_switch.Center ? 0.5f : 1.f;
 	}
 
 	cur_params++;
