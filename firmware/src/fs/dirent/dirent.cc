@@ -1,5 +1,5 @@
 #include "filesystem/dirent.h"
-#include "ff.h"
+// #include "ff.h"
 #include "fs/syscall/filesystem.hh"
 
 DIR *opendir(const char *path) {

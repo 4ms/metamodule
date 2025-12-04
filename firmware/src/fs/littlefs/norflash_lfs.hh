@@ -1,6 +1,6 @@
 #pragma once
 #include "drivers/callable.hh"
-#include "ff.h"
+// #include "ff.h"
 #include "fs/dir_entry_kind.hh"
 #include "fs/littlefs/norflash_ops.hh"
 #include "fs/time_convert.hh"
@@ -113,7 +113,7 @@ public:
 			return 0;
 		}
 
-		file.timestamp = get_fattime();
+		file.timestamp = HAL_GetTick();
 
 		pr_trace("LFS: write file %s, timestamp 0x%x, size %u\n", filename.data(), file.timestamp, data.size());
 
@@ -263,7 +263,7 @@ public:
 	}
 
 	int time_file_write(TimeFile *file, const void *buffer, size_t size) {
-		file->timestamp = get_fattime();
+		file->timestamp = HAL_GetTick();
 		return lfs_file_write(&lfs, &file->file, buffer, size);
 	}
 
