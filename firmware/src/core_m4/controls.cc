@@ -3,6 +3,7 @@
 #include "conf/panel_conf.hh"
 #include "drivers/hsem.hh"
 #include "hsem_handler.hh"
+#include "util/zip.hh"
 
 namespace MetaModule
 {
@@ -70,11 +71,31 @@ void Controls::update_params() {
 
 		auto sw = comp_switch.state();
 		cur_metaparams->comp_switch = sw == comp_switch.Left ? 0.f : sw == comp_switch.Center ? 0.5f : 1.f;
+
+		update_lights();
 	}
 
 	cur_params++;
 	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
 		_buffer_full = true;
+}
+
+void Controls::update_lights() {
+	//Direct: LED9-25
+	for (auto [led, val] : zip(low_sel_leds, cur_leds->low)) {
+		led.set_to(val);
+	}
+
+	for (auto [led, val] : zip(mid_sel_leds, cur_leds->mid)) {
+		led.set_to(val);
+	}
+
+	for (auto [led, val] : zip(high_sel_leds, cur_leds->high)) {
+		led.set_to(val);
+	}
+
+	clip_left_led.set_to(cur_leds->comp_clip);
+	clip_right_led.set_to(cur_leds->eq_clip);
 }
 
 template<size_t block_num>
@@ -84,6 +105,7 @@ void Controls::start_param_block() {
 	// 28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
 	cur_metaparams = &param_blocks[block_num].metaparams;
 	cur_params = param_blocks[block_num].params.begin();
+	cur_leds = &param_blocks[block_num].leds;
 	_first_param = true;
 	_buffer_full = false;
 }
@@ -105,6 +127,13 @@ void Controls::start() {
 
 void Controls::process() {
 	sense_pin_reader.update();
+
+	if (i2c.is_ready()) {
+		for (auto [led, adjust, val] : zip(packed_leds, brightness, cur_leds->graph)) {
+			led = std::clamp(int(val * adjust), 0, 255);
+		}
+		led_driver.set_all_leds(packed_leds);
+	}
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
@@ -115,9 +144,13 @@ void Controls::set_samplerate(unsigned sample_rate) {
 }
 
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref)
-	: param_blocks(param_blocks_ref)
+	: i2c{a7m4_shared_i2c_conf}
+	, led_driver{i2c, 0b00101000}
+	, sense_pin_reader{i2c}
+	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
-	, cur_metaparams(&param_blocks_ref[0].metaparams) {
+	, cur_metaparams(&param_blocks_ref[0].metaparams)
+	, cur_leds(&param_blocks_ref[0].leds) {
 
 	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
 	// TODO: _new_adc_data_ready is set true here (pri 2) and set false in read_controls_task (pri 0)
@@ -132,6 +165,16 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref)
 	set_samplerate(sample_rate);
 
 	pot_adc.start();
+
+	for (auto &b : brightness) {
+		// TODO: set different values for each LED color
+		b = 16.f;
+	}
+
+	if (!led_driver.init()) {
+		printf("Failed to init LP5009 led driver\n");
+	} else
+		printf("Init LP5009 led driver\n");
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen

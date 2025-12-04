@@ -81,8 +81,38 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 void AudioStream::handle_patch_just_loaded() {
 }
 
-void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
+// From ListenClosely.cpp:
+enum LightId {
+	GRAPH1_LIGHT,
+	GRAPH2_LIGHT,
+	GRAPH3_LIGHT,
+	GRAPH4_LIGHT,
+	GRAPH5_LIGHT,
+	GRAPH6_LIGHT,
+	GRAPH7_LIGHT,
+	GRAPH8_LIGHT,
+	GRAPH9_LIGHT,
+	CLIPLED_LIGHT,
+	_110LED_LIGHT,
+	_80LED_LIGHT,
+	_160LED_LIGHT,
+	_220LED_LIGHT,
+	_50LED_LIGHT,
+	_300LED_LIGHT,
+	_60LED_LIGHT,
+	OFFLED_LIGHT,
+	_35LED_LIGHT,
+	_32KLED_LIGHT,
+	_16KLED_LIGHT,
+	_700LED_LIGHT,
+	_48KLED_LIGHT,
+	_360LED_LIGHT,
+	_72KLED_LIGHT,
+	EQCLIPLED_LIGHT,
+	LIGHTS_LEN
+};
 
+void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	player.set_input_jack_patched_status(0, true);
 	player.set_input_jack_patched_status(1, true);
 	player.set_input_jack_patched_status(2, true);
@@ -126,6 +156,32 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		idx++;
 	}
+
+	// LEDS
+	constexpr int ModuleID = 1;
+	param_block.leds.low[0] = player.get_module_light(ModuleID, _35LED_LIGHT);
+	param_block.leds.low[1] = player.get_module_light(ModuleID, _60LED_LIGHT);
+	param_block.leds.low[2] = player.get_module_light(ModuleID, _110LED_LIGHT);
+	param_block.leds.low[3] = player.get_module_light(ModuleID, _220LED_LIGHT);
+
+	param_block.leds.mid[0] = player.get_module_light(ModuleID, _360LED_LIGHT);
+	param_block.leds.mid[1] = player.get_module_light(ModuleID, _700LED_LIGHT);
+	param_block.leds.mid[2] = player.get_module_light(ModuleID, _16KLED_LIGHT);
+	param_block.leds.mid[3] = player.get_module_light(ModuleID, _32KLED_LIGHT);
+	param_block.leds.mid[4] = player.get_module_light(ModuleID, _48KLED_LIGHT);
+	param_block.leds.mid[5] = player.get_module_light(ModuleID, _72KLED_LIGHT);
+
+	param_block.leds.high[0] = player.get_module_light(ModuleID, OFFLED_LIGHT);
+	param_block.leds.high[1] = player.get_module_light(ModuleID, _50LED_LIGHT);
+	param_block.leds.high[2] = player.get_module_light(ModuleID, _80LED_LIGHT);
+	param_block.leds.high[3] = player.get_module_light(ModuleID, _160LED_LIGHT);
+	param_block.leds.high[4] = player.get_module_light(ModuleID, _300LED_LIGHT);
+
+	param_block.leds.eq_clip = player.get_module_light(ModuleID, EQCLIPLED_LIGHT) > 0.5f;
+	param_block.leds.comp_clip = player.get_module_light(ModuleID, CLIPLED_LIGHT) > 0.5f;
+
+	for (auto i = 0; i < 9; i++)
+		param_block.leds.graph[i] = player.get_module_light(1, i);
 }
 
 void AudioStream::set_calibration(CalData const &caldata) {
@@ -147,6 +203,7 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 }
 
 void AudioStream::return_cached_params(unsigned block) {
+	param_blocks[block].leds = local_params.leds;
 }
 
 void AudioStream::set_block_spans() {
