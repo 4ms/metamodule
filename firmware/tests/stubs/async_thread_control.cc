@@ -3,6 +3,9 @@
 namespace MetaModule
 {
 
+void start_module_threads() {
+}
+
 void peg_task_to_core(uint32_t module_id, uint32_t core_id) {
 }
 
