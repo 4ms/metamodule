@@ -5,14 +5,11 @@ set_arch_flags()
 include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
 enable_logging()
 
-# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-
 set(M4DIR ${CMAKE_CURRENT_SOURCE_DIR}) # /firmware/src/core_m4
 set(FWDIR ${CMAKE_SOURCE_DIR}) # /firmware
 
 set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp1)
 set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
-set(WIFI_DIR ${FWDIR}/src/wifi)
 
 add_executable(
   main_m4.elf
@@ -22,18 +19,6 @@ add_executable(
   ${M4DIR}/system_stm32mp1xx.c
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_intercom/shared_memory.cc
-  ${FWDIR}/src/fs/fatfs/diskio.cc
-  ${FWDIR}/src/fs/fatfs/fattime.cc
-  ${FWDIR}/src/fs/time_convert.cc
-  ${FWDIR}/src/fs/helpers.cc
-  ${FWDIR}/src/fw_update/hash/hash_processor.cc
-  ${FWDIR}/src/fw_update/hash/md5_hash.c
-  ${FWDIR}/src/fw_update/firmware_writer.cc
-  ${FWDIR}/src/flash_loader/flash_loader.cc
-  ${FWDIR}/lib/fatfs/source/ff.c
-  ${FWDIR}/lib/fatfs/source/ffunicode.c
-  ${FWDIR}/lib/littlefs/lfs.c
-  ${FWDIR}/lib/littlefs/lfs_util.c
   ${FWDIR}/system/libc_stub.c
   ${M4DIR}/libc_stub.c
   ${M4DIR}/libcpp_stub.cc
@@ -43,7 +28,6 @@ add_executable(
   ${DRIVERLIB}/drivers/hal_handlers.cc
   ${DRIVERLIB}/drivers/i2c.cc
   ${DRIVERLIB}/drivers/pin.cc
-  ${DRIVERLIB}/drivers/qspi_flash_driver.cc
   ${DRIVERLIB}/drivers/tim.cc
   ${DRIVERLIB}/drivers/timekeeper.cc
   ${DRIVERLIB}/target/stm32mp1_cm4/drivers/interrupt_handler.cc
@@ -56,15 +40,11 @@ add_executable(
   ${HALDIR}/src/stm32mp1xx_hal_i2c_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_mdma.c
   ${HALDIR}/src/stm32mp1xx_hal_pwr_ex.c
-  ${HALDIR}/src/stm32mp1xx_hal_qspi.c
   ${HALDIR}/src/stm32mp1xx_hal_rcc.c
   ${HALDIR}/src/stm32mp1xx_hal_rcc_ex.c
-  ${HALDIR}/src/stm32mp1xx_hal_sd.c
-  ${HALDIR}/src/stm32mp1xx_hal_sd_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_uart.c
   ${HALDIR}/src/stm32mp1xx_hal_usart.c
   ${HALDIR}/src/stm32mp1xx_ll_rcc.c
-  ${HALDIR}/src/stm32mp1xx_ll_sdmmc.c
   ${HALDIR}/src/stm32mp1xx_ll_tim.c
 )
 
@@ -76,7 +56,6 @@ target_include_directories(
           ${DRIVERLIB}
           ${DRIVERLIB}/target/stm32mp1
           ${DRIVERLIB}/target/stm32mp1_cm4
-          ${FWDIR}/lib/easiglib
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
@@ -85,12 +64,7 @@ target_include_directories(
           ${FWDIR}
           ${FWDIR}/lib
           ${FWDIR}/system
-          ${FWDIR}/lib/patch-serial
-          ${FWDIR}/lib/fatfs/source
-          ${FWDIR}/src/fs/fatfs
 )
-
-target_link_libraries(main_m4.elf PUBLIC metamodule::core-interface)
 
 set_property(TARGET main_m4.elf PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
@@ -98,9 +72,3 @@ target_link_script(main_m4 ${FWDIR}/system/linker/stm32mp15xx_m4.ld -L${FWDIR})
 
 target_link_libraries(main_m4.elf PRIVATE cpputil)
 target_compile_definitions(main_m4.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
-
-# Fixup for compiler warning for LittleFS
-set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
-
-# Fix for ff.c string overfow (false positive?)
-target_link_options(main_m4.elf PUBLIC -Wno-stringop-overflow)
