@@ -1,8 +1,6 @@
 #pragma once
 #include "concurrent_buffer.hh"
 #include "params/param_block.hh"
-#include "patch_file/patch_dir_list.hh"
-#include <array>
 
 namespace MetaModule
 {
@@ -13,9 +11,6 @@ namespace StaticBuffers
 
 extern StreamConf::Audio::AudioInBlock audio_in_dma_block;
 extern StreamConf::Audio::AudioOutBlock audio_out_dma_block;
-extern std::array<char, 1024 * 1024> raw_patch_data;
-extern PatchDirList patch_dir_list;
-extern DirTree<FileEntry> dir_tree;
 extern DoubleBufParamBlock param_blocks;
 extern ConcurrentBuffer console_a7_0_buff;
 extern ConcurrentBuffer console_a7_1_buff;

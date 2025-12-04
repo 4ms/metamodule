@@ -1,6 +1,5 @@
 #include "console/concurrent_buffer.hh"
 #include "param_block.hh"
-#include "patch_file/patch_dir_list.hh"
 #include <array>
 
 namespace MetaModule
@@ -16,17 +15,7 @@ namespace StaticBuffers
 
 __attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock audio_in_dma_block{};
 __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block{};
-// TODO: get rid of this
-__attribute__((section(".ddma"))) std::array<char, 1024 * 1024> raw_patch_data;
-
-// TODO: get rid of this
-__attribute__((section(".ddma"))) PatchDirList patch_dir_list;
-
-// TODO: get rid of this
-__attribute__((section(".ddma"))) DirTree<FileEntry> dir_tree;
-
 __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};
-
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff{};
