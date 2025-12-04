@@ -38,7 +38,7 @@ AudioStream::AudioStream(PatchPlayer &player,
 	cal.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		Debug::Pin0::high();
+		// Debug::Pin0::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		// param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -57,7 +57,7 @@ AudioStream::AudioStream(PatchPlayer &player,
 
 		load_measure.end_measurement();
 
-		Debug::Pin0::low();
+		// Debug::Pin0::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -83,43 +83,39 @@ void AudioStream::handle_patch_just_loaded() {
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 
-	// panel# | params.knobs[X] or metaparams: MODULE ENUM
-	// 9 | comp switch: RATIO_PARAM, = 0
-	// 6 | 0: PEAKREDUCTION_PARAM = 1 (amount)
-	// 8 | 2: DRYWET_PARAM = 2
-	// 7 | 1: GAIN_PARAM = 3
-	// 1 | 3: LOWSHELF_PARAM = 4
-	// 3 | 5: HIGHSHELF_PARAM = 5
-	// 2 | 4: MID_PARAM = 6
-	// 10 | low_sel: LOWFREQSELECT_PARAM = 7
-	// 12 | high_sel: HIGHPASSFREQSELECT_PARAM = 8
-	// 11 | mid_sel: MIDFREQSELECT_PARAM = 9
-	// 0 | 6: WIDTH_PARAM = 10
-	// 5 | 7(eq level): OUTPUTVOL_PARAM = 11
-	// 4 | eq_switch: PREPOST_PARAM = 12
+	player.set_input_jack_patched_status(0, true);
+	player.set_input_jack_patched_status(1, true);
+	player.set_input_jack_patched_status(2, true);
+	player.set_output_jack_patched_status(0, true);
+	player.set_output_jack_patched_status(1, true);
 
+	// Buttons. Values are the panel_knob_id in the patch yaml
 	player.set_panel_param(9, param_block.metaparams.comp_switch);
 	player.set_panel_param(4, param_block.metaparams.eq_switch);
-	player.set_panel_param(10, param_block.metaparams.low_sel);
-	player.set_panel_param(11, param_block.metaparams.mid_sel);
-	player.set_panel_param(12, param_block.metaparams.high_sel);
+	player.set_panel_param(44, param_block.metaparams.low_sel);
+	player.set_panel_param(45, param_block.metaparams.mid_sel);
+	player.set_panel_param(46, param_block.metaparams.high_sel);
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
 
 		// Audio inputs
-		for (auto [i, inchan] : countzip(in.chan)) {
-			float calibrated_input = cal.in_cal[i].adjust(AudioInFrame::sign_extend(inchan));
-			player.set_panel_input(i, calibrated_input);
-		}
+		player.set_panel_input(0, cal.in_cal[0].adjust(in.sign_extend_chan(1)));
+		player.set_panel_input(1, cal.in_cal[1].adjust(in.sign_extend_chan(0)));
 
-		player.set_panel_input(2, params.width_cv);
+		// CV Input
+		player.set_panel_input(2, params.width_cv * 2.f);
 
-		constexpr std::array ParamOrder = {6, 7, 8, 1, 2, 3, 0, 5};
-		for (auto [i, knob_val] : zip(ParamOrder, params.knobs)) {
-			player.set_panel_param(i, knob_val);
-		}
+		// Knobs. Values are the panel_knob_id in the patch yaml
+		player.set_panel_param(6, params.knobs[0]);
+		player.set_panel_param(7, params.knobs[1]);
+		player.set_panel_param(8, params.knobs[2]);
+		player.set_panel_param(1, params.knobs[3]);
+		player.set_panel_param(2, params.knobs[4]);
+		player.set_panel_param(3, params.knobs[5]);
+		player.set_panel_param(0, params.knobs[6]);
+		player.set_panel_param(5, params.knobs[7]);
 
 		// Run each module
 		player.update_patch_singlecore();
@@ -162,31 +158,6 @@ void AudioStream::set_block_spans() {
 }
 
 void AudioStream::update_audio_settings() {
-	// auto [sample_rate, block_size, max_retries] = patch_loader.get_audio_settings();
-
-	// if (sample_rate != sample_rate_ || block_size != block_size_) {
-
-	// 	auto ok = (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecBase::CODEC_NO_ERR);
-	// 	if (ok) {
-	// 		codec_.start();
-
-	// 		if (sample_rate_ != sample_rate) {
-	// 			sample_rate_ = sample_rate;
-	// 			player.set_samplerate(sample_rate);
-	// 			// param_blocks[0].metaparams.sample_rate = sample_rate;
-	// 			// param_blocks[1].metaparams.sample_rate = sample_rate;
-	// 		}
-
-	// 		if (block_size_ != block_size) {
-	// 			block_size_ = block_size;
-
-	// 			set_block_spans();
-	// 		}
-	// 	} else {
-	// 		pr_err("FAIL TO CHANGE SR/BS: %d/%d\n", sample_rate_, block_size_);
-	// 		codec_.start();
-	// 	}
-	// }
 }
 
 void AudioStream::handle_overruns() {
