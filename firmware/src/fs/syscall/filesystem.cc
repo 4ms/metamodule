@@ -1,12 +1,9 @@
 #include "filesystem.hh"
 #include "console/uart_log.hh"
 #include "dirent.h"
-#include "fat_file_io.hh"
-#include "ff.h"
 #include "filedesc_manager.hh"
 #include "fs/helpers.hh"
-#include "fs_syscall_proxy.hh"
-#include "time_convert.hh"
+// #include "fs_syscall_proxy.hh"
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -43,14 +40,12 @@ namespace MetaModule::Filesystem
 namespace
 {
 
-// Private:
-FatFileIO *mRamdisk{nullptr};
-FsSyscallProxy fs_proxy;
+PatchVolFileIO *nor{nullptr};
 
 } // namespace
 
-void init(FatFileIO &ramdisk) {
-	mRamdisk = &ramdisk;
+void init(PatchVolFileIO &littlefs_io) {
+	nor = &littlefs_io;
 	FileDescManager::init();
 }
 
@@ -62,39 +57,15 @@ int open(const char *filename, int flags, int mode) {
 		auto [path, volume] = split_volume(filename);
 
 		if (volume == Volume::RamDisk || volume == Volume::SDCard || volume == Volume::USB) {
-			uint8_t fatfs_modes = 0;
-
-			if ((flags & O_ACCMODE) == O_RDWR)
-				fatfs_modes = FA_READ | FA_WRITE;
-			else if ((flags & O_ACCMODE) == O_RDONLY)
-				fatfs_modes = FA_READ;
-			else
-				fatfs_modes = FA_WRITE;
-
-			if (flags & O_CREAT) {
-				if (flags & O_TRUNC)
-					fatfs_modes |= FA_CREATE_ALWAYS;
-				else
-					fatfs_modes |= FA_OPEN_ALWAYS;
-			}
-
-			if (volume == Volume::RamDisk) {
-				if (mRamdisk && mRamdisk->open(path, file->fatfil, fatfs_modes)) {
-					file->vol = volume;
-					return *fd;
-				}
-			} else {
-				// SDCard or USB:
-				if (fs_proxy.open(filename, file->fatfil, fatfs_modes)) {
-					file->vol = volume;
-					return *fd;
-				}
-			}
+			pr_err("Filesystem access to SD, USB, or RamDisk not permitted\n");
 		}
 
-		else if (volume == Volume::NorFlash)
+		else if (volume == Volume::NorFlash && nor)
 		{
-			pr_err("Filesystem access to internal NorFlash drive not permitted\n");
+			// if (mRamdisk && mRamdisk->open(path, file->fatfil, fatfs_modes)) {
+			// 	file->vol = volume;
+			// 	return *fd;
+			// }
 		}
 
 		pr_err("Opening file '%s' on vol %d with flags %d mode %d failed\n", filename, (int)volume, flags, mode);
@@ -110,13 +81,8 @@ int open(const char *filename, int flags, int mode) {
 int lseek(int fd, int offset, int whence) {
 	if (auto file = FileDescManager::filedesc(fd)) {
 
-		if (file->vol == Volume::RamDisk && mRamdisk) {
-			return mRamdisk->seek(file->fatfil, offset, whence);
-		}
-
-		else if (file->vol == Volume::SDCard || file->vol == Volume::USB)
-		{
-			return fs_proxy.seek(file->fatfil, offset, whence);
+		if (file->vol == Volume::NorFlash && nor) {
+			//
 		}
 	}
 	return -1;
@@ -127,15 +93,9 @@ int read(int fd, char *ptr, int len) {
 
 		auto buff = std::span{ptr, (size_t)len};
 
-		if (file->vol == Volume::RamDisk && mRamdisk) {
-			const auto bytes_read = mRamdisk->read(file->fatfil, buff);
-			return bytes_read.value_or(-1);
-		}
-
-		else if (file->vol == Volume::SDCard || file->vol == Volume::USB)
-		{
-			auto bytes_read = fs_proxy.read(file->fatfil, buff);
-			return bytes_read.value_or(-1);
+		if (file->vol == Volume::NorFlash && nor) {
+			// const auto bytes_read = mRamdisk->read(file->fatfil, buff);
+			// return bytes_read.value_or(-1);
 		}
 	}
 
@@ -145,13 +105,8 @@ int read(int fd, char *ptr, int len) {
 int close(int fd) {
 	if (auto file = FileDescManager::filedesc(fd)) {
 
-		if (file->vol == Volume::RamDisk && mRamdisk) {
-			mRamdisk->close(file->fatfil);
-		}
-
-		else if (file->vol == Volume::USB || file->vol == Volume::SDCard)
-		{
-			fs_proxy.close(file->fatfil);
+		if (file->vol == Volume::NorFlash && nor) {
+			// mRamdisk->close(file->fatfil);
 		}
 
 		FileDescManager::dealloc_file(fd);
@@ -183,34 +138,31 @@ int fstat(int fd, struct stat *st) {
 int stat(const char *filename, struct stat *st) {
 	auto [path, volume] = split_volume(filename);
 
-	if (volume == Volume::RamDisk || volume == Volume::SDCard || volume == Volume::USB) {
-		FILINFO filinfo;
+	if (volume == Volume::NorFlash && nor) {
+		// FILINFO filinfo;
 
 		bool ok = false;
-		if (volume == Volume::RamDisk && mRamdisk)
-			ok = mRamdisk->get_fat_filinfo(path, filinfo);
-		else
-			ok = fs_proxy.stat(path, &filinfo);
+		// 	ok = nor->get_fat_filinfo(path, filinfo);
 
 		if (ok) {
-			FatTime fattime{.date = filinfo.fdate, .time = filinfo.ftime};
-			auto tm = fattime_to_tm(fattime);
-			time_t secs = mktime(&tm);
-			st->st_mtim.tv_sec = secs; //since poweron
-			st->st_mtim.tv_nsec = secs * 1000;
+			// FatTime fattime{.date = filinfo.fdate, .time = filinfo.ftime};
+			// auto tm = fattime_to_tm(fattime);
+			// time_t secs = mktime(&tm);
+			// st->st_mtim.tv_sec = secs; //since poweron
+			// st->st_mtim.tv_nsec = secs * 1000;
 
-			/// we don't know created time, use last modification
-			st->st_ctim.tv_sec = secs;
-			st->st_ctim.tv_nsec = secs * 1000;
+			// /// we don't know created time, use last modification
+			// st->st_ctim.tv_sec = secs;
+			// st->st_ctim.tv_nsec = secs * 1000;
 
-			/// we don't know accessed time, use last modification
-			st->st_atim.tv_sec = secs;
-			st->st_atim.tv_nsec = secs * 1000;
+			// /// we don't know accessed time, use last modification
+			// st->st_atim.tv_sec = secs;
+			// st->st_atim.tv_nsec = secs * 1000;
 
-			st->st_size = filinfo.fsize;
+			// st->st_size = filinfo.fsize;
 
-			st->st_mode = S_IFREG;
-			return 0;
+			// st->st_mode = S_IFREG;
+			// return 0;
 		}
 	}
 
@@ -223,18 +175,11 @@ DIR *opendir(std::string_view fullpath) {
 
 		auto [path, volume] = split_volume(fullpath);
 
-		if (volume == Volume::RamDisk && mRamdisk) {
-			if (mRamdisk->opendir(path, dirdesc->dir)) {
-				dirdesc->vol = volume;
-				return dirdesc->dir;
-			}
-		}
-
-		if (volume == Volume::SDCard || volume == Volume::USB) {
-			if (fs_proxy.opendir(path, dirdesc->dir)) {
-				dirdesc->vol = volume;
-				return dirdesc->dir;
-			}
+		if (volume == Volume::NorFlash && nor) {
+			// if (mRamdisk->opendir(path, dirdesc->dir)) {
+			// 	dirdesc->vol = volume;
+			// 	return dirdesc->dir;
+			// }
 		}
 
 		pr_err("Opening dir %s on vol %d failed\n", fullpath.data(), (int)volume);
@@ -251,22 +196,19 @@ dirent *readdir(DIR *dir) {
 	if (!dir)
 		return nullptr;
 
-	auto dirdesc = FileDescManager::dirdesc(dir);
-	if (!dirdesc)
-		return nullptr;
+	//auto dirdesc = FileDescManager::dirdesc(dir);
+	//if (!dirdesc)
+	//	return nullptr;
 
-	if (dirdesc->vol == Volume::RamDisk) {
-		//TODO
-	}
+	//if (dirdesc->vol == Volume::NorFlash) {
+	//	//TODO
+	//	// FILINFO info;
+	//	// if (fs_proxy.readdir(dirdesc->dir, &info)) {
+	//	// 	strncpy(dirdesc->cur_entry.d_name, info.fname, 256);
+	//	// 	return &dirdesc->cur_entry;
+	//	// }
+	//}
 
-	else if (dirdesc->vol == Volume::SDCard || dirdesc->vol == Volume::USB)
-	{
-		FILINFO info;
-		if (fs_proxy.readdir(dirdesc->dir, &info)) {
-			strncpy(dirdesc->cur_entry.d_name, info.fname, 256);
-			return &dirdesc->cur_entry;
-		}
-	}
 	return nullptr;
 }
 
@@ -274,25 +216,21 @@ void rewinddir(DIR *dir) {
 	if (!dir)
 		return;
 
-	auto dirdesc = FileDescManager::dirdesc(dir);
-	if (!dirdesc)
-		return;
+	//auto dirdesc = FileDescManager::dirdesc(dir);
+	//if (!dirdesc)
+	//	return;
 
-	if (dirdesc->vol == Volume::RamDisk) {
-		//TODO
-	}
-
-	else if (dirdesc->vol == Volume::SDCard || dirdesc->vol == Volume::USB)
-	{
-		fs_proxy.readdir(dirdesc->dir, nullptr);
-	}
+	//if (dirdesc->vol == Volume::RamDisk) {
+	//	//TODO
+	//	// fs_proxy.readdir(dirdesc->dir, nullptr);
+	//}
 }
 
 int closedir(DIR *dir) {
-	if (!dir)
-		return -1;
+	// if (!dir)
+	return -1;
 
-	return FileDescManager::dealloc_dir(dir) ? 0 : -1;
+	// return FileDescManager::dealloc_dir(dir) ? 0 : -1;
 }
 
 int write(int fd, const char *ptr, int len) {
@@ -304,16 +242,9 @@ int write(int fd, const char *ptr, int len) {
 
 		auto buff = std::span{ptr, (size_t)len};
 
-		if (file->vol == Volume::RamDisk && mRamdisk) {
+		if (file->vol == Volume::NorFlash && nor) {
 			// const auto bytes_read = mRamdisk->write_file(file->fatfil, buff);
 			// return bytes_read.value_or(-1);
-			return -1;
-		}
-
-		else if (file->vol == Volume::SDCard || file->vol == Volume::USB)
-		{
-			auto bytes_written = fs_proxy.write(file->fatfil, buff);
-			return bytes_written.value_or(-1);
 		}
 	}
 

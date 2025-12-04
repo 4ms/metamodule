@@ -1,19 +1,22 @@
 #pragma once
-#include "ff.h"
 #include "filesystem/dirent.h"
+#include "littlefs/lfs.h"
 #include "volumes.hh"
 #include <optional>
 
 namespace MetaModule
 {
 
+using FileT = lfs_file_t;
+using DirT = lfs_dir_t;
+
 struct FileDesc {
-	FIL *fatfil = nullptr;
+	FileT *fil = nullptr;
 	Volume vol{Volume::MaxVolumes};
 };
 
 struct DirDesc {
-	DIR *dir;
+	DirT *dir;
 	Volume vol;
 	struct dirent cur_entry;
 
@@ -36,10 +39,10 @@ FileDesc *filedesc(size_t fd);
 int isatty(int fd);
 
 DirDesc *alloc_dir();
-bool dealloc_dir(DIR *dir);
+bool dealloc_dir(DirT *dir);
 bool dealloc_dir(DirDesc *dirdesc);
 
-DirDesc *dirdesc(DIR *dir);
+DirDesc *dirdesc(DirT *dir);
 
 } // namespace FileDescManager
 } // namespace MetaModule

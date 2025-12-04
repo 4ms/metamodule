@@ -84,7 +84,7 @@ add_executable(
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/audio/audio.cc
-  ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
+  # ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
@@ -95,19 +95,17 @@ add_executable(
   ${FWDIR}/src/patch_play/plugin_module.cc
   #
   ${FWDIR}/src/fs/syscall/syscalls.cc
-  ${FWDIR}/src/fs/syscall/fs_syscall_proxy.cc
+  # ${FWDIR}/src/fs/syscall/fs_syscall_proxy.cc
   ${FWDIR}/src/fs/syscall/filedesc_manager.cc
   ${FWDIR}/src/fs/syscall/filesystem.cc
-  ${FWDIR}/src/fs/fatfs/fatfs_adaptor.cc
+  # ${FWDIR}/src/fs/fatfs/fatfs_adaptor.cc
   ${FWDIR}/src/fs/dirent/dirent.cc
   #
-  ${FWDIR}/src/dynload/dynloader.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
   ${FWDIR}/src/fs/general_io.cc
-  ${FWDIR}/src/patch_file/reload_patch.cc
   #
   ${FWDIR}/src/user_settings/settings_file.cc
   ${FWDIR}/src/user_settings/settings_parse.cc

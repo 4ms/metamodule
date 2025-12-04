@@ -45,9 +45,6 @@ int main() {
 
 	SharedMemoryS::ptrs = {
 		&StaticBuffers::param_blocks,
-		&StaticBuffers::icc_shared_message,
-		&StaticBuffers::icc_module_fs_message_core0,
-		&StaticBuffers::icc_module_fs_message_core1,
 		&StaticBuffers::console_a7_0_buff,
 		&StaticBuffers::console_a7_1_buff,
 		&StaticBuffers::console_m4_buff,

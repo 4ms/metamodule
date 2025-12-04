@@ -1,4 +1,6 @@
 #pragma once
+#include "littlefs/norflash_lfs.hh"
+#include "norflash_layout.hh"
 #include <string_view>
 
 struct DIR;
@@ -12,7 +14,8 @@ namespace MetaModule
 namespace Filesystem
 {
 
-void init(FatFileIO &ramdisk);
+using PatchVolFileIO = LfsFileIO<PatchVolFlashOffset, PatchVolFlashSize>;
+void init(PatchVolFileIO &littlefs_io);
 
 int open(const char *filename, int flags, int mode);
 int lseek(int fd, int offset, int whence);

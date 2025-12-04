@@ -23,17 +23,17 @@ static_assert(FirstFileFD > STDOUT_FILENO);
 static_assert(FirstFileFD > STDERR_FILENO);
 
 static cpputil::ThreadSafePool<FileDesc, MaxOpenFiles> descriptors{};
-static std::array<FIL, MaxOpenFiles> fatfil_pool{};
+static std::array<FileT, MaxOpenFiles> fatfil_pool{};
 
 static cpputil::ThreadSafePool<DirDesc, MaxOpenDirs> dir_scriptors{};
-static std::array<DIR, MaxOpenDirs> dir_pool{};
+static std::array<DirT, MaxOpenDirs> dir_pool{};
 
 static int index(size_t fd) {
 	return fd - FirstFileFD;
 }
 
 static bool fd_is_file(int fd) {
-	return (index(fd) >= 0 && index(fd) < MaxOpenFiles && descriptors[index(fd)].fatfil != nullptr);
+	return (index(fd) >= 0 && index(fd) < MaxOpenFiles && descriptors[index(fd)].fil != nullptr);
 }
 
 int isatty(int fd) {
@@ -48,9 +48,9 @@ void init() {
 std::optional<int> alloc_file() {
 	// Thread-safe way to find first empty descriptor
 	if (auto fd_idx = descriptors.create()) {
-		// Default-init a FIL
-		fatfil_pool[*fd_idx] = FIL{};
-		descriptors[*fd_idx].fatfil = &fatfil_pool[*fd_idx];
+		// Default-init a FileT
+		fatfil_pool[*fd_idx] = FileT{};
+		descriptors[*fd_idx].fil = &fatfil_pool[*fd_idx];
 		pr_trace("FileDescManager: alloc fd %zu\n", *fd_idx + FirstFileFD);
 		return static_cast<int>(*fd_idx + FirstFileFD);
 	} else {
@@ -66,8 +66,8 @@ void dealloc_file(size_t fd) {
 		} else
 			pr_trace("FileDescManager: dealloc fd %zu\n", fd);
 
-		fatfil_pool[index(fd)].obj.fs = nullptr;
-		descriptors[index(fd)].fatfil = nullptr;
+		// fatfil_pool[index(fd)].obj.fs = nullptr;
+		descriptors[index(fd)].fil = nullptr;
 		descriptors[index(fd)].vol = Volume::MaxVolumes;
 	}
 }
@@ -83,15 +83,15 @@ FileDesc *filedesc(size_t fd) {
 DirDesc *alloc_dir() {
 	// Thread-safe way to find first empty descriptor
 	if (auto d_idx = dir_scriptors.create()) {
-		// Default-init a FIL
-		dir_pool[*d_idx] = DIR{};
+		// Default-init a FileT
+		dir_pool[*d_idx] = DirT{};
 		dir_scriptors[*d_idx].dir = &dir_pool[*d_idx];
 		return &dir_scriptors[*d_idx];
 	} else
 		return nullptr;
 }
 
-bool dealloc_dir(DIR *dir) {
+bool dealloc_dir(DirT *dir) {
 	if (!dir)
 		return false;
 
@@ -118,7 +118,7 @@ bool dealloc_dir(DirDesc *dirdesc) {
 	return dealloc_dir(dirdesc->dir);
 }
 
-DirDesc *dirdesc(DIR *dir) {
+DirDesc *dirdesc(DirT *dir) {
 	if (!dir)
 		return nullptr;
 
