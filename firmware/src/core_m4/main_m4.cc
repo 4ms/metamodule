@@ -4,6 +4,7 @@
 #include "drivers/hsem.hh"
 #include "drivers/system_clocks.hh"
 #include "hsem_handler.hh"
+#include <ctime>
 
 namespace MetaModule
 {
@@ -33,6 +34,9 @@ int main() {
 	app_startup();
 
 	pr_info("M4 starting\n");
+
+	std::tm t{};
+	mktime(&t);
 
 	// Controls
 	Controls controls{*SharedMemoryS::ptrs.param_block};
