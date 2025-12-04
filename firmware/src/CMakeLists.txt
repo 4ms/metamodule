@@ -78,19 +78,15 @@ add_executable(
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/core_a7/a7_shared_memory.cc
   ${FWDIR}/src/core_a7/gettimeofday.cc
-  # ${FWDIR}/src/core_a7/async_thread_control.cc
   ${FWDIR}/tests/stubs/async_thread_control.cc
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/audio/audio.cc
-  ${FWDIR}/src/fs/fatfs/diskio.cc
-  ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fs/helpers.cc
-  ${FWDIR}/src/fw_update/updater_proxy.cc
-  ${FWDIR}/src/midi/midi_router.cc
+  ${FWDIR}/src/midi/midi_router.cc # required for rack-interface
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
   #
@@ -103,16 +99,12 @@ add_executable(
   #
   ${FWDIR}/metamodule-plugin-sdk/version.cc
   #
-  ${FWDIR}/src/fs/asset_drive/untar.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
   ${FWDIR}/src/fs/general_io.cc
   #
   ${FWDIR}/src/user_settings/settings_file.cc
   ${FWDIR}/src/user_settings/settings_parse.cc
   ${FWDIR}/src/user_settings/settings_serialize.cc
-  #
-  ${FWDIR}/lib/fatfs/source/ff.c
-  ${FWDIR}/lib/fatfs/source/ffunicode.c
   #
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
@@ -126,13 +118,9 @@ add_executable(
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c_ex.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_sai.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_ltdc.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rng.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_tim.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_rcc.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_sd.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_sd_ex.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_sdmmc.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_qspi.c
   #
   ${FWDIR}/lib/mdrivlib/drivers/pin.cc
@@ -147,10 +135,6 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
-  #
-  ${FWDIR}/src/patch_play/modules_helpers.cc
-  #
-  ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
@@ -174,8 +158,6 @@ target_include_directories(
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
           ${LIBDIR}
-          ${FWDIR}/lib/fatfs/source
-          ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
           #
           ${CMAKE_BINARY_DIR}/checkgit
