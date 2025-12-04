@@ -3,9 +3,7 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "param_block.hh"
-#include "user_settings/audio_settings.hh"
 #include "util/countzip.hh"
-#include "util/zip.hh"
 #include <cstring>
 
 namespace MetaModule
@@ -22,8 +20,8 @@ AudioStream::AudioStream(PatchPlayer &player,
 	, audio_in_block{audio_in_block}
 	, audio_out_block{audio_out_block}
 	, codec_{ListenClosely::Hardware::codec}
-	, sample_rate_{AudioSettings::DefaultSampleRate}
-	, block_size_{AudioSettings::DefaultBlockSize} {
+	, sample_rate_{StreamConf::Audio::SampleRate}
+	, block_size_{StreamConf::Audio::MaxBlockSize} {
 
 	if (codec_.init() == ListenClosely::CodecT::CODEC_NO_ERR)
 		pr_info("Codec initialized\n");
@@ -59,6 +57,8 @@ AudioStream::AudioStream(PatchPlayer &player,
 
 		// Debug::Pin0::low();
 	};
+
+	player.set_samplerate(sample_rate_);
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
 						 [audio_callback]() { audio_callback.operator()<1>(); });

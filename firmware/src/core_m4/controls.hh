@@ -123,7 +123,7 @@ private:
 	bool _first_param = true;
 	unsigned num_pot_updates = 0;
 
-	uint32_t sample_rate = 48000;
+	uint32_t sample_rate = StreamConf::Audio::SampleRate;
 };
 
 } // namespace MetaModule

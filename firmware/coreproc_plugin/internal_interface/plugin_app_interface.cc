@@ -1,3 +1,4 @@
+#include "conf/stream_conf.hh"
 #include "fs/helpers.hh"
 #include "plugin_app_if_internal.hh"
 
@@ -21,7 +22,8 @@ void PluginAppInterface::register_interface() {
 /// Plugin-visible functions:
 
 uint32_t PluginAppInterface::get_block_size() {
-	return instance->internal->settings.audio.block_size;
+	return StreamConf::Audio::MaxBlockSize;
+	// return instance->internal->settings.audio.block_size;
 }
 
 void PluginAppInterface::mark_patch_modified() {

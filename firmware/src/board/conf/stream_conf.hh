@@ -8,9 +8,10 @@ namespace MetaModule
 
 struct StreamConfSingleCodecStereo {
 	struct Audio {
+		static constexpr int SampleRate = 48000;
 
 		// BlockSize: Number of Frames processed each time AudioStream::process() is called
-		static constexpr int MaxBlockSize = 512;
+		static constexpr int MaxBlockSize = 64;
 
 		static constexpr int NumDMAHalfTransfers = 2;
 

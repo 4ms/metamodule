@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/stream_conf.hh"
 #include "drivers/pin.hh"
 #include "drivers/sai_config_struct.hh"
 
@@ -10,7 +11,7 @@ using mdrivlib::PinAF;
 using mdrivlib::PinNum;
 using mdrivlib::SaiConfig;
 
-const SaiConfig codec_mainPCB_sai_conf = {
+const SaiConfig codec_sai_conf = {
 	.sai = SAI2,
 	.tx_block = SAI2_Block_A,
 	.rx_block = SAI2_Block_B,
@@ -38,7 +39,7 @@ const SaiConfig codec_mainPCB_sai_conf = {
 
 	.datasize = SAI_DATASIZE_24,
 	.framesize = 64, //24bit extends to 32bits * max(num_tdm_outs, num_td_ins)
-	.samplerate = 48000,
+	.samplerate = MetaModule::StreamConf::Audio::SampleRate,
 
 	.MCLK = {GPIO::E, PinNum::_0, PinAF::AltFunc10},
 	.SCLK = {GPIO::D, PinNum::_13, PinAF::AltFunc10},
