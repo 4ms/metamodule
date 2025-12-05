@@ -19,9 +19,9 @@ using mdrivlib::PinNum;
 
 // LED Line A
 // B54 PA7 TIM8 CH1N (or TIM14 CH1 or TIM3 CH2 or TIM1 CH1N)
-constexpr size_t NumLedsA = 40;
+constexpr size_t num_leds_a = 40;
 
-constexpr inline mdrivlib::TimChanConf PWMConfA{
+constexpr inline mdrivlib::TimChanConf pwm_conf_a{
 	.pin = {GPIO::A, PinNum::_7, PinAF::AltFunc3},
 	.TIM = TIM8_BASE,
 	.channum = mdrivlib::TimChannelNum::_1N,
@@ -30,7 +30,7 @@ constexpr inline mdrivlib::TimChanConf PWMConfA{
 	.clock_div = 1,
 };
 
-struct DMAConfA : mdrivlib::DefaultDMAConf {
+struct dma_conf_a : mdrivlib::DefaultDMAConf {
 	static constexpr unsigned DMAx = 1;
 	static constexpr unsigned StreamNum = 1;
 	static constexpr unsigned RequestNum = DMA_REQUEST_TIM8_UP;
@@ -54,9 +54,9 @@ struct DMAConfA : mdrivlib::DefaultDMAConf {
 
 // LED Line B
 // A63 PE10 TIM1 CH2N
-constexpr size_t NumLedsB = 40;
+constexpr size_t num_leds_b = 40;
 
-constexpr inline mdrivlib::TimChanConf PWMConfB{
+constexpr inline mdrivlib::TimChanConf pwm_conf_b{
 	.pin = {GPIO::E, PinNum::_10, PinAF::AltFunc1},
 	.TIM = TIM1_BASE,
 	.channum = mdrivlib::TimChannelNum::_2N,
@@ -65,7 +65,7 @@ constexpr inline mdrivlib::TimChanConf PWMConfB{
 	.clock_div = 1,
 };
 
-struct DMAConfB : mdrivlib::DefaultDMAConf {
+struct dma_conf_b : mdrivlib::DefaultDMAConf {
 	static constexpr unsigned DMAx = 1;
 	static constexpr unsigned StreamNum = 2;
 	static constexpr unsigned RequestNum = DMA_REQUEST_TIM1_UP;
@@ -89,9 +89,9 @@ struct DMAConfB : mdrivlib::DefaultDMAConf {
 
 // LED Line VU
 // B58 PA6 TIM3 CH1
-constexpr size_t NumLedsVU = 26;
+constexpr size_t num_leds_vu = 26;
 
-constexpr inline mdrivlib::TimChanConf PWMConfVU{
+constexpr inline mdrivlib::TimChanConf pwm_conf_vu{
 	.pin = {GPIO::A, PinNum::_6, PinAF::AltFunc2},
 	.TIM = TIM3_BASE,
 	.channum = mdrivlib::TimChannelNum::_1,
@@ -100,7 +100,7 @@ constexpr inline mdrivlib::TimChanConf PWMConfVU{
 	.clock_div = 1,
 };
 
-struct DMAConfVU : mdrivlib::DefaultDMAConf {
+struct dma_conf_vu : mdrivlib::DefaultDMAConf {
 	static constexpr unsigned DMAx = 1;
 	static constexpr unsigned StreamNum = 3;
 	static constexpr unsigned RequestNum = DMA_REQUEST_TIM3_UP;

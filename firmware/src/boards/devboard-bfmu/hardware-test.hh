@@ -112,24 +112,24 @@ void Controls::test_pins() {
 		printf("Neopixels Line A will display various colors\n");
 		pause();
 		neopixel_a.all_leds_off();
-		for (auto i = 0u; i < Neopixels::NumLedsA; i++) {
-			neopixel_a.set_led(i, i * 6, (Neopixels::NumLedsA - i) * 6, i * 6);
+		for (auto i = 0u; i < Neopixels::num_leds_a; i++) {
+			neopixel_a.set_led(i, i * 6, (Neopixels::num_leds_a - i) * 6, i * 6);
 		}
 		neopixel_a.start();
 
 		printf("Neopixels Line B will display various colors\n");
 		pause();
 		neopixel_b.all_leds_off();
-		for (auto i = 0u; i < Neopixels::NumLedsB; i++) {
-			neopixel_b.set_led(i, i * 6, (Neopixels::NumLedsB - i) * 6, i * 6);
+		for (auto i = 0u; i < Neopixels::num_leds_b; i++) {
+			neopixel_b.set_led(i, i * 6, (Neopixels::num_leds_b - i) * 6, i * 6);
 		}
 		neopixel_b.start();
 
 		printf("Neopixels Line VU will display various colors\n");
 		pause();
 		neopixel_vu.all_leds_off();
-		for (auto i = 0u; i < Neopixels::NumLedsVU; i++) {
-			neopixel_vu.set_led(i, i * 9, i * 9, (Neopixels::NumLedsVU - i) * 9);
+		for (auto i = 0u; i < Neopixels::num_leds_vu; i++) {
+			neopixel_vu.set_led(i, i * 9, i * 9, (Neopixels::num_leds_vu - i) * 9);
 		}
 		neopixel_vu.start();
 

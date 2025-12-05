@@ -4,7 +4,6 @@
 #include "conf/pin_conf.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
-#include "drivers/gpio_expander.hh"
 #include "drivers/neopixel.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
@@ -25,7 +24,6 @@ namespace MetaModule
 
 using mdrivlib::DebouncedPin;
 using mdrivlib::PinPolarity;
-using namespace ControlPins;
 
 struct Controls {
 	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host);
@@ -71,15 +69,15 @@ private:
 	// TODO
 
 	// NEOPIXELS
-	mdrivlib::NeoPixel<Neopixels::PWMConfA, Neopixels::DMAConfA, Neopixels::NumLedsA> neopixel_a;
-	mdrivlib::NeoPixel<Neopixels::PWMConfB, Neopixels::DMAConfB, Neopixels::NumLedsB> neopixel_b;
-	mdrivlib::NeoPixel<Neopixels::PWMConfVU, Neopixels::DMAConfVU, Neopixels::NumLedsVU> neopixel_vu;
+	mdrivlib::NeoPixel<Neopixels::pwm_conf_a, Neopixels::dma_conf_a, Neopixels::num_leds_a> neopixel_a;
+	mdrivlib::NeoPixel<Neopixels::pwm_conf_b, Neopixels::dma_conf_b, Neopixels::num_leds_b> neopixel_b;
+	mdrivlib::NeoPixel<Neopixels::pwm_conf_vu, Neopixels::dma_conf_vu, Neopixels::num_leds_vu> neopixel_vu;
 
 	// GATE OUTS
 	mdrivlib::PinF<ControlPins::clock_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted> clock_out;
 
-	//TODO: PWM OUT
-	mdrivlib::PinF<ControlPins::haptic_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Normal> haptic_out;
+	//PWM OUT
+	mdrivlib::TimPwmChan<ControlPins::haptic_conf> haptic_out;
 
 	// Analog inputs (ignoring MUX for now)
 	static constexpr size_t NumAdcPins = ADCs::AdcPins.size();
