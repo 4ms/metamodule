@@ -37,8 +37,8 @@ constexpr inline PinDef sync_in{GPIO::C, PinNum::_4};		  //inverted, no pullup
 constexpr inline PinDef rec_gate_in{GPIO::C, PinNum::_0};	  //inverted, no pullup
 
 // DAC out (driver TODO)
-// constexpr inline PinDef cv_out_1{GPIO::A, PinNum::_4};
-// constexpr inline PinDef cv_out_2{GPIO::A, PinNum::_5};
+constexpr inline PinDef cv_out_1{GPIO::A, PinNum::_4};
+constexpr inline PinDef cv_out_2{GPIO::A, PinNum::_5};
 
 // MIDI IN Uart:
 constexpr inline UartConf MIDI_Uart{

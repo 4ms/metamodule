@@ -70,12 +70,10 @@ private:
 	// DAC OUTS
 	// TODO
 
-	// NEOPIXEL OUTS: handle with TIM periph?
-	// TODO
-	// A63 PE10 TIM1 CH2N
-	// B58 PA6 TIM3 CH1 (or TIM13 CH1)
-
-	mdrivlib::NeoPixel<NeopixelPWMConfA, NeopixelDMAConfA, NeopixelNumLedsA> neopixel_a;
+	// NEOPIXELS
+	mdrivlib::NeoPixel<Neopixels::PWMConfA, Neopixels::DMAConfA, Neopixels::NumLedsA> neopixel_a;
+	mdrivlib::NeoPixel<Neopixels::PWMConfB, Neopixels::DMAConfB, Neopixels::NumLedsB> neopixel_b;
+	mdrivlib::NeoPixel<Neopixels::PWMConfVU, Neopixels::DMAConfVU, Neopixels::NumLedsVU> neopixel_vu;
 
 	// GATE OUTS
 	mdrivlib::PinF<ControlPins::clock_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted> clock_out;
