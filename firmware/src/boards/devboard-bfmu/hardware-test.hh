@@ -52,8 +52,8 @@ void Controls::test_pins() {
 		printf("Clock out will pulse 10 times\n");
 		toggle_pin(ControlPins::clock_out);
 
-		printf("Haptic out will pulse 10 times\n");
-		toggle_pin(ControlPins::haptic_out);
+		// printf("Haptic out will pulse 10 times\n");
+		// toggle_pin(ControlPins::haptic_out);
 
 		// printf("Neopixel A out will pulse 10 times\n");
 		// toggle_pin(Neopixels::PWMConfA.pin);
@@ -132,6 +132,11 @@ void Controls::test_pins() {
 			neopixel_vu.set_led(i, i * 9, i * 9, (Neopixels::num_leds_vu - i) * 9);
 		}
 		neopixel_vu.start();
+
+		printf("Haptic PWM output will output 25 percent duty cycle\n");
+		pause();
+		haptic_out.set(ControlPins::haptic_conf.period * 3 / 4);
+		haptic_out.start_output();
 
 		///////////////////////////////
 		// Inputs

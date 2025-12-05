@@ -201,6 +201,8 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 
 	uart_midi.init();
 
+	haptic_out.init();
+
 	test_pins();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:

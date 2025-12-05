@@ -26,9 +26,20 @@ constexpr inline auto encoders = std::array{
 	EncoderPins{{GPIO::G, PinNum::_6}, {GPIO::D, PinNum::_3}},	//ENCODER 2
 };
 
+// PWM out:
+constexpr inline mdrivlib::TimChanConf haptic_conf{
+	// .pin = {GPIO::B, PinNum::_9, PinAF::AltFunc1},
+	.pin = {GPIO::B, PinNum::_7, PinAF::AltFunc1},
+	.TIM = TIM17_BASE,
+	// .channum = mdrivlib::TimChannelNum::_1,
+	.channum = mdrivlib::TimChannelNum::_1N,
+	.period = 512,
+	.prescaler = 0,
+	.clock_div = 0,
+};
+
 // GPIO outs:
-constexpr inline PinDef haptic_out{GPIO::B, PinNum::_9}; //PWM
-constexpr inline PinDef clock_out{GPIO::C, PinNum::_7};	 //inverted
+constexpr inline PinDef clock_out{GPIO::C, PinNum::_7}; //inverted
 
 // GPIO ins:
 constexpr inline PinDef random_gate_in{GPIO::B, PinNum::_10}; //inverted, no pullup
