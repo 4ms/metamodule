@@ -1,38 +1,10 @@
 #pragma once
 #include "drivers/gpio_expander.hh"
 
-namespace MetaModule::ButtonLedExpander
+namespace Mousai::ButtonLedExpander
 {
+
 using mdrivlib::GPIO_expander_conf;
-
-struct GpioBit {
-	uint16_t chip_num;
-	uint16_t pin_num;
-};
-
-constexpr inline auto buttons = std::array{
-	GpioBit{0, 0},
-};
-
-// Given a button number, return which chip and bit it refers to
-constexpr inline GpioBit find_button(unsigned button_id) {
-	// buttons 0-7 => chip 0, pins 0-7
-	// buttons 8-15 => chip 1, pins 0-7
-	// buttons 16-23 => chip 2, pins 0-7
-	// buttons 24-31 => chip 3, pins 0-7
-
-	return {(uint16_t)(button_id / 8), (uint16_t)(button_id % 8)};
-}
-
-// Given a light number, return which chip and bit it refers to
-constexpr inline GpioBit find_light(unsigned light_id) {
-	// buttons 0-7 => chip 0, pins 8-15
-	// buttons 8-15 => chip 1, pins 8-15
-	// buttons 16-23 => chip 2, pins 8-15
-	// buttons 24-31 => chip 3, pins 8-15
-
-	return {(uint16_t)(light_id / 8), (uint16_t)((light_id % 8) + 8)};
-}
 
 // I2C TCA9555 Expanders
 const mdrivlib::I2CConfig i2c_conf = {
@@ -60,134 +32,32 @@ constexpr uint8_t MaxAddresses = 8; // Number of addresses the chip supports
 // As just a guess, I set chips 1 2 and 3 to all inputs (buttons), and chips 4, 5, and 6 to outputs (LEDs)
 constexpr GPIO_expander_conf gpio_chip_conf_1 = {
 	.addr = 0b010'0000,
-	.config = GPIO_expander_conf::Config({
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-	}),
+	.config = GPIO_expander_conf::AllInputs(),
 };
 
 constexpr GPIO_expander_conf gpio_chip_conf_2 = {
 	.addr = 0b010'0001,
-	.config = GPIO_expander_conf::Config({
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-	}),
+	.config = GPIO_expander_conf::AllInputs(),
 };
 
 constexpr GPIO_expander_conf gpio_chip_conf_3 = {
 	.addr = 0b010'0010,
-	.config = GPIO_expander_conf::Config({
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-	}),
+	.config = GPIO_expander_conf::AllInputs(),
 };
 
 constexpr GPIO_expander_conf gpio_chip_conf_4 = {
 	.addr = 0b010'0011,
-	.config = GPIO_expander_conf::Config({
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-	}),
+	.config = GPIO_expander_conf::AllOutputs(),
 };
 
 constexpr GPIO_expander_conf gpio_chip_conf_5 = {
 	.addr = 0b010'0100,
-	.config = GPIO_expander_conf::Config({
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-	}),
+	.config = GPIO_expander_conf::AllOutputs(),
 };
 
 constexpr GPIO_expander_conf gpio_chip_conf_6 = {
 	.addr = 0b010'0101,
-	.config = GPIO_expander_conf::Config({
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Input,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-		GPIO_expander_conf::Output,
-	}),
+	.config = GPIO_expander_conf::AllOutputs(),
 };
 
-} // namespace MetaModule::ButtonLedExpander
+} // namespace Mousai::ButtonLedExpander

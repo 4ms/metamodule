@@ -8,9 +8,17 @@
 namespace MetaModule
 {
 
-// A catch-all of data shared between cores
-// TODO: separate out into data that follows the same paths
+// Block-rate parameters
 struct MetaParams {
+
+	// Indexed by MousaiMix::ButtonMux0
+	uint16_t buttons0;
+	// Indexed by MousaiMix::ButtonMux1
+	uint16_t buttons1;
+	// Indexed by MousaiMix::ButtonMux2
+	uint16_t buttons2;
+
+	// Encoders
 	std::array<RotaryMotion, 2> encoder{};
 
 	uint16_t haptic_out{}; //Haptic PWM value

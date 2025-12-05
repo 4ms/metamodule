@@ -6,6 +6,8 @@ namespace MetaModule
 {
 
 void Controls::test_pins() {
+	using namespace Mousai;
+
 	using mdrivlib::GPIO;
 	using mdrivlib::PinAF;
 	using mdrivlib::PinMode;

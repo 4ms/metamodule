@@ -1,22 +1,19 @@
 #pragma once
 #include "conf/adc_conf.hh"
 #include "conf/control_conf.hh"
-#include "conf/gpio_expander_conf.hh"
 #include "conf/pin_conf.hh"
-#include "drivers/uart.hh"
-#include "params/metaparams.hh"
-#include "params/params.hh"
-
-//
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
+#include "drivers/uart.hh"
+#include "gpio_expander_manager.hh"
 #include "midi/midi_message.hh"
-#include "midi_controls.hh"
 #include "param_block.hh"
+#include "params/metaparams.hh"
+#include "params/params.hh"
 #include "usb/midi_host.hh"
 #include "util/edge_detector.hh"
 #include "util/interp_param.hh"
@@ -62,6 +59,9 @@ private:
 	DebouncedPin<ControlPins::sync_in, PinPolarity::Inverted> sync_in;
 	DebouncedPin<ControlPins::rec_gate_in, PinPolarity::Inverted> rec_gate_in;
 
+	// Buttons/LEDs MUX
+	GpioExpanderManager gpio_expanders;
+
 	// MIDI UART
 	mdrivlib::Uart<ControlPins::MIDI_Uart> uart_midi;
 
@@ -97,6 +97,7 @@ private:
 	DoubleBufParamBlock &param_blocks;
 	Params *cur_params;
 	MetaParams *cur_metaparams;
+	LedStates *cur_leds;
 	bool _buffer_full = false;
 	bool _first_param = true;
 

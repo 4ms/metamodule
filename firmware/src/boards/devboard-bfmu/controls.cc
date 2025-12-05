@@ -24,11 +24,13 @@ void Controls::update_debouncers() {
 }
 
 void Controls::update_params() {
+	// Gates
 	cur_params->gate_ins = random_gate_in.is_high() ? 0b0001 : 0b00;
 	cur_params->gate_ins |= trig_in.is_high() ? 0b0010 : 0b00;
 	cur_params->gate_ins |= sync_in.is_high() ? 0b0100 : 0b00;
 	cur_params->gate_ins |= rec_gate_in.is_high() ? 0b1000 : 0b00;
 
+	// Pots
 	// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
 	if (_new_adc_data_ready) {
 		for (unsigned i = 0; i < knobs.size(); i++) {
@@ -52,10 +54,19 @@ void Controls::update_params() {
 		}
 	}
 
+	// Block-rate metaparams
 	if (_first_param) {
 		_first_param = false;
 
 		update_midi_connected();
+
+		cur_metaparams->buttons0 = gpio_expanders.get_buttons(0);
+		cur_metaparams->buttons1 = gpio_expanders.get_buttons(1);
+		cur_metaparams->buttons2 = gpio_expanders.get_buttons(2);
+
+		gpio_expanders.set_leds(0, cur_leds->leds0);
+		gpio_expanders.set_leds(1, cur_leds->leds1);
+		gpio_expanders.set_leds(2, cur_leds->leds2);
 
 		cur_metaparams->usb_midi_connected = usb_midi_connected;
 
@@ -111,6 +122,7 @@ void Controls::start_param_block() {
 	// 28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
 	cur_metaparams = &param_blocks[block_num].metaparams;
 	cur_params = param_blocks[block_num].params.begin();
+	cur_leds = &param_blocks[block_num].leds;
 	_first_param = true;
 	_buffer_full = false;
 
@@ -158,6 +170,7 @@ void Controls::start() {
 }
 
 void Controls::process() {
+	gpio_expanders.update();
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
@@ -171,7 +184,8 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	: usb_midi_host{midi_host}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
-	, cur_metaparams(&param_blocks_ref[0].metaparams) {
+	, cur_metaparams(&param_blocks_ref[0].metaparams)
+	, cur_leds(&param_blocks_ref[0].leds) {
 
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
@@ -187,7 +201,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 
 	uart_midi.init();
 
-	test_pins();
+	// test_pins();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen

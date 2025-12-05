@@ -8,9 +8,10 @@ namespace MetaModule
 {
 
 struct Params {
-	// TODO: make this the actual number of pots, not the mux size
 	std::array<float, PanelDef::NumPot> knobs{};
+
 	std::array<float, PanelDef::NumCVIn> cvs{};
+
 	std::array<uint16_t, PanelDef::NumDACOut> dacs{};
 
 	Midi::Event usb_midi_event{};  //6B

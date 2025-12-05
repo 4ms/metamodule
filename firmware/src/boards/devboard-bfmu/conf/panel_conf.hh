@@ -14,9 +14,8 @@ struct PanelDef {
 	static constexpr uint32_t NumAudioOut = 2;
 	static constexpr uint32_t NumDACOut = 2;
 
-	// 37 pots + 1 Exp pedal => 5 MUXes
-	static constexpr uint32_t NumPot = 38;
-	static constexpr uint32_t NumCVIn = 5;
+	static constexpr uint32_t NumPot = 39;
+	static constexpr uint32_t NumCVIn = 4;
 
 	static constexpr uint32_t NumGateIn = 4;
 	static constexpr uint32_t NumGateOut = 2;
