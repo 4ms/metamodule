@@ -84,9 +84,7 @@ public:
 				break;
 			}
 
-			default:
-				tmr = HAL_GetTick();
-				state = States::PauseBeforeButtons;
+			case States::Disabled:
 				break;
 		}
 	}
@@ -136,6 +134,7 @@ private:
 		CollectReadings,
 		PauseBeforeLeds,
 		SetLeds,
+		Disabled,
 	} state = States::ReadButtons;
 
 	std::array<uint32_t, NumInputChips + NumOutputChips> num_errors{};
@@ -143,19 +142,19 @@ private:
 
 	void handle_error(unsigned chip) {
 		num_errors[chip]++;
-		pr_dbg("ControlExpander %u I2C Error!\n", chip);
+		pr_trace("ControlExpander %u I2C Error!\n", chip);
 
 		if (num_errors[chip] > 8) {
 			num_error_retries[chip]++;
 
 			if (num_error_retries[chip] > 10) {
 				pr_dbg("ControlExpander: too many errors on button exp %u\n", chip);
-				chip = 0;
+				state = States::Disabled;
+			} else {
+				i2c.init(Mousai::ButtonLedExpander::i2c_conf);
+				tmr = std::max<uint32_t>(HAL_GetTick(), 500u) - 500;
+				state = States::PauseBeforeButtons;
 			}
-
-			i2c.init(Mousai::ButtonLedExpander::i2c_conf);
-			tmr = std::max<uint32_t>(HAL_GetTick(), 500u) - 500;
-			state = States::PauseBeforeButtons;
 		}
 	}
 };
