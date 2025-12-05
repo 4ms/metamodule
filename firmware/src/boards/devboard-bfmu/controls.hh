@@ -5,6 +5,7 @@
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
+#include "drivers/neopixel.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
@@ -24,6 +25,7 @@ namespace MetaModule
 
 using mdrivlib::DebouncedPin;
 using mdrivlib::PinPolarity;
+using namespace ControlPins;
 
 struct Controls {
 	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host);
@@ -70,9 +72,14 @@ private:
 
 	// NEOPIXEL OUTS: handle with TIM periph?
 	// TODO
+	// A63 PE10 TIM1 CH2N
+	// B58 PA6 TIM3 CH1 (or TIM13 CH1)
+
+	mdrivlib::NeoPixel<NeopixelPWMConfA, NeopixelDMAConfA, NeopixelNumLedsA> neopixel_a;
 
 	// GATE OUTS
 	mdrivlib::PinF<ControlPins::clock_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted> clock_out;
+
 	//TODO: PWM OUT
 	mdrivlib::PinF<ControlPins::haptic_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Normal> haptic_out;
 

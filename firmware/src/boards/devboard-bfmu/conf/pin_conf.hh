@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/neopixel_conf.hh"
 #include "drivers/pin.hh"
 #include "drivers/uart_conf.hh"
 #include <array>
@@ -35,14 +36,9 @@ constexpr inline PinDef trig_in{GPIO::G, PinNum::_15};		  //inverted, no pullup
 constexpr inline PinDef sync_in{GPIO::C, PinNum::_4};		  //inverted, no pullup
 constexpr inline PinDef rec_gate_in{GPIO::C, PinNum::_0};	  //inverted, no pullup
 
-// Neopixels (Driver TODO)
-constexpr inline PinDef neopixel_a{GPIO::A, PinNum::_7};
-constexpr inline PinDef neopixel_b{GPIO::E, PinNum::_10};
-constexpr inline PinDef neopixel_vu{GPIO::A, PinNum::_6};
-
 // DAC out (driver TODO)
-constexpr inline PinDef cv_out_1{GPIO::A, PinNum::_4};
-constexpr inline PinDef cv_out_2{GPIO::A, PinNum::_5};
+// constexpr inline PinDef cv_out_1{GPIO::A, PinNum::_4};
+// constexpr inline PinDef cv_out_2{GPIO::A, PinNum::_5};
 
 // MIDI IN Uart:
 constexpr inline UartConf MIDI_Uart{
