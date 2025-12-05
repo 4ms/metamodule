@@ -36,9 +36,9 @@ void Controls::test_pins() {
 		pause();
 		for (auto i = 0; i < 10; i++) {
 			pin.high();
-			HAL_Delay(1);
+			HAL_Delay(50);
 			pin.low();
-			HAL_Delay(1);
+			HAL_Delay(50);
 		}
 	};
 
