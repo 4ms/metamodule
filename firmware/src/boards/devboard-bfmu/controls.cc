@@ -201,7 +201,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 
 	uart_midi.init();
 
-	// test_pins();
+	test_pins();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen

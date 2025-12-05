@@ -55,14 +55,14 @@ void Controls::test_pins() {
 		printf("Haptic out will pulse 10 times\n");
 		toggle_pin(ControlPins::haptic_out);
 
-		printf("Neopixel A out will pulse 10 times\n");
-		toggle_pin(ControlPins::neopixel_a);
+		// printf("Neopixel A out will pulse 10 times\n");
+		// toggle_pin(Neopixels::PWMConfA.pin);
 
-		printf("Neopixel B out will pulse 10 times\n");
-		toggle_pin(ControlPins::neopixel_b);
+		// printf("Neopixel B out will pulse 10 times\n");
+		// toggle_pin(Neopixels::PWMConfB.pin);
 
-		printf("Neopixel VU out will pulse 10 times\n");
-		toggle_pin(ControlPins::neopixel_vu);
+		// printf("Neopixel VU out will pulse 10 times\n");
+		// toggle_pin(Neopixels::PWMConfVU.pin);
 
 		printf("CV DAC Out 1 will pulse 10 times\n");
 		toggle_pin(ControlPins::cv_out_1);
@@ -108,6 +108,30 @@ void Controls::test_pins() {
 		uart_midi.transmit(0x80);
 		uart_midi.transmit(0x55);
 		uart_midi.transmit(0x00);
+
+		printf("Neopixels Line A will display various colors\n");
+		pause();
+		neopixel_a.all_leds_off();
+		for (auto i = 0u; i < Neopixels::NumLedsA; i++) {
+			neopixel_a.set_led(i, i * 6, (Neopixels::NumLedsA - i) * 6, i * 6);
+		}
+		neopixel_a.start();
+
+		printf("Neopixels Line B will display various colors\n");
+		pause();
+		neopixel_b.all_leds_off();
+		for (auto i = 0u; i < Neopixels::NumLedsB; i++) {
+			neopixel_b.set_led(i, i * 6, (Neopixels::NumLedsB - i) * 6, i * 6);
+		}
+		neopixel_b.start();
+
+		printf("Neopixels Line VU will display various colors\n");
+		pause();
+		neopixel_vu.all_leds_off();
+		for (auto i = 0u; i < Neopixels::NumLedsVU; i++) {
+			neopixel_vu.set_led(i, i * 9, i * 9, (Neopixels::NumLedsVU - i) * 9);
+		}
+		neopixel_vu.start();
 
 		///////////////////////////////
 		// Inputs
