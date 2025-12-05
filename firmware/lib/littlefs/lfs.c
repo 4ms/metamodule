@@ -510,6 +510,9 @@ static void lfs_mlist_remove(lfs_t *lfs, struct lfs_mlist *mlist) {
             *p = (*p)->next;
             break;
         }
+		// Bail out if we have an infinite loop
+		if (*p == (*p)->next)
+			break;
     }
 }
 
