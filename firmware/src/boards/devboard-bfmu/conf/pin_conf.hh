@@ -1,6 +1,6 @@
 #pragma once
-#include "conf/neopixel_conf.hh"
 #include "drivers/pin.hh"
+#include "drivers/tim_pwm.hh"
 #include "drivers/uart_conf.hh"
 #include <array>
 
@@ -16,6 +16,7 @@ using mdrivlib::PinDef;
 using mdrivlib::PinMode;
 using mdrivlib::PinNum;
 
+// Encoders
 struct EncoderPins {
 	PinDef A;
 	PinDef B;
@@ -28,11 +29,9 @@ constexpr inline auto encoders = std::array{
 
 // PWM out:
 constexpr inline mdrivlib::TimChanConf haptic_conf{
-	// .pin = {GPIO::B, PinNum::_9, PinAF::AltFunc1},
-	.pin = {GPIO::B, PinNum::_7, PinAF::AltFunc1},
+	.pin = {GPIO::B, PinNum::_9, PinAF::AltFunc1},
 	.TIM = TIM17_BASE,
-	// .channum = mdrivlib::TimChannelNum::_1,
-	.channum = mdrivlib::TimChannelNum::_1N,
+	.channum = mdrivlib::TimChannelNum::_1,
 	.period = 512,
 	.prescaler = 0,
 	.clock_div = 0,
