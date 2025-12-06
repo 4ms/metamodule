@@ -17,6 +17,7 @@ using namespace mdrivlib;
 void Controls::update_debouncers() {
 	encoder1.update();
 	encoder2.update();
+
 	random_gate_in.update();
 	trig_in.update();
 	sync_in.update();
@@ -68,6 +69,8 @@ void Controls::update_params() {
 		gpio_expanders.set_leds(1, cur_leds->leds1);
 		gpio_expanders.set_leds(2, cur_leds->leds2);
 
+		set_neopixels();
+
 		cur_metaparams->usb_midi_connected = usb_midi_connected;
 
 		cur_metaparams->encoder[0].motion = encoder1.read();
@@ -81,15 +84,28 @@ void Controls::update_params() {
 		_buffer_full = true;
 }
 
-void Controls::update_rotary() {
-	// Rotary turning
-}
-
 void Controls::update_midi_connected() {
 	usb_midi_connected_raw.update(usb_midi_host.is_connected());
 
 	if (usb_midi_connected_raw.went_high()) {
 		usb_midi_connected = true;
+	}
+}
+
+void Controls::set_neopixels() {
+	for (auto led = 0; auto color : cur_leds->neo_a) {
+		neopixel_a.set_led(led, color.red(), color.green(), color.blue());
+		led++;
+	}
+
+	for (auto led = 0; auto color : cur_leds->neo_b) {
+		neopixel_b.set_led(led, color.red(), color.green(), color.blue());
+		led++;
+	}
+
+	for (auto led = 0; auto color : cur_leds->neo_vu) {
+		neopixel_vu.set_led(led, color.red(), color.green(), color.blue());
+		led++;
 	}
 }
 
@@ -205,8 +221,6 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 
 	test_pins();
 
-	// Todo: use RCC_Enable or create DBGMCU_Control:
-	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 

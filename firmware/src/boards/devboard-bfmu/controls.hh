@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/adc_conf.hh"
 #include "conf/control_conf.hh"
+#include "conf/neopixel_conf.hh"
 #include "conf/pin_conf.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
@@ -44,16 +45,17 @@ private:
 
 	void parse_midi();
 	void update_midi_connected();
-	void update_rotary();
+	void set_neopixels();
 
 	void test_pins();
 
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
-	// Digital controls: Rotary, Buttons and Gate jacks
+	// ROTARY ENCODERS
 	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::encoders[0].A, ControlPins::encoders[0].B> encoder1;
 	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::encoders[1].A, ControlPins::encoders[1].B> encoder2;
 
+	// GATE INS
 	DebouncedPin<ControlPins::random_gate_in, PinPolarity::Inverted> random_gate_in;
 	DebouncedPin<ControlPins::trig_in, PinPolarity::Inverted> trig_in;
 	DebouncedPin<ControlPins::sync_in, PinPolarity::Inverted> sync_in;
@@ -73,13 +75,15 @@ private:
 	mdrivlib::NeoPixel<Neopixels::pwm_conf_b, Neopixels::dma_conf_b, Neopixels::num_leds_b> neopixel_b;
 	mdrivlib::NeoPixel<Neopixels::pwm_conf_vu, Neopixels::dma_conf_vu, Neopixels::num_leds_vu> neopixel_vu;
 
-	// GATE OUTS
+	// GATE OUT
 	mdrivlib::PinF<ControlPins::clock_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted> clock_out;
 
-	//PWM OUT
+	// PWM OUT
 	mdrivlib::TimPwmChan<ControlPins::haptic_conf> haptic_out;
 
 	// Analog inputs (ignoring MUX for now)
+	// ADC MUX
+	// TODO
 	static constexpr size_t NumAdcPins = ADCs::AdcPins.size();
 	std::array<uint16_t, NumAdcPins> pot_vals{};
 	mdrivlib::AdcDmaPeriph<ADCs::PotAdcConf> pot_adc{pot_vals, ADCs::AdcPins};

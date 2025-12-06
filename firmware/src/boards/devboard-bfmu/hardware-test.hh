@@ -52,18 +52,6 @@ void Controls::test_pins() {
 		printf("Clock out will pulse 10 times\n");
 		toggle_pin(ControlPins::clock_out);
 
-		// printf("Haptic out will pulse 10 times\n");
-		// toggle_pin(ControlPins::haptic_out);
-
-		// printf("Neopixel A out will pulse 10 times\n");
-		// toggle_pin(Neopixels::PWMConfA.pin);
-
-		// printf("Neopixel B out will pulse 10 times\n");
-		// toggle_pin(Neopixels::PWMConfB.pin);
-
-		// printf("Neopixel VU out will pulse 10 times\n");
-		// toggle_pin(Neopixels::PWMConfVU.pin);
-
 		printf("CV DAC Out 1 will pulse 10 times\n");
 		toggle_pin(ControlPins::cv_out_1);
 
