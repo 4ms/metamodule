@@ -24,6 +24,22 @@ void Controls::update_debouncers() {
 	rec_gate_in.update();
 }
 
+void interpolate_adcs(unsigned update_ctr, auto &values, auto &dest) {
+	if (update_ctr >= values[0].get_num_updates()) {
+		// Don't overshoot value:
+		for (unsigned i = 0; i < values.size(); i++) {
+			auto val = values[i].target_val;
+			dest[i] = std::clamp(val, 0.f, 1.f);
+			values[i].cur_val = values[i].target_val;
+		}
+	} else {
+		for (unsigned i = 0; i < values.size(); i++) {
+			auto val = values[i].next();
+			dest[i] = std::clamp(val, 0.f, 1.f);
+		}
+	}
+}
+
 void Controls::update_params() {
 	// Gates
 	cur_params->gate_ins = random_gate_in.is_high() ? 0b0001 : 0b00;
@@ -31,29 +47,17 @@ void Controls::update_params() {
 	cur_params->gate_ins |= sync_in.is_high() ? 0b0100 : 0b00;
 	cur_params->gate_ins |= rec_gate_in.is_high() ? 0b1000 : 0b00;
 
-	// Pots
-	// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
+	// CV jacks
+	// Interpolate cv readings across the param block, since we capture them at a slower rate than audio process
 	if (_new_adc_data_ready) {
-		for (unsigned i = 0; i < knobs.size(); i++) {
-			knobs[i].set_new_value(get_pot_reading(i));
-			num_pot_updates = 0;
-		}
 		_new_adc_data_ready = false;
 	}
 
-	num_pot_updates++;
-	if (num_pot_updates >= knobs[0].get_num_updates()) {
-		for (unsigned i = 0; i < knobs.size(); i++) {
-			auto val = knobs[i].target_val;
-			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
-			knobs[i].cur_val = knobs[i].target_val;
-		}
-	} else {
-		for (unsigned i = 0; i < knobs.size(); i++) {
-			auto val = knobs[i].next();
-			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
-		}
-	}
+	num_cv_updates++;
+	interpolate_adcs(num_cv_updates, cvs, cur_params->cvs);
+
+	// num_pot_updates++;
+	// interpolate_adcs(num_pot_updates, knobs, cur_params->knobs);
 
 	// Block-rate metaparams
 	if (_first_param) {
@@ -104,7 +108,7 @@ void Controls::set_neopixels() {
 	}
 
 	for (auto led = 0; auto color : cur_leds->neo_vu) {
-		neopixel_vu.set_led(led, color.red(), color.green(), color.blue());
+		// neopixel_vu.set_led(led, color.red(), color.green(), color.blue());
 		led++;
 	}
 }
@@ -206,14 +210,38 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {
+
+			// Store readings into unpacked array
+			for (uint32_t i = ADCs::VOct; auto &cv : cvs) {
+				cv.set_new_value(get_adc_reading(i));
+				i++;
+			}
+			num_cv_updates = 0;
+
+			auto offset = mux_chan & 0b111;
+			for (uint32_t mux = ADCs::Mux1; mux <= ADCs::Mux5; mux++) {
+				knobs[mux * 8 + offset].set_new_value(get_adc_reading(mux));
+			}
+			num_pot_updates = 0;
+
+			// Advance the MUX
+			mux_chan++;
+			adc_mux_a.set(mux_chan & 0b001);
+			adc_mux_b.set(mux_chan & 0b010);
+			adc_mux_c.set(mux_chan & 0b100);
+
+			// Start conversion
 			ADC1->ISR = tmp | ADC_ISR_EOS;
+
 			_new_adc_data_ready = true;
+
+			adc.start();
 		}
 	});
 
 	set_samplerate(sample_rate);
 
-	pot_adc.start();
+	adc.start();
 
 	uart_midi.init();
 
@@ -232,13 +260,13 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	});
 }
 
-float Controls::get_pot_reading(uint32_t pot_id) {
-	if (pot_id < pot_vals.size()) {
-		auto raw = (int32_t)pot_vals[pot_id];
+float Controls::get_adc_reading(uint32_t adc_id) {
+	if (adc_id < raw_adc_vals.size()) {
+		auto raw = (int32_t)raw_adc_vals[adc_id];
 		float val = raw - ADCs::MinPotValue;
 		return std::clamp(val / ADCs::MaxPotValue, 0.f, 1.f);
-	}
-	return 0;
+	} else
+		return 0;
 }
 
 } // namespace MetaModule

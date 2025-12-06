@@ -49,6 +49,7 @@ void Controls::test_pins() {
 		printf("Press DFU button now to start\n");
 		pause();
 
+#if 0
 		printf("Clock out will pulse 10 times\n");
 		toggle_pin(ControlPins::clock_out);
 
@@ -125,7 +126,7 @@ void Controls::test_pins() {
 		pause();
 		haptic_out.set(ControlPins::haptic_conf.period * 3 / 4);
 		haptic_out.start_output();
-
+#endif
 		///////////////////////////////
 		// Inputs
 
@@ -160,16 +161,16 @@ void Controls::test_pins() {
 
 			printf("GPIO expander IRQ pin %d\n", MIDI_rx.is_on());
 
-			printf("ADC Mux1 = %u\n", pot_vals[ADCs::Mux1]);
-			printf("ADC Mux2 = %u\n", pot_vals[ADCs::Mux2]);
-			printf("ADC Mux3 = %u\n", pot_vals[ADCs::Mux3]);
-			printf("ADC Mux4 = %u\n", pot_vals[ADCs::Mux4]);
-			printf("ADC Mux5 = %u\n", pot_vals[ADCs::Mux5]);
-			printf("ADC Voct = %u\n", pot_vals[ADCs::VOct]);
-			printf("ADC CV1 = %u\n", pot_vals[ADCs::CV1]);
-			printf("ADC CV2 = %u\n", pot_vals[ADCs::CV2]);
-			printf("ADC CV3 = %u\n", pot_vals[ADCs::CV3]);
-			printf("ADC CV4 = %u\n", pot_vals[ADCs::CV4]);
+			printf("ADC Mux1 = %u\n", raw_adc_vals[ADCs::Mux1]);
+			printf("ADC Mux2 = %u\n", raw_adc_vals[ADCs::Mux2]);
+			printf("ADC Mux3 = %u\n", raw_adc_vals[ADCs::Mux3]);
+			printf("ADC Mux4 = %u\n", raw_adc_vals[ADCs::Mux4]);
+			printf("ADC Mux5 = %u\n", raw_adc_vals[ADCs::Mux5]);
+			printf("ADC Voct = %u\n", raw_adc_vals[ADCs::VOct]);
+			printf("ADC CV1 = %u\n", raw_adc_vals[ADCs::CV1]);
+			printf("ADC CV2 = %u\n", raw_adc_vals[ADCs::CV2]);
+			printf("ADC CV3 = %u\n", raw_adc_vals[ADCs::CV3]);
+			printf("ADC CV4 = %u\n", raw_adc_vals[ADCs::CV4]);
 
 			HAL_Delay(1000);
 		}

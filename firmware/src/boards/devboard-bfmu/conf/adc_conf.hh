@@ -58,6 +58,7 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 		static constexpr auto StreamNum = 7;
 		static constexpr auto RequestNum = DMA_REQUEST_ADC1;
 		static constexpr auto dma_priority = Low;
+		static constexpr auto circular = false; // Not free-running: need to update the MUX between sequences
 	};
 };
 

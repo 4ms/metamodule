@@ -2,7 +2,6 @@
 
 #include <array>
 #include <cstdint>
-#include <optional>
 #include <string_view>
 
 struct PanelDef {
@@ -14,8 +13,8 @@ struct PanelDef {
 	static constexpr uint32_t NumAudioOut = 2;
 	static constexpr uint32_t NumDACOut = 2;
 
-	static constexpr uint32_t NumPot = 39;
-	static constexpr uint32_t NumCVIn = 4;
+	static constexpr uint32_t NumPot = 39; // 5 MUX * 8 channels = 40, minus 1 pin is not used. Includes EXP PEDALS
+	static constexpr uint32_t NumCVIn = 5; // VOCT + CV1-4
 
 	static constexpr uint32_t NumGateIn = 4;
 	static constexpr uint32_t NumGateOut = 2;

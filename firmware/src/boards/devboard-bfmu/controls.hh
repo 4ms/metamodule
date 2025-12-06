@@ -36,7 +36,7 @@ private:
 	void update_params();
 	void update_debouncers();
 
-	float get_pot_reading(uint32_t pot_id);
+	float get_adc_reading(uint32_t pot_id);
 
 	void set_samplerate(unsigned sample_rate);
 
@@ -73,7 +73,7 @@ private:
 	// NEOPIXELS
 	mdrivlib::NeoPixel<Neopixels::pwm_conf_a, Neopixels::dma_conf_a, Neopixels::num_leds_a> neopixel_a;
 	mdrivlib::NeoPixel<Neopixels::pwm_conf_b, Neopixels::dma_conf_b, Neopixels::num_leds_b> neopixel_b;
-	mdrivlib::NeoPixel<Neopixels::pwm_conf_vu, Neopixels::dma_conf_vu, Neopixels::num_leds_vu> neopixel_vu;
+	// mdrivlib::NeoPixel<Neopixels::pwm_conf_vu, Neopixels::dma_conf_vu, Neopixels::num_leds_vu> neopixel_vu;
 
 	// GATE OUT
 	mdrivlib::PinF<ControlPins::clock_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted> clock_out;
@@ -81,14 +81,21 @@ private:
 	// PWM OUT
 	mdrivlib::TimPwmChan<ControlPins::haptic_conf> haptic_out;
 
-	// Analog inputs (ignoring MUX for now)
+	// Analog inputs
 	// ADC MUX
-	// TODO
+	mdrivlib::PinF<ADCs::mux_a> adc_mux_a;
+	mdrivlib::PinF<ADCs::mux_b> adc_mux_b;
+	mdrivlib::PinF<ADCs::mux_c> adc_mux_c;
+	uint8_t mux_chan = 0;
+
+	// ADCs
 	static constexpr size_t NumAdcPins = ADCs::AdcPins.size();
-	std::array<uint16_t, NumAdcPins> pot_vals{};
-	mdrivlib::AdcDmaPeriph<ADCs::PotAdcConf> pot_adc{pot_vals, ADCs::AdcPins};
+	std::array<uint16_t, NumAdcPins> raw_adc_vals{};
+	mdrivlib::AdcDmaPeriph<ADCs::PotAdcConf> adc{raw_adc_vals, ADCs::AdcPins};
 
 	std::array<InterpParamVariable<float>, PanelDef::NumPot> knobs;
+	std::array<InterpParamVariable<float>, PanelDef::NumCVIn> cvs;
+
 	static constexpr uint32_t AdcReadFrequency = 580; //571
 	bool _new_adc_data_ready = false;
 
@@ -111,6 +118,7 @@ private:
 	uint32_t sample_rate = 48000;
 
 	unsigned num_pot_updates = 0;
+	unsigned num_cv_updates = 0;
 };
 
 } // namespace MetaModule
