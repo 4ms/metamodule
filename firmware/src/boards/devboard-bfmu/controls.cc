@@ -24,6 +24,7 @@ void Controls::update_debouncers() {
 	rec_gate_in.update();
 }
 
+// Interpolate adc readings across the param block, since we capture them at a slower rate than audio process
 void interpolate_adcs(unsigned update_ctr, auto &values, auto &dest) {
 	if (update_ctr >= values[0].get_num_updates()) {
 		// Don't overshoot value:
@@ -47,17 +48,13 @@ void Controls::update_params() {
 	cur_params->gate_ins |= sync_in.is_high() ? 0b0100 : 0b00;
 	cur_params->gate_ins |= rec_gate_in.is_high() ? 0b1000 : 0b00;
 
-	// CV jacks
-	// Interpolate cv readings across the param block, since we capture them at a slower rate than audio process
-	if (_new_adc_data_ready) {
-		_new_adc_data_ready = false;
-	}
-
+	// CV jacks (non-muxed ADCs)
 	num_cv_updates++;
 	interpolate_adcs(num_cv_updates, cvs, cur_params->cvs);
 
-	// num_pot_updates++;
-	// interpolate_adcs(num_pot_updates, knobs, cur_params->knobs);
+	// Knobs (ADC muxes)
+	num_pot_updates++;
+	interpolate_adcs(num_pot_updates, knobs, cur_params->knobs);
 
 	// Block-rate metaparams
 	if (_first_param) {
@@ -195,8 +192,11 @@ void Controls::process() {
 
 void Controls::set_samplerate(unsigned sample_rate) {
 	this->sample_rate = sample_rate;
-	for (auto &_knob : knobs) {
-		_knob.set_num_updates(sample_rate / AdcReadFrequency);
+	for (auto &knob : knobs) {
+		knob.set_num_updates(sample_rate / (AdcReadFrequency / 8));
+	}
+	for (auto &cv : cvs) {
+		cv.set_num_updates(sample_rate / AdcReadFrequency);
 	}
 }
 
@@ -222,20 +222,25 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 			for (uint32_t mux = ADCs::Mux1; mux <= ADCs::Mux5; mux++) {
 				knobs[mux * 8 + offset].set_new_value(get_adc_reading(mux));
 			}
-			num_pot_updates = 0;
 
 			// Advance the MUX
 			mux_chan++;
 			adc_mux_a.set(mux_chan & 0b001);
 			adc_mux_b.set(mux_chan & 0b010);
 			adc_mux_c.set(mux_chan & 0b100);
+			if (mux_chan == 0) {
+				num_pot_updates = 0;
+			}
+
+			// Let mux pins settle
+			int x = ADCs::mux_settle_period;
+			while (x--) {
+				__NOP();
+			}
 
 			// Start conversion
 			ADC1->ISR = tmp | ADC_ISR_EOS;
-
-			_new_adc_data_ready = true;
-
-			adc.start();
+			ADC1->CR |= ADC_CR_ADSTART;
 		}
 	});
 
@@ -264,7 +269,7 @@ float Controls::get_adc_reading(uint32_t adc_id) {
 	if (adc_id < raw_adc_vals.size()) {
 		auto raw = (int32_t)raw_adc_vals[adc_id];
 		float val = raw - ADCs::MinPotValue;
-		return std::clamp(val / ADCs::MaxPotValue, 0.f, 1.f);
+		return std::clamp(val / (ADCs::MaxPotValue - ADCs::MinPotValue), 0.f, 1.f);
 	} else
 		return 0;
 }

@@ -97,7 +97,6 @@ private:
 	std::array<InterpParamVariable<float>, PanelDef::NumCVIn> cvs;
 
 	static constexpr uint32_t AdcReadFrequency = 580; //571
-	bool _new_adc_data_ready = false;
 
 	// MIDI
 	MidiHost &usb_midi_host;
