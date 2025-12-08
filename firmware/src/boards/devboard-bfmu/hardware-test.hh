@@ -173,11 +173,11 @@ void Controls::test_pins() {
 			printf("ADC CV4 = %u\n", raw_adc_vals[ADCs::CV4]);
 
 			for (uint32_t i = 0; auto &cv : cvs) {
-				printf("CV[%d] = %g\n", i, cv.target_val * 4095);
+				printf("CV[%d] = %d\n", i, int(cv.target_val * 4095));
 				i++;
 			}
 			for (uint32_t i = 0; auto &knob : knobs) {
-				printf("Knob CV[%d] = %g\n", i, knob.target_val * 4095);
+				printf("Knob CV[%d] = %d\n", i, int(knob.target_val * 4095));
 				i++;
 			}
 
