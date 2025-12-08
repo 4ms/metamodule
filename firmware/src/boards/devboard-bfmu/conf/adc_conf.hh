@@ -37,28 +37,36 @@ constexpr inline PinDef mux_a{GPIO::F, PinNum::_11};
 constexpr inline PinDef mux_b{GPIO::E, PinNum::_2};
 constexpr inline PinDef mux_c{GPIO::G, PinNum::_13};
 
-// Can set this if the ADCs aren't going full range
-constexpr int32_t MinPotValue = 0;
-constexpr float MaxPotValue = 4095.f - (float)MinPotValue;
+// Delay (in cycles to let MUX pins settle before reading ADC)
+// This probably will need to be adjusted to compensate for the MUXes
+constexpr inline int mux_settle_period = 1000; // 1000 is about 20s
+
+// Can change this if the ADCs aren't going full range
+constexpr int32_t MinPotValue = 70.f;
+constexpr float MaxPotValue = 4095.f;
 
 // ADC DMA:
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr mdrivlib::AdcResolution resolution = mdrivlib::Bits12;
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
-	static constexpr auto oversample = true;
-	static constexpr auto oversampling_ratio = 1024;
-	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift10Right;
+
+	static constexpr bool oversample = true;
+	static constexpr uint32_t oversampling_ratio = 512;
+	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift9Right;
+
 	static constexpr auto clock_div = mdrivlib::PLL_Div1;
 
 	static constexpr bool enable_end_of_sequence_isr = true;
 	static constexpr bool enable_end_of_conversion_isr = false;
+
+	static constexpr bool continuous_adc = false;
 
 	struct DmaConf : mdrivlib::DefaultAdcPeriphConf::DmaConf {
 		static constexpr auto DMAx = 2;
 		static constexpr auto StreamNum = 7;
 		static constexpr auto RequestNum = DMA_REQUEST_ADC1;
 		static constexpr auto dma_priority = Low;
-		static constexpr auto circular = false; // Not free-running: need to update the MUX between sequences
+		static constexpr auto circular = true;
 	};
 };
 
