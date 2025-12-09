@@ -80,6 +80,8 @@ void Controls::update_params() {
 
 	parse_midi();
 
+	output_dac();
+
 	cur_params++;
 	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
 		_buffer_full = true;
@@ -252,17 +254,24 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 
 	haptic_out.init();
 
-	// test_pins();
+	test_pins();
 
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 
+	// Task is called at sample rate
 	read_controls_task.init([this]() {
-		if (_buffer_full)
+		if (_buffer_full) {
 			return;
+		}
 		update_debouncers();
 		update_params();
 	});
+}
+
+void Controls::output_dac() {
+	cv_out.set(0, cur_params->dac0);
+	cv_out.set(1, cur_params->dac1);
 }
 
 float Controls::get_adc_reading(uint32_t adc_id) {

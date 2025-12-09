@@ -1,4 +1,5 @@
 #pragma once
+#include "drivers/dac_builtin.hh"
 #include "drivers/pin.hh"
 #include "drivers/tim_pwm.hh"
 #include "drivers/uart_conf.hh"
@@ -46,9 +47,35 @@ constexpr inline PinDef trig_in{GPIO::G, PinNum::_15};		  //inverted, no pullup
 constexpr inline PinDef sync_in{GPIO::C, PinNum::_4};		  //inverted, no pullup
 constexpr inline PinDef rec_gate_in{GPIO::C, PinNum::_0};	  //inverted, no pullup
 
-// DAC out (driver TODO)
-constexpr inline PinDef cv_out_1{GPIO::A, PinNum::_4};
-constexpr inline PinDef cv_out_2{GPIO::A, PinNum::_5};
+// DAC out
+
+constexpr inline mdrivlib::DacConfig dac{
+	.dac_num = 1,
+	.dac0_pin{GPIO::A, PinNum::_4},
+	.dac1_pin{GPIO::A, PinNum::_5},
+	.chan0 =
+		{
+			.DAC_HighFrequency = DAC_HIGH_FREQUENCY_INTERFACE_MODE_DISABLE,
+			.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE,
+			.DAC_Trigger = DAC_TRIGGER_NONE,
+			.DAC_OutputBuffer = DAC_OUTPUTBUFFER_DISABLE,			//????
+			.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE, //????
+			.DAC_UserTrimming = DAC_TRIMMING_FACTORY,
+			.DAC_TrimmingValue = 1,
+			.DAC_SampleAndHoldConfig = {.DAC_SampleTime = 0, .DAC_HoldTime = 0, .DAC_RefreshTime = 0},
+		},
+	.chan1 =
+		{
+			.DAC_HighFrequency = 0,
+			.DAC_SampleAndHold = 0,
+			.DAC_Trigger = DAC_TRIGGER_NONE,
+			.DAC_OutputBuffer = DAC_OUTPUTBUFFER_DISABLE,			//????
+			.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE, //????
+			.DAC_UserTrimming = DAC_TRIMMING_FACTORY,
+			.DAC_TrimmingValue = 1,
+			.DAC_SampleAndHoldConfig = {.DAC_SampleTime = 0, .DAC_HoldTime = 0, .DAC_RefreshTime = 0},
+		},
+};
 
 // MIDI IN Uart:
 constexpr inline UartConf MIDI_Uart{

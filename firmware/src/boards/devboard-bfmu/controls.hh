@@ -4,6 +4,7 @@
 #include "conf/neopixel_conf.hh"
 #include "conf/pin_conf.hh"
 #include "drivers/adc_builtin.hh"
+#include "drivers/dac_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/neopixel.hh"
 #include "drivers/pin.hh"
@@ -46,6 +47,7 @@ private:
 	void parse_midi();
 	void update_midi_connected();
 	void set_neopixels();
+	void output_dac();
 
 	void test_pins();
 
@@ -68,6 +70,8 @@ private:
 	mdrivlib::Uart<ControlPins::MIDI_Uart> uart_midi;
 
 	// DAC OUTS
+	mdrivlib::DualDac cv_out{ControlPins::dac};
+
 	// TODO
 
 	// NEOPIXELS

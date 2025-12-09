@@ -12,7 +12,8 @@ struct Params {
 
 	std::array<float, PanelDef::NumCVIn> cvs{};
 
-	std::array<uint16_t, PanelDef::NumDACOut> dacs{};
+	uint16_t dac0{};
+	uint16_t dac1{};
 
 	Midi::Event usb_midi_event{};  //6B
 	Midi::Event uart_midi_event{}; //6B
@@ -23,22 +24,7 @@ struct Params {
 	uint8_t clock_out{}; //clock out
 
 	void clear() {
-		for (auto &knob : knobs)
-			knob = 0.f;
-
-		for (auto &cv : cvs)
-			cv = 0.f;
-
-		for (auto &dac : dacs)
-			dac = 0;
-
-		usb_midi_event = Midi::Event{};
-		usb_raw_midi = {};
-		uart_midi_event = Midi::Event{};
-		uart_raw_midi = {};
-
-		gate_ins = 0;
-		clock_out = 0;
+		*this = Params{};
 	}
 };
 
