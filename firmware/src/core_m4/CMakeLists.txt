@@ -61,6 +61,8 @@ add_executable(
   ${HALDIR}/src/stm32mp1xx_hal_adc.c
   ${HALDIR}/src/stm32mp1xx_hal_adc_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_cortex.c
+  ${HALDIR}/src/stm32mp1xx_hal_dac.c
+  ${HALDIR}/src/stm32mp1xx_hal_dac_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_dma.c
   ${HALDIR}/src/stm32mp1xx_hal_hcd.c
   ${HALDIR}/src/stm32mp1xx_hal_i2c.c
