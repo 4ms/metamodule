@@ -50,15 +50,15 @@ R"(PatchData:
 		SUBCASE("Check if output connection data is correct") {
 			CHECK(player.get_panel_output_connection(0) == Jack{1, 3});
 			CHECK(player.get_panel_output_connection(1) == Jack{1, 1});
-			// CHECK(player.get_panel_output_connection(2) == Jack{2, 1});
-			SUBCASE("Out of range jacks go to module 0, jack 0") {
-				CHECK(player.get_panel_output_connection(2) == Jack{0, 0});
-			}
-
-			// SUBCASE("Unmapped jacks are connected to 0xFFFF,0xFFFF") {
-			// 	CHECK(player.get_panel_output_connection(3) == Jack{0xFFFF, 0xFFFF});
-			// 	CHECK(player.get_panel_output_connection(4) == Jack{0xFFFF, 0xFFFF});
+			CHECK(player.get_panel_output_connection(2) == Jack{2, 1});
+			// SUBCASE("Out of range jacks go to module 0, jack 0") {
+			// 	CHECK(player.get_panel_output_connection(2) == Jack{0, 0});
 			// }
+
+			SUBCASE("Unmapped jacks are connected to 0xFFFF,0xFFFF") {
+				CHECK(player.get_panel_output_connection(3) == Jack{0xFFFF, 0xFFFF});
+				CHECK(player.get_panel_output_connection(4) == Jack{0xFFFF, 0xFFFF});
+			}
 		}
 	}
 }
