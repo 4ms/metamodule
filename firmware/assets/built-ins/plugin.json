@@ -1,0 +1,23 @@
+{
+  "slug": "InternalBuiltIns",
+  "version": "1.0.0",
+  "license": "GPL-3.0-or-later",
+  "name": "Internal modules",
+  "brand": "InternalBuiltIns",
+  "author": "",
+  "authorEmail": "",
+  "pluginUrl": "",
+  "authorUrl": "",
+  "sourceUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "MyModule",
+      "name": "My Module Name",
+      "description": "An example module",
+      "tags": [
+        "Utility"
+      ]
+    }
+  ]
+}

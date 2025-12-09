@@ -81,16 +81,31 @@ struct InternalPluginManager {
 		// pluginInstance = &internal_plugins.emplace_back("YourInternalBrandHere");
 		// pluginInstance->addModel(yourModuleName);
 		// parse_metadata(yourModuleJson, yourModuleMMJson);
+
+		parse_internal_jsons("built-ins/");
 	}
 
-	void parse_metadata(std::string_view plugin_json, std::string_view plugin_mm_json) {
+	void parse_internal_jsons(std::string directory) {
 		Plugin::Metadata metadata;
+		std::vector<char> buffer;
 
-		std::string json_working_data{plugin_json};
-		Plugin::parse_json(json_working_data, &metadata);
+		std::string filename = directory + "/plugin.json";
+		auto sz = ramdisk.get_file_size(filename);
+		if (sz > 0) {
+			buffer.resize(sz);
+			if (ramdisk.read_file(filename, buffer) > 0) {
+				Plugin::parse_json(buffer, &metadata);
+			}
+		}
 
-		std::string mm_json_working_data{plugin_json};
-		Plugin::parse_mm_json(mm_json_working_data, &metadata);
+		filename = directory + "/plugin-mm.json";
+		sz = ramdisk.get_file_size(filename);
+		if (sz > 0) {
+			buffer.resize(sz);
+			if (ramdisk.read_file(filename, buffer) > 0) {
+				Plugin::parse_mm_json(buffer, &metadata);
+			}
+		}
 
 		ModuleFactory::setBrandDisplayName(metadata.brand_slug, metadata.display_name);
 

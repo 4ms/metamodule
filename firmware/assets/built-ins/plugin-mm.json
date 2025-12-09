@@ -1,0 +1,13 @@
+{
+	"MetaModuleBrandName": "InternalBuiltIns",
+	"MetaModulePluginMaintainer": "",
+	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerUrl": "",
+	"MetaModuleDescription": "",
+	"MetaModuleIncludedModules": [
+		{
+			"slug": "MyModule",
+			"name": "My Module Name"
+		}
+	]
+}
