@@ -1,5 +1,4 @@
 #pragma once
-
 #include "general_io.hh"
 #include "gui/ui.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -30,7 +29,7 @@ struct AutoUpdater {
 		}
 
 		hil_message("*updating\n");
-		lv_label_set_text(ui_MainMenuNowPlaying, "Updating firmware...");
+		pr_info("Updating firmware...");
 		ui.update_screen();
 
 		while (true) {
@@ -38,7 +37,7 @@ struct AutoUpdater {
 			if (status.state == FirmwareUpdaterProxy::Success) {
 				hil_message("*success\n");
 
-				lv_label_set_text(ui_MainMenuNowPlaying, "Succeess!");
+				pr_info("Succeess!");
 				ui.update_screen();
 				break;
 
@@ -46,7 +45,7 @@ struct AutoUpdater {
 				hil_message("*failure\n");
 				pr_err("%s\n", status.message.c_str());
 
-				lv_label_set_text(ui_MainMenuNowPlaying, "failure :(");
+				pr_info("Firmware update failure :(");
 				ui.update_screen();
 				break;
 			}
