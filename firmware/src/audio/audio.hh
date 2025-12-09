@@ -14,7 +14,6 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
-#include "processors/tools/kneeCompress.h"
 #include "sync_params.hh"
 #include "util/calibrator.hh"
 #include "util/edge_detector.hh"
