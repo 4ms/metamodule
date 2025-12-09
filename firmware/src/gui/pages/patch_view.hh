@@ -65,6 +65,8 @@ struct PatchViewPage : PageBase {
 
 		lv_label_set_text(ui_ModuleName, "");
 		lv_hide(ui_ModuleName);
+
+		load_meter = create_load_meter(ui_PatchViewPage);
 	}
 
 	void prepare_focus() override {
@@ -77,7 +79,7 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(args.patch_loc_hash);
 
-		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, load_meter);
 
 		if (is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
@@ -303,7 +305,7 @@ struct PatchViewPage : PageBase {
 
 		dynamic_elements_prepared = false;
 
-		lv_hide(ui_LoadMeter2);
+		lv_hide(load_meter);
 	}
 
 	void update() override {
@@ -422,7 +424,7 @@ struct PatchViewPage : PageBase {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
-		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, load_meter);
 
 		file_menu.update();
 
@@ -493,16 +495,18 @@ private:
 			lv_hide(ui_KnobSetName);
 		}
 
-		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, ui_LoadMeter2);
+		update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.patch_view, load_meter);
 
 		if (settings.patch_view.float_loadmeter) {
-			lv_obj_set_parent(ui_LoadMeter2, lv_layer_sys());
+			lv_obj_set_parent(load_meter, lv_layer_sys());
 			lv_obj_move_foreground(ui_OverloadMsgLabel);
-			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_80, 0);
+			lv_obj_set_style_bg_opa(load_meter, LV_OPA_80, 0);
+			lv_obj_set_x(load_meter, -4);
+			lv_obj_set_y(load_meter, 4);
 		} else {
-			lv_obj_set_parent(ui_LoadMeter2, ui_PatchViewPage);
-			lv_obj_move_to_index(ui_LoadMeter2, 2);
-			lv_obj_set_style_bg_opa(ui_LoadMeter2, LV_OPA_0, 0);
+			lv_obj_set_parent(load_meter, ui_PatchViewPage);
+			lv_obj_move_to_index(load_meter, 2);
+			lv_obj_set_style_bg_opa(load_meter, LV_OPA_0, 0);
 		}
 	}
 
@@ -837,6 +841,8 @@ private:
 	unsigned dyn_draw_throttle = 2;
 	unsigned dyn_module_idx = 0;
 	bool dynamic_elements_prepared = false;
+
+	lv_obj_t *load_meter;
 };
 
 } // namespace MetaModule

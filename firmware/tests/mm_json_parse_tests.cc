@@ -13,11 +13,11 @@ TEST_CASE("basic parsing") {
   "MetaModuleIncludedModules": [
   {
     "slug": "Atvert2",
-    "name": "Atvert2"
+    "displayName": "Atvert2"
   },
   {
     "slug": "BPF",
-    "name": "BPF"
+    "displayName": "BPF"
   }
   ]
 }

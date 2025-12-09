@@ -4,6 +4,7 @@
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/tags.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "src/core/lv_obj_pos.h"
 #include "src/misc/lv_timer.h"
@@ -29,6 +30,8 @@ struct ModuleListPage : PageBase {
 		lv_obj_set_x(hov, -2);
 		lv_obj_set_y(hov, 13);
 		lv_obj_set_width(hov, 172);
+
+		lv_label_set_recolor(lv_obj_get_child(ui_ModuleListRoller, 0), true);
 	}
 
 private:
@@ -87,18 +90,77 @@ private:
 		std::ranges::sort(all_brands, less_ci);
 
 		std::string roller_str = "";
-		roller_str.reserve(all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
-		unsigned sel_idx = 0;
+		roller_str += Gui::blue_text("Sort by tag " LV_SYMBOL_RIGHT);
+		roller_str += "\n";
+		roller_str += "________________";
+		roller_str += "\n";
+		roller_str += Gui::orange_text("Brands:");
+		roller_str += "\n";
+
+		roller_str.reserve(roller_str.size() + all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
+
+		unsigned sel_idx = 1; // account for the first toggle item
 		for (unsigned i = 0; auto const &item : all_brands) {
+			if (!item.length())
+				continue;
 			roller_str += item;
 			roller_str += "\n";
 			if (sel_brand_display_name == item)
-				sel_idx = i;
+				sel_idx = i + 3; // shift for headers
 			i++;
 		}
-		roller_str.pop_back();
+		// Remove last newline
+		if (roller_str.size())
+			roller_str.pop_back();
 		lv_roller_set_options(ui_ModuleListRoller, roller_str.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_selected(ui_ModuleListRoller, sel_idx, LV_ANIM_OFF);
+		cur_selected = sel_idx;
+	}
+
+	void populate_tags() {
+		// Gather unique tags from all modules
+		std::vector<std::string> all_tags;
+
+		for (auto const &brand : ModuleFactory::getAllBrands()) {
+			for (auto const &slug : ModuleFactory::getAllModuleSlugs(brand)) {
+				auto tags = ModuleFactory::getModuleTags(brand, slug);
+				for (auto const &tag : tags) {
+					if (tag.empty())
+						continue;
+
+					// Normalize tag aliases:
+					auto t = std::string(ModuleTags::normalize_tag(tag));
+					t[0] = toupper(t[0]);
+
+					// Populate unique values
+					if (std::ranges::find(all_tags, t) == all_tags.end()) {
+						all_tags.emplace_back(t);
+					}
+				}
+			}
+		}
+		std::ranges::sort(all_tags, [](std::string const &a, std::string const &b) { return less_ci(a, b); });
+
+		std::string roller_str;
+		roller_str += Gui::blue_text("Sort by brand " LV_SYMBOL_RIGHT);
+		roller_str += "\n";
+		roller_str += "________________";
+		roller_str += "\n";
+		roller_str += Gui::orange_text("Tags:");
+		roller_str += "\n";
+		unsigned sel_idx = 0;
+		for (unsigned i = 0; auto const &t : all_tags) {
+			roller_str += t;
+			roller_str += "\n";
+			if (sel_tag == t)
+				sel_idx = i + 3; // shift by 1
+			i++;
+		}
+		if (roller_str.size())
+			roller_str.pop_back();
+		lv_roller_set_options(ui_ModuleListRoller, roller_str.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_selected(ui_ModuleListRoller, sel_idx, LV_ANIM_OFF);
+		cur_selected = sel_idx;
 	}
 
 	void roller_module_list() {
@@ -118,6 +180,69 @@ private:
 		hide_module();
 		populate_brands();
 		show_roller();
+	}
+
+	void roller_tag_list() {
+		lv_label_set_text(ui_ModuleListRollerTitle, "Tags:");
+		hide_module();
+		populate_tags();
+		show_roller();
+	}
+
+	void populate_modules_by_tag() {
+		entries.clear();
+
+		// Iterate all modules and filter by selected tag
+		for (auto const &brand : ModuleFactory::getAllBrands()) {
+			for (auto const &slug : ModuleFactory::getAllModuleSlugs(brand)) {
+				auto tags = ModuleFactory::getModuleTags(brand, slug);
+
+				for (auto const &tag : tags) {
+					// Normalize tag aliases:
+					auto t = std::string(ModuleTags::normalize_tag(tag));
+					t[0] = toupper(t[0]);
+
+					if (equal_ci(t, sel_tag)) {
+						auto combined_slug = std::string(brand) + ":" + std::string(slug);
+						auto display_name = ModuleFactory::getModuleDisplayName(combined_slug);
+						entries.push_back(
+							{.brand_slug = brand, .module_slug = slug, .module_display_name = display_name});
+						break;
+					}
+				}
+			}
+		}
+
+		// Remove 4ms Hub
+		std::erase_if(entries, [](auto const &entry) {
+			return (entry.brand_slug == "4msCompany" &&
+					(entry.module_slug == "HubMedium" || entry.module_slug == "Panel"));
+		});
+
+		// Sort by display name
+		std::ranges::sort(entries,
+						  [](auto a, auto b) { return less_ci(a.module_display_name, b.module_display_name); });
+
+		std::string slugs_str;
+		slugs_str.reserve(entries.size() * (sizeof(ModuleTypeSlug) + 1));
+		for (auto entry : entries) {
+			slugs_str += entry.module_display_name;
+			slugs_str += "\n";
+		}
+		if (slugs_str.length())
+			slugs_str.pop_back();
+		lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_selected(ui_ModuleListRoller, 0, LV_ANIM_OFF);
+	}
+
+	void roller_module_list_by_tag() {
+		lv_label_set_text(ui_ModuleListRollerTitle, sel_tag.c_str());
+		populate_modules_by_tag();
+		drawn_module_idx = -1;
+		draw_module();
+		draw_timer = lv_timer_create(draw_module_cb, 100, this);
+		show_roller();
+		show_module();
 	}
 
 	void show_roller() {
@@ -142,8 +267,12 @@ private:
 
 public:
 	void prepare_focus() final {
-		view = View::BrandRoller;
-		roller_brand_list();
+		view = View::CategoryRoller;
+		if (sort == Sort::Brand) {
+			roller_brand_list();
+		} else {
+			roller_tag_list();
+		}
 		roller_hover.hide();
 	}
 
@@ -152,16 +281,20 @@ public:
 		if (gui_state.back_button.is_just_released()) {
 			roller_hover.hide();
 
-			if (view == View::BrandRoller) {
+			if (view == View::CategoryRoller) {
 				gui_state.force_redraw_patch = true;
 				load_prev_page();
 
 			} else if (view == View::ModuleRoller) {
-				view = View::BrandRoller;
+				view = View::CategoryRoller;
 				if (draw_timer)
 					lv_timer_del(draw_timer);
 				draw_timer = nullptr;
-				roller_brand_list();
+
+				if (sort == Sort::Brand)
+					roller_brand_list();
+				else
+					roller_tag_list();
 
 			} else if (view == View::ModuleOnly) {
 				view = View::ModuleRoller;
@@ -189,12 +322,33 @@ private:
 		if (!page)
 			return;
 
-		if (page->view == View::BrandRoller) {
-			page->view = View::ModuleRoller;
-			ModuleTypeSlug selected_str;
-			lv_roller_get_selected_str(event->target, selected_str._data, selected_str.capacity);
-			page->sel_brand_display_name = selected_str.c_str();
-			page->roller_module_list();
+		if (page->view == View::CategoryRoller) {
+			if (page->sort == Sort::Brand) {
+				auto idx = lv_roller_get_selected(event->target);
+				if (idx == 0 || idx == 1) {
+					page->sort = Sort::Tag;
+					page->roller_tag_list();
+				} else {
+					page->view = View::ModuleRoller;
+					ModuleTypeSlug selected_str;
+					lv_roller_get_selected_str(event->target, selected_str._data, selected_str.capacity);
+					page->sel_brand_display_name = selected_str.c_str();
+					page->roller_module_list();
+				}
+
+			} else if (page->sort == Sort::Tag) {
+				auto idx = lv_roller_get_selected(event->target);
+				if (idx == 0 || idx == 1) {
+					page->sort = Sort::Brand;
+					page->roller_brand_list();
+				} else {
+					page->view = View::ModuleRoller;
+					ModuleTypeSlug selected_str;
+					lv_roller_get_selected_str(event->target, selected_str._data, selected_str.capacity);
+					page->sel_tag = selected_str.c_str();
+					page->roller_module_list_by_tag();
+				}
+			}
 
 		} else if (page->view == View::ModuleRoller) {
 			page->view = View::ModuleOnly;
@@ -211,6 +365,8 @@ private:
 		}
 	}
 
+	static inline unsigned cur_selected = 0;
+
 	static void scroll_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleListPage *>(event->user_data);
 		if (!page)
@@ -220,6 +376,23 @@ private:
 
 		if (page->view == View::ModuleOnly || page->view == View::ModuleRoller) {
 			lv_timer_reset(page->draw_timer);
+		}
+
+		if (page->view == View::CategoryRoller) {
+			auto cur_sel = lv_roller_get_selected(ui_ModuleListRoller);
+			auto prev_sel = page->cur_selected;
+
+			// Skip over headers
+			if (lv_roller_get_selected(ui_ModuleListRoller) < 3) {
+				// Scrolled down -> scroll past headers
+				if (prev_sel >= cur_sel) {
+					cur_sel = 0;
+				} else {
+					cur_sel = 3;
+				}
+				lv_roller_set_selected(ui_ModuleListRoller, cur_sel, LV_ANIM_ON);
+			}
+			page->cur_selected = cur_sel;
 		}
 	}
 
@@ -282,11 +455,13 @@ private:
 		lv_foreach_child(ui_ModuleListImage, [](auto *obj, int i) { lv_obj_del_async(obj); });
 	}
 
-	enum class View { BrandRoller, ModuleRoller, ModuleOnly } view{View::BrandRoller};
+	enum class View { CategoryRoller, ModuleRoller, ModuleOnly } view{View::CategoryRoller};
+	enum class Sort { Brand, Tag } sort{Sort::Brand};
 	lv_timer_t *draw_timer{};
 	unsigned drawn_module_idx = -1;
 	bool do_redraw = false;
 	std::string sel_brand_display_name{"4msCompany"};
+	std::string sel_tag{};
 	std::string selected_module_slug;
 
 	RollerHoverText roller_hover;

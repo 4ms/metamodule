@@ -26,11 +26,11 @@ lv_obj_set_style_pad_top(ui_MainMenuStatusBar, 2, LV_PART_MAIN| LV_STATE_DEFAULT
 lv_obj_set_style_pad_bottom(ui_MainMenuStatusBar, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_MainMenuNowPlayingPanel = lv_obj_create(ui_MainMenuStatusBar);
-lv_obj_set_width( ui_MainMenuNowPlayingPanel, 314);
+lv_obj_set_width( ui_MainMenuNowPlayingPanel, lv_pct(100));
 lv_obj_set_height( ui_MainMenuNowPlayingPanel, 24);
 lv_obj_set_x( ui_MainMenuNowPlayingPanel, 0 );
 lv_obj_set_y( ui_MainMenuNowPlayingPanel, 3 );
-lv_obj_set_align( ui_MainMenuNowPlayingPanel, LV_ALIGN_TOP_MID );
+lv_obj_set_align( ui_MainMenuNowPlayingPanel, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_MainMenuNowPlayingPanel,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_MainMenuNowPlayingPanel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_SPACE_BETWEEN);
 lv_obj_clear_flag( ui_MainMenuNowPlayingPanel, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
@@ -42,7 +42,7 @@ lv_obj_set_style_border_color(ui_MainMenuNowPlayingPanel, lv_color_hex(0x000000)
 lv_obj_set_style_border_opa(ui_MainMenuNowPlayingPanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_MainMenuNowPlayingPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_MainMenuNowPlayingPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_MainMenuNowPlayingPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_MainMenuNowPlayingPanel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MainMenuNowPlayingPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MainMenuNowPlayingPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_MainMenuNowPlayingPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -302,29 +302,5 @@ lv_obj_set_style_pad_left(ui_MenuLabelSettings, 0, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_right(ui_MenuLabelSettings, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MenuLabelSettings, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MenuLabelSettings, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_MainMenuLoadMeter = lv_label_create(ui_MainMenu);
-lv_obj_set_width( ui_MainMenuLoadMeter, LV_SIZE_CONTENT);
-lv_obj_set_height( ui_MainMenuLoadMeter, 20);
-lv_obj_set_x( ui_MainMenuLoadMeter, -4 );
-lv_obj_set_y( ui_MainMenuLoadMeter, 217 );
-lv_obj_set_align( ui_MainMenuLoadMeter, LV_ALIGN_TOP_RIGHT );
-lv_obj_set_flex_flow(ui_MainMenuLoadMeter,LV_FLEX_FLOW_ROW);
-lv_obj_set_flex_align(ui_MainMenuLoadMeter, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_SPACE_EVENLY);
-lv_label_set_text(ui_MainMenuLoadMeter,"1%");
-lv_obj_clear_flag( ui_MainMenuLoadMeter, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_scrollbar_mode(ui_MainMenuLoadMeter, LV_SCROLLBAR_MODE_OFF);
-lv_obj_set_style_text_color(ui_MainMenuLoadMeter, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_MainMenuLoadMeter, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_MainMenuLoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_MainMenuLoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_align(ui_MainMenuLoadMeter, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_MainMenuLoadMeter, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_radius(ui_MainMenuLoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_MainMenuLoadMeter, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_MainMenuLoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_MainMenuLoadMeter, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_MainMenuLoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_label_set_recolor(ui_MainMenuLoadMeter, 1);
 
 }

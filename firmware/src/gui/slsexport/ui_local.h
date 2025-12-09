@@ -55,4 +55,6 @@ lv_obj_t *create_save_revert_buttons(lv_obj_t *parent);
 
 lv_obj_t *create_settings_cont(lv_obj_t *parent);
 
+lv_obj_t *create_load_meter(lv_obj_t *parent);
+
 } // namespace MetaModule

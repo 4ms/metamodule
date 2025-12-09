@@ -36,12 +36,11 @@ struct PatchDescriptionPanel {
 
 		// Patch suggested audio settings
 		create_suggested_audio_controls();
-		lv_obj_move_to_index(suggest_sr_cont, lv_obj_get_index(desc_cont) + 1);
-		lv_obj_move_to_index(suggest_bs_cont, lv_obj_get_index(desc_cont) + 2);
+		lv_obj_move_to_index(ui_DescMIDIPolyNumLabel, 2);
+
 		lv_obj_add_event_cb(suggest_sr_drop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(suggest_bs_drop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(apply_settings_button, apply_settings_cb, LV_EVENT_CLICKED, this);
-		lv_obj_move_to_index(suggest_bs_cont, lv_obj_get_index(desc_cont) + 3);
 
 		lv_obj_set_style_pad_row(ui_DescriptionPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_column(ui_DescriptionPanel, 8, LV_PART_MAIN | LV_STATE_DEFAULT);

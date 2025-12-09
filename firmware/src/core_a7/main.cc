@@ -34,8 +34,8 @@ int main() {
 
 	HAL_Delay(50);
 	print_time();
-	pr_info("Build: %s (%s)\n", GIT_HASH.data(), GIT_COMMIT_TIME.data());
-	pr_info("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
+	printf("Build: %s (%s)\n", GIT_HASH.data(), GIT_COMMIT_TIME.data());
+	printf("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
 
 	PatchPlayer patch_player;
 	FileStorageComm patch_comm{StaticBuffers::icc_shared_message};

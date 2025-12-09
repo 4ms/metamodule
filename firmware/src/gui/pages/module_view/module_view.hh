@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
+#include "gui/helpers/load_meter.hh"
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/module_menu/plugin_module_menu.hh"
 #include "gui/pages/base.hh"
@@ -76,6 +77,14 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ModuleViewHideBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
+
+		load_meter = create_load_meter(lv_layer_sys());
+		lv_obj_set_align(load_meter, LV_ALIGN_TOP_LEFT);
+		lv_obj_set_y(load_meter, -2);
+		lv_hide(load_meter);
+
+		lv_obj_set_x(roller_hover.get_cont(), 8);
+		lv_obj_set_style_pad_left(lv_obj_get_child(roller_hover.get_cont(), 0), 14, 0);
 	}
 
 	void prepare_focus() override {
@@ -125,7 +134,6 @@ struct ModuleViewPage : PageBase {
 			lv_show(ui_ModuleViewCableCancelBut);
 			lv_show(ui_ModuleViewCableCreateLabel);
 			lv_label_set_text(ui_ModuleViewCableCreateLabel, "Creating a cable");
-			lv_obj_set_height(ui_ElementRoller, 132);
 			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_flex_align(
@@ -136,7 +144,6 @@ struct ModuleViewPage : PageBase {
 			lv_show(ui_ModuleViewSettingsBut);
 			lv_hide(ui_ModuleViewCableCancelBut);
 			lv_hide(ui_ModuleViewCableCreateLabel);
-			lv_obj_set_height(ui_ElementRoller, 186);
 			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 2, LV_PART_MAIN);
 			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, -4, LV_PART_MAIN);
 			lv_obj_set_flex_align(
@@ -147,6 +154,12 @@ struct ModuleViewPage : PageBase {
 
 		quick_control_mode = false;
 		suppress_next_click = false;
+
+		if (settings.module_view.float_loadmeter) {
+			update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.module_view, load_meter);
+		} else {
+			lv_hide(load_meter);
+		}
 	}
 
 	void update() override {
@@ -280,6 +293,15 @@ struct ModuleViewPage : PageBase {
 		if (mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible()) {
 			handle_quick_assign();
 		}
+
+		if (settings.module_view.float_loadmeter) {
+			update_audio_meter(is_patch_playloaded, metaparams, patch_playloader, settings.module_view, load_meter);
+		} else {
+			lv_hide(load_meter);
+		}
+
+		auto ht = lv_obj_get_height(ui_ElementRollerButtonCont);
+		lv_obj_set_height(ui_ElementRoller, 240 - ht);
 	}
 
 	bool handle_patch_mods() {
@@ -334,6 +356,7 @@ struct ModuleViewPage : PageBase {
 		params.text_displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
+		lv_hide(load_meter);
 		lv_enable_long_press();
 	}
 
@@ -500,6 +523,8 @@ private:
 	bool suppress_next_click = false;
 	bool quick_control_mode = false;
 	Toggler quickmap_rotary_button;
+
+	lv_obj_t *load_meter;
 };
 
 } // namespace MetaModule

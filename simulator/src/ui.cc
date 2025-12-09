@@ -123,7 +123,7 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 	// load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 	// metaparams.audio_load = load_lpf * 100.f;
 	// load_measure.start_measurement();
-	metaparams.audio_load = 1;
+	metaparams.audio_load = 58;
 
 	audio_stream.process(in_buffer, out_buffer);
 
