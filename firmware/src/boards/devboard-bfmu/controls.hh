@@ -46,7 +46,7 @@ private:
 
 	void parse_midi();
 	void update_midi_connected();
-	void set_neopixels();
+	void set_next_neopixel();
 	void output_dac();
 
 	void test_pins();
@@ -72,12 +72,11 @@ private:
 	// DAC OUTS
 	mdrivlib::DualDac cv_out{ControlPins::dac};
 
-	// TODO
-
 	// NEOPIXELS
 	mdrivlib::NeoPixel<Neopixels::pwm_conf_a, Neopixels::dma_conf_a, Neopixels::num_leds_a> neopixel_a;
 	mdrivlib::NeoPixel<Neopixels::pwm_conf_b, Neopixels::dma_conf_b, Neopixels::num_leds_b> neopixel_b;
-	// mdrivlib::NeoPixel<Neopixels::pwm_conf_vu, Neopixels::dma_conf_vu, Neopixels::num_leds_vu> neopixel_vu;
+	mdrivlib::NeoPixel<Neopixels::pwm_conf_vu, Neopixels::dma_conf_vu, Neopixels::num_leds_vu> neopixel_vu;
+	unsigned neopixel_ctr = 0;
 
 	// GATE OUT
 	mdrivlib::PinF<ControlPins::clock_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted> clock_out;
@@ -100,7 +99,8 @@ private:
 	std::array<InterpParamVariable<float>, PanelDef::NumPot> knobs;
 	std::array<InterpParamVariable<float>, PanelDef::NumCVIn> cvs;
 
-	static constexpr uint32_t AdcReadFrequency = 580; //571
+	// May need to adjust this if adc interpolation is not smooth
+	static constexpr uint32_t AdcReadFrequency = 648; //Hz
 
 	// MIDI
 	MidiHost &usb_midi_host;

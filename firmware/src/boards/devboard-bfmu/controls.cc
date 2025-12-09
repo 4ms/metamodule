@@ -5,7 +5,6 @@
 #include "hsem_handler.hh"
 #include "midi_controls.hh"
 #include "patch/midi_def.hh"
-#include "util/countzip.hh"
 
 #include "hardware-test.hh"
 
@@ -70,13 +69,15 @@ void Controls::update_params() {
 		gpio_expanders.set_leds(1, cur_leds->leds1);
 		gpio_expanders.set_leds(2, cur_leds->leds2);
 
-		set_neopixels();
-
 		cur_metaparams->usb_midi_connected = usb_midi_connected;
 
 		cur_metaparams->encoder[0].motion = encoder1.read();
 		cur_metaparams->encoder[1].motion = encoder2.read();
 	}
+
+	// Update one pixel value every audio sample. ~450Hz refresh rate
+	// Could save some CPU by refreshing at block rate (@block size 64 -> 7Hz)
+	set_next_neopixel();
 
 	parse_midi();
 
@@ -95,21 +96,36 @@ void Controls::update_midi_connected() {
 	}
 }
 
-void Controls::set_neopixels() {
-	for (auto led = 0; auto color : cur_leds->neo_a) {
-		neopixel_a.set_led(led, color.red(), color.green(), color.blue());
-		led++;
+// Update one neopixel
+void Controls::set_next_neopixel() {
+	auto i = neopixel_ctr;
+
+	if (i < cur_leds->neo_a.size()) {
+		auto const &led = cur_leds->neo_a[i];
+		neopixel_a.set_led(i, led.red(), led.green(), led.blue());
+		neopixel_ctr++;
+		return;
 	}
 
-	for (auto led = 0; auto color : cur_leds->neo_b) {
-		neopixel_b.set_led(led, color.red(), color.green(), color.blue());
-		led++;
+	i -= Neopixels::num_leds_a;
+
+	if (i < Neopixels::num_leds_b) {
+		auto const &led = cur_leds->neo_b[i];
+		neopixel_a.set_led(i, led.red(), led.green(), led.blue());
+		neopixel_ctr++;
+		return;
 	}
 
-	for (auto led = 0; auto color : cur_leds->neo_vu) {
-		// neopixel_vu.set_led(led, color.red(), color.green(), color.blue());
-		led++;
+	i -= Neopixels::num_leds_b;
+
+	if (i < Neopixels::num_leds_vu) {
+		auto const &led = cur_leds->neo_vu[i];
+		neopixel_a.set_led(i, led.red(), led.green(), led.blue());
+		neopixel_ctr++;
 	}
+
+	if (neopixel_ctr >= Neopixels::num_leds_a + Neopixels::num_leds_b + Neopixels::num_leds_vu)
+		neopixel_ctr = 0;
 }
 
 void Controls::parse_midi() {
@@ -138,7 +154,6 @@ template<size_t block_num>
 void Controls::start_param_block() {
 	static_assert(block_num <= 1, "There is only block 0 and block 1");
 
-	// 28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
 	cur_metaparams = &param_blocks[block_num].metaparams;
 	cur_params = param_blocks[block_num].params.begin();
 	cur_leds = &param_blocks[block_num].leds;
