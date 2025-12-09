@@ -1,4 +1,6 @@
 #pragma once
+#include "CoreModules/moduleFactory.hh"
+#include "CoreModules/register_module.hh"
 #include "dynload/json_parse.hh"
 #include "ext_plugin_builtin.hh"
 #include "fat_file_io.hh"
@@ -69,38 +71,26 @@ struct InternalPluginManager {
 	void load_internal_plugins() {
 		rack::contextSet(nullptr);
 
-		//Load internal plugins
+		// Load internal plugins
 
+		// Native modules:
+		// register_module<YourModuleClass, YourModuleInfoClass>("MyBrandSlug");
+		// parse_metadata(yourModuleJsonStringView, yourModuleMMJsonStringView);
+
+		// VCV Ports:
 		// pluginInstance = &internal_plugins.emplace_back("YourInternalBrandHere");
-		// internalPluginInstance = pluginInstance;
 		// pluginInstance->addModel(yourModuleName);
-
-		for (auto &p : internal_plugins) {
-			parse_jsons(p.getBrand());
-		}
+		// parse_metadata(yourModuleJson, yourModuleMMJson);
 	}
 
-	void parse_jsons(std::string const &plugin_name) {
+	void parse_metadata(std::string_view plugin_json, std::string_view plugin_mm_json) {
 		Plugin::Metadata metadata;
-		std::vector<char> buffer;
 
-		std::string filename = plugin_name + "/plugin.json";
-		auto sz = ramdisk.get_file_size(filename);
-		if (sz > 0) {
-			buffer.resize(sz);
-			if (ramdisk.read_file(filename, buffer) > 0) {
-				Plugin::parse_json(buffer, &metadata);
-			}
-		}
+		std::string json_working_data{plugin_json};
+		Plugin::parse_json(json_working_data, &metadata);
 
-		filename = plugin_name + "/plugin-mm.json";
-		sz = ramdisk.get_file_size(filename);
-		if (sz > 0) {
-			buffer.resize(sz);
-			if (ramdisk.read_file(filename, buffer) > 0) {
-				Plugin::parse_mm_json(buffer, &metadata);
-			}
-		}
+		std::string mm_json_working_data{plugin_json};
+		Plugin::parse_mm_json(mm_json_working_data, &metadata);
 
 		ModuleFactory::setBrandDisplayName(metadata.brand_slug, metadata.display_name);
 
