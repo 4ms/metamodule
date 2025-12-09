@@ -1,4 +1,5 @@
 #pragma once
+#include "core_a7/delay.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
@@ -19,6 +20,10 @@ struct AuxPlayer {
 
 	// MIDI sync instance
 	MidiSync midi_sync;
+
+	// Track when patch was loaded to delay MIDI sync messages
+	static constexpr uint32_t MIDI_SYNC_DELAY_MS = 3000; // 3 seconds delay
+	uint32_t patch_load_time = 0;
 
 	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
 		: patch_player{patch_player}
@@ -70,6 +75,7 @@ struct AuxPlayer {
 			pr_err("Error: %u modules requested to run on core 2, max is %z\n", num_modules, module_ids.size());
 
 		midi_sync.clear_last_values();
+		patch_load_time = get_time();
 
 		SMPThread::signal_done();
 	}
@@ -78,6 +84,7 @@ struct AuxPlayer {
 
 		if (SMPControl::read<SMPRegister::RefreshPatchElements>() > 0) {
 			midi_sync.clear_last_values();
+			patch_load_time = get_time();
 		}
 
 		if (ui.new_patch_data.load() == false) {
@@ -92,19 +99,25 @@ struct AuxPlayer {
 			}
 
 			if (ui.midi_feedback_enabled()) {
-				for (auto &p : patch_player.watched_params().active_watched_params()) {
-					if (p.is_active()) {
-						auto value = patch_player.get_param(p.module_id, p.param_id);
-						auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
+				// Only send MIDI sync if enough time has passed since patch load
+				uint32_t current_time = get_time();
+				bool delay_elapsed = (current_time - patch_load_time) >= MIDI_SYNC_DELAY_MS;
 
-						if (map.is_midi_cc()) {
-							midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
+				if (delay_elapsed) {
+					for (auto &p : patch_player.watched_params().active_watched_params()) {
+						if (p.is_active()) {
+							auto value = patch_player.get_param(p.module_id, p.param_id);
+							auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
 
-						} else if (map.is_midi_notegate()) {
-							midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
+							if (map.is_midi_cc()) {
+								midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
 
-						} else if (p.panel_knob_id == MidiPitchWheelJack) {
-							midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
+							} else if (map.is_midi_notegate()) {
+								midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
+
+							} else if (p.panel_knob_id == MidiPitchWheelJack) {
+								midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
+							}
 						}
 					}
 				}
