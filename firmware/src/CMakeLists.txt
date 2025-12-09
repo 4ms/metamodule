@@ -33,28 +33,6 @@ target_compile_options(mdrivlib_interface INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-W
 
 add_subdirectory(hardware_support)
 
-#
-# LVGL
-#
-set(LV_CONF_PATH
-    ${FWDIR}/lib/lvgl/lv_conf.h
-    CACHE STRING "" FORCE
-)
-add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
-target_link_libraries(lvgl PRIVATE mdrivlib_interface)
-
-target_include_directories(lvgl 
-    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source 
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs
-)
-
-target_sources(lvgl
-    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
-            ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/delete_node.cc
-)
-
 set(CMSISCORE ${CMAKE_CURRENT_LIST_DIR}/../lib/cmsis)
 add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
