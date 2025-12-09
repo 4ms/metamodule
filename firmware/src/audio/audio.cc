@@ -300,7 +300,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		idx++;
 	}
 
-	player.trigger_reading_gui_elements();
 	propagate_sense_pins(param_block.metaparams.jack_senses);
 }
 
@@ -360,8 +359,6 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		for (auto &extoutchan : ext_out.chan)
 			extoutchan = 0;
 	}
-
-	player.trigger_reading_gui_elements();
 }
 
 void AudioStream::handle_button_events(uint32_t event_bitmask, float param_val) {

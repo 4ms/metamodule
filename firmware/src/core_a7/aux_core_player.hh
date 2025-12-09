@@ -33,9 +33,6 @@ struct AuxPlayer {
 
 		constexpr auto ProcessCablesIRQn = SMPControl::IRQn(SMPCommand::ProcessCables);
 		InterruptManager::register_and_start_isr(ProcessCablesIRQn, 1, 0, [this]() { process_cables(); });
-
-		constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchGuiElements);
-		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [this]() { read_patch_gui_elements(); });
 	}
 
 	void play_modules() {
@@ -70,48 +67,6 @@ struct AuxPlayer {
 			pr_err("Error: %u modules requested to run on core 2, max is %z\n", num_modules, module_ids.size());
 
 		midi_sync.clear_last_values();
-
-		SMPThread::signal_done();
-	}
-
-	void read_patch_gui_elements() {
-
-		if (SMPControl::read<SMPRegister::RefreshPatchElements>() > 0) {
-			midi_sync.clear_last_values();
-		}
-
-		if (ui.new_patch_data.load() == false) {
-
-			for (auto &d : ui.displays().watch_displays) {
-				if (d.is_active()) {
-					auto text = std::span<char>(d.text._data, d.text.capacity);
-					auto sz = patch_player.get_display_text(d.module_id, d.light_id, text);
-					if (sz)
-						d.text._data[sz] = '\0';
-				}
-			}
-
-			if (ui.midi_feedback_enabled()) {
-				for (auto &p : patch_player.watched_params().active_watched_params()) {
-					if (p.is_active()) {
-						auto value = patch_player.get_param(p.module_id, p.param_id);
-						auto map = MappedKnob{.panel_knob_id = p.panel_knob_id};
-
-						if (map.is_midi_cc()) {
-							midi_sync.sync_param_to_midi(value, p.midi_chan, map.cc_num());
-
-						} else if (map.is_midi_notegate()) {
-							midi_sync.sync_param_to_midi_notegate(value, p.midi_chan, map.notegate_num());
-
-						} else if (p.panel_knob_id == MidiPitchWheelJack) {
-							midi_sync.sync_param_to_midi_pitchwheel(value, p.midi_chan);
-						}
-					}
-				}
-			}
-
-			ui.new_patch_data.store(true, std::memory_order_release);
-		}
 
 		SMPThread::signal_done();
 	}

@@ -326,16 +326,12 @@ public:
 		update_midi_pulses();
 	}
 
-	void trigger_reading_gui_elements() {
-		smp.read_patch_gui_elements();
-	}
-
 	void sync() {
 		smp.join();
 	}
 
 	void notify_audio_resumed() {
-		smp.refresh_patch_gui_elements();
+		// Nothing to do...
 	}
 
 	void unload_patch() {
