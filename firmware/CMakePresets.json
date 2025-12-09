@@ -41,39 +41,6 @@
       }
     },
     {
-      "name": "dyn-plugins",
-      "inherits": "full",
-      "cacheVariables": {
-        "BUILD_DYN_PLUGIN_AudibleInstruments": { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_Befaco":             { "type": "BOOL", "value": "ON" }, 
-        "BUILD_DYN_PLUGIN_hetrickcv":          { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_eightfold":          { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_Valley":             { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_RackCore":           { "type": "BOOL", "value": "ON" }
-      }
-    },
-    {
-      "name": "befaco",
-      "inherits": "full",
-      "cacheVariables": {
-        "BUILD_DYN_PLUGIN_AudibleInstruments": { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_hetrickcv":          { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_eightfold":          { "type": "BOOL", "value": "ON" }
-      }
-    },
-    {
-      "name": "audible",
-      "inherits": "full",
-      "cacheVariables": {
-        "BUILD_DYN_PLUGIN_Befaco":             { "type": "BOOL", "value": "ON" }, 
-        "BUILD_DYN_PLUGIN_hetrickcv":          { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
-        "BUILD_DYN_PLUGIN_eightfold":          { "type": "BOOL", "value": "ON" }
-      }
-    },
-    {
       "name": "usb-log",
       "inherits": "full",
       "cacheVariables": {
@@ -87,6 +54,22 @@
       "cacheVariables": {
         "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
         "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
+	  }
+    },
+    {
+      "name": "uart-log-min-modules",
+      "inherits": "base",
+      "cacheVariables": {
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "OFF" },
+        "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" },
+        "OMIT_BRAND_AudibleInstruments": { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_Befaco":             { "type": "BOOL", "value": "ON" }, 
+        "OMIT_BRAND_hetrickcv":          { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_eightfold":          { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_Valley":             { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_RackCore":           { "type": "BOOL", "value": "ON" },
+        "OMIT_BRAND_4ms":           { "type": "BOOL", "value": "ON" }
 	  }
     }
   ]

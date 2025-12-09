@@ -67,10 +67,12 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 # Brands
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
-add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
-target_include_directories(CoreModules-4ms PRIVATE ${FWDIR}/src/vcv_hardware)
 
-target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
+if(NOT OMIT_BRAND_4ms)
+  add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
+  target_include_directories(CoreModules-4ms PRIVATE ${FWDIR}/src/vcv_hardware)
+  target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
+endif()
 
 #
 # Patch format and serialization
@@ -252,7 +254,10 @@ target_link_libraries(
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
-target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
+
+if(NOT OMIT_BRAND_4ms)
+  target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
+endif()
 
 if(CPU_TEST_ALL_MODULES)
   target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)
