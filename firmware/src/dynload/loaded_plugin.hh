@@ -1,7 +1,6 @@
 #pragma once
-
 #include "dynload/plugin_file_list.hh"
-#include "plugin/Plugin.hpp"
+// #include "plugin/Plugin.hpp"
 #include <cstdint>
 #include <list>
 #include <vector>
@@ -11,7 +10,7 @@ namespace MetaModule
 
 struct LoadedPlugin {
 	PluginFile fileinfo;
-	rack::plugin::Plugin rack_plugin;
+	// rack::plugin::Plugin rack_plugin;
 	std::vector<std::string> loaded_files;
 	std::vector<uint8_t> code;
 };

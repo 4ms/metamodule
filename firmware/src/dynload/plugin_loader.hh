@@ -8,7 +8,7 @@
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
-#include "plugin/Plugin.hpp"
+// #include "plugin/Plugin.hpp"
 #include "untar_contents.hh"
 #include "util/monotonic_allocator.hh"
 #include "util/version_tools.hh"
@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <string>
 
-extern rack::plugin::Plugin *pluginInstance;
+// extern rack::plugin::Plugin *pluginInstance;
 
 namespace MetaModule
 {
@@ -175,8 +175,8 @@ public:
 				std::string fallback_name = plugin_file.plugin_name;
 				if (metadata.brand_slug.length() == 0)
 					metadata.brand_slug = fallback_name;
-				plugin.rack_plugin.slug = metadata.brand_slug;
-				plugin.rack_plugin.name = metadata.display_name.length() ? metadata.display_name : fallback_name;
+				// plugin.rack_plugin.slug = metadata.brand_slug;
+				// plugin.rack_plugin.name = metadata.display_name.length() ? metadata.display_name : fallback_name;
 
 				plugin.loaded_files = std::move(contents.files_copied_to_ramdisk);
 
@@ -285,7 +285,7 @@ public:
 	}
 
 	bool load_plugin(LoadedPlugin &plugin) {
-		using InitPluginFunc = void(rack::plugin::Plugin *);
+		using InitPluginFunc = void();
 
 		DynLoader dynloader{contents.so_buffer, plugin.code};
 
@@ -321,9 +321,8 @@ public:
 			return false;
 		}
 
-		pluginInstance = &plugin.rack_plugin;
 		//TODO: trap exceptions, restore state, and return
-		init(&plugin.rack_plugin);
+		init();
 
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";

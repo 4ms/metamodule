@@ -74,19 +74,21 @@ struct DynLoader {
 
 	template<typename PluginInitFunc>
 	PluginInitFunc *find_init_func() {
-		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
-		if (!init_plugin_symbol) {
-			pr_trace("No c++ init(rack::plugin::Plugin*) symbol found, trying init()\n");
-			init_plugin_symbol = elf.find_dyn_symbol("init");
-		}
+		auto init_plugin_symbol = elf.find_dyn_symbol("init");
+
+		// auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
+		// if (!init_plugin_symbol) {
+		// 	pr_trace("No c++ init(rack::plugin::Plugin*) symbol found, trying init()\n");
+		// 	init_plugin_symbol = elf.find_dyn_symbol("init");
+		// }
+
+		// if (!init_plugin_symbol) {
+		// 	pr_trace("No init() dyn symbol found, trying non-dyn init(Plugin*)\n");
+		// 	init_plugin_symbol = elf.find_symbol("_Z4initPN4rack6plugin6PluginE");
+		// }
 
 		if (!init_plugin_symbol) {
-			pr_trace("No init() dyn symbol found, trying non-dyn init(Plugin*)\n");
-			init_plugin_symbol = elf.find_symbol("_Z4initPN4rack6plugin6PluginE");
-		}
-
-		if (!init_plugin_symbol) {
-			pr_trace("No non-dyn init(Plugin*) symbol found, trying non-dyn init()\n");
+			// pr_trace("No non-dyn init(Plugin*) symbol found, trying non-dyn init()\n");
 			init_plugin_symbol = elf.find_symbol("init");
 		}
 

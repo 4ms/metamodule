@@ -38,31 +38,16 @@ add_subdirectory(../lib/cmsis-dsp ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
 
 #
-# VCV Adaptor
-#
-add_subdirectory(../vcv_plugin ${CMAKE_BINARY_DIR}/vcv_plugin)
-
-#
-# Brands
-#
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
-
-#
 # Patch format and serialization
 #
 add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
 
 
-#
-# Jansson
-#
-# TODO: replace this with for example fetchContent later
-if (NOT TARGET jansson)
-  add_subdirectory(${FWDIR}/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
+# CoreModules sources
+if(NOT TARGET metamodule::core-interface)
+  add_subdirectory(${FWDIR}/metamodule-plugin-sdk/core-interface core-interface)
 endif()
 
-
-# CoreModules sources
 add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 
 #
@@ -169,8 +154,6 @@ set_source_files_properties(
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
 
-  ${FWDIR}/vcv_plugin/export/osdialog/osdialog-mm.cc
-
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 
@@ -192,6 +175,7 @@ target_include_directories(
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
+          ${FWDIR}/src/built-ins
           #
           ${CMAKE_BINARY_DIR}/checkgit
 )
@@ -202,8 +186,7 @@ endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 
-target_link_libraries(main.elf PRIVATE mdrivlib_interface CoreModules metamodule::patch-serial cpputil vcv_ports )
-target_link_libraries(main.elf PUBLIC vcv_plugin)
+target_link_libraries(main.elf PRIVATE mdrivlib_interface CoreModules metamodule::patch-serial cpputil metamodule::core-interface)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,hardware_support>")
@@ -220,19 +203,6 @@ if (CONSOLE_USE_USB)
   message("USB serial device enabled for console logging")
   target_compile_definitions(main.elf PRIVATE CONSOLE_USE_USB=1)
 endif()
-
-include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
-foreach(brand ${brands})
-	if (DEFINED BUILD_DYN_PLUGIN_${brand})
-	target_compile_definitions(main.elf PRIVATE -DBUILD_DYN_PLUGIN_${brand})
-
-	elseif (DEFINED OMIT_BRAND_${brand})
-	target_compile_definitions(main.elf PRIVATE -DOMIT_BRAND_${brand})
-
-    else()
-	target_compile_definitions(main.elf PRIVATE -DBUILD_INTERNAL_${brand})
-	endif()
-endforeach()
 
 
 target_link_script(

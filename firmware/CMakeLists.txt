@@ -34,7 +34,6 @@ add_subdirectory(src ${A7_BIN_PATH})
 
 set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
 set(API_SYMBOL_NAMES_FILE ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugin-sdk/api-symbols.txt)
-get_target_property(VcvPluginBinDir vcv_plugin_export BINARY_DIR)
 get_target_property(CoreProcPluginBinDir coreproc_plugin_export BINARY_DIR)
 get_target_property(HardwareSupportBinDir hardware_support BINARY_DIR)
 set(SYMBOLS_BINFILE_DIRS
