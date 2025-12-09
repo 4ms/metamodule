@@ -46,10 +46,14 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 		pr_trace("-> Start flashing %u bytes to 0x%08x\n", message.buffer.size(), message.address);
 		auto buf = std::span<uint8_t>{(uint8_t *)message.buffer.data(), message.buffer.size()};
 
+#ifdef WIFI_MODULE
 		if (message.flashTarget == WIFI) {
 			return flashWifi(buf, message.address, message.uncompressed_size, *message.bytes_processed);
 
-		} else if (message.flashTarget == QSPI) {
+		} else
+#endif
+			if (message.flashTarget == QSPI)
+		{
 			return flashQSPI(buf, message.address, *message.bytes_processed);
 
 		} else {

@@ -9,8 +9,6 @@
 #include "hsem_handler.hh"
 #include "usb/usb_manager.hh"
 
-#include <wifi_interface.hh>
-
 namespace MetaModule
 {
 
@@ -59,9 +57,6 @@ int main() {
 	ModuleFSMessageHandler module_fs_messages{SharedMemoryS::ptrs.icc_modulefs_message_core0,
 											  SharedMemoryS::ptrs.icc_modulefs_message_core1};
 
-	WifiInterface::init(&fs_messages.get_patch_storage());
-	WifiInterface::start();
-
 	// Controls
 	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host()};
 
@@ -97,7 +92,5 @@ int main() {
 		fs_messages.process();
 
 		module_fs_messages.process();
-
-		WifiInterface::run();
 	}
 }
