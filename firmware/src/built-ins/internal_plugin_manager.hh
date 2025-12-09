@@ -2,17 +2,16 @@
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/register_module.hh"
 #include "dynload/json_parse.hh"
-#include "ext_plugin_builtin.hh"
 #include "fat_file_io.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
 #include "gui/fonts/fonts_init.hh"
-#include "internal_plugins.hh"
-#include "plugin/Plugin.hpp"
-#include <context.hpp>
-#include <list>
 #include <span>
 #include <string_view>
+
+#ifdef SIMULATOR
+#include "ext_plugin_builtin.hh"
+#endif
 
 namespace MetaModule
 {
@@ -21,7 +20,9 @@ struct InternalPluginManager {
 	FatFileIO &ramdisk;
 	AssetFS &asset_fs;
 
+#ifdef SIMULATOR
 	std::list<rack::plugin::Plugin> internal_plugins;
+#endif
 	bool asset_fs_valid = true;
 
 	InternalPluginManager(FatFileIO &ramdisk, AssetFS &asset_fs)
@@ -30,7 +31,9 @@ struct InternalPluginManager {
 		prepare_ramdisk();
 		load_internal_assets();
 		load_internal_plugins();
+#ifdef SIMULATOR
 		load_ext_builtin_plugins(internal_plugins);
+#endif
 		ModuleFactory::setBrandDisplayName("4msCompany", "4ms");
 	}
 
@@ -69,7 +72,6 @@ struct InternalPluginManager {
 	}
 
 	void load_internal_plugins() {
-		rack::contextSet(nullptr);
 
 		// Load internal plugins
 
