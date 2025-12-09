@@ -92,6 +92,9 @@ void AudioStream::handle_patch_just_loaded() {
 	midi.last_connected = false;
 }
 
+TriangleOscillator<48000> tri1{100};
+TriangleOscillator<48000> tri2{1000};
+
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	player.sync();
 
@@ -99,6 +102,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
 
+		params.dac1 = tri1.process() >> 20;
+		params.dac0 = tri2.process() >> 20;
 
 		// Audio inputs
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
