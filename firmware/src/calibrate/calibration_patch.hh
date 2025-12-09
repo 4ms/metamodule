@@ -1,7 +1,5 @@
 #pragma once
-#include "CoreModules/4ms/info/FM_info.hh"
 #include "patch/patch_data.hh"
-#include <utility>
 
 namespace MetaModule
 {
@@ -116,17 +114,15 @@ struct CalibrationPatch {
 		auto panel_out_idx = 0;
 		auto octave = 0;
 		for (auto v : vco) {
-			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::PitchKnob), 1.0f);
-			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::MixKnob), 1.0f);
-			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::ShapeKnob), 0.f);
-			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::ShapeCvKnob), 1.f);
+			patch.set_or_add_static_knob_value(v, 0, 1.0f); // Pitch
+			patch.set_or_add_static_knob_value(v, 1, 1.0f); // Mix
+			patch.set_or_add_static_knob_value(v, 6, 0.f);	// Shape
+			patch.set_or_add_static_knob_value(v, 7, 1.f);	// ShapeCV
 
 			// Each output is an octave higher, starting from 40Hz
-			patch.set_or_add_static_knob_value(
-				v, std::to_underlying(FMInfo::Elem::RatioCoarseKnob), std::min(octave / 7.f + 1.f / 14.f, 1.f));
+			patch.set_or_add_static_knob_value(v, 4, std::min(octave / 7.f + 1.f / 14.f, 1.f)); // RatioCoarseKnob
 			// Expanders are higher by a fifth or so
-			patch.set_or_add_static_knob_value(
-				v, std::to_underlying(FMInfo::Elem::RatioFineKnob), panel_out_idx < 8 ? 0.f : 0.25f);
+			patch.set_or_add_static_knob_value(v, 5, panel_out_idx < 8 ? 0.f : 0.25f); // RatioFineKnob
 
 			// Output
 			patch.add_mapped_outjack(panel_out_idx, {.module_id = v, .jack_id = 0}); //OutputOut
