@@ -193,7 +193,7 @@ void Controls::process() {
 void Controls::set_samplerate(unsigned sample_rate) {
 	this->sample_rate = sample_rate;
 	for (auto &knob : knobs) {
-		knob.set_num_updates(sample_rate / (AdcReadFrequency / 8));
+		knob.set_num_updates(sample_rate * 8 / AdcReadFrequency);
 	}
 	for (auto &cv : cvs) {
 		cv.set_num_updates(sample_rate / AdcReadFrequency);
@@ -252,7 +252,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 
 	haptic_out.init();
 
-	test_pins();
+	// test_pins();
 
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
