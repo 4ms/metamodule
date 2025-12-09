@@ -1,5 +1,6 @@
 #include "aux_core_player.hh"
 #include "conf/hsem_conf.hh"
+#include "conf/screen_buffer_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "debug.hh"
@@ -12,12 +13,11 @@
 #include "internal_interface/plugin_app_if_internal.hh"
 #include "internal_interface/plugin_app_interface.hh"
 #include "internal_plugin_manager.hh"
-#include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
 #include "system/print_time.hh"
 
 using FrameBufferT =
-	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
+	std::array<uint8_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 8>;
 static inline FrameBufferT framebuf1 alignas(64);
 static inline FrameBufferT framebuf2 alignas(64);
 
@@ -39,8 +39,6 @@ extern "C" void aux_core_main() {
 #ifdef CONSOLE_USE_USB
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
 #endif
-
-	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 
 	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
@@ -78,11 +76,7 @@ extern "C" void aux_core_main() {
 
 	AutoUpdater::run(file_storage_proxy, ui);
 
-	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
-		CpuLoadTest::run_tests(file_storage_proxy, ui, plugin_manager);
-	} else {
-		ui.preload_plugins(plugin_manager);
-	}
+	ui.preload_plugins();
 
 	hil_message("*initialized\n");
 

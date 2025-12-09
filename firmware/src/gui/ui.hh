@@ -1,5 +1,6 @@
 #pragma once
 #include "dynload/plugin_manager.hh"
+#include "dynload/preload_plugins.hh"
 #include "gui/notify/notification.hh"
 #include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
@@ -21,6 +22,7 @@ private:
 	ParamsMidiState params;
 	MetaParams metaparams;
 	UserSettings settings;
+	PluginManager &plugin_manager;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
@@ -33,7 +35,8 @@ public:
 	   PluginManager &plugin_manager,
 	   FatFileIO &ramdisk)
 		: sync_params{sync_params}
-		, patch_playloader{patch_playloader} {
+		, patch_playloader{patch_playloader}
+		, plugin_manager{plugin_manager} {
 		params.clear();
 		metaparams.clear();
 
@@ -93,6 +96,21 @@ public:
 
 	void notify_error(std::string const &message) {
 		notify_queue.put({message, Notification::Priority::Error, 2000});
+	}
+
+	void preload_plugins() {
+		auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
+
+		if (settings.plugin_preload.slugs.size())
+			delay_ms(600); //allow time for ???
+
+		while (true) {
+			auto status = preloader.process();
+
+			if (status.message.length()) {
+				notify_queue.put({status.message, Notification::Priority::Info, 2000});
+			}
+		}
 	}
 
 	UserSettings &get_settings() {
