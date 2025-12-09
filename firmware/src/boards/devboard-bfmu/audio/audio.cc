@@ -99,6 +99,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
 
+
 		// Audio inputs
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
 
@@ -164,6 +165,10 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 }
 
 void AudioStream::return_cached_params(unsigned block) {
+	for (auto i = 0u; i < block_size_; i++) {
+		param_blocks[block].params[i].dac0 = local_params.params[i].dac0;
+		param_blocks[block].params[i].dac1 = local_params.params[i].dac1;
+	}
 }
 
 void AudioStream::set_block_spans() {
