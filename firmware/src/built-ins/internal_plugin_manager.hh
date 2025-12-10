@@ -5,6 +5,7 @@
 #include "fat_file_io.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
+#include "modules/blank.hh"
 #include <span>
 #include <string_view>
 
@@ -73,18 +74,16 @@ struct InternalPluginManager {
 		// Load internal plugins
 
 		// Native modules:
-		// register_module<YourModuleClass, YourModuleInfoClass>("MyBrandSlug");
-		// parse_metadata(yourModuleJsonStringView, yourModuleMMJsonStringView);
+		register_module<Blank, BlankInfo>("MyBrandSlug");
+		parse_brand_jsons("built-ins/");
 
 		// VCV Ports:
 		// pluginInstance = &internal_plugins.emplace_back("YourInternalBrandHere");
 		// pluginInstance->addModel(yourModuleName);
-		// parse_metadata(yourModuleJson, yourModuleMMJson);
-
-		parse_internal_jsons("built-ins/");
+		// parse_brand_jsons("YourInternalBrandHere");
 	}
 
-	void parse_internal_jsons(std::string directory) {
+	void parse_brand_jsons(std::string directory) {
 		Plugin::Metadata metadata;
 		std::vector<char> buffer;
 
