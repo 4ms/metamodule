@@ -5,7 +5,6 @@
 #include "fat_file_io.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
-#include "gui/fonts/fonts_init.hh"
 #include <span>
 #include <string_view>
 
@@ -65,8 +64,6 @@ struct InternalPluginManager {
 		asset_tar.extract_files(ramdisk_writer);
 
 		ramdisk.debug_print_disk_info();
-
-		Fonts::init_fonts(ramdisk);
 
 		ramdisk.make_dir("/usr");
 	}
