@@ -93,6 +93,7 @@ add_executable(
 
   #
   ${FWDIR}/src/dynload/dynloader.cc
+  ${FWDIR}/src/dynload/keep-symbols.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc

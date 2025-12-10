@@ -27,7 +27,11 @@ struct DynLoader {
 		, codeblock{code_buffer} {
 
 		if (!kept_syms) {
-			keep_symbols();
+
+			// Random check to make compiler not drop keep_symbols(), but actually will never call it
+			if (elf_file_data[0] == 0xAA && elf_file_data.size() == 0x12345678)
+				keep_symbols();
+
 			kept_syms = true;
 		}
 		init_host_symbol_table();
