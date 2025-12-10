@@ -9,7 +9,7 @@ namespace MetaModule
 
 inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 							  PatchPlayer &player,
-							  std::array<CalData *, 2> caldatas,
+							  CalData *caldata,
 							  std::optional<bool> &new_cal_state) {
 	PatchModRequest patch_mod{};
 	if (patch_mod_queue.get_move(patch_mod)) {
@@ -35,17 +35,13 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 					   },
 					   [&](SetMidiPolyNum mod) { player.set_midi_poly_num(mod.poly_num); },
 
-					   [&caldatas](SetChanCalibration &mod) {
+					   [&caldata](SetChanCalibration &mod) {
 						   if (mod.is_input) {
 							   auto chan = mod.channel % CalData::NumIns;
-							   auto caldata_idx = mod.channel / CalData::NumIns;
-							   if (caldata_idx < caldatas.size())
-								   caldatas[caldata_idx]->in_cal[chan] = {mod.slope, mod.offset};
+							   caldata->in_cal[chan] = {mod.slope, mod.offset};
 						   } else {
 							   auto chan = mod.channel % CalData::NumOuts;
-							   auto caldata_idx = mod.channel / CalData::NumOuts;
-							   if (caldata_idx < caldatas.size())
-								   caldatas[caldata_idx]->out_cal[chan] = {mod.slope, mod.offset};
+							   caldata->out_cal[chan] = {mod.slope, mod.offset};
 						   }
 					   },
 

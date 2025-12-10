@@ -1,11 +1,8 @@
 #include "audio/audio.hh"
-#include "CoreModules/hub/audio_expander_defs.hh"
-#include "calibrate/calibration_data_reader.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
-#include "expanders.hh"
 #include "param_block.hh"
 #include "patch_play/patch_mods.hh"
 #include "patch_play/patch_player.hh"
@@ -37,7 +34,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, player{patchplayer}
 	, midi{patchplayer, sync_params}
 	, codec_{Hardware::codec}
-	, codec_ext_{Hardware::codec_ext}
 	, sample_rate_{AudioSettings::DefaultSampleRate}
 	, block_size_{AudioSettings::DefaultBlockSize}
 	, audio_period_{calc_audio_period()} {
@@ -51,27 +47,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	codec_.set_tx_buffer(audio_blocks[0].out_codec, block_size_);
 	codec_.set_rx_buffer(audio_blocks[0].in_codec, block_size_);
-
-	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
-		ext_audio_connected = true;
-		Expanders::ext_audio_found(true);
-		codec_ext_.set_tx_buffer(audio_blocks[0].out_ext_codec, block_size_);
-		codec_ext_.set_rx_buffer(audio_blocks[0].in_ext_codec, block_size_);
-
-		ext_cal.reset_to_default();
-		if (!CalibrationDataReader::read_calibration(&ext_cal, Hardware::codec_ext_memory, 0)) {
-			ext_cal.reset_to_default();
-			Hardware::codec_ext_memory.write(ext_cal);
-		}
-		ext_cal_stash = ext_cal;
-
-		pr_info("Audio Expander detected\n");
-		ext_cal.print_calibration();
-	} else {
-		ext_audio_connected = false;
-		Expanders::ext_audio_found(false);
-		pr_info("No Audio Expander detected\n");
-	}
 
 	cal.reset_to_default();
 	cal_stash.reset_to_default();
@@ -139,8 +114,6 @@ void AudioStream::step() {
 }
 
 void AudioStream::start() {
-	if (ext_audio_connected)
-		codec_ext_.start();
 	codec_.start();
 }
 
@@ -163,12 +136,6 @@ void AudioStream::handle_overruns() {
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	float output_volts = player.get_panel_output(output_id) * output_fade_amt;
 	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
-}
-
-AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
-	output_id = AudioExpander::out_order[output_id];
-	float output_volts = player.get_panel_output(output_id + PanelDef::NumAudioOut) * output_fade_amt;
-	return MathTools::signed_saturate(ext_cal.out_cal[output_id].adjust(output_volts), 24);
 }
 
 void AudioStream::handle_fade_inout() {
@@ -198,8 +165,6 @@ void AudioStream::handle_patch_just_loaded() {
 	// and will propagate to the patch player
 	for (auto &p : plug_detects)
 		p.reset();
-	for (auto &p : ext_plug_detects)
-		p.reset();
 
 	midi.last_connected = false;
 }
@@ -219,8 +184,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
-		auto &ext_out = audio_block.out_ext_codec[idx];
-		auto const &ext_in = audio_block.in_ext_codec[idx];
 
 		// Audio inputs
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
@@ -235,24 +198,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 			// Send smoothed sigals to other core
 			param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
-		}
-
-		if (ext_audio_connected) {
-			for (auto [exp_panel_jack_i, inchan] : zip(AudioExpander::in_order, ext_in.chan)) {
-
-				// Skip unpatched jacks
-				if (!AudioExpander::jack_is_patched(param_state.jack_senses, exp_panel_jack_i))
-					continue;
-
-				float calibrated_input = ext_cal.in_cal[exp_panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
-
-				auto panel_jack_i = AudioExpander::exp_to_panel_input(exp_panel_jack_i); //0..5 => 8..13
-				player.set_panel_input(panel_jack_i, calibrated_input);
-
-				// Smoothed ins skips the gate inputs, so subtract those from the index: 8..13 => 6..11
-				auto smooth_idx = panel_jack_i - PanelDef::NumGateIn;
-				param_state.smoothed_ins[smooth_idx].add_val(calibrated_input);
-			}
 		}
 
 		// Gate inputs
@@ -291,12 +236,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, outchan] : countzip(out.chan))
 			outchan = get_audio_output(i);
 
-		// Ext audio modules:
-		if (ext_audio_connected) {
-			for (auto [i, extoutchan] : countzip(ext_out.chan))
-				extoutchan = get_ext_audio_output(i);
-		}
-
 		idx++;
 	}
 
@@ -311,8 +250,6 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
-		auto &ext_out = audio_block.out_ext_codec[idx];
-		auto const &ext_in = audio_block.in_ext_codec[idx];
 		auto &params = param_block.params[idx];
 		idx++;
 
@@ -322,22 +259,6 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 									 cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
 									 0;
 			param_state.smoothed_ins[panel_jack_i].add_val(scaled_input);
-		}
-
-		if (ext_audio_connected) {
-			for (auto [exp_panel_jack_i, inchan] : zip(AudioExpander::in_order, ext_in.chan)) {
-				// Skip unpatched jacks
-				if (!AudioExpander::jack_is_patched(param_state.jack_senses, exp_panel_jack_i))
-					continue;
-
-				float calibrated_input = ext_cal.in_cal[exp_panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
-
-				auto panel_jack_i = AudioExpander::exp_to_panel_input(exp_panel_jack_i); //0..5 => 8..13
-
-				// Smoothed ins skips the gate inputs, so subtract those from the index: 8..13 => 6..11
-				auto smooth_idx = panel_jack_i - PanelDef::NumGateIn;
-				param_state.smoothed_ins[smooth_idx].add_val(calibrated_input);
-			}
 		}
 
 		// Pass Knob values to modules
@@ -355,9 +276,6 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 
 		for (auto &outchan : out.chan)
 			outchan = 0;
-
-		for (auto &extoutchan : ext_out.chan)
-			extoutchan = 0;
 	}
 }
 
@@ -387,25 +305,6 @@ void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 		i++;
 	}
 
-	if (ext_audio_connected) {
-		for (unsigned i = 0; auto &plug_detect : ext_plug_detects) {
-			bool sense = AudioExpander::jack_is_patched(jack_senses, i);
-
-			plug_detect.update(sense);
-
-			if (plug_detect.changed()) {
-				if (i < AudioExpander::NumInJacks) {
-					auto panel_in_jack = AudioExpander::exp_to_panel_input(i);
-					player.set_input_jack_patched_status(panel_in_jack, sense);
-				} else {
-					auto panel_out_jack = AudioExpander::exp_to_panel_output(i - AudioExpander::NumInJacks);
-					player.set_output_jack_patched_status(panel_out_jack, sense);
-				}
-			}
-			i++;
-		}
-	}
-
 	param_state.jack_senses = jack_senses;
 }
 
@@ -413,7 +312,7 @@ void AudioStream::handle_patch_mod_queue() {
 	if (player.is_loaded) {
 		std::optional<bool> new_cal_state = std::nullopt;
 
-		handle_patch_mods(patch_mod_queue, player, {&cal_stash, &ext_cal_stash}, new_cal_state);
+		handle_patch_mods(patch_mod_queue, player, &cal_stash, new_cal_state);
 
 		if (new_cal_state.has_value() && *new_cal_state == true)
 			re_enable_calibration();
@@ -428,16 +327,12 @@ void AudioStream::disable_calibration() {
 	cal_stash = cal;
 	cal.reset_to_default();
 
-	ext_cal_stash = ext_cal;
-	ext_cal.reset_to_default();
-
 	// pr_dbg("Using default cal and ext_cal:\n");
 	// 	ext_cal.print_calibration();
 }
 
 void AudioStream::re_enable_calibration() {
 	cal = cal_stash;
-	ext_cal = ext_cal_stash;
 
 	// pr_dbg("Re-enable cal=\n");
 	// cal.print_calibration();
@@ -498,9 +393,6 @@ void AudioStream::update_audio_settings() {
 		codec_.stop();
 
 		auto ok = (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
-		if (ok && ext_audio_connected)
-			ok = (codec_ext_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
-
 		if (ok) {
 
 			if (sample_rate_ != sample_rate) {
@@ -521,12 +413,10 @@ void AudioStream::update_audio_settings() {
 
 			audio_period_ = calc_audio_period();
 
-			codec_ext_.start();
 			codec_.start();
 
 		} else {
 			pr_err("FAIL TO CHANGE SR/BS: %d/%d\n", sample_rate_, block_size_);
-			codec_ext_.start();
 			codec_.start();
 		}
 		// Debug::Pin1::low();

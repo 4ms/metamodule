@@ -67,7 +67,6 @@ private:
 
 	// Hardware interface
 	CodecT &codec_;
-	CodecT &codec_ext_;
 	uint32_t sample_rate_;
 	uint32_t block_size_;
 	uint32_t audio_period_;
@@ -75,12 +74,9 @@ private:
 	// Calibration
 	CalData cal;
 	CalData cal_stash;
-	CalData ext_cal{};
-	CalData ext_cal_stash{};
 
 	// Plug detector
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
-	EdgeStateDetector ext_plug_detects[AudioExpander::NumJacks];
 
 	// Load measurement
 	mdrivlib::CycleCounter load_measure;
@@ -96,13 +92,10 @@ private:
 	// Local
 	ParamBlock local_params;
 
-	bool ext_audio_connected = false;
-
 	void step();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 
 	AudioConf::SampleT get_audio_output(int output_id);
-	AudioConf::SampleT get_ext_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
