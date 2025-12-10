@@ -1,4 +1,4 @@
-#include "midi/midi_message.hh"
+#include "../src/midi/midi_message.hh"
 #include <cstdint>
 #include <span>
 #include <string>

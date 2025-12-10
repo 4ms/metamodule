@@ -13,6 +13,7 @@ target_sources(
           patch/patch.cc
           wav/wav_file_stream.cc
           wav/dr_wav.c
+          midi_message.cc
 )
 
 if(NOT DEFINED METAMODULE_HEADLESS)
