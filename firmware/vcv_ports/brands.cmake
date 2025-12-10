@@ -1,9 +1,0 @@
-set(brands
-    # Befaco
-    # hetrickcv
-    # AudibleInstruments
-    # nonlinearcircuits
-    # eightfold
-    # Valley
-    RackCore
-)
