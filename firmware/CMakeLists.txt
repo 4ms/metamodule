@@ -37,7 +37,6 @@ set(API_SYMBOL_NAMES_FILE ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugin-sdk/api-sy
 get_target_property(CoreProcPluginBinDir coreproc_plugin_export BINARY_DIR)
 get_target_property(HardwareSupportBinDir hardware_support BINARY_DIR)
 set(SYMBOLS_BINFILE_DIRS
-  --objdir ${VcvPluginBinDir} 
   --objdir ${CoreProcPluginBinDir} 
   --objdir ${HardwareSupportBinDir} 
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/fs/dirent/
@@ -313,14 +312,3 @@ add_custom_target(
   VERBATIM USES_TERMINAL
 )
 
-#
-# minBlep tables for vcv modules
-#
-
-add_custom_target(
-  gen_minblep
-  COMMAND cd ${PROJECT_SOURCE_DIR}/../shared/gen_minblep && cmake -B build -GNinja && cmake --build build --target
-          generate_minblep_files
-  COMMENT "Regenerating minBlep tables"
-  VERBATIM USES_TERMINAL
-)
