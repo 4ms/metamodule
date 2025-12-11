@@ -194,7 +194,7 @@ void Controls::start() {
 		bool ignore = false;
 
 		while (rxbuffer.size() >= 4) {
-			auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
+			auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 
 			//Starting ignoring from SysEx Start (F0)...
 			if (msg.is_sysex())
