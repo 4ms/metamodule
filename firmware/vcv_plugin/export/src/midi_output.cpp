@@ -1,6 +1,7 @@
 #include "midi.hpp"
 #include "midi/midi_queue.hh"
 #include "midi/midi_router.hh"
+#include <utility>
 
 namespace rack::midi
 {
@@ -54,12 +55,21 @@ void Output::sendMessage(const Message &message) {
 
 	// Set channel
 	channel = getChannel();
-	if (channel >= 0 && status.command != MidiCommand::Sys)
+	if (channel >= 0 && status.command != MidiCommand::Sys) {
 		status.channel = channel;
+	}
 
 	msg.status = status;
 	msg.data.byte[0] = message.bytes[1];
 	msg.data.byte[1] = message.bytes[2];
+
+	if (status.command == MidiCommand::Sys) {
+		msg.usb_hdr.cin = UsbCableCodeByte::cin_from_status_byte(status);
+	} else
+		msg.usb_hdr.cin = std::to_underlying(status.command);
+
+	msg.usb_hdr.cable_num = message.getUsbCable();
+
 	internal->queue.put(msg);
 }
 
