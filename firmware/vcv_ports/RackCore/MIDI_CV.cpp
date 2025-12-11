@@ -495,6 +495,8 @@ struct MIDI_CV : Module {
 			if (s.length()) {
 				if (i != 0)
 					chars += "\n\n";
+				if (msg.usb_cable != 0)
+					chars += "CN" + std::to_string(msg.usb_cable) + " ";
 				chars += s;
 			}
 		}
