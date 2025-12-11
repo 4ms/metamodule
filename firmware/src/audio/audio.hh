@@ -95,7 +95,7 @@ private:
 	AudioOverrunHandler overrun_handler;
 
 	// Local
-	ParamBlock local_params;
+	alignas(64) ParamBlock local_params;
 
 	bool ext_audio_connected = false;
 
