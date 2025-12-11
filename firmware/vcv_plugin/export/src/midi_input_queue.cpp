@@ -38,6 +38,7 @@ bool InputQueue::tryPop(rack::midi::Message *messageOut, int64_t maxFrame) {
 				messageOut->bytes[0] = msg->status;
 				messageOut->bytes[1] = msg->data.byte[0];
 				messageOut->bytes[2] = msg->data.byte[1];
+				messageOut->usb_cable = msg->usb_hdr.cable_num;
 				return true;
 			}
 		}

@@ -25,7 +25,7 @@ enum class MidiCommand : uint8_t {
 };
 
 struct MidiStatusByte {
-	MidiCommand command : 4;
+	MidiCommand command : 4; // these are swapped in position, but doesn't matter
 	uint8_t channel : 4;
 
 	static MidiStatusByte make(uint8_t raw) {
@@ -69,15 +69,49 @@ enum MidiSystemExclusiveCommand : uint8_t {
 	SysEx = 0xF0,
 };
 
+struct UsbCableCodeByte {
+	uint8_t cin : 4 = 0;	   // low nibble
+	uint8_t cable_num : 4 = 0; // high nibble
+
+	constexpr static UsbCableCodeByte make(uint8_t raw) {
+		return UsbCableCodeByte{
+			.cin = uint8_t(raw & 0x0F),
+			.cable_num = uint8_t(raw >> 4),
+		};
+	}
+
+	constexpr operator uint8_t() const {
+		return (uint8_t)cable_num << 4 | cin;
+	}
+
+	constexpr static uint8_t cin_from_status_byte(uint8_t status) {
+		// 0x5: single-byte messages (system common)
+		// 0x2: two-byte message for Songselect
+		// 0x3: three-byte message for SongPosPtr
+		// 0x0: undefined: F0, F4, F5
+		return (status >= 0xF6) ? 0x5 : (status == 0xF3 || status == 0xF1) ? 0x2 : (status == 0xF2) ? 0x3 : 0x0;
+	}
+};
+static_assert(UsbCableCodeByte::make(0x1B).cable_num == 1);
+static_assert(UsbCableCodeByte::make(0x1B).cin == 0xB);
+
 struct MidiMessage {
 	MidiStatusByte status{MidiCommand::None, 0};
 	MidiDataBytes data{0, 0};
+	UsbCableCodeByte usb_hdr{0};
 
 	MidiMessage() = default;
 
 	MidiMessage(uint8_t status_byte, uint8_t data_byte0 = 0, uint8_t data_byte1 = 0)
 		: status{MidiStatusByte::make(status_byte)}
-		, data{data_byte0, data_byte1} {
+		, data{data_byte0, data_byte1}
+		, usb_hdr{UsbCableCodeByte::cin_from_status_byte(status)} {
+	}
+
+	MidiMessage(uint8_t usb_header, uint8_t status_byte, uint8_t data_byte0, uint8_t data_byte1)
+		: status{MidiStatusByte::make(status_byte)}
+		, data{data_byte0, data_byte1}
+		, usb_hdr{usb_header} {
 	}
 
 	template<MidiCommand cmd>
@@ -120,7 +154,10 @@ struct MidiMessage {
 	}
 
 	void make_usb_msg(std::array<uint8_t, 4> &bytes) {
-		bytes[0] = status >> 4;
+		bytes[0] = usb_hdr;
+		if (bytes[0] == 0)
+			bytes[0] = (uint8_t)status.command;
+
 		if (is_timing_transport()) {
 			bytes[1] = status;
 			bytes[2] = 0;
