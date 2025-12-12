@@ -53,9 +53,9 @@ void Output::sendMessage(const Message &message) {
 
 	auto status = MidiStatusByte::make(message.bytes[0]);
 
-	// Set channel
+	// Set channel if it's a voice message (note on/off, cc, etc)
 	channel = getChannel();
-	if (channel >= 0 && status.command != MidiCommand::Sys) {
+	if (channel >= 0 && uint8_t(status.command) >= 0x8 && uint8_t(status.command) <= 0xE) {
 		status.channel = channel;
 	}
 
@@ -63,11 +63,9 @@ void Output::sendMessage(const Message &message) {
 	msg.data.byte[0] = message.bytes[1];
 	msg.data.byte[1] = message.bytes[2];
 
-	if (status.command == MidiCommand::Sys) {
-		msg.usb_hdr.cin = UsbCableCodeByte::cin_from_status_byte(status);
-	} else
-		msg.usb_hdr.cin = std::to_underlying(status.command);
-
+	// Set the usb code here since the Rack::midi object might have
+	// knowledge about sysex packet length.
+	msg.usb_hdr.cin = message.usb_code;
 	msg.usb_hdr.cable_num = message.getUsbCable();
 
 	internal->queue.put(msg);
