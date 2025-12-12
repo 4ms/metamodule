@@ -56,7 +56,7 @@ public:
 
 		if (cc_val != cc_value) {
 			MidiMessage cc_msg;
-			cc_msg.status = MidiStatusByte{MidiCommand::ControlChange, midi_chan};
+			cc_msg.status = MidiStatusByte{midi_chan, MidiCommand::ControlChange};
 			cc_msg.data.byte[0] = cc_num;
 			cc_msg.data.byte[1] = cc_value;
 
@@ -77,13 +77,13 @@ public:
 		if (note_val != gate_on) {
 			if (gate_on) {
 				MidiMessage note_msg;
-				note_msg.status = MidiStatusByte{MidiCommand::NoteOn, midi_chan};
+				note_msg.status = MidiStatusByte{midi_chan, MidiCommand::NoteOn};
 				note_msg.data.byte[0] = note_num;
 				note_msg.data.byte[1] = 127;
 				midi_out_queue.put(note_msg);
 			} else {
 				MidiMessage note_msg;
-				note_msg.status = MidiStatusByte{MidiCommand::NoteOff, midi_chan};
+				note_msg.status = MidiStatusByte{midi_chan, MidiCommand::NoteOff};
 				note_msg.data.byte[0] = note_num;
 				note_msg.data.byte[1] = 0;
 				midi_out_queue.put(note_msg);
@@ -108,7 +108,7 @@ public:
 
 		if (pitch_val != pitchwheel_value) {
 			MidiMessage pitchwheel_msg;
-			pitchwheel_msg.status = MidiStatusByte{MidiCommand::PitchBend, midi_chan};
+			pitchwheel_msg.status = MidiStatusByte{midi_chan, MidiCommand::PitchBend};
 			pitchwheel_msg.data.byte[0] = pitchwheel_value & 0x7F;
 			pitchwheel_msg.data.byte[1] = (pitchwheel_value >> 7) & 0x7F;
 
