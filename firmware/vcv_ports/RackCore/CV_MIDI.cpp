@@ -2,6 +2,11 @@
 #include "plugin.hpp"
 #include "util/circular_buffer.hh"
 
+// #define DEMO_MIDI_OUT
+#ifdef DEMO_MIDI_OUT
+#include "../../src/midi/midi_test_data.hh"
+#endif
+
 namespace rack
 {
 namespace core
@@ -65,13 +70,32 @@ struct CV_MIDI : Module {
 		configInput(STOP_INPUT, "Stop trigger");
 		configInput(CONTINUE_INPUT, "Continue trigger");
 		onReset();
+
+#ifdef DEMO_MIDI_OUT
+		fill_midi_data();
+#endif
 	}
 
 	void onReset() override {
 		midiOutput.reset();
 	}
 
+	static inline unsigned tick = 0;
+	static inline unsigned last_msg = 0;
+	static inline unsigned md_idx = 0;
+
 	void process(const ProcessArgs &args) override {
+#ifdef DEMO_MIDI_OUT
+		tick++;
+		if (tick - last_msg > 300) {
+			if (md_idx >= MidiDemoData.size())
+				md_idx = 0;
+			midiOutput.onMessage(MidiDemoData[md_idx]);
+			md_idx++;
+			last_msg = tick;
+		}
+#endif
+
 		// MIDI baud rate is 31250 b/s, or 3125 B/s.
 		// CC messages are 3 bytes, so we can send a maximum of 1041 CC messages per second.
 		// Since multiple CCs can be generated, play it safe and limit the CC rate to 200 Hz.

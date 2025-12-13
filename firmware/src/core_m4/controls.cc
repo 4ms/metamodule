@@ -6,6 +6,12 @@
 #include "midi_controls.hh"
 #include "patch/midi_def.hh"
 #include "util/countzip.hh"
+#include <cstring>
+
+// #define DEMO_MIDI_IN
+#ifdef DEMO_MIDI_IN
+#include "midi/midi_test_data.hh"
+#endif
 
 namespace MetaModule
 {
@@ -136,6 +142,10 @@ void Controls::parse_midi() {
 			std::array<uint8_t, 4> bytes;
 			cur_params->raw_msg.make_usb_msg(bytes);
 			_midi_host.transmit(bytes);
+
+#ifdef DEMO_MIDI_OUT
+			printf("%08x\n", (unsigned)cur_params->raw_msg.raw());
+#endif
 		}
 	}
 
@@ -193,6 +203,15 @@ void Controls::start() {
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
 		while (rxbuffer.size() >= 4) {
 
+#ifdef DEMO_MIDI_IN
+			if (md_idx >= MidiDemoData.size())
+				md_idx = 0;
+			rxbuffer[0] = MidiDemoData[md_idx][0];
+			rxbuffer[1] = MidiDemoData[md_idx][1];
+			rxbuffer[2] = MidiDemoData[md_idx][2];
+			rxbuffer[3] = MidiDemoData[md_idx][3];
+			md_idx++;
+#endif
 			auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 
 			_midi_rx_buf.put(msg);
@@ -220,7 +239,6 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {
-
 	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
 	// TODO: _new_adc_data_ready is set true here (pri 2) and set false in read_controls_task (pri 0)
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {

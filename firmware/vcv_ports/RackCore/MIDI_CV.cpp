@@ -3,6 +3,8 @@
 #include "util/circular_buffer.hh"
 #include <algorithm>
 
+// #define PRINT_MIDI_IN
+
 namespace rack
 {
 namespace core
@@ -126,6 +128,10 @@ struct MIDI_CV : Module {
 			// Do not put Timing clock or Active Sending messages in the history window
 			if (msg.bytes[0] & 0x80 && msg.bytes[0] != 0xf8 && msg.bytes[0] != 0xfe)
 				msg_history.put(msg);
+
+#ifdef PRINT_MIDI_IN
+			printf("%x%x %02x %02x %02x\n", msg.usb_cable, msg.usb_code, msg.bytes[0], msg.bytes[1], msg.bytes[2]);
+#endif
 			////////
 			processMessage(msg);
 		}
