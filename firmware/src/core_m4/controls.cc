@@ -131,7 +131,7 @@ void Controls::update_control_expander() {
 
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected
-	if (cur_params->raw_msg.raw() != MidiMessage{}.raw()) {
+	if (cur_params->raw_msg.raw() != 0) {
 		if (_midi_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
 			cur_params->raw_msg.make_usb_msg(bytes);
@@ -191,24 +191,13 @@ void Controls::start() {
 	read_controls_task.start();
 
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
-		bool ignore = false;
-
 		while (rxbuffer.size() >= 4) {
+
 			auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 
-			//Starting ignoring from SysEx Start (F0)...
-			if (msg.is_sysex())
-				ignore = true;
-
-			//...until SysEx End (F7) received
-			if (ignore && msg.has_sysex_end())
-				ignore = false;
-
-			if (!ignore)
-				_midi_rx_buf.put(msg);
+			_midi_rx_buf.put(msg);
 
 			rxbuffer = rxbuffer.subspan(4);
-			// msg.print();
 		}
 		_midi_host.receive();
 	});
