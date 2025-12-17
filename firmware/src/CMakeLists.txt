@@ -134,7 +134,7 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/drivers/timekeeper.cc
   ${FWDIR}/lib/mdrivlib/drivers/i2c.cc
   ${FWDIR}/lib/mdrivlib/drivers/qspi_flash_driver.cc
-  ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3168.cc
+  ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3060.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1/drivers/sai_tdm.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/system_ca7.c
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
