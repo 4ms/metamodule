@@ -1,13 +1,14 @@
 #pragma once
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
-#include "gui/notify/notification.hh"
+#include "general_io.hh"
 #include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
+#include "user_settings/settings.hh"
 #include "user_settings/settings_file.hh"
 
 namespace MetaModule
@@ -17,18 +18,19 @@ class Ui {
 private:
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
+	PluginManager &plugin_manager;
+	FileStorageProxy &file_storage_proxy;
 
-	NotificationQueue notify_queue;
-	ParamsMidiState params;
+	ParamsState params;
 	MetaParams metaparams;
 	UserSettings settings;
-	PluginManager &plugin_manager;
+	NotificationQueue notify_queue;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
-	   FileStorageProxy &patch_storage,
+	   FileStorageProxy &file_storage_proxy,
 	   OpenPatchManager &open_patch_manager,
 	   SyncParams &sync_params,
 	   PatchModQueue &patch_mod_queue,
@@ -36,115 +38,159 @@ public:
 	   FatFileIO &ramdisk)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
-		, plugin_manager{plugin_manager} {
+		, plugin_manager{plugin_manager}
+		, file_storage_proxy{file_storage_proxy} {
 		params.clear();
 		metaparams.clear();
 
-		if (!Settings::read_settings(patch_storage, &settings, Volume::NorFlash)) {
+		if (!Settings::read_settings(file_storage_proxy, &settings)) {
 			settings = UserSettings{};
-			if (!Settings::write_settings(patch_storage, settings, Volume::NorFlash)) {
+			if (!Settings::write_settings(file_storage_proxy, settings)) {
 				pr_err("Failed to write settings file\n");
 			}
 		}
 
-		patch_playloader.connect_user_settings(&settings);
-		patch_playloader.connect_notification_queue(&notify_queue);
+		settings.initial_patch_vol = Volume::SDCard;
+		settings.initial_patch_name = "/patch.yml";
 
 		patch_playloader.request_new_audio_settings(
 			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);
-
-		patch_playloader.update_param_catchup_mode();
+		// patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.allow_jump_outofrange);
 
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 	}
 
 	void update_screen() {
-		auto now = HAL_GetTick();
-		// Set the frame rate here:
-		if ((now - last_screen_update_tm) > 16) {
-			last_screen_update_tm = now;
-			// TODO: dump screen buffer via SPI DMA
-		}
+		// no screen
+	}
+
+	void read_patch_gui_elements() {
 	}
 
 	void update_page() {
 		auto now = HAL_GetTick();
-		// Set the update rate here:
 		if ((now - last_page_update_tm) > 16) {
 			last_page_update_tm = now;
-			read_latest_params();
-			handle_file_requests();
-			redraw_page();
+			page_update_task();
 		}
+
+		// print_dbg_params.output_debug_info(HAL_GetTick());
+		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
-	void redraw_page() {
-		// TODO:
-		// Here you can update the screen framebuffer
-	}
+	bool preload_all_plugins() {
+		plugin_manager.start_loading_plugin_list();
 
-	void load_initial_patch() {
-		if (settings.load_initial_patch) {
-			pr_dbg("Loading initial patch '%s' on vol %u\n",
-				   settings.initial_patch_name.c_str(),
-				   settings.initial_patch_vol);
-			patch_playloader.load_initial_patch(settings.initial_patch_name, settings.initial_patch_vol);
-		} else {
-			pr_dbg("Not loading initial patch (disabled in settings)\n");
+		while (true) {
+			auto result = plugin_manager.process_loading();
+
+			if (result.state == PluginFileLoader::State::GotList) {
+				break;
+			}
+
+			if (result.state == PluginFileLoader::State::Error) {
+				return false;
+			}
 		}
-	}
 
-	void notify_error(std::string const &message) {
-		notify_queue.put({message, Notification::Priority::Error, 2000});
+		auto list = plugin_manager.found_plugin_list();
+
+		for (auto i = 0u; i < list->size(); ++i) {
+			plugin_manager.load_plugin(i);
+			auto load = true;
+			while (load) {
+				switch (plugin_manager.process_loading().state) {
+					using enum PluginFileLoader::State;
+					case Success:
+						load = false;
+						break;
+					case RamDiskFull:
+					case InvalidPlugin:
+					case Error:
+						return false;
+					default:
+						continue;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	void preload_plugins() {
-		auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
+		if (FS::file_size(file_storage_proxy, {"preload_all_plugins", Volume::SDCard}) ||
+			FS::file_size(file_storage_proxy, {"preload_all_plugins", Volume::USB}))
+		{
+			pr_info("Preloading all plugins\n");
+			preload_all_plugins();
+		} else {
 
-		if (settings.plugin_preload.slugs.size())
-			delay_ms(600); //allow time for ???
+			auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
 
-		while (true) {
-			auto status = preloader.process();
+			if (settings.plugin_preload.slugs.size())
+				delay_ms(600); //allow time for ???
 
-			if (status.message.length()) {
-				notify_queue.put({status.message, Notification::Priority::Info, 2000});
+			while (true) {
+				auto status = preloader.process();
+
+				if (status.state == PreLoader::State::Error) {
+					break;
+
+				} else if (status.state == PreLoader::State::Warning) {
+					// continue
+
+				} else if (status.state == PreLoader::State::Done) {
+					break;
+
+				} else {
+					if (status.message.length()) {
+						printf("%s\n", status.message.c_str());
+					}
+				}
 			}
 		}
 	}
 
-	UserSettings &get_settings() {
+	void load_initial_patch() {
+		patch_playloader.load_initial_patch(settings.initial_patch_name, settings.initial_patch_vol);
+	}
+
+	void notify_error(std::string const &message) {
+		printf("%s\n", message.c_str());
+	}
+
+	void notify_now_playing(std::string const &message) {
+		printf("%s\n", message.c_str());
+	}
+
+	auto &get_settings() {
 		return settings;
 	}
 
-	NotificationQueue &get_notify_queue() {
+	auto &get_notify_queue() {
 		return notify_queue;
 	}
 
+	std::atomic<bool> new_patch_data = false;
+
 private:
-	void read_latest_params() {
+	void page_update_task() {
 		// Clear all accumulated knob change events
 		for (auto &knob : params.knobs) {
 			knob.changed = false;
 		}
 
-		// Copy params and metaparams from the audio thread
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
-	}
 
-	void handle_file_requests() {
-		// Handle file save/load requests
+		new_patch_data.store(false, std::memory_order_release);
+
 		auto load_status = patch_playloader.handle_file_events();
-		if (!load_status.success) {
-			notify_queue.put({load_status.error_string, Notification::Priority::Error, 1500});
-
-		} else if (load_status.error_string.size()) {
-			notify_queue.put({load_status.error_string, Notification::Priority::Info, 3000});
+		if (!load_status.success || load_status.error_string.length()) {
+			printf("%s\n", load_status.error_string.c_str());
 		}
 	}
 
 	uint32_t last_page_update_tm = 0;
-	uint32_t last_screen_update_tm = 0;
 };
 
 } // namespace MetaModule

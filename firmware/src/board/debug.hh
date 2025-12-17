@@ -1,8 +1,5 @@
 #pragma once
 #include "drivers/pin.hh"
-#include "drivers/register_access.hh"
-
-#define DEBUG_PINS_CTRL_EXP_GPIOS
 
 struct Debug {
 	struct NoPin {
@@ -12,38 +9,15 @@ struct Debug {
 		}
 	};
 
-#if defined(DEBUG_PINS_CTRL_EXP_ALL)
-	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::B, 10, mdrivlib::PinMode::Output>; //Control Exp pin 1 (AUX_I2C_SCL)
-	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::A, 14, mdrivlib::PinMode::Output>; //Control Exp pin 3 (EXTGPIO1)
-	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::E, 2, mdrivlib::PinMode::Output>;  //Control Exp pin 5 (EXTGPIO2)
-	using Pin3 = mdrivlib::FPin<mdrivlib::GPIO::G, 11, mdrivlib::PinMode::Output>; //Control Exp pin 7 (EXTGPIO3)
+	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::D, 7, mdrivlib::PinMode::Output>; //Third pin
+	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::E, 5, mdrivlib::PinMode::Output>; //Fourth pin (FREEZE)
+	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::D, 0, mdrivlib::PinMode::Output>; //UART RX
 
-	using Pin4 = mdrivlib::FPin<mdrivlib::GPIO::E, 4, mdrivlib::PinMode::Output>;  //DEBUG0 pin 5 of debug header
-	using Pin5 = mdrivlib::FPin<mdrivlib::GPIO::D, 3, mdrivlib::PinMode::Output>;  //DEBUG1 pin 7 of debug header
-	using Pin6 = mdrivlib::FPin<mdrivlib::GPIO::B, 14, mdrivlib::PinMode::Output>; //DEBUG2 pad
-	using Pin7 = mdrivlib::FPin<mdrivlib::GPIO::G, 6, mdrivlib::PinMode::Output>;  //DEBUG3 pad (p11)
-
-#elif defined(DEBUG_PINS_CTRL_EXP_GPIOS)
-	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::A, 14, mdrivlib::PinMode::Output>; //Control Exp pin 3 (EXTGPIO1)
-	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::E, 2, mdrivlib::PinMode::Output>;  //Control Exp pin 5 (EXTGPIO2)
-	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::G, 11, mdrivlib::PinMode::Output>; //Control Exp pin 7 (EXTGPIO3)
-	using Pin3 = mdrivlib::FPin<mdrivlib::GPIO::E, 4, mdrivlib::PinMode::Output>;  //DEBUG0 pin 5 of debug header
-
-	using Pin4 = NoPin;
-	using Pin5 = NoPin;
-	using Pin6 = mdrivlib::FPin<mdrivlib::GPIO::B, 14, mdrivlib::PinMode::Output>; //DEBUG2 pad
-	using Pin7 = mdrivlib::FPin<mdrivlib::GPIO::G, 6, mdrivlib::PinMode::Output>;  //DEBUG3 pad (p11)
-
-#else
-	using Pin0 = NoPin;
-	using Pin1 = NoPin;
-	using Pin2 = NoPin;
 	using Pin3 = NoPin;
 	using Pin4 = NoPin;
 	using Pin5 = NoPin;
 	using Pin6 = NoPin;
 	using Pin7 = NoPin;
-#endif
 
 	using green_LED1 = NoPin;
 	using blue_LED1 = NoPin;

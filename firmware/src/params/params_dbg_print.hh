@@ -1,5 +1,4 @@
 #pragma once
-#include "conf/jack_sense_conf.hh"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
 #include "pr_dbg.hh"
@@ -20,17 +19,14 @@ struct ParamDbgPrint {
 	}
 
 	uint32_t last_dbg_output_tm = 0;
-	float pot_min[12]{9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999};
-	float pot_max[12]{};
-	float pot_iir[12]{};
+	float pot_min[PanelDef::NumPot]{9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999};
+	float pot_max[PanelDef::NumPot]{};
+	float pot_iir[PanelDef::NumPot]{};
 	uint32_t readings = 0;
 	static constexpr float iir_coef = 1.f / 1000.f;
 	static constexpr float iir_coef_inv = 1.f - iir_coef;
 
-	std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn + AudioExpander::NumInJacks> ins;
-
-	bool flag_next_page = false;
-	bool flag_prev_page = false;
+	std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> ins;
 
 	void output_load(uint32_t now_ticks) {
 		if ((now_ticks - last_dbg_output_tm) > 2000) {
@@ -71,27 +67,13 @@ struct ParamDbgPrint {
 				pot_max[i] = 0.f;
 			}
 
-			auto b = [j = params.jack_senses](uint32_t bit) -> int {
-				return (j >> (jacksense_pin_order[bit])) & 1;
-			};
-			auto x = [j = params.jack_senses](uint32_t bit) -> int {
-				return (j >> (AudioExpander::jacksense_pin_order[bit])) & 1;
-			};
-
-			pr_dbg("Outs patched: %d %d %d %d %d %d %d %d\n", b(8), b(9), b(10), b(11), b(12), b(13), b(14), b(15));
-			pr_dbg("ExpOuts patched: %d %d %d %d %d %d %d %d\n", x(6), x(7), x(8), x(9), x(10), x(11), x(12), x(13));
-
-			pr_dbg("Button: %d GateIn1: %d [%d] GateIn2: %d [%d] \r\n",
-				   metaparams.meta_buttons[0].is_high() ? 1 : 0,
+			pr_dbg("GateIn1: %d. GateIn2: %d \r\n",
 				   params.gate_ins[0].is_high() ? 1 : 0,
-				   b(6),
-				   params.gate_ins[1].is_high() ? 1 : 0,
-				   b(7));
+				   params.gate_ins[1].is_high() ? 1 : 0);
 
 			for (auto [i, ain] : enumerate(ins)) {
-				pr_dbg("AIN %zu: [%d] iir=%f min=%f max=%f range=%f\r\n",
+				pr_dbg("ADC %zu: iir=%f min=%f max=%f range=%f\r\n",
 					   i,
-					   i < 6 ? b(i) : x(i - 6),
 					   ain.iir,
 					   ain.min,
 					   ain.max,

@@ -1,19 +1,94 @@
 #pragma once
+#include "drivers/dac_builtin.hh"
 #include "drivers/pin.hh"
+#include "drivers/tim_pwm.hh"
+#include "drivers/uart_conf.hh"
+#include <array>
 
 namespace MetaModule
 {
 
+namespace ControlPins
+{
+
 using mdrivlib::GPIO;
+using mdrivlib::PinAF;
+using mdrivlib::PinDef;
+using mdrivlib::PinMode;
 using mdrivlib::PinNum;
 
-struct ControlPins {
-	static constexpr mdrivlib::PinDef rotA{GPIO::D, PinNum::_5};
-	static constexpr mdrivlib::PinDef rotB{GPIO::E, PinNum::_13};
-	static constexpr mdrivlib::PinDef rotS{GPIO::E, PinNum::_15};
-	static constexpr mdrivlib::PinDef but0{GPIO::D, PinNum::_8};
-	static constexpr mdrivlib::PinDef gate_in_1{GPIO::F, PinNum::_11};
-	static constexpr mdrivlib::PinDef gate_in_2{GPIO::B, PinNum::_8};
+// Encoders
+struct EncoderPins {
+	PinDef A;
+	PinDef B;
 };
+
+constexpr inline auto encoders = std::array{
+	EncoderPins{{GPIO::E, PinNum::_3}, {GPIO::D, PinNum::_10}}, //ENCODER 1
+	EncoderPins{{GPIO::G, PinNum::_6}, {GPIO::D, PinNum::_3}},	//ENCODER 2
+};
+
+// PWM out:
+constexpr inline mdrivlib::TimChanConf haptic_conf{
+	.pin = {GPIO::B, PinNum::_9, PinAF::AltFunc1},
+	.TIM = TIM17_BASE,
+	.channum = mdrivlib::TimChannelNum::_1,
+	.period = 512,
+	.prescaler = 0,
+	.clock_div = 0,
+};
+
+// GPIO outs:
+constexpr inline PinDef clock_out{GPIO::C, PinNum::_7}; //inverted
+
+// GPIO ins:
+constexpr inline PinDef random_gate_in{GPIO::B, PinNum::_10}; //inverted, no pullup
+constexpr inline PinDef trig_in{GPIO::G, PinNum::_15};		  //inverted, no pullup
+constexpr inline PinDef sync_in{GPIO::C, PinNum::_4};		  //inverted, no pullup
+constexpr inline PinDef rec_gate_in{GPIO::C, PinNum::_0};	  //inverted, no pullup
+
+// DAC out
+
+constexpr inline mdrivlib::DacConfig dac{
+	.dac_num = 1,
+	.dac0_pin{GPIO::A, PinNum::_4},
+	.dac1_pin{GPIO::A, PinNum::_5},
+	.chan0 =
+		{
+			.DAC_HighFrequency = DAC_HIGH_FREQUENCY_INTERFACE_MODE_DISABLE,
+			.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE,
+			.DAC_Trigger = DAC_TRIGGER_NONE,
+			.DAC_OutputBuffer = DAC_OUTPUTBUFFER_DISABLE,			//????
+			.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE, //????
+			.DAC_UserTrimming = DAC_TRIMMING_FACTORY,
+			.DAC_TrimmingValue = 1,
+			.DAC_SampleAndHoldConfig = {.DAC_SampleTime = 0, .DAC_HoldTime = 0, .DAC_RefreshTime = 0},
+		},
+	.chan1 =
+		{
+			.DAC_HighFrequency = 0,
+			.DAC_SampleAndHold = 0,
+			.DAC_Trigger = DAC_TRIGGER_NONE,
+			.DAC_OutputBuffer = DAC_OUTPUTBUFFER_DISABLE,			//????
+			.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE, //????
+			.DAC_UserTrimming = DAC_TRIMMING_FACTORY,
+			.DAC_TrimmingValue = 1,
+			.DAC_SampleAndHoldConfig = {.DAC_SampleTime = 0, .DAC_HoldTime = 0, .DAC_RefreshTime = 0},
+		},
+};
+
+// MIDI IN Uart:
+constexpr inline UartConf MIDI_Uart{
+	.base_addr = UART7_BASE,
+	.TXPin = {GPIO::B, PinNum::_4, PinAF::AltFunc13},
+	.RXPin = {GPIO::A, PinNum::_8, PinAF::AltFunc13},
+	.mode = UartConf::Mode::TXRX,
+	.baud = 31250,
+	.wordlen = 8,
+	.parity = UartConf::Parity::None,
+	.stopbits = UartConf::StopBits::_1,
+};
+
+} // namespace ControlPins
 
 } // namespace MetaModule

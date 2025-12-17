@@ -6,7 +6,7 @@
 namespace MetaModule
 {
 
-struct StreamConfSingleCodec6x8 {
+struct StreamConfSingleCodecStereo {
 	struct Audio {
 
 		// BlockSize: Number of Frames processed each time AudioStream::process() is called
@@ -16,10 +16,8 @@ struct StreamConfSingleCodec6x8 {
 
 		using SampleT = int32_t;
 		static constexpr int SampleBits = 24;
-		static constexpr int NumInChans = 6;
-		static constexpr int NumOutChans = 8;
-
-		static constexpr int NumCodecs = 2; //not used anywhere
+		static constexpr int NumInChans = 2;
+		static constexpr int NumOutChans = 2;
 
 		// One frame: data for all input channels at a single moment of time
 		using AudioInFrame = AudioFrame<SampleT, SampleBits, NumInChans>;
@@ -31,7 +29,6 @@ struct StreamConfSingleCodec6x8 {
 		// There are [2] blocks per codec, one for each half-transfer
 		struct alignas(64) AudioInBlock {
 			AudioInBuffer codec[NumDMAHalfTransfers];
-			AudioInBuffer ext_codec[NumDMAHalfTransfers];
 		};
 
 		// One frame: data for all output channels at a single moment of time
@@ -44,11 +41,10 @@ struct StreamConfSingleCodec6x8 {
 		// There are [2] blocks per codec, one for each half-transfer
 		struct alignas(64) AudioOutBlock {
 			AudioOutBuffer codec[NumDMAHalfTransfers];
-			AudioOutBuffer ext_codec[NumDMAHalfTransfers];
 		};
 
 		// A handy struct used to call the audio process() function
-		// It's just a reference to the actual daya.
+		// It's just a reference to the actual data.
 		// Since the memory layout for the DMA buffers is fixed, using
 		// references makes it easier to refer to what we need to use
 		// suring each call to process()
@@ -61,6 +57,6 @@ struct StreamConfSingleCodec6x8 {
 	};
 };
 
-using StreamConf = StreamConfSingleCodec6x8;
+using StreamConf = StreamConfSingleCodecStereo;
 
 } // namespace MetaModule

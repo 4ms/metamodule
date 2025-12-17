@@ -1,20 +1,21 @@
 #pragma once
-#include "CoreModules/hub/button_expander_defs.hh"
+#include "conf/adc_conf.hh"
 #include "conf/control_conf.hh"
+#include "conf/neopixel_conf.hh"
 #include "conf/pin_conf.hh"
-#include "control_expander.hh"
 #include "drivers/adc_builtin.hh"
+#include "drivers/dac_builtin.hh"
 #include "drivers/debounced_switch.hh"
-#include "drivers/gpio_expander.hh"
+#include "drivers/neopixel.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
-#include "metaparams.hh"
+#include "drivers/uart.hh"
+#include "gpio_expander_manager.hh"
 #include "midi/midi_message.hh"
-#include "midi_controls.hh"
 #include "param_block.hh"
-#include "params.hh"
-#include "sense_pin_reader.hh"
+#include "params/metaparams.hh"
+#include "params/params.hh"
 #include "usb/midi_host.hh"
 #include "util/edge_detector.hh"
 #include "util/interp_param.hh"
@@ -24,7 +25,6 @@ namespace MetaModule
 {
 
 using mdrivlib::DebouncedPin;
-using mdrivlib::GPIOExpander;
 using mdrivlib::PinPolarity;
 
 struct Controls {
@@ -37,7 +37,7 @@ private:
 	void update_params();
 	void update_debouncers();
 
-	float get_pot_reading(uint32_t pot_id);
+	float get_adc_reading(uint32_t pot_id);
 
 	void set_samplerate(unsigned sample_rate);
 
@@ -46,49 +46,82 @@ private:
 
 	void parse_midi();
 	void update_midi_connected();
-	void update_control_expander();
-	void update_rotary();
+	void set_next_neopixel();
+	void output_dac();
+
+	void test_pins();
 
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
-	// Digital controls: Rotary, Buttons and Gate jacks
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::rotA, ControlPins::rotB> rotary;
-	DebouncedPin<ControlPins::rotS, PinPolarity::Inverted> rotary_button;
-	DebouncedPin<ControlPins::but0, PinPolarity::Inverted> button0;
-	DebouncedPin<ControlPins::gate_in_1, PinPolarity::Normal> gate_in_1;
-	DebouncedPin<ControlPins::gate_in_2, PinPolarity::Normal> gate_in_2;
-	bool _rotary_moved_while_pressed = false;
+	// ROTARY ENCODERS
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::encoders[0].A, ControlPins::encoders[0].B> encoder1;
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::encoders[1].A, ControlPins::encoders[1].B> encoder2;
 
-	// Analog controls (pots)
-	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
-	std::array<uint16_t, NumPotAdcs> pot_vals{};
-	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
+	// GATE INS
+	DebouncedPin<ControlPins::random_gate_in, PinPolarity::Inverted> random_gate_in;
+	DebouncedPin<ControlPins::trig_in, PinPolarity::Inverted> trig_in;
+	DebouncedPin<ControlPins::sync_in, PinPolarity::Inverted> sync_in;
+	DebouncedPin<ControlPins::rec_gate_in, PinPolarity::Inverted> rec_gate_in;
 
-	InterpParamVariable<float> _knobs[PanelDef::NumPot]{};
-	static constexpr uint32_t AdcReadFrequency = 580; //571
-	bool _new_adc_data_ready = false;
+	// Buttons/LEDs MUX
+	GpioExpanderManager gpio_expanders;
 
-	SensePinReader sense_pin_reader;
-	ControlExpanderManager control_expander;
-	std::array<Toggler, ButtonExpander::NumTotalButtons> ext_buttons{};
+	// MIDI UART
+	mdrivlib::Uart<ControlPins::MIDI_Uart> uart_midi;
+
+	// DAC OUTS
+	mdrivlib::DualDac cv_out{ControlPins::dac};
+
+	// NEOPIXELS
+	mdrivlib::NeoPixel<Neopixels::pwm_conf_a, Neopixels::dma_conf_a, Neopixels::num_leds_a> neopixel_a;
+	mdrivlib::NeoPixel<Neopixels::pwm_conf_b, Neopixels::dma_conf_b, Neopixels::num_leds_b> neopixel_b;
+	mdrivlib::NeoPixel<Neopixels::pwm_conf_vu, Neopixels::dma_conf_vu, Neopixels::num_leds_vu> neopixel_vu;
+	unsigned neopixel_ctr = 0;
+
+	// GATE OUT
+	mdrivlib::PinF<ControlPins::clock_out, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted> clock_out;
+
+	// PWM OUT
+	mdrivlib::TimPwmChan<ControlPins::haptic_conf> haptic_out;
+
+	// Analog inputs
+	// ADC MUX
+	mdrivlib::PinF<ADCs::mux_a> adc_mux_a;
+	mdrivlib::PinF<ADCs::mux_b> adc_mux_b;
+	mdrivlib::PinF<ADCs::mux_c> adc_mux_c;
+	uint8_t mux_chan = 0;
+
+	// ADCs
+	static constexpr size_t NumAdcPins = ADCs::AdcPins.size();
+	std::array<uint16_t, NumAdcPins> raw_adc_vals{};
+	mdrivlib::AdcDmaPeriph<ADCs::PotAdcConf> adc{raw_adc_vals, ADCs::AdcPins};
+
+	std::array<InterpParamVariable<float>, PanelDef::NumPot> knobs;
+	std::array<InterpParamVariable<float>, PanelDef::NumCVIn> cvs;
+
+	// May need to adjust this if adc interpolation is not smooth
+	static constexpr uint32_t AdcReadFrequency = 648; //Hz
 
 	// MIDI
-	MidiHost &_midi_host;
-	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
-	Midi::MessageParser _midi_parser;
-	EdgeStateDetector _midi_connected_raw;
-	bool _midi_connected = false;
+	MidiHost &usb_midi_host;
+	LockFreeFifoSpsc<MidiMessage, 256> usb_midi_rx_buf;
+	LockFreeFifoSpsc<MidiMessage, 256> uart_midi_rx_buf;
+
+	EdgeStateDetector usb_midi_connected_raw;
+	bool usb_midi_connected = false;
 
 	// Params
 	DoubleBufParamBlock &param_blocks;
 	Params *cur_params;
 	MetaParams *cur_metaparams;
+	LedStates *cur_leds;
 	bool _buffer_full = false;
 	bool _first_param = true;
 
 	uint32_t sample_rate = 48000;
 
 	unsigned num_pot_updates = 0;
+	unsigned num_cv_updates = 0;
 };
 
 } // namespace MetaModule

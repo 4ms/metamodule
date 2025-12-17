@@ -8,8 +8,8 @@ namespace MetaModule
 // I2C for usb-c chip
 const mdrivlib::I2CConfig usb_i2c_conf = {
 	.I2Cx = I2C6,
-	.SCL = {mdrivlib::GPIO::D, mdrivlib::PinNum::_1, mdrivlib::PinAF::AltFunc2},
-	.SDA = {mdrivlib::GPIO::D, mdrivlib::PinNum::_0, mdrivlib::PinAF::AltFunc2},
+	.SCL = {mdrivlib::GPIO::A, mdrivlib::PinNum::_11, mdrivlib::PinAF::AltFunc2},
+	.SDA = {mdrivlib::GPIO::A, mdrivlib::PinNum::_12, mdrivlib::PinAF::AltFunc2},
 	.timing =
 		{
 			.PRESC = 0x10, //0x20 is 100k
@@ -25,7 +25,7 @@ const mdrivlib::I2CConfig usb_i2c_conf = {
 
 struct FUSBPinChangeConf : mdrivlib::DefaultPinChangeConf {
 	static constexpr uint32_t pin = 10;
-	static constexpr mdrivlib::GPIO port = mdrivlib::GPIO::A;
+	static constexpr mdrivlib::GPIO port = mdrivlib::GPIO::E;
 	static constexpr bool on_rising_edge = false;
 	static constexpr bool on_falling_edge = true;
 	static constexpr uint32_t priority1 = 3;
@@ -34,10 +34,10 @@ struct FUSBPinChangeConf : mdrivlib::DefaultPinChangeConf {
 };
 
 using FUSBIntPin =
-	mdrivlib::FPin<mdrivlib::GPIO::A, mdrivlib::PinNum::_10, mdrivlib::PinMode::Input, mdrivlib::PinPolarity::Inverted>;
+	mdrivlib::FPin<mdrivlib::GPIO::E, mdrivlib::PinNum::_10, mdrivlib::PinMode::Input, mdrivlib::PinPolarity::Inverted>;
 
 constexpr inline uint8_t FUSBDevAddr = 0b01000100;
 
-constexpr inline mdrivlib::PinDef Usb5VSrcEnablePin{mdrivlib::GPIO::A, mdrivlib::PinNum::_15};
+constexpr inline mdrivlib::PinDef Usb5VSrcEnablePin{mdrivlib::GPIO::G, mdrivlib::PinNum::_9};
 
 } // namespace MetaModule

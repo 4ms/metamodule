@@ -1,8 +1,6 @@
 #pragma once
-#include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/sai_config_struct.hh"
-#include "drivers/stm32xx.h"
 #include "user_settings/audio_settings.hh"
 
 using mdrivlib::GPIO;
@@ -46,61 +44,13 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.SD_DAC = {GPIO::D, PinNum::_11, PinAF::AltFunc10}, // SD A
 	.SD_ADC = {GPIO::G, PinNum::_10, PinAF::AltFunc10}, // SD B
 
-	.reset_pin = {GPIO::E, PinNum::_10, PinAF::AFNone},
+	.reset_pin = {GPIO::A, PinNum::_10},
 
 	.bus_address = 0b00,
 
-	.num_tdm_ins = 6,
-	.num_tdm_outs = 8,
-
-	.sync_send = SaiConfig::BlockASendsSync,
-	.sync_receive_from = SaiConfig::NoReceiveSync,
-};
-
-// External header
-const SaiConfig codec_ext_sai_conf = {
-	.sai = SAI1,
-	.tx_block = SAI1_Block_A,
-	.rx_block = SAI1_Block_B,
-
-	.mode = SaiConfig::ExtSynced,
-
-	.dma_init_tx =
-		{
-			.DMAx = DMA2,
-			.stream = DMA2_Stream4,
-			.channel = DMA_REQUEST_SAI1_A,
-			.IRQn = DMA2_Stream4_IRQn,
-			.pri = 1,
-			.subpri = 1,
-		},
-	.dma_init_rx =
-		{
-			.DMAx = DMA2,
-			.stream = DMA2_Stream6,
-			.channel = DMA_REQUEST_SAI1_B,
-			.IRQn = DMA2_Stream6_IRQn,
-			.pri = 1,
-			.subpri = 1,
-		},
-
-	.datasize = SAI_DATASIZE_24,
-	.framesize = 256,
-	.samplerate = 48000,
-
-	.MCLK = {GPIO::Unused, PinNum::_0, PinAF::AFNone},
-	.SCLK = {GPIO::Unused, PinNum::_0, PinAF::AFNone},
-	.LRCLK = {GPIO::Unused, PinNum::_0, PinAF::AFNone},
-	.SD_DAC = {GPIO::B, PinNum::_2, PinAF::AltFunc6}, // SD A
-	.SD_ADC = {GPIO::F, PinNum::_6, PinAF::AltFunc6}, // SD B
-
-	.reset_pin = {GPIO::E, PinNum::_8},
-
-	.bus_address = 0b01,
-
-	.num_tdm_ins = 6,
-	.num_tdm_outs = 8,
+	.num_tdm_ins = 2,
+	.num_tdm_outs = 2,
 
 	.sync_send = SaiConfig::NoSendSync,
-	.sync_receive_from = SaiConfig::SyncToSAI2,
+	.sync_receive_from = SaiConfig::NoReceiveSync,
 };

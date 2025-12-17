@@ -5,7 +5,8 @@
 #include "hsem_handler.hh"
 #include "midi_controls.hh"
 #include "patch/midi_def.hh"
-#include "util/countzip.hh"
+
+#include "hardware-test.hh"
 
 namespace MetaModule
 {
@@ -13,161 +14,149 @@ namespace MetaModule
 using namespace mdrivlib;
 
 void Controls::update_debouncers() {
-	rotary.update();
-	rotary_button.update();
-	button0.update();
+	encoder1.update();
+	encoder2.update();
 
-	gate_in_1.update();
-	gate_in_2.update();
+	random_gate_in.update();
+	trig_in.update();
+	sync_in.update();
+	rec_gate_in.update();
+}
+
+// Interpolate adc readings across the param block, since we capture them at a slower rate than audio process
+void interpolate_adcs(unsigned update_ctr, auto &values, auto &dest) {
+	if (update_ctr >= values[0].get_num_updates()) {
+		// Don't overshoot value:
+		for (unsigned i = 0; i < values.size(); i++) {
+			auto val = values[i].target_val;
+			dest[i] = std::clamp(val, 0.f, 1.f);
+			values[i].cur_val = values[i].target_val;
+		}
+	} else {
+		for (unsigned i = 0; i < values.size(); i++) {
+			auto val = values[i].next();
+			dest[i] = std::clamp(val, 0.f, 1.f);
+		}
+	}
 }
 
 void Controls::update_params() {
-	cur_params->gate_ins = gate_in_1.is_high() ? 0b01 : 0b00;
-	cur_params->gate_ins |= gate_in_2.is_high() ? 0b10 : 0b00;
+	// Gates
+	cur_params->gate_ins = random_gate_in.is_high() ? 0b0001 : 0b00;
+	cur_params->gate_ins |= trig_in.is_high() ? 0b0010 : 0b00;
+	cur_params->gate_ins |= sync_in.is_high() ? 0b0100 : 0b00;
+	cur_params->gate_ins |= rec_gate_in.is_high() ? 0b1000 : 0b00;
 
-	// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
-	if (_new_adc_data_ready) {
-		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
-			_knobs[i].set_new_value(get_pot_reading(i));
-			num_pot_updates = 0;
-		}
-		_new_adc_data_ready = false;
-	}
+	// CV jacks (non-muxed ADCs)
+	num_cv_updates++;
+	interpolate_adcs(num_cv_updates, cvs, cur_params->cvs);
 
+	// Knobs (ADC muxes)
 	num_pot_updates++;
-	if (num_pot_updates >= _knobs[0].get_num_updates()) {
-		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
-			auto val = _knobs[i].target_val;
-			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
-			_knobs[i].cur_val = _knobs[i].target_val;
-		}
-	} else {
-		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
-			auto val = _knobs[i].next();
-			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
-		}
-	}
+	interpolate_adcs(num_pot_updates, knobs, cur_params->knobs);
 
+	// Block-rate metaparams
 	if (_first_param) {
 		_first_param = false;
 
 		update_midi_connected();
 
-		cur_metaparams->midi_connected = _midi_connected;
+		cur_metaparams->buttons0 = gpio_expanders.get_buttons(0);
+		cur_metaparams->buttons1 = gpio_expanders.get_buttons(1);
+		cur_metaparams->buttons2 = gpio_expanders.get_buttons(2);
 
-		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
+		gpio_expanders.set_leds(0, cur_leds->leds0);
+		gpio_expanders.set_leds(1, cur_leds->leds1);
+		gpio_expanders.set_leds(2, cur_leds->leds2);
 
-		update_control_expander();
+		cur_metaparams->usb_midi_connected = usb_midi_connected;
 
-		update_rotary();
-
-		// Meta button
-		cur_metaparams->meta_buttons[0].transfer_events(button0);
+		cur_metaparams->encoder[0].motion = encoder1.read();
+		cur_metaparams->encoder[1].motion = encoder2.read();
 	}
 
+	// Update one pixel value every audio sample. ~450Hz refresh rate
+	// Could save some CPU by refreshing at block rate (@block size 64 -> 7Hz)
+	set_next_neopixel();
+
 	parse_midi();
+
+	output_dac();
 
 	cur_params++;
 	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
 		_buffer_full = true;
 }
 
-void Controls::update_rotary() {
-	// Rotary button
-	if (rotary_button.is_just_pressed()) {
-		_rotary_moved_while_pressed = false;
-		cur_metaparams->rotary_button.register_rising_edge();
-	}
-
-	if (rotary_button.is_just_released()) {
-		if (_rotary_moved_while_pressed) {
-			cur_metaparams->rotary_button.reset();
-		} else {
-			cur_metaparams->rotary_button.register_falling_edge();
-		}
-	}
-	cur_metaparams->rotary_button.set_state_no_events(rotary_button.is_pressed());
-
-	// Rotary turning
-	int new_rotary_motion = rotary.read();
-	bool pressed = rotary_button.is_pressed();
-	cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
-	cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
-	//"If rotary was turned at any point since button was pressed" --> logical OR of all (pressed AND new_motion)
-	_rotary_moved_while_pressed |= pressed && (new_rotary_motion != 0);
-}
-
 void Controls::update_midi_connected() {
-	_midi_connected_raw.update(_midi_host.is_connected());
+	usb_midi_connected_raw.update(usb_midi_host.is_connected());
 
-	if (_midi_connected_raw.went_low()) {
-		_midi_parser.start_all_notes_off_sequence();
+	if (usb_midi_connected_raw.went_high()) {
+		usb_midi_connected = true;
 	}
-
-	if (_midi_connected_raw.went_high()) {
-		_midi_connected = true;
-	}
-
-	if (cur_metaparams->midi_poly_chans > 0)
-		_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
 }
 
-void Controls::update_control_expander() {
-	// Control expander
-	cur_metaparams->button_exp_connected = control_expander.button_expanders_connected();
+// Update one neopixel
+void Controls::set_next_neopixel() {
+	auto i = neopixel_ctr;
 
-	uint32_t buttons_state = control_expander.get_buttons();
-	cur_metaparams->ext_buttons_high_events = 0;
-	cur_metaparams->ext_buttons_low_events = 0;
-	for (auto [i, extbut] : enumerate(ext_buttons)) {
-
-		extbut.register_state(buttons_state & (1 << i));
-		if (extbut.just_went_high())
-			cur_metaparams->ext_buttons_high_events |= (1 << i);
-		if (extbut.just_went_low())
-			cur_metaparams->ext_buttons_low_events |= (1 << i);
+	if (i < cur_leds->neo_a.size()) {
+		auto const &led = cur_leds->neo_a[i];
+		neopixel_a.set_led(i, led.red(), led.green(), led.blue());
+		neopixel_ctr++;
+		return;
 	}
+
+	i -= Neopixels::num_leds_a;
+
+	if (i < Neopixels::num_leds_b) {
+		auto const &led = cur_leds->neo_b[i];
+		neopixel_a.set_led(i, led.red(), led.green(), led.blue());
+		neopixel_ctr++;
+		return;
+	}
+
+	i -= Neopixels::num_leds_b;
+
+	if (i < Neopixels::num_leds_vu) {
+		auto const &led = cur_leds->neo_vu[i];
+		neopixel_a.set_led(i, led.red(), led.green(), led.blue());
+		neopixel_ctr++;
+	}
+
+	if (neopixel_ctr >= Neopixels::num_leds_a + Neopixels::num_leds_b + Neopixels::num_leds_vu)
+		neopixel_ctr = 0;
 }
 
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected
-	if (cur_params->raw_msg.raw() != MidiMessage{}.raw()) {
-		if (_midi_connected_raw.is_high()) {
+	if (cur_params->usb_raw_midi.raw() != MidiMessage{}.raw()) {
+		if (usb_midi_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
-			cur_params->raw_msg.make_usb_msg(bytes);
-			_midi_host.transmit(bytes);
+			cur_params->usb_raw_midi.make_usb_msg(bytes);
+			usb_midi_host.transmit(bytes);
 		}
 	}
 
-	// Parse a MIDI message if available
-	if (auto msg = _midi_rx_buf.get(); msg.has_value()) {
-		cur_params->raw_msg = msg.value();
-		cur_params->midi_event = _midi_parser.parse(msg.value());
-
-	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence()) {
-		if (noteoff->type == Midi::Event::Type::None) {
-			_midi_connected = false;
-			cur_metaparams->midi_connected = _midi_connected;
-			cur_params->raw_msg = MidiMessage{};
-			cur_params->midi_event.type = Midi::Event::Type::None;
-		} else {
-			cur_params->midi_event = *noteoff;
-			cur_params->raw_msg = {0x80, noteoff->note, 0};
-		}
-
-	} else {
-		cur_params->raw_msg = MidiMessage{};
-		cur_params->midi_event.type = Midi::Event::Type::None;
+	auto uart_midi_raw = cur_params->uart_raw_midi.raw();
+	if (uart_midi_raw != MidiMessage{}.raw()) {
+		uart_midi.transmit(uart_midi_raw >> 16); //status
+		uart_midi.transmit(uart_midi_raw >> 8);	 //data[0]
+		uart_midi.transmit(uart_midi_raw >> 0);	 //data[1]
 	}
+
+	// Parse incoming MIDI messages if available
+	cur_params->usb_raw_midi = usb_midi_rx_buf.get().value_or(MidiMessage{});
+	cur_params->uart_raw_midi = uart_midi_rx_buf.get().value_or(MidiMessage{});
 }
 
 template<size_t block_num>
 void Controls::start_param_block() {
 	static_assert(block_num <= 1, "There is only block 0 and block 1");
 
-	// 28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
 	cur_metaparams = &param_blocks[block_num].metaparams;
 	cur_params = param_blocks[block_num].params.begin();
+	cur_leds = &param_blocks[block_num].leds;
 	_first_param = true;
 	_buffer_full = false;
 
@@ -190,7 +179,7 @@ void Controls::start() {
 
 	read_controls_task.start();
 
-	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
+	usb_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
 		bool ignore = false;
 
 		while (rxbuffer.size() >= 4) {
@@ -205,67 +194,108 @@ void Controls::start() {
 				ignore = false;
 
 			if (!ignore)
-				_midi_rx_buf.put(msg);
+				usb_midi_rx_buf.put(msg);
 
 			rxbuffer = rxbuffer.subspan(4);
 			// msg.print();
 		}
-		_midi_host.receive();
+		usb_midi_host.receive();
 	});
 }
 
 void Controls::process() {
-	sense_pin_reader.update();
-	control_expander.update();
+	gpio_expanders.update();
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
 	this->sample_rate = sample_rate;
-	for (auto &_knob : _knobs) {
-		_knob.set_num_updates(sample_rate / AdcReadFrequency);
+	for (auto &knob : knobs) {
+		knob.set_num_updates(sample_rate * 8 / AdcReadFrequency);
+	}
+	for (auto &cv : cvs) {
+		cv.set_num_updates(sample_rate / AdcReadFrequency);
 	}
 }
 
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
-	: _midi_host{midi_host}
+	: usb_midi_host{midi_host}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
-	, cur_metaparams(&param_blocks_ref[0].metaparams) {
+	, cur_metaparams(&param_blocks_ref[0].metaparams)
+	, cur_leds(&param_blocks_ref[0].leds) {
 
-	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
-	// TODO: _new_adc_data_ready is set true here (pri 2) and set false in read_controls_task (pri 0)
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {
+
+			// Store readings into unpacked array
+			for (uint32_t i = ADCs::VOct; auto &cv : cvs) {
+				cv.set_new_value(get_adc_reading(i));
+				i++;
+			}
+			num_cv_updates = 0;
+
+			auto offset = mux_chan & 0b111;
+			for (uint32_t mux = ADCs::Mux1; mux <= ADCs::Mux5; mux++) {
+				knobs[mux * 8 + offset].set_new_value(get_adc_reading(mux));
+			}
+
+			// Advance the MUX
+			mux_chan++;
+			adc_mux_a.set(mux_chan & 0b001);
+			adc_mux_b.set(mux_chan & 0b010);
+			adc_mux_c.set(mux_chan & 0b100);
+			if (mux_chan == 0) {
+				num_pot_updates = 0;
+			}
+
+			// Let mux pins settle
+			int x = ADCs::mux_settle_period;
+			while (x--) {
+				__NOP();
+			}
+
+			// Start conversion
 			ADC1->ISR = tmp | ADC_ISR_EOS;
-			_new_adc_data_ready = true;
+			ADC1->CR |= ADC_CR_ADSTART;
 		}
 	});
 
 	set_samplerate(sample_rate);
 
-	pot_adc.start();
+	adc.start();
 
-	// Todo: use RCC_Enable or create DBGMCU_Control:
-	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen
+	uart_midi.init();
+
+	haptic_out.init();
+
+	test_pins();
+
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 
+	// Task is called at sample rate
 	read_controls_task.init([this]() {
-		if (_buffer_full)
+		if (_buffer_full) {
 			return;
+		}
 		update_debouncers();
 		update_params();
 	});
 }
 
-float Controls::get_pot_reading(uint32_t pot_id) {
-	if (pot_id < pot_vals.size()) {
-		auto raw = (int32_t)pot_vals[pot_id];
-		float val = raw - MinPotValue;
-		return std::clamp(val / MaxPotValue, 0.f, 1.f);
-	}
-	return 0;
+void Controls::output_dac() {
+	cv_out.set(0, cur_params->dac0);
+	cv_out.set(1, cur_params->dac1);
+}
+
+float Controls::get_adc_reading(uint32_t adc_id) {
+	if (adc_id < raw_adc_vals.size()) {
+		auto raw = (int32_t)raw_adc_vals[adc_id];
+		float val = raw - ADCs::MinPotValue;
+		return std::clamp(val / (ADCs::MaxPotValue - ADCs::MinPotValue), 0.f, 1.f);
+	} else
+		return 0;
 }
 
 } // namespace MetaModule
