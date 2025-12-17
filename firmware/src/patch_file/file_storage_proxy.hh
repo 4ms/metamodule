@@ -197,10 +197,10 @@ public:
 		return comm_.send_message(message);
 	}
 
-	[[nodiscard]] bool request_wifi_ip() {
-		IntercoreStorageMessage message{.message_type = RequestWifiIP};
-		return comm_.send_message(message);
-	}
+	// [[nodiscard]] bool request_wifi_ip() {
+	// 	IntercoreStorageMessage message{.message_type = RequestWifiIP};
+	// 	return comm_.send_message(message);
+	// }
 
 	[[nodiscard]] bool
 	request_dir_entries(DirTree<FileEntry> *dir_tree, Volume vol, std::string_view path, std::string_view extension) {

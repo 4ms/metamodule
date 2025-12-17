@@ -192,24 +192,24 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 						moveToState(Writing);
 						break;
 
-					case FileStorageProxy::WifiExpanderCommError:
+					// case FileStorageProxy::WifiExpanderCommError:
 					case FileStorageProxy::ReadFlashFailed:
 					case FileStorageProxy::ChecksumFailed:
 						abortWithMessage("Error when comparing checksums");
 						break;
 
-					case FileStorageProxy::WifiExpanderNotConnected: {
-						error_message = "No Wifi Expander: skipping ";
+						// case FileStorageProxy::WifiExpanderNotConnected: {
+						// 	error_message = "No Wifi Expander: skipping ";
 
-						auto full_path = manifest.files[current_file_idx].filename;
-						auto slash_pos = full_path.find_first_of("/");
-						if (slash_pos != std::string::npos)
-							error_message += full_path.substr(slash_pos + 1);
-						else
-							error_message += full_path;
+						// 	auto full_path = manifest.files[current_file_idx].filename;
+						// 	auto slash_pos = full_path.find_first_of("/");
+						// 	if (slash_pos != std::string::npos)
+						// 		error_message += full_path.substr(slash_pos + 1);
+						// 	else
+						// 		error_message += full_path;
 
-						proceedWithNextFile();
-					} break;
+						// 	proceedWithNextFile();
+						// } break;
 
 					default:
 						break;

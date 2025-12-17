@@ -173,45 +173,6 @@ add_custom_command(
                                         ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} 
                                         && rm -rf ${RELEASE_TARGET_DIR}
 
-  # Firmware+Assets+Wifi
-  COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
-                                   --version         "${GIT_FIRMWARE_VERSION_TAG}"
-                                   --assets          "${ASSET_IMG_PATH}"
-                                   --app             "${MAIN_FW_FILENAME}"
-                                   --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-bootloader.bin"
-                                   --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-application.bin"
-                                   --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-filesystem.img"
-                                   "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_AS_WIFI_ARCHIVE} --format=zip -- 
-                                        ${RELEASE_TARGET_DIR} 
-                                        && rm -rf ${RELEASE_TARGET_DIR}
-
-  # Firmware+Assets+Bootloaders+Wifi
-  COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
-                                   --version         "${GIT_FIRMWARE_VERSION_TAG}"
-                                   --fsbl            "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot/build/fsbl.stm32"
-                                   --dfu             "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu/build/usbdfu.uimg"
-                                   --assets          "${ASSET_IMG_PATH}"
-                                   --app             "${MAIN_FW_FILENAME}"
-                                   --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-bootloader.bin"
-                                   --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-application.bin"
-                                   --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-filesystem.img"
-                                   "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_AS_BL_WIFI_ARCHIVE} --format=zip -- 
-                                        ${RELEASE_TARGET_DIR} 
-                                        && rm -rf ${RELEASE_TARGET_DIR}
-
-  # Wifi only
-  COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
-                                   --version         "${GIT_FIRMWARE_VERSION_TAG}"
-                                   --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-bootloader.bin"
-                                   --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-application.bin"
-                                   --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-filesystem.img"
-                                   "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_WIFI_ARCHIVE} --format=zip -- 
-                                        ${RELEASE_TARGET_DIR} 
-                                        && rm -rf ${RELEASE_TARGET_DIR}
-
   DEPENDS ${MAIN_FW_FILENAME} ${ASSET_IMG_PATH} bootloader bootloader-dfu AlwaysCheckGit
   COMMENT "Creating releases at ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-*.zip"
   VERBATIM USES_TERMINAL

@@ -3,12 +3,8 @@
 #include "fs/volumes.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "util/static_string.hh"
-#include "wifi/wifi_result_t.hh"
-#include <array>
 #include <cstdint>
-#include <expected>
 #include <span>
-#include <variant>
 
 namespace MetaModule
 {
@@ -36,8 +32,8 @@ struct IntercoreStorageMessage {
 		ChecksumMismatch,
 		ChecksumFailed,
 		ReadFlashFailed,
-		WifiExpanderNotConnected,
-		WifiExpanderCommError,
+		// WifiExpanderNotConnected,
+		// WifiExpanderCommError,
 
 		StartFlashing, // write to Flash or WifiExpander
 		FlashingOk,
@@ -69,9 +65,9 @@ struct IntercoreStorageMessage {
 		DeleteFileFailed,
 		DeleteFileSuccess,
 
-		RequestWifiIP,
-		WifiIPSuccess,
-		WifiIPFailed,
+		// RequestWifiIP,
+		// WifiIPSuccess,
+		// WifiIPFailed,
 
 		RequestPatchFileInfo,
 		PatchFileInfoFailed,
@@ -107,44 +103,11 @@ struct IntercoreStorageMessage {
 	enum FlashTarget : uint8_t { WIFI, QSPI };
 	FlashTarget flashTarget;
 
-	WifiIPResult wifi_ip_result;
-
 	PluginFileList *plugin_file_list;
 
 	DirTree<FileEntry> *dir_entries;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);
-
-///////////////////////////////////////
-// TODO: Use this instead of MessageType
-
-// struct PatchListMsg {
-// 	PatchFileList &patch_list;
-// 	enum class Result { Unchanged, Changed } result;
-// };
-// struct PatchData;
-// struct PatchDataLoadMsg {
-// 	PatchData &patch_data;
-// 	Volume vol;
-// 	unsigned patch_id; //change to filename
-// 	// StaticString<255> filename;
-// 	std::span<char> buffer;
-// 	enum class Result { LoadFailed, LoadOK } result;
-// };
-// struct FirmwareFindMsg {
-// 	StaticString<255> filename;
-// 	Volume vol_id;
-// 	uint32_t filesize;
-// 	enum class Result { Unchanged, FileFound, NotFound } result;
-// };
-// struct FileLoadMsg {
-// 	std::span<char> buffer;
-// 	StaticString<255> filename;
-// 	Volume vol_id;
-// 	enum class Result { Failed, Success } result;
-// };
-
-// using Message = std::variant<PatchListMsg, PatchDataLoadMsg, FirmwareFindMsg, FileLoadMsg>;
 
 } // namespace MetaModule

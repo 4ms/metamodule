@@ -14,7 +14,6 @@ set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp1)
 set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
 set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
 set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
-set(WIFI_DIR ${FWDIR}/src/wifi)
 
 add_executable(
   main_m4.elf
@@ -61,6 +60,7 @@ add_executable(
   ${HALDIR}/src/stm32mp1xx_hal_adc.c
   ${HALDIR}/src/stm32mp1xx_hal_adc_ex.c
   ${HALDIR}/src/stm32mp1xx_hal_cortex.c
+  ${HALDIR}/src/stm32mp1xx_hal_dac.c
   ${HALDIR}/src/stm32mp1xx_hal_dma.c
   ${HALDIR}/src/stm32mp1xx_hal_hcd.c
   ${HALDIR}/src/stm32mp1xx_hal_i2c.c
