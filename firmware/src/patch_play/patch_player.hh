@@ -1,6 +1,5 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
-#include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/patch_conf.hh"
 #include "coreproc_plugin/async_thread_control.hh"
