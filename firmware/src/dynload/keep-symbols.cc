@@ -44,6 +44,20 @@ double __attribute__((optimize("-O0"))) keep_math(float x);
 void keep_dirent();
 
 void __attribute__((optimize("-O0"))) keep_symbols() {
+	// These symbols are in MetaModule SDK v2.1, but missing from this firmware:
+	// (in addition to all rack-interface symbols)
+	//cosqb
+	//cosqf
+	//cosqi
+	//cost
+	//costi
+	//roundevenf
+	//sinqb
+	//sinqf
+	//sinqi
+	//sint
+	//sinti
+
 	{
 		auto x = &calloc;
 		(void)x;
