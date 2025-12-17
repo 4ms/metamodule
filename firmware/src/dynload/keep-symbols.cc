@@ -40,6 +40,9 @@ extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp);
 extern "C" void __cxa_pure_virtual();
 extern "C" void *memalign(size_t align, size_t nbytes);
 
+double __attribute__((optimize("-O0"))) keep_math(float x);
+void keep_dirent();
+
 void __attribute__((optimize("-O0"))) keep_symbols() {
 	{
 		auto x = &calloc;
@@ -78,6 +81,10 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 		(void)x;
 	}
 
+	{
+		MetaModule::StreamingWaveformDisplay s{0, 0};
+	}
+
 	MetaModule::Filesystem::is_local_path("");
 	MetaModule::Patch::get_path();
 	MetaModule::Patch::get_dir();
@@ -89,10 +96,13 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	MetaModule::System::get_ticks();
 	MetaModule::System::delay_ms(1);
 	MetaModule::System::hardware_random();
-	//register_module
 	MetaModule::Gui::notify_user("", 1);
 	std::array<uint8_t, 3> c{0, 0, 0};
 	MetaModule::Midi::toPrettyString(c);
+
+	(void)keep_math(12.334f);
+
+	keep_dirent();
 }
 
 void keep_async() {
@@ -105,9 +115,10 @@ void keep_async() {
 							  }};
 }
 
-void __attribute__((optimize("-O0"))) keep_math(float x) {
+double __attribute__((optimize("-O0"))) keep_math(float x) {
 	[[maybe_unused]] auto y = log1pl(x);
 	[[maybe_unused]] auto z = expm1l(y);
+	return z;
 }
 
 void keep_dirent() {

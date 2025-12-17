@@ -18,6 +18,8 @@ target_sources(
 
 if(NOT DEFINED METAMODULE_HEADLESS)
   target_sources(coreproc_plugin_export PRIVATE graphics/waveform_display.cc)
+else()
+  target_sources(coreproc_plugin_export PRIVATE graphics/waveform_display_stub.cc)
 endif()
 
 target_link_libraries(coreproc_plugin_export PRIVATE cpputil metamodule::core-interface CoreModules)
