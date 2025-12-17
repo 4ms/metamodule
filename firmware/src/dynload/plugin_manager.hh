@@ -1,10 +1,12 @@
 #pragma once
 #include "fs/fatfs/fat_file_io.hh"
-#include "gui/fonts/ttf.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
 
+#ifdef MM_USE_FONTS
 #include "gui/fonts/fonts.hh"
+#include "gui/fonts/ttf.hh"
+#endif
 
 namespace MetaModule
 {
@@ -34,12 +36,14 @@ public:
 
 				// Cleanup files we copied to the ramdisk
 				for (auto const &file : plugin.loaded_files) {
+#ifdef MM_USE_FONTS
 					if (file.ends_with(".bin")) {
 						Fonts::free_font(file);
 					}
 					if (file.ends_with(".ttf")) {
 						Fonts::free_ttf(file);
 					}
+#endif
 					ramdisk.delete_file(file);
 				}
 
