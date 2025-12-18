@@ -147,6 +147,8 @@ add_executable(
   ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
+
+  ${FWDIR}/modules/ramp-vco.cc
 )
 
 

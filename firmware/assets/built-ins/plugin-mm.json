@@ -6,8 +6,12 @@
 	"MetaModuleDescription": "",
 	"MetaModuleIncludedModules": [
 		{
-			"slug": "MyModule",
-			"name": "My Module Name"
+			"slug": "Blank",
+			"name": "Blank Module"
+		},
+		{
+			"slug": "RampVCO",
+			"name": "RampVCO"
 		}
 	]
 }

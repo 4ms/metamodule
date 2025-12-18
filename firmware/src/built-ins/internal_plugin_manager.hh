@@ -5,9 +5,11 @@
 #include "fat_file_io.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
-#include "modules/blank.hh"
 #include <span>
 #include <string_view>
+
+#include "modules/blank.hh"
+#include "modules/ramp-vco.hh"
 
 #ifdef SIMULATOR
 #include "ext_plugin_builtin.hh"
@@ -74,13 +76,10 @@ struct InternalPluginManager {
 		// Load internal plugins
 
 		// Native modules:
-		register_module<Blank, BlankInfo>("MyBrandSlug");
-		parse_brand_jsons("built-ins/");
+		register_module<Blank, BlankInfo>("InternalBuiltIns");
+		register_module<DemoBuiltIns::RampVCO, DemoBuiltIns::RampVCOInfo>("InternalBuiltIns");
 
-		// VCV Ports:
-		// pluginInstance = &internal_plugins.emplace_back("YourInternalBrandHere");
-		// pluginInstance->addModel(yourModuleName);
-		// parse_brand_jsons("YourInternalBrandHere");
+		parse_brand_jsons("built-ins/");
 	}
 
 	void parse_brand_jsons(std::string directory) {

@@ -12,11 +12,19 @@
   "changelogUrl": "",
   "modules": [
     {
-      "slug": "MyModule",
-      "name": "My Module Name",
-      "description": "An example module",
+      "slug": "Blank",
+      "name": "Blank module",
+      "description": "An example module that does nothing",
       "tags": [
         "Utility"
+      ]
+    },
+    {
+      "slug": "RampVCO",
+      "name": "Ramp up VCO",
+      "description": "An example module",
+      "tags": [
+        "VCO"
       ]
     }
   ]
