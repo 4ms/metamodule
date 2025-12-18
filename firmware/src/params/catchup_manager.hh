@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
-#include "CoreModules/hub/button_expander_defs.hh"
 #include "catchup_param.hh"
+#include "conf/mapping_ids.hh"
 #include "conf/panel_conf.hh"
 #include "patch-serial/patch/patch.hh"
 #include "toggle_param.hh"
@@ -37,7 +37,7 @@ public:
 		for (auto &knob_map : active_knob_maps[panel_knob_id]) {
 			auto &map = knob_map.map;
 
-			if (map.is_button()) {
+			if (is_button(map.panel_knob_id)) {
 				if (is_toggle(map)) {
 					toggle_button(modules[map.module_id], map, val);
 				} else {

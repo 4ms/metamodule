@@ -1271,7 +1271,7 @@ private:
 		if (knob_set >= knob_maps.size())
 			return;
 
-		if (k.is_panel_knob() || k.is_button()) {
+		if (is_panel_knob(k.panel_knob_id) || is_button(k.panel_knob_id)) {
 			// Update existing, if present
 			for (auto &el : knob_maps[knob_set][k.panel_knob_id]) {
 				if (el.map.maps_to_same_as(k)) {

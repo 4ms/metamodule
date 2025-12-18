@@ -19,6 +19,8 @@ struct PanelDef {
 	static constexpr uint32_t NumGateIn = 4;
 	static constexpr uint32_t NumGateOut = 2;
 
+	static constexpr uint32_t NumButtons = 48; // 3 MUX of 16 pins each (some are not connected)
+
 	static constexpr uint32_t NumMetaCV = 0;
 	static constexpr uint32_t NumRgbButton = 0;
 	static constexpr uint32_t NumMetaRgbButton = 0;
