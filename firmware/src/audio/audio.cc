@@ -98,6 +98,22 @@ TriangleOscillator<48000> tri2{1000};
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	player.sync();
 
+	// Buttons
+	for (auto [i, sync_button] : enumerate(param_state.buttons)) {
+		auto src = (i < 16) ? param_block.metaparams.buttons0 :
+				   (i < 32) ? param_block.metaparams.buttons1 :
+							  param_block.metaparams.buttons2;
+		bool button = (src >> i) & 1;
+
+		sync_button.register_state(button);
+
+		if (sync_button.just_went_low())
+			player.set_panel_param(i + FirstButton, 0.f);
+
+		else if (sync_button.just_went_high())
+			player.set_panel_param(i + FirstButton, 1.f);
+	}
+
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];

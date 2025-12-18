@@ -14,8 +14,7 @@ struct MappedParam {
 	MappedKnob map;
 	CatchupParam catchup;
 };
-//[0-11] knobs
-//[12-43] buttons
+
 using ParamSet = std::array<std::vector<MappedParam>, NumTotalParams>;
 
 class CatchupManager {

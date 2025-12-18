@@ -1,10 +1,10 @@
 #pragma once
 #include "conf/hsem_conf.hh"
 #include "drivers/hsem.hh"
+#include "midi_params.hh"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
-// #include "patch_play/patch_player.hh"
-// #include "util/lockfree_fifo_spsc.hh"
+#include "util/lockfree_fifo_spsc.hh"
 
 namespace MetaModule
 {
@@ -17,7 +17,7 @@ namespace MetaModule
 // Non-blocking, if simultaneous read/write occurs, it just returns
 // (unmodified local copy will still be valid, just out-dated)
 struct SyncParams {
-	// LockFreeFifoSpsc<Midi::Event, 64> midi_events;
+	LockFreeFifoSpsc<Midi::Event, 64> midi_events;
 
 private:
 	ParamsState p;
@@ -31,25 +31,27 @@ public:
 		clear();
 	}
 
+	// Audio thread calls this
 	void write_sync(ParamsState &params, MetaParams &metaparams) {
-		// using namespace mdrivlib;
-		// if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
-		// 	copy(p, params);
-		// 	m.update_with(metaparams);
-		// 	HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
-		// }
+		using namespace mdrivlib;
+		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
+			copy(p, params);
+			m.update_with(metaparams);
+			HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
+		}
 	}
 
+	// UI thread calls this
 	bool read_sync(ParamsState &params, MetaParams &metaparams) {
 		bool read_ok = false;
 
-		// using namespace mdrivlib;
-		// if (HWSemaphore<ParamCacheLock>::lock(ReadProcID) == HWSemaphoreFlag::LockedOk) {
-		// 	transfer_events(params, p);
-		// 	metaparams.transfer(m);
-		// 	HWSemaphore<ParamCacheLock>::unlock(ReadProcID);
-		// 	read_ok = true;
-		// }
+		using namespace mdrivlib;
+		if (HWSemaphore<ParamCacheLock>::lock(ReadProcID) == HWSemaphoreFlag::LockedOk) {
+			transfer_events(params, p);
+			metaparams.transfer(m);
+			HWSemaphore<ParamCacheLock>::unlock(ReadProcID);
+			read_ok = true;
+		}
 
 		// while (true) {
 		// 	if (auto event = midi_events.get(); event.has_value()) {
