@@ -1,9 +1,7 @@
 #include "settings_parse.hh"
-#include "catchup_settings.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"
-#include "util/countzip.hh"
 #include <span>
 
 namespace MetaModule
@@ -18,34 +16,7 @@ void read_or_default(ryml::ConstNodeRef const &n, c4::csubstr name, T *s, auto m
 	}
 }
 
-static bool read(ryml::ConstNodeRef const &n, MapRingStyle *s) {
-	if (!n.is_map())
-		return false;
-
-	using enum MapRingStyle::Mode;
-
-	if (n.has_child("mode")) {
-		s->mode = n["mode"].val() == "HideAlways"		  ? HideAlways :
-				  n["mode"].val() == "CurModule"		  ? CurModule :
-				  n["mode"].val() == "CurModuleIfPlaying" ? CurModuleIfPlaying :
-				  n["mode"].val() == "ShowAll"			  ? ShowAll :
-				  n["mode"].val() == "ShowAllIfPlaying"	  ? ShowAllIfPlaying :
-															ShowAll;
-	} else {
-		s->mode = MapRingStyle{}.mode;
-	}
-
-	// Use default value if opa is defined, but not a number
-	if (n.has_child("opa") && n["opa"].val().is_number()) {
-		n["opa"] >> s->opa;
-	} else {
-		s->opa = MapRingStyle{}.opa;
-	}
-
-	return true;
-}
-
-static bool read(ryml::ConstNodeRef const &node, AudioSettings *audio) {
+[[maybe_unused]] static bool read(ryml::ConstNodeRef const &node, AudioSettings *audio) {
 	if (!node.is_map())
 		return false;
 
@@ -57,7 +28,7 @@ static bool read(ryml::ConstNodeRef const &node, AudioSettings *audio) {
 	return true;
 }
 
-static bool read(ryml::ConstNodeRef const &node, PluginPreloadSettings *autoload) {
+[[maybe_unused]] static bool read(ryml::ConstNodeRef const &node, PluginPreloadSettings *autoload) {
 	if (!node.is_seq())
 		return false;
 
@@ -65,115 +36,6 @@ static bool read(ryml::ConstNodeRef const &node, PluginPreloadSettings *autoload
 	auto pos = 0u;
 	for (auto const ch : node.children())
 		ch >> autoload->slugs[pos++];
-
-	return true;
-}
-
-static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
-	if (!node.is_map())
-		return false;
-
-	read_or_default(node, "map_ring_flash_active", s, &ModuleDisplaySettings::map_ring_flash_active);
-	read_or_default(node, "scroll_to_active_param", s, &ModuleDisplaySettings::scroll_to_active_param);
-	read_or_default(node, "view_height_px", s, &ModuleDisplaySettings::view_height_px);
-	read_or_default(node, "param_style", s, &ModuleDisplaySettings::param_style);
-	read_or_default(node, "paneljack_style", s, &ModuleDisplaySettings::paneljack_style);
-	read_or_default(node, "cable_style", s, &ModuleDisplaySettings::cable_style);
-	read_or_default(node, "show_graphic_screens", s, &ModuleDisplaySettings::show_graphic_screens);
-	read_or_default(node, "graphic_screen_throttle", s, &ModuleDisplaySettings::graphic_screen_throttle);
-	read_or_default(node, "show_samplerate", s, &ModuleDisplaySettings::show_samplerate);
-	read_or_default(node, "float_loadmeter", s, &ModuleDisplaySettings::float_loadmeter);
-	read_or_default(node, "show_knobset_name", s, &ModuleDisplaySettings::show_knobset_name);
-	read_or_default(node, "show_jack_aliases", s, &ModuleDisplaySettings::show_jack_aliases);
-	read_or_default(node, "show_knob_aliases", s, &ModuleDisplaySettings::show_knob_aliases);
-
-	return true;
-}
-
-static bool read(ryml::ConstNodeRef const &node, ScreensaverSettings *s) {
-	if (!node.is_map())
-		return false;
-
-	read_or_default(node, "index", s, &ScreensaverSettings::timeout_ms);
-	read_or_default(node, "knobs_can_wake", s, &ScreensaverSettings::knobs_can_wake);
-
-	return true;
-}
-
-static bool read(ryml::ConstNodeRef const &node, CatchupSettings *settings) {
-	if (!node.is_map())
-		return false;
-
-	using enum CatchupParam::Mode;
-
-	if (node.has_child("mode")) {
-		settings->mode = node["mode"].val() == "ResumeOnEqual"	? ResumeOnEqual :
-						 node["mode"].val() == "ResumeOnMotion" ? ResumeOnMotion :
-						 node["mode"].val() == "LinearFade"		? LinearFade :
-																  ResumeOnMotion;
-	} else {
-		settings->mode = CatchupParam{}.mode;
-	}
-
-	read_or_default(node, "allow_jump_outofrange", settings, &CatchupSettings::allow_jump_outofrange);
-	settings->make_valid();
-
-	return true;
-}
-
-static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
-	if (!node.is_map())
-		return false;
-
-	using enum CatchupParam::Mode;
-
-	read_or_default(node, "auto_reload_patch_file", settings, &FilesystemSettings::auto_reload_patch_file);
-	read_or_default(node, "max_open_patches", settings, &FilesystemSettings::max_open_patches);
-	settings->make_valid();
-
-	return true;
-}
-
-[[maybe_unused]] static bool read(ryml::ConstNodeRef const &node, MidiSettings *settings) {
-	if (!node.is_map())
-		return false;
-
-	using enum MidiSettings::MidiFeedback;
-
-	if (node.has_child("midi_feedback")) {
-		settings->midi_feedback = node["midi_feedback"].val() == "1" ? Enabled : Disabled;
-	} else {
-		settings->midi_feedback = MidiSettings{}.midi_feedback;
-	}
-
-	settings->make_valid();
-
-	return true;
-}
-
-static bool read(ryml::ConstNodeRef const &node, PatchSuggestedAudioSettings *settings) {
-	if (!node.is_map())
-		return false;
-
-	read_or_default(node, "apply_samplerate", settings, &PatchSuggestedAudioSettings::apply_samplerate);
-	read_or_default(node, "apply_blocksize", settings, &PatchSuggestedAudioSettings::apply_blocksize);
-	settings->make_valid();
-
-	return true;
-}
-
-static bool read(ryml::ConstNodeRef const &node, MissingPluginSettings *settings) {
-	if (!node.is_map())
-		return false;
-
-	using enum MissingPluginSettings::Autoload;
-
-	if (node.has_child("autoload")) {
-		auto v = node["autoload"].val();
-		settings->autoload = v == "Always" ? Always : v == "Never" ? Never : Ask;
-	} else {
-		settings->autoload = MissingPluginSettings{}.autoload;
-	}
 
 	return true;
 }
@@ -196,17 +58,8 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 
 	ryml::ConstNodeRef node = root["Settings"];
 
-	read_or_default(node, "patch_view", settings, &UserSettings::patch_view);
-	read_or_default(node, "module_view", settings, &UserSettings::module_view);
 	read_or_default(node, "audio", settings, &UserSettings::audio);
 	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_preload);
-	read_or_default(node, "missing_plugins", settings, &UserSettings::missing_plugins);
-	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
-	read_or_default(node, "catchup", settings, &UserSettings::catchup);
-	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
-	read_or_default(node, "midi", settings, &UserSettings::midi);
-	read_or_default(node, "patch_suggested_audio", settings, &UserSettings::patch_suggested_audio);
-
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::initial_patch_name);
 	// TODO: cleaner way to parse an enum and reject out of range?
 	if (node.is_map() && node.has_child("last_patch_vol")) {

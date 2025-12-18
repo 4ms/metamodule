@@ -319,8 +319,8 @@ struct PatchPlayLoader {
 		if (!sugg_bs)
 			sugg_bs = settings->audio.block_size;
 
-		bool change_sr = settings->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
-		bool change_bs = settings->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
+		bool change_sr = /*settings->patch_suggested_audio.apply_samplerate &&*/ (sugg_sr > 0 && sugg_sr != cur_sr);
+		bool change_bs = /*settings->patch_suggested_audio.apply_blocksize &&*/ (sugg_bs > 0 && sugg_bs != cur_bs);
 
 		if (change_sr || change_bs) {
 			uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
@@ -356,7 +356,7 @@ struct PatchPlayLoader {
 	}
 
 	void update_param_catchup_mode() {
-		player_.set_catchup_mode(settings->catchup.mode, settings->catchup.allow_jump_outofrange);
+		// player_.set_catchup_mode(settings->catchup.mode, settings->catchup.allow_jump_outofrange);
 	}
 
 	void get_module_states() {
