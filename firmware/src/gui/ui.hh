@@ -2,7 +2,6 @@
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "general_io.hh"
-#include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -25,8 +24,6 @@ private:
 	MetaParams metaparams;
 	UserSettings settings;
 	NotificationQueue notify_queue;
-
-	ParamDbgPrint print_dbg_params{params, metaparams};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
@@ -55,13 +52,13 @@ public:
 
 		patch_playloader.request_new_audio_settings(
 			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);
+
 		// patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.allow_jump_outofrange);
 
 		ModuleFactory::setModuleDisplayName("HubMedium", "Panel");
 	}
 
 	void update_screen() {
-		// no screen
 	}
 
 	void read_patch_gui_elements() {
@@ -73,9 +70,6 @@ public:
 			last_page_update_tm = now;
 			page_update_task();
 		}
-
-		// print_dbg_params.output_debug_info(HAL_GetTick());
-		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
 	bool preload_all_plugins() {
