@@ -10,14 +10,7 @@ For examples, see [metamodule-plugin-examples](https://github.com/4ms/metamodule
 
 ### VCV Rack plugins
 
-Most plugins are VCV Rack modules re-compiled for the MetaModule. The `metamodule-rack-interface` submodule of the plugin SDK provides a similar API as the Rack SDK. The API functions are implemented as wrappers and adaptors for the `metamodule-core-interface`.
-
-TODO: 
-Describe system:
-- How faceplate is assigned
-- Rack components
-- ModuleWidget's widget tree -> element conversion
-- How images work and limitations
+This version of the MetaModule SDK has the VCV Rack adaptor removed. Plugins using the rack-interface of the SDK are not supported.
 
 
 ### Native plugins
@@ -39,8 +32,7 @@ A plugin's job is to intialize plugin-wide data (if any) and register its
 modules. This is usually done in init() but also can be done in the global
 constructors.
 
-In a typical VCV Rack plugin, modules are registered with calls to
-`p->addModel(modelName)` in init(). In the more general case, modules can be
+Modules can be
 registered using the function `register_module()`, defined in
 `metamodule-core-interface` in `CoreModules/register_module.hh`:
 

@@ -4,106 +4,76 @@ For creating a plugin, see [Plugins.md](Plugins.md)
 
 -----
 
-Below are instructions for adding a new built-in brand from an existing VCV Rack plugin, statically compiled 
-into the main firmware. This is not a common thing, typically you will use plugins (see above).
+Below are instructions for adding a new built-in module, statically compiled 
+into the main firmware. 
 
-1) **Add the module code as a git submodule into vcv_ports/**
+1) **Add the module code to `firmware/modules`. 
 
-```bash
-git submodule add https://github.com/<user>/<repo> firmware/vcv_ports/<Brand>
-```
+See `firmware/modules/blank.hh` for an example structure. Notice there are two classes or structs:
+the `Info` struct (`BlankInfo` in this case) and the `CoreProcessor` or
+`SmartCoreProcessor` class (called `Blank` in this case, which derives from
+`SmartCoreProcessor<BlankInfo>`)
 
-2) **Copy artwork PNG files**
+For larger modules, you might want to put the `Info` struct and the
+`CoreProcessor` class in different files, but it's up to you how to organize it.
 
-```bash
-mkdir -p firmware/assets/<Brand>/
-```
-
-Convert all your artwork SVG files (faceplates and components) into PNG files,
-and put them into this new directory.
-Make sure the faceplate PNG files are 240px high, and component PNG files are 
-scaled similarly.
-
-Keep the same file names and directory structure as your original VCV Rack plugin.
-Just change the `.svg` suffixes to `.png`.
-The `<Brand>` directory replaces the `res/` directory that VCV plugins use.
-
-
-3) **Create a brand `CMakeLists.txt` file**
-
-   Make a new file called `firmware/vcv_ports/glue/<Brand>/CMakeLists.txt`.
-   This file tells CMake how to build your modules. It's a fairly simple CMake
-   file, the only thing it must do is create a new target named <Brand>Library.
-
-   Here's an example:
+You also might want to make a `.hh` file for the module class declaration
+(interface), and a `.cpp` or `.cc` file that actually defines the methods
+(implementation). If you do this, make sure to add the `.cpp` file to 
+`firmware/src/CMakeLists.txt`. Like this:
 
 ```cmake
-
-cmake_minimum_required(VERSION 3.22)
-
-# Define your project name, vesion, etc
-project(MyBrandMetaModulePlugin 
-    VERSION     0.1 
-    DESCRIPTION "MyBrand Plugin for MetaModule" 
-    LANGUAGES   C CXX ASM
-)
-
-add_library(MyBrandLibrary STATIC)
-
-target_sources(MyBrandLibrary
-    PRIVATE
-    #Put all source files here
-)
-
-# Put whatever dirs you need to include here:
-target_include_directories(MyBrandLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../../MyBrand/src)
-
-# Put whatever compile options you need here
-target_compile_options(MyBrandLibrary PRIVATE -Wno-double-promotion)
-
-# Set properites here (at least c++20 is required)
-set_property(TARGET MyBrandLibrary PROPERTY CXX_STANDARD 23)
-
-```
-
-
-4) Add the brand name to `firmware/vcv_ports/brands.cmake`
-
-```cmake
-# List of brands
-set(brands
-  ...
-  <Brand>
+# Find this part of the cmake file:
+add_executable(
+  main.elf
+  # ....
+  # add your module anywhere in this list:
+  ${FWDIR}/modules/my_new_module.cpp
+  # ...
 )
 ```
 
+2) **Add modules to `internal_plugin_manager.hh`**
 
-5) **Add modules to internal_plugin_manager.hh**
-
-TODO
+In the `load_internal_plugins()` function, add a call to `register_module`. Follow the example
+given for the Blank module:
 
 ```c++
-// glue/Brand/plugin.hh
-#include "plugin/Plugin.hpp"
+void load_internal_plugins() {
+    //...
+    // Add this line:
+    register_module<MyNewModule, MyNewModuleInfo>("MyBrandSlug");
+```
 
-extern rack::plugin::Model *modelSomeModule;
-extern rack::plugin::Model *modelSomeOtherModule;
+3) **Optional: Add the module to the json files**
 
+If you want support for using module metadata in the firmware, then you need to add the metadata to both .json files.
+
+This gives you the ability to search/filter modules by tag, list module names by their
+display name (instread of just their slug), list brand aliases (display names).
+
+Add an entry for your new module into the "modules" section of `firmware/assets/plugin.json` and into the "MetaModuleIncludedModules" section of `firmware/assets/plugin-mm.json`.
+
+```json
+
+  "modules": [
+    # add this (make sure to avoid trailing commas!)
+    {
+      "slug": "MyModule",
+      "name": "My Module Name",
+      "description": "An example module",
+      "tags": [
+        "Utility"
+      ]
+    },
+    # more modules follow...
+  ]
 ```
 
 
-```c++
-// add this to internal_plugin_manager.hh:
-#include "glue/Brand/plugin.hh"
+4) **Optional: add any supporting files to `firmware/assets/built-ins`**
 
-// add this to the end of load_internal_plugins()
-    auto &MyBrand_plugin = internal_plugins.emplace_back("MyBrand");
-    pluginInstance = &MyBrand_plugin;
-    MyBrand_plugin.addModel(modelSomeModule);
-    MyBrand_plugin.addModel(modelSomeOtherModule);
+This is optional, but if you have any files that your modules will open 
+(like a .wav file perhaps), then put it in the assets dir.
+It be accessed from your module with `fopen`, using the path `ram:/filename.wav`
 
-```
-
-6) Run `make configure` to refresh the build with the new brand.
-
-Then build and update firmware as normal.
