@@ -22,10 +22,8 @@ struct ParamsState {
 	std::array<TogglerCompact, PanelDef::NumButtons> buttons{};
 	std::array<ResizingOversampler, PanelDef::NumAudioIn + AudioExpander::NumInJacks> smoothed_ins;
 
-	// TODO:
 	std::array<RotaryMotion, 2> encoder{};
 	bool usb_midi_connected = false;
-	uint32_t sample_rate = 48000;
 	uint32_t audio_load = 0;
 
 	void clear() {
@@ -75,6 +73,9 @@ struct ParamsState {
 		for (auto [this_enc, that_enc] : zip(dst.encoder, src.encoder)) {
 			this_enc.add_motion(that_enc);
 		}
+
+		dst.usb_midi_connected = src.usb_midi_connected;
+		dst.audio_load = src.audio_load;
 	}
 
 	friend void transfer_events(ParamsState &dst, ParamsState &src) {
@@ -106,6 +107,8 @@ struct ParamsState {
 		for (auto [enc, that_enc] : zip(dst.encoder, src.encoder)) {
 			enc.transfer_motion(that_enc);
 		}
+
+		dst.usb_midi_connected = src.usb_midi_connected;
 	}
 };
 

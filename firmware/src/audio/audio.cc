@@ -50,7 +50,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		// Debug::Pin0::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
-		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
+		param_state.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 		load_measure.start_measurement();
 
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
@@ -98,6 +98,7 @@ TriangleOscillator<48000> tri2{1000};
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	player.sync();
 
+	// TODO: param_state:encoders, usb_midi_connected
 	// Buttons
 	for (auto [i, sync_button] : enumerate(param_state.buttons)) {
 		auto src = (i < 16) ? param_block.metaparams.buttons0 :
