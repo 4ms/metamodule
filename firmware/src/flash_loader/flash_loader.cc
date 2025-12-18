@@ -6,7 +6,7 @@ namespace MetaModule
 {
 
 FlashLoader::FlashLoader()
-	: flash{qspi_patchflash_conf} {
+	: flash{qspi_norflash_conf} {
 }
 
 bool FlashLoader::check_flash_chip() {

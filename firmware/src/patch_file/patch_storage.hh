@@ -26,7 +26,7 @@ class PatchStorage {
 
 	FatFileIO &usbdrive_;
 
-	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
+	mdrivlib::QSpiFlash flash_{qspi_norflash_conf};
 	PatchVolFileIO norflash_{flash_};
 
 	PollChange usb_changes_{300};

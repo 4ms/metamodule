@@ -5,7 +5,7 @@ using mdrivlib::GPIO;
 using mdrivlib::PinAF;
 using mdrivlib::PinNum;
 
-constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
+constexpr mdrivlib::QSPIFlashConfig qspi_norflash_conf = {
 	.io0 = {GPIO::F, PinNum::_8, PinAF::AltFunc10},
 	.io1 = {GPIO::F, PinNum::_9, PinAF::AltFunc10},
 	.io2 = {GPIO::F, PinNum::_7, PinAF::AltFunc9},

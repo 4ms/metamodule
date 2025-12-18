@@ -11,7 +11,7 @@ namespace MetaModule
 
 struct AssetFS {
 	uint32_t flash_addr;
-	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
+	mdrivlib::QSpiFlash flash_{qspi_norflash_conf};
 
 	AssetFS(uint32_t flash_address)
 		: flash_addr{flash_address} {
