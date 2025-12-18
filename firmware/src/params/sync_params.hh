@@ -32,23 +32,21 @@ public:
 	}
 
 	// Audio thread calls this
-	void write_sync(ParamsState &params, MetaParams &metaparams) {
+	void write_sync(ParamsState &params, MetaParams &) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
 			copy(p, params);
-			m.update_with(metaparams);
 			HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
 		}
 	}
 
 	// UI thread calls this
-	bool read_sync(ParamsState &params, MetaParams &metaparams) {
+	bool read_sync(ParamsState &params, MetaParams &) {
 		bool read_ok = false;
 
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(ReadProcID) == HWSemaphoreFlag::LockedOk) {
 			transfer_events(params, p);
-			metaparams.transfer(m);
 			HWSemaphore<ParamCacheLock>::unlock(ReadProcID);
 			read_ok = true;
 		}

@@ -150,6 +150,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 				player.set_panel_param(i, knob_val);
 		}
 
+		// Pass CV values to module jacks
+		for (auto [i, cv_val, cv_state] : countzip(params.cvs, param_state.cvs)) {
+			if (cv_state.store_changed(cv_val))
+				player.set_panel_input(i + FirstCVInput, cv_val);
+		}
+
 		// USB MIDI
 		MidiMessage msg = params.usb_raw_midi;
 		midi.process(param_block.metaparams.usb_midi_connected, &msg);

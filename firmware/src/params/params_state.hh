@@ -3,6 +3,7 @@
 #include "util/debouncer_compact.hh"
 #include "util/filter.hh"
 #include "util/parameter.hh"
+#include "util/rotary_motion.hh"
 #include "util/zip.hh"
 #include <array>
 #include <cmath>
@@ -16,10 +17,16 @@ namespace MetaModule
 
 struct ParamsState {
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
-	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> cvs{};
+	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumCVIn> cvs{};
 	std::array<TogglerCompact, PanelDef::NumGateIn> gate_ins{};
 	std::array<TogglerCompact, PanelDef::NumButtons> buttons{};
 	std::array<ResizingOversampler, PanelDef::NumAudioIn + AudioExpander::NumInJacks> smoothed_ins;
+
+	// TODO:
+	std::array<RotaryMotion, 2> encoder{};
+	bool usb_midi_connected = false;
+	uint32_t sample_rate = 48000;
+	uint32_t audio_load = 0;
 
 	void clear() {
 		for (auto &knob : knobs)
@@ -63,9 +70,14 @@ struct ParamsState {
 
 		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
 			in = that_in;
+
+		// For rotary motion: adds events from hardware to events in this copy.
+		for (auto [this_enc, that_enc] : zip(dst.encoder, src.encoder)) {
+			this_enc.add_motion(that_enc);
+		}
 	}
 
-	friend void transfer_events(ParamsState &dst, ParamsState const &src) {
+	friend void transfer_events(ParamsState &dst, ParamsState &src) {
 		// Copy the state (pressed or not), set new events, and preserve any uncleared events
 		for (auto [gate_in, that_gate_in] : zip(dst.gate_ins, src.gate_ins)) {
 			gate_in.register_state(that_gate_in.is_high());
@@ -89,6 +101,11 @@ struct ParamsState {
 
 		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
 			in = that_in;
+
+		// Move rotary motion events from `that` to `this` (removing them from `that`,
+		for (auto [enc, that_enc] : zip(dst.encoder, src.encoder)) {
+			enc.transfer_motion(that_enc);
+		}
 	}
 };
 

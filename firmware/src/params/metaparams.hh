@@ -26,7 +26,6 @@ struct MetaParams {
 	bool usb_midi_connected = false;
 
 	uint32_t sample_rate = 48000;
-	uint32_t audio_load = 0;
 
 	MetaParams() {
 		clear();
