@@ -1,5 +1,5 @@
 #pragma once
-#include "board/display.hh"
+#include "board/screen/display.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "general_io.hh"
