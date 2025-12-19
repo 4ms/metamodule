@@ -30,7 +30,7 @@ struct PatchPlayLoader {
 		uint32_t tries = 10000;
 
 		if (patchname.length() == 0) {
-			patchname = "/SlothDrone.yml";
+			patchname = "/patch.yml";
 			patch_vol = Volume::NorFlash;
 		}
 
@@ -440,7 +440,7 @@ private:
 			return {false, "Internal error loading patch"};
 		}
 
-		pr_trace("Attempting play patch: %.31s\n", next_patch->patch_name.data());
+		pr_info("Attempting play patch: %.31s\n", next_patch->patch_name.data());
 
 		// Change the currently playing patch to point to the new patch
 		// This ensures that modules that use the patch location during
