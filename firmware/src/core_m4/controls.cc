@@ -180,21 +180,10 @@ void Controls::start() {
 	read_controls_task.start();
 
 	usb_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
-		bool ignore = false;
-
 		while (rxbuffer.size() >= 4) {
-			auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
+			auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 
-			//Starting ignoring from SysEx Start (F0)...
-			if (msg.is_sysex())
-				ignore = true;
-
-			//...until SysEx End (F7) received
-			if (ignore && msg.has_sysex_end())
-				ignore = false;
-
-			if (!ignore)
-				usb_midi_rx_buf.put(msg);
+			usb_midi_rx_buf.put(msg);
 
 			rxbuffer = rxbuffer.subspan(4);
 			// msg.print();
