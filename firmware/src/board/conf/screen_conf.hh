@@ -4,8 +4,9 @@
 #include "drivers/dma_transfer.hh"
 #include "drivers/spi_screen_config_struct.hh"
 
-namespace MetaModule
+namespace Mousai
 {
+
 using mdrivlib::FPin;
 using mdrivlib::GPIO;
 using mdrivlib::PinAF;
@@ -79,4 +80,4 @@ struct ScreenConf : mdrivlib::DefaultSpiScreenConf {
 
 using ScreenTransferDriverT = mdrivlib::DMATransfer<typename ScreenConf::DMAConf>;
 
-} // namespace MetaModule
+} // namespace Mousai

@@ -1,4 +1,5 @@
 #pragma once
+#include "board/display.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "general_io.hh"
@@ -23,6 +24,11 @@ private:
 	ParamsState param_state;
 	UserSettings settings;
 	NotificationQueue notify_queue;
+
+	Mousai::Display display;
+	// 1-bit per pixel:
+	using FrameBufferT = std::array<uint8_t, Mousai::ScreenBufferConf::width * Mousai::ScreenBufferConf::height / 8>;
+	static inline FrameBufferT framebuf alignas(64);
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
@@ -60,20 +66,37 @@ public:
 
 	void update_screen() {
 		// Here you can draw into the frame buffer
-		// Call screen.flush() to send it via SPI
+		if (display.is_ready()) {
+			// Fill it with a 50% grey pattern
+			for (auto &pix8 : framebuf)
+				pix8 = 0xAA;
 
-		// You can read the state of the module via params_state
+			display.flush_screen(framebuf);
+		}
+	}
+
+	void handle_event() {
+		// Here you can respond to parameter, encoder, and other UI events.
+		//
 		// Note these are events, so reading their value consumes the events.
-		// E.g.: use_motion() returns the accumulated motion of the encoder and resets it to 0
+		// E.g.:
+		// use_motion() returns the accumulated motion of the encoder and resets it to 0
+		// did_change() clears the changed flag
+		// is_just_pressed/released() clears the pressed/released flag
 
+		// To save CPU load, if any of these fields are not needed, remove them from ParamsState
+		// and from AudioStream (where the values are being set)
+
+		// Encoders
 		auto enc0 = param_state.encoder[0].use_motion();
 		if (enc0 != 0)
-			printf("Encoder 1: %d\n", enc0);
+			printf("Encoder 1: %d\n", (int)enc0);
 
 		auto enc1 = param_state.encoder[1].use_motion();
 		if (enc1 != 0)
-			printf("Encoder 2: %d\n", enc1);
+			printf("Encoder 2: %d\n", (int)enc1);
 
+		// Knobs/CV
 		for (auto i = 0u; i < param_state.knobs.size(); i++) {
 			if (param_state.knobs[i].did_change()) {
 				printf("Knob[%d] => %f\n", i, param_state.knobs[i].val);
@@ -86,6 +109,7 @@ public:
 			}
 		}
 
+		// Buttons/Gate jacks
 		for (auto i = 0u; i < param_state.buttons.size(); i++) {
 			if (param_state.buttons[i].is_just_pressed())
 				printf("Button %d pressed\n", i);
@@ -98,6 +122,13 @@ public:
 				printf("Gate %d high\n", i);
 			if (param_state.gate_ins[i].is_just_released())
 				printf("Gate %d low\n", i);
+		}
+
+		for (auto i = 0u; i < param_state.midi_ccs.size(); i++) {
+			if (param_state.midi_ccs[i].changed) {
+				param_state.midi_ccs[i].changed = false;
+				printf("MIDI CC%d => %d\n", i, param_state.midi_ccs[i].val);
+			}
 		}
 	}
 

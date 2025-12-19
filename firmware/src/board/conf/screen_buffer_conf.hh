@@ -2,8 +2,9 @@
 
 #include <cstdint>
 
-namespace MetaModule
+namespace Mousai
 {
+
 struct ScreenBufferConf {
 	//The width x height as defined by the screen hardware
 	static constexpr uint32_t width = 128;
@@ -17,4 +18,4 @@ struct ScreenBufferConf {
 	static constexpr uint32_t viewWidth = 128;
 	static constexpr uint32_t viewHeight = 64;
 };
-} // namespace MetaModule
+} // namespace Mousai

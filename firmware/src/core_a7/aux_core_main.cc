@@ -16,12 +16,6 @@
 #include "ramdisk_ops.hh"
 #include "system/print_time.hh"
 
-using namespace MetaModule;
-using FrameBufferT = std::array<uint8_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
-// TODO: use these in UI for the display
-static inline FrameBufferT framebuf1 alignas(64);
-static inline FrameBufferT framebuf2 alignas(64);
-
 extern "C" void aux_core_main() {
 	using namespace MetaModule;
 	using namespace mdrivlib;
