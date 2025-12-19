@@ -20,8 +20,7 @@ private:
 	PluginManager &plugin_manager;
 	FileStorageProxy &file_storage_proxy;
 
-	ParamsState params;
-	MetaParams metaparams;
+	ParamsState param_state;
 	UserSettings settings;
 	NotificationQueue notify_queue;
 
@@ -37,8 +36,7 @@ public:
 		, patch_playloader{patch_playloader}
 		, plugin_manager{plugin_manager}
 		, file_storage_proxy{file_storage_proxy} {
-		params.clear();
-		metaparams.clear();
+		param_state.clear();
 
 		if (!Settings::read_settings(file_storage_proxy, &settings)) {
 			settings = UserSettings{};
@@ -50,6 +48,8 @@ public:
 		settings.initial_patch_vol = Volume::SDCard;
 		settings.initial_patch_name = "/patch.yml";
 
+		patch_playloader.connect_user_settings(&settings);
+
 		patch_playloader.request_new_audio_settings(
 			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);
 
@@ -59,16 +59,56 @@ public:
 	}
 
 	void update_screen() {
+		// Here you can draw into the frame buffer
+		// Call screen.flush() to send it via SPI
+
+		// You can read the state of the module via params_state
+		// Note these are events, so reading their value consumes the events.
+		// E.g.: use_motion() returns the accumulated motion of the encoder and resets it to 0
+
+		auto enc0 = param_state.encoder[0].use_motion();
+		if (enc0 != 0)
+			printf("Encoder 1: %d\n", enc0);
+
+		auto enc1 = param_state.encoder[1].use_motion();
+		if (enc1 != 0)
+			printf("Encoder 2: %d\n", enc1);
+
+		for (auto i = 0u; i < param_state.knobs.size(); i++) {
+			if (param_state.knobs[i].did_change()) {
+				printf("Knob[%d] => %f\n", i, param_state.knobs[i].val);
+			}
+		}
+
+		for (auto i = 0u; i < param_state.cvs.size(); i++) {
+			if (param_state.cvs[i].did_change()) {
+				printf("CV[%d] => %f\n", i, param_state.cvs[i].val);
+			}
+		}
+
+		for (auto i = 0u; i < param_state.buttons.size(); i++) {
+			if (param_state.buttons[i].is_just_pressed())
+				printf("Button %d pressed\n", i);
+			if (param_state.buttons[i].is_just_released())
+				printf("Button %d released\n", i);
+		}
+
+		for (auto i = 0u; i < param_state.gate_ins.size(); i++) {
+			if (param_state.gate_ins[i].is_just_pressed())
+				printf("Gate %d high\n", i);
+			if (param_state.gate_ins[i].is_just_released())
+				printf("Gate %d low\n", i);
+		}
 	}
 
-	void read_patch_gui_elements() {
-	}
-
-	void update_page() {
+	void update_gui() {
+		// Throttle updates to every 16ms
 		auto now = HAL_GetTick();
 		if ((now - last_page_update_tm) > 16) {
 			last_page_update_tm = now;
-			page_update_task();
+			read_param_state();
+			handle_file_events();
+			update_screen();
 		}
 	}
 
@@ -157,6 +197,9 @@ public:
 		printf("%s\n", message.c_str());
 	}
 
+	void read_patch_gui_elements() {
+	}
+
 	auto &get_settings() {
 		return settings;
 	}
@@ -165,19 +208,17 @@ public:
 		return notify_queue;
 	}
 
-	std::atomic<bool> new_patch_data = false;
-
 private:
-	void page_update_task() {
+	void read_param_state() {
 		// Clear all accumulated knob change events
-		for (auto &knob : params.knobs) {
+		for (auto &knob : param_state.knobs) {
 			knob.changed = false;
 		}
 
-		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
+		[[maybe_unused]] bool read_ok = sync_params.read_sync(param_state);
+	}
 
-		new_patch_data.store(false, std::memory_order_release);
-
+	void handle_file_events() {
 		auto load_status = patch_playloader.handle_file_events();
 		if (!load_status.success || load_status.error_string.length()) {
 			printf("%s\n", load_status.error_string.c_str());

@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "patch/midi_def.hh"
 #include "util/debouncer_compact.hh"
 #include "util/filter.hh"
 #include "util/parameter.hh"
@@ -20,9 +21,16 @@ struct ParamsState {
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumCVIn> cvs{};
 	std::array<TogglerCompact, PanelDef::NumGateIn> gate_ins{};
 	std::array<TogglerCompact, PanelDef::NumButtons> buttons{};
-	std::array<ResizingOversampler, PanelDef::NumAudioIn + AudioExpander::NumInJacks> smoothed_ins;
+	std::array<ResizingOversampler, PanelDef::NumAudioIn> smoothed_ins;
 
 	std::array<RotaryMotion, 2> encoder{};
+
+	struct MidiChangedVal {
+		uint8_t changed : 1;
+		uint8_t val : 7;
+	};
+	std::array<MidiChangedVal, NumMidiCCs> midi_ccs;
+
 	bool usb_midi_connected = false;
 	uint32_t audio_load = 0;
 
@@ -41,6 +49,9 @@ struct ParamsState {
 
 		for (auto &in : smoothed_ins)
 			in.reset();
+
+		for (auto &cc : midi_ccs)
+			cc.changed = 0;
 	}
 
 	void reset_change_flags() {
@@ -51,26 +62,28 @@ struct ParamsState {
 			cv.changed = false;
 	}
 
-	friend void copy(ParamsState &dst, ParamsState const &src) {
-		// TODO: memcpy?
-
+	friend void accumulate_events(ParamsState &dst, ParamsState const &src) {
 		for (auto [knob, that_knob] : zip(dst.knobs, src.knobs))
 			knob = that_knob;
 
 		for (auto [cv, that_cv] : zip(dst.cvs, src.cvs))
 			cv = that_cv;
 
-		for (auto [gate_in, that_gate_in] : zip(dst.gate_ins, src.gate_ins))
-			gate_in = that_gate_in;
+		for (auto [gate_in, that_gate_in] : zip(dst.gate_ins, src.gate_ins)) {
+			// Accumulate events
+			gate_in.register_state(that_gate_in.is_high());
+		}
 
-		for (auto [b, that_b] : zip(dst.buttons, src.buttons))
-			b = that_b;
+		for (auto [but, that_but] : zip(dst.buttons, src.buttons)) {
+			// Accumulate events
+			but.register_state(that_but.is_high());
+		}
 
 		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
 			in = that_in;
 
-		// For rotary motion: adds events from hardware to events in this copy.
 		for (auto [this_enc, that_enc] : zip(dst.encoder, src.encoder)) {
+			// Accumulate events
 			this_enc.add_motion(that_enc);
 		}
 
@@ -103,7 +116,7 @@ struct ParamsState {
 		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
 			in = that_in;
 
-		// Move rotary motion events from `that` to `this` (removing them from `that`,
+		// Move rotary motion events from internal copy to the dst (GUI's copy)
 		for (auto [enc, that_enc] : zip(dst.encoder, src.encoder)) {
 			enc.transfer_motion(that_enc);
 		}

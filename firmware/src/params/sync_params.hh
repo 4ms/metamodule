@@ -4,6 +4,7 @@
 #include "midi_params.hh"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
+#include "patch/midi_def.hh"
 #include "util/lockfree_fifo_spsc.hh"
 
 namespace MetaModule
@@ -21,7 +22,6 @@ struct SyncParams {
 
 private:
 	ParamsState p;
-	MetaParams m;
 
 	static constexpr uint32_t WriteProcID = 1;
 	static constexpr uint32_t ReadProcID = 2;
@@ -32,47 +32,48 @@ public:
 	}
 
 	// Audio thread calls this
-	void write_sync(ParamsState &params, MetaParams &) {
+	void write_sync(ParamsState &params) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
-			copy(p, params);
+			accumulate_events(p, params);
 			HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
 		}
 	}
 
 	// UI thread calls this
-	bool read_sync(ParamsState &params, MetaParams &) {
+	bool read_sync(ParamsState &param_state) {
 		bool read_ok = false;
 
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(ReadProcID) == HWSemaphoreFlag::LockedOk) {
-			transfer_events(params, p);
+			transfer_events(param_state, p);
 			HWSemaphore<ParamCacheLock>::unlock(ReadProcID);
 			read_ok = true;
 		}
 
-		// while (true) {
-		// 	if (auto event = midi_events.get(); event.has_value()) {
-		// 		auto e = event.value();
-		// 		if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs) {
-		// 			params.midi_ccs[e.note].changed = 1;
-		// 			params.midi_ccs[e.note].val = e.midi_chan;
-		// 		}
-		// 		if (e.type == Midi::Event::Type::NoteOn && e.note < NumMidiNotes) {
-		// 			params.last_midi_note.changed = 1;
-		// 			params.last_midi_note.val = e.note;
-		// 			params.last_midi_note_channel = e.midi_chan;
-		// 			params.midi_gate = true;
-		// 		}
-		// 		if (e.type == Midi::Event::Type::NoteOff && e.note < NumMidiNotes) {
-		// 			params.last_midi_note.changed = 1;
-		// 			params.last_midi_note.val = e.note;
-		// 			params.last_midi_note_channel = e.midi_chan;
-		// 			params.midi_gate = false;
-		// 		}
-		// 	} else
-		// 		break;
-		// }
+		while (true) {
+			if (auto event = midi_events.get(); event.has_value()) {
+				auto e = event.value();
+				if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs) {
+					param_state.midi_ccs[e.note].changed = 1;
+					param_state.midi_ccs[e.note].val = e.midi_chan;
+				}
+				// Can enable this if needed
+				// if (e.type == Midi::Event::Type::NoteOn && e.note < NumMidiNotes) {
+				// 	params.last_midi_note.changed = 1;
+				// 	params.last_midi_note.val = e.note;
+				// 	params.last_midi_note_channel = e.midi_chan;
+				// 	params.midi_gate = true;
+				// }
+				// if (e.type == Midi::Event::Type::NoteOff && e.note < NumMidiNotes) {
+				// 	params.last_midi_note.changed = 1;
+				// 	params.last_midi_note.val = e.note;
+				// 	params.last_midi_note_channel = e.midi_chan;
+				// 	params.midi_gate = false;
+				// }
+			} else
+				break;
+		}
 
 		return read_ok;
 	}
@@ -81,7 +82,6 @@ public:
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
 			p.clear();
-			m.clear();
 			HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
 		}
 	}

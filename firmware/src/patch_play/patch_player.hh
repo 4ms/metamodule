@@ -663,8 +663,7 @@ public:
 		if (panel_jack_id < in_conns.size()) {
 			panel_patched = in_patched[panel_jack_id];
 
-			// TODO:
-		} else if (panel_jack_id > LastPossibleKnob) {
+		} else if (is_midi_param(panel_jack_id)) {
 			panel_patched = midi_connected;
 		}
 

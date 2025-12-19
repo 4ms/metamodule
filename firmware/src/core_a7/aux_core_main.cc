@@ -54,8 +54,7 @@ extern "C" void aux_core_main() {
 		  *A7SharedMemoryS::ptrs.patch_mod_queue,
 		  plugin_manager,
 		  ramdisk};
-	ui.update_screen();
-	ui.update_page();
+	ui.update_gui();
 
 	PluginAppInterface::Internal plugin_internal{
 		ui.get_settings(), *A7SharedMemoryS::ptrs.open_patch_manager, ui.get_notify_queue()};
@@ -90,8 +89,7 @@ extern "C" void aux_core_main() {
 	ui.load_initial_patch();
 
 	while (true) {
-		ui.update_screen();
-		ui.update_page();
+		ui.update_gui();
 		__NOP();
 	}
 }
