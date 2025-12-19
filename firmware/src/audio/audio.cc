@@ -55,19 +55,23 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
+		// 101us per 64block
 		auto &params = cache_params(block);
 
 		cur_block = block;
 		process(audio_blocks[1 - block], params);
 
+		//7.6us per 64block
 		return_cached_params(block);
 
 		load_measure.end_measurement();
 
+		// 7us for 64block
 		sync_params.write_sync(param_state);
 		param_state.reset_change_flags();
 
 		update_audio_settings();
+		// Debug::Pin0::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },

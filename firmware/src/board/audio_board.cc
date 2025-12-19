@@ -11,10 +11,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	param_state.encoder[0] = param_block.metaparams.encoder[0];
 	param_state.encoder[1] = param_block.metaparams.encoder[1];
 	param_state.usb_midi_connected = param_block.metaparams.usb_midi_connected;
+
 	// Who is responsible for setting this?
 	param_block.metaparams.haptic_out = 0;
 
-	// Buttons
+	// Buttons (~1us/block)
 	for (auto [i, param_state_button] : enumerate(param_state.buttons)) {
 		auto src = (i < 16) ? param_block.metaparams.buttons0 :
 				   (i < 32) ? param_block.metaparams.buttons1 :
@@ -45,7 +46,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
 		}
 
-		// Gate inputs
+		// Gate inputs: no change = 0.4us/sample = 2.1% load
 		for (auto [i, sync_gatein] : enumerate(param_state.gate_ins)) {
 			bool gate = (params.gate_ins >> i) & 1;
 
@@ -58,6 +59,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// Pass Knob values to modules
+		// All knobs changing constantly = ~1us/sample = 64us/block = 4.8% load
 		for (auto [i, knob_val, knob_state] : countzip(params.knobs, param_state.knobs)) {
 			if (knob_state.store_changed(knob_val))
 				player.set_panel_param(i, knob_val);
@@ -70,23 +72,22 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// USB MIDI
-		MidiMessage msg = params.usb_raw_midi;
-		usb_midi.process(param_block.metaparams.usb_midi_connected, &msg);
-		param_blocks[cur_block].params[idx].usb_raw_midi = msg;
+		usb_midi.process(param_block.metaparams.usb_midi_connected, &params.usb_raw_midi);
 
-		// TODO UART MIDI
-		msg = params.uart_raw_midi;
-		uart_midi.process(true, &msg);
-		param_blocks[cur_block].params[idx].uart_raw_midi = msg;
+		// UART MIDI
+		uart_midi.process(true, &params.uart_raw_midi);
 
 		// Run each module
 		player.update_patch();
 
 		// Get outputs from modules
-		for (auto [i, outchan] : countzip(out.chan))
-			outchan = get_audio_output(i);
+		out.chan[0] = get_audio_output(0);
+		out.chan[1] = get_audio_output(1);
 
-		// TODO: set DACs
+		// DAC outputs
+		// TODO: adjust scaling. This assumes the module outputs 0 - 1
+		params.dac0 = std::clamp<uint16_t>(player.get_panel_output(Mousai::LFOOut1) * 4095, 0, 4095);
+		params.dac1 = std::clamp<uint16_t>(player.get_panel_output(Mousai::LFOOut2) * 4095, 0, 4095);
 
 		idx++;
 	}
@@ -94,18 +95,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 // Copy needed params/metaparams from the slow non-cachable shared param block to a local copy
 ParamBlock &AudioStream::cache_params(unsigned block) {
-	param_state.usb_midi_connected = param_blocks[block].metaparams.usb_midi_connected;
-	param_state.encoder[0] = param_blocks[block].metaparams.encoder[0];
-	param_state.encoder[1] = param_blocks[block].metaparams.encoder[1];
-
 	local_params.metaparams.buttons0 = param_blocks[block].metaparams.buttons0;
 	local_params.metaparams.buttons1 = param_blocks[block].metaparams.buttons1;
 	local_params.metaparams.buttons2 = param_blocks[block].metaparams.buttons2;
 
 	std::memcpy((void *)local_params.params.data(), &param_blocks[block].params, sizeof(Params) * block_size_);
-
-	// for (auto i = 0u; i < block_size_; i++)
-	// 	local_params.params[i] = param_blocks[block].params[i];
 
 	return local_params;
 }
@@ -118,6 +112,8 @@ void AudioStream::return_cached_params(unsigned block) {
 		param_blocks[block].params[i].dac0 = local_params.params[i].dac0;
 		param_blocks[block].params[i].dac1 = local_params.params[i].dac1;
 		param_blocks[block].params[i].clock_out = local_params.params[i].clock_out;
+		param_blocks[block].params[i].uart_raw_midi = local_params.params[i].uart_raw_midi;
+		param_blocks[block].params[i].usb_raw_midi = local_params.params[i].usb_raw_midi;
 	}
 }
 

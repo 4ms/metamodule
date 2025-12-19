@@ -83,16 +83,8 @@ public:
 	void set_calibration(CalData const &caldata);
 
 private:
-	static constexpr unsigned NumKnobs = PanelDef::NumPot;
-	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;
-	static constexpr unsigned NumCVInputs = PanelDef::NumCVIn;
-	static constexpr unsigned NumGateInputs = PanelDef::NumGateIn;
-	static constexpr unsigned NumGateOutputs = PanelDef::NumGateOut;
-	static constexpr unsigned NumAudioOutputs = PanelDef::NumAudioOut;
-	static constexpr unsigned NumCVOutputs = PanelDef::NumDACOut;
-
-	static constexpr unsigned FirstAudioInput = 0;
-	static constexpr unsigned FirstCVInput = NumAudioInputs;
-	static constexpr unsigned FirstGateInput = FirstCVInput + NumCVInputs;
+	static constexpr unsigned FirstCVInput = Mousai::VoctIn;
+	static constexpr unsigned FirstGateInput = Mousai::RandomGateIn;
+	static constexpr unsigned FirstCVOutput = Mousai::LFOOut1;
 };
 } // namespace MetaModule
