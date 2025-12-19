@@ -2,7 +2,6 @@
 #include "conf/hsem_conf.hh"
 #include "drivers/hsem.hh"
 #include "midi_params.hh"
-#include "params/metaparams.hh"
 #include "params/params_state.hh"
 #include "patch/midi_def.hh"
 #include "util/lockfree_fifo_spsc.hh"

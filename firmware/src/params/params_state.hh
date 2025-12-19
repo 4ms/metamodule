@@ -12,16 +12,19 @@
 namespace MetaModule
 {
 
-// TODO: put all fields that the GUI needs to see here.
-// Some of these fields come from the Params struct (sample-rate). It's most efficient to populate these by the audio stream.
-// Other fields come from the MetaParams struct (block-rate). These can be populated when copied
+// These are all the UI events that the GUI might need to know about.
+// Some of these fields come from the Params struct (sample-rate).
+// Other fields come from the MetaParams struct (block-rate).
+// The AudioStream populates this and the UI class reads this.
+// The SyncParams class is used to keep the write/reads in sync
+// without losing events
 
 struct ParamsState {
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumCVIn> cvs{};
 	std::array<TogglerCompact, PanelDef::NumGateIn> gate_ins{};
 	std::array<TogglerCompact, PanelDef::NumButtons> buttons{};
-	std::array<ResizingOversampler, PanelDef::NumAudioIn> smoothed_ins;
+	std::array<ResizingOversampler, PanelDef::NumAudioIn> smoothed_ins{};
 
 	std::array<RotaryMotion, 2> encoder{};
 
@@ -29,7 +32,7 @@ struct ParamsState {
 		uint8_t changed : 1;
 		uint8_t val : 7;
 	};
-	std::array<MidiChangedVal, NumMidiCCs> midi_ccs;
+	std::array<MidiChangedVal, NumMidiCCs> midi_ccs{};
 
 	bool usb_midi_connected = false;
 	uint32_t audio_load = 0;

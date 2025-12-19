@@ -17,11 +17,12 @@ struct Params {
 
 	Midi::Event usb_midi_event{};  //6B
 	Midi::Event uart_midi_event{}; //6B
-	MidiMessage usb_raw_midi{};	   //3B
-	MidiMessage uart_raw_midi{};   //3B
 
-	uint8_t gate_ins{};	 //bit mask for 4 gate ins
-	uint8_t clock_out{}; //clock out
+	MidiMessage usb_raw_midi{}; //3B
+	uint8_t gate_ins{};			//bit mask for 4 gate ins
+
+	MidiMessage uart_raw_midi{}; //3B
+	uint8_t clock_out{};		 //clock out
 
 	void clear() {
 		*this = Params{};
