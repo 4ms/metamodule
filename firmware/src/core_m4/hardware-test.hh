@@ -43,11 +43,11 @@ void Controls::test_pins() {
 	};
 
 	printf("******************************************************\n");
-	printf("Press the DFU button to start test (you have 2 seconds)\n");
+	printf("Press the DFU button to start test (you have 1 second)\n");
 
 	auto start_tm = HAL_GetTick();
 	bool do_test = false;
-	while (HAL_GetTick() - start_tm < 2000) {
+	while (HAL_GetTick() - start_tm < 1000) {
 		if (DFU_Button.is_on()) {
 			do_test = true;
 			break;
