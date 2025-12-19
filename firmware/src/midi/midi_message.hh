@@ -25,17 +25,17 @@ enum class MidiCommand : uint8_t {
 };
 
 struct MidiStatusByte {
-	MidiCommand command : 4;
 	uint8_t channel : 4;
+	MidiCommand command : 4;
 
-	static MidiStatusByte make(uint8_t raw) {
+	constexpr static MidiStatusByte make(uint8_t raw) {
 		return MidiStatusByte{
-			.command = MidiCommand(raw >> 4),
 			.channel = uint8_t(raw & 0x0F),
+			.command = MidiCommand(raw >> 4),
 		};
 	}
 
-	operator uint8_t() const {
+	constexpr operator uint8_t() const {
 		return (uint8_t)command << 4 | channel;
 	}
 };
@@ -43,24 +43,29 @@ struct MidiStatusByte {
 struct MidiDataBytes {
 	uint8_t byte[2];
 
-	operator uint16_t() const {
+	constexpr operator uint16_t() const {
 		return ((uint16_t)byte[0] << 8) | byte[1];
 	}
 };
 
 enum MidiSystemCommonCommand : uint8_t {
-	TimeCodeQuarterFrame = 0xF1,
-	SongPositionPtr = 0xF2,
-	SongSelect = 0xF3,
-	TuneRequest = 0xF6,
-	EndExclusive = 0xF7,
+	TimeCodeQuarterFrame = 0xF1, // packet = 2 bytes
+	SongPositionPtr = 0xF2,		 // packet = 3 byte
+	SongSelect = 0xF3,			 // packet = 2 bytes
+	// 0xF4 undefined
+	// 0xF5 undefined
+	TuneRequest = 0xF6,	 // packet = 1 byte
+	EndExclusive = 0xF7, // packet = 1 byte
 };
 
 enum MidiSystemRealTimeCommand : uint8_t {
+	// packet = 1 byte
 	TimingClock = 0xF8,
+	// 0xF9 undefined
 	Start = 0xFA,
 	Continue = 0xFB,
 	Stop = 0xFC,
+	// 0xFD undefined
 	ActiveSending = 0xFE,
 	SystemReset = 0xFF,
 };
@@ -69,15 +74,55 @@ enum MidiSystemExclusiveCommand : uint8_t {
 	SysEx = 0xF0,
 };
 
+struct UsbCableCodeByte {
+	uint8_t cin : 4 = 0;	   // low nibble
+	uint8_t cable_num : 4 = 0; // high nibble
+
+	constexpr UsbCableCodeByte(uint8_t raw)
+		: cin(raw & 0x0F)
+		, cable_num(raw >> 4) {
+	}
+
+	constexpr static UsbCableCodeByte make(uint8_t raw) {
+		return raw;
+	}
+
+	constexpr operator uint8_t() const {
+		return (uint8_t)cable_num << 4 | cin;
+	}
+
+	constexpr static uint8_t cin_from_status_byte(uint8_t status) {
+		// Deduce the CIN code based on the status byte
+		// We cannot deduce SysEx payload size here: that must be set already, so we never set CIN to 0x6 or 0x7 here.
+		return (status >= 0x80 && status < 0xF0)						? (status >> 4) : //voice messages
+			   status == SysEx					  						? 0x4 :
+			   (status == TimeCodeQuarterFrame || status == SongSelect) ? 0x2 :
+			   status == SongPositionPtr					  			? 0x3 :
+			   status == TuneRequest || status == EndExclusive   		? 0x5 : 
+			   status >= 0xF8					  						? 0xF : // single byte System Realtime
+																		  0x4;  // unknown: default to sysex payload
+	}
+};
+static_assert(UsbCableCodeByte::make(0x1B).cable_num == 1);
+static_assert(UsbCableCodeByte::make(0x1B).cin == 0xB);
+
 struct MidiMessage {
-	MidiStatusByte status{MidiCommand::None, 0};
+	MidiStatusByte status{0, MidiCommand::None};
 	MidiDataBytes data{0, 0};
+	UsbCableCodeByte usb_hdr{0};
 
-	MidiMessage() = default;
+	constexpr MidiMessage() = default;
 
-	MidiMessage(uint8_t status_byte, uint8_t data_byte0 = 0, uint8_t data_byte1 = 0)
+	constexpr MidiMessage(uint8_t status_byte, uint8_t data_byte0 = 0, uint8_t data_byte1 = 0)
 		: status{MidiStatusByte::make(status_byte)}
-		, data{data_byte0, data_byte1} {
+		, data{data_byte0, data_byte1}
+		, usb_hdr{UsbCableCodeByte::cin_from_status_byte(status_byte)} {
+	}
+
+	constexpr MidiMessage(uint8_t usb_header, uint8_t status_byte, uint8_t data_byte0, uint8_t data_byte1)
+		: status{MidiStatusByte::make(status_byte)}
+		, data{data_byte0, data_byte1}
+		, usb_hdr{usb_header} {
 	}
 
 	template<MidiCommand cmd>
@@ -116,24 +161,20 @@ struct MidiMessage {
 	}
 
 	uint32_t raw() const {
-		return (status << 16) | data;
+		return (usb_hdr << 24) | (status << 16) | data;
 	}
 
+	// Fill given `bytes` array with a valid usb midi packet
 	void make_usb_msg(std::array<uint8_t, 4> &bytes) {
-		bytes[0] = status >> 4;
-		if (is_timing_transport()) {
-			bytes[1] = status;
-			bytes[2] = 0;
-			bytes[3] = 0;
-		} else if (status.command == MidiCommand::ChannelPressure) {
-			bytes[1] = status;
-			bytes[2] = data.byte[0];
-			bytes[3] = 0;
-		} else {
-			bytes[1] = status;
-			bytes[2] = data.byte[0];
-			bytes[3] = data.byte[1];
+		// If usb CIN field is not set, then deduce it from the status byte
+		if (usb_hdr.cin == 0) {
+			usb_hdr.cin = UsbCableCodeByte::cin_from_status_byte(status);
 		}
+
+		bytes[0] = usb_hdr;
+		bytes[1] = status;
+		bytes[2] = data.byte[0];
+		bytes[3] = data.byte[1];
 	}
 
 	uint8_t note() const {
@@ -173,6 +214,10 @@ struct MidiMessage {
 		if (is_timing_transport()) {
 			return 1;
 		} else if (status.command == MidiCommand::ChannelPressure) {
+			return 2;
+		} else if (usb_hdr.cin == 0x5) {
+			return 1;
+		} else if (usb_hdr.cin == 0x6) {
 			return 2;
 		} else {
 			return 3;
@@ -248,3 +293,6 @@ struct MidiMessage {
 		return std::string(nts[midi_val % 12]) + std::to_string(oct);
 	}
 };
+
+static_assert(MidiMessage(0x3B, 0xB0, 0x10, 0x20).usb_hdr.cin == 0xB);
+static_assert(MidiMessage(0x3B, 0xB0, 0x10, 0x20).usb_hdr.cable_num == 0x3);
