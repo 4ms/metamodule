@@ -123,13 +123,6 @@ public:
 			if (param_state.gate_ins[i].is_just_released())
 				printf("Gate %d low\n", i);
 		}
-
-		for (auto i = 0u; i < param_state.midi_ccs.size(); i++) {
-			if (param_state.midi_ccs[i].changed) {
-				param_state.midi_ccs[i].changed = false;
-				printf("MIDI CC%d => %d\n", i, param_state.midi_ccs[i].val);
-			}
-		}
 	}
 
 	void update_gui() {
@@ -246,6 +239,7 @@ private:
 			knob.changed = false;
 		}
 
+		Debug::Pin2 init;
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(param_state);
 	}
 

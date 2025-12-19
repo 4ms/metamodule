@@ -28,12 +28,6 @@ struct ParamsState {
 
 	std::array<RotaryMotion, 2> encoder{};
 
-	struct MidiChangedVal {
-		uint8_t changed : 1;
-		uint8_t val : 7;
-	};
-	std::array<MidiChangedVal, NumMidiCCs> midi_ccs{};
-
 	bool usb_midi_connected = false;
 	uint32_t audio_load = 0;
 
@@ -52,9 +46,6 @@ struct ParamsState {
 
 		for (auto &in : smoothed_ins)
 			in.reset();
-
-		for (auto &cc : midi_ccs)
-			cc.changed = 0;
 	}
 
 	void reset_change_flags() {

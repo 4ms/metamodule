@@ -71,12 +71,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// USB MIDI
 		MidiMessage msg = params.usb_raw_midi;
-		usb_midi.process(param_block.metaparams.usb_midi_connected, params.usb_midi_event, &msg);
+		usb_midi.process(param_block.metaparams.usb_midi_connected, &msg);
 		param_blocks[cur_block].params[idx].usb_raw_midi = msg;
 
 		// TODO UART MIDI
 		msg = params.uart_raw_midi;
-		uart_midi.process(true, params.uart_midi_event, &msg);
+		uart_midi.process(true, &msg);
 		param_blocks[cur_block].params[idx].uart_raw_midi = msg;
 
 		// Run each module
@@ -102,9 +102,10 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.buttons1 = param_blocks[block].metaparams.buttons1;
 	local_params.metaparams.buttons2 = param_blocks[block].metaparams.buttons2;
 
-	// TODO memcpy
-	for (auto i = 0u; i < block_size_; i++)
-		local_params.params[i] = param_blocks[block].params[i];
+	std::memcpy((void *)local_params.params.data(), &param_blocks[block].params, sizeof(Params) * block_size_);
+
+	// for (auto i = 0u; i < block_size_; i++)
+	// 	local_params.params[i] = param_blocks[block].params[i];
 
 	return local_params;
 }

@@ -1,25 +1,21 @@
 #pragma once
 #include "conf/hsem_conf.hh"
+#include "debug.hh"
 #include "drivers/hsem.hh"
-#include "midi_params.hh"
 #include "params/params_state.hh"
-#include "patch/midi_def.hh"
-#include "util/lockfree_fifo_spsc.hh"
 
 namespace MetaModule
 {
 
-// TODO: set this up with all data that the GUI thread needs to see
-
 // SyncParams class
-// Thread-safe sharing of ParamsState and MetaParams.
-// Each writer and reader keeps their own copy of data.
+// Thread-safe sharing of ParamsState between audio and GUI threads.
+// The audio thread writes and the GUI thread reads.
+// The writer and reader keep their own copy of data, and another copy is stored here.
+//
 // Non-blocking, if simultaneous read/write occurs, it just returns
 // (unmodified local copy will still be valid, just out-dated)
-struct SyncParams {
-	LockFreeFifoSpsc<Midi::Event, 64> midi_events;
+class SyncParams {
 
-private:
 	ParamsState p;
 
 	static constexpr uint32_t WriteProcID = 1;
@@ -30,13 +26,14 @@ public:
 		clear();
 	}
 
-	// Audio thread calls this
+	// Audio thread calls this (~7us)
 	void write_sync(ParamsState &params) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
 			accumulate_events(p, params);
 			HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
 		}
+		// FIXME: we could miss an event if the lock fails
 	}
 
 	// UI thread calls this
@@ -48,30 +45,6 @@ public:
 			transfer_events(param_state, p);
 			HWSemaphore<ParamCacheLock>::unlock(ReadProcID);
 			read_ok = true;
-		}
-
-		while (true) {
-			if (auto event = midi_events.get(); event.has_value()) {
-				auto e = event.value();
-				if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs) {
-					param_state.midi_ccs[e.note].changed = 1;
-					param_state.midi_ccs[e.note].val = e.midi_chan;
-				}
-				// Can enable this if needed
-				// if (e.type == Midi::Event::Type::NoteOn && e.note < NumMidiNotes) {
-				// 	params.last_midi_note.changed = 1;
-				// 	params.last_midi_note.val = e.note;
-				// 	params.last_midi_note_channel = e.midi_chan;
-				// 	params.midi_gate = true;
-				// }
-				// if (e.type == Midi::Event::Type::NoteOff && e.note < NumMidiNotes) {
-				// 	params.last_midi_note.changed = 1;
-				// 	params.last_midi_note.val = e.note;
-				// 	params.last_midi_note_channel = e.midi_chan;
-				// 	params.midi_gate = false;
-				// }
-			} else
-				break;
 		}
 
 		return read_ok;

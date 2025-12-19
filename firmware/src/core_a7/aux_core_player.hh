@@ -3,10 +3,8 @@
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
 #include "gui/ui.hh"
-#include "midi/midi_sync.hh"
 #include "patch_play/patch_player.hh"
 #include "util/fixed_vector.hh"
-#include <atomic>
 
 namespace MetaModule
 {
@@ -16,9 +14,6 @@ struct AuxPlayer {
 	Ui &ui;
 
 	FixedVector<unsigned, 64> module_ids;
-
-	// MIDI sync instance
-	MidiSync midi_sync;
 
 	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
 		: patch_player{patch_player}
@@ -65,8 +60,6 @@ struct AuxPlayer {
 
 		} else
 			pr_err("Error: %u modules requested to run on core 2, max is %z\n", num_modules, module_ids.size());
-
-		midi_sync.clear_last_values();
 
 		SMPThread::signal_done();
 	}

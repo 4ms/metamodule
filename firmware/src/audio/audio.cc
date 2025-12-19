@@ -27,8 +27,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, audio_in_block{audio_in_block}
 	, audio_out_block{audio_out_block}
 	, player{patchplayer}
-	, usb_midi{patchplayer, sync_params}
-	, uart_midi{patchplayer, sync_params}
+	, usb_midi{patchplayer}
+	, uart_midi{patchplayer}
 	, codec_{Hardware::codec}
 	, sample_rate_{AudioSettings::DefaultSampleRate}
 	, block_size_{AudioSettings::DefaultBlockSize} {
