@@ -7,8 +7,6 @@
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/audio_settings.hh"
-#include "util/countzip.hh"
-#include "util/zip.hh"
 #include <cstring>
 
 namespace MetaModule
@@ -29,7 +27,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, audio_in_block{audio_in_block}
 	, audio_out_block{audio_out_block}
 	, player{patchplayer}
-	, midi{patchplayer, sync_params}
+	, usb_midi{patchplayer, sync_params}
+	, uart_midi{patchplayer, sync_params}
 	, codec_{Hardware::codec}
 	, sample_rate_{AudioSettings::DefaultSampleRate}
 	, block_size_{AudioSettings::DefaultBlockSize} {
@@ -65,7 +64,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.end_measurement();
 
-		sync_params.write_sync(param_state, param_blocks[block].metaparams);
+		sync_params.write_sync(param_state);
 		param_state.reset_change_flags();
 
 		update_audio_settings();
@@ -89,90 +88,8 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 }
 
 void AudioStream::handle_patch_just_loaded() {
-	midi.last_connected = false;
-}
-
-TriangleOscillator<48000> tri1{100};
-TriangleOscillator<48000> tri2{1000};
-
-void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
-	player.sync();
-
-	// TODO: param_state:encoders, usb_midi_connected
-	// Buttons
-	for (auto [i, sync_button] : enumerate(param_state.buttons)) {
-		auto src = (i < 16) ? param_block.metaparams.buttons0 :
-				   (i < 32) ? param_block.metaparams.buttons1 :
-							  param_block.metaparams.buttons2;
-		bool button = (src >> i) & 1;
-
-		sync_button.register_state(button);
-
-		if (sync_button.just_went_low())
-			player.set_panel_param(i + FirstButton, 0.f);
-
-		else if (sync_button.just_went_high())
-			player.set_panel_param(i + FirstButton, 1.f);
-	}
-
-	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
-		auto &out = audio_block.out_codec[idx];
-		auto &params = param_block.params[idx];
-
-		params.dac1 = tri1.process() >> 20;
-		params.dac0 = tri2.process() >> 20;
-
-		// Audio inputs
-		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
-
-			float calibrated_input = cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
-
-			player.set_panel_input(panel_jack_i, calibrated_input);
-
-			// Send smoothed sigals to other core
-			param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
-		}
-
-		// Gate inputs
-		for (auto [i, sync_gatein] : enumerate(param_state.gate_ins)) {
-			bool gate = (params.gate_ins >> i) & 1;
-
-			sync_gatein.register_state(gate);
-
-			if (sync_gatein.just_went_low())
-				player.set_panel_input(i + FirstGateInput, 0.f);
-			else if (sync_gatein.just_went_high())
-				player.set_panel_input(i + FirstGateInput, 8.f);
-		}
-
-		// Pass Knob values to modules
-		for (auto [i, knob_val, knob_state] : countzip(params.knobs, param_state.knobs)) {
-			if (knob_state.store_changed(knob_val))
-				player.set_panel_param(i, knob_val);
-		}
-
-		// Pass CV values to module jacks
-		for (auto [i, cv_val, cv_state] : countzip(params.cvs, param_state.cvs)) {
-			if (cv_state.store_changed(cv_val))
-				player.set_panel_input(i + FirstCVInput, cv_val);
-		}
-
-		// USB MIDI
-		MidiMessage msg = params.usb_raw_midi;
-		midi.process(param_block.metaparams.usb_midi_connected, &msg);
-		param_blocks[cur_block].params[idx].usb_raw_midi = msg;
-
-		// TODO UART MIDI
-
-		// Run each module
-		player.update_patch();
-
-		// Get outputs from modules
-		for (auto [i, outchan] : countzip(out.chan))
-			outchan = get_audio_output(i);
-
-		idx++;
-	}
+	usb_midi.last_connected = false;
+	uart_midi.last_connected = false;
 }
 
 void AudioStream::set_calibration(CalData const &caldata) {
@@ -181,22 +98,6 @@ void AudioStream::set_calibration(CalData const &caldata) {
 
 uint32_t AudioStream::get_audio_errors() {
 	return codec_.get_sai_errors();
-}
-
-// It's measurably faster to copy params into cacheable ram
-ParamBlock &AudioStream::cache_params(unsigned block) {
-	local_params.metaparams.usb_midi_connected = param_blocks[block].metaparams.usb_midi_connected;
-	for (auto i = 0u; i < block_size_; i++)
-		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt
-
-	return local_params;
-}
-
-void AudioStream::return_cached_params(unsigned block) {
-	for (auto i = 0u; i < block_size_; i++) {
-		param_blocks[block].params[i].dac0 = local_params.params[i].dac0;
-		param_blocks[block].params[i].dac1 = local_params.params[i].dac1;
-	}
 }
 
 void AudioStream::set_block_spans() {

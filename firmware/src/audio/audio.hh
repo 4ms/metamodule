@@ -52,7 +52,8 @@ private:
 
 	PatchPlayer &player;
 
-	AudioStreamMidi midi;
+	AudioStreamMidi usb_midi;
+	AudioStreamMidi uart_midi;
 	unsigned cur_block = 0;
 
 	// Hardware interface
