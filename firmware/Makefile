@@ -13,6 +13,9 @@ all:
 configure:
 	cmake --fresh --preset ${PRESET} -G ${GEN} -DLOG_LEVEL=DEBUG -DSUPPRESS_HIL_MESSAGES=ON
 
+configure-trace:
+	cmake --fresh --preset ${PRESET} -G ${GEN} -DLOG_LEVEL=TRACE -DSUPPRESS_HIL_MESSAGES=ON
+
 # Auto-complete these targets:
 bootloader tests dep_tests simulate gen_minblep flash-bootloader-sd flash-app-sd flash-dfu jprog debug start-jlinkgdb start-openocd flash_loader flash_loader_dfu new-api-sym-list:
 	cmake --build --preset ${PRESET} -- $(MAKECMDGOALS)
