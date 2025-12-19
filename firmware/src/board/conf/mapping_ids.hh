@@ -1,24 +1,47 @@
 #pragma once
 
-// This is the maximum number of knobs and buttons defined in the patch format
+// These is the maximum number of knobs and buttons defined in the patch format
 // (independent of any particular hardware)
-//
-
 static constexpr auto MaxPanelKnobs = 48; // 5 MUX x 8 channels (include the unused pin) + extra to spare
 static constexpr auto MaxButtons = 48;	  // 3 MUX x 16 channels (include the unused pins)
+static constexpr auto NumTotalParams = MaxPanelKnobs + MaxButtons;
 
-enum {
-	LastPossibleKnob = MaxPanelKnobs,		   //40
-	FirstButton = LastPossibleKnob + 1,		   //41
-	LastButton = LastPossibleKnob + MaxButtons //75
+// These IDs
+namespace Mousai
+{
+enum ParamMapIds {
+	// 0 - 47: Knobs/Sliders/Exp Pedal
+	LastPossibleKnob = MaxPanelKnobs - 1,
+
+	// 48 - 95: Buttons
+	FirstButton = LastPossibleKnob + 1,
+	LastButton = LastPossibleKnob + MaxButtons
 };
 
-static constexpr auto NumTotalParams = LastButton;
+enum InputJackMapIds {
+	AudioInputLeft = 0,
+	AudioInputRight = 1,
 
-constexpr bool is_button(unsigned panel_knob_id) {
-	return panel_knob_id >= FirstButton && panel_knob_id <= LastButton;
-}
+	VoctIn = 2,
+	CVInJack1 = 3,
+	CVInJack2 = 4,
+	CVInJack3 = 5,
+	CVInJack4 = 6,
 
-constexpr bool is_panel_knob(unsigned panel_knob_id) {
-	return panel_knob_id < MaxPanelKnobs;
-}
+	RandomGateIn = 7,
+	SyncIn = 8,
+	RecGateIn = 9,
+	TrigIn = 10,
+
+};
+
+enum OutputJackMapIds {
+	AudioOutputLeft = 0,
+	AudioOutputRight = 1,
+
+	LFOOut1 = 2,
+	LFOOut2 = 3,
+	ClockOut = 4,
+};
+
+} // namespace Mousai

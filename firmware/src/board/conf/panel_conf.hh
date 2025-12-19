@@ -1,5 +1,6 @@
 #pragma once
 
+#include "conf/mapping_ids.hh"
 #include <array>
 #include <cstdint>
 #include <string_view>
@@ -83,6 +84,18 @@ struct PanelDef {
 		return panel_jack_idx < PanelDef::NumUserFacingOutJacks;
 	}
 };
+
+constexpr bool is_button(unsigned panel_knob_id) {
+	return panel_knob_id >= Mousai::FirstButton && panel_knob_id <= Mousai::LastButton;
+}
+
+constexpr bool is_panel_knob(unsigned panel_knob_id) {
+	return panel_knob_id < MaxPanelKnobs;
+}
+
+constexpr bool is_midi_param(unsigned panel_knob_id) {
+	return panel_knob_id > Mousai::LastPossibleKnob;
+}
 
 namespace MetaModule::AudioExpander
 {
