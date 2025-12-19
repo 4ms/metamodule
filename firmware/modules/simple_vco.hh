@@ -6,8 +6,8 @@
 namespace DemoBuiltIns
 {
 
-struct RampVCOInfo : MetaModule::ModuleInfoBase {
-	static constexpr std::string_view slug{"RampVCO"};
+struct SimpleVCOInfo : MetaModule::ModuleInfoBase {
+	static constexpr std::string_view slug{"SimpleVCO"};
 	static constexpr std::string_view description{""};
 	static constexpr uint32_t width_hp = 4;
 	static constexpr std::string_view png_filename{""};
@@ -27,20 +27,20 @@ struct RampVCOInfo : MetaModule::ModuleInfoBase {
 	};
 };
 
-class RampVCO : public MetaModule::SmartCoreProcessor<RampVCOInfo> {
-	using Info = RampVCOInfo;
+class SimpleVCO : public MetaModule::SmartCoreProcessor<SimpleVCOInfo> {
+	using Info = SimpleVCOInfo;
 	using enum Info::Elem;
 
 public:
-	RampVCO();
+	SimpleVCO();
 	void update() override;
 	void set_samplerate(float sr) override;
 
 private:
 	void update_freq();
 
-	uint32_t sample_rate;
-	uint32_t phase;
+	float sample_rate;
+	float phase;
 };
 
 } // namespace DemoBuiltIns

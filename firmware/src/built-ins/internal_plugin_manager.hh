@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "modules/blank.hh"
-#include "modules/ramp-vco.hh"
+#include "modules/simple_vco.hh"
 
 #ifdef SIMULATOR
 #include "ext_plugin_builtin.hh"
@@ -77,7 +77,7 @@ struct InternalPluginManager {
 
 		// Native modules:
 		register_module<Blank, BlankInfo>("InternalBuiltIns");
-		register_module<DemoBuiltIns::RampVCO, DemoBuiltIns::RampVCOInfo>("InternalBuiltIns");
+		register_module<DemoBuiltIns::SimpleVCO, DemoBuiltIns::SimpleVCOInfo>("InternalBuiltIns");
 
 		parse_brand_jsons("built-ins/");
 	}

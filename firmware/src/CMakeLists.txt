@@ -73,6 +73,7 @@ add_executable(
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/audio/audio.cc
+  ${FWDIR}/src/board/audio_board.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
@@ -148,7 +149,7 @@ add_executable(
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 
-  ${FWDIR}/modules/ramp-vco.cc
+  ${FWDIR}/modules/simple_vco.cc
 )
 
 
