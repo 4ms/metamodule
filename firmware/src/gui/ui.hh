@@ -14,6 +14,10 @@
 namespace MetaModule
 {
 
+// 1-bit per pixel:
+using FrameBufferT = std::array<uint8_t, Mousai::ScreenBufferConf::width * Mousai::ScreenBufferConf::height / 8>;
+static inline __attribute__((section(".sysram"))) FrameBufferT framebuf alignas(64);
+
 class Ui {
 private:
 	SyncParams &sync_params;
@@ -26,9 +30,6 @@ private:
 	NotificationQueue notify_queue;
 
 	Mousai::Display display;
-	// 1-bit per pixel:
-	using FrameBufferT = std::array<uint8_t, Mousai::ScreenBufferConf::width * Mousai::ScreenBufferConf::height / 8>;
-	static inline FrameBufferT framebuf alignas(64);
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
@@ -43,6 +44,8 @@ public:
 		, plugin_manager{plugin_manager}
 		, file_storage_proxy{file_storage_proxy} {
 		param_state.clear();
+
+		display.init();
 
 		if (!Settings::read_settings(file_storage_proxy, &settings)) {
 			settings = UserSettings{};
