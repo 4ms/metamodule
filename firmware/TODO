@@ -1,0 +1,32 @@
+CA7 or arm32 specific:
+
+system/linker:
+	memory.ld
+	- Update the addresses of mem regions
+
+	stm32mp15xx_ca7.ld
+	- Link script in general needs to be updated with regions
+
+system/newlib:
+	- recompile with -mcpu=cortex-a35 and neon/vfp...
+	- Or just use -stdlib?
+
+system/mmu_ca7.c:
+	- Need a64 mmu 
+
+
+system/startup_ca7.c:
+	- We have startup_stm32mp23xx_a35.c in cmsis-device/mp2/Source/Templates/gcc
+		- from boot, parking cores, setup NEON, BranchPred, MMU, Caches, IRQ Handler(?)
+	- also have stm32mp2xx_a35_el1_pagetables.s (probably is for mp2-boot)
+	- also have startup64_stm32mp2xx_a35_el1.s (probably is for mp2-boot)
+
+system/system_stm32mp1xx.h:
+	- Have it in cmsis-device/mp2/Source/Templates/
+
+CMSIS device:
+	- Have a35 and m33 and m0
+
+M33:
+- where does the vector table live?
+- what is the diff between alias regions? (boot alias vs. alias)
