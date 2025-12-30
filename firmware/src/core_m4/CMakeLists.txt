@@ -1,5 +1,5 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xm4.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/arch_mp2xxm33.cmake)
 set_arch_flags()
 
 include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
@@ -10,7 +10,7 @@ enable_logging()
 set(M4DIR ${CMAKE_CURRENT_SOURCE_DIR}) # /firmware/src/core_m4
 set(FWDIR ${CMAKE_SOURCE_DIR}) # /firmware
 
-set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp1)
+set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp2)
 set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
 set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
 set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
@@ -21,7 +21,6 @@ add_executable(
   ${M4DIR}/controls.cc
   ${M4DIR}/main_m4.cc
   ${M4DIR}/write.cc
-  ${M4DIR}/system_stm32mp1xx.c
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
@@ -51,38 +50,40 @@ add_executable(
   ${M4DIR}/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
-  ${FWDIR}/system/startup_stm32mp157cxx_cm4.s
   ${DRIVERLIB}/drivers/hal_handlers.cc
   ${DRIVERLIB}/drivers/i2c.cc
   ${DRIVERLIB}/drivers/pin.cc
   ${DRIVERLIB}/drivers/qspi_flash_driver.cc
   ${DRIVERLIB}/drivers/tim.cc
   ${DRIVERLIB}/drivers/timekeeper.cc
-  ${DRIVERLIB}/target/stm32mp1_cm4/drivers/interrupt_handler.cc
-  ${HALDIR}/src/stm32mp1xx_hal.c
-  ${HALDIR}/src/stm32mp1xx_hal_adc.c
-  ${HALDIR}/src/stm32mp1xx_hal_adc_ex.c
-  ${HALDIR}/src/stm32mp1xx_hal_cortex.c
-  ${HALDIR}/src/stm32mp1xx_hal_dma.c
-  ${HALDIR}/src/stm32mp1xx_hal_hcd.c
-  ${HALDIR}/src/stm32mp1xx_hal_i2c.c
-  ${HALDIR}/src/stm32mp1xx_hal_i2c_ex.c
-  ${HALDIR}/src/stm32mp1xx_hal_mdma.c
-  ${HALDIR}/src/stm32mp1xx_hal_pcd.c
-  ${HALDIR}/src/stm32mp1xx_hal_pcd_ex.c
-  ${HALDIR}/src/stm32mp1xx_hal_pwr_ex.c
-  ${HALDIR}/src/stm32mp1xx_hal_qspi.c
-  ${HALDIR}/src/stm32mp1xx_hal_rcc.c
-  ${HALDIR}/src/stm32mp1xx_hal_rcc_ex.c
-  ${HALDIR}/src/stm32mp1xx_hal_sd.c
-  ${HALDIR}/src/stm32mp1xx_hal_sd_ex.c
-  ${HALDIR}/src/stm32mp1xx_hal_uart.c
-  ${HALDIR}/src/stm32mp1xx_hal_usart.c
-  ${HALDIR}/src/stm32mp1xx_ll_rcc.c
-  ${HALDIR}/src/stm32mp1xx_ll_sdmmc.c
-  ${HALDIR}/src/stm32mp1xx_ll_tim.c
-  ${HALDIR}/src/stm32mp1xx_ll_usb.c
-  ${HALDIR}/src/stm32mp1xx_ll_usb_phy.c
+
+  ${M4DIR}/system_stm32mp2xx.c
+  ${FWDIR}/system/startup_stm32mp257fxx_cm33.s
+  ${DRIVERLIB}/target/stm32mp2_cm33/drivers/interrupt_handler.cc
+  ${HALDIR}/src/stm32mp2xx_hal.c
+  ${HALDIR}/src/stm32mp2xx_hal_adc.c
+  ${HALDIR}/src/stm32mp2xx_hal_adc_ex.c
+  ${HALDIR}/src/stm32mp2xx_hal_cortex.c
+  ${HALDIR}/src/stm32mp2xx_hal_dma.c
+  ${HALDIR}/src/stm32mp2xx_hal_hcd.c
+  ${HALDIR}/src/stm32mp2xx_hal_i2c.c
+  ${HALDIR}/src/stm32mp2xx_hal_i2c_ex.c
+  ${HALDIR}/src/stm32mp2xx_hal_mdma.c
+  ${HALDIR}/src/stm32mp2xx_hal_pcd.c
+  ${HALDIR}/src/stm32mp2xx_hal_pcd_ex.c
+  ${HALDIR}/src/stm32mp2xx_hal_pwr_ex.c
+  ${HALDIR}/src/stm32mp2xx_hal_qspi.c
+  ${HALDIR}/src/stm32mp2xx_hal_rcc.c
+  ${HALDIR}/src/stm32mp2xx_hal_rcc_ex.c
+  ${HALDIR}/src/stm32mp2xx_hal_sd.c
+  ${HALDIR}/src/stm32mp2xx_hal_sd_ex.c
+  ${HALDIR}/src/stm32mp2xx_hal_uart.c
+  ${HALDIR}/src/stm32mp2xx_hal_usart.c
+  ${HALDIR}/src/stm32mp2xx_ll_rcc.c
+  ${HALDIR}/src/stm32mp2xx_ll_sdmmc.c
+  ${HALDIR}/src/stm32mp2xx_ll_tim.c
+  ${HALDIR}/src/stm32mp2xx_ll_usb.c
+  ${HALDIR}/src/stm32mp2xx_ll_usb_phy.c
 
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc.c
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_bot.c
@@ -105,12 +106,12 @@ add_executable(
 
 target_include_directories(
   main_m4.elf
-  PRIVATE ${FWDIR}/lib/cmsis-device/stm32mp157c/include
+  PRIVATE ${FWDIR}/lib/cmsis-device/stm32mp2xx/include
           ${FWDIR}/lib/cmsis/Include
           ${HALDIR}/include
           ${DRIVERLIB}
-          ${DRIVERLIB}/target/stm32mp1
-          ${DRIVERLIB}/target/stm32mp1_cm4
+          ${DRIVERLIB}/target/stm32mp2
+          ${DRIVERLIB}/target/stm32mp2_cm33
           ${FWDIR}/lib/easiglib
           ${FWDIR}/src
           ${FWDIR}/src/console
@@ -137,7 +138,7 @@ set_property(TARGET main_m4.elf PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 target_link_script(
   main_m4
-  ${FWDIR}/system/linker/stm32mp15xx_m4.ld
+  ${FWDIR}/system/linker/stm32mp2xxx_m33.ld
   -L${FWDIR}
 )
 

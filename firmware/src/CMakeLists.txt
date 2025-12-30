@@ -1,5 +1,5 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/arch_mp2xxa35.cmake)
 
 option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" ON)
 option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
@@ -20,14 +20,14 @@ set_arch_flags()
 add_library(mdrivlib_interface INTERFACE)
 target_include_directories(
   mdrivlib_interface
-  INTERFACE ${FWDIR}/lib/cmsis-device/stm32mp157c/include
+  INTERFACE ${FWDIR}/lib/cmsis-device/stm32mp2xx/include
             ${FWDIR}/lib/cmsis/Core_A/Include
             ${FWDIR}/lib/cmsis/Include
             ${FWDIR}/lib/mdrivlib
-            ${FWDIR}/lib/mdrivlib/target/stm32mp1
-            ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
-            ${FWDIR}/lib/stm32-hal/stm32mp1/include
-            ${FWDIR}/src/core_a7
+            ${FWDIR}/lib/mdrivlib/target/stm32mp2
+            ${FWDIR}/lib/mdrivlib/target/stm32mp2_ca35
+            ${FWDIR}/lib/stm32-hal/stm32mp2/include
+            ${FWDIR}/src/core_a35
 )
 target_compile_options(mdrivlib_interface INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
 
@@ -105,15 +105,15 @@ add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 #
 add_executable(
   main.elf
+
+
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/reent_mm.cc
   ${FWDIR}/system/lock.cc
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
-  ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
-  ${FWDIR}/system/startup_ca7.s
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/core_a7/a7_shared_memory.cc
   ${FWDIR}/src/core_a7/gettimeofday.cc
@@ -167,26 +167,26 @@ add_executable(
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
   #
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc_ex.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_mdma.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_usart.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_usart_ex.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_uart.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_uart_ex.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_dma.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c_ex.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_sai.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_ltdc.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rng.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_tim.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_rcc.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_sd.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_sd_ex.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_sdmmc.c
-  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_qspi.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_rcc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_rcc_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_mdma.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_usart.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_usart_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_uart.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_uart_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_dma.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_i2c.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_i2c_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_sai.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_ltdc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_rng.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_ll_tim.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_ll_rcc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_sd.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_sd_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_ll_sdmmc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp2/src/stm32mp2xx_hal_qspi.c
   #
   ${FWDIR}/lib/mdrivlib/drivers/pin.cc
   ${FWDIR}/lib/mdrivlib/drivers/tim.cc
@@ -194,12 +194,17 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/drivers/i2c.cc
   ${FWDIR}/lib/mdrivlib/drivers/qspi_flash_driver.cc
   ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3168.cc
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1/drivers/sai_tdm.cc
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/system_ca7.c
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
+
+
+  # TO CHANGE:
+  ${FWDIR}/system/mmu_ca35.c
+  ${FWDIR}/system/startup_ca7.s
+  ${FWDIR}/lib/mdrivlib/target/stm32mp2/drivers/sai_tdm.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp2_ca35/boot/system_ca7.c
+  ${FWDIR}/lib/mdrivlib/target/stm32mp2_ca35/boot/irq_ctrl.c
+  ${FWDIR}/lib/mdrivlib/target/stm32mp2_ca35/drivers/interrupt_handler.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp2_ca35/drivers/hal_handlers.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp2_ca35/drivers/cycle_counter.cc
   #
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #
@@ -239,12 +244,12 @@ target_include_directories(
           ${FWDIR}/src/core_a7
           ${FWDIR}/src/medium
           ${FWDIR}/lib/mdrivlib
-          ${FWDIR}/lib/mdrivlib/target/stm32mp1
-          ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
+          ${FWDIR}/lib/mdrivlib/target/stm32mp2
+          ${FWDIR}/lib/mdrivlib/target/stm32mp2_ca35
           ${LIBDIR}
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
-          ${FWDIR}/lib/cmsis-device/stm32mp157c/include
+          ${FWDIR}/lib/cmsis-device/stm32mp2xx/include
           #
           ${CMAKE_BINARY_DIR}/checkgit
 )
@@ -291,7 +296,7 @@ endforeach()
 
 target_link_script(
   main
-  ${FWDIR}/system/linker/stm32mp15xx_ca7.ld
+  ${FWDIR}/system/linker/stm32mp2xxx_ca35.ld
   -L${FWDIR}
   -Wl,--gc-sections
   -Wno-psabi
