@@ -1,5 +1,5 @@
-OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
-OUTPUT_ARCH(arm)
+/* OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm") */
+/*OUTPUT_ARCH(arm)*/
 ENTRY(_Reset)
 
 INCLUDE system/linker/memory.ld
@@ -7,14 +7,23 @@ INCLUDE system/linker/memory.ld
 
 MEMORY
 {
-    ROM (rx)			: ORIGIN = _A7_CODE,		LENGTH = _A7_CODE_SZ
-	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
+    ROM (rx)			: ORIGIN = _A35_CODE,		LENGTH = _A35_CODE_SZ
+    RAM (rx)			: ORIGIN = _A35_RAM,		LENGTH = _A35_RAM_SZ
+	VIRTDRIVE (rw)		: ORIGIN = _VIRTDRIVE,		LENGTH = _VIRTDRIVE_SZ 
+	CONSOLEBUF (rw)		: ORIGIN = _CONSOLEBUF,		LENGTH = _CONSOLEBUF_SZ 
+	FWBUFFER (rw)		: ORIGIN = _FWBUFFER,		LENGTH = _FWBUFFER_SZ 
+	HEAP (rw)			: ORIGIN = _A35_HEAP,		LENGTH = _A35_HEAP_SZ
 	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
 
-	SYSRAM (rw)			: ORIGIN = 0x2FFC0000,		LENGTH = 256K
+	SYMLIST (r)			: ORIGIN = _A35_SYMS,		LENGTH = _A35_SYMS_SZ
+
+	SHAREDMEMINDEX (rw) : ORIGIN = _A35_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
+	SYSRAM (rw)			: ORIGIN = _SYSRAM,			LENGTH = _SYSRAM_SZ
 }
 
-/* A7 stacks are at end of RAM */
+/* A35 stacks are at end of RAM */
+
+_shared_list = _A35_SHARED_LIST;
 
 SECTIONS
 {
@@ -24,7 +33,13 @@ SECTIONS
 		*(.irqhandler)
         *(.text)
         *(.text*)
-					/* Todo: check if we need the next 5 lines */
+
+		/* Keep symbols that we want to export to plugin API */
+		KEEP(*vcv_plugin*:(.text*))
+		KEEP(*jansson*:(.text*))
+		KEEP(*pffft*:(.text*))
+		KEEP(libcpp_stub*(.text*))
+
 		*(.glue_7)         /* glue arm to thumb code */
 		*(.glue_7t)        /* glue thumb to arm code */
 		*(.eh_frame)
@@ -38,7 +53,8 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		*(.rodata)         /* .rodata sections (constants, strings, etc.) */
-		*(.rodata*) 
+		*(.rodata*)
+		*(.binary*)
 		. = ALIGN(8);
 	} > ROM
 
@@ -74,7 +90,6 @@ SECTIONS
 		. = ALIGN(8);
 	} > ROM
 
-
     .data : 
     {
         . = ALIGN(8);
@@ -94,13 +109,18 @@ SECTIONS
         _bss_end = .;
 		. = ALIGN(256);
 		_ram_aligned_end = .;
-    } > ROM
+    } > RAM
+
+	.symlist : {
+        FILL(0x00);
+        BYTE(0x00);
+	} > SYMLIST
 
 	.heap (NOLOAD):
 	{
 		. = ALIGN(8);
 		_sheap = .;
-		. += _A7_HEAP_SZ;
+		. += _A35_HEAP_SZ;
 		_eheap = .;
 	} > HEAP
 
@@ -119,9 +139,23 @@ SECTIONS
 		_end_of_sysram = .;
 	} > SYSRAM
 
+	.virtdrive (NOLOAD):
+	{
+		*(.virtdrive)
+	} > VIRTDRIVE
+
+	.consolebuf (NOLOAD):
+	{
+		*(.consolebuf)
+	} > CONSOLEBUF
+
+	.fwbuffer (NOLOAD):
+	{
+		*(.fwbuffer)
+	} > FWBUFFER
 
     _user_stack_start = _ram_aligned_end;
-    _user_stack_end = _user_stack_start + 0x80000; /* 512k */
+    _user_stack_end = _user_stack_start + 0x1000000;  /* 16MB */
 
     _svc_stack_start = _user_stack_end;
     _svc_stack_end = _svc_stack_start + 0x6000; /* 24k for ISRs*/
@@ -133,16 +167,25 @@ SECTIONS
     _fiq_stack_end = _fiq_stack_start + 0x100;
 
     _auxcore_user_stack_start = _fiq_stack_end;
-    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x1000;
+    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x1000000; /* 16MB */
 
+
+	.sharedmemindex (NOLOAD) :
+	{
+		. = ALIGN(8);
+		*(.sharedmemindex)
+		*(.sharedmemindex*)
+		. = ALIGN(8);
+	} > SHAREDMEMINDEX
+	
 
   /* Remove information from the compiler libraries */
-  /DISCARD/ :
-  {
-    libc.a ( * )
-    libm.a ( * )
-    libgcc.a ( * )
-  }
+  /* /DISCARD/ : */
+  /* { */
+  /*   libc.a ( * ) */
+  /*   libm.a ( * ) */
+  /*   libgcc.a ( * ) */
+  /* } */
 
 	.ARM.attributes 0 : { *(.ARM.attributes) }
 }
