@@ -447,9 +447,8 @@ static Element make_latching_mono(std::string_view image, NVGcolor c, LatchingBu
 Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *light) {
 	log_make_element("SvgSwitch, Light", widget->paramId);
 
-	// Note: this seems reversed, but PhasorGates uses this (VCVLightBezel<>), and it works
 	LatchingButton::State_t defaultValue =
-		getScaledDefaultValue(widget) > 0.5f ? LatchingButton::State_t::DOWN /*0*/ : LatchingButton::State_t::UP /*1*/;
+		getScaledDefaultValue(widget) > 0.5f ? LatchingButton::State_t::DOWN : LatchingButton::State_t::UP;
 
 	if (light->getNumColors() != 1 && light->getNumColors() != 3) {
 		pr_warn("In %s, SvgSwitch with MultiLightWidget with %d colors: only 1 and 3 colors are supported.\n",
@@ -467,15 +466,19 @@ Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *
 		auto c = light->baseColors[0];
 		if (widget->momentary)
 			return make_momentary_mono(widget->frames[0]->filename(), c);
-		else
+		else {
+			printf("make_element mono: defaultValue (%f) changed to %d\n", getScaledDefaultValue(widget), defaultValue);
 			return make_latching_mono(widget->frames[0]->filename(), c, defaultValue);
+		}
 
 		// Treat 3 or more lights as an RGB light
 	} else {
 		if (widget->momentary)
 			return make_momentary_rgb(widget->frames[0]->filename());
-		else
+		else {
+			printf("make_element rgb: defaultValue (%f) changed to %d\n", getScaledDefaultValue(widget), defaultValue);
 			return make_latching_rgb(widget->frames[0]->filename(), defaultValue);
+		}
 	}
 }
 
