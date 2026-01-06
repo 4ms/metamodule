@@ -449,7 +449,7 @@ Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *
 
 	// Note: this seems reversed, but PhasorGates uses this (VCVLightBezel<>), and it works
 	LatchingButton::State_t defaultValue =
-		getScaledDefaultValue(widget) > 0.5f ? LatchingButton::State_t::UP : LatchingButton::State_t::DOWN;
+		getScaledDefaultValue(widget) > 0.5f ? LatchingButton::State_t::DOWN /*0*/ : LatchingButton::State_t::UP /*1*/;
 
 	if (light->getNumColors() != 1 && light->getNumColors() != 3) {
 		pr_warn("In %s, SvgSwitch with MultiLightWidget with %d colors: only 1 and 3 colors are supported.\n",
