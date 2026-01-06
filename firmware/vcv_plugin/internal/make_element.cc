@@ -467,7 +467,6 @@ Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *
 		if (widget->momentary)
 			return make_momentary_mono(widget->frames[0]->filename(), c);
 		else {
-			printf("make_element mono: defaultValue (%f) changed to %d\n", getScaledDefaultValue(widget), defaultValue);
 			return make_latching_mono(widget->frames[0]->filename(), c, defaultValue);
 		}
 
@@ -476,7 +475,6 @@ Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *
 		if (widget->momentary)
 			return make_momentary_rgb(widget->frames[0]->filename());
 		else {
-			printf("make_element rgb: defaultValue (%f) changed to %d\n", getScaledDefaultValue(widget), defaultValue);
 			return make_latching_rgb(widget->frames[0]->filename(), defaultValue);
 		}
 	}
