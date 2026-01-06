@@ -22,7 +22,7 @@ void Plugin::addModel(Model *model) {
 	std::string_view slug = model->slug;
 	std::string_view brand = model->plugin->slug;
 
-	pr_info("Adding VCV_adaptor model %s:%s\n", brand.data(), slug.data());
+	pr_trace("Adding VCV_adaptor model %s:%s\n", brand.data(), slug.data());
 
 	if (ModuleFactory::isValidBrandModule(brand, slug)) {
 		pr_err("Duplicate module slug: %s, skipping\n", model->slug.c_str());
