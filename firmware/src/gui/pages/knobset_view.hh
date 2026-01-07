@@ -469,14 +469,14 @@ private:
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<KnobSetViewPage *>(event->user_data);
-		page->page_list.request_new_page_no_history(PageId::JackMapView, page->args);
+		page->page_list.request_new_page(PageId::JackMapView, page->args);
 	}
 
 	static void goto_midimap_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<KnobSetViewPage *>(event->user_data);
-		page->page_list.request_new_page_no_history(PageId::MidiMapView, page->args);
+		page->page_list.request_new_page(PageId::MidiMapView, page->args);
 	}
 
 	static void activate_knobset_cb(lv_event_t *event) {
