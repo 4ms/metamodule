@@ -16,10 +16,12 @@ RackWidget::~RackWidget() {
 }
 
 widget::Widget *RackWidget::getModuleContainer() {
-	return {};
+	static widget::Widget w{};
+	return &w;
 }
 widget::Widget *RackWidget::getCableContainer() {
-	return {};
+	static widget::Widget w{};
+	return &w;
 }
 math::Vec RackWidget::getMousePos() {
 	return {};
