@@ -291,13 +291,16 @@ public:
 			return;
 	}
 
+	static constexpr size_t MAXPOLY = 4;
 	template<size_t Core>
 	void process_outputs_samecore() {
 		for (auto const &cable : cables.samecore_cables[Core]) {
-			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+			std::array<float, MAXPOLY> value_buffer;
+			std::span<float> values{value_buffer};
+			auto num_poly = modules[cable.out.module_id]->get_output_poly(cable.out.jack_id, values);
 
 			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input(in.jack_id, val);
+				modules[in.module_id]->set_input_poly(in.jack_id, values.subspan(0, num_poly));
 			}
 		}
 	}
@@ -305,10 +308,12 @@ public:
 	template<size_t Core>
 	void process_outputs_diffcore() {
 		for (auto const &cable : cables.diffcore_cables[Core]) {
-			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+			std::array<float, MAXPOLY> value_buffer;
+			std::span<float> values{value_buffer};
+			auto num_poly = modules[cable.out.module_id]->get_output_poly(cable.out.jack_id, values);
 
 			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input(in.jack_id, val);
+				modules[in.module_id]->set_input_poly(in.jack_id, values.subspan(0, num_poly));
 			}
 		}
 	}
