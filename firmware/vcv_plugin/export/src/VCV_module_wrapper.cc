@@ -53,6 +53,28 @@ float VCVModuleWrapper::get_output(int output_id) const {
 		return 0.f;
 }
 
+void VCVModuleWrapper::set_input_poly(int input_id, std::span<const float> values) {
+	if ((size_t)input_id >= inputs.size())
+		return;
+
+	inputs[input_id].setChannels(values.size());
+
+	for (size_t i = 0; auto f : values) {
+		inputs[input_id].setVoltage(f, i);
+		i++;
+	}
+}
+
+size_t VCVModuleWrapper::get_output_poly(int output_id, std::span<float> values) const {
+	if ((size_t)output_id >= outputs.size())
+		return 0;
+
+	// auto num_chans = std::min<size_t>(outputs[output_id].getChannels(), values.size()); // This is safer, but we probably can guarentee it's not needed
+	auto num_chans = outputs[output_id].getChannels();
+	std::copy(outputs[output_id].voltages.begin(), outputs[output_id].voltages.begin() + num_chans, values.begin());
+	return num_chans;
+}
+
 float VCVModuleWrapper::get_led_brightness(int led_id) const {
 	if ((size_t)led_id < lights.size()) {
 		auto l = std::clamp(lights[led_id].value, 0.f, 1.f);
