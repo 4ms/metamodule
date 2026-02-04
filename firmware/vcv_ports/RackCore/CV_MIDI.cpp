@@ -182,11 +182,11 @@ struct CV_MIDIWidget : ModuleWidget {
 		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(20.249, 80.603)), module, CV_MIDI::PW_INPUT));
 		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(32.591, 80.603)), module, CV_MIDI::MW_INPUT));
 		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(7.906, 96.859)), module, CV_MIDI::CLK_INPUT));
-		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(20.249, 96.707)), module, CV_MIDI::VOL_INPUT));
+		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(20.249, 96.859)), module, CV_MIDI::VOL_INPUT));
 		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(32.591, 96.859)), module, CV_MIDI::PAN_INPUT));
 		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(7.906, 113.115)), module, CV_MIDI::START_INPUT));
 		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(20.249, 113.115)), module, CV_MIDI::STOP_INPUT));
-		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(32.591, 112.975)), module, CV_MIDI::CONTINUE_INPUT));
+		addInput(createInputCentered<ThemedPJ301MPort>(mm2px(Vec(32.591, 113.115)), module, CV_MIDI::CONTINUE_INPUT));
 
 		// Changed for METAMODULE
 		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(4, 12)));
