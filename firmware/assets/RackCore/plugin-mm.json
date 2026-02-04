@@ -14,6 +14,16 @@
 		  "slug": "CV-MIDI",
 		  "name": "CV to MIDI",
 		  "displayName": "CV to MIDI"
+		},
+		{
+		  "slug": "CV-CC",
+		  "name": "CV to MIDI CC",
+		  "displayName": "CV to MIDI CC"
+		},
+		{
+		  "slug": "Scope",
+		  "name": "Scope",
+		  "displayName": "Scope"
 		}
 	]
 }
