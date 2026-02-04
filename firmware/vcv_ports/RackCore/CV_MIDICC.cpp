@@ -1,3 +1,5 @@
+#include "midi/midi_message.hh"
+#include "patch/patch_file.hh"
 #include "plugin.hpp"
 
 namespace rack
@@ -183,6 +185,50 @@ struct CV_MIDICCWidget : ModuleWidget {
 		display->font = "RackCore/ShareTechMono_12.bin";
 		display->color = Colors565::Yellow;
 		addChild(display);
+	}
+
+	// METAMODULE: add MIDI channel selection to menu
+	void appendContextMenu(Menu *menu) override {
+		auto module = dynamic_cast<CV_MIDICC *>(this->module);
+
+		if (!module)
+			return;
+
+		for (auto cell = 0; cell < 16; cell++) {
+			menu->addChild(createSubmenuItem(
+				"Cell " + std::to_string(cell + 1) + " CC#",
+				[=] { return std::to_string(module->learnedCcs[cell]); },
+				[=](Menu *menu) {
+					for (int cc = 0; cc < 128; cc++) {
+						menu->addChild(createCheckMenuItem(
+							string::f("CC# %d", cc),
+							"",
+							[=]() { return module->learnedCcs[cell] == cc; },
+							[=]() {
+								module->setLearnedCc(cell, cc);
+								MetaModule::Patch::mark_patch_modified();
+							}));
+					}
+				}));
+		}
+
+		menu->addChild(new MenuSeparator);
+
+		menu->addChild(createSubmenuItem(
+			"MIDI channel",
+			[=] {
+				auto chan = module->midiOutput.getChannel();
+				return chan < 0 ? "Omni" : std::to_string(chan + 1);
+			},
+			[=](Menu *menu) {
+				for (int c = 0; c < 16; c++) {
+					menu->addChild(createCheckMenuItem(
+						string::f("Channel %d", c + 1),
+						"",
+						[=]() { return module->midiOutput.getChannel() == c; },
+						[=]() { module->midiOutput.setChannel(c); }));
+				}
+			}));
 	}
 };
 
