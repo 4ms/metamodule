@@ -1,6 +1,10 @@
 #include "plugin.hpp"
 #include <string.h>
 
+namespace rack
+{
+namespace core
+{
 static const int BUFFER_SIZE = 256;
 
 struct Scope : Module {
@@ -521,3 +525,6 @@ struct ScopeWidget : ModuleWidget {
 };
 
 Model *modelScope = createModel<Scope, ScopeWidget>("Scope");
+
+} // namespace core
+} // namespace rack
