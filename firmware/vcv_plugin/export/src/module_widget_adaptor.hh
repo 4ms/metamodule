@@ -248,6 +248,11 @@ struct ModuleWidgetAdaptor {
 			indices.light_idx = graphic_display_idx;
 			elem_idx.emplace_back(element, indices, widget);
 
+			if (to_mm(widget->box.size.y) < 5 && to_mm(widget->box.size.x) < 5)
+				pr_trace("Will disable full-screen for DynamicGraphicDisplay size %f x %f\n",
+						 to_mm(widget->box.size.x),
+						 to_mm(widget->box.size.y));
+
 			log_widget("Widget (as Graphic Display buffer):", graphic_display_idx, widget, element);
 		}
 	}
