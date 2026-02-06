@@ -1343,6 +1343,7 @@ lv_obj_t *create_settings_cont(lv_obj_t *parent) {
 
 lv_obj_t *create_load_meter(lv_obj_t *parent) {
 	auto load_meter = lv_label_create(parent);
+	lv_label_set_text(load_meter, "");
 	lv_obj_set_width(load_meter, LV_SIZE_CONTENT);
 	lv_obj_set_height(load_meter, 20);
 	lv_obj_set_x(load_meter, 0);
