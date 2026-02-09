@@ -149,7 +149,7 @@ struct ModuleViewPage : PageBase {
 			lv_obj_set_flex_align(
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 			settings_menu.prepare_focus(group);
-			action_menu.prepare_focus(group, this_module_id);
+			action_menu.prepare_focus(group, this_module_id, canvas);
 		}
 
 		quick_control_mode = false;
