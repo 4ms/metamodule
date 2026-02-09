@@ -43,10 +43,12 @@ public:
 		, randomizer{patch_mod_queue}
 		, reset_params_{patch_mod_queue}
 		, group(lv_group_create())
-		, moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")} {
+		, moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")}
+		, moduleViewActionBypassBut{create_lv_list_button(ui_ModuleViewActionMenu, "Bypass: Off")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
 		lv_show(moduleViewActionPresetBut);
+		lv_show(moduleViewActionBypassBut);
 		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
 		lv_obj_set_height(ui_ModuleViewActionMenu, 240);
 
@@ -61,6 +63,7 @@ public:
 		lv_obj_add_event_cb(moduleViewActionPresetBut, preset_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionResetBut, reset_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionMidiBut, midi_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(moduleViewActionBypassBut, bypass_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
@@ -68,12 +71,14 @@ public:
 		lv_group_add_obj(group, ui_ModuleViewActionResetBut);
 		lv_group_add_obj(group, ui_ModuleViewActionMidiBut);
 		lv_group_add_obj(group, moduleViewActionPresetBut);
+		lv_group_add_obj(group, moduleViewActionBypassBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
 	}
 
-	void prepare_focus(lv_group_t *parent_group, unsigned module_idx) {
+	void prepare_focus(lv_group_t *parent_group, unsigned module_idx, lv_obj_t *canvas = nullptr) {
 		this->module_idx = module_idx;
+		this->module_canvas = canvas;
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), group);
 
@@ -118,6 +123,7 @@ public:
 		preset_popup.init(lv_layer_sys(), group);
 
 		update_midi_map_text();
+		update_bypass_text();
 	}
 
 	void back() {
@@ -317,6 +323,30 @@ private:
 		page->hide();
 	}
 
+	void update_bypass_text() {
+		bool bypassed = patches.get_view_patch()->is_module_bypassed(module_idx);
+		auto *label = lv_obj_get_child(moduleViewActionBypassBut, 0);
+		if (label)
+			lv_label_set_text(label, bypassed ? "Bypass: On" : "Bypass: Off");
+	}
+
+	static void bypass_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+
+		auto *pd = page->patches.get_view_patch();
+		bool new_state = !pd->is_module_bypassed(page->module_idx);
+
+		pd->set_module_bypassed(page->module_idx, new_state);
+		page->patch_mod_queue.put(
+			SetModuleBypass{.module_id = static_cast<uint16_t>(page->module_idx), .bypassed = new_state});
+		page->patches.mark_view_patch_modified();
+		page->update_bypass_text();
+		if (page->module_canvas)
+			lv_obj_set_style_opa(page->module_canvas, new_state ? LV_OPA_50 : LV_OPA_COVER, LV_PART_MAIN);
+	}
+
 	FatFileIO &ramdisk;
 	OpenPatchManager &patches;
 	PageList &page_list;
@@ -332,11 +362,13 @@ private:
 	ResetParams reset_params_;
 
 	unsigned module_idx = 0;
+	lv_obj_t *module_canvas = nullptr;
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
 
 	lv_obj_t *moduleViewActionPresetBut;
+	lv_obj_t *moduleViewActionBypassBut;
 	std::string preset_path{};
 	uint16_t cur_preset_idx{};
 	std::string presets{};
