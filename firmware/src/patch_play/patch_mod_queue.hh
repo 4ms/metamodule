@@ -78,6 +78,11 @@ struct LoadModuleState {
 	std::string data;
 };
 
+struct SetModuleBypass {
+	uint16_t module_id;
+	bool bypassed;
+};
+
 using PatchModRequest = std::variant<SetStaticParam,
 									 AddMapping,
 									 ModifyMapping,
@@ -91,7 +96,8 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 CalibrationOnOff,
 									 SetChanCalibration,
 									 SetMidiPolyNum,
-									 LoadModuleState>;
+									 LoadModuleState,
+									 SetModuleBypass>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 128>;
 
