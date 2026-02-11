@@ -76,9 +76,8 @@ public:
 		lv_group_set_wrap(group, false);
 	}
 
-	void prepare_focus(lv_group_t *parent_group, unsigned module_idx, lv_obj_t *canvas = nullptr) {
+	void prepare_focus(lv_group_t *parent_group, unsigned module_idx) {
 		this->module_idx = module_idx;
-		this->module_canvas = canvas;
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), group);
 
@@ -123,7 +122,6 @@ public:
 		preset_popup.init(lv_layer_sys(), group);
 
 		update_midi_map_text();
-		update_bypass_text();
 	}
 
 	void back() {
@@ -155,6 +153,7 @@ public:
 	}
 
 	void show() {
+		update_bypass_text();
 		lv_group_focus_obj(ui_ModuleViewActionAutopatchBut);
 
 		if (!visible) {
@@ -338,13 +337,10 @@ private:
 		auto *pd = page->patches.get_view_patch();
 		bool new_state = !pd->is_module_bypassed(page->module_idx);
 
-		pd->set_module_bypassed(page->module_idx, new_state);
 		page->patch_mod_queue.put(
 			SetModuleBypass{.module_id = static_cast<uint16_t>(page->module_idx), .bypassed = new_state});
 		page->patches.mark_view_patch_modified();
-		page->update_bypass_text();
-		if (page->module_canvas)
-			lv_obj_set_style_opa(page->module_canvas, new_state ? LV_OPA_50 : LV_OPA_COVER, LV_PART_MAIN);
+		page->hide();
 	}
 
 	FatFileIO &ramdisk;
@@ -362,7 +358,6 @@ private:
 	ResetParams reset_params_;
 
 	unsigned module_idx = 0;
-	lv_obj_t *module_canvas = nullptr;
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;

@@ -149,7 +149,7 @@ struct ModuleViewPage : PageBase {
 			lv_obj_set_flex_align(
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 			settings_menu.prepare_focus(group);
-			action_menu.prepare_focus(group, this_module_id, canvas);
+			action_menu.prepare_focus(group, this_module_id);
 		}
 
 		quick_control_mode = false;
@@ -336,6 +336,10 @@ struct ModuleViewPage : PageBase {
 						   },
 						   [&, this](RemoveMapping &mod) {
 							   patch->remove_mapping(mod.set_id, mod.map);
+							   refresh = true;
+						   },
+						   [&, this](SetModuleBypass &mod) {
+							   patch->set_module_bypassed(mod.module_id, mod.bypassed);
 							   refresh = true;
 						   },
 						   [&](auto &m) { refresh = false; },
