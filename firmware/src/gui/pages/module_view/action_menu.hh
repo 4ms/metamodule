@@ -170,6 +170,10 @@ public:
 		return visible;
 	}
 
+	void reactivate_group() {
+		lv_group_activate(group);
+	}
+
 	void update() {
 		process_delete_module();
 		auto_map.update();
@@ -340,7 +344,11 @@ private:
 		page->patch_mod_queue.put(
 			SetModuleBypass{.module_id = static_cast<uint16_t>(page->module_idx), .bypassed = new_state});
 		page->patches.mark_view_patch_modified();
-		page->hide();
+
+		// Use new_state directly since the patch data hasn't been updated yet
+		auto *label = lv_obj_get_child(page->moduleViewActionBypassBut, 0);
+		if (label)
+			lv_label_set_text(label, new_state ? "Bypass: On" : "Bypass: Off");
 	}
 
 	FatFileIO &ramdisk;

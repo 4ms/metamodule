@@ -272,6 +272,11 @@ struct ModuleViewPage : PageBase {
 		if (handle_patch_mods()) {
 			redraw_module();
 			mapping_pane.refresh();
+
+			if (action_menu.is_visible()) {
+				focus_button_bar();
+				action_menu.reactivate_group();
+			}
 		}
 
 		// Draw the on-screen elements (knobs, lights, etc)
