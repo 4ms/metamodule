@@ -19,7 +19,13 @@ inline bool is_light_only(DrawnElement const &drawn_el) {
 											(gui_el.count.num_outputs == 0) && (gui_el.count.num_inputs == 0);
 								 },
 								 [](DynamicGraphicDisplay const &el) {
-									 return false;
+									 if (el.width_mm < 5 && el.height_mm < 5) {
+										 pr_trace("Disabled full-screen for DynamicGraphicDisplay size %f x %f\n",
+												  el.width_mm,
+												  el.height_mm);
+										 return true;
+									 } else
+										 return false;
 								 }},
 					  drawn_el.element);
 }
