@@ -43,6 +43,9 @@ void ModuleViewPage::redraw_module() {
 	auto [faceplate, width] = module_drawer.read_faceplate(slug);
 	canvas = module_drawer.draw_faceplate(faceplate, width, buffer);
 
+	if (patch->is_module_bypassed(this_module_id))
+		lv_obj_set_style_opa(canvas, LV_OPA_50, LV_PART_MAIN);
+
 	active_knobset = page_list.get_active_knobset();
 
 	module_drawer.draw_mapped_elements(

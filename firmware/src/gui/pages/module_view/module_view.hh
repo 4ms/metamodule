@@ -272,6 +272,11 @@ struct ModuleViewPage : PageBase {
 		if (handle_patch_mods()) {
 			redraw_module();
 			mapping_pane.refresh();
+
+			if (action_menu.is_visible()) {
+				focus_button_bar();
+				action_menu.reactivate_group();
+			}
 		}
 
 		// Draw the on-screen elements (knobs, lights, etc)
@@ -336,6 +341,10 @@ struct ModuleViewPage : PageBase {
 						   },
 						   [&, this](RemoveMapping &mod) {
 							   patch->remove_mapping(mod.set_id, mod.map);
+							   refresh = true;
+						   },
+						   [&, this](SetModuleBypass &mod) {
+							   patch->set_module_bypassed(mod.module_id, mod.bypassed);
 							   refresh = true;
 						   },
 						   [&](auto &m) { refresh = false; },

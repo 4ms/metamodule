@@ -783,6 +783,7 @@ PatchData:
   vcvModuleStates: []
   suggested_samplerate: 0
   suggested_blocksize: 0
+  bypassed_modules: []
 )"
 		  // clang-format off
 		 );
@@ -1074,6 +1075,7 @@ PatchData:
   vcvModuleStates: []
   suggested_samplerate: 0
   suggested_blocksize: 0
+  bypassed_modules: []
 )");
 	// clang-format on
 }
