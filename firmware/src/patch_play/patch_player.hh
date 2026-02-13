@@ -922,6 +922,54 @@ public:
 		rebalance_modules();
 	}
 
+	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
+		// Remove old
+		pd.remove_module(module_idx);
+
+		plugin_module_deinit(modules[module_idx]);
+		modules[module_idx].reset();
+
+		// Add new
+		modules[module_idx] = ModuleFactory::create(new_slug);
+		if (modules[module_idx] == nullptr) {
+			pr_err("Module %s not found\n", new_slug.c_str());
+			return;
+		}
+		pd.module_slugs.push_back(new_slug);
+		calc_multiple_module_indicies();
+
+		pr_trace("Replaced module %u with %s\n", module_idx, new_slug.c_str());
+
+		modules[module_idx]->id = module_idx;
+
+		// Match order that VCV does: fromJson (via load_state), then onAdd (via plugin_module_init)
+		reset_module(module_idx);
+		plugin_module_init(modules[module_idx]);
+
+		modules[module_idx]->set_samplerate(samplerate);
+
+		modules[module_idx]->mark_all_inputs_unpatched();
+		modules[module_idx]->mark_all_outputs_unpatched();
+
+		// Mark jacks patched
+		for (auto const &cable : pd.int_cables) {
+			if (cable.out.module_id == module_idx)
+				modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
+
+			for (auto const &input_jack : cable.ins) {
+				if (input_jack.module_id == module_idx) {
+					modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
+				}
+			}
+		}
+
+		// TODO: panel jack maps mark ins/outs as patched
+
+		// TODO: Can we verify mappings and panel jack mappings are valid?
+
+		rebalance_modules();
+	}
+
 	// General info getters:
 
 	// Jack patched/unpatched status
