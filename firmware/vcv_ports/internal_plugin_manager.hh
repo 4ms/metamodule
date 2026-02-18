@@ -288,6 +288,8 @@ struct InternalPluginManager {
 		rackCorePluginInstance = pluginInstance;
 		pluginInstance->addModel(rack::core::modelMIDI_CV);
 		pluginInstance->addModel(rack::core::modelCV_MIDI);
+		pluginInstance->addModel(rack::core::modelCV_MIDICC);
+		pluginInstance->addModel(rack::core::modelScope);
 #endif
 
 		parse_jsons("4ms");

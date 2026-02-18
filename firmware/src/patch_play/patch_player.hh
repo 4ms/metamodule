@@ -217,6 +217,12 @@ public:
 		for (auto const &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
 
+		// Apply bypass state
+		for (auto id : pd.bypassed_modules) {
+			if (id < num_modules)
+				modules[id]->bypassed = true;
+		}
+
 		calc_multiple_module_indicies();
 
 		active_knob_set = 0;
@@ -362,6 +368,7 @@ public:
 		pd.module_slugs.clear();
 		pd.mapped_lights.clear();
 		pd.module_states.clear();
+		pd.bypassed_modules.clear();
 		pd.midi_maps.set.clear();
 		pd.midi_maps.name = "";
 
@@ -788,6 +795,11 @@ public:
 	void reset_module(uint16_t module_id, std::string_view data = "") {
 		if (module_id < num_modules)
 			modules[module_id]->load_state(data);
+	}
+
+	void set_module_bypass(uint16_t module_id, bool bypassed) {
+		if (module_id < num_modules)
+			modules[module_id]->bypassed = bypassed;
 	}
 
 	void add_module(BrandModuleSlug slug) {

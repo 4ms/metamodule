@@ -246,6 +246,8 @@ struct PatchViewPage : PageBase {
 
 			module_canvases.push_back(canvas);
 			style_module(canvas);
+			if (patch->is_module_bypassed(module_idx))
+				lv_obj_set_style_opa(canvas, LV_OPA_50, LV_PART_MAIN);
 
 			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
