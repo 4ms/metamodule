@@ -65,22 +65,25 @@ void Module::load_state(std::string_view state_data) {
 		return;
 	}
 
-	// we need to check if the incoming state data is a preset or patch
-	// occasionally presets use params, and other times they use the data node.
-	// the params node is always present, however the data node is not.
+	// We need to check if the incoming state data is a preset or patch.
+	// Sometimes presets use `params`, and other times they use the `data` node.
+	// Patch files ususally are missing plugin, model, and version.
 	const auto is_preset = [root]() {
-		std::array<std::string_view, 4> nodes = {
+		std::array<std::string_view, 3> req_nodes = {
 			"plugin",
 			"model",
 			"version",
-			"params",
 		};
 
-		for (const auto i : nodes) {
-			if (!json_object_get(root, i.data())) {
+		for (const auto node : req_nodes) {
+			if (!json_object_get(root, node.data())) {
 				return false;
 			}
 		}
+		// Presets have either data or params, or both
+		if (!json_object_get(root, "data") && !json_object_get(root, "params"))
+			return false;
+
 		return true;
 	}();
 
