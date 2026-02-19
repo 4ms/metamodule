@@ -7,6 +7,7 @@
 #include <ui/MenuEntry.hpp>
 #include <ui/MenuItem.hpp>
 #include <ui/MenuSeparator.hpp>
+#include <ui/Slider.hpp>
 
 namespace MetaModule
 {
@@ -160,6 +161,13 @@ private:
 					menu.emplace_back(Gui::grey_text(rack_item->text));
 				}
 
+				else if (auto rack_item = dynamic_cast<rack::ui::Slider *>(child))
+				{
+					rack_item->step();
+					if (rack_item->quantity)
+						menu.emplace_back(Gui::grey_text(rack_item->quantity->getString()));
+				}
+
 				else if (auto rack_item = dynamic_cast<rack::ui::MenuSeparator *>(child))
 				{
 					rack_item->step();
@@ -168,7 +176,8 @@ private:
 
 				else
 				{
-					menu.emplace_back("?");
+					// Hide unknown items
+					// menu.emplace_back("?");
 				}
 			}
 		}
