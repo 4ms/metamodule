@@ -44,9 +44,13 @@ static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
 	if (!n.is_map())
 		return false;
 
-	if (n.has_child("slug") && n.has_child("displayName")) {
+	if (n.has_child("slug")) {
 		n["slug"] >> s->slug;
-		n["displayName"] >> s->display_name;
+		if (n.has_child("displayName")) {
+			n["displayName"] >> s->display_name;
+		} else if (n.has_child("name")) {
+			n["name"] >> s->display_name;
+		}
 	}
 	return true;
 }
