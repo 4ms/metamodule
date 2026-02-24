@@ -21,10 +21,14 @@ void VCVModuleWrapper::set_samplerate(float rate) {
 
 void VCVModuleWrapper::set_param(int id, float val) {
 	if ((size_t)id < paramQuantities.size() && paramQuantities[id]) {
-		val *= (paramQuantities[id]->maxValue - paramQuantities[id]->minValue);
-		val += paramQuantities[id]->minValue;
-		if (paramQuantities[id]->snapEnabled)
-			val = std::round(val);
+		if (MathTools::is_finite_fastmath(paramQuantities[id]->maxValue) &&
+			MathTools::is_finite_fastmath(paramQuantities[id]->minValue))
+		{
+			val *= (paramQuantities[id]->maxValue - paramQuantities[id]->minValue);
+			val += paramQuantities[id]->minValue;
+			if (paramQuantities[id]->snapEnabled)
+				val = std::round(val);
+		}
 	}
 	if ((size_t)id < params.size())
 		params[id].setValue(val);
