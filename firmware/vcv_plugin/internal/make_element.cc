@@ -2,6 +2,7 @@
 #include "CoreModules/elements/base_element.hh"
 #include "CoreModules/elements/units.hh"
 #include "console/pr_dbg.hh"
+#include "util/math.hh"
 #include "util/overloaded.hh"
 #include <concepts>
 
@@ -105,6 +106,9 @@ static void set_pot_display_params(Pot &element, rack::app::ParamWidget *widget)
 }
 
 static Element create_base_knob(rack::app::Knob *widget) {
+	if (widget->getParamQuantity() && !MathTools::is_finite_fastmath(widget->getParamQuantity()->minValue))
+		return Encoder{};
+
 	Knob knob{};
 	knob.default_value = getScaledDefaultValue(widget);
 	knob.min_angle = radians_to_degrees(widget->minAngle);
