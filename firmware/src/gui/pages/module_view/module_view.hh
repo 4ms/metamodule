@@ -439,7 +439,7 @@ private:
 	void show_roller();
 	void populate_roller();
 	void populate_element_objects();
-	void add_element_highlight(lv_obj_t *obj);
+	void add_element_highlight(DrawnElement const &drawn_element);
 	void unhighlight_component(uint32_t prev_sel);
 	void highlight_component(size_t idx);
 	void focus_button_bar();
