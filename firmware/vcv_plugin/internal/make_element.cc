@@ -325,7 +325,7 @@ static MomentaryButton make_momentary(rack::app::SvgSwitch *widget) {
 			pr_info("Excess momentary button frames ignored\n");
 
 	} else {
-		pr_warn("Warning: In %s, SvgSwitch has no image frames\n", module_name(widget));
+		pr_warn("make_momentary: model '%s' has SvgSwitch with no image frames\n", module_name(widget));
 	}
 
 	return element;
