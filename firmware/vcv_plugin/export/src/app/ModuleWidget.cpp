@@ -163,6 +163,11 @@ void ModuleWidget::addParam(app::ParamWidget *widget) {
 		addParam(w);
 	else if (auto w = dynamic_cast<app::SvgSwitch *>(widget))
 		addParam(w);
+	else if (auto w = dynamic_cast<app::Switch *>(widget)) {
+		log_widget("addParam(Switch)", w);
+		internal->adaptor->addParam(w);
+		Widget::addChild(w);
+	} 
 	else {
 		log_widget("addParam(unknown ParamWidget)", widget);
 		Widget::addChild(widget);

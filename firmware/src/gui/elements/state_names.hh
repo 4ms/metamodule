@@ -174,6 +174,8 @@ inline std::string get_element_value_string(Element const &element, float value,
 
 			[&s](AltParamAction const &) { s = "Off"; },
 
+			[&s](Encoder const &) { s = ""; },
+
 			[](BaseElement const &) {},
 		},
 		element);

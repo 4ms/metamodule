@@ -2,6 +2,7 @@
 #include "CoreModules/elements/base_element.hh"
 #include "CoreModules/elements/units.hh"
 #include "console/pr_dbg.hh"
+#include "util/math.hh"
 #include "util/overloaded.hh"
 #include <concepts>
 
@@ -105,6 +106,9 @@ static void set_pot_display_params(Pot &element, rack::app::ParamWidget *widget)
 }
 
 static Element create_base_knob(rack::app::Knob *widget) {
+	if (widget->getParamQuantity() && !MathTools::is_finite_fastmath(widget->getParamQuantity()->minValue))
+		return Encoder{};
+
 	Knob knob{};
 	knob.default_value = getScaledDefaultValue(widget);
 	knob.min_angle = radians_to_degrees(widget->minAngle);
@@ -321,7 +325,7 @@ static MomentaryButton make_momentary(rack::app::SvgSwitch *widget) {
 			pr_info("Excess momentary button frames ignored\n");
 
 	} else {
-		pr_warn("Warning: In %s, SvgSwitch has no image frames\n", module_name(widget));
+		pr_warn("make_momentary: model '%s' has SvgSwitch with no image frames\n", module_name(widget));
 	}
 
 	return element;
@@ -387,6 +391,35 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 
 	element.default_value = getDefaultValue(widget);
 	return element;
+}
+
+Element make_element(rack::app::Switch *widget) {
+	auto pq = widget->getParamQuantity();
+
+	if (widget->momentary) {
+		log_make_element("rack::app::Switch momentary button", widget->paramId);
+		return MomentaryButton{};
+
+	} else if (!pq || (pq->minValue == 0 && pq->maxValue == 1)) {
+		log_make_element("rack::app::Switch latching button", widget->paramId);
+		FlipSwitch element{};
+		element.num_pos = 2;
+		element.default_value = 0;
+		if (pq && pq->labels.size() >= 1)
+			element.pos_names[0] = pq->labels[0];
+		if (pq && pq->labels.size() >= 2)
+			element.pos_names[1] = pq->labels[1];
+		return element;
+	} else {
+		// TODO: find examples of plugins using app::Switch for flip or slide switches and
+		// determine the best way to handle these cases.
+		// For now, we use Slide Switches since they can be drawn without SVGs.
+		log_make_element("rack::app::Switch slide", widget->paramId);
+		SlideSwitch element{};
+		element.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, element.pos_names.size());
+		element.default_value = getDefaultValue(widget);
+		return element;
+	}
 }
 
 Element make_element(rack::app::SvgSwitch *widget) {
