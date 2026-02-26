@@ -18,6 +18,7 @@ Element make_element(rack::app::SvgSlider *widget);
 
 // Switches
 Element make_element(rack::app::SvgSwitch *widget);
+Element make_element(rack::app::Switch *widget);
 
 // Lights:
 Element make_element(rack::app::MultiLightWidget *widget);

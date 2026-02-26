@@ -393,6 +393,35 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 	return element;
 }
 
+Element make_element(rack::app::Switch *widget) {
+	auto pq = widget->getParamQuantity();
+
+	if (widget->momentary) {
+		log_make_element("rack::app::Switch momentary button", widget->paramId);
+		return MomentaryButton{};
+
+	} else if (!pq || (pq->minValue == 0 && pq->maxValue == 1)) {
+		log_make_element("rack::app::Switch latching button", widget->paramId);
+		FlipSwitch element{};
+		element.num_pos = 2;
+		element.default_value = 0;
+		if (pq && pq->labels.size() >= 1)
+			element.pos_names[0] = pq->labels[0];
+		if (pq && pq->labels.size() >= 2)
+			element.pos_names[1] = pq->labels[1];
+		return element;
+	} else {
+		// TODO: find examples of plugins using app::Switch for flip or slide switches and
+		// determine the best way to handle these cases.
+		// For now, we use Slide Switches since they can be drawn without SVGs.
+		log_make_element("rack::app::Switch slide", widget->paramId);
+		SlideSwitch element{};
+		element.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, element.pos_names.size());
+		element.default_value = getDefaultValue(widget);
+		return element;
+	}
+}
+
 Element make_element(rack::app::SvgSwitch *widget) {
 
 	bool momentary = widget->momentary;
