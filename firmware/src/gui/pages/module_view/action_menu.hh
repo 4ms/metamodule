@@ -1,8 +1,10 @@
 #pragma once
+#include "CoreModules/moduleFactory.hh"
 #include "fat_file_io.hh"
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
+#include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/module_view/automap.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/roller_popup.hh"
@@ -44,11 +46,19 @@ public:
 		, reset_params_{patch_mod_queue}
 		, group(lv_group_create())
 		, moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")}
-		, moduleViewActionBypassBut{create_lv_list_button(ui_ModuleViewActionMenu, "Bypass: Off")} {
+		, moduleViewActionBypassBut{create_lv_list_button(ui_ModuleViewActionMenu, "Bypass: Off")}
+		, moduleViewActionRenameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Rename...")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
 		lv_show(moduleViewActionPresetBut);
 		lv_show(moduleViewActionBypassBut);
+		lv_show(moduleViewActionRenameBut);
+
+		rename_textarea = lv_textarea_create(lv_layer_top());
+		lv_obj_add_flag(rename_textarea, LV_OBJ_FLAG_HIDDEN);
+		lv_textarea_set_max_length(rename_textarea, AliasNameString::capacity);
+		lv_textarea_set_one_line(rename_textarea, true);
+		lv_obj_add_event_cb(rename_textarea, rename_textarea_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
 		lv_obj_set_height(ui_ModuleViewActionMenu, 240);
 
@@ -64,6 +74,7 @@ public:
 		lv_obj_add_event_cb(ui_ModuleViewActionResetBut, reset_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionMidiBut, midi_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionBypassBut, bypass_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(moduleViewActionRenameBut, rename_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
@@ -72,6 +83,7 @@ public:
 		lv_group_add_obj(group, ui_ModuleViewActionMidiBut);
 		lv_group_add_obj(group, moduleViewActionPresetBut);
 		lv_group_add_obj(group, moduleViewActionBypassBut);
+		lv_group_add_obj(group, moduleViewActionRenameBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
 	}
@@ -80,6 +92,7 @@ public:
 		this->module_idx = module_idx;
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), group);
+		keyboard_entry.prepare_focus(lv_layer_top(), base_group);
 
 		const auto module_slug = std::string{patches.get_view_patch()->module_slugs[module_idx]};
 		const auto module_name = module_slug.substr(module_slug.find_first_of(':') + 1);
@@ -131,6 +144,8 @@ public:
 			confirm_popup.hide();
 		} else if (auto_map.is_visible()) {
 			auto_map.hide();
+		} else if (keyboard_entry.is_visible()) {
+			keyboard_entry.back();
 		} else if (visible) {
 			hide();
 		}
@@ -168,6 +183,10 @@ public:
 
 	bool is_visible() {
 		return visible;
+	}
+
+	bool keyboard_visible() {
+		return keyboard_entry.is_visible();
 	}
 
 	void reactivate_group() {
@@ -351,6 +370,38 @@ private:
 			lv_label_set_text(label, new_state ? "Bypass: On" : "Bypass: Off");
 	}
 
+	static void rename_textarea_changed_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		lv_label_set_text(ui_ElementRollerModuleName, lv_textarea_get_text(page->rename_textarea));
+	}
+
+	static void rename_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+
+		auto *pd = page->patches.get_view_patch();
+		auto alias = pd->get_module_alias(static_cast<uint16_t>(page->module_idx));
+		auto alias_str = std::string{alias};
+		lv_textarea_set_text(page->rename_textarea, alias_str.c_str());
+
+		page->hide_menu();
+		page->keyboard_entry.show_keyboard(page->rename_textarea, [page](std::string_view text) {
+			auto *pd = page->patches.get_view_patch();
+			pd->set_module_alias(static_cast<uint16_t>(page->module_idx), text);
+			page->patches.mark_view_patch_modified();
+
+			std::string_view display = text.empty()
+				? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
+				: text;
+			lv_label_set_text(ui_ElementRollerModuleName, display.data());
+		});
+		// Set label after show_keyboard to override any intermediate VALUE_CHANGED events
+		lv_label_set_text(ui_ElementRollerModuleName, alias_str.c_str());
+	}
+
 	FatFileIO &ramdisk;
 	OpenPatchManager &patches;
 	PageList &page_list;
@@ -372,6 +423,9 @@ private:
 
 	lv_obj_t *moduleViewActionPresetBut;
 	lv_obj_t *moduleViewActionBypassBut;
+	lv_obj_t *moduleViewActionRenameBut;
+	lv_obj_t *rename_textarea = nullptr;
+	KeyboardEntry keyboard_entry;
 	std::string preset_path{};
 	uint16_t cur_preset_idx{};
 	std::string presets{};

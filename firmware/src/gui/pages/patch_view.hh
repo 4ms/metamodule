@@ -708,7 +708,10 @@ private:
 		page->highlighted_module_obj = this_module_obj;
 
 		const auto this_slug = page->patch->module_slugs[module_id];
-		if (auto display_name = ModuleFactory::getModuleDisplayName(this_slug); display_name.length()) {
+		auto alias = page->patch->get_module_alias(static_cast<uint16_t>(module_id));
+		if (!alias.empty()) {
+			lv_label_set_text(ui_ModuleName, alias.data());
+		} else if (auto display_name = ModuleFactory::getModuleDisplayName(this_slug); display_name.length()) {
 			lv_label_set_text(ui_ModuleName, display_name.data());
 		} else {
 			lv_label_set_text(ui_ModuleName, "");
