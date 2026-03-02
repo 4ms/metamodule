@@ -35,6 +35,9 @@ inline bool redraw_element(const Knob &el, const GuiElement &gui_el, float val) 
 			lv_obj_set_style_transform_angle(gui_el.obj, angle, LV_PART_MAIN);
 
 		did_update_position = true;
+
+		// If overlapping controls share the same region, keep the actively moved one on top.
+		lv_obj_move_foreground(gui_el.obj);
 	}
 
 	return did_update_position;

@@ -1,6 +1,7 @@
 #pragma once
 #include "util/static_string.hh"
 #include <memory>
+#include <cstdint>
 #include <string>
 
 namespace MetaModule
