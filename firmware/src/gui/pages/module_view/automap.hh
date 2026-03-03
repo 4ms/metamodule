@@ -178,7 +178,8 @@ private:
 	void name_knobset_by_modulename(uint16_t knobset_id) {
 		if (knobset_id < patch->knob_sets.size()) {
 			if (module_idx < patch->module_slugs.size()) {
-				auto module_display_name = ModuleFactory::getModuleDisplayName(patch->module_slugs[module_idx]);
+				auto alias = patch->get_module_alias(static_cast<uint16_t>(module_idx));
+				auto module_display_name = alias.empty() ? ModuleFactory::getModuleDisplayName(patch->module_slugs[module_idx]) : alias;
 				patch->knob_sets[knobset_id].name = module_display_name;
 			}
 		}
