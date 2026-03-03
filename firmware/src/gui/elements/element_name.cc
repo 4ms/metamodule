@@ -16,7 +16,8 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 	FullElementName fullname{"?", "?"};
 
 	if (module_id < patch.module_slugs.size()) {
-		fullname.module_name = ModuleFactory::getModuleDisplayName(patch.module_slugs[module_id]);
+		auto alias = patch.get_module_alias(static_cast<uint16_t>(module_id));
+		fullname.module_name = alias.empty() ? ModuleFactory::getModuleDisplayName(patch.module_slugs[module_id]) : alias;
 
 		auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[module_id]);
 
