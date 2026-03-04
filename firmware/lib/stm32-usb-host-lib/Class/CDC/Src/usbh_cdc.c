@@ -158,7 +158,7 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
 
   if ((interface == 0xFFU) || (interface >= USBH_MAX_NUM_INTERFACES))
   {
-    USBH_DbgLog("Cannot Find the interface for Communication Interface Class.", phost->pActiveClass->Name);
+    USBH_DbgLog("Cannot Find the interface for Communication Interface Class: '%s'", phost->pActiveClass->Name);
     return USBH_FAIL;
   }
 
@@ -201,7 +201,7 @@ static USBH_StatusTypeDef USBH_CDC_InterfaceInit(USBH_HandleTypeDef *phost)
 
   if ((interface == 0xFFU) || (interface >= USBH_MAX_NUM_INTERFACES))
   {
-    USBH_DbgLog("Cannot Find the interface for Data Interface Class.", phost->pActiveClass->Name);
+    USBH_DbgLog("Cannot Find the interface for Data Interface Class '%s'", phost->pActiveClass->Name);
     return USBH_FAIL;
   }
 
