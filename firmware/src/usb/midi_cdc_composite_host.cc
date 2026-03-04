@@ -96,7 +96,10 @@ void MidiCdcCompositeHost::set_cdc_rx_callback(CDCRxCallbackType cb) {
 	cdc_rx_callback = cb;
 }
 
-bool MidiCdcCompositeHost::set_cdc_line_coding(uint32_t baud_rate, uint8_t data_bits, uint8_t stop_bits, uint8_t parity) {
+bool MidiCdcCompositeHost::set_cdc_line_coding(uint32_t baud_rate,
+											   uint8_t data_bits,
+											   uint8_t stop_bits,
+											   uint8_t parity) {
 	if (!composite_handle.cdc_available || !_is_connected)
 		return false;
 
@@ -116,14 +119,16 @@ bool MidiCdcCompositeHost::set_cdc_control_line_state(bool dtr, bool rts) {
 		return false;
 
 	// Find the CDC Communication interface to get the correct interface number
-	uint8_t comm_itf = USBH_FindInterface(&usbhost, COMMUNICATION_INTERFACE_CLASS_CODE,
-										   ABSTRACT_CONTROL_MODEL, NO_CLASS_SPECIFIC_PROTOCOL_CODE);
+	uint8_t comm_itf = USBH_FindInterface(
+		&usbhost, COMMUNICATION_INTERFACE_CLASS_CODE, ABSTRACT_CONTROL_MODEL, NO_CLASS_SPECIFIC_PROTOCOL_CODE);
 	if (comm_itf == 0xFF)
 		comm_itf = USBH_FindInterface(&usbhost, COMMUNICATION_INTERFACE_CLASS_CODE, 0xFF, 0xFF);
 
 	uint16_t wValue = 0;
-	if (dtr) wValue |= CDC_ACTIVATE_SIGNAL_DTR;
-	if (rts) wValue |= CDC_ACTIVATE_CARRIER_SIGNAL_RTS;
+	if (dtr)
+		wValue |= CDC_ACTIVATE_SIGNAL_DTR;
+	if (rts)
+		wValue |= CDC_ACTIVATE_CARRIER_SIGNAL_RTS;
 
 	usbhost.Control.setup.b.bmRequestType = USB_H2D | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE;
 	usbhost.Control.setup.b.bRequest = CDC_SET_CONTROL_LINE_STATE;
@@ -184,20 +189,21 @@ USBH_StatusTypeDef MidiCdcCompositeHost::composite_interface_init(USBH_HandleTyp
 	USBHostHelper host{phost};
 	handle->cdc_available = false;
 
-	uint8_t comm_itf = USBH_FindInterface(phost, COMMUNICATION_INTERFACE_CLASS_CODE,
-										   ABSTRACT_CONTROL_MODEL, NO_CLASS_SPECIFIC_PROTOCOL_CODE);
+	uint8_t comm_itf = USBH_FindInterface(
+		phost, COMMUNICATION_INTERFACE_CLASS_CODE, ABSTRACT_CONTROL_MODEL, NO_CLASS_SPECIFIC_PROTOCOL_CODE);
 	if (comm_itf == 0xFF || comm_itf >= USBH_MAX_NUM_INTERFACES) {
 		// Try with any subclass/protocol
 		comm_itf = USBH_FindInterface(phost, COMMUNICATION_INTERFACE_CLASS_CODE, 0xFF, 0xFF);
 	}
 
-	uint8_t data_itf = USBH_FindInterface(phost, DATA_INTERFACE_CLASS_CODE,
-										   RESERVED, NO_CLASS_SPECIFIC_PROTOCOL_CODE);
+	uint8_t data_itf = USBH_FindInterface(phost, DATA_INTERFACE_CLASS_CODE, RESERVED, NO_CLASS_SPECIFIC_PROTOCOL_CODE);
 	if (data_itf == 0xFF || data_itf >= USBH_MAX_NUM_INTERFACES) {
 		data_itf = USBH_FindInterface(phost, DATA_INTERFACE_CLASS_CODE, 0xFF, 0xFF);
 	}
 
-	if (comm_itf == 0xFF || data_itf == 0xFF || comm_itf >= USBH_MAX_NUM_INTERFACES || data_itf >= USBH_MAX_NUM_INTERFACES) {
+	if (comm_itf == 0xFF || data_itf == 0xFF || comm_itf >= USBH_MAX_NUM_INTERFACES ||
+		data_itf >= USBH_MAX_NUM_INTERFACES)
+	{
 		pr_trace("Composite: No CDC interfaces found, MIDI-only mode\n");
 		return USBH_OK;
 	}
@@ -214,9 +220,13 @@ USBH_StatusTypeDef MidiCdcCompositeHost::composite_interface_init(USBH_HandleTyp
 	}
 
 	cdc->CommItf.NotifPipe = USBH_AllocPipe(phost, cdc->CommItf.NotifEp);
-	USBH_OpenPipe(phost, cdc->CommItf.NotifPipe, cdc->CommItf.NotifEp,
-				   phost->device.address, phost->device.speed, USB_EP_TYPE_INTR,
-				   cdc->CommItf.NotifEpSize);
+	USBH_OpenPipe(phost,
+				  cdc->CommItf.NotifPipe,
+				  cdc->CommItf.NotifEp,
+				  phost->device.address,
+				  phost->device.speed,
+				  USB_EP_TYPE_INTR,
+				  cdc->CommItf.NotifEpSize);
 
 	// Setup data endpoints from data interface
 	if ((phost->device.CfgDesc.Itf_Desc[data_itf].Ep_Desc[0].bEndpointAddress & 0x80U) != 0U) {
@@ -238,13 +248,21 @@ USBH_StatusTypeDef MidiCdcCompositeHost::composite_interface_init(USBH_HandleTyp
 	cdc->DataItf.OutPipe = USBH_AllocPipe(phost, cdc->DataItf.OutEp);
 	cdc->DataItf.InPipe = USBH_AllocPipe(phost, cdc->DataItf.InEp);
 
-	USBH_OpenPipe(phost, cdc->DataItf.OutPipe, cdc->DataItf.OutEp,
-				   phost->device.address, phost->device.speed, USB_EP_TYPE_BULK,
-				   cdc->DataItf.OutEpSize);
+	USBH_OpenPipe(phost,
+				  cdc->DataItf.OutPipe,
+				  cdc->DataItf.OutEp,
+				  phost->device.address,
+				  phost->device.speed,
+				  USB_EP_TYPE_BULK,
+				  cdc->DataItf.OutEpSize);
 
-	USBH_OpenPipe(phost, cdc->DataItf.InPipe, cdc->DataItf.InEp,
-				   phost->device.address, phost->device.speed, USB_EP_TYPE_BULK,
-				   cdc->DataItf.InEpSize);
+	USBH_OpenPipe(phost,
+				  cdc->DataItf.InPipe,
+				  cdc->DataItf.InEp,
+				  phost->device.address,
+				  phost->device.speed,
+				  USB_EP_TYPE_BULK,
+				  cdc->DataItf.InEpSize);
 
 	cdc->state = CDC_IDLE_STATE;
 
