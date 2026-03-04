@@ -1,3 +1,4 @@
+#include "CoreModules/elements/units.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/module_view/roller_helpers.hh"
 
@@ -25,9 +26,8 @@ void ModuleViewPage::populate_element_objects() {
 	element_highlights.reserve(num_elements);
 
 	for (auto drawn_element : drawn_elements) {
-		auto &gui_el = drawn_element.gui_element;
 		watch_element(drawn_element);
-		add_element_highlight(gui_el.obj);
+		add_element_highlight(drawn_element);
 	}
 }
 
@@ -142,7 +142,10 @@ void ModuleViewPage::populate_roller() {
 	}
 }
 
-void ModuleViewPage::add_element_highlight(lv_obj_t *obj) {
+void ModuleViewPage::add_element_highlight(DrawnElement const &drawn_element) {
+	auto const &gui_el = drawn_element.gui_element;
+	auto const *obj = gui_el.obj;
+
 	auto &b = element_highlights.emplace_back();
 	b = lv_btn_create(ui_ModuleImage);
 	lv_obj_remove_style(b, &Gui::invisible_style, LV_PART_MAIN);
@@ -164,8 +167,12 @@ void ModuleViewPage::add_element_highlight(lv_obj_t *obj) {
 		lv_obj_refr_size(b);
 		lv_obj_refr_pos(b);
 	} else {
-		lv_obj_set_pos(b, 0, 0);
-		lv_obj_set_size(b, 0, 0);
+		auto w = base_element(drawn_element.element).width_mm;
+		auto h = base_element(drawn_element.element).height_mm;
+		auto x = base_element(drawn_element.element).x_mm;
+		auto y = base_element(drawn_element.element).y_mm;
+		lv_obj_set_pos(b, mm_to_px(x, 240), mm_to_px(y, 240));
+		lv_obj_set_size(b, mm_to_px(w, 240), mm_to_px(h, 240));
 	}
 }
 

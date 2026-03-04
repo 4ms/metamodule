@@ -88,6 +88,42 @@ private:
 		arc_change_value();
 	}
 
+	void change_encoder_value() {
+		auto cur_arc = lv_arc_get_value(ui_ControlArc);
+		if (cur_arc != last_arc_value) {
+			auto delta = cur_arc - last_arc_value;
+			last_arc_value = cur_arc;
+
+			auto cur_val =
+				patch->get_static_knob_value(drawn_el->gui_element.module_idx, drawn_el->gui_element.idx.param_idx);
+
+			if (!cur_val.has_value())
+				return;
+
+			float d = delta * (10.f / arc_range_value[arc_range_idx]);
+			*cur_val += d;
+
+			StaticParam sp{
+				.module_id = drawn_el->gui_element.module_idx,
+				.param_id = drawn_el->gui_element.idx.param_idx,
+				.value = *cur_val,
+			};
+			patch_mod_queue.put(SetStaticParam{.param = sp});
+
+			patch->set_or_add_static_knob_value(
+				drawn_el->gui_element.module_idx, drawn_el->gui_element.idx.param_idx, *cur_val);
+
+			if (arc_range_idx == 0)
+				lv_label_set_text(ui_ControlAlertAmount, d > 0 ? ">>>" : "<<<");
+			else if (arc_range_idx == 1)
+				lv_label_set_text(ui_ControlAlertAmount, d > 0 ? ">>" : "<<");
+			else if (arc_range_idx == 2)
+				lv_label_set_text(ui_ControlAlertAmount, d > 0 ? ">" : "<");
+			else
+				lv_label_set_text(ui_ControlAlertAmount, "");
+		}
+	}
+
 	void press() {
 		if (!drawn_el)
 			return;
@@ -95,6 +131,11 @@ private:
 		std::visit(overloaded{
 					   // default: do nothing
 					   [](const BaseElement &) {},
+
+					   [this](const Encoder &) {
+						   arc_range_idx = (arc_range_idx + 1) % arc_range_value.size();
+						   show_resolution_text();
+					   },
 
 					   [this](const ParamElement &) {
 						   // Generic Param: clicking toggles value 0/100
@@ -183,6 +224,7 @@ private:
 					   [this](const Knob &knob) { set_continuous_range(knob); },
 					   [this](const Slider &slider) { set_continuous_range(slider); },
 					   [this](const KnobSnapped &knob) { set_snapped_range(knob); },
+					   [this](const Encoder &el) { set_encoder_range(el); },
 					   [](const Button &el) { lv_arc_set_range(ui_ControlArc, 0, 1); },
 					   [](const FlipSwitch &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
@@ -219,20 +261,33 @@ private:
 		}
 	}
 
+	void set_encoder_range(Encoder const &knob) {
+		last_arc_value = 0;
+		lv_arc_set_range(ui_ControlArc, -32768, 32767);
+		show_resolution_text();
+	}
+
 	void arc_change_value() {
-		float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
-		auto value = lv_arc_get_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
+		std::visit(overloaded{
+					   [this](const BaseElement &) {
+						   float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
+						   auto value = lv_arc_get_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 
-		StaticParam sp{
-			.module_id = drawn_el->gui_element.module_idx,
-			.param_id = drawn_el->gui_element.idx.param_idx,
-			.value = (float)value / range, //0/6 1/6 ... 6/6 => 1 2 ... 7
-		};
-		patch_mod_queue.put(SetStaticParam{.param = sp});
+						   StaticParam sp{
+							   .module_id = drawn_el->gui_element.module_idx,
+							   .param_id = drawn_el->gui_element.idx.param_idx,
+							   .value = (float)value / range, //0/6 1/6 ... 6/6 => 1 2 ... 7
+						   };
+						   patch_mod_queue.put(SetStaticParam{.param = sp});
 
-		patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
+						   patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
 
-		update_control_arc_text();
+						   update_control_arc_text();
+					   },
+
+					   [this](const Encoder &el) { change_encoder_value(); },
+				   },
+				   drawn_el->element);
 	}
 
 	void update_control_arc_text() {
@@ -288,6 +343,8 @@ private:
 	unsigned arc_range_idx = 0;
 	std::array<unsigned, 3> arc_range_value{100, 1000, 10000};
 	std::array<std::string_view, 3> arc_range_text{"Coarse", "Fine", "Ultra-fine"};
+
+	int16_t last_arc_value = 0;
 
 public:
 	bool visible = true;
