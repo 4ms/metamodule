@@ -3,8 +3,8 @@
 #include "drivers/pin.hh"
 #include "midi_cdc_composite_host.hh"
 #include "msc_host.hh"
-#include "rotocontrol_host.hh"
 #include "pr_dbg.hh"
+#include "rotocontrol_host.hh"
 #include <cstring>
 
 class UsbHostManager {
@@ -18,6 +18,7 @@ class UsbHostManager {
 	static inline bool did_init = false;
 
 	// For access in C-style callback:
+	// TODO: reduce these to just the _manager_instance and _console_cdc_buff/_current_read_pos
 	static inline MidiCdcCompositeHost *_composite_instance;
 	static inline MSCHost *_mschost_instance;
 	static inline ConcurrentBuffer *_console_cdc_buff;
@@ -113,19 +114,20 @@ public:
 					_composite_instance->connect();
 
 					// Start MIDI receive
-					USBH_MIDI_Receive_Direct(phost, &_composite_instance->get_midi_handle(),
-											  _composite_instance->get_midi_handle().rx_buffer, MidiStreamingBufferSize);
+					USBH_MIDI_Receive_Direct(phost,
+											 &_composite_instance->get_midi_handle(),
+											 _composite_instance->get_midi_handle().rx_buffer,
+											 MidiStreamingBufferSize);
 
 					// If CDC is available, configure Rotocontrol
 					if (_composite_instance->is_cdc_available()) {
-						pr_trace("CDC available on composite device\n");
+						pr_trace("CDC available on composite MIDI+CDC device\n");
 						// Reset the buffer (clears all pending messages, e.g. from previously opened patches)
 						_manager_instance->_console_cdc_buff->current_write_pos = 0;
 						_manager_instance->_current_read_pos = 0;
 						_manager_instance->roto_host.on_cdc_connected();
 					}
-				}
-				else if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
+				} else if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
 					pr_trace("MSC connected\n");
 					_mschost_instance->connect();
 				}
@@ -227,6 +229,8 @@ private:
 			// Wraparound
 			if (transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos)) {
 				_current_read_pos = 0;
+			} else {
+				pr_err("Failed to transmit\n");
 			}
 		} else {
 			if (transmit(&buff->buffer.data[start_pos], end_pos - start_pos)) {
@@ -240,6 +244,8 @@ private:
 						_current_read_pos = (next_check + 1) & buff->buffer.SIZEMASK;
 					}
 				}
+			} else {
+				pr_err("Failed to transmit\n");
 			}
 		}
 	}
