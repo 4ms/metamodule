@@ -696,7 +696,7 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
         phost->pActiveClass = NULL;
         
         // Check if we have a preferred class name set
-        char *preferred_class = phost->PreferredClassName;
+        const char *preferred_class = phost->PreferredClassName;
 
         for (idx = 0U; idx < USBH_MAX_NUM_SUPPORTED_CLASS; idx++)
         {

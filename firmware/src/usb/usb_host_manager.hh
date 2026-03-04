@@ -1,3 +1,4 @@
+#include "concurrent_buffer.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/pin.hh"
 #include "midi_host.hh"
