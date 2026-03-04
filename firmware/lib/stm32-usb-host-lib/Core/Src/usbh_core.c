@@ -109,9 +109,6 @@ USBH_StatusTypeDef USBH_Init(USBH_HandleTypeDef *phost,
   /* Unlink class*/
   phost->pActiveClass = NULL;
   phost->ClassNumber = 0U;
-  
-  /* Initialize class preference to auto-select */
-  phost->PreferredClassName = NULL;
 
   /* Restore default states and prepare EP0 */
   (void)DeInitStateMachine(phost);
@@ -694,21 +691,11 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       else
       {
         phost->pActiveClass = NULL;
-        
-        // Check if we have a preferred class name set
-        const char *preferred_class = phost->PreferredClassName;
 
         for (idx = 0U; idx < USBH_MAX_NUM_SUPPORTED_CLASS; idx++)
         {
           if (phost->pClass[idx] == NULL)
           {
-            continue;
-          }
-
-
-
-          // If we have a preference, check if this class matches
-          if (preferred_class != NULL && strcmp(phost->pClass[idx]->Name, preferred_class) != 0) {
             continue;
           }
 
@@ -733,11 +720,6 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
                 }
               }
             }
-          }
-          
-          // If we found our preferred class, stop looking at other classes
-          if (phost->pActiveClass != NULL && preferred_class != NULL) {
-              break;
           }
         }
 
