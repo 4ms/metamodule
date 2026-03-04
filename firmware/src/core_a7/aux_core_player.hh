@@ -1,10 +1,12 @@
 #pragma once
+#include "core_a7/a7_shared_memory.hh"
 #include "core_a7/delay.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
 #include "gui/ui.hh"
 #include "midi/midi_sync.hh"
+#include "midi/rotocontrol/send_mappings.hh"
 #include "patch_play/patch_player.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>
@@ -23,6 +25,8 @@ struct AuxPlayer {
 	// Track when patch was loaded to delay MIDI sync messages
 	static constexpr uint32_t MidiSyncDelayMs = 500;
 	uint32_t patch_load_time = 0;
+
+	RotoControlSerializer roto{A7SharedMemoryS::ptrs.console_cdc_buff};
 
 	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
 		: patch_player{patch_player}
@@ -75,6 +79,8 @@ struct AuxPlayer {
 
 		midi_sync.clear_last_values();
 		patch_load_time = get_time();
+
+		roto.update_from_patch(patch_player.patch(), patch_player.modules);
 
 		SMPThread::signal_done();
 	}

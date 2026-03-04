@@ -14,7 +14,6 @@
 #include "internal_plugin_manager.hh"
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
-#include "rotocontrol.hh"
 #include "system/print_time.hh"
 
 using FrameBufferT =
@@ -69,7 +68,6 @@ extern "C" void aux_core_main() {
 		ui.notify_error("Graphic assets are corrupted!\nRe-install firmware.");
 	}
 
-	RotoControl::init(A7SharedMemoryS::ptrs.console_cdc_buff);
 	AuxPlayer aux_player{*A7SharedMemoryS::ptrs.patch_player, ui};
 
 	// Wait for M4 to be ready (so USB and SD are available)

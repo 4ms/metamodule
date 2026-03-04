@@ -121,7 +121,6 @@ add_executable(
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
-  ${FWDIR}/src/core_a7/rotocontrol.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/audio/audio.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
@@ -206,6 +205,9 @@ add_executable(
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #
   ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
+  #
+  ${FWDIR}/src/midi/rotocontrol/rotocontrol.cc
+  ${FWDIR}/src/midi/rotocontrol/send_mappings.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
