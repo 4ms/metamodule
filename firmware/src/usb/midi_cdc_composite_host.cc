@@ -3,8 +3,26 @@
 
 MidiCdcCompositeHost::MidiCdcCompositeHost(USBH_HandleTypeDef &usbhh)
 	: usbhost{usbhh}
-	, midi_tx_stream{make_midi_transmit_lambda()}
-	, cdc_tx_stream{make_cdc_transmit_lambda()}
+	, midi_tx_stream{[this](std::span<uint8_t> bytes) {
+		auto res = USBH_MIDI_Transmit_Direct(&usbhost, &composite_handle.midi, bytes.data(), bytes.size());
+		if (res == USBH_BUSY) {
+			pr_err("MIDI Host: USBH is busy, cannot send\n");
+		}
+		return res == USBH_OK;
+	}}
+	, cdc_tx_stream{[this](std::span<uint8_t> bytes) -> bool {
+		if (!composite_handle.cdc_available)
+			return false;
+
+		if ((composite_handle.cdc.state == CDC_IDLE_STATE) || (composite_handle.cdc.state == CDC_TRANSFER_DATA)) {
+			composite_handle.cdc.pTxData = bytes.data();
+			composite_handle.cdc.TxDataLength = bytes.size();
+			composite_handle.cdc.state = CDC_TRANSFER_DATA;
+			composite_handle.cdc.data_tx_state = CDC_SEND_DATA;
+			return true;
+		}
+		return false;
+	}}
 	, composite_class_ops{
 		  "MIDI",
 		  AudioClassCode,
@@ -23,38 +41,9 @@ MidiCdcCompositeHost::MidiCdcCompositeHost(USBH_HandleTypeDef &usbhh)
 	instance = this;
 }
 
-std::function<bool(std::span<uint8_t>)> MidiCdcCompositeHost::make_midi_transmit_lambda() {
-	return [this](std::span<uint8_t> bytes) {
-		auto res = USBH_MIDI_Transmit_Direct(&usbhost, &composite_handle.midi, bytes.data(), bytes.size());
-		if (res == USBH_BUSY) {
-			pr_err("MIDI Host: USBH is busy, cannot send\n");
-		}
-		return res == USBH_OK;
-	};
-}
-
-std::function<bool(std::span<uint8_t>)> MidiCdcCompositeHost::make_cdc_transmit_lambda() {
-	return [this](std::span<uint8_t> bytes) {
-		auto *cdc = &composite_handle.cdc;
-		if (!composite_handle.cdc_available)
-			return false;
-
-		if ((cdc->state == CDC_IDLE_STATE) || (cdc->state == CDC_TRANSFER_DATA)) {
-			cdc->pTxData = bytes.data();
-			cdc->TxDataLength = bytes.size();
-			cdc->state = CDC_TRANSFER_DATA;
-			cdc->data_tx_state = CDC_SEND_DATA;
-			return true;
-		}
-		return false;
-	};
-}
-
 void MidiCdcCompositeHost::init() {
 	pr_info("Registering MIDI+CDC composite host\n");
 	USBH_RegisterClass(&usbhost, &composite_class_ops);
-	midi_tx_stream = DoubleBufferStream<uint8_t, 64>{make_midi_transmit_lambda()};
-	cdc_tx_stream = DoubleBufferStream<uint8_t, 256>{make_cdc_transmit_lambda()};
 }
 
 void MidiCdcCompositeHost::connect() {
@@ -89,6 +78,7 @@ bool MidiCdcCompositeHost::is_cdc_available() {
 bool MidiCdcCompositeHost::cdc_transmit(std::span<uint8_t> bytes) {
 	if (!composite_handle.cdc_available || !_is_connected)
 		return false;
+
 	return cdc_tx_stream.transmit(bytes);
 }
 
@@ -177,7 +167,7 @@ USBH_StatusTypeDef MidiCdcCompositeHost::composite_interface_init(USBH_HandleTyp
 	if (!handle)
 		return USBH_FAIL;
 
-	// 1. Initialize MIDI (required)
+	// Initialize MIDI
 	auto status = USBH_MIDI_InterfaceInit_Direct(phost, &handle->midi);
 	if (status != USBH_OK) {
 		pr_err("Composite: MIDI init failed\n");
@@ -185,7 +175,7 @@ USBH_StatusTypeDef MidiCdcCompositeHost::composite_interface_init(USBH_HandleTyp
 	}
 	pr_trace("Composite: MIDI interface initialized\n");
 
-	// 2. Opportunistically look for CDC interfaces
+	// Look for CDC interfaces
 	USBHostHelper host{phost};
 	handle->cdc_available = false;
 

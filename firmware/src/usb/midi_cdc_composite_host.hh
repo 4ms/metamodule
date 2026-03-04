@@ -41,9 +41,15 @@ public:
 	USBH_StatusTypeDef cdc_receive();
 
 	// Handle access
-	MidiStreamingHandle &get_midi_handle() { return composite_handle.midi; }
-	CDC_HandleTypeDef &get_cdc_handle() { return composite_handle.cdc; }
-	MidiCdcCompositeHandle &get_composite_handle() { return composite_handle; }
+	MidiStreamingHandle &get_midi_handle() {
+		return composite_handle.midi;
+	}
+	CDC_HandleTypeDef &get_cdc_handle() {
+		return composite_handle.cdc;
+	}
+	MidiCdcCompositeHandle &get_composite_handle() {
+		return composite_handle;
+	}
 
 	// CDC callbacks (called from static context)
 	void on_cdc_tx_done();
@@ -75,7 +81,4 @@ private:
 	static void cdc_process_reception(USBH_HandleTypeDef *phost, CDC_HandleTypeDef *cdc);
 
 	USBH_ClassTypeDef composite_class_ops;
-
-	std::function<bool(std::span<uint8_t>)> make_midi_transmit_lambda();
-	std::function<bool(std::span<uint8_t>)> make_cdc_transmit_lambda();
 };
