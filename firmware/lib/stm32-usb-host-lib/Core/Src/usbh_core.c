@@ -895,7 +895,8 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
           (void)USBH_FreePipe(phost, phost->Control.pipe_in);
 
           /* Reset the USB Device */
-          phost->EnumState = ENUM_IDLE;
+		  // ???? 
+		  phost->EnumState = ENUM_IDLE;
           phost->gState = HOST_IDLE;
         }
       }
