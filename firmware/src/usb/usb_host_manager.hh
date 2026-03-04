@@ -119,8 +119,10 @@ public:
 					// If CDC is available, configure Rotocontrol
 					if (_composite_instance->is_cdc_available()) {
 						pr_trace("CDC available on composite device\n");
-						if (_manager_instance)
-							_manager_instance->roto_host.on_cdc_connected();
+						// Reset the buffer (clears all pending messages, e.g. from previously opened patches)
+						_manager_instance->_console_cdc_buff->current_write_pos = 0;
+						_manager_instance->_current_read_pos = 0;
+						_manager_instance->roto_host.on_cdc_connected();
 					}
 				}
 				else if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
