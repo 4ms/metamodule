@@ -18,11 +18,10 @@ struct AuxPlayer {
 
 	FixedVector<unsigned, 64> module_ids;
 
-	// MIDI sync instance
 	MidiSync midi_sync;
 
 	// Track when patch was loaded to delay MIDI sync messages
-	static constexpr uint32_t MIDI_SYNC_DELAY_MS = 3000; // 3 seconds delay
+	static constexpr uint32_t MidiSyncDelayMs = 500;
 	uint32_t patch_load_time = 0;
 
 	AuxPlayer(PatchPlayer &patch_player, Ui &ui)
@@ -101,7 +100,7 @@ struct AuxPlayer {
 			if (ui.midi_feedback_enabled()) {
 				// Only send MIDI sync if enough time has passed since patch load
 				uint32_t current_time = get_time();
-				bool delay_elapsed = (current_time - patch_load_time) >= MIDI_SYNC_DELAY_MS;
+				bool delay_elapsed = (current_time - patch_load_time) >= MidiSyncDelayMs;
 
 				if (delay_elapsed) {
 					for (auto &p : patch_player.watched_params().active_watched_params()) {
