@@ -1,5 +1,6 @@
 #include "uart_log.hh"
 #include "util/term_codes.hh"
+#include <atomic>
 #include <cstdarg>
 #include <cstring>
 

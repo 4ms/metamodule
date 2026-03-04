@@ -1,7 +1,6 @@
 #pragma once
 
 #include "util/circular_buffer_block.hh"
-#include <atomic>
 #include <span>
 
 struct ConcurrentBuffer {
