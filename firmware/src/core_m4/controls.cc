@@ -226,7 +226,7 @@ void Controls::set_samplerate(unsigned sample_rate) {
 	}
 }
 
-Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiCdcCompositeHost &midi_host)
 	: _midi_host{midi_host}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())

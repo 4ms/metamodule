@@ -142,6 +142,7 @@ struct MidiStreamingHandle {
 	uint8_t rx_buffer[MidiStreamingBufferSize];
 };
 
+// Original functions (extract handle from pActiveClass->pData)
 USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost);
@@ -153,5 +154,10 @@ USBH_StatusTypeDef USBH_MIDI_Receive(USBH_HandleTypeDef *phost, uint8_t *pbuff, 
 uint16_t USBH_MIDI_GetLastReceivedDataSize(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef USBH_MIDI_Stop(USBH_HandleTypeDef *phost);
 
-// extern USBH_ClassTypeDef MIDI_Class_Ops;
-// #define USBH_MIDI_CLASS &MIDI_Class_Ops
+// Direct handle-based variants (for composite class drivers)
+USBH_StatusTypeDef USBH_MIDI_InterfaceInit_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle);
+USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle);
+USBH_StatusTypeDef USBH_MIDI_Transmit_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle, uint8_t *pbuff, uint32_t length);
+USBH_StatusTypeDef USBH_MIDI_Receive_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle, uint8_t *pbuff, uint32_t length);
+void MIDI_ProcessTransmission_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle);
+void MIDI_ProcessReception_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle);

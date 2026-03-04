@@ -8,7 +8,6 @@
 #include "usb/device_cdc/usb_serial_device.hh"
 #include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
-#include "usb/cdc_host.hh"
 
 namespace MetaModule
 {
@@ -114,7 +113,7 @@ public:
 		// }
 	}
 
-	MidiHost &get_midi_host() {
+	MidiCdcCompositeHost &get_midi_host() {
 		return usb_host.get_midi_host();
 	}
 

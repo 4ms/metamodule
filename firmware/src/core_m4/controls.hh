@@ -15,7 +15,7 @@
 #include "param_block.hh"
 #include "params.hh"
 #include "sense_pin_reader.hh"
-#include "usb/midi_host.hh"
+#include "usb/midi_cdc_composite_host.hh"
 #include "util/edge_detector.hh"
 #include "util/interp_param.hh"
 #include "util/lockfree_fifo_spsc.hh"
@@ -28,7 +28,7 @@ using mdrivlib::GPIOExpander;
 using mdrivlib::PinPolarity;
 
 struct Controls {
-	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host);
+	Controls(DoubleBufParamBlock &param_blocks_ref, MidiCdcCompositeHost &midi_host);
 
 	void start();
 	void process();
@@ -73,7 +73,7 @@ private:
 	std::array<Toggler, ButtonExpander::NumTotalButtons> ext_buttons{};
 
 	// MIDI
-	MidiHost &_midi_host;
+	MidiCdcCompositeHost &_midi_host;
 	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
 	Midi::MessageParser _midi_parser;
 	EdgeStateDetector _midi_connected_raw;

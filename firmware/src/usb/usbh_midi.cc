@@ -30,29 +30,23 @@ static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost);
 static void MIDI_ProcessReception(USBH_HandleTypeDef *phost);
 
 /**
- * @brief  USBH_MIDI_InterfaceInit
- *         The function init the MIDI class.
+ * @brief  USBH_MIDI_InterfaceInit_Direct
+ *         Init the MIDI class using a directly-provided handle.
  * @param  phost: Host handle
+ * @param  handle: MidiStreamingHandle to initialize
  * @retval USBH Status
  */
-USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost)
+USBH_StatusTypeDef USBH_MIDI_InterfaceInit_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle)
 {
 	USBH_StatusTypeDef status;
 	uint8_t interface;
 
-	// In most STM Host Lib Classes, we USBH_malloc() a class handle here.
-	// But in this class, we already specified it by passing it in the pData field
-	// of the USBH_ClassTypeDef struct passed to USBH_RegisterClass
-	// This allows the app to own the class handle, managing its memory as it likes
-	// without requiring either dynamic memory or static/globals/singletons
-
-	if (phost->pActiveClass->pData == nullptr) {
-		USBH_DbgLog("Cannot allocate memory for CDC Handle");
+	if (handle == nullptr) {
+		USBH_DbgLog("Cannot allocate memory for MIDI Handle");
 		return USBH_FAIL;
 	}
 
 	USBHostHelper host{phost};
-	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 
 	// Look for an optional Audio Control interface
 	interface = USBH_FindInterface(phost, AudioClassCode, AudioControlSubclassCode, AnyProtocol);
@@ -60,15 +54,15 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost)
 		USBH_DbgLog("Did not find an audio control interface, continuing\n");
 	} else {
 		USBH_DbgLog("Found Audio Control subclass\n");
-		host.link_endpoint_pipe(MSHandle->ControlItf.ControlEP, interface, 0);
-		host.open_pipe(MSHandle->ControlItf.ControlEP, EndPointType::Intr); // TODO: Is it an Intr EP type?
-		host.set_toggle(MSHandle->ControlItf.ControlEP, 0);
+		host.link_endpoint_pipe(handle->ControlItf.ControlEP, interface, 0);
+		host.open_pipe(handle->ControlItf.ControlEP, EndPointType::Intr);
+		host.set_toggle(handle->ControlItf.ControlEP, 0);
 	}
 
 	// Look for MidiStreamingSubClass
 	interface = USBH_FindInterface(phost, AudioClassCode, MidiStreamingSubClass, AnyProtocol);
 	if ((interface == NoValidInterfaceFound) || (interface >= USBH_MAX_NUM_INTERFACES)) {
-		USBH_DbgLog("Cannot find the interface for MIDI subclass: %s.", phost->pActiveClass->Name);
+		USBH_DbgLog("Cannot find the interface for MIDI subclass.");
 		return USBH_FAIL;
 	}
 
@@ -76,51 +70,63 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost)
 	if (status != USBH_OK)
 		return USBH_FAIL;
 
-	// Print info about class-specific descriptors
-	// Here is where we could store the various jacks found
-	// scan_all_descriptors(phost);
 	if (host.is_in_ep(interface, 0))
-		host.link_endpoint_pipe(MSHandle->DataItf.InEP, interface, 0);
+		host.link_endpoint_pipe(handle->DataItf.InEP, interface, 0);
 	else
-		host.link_endpoint_pipe(MSHandle->DataItf.OutEP, interface, 0);
+		host.link_endpoint_pipe(handle->DataItf.OutEP, interface, 0);
 
 	if (host.is_in_ep(interface, 1))
-		host.link_endpoint_pipe(MSHandle->DataItf.InEP, interface, 1);
+		host.link_endpoint_pipe(handle->DataItf.InEP, interface, 1);
 	else
-		host.link_endpoint_pipe(MSHandle->DataItf.OutEP, interface, 1);
+		host.link_endpoint_pipe(handle->DataItf.OutEP, interface, 1);
 
-	host.open_pipe(MSHandle->DataItf.OutEP, EndPointType::Bulk);
-	host.open_pipe(MSHandle->DataItf.InEP, EndPointType::Bulk);
+	host.open_pipe(handle->DataItf.OutEP, EndPointType::Bulk);
+	host.open_pipe(handle->DataItf.InEP, EndPointType::Bulk);
 
-	MSHandle->state = MidiStreamingState::Idle;
+	handle->state = MidiStreamingState::Idle;
 
-	host.set_toggle(MSHandle->DataItf.OutEP, 0);
-	host.set_toggle(MSHandle->DataItf.InEP, 0);
+	host.set_toggle(handle->DataItf.OutEP, 0);
+	host.set_toggle(handle->DataItf.InEP, 0);
 
 	return USBH_OK;
 }
 
 /**
- * @brief  USBH_MIDI_InterfaceDeInit
- *         The function DeInit the Pipes used for the MIDI class.
- * @param  phost: Host handle
- * @retval USBH Status
+ * @brief  USBH_MIDI_InterfaceInit
+ *         The function init the MIDI class (wrapper).
+ */
+USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost)
+{
+	USBHostHelper host{phost};
+	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
+	return USBH_MIDI_InterfaceInit_Direct(phost, MSHandle);
+}
+
+/**
+ * @brief  USBH_MIDI_InterfaceDeInit_Direct
+ *         DeInit the Pipes using a directly-provided handle.
+ */
+USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle)
+{
+	if (!handle)
+		return USBH_FAIL;
+
+	USBHostHelper host{phost};
+	host.close_and_free_pipe(handle->ControlItf.ControlEP);
+	host.close_and_free_pipe(handle->DataItf.InEP);
+	host.close_and_free_pipe(handle->DataItf.OutEP);
+
+	return USBH_OK;
+}
+
+/**
+ * @brief  USBH_MIDI_InterfaceDeInit (wrapper)
  */
 USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit(USBH_HandleTypeDef *phost)
 {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
-	if (!MSHandle)
-		return USBH_FAIL;
-
-	host.close_and_free_pipe(MSHandle->ControlItf.ControlEP);
-	host.close_and_free_pipe(MSHandle->DataItf.InEP);
-	host.close_and_free_pipe(MSHandle->DataItf.OutEP);
-
-	// USBH_free(phost->pActiveClass->pData);
-	// phost->pActiveClass->pData = nullptr;
-
-	return USBH_OK;
+	return USBH_MIDI_InterfaceDeInit_Direct(phost, MSHandle);
 }
 
 /**
@@ -236,24 +242,51 @@ uint16_t USBH_MIDI_GetLastReceivedDataSize(USBH_HandleTypeDef *phost)
 }
 
 /**
- * @brief  This function prepares the state before issuing the class specific commands
- * @param  None
- * @retval None
+ * @brief  USBH_MIDI_Transmit_Direct — using a directly-provided handle.
  */
+USBH_StatusTypeDef USBH_MIDI_Transmit_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle, uint8_t *pbuff, uint32_t length)
+{
+	if (!handle)
+		return USBH_FAIL;
+
+	USBH_StatusTypeDef status = USBH_BUSY;
+
+	if ((handle->state == MidiStreamingState::Idle) || (handle->state == MidiStreamingState::TransferData)) {
+		handle->pTxData = pbuff;
+		handle->TxDataLength = length;
+		handle->state = MidiStreamingState::TransferData;
+		handle->data_tx_state = MidiStreamingDataState::SendData;
+		status = USBH_OK;
+
+#if (USBH_USE_OS == 1U)
+		phost->os_msg = (uint32_t)USBH_CLASS_EVENT;
+		(void)osMessageQueuePut(phost->os_event, &phost->os_msg, 0U, NULL);
+#endif
+	}
+	return status;
+}
+
 USBH_StatusTypeDef USBH_MIDI_Transmit(USBH_HandleTypeDef *phost, uint8_t *pbuff, uint32_t length)
 {
 	USBHostHelper host{phost};
-	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
-	if (!MSHandle)
+	return USBH_MIDI_Transmit_Direct(phost, host.get_class_handle<MidiStreamingHandle>(), pbuff, length);
+}
+
+/**
+ * @brief  USBH_MIDI_Receive_Direct — using a directly-provided handle.
+ */
+USBH_StatusTypeDef USBH_MIDI_Receive_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle, uint8_t *pbuff, uint32_t length)
+{
+	if (!handle)
 		return USBH_FAIL;
 
 	USBH_StatusTypeDef status = USBH_BUSY;
 
-	if ((MSHandle->state == MidiStreamingState::Idle) || (MSHandle->state == MidiStreamingState::TransferData)) {
-		MSHandle->pTxData = pbuff;
-		MSHandle->TxDataLength = length;
-		MSHandle->state = MidiStreamingState::TransferData;
-		MSHandle->data_tx_state = MidiStreamingDataState::SendData;
+	if ((handle->state == MidiStreamingState::Idle) || (handle->state == MidiStreamingState::TransferData)) {
+		handle->pRxData = pbuff;
+		handle->RxDataLength = length;
+		handle->state = MidiStreamingState::TransferData;
+		handle->data_rx_state = MidiStreamingDataState::ReceiveData;
 		status = USBH_OK;
 
 #if (USBH_USE_OS == 1U)
@@ -264,80 +297,52 @@ USBH_StatusTypeDef USBH_MIDI_Transmit(USBH_HandleTypeDef *phost, uint8_t *pbuff,
 	return status;
 }
 
-/**
- * @brief  This function prepares the state before issuing the class specific commands
- * @param  None
- * @retval None
- */
 USBH_StatusTypeDef USBH_MIDI_Receive(USBH_HandleTypeDef *phost, uint8_t *pbuff, uint32_t length)
 {
 	USBHostHelper host{phost};
-	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
-	if (!MSHandle)
-		return USBH_FAIL;
-
-	USBH_StatusTypeDef status = USBH_BUSY;
-
-	if ((MSHandle->state == MidiStreamingState::Idle) || (MSHandle->state == MidiStreamingState::TransferData)) {
-		MSHandle->pRxData = pbuff;
-		MSHandle->RxDataLength = length;
-		MSHandle->state = MidiStreamingState::TransferData;
-		MSHandle->data_rx_state = MidiStreamingDataState::ReceiveData;
-		status = USBH_OK;
-
-#if (USBH_USE_OS == 1U)
-		phost->os_msg = (uint32_t)USBH_CLASS_EVENT;
-		(void)osMessageQueuePut(phost->os_event, &phost->os_msg, 0U, NULL);
-#endif
-	}
-	return status;
+	return USBH_MIDI_Receive_Direct(phost, host.get_class_handle<MidiStreamingHandle>(), pbuff, length);
 }
 
 /**
- * @brief  The function is responsible for sending data to the device
- *  @param  pdev: Selected device
- * @retval None
+ * @brief  MIDI_ProcessTransmission_Direct — using a directly-provided handle.
  */
-static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost)
+void MIDI_ProcessTransmission_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle)
 {
-	USBHostHelper host{phost};
-	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
-	if (!MSHandle)
+	if (!handle)
 		return;
 
 	USBH_URBStateTypeDef URB_Status = USBH_URB_IDLE;
 
-	switch (MSHandle->data_tx_state) {
+	switch (handle->data_tx_state) {
 		case MidiStreamingDataState::SendData:
-			if (MSHandle->TxDataLength > MSHandle->DataItf.OutEP.size) {
+			if (handle->TxDataLength > handle->DataItf.OutEP.size) {
 				USBH_BulkSendData(
-					phost, MSHandle->pTxData, MSHandle->DataItf.OutEP.size, MSHandle->DataItf.OutEP.pipe, 1U);
+					phost, handle->pTxData, handle->DataItf.OutEP.size, handle->DataItf.OutEP.pipe, 1U);
 			} else {
 				USBH_BulkSendData(
-					phost, MSHandle->pTxData, (uint16_t)MSHandle->TxDataLength, MSHandle->DataItf.OutEP.pipe, 1U);
+					phost, handle->pTxData, (uint16_t)handle->TxDataLength, handle->DataItf.OutEP.pipe, 1U);
 			}
 
-			MSHandle->data_tx_state = MidiStreamingDataState::SendDataWait;
+			handle->data_tx_state = MidiStreamingDataState::SendDataWait;
 			break;
 
 		case MidiStreamingDataState::SendDataWait:
 
-			URB_Status = USBH_LL_GetURBState(phost, MSHandle->DataItf.OutEP.pipe);
+			URB_Status = USBH_LL_GetURBState(phost, handle->DataItf.OutEP.pipe);
 
-			/* Check the status done for transmission */
 			if (URB_Status == USBH_URB_DONE) {
-				if (MSHandle->TxDataLength > MSHandle->DataItf.OutEP.size) {
-					MSHandle->TxDataLength -= MSHandle->DataItf.OutEP.size;
-					MSHandle->pTxData += MSHandle->DataItf.OutEP.size;
+				if (handle->TxDataLength > handle->DataItf.OutEP.size) {
+					handle->TxDataLength -= handle->DataItf.OutEP.size;
+					handle->pTxData += handle->DataItf.OutEP.size;
 				} else {
-					MSHandle->TxDataLength = 0U;
+					handle->TxDataLength = 0U;
 				}
 
-				if (MSHandle->TxDataLength > 0U) {
-					MSHandle->data_tx_state = MidiStreamingDataState::SendData;
+				if (handle->TxDataLength > 0U) {
+					handle->data_tx_state = MidiStreamingDataState::SendData;
 				} else {
-					MSHandle->data_tx_state = MidiStreamingDataState::Idle;
-					MSHandle->tx_callback();
+					handle->data_tx_state = MidiStreamingDataState::Idle;
+					handle->tx_callback();
 				}
 
 #if (USBH_USE_OS == 1U)
@@ -346,7 +351,7 @@ static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost)
 #endif
 			} else {
 				if (URB_Status == USBH_URB_NOTREADY) {
-					MSHandle->data_tx_state = MidiStreamingDataState::SendData;
+					handle->data_tx_state = MidiStreamingDataState::SendData;
 
 #if (USBH_USE_OS == 1U)
 					phost->os_msg = (uint32_t)USBH_CLASS_EVENT;
@@ -360,45 +365,38 @@ static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost)
 			break;
 	}
 }
-/**
- * @brief  This function responsible for reception of data from the device
- *  @param  pdev: Selected device
- * @retval None
- */
 
-static void MIDI_ProcessReception(USBH_HandleTypeDef *phost)
+/**
+ * @brief  MIDI_ProcessReception_Direct — using a directly-provided handle.
+ */
+void MIDI_ProcessReception_Direct(USBH_HandleTypeDef *phost, MidiStreamingHandle *handle)
 {
-	USBHostHelper host{phost};
-	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
-	if (!MSHandle) {
-		USBH_DbgLog("no mshandle");
+	if (!handle)
 		return;
-	}
 
 	USBH_URBStateTypeDef URB_Status = USBH_URB_IDLE;
 	uint32_t length;
 
-	switch (MSHandle->data_rx_state) {
+	switch (handle->data_rx_state) {
 
 		case MidiStreamingDataState::ReceiveData:
-			USBH_BulkReceiveData(phost, MSHandle->pRxData, MSHandle->DataItf.InEP.size, MSHandle->DataItf.InEP.pipe);
-			MSHandle->data_rx_state = MidiStreamingDataState::ReceiveDataWait;
+			USBH_BulkReceiveData(phost, handle->pRxData, handle->DataItf.InEP.size, handle->DataItf.InEP.pipe);
+			handle->data_rx_state = MidiStreamingDataState::ReceiveDataWait;
 			break;
 
 		case MidiStreamingDataState::ReceiveDataWait:
-			URB_Status = USBH_LL_GetURBState(phost, MSHandle->DataItf.InEP.pipe);
+			URB_Status = USBH_LL_GetURBState(phost, handle->DataItf.InEP.pipe);
 
-			/*Check the status done for reception*/
 			if (URB_Status == USBH_URB_DONE) {
-				length = USBH_LL_GetLastXferSize(phost, MSHandle->DataItf.InEP.pipe);
+				length = USBH_LL_GetLastXferSize(phost, handle->DataItf.InEP.pipe);
 
-				if (((MSHandle->RxDataLength - length) > 0U) && (length > MSHandle->DataItf.InEP.size)) {
-					MSHandle->RxDataLength -= length;
-					MSHandle->pRxData += length;
-					MSHandle->data_rx_state = MidiStreamingDataState::ReceiveData;
+				if (((handle->RxDataLength - length) > 0U) && (length > handle->DataItf.InEP.size)) {
+					handle->RxDataLength -= length;
+					handle->pRxData += length;
+					handle->data_rx_state = MidiStreamingDataState::ReceiveData;
 				} else {
-					MSHandle->data_rx_state = MidiStreamingDataState::Idle;
-					MSHandle->rx_callback(std::span<uint8_t>(MSHandle->pRxData, length));
+					handle->data_rx_state = MidiStreamingDataState::Idle;
+					handle->rx_callback(std::span<uint8_t>(handle->pRxData, length));
 				}
 
 #if (USBH_USE_OS == 1U)
@@ -411,6 +409,18 @@ static void MIDI_ProcessReception(USBH_HandleTypeDef *phost)
 		default:
 			break;
 	}
+}
+
+static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost)
+{
+	USBHostHelper host{phost};
+	MIDI_ProcessTransmission_Direct(phost, host.get_class_handle<MidiStreamingHandle>());
+}
+
+static void MIDI_ProcessReception(USBH_HandleTypeDef *phost)
+{
+	USBHostHelper host{phost};
+	MIDI_ProcessReception_Direct(phost, host.get_class_handle<MidiStreamingHandle>());
 }
 
 // Note: To use this class like other STM32 Host Classes,
