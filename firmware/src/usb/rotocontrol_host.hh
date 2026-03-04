@@ -22,7 +22,7 @@ public:
 
 		// Set DTR and RTS high
 		if (!composite.set_cdc_control_line_state(true, true)) {
-			pr_warn("RotocontrolHost: Control line state not supported (normal for some devices)\n");
+			pr_trace("RotocontrolHost: line state control (DTR/RTS) not supported\n");
 		} else {
 			pr_trace("RotocontrolHost: DTR/RTS set high\n");
 		}
