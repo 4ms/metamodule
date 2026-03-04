@@ -35,6 +35,8 @@
 namespace MetaModule
 {
 
+static inline void update_all_roto_controls(PatchData &pd, std::span<std::unique_ptr<CoreProcessor>> modules);
+
 class PatchPlayer {
 public:
 	// TODO: modules should be a FixedVector, and then num_modules is replaced by modules.size()
@@ -47,8 +49,6 @@ public:
 	PatchQuery patch_query{modules, pd};
 
 private:
-	uint8_t next_midi_roto_knob_index_ = 0; // Separate index for knobs
-	uint8_t next_midi_roto_switch_index_ = 0; // Separate index for switches
 	// Out1-Out8 + Ext Out1-8
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
@@ -200,7 +200,7 @@ public:
 			cache_midi_mapping(mm);
 			param_watcher.start_watching_param(mm);
 		}
-		update_all_roto_controls();
+		update_all_roto_controls(pd, modules);
 
 		// Init modules
 		for (size_t module_idx = 1; module_idx < num_modules; module_idx++) {
@@ -1061,7 +1061,6 @@ public:
 	std::optional<unsigned> panel_knob_catchup_inaccessible();
 
 private:
-	void update_all_roto_controls();
 	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
 
 	// Cache functions:
@@ -1416,12 +1415,13 @@ public:
 #endif
 };
 
-inline void PatchPlayer::update_all_roto_controls() {
-    next_midi_roto_knob_index_ = 0; // Reset for fresh batch configuration
-    next_midi_roto_switch_index_ = 0; // Reset for fresh batch configuration
-    RotoControl::start_config_update(/*roto_control_buffer_*/); // Argument removed
+void update_all_roto_controls(PatchData &pd, std::span<std::unique_ptr<CoreProcessor>> modules) {
+    unsigned next_midi_roto_knob_index_ = 0;
+    unsigned next_midi_roto_switch_index_ = 0;
+	unsigned num_modules = pd.module_slugs.size();
+    RotoControl::start_config_update();
 
-	RotoControl::clear_midi_setup(0x00); // Clear all MIDI setup
+	RotoControl::clear_midi_setup(0x00);
 
     for (const auto& k : pd.midi_maps.set) {
         if (!(k.is_midi_cc() || k.is_midi_notegate())) {
