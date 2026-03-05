@@ -6,6 +6,7 @@
 
 class RotocontrolHost {
 	MidiCdcCompositeHost &composite;
+	bool has_started_rx = false;
 
 public:
 	RotocontrolHost(MidiCdcCompositeHost &host)
@@ -35,9 +36,15 @@ public:
 			}
 			pr_dbg("\n");
 		});
+	}
 
-		// Start receiving
-		composite.cdc_receive();
+	void start_rx() {
+		if (!has_started_rx) {
+			if (composite.cdc_receive() == USBH_OK) {
+				has_started_rx = true;
+				pr_dbg("Started Roto RX\n");
+			}
+		}
 	}
 
 	bool send_commands(std::span<const uint8_t> data) {

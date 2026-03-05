@@ -81,6 +81,9 @@ public:
 
 		// If CDC available, poll ConcurrentBuffer and transmit directly
 		if (composite_host.is_cdc_available() && composite_host.is_connected()) {
+			// Starting RX makes TX miss messages. Maybe TX needs to wait to hear the OK response
+			// in between messages?
+			//roto_host.start_rx();
 			poll_and_transmit_cdc_buffer();
 		}
 	}
