@@ -206,8 +206,8 @@ add_executable(
   #
   ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
   #
-  ${FWDIR}/src/midi/rotocontrol/rotocontrol.cc
-  ${FWDIR}/src/midi/rotocontrol/send_mappings.cc
+  ${FWDIR}/src/midi/rotocontrol/messages.cc
+  ${FWDIR}/src/midi/rotocontrol/serializer.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )

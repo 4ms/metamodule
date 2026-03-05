@@ -6,7 +6,7 @@
 #include "drivers/smp.hh"
 #include "gui/ui.hh"
 #include "midi/midi_sync.hh"
-#include "midi/rotocontrol/send_mappings.hh"
+#include "midi/rotocontrol/serializer.hh"
 #include "patch_play/patch_player.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>

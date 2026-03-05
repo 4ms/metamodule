@@ -1,9 +1,9 @@
-#include "send_mappings.hh"
+#include "serializer.hh"
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
-#include "rotocontrol.hh"
+#include "util/overloaded.hh"
 #include <memory>
 
 namespace MetaModule
@@ -43,6 +43,9 @@ void RotoControlSerializer::update_from_patch(PatchData const &pd,
 
 			if (is_target_param) {
 				const auto &element_variant = module_info.elements[el_idx];
+				// FIXME: use std::visit properly, matching with an overload set
+				// use `overloaded` class and a lambda matching on the type.
+
 				std::visit(
 					[&](auto &&arg) {
 						using T = std::decay_t<decltype(arg)>;
