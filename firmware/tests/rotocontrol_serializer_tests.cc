@@ -317,7 +317,7 @@ TEST_CASE("RotoControlSerializer: momentary button maps as SWITCH with PUSH hapt
 	CHECK(data[pos + 19] == 'g');
 
 	// For switch: [29] color_scheme=0, [30] led_on_color=0x00, [31] led_off_color=0x01, [32] haptic_mode=PUSH=0x00
-	CHECK(data[pos + 29] == 0x00);						// color_scheme
+	CHECK(data[pos + 29] == 0x03);						// color_scheme for button
 	CHECK(data[pos + 30] == 0x00);						// led_on_color
 	CHECK(data[pos + 31] == 0x01);						// led_off_color
 	CHECK(data[pos + 32] == (uint8_t)HapticMode::PUSH); // haptic_mode
@@ -414,32 +414,67 @@ TEST_CASE("RotoControlSerializer: flip switch with position names") {
 	modules.push_back(std::make_unique<StubProcessor>());
 	modules.push_back(std::make_unique<StubProcessor>());
 
-	serializer.update_from_patch(pd, modules);
+	SUBCASE("max switch pos = 2") {
+		serializer.config_max_switch_position(2);
 
-	auto data = get_buffer_data(buf);
+		serializer.update_from_patch(pd, modules);
 
-	// FlipSwitch with 3 pos and haptic_steps == 3 => routed as KNOB (not switch, since haptic_steps != 2)
-	uint8_t knob_header[] = {0x5A, 0x02, 0x07};
-	int pos = find_sequence(data, knob_header);
-	CHECK(pos >= 0);
+		auto data = get_buffer_data(buf);
 
-	CHECK(data[pos + 30] == (uint8_t)HapticMode::KNOB_N_STEP);
-	CHECK(data[pos + 33] == 3); // haptic_steps
+		// FlipSwitch with 3 pos and haptic_steps == 3 => routed as KNOB (not switch, since haptic_steps != 2)
+		uint8_t knob_header[] = {0x5A, 0x02, 0x07};
+		int pos = find_sequence(data, knob_header);
+		CHECK(pos >= 0);
 
-	// Step names: "Off", "Mid", "On"
-	CHECK(data[pos + 34] == 'O');
-	CHECK(data[pos + 35] == 'f');
-	CHECK(data[pos + 36] == 'f');
-	CHECK(data[pos + 37] == 0x00);
+		CHECK(data[pos + 30] == (uint8_t)HapticMode::KNOB_N_STEP);
+		CHECK(data[pos + 33] == 3); // haptic_steps
 
-	CHECK(data[pos + 47] == 'M');
-	CHECK(data[pos + 48] == 'i');
-	CHECK(data[pos + 49] == 'd');
-	CHECK(data[pos + 50] == 0x00);
+		// Step names: "Off", "Mid", "On"
+		CHECK(data[pos + 34] == 'O');
+		CHECK(data[pos + 35] == 'f');
+		CHECK(data[pos + 36] == 'f');
+		CHECK(data[pos + 37] == 0x00);
 
-	CHECK(data[pos + 60] == 'O');
-	CHECK(data[pos + 61] == 'n');
-	CHECK(data[pos + 62] == 0x00);
+		CHECK(data[pos + 47] == 'M');
+		CHECK(data[pos + 48] == 'i');
+		CHECK(data[pos + 49] == 'd');
+		CHECK(data[pos + 50] == 0x00);
+
+		CHECK(data[pos + 60] == 'O');
+		CHECK(data[pos + 61] == 'n');
+		CHECK(data[pos + 62] == 0x00);
+	}
+
+	SUBCASE("max switch pos = 3") {
+		serializer.config_max_switch_position(3);
+
+		serializer.update_from_patch(pd, modules);
+
+		auto data = get_buffer_data(buf);
+
+		// FlipSwitch with 3 pos and haptic_steps == 3
+		uint8_t knob_header[] = {0x5A, 0x02, 0x08};
+		int pos = find_sequence(data, knob_header);
+		CHECK(pos >= 0);
+
+		CHECK(data[pos + 32] == (uint8_t)HapticMode::TOGGLE);
+		CHECK(data[pos + 33] == 3); // haptic_steps
+
+		// Step names: "Off", "Mid", "On"
+		CHECK(data[pos + 34] == 'O');
+		CHECK(data[pos + 35] == 'f');
+		CHECK(data[pos + 36] == 'f');
+		CHECK(data[pos + 37] == 0x00);
+
+		CHECK(data[pos + 47] == 'M');
+		CHECK(data[pos + 48] == 'i');
+		CHECK(data[pos + 49] == 'd');
+		CHECK(data[pos + 50] == 0x00);
+
+		CHECK(data[pos + 60] == 'O');
+		CHECK(data[pos + 61] == 'n');
+		CHECK(data[pos + 62] == 0x00);
+	}
 }
 
 TEST_CASE("RotoControlSerializer: multiple MIDI maps produce sequential control indices") {

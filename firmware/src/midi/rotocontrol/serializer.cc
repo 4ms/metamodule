@@ -17,14 +17,14 @@ namespace
 static constexpr unsigned MaxRotoSteps = 16;
 
 // Format a control name: use short_name (or long_name), truncate to 12 chars, pad to 13 with nulls.
-std::string format_control_name(const ParamElement &el) {
+std::string format_control_name(const BaseElement &el) {
 	std::string_view sv = el.short_name;
 	if (sv.empty())
 		sv = el.long_name;
 
 	std::string name;
 	if (sv.empty()) {
-		name = "Unnamed MIDI";
+		name = "Unnamed";
 	} else {
 		name = std::string(sv.substr(0, 12));
 	}
@@ -34,33 +34,29 @@ std::string format_control_name(const ParamElement &el) {
 
 // Collect step names from a pos_names array. Returns the storage vector; haptic_steps is updated.
 // Works with both const char* arrays (KnobSnapped) and string_view arrays (FlipSwitch, SlideSwitch).
-template<typename PosNameArray>
-std::vector<std::string> collect_step_names(const PosNameArray &pos_names, unsigned num_pos, uint8_t &haptic_steps) {
+// FIXME: do not use the out param haptic_steps: instead the caller can check size() of the returned object
+std::vector<std::string> collect_step_names(const auto &pos_names, unsigned num_pos, uint8_t &haptic_steps) {
 	std::vector<std::string> storage;
 	storage.reserve(num_pos);
 
+	auto is_null = overloaded{
+		[](const char *x) { return x == nullptr; },
+		[](std::string_view x) { return x.empty(); },
+	};
+
 	for (unsigned i = 0; i < num_pos; ++i) {
 		std::string step_name;
-		bool valid = false;
 
-		if constexpr (std::is_same_v<std::decay_t<decltype(pos_names[0])>, const char *>) {
-			if (pos_names[i] != nullptr) {
-				step_name = std::string(pos_names[i]);
-				valid = true;
-			}
-		} else {
-			if (!pos_names[i].empty()) {
-				step_name = std::string(pos_names[i]);
-				valid = true;
-			}
-		}
+		if (!is_null(pos_names[i])) {
+			step_name = std::string(pos_names[i]);
 
-		if (valid) {
 			if (step_name.length() > 12)
 				step_name = step_name.substr(0, 12);
+
 			step_name.resize(13, '\0');
-			storage.push_back(step_name);
 		}
+
+		storage.push_back(step_name);
 	}
 
 	haptic_steps = storage.size();
@@ -69,17 +65,7 @@ std::vector<std::string> collect_step_names(const PosNameArray &pos_names, unsig
 
 // Create step names where each entry is just the control name (used for 2-state buttons).
 std::vector<std::string> make_button_step_names(const std::string &control_name) {
-	return {control_name, control_name};
-}
-
-// Build a c-string pointer array from a string storage vector.
-std::vector<const char *> make_step_name_ptrs(const std::vector<std::string> &storage) {
-	std::vector<const char *> ptrs;
-	ptrs.reserve(storage.size());
-	for (const auto &s : storage) {
-		ptrs.push_back(s.c_str());
-	}
-	return ptrs;
+	return {control_name + " Off", control_name + " On"};
 }
 
 struct HapticConfig {
@@ -88,12 +74,10 @@ struct HapticConfig {
 	std::vector<std::string> step_name_storage;
 };
 
-// Determine haptic config for a Knob (continuous, no steps).
 HapticConfig haptic_for_knob() {
 	return {HapticMode::KNOB_300, 0, {}};
 }
 
-// Determine haptic config for a KnobSnapped.
 HapticConfig haptic_for_knob_snapped(const KnobSnapped &el) {
 	if (el.num_pos > 0 && el.num_pos <= MaxRotoSteps) {
 		uint8_t steps = el.num_pos;
@@ -103,9 +87,7 @@ HapticConfig haptic_for_knob_snapped(const KnobSnapped &el) {
 	return haptic_for_knob();
 }
 
-// Determine haptic config for a Switch (FlipSwitch or SlideSwitch).
-template<typename SwitchT>
-HapticConfig haptic_for_switch(const SwitchT &el) {
+HapticConfig haptic_for_switch(const auto &el) {
 	if (el.num_pos > 0 && el.num_pos <= MaxRotoSteps) {
 		uint8_t steps = el.num_pos;
 		auto storage = collect_step_names(el.pos_names, el.num_pos, steps);
@@ -114,23 +96,19 @@ HapticConfig haptic_for_switch(const SwitchT &el) {
 	return {HapticMode::KNOB_300, 0, {}};
 }
 
-// Determine haptic config for a momentary button (push action, 2-state).
-HapticConfig haptic_for_momentary_button(const std::string &control_name) {
+HapticConfig haptic_for_momentary_button(const BaseElement &el) {
+	auto control_name = format_control_name(el);
 	return {HapticMode::PUSH, 2, make_button_step_names(control_name)};
 }
 
-// Determine haptic config for a latching button (toggle, 2-state).
-HapticConfig haptic_for_latching_button(const std::string &control_name) {
-	return {HapticMode::KNOB_N_STEP, 2, make_button_step_names(control_name)};
+HapticConfig haptic_for_latching_button(const BaseElement &el) {
+	auto control_name = format_control_name(el);
+	return {HapticMode::TOGGLE, 2, make_button_step_names(control_name)};
 }
 
 // Emit a KNOB control config command.
-void emit_knob(RotoControlMessage &msg,
-			   uint8_t &knob_index,
-			   const MappedKnob &k,
-			   const char *name,
-			   const HapticConfig &hc,
-			   const char *const *step_names_ptr) {
+void emit_knob(
+	RotoControlMessage &msg, uint8_t &knob_index, const MappedKnob &k, Element const &el, const HapticConfig &hc) {
 	msg.set_control_config({ControlType::KNOB,
 							0,
 							knob_index,
@@ -140,23 +118,23 @@ void emit_knob(RotoControlMessage &msg,
 							0,
 							0,
 							127,
-							name,
+							format_control_name(base_element(el)),
 							0,
 							hc.mode,
 							0xFF,
 							0xFF,
 							hc.steps,
-							step_names_ptr});
+							hc.step_name_storage});
 	knob_index++;
 }
 
 // Emit a SWITCH control config command.
-void emit_switch(RotoControlMessage &msg,
-				 uint8_t &switch_index,
-				 const MappedKnob &k,
-				 const char *name,
-				 const HapticConfig &hc,
-				 const char *const *step_names_ptr) {
+void emit_switch(
+	RotoControlMessage &msg, uint8_t &switch_index, const MappedKnob &k, Element const &el, const HapticConfig &hc) {
+
+	uint8_t colorscheme = hc.steps + 1;
+	uint8_t hc_steps = (hc.steps == 2) ? 0 : hc.steps;
+
 	msg.set_control_config({ControlType::SWITCH,
 							0,
 							switch_index,
@@ -166,43 +144,24 @@ void emit_switch(RotoControlMessage &msg,
 							0,
 							0,
 							127,
-							name,
-							0,
+							format_control_name(base_element(el)),
+							colorscheme,
 							hc.mode,
 							0x00,
 							0x01,
-							0,
-							step_names_ptr});
+							hc_steps,
+							hc.step_name_storage});
 	switch_index++;
-}
-
-// Emit either a knob or switch command based on haptic_steps.
-// 2-state controls (buttons) => SWITCH, everything else => KNOB.
-void emit_control(RotoControlMessage &msg,
-				  uint8_t &knob_index,
-				  uint8_t &switch_index,
-				  const MappedKnob &k,
-				  const char *name,
-				  HapticConfig &hc) {
-	const char *const *step_names_ptr = nullptr;
-	std::vector<const char *> ptrs;
-
-	if (!hc.step_name_storage.empty()) {
-		ptrs = make_step_name_ptrs(hc.step_name_storage);
-		step_names_ptr = ptrs.data();
-	}
-
-	if (hc.steps == 2) {
-		emit_switch(msg, switch_index, k, name, hc, step_names_ptr);
-	} else {
-		emit_knob(msg, knob_index, k, name, hc, step_names_ptr);
-	}
 }
 
 } // namespace
 
 RotoControlSerializer::RotoControlSerializer(ConcurrentBuffer *buffer)
 	: cdc_buffer{buffer} {
+}
+
+void RotoControlSerializer::config_max_switch_position(unsigned max_pos) {
+	max_switch_pos = std::clamp(max_pos, 2u, MaxRotoSteps);
 }
 
 void RotoControlSerializer::update_from_patch(PatchData const &pd,
@@ -229,52 +188,54 @@ void RotoControlSerializer::update_from_patch(PatchData const &pd,
 
 			std::visit(overloaded{
 						   [&](const KnobSnapped &el) {
-							   auto name = format_control_name(el);
 							   auto hc = haptic_for_knob_snapped(el);
-							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+							   emit_knob(msg, next_knob_index, k, el, hc);
 						   },
 
 						   [&](const Knob &el) {
-							   auto name = format_control_name(el);
 							   auto hc = haptic_for_knob();
-							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+							   emit_knob(msg, next_knob_index, k, el, hc);
 						   },
 
 						   [&](const FlipSwitch &el) {
-							   auto name = format_control_name(el);
 							   auto hc = haptic_for_switch(el);
-							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+
+							   if (el.num_pos <= max_switch_pos) {
+								   emit_switch(msg, next_switch_index, k, el, hc);
+							   } else {
+								   emit_knob(msg, next_knob_index, k, el, hc);
+							   }
 						   },
 
 						   [&](const SlideSwitch &el) {
-							   auto name = format_control_name(el);
 							   auto hc = haptic_for_switch(el);
-							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+
+							   if (el.num_pos <= max_switch_pos) {
+								   emit_switch(msg, next_switch_index, k, el, hc);
+							   } else {
+								   emit_knob(msg, next_knob_index, k, el, hc);
+							   }
 						   },
 
 						   [&](const MomentaryButton &el) {
-							   auto name = format_control_name(el);
-							   auto hc = haptic_for_momentary_button(name);
-							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+							   auto hc = haptic_for_momentary_button(el);
+							   emit_switch(msg, next_switch_index, k, el, hc);
 						   },
 
 						   [&](const LatchingButton &el) {
-							   auto name = format_control_name(el);
-							   auto hc = haptic_for_latching_button(name);
-							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+							   auto hc = haptic_for_latching_button(el);
+							   emit_switch(msg, next_switch_index, k, el, hc);
 						   },
 
 						   [&](const Encoder &el) {
-							   auto name = format_control_name(el);
-							   // how to handle this?
+							   // how to handle endless encoders?
 							   auto hc = haptic_for_knob();
-							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+							   emit_knob(msg, next_knob_index, k, el, hc);
 						   },
 
 						   [&](const ParamElement &el) {
-							   auto name = format_control_name(el);
 							   auto hc = haptic_for_knob();
-							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+							   emit_knob(msg, next_knob_index, k, el, hc);
 						   },
 
 						   [](const auto &) {

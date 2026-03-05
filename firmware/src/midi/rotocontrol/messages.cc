@@ -41,8 +41,8 @@ void RotoControlMessage::set_control_config(RotoControlMessage::ControlConfig &&
 	push_byte(cfg.max_value & 0xFF);
 
 	// Control name (13 bytes, NULL terminated, padded with 00s)
-	for (int i = 0; i < 13; ++i) {
-		if (cfg.control_name != nullptr && cfg.control_name[i] != '\0') {
+	for (unsigned i = 0; i < 13; ++i) {
+		if (i < cfg.control_name.length()) {
 			push_byte(cfg.control_name[i]);
 		} else {
 			push_byte(0x00);
@@ -70,14 +70,10 @@ void RotoControlMessage::set_control_config(RotoControlMessage::ControlConfig &&
 	push_byte(cfg.haptic_steps);
 
 	// Step names (for KNOB_N_STEP or switch with haptic strings)
-	for (int step = 0; step < cfg.haptic_steps; ++step) {
-		for (int i = 0; i < 13; ++i) {
-			if (cfg.step_names != nullptr) {
-				if (cfg.step_names[step] != nullptr && cfg.step_names[step][i] != '\0') {
-					push_byte(cfg.step_names[step][i]);
-				} else {
-					push_byte(0x00);
-				}
+	for (size_t step = 0; step < cfg.haptic_steps; ++step) {
+		for (size_t i = 0; i < 13; ++i) {
+			if (step < cfg.step_names.size() && i < cfg.step_names[step].length()) {
+				push_byte(cfg.step_names[step][i]);
 			} else {
 				push_byte(0x00);
 			}
