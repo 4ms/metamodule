@@ -60,8 +60,12 @@ public:
 		lv_hide(rename_textarea);
 		lv_textarea_set_max_length(rename_textarea, AliasNameString::capacity);
 		lv_textarea_set_one_line(rename_textarea, true);
-		lv_obj_set_width(rename_textarea, 220); // screen width (240) minus 10px margin each side
+		lv_obj_set_width(rename_textarea, 300); // screen width (320) minus 10px margin each side
 		lv_obj_set_style_bg_opa(rename_textarea, LV_OPA_COVER, 0);
+		lv_obj_set_style_border_color(rename_textarea, lv_color_white(), LV_PART_CURSOR | LV_STATE_DEFAULT);
+		lv_obj_set_style_border_opa(rename_textarea, LV_OPA_COVER, LV_PART_CURSOR | LV_STATE_DEFAULT);
+		lv_obj_set_style_border_width(rename_textarea, 1, LV_PART_CURSOR | LV_STATE_DEFAULT);
+		lv_obj_set_style_border_side(rename_textarea, LV_BORDER_SIDE_LEFT, LV_PART_CURSOR | LV_STATE_DEFAULT);
 		lv_obj_add_event_cb(rename_textarea, textarea_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
 		lv_obj_set_height(ui_ModuleViewActionMenu, 240);
@@ -396,7 +400,7 @@ private:
 			auto *pd = page->patches.get_view_patch();
 			auto alias = pd->get_module_alias(static_cast<uint16_t>(page->module_idx));
 			auto default_name = ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx]);
-			msg = "Rename '" + std::string{alias} + "' to '" + std::string{default_name} + "'?";
+			msg = "Reset module name to '" + std::string{default_name} + "'?";
 		}
 
 		page->hide_menu();
@@ -435,18 +439,17 @@ private:
 
 		auto *pd = page->patches.get_view_patch();
 		auto alias = pd->get_module_alias(static_cast<uint16_t>(page->module_idx));
-		auto alias_str = std::string{alias};
 
 		// Show current alias (or module name) as greyed-out placeholder; don't pre-fill
-		std::string_view placeholder = alias_str.empty()
+		std::string_view placeholder = alias.empty()
 			? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
-			: std::string_view{alias_str};
+			: alias;
 		lv_textarea_set_placeholder_text(page->rename_textarea, placeholder.data());
 		lv_textarea_set_text(page->rename_textarea, "");
 		lv_label_set_text(ui_ElementRollerModuleName, placeholder.data());
 
 		page->hide_menu();
-		page->pending_alias = alias_str;
+		page->pending_alias = alias;
 		page->keyboard_entry.show_keyboard(
 			page->rename_textarea,
 			[page](std::string_view text) {
