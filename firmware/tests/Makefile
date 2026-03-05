@@ -35,6 +35,8 @@ TEST_SOURCES += coreproc_plugin/dsp/stream_resampler.cc
 TEST_SOURCES += coreproc_plugin/dsp/block_resampler.cc
 TEST_SOURCES += coreproc_plugin/wav/wav_file_stream.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
+TEST_SOURCES += src/midi/rotocontrol/serializer.cc
+TEST_SOURCES += src/midi/rotocontrol/messages.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
@@ -47,6 +49,7 @@ CXXFLAGS = 	-Wall \
 			-I.. \
 			-Isrc \
 			-Isrc/medium \
+			-Isrc/console \
 			-Ilib \
 			-Ilib/lvgl/lvgl \
 			-Ilib/cpputil \
