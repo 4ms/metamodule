@@ -47,12 +47,14 @@ public:
 		, group(lv_group_create())
 		, moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")}
 		, moduleViewActionBypassBut{create_lv_list_button(ui_ModuleViewActionMenu, "Bypass: Off")}
-		, moduleViewActionRenameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Rename...")} {
+		, moduleViewActionRenameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Rename...")}
+		, moduleViewActionResetNameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Reset name")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
 		lv_show(moduleViewActionPresetBut);
 		lv_show(moduleViewActionBypassBut);
 		lv_show(moduleViewActionRenameBut);
+		lv_hide(moduleViewActionResetNameBut);
 
 		rename_textarea = lv_textarea_create(lv_layer_top());
 		lv_hide(rename_textarea);
@@ -77,6 +79,7 @@ public:
 		lv_obj_add_event_cb(ui_ModuleViewActionMidiBut, midi_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionBypassBut, bypass_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionRenameBut, rename_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(moduleViewActionResetNameBut, reset_name_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
@@ -86,6 +89,7 @@ public:
 		lv_group_add_obj(group, moduleViewActionPresetBut);
 		lv_group_add_obj(group, moduleViewActionBypassBut);
 		lv_group_add_obj(group, moduleViewActionRenameBut);
+		lv_group_add_obj(group, moduleViewActionResetNameBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
 	}
@@ -94,6 +98,7 @@ public:
 		this->module_idx = module_idx;
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), group);
+		reset_name_popup.init(lv_layer_top(), base_group);
 		keyboard_entry.prepare_focus(lv_layer_top(), base_group);
 
 		const auto module_slug = std::string{patches.get_view_patch()->module_slugs[module_idx]};
@@ -144,6 +149,8 @@ public:
 			preset_popup.hide();
 		} else if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
+		} else if (reset_name_popup.is_visible()) {
+			reset_name_popup.hide();
 		} else if (auto_map.is_visible()) {
 			auto_map.hide();
 		} else if (keyboard_entry.is_visible()) {
@@ -156,6 +163,7 @@ public:
 	void hide() {
 		preset_popup.hide();
 		confirm_popup.hide();
+		reset_name_popup.hide();
 		hide_menu();
 	}
 
@@ -171,6 +179,7 @@ public:
 
 	void show() {
 		update_bypass_text();
+		update_reset_name_visibility();
 		lv_group_focus_obj(ui_ModuleViewActionAutopatchBut);
 
 		if (!visible) {
@@ -188,7 +197,8 @@ public:
 	}
 
 	bool keyboard_visible() {
-		return keyboard_entry.is_visible();
+		// also covers reset_name_popup which intercepts back button -- consider renaming to modal_visible()
+		return keyboard_entry.is_visible() || reset_name_popup.is_visible();
 	}
 
 	void reactivate_group() {
@@ -354,6 +364,11 @@ private:
 			lv_label_set_text(label, bypassed ? "Bypass: On" : "Bypass: Off");
 	}
 
+	void update_reset_name_visibility() {
+		auto alias = patches.get_view_patch()->get_module_alias(static_cast<uint16_t>(module_idx));
+		lv_show(moduleViewActionResetNameBut, !alias.empty());
+	}
+
 	static void bypass_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -370,6 +385,33 @@ private:
 		auto *label = lv_obj_get_child(page->moduleViewActionBypassBut, 0);
 		if (label)
 			lv_label_set_text(label, new_state ? "Bypass: On" : "Bypass: Off");
+	}
+
+	static void reset_name_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		std::string msg;
+		{
+			auto *pd = page->patches.get_view_patch();
+			auto alias = pd->get_module_alias(static_cast<uint16_t>(page->module_idx));
+			auto default_name = ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx]);
+			msg = "Rename '" + std::string{alias} + "' to '" + std::string{default_name} + "'?";
+		}
+
+		page->hide_menu();
+		page->reset_name_popup.show(
+			[page](unsigned choice) {
+				if (choice == 1) {
+					auto *pd = page->patches.get_view_patch();
+					pd->set_module_alias(static_cast<uint16_t>(page->module_idx), "");
+					page->patches.mark_view_patch_modified();
+					auto display = ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx]);
+					lv_label_set_text(ui_ElementRollerModuleName, display.data());
+				}
+			},
+			msg.c_str(),
+			"Reset");
 	}
 
 	static void textarea_changed_cb(lv_event_t *event) {
@@ -433,6 +475,7 @@ private:
 	NotificationQueue &notify_queue;
 
 	ConfirmPopup confirm_popup;
+	ConfirmPopup reset_name_popup;
 
 	ModuleViewAutoMapDialog auto_map;
 	RandomizeParams randomizer;
@@ -446,6 +489,7 @@ private:
 	lv_obj_t *moduleViewActionPresetBut;
 	lv_obj_t *moduleViewActionBypassBut;
 	lv_obj_t *moduleViewActionRenameBut;
+	lv_obj_t *moduleViewActionResetNameBut;
 	lv_obj_t *rename_textarea = nullptr;
 	std::string pending_alias{};
 	KeyboardEntry keyboard_entry;
