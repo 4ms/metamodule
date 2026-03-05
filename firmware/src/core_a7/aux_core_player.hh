@@ -80,6 +80,7 @@ struct AuxPlayer {
 		midi_sync.clear_last_values();
 		patch_load_time = get_time();
 
+		roto.config_max_switch_position(3); //TODO: ui.get_settings().roto.max_switch_pos
 		roto.update_from_patch(patch_player.patch(), patch_player.modules);
 
 		SMPThread::signal_done();
