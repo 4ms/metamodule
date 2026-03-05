@@ -1,5 +1,6 @@
 #pragma once
 #include "console/concurrent_buffer.hh"
+#include "util/static_string.hh"
 #include <string>
 #include <vector>
 
@@ -31,13 +32,13 @@ public:
 		uint16_t nrpn_address;
 		uint16_t min_value;
 		uint16_t max_value;
-		std::string_view control_name;
+		StaticString<12> control_name;
 		uint8_t color_scheme;
 		HapticMode haptic_mode;
 		uint8_t param1 = 0xFF;
 		uint8_t param2 = 0xFF;
 		uint8_t haptic_steps = 2;
-		std::span<const std::string> step_names{};
+		std::span<const StaticString<12>> step_names{};
 	};
 
 	void set_control_config(ControlConfig &&cfg);

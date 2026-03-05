@@ -64,6 +64,7 @@ CXXFLAGS = 	-Wall \
 			-isystem $(TEST_DIR) \
 			-DTESTPROJECT \
 			-g3 -O0 \
+			-DCPPUTIL_STATIC_STRING_USE_STD_STRING
 
 $(BUILDDIR)/src/gui/elements/element_name.o: CXXFLAGS += -Wno-deprecated-anon-enum-enum-conversion
 
