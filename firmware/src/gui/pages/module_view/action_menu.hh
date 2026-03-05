@@ -58,7 +58,6 @@ public:
 		lv_obj_add_flag(rename_textarea, LV_OBJ_FLAG_HIDDEN);
 		lv_textarea_set_max_length(rename_textarea, AliasNameString::capacity);
 		lv_textarea_set_one_line(rename_textarea, true);
-		lv_obj_add_event_cb(rename_textarea, rename_textarea_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
 		lv_obj_set_height(ui_ModuleViewActionMenu, 240);
 
@@ -370,13 +369,6 @@ private:
 			lv_label_set_text(label, new_state ? "Bypass: On" : "Bypass: Off");
 	}
 
-	static void rename_textarea_changed_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
-		lv_label_set_text(ui_ElementRollerModuleName, lv_textarea_get_text(page->rename_textarea));
-	}
-
 	static void rename_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -398,8 +390,11 @@ private:
 				: text;
 			lv_label_set_text(ui_ElementRollerModuleName, display.data());
 		});
-		// Set label after show_keyboard to override any intermediate VALUE_CHANGED events
-		lv_label_set_text(ui_ElementRollerModuleName, alias_str.c_str());
+		// Set label to resolved display name so cancel without typing leaves it correct
+		std::string_view display = alias_str.empty()
+			? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
+			: std::string_view{alias_str};
+		lv_label_set_text(ui_ElementRollerModuleName, display.data());
 	}
 
 	FatFileIO &ramdisk;
