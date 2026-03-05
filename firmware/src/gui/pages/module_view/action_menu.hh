@@ -55,9 +55,12 @@ public:
 		lv_show(moduleViewActionRenameBut);
 
 		rename_textarea = lv_textarea_create(lv_layer_top());
-		lv_obj_add_flag(rename_textarea, LV_OBJ_FLAG_HIDDEN);
+		lv_hide(rename_textarea);
 		lv_textarea_set_max_length(rename_textarea, AliasNameString::capacity);
 		lv_textarea_set_one_line(rename_textarea, true);
+		lv_obj_set_width(rename_textarea, 220); // screen width (240) minus 10px margin each side
+		lv_obj_set_style_bg_opa(rename_textarea, LV_OPA_COVER, 0);
+		lv_obj_add_event_cb(rename_textarea, textarea_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
 		lv_obj_set_height(ui_ModuleViewActionMenu, 240);
 
@@ -369,6 +372,20 @@ private:
 			lv_label_set_text(label, new_state ? "Bypass: On" : "Bypass: Off");
 	}
 
+	static void textarea_changed_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		std::string_view text = lv_textarea_get_text(page->rename_textarea);
+		auto *pd = page->patches.get_view_patch();
+		std::string_view display = text.empty()
+			? (page->pending_alias.empty()
+				? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
+				: std::string_view{page->pending_alias})
+			: text;
+		lv_label_set_text(ui_ElementRollerModuleName, display.data());
+	}
+
 	static void rename_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -377,24 +394,34 @@ private:
 		auto *pd = page->patches.get_view_patch();
 		auto alias = pd->get_module_alias(static_cast<uint16_t>(page->module_idx));
 		auto alias_str = std::string{alias};
-		lv_textarea_set_text(page->rename_textarea, alias_str.c_str());
 
-		page->hide_menu();
-		page->keyboard_entry.show_keyboard(page->rename_textarea, [page](std::string_view text) {
-			auto *pd = page->patches.get_view_patch();
-			pd->set_module_alias(static_cast<uint16_t>(page->module_idx), text);
-			page->patches.mark_view_patch_modified();
-
-			std::string_view display = text.empty()
-				? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
-				: text;
-			lv_label_set_text(ui_ElementRollerModuleName, display.data());
-		});
-		// Set label to resolved display name so cancel without typing leaves it correct
-		std::string_view display = alias_str.empty()
+		// Show current alias (or module name) as greyed-out placeholder; don't pre-fill
+		std::string_view placeholder = alias_str.empty()
 			? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
 			: std::string_view{alias_str};
-		lv_label_set_text(ui_ElementRollerModuleName, display.data());
+		lv_textarea_set_placeholder_text(page->rename_textarea, placeholder.data());
+		lv_textarea_set_text(page->rename_textarea, "");
+		lv_label_set_text(ui_ElementRollerModuleName, placeholder.data());
+
+		page->hide_menu();
+		page->pending_alias = alias_str;
+		page->keyboard_entry.show_keyboard(
+			page->rename_textarea,
+			[page](std::string_view text) {
+				auto *pd = page->patches.get_view_patch();
+				// Empty text means user didn't type anything — preserve existing alias
+				std::string_view actual = text.empty() ? std::string_view{page->pending_alias} : text;
+				pd->set_module_alias(static_cast<uint16_t>(page->module_idx), actual);
+				page->patches.mark_view_patch_modified();
+
+				std::string_view display = actual.empty()
+					? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
+					: actual;
+				lv_label_set_text(ui_ElementRollerModuleName, display.data());
+			},
+			/*hide_field_on_dismiss=*/true);
+		lv_show(page->rename_textarea);
+		lv_obj_align_to(page->rename_textarea, ui_Keyboard, LV_ALIGN_OUT_TOP_MID, 0, -4);
 	}
 
 	FatFileIO &ramdisk;
@@ -420,6 +447,7 @@ private:
 	lv_obj_t *moduleViewActionBypassBut;
 	lv_obj_t *moduleViewActionRenameBut;
 	lv_obj_t *rename_textarea = nullptr;
+	std::string pending_alias{};
 	KeyboardEntry keyboard_entry;
 	std::string preset_path{};
 	uint16_t cur_preset_idx{};

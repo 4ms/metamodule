@@ -22,8 +22,11 @@ struct KeyboardEntry {
 		kb_popup.init(parent_obj, parent_group);
 	}
 
-	void show_keyboard(lv_obj_t *textarea_field, FunctionSized<16, void(std::string_view)> save_callback) {
+	void show_keyboard(lv_obj_t *textarea_field,
+					   FunctionSized<16, void(std::string_view)> save_callback,
+					   bool hide_field_on_dismiss = false) {
 		text_field = textarea_field;
+		hide_on_dismiss = hide_field_on_dismiss;
 
 		save_cb = save_callback;
 
@@ -78,6 +81,8 @@ struct KeyboardEntry {
 			if (text_field) {
 				lv_obj_clear_state(text_field, LV_STATE_USER_1);
 				lv_group_focus_obj(text_field);
+				if (hide_on_dismiss)
+					lv_hide(text_field);
 			}
 			lv_group_remove_obj(ui_Keyboard);
 			lv_hide(ui_Keyboard);
@@ -123,6 +128,7 @@ private:
 	lv_obj_t *text_field = nullptr;
 
 	bool kb_visible = false;
+	bool hide_on_dismiss = false;
 	ConfirmPopup kb_popup;
 
 	FunctionSized<16, void(std::string_view)> save_cb;
