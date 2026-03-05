@@ -15,8 +15,8 @@ RotoControlSerializer::RotoControlSerializer(ConcurrentBuffer *buffer)
 
 void RotoControlSerializer::update_from_patch(PatchData const &pd,
 											  std::span<const std::unique_ptr<CoreProcessor>> modules) {
-	unsigned next_midi_roto_knob_index_ = 0;
-	unsigned next_midi_roto_switch_index_ = 0;
+	uint8_t next_midi_roto_knob_index_ = 0;
+	uint8_t next_midi_roto_switch_index_ = 0;
 	const unsigned num_modules = pd.module_slugs.size();
 
 	msg.start_config_update();
@@ -127,7 +127,7 @@ void RotoControlSerializer::update_from_patch(PatchData const &pd,
 							pr_dbg("haptic_mode: %d\n", haptic_mode);
 							pr_dbg("control_name_str: %s\n", control_name_str.c_str());
 
-							if (haptic_steps > 0) { // MODIFIED: Ensure check is > 0 explicitly
+							if (haptic_steps > 0) {
 								dummy_step_names_storage.reserve(haptic_steps); // ADDED: Reserve storage
 
 								if (haptic_steps == 2) {
@@ -185,7 +185,7 @@ void RotoControlSerializer::update_from_patch(PatchData const &pd,
 									}
 								}
 
-								// MODIFIED: Populate dummy_step_names_ptrs AFTER dummy_step_names_storage is complete
+								// Populate dummy_step_names_ptrs after dummy_step_names_storage is complete
 								if (!dummy_step_names_storage.empty()) {
 									dummy_step_names_ptrs.reserve(dummy_step_names_storage.size());
 									for (const auto &s_str : dummy_step_names_storage) {
@@ -195,25 +195,34 @@ void RotoControlSerializer::update_from_patch(PatchData const &pd,
 								}
 							}
 
-							if (haptic_steps == 2) { // This condition was for calling set_switch_control_config
-								// TODO lazy start
+							if (haptic_steps == 2) {
+								pr_dbg(
+									"Setting switch control config, setup_index: %d, control_index: %d, haptic_mode: "
+									"%d, haptic_steps: %d\n min_val_u16: %d, max_val_u16: %d, control_name: %s\n",
+									0,
+									next_midi_roto_switch_index_,
+									haptic_mode,
+									haptic_steps,
+									min_val_u16,
+									max_val_u16,
+									control_name_ptr);
 								msg.set_control_config(
-									ControlType::SWITCH,
-									0,							  // setup_index
-									next_midi_roto_switch_index_, // RotoControl's own knob/control index
-									ControlMode::CC_7BIT,
-									k.midi_chan == 0 ? 1 : k.midi_chan,
-									k.cc_num(), // RotoControl's parameter index
-									0,			// nrpn_address
-									0,
-									127,
-									control_name_ptr,
-									0,			 // color_scheme
-									haptic_mode, // haptic_mode for switch
-									0x00,		 // led_on_color
-									0x01,		 // led_off_color
-									0,
-									step_names_ptr);
+									{ControlType::SWITCH,
+									 0,							   // setup_index
+									 next_midi_roto_switch_index_, // RotoControl's own knob/control index
+									 ControlMode::CC_7BIT,
+									 k.midi_chan == 0 ? uint8_t(1) : k.midi_chan,
+									 static_cast<uint8_t>(k.cc_num()), // RotoControl's parameter index
+									 0,								   // nrpn_address
+									 0,
+									 127,
+									 control_name_ptr,
+									 0,			  // color_scheme
+									 haptic_mode, // haptic_mode for switch
+									 0x00,		  // led_on_color
+									 0x01,		  // led_off_color
+									 0,			  // haptic_steps == 0 for normal 2-pos switch with no strings
+									 step_names_ptr});
 								next_midi_roto_switch_index_++;
 							} else {
 								pr_dbg("Setting knob control config, setup_index: %d, control_index: %d, haptic_mode: "
@@ -237,22 +246,22 @@ void RotoControlSerializer::update_from_patch(PatchData const &pd,
 									pr_dbg("step_names: null or empty\n");
 								}
 								msg.set_control_config(
-									ControlType::KNOB,
-									0,							// setup_index
-									next_midi_roto_knob_index_, // RotoControl's own knob/control index
-									ControlMode::CC_7BIT,
-									k.midi_chan == 0 ? 1 : k.midi_chan,
-									k.cc_num(), // RotoControl's parameter index
-									0,			// nrpn_address
-									min_val_u16,
-									max_val_u16,
-									control_name_ptr,
-									0, // color_scheme
-									haptic_mode,
-									0xFF, // indent_pos1
-									0xFF, // indent_pos2
-									haptic_steps,
-									step_names_ptr);
+									{ControlType::KNOB,
+									 0,							 // setup_index
+									 next_midi_roto_knob_index_, // RotoControl's own knob/control index
+									 ControlMode::CC_7BIT,
+									 k.midi_chan == 0 ? (uint8_t)1 : k.midi_chan,
+									 static_cast<uint8_t>(k.cc_num()), // RotoControl's parameter index
+									 0,								   // nrpn_address
+									 min_val_u16,
+									 max_val_u16,
+									 control_name_ptr,
+									 0, // color_scheme
+									 haptic_mode,
+									 0xFF, // indent_pos1
+									 0xFF, // indent_pos2
+									 haptic_steps,
+									 step_names_ptr});
 								next_midi_roto_knob_index_++;
 							}
 						}

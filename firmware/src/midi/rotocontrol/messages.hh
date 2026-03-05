@@ -20,22 +20,26 @@ enum class HapticMode : uint8_t {
 
 class RotoControlMessage {
 public:
-	void set_control_config(ControlType control_type,
-							uint8_t setup_index,
-							uint8_t control_index,
-							ControlMode control_mode,
-							uint8_t control_channel,
-							uint8_t control_param,
-							uint16_t nrpn_address,
-							uint16_t min_value,
-							uint16_t max_value,
-							const char *control_name,
-							uint8_t color_scheme,
-							HapticMode haptic_mode,
-							uint8_t param1 = 0xFF, // indent_pos1 for knob, led_on_color for switch
-							uint8_t param2 = 0xFF, // indent_pos2 for knob, led_off_color for switch
-							uint8_t haptic_steps = 2,
-							const char *const *step_names = nullptr);
+	struct ControlConfig {
+		ControlType control_type;
+		uint8_t setup_index;
+		uint8_t control_index;
+		ControlMode control_mode;
+		uint8_t control_channel;
+		uint8_t control_param;
+		uint16_t nrpn_address;
+		uint16_t min_value;
+		uint16_t max_value;
+		const char *control_name;
+		uint8_t color_scheme;
+		HapticMode haptic_mode;
+		uint8_t param1 = 0xFF;
+		uint8_t param2 = 0xFF;
+		uint8_t haptic_steps = 2;
+		const char *const *step_names = nullptr;
+	};
+
+	void set_control_config(ControlConfig &&cfg);
 
 	void start_config_update();
 	void end_config_update();
@@ -45,6 +49,7 @@ public:
 
 private:
 	std::vector<uint8_t> command_buffer_;
+	void push_byte(uint8_t);
 };
 
 } // namespace MetaModule
