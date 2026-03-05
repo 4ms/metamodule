@@ -227,91 +227,61 @@ void RotoControlSerializer::update_from_patch(PatchData const &pd,
 			if (el_idx >= module_info.indices.size() || module_info.indices[el_idx].param_idx != k.param_id)
 				continue;
 
-			std::visit(
-				overloaded{
-					[&](const KnobSnapped &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_knob_snapped(el);
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
+			std::visit(overloaded{
+						   [&](const KnobSnapped &el) {
+							   auto name = format_control_name(el);
+							   auto hc = haptic_for_knob_snapped(el);
+							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+						   },
 
-					[&](const Knob &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_knob();
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
+						   [&](const Knob &el) {
+							   auto name = format_control_name(el);
+							   auto hc = haptic_for_knob();
+							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+						   },
 
-					[&](const FlipSwitch &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_switch(el);
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
+						   [&](const FlipSwitch &el) {
+							   auto name = format_control_name(el);
+							   auto hc = haptic_for_switch(el);
+							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+						   },
 
-					[&](const SlideSwitch &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_switch(el);
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
+						   [&](const SlideSwitch &el) {
+							   auto name = format_control_name(el);
+							   auto hc = haptic_for_switch(el);
+							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+						   },
 
-					[&](const MomentaryButton &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_momentary_button(name);
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
+						   [&](const MomentaryButton &el) {
+							   auto name = format_control_name(el);
+							   auto hc = haptic_for_momentary_button(name);
+							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+						   },
 
-					[&](const MomentaryButtonLight &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_momentary_button(name);
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
+						   [&](const LatchingButton &el) {
+							   auto name = format_control_name(el);
+							   auto hc = haptic_for_latching_button(name);
+							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+						   },
 
-					[&](const MomentaryButtonRGB &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_momentary_button(name);
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
+						   [&](const Encoder &el) {
+							   auto name = format_control_name(el);
+							   // how to handle this?
+							   auto hc = haptic_for_knob();
+							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+						   },
 
-					[&](const LatchingButton &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_latching_button(name);
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
+						   [&](const ParamElement &el) {
+							   auto name = format_control_name(el);
+							   auto hc = haptic_for_knob();
+							   emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
+						   },
 
-					[&](const Slider &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_knob();
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
-
-					[&](const SliderLight &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_knob();
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
-
-					[&](const Encoder &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_knob();
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
-
-					[&](const EncoderRGB &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_knob();
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
-
-					[&](const ParamElement &el) {
-						auto name = format_control_name(el);
-						auto hc = haptic_for_knob();
-						emit_control(msg, next_knob_index, next_switch_index, k, name.c_str(), hc);
-					},
-
-					[](const auto &) {
-						// Non-param elements: NullElement, ImageElement, Jacks, Lights, Displays
-					},
-				},
-				module_info.elements[el_idx]);
+						   [](const auto &) {
+							   // Non-param elements: NullElement, ImageElement, Jacks, Lights, Displays
+						   },
+					   },
+					   module_info.elements[el_idx]);
 
 			break;
 		}
