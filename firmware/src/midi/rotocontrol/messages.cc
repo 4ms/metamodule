@@ -10,9 +10,7 @@ void RotoControlMessage::push_byte(uint8_t byte) {
 void RotoControlMessage::set_control_config(RotoControlMessage::ControlConfig &&cfg) {
 	// Calculate command data length: 0x001D base + (HS * 0x0D) for step names
 	uint16_t data_length = 0x001D;
-	if (cfg.haptic_steps > 0) {
-		data_length += cfg.haptic_steps * 0x0D;
-	}
+	data_length += cfg.haptic_steps * 0x0D;
 
 	// Command header: 5A 02 [07 for knob, 08 for switch]
 	push_byte(0x5A);
@@ -72,18 +70,16 @@ void RotoControlMessage::set_control_config(RotoControlMessage::ControlConfig &&
 	push_byte(cfg.haptic_steps);
 
 	// Step names (for KNOB_N_STEP or switch with haptic strings)
-	if (cfg.haptic_steps > 0) {
-		for (int step = 0; step < cfg.haptic_steps; ++step) {
-			for (int i = 0; i < 13; ++i) {
-				if (cfg.step_names != nullptr) {
-					if (cfg.step_names[step] != nullptr && cfg.step_names[step][i] != '\0') {
-						push_byte(cfg.step_names[step][i]);
-					} else {
-						push_byte(0x00);
-					}
+	for (int step = 0; step < cfg.haptic_steps; ++step) {
+		for (int i = 0; i < 13; ++i) {
+			if (cfg.step_names != nullptr) {
+				if (cfg.step_names[step] != nullptr && cfg.step_names[step][i] != '\0') {
+					push_byte(cfg.step_names[step][i]);
 				} else {
 					push_byte(0x00);
 				}
+			} else {
+				push_byte(0x00);
 			}
 		}
 	}
