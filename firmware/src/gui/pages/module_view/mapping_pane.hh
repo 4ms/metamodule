@@ -100,7 +100,8 @@ struct ModuleViewMappingPane {
 		args.detail_mode = true;
 
 		auto slug = patch->module_slugs[this_module_id];
-		auto display_name = ModuleFactory::getModuleDisplayName(slug);
+		auto alias = patch->get_module_alias(static_cast<uint16_t>(this_module_id));
+		auto display_name = alias.empty() ? ModuleFactory::getModuleDisplayName(slug) : alias;
 
 		// Knob name label
 		lv_label_set_text(ui_Module_Name, display_name.data());

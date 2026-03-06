@@ -116,8 +116,9 @@ struct ModuleViewPage : PageBase {
 			return;
 		}
 
-		auto module_display_name = ModuleFactory::getModuleDisplayName(slug);
-		lv_label_set_text(ui_ElementRollerModuleName, module_display_name.data());
+		auto alias = patch->get_module_alias(static_cast<uint16_t>(this_module_id));
+		auto display = alias.empty() ? ModuleFactory::getModuleDisplayName(slug) : alias;
+		lv_label_set_text(ui_ElementRollerModuleName, display.data());
 
 		has_context_menu = module_context_menu.create_options_menu(this_module_id);
 
@@ -166,7 +167,7 @@ struct ModuleViewPage : PageBase {
 		// Back button
 		if (gui_state.back_button.is_just_released()) {
 
-			if (action_menu.is_visible()) {
+			if (action_menu.is_visible() || action_menu.keyboard_visible()) {
 				action_menu.back();
 
 			} else if (settings_menu.is_visible()) {
