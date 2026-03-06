@@ -398,7 +398,6 @@ private:
 		std::string msg;
 		{
 			auto *pd = page->patches.get_view_patch();
-			auto alias = pd->get_module_alias(static_cast<uint16_t>(page->module_idx));
 			auto default_name = ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx]);
 			msg = "Reset module name to '" + std::string{default_name} + "'?";
 		}
