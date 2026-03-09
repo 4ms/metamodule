@@ -784,6 +784,7 @@ PatchData:
   suggested_samplerate: 0
   suggested_blocksize: 0
   bypassed_modules: []
+  module_aliases: []
 )"
 		  // clang-format off
 		 );
@@ -1076,6 +1077,7 @@ PatchData:
   suggested_samplerate: 0
   suggested_blocksize: 0
   bypassed_modules: []
+  module_aliases: []
 )");
 	// clang-format on
 }
