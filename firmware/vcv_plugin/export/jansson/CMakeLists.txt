@@ -20,6 +20,7 @@ target_compile_definitions(jansson PRIVATE -DHAVE_CONFIG_H)
 target_compile_options(
   jansson
   PRIVATE -Wno-format-truncation
+          $<$<CXX_COMPILER_ID:GNU>:-Wno-stringop-overflow>
           $<$<CXX_COMPILER_ID:GNU>:-Wno-stringop-truncation>
           $<$<CXX_COMPILER_ID:GNU>:
           $<$<COMPILE_LANGUAGE:C>:-Wno-stringop-truncation>

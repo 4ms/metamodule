@@ -64,7 +64,7 @@ Element make_element(rack::app::SvgPort *widget) {
 }
 
 Element make_element(rack::app::PortWidget *widget) {
-	JackElement element;
+	JackElement element{};
 	if (auto inner_fb = match_child<rack::widget::FramebufferWidget>(widget); inner_fb != nullptr) {
 		if (auto svgw = match_child<rack::widget::SvgWidget>(inner_fb); svgw != nullptr) {
 			if (!svgw->box.size.isZero() && svgw->box.size.isFinite()) {
@@ -291,7 +291,7 @@ Element make_element(rack::app::SvgSlider *widget, rack::app::MultiLightWidget *
 	if (widget->snap || (widget->getParamQuantity() && widget->getParamQuantity()->snapEnabled)) {
 		pr_warn("Warning: in '%s', snapped sliders with lights are not supported\n", module_name(widget));
 	}
-	SliderLight element;
+	SliderLight element{};
 
 	element.default_value = getScaledDefaultValue(widget);
 	set_pot_display_params(element, widget);
@@ -446,7 +446,7 @@ Element make_element(rack::app::SvgSwitch *widget) {
 }
 
 static Element make_momentary_rgb(std::string_view image) {
-	MomentaryButtonRGB element;
+	MomentaryButtonRGB element{};
 	element.image = image;
 	log_make_element_notes("make_momentary_rgb()", "");
 	return element;
@@ -454,14 +454,14 @@ static Element make_momentary_rgb(std::string_view image) {
 
 static Element make_latching_rgb(std::string_view image, LatchingButton::State_t defaultValue) {
 	pr_warn("Latching RGB button not supported yet. Using momentary\n");
-	MomentaryButtonRGB element;
+	MomentaryButtonRGB element{};
 	element.image = image;
 	log_make_element_notes("make_latching_rgb()", "");
 	return element;
 }
 
 static Element make_momentary_mono(std::string_view image, NVGcolor c) {
-	MomentaryButtonLight element;
+	MomentaryButtonLight element{};
 	element.image = image;
 	element.color = RGB565{c.r, c.g, c.b};
 	log_make_element_notes("make_momentary_mono()", "");
@@ -469,7 +469,7 @@ static Element make_momentary_mono(std::string_view image, NVGcolor c) {
 }
 
 static Element make_latching_mono(std::string_view image, NVGcolor c, LatchingButton::State_t defaultValue) {
-	LatchingButton element;
+	LatchingButton element{};
 	element.image = image;
 	element.color = RGB565{c.r, c.g, c.b};
 	element.default_value = defaultValue;
