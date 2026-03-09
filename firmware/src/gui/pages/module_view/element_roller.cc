@@ -5,6 +5,18 @@
 namespace MetaModule
 {
 
+static void move_selected_control_foreground(DrawnElement const &drawn_element) {
+	auto *obj = drawn_element.gui_element.obj;
+	if (!obj)
+		return;
+
+	if (std::holds_alternative<Knob>(drawn_element.element) ||
+		std::holds_alternative<KnobSnapped>(drawn_element.element))
+	{
+		lv_obj_move_foreground(obj);
+	}
+}
+
 void ModuleViewPage::show_roller() {
 	// 322 when closed, 102 when open
 	if (lv_obj_get_x(ui_MVSettingsMenu) > 200) {
@@ -131,6 +143,7 @@ void ModuleViewPage::populate_roller() {
 	// Highlight the selected component
 	if (auto drawn_idx = get_drawn_idx(cur_selected)) {
 		highlight_component(*drawn_idx);
+		move_selected_control_foreground(drawn_elements[*drawn_idx]);
 	}
 
 	if (cur_el && args.detail_mode == true) {
@@ -267,6 +280,7 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 		page->highlight_component(cur_idx);
 	}
 
+	move_selected_control_foreground(page->drawn_elements[cur_idx]);
 	page->roller_hover.hide();
 }
 
@@ -441,6 +455,7 @@ void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 
 		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
 			page->highlight_component(*drawn_idx);
+			move_selected_control_foreground(page->drawn_elements[*drawn_idx]);
 		}
 	}
 }
