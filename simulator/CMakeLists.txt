@@ -5,6 +5,7 @@ project(metamodule-simulator LANGUAGES C CXX)
 
 set(SIMULATOR 1)
 option(HEADLESS "Build as headless" OFF)
+option(ADDRESS_SAN "Use address sanitizer" OFF)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
@@ -34,6 +35,12 @@ else()
 		CACHE STRING "" FORCE)
 
 endif()
+
+if (ADDRESS_SAN)
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+endif()
+
 
 include(${FWDIR}/cmake/log_levels.cmake)
 enable_logging()
