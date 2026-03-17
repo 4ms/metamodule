@@ -49,6 +49,7 @@ struct AuxPlayer {
 
 	void process_cables() {
 		patch_player.process_outputs_diffcore<1>();
+		patch_player.process_summed_inputs<1>();
 
 		mdrivlib::SMPThread::signal_done();
 	}

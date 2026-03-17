@@ -291,6 +291,7 @@ public:
 
 			smp.process_cables();
 			process_outputs_diffcore<0>();
+			process_summed_inputs<0>();
 
 			smp.join();
 		} else
@@ -319,6 +320,17 @@ public:
 		}
 	}
 
+	template<size_t Core>
+	void process_summed_inputs() {
+		for (auto const &si : cables.summed_inputs[Core]) {
+			float sum = 0.f;
+			for (auto const &out : si.outs) {
+				sum += modules[out.module_id]->get_output(out.jack_id);
+			}
+			modules[si.in.module_id]->set_input(si.in.jack_id, sum);
+		}
+	}
+
 	void step_module(unsigned module_i) {
 		modules[module_i]->update();
 	}
@@ -329,6 +341,7 @@ public:
 		}
 		process_outputs_samecore<0>();
 		process_outputs_diffcore<0>();
+		process_summed_inputs<0>();
 		update_midi_pulses();
 	}
 
@@ -662,6 +675,7 @@ public:
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
 		cables.add(in, out, core_balancer.cores.parts);
+		cables.rebuild_summed_inputs(pd.int_cables, core_balancer.cores.parts);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}

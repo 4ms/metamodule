@@ -18,6 +18,9 @@ struct CableCache {
 		for (auto &cable : diffcore_cables) {
 			cable.clear();
 		}
+		for (auto &si : summed_inputs) {
+			si.clear();
+		}
 	}
 
 	template<typename SpanT>
@@ -40,6 +43,9 @@ struct CableCache {
 				add(in, cable.out, module_cores);
 			}
 		}
+
+		build_summed_inputs(cables, module_cores);
+		remove_summed_inputs_from_cables();
 	}
 
 	template<typename SpanT>
@@ -74,8 +80,115 @@ struct CableCache {
 		FixedVector<Jack, 4> ins;
 	};
 
+	// An input jack that receives from multiple output jacks (cables are summed)
+	struct SummedInput {
+		Jack in;
+		FixedVector<Jack, 8> outs;
+	};
+
 	// organized by out
 	std::array<std::vector<SingleCable>, NumCores> diffcore_cables;
 	std::array<std::vector<SingleCable>, NumCores> samecore_cables;
+
+	// Inputs that receive from multiple cables, organized by input's core
+	std::array<std::vector<SummedInput>, NumCores> summed_inputs;
+
+	// Rebuild only the summed_inputs (e.g. after adding a single cable)
+	template<typename SpanT>
+	void rebuild_summed_inputs(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
+		// First, restore any previously removed summed input jacks back into regular cables.
+		// This is needed because the set of summed inputs may change when cables are added/removed.
+		// Simplest approach: full rebuild.
+		// TODO: optimize if this becomes a performance concern during live patching.
+		build(cables, module_cores);
+	}
+
+private:
+	// Remove summed input jacks from samecore_cables and diffcore_cables
+	// so that process_outputs_samecore/diffcore don't write to them.
+	void remove_summed_inputs_from_cables() {
+		for (auto &core_si : summed_inputs) {
+			for (auto const &si : core_si) {
+				remove_input_from_cable_list(si.in, samecore_cables);
+				remove_input_from_cable_list(si.in, diffcore_cables);
+			}
+		}
+	}
+
+	void remove_input_from_cable_list(Jack in, std::array<std::vector<SingleCable>, NumCores> &cable_list) {
+		for (auto &core_cables : cable_list) {
+			for (auto it = core_cables.begin(); it != core_cables.end();) {
+				// Remove this input jack from the cable's ins list
+				auto &ins = it->ins;
+				for (size_t i = 0; i < ins.size();) {
+					if (ins[i] == in) {
+						// Swap with last and pop
+						ins[i] = ins[ins.size() - 1];
+						ins.pop_back();
+					} else {
+						i++;
+					}
+				}
+				// If no inputs remain for this cable, remove the entire entry
+				if (ins.size() == 0) {
+					it = core_cables.erase(it);
+				} else {
+					++it;
+				}
+			}
+		}
+	}
+
+	// Detect inputs that are targets of multiple cables and build summed_inputs entries.
+	template<typename SpanT>
+	void build_summed_inputs(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
+		// Collect all (in, out) pairs
+		struct InOutPair {
+			Jack in;
+			Jack out;
+		};
+		FixedVector<InOutPair, 512> pairs;
+
+		for (auto const &cable : cables) {
+			for (auto const &in : cable.ins) {
+				pairs.push_back({in, cable.out});
+			}
+		}
+
+		// Find inputs with multiple outputs and create summed entries
+		for (size_t i = 0; i < pairs.size(); i++) {
+			// Skip if this input was already processed by an earlier pair
+			bool already_processed = false;
+			for (size_t j = 0; j < i; j++) {
+				if (pairs[j].in == pairs[i].in) {
+					already_processed = true;
+					break;
+				}
+			}
+			if (already_processed)
+				continue;
+
+			// Collect all outputs that feed this input
+			SummedInput si;
+			si.in = pairs[i].in;
+			for (size_t j = 0; j < pairs.size(); j++) {
+				if (pairs[j].in == si.in) {
+					si.outs.push_back(pairs[j].out);
+				}
+			}
+
+			// Only create a summed entry if there are multiple sources
+			if (si.outs.size() > 1) {
+				auto in_core = find_core(si.in.module_id, module_cores);
+				if (in_core < NumCores) {
+					summed_inputs[in_core].push_back(si);
+					pr_trace("SummedInput: m%u j%u <- %zu sources\n",
+							 si.in.module_id,
+							 si.in.jack_id,
+							 si.outs.size());
+				}
+			}
+		}
+	}
 };
 } // namespace MetaModule
