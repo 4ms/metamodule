@@ -135,50 +135,43 @@ private:
 	// Detect inputs that are targets of multiple cables and build summed_inputs entries.
 	template<typename SpanT>
 	void build_summed_inputs(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
-		// Collect all (in, out) pairs
-		struct InOutPair {
-			Jack in;
-			Jack out;
-		};
-		FixedVector<InOutPair, 512> pairs;
-
 		for (auto const &cable : cables) {
 			for (auto const &in : cable.ins) {
-				pairs.push_back({in, cable.out});
-			}
-		}
-
-		// Find inputs with multiple outputs and create summed entries
-		for (size_t i = 0; i < pairs.size(); i++) {
-			// Skip if this input was already processed by an earlier pair
-			bool already_processed = false;
-			for (size_t j = 0; j < i; j++) {
-				if (pairs[j].in == pairs[i].in) {
-					already_processed = true;
-					break;
+				// Skip if this input already has a summed entry
+				bool already_processed = false;
+				for (auto const &core_si : summed_inputs) {
+					for (auto const &existing : core_si) {
+						if (existing.in == in) {
+							already_processed = true;
+							break;
+						}
+					}
+					if (already_processed)
+						break;
 				}
-			}
-			if (already_processed)
-				continue;
+				if (already_processed)
+					continue;
 
-			// Collect all outputs that feed this input
-			SummedInput si;
-			si.in = pairs[i].in;
-			for (size_t j = 0; j < pairs.size(); j++) {
-				if (pairs[j].in == si.in) {
-					si.outs.push_back(pairs[j].out);
+				// Collect all outputs that feed this input
+				SummedInput si;
+				si.in = in;
+				for (auto const &other_cable : cables) {
+					for (auto const &other_in : other_cable.ins) {
+						if (other_in == in) {
+							si.outs.push_back(other_cable.out);
+						}
+					}
 				}
-			}
 
-			// Only create a summed entry if there are multiple sources
-			if (si.outs.size() > 1) {
-				auto in_core = find_core(si.in.module_id, module_cores);
-				if (in_core < NumCores) {
-					summed_inputs[in_core].push_back(si);
-					pr_trace("SummedInput: m%u j%u <- %zu sources\n",
-							 si.in.module_id,
-							 si.in.jack_id,
-							 si.outs.size());
+				if (si.outs.size() > 1) {
+					auto in_core = find_core(si.in.module_id, module_cores);
+					if (in_core < NumCores) {
+						summed_inputs[in_core].push_back(si);
+						pr_trace("SummedInput: m%u j%u <- %zu sources\n",
+								 si.in.module_id,
+								 si.in.jack_id,
+								 si.outs.size());
+					}
 				}
 			}
 		}
