@@ -54,3 +54,4 @@ simulator/patches/metamodule-firmware
 
 .clangd
 firmware/.clangd
+**/settings.local.json
