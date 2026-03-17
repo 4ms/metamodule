@@ -18,6 +18,9 @@ struct CableCache {
 		for (auto &cable : diffcore_cables) {
 			cable.clear();
 		}
+		for (auto &si : summed_inputs) {
+			si.clear();
+		}
 	}
 
 	template<typename SpanT>
@@ -40,6 +43,9 @@ struct CableCache {
 				add(in, cable.out, module_cores);
 			}
 		}
+
+		build_summed_inputs(cables, module_cores);
+		remove_summed_inputs_from_cables();
 	}
 
 	template<typename SpanT>
@@ -74,8 +80,101 @@ struct CableCache {
 		FixedVector<Jack, 4> ins;
 	};
 
+	// An input jack that receives from multiple output jacks (cables are summed)
+	struct SummedInput {
+		Jack in;
+		FixedVector<Jack, 8> outs;
+	};
+
 	// organized by out
 	std::array<std::vector<SingleCable>, NumCores> diffcore_cables;
 	std::array<std::vector<SingleCable>, NumCores> samecore_cables;
+
+	// Inputs that receive from multiple cables, organized by input's core
+	std::array<std::vector<SummedInput>, NumCores> summed_inputs;
+
+	// Rebuild only the summed_inputs (e.g. after adding a single cable)
+	template<typename SpanT>
+	void rebuild_summed_inputs(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
+		// First, restore any previously removed summed input jacks back into regular cables.
+		// This is needed because the set of summed inputs may change when cables are added/removed.
+		// Simplest approach: full rebuild.
+		// TODO: optimize if this becomes a performance concern during live patching.
+		build(cables, module_cores);
+	}
+
+private:
+	// Remove summed input jacks from samecore_cables and diffcore_cables
+	// so that process_outputs_samecore/diffcore don't write to them.
+	void remove_summed_inputs_from_cables() {
+		for (auto &core_si : summed_inputs) {
+			for (auto const &si : core_si) {
+				remove_input_from_cable_list(si.in, samecore_cables);
+				remove_input_from_cable_list(si.in, diffcore_cables);
+			}
+		}
+	}
+
+	void remove_input_from_cable_list(Jack in, std::array<std::vector<SingleCable>, NumCores> &cable_list) {
+		for (auto &core_cables : cable_list) {
+			for (auto &cable : core_cables) {
+				auto &ins = cable.ins;
+				for (size_t i = 0; i < ins.size();) {
+					if (ins[i] == in) {
+						ins[i] = ins[ins.size() - 1];
+						ins.pop_back();
+					} else {
+						i++;
+					}
+				}
+			}
+			std::erase_if(core_cables, [](auto const &cable) { return cable.ins.size() == 0; });
+		}
+	}
+
+	// Detect inputs that are targets of multiple cables and build summed_inputs entries.
+	template<typename SpanT>
+	void build_summed_inputs(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
+		for (auto const &cable : cables) {
+			for (auto const &in : cable.ins) {
+				// Skip if this input already has a summed entry
+				bool already_processed = false;
+				for (auto const &core_si : summed_inputs) {
+					for (auto const &existing : core_si) {
+						if (existing.in == in) {
+							already_processed = true;
+							break;
+						}
+					}
+					if (already_processed)
+						break;
+				}
+				if (already_processed)
+					continue;
+
+				// Collect all outputs that feed this input
+				SummedInput si;
+				si.in = in;
+				for (auto const &other_cable : cables) {
+					for (auto const &other_in : other_cable.ins) {
+						if (other_in == in) {
+							si.outs.push_back(other_cable.out);
+						}
+					}
+				}
+
+				if (si.outs.size() > 1) {
+					auto in_core = find_core(si.in.module_id, module_cores);
+					if (in_core < NumCores) {
+						summed_inputs[in_core].push_back(si);
+						pr_trace("SummedInput: m%u j%u <- %zu sources\n",
+								 si.in.module_id,
+								 si.in.jack_id,
+								 si.outs.size());
+					}
+				}
+			}
+		}
+	}
 };
 } // namespace MetaModule

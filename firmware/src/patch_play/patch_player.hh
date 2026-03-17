@@ -50,7 +50,7 @@ private:
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
 
-	std::array<Jack, NumOutJacks> out_conns __attribute__((aligned(4))) = {{{0, 0}}};
+	std::array<std::vector<Jack>, NumOutJacks> out_conns;
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
@@ -291,6 +291,7 @@ public:
 
 			smp.process_cables();
 			process_outputs_diffcore<0>();
+			process_summed_inputs<0>();
 
 			smp.join();
 		} else
@@ -319,6 +320,17 @@ public:
 		}
 	}
 
+	template<size_t Core>
+	void process_summed_inputs() {
+		for (auto const &si : cables.summed_inputs[Core]) {
+			float sum = 0.f;
+			for (auto const &out : si.outs) {
+				sum += modules[out.module_id]->get_output(out.jack_id);
+			}
+			modules[si.in.module_id]->set_input(si.in.jack_id, sum);
+		}
+	}
+
 	void step_module(unsigned module_i) {
 		modules[module_i]->update();
 	}
@@ -329,6 +341,7 @@ public:
 		}
 		process_outputs_samecore<0>();
 		process_outputs_diffcore<0>();
+		process_summed_inputs<0>();
 		update_midi_pulses();
 	}
 
@@ -550,11 +563,12 @@ private:
 
 public:
 	float get_panel_output(uint32_t jack_id) {
-		auto const &jack = out_conns[jack_id];
-		if (jack.module_id < num_modules)
-			return modules[jack.module_id]->get_output(jack.jack_id);
-		else
-			return 0.f;
+		float sum = 0.f;
+		for (auto const &jack : out_conns[jack_id]) {
+			if (jack.module_id < num_modules)
+				sum += modules[jack.module_id]->get_output(jack.jack_id);
+		}
+		return sum;
 	}
 
 	float get_module_light(uint16_t module_id, uint16_t light_id) const {
@@ -662,6 +676,7 @@ public:
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
 		cables.add(in, out, core_balancer.cores.parts);
+		cables.rebuild_summed_inputs(pd.int_cables, core_balancer.cores.parts);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
@@ -688,7 +703,7 @@ public:
 		pd.add_mapped_outjack(panel_jack_id, jack);
 
 		if (panel_jack_id < out_conns.size()) {
-			out_conns[panel_jack_id] = jack;
+			out_conns[panel_jack_id].push_back(jack);
 
 			if (out_patched[panel_jack_id] && jack.module_id < num_modules)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
@@ -754,10 +769,8 @@ public:
 	}
 
 	void disconnect_outjack(Jack jack) {
-		for (auto &out : out_conns) {
-			if (out == jack) {
-				out = disconnected_jack;
-			}
+		for (auto &outs : out_conns) {
+			std::erase(outs, jack);
 		}
 		safe_unpatch_output(jack);
 
@@ -774,10 +787,8 @@ public:
 	}
 
 	void remove_outjack_mappings(Jack jack) {
-		for (auto &out : out_conns) {
-			if (out == jack) {
-				out = disconnected_jack;
-			}
+		for (auto &outs : out_conns) {
+			std::erase(outs, jack);
 		}
 
 		if (pd.find_internal_cable_with_outjack(jack) == nullptr) {
@@ -853,12 +864,7 @@ public:
 		erase_and_squash(in_conns);
 
 		// Panel Output connections
-		for (auto &out : out_conns) {
-			if (out.module_id == module_idx) {
-				out = disconnected_jack;
-			}
-			squash_module_id(out.module_id);
-		}
+		erase_and_squash(out_conns);
 
 		// Internal cables
 		// Inform other modules connected to this one
@@ -959,16 +965,16 @@ public:
 
 		out_patched[panel_out_jack_id] = is_patched;
 
-		auto const &jack = out_conns[panel_out_jack_id];
-
-		if (jack.module_id < num_modules) {
-			// Don't mark the virtual module jack unpatched/patched
-			// if there is an existing internal cable
-			if (!pd.find_internal_cable_with_outjack(jack)) {
-				if (is_patched)
-					modules[jack.module_id]->mark_output_patched(jack.jack_id);
-				else
-					modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
+		for (auto const &jack : out_conns[panel_out_jack_id]) {
+			if (jack.module_id < num_modules) {
+				// Don't mark the virtual module jack unpatched/patched
+				// if there is an existing internal cable
+				if (!pd.find_internal_cable_with_outjack(jack)) {
+					if (is_patched)
+						modules[jack.module_id]->mark_output_patched(jack.jack_id);
+					else
+						modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
+				}
 			}
 		}
 	}
@@ -1069,7 +1075,7 @@ private:
 		// 	d = 0;
 
 		for (auto &out_conn : out_conns)
-			out_conn = disconnected_jack;
+			out_conn.clear();
 
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
@@ -1144,7 +1150,7 @@ public:
 
 				// Handle MIDI->Hub and Hub->Hub cables by connecting Hub input to output
 				if (input_jack.module_id == 0) {
-					out_conns[input_jack.jack_id] = input_jack;
+					out_conns[input_jack.jack_id].push_back(input_jack);
 					pr_trace(
 						"Connect hub module out jack %d to panel out %d\n", input_jack.jack_id, input_jack.jack_id);
 				}
@@ -1155,7 +1161,7 @@ public:
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id >= out_conns.size())
 				break;
-			out_conns[panel_jack_id] = cable.out;
+			out_conns[panel_jack_id].push_back(cable.out);
 			pr_trace("Connect module %d out jack %d to panel out %d\n",
 					 cable.out.module_id,
 					 cable.out.jack_id,
@@ -1360,11 +1366,11 @@ public:
 	}
 
 	//Used in unit tests
-	Jack get_panel_output_connection(unsigned jack_id) {
-		if (jack_id >= out_conns.size())
+	Jack get_panel_output_connection(unsigned jack_id, unsigned multiple_connection_id = 0) {
+		if ((jack_id >= out_conns.size()) || (multiple_connection_id >= out_conns[jack_id].size()))
 			return {.module_id = 0, .jack_id = 0};
 
-		return out_conns[jack_id];
+		return out_conns[jack_id][multiple_connection_id];
 	}
 
 	//Used in unit tests
