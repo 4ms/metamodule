@@ -117,25 +117,18 @@ private:
 
 	void remove_input_from_cable_list(Jack in, std::array<std::vector<SingleCable>, NumCores> &cable_list) {
 		for (auto &core_cables : cable_list) {
-			for (auto it = core_cables.begin(); it != core_cables.end();) {
-				// Remove this input jack from the cable's ins list
-				auto &ins = it->ins;
+			for (auto &cable : core_cables) {
+				auto &ins = cable.ins;
 				for (size_t i = 0; i < ins.size();) {
 					if (ins[i] == in) {
-						// Swap with last and pop
 						ins[i] = ins[ins.size() - 1];
 						ins.pop_back();
 					} else {
 						i++;
 					}
 				}
-				// If no inputs remain for this cable, remove the entire entry
-				if (ins.size() == 0) {
-					it = core_cables.erase(it);
-				} else {
-					++it;
-				}
 			}
+			std::erase_if(core_cables, [](auto const &cable) { return cable.ins.size() == 0; });
 		}
 	}
 
