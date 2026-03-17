@@ -52,9 +52,9 @@ R"(PatchData:
 			CHECK(player.get_panel_output_connection(1) == Jack{1, 1});
 			CHECK(player.get_panel_output_connection(2) == Jack{2, 1});
 
-			SUBCASE("Unmapped jacks are connected to 0xFFFF,0xFFFF") {
-				CHECK(player.get_panel_output_connection(3) == Jack{0xFFFF, 0xFFFF});
-				CHECK(player.get_panel_output_connection(4) == Jack{0xFFFF, 0xFFFF});
+			SUBCASE("Unmapped jacks have no connections") {
+				CHECK(player.get_panel_output_connection(3) == Jack{0, 0});
+				CHECK(player.get_panel_output_connection(4) == Jack{0, 0});
 			}
 		}
 	}
@@ -180,9 +180,9 @@ PatchData:
 			CHECK(player.get_panel_output_connection(1) == Jack{1, 1});
 			CHECK(player.get_panel_output_connection(2) == Jack{2, 1});
 
-			SUBCASE("Unmapped jack is connected to -1,-1") {
-				CHECK(player.get_panel_output_connection(3) == Jack{0xFFFF, 0xFFFF});
-				CHECK(player.get_panel_output_connection(4) == Jack{0xFFFF, 0xFFFF});
+			SUBCASE("Unmapped jacks have no connections") {
+				CHECK(player.get_panel_output_connection(3) == Jack{0, 0});
+				CHECK(player.get_panel_output_connection(4) == Jack{0, 0});
 			}
 		}
 	}
@@ -1115,9 +1115,10 @@ TEST_CASE("Patchplayer works to delete a module in the middle") {
 		}
 
 		auto out_conns = p.get_outconns();
-		for (unsigned i = 0; auto out : out_conns) {
+		for (unsigned i = 0; auto &outs : out_conns) {
 			printf("OUT %d <- ", i);
-			printf("%d,%d ", out.module_id, out.jack_id);
+			for (auto &out : outs)
+				printf("%d,%d ", out.module_id, out.jack_id);
 			printf("\n");
 			i++;
 		}
@@ -1138,8 +1139,8 @@ TEST_CASE("Patchplayer works to delete a module in the middle") {
 	auto orig_panel_in_0_conns = p.get_inconns()[0];
 
 	CHECK(orig_panel_in_0_conns[1].module_id == 3);
-	CHECK(p.get_outconns()[0].module_id == 1);
-	CHECK(p.get_outconns()[1].module_id == 2);
+	CHECK(p.get_outconns()[0][0].module_id == 1);
+	CHECK(p.get_outconns()[1][0].module_id == 2);
 
 	// Original: 2 cables
 	auto orig_num_int_cables = p.get_int_cables().size();
@@ -1171,8 +1172,8 @@ TEST_CASE("Patchplayer works to delete a module in the middle") {
 	// module 3 => 2
 	CHECK(new_panel_in_0_conns[1].module_id == 2);
 
-	CHECK(p.get_outconns()[0].module_id == 1);
-	CHECK(p.get_outconns()[1].module_id == 0xFFFF); //disconnected
+	CHECK(p.get_outconns()[0][0].module_id == 1);
+	CHECK(p.get_outconns()[1].size() == 0); //disconnected
 
 	CHECK(p.get_int_cables().size() == orig_num_int_cables - 1);
 	CHECK(p.get_int_cables()[0].out.module_id == orig_cable_out.module_id - 1);
