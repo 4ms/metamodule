@@ -17,13 +17,19 @@ inline bool can_finish_cable(ElementType begin_jack_type,
 							 ElementType this_jack_type,
 							 bool this_jack_has_connections) {
 
-	auto begin_node_has_output = begin_jack_has_connections || begin_jack_type == ElementType::Output;
-	auto this_node_has_output = this_jack_has_connections || this_jack_type == ElementType::Output;
+	bool begin_is_output = begin_jack_type == ElementType::Output;
+	bool this_is_output = this_jack_type == ElementType::Output;
 
-	// XOR: Exactly one node can have an output
-	bool can_finish_cable_ = this_node_has_output ^ begin_node_has_output;
+	// Can't connect two outputs
+	if (begin_is_output && this_is_output)
+		return false;
 
-	return can_finish_cable_;
+	// Output to Input (including inputs that already have connections — cables will be summed)
+	if (begin_is_output != this_is_output)
+		return true;
+
+	// Both are inputs: allow if one of them has an existing cable (to extend/copy the connection)
+	return begin_jack_has_connections || this_jack_has_connections;
 }
 
 inline bool can_finish_cable(GuiState::CableBeginning const &new_cable,
