@@ -78,6 +78,7 @@ struct CableCache {
 	struct SingleCable {
 		Jack out;
 		FixedVector<Jack, 4> ins;
+		unsigned num_poly = 1;
 	};
 
 	// An input jack that receives from multiple output jacks (cables are summed)
@@ -167,10 +168,8 @@ private:
 					auto in_core = find_core(si.in.module_id, module_cores);
 					if (in_core < NumCores) {
 						summed_inputs[in_core].push_back(si);
-						pr_trace("SummedInput: m%u j%u <- %zu sources\n",
-								 si.in.module_id,
-								 si.in.jack_id,
-								 si.outs.size());
+						pr_trace(
+							"SummedInput: m%u j%u <- %zu sources\n", si.in.module_id, si.in.jack_id, si.outs.size());
 					}
 				}
 			}

@@ -298,16 +298,19 @@ public:
 			return;
 	}
 
-	static constexpr size_t MAXPOLY = 4;
 	template<size_t Core>
 	void process_outputs_samecore() {
 		for (auto const &cable : cables.samecore_cables[Core]) {
-			std::array<float, MAXPOLY> value_buffer;
-			std::span<float> values{value_buffer};
-			auto num_poly = modules[cable.out.module_id]->get_output_poly(cable.out.jack_id, values);
-
-			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input_poly(in.jack_id, values.subspan(0, num_poly));
+			if (cable.num_poly <= 1) {
+				float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+				for (auto const &in : cable.ins)
+					modules[in.module_id]->set_input(in.jack_id, val);
+			} else {
+				std::array<float, MAXPOLY> values;
+				auto num_poly = modules[cable.out.module_id]->get_output_poly(cable.out.jack_id, values);
+				for (auto const &in : cable.ins) {
+					modules[in.module_id]->set_input_poly(in.jack_id, std::span{values.data(), num_poly});
+				}
 			}
 		}
 	}
@@ -315,12 +318,16 @@ public:
 	template<size_t Core>
 	void process_outputs_diffcore() {
 		for (auto const &cable : cables.diffcore_cables[Core]) {
-			std::array<float, MAXPOLY> value_buffer;
-			std::span<float> values{value_buffer};
-			auto num_poly = modules[cable.out.module_id]->get_output_poly(cable.out.jack_id, values);
-
-			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input_poly(in.jack_id, values.subspan(0, num_poly));
+			if (cable.num_poly <= 1) {
+				float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+				for (auto const &in : cable.ins)
+					modules[in.module_id]->set_input(in.jack_id, val);
+			} else {
+				std::array<float, MAXPOLY> values;
+				auto num_poly = modules[cable.out.module_id]->get_output_poly(cable.out.jack_id, values);
+				for (auto const &in : cable.ins) {
+					modules[in.module_id]->set_input_poly(in.jack_id, std::span{values.data(), num_poly});
+				}
 			}
 		}
 	}
@@ -328,11 +335,29 @@ public:
 	template<size_t Core>
 	void process_summed_inputs() {
 		for (auto const &si : cables.summed_inputs[Core]) {
-			float sum = 0.f;
-			for (auto const &out : si.outs) {
-				sum += modules[out.module_id]->get_output(out.jack_id);
+			// TODO: cache the max poly for all outputs
+			// update this once per block
+			// If it's 1, then execute former mono block
+			// if (max_poly <= 1) {
+			// 	float sum = 0.f;
+			// 	for (auto const &out : si.outs) {
+			// 		sum += modules[out.module_id]->get_output(out.jack_id);
+			// 	}
+			// 	modules[si.in.module_id]->set_input_poly(si.in.jack_id, std::span{sum.data(), max_poly});
+			// } else
+			{
+				std::array<float, MAXPOLY> sum{};
+				unsigned max_poly = 1;
+				for (auto const &out : si.outs) {
+					std::array<float, MAXPOLY> value_buffer{};
+					std::span<float> values{value_buffer};
+					auto num_poly = modules[out.module_id]->get_output_poly(out.jack_id, values);
+					max_poly = std::max(num_poly, max_poly);
+					for (auto i = 0u; auto &s : sum)
+						s += values[i++];
+				}
+				modules[si.in.module_id]->set_input_poly(si.in.jack_id, std::span{sum.data(), max_poly});
 			}
-			modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 		}
 	}
 
