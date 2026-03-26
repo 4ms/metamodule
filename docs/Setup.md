@@ -2,7 +2,7 @@
 
 ### All platforms:
 - You will need a C++ toolchain that has partial support for c++23 (`gcc-12` or later, `clang` 16 or later).
-- To build firmware, you need the gcc arm toolchain, version 12.2 or later.
+- To build firmware, you need the gcc arm toolchain, version 12.2 or 12.3.
   - Download here: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
     - Make sure you get the package for your host computer that ends in `arm-none-eabi`
   - Or xpack versions are OK: https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/tag/v12.2.1-1.2
