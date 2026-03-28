@@ -267,7 +267,7 @@ public:
 			}
 		}
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 	}
 
 	// Runs the patch
@@ -681,8 +681,7 @@ public:
 
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
-		cables.add(in, out, core_balancer.cores.parts);
-		cables.rebuild_summed_inputs(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
@@ -759,7 +758,7 @@ public:
 
 		pd.disconnect_injack(jack);
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 	}
 
 	void remove_injack_mappings(Jack jack) {
@@ -789,7 +788,7 @@ public:
 
 		pd.disconnect_outjack(jack);
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 	}
 
 	void remove_outjack_mappings(Jack jack) {
