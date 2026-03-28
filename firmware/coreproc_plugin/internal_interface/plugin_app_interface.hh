@@ -1,5 +1,6 @@
 #pragma once
 #include "util/static_string.hh"
+#include <cstdint>
 #include <memory>
 #include <string>
 
