@@ -115,14 +115,14 @@ void VCVModuleWrapper::mark_output_patched(int output_id) {
 
 CoreProcessor::PolyPortBuffer VCVModuleWrapper::get_output_poly_buffer(int output_id) {
 	if (output_id < (int)outputs.size())
-		return {{outputs[output_id].voltages.begin(), outputs[output_id].channels}};
+		return {outputs[output_id].voltages.begin(), &outputs[output_id].channels};
 	else
-		return {{}};
+		return {nullptr, nullptr};
 }
 
 CoreProcessor::PolyPortBuffer VCVModuleWrapper::get_input_poly_buffer(int input_id) {
 	if (input_id < (int)outputs.size())
-		return {{inputs[input_id].voltages.begin(), inputs[input_id].channels}};
+		return {inputs[input_id].voltages.begin(), &inputs[input_id].channels};
 	else
-		return {{}};
+		return {nullptr, nullptr};
 }
