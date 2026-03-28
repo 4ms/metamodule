@@ -84,7 +84,12 @@ void VCVModuleWrapper::mark_input_unpatched(int input_id) {
 }
 
 void VCVModuleWrapper::mark_input_patched(int input_id) {
-	if ((size_t)input_id < inputs.size())
+	if ((size_t)input_id >= inputs.size())
+		return;
+
+	// 0 (unpatched) -> 1 (patched mono)
+	// 1-N (mono/poly patched) => no change
+	if (inputs[input_id].channels == 0)
 		inputs[input_id].channels = 1;
 }
 
@@ -99,7 +104,12 @@ void VCVModuleWrapper::mark_output_unpatched(int output_id) {
 }
 
 void VCVModuleWrapper::mark_output_patched(int output_id) {
-	if ((size_t)output_id < outputs.size())
+	if ((size_t)output_id >= outputs.size())
+		return;
+
+	// 0 (unpatched) -> 1 (patched mono)
+	// 1-N (mono/poly patched) => no change
+	if (outputs[output_id].channels == 0)
 		outputs[output_id].channels = 1;
 }
 
