@@ -36,7 +36,7 @@ struct CableCache {
 	}
 
 	template<typename SpanT>
-	void build(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
+	void build(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores, auto &modules) {
 		clear();
 
 		for (auto const &cable : cables) {
@@ -47,6 +47,7 @@ struct CableCache {
 
 		build_summed_inputs(cables, module_cores);
 		remove_summed_inputs_from_cables();
+		resolve_poly_buffers(modules);
 	}
 
 	template<typename SpanT>
@@ -96,16 +97,6 @@ struct CableCache {
 
 	// Inputs that receive from multiple cables, organized by input's core
 	std::array<std::vector<SummedInput>, NumCores> summed_inputs;
-
-	// Rebuild only the summed_inputs (e.g. after adding a single cable)
-	template<typename SpanT>
-	void rebuild_summed_inputs(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
-		// First, restore any previously removed summed input jacks back into regular cables.
-		// This is needed because the set of summed inputs may change when cables are added/removed.
-		// Simplest approach: full rebuild.
-		// TODO: optimize if this becomes a performance concern during live patching.
-		build(cables, module_cores);
-	}
 
 private:
 	// Remove summed input jacks from samecore_cables and diffcore_cables
@@ -177,6 +168,25 @@ private:
 				}
 			}
 		}
+	}
+
+	void resolve_poly_buffers(auto &modules) {
+		auto resolve = [&](std::vector<SingleCable> &cable_list) {
+			for (auto &cable : cable_list) {
+				cable.out_buf = modules[cable.out.module_id]->get_output_poly_buffer(cable.out.jack_id);
+				cable.in_bufs.clear();
+
+				for (auto const &in : cable.ins) {
+					cable.in_bufs.push_back(modules[in.module_id]->get_input_poly_buffer(in.jack_id));
+				}
+			}
+		};
+
+		for (auto &core_cables : samecore_cables)
+			resolve(core_cables);
+
+		for (auto &core_cables : diffcore_cables)
+			resolve(core_cables);
 	}
 };
 } // namespace MetaModule
