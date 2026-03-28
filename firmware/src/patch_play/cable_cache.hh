@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/CoreProcessor.hh"
 #include "console/pr_dbg.hh"
 #include "patch/patch.hh"
 #include "util/fixed_vector.hh"
@@ -78,6 +79,9 @@ struct CableCache {
 	struct SingleCable {
 		Jack out;
 		FixedVector<Jack, 4> ins;
+
+		CoreProcessor::PolyPortBuffer out_buf;
+		FixedVector<CoreProcessor::PolyPortBuffer, 4> in_bufs;
 	};
 
 	// An input jack that receives from multiple output jacks (cables are summed)
@@ -167,10 +171,8 @@ private:
 					auto in_core = find_core(si.in.module_id, module_cores);
 					if (in_core < NumCores) {
 						summed_inputs[in_core].push_back(si);
-						pr_trace("SummedInput: m%u j%u <- %zu sources\n",
-								 si.in.module_id,
-								 si.in.jack_id,
-								 si.outs.size());
+						pr_trace(
+							"SummedInput: m%u j%u <- %zu sources\n", si.in.module_id, si.in.jack_id, si.outs.size());
 					}
 				}
 			}

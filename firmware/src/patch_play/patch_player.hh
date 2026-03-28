@@ -301,26 +301,32 @@ public:
 			return;
 	}
 
-	template<size_t Core>
-	void process_outputs_samecore() {
-		for (auto const &cable : cables.samecore_cables[Core]) {
-			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+	void process_outputs(auto &cables) {
+		for (auto const &cable : cables) {
+			if (cable.out_buf.voltages) {
+				auto num_poly = *cable.out_buf.channels;
+				for (auto &in_buf : cable.in_bufs) {
+					*in_buf.channels = num_poly;
+					std::copy_n(cable.out_buf.voltages, num_poly, in_buf.voltages);
+				}
+			} else {
+				float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
 
-			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input(in.jack_id, val);
+				for (auto const &in : cable.ins) {
+					modules[in.module_id]->set_input(in.jack_id, val);
+				}
 			}
 		}
 	}
 
 	template<size_t Core>
-	void process_outputs_diffcore() {
-		for (auto const &cable : cables.diffcore_cables[Core]) {
-			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+	void process_outputs_samecore() {
+		process_outputs(cables.samecore_cables[Core]);
+	}
 
-			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input(in.jack_id, val);
-			}
-		}
+	template<size_t Core>
+	void process_outputs_diffcore() {
+		process_outputs(cables.diffcore_cables[Core]);
 	}
 
 	template<size_t Core>
