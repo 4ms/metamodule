@@ -174,11 +174,30 @@ private:
 		auto resolve = [&](std::vector<SingleCable> &cable_list) {
 			for (auto &cable : cable_list) {
 				cable.out_buf = modules[cable.out.module_id]->get_output_poly_buffer(cable.out.jack_id);
-				cable.in_bufs.clear();
 
-				for (auto const &in : cable.ins) {
-					cable.in_bufs.push_back(modules[in.module_id]->get_input_poly_buffer(in.jack_id));
+				// Optimization: If either voltages or channels is invalid,
+				// mark both invalid so we only need to check one in the hot loop
+				if (!cable.out_buf.voltages || !cable.out_buf.channels) {
+					cable.out_buf.voltages = nullptr;
+					cable.out_buf.channels = nullptr;
 				}
+
+				pr_trace("%s out m%u j%u -> ",
+						 cable.out_buf.voltages ? "Poly" : "Mono",
+						 cable.out.module_id,
+						 cable.out.jack_id);
+
+				cable.in_bufs.clear();
+				for (auto const &in : cable.ins) {
+					auto buf = modules[in.module_id]->get_input_poly_buffer(in.jack_id);
+					if (!buf.voltages || !buf.channels) {
+						buf.voltages = nullptr;
+						buf.channels = nullptr;
+					}
+					cable.in_bufs.push_back(buf);
+					pr_trace("%s in m%u j%u; ", buf.voltages ? "Poly" : "Mono", in.module_id, in.jack_id);
+				}
+				pr_trace("\n");
 			}
 		};
 
