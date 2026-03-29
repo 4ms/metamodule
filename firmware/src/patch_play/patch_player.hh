@@ -305,11 +305,19 @@ public:
 		for (auto const &cable : cables) {
 			if (cable.out_buf.voltages) {
 				auto num_poly = *cable.out_buf.channels;
-				for (auto &in_buf : cable.in_bufs) {
-					*in_buf.channels = num_poly;
-					std::copy_n(cable.out_buf.voltages, num_poly, in_buf.voltages);
+				for (auto i = 0u; auto &in_buf : cable.in_bufs) {
+					if (in_buf.voltages) {
+						// poly->poly
+						*in_buf.channels = num_poly;
+						std::copy_n(cable.out_buf.voltages, num_poly, in_buf.voltages);
+					} else {
+						// poly->mono
+						modules[cable.ins[i].module_id]->set_input(cable.ins[i].jack_id, *cable.out_buf.voltages);
+					}
+					i++;
 				}
 			} else {
+				// mono->poly, mono->mono
 				float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
 
 				for (auto const &in : cable.ins) {
