@@ -55,9 +55,6 @@ struct MidiMapViewPage : PageBase {
 		return jack_maps;
 	}
 
-	static_assert(std::optional<int>{std::nullopt} < std::optional<int>{2});
-	static_assert(std::optional<int>{std::nullopt} == std::optional<int>{std::nullopt});
-
 	void redraw() {
 		patch = patches.get_view_patch();
 
@@ -84,16 +81,19 @@ struct MidiMapViewPage : PageBase {
 			} else if (!map.ins.empty()) {
 				auto name = get_full_element_name(map.ins[0].module_id, map.ins[0].jack_id, ElementType::Input, *patch);
 				if (patch->module_slugs.size() <= 2) // 2 slugs means 1 module in patch because Hub counts as a module
-					label_storage = std::string(name.element_name);
+					label_storage = name.element_name;
 				else
-					label_storage = std::string(name.module_name) + " " + std::string(name.element_name);
+					label_storage = name.module_name + " " + name.element_name;
 				label_text = label_storage.c_str();
 			}
 
 			auto cont =
 				create_mapping_circle_item(ui_MidiMapLeftItems, MapButtonType::MIDIJack, map.panel_jack_id, label_text);
 			lv_obj_set_user_data(cont, (void *)((uintptr_t)i));
-			lv_obj_add_event_cb(cont, midi_jack_map_click, LV_EVENT_CLICKED, this);
+			if (map.ins[0].module_id > 0) {
+				// Don't allow clicking on MIDI -> hub maps
+				lv_obj_add_event_cb(cont, midi_jack_map_click, LV_EVENT_CLICKED, this);
+			}
 			lv_group_add_obj(group, cont);
 			left_items.push_back(cont);
 		}
@@ -103,9 +103,9 @@ struct MidiMapViewPage : PageBase {
 			auto fullname = get_full_element_name(mk.module_id, mk.param_id, ElementType::Param, *patch);
 			std::string label;
 			if (patch->module_slugs.size() <= 2) // 2 slugs means 1 module in patch because Hub counts as a module
-				label = std::string(fullname.element_name);
+				label = fullname.element_name;
 			else
-				label = std::string(fullname.module_name) + " " + std::string(fullname.element_name);
+				label = fullname.module_name + " " + fullname.element_name;
 
 			auto cont = create_mapping_circle_item(
 				ui_MidiMapRightItems, MapButtonType::MIDIParam, mk.panel_knob_id, label.c_str());

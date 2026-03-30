@@ -3,6 +3,7 @@
 #include "gui/elements/context.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/styles.hh"
+#include "panel_name.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "util/overloaded.hh"
@@ -16,25 +17,36 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 	FullElementName fullname{"?", "?"};
 
 	if (module_id < patch.module_slugs.size()) {
-		auto alias = patch.get_module_alias(static_cast<uint16_t>(module_id));
-		fullname.module_name = alias.empty() ? ModuleFactory::getModuleDisplayName(patch.module_slugs[module_id]) : alias;
+		if (std::string_view{patch.module_slugs[module_id]}.ends_with("HubMedium")) {
+			// Hub/Panel:
+			fullname.module_name = "Panel";
+			fullname.element_name = (type == ElementType::Param)  ? get_panel_name(ParamElement{}, element_idx) :
+									(type == ElementType::Input)  ? get_panel_name(JackOutput{}, element_idx) :
+									(type == ElementType::Output) ? get_panel_name(JackInput{}, element_idx) :
+																	"?";
+		} else {
+			auto alias = patch.get_module_alias(static_cast<uint16_t>(module_id));
 
-		auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[module_id]);
+			fullname.module_name =
+				alias.empty() ? ModuleFactory::getModuleDisplayName(patch.module_slugs[module_id]) : alias;
 
-		if (info.width_hp) {
-			// Search in reverse (the matching element is the last one with the matching index)
-			for (int el_id = info.indices.size() - 1; el_id >= 0; el_id--) {
+			auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[module_id]);
 
-				auto idx = info.indices[el_id];
+			if (info.width_hp) {
+				// Search in reverse (the matching element is the last one with the matching index)
+				for (int el_id = info.indices.size() - 1; el_id >= 0; el_id--) {
 
-				bool is_found = (type == ElementType::Param)  ? element_idx == idx.param_idx :
-								(type == ElementType::Input)  ? element_idx == idx.input_idx :
-								(type == ElementType::Output) ? element_idx == idx.output_idx :
-								(type == ElementType::Light)  ? element_idx == idx.light_idx :
-																false;
-				if (is_found) {
-					fullname.element_name = base_element(info.elements[el_id]).short_name;
-					break;
+					auto idx = info.indices[el_id];
+
+					bool is_found = (type == ElementType::Param)  ? element_idx == idx.param_idx :
+									(type == ElementType::Input)  ? element_idx == idx.input_idx :
+									(type == ElementType::Output) ? element_idx == idx.output_idx :
+									(type == ElementType::Light)  ? element_idx == idx.light_idx :
+																	false;
+					if (is_found) {
+						fullname.element_name = base_element(info.elements[el_id]).short_name;
+						break;
+					}
 				}
 			}
 		}
@@ -71,7 +83,7 @@ void append_connected_jack_name(std::string &opts,
 
 	auto append = [&opts, &patch](Jack jack, ElementType type) {
 		FullElementName name = get_full_element_name(jack.module_id, jack.jack_id, type, patch);
-		opts = opts + " [" + std::string(name.module_name) + " " + std::string(name.element_name) + "] ";
+		opts = opts + " [" + name.module_name + " " + name.element_name + "] ";
 	};
 
 	if (indices.input_idx != ElementCount::Indices::NoElementMarker) {

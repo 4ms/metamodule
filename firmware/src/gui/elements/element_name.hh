@@ -9,8 +9,8 @@ namespace MetaModule
 {
 
 struct FullElementName {
-	std::string_view module_name;
-	std::string_view element_name;
+	std::string module_name;
+	std::string element_name;
 };
 
 // Return the module name and element name, given the IDs and type (not the Element)
