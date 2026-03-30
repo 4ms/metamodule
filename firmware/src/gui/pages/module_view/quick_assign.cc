@@ -262,24 +262,6 @@ bool ModuleViewPage::cycle_port_selection(const DrawnElement *element, int motio
 			total_ports += AudioExpander::NumOutJacks;
 		}
 
-		uint16_t start_port = selected_output_port;
-
-		do {
-			int cur = selected_output_port;
-			selected_output_port = int(cur + motion) % total_ports;
-
-			// Check if this port is available (not already mapped)
-			if (!patch->find_mapped_outjack(selected_output_port)) {
-				return true;
-			}
-
-			// If we've cycled through all options and returned to start, break to avoid infinite loop
-			if (selected_output_port == start_port) {
-				return false;
-			}
-
-		} while (true);
-
 		if (selected_output_port == 0)
 			selected_output_port += total_ports;
 		selected_output_port = ((int)selected_output_port + motion) % total_ports;

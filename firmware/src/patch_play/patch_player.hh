@@ -50,10 +50,13 @@ private:
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
 
-	std::array<Jack, NumOutJacks> out_conns __attribute__((aligned(4))) = {{{0, 0}}};
+	std::array<std::vector<Jack>, NumOutJacks> out_conns;
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
+
+	// Cached panel input values, used by get_panel_output for Hub-to-Hub summing
+	std::array<float, NumInJacks> panel_in_vals{};
 
 	// MIDI
 	bool midi_connected = false;
@@ -291,6 +294,7 @@ public:
 
 			smp.process_cables();
 			process_outputs_diffcore<0>();
+			process_summed_inputs<0>();
 
 			smp.join();
 		} else
@@ -319,6 +323,17 @@ public:
 		}
 	}
 
+	template<size_t Core>
+	void process_summed_inputs() {
+		for (auto const &si : cables.summed_inputs[Core]) {
+			float sum = 0.f;
+			for (auto const &out : si.outs) {
+				sum += modules[out.module_id]->get_output(out.jack_id);
+			}
+			modules[si.in.module_id]->set_input(si.in.jack_id, sum);
+		}
+	}
+
 	void step_module(unsigned module_i) {
 		modules[module_i]->update();
 	}
@@ -329,6 +344,7 @@ public:
 		}
 		process_outputs_samecore<0>();
 		process_outputs_diffcore<0>();
+		process_summed_inputs<0>();
 		update_midi_pulses();
 	}
 
@@ -384,6 +400,8 @@ public:
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {
+		if (jack_id < panel_in_vals.size())
+			panel_in_vals[jack_id] = val;
 		set_all_connected_jacks(in_conns[jack_id], val);
 	}
 
@@ -550,11 +568,18 @@ private:
 
 public:
 	float get_panel_output(uint32_t jack_id) {
-		auto const &jack = out_conns[jack_id];
-		if (jack.module_id < num_modules)
-			return modules[jack.module_id]->get_output(jack.jack_id);
-		else
-			return 0.f;
+		float sum = 0.f;
+		for (auto const &jack : out_conns[jack_id]) {
+			if (jack.module_id == 0) {
+				// Hub module: read directly from cached panel input values
+				// to support summing multiple panel inputs to one output
+				if (jack.jack_id < panel_in_vals.size())
+					sum += panel_in_vals[jack.jack_id];
+			} else if (jack.module_id < num_modules) {
+				sum += modules[jack.module_id]->get_output(jack.jack_id);
+			}
+		}
+		return sum;
 	}
 
 	float get_module_light(uint16_t module_id, uint16_t light_id) const {
@@ -662,6 +687,7 @@ public:
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
 		cables.add(in, out, core_balancer.cores.parts);
+		cables.rebuild_summed_inputs(pd.int_cables, core_balancer.cores.parts);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
@@ -688,7 +714,7 @@ public:
 		pd.add_mapped_outjack(panel_jack_id, jack);
 
 		if (panel_jack_id < out_conns.size()) {
-			out_conns[panel_jack_id] = jack;
+			out_conns[panel_jack_id].push_back(jack);
 
 			if (out_patched[panel_jack_id] && jack.module_id < num_modules)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
@@ -754,10 +780,8 @@ public:
 	}
 
 	void disconnect_outjack(Jack jack) {
-		for (auto &out : out_conns) {
-			if (out == jack) {
-				out = disconnected_jack;
-			}
+		for (auto &outs : out_conns) {
+			std::erase(outs, jack);
 		}
 		safe_unpatch_output(jack);
 
@@ -774,10 +798,8 @@ public:
 	}
 
 	void remove_outjack_mappings(Jack jack) {
-		for (auto &out : out_conns) {
-			if (out == jack) {
-				out = disconnected_jack;
-			}
+		for (auto &outs : out_conns) {
+			std::erase(outs, jack);
 		}
 
 		if (pd.find_internal_cable_with_outjack(jack) == nullptr) {
@@ -853,12 +875,7 @@ public:
 		erase_and_squash(in_conns);
 
 		// Panel Output connections
-		for (auto &out : out_conns) {
-			if (out.module_id == module_idx) {
-				out = disconnected_jack;
-			}
-			squash_module_id(out.module_id);
-		}
+		erase_and_squash(out_conns);
 
 		// Internal cables
 		// Inform other modules connected to this one
@@ -959,16 +976,16 @@ public:
 
 		out_patched[panel_out_jack_id] = is_patched;
 
-		auto const &jack = out_conns[panel_out_jack_id];
-
-		if (jack.module_id < num_modules) {
-			// Don't mark the virtual module jack unpatched/patched
-			// if there is an existing internal cable
-			if (!pd.find_internal_cable_with_outjack(jack)) {
-				if (is_patched)
-					modules[jack.module_id]->mark_output_patched(jack.jack_id);
-				else
-					modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
+		for (auto const &jack : out_conns[panel_out_jack_id]) {
+			if (jack.module_id < num_modules) {
+				// Don't mark the virtual module jack unpatched/patched
+				// if there is an existing internal cable
+				if (!pd.find_internal_cable_with_outjack(jack)) {
+					if (is_patched)
+						modules[jack.module_id]->mark_output_patched(jack.jack_id);
+					else
+						modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
+				}
 			}
 		}
 	}
@@ -1069,10 +1086,12 @@ private:
 		// 	d = 0;
 
 		for (auto &out_conn : out_conns)
-			out_conn = disconnected_jack;
+			out_conn.clear();
 
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
+
+		panel_in_vals = {};
 
 		for (auto &knob_set : knob_maps)
 			for (auto &mappings : knob_set)
@@ -1120,7 +1139,7 @@ public:
 	// This speeds up propagating I/O from user to virtual modules
 	void calc_panel_jack_connections() {
 		for (auto const &cable : pd.mapped_ins) {
-			auto panel_jack_id = cable.panel_jack_id;
+			uint16_t panel_jack_id = cable.panel_jack_id;
 
 			for (auto const &input_jack : cable.ins) {
 				auto jack_id = input_jack.jack_id;
@@ -1129,24 +1148,25 @@ public:
 				if (module_id < 0 || jack_id < 0)
 					break;
 
-				int dup_int_cable = find_int_cable_input_jack(input_jack);
-				if (dup_int_cable >= 0) {
-					pr_warn("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
-							panel_jack_id,
-							dup_int_cable);
-					// TODO: When panel input jack is mapped to a jack containing a cable (to an output)
-					// ->>> Create a normalized mapping: Use the int_cable when panel jack is unpatched
-					continue;
-				}
-
-				update_or_add_input_panel_conn(panel_jack_id, input_jack);
-				pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
-
-				// Handle MIDI->Hub and Hub->Hub cables by connecting Hub input to output
+				// Handle Hub-to-Hub cables: panel input -> panel output passthrough.
+				// input_jack.jack_id is the Hub input jack (= panel output jack).
+				// panel_jack_id is the panel input jack whose value we want to read.
+				// We add to out_conns so get_panel_output reads panel_in_vals[panel_jack_id].
 				if (input_jack.module_id == 0) {
-					out_conns[input_jack.jack_id] = input_jack;
-					pr_trace(
-						"Connect hub module out jack %d to panel out %d\n", input_jack.jack_id, input_jack.jack_id);
+					out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
+					pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
+
+				} else if (find_int_cable_input_jack(input_jack) >= 0) {
+					// This module input also has an internal cable. Route the panel value
+					// through the Hub and add a virtual cable so the cable cache sums them.
+					update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
+					pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = panel_jack_id});
+					pr_trace("Panel in %d summed with int cable to m=%d j=%d\n", panel_jack_id, module_id, jack_id);
+
+				} else {
+					// No conflict — route panel input directly to module input
+					update_or_add_input_panel_conn(panel_jack_id, input_jack);
+					pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
 				}
 			}
 		}
@@ -1155,7 +1175,7 @@ public:
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id >= out_conns.size())
 				break;
-			out_conns[panel_jack_id] = cable.out;
+			out_conns[panel_jack_id].push_back(cable.out);
 			pr_trace("Connect module %d out jack %d to panel out %d\n",
 					 cable.out.module_id,
 					 cable.out.jack_id,
@@ -1360,11 +1380,11 @@ public:
 	}
 
 	//Used in unit tests
-	Jack get_panel_output_connection(unsigned jack_id) {
-		if (jack_id >= out_conns.size())
+	Jack get_panel_output_connection(unsigned jack_id, unsigned multiple_connection_id = 0) {
+		if ((jack_id >= out_conns.size()) || (multiple_connection_id >= out_conns[jack_id].size()))
 			return {.module_id = 0, .jack_id = 0};
 
-		return out_conns[jack_id];
+		return out_conns[jack_id][multiple_connection_id];
 	}
 
 	//Used in unit tests
