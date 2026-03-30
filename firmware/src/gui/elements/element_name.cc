@@ -71,7 +71,7 @@ void append_connected_jack_name(std::string &opts,
 
 	auto append = [&opts, &patch](Jack jack, ElementType type) {
 		FullElementName name = get_full_element_name(jack.module_id, jack.jack_id, type, patch);
-		opts = opts + " [" + std::string(name.module_name) + " " + std::string(name.element_name) + "] ";
+		opts = opts + " [" + name.module_name + " " + name.element_name + "] ";
 	};
 
 	if (indices.input_idx != ElementCount::Indices::NoElementMarker) {

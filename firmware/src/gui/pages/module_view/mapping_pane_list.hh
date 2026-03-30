@@ -176,7 +176,7 @@ struct MappingPaneList {
 		auto label = lv_obj_get_child(obj, 0);
 		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
 		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, patch);
-		lv_label_set_text_fmt(label, "%.16s %.16s", name.module_name.data(), name.element_name.data());
+		lv_label_set_text_fmt(label, "%.16s %.16s", name.module_name.c_str(), name.element_name.c_str());
 	}
 
 private:

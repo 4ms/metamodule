@@ -154,10 +154,9 @@ struct AddMapPopUp {
 					auto full_name = get_full_element_name(
 						existingmap->module_id, existingmap->param_id, ElementType::Param, *patch);
 
-					std::string combined =
-						(module_idx == existingmap->module_id) ?
-							std::string(full_name.element_name) :
-							std::string(full_name.module_name) + "\n" + std::string(full_name.element_name);
+					std::string combined = (module_idx == existingmap->module_id) ?
+											   full_name.element_name :
+											   full_name.module_name + "\n" + full_name.element_name;
 
 					lv_label_set_text_fmt(ui_MapExistsLabel, "Already Mapped To:\n%s", combined.c_str());
 				} else
