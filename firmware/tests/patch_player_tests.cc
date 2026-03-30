@@ -271,7 +271,7 @@ PatchData:
 	CHECK(pd.midi_maps.name.size() == 0);
 }
 #include "patches/unittest_inmapping_overlapping.hh"
-TEST_CASE("Input jack is patched and mapped to a panel jack -- for now we ignore the mapping") {
+TEST_CASE("Input jack is patched and mapped to a panel jack -- panel value routes through Hub for summing") {
 	// clang-format off
 	std::string patchyml{R"( 
 PatchData:
@@ -309,10 +309,10 @@ PatchData:
 	CHECK(pd.mapped_ins.size() == 1);
 	CHECK(pd.int_cables.size() == 1);
 
-	SUBCASE("No input mappings are present") {
+	SUBCASE("Panel input 2 is routed to Hub for summing, others are unmapped") {
 		CHECK(player.get_panel_input_connection(0) == Jack{0, 0});
 		CHECK(player.get_panel_input_connection(1) == Jack{0, 0});
-		CHECK(player.get_panel_input_connection(2) == Jack{0, 0});
+		CHECK(player.get_panel_input_connection(2) == Jack{0, 2}); // routed to Hub jack 2
 		CHECK(player.get_panel_input_connection(3) == Jack{0, 0});
 		CHECK(player.get_panel_input_connection(4) == Jack{0, 0});
 		CHECK(player.get_panel_input_connection(5) == Jack{0, 0});
