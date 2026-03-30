@@ -90,7 +90,10 @@ struct MidiMapViewPage : PageBase {
 			auto cont =
 				create_mapping_circle_item(ui_MidiMapLeftItems, MapButtonType::MIDIJack, map.panel_jack_id, label_text);
 			lv_obj_set_user_data(cont, (void *)((uintptr_t)i));
-			lv_obj_add_event_cb(cont, midi_jack_map_click, LV_EVENT_CLICKED, this);
+			if (map.ins[0].module_id > 0) {
+				// Don't allow clicking on MIDI -> hub maps
+				lv_obj_add_event_cb(cont, midi_jack_map_click, LV_EVENT_CLICKED, this);
+			}
 			lv_group_add_obj(group, cont);
 			left_items.push_back(cont);
 		}
