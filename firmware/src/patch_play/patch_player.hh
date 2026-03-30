@@ -55,6 +55,9 @@ private:
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
 
+	// Cached panel input values, used by get_panel_output for Hub-to-Hub summing
+	std::array<float, NumInJacks> panel_in_vals{};
+
 	// MIDI
 	bool midi_connected = false;
 
@@ -397,6 +400,8 @@ public:
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {
+		if (jack_id < panel_in_vals.size())
+			panel_in_vals[jack_id] = val;
 		set_all_connected_jacks(in_conns[jack_id], val);
 	}
 
@@ -565,8 +570,14 @@ public:
 	float get_panel_output(uint32_t jack_id) {
 		float sum = 0.f;
 		for (auto const &jack : out_conns[jack_id]) {
-			if (jack.module_id < num_modules)
+			if (jack.module_id == 0) {
+				// Hub module: read directly from cached panel input values
+				// to support summing multiple panel inputs to one output
+				if (jack.jack_id < panel_in_vals.size())
+					sum += panel_in_vals[jack.jack_id];
+			} else if (jack.module_id < num_modules) {
 				sum += modules[jack.module_id]->get_output(jack.jack_id);
+			}
 		}
 		return sum;
 	}
@@ -1140,19 +1151,20 @@ public:
 					pr_warn("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
 							panel_jack_id,
 							dup_int_cable);
-					// TODO: When panel input jack is mapped to a jack containing a cable (to an output)
-					// ->>> Create a normalized mapping: Use the int_cable when panel jack is unpatched
-					continue;
 				}
 
-				update_or_add_input_panel_conn(panel_jack_id, input_jack);
-				pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
-
-				// Handle MIDI->Hub and Hub->Hub cables by connecting Hub input to output
+				// Handle Hub-to-Hub cables: panel input -> panel output passthrough.
+				// input_jack.jack_id is the Hub input jack (= panel output jack).
+				// panel_jack_id is the panel input jack whose value we want to read.
+				// We add to out_conns so get_panel_output reads panel_in_vals[panel_jack_id].
+				// We skip adding to in_conns since that would route through the Hub's
+				// single set_input/get_output slot, breaking summing of multiple panel inputs.
 				if (input_jack.module_id == 0) {
-					out_conns[input_jack.jack_id].push_back(input_jack);
-					pr_trace(
-						"Connect hub module out jack %d to panel out %d\n", input_jack.jack_id, input_jack.jack_id);
+					out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = (uint16_t)panel_jack_id});
+					pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
+				} else {
+					update_or_add_input_panel_conn(panel_jack_id, input_jack);
+					pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
 				}
 			}
 		}
