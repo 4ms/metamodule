@@ -1091,6 +1091,8 @@ private:
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
 
+		panel_in_vals = {};
+
 		for (auto &knob_set : knob_maps)
 			for (auto &mappings : knob_set)
 				mappings.clear();
@@ -1137,7 +1139,7 @@ public:
 	// This speeds up propagating I/O from user to virtual modules
 	void calc_panel_jack_connections() {
 		for (auto const &cable : pd.mapped_ins) {
-			auto panel_jack_id = cable.panel_jack_id;
+			uint16_t panel_jack_id = cable.panel_jack_id;
 
 			for (auto const &input_jack : cable.ins) {
 				auto jack_id = input_jack.jack_id;
@@ -1146,23 +1148,23 @@ public:
 				if (module_id < 0 || jack_id < 0)
 					break;
 
-				int dup_int_cable = find_int_cable_input_jack(input_jack);
-				if (dup_int_cable >= 0) {
-					pr_warn("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
-							panel_jack_id,
-							dup_int_cable);
-				}
-
 				// Handle Hub-to-Hub cables: panel input -> panel output passthrough.
 				// input_jack.jack_id is the Hub input jack (= panel output jack).
 				// panel_jack_id is the panel input jack whose value we want to read.
 				// We add to out_conns so get_panel_output reads panel_in_vals[panel_jack_id].
-				// We skip adding to in_conns since that would route through the Hub's
-				// single set_input/get_output slot, breaking summing of multiple panel inputs.
 				if (input_jack.module_id == 0) {
-					out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = (uint16_t)panel_jack_id});
+					out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
 					pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
+
+				} else if (find_int_cable_input_jack(input_jack) >= 0) {
+					// This module input also has an internal cable. Route the panel value
+					// through the Hub and add a virtual cable so the cable cache sums them.
+					update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
+					pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = panel_jack_id});
+					pr_trace("Panel in %d summed with int cable to m=%d j=%d\n", panel_jack_id, module_id, jack_id);
+
 				} else {
+					// No conflict — route panel input directly to module input
 					update_or_add_input_panel_conn(panel_jack_id, input_jack);
 					pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
 				}
