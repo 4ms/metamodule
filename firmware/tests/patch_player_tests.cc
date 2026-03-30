@@ -1183,3 +1183,616 @@ TEST_CASE("Patchplayer works to delete a module in the middle") {
 	CHECK(p.get_int_cables()[0].ins[0].module_id == orig_cable_in0.module_id);
 	CHECK(p.get_int_cables()[0].ins[0].jack_id == orig_cable_in0.jack_id);
 }
+
+// ============================================================================
+// Summing tests
+// ============================================================================
+
+TEST_CASE("Summed internal cables: two outputs to same input") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: summed_int_cables
+  module_slugs:
+    0: PANEL_8
+    1: LFOSINE
+    2: LFOSINE
+    3: MULTILFO
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Cable cache has a summed input for module 3 jack 0") {
+		bool found = false;
+		for (auto &core_si : player.cables.summed_inputs) {
+			for (auto &si : core_si) {
+				if (si.in == Jack{3, 0}) {
+					found = true;
+					CHECK(si.outs.size() == 2);
+				}
+			}
+		}
+		CHECK(found);
+	}
+
+	SUBCASE("Summed entry contains both output jacks") {
+		bool found = false;
+		for (auto &core_si : player.cables.summed_inputs) {
+			for (auto &si : core_si) {
+				if (si.in == Jack{3, 0}) {
+					found = true;
+					bool has_lfo1 = false, has_lfo2 = false;
+					for (size_t j = 0; j < si.outs.size(); j++) {
+						if (si.outs[j] == Jack{1, 0})
+							has_lfo1 = true;
+						if (si.outs[j] == Jack{2, 0})
+							has_lfo2 = true;
+					}
+					CHECK(has_lfo1);
+					CHECK(has_lfo2);
+				}
+			}
+		}
+		CHECK(found);
+	}
+
+	SUBCASE("Summed input is removed from regular cable arrays") {
+		// Module 3 jack 0 should NOT appear in samecore or diffcore cable ins
+		for (auto &core_cables : player.cables.samecore_cables) {
+			for (auto &cable : core_cables) {
+				for (size_t i = 0; i < cable.ins.size(); i++) {
+					CHECK_FALSE((cable.ins[i] == Jack{3, 0}));
+				}
+			}
+		}
+		for (auto &core_cables : player.cables.diffcore_cables) {
+			for (auto &cable : core_cables) {
+				for (size_t i = 0; i < cable.ins.size(); i++) {
+					CHECK_FALSE((cable.ins[i] == Jack{3, 0}));
+				}
+			}
+		}
+	}
+}
+
+TEST_CASE("Single internal cable: no summed input entry created") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: single_cable
+  module_slugs:
+    0: PANEL_8
+    1: LFOSINE
+    2: MULTILFO
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("No summed inputs exist") {
+		for (auto &core_si : player.cables.summed_inputs) {
+			CHECK(core_si.size() == 0);
+		}
+	}
+}
+
+TEST_CASE("Summed panel output: two module outputs to same panel out jack") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: summed_panel_out
+  module_slugs:
+    0: PANEL_8
+    1: LFOSINE
+    2: LFOSINE
+  int_cables:
+  mapped_ins:
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 0
+      out:
+        module_id: 2
+        jack_id: 0
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Panel out 0 has two connections") {
+		CHECK(player.get_outconns()[0].size() == 2);
+		CHECK(player.get_panel_output_connection(0, 0) == Jack{1, 0});
+		CHECK(player.get_panel_output_connection(0, 1) == Jack{2, 0});
+	}
+
+	SUBCASE("Panel out 0 sums the two module outputs") {
+		// Run some frames
+		for (int i = 0; i < 100; i++)
+			player.update_patch();
+
+		float lfo1 = player.modules[1]->get_output(0);
+		float lfo2 = player.modules[2]->get_output(0);
+		float panel_out = player.get_panel_output(0);
+
+		CHECK(panel_out == doctest::Approx(lfo1 + lfo2));
+	}
+
+	SUBCASE("Other panel outs are unaffected") {
+		CHECK(player.get_outconns()[1].size() == 0);
+		CHECK(player.get_outconns()[2].size() == 0);
+	}
+}
+
+TEST_CASE("Hub-to-Hub summing: multiple panel inputs to one panel output") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: hub_sum
+  module_slugs:
+    0: PANEL_8
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 0
+          jack_id: 0
+    - panel_jack_id: 1
+      ins:
+        - module_id: 0
+          jack_id: 0
+    - panel_jack_id: 2
+      ins:
+        - module_id: 0
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Panel out 0 has three Hub output connections (one per panel input)") {
+		CHECK(player.get_outconns()[0].size() == 3);
+		CHECK(player.get_panel_output_connection(0, 0) == Jack{0, 0}); // Hub out 0 = panel in 0
+		CHECK(player.get_panel_output_connection(0, 1) == Jack{0, 1}); // Hub out 1 = panel in 1
+		CHECK(player.get_panel_output_connection(0, 2) == Jack{0, 2}); // Hub out 2 = panel in 2
+	}
+
+	SUBCASE("Panel inputs are NOT routed to Hub via in_conns (to avoid overwrite)") {
+		// Hub-to-Hub connections skip in_conns entirely
+		CHECK(player.get_inconns()[0].size() == 0);
+		CHECK(player.get_inconns()[1].size() == 0);
+		CHECK(player.get_inconns()[2].size() == 0);
+	}
+
+	SUBCASE("get_panel_output sums panel_in_vals for Hub connections") {
+		player.set_panel_input(0, 1.0f);
+		player.set_panel_input(1, 2.0f);
+		player.set_panel_input(2, 3.0f);
+
+		float panel_out = player.get_panel_output(0);
+		CHECK(panel_out == doctest::Approx(1.0f + 2.0f + 3.0f));
+	}
+}
+
+TEST_CASE("Panel input summed with internal cable") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: panel_plus_cable
+  module_slugs:
+    0: PANEL_8
+    1: LFOSINE
+    2: MULTILFO
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Panel input 0 routes to Hub (not directly to module 2)") {
+		// in_conns[0] should contain Hub connection, not module 2
+		CHECK(player.get_panel_input_connection(0) == Jack{0, 0});
+	}
+
+	SUBCASE("Virtual cable creates a summed input for module 2 jack 0") {
+		bool found = false;
+		for (auto &core_si : player.cables.summed_inputs) {
+			for (auto &si : core_si) {
+				if (si.in == Jack{2, 0}) {
+					found = true;
+					CHECK(si.outs.size() == 2);
+					// Should have both the real cable (module 1 out 0) and virtual cable (Hub out 0)
+					bool has_lfo = false, has_hub = false;
+					for (size_t j = 0; j < si.outs.size(); j++) {
+						if (si.outs[j] == Jack{1, 0})
+							has_lfo = true;
+						if (si.outs[j] == Jack{0, 0})
+							has_hub = true;
+					}
+					CHECK(has_lfo);
+					CHECK(has_hub);
+				}
+			}
+		}
+		CHECK(found);
+	}
+
+	SUBCASE("Module 2 input 0 is removed from regular cable arrays") {
+		for (auto &core_cables : player.cables.samecore_cables) {
+			for (auto &cable : core_cables) {
+				for (size_t i = 0; i < cable.ins.size(); i++) {
+					CHECK_FALSE((cable.ins[i] == Jack{2, 0}));
+				}
+			}
+		}
+		for (auto &core_cables : player.cables.diffcore_cables) {
+			for (auto &cable : core_cables) {
+				for (size_t i = 0; i < cable.ins.size(); i++) {
+					CHECK_FALSE((cable.ins[i] == Jack{2, 0}));
+				}
+			}
+		}
+	}
+}
+
+TEST_CASE("Panel input to module input with no internal cable: direct routing (no summing needed)") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: panel_direct
+  module_slugs:
+    0: PANEL_8
+    1: MULTILFO
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Panel input routes directly to module (not through Hub)") {
+		CHECK(player.get_panel_input_connection(0) == Jack{1, 0});
+	}
+
+	SUBCASE("No summed inputs or virtual cables needed") {
+		for (auto &core_si : player.cables.summed_inputs) {
+			CHECK(core_si.size() == 0);
+		}
+	}
+}
+
+TEST_CASE("Hub-to-Hub single passthrough: panel in 0 to panel out 0") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: hub_passthrough
+  module_slugs:
+    0: PANEL_8
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 0
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Panel out 0 reads from Hub out 0 (panel in 0)") {
+		CHECK(player.get_outconns()[0].size() == 1);
+		CHECK(player.get_panel_output_connection(0, 0) == Jack{0, 0});
+	}
+
+	SUBCASE("Passthrough works: panel in value appears on panel out") {
+		player.set_panel_input(0, 4.2f);
+		float panel_out = player.get_panel_output(0);
+		CHECK(panel_out == doctest::Approx(4.2f));
+	}
+}
+
+TEST_CASE("Three internal cables to same input are summed") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: three_way_sum
+  module_slugs:
+    0: PANEL_8
+    1: LFOSINE
+    2: LFOSINE
+    3: LFOSINE
+    4: MULTILFO
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Summed input for module 4 jack 0 has all three sources") {
+		bool found = false;
+		for (auto &core_si : player.cables.summed_inputs) {
+			for (auto &si : core_si) {
+				if (si.in == Jack{4, 0}) {
+					found = true;
+					CHECK(si.outs.size() == 3);
+				}
+			}
+		}
+		CHECK(found);
+	}
+}
+
+TEST_CASE("Summing part of a split: virt output splits to a virt input and panel output. The virt input also sums with "
+		  "a panel input") {
+	// Module 2 input 0 receives both an internal cable (from Module 1 output 0) and a panel input.
+	// Module 1 output 0 is also mapped to panel out 0.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: mixed_sum
+  module_slugs:
+    0: PANEL_8
+    1: LFOSINE
+    2: MULTILFO
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Panel input 1 routes to Hub for summing") {
+		CHECK(player.get_panel_input_connection(1) == Jack{0, 1});
+	}
+
+	SUBCASE("Summed input for module 2 jack 0 has LFO and Hub sources") {
+		bool found = false;
+		for (auto &core_si : player.cables.summed_inputs) {
+			for (auto &si : core_si) {
+				if (si.in == Jack{2, 0}) {
+					found = true;
+					CHECK(si.outs.size() == 2);
+					bool has_lfo = false, has_hub = false;
+					for (size_t j = 0; j < si.outs.size(); j++) {
+						if (si.outs[j] == Jack{1, 0})
+							has_lfo = true;
+						if (si.outs[j] == Jack{0, 1})
+							has_hub = true;
+					}
+					CHECK(has_lfo);
+					CHECK(has_hub);
+				}
+			}
+		}
+		CHECK(found);
+	}
+
+	SUBCASE("Panel output 0 reads from module 1") {
+		CHECK(player.get_outconns()[0].size() == 1);
+		CHECK(player.get_panel_output_connection(0) == Jack{1, 0});
+	}
+}
