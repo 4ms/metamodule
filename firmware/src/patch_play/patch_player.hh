@@ -1157,11 +1157,16 @@ public:
 					pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 
 				} else if (find_int_cable_input_jack(input_jack) >= 0) {
-					// This module input also has an internal cable. Route the panel value
-					// through the Hub and add a virtual cable so the cable cache sums them.
-					update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
-					pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = panel_jack_id});
+					// The module input jack has an internal cable AND a panel input mapping.
+					// In order to sum the panel input and the internal cable, we map the panel input
+					// to the Hub input, and then add a second internal cable from Hub output to the
+					// original module input jack. Then the summing happens automatically via cable_cache.
 					pr_trace("Panel in %d summed with int cable to m=%d j=%d\n", panel_jack_id, module_id, jack_id);
+
+					// Map panel input to hub input:
+					update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
+					// Add cable from hub output to the original panel-mapped jack
+					pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = panel_jack_id});
 
 				} else {
 					// No conflict — route panel input directly to module input
