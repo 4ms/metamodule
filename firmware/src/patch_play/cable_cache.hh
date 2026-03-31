@@ -2,6 +2,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "console/pr_dbg.hh"
 #include "patch/patch.hh"
+#include "plugin_module.hh"
 #include "util/fixed_vector.hh"
 #include <span>
 
@@ -173,7 +174,8 @@ private:
 	void resolve_poly_buffers(auto &modules) {
 		auto resolve = [&](std::vector<SingleCable> &cable_list) {
 			for (auto &cable : cable_list) {
-				cable.out_buf = modules[cable.out.module_id]->get_output_poly_buffer(cable.out.jack_id);
+				cable.out_buf = plugin_module_get_poly_output_buffer(modules[cable.out.module_id], cable.out.jack_id);
+				// cable.out_buf = modules[cable.out.module_id]->get_output_poly_buffer(cable.out.jack_id);
 
 				// Optimization: If either voltages or channels is invalid,
 				// mark both invalid so we only need to check one in the hot loop
@@ -189,7 +191,8 @@ private:
 
 				cable.in_bufs.clear();
 				for (auto const &in : cable.ins) {
-					auto buf = modules[in.module_id]->get_input_poly_buffer(in.jack_id);
+					// auto buf = modules[in.module_id]->get_input_poly_buffer(in.jack_id);
+					auto buf = plugin_module_get_poly_input_buffer(modules[in.module_id], in.jack_id);
 					if (!buf.voltages || !buf.channels) {
 						buf.voltages = nullptr;
 						buf.channels = nullptr;
