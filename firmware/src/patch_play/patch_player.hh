@@ -50,7 +50,10 @@ private:
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
 
-	std::array<std::vector<Jack>, NumOutJacks> out_conns;
+	struct PolyJack : Jack {
+		CoreProcessor::PolyPortBuffer buf{};
+	};
+	std::array<std::vector<PolyJack>, NumOutJacks> out_conns;
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
@@ -579,8 +582,17 @@ public:
 	float get_panel_output(uint32_t jack_id) {
 		float sum = 0.f;
 		for (auto const &jack : out_conns[jack_id]) {
-			if (jack.module_id < num_modules)
-				sum += modules[jack.module_id]->get_output(jack.jack_id);
+			if (jack.module_id < num_modules) {
+				if (jack.buf.voltages) {
+					for (unsigned i = 0; i < std::min<unsigned>(CoreProcessor::MaxPolyChannels, *jack.buf.channels);
+						 i++)
+					{
+						sum += jack.buf.voltages[i];
+					}
+
+				} else
+					sum += modules[jack.module_id]->get_output(jack.jack_id);
+			}
 		}
 		return sum;
 	}
@@ -715,8 +727,10 @@ public:
 	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
 		pd.add_mapped_outjack(panel_jack_id, jack);
 
+		PolyJack poly_jack{jack};
+		poly_jack.buf = plugin_module_get_poly_output_buffer(modules[jack.module_id], jack.jack_id);
 		if (panel_jack_id < out_conns.size()) {
-			out_conns[panel_jack_id].push_back(jack);
+			out_conns[panel_jack_id].push_back(poly_jack);
 
 			if (out_patched[panel_jack_id] && jack.module_id < num_modules)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
@@ -1163,7 +1177,7 @@ public:
 
 				// Handle MIDI->Hub and Hub->Hub cables by connecting Hub input to output
 				if (input_jack.module_id == 0) {
-					out_conns[input_jack.jack_id].push_back(input_jack);
+					out_conns[input_jack.jack_id].push_back({input_jack, {}});
 					pr_trace(
 						"Connect hub module out jack %d to panel out %d\n", input_jack.jack_id, input_jack.jack_id);
 				}
@@ -1174,7 +1188,12 @@ public:
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id >= out_conns.size())
 				break;
-			out_conns[panel_jack_id].push_back(cable.out);
+
+			PolyJack poly_jack{cable.out};
+			if (cable.out.module_id < num_modules)
+				poly_jack.buf = plugin_module_get_poly_output_buffer(modules[cable.out.module_id], cable.out.jack_id);
+
+			out_conns[panel_jack_id].push_back(poly_jack);
 			pr_trace("Connect module %d out jack %d to panel out %d\n",
 					 cable.out.module_id,
 					 cable.out.jack_id,
