@@ -17,6 +17,7 @@ add_library(RackCoreLibrary OBJECT
     ${SOURCE_DIR}/CV_MIDI.cpp
     ${SOURCE_DIR}/CV_MIDICC.cpp
     ${SOURCE_DIR}/Scope.cpp
+    ${SOURCE_DIR}/Merge.cpp
 )
 
 target_include_directories(RackCoreLibrary PRIVATE ${SOURCE_DIR})
