@@ -2,6 +2,7 @@
 #include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/i2c_codec_conf.hh"
+#include "debug.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/hsem.hh"
 #include "params.hh"
@@ -47,11 +48,18 @@ public:
 
 	void update() {
 		// Note: this just checks if I2C is busy in this process, not globally:
-		if (!i2c.is_ready())
+		if (!i2c.is_ready()) {
+			if (HAL_GetTick() - last_i2c_activity_tm > 5000) {
+				pr_err("i2c activity timeout\n");
+				handle_error();
+			}
 			return;
+		}
 
 		// Our process is not using the bus, so release our lock:
 		mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
+
+		last_i2c_activity_tm = HAL_GetTick();
 
 		switch (state) {
 
@@ -119,6 +127,8 @@ private:
 	GPIOExpander main_jacksense_reader{i2c, mainboard_gpio_expander_conf};
 
 	uint32_t tmr{0};
+	uint32_t last_i2c_activity_tm{0};
+	uint32_t error_tmr{0};
 	unsigned num_jacksense_readers{1};
 	unsigned cur_reader{0};
 
