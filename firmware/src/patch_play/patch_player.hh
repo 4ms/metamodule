@@ -50,7 +50,10 @@ private:
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
 
-	std::array<std::vector<Jack>, NumOutJacks> out_conns;
+	struct PolyJack : Jack {
+		CoreProcessor::PolyPortBuffer buf{};
+	};
+	std::array<std::vector<PolyJack>, NumOutJacks> out_conns;
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
@@ -590,7 +593,15 @@ public:
 				if (jack.jack_id < panel_in_vals.size())
 					sum += panel_in_vals[jack.jack_id];
 			} else if (jack.module_id < num_modules) {
-				sum += modules[jack.module_id]->get_output(jack.jack_id);
+				if (jack.buf.voltages) {
+					for (unsigned i = 0; i < std::min<unsigned>(CoreProcessor::MaxPolyChannels, *jack.buf.channels);
+						 i++)
+					{
+						sum += jack.buf.voltages[i];
+					}
+
+				} else
+					sum += modules[jack.module_id]->get_output(jack.jack_id);
 			}
 		}
 		return sum;
@@ -726,8 +737,10 @@ public:
 	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
 		pd.add_mapped_outjack(panel_jack_id, jack);
 
+		PolyJack poly_jack{jack};
+		poly_jack.buf = plugin_module_get_poly_output_buffer(modules[jack.module_id], jack.jack_id);
 		if (panel_jack_id < out_conns.size()) {
-			out_conns[panel_jack_id].push_back(jack);
+			out_conns[panel_jack_id].push_back(poly_jack);
 
 			if (out_patched[panel_jack_id] && jack.module_id < num_modules)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
@@ -1193,7 +1206,12 @@ public:
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id >= out_conns.size())
 				break;
-			out_conns[panel_jack_id].push_back(cable.out);
+
+			PolyJack poly_jack{cable.out};
+			if (cable.out.module_id < num_modules)
+				poly_jack.buf = plugin_module_get_poly_output_buffer(modules[cable.out.module_id], cable.out.jack_id);
+
+			out_conns[panel_jack_id].push_back(poly_jack);
 			pr_trace("Connect module %d out jack %d to panel out %d\n",
 					 cable.out.module_id,
 					 cable.out.jack_id,
