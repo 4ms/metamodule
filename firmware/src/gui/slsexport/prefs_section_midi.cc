@@ -15,7 +15,9 @@ void PrefsSectionMidi::create(lv_obj_t *parent) {
 	create_prefs_note(midi_cont, "Sends MIDI to controller\nwhen MIDI-mapped params\nchange");
 
 	// Knob Set Control
-	auto knobset_cont = create_prefs_labeled_check(parent, "Knob Set Control:");
+	create_prefs_section_title(parent, "MIDI Knob Set Select");
+
+	auto knobset_cont = create_prefs_labeled_check(parent, "Enable:");
 	knobset_control_check = lv_obj_get_child(knobset_cont, 1);
 
 	create_prefs_note(knobset_cont, "MIDI CC values 0-7\nselect Knob Set");

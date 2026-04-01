@@ -213,6 +213,7 @@ private:
 		lv_check(midi_section.knobset_control_check, midi.knobset_control == MidiSettings::KnobsetControl::Enabled);
 		lv_dropdown_set_selected(midi_section.knobset_cc_dropdown, midi.knobset_cc);
 		lv_dropdown_set_selected(midi_section.knobset_channel_dropdown, midi.knobset_channel - 1);
+		update_knobset_control_items(midi.knobset_control == MidiSettings::KnobsetControl::Enabled);
 
 		// Patch suggested audio toggles
 		lv_check(audio_section.sr_override_check, settings.patch_suggested_audio.apply_samplerate);
@@ -343,6 +344,14 @@ private:
 		return lv_obj_has_state(midi_section.knobset_control_check, LV_STATE_CHECKED)
 				 ? MidiSettings::KnobsetControl::Enabled
 				 : MidiSettings::KnobsetControl::Disabled;
+	}
+
+	void update_knobset_control_items(bool enabled) {
+		lv_enable(midi_section.knobset_cc_dropdown, enabled);
+		lv_enable(midi_section.knobset_channel_dropdown, enabled);
+		auto opa = enabled ? LV_OPA_100 : LV_OPA_50;
+		lv_obj_set_style_opa(lv_obj_get_parent(midi_section.knobset_cc_dropdown), opa, LV_PART_MAIN);
+		lv_obj_set_style_opa(lv_obj_get_parent(midi_section.knobset_channel_dropdown), opa, LV_PART_MAIN);
 	}
 
 	uint32_t read_knobset_cc_dropdown() {
@@ -586,6 +595,7 @@ private:
 		auto mp_mode = read_missing_plugins_dropdown();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
+		update_knobset_control_items(knobset_control == MidiSettings::KnobsetControl::Enabled);
 
 		if (block_size == audio_settings.block_size && sample_rate == audio_settings.sample_rate &&
 			overrun_retries == audio_settings.max_overrun_retries && timeout == screensaver.timeout_ms &&
