@@ -166,7 +166,7 @@ public:
 					auto &cc = info.params.midi_ccs[info.settings.midi.knobset_cc & 127];
 
 					auto midi_chan =
-						info.settings.midi.knobset_channel + 1; //User sees channels 1-16, but internally is 0-15
+						info.settings.midi.knobset_channel - 1; //User sees channels 1-16, but internally is 0-15
 					if (cc.changed && cc.val == midi_chan) {
 						auto next = std::clamp<unsigned>(cc.value, 0, num_knobsets - 1);
 						if (next != info.page_list.get_active_knobset())
