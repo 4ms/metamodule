@@ -370,6 +370,11 @@ struct PatchSelectorPage : PageBase {
 
 					if (result.success) {
 						patches.start_viewing(selected_patch);
+
+						// Clear cc events so we don't change knobsets with stale events
+						for (auto &cc : params.midi_ccs)
+							cc.changed = false;
+
 						missing_plugins.start(
 							patches.get_view_patch(), group, [this](bool) { exit_to_patch_view_page(); });
 						state = State::Closing;
