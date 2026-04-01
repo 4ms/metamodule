@@ -343,11 +343,40 @@ public:
 	template<size_t Core>
 	void process_summed_inputs() {
 		for (auto const &si : cables.summed_inputs[Core]) {
-			float sum = 0.f;
-			for (auto const &out : si.outs) {
-				sum += modules[out.module_id]->get_output(out.jack_id);
+			if (si.in_buf.voltages) {
+				// Poly input: sum per-channel across all sources
+				unsigned max_channels = 0;
+
+				for (size_t i = 0; i < si.outs.size(); i++) {
+					if (si.out_bufs[i].voltages)
+						max_channels = std::max<unsigned>(max_channels, *si.out_bufs[i].channels);
+				}
+				max_channels = std::min<unsigned>(max_channels, CoreProcessor::MaxPolyChannels);
+
+				// Zero the input buffer, then accumulate
+				for (unsigned ch = 0; ch < max_channels; ch++)
+					si.in_buf.voltages[ch] = 0.f;
+
+				for (size_t i = 0; i < si.outs.size(); i++) {
+					if (si.out_bufs[i].voltages) {
+						auto n = std::min<unsigned>(*si.out_bufs[i].channels, max_channels);
+						for (unsigned ch = 0; ch < n; ch++)
+							si.in_buf.voltages[ch] += si.out_bufs[i].voltages[ch];
+					} else {
+						// Mono source: add to channel 0
+						si.in_buf.voltages[0] += modules[si.outs[i].module_id]->get_output(si.outs[i].jack_id);
+					}
+				}
+				*si.in_buf.channels = max_channels;
+
+			} else {
+				// Mono input: sum all sources via get_output/set_input
+				float sum = 0.f;
+				for (auto const &out : si.outs) {
+					sum += modules[out.module_id]->get_output(out.jack_id);
+				}
+				modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 			}
-			modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 		}
 	}
 

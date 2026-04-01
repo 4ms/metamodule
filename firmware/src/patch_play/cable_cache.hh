@@ -90,6 +90,8 @@ struct CableCache {
 	struct SummedInput {
 		Jack in;
 		FixedVector<Jack, 8> outs;
+		FixedVector<CoreProcessor::PolyPortBuffer, 8> out_bufs;
+		CoreProcessor::PolyPortBuffer in_buf;
 	};
 
 	// organized by out
@@ -209,6 +211,25 @@ private:
 
 		for (auto &core_cables : diffcore_cables)
 			resolve(core_cables);
+
+		for (auto &core_si : summed_inputs) {
+			for (auto &si : core_si) {
+				si.out_bufs.clear();
+				for (auto const &out : si.outs) {
+					auto buf = plugin_module_get_poly_output_buffer(modules[out.module_id], out.jack_id);
+					if (!buf.voltages || !buf.channels) {
+						buf.voltages = nullptr;
+						buf.channels = nullptr;
+					}
+					si.out_bufs.push_back(buf);
+				}
+				si.in_buf = plugin_module_get_poly_input_buffer(modules[si.in.module_id], si.in.jack_id);
+				if (!si.in_buf.voltages || !si.in_buf.channels) {
+					si.in_buf.voltages = nullptr;
+					si.in_buf.channels = nullptr;
+				}
+			}
+		}
 	}
 };
 } // namespace MetaModule
