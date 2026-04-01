@@ -61,6 +61,9 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(fs_section.startup_patch_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(fs_section.max_patches_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(midi_section.feedback_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(midi_section.knobset_control_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(midi_section.knobset_cc_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(midi_section.knobset_channel_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(audio_section.sr_override_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(audio_section.bs_override_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(missingplugins_section.dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -75,6 +78,9 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(fs_section.startup_patch_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(fs_section.max_patches_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(midi_section.feedback_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(midi_section.knobset_control_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(midi_section.knobset_cc_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(midi_section.knobset_channel_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.sr_override_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.bs_override_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(missingplugins_section.dropdown, focus_cb, LV_EVENT_FOCUSED, this);
@@ -204,6 +210,9 @@ private:
 		lv_show(catchup_section.allowjump_cont, catchup.mode == CatchupParam::Mode::ResumeOnEqual);
 
 		lv_check(midi_section.feedback_check, midi.midi_feedback == MidiSettings::MidiFeedback::Enabled);
+		lv_check(midi_section.knobset_control_check, midi.knobset_control == MidiSettings::KnobsetControl::Enabled);
+		lv_dropdown_set_selected(midi_section.knobset_cc_dropdown, midi.knobset_cc);
+		lv_dropdown_set_selected(midi_section.knobset_channel_dropdown, midi.knobset_channel - 1);
 
 		// Patch suggested audio toggles
 		lv_check(audio_section.sr_override_check, settings.patch_suggested_audio.apply_samplerate);
@@ -330,6 +339,20 @@ private:
 																				 MidiSettings::MidiFeedback::Disabled;
 	}
 
+	auto read_knobset_control_check() {
+		return lv_obj_has_state(midi_section.knobset_control_check, LV_STATE_CHECKED)
+				 ? MidiSettings::KnobsetControl::Enabled
+				 : MidiSettings::KnobsetControl::Disabled;
+	}
+
+	uint32_t read_knobset_cc_dropdown() {
+		return lv_dropdown_get_selected(midi_section.knobset_cc_dropdown);
+	}
+
+	uint32_t read_knobset_channel_dropdown() {
+		return lv_dropdown_get_selected(midi_section.knobset_channel_dropdown) + 1;
+	}
+
 	MissingPluginSettings::Autoload read_missing_plugins_dropdown() {
 		auto item = lv_dropdown_get_selected(missingplugins_section.dropdown);
 		if (item == 1)
@@ -396,6 +419,18 @@ private:
 		auto midi_feedback = read_midi_feedback_check();
 		if (midi.midi_feedback != midi_feedback) {
 			midi.midi_feedback = midi_feedback;
+			gui_state.do_write_settings = true;
+		}
+
+		auto knobset_control = read_knobset_control_check();
+		auto knobset_cc = read_knobset_cc_dropdown();
+		auto knobset_channel = read_knobset_channel_dropdown();
+		if (midi.knobset_control != knobset_control || midi.knobset_cc != knobset_cc ||
+			midi.knobset_channel != knobset_channel)
+		{
+			midi.knobset_control = knobset_control;
+			midi.knobset_cc = knobset_cc;
+			midi.knobset_channel = knobset_channel;
 			gui_state.do_write_settings = true;
 		}
 
@@ -482,6 +517,18 @@ private:
 			lv_group_set_editing(group, false);
 			return true;
 
+		} else if (lv_dropdown_is_open(midi_section.knobset_cc_dropdown)) {
+			lv_dropdown_close(midi_section.knobset_cc_dropdown);
+			lv_group_focus_obj(midi_section.knobset_cc_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
+		} else if (lv_dropdown_is_open(midi_section.knobset_channel_dropdown)) {
+			lv_dropdown_close(midi_section.knobset_channel_dropdown);
+			lv_group_focus_obj(midi_section.knobset_channel_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
 		} else if (lv_dropdown_is_open(missingplugins_section.dropdown)) {
 			lv_dropdown_close(missingplugins_section.dropdown);
 			lv_group_focus_obj(missingplugins_section.dropdown);
@@ -530,6 +577,9 @@ private:
 		auto catchup_exclude_buttons = read_catchup_exclude_check();
 		auto fs_max_patches = read_fs_max_open_patches();
 		auto midi_feedback = read_midi_feedback_check();
+		auto knobset_control = read_knobset_control_check();
+		auto knobset_cc = read_knobset_cc_dropdown();
+		auto knobset_channel = read_knobset_channel_dropdown();
 		auto apply_sr = read_patch_suggest_samplerate_check();
 		auto apply_bs = read_patch_suggest_blocksize_check();
 		auto load_initial_patch = lv_obj_has_state(fs_section.startup_patch_check, LV_STATE_CHECKED);
@@ -542,7 +592,9 @@ private:
 			knobwake == screensaver.knobs_can_wake && catchupmode == catchup.mode &&
 			catchup_exclude_buttons == catchup.allow_jump_outofrange &&
 			load_initial_patch == settings.load_initial_patch && fs_max_patches == fs.max_open_patches &&
-			midi_feedback == midi.midi_feedback && mp_mode == missing_plugins.autoload &&
+			midi_feedback == midi.midi_feedback && knobset_control == midi.knobset_control &&
+			knobset_cc == midi.knobset_cc && knobset_channel == midi.knobset_channel &&
+			mp_mode == missing_plugins.autoload &&
 			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == settings.patch_suggested_audio.apply_blocksize)
 		{
