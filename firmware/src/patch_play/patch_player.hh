@@ -1179,7 +1179,7 @@ public:
 				// panel_jack_id is the panel input jack whose value we want to read.
 				// We add to out_conns so get_panel_output reads panel_in_vals[panel_jack_id].
 				if (input_jack.module_id == 0) {
-					out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
+					out_conns[input_jack.jack_id].push_back(PolyJack{{0, panel_jack_id}, {}});
 					pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 
 				} else if (find_int_cable_input_jack(input_jack) >= 0) {
