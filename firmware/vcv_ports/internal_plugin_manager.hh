@@ -291,8 +291,8 @@ struct InternalPluginManager {
 		pluginInstance->addModel(rack::core::modelCV_MIDICC);
 		pluginInstance->addModel(rack::core::modelScope);
 		pluginInstance->addModel(rack::core::modelMerge);
-		// pluginInstance->addModel(rack::core::modelSplit);
-		// pluginInstance->addModel(rack::core::modelSum);
+		pluginInstance->addModel(rack::core::modelSplit);
+		pluginInstance->addModel(rack::core::modelSum);
 #endif
 
 		parse_jsons("4ms");
