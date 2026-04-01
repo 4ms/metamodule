@@ -18,7 +18,7 @@ void PrefsSectionMidi::create(lv_obj_t *parent) {
 	auto knobset_cont = create_prefs_labeled_check(parent, "Knob Set Control:");
 	knobset_control_check = lv_obj_get_child(knobset_cont, 1);
 
-	create_prefs_note(knobset_cont, "Change knobsets via MIDI CC");
+	create_prefs_note(knobset_cont, "MIDI CC values 0-7\nselect Knob Set");
 
 	// MIDI CC number (0-127)
 	std::string cc_opts;
