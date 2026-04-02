@@ -48,7 +48,8 @@ public:
 		, moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")}
 		, moduleViewActionBypassBut{create_lv_list_button(ui_ModuleViewActionMenu, "Bypass: Off")}
 		, moduleViewActionRenameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Rename...")}
-		, moduleViewActionResetNameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Reset name")} {
+		, moduleViewActionResetNameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Reset name")}
+		, moduleViewActionReplaceBut{create_lv_list_button(ui_ModuleViewActionMenu, "Replace...")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
 		lv_show(moduleViewActionPresetBut);
@@ -84,6 +85,7 @@ public:
 		lv_obj_add_event_cb(moduleViewActionBypassBut, bypass_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionRenameBut, rename_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionResetNameBut, reset_name_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(moduleViewActionReplaceBut, replace_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
@@ -94,6 +96,7 @@ public:
 		lv_group_add_obj(group, moduleViewActionBypassBut);
 		lv_group_add_obj(group, moduleViewActionRenameBut);
 		lv_group_add_obj(group, moduleViewActionResetNameBut);
+		lv_group_add_obj(group, moduleViewActionReplaceBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
 	}
@@ -431,6 +434,19 @@ private:
 		lv_label_set_text(ui_ElementRollerModuleName, display.data());
 	}
 
+	static void replace_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		page->hide();
+		PageArguments new_args{
+			.patch_loc_hash = page->patches.get_view_patch_loc_hash(),
+			.module_id = static_cast<uint16_t>(page->module_idx),
+			.replace_module = true,
+		};
+		page->page_list.request_new_page(PageId::ModuleList, new_args);
+	}
+
 	static void rename_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -492,6 +508,7 @@ private:
 	lv_obj_t *moduleViewActionBypassBut;
 	lv_obj_t *moduleViewActionRenameBut;
 	lv_obj_t *moduleViewActionResetNameBut;
+	lv_obj_t *moduleViewActionReplaceBut;
 	lv_obj_t *rename_textarea = nullptr;
 	std::string pending_alias{};
 	KeyboardEntry keyboard_entry;
