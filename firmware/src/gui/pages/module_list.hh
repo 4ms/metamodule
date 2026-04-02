@@ -4,6 +4,7 @@
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/plugin_popup.hh"
 #include "gui/pages/tags.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "src/core/lv_obj_pos.h"
@@ -279,6 +280,10 @@ public:
 	void update() final {
 		roller_hover.update();
 		if (gui_state.back_button.is_just_released()) {
+			if (replace_popup.is_visible()) {
+				replace_popup.hide();
+				return;
+			}
 			roller_hover.hide();
 
 			if (view == View::CategoryRoller) {
@@ -311,6 +316,8 @@ public:
 	}
 
 	void blur() final {
+		if (replace_popup.is_visible())
+			replace_popup.hide();
 		if (draw_timer)
 			lv_timer_del(draw_timer);
 		draw_timer = nullptr;
@@ -357,8 +364,41 @@ private:
 		} else {
 			auto cur_idx = lv_roller_get_selected(ui_ModuleListRoller);
 			if (auto slug = page->get_selected_combined_slug(cur_idx); slug.length()) {
-				page->add_module(slug);
-				page->load_page(PageId::PatchView, page->args);
+				if (page->args.replace_module.value_or(false) && page->args.module_id.has_value()) {
+					page->pending_replace_slug = slug;
+					auto display_name = ModuleFactory::getModuleDisplayName(slug);
+					page->replace_confirm_msg = "Replace module with " + std::string{display_name} + "?";
+					page->replace_popup.init(lv_layer_top(), page->group);
+					page->replace_keep_cables = false;
+					page->replace_popup.show(
+						[page](std::optional<unsigned> button, std::optional<bool> toggle) {
+							if (toggle.has_value()) {
+								page->replace_keep_cables = *toggle;
+							}
+							if (button && *button == 1) {
+								auto module_id = page->args.module_id.value();
+
+								page->patch_playloader.change_module(
+									page->pending_replace_slug, module_id, page->replace_keep_cables);
+
+								page->patches.get_view_patch()->module_slugs[module_id] = page->pending_replace_slug;
+
+								page->patches.mark_view_patch_modified();
+								page->gui_state.force_redraw_patch = true;
+								PageArguments new_args{
+									.patch_loc_hash = page->patches.get_view_patch_loc_hash(),
+									.module_id = module_id,
+								};
+								page->page_list.request_new_page_no_history(PageId::ModuleView, new_args);
+							}
+						},
+						page->replace_confirm_msg.c_str(),
+						"Replace",
+						false);
+				} else {
+					page->add_module(slug);
+					page->load_page(PageId::PatchView, page->args);
+				}
 			} else {
 				page->notify_queue.put({"Cannot add module, slug is empty"});
 			}
@@ -465,7 +505,10 @@ private:
 	std::string selected_module_slug;
 
 	RollerHoverText roller_hover;
-	;
+	PluginPopup replace_popup{"Keep cables and maps"};
+	std::string pending_replace_slug;
+	std::string replace_confirm_msg;
+	bool replace_keep_cables = false;
 };
 
 } // namespace MetaModule

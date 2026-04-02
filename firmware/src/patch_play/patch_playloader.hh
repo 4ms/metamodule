@@ -243,6 +243,23 @@ struct PatchPlayLoader {
 			start_audio();
 	}
 
+	void change_module(std::string_view slug, unsigned module_id, bool keep_cables_and_maps) {
+		bool should_play = is_playing();
+
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		if (keep_cables_and_maps)
+			player_.substitute_module(module_id, slug);
+		else
+			player_.replace_module(module_id, slug);
+
+		pr_info("Heap: %u\n", get_heap_size());
+		if (should_play)
+			start_audio();
+	}
+
 	void remove_module(unsigned module_id) {
 		stop_audio();
 		while (!is_audio_muted())
