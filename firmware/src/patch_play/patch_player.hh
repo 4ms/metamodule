@@ -821,10 +821,14 @@ public:
 	}
 
 	void add_module(BrandModuleSlug slug) {
-		auto module_idx = num_modules;
 		pd.module_slugs.push_back(slug);
 		calc_multiple_module_indicies();
 
+		auto module_idx = num_modules;
+		create_module(slug, module_idx);
+	}
+
+	void create_module(BrandModuleSlug slug, unsigned module_idx) {
 		modules[module_idx] = ModuleFactory::create(slug);
 		if (modules[module_idx] == nullptr) {
 			pr_err("Module %s not found\n", slug.c_str());
@@ -939,66 +943,134 @@ public:
 		rebalance_modules();
 	}
 
-	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
-		// Remove old
-		pd.remove_module(module_idx);
+	// replace a module without changing any mappings or cables
+	void substitute_module(unsigned module_idx, BrandModuleSlug new_slug) {
+		if (module_idx >= num_modules)
+			return;
 
+		pr_trace(
+			"Substituting module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
+
+		// De-init original module
 		plugin_module_deinit(modules[module_idx]);
 		modules[module_idx].reset();
 
-		// Add new
-		modules[module_idx] = ModuleFactory::create(new_slug);
-		if (modules[module_idx] == nullptr) {
-			pr_err("Module %s not found\n", new_slug.c_str());
-			return;
-		}
-		pd.module_slugs.push_back(new_slug);
+		// Add new module
+		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
-
-		pr_trace("Replaced module %u with %s\n", module_idx, new_slug.c_str());
-
-		modules[module_idx]->id = module_idx;
-
-		// Match order that VCV does: fromJson (via load_state), then onAdd (via plugin_module_init)
-		reset_module(module_idx);
-		plugin_module_init(modules[module_idx]);
-
-		modules[module_idx]->set_samplerate(samplerate);
-
-		modules[module_idx]->mark_all_inputs_unpatched();
-		modules[module_idx]->mark_all_outputs_unpatched();
+		create_module(new_slug, module_idx);
 
 		// Mark jacks patched
-		for (auto const &cable : pd.int_cables) {
-			if (cable.out.module_id == module_idx)
-				modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
+		mark_patched_jacks(module_idx);
+		mark_patched_panel_jacks(module_idx);
+	}
 
-			for (auto const &input_jack : cable.ins) {
-				if (input_jack.module_id == module_idx) {
-					modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
+	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
+		if (module_idx >= num_modules)
+			return;
+
+		// -- Erase cached connections referencing this module (no squashing) --
+
+		auto erase_matching = [=](auto &container) {
+			for (auto &item : container) {
+				std::erase_if(item, [=](auto &map) { return (map.module_id == module_idx); });
+			}
+		};
+
+		auto erase_matching_inner = [=](auto &container) {
+			for (auto &item : container) {
+				std::erase_if(item.conns, [=](auto &map) { return (map.module_id == module_idx); });
+			}
+		};
+
+		// Panel connections
+		erase_matching(in_conns);
+		erase_matching(out_conns);
+
+		// Inform other modules their jacks are disconnected
+		for (auto &cable : pd.int_cables) {
+			unsigned ins_to_disconnect = 0;
+			for (auto in : cable.ins) {
+				if (cable.out.module_id == module_idx) {
+					modules[in.module_id]->mark_input_unpatched(in.jack_id);
 				}
+				if (in.module_id == module_idx) {
+					ins_to_disconnect++;
+				}
+			}
+			if (ins_to_disconnect == cable.ins.size()) {
+				modules[cable.out.module_id]->mark_output_unpatched(cable.out.jack_id);
 			}
 		}
 
-		// TODO: panel jack maps mark ins/outs as patched
+		// Knob maps
+		for (auto &param_set : knob_maps) {
+			for (auto &set : param_set) {
+				std::erase_if(set, [=](auto &map) { return (map.map.module_id == module_idx); });
+			}
+		}
 
-		// TODO: Can we verify mappings and panel jack mappings are valid?
+		// MIDI maps
+		erase_matching(midi_cc_knob_maps);
+		erase_matching(midi_note_knob_maps);
+		erase_matching(midi_note_pitch_conns);
+		erase_matching(midi_note_gate_conns);
+		erase_matching(midi_note_vel_conns);
+		erase_matching(midi_note_aft_conns);
+		erase_matching(midi_cc_conns);
+		erase_matching(midi_gate_conns);
+		erase_matching_inner(midi_note_retrig);
+		erase_matching_inner(midi_pulses);
+		erase_matching_inner(midi_divclk_pulses);
 
-		rebalance_modules();
+		// Clean up PatchData (cables, mapped_ins/outs, static_knobs, etc.)
+		pd.blank_out_module(module_idx);
+
+		// Deinit old module
+		plugin_module_deinit(modules[module_idx]);
+		modules[module_idx].reset();
+
+		// Create new module in the same slot
+		pd.module_slugs[module_idx] = new_slug;
+		calc_multiple_module_indicies();
+		create_module(new_slug, module_idx);
 	}
-
-	// General info getters:
 
 	// Jack patched/unpatched status
 
 	// Follow every internal cable and tell the modules that their jacks are patched
-	void mark_patched_jacks() {
+	// Optionally filter by module id
+	void mark_patched_jacks(std::optional<uint16_t> module_id = std::nullopt) {
 		for (auto const &cable : pd.int_cables) {
-			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
+			if (!module_id.has_value() || cable.out.module_id == module_id.value())
+				modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
+
 			for (auto const &input_jack : cable.ins) {
 				if (input_jack.module_id < num_modules)
-					modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
+					if (!module_id.has_value() || input_jack.module_id == module_id.value())
+						modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
 			}
+		}
+	}
+
+	void mark_patched_panel_jacks(std::optional<uint16_t> module_idx = std::nullopt) {
+		for (auto i = 0u; auto const &panel_out : out_conns) {
+			if (out_patched[i]) {
+				for (auto const &c : panel_out) {
+					if (!module_idx.has_value() || c.module_id == module_idx)
+						modules[c.module_id]->mark_output_patched(c.jack_id);
+				}
+			}
+			i++;
+		}
+		for (auto i = 0u; auto const &panel_in : in_conns) {
+			if (in_patched[i]) {
+				for (auto const &c : panel_in) {
+					if (!module_idx.has_value() || c.module_id == module_idx)
+						modules[c.module_id]->mark_input_patched(c.jack_id);
+				}
+			}
+			i++;
 		}
 	}
 
