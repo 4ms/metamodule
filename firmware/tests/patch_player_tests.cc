@@ -1715,6 +1715,381 @@ PatchData:
 	}
 }
 
+TEST_CASE("substitute_module preserves all connections and mappings") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: SubstituteTest
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:MultiLFO'
+    2: '4msCompany:Drum'
+    3: '4msCompany:StMix'
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+      color: 1000
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 1
+    - panel_jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 2
+        - module_id: 3
+          jack_id: 1
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 2
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 3
+        jack_id: 0
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 2
+      param_id: 0
+      value: 0.25
+    - module_id: 2
+      param_id: 1
+      value: 0.75
+    - module_id: 3
+      param_id: 0
+      value: 0.1
+  mapped_knobs:
+    - name: ''
+      set:
+        - panel_knob_id: 0
+          module_id: 2
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 3
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer p;
+	p.load_patch(pd);
+
+	// Verify initial state
+	CHECK(p.get_module_slugs().size() == 4);
+	CHECK(p.get_module_slugs()[2].is_equal("4msCompany:Drum"));
+
+	auto orig_num_cables = p.get_int_cables().size();
+	auto orig_in_conns = p.get_inconns();
+	auto orig_out_conns = p.get_outconns();
+
+	// Substitute module 2 (Drum) with a different slug.
+	// Module 2 has no int_cables, but has panel in/out connections and knob maps.
+	p.substitute_module(2, "4msCompany:KPLS");
+
+	SUBCASE("Module count unchanged") {
+		CHECK(p.get_module_slugs().size() == 4);
+	}
+
+	SUBCASE("Slug is updated") {
+		CHECK(p.get_module_slugs()[2].is_equal("4msCompany:KPLS"));
+	}
+
+	SUBCASE("Other slugs unchanged") {
+		CHECK(p.get_module_slugs()[0].is_equal("4msCompany:HubMedium"));
+		CHECK(p.get_module_slugs()[1].is_equal("4msCompany:MultiLFO"));
+		CHECK(p.get_module_slugs()[3].is_equal("4msCompany:StMix"));
+	}
+
+	SUBCASE("Internal cables preserved") {
+		CHECK(p.get_int_cables().size() == orig_num_cables);
+	}
+
+	SUBCASE("Panel input connections preserved") {
+		CHECK(p.get_inconns()[0] == orig_in_conns[0]);
+		CHECK(p.get_inconns()[1] == orig_in_conns[1]);
+	}
+
+	SUBCASE("Panel output connections preserved") {
+		CHECK(p.get_outconns()[0] == orig_out_conns[0]);
+		CHECK(p.get_outconns()[1] == orig_out_conns[1]);
+	}
+
+	SUBCASE("Knob mappings preserved") {
+		auto &knobs = p.get_knobconns();
+		// knob_maps[0] should still have entries for module 2 and module 3
+		bool found_mod2 = false;
+		bool found_mod3 = false;
+		for (auto &param_vec : knobs[0]) {
+			for (auto &mp : param_vec) {
+				if (mp.map.module_id == 2)
+					found_mod2 = true;
+				if (mp.map.module_id == 3)
+					found_mod3 = true;
+			}
+		}
+		CHECK(found_mod2);
+		CHECK(found_mod3);
+	}
+}
+
+TEST_CASE("replace_module removes all connections and mappings for the replaced module") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: ReplaceTest
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:MultiLFO'
+    2: '4msCompany:Drum'
+    3: '4msCompany:StMix'
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 3
+      color: 1000
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+      color: 2000
+    - out:
+        module_id: 1
+        jack_id: 1
+      ins:
+        - module_id: 3
+          jack_id: 1
+      color: 3000
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 1
+    - panel_jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 2
+        - module_id: 3
+          jack_id: 1
+    - panel_jack_id: 2
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 2
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 3
+        jack_id: 0
+    - panel_jack_id: 2
+      out:
+        module_id: 1
+        jack_id: 0
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 2
+      param_id: 0
+      value: 0.25
+    - module_id: 2
+      param_id: 1
+      value: 0.75
+    - module_id: 3
+      param_id: 0
+      value: 0.1
+  mapped_knobs:
+    - name: ''
+      set:
+        - panel_knob_id: 0
+          module_id: 2
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 3
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer p;
+	p.load_patch(pd);
+
+	// Verify initial state
+	CHECK(p.get_module_slugs().size() == 4);
+	CHECK(p.get_module_slugs()[2].is_equal("4msCompany:Drum"));
+
+	// Replace module 2 (Drum) with a different slug
+	p.replace_module(2, "4msCompany:KPLS");
+
+	SUBCASE("Module count unchanged") {
+		CHECK(p.get_module_slugs().size() == 4);
+	}
+
+	SUBCASE("Slug is updated") {
+		CHECK(p.get_module_slugs()[2].is_equal("4msCompany:KPLS"));
+	}
+
+	SUBCASE("Other slugs unchanged") {
+		CHECK(p.get_module_slugs()[0].is_equal("4msCompany:HubMedium"));
+		CHECK(p.get_module_slugs()[1].is_equal("4msCompany:MultiLFO"));
+		CHECK(p.get_module_slugs()[3].is_equal("4msCompany:StMix"));
+	}
+
+	SUBCASE("Internal cables referencing module 2 are removed") {
+		// Cable 1->2 and 2->3 should be removed, cable 1->3 should remain
+		bool found_cable_1_3 = false;
+		for (auto &cable : p.get_int_cables()) {
+			// No cable should reference module 2
+			CHECK(cable.out.module_id != 2);
+			for (auto &in : cable.ins) {
+				CHECK(in.module_id != 2);
+			}
+			if (cable.out == Jack{1, 1} && cable.ins.size() == 1 && cable.ins[0] == Jack{3, 1})
+				found_cable_1_3 = true;
+		}
+		CHECK(found_cable_1_3);
+	}
+
+	SUBCASE("Panel input connections referencing module 2 are removed") {
+		// Panel in 0 was mapped to module 2 only — should be empty
+		CHECK(p.get_inconns()[0].size() == 0);
+		// Panel in 1 had module 2 entry — that's removed, but module 3 entry (via Hub) remains
+		CHECK(p.get_inconns()[1].size() == 1);
+		// The remaining connection is routed through the Hub (module 0) because module 3 jack 1
+		// also has an internal cable to it
+		CHECK(p.get_inconns()[1][0] == Jack{0, 1});
+		// Panel in 2 was mapped to module 1 — unaffected
+		CHECK(p.get_inconns()[2].size() == 1);
+		CHECK(p.get_inconns()[2][0] == Jack{1, 0});
+	}
+
+	SUBCASE("Panel output connections referencing module 2 are removed") {
+		// Panel out 0 was mapped to module 2 — should be empty
+		CHECK(p.get_outconns()[0].size() == 0);
+		// Panel out 1 was mapped to module 3 — unaffected
+		CHECK(p.get_outconns()[1].size() == 1);
+		CHECK(p.get_outconns()[1][0] == Jack{3, 0});
+		// Panel out 2 was mapped to module 1 — unaffected
+		CHECK(p.get_outconns()[2].size() == 1);
+		CHECK(p.get_outconns()[2][0] == Jack{1, 0});
+	}
+
+	SUBCASE("Knob mappings referencing module 2 are removed, others preserved") {
+		auto &knobs = p.get_knobconns();
+		bool found_mod2 = false;
+		bool found_mod1 = false;
+		bool found_mod3 = false;
+		for (auto &param_vec : knobs[0]) {
+			for (auto &mp : param_vec) {
+				if (mp.map.module_id == 2)
+					found_mod2 = true;
+				if (mp.map.module_id == 1)
+					found_mod1 = true;
+				if (mp.map.module_id == 3)
+					found_mod3 = true;
+			}
+		}
+		CHECK_FALSE(found_mod2);
+		CHECK(found_mod1);
+		CHECK(found_mod3);
+	}
+
+	SUBCASE("Module IDs of other modules are unchanged (no squashing)") {
+		// Module 1 and 3 should still be at their original indices
+		CHECK(p.get_modules()[1].get() != nullptr);
+		CHECK(p.get_modules()[3].get() != nullptr);
+	}
+}
+
 TEST_CASE("Summing part of a split: virt output splits to a virt input and panel output. The virt input also sums with "
 		  "a panel input") {
 	// Module 2 input 0 receives both an internal cable (from Module 1 output 0) and a panel input.
