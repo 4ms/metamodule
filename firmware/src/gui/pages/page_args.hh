@@ -17,6 +17,7 @@ struct PageArguments {
 	std::optional<ElementCount::Indices> element_indices{};
 	std::optional<bool> detail_mode{};
 	std::optional<std::pair<float, float>> element_mm{};
+	std::optional<bool> replace_module{};
 
 	bool operator==(PageArguments const &that) const = default;
 };
