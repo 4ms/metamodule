@@ -160,23 +160,23 @@ public:
 			if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
 
 				std::optional<int> next_knobset = std::nullopt;
+				int cur_knobset = info.page_list.get_active_knobset();
 
 				// Change knobset via MIDI CC
 				if (info.settings.midi.knobset_control == MidiSettings::KnobsetControl::Enabled) {
 					auto &cc = info.params.midi_ccs[info.settings.midi.knobset_cc & 127];
 
-					auto midi_chan =
-						info.settings.midi.knobset_channel - 1; //User sees channels 1-16, but internally is 0-15
+					auto midi_chan = info.settings.midi.knobset_channel - 1;
 					if (cc.changed && cc.val == midi_chan) {
-						auto next = std::clamp<unsigned>(cc.value, 0, num_knobsets - 1);
-						if (next != info.page_list.get_active_knobset())
-							next_knobset = next;
+						if (cc.value != cur_knobset && cc.value < num_knobsets) {
+							next_knobset = cc.value;
+							cc.changed = false;
+						}
 					}
 				}
 
 				// Change knobset via Button+Encoder
 				if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
-					int cur_knobset = info.page_list.get_active_knobset();
 					next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
 				}
 
