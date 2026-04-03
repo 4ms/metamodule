@@ -365,36 +365,7 @@ private:
 			auto cur_idx = lv_roller_get_selected(ui_ModuleListRoller);
 			if (auto slug = page->get_selected_combined_slug(cur_idx); slug.length()) {
 				if (page->args.replace_module.value_or(false) && page->args.module_id.has_value()) {
-					page->pending_replace_slug = slug;
-					auto display_name = ModuleFactory::getModuleDisplayName(slug);
-					page->replace_confirm_msg = "Replace module with " + std::string{display_name} + "?";
-					page->replace_popup.init(lv_layer_top(), page->group);
-					page->replace_keep_cables = false;
-					page->replace_popup.show(
-						[page](std::optional<unsigned> button, std::optional<bool> toggle) {
-							if (toggle.has_value()) {
-								page->replace_keep_cables = *toggle;
-							}
-							if (button && *button == 1) {
-								auto module_id = page->args.module_id.value();
-
-								page->patch_playloader.change_module(
-									page->pending_replace_slug, module_id, page->replace_keep_cables);
-
-								page->patches.get_view_patch()->module_slugs[module_id] = page->pending_replace_slug;
-
-								page->patches.mark_view_patch_modified();
-								page->gui_state.force_redraw_patch = true;
-								PageArguments new_args{
-									.patch_loc_hash = page->patches.get_view_patch_loc_hash(),
-									.module_id = module_id,
-								};
-								page->page_list.request_new_page_no_history(PageId::ModuleView, new_args);
-							}
-						},
-						page->replace_confirm_msg.c_str(),
-						"Replace",
-						false);
+					page->change_module(slug);
 				} else {
 					page->add_module(slug);
 					page->load_page(PageId::PatchView, page->args);
@@ -403,6 +374,36 @@ private:
 				page->notify_queue.put({"Cannot add module, slug is empty"});
 			}
 		}
+	}
+
+	void change_module(std::string const &slug) {
+		pending_replace_slug = slug;
+		auto display_name = ModuleFactory::getModuleDisplayName(slug);
+		replace_confirm_msg = "Replace module with " + std::string{display_name} + "?";
+		replace_popup.init(lv_layer_top(), group);
+		replace_keep_cables = false;
+		replace_popup.show(
+			[this](std::optional<unsigned> button, std::optional<bool> toggle) {
+				if (toggle.has_value()) {
+					replace_keep_cables = *toggle;
+				}
+				if (button && *button == 1) {
+					auto module_id = args.module_id.value();
+
+					patch_playloader.change_module(pending_replace_slug, module_id, replace_keep_cables);
+
+					patches.mark_view_patch_modified();
+					gui_state.force_redraw_patch = true;
+					PageArguments new_args{
+						.patch_loc_hash = patches.get_view_patch_loc_hash(),
+						.module_id = module_id,
+					};
+					page_list.request_new_page_no_history(PageId::ModuleView, new_args);
+				}
+			},
+			replace_confirm_msg.c_str(),
+			"Replace",
+			false);
 	}
 
 	static inline unsigned cur_selected = 0;
