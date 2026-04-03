@@ -400,6 +400,8 @@ TEST_CASE("Serialize settings") {
   patch_suggested_audio:
     apply_samplerate: 0
     apply_blocksize: 1
+  video:
+    enabled: 0
 )";
 	// clang format-on
 
