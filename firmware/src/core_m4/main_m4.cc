@@ -7,6 +7,7 @@
 #include "fs/fs_messages.hh"
 #include "fs/module_fs_message_handler.hh"
 #include "hsem_handler.hh"
+#include "usb/device_settings_messages.hh"
 #include "usb/usb_manager.hh"
 
 #include <wifi_interface.hh>
@@ -56,6 +57,8 @@ int main() {
 	if (reload_default_patches)
 		fs_messages.reload_default_patches();
 
+	DeviceSettingsMessages device_settings{SharedMemoryS::ptrs.icc_device_settings_message};
+
 	ModuleFSMessageHandler module_fs_messages{SharedMemoryS::ptrs.icc_modulefs_message_core0,
 											  SharedMemoryS::ptrs.icc_modulefs_message_core1};
 
@@ -97,6 +100,10 @@ int main() {
 		fs_messages.process();
 
 		module_fs_messages.process();
+
+		auto ds_result = device_settings.process();
+		if (ds_result.has_video_mode_change)
+			usb.set_video_mode(ds_result.video_enabled);
 
 		WifiInterface::run();
 	}
