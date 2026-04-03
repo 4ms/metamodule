@@ -1,5 +1,5 @@
 #include "usb_video_device.hh"
-#include "rgb565_to_yuy2.hh"
+#include "debug.hh"
 #include <cstring>
 
 extern "C" USBD_DescriptorsTypeDef UVC_Desc;
@@ -11,8 +11,8 @@ static USBD_VIDEO_ItfTypeDef video_fops = {
 	MetaModule::UsbVideoDevice::Video_Itf_Data,
 };
 
-// Temporary buffer for YUY2 packet data
-static uint8_t yuy2_packet_buf[UVC_PACKET_SIZE] __attribute__((aligned(4)));
+// Packet buffer for USB transmission (4-byte aligned for DMA)
+static uint8_t packet_buf[UVC_PACKET_SIZE] __attribute__((aligned(4)));
 
 namespace MetaModule
 {
@@ -61,35 +61,34 @@ int8_t UsbVideoDevice::Video_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t 
 		return 0;
 	}
 
-	// Payload size per packet (excluding 2-byte UVC header added by the class driver)
+	// Shadow buffer is already YUY2 (converted on A7 side).
+	// 2 bytes per pixel in YUY2, same as total byte count.
 	constexpr uint32_t payload_per_packet = UVC_PACKET_SIZE - 2;
-	// YUY2: 2 bytes per pixel (same as RGB565), so pixels per packet.
-	// Round down to even so YUY2 pairs are never split across packets.
-	constexpr uint32_t pixels_per_packet = (payload_per_packet / 2) & ~1u;
-	// Total packets needed for one frame
-	constexpr uint32_t total_pixels = UVC_WIDTH * UVC_HEIGHT;
+	// Align to 4 bytes (YUY2 macro-pixel = 4 bytes = 2 pixels)
+	constexpr uint32_t bytes_per_packet = payload_per_packet & ~3u;
+	constexpr uint32_t total_bytes = UVC_WIDTH * UVC_HEIGHT * 2;
 
-	if (pixel_offset < total_pixels) {
-		uint32_t pixels_remaining = total_pixels - pixel_offset;
-		uint32_t pixels_this_packet = (pixels_remaining < pixels_per_packet) ? pixels_remaining : pixels_per_packet;
+	Debug::Pin1::high();
+	if (pixel_offset < total_bytes) {
+		uint32_t remaining = total_bytes - pixel_offset;
+		uint32_t bytes_this_packet = (remaining < bytes_per_packet) ? remaining : bytes_per_packet;
 
-		// Ensure even number of pixels for YUY2 pair conversion
-		pixels_this_packet &= ~1u;
+		// Direct memcpy from pre-converted YUY2 shadow buffer
+		auto *src = reinterpret_cast<const uint8_t *>(shadow_fb) + pixel_offset;
+		std::memcpy(packet_buf, src, bytes_this_packet);
 
-		// Convert RGB565 to YUY2 directly into packet buffer
-		rgb565_to_yuy2(&shadow_fb[pixel_offset], yuy2_packet_buf, pixels_this_packet);
-
-		*pbuf = yuy2_packet_buf;
-		*psize = (uint16_t)(pixels_this_packet * 2 + 2); // +2 for UVC header
-		pixel_offset += pixels_this_packet;
+		*pbuf = packet_buf;
+		*psize = (uint16_t)(bytes_this_packet + 2); // +2 for UVC header
+		pixel_offset += bytes_this_packet;
 	} else {
 		// End of frame: header-only packet signals new frame
 		*psize = 2;
 	}
+	Debug::Pin1::low();
 
 	*pcktidx = (uint16_t)packet_index;
 
-	if (pixel_offset >= total_pixels) {
+	if (pixel_offset >= total_bytes) {
 		pixel_offset = 0;
 		packet_index = 0;
 	} else {
