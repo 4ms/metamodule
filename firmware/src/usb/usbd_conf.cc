@@ -232,7 +232,11 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	hpcd.Init.low_power_enable = 0;
 	hpcd.Init.lpm_enable = 0;
 	hpcd.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
+#ifdef USB_MODE_VIDEO
+	hpcd.Init.Sof_enable = 1;
+#else
 	hpcd.Init.Sof_enable = 0;
+#endif
 	hpcd.Init.speed = PCD_SPEED_HIGH;
 	hpcd.Init.vbus_sensing_enable = 1;
 

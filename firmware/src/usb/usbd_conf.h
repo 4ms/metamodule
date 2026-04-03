@@ -65,14 +65,26 @@ extern "C" {
 #define USBD_CLASS_BOS_ENABLED 1U
 #define USB_BB_MAX_NUM_ALT_MODE 0x2U
 
+/* UVC Video Class Configuration */
+#define USBD_UVC_FORMAT_UNCOMPRESSED
+
+#define UVC_WIDTH 320U
+#define UVC_HEIGHT 240U
+
 /* bEndpointAddress in Endpoint Descriptor */
 #define UVC_IN_EP 0x81U
 
 #define UVC_CAM_FPS_FS 10U
-#define UVC_CAM_FPS_HS 5U
+#define UVC_CAM_FPS_HS 15U
 
 #define UVC_ISO_FS_MPS 512U
-#define UVC_ISO_HS_MPS 512U
+#define UVC_ISO_HS_MPS 1024U
+#define UVC_PACKET_SIZE 1024U
+
+#define UVC_BITS_PER_PIXEL 16U
+#define UVC_UNCOMPRESSED_GUID UVC_GUID_YUY2
+
+#include <string.h>
 
 /* Memory management macros make sure to use static memory allocation */
 /** Alias for memory allocation. */

@@ -6,6 +6,7 @@
 #include "drivers/pin_change.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "usb/device_cdc/usb_serial_device.hh"
+#include "core_intercom/shared_memory.hh"
 #include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
 
@@ -30,6 +31,9 @@ public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
 		: usb_device{console_buffers}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
+#ifdef USB_MODE_VIDEO
+		UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
+#endif
 		usb_device.start();
 		usb_host.init();
 		found_fusb = usbctl.init(); //NOLINT
