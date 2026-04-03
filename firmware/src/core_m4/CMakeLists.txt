@@ -148,11 +148,6 @@ target_link_script(
 target_link_libraries(main_m4.elf PRIVATE cpputil)
 target_compile_definitions(main_m4.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
-option(USB_MODE_VIDEO "Enable USB Video Class (UVC) instead of CDC serial" OFF)
-if(USB_MODE_VIDEO)
-  target_compile_definitions(main_m4.elf PRIVATE USB_MODE_VIDEO)
-endif()
-
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 
