@@ -103,13 +103,18 @@ public:
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
 
-		// Copy flushed region into the shadow framebuffer for USB video streaming
+		// Copy flushed region into the shadow framebuffer for USB video streaming.
+		// Horizontally mirror each row because the MADCTL CW90 rotation (MY|MV)
+		// flips the X-axis in view coordinates vs what appears on the physical screen.
 		if (uvc_shadow_fb) {
 			auto region_w = area->x2 - area->x1 + 1;
 			auto src = pixbuf;
+			auto mirror_x1 = ScreenBufferConf::viewWidth - 1 - area->x2;
 			for (auto y = area->y1; y <= area->y2; y++) {
-				auto dst = &uvc_shadow_fb[y * ScreenBufferConf::viewWidth + area->x1];
-				std::copy_n(src, region_w, dst);
+				auto dst = &uvc_shadow_fb[y * ScreenBufferConf::viewWidth + mirror_x1];
+				for (auto x = region_w - 1; x >= 0; x--) {
+					*dst++ = src[x];
+				}
 				src += region_w;
 			}
 		}
