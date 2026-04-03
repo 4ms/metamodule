@@ -68,7 +68,6 @@ int8_t UsbVideoDevice::Video_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t 
 	constexpr uint32_t pixels_per_packet = (payload_per_packet / 2) & ~1u;
 	// Total packets needed for one frame
 	constexpr uint32_t total_pixels = UVC_WIDTH * UVC_HEIGHT;
-	constexpr uint32_t total_packets = (total_pixels + pixels_per_packet - 1) / pixels_per_packet;
 
 	if (pixel_offset < total_pixels) {
 		uint32_t pixels_remaining = total_pixels - pixel_offset;
