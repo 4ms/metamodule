@@ -76,6 +76,10 @@ class MMDisplay {
 
 	static inline std::array<lv_color_t, BufferSize> testbuf;
 
+	// Pointer to external shadow framebuffer for USB video streaming.
+	// Set by init(), points to a shared memory buffer accessible from both cores.
+	static inline uint16_t *uvc_shadow_fb = nullptr;
+
 public:
 	static void init(MetaParams &metaparams, Screensaver &screensaver) {
 		m = &metaparams;
@@ -98,6 +102,17 @@ public:
 		last_used_disp_drv = disp_drv;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
+
+		// Copy flushed region into the shadow framebuffer for USB video streaming
+		if (uvc_shadow_fb) {
+			auto region_w = area->x2 - area->x1 + 1;
+			auto src = pixbuf;
+			for (auto y = area->y1; y <= area->y2; y++) {
+				auto dst = &uvc_shadow_fb[y * ScreenBufferConf::viewWidth + area->x1];
+				std::copy_n(src, region_w, dst);
+				src += region_w;
+			}
+		}
 
 		last_transfer_start_time = HAL_GetTick();
 		last_area = *area;
@@ -124,6 +139,10 @@ public:
 				// _spi_driver.transfer_partial_frame(last_area.x1, last_area.y1, last_area.x2, last_area.y2, last_pixbuf);
 			}
 		}
+	}
+
+	static void set_uvc_shadow_fb(uint16_t *fb) {
+		uvc_shadow_fb = fb;
 	}
 
 	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
