@@ -433,6 +433,8 @@ TEST_CASE("Serialize settings") {
   notifications:
     amount: OnlyCritical
     animation: 0
+  video:
+    enabled: 0
 )";
 	// clang format-on
 
