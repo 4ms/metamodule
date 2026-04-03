@@ -89,6 +89,9 @@ add_executable(
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_data.c
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_scsi.c
   ${USBDEV_LIBDIR}/Class/CDC/Src/usbd_cdc.c
+  ${USBDEV_LIBDIR}/Class/VIDEO/Src/usbd_video.c
+  ${FWDIR}/src/usb/device_video/usb_video_device.cc
+  ${FWDIR}/src/usb/device_video/usbd_video_desc.c
 
   ${USBDEV_LIBDIR}/Core/Src/usbd_core.c
   ${USBDEV_LIBDIR}/Core/Src/usbd_ctlreq.c
@@ -129,6 +132,7 @@ target_include_directories(
           ${USBDEV_LIBDIR}/Core/Inc
           ${USBDEV_LIBDIR}/Class/MSC/Inc
           ${USBDEV_LIBDIR}/Class/CDC/Inc
+          ${USBDEV_LIBDIR}/Class/VIDEO/Inc
 )
 
 target_link_libraries(main_m4.elf PUBLIC metamodule::core-interface)
@@ -143,6 +147,11 @@ target_link_script(
 
 target_link_libraries(main_m4.elf PRIVATE cpputil)
 target_compile_definitions(main_m4.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
+
+option(USB_MODE_VIDEO "Enable USB Video Class (UVC) instead of CDC serial" OFF)
+if(USB_MODE_VIDEO)
+  target_compile_definitions(main_m4.elf PRIVATE USB_MODE_VIDEO)
+endif()
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")

@@ -31,6 +31,7 @@ extern RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 extern ConcurrentBuffer console_a7_0_buff;
 extern ConcurrentBuffer console_a7_1_buff;
 extern ConcurrentBuffer console_m4_buff;
+extern std::array<uint16_t, 320 * 240> uvc_shadow_framebuffer;
 
 void init();
 
