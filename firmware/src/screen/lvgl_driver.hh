@@ -8,6 +8,7 @@
 #include "params/params.hh"
 #include "screen/screen_writer.hh"
 #include "uart_log.hh"
+#include "usb/device_video/rgb565_to_yuy2.hh"
 #include <span>
 
 // #define MONKEYROTARY
@@ -109,29 +110,34 @@ public:
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
 
-		// Copy flushed region into the shadow framebuffer for USB video streaming.
-		// Conditionally horizontally mirror each row.
+		// Convert flushed region from RGB565 to YUY2 into the shadow framebuffer.
+		// The M4 USB side can then memcpy directly without any per-pixel work.
+		Debug::Pin0::high();
 		if (uvc_shadow_fb) {
 			auto region_w = area->x2 - area->x1 + 1;
 			auto src = pixbuf;
+			auto *yuy2_buf = reinterpret_cast<uint8_t *>(uvc_shadow_fb);
 
 			if (mirror_x) {
-				auto mirror_x1 = ScreenBufferConf::viewWidth - 1 - area->x2;
 				for (auto y = area->y1; y <= area->y2; y++) {
-					auto dst = &uvc_shadow_fb[y * ScreenBufferConf::viewWidth + mirror_x1];
-					for (auto x = region_w - 1; x >= 0; x--) {
-						*dst++ = src[x];
+					auto *yuy2_row = &yuy2_buf[y * ScreenBufferConf::viewWidth * 2];
+					auto dest_x = ScreenBufferConf::viewWidth - 1 - area->x1;
+					for (int i = 0; i < region_w; i++) {
+						write_yuy2_pixel(yuy2_row, dest_x - i, src[i]);
 					}
 					src += region_w;
 				}
 			} else {
 				for (auto y = area->y1; y <= area->y2; y++) {
-					auto dst = &uvc_shadow_fb[y * ScreenBufferConf::viewWidth + area->x1];
-					std::copy_n(src, region_w, dst);
+					auto *yuy2_row = &yuy2_buf[y * ScreenBufferConf::viewWidth * 2];
+					for (int i = 0; i < region_w; i++) {
+						write_yuy2_pixel(yuy2_row, area->x1 + i, src[i]);
+					}
 					src += region_w;
 				}
 			}
 		}
+		Debug::Pin0::low();
 
 		last_transfer_start_time = HAL_GetTick();
 		last_area = *area;

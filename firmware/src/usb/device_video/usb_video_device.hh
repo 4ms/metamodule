@@ -13,7 +13,7 @@ public:
 	void start();
 	void stop();
 
-	// Set the pointer to the RGB565 shadow framebuffer (320x240)
+	// Set the pointer to the YUY2 shadow framebuffer (320x240, pre-converted on A7)
 	static void set_framebuffer(uint16_t *fb);
 
 	static int8_t Video_Itf_Init();
