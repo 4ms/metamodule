@@ -10,6 +10,7 @@
 #include "user_settings/missing_plugin_settings.hh"
 #include "user_settings/notification_settings.hh"
 #include "user_settings/screensaver_settings.hh"
+#include "user_settings/video_settings.hh"
 #include "user_settings/view_settings.hh"
 
 namespace MetaModule
@@ -34,6 +35,7 @@ struct UserSettings {
 	PatchSuggestedAudioSettings patch_suggested_audio{};
 	ButtonExpKnobSetSettings button_exp_knobset{};
 	NotificationSettings notifications{};
+	VideoSettings video{};
 };
 
 } // namespace MetaModule
