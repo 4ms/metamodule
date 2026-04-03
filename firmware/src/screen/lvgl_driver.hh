@@ -80,6 +80,8 @@ class MMDisplay {
 	// Set by init(), points to a shared memory buffer accessible from both cores.
 	static inline uint16_t *uvc_shadow_fb = nullptr;
 
+	static inline bool mirror_x = false;
+
 public:
 	static void init(MetaParams &metaparams, Screensaver &screensaver) {
 		m = &metaparams;
@@ -98,24 +100,36 @@ public:
 		lv_disp_flush_ready(last_used_disp_drv);
 	}
 
+	static void set_mirroring(bool mirror) {
+		mirror_x = mirror;
+	}
+
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
 		last_used_disp_drv = disp_drv;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
 
 		// Copy flushed region into the shadow framebuffer for USB video streaming.
-		// Horizontally mirror each row because the MADCTL CW90 rotation (MY|MV)
-		// flips the X-axis in view coordinates vs what appears on the physical screen.
+		// Conditionally horizontally mirror each row.
 		if (uvc_shadow_fb) {
 			auto region_w = area->x2 - area->x1 + 1;
 			auto src = pixbuf;
-			auto mirror_x1 = ScreenBufferConf::viewWidth - 1 - area->x2;
-			for (auto y = area->y1; y <= area->y2; y++) {
-				auto dst = &uvc_shadow_fb[y * ScreenBufferConf::viewWidth + mirror_x1];
-				for (auto x = region_w - 1; x >= 0; x--) {
-					*dst++ = src[x];
+
+			if (mirror_x) {
+				auto mirror_x1 = ScreenBufferConf::viewWidth - 1 - area->x2;
+				for (auto y = area->y1; y <= area->y2; y++) {
+					auto dst = &uvc_shadow_fb[y * ScreenBufferConf::viewWidth + mirror_x1];
+					for (auto x = region_w - 1; x >= 0; x--) {
+						*dst++ = src[x];
+					}
+					src += region_w;
 				}
-				src += region_w;
+			} else {
+				for (auto y = area->y1; y <= area->y2; y++) {
+					auto dst = &uvc_shadow_fb[y * ScreenBufferConf::viewWidth + area->x1];
+					std::copy_n(src, region_w, dst);
+					src += region_w;
+				}
 			}
 		}
 
