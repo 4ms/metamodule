@@ -29,11 +29,10 @@ class UsbManager {
 
 public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: usb_device{console_buffers}
+		: usb_device{console_buffers, SharedMemoryS::ptrs.video_enabled}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
-#ifdef USB_MODE_VIDEO
-		UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
-#endif
+		if (usb_device.video_mode)
+			UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
 		usb_device.start();
 		usb_host.init();
 		found_fusb = usbctl.init(); //NOLINT

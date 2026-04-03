@@ -57,6 +57,8 @@ extern "C" void aux_core_main() {
 		  *A7SharedMemoryS::ptrs.patch_mod_queue,
 		  plugin_manager,
 		  ramdisk};
+	SharedMemoryS::ptrs.video_enabled = ui.get_settings().video.enabled;
+
 	ui.update_screen();
 	ui.update_page();
 

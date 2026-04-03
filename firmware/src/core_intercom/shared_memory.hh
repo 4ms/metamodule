@@ -21,6 +21,7 @@ struct SharedMemoryS {
 		ConcurrentBuffer *console_a7_1_buff;
 		ConcurrentBuffer *console_m4_buff;
 		uint16_t *uvc_framebuffer;
+		bool video_enabled;
 	};
 
 	static Ptrs ptrs;
