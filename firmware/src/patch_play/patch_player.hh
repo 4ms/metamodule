@@ -847,6 +847,10 @@ public:
 		modules[module_idx]->set_samplerate(samplerate);
 
 		rebalance_modules();
+
+		// Mark jacks patched
+		mark_patched_jacks(module_idx);
+		mark_patched_panel_jacks(module_idx);
 	}
 
 	void remove_module(uint16_t module_idx) {
@@ -948,8 +952,7 @@ public:
 		if (module_idx >= num_modules)
 			return;
 
-		pr_trace(
-			"Substituting module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
+		pr_trace("Subs. module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
 
 		// De-init original module
 		plugin_module_deinit(modules[module_idx]);
@@ -959,17 +962,15 @@ public:
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
 		create_module(new_slug, module_idx);
-
-		// Mark jacks patched
-		mark_patched_jacks(module_idx);
-		mark_patched_panel_jacks(module_idx);
 	}
 
 	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
 		if (module_idx >= num_modules)
 			return;
 
-		// -- Erase cached connections referencing this module (no squashing) --
+		pr_trace("Replace module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
+
+		//  Erase cached connections referencing this module (no squashing)
 
 		auto erase_matching = [=](auto &container) {
 			for (auto &item : container) {
@@ -1023,12 +1024,12 @@ public:
 		erase_matching_inner(midi_pulses);
 		erase_matching_inner(midi_divclk_pulses);
 
-		// Clean up PatchData (cables, mapped_ins/outs, static_knobs, etc.)
-		pd.blank_out_module(module_idx);
-
 		// Deinit old module
 		plugin_module_deinit(modules[module_idx]);
 		modules[module_idx].reset();
+
+		// Clean up PatchData (cables, mapped_ins/outs, static_knobs, etc.)
+		pd.blank_out_module(module_idx);
 
 		// Create new module in the same slot
 		pd.module_slugs[module_idx] = new_slug;
