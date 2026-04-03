@@ -132,6 +132,12 @@ static void write(ryml::NodeRef *n, MidiPCPatchLoadSettings const &s) {
 	}
 }
 
+static void write(ryml::NodeRef *n, VideoSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("enabled") << s.enabled;
+}
+
 static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {
 	*n |= ryml::MAP;
 
@@ -170,6 +176,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["patch_suggested_audio"] << settings.patch_suggested_audio;
 	data["button_exp_knobset"] << settings.button_exp_knobset;
 	data["notifications"] << settings.notifications;
+	data["video"] << settings.video;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();
