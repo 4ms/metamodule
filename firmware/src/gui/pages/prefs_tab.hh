@@ -10,8 +10,10 @@
 #include "gui/slsexport/prefs_section_midi.hh"
 #include "gui/slsexport/prefs_section_missing_plugins.hh"
 #include "gui/slsexport/prefs_section_screensaver.hh"
+#include "gui/slsexport/prefs_section_video.hh"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "core_a7/device_settings_proxy.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/audio_settings.hh"
 
@@ -29,6 +31,7 @@ struct PrefsTab : SystemMenuTab {
 		, fs{settings.filesystem}
 		, midi{settings.midi}
 		, missing_plugins{settings.missing_plugins}
+		, video{settings.video}
 		, settings{settings} {
 
 		audio_section.create(ui_SystemMenuPrefsTab);
@@ -37,6 +40,7 @@ struct PrefsTab : SystemMenuTab {
 		fs_section.create(ui_SystemMenuPrefsTab);
 		midi_section.create(ui_SystemMenuPrefsTab);
 		missingplugins_section.create(ui_SystemMenuPrefsTab);
+		video_section.create(ui_SystemMenuPrefsTab);
 
 		auto btns = create_save_revert_buttons(ui_SystemMenuPrefsTab);
 		save_button = lv_obj_get_child(btns, 1);
@@ -64,6 +68,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(audio_section.sr_override_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(audio_section.bs_override_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(missingplugins_section.dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(video_section.enabled_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, focus_cb, LV_EVENT_FOCUSED, this);
@@ -78,6 +83,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(audio_section.sr_override_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.bs_override_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(missingplugins_section.dropdown, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(video_section.enabled_check, focus_cb, LV_EVENT_FOCUSED, this);
 
 		std::string opts;
 		for (auto item : AudioSettings::ValidBlockSizes) {
@@ -217,6 +223,8 @@ private:
 			lv_dropdown_set_selected(missingplugins_section.dropdown, idx);
 		}
 
+		lv_check(video_section.enabled_check, video.enabled);
+
 		gui_state.do_write_settings = false;
 
 		lv_disable(save_button);
@@ -330,6 +338,10 @@ private:
 																				 MidiSettings::MidiFeedback::Disabled;
 	}
 
+	bool read_video_enabled_check() {
+		return lv_obj_has_state(video_section.enabled_check, LV_STATE_CHECKED);
+	}
+
 	MissingPluginSettings::Autoload read_missing_plugins_dropdown() {
 		auto item = lv_dropdown_get_selected(missingplugins_section.dropdown);
 		if (item == 1)
@@ -440,6 +452,15 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		// Video output
+		auto video_enabled = read_video_enabled_check();
+		if (video.enabled != video_enabled) {
+			video.enabled = video_enabled;
+			while (!DeviceSettingsProxy::send_video_mode(video_enabled))
+				;
+			gui_state.do_write_settings = true;
+		}
+
 		lv_disable(save_button);
 		lv_disable(revert_button);
 	}
@@ -534,6 +555,7 @@ private:
 		auto apply_bs = read_patch_suggest_blocksize_check();
 		auto load_initial_patch = lv_obj_has_state(fs_section.startup_patch_check, LV_STATE_CHECKED);
 		auto mp_mode = read_missing_plugins_dropdown();
+		auto video_enabled = read_video_enabled_check();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 
@@ -544,7 +566,8 @@ private:
 			load_initial_patch == settings.load_initial_patch && fs_max_patches == fs.max_open_patches &&
 			midi_feedback == midi.midi_feedback && mp_mode == missing_plugins.autoload &&
 			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
-			apply_bs == settings.patch_suggested_audio.apply_blocksize)
+			apply_bs == settings.patch_suggested_audio.apply_blocksize &&
+			video_enabled == video.enabled)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
@@ -563,7 +586,7 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == page->missingplugins_section.dropdown) {
+		if (target == page->video_section.enabled_check || target == page->missingplugins_section.dropdown) {
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);
 
 			// scroll to top if we select first items
@@ -582,6 +605,7 @@ private:
 	FilesystemSettings &fs;
 	MidiSettings &midi;
 	MissingPluginSettings &missing_plugins;
+	VideoSettings &video;
 	UserSettings &settings;
 
 	lv_group_t *group = nullptr;
@@ -592,6 +616,7 @@ private:
 	PrefsSectionFilesystem fs_section;
 	PrefsSectionMidi midi_section;
 	PrefsSectionMissingPlugins missingplugins_section;
+	PrefsSectionVideo video_section;
 
 	lv_obj_t *save_button;
 	lv_obj_t *revert_button;
