@@ -1,5 +1,6 @@
 #pragma once
 #include "console/concurrent_buffer.hh"
+#include "debug.hh"
 #include "device_cdc/usb_serial_device.hh"
 #include "device_video/usb_video_device.hh"
 #include "drivers/interrupt.hh"
@@ -30,7 +31,7 @@ struct UsbDeviceManager {
 #endif
 
 	void start() {
-		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
+		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 1, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
 		if (video_mode)
 			video.start();
 		else
