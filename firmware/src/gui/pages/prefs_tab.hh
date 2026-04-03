@@ -12,8 +12,10 @@
 #include "gui/slsexport/prefs_section_missing_plugins.hh"
 #include "gui/slsexport/prefs_section_notifications.hh"
 #include "gui/slsexport/prefs_section_screensaver.hh"
+#include "gui/slsexport/prefs_section_video.hh"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "core_a7/device_settings_proxy.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/audio_settings.hh"
 
@@ -33,6 +35,7 @@ struct PrefsTab : SystemMenuTab {
 		, missing_plugins{settings.missing_plugins}
 		, button_exp_knobset{settings.button_exp_knobset}
 		, notifications{settings.notifications}
+		, video{settings.video}
 		, settings{settings} {
 
 		audio_section.create(ui_SystemMenuPrefsTab);
@@ -43,6 +46,7 @@ struct PrefsTab : SystemMenuTab {
 		buttonexpknobset_section.create(ui_SystemMenuPrefsTab);
 		missingplugins_section.create(ui_SystemMenuPrefsTab);
 		notifications_section.create(ui_SystemMenuPrefsTab);
+		video_section.create(ui_SystemMenuPrefsTab);
 
 		auto btns = create_save_revert_buttons(ui_SystemMenuPrefsTab);
 		save_button = lv_obj_get_child(btns, 1);
@@ -77,6 +81,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(video_section.enabled_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, focus_cb, LV_EVENT_FOCUSED, this);
@@ -98,6 +103,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(video_section.enabled_check, focus_cb, LV_EVENT_FOCUSED, this);
 
 		std::string opts;
 		for (auto item : AudioSettings::ValidBlockSizes) {
@@ -256,6 +262,8 @@ private:
 		lv_dropdown_set_selected(notifications_section.amount_dropdown, notif_item >= 0 ? notif_item : 0);
 		lv_check(notifications_section.animation_check, notifications.animation);
 
+		lv_check(video_section.enabled_check, video.enabled);
+
 		gui_state.do_write_settings = false;
 
 		lv_disable(save_button);
@@ -389,6 +397,10 @@ private:
 
 	uint32_t read_knobset_channel_dropdown() {
 		return lv_dropdown_get_selected(midi_section.knobset_channel_dropdown) + 1;
+	}
+
+	bool read_video_enabled_check() {
+		return lv_obj_has_state(video_section.enabled_check, LV_STATE_CHECKED);
 	}
 
 	MissingPluginSettings::Autoload read_missing_plugins_dropdown() {
@@ -561,6 +573,15 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		// Video output
+		auto video_enabled = read_video_enabled_check();
+		if (video.enabled != video_enabled) {
+			video.enabled = video_enabled;
+			while (!DeviceSettingsProxy::send_video_mode(video_enabled))
+				;
+			gui_state.do_write_settings = true;
+		}
+
 		lv_disable(save_button);
 		lv_disable(revert_button);
 	}
@@ -686,6 +707,7 @@ private:
 		auto bexp_back = read_require_back_check();
 		auto notif_amount = read_notification_amount_dropdown();
 		auto notif_anim = read_notification_animation_check();
+		auto video_enabled = read_video_enabled_check();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 		update_knobset_control_items(knobset_control == MidiSettings::KnobsetControl::Enabled);
@@ -701,7 +723,8 @@ private:
 			mp_mode == missing_plugins.autoload && apply_sr == settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
-			notif_anim == notifications.animation)
+			notif_anim == notifications.animation &&
+			video_enabled == video.enabled)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
@@ -720,9 +743,7 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == page->notifications_section.amount_dropdown ||
-			target == page->notifications_section.animation_check)
-		{
+		if (target == page->video_section.enabled_check || target == page->missingplugins_section.dropdown) {
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);
 
 			// scroll to top if we select first items
@@ -743,6 +764,7 @@ private:
 	MissingPluginSettings &missing_plugins;
 	ButtonExpKnobSetSettings &button_exp_knobset;
 	NotificationSettings &notifications;
+	VideoSettings &video;
 	UserSettings &settings;
 
 	lv_group_t *group = nullptr;
@@ -755,6 +777,7 @@ private:
 	PrefsSectionMissingPlugins missingplugins_section;
 	PrefsSectionButtonExpKnobSet buttonexpknobset_section;
 	PrefsSectionNotifications notifications_section;
+	PrefsSectionVideo video_section;
 
 	lv_obj_t *save_button;
 	lv_obj_t *revert_button;
