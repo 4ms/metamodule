@@ -97,6 +97,7 @@ static void write(ryml::NodeRef *n, VideoSettings const &s) {
 	*n |= ryml::MAP;
 
 	n->append_child() << ryml::key("enabled") << s.enabled;
+	n->append_child() << ryml::key("mirror") << s.mirror;
 }
 
 static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {

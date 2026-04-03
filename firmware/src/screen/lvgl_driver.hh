@@ -1,3 +1,4 @@
+#pragma once
 #include "conf/screen_buffer_conf.hh"
 #include "conf/screen_conf.hh"
 #include "drivers/screen_ST77XX.hh"
