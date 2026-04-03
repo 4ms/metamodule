@@ -25,7 +25,7 @@ private:
 	USBD_HandleTypeDef *pdev;
 
 	static inline uint16_t *shadow_fb = nullptr;
-	static inline uint32_t frame_pixel_count = 0;
+	static inline uint32_t pixel_offset = 0;
 	static inline uint32_t packet_index = 0;
 };
 
