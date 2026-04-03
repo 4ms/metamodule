@@ -1,6 +1,7 @@
 #include "aux_core_player.hh"
 #include "conf/hsem_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_a7/device_settings_proxy.hh"
 #include "core_intercom/shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "debug.hh"
@@ -57,7 +58,10 @@ extern "C" void aux_core_main() {
 		  *A7SharedMemoryS::ptrs.patch_mod_queue,
 		  plugin_manager,
 		  ramdisk};
-	SharedMemoryS::ptrs.video_enabled = ui.get_settings().video.enabled;
+	if (ui.get_settings().video.enabled) {
+		while (!DeviceSettingsProxy::send_video_mode(true))
+			;
+	}
 
 	ui.update_screen();
 	ui.update_page();
