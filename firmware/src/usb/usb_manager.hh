@@ -29,10 +29,8 @@ class UsbManager {
 
 public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: usb_device{console_buffers, SharedMemoryS::ptrs.video_enabled}
+		: usb_device{console_buffers, false}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
-		if (usb_device.video_mode)
-			UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
 		usb_device.start();
 		usb_host.init();
 		found_fusb = usbctl.init(); //NOLINT
@@ -113,6 +111,12 @@ public:
 		// 		Debug::Pin0::low();
 		// }
 		// }
+	}
+
+	void set_video_mode(bool enabled) {
+		if (enabled)
+			UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
+		usb_device.set_video_mode(enabled);
 	}
 
 	MidiHost &get_midi_host() {
