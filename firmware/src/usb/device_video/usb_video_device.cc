@@ -39,7 +39,7 @@ void UsbVideoDevice::set_framebuffer(uint16_t *fb) {
 
 int8_t UsbVideoDevice::Video_Itf_Init() {
 	packet_index = 0;
-	frame_pixel_count = UVC_WIDTH * UVC_HEIGHT;
+	pixel_offset = 0;
 	return 0;
 }
 
@@ -63,14 +63,14 @@ int8_t UsbVideoDevice::Video_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t 
 
 	// Payload size per packet (excluding 2-byte UVC header added by the class driver)
 	constexpr uint32_t payload_per_packet = UVC_PACKET_SIZE - 2;
-	// YUY2: 2 bytes per pixel (same as RGB565), so pixels per packet:
-	constexpr uint32_t pixels_per_packet = payload_per_packet / 2;
+	// YUY2: 2 bytes per pixel (same as RGB565), so pixels per packet.
+	// Round down to even so YUY2 pairs are never split across packets.
+	constexpr uint32_t pixels_per_packet = (payload_per_packet / 2) & ~1u;
 	// Total packets needed for one frame
 	constexpr uint32_t total_pixels = UVC_WIDTH * UVC_HEIGHT;
 	constexpr uint32_t total_packets = (total_pixels + pixels_per_packet - 1) / pixels_per_packet;
 
-	if (packet_index < total_packets) {
-		uint32_t pixel_offset = packet_index * pixels_per_packet;
+	if (pixel_offset < total_pixels) {
 		uint32_t pixels_remaining = total_pixels - pixel_offset;
 		uint32_t pixels_this_packet = (pixels_remaining < pixels_per_packet) ? pixels_remaining : pixels_per_packet;
 
@@ -82,6 +82,7 @@ int8_t UsbVideoDevice::Video_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t 
 
 		*pbuf = yuy2_packet_buf;
 		*psize = (uint16_t)(pixels_this_packet * 2 + 2); // +2 for UVC header
+		pixel_offset += pixels_this_packet;
 	} else {
 		// End of frame: header-only packet signals new frame
 		*psize = 2;
@@ -89,7 +90,8 @@ int8_t UsbVideoDevice::Video_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t 
 
 	*pcktidx = (uint16_t)packet_index;
 
-	if (packet_index >= total_packets) {
+	if (pixel_offset >= total_pixels) {
+		pixel_offset = 0;
 		packet_index = 0;
 	} else {
 		packet_index++;
