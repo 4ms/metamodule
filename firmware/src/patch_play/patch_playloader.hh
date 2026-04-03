@@ -250,10 +250,16 @@ struct PatchPlayLoader {
 		while (!is_audio_muted())
 			;
 
-		if (keep_cables_and_maps)
+		auto *patch = patches_.get_view_patch();
+
+		if (keep_cables_and_maps) {
+			patch->module_slugs[module_id] = slug;
 			player_.substitute_module(module_id, slug);
-		else
+		} else {
+			patch->blank_out_module(module_id);
+			patch->module_slugs[module_id] = slug;
 			player_.replace_module(module_id, slug);
+		}
 
 		pr_info("Heap: %u\n", get_heap_size());
 		if (should_play)
