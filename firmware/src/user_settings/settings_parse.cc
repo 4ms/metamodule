@@ -207,6 +207,7 @@ static bool read(ryml::ConstNodeRef const &node, VideoSettings *settings) {
 		return false;
 
 	read_or_default(node, "enabled", settings, &VideoSettings::enabled);
+	read_or_default(node, "mirror", settings, &VideoSettings::mirror);
 
 	return true;
 }

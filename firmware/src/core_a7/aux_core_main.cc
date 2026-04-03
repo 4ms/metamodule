@@ -62,6 +62,7 @@ extern "C" void aux_core_main() {
 		while (!DeviceSettingsProxy::send_video_mode(true))
 			;
 	}
+	MMDisplay::set_mirroring(ui.get_settings().video.mirror);
 
 	ui.update_screen();
 	ui.update_page();

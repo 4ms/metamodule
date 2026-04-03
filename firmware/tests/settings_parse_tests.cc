@@ -79,6 +79,9 @@ TEST_CASE("Parse settings file") {
   notifications:
     amount: Fewer
     animation: 0
+  video:
+    enabled: 1
+    mirror: 1
 )";
 	// clang-format on
 
@@ -148,6 +151,9 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::Fewer);
 	CHECK(settings.notifications.animation == false);
+
+	CHECK(settings.video.enabled == true);
+	CHECK(settings.video.mirror == true);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -298,6 +304,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::All);
 	CHECK(settings.notifications.animation == true);
+
+	CHECK(settings.video.enabled == false);
+	CHECK(settings.video.mirror == false);
 }
 
 TEST_CASE("Serialize settings") {
@@ -435,6 +444,7 @@ TEST_CASE("Serialize settings") {
     animation: 0
   video:
     enabled: 0
+    mirror: 0
 )";
 	// clang format-on
 
