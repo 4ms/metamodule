@@ -6,6 +6,7 @@
 #include "drivers/pin_change.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "usb/device_cdc/usb_serial_device.hh"
+#include "core_intercom/shared_memory.hh"
 #include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
 
@@ -28,7 +29,7 @@ class UsbManager {
 
 public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: usb_device{console_buffers}
+		: usb_device{console_buffers, false}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		usb_device.start();
 		usb_host.init();
@@ -110,6 +111,12 @@ public:
 		// 		Debug::Pin0::low();
 		// }
 		// }
+	}
+
+	void set_video_mode(bool enabled) {
+		if (enabled)
+			UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
+		usb_device.set_video_mode(enabled);
 	}
 
 	MidiHost &get_midi_host() {

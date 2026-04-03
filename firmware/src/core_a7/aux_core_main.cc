@@ -1,6 +1,8 @@
 #include "aux_core_player.hh"
 #include "conf/hsem_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_a7/device_settings_proxy.hh"
+#include "core_intercom/shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
@@ -40,6 +42,7 @@ extern "C" void aux_core_main() {
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
 #endif
 
+	MMDisplay::set_uvc_shadow_fb(SharedMemoryS::ptrs.uvc_framebuffer);
 	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 
 	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};
@@ -55,6 +58,12 @@ extern "C" void aux_core_main() {
 		  *A7SharedMemoryS::ptrs.patch_mod_queue,
 		  plugin_manager,
 		  ramdisk};
+	if (ui.get_settings().video.enabled) {
+		while (!DeviceSettingsProxy::send_video_mode(true))
+			;
+	}
+	MMDisplay::set_mirroring(ui.get_settings().video.mirror);
+
 	ui.update_screen();
 	ui.update_page();
 

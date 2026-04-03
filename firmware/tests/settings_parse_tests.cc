@@ -73,6 +73,9 @@ TEST_CASE("Parse settings file") {
   patch_suggested_audio:
     apply_samplerate: 0
     apply_blocksize: 1
+  video:
+    enabled: 1
+    mirror: 1
 )";
 	// clang-format on
 
@@ -136,6 +139,9 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.module_view.show_knobset_name == false);
 
 	CHECK(settings.missing_plugins.autoload == MetaModule::MissingPluginSettings::Autoload::Never);
+
+	CHECK(settings.video.enabled == true);
+	CHECK(settings.video.mirror == true);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -280,6 +286,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.patch_suggested_audio.apply_blocksize == true);
 
 	CHECK(settings.missing_plugins.autoload == MetaModule::MissingPluginSettings::Autoload::Ask);
+
+	CHECK(settings.video.enabled == false);
+	CHECK(settings.video.mirror == false);
 }
 
 TEST_CASE("Serialize settings") {
@@ -400,6 +409,9 @@ TEST_CASE("Serialize settings") {
   patch_suggested_audio:
     apply_samplerate: 0
     apply_blocksize: 1
+  video:
+    enabled: 0
+    mirror: 0
 )";
 	// clang format-on
 

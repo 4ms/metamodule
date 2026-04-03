@@ -62,6 +62,8 @@ int main() {
 		&StaticBuffers::console_a7_0_buff,
 		&StaticBuffers::console_a7_1_buff,
 		&StaticBuffers::console_m4_buff,
+		StaticBuffers::uvc_shadow_framebuffer.data(),
+		&StaticBuffers::icc_device_settings_message,
 	};
 
 	A7SharedMemoryS::ptrs = {

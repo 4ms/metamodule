@@ -8,6 +8,7 @@ namespace MetaModule
 {
 //fwd declare to reduce dependencies
 class IntercoreStorageMessage;
+struct DeviceSettingsMessage;
 
 //TODO: Move this structure to static_buffers.hh and declare static inline ptrs there too
 struct SharedMemoryS {
@@ -20,6 +21,8 @@ struct SharedMemoryS {
 		ConcurrentBuffer *console_a7_0_buff;
 		ConcurrentBuffer *console_a7_1_buff;
 		ConcurrentBuffer *console_m4_buff;
+		uint16_t *uvc_framebuffer;
+		DeviceSettingsMessage *icc_device_settings_message;
 	};
 
 	static Ptrs ptrs;

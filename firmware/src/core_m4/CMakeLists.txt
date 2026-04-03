@@ -89,6 +89,9 @@ add_executable(
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_data.c
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_scsi.c
   ${USBDEV_LIBDIR}/Class/CDC/Src/usbd_cdc.c
+  ${USBDEV_LIBDIR}/Class/VIDEO/Src/usbd_video.c
+  ${FWDIR}/src/usb/device_video/usb_video_device.cc
+  ${FWDIR}/src/usb/device_video/usbd_video_desc.c
 
   ${USBDEV_LIBDIR}/Core/Src/usbd_core.c
   ${USBDEV_LIBDIR}/Core/Src/usbd_ctlreq.c
@@ -129,6 +132,7 @@ target_include_directories(
           ${USBDEV_LIBDIR}/Core/Inc
           ${USBDEV_LIBDIR}/Class/MSC/Inc
           ${USBDEV_LIBDIR}/Class/CDC/Inc
+          ${USBDEV_LIBDIR}/Class/VIDEO/Inc
 )
 
 target_link_libraries(main_m4.elf PUBLIC metamodule::core-interface)

@@ -1,6 +1,8 @@
 #pragma once
 #include "console/concurrent_buffer.hh"
+#include "debug.hh"
 #include "device_cdc/usb_serial_device.hh"
+#include "device_video/usb_video_device.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
 #include "stm32mp1xx.h"
@@ -16,32 +18,50 @@ extern "C" PCD_HandleTypeDef hpcd;
 
 struct UsbDeviceManager {
 	USBD_HandleTypeDef USBD_Device{};
-	UsbSerialDevice serial;
 
-#if !defined(USE_RAMDISK_USB)
-	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: serial{&USBD_Device, console_buffers} {
+	UsbSerialDevice serial;
+	MetaModule::UsbVideoDevice video{&USBD_Device};
+	bool video_mode = false;
+
+#ifndef USE_RAMDISK_USB
+	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers, bool video_enabled)
+		: serial{&USBD_Device, console_buffers}
+		, video_mode{video_enabled} {
 	}
 #endif
 
 	void start() {
-		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
-		serial.start();
-		// drive.start(); // cant use this until we support multiple device classes
+		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 1, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
+		if (video_mode)
+			video.start();
+		else
+			serial.start();
 	}
 
 	void stop() {
-		serial.stop();
-		// drive.stop();
+		if (video_mode)
+			video.stop();
+		else
+			serial.stop();
+	}
+
+	void set_video_mode(bool enabled) {
+		if (enabled == video_mode)
+			return;
+		stop();
+		video_mode = enabled;
+		start();
 	}
 
 	void process() {
-		serial.process();
+		if (!video_mode)
+			serial.process();
 	}
 
 	void process_disconnected() {
-		// Still process serial because we if USB is not connected, we forward console messages to UART
-		serial.forward_to_uart();
+		if (!video_mode)
+			// Still process serial because if USB is not connected, we forward console messages to UART
+			serial.forward_to_uart();
 	}
 
 #ifdef USE_RAMDISK_USB

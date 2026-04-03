@@ -1,6 +1,7 @@
 #include "conf/ramdisk_conf.hh"
 #include "console/concurrent_buffer.hh"
 #include "core_intercom/intercore_message.hh"
+#include "core_intercom/intercore_devicesettings_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
 #include "patch_file/patch_dir_list.hh"
@@ -40,6 +41,11 @@ __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSiz
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff{};
+
+// Shadow framebuffer for UVC video streaming: 320x240 RGB565, accessible from both A7 and M4
+__attribute__((section(".ddma"))) alignas(64) std::array<uint16_t, 320 * 240> uvc_shadow_framebuffer{};
+
+__attribute__((section(".ddma"))) DeviceSettingsMessage icc_device_settings_message;
 
 void init() {
 	for (auto &block : param_blocks) {
