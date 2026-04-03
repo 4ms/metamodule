@@ -83,6 +83,8 @@ extern "C" {
 
 #define UVC_BITS_PER_PIXEL 16U
 #define UVC_UNCOMPRESSED_GUID UVC_GUID_YUY2
+// ST library formula has a bug (*16/2 instead of *16/8), override with correct value
+#define UVC_MAX_FRAME_SIZE (UVC_WIDTH * UVC_HEIGHT * UVC_BITS_PER_PIXEL / 8U)
 
 #include <string.h>
 
