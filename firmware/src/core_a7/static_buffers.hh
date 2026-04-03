@@ -2,6 +2,7 @@
 #include "concurrent_buffer.hh"
 #include "conf/ramdisk_conf.hh"
 #include "core_intercom/intercore_message.hh"
+#include "core_intercom/intercore_devicesettings_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
 #include "patch_file/patch_dir_list.hh"
@@ -32,6 +33,7 @@ extern ConcurrentBuffer console_a7_0_buff;
 extern ConcurrentBuffer console_a7_1_buff;
 extern ConcurrentBuffer console_m4_buff;
 extern std::array<uint16_t, 320 * 240> uvc_shadow_framebuffer;
+extern DeviceSettingsMessage icc_device_settings_message;
 
 void init();
 
