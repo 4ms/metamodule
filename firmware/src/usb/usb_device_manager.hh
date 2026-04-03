@@ -44,6 +44,14 @@ struct UsbDeviceManager {
 			serial.stop();
 	}
 
+	void set_video_mode(bool enabled) {
+		if (enabled == video_mode)
+			return;
+		stop();
+		video_mode = enabled;
+		start();
+	}
+
 	void process() {
 		if (!video_mode)
 			serial.process();
