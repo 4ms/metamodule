@@ -8,6 +8,7 @@
 #include "user_settings/plugin_preload_settings.hh"
 #include "user_settings/missing_plugin_settings.hh"
 #include "user_settings/screensaver_settings.hh"
+#include "user_settings/video_settings.hh"
 #include "user_settings/view_settings.hh"
 
 namespace MetaModule
@@ -30,6 +31,7 @@ struct UserSettings {
 	FilesystemSettings filesystem{};
 	MidiSettings midi{};
 	PatchSuggestedAudioSettings patch_suggested_audio{};
+	VideoSettings video{};
 };
 
 } // namespace MetaModule

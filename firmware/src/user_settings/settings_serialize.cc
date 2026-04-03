@@ -93,6 +93,12 @@ static void write(ryml::NodeRef *n, PatchSuggestedAudioSettings const &s) {
 	n->append_child() << ryml::key("apply_blocksize") << s.apply_blocksize;
 }
 
+static void write(ryml::NodeRef *n, VideoSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("enabled") << s.enabled;
+}
+
 static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {
 	*n |= ryml::MAP;
 
@@ -128,6 +134,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["filesystem"] << settings.filesystem;
 	data["midi"] << settings.midi;
 	data["patch_suggested_audio"] << settings.patch_suggested_audio;
+	data["video"] << settings.video;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();
