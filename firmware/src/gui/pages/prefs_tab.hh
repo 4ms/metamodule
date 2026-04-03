@@ -16,6 +16,7 @@
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "core_a7/device_settings_proxy.hh"
+#include "screen/lvgl_driver.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/audio_settings.hh"
 
@@ -84,6 +85,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(video_section.enabled_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(video_section.mirror_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, focus_cb, LV_EVENT_FOCUSED, this);
@@ -107,6 +109,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(video_section.enabled_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(video_section.mirror_check, focus_cb, LV_EVENT_FOCUSED, this);
 
 		std::string opts;
 		for (auto item : AudioSettings::ValidBlockSizes) {
@@ -273,6 +276,7 @@ private:
 		lv_check(notifications_section.animation_check, notifications.animation);
 
 		lv_check(video_section.enabled_check, video.enabled);
+		lv_check(video_section.mirror_check, video.mirror);
 
 		gui_state.do_write_settings = false;
 
@@ -415,6 +419,10 @@ private:
 
 	bool read_video_enabled_check() {
 		return lv_obj_has_state(video_section.enabled_check, LV_STATE_CHECKED);
+	}
+
+	bool read_video_mirror_check() {
+		return lv_obj_has_state(video_section.mirror_check, LV_STATE_CHECKED);
 	}
 
 	MissingPluginSettings::Autoload read_missing_plugins_dropdown() {
@@ -595,10 +603,16 @@ private:
 
 		// Video output
 		auto video_enabled = read_video_enabled_check();
+		auto video_mirror = read_video_mirror_check();
 		if (video.enabled != video_enabled) {
 			video.enabled = video_enabled;
 			while (!DeviceSettingsProxy::send_video_mode(video_enabled))
 				;
+			gui_state.do_write_settings = true;
+		}
+		if (video.mirror != video_mirror) {
+			video.mirror = video_mirror;
+			MMDisplay::set_mirroring(video_mirror);
 			gui_state.do_write_settings = true;
 		}
 
@@ -731,6 +745,7 @@ private:
 		auto notif_amount = read_notification_amount_dropdown();
 		auto notif_anim = read_notification_animation_check();
 		auto video_enabled = read_video_enabled_check();
+		auto video_mirror = read_video_mirror_check();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 		update_knobset_control_items(knobset_control == MidiSettings::KnobsetControl::Enabled);
@@ -747,7 +762,7 @@ private:
 			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
-			notif_anim == notifications.animation && video_enabled == video.enabled)
+			notif_anim == notifications.animation && video_enabled == video.enabled && video_mirror == video.mirror)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
@@ -766,9 +781,7 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == page->notifications_section.amount_dropdown ||
-			target == page->notifications_section.animation_check)
-		{
+		if (target == page->video_section.enabled_check || target == page->video_section.mirror_check) {
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);
 
 			// scroll to top if we select first items

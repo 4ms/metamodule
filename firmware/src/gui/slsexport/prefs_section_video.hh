@@ -5,6 +5,7 @@ namespace MetaModule
 
 struct PrefsSectionVideo {
 	lv_obj_t *enabled_check;
+	lv_obj_t *mirror_check;
 
 	void create(lv_obj_t *parent);
 };
