@@ -121,6 +121,7 @@ struct ParamsMidiState : ParamsState {
 	struct MidiChangedVal {
 		uint8_t changed : 1;
 		uint8_t val : 7;
+		uint8_t value;
 	};
 	std::array<MidiChangedVal, NumMidiCCs> midi_ccs;
 	MidiChangedVal last_midi_note;

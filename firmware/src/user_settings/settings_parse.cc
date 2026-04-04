@@ -146,6 +146,16 @@ static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
 		settings->midi_feedback = MidiSettings{}.midi_feedback;
 	}
 
+	if (node.has_child("knobset_control")) {
+		settings->knobset_control = node["knobset_control"].val() == "1" ? MidiSettings::KnobsetControl::Enabled :
+																		   MidiSettings::KnobsetControl::Disabled;
+	} else {
+		settings->knobset_control = MidiSettings{}.knobset_control;
+	}
+
+	read_or_default(node, "knobset_cc", settings, &MidiSettings::knobset_cc);
+	read_or_default(node, "knobset_channel", settings, &MidiSettings::knobset_channel);
+
 	settings->make_valid();
 
 	return true;

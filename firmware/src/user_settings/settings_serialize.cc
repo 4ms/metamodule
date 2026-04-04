@@ -84,6 +84,9 @@ static void write(ryml::NodeRef *n, FilesystemSettings const &s) {
 	*n |= ryml::MAP;
 
 	n->append_child() << ryml::key("midi_feedback") << std::to_underlying(s.midi_feedback);
+	n->append_child() << ryml::key("knobset_control") << std::to_underlying(s.knobset_control);
+	n->append_child() << ryml::key("knobset_cc") << s.knobset_cc;
+	n->append_child() << ryml::key("knobset_channel") << s.knobset_channel;
 }
 
 static void write(ryml::NodeRef *n, PatchSuggestedAudioSettings const &s) {

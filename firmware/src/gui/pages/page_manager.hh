@@ -154,16 +154,36 @@ public:
 	}
 
 	void handle_knobset_change() {
-		if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
-			if (auto patch = info.open_patch_manager.get_playing_patch(); patch != nullptr) {
 
-				if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
-					int cur_knobset = info.page_list.get_active_knobset();
-					int next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
+		// Patch must be valid, playing, and have at least one knobset
+		if (auto patch = info.open_patch_manager.get_playing_patch(); patch != nullptr) {
+			if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
 
-					info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
-					info.page_list.set_active_knobset(next_knobset);
-					std::string ks_name = patch->valid_knob_set_name(next_knobset);
+				std::optional<int> next_knobset = std::nullopt;
+				int cur_knobset = info.page_list.get_active_knobset();
+
+				// Change knobset via MIDI CC
+				if (info.settings.midi.knobset_control == MidiSettings::KnobsetControl::Enabled) {
+					auto &cc = info.params.midi_ccs[info.settings.midi.knobset_cc & 127];
+
+					auto midi_chan = info.settings.midi.knobset_channel - 1;
+					if (cc.changed && cc.val == midi_chan) {
+						if (cc.value != cur_knobset && cc.value < num_knobsets) {
+							next_knobset = cc.value;
+							cc.changed = false;
+						}
+					}
+				}
+
+				// Change knobset via Button+Encoder
+				if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
+					next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
+				}
+
+				if (next_knobset.has_value()) {
+					info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)*next_knobset});
+					info.page_list.set_active_knobset(*next_knobset);
+					std::string ks_name = patch->valid_knob_set_name(*next_knobset);
 
 					bool patchview_knobset_visible = cur_page == page_list.page(PageId::PatchView) &&
 													 info.settings.patch_view.show_knobset_name &&
@@ -175,7 +195,7 @@ public:
 							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 600});
 					}
 
-					button_light.display_knobset(next_knobset);
+					button_light.display_knobset(*next_knobset);
 				}
 			}
 		}

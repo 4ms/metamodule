@@ -397,6 +397,9 @@ TEST_CASE("Serialize settings") {
     max_open_patches: 8
   midi:
     midi_feedback: 0
+    knobset_control: 0
+    knobset_cc: 0
+    knobset_channel: 16
   patch_suggested_audio:
     apply_samplerate: 0
     apply_blocksize: 1

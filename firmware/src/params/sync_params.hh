@@ -54,6 +54,7 @@ public:
 				if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs) {
 					params.midi_ccs[e.note].changed = 1;
 					params.midi_ccs[e.note].val = e.midi_chan;
+					params.midi_ccs[e.note].value = e.val;
 				}
 				if (e.type == Midi::Event::Type::NoteOn && e.note < NumMidiNotes) {
 					params.last_midi_note.changed = 1;
