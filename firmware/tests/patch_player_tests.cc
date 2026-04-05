@@ -2970,18 +2970,18 @@ PatchData:
 	player.set_midi_connected();
 
 	SUBCASE("Write pitch to poly channel 0") {
-		player.set_midi_note_pitch_poly(0, 1.5f, 0);
+		player.set_midi_note_pitch(0, 1.5f, 0);
 		CHECK(mod->input_poly[0][0] == doctest::Approx(1.5f));
 	}
 
 	SUBCASE("Write pitch to poly channel 3") {
-		player.set_midi_note_pitch_poly(3, -2.0f, 0);
+		player.set_midi_note_pitch(3, -2.0f, 0);
 		CHECK(mod->input_poly[0][3] == doctest::Approx(-2.0f));
 	}
 
 	SUBCASE("poly_chan >= MaxPolyChannels is no-op") {
 		mod->input_poly[0] = {};
-		player.set_midi_note_pitch_poly(4, 5.0f, 0);
+		player.set_midi_note_pitch(4, 5.0f, 0);
 		// All channels remain zero
 		for (unsigned ch = 0; ch < CoreProcessor::MaxPolyChannels; ch++)
 			CHECK(mod->input_poly[0][ch] == doctest::Approx(0.0f));
@@ -3089,13 +3089,13 @@ PatchData:
 
 	SUBCASE("Matching MIDI channel passes through") {
 		// midi_chan=2 means MIDI channel 3 (0-indexed in event)
-		player.set_midi_note_pitch_poly(0, 3.0f, 2);
+		player.set_midi_note_pitch(0, 3.0f, 2);
 		CHECK(mod->input_poly[0][0] == doctest::Approx(3.0f));
 	}
 
 	SUBCASE("Non-matching MIDI channel is filtered") {
 		mod->input_poly[0] = {};
-		player.set_midi_note_pitch_poly(0, 3.0f, 5); // channel 6 != channel 3
+		player.set_midi_note_pitch(0, 3.0f, 5); // channel 6 != channel 3
 		CHECK(mod->input_poly[0][0] == doctest::Approx(0.0f));
 	}
 }
@@ -3189,10 +3189,10 @@ PatchData:
 	player.set_midi_connected();
 
 	SUBCASE("Channel 0 falls back to set_input and Channel >= 1 with null buffer is no-op") {
-		player.set_midi_note_pitch_poly(0, 2.5f, 0);
-		player.set_midi_note_pitch_poly(1, 3.5f, 0);
-		player.set_midi_note_pitch_poly(2, 4.5f, 0);
-		player.set_midi_note_pitch_poly(3, 5.5f, 0);
+		player.set_midi_note_pitch(0, 2.5f, 0);
+		player.set_midi_note_pitch(1, 3.5f, 0);
+		player.set_midi_note_pitch(2, 4.5f, 0);
+		player.set_midi_note_pitch(3, 5.5f, 0);
 
 		CHECK(player.modules[1]->get_output(0) == 2.5f);
 		CHECK(player.modules[1]->get_output(1) == 0.f);

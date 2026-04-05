@@ -72,7 +72,7 @@ private:
 	struct PolyJackMidi : JackMidi {
 		CoreProcessor::PolyPortBuffer buf{};
 	};
-	std::array<std::vector<PolyJackMidi>, MaxMidiPolyphony> midi_note_pitch_conns;
+	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_gate_conns;
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_vel_conns;
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_aft_conns;
@@ -476,11 +476,24 @@ public:
 		}
 	}
 
-	void set_midi_note_pitch(unsigned midi_poly_note, float val, uint16_t midi_chan) {
-		// if midi_poly_note == MaxMidiPolyphony
-		// set all connected jacks using poly buffer copy
-		// else
-		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val, midi_chan);
+	void set_midi_note_pitch(unsigned poly_chan, float val, uint16_t midi_chan) {
+		if (poly_chan >= CoreProcessor::MaxPolyChannels)
+			return;
+
+		for (auto &jack : midi_poly_pitch_conns) {
+			if (jack.midi_chan != 0 && jack.midi_chan != uint32_t(midi_chan + 1))
+				continue;
+			if (jack.buf.voltages)
+				jack.buf.voltages[poly_chan] = val;
+			else if (poly_chan == 0)
+				modules[jack.module_id]->set_input(jack.jack_id, val);
+		}
+
+		set_all_connected_jacks(midi_note_pitch_conns[poly_chan], val, midi_chan);
+		// for (auto const &jack : midi_note_pitch_conns[poly_chan]) {
+		// 	if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1))
+		// 		modules[jack.module_id]->set_input(jack.jack_id, val);
+		// }
 	}
 
 	void set_midi_note_gate(unsigned midi_poly_note, float val, uint16_t midi_chan) {
@@ -501,19 +514,6 @@ public:
 	}
 
 	// Poly cable methods: write to a specific channel of the poly buffer
-	void set_midi_note_pitch_poly(unsigned poly_chan, float val, uint16_t midi_chan) {
-		if (poly_chan >= CoreProcessor::MaxPolyChannels)
-			return;
-		for (auto &jack : midi_poly_pitch_conns) {
-			if (jack.midi_chan != 0 && jack.midi_chan != uint32_t(midi_chan + 1))
-				continue;
-			if (jack.buf.voltages)
-				jack.buf.voltages[poly_chan] = val;
-			else if (poly_chan == 0)
-				modules[jack.module_id]->set_input(jack.jack_id, val);
-		}
-	}
-
 	void set_midi_note_gate_poly(unsigned poly_chan, float val, uint16_t midi_chan) {
 		if (poly_chan >= CoreProcessor::MaxPolyChannels)
 			return;

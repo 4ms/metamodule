@@ -59,7 +59,6 @@ struct AudioStreamMidi {
 			player.set_midi_note_retrig(event.poly_chan, 10.f, event.midi_chan);
 			player.set_midi_gate(event.note, 10.f, event.midi_chan);
 
-			player.set_midi_note_pitch_poly(event.poly_chan, Midi::note_to_volts(event.note), event.midi_chan);
 			player.set_midi_note_gate_poly(event.poly_chan, 10.f, event.midi_chan);
 			player.set_midi_note_vel_poly(event.poly_chan, float(event.val) / 12.7f, event.midi_chan);
 			player.set_midi_note_retrig_poly(event.poly_chan, 10.f, event.midi_chan);
