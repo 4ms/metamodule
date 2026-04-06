@@ -28,13 +28,7 @@ const mdrivlib::I2CConfig a7m4_shared_i2c_codec_conf = {
 			// SCLH = 0x90+1 * 48ns = 6.9us
 			// SCLL = 0x90+1 * 48ns = 6.9us
 
-			// 68kHz:
-			// .PRESC = 0x40,
-			// .SCLDEL_SDADEL = 0xFF,
-			// .SCLH = 0x90,
-			// .SCLL = 0x90,
-
-			.PRESC = 0x80,
+			.PRESC = 0x40,
 			.SCLDEL_SDADEL = 0xFF,
 			.SCLH = 0x90,
 			.SCLL = 0x90,
