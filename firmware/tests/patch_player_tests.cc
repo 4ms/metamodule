@@ -3035,13 +3035,13 @@ PatchData:
 	player.set_midi_connected();
 
 	SUBCASE("Gate poly writes to channel") {
-		player.set_midi_note_gate_poly(1, 10.f, 0);
+		player.set_midi_note_gate(1, 10.f, 0);
 		CHECK(mod->input_poly[0][1] == doctest::Approx(10.f));
 	}
 
 	SUBCASE("Velocity poly writes to channel") {
-		player.set_midi_note_vel_poly(2, 5.0f, 0);
-		CHECK(mod->input_poly[1][2] == doctest::Approx(5.0f));
+		player.set_midi_note_velocity(2, 63, 0);
+		CHECK(mod->input_poly[1][2] == doctest::Approx(63.f / 12.7f));
 	}
 }
 

@@ -58,30 +58,19 @@ struct AudioStreamMidi {
 			player.set_midi_note_velocity(event.poly_chan, event.val, event.midi_chan);
 			player.set_midi_note_retrig(event.poly_chan, 10.f, event.midi_chan);
 			player.set_midi_gate(event.note, 10.f, event.midi_chan);
-
-			player.set_midi_note_gate_poly(event.poly_chan, 10.f, event.midi_chan);
-			player.set_midi_note_vel_poly(event.poly_chan, float(event.val) / 12.7f, event.midi_chan);
-			player.set_midi_note_retrig_poly(event.poly_chan, 10.f, event.midi_chan);
-
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::NoteOff) {
 			player.set_midi_note_gate(event.poly_chan, 0, event.midi_chan);
 			player.set_midi_gate(event.note, 0, event.midi_chan);
-
-			player.set_midi_note_gate_poly(event.poly_chan, 0, event.midi_chan);
-
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::Aft) {
 			player.set_midi_note_aftertouch(event.poly_chan, event.val, event.midi_chan);
-			player.set_midi_note_aft_poly(event.poly_chan, float(event.val) / 12.7f, event.midi_chan);
 
 		} else if (event.type == Midi::Event::Type::ChanPress) {
-			for (unsigned i = 0; i < poly_num; i++) {
+			for (unsigned i = 0; i < poly_num; i++)
 				player.set_midi_note_aftertouch(i, event.val, event.midi_chan);
-				player.set_midi_note_aft_poly(i, float(event.val) / 12.7f, event.midi_chan);
-			}
 
 		} else if (event.type == Midi::Event::Type::CC) {
 			player.set_midi_cc(event.note, event.val, event.midi_chan);
