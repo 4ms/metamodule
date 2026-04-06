@@ -50,7 +50,10 @@ private:
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
 
-	std::array<std::vector<Jack>, NumOutJacks> out_conns;
+	struct PolyJack : Jack {
+		CoreProcessor::PolyPortBuffer buf{};
+	};
+	std::array<std::vector<PolyJack>, NumOutJacks> out_conns;
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
@@ -270,7 +273,7 @@ public:
 			}
 		}
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 	}
 
 	// Runs the patch
@@ -301,36 +304,79 @@ public:
 			return;
 	}
 
-	template<size_t Core>
-	void process_outputs_samecore() {
-		for (auto const &cable : cables.samecore_cables[Core]) {
-			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+	void process_outputs(auto &cables) {
+		for (auto const &cable : cables) {
+			if (cable.out_buf.voltages) {
+				auto num_poly = *cable.out_buf.channels;
+				for (auto i = 0u; auto &in_buf : cable.in_bufs) {
+					if (in_buf.voltages) {
+						// poly->poly
+						*in_buf.channels = num_poly;
+						std::copy_n(cable.out_buf.voltages, num_poly, in_buf.voltages);
+					} else {
+						// poly->mono
+						modules[cable.ins[i].module_id]->set_input(cable.ins[i].jack_id, *cable.out_buf.voltages);
+					}
+					i++;
+				}
+			} else {
+				// mono->poly, mono->mono
+				float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
 
-			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input(in.jack_id, val);
+				for (auto const &in : cable.ins) {
+					modules[in.module_id]->set_input(in.jack_id, val);
+				}
 			}
 		}
 	}
 
 	template<size_t Core>
-	void process_outputs_diffcore() {
-		for (auto const &cable : cables.diffcore_cables[Core]) {
-			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+	void process_outputs_samecore() {
+		process_outputs(cables.samecore_cables[Core]);
+	}
 
-			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input(in.jack_id, val);
-			}
-		}
+	template<size_t Core>
+	void process_outputs_diffcore() {
+		process_outputs(cables.diffcore_cables[Core]);
 	}
 
 	template<size_t Core>
 	void process_summed_inputs() {
 		for (auto const &si : cables.summed_inputs[Core]) {
-			float sum = 0.f;
-			for (auto const &out : si.outs) {
-				sum += modules[out.module_id]->get_output(out.jack_id);
+			if (si.in_buf.voltages) {
+				// Poly input: sum per-channel across all sources
+				unsigned max_channels = 0;
+
+				for (size_t i = 0; i < si.outs.size(); i++) {
+					if (si.out_bufs[i].voltages)
+						max_channels = std::max<unsigned>(max_channels, *si.out_bufs[i].channels);
+				}
+				max_channels = std::min<unsigned>(max_channels, CoreProcessor::MaxPolyChannels);
+
+				// Zero the input buffer, then accumulate
+				for (unsigned ch = 0; ch < max_channels; ch++)
+					si.in_buf.voltages[ch] = 0.f;
+
+				for (size_t i = 0; i < si.outs.size(); i++) {
+					if (si.out_bufs[i].voltages) {
+						auto n = std::min<unsigned>(*si.out_bufs[i].channels, max_channels);
+						for (unsigned ch = 0; ch < n; ch++)
+							si.in_buf.voltages[ch] += si.out_bufs[i].voltages[ch];
+					} else {
+						// Mono source: add to channel 0
+						si.in_buf.voltages[0] += modules[si.outs[i].module_id]->get_output(si.outs[i].jack_id);
+					}
+				}
+				*si.in_buf.channels = max_channels;
+
+			} else {
+				// Mono input: sum all sources via get_output/set_input
+				float sum = 0.f;
+				for (auto const &out : si.outs) {
+					sum += modules[out.module_id]->get_output(out.jack_id);
+				}
+				modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 			}
-			modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 		}
 	}
 
@@ -576,7 +622,15 @@ public:
 				if (jack.jack_id < panel_in_vals.size())
 					sum += panel_in_vals[jack.jack_id];
 			} else if (jack.module_id < num_modules) {
-				sum += modules[jack.module_id]->get_output(jack.jack_id);
+				if (jack.buf.voltages) {
+					for (unsigned i = 0; i < std::min<unsigned>(CoreProcessor::MaxPolyChannels, *jack.buf.channels);
+						 i++)
+					{
+						sum += jack.buf.voltages[i];
+					}
+
+				} else
+					sum += modules[jack.module_id]->get_output(jack.jack_id);
 			}
 		}
 		return sum;
@@ -686,8 +740,7 @@ public:
 
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
-		cables.add(in, out, core_balancer.cores.parts);
-		cables.rebuild_summed_inputs(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
@@ -713,8 +766,10 @@ public:
 	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
 		pd.add_mapped_outjack(panel_jack_id, jack);
 
+		PolyJack poly_jack{jack};
+		poly_jack.buf = plugin_module_get_poly_output_buffer(modules[jack.module_id], jack.jack_id);
 		if (panel_jack_id < out_conns.size()) {
-			out_conns[panel_jack_id].push_back(jack);
+			out_conns[panel_jack_id].push_back(poly_jack);
 
 			if (out_patched[panel_jack_id] && jack.module_id < num_modules)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
@@ -764,7 +819,7 @@ public:
 
 		pd.disconnect_injack(jack);
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 	}
 
 	void remove_injack_mappings(Jack jack) {
@@ -794,7 +849,7 @@ public:
 
 		pd.disconnect_outjack(jack);
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 	}
 
 	void remove_outjack_mappings(Jack jack) {
@@ -1153,7 +1208,7 @@ public:
 				// panel_jack_id is the panel input jack whose value we want to read.
 				// We add to out_conns so get_panel_output reads panel_in_vals[panel_jack_id].
 				if (input_jack.module_id == 0) {
-					out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
+					out_conns[input_jack.jack_id].push_back(PolyJack{{0, panel_jack_id}, {}});
 					pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 
 				} else if (find_int_cable_input_jack(input_jack) >= 0) {
@@ -1180,7 +1235,12 @@ public:
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id >= out_conns.size())
 				break;
-			out_conns[panel_jack_id].push_back(cable.out);
+
+			PolyJack poly_jack{cable.out};
+			if (cable.out.module_id < num_modules)
+				poly_jack.buf = plugin_module_get_poly_output_buffer(modules[cable.out.module_id], cable.out.jack_id);
+
+			out_conns[panel_jack_id].push_back(poly_jack);
 			pr_trace("Connect module %d out jack %d to panel out %d\n",
 					 cable.out.module_id,
 					 cable.out.jack_id,
