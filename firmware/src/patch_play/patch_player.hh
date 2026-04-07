@@ -328,7 +328,13 @@ public:
 		for (auto const &si : cables.summed_inputs[Core]) {
 			float sum = 0.f;
 			for (auto const &out : si.outs) {
-				sum += modules[out.module_id]->get_output(out.jack_id);
+				if (out.module_id == 0) {
+					// Hub module: read from cached panel input values
+					if (out.jack_id < panel_in_vals.size())
+						sum += panel_in_vals[out.jack_id];
+				} else {
+					sum += modules[out.module_id]->get_output(out.jack_id);
+				}
 			}
 			modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 		}
@@ -536,8 +542,15 @@ public:
 private:
 	template<typename JackT>
 	void set_all_connected_jacks(std::vector<JackT> const &jacks, float val) {
-		for (auto const &jack : jacks)
-			modules[jack.module_id]->set_input(jack.jack_id, val);
+		for (auto const &jack : jacks) {
+			if (jack.module_id == 0) {
+				// Hub module: panel_in_vals is already set by set_panel_input(); nothing more to do here
+				if (jack.jack_id < panel_in_vals.size())
+					panel_in_vals[jack.jack_id] = val;
+			} else {
+				modules[jack.module_id]->set_input(jack.jack_id, val);
+			}
+		}
 	}
 
 	void set_all_connected_jacks(std::vector<JackMidi> const &jacks, float val, uint32_t midi_chan) {
