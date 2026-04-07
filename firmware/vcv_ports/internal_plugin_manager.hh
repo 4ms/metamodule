@@ -287,8 +287,11 @@ struct InternalPluginManager {
 		pluginInstance = &internal_plugins.emplace_back("RackCore");
 		rackCorePluginInstance = pluginInstance;
 		pluginInstance->addModel(rack::core::modelMIDI_CV);
+		pluginInstance->addModel(rack::core::modelMIDICC_CV);
+		// pluginInstance->addModel(rack::core::modelMIDI_Gate);
 		pluginInstance->addModel(rack::core::modelCV_MIDI);
 		pluginInstance->addModel(rack::core::modelCV_MIDICC);
+		// pluginInstance->addModel(rack::core::modelGate_MIDI);
 		pluginInstance->addModel(rack::core::modelScope);
 		pluginInstance->addModel(rack::core::modelMerge);
 		pluginInstance->addModel(rack::core::modelSplit);
