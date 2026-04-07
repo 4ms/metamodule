@@ -1796,3 +1796,45 @@ PatchData:
 		CHECK(player.get_panel_output_connection(0) == Jack{1, 0});
 	}
 }
+
+TEST_CASE("MIDI to Hub mapping") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: hub_midi_passthrough
+  module_slugs:
+    0: PANEL_8
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 256
+      ins:
+        - module_id: 0
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Passthrough works: MIDI pitch appears on panel out") {
+		player.set_midi_note_pitch(0, 4.2f, 0);
+		float panel_out = player.get_panel_output(0);
+		CHECK(panel_out == doctest::Approx(4.2f));
+	}
+}

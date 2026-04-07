@@ -542,8 +542,15 @@ private:
 
 	void set_all_connected_jacks(std::vector<JackMidi> const &jacks, float val, uint32_t midi_chan) {
 		for (auto const &jack : jacks) {
-			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1))
-				modules[jack.module_id]->set_input(jack.jack_id, val);
+			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1)) {
+				if (jack.module_id == 0) {
+					// Hub module: write to panel_in_vals so get_panel_output can read it
+					if (jack.jack_id < panel_in_vals.size())
+						panel_in_vals[jack.jack_id] = val;
+				} else {
+					modules[jack.module_id]->set_input(jack.jack_id, val);
+				}
+			}
 		}
 	}
 
@@ -1153,8 +1160,18 @@ public:
 				// panel_jack_id is the panel input jack whose value we want to read.
 				// We add to out_conns so get_panel_output reads panel_in_vals[panel_jack_id].
 				if (input_jack.module_id == 0) {
-					out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
-					pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
+					if (Midi::is_midi_panel_id(panel_jack_id)) {
+						// MIDI -> Hub Out: register the MIDI connection and store the
+						// Hub output jack ID as the panel_in_vals index (not the raw MIDI ID).
+						// MIDI->Hub In jack
+						update_or_add_input_panel_conn(panel_jack_id, input_jack);
+						// Hub In jack->Hub Out jack
+						out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = input_jack.jack_id});
+						pr_trace("Connect MIDI %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
+					} else {
+						out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
+						pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
+					}
 
 				} else if (find_int_cable_input_jack(input_jack) >= 0) {
 					// The module input jack has an internal cable AND a panel input mapping.
