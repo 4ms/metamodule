@@ -55,10 +55,12 @@ private:
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
 
-	// Cached panel input values, used by get_panel_output for Hub-to-Hub summing
-	std::array<float, NumInJacks> panel_in_vals{};
-	// Tracks which panel inputs feed a hub-to-hub passthrough (non-MIDI)
-	std::array<bool, NumInJacks> panel_in_is_hub_src{};
+	// Cached panel input values, used by get_panel_output for Hub-to-Hub summing.
+	// Indices [0, NumInJacks) store panel input values.
+	// Indices [NumInJacks, NumInJacks+NumOutJacks) store MIDI-to-Hub passthrough values.
+	static constexpr auto MidiHubOffset = NumInJacks;
+	static constexpr auto PanelInValsSize = NumInJacks + NumOutJacks;
+	std::array<float, PanelInValsSize> panel_in_vals{};
 
 	// MIDI
 	bool midi_connected = false;
@@ -408,7 +410,7 @@ public:
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {
-		if (jack_id < panel_in_vals.size() && panel_in_is_hub_src[jack_id])
+		if (jack_id < NumInJacks)
 			panel_in_vals[jack_id] = val;
 		set_all_connected_jacks(in_conns[jack_id], val);
 	}
@@ -1114,7 +1116,6 @@ private:
 			in_conn.clear();
 
 		panel_in_vals = {};
-		panel_in_is_hub_src = {};
 
 		for (auto &knob_set : knob_maps)
 			for (auto &mappings : knob_set)
@@ -1177,17 +1178,16 @@ public:
 				if (input_jack.module_id == 0) {
 					if (Midi::is_midi_panel_id(panel_jack_id)) {
 
-						// MIDI->Hub passthrough jack:
-						update_or_add_input_panel_conn(panel_jack_id, input_jack);
-						pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
+						// MIDI->Hub passthrough: use offset index in panel_in_vals
+						// to avoid collisions with panel input values
+						auto midi_hub_jack = Jack{.module_id = 0, .jack_id = (uint16_t)(input_jack.jack_id + MidiHubOffset)};
+						update_or_add_input_panel_conn(panel_jack_id, midi_hub_jack);
+						pr_trace(" to jack: m=%d, p=%d (passthrough jack)\n", module_id, midi_hub_jack.jack_id);
 
 						// Hub passthrough jack->Panel Out jack:
-						out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = input_jack.jack_id});
+						out_conns[input_jack.jack_id].push_back(midi_hub_jack);
 						pr_trace("Connect MIDI %d to panel out %d via hub\n", panel_jack_id, input_jack.jack_id);
 					} else {
-						if (panel_jack_id < panel_in_is_hub_src.size())
-							panel_in_is_hub_src[panel_jack_id] = true;
-
 						out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
 						pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 					}

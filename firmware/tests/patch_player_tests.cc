@@ -1939,6 +1939,8 @@ PatchData:
 }
 
 TEST_CASE("MIDI to Hub summed with Hub to Hub mapping") {
+	// MIDI Note -> Panel Out 0
+	// MIDI Gate + Panel In 0 -> Panel Out 1
 	// clang-format off
 	std::string patchyml{R"(
 PatchData:
@@ -1950,11 +1952,15 @@ PatchData:
     - panel_jack_id: 256
       ins:
         - module_id: 0
-          jack_id: 2 
-    - panel_jack_id: 1
+          jack_id: 0 
+    - panel_jack_id: 272
       ins:
         - module_id: 0
-          jack_id: 2 
+          jack_id: 1 
+    - panel_jack_id: 0
+      ins:
+        - module_id: 0
+          jack_id: 1 
   mapped_outs:
   static_knobs:
   mapped_knobs:
@@ -1979,28 +1985,30 @@ PatchData:
 	player.load_patch(pd);
 
 	SUBCASE("Set just MIDI") {
-		player.set_midi_note_pitch(0, 7.f, 0);
-		float panel_out = player.get_panel_output(2);
+		player.set_midi_note_gate(0, 7.f, 0);
+		float panel_out = player.get_panel_output(1);
 		CHECK(panel_out == doctest::Approx(7.f));
 	}
 	SUBCASE("Set just Panel In") {
-		player.set_panel_input(1, 3.f);
-		float panel_out = player.get_panel_output(2);
+		player.set_panel_input(0, 3.f);
+		float panel_out = player.get_panel_output(1);
 		CHECK(panel_out == doctest::Approx(3.f));
 	}
 	SUBCASE("Set MIDI and Panel In") {
-		player.set_panel_input(1, 3.f);
-		player.set_midi_note_pitch(0, 7.f, 0);
-		float panel_out = player.get_panel_output(2);
+		player.set_panel_input(0, 3.f);
+		player.set_midi_note_gate(0, 7.f, 0);
+		float panel_out = player.get_panel_output(1);
 		CHECK(panel_out == doctest::Approx(10.f));
 	}
 	SUBCASE("Set a different Panel In that matches panel out ID") {
-		// printf("set_panel_input(2, 6.f)\n");
-		player.set_panel_input(2, 6.f);
-		float panel_out = player.get_panel_output(2);
+		player.set_panel_input(1, 6.f); // Make sure passthrough Panel 1->Panel 1 is disabled
+		float panel_out = player.get_panel_output(1);
 		CHECK(panel_out == doctest::Approx(0.f));
-
-		// printf("done\n");
+	}
+	SUBCASE("Set wrong MIDI signal") {
+		player.set_midi_note_pitch(0, 7.f, 0);
+		float panel_out = player.get_panel_output(1);
+		CHECK(panel_out == doctest::Approx(0.f));
 	}
 }
 
