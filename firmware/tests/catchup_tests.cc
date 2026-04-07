@@ -4,7 +4,7 @@
 #include "params/catchup_param.hh"
 #include <memory>
 
-struct TestModule : CoreProcessor {
+struct CatchupTestModule : CoreProcessor {
 	std::array<float, 8> params{};
 
 	void set_param(int param_id, float val) override {
@@ -32,7 +32,7 @@ TEST_CASE("Basic usage of ResumeOnEqual") {
 	using namespace MetaModule;
 
 	std::array<std::unique_ptr<CoreProcessor>, 1> modules;
-	modules[0] = std::make_unique<TestModule>();
+	modules[0] = std::make_unique<CatchupTestModule>();
 
 	CatchupManager catchup_manager;
 	std::array<ParamSet, MaxKnobSets> knob_maps;
@@ -241,7 +241,7 @@ TEST_CASE("Basic usage of ResumeOnMotion") {
 	using namespace MetaModule;
 
 	std::array<std::unique_ptr<CoreProcessor>, 1> modules;
-	modules[0] = std::make_unique<TestModule>();
+	modules[0] = std::make_unique<CatchupTestModule>();
 
 	CatchupManager catchup_manager;
 	std::array<ParamSet, MaxKnobSets> knob_maps;
@@ -358,7 +358,7 @@ TEST_CASE("Basic usage of LinearFade") {
 	using namespace MetaModule;
 
 	std::array<std::unique_ptr<CoreProcessor>, 1> modules;
-	modules[0] = std::make_unique<TestModule>();
+	modules[0] = std::make_unique<CatchupTestModule>();
 
 	CatchupManager catchup_manager;
 	std::array<ParamSet, MaxKnobSets> knob_maps;

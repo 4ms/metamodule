@@ -3,8 +3,25 @@
 #include "patch-serial/yaml_to_patch.hh"
 
 #include "patch_play/patch_player.hh"
+#include "stubs/test_module.hh"
 #include <fstream>
 #include <string>
+
+// Register TestModule so patches can use slug "TestMono"
+namespace
+{
+constexpr MetaModule::ModuleInfoView TestModuleInfo{
+	.description = "Test module",
+	.width_hp = 8,
+};
+[[maybe_unused]] bool s_test_mono_registered =
+	MetaModule::ModuleFactory::registerModuleType("TestModule", TestModule::create, TestModuleInfo, "");
+
+TestModule *get_test_mono(MetaModule::PatchPlayer &player, unsigned module_id) {
+	return dynamic_cast<TestModule *>(player.modules[module_id].get());
+}
+
+} // namespace
 
 TEST_CASE("Simple output jack mapping") {
 	std::string patchyml{// clang-format off
@@ -1195,9 +1212,9 @@ PatchData:
   patch_name: summed_int_cables
   module_slugs:
     0: PANEL_8
-    1: LFOSINE
-    2: LFOSINE
-    3: MULTILFO
+    1: TestModule
+    2: TestModule
+    3: TestModule
   int_cables:
     - out:
         module_id: 1
@@ -1234,34 +1251,39 @@ PatchData:
 	MetaModule::PatchPlayer player;
 	player.load_patch(pd);
 
-	SUBCASE("Cable cache has a summed input for module 3 jack 0") {
+	auto mono1 = get_test_mono(player, 1);
+	auto mono2 = get_test_mono(player, 2);
+	auto mono3 = get_test_mono(player, 3);
+	CHECK(mono1);
+	CHECK(mono2);
+	CHECK(mono3);
+
+	mono1->set_input(0, 3.5f);
+	CHECK(mono1->get_output(0) == 3.5f);
+
+	mono2->set_input(0, 1.5f);
+	CHECK(mono2->get_output(0) == 1.5f);
+
+	player.update_patch();
+
+	CHECK(mono3->get_output(0) == 5.f);
+
+	SUBCASE("Cable cache has a summed input for module 3 jack 0 from both output jacks") {
 		bool found = false;
 		for (auto &core_si : player.cables.summed_inputs) {
 			for (auto &si : core_si) {
 				if (si.in == Jack{3, 0}) {
 					found = true;
 					CHECK(si.outs.size() == 2);
-				}
-			}
-		}
-		CHECK(found);
-	}
-
-	SUBCASE("Summed entry contains both output jacks") {
-		bool found = false;
-		for (auto &core_si : player.cables.summed_inputs) {
-			for (auto &si : core_si) {
-				if (si.in == Jack{3, 0}) {
-					found = true;
-					bool has_lfo1 = false, has_lfo2 = false;
+					bool has_mod1 = false, has_mod2 = false;
 					for (size_t j = 0; j < si.outs.size(); j++) {
 						if (si.outs[j] == Jack{1, 0})
-							has_lfo1 = true;
+							has_mod1 = true;
 						if (si.outs[j] == Jack{2, 0})
-							has_lfo2 = true;
+							has_mod2 = true;
 					}
-					CHECK(has_lfo1);
-					CHECK(has_lfo2);
+					CHECK(has_mod1);
+					CHECK(has_mod2);
 				}
 			}
 		}
