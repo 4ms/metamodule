@@ -637,8 +637,15 @@ private:
 	template<typename JackMidiT>
 	void set_all_connected_jacks(std::vector<JackMidiT> const &jacks, float val, uint32_t midi_chan) {
 		for (auto const &jack : jacks) {
-			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1))
-				modules[jack.module_id]->set_input(jack.jack_id, val);
+			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1)) {
+				if (jack.module_id == 0) {
+					// Hub module: write to panel_in_vals so get_panel_output can read it
+					if (jack.jack_id < panel_in_vals.size())
+						panel_in_vals[jack.jack_id] = val;
+				} else {
+					modules[jack.module_id]->set_input(jack.jack_id, val);
+				}
+			}
 		}
 	}
 
@@ -1342,12 +1349,12 @@ public:
 				// panel_jack_id is the panel input jack whose value we want to read.
 				// We add to out_conns so get_panel_output reads panel_in_vals[panel_jack_id].
 				if (input_jack.module_id == 0) {
-					if (Midi::is_midi_poly_cable(panel_jack_id)) {
-						// MIDI poly cable -> Hub output: register in the poly MIDI cache using
+					if (Midi::is_midi_poly_cable(panel_jack_id) || Midi::is_midi_panel_id(panel_jack_id)) {
+						// MIDI cable -> Hub output: register in the poly MIDI cache using
 						// input_jack.jack_id (Hub out port) as the key. On poly_chan==0 events,
 						// set_all_connected_poly_jacks writes to panel_in_vals[hub_out_port].
 						// out_conns stores {0, hub_out_port} so get_panel_output reads the right slot.
-						update_or_add_input_panel_conn(panel_jack_id, Jack{0, input_jack.jack_id});
+						update_or_add_input_panel_conn(panel_jack_id, input_jack);
 						out_conns[input_jack.jack_id].push_back(PolyJack{{0, input_jack.jack_id}, {}});
 					} else {
 						out_conns[input_jack.jack_id].push_back(PolyJack{{0, panel_jack_id}, {}});
