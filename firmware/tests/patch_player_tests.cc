@@ -1316,8 +1316,8 @@ PatchData:
   patch_name: single_cable
   module_slugs:
     0: PANEL_8
-    1: LFOSINE
-    2: MULTILFO
+    1: TestModule
+    2: TestModule
   int_cables:
     - out:
         module_id: 1
@@ -1353,6 +1353,16 @@ PatchData:
 			CHECK(core_si.size() == 0);
 		}
 	}
+
+	SUBCASE("Value propagates from module 1 to module 2 via cable") {
+		auto mono1 = get_test_mono(player, 1);
+		auto mono2 = get_test_mono(player, 2);
+		CHECK(mono1);
+		CHECK(mono2);
+		mono1->set_input(0, 2.5f);
+		player.update_patch();
+		CHECK(mono2->get_output(0) == doctest::Approx(2.5f));
+	}
 }
 
 TEST_CASE("Summed panel output: two module outputs to same panel out jack") {
@@ -1362,8 +1372,8 @@ PatchData:
   patch_name: summed_panel_out
   module_slugs:
     0: PANEL_8
-    1: LFOSINE
-    2: LFOSINE
+    1: TestModule
+    2: TestModule
   int_cables:
   mapped_ins:
   mapped_outs:
@@ -1403,15 +1413,14 @@ PatchData:
 	}
 
 	SUBCASE("Panel out 0 sums the two module outputs") {
-		// Run some frames
-		for (int i = 0; i < 100; i++)
-			player.update_patch();
-
-		float lfo1 = player.modules[1]->get_output(0);
-		float lfo2 = player.modules[2]->get_output(0);
-		float panel_out = player.get_panel_output(0);
-
-		CHECK(panel_out == doctest::Approx(lfo1 + lfo2));
+		auto mono1 = get_test_mono(player, 1);
+		auto mono2 = get_test_mono(player, 2);
+		CHECK(mono1);
+		CHECK(mono2);
+		mono1->set_input(0, 3.0f);
+		mono2->set_input(0, 2.0f);
+		player.update_patch();
+		CHECK(player.get_panel_output(0) == doctest::Approx(5.0f));
 	}
 
 	SUBCASE("Other panel outs are unaffected") {
@@ -1494,8 +1503,8 @@ PatchData:
   patch_name: panel_plus_cable
   module_slugs:
     0: PANEL_8
-    1: LFOSINE
-    2: MULTILFO
+    1: TestModule
+    2: TestModule
   int_cables:
     - out:
         module_id: 1
@@ -1574,6 +1583,18 @@ PatchData:
 			}
 		}
 	}
+
+	SUBCASE("Module 2 jack 0 receives sum of panel input and cable source") {
+		auto mono1 = get_test_mono(player, 1);
+		auto mono2 = get_test_mono(player, 2);
+		CHECK(mono1);
+		CHECK(mono2);
+		// Panel in 0 contributes via Hub virtual cable; module 1 contributes via internal cable
+		player.set_panel_input(0, 3.0f);
+		mono1->set_input(0, 2.0f);
+		player.update_patch();
+		CHECK(mono2->get_output(0) == doctest::Approx(5.0f));
+	}
 }
 
 TEST_CASE("Panel input to module input with no internal cable: direct routing (no summing needed)") {
@@ -1583,7 +1604,7 @@ PatchData:
   patch_name: panel_direct
   module_slugs:
     0: PANEL_8
-    1: MULTILFO
+    1: TestModule
   int_cables:
   mapped_ins:
     - panel_jack_id: 0
@@ -1620,6 +1641,14 @@ PatchData:
 		for (auto &core_si : player.cables.summed_inputs) {
 			CHECK(core_si.size() == 0);
 		}
+	}
+
+	SUBCASE("Panel input value propagates to module jack") {
+		auto mono1 = get_test_mono(player, 1);
+		CHECK(mono1);
+		player.set_panel_input(0, 4.0f);
+		player.update_patch();
+		CHECK(mono1->get_output(0) == doctest::Approx(4.0f));
 	}
 }
 
@@ -1677,10 +1706,10 @@ PatchData:
   patch_name: three_way_sum
   module_slugs:
     0: PANEL_8
-    1: LFOSINE
-    2: LFOSINE
-    3: LFOSINE
-    4: MULTILFO
+    1: TestModule
+    2: TestModule
+    3: TestModule
+    4: TestModule
   int_cables:
     - out:
         module_id: 1
@@ -1735,6 +1764,22 @@ PatchData:
 		}
 		CHECK(found);
 	}
+
+	SUBCASE("Module 4 jack 0 receives sum of all three cable sources") {
+		auto mono1 = get_test_mono(player, 1);
+		auto mono2 = get_test_mono(player, 2);
+		auto mono3 = get_test_mono(player, 3);
+		auto mono4 = get_test_mono(player, 4);
+		CHECK(mono1);
+		CHECK(mono2);
+		CHECK(mono3);
+		CHECK(mono4);
+		mono1->set_input(0, 1.0f);
+		mono2->set_input(0, 2.0f);
+		mono3->set_input(0, 3.0f);
+		player.update_patch();
+		CHECK(mono4->get_output(0) == doctest::Approx(6.0f));
+	}
 }
 
 TEST_CASE("Summing part of a split: virt output splits to a virt input and panel output. The virt input also sums with "
@@ -1747,8 +1792,8 @@ PatchData:
   patch_name: mixed_sum
   module_slugs:
     0: PANEL_8
-    1: LFOSINE
-    2: MULTILFO
+    1: TestModule
+    2: TestModule
   int_cables:
     - out:
         module_id: 1
@@ -1791,21 +1836,21 @@ PatchData:
 		CHECK(player.get_panel_input_connection(1) == Jack{0, 1});
 	}
 
-	SUBCASE("Summed input for module 2 jack 0 has LFO and Hub sources") {
+	SUBCASE("Summed input for module 2 jack 0 has module 1 and Hub sources") {
 		bool found = false;
 		for (auto &core_si : player.cables.summed_inputs) {
 			for (auto &si : core_si) {
 				if (si.in == Jack{2, 0}) {
 					found = true;
 					CHECK(si.outs.size() == 2);
-					bool has_lfo = false, has_hub = false;
+					bool has_mod1 = false, has_hub = false;
 					for (size_t j = 0; j < si.outs.size(); j++) {
 						if (si.outs[j] == Jack{1, 0})
-							has_lfo = true;
+							has_mod1 = true;
 						if (si.outs[j] == Jack{0, 1})
 							has_hub = true;
 					}
-					CHECK(has_lfo);
+					CHECK(has_mod1);
 					CHECK(has_hub);
 				}
 			}
@@ -1816,6 +1861,25 @@ PatchData:
 	SUBCASE("Panel output 0 reads from module 1") {
 		CHECK(player.get_outconns()[0].size() == 1);
 		CHECK(player.get_panel_output_connection(0) == Jack{1, 0});
+	}
+
+	SUBCASE("Panel out 0 reflects module 1 output") {
+		auto mono1 = get_test_mono(player, 1);
+		CHECK(mono1);
+		mono1->set_input(0, 4.0f);
+		player.update_patch();
+		CHECK(player.get_panel_output(0) == doctest::Approx(4.0f));
+	}
+
+	SUBCASE("Module 2 jack 0 receives sum of module 1 output and panel input 1") {
+		auto mono1 = get_test_mono(player, 1);
+		auto mono2 = get_test_mono(player, 2);
+		CHECK(mono1);
+		CHECK(mono2);
+		mono1->set_input(0, 2.0f);
+		player.set_panel_input(1, 3.0f);
+		player.update_patch();
+		CHECK(mono2->get_output(0) == doctest::Approx(5.0f));
 	}
 }
 
@@ -1921,5 +1985,278 @@ PatchData:
 		player.set_midi_note_pitch(0, 7.f, 0);
 		float panel_out = player.get_panel_output(2);
 		CHECK(panel_out == doctest::Approx(10.f));
+	}
+}
+
+TEST_CASE("Split: one output fans to multiple inputs — all destinations receive same value") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: split
+  module_slugs:
+    0: PANEL_8
+    1: TestModule
+    2: TestModule
+    3: TestModule
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+        - module_id: 3
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("No summed inputs — split destinations are independent") {
+		for (auto &core_si : player.cables.summed_inputs) {
+			CHECK(core_si.size() == 0);
+		}
+	}
+
+	SUBCASE("Both destinations receive the same value from the source") {
+		auto mono1 = get_test_mono(player, 1);
+		auto mono2 = get_test_mono(player, 2);
+		auto mono3 = get_test_mono(player, 3);
+		CHECK(mono1);
+		CHECK(mono2);
+		CHECK(mono3);
+		mono1->set_input(0, 2.5f);
+		player.update_patch();
+		CHECK(mono2->get_output(0) == doctest::Approx(2.5f));
+		CHECK(mono3->get_output(0) == doctest::Approx(2.5f));
+	}
+}
+
+TEST_CASE("MIDI to module input directly (not via Hub)") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_direct
+  module_slugs:
+    0: PANEL_8
+    1: TestModule
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 256
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 0x110
+      ins:
+        - module_id: 1
+          jack_id: 1
+    - panel_jack_id: 0x200
+      ins:
+        - module_id: 1
+          jack_id: 2
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto mono1 = get_test_mono(player, 1);
+	CHECK(mono1);
+
+	SUBCASE("MIDI note pitch routes directly to module jack 0") {
+		player.set_midi_note_pitch(0, 4.5f, 0);
+		CHECK(mono1->get_output(0) == doctest::Approx(4.5f));
+	}
+
+	SUBCASE("MIDI note gate routes directly to module jack 1") {
+		player.set_midi_note_gate(0, 8.f, 0);
+		CHECK(mono1->get_output(1) == doctest::Approx(8.f));
+	}
+
+	SUBCASE("MIDI CC 0 routes directly to module jack 2, scaled to 0-10V") {
+		player.set_midi_cc(0, 127, 0);
+		CHECK(mono1->get_output(2) == doctest::Approx(127.f / 12.7f));
+	}
+}
+
+TEST_CASE("Split combined with sum: source fans to two destinations, second source sums at one") {
+	// Module 1 output 0 splits to module 2 jack 0 and module 3 jack 0.
+	// Module 4 output 0 also connects to module 2 jack 0, so module 2 has a summed input.
+	// Module 3 receives only the split (no sum).
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: split_plus_sum
+  module_slugs:
+    0: PANEL_8
+    1: TestModule
+    2: TestModule
+    3: TestModule
+    4: TestModule
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+        - module_id: 3
+          jack_id: 0
+    - out:
+        module_id: 4
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Module 2 jack 0 is summed; module 3 jack 0 is a plain cable") {
+		bool found_sum = false;
+		for (auto &core_si : player.cables.summed_inputs) {
+			for (auto &si : core_si) {
+				if (si.in == Jack{2, 0}) {
+					found_sum = true;
+					CHECK(si.outs.size() == 2);
+				}
+				CHECK_FALSE(si.in == Jack{3, 0});
+			}
+		}
+		CHECK(found_sum);
+	}
+
+	SUBCASE("Module 2 receives sum; module 3 receives only module 1 value") {
+		auto mono1 = get_test_mono(player, 1);
+		auto mono2 = get_test_mono(player, 2);
+		auto mono3 = get_test_mono(player, 3);
+		auto mono4 = get_test_mono(player, 4);
+		CHECK(mono1);
+		CHECK(mono2);
+		CHECK(mono3);
+		CHECK(mono4);
+		mono1->set_input(0, 3.0f);
+		mono4->set_input(0, 1.5f);
+		player.update_patch();
+		CHECK(mono2->get_output(0) == doctest::Approx(4.5f));
+		CHECK(mono3->get_output(0) == doctest::Approx(3.0f));
+	}
+}
+
+TEST_CASE("Full round-trip: panel in routes to module, module output cables to second module, mapped to panel out") {
+	// panel_in 0 → module 1 jack 0 (direct) → module 2 jack 0 (cable) → panel_out 0 (mapped_outs)
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: round_trip
+  module_slugs:
+    0: PANEL_8
+    1: TestModule
+    2: TestModule
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 2
+        jack_id: 0
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Panel in value flows through both modules and appears on panel out") {
+		player.set_panel_input(0, 3.3f);
+		player.update_patch();
+		CHECK(player.get_panel_output(0) == doctest::Approx(3.3f));
+	}
+
+	SUBCASE("Changing panel in changes panel out after update") {
+		player.set_panel_input(0, 1.0f);
+		player.update_patch();
+		CHECK(player.get_panel_output(0) == doctest::Approx(1.0f));
+
+		player.set_panel_input(0, 5.0f);
+		player.update_patch();
+		CHECK(player.get_panel_output(0) == doctest::Approx(5.0f));
 	}
 }
