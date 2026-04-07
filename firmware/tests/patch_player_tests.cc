@@ -3206,3 +3206,73 @@ PatchData:
 		CHECK(module->mono[3] == 0.f);
 	}
 }
+
+TEST_CASE("MIDI poly cable patched to Panel Out jack") {
+	// Map MidiNotePolyJack and MidiGatePolyJack to Panel Out 1 and Panel Out 2
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_poly_gate_vel
+  module_slugs:
+    0: HubMedium
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 336
+      ins:
+        - module_id: 0
+          jack_id: 0
+    - panel_jack_id: 337
+      ins:
+        - module_id: 0
+          jack_id: 1
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 4
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+	player.set_midi_connected();
+
+	SUBCASE("Note poly channel 0 writes to panel out 1, but other poly channels do not") {
+		player.set_midi_note_pitch(0, 1.f, 0);
+		CHECK(player.get_panel_output(0) == 1.f);
+
+		// poly channel 1: output does not change
+		player.set_midi_note_pitch(1, 3.f, 0);
+		CHECK(player.get_panel_output(0) == 1.f);
+
+		// poly channel 2: output does not change
+		player.set_midi_note_pitch(2, 2.f, 0);
+		CHECK(player.get_panel_output(0) == 1.f);
+
+		// Poly channel 0: output changes
+		player.set_midi_note_pitch(0, 2.f, 0);
+		CHECK(player.get_panel_output(0) == 2.f);
+	}
+
+	SUBCASE("Gate poly writes to panel out 2") {
+		player.set_midi_note_gate(0, 1.f, 0);
+		CHECK(player.get_panel_output(1) == doctest::Approx(1.f));
+
+		player.set_midi_note_gate(1, 99.f, 0); // ch1: no effect
+		CHECK(player.get_panel_output(1) == doctest::Approx(1.f));
+
+		player.set_midi_note_gate(0, 2.f, 0);
+		CHECK(player.get_panel_output(1) == doctest::Approx(2.f));
+	}
+}

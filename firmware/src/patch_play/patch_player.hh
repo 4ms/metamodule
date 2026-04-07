@@ -655,8 +655,12 @@ private:
 				continue;
 			if (jack.buf.voltages)
 				jack.buf.voltages[poly_chan] = val;
-			else if (poly_chan == 0)
-				modules[jack.module_id]->set_input(jack.jack_id, val);
+			else if (poly_chan == 0) {
+				if (jack.module_id == 0)
+					panel_in_vals[jack.jack_id] = val; // Hub: write to panel output buffer
+				else
+					modules[jack.module_id]->set_input(jack.jack_id, val);
+			}
 		}
 	}
 
@@ -1159,7 +1163,7 @@ public:
 
 		auto mark_jacks_patched = [&](auto const &conns) {
 			for (auto const &jack : conns) {
-				if (jack.module_id < num_modules)
+				if (jack.module_id > 0 && jack.module_id < num_modules)
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
 			}
 		};
@@ -1219,7 +1223,7 @@ public:
 
 		auto mark_poly_unpatched = [&](auto const &conns) {
 			for (auto const &jack : conns) {
-				if (jack.module_id < num_modules)
+				if (jack.module_id > 0 && jack.module_id < num_modules)
 					modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
 				// Zero poly buffers
 				if (jack.buf.voltages) {
@@ -1338,7 +1342,16 @@ public:
 				// panel_jack_id is the panel input jack whose value we want to read.
 				// We add to out_conns so get_panel_output reads panel_in_vals[panel_jack_id].
 				if (input_jack.module_id == 0) {
-					out_conns[input_jack.jack_id].push_back(PolyJack{{0, panel_jack_id}, {}});
+					if (Midi::is_midi_poly_cable(panel_jack_id)) {
+						// MIDI poly cable -> Hub output: register in the poly MIDI cache using
+						// input_jack.jack_id (Hub out port) as the key. On poly_chan==0 events,
+						// set_all_connected_poly_jacks writes to panel_in_vals[hub_out_port].
+						// out_conns stores {0, hub_out_port} so get_panel_output reads the right slot.
+						update_or_add_input_panel_conn(panel_jack_id, Jack{0, input_jack.jack_id});
+						out_conns[input_jack.jack_id].push_back(PolyJack{{0, input_jack.jack_id}, {}});
+					} else {
+						out_conns[input_jack.jack_id].push_back(PolyJack{{0, panel_jack_id}, {}});
+					}
 					pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 
 				} else if (find_int_cable_input_jack(input_jack) >= 0) {
