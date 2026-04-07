@@ -57,6 +57,8 @@ private:
 
 	// Cached panel input values, used by get_panel_output for Hub-to-Hub summing
 	std::array<float, NumInJacks> panel_in_vals{};
+	// Tracks which panel inputs feed a hub-to-hub passthrough (non-MIDI)
+	std::array<bool, NumInJacks> panel_in_is_hub_src{};
 
 	// MIDI
 	bool midi_connected = false;
@@ -406,7 +408,7 @@ public:
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {
-		if (jack_id < panel_in_vals.size())
+		if (jack_id < panel_in_vals.size() && panel_in_is_hub_src[jack_id])
 			panel_in_vals[jack_id] = val;
 		set_all_connected_jacks(in_conns[jack_id], val);
 	}
@@ -1112,6 +1114,7 @@ private:
 			in_conn.clear();
 
 		panel_in_vals = {};
+		panel_in_is_hub_src = {};
 
 		for (auto &knob_set : knob_maps)
 			for (auto &mappings : knob_set)
@@ -1182,6 +1185,8 @@ public:
 						out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = input_jack.jack_id});
 						pr_trace("Connect MIDI %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 					} else {
+						if (panel_jack_id < panel_in_is_hub_src.size())
+							panel_in_is_hub_src[panel_jack_id] = true;
 						out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
 						pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 					}
