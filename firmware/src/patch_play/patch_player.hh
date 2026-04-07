@@ -1202,7 +1202,7 @@ public:
 						}
 						auto midi_hub_jack = Jack{.module_id = 0, .jack_id = next_midi_hub_slot++};
 						update_or_add_input_panel_conn(panel_jack_id, midi_hub_jack);
-						pr_trace(" to jack: m=%d, p=%d (passthrough jack)\n", module_id, midi_hub_jack.jack_id);
+						pr_trace(" to hub passthrough jack: p=%d\n", midi_hub_jack.jack_id);
 
 						// Hub passthrough jack->Panel Out jack:
 						out_conns[input_jack.jack_id].push_back(midi_hub_jack);
