@@ -181,7 +181,19 @@ public:
 				}
 
 				// TODO: change via Back button + Button expander
-				{}
+				if (info.metaparams.meta_buttons[0].is_pressed() && info.metaparams.button_exp_connected > 0) {
+					auto mask = info.metaparams.ext_buttons_high_events;
+					unsigned i = 0;
+					while (mask) {
+						if (mask & 0b1) {
+							if (i < next_knobset)
+								next_knobset = i;
+							// TODO: Disable Back button release event
+						}
+						mask >>= 1;
+						i++;
+					}
+				}
 
 				// Perform the knob set change:
 				if (next_knobset.has_value()) {
