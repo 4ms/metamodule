@@ -17,7 +17,7 @@ constexpr MetaModule::ModuleInfoView TestModuleInfo{
 [[maybe_unused]] bool s_test_mono_registered =
 	MetaModule::ModuleFactory::registerModuleType("TestModule", TestModule::create, TestModuleInfo, "");
 
-auto *get_test_mono(MetaModule::PatchPlayer &player, unsigned module_id) {
+auto *get_test_module(MetaModule::PatchPlayer &player, unsigned module_id) {
 	return dynamic_cast<TestModule *>(player.modules[module_id].get());
 }
 
@@ -1258,9 +1258,9 @@ PatchData:
 	MetaModule::PatchPlayer player;
 	player.load_patch(pd);
 
-	auto mono1 = get_test_mono(player, 1);
-	auto mono2 = get_test_mono(player, 2);
-	auto mono3 = get_test_mono(player, 3);
+	auto mono1 = get_test_module(player, 1);
+	auto mono2 = get_test_module(player, 2);
+	auto mono3 = get_test_module(player, 3);
 	CHECK(mono1);
 	CHECK(mono2);
 	CHECK(mono3);
@@ -1362,8 +1362,8 @@ PatchData:
 	}
 
 	SUBCASE("Value propagates from module 1 to module 2 via cable") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
 		CHECK(mono1);
 		CHECK(mono2);
 		mono1->set_input(0, 2.5f);
@@ -1420,8 +1420,8 @@ PatchData:
 	}
 
 	SUBCASE("Panel out 0 sums the two module outputs") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
 		CHECK(mono1);
 		CHECK(mono2);
 		mono1->set_input(0, 3.0f);
@@ -1592,8 +1592,8 @@ PatchData:
 	}
 
 	SUBCASE("Module 2 jack 0 receives sum of panel input and cable source") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
 		CHECK(mono1);
 		CHECK(mono2);
 		// Panel in 0 contributes via Hub virtual cable; module 1 contributes via internal cable
@@ -1651,7 +1651,7 @@ PatchData:
 	}
 
 	SUBCASE("Panel input value propagates to module jack") {
-		auto mono1 = get_test_mono(player, 1);
+		auto mono1 = get_test_module(player, 1);
 		CHECK(mono1);
 		player.set_panel_input(0, 4.0f);
 		player.update_patch();
@@ -1773,10 +1773,10 @@ PatchData:
 	}
 
 	SUBCASE("Module 4 jack 0 receives sum of all three cable sources") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
-		auto mono3 = get_test_mono(player, 3);
-		auto mono4 = get_test_mono(player, 4);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
+		auto mono3 = get_test_module(player, 3);
+		auto mono4 = get_test_module(player, 4);
 		CHECK(mono1);
 		CHECK(mono2);
 		CHECK(mono3);
@@ -1871,7 +1871,7 @@ PatchData:
 	}
 
 	SUBCASE("Panel out 0 reflects module 1 output") {
-		auto mono1 = get_test_mono(player, 1);
+		auto mono1 = get_test_module(player, 1);
 		CHECK(mono1);
 		mono1->set_input(0, 4.0f);
 		player.update_patch();
@@ -1879,8 +1879,8 @@ PatchData:
 	}
 
 	SUBCASE("Module 2 jack 0 receives sum of module 1 output and panel input 1") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
 		CHECK(mono1);
 		CHECK(mono2);
 		mono1->set_input(0, 2.0f);
@@ -2061,9 +2061,9 @@ PatchData:
 	}
 
 	SUBCASE("Both destinations receive the same value from the source") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
-		auto mono3 = get_test_mono(player, 3);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
+		auto mono3 = get_test_module(player, 3);
 		CHECK(mono1);
 		CHECK(mono2);
 		CHECK(mono3);
@@ -2118,7 +2118,7 @@ PatchData:
 	MetaModule::PatchPlayer player;
 	player.load_patch(pd);
 
-	auto mono1 = get_test_mono(player, 1);
+	auto mono1 = get_test_module(player, 1);
 	CHECK(mono1);
 
 	SUBCASE("MIDI note pitch routes directly to module jack 0") {
@@ -2204,10 +2204,10 @@ PatchData:
 	}
 
 	SUBCASE("Module 2 receives sum; module 3 receives only module 1 value") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
-		auto mono3 = get_test_mono(player, 3);
-		auto mono4 = get_test_mono(player, 4);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
+		auto mono3 = get_test_module(player, 3);
+		auto mono4 = get_test_module(player, 4);
 		CHECK(mono1);
 		CHECK(mono2);
 		CHECK(mono3);
@@ -2282,5 +2282,137 @@ PatchData:
 		player.set_panel_input(0, 5.0f);
 		player.update_patch();
 		CHECK(player.get_panel_output(0) == doctest::Approx(5.0f));
+	}
+}
+
+TEST_CASE("MIDI summed with virt cable on virt module input") {
+	// Module 2 out 0 + MIDI pitch -> module 1 in 0
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_summed_direct
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+    2: TestModule
+  int_cables:
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 256
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto module1 = get_test_module(player, 1);
+	CHECK(module1);
+	auto module2 = get_test_module(player, 2);
+	CHECK(module2);
+
+	SUBCASE("Module 2 out routes directly to module 1 jack 0") {
+		module2->set_input(0, 2.4f);
+		player.update_patch();
+		CHECK(module1->get_output(0) == doctest::Approx(2.4f));
+	}
+
+	SUBCASE("MIDI note pitch routes directly to module 1 jack 0") {
+		player.set_midi_note_pitch(0, 4.5f, 0);
+		player.update_patch();
+		CHECK(module1->get_output(0) == doctest::Approx(4.5f));
+	}
+
+	SUBCASE("MIDI note pitch and module 2 sum on module 1 jack 0") {
+		module2->set_input(0, 2.4f);
+		player.set_midi_note_pitch(0, 4.1f, 0);
+		player.update_patch();
+		CHECK(module1->get_output(0) == doctest::Approx(6.5f));
+	}
+}
+
+TEST_CASE("Multiple Hub In jacks summed on a virt module input") {
+	// Panel In 1 + Panel In 2 -> Module 1 jack 0
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_summed_direct
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto module1 = get_test_module(player, 1);
+	CHECK(module1);
+
+	SUBCASE("Panel jack 1 routes directly to module 1") {
+		player.set_panel_input(0, 2.4f);
+		player.update_patch();
+		CHECK(module1->get_output(0) == doctest::Approx(2.4f));
+	}
+
+	SUBCASE("Panel jack 2 routes directly to module 1") {
+		player.set_panel_input(1, 0.9f);
+		player.update_patch();
+		CHECK(module1->get_output(0) == doctest::Approx(0.9f));
+	}
+
+	SUBCASE("Panel jack 1 and 2 sum on module 1 jack 0") {
+		player.set_panel_input(0, 1.9f);
+		player.set_panel_input(1, 0.9f);
+		player.update_patch();
+		CHECK(module1->get_output(0) == doctest::Approx(2.8f));
 	}
 }

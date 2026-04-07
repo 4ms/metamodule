@@ -57,9 +57,11 @@ private:
 
 	// Cached panel input values, used by get_panel_output for MIDI/Hub-to-Hub summing.
 	// Indices [0, NumInJacks) store panel input values.
-	// Indices [NumInJacks, NumInJacks+NumOutJacks) store MIDI-to-Hub passthrough values.
+	// Indices [MidiHubOffset, PanelInValsSize) store MIDI-to-Hub passthrough values,
+	// allocated via next_midi_hub_slot counter during calc_panel_jack_connections.
 	static constexpr auto MidiHubOffset = NumInJacks;
-	static constexpr auto PanelInValsSize = NumInJacks + NumOutJacks;
+	static constexpr auto MaxMidiHubSlots = 64;
+	static constexpr auto PanelInValsSize = MidiHubOffset + MaxMidiHubSlots;
 	std::array<float, PanelInValsSize> panel_in_vals{};
 
 	// MIDI
@@ -1156,11 +1158,26 @@ private:
 		return -1;
 	}
 
+	bool has_other_mapped_in(Jack j) {
+		int found = 0;
+		for (auto const &cable : pd.mapped_ins) {
+			for (auto const &in : cable.ins) {
+				if (in == j) {
+					if (++found == 2)
+						return true;
+				}
+			}
+		}
+		return false;
+	};
+
 public:
 	// Map all the panel jack connections into in_conns[] and out_conns[]
 	// which are indexed by panel_jack_id.
 	// This speeds up propagating I/O from user to virtual modules
 	void calc_panel_jack_connections() {
+		uint16_t next_midi_hub_slot = MidiHubOffset;
+
 		for (auto const &cable : pd.mapped_ins) {
 			uint16_t panel_jack_id = cable.panel_jack_id;
 
@@ -1177,10 +1194,13 @@ public:
 				if (input_jack.module_id == 0) {
 					if (Midi::is_midi_panel_id(panel_jack_id)) {
 
-						// MIDI->Hub passthrough: use offset index in panel_in_vals
+						// MIDI->Hub passthrough: allocate a unique slot in panel_in_vals
 						// to avoid collisions with panel input values
-						auto midi_hub_jack =
-							Jack{.module_id = 0, .jack_id = (uint16_t)(input_jack.jack_id + MidiHubOffset)};
+						if (next_midi_hub_slot >= PanelInValsSize) {
+							pr_err("Too many MIDI-to-Hub connections\n");
+							break;
+						}
+						auto midi_hub_jack = Jack{.module_id = 0, .jack_id = next_midi_hub_slot++};
 						update_or_add_input_panel_conn(panel_jack_id, midi_hub_jack);
 						pr_trace(" to jack: m=%d, p=%d (passthrough jack)\n", module_id, midi_hub_jack.jack_id);
 
@@ -1192,18 +1212,32 @@ public:
 						pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 					}
 
-				} else if (find_int_cable_input_jack(input_jack) >= 0) {
-					// The module input jack has an internal cable AND a panel input mapping.
-					// In order to sum the panel input and the internal cable, we map the panel input
-					// to the Hub input, and then add a second internal cable from Hub output to the
+				} else if (find_int_cable_input_jack(input_jack) >= 0 || has_other_mapped_in(input_jack)) {
+					// The module input jack has an internal cable or multiple panel input mappings.
+					// In order to sum inputs, we map the panel/MIDI input to the Hub input,
+					// and then add a second internal cable from Hub output to the
 					// original module input jack. Then the summing happens automatically via cable_cache.
-					pr_trace("Panel in %d summed with int cable to m=%d j=%d\n", panel_jack_id, module_id, jack_id);
+					pr_trace("Panel in %d summed to m=%d j=%d\n", panel_jack_id, module_id, jack_id);
 
-					// Map panel input to hub input:
-					update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
-					pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
-					// Add cable from hub output to the original panel-mapped jack
-					pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = panel_jack_id});
+					if (Midi::is_midi_panel_id(panel_jack_id)) {
+						// MIDI summed with internal cable: allocate a hub slot for the MIDI value
+						if (next_midi_hub_slot >= PanelInValsSize) {
+							pr_err("Too many MIDI-to-Hub connections\n");
+							break;
+						}
+						auto midi_hub_jack = Jack{.module_id = 0, .jack_id = next_midi_hub_slot++};
+						update_or_add_input_panel_conn(panel_jack_id, midi_hub_jack);
+						pr_trace(" to hub passthrough slot %d\n", midi_hub_jack.jack_id);
+
+						pd.add_internal_cable(input_jack, midi_hub_jack);
+					} else {
+						// Map panel input to hub input:
+						update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
+						pr_trace(" to hub passthrough slot %d\n", panel_jack_id);
+
+						// Add cable from hub output to the original panel-mapped jack
+						pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = panel_jack_id});
+					}
 
 				} else {
 					// No conflict — route panel input directly to module input
