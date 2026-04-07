@@ -1171,22 +1171,23 @@ public:
 				if (module_id < 0 || jack_id < 0)
 					break;
 
-				// Handle Hub-to-Hub cables: panel input -> panel output passthrough.
+				// Handle Panel-to-Panel cables: panel jack or MIDI input -> panel output passthrough.
 				// input_jack.jack_id is the Hub input jack (= panel output jack).
-				// panel_jack_id is the panel input jack whose value we want to read.
-				// We add to out_conns so get_panel_output reads panel_in_vals[panel_jack_id].
+				// panel_jack_id is the MIDI or panel input jack ID whose value we want to read.
 				if (input_jack.module_id == 0) {
 					if (Midi::is_midi_panel_id(panel_jack_id)) {
-						// MIDI -> Hub Out: register the MIDI connection and store the
-						// Hub output jack ID as the panel_in_vals index (not the raw MIDI ID).
-						// MIDI->Hub In jack
+
+						// MIDI->Hub passthrough jack:
 						update_or_add_input_panel_conn(panel_jack_id, input_jack);
-						// Hub In jack->Hub Out jack
+						pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
+
+						// Hub passthrough jack->Panel Out jack:
 						out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = input_jack.jack_id});
-						pr_trace("Connect MIDI %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
+						pr_trace("Connect MIDI %d to panel out %d via hub\n", panel_jack_id, input_jack.jack_id);
 					} else {
 						if (panel_jack_id < panel_in_is_hub_src.size())
 							panel_in_is_hub_src[panel_jack_id] = true;
+
 						out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
 						pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 					}
@@ -1200,6 +1201,7 @@ public:
 
 					// Map panel input to hub input:
 					update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
+					pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
 					// Add cable from hub output to the original panel-mapped jack
 					pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = panel_jack_id});
 
@@ -1233,7 +1235,7 @@ public:
 
 		} else if (auto num = Midi::midi_note_gate(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_gate_conns[num.value()], input_jack, chan);
-			pr_trace("MIDI gate (poly %d) ch:% ch:%uu", num.value(), chan);
+			pr_trace("MIDI gate (poly %d) ch: %u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_vel(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_vel_conns[num.value()], input_jack, chan);
