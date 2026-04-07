@@ -17,9 +17,16 @@ constexpr MetaModule::ModuleInfoView TestModuleInfo{
 [[maybe_unused]] bool s_test_mono_registered =
 	MetaModule::ModuleFactory::registerModuleType("TestModule", TestModule::create, TestModuleInfo, "");
 
-TestModule *get_test_mono(MetaModule::PatchPlayer &player, unsigned module_id) {
+auto *get_test_mono(MetaModule::PatchPlayer &player, unsigned module_id) {
 	return dynamic_cast<TestModule *>(player.modules[module_id].get());
 }
+
+constexpr MetaModule::ModuleInfoView TestPanelInfo{
+	.description = "Test panel",
+	.width_hp = 8,
+};
+[[maybe_unused]] bool s_test_panel_registered =
+	MetaModule::ModuleFactory::registerModuleType("HubMedium", TestPanel::create, TestPanelInfo, "");
 
 } // namespace
 
@@ -1211,7 +1218,7 @@ TEST_CASE("Summed internal cables: two outputs to same input") {
 PatchData:
   patch_name: summed_int_cables
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
     2: TestModule
     3: TestModule
@@ -1315,7 +1322,7 @@ TEST_CASE("Single internal cable: no summed input entry created") {
 PatchData:
   patch_name: single_cable
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
     2: TestModule
   int_cables:
@@ -1371,7 +1378,7 @@ TEST_CASE("Summed panel output: two module outputs to same panel out jack") {
 PatchData:
   patch_name: summed_panel_out
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
     2: TestModule
   int_cables:
@@ -1435,7 +1442,7 @@ TEST_CASE("Hub-to-Hub summing: multiple panel inputs to one panel output") {
 PatchData:
   patch_name: hub_sum
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
   int_cables:
   mapped_ins:
     - panel_jack_id: 0
@@ -1502,7 +1509,7 @@ TEST_CASE("Panel input summed with internal cable") {
 PatchData:
   patch_name: panel_plus_cable
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
     2: TestModule
   int_cables:
@@ -1603,7 +1610,7 @@ TEST_CASE("Panel input to module input with no internal cable: direct routing (n
 PatchData:
   patch_name: panel_direct
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
   int_cables:
   mapped_ins:
@@ -1658,7 +1665,7 @@ TEST_CASE("Hub-to-Hub single passthrough: panel in 0 to panel out 0") {
 PatchData:
   patch_name: hub_passthrough
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
   int_cables:
   mapped_ins:
     - panel_jack_id: 0
@@ -1705,7 +1712,7 @@ TEST_CASE("Three internal cables to same input are summed") {
 PatchData:
   patch_name: three_way_sum
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
     2: TestModule
     3: TestModule
@@ -1791,7 +1798,7 @@ TEST_CASE("Summing part of a split: virt output splits to a virt input and panel
 PatchData:
   patch_name: mixed_sum
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
     2: TestModule
   int_cables:
@@ -1889,17 +1896,17 @@ TEST_CASE("MIDI to Hub mapping") {
 PatchData:
   patch_name: hub_midi_passthrough
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
   int_cables:
   mapped_ins:
     - panel_jack_id: 256
       ins:
         - module_id: 0
-          jack_id: 0
+          jack_id: 1
     - panel_jack_id: 0x110
       ins:
         - module_id: 0
-          jack_id: 12 
+          jack_id: 4 
   mapped_outs:
   static_knobs:
   mapped_knobs:
@@ -1923,11 +1930,11 @@ PatchData:
 	player.load_patch(pd);
 
 	player.set_midi_note_pitch(0, 4.2f, 0);
-	float panel_out = player.get_panel_output(0);
+	float panel_out = player.get_panel_output(1);
 	CHECK(panel_out == doctest::Approx(4.2f));
 
 	player.set_midi_note_gate(0, 8.f, 0);
-	panel_out = player.get_panel_output(12);
+	panel_out = player.get_panel_output(4);
 	CHECK(panel_out == doctest::Approx(8.f));
 }
 
@@ -1937,7 +1944,7 @@ TEST_CASE("MIDI to Hub summed with Hub to Hub mapping") {
 PatchData:
   patch_name: hub_midi_passthrough
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
   int_cables:
   mapped_ins:
     - panel_jack_id: 256
@@ -1968,6 +1975,7 @@ PatchData:
 	yaml_string_to_patch(patchyml, pd);
 
 	MetaModule::PatchPlayer player;
+	// printf("load\n");
 	player.load_patch(pd);
 
 	SUBCASE("Set just MIDI") {
@@ -1986,6 +1994,14 @@ PatchData:
 		float panel_out = player.get_panel_output(2);
 		CHECK(panel_out == doctest::Approx(10.f));
 	}
+	SUBCASE("Set a different Panel In that matches panel out ID") {
+		// printf("set_panel_input(2, 6.f)\n");
+		player.set_panel_input(2, 6.f);
+		float panel_out = player.get_panel_output(2);
+		CHECK(panel_out == doctest::Approx(0.f));
+
+		// printf("done\n");
+	}
 }
 
 TEST_CASE("Split: one output fans to multiple inputs — all destinations receive same value") {
@@ -1994,7 +2010,7 @@ TEST_CASE("Split: one output fans to multiple inputs — all destinations receiv
 PatchData:
   patch_name: split
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
     2: TestModule
     3: TestModule
@@ -2056,7 +2072,7 @@ TEST_CASE("MIDI to module input directly (not via Hub)") {
 PatchData:
   patch_name: midi_direct
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
   int_cables:
   mapped_ins:
@@ -2122,7 +2138,7 @@ TEST_CASE("Split combined with sum: source fans to two destinations, second sour
 PatchData:
   patch_name: split_plus_sum
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
     2: TestModule
     3: TestModule
@@ -2203,7 +2219,7 @@ TEST_CASE("Full round-trip: panel in routes to module, module output cables to s
 PatchData:
   patch_name: round_trip
   module_slugs:
-    0: PANEL_8
+    0: HubMedium
     1: TestModule
     2: TestModule
   int_cables:
