@@ -175,11 +175,15 @@ public:
 					}
 				}
 
-				// Change knobset via Button+Encoder
+				// Change knobset via Back Button + Encoder
 				if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
 					next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
 				}
 
+				// TODO: change via Back button + Button expander
+				{}
+
+				// Perform the knob set change:
 				if (next_knobset.has_value()) {
 					info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)*next_knobset});
 					info.page_list.set_active_knobset(*next_knobset);
