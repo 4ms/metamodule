@@ -55,7 +55,7 @@ private:
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
 
-	// Cached panel input values, used by get_panel_output for Hub-to-Hub summing.
+	// Cached panel input values, used by get_panel_output for MIDI/Hub-to-Hub summing.
 	// Indices [0, NumInJacks) store panel input values.
 	// Indices [NumInJacks, NumInJacks+NumOutJacks) store MIDI-to-Hub passthrough values.
 	static constexpr auto MidiHubOffset = NumInJacks;
@@ -332,13 +332,7 @@ public:
 		for (auto const &si : cables.summed_inputs[Core]) {
 			float sum = 0.f;
 			for (auto const &out : si.outs) {
-				if (out.module_id == 0) {
-					// Hub module: read from cached panel input values
-					if (out.jack_id < panel_in_vals.size())
-						sum += panel_in_vals[out.jack_id];
-				} else {
-					sum += modules[out.module_id]->get_output(out.jack_id);
-				}
+				sum += get_output(out);
 			}
 			modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 		}
@@ -410,6 +404,7 @@ public:
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {
+		// cache signal on Panel Ins
 		if (jack_id < NumInJacks)
 			panel_in_vals[jack_id] = val;
 		set_all_connected_jacks(in_conns[jack_id], val);
@@ -544,29 +539,40 @@ public:
 	}
 
 private:
+	// Returns module output, or the cached midi/hub passthrough value
+	float get_output(Jack out) {
+		if (out.module_id == 0) {
+			// Hub module: read from cached panel input values
+			if (out.jack_id < panel_in_vals.size())
+				return panel_in_vals[out.jack_id];
+			else
+				return 0;
+		} else {
+			return modules[out.module_id]->get_output(out.jack_id);
+		}
+	}
+
+	// Sets a module input, or a midi/hub passthrough value
+	void set_input(Jack in, float val) {
+		if (in.module_id == 0) {
+			if (in.jack_id < panel_in_vals.size())
+				panel_in_vals[in.jack_id] = val;
+		} else {
+			modules[in.module_id]->set_input(in.jack_id, val);
+		}
+	}
+
 	template<typename JackT>
 	void set_all_connected_jacks(std::vector<JackT> const &jacks, float val) {
 		for (auto const &jack : jacks) {
-			if (jack.module_id == 0) {
-				// Hub module: panel_in_vals is already set by set_panel_input(); nothing more to do here
-				if (jack.jack_id < panel_in_vals.size())
-					panel_in_vals[jack.jack_id] = val;
-			} else {
-				modules[jack.module_id]->set_input(jack.jack_id, val);
-			}
+			set_input(jack, val);
 		}
 	}
 
 	void set_all_connected_jacks(std::vector<JackMidi> const &jacks, float val, uint32_t midi_chan) {
 		for (auto const &jack : jacks) {
 			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1)) {
-				if (jack.module_id == 0) {
-					// Hub module: write to panel_in_vals so get_panel_output can read it
-					if (jack.jack_id < panel_in_vals.size())
-						panel_in_vals[jack.jack_id] = val;
-				} else {
-					modules[jack.module_id]->set_input(jack.jack_id, val);
-				}
+				set_input(jack, val);
 			}
 		}
 	}
@@ -594,14 +600,7 @@ public:
 	float get_panel_output(uint32_t jack_id) {
 		float sum = 0.f;
 		for (auto const &jack : out_conns[jack_id]) {
-			if (jack.module_id == 0) {
-				// Hub module: read directly from cached panel input values
-				// to support summing multiple panel inputs to one output
-				if (jack.jack_id < panel_in_vals.size())
-					sum += panel_in_vals[jack.jack_id];
-			} else if (jack.module_id < num_modules) {
-				sum += modules[jack.module_id]->get_output(jack.jack_id);
-			}
+			sum += get_output(jack);
 		}
 		return sum;
 	}
@@ -1180,7 +1179,8 @@ public:
 
 						// MIDI->Hub passthrough: use offset index in panel_in_vals
 						// to avoid collisions with panel input values
-						auto midi_hub_jack = Jack{.module_id = 0, .jack_id = (uint16_t)(input_jack.jack_id + MidiHubOffset)};
+						auto midi_hub_jack =
+							Jack{.module_id = 0, .jack_id = (uint16_t)(input_jack.jack_id + MidiHubOffset)};
 						update_or_add_input_panel_conn(panel_jack_id, midi_hub_jack);
 						pr_trace(" to jack: m=%d, p=%d (passthrough jack)\n", module_id, midi_hub_jack.jack_id);
 
