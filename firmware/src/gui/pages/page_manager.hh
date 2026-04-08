@@ -158,11 +158,12 @@ public:
 		// Patch must be valid, playing, and have at least one knobset
 		if (auto patch = info.open_patch_manager.get_playing_patch(); patch != nullptr) {
 			if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
+				auto &metaparams = info.metaparams;
 
 				std::optional<int> next_knobset = std::nullopt;
 				int cur_knobset = info.page_list.get_active_knobset();
 
-				// Change knobset via MIDI CC
+				// Detecrt MIDI CC
 				if (info.settings.midi.knobset_control == MidiSettings::KnobsetControl::Enabled) {
 					auto &cc = info.params.midi_ccs[info.settings.midi.knobset_cc & 127];
 
@@ -175,23 +176,40 @@ public:
 					}
 				}
 
-				// Change knobset via Back Button + Encoder
-				if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
+				// Detect Back Button + Encoder
+				if (auto knobset_change = metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
 					next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
 				}
 
-				// TODO: change via Back button + Button expander
-				if (info.metaparams.meta_buttons[0].is_pressed() && info.metaparams.button_exp_connected > 0) {
-					auto mask = info.metaparams.ext_buttons_high_events;
-					int i = 0;
-					while (mask) {
-						if (mask & 0b1) {
-							if (i < num_knobsets)
-								next_knobset = i;
-							// TODO: Disable Back button release event
+				// Detect Back button + Button expander
+				// Filter out disconnected button expanders and ones for which this feature is not enabled
+				if (auto exp = (info.settings.button_exp_knobset.button_expander & metaparams.button_exp_connected)) {
+					bool back_pressed = true;
+
+					if (info.settings.button_exp_knobset.require_back) {
+						back_pressed = metaparams.meta_buttons[0].is_pressed();
+
+						if (metaparams.meta_buttons[0].is_just_pressed()) {
+							// Clear all events when pressing Back
+							metaparams.ext_buttons_high_events = 0;
 						}
-						mask >>= 1;
-						i++;
+					}
+
+					if (back_pressed && metaparams.ext_buttons_high_events) {
+						// turn bit mask 0bwxyz into 0xWWXXYYZZ
+						auto mask = ((exp & 0b0001) ? 0x000000FFu : 0) | ((exp & 0b0010) ? 0x0000FF00u : 0) |
+									((exp & 0b0100) ? 0x00FF0000u : 0) | ((exp & 0b1000) ? 0xFF000000u : 0);
+
+						// Get and clear events on the enabled expander(s)
+						auto events = metaparams.ext_buttons_high_events;
+						metaparams.ext_buttons_high_events &= ~mask;
+
+						auto firstbit = std::countr_zero(events);
+						pr_dbg("Back + exp %d (max %d)\n", firstbit, num_knobsets);
+						if (firstbit < num_knobsets) {
+							next_knobset = firstbit;
+							metaparams.ignore_metabutton_release = true;
+						}
 					}
 				}
 
