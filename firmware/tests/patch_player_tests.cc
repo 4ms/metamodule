@@ -3,45 +3,30 @@
 #include "patch-serial/yaml_to_patch.hh"
 
 #include "patch_play/patch_player.hh"
-#include "stubs/test_poly_module.hh"
 #include "stubs/test_module.hh"
+#include "stubs/test_poly_module.hh"
 #include <fstream>
 #include <string>
 
-// Register TestPolyModule so patches can use slug "TestPoly"
 namespace
 {
-constexpr MetaModule::ModuleInfoView TestPolyModuleInfo{
-	.description = "Test poly module",
-	.width_hp = 8,
-};
-[[maybe_unused]] bool s_test_poly_registered =
-	MetaModule::ModuleFactory::registerModuleType("TestPoly", TestPolyModule::create, TestPolyModuleInfo, "");
+constexpr MetaModule::ModuleInfoView TestPanelInfo{.width_hp = 8};
+constexpr MetaModule::ModuleInfoView TestModuleInfo{.width_hp = 8};
+constexpr MetaModule::ModuleInfoView TestPolyModuleInfo{.width_hp = 8};
 
-constexpr MetaModule::ModuleInfoView TestMonoModuleInfo{
-	.description = "Test mono module",
-	.width_hp = 8,
+const std::array register_modules = {
+	MetaModule::ModuleFactory::registerModuleType("HubMedium", TestPanel::create, TestPanelInfo, ""),
+	MetaModule::ModuleFactory::registerModuleType("TestModule", TestModule::create, TestModuleInfo, ""),
+	MetaModule::ModuleFactory::registerModuleType("TestPoly", TestPolyModule::create, TestPolyModuleInfo, ""),
 };
-[[maybe_unused]] bool s_test_mono_registered =
-	MetaModule::ModuleFactory::registerModuleType("TestMono", TestMonoModule::create, TestMonoModuleInfo, "");
-    
-constexpr MetaModule::ModuleInfoView TestModuleInfo{
-	.description = "Test module",
-	.width_hp = 8,
-};
-[[maybe_unused]] bool s_test_mono_registered =
-	MetaModule::ModuleFactory::registerModuleType("TestModule", TestModule::create, TestModuleInfo, "");
 
-auto *get_test_mono(MetaModule::PatchPlayer &player, unsigned module_id) {
+auto *get_test_module(MetaModule::PatchPlayer &player, unsigned module_id) {
 	return dynamic_cast<TestModule *>(player.modules[module_id].get());
 }
 
-constexpr MetaModule::ModuleInfoView TestPanelInfo{
-	.description = "Test panel",
-	.width_hp = 8,
-};
-[[maybe_unused]] bool s_test_panel_registered =
-	MetaModule::ModuleFactory::registerModuleType("HubMedium", TestPanel::create, TestPanelInfo, "");
+auto *get_test_poly(MetaModule::PatchPlayer &player, unsigned module_id) {
+	return dynamic_cast<TestPolyModule *>(player.modules[module_id].get());
+}
 
 } // namespace
 
@@ -1273,9 +1258,9 @@ PatchData:
 	MetaModule::PatchPlayer player;
 	player.load_patch(pd);
 
-	auto mono1 = get_test_mono(player, 1);
-	auto mono2 = get_test_mono(player, 2);
-	auto mono3 = get_test_mono(player, 3);
+	auto mono1 = get_test_module(player, 1);
+	auto mono2 = get_test_module(player, 2);
+	auto mono3 = get_test_module(player, 3);
 	CHECK(mono1);
 	CHECK(mono2);
 	CHECK(mono3);
@@ -1377,8 +1362,8 @@ PatchData:
 	}
 
 	SUBCASE("Value propagates from module 1 to module 2 via cable") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
 		CHECK(mono1);
 		CHECK(mono2);
 		mono1->set_input(0, 2.5f);
@@ -1435,8 +1420,8 @@ PatchData:
 	}
 
 	SUBCASE("Panel out 0 sums the two module outputs") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
 		CHECK(mono1);
 		CHECK(mono2);
 		mono1->set_input(0, 3.0f);
@@ -1607,8 +1592,8 @@ PatchData:
 	}
 
 	SUBCASE("Module 2 jack 0 receives sum of panel input and cable source") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
 		CHECK(mono1);
 		CHECK(mono2);
 		// Panel in 0 contributes via Hub virtual cable; module 1 contributes via internal cable
@@ -1666,7 +1651,7 @@ PatchData:
 	}
 
 	SUBCASE("Panel input value propagates to module jack") {
-		auto mono1 = get_test_mono(player, 1);
+		auto mono1 = get_test_module(player, 1);
 		CHECK(mono1);
 		player.set_panel_input(0, 4.0f);
 		player.update_patch();
@@ -1788,10 +1773,10 @@ PatchData:
 	}
 
 	SUBCASE("Module 4 jack 0 receives sum of all three cable sources") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
-		auto mono3 = get_test_mono(player, 3);
-		auto mono4 = get_test_mono(player, 4);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
+		auto mono3 = get_test_module(player, 3);
+		auto mono4 = get_test_module(player, 4);
 		CHECK(mono1);
 		CHECK(mono2);
 		CHECK(mono3);
@@ -1886,7 +1871,7 @@ PatchData:
 	}
 
 	SUBCASE("Panel out 0 reflects module 1 output") {
-		auto mono1 = get_test_mono(player, 1);
+		auto mono1 = get_test_module(player, 1);
 		CHECK(mono1);
 		mono1->set_input(0, 4.0f);
 		player.update_patch();
@@ -1894,8 +1879,8 @@ PatchData:
 	}
 
 	SUBCASE("Module 2 jack 0 receives sum of module 1 output and panel input 1") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
 		CHECK(mono1);
 		CHECK(mono2);
 		mono1->set_input(0, 2.0f);
@@ -1908,14 +1893,6 @@ PatchData:
 // ============================================================================
 // Poly cable tests
 // ============================================================================
-
-// Helper to get a TestPolyModule* from the player's modules array
-static TestPolyModule *get_test_poly(MetaModule::PatchPlayer &player, unsigned module_id) {
-	return dynamic_cast<TestPolyModule *>(player.modules[module_id].get());
-}
-static TestMonoModule *get_test_mono(MetaModule::PatchPlayer &player, unsigned module_id) {
-	return dynamic_cast<TestMonoModule *>(player.modules[module_id].get());
-}
 
 TEST_CASE("Poly cable: cable cache resolves poly buffers for TestPolyModule") {
 	// clang-format off
@@ -3288,11 +3265,11 @@ PatchData:
 		CHECK(player.modules[1]->get_output(2) == 0.f);
 		CHECK(player.modules[1]->get_output(3) == 0.f);
 
-		auto *module = get_test_mono(player, 1);
-		CHECK(module->mono[0] == 2.5f);
-		CHECK(module->mono[1] == 0.f);
-		CHECK(module->mono[2] == 0.f);
-		CHECK(module->mono[3] == 0.f);
+		auto *module = get_test_module(player, 1);
+		CHECK(module->outs[0] == 2.5f);
+		CHECK(module->outs[1] == 0.f);
+		CHECK(module->outs[2] == 0.f);
+		CHECK(module->outs[3] == 0.f);
 	}
 }
 
@@ -3529,9 +3506,9 @@ PatchData:
 	}
 
 	SUBCASE("Both destinations receive the same value from the source") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
-		auto mono3 = get_test_mono(player, 3);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
+		auto mono3 = get_test_module(player, 3);
 		CHECK(mono1);
 		CHECK(mono2);
 		CHECK(mono3);
@@ -3586,7 +3563,7 @@ PatchData:
 	MetaModule::PatchPlayer player;
 	player.load_patch(pd);
 
-	auto mono1 = get_test_mono(player, 1);
+	auto mono1 = get_test_module(player, 1);
 	CHECK(mono1);
 
 	SUBCASE("MIDI note pitch routes directly to module jack 0") {
@@ -3672,10 +3649,10 @@ PatchData:
 	}
 
 	SUBCASE("Module 2 receives sum; module 3 receives only module 1 value") {
-		auto mono1 = get_test_mono(player, 1);
-		auto mono2 = get_test_mono(player, 2);
-		auto mono3 = get_test_mono(player, 3);
-		auto mono4 = get_test_mono(player, 4);
+		auto mono1 = get_test_module(player, 1);
+		auto mono2 = get_test_module(player, 2);
+		auto mono3 = get_test_module(player, 3);
+		auto mono4 = get_test_module(player, 4);
 		CHECK(mono1);
 		CHECK(mono2);
 		CHECK(mono3);
