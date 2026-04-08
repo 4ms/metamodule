@@ -183,10 +183,10 @@ public:
 				// TODO: change via Back button + Button expander
 				if (info.metaparams.meta_buttons[0].is_pressed() && info.metaparams.button_exp_connected > 0) {
 					auto mask = info.metaparams.ext_buttons_high_events;
-					unsigned i = 0;
+					int i = 0;
 					while (mask) {
 						if (mask & 0b1) {
-							if (i < next_knobset)
+							if (i < num_knobsets)
 								next_knobset = i;
 							// TODO: Disable Back button release event
 						}
