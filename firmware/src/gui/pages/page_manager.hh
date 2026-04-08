@@ -195,17 +195,16 @@ public:
 						}
 					}
 
-					if (back_pressed && metaparams.ext_buttons_high_events) {
-						// turn bit mask 0bwxyz into 0xWWXXYYZZ
-						auto mask = ((exp & 0b0001) ? 0x000000FFu : 0) | ((exp & 0b0010) ? 0x0000FF00u : 0) |
-									((exp & 0b0100) ? 0x00FF0000u : 0) | ((exp & 0b1000) ? 0xFF000000u : 0);
+					// turn bit mask 0bwxyz into 0xWWXXYYZZ
+					auto mask = ((exp & 0b0001) ? 0x000000FFu : 0) | ((exp & 0b0010) ? 0x0000FF00u : 0) |
+								((exp & 0b0100) ? 0x00FF0000u : 0) | ((exp & 0b1000) ? 0xFF000000u : 0);
 
+					if (back_pressed && (metaparams.ext_buttons_high_events & mask)) {
 						// Get and clear events on the enabled expander(s)
-						auto events = metaparams.ext_buttons_high_events;
+						auto events = metaparams.ext_buttons_high_events & mask;
 						metaparams.ext_buttons_high_events &= ~mask;
 
-						auto firstbit = std::countr_zero(events);
-						pr_dbg("Back + exp %d (max %d)\n", firstbit, num_knobsets);
+						auto firstbit = std::countr_zero(events) % 8;
 						if (firstbit < num_knobsets) {
 							next_knobset = firstbit;
 							metaparams.ignore_metabutton_release = true;
