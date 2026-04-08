@@ -7,7 +7,7 @@ namespace MetaModule
 void PrefsSectionFilesystem::create(lv_obj_t *parent) {
 
 	// Title
-	create_prefs_section_title(parent, "Patch Files");
+	create_prefs_section_title(parent, "PATCH FILES");
 
 	// Startup Patch
 	auto startup_cont = create_prefs_labeled_check(parent, "Startup Patch:");
