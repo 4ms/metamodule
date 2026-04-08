@@ -12,6 +12,7 @@ target_sources(
           prefs_section_fs.cc
           prefs_section_midi.cc
           prefs_section_missing_plugins.cc
+          prefs_section_button_exp_knobset.cc
           filebrowser/ui.c
           filebrowser/screens/ui_FileBrowserPage.c
 )
@@ -23,5 +24,6 @@ set_source_files_properties(
   prefs_section_fs.cc
   prefs_section_midi.cc
   prefs_section_missing_plugins.cc
+  prefs_section_button_exp_knobset.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )

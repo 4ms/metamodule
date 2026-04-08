@@ -1,5 +1,6 @@
 #pragma once
 #include "audio_settings.hh"
+#include "button_exp_knobset_settings.hh"
 #include "catchup_settings.hh"
 #include "fs/volumes.hh"
 #include "user_settings/fs_settings.hh"
@@ -30,6 +31,7 @@ struct UserSettings {
 	FilesystemSettings filesystem{};
 	MidiSettings midi{};
 	PatchSuggestedAudioSettings patch_suggested_audio{};
+	ButtonExpKnobSetSettings button_exp_knobset{};
 };
 
 } // namespace MetaModule
