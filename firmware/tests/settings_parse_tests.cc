@@ -74,7 +74,7 @@ TEST_CASE("Parse settings file") {
     apply_samplerate: 0
     apply_blocksize: 1
   button_exp_knobset:
-    button_expander: 2
+    button_expander: 8
     require_back: 0
 )";
 	// clang-format on
@@ -140,7 +140,7 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.missing_plugins.autoload == MetaModule::MissingPluginSettings::Autoload::Never);
 
-	CHECK(settings.button_exp_knobset.button_expander == 2);
+	CHECK(settings.button_exp_knobset.button_expander == 8); // (1<<3) = Expander 3
 	CHECK(settings.button_exp_knobset.require_back == false);
 }
 
@@ -341,7 +341,7 @@ TEST_CASE("Serialize settings") {
 	settings.patch_suggested_audio.apply_samplerate = false;
 	settings.patch_suggested_audio.apply_blocksize = true;
 
-	settings.button_exp_knobset.button_expander = 3;
+	settings.button_exp_knobset.button_expander = 8; // (1<<3) = Expander 3
 	settings.button_exp_knobset.require_back = false;
 
 	// clang format-off
@@ -416,7 +416,7 @@ TEST_CASE("Serialize settings") {
     apply_samplerate: 0
     apply_blocksize: 1
   button_exp_knobset:
-    button_expander: 3
+    button_expander: 8
     require_back: 0
 )";
 	// clang format-on

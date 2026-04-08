@@ -38,8 +38,8 @@ struct PrefsTab : SystemMenuTab {
 		catchup_section.create(ui_SystemMenuPrefsTab);
 		fs_section.create(ui_SystemMenuPrefsTab);
 		midi_section.create(ui_SystemMenuPrefsTab);
-		missingplugins_section.create(ui_SystemMenuPrefsTab);
 		buttonexpknobset_section.create(ui_SystemMenuPrefsTab);
+		missingplugins_section.create(ui_SystemMenuPrefsTab);
 
 		auto btns = create_save_revert_buttons(ui_SystemMenuPrefsTab);
 		save_button = lv_obj_get_child(btns, 1);
@@ -131,6 +131,7 @@ struct PrefsTab : SystemMenuTab {
 
 		set_options(ScreensaverSettings::ValidOptions, catchup_section.mode_dropdown);
 		set_options(CatchupSettings::ValidOptions, catchup_section.mode_dropdown);
+		set_options(ButtonExpKnobSetSettings::ValidOptions, buttonexpknobset_section.expander_dropdown);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -235,7 +236,9 @@ private:
 		}
 
 		// Button expander knob set
-		lv_dropdown_set_selected(buttonexpknobset_section.expander_dropdown, button_exp_knobset.button_expander);
+		auto bexp_item = get_index(ButtonExpKnobSetSettings::ValidOptions,
+								   [this](auto t) { return t.value == button_exp_knobset.button_expander; });
+		lv_dropdown_set_selected(buttonexpknobset_section.expander_dropdown, bexp_item >= 0 ? bexp_item : 0);
 		lv_check(buttonexpknobset_section.require_back_check, button_exp_knobset.require_back);
 		update_require_back_enabled(button_exp_knobset.button_expander != 0);
 
@@ -353,9 +356,9 @@ private:
 	}
 
 	auto read_knobset_control_check() {
-		return lv_obj_has_state(midi_section.knobset_control_check, LV_STATE_CHECKED)
-				 ? MidiSettings::KnobsetControl::Enabled
-				 : MidiSettings::KnobsetControl::Disabled;
+		return lv_obj_has_state(midi_section.knobset_control_check, LV_STATE_CHECKED) ?
+				   MidiSettings::KnobsetControl::Enabled :
+				   MidiSettings::KnobsetControl::Disabled;
 	}
 
 	void update_knobset_control_items(bool enabled) {
@@ -384,7 +387,11 @@ private:
 	}
 
 	uint32_t read_button_exp_knobset_dropdown() {
-		return lv_dropdown_get_selected(buttonexpknobset_section.expander_dropdown);
+		auto item = lv_dropdown_get_selected(buttonexpknobset_section.expander_dropdown);
+		if (item >= 0 && item < ButtonExpKnobSetSettings::ValidOptions.size())
+			return ButtonExpKnobSetSettings::ValidOptions[item].value;
+		else
+			return ButtonExpKnobSetSettings::DefaultButtonExpander;
 	}
 
 	bool read_require_back_check() {
@@ -648,10 +655,8 @@ private:
 			load_initial_patch == settings.load_initial_patch && fs_max_patches == fs.max_open_patches &&
 			midi_feedback == midi.midi_feedback && knobset_control == midi.knobset_control &&
 			knobset_cc == midi.knobset_cc && knobset_channel == midi.knobset_channel &&
-			mp_mode == missing_plugins.autoload &&
-			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
-			apply_bs == settings.patch_suggested_audio.apply_blocksize &&
-			bexp == button_exp_knobset.button_expander &&
+			mp_mode == missing_plugins.autoload && apply_sr == settings.patch_suggested_audio.apply_samplerate &&
+			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back)
 		{
 			lv_disable(save_button);
@@ -671,10 +676,7 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == page->buttonexpknobset_section.expander_dropdown ||
-			target == page->buttonexpknobset_section.require_back_check ||
-			target == page->missingplugins_section.dropdown)
-		{
+		if (target == page->missingplugins_section.dropdown) {
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);
 
 			// scroll to top if we select first items
