@@ -7,7 +7,7 @@ namespace MetaModule
 {
 
 struct ButtonExpKnobSetSettings {
-	// Bitfield: each expander N (1-4) is represented by (1 << N)
+	// Bitfield: expander #N (1-4) is represented by bit (N-1)
 	static constexpr uint32_t Disabled = 0;
 	static constexpr uint32_t Any = 0b1111;
 	static constexpr uint32_t Exp1 = (1 << 0);
