@@ -58,8 +58,14 @@ private:
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
 
-	// Cached panel input values, used by get_panel_output for Hub-to-Hub summing
-	std::array<float, NumInJacks> panel_in_vals{};
+	// Cached panel input values, used by get_panel_output for MIDI/Hub-to-Hub summing.
+	// Indices [0, NumInJacks) store panel input values.
+	// Indices [MidiHubOffset, PanelInValsSize) store MIDI-to-Hub passthrough values,
+	// allocated via next_midi_hub_slot counter during calc_panel_jack_connections.
+	static constexpr auto MidiHubOffset = NumInJacks;
+	static constexpr auto MaxMidiHubSlots = 64;
+	static constexpr auto PanelInValsSize = MidiHubOffset + MaxMidiHubSlots;
+	std::array<float, PanelInValsSize> panel_in_vals{};
 
 	// MIDI
 	bool midi_connected = false;
@@ -298,7 +304,8 @@ public:
 			return;
 		}
 
-		if (num_modules > 2) {
+		else if (num_modules > 2)
+		{
 			smp.update_modules();
 			for (auto module_i : core_balancer.cores.parts[0]) {
 				step_module(module_i);
@@ -315,8 +322,7 @@ public:
 			process_summed_inputs<0>();
 
 			smp.join();
-		} else
-			return;
+		}
 	}
 
 	void process_outputs(auto &cables) {
@@ -379,7 +385,8 @@ public:
 							si.in_buf.voltages[ch] += si.out_bufs[i].voltages[ch];
 					} else {
 						// Mono source: add to channel 0
-						si.in_buf.voltages[0] += modules[si.outs[i].module_id]->get_output(si.outs[i].jack_id);
+						// si.in_buf.voltages[0] += modules[si.outs[i].module_id]->get_output(si.outs[i].jack_id);
+						si.in_buf.voltages[0] += get_output(si.outs[i]);
 					}
 				}
 				*si.in_buf.channels = max_channels;
@@ -388,7 +395,8 @@ public:
 				// Mono input: sum all sources via get_output/set_input
 				float sum = 0.f;
 				for (auto const &out : si.outs) {
-					sum += modules[out.module_id]->get_output(out.jack_id);
+					sum += get_output(out);
+					// sum += modules[out.module_id]->get_output(out.jack_id);
 				}
 				modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 			}
@@ -461,7 +469,8 @@ public:
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {
-		if (jack_id < panel_in_vals.size())
+		// cache signal for Panel Ins
+		if (jack_id < NumInJacks)
 			panel_in_vals[jack_id] = val;
 		set_all_connected_jacks(in_conns[jack_id], val);
 	}
@@ -628,23 +637,40 @@ public:
 	}
 
 private:
+	// Returns module output, or the cached midi/hub passthrough value
+	float get_output(Jack out) {
+		if (out.module_id == 0) {
+			// Hub module: read from cached panel input values
+			if (out.jack_id < panel_in_vals.size())
+				return panel_in_vals[out.jack_id];
+			else
+				return 0;
+		} else {
+			return modules[out.module_id]->get_output(out.jack_id);
+		}
+	}
+
+	// Sets a module input, or a midi/hub passthrough value
+	void set_input(Jack in, float val) {
+		if (in.module_id == 0) {
+			if (in.jack_id < panel_in_vals.size())
+				panel_in_vals[in.jack_id] = val;
+		} else {
+			modules[in.module_id]->set_input(in.jack_id, val);
+		}
+	}
+
 	template<typename JackT>
 	void set_all_connected_jacks(std::vector<JackT> const &jacks, float val) {
 		for (auto const &jack : jacks)
-			modules[jack.module_id]->set_input(jack.jack_id, val);
+			set_input(jack, val);
 	}
 
 	template<typename JackMidiT>
 	void set_all_connected_jacks(std::vector<JackMidiT> const &jacks, float val, uint32_t midi_chan) {
 		for (auto const &jack : jacks) {
 			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1)) {
-				if (jack.module_id == 0) {
-					// Hub module: write to panel_in_vals so get_panel_output can read it
-					if (jack.jack_id < panel_in_vals.size())
-						panel_in_vals[jack.jack_id] = val;
-				} else {
-					modules[jack.module_id]->set_input(jack.jack_id, val);
-				}
+				set_input(jack, val);
 			}
 		}
 	}
@@ -660,14 +686,12 @@ private:
 		for (auto const &jack : jacks) {
 			if (jack.midi_chan != 0 && jack.midi_chan != uint32_t(midi_chan + 1))
 				continue;
+
 			if (jack.buf.voltages)
 				jack.buf.voltages[poly_chan] = val;
-			else if (poly_chan == 0) {
-				if (jack.module_id == 0)
-					panel_in_vals[jack.jack_id] = val; // Hub: write to panel output buffer
-				else
-					modules[jack.module_id]->set_input(jack.jack_id, val);
-			}
+
+			else if (poly_chan == 0)
+				set_input(jack, val);
 		}
 	}
 
@@ -703,21 +727,12 @@ public:
 	float get_panel_output(uint32_t jack_id) {
 		float sum = 0.f;
 		for (auto const &jack : out_conns[jack_id]) {
-			if (jack.module_id == 0) {
-				// Hub module: read directly from cached panel input values
-				// to support summing multiple panel inputs to one output
-				if (jack.jack_id < panel_in_vals.size())
-					sum += panel_in_vals[jack.jack_id];
-			} else if (jack.module_id < num_modules) {
-				if (jack.buf.voltages) {
-					for (unsigned i = 0; i < std::min<unsigned>(CoreProcessor::MaxPolyChannels, *jack.buf.channels);
-						 i++)
-					{
-						sum += jack.buf.voltages[i];
-					}
-
-				} else
-					sum += modules[jack.module_id]->get_output(jack.jack_id);
+			if (jack.buf.voltages) {
+				auto num_chan = std::min<unsigned>(CoreProcessor::MaxPolyChannels, *jack.buf.channels);
+				for (unsigned i = 0; i < num_chan; i++)
+					sum += jack.buf.voltages[i];
+			} else {
+				sum += get_output(jack);
 			}
 		}
 		return sum;
@@ -1329,11 +1344,27 @@ private:
 		return -1;
 	}
 
+	bool has_other_mapped_in(Jack j) {
+		int found = 0;
+		for (auto const &cable : pd.mapped_ins) {
+			for (auto const &in : cable.ins) {
+				if (in == j) {
+					if (++found == 2)
+						return true;
+				}
+			}
+		}
+		return false;
+	};
+
 public:
 	// Map all the panel jack connections into in_conns[] and out_conns[]
 	// which are indexed by panel_jack_id.
 	// This speeds up propagating I/O from user to virtual modules
 	void calc_panel_jack_connections() {
+		uint16_t next_midi_hub_slot = MidiHubOffset;
+		//TODO merge rest of this function
+
 		for (auto const &cable : pd.mapped_ins) {
 			uint16_t panel_jack_id = cable.panel_jack_id;
 
