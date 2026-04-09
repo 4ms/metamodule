@@ -3224,7 +3224,7 @@ PatchData:
   patch_name: midi_poly_fallback
   module_slugs:
     0: PANEL_8
-    1: TestMono
+    1: TestModule
   int_cables:
   mapped_ins:
     - panel_jack_id: 336
