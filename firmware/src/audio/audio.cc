@@ -464,6 +464,8 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.button_exp_connected = param_blocks[block].metaparams.button_exp_connected;
 	local_params.metaparams.ext_buttons_high_events = param_blocks[block].metaparams.ext_buttons_high_events;
 	local_params.metaparams.ext_buttons_low_events = param_blocks[block].metaparams.ext_buttons_low_events;
+	local_params.metaparams.meta_buttons[0].set_state_no_events(
+		param_blocks[block].metaparams.meta_buttons[0].is_pressed());
 
 	for (auto i = 0u; i < block_size_; i++)
 		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt
