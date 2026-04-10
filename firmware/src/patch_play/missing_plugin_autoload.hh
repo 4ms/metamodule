@@ -30,6 +30,10 @@ struct MissingPluginAutoload {
 		for (std::string_view slug : patch->module_slugs) {
 			if (!ModuleFactory::isValidSlug(slug)) {
 
+				// Special-case: skip Glue module: 4ms VCV plugin integrates it into the patch via module aliases
+				if (slug == "Stoermelder-P1:Glue")
+					continue;
+
 				// Collect unique modules names
 				if (std::ranges::find(modules, slug) == modules.end()) {
 					pr_info("Missing module: %.*s\n", slug.size(), slug.data());
