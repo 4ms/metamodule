@@ -252,7 +252,7 @@ private:
 					if (Settings::write_settings(
 							page->storage, page->settings, res == 1 ? Volume::USB : Volume::SDCard))
 						page->notify_queue.put(
-							{"Successfully saved settings.yml file to disk", Notification::Priority::Info, 2000});
+							{"Successfully saved settings.yml file to disk", Notification::Priority::Status, 2000});
 					else
 						page->notify_queue.put(
 							{"Failed to save settings.yml file to disk", Notification::Priority::Error, 2000});
@@ -275,8 +275,9 @@ private:
 					if (Settings::read_settings(page->storage, &tmp, res == 1 ? Volume::USB : Volume::SDCard)) {
 						page->settings = tmp;
 						if (Settings::write_settings(page->storage, tmp, Volume::NorFlash)) {
-							page->notify_queue.put(
-								{"Successfully loaded file and updated settings", Notification::Priority::Info, 2000});
+							page->notify_queue.put({"Successfully loaded file and updated settings",
+													Notification::Priority::Status,
+													2000});
 						} else {
 							page->notify_queue.put(
 								{"Failed to update settings from the file", Notification::Priority::Error, 2000});

@@ -189,7 +189,7 @@ private:
 			notify_queue.put({load_status.error_string, Notification::Priority::Error, 1500});
 
 		} else if (load_status.error_string.size()) {
-			notify_queue.put({load_status.error_string, Notification::Priority::Info, 3000});
+			notify_queue.put({load_status.error_string, Notification::Priority::Status, 1500});
 		}
 	}
 

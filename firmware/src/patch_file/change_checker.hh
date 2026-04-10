@@ -53,11 +53,11 @@ struct PatchFileChangeChecker {
 					version_conflict = true;
 					std::string message = "A new version of ";
 					message.append(loc.filename.c_str());
-					message.append(" was just transferred, but you have unsaved changes. Please save, revert, or "
-								   "duplicate the patch");
+					message.append(" was just transferred, but you have unsaved changes. Please duplicate, "
+								   "move/rename, or revert the patch");
 					notify_queue.put({
 						.message = message,
-						.priority = Notification::Priority::Info,
+						.priority = Notification::Priority::Error,
 						.duration_ms = 3000,
 					});
 

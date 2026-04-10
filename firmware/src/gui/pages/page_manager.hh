@@ -277,7 +277,7 @@ public:
 				if ((info.settings.notifications.amount == All || msg->priority == Error) ||
 					(info.settings.notifications.amount == Fewer && msg->priority == Info))
 				{
-					DisplayNotification::show(*msg);
+					DisplayNotification::show(*msg, info.settings.notifications.animation);
 				}
 
 				pr_info("Notify: %s (%u)\n", msg->message.c_str(), msg->duration_ms);

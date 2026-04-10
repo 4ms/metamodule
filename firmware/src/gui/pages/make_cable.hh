@@ -72,7 +72,7 @@ inline void make_cable(GuiState::CableBeginning &new_cable,
 		if (make_panel_mapping) {
 			jackmapping.type = ElementType::Input;
 			patch_mod_queue.put(jackmapping);
-			notify_queue.put({"Added cable from panel input", Notification::Priority::Info, 1000});
+			notify_queue.put({"Added cable from panel input", Notification::Priority::Status, 1000});
 		}
 	}
 
@@ -92,7 +92,9 @@ inline void make_cable(GuiState::CableBeginning &new_cable,
 					newcable.out = cable->out;
 
 				} else {
-					notify_queue.put({"Error: cannot connect two inputs", Notification::Priority::Error, 2000});
+					notify_queue.put({"Error: cannot connect two inputs with no output connected",
+									  Notification::Priority::Error,
+									  2000});
 				}
 			}
 		} else {
@@ -108,7 +110,7 @@ inline void make_cable(GuiState::CableBeginning &new_cable,
 inline void abort_cable(GuiState &gui_state, NotificationQueue &notify_queue) {
 	if (gui_state.new_cable) {
 		gui_state.new_cable = std::nullopt;
-		notify_queue.put(Notification{"Cancelled making a cable", Notification::Priority::Info, 1000});
+		notify_queue.put(Notification{"Cancelled making a cable", Notification::Priority::Status, 1000});
 	}
 }
 
