@@ -99,7 +99,7 @@ private:
 
 		roller_str.reserve(roller_str.size() + all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
 
-		unsigned sel_idx = 1; // account for the first toggle item
+		unsigned sel_idx = 3; // account for the first toggle item
 		for (unsigned i = 0; auto const &item : all_brands) {
 			if (!item.length())
 				continue;
@@ -109,6 +109,9 @@ private:
 				sel_idx = i + 3; // shift for headers
 			i++;
 		}
+		if (sel_idx == 1 || sel_idx == 2)
+			sel_idx = 3;
+
 		// Remove last newline
 		if (roller_str.size())
 			roller_str.pop_back();
