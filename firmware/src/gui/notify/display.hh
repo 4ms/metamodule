@@ -16,13 +16,14 @@ namespace MetaModule
 
 struct DisplayNotification {
 
-	static void show(Notification const &msg) {
+	static void show(Notification const &msg, bool animate) {
 		lv_label_set_text(ui_MessageLabel, msg.message.c_str());
 
-		if (msg.duration_ms > 0) {
-			slide_down_up_animation(ui_MessagePanel, msg.duration_ms);
+		auto duration = (msg.duration_ms > 0) ? msg.duration_ms : 5000;
+		if (animate) {
+			slide_down_up_animation(ui_MessagePanel, duration);
 		} else {
-			slide_down_up_animation(ui_MessagePanel, 10000);
+			disappear_animation(ui_MessagePanel, duration);
 		}
 	}
 
@@ -35,25 +36,38 @@ struct DisplayNotification {
 	}
 
 	static void slide_down_up_animation(lv_obj_t *obj, int hold_time) {
-		ui_anim_user_data_t *user_data = (ui_anim_user_data_t *)lv_mem_alloc(sizeof(ui_anim_user_data_t));
-		user_data->target = obj;
-		user_data->val = -1;
+		lv_obj_refr_size(obj);
+		lv_obj_refr_pos(obj);
+		int offscreen_y = lv_obj_get_height(obj) * 2 + 10;
+
+		lv_anim_t anim;
+		lv_anim_init(&anim);
+		lv_anim_set_time(&anim, 400);
+		lv_anim_set_exec_cb(&anim, (lv_anim_exec_xcb_t)lv_obj_set_y);
+		lv_anim_set_var(&anim, obj);
+		lv_anim_set_values(&anim, -1 * offscreen_y, 0);
+		lv_anim_set_path_cb(&anim, lv_anim_path_ease_in_out);
+		lv_anim_set_delay(&anim, 0);
+		lv_anim_set_playback_time(&anim, 400);
+		lv_anim_set_playback_delay(&anim, hold_time + 400);
+		lv_anim_set_early_apply(&anim, false);
+		lv_anim_start(&anim);
+	}
+
+	static void disappear_animation(lv_obj_t *obj, int hold_time) {
 		lv_obj_refr_size(obj);
 		int startpos = lv_obj_get_height(obj) * 2 + 10;
 
 		lv_anim_t anim;
 		lv_anim_init(&anim);
-		lv_anim_set_time(&anim, 400);
-		lv_anim_set_user_data(&anim, user_data);
-		lv_anim_set_custom_exec_cb(&anim, _ui_anim_callback_set_y);
+		lv_anim_set_time(&anim, 1);
+		lv_anim_set_exec_cb(&anim, (lv_anim_exec_xcb_t)lv_obj_set_y);
+		lv_anim_set_var(&anim, obj);
 		lv_anim_set_values(&anim, -1 * startpos, 0);
-		lv_anim_set_path_cb(&anim, lv_anim_path_ease_in_out);
+		lv_anim_set_path_cb(&anim, lv_anim_path_step);
 		lv_anim_set_delay(&anim, 0);
-		lv_anim_set_deleted_cb(&anim, _ui_anim_callback_free_user_data);
-		lv_anim_set_playback_time(&anim, 400);
-		lv_anim_set_playback_delay(&anim, hold_time + 400);
-		lv_anim_set_repeat_count(&anim, 0);
-		lv_anim_set_repeat_delay(&anim, 0);
+		lv_anim_set_playback_time(&anim, 1);
+		lv_anim_set_playback_delay(&anim, hold_time);
 		lv_anim_set_early_apply(&anim, false);
 		lv_anim_start(&anim);
 	}
