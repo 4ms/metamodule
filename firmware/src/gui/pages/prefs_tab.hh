@@ -10,6 +10,7 @@
 #include "gui/slsexport/prefs_section_fs.hh"
 #include "gui/slsexport/prefs_section_midi.hh"
 #include "gui/slsexport/prefs_section_missing_plugins.hh"
+#include "gui/slsexport/prefs_section_notifications.hh"
 #include "gui/slsexport/prefs_section_screensaver.hh"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -31,6 +32,7 @@ struct PrefsTab : SystemMenuTab {
 		, midi{settings.midi}
 		, missing_plugins{settings.missing_plugins}
 		, button_exp_knobset{settings.button_exp_knobset}
+		, notifications{settings.notifications}
 		, settings{settings} {
 
 		audio_section.create(ui_SystemMenuPrefsTab);
@@ -40,6 +42,7 @@ struct PrefsTab : SystemMenuTab {
 		midi_section.create(ui_SystemMenuPrefsTab);
 		buttonexpknobset_section.create(ui_SystemMenuPrefsTab);
 		missingplugins_section.create(ui_SystemMenuPrefsTab);
+		notifications_section.create(ui_SystemMenuPrefsTab);
 
 		auto btns = create_save_revert_buttons(ui_SystemMenuPrefsTab);
 		save_button = lv_obj_get_child(btns, 1);
@@ -72,6 +75,8 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(missingplugins_section.dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(buttonexpknobset_section.expander_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(notifications_section.amount_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(notifications_section.animation_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, focus_cb, LV_EVENT_FOCUSED, this);
@@ -91,6 +96,8 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(missingplugins_section.dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(buttonexpknobset_section.expander_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(notifications_section.amount_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(notifications_section.animation_check, focus_cb, LV_EVENT_FOCUSED, this);
 
 		std::string opts;
 		for (auto item : AudioSettings::ValidBlockSizes) {
@@ -132,6 +139,7 @@ struct PrefsTab : SystemMenuTab {
 		set_options(ScreensaverSettings::ValidOptions, catchup_section.mode_dropdown);
 		set_options(CatchupSettings::ValidOptions, catchup_section.mode_dropdown);
 		set_options(ButtonExpKnobSetSettings::ValidOptions, buttonexpknobset_section.expander_dropdown);
+		set_options(NotificationSettings::ValidAmountOptions, notifications_section.amount_dropdown);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -241,6 +249,12 @@ private:
 		lv_dropdown_set_selected(buttonexpknobset_section.expander_dropdown, bexp_item >= 0 ? bexp_item : 0);
 		lv_check(buttonexpknobset_section.require_back_check, button_exp_knobset.require_back);
 		update_require_back_enabled(button_exp_knobset.button_expander != 0);
+
+		// Notifications
+		auto notif_item = get_index(NotificationSettings::ValidAmountOptions,
+									[this](auto t) { return t.value == notifications.amount; });
+		lv_dropdown_set_selected(notifications_section.amount_dropdown, notif_item >= 0 ? notif_item : 0);
+		lv_check(notifications_section.animation_check, notifications.animation);
 
 		gui_state.do_write_settings = false;
 
@@ -398,6 +412,18 @@ private:
 		return lv_obj_has_state(buttonexpknobset_section.require_back_check, LV_STATE_CHECKED);
 	}
 
+	NotificationSettings::Amount read_notification_amount_dropdown() {
+		auto item = lv_dropdown_get_selected(notifications_section.amount_dropdown);
+		if (item >= 0 && item < NotificationSettings::ValidAmountOptions.size())
+			return NotificationSettings::ValidAmountOptions[item].value;
+		else
+			return NotificationSettings::DefaultAmount;
+	}
+
+	bool read_notification_animation_check() {
+		return lv_obj_has_state(notifications_section.animation_check, LV_STATE_CHECKED);
+	}
+
 	void update_require_back_enabled(bool expander_enabled) {
 		lv_enable(buttonexpknobset_section.require_back_check, expander_enabled);
 		auto opa = expander_enabled ? LV_OPA_100 : LV_OPA_50;
@@ -526,6 +552,15 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		// Notifications
+		auto notif_amount = read_notification_amount_dropdown();
+		auto notif_anim = read_notification_animation_check();
+		if (notifications.amount != notif_amount || notifications.animation != notif_anim) {
+			notifications.amount = notif_amount;
+			notifications.animation = notif_anim;
+			gui_state.do_write_settings = true;
+		}
+
 		lv_disable(save_button);
 		lv_disable(revert_button);
 	}
@@ -592,6 +627,12 @@ private:
 			lv_group_set_editing(group, false);
 			return true;
 
+		} else if (lv_dropdown_is_open(notifications_section.amount_dropdown)) {
+			lv_dropdown_close(notifications_section.amount_dropdown);
+			lv_group_focus_obj(notifications_section.amount_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
 		} else {
 			update_settings_from_dropdown();
 			return false;
@@ -643,6 +684,8 @@ private:
 		auto mp_mode = read_missing_plugins_dropdown();
 		auto bexp = read_button_exp_knobset_dropdown();
 		auto bexp_back = read_require_back_check();
+		auto notif_amount = read_notification_amount_dropdown();
+		auto notif_anim = read_notification_animation_check();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 		update_knobset_control_items(knobset_control == MidiSettings::KnobsetControl::Enabled);
@@ -657,7 +700,8 @@ private:
 			knobset_cc == midi.knobset_cc && knobset_channel == midi.knobset_channel &&
 			mp_mode == missing_plugins.autoload && apply_sr == settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
-			bexp_back == button_exp_knobset.require_back)
+			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
+			notif_anim == notifications.animation)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
@@ -676,7 +720,10 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == page->missingplugins_section.dropdown) {
+		if (target == page->notifications_section.amount_dropdown ||
+			target == page->notifications_section.animation_check ||
+			target == page->missingplugins_section.dropdown)
+		{
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);
 
 			// scroll to top if we select first items
@@ -696,6 +743,7 @@ private:
 	MidiSettings &midi;
 	MissingPluginSettings &missing_plugins;
 	ButtonExpKnobSetSettings &button_exp_knobset;
+	NotificationSettings &notifications;
 	UserSettings &settings;
 
 	lv_group_t *group = nullptr;
@@ -707,6 +755,7 @@ private:
 	PrefsSectionMidi midi_section;
 	PrefsSectionMissingPlugins missingplugins_section;
 	PrefsSectionButtonExpKnobSet buttonexpknobset_section;
+	PrefsSectionNotifications notifications_section;
 
 	lv_obj_t *save_button;
 	lv_obj_t *revert_button;

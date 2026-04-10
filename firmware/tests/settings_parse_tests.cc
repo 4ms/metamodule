@@ -76,6 +76,9 @@ TEST_CASE("Parse settings file") {
   button_exp_knobset:
     button_expander: 4
     require_back: 0
+  notifications:
+    amount: Fewer
+    animation: 0
 )";
 	// clang-format on
 
@@ -142,6 +145,9 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.button_exp_knobset.button_expander == 4); // (1<<2) = Expander #3
 	CHECK(settings.button_exp_knobset.require_back == false);
+
+	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::Fewer);
+	CHECK(settings.notifications.animation == false);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -289,6 +295,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.button_exp_knobset.button_expander == 0);
 	CHECK(settings.button_exp_knobset.require_back == true);
+
+	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::All);
+	CHECK(settings.notifications.animation == true);
 }
 
 TEST_CASE("Serialize settings") {
@@ -343,6 +352,9 @@ TEST_CASE("Serialize settings") {
 
 	settings.button_exp_knobset.button_expander = 4; // (1<<2) = Expander #3
 	settings.button_exp_knobset.require_back = false;
+
+	settings.notifications.amount = MetaModule::NotificationSettings::Amount::OnlyCritical;
+	settings.notifications.animation = false;
 
 	// clang format-off
 	std::string expected = R"(Settings:
@@ -418,6 +430,9 @@ TEST_CASE("Serialize settings") {
   button_exp_knobset:
     button_expander: 4
     require_back: 0
+  notifications:
+    amount: OnlyCritical
+    animation: 0
 )";
 	// clang format-on
 

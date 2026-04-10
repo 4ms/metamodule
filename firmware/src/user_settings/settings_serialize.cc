@@ -103,6 +103,17 @@ static void write(ryml::NodeRef *n, ButtonExpKnobSetSettings const &s) {
 	n->append_child() << ryml::key("require_back") << s.require_back;
 }
 
+static void write(ryml::NodeRef *n, NotificationSettings const &s) {
+	*n |= ryml::MAP;
+
+	using enum NotificationSettings::Amount;
+	ryml::csubstr amount_string = s.amount == Fewer		   ? "Fewer" :
+								  s.amount == OnlyCritical ? "OnlyCritical" :
+															 "All";
+	n->append_child() << ryml::key("amount") << amount_string;
+	n->append_child() << ryml::key("animation") << s.animation;
+}
+
 static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {
 	*n |= ryml::MAP;
 
@@ -139,6 +150,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["midi"] << settings.midi;
 	data["patch_suggested_audio"] << settings.patch_suggested_audio;
 	data["button_exp_knobset"] << settings.button_exp_knobset;
+	data["notifications"] << settings.notifications;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();
