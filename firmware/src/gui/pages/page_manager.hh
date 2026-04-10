@@ -207,7 +207,9 @@ public:
 						auto firstbit = std::countr_zero(events) % 8;
 						if (firstbit < num_knobsets) {
 							next_knobset = firstbit;
-							metaparams.ignore_metabutton_release = true;
+							if (info.settings.button_exp_knobset.require_back) {
+								metaparams.ignore_metabutton_release = true;
+							}
 						}
 					}
 				}
