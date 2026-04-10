@@ -14,7 +14,7 @@ void PrefsSectionScreenSaver::create(lv_obj_t *parent) {
 	time_dropdown = lv_obj_get_child(screensaver_cont, 1);
 	lv_obj_set_width(time_dropdown, 90);
 
-	auto ss_knobs_cont = create_prefs_labeled_check(parent, "Wake with knob");
+	auto ss_knobs_cont = create_prefs_labeled_check(parent, "Wake with knob:");
 	knobs_check = lv_obj_get_child(ss_knobs_cont, 1);
 }
 
