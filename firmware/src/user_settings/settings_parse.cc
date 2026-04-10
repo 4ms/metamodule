@@ -172,6 +172,17 @@ static bool read(ryml::ConstNodeRef const &node, PatchSuggestedAudioSettings *se
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, ButtonExpKnobSetSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	read_or_default(node, "button_expander", settings, &ButtonExpKnobSetSettings::button_expander);
+	read_or_default(node, "require_back", settings, &ButtonExpKnobSetSettings::require_back);
+	settings->make_valid();
+
+	return true;
+}
+
 static bool read(ryml::ConstNodeRef const &node, MissingPluginSettings *settings) {
 	if (!node.is_map())
 		return false;
@@ -216,6 +227,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
 	read_or_default(node, "midi", settings, &UserSettings::midi);
 	read_or_default(node, "patch_suggested_audio", settings, &UserSettings::patch_suggested_audio);
+	read_or_default(node, "button_exp_knobset", settings, &UserSettings::button_exp_knobset);
 
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::initial_patch_name);
 	// TODO: cleaner way to parse an enum and reject out of range?

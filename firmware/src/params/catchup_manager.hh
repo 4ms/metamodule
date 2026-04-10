@@ -1,8 +1,5 @@
 #pragma once
-#include "CoreModules/CoreProcessor.hh"
-#include "CoreModules/hub/button_expander_defs.hh"
 #include "catchup_param.hh"
-#include "conf/panel_conf.hh"
 #include "patch-serial/patch/patch.hh"
 #include "toggle_param.hh"
 #include <vector>
@@ -134,6 +131,9 @@ public:
 		for (unsigned i = 0u; auto &knob : active_knob_maps) {
 
 			for (auto &knob_map : knob) {
+				if (knob_map.map.is_button())
+					continue;
+
 				auto module_val = modules[knob_map.map.module_id]->get_param(knob_map.map.param_id);
 				float scaled_phys_val = knob_map.map.get_mapped_val(panel_knobs[i]);
 

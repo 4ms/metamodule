@@ -73,6 +73,9 @@ TEST_CASE("Parse settings file") {
   patch_suggested_audio:
     apply_samplerate: 0
     apply_blocksize: 1
+  button_exp_knobset:
+    button_expander: 4
+    require_back: 0
 )";
 	// clang-format on
 
@@ -136,6 +139,9 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.module_view.show_knobset_name == false);
 
 	CHECK(settings.missing_plugins.autoload == MetaModule::MissingPluginSettings::Autoload::Never);
+
+	CHECK(settings.button_exp_knobset.button_expander == 4); // (1<<2) = Expander #3
+	CHECK(settings.button_exp_knobset.require_back == false);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -280,6 +286,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.patch_suggested_audio.apply_blocksize == true);
 
 	CHECK(settings.missing_plugins.autoload == MetaModule::MissingPluginSettings::Autoload::Ask);
+
+	CHECK(settings.button_exp_knobset.button_expander == 0);
+	CHECK(settings.button_exp_knobset.require_back == true);
 }
 
 TEST_CASE("Serialize settings") {
@@ -331,6 +340,9 @@ TEST_CASE("Serialize settings") {
 
 	settings.patch_suggested_audio.apply_samplerate = false;
 	settings.patch_suggested_audio.apply_blocksize = true;
+
+	settings.button_exp_knobset.button_expander = 4; // (1<<2) = Expander #3
+	settings.button_exp_knobset.require_back = false;
 
 	// clang format-off
 	std::string expected = R"(Settings:
@@ -403,6 +415,9 @@ TEST_CASE("Serialize settings") {
   patch_suggested_audio:
     apply_samplerate: 0
     apply_blocksize: 1
+  button_exp_knobset:
+    button_expander: 4
+    require_back: 0
 )";
 	// clang format-on
 

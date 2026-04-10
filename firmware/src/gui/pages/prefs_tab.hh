@@ -5,6 +5,7 @@
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/prefs_section_audio.hh"
+#include "gui/slsexport/prefs_section_button_exp_knobset.hh"
 #include "gui/slsexport/prefs_section_catchup.hh"
 #include "gui/slsexport/prefs_section_fs.hh"
 #include "gui/slsexport/prefs_section_midi.hh"
@@ -29,6 +30,7 @@ struct PrefsTab : SystemMenuTab {
 		, fs{settings.filesystem}
 		, midi{settings.midi}
 		, missing_plugins{settings.missing_plugins}
+		, button_exp_knobset{settings.button_exp_knobset}
 		, settings{settings} {
 
 		audio_section.create(ui_SystemMenuPrefsTab);
@@ -36,6 +38,7 @@ struct PrefsTab : SystemMenuTab {
 		catchup_section.create(ui_SystemMenuPrefsTab);
 		fs_section.create(ui_SystemMenuPrefsTab);
 		midi_section.create(ui_SystemMenuPrefsTab);
+		buttonexpknobset_section.create(ui_SystemMenuPrefsTab);
 		missingplugins_section.create(ui_SystemMenuPrefsTab);
 
 		auto btns = create_save_revert_buttons(ui_SystemMenuPrefsTab);
@@ -67,6 +70,8 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(audio_section.sr_override_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(audio_section.bs_override_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(missingplugins_section.dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(buttonexpknobset_section.expander_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, focus_cb, LV_EVENT_FOCUSED, this);
@@ -84,6 +89,8 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(audio_section.sr_override_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.bs_override_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(missingplugins_section.dropdown, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(buttonexpknobset_section.expander_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, focus_cb, LV_EVENT_FOCUSED, this);
 
 		std::string opts;
 		for (auto item : AudioSettings::ValidBlockSizes) {
@@ -124,6 +131,7 @@ struct PrefsTab : SystemMenuTab {
 
 		set_options(ScreensaverSettings::ValidOptions, catchup_section.mode_dropdown);
 		set_options(CatchupSettings::ValidOptions, catchup_section.mode_dropdown);
+		set_options(ButtonExpKnobSetSettings::ValidOptions, buttonexpknobset_section.expander_dropdown);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -226,6 +234,13 @@ private:
 																									 2;
 			lv_dropdown_set_selected(missingplugins_section.dropdown, idx);
 		}
+
+		// Button expander knob set
+		auto bexp_item = get_index(ButtonExpKnobSetSettings::ValidOptions,
+								   [this](auto t) { return t.value == button_exp_knobset.button_expander; });
+		lv_dropdown_set_selected(buttonexpknobset_section.expander_dropdown, bexp_item >= 0 ? bexp_item : 0);
+		lv_check(buttonexpknobset_section.require_back_check, button_exp_knobset.require_back);
+		update_require_back_enabled(button_exp_knobset.button_expander != 0);
 
 		gui_state.do_write_settings = false;
 
@@ -341,9 +356,9 @@ private:
 	}
 
 	auto read_knobset_control_check() {
-		return lv_obj_has_state(midi_section.knobset_control_check, LV_STATE_CHECKED)
-				 ? MidiSettings::KnobsetControl::Enabled
-				 : MidiSettings::KnobsetControl::Disabled;
+		return lv_obj_has_state(midi_section.knobset_control_check, LV_STATE_CHECKED) ?
+				   MidiSettings::KnobsetControl::Enabled :
+				   MidiSettings::KnobsetControl::Disabled;
 	}
 
 	void update_knobset_control_items(bool enabled) {
@@ -369,6 +384,24 @@ private:
 		if (item == 2)
 			return MissingPluginSettings::Autoload::Never;
 		return MissingPluginSettings::Autoload::Ask;
+	}
+
+	uint32_t read_button_exp_knobset_dropdown() {
+		auto item = lv_dropdown_get_selected(buttonexpknobset_section.expander_dropdown);
+		if (item >= 0 && item < ButtonExpKnobSetSettings::ValidOptions.size())
+			return ButtonExpKnobSetSettings::ValidOptions[item].value;
+		else
+			return ButtonExpKnobSetSettings::DefaultButtonExpander;
+	}
+
+	bool read_require_back_check() {
+		return lv_obj_has_state(buttonexpknobset_section.require_back_check, LV_STATE_CHECKED);
+	}
+
+	void update_require_back_enabled(bool expander_enabled) {
+		lv_enable(buttonexpknobset_section.require_back_check, expander_enabled);
+		auto opa = expander_enabled ? LV_OPA_100 : LV_OPA_50;
+		lv_obj_set_style_opa(buttonexpknobset_section.require_back_cont, opa, LV_PART_MAIN);
 	}
 
 	// Update the settings structure from the dropdown and checkbox selections
@@ -484,6 +517,15 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		// Button expander knob set
+		auto bexp = read_button_exp_knobset_dropdown();
+		auto bexp_back = read_require_back_check();
+		if (button_exp_knobset.button_expander != bexp || button_exp_knobset.require_back != bexp_back) {
+			button_exp_knobset.button_expander = bexp;
+			button_exp_knobset.require_back = bexp_back;
+			gui_state.do_write_settings = true;
+		}
+
 		lv_disable(save_button);
 		lv_disable(revert_button);
 	}
@@ -544,6 +586,12 @@ private:
 			lv_group_set_editing(group, false);
 			return true;
 
+		} else if (lv_dropdown_is_open(buttonexpknobset_section.expander_dropdown)) {
+			lv_dropdown_close(buttonexpknobset_section.expander_dropdown);
+			lv_group_focus_obj(buttonexpknobset_section.expander_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
 		} else {
 			update_settings_from_dropdown();
 			return false;
@@ -593,9 +641,12 @@ private:
 		auto apply_bs = read_patch_suggest_blocksize_check();
 		auto load_initial_patch = lv_obj_has_state(fs_section.startup_patch_check, LV_STATE_CHECKED);
 		auto mp_mode = read_missing_plugins_dropdown();
+		auto bexp = read_button_exp_knobset_dropdown();
+		auto bexp_back = read_require_back_check();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 		update_knobset_control_items(knobset_control == MidiSettings::KnobsetControl::Enabled);
+		update_require_back_enabled(bexp != 0);
 
 		if (block_size == audio_settings.block_size && sample_rate == audio_settings.sample_rate &&
 			overrun_retries == audio_settings.max_overrun_retries && timeout == screensaver.timeout_ms &&
@@ -604,9 +655,9 @@ private:
 			load_initial_patch == settings.load_initial_patch && fs_max_patches == fs.max_open_patches &&
 			midi_feedback == midi.midi_feedback && knobset_control == midi.knobset_control &&
 			knobset_cc == midi.knobset_cc && knobset_channel == midi.knobset_channel &&
-			mp_mode == missing_plugins.autoload &&
-			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
-			apply_bs == settings.patch_suggested_audio.apply_blocksize)
+			mp_mode == missing_plugins.autoload && apply_sr == settings.patch_suggested_audio.apply_samplerate &&
+			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
+			bexp_back == button_exp_knobset.require_back)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
@@ -644,6 +695,7 @@ private:
 	FilesystemSettings &fs;
 	MidiSettings &midi;
 	MissingPluginSettings &missing_plugins;
+	ButtonExpKnobSetSettings &button_exp_knobset;
 	UserSettings &settings;
 
 	lv_group_t *group = nullptr;
@@ -654,6 +706,7 @@ private:
 	PrefsSectionFilesystem fs_section;
 	PrefsSectionMidi midi_section;
 	PrefsSectionMissingPlugins missingplugins_section;
+	PrefsSectionButtonExpKnobSet buttonexpknobset_section;
 
 	lv_obj_t *save_button;
 	lv_obj_t *revert_button;
