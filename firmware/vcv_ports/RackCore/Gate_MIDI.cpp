@@ -1,3 +1,4 @@
+#include "patch/patch_file.hh"
 #include "plugin.hpp"
 
 namespace rack
@@ -162,6 +163,36 @@ struct Gate_MIDI : Module {
 		if (midiJ)
 			midiOutput.fromJson(midiJ);
 	}
+
+	// METAMODULE
+	static std::string note_string(int8_t note) {
+		if (note < 0)
+			return "--";
+		static const std::string noteNames[12] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+		int oct = note / 12 - 1;
+		int semi = note % 12;
+		return noteNames[semi] + std::to_string(oct);
+	}
+
+	size_t get_display_text(int led_id, std::span<char> text) override {
+		std::string chars = "";
+
+		for (auto i = 0; i < 16; i++) {
+			chars += (i == 0) ? "" : ((i % 4) == 0) ? "\n" : " ";
+
+			auto note = learnedNotes[i];
+			std::string str = note_string(note).substr(0, 3);
+
+			for (auto len = str.length(); len < 3; len++)
+				chars += " ";
+			chars += str;
+		}
+
+		size_t chars_to_copy = std::min(text.size(), chars.length());
+		std::copy(chars.begin(), chars.begin() + chars_to_copy, text.begin());
+
+		return chars_to_copy;
+	}
 };
 
 struct Gate_MIDIWidget : ModuleWidget {
@@ -198,11 +229,12 @@ struct Gate_MIDIWidget : ModuleWidget {
 		addInput(
 			createInputCentered<ThemedPJ301MPort>(mm2px(Vec(42.838, 112.984)), module, Gate_MIDI::GATE_INPUTS + 15));
 
-		typedef Grid16MidiDisplay<NoteChoice<Gate_MIDI>> TMidiDisplay;
-		TMidiDisplay *display = createWidget<TMidiDisplay>(mm2px(Vec(0.0, 13.039)));
-		display->box.size = mm2px(Vec(50.8, 55.88));
-		display->setMidiPort(module ? &module->midiOutput : NULL);
-		display->setModule(module);
+		// Changed for METAMODULE
+		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(1, 15)));
+		display->box.size = mm2px(Vec(52, 64));
+		display->firstLightId = 0;
+		display->font = "RackCore/ShareTechMono_12.bin";
+		display->color = Colors565::Yellow;
 		addChild(display);
 	}
 
@@ -214,6 +246,44 @@ struct Gate_MIDIWidget : ModuleWidget {
 		menu->addChild(createBoolPtrMenuItem("Velocity from gate amplitude", "", &module->velocityMode));
 
 		menu->addChild(createMenuItem("Reset MIDI (Panic)", "", [=]() { module->midiOutput.panic(); }));
+
+		// METAMODULE: add MIDI Channel to context menu:
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createSubmenuItem(
+			"MIDI channel",
+			[=] {
+				auto chan = module->midiOutput.getChannel();
+				return chan < 0 ? "??" : std::to_string(chan + 1);
+			},
+			[=](Menu *menu) {
+				for (int c = 0; c < 16; c++) {
+					menu->addChild(createCheckMenuItem(
+						string::f("Channel %d", c + 1),
+						"",
+						[=]() { return module->midiOutput.getChannel() == c; },
+						[=]() { module->midiOutput.setChannel(c); }));
+				}
+			}));
+
+		menu->addChild(new MenuSeparator);
+
+		for (auto cell = 0; cell < 16; cell++) {
+			menu->addChild(createSubmenuItem(
+				"Cell " + std::to_string(cell + 1) + " ",
+				[=] { return Gate_MIDI::note_string(module->learnedNotes[cell]); },
+				[=](Menu *menu) {
+					for (int note = 0; note < 128; note++) {
+						menu->addChild(createCheckMenuItem(
+							Gate_MIDI::note_string(note),
+							"",
+							[=]() { return module->learnedNotes[cell] == note; },
+							[=]() {
+								module->setLearnedNote(cell, note);
+								MetaModule::Patch::mark_patch_modified();
+							}));
+					}
+				}));
+		}
 	}
 };
 
