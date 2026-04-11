@@ -7,11 +7,11 @@
    viewBox="0 0 50.89 128.5"
    version="1.1"
    id="svg1"
-   inkscape:export-filename="../../firmware/assets/RackCore/MIDICC_CV.png"
+   inkscape:export-filename="../../firmware/assets/RackCore/Gate_MIDI.png"
    inkscape:export-xdpi="47.439999"
    inkscape:export-ydpi="47.439999"
    inkscape:version="1.3.2 (091e20e, 2023-11-25)"
-   sodipodi:docname="MIDICC2CV.svg"
+   sodipodi:docname="Gate_MIDI.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -26,9 +26,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.6783748"
-     inkscape:cx="37.238404"
-     inkscape:cy="198.70412"
+     inkscape:zoom="1.2494214"
+     inkscape:cx="109.65076"
+     inkscape:cy="268.5243"
      inkscape:window-width="1680"
      inkscape:window-height="1056"
      inkscape:window-x="53"
@@ -54,13 +54,29 @@
          stop-color="#e1e1e1"
          id="stop4" />
     </linearGradient>
+    <linearGradient
+       id="ac63b0da-9b5c-4a7f-b473-21d45bc390a1"
+       x1="75"
+       x2="75"
+       y2="380"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#ebebeb"
+         id="stop2-7" />
+      <stop
+         offset="1"
+         stop-color="#e1e1e1"
+         id="stop4-7" />
+    </linearGradient>
   </defs>
   <g
      inkscape:groupmode="layer"
      id="layer2"
-     inkscape:label="artwork">
+     inkscape:label="artwork"
+     style="display:inline">
     <rect
-       style="fill:#eeeeee"
+       style="display:inline;fill:#eeeeee"
        id="rect3"
        width="50.889999"
        height="128.5"
@@ -69,20 +85,20 @@
     <text
        xml:space="preserve"
        style="font-weight:bold;font-size:4px;font-family:GillSans-Bold, 'Gill Sans'"
-       x="10.463554"
+       x="11.995781"
        y="9.4902859"
        id="text1"><tspan
          sodipodi:role="line"
          id="tspan1"
          style="stroke-width:0.4"
-         x="10.463554"
-         y="9.4902859">MIDI CC to CV</tspan></text>
+         x="11.995781"
+         y="9.4902859">Gate to MIDI</tspan></text>
     <rect
        style="fill:#000000;stroke-width:1.20002"
        id="rect2"
        width="50.889999"
-       height="38.602379"
+       height="58.53804"
        x="1.7763568e-15"
-       y="12.232008" />
+       y="12.232009" />
   </g>
 </svg>

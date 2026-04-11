@@ -1,3 +1,4 @@
+#include "patch/patch_file.hh"
 #include "plugin.hpp"
 
 namespace rack
@@ -163,9 +164,10 @@ struct MIDI_Gate : Module {
 	void setLearnedNote(int id, int8_t note) {
 		// Unset IDs of similar note
 		if (note >= 0) {
-			for (int id = 0; id < 16; id++) {
-				if (learnedNotes[id] == note)
-					learnedNotes[id] = -1;
+			for (int i = 0; i < 16; i++) {
+				if (i != id && learnedNotes[i] == note) {
+					learnedNotes[i] = -1;
+				}
 			}
 		}
 		learnedNotes[id] = note;
@@ -220,6 +222,36 @@ struct MIDI_Gate : Module {
 		if (midiJ)
 			midiInput.fromJson(midiJ);
 	}
+
+	// METAMODULE
+	static std::string note_string(int8_t note) {
+		if (note < 0)
+			return "--";
+		static const std::string noteNames[12] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+		int oct = note / 12 - 1;
+		int semi = note % 12;
+		return noteNames[semi] + std::to_string(oct);
+	}
+
+	size_t get_display_text(int led_id, std::span<char> text) override {
+		std::string chars = "";
+
+		for (auto i = 0; i < 16; i++) {
+			chars += (i == 0) ? "" : ((i % 4) == 0) ? "\n" : " ";
+
+			auto note = learnedNotes[i];
+			std::string str = note_string(note).substr(0, 3);
+
+			for (auto len = str.length(); len < 3; len++)
+				chars += " ";
+			chars += str;
+		}
+
+		size_t chars_to_copy = std::min(text.size(), chars.length());
+		std::copy(chars.begin(), chars.begin() + chars_to_copy, text.begin());
+
+		return chars_to_copy;
+	}
 };
 
 struct MIDI_GateWidget : ModuleWidget {
@@ -232,44 +264,29 @@ struct MIDI_GateWidget : ModuleWidget {
 		addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(8.189, 78.431)), module, MIDI_Gate::GATE_OUTPUTS + 0));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(19.739, 78.431)), module, MIDI_Gate::GATE_OUTPUTS + 1));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(31.289, 78.431)), module, MIDI_Gate::GATE_OUTPUTS + 2));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(42.838, 78.431)), module, MIDI_Gate::GATE_OUTPUTS + 3));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(8.189, 89.946)), module, MIDI_Gate::GATE_OUTPUTS + 4));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(19.739, 89.946)), module, MIDI_Gate::GATE_OUTPUTS + 5));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(31.289, 89.946)), module, MIDI_Gate::GATE_OUTPUTS + 6));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(42.838, 89.946)), module, MIDI_Gate::GATE_OUTPUTS + 7));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(8.189, 101.466)), module, MIDI_Gate::GATE_OUTPUTS + 8));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(19.739, 101.466)), module, MIDI_Gate::GATE_OUTPUTS + 9));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(31.289, 101.466)), module, MIDI_Gate::GATE_OUTPUTS + 10));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(42.838, 101.466)), module, MIDI_Gate::GATE_OUTPUTS + 11));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(8.189, 112.998)), module, MIDI_Gate::GATE_OUTPUTS + 12));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(19.739, 112.984)), module, MIDI_Gate::GATE_OUTPUTS + 13));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(31.289, 112.984)), module, MIDI_Gate::GATE_OUTPUTS + 14));
-		addOutput(
-			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(42.838, 112.984)), module, MIDI_Gate::GATE_OUTPUTS + 15));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(8, 78)), module, MIDI_Gate::GATE_OUTPUTS + 0));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(20, 78)), module, MIDI_Gate::GATE_OUTPUTS + 1));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(32, 78)), module, MIDI_Gate::GATE_OUTPUTS + 2));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(43, 78)), module, MIDI_Gate::GATE_OUTPUTS + 3));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(8, 91)), module, MIDI_Gate::GATE_OUTPUTS + 4));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(20, 91)), module, MIDI_Gate::GATE_OUTPUTS + 5));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(32, 91)), module, MIDI_Gate::GATE_OUTPUTS + 6));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(43, 91)), module, MIDI_Gate::GATE_OUTPUTS + 7));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(8, 104)), module, MIDI_Gate::GATE_OUTPUTS + 8));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(20, 104)), module, MIDI_Gate::GATE_OUTPUTS + 9));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(32, 104)), module, MIDI_Gate::GATE_OUTPUTS + 10));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(43, 104)), module, MIDI_Gate::GATE_OUTPUTS + 11));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(8, 116)), module, MIDI_Gate::GATE_OUTPUTS + 12));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(20, 116)), module, MIDI_Gate::GATE_OUTPUTS + 13));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(32, 116)), module, MIDI_Gate::GATE_OUTPUTS + 14));
+		addOutput(createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(43, 116)), module, MIDI_Gate::GATE_OUTPUTS + 15));
 
-		typedef Grid16MidiDisplay<NoteChoice<MIDI_Gate>> TMidiDisplay;
-		TMidiDisplay *display = createWidget<TMidiDisplay>(mm2px(Vec(0.0, 13.039)));
-		display->box.size = mm2px(Vec(50.8, 55.88));
-		display->setMidiPort(module ? &module->midiInput : NULL);
-		display->setModule(module);
+		// Changed for METAMODULE
+		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(1, 15)));
+		display->box.size = mm2px(Vec(52, 64));
+		display->firstLightId = 0;
+		display->font = "RackCore/ShareTechMono_12.bin";
+		display->color = Colors565::Yellow;
 		addChild(display);
 	}
 
@@ -298,6 +315,49 @@ struct MIDI_GateWidget : ModuleWidget {
 		menu->addChild(new MenuSeparator);
 
 		menu->addChild(createMenuItem("Reset MIDI (Panic)", "", [=]() { module->panic(); }));
+
+		// METAMODULE: add MIDI Channel to context menu:
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createSubmenuItem(
+			"MIDI channel",
+			[=] {
+				auto chan = module->midiInput.getChannel();
+				return chan < 0 ? "Omni" : std::to_string(chan + 1);
+			},
+			[=](Menu *menu) {
+				menu->addChild(createCheckMenuItem(
+					"Omni",
+					"",
+					[=]() { return module->midiInput.getChannel() == -1; },
+					[=]() { module->midiInput.setChannel(-1); }));
+				for (int c = 0; c < 16; c++) {
+					menu->addChild(createCheckMenuItem(
+						string::f("Channel %d", c + 1),
+						"",
+						[=]() { return module->midiInput.getChannel() == c; },
+						[=]() { module->midiInput.setChannel(c); }));
+				}
+			}));
+
+		menu->addChild(new MenuSeparator);
+
+		for (auto cell = 0; cell < 16; cell++) {
+			menu->addChild(createSubmenuItem(
+				"Cell " + std::to_string(cell + 1) + " ",
+				[=] { return MIDI_Gate::note_string(module->learnedNotes[cell]); },
+				[=](Menu *menu) {
+					for (int note = 0; note < 128; note++) {
+						menu->addChild(createCheckMenuItem(
+							MIDI_Gate::note_string(note),
+							"",
+							[=]() { return module->learnedNotes[cell] == note; },
+							[=]() {
+								module->setLearnedNote(cell, note);
+								MetaModule::Patch::mark_patch_modified();
+							}));
+					}
+				}));
+		}
 	}
 };
 

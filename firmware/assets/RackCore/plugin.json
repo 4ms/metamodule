@@ -12,19 +12,67 @@
   "changelogUrl": "https://github.com/VCVRack/Rack/blob/v2/CHANGELOG.md",
   "description": "Necessary modules built into VCV Rack",
   "modules": [
-     {
+    {
       "slug": "MIDIToCVInterface",
       "name": "MIDI to CV",
       "description": "Converts MIDI from an external device to CV and gates",
       "manualUrl": "https://vcvrack.com/manual/Core#MIDI-CV",
-      "tags": [ "External", "MIDI" ]
+      "tags": [
+        "External",
+        "MIDI",
+        "Polyphonic"
+      ]
+    },
+    {
+      "slug": "MIDICCToCVInterface",
+      "name": "MIDI CC to CV",
+      "description": "Converts MIDI CC from an external device to CV",
+      "manualUrl": "https://vcvrack.com/manual/Core#MIDI-CC",
+      "tags": [
+        "External",
+        "MIDI"
+      ]
+    },
+    {
+      "slug": "MIDITriggerToCVInterface",
+      "name": "MIDI to Gate",
+      "description": "Converts MIDI notes from an external device to gates",
+      "manualUrl": "https://vcvrack.com/manual/Core#MIDI-Gate",
+      "tags": [
+        "External",
+        "MIDI"
+      ]
     },
     {
       "slug": "CV-MIDI",
       "name": "CV to MIDI",
       "description": "Converts CV to MIDI and sends to an external device",
       "manualUrl": "https://vcvrack.com/manual/Core#CV-MIDI",
-      "tags": [ "External", "MIDI" ]
+      "tags": [
+        "External",
+        "MIDI",
+        "Polyphonic"
+      ]
+    },
+    {
+      "slug": "CV-CC",
+      "name": "CV to MIDI CC",
+      "description": "Converts CV to MIDI CC and sends to an external device",
+      "manualUrl": "https://vcvrack.com/manual/Core#CV-CC",
+      "tags": [
+        "External",
+        "MIDI"
+      ]
+    },
+    {
+      "slug": "CV-Gate",
+      "name": "Gate to MIDI",
+      "description": "Converts gates to MIDI notes and sends to an external device",
+      "manualUrl": "https://vcvrack.com/manual/Core#CV-Gate",
+      "tags": [
+        "External",
+        "MIDI"
+      ]
     }
   ]
 }

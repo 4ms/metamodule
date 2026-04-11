@@ -15,7 +15,7 @@ set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../RackCore)
 add_library(RackCoreLibrary OBJECT
     ${SOURCE_DIR}/MIDI_CV.cpp
     ${SOURCE_DIR}/MIDICC_CV.cpp
-    # ${SOURCE_DIR}/MIDI_Gate.cpp
+    ${SOURCE_DIR}/MIDI_Gate.cpp
 
     ${SOURCE_DIR}/CV_MIDI.cpp
     ${SOURCE_DIR}/CV_MIDICC.cpp
