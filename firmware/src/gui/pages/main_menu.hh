@@ -138,11 +138,10 @@ private:
 			page->load_page(PageId::ModuleList,
 							{.patch_loc_hash = page->patches.get_view_patch_loc_hash(), .view_knobset_id = 0});
 		} else {
-			page->notify_queue.put(
-				{"Too many unsaved patches open! Save or close them to open a new patch, or change this in "
-				 "Settings > Prefs.",
-				 Notification::Priority::Info,
-				 4000});
+			page->notify_queue.put({"Too many unsaved patches open! Save or close some. Tip: set your preference in "
+									"Settings > Prefs.",
+									Notification::Priority::Error,
+									4000});
 		}
 	}
 

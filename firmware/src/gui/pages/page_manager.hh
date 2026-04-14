@@ -269,8 +269,18 @@ public:
 		if (lv_obj_get_y(ui_MessagePanel) < -30) {
 			if (auto msg = info.notify_queue.get()) {
 				screensaver.wake();
+				using enum NotificationSettings::Amount;
+				using enum Notification::Priority;
+				// All -> Error + Info + Status
+				// Fewer -> Error + Info
+				// Critical -> Error
+				if ((info.settings.notifications.amount == All || msg->priority == Error) ||
+					(info.settings.notifications.amount == Fewer && msg->priority == Info))
+				{
+					DisplayNotification::show(*msg, info.settings.notifications.animation);
+				}
+
 				pr_info("Notify: %s (%u)\n", msg->message.c_str(), msg->duration_ms);
-				DisplayNotification::show(*msg);
 			}
 		}
 
