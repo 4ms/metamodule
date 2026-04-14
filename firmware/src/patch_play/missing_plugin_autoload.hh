@@ -19,7 +19,6 @@ struct MissingPluginAutoload {
 	void scan(PatchData *patch) {
 		brands.clear();
 		modules.clear();
-		skipped.clear();
 		processing = false;
 
 		if (!patch) {
@@ -48,10 +47,10 @@ struct MissingPluginAutoload {
 						// Brand plugin is loaded, but module is just not known.
 						// We could unload the plugin and scan for newer versions,
 						// and/or tell the user to look for new versions.
-						// But for now we just report the module as missing
-						if (std::ranges::find(skipped, slug) == skipped.end()) {
-							skipped.emplace_back(slug);
-						}
+						// But for now we just report the module as missing, but not the brand
+						// if (std::ranges::find(skipped, slug) == skipped.end()) {
+						// 	skipped.emplace_back(slug);
+						// }
 
 					} else {
 
@@ -62,10 +61,6 @@ struct MissingPluginAutoload {
 				}
 			}
 		}
-	}
-
-	std::vector<std::string> &missing_modules() {
-		return modules;
 	}
 
 	std::vector<std::string> &skipped_modules() {
@@ -107,8 +102,6 @@ private:
 
 	std::vector<std::string> brands;
 	std::vector<std::string> modules;
-
-	std::vector<std::string> skipped;
 
 	bool processing = false;
 };
