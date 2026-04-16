@@ -61,14 +61,15 @@ std::optional<int> alloc_file() {
 
 void dealloc_file(size_t fd) {
 	if (fd_is_file(fd)) {
-		if (!descriptors.destroy(index(fd))) {
-			pr_err("FileDescManager error: descriptor %zu was already dealloced\n", fd);
-		} else
-			pr_trace("FileDescManager: dealloc fd %zu\n", fd);
-
 		fatfil_pool[index(fd)].obj.fs = nullptr;
 		descriptors[index(fd)].fatfil = nullptr;
 		descriptors[index(fd)].vol = Volume::MaxVolumes;
+
+		if (!descriptors.destroy(index(fd))) {
+			pr_err("FileDescManager error: descriptor %zu was already dealloced\n", fd);
+		} else {
+			pr_trace("FileDescManager: dealloc fd %zu\n", fd);
+		}
 	}
 }
 

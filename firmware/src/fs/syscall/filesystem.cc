@@ -58,6 +58,11 @@ int open(const char *filename, int flags, int mode) {
 	if (auto fd = FileDescManager::alloc_file()) {
 
 		auto file = FileDescManager::filedesc(*fd);
+		if (!file) {
+			pr_err("Internal error when opening file '%.*s': no file for descriptor %d\n", 63, filename, *fd);
+			FileDescManager::dealloc_file(*fd);
+			return -1;
+		}
 
 		auto [path, volume] = split_volume(filename);
 
