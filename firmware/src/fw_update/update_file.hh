@@ -22,6 +22,13 @@ struct UpdateFile {
 
 struct UpdateManifest {
 	uint32_t version{};
+
+	struct FwVersion {
+		uint32_t major{};
+		uint32_t minor{};
+		uint32_t revision{};
+	} fw_version{};
+
 	std::vector<UpdateFile> files;
 };
 
