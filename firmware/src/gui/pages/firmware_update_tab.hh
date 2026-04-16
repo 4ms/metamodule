@@ -1,12 +1,16 @@
 #pragma once
+#include "fw_update/manifest_parse.hh"
 #include "fw_update/updater_proxy.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "memory/ram_buffer.hh"
 #include "patch_play/patch_playloader.hh"
 #include "reboot.hh"
+#include "util/monotonic_allocator.hh"
 #include "util/poll_event.hh"
+#include <algorithm>
 
 namespace MetaModule
 {
@@ -26,6 +30,8 @@ struct FirmwareUpdateTab : SystemMenuTab {
 		this->group = group;
 
 		state = State::Idle;
+		manifest_parsed = false;
+		manifest_filename.clear();
 		lv_hide(ui_FWUpdateSpinner);
 		display_file_not_found();
 
@@ -64,19 +70,56 @@ struct FirmwareUpdateTab : SystemMenuTab {
 
 				if (message.message_type == FileStorageProxy::FirmwareFileFound) {
 					pr_trace("A7: Message received: manifest file found: %.255s\n", message.filename.data());
-					if (manifest_filename = std::string{message.filename.data()}; manifest_filename.length()) {
+					std::string new_filename{message.filename.data()};
+					if (new_filename.empty()) {
+						pr_trace("Filename empty, skipping\n");
+						manifest_parsed = false;
+						manifest_filename.clear();
+						display_file_not_found();
+						state = State::Idle;
+					} else if (manifest_parsed && new_filename == manifest_filename &&
+							   message.vol_id == manifest_file_vol && message.bytes_read == manifest_filesize)
+					{
+						state = State::Idle;
+					} else {
+						manifest_filename = new_filename;
 						manifest_file_vol = message.vol_id;
 						manifest_filesize = message.bytes_read;
-						display_manifest_found();
-					} else {
-						pr_trace("Filename empty, skipping\n");
-						display_file_not_found();
+						manifest_parsed = false;
+						if (request_load_preview()) {
+							state = State::LoadingPreview;
+						} else {
+							display_preview_failed("Cannot allocate buffer for manifest");
+							state = State::Idle;
+						}
 					}
-					state = State::Idle;
 
 				} else if (message.message_type == FileStorageProxy::FirmwareFileNotFound) {
 					pr_trace("A7: Message received: no manifest file found\n");
+					manifest_parsed = false;
+					manifest_filename.clear();
 					display_file_not_found();
+					state = State::Idle;
+				}
+
+			} break;
+
+			case State::LoadingPreview: {
+				auto message = file_storage.get_message();
+
+				if (message.message_type == FileStorageProxy::LoadFileOK) {
+					ManifestParser parser;
+					if (auto parsed = parser.parse(preview_buffer); parsed) {
+						preview_manifest = *parsed;
+						manifest_parsed = true;
+						display_manifest_found();
+					} else {
+						display_preview_failed("Manifest file is invalid");
+					}
+					state = State::Idle;
+
+				} else if (message.message_type == FileStorageProxy::LoadFileFailed) {
+					display_preview_failed("Failed to read manifest file");
 					state = State::Idle;
 				}
 
@@ -176,10 +219,12 @@ private:
 	void display_manifest_found() {
 		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
-							  "Firmware update file found on %s: %s, %u bytes",
-							  manifest_file_vol == Volume::USB ? "USB" : "SD",
-							  manifest_filename.c_str(),
-							  (unsigned)manifest_filesize);
+							  "Update found on %s\nVersion %u.%u.%u\nIncludes: %s",
+							  manifest_file_vol == Volume::USB ? "USB" : "SD card",
+							  (unsigned)preview_manifest.fw_version.major,
+							  (unsigned)preview_manifest.fw_version.minor,
+							  (unsigned)preview_manifest.fw_version.revision,
+							  build_file_types_string().c_str());
 
 		if (lv_obj_has_flag(ui_SystemMenuUpdateFWBut, LV_OBJ_FLAG_HIDDEN)) {
 			lv_show(ui_SystemMenuUpdateFWBut);
@@ -196,6 +241,53 @@ private:
 		lv_hide(ui_SystemMenuUpdateFWBut);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
+	}
+
+	void display_preview_failed(std::string_view reason) {
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
+		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
+							  "Firmware update file found on %s: %s\n%.*s",
+							  manifest_file_vol == Volume::USB ? "USB" : "SD",
+							  manifest_filename.c_str(),
+							  (int)reason.size(),
+							  reason.data());
+		lv_hide(ui_SystemMenuUpdateFWBut);
+		lv_group_focus_obj(tabs);
+		lv_group_set_editing(group, true);
+	}
+
+	bool request_load_preview() {
+		preview_allocator.reset();
+		auto buffer_ptr = preview_allocator.allocate(manifest_filesize);
+		if (!buffer_ptr)
+			return false;
+		preview_buffer = std::span<char>{(char *)buffer_ptr, manifest_filesize};
+		return file_storage.request_load_file(manifest_filename, manifest_file_vol, preview_buffer);
+	}
+
+	static std::string_view friendly_name(std::string_view raw) {
+		if (raw == "FSBL1" || raw == "FSBL2")
+			return "Bootloader";
+		if (raw == "DFU")
+			return "Bootloader";
+		return raw;
+	}
+
+	std::string build_file_types_string() const {
+		std::vector<std::string_view> seen;
+		std::string result;
+		for (const auto &file : preview_manifest.files) {
+			auto name = friendly_name(file.name);
+			if (name.empty())
+				continue;
+			if (std::find(seen.begin(), seen.end(), name) != seen.end())
+				continue;
+			seen.push_back(name);
+			if (!result.empty())
+				result += ", ";
+			result.append(name);
+		}
+		return result;
 	}
 
 	void display_ram_loaded() {
@@ -267,10 +359,15 @@ private:
 
 	uint32_t manifest_filesize = 0;
 
+	MonotonicAllocator preview_allocator{get_ram_buffer()};
+	std::span<char> preview_buffer;
+	UpdateManifest preview_manifest;
+	bool manifest_parsed = false;
+
 	FirmwareUpdaterProxy updater;
 
 	PollEvent<uint32_t> media_poll{2000};
 
-	enum class State { Idle, Scanning, Updating, Failed, Success } state = State::Idle;
+	enum class State { Idle, Scanning, LoadingPreview, Updating, Failed, Success } state = State::Idle;
 };
 } // namespace MetaModule

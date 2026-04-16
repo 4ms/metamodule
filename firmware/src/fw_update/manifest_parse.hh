@@ -90,6 +90,19 @@ struct ManifestParser {
 				UpdateManifest manifest{};
 				root["version"] >> manifest.version;
 
+				if (root.has_child("metadata")) {
+					auto metadata = root["metadata"];
+					if (metadata.has_child("version")) {
+						auto version_node = metadata["version"];
+						if (version_node.has_child("major"))
+							version_node["major"] >> manifest.fw_version.major;
+						if (version_node.has_child("minor"))
+							version_node["minor"] >> manifest.fw_version.minor;
+						if (version_node.has_child("revision"))
+							version_node["revision"] >> manifest.fw_version.revision;
+					}
+				}
+
 				if (root.has_child("files")) {
 					root["files"] >> manifest.files;
 					return manifest;
