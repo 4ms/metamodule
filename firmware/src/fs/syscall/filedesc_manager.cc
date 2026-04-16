@@ -33,7 +33,7 @@ static int index(size_t fd) {
 }
 
 static bool fd_is_file(int fd) {
-	return (index(fd) >= 0 && index(fd) < MaxOpenFiles && descriptors[index(fd)].fatfil != nullptr);
+	return (index(fd) >= 0 && index(fd) < MaxOpenFiles && descriptors.is_used(index(fd)));
 }
 
 int isatty(int fd) {
@@ -43,24 +43,29 @@ int isatty(int fd) {
 void init() {
 	descriptors.clear();
 	dir_scriptors.clear();
+
+	// Bind each FileDesc to its FIL slot once. The pointer is never mutated again,
+	// so concurrent alloc/dealloc on different cores have no plain stores to race on.
+	for (size_t i = 0; i < MaxOpenFiles; i++) {
+		descriptors[i].fatfil = &fatfil_pool[i];
+	}
+
+	for (size_t i = 0; i < MaxOpenDirs; i++) {
+		dir_scriptors[i].dir = &dir_pool[i];
+	}
 }
 
-// Potential for race condition if newlib is holding a stale fd
-// (that is, it attempts to double-close a file), and we have 3 threads.
-// E.g. thread 1 and thread 2 both try to close filedesc 8, and thread 3 tries to open a file:
-// T2: fd_is_file(8) → true         // passes check, then stalls
-// T1: fd_is_file(8) → true, nulls fields, CAS destroy → OK
-// T3: alloc_file()   → CAS create wins slot, writes new pointer
-// T2: resumes → nulls fields (clobbers T3's pointer!)
-//     CAS destroy succeeds (used_flags was true from T3) → no error logged
-// T3 now holds a “live” fd whose fatfil is nullptr and used_flags is false
+// Residual stale-fd risk: if newlib double-closes an fd that has already been recycled
+// to a new owner, our CAS-destroy can spuriously succeed and free the new owner's slot.
+// The new owner's fd then becomes invalid and subsequent ops return -1, but no field
+// can be clobbered, so this no longer crashes — it just fails the in-flight operation.
 
 std::optional<int> alloc_file() {
-	// Thread-safe way to find first empty descriptor
 	if (auto fd_idx = descriptors.create()) {
-		// Default-init a FIL
+		// Re-init happens here because we have exclusive ownership.
+		// This avoids non-atomic stores if we were to init the fields in dealloc_file()
 		fatfil_pool[*fd_idx] = FIL{};
-		descriptors[*fd_idx].fatfil = &fatfil_pool[*fd_idx];
+		descriptors[*fd_idx].vol = Volume::MaxVolumes;
 		pr_trace("FileDescManager: alloc fd %zu\n", *fd_idx + FirstFileFD);
 		return static_cast<int>(*fd_idx + FirstFileFD);
 	} else {
@@ -71,10 +76,6 @@ std::optional<int> alloc_file() {
 
 void dealloc_file(size_t fd) {
 	if (fd_is_file(fd)) {
-		fatfil_pool[index(fd)].obj.fs = nullptr;
-		descriptors[index(fd)].fatfil = nullptr;
-		descriptors[index(fd)].vol = Volume::MaxVolumes;
-
 		if (!descriptors.destroy(index(fd))) {
 			pr_err("FileDescManager error: descriptor %zu was already dealloced\n", fd);
 		} else {
@@ -91,12 +92,14 @@ FileDesc *filedesc(size_t fd) {
 	}
 }
 
+// See comments above alloc_file(), same issue is possible with dirs.
 DirDesc *alloc_dir() {
 	// Thread-safe way to find first empty descriptor
 	if (auto d_idx = dir_scriptors.create()) {
-		// Default-init a FIL
+		// Re-init happens here because we have exclusive ownership.
 		dir_pool[*d_idx] = DIR{};
-		dir_scriptors[*d_idx].dir = &dir_pool[*d_idx];
+		dir_scriptors[*d_idx].vol = Volume::MaxVolumes;
+		dir_scriptors[*d_idx].cur_entry.d_name[0] = '\0';
 		return &dir_scriptors[*d_idx];
 	} else
 		return nullptr;
@@ -108,13 +111,9 @@ bool dealloc_dir(DIR *dir) {
 
 	for (auto i = 0u; i < dir_scriptors.size(); i++) {
 		if (dir_scriptors[i].dir == dir) {
-			if (dir_scriptors.destroy(i)) {
-				dir_scriptors[i].dir = nullptr;
-				dir_scriptors[i].vol = Volume::MaxVolumes;
-				dir_scriptors[i].cur_entry.d_name[0] = '\0';
+			if (dir_scriptors.destroy(i))
 				return true;
-			}
-			// else keep trying
+			break;
 		}
 	}
 
@@ -133,9 +132,13 @@ DirDesc *dirdesc(DIR *dir) {
 	if (!dir)
 		return nullptr;
 
+	// Note: could replace this with auto idx = dir - &dir_pool[0];
+	// But we'd be more at risk to injected/corrupted pointers
 	for (auto i = 0u; i < dir_scriptors.size(); i++) {
 		if (dir_scriptors[i].dir == dir) {
-			return &dir_scriptors[i];
+			if (dir_scriptors.is_used(i))
+				return &dir_scriptors[i];
+			break;
 		}
 	}
 
