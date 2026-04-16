@@ -45,6 +45,16 @@ void init() {
 	dir_scriptors.clear();
 }
 
+// Potential for race condition if newlib is holding a stale fd
+// (that is, it attempts to double-close a file), and we have 3 threads.
+// E.g. thread 1 and thread 2 both try to close filedesc 8, and thread 3 tries to open a file:
+// T2: fd_is_file(8) → true         // passes check, then stalls
+// T1: fd_is_file(8) → true, nulls fields, CAS destroy → OK
+// T3: alloc_file()   → CAS create wins slot, writes new pointer
+// T2: resumes → nulls fields (clobbers T3's pointer!)
+//     CAS destroy succeeds (used_flags was true from T3) → no error logged
+// T3 now holds a “live” fd whose fatfil is nullptr and used_flags is false
+
 std::optional<int> alloc_file() {
 	// Thread-safe way to find first empty descriptor
 	if (auto fd_idx = descriptors.create()) {
