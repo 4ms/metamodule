@@ -86,8 +86,7 @@ struct FullscreenGraphicPage : PageBase {
 
 	void blur() final {
 		if (dyn_drawer) {
-			dyn_drawer->blur();
-
+			// Clean up canvas children and fill with black while buffer is still valid
 			if (canvas && lv_obj_is_valid(canvas)) {
 				lv_foreach_child(canvas, [](lv_obj_t *child, unsigned id) {
 					if (child && lv_obj_is_valid(child))
@@ -98,6 +97,9 @@ struct FullscreenGraphicPage : PageBase {
 					lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_100);
 				}
 			}
+
+			// Now free the buffer and hide the canvas
+			dyn_drawer->blur();
 		}
 	}
 
