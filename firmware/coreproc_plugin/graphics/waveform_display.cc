@@ -190,7 +190,7 @@ bool StreamingWaveformDisplay::draw_graphic_display() {
 	internal->wave->reset();
 
 	//start with the oldest sample
-	int start = newest_sample.load() + 1;
+	int start = (newest_sample.load() + 1) % (int)samples.size();
 
 	// Draw top contour left->right
 	int i = start;
