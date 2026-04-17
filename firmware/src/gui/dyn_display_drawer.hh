@@ -74,6 +74,7 @@ struct DynamicDisplayDrawer {
 				disp.lv_buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h), 0);
 
 				lv_canvas_set_buffer(disp.lv_canvas, disp.lv_buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+				lv_obj_clear_flag(disp.lv_canvas, LV_OBJ_FLAG_HIDDEN);
 
 				// Debug border
 				// lv_obj_set_style_border_color(disp.lv_canvas, lv_color_hex(0xFFFF00), LV_PART_MAIN);
@@ -115,6 +116,11 @@ struct DynamicDisplayDrawer {
 
 			if (auto module = patch_playloader.get_plugin_module(module_id))
 				module->hide_graphic_display(disp.id);
+
+			// Hide the canvas before freeing its buffer, so LVGL won't
+			// try to render it with a dangling pointer on the next redraw
+			if (disp.lv_canvas && lv_obj_is_valid(disp.lv_canvas))
+				lv_obj_add_flag(disp.lv_canvas, LV_OBJ_FLAG_HIDDEN);
 
 			disp.fullcolor_buffer.clear();
 			disp.lv_buffer.clear();
