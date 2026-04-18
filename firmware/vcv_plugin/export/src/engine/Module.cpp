@@ -265,7 +265,9 @@ void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer
 			auto boxwidth = std::abs(widget->box.getWidth());
 
 			// FIXME: this is a round-about way to determine pp3u (and is off by a little bit)
-			uint32_t px_per_3U = std::round((float)width / MetaModule::svgpx_to_pngpx(boxwidth, 240) * 240);
+			uint32_t box_px = MetaModule::svgpx_to_pngpx(boxwidth, 240);
+			uint32_t px_per_3U = box_px != 0 ? std::round((float)width / box_px * 240) : 180;
+
 			if (px_per_3U < 180) {
 				pr_err("Module::show_graphic_display(): pp3=%u, width=%u box.getWidth()=%f\n",
 					   px_per_3U,
