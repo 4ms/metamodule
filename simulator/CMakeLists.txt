@@ -6,6 +6,7 @@ project(metamodule-simulator LANGUAGES C CXX)
 set(SIMULATOR 1)
 option(HEADLESS "Build as headless" OFF)
 option(ADDRESS_SAN "Use address sanitizer" OFF)
+option(ALL_SAN "Use address sanitizer and all other sanitizers" OFF)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
@@ -39,6 +40,9 @@ endif()
 if (ADDRESS_SAN)
     add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
     add_link_options(-fsanitize=address)
+elseif (ALL_SAN)
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined)
+    add_link_options(-fsanitize=address -fsanitize=undefined)
 endif()
 
 
