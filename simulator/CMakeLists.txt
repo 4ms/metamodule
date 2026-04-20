@@ -41,8 +41,8 @@ if (ADDRESS_SAN)
     add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
     add_link_options(-fsanitize=address)
 elseif (ALL_SAN)
-    add_compile_options(-fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined)
-    add_link_options(-fsanitize=address -fsanitize=undefined)
+    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fsanitize-address-use-after-return=always)
+    add_link_options(-fsanitize=address,undefined)
 endif()
 
 
