@@ -52,6 +52,50 @@ inline bool redraw_element(const KnobSnapped &el, const GuiElement &gui_el, floa
 	return redraw_element(static_cast<const Knob>(el), gui_el, val);
 }
 
+inline bool redraw_element(const Encoder &el, const GuiElement &gui_el, float val) {
+	bool did_update_position = false;
+
+	constexpr int32_t angle_multiplier = 500;
+
+	bool is_img = lv_obj_has_class(gui_el.obj, &lv_img_class);
+
+	float diff = 0;
+	if (auto last_val_ptr = lv_obj_get_user_data(gui_el.obj)) {
+		if (auto last_val_uint = reinterpret_cast<uintptr_t>(last_val_ptr); last_val_uint > 0) {
+			float last_val = static_cast<intptr_t>(last_val_uint - 1) / 1000.f;
+			diff = last_val - val;
+		}
+	}
+	// Use +1 to differ 0 vs. nullptr
+	auto encoded = static_cast<uintptr_t>(static_cast<intptr_t>(val * 1000.f)) + 1;
+	lv_obj_set_user_data(gui_el.obj, reinterpret_cast<void *>(encoded));
+
+	if (diff != 0) {
+
+		int32_t cur_angle =
+			is_img ? lv_img_get_angle(gui_el.obj) : lv_obj_get_style_transform_angle(gui_el.obj, LV_PART_MAIN);
+
+		auto angle = cur_angle + int32_t(diff * angle_multiplier);
+		while (angle < 0)
+			angle += 3600;
+		angle = angle % 3600;
+
+		printf("delta: %f => val %f. Angle %d => %d\n", diff, val, cur_angle, angle);
+
+		if (is_img)
+			lv_img_set_angle(gui_el.obj, angle);
+		else
+			lv_obj_set_style_transform_angle(gui_el.obj, angle, LV_PART_MAIN);
+
+		did_update_position = true;
+
+		// If overlapping controls share the same region, keep the actively moved one on top.
+		lv_obj_move_foreground(gui_el.obj);
+	}
+
+	return did_update_position;
+}
+
 // Slider update
 inline bool redraw_element(const Slider &element, const GuiElement &gui_el, float val) {
 	bool did_update_position = false;
