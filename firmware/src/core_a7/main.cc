@@ -10,6 +10,7 @@
 #include "drivers/cache.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
+#include "load_test/test_manager.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
@@ -101,12 +102,21 @@ int main() {
 	printf("Using USB buffer\n");
 #endif
 
+	mdrivlib::HWSemaphore<RunningPatchTests>::lock();
+
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for other cores to be ready: ~2400ms + more for preloading plugins
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked() || mdrivlib::HWSemaphore<AuxCoreReady>::is_locked())
 		;
+
+	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
+		CpuLoadTest::run_patch_tests(file_storage_proxy);
+	}
+	mdrivlib::HWSemaphore<RunningPatchTests>::unlock();
+
+	hil_message("*initialized\n");
 
 	StaticBuffers::sync_params.clear();
 

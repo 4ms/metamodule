@@ -84,13 +84,15 @@ extern "C" void aux_core_main() {
 		ui.preload_plugins(plugin_manager);
 	}
 
-	hil_message("*initialized\n");
-
 	// Signal that we're ready
 	printf("A7 Core 2 initialized\n");
 	print_time();
 
 	HWSemaphore<AuxCoreReady>::unlock();
+
+	// Wait for patch tests to be done
+	while (mdrivlib::HWSemaphore<RunningPatchTests>::is_locked())
+		;
 
 	ui.load_initial_patch();
 
