@@ -44,26 +44,25 @@ inline std::string patch_entry_to_csv(PatchEntry const &entry) {
 	constexpr float sampletime = 1'000'000.f / 48000.f;
 
 	std::string s = entry.name + ",";
-	pr_info("%s,", entry.name.c_str());
 
 	if (entry.load_failed) {
 		for (auto i = 0u; i < PatchEntry::blocksizes.size(); i++) {
 			s += "FAIL,";
-			pr_info("FAIL,");
 		}
 	} else {
 		for (auto const &m : entry.times) {
 			char buf[16];
-			snprintf(buf, 16, "%.3f,", m.average_run_time_after_first / sampletime);
+			snprintf(buf, 16, "%.3f,", m.average_run_time / sampletime);
 			s += buf;
-			pr_info("%.3f,", m.average_run_time_after_first / sampletime);
 		}
 	}
 
 	if (s.ends_with(","))
 		s.pop_back();
 	s += "\n";
-	pr_info("\n");
+
+	pr_info("%s", s.c_str());
+
 	return s;
 }
 
@@ -80,7 +79,6 @@ inline ModuleLoadTester::Measurements run_loaded_patch(PatchPlayer &player, size
 		for (auto &tm : times) {
 			tm = ModuleLoadTester::measure([&]() { player.update_patch(); });
 		}
-
 		auto current = ModuleLoadTester::Measurements{times};
 
 		worst.first_run_time = std::max(worst.first_run_time, current.first_run_time);
@@ -89,6 +87,12 @@ inline ModuleLoadTester::Measurements run_loaded_patch(PatchPlayer &player, size
 			std::max(worst.worst_run_time_after_first, current.worst_run_time_after_first);
 		worst.average_run_time_after_first =
 			std::max(worst.average_run_time_after_first, current.average_run_time_after_first);
+
+		pr_info("it %d: avg:%f first:%llu worst(>1):%llu\n",
+				iterations,
+				worst.average_run_time,
+				worst.first_run_time,
+				worst.worst_run_time_after_first);
 
 		iterations += block_size;
 	}
@@ -127,19 +131,17 @@ inline void test_default_patches(PatchPlayer &player, auto append_file) {
 		PatchEntry entry;
 		entry.name = filename.c_str();
 
-		printf("Testing patch %s\n", entry.name.c_str());
+		pr_info("Testing patch %s\n", entry.name.c_str());
 		lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.name.c_str());
 
 		// yaml_raw_to_patch parses in place, so make a writable copy
-		std::string yaml(raw.data(), raw.size());
-
 		PatchData pd;
+
+		std::string yaml(raw.data(), raw.size());
 		if (!yaml_raw_to_patch(yaml.data(), yaml.size(), pd)) {
 			pr_err("Failed to parse default patch '%s'\n", entry.name.c_str());
 			entry.load_failed = true;
 		} else {
-			pd.trim_empty_knobsets();
-			pd.update_midi_poly_num();
 			run_patch_entry(player, pd, entry);
 		}
 
@@ -187,7 +189,7 @@ inline void test_usb_patches(FileStorageProxy &file_storage_proxy, PatchPlayer &
 		PatchEntry entry;
 		entry.name = file.filename;
 
-		printf("Testing patch %s\n", entry.name.c_str());
+		pr_info("Testing patch %s\n", entry.name.c_str());
 		lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.name.c_str());
 
 		std::string filedata;
