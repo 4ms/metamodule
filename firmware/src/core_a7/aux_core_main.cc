@@ -78,10 +78,14 @@ extern "C" void aux_core_main() {
 
 	AutoUpdater::run(file_storage_proxy, ui);
 
-	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
-		CpuLoadTest::run_tests(file_storage_proxy, ui, plugin_manager);
-	} else {
-		ui.preload_plugins(plugin_manager);
+	if (CpuLoadTest::should_run_hil_tests(file_storage_proxy)) {
+		CpuLoadTest::run_hil_tests(file_storage_proxy, ui, plugin_manager);
+	}
+
+	ui.preload_plugins(plugin_manager);
+
+	if (CpuLoadTest::should_run_module_tests(file_storage_proxy)) {
+		CpuLoadTest::run_module_tests(file_storage_proxy, ui);
 	}
 
 	// Signal that we're ready

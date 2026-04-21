@@ -111,9 +111,10 @@ int main() {
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked() || mdrivlib::HWSemaphore<AuxCoreReady>::is_locked())
 		;
 
-	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
-		CpuLoadTest::run_patch_tests(file_storage_proxy);
+	if (CpuLoadTest::should_run_patch_tests(file_storage_proxy)) {
+		CpuLoadTest::run_patch_tests(patch_player, file_storage_proxy);
 	}
+
 	mdrivlib::HWSemaphore<RunningPatchTests>::unlock();
 
 	hil_message("*initialized\n");

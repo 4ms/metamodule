@@ -172,8 +172,7 @@ inline bool request_test_patch_dir(FileStorageProxy &file_storage_proxy, DirTree
 	}
 }
 
-inline void
-test_usb_patches(FileStorageProxy &file_storage_proxy, PatchPlayer &player, auto append_file) {
+inline void test_usb_patches(FileStorageProxy &file_storage_proxy, PatchPlayer &player, auto append_file) {
 	auto &dir_tree = StaticBuffers::dir_tree;
 	dir_tree = DirTree<FileEntry>{};
 
@@ -215,13 +214,11 @@ test_usb_patches(FileStorageProxy &file_storage_proxy, PatchPlayer &player, auto
 	}
 }
 
-inline void test_all_patches(FileStorageProxy &file_storage_proxy, auto append_file) {
+inline void test_all_patches(PatchPlayer &player, FileStorageProxy &file_storage_proxy, auto append_file) {
 	lv_show(ui_MainMenuNowPlayingPanel);
 	lv_show(ui_MainMenuNowPlaying);
 
 	append_file(patches_csv_header());
-
-	PatchPlayer player;
 
 	test_default_patches(player, append_file);
 	test_usb_patches(file_storage_proxy, player, append_file);
