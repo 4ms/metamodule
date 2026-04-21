@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-// #define PRINT_LOAD_BALANCE
+#define PRINT_LOAD_BALANCE
 #ifdef PRINT_LOAD_BALANCE
 #include "console/pr_dbg.hh"
 #endif
@@ -31,6 +31,8 @@ struct Balancer {
 		for (auto iter_i = 0u; iter_i < NumIterations + DropFirst; iter_i++) {
 
 			for (size_t module_i = 1; module_i < num_modules; module_i++) {
+			// Measuring in reverse order doesn't change anything:
+			// for (size_t module_i = num_modules - 1; module_i > 0; module_i--) {
 
 				counter.start_measurement();
 				run(module_i);
