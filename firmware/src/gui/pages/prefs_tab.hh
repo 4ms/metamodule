@@ -721,8 +721,7 @@ private:
 
 		// scroll to bottom if we select last items
 		if (target == page->notifications_section.amount_dropdown ||
-			target == page->notifications_section.animation_check ||
-			target == page->missingplugins_section.dropdown)
+			target == page->notifications_section.animation_check)
 		{
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);
 
