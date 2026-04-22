@@ -1,5 +1,6 @@
 {
 	"MetaModuleBrandName": "RackCore",
+	"MetaModuleBrandAliases": ["Core"],
 	"MetaModulePluginMaintainer": "4ms Company",
 	"MetaModulePluginMaintainerEmail": "4ms@4mscompany.com",
 	"MetaModulePluginMaintainerUrl": "https://4mscompany.com",
