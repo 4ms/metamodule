@@ -3,6 +3,7 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/patch_conf.hh"
+#include "core_a7/run_on_core0.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "delay.hh"
 #include "null_module.hh"
@@ -282,30 +283,47 @@ public:
 	// Apply the partition currently in core_balancer.cores, then run update_patch()
 	// under real SMP and return the worst per-iteration cycle count. Used by
 	// Balancer::find_best_partition to select between candidate partitions.
+	// update_patch() drives Core 1 via SGI, so the measurement must happen on Core 0;
+	// dispatches there if called from Core 1.
 	uint64_t measure_partition_cost() {
-		smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		return RunOnCore0::run([this]() -> uint64_t {
+			smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
+			cables.build(pd.int_cables, core_balancer.cores.parts);
 
-		constexpr unsigned WarmupIterations = 32;
-		constexpr unsigned MeasureIterations = 128;
+			constexpr unsigned WarmupIterations = 32;
+			constexpr unsigned MeasureIterations = 128;
 
-		for (auto i = 0u; i < WarmupIterations; i++)
-			update_patch();
+			for (auto i = 0u; i < WarmupIterations; i++)
+				update_patch();
 
-// #ifndef TESTPROJECT
-// 		asm("bkpt 1\n");
-// #endif
-		mdrivlib::CycleCounter counter;
-		uint32_t worst = 0;
-		for (auto i = 0u; i < MeasureIterations; i++) {
-			counter.start_simple_measurement();
-			update_patch();
-			worst = std::max(worst, counter.stop_simple_measurement());
-		}
-// #ifndef TESTPROJECT
-// 		asm("bkpt 2\n");
-// #endif
-		return worst;
+			// #ifndef TESTPROJECT
+			// asm("bkpt 1");
+			// #endif
+			mdrivlib::CycleCounter counter;
+			uint32_t worst = 0;
+			for (auto i = 0u; i < MeasureIterations; i++) {
+				Debug::Pin2::high();
+				counter.start_simple_measurement();
+
+				for (uint32_t i = 0; i < NumInJacks; i++)
+					set_panel_input(i, 0);
+
+				for (uint32_t i = 0; i < NumTotalParams; i++)
+					set_panel_param(i, 0);
+
+				update_patch();
+
+				for (uint32_t i = 0; i < NumOutJacks; i++) [[maybe_unused]]
+					auto x = get_panel_output(i);
+
+				worst = std::max(worst, counter.stop_simple_measurement());
+				Debug::Pin2::low();
+			}
+			// #ifndef TESTPROJECT
+			// asm("bkpt 2");
+			// #endif
+			return worst;
+		});
 	}
 
 	// Runs the patch
