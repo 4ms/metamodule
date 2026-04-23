@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="50.889999mm"
+   height="128.5mm"
+   viewBox="0 0 50.89 128.5"
+   version="1.1"
+   id="svg1"
+   inkscape:export-filename="../../firmware/assets/RackCore/MIDI_Gate.png"
+   inkscape:export-xdpi="47.439999"
+   inkscape:export-ydpi="47.439999"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   sodipodi:docname="MIDI_Gate.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.6316137"
+     inkscape:cx="95.304422"
+     inkscape:cy="242.39806"
+     inkscape:window-width="1312"
+     inkscape:window-height="1056"
+     inkscape:window-x="53"
+     inkscape:window-y="33"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer2"
+     showgrid="false"
+     inkscape:export-bgcolor="#ffffffff" />
+  <defs
+     id="defs1">
+    <linearGradient
+       id="aae5b07c-b446-4b70-86f6-2dd95e4bbb54"
+       x1="60"
+       x2="60"
+       y2="380"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#ebebeb"
+         id="stop2" />
+      <stop
+         offset="1"
+         stop-color="#e1e1e1"
+         id="stop4" />
+    </linearGradient>
+    <linearGradient
+       id="ac63b0da-9b5c-4a7f-b473-21d45bc390a1"
+       x1="75"
+       x2="75"
+       y2="380"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#ebebeb"
+         id="stop2-7" />
+      <stop
+         offset="1"
+         stop-color="#e1e1e1"
+         id="stop4-7" />
+    </linearGradient>
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="artwork"
+     style="display:inline">
+    <rect
+       style="display:inline;fill:#eeeeee"
+       id="rect3"
+       width="50.889999"
+       height="128.5"
+       x="0"
+       y="0" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:4px;font-family:GillSans-Bold, 'Gill Sans'"
+       x="11.995781"
+       y="9.4902859"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="stroke-width:0.4"
+         x="11.995781"
+         y="9.4902859">MIDI to Gate</tspan></text>
+    <rect
+       style="fill:#000000;stroke-width:1.20002"
+       id="rect2"
+       width="50.889999"
+       height="40.807247"
+       x="1.7763568e-15"
+       y="12.232009" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1"
+       width="9.713747"
+       height="9.6824799"
+       x="3.3470116"
+       y="73.476616" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-2"
+       width="9.713747"
+       height="9.6824799"
+       x="3.3470116"
+       y="111.4393" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-5"
+       width="9.713747"
+       height="9.6824799"
+       x="3.3470116"
+       y="86.130844" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-0"
+       width="9.713747"
+       height="9.6824799"
+       x="3.3470116"
+       y="98.785072" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-60"
+       width="9.713747"
+       height="9.6824799"
+       x="14.969426"
+       y="73.476616" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-2-0"
+       width="9.713747"
+       height="9.6824799"
+       x="14.969426"
+       y="111.4393" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-5-9"
+       width="9.713747"
+       height="9.6824799"
+       x="14.969426"
+       y="86.130844" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-0-5"
+       width="9.713747"
+       height="9.6824799"
+       x="14.969426"
+       y="98.785072" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-5"
+       width="9.713747"
+       height="9.6824799"
+       x="26.591841"
+       y="73.476616" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-2-9"
+       width="9.713747"
+       height="9.6824799"
+       x="26.591841"
+       y="111.4393" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-5-4"
+       width="9.713747"
+       height="9.6824799"
+       x="26.591841"
+       y="86.130844" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-0-3"
+       width="9.713747"
+       height="9.6824799"
+       x="26.591841"
+       y="98.78508" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-0"
+       width="9.713747"
+       height="9.6824799"
+       x="38.214256"
+       y="73.476616" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-2-8"
+       width="9.713747"
+       height="9.6824799"
+       x="38.214256"
+       y="111.4393" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-5-40"
+       width="9.713747"
+       height="9.6824799"
+       x="38.214256"
+       y="86.130844" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel"
+       id="rect1-6-0-4"
+       width="9.713747"
+       height="9.6824799"
+       x="38.214256"
+       y="98.78508" />
+  </g>
+</svg>

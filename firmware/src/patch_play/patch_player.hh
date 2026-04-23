@@ -50,7 +50,10 @@ private:
 	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
 	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
 
-	std::array<std::vector<Jack>, NumOutJacks> out_conns;
+	struct PolyJack : Jack {
+		CoreProcessor::PolyPortBuffer buf{};
+	};
+	std::array<std::vector<PolyJack>, NumOutJacks> out_conns;
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
@@ -72,12 +75,27 @@ private:
 	struct JackMidi : Jack {
 		uint32_t midi_chan = 0; //0: Omni
 	};
+	struct PolyJackMidi : JackMidi {
+		CoreProcessor::PolyPortBuffer buf{};
+	};
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_gate_conns;
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_vel_conns;
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_aft_conns;
 	std::array<std::vector<JackMidi>, NumMidiCCsPW> midi_cc_conns;
 	std::array<std::vector<JackMidi>, NumMidiNotes> midi_gate_conns;
+
+	// Poly cable connections (one vector per signal type, not per poly channel)
+	std::vector<PolyJackMidi> midi_poly_pitch_conns;
+	std::vector<PolyJackMidi> midi_poly_gate_conns;
+	std::vector<PolyJackMidi> midi_poly_vel_conns;
+	std::vector<PolyJackMidi> midi_poly_aft_conns;
+
+	struct MidiPolyPulse {
+		std::array<OneShot, CoreProcessor::MaxPolyChannels> pulses{};
+		std::vector<PolyJackMidi> conns;
+	};
+	MidiPolyPulse midi_poly_retrig;
 
 	std::array<std::vector<MappedKnob>, NumMidiCCs> midi_cc_knob_maps;
 	std::array<std::vector<MappedKnob>, NumMidiNotes> midi_note_knob_maps;
@@ -276,7 +294,7 @@ public:
 			}
 		}
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 	}
 
 	// Apply the partition currently in core_balancer.cores, then run update_patch()
@@ -287,7 +305,7 @@ public:
 	uint64_t measure_partition_cost() {
 		return mdrivlib::SMPThread::run([this]() -> uint64_t {
 			smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
-			cables.build(pd.int_cables, core_balancer.cores.parts);
+			cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 
 			constexpr unsigned WarmupIterations = 32;
 			constexpr unsigned MeasureIterations = 128;
@@ -332,7 +350,8 @@ public:
 			return;
 		}
 
-		if (num_modules > 2) {
+		else if (num_modules > 2)
+		{
 			smp.update_modules();
 			for (auto module_i : core_balancer.cores.parts[0]) {
 				step_module(module_i);
@@ -349,40 +368,84 @@ public:
 			process_summed_inputs<0>();
 
 			smp.join();
-		} else
-			return;
+		}
+	}
+
+	void process_outputs(auto &cables) {
+		for (auto const &cable : cables) {
+			if (cable.out_buf.voltages) {
+				auto num_poly = *cable.out_buf.channels;
+				for (auto i = 0u; auto &in_buf : cable.in_bufs) {
+					if (in_buf.voltages) {
+						// poly->poly
+						*in_buf.channels = num_poly;
+						std::copy_n(cable.out_buf.voltages, num_poly, in_buf.voltages);
+					} else {
+						// poly->mono
+						modules[cable.ins[i].module_id]->set_input(cable.ins[i].jack_id, *cable.out_buf.voltages);
+					}
+					i++;
+				}
+			} else {
+				// mono->poly, mono->mono
+				float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
+
+				for (auto const &in : cable.ins) {
+					modules[in.module_id]->set_input(in.jack_id, val);
+				}
+			}
+		}
 	}
 
 	template<size_t Core>
 	void process_outputs_samecore() {
-		for (auto const &cable : cables.samecore_cables[Core]) {
-			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
-
-			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input(in.jack_id, val);
-			}
-		}
+		process_outputs(cables.samecore_cables[Core]);
 	}
 
 	template<size_t Core>
 	void process_outputs_diffcore() {
-		for (auto const &cable : cables.diffcore_cables[Core]) {
-			float val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
-
-			for (auto const &in : cable.ins) {
-				modules[in.module_id]->set_input(in.jack_id, val);
-			}
-		}
+		process_outputs(cables.diffcore_cables[Core]);
 	}
 
 	template<size_t Core>
 	void process_summed_inputs() {
 		for (auto const &si : cables.summed_inputs[Core]) {
-			float sum = 0.f;
-			for (auto const &out : si.outs) {
-				sum += get_output(out);
+			if (si.in_buf.voltages) {
+				// Poly input: sum per-channel across all sources
+				unsigned max_channels = 0;
+
+				for (size_t i = 0; i < si.outs.size(); i++) {
+					if (si.out_bufs[i].voltages)
+						max_channels = std::max<unsigned>(max_channels, *si.out_bufs[i].channels);
+				}
+				max_channels = std::min<unsigned>(max_channels, CoreProcessor::MaxPolyChannels);
+
+				// Zero the input buffer, then accumulate
+				for (unsigned ch = 0; ch < max_channels; ch++)
+					si.in_buf.voltages[ch] = 0.f;
+
+				for (size_t i = 0; i < si.outs.size(); i++) {
+					if (si.out_bufs[i].voltages) {
+						auto n = std::min<unsigned>(*si.out_bufs[i].channels, max_channels);
+						for (unsigned ch = 0; ch < n; ch++)
+							si.in_buf.voltages[ch] += si.out_bufs[i].voltages[ch];
+					} else {
+						// Mono source: add to channel 0
+						// si.in_buf.voltages[0] += modules[si.outs[i].module_id]->get_output(si.outs[i].jack_id);
+						si.in_buf.voltages[0] += get_output(si.outs[i]);
+					}
+				}
+				*si.in_buf.channels = max_channels;
+
+			} else {
+				// Mono input: sum all sources via get_output/set_input
+				float sum = 0.f;
+				for (auto const &out : si.outs) {
+					sum += get_output(out);
+					// sum += modules[out.module_id]->get_output(out.jack_id);
+				}
+				modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 			}
-			modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 		}
 	}
 
@@ -452,7 +515,7 @@ public:
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {
-		// cache signal on Panel Ins
+		// cache signal for Panel Ins
 		if (jack_id < NumInJacks)
 			panel_in_vals[jack_id] = val;
 		set_all_connected_jacks(in_conns[jack_id], val);
@@ -468,25 +531,55 @@ public:
 		}
 	}
 
-	void set_midi_note_pitch(unsigned midi_poly_note, float val, uint16_t midi_chan) {
-		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val, midi_chan);
+	void set_midi_note_pitch(unsigned poly_chan, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_pitch_conns[poly_chan], val, midi_chan);
+		set_all_connected_poly_jacks(midi_poly_pitch_conns, poly_chan, val, midi_chan);
 	}
 
-	void set_midi_note_gate(unsigned midi_poly_note, float val, uint16_t midi_chan) {
-		set_all_connected_jacks(midi_note_gate_conns[midi_poly_note], val, midi_chan);
+	void set_midi_note_gate(unsigned poly_chan, float val, uint16_t midi_chan) {
+		set_all_connected_jacks(midi_note_gate_conns[poly_chan], val, midi_chan);
+		set_all_connected_poly_jacks(midi_poly_gate_conns, poly_chan, val, midi_chan);
 	}
 
-	void set_midi_note_velocity(unsigned midi_poly_note, int16_t val, uint16_t midi_chan) {
-		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], float(val) / 12.7f, midi_chan);
+	void set_midi_note_velocity(unsigned poly_chan, int16_t val, uint16_t midi_chan) {
+		float volts = float(val) / 12.7f;
+
+		set_all_connected_jacks(midi_note_vel_conns[poly_chan], volts, midi_chan);
+		set_all_connected_poly_jacks(midi_poly_vel_conns, poly_chan, volts, midi_chan);
 	}
 
-	void set_midi_note_aftertouch(unsigned midi_poly_note, int16_t val, uint16_t midi_chan) {
-		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], float(val) / 12.7f, midi_chan);
+	void set_midi_note_aftertouch(unsigned poly_chan, int16_t val, uint16_t midi_chan) {
+		float volts = float(val) / 12.7f;
+
+		// Mono cables:
+		set_all_connected_jacks(midi_note_aft_conns[poly_chan], volts, midi_chan);
+		set_all_connected_poly_jacks(midi_poly_aft_conns, poly_chan, volts, midi_chan);
 	}
 
-	void set_midi_note_retrig(unsigned midi_poly_note, float val, uint16_t midi_chan) {
-		set_all_connected_jacks(midi_note_retrig[midi_poly_note].conns, val, midi_chan);
-		midi_note_retrig[midi_poly_note].pulse.start(0.01);
+	void set_midi_note_retrig(unsigned poly_chan, float val, uint16_t midi_chan) {
+		// Mono cables:
+		set_all_connected_jacks(midi_note_retrig[poly_chan].conns, val, midi_chan);
+		midi_note_retrig[poly_chan].pulse.start(0.01);
+
+		// Poly cables:
+		set_all_connected_poly_jacks(midi_poly_retrig.conns, poly_chan, val, midi_chan);
+		if (poly_chan < CoreProcessor::MaxPolyChannels)
+			midi_poly_retrig.pulses[poly_chan].start(0.01);
+	}
+
+	void set_midi_poly_channel_count(uint32_t poly_num) {
+		uint8_t count = static_cast<uint8_t>(std::min<uint32_t>(poly_num, CoreProcessor::MaxPolyChannels));
+		auto set_count = [count](auto &conns) {
+			for (auto &jack : conns) {
+				if (jack.buf.channels)
+					*jack.buf.channels = count;
+			}
+		};
+		set_count(midi_poly_pitch_conns);
+		set_count(midi_poly_gate_conns);
+		set_count(midi_poly_vel_conns);
+		set_count(midi_poly_aft_conns);
+		set_count(midi_poly_retrig.conns);
 	}
 
 	void set_midi_cc(unsigned ccnum, int16_t val, uint16_t midi_chan) {
@@ -581,6 +674,9 @@ public:
 		for (auto &mp : midi_divclk_pulses)
 			mp.pulse.set_update_rate_hz(samplerate);
 
+		for (auto &p : midi_poly_retrig.pulses)
+			p.set_update_rate_hz(samplerate);
+
 		for (size_t i = 1; i < num_modules; i++) {
 			modules[i]->set_samplerate(samplerate);
 		}
@@ -612,16 +708,36 @@ private:
 
 	template<typename JackT>
 	void set_all_connected_jacks(std::vector<JackT> const &jacks, float val) {
-		for (auto const &jack : jacks) {
+		for (auto const &jack : jacks)
 			set_input(jack, val);
-		}
 	}
 
-	void set_all_connected_jacks(std::vector<JackMidi> const &jacks, float val, uint32_t midi_chan) {
+	template<typename JackMidiT>
+	void set_all_connected_jacks(std::vector<JackMidiT> const &jacks, float val, uint32_t midi_chan) {
 		for (auto const &jack : jacks) {
 			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1)) {
 				set_input(jack, val);
 			}
+		}
+	}
+
+	template<typename JackMidiT>
+	void set_all_connected_poly_jacks(std::vector<JackMidiT> const &jacks,
+									  unsigned poly_chan,
+									  float val,
+									  uint32_t midi_chan) {
+		if (poly_chan >= CoreProcessor::MaxPolyChannels)
+			return;
+
+		for (auto const &jack : jacks) {
+			if (jack.midi_chan != 0 && jack.midi_chan != uint32_t(midi_chan + 1))
+				continue;
+
+			if (jack.buf.voltages)
+				jack.buf.voltages[poly_chan] = val;
+
+			else if (poly_chan == 0)
+				set_input(jack, val);
 		}
 	}
 
@@ -642,13 +758,28 @@ private:
 			if (!ret.pulse.update())
 				set_all_connected_jacks(ret.conns, 0);
 		}
+
+		for (unsigned ch = 0; ch < CoreProcessor::MaxPolyChannels; ch++) {
+			if (!midi_poly_retrig.pulses[ch].update()) {
+				for (auto &jack : midi_poly_retrig.conns) {
+					if (jack.buf.voltages)
+						jack.buf.voltages[ch] = 0.f;
+				}
+			}
+		}
 	}
 
 public:
 	float get_panel_output(uint32_t jack_id) {
 		float sum = 0.f;
 		for (auto const &jack : out_conns[jack_id]) {
-			sum += get_output(jack);
+			if (jack.buf.voltages) {
+				auto num_chan = std::min<unsigned>(CoreProcessor::MaxPolyChannels, *jack.buf.channels);
+				for (unsigned i = 0; i < num_chan; i++)
+					sum += jack.buf.voltages[i];
+			} else {
+				sum += get_output(jack);
+			}
 		}
 		return sum;
 	}
@@ -676,6 +807,7 @@ public:
 
 	void set_midi_poly_num(uint32_t poly_num) {
 		pd.midi_poly_num = poly_num;
+		set_midi_poly_channel_count(poly_num);
 	}
 
 	uint32_t get_midi_poly_num() {
@@ -757,8 +889,7 @@ public:
 
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
-		cables.add(in, out, core_balancer.cores.parts);
-		cables.rebuild_summed_inputs(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
@@ -784,8 +915,10 @@ public:
 	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
 		pd.add_mapped_outjack(panel_jack_id, jack);
 
+		PolyJack poly_jack{jack};
+		poly_jack.buf = plugin_module_get_poly_output_buffer(modules[jack.module_id], jack.jack_id);
 		if (panel_jack_id < out_conns.size()) {
-			out_conns[panel_jack_id].push_back(jack);
+			out_conns[panel_jack_id].push_back(poly_jack);
 
 			if (out_patched[panel_jack_id] && jack.module_id < num_modules)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
@@ -824,6 +957,12 @@ public:
 		for (auto &mp : midi_note_retrig)
 			std::erase(mp.conns, jack);
 
+		std::erase(midi_poly_pitch_conns, jack);
+		std::erase(midi_poly_gate_conns, jack);
+		std::erase(midi_poly_vel_conns, jack);
+		std::erase(midi_poly_aft_conns, jack);
+		std::erase(midi_poly_retrig.conns, jack);
+
 		safe_unpatch_input(jack);
 
 		// Unpatch the output if the int_cable has no more inputs
@@ -835,7 +974,7 @@ public:
 
 		pd.disconnect_injack(jack);
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 	}
 
 	void remove_injack_mappings(Jack jack) {
@@ -865,7 +1004,7 @@ public:
 
 		pd.disconnect_outjack(jack);
 
-		cables.build(pd.int_cables, core_balancer.cores.parts);
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 	}
 
 	void remove_outjack_mappings(Jack jack) {
@@ -992,6 +1131,19 @@ public:
 		erase_and_squash_inner(midi_pulses);
 		erase_and_squash_inner(midi_divclk_pulses);
 
+		// Poly cable flat vectors
+		auto erase_and_squash_flat = [=, &squash_module_id](auto &vec) {
+			std::erase_if(vec, [=](auto &map) { return (map.module_id == module_idx); });
+			for (auto &map : vec) {
+				squash_module_id(map.module_id);
+			}
+		};
+		erase_and_squash_flat(midi_poly_pitch_conns);
+		erase_and_squash_flat(midi_poly_gate_conns);
+		erase_and_squash_flat(midi_poly_vel_conns);
+		erase_and_squash_flat(midi_poly_aft_conns);
+		erase_and_squash_flat(midi_poly_retrig.conns);
+
 		pd.remove_module(module_idx);
 
 		plugin_module_deinit(modules[module_idx]);
@@ -1077,20 +1229,29 @@ public:
 		mark_patched(midi_cc_conns);
 		mark_patched(midi_gate_conns);
 
-		for (auto const &conn : midi_pulses) {
-			for (auto const &jack : conn.conns) {
-				if (jack.module_id < num_modules) {
+		auto mark_jacks_patched = [&](auto const &conns) {
+			for (auto const &jack : conns) {
+				if (jack.module_id > 0 && jack.module_id < num_modules)
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
-				}
 			}
+		};
+
+		for (auto const &conn : midi_pulses) {
+			mark_jacks_patched(conn.conns);
 		}
 		for (auto const &conn : midi_divclk_pulses) {
-			for (auto const &jack : conn.conns) {
-				if (jack.module_id < num_modules) {
-					modules[jack.module_id]->mark_input_patched(jack.jack_id);
-				}
-			}
+			mark_jacks_patched(conn.conns);
 		}
+
+		mark_jacks_patched(midi_poly_pitch_conns);
+		mark_jacks_patched(midi_poly_gate_conns);
+		mark_jacks_patched(midi_poly_vel_conns);
+		mark_jacks_patched(midi_poly_aft_conns);
+		mark_jacks_patched(midi_poly_retrig.conns);
+
+		// Poly channel count is stored in the patch file
+		// And loaded on patch load
+		set_midi_poly_channel_count(pd.midi_poly_num);
 
 		midi_divclocks_reset();
 
@@ -1127,6 +1288,25 @@ public:
 				}
 			}
 		}
+
+		auto mark_poly_unpatched = [&](auto const &conns) {
+			for (auto const &jack : conns) {
+				if (jack.module_id > 0 && jack.module_id < num_modules)
+					modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+				// Zero poly buffers
+				if (jack.buf.voltages) {
+					for (unsigned ch = 0; ch < CoreProcessor::MaxPolyChannels; ch++)
+						jack.buf.voltages[ch] = 0.f;
+					if (jack.buf.channels)
+						*jack.buf.channels = 0;
+				}
+			}
+		};
+		mark_poly_unpatched(midi_poly_pitch_conns);
+		mark_poly_unpatched(midi_poly_gate_conns);
+		mark_poly_unpatched(midi_poly_vel_conns);
+		mark_poly_unpatched(midi_poly_aft_conns);
+		mark_poly_unpatched(midi_poly_retrig.conns);
 
 		midi_connected = false;
 	}
@@ -1190,6 +1370,12 @@ private:
 			mp.conns.clear();
 		for (auto &mp : midi_divclk_pulses)
 			mp.conns.clear();
+
+		midi_poly_pitch_conns.clear();
+		midi_poly_gate_conns.clear();
+		midi_poly_vel_conns.clear();
+		midi_poly_aft_conns.clear();
+		midi_poly_retrig.conns.clear();
 	}
 
 	// Returns the index in int_cables[] for a cable that has the given Jack as an input
@@ -1238,34 +1424,36 @@ public:
 				// input_jack.jack_id is the Hub input jack (= panel output jack).
 				// panel_jack_id is the MIDI or panel input jack ID whose value we want to read.
 				if (input_jack.module_id == 0) {
-					if (Midi::is_midi_panel_id(panel_jack_id)) {
-
+					// mapped_ins->Hub passthrough:
+					// MIDI or Panel In (panel_jack_id) -> Panel Out (input_jack.jack_id)
+					if (Midi::is_midi_poly_cable(panel_jack_id) || Midi::is_midi_panel_id(panel_jack_id)) {
 						// MIDI->Hub passthrough: allocate a unique slot in panel_in_vals
-						// to avoid collisions with panel input values
+						// The slot index is stored in midi_*_conns[]
 						if (next_midi_hub_slot >= PanelInValsSize) {
 							pr_err("Too many MIDI-to-Hub connections\n");
 							break;
 						}
 						auto midi_hub_jack = Jack{.module_id = 0, .jack_id = next_midi_hub_slot++};
 						update_or_add_input_panel_conn(panel_jack_id, midi_hub_jack);
-						pr_trace(" to hub passthrough jack: p=%d\n", midi_hub_jack.jack_id);
+						pr_trace(" to jack: m=%d, p=%d (passthrough jack)\n", module_id, midi_hub_jack.jack_id);
 
 						// Hub passthrough jack->Panel Out jack:
-						out_conns[input_jack.jack_id].push_back(midi_hub_jack);
+						out_conns[input_jack.jack_id].push_back({midi_hub_jack, {}});
 						pr_trace("Connect MIDI %d to panel out %d via hub\n", panel_jack_id, input_jack.jack_id);
 					} else {
-						out_conns[input_jack.jack_id].push_back(Jack{.module_id = 0, .jack_id = panel_jack_id});
+						out_conns[input_jack.jack_id].push_back(PolyJack{{0, panel_jack_id}, {}});
 						pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 					}
 
 				} else if (find_int_cable_input_jack(input_jack) >= 0 || has_other_mapped_in(input_jack)) {
-					// The module input jack has an internal cable or multiple panel input mappings.
-					// In order to sum inputs, we map the panel/MIDI input to the Hub input,
+					// The module input jack also has an internal cable or multiple panel input mappings.
+					// In order to sum inputs, we map the panel/MIDI input to the Hub input (passthrough),
 					// and then add a second internal cable from Hub output to the
 					// original module input jack. Then the summing happens automatically via cable_cache.
+
 					pr_trace("Panel in %d summed to m=%d j=%d\n", panel_jack_id, module_id, jack_id);
 
-					if (Midi::is_midi_panel_id(panel_jack_id)) {
+					if (Midi::is_midi_poly_cable(panel_jack_id) || Midi::is_midi_panel_id(panel_jack_id)) {
 						// MIDI summed with internal cable: allocate a hub slot for the MIDI value
 						if (next_midi_hub_slot >= PanelInValsSize) {
 							pr_err("Too many MIDI-to-Hub connections\n");
@@ -1277,7 +1465,8 @@ public:
 
 						pd.add_internal_cable(input_jack, midi_hub_jack);
 					} else {
-						// Map panel input to hub input:
+
+						// Connect panel input to hub input:
 						update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
 						pr_trace(" to hub passthrough slot %d\n", panel_jack_id);
 
@@ -1286,9 +1475,9 @@ public:
 					}
 
 				} else {
-					// No conflict — route panel input directly to module input
+					// Simple connection with no summing — route Panel In directly to module input
 					update_or_add_input_panel_conn(panel_jack_id, input_jack);
-					pr_trace(" to jack: m=%d, p=%d\n", module_id, jack_id);
+					pr_trace(" to jack: m=%d, in=%d\n", module_id, jack_id);
 				}
 			}
 		}
@@ -1297,7 +1486,12 @@ public:
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id >= out_conns.size())
 				break;
-			out_conns[panel_jack_id].push_back(cable.out);
+
+			PolyJack poly_jack{cable.out};
+			if (cable.out.module_id < num_modules)
+				poly_jack.buf = plugin_module_get_poly_output_buffer(modules[cable.out.module_id], cable.out.jack_id);
+
+			out_conns[panel_jack_id].push_back(poly_jack);
 			pr_trace("Connect module %d out jack %d to panel out %d\n",
 					 cable.out.module_id,
 					 cable.out.jack_id,
@@ -1309,13 +1503,48 @@ public:
 		pr_trace("update_or_add_input_panel_conn: %x\n", panel_jack_id);
 		auto chan = Midi::midi_channel(panel_jack_id);
 
-		if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
+		if (Midi::midi_note_pitch_poly(panel_jack_id)) {
+			auto buf = (input_jack.module_id < num_modules) ?
+						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
+						   CoreProcessor::PolyPortBuffer{};
+			update_or_add_poly(midi_poly_pitch_conns, input_jack, chan, buf);
+			pr_trace("MIDI note poly ch:%u", chan);
+
+		} else if (Midi::midi_note_gate_poly(panel_jack_id)) {
+			auto buf = (input_jack.module_id < num_modules) ?
+						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
+						   CoreProcessor::PolyPortBuffer{};
+			update_or_add_poly(midi_poly_gate_conns, input_jack, chan, buf);
+			pr_trace("MIDI gate poly ch:%u", chan);
+
+		} else if (Midi::midi_note_vel_poly(panel_jack_id)) {
+			auto buf = (input_jack.module_id < num_modules) ?
+						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
+						   CoreProcessor::PolyPortBuffer{};
+			update_or_add_poly(midi_poly_vel_conns, input_jack, chan, buf);
+			pr_trace("MIDI vel poly ch:%u", chan);
+
+		} else if (Midi::midi_note_aft_poly(panel_jack_id)) {
+			auto buf = (input_jack.module_id < num_modules) ?
+						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
+						   CoreProcessor::PolyPortBuffer{};
+			update_or_add_poly(midi_poly_aft_conns, input_jack, chan, buf);
+			pr_trace("MIDI aft poly ch:%u", chan);
+
+		} else if (Midi::midi_note_retrig_poly(panel_jack_id)) {
+			auto buf = (input_jack.module_id < num_modules) ?
+						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
+						   CoreProcessor::PolyPortBuffer{};
+			update_or_add_poly(midi_poly_retrig.conns, input_jack, chan, buf);
+			pr_trace("MIDI retrig poly ch:%u", chan);
+
+		} else if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_pitch_conns[num.value()], input_jack, chan);
-			pr_trace("MIDI note (poly %d) ch: %u", num.value(), chan);
+			pr_trace("MIDI note (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_gate(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_gate_conns[num.value()], input_jack, chan);
-			pr_trace("MIDI gate (poly %d) ch: %u", num.value(), chan);
+			pr_trace("MIDI gate (poly %d) ch:%u", num.value(), chan);
 
 		} else if (auto num = Midi::midi_note_vel(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_vel_conns[num.value()], input_jack, chan);
@@ -1415,14 +1644,38 @@ private:
 		v.push_back(d);
 	}
 
-	static void update_or_add(std::vector<JackMidi> &v, const Jack &d, uint32_t midi_chan = 0) {
+	template<typename T>
+	static void update_or_add(std::vector<T> &v, const Jack &d, uint32_t midi_chan = 0)
+		requires std::derived_from<T, JackMidi>
+	{
 		for (auto &el : v) {
 			if (el.module_id == d.module_id && el.jack_id == d.jack_id) {
 				el.midi_chan = midi_chan;
 				return;
 			}
 		}
-		v.push_back({d, midi_chan});
+		T entry{};
+		static_cast<Jack &>(entry) = d;
+		entry.midi_chan = midi_chan;
+		v.push_back(entry);
+	}
+
+	static void update_or_add_poly(std::vector<PolyJackMidi> &v,
+								   const Jack &d,
+								   uint32_t midi_chan,
+								   CoreProcessor::PolyPortBuffer buf) {
+		for (auto &el : v) {
+			if (el.module_id == d.module_id && el.jack_id == d.jack_id) {
+				el.midi_chan = midi_chan;
+				el.buf = buf;
+				return;
+			}
+		}
+		PolyJackMidi entry{};
+		static_cast<Jack &>(entry) = d;
+		entry.midi_chan = midi_chan;
+		entry.buf = buf;
+		v.push_back(entry);
 	}
 
 	// Cache a panel knob mapping into knob_conns[]

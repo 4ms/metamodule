@@ -12,6 +12,16 @@
 		  "displayName": "MIDI to CV"
 		},
 		{
+		  "slug": "MIDICCToCVInterface",
+		  "name": "MIDI CC to CV",
+		  "displayName": "MIDI CC to CV"
+		},
+		{
+		  "slug": "MIDITriggerToCVInterface",
+		  "name": "MIDI to Gate",
+		  "displayName": "MIDI to Gate"
+		},
+		{
 		  "slug": "CV-MIDI",
 		  "name": "CV to MIDI",
 		  "displayName": "CV to MIDI"
@@ -20,6 +30,11 @@
 		  "slug": "CV-CC",
 		  "name": "CV to MIDI CC",
 		  "displayName": "CV to MIDI CC"
+		},
+		{
+		  "slug": "CV-Gate",
+		  "name": "Gate to MIDI",
+		  "displayName": "Gate to MIDI"
 		},
 		{
 		  "slug": "Scope",

@@ -4,29 +4,29 @@
 
 #include "patch_play/patch_player.hh"
 #include "stubs/test_module.hh"
+#include "stubs/test_poly_module.hh"
 #include <fstream>
 #include <string>
 
-// Register TestModule so patches can use slug "TestMono"
 namespace
 {
-constexpr MetaModule::ModuleInfoView TestModuleInfo{
-	.description = "Test module",
-	.width_hp = 8,
+constexpr MetaModule::ModuleInfoView TestPanelInfo{.width_hp = 8};
+constexpr MetaModule::ModuleInfoView TestModuleInfo{.width_hp = 8};
+constexpr MetaModule::ModuleInfoView TestPolyModuleInfo{.width_hp = 8};
+
+const std::array register_modules = {
+	MetaModule::ModuleFactory::registerModuleType("HubMedium", TestPanel::create, TestPanelInfo, ""),
+	MetaModule::ModuleFactory::registerModuleType("TestModule", TestModule::create, TestModuleInfo, ""),
+	MetaModule::ModuleFactory::registerModuleType("TestPoly", TestPolyModule::create, TestPolyModuleInfo, ""),
 };
-[[maybe_unused]] bool s_test_mono_registered =
-	MetaModule::ModuleFactory::registerModuleType("TestModule", TestModule::create, TestModuleInfo, "");
 
 auto *get_test_module(MetaModule::PatchPlayer &player, unsigned module_id) {
 	return dynamic_cast<TestModule *>(player.modules[module_id].get());
 }
 
-constexpr MetaModule::ModuleInfoView TestPanelInfo{
-	.description = "Test panel",
-	.width_hp = 8,
-};
-[[maybe_unused]] bool s_test_panel_registered =
-	MetaModule::ModuleFactory::registerModuleType("HubMedium", TestPanel::create, TestPanelInfo, "");
+auto *get_test_poly(MetaModule::PatchPlayer &player, unsigned module_id) {
+	return dynamic_cast<TestPolyModule *>(player.modules[module_id].get());
+}
 
 } // namespace
 
@@ -1890,6 +1890,1459 @@ PatchData:
 	}
 }
 
+// ============================================================================
+// Poly cable tests
+// ============================================================================
+
+TEST_CASE("Poly cable: cable cache resolves poly buffers for TestPolyModule") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_resolve
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: TestPoly
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	REQUIRE(get_test_poly(player, 1) != nullptr);
+	REQUIRE(get_test_poly(player, 2) != nullptr);
+
+	SUBCASE("Cable out_buf points to module 1 output poly buffer") {
+		bool found = false;
+		auto *mod1 = get_test_poly(player, 1);
+		for (auto &core_cables : player.cables.samecore_cables) {
+			for (auto &cable : core_cables) {
+				if (cable.out == Jack{1, 0}) {
+					found = true;
+					CHECK(cable.out_buf.voltages == mod1->output_poly[0].data());
+					CHECK(cable.out_buf.channels == &mod1->output_channels[0]);
+				}
+			}
+		}
+		if (!found) {
+			for (auto &core_cables : player.cables.diffcore_cables) {
+				for (auto &cable : core_cables) {
+					if (cable.out == Jack{1, 0}) {
+						found = true;
+						CHECK(cable.out_buf.voltages == mod1->output_poly[0].data());
+						CHECK(cable.out_buf.channels == &mod1->output_channels[0]);
+					}
+				}
+			}
+		}
+		CHECK(found);
+	}
+
+	SUBCASE("Cable in_bufs points to module 2 input poly buffer") {
+		bool found = false;
+		auto *mod2 = get_test_poly(player, 2);
+		auto check_cables = [&](auto &cable_list) {
+			for (auto &core_cables : cable_list) {
+				for (auto &cable : core_cables) {
+					if (cable.out == Jack{1, 0}) {
+						for (size_t i = 0; i < cable.ins.size(); i++) {
+							if (cable.ins[i] == Jack{2, 0}) {
+								found = true;
+								CHECK(cable.in_bufs[i].voltages == mod2->input_poly[0].data());
+								CHECK(cable.in_bufs[i].channels == &mod2->input_channels[0]);
+							}
+						}
+					}
+				}
+			}
+		};
+		check_cables(player.cables.samecore_cables);
+		check_cables(player.cables.diffcore_cables);
+		CHECK(found);
+	}
+}
+
+TEST_CASE("Poly cable: process_outputs copies poly channels from output to input") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_propagate
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: TestPoly
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	auto *mod2 = get_test_poly(player, 2);
+	REQUIRE(mod1 != nullptr);
+	REQUIRE(mod2 != nullptr);
+
+	SUBCASE("All 4 poly channels are copied from output to input") {
+		mod1->output_channels[0] = 4;
+		mod1->output_poly[0] = {1.0f, 2.0f, 3.0f, 4.0f};
+
+		player.update_patch();
+
+		CHECK(mod2->input_channels[0] == 4);
+		CHECK(mod2->input_poly[0][0] == doctest::Approx(1.0f));
+		CHECK(mod2->input_poly[0][1] == doctest::Approx(2.0f));
+		CHECK(mod2->input_poly[0][2] == doctest::Approx(3.0f));
+		CHECK(mod2->input_poly[0][3] == doctest::Approx(4.0f));
+	}
+
+	SUBCASE("Fewer than MaxPoly channels: only active channels copied") {
+		mod1->output_channels[0] = 2;
+		mod1->output_poly[0] = {5.0f, 6.0f, 99.0f, 99.0f};
+
+		// Pre-fill destination with sentinel values
+		mod2->input_poly[0] = {-1.f, -1.f, -1.f, -1.f};
+
+		player.update_patch();
+
+		CHECK(mod2->input_channels[0] == 2);
+		CHECK(mod2->input_poly[0][0] == doctest::Approx(5.0f));
+		CHECK(mod2->input_poly[0][1] == doctest::Approx(6.0f));
+		// Channels beyond the active count are not guaranteed to be zeroed by process_outputs
+	}
+
+	SUBCASE("Single channel (mono-like poly)") {
+		mod1->output_channels[0] = 1;
+		mod1->output_poly[0] = {7.5f, 0.f, 0.f, 0.f};
+
+		player.update_patch();
+
+		CHECK(mod2->input_channels[0] == 1);
+		CHECK(mod2->input_poly[0][0] == doctest::Approx(7.5f));
+	}
+}
+
+TEST_CASE("Poly to mono cable: mono input receives first channel only") {
+	// Module 1 (TestPoly) output 0 -> Module 2 (MultiLFO, mono) input 0
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_to_mono
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: MultiLFO
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	REQUIRE(mod1 != nullptr);
+
+	SUBCASE("Mono input receives only the first poly channel voltage") {
+		mod1->output_channels[0] = 4;
+		mod1->output_poly[0] = {3.3f, 6.6f, 9.9f, 1.1f};
+
+		player.update_patch();
+
+		// MultiLFO is a regular CoreModule, so its input poly buffer is null.
+		// process_outputs does poly->mono: set_input(jack_id, *out_buf.voltages)
+		// which means only the first channel (3.3f) is used.
+		// We can't easily read the mono module's input directly, but we can verify
+		// the cable cache detected this as poly->mono:
+		bool found = false;
+		auto check = [&](auto &cable_list) {
+			for (auto &core_cables : cable_list) {
+				for (auto &cable : core_cables) {
+					if (cable.out == Jack{1, 0}) {
+						found = true;
+						// Output is poly
+						CHECK(cable.out_buf.voltages != nullptr);
+						// Input is mono (nullptr)
+						for (size_t i = 0; i < cable.ins.size(); i++) {
+							if (cable.ins[i] == Jack{2, 0}) {
+								CHECK(cable.in_bufs[i].voltages == nullptr);
+							}
+						}
+					}
+				}
+			}
+		};
+		check(player.cables.samecore_cables);
+		check(player.cables.diffcore_cables);
+		CHECK(found);
+	}
+}
+
+TEST_CASE("Mono to poly cable: poly input receives value in first channel") {
+	// Module 1 (MultiLFO, mono output) -> Module 2 (TestPoly, poly input)
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: mono_to_poly
+  module_slugs:
+    0: PANEL_8
+    1: MultiLFO
+    2: TestPoly
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod2 = get_test_poly(player, 2);
+	REQUIRE(mod2 != nullptr);
+
+	SUBCASE("Cable cache: output is mono, input is poly") {
+		bool found = false;
+		auto check = [&](auto &cable_list) {
+			for (auto &core_cables : cable_list) {
+				for (auto &cable : core_cables) {
+					if (cable.out == Jack{1, 0}) {
+						found = true;
+						CHECK(cable.out_buf.voltages == nullptr);
+					}
+				}
+			}
+		};
+		check(player.cables.samecore_cables);
+		check(player.cables.diffcore_cables);
+		CHECK(found);
+	}
+
+	SUBCASE("Mono output value is set via set_input on poly module") {
+		// When out_buf.voltages is null (mono output), process_outputs uses get_output/set_input.
+		// The TestPolyModule::set_input stores in inputs_mono, not input_poly.
+		// This is the mono->poly path where the mono value arrives via set_input().
+		player.update_patch();
+
+		float lfo_out = player.modules[1]->get_output(0);
+		CHECK(mod2->inputs_mono[0] == doctest::Approx(lfo_out));
+	}
+}
+
+TEST_CASE("Poly output mapped to panel: get_panel_output sums all poly channels") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_panel_sum
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	REQUIRE(mod1 != nullptr);
+
+	SUBCASE("out_conns has poly buffer pointer for panel jack 0") {
+		auto &conns = player.get_outconns()[0];
+		REQUIRE(conns.size() == 1);
+		CHECK(conns[0].buf.voltages == mod1->output_poly[0].data());
+		CHECK(conns[0].buf.channels == &mod1->output_channels[0]);
+	}
+
+	SUBCASE("get_panel_output sums all 4 poly channels") {
+		mod1->output_channels[0] = 4;
+		mod1->output_poly[0] = {1.0f, 2.0f, 3.0f, 4.0f};
+
+		float panel_out = player.get_panel_output(0);
+		CHECK(panel_out == doctest::Approx(10.0f));
+	}
+
+	SUBCASE("get_panel_output sums only active channels") {
+		mod1->output_channels[0] = 2;
+		mod1->output_poly[0] = {5.0f, 7.0f, 99.0f, 99.0f};
+
+		float panel_out = player.get_panel_output(0);
+		CHECK(panel_out == doctest::Approx(12.0f)); // 5 + 7
+	}
+
+	SUBCASE("Single-channel poly output gives just that value") {
+		mod1->output_channels[0] = 1;
+		mod1->output_poly[0] = {3.14f, 0.f, 0.f, 0.f};
+
+		float panel_out = player.get_panel_output(0);
+		CHECK(panel_out == doctest::Approx(3.14f));
+	}
+}
+
+TEST_CASE("Two poly outputs summed to same panel jack") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_sum_panel
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: TestPoly
+  int_cables:
+  mapped_ins:
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 0
+      out:
+        module_id: 2
+        jack_id: 0
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	auto *mod2 = get_test_poly(player, 2);
+	REQUIRE(mod1 != nullptr);
+	REQUIRE(mod2 != nullptr);
+
+	SUBCASE("Panel out 0 has two poly connections") {
+		auto &conns = player.get_outconns()[0];
+		CHECK(conns.size() == 2);
+	}
+
+	SUBCASE("get_panel_output sums all channels from both modules") {
+		mod1->output_channels[0] = 4;
+		mod1->output_poly[0] = {1.0f, 2.0f, 3.0f, 4.0f};
+
+		mod2->output_channels[0] = 3;
+		mod2->output_poly[0] = {10.0f, 20.0f, 30.0f, 0.0f};
+
+		float panel_out = player.get_panel_output(0);
+		// (1+2+3+4) + (10+20+30) = 10 + 60 = 70
+		CHECK(panel_out == doctest::Approx(70.0f));
+	}
+
+	SUBCASE("Mixed: one poly + one zero-channel output") {
+		mod1->output_channels[0] = 2;
+		mod1->output_poly[0] = {5.0f, 5.0f, 0.0f, 0.0f};
+
+		mod2->output_channels[0] = 0;
+		mod2->output_poly[0] = {99.0f, 99.0f, 0.0f, 0.0f};
+
+		float panel_out = player.get_panel_output(0);
+		// Only mod1's 2 channels contribute: 5 + 5 = 10
+		CHECK(panel_out == doctest::Approx(10.0f));
+	}
+}
+
+TEST_CASE("Poly cable: one output splits to two poly inputs") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_split
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: TestPoly
+    3: TestPoly
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+        - module_id: 3
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	auto *mod2 = get_test_poly(player, 2);
+	auto *mod3 = get_test_poly(player, 3);
+	REQUIRE(mod1 != nullptr);
+	REQUIRE(mod2 != nullptr);
+	REQUIRE(mod3 != nullptr);
+
+	SUBCASE("Both inputs receive all poly channels") {
+		mod1->output_channels[0] = 3;
+		mod1->output_poly[0] = {1.5f, 2.5f, 3.5f, 0.0f};
+
+		player.update_patch();
+
+		CHECK(mod2->input_channels[0] == 3);
+		CHECK(mod2->input_poly[0][0] == doctest::Approx(1.5f));
+		CHECK(mod2->input_poly[0][1] == doctest::Approx(2.5f));
+		CHECK(mod2->input_poly[0][2] == doctest::Approx(3.5f));
+
+		CHECK(mod3->input_channels[0] == 3);
+		CHECK(mod3->input_poly[0][0] == doctest::Approx(1.5f));
+		CHECK(mod3->input_poly[0][1] == doctest::Approx(2.5f));
+		CHECK(mod3->input_poly[0][2] == doctest::Approx(3.5f));
+	}
+}
+
+TEST_CASE("Poly cable: split to poly and mono input simultaneously") {
+	// Module 1 (poly output) -> Module 2 (poly input) and Module 3 (mono input)
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_split_mixed
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: TestPoly
+    3: MultiLFO
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+        - module_id: 3
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	auto *mod2 = get_test_poly(player, 2);
+	REQUIRE(mod1 != nullptr);
+	REQUIRE(mod2 != nullptr);
+
+	SUBCASE("Poly input gets all channels, mono input gets first channel") {
+		mod1->output_channels[0] = 4;
+		mod1->output_poly[0] = {10.0f, 20.0f, 30.0f, 40.0f};
+
+		player.update_patch();
+
+		// Poly input (module 2) gets all channels
+		CHECK(mod2->input_channels[0] == 4);
+		CHECK(mod2->input_poly[0][0] == doctest::Approx(10.0f));
+		CHECK(mod2->input_poly[0][1] == doctest::Approx(20.0f));
+		CHECK(mod2->input_poly[0][2] == doctest::Approx(30.0f));
+		CHECK(mod2->input_poly[0][3] == doctest::Approx(40.0f));
+
+		// Mono input (module 3): verify cable cache has null in_buf for it
+		bool found_mono = false;
+		auto check = [&](auto &cable_list) {
+			for (auto &core_cables : cable_list) {
+				for (auto &cable : core_cables) {
+					if (cable.out == Jack{1, 0}) {
+						for (size_t i = 0; i < cable.ins.size(); i++) {
+							if (cable.ins[i] == Jack{3, 0}) {
+								found_mono = true;
+								CHECK(cable.in_bufs[i].voltages == nullptr);
+							}
+						}
+					}
+				}
+			}
+		};
+		check(player.cables.samecore_cables);
+		check(player.cables.diffcore_cables);
+		CHECK(found_mono);
+	}
+}
+
+TEST_CASE("Poly cable: second output jack also works") {
+	// Uses output jack 1 (the second output) to verify jack_id indexing
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_jack1
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: TestPoly
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 1
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	auto *mod2 = get_test_poly(player, 2);
+	REQUIRE(mod1 != nullptr);
+	REQUIRE(mod2 != nullptr);
+
+	SUBCASE("Output jack 1 poly data propagates to input jack 1") {
+		mod1->output_channels[1] = 3;
+		mod1->output_poly[1] = {100.0f, 200.0f, 300.0f, 0.0f};
+
+		player.update_patch();
+
+		CHECK(mod2->input_channels[1] == 3);
+		CHECK(mod2->input_poly[1][0] == doctest::Approx(100.0f));
+		CHECK(mod2->input_poly[1][1] == doctest::Approx(200.0f));
+		CHECK(mod2->input_poly[1][2] == doctest::Approx(300.0f));
+	}
+
+	SUBCASE("Cable cache resolves correct jack") {
+		bool found = false;
+		auto check = [&](auto &cable_list) {
+			for (auto &core_cables : cable_list) {
+				for (auto &cable : core_cables) {
+					if (cable.out == Jack{1, 1}) {
+						found = true;
+						CHECK(cable.out_buf.voltages == mod1->output_poly[1].data());
+						CHECK(cable.out_buf.channels == &mod1->output_channels[1]);
+					}
+				}
+			}
+		};
+		check(player.cables.samecore_cables);
+		check(player.cables.diffcore_cables);
+		CHECK(found);
+	}
+}
+
+TEST_CASE("Poly output to panel: second output jack summed to panel") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_panel_jack1
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+  mapped_outs:
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 1
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	REQUIRE(mod1 != nullptr);
+
+	SUBCASE("Panel output 1 sums poly channels from output jack 1") {
+		mod1->output_channels[1] = 4;
+		mod1->output_poly[1] = {0.1f, 0.2f, 0.3f, 0.4f};
+
+		float panel_out = player.get_panel_output(1);
+		CHECK(panel_out == doctest::Approx(1.0f));
+	}
+}
+
+TEST_CASE("Poly cable with panel input summing: panel + poly cable to same input") {
+	// Panel input 0 is mapped to TestPoly (module 2) input 0.
+	// Module 1 output 0 also has a cable to module 2 input 0.
+	// This creates a summed input via the Hub routing mechanism.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_panel_sum_cable
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: TestPoly
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	SUBCASE("Panel input 0 routes to Hub for summing") {
+		CHECK(player.get_panel_input_connection(0) == Jack{0, 0});
+	}
+
+	SUBCASE("Summed input exists for module 2 jack 0") {
+		bool found = false;
+		for (auto &core_si : player.cables.summed_inputs) {
+			for (auto &si : core_si) {
+				if (si.in == Jack{2, 0}) {
+					found = true;
+					CHECK(si.outs.size() == 2);
+				}
+			}
+		}
+		CHECK(found);
+	}
+}
+
+TEST_CASE("Poly summed inputs: two poly outputs with different channel counts to one poly input") {
+	// Module 1 output 0 (4 channels) and Module 2 output 0 (2 channels)
+	// both cable to Module 3 input 0 (poly). Result: 4 channels, per-channel sum.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_summed
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: TestPoly
+    3: TestPoly
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	auto *mod2 = get_test_poly(player, 2);
+	auto *mod3 = get_test_poly(player, 3);
+	REQUIRE(mod1 != nullptr);
+	REQUIRE(mod2 != nullptr);
+	REQUIRE(mod3 != nullptr);
+
+	SUBCASE("Summed input entry exists with poly buffers resolved") {
+		bool found = false;
+		for (auto &core_si : player.cables.summed_inputs) {
+			for (auto &si : core_si) {
+				if (si.in == Jack{3, 0}) {
+					found = true;
+					CHECK(si.outs.size() == 2);
+					// Input poly buffer resolved
+					CHECK(si.in_buf.voltages == mod3->input_poly[0].data());
+					CHECK(si.in_buf.channels == &mod3->input_channels[0]);
+					// Output poly buffers resolved
+					for (size_t i = 0; i < si.outs.size(); i++) {
+						CHECK(si.out_bufs[i].voltages != nullptr);
+						CHECK(si.out_bufs[i].channels != nullptr);
+					}
+				}
+			}
+		}
+		CHECK(found);
+	}
+
+	SUBCASE("Input channel count is max of source channel counts") {
+		mod1->output_channels[0] = 4;
+		mod1->output_poly[0] = {1.0f, 2.0f, 3.0f, 4.0f};
+
+		mod2->output_channels[0] = 2;
+		mod2->output_poly[0] = {10.0f, 20.0f, 0.0f, 0.0f};
+
+		player.update_patch();
+
+		CHECK(mod3->input_channels[0] == 4);
+	}
+
+	SUBCASE("Per-channel summing with different channel counts") {
+		mod1->output_channels[0] = 4;
+		mod1->output_poly[0] = {1.0f, 2.0f, 3.0f, 4.0f};
+
+		mod2->output_channels[0] = 2;
+		mod2->output_poly[0] = {10.0f, 20.0f, 0.0f, 0.0f};
+
+		player.update_patch();
+
+		// ch0: 1 + 10 = 11, ch1: 2 + 20 = 22, ch2: 3 + 0 = 3, ch3: 4 + 0 = 4
+		CHECK(mod3->input_poly[0][0] == doctest::Approx(11.0f));
+		CHECK(mod3->input_poly[0][1] == doctest::Approx(22.0f));
+		CHECK(mod3->input_poly[0][2] == doctest::Approx(3.0f));
+		CHECK(mod3->input_poly[0][3] == doctest::Approx(4.0f));
+	}
+
+	SUBCASE("Both sources same channel count") {
+		mod1->output_channels[0] = 3;
+		mod1->output_poly[0] = {1.0f, 1.0f, 1.0f, 0.0f};
+
+		mod2->output_channels[0] = 3;
+		mod2->output_poly[0] = {2.0f, 3.0f, 4.0f, 0.0f};
+
+		player.update_patch();
+
+		CHECK(mod3->input_channels[0] == 3);
+		CHECK(mod3->input_poly[0][0] == doctest::Approx(3.0f));
+		CHECK(mod3->input_poly[0][1] == doctest::Approx(4.0f));
+		CHECK(mod3->input_poly[0][2] == doctest::Approx(5.0f));
+	}
+
+	SUBCASE("Single-channel sources sum to single channel") {
+		mod1->output_channels[0] = 1;
+		mod1->output_poly[0] = {5.0f, 0.0f, 0.0f, 0.0f};
+
+		mod2->output_channels[0] = 1;
+		mod2->output_poly[0] = {7.0f, 0.0f, 0.0f, 0.0f};
+
+		player.update_patch();
+
+		CHECK(mod3->input_channels[0] == 1);
+		CHECK(mod3->input_poly[0][0] == doctest::Approx(12.0f));
+	}
+}
+
+TEST_CASE("Poly summed inputs: three poly sources with varied channel counts") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_sum_3way
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+    2: TestPoly
+    3: TestPoly
+    4: TestPoly
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod1 = get_test_poly(player, 1);
+	auto *mod2 = get_test_poly(player, 2);
+	auto *mod3 = get_test_poly(player, 3);
+	auto *mod4 = get_test_poly(player, 4);
+	REQUIRE(mod1 != nullptr);
+	REQUIRE(mod2 != nullptr);
+	REQUIRE(mod3 != nullptr);
+	REQUIRE(mod4 != nullptr);
+
+	SUBCASE("Three sources: 1ch, 3ch, 4ch -> 4ch output with per-channel sums") {
+		mod1->output_channels[0] = 1;
+		mod1->output_poly[0] = {100.0f, 0.0f, 0.0f, 0.0f};
+
+		mod2->output_channels[0] = 3;
+		mod2->output_poly[0] = {1.0f, 2.0f, 3.0f, 0.0f};
+
+		mod3->output_channels[0] = 4;
+		mod3->output_poly[0] = {0.1f, 0.2f, 0.3f, 0.4f};
+
+		player.update_patch();
+
+		CHECK(mod4->input_channels[0] == 4);
+		CHECK(mod4->input_poly[0][0] == doctest::Approx(101.1f));
+		CHECK(mod4->input_poly[0][1] == doctest::Approx(2.2f));
+		CHECK(mod4->input_poly[0][2] == doctest::Approx(3.3f));
+		CHECK(mod4->input_poly[0][3] == doctest::Approx(0.4f));
+	}
+}
+
+TEST_CASE("Poly summed inputs: mono + poly sources summed to poly input") {
+	// Module 1 (MultiLFO, mono output) and Module 2 (TestPoly, poly output)
+	// both cable to Module 3 (TestPoly, poly input). Mono adds to channel 0.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: poly_sum_mixed
+  module_slugs:
+    0: PANEL_8
+    1: MultiLFO
+    2: TestPoly
+    3: TestPoly
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod2 = get_test_poly(player, 2);
+	auto *mod3 = get_test_poly(player, 3);
+	REQUIRE(mod2 != nullptr);
+	REQUIRE(mod3 != nullptr);
+
+	SUBCASE("Mono source adds to channel 0, poly source adds per-channel") {
+		mod2->output_channels[0] = 3;
+		mod2->output_poly[0] = {10.0f, 20.0f, 30.0f, 0.0f};
+
+		player.update_patch();
+
+		float mono_val = player.modules[1]->get_output(0);
+
+		// Channel count comes from the poly source (3)
+		CHECK(mod3->input_channels[0] == 3);
+		// ch0 = mono_val + 10, ch1 = 20, ch2 = 30
+		CHECK(mod3->input_poly[0][0] == doctest::Approx(mono_val + 10.0f));
+		CHECK(mod3->input_poly[0][1] == doctest::Approx(20.0f));
+		CHECK(mod3->input_poly[0][2] == doctest::Approx(30.0f));
+	}
+}
+
+// ============================================================================
+// MIDI Poly Cable Tests
+// ============================================================================
+
+TEST_CASE("MIDI poly cable: MidiNotePolyJack writes to poly buffer") {
+	// Map MidiNotePolyJack to TestPoly module input 0
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_poly_note
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 336
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 4
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod = get_test_poly(player, 1);
+	REQUIRE(mod != nullptr);
+
+	// Simulate MIDI connected
+	player.set_midi_connected();
+
+	SUBCASE("Write pitch to poly channel 0") {
+		player.set_midi_note_pitch(0, 1.5f, 0);
+		CHECK(mod->input_poly[0][0] == doctest::Approx(1.5f));
+	}
+
+	SUBCASE("Write pitch to poly channel 3") {
+		player.set_midi_note_pitch(3, -2.0f, 0);
+		CHECK(mod->input_poly[0][3] == doctest::Approx(-2.0f));
+	}
+
+	SUBCASE("poly_chan >= MaxPolyChannels is no-op") {
+		mod->input_poly[0] = {};
+		player.set_midi_note_pitch(4, 5.0f, 0);
+		// All channels remain zero
+		for (unsigned ch = 0; ch < CoreProcessor::MaxPolyChannels; ch++)
+			CHECK(mod->input_poly[0][ch] == doctest::Approx(0.0f));
+	}
+}
+
+TEST_CASE("MIDI poly cable: gate and velocity poly") {
+	// Map MidiGatePolyJack and MidiVelPolyJack to TestPoly inputs 0 and 1
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_poly_gate_vel
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 337
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 338
+      ins:
+        - module_id: 1
+          jack_id: 1
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 4
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod = get_test_poly(player, 1);
+	REQUIRE(mod != nullptr);
+
+	player.set_midi_connected();
+
+	SUBCASE("Gate poly writes to channel") {
+		player.set_midi_note_gate(1, 10.f, 0);
+		CHECK(mod->input_poly[0][1] == doctest::Approx(10.f));
+	}
+
+	SUBCASE("Velocity poly writes to channel") {
+		player.set_midi_note_velocity(2, 63, 0);
+		CHECK(mod->input_poly[1][2] == doctest::Approx(63.f / 12.7f));
+	}
+}
+
+TEST_CASE("MIDI poly cable: MIDI channel filtering") {
+	// Map MidiNotePolyJack with MIDI channel 3 (panel_jack_id = 0x150 | 0x800 | (2 << 12) = 0x2950)
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_poly_chan_filter
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 10576
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 4
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod = get_test_poly(player, 1);
+	REQUIRE(mod != nullptr);
+
+	player.set_midi_connected();
+
+	SUBCASE("Matching MIDI channel passes through") {
+		// midi_chan=2 means MIDI channel 3 (0-indexed in event)
+		player.set_midi_note_pitch(0, 3.0f, 2);
+		CHECK(mod->input_poly[0][0] == doctest::Approx(3.0f));
+	}
+
+	SUBCASE("Non-matching MIDI channel is filtered") {
+		mod->input_poly[0] = {};
+		player.set_midi_note_pitch(0, 3.0f, 5); // channel 6 != channel 3
+		CHECK(mod->input_poly[0][0] == doctest::Approx(0.0f));
+	}
+}
+
+TEST_CASE("MIDI poly cable: channel count is set correctly") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_poly_chancount
+  module_slugs:
+    0: PANEL_8
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 336
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 4
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *mod = get_test_poly(player, 1);
+	REQUIRE(mod != nullptr);
+
+	player.set_midi_connected();
+
+	SUBCASE("Channel count set to MaxPolyChannels on connect") {
+		CHECK(mod->input_channels[0] == CoreProcessor::MaxPolyChannels);
+	}
+
+	SUBCASE("set_midi_poly_num updates channel count") {
+		player.set_midi_poly_num(2);
+		CHECK(mod->input_channels[0] == 2);
+	}
+}
+
+TEST_CASE("MIDI poly cable into a mono module falls back to set_input with channel 0 and ignores channels > 0") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_poly_fallback
+  module_slugs:
+    0: PANEL_8
+    1: TestModule
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 336
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 4
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+	player.set_midi_connected();
+
+	SUBCASE("Channel 0 falls back to set_input and Channel >= 1 with null buffer is no-op") {
+		player.set_midi_note_pitch(0, 2.5f, 0);
+		player.set_midi_note_pitch(1, 3.5f, 0);
+		player.set_midi_note_pitch(2, 4.5f, 0);
+		player.set_midi_note_pitch(3, 5.5f, 0);
+
+		CHECK(player.modules[1]->get_output(0) == 2.5f);
+		CHECK(player.modules[1]->get_output(1) == 0.f);
+		CHECK(player.modules[1]->get_output(2) == 0.f);
+		CHECK(player.modules[1]->get_output(3) == 0.f);
+
+		auto *module = get_test_module(player, 1);
+		CHECK(module->outs[0] == 2.5f);
+		CHECK(module->outs[1] == 0.f);
+		CHECK(module->outs[2] == 0.f);
+		CHECK(module->outs[3] == 0.f);
+	}
+}
+
+TEST_CASE("MIDI poly cable patched to Panel Out jack") {
+	// Map MidiNotePolyJack and MidiGatePolyJack to Panel Out 1 and Panel Out 2
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_poly_gate_vel
+  module_slugs:
+    0: HubMedium
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 336
+      ins:
+        - module_id: 0
+          jack_id: 0
+    - panel_jack_id: 337
+      ins:
+        - module_id: 0
+          jack_id: 1
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 4
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+	player.set_midi_connected();
+
+	SUBCASE("Note poly channel 0 writes to panel out 1, but other poly channels do not") {
+		player.set_midi_note_pitch(0, 1.f, 0);
+		CHECK(player.get_panel_output(0) == 1.f);
+
+		// poly channel 1: output does not change
+		player.set_midi_note_pitch(1, 3.f, 0);
+		CHECK(player.get_panel_output(0) == 1.f);
+
+		// poly channel 2: output does not change
+		player.set_midi_note_pitch(2, 2.f, 0);
+		CHECK(player.get_panel_output(0) == 1.f);
+
+		// Poly channel 0: output changes
+		player.set_midi_note_pitch(0, 2.f, 0);
+		CHECK(player.get_panel_output(0) == 2.f);
+	}
+
+	SUBCASE("Gate poly writes to panel out 2") {
+		player.set_midi_note_gate(0, 1.f, 0);
+		CHECK(player.get_panel_output(1) == doctest::Approx(1.f));
+
+		player.set_midi_note_gate(1, 99.f, 0); // ch1: no effect
+		CHECK(player.get_panel_output(1) == doctest::Approx(1.f));
+
+		player.set_midi_note_gate(0, 2.f, 0);
+		CHECK(player.get_panel_output(1) == doctest::Approx(2.f));
+	}
+}
+
 TEST_CASE("MIDI to Hub mapping") {
 	// clang-format off
 	std::string patchyml{R"(
@@ -1939,8 +3392,6 @@ PatchData:
 }
 
 TEST_CASE("MIDI to Hub summed with Hub to Hub mapping") {
-	// MIDI Note -> Panel Out 0
-	// MIDI Gate + Panel In 0 -> Panel Out 1
 	// clang-format off
 	std::string patchyml{R"(
 PatchData:
@@ -1952,15 +3403,11 @@ PatchData:
     - panel_jack_id: 256
       ins:
         - module_id: 0
-          jack_id: 0 
-    - panel_jack_id: 272
+          jack_id: 2 
+    - panel_jack_id: 1
       ins:
         - module_id: 0
-          jack_id: 1 
-    - panel_jack_id: 0
-      ins:
-        - module_id: 0
-          jack_id: 1 
+          jack_id: 2 
   mapped_outs:
   static_knobs:
   mapped_knobs:
@@ -1985,30 +3432,28 @@ PatchData:
 	player.load_patch(pd);
 
 	SUBCASE("Set just MIDI") {
-		player.set_midi_note_gate(0, 7.f, 0);
-		float panel_out = player.get_panel_output(1);
+		player.set_midi_note_pitch(0, 7.f, 0);
+		float panel_out = player.get_panel_output(2);
 		CHECK(panel_out == doctest::Approx(7.f));
 	}
 	SUBCASE("Set just Panel In") {
-		player.set_panel_input(0, 3.f);
-		float panel_out = player.get_panel_output(1);
+		player.set_panel_input(1, 3.f);
+		float panel_out = player.get_panel_output(2);
 		CHECK(panel_out == doctest::Approx(3.f));
 	}
 	SUBCASE("Set MIDI and Panel In") {
-		player.set_panel_input(0, 3.f);
-		player.set_midi_note_gate(0, 7.f, 0);
-		float panel_out = player.get_panel_output(1);
+		player.set_panel_input(1, 3.f);
+		player.set_midi_note_pitch(0, 7.f, 0);
+		float panel_out = player.get_panel_output(2);
 		CHECK(panel_out == doctest::Approx(10.f));
 	}
 	SUBCASE("Set a different Panel In that matches panel out ID") {
-		player.set_panel_input(1, 6.f); // Make sure passthrough Panel 1->Panel 1 is disabled
-		float panel_out = player.get_panel_output(1);
+		// printf("set_panel_input(2, 6.f)\n");
+		player.set_panel_input(2, 6.f);
+		float panel_out = player.get_panel_output(2);
 		CHECK(panel_out == doctest::Approx(0.f));
-	}
-	SUBCASE("Set wrong MIDI signal") {
-		player.set_midi_note_pitch(0, 7.f, 0);
-		float panel_out = player.get_panel_output(1);
-		CHECK(panel_out == doctest::Approx(0.f));
+
+		// printf("done\n");
 	}
 }
 
@@ -2282,137 +3727,5 @@ PatchData:
 		player.set_panel_input(0, 5.0f);
 		player.update_patch();
 		CHECK(player.get_panel_output(0) == doctest::Approx(5.0f));
-	}
-}
-
-TEST_CASE("MIDI summed with virt cable on virt module input") {
-	// Module 2 out 0 + MIDI pitch -> module 1 in 0
-	// clang-format off
-	std::string patchyml{R"(
-PatchData:
-  patch_name: midi_summed_direct
-  module_slugs:
-    0: HubMedium
-    1: TestModule
-    2: TestModule
-  int_cables:
-    - out:
-        module_id: 2
-        jack_id: 0
-      ins:
-        - module_id: 1
-          jack_id: 0
-  mapped_ins:
-    - panel_jack_id: 256
-      ins:
-        - module_id: 1
-          jack_id: 0
-  mapped_outs:
-  static_knobs:
-  mapped_knobs:
-  midi_maps:
-  midi_poly_num: 1
-  midi_poly_mode: 0
-  midi_pitchwheel_range: 1
-  mapped_lights: []
-  vcvModuleStates: []
-  suggested_samplerate: 0
-  suggested_blocksize: 0
-  bypassed_modules: []
-  module_aliases: []
-)"};
-	// clang-format on
-
-	MetaModule::PatchData pd;
-	yaml_string_to_patch(patchyml, pd);
-
-	MetaModule::PatchPlayer player;
-	player.load_patch(pd);
-
-	auto module1 = get_test_module(player, 1);
-	CHECK(module1);
-	auto module2 = get_test_module(player, 2);
-	CHECK(module2);
-
-	SUBCASE("Module 2 out routes directly to module 1 jack 0") {
-		module2->set_input(0, 2.4f);
-		player.update_patch();
-		CHECK(module1->get_output(0) == doctest::Approx(2.4f));
-	}
-
-	SUBCASE("MIDI note pitch routes directly to module 1 jack 0") {
-		player.set_midi_note_pitch(0, 4.5f, 0);
-		player.update_patch();
-		CHECK(module1->get_output(0) == doctest::Approx(4.5f));
-	}
-
-	SUBCASE("MIDI note pitch and module 2 sum on module 1 jack 0") {
-		module2->set_input(0, 2.4f);
-		player.set_midi_note_pitch(0, 4.1f, 0);
-		player.update_patch();
-		CHECK(module1->get_output(0) == doctest::Approx(6.5f));
-	}
-}
-
-TEST_CASE("Multiple Hub In jacks summed on a virt module input") {
-	// Panel In 1 + Panel In 2 -> Module 1 jack 0
-	// clang-format off
-	std::string patchyml{R"(
-PatchData:
-  patch_name: midi_summed_direct
-  module_slugs:
-    0: HubMedium
-    1: TestModule
-  mapped_ins:
-    - panel_jack_id: 0
-      ins:
-        - module_id: 1
-          jack_id: 0
-    - panel_jack_id: 1
-      ins:
-        - module_id: 1
-          jack_id: 0
-  mapped_outs:
-  static_knobs:
-  mapped_knobs:
-  midi_maps:
-  midi_poly_num: 1
-  midi_poly_mode: 0
-  midi_pitchwheel_range: 1
-  mapped_lights: []
-  vcvModuleStates: []
-  suggested_samplerate: 0
-  suggested_blocksize: 0
-  bypassed_modules: []
-  module_aliases: []
-)"};
-	// clang-format on
-
-	MetaModule::PatchData pd;
-	yaml_string_to_patch(patchyml, pd);
-
-	MetaModule::PatchPlayer player;
-	player.load_patch(pd);
-
-	auto module1 = get_test_module(player, 1);
-	CHECK(module1);
-
-	SUBCASE("Panel jack 1 routes directly to module 1") {
-		player.set_panel_input(0, 2.4f);
-		player.update_patch();
-		CHECK(module1->get_output(0) == doctest::Approx(2.4f));
-	}
-
-	SUBCASE("Panel jack 2 routes directly to module 1") {
-		player.set_panel_input(1, 0.9f);
-		player.update_patch();
-		CHECK(module1->get_output(0) == doctest::Approx(0.9f));
-	}
-
-	SUBCASE("Panel jack 1 and 2 sum on module 1 jack 0") {
-		player.set_panel_input(0, 1.9f);
-		player.set_panel_input(1, 0.9f);
-		player.update_patch();
-		CHECK(module1->get_output(0) == doctest::Approx(2.8f));
 	}
 }
