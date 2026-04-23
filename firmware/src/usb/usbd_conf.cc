@@ -52,7 +52,8 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd) {
 
 		__HAL_RCC_USBO_CLK_ENABLE();
 		__HAL_RCC_USBPHY_CLK_ENABLE();
-		HAL_PWREx_EnableUSBVoltageDetector();
+		// HAL_PWREx_EnableUSBVoltageDetector();
+		HAL_PWREx_DisableUSBVoltageDetector();
 	}
 }
 
