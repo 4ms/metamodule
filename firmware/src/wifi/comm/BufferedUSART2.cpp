@@ -12,12 +12,12 @@
 #include <console/pr_dbg.hh>
 
 static mdrivlib::Uart<WifiUartConfig> commMain;
-LockFreeFifoSpsc<uint8_t,256> BufferedUSART2::queue;
+LockFreeFifoSpsc<uint8_t, 64 * 1024> BufferedUSART2::queue;
 std::atomic_bool BufferedUSART2::overrunDetected;
 
-#define USART_PERIPH        UART5
-#define USART_IRQ           UART5_IRQn
-#define USART_IRQ_PRIO      3
+#define USART_PERIPH UART5
+#define USART_IRQ UART5_IRQn
+#define USART_IRQ_PRIO 2
 
 void BufferedUSART2::init()
 {

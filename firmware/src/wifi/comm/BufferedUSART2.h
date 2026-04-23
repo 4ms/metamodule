@@ -29,7 +29,7 @@ private:
     static void initPeripheral();
 
 private:
-    static LockFreeFifoSpsc<uint8_t,256> queue;
+	static LockFreeFifoSpsc<uint8_t, 64 * 1024> queue;
 
     static std::atomic_bool overrunDetected;
 };
