@@ -31,7 +31,7 @@ struct UsbDeviceManager {
 #endif
 
 	void start() {
-		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 1, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
+		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 3, [] { HAL_PCD_IRQHandler(&hpcd); });
 		if (video_mode)
 			video.start();
 		else
