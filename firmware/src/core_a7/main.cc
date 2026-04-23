@@ -15,7 +15,6 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
-#include "run_on_core0.hh"
 #include "system/print_time.hh"
 #include "uart_log.hh"
 
@@ -105,8 +104,9 @@ int main() {
 
 	mdrivlib::HWSemaphore<RunningPatchTests>::lock();
 
-	// Allow Core 1 to dispatch SMP-using work to us before audio starts
-	RunOnCore0::init();
+	// Allow Core 1 to dispatch SMP work to us before audio starts
+	InterruptManager::register_and_start_isr(
+		SMPControl::IRQn(SMPThread::CallFunctionIRQn), 0, 0, []() { mdrivlib::SMPThread::execute(); });
 
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();

@@ -3,7 +3,6 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/patch_conf.hh"
-#include "core_a7/run_on_core0.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "delay.hh"
 #include "null_module.hh"
@@ -286,7 +285,7 @@ public:
 	// update_patch() drives Core 1 via SGI, so the measurement must happen on Core 0;
 	// dispatches there if called from Core 1.
 	uint64_t measure_partition_cost() {
-		return RunOnCore0::run([this]() -> uint64_t {
+		return mdrivlib::SMPThread::run([this]() -> uint64_t {
 			smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
 			cables.build(pd.int_cables, core_balancer.cores.parts);
 
