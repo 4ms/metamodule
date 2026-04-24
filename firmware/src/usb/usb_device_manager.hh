@@ -5,6 +5,7 @@
 #include "device_video/usb_video_device.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
+#include "pr_dbg.hh"
 #include "stm32mp1xx.h"
 
 #ifdef USE_RAMDISK_USB
@@ -31,14 +32,17 @@ struct UsbDeviceManager {
 #endif
 
 	void start() {
-		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 3, [] { HAL_PCD_IRQHandler(&hpcd); });
-		if (video_mode)
+		if (video_mode) {
+			pr_info("Starting video device\n");
 			video.start();
-		else
+		} else {
+			pr_info("Starting serial device\n");
 			serial.start();
+		}
 	}
 
 	void stop() {
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		if (video_mode)
 			video.stop();
 		else

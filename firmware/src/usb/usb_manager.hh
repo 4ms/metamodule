@@ -1,17 +1,19 @@
 #pragma once
 #include "conf/fusb30x_conf.hh"
 #include "console/concurrent_buffer.hh"
+#include "core_intercom/shared_memory.hh"
 #include "debug.hh"
 #include "drivers/fusb302.hh"
 #include "drivers/pin_change.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "usb/device_cdc/usb_serial_device.hh"
-#include "core_intercom/shared_memory.hh"
 #include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
 
 namespace MetaModule
 {
+
+extern "C" PCD_HandleTypeDef hpcd;
 
 class UsbManager {
 	UsbHostManager usb_host{Usb5VSrcEnablePin};
@@ -45,6 +47,17 @@ public:
 		// tm = HAL_GetTick();
 		pr_dbg("Starting DRP polling\n");
 		usbctl.start_drp_polling();
+
+		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] {
+			using enum FUSB302::Device::ConnectedState;
+
+			if (state == AsDevice) {
+				HAL_PCD_IRQHandler(&hpcd);
+			} else if (state == AsHost) {
+				HAL_HCD_IRQHandler(&UsbHostManager::hhcd);
+			}
+		});
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 	}
 
 	void handle_fusb_int() {
@@ -55,19 +68,26 @@ public:
 
 			if (newstate == AsDevice) {
 				pr_info("Connected as a device\n");
+				state = newstate;
+				// start() before enabling IRQ: clears pending host-mode GINTSTS events
 				usb_device.start();
+				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 
 			} else if (newstate == AsHost) {
 				pr_info("Starting host\n");
+				state = newstate;
 				usb_host.start();
 
 			} else if (newstate == None) {
 				if (state == AsHost) {
-					state = None; //so that we don't do Host::Process()
+					pr_info("Stopping host\n");
+					state = None;
 					usb_host.stop();
 				}
 
 				if (state == AsDevice) {
+					pr_info("Stopping device\n");
+					state = None;
 					usb_device.stop();
 				}
 
@@ -96,8 +116,8 @@ public:
 
 		if (state == FUSB302::Device::ConnectedState::AsDevice) {
 			usb_device.process();
-		} else {
-			usb_device.process_disconnected();
+		} else { // None or AsHost:
+				 // usb_device.process_disconnected();
 		}
 
 		//DEBUG: toggle Pin0 when we're DRD polling
