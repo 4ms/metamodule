@@ -51,6 +51,16 @@ struct SMPThread {
 	// static void launch(std::function<void()> &&entry) {
 	// }
 
+	template<typename Fn>
+	static auto run(Fn fn) -> std::invoke_result_t<Fn> {
+		using R = std::invoke_result_t<Fn>;
+
+		if constexpr (std::is_void_v<R>)
+			return;
+		else
+			return R{};
+	}
+
 	// Called by the aux core to respond to receiving an SGI3
 	static void execute() {
 	}
