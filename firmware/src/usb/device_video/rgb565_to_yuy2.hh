@@ -11,7 +11,7 @@ struct YuvEntry {
 	uint8_t v;
 };
 
-constexpr YuvEntry rgb565_to_yuv(uint16_t rgb565) {
+constexpr YuvEntry rgb565_to_yuv(uint32_t rgb565) {
 	uint32_t r = (rgb565 >> 11) & 0x1F;
 	uint32_t g = (rgb565 >> 5) & 0x3F;
 	uint32_t b = rgb565 & 0x1F;
@@ -26,9 +26,18 @@ constexpr YuvEntry rgb565_to_yuv(uint16_t rgb565) {
 	// V = 0.500*R - 0.419*G - 0.081*B + 128
 	int32_t v = ((128 * (int32_t)r - 107 * (int32_t)g - 21 * (int32_t)b + 128) >> 8) + 128;
 
-	if (y < 0) y = 0; else if (y > 255) y = 255;
-	if (u < 0) u = 0; else if (u > 255) u = 255;
-	if (v < 0) v = 0; else if (v > 255) v = 255;
+	if (y < 0)
+		y = 0;
+	else if (y > 255)
+		y = 255;
+	if (u < 0)
+		u = 0;
+	else if (u > 255)
+		u = 255;
+	if (v < 0)
+		v = 0;
+	else if (v > 255)
+		v = 255;
 
 	return {(uint8_t)y, (uint8_t)u, (uint8_t)v};
 }
@@ -36,14 +45,19 @@ constexpr YuvEntry rgb565_to_yuv(uint16_t rgb565) {
 constexpr auto make_rgb565_to_yuv_lut() {
 	std::array<YuvEntry, 65536> lut{};
 	for (uint32_t i = 0; i < 65536; i++) {
-		lut[i] = rgb565_to_yuv((uint16_t)i);
+		lut[i] = rgb565_to_yuv(i);
 	}
 	return lut;
 }
 
-// 192KB lookup table, computed at compile time, stored in flash.
+// 192KB lookup table, computed at compile time on hardware (gcc 12+)
+// Compute at runtime startup for simulator because some compilers don't consider it constexpr.
 // Indexed by RGB565 pixel value, returns {Y, U, V}.
+#ifdef SIMULATOR
+inline const auto rgb565_yuv_lut = make_rgb565_to_yuv_lut();
+#else
 inline constexpr auto rgb565_yuv_lut = make_rgb565_to_yuv_lut();
+#endif
 
 // Write one RGB565 pixel into a YUY2 framebuffer at the given x position.
 // Even x: writes Y and U. Odd x: writes Y and V.
