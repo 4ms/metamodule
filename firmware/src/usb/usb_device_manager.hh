@@ -52,7 +52,15 @@ struct UsbDeviceManager {
 	void set_video_mode(bool enabled) {
 		if (enabled == video_mode)
 			return;
-		stop();
+		// Soft stop: skip USBD_DeInit so HAL_PCD_DeInit/MspDeInit don't run.
+		// hpcd->State stays READY, so the next start()'s HAL_PCD_Init skips
+		// MspInit and avoids toggling USBO_CLK while VBUS is held by the host.
+		// Global IRQ is disabled at the peripheral by USBD_Stop and re-enabled
+		// by USBD_Start, so NVIC state can be left alone.
+		if (video_mode)
+			video.soft_stop();
+		else
+			serial.soft_stop();
 		video_mode = enabled;
 		start();
 	}
