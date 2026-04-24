@@ -33,8 +33,8 @@ public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
 		: usb_device{console_buffers, false}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
-		usb_device.start();
-		usb_host.init();
+		// usb_device.start();
+		// usb_host.init();
 		found_fusb = usbctl.init(); //NOLINT
 	}
 
@@ -48,6 +48,10 @@ public:
 		pr_dbg("Starting DRP polling\n");
 		usbctl.start_drp_polling();
 
+		usb_device.start();
+		usb_host.init();
+
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] {
 			using enum FUSB302::Device::ConnectedState;
 
@@ -57,7 +61,6 @@ public:
 				HAL_HCD_IRQHandler(&UsbHostManager::hhcd);
 			}
 		});
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 	}
 
 	void handle_fusb_int() {
