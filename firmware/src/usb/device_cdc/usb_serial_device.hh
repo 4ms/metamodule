@@ -12,6 +12,7 @@ public:
 	void process();
 	void start();
 	void stop();
+	void soft_stop();
 
 	void init_buffers();
 	void forward_to_uart();
