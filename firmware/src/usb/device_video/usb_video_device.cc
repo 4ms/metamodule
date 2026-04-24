@@ -33,6 +33,12 @@ void UsbVideoDevice::stop() {
 	USBD_DeInit(pdev);
 }
 
+void UsbVideoDevice::soft_stop() {
+	// See UsbSerialDevice::soft_stop -- skip USBD_DeInit so hpcd->State stays
+	// READY and the next USBD_Init won't toggle USBO_CLK via MspInit.
+	USBD_Stop(pdev);
+}
+
 void UsbVideoDevice::set_framebuffer(uint8_t *fb) {
 	shadow_fb = fb;
 }

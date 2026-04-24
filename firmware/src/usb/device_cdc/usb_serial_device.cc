@@ -50,6 +50,15 @@ void UsbSerialDevice::stop() {
 	USBD_DeInit(pdev);
 }
 
+void UsbSerialDevice::soft_stop() {
+	// Class transition without HAL_PCD_DeInit. USBD_Stop disconnects D+ and
+	// invokes pClass->DeInit (closes endpoints); skipping USBD_DeInit keeps
+	// hpcd->State == READY so the next USBD_Init won't re-run MspInit, which
+	// avoids toggling USBO_CLK on a live VBUS bus.
+	pr_info("Stopping UsbSerialDevice\n");
+	USBD_Stop(pdev);
+}
+
 void UsbSerialDevice::transmit_buffers(Destination dest) {
 	auto transmit = [this, dest = dest](uint8_t *ptr, int len) {
 		if (dest == Destination::USB) {
