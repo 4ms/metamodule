@@ -29,12 +29,15 @@ class UsbManager {
 	// Debug: timer for dumping registers
 	// uint32_t tm;
 
+	// Known issues:
+	// Connecting to some self-powered MIDI keyboards that have a dual host/device mode feature, can sometimes
+	// cause the MM to no longer connect as a device (i.e. USB Video mode doesn't work). Unknown reasons.
+	// Workaround is to set the device to to Device-only mode (OXI One: "Device", not "Device self-powered").
+
 public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
 		: usb_device{console_buffers, false}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
-		// usb_device.start();
-		// usb_host.init();
 		found_fusb = usbctl.init(); //NOLINT
 	}
 

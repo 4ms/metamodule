@@ -41,7 +41,8 @@ void HAL_HCD_MspInit(HCD_HandleTypeDef *hpcd) {
 		USBPHYC->MISC = (USBPHYC->MISC & ~(USBPHYC_MISC_SWITHOST_Msk | USBPHYC_MISC_PPCKDIS_Msk)) |
 						(0 << USBPHYC_MISC_SWITHOST_Pos) | (0 << USBPHYC_MISC_PPCKDIS_Pos);
 
-		HAL_PWREx_EnableUSBVoltageDetector();
+		// HAL_PWREx_EnableUSBVoltageDetector();
+		HAL_PWREx_DisableUSBVoltageDetector();
 	}
 }
 
