@@ -12,7 +12,6 @@ class UsbHostManager {
 private:
 	mdrivlib::Pin src_enable;
 	USBH_HandleTypeDef usbhost{};
-	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
 	MSCHost msc_host{usbhost, MetaModule::Volume::USB};
 
@@ -21,6 +20,8 @@ private:
 	static inline MSCHost *_mschost_instance;
 
 public:
+	static inline HCD_HandleTypeDef hhcd;
+
 	UsbHostManager(mdrivlib::PinDef enable_5v)
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
 		usbhost.pActiveClass = nullptr;
@@ -47,7 +48,7 @@ public:
 		midi_host.init();
 		msc_host.init();
 
-		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 		auto err = USBH_Start(&usbhost);
 		if (err != USBH_OK)
 			pr_err("Error starting host\n");
