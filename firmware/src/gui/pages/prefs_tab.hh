@@ -1,4 +1,5 @@
 #pragma once
+#include "core_a7/device_settings_proxy.hh"
 #include "fs/helpers.hh"
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -15,9 +16,8 @@
 #include "gui/slsexport/prefs_section_video.hh"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
-#include "core_a7/device_settings_proxy.hh"
-#include "screen/lvgl_driver.hh"
 #include "patch_play/patch_playloader.hh"
+#include "screen/usb_video_buffer.hh"
 #include "user_settings/audio_settings.hh"
 
 namespace MetaModule
@@ -612,7 +612,7 @@ private:
 		}
 		if (video.mirror != video_mirror) {
 			video.mirror = video_mirror;
-			MMDisplay::set_mirroring(video_mirror);
+			UsbVideoBuffer::set_mirroring(video_mirror);
 			gui_state.do_write_settings = true;
 		}
 
