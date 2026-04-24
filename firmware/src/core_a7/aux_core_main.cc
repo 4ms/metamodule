@@ -42,7 +42,7 @@ extern "C" void aux_core_main() {
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
 #endif
 
-	MMDisplay::set_uvc_shadow_fb(SharedMemoryS::ptrs.uvc_framebuffer);
+	UsbVideoBuffer::set_frame_buffer(SharedMemoryS::ptrs.uvc_framebuffer);
 	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 
 	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};
