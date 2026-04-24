@@ -588,6 +588,7 @@ private:
 			video.enabled = video_enabled;
 			while (!DeviceSettingsProxy::send_video_mode(video_enabled))
 				;
+			UsbVideoBuffer::enable(video_enabled);
 			gui_state.do_write_settings = true;
 		}
 		if (video.mirror != video_mirror) {

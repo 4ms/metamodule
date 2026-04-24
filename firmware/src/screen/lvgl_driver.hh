@@ -96,10 +96,6 @@ public:
 		lv_disp_flush_ready(last_used_disp_drv);
 	}
 
-	static void set_mirroring(bool mirror) {
-		UsbVideoBuffer::set_mirroring(mirror);
-	}
-
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
 		last_used_disp_drv = disp_drv;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
