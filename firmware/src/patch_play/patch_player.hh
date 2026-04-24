@@ -319,22 +319,11 @@ public:
 			mdrivlib::CycleCounter counter;
 			uint32_t worst = 0;
 			for (auto i = 0u; i < MeasureIterations; i++) {
-				Debug::Pin2::high();
+				// Debug::Pin2::high();
 				counter.start_simple_measurement();
-
-				for (uint32_t i = 0; i < NumInJacks; i++)
-					set_panel_input(i, 0);
-
-				for (uint32_t i = 0; i < NumTotalParams; i++)
-					set_panel_param(i, 0);
-
 				update_patch();
-
-				for (uint32_t i = 0; i < NumOutJacks; i++) [[maybe_unused]]
-					auto x = get_panel_output(i);
-
 				worst = std::max(worst, counter.stop_simple_measurement());
-				Debug::Pin2::low();
+				// Debug::Pin2::low();
 			}
 			// #ifndef TESTPROJECT
 			// asm("bkpt 2");
