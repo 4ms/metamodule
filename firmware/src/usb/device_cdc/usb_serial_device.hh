@@ -13,6 +13,7 @@ public:
 	void start();
 	void stop();
 
+	void init_buffers();
 	void forward_to_uart();
 
 private:
