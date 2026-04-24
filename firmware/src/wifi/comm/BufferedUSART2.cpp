@@ -52,7 +52,7 @@ void BufferedUSART2::initPeripheral() {
 			pr_warn("USART2: FIFO Overrun\n");
 			LL_USART_ClearFlag_ORE(USART_PERIPH);
 		} else {
-			pr_warn("USART2: ISR called with no flag\n");
+			pr_warn("USART2: ISR called with no flag (ISR=%x)\n", USART_PERIPH->ISR);
 			(void)USART_PERIPH->RDR;
 		}
 	});
@@ -61,6 +61,11 @@ void BufferedUSART2::initPeripheral() {
 	(void)USART_PERIPH->RDR;
 
 	LL_USART_EnableIT_RXNE_RXFNE(USART_PERIPH);
+
+	LL_USART_DisableIT_CM(USART_PERIPH);
+	LL_USART_DisableIT_PE(USART_PERIPH);
+	LL_USART_DisableIT_TC(USART_PERIPH);
+	LL_USART_DisableIT_TC(USART_PERIPH);
 }
 
 void BufferedUSART2::transmit(uint8_t val) {
