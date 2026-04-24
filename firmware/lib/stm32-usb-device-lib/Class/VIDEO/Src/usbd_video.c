@@ -239,12 +239,9 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_CfgDesc[] __ALIGN_END =
   VS_FORMAT_SUBTYPE,                             /* bDescriptorSubType */
   0x01,                                          /* bFormatIndex */
   0x01,                                          /* bNumFrameDescriptor */
-#ifdef USBD_UVC_FORMAT_UNCOMPRESSED
-  DBVAL(UVC_UNCOMPRESSED_GUID),                  /* Giud Format: YUY2 {32595559-0000-0010-8000-00AA00389B71} */
-  0x00, 0x00,
-  0x10, 0x00,
-  0x80, 0x00,
-  0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71,
+#if defined(USBD_UVC_FORMAT_UNCOMPRESSED) || defined(USBD_UVC_FORMAT_FRAME_BASED)
+  DBVAL(UVC_UNCOMPRESSED_GUID),                  /* Guid Format: low 4 bytes (format-specific, see usbd_conf.h) */
+  UVC_GUID_SUFFIX_BYTES,                         /* Guid Format: remaining 12 bytes */
   UVC_BITS_PER_PIXEL,                            /* bBitsPerPixel : Number of bits per pixel */
 #else
   0x01,                                          /* bmFlags: FixedSizeSamples */
@@ -254,8 +251,27 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_CfgDesc[] __ALIGN_END =
   0x00,                                          /* bAspectRatioY: not required by specification */
   0x00,                                          /* bInterlaceFlags: non interlaced stream */
   0x00,                                          /* bCopyProtect: no protection restrictions */
+#ifdef USBD_UVC_FORMAT_FRAME_BASED
+  0x00,                                          /* bVariableSize: 0 = fixed-size frames */
+#endif
 
-  /* Class-specific VS (Video Streaming) Frame Descriptor */
+#ifdef USBD_UVC_FORMAT_FRAME_BASED
+  /* Class-specific VS (Video Streaming) Frame Descriptor (Frame Based) */
+  VS_FRAME_DESC_SIZE,                            /* bLength */
+  CS_INTERFACE,                                  /* bDescriptorType */
+  VS_FRAME_SUBTYPE,                              /* bDescriptorSubType: VS_FRAME_FRAME_BASED */
+  0x01,                                          /* bFrameIndex */
+  0x02,                                          /* bmCapabilities: fixed frame rate supported */
+  WBVAL(UVC_WIDTH),                              /* wWidth: Image Frame Width */
+  WBVAL(UVC_HEIGHT),                             /* wHeight: Image Frame Height */
+  DBVAL(UVC_MIN_BIT_RATE(UVC_CAM_FPS_FS)),       /* dwMinBitRate: Minimum supported bit rate in bits/s */
+  DBVAL(UVC_MAX_BIT_RATE(UVC_CAM_FPS_FS)),       /* dwMaxBitRate: Maximum supported bit rate in bits/s */
+  DBVAL(UVC_INTERVAL(UVC_CAM_FPS_FS)),           /* dwDefaultFrameInterval: following number of FPS */
+  0x01,                                          /* bFrameIntervalType: Discrete frame interval type */
+  DBVAL(UVC_WIDTH * UVC_BITS_PER_PIXEL / 8U),    /* dwBytesPerLine */
+  DBVAL(UVC_INTERVAL(UVC_CAM_FPS_FS)),           /* dwFrameInterval[0]: one supported interval (FPS) */
+#else
+  /* Class-specific VS (Video Streaming) Frame Descriptor (Uncompressed / MJPEG) */
   VS_FRAME_DESC_SIZE,                            /* bLength */
   CS_INTERFACE,                                  /* bDescriptorType */
   VS_FRAME_SUBTYPE,                              /* bDescriptorSubType */
@@ -269,8 +285,9 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_CfgDesc[] __ALIGN_END =
   DBVAL(UVC_INTERVAL(UVC_CAM_FPS_FS)),           /* dwDefaultFrameInterval: following number of FPS */
   0x01,                                          /* bFrameIntervalType: Discrete frame interval type */
   DBVAL(UVC_INTERVAL(UVC_CAM_FPS_FS)),           /* dwMinFrameInterval: One supported value of interval (FPS) */
+#endif
 
-#ifdef USBD_UVC_FORMAT_UNCOMPRESSED
+#if defined(USBD_UVC_FORMAT_UNCOMPRESSED) || defined(USBD_UVC_FORMAT_FRAME_BASED)
   /* Color Matching Descriptor */
   VS_COLOR_MATCHING_DESC_SIZE,                   /* bLength */
   CS_INTERFACE,                                  /* bDescriptorType: CS_INTERFACE */
@@ -820,13 +837,24 @@ static void VIDEO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
 static uint8_t  *USBD_VIDEO_GetFSCfgDesc(uint16_t *length)
 {
   USBD_EpDescTypedef *pEpDesc = USBD_VIDEO_GetEpDesc(USBD_VIDEO_CfgDesc, UVC_IN_EP);
-  USBD_VIDEO_VSFrameDescTypeDef *pVSFrameDesc = USBD_VIDEO_GetVSFrameDesc(USBD_VIDEO_CfgDesc);
 
   if (pEpDesc != NULL)
   {
     pEpDesc->wMaxPacketSize = UVC_ISO_FS_MPS;
   }
 
+#ifdef USBD_UVC_FORMAT_FRAME_BASED
+  USBD_VIDEO_VSFrameBasedFrameDescTypeDef *pVSFrameDesc =
+    (USBD_VIDEO_VSFrameBasedFrameDescTypeDef *)USBD_VIDEO_GetVSFrameDesc(USBD_VIDEO_CfgDesc);
+  if (pVSFrameDesc != NULL)
+  {
+    pVSFrameDesc->dwMinBitRate = UVC_MIN_BIT_RATE(UVC_CAM_FPS_FS);
+    pVSFrameDesc->dwMaxBitRate = UVC_MAX_BIT_RATE(UVC_CAM_FPS_FS);
+    pVSFrameDesc->dwDefaultFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_FS);
+    pVSFrameDesc->dwFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_FS);
+  }
+#else
+  USBD_VIDEO_VSFrameDescTypeDef *pVSFrameDesc = USBD_VIDEO_GetVSFrameDesc(USBD_VIDEO_CfgDesc);
   if (pVSFrameDesc != NULL)
   {
     pVSFrameDesc->dwMinBitRate = UVC_MIN_BIT_RATE(UVC_CAM_FPS_FS);
@@ -834,6 +862,7 @@ static uint8_t  *USBD_VIDEO_GetFSCfgDesc(uint16_t *length)
     pVSFrameDesc->dwDefaultFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_FS);
     pVSFrameDesc->dwMinFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_FS);
   }
+#endif
 
   *length = (uint16_t)(sizeof(USBD_VIDEO_CfgDesc));
   return USBD_VIDEO_CfgDesc;
@@ -848,13 +877,24 @@ static uint8_t  *USBD_VIDEO_GetFSCfgDesc(uint16_t *length)
 static uint8_t  *USBD_VIDEO_GetHSCfgDesc(uint16_t *length)
 {
   USBD_EpDescTypedef *pEpDesc = USBD_VIDEO_GetEpDesc(USBD_VIDEO_CfgDesc, UVC_IN_EP);
-  USBD_VIDEO_VSFrameDescTypeDef *pVSFrameDesc = USBD_VIDEO_GetVSFrameDesc(USBD_VIDEO_CfgDesc);
 
   if (pEpDesc != NULL)
   {
     pEpDesc->wMaxPacketSize = UVC_ISO_HS_MPS;
   }
 
+#ifdef USBD_UVC_FORMAT_FRAME_BASED
+  USBD_VIDEO_VSFrameBasedFrameDescTypeDef *pVSFrameDesc =
+    (USBD_VIDEO_VSFrameBasedFrameDescTypeDef *)USBD_VIDEO_GetVSFrameDesc(USBD_VIDEO_CfgDesc);
+  if (pVSFrameDesc != NULL)
+  {
+    pVSFrameDesc->dwMinBitRate = UVC_MIN_BIT_RATE(UVC_CAM_FPS_HS);
+    pVSFrameDesc->dwMaxBitRate = UVC_MAX_BIT_RATE(UVC_CAM_FPS_HS);
+    pVSFrameDesc->dwDefaultFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_HS);
+    pVSFrameDesc->dwFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_HS);
+  }
+#else
+  USBD_VIDEO_VSFrameDescTypeDef *pVSFrameDesc = USBD_VIDEO_GetVSFrameDesc(USBD_VIDEO_CfgDesc);
   if (pVSFrameDesc != NULL)
   {
     pVSFrameDesc->dwMinBitRate = UVC_MIN_BIT_RATE(UVC_CAM_FPS_HS);
@@ -862,6 +902,7 @@ static uint8_t  *USBD_VIDEO_GetHSCfgDesc(uint16_t *length)
     pVSFrameDesc->dwDefaultFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_HS);
     pVSFrameDesc->dwMinFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_HS);
   }
+#endif
 
   *length = (uint16_t)(sizeof(USBD_VIDEO_CfgDesc));
   return USBD_VIDEO_CfgDesc;
@@ -876,13 +917,24 @@ static uint8_t  *USBD_VIDEO_GetHSCfgDesc(uint16_t *length)
 static uint8_t  *USBD_VIDEO_GetOtherSpeedCfgDesc(uint16_t *length)
 {
   USBD_EpDescTypedef *pEpDesc = USBD_VIDEO_GetEpDesc(USBD_VIDEO_CfgDesc, UVC_IN_EP);
-  USBD_VIDEO_VSFrameDescTypeDef *pVSFrameDesc = USBD_VIDEO_GetVSFrameDesc(USBD_VIDEO_CfgDesc);
 
   if (pEpDesc != NULL)
   {
     pEpDesc->wMaxPacketSize = UVC_ISO_FS_MPS;
   }
 
+#ifdef USBD_UVC_FORMAT_FRAME_BASED
+  USBD_VIDEO_VSFrameBasedFrameDescTypeDef *pVSFrameDesc =
+    (USBD_VIDEO_VSFrameBasedFrameDescTypeDef *)USBD_VIDEO_GetVSFrameDesc(USBD_VIDEO_CfgDesc);
+  if (pVSFrameDesc != NULL)
+  {
+    pVSFrameDesc->dwMinBitRate = UVC_MIN_BIT_RATE(UVC_CAM_FPS_FS);
+    pVSFrameDesc->dwMaxBitRate = UVC_MAX_BIT_RATE(UVC_CAM_FPS_FS);
+    pVSFrameDesc->dwDefaultFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_FS);
+    pVSFrameDesc->dwFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_FS);
+  }
+#else
+  USBD_VIDEO_VSFrameDescTypeDef *pVSFrameDesc = USBD_VIDEO_GetVSFrameDesc(USBD_VIDEO_CfgDesc);
   if (pVSFrameDesc != NULL)
   {
     pVSFrameDesc->dwMinBitRate = UVC_MIN_BIT_RATE(UVC_CAM_FPS_FS);
@@ -890,6 +942,7 @@ static uint8_t  *USBD_VIDEO_GetOtherSpeedCfgDesc(uint16_t *length)
     pVSFrameDesc->dwDefaultFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_FS);
     pVSFrameDesc->dwMinFrameInterval = UVC_INTERVAL(UVC_CAM_FPS_FS);
   }
+#endif
 
   *length = (uint16_t)(sizeof(USBD_VIDEO_CfgDesc));
   return USBD_VIDEO_CfgDesc;
@@ -947,7 +1000,8 @@ static void *USBD_VIDEO_GetVSFrameDesc(uint8_t *pConfDesc)
       pdesc = USBD_VIDEO_GetNextDesc((uint8_t *)pdesc, &ptr);
 
       if ((pdesc->bDescriptorSubType == VS_FRAME_MJPEG) ||
-          (pdesc->bDescriptorSubType == VS_FRAME_UNCOMPRESSED))
+          (pdesc->bDescriptorSubType == VS_FRAME_UNCOMPRESSED) ||
+          (pdesc->bDescriptorSubType == VS_FRAME_FRAME_BASED))
       {
         pVSFrameDesc = (USBD_VIDEO_VSFrameDescTypeDef *)(void *)pdesc;
         break;

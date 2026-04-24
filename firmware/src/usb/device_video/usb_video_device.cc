@@ -33,7 +33,7 @@ void UsbVideoDevice::stop() {
 	USBD_DeInit(pdev);
 }
 
-void UsbVideoDevice::set_framebuffer(uint16_t *fb) {
+void UsbVideoDevice::set_framebuffer(uint8_t *fb) {
 	shadow_fb = fb;
 }
 
@@ -61,20 +61,21 @@ int8_t UsbVideoDevice::Video_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t 
 		return 0;
 	}
 
-	// Shadow buffer is already YUY2 (converted on A7 side).
-	// 2 bytes per pixel in YUY2, same as total byte count.
+	// Shadow buffer is already in the UVC pixel format (YUY2 or BGR24,
+	// selected at compile time in usbd_conf.h and converted on A7 side).
 	constexpr uint32_t payload_per_packet = UVC_PACKET_SIZE - 2;
-	// Align to 4 bytes (YUY2 macro-pixel = 4 bytes = 2 pixels)
+	// Align to 4 bytes for USB DMA; works for both YUY2 (4-byte macro-pixel)
+	// and BGR24 (3-byte pixel — 1020 bytes = 340 whole pixels).
 	constexpr uint32_t bytes_per_packet = payload_per_packet & ~3u;
-	constexpr uint32_t total_bytes = UVC_WIDTH * UVC_HEIGHT * 2;
+	constexpr uint32_t total_bytes = UVC_WIDTH * UVC_HEIGHT * (UVC_BITS_PER_PIXEL / 8U);
 
 	Debug::Pin1::high();
 	if (pixel_offset < total_bytes) {
 		uint32_t remaining = total_bytes - pixel_offset;
 		uint32_t bytes_this_packet = (remaining < bytes_per_packet) ? remaining : bytes_per_packet;
 
-		// Direct memcpy from pre-converted YUY2 shadow buffer
-		auto *src = reinterpret_cast<const uint8_t *>(shadow_fb) + pixel_offset;
+		// Direct memcpy from pre-converted shadow buffer
+		auto *src = shadow_fb + pixel_offset;
 		std::memcpy(packet_buf, src, bytes_this_packet);
 
 		*pbuf = packet_buf;

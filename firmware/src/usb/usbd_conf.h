@@ -66,7 +66,7 @@ extern "C" {
 #define USB_BB_MAX_NUM_ALT_MODE 0x2U
 
 /* UVC Video Class Configuration */
-#define USBD_UVC_FORMAT_UNCOMPRESSED
+#include "device_video/uvc_format_config.hh"
 
 #define UVC_WIDTH 320U
 #define UVC_HEIGHT 240U
@@ -81,8 +81,27 @@ extern "C" {
 #define UVC_ISO_HS_MPS 1024U
 #define UVC_PACKET_SIZE 1024U
 
+#ifdef USE_UVC_FORMAT_BGR3
+// BGR24 advertised via UVC "Frame Based" format (VS_FORMAT_FRAME_BASED, subtype 0x10).
+// Uncompressed subtype (0x04) only officially supports YUV GUIDs (YUY2/NV12/...),
+// so macOS and Windows reject non-YUV GUIDs there. Frame Based permits any GUID.
+// GUID: {e436eb7d-524f-11ce-9f53-0020af0ba770}  (MEDIASUBTYPE_RGB24 / "BGR3")
+#define USBD_UVC_FORMAT_FRAME_BASED
+#define UVC_BITS_PER_PIXEL 24U
+#define UVC_UNCOMPRESSED_GUID 0xE436EB7DU
+#define UVC_GUID_SUFFIX_BYTES 0x4F, 0x52, 0xCE, 0x11, 0x9F, 0x53, 0x00, 0x20, 0xAF, 0x0B, 0xA7, 0x70
+// No RGB->YUV matrix was applied (BGR24 pass-through), so report "Unspecified"
+// instead of the library default of BT.601 (0x04).
+#define UVC_MATRIX_COEFFICIENTS 0x00U
+#else
+// YUY2 4:2:2 advertised via UVC "Uncompressed" format (subtype 0x04).
+// GUID: {32595559-0000-0010-8000-00AA00389B71}
+#define USBD_UVC_FORMAT_UNCOMPRESSED
 #define UVC_BITS_PER_PIXEL 16U
-#define UVC_UNCOMPRESSED_GUID UVC_GUID_YUY2
+#define UVC_UNCOMPRESSED_GUID 0x32595559U
+#define UVC_GUID_SUFFIX_BYTES 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71
+#endif
+
 // ST library formula has a bug (*16/2 instead of *16/8), override with correct value
 #define UVC_MAX_FRAME_SIZE (UVC_WIDTH * UVC_HEIGHT * UVC_BITS_PER_PIXEL / 8U)
 
