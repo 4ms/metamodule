@@ -11,6 +11,5 @@
 //   - the M4 side (src/usb/usbd_conf.h + device_video/usb_video_device.cc),
 //     which advertises the format in the USB descriptor and streams bytes.
 //
-// TODO: replace with a runtime selector once BGR3 is verified on hardware.
 
 //#define USE_UVC_FORMAT_BGR3
