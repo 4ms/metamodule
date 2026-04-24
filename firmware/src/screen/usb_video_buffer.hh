@@ -17,16 +17,18 @@ private:
 	// Points to a shared memory buffer accessible from both cores.
 	static inline uint8_t *uvc_shadow_fb = nullptr;
 	static inline bool mirror_x = false;
+	static inline bool enabled = true;
+
 #ifdef USE_UVC_FORMAT_BGR3
 	static inline Format format = Format::BGR24;
+	static constexpr bool dither = false
 #else
 	static inline Format format = Format::YUY2;
+	static constexpr bool dither = true;
 #endif
 
-	static constexpr bool dither = true;
-
-	template<auto Writer, int BytesPerPixel>
-	static void flush_impl(int xstart, int ystart, int xend, int yend, uint16_t const *buffer) {
+		template<auto Writer, int BytesPerPixel>
+		static void flush_impl(int xstart, int ystart, int xend, int yend, uint16_t const *buffer) {
 		auto region_w = xend - xstart + 1;
 		auto src = buffer;
 		auto *dest_buf = uvc_shadow_fb;
@@ -126,11 +128,15 @@ public:
 		return format;
 	}
 
+	static void enable(bool do_enable) {
+		enabled = do_enable;
+	}
+
 	// Convert a flushed region from RGB565 into the shadow framebuffer
 	// using the currently selected format. The M4 USB side then memcpys
 	// the shadow buffer directly into USB packets.
 	static void flush(int xstart, int ystart, int xend, int yend, uint16_t *buffer) {
-		if (!uvc_shadow_fb)
+		if (!enabled || !uvc_shadow_fb)
 			return;
 
 		if (format == Format::BGR24)
