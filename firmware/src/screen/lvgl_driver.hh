@@ -9,7 +9,7 @@
 #include "params/params.hh"
 #include "screen/screen_writer.hh"
 #include "uart_log.hh"
-#include "usb/device_video/rgb565_to_yuy2.hh"
+#include "usb_video_buffer.hh"
 #include <span>
 
 // #define MONKEYROTARY
@@ -78,12 +78,6 @@ class MMDisplay {
 
 	static inline std::array<lv_color_t, BufferSize> testbuf;
 
-	// Pointer to external shadow framebuffer for USB video streaming.
-	// Set by init(), points to a shared memory buffer accessible from both cores.
-	static inline uint16_t *uvc_shadow_fb = nullptr;
-
-	static inline bool mirror_x = false;
-
 public:
 	static void init(MetaParams &metaparams, Screensaver &screensaver) {
 		m = &metaparams;
@@ -103,7 +97,7 @@ public:
 	}
 
 	static void set_mirroring(bool mirror) {
-		mirror_x = mirror;
+		UsbVideoBuffer::set_mirroring(mirror);
 	}
 
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
@@ -111,34 +105,7 @@ public:
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
 
-		// Convert flushed region from RGB565 to YUY2 into the shadow framebuffer.
-		// The M4 USB side can then memcpy directly without any per-pixel work.
-		Debug::Pin0::high();
-		if (uvc_shadow_fb) {
-			auto region_w = area->x2 - area->x1 + 1;
-			auto src = pixbuf;
-			auto *yuy2_buf = reinterpret_cast<uint8_t *>(uvc_shadow_fb);
-
-			if (mirror_x) {
-				for (auto y = area->y1; y <= area->y2; y++) {
-					auto *yuy2_row = &yuy2_buf[y * ScreenBufferConf::viewWidth * 2];
-					auto dest_x = ScreenBufferConf::viewWidth - 1 - area->x1;
-					for (int i = 0; i < region_w; i++) {
-						write_yuy2_pixel(yuy2_row, dest_x - i, src[i]);
-					}
-					src += region_w;
-				}
-			} else {
-				for (auto y = area->y1; y <= area->y2; y++) {
-					auto *yuy2_row = &yuy2_buf[y * ScreenBufferConf::viewWidth * 2];
-					for (int i = 0; i < region_w; i++) {
-						write_yuy2_pixel(yuy2_row, area->x1 + i, src[i]);
-					}
-					src += region_w;
-				}
-			}
-		}
-		Debug::Pin0::low();
+		UsbVideoBuffer::flush(area->x1, area->y1, area->x2, area->y2, pixbuf);
 
 		last_transfer_start_time = HAL_GetTick();
 		last_area = *area;
@@ -165,10 +132,6 @@ public:
 				// _spi_driver.transfer_partial_frame(last_area.x1, last_area.y1, last_area.x2, last_area.y2, last_pixbuf);
 			}
 		}
-	}
-
-	static void set_uvc_shadow_fb(uint16_t *fb) {
-		uvc_shadow_fb = fb;
 	}
 
 	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
