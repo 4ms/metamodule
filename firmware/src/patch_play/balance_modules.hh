@@ -66,7 +66,8 @@ struct Balancer {
 		for (auto core = 0u; core < NumCores; core++) {
 			unsigned sum = 0;
 			for (auto idx : cores.parts[core]) {
-				pr_dbg("Core %d: Module %u (%s): %u\n", core, idx, slugs[idx].c_str(), times[idx - 1]);
+				pr_dbg(
+					"Core %d: Module %u %s: %u\n", core, idx, slugs.size() ? slugs[idx].c_str() : "", times[idx - 1]);
 				sum += times[idx - 1];
 			}
 			pr_dbg("Core %d Total: %u\n", core, sum);
