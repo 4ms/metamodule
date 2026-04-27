@@ -42,7 +42,6 @@ struct UsbDeviceManager {
 	}
 
 	void stop() {
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		if (video_mode)
 			video.stop();
 		else

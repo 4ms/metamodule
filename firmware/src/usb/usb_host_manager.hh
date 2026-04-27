@@ -45,7 +45,6 @@ public:
 		midi_host.init();
 		msc_host.init();
 
-		mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 		auto err = USBH_Start(&usbhost);
 		if (err != USBH_OK)
 			pr_err("Error starting host\n");
@@ -54,11 +53,14 @@ public:
 		pr_trace("VBus high, starting host\n");
 		// HAL_Delay(500);
 	}
-	void stop() {
+
+	void vbus_off() {
 		src_enable.low();
 		HAL_Delay(250);
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-		HAL_Delay(250);
+	}
+
+	void stop() {
+		HAL_Delay(100);
 		USBH_Stop(&usbhost);
 		usbhost.pData = nullptr;
 		USBH_DeInit(&usbhost); //sets hhcd to NULL?
