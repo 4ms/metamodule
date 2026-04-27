@@ -55,6 +55,7 @@ public:
 		usb_host.init();
 
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 3, 0);
 		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] {
 			using enum FUSB302::Device::ConnectedState;
 
@@ -83,17 +84,21 @@ public:
 				pr_info("Starting host\n");
 				state = newstate;
 				usb_host.start();
+				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 
 			} else if (newstate == None) {
 				if (state == AsHost) {
 					pr_info("Stopping host\n");
 					state = None;
+					usb_host.vbus_off();
+					mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 					usb_host.stop();
 				}
 
 				if (state == AsDevice) {
 					pr_info("Stopping device\n");
 					state = None;
+					mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 					usb_device.stop();
 				}
 
