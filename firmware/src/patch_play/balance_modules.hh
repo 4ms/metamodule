@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-#define PRINT_LOAD_BALANCE
+// #define PRINT_LOAD_BALANCE
 #ifdef PRINT_LOAD_BALANCE
 #include "console/pr_dbg.hh"
 #endif
@@ -35,8 +35,6 @@ struct Balancer {
 		for (auto iter_i = 0u; iter_i < NumIterations + DropFirst; iter_i++) {
 
 			for (size_t module_i = 1; module_i < num_modules; module_i++) {
-				// Measuring in reverse order doesn't change anything:
-				// for (size_t module_i = num_modules - 1; module_i > 0; module_i--) {
 
 				counter.start_measurement();
 				run(module_i);
@@ -130,25 +128,14 @@ struct Balancer {
 		uint64_t best_cost = UINT64_MAX;
 		size_t best_idx = 0;
 
-#ifdef PRINT_LOAD_BALANCE
-		pr_dbg("Testing %zu partition candidates\n", candidates.size());
-#endif
-
 		for (auto i = 0u; i < candidates.size(); i++) {
 			cores = candidates[i];
 			uint64_t cost = apply_and_measure();
 
 #ifdef PRINT_LOAD_BALANCE
 			pr_dbg("Candidate %u: cost=%llu\n", i, (unsigned long long)cost);
-			for (auto core = 0u; core < NumCores; core++) {
-				unsigned sum = 0;
-				for (auto idx : cores.parts[core]) {
-					pr_dbg("    Core %d: Module %u: %u\n", core, idx, times[idx - 1]);
-					sum += times[idx - 1];
-				}
-				pr_dbg("    Core %d Total: %u\n", core, sum);
-			}
 #endif
+			print_times(times, {});
 
 			if (cost < best_cost) {
 				best_cost = cost;
@@ -169,7 +156,8 @@ struct Balancer {
 		for (auto core = 0u; core < NumCores; core++) {
 			unsigned sum = 0;
 			for (auto idx : cores.parts[core]) {
-				pr_dbg("Core %d: Module %u (%s): %u\n", core, idx, slugs[idx].c_str(), times[idx - 1]);
+				pr_dbg(
+					"Core %d: Module %u %s: %u\n", core, idx, slugs.size() ? slugs[idx].c_str() : "", times[idx - 1]);
 				sum += times[idx - 1];
 			}
 			pr_dbg("Core %d Total: %u\n", core, sum);
