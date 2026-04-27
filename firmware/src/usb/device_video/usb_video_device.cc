@@ -75,7 +75,7 @@ int8_t UsbVideoDevice::Video_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t 
 	constexpr uint32_t bytes_per_packet = payload_per_packet & ~3u;
 	constexpr uint32_t total_bytes = UVC_WIDTH * UVC_HEIGHT * (UVC_BITS_PER_PIXEL / 8U);
 
-	Debug::Pin1::high();
+	// ~22% load
 	if (pixel_offset < total_bytes) {
 		uint32_t remaining = total_bytes - pixel_offset;
 		uint32_t bytes_this_packet = (remaining < bytes_per_packet) ? remaining : bytes_per_packet;
@@ -91,7 +91,6 @@ int8_t UsbVideoDevice::Video_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t 
 		// End of frame: header-only packet signals new frame
 		*psize = 2;
 	}
-	Debug::Pin1::low();
 
 	*pcktidx = (uint16_t)packet_index;
 
