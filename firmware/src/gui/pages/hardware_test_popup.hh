@@ -34,7 +34,7 @@ struct HardwareCheckPopup {
 		lv_obj_add_flag(btn1, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		lv_hide(ui_HWTestPagePanel);
 
-		lv_obj_add_style(ui_HWTestMidiLabel, mc_palette_main_border(1), LV_PART_MAIN);
+		lv_obj_add_style(ui_HWTestMidiLabel, metacolor_style_border(METACOLOR_RED_HIGHLIGHT), LV_PART_MAIN);
 		lv_obj_set_style_border_opa(ui_HWTestMidiLabel, LV_OPA_100, LV_PART_MAIN);
 	}
 
@@ -106,8 +106,10 @@ struct HardwareCheckPopup {
 			lv_label_set_text(ui_GateInData1, params.gate_ins[0].is_high() ? "X" : "-");
 			lv_label_set_text(ui_GateInData2, params.gate_ins[1].is_high() ? "X" : "-");
 
-			lv_obj_set_style_text_color(ui_GateInData1, b(6) ? Gui::palette_main[2] : mc(METACOLOR_WHITE), LV_PART_MAIN);
-			lv_obj_set_style_text_color(ui_GateInData2, b(7) ? Gui::palette_main[2] : mc(METACOLOR_WHITE), LV_PART_MAIN);
+			lv_obj_set_style_text_color(
+				ui_GateInData1, b(6) ? Gui::palette_main[2] : mc(METACOLOR_WHITE), LV_PART_MAIN);
+			lv_obj_set_style_text_color(
+				ui_GateInData2, b(7) ? Gui::palette_main[2] : mc(METACOLOR_WHITE), LV_PART_MAIN);
 
 			for (auto [i, ain] : enumerate(params.smoothed_ins)) {
 				if (i >= last_injack_vals.size() || i >= injack_labels.size())

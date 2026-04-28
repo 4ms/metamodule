@@ -58,8 +58,6 @@ public:
 		metaparams.clear();
 
 		MMDisplay::init(metaparams, screensaver);
-		ColorStyles::init();
-		Gui::init_lvgl_styles();
 
 		if (!Settings::read_settings(patch_storage, &settings, Volume::NorFlash)) {
 			settings = UserSettings{};
@@ -68,6 +66,7 @@ public:
 			}
 		}
 
+		ColorStyles::init();
 		Scheme::set(settings.color_scheme.scheme_id);
 		Gui::init_lvgl_styles();
 

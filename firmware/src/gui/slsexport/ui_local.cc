@@ -84,41 +84,37 @@ static void scroll_fully_viewed_cb(lv_event_t *event) {
 }
 
 void format_mapping_circle(lv_obj_t *circle, MapButtonType type, unsigned panel_jack_id) {
-	lv_style_t *circle_bg_style = nullptr;
-	lv_style_t *circle_border_style = mc_border(METACOLOR_BLACK);
-	lv_style_t *letter_text_style = mc_text(METACOLOR_TEXT_DARK);
+	lv_color_t circle_bgcolor;
+	lv_color_t circle_bordercolor = mc(METACOLOR_BLACK);
 	unsigned circle_borderwidth = 0;
 	std::string letterchar = "";
 
 	switch (type) {
 		case MapButtonType::Input:
-			circle_bg_style = Gui::mapped_jack_bg_style(panel_jack_id);
+			circle_bgcolor = Gui::mapped_jack_color(panel_jack_id);
 			letterchar = get_panel_brief_name(JackInput{}, panel_jack_id);
-			// jack_palette[6] is black; only that case wants white text. The
-			// jack panel ids that map to that entry are panel_id % 8 == 6, but
-			// the boundary depends on the MIDI/non-MIDI branch in mapped_jack_color.
-			if (!Midi::is_midi_panel_id(panel_jack_id) && (panel_jack_id % 8) == 6)
-				letter_text_style = mc_text(METACOLOR_WHITE);
 			break;
 
 		case MapButtonType::Output:
-			circle_bg_style = mc_bg(METACOLOR_GREY_88);
-			circle_border_style = Gui::mapped_jack_border_style(panel_jack_id);
+			circle_bgcolor = mc(METACOLOR_GREY_88);
+			circle_bordercolor = Gui::mapped_jack_color(panel_jack_id);
 			circle_borderwidth = 2;
 			letterchar = get_panel_brief_name(JackOutput{}, panel_jack_id);
 			break;
 
 		case MapButtonType::MIDIJack:
 			panel_jack_id = Midi::strip_midi_channel(panel_jack_id);
-			circle_bg_style = Gui::mapped_jack_bg_style(panel_jack_id);
+			circle_bgcolor = Gui::mapped_jack_color(panel_jack_id);
 			letterchar = get_panel_brief_name(JackInput{}, panel_jack_id);
 			break;
 
 		case MapButtonType::MIDIParam:
-			circle_bg_style = Gui::get_knob_bg_style(panel_jack_id);
+			circle_bgcolor = Gui::get_knob_color(panel_jack_id);
 			letterchar = get_panel_brief_name(JackInput{}, panel_jack_id);
 			break;
 	}
+
+	auto letter_color = circle_bgcolor.full == lv_color_black().full ? mc(METACOLOR_WHITE) : mc(METACOLOR_TEXT_DARK);
 
 	if (type == MapButtonType::Output) {
 		letterchar = get_panel_brief_name(JackOutput{}, panel_jack_id);
@@ -143,11 +139,11 @@ void format_mapping_circle(lv_obj_t *circle, MapButtonType type, unsigned panel_
 						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE |
 						  LV_OBJ_FLAG_SCROLL_CHAIN);
 	lv_obj_set_style_radius(circle, 6, LV_STATE_DEFAULT);
-	lv_obj_add_style(circle, circle_bg_style, LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(circle, circle_bgcolor, LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(circle, 255, LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(circle, circle_borderwidth, LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(circle, LV_OPA_100, LV_STATE_DEFAULT);
-	lv_obj_add_style(circle, circle_border_style, LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(circle, circle_bordercolor, LV_STATE_DEFAULT);
 
 	// auto letter = lv_label_create(circle);
 	auto letter = lv_obj_get_child(circle, 0);
@@ -158,7 +154,7 @@ void format_mapping_circle(lv_obj_t *circle, MapButtonType type, unsigned panel_
 	lv_obj_clear_flag(letter,
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 						  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
-	lv_obj_add_style(letter, letter_text_style, LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(letter, letter_color, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(letter, 255, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(letter, LV_TEXT_ALIGN_CENTER, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(letter, font, LV_STATE_DEFAULT);
@@ -167,6 +163,91 @@ void format_mapping_circle(lv_obj_t *circle, MapButtonType type, unsigned panel_
 	lv_obj_set_style_pad_top(letter, 0, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(letter, 2, LV_STATE_DEFAULT);
 }
+
+// void format_mapping_circle(lv_obj_t *circle, MapButtonType type, unsigned panel_jack_id) {
+// 	lv_style_t *circle_bg_style = nullptr;
+// 	lv_style_t *circle_border_style = mc_border(METACOLOR_BLACK);
+// 	lv_style_t *letter_text_style = mc_text(METACOLOR_TEXT_DARK);
+// 	unsigned circle_borderwidth = 0;
+// 	std::string letterchar = "";
+
+// 	switch (type) {
+// 		case MapButtonType::Input:
+// 			circle_bg_style = Gui::mapped_jack_bg_style(panel_jack_id);
+// 			letterchar = get_panel_brief_name(JackInput{}, panel_jack_id);
+// 			// jack_palette[6] is black; only that case wants white text. The
+// 			// jack panel ids that map to that entry are panel_id % 8 == 6, but
+// 			// the boundary depends on the MIDI/non-MIDI branch in mapped_jack_color.
+// 			if (!Midi::is_midi_panel_id(panel_jack_id) && (panel_jack_id % 8) == 6)
+// 				letter_text_style = mc_text(METACOLOR_WHITE);
+// 			break;
+
+// 		case MapButtonType::Output:
+// 			circle_bg_style = mc_bg(METACOLOR_GREY_88);
+// 			circle_border_style = Gui::mapped_jack_border_style(panel_jack_id);
+// 			circle_borderwidth = 2;
+// 			letterchar = get_panel_brief_name(JackOutput{}, panel_jack_id);
+// 			break;
+
+// 		case MapButtonType::MIDIJack:
+// 			panel_jack_id = Midi::strip_midi_channel(panel_jack_id);
+// 			circle_bg_style = Gui::mapped_jack_bg_style(panel_jack_id);
+// 			letterchar = get_panel_brief_name(JackInput{}, panel_jack_id);
+// 			break;
+
+// 		case MapButtonType::MIDIParam:
+// 			circle_bg_style = Gui::get_knob_bg_style(panel_jack_id);
+// 			letterchar = get_panel_brief_name(JackInput{}, panel_jack_id);
+// 			break;
+// 	}
+
+// 	if (type == MapButtonType::Output) {
+// 		letterchar = get_panel_brief_name(JackOutput{}, panel_jack_id);
+// 	} else {
+// 		letterchar = get_panel_brief_name(JackInput{}, panel_jack_id);
+// 	}
+
+// 	auto font = letterchar.size() > 2 ? &ui_font_MuseoSansRounded50014 :
+// 				letterchar.size() > 1 ? &ui_font_MuseoSansRounded70014 :
+// 										&ui_font_MuseoSansRounded70016;
+
+// 	auto circle_width = letterchar.length() > 3 ? 45 : letterchar.length() > 2 ? 35 : letterchar.length() > 1 ? 30 : 20;
+
+// 	lv_obj_set_width(circle, circle_width);
+// 	lv_obj_set_height(circle, 20);
+// 	lv_obj_set_x(circle, 0);
+// 	lv_obj_set_y(circle, 31);
+// 	lv_obj_set_align(circle, LV_ALIGN_TOP_MID);
+// 	lv_obj_add_flag(circle, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+// 	lv_obj_clear_flag(circle,
+// 					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
+// 						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE |
+// 						  LV_OBJ_FLAG_SCROLL_CHAIN);
+// 	lv_obj_set_style_radius(circle, 6, LV_STATE_DEFAULT);
+// 	lv_obj_add_style(circle, circle_bg_style, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_bg_opa(circle, 255, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_border_width(circle, circle_borderwidth, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_border_opa(circle, LV_OPA_100, LV_STATE_DEFAULT);
+// 	lv_obj_add_style(circle, circle_border_style, LV_STATE_DEFAULT);
+
+// 	// auto letter = lv_label_create(circle);
+// 	auto letter = lv_obj_get_child(circle, 0);
+// 	lv_obj_set_width(letter, LV_SIZE_CONTENT);
+// 	lv_obj_set_height(letter, LV_SIZE_CONTENT);
+// 	lv_obj_set_align(letter, LV_ALIGN_CENTER);
+// 	lv_label_set_text(letter, letterchar.data());
+// 	lv_obj_clear_flag(letter,
+// 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+// 						  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
+// 	lv_obj_add_style(letter, letter_text_style, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_opa(letter, 255, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_align(letter, LV_TEXT_ALIGN_CENTER, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_text_font(letter, font, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_pad_left(letter, 0, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_pad_right(letter, 0, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_pad_top(letter, 0, LV_STATE_DEFAULT);
+// 	lv_obj_set_style_pad_bottom(letter, 2, LV_STATE_DEFAULT);
+// }
 
 lv_obj_t *create_mapping_circle_item(lv_obj_t *parent, MapButtonType type, unsigned panel_jack_id, const char *name) {
 
@@ -624,11 +705,13 @@ lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slide
 	lv_obj_set_style_outline_opa(slider, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(slider, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(slider, 1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-	lv_obj_add_style(slider, mc_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
+	lv_obj_add_style(
+		slider, mc_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(slider, 200, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(slider, 2, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(slider, 1, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
-	lv_obj_add_style(slider, mc_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
+	lv_obj_add_style(
+		slider, mc_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_opa(slider, 255, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_width(slider, 2, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_pad(slider, 1, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);

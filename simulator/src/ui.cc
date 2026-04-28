@@ -41,12 +41,6 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 	params.clear();
 	metaparams.clear();
 
-	ColorStyles::init();
-	Gui::init_lvgl_styles();
-	page_manager.init();
-
-	tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
-
 	if (!Settings::read_settings(file_storage_proxy, &settings)) {
 		settings = UserSettings{};
 		pr_warn("Could not read settings.yml, using defaults\n");
@@ -54,6 +48,14 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 			pr_err("Failed to write settings file\n");
 		}
 	}
+
+	ColorStyles::init();
+	Scheme::set(settings.color_scheme.scheme_id);
+	Gui::init_lvgl_styles();
+
+	page_manager.init();
+
+	tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 
 	metaparams.button_exp_connected = 0b0001;
 
