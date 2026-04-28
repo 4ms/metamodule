@@ -129,6 +129,8 @@ add_executable(
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fs/helpers.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
+  ${FWDIR}/src/gui/colors/color_scheme.cc
+  ${FWDIR}/src/gui/colors/color_styles.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/elements/panel_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
@@ -214,6 +216,8 @@ add_executable(
 set_source_files_properties(
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
+  ${FWDIR}/src/gui/colors/color_scheme.cc
+  ${FWDIR}/src/gui/colors/color_styles.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
   ${FWDIR}/src/gui/pages/module_view/draw_module.cc

@@ -4,6 +4,7 @@
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "gui/button_exp_nav.hh"
+#include "gui/colors/color_styles.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params_dbg_print.hh"
@@ -56,6 +57,7 @@ public:
 		metaparams.clear();
 
 		MMDisplay::init(metaparams, screensaver);
+		ColorStyles::init();
 		Gui::init_lvgl_styles();
 
 		if (!Settings::read_settings(patch_storage, &settings, Volume::NorFlash)) {
