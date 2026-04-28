@@ -1,6 +1,7 @@
 #pragma once
 #include "fw_update/manifest_parse.hh"
 #include "fw_update/updater_proxy.hh"
+#include "gui/colors/color_scheme.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/system_menu_tab_base.hh"
@@ -217,7 +218,7 @@ private:
 	}
 
 	void display_manifest_found() {
-		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, mc(METACOLOR_LV_GREEN_LIGHT), LV_PART_MAIN);
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
 							  "Update found on %s\nVersion %u.%u.%u\nIncludes: %s",
 							  manifest_file_vol == Volume::USB ? "USB" : "SD card",
@@ -237,14 +238,14 @@ private:
 	void display_file_not_found() {
 		lv_label_set_text(ui_SystemMenuUpdateMessage,
 						  "Insert an SD card or USB drive containing a firmware update file.");
-		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, mc(METACOLOR_LV_RED_LIGHT), LV_PART_MAIN);
 		lv_hide(ui_SystemMenuUpdateFWBut);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
 	}
 
 	void display_preview_failed(std::string_view reason) {
-		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, mc(METACOLOR_LV_RED_LIGHT), LV_PART_MAIN);
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
 							  "Firmware update file found on %s: %s\n%.*s",
 							  manifest_file_vol == Volume::USB ? "USB" : "SD",
@@ -291,13 +292,13 @@ private:
 	}
 
 	void display_ram_loaded() {
-		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, mc(METACOLOR_LV_GREEN_LIGHT), LV_PART_MAIN);
 		lv_label_set_text(ui_SystemMenuUpdateMessage,
 						  "Writing to Flash. DO NOT POWER DOWN. This may take several minutes");
 	}
 
 	void display_update_failed(std::string_view message) {
-		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, mc(METACOLOR_LV_RED_LIGHT), LV_PART_MAIN);
 		lv_label_set_text_fmt(
 			ui_SystemMenuUpdateMessage, "Updating firmware failed!\n%.*s", (int)message.length(), message.data());
 		lv_hide(ui_FWUpdateSpinner);
@@ -312,7 +313,7 @@ private:
 	}
 
 	void display_success() {
-		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, mc(METACOLOR_LV_GREEN_LIGHT), LV_PART_MAIN);
 		lv_label_set_text(ui_SystemMenuUpdateMessage, "Success! Firmware has been updated. Power off and back on now");
 
 		lv_hide(ui_FWUpdateSpinner);

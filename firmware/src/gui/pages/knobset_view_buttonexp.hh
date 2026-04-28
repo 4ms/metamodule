@@ -80,13 +80,13 @@ struct ButtonExpanderMapsView {
 			lv_color_t num;
 			lv_color_t label;
 			if (!exp_connected && has_mappings) {
-				bg = lv_color_hex(0x444444);
-				num = lv_color_hex(0xaaaaaa);
-				label = lv_color_hex(0x888888);
+				bg = mc(METACOLOR_GREY_44);
+				num = mc(METACOLOR_GREY_HIGHLIGHT);
+				label = mc(METACOLOR_GREY_88);
 			} else {
 				bg = Gui::get_buttonexp_color(0);
 				num = Gui::get_buttonexp_textcolor(0);
-				label = lv_color_white();
+				label = mc(METACOLOR_WHITE);
 			}
 
 			lv_foreach_child(col, [=](lv_obj_t *cont, int idx) {
@@ -150,7 +150,7 @@ struct ButtonExpanderMapsView {
 						auto textcolor = Gui::get_buttonexp_textcolor(value);
 						lv_obj_set_style_text_color(get_button_circle_number(child), textcolor, LV_PART_MAIN);
 
-						lv_obj_set_style_text_color(get_button_label(child), lv_color_white(), 0);
+						lv_obj_set_style_text_color(get_button_label(child), mc(METACOLOR_WHITE), 0);
 						return;
 					}
 				}
@@ -189,16 +189,16 @@ private:
 		lv_enable(cont);
 		auto circle = get_button_circle(cont);
 		lv_enable(circle);
-		lv_obj_set_style_bg_color(circle, lv_color_white(), LV_PART_MAIN);
+		lv_obj_set_style_bg_color(circle, mc(METACOLOR_WHITE), LV_PART_MAIN);
 		lv_obj_set_style_border_opa(circle, LV_OPA_100, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_color(circle, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_border_color(circle, mc(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
 	}
 
 	void disable(lv_obj_t *cont) {
 		lv_disable(cont);
 		auto circle = get_button_circle(cont);
 		lv_disable(circle);
-		lv_obj_set_style_bg_color(circle, lv_color_hex(0x888888), LV_PART_MAIN);
+		lv_obj_set_style_bg_color(circle, mc(METACOLOR_GREY_88), LV_PART_MAIN);
 		lv_obj_set_style_border_opa(circle, LV_OPA_0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(circle, LV_OPA_30, LV_STATE_DISABLED);
 	}

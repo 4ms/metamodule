@@ -127,77 +127,14 @@ struct Gui {
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
 
-	static constexpr std::array<lv_color_t, 19> palette_main = {
-		lv_color_make_rgb565(0xF4, 0x00, 0x00), // RED
-		lv_color_make_rgb565(0xF0, 0x63, 0xB2), // PINK
-		lv_color_make_rgb565(0x9C, 0x27, 0xB0), // PURPLE,
-		lv_color_make_rgb565(0x67, 0x3A, 0xB7), // DEEP_PURPLE,
-		lv_color_make_rgb565(0x3F, 0x51, 0xB5), // INDIGO,
-		// lv_color_make_rgb565(0x21, 0x96, 0xF3), // BLUE,
-		lv_color_make_rgb565(0x42, 0xA5, 0xF5), // BLUE,
-
-		// lv_color_make_rgb565(0x03, 0xA9, 0xF4), // LIGHT_BLUE,
-		lv_color_make_rgb565(0xBB, 0xDE, 0xFB),
-
-		// lv_color_make_rgb565(0x00, 0xAD, 0xEE), // CYAN, 00ADEE
-		lv_color_make_rgb565(0x26, 0xC6, 0xDA),
-
-		lv_color_make_rgb565(0x00, 0x96, 0x88), // TEAL,
-		lv_color_make_rgb565(0x00, 0xA5, 0x51), // GREEN, 00A551
-		lv_color_make_rgb565(0x8B, 0xC3, 0x4A), // LIGHT_GREEN,
-		lv_color_make_rgb565(0xCD, 0xDC, 0x39), // LIME,
-		lv_color_make_rgb565(0xFF, 0xF1, 0x00), // YELLOW, FFF100
-		lv_color_make_rgb565(0xFF, 0xC1, 0x07), // AMBER,
-		lv_color_make_rgb565(0xFA, 0xA6, 0x29), // ORANGE, FAA629
-		lv_color_make_rgb565(0xFF, 0x57, 0x22), // DEEP_ORANGE,
-		lv_color_make_rgb565(0x89, 0x65, 0x58), // BROWN,
-		lv_color_make_rgb565(0x60, 0x7D, 0x8B), // BLUE_GREY,
-		lv_color_make_rgb565(0x9E, 0x9E, 0x9E), // GREY
-	};
-
-	static inline std::array<lv_color_t, 8> jack_palette{
-		lv_color_make_rgb565(0xEA, 0x1C, 0x25),
-		lv_color_make_rgb565(0xFF, 0xF2, 0x00),
-		lv_color_make_rgb565(0x00, 0xAE, 0xEE),
-		lv_color_make_rgb565(0xF6, 0x61, 0x94),
-		lv_color_make_rgb565(0xFF, 0xA5, 0x29),
-		lv_color_make_rgb565(0x00, 0xA5, 0x52),
-		lv_color_make_rgb565(0x00, 0x00, 0x00),
-		lv_color_make_rgb565(0xFF, 0xFF, 0xFF),
-	};
-
-	static inline std::array<lv_color_t, 8> cable_palette{
-		palette_main[LV_PALETTE_RED],
-		palette_main[LV_PALETTE_BLUE],
-		palette_main[LV_PALETTE_GREEN],
-		palette_main[LV_PALETTE_GREY],
-		palette_main[LV_PALETTE_YELLOW],
-		palette_main[LV_PALETTE_ORANGE],
-		palette_main[LV_PALETTE_PINK],
-		palette_main[LV_PALETTE_PURPLE],
-	};
-
-	static inline std::array<lv_color_t, 8> knob_palette{
-		palette_main[LV_PALETTE_RED],
-		palette_main[LV_PALETTE_YELLOW],
-		palette_main[LV_PALETTE_CYAN],
-		palette_main[LV_PALETTE_PINK],
-		palette_main[LV_PALETTE_ORANGE],
-		palette_main[LV_PALETTE_GREEN],
-		palette_main[LV_PALETTE_GREY],		//?
-		palette_main[LV_PALETTE_BLUE_GREY], //?
-	};
-
-	static inline std::array<lv_color_t, 8> knob_disabled_palette{
-		palette_main[LV_PALETTE_RED],
-		palette_main[LV_PALETTE_YELLOW],
-		palette_main[LV_PALETTE_CYAN],
-		palette_main[LV_PALETTE_PINK],
-		palette_main[LV_PALETTE_ORANGE],
-		palette_main[LV_PALETTE_GREEN],
-		palette_main[LV_PALETTE_GREY],		//?
-		palette_main[LV_PALETTE_BLUE_GREY], //?
-	};
+	// Themable palettes — populated from the active ColorScheme at the top of
+	// init_lvgl_styles(). Zero-initialized at static-init time; do NOT read
+	// from these in any other static initializer or you'll get black.
+	static inline std::array<lv_color_t, 19> palette_main{};
+	static inline std::array<lv_color_t, 8> jack_palette{};
+	static inline std::array<lv_color_t, 8> cable_palette{};
+	static inline std::array<lv_color_t, 8> knob_palette{};
+	static inline std::array<lv_color_t, 8> knob_disabled_palette{};
 
 	static inline std::array<lv_color_t, 8> knob_indicator_palette{
 		lv_color_black(),
@@ -326,6 +263,29 @@ struct Gui {
 		brown_highlight_html = html_code(METACOLOR_BROWN_HIGHLIGHT);
 		orange_highlight_html = html_code(METACOLOR_ORANGE_HIGHLIGHT);
 
+		// Refresh the LVGL palette arrays from the active scheme.
+		const ColorScheme *scheme = Scheme::active_scheme();
+		for (size_t i = 0; i < palette_main.size(); ++i)
+			palette_main[i] = lv_color_hex(scheme->palette_main[i]);
+		for (size_t i = 0; i < jack_palette.size(); ++i)
+			jack_palette[i] = lv_color_hex(scheme->jack_palette[i]);
+
+		// Derived palettes — must be recomputed every call (knob_disabled
+		// is then darkened in-place below; consecutive calls would otherwise
+		// keep darkening the same data).
+		cable_palette = {
+			palette_main[LV_PALETTE_RED],    palette_main[LV_PALETTE_BLUE],
+			palette_main[LV_PALETTE_GREEN],  palette_main[LV_PALETTE_GREY],
+			palette_main[LV_PALETTE_YELLOW], palette_main[LV_PALETTE_ORANGE],
+			palette_main[LV_PALETTE_PINK],   palette_main[LV_PALETTE_PURPLE],
+		};
+		knob_palette = {
+			palette_main[LV_PALETTE_RED],    palette_main[LV_PALETTE_YELLOW],
+			palette_main[LV_PALETTE_CYAN],   palette_main[LV_PALETTE_PINK],
+			palette_main[LV_PALETTE_ORANGE], palette_main[LV_PALETTE_GREEN],
+			palette_main[LV_PALETTE_GREY],   palette_main[LV_PALETTE_BLUE_GREY],
+		};
+		knob_disabled_palette = knob_palette;
 		for (auto &color : knob_disabled_palette) {
 			auto hsv = lv_color_to_hsv(color);
 			color = lv_color_hsv_to_rgb(hsv.h, hsv.s / 2, hsv.v / 2);
@@ -365,7 +325,7 @@ struct Gui {
 
 		// selected_module_style
 		lv_style_init(&selected_module_style);
-		lv_style_set_outline_color(&selected_module_style, lv_palette_lighten(LV_PALETTE_ORANGE, 1));
+		lv_style_set_outline_color(&selected_module_style, mc(METACOLOR_LV_ORANGE_LIGHT));
 		lv_style_set_outline_width(&selected_module_style, 3);
 		lv_style_set_outline_opa(&selected_module_style, LV_OPA_100);
 		lv_style_set_radius(&selected_module_style, 0);
@@ -383,12 +343,12 @@ struct Gui {
 		lv_style_set_pad_hor(&roller_style, 2);
 		lv_style_set_pad_ver(&roller_style, 1);
 		lv_style_set_pad_gap(&roller_style, 2);
-		lv_style_set_line_color(&roller_style, lv_palette_main(LV_PALETTE_GREY));
+		lv_style_set_line_color(&roller_style, mc(METACOLOR_LV_GREY));
 		lv_style_set_line_width(&roller_style, 12);
 
 		// roller_sel_style
 		lv_style_init(&roller_sel_style);
-		lv_style_set_bg_color(&roller_sel_style, lv_palette_main(LV_PALETTE_ORANGE));
+		lv_style_set_bg_color(&roller_sel_style, mc(METACOLOR_LV_ORANGE));
 		lv_style_set_bg_opa(&roller_sel_style, LV_OPA_COVER);
 		lv_style_set_text_color(&roller_sel_style, lv_color_black());
 		lv_style_set_border_width(&roller_sel_style, 0);
@@ -402,7 +362,7 @@ struct Gui {
 		//module border
 		lv_style_init(&module_border_style);
 		lv_style_set_outline_width(&module_border_style, 1);
-		lv_style_set_outline_color(&module_border_style, lv_palette_main(LV_PALETTE_ORANGE));
+		lv_style_set_outline_color(&module_border_style, mc(METACOLOR_LV_ORANGE));
 		lv_style_set_border_width(&module_border_style, 0);
 		lv_style_set_shadow_opa(&module_border_style, LV_OPA_TRANSP);
 		lv_style_set_pad_all(&module_border_style, 0);

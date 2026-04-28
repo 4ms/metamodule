@@ -63,6 +63,44 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_KNOBSET_D] = 0xf66194;
 	s.rgb[METACOLOR_KNOBSET_E] = 0xffa529;
 
+	s.rgb[METACOLOR_LV_GREY] = 0x9e9e9e;
+	s.rgb[METACOLOR_LV_ORANGE] = 0xff9800;
+	s.rgb[METACOLOR_LV_ORANGE_LIGHT] = 0xffb74d;
+	s.rgb[METACOLOR_LV_GREEN_LIGHT] = 0x66bb6a;
+	s.rgb[METACOLOR_LV_RED_LIGHT] = 0xef5350;
+
+	// LV_PALETTE_* indices. Layout: RED, PINK, PURPLE, DEEP_PURPLE, INDIGO,
+	// BLUE, LIGHT_BLUE, CYAN, TEAL, GREEN, LIGHT_GREEN, LIME, YELLOW, AMBER,
+	// ORANGE, DEEP_ORANGE, BROWN, BLUE_GREY, GREY.
+	s.palette_main[0] = 0xf40000;  // RED
+	s.palette_main[1] = 0xf063b2;  // PINK
+	s.palette_main[2] = 0x9c27b0;  // PURPLE
+	s.palette_main[3] = 0x673ab7;  // DEEP_PURPLE
+	s.palette_main[4] = 0x3f51b5;  // INDIGO
+	s.palette_main[5] = 0x42a5f5;  // BLUE
+	s.palette_main[6] = 0xbbdefb;  // LIGHT_BLUE
+	s.palette_main[7] = 0x26c6da;  // CYAN
+	s.palette_main[8] = 0x009688;  // TEAL
+	s.palette_main[9] = 0x00a551;  // GREEN
+	s.palette_main[10] = 0x8bc34a; // LIGHT_GREEN
+	s.palette_main[11] = 0xcddc39; // LIME
+	s.palette_main[12] = 0xfff100; // YELLOW
+	s.palette_main[13] = 0xffc107; // AMBER
+	s.palette_main[14] = 0xfaa629; // ORANGE
+	s.palette_main[15] = 0xff5722; // DEEP_ORANGE
+	s.palette_main[16] = 0x896558; // BROWN
+	s.palette_main[17] = 0x607d8b; // BLUE_GREY
+	s.palette_main[18] = 0x9e9e9e; // GREY
+
+	s.jack_palette[0] = 0xea1c25;
+	s.jack_palette[1] = 0xfff200;
+	s.jack_palette[2] = 0x00aeee;
+	s.jack_palette[3] = 0xf66194;
+	s.jack_palette[4] = 0xffa529;
+	s.jack_palette[5] = 0x00a552;
+	s.jack_palette[6] = 0x000000;
+	s.jack_palette[7] = 0xffffff;
+
 	return s;
 }
 
@@ -102,6 +140,10 @@ std::string_view name(unsigned idx) {
 	if (idx >= kSchemeCount)
 		return {};
 	return schemes[idx].name;
+}
+
+const ColorScheme *active_scheme() {
+	return active;
 }
 
 } // namespace Scheme

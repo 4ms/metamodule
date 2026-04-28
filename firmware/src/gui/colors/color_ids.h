@@ -69,6 +69,13 @@ typedef enum MetaColorId {
 	METACOLOR_KNOBSET_D,          /* 0xF66194 — pink knobset color */
 	METACOLOR_KNOBSET_E,          /* 0xFFA529 — orange knobset color */
 
+	/* Substitutes for lv_palette_main()/lighten() calls in firmware code. */
+	METACOLOR_LV_GREY,            /* 0x9E9E9E — lv_palette_main(LV_PALETTE_GREY) */
+	METACOLOR_LV_ORANGE,          /* 0xFF9800 — lv_palette_main(LV_PALETTE_ORANGE) */
+	METACOLOR_LV_ORANGE_LIGHT,    /* 0xFFB74D — lv_palette_lighten(LV_PALETTE_ORANGE, 1) */
+	METACOLOR_LV_GREEN_LIGHT,     /* 0x66BB6A — lv_palette_lighten(LV_PALETTE_GREEN, 1) */
+	METACOLOR_LV_RED_LIGHT,       /* 0xEF5350 — lv_palette_lighten(LV_PALETTE_RED, 1) */
+
 	METACOLOR_COUNT
 } MetaColorId;
 

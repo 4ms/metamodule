@@ -83,7 +83,7 @@ struct HardwareCheckPopup {
 					last_pot_vals[i] = clamped_val;
 					lv_obj_set_style_text_color(knob_labels[i], Gui::palette_main[0], LV_PART_MAIN);
 				} else
-					lv_obj_set_style_text_color(knob_labels[i], lv_color_white(), LV_PART_MAIN);
+					lv_obj_set_style_text_color(knob_labels[i], mc(METACOLOR_WHITE), LV_PART_MAIN);
 
 				pot_iir[i] = pot;
 				pot_min[i] = 4096.f;
@@ -97,7 +97,7 @@ struct HardwareCheckPopup {
 			for (unsigned i = 8; i < 16; i++) {
 				lv_label_set_text(outjack_labels[i - 8], b(i) ? "X" : "_");
 				lv_obj_set_style_text_color(
-					outjack_labels[i - 8], b(i) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
+					outjack_labels[i - 8], b(i) ? Gui::palette_main[2] : mc(METACOLOR_WHITE), LV_PART_MAIN);
 			}
 
 			lv_label_set_text(ui_RotaryButton1, metaparams.meta_buttons[0].is_high() ? "X" : "_");
@@ -106,8 +106,8 @@ struct HardwareCheckPopup {
 			lv_label_set_text(ui_GateInData1, params.gate_ins[0].is_high() ? "X" : "-");
 			lv_label_set_text(ui_GateInData2, params.gate_ins[1].is_high() ? "X" : "-");
 
-			lv_obj_set_style_text_color(ui_GateInData1, b(6) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
-			lv_obj_set_style_text_color(ui_GateInData2, b(7) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
+			lv_obj_set_style_text_color(ui_GateInData1, b(6) ? Gui::palette_main[2] : mc(METACOLOR_WHITE), LV_PART_MAIN);
+			lv_obj_set_style_text_color(ui_GateInData2, b(7) ? Gui::palette_main[2] : mc(METACOLOR_WHITE), LV_PART_MAIN);
 
 			for (auto [i, ain] : enumerate(params.smoothed_ins)) {
 				if (i >= last_injack_vals.size() || i >= injack_labels.size())
@@ -120,7 +120,7 @@ struct HardwareCheckPopup {
 					last_injack_vals[i] = clamped_val;
 				} else
 					lv_obj_set_style_text_color(
-						injack_labels[i], b(i) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
+						injack_labels[i], b(i) ? Gui::palette_main[2] : mc(METACOLOR_WHITE), LV_PART_MAIN);
 			}
 
 			for (auto ccnum = 0u; auto &cc : params.midi_ccs) {
