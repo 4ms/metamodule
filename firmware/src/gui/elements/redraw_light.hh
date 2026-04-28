@@ -11,6 +11,10 @@
 namespace MetaModule
 {
 
+// Per-light dynamic color (computed from RGB led state every frame). NOT
+// theme-derived — runtime light intensity dictates the color directly. The
+// atomic-style sharing scheme does not apply: each light has its own arbitrary
+// color from element/light data, so per-widget local style is required.
 inline void update_light_style(lv_obj_t *obj, lv_color_t color, lv_opa_t opa) {
 	using namespace MathTools;
 
