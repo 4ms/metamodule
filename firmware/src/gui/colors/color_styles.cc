@@ -7,6 +7,8 @@ namespace MetaModule::ColorStyles
 namespace
 {
 lv_style_t bg_styles[METACOLOR_COUNT];
+lv_style_t bg_grad_styles[METACOLOR_COUNT];
+lv_style_t bg_img_recolor_styles[METACOLOR_COUNT];
 lv_style_t text_styles[METACOLOR_COUNT];
 lv_style_t border_styles[METACOLOR_COUNT];
 lv_style_t outline_styles[METACOLOR_COUNT];
@@ -19,6 +21,8 @@ void apply_colors() {
 	for (unsigned i = 0; i < METACOLOR_COUNT; i++) {
 		auto color = mc(static_cast<MetaColorId>(i));
 		lv_style_set_bg_color(&bg_styles[i], color);
+		lv_style_set_bg_grad_color(&bg_grad_styles[i], color);
+		lv_style_set_bg_img_recolor(&bg_img_recolor_styles[i], color);
 		lv_style_set_text_color(&text_styles[i], color);
 		lv_style_set_border_color(&border_styles[i], color);
 		lv_style_set_outline_color(&outline_styles[i], color);
@@ -33,6 +37,8 @@ void apply_colors() {
 void init() {
 	for (unsigned i = 0; i < METACOLOR_COUNT; i++) {
 		lv_style_init(&bg_styles[i]);
+		lv_style_init(&bg_grad_styles[i]);
+		lv_style_init(&bg_img_recolor_styles[i]);
 		lv_style_init(&text_styles[i]);
 		lv_style_init(&border_styles[i]);
 		lv_style_init(&outline_styles[i]);
@@ -55,6 +61,12 @@ extern "C" {
 
 lv_style_t *metacolor_style_bg(MetaColorId id) {
 	return &MetaModule::ColorStyles::bg_styles[id];
+}
+lv_style_t *metacolor_style_bg_grad(MetaColorId id) {
+	return &MetaModule::ColorStyles::bg_grad_styles[id];
+}
+lv_style_t *metacolor_style_bg_img_recolor(MetaColorId id) {
+	return &MetaModule::ColorStyles::bg_img_recolor_styles[id];
 }
 lv_style_t *metacolor_style_text(MetaColorId id) {
 	return &MetaModule::ColorStyles::text_styles[id];

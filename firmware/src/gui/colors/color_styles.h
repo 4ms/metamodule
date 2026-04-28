@@ -21,6 +21,8 @@ extern "C" {
  * lv_style_init() it.
  */
 lv_style_t *metacolor_style_bg(MetaColorId id);
+lv_style_t *metacolor_style_bg_grad(MetaColorId id);
+lv_style_t *metacolor_style_bg_img_recolor(MetaColorId id);
 lv_style_t *metacolor_style_text(MetaColorId id);
 lv_style_t *metacolor_style_border(MetaColorId id);
 lv_style_t *metacolor_style_outline(MetaColorId id);
