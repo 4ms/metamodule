@@ -4,6 +4,7 @@
 // Project name: Main
 
 #include "../ui.h"
+#include "gui/colors/color_ids.h"
 
 // COMPONENT UnmappedSetItem
 // child 0: KnobSetNameText (label)
@@ -22,7 +23,7 @@ lv_obj_t *ui_UnmappedSetItem_create(lv_obj_t *comp_parent) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(cui_UnmappedSetItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(cui_UnmappedSetItem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(cui_UnmappedSetItem, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(cui_UnmappedSetItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(cui_UnmappedSetItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(cui_UnmappedSetItem, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -31,15 +32,15 @@ lv_obj_t *ui_UnmappedSetItem_create(lv_obj_t *comp_parent) {
 	lv_obj_set_style_pad_bottom(cui_UnmappedSetItem, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(cui_UnmappedSetItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(cui_UnmappedSetItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(cui_UnmappedSetItem, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(cui_UnmappedSetItem, MC(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(cui_UnmappedSetItem, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_color(cui_UnmappedSetItem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_color(cui_UnmappedSetItem, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(cui_UnmappedSetItem, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(cui_UnmappedSetItem, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(cui_UnmappedSetItem, -1, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_set_style_text_color(cui_UnmappedSetItem, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_text_color(cui_UnmappedSetItem, MC(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_text_opa(cui_UnmappedSetItem, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_set_style_outline_color(cui_UnmappedSetItem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_color(cui_UnmappedSetItem, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(cui_UnmappedSetItem, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(cui_UnmappedSetItem, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(cui_UnmappedSetItem, -1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);

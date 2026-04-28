@@ -4,6 +4,7 @@
 // Project name: Main
 
 #include "../ui.h"
+#include "gui/colors/color_ids.h"
 
 // COMPONENT MappedKnobsetitem
 // child 0: Cicle (btn)
@@ -25,7 +26,7 @@ lv_obj_t *ui_MappedKnobsetitem_create(lv_obj_t *comp_parent, bool has_textarea) 
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(cui_MappedKnobsetitem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(cui_MappedKnobsetitem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(cui_MappedKnobsetitem, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(cui_MappedKnobsetitem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(cui_MappedKnobsetitem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(cui_MappedKnobsetitem, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -34,16 +35,16 @@ lv_obj_t *ui_MappedKnobsetitem_create(lv_obj_t *comp_parent, bool has_textarea) 
 	lv_obj_set_style_pad_bottom(cui_MappedKnobsetitem, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(cui_MappedKnobsetitem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(cui_MappedKnobsetitem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(cui_MappedKnobsetitem, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(cui_MappedKnobsetitem, MC(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(cui_MappedKnobsetitem, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(cui_MappedKnobsetitem, LV_TEXT_ALIGN_AUTO, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(cui_MappedKnobsetitem, &ui_font_MuseoSansRounded90018, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_color(cui_MappedKnobsetitem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_set_style_outline_color(cui_MappedKnobsetitem, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(cui_MappedKnobsetitem, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(cui_MappedKnobsetitem, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(cui_MappedKnobsetitem, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_border_width(cui_MappedKnobsetitem, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-	lv_obj_set_style_outline_color(cui_MappedKnobsetitem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_set_style_outline_color(cui_MappedKnobsetitem, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(cui_MappedKnobsetitem, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(cui_MappedKnobsetitem, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(cui_MappedKnobsetitem, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
@@ -60,7 +61,7 @@ lv_obj_t *ui_MappedKnobsetitem_create(lv_obj_t *comp_parent, bool has_textarea) 
 						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(cui_Circle, 22, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(cui_Circle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_color(cui_Circle, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_color(cui_Circle, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(cui_Circle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_width(cui_Circle, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_pad(cui_Circle, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -71,7 +72,7 @@ lv_obj_t *ui_MappedKnobsetitem_create(lv_obj_t *comp_parent, bool has_textarea) 
 	lv_obj_set_height(cui_KnobLetter, LV_SIZE_CONTENT); /// 1
 	lv_obj_set_align(cui_KnobLetter, LV_ALIGN_CENTER);
 	lv_label_set_text(cui_KnobLetter, "C");
-	lv_obj_set_style_text_color(cui_KnobLetter, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(cui_KnobLetter, MC(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(cui_KnobLetter, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(cui_KnobLetter, -1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(cui_KnobLetter, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -91,19 +92,19 @@ lv_obj_t *ui_MappedKnobsetitem_create(lv_obj_t *comp_parent, bool has_textarea) 
 							  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 		// Focused outline:
 		lv_obj_set_style_outline_color(
-			cui_KnobSetNameText, lv_color_hex(0xFD8B18), LV_STATE_FOCUS_KEY | LV_STATE_FOCUSED);
+			cui_KnobSetNameText, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_STATE_FOCUS_KEY | LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_opa(cui_KnobSetNameText, 255, LV_STATE_FOCUS_KEY | LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_width(cui_KnobSetNameText, 1, LV_STATE_FOCUS_KEY | LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_pad(cui_KnobSetNameText, 2, LV_STATE_FOCUS_KEY | LV_STATE_FOCUSED);
 
 		// Cursor:
 		int state = LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY;
-		lv_obj_set_style_border_color(cui_KnobSetNameText, lv_color_hex(0xFFFFFF), LV_PART_CURSOR | state);
+		lv_obj_set_style_border_color(cui_KnobSetNameText, MC(METACOLOR_WHITE), LV_PART_CURSOR | state);
 		lv_obj_set_style_border_opa(cui_KnobSetNameText, 255, LV_PART_CURSOR | state);
 		lv_obj_set_style_border_width(cui_KnobSetNameText, 0, LV_PART_CURSOR | state);
 		lv_obj_set_style_border_side(cui_KnobSetNameText, LV_BORDER_SIDE_LEFT, LV_PART_CURSOR | state);
 		state = LV_STATE_USER_1;
-		lv_obj_set_style_border_color(cui_KnobSetNameText, lv_color_hex(0xFFFFFF), LV_PART_CURSOR | state);
+		lv_obj_set_style_border_color(cui_KnobSetNameText, MC(METACOLOR_WHITE), LV_PART_CURSOR | state);
 		lv_obj_set_style_border_opa(cui_KnobSetNameText, 255, LV_PART_CURSOR | state);
 		lv_obj_set_style_border_width(cui_KnobSetNameText, 1, LV_PART_CURSOR | state);
 		lv_obj_set_style_border_side(cui_KnobSetNameText, LV_BORDER_SIDE_LEFT, LV_PART_CURSOR | state);
