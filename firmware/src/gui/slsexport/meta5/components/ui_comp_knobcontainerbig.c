@@ -29,7 +29,7 @@ lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent) {
 	lv_obj_set_scrollbar_mode(cui_KnobContainerBig, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_set_scroll_dir(cui_KnobContainerBig, LV_DIR_HOR);
 	lv_obj_set_style_radius(cui_KnobContainerBig, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_KnobContainerBig, metacolor_style_bg(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(cui_KnobContainerBig, scheme_bg(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(cui_KnobContainerBig, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(cui_KnobContainerBig, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(cui_KnobContainerBig, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -40,7 +40,7 @@ lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent) {
 	lv_obj_set_style_pad_column(cui_KnobContainerBig, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(cui_KnobContainerBig, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_border_width(cui_KnobContainerBig, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(cui_KnobContainerBig, metacolor_style_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(cui_KnobContainerBig, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(cui_KnobContainerBig, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(cui_KnobContainerBig, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(cui_KnobContainerBig, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -64,30 +64,30 @@ lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent) {
 	lv_obj_set_style_pad_right(cui_Knob, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(cui_Knob, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(cui_Knob, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_Knob, metacolor_style_arc(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(cui_Knob, scheme_arc(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(cui_Knob, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_width(cui_Knob, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_Knob, metacolor_style_arc(METACOLOR_GREY_44), LV_PART_MAIN | LV_STATE_DISABLED);
+	lv_obj_add_style(cui_Knob, scheme_arc(METACOLOR_GREY_44), LV_PART_MAIN | LV_STATE_DISABLED);
 	lv_obj_set_style_arc_opa(cui_Knob, 255, LV_PART_MAIN | LV_STATE_DISABLED);
 
 	lv_obj_set_style_radius(cui_Knob, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_Knob, metacolor_style_bg(METACOLOR_GREY_MEDIUM), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_add_style(cui_Knob, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(cui_Knob, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_Knob, metacolor_style_arc(METACOLOR_RED_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_add_style(cui_Knob, scheme_arc(METACOLOR_RED_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(cui_Knob, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_width(cui_Knob, 10, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_Knob, metacolor_style_arc(METACOLOR_GREY_DARK), LV_PART_INDICATOR | LV_STATE_DISABLED);
+	lv_obj_add_style(cui_Knob, scheme_arc(METACOLOR_GREY_DARK), LV_PART_INDICATOR | LV_STATE_DISABLED);
 	lv_obj_set_style_arc_opa(cui_Knob, 255, LV_PART_INDICATOR | LV_STATE_DISABLED);
 
 	lv_obj_set_style_radius(cui_Knob, 10, LV_PART_KNOB | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_Knob, metacolor_style_bg(METACOLOR_WHITE), LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_add_style(cui_Knob, scheme_bg(METACOLOR_WHITE), LV_PART_KNOB | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(cui_Knob, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(cui_Knob, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(cui_Knob, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(cui_Knob, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(cui_Knob, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(cui_Knob, 140, LV_PART_KNOB | LV_STATE_DISABLED);
-	lv_obj_add_style(cui_Knob, metacolor_style_bg(METACOLOR_GREY_88), LV_PART_KNOB | LV_STATE_DISABLED);
+	lv_obj_add_style(cui_Knob, scheme_bg(METACOLOR_GREY_88), LV_PART_KNOB | LV_STATE_DISABLED);
 	lv_obj_set_style_bg_opa(cui_Knob, 255, LV_PART_KNOB | LV_STATE_DISABLED);
 
 	lv_obj_t *cui_Circle;
@@ -103,7 +103,7 @@ lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent) {
 						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(cui_Circle, 22, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_Circle, metacolor_style_bg(METACOLOR_RED_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(cui_Circle, scheme_bg(METACOLOR_RED_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(cui_Circle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(cui_Circle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -117,7 +117,7 @@ lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent) {
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 						  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
 						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
-	lv_obj_add_style(cui_KnobLetter, metacolor_style_text(METACOLOR_TEXT_DARK), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(cui_KnobLetter, scheme_text(METACOLOR_TEXT_DARK), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(cui_KnobLetter, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(cui_KnobLetter, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(cui_KnobLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -138,7 +138,7 @@ lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent) {
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 						  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
 						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
-	lv_obj_add_style(cui_Label, metacolor_style_text(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(cui_Label, scheme_text(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(cui_Label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_letter_space(cui_Label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_line_space(cui_Label, -1, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -148,7 +148,7 @@ lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent) {
 	lv_obj_set_style_pad_right(cui_Label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(cui_Label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(cui_Label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_Label, metacolor_style_text(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DISABLED);
+	lv_obj_add_style(cui_Label, scheme_text(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DISABLED);
 	lv_obj_set_style_text_opa(cui_Label, 128, LV_PART_MAIN | LV_STATE_DISABLED);
 
 	lv_obj_t *cui_Indicator;
@@ -158,7 +158,7 @@ lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent) {
 	lv_obj_set_x(cui_Indicator, 0);
 	lv_obj_set_y(cui_Indicator, 15);
 	lv_obj_set_align(cui_Indicator, LV_ALIGN_TOP_MID);
-	lv_obj_add_style(cui_Indicator, metacolor_style_bg(METACOLOR_WHITE), LV_PART_MAIN);
+	lv_obj_add_style(cui_Indicator, scheme_bg(METACOLOR_WHITE), LV_PART_MAIN);
 	lv_obj_set_style_bg_opa(cui_Indicator, LV_OPA_50, LV_PART_MAIN);
 	lv_obj_set_style_radius(cui_Indicator, 0, LV_PART_MAIN);
 	lv_obj_set_style_transform_pivot_x(cui_Indicator, 0, LV_PART_MAIN);

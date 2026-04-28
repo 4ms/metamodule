@@ -18,7 +18,7 @@ lv_obj_set_flex_align(ui_MessagePanel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START,
 lv_obj_add_flag( ui_MessagePanel, LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_MessagePanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_MessagePanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_MessagePanel, metacolor_style_bg(METACOLOR_POPUP_WARNING_BG), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_MessagePanel, scheme_bg(METACOLOR_POPUP_WARNING_BG), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_MessagePanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_MessagePanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_MessagePanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -31,7 +31,7 @@ lv_obj_set_width( ui_MessageLabel, lv_pct(100));
 lv_obj_set_height( ui_MessageLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_MessageLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_MessageLabel,"Welcome to MetaModule. Have fun exploring!");
-lv_obj_add_style(ui_MessageLabel, metacolor_style_text(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_MessageLabel, scheme_text(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_MessageLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_MessageLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_MessageLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);

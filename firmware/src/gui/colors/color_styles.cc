@@ -59,34 +59,34 @@ void reapply_scheme() {
 
 extern "C" {
 
-lv_style_t *metacolor_style_bg(MetaColorId id) {
+lv_style_t *scheme_bg(MetaColorId id) {
 	return &MetaModule::ColorStyles::bg_styles[id];
 }
-lv_style_t *metacolor_style_bg_grad(MetaColorId id) {
+lv_style_t *scheme_bg_grad(MetaColorId id) {
 	return &MetaModule::ColorStyles::bg_grad_styles[id];
 }
-lv_style_t *metacolor_style_bg_img_recolor(MetaColorId id) {
+lv_style_t *scheme_bg_img_recolor(MetaColorId id) {
 	return &MetaModule::ColorStyles::bg_img_recolor_styles[id];
 }
-lv_style_t *metacolor_style_text(MetaColorId id) {
+lv_style_t *scheme_text(MetaColorId id) {
 	return &MetaModule::ColorStyles::text_styles[id];
 }
-lv_style_t *metacolor_style_border(MetaColorId id) {
+lv_style_t *scheme_border(MetaColorId id) {
 	return &MetaModule::ColorStyles::border_styles[id];
 }
-lv_style_t *metacolor_style_outline(MetaColorId id) {
+lv_style_t *scheme_outline(MetaColorId id) {
 	return &MetaModule::ColorStyles::outline_styles[id];
 }
-lv_style_t *metacolor_style_line(MetaColorId id) {
+lv_style_t *scheme_line(MetaColorId id) {
 	return &MetaModule::ColorStyles::line_styles[id];
 }
-lv_style_t *metacolor_style_arc(MetaColorId id) {
+lv_style_t *scheme_arc(MetaColorId id) {
 	return &MetaModule::ColorStyles::arc_styles[id];
 }
-lv_style_t *metacolor_style_shadow(MetaColorId id) {
+lv_style_t *scheme_shadow(MetaColorId id) {
 	return &MetaModule::ColorStyles::shadow_styles[id];
 }
-lv_style_t *metacolor_style_img_recolor(MetaColorId id) {
+lv_style_t *scheme_img_recolor(MetaColorId id) {
 	return &MetaModule::ColorStyles::img_recolor_styles[id];
 }
 

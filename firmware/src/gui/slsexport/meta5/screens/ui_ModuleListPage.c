@@ -14,7 +14,7 @@ lv_obj_clear_flag( ui_ModuleListPage, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_flex_flow(ui_ModuleListPage,LV_FLEX_FLOW_ROW_REVERSE);
 lv_obj_set_flex_align(ui_ModuleListPage, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_set_style_radius(ui_ModuleListPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListPage, metacolor_style_bg(METACOLOR_TEXT_DARK), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListPage, scheme_bg(METACOLOR_TEXT_DARK), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_ModuleListPage, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_ModuleListPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_ModuleListPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -30,9 +30,9 @@ lv_obj_set_align( ui_ModuleListImage, LV_ALIGN_RIGHT_MID );
 lv_obj_clear_flag( ui_ModuleListImage, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_ModuleListImage, LV_SCROLLBAR_MODE_OFF);
 lv_obj_set_style_radius(ui_ModuleListImage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListImage, metacolor_style_bg(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListImage, scheme_bg(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_ModuleListImage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListImage, metacolor_style_border(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListImage, scheme_border(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_ModuleListImage, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_ModuleListImage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_ModuleListImage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -43,7 +43,7 @@ lv_obj_set_style_pad_row(ui_ModuleListImage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_ModuleListImage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_set_style_radius(ui_ModuleListImage, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListImage, metacolor_style_bg(METACOLOR_BLACK), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListImage, scheme_bg(METACOLOR_BLACK), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_ModuleListImage, 255, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 
 ui_ModuleListRollerPanel = lv_obj_create(ui_ModuleListPage);
@@ -52,9 +52,9 @@ lv_obj_set_height( ui_ModuleListRollerPanel, lv_pct(100));
 lv_obj_set_align( ui_ModuleListRollerPanel, LV_ALIGN_LEFT_MID );
 lv_obj_clear_flag( ui_ModuleListRollerPanel, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_ModuleListRollerPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListRollerPanel, metacolor_style_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRollerPanel, scheme_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_ModuleListRollerPanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListRollerPanel, metacolor_style_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRollerPanel, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_ModuleListRollerPanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_ModuleListRollerPanel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_ModuleListRollerPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -72,13 +72,13 @@ lv_label_set_text(ui_ModuleListRollerTitle,"4msCompany");
 lv_obj_add_flag( ui_ModuleListRollerTitle, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
 lv_obj_clear_flag( ui_ModuleListRollerTitle, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_ModuleListRollerTitle, LV_SCROLLBAR_MODE_OFF);
-lv_obj_add_style(ui_ModuleListRollerTitle, metacolor_style_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRollerTitle, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ModuleListRollerTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_ModuleListRollerTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_ModuleListRollerTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_ModuleListRollerTitle, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_ModuleListRollerTitle, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListRollerTitle, metacolor_style_border(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRollerTitle, scheme_border(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_ModuleListRollerTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_ModuleListRollerTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(ui_ModuleListRollerTitle, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -93,33 +93,33 @@ lv_obj_set_height( ui_ModuleListRoller, 208);
 lv_obj_set_width( ui_ModuleListRoller, lv_pct(100));
 lv_obj_set_align( ui_ModuleListRoller, LV_ALIGN_BOTTOM_RIGHT );
 lv_obj_clear_flag( ui_ModuleListRoller, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE );    /// Flags
-lv_obj_add_style(ui_ModuleListRoller, metacolor_style_text(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRoller, scheme_text(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ModuleListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_ModuleListRoller, 7, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_ModuleListRoller, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_ModuleListRoller, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListRoller, metacolor_style_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRoller, scheme_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListRoller, metacolor_style_shadow(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_add_style(ui_ModuleListRoller, scheme_shadow(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_shadow_opa(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_shadow_width(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_shadow_spread(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_shadow_ofs_x(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_shadow_ofs_y(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
 
-lv_obj_add_style(ui_ModuleListRoller, metacolor_style_text(METACOLOR_WHITE), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRoller, scheme_text(METACOLOR_WHITE), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_ModuleListRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListRoller, metacolor_style_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRoller, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListRoller, metacolor_style_border(METACOLOR_BLACK), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRoller, scheme_border(METACOLOR_BLACK), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_ModuleListRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(ui_ModuleListRoller, LV_BORDER_SIDE_NONE, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListRoller, metacolor_style_shadow(METACOLOR_BLACK), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRoller, scheme_shadow(METACOLOR_BLACK), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_shadow_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_width(ui_ModuleListRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_spread(ui_ModuleListRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);

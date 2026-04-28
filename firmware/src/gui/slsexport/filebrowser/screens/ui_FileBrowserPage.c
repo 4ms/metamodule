@@ -16,7 +16,7 @@ lv_obj_set_scrollbar_mode(ui_FileBrowserPage, LV_SCROLLBAR_MODE_OFF);
 lv_obj_set_flex_flow(ui_FileBrowserPage,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_FileBrowserPage, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_set_style_radius(ui_FileBrowserPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserPage, metacolor_style_bg(METACOLOR_TEXT_DARK), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserPage, scheme_bg(METACOLOR_TEXT_DARK), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_FileBrowserPage, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_FileBrowserPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_FileBrowserPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -33,7 +33,7 @@ lv_obj_set_align( ui_FileBrowserCont, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_FileBrowserCont,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_FileBrowserCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_clear_flag( ui_FileBrowserCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_add_style(ui_FileBrowserCont, metacolor_style_bg(METACOLOR_TEXT_DARK), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserCont, scheme_bg(METACOLOR_TEXT_DARK), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_FileBrowserCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_FileBrowserCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_FileBrowserCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -52,9 +52,9 @@ lv_obj_add_flag( ui_FileBrowserTitlePanel, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   ///
 lv_obj_clear_flag( ui_FileBrowserTitlePanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_FileBrowserTitlePanel, LV_SCROLLBAR_MODE_OFF);
 lv_obj_set_style_radius(ui_FileBrowserTitlePanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserTitlePanel, metacolor_style_bg(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserTitlePanel, scheme_bg(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_FileBrowserTitlePanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserTitlePanel, metacolor_style_border(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserTitlePanel, scheme_border(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_FileBrowserTitlePanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_FileBrowserTitlePanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_FileBrowserTitlePanel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -73,7 +73,7 @@ lv_obj_set_align( ui_FileBrowserTitle, LV_ALIGN_CENTER );
 lv_label_set_text(ui_FileBrowserTitle,"Open File:");
 lv_obj_clear_flag( ui_FileBrowserTitle, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_FileBrowserTitle, LV_SCROLLBAR_MODE_OFF);
-lv_obj_add_style(ui_FileBrowserTitle, metacolor_style_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserTitle, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FileBrowserTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_FileBrowserTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_FileBrowserTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -95,7 +95,7 @@ lv_label_set_text(ui_FileBrowserSubtitle,"*.wav, *.WAV, *.raw");
 lv_obj_clear_flag( ui_FileBrowserSubtitle, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_FileBrowserSubtitle, LV_SCROLLBAR_MODE_OFF);
 lv_obj_set_scroll_dir(ui_FileBrowserSubtitle, LV_DIR_LEFT);
-lv_obj_add_style(ui_FileBrowserSubtitle, metacolor_style_text(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserSubtitle, scheme_text(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FileBrowserSubtitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_FileBrowserSubtitle, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_decor(ui_FileBrowserSubtitle, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -113,9 +113,9 @@ lv_obj_set_height( ui_FileBrowserPathCont, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_FileBrowserPathCont, LV_ALIGN_CENTER );
 lv_obj_clear_flag( ui_FileBrowserPathCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_FileBrowserPathCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserPathCont, metacolor_style_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserPathCont, scheme_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_FileBrowserPathCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserPathCont, metacolor_style_border(METACOLOR_KNOB_DOT), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserPathCont, scheme_border(METACOLOR_KNOB_DOT), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_FileBrowserPathCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_FileBrowserPathCont, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_FileBrowserPathCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -130,7 +130,7 @@ lv_obj_set_align( ui_FileBrowserPathLabel, LV_ALIGN_LEFT_MID );
 lv_label_set_text(ui_FileBrowserPathLabel,"USB: /samples/electro-drums");
 lv_obj_clear_flag( ui_FileBrowserPathLabel, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_FileBrowserPathLabel, LV_SCROLLBAR_MODE_OFF);
-lv_obj_add_style(ui_FileBrowserPathLabel, metacolor_style_text(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserPathLabel, scheme_text(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FileBrowserPathLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_FileBrowserPathLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_FileBrowserPathLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -150,50 +150,50 @@ lv_obj_set_y( ui_FileBrowserRoller, -3 );
 lv_obj_set_align( ui_FileBrowserRoller, LV_ALIGN_BOTTOM_RIGHT );
 lv_obj_add_state( ui_FileBrowserRoller, LV_STATE_FOCUSED );     /// States
 lv_obj_clear_flag( ui_FileBrowserRoller, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE );    /// Flags
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_text(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_text(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_FileBrowserRoller, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_FileBrowserRoller, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_FileBrowserRoller, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_FileBrowserRoller, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(ui_FileBrowserRoller, LV_BORDER_SIDE_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_outline(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_width(ui_FileBrowserRoller, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_pad(ui_FileBrowserRoller, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_shadow(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_shadow(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_shadow_opa(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_width(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_spread(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_ofs_x(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_ofs_y(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_border(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_CHECKED );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_border(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_CHECKED );
 lv_obj_set_style_border_opa(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_CHECKED);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_outline(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_CHECKED );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_CHECKED );
 lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_CHECKED);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_border(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_SCROLLED );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_border(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_SCROLLED );
 lv_obj_set_style_border_opa(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_SCROLLED);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_outline(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_SCROLLED );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_SCROLLED );
 lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_SCROLLED);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_width(ui_FileBrowserRoller, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_pad(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
 lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_text(METACOLOR_WHITE), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_text(METACOLOR_WHITE), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FileBrowserRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_bg(METACOLOR_GREY_44), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_bg(METACOLOR_GREY_44), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_FileBrowserRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_border(METACOLOR_BLACK), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_border(METACOLOR_BLACK), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_FileBrowserRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_FileBrowserRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(ui_FileBrowserRoller, LV_BORDER_SIDE_FULL, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, metacolor_style_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_FOCUSED );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_FOCUSED );
 lv_obj_set_style_bg_opa(ui_FileBrowserRoller, 255, LV_PART_SELECTED| LV_STATE_FOCUSED);
 
 ui_FileBrowserSpinner = lv_spinner_create(ui_FileBrowserCont,1000,90);
@@ -202,11 +202,11 @@ lv_obj_set_height( ui_FileBrowserSpinner, 67);
 lv_obj_set_align( ui_FileBrowserSpinner, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_FileBrowserSpinner, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_FileBrowserSpinner, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_add_style(ui_FileBrowserSpinner, metacolor_style_arc(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserSpinner, scheme_arc(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_arc_opa(ui_FileBrowserSpinner, 200, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_arc_width(ui_FileBrowserSpinner, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-lv_obj_add_style(ui_FileBrowserSpinner, metacolor_style_arc(METACOLOR_GREY_DARKEST), LV_PART_INDICATOR | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserSpinner, scheme_arc(METACOLOR_GREY_DARKEST), LV_PART_INDICATOR | LV_STATE_DEFAULT );
 lv_obj_set_style_arc_opa(ui_FileBrowserSpinner, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
 lv_obj_set_style_arc_width(ui_FileBrowserSpinner, 12, LV_PART_INDICATOR| LV_STATE_DEFAULT);
 
