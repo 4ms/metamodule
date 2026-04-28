@@ -320,7 +320,7 @@ struct ConfirmPopup {
 						  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE |
 							  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
 		lv_obj_set_style_radius(confirm_button, 20, LV_STATE_DEFAULT);
-		lv_obj_add_style(confirm_button, scheme_bg(METACOLOR_BLUE_INFO), LV_STATE_DEFAULT);
+		lv_obj_add_style(confirm_button, scheme_bg(METACOLOR_BUTTON_CONFIRM), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(confirm_button, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(confirm_button, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_left(confirm_button, 10, LV_STATE_DEFAULT);

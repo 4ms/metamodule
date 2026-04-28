@@ -17,7 +17,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_align(ui_SystemMenuTabView, LV_ALIGN_CENTER);
 	lv_obj_clear_flag(ui_SystemMenuTabView, LV_OBJ_FLAG_SCROLLABLE); /// Flags
 	lv_obj_set_style_radius(ui_SystemMenuTabView, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_SystemMenuTabView, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_SystemMenuTabView, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_SystemMenuTabView, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_SystemMenuTabView, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -29,7 +29,7 @@ void ui_SystemMenu_screen_init(void) {
 		lv_tabview_get_tab_btns(ui_SystemMenuTabView), scheme_bg(METACOLOR_GREY_DARK), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(
-		lv_tabview_get_tab_btns(ui_SystemMenuTabView), scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_tabview_get_tab_btns(ui_SystemMenuTabView), scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 3, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(
@@ -81,7 +81,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_style_text_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255, LV_PART_ITEMS | LV_STATE_CHECKED);
 	lv_obj_set_style_radius(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0, LV_PART_ITEMS | LV_STATE_CHECKED);
 	lv_obj_add_style(
-		lv_tabview_get_tab_btns(ui_SystemMenuTabView), scheme_bg(METACOLOR_GREY_88), LV_PART_ITEMS | LV_STATE_CHECKED);
+		lv_tabview_get_tab_btns(ui_SystemMenuTabView), scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_ITEMS | LV_STATE_CHECKED);
 	lv_obj_set_style_bg_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255, LV_PART_ITEMS | LV_STATE_CHECKED);
 	lv_obj_add_style(
 		lv_tabview_get_tab_btns(ui_SystemMenuTabView), scheme_border(METACOLOR_BLACK), LV_PART_ITEMS | LV_STATE_CHECKED);
@@ -229,7 +229,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_style_text_line_space(ui_SystemMenuInfoHardware, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(
 		ui_SystemMenuInfoHardware, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_SystemMenuInfoHardware, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_SystemMenuInfoHardware, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_SystemMenuInfoHardware, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_SystemMenuInfoHardware, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(ui_SystemMenuInfoHardware, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -285,7 +285,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_style_text_line_space(ui_SystemMenuInfoExpanders, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(
 		ui_SystemMenuInfoExpanders, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_SystemMenuInfoExpanders, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_SystemMenuInfoExpanders, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_SystemMenuInfoExpanders, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_SystemMenuInfoExpanders, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(ui_SystemMenuInfoExpanders, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -392,7 +392,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_style_text_letter_space(ui_PluginsFoundTitle, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_line_space(ui_PluginsFoundTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui_PluginsFoundTitle, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_PluginsFoundTitle, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_PluginsFoundTitle, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_PluginsFoundTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_PluginsFoundTitle, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(ui_PluginsFoundTitle, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -410,7 +410,7 @@ void ui_SystemMenu_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_PluginScanButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_PluginScanButton, scheme_bg(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_PluginScanButton, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_PluginScanButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_PluginScanButton, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_PluginScanButton, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -535,7 +535,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_style_text_letter_space(ui_PluginsLoadedTitle, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_line_space(ui_PluginsLoadedTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui_PluginsLoadedTitle, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_PluginsLoadedTitle, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_PluginsLoadedTitle, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_PluginsLoadedTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_PluginsLoadedTitle, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(ui_PluginsLoadedTitle, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -631,7 +631,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_style_text_line_space(ui_PluginsBuiltinListText, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(
 		ui_PluginsBuiltinListText, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_PluginsBuiltinListText, scheme_bg(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_PluginsBuiltinListText, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_PluginsBuiltinListText, 64, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_PluginsBuiltinListText, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_PluginsBuiltinListText, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -731,7 +731,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_style_text_opa(ui_SystemCalibrationTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(
 		ui_SystemCalibrationTitle, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_SystemCalibrationTitle, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_SystemCalibrationTitle, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_SystemCalibrationTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_SystemCalibrationTitle, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(ui_SystemCalibrationTitle, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -745,7 +745,7 @@ void ui_SystemMenu_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_SystemCalCheckButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_SystemCalCheckButton, scheme_bg(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_SystemCalCheckButton, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_SystemCalCheckButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_SystemCalCheckButton, scheme_outline(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_SystemCalCheckButton, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -771,7 +771,7 @@ void ui_SystemMenu_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_SystemCalibrationButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_SystemCalibrationButton, scheme_bg(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_SystemCalibrationButton, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_SystemCalibrationButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_SystemCalibrationButton, scheme_outline(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_SystemCalibrationButton, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -798,7 +798,7 @@ void ui_SystemMenu_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_SystemExpCalibrationButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_SystemExpCalibrationButton, scheme_bg(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_SystemExpCalibrationButton, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_SystemExpCalibrationButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(
 		ui_SystemExpCalibrationButton, scheme_outline(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -1296,7 +1296,7 @@ void ui_SystemMenu_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_CalibrationCancelButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_CalibrationCancelButton, scheme_bg(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_CalibrationCancelButton, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_CalibrationCancelButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui_CalibrationCancelButton, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_CalibrationCancelButton, scheme_outline(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -1325,7 +1325,7 @@ void ui_SystemMenu_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_CalibrationNextButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_CalibrationNextButton, scheme_bg(METACOLOR_BLUE_INFO), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_CalibrationNextButton, scheme_bg(METACOLOR_BUTTON_CONFIRM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_CalibrationNextButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui_CalibrationNextButton, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_CalibrationNextButton, scheme_outline(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -1366,7 +1366,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_add_style(ui_CheckHardwareTitle, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_CheckHardwareTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui_CheckHardwareTitle, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_CheckHardwareTitle, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_CheckHardwareTitle, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_CheckHardwareTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_CheckHardwareTitle, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(ui_CheckHardwareTitle, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1381,7 +1381,7 @@ void ui_SystemMenu_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_CheckHardwareButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_CheckHardwareButton, scheme_bg(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_CheckHardwareButton, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_CheckHardwareButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_CheckHardwareButton, scheme_outline(METACOLOR_WHITE), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_CheckHardwareButton, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -1425,7 +1425,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_style_text_font(
 		ui_ResetFactoryPatchesDescription, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(
-		ui_ResetFactoryPatchesDescription, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+		ui_ResetFactoryPatchesDescription, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_ResetFactoryPatchesDescription, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_ResetFactoryPatchesDescription, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(
@@ -1476,7 +1476,7 @@ void ui_SystemMenu_screen_init(void) {
 	lv_obj_set_style_text_font(
 		ui_SystemMenuUpdateFWversion, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(
-		ui_SystemMenuUpdateFWversion, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+		ui_SystemMenuUpdateFWversion, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_SystemMenuUpdateFWversion, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_SystemMenuUpdateFWversion, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(ui_SystemMenuUpdateFWversion, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);

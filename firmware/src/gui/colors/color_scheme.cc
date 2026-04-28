@@ -17,29 +17,28 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_ORANGE_HIGHLIGHT] = 0xfd8b18;
 	s.rgb[METACOLOR_ORANGE_BRIGHT] = 0xfdb818;
 	s.rgb[METACOLOR_YELLOW_HIGHLIGHT] = 0x8bfd18;
-	// s.rgb[METACOLOR_GREEN_HIGHLIGHT] = 0x00a551;
-	// s.rgb[METACOLOR_BLUE_HIGHLIGHT] = 0x188bfd;
-	s.rgb[METACOLOR_BLUE_INFO] = 0x2095f6;
-	s.rgb[METACOLOR_GREY_HIGHLIGHT] = 0xaaaaaa;
+	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x2095f6;
+
 	s.rgb[METACOLOR_GREY_DARKEST] = 0x222222;
 	s.rgb[METACOLOR_GREY_DARKER] = 0x333333;
 	s.rgb[METACOLOR_GREY_DARK] = 0x555555;
-	s.rgb[METACOLOR_GREY_44] = 0x444444;
+	s.rgb[METACOLOR_GREY_MED_DARK] = 0x444444;
 	s.rgb[METACOLOR_GREY_MEDIUM] = 0x777777;
-	s.rgb[METACOLOR_GREY_88] = 0x888888;
-	s.rgb[METACOLOR_GREY_BB] = 0xbbbbbb;
-	s.rgb[METACOLOR_GREY_BRIGHT] = 0xeeeeee;
-	s.rgb[METACOLOR_POPUP_WARNING_BG] = 0xe1e878;
+	s.rgb[METACOLOR_GREY_MED_LIGHT] = 0x888888;
+	s.rgb[METACOLOR_GREY_BRIGHT] = 0xaaaaaa;
+	s.rgb[METACOLOR_GREY_BRIGHTER] = 0xbbbbbb;
+	s.rgb[METACOLOR_GREY_BRIGHTEST] = 0xeeeeee;
+
+	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xffb74d;
+
+	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe1e878;
+
 	s.rgb[METACOLOR_KNOB_BODY] = 0x666666;
 	s.rgb[METACOLOR_KNOB_DOT] = 0xdddddd;
 	s.rgb[METACOLOR_KNOB_DISABLED] = 0xb4b2b4;
-	s.rgb[METACOLOR_INPUT_BG] = 0x202020;
-	s.rgb[METACOLOR_INPUT_ACCENT] = 0x202328;
-	s.rgb[METACOLOR_INPUT_DISABLED_BG] = 0x404040;
-	s.rgb[METACOLOR_BLUE_CHECKED] = 0x4067d3;
+
+	s.rgb[METACOLOR_CHECKBOX] = 0x4067d3;
 	s.rgb[METACOLOR_TEXT_DARK] = 0x111111;
-	s.rgb[METACOLOR_DEBUG_GREEN] = 0x00ff00;
-	s.rgb[METACOLOR_BROWN_HIGHLIGHT] = 0xa26e3e;
 
 	s.rgb[METACOLOR_RED_TEXT] = 0xea1c25;
 	s.rgb[METACOLOR_ORANGE_TEXT] = 0xfd9b18;
@@ -56,12 +55,10 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_ORANGE_DARK] = 0xf19300;
 	s.rgb[METACOLOR_GREEN_DARK] = 0x23973c;
 	s.rgb[METACOLOR_BLUE_DEEP] = 0x4040ff;
-	s.rgb[METACOLOR_GREY_80] = 0x808080;
 	s.rgb[METACOLOR_SCROLLBAR_ORANGE] = 0xdf7d1a;
 
 	s.rgb[METACOLOR_LV_GREY] = 0x9e9e9e;
 	s.rgb[METACOLOR_LV_ORANGE] = 0xff9800;
-	s.rgb[METACOLOR_LV_ORANGE_LIGHT] = 0xffb74d;
 	s.rgb[METACOLOR_LV_GREEN_LIGHT] = 0x66bb6a;
 	s.rgb[METACOLOR_LV_RED_LIGHT] = 0xef5350;
 
@@ -112,37 +109,31 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	s.rgb[METACOLOR_ORANGE_HIGHLIGHT] = 0xffa000;
 	s.rgb[METACOLOR_ORANGE_BRIGHT] = 0xffd000;
 	s.rgb[METACOLOR_YELLOW_HIGHLIGHT] = 0xccff00;
-	// s.rgb[METACOLOR_GREEN_HIGHLIGHT] = 0x00ff00;
-	// s.rgb[METACOLOR_BLUE_HIGHLIGHT] = 0x00bfff;
-	s.rgb[METACOLOR_BLUE_INFO] = 0x00bfff;
-	s.rgb[METACOLOR_BROWN_HIGHLIGHT] = 0xd2884a;
+	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x00bfff;
 
 	// Greys — collapse low-contrast mid-greys toward black or white. Keep two
 	// distinct dark steps for panel layering on the black screen background.
-	s.rgb[METACOLOR_GREY_HIGHLIGHT] = 0xffffff; // was a low-contrast text grey
+	s.rgb[METACOLOR_GREY_BRIGHT] = 0xffffff; // was a low-contrast text grey
 	s.rgb[METACOLOR_GREY_DARKEST] = 0x000000;
 	s.rgb[METACOLOR_GREY_DARKER] = 0x111111;
 	s.rgb[METACOLOR_GREY_DARK] = 0x222222;
-	s.rgb[METACOLOR_GREY_44] = 0x222222;
+	s.rgb[METACOLOR_GREY_MED_DARK] = 0x222222;
 	s.rgb[METACOLOR_GREY_MEDIUM] = 0x666666;
-	s.rgb[METACOLOR_GREY_88] = 0xaaaaaa;
-	s.rgb[METACOLOR_GREY_BB] = 0xdddddd;
-	s.rgb[METACOLOR_GREY_BRIGHT] = 0xffffff;
-	s.rgb[METACOLOR_GREY_80] = 0x888888;
+	s.rgb[METACOLOR_GREY_MED_LIGHT] = 0xaaaaaa;
+	s.rgb[METACOLOR_GREY_BRIGHTER] = 0xdddddd;
+	s.rgb[METACOLOR_GREY_BRIGHTEST] = 0xffffff;
 
 	// Popup warning — keep yellow but make it pure for max attention.
-	s.rgb[METACOLOR_POPUP_WARNING_BG] = 0xffff00;
+	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xffff00;
 
 	s.rgb[METACOLOR_KNOB_BODY] = 0x444444;
 	s.rgb[METACOLOR_KNOB_DOT] = 0xffffff;
 	s.rgb[METACOLOR_KNOB_DISABLED] = 0x666666;
 
-	s.rgb[METACOLOR_INPUT_BG] = 0x000000;
-	s.rgb[METACOLOR_INPUT_ACCENT] = 0x000000;
-	s.rgb[METACOLOR_INPUT_DISABLED_BG] = 0x222222;
-	s.rgb[METACOLOR_BLUE_CHECKED] = 0x4080ff;
+	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xffcc66;
+
+	s.rgb[METACOLOR_CHECKBOX] = 0x4080ff;
 	s.rgb[METACOLOR_TEXT_DARK] = 0x000000;
-	s.rgb[METACOLOR_DEBUG_GREEN] = 0x00ff00;
 
 	// Rich-text colors used in HTML escape sequences — pull these toward
 	// near-white tints of their hue so they still read on black.
@@ -165,7 +156,6 @@ constexpr ColorScheme make_high_contrast_scheme() {
 
 	s.rgb[METACOLOR_LV_GREY] = 0xcccccc;
 	s.rgb[METACOLOR_LV_ORANGE] = 0xffa000;
-	s.rgb[METACOLOR_LV_ORANGE_LIGHT] = 0xffcc66;
 	s.rgb[METACOLOR_LV_GREEN_LIGHT] = 0x80ff80;
 	s.rgb[METACOLOR_LV_RED_LIGHT] = 0xff8080;
 

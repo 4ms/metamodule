@@ -116,7 +116,7 @@ struct Gui {
 		return color_text(txt, html_code(METACOLOR_LT_GREY_TEXT));
 	}
 
-	static inline std::string grey_color_html = html_code(METACOLOR_GREY_HIGHLIGHT);
+	static inline std::string grey_color_html = html_code(METACOLOR_GREY_BRIGHT);
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
@@ -249,7 +249,7 @@ struct Gui {
 		// initialized at static init time, but we need to reassign here so
 		// runtime scheme changes (which re-run init_lvgl_styles) propagate.
 		orange_highlight = mc(METACOLOR_ORANGE_HIGHLIGHT);
-		grey_color_html = html_code(METACOLOR_GREY_HIGHLIGHT);
+		grey_color_html = html_code(METACOLOR_GREY_BRIGHT);
 
 		// Refresh the LVGL palette arrays from the active scheme.
 		const ColorScheme *scheme = Scheme::active_scheme();
@@ -321,7 +321,7 @@ struct Gui {
 
 		// selected_module_style
 		lv_style_init(&selected_module_style);
-		lv_style_set_outline_color(&selected_module_style, mc(METACOLOR_LV_ORANGE_LIGHT));
+		lv_style_set_outline_color(&selected_module_style, mc(METACOLOR_MODULE_SELECTED_BORDER));
 		lv_style_set_outline_width(&selected_module_style, 3);
 		lv_style_set_outline_opa(&selected_module_style, LV_OPA_100);
 		lv_style_set_radius(&selected_module_style, 0);

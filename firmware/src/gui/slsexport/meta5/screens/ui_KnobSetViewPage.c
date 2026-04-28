@@ -87,7 +87,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_add_flag(ui_PreviousKnobSet, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
 	lv_obj_clear_flag(ui_PreviousKnobSet, LV_OBJ_FLAG_SCROLLABLE);	  /// Flags
 	lv_obj_set_style_radius(ui_PreviousKnobSet, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_PreviousKnobSet, scheme_bg(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_PreviousKnobSet, scheme_bg(METACOLOR_GREY_MED_LIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_PreviousKnobSet, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_PreviousKnobSet, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_PreviousKnobSet, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -282,7 +282,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_NextKnobSet, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_NextKnobSet, scheme_bg(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_NextKnobSet, scheme_bg(METACOLOR_GREY_MED_LIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_NextKnobSet, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_NextKnobSet, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_NextKnobSet, 6, LV_PART_MAIN | LV_STATE_DEFAULT);

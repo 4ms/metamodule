@@ -150,7 +150,7 @@ lv_obj_set_y( ui_FileBrowserRoller, -3 );
 lv_obj_set_align( ui_FileBrowserRoller, LV_ALIGN_BOTTOM_RIGHT );
 lv_obj_add_state( ui_FileBrowserRoller, LV_STATE_FOCUSED );     /// States
 lv_obj_clear_flag( ui_FileBrowserRoller, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE );    /// Flags
-lv_obj_add_style(ui_FileBrowserRoller, scheme_text(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_text(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_FileBrowserRoller, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -187,7 +187,7 @@ lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_F
 
 lv_obj_add_style(ui_FileBrowserRoller, scheme_text(METACOLOR_WHITE), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FileBrowserRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, scheme_bg(METACOLOR_GREY_44), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_bg(METACOLOR_GREY_MED_DARK), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_FileBrowserRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_add_style(ui_FileBrowserRoller, scheme_border(METACOLOR_BLACK), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_FileBrowserRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
@@ -202,7 +202,7 @@ lv_obj_set_height( ui_FileBrowserSpinner, 67);
 lv_obj_set_align( ui_FileBrowserSpinner, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_FileBrowserSpinner, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_FileBrowserSpinner, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_add_style(ui_FileBrowserSpinner, scheme_arc(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserSpinner, scheme_arc(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_arc_opa(ui_FileBrowserSpinner, 200, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_arc_width(ui_FileBrowserSpinner, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
 

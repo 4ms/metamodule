@@ -93,7 +93,7 @@ lv_obj_set_height( ui_ModuleListRoller, 208);
 lv_obj_set_width( ui_ModuleListRoller, lv_pct(100));
 lv_obj_set_align( ui_ModuleListRoller, LV_ALIGN_BOTTOM_RIGHT );
 lv_obj_clear_flag( ui_ModuleListRoller, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE );    /// Flags
-lv_obj_add_style(ui_ModuleListRoller, scheme_text(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRoller, scheme_text(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ModuleListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_ModuleListRoller, 7, LV_PART_MAIN| LV_STATE_DEFAULT);

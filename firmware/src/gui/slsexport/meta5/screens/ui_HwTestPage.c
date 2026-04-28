@@ -24,7 +24,7 @@ lv_obj_clear_flag( ui_HWTestPagePanel, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_HWTestPagePanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_add_style(ui_HWTestPagePanel, scheme_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_HWTestPagePanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_HWTestPagePanel, scheme_border(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_HWTestPagePanel, scheme_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_HWTestPagePanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_HwTestTitle = lv_label_create(ui_HWTestPagePanel);

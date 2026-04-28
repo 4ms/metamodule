@@ -42,7 +42,7 @@ struct PluginTab : SystemMenuTab {
 			lv_obj_set_style_radius(load_all_popup, 0, LV_PART_MAIN);
 			lv_obj_set_style_pad_hor(load_all_popup, 8, LV_PART_MAIN);
 			lv_obj_set_style_pad_ver(load_all_popup, 6, LV_PART_MAIN);
-			lv_obj_add_style(load_all_popup, scheme_bg(METACOLOR_POPUP_WARNING_BG), LV_PART_MAIN);
+			lv_obj_add_style(load_all_popup, scheme_bg(METACOLOR_NOTIFICATION_BG), LV_PART_MAIN);
 			lv_obj_add_flag(load_all_popup, LV_OBJ_FLAG_SNAPABLE);
 
 			load_in_progress_label = lv_label_create(load_all_popup);

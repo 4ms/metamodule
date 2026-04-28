@@ -185,7 +185,7 @@ struct MappingPaneList {
 private:
 	static void format_panel_cable_circle(lv_obj_t *circle) {
 		lv_obj_set_style_border_width(circle, 3, LV_STATE_DEFAULT);
-		lv_obj_add_style(circle, scheme_bg(METACOLOR_GREY_BB), LV_STATE_DEFAULT);
+		lv_obj_add_style(circle, scheme_bg(METACOLOR_GREY_BRIGHTER), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(circle, LV_OPA_100, LV_STATE_DEFAULT);
 	}
 

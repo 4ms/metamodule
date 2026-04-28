@@ -207,7 +207,7 @@ struct KnobMapPage : PageBase {
 				lv_obj_set_style_bg_color(ui_EditMappingArc, mc(METACOLOR_WHITE), LV_PART_KNOB);
 			} else {
 				lv_show(indicator);
-				lv_obj_set_style_bg_color(ui_EditMappingArc, mc(METACOLOR_GREY_HIGHLIGHT), LV_PART_KNOB);
+				lv_obj_set_style_bg_color(ui_EditMappingArc, mc(METACOLOR_GREY_BRIGHT), LV_PART_KNOB);
 
 				if (map.panel_knob_id < params.knobs.size()) {
 					auto phys_val = params.knobs[map.panel_knob_id].val;

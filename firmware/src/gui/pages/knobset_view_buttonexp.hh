@@ -80,9 +80,9 @@ struct ButtonExpanderMapsView {
 			lv_color_t num;
 			lv_color_t label;
 			if (!exp_connected && has_mappings) {
-				bg = mc(METACOLOR_GREY_44);
-				num = mc(METACOLOR_GREY_HIGHLIGHT);
-				label = mc(METACOLOR_GREY_88);
+				bg = mc(METACOLOR_GREY_MED_DARK);
+				num = mc(METACOLOR_GREY_BRIGHT);
+				label = mc(METACOLOR_GREY_MEDIUM);
 			} else {
 				bg = Gui::get_buttonexp_color(0);
 				num = Gui::get_buttonexp_textcolor(0);
@@ -191,14 +191,14 @@ private:
 		lv_enable(circle);
 		lv_obj_set_style_bg_color(circle, mc(METACOLOR_WHITE), LV_PART_MAIN);
 		lv_obj_set_style_border_opa(circle, LV_OPA_100, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_color(circle, mc(METACOLOR_GREY_88), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_border_color(circle, mc(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	}
 
 	void disable(lv_obj_t *cont) {
 		lv_disable(cont);
 		auto circle = get_button_circle(cont);
 		lv_disable(circle);
-		lv_obj_set_style_bg_color(circle, mc(METACOLOR_GREY_88), LV_PART_MAIN);
+		lv_obj_set_style_bg_color(circle, mc(METACOLOR_GREY_MEDIUM), LV_PART_MAIN);
 		lv_obj_set_style_border_opa(circle, LV_OPA_0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(circle, LV_OPA_30, LV_STATE_DISABLED);
 	}

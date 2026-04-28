@@ -284,7 +284,7 @@ struct KnobSetViewPage : PageBase {
 			if (is_tracking) {
 				lv_obj_set_style_bg_color(arc, mc(METACOLOR_WHITE), LV_PART_KNOB);
 			} else {
-				lv_obj_set_style_bg_color(arc, mc(METACOLOR_GREY_HIGHLIGHT), LV_PART_KNOB);
+				lv_obj_set_style_bg_color(arc, mc(METACOLOR_GREY_BRIGHT), LV_PART_KNOB);
 			}
 		}
 	}
