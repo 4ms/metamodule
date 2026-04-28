@@ -274,16 +274,24 @@ struct Gui {
 		// is then darkened in-place below; consecutive calls would otherwise
 		// keep darkening the same data).
 		cable_palette = {
-			palette_main[LV_PALETTE_RED],    palette_main[LV_PALETTE_BLUE],
-			palette_main[LV_PALETTE_GREEN],  palette_main[LV_PALETTE_GREY],
-			palette_main[LV_PALETTE_YELLOW], palette_main[LV_PALETTE_ORANGE],
-			palette_main[LV_PALETTE_PINK],   palette_main[LV_PALETTE_PURPLE],
+			palette_main[LV_PALETTE_RED],
+			palette_main[LV_PALETTE_BLUE],
+			palette_main[LV_PALETTE_GREEN],
+			palette_main[LV_PALETTE_GREY],
+			palette_main[LV_PALETTE_YELLOW],
+			palette_main[LV_PALETTE_ORANGE],
+			palette_main[LV_PALETTE_PINK],
+			palette_main[LV_PALETTE_PURPLE],
 		};
 		knob_palette = {
-			palette_main[LV_PALETTE_RED],    palette_main[LV_PALETTE_YELLOW],
-			palette_main[LV_PALETTE_CYAN],   palette_main[LV_PALETTE_PINK],
-			palette_main[LV_PALETTE_ORANGE], palette_main[LV_PALETTE_GREEN],
-			palette_main[LV_PALETTE_GREY],   palette_main[LV_PALETTE_BLUE_GREY],
+			palette_main[LV_PALETTE_RED],
+			palette_main[LV_PALETTE_YELLOW],
+			palette_main[LV_PALETTE_CYAN],
+			palette_main[LV_PALETTE_PINK],
+			palette_main[LV_PALETTE_ORANGE],
+			palette_main[LV_PALETTE_GREEN],
+			palette_main[LV_PALETTE_GREY],
+			palette_main[LV_PALETTE_BLUE_GREY],
 		};
 		knob_disabled_palette = knob_palette;
 		for (auto &color : knob_disabled_palette) {
@@ -441,6 +449,28 @@ struct Gui {
 		lv_style_set_outline_opa(&focus_style, LV_OPA_100);
 		lv_style_set_outline_width(&focus_style, 3);
 		lv_style_set_outline_pad(&focus_style, 2);
+	}
+
+	static void reinit_lvgl_styles() {
+		lv_style_reset(&debug_border);
+		lv_style_reset(&invisible_style);
+		lv_style_reset(&panel_highlight_style);
+		lv_style_reset(&panel_large_highlight_style);
+		lv_style_reset(&selected_module_style);
+		lv_style_reset(&roller_style);
+		lv_style_reset(&roller_sel_style);
+		lv_style_reset(&plain_border_style);
+		lv_style_reset(&module_border_style);
+		lv_style_reset(&mapped_circle_style);
+		lv_style_reset(&mapped_jack_circle_label_style);
+		lv_style_reset(&subdir_panel_item_style);
+		lv_style_reset(&subdir_panel_item_sel_style);
+		lv_style_reset(&subdir_panel_item_sel_blurred_style);
+		lv_style_reset(&dropdown_style);
+		lv_style_reset(&dropdown_style_main_checked);
+		lv_style_reset(&dropdown_style_selected);
+		lv_style_reset(&focus_style);
+		init_lvgl_styles();
 	}
 
 	static lv_obj_t *create_map_circle(lv_obj_t *parent) {

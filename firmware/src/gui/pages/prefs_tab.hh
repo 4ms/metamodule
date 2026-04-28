@@ -8,6 +8,7 @@
 #include "gui/slsexport/prefs_section_audio.hh"
 #include "gui/slsexport/prefs_section_button_exp_knobset.hh"
 #include "gui/slsexport/prefs_section_catchup.hh"
+#include "gui/slsexport/prefs_section_color_scheme.hh"
 #include "gui/slsexport/prefs_section_fs.hh"
 #include "gui/slsexport/prefs_section_midi.hh"
 #include "gui/slsexport/prefs_section_missing_plugins.hh"
@@ -34,6 +35,7 @@ struct PrefsTab : SystemMenuTab {
 		, missing_plugins{settings.missing_plugins}
 		, button_exp_knobset{settings.button_exp_knobset}
 		, notifications{settings.notifications}
+		, color_scheme{settings.color_scheme}
 		, settings{settings} {
 
 		audio_section.create(ui_SystemMenuPrefsTab);
@@ -44,6 +46,7 @@ struct PrefsTab : SystemMenuTab {
 		buttonexpknobset_section.create(ui_SystemMenuPrefsTab);
 		missingplugins_section.create(ui_SystemMenuPrefsTab);
 		notifications_section.create(ui_SystemMenuPrefsTab);
+		color_scheme_section.create(ui_SystemMenuPrefsTab);
 
 		auto btns = create_save_revert_buttons(ui_SystemMenuPrefsTab);
 		save_button = lv_obj_get_child(btns, 1);
@@ -78,6 +81,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(color_scheme_section.scheme_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, focus_cb, LV_EVENT_FOCUSED, this);
@@ -99,6 +103,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(color_scheme_section.scheme_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 
 		std::string opts;
 		for (auto item : AudioSettings::ValidBlockSizes) {
@@ -141,6 +146,14 @@ struct PrefsTab : SystemMenuTab {
 		set_options(CatchupSettings::ValidOptions, catchup_section.mode_dropdown);
 		set_options(ButtonExpKnobSetSettings::ValidOptions, buttonexpknobset_section.expander_dropdown);
 		set_options(NotificationSettings::ValidAmountOptions, notifications_section.amount_dropdown);
+
+		std::string scheme_opts;
+		for (unsigned i = 0; i < Scheme::count(); ++i) {
+			scheme_opts += std::string(Scheme::name(i)) + "\n";
+		}
+		if (scheme_opts.length())
+			scheme_opts.pop_back();
+		lv_dropdown_set_options(color_scheme_section.scheme_dropdown, scheme_opts.c_str());
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -256,6 +269,10 @@ private:
 									[this](auto t) { return t.value == notifications.amount; });
 		lv_dropdown_set_selected(notifications_section.amount_dropdown, notif_item >= 0 ? notif_item : 0);
 		lv_check(notifications_section.animation_check, notifications.animation);
+
+		// Color scheme: select the persisted id and re-apply (revert path also lands here).
+		lv_dropdown_set_selected(color_scheme_section.scheme_dropdown, color_scheme.scheme_id);
+		apply_scheme(color_scheme.scheme_id);
 
 		gui_state.do_write_settings = false;
 
@@ -425,6 +442,21 @@ private:
 		return lv_obj_has_state(notifications_section.animation_check, LV_STATE_CHECKED);
 	}
 
+	uint8_t read_color_scheme_dropdown() {
+		auto item = lv_dropdown_get_selected(color_scheme_section.scheme_dropdown);
+		if (item < Scheme::count())
+			return static_cast<uint8_t>(item);
+		return ColorSchemeSettings::DefaultSchemeId;
+	}
+
+	// Live-applies a scheme so the user sees a preview as they change the dropdown.
+	// Atomic styles re-paint via lv_obj_report_style_change(NULL) (called inside
+	// Scheme::set), and Gui::init_lvgl_styles() refreshes the composite styles.
+	static void apply_scheme(uint8_t scheme_id) {
+		Scheme::set(scheme_id);
+		Gui::reinit_lvgl_styles();
+	}
+
 	void update_require_back_enabled(bool expander_enabled) {
 		lv_enable(buttonexpknobset_section.require_back_check, expander_enabled);
 		auto opa = expander_enabled ? LV_OPA_100 : LV_OPA_50;
@@ -562,6 +594,14 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		// Color scheme: scheme has already been live-applied in do_changed_cb;
+		// here we only persist the id.
+		auto scheme_id = read_color_scheme_dropdown();
+		if (color_scheme.scheme_id != scheme_id) {
+			color_scheme.scheme_id = scheme_id;
+			gui_state.do_write_settings = true;
+		}
+
 		lv_disable(save_button);
 		lv_disable(revert_button);
 	}
@@ -634,6 +674,12 @@ private:
 			lv_group_set_editing(group, false);
 			return true;
 
+		} else if (lv_dropdown_is_open(color_scheme_section.scheme_dropdown)) {
+			lv_dropdown_close(color_scheme_section.scheme_dropdown);
+			lv_group_focus_obj(color_scheme_section.scheme_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
 		} else {
 			update_settings_from_dropdown();
 			return false;
@@ -687,10 +733,17 @@ private:
 		auto bexp_back = read_require_back_check();
 		auto notif_amount = read_notification_amount_dropdown();
 		auto notif_anim = read_notification_animation_check();
+		auto scheme_id = read_color_scheme_dropdown();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 		update_knobset_control_items(knobset_control == MidiSettings::KnobsetControl::Enabled);
 		update_require_back_enabled(bexp != 0);
+
+		// Live-preview scheme so the user can see what they're picking.
+		// Save persists the id; revert restores the previous scheme via
+		// update_dropdowns_from_settings().
+		if (scheme_id != Scheme::current())
+			apply_scheme(scheme_id);
 
 		if (block_size == audio_settings.block_size && sample_rate == audio_settings.sample_rate &&
 			overrun_retries == audio_settings.max_overrun_retries && timeout == screensaver.timeout_ms &&
@@ -702,7 +755,7 @@ private:
 			mp_mode == missing_plugins.autoload && apply_sr == settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
-			notif_anim == notifications.animation)
+			notif_anim == notifications.animation && scheme_id == color_scheme.scheme_id)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
@@ -722,7 +775,8 @@ private:
 
 		// scroll to bottom if we select last items
 		if (target == page->notifications_section.amount_dropdown ||
-			target == page->notifications_section.animation_check)
+			target == page->notifications_section.animation_check ||
+			target == page->color_scheme_section.scheme_dropdown)
 		{
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);
 
@@ -744,6 +798,7 @@ private:
 	MissingPluginSettings &missing_plugins;
 	ButtonExpKnobSetSettings &button_exp_knobset;
 	NotificationSettings &notifications;
+	ColorSchemeSettings &color_scheme;
 	UserSettings &settings;
 
 	lv_group_t *group = nullptr;
@@ -756,6 +811,7 @@ private:
 	PrefsSectionMissingPlugins missingplugins_section;
 	PrefsSectionButtonExpKnobSet buttonexpknobset_section;
 	PrefsSectionNotifications notifications_section;
+	PrefsSectionColorScheme color_scheme_section;
 
 	lv_obj_t *save_button;
 	lv_obj_t *revert_button;

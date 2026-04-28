@@ -123,6 +123,12 @@ static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {
 	n->append_child() << ryml::key("autoload") << mode_string;
 }
 
+static void write(ryml::NodeRef *n, ColorSchemeSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("scheme_id") << s.scheme_id;
+}
+
 namespace Settings
 {
 
@@ -151,6 +157,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["patch_suggested_audio"] << settings.patch_suggested_audio;
 	data["button_exp_knobset"] << settings.button_exp_knobset;
 	data["notifications"] << settings.notifications;
+	data["color_scheme"] << settings.color_scheme;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();

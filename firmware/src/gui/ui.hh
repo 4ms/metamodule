@@ -4,6 +4,7 @@
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "gui/button_exp_nav.hh"
+#include "gui/colors/color_scheme.hh"
 #include "gui/colors/color_styles.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
@@ -66,6 +67,9 @@ public:
 				pr_err("Failed to write settings file\n");
 			}
 		}
+
+		Scheme::set(settings.color_scheme.scheme_id);
+		Gui::init_lvgl_styles();
 
 		patch_playloader.connect_user_settings(&settings);
 		patch_playloader.connect_notification_queue(&notify_queue);

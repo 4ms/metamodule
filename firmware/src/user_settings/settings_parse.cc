@@ -218,6 +218,16 @@ static bool read(ryml::ConstNodeRef const &node, MissingPluginSettings *settings
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, ColorSchemeSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	read_or_default(node, "scheme_id", settings, &ColorSchemeSettings::scheme_id);
+	settings->make_valid();
+
+	return true;
+}
+
 namespace Settings
 {
 
@@ -248,6 +258,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "patch_suggested_audio", settings, &UserSettings::patch_suggested_audio);
 	read_or_default(node, "button_exp_knobset", settings, &UserSettings::button_exp_knobset);
 	read_or_default(node, "notifications", settings, &UserSettings::notifications);
+	read_or_default(node, "color_scheme", settings, &UserSettings::color_scheme);
 
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::initial_patch_name);
 	// TODO: cleaner way to parse an enum and reject out of range?

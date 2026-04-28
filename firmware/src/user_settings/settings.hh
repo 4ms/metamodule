@@ -3,6 +3,7 @@
 #include "button_exp_knobset_settings.hh"
 #include "catchup_settings.hh"
 #include "fs/volumes.hh"
+#include "user_settings/color_scheme_settings.hh"
 #include "user_settings/fs_settings.hh"
 #include "user_settings/midi_settings.hh"
 #include "user_settings/patch_suggested_audio_settings.hh"
@@ -34,6 +35,7 @@ struct UserSettings {
 	PatchSuggestedAudioSettings patch_suggested_audio{};
 	ButtonExpKnobSetSettings button_exp_knobset{};
 	NotificationSettings notifications{};
+	ColorSchemeSettings color_scheme{};
 };
 
 } // namespace MetaModule

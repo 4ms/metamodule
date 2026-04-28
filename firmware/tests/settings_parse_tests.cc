@@ -79,6 +79,8 @@ TEST_CASE("Parse settings file") {
   notifications:
     amount: Fewer
     animation: 0
+  color_scheme:
+    scheme_id: 0
 )";
 	// clang-format on
 
@@ -148,6 +150,8 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::Fewer);
 	CHECK(settings.notifications.animation == false);
+
+	CHECK(settings.color_scheme.scheme_id == 0);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -298,6 +302,8 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::All);
 	CHECK(settings.notifications.animation == true);
+
+	CHECK(settings.color_scheme.scheme_id == MetaModule::ColorSchemeSettings::DefaultSchemeId);
 }
 
 TEST_CASE("Serialize settings") {
@@ -355,6 +361,8 @@ TEST_CASE("Serialize settings") {
 
 	settings.notifications.amount = MetaModule::NotificationSettings::Amount::OnlyCritical;
 	settings.notifications.animation = false;
+
+	settings.color_scheme.scheme_id = 0;
 
 	// clang format-off
 	std::string expected = R"(Settings:
@@ -433,6 +441,8 @@ TEST_CASE("Serialize settings") {
   notifications:
     amount: OnlyCritical
     animation: 0
+  color_scheme:
+    scheme_id: 0
 )";
 	// clang format-on
 
