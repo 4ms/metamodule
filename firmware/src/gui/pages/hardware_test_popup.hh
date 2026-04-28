@@ -34,7 +34,7 @@ struct HardwareCheckPopup {
 		lv_obj_add_flag(btn1, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		lv_hide(ui_HWTestPagePanel);
 
-		lv_obj_set_style_border_color(ui_HWTestMidiLabel, Gui::palette_main[1], LV_PART_MAIN);
+		lv_obj_add_style(ui_HWTestMidiLabel, mc_palette_main_border(1), LV_PART_MAIN);
 		lv_obj_set_style_border_opa(ui_HWTestMidiLabel, LV_OPA_100, LV_PART_MAIN);
 	}
 
