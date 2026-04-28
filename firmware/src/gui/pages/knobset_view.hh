@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/colors/color_styles.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/helpers.hh"
@@ -276,14 +277,14 @@ struct KnobSetViewPage : PageBase {
 	void update_knob(lv_obj_t *arc, bool is_tracking, float arc_val) {
 		if (arc_val > lv_arc_get_max_value(arc) || arc_val < lv_arc_get_min_value(arc)) {
 			lv_obj_set_style_radius(arc, 0, LV_PART_KNOB);
-			lv_obj_set_style_bg_color(arc, lv_color_hex(0x000000), LV_PART_KNOB);
+			lv_obj_set_style_bg_color(arc, mc(METACOLOR_BLACK), LV_PART_KNOB);
 		} else {
 			lv_obj_set_style_radius(arc, 20, LV_PART_KNOB);
 
 			if (is_tracking) {
-				lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+				lv_obj_set_style_bg_color(arc, mc(METACOLOR_WHITE), LV_PART_KNOB);
 			} else {
-				lv_obj_set_style_bg_color(arc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
+				lv_obj_set_style_bg_color(arc, mc(METACOLOR_GREY_HIGHLIGHT), LV_PART_KNOB);
 			}
 		}
 	}

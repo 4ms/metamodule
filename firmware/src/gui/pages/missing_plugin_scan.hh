@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/colors/color_styles.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -25,12 +26,12 @@ struct MissingPluginScanner {
 		lv_obj_set_width(status_label, lv_pct(100));
 		lv_obj_set_height(status_label, LV_SIZE_CONTENT);
 		lv_obj_set_pos(status_label, 0, 0);
-		lv_obj_set_style_bg_color(status_label, lv_color_hex(0x222222), 0);
+		lv_obj_add_style(status_label, mc_bg(METACOLOR_GREY_DARKEST), 0);
 		lv_obj_set_style_bg_opa(status_label, LV_OPA_100, 0);
 		lv_obj_set_style_pad_ver(status_label, 4, 0);
 		lv_obj_set_style_pad_hor(status_label, 8, 0);
 		lv_obj_set_style_text_font(status_label, &ui_font_MuseoSansRounded50014, 0);
-		lv_obj_set_style_text_color(status_label, Gui::orange_highlight, 0);
+		lv_obj_add_style(status_label, mc_text(METACOLOR_ORANGE_HIGHLIGHT), 0);
 		lv_obj_set_style_text_align(status_label, LV_TEXT_ALIGN_CENTER, 0);
 		lv_obj_add_flag(status_label, LV_OBJ_FLAG_FLOATING);
 
@@ -43,7 +44,7 @@ struct MissingPluginScanner {
 		lv_obj_set_height(title, LV_SIZE_CONTENT);
 		lv_label_set_text(title, "");
 		lv_obj_set_align(title, LV_ALIGN_TOP_LEFT);
-		lv_obj_set_style_text_color(title, Gui::orange_highlight, LV_STATE_DEFAULT);
+		lv_obj_add_style(title, mc_text(METACOLOR_ORANGE_HIGHLIGHT), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(title, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_LEFT, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_font(title, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);

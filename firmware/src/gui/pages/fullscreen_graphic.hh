@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/colors/color_styles.hh"
 #include "gui/dyn_display_drawer.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
@@ -14,7 +15,7 @@ struct FullscreenGraphicPage : PageBase {
 		screen = lv_obj_create(NULL);
 		lv_obj_clear_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_set_style_opa(screen, LV_OPA_100, LV_PART_MAIN);
-		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_PART_MAIN);
+		lv_obj_add_style(screen, mc_bg(METACOLOR_BLACK), LV_PART_MAIN);
 		lv_obj_set_size(screen, 320, 240);
 		lv_obj_set_style_pad_all(screen, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_width(screen, 0, LV_PART_MAIN);
@@ -22,7 +23,7 @@ struct FullscreenGraphicPage : PageBase {
 
 		canvas = lv_canvas_create(screen);
 		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_set_style_bg_color(canvas, lv_color_black(), LV_PART_MAIN);
+		lv_obj_add_style(canvas, mc_bg(METACOLOR_BLACK), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(canvas, LV_OPA_100, LV_PART_MAIN);
 
 		init_bg(screen);

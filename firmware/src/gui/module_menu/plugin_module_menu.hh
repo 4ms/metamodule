@@ -1,5 +1,6 @@
 #pragma once
 #include "console/pr_dbg.hh"
+#include "gui/colors/color_styles.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/module_menu/base_plugin_menu.hh"
@@ -30,7 +31,7 @@ struct PluginModuleMenu {
 		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
 		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_SELECTED);
 
-		lv_obj_set_style_text_color(roller, lv_color_hex(0xCCCCCC), LV_STATE_DEFAULT);
+		lv_obj_add_style(roller, mc_text(METACOLOR_LT_GREY_TEXT), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(roller, 255, LV_STATE_DEFAULT);
 
 		auto hover_label = lv_obj_get_child(roller_hover.get_cont(), 0);

@@ -1,5 +1,6 @@
 #pragma once
 #include "fs/helpers.hh"
+#include "gui/colors/color_styles.hh"
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/system_menu_tab_base.hh"
@@ -49,10 +50,10 @@ struct PrefsTab : SystemMenuTab {
 		revert_button = lv_obj_get_child(btns, 0);
 
 		lv_hide(audio_section.sr_override_cont);
-		lv_obj_set_style_text_color(audio_section.sr_override_cont, Gui::orange_highlight, 0);
+		lv_obj_add_style(audio_section.sr_override_cont, mc_text(METACOLOR_ORANGE_HIGHLIGHT), 0);
 
 		lv_hide(audio_section.bs_override_cont);
-		lv_obj_set_style_text_color(audio_section.bs_override_cont, Gui::orange_highlight, 0);
+		lv_obj_add_style(audio_section.bs_override_cont, mc_text(METACOLOR_ORANGE_HIGHLIGHT), 0);
 
 		lv_obj_add_event_cb(save_button, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(revert_button, revert_cb, LV_EVENT_CLICKED, this);

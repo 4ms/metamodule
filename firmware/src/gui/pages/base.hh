@@ -1,5 +1,6 @@
 #pragma once
 #include "dynload/plugin_manager.hh"
+#include "gui/colors/color_styles.hh"
 #include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages//file_browser/file_browser.hh"
@@ -94,7 +95,7 @@ struct PageBase {
 		group = lv_group_create();
 		screen = screen_ptr;
 		lv_obj_set_size(screen, 320, 240); //TODO: use Screen Conf, not hard-set values
-		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_STATE_DEFAULT);
+		lv_obj_add_style(screen, mc_bg(METACOLOR_BLACK), LV_STATE_DEFAULT);
 	}
 
 	void focus(PageArguments const *args) {

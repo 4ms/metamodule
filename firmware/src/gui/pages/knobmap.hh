@@ -70,7 +70,7 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_x(indicator, 0);
 		lv_obj_set_y(indicator, 31);
 		lv_obj_set_align(indicator, LV_ALIGN_TOP_MID);
-		lv_obj_set_style_bg_color(indicator, lv_color_hex(0x0), LV_PART_MAIN);
+		lv_obj_add_style(indicator, mc_bg(METACOLOR_BLACK), LV_PART_MAIN);
 		lv_obj_set_style_radius(indicator, 0, LV_PART_MAIN);
 		lv_obj_set_style_transform_pivot_x(indicator, 0, LV_PART_MAIN);
 		lv_obj_set_style_transform_pivot_y(indicator, 23, LV_PART_MAIN);
@@ -167,9 +167,9 @@ struct KnobMapPage : PageBase {
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
 		if (map.is_button())
-			lv_obj_set_style_text_color(ui_EditMappingLetter, lv_color_white(), LV_PART_MAIN);
+			lv_obj_set_style_text_color(ui_EditMappingLetter, mc(METACOLOR_WHITE), LV_PART_MAIN);
 		else
-			lv_obj_set_style_text_color(ui_EditMappingLetter, lv_color_black(), LV_PART_MAIN);
+			lv_obj_set_style_text_color(ui_EditMappingLetter, mc(METACOLOR_BLACK), LV_PART_MAIN);
 
 		lv_obj_set_style_bg_color(indicator, Gui::get_knob_indicator_color(map.panel_knob_id), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
@@ -204,10 +204,10 @@ struct KnobMapPage : PageBase {
 
 			if (is_tracking) {
 				lv_hide(indicator);
-				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+				lv_obj_set_style_bg_color(ui_EditMappingArc, mc(METACOLOR_WHITE), LV_PART_KNOB);
 			} else {
 				lv_show(indicator);
-				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
+				lv_obj_set_style_bg_color(ui_EditMappingArc, mc(METACOLOR_GREY_HIGHLIGHT), LV_PART_KNOB);
 
 				if (map.panel_knob_id < params.knobs.size()) {
 					auto phys_val = params.knobs[map.panel_knob_id].val;

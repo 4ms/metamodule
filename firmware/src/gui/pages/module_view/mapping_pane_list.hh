@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "gui/colors/color_styles.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -38,7 +39,7 @@ struct MappingPaneList {
 		if (lv_obj_has_class(setname, &lv_label_class))
 			lv_label_set_text(setname, knobset_name.data());
 		lv_show(circle);
-		lv_obj_set_style_text_color(obj, is_active ? lv_color_hex(0xFF8918) : lv_color_white(), LV_STATE_DEFAULT);
+		lv_obj_set_style_text_color(obj, is_active ? mc(METACOLOR_ORANGE_HIGHLIGHT) : mc(METACOLOR_WHITE), LV_STATE_DEFAULT);
 
 		auto name = get_panel_name(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text(label, name.c_str());
@@ -70,7 +71,7 @@ struct MappingPaneList {
 		auto setname = lv_obj_get_child(obj, 0);
 
 		lv_label_set_text(setname, knobset_name.data());
-		lv_obj_set_style_text_color(obj, is_active ? lv_color_hex(0xFF8918) : lv_color_white(), LV_STATE_DEFAULT);
+		lv_obj_set_style_text_color(obj, is_active ? mc(METACOLOR_ORANGE_HIGHLIGHT) : mc(METACOLOR_WHITE), LV_STATE_DEFAULT);
 		return obj;
 	}
 
@@ -174,7 +175,7 @@ struct MappingPaneList {
 		if (lv_obj_get_child_cnt(obj) == 0)
 			return;
 		auto label = lv_obj_get_child(obj, 0);
-		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
+		lv_obj_add_style(label, mc_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
 		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, patch);
 		lv_label_set_text_fmt(label, "%.16s %.16s", name.module_name.c_str(), name.element_name.c_str());
 	}
@@ -182,7 +183,7 @@ struct MappingPaneList {
 private:
 	static void format_panel_cable_circle(lv_obj_t *circle) {
 		lv_obj_set_style_border_width(circle, 3, LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_color(circle, lv_color_hex(0xbbbbbb), LV_STATE_DEFAULT);
+		lv_obj_add_style(circle, mc_bg(METACOLOR_GREY_BB), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(circle, LV_OPA_100, LV_STATE_DEFAULT);
 	}
 
@@ -197,7 +198,7 @@ private:
 
 	static void format_button_map_circle(uint16_t panel_knob_id, lv_obj_t *circle, lv_obj_t *label) {
 		format_label(label, 0, &ui_font_MuseoSansRounded70014);
-		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
+		lv_obj_add_style(label, mc_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
 		format_circle(circle, Gui::get_knob_color(panel_knob_id), 22);
 	}
 
@@ -209,7 +210,7 @@ private:
 	static void format_label(lv_obj_t *label, lv_coord_t line_spacing, const lv_font_t *font) {
 		lv_obj_set_style_text_font(label, font, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_line_space(label, line_spacing, LV_STATE_DEFAULT);
-		lv_obj_set_style_text_color(label, lv_color_black(), LV_STATE_DEFAULT);
+		lv_obj_add_style(label, mc_text(METACOLOR_BLACK), LV_STATE_DEFAULT);
 	}
 };
 } // namespace MetaModule

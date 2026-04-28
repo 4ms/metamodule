@@ -4,6 +4,7 @@
 #include "drivers/cache.hh"
 #include "expanders.hh"
 #include "fs/norflash_layout.hh"
+#include "gui/colors/color_styles.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -25,14 +26,14 @@ struct CalibrationRoutine {
 		, measurer{{Calibration::DefaultLowV, Calibration::DefaultHighV}} {
 
 		for (auto label : input_status_labels) {
-			lv_obj_set_style_outline_color(label, Gui::orange_highlight, LV_PART_MAIN);
+			lv_obj_add_style(label, mc_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN);
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
 			lv_obj_set_style_outline_width(label, 2, LV_PART_MAIN);
 			lv_obj_set_style_outline_pad(label, 4, LV_PART_MAIN);
 		}
 
 		for (auto label : output_status_labels) {
-			lv_obj_set_style_outline_color(label, Gui::orange_highlight, LV_PART_MAIN);
+			lv_obj_add_style(label, mc_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN);
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
 			lv_obj_set_style_outline_width(label, 2, LV_PART_MAIN);
 			lv_obj_set_style_outline_pad(label, 4, LV_PART_MAIN);

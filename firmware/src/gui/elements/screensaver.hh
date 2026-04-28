@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gui/colors/color_styles.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "pr_dbg.hh"
@@ -24,8 +25,8 @@ public:
 		lv_obj_set_width(screensaver, lv_pct(100));
 		lv_obj_set_height(screensaver, lv_pct(100));
 		lv_obj_set_align(screensaver, LV_ALIGN_CENTER);
-		lv_obj_set_style_bg_color(screensaver, lv_color_hex(0x000000), LV_STATE_DEFAULT);
-		lv_obj_set_style_border_color(screensaver, lv_color_hex(0x000000), LV_STATE_DEFAULT);
+		lv_obj_add_style(screensaver, mc_bg(METACOLOR_BLACK), LV_STATE_DEFAULT);
+		lv_obj_add_style(screensaver, mc_border(METACOLOR_BLACK), LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(screensaver, 0, LV_STATE_DEFAULT);
 		wake();
 	}

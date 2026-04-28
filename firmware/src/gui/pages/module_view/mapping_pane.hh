@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements_index.hh"
+#include "gui/colors/color_styles.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/gui_state.hh"
@@ -187,8 +188,8 @@ struct ModuleViewMappingPane {
 					//Remove active mark
 					if (auto set_i = last_active_knobset + 1; set_i < map_list_items.size()) {
 						if (auto obj = map_list_items[set_i]) {
-							lv_obj_set_style_text_color(obj, lv_color_white(), LV_STATE_DEFAULT);
-							lv_obj_set_style_text_color(obj, lv_color_white(), LV_STATE_FOCUSED);
+							lv_obj_set_style_text_color(obj, mc(METACOLOR_WHITE), LV_STATE_DEFAULT);
+							lv_obj_set_style_text_color(obj, mc(METACOLOR_WHITE), LV_STATE_FOCUSED);
 						}
 					}
 				}
@@ -196,8 +197,8 @@ struct ModuleViewMappingPane {
 					//Add active mark
 					if (auto set_i = page_list.get_active_knobset() + 1; set_i < map_list_items.size()) {
 						if (auto obj = map_list_items[set_i]) {
-							lv_obj_set_style_text_color(obj, lv_color_hex(0xFDB818), LV_STATE_DEFAULT);
-							lv_obj_set_style_text_color(obj, lv_color_hex(0xFDB818), LV_STATE_FOCUSED);
+							lv_obj_set_style_text_color(obj, mc(METACOLOR_ORANGE_BRIGHT), LV_STATE_DEFAULT);
+							lv_obj_set_style_text_color(obj, mc(METACOLOR_ORANGE_BRIGHT), LV_STATE_FOCUSED);
 						}
 					}
 				}
