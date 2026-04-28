@@ -1,5 +1,6 @@
 #include "../ui.h"
 #include "gui/colors/color_ids.h"
+#include "gui/colors/color_styles.h"
 
 void ui_MidiMapViewPage_screen_init(void) {
 	ui_MidiMapViewPage = lv_obj_create(NULL);
@@ -23,15 +24,15 @@ void ui_MidiMapViewPage_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_MidiMapViewCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(ui_MidiMapViewCont, MC(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MidiMapViewCont, metacolor_style_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_MidiMapViewCont, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_img_opa(ui_MidiMapViewCont, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_img_recolor(ui_MidiMapViewCont, MC(METACOLOR_KNOB_BODY), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MidiMapViewCont, metacolor_style_bg_img_recolor(METACOLOR_KNOB_BODY), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_img_recolor_opa(ui_MidiMapViewCont, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_border_color(ui_MidiMapViewCont, MC(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MidiMapViewCont, metacolor_style_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_MidiMapViewCont, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_MidiMapViewCont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_color(ui_MidiMapViewCont, MC(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MidiMapViewCont, metacolor_style_outline(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_MidiMapViewCont, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_width(ui_MidiMapViewCont, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_pad(ui_MidiMapViewCont, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -62,7 +63,7 @@ void ui_MidiMapViewPage_screen_init(void) {
 	lv_obj_set_height(ui_MidiMapInputsTitle, LV_SIZE_CONTENT); /// 1
 	lv_obj_set_align(ui_MidiMapInputsTitle, LV_ALIGN_CENTER);
 	lv_label_set_text(ui_MidiMapInputsTitle, "MIDI Jacks");
-	lv_obj_set_style_text_color(ui_MidiMapInputsTitle, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MidiMapInputsTitle, metacolor_style_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_MidiMapInputsTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_letter_space(ui_MidiMapInputsTitle, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_line_space(ui_MidiMapInputsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -106,7 +107,7 @@ void ui_MidiMapViewPage_screen_init(void) {
 	lv_obj_set_height(ui_MidiMapOutputsTitle, LV_SIZE_CONTENT); /// 1
 	lv_obj_set_align(ui_MidiMapOutputsTitle, LV_ALIGN_CENTER);
 	lv_label_set_text(ui_MidiMapOutputsTitle, "MIDI Params");
-	lv_obj_set_style_text_color(ui_MidiMapOutputsTitle, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MidiMapOutputsTitle, metacolor_style_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_MidiMapOutputsTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_letter_space(ui_MidiMapOutputsTitle, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_line_space(ui_MidiMapOutputsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -136,7 +137,7 @@ void ui_MidiMapViewPage_screen_init(void) {
 
 	lv_obj_set_scrollbar_mode(ui_MidiMapLeftItems, LV_SCROLLBAR_MODE_AUTO);
 	lv_obj_set_scroll_dir(ui_MidiMapLeftItems, LV_DIR_VER);
-	lv_obj_set_style_bg_color(ui_MidiMapLeftItems, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MidiMapLeftItems, metacolor_style_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_MidiMapLeftItems, 128, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_MidiMapLeftItems, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_MidiMapLeftItems, 1, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -146,7 +147,7 @@ void ui_MidiMapViewPage_screen_init(void) {
 
 	lv_obj_set_scrollbar_mode(ui_MidiMapRightItems, LV_SCROLLBAR_MODE_ON);
 	lv_obj_set_scroll_dir(ui_MidiMapRightItems, LV_DIR_VER);
-	lv_obj_set_style_bg_color(ui_MidiMapRightItems, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MidiMapRightItems, metacolor_style_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_MidiMapRightItems, 128, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_MidiMapRightItems, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_MidiMapRightItems, 3, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);

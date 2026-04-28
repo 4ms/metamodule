@@ -5,6 +5,7 @@
 
 #include "../ui.h"
 #include "gui/colors/color_ids.h"
+#include "gui/colors/color_styles.h"
 
 void ui_JackMapViewPage_screen_init(void)
 {
@@ -25,15 +26,15 @@ lv_obj_set_flex_flow(ui_JackMapViewCont,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_JackMapViewCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_clear_flag( ui_JackMapViewCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_JackMapViewCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_JackMapViewCont, MC(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_JackMapViewCont, metacolor_style_bg(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_img_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_img_recolor(ui_JackMapViewCont, MC(METACOLOR_KNOB_BODY), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_add_style(ui_JackMapViewCont, metacolor_style_bg_img_recolor(METACOLOR_KNOB_BODY), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_img_recolor_opa(ui_JackMapViewCont, 100, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_color(ui_JackMapViewCont, MC(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_JackMapViewCont, metacolor_style_border(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_JackMapViewCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(ui_JackMapViewCont, MC(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_JackMapViewCont, metacolor_style_outline(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_outline_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_width(ui_JackMapViewCont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_pad(ui_JackMapViewCont, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -68,7 +69,7 @@ lv_obj_set_width( ui_JackMapInputsTitle, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_JackMapInputsTitle, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_JackMapInputsTitle, LV_ALIGN_CENTER );
 lv_label_set_text(ui_JackMapInputsTitle,"INPUTS");
-lv_obj_set_style_text_color(ui_JackMapInputsTitle, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_JackMapInputsTitle, metacolor_style_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_JackMapInputsTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_JackMapInputsTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_JackMapInputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -122,7 +123,7 @@ lv_obj_set_width( ui_JackMapOutputsTitle, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_JackMapOutputsTitle, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_JackMapOutputsTitle, LV_ALIGN_CENTER );
 lv_label_set_text(ui_JackMapOutputsTitle,"OUTPUTS");
-lv_obj_set_style_text_color(ui_JackMapOutputsTitle, MC(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_JackMapOutputsTitle, metacolor_style_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_JackMapOutputsTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_JackMapOutputsTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_JackMapOutputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
