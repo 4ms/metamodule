@@ -257,7 +257,7 @@ public:
 			auto cpu_times = core_balancer.measure_modules(
 				modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
 
-			core_balancer.balance_loads(cpu_times);
+			core_balancer.find_best_partition(cpu_times, [this] { return measure_partition_cost(); });
 
 			core_balancer.print_times(cpu_times, pd.module_slugs);
 
@@ -277,6 +277,52 @@ public:
 		}
 
 		cables.build(pd.int_cables, core_balancer.cores.parts);
+	}
+
+	// Apply the partition currently in core_balancer.cores, then run update_patch()
+	// under real SMP and return the worst per-iteration cycle count. Used by
+	// Balancer::find_best_partition to select between candidate partitions.
+	// update_patch() drives Core 1 via SGI, so the measurement must happen on Core 0;
+	// dispatches there if called from Core 1.
+	uint64_t measure_partition_cost() {
+		return mdrivlib::SMPThread::run([this]() -> uint64_t {
+			smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
+			cables.build(pd.int_cables, core_balancer.cores.parts);
+
+			constexpr unsigned WarmupIterations = 32;
+			constexpr unsigned MeasureIterations = 128;
+
+			for (auto i = 0u; i < WarmupIterations; i++)
+				update_patch();
+
+			// #ifndef TESTPROJECT
+			// asm("bkpt 1");
+			// #endif
+			mdrivlib::CycleCounter counter;
+			uint32_t worst = 0;
+			for (auto i = 0u; i < MeasureIterations; i++) {
+				Debug::Pin2::high();
+				counter.start_simple_measurement();
+
+				for (uint32_t i = 0; i < NumInJacks; i++)
+					set_panel_input(i, 0);
+
+				for (uint32_t i = 0; i < NumTotalParams; i++)
+					set_panel_param(i, 0);
+
+				update_patch();
+
+				for (uint32_t i = 0; i < NumOutJacks; i++) [[maybe_unused]]
+					auto x = get_panel_output(i);
+
+				worst = std::max(worst, counter.stop_simple_measurement());
+				Debug::Pin2::low();
+			}
+			// #ifndef TESTPROJECT
+			// asm("bkpt 2");
+			// #endif
+			return worst;
+		});
 	}
 
 	// Runs the patch

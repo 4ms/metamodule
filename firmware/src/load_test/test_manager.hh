@@ -4,59 +4,100 @@
 #include "gui/ui.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "test_modules.hh"
+#include "test_patches.hh"
 
 namespace MetaModule
 {
 
 struct CpuLoadTest {
-	static bool should_run_tests(FileStorageProxy &file_storage_proxy) {
-		return FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value();
+	static bool should_run_hil_tests(FileStorageProxy &file_storage_proxy) {
+		if (FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value()) {
+			std::string should_run;
+			FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
+			return should_run.starts_with("hil\n");
+		}
+		return false;
 	}
 
-	static void run_tests(FileStorageProxy &file_storage_proxy, Ui &ui, PluginManager &plugin_manager) {
+	static void run_hil_tests(FileStorageProxy &file_storage_proxy, Ui &ui, PluginManager &plugin_manager) {
+		if (!should_run_hil_tests(file_storage_proxy))
+			return;
+
+		pr_info("Running HIL CPU load tests\n");
+
+		if (!preload_all_plugins(plugin_manager)) {
+			pr_err("Failed preloading plugins for HIL CPU load tests\n");
+			hil_message("*failure\n");
+			return;
+		}
+		hil_message("*loadtesting\n");
+
+		run_module_tests(file_storage_proxy, ui);
+	}
+
+	static bool should_run_module_tests(FileStorageProxy &file_storage_proxy) {
+		if (FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value()) {
+			std::string should_run;
+			FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
+			return should_run.starts_with("all\n") || should_run.starts_with("modules\n");
+		}
+		return false;
+	}
+
+	static void run_tests(PatchPlayer &patch_player, FileStorageProxy &file_storage_proxy, Ui &ui) {
+
 		std::string should_run;
 		FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
 
-		bool do_tests = false;
-
-		const auto run_all = should_run.starts_with("all\n");
-		const auto run_hil = should_run.starts_with("hil\n");
-		if (run_hil) {
-			// TODO: auto load all plugins on USB drive
-			if (!preload_all_plugins(plugin_manager)) {
-				hil_message("*failure\n");
-				return;
-			}
-			do_tests = true;
+		if (should_run.starts_with("all\n") || should_run.starts_with("modules\n")) {
+			run_module_tests(file_storage_proxy, ui);
 		}
 
-		if (run_all) {
-			ui.preload_plugins(plugin_manager);
-			do_tests = true;
+		if (should_run.starts_with("all\n") || should_run.starts_with("patches\n")) {
+			run_patch_tests(patch_player, file_storage_proxy, ui);
 		}
 
-		// TODO: check file contents and only test brands that are in the file
-		// "Brand1\nBrand2\n" => only test Brand1 and Brand2
-
-		if (do_tests) {
-			pr_info("A7 Core 2 running CPU load tests\n");
-
-			hil_message("*loadtesting\n");
-
-			// clear previous results files
-			FS::write_file(file_storage_proxy, std::string("In progress"), {"cpu_test.csv", Volume::USB});
-			FS::write_file(file_storage_proxy, std::string(""), {"cpu_test_in_progress.csv", Volume::USB});
-
-			std::string results;
-			results.reserve(1024 * 1024); // reserve a 1MB to reduce memory fragmentation
-			LoadTest::test_all_modules([&file_storage_proxy, &ui, &results](std::string_view csv_line) {
-				results += csv_line;
-				FS::append_file(file_storage_proxy, csv_line, {"cpu_test_in_progress.csv", Volume::USB});
-				ui.update_screen();
-			});
-			FS::write_file(file_storage_proxy, results, {"cpu_test.csv", Volume::USB});
+		if (should_run.starts_with("all\n") || should_run.starts_with("modules\n") ||
+			should_run.starts_with("patches\n"))
+		{
 			hil_message("*success\n");
 		}
+	}
+
+	static void run_module_tests(FileStorageProxy &file_storage_proxy, Ui &ui) {
+		pr_info("Running module CPU load tests\n");
+		hil_message("*loadtesting\n");
+
+		// clear previous results files
+		FS::write_file(file_storage_proxy, std::string("In progress"), {"cpu_test.csv", Volume::USB});
+		FS::write_file(file_storage_proxy, std::string("\n"), {"cpu_test_in_progress.csv", Volume::USB});
+
+		std::string results;
+		results.reserve(1024 * 1024); // reserve a 1MB to reduce memory fragmentation
+		LoadTest::test_all_modules([&file_storage_proxy, &ui, &results](std::string_view csv_line) {
+			results += csv_line;
+			FS::append_file(file_storage_proxy, csv_line, {"cpu_test_in_progress.csv", Volume::USB});
+			ui.update_screen();
+		});
+		FS::write_file(file_storage_proxy, results, {"cpu_test.csv", Volume::USB});
+	}
+
+	static void run_patch_tests(PatchPlayer &player, FileStorageProxy &file_storage_proxy, Ui &ui) {
+		// Runs on Core 0
+		mdrivlib::SMPThread::run([&ui, &file_storage_proxy, &player]() {
+			FS::write_file(file_storage_proxy, std::string("In progress"), {"cpu_test_patches.csv", Volume::USB});
+			FS::write_file(file_storage_proxy, std::string("\n"), {"cpu_test_patches_in_progress.csv", Volume::USB});
+
+			std::string results;
+			results.reserve(64 * 1024);
+			LoadTest::test_all_patches(
+				player, file_storage_proxy, [&file_storage_proxy, &ui, &results](std::string_view csv_line) {
+					results += csv_line;
+					FS::append_file(file_storage_proxy, csv_line, {"cpu_test_patches_in_progress.csv", Volume::USB});
+					ui.update_screen();
+				});
+			FS::write_file(file_storage_proxy, results, {"cpu_test_patches.csv", Volume::USB});
+		});
 	}
 
 	static bool preload_all_plugins(PluginManager &plugin_manager) {

@@ -101,6 +101,12 @@ int main() {
 	printf("Using USB buffer\n");
 #endif
 
+	// Allow Core 1 to dispatch SMP work to us before audio starts
+	mdrivlib::InterruptManager::register_and_start_isr(
+		mdrivlib::SMPControl::IRQn(mdrivlib::SMPThread::CallFunctionIRQn), 0, 0, []() {
+			mdrivlib::SMPThread::execute();
+		});
+
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 

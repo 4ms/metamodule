@@ -44,6 +44,13 @@ static inline void DebugPin0Low() {
 	*GPIOA_BSRR = (1 << (14 + 16));
 }
 
+//returns 0 = CA7 Core 1, 1 = CA7 Core 2
+static inline uint32_t get_core_id() {
+	uint32_t result;
+	asm volatile("MRC p15, 0, %0, c0, c0, 5" : "=r"(result) : : "memory");
+	return result & 0b1;
+}
+
 #define HARDWARE_BKPT() asm volatile("bkpt")
 
 #else
@@ -69,6 +76,10 @@ static inline void DebugPin0High() {
 }
 
 static inline void DebugPin0Low() {
+}
+
+static inline uint32_t get_core_id() {
+	return 0;
 }
 
 #define HARDWARE_BKPT()

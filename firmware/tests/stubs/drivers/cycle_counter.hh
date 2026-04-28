@@ -11,6 +11,13 @@ public:
 	void init() {
 	}
 
+	void start_simple_measurement() {
+	}
+
+	uint32_t stop_simple_measurement() {
+		return 1;
+	}
+
 	void start_measurement() {
 	}
 

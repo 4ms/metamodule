@@ -78,11 +78,11 @@ extern "C" void aux_core_main() {
 
 	AutoUpdater::run(file_storage_proxy, ui);
 
-	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
-		CpuLoadTest::run_tests(file_storage_proxy, ui, plugin_manager);
-	} else {
-		ui.preload_plugins(plugin_manager);
-	}
+	CpuLoadTest::run_hil_tests(file_storage_proxy, ui, plugin_manager);
+
+	ui.preload_plugins(plugin_manager);
+
+	CpuLoadTest::run_tests(*A7SharedMemoryS::ptrs.patch_player, file_storage_proxy, ui);
 
 	hil_message("*initialized\n");
 
