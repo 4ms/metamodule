@@ -41,6 +41,7 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 	params.clear();
 	metaparams.clear();
 
+	ColorStyles::init();
 	Gui::init_lvgl_styles();
 	page_manager.init();
 
