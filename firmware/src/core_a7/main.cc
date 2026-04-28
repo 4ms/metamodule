@@ -10,7 +10,6 @@
 #include "drivers/cache.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
-#include "load_test/test_manager.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
@@ -102,11 +101,11 @@ int main() {
 	printf("Using USB buffer\n");
 #endif
 
-	mdrivlib::HWSemaphore<RunningPatchTests>::lock();
-
 	// Allow Core 1 to dispatch SMP work to us before audio starts
-	InterruptManager::register_and_start_isr(
-		SMPControl::IRQn(SMPThread::CallFunctionIRQn), 0, 0, []() { mdrivlib::SMPThread::execute(); });
+	mdrivlib::InterruptManager::register_and_start_isr(
+		mdrivlib::SMPControl::IRQn(mdrivlib::SMPThread::CallFunctionIRQn), 0, 0, []() {
+			mdrivlib::SMPThread::execute();
+		});
 
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
@@ -114,14 +113,6 @@ int main() {
 	// wait for other cores to be ready: ~2400ms + more for preloading plugins
 	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked() || mdrivlib::HWSemaphore<AuxCoreReady>::is_locked())
 		;
-
-	if (CpuLoadTest::should_run_patch_tests(file_storage_proxy)) {
-		CpuLoadTest::run_patch_tests(patch_player, file_storage_proxy);
-	}
-
-	mdrivlib::HWSemaphore<RunningPatchTests>::unlock();
-
-	hil_message("*initialized\n");
 
 	StaticBuffers::sync_params.clear();
 
