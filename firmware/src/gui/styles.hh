@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/colors/color_scheme.hh"
 #include "lvgl.h"
 #include "patch-serial/patch/mapping_ids.hh"
 #include "patch-serial/patch/midi_def.hh"
@@ -66,42 +67,62 @@ struct Gui {
 	static inline std::string color_text(std::string_view txt, std::string_view color) {
 		return std::string{color} + std::string{txt} + LV_TXT_COLOR_CMD + " ";
 	}
-	static inline lv_color_t red_highlight = lv_color_hex(0xea1c25);
+
+	// Returns the LVGL rich-text color escape "^RRGGBB " for the given color id.
+	static std::string html_code(MetaColorId id) {
+		uint32_t rgb = metacolor_rgb(id);
+		std::string s = "^000000 ";
+		auto put_hex = [&s](uint8_t v, size_t pos) {
+			if (v < 0x10)
+				++pos; // keep leading zero
+			std::to_chars(s.data() + pos, s.data() + pos + 2, v, 16);
+		};
+		put_hex((rgb >> 16) & 0xFF, 1);
+		put_hex((rgb >> 8) & 0xFF, 3);
+		put_hex(rgb & 0xFF, 5);
+		return s;
+	}
+
+	// Named lv_color_t members are inline-initialized from the active scheme at
+	// static init time (safe: ColorScheme::schemes and Colors::active are
+	// constant-initialized). They are also reassigned in init_lvgl_styles() so a
+	// scheme change refreshes them when init_lvgl_styles() re-runs.
+	static inline lv_color_t red_highlight = mc(METACOLOR_RED_HIGHLIGHT);
 	static std::string red_text(std::string_view txt) {
-		return color_text(txt, "^ea1c25 ");
+		return color_text(txt, html_code(METACOLOR_RED_TEXT));
 	}
 
-	static inline lv_color_t orange_highlight = lv_color_hex(0xfd8b18);
+	static inline lv_color_t orange_highlight = mc(METACOLOR_ORANGE_HIGHLIGHT);
 	static std::string orange_text(std::string_view txt) {
-		return color_text(txt, "^fd9b18 ");
+		return color_text(txt, html_code(METACOLOR_ORANGE_TEXT));
 	}
 
-	static inline lv_color_t yellow_highlight = lv_color_hex(0x8bfd18);
+	static inline lv_color_t yellow_highlight = mc(METACOLOR_YELLOW_HIGHLIGHT);
 	static std::string yellow_text(std::string_view txt) {
-		return color_text(txt, "^d7ff6a ");
+		return color_text(txt, html_code(METACOLOR_YELLOW_TEXT));
 	}
 
-	static inline lv_color_t green_highlight = lv_color_hex(0x00a551);
+	static inline lv_color_t green_highlight = mc(METACOLOR_GREEN_HIGHLIGHT);
 	static std::string green_text(std::string_view txt) {
-		return color_text(txt, "^00a551 ");
+		return color_text(txt, html_code(METACOLOR_GREEN_TEXT));
 	}
 
 	static std::string blue_text(std::string_view txt) {
-		return color_text(txt, "^188bfd ");
+		return color_text(txt, html_code(METACOLOR_BLUE_TEXT));
 	}
 
-	static inline lv_color_t grey_highlight = lv_color_hex(0xaaaaaa);
+	static inline lv_color_t grey_highlight = mc(METACOLOR_GREY_HIGHLIGHT);
 	static std::string grey_text(std::string_view txt) {
-		return color_text(txt, "^aaaaaa ");
+		return color_text(txt, html_code(METACOLOR_GREY_TEXT));
 	}
 
 	static std::string lt_grey_text(std::string_view txt) {
-		return color_text(txt, "^cccccc ");
+		return color_text(txt, html_code(METACOLOR_LT_GREY_TEXT));
 	}
 
-	static inline std::string_view grey_color_html = "^aaaaaa ";
-	static inline std::string_view brown_highlight_html = "^A26E3E ";
-	static inline std::string_view orange_highlight_html = "^fd8b18 ";
+	static inline std::string grey_color_html = html_code(METACOLOR_GREY_HIGHLIGHT);
+	static inline std::string brown_highlight_html = html_code(METACOLOR_BROWN_HIGHLIGHT);
+	static inline std::string orange_highlight_html = html_code(METACOLOR_ORANGE_HIGHLIGHT);
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
@@ -293,6 +314,18 @@ struct Gui {
 
 	static void init_lvgl_styles() {
 
+		// Refresh named color values from the active scheme. These were
+		// initialized at static init time, but we need to reassign here so
+		// runtime scheme changes (which re-run init_lvgl_styles) propagate.
+		red_highlight = mc(METACOLOR_RED_HIGHLIGHT);
+		orange_highlight = mc(METACOLOR_ORANGE_HIGHLIGHT);
+		yellow_highlight = mc(METACOLOR_YELLOW_HIGHLIGHT);
+		green_highlight = mc(METACOLOR_GREEN_HIGHLIGHT);
+		grey_highlight = mc(METACOLOR_GREY_HIGHLIGHT);
+		grey_color_html = html_code(METACOLOR_GREY_HIGHLIGHT);
+		brown_highlight_html = html_code(METACOLOR_BROWN_HIGHLIGHT);
+		orange_highlight_html = html_code(METACOLOR_ORANGE_HIGHLIGHT);
+
 		for (auto &color : knob_disabled_palette) {
 			auto hsv = lv_color_to_hsv(color);
 			color = lv_color_hsv_to_rgb(hsv.h, hsv.s / 2, hsv.v / 2);
@@ -301,7 +334,7 @@ struct Gui {
 		// debug border
 		lv_style_init(&debug_border);
 		lv_style_set_radius(&debug_border, 0);
-		lv_style_set_border_color(&debug_border, lv_color_hex(0xff0000));
+		lv_style_set_border_color(&debug_border, mc(METACOLOR_DEBUG_BORDER));
 		lv_style_set_border_opa(&debug_border, LV_OPA_70);
 		lv_style_set_border_width(&debug_border, 1);
 
@@ -386,7 +419,7 @@ struct Gui {
 		lv_style_set_outline_width(&mapped_circle_style, 3);
 		lv_style_set_outline_pad(&mapped_circle_style, 0);
 		lv_style_set_radius(&mapped_circle_style, 40);
-		lv_style_set_text_color(&mapped_circle_style, lv_color_hex(0x000000));
+		lv_style_set_text_color(&mapped_circle_style, mc(METACOLOR_BLACK));
 		lv_style_set_text_opa(&mapped_circle_style, 255);
 		lv_style_set_text_font(&mapped_circle_style, &ui_font_MuseoSansRounded50010);
 
@@ -417,14 +450,14 @@ struct Gui {
 		lv_style_set_border_width(&subdir_panel_item_sel_style, 0);
 
 		lv_style_init(&subdir_panel_item_sel_blurred_style);
-		lv_style_set_bg_color(&subdir_panel_item_sel_blurred_style, lv_color_hex(0x555555));
+		lv_style_set_bg_color(&subdir_panel_item_sel_blurred_style, mc(METACOLOR_GREY_DARK));
 		lv_style_set_bg_opa(&subdir_panel_item_sel_blurred_style, LV_OPA_100);
 		lv_style_set_outline_width(&subdir_panel_item_sel_blurred_style, 0);
 		lv_style_set_border_width(&subdir_panel_item_sel_blurred_style, 0);
 
 		// Dropdown
 		lv_style_init(&dropdown_style);
-		lv_style_set_bg_color(&dropdown_style, lv_color_hex(0x555555));
+		lv_style_set_bg_color(&dropdown_style, mc(METACOLOR_GREY_DARK));
 		lv_style_set_text_color(&dropdown_style, lv_color_white());
 		lv_style_set_text_opa(&dropdown_style, 255);
 		lv_style_set_text_font(&dropdown_style, &ui_font_MuseoSansRounded70014);

@@ -19,6 +19,7 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_GREEN_HIGHLIGHT] = 0x00a551;
 	s.rgb[METACOLOR_BLUE_HIGHLIGHT] = 0x188bfd;
 	s.rgb[METACOLOR_GREY_HIGHLIGHT] = 0xaaaaaa;
+	s.rgb[METACOLOR_GREY_DARK] = 0x555555;
 	s.rgb[METACOLOR_BROWN_HIGHLIGHT] = 0xa26e3e;
 
 	s.rgb[METACOLOR_RED_TEXT] = 0xea1c25;
@@ -50,30 +51,30 @@ extern "C" uint32_t metacolor_rgb(MetaColorId id) {
 	return active->rgb[id];
 }
 
-namespace Colors
+namespace Scheme
 {
 
-void set_scheme(unsigned idx) {
+void set(unsigned idx) {
 	if (idx >= kSchemeCount)
 		return;
 	active = &schemes[idx];
 	ColorStyles::reapply_scheme();
 }
 
-unsigned current_scheme() {
+unsigned current() {
 	return static_cast<unsigned>(active - &schemes[0]);
 }
 
-unsigned scheme_count() {
+unsigned count() {
 	return kSchemeCount;
 }
 
-std::string_view scheme_name(unsigned idx) {
+std::string_view name(unsigned idx) {
 	if (idx >= kSchemeCount)
 		return {};
 	return schemes[idx].name;
 }
 
-} // namespace Colors
+} // namespace Scheme
 
 } // namespace MetaModule

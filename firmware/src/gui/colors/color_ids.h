@@ -20,6 +20,7 @@ typedef enum MetaColorId {
 	METACOLOR_GREEN_HIGHLIGHT,
 	METACOLOR_BLUE_HIGHLIGHT,
 	METACOLOR_GREY_HIGHLIGHT,
+	METACOLOR_GREY_DARK,
 	METACOLOR_BROWN_HIGHLIGHT,
 
 	/* HTML rich-text variants (used by Gui::*_text() formatters).
