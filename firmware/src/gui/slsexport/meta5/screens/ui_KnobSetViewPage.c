@@ -602,11 +602,11 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_x(ui_KnobContainerB, 0);
 	lv_obj_set_y(ui_KnobContainerB, 0);
 
-	lv_obj_add_style(
-		get_knob(ui_KnobContainerB), scheme_arc(METACOLOR_KNOBSET_B), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	// lv_obj_add_style(
+	// 	get_knob(ui_KnobContainerB), scheme_arc(METACOLOR_KNOBSET_B), LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(get_knob(ui_KnobContainerB), 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
-	lv_obj_add_style(get_circle(ui_KnobContainerB), scheme_bg(METACOLOR_KNOBSET_B), LV_PART_MAIN | LV_STATE_DEFAULT);
+	// lv_obj_add_style(get_circle(ui_KnobContainerB), scheme_bg(METACOLOR_KNOBSET_B), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(get_circle(ui_KnobContainerB), 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_label_set_text(get_circle_letter(ui_KnobContainerB), "B");
@@ -653,11 +653,11 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_x(ui_KnobContainerC, 0);
 	lv_obj_set_y(ui_KnobContainerC, 0);
 
-	lv_obj_add_style(
-		get_knob(ui_KnobContainerC), scheme_arc(METACOLOR_KNOBSET_C), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	// lv_obj_add_style(
+	// 	get_knob(ui_KnobContainerC), scheme_arc(METACOLOR_KNOBSET_C), LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(get_knob(ui_KnobContainerC), 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
-	lv_obj_add_style(get_circle(ui_KnobContainerC), scheme_bg(METACOLOR_KNOBSET_C), LV_PART_MAIN | LV_STATE_DEFAULT);
+	// lv_obj_add_style(get_circle(ui_KnobContainerC), scheme_bg(METACOLOR_KNOBSET_C), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(get_circle(ui_KnobContainerC), 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_label_set_text(get_circle_letter(ui_KnobContainerC), "C");
@@ -704,11 +704,11 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_x(ui_KnobContainerD, 0);
 	lv_obj_set_y(ui_KnobContainerD, 0);
 
-	lv_obj_add_style(
-		get_knob(ui_KnobContainerD), scheme_arc(METACOLOR_KNOBSET_D), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	// lv_obj_add_style(
+	// 	get_knob(ui_KnobContainerD), scheme_arc(METACOLOR_KNOBSET_D), LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(get_knob(ui_KnobContainerD), 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
-	lv_obj_add_style(get_circle(ui_KnobContainerD), scheme_bg(METACOLOR_KNOBSET_D), LV_PART_MAIN | LV_STATE_DEFAULT);
+	// lv_obj_add_style(get_circle(ui_KnobContainerD), scheme_bg(METACOLOR_KNOBSET_D), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(get_circle(ui_KnobContainerD), 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_label_set_text(get_circle_letter(ui_KnobContainerD), "D");
@@ -755,11 +755,11 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_x(ui_KnobContainerE, 0);
 	lv_obj_set_y(ui_KnobContainerE, 0);
 
-	lv_obj_add_style(
-		get_knob(ui_KnobContainerE), scheme_arc(METACOLOR_KNOBSET_E), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	// lv_obj_add_style(
+	// 	get_knob(ui_KnobContainerE), scheme_arc(METACOLOR_KNOBSET_E), LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(get_knob(ui_KnobContainerE), 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
-	lv_obj_add_style(get_circle(ui_KnobContainerE), scheme_bg(METACOLOR_KNOBSET_E), LV_PART_MAIN | LV_STATE_DEFAULT);
+	// lv_obj_add_style(get_circle(ui_KnobContainerE), scheme_bg(METACOLOR_KNOBSET_E), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(get_circle(ui_KnobContainerE), 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_label_set_text(get_circle_letter(ui_KnobContainerE), "E");
@@ -806,11 +806,12 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_x(ui_KnobContainerF, 0);
 	lv_obj_set_y(ui_KnobContainerF, 0);
 
-	lv_obj_add_style(
-		get_knob(ui_KnobContainerF), scheme_arc(METACOLOR_GREEN_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	// lv_obj_add_style(
+	// 	get_knob(ui_KnobContainerF), scheme_arc(METACOLOR_GREEN_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(get_knob(ui_KnobContainerF), 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
-	lv_obj_add_style(get_circle(ui_KnobContainerF), scheme_bg(METACOLOR_GREEN_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	// lv_obj_add_style(
+	// get_circle(ui_KnobContainerF), scheme_bg(METACOLOR_GREEN_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(get_circle(ui_KnobContainerF), 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_label_set_text(get_circle_letter(ui_KnobContainerF), "F");

@@ -42,12 +42,12 @@ struct PluginTab : SystemMenuTab {
 			lv_obj_set_style_radius(load_all_popup, 0, LV_PART_MAIN);
 			lv_obj_set_style_pad_hor(load_all_popup, 8, LV_PART_MAIN);
 			lv_obj_set_style_pad_ver(load_all_popup, 6, LV_PART_MAIN);
-			lv_obj_add_style(load_all_popup, mc_bg(METACOLOR_POPUP_WARNING_BG), LV_PART_MAIN);
+			lv_obj_add_style(load_all_popup, scheme_bg(METACOLOR_POPUP_WARNING_BG), LV_PART_MAIN);
 			lv_obj_add_flag(load_all_popup, LV_OBJ_FLAG_SNAPABLE);
 
 			load_in_progress_label = lv_label_create(load_all_popup);
 			lv_label_set_text(load_in_progress_label, "Loading All Plugins: Please Wait");
-			lv_obj_add_style(load_all_popup, mc_text(METACOLOR_BLACK), LV_PART_MAIN);
+			lv_obj_add_style(load_all_popup, scheme_text(METACOLOR_BLACK), LV_PART_MAIN);
 			lv_label_set_long_mode(load_in_progress_label, LV_LABEL_LONG_DOT);
 			lv_obj_set_width(load_in_progress_label, LV_PCT(100));
 			lv_obj_set_height(load_in_progress_label, LV_SIZE_CONTENT);

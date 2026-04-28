@@ -26,14 +26,14 @@ struct CalibrationRoutine {
 		, measurer{{Calibration::DefaultLowV, Calibration::DefaultHighV}} {
 
 		for (auto label : input_status_labels) {
-			lv_obj_add_style(label, mc_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN);
+			lv_obj_add_style(label, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN);
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
 			lv_obj_set_style_outline_width(label, 2, LV_PART_MAIN);
 			lv_obj_set_style_outline_pad(label, 4, LV_PART_MAIN);
 		}
 
 		for (auto label : output_status_labels) {
-			lv_obj_add_style(label, mc_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN);
+			lv_obj_add_style(label, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN);
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
 			lv_obj_set_style_outline_width(label, 2, LV_PART_MAIN);
 			lv_obj_set_style_outline_pad(label, 4, LV_PART_MAIN);

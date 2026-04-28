@@ -44,14 +44,14 @@ public:
 		lv_obj_set_width(label, lv_pct(100));
 		lv_label_set_text(label, "");
 		lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL);
-		lv_obj_add_style(label, mc_text(METACOLOR_WHITE), LV_PART_MAIN);
+		lv_obj_add_style(label, scheme_text(METACOLOR_WHITE), LV_PART_MAIN);
 		lv_obj_set_style_text_opa(label, LV_OPA_100, LV_PART_MAIN);
 		lv_obj_set_style_text_letter_space(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
 		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_PART_MAIN);
 		lv_obj_set_style_radius(label, 0, LV_PART_MAIN);
-		lv_obj_add_style(label, mc_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN);
+		lv_obj_add_style(label, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(label, LV_OPA_100, LV_PART_MAIN);
 		lv_obj_set_style_border_width(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_top(label, 0, LV_PART_MAIN);

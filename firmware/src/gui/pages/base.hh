@@ -95,7 +95,7 @@ struct PageBase {
 		group = lv_group_create();
 		screen = screen_ptr;
 		lv_obj_set_size(screen, 320, 240); //TODO: use Screen Conf, not hard-set values
-		lv_obj_add_style(screen, mc_bg(METACOLOR_BLACK), LV_STATE_DEFAULT);
+		lv_obj_add_style(screen, scheme_bg(METACOLOR_BLACK), LV_STATE_DEFAULT);
 	}
 
 	void focus(PageArguments const *args) {

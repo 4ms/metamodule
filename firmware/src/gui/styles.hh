@@ -70,7 +70,7 @@ struct Gui {
 
 	// Returns the LVGL rich-text color escape "^RRGGBB " for the given color id.
 	static std::string html_code(MetaColorId id) {
-		uint32_t rgb = metacolor_rgb(id);
+		uint32_t rgb = scheme_color_rgb(id);
 		std::string s = "^000000 ";
 		auto put_hex = [&s](uint8_t v, size_t pos) {
 			if (v < 0x10)
@@ -87,7 +87,6 @@ struct Gui {
 	// static init time (safe: ColorScheme::schemes and Colors::active are
 	// constant-initialized). They are also reassigned in init_lvgl_styles() so a
 	// scheme change refreshes them when init_lvgl_styles() re-runs.
-	static inline lv_color_t red_highlight = mc(METACOLOR_RED_HIGHLIGHT);
 	static std::string red_text(std::string_view txt) {
 		return color_text(txt, html_code(METACOLOR_RED_TEXT));
 	}
@@ -97,12 +96,10 @@ struct Gui {
 		return color_text(txt, html_code(METACOLOR_ORANGE_TEXT));
 	}
 
-	static inline lv_color_t yellow_highlight = mc(METACOLOR_YELLOW_HIGHLIGHT);
 	static std::string yellow_text(std::string_view txt) {
 		return color_text(txt, html_code(METACOLOR_YELLOW_TEXT));
 	}
 
-	static inline lv_color_t green_highlight = mc(METACOLOR_GREEN_HIGHLIGHT);
 	static std::string green_text(std::string_view txt) {
 		return color_text(txt, html_code(METACOLOR_GREEN_TEXT));
 	}
@@ -111,7 +108,6 @@ struct Gui {
 		return color_text(txt, html_code(METACOLOR_BLUE_TEXT));
 	}
 
-	static inline lv_color_t grey_highlight = mc(METACOLOR_GREY_HIGHLIGHT);
 	static std::string grey_text(std::string_view txt) {
 		return color_text(txt, html_code(METACOLOR_GREY_TEXT));
 	}
@@ -121,8 +117,6 @@ struct Gui {
 	}
 
 	static inline std::string grey_color_html = html_code(METACOLOR_GREY_HIGHLIGHT);
-	static inline std::string brown_highlight_html = html_code(METACOLOR_BROWN_HIGHLIGHT);
-	static inline std::string orange_highlight_html = html_code(METACOLOR_ORANGE_HIGHLIGHT);
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
@@ -254,14 +248,8 @@ struct Gui {
 		// Refresh named color values from the active scheme. These were
 		// initialized at static init time, but we need to reassign here so
 		// runtime scheme changes (which re-run init_lvgl_styles) propagate.
-		red_highlight = mc(METACOLOR_RED_HIGHLIGHT);
 		orange_highlight = mc(METACOLOR_ORANGE_HIGHLIGHT);
-		yellow_highlight = mc(METACOLOR_YELLOW_HIGHLIGHT);
-		green_highlight = mc(METACOLOR_GREEN_HIGHLIGHT);
-		grey_highlight = mc(METACOLOR_GREY_HIGHLIGHT);
 		grey_color_html = html_code(METACOLOR_GREY_HIGHLIGHT);
-		brown_highlight_html = html_code(METACOLOR_BROWN_HIGHLIGHT);
-		orange_highlight_html = html_code(METACOLOR_ORANGE_HIGHLIGHT);
 
 		// Refresh the LVGL palette arrays from the active scheme.
 		const ColorScheme *scheme = Scheme::active_scheme();

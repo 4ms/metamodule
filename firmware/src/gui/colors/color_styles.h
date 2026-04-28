@@ -30,17 +30,6 @@ lv_style_t *scheme_arc(MetaColorId id);
 lv_style_t *scheme_shadow(MetaColorId id);
 lv_style_t *scheme_img_recolor(MetaColorId id);
 
-inline lv_style_t *mc_bg(MetaColorId id) { return scheme_bg(id); }
-inline lv_style_t *mc_bg_grad(MetaColorId id) { return scheme_bg_grad(id); }
-inline lv_style_t *mc_bg_img_recolor(MetaColorId id) { return scheme_bg_img_recolor(id); }
-inline lv_style_t *mc_text(MetaColorId id) { return scheme_text(id); }
-inline lv_style_t *mc_border(MetaColorId id) { return scheme_border(id); }
-inline lv_style_t *mc_outline(MetaColorId id) { return scheme_outline(id); }
-inline lv_style_t *mc_line(MetaColorId id) { return scheme_line(id); }
-inline lv_style_t *mc_arc(MetaColorId id) { return scheme_arc(id); }
-inline lv_style_t *mc_shadow(MetaColorId id) { return scheme_shadow(id); }
-inline lv_style_t *mc_img_recolor(MetaColorId id) { return scheme_img_recolor(id); }
-
 #ifdef __cplusplus
 }
 #endif

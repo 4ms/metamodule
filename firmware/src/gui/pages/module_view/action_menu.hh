@@ -63,7 +63,7 @@ public:
 		lv_textarea_set_one_line(rename_textarea, true);
 		lv_obj_set_width(rename_textarea, 300); // screen width (320) minus 10px margin each side
 		lv_obj_set_style_bg_opa(rename_textarea, LV_OPA_COVER, 0);
-		lv_obj_add_style(rename_textarea, mc_border(METACOLOR_WHITE), LV_PART_CURSOR | LV_STATE_DEFAULT);
+		lv_obj_add_style(rename_textarea, scheme_border(METACOLOR_WHITE), LV_PART_CURSOR | LV_STATE_DEFAULT);
 		lv_obj_set_style_border_opa(rename_textarea, LV_OPA_COVER, LV_PART_CURSOR | LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(rename_textarea, 1, LV_PART_CURSOR | LV_STATE_DEFAULT);
 		lv_obj_set_style_border_side(rename_textarea, LV_BORDER_SIDE_LEFT, LV_PART_CURSOR | LV_STATE_DEFAULT);

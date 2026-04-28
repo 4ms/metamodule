@@ -6,6 +6,7 @@ namespace MetaModule::ColorStyles
 
 namespace
 {
+// These are atomic styles that assign a color to one property.
 lv_style_t bg_styles[METACOLOR_COUNT];
 lv_style_t bg_grad_styles[METACOLOR_COUNT];
 lv_style_t bg_img_recolor_styles[METACOLOR_COUNT];
@@ -17,6 +18,8 @@ lv_style_t arc_styles[METACOLOR_COUNT];
 lv_style_t shadow_styles[METACOLOR_COUNT];
 lv_style_t img_recolor_styles[METACOLOR_COUNT];
 
+// For each color in the active scheme, 
+// update/set the color of the each style's relevant part
 void apply_colors() {
 	for (unsigned i = 0; i < METACOLOR_COUNT; i++) {
 		auto color = mc(static_cast<MetaColorId>(i));
@@ -35,18 +38,22 @@ void apply_colors() {
 } // namespace
 
 void init() {
-	for (unsigned i = 0; i < METACOLOR_COUNT; i++) {
-		lv_style_init(&bg_styles[i]);
-		lv_style_init(&bg_grad_styles[i]);
-		lv_style_init(&bg_img_recolor_styles[i]);
-		lv_style_init(&text_styles[i]);
-		lv_style_init(&border_styles[i]);
-		lv_style_init(&outline_styles[i]);
-		lv_style_init(&line_styles[i]);
-		lv_style_init(&arc_styles[i]);
-		lv_style_init(&shadow_styles[i]);
-		lv_style_init(&img_recolor_styles[i]);
+	static bool is_init = false;
+	if (!is_init) {
+		for (unsigned i = 0; i < METACOLOR_COUNT; i++) {
+			lv_style_init(&bg_styles[i]);
+			lv_style_init(&bg_grad_styles[i]);
+			lv_style_init(&bg_img_recolor_styles[i]);
+			lv_style_init(&text_styles[i]);
+			lv_style_init(&border_styles[i]);
+			lv_style_init(&outline_styles[i]);
+			lv_style_init(&line_styles[i]);
+			lv_style_init(&arc_styles[i]);
+			lv_style_init(&shadow_styles[i]);
+			lv_style_init(&img_recolor_styles[i]);
+		}
 	}
+	is_init = true;
 	apply_colors();
 }
 

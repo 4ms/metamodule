@@ -21,7 +21,7 @@ struct ColorScheme {
 
 // Resolve a color id to an lv_color_t under the active scheme.
 inline lv_color_t mc(MetaColorId id) {
-	return lv_color_hex(metacolor_rgb(id));
+	return lv_color_hex(scheme_color_rgb(id));
 }
 
 namespace Scheme

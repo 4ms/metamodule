@@ -2,10 +2,7 @@
 
 #include "gui/colors/color_styles.h"
 
-namespace MetaModule
-{
-
-namespace ColorStyles
+namespace MetaModule::ColorStyles
 {
 
 // One-time setup at startup. Initializes every atomic style with the
@@ -17,5 +14,4 @@ void init();
 // Called from Scheme::set().
 void reapply_scheme();
 
-} // namespace ColorStyles
-} // namespace MetaModule
+} // namespace MetaModule::ColorStyles

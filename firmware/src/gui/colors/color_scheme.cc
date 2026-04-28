@@ -17,8 +17,8 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_ORANGE_HIGHLIGHT] = 0xfd8b18;
 	s.rgb[METACOLOR_ORANGE_BRIGHT] = 0xfdb818;
 	s.rgb[METACOLOR_YELLOW_HIGHLIGHT] = 0x8bfd18;
-	s.rgb[METACOLOR_GREEN_HIGHLIGHT] = 0x00a551;
-	s.rgb[METACOLOR_BLUE_HIGHLIGHT] = 0x188bfd;
+	// s.rgb[METACOLOR_GREEN_HIGHLIGHT] = 0x00a551;
+	// s.rgb[METACOLOR_BLUE_HIGHLIGHT] = 0x188bfd;
 	s.rgb[METACOLOR_BLUE_INFO] = 0x2095f6;
 	s.rgb[METACOLOR_GREY_HIGHLIGHT] = 0xaaaaaa;
 	s.rgb[METACOLOR_GREY_DARKEST] = 0x222222;
@@ -58,10 +58,6 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_BLUE_DEEP] = 0x4040ff;
 	s.rgb[METACOLOR_GREY_80] = 0x808080;
 	s.rgb[METACOLOR_SCROLLBAR_ORANGE] = 0xdf7d1a;
-	s.rgb[METACOLOR_KNOBSET_B] = 0xfff200;
-	s.rgb[METACOLOR_KNOBSET_C] = 0x00aeee;
-	s.rgb[METACOLOR_KNOBSET_D] = 0xf66194;
-	s.rgb[METACOLOR_KNOBSET_E] = 0xffa529;
 
 	s.rgb[METACOLOR_LV_GREY] = 0x9e9e9e;
 	s.rgb[METACOLOR_LV_ORANGE] = 0xff9800;
@@ -116,8 +112,8 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	s.rgb[METACOLOR_ORANGE_HIGHLIGHT] = 0xffa000;
 	s.rgb[METACOLOR_ORANGE_BRIGHT] = 0xffd000;
 	s.rgb[METACOLOR_YELLOW_HIGHLIGHT] = 0xccff00;
-	s.rgb[METACOLOR_GREEN_HIGHLIGHT] = 0x00ff00;
-	s.rgb[METACOLOR_BLUE_HIGHLIGHT] = 0x00bfff;
+	// s.rgb[METACOLOR_GREEN_HIGHLIGHT] = 0x00ff00;
+	// s.rgb[METACOLOR_BLUE_HIGHLIGHT] = 0x00bfff;
 	s.rgb[METACOLOR_BLUE_INFO] = 0x00bfff;
 	s.rgb[METACOLOR_BROWN_HIGHLIGHT] = 0xd2884a;
 
@@ -166,10 +162,6 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	s.rgb[METACOLOR_GREEN_DARK] = 0x00ff00;
 	s.rgb[METACOLOR_BLUE_DEEP] = 0x6080ff;
 	s.rgb[METACOLOR_SCROLLBAR_ORANGE] = 0xffa000;
-	s.rgb[METACOLOR_KNOBSET_B] = 0xffff00;
-	s.rgb[METACOLOR_KNOBSET_C] = 0x00ffff;
-	s.rgb[METACOLOR_KNOBSET_D] = 0xff80c0;
-	s.rgb[METACOLOR_KNOBSET_E] = 0xffa000;
 
 	s.rgb[METACOLOR_LV_GREY] = 0xcccccc;
 	s.rgb[METACOLOR_LV_ORANGE] = 0xffa000;
@@ -221,7 +213,7 @@ const ColorScheme *active = &schemes[0];
 
 } // namespace
 
-extern "C" uint32_t metacolor_rgb(MetaColorId id) {
+extern "C" uint32_t scheme_color_rgb(MetaColorId id) {
 	return active->rgb[id];
 }
 

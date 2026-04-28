@@ -1,27 +1,25 @@
 #pragma once
 
-#include <stdint.h>
 #include "lvgl.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*
- * MetaColorId — symbolic names for every themable color in the GUI.
- * Pure C so .c files (e.g. SLS-generated ui.c) can use it.
- *
+ * SchemeColorId — symbolic names for every themable color in the GUI.
  * To add a color: append before METACOLOR_COUNT, then add a value for
  * every scheme in color_scheme.cc.
  */
-typedef enum MetaColorId {
+typedef enum SchemeColorId {
 	METACOLOR_RED_HIGHLIGHT = 0,
 	METACOLOR_ORANGE_HIGHLIGHT,
 	METACOLOR_ORANGE_BRIGHT,
 	METACOLOR_YELLOW_HIGHLIGHT,
-	METACOLOR_GREEN_HIGHLIGHT,
-	METACOLOR_BLUE_HIGHLIGHT,
-	METACOLOR_BLUE_INFO,
+	// METACOLOR_GREEN_HIGHLIGHT,
+	// METACOLOR_BLUE_HIGHLIGHT,
+	METACOLOR_BLUE_INFO, // Button color for "Confirm" buttons
 	METACOLOR_GREY_HIGHLIGHT,
 	METACOLOR_GREY_DARKEST,
 	METACOLOR_GREY_DARKER,
@@ -41,7 +39,7 @@ typedef enum MetaColorId {
 	METACOLOR_BLUE_CHECKED,
 	METACOLOR_TEXT_DARK,
 	METACOLOR_DEBUG_GREEN,
-	METACOLOR_BROWN_HIGHLIGHT,
+	// METACOLOR_BROWN_HIGHLIGHT,
 
 	/* HTML rich-text variants (used by Gui::*_text() formatters).
 	   Some differ slightly from the *_HIGHLIGHT values — preserved
@@ -59,33 +57,29 @@ typedef enum MetaColorId {
 	METACOLOR_DEBUG_BORDER,
 
 	/* Additional ids discovered during SLS C-file sweep. */
-	METACOLOR_ORANGE_DARK,        /* 0xF19300 — HwTestPage data text */
-	METACOLOR_GREEN_DARK,         /* 0x23973C — PatchView play-button green */
-	METACOLOR_BLUE_DEEP,          /* 0x4040FF — mapping menu control arc */
-	METACOLOR_GREY_80,            /* 0x808080 — disabled state text */
-	METACOLOR_SCROLLBAR_ORANGE,   /* 0xDF7D1A — scrollbar accent */
-	METACOLOR_KNOBSET_B,          /* 0xFFF200 — yellow knobset color */
-	METACOLOR_KNOBSET_C,          /* 0x00AEEE — cyan knobset color */
-	METACOLOR_KNOBSET_D,          /* 0xF66194 — pink knobset color */
-	METACOLOR_KNOBSET_E,          /* 0xFFA529 — orange knobset color */
+	METACOLOR_ORANGE_DARK,		/* 0xF19300 — HwTestPage data text */
+	METACOLOR_GREEN_DARK,		/* 0x23973C — PatchView play-button green */
+	METACOLOR_BLUE_DEEP,		/* 0x4040FF — mapping menu control arc */
+	METACOLOR_GREY_80,			/* 0x808080 — disabled state text */
+	METACOLOR_SCROLLBAR_ORANGE, /* 0xDF7D1A — scrollbar accent */
 
 	/* Substitutes for lv_palette_main()/lighten() calls in firmware code. */
-	METACOLOR_LV_GREY,            /* 0x9E9E9E — lv_palette_main(LV_PALETTE_GREY) */
-	METACOLOR_LV_ORANGE,          /* 0xFF9800 — lv_palette_main(LV_PALETTE_ORANGE) */
-	METACOLOR_LV_ORANGE_LIGHT,    /* 0xFFB74D — lv_palette_lighten(LV_PALETTE_ORANGE, 1) */
-	METACOLOR_LV_GREEN_LIGHT,     /* 0x66BB6A — lv_palette_lighten(LV_PALETTE_GREEN, 1) */
-	METACOLOR_LV_RED_LIGHT,       /* 0xEF5350 — lv_palette_lighten(LV_PALETTE_RED, 1) */
+	METACOLOR_LV_GREY,		   /* 0x9E9E9E — lv_palette_main(LV_PALETTE_GREY) */
+	METACOLOR_LV_ORANGE,	   /* 0xFF9800 — lv_palette_main(LV_PALETTE_ORANGE) */
+	METACOLOR_LV_ORANGE_LIGHT, /* 0xFFB74D — lv_palette_lighten(LV_PALETTE_ORANGE, 1) */
+	METACOLOR_LV_GREEN_LIGHT,  /* 0x66BB6A — lv_palette_lighten(LV_PALETTE_GREEN, 1) */
+	METACOLOR_LV_RED_LIGHT,	   /* 0xEF5350 — lv_palette_lighten(LV_PALETTE_RED, 1) */
 
 	METACOLOR_COUNT
 } MetaColorId;
 
 /* Returns 0xRRGGBB for the given color id under the active scheme. */
-uint32_t metacolor_rgb(MetaColorId id);
+uint32_t scheme_color_rgb(MetaColorId id);
 
 /* C-callable shortcut: returns lv_color_t for the given id under the active scheme.
    Used by SLS-generated .c files in place of lv_color_hex(0xXXXXXX) literals. */
 static inline lv_color_t MC(MetaColorId id) {
-	return lv_color_hex(metacolor_rgb(id));
+	return lv_color_hex(scheme_color_rgb(id));
 }
 
 #ifdef __cplusplus

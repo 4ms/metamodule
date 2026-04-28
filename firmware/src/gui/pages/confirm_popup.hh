@@ -148,11 +148,11 @@ struct ConfirmPopup {
 							  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
 							  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
 		lv_obj_set_style_radius(panel, 4, LV_STATE_DEFAULT);
-		lv_obj_add_style(panel, mc_bg(METACOLOR_GREY_DARKER), LV_STATE_DEFAULT);
+		lv_obj_add_style(panel, scheme_bg(METACOLOR_GREY_DARKER), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(panel, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(panel, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_side(panel, LV_BORDER_SIDE_NONE, LV_STATE_DEFAULT);
-		lv_obj_add_style(panel, mc_outline(METACOLOR_GREY_MEDIUM), LV_STATE_DEFAULT);
+		lv_obj_add_style(panel, scheme_outline(METACOLOR_GREY_MEDIUM), LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_opa(panel, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_width(panel, 2, LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_pad(panel, 1, LV_STATE_DEFAULT);
@@ -164,7 +164,7 @@ struct ConfirmPopup {
 		lv_obj_set_height(message_label, LV_SIZE_CONTENT); /// 30
 		lv_obj_set_align(message_label, LV_ALIGN_CENTER);
 		lv_label_set_text(message_label, "Are you sure you want to Delete this mapping?");
-		lv_obj_add_style(message_label, mc_text(METACOLOR_GREY_BRIGHT), LV_STATE_DEFAULT);
+		lv_obj_add_style(message_label, scheme_text(METACOLOR_GREY_BRIGHT), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(message_label, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_letter_space(message_label, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_line_space(message_label, -1, LV_STATE_DEFAULT);
@@ -172,7 +172,7 @@ struct ConfirmPopup {
 		lv_obj_set_style_text_font(message_label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(message_label, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(message_label, 0, LV_STATE_DEFAULT);
-		lv_obj_add_style(message_label, mc_outline(METACOLOR_GREY_DARK), LV_STATE_DEFAULT);
+		lv_obj_add_style(message_label, scheme_outline(METACOLOR_GREY_DARK), LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_opa(message_label, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_width(message_label, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_pad(message_label, 0, LV_STATE_DEFAULT);
@@ -213,7 +213,7 @@ struct ConfirmPopup {
 						  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE |
 							  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
 		lv_obj_set_style_radius(cancel_button, 20, LV_STATE_DEFAULT);
-		lv_obj_add_style(cancel_button, mc_bg(METACOLOR_GREY_MEDIUM), LV_STATE_DEFAULT);
+		lv_obj_add_style(cancel_button, scheme_bg(METACOLOR_GREY_MEDIUM), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(cancel_button, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(cancel_button, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_left(cancel_button, 10, LV_STATE_DEFAULT);
@@ -221,11 +221,11 @@ struct ConfirmPopup {
 		lv_obj_set_style_pad_top(cancel_button, 6, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(cancel_button, 6, LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_opa(cancel_button, 0, LV_STATE_PRESSED);
-		lv_obj_add_style(cancel_button, mc_outline(METACOLOR_WHITE), LV_STATE_FOCUSED);
+		lv_obj_add_style(cancel_button, scheme_outline(METACOLOR_WHITE), LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_opa(cancel_button, 255, LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_width(cancel_button, 2, LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_pad(cancel_button, 3, LV_STATE_FOCUSED);
-		lv_obj_add_style(cancel_button, mc_outline(METACOLOR_WHITE), LV_STATE_FOCUS_KEY);
+		lv_obj_add_style(cancel_button, scheme_outline(METACOLOR_WHITE), LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_opa(cancel_button, 255, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_width(cancel_button, 2, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_pad(cancel_button, 3, LV_STATE_FOCUS_KEY);
@@ -237,7 +237,7 @@ struct ConfirmPopup {
 		lv_obj_set_y(cancel_label, 0);
 		lv_obj_set_align(cancel_label, LV_ALIGN_CENTER);
 		lv_label_set_text(cancel_label, "Cancel");
-		lv_obj_add_style(cancel_label, mc_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
+		lv_obj_add_style(cancel_label, scheme_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(cancel_label, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_font(cancel_label, &ui_font_MuseoSansRounded50016, LV_STATE_DEFAULT);
 
@@ -251,22 +251,22 @@ struct ConfirmPopup {
 							  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 							  LV_OBJ_FLAG_SCROLL_CHAIN);
 		lv_obj_set_style_radius(trash_button, 20, LV_STATE_DEFAULT);
-		lv_obj_add_style(trash_button, mc_bg(METACOLOR_RED_HIGHLIGHT), LV_STATE_DEFAULT);
+		lv_obj_add_style(trash_button, scheme_bg(METACOLOR_RED_HIGHLIGHT), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(trash_button, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_left(trash_button, 10, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_right(trash_button, 10, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_top(trash_button, 6, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(trash_button, 6, LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_opa(trash_button, 0, LV_STATE_PRESSED);
-		lv_obj_add_style(trash_button, mc_outline(METACOLOR_RED_HIGHLIGHT), LV_STATE_FOCUSED);
+		lv_obj_add_style(trash_button, scheme_outline(METACOLOR_RED_HIGHLIGHT), LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_opa(trash_button, 255, LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_width(trash_button, 2, LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_pad(trash_button, 3, LV_STATE_FOCUSED);
-		lv_obj_add_style(trash_button, mc_outline(METACOLOR_RED_HIGHLIGHT), LV_STATE_FOCUS_KEY);
+		lv_obj_add_style(trash_button, scheme_outline(METACOLOR_RED_HIGHLIGHT), LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_opa(trash_button, 255, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_width(trash_button, 2, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_pad(trash_button, 3, LV_STATE_FOCUS_KEY);
-		lv_obj_add_style(trash_button, mc_outline(METACOLOR_RED_HIGHLIGHT), LV_STATE_USER_1);
+		lv_obj_add_style(trash_button, scheme_outline(METACOLOR_RED_HIGHLIGHT), LV_STATE_USER_1);
 		lv_obj_set_style_outline_opa(trash_button, 255, LV_STATE_USER_1);
 		lv_obj_set_style_outline_width(trash_button, 2, LV_STATE_USER_1);
 		lv_obj_set_style_outline_pad(trash_button, 3, LV_STATE_USER_1);
@@ -276,7 +276,7 @@ struct ConfirmPopup {
 		lv_obj_set_height(trash_icon, LV_SIZE_CONTENT);
 		lv_obj_set_align(trash_icon, LV_ALIGN_CENTER);
 		lv_label_set_text(trash_icon, "");
-		lv_obj_add_style(trash_icon, mc_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
+		lv_obj_add_style(trash_icon, scheme_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(trash_icon, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_letter_space(trash_icon, -1, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_line_space(trash_icon, 0, LV_STATE_DEFAULT);
@@ -297,7 +297,7 @@ struct ConfirmPopup {
 		lv_obj_set_style_pad_right(choice2_button, 10, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_top(choice2_button, 6, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(choice2_button, 6, LV_STATE_DEFAULT);
-		lv_obj_add_style(choice2_button, mc_outline(METACOLOR_WHITE), LV_STATE_FOCUS_KEY);
+		lv_obj_add_style(choice2_button, scheme_outline(METACOLOR_WHITE), LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_opa(choice2_button, 255, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_width(choice2_button, 2, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_pad(choice2_button, 3, LV_STATE_FOCUS_KEY);
@@ -307,7 +307,7 @@ struct ConfirmPopup {
 		lv_obj_set_height(choice2_label, LV_SIZE_CONTENT);
 		lv_obj_set_align(choice2_label, LV_ALIGN_CENTER);
 		lv_label_set_text(choice2_label, "Choice");
-		lv_obj_add_style(choice2_label, mc_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
+		lv_obj_add_style(choice2_label, scheme_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(choice2_label, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_font(choice2_label, &ui_font_MuseoSansRounded50016, LV_STATE_DEFAULT);
 
@@ -320,7 +320,7 @@ struct ConfirmPopup {
 						  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE |
 							  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
 		lv_obj_set_style_radius(confirm_button, 20, LV_STATE_DEFAULT);
-		lv_obj_add_style(confirm_button, mc_bg(METACOLOR_BLUE_INFO), LV_STATE_DEFAULT);
+		lv_obj_add_style(confirm_button, scheme_bg(METACOLOR_BLUE_INFO), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(confirm_button, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(confirm_button, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_left(confirm_button, 10, LV_STATE_DEFAULT);
@@ -328,11 +328,11 @@ struct ConfirmPopup {
 		lv_obj_set_style_pad_top(confirm_button, 6, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(confirm_button, 6, LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_opa(confirm_button, 0, LV_STATE_PRESSED);
-		lv_obj_add_style(confirm_button, mc_outline(METACOLOR_WHITE), LV_STATE_FOCUSED);
+		lv_obj_add_style(confirm_button, scheme_outline(METACOLOR_WHITE), LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_opa(confirm_button, 255, LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_width(confirm_button, 2, LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_pad(confirm_button, 3, LV_STATE_FOCUSED);
-		lv_obj_add_style(confirm_button, mc_outline(METACOLOR_WHITE), LV_STATE_FOCUS_KEY);
+		lv_obj_add_style(confirm_button, scheme_outline(METACOLOR_WHITE), LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_opa(confirm_button, 255, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_width(confirm_button, 2, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_pad(confirm_button, 3, LV_STATE_FOCUS_KEY);
@@ -344,7 +344,7 @@ struct ConfirmPopup {
 		lv_obj_set_y(confirm_label, 0);
 		lv_obj_set_align(confirm_label, LV_ALIGN_CENTER);
 		lv_label_set_text(confirm_label, "Confirm");
-		lv_obj_add_style(confirm_label, mc_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
+		lv_obj_add_style(confirm_label, scheme_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(confirm_label, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_letter_space(confirm_label, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_line_space(confirm_label, 0, LV_STATE_DEFAULT);

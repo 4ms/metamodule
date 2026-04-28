@@ -31,7 +31,7 @@ struct PluginModuleMenu {
 		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
 		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_SELECTED);
 
-		lv_obj_add_style(roller, mc_text(METACOLOR_LT_GREY_TEXT), LV_STATE_DEFAULT);
+		lv_obj_add_style(roller, scheme_text(METACOLOR_LT_GREY_TEXT), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(roller, 255, LV_STATE_DEFAULT);
 
 		auto hover_label = lv_obj_get_child(roller_hover.get_cont(), 0);

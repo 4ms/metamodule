@@ -67,8 +67,8 @@ inline lv_obj_t *draw_element(const Knob &el, lv_obj_t *canvas, uint32_t module_
 	lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
 	lv_obj_set_style_radius(obj, diameter / 2 + 1, LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(obj, LV_OPA_100, LV_STATE_DEFAULT);
-	lv_obj_add_style(obj, mc_bg(METACOLOR_KNOB_BODY), LV_STATE_DEFAULT);
-	lv_obj_add_style(obj, mc_border(METACOLOR_GREY_DARKER), LV_STATE_DEFAULT);
+	lv_obj_add_style(obj, scheme_bg(METACOLOR_KNOB_BODY), LV_STATE_DEFAULT);
+	lv_obj_add_style(obj, scheme_border(METACOLOR_GREY_DARKER), LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(obj, 2, LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(obj, LV_OPA_70, LV_STATE_DEFAULT);
 	lv_obj_add_flag(obj, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
@@ -85,7 +85,7 @@ inline lv_obj_t *draw_element(const Knob &el, lv_obj_t *canvas, uint32_t module_
 	lv_obj_set_size(dot, dot_dia, dot_dia);
 	lv_obj_set_style_radius(dot, dot_dia, LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(dot, LV_OPA_100, LV_STATE_DEFAULT);
-	lv_obj_add_style(dot, mc_bg(METACOLOR_KNOB_DOT), LV_STATE_DEFAULT);
+	lv_obj_add_style(dot, scheme_bg(METACOLOR_KNOB_DOT), LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(dot, 0, LV_STATE_DEFAULT);
 
 	return obj;
@@ -125,7 +125,7 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 		lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
 		lv_obj_set_style_pad_all(obj, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(obj, LV_OPA_100, LV_STATE_DEFAULT);
-		lv_obj_add_style(obj, mc_bg(METACOLOR_KNOB_BODY), LV_STATE_DEFAULT);
+		lv_obj_add_style(obj, scheme_bg(METACOLOR_KNOB_BODY), LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(obj, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(obj, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 	}

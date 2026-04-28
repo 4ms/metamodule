@@ -25,8 +25,8 @@ public:
 		lv_obj_set_width(screensaver, lv_pct(100));
 		lv_obj_set_height(screensaver, lv_pct(100));
 		lv_obj_set_align(screensaver, LV_ALIGN_CENTER);
-		lv_obj_add_style(screensaver, mc_bg(METACOLOR_BLACK), LV_STATE_DEFAULT);
-		lv_obj_add_style(screensaver, mc_border(METACOLOR_BLACK), LV_STATE_DEFAULT);
+		lv_obj_add_style(screensaver, scheme_bg(METACOLOR_BLACK), LV_STATE_DEFAULT);
+		lv_obj_add_style(screensaver, scheme_border(METACOLOR_BLACK), LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(screensaver, 0, LV_STATE_DEFAULT);
 		wake();
 	}

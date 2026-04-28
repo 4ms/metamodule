@@ -70,7 +70,7 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_x(indicator, 0);
 		lv_obj_set_y(indicator, 31);
 		lv_obj_set_align(indicator, LV_ALIGN_TOP_MID);
-		lv_obj_add_style(indicator, mc_bg(METACOLOR_BLACK), LV_PART_MAIN);
+		lv_obj_add_style(indicator, scheme_bg(METACOLOR_BLACK), LV_PART_MAIN);
 		lv_obj_set_style_radius(indicator, 0, LV_PART_MAIN);
 		lv_obj_set_style_transform_pivot_x(indicator, 0, LV_PART_MAIN);
 		lv_obj_set_style_transform_pivot_y(indicator, 23, LV_PART_MAIN);
