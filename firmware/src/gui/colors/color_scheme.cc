@@ -53,6 +53,16 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_WHITE] = 0xffffff;
 	s.rgb[METACOLOR_DEBUG_BORDER] = 0xff0000;
 
+	s.rgb[METACOLOR_ORANGE_DARK] = 0xf19300;
+	s.rgb[METACOLOR_GREEN_DARK] = 0x23973c;
+	s.rgb[METACOLOR_BLUE_DEEP] = 0x4040ff;
+	s.rgb[METACOLOR_GREY_80] = 0x808080;
+	s.rgb[METACOLOR_SCROLLBAR_ORANGE] = 0xdf7d1a;
+	s.rgb[METACOLOR_KNOBSET_B] = 0xfff200;
+	s.rgb[METACOLOR_KNOBSET_C] = 0x00aeee;
+	s.rgb[METACOLOR_KNOBSET_D] = 0xf66194;
+	s.rgb[METACOLOR_KNOBSET_E] = 0xffa529;
+
 	return s;
 }
 

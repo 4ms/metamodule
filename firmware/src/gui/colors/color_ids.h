@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "lvgl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,11 +58,28 @@ typedef enum MetaColorId {
 	METACOLOR_WHITE,
 	METACOLOR_DEBUG_BORDER,
 
+	/* Additional ids discovered during SLS C-file sweep. */
+	METACOLOR_ORANGE_DARK,        /* 0xF19300 — HwTestPage data text */
+	METACOLOR_GREEN_DARK,         /* 0x23973C — PatchView play-button green */
+	METACOLOR_BLUE_DEEP,          /* 0x4040FF — mapping menu control arc */
+	METACOLOR_GREY_80,            /* 0x808080 — disabled state text */
+	METACOLOR_SCROLLBAR_ORANGE,   /* 0xDF7D1A — scrollbar accent */
+	METACOLOR_KNOBSET_B,          /* 0xFFF200 — yellow knobset color */
+	METACOLOR_KNOBSET_C,          /* 0x00AEEE — cyan knobset color */
+	METACOLOR_KNOBSET_D,          /* 0xF66194 — pink knobset color */
+	METACOLOR_KNOBSET_E,          /* 0xFFA529 — orange knobset color */
+
 	METACOLOR_COUNT
 } MetaColorId;
 
 /* Returns 0xRRGGBB for the given color id under the active scheme. */
 uint32_t metacolor_rgb(MetaColorId id);
+
+/* C-callable shortcut: returns lv_color_t for the given id under the active scheme.
+   Used by SLS-generated .c files in place of lv_color_hex(0xXXXXXX) literals. */
+static inline lv_color_t MC(MetaColorId id) {
+	return lv_color_hex(metacolor_rgb(id));
+}
 
 #ifdef __cplusplus
 }

@@ -2,6 +2,7 @@ add_library(ui_lvgl STATIC)
 
 add_subdirectory(meta5)
 target_link_libraries(ui PUBLIC lvgl)
+target_include_directories(ui PUBLIC ${FWDIR}/src)
 target_link_libraries(ui_lvgl PUBLIC ui)
 
 target_sources(
