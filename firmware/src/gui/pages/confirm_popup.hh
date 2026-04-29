@@ -251,22 +251,22 @@ struct ConfirmPopup {
 							  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 							  LV_OBJ_FLAG_SCROLL_CHAIN);
 		lv_obj_set_style_radius(trash_button, 20, LV_STATE_DEFAULT);
-		lv_obj_add_style(trash_button, scheme_bg(METACOLOR_RED_HIGHLIGHT), LV_STATE_DEFAULT);
+		lv_obj_add_style(trash_button, scheme_bg(METACOLOR_BUTTON_CAUTION), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(trash_button, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_left(trash_button, 10, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_right(trash_button, 10, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_top(trash_button, 6, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(trash_button, 6, LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_opa(trash_button, 0, LV_STATE_PRESSED);
-		lv_obj_add_style(trash_button, scheme_outline(METACOLOR_RED_HIGHLIGHT), LV_STATE_FOCUSED);
+		lv_obj_add_style(trash_button, scheme_outline(METACOLOR_BUTTON_CAUTION), LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_opa(trash_button, 255, LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_width(trash_button, 2, LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_pad(trash_button, 3, LV_STATE_FOCUSED);
-		lv_obj_add_style(trash_button, scheme_outline(METACOLOR_RED_HIGHLIGHT), LV_STATE_FOCUS_KEY);
+		lv_obj_add_style(trash_button, scheme_outline(METACOLOR_BUTTON_CAUTION), LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_opa(trash_button, 255, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_width(trash_button, 2, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_pad(trash_button, 3, LV_STATE_FOCUS_KEY);
-		lv_obj_add_style(trash_button, scheme_outline(METACOLOR_RED_HIGHLIGHT), LV_STATE_USER_1);
+		lv_obj_add_style(trash_button, scheme_outline(METACOLOR_BUTTON_CAUTION), LV_STATE_USER_1);
 		lv_obj_set_style_outline_opa(trash_button, 255, LV_STATE_USER_1);
 		lv_obj_set_style_outline_width(trash_button, 2, LV_STATE_USER_1);
 		lv_obj_set_style_outline_pad(trash_button, 3, LV_STATE_USER_1);

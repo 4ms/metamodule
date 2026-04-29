@@ -13,8 +13,8 @@ constexpr ColorScheme make_default_scheme() {
 	ColorScheme s{};
 	s.name = "Default";
 
-	s.rgb[METACOLOR_RED_HIGHLIGHT] = 0xea1c25;
-	s.rgb[METACOLOR_ORANGE_HIGHLIGHT] = 0xfd8b18;
+	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xea1c25;
+	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xfd8b18;
 	s.rgb[METACOLOR_ORANGE_BRIGHT] = 0xfdb818;
 	s.rgb[METACOLOR_YELLOW_HIGHLIGHT] = 0x8bfd18;
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x2095f6;
@@ -105,8 +105,8 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	s.name = "High Contrast";
 
 	// Highlights — pure / max-saturation versions of the Default hues.
-	s.rgb[METACOLOR_RED_HIGHLIGHT] = 0xff0000;
-	s.rgb[METACOLOR_ORANGE_HIGHLIGHT] = 0xffa000;
+	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xff0000;
+	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xffa000;
 	s.rgb[METACOLOR_ORANGE_BRIGHT] = 0xffd000;
 	s.rgb[METACOLOR_YELLOW_HIGHLIGHT] = 0xccff00;
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x00bfff;

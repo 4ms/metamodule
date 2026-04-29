@@ -40,7 +40,7 @@ struct MappingPaneList {
 			lv_label_set_text(setname, knobset_name.data());
 		lv_show(circle);
 		lv_obj_set_style_text_color(
-			obj, is_active ? mc(METACOLOR_ORANGE_HIGHLIGHT) : mc(METACOLOR_WHITE), LV_STATE_DEFAULT);
+			obj, is_active ? mc(METACOLOR_PRIMARY_HIGHLIGHT) : mc(METACOLOR_WHITE), LV_STATE_DEFAULT);
 
 		auto name = get_panel_name(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text(label, name.c_str());
@@ -73,7 +73,7 @@ struct MappingPaneList {
 
 		lv_label_set_text(setname, knobset_name.data());
 		lv_obj_set_style_text_color(
-			obj, is_active ? mc(METACOLOR_ORANGE_HIGHLIGHT) : mc(METACOLOR_WHITE), LV_STATE_DEFAULT);
+			obj, is_active ? mc(METACOLOR_PRIMARY_HIGHLIGHT) : mc(METACOLOR_WHITE), LV_STATE_DEFAULT);
 		return obj;
 	}
 

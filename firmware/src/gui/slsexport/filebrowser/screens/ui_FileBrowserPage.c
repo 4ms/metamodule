@@ -73,7 +73,7 @@ lv_obj_set_align( ui_FileBrowserTitle, LV_ALIGN_CENTER );
 lv_label_set_text(ui_FileBrowserTitle,"Open File:");
 lv_obj_clear_flag( ui_FileBrowserTitle, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_FileBrowserTitle, LV_SCROLLBAR_MODE_OFF);
-lv_obj_add_style(ui_FileBrowserTitle, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserTitle, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FileBrowserTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_FileBrowserTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_FileBrowserTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -178,11 +178,11 @@ lv_obj_add_style(ui_FileBrowserRoller, scheme_border(METACOLOR_BLACK), LV_PART_M
 lv_obj_set_style_border_opa(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_SCROLLED);
 lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_SCROLLED );
 lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_SCROLLED);
-lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_width(ui_FileBrowserRoller, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_pad(ui_FileBrowserRoller, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
 lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 lv_obj_add_style(ui_FileBrowserRoller, scheme_text(METACOLOR_WHITE), LV_PART_SELECTED | LV_STATE_DEFAULT );
@@ -193,7 +193,7 @@ lv_obj_add_style(ui_FileBrowserRoller, scheme_border(METACOLOR_BLACK), LV_PART_S
 lv_obj_set_style_border_opa(ui_FileBrowserRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_FileBrowserRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(ui_FileBrowserRoller, LV_BORDER_SIDE_FULL, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_FOCUSED );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_FOCUSED );
 lv_obj_set_style_bg_opa(ui_FileBrowserRoller, 255, LV_PART_SELECTED| LV_STATE_FOCUSED);
 
 ui_FileBrowserSpinner = lv_spinner_create(ui_FileBrowserCont,1000,90);

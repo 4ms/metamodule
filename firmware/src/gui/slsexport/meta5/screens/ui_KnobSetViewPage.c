@@ -93,11 +93,11 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_right(ui_PreviousKnobSet, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui_PreviousKnobSet, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(ui_PreviousKnobSet, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_PreviousKnobSet, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_PreviousKnobSet, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_PreviousKnobSet, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_PreviousKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_PreviousKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_PreviousKnobSet, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_PreviousKnobSet, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_PreviousKnobSet, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_PreviousKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_PreviousKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
@@ -165,7 +165,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_scrollbar_mode(ui_KnobSetNameText, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_set_scroll_dir(ui_KnobSetNameText, LV_DIR_HOR);
-	lv_obj_add_style(ui_KnobSetNameText, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobSetNameText, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_KnobSetNameText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(ui_KnobSetNameText, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui_KnobSetNameText, &ui_font_MuseoSansRounded70014, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -181,11 +181,11 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobSetNameText, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_width(ui_KnobSetNameText, 0, LV_PART_MAIN | LV_STATE_EDITED);
 	lv_obj_set_style_outline_pad(ui_KnobSetNameText, 0, LV_PART_MAIN | LV_STATE_EDITED);
-	lv_obj_add_style(ui_KnobSetNameText, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_KnobSetNameText, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_KnobSetNameText, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_KnobSetNameText, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_KnobSetNameText, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_KnobSetNameText, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_KnobSetNameText, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_KnobSetNameText, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_KnobSetNameText, 1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_KnobSetNameText, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
@@ -237,17 +237,17 @@ void ui_KnobSetViewPage_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_ActivateKnobSet, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_ActivateKnobSet, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_ActivateKnobSet, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_ActivateKnobSet, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_ActivateKnobSet, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_ActivateKnobSet, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui_ActivateKnobSet, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(ui_ActivateKnobSet, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_ActivateKnobSet, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_ActivateKnobSet, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_ActivateKnobSet, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_ActivateKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_ActivateKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_ActivateKnobSet, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_ActivateKnobSet, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_ActivateKnobSet, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_ActivateKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_ActivateKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
@@ -288,11 +288,11 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_right(ui_NextKnobSet, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(ui_NextKnobSet, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(ui_NextKnobSet, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_NextKnobSet, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_NextKnobSet, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_NextKnobSet, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_NextKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_NextKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_NextKnobSet, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_NextKnobSet, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_NextKnobSet, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_NextKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_NextKnobSet, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
@@ -392,7 +392,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelU, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelU, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelU, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelU, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelU, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelU, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelU, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -433,7 +433,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelV, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelV, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelV, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelV, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelV, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelV, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelV, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -473,7 +473,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelW, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelW, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelW, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelW, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelW, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelW, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelW, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -543,7 +543,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelA, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelA, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelA, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelA, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelA, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelA, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelA, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -585,7 +585,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelB, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelB, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelB, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelB, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelB, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelB, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelB, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -636,7 +636,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelC, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelC, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelC, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelC, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelC, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelC, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelC, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -687,7 +687,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelD, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelD, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelD, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelD, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelD, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelD, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelD, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -738,7 +738,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelE, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelE, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelE, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelE, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelE, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelE, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelE, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -789,7 +789,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelF, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelF, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelF, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelF, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelF, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelF, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelF, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -865,7 +865,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelX, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelX, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelX, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelX, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelX, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelX, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelX, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -904,7 +904,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelY, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelY, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelY, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelY, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelY, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelY, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelY, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -943,7 +943,7 @@ void ui_KnobSetViewPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_KnobPanelZ, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_KnobPanelZ, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobPanelZ, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobPanelZ, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobPanelZ, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_KnobPanelZ, scheme_outline(METACOLOR_GREY_DARKER), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_opa(ui_KnobPanelZ, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);

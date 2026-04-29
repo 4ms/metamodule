@@ -14,7 +14,7 @@ extern "C" {
 // needing per-page reapply hooks.
 
 // Example:
-//     lv_obj_add_style(label, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), 0);
+//     lv_obj_add_style(label, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), 0);
 
 // The returned pointer is owned by the color system; do not free or
 // lv_style_init() it.

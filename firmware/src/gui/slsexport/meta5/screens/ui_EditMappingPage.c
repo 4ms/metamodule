@@ -90,7 +90,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_EditMapKnob, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ui_EditMapKnob, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_border_width(ui_EditMapKnob, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_EditMapKnob, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_EditMapKnob, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_EditMapKnob, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_EditMapKnob, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_EditMapKnob, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -117,7 +117,7 @@ void ui_EditMappingPage_screen_init(void) {
 
 	lv_obj_add_style(ui_EditMappingArc, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_EditMappingArc, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_EditMappingArc, scheme_arc(METACOLOR_RED_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_EditMappingArc, scheme_arc(METACOLOR_BUTTON_CAUTION), LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(ui_EditMappingArc, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_width(ui_EditMappingArc, 22, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_EditMappingArc, scheme_arc(METACOLOR_GREY_DARK), LV_PART_INDICATOR | LV_STATE_DISABLED);
@@ -146,7 +146,7 @@ void ui_EditMappingPage_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_EditMappingCircle, 22, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_EditMappingCircle, scheme_bg(METACOLOR_RED_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_EditMappingCircle, scheme_bg(METACOLOR_BUTTON_CAUTION), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_EditMappingCircle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_width(ui_EditMappingCircle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -206,7 +206,7 @@ void ui_EditMappingPage_screen_init(void) {
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 						  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
 						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
-	lv_obj_add_style(ui_MinLabel, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MinLabel, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_MinLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_letter_space(ui_MinLabel, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_line_space(ui_MinLabel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -252,38 +252,38 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_pad_bottom(ui_MinSlider, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(ui_MinSlider, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(ui_MinSlider, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED);
+	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED);
 	lv_obj_set_style_outline_opa(ui_MinSlider, 255, LV_PART_MAIN | LV_STATE_CHECKED);
 	lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_PART_MAIN | LV_STATE_CHECKED);
 	lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_PART_MAIN | LV_STATE_CHECKED);
-	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_PRESSED);
+	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_opa(ui_MinSlider, 255, LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_PART_MAIN | LV_STATE_PRESSED);
-	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_MinSlider, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_MinSlider, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_add_style(
-		ui_MinSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
+		ui_MinSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_MinSlider, 200, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_add_style(
-		ui_MinSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
+		ui_MinSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_opa(ui_MinSlider, 255, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_add_style(
-		ui_MinSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
+		ui_MinSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_MinSlider, 255, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
-	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_USER_1);
+	lv_obj_add_style(ui_MinSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_opa(ui_MinSlider, 255, LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_PART_MAIN | LV_STATE_USER_1);
@@ -296,10 +296,10 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_border_width(ui_MinSlider, 3, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(ui_MinSlider, LV_BORDER_SIDE_FULL, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ui_MinSlider, 20, LV_PART_INDICATOR | LV_STATE_PRESSED);
-	lv_obj_add_style(ui_MinSlider, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_PRESSED);
+	lv_obj_add_style(ui_MinSlider, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_PRESSED);
 	lv_obj_set_style_bg_opa(ui_MinSlider, 255, LV_PART_INDICATOR | LV_STATE_PRESSED);
 	lv_obj_set_style_radius(ui_MinSlider, 20, LV_PART_INDICATOR | LV_STATE_USER_1);
-	lv_obj_add_style(ui_MinSlider, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_USER_1);
+	lv_obj_add_style(ui_MinSlider, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_USER_1);
 	lv_obj_set_style_bg_opa(ui_MinSlider, 255, LV_PART_INDICATOR | LV_STATE_USER_1);
 
 	lv_obj_set_style_radius(ui_MinSlider, 15, LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -328,7 +328,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_add_style(ui_MinSlider, scheme_bg(METACOLOR_GREY_BRIGHT), LV_PART_KNOB | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_bg_opa(ui_MinSlider, 255, LV_PART_KNOB | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_radius(ui_MinSlider, 15, LV_PART_KNOB | LV_STATE_USER_1);
-	lv_obj_add_style(ui_MinSlider, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_KNOB | LV_STATE_USER_1);
+	lv_obj_add_style(ui_MinSlider, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_KNOB | LV_STATE_USER_1);
 	lv_obj_set_style_bg_opa(ui_MinSlider, 255, LV_PART_KNOB | LV_STATE_USER_1);
 
 	ui_MaxSliderContainer = lv_obj_create(ui_EditMappingContainer);
@@ -369,7 +369,7 @@ void ui_EditMappingPage_screen_init(void) {
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 						  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
 						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
-	lv_obj_add_style(ui_MaxLabel, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MaxLabel, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_MaxLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_letter_space(ui_MaxLabel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_line_space(ui_MaxLabel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -418,38 +418,38 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_pad_bottom(ui_MaxSlider, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(ui_MaxSlider, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(ui_MaxSlider, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED);
+	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED);
 	lv_obj_set_style_outline_opa(ui_MaxSlider, 255, LV_PART_MAIN | LV_STATE_CHECKED);
 	lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_PART_MAIN | LV_STATE_CHECKED);
 	lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_PART_MAIN | LV_STATE_CHECKED);
-	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_PRESSED);
+	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_opa(ui_MaxSlider, 255, LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_PART_MAIN | LV_STATE_PRESSED);
-	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_MaxSlider, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_MaxSlider, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_add_style(
-		ui_MaxSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
+		ui_MaxSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_MaxSlider, 200, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
 	lv_obj_add_style(
-		ui_MaxSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
+		ui_MaxSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_opa(ui_MaxSlider, 255, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_PRESSED);
 	lv_obj_add_style(
-		ui_MaxSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
+		ui_MaxSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_MaxSlider, 255, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUS_KEY);
-	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_USER_1);
+	lv_obj_add_style(ui_MaxSlider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_opa(ui_MaxSlider, 255, LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_PART_MAIN | LV_STATE_USER_1);
@@ -462,10 +462,10 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_border_width(ui_MaxSlider, 3, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_side(ui_MaxSlider, LV_BORDER_SIDE_FULL, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ui_MaxSlider, 20, LV_PART_INDICATOR | LV_STATE_PRESSED);
-	lv_obj_add_style(ui_MaxSlider, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_PRESSED);
+	lv_obj_add_style(ui_MaxSlider, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_PRESSED);
 	lv_obj_set_style_bg_opa(ui_MaxSlider, 255, LV_PART_INDICATOR | LV_STATE_PRESSED);
 	lv_obj_set_style_radius(ui_MaxSlider, 20, LV_PART_INDICATOR | LV_STATE_USER_1);
-	lv_obj_add_style(ui_MaxSlider, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_USER_1);
+	lv_obj_add_style(ui_MaxSlider, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_USER_1);
 	lv_obj_set_style_bg_opa(ui_MaxSlider, 255, LV_PART_INDICATOR | LV_STATE_USER_1);
 
 	lv_obj_set_style_radius(ui_MaxSlider, 15, LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -494,7 +494,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_add_style(ui_MaxSlider, scheme_bg(METACOLOR_GREY_BRIGHT), LV_PART_KNOB | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_bg_opa(ui_MaxSlider, 255, LV_PART_KNOB | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_radius(ui_MaxSlider, 15, LV_PART_KNOB | LV_STATE_USER_1);
-	lv_obj_add_style(ui_MaxSlider, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_KNOB | LV_STATE_USER_1);
+	lv_obj_add_style(ui_MaxSlider, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_KNOB | LV_STATE_USER_1);
 	lv_obj_set_style_bg_opa(ui_MaxSlider, 255, LV_PART_KNOB | LV_STATE_USER_1);
 
 	ui_IDPanel = lv_obj_create(ui_EditMappingContainer);
@@ -553,12 +553,12 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_add_style(ui_ModuleMapToggleSwitch, scheme_bg(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_ModuleMapToggleSwitch, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(
-		ui_ModuleMapToggleSwitch, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+		ui_ModuleMapToggleSwitch, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_ModuleMapToggleSwitch, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_ModuleMapToggleSwitch, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_ModuleMapToggleSwitch, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_add_style(
-		ui_ModuleMapToggleSwitch, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+		ui_ModuleMapToggleSwitch, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_ModuleMapToggleSwitch, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_ModuleMapToggleSwitch, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_ModuleMapToggleSwitch, 1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
@@ -607,7 +607,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_add_style(ui_AliasTextArea, scheme_text(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_text_opa(ui_AliasTextArea, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_radius(ui_AliasTextArea, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_AliasTextArea, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_AliasTextArea, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_AliasTextArea, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_AliasTextArea, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_AliasTextArea, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -615,7 +615,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_add_style(ui_AliasTextArea, scheme_text(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_text_opa(ui_AliasTextArea, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_radius(ui_AliasTextArea, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-	lv_obj_add_style(ui_AliasTextArea, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_AliasTextArea, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_AliasTextArea, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_AliasTextArea, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_AliasTextArea, 1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
@@ -627,7 +627,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_text_align(ui_AliasTextArea, LV_TEXT_ALIGN_CENTER, LV_PART_SELECTED | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui_AliasTextArea, &ui_font_MuseoSansRounded70016, LV_PART_SELECTED | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ui_AliasTextArea, 0, LV_PART_SELECTED | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_AliasTextArea, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_AliasTextArea, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_AliasTextArea, 255, LV_PART_SELECTED | LV_STATE_DEFAULT);
 
 	lv_obj_set_style_radius(ui_AliasTextArea, 0, LV_PART_CURSOR | LV_STATE_DEFAULT);
@@ -716,7 +716,7 @@ void ui_EditMappingPage_screen_init(void) {
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM); /// Flags
 	lv_obj_add_style(
-		ui_EditMapMidiChannelTitle, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+		ui_EditMapMidiChannelTitle, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_EditMapMidiChannelTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(ui_EditMapMidiChannelTitle, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(
@@ -744,9 +744,9 @@ void ui_EditMappingPage_screen_init(void) {
 	// lv_obj_set_style_text_line_space(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
 	// lv_obj_add_style(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), scheme_bg(METACOLOR_GREY_DARK),  LV_PART_MAIN | LV_STATE_DEFAULT );
 
-	// lv_obj_add_style(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), scheme_bg(METACOLOR_ORANGE_HIGHLIGHT),  LV_PART_SELECTED | LV_STATE_DEFAULT );
+	// lv_obj_add_style(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT),  LV_PART_SELECTED | LV_STATE_DEFAULT );
 	// lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), 255,  LV_PART_SELECTED| LV_STATE_DEFAULT);
-	// lv_obj_add_style(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), scheme_bg(METACOLOR_ORANGE_HIGHLIGHT),  LV_PART_SELECTED | LV_STATE_CHECKED );
+	// lv_obj_add_style(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT),  LV_PART_SELECTED | LV_STATE_CHECKED );
 	// lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_EditMapMidiChannelDropdown), 255,  LV_PART_SELECTED| LV_STATE_CHECKED);
 
 	ui_ModuleMapLabel = lv_obj_create(ui_IDFlexPanel);
@@ -780,7 +780,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_clear_flag(ui_ModuleMap,
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM); /// Flags
-	lv_obj_add_style(ui_ModuleMap, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_ModuleMap, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_ModuleMap, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_letter_space(ui_ModuleMap, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_line_space(ui_ModuleMap, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -845,7 +845,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_clear_flag(ui_KnobMap,
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM); /// Flags
-	lv_obj_add_style(ui_KnobMap, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobMap, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_KnobMap, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_letter_space(ui_KnobMap, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_line_space(ui_KnobMap, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -906,7 +906,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_clear_flag(ui_MappedText,
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM); /// Flags
-	lv_obj_add_style(ui_MappedText, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MappedText, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(ui_MappedText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(ui_MappedText, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui_MappedText, &ui_font_MuseoSansRounded70014, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -947,7 +947,7 @@ void ui_EditMappingPage_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM); /// Flags
 	lv_obj_set_style_text_font(ui_MoreMapsIcon, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ui_MoreMapsIcon, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_MoreMapsIcon, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MoreMapsIcon, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_MoreMapsIcon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	ui_EditMapButtons = lv_obj_create(ui_EditMappingContainer);
@@ -976,13 +976,13 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_pad_column(ui_EditMapButtons, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ui_EditMapButtons, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_border_width(ui_EditMapButtons, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_EditMapButtons, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_EditMapButtons, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_EditMapButtons, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_EditMapButtons, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_EditMapButtons, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_border_width(ui_EditMapButtons, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 
-	lv_obj_add_style(ui_EditMapButtons, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_EditMapButtons, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_EditMapButtons, 128, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_EditMapButtons, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_EditMapButtons, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -999,7 +999,7 @@ void ui_EditMappingPage_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_ListButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_ListButton, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_ListButton, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_ListButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_ListButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_ListButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1007,15 +1007,15 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_pad_bottom(ui_ListButton, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_ListButton, scheme_outline(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_opa(ui_ListButton, 0, LV_PART_MAIN | LV_STATE_PRESSED);
-	lv_obj_add_style(ui_ListButton, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_ListButton, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_ListButton, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_ListButton, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_ListButton, 3, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_ListButton, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_ListButton, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_ListButton, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_ListButton, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_ListButton, 3, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-	lv_obj_add_style(ui_ListButton, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_USER_1);
+	lv_obj_add_style(ui_ListButton, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_opa(ui_ListButton, 255, LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_width(ui_ListButton, 2, LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_pad(ui_ListButton, 3, LV_PART_MAIN | LV_STATE_USER_1);
@@ -1083,10 +1083,10 @@ void ui_EditMappingPage_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_scrollbar_mode(ui_KnobSetButton, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_set_style_radius(ui_KnobSetButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_KnobSetButton, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_KnobSetButton, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_KnobSetButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ui_KnobSetButton, 20, LV_PART_MAIN | LV_STATE_PRESSED);
-	lv_obj_add_style(ui_KnobSetButton, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_PRESSED);
+	lv_obj_add_style(ui_KnobSetButton, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_bg_opa(ui_KnobSetButton, 255, LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_add_style(ui_KnobSetButton, scheme_border(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_border_opa(ui_KnobSetButton, 0, LV_PART_MAIN | LV_STATE_PRESSED);
@@ -1097,11 +1097,11 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_add_style(ui_KnobSetButton, scheme_img_recolor(METACOLOR_GREY_DARKER), LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_img_recolor_opa(ui_KnobSetButton, 255, LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_radius(ui_KnobSetButton, 20, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_KnobSetButton, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_KnobSetButton, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_KnobSetButton, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_KnobSetButton, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_KnobSetButton, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_KnobSetButton, scheme_img_recolor(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_KnobSetButton, scheme_img_recolor(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_img_recolor_opa(ui_KnobSetButton, 200, LV_PART_MAIN | LV_STATE_FOCUSED);
 
 	ui_TrashButton = lv_btn_create(ui_EditMapButtons);
@@ -1114,7 +1114,7 @@ void ui_EditMappingPage_screen_init(void) {
 						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
 	lv_obj_set_style_radius(ui_TrashButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_TrashButton, scheme_bg(METACOLOR_RED_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_TrashButton, scheme_bg(METACOLOR_BUTTON_CAUTION), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_TrashButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(ui_TrashButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(ui_TrashButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1122,15 +1122,15 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_pad_bottom(ui_TrashButton, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_TrashButton, scheme_outline(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_opa(ui_TrashButton, 0, LV_PART_MAIN | LV_STATE_PRESSED);
-	lv_obj_add_style(ui_TrashButton, scheme_outline(METACOLOR_RED_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_TrashButton, scheme_outline(METACOLOR_BUTTON_CAUTION), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(ui_TrashButton, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_width(ui_TrashButton, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(ui_TrashButton, 3, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_TrashButton, scheme_outline(METACOLOR_RED_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_TrashButton, scheme_outline(METACOLOR_BUTTON_CAUTION), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_opa(ui_TrashButton, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_width(ui_TrashButton, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_outline_pad(ui_TrashButton, 3, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-	lv_obj_add_style(ui_TrashButton, scheme_outline(METACOLOR_RED_HIGHLIGHT), LV_PART_MAIN | LV_STATE_USER_1);
+	lv_obj_add_style(ui_TrashButton, scheme_outline(METACOLOR_BUTTON_CAUTION), LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_opa(ui_TrashButton, 255, LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_width(ui_TrashButton, 2, LV_PART_MAIN | LV_STATE_USER_1);
 	lv_obj_set_style_outline_pad(ui_TrashButton, 3, LV_PART_MAIN | LV_STATE_USER_1);
@@ -1166,15 +1166,15 @@ void ui_EditMappingPage_screen_init(void) {
 
 	lv_obj_set_style_text_font(ui_Keyboard, &ui_font_MuseoSansRounded50016, LV_PART_ITEMS | LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ui_Keyboard, 0, LV_PART_ITEMS | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_Keyboard, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_ITEMS | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_Keyboard, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_ITEMS | LV_STATE_FOCUSED);
 	lv_obj_set_style_bg_opa(ui_Keyboard, 255, LV_PART_ITEMS | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_Keyboard, scheme_border(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_ITEMS | LV_STATE_FOCUSED);
+	lv_obj_add_style(ui_Keyboard, scheme_border(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_ITEMS | LV_STATE_FOCUSED);
 	lv_obj_set_style_border_opa(ui_Keyboard, 255, LV_PART_ITEMS | LV_STATE_FOCUSED);
 	lv_obj_set_style_border_width(ui_Keyboard, 2, LV_PART_ITEMS | LV_STATE_FOCUSED);
 	lv_obj_set_style_border_side(ui_Keyboard, LV_BORDER_SIDE_FULL, LV_PART_ITEMS | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_Keyboard, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_ITEMS | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_Keyboard, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_ITEMS | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_bg_opa(ui_Keyboard, 255, LV_PART_ITEMS | LV_STATE_FOCUS_KEY);
-	lv_obj_add_style(ui_Keyboard, scheme_border(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_ITEMS | LV_STATE_FOCUS_KEY);
+	lv_obj_add_style(ui_Keyboard, scheme_border(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_ITEMS | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_border_opa(ui_Keyboard, 255, LV_PART_ITEMS | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_border_width(ui_Keyboard, 2, LV_PART_ITEMS | LV_STATE_FOCUS_KEY);
 	lv_obj_set_style_border_side(ui_Keyboard, LV_BORDER_SIDE_FULL, LV_PART_ITEMS | LV_STATE_FOCUS_KEY);

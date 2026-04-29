@@ -69,7 +69,7 @@ lv_obj_set_width( ui_JackMapInputsTitle, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_JackMapInputsTitle, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_JackMapInputsTitle, LV_ALIGN_CENTER );
 lv_label_set_text(ui_JackMapInputsTitle,"INPUTS");
-lv_obj_add_style(ui_JackMapInputsTitle, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_JackMapInputsTitle, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_JackMapInputsTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_JackMapInputsTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_JackMapInputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -123,7 +123,7 @@ lv_obj_set_width( ui_JackMapOutputsTitle, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_JackMapOutputsTitle, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_JackMapOutputsTitle, LV_ALIGN_CENTER );
 lv_label_set_text(ui_JackMapOutputsTitle,"OUTPUTS");
-lv_obj_add_style(ui_JackMapOutputsTitle, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_JackMapOutputsTitle, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_JackMapOutputsTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_JackMapOutputsTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_JackMapOutputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);

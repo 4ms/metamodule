@@ -31,7 +31,7 @@ struct MissingPluginScanner {
 		lv_obj_set_style_pad_ver(status_label, 4, 0);
 		lv_obj_set_style_pad_hor(status_label, 8, 0);
 		lv_obj_set_style_text_font(status_label, &ui_font_MuseoSansRounded50014, 0);
-		lv_obj_add_style(status_label, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), 0);
+		lv_obj_add_style(status_label, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), 0);
 		lv_obj_set_style_text_align(status_label, LV_TEXT_ALIGN_CENTER, 0);
 		lv_obj_add_flag(status_label, LV_OBJ_FLAG_FLOATING);
 
@@ -44,7 +44,7 @@ struct MissingPluginScanner {
 		lv_obj_set_height(title, LV_SIZE_CONTENT);
 		lv_label_set_text(title, "");
 		lv_obj_set_align(title, LV_ALIGN_TOP_LEFT);
-		lv_obj_add_style(title, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_STATE_DEFAULT);
+		lv_obj_add_style(title, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(title, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_LEFT, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_font(title, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);

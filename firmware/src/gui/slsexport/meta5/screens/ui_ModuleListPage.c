@@ -72,7 +72,7 @@ lv_label_set_text(ui_ModuleListRollerTitle,"4msCompany");
 lv_obj_add_flag( ui_ModuleListRollerTitle, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
 lv_obj_clear_flag( ui_ModuleListRollerTitle, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_ModuleListRollerTitle, LV_SCROLLBAR_MODE_OFF);
-lv_obj_add_style(ui_ModuleListRollerTitle, scheme_text(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRollerTitle, scheme_text(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ModuleListRollerTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_ModuleListRollerTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_ModuleListRollerTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -113,7 +113,7 @@ lv_obj_set_style_shadow_ofs_y(ui_ModuleListRoller, 0, LV_PART_MAIN| LV_STATE_FOC
 lv_obj_add_style(ui_ModuleListRoller, scheme_text(METACOLOR_WHITE), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_ModuleListRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_ModuleListRoller, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_ModuleListRoller, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_add_style(ui_ModuleListRoller, scheme_border(METACOLOR_BLACK), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);

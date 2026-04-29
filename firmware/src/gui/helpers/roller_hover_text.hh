@@ -51,7 +51,7 @@ public:
 		lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
 		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_PART_MAIN);
 		lv_obj_set_style_radius(label, 0, LV_PART_MAIN);
-		lv_obj_add_style(label, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), LV_PART_MAIN);
+		lv_obj_add_style(label, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(label, LV_OPA_100, LV_PART_MAIN);
 		lv_obj_set_style_border_width(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_top(label, 0, LV_PART_MAIN);

@@ -17,7 +17,7 @@ struct SlsComponentInit {
 
 		lv_disp_t *dispp = lv_disp_get_default();
 		lv_theme_t *theme = lv_theme_default_init(dispp,
-												  mc(METACOLOR_ORANGE_HIGHLIGHT),
+												  mc(METACOLOR_PRIMARY_HIGHLIGHT),
 												  lv_palette_main(LV_PALETTE_BLUE),
 												  LV_THEME_DEFAULT_DARK,
 												  LV_FONT_DEFAULT);
@@ -54,15 +54,15 @@ struct SlsComponentInit {
 	}
 
 	static void style_slider(lv_obj_t *slider) {
-		lv_obj_add_style(slider, scheme_outline(METACOLOR_ORANGE_HIGHLIGHT), LV_STATE_EDITED);
+		lv_obj_add_style(slider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_STATE_EDITED);
 		lv_obj_set_style_outline_opa(slider, 255, LV_STATE_EDITED);
 		lv_obj_set_style_outline_width(slider, 2, LV_STATE_EDITED);
 		lv_obj_set_style_outline_pad(slider, 1, LV_STATE_EDITED);
 		lv_obj_set_style_radius(slider, 20, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
-		lv_obj_add_style(slider, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
+		lv_obj_add_style(slider, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
 		lv_obj_set_style_bg_opa(slider, 255, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
 		lv_obj_set_style_radius(slider, 15, (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
-		lv_obj_add_style(slider, scheme_bg(METACOLOR_ORANGE_HIGHLIGHT), (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
+		lv_obj_add_style(slider, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
 		lv_obj_set_style_bg_opa(slider, 255, (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
 	}
 };

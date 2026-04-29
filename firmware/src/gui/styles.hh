@@ -91,7 +91,7 @@ struct Gui {
 		return color_text(txt, html_code(METACOLOR_RED_TEXT));
 	}
 
-	static inline lv_color_t orange_highlight = mc(METACOLOR_ORANGE_HIGHLIGHT);
+	static inline lv_color_t orange_highlight = mc(METACOLOR_PRIMARY_HIGHLIGHT);
 	static std::string orange_text(std::string_view txt) {
 		return color_text(txt, html_code(METACOLOR_ORANGE_TEXT));
 	}
@@ -248,7 +248,7 @@ struct Gui {
 		// Refresh named color values from the active scheme. These were
 		// initialized at static init time, but we need to reassign here so
 		// runtime scheme changes (which re-run init_lvgl_styles) propagate.
-		orange_highlight = mc(METACOLOR_ORANGE_HIGHLIGHT);
+		orange_highlight = mc(METACOLOR_PRIMARY_HIGHLIGHT);
 		grey_color_html = html_code(METACOLOR_GREY_BRIGHT);
 
 		// Refresh the LVGL palette arrays from the active scheme.
@@ -327,6 +327,7 @@ struct Gui {
 		lv_style_set_radius(&selected_module_style, 0);
 
 		// roller_style
+		// not used!
 		lv_style_init(&roller_style);
 		lv_style_set_radius(&roller_style, 0);
 		lv_style_set_bg_opa(&roller_style, LV_OPA_COVER);
@@ -339,8 +340,6 @@ struct Gui {
 		lv_style_set_pad_hor(&roller_style, 2);
 		lv_style_set_pad_ver(&roller_style, 1);
 		lv_style_set_pad_gap(&roller_style, 2);
-		lv_style_set_line_color(&roller_style, mc(METACOLOR_LV_GREY));
-		lv_style_set_line_width(&roller_style, 12);
 
 		// roller_sel_style
 		lv_style_init(&roller_sel_style);

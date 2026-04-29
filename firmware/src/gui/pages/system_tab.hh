@@ -47,7 +47,7 @@ struct SystemTab : SystemMenuTab {
 		lv_obj_add_event_cb(reload_patches_button, reload_patches_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_flag(reboot_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
-		lv_obj_add_style(reboot_button, scheme_bg(METACOLOR_RED_HIGHLIGHT), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_add_style(reboot_button, scheme_bg(METACOLOR_BUTTON_CAUTION), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_add_event_cb(reboot_button, reboot_cb, LV_EVENT_CLICKED, this);
 
 		auto settings_cont = create_settings_cont(ui_SystemMenuSystemTab);
