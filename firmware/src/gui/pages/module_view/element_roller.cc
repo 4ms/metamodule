@@ -228,9 +228,17 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 	auto prev_sel = page->cur_selected;
 	auto cur_idx = page->roller_drawn_el_idx[cur_sel];
 
+	// Wrap off bottom back to button bar:
+	if (prev_sel == (uint32_t)cur_sel && cur_sel == lv_roller_get_option_cnt(ui_ElementRoller) - 1) {
+		page->focus_button_bar(true);
+		page->roller_hover.hide();
+		return;
+	}
+
 	// Skip over headers by scrolling over them in the same direction we just scrolled
 	if (cur_idx == RollerHeaderTag) {
 		if (prev_sel < cur_sel) {
+			// Scroll down:
 			if (cur_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
 				cur_sel++;
 			else
@@ -238,6 +246,7 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 				cur_sel = prev_sel;
 
 		} else {
+			// Scroll up:
 			if (cur_sel)
 				cur_sel--;
 
@@ -284,17 +293,24 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 	page->roller_hover.hide();
 }
 
-void ModuleViewPage::focus_button_bar() {
+void ModuleViewPage::focus_button_bar(bool first_item) {
 	if (!full_screen_mode) {
 		if (gui_state.new_cable)
 			lv_group_focus_obj(ui_ModuleViewCableCancelBut);
 		else
-			lv_group_focus_obj(ui_ModuleViewSettingsBut);
+			lv_group_focus_obj(first_item ? ui_ModuleViewHideBut : ui_ModuleViewSettingsBut);
 
 		lv_group_set_editing(group, false);
-		cur_selected = 1;
-		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
-		unhighlight_component(cur_selected);
+		if (first_item) {
+			auto cur_sel = lv_roller_get_option_cnt(ui_ElementRoller) - 1;
+			lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
+			cur_selected = roller_drawn_el_idx[cur_sel];
+			unhighlight_component(cur_sel);
+		} else {
+			cur_selected = 1;
+			lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
+			unhighlight_component(cur_selected);
+		}
 	}
 }
 
@@ -447,16 +463,28 @@ void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 
 		// Change to "edit" mode if not already editting
 		if (lv_group_get_editing(page->group) == false) {
+
+			if (page->last_button_focused == ui_ModuleViewHideBut) {
+				auto cur_sel = lv_roller_get_option_cnt(ui_ElementRoller) - 1;
+				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
+				page->cur_selected = page->roller_drawn_el_idx[cur_sel];
+			}
+			if (page->last_button_focused == ui_ModuleViewSettingsBut) {
+				auto cur_sel = 1;
+				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
+				page->cur_selected = page->roller_drawn_el_idx[cur_sel];
+			}
+
 			// Must send a PRESS event to enter "edit" mode
 			lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
 			// This sends another FOCUSED event:
 			lv_group_set_editing(page->group, true);
 		}
-
 		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
 			page->highlight_component(*drawn_idx);
 			move_selected_control_foreground(page->drawn_elements[*drawn_idx]);
 		}
+		page->last_button_focused = nullptr;
 	}
 }
 
@@ -466,6 +494,8 @@ void ModuleViewPage::jump_to_roller_cb(lv_event_t *event) {
 	auto page = static_cast<ModuleViewPage *>(event->user_data);
 	if (page->full_screen_mode) {
 		lv_group_focus_obj(ui_ElementRoller);
+	} else {
+		page->last_button_focused = event->target;
 	}
 }
 

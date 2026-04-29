@@ -368,6 +368,7 @@ struct ModuleViewPage : PageBase {
 		action_menu.hide();
 		lv_hide(load_meter);
 		lv_enable_long_press();
+		last_button_focused = nullptr;
 	}
 
 private:
@@ -443,7 +444,7 @@ private:
 	void add_element_highlight(DrawnElement const &drawn_element);
 	void unhighlight_component(uint32_t prev_sel);
 	void highlight_component(size_t idx);
-	void focus_button_bar();
+	void focus_button_bar(bool first_button = false);
 	void click_cable_destination(unsigned drawn_idx);
 	void click_altparam_action(DrawnElement const &drawn_element);
 	void manual_control_popup(DrawnElement const &drawn_element);
@@ -535,6 +536,7 @@ private:
 	Toggler quickmap_rotary_button;
 
 	lv_obj_t *load_meter;
+	lv_obj_t *last_button_focused = nullptr;
 };
 
 } // namespace MetaModule
