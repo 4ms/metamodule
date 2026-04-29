@@ -57,9 +57,16 @@ struct ModuleViewSettingsMenu {
 		lv_obj_set_style_border_width(show_samplerate_cont, 0, 0);
 		show_samplerate_check = lv_obj_get_child(show_samplerate_cont, 1);
 
+		auto nav_title = create_settings_menu_title(ui_MVSettingsMenu, "NAVIGATION");
+
+		auto nav_wrapping_cont = create_settings_menu_switch(ui_MVSettingsMenu, "Allow Wrapping");
+		nav_wrapping_check = lv_obj_get_child(nav_wrapping_cont, 1);
+
 		lv_obj_move_to_index(bar_title, 4);
 		lv_obj_move_to_index(float_samplerate_cont, 5);
 		lv_obj_move_to_index(show_samplerate_cont, 6);
+		lv_obj_move_to_index(nav_title, 7);
+		lv_obj_move_to_index(nav_wrapping_cont, 8);
 
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, settings_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MVSettingsCloseButton, settings_button_cb, LV_EVENT_CLICKED, this);
@@ -88,6 +95,8 @@ struct ModuleViewSettingsMenu {
 		lv_obj_add_event_cb(show_samplerate_check, show_titlebar_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(float_audioload_check, show_titlebar_cb, LV_EVENT_VALUE_CHANGED, this);
 
+		lv_obj_add_event_cb(nav_wrapping_check, nav_wrapping_cb, LV_EVENT_VALUE_CHANGED, this);
+
 		lv_obj_set_x(ui_MVSettingsMenu, 220);
 
 		lv_group_add_obj(settings_menu_group, ui_MVSettingsCloseButton);
@@ -97,6 +106,8 @@ struct ModuleViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, float_audioload_check);
 		lv_group_add_obj(settings_menu_group, show_samplerate_check);
+
+		lv_group_add_obj(settings_menu_group, nav_wrapping_check);
 
 		lv_group_add_obj(settings_menu_group, ui_MVShowControlMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVControlMapTranspSlider);
@@ -135,6 +146,7 @@ struct ModuleViewSettingsMenu {
 
 		lv_check(show_jack_aliases_check, settings.show_jack_aliases);
 		lv_check(show_knob_aliases_check, settings.show_knob_aliases);
+		lv_check(nav_wrapping_check, settings.nav_wrapping);
 
 		lv_check(show_samplerate_check, settings.show_samplerate);
 		lv_check(float_audioload_check, settings.float_loadmeter);
@@ -367,6 +379,17 @@ private:
 		page->changed_while_visible = true;
 	}
 
+	static void nav_wrapping_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+
+		page->settings.nav_wrapping = lv_obj_has_state(page->nav_wrapping_check, LV_STATE_CHECKED);
+
+		page->settings.changed = true;
+		page->changed_while_visible = true;
+	}
+
 	static void show_titlebar_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -390,6 +413,7 @@ private:
 	lv_obj_t *graphics_update_rate_slider;
 	lv_obj_t *show_jack_aliases_check;
 	lv_obj_t *show_knob_aliases_check;
+	lv_obj_t *nav_wrapping_check;
 
 	lv_obj_t *show_samplerate_check;
 	lv_obj_t *float_audioload_check;
