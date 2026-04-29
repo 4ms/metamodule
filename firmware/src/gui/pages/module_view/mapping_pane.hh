@@ -47,7 +47,6 @@ struct ModuleViewMappingPane {
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
 
-		lv_obj_add_event_cb(ui_ResetButton, reset_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
@@ -57,8 +56,6 @@ struct ModuleViewMappingPane {
 
 		lv_obj_set_style_pad_hor(ui_MapList, 3, LV_PART_MAIN);
 		lv_obj_set_style_pad_ver(ui_MapList, 3, LV_PART_MAIN);
-
-		lv_hide(ui_ResetButton);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -257,7 +254,6 @@ private:
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_CableAddButton);
 		lv_hide(ui_ControlButton);
-		lv_hide(ui_ResetButton);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_CableMidiAddButton);
@@ -362,7 +358,6 @@ private:
 
 	void prepare_jack_gui() {
 		lv_hide(ui_ControlButton);
-		lv_hide(ui_ResetButton);
 		lv_hide(ui_ControlAlert);
 		lv_hide(ui_AddMapPopUp);
 
@@ -593,10 +588,6 @@ private:
 		lv_show(ui_MappedPanel);
 		lv_show(ui_MappedItemHeader);
 
-		// Do not use Reset Button for individual params until we implement calling
-		// paramQuantity->reset() and/or paramWidget->onReset()
-		lv_hide(ui_ResetButton);
-
 		lv_show(ui_ControlButton, is_patch_playing);
 		lv_label_set_text(ui_ControlButtonLabel, "Adjust");
 		lv_label_set_text(ui_MappedListTitle, "Mappings:");
@@ -624,7 +615,6 @@ private:
 		}
 
 		if (is_patch_playing) {
-			lv_group_add_obj(pane_group, ui_ResetButton);
 			lv_group_focus_obj(ui_ControlButton);
 		}
 	}
@@ -671,7 +661,6 @@ private:
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_CableMidiAddButton);
-		lv_hide(ui_ResetButton);
 
 		lv_hide(ui_MappedPanel);
 		lv_hide(ui_MappedItemHeader);

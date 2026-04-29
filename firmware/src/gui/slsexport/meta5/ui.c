@@ -211,8 +211,6 @@ lv_obj_t *ui_CableMidiAddButton;
 lv_obj_t *ui_CableMidiAddLabel;
 lv_obj_t *ui_CableRemoveButton;
 lv_obj_t *ui_CableRemoveButtonLabel;
-lv_obj_t *ui_ResetButton;
-lv_obj_t *ui_ResetButtonLabel;
 lv_obj_t *ui_ControlAlert;
 lv_obj_t *ui_ControlArc;
 lv_obj_t *ui_ControlAlertLabel;
