@@ -65,7 +65,7 @@ struct ModuleViewPage : PageBase {
 		lv_group_add_obj(group, ui_ModuleViewExtraMenuRoller);
 		lv_hide(ui_ModuleViewExtraMenuRoller);
 
-		lv_group_set_wrap(group, false);
+		lv_group_set_wrap(group, settings.module_view.nav_wrapping);
 
 		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_SHORT_CLICKED, this);

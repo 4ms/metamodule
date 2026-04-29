@@ -28,9 +28,9 @@ void ModuleViewPage::show_roller() {
 		lv_show(ui_ElementRollerPanel);
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_group_set_editing(group, true);
-		lv_group_set_wrap(group, false);
 		args.detail_mode = false;
 	}
+	lv_group_set_wrap(group, settings.module_view.nav_wrapping);
 }
 
 void ModuleViewPage::populate_element_objects() {
@@ -229,10 +229,12 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 	auto cur_idx = page->roller_drawn_el_idx[cur_sel];
 
 	// Wrap off bottom back to button bar:
-	if (prev_sel == (uint32_t)cur_sel && cur_sel == lv_roller_get_option_cnt(ui_ElementRoller) - 1) {
-		page->focus_button_bar(true);
-		page->roller_hover.hide();
-		return;
+	if (page->settings.module_view.nav_wrapping) {
+		if (prev_sel == (uint32_t)cur_sel && cur_sel == lv_roller_get_option_cnt(ui_ElementRoller) - 1) {
+			page->focus_button_bar(true);
+			page->roller_hover.hide();
+			return;
+		}
 	}
 
 	// Skip over headers by scrolling over them in the same direction we just scrolled
@@ -464,7 +466,7 @@ void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 		// Change to "edit" mode if not already editting
 		if (lv_group_get_editing(page->group) == false) {
 
-			if (page->last_button_focused == ui_ModuleViewHideBut) {
+			if (page->settings.module_view.nav_wrapping && page->last_button_focused == ui_ModuleViewHideBut) {
 				auto cur_sel = lv_roller_get_option_cnt(ui_ElementRoller) - 1;
 				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
 				page->cur_selected = page->roller_drawn_el_idx[cur_sel];
