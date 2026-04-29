@@ -80,7 +80,7 @@ struct ButtonExpanderMapsView {
 			lv_color_t num;
 			lv_color_t label;
 			if (!exp_connected && has_mappings) {
-				bg = mc(METACOLOR_GREY_MED_DARK);
+				bg = mc(METACOLOR_GREY_MEDDARK);
 				num = mc(METACOLOR_GREY_BRIGHT);
 				label = mc(METACOLOR_GREY_MEDIUM);
 			} else {

@@ -112,7 +112,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_add_style(ui_EditMappingArc, scheme_arc(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(ui_EditMappingArc, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_width(ui_EditMappingArc, 22, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_EditMappingArc, scheme_arc(METACOLOR_GREY_MED_DARK), LV_PART_MAIN | LV_STATE_DISABLED);
+	lv_obj_add_style(ui_EditMappingArc, scheme_arc(METACOLOR_GREY_MEDDARK), LV_PART_MAIN | LV_STATE_DISABLED);
 	lv_obj_set_style_arc_opa(ui_EditMappingArc, 255, LV_PART_MAIN | LV_STATE_DISABLED);
 
 	lv_obj_add_style(ui_EditMappingArc, scheme_bg(METACOLOR_GREY_MEDIUM), LV_PART_INDICATOR | LV_STATE_DEFAULT);

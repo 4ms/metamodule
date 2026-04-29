@@ -13,16 +13,12 @@ constexpr ColorScheme make_default_scheme() {
 	ColorScheme s{};
 	s.name = "Default";
 
-	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xea1c25;
 	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xfd8b18;
-	s.rgb[METACOLOR_ORANGE_BRIGHT] = 0xfdb818;
-	s.rgb[METACOLOR_YELLOW_HIGHLIGHT] = 0x8bfd18;
-	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x2095f6;
 
 	s.rgb[METACOLOR_GREY_DARKEST] = 0x222222;
 	s.rgb[METACOLOR_GREY_DARKER] = 0x333333;
+	s.rgb[METACOLOR_GREY_MEDDARK] = 0x444444;
 	s.rgb[METACOLOR_GREY_DARK] = 0x555555;
-	s.rgb[METACOLOR_GREY_MED_DARK] = 0x444444;
 	s.rgb[METACOLOR_GREY_MEDIUM] = 0x777777;
 	s.rgb[METACOLOR_GREY_MED_LIGHT] = 0x888888;
 	s.rgb[METACOLOR_GREY_BRIGHT] = 0xaaaaaa;
@@ -32,6 +28,9 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xffb74d;
 
 	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe1e878;
+
+	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x2095f6;
+	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xea1c25;
 
 	s.rgb[METACOLOR_KNOB_BODY] = 0x666666;
 	s.rgb[METACOLOR_KNOB_DOT] = 0xdddddd;
@@ -107,8 +106,6 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	// Highlights — pure / max-saturation versions of the Default hues.
 	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xff0000;
 	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xffa000;
-	s.rgb[METACOLOR_ORANGE_BRIGHT] = 0xffd000;
-	s.rgb[METACOLOR_YELLOW_HIGHLIGHT] = 0xccff00;
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x00bfff;
 
 	// Greys — collapse low-contrast mid-greys toward black or white. Keep two
@@ -117,7 +114,7 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	s.rgb[METACOLOR_GREY_DARKEST] = 0x000000;
 	s.rgb[METACOLOR_GREY_DARKER] = 0x111111;
 	s.rgb[METACOLOR_GREY_DARK] = 0x222222;
-	s.rgb[METACOLOR_GREY_MED_DARK] = 0x222222;
+	s.rgb[METACOLOR_GREY_MEDDARK] = 0x222222;
 	s.rgb[METACOLOR_GREY_MEDIUM] = 0x666666;
 	s.rgb[METACOLOR_GREY_MED_LIGHT] = 0xaaaaaa;
 	s.rgb[METACOLOR_GREY_BRIGHTER] = 0xdddddd;

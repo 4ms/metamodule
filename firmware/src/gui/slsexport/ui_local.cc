@@ -696,7 +696,7 @@ lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slide
 	lv_obj_set_style_outline_opa(slider, 255, LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_width(slider, 2, LV_PART_MAIN | LV_STATE_PRESSED);
 	lv_obj_set_style_outline_pad(slider, 1, LV_PART_MAIN | LV_STATE_PRESSED);
-	lv_obj_add_style(slider, scheme_bg(METACOLOR_GREY_MED_DARK), LV_PART_MAIN | LV_STATE_DISABLED);
+	lv_obj_add_style(slider, scheme_bg(METACOLOR_GREY_MEDDARK), LV_PART_MAIN | LV_STATE_DISABLED);
 	lv_obj_set_style_bg_opa(slider, 255, LV_PART_MAIN | LV_STATE_DISABLED);
 	lv_obj_add_style(slider, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(slider, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -738,7 +738,7 @@ lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slide
 	lv_obj_set_style_bg_opa(slider, 255, LV_PART_INDICATOR | LV_STATE_PRESSED);
 	lv_obj_add_style(slider, scheme_bg(METACOLOR_CHECKBOX), LV_PART_INDICATOR | LV_STATE_DISABLED);
 	lv_obj_set_style_bg_opa(slider, 128, LV_PART_INDICATOR | LV_STATE_DISABLED);
-	lv_obj_add_style(slider, scheme_border(METACOLOR_GREY_MED_DARK), LV_PART_INDICATOR | LV_STATE_DISABLED);
+	lv_obj_add_style(slider, scheme_border(METACOLOR_GREY_MEDDARK), LV_PART_INDICATOR | LV_STATE_DISABLED);
 	lv_obj_set_style_border_opa(slider, 255, LV_PART_INDICATOR | LV_STATE_DISABLED);
 	lv_obj_set_style_radius(slider, 20, LV_PART_INDICATOR | LV_STATE_USER_1);
 	lv_obj_add_style(slider, scheme_bg(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_INDICATOR | LV_STATE_USER_1);
@@ -765,9 +765,9 @@ lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slide
 	lv_obj_set_style_pad_bottom(slider, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
 	lv_obj_add_style(slider, scheme_bg(METACOLOR_KNOB_DISABLED), LV_PART_KNOB | LV_STATE_DISABLED);
 	lv_obj_set_style_bg_opa(slider, 255, LV_PART_KNOB | LV_STATE_DISABLED);
-	lv_obj_add_style(slider, scheme_border(METACOLOR_GREY_MED_DARK), LV_PART_KNOB | LV_STATE_DISABLED);
+	lv_obj_add_style(slider, scheme_border(METACOLOR_GREY_MEDDARK), LV_PART_KNOB | LV_STATE_DISABLED);
 	lv_obj_set_style_border_opa(slider, 255, LV_PART_KNOB | LV_STATE_DISABLED);
-	lv_obj_add_style(slider, scheme_outline(METACOLOR_GREY_MED_DARK), LV_PART_KNOB | LV_STATE_DISABLED);
+	lv_obj_add_style(slider, scheme_outline(METACOLOR_GREY_MEDDARK), LV_PART_KNOB | LV_STATE_DISABLED);
 	lv_obj_set_style_outline_opa(slider, 255, LV_PART_KNOB | LV_STATE_DISABLED);
 	lv_obj_set_style_radius(slider, 15, LV_PART_KNOB | LV_STATE_FOCUSED);
 	lv_obj_add_style(slider, scheme_bg(METACOLOR_GREY_BRIGHT), LV_PART_KNOB | LV_STATE_FOCUSED);

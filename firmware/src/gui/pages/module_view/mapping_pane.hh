@@ -197,8 +197,8 @@ struct ModuleViewMappingPane {
 					//Add active mark
 					if (auto set_i = page_list.get_active_knobset() + 1; set_i < map_list_items.size()) {
 						if (auto obj = map_list_items[set_i]) {
-							lv_obj_set_style_text_color(obj, mc(METACOLOR_ORANGE_BRIGHT), LV_STATE_DEFAULT);
-							lv_obj_set_style_text_color(obj, mc(METACOLOR_ORANGE_BRIGHT), LV_STATE_FOCUSED);
+							lv_obj_set_style_text_color(obj, mc(METACOLOR_PRIMARY_HIGHLIGHT), LV_STATE_DEFAULT);
+							lv_obj_set_style_text_color(obj, mc(METACOLOR_PRIMARY_HIGHLIGHT), LV_STATE_FOCUSED);
 						}
 					}
 				}

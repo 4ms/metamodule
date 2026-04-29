@@ -61,7 +61,7 @@ lv_obj_t *ui_KnobContainer_create(lv_obj_t *comp_parent) {
 	lv_obj_add_style(cui_Knob, scheme_arc(METACOLOR_GREY_MEDIUM), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_opa(cui_Knob, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_arc_width(cui_Knob, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(cui_Knob, scheme_arc(METACOLOR_GREY_MED_DARK), LV_PART_MAIN | LV_STATE_DISABLED);
+	lv_obj_add_style(cui_Knob, scheme_arc(METACOLOR_GREY_MEDDARK), LV_PART_MAIN | LV_STATE_DISABLED);
 	lv_obj_set_style_arc_opa(cui_Knob, 255, LV_PART_MAIN | LV_STATE_DISABLED);
 
 	lv_obj_set_style_radius(cui_Knob, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);

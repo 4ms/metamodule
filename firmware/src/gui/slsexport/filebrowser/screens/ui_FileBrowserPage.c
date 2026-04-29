@@ -187,7 +187,7 @@ lv_obj_set_style_outline_opa(ui_FileBrowserRoller, 255, LV_PART_MAIN| LV_STATE_F
 
 lv_obj_add_style(ui_FileBrowserRoller, scheme_text(METACOLOR_WHITE), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FileBrowserRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_add_style(ui_FileBrowserRoller, scheme_bg(METACOLOR_GREY_MED_DARK), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_add_style(ui_FileBrowserRoller, scheme_bg(METACOLOR_GREY_MEDDARK), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_FileBrowserRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_add_style(ui_FileBrowserRoller, scheme_border(METACOLOR_BLACK), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_FileBrowserRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
