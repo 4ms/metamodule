@@ -87,34 +87,38 @@ struct Gui {
 	// static init time (safe: ColorScheme::schemes and Colors::active are
 	// constant-initialized). They are also reassigned in init_lvgl_styles() so a
 	// scheme change refreshes them when init_lvgl_styles() re-runs.
+
+	// Caution/warning text (red unsaved dot, FAILed calibration)
 	static std::string red_text(std::string_view txt) {
-		return color_text(txt, html_code(METACOLOR_RED_TEXT));
+		return color_text(txt, html_code(METACOLOR_BUTTON_CAUTION));
 	}
 
-	static inline lv_color_t orange_highlight = mc(METACOLOR_PRIMARY_HIGHLIGHT);
+	// Header text (volume names, knob set name, element section names..)
 	static std::string orange_text(std::string_view txt) {
-		return color_text(txt, html_code(METACOLOR_ORANGE_TEXT));
+		return color_text(txt, html_code(METACOLOR_PRIMARY_HIGHLIGHT));
 	}
 
+	// Subdirs
 	static std::string yellow_text(std::string_view txt) {
 		return color_text(txt, html_code(METACOLOR_YELLOW_TEXT));
 	}
 
+	// Calibration "OK", green "play" symbol in patch list
 	static std::string green_text(std::string_view txt) {
 		return color_text(txt, html_code(METACOLOR_GREEN_TEXT));
 	}
 
+	// List action text ([Select this folder], Sort By Brand/Tag)
 	static std::string blue_text(std::string_view txt) {
-		return color_text(txt, html_code(METACOLOR_BLUE_TEXT));
+		return color_text(txt, html_code(METACOLOR_BUTTON_CONFIRM));
 	}
 
+	// Subtle text: Plugin version, Options menu separators, ...
 	static std::string grey_text(std::string_view txt) {
-		return color_text(txt, html_code(METACOLOR_GREY_TEXT));
+		return color_text(txt, html_code(METACOLOR_GREY_BRIGHTER));
 	}
 
-	static std::string lt_grey_text(std::string_view txt) {
-		return color_text(txt, html_code(METACOLOR_LT_GREY_TEXT));
-	}
+	static inline lv_color_t orange_highlight = mc(METACOLOR_PRIMARY_HIGHLIGHT);
 
 	static inline std::string grey_color_html = html_code(METACOLOR_GREY_BRIGHT);
 

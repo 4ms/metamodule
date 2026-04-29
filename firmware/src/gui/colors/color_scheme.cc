@@ -39,13 +39,8 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_CHECKBOX] = 0x4067d3;
 	s.rgb[METACOLOR_TEXT_DARK] = 0x111111;
 
-	s.rgb[METACOLOR_RED_TEXT] = 0xea1c25;
-	s.rgb[METACOLOR_ORANGE_TEXT] = 0xfd9b18;
 	s.rgb[METACOLOR_YELLOW_TEXT] = 0xd7ff6a;
 	s.rgb[METACOLOR_GREEN_TEXT] = 0x00a551;
-	s.rgb[METACOLOR_BLUE_TEXT] = 0x188bfd;
-	s.rgb[METACOLOR_GREY_TEXT] = 0xaaaaaa;
-	s.rgb[METACOLOR_LT_GREY_TEXT] = 0xcccccc;
 
 	s.rgb[METACOLOR_BLACK] = 0x000000;
 	s.rgb[METACOLOR_WHITE] = 0xffffff;
@@ -104,20 +99,20 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	s.name = "High Contrast";
 
 	// Highlights — pure / max-saturation versions of the Default hues.
-	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xff0000;
 	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xffa000;
-	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x00bfff;
+	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xff0000;
+	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x0040a0;
 
 	// Greys — collapse low-contrast mid-greys toward black or white. Keep two
 	// distinct dark steps for panel layering on the black screen background.
-	s.rgb[METACOLOR_GREY_BRIGHT] = 0xffffff; // was a low-contrast text grey
 	s.rgb[METACOLOR_GREY_DARKEST] = 0x000000;
-	s.rgb[METACOLOR_GREY_DARKER] = 0x111111;
-	s.rgb[METACOLOR_GREY_DARK] = 0x222222;
-	s.rgb[METACOLOR_GREY_MEDDARK] = 0x222222;
-	s.rgb[METACOLOR_GREY_MEDIUM] = 0x666666;
-	s.rgb[METACOLOR_GREY_MED_LIGHT] = 0xaaaaaa;
-	s.rgb[METACOLOR_GREY_BRIGHTER] = 0xdddddd;
+	s.rgb[METACOLOR_GREY_DARKER] = 0x000000;
+	s.rgb[METACOLOR_GREY_DARK] = 0x000000;
+	s.rgb[METACOLOR_GREY_MEDDARK] = 0x000000;
+	s.rgb[METACOLOR_GREY_MEDIUM] = 0x888888;
+	s.rgb[METACOLOR_GREY_MED_LIGHT] = 0xcccccc;
+	s.rgb[METACOLOR_GREY_BRIGHT] = 0xcccccc;
+	s.rgb[METACOLOR_GREY_BRIGHTER] = 0xffffff;
 	s.rgb[METACOLOR_GREY_BRIGHTEST] = 0xffffff;
 
 	// Popup warning — keep yellow but make it pure for max attention.
@@ -134,13 +129,8 @@ constexpr ColorScheme make_high_contrast_scheme() {
 
 	// Rich-text colors used in HTML escape sequences — pull these toward
 	// near-white tints of their hue so they still read on black.
-	s.rgb[METACOLOR_RED_TEXT] = 0xff8080;
-	s.rgb[METACOLOR_ORANGE_TEXT] = 0xffcc66;
 	s.rgb[METACOLOR_YELLOW_TEXT] = 0xffff80;
 	s.rgb[METACOLOR_GREEN_TEXT] = 0x80ff80;
-	s.rgb[METACOLOR_BLUE_TEXT] = 0x80c8ff;
-	s.rgb[METACOLOR_GREY_TEXT] = 0xffffff;
-	s.rgb[METACOLOR_LT_GREY_TEXT] = 0xffffff;
 
 	s.rgb[METACOLOR_BLACK] = 0x000000;
 	s.rgb[METACOLOR_WHITE] = 0xffffff;
@@ -195,63 +185,58 @@ constexpr ColorScheme make_red_scheme() {
 
 	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xe02020;
 
-	s.rgb[METACOLOR_GREY_DARKEST]   = 0x1c1c1c;
-	s.rgb[METACOLOR_GREY_DARKER]    = 0x2e2e2e;
-	s.rgb[METACOLOR_GREY_MEDDARK]   = 0x404040;
-	s.rgb[METACOLOR_GREY_DARK]      = 0x525252;
-	s.rgb[METACOLOR_GREY_MEDIUM]    = 0x707070;
+	s.rgb[METACOLOR_GREY_DARKEST] = 0x1c1c1c;
+	s.rgb[METACOLOR_GREY_DARKER] = 0x2e2e2e;
+	s.rgb[METACOLOR_GREY_MEDDARK] = 0x404040;
+	s.rgb[METACOLOR_GREY_DARK] = 0x525252;
+	s.rgb[METACOLOR_GREY_MEDIUM] = 0x707070;
 	s.rgb[METACOLOR_GREY_MED_LIGHT] = 0x888888;
-	s.rgb[METACOLOR_GREY_BRIGHT]    = 0xa8a8a8;
-	s.rgb[METACOLOR_GREY_BRIGHTER]  = 0xbbbbbb;
+	s.rgb[METACOLOR_GREY_BRIGHT] = 0xa8a8a8;
+	s.rgb[METACOLOR_GREY_BRIGHTER] = 0xbbbbbb;
 	s.rgb[METACOLOR_GREY_BRIGHTEST] = 0xeeeeee;
 
 	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xff6666;
 
-	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe8d840;
+	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe84040;
 
-	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0xd4a800; // golden yellow
+	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0xa48888;
 	s.rgb[METACOLOR_BUTTON_CAUTION] = 0x991111; // dark red
 
-	s.rgb[METACOLOR_KNOB_BODY]     = 0x606060;
-	s.rgb[METACOLOR_KNOB_DOT]      = 0xdddddd;
+	s.rgb[METACOLOR_KNOB_BODY] = 0x606060;
+	s.rgb[METACOLOR_KNOB_DOT] = 0xdddddd;
 	s.rgb[METACOLOR_KNOB_DISABLED] = 0x888888;
 
-	s.rgb[METACOLOR_CHECKBOX]  = 0xd4a800;
+	s.rgb[METACOLOR_CHECKBOX] = 0xd4a800;
 	s.rgb[METACOLOR_TEXT_DARK] = 0x111111;
 
-	s.rgb[METACOLOR_RED_TEXT]     = 0xee5555;
-	s.rgb[METACOLOR_ORANGE_TEXT]  = 0xdd7722;
-	s.rgb[METACOLOR_YELLOW_TEXT]  = 0xe8d840;
-	s.rgb[METACOLOR_GREEN_TEXT]   = 0x00a551;
-	s.rgb[METACOLOR_BLUE_TEXT]    = 0x4488ee;
-	s.rgb[METACOLOR_GREY_TEXT]    = 0xa8a8a8;
-	s.rgb[METACOLOR_LT_GREY_TEXT] = 0xcccccc;
+	s.rgb[METACOLOR_YELLOW_TEXT] = 0xe8d840;
+	s.rgb[METACOLOR_GREEN_TEXT] = 0x00a551;
 
-	s.rgb[METACOLOR_BLACK]        = 0x000000;
-	s.rgb[METACOLOR_WHITE]        = 0xffffff;
+	s.rgb[METACOLOR_BLACK] = 0x000000;
+	s.rgb[METACOLOR_WHITE] = 0xffffff;
 	s.rgb[METACOLOR_DEBUG_BORDER] = 0xff0000;
 
-	s.rgb[METACOLOR_ORANGE_DARK]      = 0xcc3300;
-	s.rgb[METACOLOR_GREEN_DARK]       = 0x23973c;
-	s.rgb[METACOLOR_BLUE_DEEP]        = 0x4040ff;
+	s.rgb[METACOLOR_ORANGE_DARK] = 0xcc3300;
+	s.rgb[METACOLOR_GREEN_DARK] = 0x23973c;
+	s.rgb[METACOLOR_BLUE_DEEP] = 0x4040ff;
 	s.rgb[METACOLOR_SCROLLBAR_ORANGE] = 0xcc2222;
 
-	s.rgb[METACOLOR_LV_GREY]        = 0x9e9e9e;
-	s.rgb[METACOLOR_LV_ORANGE]      = 0xdd4411;
+	s.rgb[METACOLOR_LV_GREY] = 0x9e9e9e;
+	s.rgb[METACOLOR_LV_ORANGE] = 0xdd4411;
 	s.rgb[METACOLOR_LV_GREEN_LIGHT] = 0x66bb6a;
-	s.rgb[METACOLOR_LV_RED_LIGHT]   = 0xee5555;
+	s.rgb[METACOLOR_LV_RED_LIGHT] = 0xee5555;
 
 	// LV_PALETTE_* indices — reds/oranges pulled toward scheme hue
-	s.palette_main[0]  = 0xee2222; // RED
-	s.palette_main[1]  = 0xf063b2; // PINK
-	s.palette_main[2]  = 0x9c27b0; // PURPLE
-	s.palette_main[3]  = 0x673ab7; // DEEP_PURPLE
-	s.palette_main[4]  = 0x3f51b5; // INDIGO
-	s.palette_main[5]  = 0x42a5f5; // BLUE
-	s.palette_main[6]  = 0xbbdefb; // LIGHT_BLUE
-	s.palette_main[7]  = 0x26c6da; // CYAN
-	s.palette_main[8]  = 0x009688; // TEAL
-	s.palette_main[9]  = 0x00a551; // GREEN
+	s.palette_main[0] = 0xee2222;  // RED
+	s.palette_main[1] = 0xf063b2;  // PINK
+	s.palette_main[2] = 0x9c27b0;  // PURPLE
+	s.palette_main[3] = 0x673ab7;  // DEEP_PURPLE
+	s.palette_main[4] = 0x3f51b5;  // INDIGO
+	s.palette_main[5] = 0x42a5f5;  // BLUE
+	s.palette_main[6] = 0xbbdefb;  // LIGHT_BLUE
+	s.palette_main[7] = 0x26c6da;  // CYAN
+	s.palette_main[8] = 0x009688;  // TEAL
+	s.palette_main[9] = 0x00a551;  // GREEN
 	s.palette_main[10] = 0x8bc34a; // LIGHT_GREEN
 	s.palette_main[11] = 0xcddc39; // LIME
 	s.palette_main[12] = 0xffd700; // YELLOW
