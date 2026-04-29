@@ -10,7 +10,7 @@ void PrefsSectionColorScheme::create(lv_obj_t *parent) {
 
 	auto cont = create_prefs_labeled_dropdown(parent, "Theme:");
 	scheme_dropdown = lv_obj_get_child(cont, 1);
-	lv_obj_set_width(scheme_dropdown, 150);
+	lv_obj_set_width(scheme_dropdown, 120);
 }
 
 } // namespace MetaModule
