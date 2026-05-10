@@ -1035,37 +1035,6 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_set_style_pad_top(ui_ListLabel, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_bottom(ui_ListLabel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-	ui_EditButton = lv_btn_create(ui_EditMapButtons);
-	lv_obj_set_width(ui_EditButton, 32);
-	lv_obj_set_height(ui_EditButton, 32);
-	lv_obj_set_align(ui_EditButton, LV_ALIGN_CENTER);
-	lv_obj_add_flag(ui_EditButton, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
-	lv_obj_clear_flag(ui_EditButton,
-					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
-						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
-						  LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
-	lv_obj_set_style_radius(ui_EditButton, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_EditButton, scheme_bg(METACOLOR_CHECKBOX), LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_opa(ui_EditButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_left(ui_EditButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_right(ui_EditButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_top(ui_EditButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_pad_bottom(ui_EditButton, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_EditButton, scheme_outline(METACOLOR_BLACK), LV_PART_MAIN | LV_STATE_PRESSED);
-	lv_obj_set_style_outline_opa(ui_EditButton, 0, LV_PART_MAIN | LV_STATE_PRESSED);
-	lv_obj_add_style(ui_EditButton, scheme_outline(METACOLOR_CHECKBOX), LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_set_style_outline_opa(ui_EditButton, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_set_style_outline_width(ui_EditButton, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_set_style_outline_pad(ui_EditButton, 3, LV_PART_MAIN | LV_STATE_FOCUSED);
-	lv_obj_add_style(ui_EditButton, scheme_outline(METACOLOR_CHECKBOX), LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-	lv_obj_set_style_outline_opa(ui_EditButton, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-	lv_obj_set_style_outline_width(ui_EditButton, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-	lv_obj_set_style_outline_pad(ui_EditButton, 3, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
-	lv_obj_add_style(ui_EditButton, scheme_outline(METACOLOR_CHECKBOX), LV_PART_MAIN | LV_STATE_USER_1);
-	lv_obj_set_style_outline_opa(ui_EditButton, 255, LV_PART_MAIN | LV_STATE_USER_1);
-	lv_obj_set_style_outline_width(ui_EditButton, 2, LV_PART_MAIN | LV_STATE_USER_1);
-	lv_obj_set_style_outline_pad(ui_EditButton, 3, LV_PART_MAIN | LV_STATE_USER_1);
-
 	ui_KnobSetButton = lv_imgbtn_create(ui_EditMapButtons);
 	lv_imgbtn_set_src(ui_KnobSetButton, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_1x_knob1_png, NULL);
 	lv_imgbtn_set_src(ui_KnobSetButton, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_1x_knob1_png, NULL);

@@ -392,7 +392,6 @@ lv_obj_t *ui_MoreMapsIcon;
 lv_obj_t *ui_EditMapButtons;
 lv_obj_t *ui_ListButton;
 lv_obj_t *ui_ListLabel;
-lv_obj_t *ui_EditButton;
 lv_obj_t *ui_KnobSetButton;
 lv_obj_t *ui_TrashButton;
 lv_obj_t *ui_TrashLabel;

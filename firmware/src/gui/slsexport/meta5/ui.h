@@ -380,7 +380,6 @@ extern lv_obj_t *ui_MoreMapsIcon;
 extern lv_obj_t *ui_EditMapButtons;
 extern lv_obj_t *ui_ListButton;
 extern lv_obj_t *ui_ListLabel;
-extern lv_obj_t *ui_EditButton;
 extern lv_obj_t *ui_KnobSetButton;
 extern lv_obj_t *ui_TrashButton;
 extern lv_obj_t *ui_TrashLabel;

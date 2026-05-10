@@ -32,7 +32,6 @@ struct KnobMapPage : PageBase {
 		lv_obj_add_event_cb(ui_ModuleMapToggleSwitch, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_ListButton, list_cb, LV_EVENT_RELEASED, this);
-		lv_obj_add_event_cb(ui_EditButton, edit_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_KnobSetButton, knobset_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_TrashButton, trash_cb, LV_EVENT_RELEASED, this);
 
@@ -58,10 +57,8 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_AliasTextArea);
 		lv_group_add_obj(group, ui_EditMapMidiChannelDropdown);
 		lv_group_add_obj(group, ui_ListButton);
-		lv_group_add_obj(group, ui_EditButton);
 		lv_group_add_obj(group, ui_KnobSetButton);
 		lv_group_add_obj(group, ui_TrashButton);
-		lv_hide(ui_EditButton);
 		lv_group_set_editing(group, false);
 
 		indicator = lv_btn_create(ui_EditMapKnob); //NOLINT
