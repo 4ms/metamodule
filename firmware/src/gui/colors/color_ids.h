@@ -19,9 +19,9 @@ typedef enum SchemeColorId {
 	METACOLOR_PRIMARY_HIGHLIGHT,
 	METACOLOR_MODULE_SELECTED_BORDER,
 
-	METACOLOR_BUTTON_CONFIRM, // Button color for "Confirm" buttons
-	METACOLOR_BUTTON_CAUTION,
-	METACOLOR_CONTROL_BG,
+	METACOLOR_BUTTON_CONFIRM, // Button bg for "Confirm" buttons
+	METACOLOR_BUTTON_CAUTION, // Button bg for Delete or other cautionary action button
+	METACOLOR_CONTROL_BG, // Default bg for button, slider, checkbox
 	METACOLOR_CHECKBOX,
 
 	METACOLOR_GREY_BRIGHT,

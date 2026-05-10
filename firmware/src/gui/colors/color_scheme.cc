@@ -13,7 +13,17 @@ constexpr ColorScheme make_default_scheme() {
 	ColorScheme s{};
 	s.name = "Default";
 
+	s.rgb[METACOLOR_BLACK] = 0x000000;
+	s.rgb[METACOLOR_WHITE] = 0xffffff;
+
 	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xfd8b18;
+	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xffb74d;
+
+	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x2095f6;
+	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xea1c25;
+	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
+	s.rgb[METACOLOR_CHECKBOX] = 0x4067d3;
+	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe1e878;
 
 	s.rgb[METACOLOR_GREY_DARKEST] = 0x222222;
 	s.rgb[METACOLOR_GREY_DARKER] = 0x333333;
@@ -25,27 +35,14 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_GREY_BRIGHTER] = 0xbbbbbb;
 	s.rgb[METACOLOR_GREY_BRIGHTEST] = 0xeeeeee;
 
-	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xffb74d;
-
-	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe1e878;
-
-	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x2095f6;
-	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xea1c25;
-	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
-
 	s.rgb[METACOLOR_KNOB_BODY] = 0x666666;
 	s.rgb[METACOLOR_KNOB_DOT] = 0xdddddd;
 	s.rgb[METACOLOR_KNOB_DISABLED] = 0xb4b2b4;
 
-	s.rgb[METACOLOR_CHECKBOX] = 0x4067d3;
 	s.rgb[METACOLOR_TEXT_DARK] = 0x111111;
 
 	s.rgb[METACOLOR_YELLOW_TEXT] = 0xd7ff6a;
 	s.rgb[METACOLOR_GREEN_TEXT] = 0x00a551;
-
-	s.rgb[METACOLOR_BLACK] = 0x000000;
-	s.rgb[METACOLOR_WHITE] = 0xffffff;
-	s.rgb[METACOLOR_DEBUG_BORDER] = 0xff0000;
 
 	s.rgb[METACOLOR_ORANGE_DARK] = 0xf19300;
 	s.rgb[METACOLOR_GREEN_DARK] = 0x23973c;
@@ -56,6 +53,8 @@ constexpr ColorScheme make_default_scheme() {
 	s.rgb[METACOLOR_LV_ORANGE] = 0xff9800;
 	s.rgb[METACOLOR_LV_GREEN_LIGHT] = 0x66bb6a;
 	s.rgb[METACOLOR_LV_RED_LIGHT] = 0xef5350;
+
+	s.rgb[METACOLOR_DEBUG_BORDER] = 0xff0000;
 
 	// LV_PALETTE_* indices. Layout: RED, PINK, PURPLE, DEEP_PURPLE, INDIGO,
 	// BLUE, LIGHT_BLUE, CYAN, TEAL, GREEN, LIGHT_GREEN, LIME, YELLOW, AMBER,
@@ -99,12 +98,17 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	ColorScheme s{};
 	s.name = "High Contrast";
 
-	// Highlights — pure / max-saturation versions of the Default hues.
+	s.rgb[METACOLOR_BLACK] = 0x000000;
+	s.rgb[METACOLOR_WHITE] = 0xffffff;
+
 	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xffa000;
-	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xff0000;
+	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xffcc66;
+
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x0040a0;
-	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
+	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xff0000;
+	s.rgb[METACOLOR_CONTROL_BG] = 0x888888;
 	s.rgb[METACOLOR_CHECKBOX] = 0x4080ff;
+	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xffff00;
 
 	// Greys — collapse low-contrast mid-greys toward black or white. Keep two
 	// distinct dark steps for panel layering on the black screen background.
@@ -118,14 +122,9 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	s.rgb[METACOLOR_GREY_BRIGHTER] = 0xffffff;
 	s.rgb[METACOLOR_GREY_BRIGHTEST] = 0xffffff;
 
-	// Popup warning — keep yellow but make it pure for max attention.
-	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xffff00;
-
 	s.rgb[METACOLOR_KNOB_BODY] = 0x444444;
 	s.rgb[METACOLOR_KNOB_DOT] = 0xffffff;
 	s.rgb[METACOLOR_KNOB_DISABLED] = 0x666666;
-
-	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xffcc66;
 
 	s.rgb[METACOLOR_TEXT_DARK] = 0x000000;
 
@@ -133,10 +132,6 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	// near-white tints of their hue so they still read on black.
 	s.rgb[METACOLOR_YELLOW_TEXT] = 0xffff80;
 	s.rgb[METACOLOR_GREEN_TEXT] = 0x80ff80;
-
-	s.rgb[METACOLOR_BLACK] = 0x000000;
-	s.rgb[METACOLOR_WHITE] = 0xffffff;
-	s.rgb[METACOLOR_DEBUG_BORDER] = 0xff0000;
 
 	s.rgb[METACOLOR_ORANGE_DARK] = 0xffa000;
 	s.rgb[METACOLOR_GREEN_DARK] = 0x00ff00;
@@ -147,6 +142,8 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	s.rgb[METACOLOR_LV_ORANGE] = 0xffa000;
 	s.rgb[METACOLOR_LV_GREEN_LIGHT] = 0x80ff80;
 	s.rgb[METACOLOR_LV_RED_LIGHT] = 0xff8080;
+
+	s.rgb[METACOLOR_DEBUG_BORDER] = 0xff0000;
 
 	// Palette indices — saturated/luminous versions for a black background.
 	s.palette_main[0] = 0xff0000;  // RED
@@ -185,7 +182,17 @@ constexpr ColorScheme make_red_scheme() {
 	ColorScheme s{};
 	s.name = "Red";
 
+	s.rgb[METACOLOR_BLACK] = 0x000000;
+	s.rgb[METACOLOR_WHITE] = 0xffffff;
+
 	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xe02020;
+	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xff6666;
+
+	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0xa48888;
+	s.rgb[METACOLOR_BUTTON_CAUTION] = 0x991111; // dark red
+	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
+	s.rgb[METACOLOR_CHECKBOX] = 0xd4a800;
+	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe84040;
 
 	s.rgb[METACOLOR_GREY_DARKEST] = 0x1c1c1c;
 	s.rgb[METACOLOR_GREY_DARKER] = 0x2e2e2e;
@@ -197,27 +204,15 @@ constexpr ColorScheme make_red_scheme() {
 	s.rgb[METACOLOR_GREY_BRIGHTER] = 0xbbbbbb;
 	s.rgb[METACOLOR_GREY_BRIGHTEST] = 0xeeeeee;
 
-	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xff6666;
-
-	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe84040;
-
-	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0xa48888;
-	s.rgb[METACOLOR_BUTTON_CAUTION] = 0x991111; // dark red
-	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
-
 	s.rgb[METACOLOR_KNOB_BODY] = 0x606060;
 	s.rgb[METACOLOR_KNOB_DOT] = 0xdddddd;
 	s.rgb[METACOLOR_KNOB_DISABLED] = 0x888888;
 
-	s.rgb[METACOLOR_CHECKBOX] = 0xd4a800;
 	s.rgb[METACOLOR_TEXT_DARK] = 0x111111;
 
 	s.rgb[METACOLOR_YELLOW_TEXT] = 0xe8d840;
 	s.rgb[METACOLOR_GREEN_TEXT] = 0x00a551;
 
-	s.rgb[METACOLOR_BLACK] = 0x000000;
-	s.rgb[METACOLOR_WHITE] = 0xffffff;
-	s.rgb[METACOLOR_DEBUG_BORDER] = 0xff0000;
 
 	s.rgb[METACOLOR_ORANGE_DARK] = 0xcc3300;
 	s.rgb[METACOLOR_GREEN_DARK] = 0x23973c;
@@ -228,6 +223,8 @@ constexpr ColorScheme make_red_scheme() {
 	s.rgb[METACOLOR_LV_ORANGE] = 0xdd4411;
 	s.rgb[METACOLOR_LV_GREEN_LIGHT] = 0x66bb6a;
 	s.rgb[METACOLOR_LV_RED_LIGHT] = 0xee5555;
+
+	s.rgb[METACOLOR_DEBUG_BORDER] = 0xff0000;
 
 	// LV_PALETTE_* indices — reds/oranges pulled toward scheme hue
 	s.palette_main[0] = 0xee2222;  // RED
