@@ -16,13 +16,17 @@ typedef enum SchemeColorId {
 	METACOLOR_BLACK,
 	METACOLOR_WHITE,
 
-	METACOLOR_PRIMARY_HIGHLIGHT,
+	METACOLOR_PRIMARY_HIGHLIGHT, // Primary highlight color. WHITE text sometimes appears over it
 	METACOLOR_MODULE_SELECTED_BORDER,
 
-	METACOLOR_BUTTON_CONFIRM, // Button bg for "Confirm" buttons
-	METACOLOR_BUTTON_CAUTION, // Button bg for Delete or other cautionary action button
-	METACOLOR_CONTROL_BG, // Default bg for button, slider, checkbox
+	METACOLOR_BUTTON_CONFIRM, // Button bg for "Confirm" buttons. White text goes over.
+	METACOLOR_BUTTON_CAUTION, // Button bg for Delete or other cautionary action button. White text goes over.
+	METACOLOR_CONTROL_BG,	  // Default bg for button, slider, checkbox
+	METACOLOR_CONTROL_TEXT,	  // Default text color over control_bg
+	METACOLOR_DISABLED_BG,
+	METACOLOR_DISABLED_TEXT,
 	METACOLOR_CHECKBOX,
+	METACOLOR_NOTIFICATION_BG,
 
 	METACOLOR_GREY_BRIGHT,
 	METACOLOR_GREY_DARKEST,
@@ -33,7 +37,6 @@ typedef enum SchemeColorId {
 	METACOLOR_GREY_MED_LIGHT,
 	METACOLOR_GREY_BRIGHTER,
 	METACOLOR_GREY_BRIGHTEST,
-	METACOLOR_NOTIFICATION_BG,
 
 	METACOLOR_KNOB_BODY,
 	METACOLOR_KNOB_DOT,

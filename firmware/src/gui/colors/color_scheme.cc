@@ -21,7 +21,10 @@ constexpr ColorScheme make_default_scheme() {
 
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x2095f6;
 	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xea1c25;
+	s.rgb[METACOLOR_CONTROL_TEXT] = 0xffffff;
 	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
+	s.rgb[METACOLOR_DISABLED_TEXT] = 0xaaaaaa;
+	s.rgb[METACOLOR_DISABLED_BG] = 0x333333;
 	s.rgb[METACOLOR_CHECKBOX] = 0x4067d3;
 	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe1e878;
 
@@ -106,7 +109,10 @@ constexpr ColorScheme make_high_contrast_scheme() {
 
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x0040a0;
 	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xff0000;
+	s.rgb[METACOLOR_CONTROL_TEXT] = 0x000000;
 	s.rgb[METACOLOR_CONTROL_BG] = 0x888888;
+	s.rgb[METACOLOR_DISABLED_TEXT] = 0xffffff;
+	s.rgb[METACOLOR_DISABLED_BG] = 0x333333;
 	s.rgb[METACOLOR_CHECKBOX] = 0x4080ff;
 	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xffff00;
 
@@ -190,7 +196,10 @@ constexpr ColorScheme make_red_scheme() {
 
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0xa48888;
 	s.rgb[METACOLOR_BUTTON_CAUTION] = 0x991111; // dark red
+	s.rgb[METACOLOR_CONTROL_TEXT] = 0xff8888;
 	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
+	s.rgb[METACOLOR_DISABLED_TEXT] = 0xaaaaaa;
+	s.rgb[METACOLOR_DISABLED_BG] = 0x333333;
 	s.rgb[METACOLOR_CHECKBOX] = 0xd4a800;
 	s.rgb[METACOLOR_NOTIFICATION_BG] = 0xe84040;
 

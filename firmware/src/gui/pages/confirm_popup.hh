@@ -213,7 +213,7 @@ struct ConfirmPopup {
 						  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE |
 							  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
 		lv_obj_set_style_radius(cancel_button, 20, LV_STATE_DEFAULT);
-		lv_obj_add_style(cancel_button, scheme_bg(METACOLOR_GREY_MEDIUM), LV_STATE_DEFAULT);
+		lv_obj_add_style(cancel_button, scheme_bg(METACOLOR_CONTROL_BG), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(cancel_button, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(cancel_button, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_left(cancel_button, 10, LV_STATE_DEFAULT);
@@ -237,7 +237,7 @@ struct ConfirmPopup {
 		lv_obj_set_y(cancel_label, 0);
 		lv_obj_set_align(cancel_label, LV_ALIGN_CENTER);
 		lv_label_set_text(cancel_label, "Cancel");
-		lv_obj_add_style(cancel_label, scheme_text(METACOLOR_WHITE), LV_STATE_DEFAULT);
+		lv_obj_add_style(cancel_label, scheme_text(METACOLOR_CONTROL_TEXT), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(cancel_label, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_font(cancel_label, &ui_font_MuseoSansRounded50016, LV_STATE_DEFAULT);
 
