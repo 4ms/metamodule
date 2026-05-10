@@ -31,6 +31,7 @@ constexpr ColorScheme make_default_scheme() {
 
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x2095f6;
 	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xea1c25;
+	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
 
 	s.rgb[METACOLOR_KNOB_BODY] = 0x666666;
 	s.rgb[METACOLOR_KNOB_DOT] = 0xdddddd;
@@ -102,6 +103,8 @@ constexpr ColorScheme make_high_contrast_scheme() {
 	s.rgb[METACOLOR_PRIMARY_HIGHLIGHT] = 0xffa000;
 	s.rgb[METACOLOR_BUTTON_CAUTION] = 0xff0000;
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0x0040a0;
+	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
+	s.rgb[METACOLOR_CHECKBOX] = 0x4080ff;
 
 	// Greys — collapse low-contrast mid-greys toward black or white. Keep two
 	// distinct dark steps for panel layering on the black screen background.
@@ -124,7 +127,6 @@ constexpr ColorScheme make_high_contrast_scheme() {
 
 	s.rgb[METACOLOR_MODULE_SELECTED_BORDER] = 0xffcc66;
 
-	s.rgb[METACOLOR_CHECKBOX] = 0x4080ff;
 	s.rgb[METACOLOR_TEXT_DARK] = 0x000000;
 
 	// Rich-text colors used in HTML escape sequences — pull these toward
@@ -201,6 +203,7 @@ constexpr ColorScheme make_red_scheme() {
 
 	s.rgb[METACOLOR_BUTTON_CONFIRM] = 0xa48888;
 	s.rgb[METACOLOR_BUTTON_CAUTION] = 0x991111; // dark red
+	s.rgb[METACOLOR_CONTROL_BG] = 0x777777;
 
 	s.rgb[METACOLOR_KNOB_BODY] = 0x606060;
 	s.rgb[METACOLOR_KNOB_DOT] = 0xdddddd;

@@ -240,7 +240,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_add_flag(ui_MinSlider, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK | LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
 	lv_obj_clear_flag(ui_MinSlider, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE);		/// Flags
 	lv_obj_set_style_radius(ui_MinSlider, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_MinSlider, scheme_bg(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MinSlider, scheme_bg(METACOLOR_CONTROL_BG), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_MinSlider, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_MinSlider, scheme_border(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_MinSlider, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -406,7 +406,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_add_flag(ui_MaxSlider, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK | LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
 	lv_obj_clear_flag(ui_MaxSlider, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE);		/// Flags
 	lv_obj_set_style_radius(ui_MaxSlider, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_MaxSlider, scheme_bg(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_MaxSlider, scheme_bg(METACOLOR_CONTROL_BG), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_MaxSlider, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(ui_MaxSlider, scheme_border(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ui_MaxSlider, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -550,7 +550,7 @@ void ui_EditMappingPage_screen_init(void) {
 	lv_obj_clear_flag(ui_ModuleMapToggleSwitch,
 					  LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
 	lv_obj_set_style_radius(ui_ModuleMapToggleSwitch, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(ui_ModuleMapToggleSwitch, scheme_bg(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(ui_ModuleMapToggleSwitch, scheme_bg(METACOLOR_CONTROL_BG), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(ui_ModuleMapToggleSwitch, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(
 		ui_ModuleMapToggleSwitch, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);

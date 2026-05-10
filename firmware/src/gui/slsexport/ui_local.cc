@@ -367,7 +367,7 @@ lv_obj_t *create_labeled_check_obj(lv_obj_t *parent, const char *name) {
 	lv_obj_add_flag(check, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 	lv_obj_clear_flag(check, LV_OBJ_FLAG_GESTURE_BUBBLE); /// Flags
 	lv_obj_set_style_radius(check, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(check, scheme_bg(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(check, scheme_bg(METACOLOR_CONTROL_BG), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(check, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(check, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(check, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -618,7 +618,7 @@ lv_obj_t *create_settings_menu_switch(lv_obj_t *parent,
 	lv_obj_clear_flag(onoff_switch,
 					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
 	lv_obj_set_style_radius(onoff_switch, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(onoff_switch, scheme_bg(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(onoff_switch, scheme_bg(METACOLOR_CONTROL_BG), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(onoff_switch, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(onoff_switch, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(onoff_switch, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -682,7 +682,7 @@ lv_obj_t *create_settings_menu_slider(lv_obj_t *parent, std::string const &slide
 	lv_obj_add_flag(slider, LV_OBJ_FLAG_SCROLL_ON_FOCUS);							/// Flags
 	lv_obj_clear_flag(slider, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE); /// Flags
 	lv_obj_set_style_radius(slider, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(slider, scheme_bg(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(slider, scheme_bg(METACOLOR_CONTROL_BG), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(slider, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(slider, scheme_border(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(slider, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -790,7 +790,7 @@ lv_obj_t *create_prefs_check(lv_obj_t *parent) {
 					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
 						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE);
 	lv_obj_set_style_radius(check, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(check, scheme_bg(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(check, scheme_bg(METACOLOR_CONTROL_BG), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(check, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_style(check, scheme_outline(METACOLOR_PRIMARY_HIGHLIGHT), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_opa(check, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -1237,7 +1237,7 @@ lv_obj_t *create_prefs_labeled_check(lv_obj_t *parent, std::string_view label_te
 					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
 						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE);
 	lv_obj_set_style_radius(check, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_add_style(check, scheme_bg(METACOLOR_GREY_DARKEST), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_add_style(check, scheme_bg(METACOLOR_CONTROL_BG), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(check, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	// Focus state:
