@@ -68,7 +68,6 @@ struct ModuleViewMappingPane {
 		add_cable_popup.init(ui_MappingMenu, pane_group);
 		panel_cable_popup.init(ui_MappingMenu, pane_group);
 		midi_map_popup.init(ui_MappingMenu, pane_group);
-		keyboard_entry.prepare_focus(ui_MappingMenu, pane_group);
 
 		lv_obj_set_y(ui_Keyboard, 144);
 	}
@@ -805,6 +804,7 @@ private:
 			return;
 		}
 
+		keyboard_entry.prepare_focus(ui_MappingMenu, pane_group);
 		keyboard_entry.show_keyboard(alias_text_obj, [panelmap = panelmap, this](std::string_view text) {
 			if (panelmap.is_input)
 				patch->set_panel_in_alias(panelmap.panel_jack_id, text);
