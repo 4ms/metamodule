@@ -14,27 +14,39 @@ namespace MetaModule
 
 struct MidiMapPopup {
 	lv_obj_t *midi_channel_dropdown;
+	lv_obj_t *midi_channel_label;
 
 	MidiMapPopup(ParamsMidiState &params)
 		: group(lv_group_create())
 		, params{params} {
 
-		auto label = create_midi_map_label(ui_MidiMapCont, "Channel: ");
-		lv_obj_add_flag(label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		midi_channel_label = create_midi_map_label(ui_MidiMapCont, "Channel: ");
+		lv_obj_add_flag(midi_channel_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		midi_channel_dropdown =
 			create_midi_map_dropdown(ui_MidiMapCont, "All\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16");
 		lv_obj_set_width(midi_channel_dropdown, 90);
-		lv_obj_move_to_index(label, -3);
-		lv_obj_move_to_index(midi_channel_dropdown, -2);
+
+		auto div = lv_obj_create(ui_MidiMapCont);
+		lv_obj_remove_style_all(div);
+		lv_obj_set_width(div, LV_PCT(100));
+		lv_obj_add_flag(div, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_set_height(div, 10);
+		lv_obj_set_style_border_side(div, LV_BORDER_SIDE_BOTTOM, 0);
+		lv_obj_set_style_border_width(div, 1, 0);
+		lv_obj_set_style_border_color(div, lv_color_white(), 0);
+
+		lv_obj_move_to_index(midi_channel_label, -10);
+		lv_obj_move_to_index(midi_channel_dropdown, -9);
+		lv_obj_move_to_index(div, -8);
 
 		sources = {{
 			{.checkbox = ui_MidiMapNoteCheck, .dropdowns = {ui_MidiMapNoteDrop, ui_MidiMapNotePolyDrop}},
 			{.checkbox = ui_MidiMapCCCheck, .dropdowns = {ui_MidiMapCCDrop}},
 			{.checkbox = ui_MidiMapPitchWheelCheck, .dropdowns = {}},
 			{.checkbox = ui_MidiMapGateCheck, .dropdowns = {ui_MidiMapGateDrop}},
+			{.checkbox = nullptr, .dropdowns = {midi_channel_dropdown}},
 			{.checkbox = ui_MidiMapClockCheck, .dropdowns = {ui_MidiMapClockDrop}},
 			{.checkbox = ui_MidiMapTransportCheck, .dropdowns = {ui_MidiMapTransportDrop}},
-			{.checkbox = nullptr, .dropdowns = {midi_channel_dropdown}},
 		}};
 
 		// Group:
@@ -237,6 +249,11 @@ struct MidiMapPopup {
 					lv_obj_clear_state(source.checkbox, LV_STATE_CHECKED);
 			}
 		}
+
+		lv_enable(midi_channel_dropdown,
+				  (source_check != ui_MidiMapClockCheck) && (source_check != ui_MidiMapTransportCheck));
+		lv_enable(midi_channel_label,
+				  (source_check != ui_MidiMapClockCheck) && (source_check != ui_MidiMapTransportCheck));
 	}
 
 	std::optional<MidiMappings> calc_midi_signal_number() {
