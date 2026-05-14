@@ -402,7 +402,7 @@ private:
 		lv_group_add_obj(pane_group, obj);
 
 		if (Midi::is_midi_panel_id(panel_jack->panel_jack_id))
-			lv_obj_add_event_cb(obj, click_midi_jack_item_cb, LV_EVENT_CLICKED, this);
+			lv_obj_add_event_cb(obj, add_midi_cable_button_cb, LV_EVENT_CLICKED, this);
 		else
 			lv_obj_add_event_cb(obj, click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
 
@@ -547,6 +547,11 @@ private:
 			[page](std::optional<MidiMappings> choice) {
 				if (choice.has_value()) {
 					page->notify_queue.put({"Connected to MIDI signal"});
+
+					RemoveJackMappings remove_mapping{};
+					remove_mapping.jack = page->this_jack;
+					remove_mapping.type = page->this_jack_type;
+					page->patch_mod_queue.put(remove_mapping);
 
 					AddJackMapping mapping{};
 					mapping.panel_jack_id = choice.value();
@@ -810,20 +815,6 @@ private:
 			return;
 
 		page->show_jack_alias_keyboard(PanelJackMapUserData(userdata), event->target);
-	}
-
-	static void click_midi_jack_item_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-
-		auto userdata = lv_obj_get_user_data(event->target);
-		if (!userdata)
-			return;
-
-		page->add_midi_cable_button_cb(event);
-		// page->show_jack_alias_keyboard(PanelJackMapUserData(userdata), event->target);
 	}
 
 	void show_jack_alias_keyboard(PanelJackMapUserData panelmap, lv_obj_t *obj) {
