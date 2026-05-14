@@ -2573,7 +2573,7 @@ lv_label_set_text(ui_MidiMapNoteLabel,"CV:");
 ui_MidiMapNoteDrop = lv_dropdown_create(ui_MidiMapCont);
 lv_dropdown_set_dir( ui_MidiMapNoteDrop, LV_DIR_RIGHT);
 lv_dropdown_set_options( ui_MidiMapNoteDrop, "Pitch\nGate\nVel.\nAft.\nRetrig" );
-lv_obj_set_width( ui_MidiMapNoteDrop, 88);
+lv_obj_set_width( ui_MidiMapNoteDrop, 74);
 lv_obj_set_height( ui_MidiMapNoteDrop, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_MidiMapNoteDrop, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_MidiMapNoteDrop, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
@@ -2594,7 +2594,7 @@ ui_MidiMapPolyLabel = lv_label_create(ui_MidiMapCont);
 lv_obj_set_width( ui_MidiMapPolyLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_MidiMapPolyLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_MidiMapPolyLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_MidiMapPolyLabel,"Poly Chan:");
+lv_label_set_text(ui_MidiMapPolyLabel,"Poly Note:");
 lv_obj_clear_flag( ui_MidiMapPolyLabel, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_pad_left(ui_MidiMapPolyLabel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_MidiMapPolyLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -2602,8 +2602,8 @@ lv_obj_set_style_pad_top(ui_MidiMapPolyLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT)
 lv_obj_set_style_pad_bottom(ui_MidiMapPolyLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_MidiMapNotePolyDrop = lv_dropdown_create(ui_MidiMapCont);
-lv_dropdown_set_options( ui_MidiMapNotePolyDrop, "1\n2\n3\n4\n5\n6\n7\n8" );
-lv_obj_set_width( ui_MidiMapNotePolyDrop, 48);
+lv_dropdown_set_options( ui_MidiMapNotePolyDrop, "#1-4\n#1\n#2\n#3\n#4\n#5\n#6\n#7\n#8" );
+lv_obj_set_width( ui_MidiMapNotePolyDrop, 70);
 lv_obj_set_height( ui_MidiMapNotePolyDrop, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_MidiMapNotePolyDrop, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_MidiMapNotePolyDrop, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags

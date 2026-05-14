@@ -28,13 +28,13 @@ struct MidiMapPopup {
 		lv_obj_move_to_index(midi_channel_dropdown, -2);
 
 		sources = {{
-			{ui_MidiMapNoteCheck, {ui_MidiMapNoteDrop, ui_MidiMapNotePolyDrop}},
-			{ui_MidiMapCCCheck, {ui_MidiMapCCDrop}},
-			{ui_MidiMapPitchWheelCheck, {}},
-			{ui_MidiMapGateCheck, {ui_MidiMapGateDrop}},
-			{ui_MidiMapClockCheck, {ui_MidiMapClockDrop}},
-			{ui_MidiMapTransportCheck, {ui_MidiMapTransportDrop}},
-			{nullptr, {midi_channel_dropdown}},
+			{.checkbox = ui_MidiMapNoteCheck, .dropdowns = {ui_MidiMapNoteDrop, ui_MidiMapNotePolyDrop}},
+			{.checkbox = ui_MidiMapCCCheck, .dropdowns = {ui_MidiMapCCDrop}},
+			{.checkbox = ui_MidiMapPitchWheelCheck, .dropdowns = {}},
+			{.checkbox = ui_MidiMapGateCheck, .dropdowns = {ui_MidiMapGateDrop}},
+			{.checkbox = ui_MidiMapClockCheck, .dropdowns = {ui_MidiMapClockDrop}},
+			{.checkbox = ui_MidiMapTransportCheck, .dropdowns = {ui_MidiMapTransportDrop}},
+			{.checkbox = nullptr, .dropdowns = {midi_channel_dropdown}},
 		}};
 
 		// Group:
@@ -60,7 +60,6 @@ struct MidiMapPopup {
 				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
 				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY | LV_STATE_PRESSED);
 				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_EDITED);
-
 
 				lv_obj_add_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
 				lv_obj_set_style_pad_ver(dropdown, 8, LV_PART_MAIN);
@@ -244,17 +243,27 @@ struct MidiMapPopup {
 		};
 
 		if (lv_is_checked(ui_MidiMapNoteCheck)) {
-			auto polynum = lv_dropdown_get_selected(ui_MidiMapNotePolyDrop);
-			polynum = std::min<unsigned>(polynum, 7);
-
 			auto eventnum = lv_dropdown_get_selected(ui_MidiMapNoteDrop);
+			auto polynum = lv_dropdown_get_selected(ui_MidiMapNotePolyDrop);
 
-			return eventnum == 0 ? set_channels(MidiMonoNoteJack, polynum) :
-				   eventnum == 1 ? set_channels(MidiMonoGateJack, polynum) :
-				   eventnum == 2 ? set_channels(MidiMonoVelJack, polynum) :
-				   eventnum == 3 ? set_channels(MidiMonoAftertouchJack, polynum) :
-				   eventnum == 4 ? set_channels(MidiMonoRetrigJack, polynum) :
-								   std::optional<MidiMappings>{std::nullopt};
+			if (polynum == 0) {
+				return eventnum == 0 ? MidiNotePolyJack :
+					   eventnum == 1 ? MidiGatePolyJack :
+					   eventnum == 2 ? MidiVelPolyJack :
+					   eventnum == 3 ? MidiAftPolyJack :
+					   eventnum == 4 ? MidiRetrigPolyJack :
+									   std::optional<MidiMappings>{std::nullopt};
+
+			} else {
+				polynum = std::min<unsigned>(polynum - 1, 7);
+
+				return eventnum == 0 ? set_channels(MidiMonoNoteJack, polynum) :
+					   eventnum == 1 ? set_channels(MidiMonoGateJack, polynum) :
+					   eventnum == 2 ? set_channels(MidiMonoVelJack, polynum) :
+					   eventnum == 3 ? set_channels(MidiMonoAftertouchJack, polynum) :
+					   eventnum == 4 ? set_channels(MidiMonoRetrigJack, polynum) :
+									   std::optional<MidiMappings>{std::nullopt};
+			}
 
 		} else if (lv_is_checked(ui_MidiMapCCCheck)) {
 			auto ccnum = lv_dropdown_get_selected(ui_MidiMapCCDrop);
