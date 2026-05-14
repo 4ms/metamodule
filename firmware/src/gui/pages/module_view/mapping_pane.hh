@@ -401,7 +401,10 @@ private:
 
 		lv_group_add_obj(pane_group, obj);
 
-		lv_obj_add_event_cb(obj, click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
+		if (Midi::is_midi_panel_id(panel_jack->panel_jack_id))
+			lv_obj_add_event_cb(obj, click_midi_jack_item_cb, LV_EVENT_CLICKED, this);
+		else
+			lv_obj_add_event_cb(obj, click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_set_user_data(obj, PanelJackMapUserData{panel_jack->panel_jack_id, ElementType::Input});
 	}
@@ -535,20 +538,27 @@ private:
 		std::string title = "Map MIDI to: " + name.element_name;
 		page->midi_map_popup.set_header_text(title);
 
-		page->midi_map_popup.show([page](std::optional<MidiMappings> choice) {
-			if (choice.has_value()) {
-				page->notify_queue.put({"Connected to MIDI signal"});
+		std::optional<uint32_t> panel_jack_id{};
+		if (auto userdata = lv_obj_get_user_data(event->target)) {
+			panel_jack_id = PanelJackMapUserData(userdata).panel_jack_id;
+		}
 
-				AddJackMapping mapping{};
-				mapping.panel_jack_id = choice.value();
-				mapping.jack = page->this_jack;
-				mapping.type = page->this_jack_type;
+		page->midi_map_popup.show(
+			[page](std::optional<MidiMappings> choice) {
+				if (choice.has_value()) {
+					page->notify_queue.put({"Connected to MIDI signal"});
 
-				page->patch_mod_queue.put(mapping);
-				page->gui_state.new_cable = std::nullopt;
-				page->should_close = true;
-			}
-		});
+					AddJackMapping mapping{};
+					mapping.panel_jack_id = choice.value();
+					mapping.jack = page->this_jack;
+					mapping.type = page->this_jack_type;
+
+					page->patch_mod_queue.put(mapping);
+					page->gui_state.new_cable = std::nullopt;
+					page->should_close = true;
+				}
+			},
+			panel_jack_id);
 	}
 
 	static void disconnect_button_cb(lv_event_t *event) {
@@ -800,6 +810,20 @@ private:
 			return;
 
 		page->show_jack_alias_keyboard(PanelJackMapUserData(userdata), event->target);
+	}
+
+	static void click_midi_jack_item_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		auto userdata = lv_obj_get_user_data(event->target);
+		if (!userdata)
+			return;
+
+		page->add_midi_cable_button_cb(event);
+		// page->show_jack_alias_keyboard(PanelJackMapUserData(userdata), event->target);
 	}
 
 	void show_jack_alias_keyboard(PanelJackMapUserData panelmap, lv_obj_t *obj) {

@@ -95,17 +95,21 @@ struct MidiMapPopup {
 		lv_label_set_text(ui_MidiMapJackTitle, title.data());
 	}
 
-	void show(auto cb) {
+	void show(auto cb, std::optional<uint32_t> panel_jack_id) {
 		callback = std::move(cb);
 
 		//TODO: limit polyphony menu to patch's max poly number
 
 		lv_indev_set_group(lv_indev_get_next(nullptr), group);
 
-		// initial state: Note checked
-		lv_group_focus_obj(ui_MidiMapNoteCheck);
-		lv_obj_add_state(ui_MidiMapNoteCheck, LV_STATE_CHECKED);
-		check_only(ui_MidiMapNoteCheck);
+		if (panel_jack_id)
+			select_options(*panel_jack_id);
+		else {
+			// initial state: Note checked
+			lv_group_focus_obj(ui_MidiMapNoteCheck);
+			lv_obj_add_state(ui_MidiMapNoteCheck, LV_STATE_CHECKED);
+			check_only(ui_MidiMapNoteCheck);
+		}
 
 		// Make visible
 		lv_obj_set_parent(ui_MIDIMapPanel, base);
@@ -300,11 +304,108 @@ struct MidiMapPopup {
 		}
 	}
 
+	void select_options(uint32_t panel_jack_id) {
+		auto midi_chan = Midi::midi_channel(panel_jack_id);
+		lv_dropdown_set_selected(midi_channel_dropdown, midi_chan);
+
+		auto polychan = Midi::polychan(panel_jack_id); //1-8 for poly note chan, or nullopt for poly cables
+		auto midi_jack_id = Midi::strip_midi_channel(panel_jack_id);
+
+		if (polychan.has_value()) {
+			check_only(ui_MidiMapNoteCheck);
+			lv_group_focus_obj(ui_MidiMapNoteCheck);
+
+			lv_dropdown_set_selected(ui_MidiMapNotePolyDrop, polychan.value());
+			auto event_sel = Midi::midi_note_pitch(midi_jack_id)  ? 0 :
+							 Midi::midi_note_gate(midi_jack_id)	  ? 1 :
+							 Midi::midi_note_vel(midi_jack_id)	  ? 2 :
+							 Midi::midi_note_aft(midi_jack_id)	  ? 3 :
+							 Midi::midi_note_retrig(midi_jack_id) ? 4 :
+																	0;
+			lv_dropdown_set_selected(ui_MidiMapNoteDrop, event_sel);
+		}
+
+		else if (Midi::is_midi_poly_cable(midi_jack_id))
+		{
+			check_only(ui_MidiMapNoteCheck);
+			lv_group_focus_obj(ui_MidiMapNoteCheck);
+
+			lv_dropdown_set_selected(ui_MidiMapNotePolyDrop, 0); // "Poly 1-4"
+			auto event_sel = midi_jack_id == MidiNotePolyJack	  ? 0 :
+							 midi_jack_id == MidiGatePolyJack	  ? 1 :
+							 Midi::midi_note_vel(midi_jack_id)	  ? 2 :
+							 Midi::midi_note_aft(midi_jack_id)	  ? 3 :
+							 Midi::midi_note_retrig(midi_jack_id) ? 4 :
+																	0;
+			lv_dropdown_set_selected(ui_MidiMapNoteDrop, event_sel);
+		}
+
+		else if (midi_jack_id == MidiPitchWheelJack)
+		{
+			check_only(ui_MidiMapPitchWheelCheck);
+			lv_group_focus_obj(ui_MidiMapPitchWheelCheck);
+		}
+
+		else if (auto ccnum = Midi::midi_cc(midi_jack_id))
+		{
+			check_only(ui_MidiMapCCCheck);
+			lv_group_focus_obj(ui_MidiMapCCCheck);
+
+			lv_dropdown_set_selected(ui_MidiMapCCDrop, ccnum.value());
+		}
+
+		else if (auto notenum = Midi::midi_gate(midi_jack_id))
+		{
+			check_only(ui_MidiMapGateCheck);
+			lv_group_focus_obj(ui_MidiMapGateCheck);
+
+			lv_dropdown_set_selected(ui_MidiMapGateDrop, notenum.value());
+		}
+
+		else if (Midi::midi_clk(midi_jack_id))
+		{
+			check_only(ui_MidiMapClockCheck);
+			lv_group_focus_obj(ui_MidiMapClockCheck);
+
+			lv_dropdown_set_selected(ui_MidiMapClockDrop, 0);
+		}
+
+		else if (auto clk = Midi::midi_divclk(midi_jack_id))
+		{
+			check_only(ui_MidiMapClockCheck);
+			lv_group_focus_obj(ui_MidiMapClockCheck);
+
+			lv_dropdown_set_selected(ui_MidiMapClockDrop,
+									 midi_jack_id == MidiClockDiv1Jack	? 0 :
+									 midi_jack_id == MidiClockDiv2Jack	? 1 :
+									 midi_jack_id == MidiClockDiv3Jack	? 2 :
+									 midi_jack_id == MidiClockDiv6Jack	? 3 :
+									 midi_jack_id == MidiClockDiv12Jack ? 4 :
+									 midi_jack_id == MidiClockDiv24Jack ? 5 :
+									 midi_jack_id == MidiClockDiv48Jack ? 6 :
+									 midi_jack_id == MidiClockDiv96Jack ? 7 :
+																		  0);
+		}
+
+		else if (Midi::midi_transport(midi_jack_id))
+		{
+			check_only(ui_MidiMapTransportCheck);
+			lv_group_focus_obj(ui_MidiMapTransportCheck);
+
+			lv_dropdown_set_selected(ui_MidiMapTransportDrop,
+									 midi_jack_id == MidiStartJack	  ? 0 :
+									 midi_jack_id == MidiStopJack	  ? 1 :
+									 midi_jack_id == MidiContinueJack ? 2 :
+																		0);
+		}
+	}
+
 protected:
 	lv_obj_t *base{};
 	lv_group_t *group;
 	lv_group_t *orig_group{};
 	ParamsMidiState &params;
+	uint16_t panel_jack_id = MidiMonoNoteJack;
 
 	bool visible = false;
 	bool done = true;
