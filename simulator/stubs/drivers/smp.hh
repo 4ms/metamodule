@@ -55,6 +55,17 @@ struct SMPThread {
 	static void execute() {
 	}
 
+	template<typename Fn>
+	static auto run(Fn fn) -> std::invoke_result_t<Fn> {
+		using R = std::invoke_result_t<Fn>;
+
+		if constexpr (std::is_void_v<R>) {
+			fn();
+		} else {
+			return fn();
+		}
+	}
+
 	template<uint32_t command_id>
 	static void split_with_command() {
 	}
