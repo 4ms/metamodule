@@ -1,0 +1,662 @@
+PatchData:
+  patch_name: InternalCableTest
+  description: Benchmark - 50 Atvert2 modules chained in series (Out1->In1, Out2->In2), with panel jacks on the first and last modules
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:Atvert2'
+    2: '4msCompany:Atvert2'
+    3: '4msCompany:Atvert2'
+    4: '4msCompany:Atvert2'
+    5: '4msCompany:Atvert2'
+    6: '4msCompany:Atvert2'
+    7: '4msCompany:Atvert2'
+    8: '4msCompany:Atvert2'
+    9: '4msCompany:Atvert2'
+    10: '4msCompany:Atvert2'
+    11: '4msCompany:Atvert2'
+    12: '4msCompany:Atvert2'
+    13: '4msCompany:Atvert2'
+    14: '4msCompany:Atvert2'
+    15: '4msCompany:Atvert2'
+    16: '4msCompany:Atvert2'
+    17: '4msCompany:Atvert2'
+    18: '4msCompany:Atvert2'
+    19: '4msCompany:Atvert2'
+    20: '4msCompany:Atvert2'
+    21: '4msCompany:Atvert2'
+    22: '4msCompany:Atvert2'
+    23: '4msCompany:Atvert2'
+    24: '4msCompany:Atvert2'
+    25: '4msCompany:Atvert2'
+    26: '4msCompany:Atvert2'
+    27: '4msCompany:Atvert2'
+    28: '4msCompany:Atvert2'
+    29: '4msCompany:Atvert2'
+    30: '4msCompany:Atvert2'
+    31: '4msCompany:Atvert2'
+    32: '4msCompany:Atvert2'
+    33: '4msCompany:Atvert2'
+    34: '4msCompany:Atvert2'
+    35: '4msCompany:Atvert2'
+    36: '4msCompany:Atvert2'
+    37: '4msCompany:Atvert2'
+    38: '4msCompany:Atvert2'
+    39: '4msCompany:Atvert2'
+    40: '4msCompany:Atvert2'
+    41: '4msCompany:Atvert2'
+    42: '4msCompany:Atvert2'
+    43: '4msCompany:Atvert2'
+    44: '4msCompany:Atvert2'
+    45: '4msCompany:Atvert2'
+    46: '4msCompany:Atvert2'
+    47: '4msCompany:Atvert2'
+    48: '4msCompany:Atvert2'
+    49: '4msCompany:Atvert2'
+    50: '4msCompany:Atvert2'
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+    - out:
+        module_id: 1
+        jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 1
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+    - out:
+        module_id: 2
+        jack_id: 1
+      ins:
+        - module_id: 3
+          jack_id: 1
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+    - out:
+        module_id: 3
+        jack_id: 1
+      ins:
+        - module_id: 4
+          jack_id: 1
+    - out:
+        module_id: 4
+        jack_id: 0
+      ins:
+        - module_id: 5
+          jack_id: 0
+    - out:
+        module_id: 4
+        jack_id: 1
+      ins:
+        - module_id: 5
+          jack_id: 1
+    - out:
+        module_id: 5
+        jack_id: 0
+      ins:
+        - module_id: 6
+          jack_id: 0
+    - out:
+        module_id: 5
+        jack_id: 1
+      ins:
+        - module_id: 6
+          jack_id: 1
+    - out:
+        module_id: 6
+        jack_id: 0
+      ins:
+        - module_id: 7
+          jack_id: 0
+    - out:
+        module_id: 6
+        jack_id: 1
+      ins:
+        - module_id: 7
+          jack_id: 1
+    - out:
+        module_id: 7
+        jack_id: 0
+      ins:
+        - module_id: 8
+          jack_id: 0
+    - out:
+        module_id: 7
+        jack_id: 1
+      ins:
+        - module_id: 8
+          jack_id: 1
+    - out:
+        module_id: 8
+        jack_id: 0
+      ins:
+        - module_id: 9
+          jack_id: 0
+    - out:
+        module_id: 8
+        jack_id: 1
+      ins:
+        - module_id: 9
+          jack_id: 1
+    - out:
+        module_id: 9
+        jack_id: 0
+      ins:
+        - module_id: 10
+          jack_id: 0
+    - out:
+        module_id: 9
+        jack_id: 1
+      ins:
+        - module_id: 10
+          jack_id: 1
+    - out:
+        module_id: 10
+        jack_id: 0
+      ins:
+        - module_id: 11
+          jack_id: 0
+    - out:
+        module_id: 10
+        jack_id: 1
+      ins:
+        - module_id: 11
+          jack_id: 1
+    - out:
+        module_id: 11
+        jack_id: 0
+      ins:
+        - module_id: 12
+          jack_id: 0
+    - out:
+        module_id: 11
+        jack_id: 1
+      ins:
+        - module_id: 12
+          jack_id: 1
+    - out:
+        module_id: 12
+        jack_id: 0
+      ins:
+        - module_id: 13
+          jack_id: 0
+    - out:
+        module_id: 12
+        jack_id: 1
+      ins:
+        - module_id: 13
+          jack_id: 1
+    - out:
+        module_id: 13
+        jack_id: 0
+      ins:
+        - module_id: 14
+          jack_id: 0
+    - out:
+        module_id: 13
+        jack_id: 1
+      ins:
+        - module_id: 14
+          jack_id: 1
+    - out:
+        module_id: 14
+        jack_id: 0
+      ins:
+        - module_id: 15
+          jack_id: 0
+    - out:
+        module_id: 14
+        jack_id: 1
+      ins:
+        - module_id: 15
+          jack_id: 1
+    - out:
+        module_id: 15
+        jack_id: 0
+      ins:
+        - module_id: 16
+          jack_id: 0
+    - out:
+        module_id: 15
+        jack_id: 1
+      ins:
+        - module_id: 16
+          jack_id: 1
+    - out:
+        module_id: 16
+        jack_id: 0
+      ins:
+        - module_id: 17
+          jack_id: 0
+    - out:
+        module_id: 16
+        jack_id: 1
+      ins:
+        - module_id: 17
+          jack_id: 1
+    - out:
+        module_id: 17
+        jack_id: 0
+      ins:
+        - module_id: 18
+          jack_id: 0
+    - out:
+        module_id: 17
+        jack_id: 1
+      ins:
+        - module_id: 18
+          jack_id: 1
+    - out:
+        module_id: 18
+        jack_id: 0
+      ins:
+        - module_id: 19
+          jack_id: 0
+    - out:
+        module_id: 18
+        jack_id: 1
+      ins:
+        - module_id: 19
+          jack_id: 1
+    - out:
+        module_id: 19
+        jack_id: 0
+      ins:
+        - module_id: 20
+          jack_id: 0
+    - out:
+        module_id: 19
+        jack_id: 1
+      ins:
+        - module_id: 20
+          jack_id: 1
+    - out:
+        module_id: 20
+        jack_id: 0
+      ins:
+        - module_id: 21
+          jack_id: 0
+    - out:
+        module_id: 20
+        jack_id: 1
+      ins:
+        - module_id: 21
+          jack_id: 1
+    - out:
+        module_id: 21
+        jack_id: 0
+      ins:
+        - module_id: 22
+          jack_id: 0
+    - out:
+        module_id: 21
+        jack_id: 1
+      ins:
+        - module_id: 22
+          jack_id: 1
+    - out:
+        module_id: 22
+        jack_id: 0
+      ins:
+        - module_id: 23
+          jack_id: 0
+    - out:
+        module_id: 22
+        jack_id: 1
+      ins:
+        - module_id: 23
+          jack_id: 1
+    - out:
+        module_id: 23
+        jack_id: 0
+      ins:
+        - module_id: 24
+          jack_id: 0
+    - out:
+        module_id: 23
+        jack_id: 1
+      ins:
+        - module_id: 24
+          jack_id: 1
+    - out:
+        module_id: 24
+        jack_id: 0
+      ins:
+        - module_id: 25
+          jack_id: 0
+    - out:
+        module_id: 24
+        jack_id: 1
+      ins:
+        - module_id: 25
+          jack_id: 1
+    - out:
+        module_id: 25
+        jack_id: 0
+      ins:
+        - module_id: 26
+          jack_id: 0
+    - out:
+        module_id: 25
+        jack_id: 1
+      ins:
+        - module_id: 26
+          jack_id: 1
+    - out:
+        module_id: 26
+        jack_id: 0
+      ins:
+        - module_id: 27
+          jack_id: 0
+    - out:
+        module_id: 26
+        jack_id: 1
+      ins:
+        - module_id: 27
+          jack_id: 1
+    - out:
+        module_id: 27
+        jack_id: 0
+      ins:
+        - module_id: 28
+          jack_id: 0
+    - out:
+        module_id: 27
+        jack_id: 1
+      ins:
+        - module_id: 28
+          jack_id: 1
+    - out:
+        module_id: 28
+        jack_id: 0
+      ins:
+        - module_id: 29
+          jack_id: 0
+    - out:
+        module_id: 28
+        jack_id: 1
+      ins:
+        - module_id: 29
+          jack_id: 1
+    - out:
+        module_id: 29
+        jack_id: 0
+      ins:
+        - module_id: 30
+          jack_id: 0
+    - out:
+        module_id: 29
+        jack_id: 1
+      ins:
+        - module_id: 30
+          jack_id: 1
+    - out:
+        module_id: 30
+        jack_id: 0
+      ins:
+        - module_id: 31
+          jack_id: 0
+    - out:
+        module_id: 30
+        jack_id: 1
+      ins:
+        - module_id: 31
+          jack_id: 1
+    - out:
+        module_id: 31
+        jack_id: 0
+      ins:
+        - module_id: 32
+          jack_id: 0
+    - out:
+        module_id: 31
+        jack_id: 1
+      ins:
+        - module_id: 32
+          jack_id: 1
+    - out:
+        module_id: 32
+        jack_id: 0
+      ins:
+        - module_id: 33
+          jack_id: 0
+    - out:
+        module_id: 32
+        jack_id: 1
+      ins:
+        - module_id: 33
+          jack_id: 1
+    - out:
+        module_id: 33
+        jack_id: 0
+      ins:
+        - module_id: 34
+          jack_id: 0
+    - out:
+        module_id: 33
+        jack_id: 1
+      ins:
+        - module_id: 34
+          jack_id: 1
+    - out:
+        module_id: 34
+        jack_id: 0
+      ins:
+        - module_id: 35
+          jack_id: 0
+    - out:
+        module_id: 34
+        jack_id: 1
+      ins:
+        - module_id: 35
+          jack_id: 1
+    - out:
+        module_id: 35
+        jack_id: 0
+      ins:
+        - module_id: 36
+          jack_id: 0
+    - out:
+        module_id: 35
+        jack_id: 1
+      ins:
+        - module_id: 36
+          jack_id: 1
+    - out:
+        module_id: 36
+        jack_id: 0
+      ins:
+        - module_id: 37
+          jack_id: 0
+    - out:
+        module_id: 36
+        jack_id: 1
+      ins:
+        - module_id: 37
+          jack_id: 1
+    - out:
+        module_id: 37
+        jack_id: 0
+      ins:
+        - module_id: 38
+          jack_id: 0
+    - out:
+        module_id: 37
+        jack_id: 1
+      ins:
+        - module_id: 38
+          jack_id: 1
+    - out:
+        module_id: 38
+        jack_id: 0
+      ins:
+        - module_id: 39
+          jack_id: 0
+    - out:
+        module_id: 38
+        jack_id: 1
+      ins:
+        - module_id: 39
+          jack_id: 1
+    - out:
+        module_id: 39
+        jack_id: 0
+      ins:
+        - module_id: 40
+          jack_id: 0
+    - out:
+        module_id: 39
+        jack_id: 1
+      ins:
+        - module_id: 40
+          jack_id: 1
+    - out:
+        module_id: 40
+        jack_id: 0
+      ins:
+        - module_id: 41
+          jack_id: 0
+    - out:
+        module_id: 40
+        jack_id: 1
+      ins:
+        - module_id: 41
+          jack_id: 1
+    - out:
+        module_id: 41
+        jack_id: 0
+      ins:
+        - module_id: 42
+          jack_id: 0
+    - out:
+        module_id: 41
+        jack_id: 1
+      ins:
+        - module_id: 42
+          jack_id: 1
+    - out:
+        module_id: 42
+        jack_id: 0
+      ins:
+        - module_id: 43
+          jack_id: 0
+    - out:
+        module_id: 42
+        jack_id: 1
+      ins:
+        - module_id: 43
+          jack_id: 1
+    - out:
+        module_id: 43
+        jack_id: 0
+      ins:
+        - module_id: 44
+          jack_id: 0
+    - out:
+        module_id: 43
+        jack_id: 1
+      ins:
+        - module_id: 44
+          jack_id: 1
+    - out:
+        module_id: 44
+        jack_id: 0
+      ins:
+        - module_id: 45
+          jack_id: 0
+    - out:
+        module_id: 44
+        jack_id: 1
+      ins:
+        - module_id: 45
+          jack_id: 1
+    - out:
+        module_id: 45
+        jack_id: 0
+      ins:
+        - module_id: 46
+          jack_id: 0
+    - out:
+        module_id: 45
+        jack_id: 1
+      ins:
+        - module_id: 46
+          jack_id: 1
+    - out:
+        module_id: 46
+        jack_id: 0
+      ins:
+        - module_id: 47
+          jack_id: 0
+    - out:
+        module_id: 46
+        jack_id: 1
+      ins:
+        - module_id: 47
+          jack_id: 1
+    - out:
+        module_id: 47
+        jack_id: 0
+      ins:
+        - module_id: 48
+          jack_id: 0
+    - out:
+        module_id: 47
+        jack_id: 1
+      ins:
+        - module_id: 48
+          jack_id: 1
+    - out:
+        module_id: 48
+        jack_id: 0
+      ins:
+        - module_id: 49
+          jack_id: 0
+    - out:
+        module_id: 48
+        jack_id: 1
+      ins:
+        - module_id: 49
+          jack_id: 1
+    - out:
+        module_id: 49
+        jack_id: 0
+      ins:
+        - module_id: 50
+          jack_id: 0
+    - out:
+        module_id: 49
+        jack_id: 1
+      ins:
+        - module_id: 50
+          jack_id: 1
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 1
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 50
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 50
+        jack_id: 1
