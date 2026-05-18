@@ -77,6 +77,7 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ModuleViewHideBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, jump_to_roller_cb, LV_EVENT_FOCUSED, this);
 
 		load_meter = create_load_meter(lv_layer_sys());
 		lv_obj_set_align(load_meter, LV_ALIGN_TOP_LEFT);
@@ -291,6 +292,7 @@ struct ModuleViewPage : PageBase {
 		// Hide the hover text if we are on one of the action buttons
 		if (lv_group_get_focused(group) == ui_ModuleViewActionBut ||
 			lv_group_get_focused(group) == ui_ModuleViewSettingsBut ||
+			lv_group_get_focused(group) == ui_ModuleViewCableCancelBut ||
 			lv_group_get_focused(group) == ui_ModuleViewHideBut)
 		{
 			roller_hover.hide();
