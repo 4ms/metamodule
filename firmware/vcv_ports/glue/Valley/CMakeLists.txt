@@ -67,6 +67,7 @@ target_compile_options(ValleyLibrary PRIVATE
 	-Wno-double-promotion 
     -Wno-unused-variable
 	$<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-float-conversion>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-implicit-const-int-float-conversion>
 )
 
 # Use floats, not doubles for Plateau

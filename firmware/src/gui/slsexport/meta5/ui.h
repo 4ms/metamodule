@@ -217,8 +217,6 @@ extern lv_obj_t *ui_CableMidiAddButton;
 extern lv_obj_t *ui_CableMidiAddLabel;
 extern lv_obj_t *ui_CableRemoveButton;
 extern lv_obj_t *ui_CableRemoveButtonLabel;
-extern lv_obj_t *ui_ResetButton;
-extern lv_obj_t *ui_ResetButtonLabel;
 extern lv_obj_t *ui_ControlAlert;
 extern lv_obj_t *ui_ControlArc;
 extern lv_obj_t *ui_ControlAlertLabel;

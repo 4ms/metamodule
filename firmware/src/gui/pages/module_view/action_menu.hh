@@ -103,7 +103,6 @@ public:
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), group);
 		reset_name_popup.init(lv_layer_top(), base_group);
-		keyboard_entry.prepare_focus(lv_layer_top(), base_group);
 
 		const auto module_slug = std::string{patches.get_view_patch()->module_slugs[module_idx]};
 		const auto module_name = module_slug.substr(module_slug.find_first_of(':') + 1);
@@ -449,6 +448,7 @@ private:
 
 		page->hide_menu();
 		page->pending_alias = alias;
+		page->keyboard_entry.prepare_focus(lv_layer_top(), page->base_group);
 		page->keyboard_entry.show_keyboard(
 			page->rename_textarea,
 			[page](std::string_view text) {
