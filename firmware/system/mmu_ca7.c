@@ -75,6 +75,8 @@ static uint32_t Sect_Device_RW;	 // as Sect_Device_RO, but writeable
 static uint32_t Sect_StronglyOrdered;
 static uint32_t Sect_Normal_NonCache;
 
+static uint32_t Sect_NormalShared;
+
 static uint32_t Page_L1_4k = 0x0;	// generic
 static uint32_t Page_L1_64k = 0x0;	// generic
 static uint32_t Page_4k_Device_RW;	// Shared device, not executable, rw, domain 0
@@ -116,6 +118,9 @@ void MMU_CreateTranslationTable(void) {
 	page64k_device_rw(Page_L1_64k, Page_64k_Device_RW, region);
 	page4k_device_rw(Page_L1_4k, Page_4k_Device_RW, region);
 
+	section_normal(Sect_NormalShared, region);
+	MMU_SharedSection(&Sect_NormalShared, SHARED);
+
 	create_aligned_section(TTB_BASE, A7_CODE, A7_CODE_SZ, Sect_Normal);
 
 	create_aligned_section(TTB_BASE, A7_RAM, A7_RAM_SZ, Sect_Normal_RW);
@@ -126,6 +131,9 @@ void MMU_CreateTranslationTable(void) {
 	// Note: section_so is quite a bit faster than section_normal_nc (sometimes)
 	// But section_normal_* supports unaligned access
 	create_aligned_section(TTB_BASE, DMABUF, DMABUF_SZ, Sect_Normal_NonCache);
+
+	// Shared mem
+	create_aligned_section(TTB_BASE, SHAREDMEM, SHAREDMEM_SZ, Sect_NormalShared);
 
 	//virtdrive and firmware loading buffer: non-cacheable
 	create_aligned_section(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ, Sect_Normal_RW); //NonCache);

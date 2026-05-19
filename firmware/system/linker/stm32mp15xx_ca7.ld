@@ -14,6 +14,7 @@ MEMORY
 	FWBUFFER (rw)		: ORIGIN = _FWBUFFER,		LENGTH = _FWBUFFER_SZ 
 	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
 	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
+	SHAREDMEM (rw)		: ORIGIN = _SHAREDMEM,		LENGTH = _SHAREDMEM_SZ 
 
 	SYMLIST (r)			: ORIGIN = _A7_SYMS,		LENGTH = _A7_SYMS_SZ
 
@@ -129,6 +130,13 @@ SECTIONS
 		. = ALIGN(8);
         *(.ddma)
 	} > DMABUF
+
+	.sharedmem (NOLOAD):
+	{
+		. = ALIGN(8);
+        *(.sharedmem)
+	} > SHAREDMEM
+
 
 	.sysram (NOLOAD):
 	{
