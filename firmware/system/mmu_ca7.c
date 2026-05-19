@@ -191,3 +191,13 @@ void MMU_CreateTranslationTable(void) {
 	__set_DACR(1);
 	__ISB();
 }
+
+void MMU_CreateTranslationTableAuxCore(void) {
+	// TTB_BASE is already setup by main core
+
+	__set_TTBR0(__TTB_BASE | 0x48);
+	__ISB();
+
+	__set_DACR(1);
+	__ISB();
+}
