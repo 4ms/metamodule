@@ -1,6 +1,7 @@
 #include "midi.hpp"
 #include "midi/midi_queue.hh"
 #include "midi/midi_router.hh"
+#include <utility>
 
 namespace rack::midi
 {
@@ -52,14 +53,21 @@ void Output::sendMessage(const Message &message) {
 
 	auto status = MidiStatusByte::make(message.bytes[0]);
 
-	// Set channel
+	// Set channel if it's a voice message (note on/off, cc, etc)
 	channel = getChannel();
-	if (channel >= 0 && status.command != MidiCommand::Sys)
+	if (channel >= 0 && uint8_t(status.command) >= 0x8 && uint8_t(status.command) <= 0xE) {
 		status.channel = channel;
+	}
 
 	msg.status = status;
 	msg.data.byte[0] = message.bytes[1];
 	msg.data.byte[1] = message.bytes[2];
+
+	// Set the usb code here since the Rack::midi object might have
+	// knowledge about sysex packet length.
+	msg.usb_hdr.cin = message.usb_code;
+	msg.usb_hdr.cable_num = message.getUsbCable();
+
 	internal->queue.put(msg);
 }
 

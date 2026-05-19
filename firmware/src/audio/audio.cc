@@ -467,8 +467,12 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.meta_buttons[0].set_state_no_events(
 		param_blocks[block].metaparams.meta_buttons[0].is_pressed());
 
-	for (auto i = 0u; i < block_size_; i++)
-		local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt
+	// 31.5 - 31.7us
+	std::memcpy((void *)local_params.params.data(), &param_blocks[block].params, sizeof(Params) * block_size_);
+
+	// 42.5us
+	// for (auto i = 0u; i < block_size_; i++)
+	// 	local_params.params[i] = param_blocks[block].params[i]; // 45us/49us alt
 
 	return local_params;
 }

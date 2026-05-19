@@ -2,7 +2,7 @@
 #include "conf/panel_conf.hh"
 #include "midi/midi_message.hh"
 #include "midi_params.hh"
-#include "util/debouncer.hh"
+#include "util/debouncer_compact.hh"
 #include <array>
 
 namespace MetaModule
@@ -11,10 +11,10 @@ namespace MetaModule
 struct Params {
 	std::array<float, PanelDef::NumPot> knobs{};
 
+	MidiMessage raw_msg{};	  //4B
 	Midi::Event midi_event{}; //6B
-	MidiMessage raw_msg{};	  //3B
 	uint8_t gate_ins{};
-	Toggler button{};
+	TogglerCompact button{};
 
 	void clear() {
 		gate_ins = 0;
@@ -28,6 +28,7 @@ struct Params {
 	}
 };
 
+// 60B
 static constexpr auto Params_Size = sizeof(Params);
 
 } // namespace MetaModule
