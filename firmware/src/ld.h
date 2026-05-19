@@ -52,6 +52,10 @@ extern uint32_t _DMABUF[];
 extern uint32_t _DMABUF_SZ[];
 extern uint32_t _DMABUF_END[];
 
+extern uint32_t _SHAREDMEM[];
+extern uint32_t _SHAREDMEM_SZ[];
+extern uint32_t _SHAREDMEM_END[];
+
 //SRAM1-3: Device-RW
 extern uint32_t _M4_CODE[];
 extern uint32_t _M4_CODE_A7[];
@@ -107,6 +111,9 @@ static const uint32_t A7_HEAP_SZ = (uint32_t)_A7_HEAP_SZ;
 
 static const uint32_t DMABUF = (uint32_t)_DMABUF;
 static const uint32_t DMABUF_SZ = (uint32_t)_DMABUF_SZ;
+
+static const uint32_t SHAREDMEM = (uint32_t)_SHAREDMEM;
+static const uint32_t SHAREDMEM_SZ = (uint32_t)_SHAREDMEM_SZ;
 
 static const uint32_t M4_VECT = (uint32_t)_M4_VECT;
 static const uint32_t M4_VECT_A7 = (uint32_t)_M4_VECT_A7;

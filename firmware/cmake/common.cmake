@@ -3,6 +3,7 @@ function(target_link_script target_base link_script)
     ${target_base}.elf
     PRIVATE
     -Wl,-Map,$<TARGET_FILE_DIR:${target_base}.elf>/${target_base}.map,--cref
+    -Wl,--print-memory-usage
     -Wl,--no-warn-rwx-segments
     -T
     ${link_script}
