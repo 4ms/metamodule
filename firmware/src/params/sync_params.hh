@@ -56,6 +56,11 @@ public:
 					params.midi_ccs[e.note].val = e.midi_chan;
 					params.midi_ccs[e.note].value = e.val;
 				}
+				if (e.type == Midi::Event::Type::PC) {
+					params.last_midi_pc.changed = true;
+					params.last_midi_pc.channel = e.midi_chan;
+					params.last_midi_pc.pc = static_cast<uint8_t>(e.val);
+				}
 				if (e.type == Midi::Event::Type::NoteOn && e.note < NumMidiNotes) {
 					params.last_midi_note.changed = 1;
 					params.last_midi_note.val = e.note;

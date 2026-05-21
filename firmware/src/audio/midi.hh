@@ -76,6 +76,9 @@ struct AudioStreamMidi {
 			player.set_midi_cc(event.note, event.val, event.midi_chan);
 			sync_params.midi_events.put(event);
 
+		} else if (event.type == Midi::Event::Type::PC) {
+			sync_params.midi_events.put(event);
+
 		} else if (event.type == Midi::Event::Type::Bend) {
 			player.set_midi_cc(128, event.val, event.midi_chan);
 

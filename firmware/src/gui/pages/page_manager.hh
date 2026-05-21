@@ -1,4 +1,5 @@
 #pragma once
+#include "fs/helpers.hh"
 #include "gui/elements/screensaver.hh"
 #include "gui/knobset_button.hh"
 #include "gui/notify/display.hh"
@@ -56,6 +57,10 @@ class PageManager {
 	MidiMapViewPage page_midimap{info};
 	FullscreenGraphicPage page_fullscreen_graphic{info};
 
+	enum class MidiPCLoadState { Idle, Requesting, Loading };
+	MidiPCLoadState midi_pc_load_state = MidiPCLoadState::Idle;
+	PatchLocation midi_pc_target_loc{};
+
 public:
 	PageBase *cur_page = &page_mainmenu;
 
@@ -103,6 +108,8 @@ public:
 	void update_current_page() {
 
 		handle_knobset_change();
+
+		handle_midi_pc_patch_load();
 
 		update_screensaver();
 
@@ -237,6 +244,57 @@ public:
 
 		if (button_light.display_knobset() != info.page_list.get_active_knobset()) {
 			button_light.display_knobset(info.page_list.get_active_knobset());
+		}
+	}
+
+	void handle_midi_pc_patch_load() {
+		if (!info.settings.midi_pc_patch_load.enabled)
+			return;
+
+		switch (midi_pc_load_state) {
+			case MidiPCLoadState::Idle: {
+				auto &pc = info.params.last_midi_pc;
+				if (!pc.changed)
+					return;
+				pc.changed = false;
+
+				uint32_t recv_chan = uint32_t(pc.channel) + 1; // 0-15 → 1-16
+				uint32_t recv_pc = pc.pc;
+
+				for (auto const &entry : info.settings.midi_pc_patch_load.entries) {
+					bool chan_match = (entry.channel == 0) || (entry.channel == recv_chan);
+					if (chan_match && entry.pc == recv_pc) {
+						auto [filename, vol] = split_volume(entry.path);
+						midi_pc_target_loc = PatchLocation{std::string(filename), vol};
+						midi_pc_load_state = MidiPCLoadState::Requesting;
+						break;
+					}
+				}
+			} break;
+
+			case MidiPCLoadState::Requesting: {
+				if (info.patch_storage.request_load_patch(midi_pc_target_loc)) {
+					info.patch_playloader.stop_audio();
+					midi_pc_load_state = MidiPCLoadState::Loading;
+				}
+			} break;
+
+			case MidiPCLoadState::Loading: {
+				auto message = info.patch_storage.get_message();
+				if (message.message_type == FileStorageProxy::LoadFileOK) {
+					auto data = info.patch_storage.get_patch_data(message.bytes_read);
+					if (info.open_patch_manager.open_patch(data, midi_pc_target_loc, message.timestamp)) {
+						info.open_patch_manager.start_viewing(midi_pc_target_loc);
+						info.patch_playloader.request_load_view_patch();
+					} else {
+						info.notify_queue.put({"MIDI PC: error loading patch", Notification::Priority::Error, 2000});
+					}
+					midi_pc_load_state = MidiPCLoadState::Idle;
+				} else if (message.message_type == FileStorageProxy::LoadFileFailed) {
+					info.notify_queue.put({"MIDI PC: patch file not found", Notification::Priority::Error, 2000});
+					midi_pc_load_state = MidiPCLoadState::Idle;
+				}
+			} break;
 		}
 	}
 
