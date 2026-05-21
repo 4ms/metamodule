@@ -4,6 +4,7 @@
 #include "catchup_settings.hh"
 #include "fs/volumes.hh"
 #include "user_settings/fs_settings.hh"
+#include "user_settings/midi_pc_settings.hh"
 #include "user_settings/midi_settings.hh"
 #include "user_settings/patch_suggested_audio_settings.hh"
 #include "user_settings/plugin_preload_settings.hh"
@@ -31,6 +32,7 @@ struct UserSettings {
 	CatchupSettings catchup{};
 	FilesystemSettings filesystem{};
 	MidiSettings midi{};
+	MidiPCPatchLoadSettings midi_pc_patch_load{};
 	PatchSuggestedAudioSettings patch_suggested_audio{};
 	ButtonExpKnobSetSettings button_exp_knobset{};
 	NotificationSettings notifications{};

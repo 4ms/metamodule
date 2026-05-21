@@ -14,6 +14,14 @@ void PrefsSectionMidi::create(lv_obj_t *parent) {
 
 	create_prefs_note(midi_cont, "Sends MIDI to controller\nwhen MIDI-mapped params\nchange");
 
+	// MIDI PC Patch Load
+	create_prefs_section_title(parent, "MIDI PC PATCH LOAD");
+
+	auto pc_cont = create_prefs_labeled_check(parent, "Enable:");
+	pc_patch_load_check = lv_obj_get_child(pc_cont, 1);
+
+	create_prefs_note(pc_cont, "Load patches via MIDI\nProgram Change events");
+
 	// Knob Set Control
 	create_prefs_section_title(parent, "MIDI KNOB SET SELECT");
 

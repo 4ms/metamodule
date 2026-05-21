@@ -203,6 +203,35 @@ static bool read(ryml::ConstNodeRef const &node, NotificationSettings *settings)
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, MidiPCPatchLoadSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	read_or_default(node, "enabled", settings, &MidiPCPatchLoadSettings::enabled);
+
+	settings->entries.clear();
+	if (node.has_child("entries")) {
+		auto entries_node = node["entries"];
+		if (entries_node.is_seq()) {
+			for (auto const entry_node : entries_node.children()) {
+				if (!entry_node.is_map())
+					continue;
+				MidiPCPatchLoadSettings::Entry entry;
+				if (entry_node.has_child("path"))
+					entry_node["path"] >> entry.path;
+				if (entry_node.has_child("channel"))
+					entry_node["channel"] >> entry.channel;
+				if (entry_node.has_child("pc"))
+					entry_node["pc"] >> entry.pc;
+				settings->entries.push_back(std::move(entry));
+			}
+		}
+	}
+
+	settings->make_valid();
+	return true;
+}
+
 static bool read(ryml::ConstNodeRef const &node, MissingPluginSettings *settings) {
 	if (!node.is_map())
 		return false;
@@ -246,6 +275,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "catchup", settings, &UserSettings::catchup);
 	read_or_default(node, "filesystem", settings, &UserSettings::filesystem);
 	read_or_default(node, "midi", settings, &UserSettings::midi);
+	read_or_default(node, "midi_pc_patch_load", settings, &UserSettings::midi_pc_patch_load);
 	read_or_default(node, "patch_suggested_audio", settings, &UserSettings::patch_suggested_audio);
 	read_or_default(node, "button_exp_knobset", settings, &UserSettings::button_exp_knobset);
 	read_or_default(node, "notifications", settings, &UserSettings::notifications);

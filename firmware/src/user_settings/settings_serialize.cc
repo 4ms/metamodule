@@ -115,6 +115,23 @@ static void write(ryml::NodeRef *n, NotificationSettings const &s) {
 	n->append_child() << ryml::key("animation") << s.animation;
 }
 
+static void write(ryml::NodeRef *n, MidiPCPatchLoadSettings const &s) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("enabled") << s.enabled;
+
+	auto entries_node = n->append_child();
+	entries_node << ryml::key("entries");
+	entries_node |= ryml::SEQ;
+
+	for (auto const &e : s.entries) {
+		auto entry = entries_node.append_child();
+		entry |= ryml::MAP;
+		entry.append_child() << ryml::key("path") << e.path;
+		entry.append_child() << ryml::key("channel") << e.channel;
+		entry.append_child() << ryml::key("pc") << e.pc;
+	}
+}
+
 static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {
 	*n |= ryml::MAP;
 
@@ -149,6 +166,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["catchup"] << settings.catchup;
 	data["filesystem"] << settings.filesystem;
 	data["midi"] << settings.midi;
+	data["midi_pc_patch_load"] << settings.midi_pc_patch_load;
 	data["patch_suggested_audio"] << settings.patch_suggested_audio;
 	data["button_exp_knobset"] << settings.button_exp_knobset;
 	data["notifications"] << settings.notifications;
