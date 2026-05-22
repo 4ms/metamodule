@@ -202,7 +202,7 @@ struct MidiMessage {
 	}
 
 	uint8_t pcval() const {
-		return data.byte[1];
+		return data.byte[0];
 	}
 
 	// -8192 .. 8191
