@@ -256,6 +256,7 @@ public:
 				auto &pc = info.params.last_midi_pc;
 				if (!pc.changed)
 					return;
+				printf("PC %d ch:%d\n", pc.pc, pc.changed);
 				pc.changed = false;
 
 				uint32_t recv_chan = uint32_t(pc.channel) + 1; // 0-15 → 1-16

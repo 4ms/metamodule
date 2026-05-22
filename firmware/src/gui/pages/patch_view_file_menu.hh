@@ -1,8 +1,10 @@
 #pragma once
+#include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/make_cable.hh"
+#include "gui/pages/midi_pc_assign_dialog.hh"
 #include "gui/pages/missing_plugin_scan.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_save_dialog.hh"
@@ -52,12 +54,17 @@ struct PatchViewFileMenu {
 		lv_obj_move_to_index(make_default_patch_menu, 6);
 		lv_obj_add_event_cb(make_default_patch_menu, make_startup_patch, LV_EVENT_CLICKED, this);
 
+		midi_pc_menu_item = create_file_menu_item(ui_PatchFileMenu, "Load on MIDI PC");
+		lv_obj_move_to_index(midi_pc_menu_item, 7);
+		lv_obj_add_event_cb(midi_pc_menu_item, midi_pc_but_cb, LV_EVENT_CLICKED, this);
+
 		lv_group_add_obj(group, ui_PatchFileMenuCloseButton);
 		lv_group_add_obj(group, ui_PatchFileSaveBut);
 		lv_group_add_obj(group, ui_PatchFileDuplicateBut);
 		lv_group_add_obj(group, ui_PatchFileRenameBut);
 		lv_group_add_obj(group, ui_PatchFileRevertBut);
 		lv_group_add_obj(group, make_default_patch_menu);
+		lv_group_add_obj(group, midi_pc_menu_item);
 		lv_group_add_obj(group, ui_PatchFileDeleteBut);
 
 		lv_obj_set_width(ui_PatchFileMenu, 140);
@@ -67,6 +74,7 @@ struct PatchViewFileMenu {
 	void prepare_focus(lv_group_t *parent_group) {
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), base_group);
+		midi_pc_dialog.init(lv_layer_top(), base_group);
 	}
 
 	void back() {
@@ -78,6 +86,9 @@ struct PatchViewFileMenu {
 			missing_plugins.hide();
 			hide_menu();
 
+		} else if (midi_pc_dialog.is_visible()) {
+			midi_pc_dialog.hide();
+
 		} else if (visible) {
 			hide();
 		}
@@ -86,6 +97,7 @@ struct PatchViewFileMenu {
 	void hide() {
 		patch_save_dialog.hide();
 		confirm_popup.hide();
+		midi_pc_dialog.hide();
 		hide_menu();
 	}
 
@@ -110,6 +122,7 @@ struct PatchViewFileMenu {
 			lv_disable(ui_PatchFileDuplicateBut);
 			lv_disable(ui_PatchFileRenameBut);
 			lv_enable(ui_PatchFileDeleteBut);
+			lv_disable(midi_pc_menu_item);
 			lv_label_set_text(lv_obj_get_child(make_default_patch_menu, 0), "Startup Patch");
 		} else {
 			lv_group_focus_obj(ui_PatchFileSaveBut);
@@ -117,6 +130,7 @@ struct PatchViewFileMenu {
 			lv_enable(ui_PatchFileRenameBut);
 			lv_enable(ui_PatchFileDeleteBut);
 			lv_enable(ui_PatchFileRevertBut);
+			lv_enable(midi_pc_menu_item);
 
 			if (is_viewpatch_default()) {
 				lv_label_set_text(lv_obj_get_child(make_default_patch_menu, 0), "\xEF\x80\x8C Startup Patch");
@@ -141,7 +155,8 @@ struct PatchViewFileMenu {
 	}
 
 	bool is_visible() {
-		return confirm_popup.is_visible() || patch_save_dialog.is_visible() || missing_plugins.is_visible() || visible;
+		return confirm_popup.is_visible() || patch_save_dialog.is_visible() || missing_plugins.is_visible() ||
+			   midi_pc_dialog.is_visible() || visible;
 	}
 
 	bool is_active() {
@@ -413,6 +428,17 @@ private:
 			lv_label_get_text(ui_PatchFileRevertLabel));
 	}
 
+	static void midi_pc_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+
+		auto path = std::string(volume_string(page->patches.get_view_patch_vol())) +
+					page->patches.get_view_patch_filename();
+		page->hide_menu();
+		page->midi_pc_dialog.show(path, page->settings.midi_pc_patch_load, page->gui_state);
+	}
+
 	static void make_startup_patch(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -437,8 +463,10 @@ private:
 
 	PatchSaveDialog patch_save_dialog;
 	ConfirmPopup confirm_popup;
+	MidiPCAssignDialog midi_pc_dialog;
 
 	lv_obj_t *make_default_patch_menu = nullptr;
+	lv_obj_t *midi_pc_menu_item = nullptr;
 
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
