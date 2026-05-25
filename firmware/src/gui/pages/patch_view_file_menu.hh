@@ -36,6 +36,7 @@ struct PatchViewFileMenu {
 		, gui_state{gui_state}
 		, settings{settings}
 		, patch_save_dialog{patch_storage, patches, play_loader, file_save_dialog, notify_queue, page_list}
+		, midi_pc_dialog{settings.midi_pc_patch_load, gui_state}
 		, group(lv_group_create())
 		, missing_plugins{missing_plugins} {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
@@ -433,10 +434,10 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		auto path = std::string(volume_string(page->patches.get_view_patch_vol())) +
-					page->patches.get_view_patch_filename();
+		auto path =
+			std::string(volume_string(page->patches.get_view_patch_vol())) + page->patches.get_view_patch_filename();
 		page->hide_menu();
-		page->midi_pc_dialog.show(path, page->settings.midi_pc_patch_load, page->gui_state);
+		page->midi_pc_dialog.show(path);
 	}
 
 	static void make_startup_patch(lv_event_t *event) {
