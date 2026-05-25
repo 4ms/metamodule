@@ -30,7 +30,6 @@ struct MidiPCAssignDialog : ConfirmPopup {
 	}
 
 	void show(std::string_view path) {
-		// TODO: move settings and gs to constructor
 		current_path = path;
 
 		uint32_t init_chan = 0;
@@ -74,8 +73,8 @@ struct MidiPCAssignDialog : ConfirmPopup {
 			"OK");
 
 		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, chan_dropdown);
 		lv_group_add_obj(group, pc_dropdown);
+		lv_group_add_obj(group, chan_dropdown);
 		lv_group_add_obj(group, cancel_button);
 		lv_group_add_obj(group, confirm_button);
 		lv_group_set_wrap(group, false);
@@ -145,31 +144,26 @@ private:
 	}
 
 	void init_widgets() {
-		lv_obj_set_width(panel, 310);
-		lv_obj_set_style_pad_row(panel, 6, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(panel, 8, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(panel, 8, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_top(panel, 8, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_bottom(panel, 8, LV_STATE_DEFAULT);
+		lv_obj_set_width(panel, 300);
 		lv_obj_set_width(message_label, LV_SIZE_CONTENT);
 
+		auto pc_row = create_labeled_dropdown(panel);
+		lv_obj_set_width(pc_row, 290);
+		lv_obj_move_to_index(pc_row, 1);
+		lv_label_set_text(lv_obj_get_child(pc_row, 0), "PC #:");
+		pc_dropdown = lv_obj_get_child(pc_row, 1);
+		lv_obj_set_width(pc_dropdown, 220);
+
 		auto chan_row = create_labeled_dropdown(panel);
-		lv_obj_set_width(chan_row, 300);
-		lv_obj_move_to_index(chan_row, 1);
-		lv_label_set_text(lv_obj_get_child(chan_row, 0), "Channel:");
+		lv_obj_set_width(chan_row, 290);
+		lv_obj_move_to_index(chan_row, 2);
+		lv_label_set_text(lv_obj_get_child(chan_row, 0), "MIDI Channel:");
 		chan_dropdown = lv_obj_get_child(chan_row, 1);
 
 		lv_dropdown_set_options(chan_dropdown,
 								"Any\nChan. 1\nChan. 2\nChan. 3\nChan. 4\nChan. 5\nChan. 6\nChan. 7\nChan. 8\nChan. "
 								"9\nChan. 10\nChan. 11\nChan. 12\nChan. 13\nChan. 14\nChan. 15\nChan. 16");
 		lv_obj_set_width(chan_dropdown, 100);
-
-		auto pc_row = create_labeled_dropdown(panel);
-		lv_obj_set_width(pc_row, 300);
-		lv_obj_move_to_index(pc_row, 2);
-		lv_label_set_text(lv_obj_get_child(pc_row, 0), "PC #:");
-		pc_dropdown = lv_obj_get_child(pc_row, 1);
-		lv_obj_set_width(pc_dropdown, 210);
 	}
 
 	static void chan_changed_cb(lv_event_t *event) {
