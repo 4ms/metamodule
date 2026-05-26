@@ -185,6 +185,10 @@ struct PrefsTab : SystemMenuTab {
 		return true;
 	}
 
+	void set_patch_clicked_callback(auto cb) {
+		midi_section.on_patch_clicked = std::move(cb);
+	}
+
 private:
 	static std::string samplerate_string(uint32_t sr) {
 		return std::to_string(sr / 1000) + "kHz";

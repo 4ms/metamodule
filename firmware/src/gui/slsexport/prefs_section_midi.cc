@@ -80,14 +80,14 @@ void PrefsSectionMidi::show_pc_table(lv_event_t *event) {
 		return;
 	auto page = static_cast<PrefsSectionMidi *>(event->user_data);
 
-	std::string text = "";
-	auto sorted = page->settings->entries;
-	std::ranges::sort(sorted, std::less{}, &MidiPCPatchLoadSettings::Entry::pc);
+	page->sorted_entries = page->settings->entries;
+	std::ranges::sort(page->sorted_entries, std::less{}, &MidiPCPatchLoadSettings::Entry::pc);
 
-	for (auto const &entry : sorted) {
+	std::string text = "";
+	for (auto const &entry : page->sorted_entries) {
 
 		char c[8];
-		snprintf(c, 8, "PC%03d", entry.pc);
+		snprintf(c, 8, "PC%03d", (int)entry.pc);
 		text += c;
 
 		if (entry.channel > 0)
@@ -101,7 +101,15 @@ void PrefsSectionMidi::show_pc_table(lv_event_t *event) {
 	if (text.size())
 		text.pop_back();
 
-	page->pc_roller.show([](unsigned) {}, "", text.c_str(), 0);
+	page->pc_roller.show(
+		[page](unsigned idx) {
+			if (page->on_patch_clicked && idx < page->sorted_entries.size()) {
+				page->on_patch_clicked(page->sorted_entries[idx].path);
+			}
+		},
+		"",
+		text.c_str(),
+		0);
 }
 
 } // namespace MetaModule

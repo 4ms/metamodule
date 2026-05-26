@@ -1,4 +1,5 @@
 #pragma once
+#include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/firmware_update_tab.hh"
@@ -8,6 +9,7 @@
 #include "gui/pages/system_info_tab.hh"
 #include "gui/pages/system_tab.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "patch_file/reload_patch.hh"
 
 namespace MetaModule
 {
@@ -47,11 +49,36 @@ struct SystemMenuPage : PageBase {
 		lv_group_add_obj(group, tab_bar);
 		lv_group_focus_obj(tab_bar);
 		lv_group_set_editing(group, true);
+
+		prefs_tab.set_patch_clicked_callback([this](std::string_view path) {
+			auto [filename, vol] = split_volume(path);
+			pending_patch_view = PatchLocation{std::string(filename), vol};
+		});
 	}
 
 	void update() final {
 
 		active_tab->update();
+
+		if (pending_patch_view) {
+			auto loc = *pending_patch_view;
+			pending_patch_view.reset();
+
+			ReloadPatch patchloader{patch_storage, patches, settings.filesystem};
+			if (patchloader.needs_reloading(loc)) {
+				auto result = patchloader.reload_patch_file(loc, [] { lv_timer_handler(); });
+				if (!result.success) {
+					notify_queue.put({result.error_string, Notification::Priority::Error});
+					return;
+				}
+			}
+			patches.start_viewing(loc);
+
+			args.patch_loc_hash = PatchLocHash{loc};
+			gui_state.force_redraw_patch = true;
+			page_list.request_new_page(PageId::PatchView, args);
+			return;
+		}
 
 		if (gui_state.back_button.is_just_released()) {
 			if (!active_tab->consume_back_event()) {
@@ -103,6 +130,8 @@ private:
 	SystemMenuTab *active_tab = &info_tab;
 
 	lv_obj_t *tab_bar;
+
+	std::optional<PatchLocation> pending_patch_view;
 };
 
 } // namespace MetaModule
