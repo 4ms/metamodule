@@ -1,5 +1,6 @@
 #include "prefs_section_midi.hh"
 #include "ui_local.h"
+#include <algorithm>
 #include <string>
 
 namespace MetaModule
@@ -80,7 +81,10 @@ void PrefsSectionMidi::show_pc_table(lv_event_t *event) {
 	auto page = static_cast<PrefsSectionMidi *>(event->user_data);
 
 	std::string text = "";
-	for (auto const &entry : page->settings->entries) {
+	auto sorted = page->settings->entries;
+	std::ranges::sort(sorted, std::less{}, &MidiPCPatchLoadSettings::Entry::pc);
+
+	for (auto const &entry : sorted) {
 
 		char c[8];
 		snprintf(c, 8, "PC%03d", entry.pc);
