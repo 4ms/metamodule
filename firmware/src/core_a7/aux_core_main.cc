@@ -78,19 +78,25 @@ extern "C" void aux_core_main() {
 
 	AutoUpdater::run(file_storage_proxy, ui);
 
-	if (CpuLoadTest::should_run_tests(file_storage_proxy)) {
-		CpuLoadTest::run_tests(file_storage_proxy, ui, plugin_manager);
-	} else {
-		ui.preload_plugins(plugin_manager);
+	if (CpuLoadTest::should_run_hil_tests(file_storage_proxy)) {
+		CpuLoadTest::run_hil_tests(file_storage_proxy, ui, plugin_manager);
 	}
 
-	hil_message("*initialized\n");
+	ui.preload_plugins(plugin_manager);
+
+	if (CpuLoadTest::should_run_module_tests(file_storage_proxy)) {
+		CpuLoadTest::run_module_tests(file_storage_proxy, ui);
+	}
 
 	// Signal that we're ready
 	printf("A7 Core 2 initialized\n");
 	print_time();
 
 	HWSemaphore<AuxCoreReady>::unlock();
+
+	// Wait for patch tests to be done
+	while (mdrivlib::HWSemaphore<RunningPatchTests>::is_locked())
+		;
 
 	ui.load_initial_patch();
 
