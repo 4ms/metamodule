@@ -20,6 +20,10 @@ struct AudioStreamMidi {
 
 	void process(bool is_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg) {
 
+		if (event.type == Midi::Event::Type::PC) {
+			sync_params.midi_events.put(event);
+		}
+
 		if (!player.is_loaded)
 			return;
 
@@ -74,9 +78,6 @@ struct AudioStreamMidi {
 
 		} else if (event.type == Midi::Event::Type::CC) {
 			player.set_midi_cc(event.note, event.val, event.midi_chan);
-			sync_params.midi_events.put(event);
-
-		} else if (event.type == Midi::Event::Type::PC) {
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::Bend) {
