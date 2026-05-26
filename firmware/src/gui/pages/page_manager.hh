@@ -286,7 +286,21 @@ public:
 					auto data = info.patch_storage.get_patch_data(message.bytes_read);
 					if (info.open_patch_manager.open_patch(data, midi_pc_target_loc, message.timestamp)) {
 						info.open_patch_manager.start_viewing(midi_pc_target_loc);
-						info.patch_playloader.request_load_view_patch();
+
+						// Clear cc events so we don't change knobsets with stale events
+						for (auto &cc : info.params.midi_ccs)
+							cc.changed = false;
+
+						missing_plugins.start(
+							info.open_patch_manager.get_view_patch(), lv_group_get_default(), [this](bool) {
+								PageArguments args;
+								args.patch_loc_hash = PatchLocHash{midi_pc_target_loc};
+								gui_state.force_redraw_patch = true;
+								page_list.request_new_page(PageId::PatchView, args);
+								info.patch_playloader.request_load_view_patch();
+								midi_pc_load_state = MidiPCLoadState::Idle;
+							});
+
 					} else {
 						info.notify_queue.put({"MIDI PC: error loading patch", Notification::Priority::Error, 2000});
 					}
