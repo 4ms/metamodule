@@ -148,6 +148,8 @@ struct PrefsTab : SystemMenuTab {
 	void prepare_focus(lv_group_t *group) override {
 		this->group = group;
 
+		midi_section.init_popup(ui_SystemMenuPrefsTab, group, settings.midi_pc_patch_load);
+
 		// Remove all objects and re-add the tab side bar
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, lv_tabview_get_tab_btns(ui_SystemMenuTabView));
@@ -647,6 +649,8 @@ private:
 			lv_group_set_editing(group, false);
 			return true;
 
+		} else if (midi_section.close_popup()) {
+			return true;
 		} else {
 			update_settings_from_dropdown();
 			return false;
@@ -712,9 +716,9 @@ private:
 			catchup_exclude_buttons == catchup.allow_jump_outofrange &&
 			load_initial_patch == settings.load_initial_patch && fs_max_patches == fs.max_open_patches &&
 			midi_feedback == midi.midi_feedback && midi_pc_enabled == midi_pc_patch_load.enabled &&
-			knobset_control == midi.knobset_control &&
-			knobset_cc == midi.knobset_cc && knobset_channel == midi.knobset_channel &&
-			mp_mode == missing_plugins.autoload && apply_sr == settings.patch_suggested_audio.apply_samplerate &&
+			knobset_control == midi.knobset_control && knobset_cc == midi.knobset_cc &&
+			knobset_channel == midi.knobset_channel && mp_mode == missing_plugins.autoload &&
+			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
 			notif_anim == notifications.animation)

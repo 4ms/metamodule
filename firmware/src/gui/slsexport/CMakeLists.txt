@@ -18,6 +18,9 @@ target_sources(
           filebrowser/screens/ui_FileBrowserPage.c
 )
 
+target_include_directories(ui_lvgl PRIVATE ${FWDIR}/src)
+target_compile_features(ui_lvgl PRIVATE cxx_std_20)
+
 set_source_files_properties(
   prefs_section_audio.cc
   prefs_section_screensaver.cc

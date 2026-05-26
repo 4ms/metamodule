@@ -1,4 +1,6 @@
+#include "gui/pages/roller_popup.hh"
 #include "lvgl.h"
+#include "user_settings/midi_pc_settings.hh"
 
 namespace MetaModule
 {
@@ -10,7 +12,18 @@ struct PrefsSectionMidi {
 	lv_obj_t *knobset_cc_dropdown;
 	lv_obj_t *knobset_channel_dropdown;
 
+	lv_obj_t *show_pc_table_button;
+
+	MidiPCPatchLoadSettings *settings;
+
 	void create(lv_obj_t *parent);
+
+	void init_popup(lv_obj_t *parent, lv_group_t *group, MidiPCPatchLoadSettings &settings);
+	bool close_popup();
+
+	RollerPopup pc_roller{"MIDI PC LOAD PATCH:"};
+
+	static void show_pc_table(lv_event_t *event);
 };
 
 } // namespace MetaModule
