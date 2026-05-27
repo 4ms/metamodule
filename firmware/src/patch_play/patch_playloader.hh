@@ -209,6 +209,10 @@ struct PatchPlayLoader {
 		should_save_patch_ = true;
 	}
 
+	bool is_saving() const {
+		return should_save_patch_ || saving_patch_;
+	}
+
 	bool is_renaming_idle() {
 		return rename_state_ == RenameState::Idle;
 	}
@@ -240,6 +244,29 @@ struct PatchPlayLoader {
 				player_.apply_static_param({.module_id = module_id, .param_id = param_id, .value = def_val.value()});
 			}
 			i++;
+		}
+
+		pr_info("Heap: %u\n", get_heap_size());
+		if (should_play)
+			start_audio();
+	}
+
+	void change_module(std::string_view slug, unsigned module_id, bool keep_cables_and_maps) {
+		bool should_play = is_playing();
+
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		auto *patch = patches_.get_view_patch();
+
+		if (keep_cables_and_maps) {
+			patch->module_slugs[module_id] = slug;
+			player_.substitute_module(module_id, slug);
+		} else {
+			patch->blank_out_module(module_id);
+			patch->module_slugs[module_id] = slug;
+			player_.replace_module(module_id, slug);
 		}
 
 		pr_info("Heap: %u\n", get_heap_size());

@@ -264,7 +264,7 @@ public:
 			pc.changed = false;
 
 			for (auto const &entry : info.settings.midi_pc_patch_load.entries) {
-				bool chan_match = (entry.channel == 0) || (entry.channel == pc.channel + 1);
+				bool chan_match = (entry.channel == 0) || (entry.channel == (uint32_t)pc.channel + 1);
 				if (chan_match && entry.pc == pc.pc) {
 					auto [filename, vol] = split_volume(entry.path);
 					midi_pc_target_loc = PatchLocation{std::string(filename), vol};
