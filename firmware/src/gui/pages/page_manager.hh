@@ -62,7 +62,6 @@ class PageManager {
 	FullscreenGraphicPage page_fullscreen_graphic{info};
 
 	enum class MidiPCLoadState { Idle, Requesting, Loading };
-	MidiPCLoadState midi_pc_load_state = MidiPCLoadState::Idle;
 	PatchLocation midi_pc_target_loc{};
 
 public:
