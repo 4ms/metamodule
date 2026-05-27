@@ -853,6 +853,9 @@ public:
 
 		update_or_add_input_panel_conn(panel_jack_id, jack);
 
+		if (Midi::is_midi_poly_cable(panel_jack_id))
+			set_midi_poly_channel_count(pd.midi_poly_num);
+
 		bool panel_patched = false;
 		if (panel_jack_id < in_conns.size()) {
 			panel_patched = in_patched[panel_jack_id];
@@ -1325,8 +1328,6 @@ public:
 		mark_jacks_patched(midi_poly_aft_conns);
 		mark_jacks_patched(midi_poly_retrig.conns);
 
-		// Poly channel count is stored in the patch file
-		// And loaded on patch load
 		set_midi_poly_channel_count(pd.midi_poly_num);
 
 		midi_divclocks_reset();
