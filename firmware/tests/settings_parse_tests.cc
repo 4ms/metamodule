@@ -426,6 +426,9 @@ TEST_CASE("Serialize settings") {
     knobset_control: 0
     knobset_cc: 0
     knobset_channel: 16
+  midi_pc_patch_load:
+    enabled: 0
+    entries: []
   patch_suggested_audio:
     apply_samplerate: 0
     apply_blocksize: 1

@@ -793,7 +793,7 @@ lv_obj_t *create_file_menu_item(lv_obj_t *parent, std::string_view text) {
 	lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
 	lv_label_set_text(label, text.data());
 
-	auto button = lv_btn_create(ui_PatchFileMenu);
+	auto button = lv_btn_create(parent);
 	lv_obj_set_height(button, 25);
 	lv_obj_set_width(button, lv_pct(100));
 	lv_obj_set_align(button, LV_ALIGN_CENTER);

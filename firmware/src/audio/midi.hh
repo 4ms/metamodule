@@ -20,6 +20,10 @@ struct AudioStreamMidi {
 
 	void process(bool is_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg) {
 
+		if (event.type == Midi::Event::Type::PC) {
+			sync_params.midi_events.put(event);
+		}
+
 		if (!player.is_loaded)
 			return;
 

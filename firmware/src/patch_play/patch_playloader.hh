@@ -161,6 +161,10 @@ struct PatchPlayLoader {
 		return !audio_is_muted_ && player_.is_loaded;
 	}
 
+	bool is_view_patch_playing() {
+		return is_playing() && patches_.get_view_patch() == patches_.get_playing_patch();
+	}
+
 	bool did_audio_overrun() {
 		return audio_overrun_;
 	}

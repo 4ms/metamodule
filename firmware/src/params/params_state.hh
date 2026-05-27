@@ -128,6 +128,13 @@ struct ParamsMidiState : ParamsState {
 	uint8_t last_midi_note_channel;
 	bool midi_gate = false;
 
+	struct MidiPCEvent {
+		bool changed = false;
+		uint8_t channel = 0; // MIDI channel 0-15
+		uint8_t pc = 0;      // Program Change number 0-127
+	};
+	MidiPCEvent last_midi_pc;
+
 	TextDisplayWatcher text_displays;
 
 	void clear() {
@@ -140,6 +147,7 @@ struct ParamsMidiState : ParamsState {
 
 		midi_gate = false;
 		last_midi_note.changed = 0;
+		last_midi_pc.changed = false;
 	}
 };
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/firmware_update_tab.hh"
@@ -8,6 +9,8 @@
 #include "gui/pages/system_info_tab.hh"
 #include "gui/pages/system_tab.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "patch_file/patch_switcher.hh"
+#include "patch_file/reload_patch.hh"
 
 namespace MetaModule
 {
@@ -27,6 +30,8 @@ struct SystemMenuPage : PageBase {
 					 info.settings,
 					 info.notify_queue}
 		, fwupdate_tab{patch_storage, patch_playloader}
+		, patch_reloader{patch_storage, patches, settings.filesystem}
+		, patch_switcher{patch_reloader, patch_playloader, missing_plugins}
 		, tab_bar(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
 		init_bg(ui_SystemMenu);
@@ -47,11 +52,31 @@ struct SystemMenuPage : PageBase {
 		lv_group_add_obj(group, tab_bar);
 		lv_group_focus_obj(tab_bar);
 		lv_group_set_editing(group, true);
+
+		prefs_tab.set_patch_clicked_callback([this](std::string_view path) {
+			auto [filename, vol] = split_volume(path);
+			pending_patch_view = PatchLocation{std::string(filename), vol};
+		});
 	}
 
 	void update() final {
 
 		active_tab->update();
+
+		if (pending_patch_view) {
+			auto loc = *pending_patch_view;
+			pending_patch_view_args.patch_loc_hash = PatchLocHash{loc};
+			pending_patch_view.reset();
+
+			auto result = patch_switcher.jump_to_patch(loc, [this]() {
+				gui_state.force_redraw_patch = true;
+				page_list.request_new_page(PageId::PatchView, pending_patch_view_args);
+			});
+			if (!result.success) {
+				notify_queue.put({result.error_string, Notification::Priority::Error});
+				return;
+			}
+		}
 
 		if (gui_state.back_button.is_just_released()) {
 			if (!active_tab->consume_back_event()) {
@@ -101,8 +126,13 @@ private:
 	FirmwareUpdateTab fwupdate_tab;
 	std::array<SystemMenuTab *, 5> tabs{&info_tab, &plugin_tab, &prefs_tab, &system_tab, &fwupdate_tab};
 	SystemMenuTab *active_tab = &info_tab;
+	ReloadPatch patch_reloader;
+	PatchSwitcher patch_switcher;
 
 	lv_obj_t *tab_bar;
+
+	std::optional<PatchLocation> pending_patch_view;
+	PageArguments pending_patch_view_args;
 };
 
 } // namespace MetaModule

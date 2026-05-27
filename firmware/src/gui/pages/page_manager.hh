@@ -1,4 +1,5 @@
 #pragma once
+#include "fs/helpers.hh"
 #include "gui/elements/screensaver.hh"
 #include "gui/knobset_button.hh"
 #include "gui/notify/display.hh"
@@ -7,6 +8,7 @@
 #include "metaparams.hh"
 #include "params_state.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "patch_file/patch_switcher.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/settings_file.hh"
@@ -23,6 +25,7 @@
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"
 #include "gui/pages/system_menu.hh"
+
 #include "vcv_plugin/internal/osdialog-mm.hh"
 
 namespace MetaModule
@@ -43,6 +46,8 @@ class PageManager {
 	GuiState gui_state;
 	ButtonLight button_light;
 	Screensaver &screensaver;
+	ReloadPatch patch_reloader;
+	PatchSwitcher patch_switch;
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info, subdir_panel};
@@ -55,6 +60,9 @@ class PageManager {
 	JackMapViewPage page_jackmap{info};
 	MidiMapViewPage page_midimap{info};
 	FullscreenGraphicPage page_fullscreen_graphic{info};
+
+	enum class MidiPCLoadState { Idle, Requesting, Loading };
+	PatchLocation midi_pc_target_loc{};
 
 public:
 	PageBase *cur_page = &page_mainmenu;
@@ -89,7 +97,9 @@ public:
 			   .file_change_checker = file_change_checker,
 			   .file_browser = file_browser,
 			   .missing_plugins = missing_plugins}
-		, screensaver{screensaver} {
+		, screensaver{screensaver}
+		, patch_reloader{patch_storage, open_patch_manager, settings.filesystem}
+		, patch_switch{patch_reloader, info.patch_playloader, missing_plugins} {
 
 		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
 		register_file_browser_vcv(file_browser, file_save_dialog);
@@ -104,6 +114,8 @@ public:
 
 		handle_knobset_change();
 
+		handle_midi_pc_patch_load();
+
 		update_screensaver();
 
 		handle_back_event();
@@ -116,32 +128,7 @@ public:
 				cur_page->focus(newpage->args);
 			}
 		} else {
-			if (file_browser.is_visible()) {
-				if (gui_state.back_button.is_just_released())
-					file_browser.back_event();
-				file_browser.update();
-
-				gui_state.file_browser_visible.register_state(true);
-
-			} else if (file_save_dialog.is_visible()) {
-				if (gui_state.back_button.is_just_released())
-					file_save_dialog.back_event();
-
-				file_save_dialog.update();
-
-				gui_state.file_browser_visible.register_state(true);
-
-			} else if (missing_plugins.is_active()) {
-				missing_plugins.process();
-
-			} else {
-				gui_state.file_browser_visible.register_state(false);
-
-				cur_page->update();
-
-				// Don't let old events do surprising things when you change pages
-				gui_state.file_browser_visible.clear_events();
-			}
+			handle_dialog_popups();
 		}
 
 		handle_audio_errors();
@@ -151,6 +138,35 @@ public:
 		handle_write_settings();
 
 		screensaver.update();
+	}
+
+	void handle_dialog_popups() {
+		if (file_browser.is_visible()) {
+			if (gui_state.back_button.is_just_released())
+				file_browser.back_event();
+			file_browser.update();
+
+			gui_state.file_browser_visible.register_state(true);
+
+		} else if (file_save_dialog.is_visible()) {
+			if (gui_state.back_button.is_just_released())
+				file_save_dialog.back_event();
+
+			file_save_dialog.update();
+
+			gui_state.file_browser_visible.register_state(true);
+
+		} else if (missing_plugins.is_active()) {
+			missing_plugins.process();
+
+		} else {
+			gui_state.file_browser_visible.register_state(false);
+
+			cur_page->update();
+
+			// Don't let old events do surprising things when you change pages
+			gui_state.file_browser_visible.clear_events();
+		}
 	}
 
 	void handle_knobset_change() {
@@ -237,6 +253,40 @@ public:
 
 		if (button_light.display_knobset() != info.page_list.get_active_knobset()) {
 			button_light.display_knobset(info.page_list.get_active_knobset());
+		}
+	}
+
+	void handle_midi_pc_patch_load() {
+		if (!info.settings.midi_pc_patch_load.enabled)
+			return;
+
+		if (auto &pc = info.params.last_midi_pc; pc.changed) {
+			pc.changed = false;
+
+			for (auto const &entry : info.settings.midi_pc_patch_load.entries) {
+				bool chan_match = (entry.channel == 0) || (entry.channel == pc.channel + 1);
+				if (chan_match && entry.pc == pc.pc) {
+					auto [filename, vol] = split_volume(entry.path);
+					midi_pc_target_loc = PatchLocation{std::string(filename), vol};
+
+					// Clear cc events so we don't change knobsets with stale events
+					for (auto &cc : info.params.midi_ccs)
+						cc.changed = false;
+
+					auto result = patch_switch.jump_to_patch(midi_pc_target_loc, [this]() {
+						PageArguments args;
+						args.patch_loc_hash = PatchLocHash{midi_pc_target_loc};
+						gui_state.force_redraw_patch = true;
+						page_list.request_new_page(PageId::PatchView, args);
+						info.patch_playloader.request_load_view_patch();
+					});
+					if (!result.success) {
+						info.notify_queue.put({"MIDI PC: error loading patch: " + result.error_string,
+											   Notification::Priority::Error,
+											   2000});
+					}
+				}
+			}
 		}
 	}
 
