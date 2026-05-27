@@ -89,6 +89,21 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 		name = "MIDI Ret " + id + midi_chan_str;
 	}
 
+	else if (midi_message == MidiNotePolyJack)
+		name = "MIDI Note Poly" + midi_chan_str;
+
+	else if (midi_message == MidiGatePolyJack)
+		name = "MIDI Gate Poly" + midi_chan_str;
+
+	else if (midi_message == MidiVelPolyJack)
+		name = "MIDI Vel. Poly" + midi_chan_str;
+
+	else if (midi_message == MidiAftPolyJack)
+		name = "MIDI Aft. Poly" + midi_chan_str;
+
+	else if (midi_message == MidiRetrigPolyJack)
+		name = "MIDI Ret Poly" + midi_chan_str;
+
 	else if (midi_message >= MidiCC0 && midi_message <= MidiCC127)
 		name = "MIDI CC " + std::to_string(midi_message - MidiCC0) + midi_chan_str;
 
@@ -183,6 +198,21 @@ std::string get_panel_brief_name(const JackInput &, uint16_t panel_id) {
 		std::string id = std::to_string(panel_id + 1 - MidiMonoRetrigJack);
 		name = "Rt" + id;
 	}
+
+	else if (panel_id == MidiNotePolyJack)
+		name = "NtP";
+
+	else if (panel_id == MidiGatePolyJack)
+		name = "GtP";
+
+	else if (panel_id == MidiVelPolyJack)
+		name = "VeP";
+
+	else if (panel_id == MidiAftPolyJack)
+		name = "AfP";
+
+	else if (panel_id == MidiRetrigPolyJack)
+		name = "RtP";
 
 	else if (panel_id >= MidiCC0 && panel_id <= MidiCC127)
 		name = "CC" + std::to_string(panel_id - MidiCC0);

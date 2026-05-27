@@ -1,6 +1,8 @@
 #pragma once
+#include "CoreModules/CoreProcessor.hh"
 #include "console/pr_dbg.hh"
 #include "patch/patch.hh"
+#include "plugin_module.hh"
 #include "util/fixed_vector.hh"
 #include <span>
 
@@ -35,7 +37,7 @@ struct CableCache {
 	}
 
 	template<typename SpanT>
-	void build(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
+	void build(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores, auto &modules) {
 		clear();
 
 		for (auto const &cable : cables) {
@@ -46,6 +48,7 @@ struct CableCache {
 
 		build_summed_inputs(cables, module_cores);
 		remove_summed_inputs_from_cables();
+		resolve_poly_buffers(modules);
 	}
 
 	template<typename SpanT>
@@ -78,12 +81,17 @@ struct CableCache {
 	struct SingleCable {
 		Jack out;
 		FixedVector<Jack, 4> ins;
+
+		CoreProcessor::PolyPortBuffer out_buf;
+		FixedVector<CoreProcessor::PolyPortBuffer, 4> in_bufs;
 	};
 
 	// An input jack that receives from multiple output jacks (cables are summed)
 	struct SummedInput {
 		Jack in;
 		FixedVector<Jack, 8> outs;
+		FixedVector<CoreProcessor::PolyPortBuffer, 8> out_bufs;
+		CoreProcessor::PolyPortBuffer in_buf;
 	};
 
 	// organized by out
@@ -92,16 +100,6 @@ struct CableCache {
 
 	// Inputs that receive from multiple cables, organized by input's core
 	std::array<std::vector<SummedInput>, NumCores> summed_inputs;
-
-	// Rebuild only the summed_inputs (e.g. after adding a single cable)
-	template<typename SpanT>
-	void rebuild_summed_inputs(std::span<const InternalCable> cables, std::array<SpanT, NumCores> const &module_cores) {
-		// First, restore any previously removed summed input jacks back into regular cables.
-		// This is needed because the set of summed inputs may change when cables are added/removed.
-		// Simplest approach: full rebuild.
-		// TODO: optimize if this becomes a performance concern during live patching.
-		build(cables, module_cores);
-	}
 
 private:
 	// Remove summed input jacks from samecore_cables and diffcore_cables
@@ -167,11 +165,68 @@ private:
 					auto in_core = find_core(si.in.module_id, module_cores);
 					if (in_core < NumCores) {
 						summed_inputs[in_core].push_back(si);
-						pr_trace("SummedInput: m%u j%u <- %zu sources\n",
-								 si.in.module_id,
-								 si.in.jack_id,
-								 si.outs.size());
+						pr_trace(
+							"SummedInput: m%u j%u <- %zu sources\n", si.in.module_id, si.in.jack_id, si.outs.size());
 					}
+				}
+			}
+		}
+	}
+
+	void resolve_poly_buffers(auto &modules) {
+		auto resolve = [&](std::vector<SingleCable> &cable_list) {
+			for (auto &cable : cable_list) {
+				cable.out_buf = plugin_module_get_poly_output_buffer(modules[cable.out.module_id], cable.out.jack_id);
+				// cable.out_buf = modules[cable.out.module_id]->get_output_poly_buffer(cable.out.jack_id);
+
+				// Optimization: If either voltages or channels is invalid,
+				// mark both invalid so we only need to check one in the hot loop
+				if (!cable.out_buf.voltages || !cable.out_buf.channels) {
+					cable.out_buf.voltages = nullptr;
+					cable.out_buf.channels = nullptr;
+				}
+
+				pr_trace("%s out m%u j%u -> ",
+						 cable.out_buf.voltages ? "Poly" : "Mono",
+						 cable.out.module_id,
+						 cable.out.jack_id);
+
+				cable.in_bufs.clear();
+				for (auto const &in : cable.ins) {
+					// auto buf = modules[in.module_id]->get_input_poly_buffer(in.jack_id);
+					auto buf = plugin_module_get_poly_input_buffer(modules[in.module_id], in.jack_id);
+					if (!buf.voltages || !buf.channels) {
+						buf.voltages = nullptr;
+						buf.channels = nullptr;
+					}
+					cable.in_bufs.push_back(buf);
+					pr_trace("%s in m%u j%u; ", buf.voltages ? "Poly" : "Mono", in.module_id, in.jack_id);
+				}
+				pr_trace("\n");
+			}
+		};
+
+		for (auto &core_cables : samecore_cables)
+			resolve(core_cables);
+
+		for (auto &core_cables : diffcore_cables)
+			resolve(core_cables);
+
+		for (auto &core_si : summed_inputs) {
+			for (auto &si : core_si) {
+				si.out_bufs.clear();
+				for (auto const &out : si.outs) {
+					auto buf = plugin_module_get_poly_output_buffer(modules[out.module_id], out.jack_id);
+					if (!buf.voltages || !buf.channels) {
+						buf.voltages = nullptr;
+						buf.channels = nullptr;
+					}
+					si.out_bufs.push_back(buf);
+				}
+				si.in_buf = plugin_module_get_poly_input_buffer(modules[si.in.module_id], si.in.jack_id);
+				if (!si.in_buf.voltages || !si.in_buf.channels) {
+					si.in_buf.voltages = nullptr;
+					si.in_buf.channels = nullptr;
 				}
 			}
 		}
