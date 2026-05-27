@@ -11,6 +11,7 @@
 #include "gui/pages/patch_selector_subdir_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+#include "patch_file/patch_switcher.hh"
 #include "patch_file/reload_patch.hh"
 #include "pr_dbg.hh"
 
@@ -26,6 +27,7 @@ struct PatchSelectorPage : PageBase {
 		, subdir_panel{subdir_panel}
 		, patchfiles{patch_storage.get_patch_list()}
 		, patchloader{patch_storage, patches, settings.filesystem}
+		, patch_switch{patchloader, patch_playloader, missing_plugins}
 		, roller_hover(ui_PatchSelectorPage, ui_PatchListRoller, [this] { redraw_cb(); }) {
 
 		init_bg(ui_PatchSelectorPage);
@@ -357,53 +359,47 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::LoadPatchFile: {
+				hide_spinner();
+				// Clear cc events so we don't change knobsets with stale events
+				for (auto &cc : params.midi_ccs)
+					cc.changed = false;
 
-				// If the patch is not open, or if it's opened but modified on disk only
-				// then (re)load it from disk, checking for missing plugins
-				if (patchloader.needs_reloading(selected_patch)) {
-					show_spinner();
-
-					auto result = patchloader.reload_patch_file(selected_patch, [this] {
-						update_spinner();
-						lv_timer_handler();
-					});
-
-					if (result.success) {
-						patches.start_viewing(selected_patch);
-
-						// Clear cc events so we don't change knobsets with stale events
-						for (auto &cc : params.midi_ccs)
-							cc.changed = false;
-
-						missing_plugins.start(
-							patches.get_view_patch(), group, [this](bool) { exit_to_patch_view_page(); });
-						state = State::Closing;
-
-					} else {
-						lv_group_set_editing(group, true);
-						notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
-						state = State::Idle;
-					}
+				auto result = patch_switch.jump_to_patch(selected_patch, [this]() { exit_to_patch_view_page(); });
+				if (result.success) {
+					state = State::Closing;
 				} else {
-					// Here we know the patch is open already.
-					patches.start_viewing(selected_patch);
-
-					// If patch is unmodifed in RAM, then check for missing plugins
-					if (patches.find_open_patch(selected_patch)->modification_count == 0) {
-						missing_plugins.start(patches.get_view_patch(), group, [this](bool did_reload) {
-							if (did_reload)
-								patch_playloader.request_reload_playing_patch(false);
-							exit_to_patch_view_page();
-						});
-						state = State::Closing;
-
-					} else {
-						// Otherwise the patch has unsaved changes so just view it, don't reload/load anything
-						exit_to_patch_view_page();
-					}
+					lv_group_set_editing(group, true);
+					notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
+					state = State::Idle;
 				}
 
-				hide_spinner();
+				// If the patch is not open, or if it's opened but been modified via wifi or disk,
+				// then (re)load it from disk
+				// if (patchloader.needs_reloading(selected_patch)) {
+				// 	auto result = patchloader.reload_patch_file(selected_patch, [] { lv_timer_handler(); });
+				// 	if (!result.success) {
+				// 		lv_group_set_editing(group, true);
+				// 		notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
+				// 		state = State::Idle;
+				// 		break;
+				// 	}
+				// }
+				// patches.start_viewing(selected_patch);
+
+				// // If patch is unmodifed in RAM, then check for missing plugins
+				// if (patches.get_view_patch_modification_count() == 0) {
+				// 	missing_plugins.start(patches.get_view_patch(), group, [this](bool did_reload) {
+				// 		// If we loaded new plugins AND the patch was already playing, then reload patch into the player
+				// 		if (did_reload && patch_playloader.is_view_patch_playing())
+				// 			patch_playloader.request_load_view_patch();
+				// 		exit_to_patch_view_page();
+				// 	});
+				// 	state = State::Closing;
+
+				// } else {
+				// 	// Otherwise the patch has unsaved changes so just view it, don't reload/load anything
+				// 	exit_to_patch_view_page();
+				// }
 			} break;
 
 			case State::Closing:
@@ -525,6 +521,7 @@ private:
 	PatchDirList &patchfiles;
 	bool patchfiles_locked = true;
 	ReloadPatch patchloader;
+	PatchSwitcher patch_switch;
 
 	bool is_populating_subdir_panel = false;
 

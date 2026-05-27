@@ -10,11 +10,11 @@ namespace MetaModule
 {
 
 class ReloadPatch {
+public:
 	FileStorageProxy &patch_storage;
 	OpenPatchManager &patches;
 	FilesystemSettings &fs_settings;
 
-public:
 	struct FileTimeSize {
 		uint32_t timestamp;
 		uint32_t filesize;
