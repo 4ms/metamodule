@@ -846,10 +846,11 @@ public:
 	}
 
 	void add_module(BrandModuleSlug slug) {
+		auto module_idx = num_modules;
+
 		pd.module_slugs.push_back(slug);
 		calc_multiple_module_indicies();
 
-		auto module_idx = num_modules;
 		create_module(slug, module_idx);
 	}
 
