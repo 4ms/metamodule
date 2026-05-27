@@ -268,11 +268,11 @@ struct MidiMapPopup {
 			auto polynum = lv_dropdown_get_selected(ui_MidiMapNotePolyDrop);
 
 			if (polynum == 0) {
-				return eventnum == 0 ? MidiNotePolyJack :
-					   eventnum == 1 ? MidiGatePolyJack :
-					   eventnum == 2 ? MidiVelPolyJack :
-					   eventnum == 3 ? MidiAftPolyJack :
-					   eventnum == 4 ? MidiRetrigPolyJack :
+				return eventnum == 0 ? set_channels(MidiMonoNoteJack, 0) :
+					   eventnum == 1 ? set_channels(MidiMonoGateJack, 0) :
+					   eventnum == 2 ? set_channels(MidiMonoVelJack, 0) :
+					   eventnum == 3 ? set_channels(MidiMonoAftertouchJack, 0) :
+					   eventnum == 4 ? set_channels(MidiMonoRetrigJack, 0) :
 									   std::optional<MidiMappings>{std::nullopt};
 
 			} else {
