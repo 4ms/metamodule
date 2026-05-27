@@ -209,6 +209,10 @@ struct PatchPlayLoader {
 		should_save_patch_ = true;
 	}
 
+	bool is_saving() const {
+		return should_save_patch_ || saving_patch_;
+	}
+
 	bool is_renaming_idle() {
 		return rename_state_ == RenameState::Idle;
 	}

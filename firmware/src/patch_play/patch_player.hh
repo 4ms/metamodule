@@ -996,7 +996,7 @@ public:
 
 		pr_trace("Replace module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
 
-		//  Erase cached connections referencing this module (no squashing)
+		//  Erase cached connections referencing this module (unlike remove_module, there is no squashing)
 
 		auto erase_matching = [=](auto &container) {
 			for (auto &item : container) {

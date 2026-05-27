@@ -142,6 +142,8 @@ struct PageBase {
 
 	// Some pages call this periodically
 	void poll_patch_file_changed() {
+		if (patch_playloader.is_saving())
+			return;
 
 		file_change_poll.poll(get_time(), [this] {
 			auto playing_patch = patches.get_playing_patch();
