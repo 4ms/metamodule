@@ -75,26 +75,37 @@ you intentionally installed a newer one.
 Updating the bootloaders is done via loading a release file that has "-bl-" in the name,
 where the release tag is `firmware-v2.0.0-dev-2` or later.
 
-#### Loading firmware
-
-Power off and back on (full power-cycle is required).
-
-The UART console will show:
+With the Freeze jumper installed powering the MetaModule on will make it halt with the button's blue light on.
+The console will print this:
 
 ```
+MP1-Boot
+
+MPU Clock: 800000000 Hz
+Initializing RAM
+Testing RAM.
+Booted from NOR
 Freeze pin detected active: booting from DDR
 Please load a multi-uimg binary into an address in DDR RAM.
 Then write the address to the TAMP_BKP6 register at 0x5C00A118
 System will hang until TAMP_BKP6 register is changed...
 ```
 
-Connect a Jlink programmer and run this:
+#### Loading firmware
+
+With the Freeze jumper installed and a JLink debugger connected, and JLinkExe v9.44 or later on your PATH, run:
 
 ```
 make jprog
 ```
 
-This should take 8-30 seconds. The firmware should boot automatically.
+It may take 10-20 seconds, and the firmware will boot automatically.
+
+
+**Note:** In May 2026, Segger fixed a long-standing bug in their JLink software v9.44 that fixes Cortex-A7 resetting.
+If you are using earlier than v9.44, then you have to manually reset the MetaModule by
+powering off and back on before running `make jprog`. With v9.44, the script will do it for you.
+
 
  
 ### Load into NOR Flash over USB DFU

@@ -28,7 +28,7 @@ See [Loading Firmware](./firmware-loading.md) if you have a unit with an older b
 update your bootloader by using the in-app installer with any recent firmware zip file that has `-bl-` in 
 the name (v2.0.0 or later).
 
-3) Power off and back on (full power-cycle is required).
+3) Power on the unit
 
 The console will show:
 
@@ -65,7 +65,7 @@ on your system, adjust the following command and use it instead. You also may ne
 to adjust the USB port and speed settings.
 
 ```
-JLinkGDBServer -select USB=0 -device STM32MP15xx_A7 -endian little -if JTAG -speed 25000 -noir -noLocalhostOnly -nologtofile -port 3333
+JLinkGDBServer -select USB=0 -device STM32MP15XX_A7 -endian little -if JTAG -speed 25000 -noir -noLocalhostOnly -nologtofile -port 3333
 ```
 
 Or, you can launch the JLinkGDBServer GUI program. Choose JTAG for the
@@ -77,20 +77,44 @@ Now that the gdb server is running in a separate terminal window, start
 debugging using arm-none-eabi-gdb.
 
 ```
-make debug
+arm-none-eabi-gdb build/mp1corea7/medium/main.elf
 ```
 
-This will run launch arm-none-eabi-gdb and run the `multi.gdbinit` script. The
-script is very short and you should inspect the contents if anything is not
-working. All it does is connect to the gdb server at port 3333, and then loads
-the symbols from the A7 elf file to gdb (not to the MetaModule). Then it loads
+From the gdb, you can run a script to load new firmware:
+
+### JLinkGDBServer v9.44 and later (recommended)
+
+The newer JLink tools fixed a bug so we can now reset from a script. With v9.44 and later you do not have to power cycle before loading code via JTAG, and so the gdb server and gdb client can remain running.
+
+From the gdb prompt, do this:
+
+```
+source flashing/jflash.gdb
+```
+
+
+### OpenOCD and pre-9.44 JLinkGDBServer
+
+If you are using OpenOCD or Segger JLinkGDBServer earlier than v9.44, then make sure you just did a power cycle and can see the 
+Freeze pin message in the console. You probably have to relaunch gdb and possibly the gdb server. 
+
+Then do:
+
+```
+source flashing/multi.gdb
+```
+
+
+Either of these scripts connect to the gdb server at port 3333, and then load
+the symbols from the A7 elf file to gdb (not to the MetaModule). Then the script loads
 the multi-uimg file (`build/main.uimg`) to an arbitrary address, 0xC0000000.
 Finally, it notifies the bootloader to start parsing the multi-uimg file by
 writing 0xC0000000 to a designated register (the TAMP_BKP6R register).
 
 The loading may take a while, depending on the debugger hardware (ST-LINK or JLink),
 and the binary size (i.e. whether you compiled the full binary or limited it with
-`make limit LIMITFILE`).
+`cmake --fresh --preset min-brands`).
+
 
 
 ## Ozone
