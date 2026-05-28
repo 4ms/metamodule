@@ -14,10 +14,14 @@ namespace MetaModule
 
 struct MidiMapPopup {
 	lv_obj_t *midi_channel_dropdown;
+	lv_obj_t *title_header;
 
 	MidiMapPopup(ParamsMidiState &params)
 		: group(lv_group_create())
 		, params{params} {
+
+		title_header = create_title_level_2(ui_MIDIMapPanel, "Map MIDI to jack");
+		lv_obj_move_to_index(title_header, 0);
 
 		auto label = create_midi_map_label(ui_MidiMapCont, "Channel: ");
 		lv_obj_add_flag(label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
@@ -61,7 +65,6 @@ struct MidiMapPopup {
 				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY | LV_STATE_PRESSED);
 				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_EDITED);
 
-
 				lv_obj_add_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
 				lv_obj_set_style_pad_ver(dropdown, 8, LV_PART_MAIN);
 				lv_obj_add_style(dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);
@@ -93,7 +96,7 @@ struct MidiMapPopup {
 	}
 
 	void set_header_text(std::string_view title) {
-		lv_label_set_text(ui_MidiMapJackTitle, title.data());
+		lv_label_set_text(title_header, title.data());
 	}
 
 	void show(auto cb) {
@@ -291,7 +294,7 @@ struct MidiMapPopup {
 		}
 	}
 
-protected:
+private:
 	lv_obj_t *base{};
 	lv_group_t *group;
 	lv_group_t *orig_group{};

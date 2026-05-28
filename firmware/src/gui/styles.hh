@@ -62,6 +62,8 @@ struct Gui {
 
 	static inline lv_style_t debug_border;
 
+	static inline lv_style_t title2_style;
+
 	// COLORS
 	static inline std::string color_text(std::string_view txt, std::string_view color) {
 		return std::string{color} + std::string{txt} + LV_TXT_COLOR_CMD + " ";
@@ -441,6 +443,20 @@ struct Gui {
 		lv_style_set_outline_opa(&dropdown_style_main_checked, LV_OPA_100);
 		lv_style_set_outline_width(&dropdown_style_main_checked, 0);
 		lv_style_set_outline_pad(&dropdown_style_main_checked, 1);
+
+		// Title level 2: centered, underline, orange,
+		lv_style_init(&title2_style);
+		lv_style_set_text_color(&title2_style, orange_highlight);
+		lv_style_set_text_opa(&title2_style, 255);
+		lv_style_set_text_letter_space(&title2_style, 0);
+		lv_style_set_text_line_space(&title2_style, 0);
+		lv_style_set_text_align(&title2_style, LV_TEXT_ALIGN_CENTER);
+		lv_style_set_text_font(&title2_style, &ui_font_MuseoSansRounded70016);
+		lv_style_set_border_side(&title2_style, LV_BORDER_SIDE_BOTTOM);
+		lv_style_set_pad_left(&title2_style, 0);
+		lv_style_set_pad_right(&title2_style, 0);
+		lv_style_set_pad_top(&title2_style, 0);
+		lv_style_set_pad_bottom(&title2_style, 0);
 
 		// Focus
 		lv_style_init(&focus_style);

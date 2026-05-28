@@ -278,7 +278,6 @@ lv_obj_t *ui_AutoMapAllJacksButton;
 lv_obj_t *ui_AutoMapAllJacksButtonLabel;
 lv_obj_t *ui_AutoMapJackItemCont;
 lv_obj_t *ui_MIDIMapPanel;
-lv_obj_t *ui_MidiMapJackTitle;
 lv_obj_t *ui_MidiMapCont;
 lv_obj_t *ui_MidiMapNoteCheck;
 lv_obj_t *ui_MidiMapNoteLabel;

@@ -2451,26 +2451,6 @@ lv_obj_set_style_pad_bottom(ui_MIDIMapPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_MIDIMapPanel, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_MIDIMapPanel, 128, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 
-ui_MidiMapJackTitle = lv_label_create(ui_MIDIMapPanel);
-lv_obj_set_width( ui_MidiMapJackTitle, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_MidiMapJackTitle, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_MidiMapJackTitle, LV_ALIGN_TOP_MID );
-lv_label_set_long_mode(ui_MidiMapJackTitle,LV_LABEL_LONG_SCROLL_CIRCULAR);
-lv_label_set_text(ui_MidiMapJackTitle,"Map to MIDI signal:");
-lv_obj_clear_flag( ui_MidiMapJackTitle, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_scrollbar_mode(ui_MidiMapJackTitle, LV_SCROLLBAR_MODE_OFF);
-lv_obj_set_style_text_color(ui_MidiMapJackTitle, lv_color_hex(0xFB8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_MidiMapJackTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_MidiMapJackTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_MidiMapJackTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_align(ui_MidiMapJackTitle, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_MidiMapJackTitle, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_side(ui_MidiMapJackTitle, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_MidiMapJackTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_MidiMapJackTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_MidiMapJackTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_MidiMapJackTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
 ui_MidiMapCont = lv_obj_create(ui_MIDIMapPanel);
 lv_obj_remove_style_all(ui_MidiMapCont);
 lv_obj_set_width( ui_MidiMapCont, lv_pct(100));

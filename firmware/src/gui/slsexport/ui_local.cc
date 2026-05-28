@@ -1365,4 +1365,20 @@ lv_obj_t *create_load_meter(lv_obj_t *parent) {
 	return load_meter;
 }
 
+lv_obj_t *create_title_level_2(lv_obj_t *parent, std::string_view title) {
+	auto label = lv_label_create(parent);
+	lv_obj_set_width(label, LV_SIZE_CONTENT);
+	lv_obj_set_height(label, LV_SIZE_CONTENT);
+	lv_obj_set_align(label, LV_ALIGN_TOP_MID);
+	lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+	lv_label_set_text(label, title.data());
+	lv_obj_clear_flag(label,
+					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+						  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
+						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
+	lv_obj_set_scrollbar_mode(label, LV_SCROLLBAR_MODE_OFF);
+	lv_obj_add_style(label, &Gui::title2_style, LV_PART_MAIN);
+	return label;
+}
+
 } // namespace MetaModule
