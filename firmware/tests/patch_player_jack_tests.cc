@@ -2,6 +2,7 @@
 #include "patch-serial/yaml_to_patch.hh"
 #include "patch_play/patch_player.hh"
 #include "stubs/test_module.hh"
+#include "core_m4/midi_controls.hh"
 
 // Register TestModule so patches can use slug "TestModule"
 namespace
@@ -2752,4 +2753,184 @@ PatchData:
 
 	// Panel Out 3 sums: module 1 out 2 (1.0) + module 2 out 3 (2.0) + panel in 5 via Hub (3.0)
 	CHECK(player.get_panel_output(3) == doctest::Approx(6.0f));
+}
+
+TEST_CASE("Per-channel mono MIDI: 4 poly channels dispatch to correct modules") {
+	// MidiMonoNoteJack=256, MidiNote2Jack=257, MidiNote3Jack=258, MidiNote4Jack=259
+	// Each maps to a different TestModule's input jack 0.
+	// When set_midi_note_pitch(poly_chan, val) is called for poly_chan 0-3,
+	// each module should receive the correct value.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_4ch_mono
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+    2: TestModule
+    3: TestModule
+    4: TestModule
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 256
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 257
+      ins:
+        - module_id: 2
+          jack_id: 0
+    - panel_jack_id: 258
+      ins:
+        - module_id: 3
+          jack_id: 0
+    - panel_jack_id: 259
+      ins:
+        - module_id: 4
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 4
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	CHECK(pd.midi_poly_num == 4);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+	player.set_midi_connected();
+
+	auto *m1 = get_test_module(player, 1);
+	auto *m2 = get_test_module(player, 2);
+	auto *m3 = get_test_module(player, 3);
+	auto *m4 = get_test_module(player, 4);
+	REQUIRE(m1);
+	REQUIRE(m2);
+	REQUIRE(m3);
+	REQUIRE(m4);
+
+	player.set_midi_note_pitch(0, 1.0f, 0);
+	player.set_midi_note_pitch(1, 2.0f, 0);
+	player.set_midi_note_pitch(2, 3.0f, 0);
+	player.set_midi_note_pitch(3, 4.0f, 0);
+
+	CHECK(m1->get_output(0) == doctest::Approx(1.0f));
+	CHECK(m2->get_output(0) == doctest::Approx(2.0f));
+	CHECK(m3->get_output(0) == doctest::Approx(3.0f));
+	CHECK(m4->get_output(0) == doctest::Approx(4.0f));
+}
+
+TEST_CASE("MIDI parser: poly_num=4 allocates all 4 channels round-robin") {
+	MetaModule::Midi::MessageParser parser;
+	parser.set_poly_num(4);
+
+	// NoteOn: status=0x90 (NoteOn, channel 0), note=60, velocity=100
+	auto e1 = parser.parse(MidiMessage{0x90, 60, 100});
+	CHECK(e1.type == MetaModule::Midi::Event::Type::NoteOn);
+	CHECK(e1.poly_chan == 0);
+
+	auto e2 = parser.parse(MidiMessage{0x90, 62, 100});
+	CHECK(e2.type == MetaModule::Midi::Event::Type::NoteOn);
+	CHECK(e2.poly_chan == 1);
+
+	auto e3 = parser.parse(MidiMessage{0x90, 64, 100});
+	CHECK(e3.type == MetaModule::Midi::Event::Type::NoteOn);
+	CHECK(e3.poly_chan == 2);
+
+	auto e4 = parser.parse(MidiMessage{0x90, 67, 100});
+	CHECK(e4.type == MetaModule::Midi::Event::Type::NoteOn);
+	CHECK(e4.poly_chan == 3);
+}
+
+TEST_CASE("MIDI parser: poly_num=4 wraps after 4th note") {
+	MetaModule::Midi::MessageParser parser;
+	parser.set_poly_num(4);
+
+	parser.parse(MidiMessage{0x90, 60, 100}); // chan 0
+	parser.parse(MidiMessage{0x90, 62, 100}); // chan 1
+	parser.parse(MidiMessage{0x90, 64, 100}); // chan 2
+	parser.parse(MidiMessage{0x90, 67, 100}); // chan 3
+
+	// 5th note steals from channel 0 (oldest, round-robin)
+	auto e5 = parser.parse(MidiMessage{0x90, 69, 100});
+	CHECK(e5.type == MetaModule::Midi::Event::Type::NoteOn);
+	CHECK(e5.poly_chan == 0);
+}
+
+TEST_CASE("MIDI parser: poly_num=5 allocates all 5 channels") {
+	MetaModule::Midi::MessageParser parser;
+	parser.set_poly_num(5);
+
+	auto e1 = parser.parse(MidiMessage{0x90, 60, 100});
+	CHECK(e1.poly_chan == 0);
+
+	auto e2 = parser.parse(MidiMessage{0x90, 62, 100});
+	CHECK(e2.poly_chan == 1);
+
+	auto e3 = parser.parse(MidiMessage{0x90, 64, 100});
+	CHECK(e3.poly_chan == 2);
+
+	auto e4 = parser.parse(MidiMessage{0x90, 67, 100});
+	CHECK(e4.poly_chan == 3);
+
+	auto e5 = parser.parse(MidiMessage{0x90, 69, 100});
+	CHECK(e5.poly_chan == 4);
+}
+
+TEST_CASE("MIDI parser: note-stealing rotates through all channels") {
+	MetaModule::Midi::MessageParser parser;
+	parser.set_poly_num(4);
+
+	// Fill all 4 slots
+	parser.parse(MidiMessage{0x90, 60, 100}); // chan 0
+	parser.parse(MidiMessage{0x90, 62, 100}); // chan 1
+	parser.parse(MidiMessage{0x90, 64, 100}); // chan 2
+	parser.parse(MidiMessage{0x90, 67, 100}); // chan 3
+
+	// Note-stealing should rotate: 0, 1, 2, 3, 0, 1, ...
+	auto e5 = parser.parse(MidiMessage{0x90, 69, 100});
+	CHECK(e5.poly_chan == 0);
+
+	auto e6 = parser.parse(MidiMessage{0x90, 71, 100});
+	CHECK(e6.poly_chan == 1);
+
+	auto e7 = parser.parse(MidiMessage{0x90, 72, 100});
+	CHECK(e7.poly_chan == 2);
+
+	auto e8 = parser.parse(MidiMessage{0x90, 74, 100});
+	CHECK(e8.poly_chan == 3);
+
+	auto e9 = parser.parse(MidiMessage{0x90, 76, 100});
+	CHECK(e9.poly_chan == 0);
+}
+
+TEST_CASE("MIDI parser: release and reuse fills freed slot") {
+	MetaModule::Midi::MessageParser parser;
+	parser.set_poly_num(4);
+
+	// Fill all 4 slots
+	parser.parse(MidiMessage{0x90, 60, 100}); // chan 0
+	parser.parse(MidiMessage{0x90, 62, 100}); // chan 1
+	parser.parse(MidiMessage{0x90, 64, 100}); // chan 2
+	parser.parse(MidiMessage{0x90, 67, 100}); // chan 3
+
+	// Release note on chan 1 (note 62)
+	parser.parse(MidiMessage{0x80, 62, 0});
+
+	// New note should use the freed slot (chan 1)
+	auto e = parser.parse(MidiMessage{0x90, 69, 100});
+	CHECK(e.poly_chan == 1);
 }

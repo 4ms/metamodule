@@ -105,9 +105,13 @@ struct MessageParser {
 		if (next >= midi_notes.size())
 			next = 0;
 
+		auto first = next;
+
 		while (midi_notes[next].gate == true) {
-			if (next == last_poly_chan)
+			if (next == last_poly_chan) {
+				next = first;
 				break;
+			}
 
 			next++;
 			if (next >= midi_notes.size())
