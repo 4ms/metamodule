@@ -254,6 +254,9 @@ static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 		(void)USBD_LL_Transmit(pdev, epnum, NULL, 0U);
 	} else {
 		hmidi->TxState = 0U;
+
+		if ((pdev->pUserData != NULL) && (((USBD_MIDI_ItfTypeDef *)pdev->pUserData)->TransmitCplt != NULL))
+			((USBD_MIDI_ItfTypeDef *)pdev->pUserData)->TransmitCplt(hmidi->TxBuffer, &hmidi->TxLength, epnum);
 	}
 
 	return (uint8_t)USBD_OK;
