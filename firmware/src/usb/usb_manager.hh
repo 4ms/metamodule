@@ -147,7 +147,13 @@ public:
 	void set_video_mode(bool enabled) {
 		if (enabled)
 			UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
-		usb_device.set_video_mode(enabled);
+
+		if (state == FUSB302::Device::ConnectedState::AsHost) {
+			// Don't change to device mode if we're a host: just latch the value
+			usb_device.set_video_mode_pending(enabled);
+		} else {
+			usb_device.set_video_mode(enabled);
+		}
 	}
 
 	MidiHost &get_midi_host() {
