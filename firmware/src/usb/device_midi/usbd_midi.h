@@ -38,6 +38,7 @@ typedef struct _USBD_MIDI_Itf {
 	int8_t (*Init)(void);
 	int8_t (*DeInit)(void);
 	int8_t (*Receive)(uint8_t *Buf, uint32_t *Len);
+	int8_t (*TransmitCplt)(uint8_t *Buf, uint32_t *Len, uint8_t epnum);
 } USBD_MIDI_ItfTypeDef;
 
 typedef struct {

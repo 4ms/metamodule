@@ -26,9 +26,14 @@ public:
 private:
 	USBD_HandleTypeDef *pdev;
 
+	// Drain the TX FIFO into the IN endpoint while it is free. Safe to call from
+	// the USB ISR (DataOut/DataIn) and, later, from the app (single producer).
+	void pump_tx();
+
 	static int8_t MIDI_Itf_Init();
 	static int8_t MIDI_Itf_DeInit();
 	static int8_t MIDI_Itf_Receive(uint8_t *Buf, uint32_t *Len);
+	static int8_t MIDI_Itf_TransmitCplt(uint8_t *Buf, uint32_t *Len, uint8_t epnum);
 
 	static USBD_MIDI_ItfTypeDef fops;
 	static inline UsbMidiDevice *_instance = nullptr;
