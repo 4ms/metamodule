@@ -43,7 +43,8 @@ extern "C" {
  * @{
  */
 
-#define USBD_MAX_NUM_INTERFACES 1U
+// MIDI (AudioControl + MIDIStreaming) and CDC both use 2 interfaces.
+#define USBD_MAX_NUM_INTERFACES 2U
 #define USBD_MAX_NUM_CONFIGURATION 1U
 #define USBD_MAX_STR_DESC_SIZ 0x100U
 #define USBD_SELF_POWERED 1U

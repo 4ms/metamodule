@@ -36,7 +36,7 @@ class UsbManager {
 
 public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: usb_device{console_buffers, false}
+		: usb_device{console_buffers, UsbDeviceMode::Cdc}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		found_fusb = usbctl.init(); //NOLINT
 	}
@@ -144,20 +144,28 @@ public:
 		// }
 	}
 
-	void set_video_mode(bool enabled) {
-		if (enabled)
+	void set_device_mode(UsbDeviceMode mode) {
+		if (mode == UsbDeviceMode::Video)
 			UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
 
 		if (state == FUSB302::Device::ConnectedState::AsHost) {
-			// Don't change to device mode if we're a host: just latch the value
-			usb_device.set_video_mode_pending(enabled);
+			// Don't start a device class while we're acting as a host: starting
+			// the device peripheral would force the shared OTG core into device
+			// mode under the host IRQ and storm it. Just latch the desired mode;
+			// handle_fusb_int()'s AsDevice path applies it when the role next
+			// becomes a device.
+			usb_device.set_mode_pending(mode);
 		} else {
-			usb_device.set_video_mode(enabled);
+			usb_device.set_mode(mode);
 		}
 	}
 
 	MidiHost &get_midi_host() {
 		return usb_host.get_midi_host();
+	}
+
+	UsbMidiDevice &get_midi_device() {
+		return usb_device.midi;
 	}
 
 	FatFileIO &get_msc_fileio() {

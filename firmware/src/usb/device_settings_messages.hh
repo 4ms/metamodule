@@ -12,8 +12,8 @@ struct DeviceSettingsMessages {
 	}
 
 	struct Result {
-		bool has_video_mode_change = false;
-		bool video_enabled = false;
+		bool has_mode_change = false;
+		UsbDeviceMode mode = UsbDeviceMode::Cdc;
 	};
 
 	Result process() {
@@ -22,9 +22,9 @@ struct DeviceSettingsMessages {
 		auto message = intercore_comm.get_new_message();
 
 		if (message.type != DeviceSettingsMessage::Type::None) {
-			if (message.type == DeviceSettingsMessage::Type::SetVideoMode) {
-				result.has_video_mode_change = true;
-				result.video_enabled = message.video_enabled;
+			if (message.type == DeviceSettingsMessage::Type::SetDeviceMode) {
+				result.has_mode_change = true;
+				result.mode = message.mode;
 			}
 
 			// Send empty ack to complete half-duplex turn
