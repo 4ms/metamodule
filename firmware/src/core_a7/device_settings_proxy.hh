@@ -12,11 +12,17 @@ extern DeviceSettingsMessage icc_device_settings_message;
 
 struct DeviceSettingsProxy {
 
-	static bool send_video_mode(bool enabled) {
+	static bool send_device_mode(UsbDeviceMode mode) {
 		DeviceSettingsMessage msg;
-		msg.type = DeviceSettingsMessage::Type::SetVideoMode;
-		msg.video_enabled = enabled;
+		msg.type = DeviceSettingsMessage::Type::SetDeviceMode;
+		msg.mode = mode;
 		return comm.send_message(msg);
+	}
+
+	// Backwards-compatible shim for the existing prefs UI (video checkbox).
+	// Maps the on/off video toggle onto the Video/Cdc device modes.
+	static bool send_video_mode(bool enabled) {
+		return send_device_mode(enabled ? UsbDeviceMode::Video : UsbDeviceMode::Cdc);
 	}
 
 private:

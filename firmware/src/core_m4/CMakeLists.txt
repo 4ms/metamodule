@@ -92,6 +92,9 @@ add_executable(
   ${USBDEV_LIBDIR}/Class/VIDEO/Src/usbd_video.c
   ${FWDIR}/src/usb/device_video/usb_video_device.cc
   ${FWDIR}/src/usb/device_video/usbd_video_desc.c
+  ${FWDIR}/src/usb/device_midi/usbd_midi.c
+  ${FWDIR}/src/usb/device_midi/usbd_midi_desc.c
+  ${FWDIR}/src/usb/usb_midi_device.cc
 
   ${USBDEV_LIBDIR}/Core/Src/usbd_core.c
   ${USBDEV_LIBDIR}/Core/Src/usbd_ctlreq.c
