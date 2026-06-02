@@ -64,6 +64,10 @@ struct UsbDeviceManager {
 		start();
 	}
 
+	void set_video_mode_pending(bool enabled) {
+		video_mode = enabled;
+	}
+
 	void process() {
 		if (!video_mode)
 			serial.process();
