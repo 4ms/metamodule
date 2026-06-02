@@ -1,4 +1,5 @@
 #pragma once
+#include "usb/usb_device_mode.hh"
 #include <cstdint>
 
 namespace MetaModule
@@ -7,11 +8,11 @@ namespace MetaModule
 struct DeviceSettingsMessage {
 	enum class Type : uint32_t {
 		None,
-		SetVideoMode,
+		SetDeviceMode,
 	};
 
 	Type type = Type::None;
-	bool video_enabled = false;
+	UsbDeviceMode mode = UsbDeviceMode::Cdc;
 };
 
 } // namespace MetaModule
