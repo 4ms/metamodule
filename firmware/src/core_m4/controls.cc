@@ -98,8 +98,6 @@ void Controls::update_rotary() {
 }
 
 void Controls::update_midi_connected() {
-	// Either the USB-MIDI host (controller plugged in) or the USB-MIDI device
-	// (computer connected) counts as connected -- only one is ever active.
 	_midi_connected_raw.update(_midi_host.is_connected() || _midi_device.is_connected());
 
 	if (_midi_connected_raw.went_low()) {
@@ -132,9 +130,7 @@ void Controls::update_control_expander() {
 }
 
 void Controls::parse_midi() {
-	// Parse outgoing MIDI message if available and connected. Send to whichever
-	// endpoint is active: the USB-MIDI host if a controller is plugged in, else
-	// the USB-MIDI device if a computer is connected.
+	// Parse outgoing MIDI message if available and connected.
 	if (cur_params->raw_msg.raw() != MidiMessage{}.raw()) {
 		std::array<uint8_t, 4> bytes;
 		cur_params->raw_msg.make_usb_msg(bytes);
@@ -195,8 +191,6 @@ void Controls::start() {
 
 	read_controls_task.start();
 
-	// Host and device feed the app's MIDI router identically. The device re-arms
-	// its OUT endpoint inside MIDI_Itf_Receive; the host must re-arm here.
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
 		route_usb_midi_rx(rxbuffer);
 		_midi_host.receive();
@@ -205,9 +199,6 @@ void Controls::start() {
 	_midi_device.set_rx_callback([this](std::span<uint8_t> rxbuffer) { route_usb_midi_rx(rxbuffer); });
 }
 
-// Parse a batch of raw 4-byte USB-MIDI event packets into the RX FIFO, skipping
-// SysEx (which would span multiple packets). Runs in the USB ISR; shared by the
-// MIDI-host and MIDI-device RX callbacks.
 void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
 	bool ignore = false;
 
