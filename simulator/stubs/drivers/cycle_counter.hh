@@ -32,14 +32,6 @@ public:
 		_measured_tm = read_cycle_count() - _start_tm;
 	}
 
-	void start_simple_measurement() {
-		_start_tm = read_cycle_count();
-	}
-
-	uint32_t stop_simple_measurement() {
-		return read_cycle_count() - _start_tm;
-	}
-
 	uint32_t get_last_measurement_raw() {
 		return _measured_tm;
 	}
