@@ -58,12 +58,13 @@ extern "C" void aux_core_main() {
 		  *A7SharedMemoryS::ptrs.patch_mod_queue,
 		  plugin_manager,
 		  ramdisk};
-	if (ui.get_settings().video.enabled) {
-		while (!DeviceSettingsProxy::send_video_mode(true))
+	auto usb_device_mode = ui.get_settings().usb_device_mode;
+	if (usb_device_mode != UsbDeviceMode::Cdc) {
+		while (!DeviceSettingsProxy::send_device_mode(usb_device_mode))
 			;
 	}
 	UsbVideoBuffer::set_mirroring(ui.get_settings().video.mirror);
-	UsbVideoBuffer::enable(ui.get_settings().video.enabled);
+	UsbVideoBuffer::enable(usb_device_mode == UsbDeviceMode::Video);
 
 	ui.update_screen();
 	ui.update_page();

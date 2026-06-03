@@ -19,12 +19,6 @@ struct DeviceSettingsProxy {
 		return comm.send_message(msg);
 	}
 
-	// Backwards-compatible shim for the existing prefs UI (video checkbox).
-	// Maps the on/off video toggle onto the Video/Cdc device modes.
-	static bool send_video_mode(bool enabled) {
-		return send_device_mode(enabled ? UsbDeviceMode::Video : UsbDeviceMode::Cdc);
-	}
-
 private:
 	static constexpr uint32_t IPCC_Chan = 4;
 	using Comm = mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, DeviceSettingsMessage, IPCC_Chan>;

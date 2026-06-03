@@ -152,8 +152,10 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::Fewer);
 	CHECK(settings.notifications.animation == false);
 
-	CHECK(settings.video.enabled == true);
 	CHECK(settings.video.mirror == true);
+
+	// No usb_device_mode key -> defaults to Console (Cdc)
+	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::Cdc);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -305,8 +307,41 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::All);
 	CHECK(settings.notifications.animation == true);
 
-	CHECK(settings.video.enabled == false);
 	CHECK(settings.video.mirror == false);
+
+	// No usb_device_mode -> defaults to Console (Cdc)
+	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::Cdc);
+}
+
+TEST_CASE("Parse usb_device_mode") {
+	using enum MetaModule::UsbDeviceMode;
+
+	auto parse_mode = [](std::string const &mode_yaml) {
+		MetaModule::UserSettings settings;
+		std::string yaml = "Settings:\n  " + mode_yaml + "\n";
+		MetaModule::Settings::parse(yaml, &settings);
+		return settings.usb_device_mode;
+	};
+
+	CHECK(parse_mode("usb_device_mode: Console") == Cdc);
+	CHECK(parse_mode("usb_device_mode: Video") == Video);
+	CHECK(parse_mode("usb_device_mode: MIDI") == Midi);
+	CHECK(parse_mode("usb_device_mode: garbage") == Cdc); // unknown -> default
+	CHECK(parse_mode("notifications:\n    animation: 0") == Cdc); // absent key -> default
+
+	// Round-trip through serialize -> parse
+	for (auto mode : {Cdc, Video, Midi}) {
+		MetaModule::UserSettings out;
+		out.usb_device_mode = mode;
+		std::string buf;
+		buf.resize(2048);
+		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
+		buf.resize(sz);
+
+		MetaModule::UserSettings in;
+		MetaModule::Settings::parse(buf, &in);
+		CHECK(in.usb_device_mode == mode);
+	}
 }
 
 TEST_CASE("Serialize settings") {
@@ -448,8 +483,8 @@ TEST_CASE("Serialize settings") {
     amount: OnlyCritical
     animation: 0
   video:
-    enabled: 0
     mirror: 0
+  usb_device_mode: Console
 )";
 	// clang format-on
 

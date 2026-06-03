@@ -4,7 +4,6 @@ namespace MetaModule
 {
 
 struct VideoSettings {
-	bool enabled = false;
 	bool mirror = false;
 };
 
