@@ -103,6 +103,8 @@ struct UsbDeviceManager {
 	void process() {
 		if (mode == UsbDeviceMode::Cdc)
 			serial.process();
+		else if (mode == UsbDeviceMode::Midi)
+			midi.process(); // idle-kick drain of any app-queued TX
 	}
 
 	void process_disconnected() {

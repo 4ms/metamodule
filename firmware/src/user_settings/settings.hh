@@ -13,6 +13,7 @@
 #include "user_settings/screensaver_settings.hh"
 #include "user_settings/video_settings.hh"
 #include "user_settings/view_settings.hh"
+#include "usb/usb_device_mode.hh"
 
 namespace MetaModule
 {
@@ -38,6 +39,10 @@ struct UserSettings {
 	ButtonExpKnobSetSettings button_exp_knobset{};
 	NotificationSettings notifications{};
 	VideoSettings video{};
+
+	// Which USB device class the OTG core presents (Console/Video/MIDI), mutually
+	// exclusive.
+	UsbDeviceMode usb_device_mode = UsbDeviceMode::Cdc;
 };
 
 } // namespace MetaModule
