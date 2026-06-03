@@ -16,6 +16,7 @@
 #include "params.hh"
 #include "sense_pin_reader.hh"
 #include "usb/midi_host.hh"
+#include "usb/usb_midi_device.hh"
 #include "util/edge_detector.hh"
 #include "util/interp_param.hh"
 #include "util/lockfree_fifo_spsc.hh"
@@ -28,7 +29,7 @@ using mdrivlib::GPIOExpander;
 using mdrivlib::PinPolarity;
 
 struct Controls {
-	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host);
+	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host, UsbMidiDevice &midi_device);
 
 	void start();
 	void process();
@@ -45,6 +46,7 @@ private:
 	void start_param_block();
 
 	void parse_midi();
+	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
 	void update_midi_connected();
 	void update_control_expander();
 	void update_rotary();
@@ -72,8 +74,10 @@ private:
 	ControlExpanderManager control_expander;
 	std::array<Toggler, ButtonExpander::NumTotalButtons> ext_buttons{};
 
-	// MIDI
+	// MIDI. Host and device are never active simultaneously (single OTG core),
+	// so both feed the same _midi_rx_buf and TX goes to whichever is connected.
 	MidiHost &_midi_host;
+	UsbMidiDevice &_midi_device;
 	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
 	Midi::MessageParser _midi_parser;
 	EdgeStateDetector _midi_connected_raw;

@@ -98,7 +98,9 @@ void Controls::update_rotary() {
 }
 
 void Controls::update_midi_connected() {
-	_midi_connected_raw.update(_midi_host.is_connected());
+	// Either the USB-MIDI host (controller plugged in) or the USB-MIDI device
+	// (computer connected) counts as connected -- only one is ever active.
+	_midi_connected_raw.update(_midi_host.is_connected() || _midi_device.is_connected());
 
 	if (_midi_connected_raw.went_low()) {
 		_midi_parser.start_all_notes_off_sequence();
@@ -130,13 +132,16 @@ void Controls::update_control_expander() {
 }
 
 void Controls::parse_midi() {
-	// Parse outgoing MIDI message if available and connected
+	// Parse outgoing MIDI message if available and connected. Send to whichever
+	// endpoint is active: the USB-MIDI host if a controller is plugged in, else
+	// the USB-MIDI device if a computer is connected.
 	if (cur_params->raw_msg.raw() != MidiMessage{}.raw()) {
-		if (_midi_connected_raw.is_high()) {
-			std::array<uint8_t, 4> bytes;
-			cur_params->raw_msg.make_usb_msg(bytes);
+		std::array<uint8_t, 4> bytes;
+		cur_params->raw_msg.make_usb_msg(bytes);
+		if (_midi_host.is_connected())
 			_midi_host.transmit(bytes);
-		}
+		else if (_midi_device.is_connected())
+			_midi_device.transmit(bytes);
 	}
 
 	// Parse a MIDI message if available
@@ -190,28 +195,39 @@ void Controls::start() {
 
 	read_controls_task.start();
 
+	// Host and device feed the app's MIDI router identically. The device re-arms
+	// its OUT endpoint inside MIDI_Itf_Receive; the host must re-arm here.
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
-		bool ignore = false;
-
-		while (rxbuffer.size() >= 4) {
-			auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
-
-			//Starting ignoring from SysEx Start (F0)...
-			if (msg.is_sysex())
-				ignore = true;
-
-			//...until SysEx End (F7) received
-			if (ignore && msg.has_sysex_end())
-				ignore = false;
-
-			if (!ignore)
-				_midi_rx_buf.put(msg);
-
-			rxbuffer = rxbuffer.subspan(4);
-			// msg.print();
-		}
+		route_usb_midi_rx(rxbuffer);
 		_midi_host.receive();
 	});
+
+	_midi_device.set_rx_callback([this](std::span<uint8_t> rxbuffer) { route_usb_midi_rx(rxbuffer); });
+}
+
+// Parse a batch of raw 4-byte USB-MIDI event packets into the RX FIFO, skipping
+// SysEx (which would span multiple packets). Runs in the USB ISR; shared by the
+// MIDI-host and MIDI-device RX callbacks.
+void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
+	bool ignore = false;
+
+	while (rxbuffer.size() >= 4) {
+		auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
+
+		//Starting ignoring from SysEx Start (F0)...
+		if (msg.is_sysex())
+			ignore = true;
+
+		//...until SysEx End (F7) received
+		if (ignore && msg.has_sysex_end())
+			ignore = false;
+
+		if (!ignore)
+			_midi_rx_buf.put(msg);
+
+		rxbuffer = rxbuffer.subspan(4);
+		// msg.print();
+	}
 }
 
 void Controls::process() {
@@ -226,8 +242,9 @@ void Controls::set_samplerate(unsigned sample_rate) {
 	}
 }
 
-Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host, UsbMidiDevice &midi_device)
 	: _midi_host{midi_host}
+	, _midi_device{midi_device}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {
