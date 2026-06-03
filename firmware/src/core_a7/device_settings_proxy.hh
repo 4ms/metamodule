@@ -19,6 +19,13 @@ struct DeviceSettingsProxy {
 		return comm.send_message(msg);
 	}
 
+	static bool send_role_mode(UsbRoleMode role) {
+		DeviceSettingsMessage msg;
+		msg.type = DeviceSettingsMessage::Type::SetRoleMode;
+		msg.role = role;
+		return comm.send_message(msg);
+	}
+
 private:
 	static constexpr uint32_t IPCC_Chan = 4;
 	using Comm = mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, DeviceSettingsMessage, IPCC_Chan>;

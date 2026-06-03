@@ -14,6 +14,7 @@
 #include "user_settings/video_settings.hh"
 #include "user_settings/view_settings.hh"
 #include "usb/usb_device_mode.hh"
+#include "usb/usb_role_mode.hh"
 
 namespace MetaModule
 {
@@ -39,6 +40,9 @@ struct UserSettings {
 	ButtonExpKnobSetSettings button_exp_knobset{};
 	NotificationSettings notifications{};
 	VideoSettings video{};
+
+	// How the USB-C port chooses its data role (Auto DRP / ForceHost / ForceDevice).
+	UsbRoleMode usb_role_mode = UsbRoleMode::Auto;
 
 	// Which USB device class the OTG core presents (Console/Video/MIDI), mutually
 	// exclusive.

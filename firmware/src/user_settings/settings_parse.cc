@@ -290,6 +290,14 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "notifications", settings, &UserSettings::notifications);
 	read_or_default(node, "video", settings, &UserSettings::video);
 
+	if (node.is_map() && node.has_child("usb_role_mode")) {
+		using enum UsbRoleMode;
+		auto v = node["usb_role_mode"].val();
+		settings->usb_role_mode = v == "ForceHost" ? ForceHost : v == "ForceDevice" ? ForceDevice : Auto;
+	} else {
+		settings->usb_role_mode = UserSettings{}.usb_role_mode;
+	}
+
 	using enum UsbDeviceMode;
 	if (node.is_map() && node.has_child("usb_device_mode")) {
 		auto v = node["usb_device_mode"].val();

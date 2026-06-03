@@ -104,6 +104,8 @@ int main() {
 		auto ds_result = device_settings.process();
 		if (ds_result.has_mode_change)
 			usb.set_device_mode(ds_result.mode);
+		if (ds_result.has_role_change)
+			usb.set_role_mode(ds_result.role);
 
 		WifiInterface::run();
 	}

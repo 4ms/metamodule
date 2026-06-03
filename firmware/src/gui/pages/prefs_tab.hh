@@ -84,6 +84,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(video_section.role_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(video_section.mode_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(video_section.mirror_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
@@ -108,6 +109,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(video_section.role_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(video_section.mode_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(video_section.mirror_check, focus_cb, LV_EVENT_FOCUSED, this);
 
@@ -275,6 +277,7 @@ private:
 		lv_dropdown_set_selected(notifications_section.amount_dropdown, notif_item >= 0 ? notif_item : 0);
 		lv_check(notifications_section.animation_check, notifications.animation);
 
+		lv_dropdown_set_selected(video_section.role_dropdown, usb_role_to_index(settings.usb_role_mode));
 		lv_dropdown_set_selected(video_section.mode_dropdown, usb_mode_to_index(settings.usb_device_mode));
 		lv_check(video_section.mirror_check, video.mirror);
 
@@ -415,6 +418,22 @@ private:
 
 	uint32_t read_knobset_channel_dropdown() {
 		return lv_dropdown_get_selected(midi_section.knobset_channel_dropdown) + 1;
+	}
+
+	// USB role dropdown order: 0 = Auto, 1 = Force Host, 2 = Force Device.
+	static int usb_role_to_index(UsbRoleMode role) {
+		return role == UsbRoleMode::ForceHost ? 1 : role == UsbRoleMode::ForceDevice ? 2 : 0;
+	}
+
+	UsbRoleMode read_usb_role_dropdown() {
+		switch (lv_dropdown_get_selected(video_section.role_dropdown)) {
+			case 1:
+				return UsbRoleMode::ForceHost;
+			case 2:
+				return UsbRoleMode::ForceDevice;
+			default:
+				return UsbRoleMode::Auto;
+		}
 	}
 
 	// USB mode dropdown order: 0 = Console (Cdc), 1 = Video, 2 = MIDI.
@@ -613,6 +632,15 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		// USB role (Auto / Force Host / Force Device)
+		auto usb_role = read_usb_role_dropdown();
+		if (settings.usb_role_mode != usb_role) {
+			settings.usb_role_mode = usb_role;
+			while (!DeviceSettingsProxy::send_role_mode(usb_role))
+				;
+			gui_state.do_write_settings = true;
+		}
+
 		// USB device mode (Console / Video / MIDI)
 		auto usb_mode = read_usb_mode_dropdown();
 		auto video_mirror = read_video_mirror_check();
@@ -704,6 +732,12 @@ private:
 		} else if (midi_section.close_popup()) {
 			return true;
 
+		} else if (lv_dropdown_is_open(video_section.role_dropdown)) {
+			lv_dropdown_close(video_section.role_dropdown);
+			lv_group_focus_obj(video_section.role_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
 		} else if (lv_dropdown_is_open(video_section.mode_dropdown)) {
 			lv_dropdown_close(video_section.mode_dropdown);
 			lv_group_focus_obj(video_section.mode_dropdown);
@@ -764,6 +798,7 @@ private:
 		auto bexp_back = read_require_back_check();
 		auto notif_amount = read_notification_amount_dropdown();
 		auto notif_anim = read_notification_animation_check();
+		auto usb_role = read_usb_role_dropdown();
 		auto usb_mode = read_usb_mode_dropdown();
 		auto video_mirror = read_video_mirror_check();
 
@@ -782,8 +817,8 @@ private:
 			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
-			notif_anim == notifications.animation && usb_mode == settings.usb_device_mode &&
-			video_mirror == video.mirror)
+			notif_anim == notifications.animation && usb_role == settings.usb_role_mode &&
+			usb_mode == settings.usb_device_mode && video_mirror == video.mirror)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
