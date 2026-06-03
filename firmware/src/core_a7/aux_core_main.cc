@@ -58,6 +58,12 @@ extern "C" void aux_core_main() {
 		  *A7SharedMemoryS::ptrs.patch_mod_queue,
 		  plugin_manager,
 		  ramdisk};
+	auto usb_role_mode = ui.get_settings().usb_role_mode;
+	if (usb_role_mode != UsbRoleMode::Auto) {
+		while (!DeviceSettingsProxy::send_role_mode(usb_role_mode))
+			;
+	}
+
 	auto usb_device_mode = ui.get_settings().usb_device_mode;
 	if (usb_device_mode != UsbDeviceMode::Cdc) {
 		while (!DeviceSettingsProxy::send_device_mode(usb_device_mode))

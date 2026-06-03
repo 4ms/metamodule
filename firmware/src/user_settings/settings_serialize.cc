@@ -178,6 +178,14 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["notifications"] << settings.notifications;
 	data["video"] << settings.video;
 
+	{
+		using enum UsbRoleMode;
+		ryml::csubstr role_string = settings.usb_role_mode == ForceHost	 ? "ForceHost" :
+									settings.usb_role_mode == ForceDevice ? "ForceDevice" :
+																			"Auto";
+		data["usb_role_mode"] << role_string;
+	}
+
 	using enum UsbDeviceMode;
 	ryml::csubstr usb_mode_string = settings.usb_device_mode == Video ? "Video" :
 									settings.usb_device_mode == Midi	 ? "MIDI" :

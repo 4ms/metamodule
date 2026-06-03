@@ -9,6 +9,7 @@
 #include "usb/device_cdc/usb_serial_device.hh"
 #include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
+#include "usb/usb_role_mode.hh"
 
 namespace MetaModule
 {
@@ -25,6 +26,7 @@ class UsbManager {
 	FUSBIntPin fusb_int_pin;
 	bool int_asserted = false;
 	bool found_fusb = false;
+	UsbRoleMode role_mode = UsbRoleMode::Auto;
 
 	// Debug: timer for dumping registers
 	// uint32_t tm;
@@ -158,6 +160,19 @@ public:
 		} else {
 			usb_device.set_mode(mode);
 		}
+	}
+
+	// Store the desired USB-C data-role policy pushed from the A7.
+	//
+	// TODO (hardware): actually honor ForceHost/ForceDevice. Today the role is
+	// always auto-detected by the FUSB302 DRP toggle-polling (start_drp_polling()
+	// + handle_fusb_int()), so this preference is recorded but not yet acted on.
+	// Forcing requires configuring the FUSB302 to present a fixed source (Rp +
+	// drive VBUS) or sink (Rd) instead of DRP, and driving `state` accordingly --
+	// all on the single shared OTG core, so mind the AsHost/AsDevice IRQ-dispatch
+	// constraint (see the class header notes) to avoid the OTG IRQ storm.
+	void set_role_mode(UsbRoleMode mode) {
+		role_mode = mode;
 	}
 
 	MidiHost &get_midi_host() {

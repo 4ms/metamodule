@@ -4,6 +4,7 @@ namespace MetaModule
 {
 
 struct PrefsSectionVideo {
+	lv_obj_t *role_dropdown; // USB role: Auto Host/Device / Force Host / Force Device
 	lv_obj_t *mode_dropdown; // USB device mode: Console / Video / MIDI
 	lv_obj_t *mirror_check;	 // Video-only: mirror X
 
