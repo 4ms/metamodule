@@ -82,7 +82,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(video_section.enabled_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(video_section.mode_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(video_section.mirror_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
@@ -105,7 +105,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, focus_cb, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(video_section.enabled_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(video_section.mode_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(video_section.mirror_check, focus_cb, LV_EVENT_FOCUSED, this);
 
 		std::string opts;
@@ -265,7 +265,7 @@ private:
 		lv_dropdown_set_selected(notifications_section.amount_dropdown, notif_item >= 0 ? notif_item : 0);
 		lv_check(notifications_section.animation_check, notifications.animation);
 
-		lv_check(video_section.enabled_check, video.enabled);
+		lv_dropdown_set_selected(video_section.mode_dropdown, usb_mode_to_index(settings.usb_device_mode));
 		lv_check(video_section.mirror_check, video.mirror);
 
 		gui_state.do_write_settings = false;
@@ -403,8 +403,20 @@ private:
 		return lv_dropdown_get_selected(midi_section.knobset_channel_dropdown) + 1;
 	}
 
-	bool read_video_enabled_check() {
-		return lv_obj_has_state(video_section.enabled_check, LV_STATE_CHECKED);
+	// USB mode dropdown order: 0 = Console (Cdc), 1 = Video, 2 = MIDI.
+	static int usb_mode_to_index(UsbDeviceMode mode) {
+		return mode == UsbDeviceMode::Video ? 1 : mode == UsbDeviceMode::Midi ? 2 : 0;
+	}
+
+	UsbDeviceMode read_usb_mode_dropdown() {
+		switch (lv_dropdown_get_selected(video_section.mode_dropdown)) {
+			case 1:
+				return UsbDeviceMode::Video;
+			case 2:
+				return UsbDeviceMode::Midi;
+			default:
+				return UsbDeviceMode::Cdc;
+		}
 	}
 
 	bool read_video_mirror_check() {
@@ -581,14 +593,14 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
-		// Video output
-		auto video_enabled = read_video_enabled_check();
+		// USB device mode (Console / Video / MIDI)
+		auto usb_mode = read_usb_mode_dropdown();
 		auto video_mirror = read_video_mirror_check();
-		if (video.enabled != video_enabled) {
-			video.enabled = video_enabled;
-			while (!DeviceSettingsProxy::send_video_mode(video_enabled))
+		if (settings.usb_device_mode != usb_mode) {
+			settings.usb_device_mode = usb_mode;
+			while (!DeviceSettingsProxy::send_device_mode(usb_mode))
 				;
-			UsbVideoBuffer::enable(video_enabled);
+			UsbVideoBuffer::enable(usb_mode == UsbDeviceMode::Video);
 			gui_state.do_write_settings = true;
 		}
 		if (video.mirror != video_mirror) {
@@ -669,6 +681,12 @@ private:
 			lv_group_set_editing(group, false);
 			return true;
 
+		} else if (lv_dropdown_is_open(video_section.mode_dropdown)) {
+			lv_dropdown_close(video_section.mode_dropdown);
+			lv_group_focus_obj(video_section.mode_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
 		} else {
 			update_settings_from_dropdown();
 			return false;
@@ -722,7 +740,7 @@ private:
 		auto bexp_back = read_require_back_check();
 		auto notif_amount = read_notification_amount_dropdown();
 		auto notif_anim = read_notification_animation_check();
-		auto video_enabled = read_video_enabled_check();
+		auto usb_mode = read_usb_mode_dropdown();
 		auto video_mirror = read_video_mirror_check();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
@@ -739,7 +757,8 @@ private:
 			mp_mode == missing_plugins.autoload && apply_sr == settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
-			notif_anim == notifications.animation && video_enabled == video.enabled && video_mirror == video.mirror)
+			notif_anim == notifications.animation && usb_mode == settings.usb_device_mode &&
+			video_mirror == video.mirror)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
@@ -758,7 +777,7 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == page->video_section.enabled_check || target == page->video_section.mirror_check ||
+		if (target == page->video_section.mode_dropdown || target == page->video_section.mirror_check ||
 			target == page->missingplugins_section.dropdown)
 		{
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);

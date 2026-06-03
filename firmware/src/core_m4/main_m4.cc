@@ -101,15 +101,9 @@ int main() {
 
 		module_fs_messages.process();
 
-		// TEMPORARY (hardware bring-up): force USB MIDI device mode, ignoring the
-		// mode requested by the A7 settings. Still call process() to ack the A7's
-		// half-duplex message. set_device_mode() is idempotent once mode == Midi.
-		// To restore normal behavior, delete these two lines and uncomment below.
-		(void)device_settings.process();
-		usb.set_device_mode(UsbDeviceMode::Midi);
-		// auto ds_result = device_settings.process();
-		// if (ds_result.has_mode_change)
-		// 	usb.set_device_mode(ds_result.mode);
+		auto ds_result = device_settings.process();
+		if (ds_result.has_mode_change)
+			usb.set_device_mode(ds_result.mode);
 
 		WifiInterface::run();
 	}

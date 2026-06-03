@@ -6,12 +6,14 @@ namespace MetaModule
 
 void PrefsSectionVideo::create(lv_obj_t *parent) {
 
-	create_prefs_section_title(parent, "Video");
+	create_prefs_section_title(parent, "USB");
 
-	auto video_cont = create_prefs_labeled_check(parent, "USB Video Output:");
-	enabled_check = lv_obj_get_child(video_cont, 1);
+	auto mode_cont = create_prefs_labeled_dropdown(parent, "USB Mode:", "Console\nVideo\nMIDI");
+	mode_dropdown = lv_obj_get_child(mode_cont, 1);
+	lv_obj_set_width(mode_dropdown, 110);
 
-	create_prefs_note(video_cont, "Stream screen over USB\nas a UVC video device");
+	create_prefs_note(mode_cont,
+					  "Console: serial console\nVideo: screen as UVC device\nMIDI: USB-MIDI port\n(replaces console)");
 
 	auto mirror_cont = create_prefs_labeled_check(parent, "Mirror X:");
 	mirror_check = lv_obj_get_child(mirror_cont, 1);
