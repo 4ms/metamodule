@@ -50,8 +50,8 @@ public:
 			pr_err("Can't communicate with FUSB302\n");
 
 		// tm = HAL_GetTick();
-		pr_dbg("Starting DRP polling\n");
-		usbctl.start_drp_polling();
+		pr_dbg("Starting USB role polling\n");
+		start_polling_for_role();
 
 		usb_device.start();
 		usb_host.init();
@@ -104,8 +104,8 @@ public:
 					usb_device.stop();
 				}
 
-				//printf_("Disconnected, resuming DRP polling\n");
-				usbctl.start_drp_polling();
+				//printf_("Disconnected, resuming polling\n");
+				start_polling_for_role();
 			}
 			state = newstate;
 		}
@@ -151,28 +151,28 @@ public:
 			UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
 
 		if (state == FUSB302::Device::ConnectedState::AsHost) {
-			// Don't start a device class while we're acting as a host: starting
-			// the device peripheral would force the shared OTG core into device
-			// mode under the host IRQ and storm it. Just latch the desired mode;
-			// handle_fusb_int()'s AsDevice path applies it when the role next
-			// becomes a device.
+			// Don't start a device class while we're acting as a host, just
+			// store the desired mode for later.
 			usb_device.set_mode_pending(mode);
 		} else {
 			usb_device.set_mode(mode);
 		}
 	}
 
-	// Store the desired USB-C data-role policy pushed from the A7.
-	//
-	// TODO (hardware): actually honor ForceHost/ForceDevice. Today the role is
-	// always auto-detected by the FUSB302 DRP toggle-polling (start_drp_polling()
-	// + handle_fusb_int()), so this preference is recorded but not yet acted on.
-	// Forcing requires configuring the FUSB302 to present a fixed source (Rp +
-	// drive VBUS) or sink (Rd) instead of DRP, and driving `state` accordingly --
-	// all on the single shared OTG core, so mind the AsHost/AsDevice IRQ-dispatch
-	// constraint (see the class header notes) to avoid the OTG IRQ storm.
+	// Apply the USB-C data-role policy pushed from the A7. Auto = DRP toggle;
+	// ForceHost = SRC-only toggle; ForceDevice = SNK-only toggle.
 	void set_role_mode(UsbRoleMode mode) {
+		if (mode == role_mode)
+			return;
 		role_mode = mode;
+
+		using enum FUSB302::Device::ConnectedState;
+		// Re-poll in the new role only if we're not in an active connection.
+		// If currently attached (AsHost/AsDevice), the new role takes effect on
+		// the next disconnect (handle_fusb_int's None path re-polls). Don't tear
+		// down a live connection out from under the OTG core.
+		if (state == None || state == TogglePolling)
+			start_polling_for_role();
 	}
 
 	MidiHost &get_midi_host() {
@@ -199,6 +199,26 @@ public:
 			return usb_host.is_msc_mounted();
 		} else
 			return false;
+	}
+
+private:
+	// Start (or restart) the FUSB302 toggle polling for the current role policy.
+	void start_polling_for_role() {
+		switch (role_mode) {
+			case UsbRoleMode::ForceHost:
+				pr_info("USB: forcing host role (SRC polling)\n");
+				usbctl.start_src_polling();
+				break;
+			case UsbRoleMode::ForceDevice:
+				pr_info("USB: forcing device role (SNK polling)\n");
+				usbctl.start_snk_polling();
+				break;
+			case UsbRoleMode::Auto:
+			default:
+				pr_dbg("USB: auto host/device role (DRP polling)\n");
+				usbctl.start_drp_polling();
+				break;
+		}
 	}
 };
 } // namespace MetaModule
