@@ -850,7 +850,10 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == page->usb_section.device_mode_dropdown || target == page->usb_section.mirror_check) {
+		if (target == page->usb_section.role_dropdown) {
+			lv_obj_scroll_to_view_recursive(lv_obj_get_parent(page->usb_section.role_dropdown), LV_ANIM_ON);
+
+		} else if (target == page->usb_section.device_mode_dropdown || target == page->usb_section.mirror_check) {
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);
 
 			// scroll to top if we select first items
