@@ -112,17 +112,3 @@ void VCVModuleWrapper::mark_output_patched(int output_id) {
 	if (outputs[output_id].channels == 0)
 		outputs[output_id].channels = 1;
 }
-
-// CoreProcessor::PolyPortBuffer VCVModuleWrapper::get_output_poly_buffer(int output_id) {
-// 	if (output_id < (int)outputs.size())
-// 		return {outputs[output_id].voltages.begin(), &outputs[output_id].channels};
-// 	else
-// 		return {nullptr, nullptr};
-// }
-
-// CoreProcessor::PolyPortBuffer VCVModuleWrapper::get_input_poly_buffer(int input_id) {
-// 	if (input_id < (int)inputs.size())
-// 		return {inputs[input_id].voltages.begin(), &inputs[input_id].channels};
-// 	else
-// 		return {nullptr, nullptr};
-// }
