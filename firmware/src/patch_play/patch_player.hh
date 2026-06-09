@@ -1588,41 +1588,31 @@ public:
 
 	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack) {
 		pr_trace("update_or_add_input_panel_conn: %x\n", panel_jack_id);
-		auto chan = Midi::midi_channel(panel_jack_id);
+		const auto chan = Midi::midi_channel(panel_jack_id);
+
+		const auto polybuf =
+			(input_jack.module_id < num_modules) ?
+				plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
+				CoreProcessor::PolyPortBuffer{};
 
 		if (Midi::midi_note_pitch_poly(panel_jack_id)) {
-			auto buf = (input_jack.module_id < num_modules) ?
-						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
-						   CoreProcessor::PolyPortBuffer{};
-			update_or_add_poly(midi_poly_pitch_conns, input_jack, chan, buf);
+			update_or_add_poly(midi_poly_pitch_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI note poly ch:%u", chan);
 
 		} else if (Midi::midi_note_gate_poly(panel_jack_id)) {
-			auto buf = (input_jack.module_id < num_modules) ?
-						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
-						   CoreProcessor::PolyPortBuffer{};
-			update_or_add_poly(midi_poly_gate_conns, input_jack, chan, buf);
+			update_or_add_poly(midi_poly_gate_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI gate poly ch:%u", chan);
 
 		} else if (Midi::midi_note_vel_poly(panel_jack_id)) {
-			auto buf = (input_jack.module_id < num_modules) ?
-						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
-						   CoreProcessor::PolyPortBuffer{};
-			update_or_add_poly(midi_poly_vel_conns, input_jack, chan, buf);
+			update_or_add_poly(midi_poly_vel_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI vel poly ch:%u", chan);
 
 		} else if (Midi::midi_note_aft_poly(panel_jack_id)) {
-			auto buf = (input_jack.module_id < num_modules) ?
-						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
-						   CoreProcessor::PolyPortBuffer{};
-			update_or_add_poly(midi_poly_aft_conns, input_jack, chan, buf);
+			update_or_add_poly(midi_poly_aft_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI aft poly ch:%u", chan);
 
 		} else if (Midi::midi_note_retrig_poly(panel_jack_id)) {
-			auto buf = (input_jack.module_id < num_modules) ?
-						   plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
-						   CoreProcessor::PolyPortBuffer{};
-			update_or_add_poly(midi_poly_retrig.conns, input_jack, chan, buf);
+			update_or_add_poly(midi_poly_retrig.conns, input_jack, chan, polybuf);
 			pr_trace("MIDI retrig poly ch:%u", chan);
 
 		} else if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
