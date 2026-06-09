@@ -40,6 +40,11 @@ struct ModuleViewPage : PageBase {
 
 		init_bg(ui_MappingMenu);
 
+		// Only ask the player about poly channels when the viewed patch is the playing patch
+		cable_drawer.set_channel_lookup([this](Jack out, Jack in) -> unsigned {
+			return is_patch_playloaded ? patch_playloader.num_poly_cable_channels(out, in) : 0;
+		});
+
 		lv_draw_img_dsc_init(&img_dsc);
 
 		lv_obj_remove_style(ui_ElementRoller, nullptr, LV_STATE_EDITED);

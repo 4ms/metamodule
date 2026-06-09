@@ -759,6 +759,23 @@ public:
 			return 0;
 	}
 
+	// Returns the number of poly channels flowing from out jack to in jack,
+	// or 0 if the connection is mono (or unknowable, e.g. no patch loaded)
+	unsigned num_poly_cable_channels(Jack out, Jack in) {
+		if (!is_loaded || out.module_id >= num_modules || in.module_id >= num_modules)
+			return 0;
+
+		auto out_buf = plugin_module_get_poly_output_buffer(modules[out.module_id], out.jack_id);
+		if (!out_buf.channels || *out_buf.channels <= 1)
+			return 0;
+
+		auto in_buf = plugin_module_get_poly_input_buffer(modules[in.module_id], in.jack_id);
+		if (!in_buf.channels || *in_buf.channels <= 1)
+			return 0;
+
+		return std::min(*out_buf.channels, *in_buf.channels);
+	}
+
 	void set_midi_poly_num(uint32_t poly_num) {
 		pd.midi_poly_num = poly_num;
 		set_midi_poly_channel_count(poly_num);

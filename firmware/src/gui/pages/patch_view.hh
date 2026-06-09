@@ -46,6 +46,11 @@ struct PatchViewPage : PageBase {
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
+		// Only ask the player about poly channels when the viewed patch is the playing patch
+		cable_drawer.set_channel_lookup([this](Jack out, Jack in) -> unsigned {
+			return is_patch_playloaded ? patch_playloader.num_poly_cable_channels(out, in) : 0;
+		});
+
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_AddButton, add_module_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_KnobButton, knob_button_cb, LV_EVENT_CLICKED, this);
