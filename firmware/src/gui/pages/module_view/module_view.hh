@@ -254,6 +254,8 @@ struct ModuleViewPage : PageBase {
 		// Patch file changed via wifi/disk
 		poll_patch_file_changed();
 
+		poll_poly_cable_changes();
+
 		if (gui_state.force_redraw_patch || gui_state.view_patch_file_changed) {
 
 			abort_cable(gui_state, notify_queue);
@@ -473,6 +475,7 @@ private:
 	void redraw_elements();
 	void update_map_ring_style();
 	void update_cable_style(bool force = false);
+	void poll_poly_cable_changes();
 	void update_graphic_throttle_setting();
 
 	// Defined in module_view/quick_assign.cc
@@ -541,6 +544,8 @@ private:
 	bool suppress_next_click = false;
 	bool quick_control_mode = false;
 	Toggler quickmap_rotary_button;
+
+	uint64_t last_poly_check_tm = 0;
 
 	lv_obj_t *load_meter;
 	lv_obj_t *last_button_focused = nullptr;

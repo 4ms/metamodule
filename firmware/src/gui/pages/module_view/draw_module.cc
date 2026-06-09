@@ -136,6 +136,21 @@ void ModuleViewPage::update_cable_style(bool force) {
 	last_cable_style = page_settings.cable_style;
 }
 
+// Re-draw cables when a poly channel count changes after the cables were drawn
+// (e.g. a cable was added/removed, or a module's poly setting was changed)
+void ModuleViewPage::poll_poly_cable_changes() {
+	if (page_settings.cable_style.mode != MapRingStyle::Mode::ShowAll)
+		return;
+
+	auto now = get_time();
+	if (now - last_poly_check_tm < 100)
+		return;
+	last_poly_check_tm = now;
+
+	if (cable_drawer.channel_counts_changed(*patch))
+		cable_drawer.draw_single_module(*patch, this_module_id);
+}
+
 void ModuleViewPage::update_graphic_throttle_setting() {
 	if (page_settings.show_graphic_screens) {
 		dyn_draw_throttle = std::max(page_settings.graphic_screen_throttle, 1u);

@@ -30,6 +30,9 @@ class CableDrawer {
 	// Returns the live poly channel count for the cable from out jack to in jack (0 or 1 means mono)
 	std::function<unsigned(Jack out, Jack in)> channel_lookup;
 
+	// Channel count of each (out, in) jack pair as of the last draw, used to detect changes
+	std::vector<uint8_t> drawn_channel_counts;
+
 	//LVGL canvas is internally an img, which has 11 bits for height, so max is 2047
 	static constexpr uint32_t Height = std::min<uint32_t>(MaxCanvasHeight, 2047);
 	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, Height)> cable_buf;
@@ -113,9 +116,31 @@ public:
 		lv_obj_set_height(canvas, height);
 	}
 
+	// Returns true if any poly channel count differs from when cables were last drawn
+	bool channel_counts_changed(const PatchData &patch) const {
+		size_t i = 0;
+		for (const auto &cable : patch.int_cables) {
+			for (const auto &in : cable.ins) {
+				if (i >= drawn_channel_counts.size() || drawn_channel_counts[i] != num_channels(cable.out, in))
+					return true;
+				i++;
+			}
+		}
+		return i != drawn_channel_counts.size();
+	}
+
+	void capture_channel_counts(const PatchData &patch) {
+		drawn_channel_counts.clear();
+		for (const auto &cable : patch.int_cables) {
+			for (const auto &in : cable.ins)
+				drawn_channel_counts.push_back(num_channels(cable.out, in));
+		}
+	}
+
 	void draw(const PatchData &patch) {
 		clear();
 		lv_obj_move_foreground(canvas);
+		capture_channel_counts(patch);
 
 		for (const auto &cable : patch.int_cables) {
 			if (auto outpos = find_outjack_xy(cable.out)) {
@@ -132,6 +157,7 @@ public:
 	void draw_single_module(const PatchData &patch, uint32_t module_id) {
 		clear();
 		lv_obj_move_foreground(canvas);
+		capture_channel_counts(patch);
 
 		for (const auto &cable : patch.int_cables) {
 			if (cable.out.module_id == module_id) {
