@@ -301,7 +301,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	using enum UsbDeviceMode;
 	if (node.is_map() && node.has_child("usb_device_mode")) {
 		auto v = node["usb_device_mode"].val();
-		settings->usb_device_mode = v == "Video" ? Video : v == "MIDI" ? Midi : Cdc;
+		settings->usb_device_mode = v == "Video" ? Video : v == "MIDI" ? Midi : v == "Console" ? Cdc : Midi;
 	} else {
 		settings->usb_device_mode = UserSettings{}.usb_device_mode;
 	}
