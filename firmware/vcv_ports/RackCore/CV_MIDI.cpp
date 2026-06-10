@@ -76,10 +76,10 @@ struct CV_MIDI : Module {
 		static unsigned last_sysex_frame = 0;
 
 		// Send sysex bursts 240 times a second
-		if ((args.frame - last_sysex_frame) > (args.sampleRate / 240)){
+		if ((args.frame - last_sysex_frame) > (args.sampleRate / 240)) {
 			last_sysex_frame = args.frame;
 
-			printf("%02x\n", sysex_i & 0x7F);
+			// printf("%02x\n", sysex_i & 0x7F);
 
 			midi::Message m;
 			// Send first 2 bytes

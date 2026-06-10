@@ -68,7 +68,7 @@ void Output::sendMessage(const Message &message) {
 	msg.usb_hdr.cin = message.usb_code;
 	msg.usb_hdr.cable_num = message.getUsbCable();
 
-	printf("%08x\n", msg.raw());
+	// printf("%08x\n", msg.raw());
 	internal->queue.put(msg);
 }
 
