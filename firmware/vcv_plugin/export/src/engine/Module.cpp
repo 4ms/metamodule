@@ -4,6 +4,7 @@
 #include "console/pr_dbg.hh"
 #include "jansson.h"
 #include "vcv_plugin/internal/nanovg_pixbuf.hh"
+#include "vcv_plugin/internal/rack_module_registry.hh"
 #include <array>
 #include <context.hpp>
 #include <engine/Engine.hpp>
@@ -24,9 +25,12 @@ struct Module::Internal {
 
 Module::Module()
 	: internal{new Internal} {
+	MetaModule::RackModuleRegistry::register_module(this);
 }
 
 Module::~Module() {
+	MetaModule::RackModuleRegistry::unregister_module(this);
+
 	for (auto paramQuantity : paramQuantities) {
 		if (paramQuantity)
 			delete paramQuantity;
@@ -245,7 +249,8 @@ void Module::onRandomize(const RandomizeEvent &e) {
 }
 
 bool Module::isBypassed() {
-	return false;
+	// CoreProcessor::bypassed is maintained by the MetaModule engine
+	return bypassed;
 }
 
 void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer, unsigned width, lv_obj_t *canvas) {

@@ -48,6 +48,7 @@ target_sources(
 
          src/engine/Engine.cpp
          src/engine/Module.cpp
+         src/engine/rack_module_registry.cc
          src/engine/ParamQuantity.cpp
          src/engine/LightInfo.cc
          src/engine/PortInfo.cc
