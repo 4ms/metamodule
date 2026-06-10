@@ -46,6 +46,11 @@ elseif (ALL_SAN)
 endif()
 
 
+# Default to WARN so errors/warnings are visible when configuring with plain
+# cmake (log_levels.cmake defaults to NONE, which compiles out even pr_err).
+# A -DLOG_LEVEL=... on the command line still takes precedence.
+set(LOG_LEVEL WARN CACHE STRING "Console log level")
+
 include(${FWDIR}/cmake/log_levels.cmake)
 enable_logging()
 
