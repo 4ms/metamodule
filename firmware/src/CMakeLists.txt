@@ -149,6 +149,7 @@ add_executable(
   ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
+  ${FWDIR}/src/patch_play/rack_expanders.cc
 
   #
   ${FWDIR}/src/fs/syscall/syscalls.cc

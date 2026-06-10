@@ -18,6 +18,7 @@
 #include "patch_play/param_watch.hh"
 #include "patch_play/patch_player_query_patch.hh"
 #include "patch_play/plugin_module.hh"
+#include "patch_play/rack_expanders.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include "system/abort_rescue.hh"
@@ -126,6 +127,8 @@ private:
 	MulticorePlayer smp;
 	Balancer<MulticorePlayer::NumCores, MAX_MODULES_IN_PATCH> core_balancer;
 
+	RackExpanders rack_expanders;
+
 	float samplerate = 48000.f;
 
 	// Index of each module that appears more than once.
@@ -150,6 +153,10 @@ public:
 
 	ParamWatcher &watched_params() {
 		return param_watcher;
+	}
+
+	RackExpanders &expanders() {
+		return rack_expanders;
 	}
 
 	void copy_patch_data(const PatchData &patchdata) {
@@ -252,6 +259,16 @@ public:
 				modules[id]->bypassed = true;
 		}
 
+		// Wire up VCV-style expander module connections
+		rack_expanders.clear();
+		for (auto const &exp : pd.expanders) {
+			if (exp.left_module_id < num_modules && exp.right_module_id < num_modules)
+				rack_expanders.connect(modules[exp.left_module_id].get(),
+									   modules[exp.right_module_id].get(),
+									   exp.left_module_id,
+									   exp.right_module_id);
+		}
+
 		calc_multiple_module_indicies();
 
 		active_knob_set = 0;
@@ -320,6 +337,8 @@ public:
 
 			// Synchronize cores here before they update each other's module's inputs
 			smp.join();
+
+			rack_expanders.flip_messages();
 
 			update_midi_pulses();
 
@@ -417,6 +436,7 @@ public:
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
 			step_module(module_i);
 		}
+		rack_expanders.flip_messages();
 		process_outputs_samecore<0>();
 		process_outputs_diffcore<0>();
 		process_summed_inputs<0>();
@@ -440,6 +460,7 @@ public:
 
 		smp.join();
 		is_loaded = false;
+		rack_expanders.clear();
 		for (size_t i = 0; i < num_modules; i++) {
 			plugin_module_deinit(modules[i]);
 			modules[i].reset(nullptr);
