@@ -148,6 +148,7 @@ if(HEADLESS)
 
 		${FWDIR}/src/midi/midi_router.cc
 		${FWDIR}/src/patch_play/plugin_module.cc
+		${FWDIR}/src/patch_play/rack_expanders.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
