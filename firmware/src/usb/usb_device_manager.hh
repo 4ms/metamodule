@@ -100,6 +100,14 @@ struct UsbDeviceManager {
 		mode = new_mode;
 	}
 
+
+	// True if a host has enumerated us (SetConfiguration received), including
+	// if the bus was subsequently suspended. Class-agnostic.
+	bool is_configured() {
+		return USBD_Device.dev_state == USBD_STATE_CONFIGURED ||
+			   (USBD_Device.dev_state == USBD_STATE_SUSPENDED && USBD_Device.dev_old_state == USBD_STATE_CONFIGURED);
+	}
+
 	void process() {
 		if (mode == UsbDeviceMode::Cdc)
 			serial.process();
