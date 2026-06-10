@@ -145,7 +145,9 @@ struct MidiMessage {
 	}
 
 	bool is_sysex() const {
-		return status == SysEx;
+		return status == SysEx || usb_hdr.cin == 0x4 || usb_hdr.cin == 0x6 || usb_hdr.cin == 0x7 ||
+			   status == EndExclusive;
+		//0x5 can be SysEx also, but it also can also be System Common. If SysEx, it will have status==0xf7
 	}
 
 	bool has_sysex_end() const {
