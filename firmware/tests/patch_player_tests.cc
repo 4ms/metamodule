@@ -2747,6 +2747,7 @@ PatchData:
       ins:
         - module_id: 1
           jack_id: 0
+  int_cables: []
   mapped_outs:
   static_knobs:
   mapped_knobs:
