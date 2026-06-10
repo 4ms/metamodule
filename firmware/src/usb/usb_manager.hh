@@ -24,17 +24,17 @@ class UsbManager {
 	FUSB302::Device usbctl{usbi2c, FUSBDevAddr};
 	FUSB302::Device::ConnectedState state = FUSB302::Device::ConnectedState::None;
 	FUSBIntPin fusb_int_pin;
-	bool int_asserted = false;
 	bool found_fusb = false;
+	uint32_t last_device_link_check = 0;
 	UsbRoleMode role_mode = UsbRoleMode::Auto;
 
 	// Debug: timer for dumping registers
 	// uint32_t tm;
 
 	// Known issues:
-	// Connecting to some self-powered MIDI keyboards that have a dual host/device mode feature, can sometimes
-	// cause the MM to no longer connect as a device (i.e. USB Video mode doesn't work). Unknown reasons.
-	// Workaround is to set the device to to Device-only mode (OXI One: "Device", not "Device self-powered").
+	// Self-powered MIDI keyboards operating in Host + Power Sink mode (e.g. OXI One "Host No Power" mode),
+	// will fail to connect. The MetaModule only connects to Device+Sink (whether or not power is actually
+	// being sunk/used) and Host+Source (e.g. a computer).
 
 public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
@@ -112,14 +112,24 @@ public:
 	}
 
 	void process() {
+		// INT_N is a level interrupt: the FUSB302 holds it asserted while any
+		// unmasked event is pending, releasing it only when handle_interrupt()
+		// reads the Interrupt registers.
 		if (fusb_int_pin.read()) {
-			if (!int_asserted) {
-				int_asserted = true;
-				handle_fusb_int();
-			}
-		} else {
-			if (int_asserted) {
-				int_asserted = false;
+			handle_fusb_int();
+		}
+
+		// Backstop for unplug events the FUSB302 never raises an interrupt
+		// for (observed with OXI One Host+Power after a SRC mis-settle, and
+		// VBUSOK has been seen not to fire on VBUS decay): while attached as
+		// a device, poll the link status at a low rate and run the normal
+		// interrupt handling if it shows the link down.
+		if (state == FUSB302::Device::ConnectedState::AsDevice) {
+			if (HAL_GetTick() - last_device_link_check > 250) {
+				last_device_link_check = HAL_GetTick();
+				auto status0 = usbctl.read<FUSB302::Status0>();
+				if (status0.VBusOK == 0 || status0.BCLevel == 0)
+					handle_fusb_int();
 			}
 		}
 
