@@ -3,18 +3,18 @@
 #include "button_exp_knobset_settings.hh"
 #include "catchup_settings.hh"
 #include "fs/volumes.hh"
+#include "usb/usb_device_mode.hh"
+#include "usb/usb_role_mode.hh"
 #include "user_settings/fs_settings.hh"
 #include "user_settings/midi_pc_settings.hh"
 #include "user_settings/midi_settings.hh"
-#include "user_settings/patch_suggested_audio_settings.hh"
-#include "user_settings/plugin_preload_settings.hh"
 #include "user_settings/missing_plugin_settings.hh"
 #include "user_settings/notification_settings.hh"
+#include "user_settings/patch_suggested_audio_settings.hh"
+#include "user_settings/plugin_preload_settings.hh"
 #include "user_settings/screensaver_settings.hh"
 #include "user_settings/video_settings.hh"
 #include "user_settings/view_settings.hh"
-#include "usb/usb_device_mode.hh"
-#include "usb/usb_role_mode.hh"
 
 namespace MetaModule
 {
@@ -46,7 +46,7 @@ struct UserSettings {
 
 	// Which USB device class the OTG core presents (Console/Video/MIDI), mutually
 	// exclusive.
-	UsbDeviceMode usb_device_mode = UsbDeviceMode::Cdc;
+	UsbDeviceMode usb_device_mode = UsbDeviceMode::Midi;
 };
 
 } // namespace MetaModule

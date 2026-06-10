@@ -49,7 +49,7 @@ class UsbManager {
 
 public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: usb_device{console_buffers, UsbDeviceMode::Cdc}
+		: usb_device{console_buffers, UsbDeviceMode::Midi}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		found_fusb = usbctl.init(); //NOLINT
 	}
