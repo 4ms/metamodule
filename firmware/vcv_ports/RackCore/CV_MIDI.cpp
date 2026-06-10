@@ -72,6 +72,24 @@ struct CV_MIDI : Module {
 	}
 
 	void process(const ProcessArgs &args) override {
+		static bool did_sysex = false;
+		if (!did_sysex){
+			midi::Message m;
+			m.startSysEx(0x00, 0x21);
+			midiOutput.sendMessage(m);
+			m.continueSysEx(0x50, 0x00, 0x01);
+			midiOutput.sendMessage(m);
+			m.continueSysEx(0x00, 0x02, 0x01);
+			midiOutput.sendMessage(m);
+			m.continueSysEx(0x01, 0x04, 0x01);
+			midiOutput.sendMessage(m);
+			m.continueSysEx(0x00, 0x01, 0x02);
+			midiOutput.sendMessage(m);
+			m.endSysEx();
+			midiOutput.sendMessage(m);
+			did_sysex = true;
+		}
+
 		// MIDI baud rate is 31250 b/s, or 3125 B/s.
 		// CC messages are 3 bytes, so we can send a maximum of 1041 CC messages per second.
 		// Since multiple CCs can be generated, play it safe and limit the CC rate to 200 Hz.
