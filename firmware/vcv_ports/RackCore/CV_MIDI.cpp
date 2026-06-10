@@ -72,22 +72,31 @@ struct CV_MIDI : Module {
 	}
 
 	void process(const ProcessArgs &args) override {
-		static bool did_sysex = false;
-		if (!did_sysex){
+		static int sysex_i = 0;
+		static unsigned last_sysex_frame = 0;
+
+		// Send sysex bursts 240 times a second
+		if ((args.frame - last_sysex_frame) > (args.sampleRate / 240)){
+			last_sysex_frame = args.frame;
+
+			printf("%02x\n", sysex_i & 0x7F);
+
 			midi::Message m;
-			m.startSysEx(0x00, 0x21);
+			// Send first 2 bytes
+			m.startSysEx(sysex_i & 0x7F, (sysex_i + 1) & 0x7F);
 			midiOutput.sendMessage(m);
-			m.continueSysEx(0x50, 0x00, 0x01);
-			midiOutput.sendMessage(m);
-			m.continueSysEx(0x00, 0x02, 0x01);
-			midiOutput.sendMessage(m);
-			m.continueSysEx(0x01, 0x04, 0x01);
-			midiOutput.sendMessage(m);
-			m.continueSysEx(0x00, 0x01, 0x02);
-			midiOutput.sendMessage(m);
+			sysex_i += 2;
+
+			// Send next 10 * 3 bytes = 32 total
+			for (auto i = 0; i < 10; i++) {
+				m.continueSysEx(sysex_i & 0x7F, (sysex_i + 1) & 0x7F, (sysex_i + 2) & 0x7F);
+				midiOutput.sendMessage(m);
+				sysex_i += 3;
+			}
+
 			m.endSysEx();
 			midiOutput.sendMessage(m);
-			did_sysex = true;
+			return;
 		}
 
 		// MIDI baud rate is 31250 b/s, or 3125 B/s.
