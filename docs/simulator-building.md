@@ -18,6 +18,10 @@ Generate the build system:
 cmake --fresh -B build -GNinja      #Or whatever build system you want
 ```
 
+By default the simulator logs errors and warnings to the console. For more
+verbose logging, add `-DLOG_LEVEL=DEBUG` (levels: NONE, ERROR, WARN, INFO,
+DEBUG, TRACE, DUMP).
+
 Build it:
 
 ```
