@@ -251,3 +251,15 @@ void nvgTextMetrics(NVGcontext *ctx, float *ascender, float *descender, float *l
 int nvgTextBreakLines( NVGcontext *ctx, const char *string, const char *end, float breakRowWidth, NVGtextRow *rows, int maxRows) { return {}; }
 // clang-format on
 }
+
+// Pixel-buffer contexts for module graphic displays (GUI implementation is
+// vcv_plugin/internal/nanovg_pixbuf.cc). Headless never shows a display, so
+// rack::engine::Module::show_graphic_display() is never called.
+#include "vcv_plugin/internal/nanovg_pixbuf.hh"
+
+NVGcontext *nvgCreatePixelBufferContext(void *, std::span<uint32_t>, uint32_t, uint32_t) {
+	return nullptr;
+}
+
+void nvgDeletePixelBufferContext(NVGcontext *) {
+}
