@@ -34,7 +34,17 @@ public:
 		init_hhcd();
 	}
 
-	void start() {
+	// source_vbus = false starts the host stack without enabling our 5V
+	// source. Used for the data-role fallback against non-compliant
+	// self-powered devices that present Rp and source VBUS themselves --
+	// driving our own VBUS against theirs must be avoided.
+	//
+	// Note: a "soft" host start (skipping HAL_HCD_MspInit's USBO force-reset
+	// by pre-marking hhcd READY) was tried and does NOT work: the port powers
+	// up but never detects device pull-ups. The OTG core needs the reset to
+	// become a functional host after running as a device. Resetting with the
+	// partner's VBUS hot is fine (device re-connects do it routinely).
+	void start(bool source_vbus = true) {
 		init_hhcd();
 
 		auto status = USBH_Init(&usbhost, usbh_state_change_callback, 0);
@@ -49,9 +59,24 @@ public:
 		if (err != USBH_OK)
 			pr_err("Error starting host\n");
 
-		src_enable.high();
-		pr_trace("VBus high, starting host\n");
+		if (source_vbus) {
+			src_enable.high();
+			pr_trace("VBus high, starting host\n");
+		}
 		// HAL_Delay(500);
+	}
+
+	// True if the HCD has detected a device attached (D+ pull-up seen),
+	// whether or not it has enumerated yet.
+	bool is_device_attached() {
+		return usbhost.device.is_connected;
+	}
+
+	// Raw HPRT0 register (offset 0x440), for diagnostics: bit0 (PCSTS) is the
+	// live electrical port connect status -- set iff a device pull-up is
+	// present on D+/D-, regardless of interrupt handling.
+	uint32_t read_port_status() {
+		return *reinterpret_cast<volatile uint32_t *>(reinterpret_cast<uint32_t>(hhcd.Instance) + 0x440U);
 	}
 
 	void vbus_off() {

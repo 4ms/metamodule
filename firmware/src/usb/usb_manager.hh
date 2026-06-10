@@ -28,6 +28,17 @@ class UsbManager {
 	uint32_t last_device_link_check = 0;
 	UsbRoleMode role_mode = UsbRoleMode::Auto;
 
+	// Data-role fallback for non-compliant self-powered devices (e.g. OXI One
+	// "Device Self Powered") that present Rp and source VBUS -- the Type-C
+	// signature of a host -- while expecting to be the USB *data* device.
+	// CC-wise we stay an attached sink (the FUSB302 state remains AsDevice,
+	// so its sink detach detection still applies); only the OTG core's data
+	// role is swapped. See update_role_fallback().
+	bool host_fallback = false; // OTG core is running HCD while FUSB state is AsDevice
+	bool role_settled = false;	// enumeration succeeded in some role; stop swapping
+	uint32_t role_phase_tm = 0; // when the current PCD/HCD trial phase began
+	static constexpr uint32_t RolePhaseTimeoutMs = 2000;
+
 	// Debug: timer for dumping registers
 	// uint32_t tm;
 
@@ -62,7 +73,10 @@ public:
 			using enum FUSB302::Device::ConnectedState;
 
 			if (state == AsDevice) {
-				HAL_PCD_IRQHandler(&hpcd);
+				if (host_fallback)
+					HAL_HCD_IRQHandler(&UsbHostManager::hhcd);
+				else
+					HAL_PCD_IRQHandler(&hpcd);
 			} else if (state == AsHost) {
 				HAL_HCD_IRQHandler(&UsbHostManager::hhcd);
 			}
@@ -78,6 +92,9 @@ public:
 			if (newstate == AsDevice) {
 				pr_info("Connected as a device\n");
 				state = newstate;
+				host_fallback = false;
+				role_settled = false;
+				role_phase_tm = HAL_GetTick();
 				// start() before enabling IRQ: clears pending host-mode GINTSTS events
 				usb_device.start();
 				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
@@ -101,7 +118,13 @@ public:
 					pr_info("Stopping device\n");
 					state = None;
 					mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-					usb_device.stop();
+					// The OTG core may be running HCD via the data-role fallback
+					if (host_fallback) {
+						usb_host.stop();
+						host_fallback = false;
+					} else {
+						usb_device.stop();
+					}
 				}
 
 				//printf_("Disconnected, resuming polling\n");
@@ -138,7 +161,12 @@ public:
 		}
 
 		if (state == FUSB302::Device::ConnectedState::AsDevice) {
-			usb_device.process();
+			if (host_fallback)
+				usb_host.process();
+			else
+				usb_device.process();
+
+			update_role_fallback();
 		} else { // None or AsHost:
 				 // usb_device.process_disconnected();
 		}
@@ -160,7 +188,7 @@ public:
 		if (mode == UsbDeviceMode::Video)
 			UsbVideoDevice::set_framebuffer(SharedMemoryS::ptrs.uvc_framebuffer);
 
-		if (state == FUSB302::Device::ConnectedState::AsHost) {
+		if (state == FUSB302::Device::ConnectedState::AsHost || host_fallback) {
 			// Don't start a device class while we're acting as a host, just
 			// store the desired mode for later.
 			usb_device.set_mode_pending(mode);
@@ -198,20 +226,72 @@ public:
 	}
 
 	bool is_drive_detected() {
-		if (state == FUSB302::Device::ConnectedState::AsHost) {
+		if (state == FUSB302::Device::ConnectedState::AsHost || host_fallback) {
 			return usb_host.is_msc_connected();
 		} else
 			return false;
 	}
 
 	bool is_drive_mounted() {
-		if (state == FUSB302::Device::ConnectedState::AsHost) {
+		if (state == FUSB302::Device::ConnectedState::AsHost || host_fallback) {
 			return usb_host.is_msc_mounted();
 		} else
 			return false;
 	}
 
 private:
+	// While CC-attached as a sink, a compliant partner is a host and will
+	// enumerate us promptly. A non-compliant self-powered device presenting
+	// Rp + VBUS never will. If we haven't been enumerated after a timeout,
+	// swap the OTG core to host mode -- without sourcing VBUS, the partner
+	// already drives it -- and look for their D+ pull-up. If nothing attaches
+	// there either (e.g. a charger, or a host that's just slow), swap back,
+	// alternating until one role succeeds. Only in Auto role mode: ForceDevice
+	// means device, period. The FUSB302 stays in AsDevice throughout, so CC
+	// detach detection (VBUS/BCLevel drop, plus the 250 ms backstop above) is
+	// unaffected.
+	void update_role_fallback() {
+		if (role_settled || role_mode != UsbRoleMode::Auto)
+			return;
+
+		if (!host_fallback) {
+			if (usb_device.is_configured()) {
+				role_settled = true;
+				return;
+			}
+			if (HAL_GetTick() - role_phase_tm > RolePhaseTimeoutMs) {
+				pr_info("USB: not enumerated by partner, trying host data role (not sourcing VBUS)\n");
+				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+				// Full stop + full host init: the host port only detects
+				// pull-ups after the MspInit USBO force-reset, and resetting
+				// the core with the partner's VBUS hot is proven safe (every
+				// device re-connect to a computer does the same).
+				usb_device.stop();
+				usb_host.start(false);
+				host_fallback = true;
+				role_phase_tm = HAL_GetTick();
+				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+			}
+		} else {
+			if (usb_host.is_device_attached()) {
+				role_settled = true;
+				return;
+			}
+			if (HAL_GetTick() - role_phase_tm > RolePhaseTimeoutMs) {
+				// PCSTS (bit0) is the live electrical connect status: if it's 0
+				// here, the partner never presented a D+ pull-up at all
+				pr_info("USB: no device attached (HPRT=0x%08x), trying device data role\n",
+						(unsigned)usb_host.read_port_status());
+				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+				usb_host.stop();
+				usb_device.start();
+				host_fallback = false;
+				role_phase_tm = HAL_GetTick();
+				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+			}
+		}
+	}
+
 	// Start (or restart) the FUSB302 toggle polling for the current role policy.
 	void start_polling_for_role() {
 		switch (role_mode) {
