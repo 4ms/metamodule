@@ -3,8 +3,12 @@
 #include "coreproc_plugin/async_thread_control.hh"
 #include "file_io.hh"
 #include "patch-serial/yaml_to_patch.hh"
+#include "plugin/Plugin.hpp"
+// must come after plugin/Plugin.hpp:
+#include "ext_plugin_builtin.hh"
 #include "settings.hh"
 #include <chrono>
+#include <list>
 #include <span>
 
 namespace MetaModule::Headless
@@ -45,6 +49,10 @@ int main(int argc, char *argv[]) {
 
 	MetaModuleSim::Settings settings;
 	settings.parse(argc, argv);
+
+	// Register VCV-ported built-in brands (see ext-plugins.cmake)
+	std::list<rack::plugin::Plugin> builtin_plugins;
+	load_ext_builtin_plugins(builtin_plugins);
 
 	const auto samples_to_run = settings.samples_to_run;
 	const float effective_play_time = samples_to_run / 48000.f;
