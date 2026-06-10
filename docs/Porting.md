@@ -78,7 +78,7 @@ set(brands
 ```
 
 
-5) **Add modules to internal_plugin_manager.hh**
+5) **Add modules to load_internal_plugins.hh**
 
 TODO
 
@@ -93,7 +93,7 @@ extern rack::plugin::Model *modelSomeOtherModule;
 
 
 ```c++
-// add this to internal_plugin_manager.hh:
+// add this to vcv_ports/load_internal_plugins.hh:
 #include "glue/Brand/plugin.hh"
 
 // add this to the end of load_internal_plugins()
