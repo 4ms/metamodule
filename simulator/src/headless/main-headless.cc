@@ -1,5 +1,6 @@
 #include "audio_files.hh"
 #include "audio_wrapper.hh"
+#include "coreproc_plugin/async_thread_control.hh"
 #include "file_io.hh"
 #include "patch-serial/yaml_to_patch.hh"
 #include "settings.hh"
@@ -53,6 +54,8 @@ int main(int argc, char *argv[]) {
 
 	auto input = read_wav(settings.audio_in_file, samples_to_run);
 
+	MetaModule::start_module_threads();
+
 	// Load patch file
 	MetaModule::PatchPlayer player;
 	player.load_patch(patchdata);
@@ -74,6 +77,8 @@ int main(int argc, char *argv[]) {
 		}
 	});
 	printf("Effective load (single core): %g percent\n", (float)duration / (effective_play_time * 10));
+
+	MetaModule::kill_module_threads();
 
 	// Write output to wav file
 	write_wav(output, settings.audio_out_file);
