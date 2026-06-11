@@ -131,11 +131,10 @@ void Controls::update_control_expander() {
 
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected.
-	if (cur_params->raw_msg.raw() != MidiMessage{}.raw()) {
+	if (MidiMessage out_msg = cur_params->raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
 		if (_midi_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
-			printf(">%08x\n", cur_params->raw_msg.raw());
-			cur_params->raw_msg.make_usb_msg(bytes);
+			out_msg.make_usb_msg(bytes);
 			if (_midi_host.is_connected())
 				_midi_host.transmit(bytes);
 			else if (_midi_device.is_connected())
@@ -205,7 +204,6 @@ void Controls::start() {
 void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
 	while (rxbuffer.size() >= 4) {
 		auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
-		printf("<%08x\n", msg.raw());
 		_midi_rx_buf.put(msg);
 		rxbuffer = rxbuffer.subspan(4);
 	}
