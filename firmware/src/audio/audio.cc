@@ -347,10 +347,7 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			}
 		}
 
-		// MIDI: consume the incoming message and write back to the shared
-		// param block (params is a discarded cached copy). The M4 transmits
-		// whatever is left in the shared slot, so skipping the write-back
-		// echoes all incoming MIDI back to the sender.
+		// MIDI: consume the incoming message and write back to the shared param block
 		MidiMessage msg = params.raw_msg;
 
 		midi.process(
