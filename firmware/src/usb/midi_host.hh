@@ -26,7 +26,7 @@ class MidiHost {
 	};
 	bool _is_connected = false;
 
-	DoubleBufferStream<uint8_t, 64> tx_stream;
+	DoubleBufferStream<uint8_t, 1024> tx_stream;
 
 public:
 	MidiHost(USBH_HandleTypeDef &usbhh)
