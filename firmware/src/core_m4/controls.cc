@@ -130,12 +130,16 @@ void Controls::update_control_expander() {
 }
 
 void Controls::parse_midi() {
-	// Parse outgoing MIDI message if available and connected
-	if (cur_params->raw_msg.raw() != 0) {
+	// Parse outgoing MIDI message if available and connected.
+	if (MidiMessage out_msg = cur_params->raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
 		if (_midi_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
-			cur_params->raw_msg.make_usb_msg(bytes);
-			_midi_host.transmit(bytes);
+			out_msg.make_usb_msg(bytes);
+			_tx_monitor.log((uint32_t(bytes[0]) << 24) | (uint32_t(bytes[1]) << 16) | (uint32_t(bytes[2]) << 8) |
+							uint32_t(bytes[3]));
+
+			if (!_midi_host.transmit(bytes))
+				_tx_monitor.transport_drops++;
 		}
 	}
 
@@ -191,21 +195,28 @@ void Controls::start() {
 	read_controls_task.start();
 
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
-		while (rxbuffer.size() >= 4) {
-
-			auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
-
-			_midi_rx_buf.put(msg);
-
-			rxbuffer = rxbuffer.subspan(4);
-		}
+		route_usb_midi_rx(rxbuffer);
 		_midi_host.receive();
 	});
+}
+
+void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
+	_rx_monitor.add_urb(rxbuffer.size());
+	while (rxbuffer.size() >= 4) {
+		auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
+		_rx_monitor.log(msg.raw());
+		_midi_rx_buf.put(msg);
+		rxbuffer = rxbuffer.subspan(4);
+	}
 }
 
 void Controls::process() {
 	sense_pin_reader.update();
 	control_expander.update();
+
+	auto now = HAL_GetTick();
+	_tx_monitor.print_report(now);
+	_rx_monitor.print_report(now);
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
