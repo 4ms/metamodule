@@ -151,6 +151,15 @@ target_link_script(
 target_link_libraries(main_m4.elf PRIVATE cpputil)
 target_compile_definitions(main_m4.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
+# USB MIDI packet/transfer monitoring: RAM rings, per-packet checks, and
+# once-per-second reports (reports print at LOG_LEVEL TRACE or higher).
+# Costs ~1.3kB RAM plus per-packet work in the FrameRate and OTG ISRs,
+# so it is opt-in.
+option(USB_MIDI_MONITOR "Enable USB MIDI packet/transfer monitoring" OFF)
+if(USB_MIDI_MONITOR)
+  target_compile_definitions(main_m4.elf PRIVATE USB_MIDI_MONITOR)
+endif()
+
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 

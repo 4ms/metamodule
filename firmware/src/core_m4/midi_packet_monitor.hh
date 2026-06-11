@@ -1,15 +1,19 @@
 #pragma once
+#include "console/pr_dbg.hh"
 #include "midi/usb_midi_packet_checker.hh"
 #include <array>
 #include <cstdint>
-#include <cstdio>
 
 namespace MetaModule
 {
 
-// Debug monitor for USB MIDI packet streams.
+#ifdef USB_MIDI_MONITOR
+
+// Debug monitor for USB MIDI packet streams (enabled with the USB_MIDI_MONITOR
+// cmake option; reports print at LOG_LEVEL TRACE or higher).
+//
 // log() is called from ISR context: it records the packet in a RAM ring and
-// runs the SysEx order checker -- it never prints (a blocking printf in the
+// runs the SysEx framing checker -- it never prints (a blocking print in the
 // 48kHz FrameRate ISR stalls the param-block walk and loses packets for real).
 // print_report() is called from the main loop and prints a once-per-second
 // summary when there was traffic, plus the packets surrounding the first
@@ -89,43 +93,43 @@ struct MidiPacketMonitor {
 		if (pkts == last_pkts && errors == last_errors && cur_urbs == last_urbs)
 			return; // no traffic, no news
 
-		printf("[%s] %u pkt/s %u msg/s | total: %u pkts %u msgs | err: %u seq %u framing %u zero-pkt %u drop | %u non-sysex\n",
-			   name,
-			   (unsigned)((pkts - last_pkts) * 1000 / elapsed_ms),
-			   (unsigned)((c.messages - last_msgs) * 1000 / elapsed_ms),
-			   (unsigned)pkts,
-			   (unsigned)c.messages,
-			   (unsigned)c.seq_errors,
-			   (unsigned)c.framing_errors,
-			   (unsigned)c.zero_packets,
-			   (unsigned)drops,
-			   (unsigned)c.other_packets);
+		pr_trace("[%s] %u pkt/s %u msg/s | total: %u pkts %u msgs | err: %u seq %u framing %u zero-pkt %u drop | %u non-sysex\n",
+				 name,
+				 (unsigned)((pkts - last_pkts) * 1000 / elapsed_ms),
+				 (unsigned)((c.messages - last_msgs) * 1000 / elapsed_ms),
+				 (unsigned)pkts,
+				 (unsigned)c.messages,
+				 (unsigned)c.seq_errors,
+				 (unsigned)c.framing_errors,
+				 (unsigned)c.zero_packets,
+				 (unsigned)drops,
+				 (unsigned)c.other_packets);
 
 		if (cur_urbs != last_urbs) {
 			auto n_urbs = cur_urbs - last_urbs;
-			printf("[%s] %u urb/s avg %u B | total %u urbs %u B | max %u B, %u zero-len, %u ragged\n",
-				   name,
-				   (unsigned)(n_urbs * 1000 / elapsed_ms),
-				   (unsigned)((urb_bytes - last_urb_bytes) / n_urbs),
-				   (unsigned)cur_urbs,
-				   (unsigned)urb_bytes,
-				   (unsigned)urb_max_len,
-				   (unsigned)urb_zero_len,
-				   (unsigned)urb_ragged);
+			pr_trace("[%s] %u urb/s avg %u B | total %u urbs %u B | max %u B, %u zero-len, %u ragged\n",
+					 name,
+					 (unsigned)(n_urbs * 1000 / elapsed_ms),
+					 (unsigned)((urb_bytes - last_urb_bytes) / n_urbs),
+					 (unsigned)cur_urbs,
+					 (unsigned)urb_bytes,
+					 (unsigned)urb_max_len,
+					 (unsigned)urb_zero_len,
+					 (unsigned)urb_ragged);
 		}
 
 		if (c.seq_errors != last_seq_errors)
-			printf("[%s] last seq err: expected %02x got %02x\n", name, c.last_seq_expected, c.last_seq_got);
+			pr_trace("[%s] last seq err: expected %02x got %02x\n", name, c.last_seq_expected, c.last_seq_got);
 
 		if (c.framing_errors != last_framing_errors && c.last_bad_msg_len != 0)
-			printf("[%s] last bad msg len: %u\n", name, (unsigned)c.last_bad_msg_len);
+			pr_trace("[%s] last bad msg len: %u\n", name, (unsigned)c.last_bad_msg_len);
 
 		if (snapshot_valid) {
-			printf("[%s] packets around first error (oldest first):\n", name);
+			pr_trace("[%s] packets around first error (oldest first):\n", name);
 			for (auto i = 0u; i < snapshot_len; i++) {
-				printf(" %08x", (unsigned)snapshot[i]);
+				pr_trace(" %08x", (unsigned)snapshot[i]);
 				if ((i % 8) == 7 || i == snapshot_len - 1)
-					printf("\n");
+					pr_trace("\n");
 			}
 			snapshot_valid = false; // re-arm capture
 		}
@@ -158,5 +162,26 @@ private:
 	uint32_t last_urbs = 0;
 	uint32_t last_urb_bytes = 0;
 };
+
+#else
+
+// Monitoring disabled (default): all calls compile to nothing.
+// Enable with cmake -DUSB_MIDI_MONITOR=ON
+struct MidiPacketMonitor {
+	uint32_t transport_drops = 0;
+
+	MidiPacketMonitor(const char *) {
+	}
+	void log(uint32_t) {
+	}
+	void mark(uint32_t) {
+	}
+	void add_urb(uint32_t) {
+	}
+	void print_report(uint32_t) {
+	}
+};
+
+#endif // USB_MIDI_MONITOR
 
 } // namespace MetaModule

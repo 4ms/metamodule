@@ -109,14 +109,18 @@ void HAL_HCD_PortDisabled_Callback(HCD_HandleTypeDef *hhcd) {
  * @param  urb_state: URB State
  * @retval None
  */
-// Channel-event diagnostics. The HAL invokes this on every channel halt (CHH),
-// classifying by the channel state the HAL assigned: HC_NAK reactivations are
-// the normal bulk-IN poll loop (IN) or a not-yet-rearmed device endpoint (OUT);
-// HC_NYET means a high-speed OUT was accepted but the endpoint is now busy
-// (PING protocol engages); HC_DATATGLERR means the core received a packet with
-// the wrong DATA0/1 toggle -- per USB spec it was ACKed and silently discarded,
-// i.e. one packet was lost. HC_XACTERR is a CRC/timeout retry (lossless unless
-// ErrCnt exceeds the limit -> URB_ERROR).
+#ifdef USB_MIDI_MONITOR
+#include "console/pr_dbg.hh"
+
+// Channel-event diagnostics (enabled with the USB_MIDI_MONITOR cmake option;
+// prints at LOG_LEVEL TRACE or higher). The HAL invokes this on every channel
+// halt (CHH), classifying by the channel state the HAL assigned: HC_NAK
+// reactivations are the normal bulk-IN poll loop (IN) or a not-yet-rearmed
+// device endpoint (OUT); HC_NYET means a high-speed OUT was accepted but the
+// endpoint is now busy (PING protocol engages); HC_DATATGLERR means the core
+// received a packet with the wrong DATA0/1 toggle -- per USB spec it was ACKed
+// and silently discarded, i.e. one packet was lost. HC_XACTERR is a
+// CRC/timeout retry (lossless unless ErrCnt exceeds the limit -> URB_ERROR).
 //
 // The OUT totals are the key cross-check against the receiving device's URB
 // count: out-done minus device-received = transfers the host believes were
@@ -182,22 +186,31 @@ void usbh_print_hc_stats() {
 	if (s.done_in == last_done_in && s.done_out == last_done_out)
 		return;
 
-	printf("[USBH-HC] in: %u done/s %u nak/s | out: %u done/s, total %u done %u attempts %u nak %u nyet | dterr %u xacterr %u urberr %u\n",
-		   (unsigned)((s.done_in - last_done_in) * 1000 / elapsed_ms),
-		   (unsigned)((s.nak_in - last_nak_in) * 1000 / elapsed_ms),
-		   (unsigned)((s.done_out - last_done_out) * 1000 / elapsed_ms),
-		   (unsigned)s.done_out,
-		   (unsigned)g_usbh_midi_out_attempts,
-		   (unsigned)s.nak_out,
-		   (unsigned)s.nyet,
-		   (unsigned)s.dterr,
-		   (unsigned)s.xacterr,
-		   (unsigned)s.urb_error);
+	pr_trace("[USBH-HC] in: %u done/s %u nak/s | out: %u done/s, total %u done %u attempts %u nak %u nyet | dterr %u xacterr %u urberr %u\n",
+			 (unsigned)((s.done_in - last_done_in) * 1000 / elapsed_ms),
+			 (unsigned)((s.nak_in - last_nak_in) * 1000 / elapsed_ms),
+			 (unsigned)((s.done_out - last_done_out) * 1000 / elapsed_ms),
+			 (unsigned)s.done_out,
+			 (unsigned)g_usbh_midi_out_attempts,
+			 (unsigned)s.nak_out,
+			 (unsigned)s.nyet,
+			 (unsigned)s.dterr,
+			 (unsigned)s.xacterr,
+			 (unsigned)s.urb_error);
 
 	last_done_in = s.done_in;
 	last_done_out = s.done_out;
 	last_nak_in = s.nak_in;
 }
+
+#else
+
+// Monitoring disabled (default): the HAL's weak no-op URB-change callback is
+// used and the stats printer does nothing. Enable with cmake -DUSB_MIDI_MONITOR=ON
+void usbh_print_hc_stats() {
+}
+
+#endif // USB_MIDI_MONITOR
 
 /*******************************************************************************
 					   LL Driver Interface (USB Host Library --> HCD)
