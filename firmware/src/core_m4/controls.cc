@@ -131,14 +131,22 @@ void Controls::update_control_expander() {
 
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected.
+	// Copy the slot once: the A7 rewrites it every audio block, so reading it
+	// again later in this function can pick up a different (or empty) message.
 	if (MidiMessage out_msg = cur_params->raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
 		if (_midi_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
 			out_msg.make_usb_msg(bytes);
+			_tx_monitor.log((uint32_t(bytes[0]) << 24) | (uint32_t(bytes[1]) << 16) | (uint32_t(bytes[2]) << 8) |
+							uint32_t(bytes[3]));
+
+			bool sent = false;
 			if (_midi_host.is_connected())
-				_midi_host.transmit(bytes);
+				sent = _midi_host.transmit(bytes);
 			else if (_midi_device.is_connected())
-				_midi_device.transmit(bytes);
+				sent = _midi_device.transmit(bytes);
+			if (!sent)
+				_tx_monitor.transport_drops++;
 		}
 	}
 
@@ -204,6 +212,7 @@ void Controls::start() {
 void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
 	while (rxbuffer.size() >= 4) {
 		auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
+		_rx_monitor.log(msg.raw());
 		_midi_rx_buf.put(msg);
 		rxbuffer = rxbuffer.subspan(4);
 	}
@@ -212,6 +221,10 @@ void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
 void Controls::process() {
 	sense_pin_reader.update();
 	control_expander.update();
+
+	auto now = HAL_GetTick();
+	_tx_monitor.print_report(now);
+	_rx_monitor.print_report(now);
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {

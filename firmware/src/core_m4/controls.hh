@@ -12,6 +12,7 @@
 #include "metaparams.hh"
 #include "midi/midi_message.hh"
 #include "midi_controls.hh"
+#include "midi_packet_monitor.hh"
 #include "param_block.hh"
 #include "params.hh"
 #include "sense_pin_reader.hh"
@@ -79,6 +80,8 @@ private:
 	MidiHost &_midi_host;
 	UsbMidiDevice &_midi_device;
 	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
+	MidiPacketMonitor _tx_monitor{"TX"};
+	MidiPacketMonitor _rx_monitor{"RX"};
 	Midi::MessageParser _midi_parser;
 	EdgeStateDetector _midi_connected_raw;
 	bool _midi_connected = false;
