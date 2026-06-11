@@ -24,9 +24,11 @@ static uint8_t midi_tx_buf[MIDI_DATA_HS_MAX_PACKET_SIZE] __attribute__((aligned(
 using MidiEventPacket = std::array<uint8_t, MIDI_EVENT_PACKET_SIZE>;
 static LockFreeFifoSpsc<MidiEventPacket, 512> tx_fifo;
 
-// TX pump diagnostics: sizes of the IN transfers handed to the endpoint, and
-// how far the FIFO backs up between pumps. Written in pump_tx (OTG ISR or
-// OTG-masked main loop); printed once per second from the main loop.
+#ifdef USB_MIDI_MONITOR
+// TX pump diagnostics (enabled with the USB_MIDI_MONITOR cmake option; prints
+// at LOG_LEVEL TRACE or higher): sizes of the IN transfers handed to the
+// endpoint, and how far the FIFO backs up between pumps. Written in pump_tx
+// (OTG ISR or OTG-masked main loop); printed once per second from the main loop.
 struct PumpTxStats {
 	uint32_t xfers = 0;
 	uint32_t bytes = 0;
@@ -35,6 +37,7 @@ struct PumpTxStats {
 	uint32_t fifo_high_water = 0; // max packets queued at pump time
 };
 static PumpTxStats pump_tx_stats;
+#endif
 
 USBD_MIDI_ItfTypeDef UsbMidiDevice::fops = {
 	MIDI_Itf_Init,
@@ -84,9 +87,11 @@ void UsbMidiDevice::pump_tx() {
 	if (hmidi == nullptr || hmidi->TxState != 0U)
 		return; // not configured, or a transfer is already in flight
 
+#ifdef USB_MIDI_MONITOR
 	auto backlog = tx_fifo.num_filled();
 	if (backlog > pump_tx_stats.fifo_high_water)
 		pump_tx_stats.fifo_high_water = backlog;
+#endif
 
 	uint32_t n = 0;
 	MidiEventPacket pkt;
@@ -97,12 +102,14 @@ void UsbMidiDevice::pump_tx() {
 	if (n == 0)
 		return; // nothing queued
 
+#ifdef USB_MIDI_MONITOR
 	pump_tx_stats.xfers++;
 	pump_tx_stats.bytes += n;
 	if (n > pump_tx_stats.max_len)
 		pump_tx_stats.max_len = n;
 	if (n == sizeof(midi_tx_buf))
 		pump_tx_stats.full_size++;
+#endif
 
 	USBD_MIDI_SetTxBuffer(pdev, midi_tx_buf, n);
 	USBD_MIDI_TransmitPacket(pdev); // endpoint was free, so this starts the transfer
@@ -120,6 +127,7 @@ void UsbMidiDevice::process() {
 
 // Once-per-second TX transfer summary (main loop; quiet when no traffic)
 void UsbMidiDevice::print_pump_stats() {
+#ifdef USB_MIDI_MONITOR
 	static uint32_t last_ms = 0;
 	static uint32_t last_xfers = 0;
 	static uint32_t last_bytes = 0;
@@ -130,21 +138,22 @@ void UsbMidiDevice::print_pump_stats() {
 	auto elapsed_ms = now - last_ms;
 	last_ms = now;
 
-	auto s = pump_tx_stats; // copy: pump_tx may run during the printf
+	auto s = pump_tx_stats; // copy: pump_tx may run during the print
 	if (s.xfers == last_xfers)
 		return;
 
-	printf("[USBD-MIDI] %u xfer/s avg %u B | total %u xfers %u B | max %u B, %u full-size, fifo high-water %u pkts\n",
-		   (unsigned)((s.xfers - last_xfers) * 1000 / elapsed_ms),
-		   (unsigned)((s.bytes - last_bytes) / (s.xfers - last_xfers)),
-		   (unsigned)s.xfers,
-		   (unsigned)s.bytes,
-		   (unsigned)s.max_len,
-		   (unsigned)s.full_size,
-		   (unsigned)s.fifo_high_water);
+	pr_trace("[USBD-MIDI] %u xfer/s avg %u B | total %u xfers %u B | max %u B, %u full-size, fifo high-water %u pkts\n",
+			 (unsigned)((s.xfers - last_xfers) * 1000 / elapsed_ms),
+			 (unsigned)((s.bytes - last_bytes) / (s.xfers - last_xfers)),
+			 (unsigned)s.xfers,
+			 (unsigned)s.bytes,
+			 (unsigned)s.max_len,
+			 (unsigned)s.full_size,
+			 (unsigned)s.fifo_high_water);
 
 	last_xfers = s.xfers;
 	last_bytes = s.bytes;
+#endif
 }
 
 bool UsbMidiDevice::transmit(std::span<const uint8_t> usb_midi_packets) {

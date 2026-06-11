@@ -4,24 +4,32 @@
 namespace MetaModule
 {
 
-// Validates a stream of 4-byte USB-MIDI event packets carrying the SysEx test
-// pattern sent by the modified CV_MIDI module: each message is F0, then
-// `expected_msg_len` data bytes, then F7. The data bytes form one continuous
-// sequence across messages, incrementing and wrapping at 0x80 (the generator
-// masks a running counter with 0x7F).
+// Validates a stream of 4-byte USB-MIDI event packets carrying SysEx.
+//
+// By default only protocol-level framing is checked, which any legal SysEx
+// stream satisfies regardless of message length or data content: messages
+// start with F0, end with F7, and data bytes are < 0x80.
+//
+// For the synthetic CV_MIDI test pattern (fixed-length messages whose data
+// bytes form one continuous sequence wrapping at 0x80), enable the optional
+// content checks below.
 //
 // Pure logic, no I/O: safe to call from ISR context, unit-testable on host.
 struct UsbMidiPacketChecker {
-	uint32_t expected_msg_len = 32;
+	// Optional content checks (off by default: real-world SysEx has
+	// variable-length messages and arbitrary data bytes)
+	uint32_t expected_msg_len = 0; // nonzero: messages must have exactly this many data bytes
+	bool check_sequential = false; // data bytes increment, wrapping at 0x80
 
 	// Counters. Single words: safe enough to read from the main loop while
 	// check() runs in an ISR.
 	uint32_t sysex_packets = 0;	 // packets with a SysEx CIN (0x4..0x7)
 	uint32_t other_packets = 0;	 // any other CIN: counted, not checked
-	uint32_t zero_packets = 0;	 // literal 0x04000000 (empty-message artifact)
+	uint32_t zero_packets = 0;	 // literal 0x04000000 (only with check_sequential)
 	uint32_t messages = 0;		 // completed messages (F7 seen)
-	uint32_t seq_errors = 0;	 // data byte != previous + 1 (wrapping at 0x80)
-	uint32_t framing_errors = 0; // missing/early F0 or F7, or bad message length
+	uint32_t seq_errors = 0;	 // data byte != previous + 1 (only with check_sequential)
+	uint32_t framing_errors = 0; // missing/early F0 or F7, status byte inside
+								 // SysEx, or (if expected_msg_len) bad length
 
 	// Context of the most recent errors
 	uint8_t last_seq_expected = 0;
@@ -46,10 +54,11 @@ struct UsbMidiPacketChecker {
 			return;
 		}
 
-		if (raw == 0x04000000) {
+		if (check_sequential && raw == 0x04000000) {
 			// An empty MidiMessage run through make_usb_msg() produces exactly
-			// this packet. The generated stream never contains three
+			// this packet. The sequential test pattern never contains three
 			// consecutive zero data bytes, so count it as its own error class.
+			// (With arbitrary data this is a perfectly legal packet.)
 			zero_packets++;
 			return;
 		}
@@ -88,7 +97,7 @@ private:
 			if (!in_msg) {
 				framing_errors++; // F7 with no matching F0
 			} else {
-				if (msg_len != expected_msg_len) {
+				if (expected_msg_len != 0 && msg_len != expected_msg_len) {
 					framing_errors++;
 					last_bad_msg_len = msg_len;
 				}
@@ -97,7 +106,8 @@ private:
 			in_msg = false;
 
 		} else if (byte >= 0x80) {
-			// Status/realtime byte: not valid inside this SysEx stream
+			// Status/realtime byte: not valid inside a SysEx event packet
+			// (realtime arrives as its own CIN 0xF packet)
 			if (synced)
 				framing_errors++;
 
@@ -112,13 +122,15 @@ private:
 				msg_len = 0;
 			}
 
-			if (have_expected && byte != expected) {
-				seq_errors++;
-				last_seq_expected = expected;
-				last_seq_got = byte;
+			if (check_sequential) {
+				if (have_expected && byte != expected) {
+					seq_errors++;
+					last_seq_expected = expected;
+					last_seq_got = byte;
+				}
+				expected = (byte + 1) & 0x7F;
+				have_expected = true;
 			}
-			expected = (byte + 1) & 0x7F;
-			have_expected = true;
 			msg_len++;
 		}
 	}
