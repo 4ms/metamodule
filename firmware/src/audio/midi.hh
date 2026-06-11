@@ -43,7 +43,6 @@ struct AudioStreamMidi {
 		if (raw_msg->is_sysex() || (raw_msg->status != 0xfe && raw_msg->status != 0)) {
 			// 50ns with no listeners + ~100ns additional per listener
 			MidiRouter::push_incoming_message(*raw_msg);
-			// printf("%08x\n", raw_msg->raw());
 		}
 
 		// Transfer MIDI TX message from router (towards hardware)

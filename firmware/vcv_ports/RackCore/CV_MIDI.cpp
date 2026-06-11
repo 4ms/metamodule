@@ -79,8 +79,6 @@ struct CV_MIDI : Module {
 		if ((args.frame - last_sysex_frame) > (args.sampleRate / 240)) {
 			last_sysex_frame = args.frame;
 
-			// printf("%02x\n", sysex_i & 0x7F);
-
 			midi::Message m;
 			// Send first 2 bytes
 			m.startSysEx(sysex_i & 0x7F, (sysex_i + 1) & 0x7F);
