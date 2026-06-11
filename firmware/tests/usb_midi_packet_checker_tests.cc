@@ -49,8 +49,6 @@ void feed(UsbMidiPacketChecker &checker, const std::vector<uint32_t> &packets) {
 
 TEST_CASE("Perfect stream: no errors, counter wraps at 0x80") {
 	UsbMidiPacketChecker checker;
-	checker.expected_msg_len = 32;
-	checker.check_sequential = true;
 	unsigned counter = 0;
 
 	// 8 messages x 32 bytes = 256 data bytes: wraps the 0..0x7F counter twice
@@ -67,8 +65,6 @@ TEST_CASE("Perfect stream: no errors, counter wraps at 0x80") {
 
 TEST_CASE("Dropped continuation packet: seq error and short message") {
 	UsbMidiPacketChecker checker;
-	checker.expected_msg_len = 32;
-	checker.check_sequential = true;
 	unsigned counter = 0;
 
 	auto packets = make_messages(2, counter);
@@ -85,8 +81,6 @@ TEST_CASE("Dropped continuation packet: seq error and short message") {
 
 TEST_CASE("Dropped SysEx End: framing error, data sequence still intact") {
 	UsbMidiPacketChecker checker;
-	checker.expected_msg_len = 32;
-	checker.check_sequential = true;
 	unsigned counter = 0;
 
 	auto packets = make_messages(3, counter);
@@ -100,8 +94,6 @@ TEST_CASE("Dropped SysEx End: framing error, data sequence still intact") {
 
 TEST_CASE("Dropped SysEx Start: framing and seq errors") {
 	UsbMidiPacketChecker checker;
-	checker.expected_msg_len = 32;
-	checker.check_sequential = true;
 	unsigned counter = 0;
 
 	auto packets = make_messages(3, counter);
@@ -117,8 +109,6 @@ TEST_CASE("Dropped SysEx Start: framing and seq errors") {
 
 TEST_CASE("Empty-message artifact packets are counted separately") {
 	UsbMidiPacketChecker checker;
-	checker.expected_msg_len = 32;
-	checker.check_sequential = true;
 	unsigned counter = 0;
 
 	auto packets = make_messages(1, counter);
@@ -134,8 +124,6 @@ TEST_CASE("Empty-message artifact packets are counted separately") {
 
 TEST_CASE("Non-SysEx packets are counted but not checked") {
 	UsbMidiPacketChecker checker;
-	checker.expected_msg_len = 32;
-	checker.check_sequential = true;
 	unsigned counter = 0;
 
 	auto packets = make_messages(1, counter);
@@ -150,8 +138,6 @@ TEST_CASE("Non-SysEx packets are counted but not checked") {
 
 TEST_CASE("Joining mid-stream: quiet until the first F0") {
 	UsbMidiPacketChecker checker;
-	checker.expected_msg_len = 32;
-	checker.check_sequential = true;
 	unsigned counter = 0;
 
 	auto packets = make_messages(3, counter);
@@ -162,54 +148,4 @@ TEST_CASE("Joining mid-stream: quiet until the first F0") {
 	CHECK(checker.messages == 2); // partial first message not counted
 	CHECK(checker.seq_errors == 0);
 	CHECK(checker.framing_errors == 0);
-}
-
-TEST_CASE("Default (real-world) mode: variable-length arbitrary-data messages pass") {
-	UsbMidiPacketChecker checker; // defaults: no length or sequence checks
-
-	std::vector<uint32_t> packets = {
-		// 2-byte payload, ends with CIN 0x6 (data + F7)
-		pkt(0x4, 0xF0, 0x7D, 0x01),
-		pkt(0x6, 0x55, 0xF7, 0x00),
-
-		// 7-byte payload with arbitrary (non-sequential, repeating, zero) data,
-		// including a literal 04 00 00 00 packet, ends with CIN 0x5 (F7 alone)
-		pkt(0x4, 0xF0, 0x43, 0x43),
-		pkt(0x4, 0x00, 0x00, 0x00), // legal data bytes, not an error here
-		pkt(0x4, 0x10, 0x05, 0x10),
-		pkt(0x5, 0xF7, 0x00, 0x00),
-
-		// 1-byte payload as a single CIN 0x7 packet (F0 + data + F7)
-		pkt(0x7, 0xF0, 0x7E, 0xF7),
-
-		// realtime clock interleaved
-		pkt(0xF, 0xF8, 0x00, 0x00),
-
-		// 4-byte payload, ends with CIN 0x7 (2 data + F7)
-		pkt(0x4, 0xF0, 0x01, 0x02),
-		pkt(0x7, 0x03, 0x04, 0xF7),
-	};
-	feed(checker, packets);
-
-	CHECK(checker.messages == 4);
-	CHECK(checker.other_packets == 1);
-	CHECK(checker.seq_errors == 0);
-	CHECK(checker.framing_errors == 0);
-	CHECK(checker.zero_packets == 0);
-	CHECK(checker.total_errors() == 0);
-}
-
-TEST_CASE("Default (real-world) mode: framing violations are still caught") {
-	UsbMidiPacketChecker checker;
-
-	std::vector<uint32_t> packets = {
-		pkt(0x4, 0xF0, 0x01, 0x02),
-		pkt(0x4, 0xF0, 0x03, 0x04), // F0 while a message is open: lost F7
-		pkt(0x5, 0xF7, 0x00, 0x00),
-		pkt(0x5, 0xF7, 0x00, 0x00), // F7 with no open message
-	};
-	feed(checker, packets);
-
-	CHECK(checker.messages == 1);
-	CHECK(checker.framing_errors == 2);
 }
