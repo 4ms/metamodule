@@ -44,7 +44,7 @@ add_custom_target(
 add_custom_target(
   jprog
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
-  COMMENT "Using JLinkExe to program via JTAG (Note: JLinkExe must be on your PATH)"
+  COMMENT "Using JLinkExe v9.44 or later to program via JTAG (Note: JLinkExe must be on your PATH)"
   COMMAND time -p JLinkExe -device STM32MP15XX_A7 -if JTAG -speed 25000 -jtagconf -1,-1 -nogui 1 -AutoConnect 1
           -CommandFile ${PROJECT_SOURCE_DIR}/flashing/program.jlink
   COMMAND ${CMAKE_COMMAND} -E echo "-----------------"
@@ -56,16 +56,34 @@ add_custom_target(
 )
 
 add_custom_target(
+  jflash-gdb
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMENT "Reset and flash using gdb via a Jlink debugger (Note: JLinkGDBServer must already be running, use `make start-jlinkgdb`) "
+  COMMAND ${CMAKE_GDB} --command=flashing/jflash.gdb
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
+
+add_custom_target(
+  jflash-gdb-bg
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMENT "Reset and flash in the background using gdb via a Jlink debugger (Note: JLinkGDBServer must already be running, use `make start-jlinkgdb`) "
+  COMMAND ${CMAKE_GDB} -batch -x flashing/jflash.gdb
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
+
+add_custom_target(
   debug
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
-  COMMAND ${CMAKE_GDB} --command=flashing/multi.gdbinit
+  COMMAND ${CMAKE_GDB} --command=flashing/multi.gdb
   VERBATIM USES_TERMINAL
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
 add_custom_target(
   start-jlinkgdb
-  COMMAND JLinkGDBServer -select USB=0 -device STM32MP15xx_A7 -endian little -if JTAG -speed 25000 -noir -noLocalhostOnly -nologtofile -port 3333 
+  COMMAND JLinkGDBServer -select USB=0 -device STM32MP15XX_A7 -endian little -if JTAG -speed 25000 -noLocalhostOnly -nologtofile -port 3333 
   VERBATIM USES_TERMINAL
 )
 

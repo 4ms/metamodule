@@ -53,6 +53,7 @@ struct MidiPCAssignDialog : ConfirmPopup {
 		rebuild_pc_options(init_chan);
 		lv_dropdown_set_selected(pc_dropdown, init_pc);
 		lv_obj_add_event_cb(chan_dropdown, chan_changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_hide(message_label);
 
 		ConfirmPopup::show(
 			[this](unsigned) {
@@ -69,7 +70,7 @@ struct MidiPCAssignDialog : ConfirmPopup {
 
 				gui_state.do_write_settings = true;
 			},
-			"Load on MIDI PC",
+			"",
 			"OK");
 
 		lv_group_remove_all_objs(group);
@@ -123,8 +124,6 @@ private:
 		for (uint32_t pc = 0; pc <= 127; pc++) {
 			options += std::to_string(pc);
 			for (auto const &e : midi_settings.entries) {
-				// if (e.path == current_path)
-				// 	continue;
 				bool chan_match = (channel == 0) || (e.channel == 0) || (e.channel == channel);
 				if (chan_match && e.pc == pc) {
 					auto [fname, vol] = split_volume(e.path);
@@ -133,8 +132,7 @@ private:
 						name = name.substr(pos + 1);
 					if (name.ends_with(".yml"))
 						name.resize(name.size() - 4);
-					options += " [" + name + "]";
-					// break;
+					options += " " + name + "";
 				}
 			}
 			if (pc < 127)
@@ -145,25 +143,35 @@ private:
 
 	void init_widgets() {
 		lv_obj_set_width(panel, 300);
-		lv_obj_set_width(message_label, LV_SIZE_CONTENT);
+		lv_obj_set_height(panel, 185);
+		lv_obj_set_flex_flow(panel, LV_FLEX_FLOW_ROW);
+		lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+		lv_obj_set_style_pad_row(panel, 12, LV_PART_MAIN);
 
-		auto pc_row = create_labeled_dropdown(panel);
-		lv_obj_set_width(pc_row, 290);
-		lv_obj_move_to_index(pc_row, 1);
-		lv_label_set_text(lv_obj_get_child(pc_row, 0), "PC #:");
-		pc_dropdown = lv_obj_get_child(pc_row, 1);
+		auto title = create_title_level_2(panel, "Load patch on MIDI PC");
+		lv_obj_move_to_index(title, 0);
+
+		auto pc_label = create_midi_map_label(panel, "PC #:");
+		lv_obj_add_flag(pc_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+
+		pc_dropdown = create_midi_map_dropdown(panel, "");
 		lv_obj_set_width(pc_dropdown, 220);
+		lv_obj_set_height(pc_dropdown, LV_SIZE_CONTENT);
 
-		auto chan_row = create_labeled_dropdown(panel);
-		lv_obj_set_width(chan_row, 290);
-		lv_obj_move_to_index(chan_row, 2);
-		lv_label_set_text(lv_obj_get_child(chan_row, 0), "MIDI Channel:");
-		chan_dropdown = lv_obj_get_child(chan_row, 1);
+		auto chan_label = create_midi_map_label(panel, "MIDI Channel:");
+		lv_obj_add_flag(chan_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
+		chan_dropdown = create_midi_map_dropdown(panel, "");
+		lv_obj_set_width(chan_dropdown, 100);
+		lv_obj_set_height(chan_dropdown, LV_SIZE_CONTENT);
 		lv_dropdown_set_options(chan_dropdown,
 								"Any\nChan. 1\nChan. 2\nChan. 3\nChan. 4\nChan. 5\nChan. 6\nChan. 7\nChan. 8\nChan. "
 								"9\nChan. 10\nChan. 11\nChan. 12\nChan. 13\nChan. 14\nChan. 15\nChan. 16");
-		lv_obj_set_width(chan_dropdown, 100);
+
+		auto button_panel = lv_obj_get_parent(cancel_button);
+		lv_obj_add_flag(button_panel, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_move_to_index(button_panel, -1);
+		lv_obj_set_style_pad_top(button_panel, 12, LV_PART_MAIN);
 	}
 
 	static void chan_changed_cb(lv_event_t *event) {

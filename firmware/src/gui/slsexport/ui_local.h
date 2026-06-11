@@ -33,6 +33,8 @@ lv_obj_t *create_settings_menu_title(lv_obj_t *parent, std::string const &title_
 // Patch view File Menu:
 lv_obj_t *create_file_menu_item(lv_obj_t *parent, std::string_view text);
 
+lv_obj_t *create_title_level_2(lv_obj_t *parent, std::string_view title);
+
 lv_obj_t *create_midi_map_label(lv_obj_t *parent, std::string const &title);
 lv_obj_t *create_midi_map_dropdown(lv_obj_t *parent, std::string const &options);
 

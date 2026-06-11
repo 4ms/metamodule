@@ -15,10 +15,14 @@ namespace MetaModule
 struct MidiMapPopup {
 	lv_obj_t *midi_channel_dropdown;
 	lv_obj_t *midi_channel_label;
+	lv_obj_t *title_header;
 
 	MidiMapPopup(ParamsMidiState &params)
 		: group(lv_group_create())
 		, params{params} {
+
+		title_header = create_title_level_2(ui_MIDIMapPanel, "Map MIDI to jack");
+		lv_obj_move_to_index(title_header, 0);
 
 		midi_channel_label = create_midi_map_label(ui_MidiMapCont, "Channel: ");
 		lv_obj_add_flag(midi_channel_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
@@ -104,7 +108,7 @@ struct MidiMapPopup {
 	}
 
 	void set_header_text(std::string_view title) {
-		lv_label_set_text(ui_MidiMapJackTitle, title.data());
+		lv_label_set_text(title_header, title.data());
 	}
 
 	void show(auto cb, std::optional<uint32_t> panel_jack_id) {

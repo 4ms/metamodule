@@ -120,9 +120,10 @@ struct PluginPopup : ConfirmPopup {
 		}
 	}
 
-protected:
 	lv_obj_t *check;
 	lv_obj_t *base;
+
+protected:
 	lv_group_t *group;
 	lv_group_t *orig_group;
 

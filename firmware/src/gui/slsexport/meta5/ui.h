@@ -284,7 +284,6 @@ extern lv_obj_t *ui_AutoMapAllJacksButton;
 extern lv_obj_t *ui_AutoMapAllJacksButtonLabel;
 extern lv_obj_t *ui_AutoMapJackItemCont;
 extern lv_obj_t *ui_MIDIMapPanel;
-extern lv_obj_t *ui_MidiMapJackTitle;
 extern lv_obj_t *ui_MidiMapCont;
 extern lv_obj_t *ui_MidiMapNoteCheck;
 extern lv_obj_t *ui_MidiMapNoteLabel;

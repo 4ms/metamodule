@@ -33,6 +33,13 @@ struct ModuleListPage : PageBase {
 		lv_obj_set_width(hov, 172);
 
 		lv_label_set_recolor(lv_obj_get_child(ui_ModuleListRoller, 0), true);
+
+		auto check_cont = lv_obj_get_parent(replace_popup.check);
+		lv_obj_set_height(check_cont, 30);
+		lv_obj_set_style_pad_ver(check_cont, 12, LV_PART_MAIN);
+		lv_obj_set_style_pad_left(check_cont, 20, LV_PART_MAIN);
+		auto check_label = lv_obj_get_child(check_cont, 0);
+		lv_obj_set_style_text_color(check_label, Gui::orange_highlight, LV_PART_MAIN);
 	}
 
 private:
@@ -509,7 +516,7 @@ private:
 	std::string selected_module_slug;
 
 	RollerHoverText roller_hover;
-	PluginPopup replace_popup{"Keep cables and maps"};
+	PluginPopup replace_popup{"Keep cables and maps\n(experimental!)"};
 	std::string pending_replace_slug;
 	std::string replace_confirm_msg;
 	bool replace_keep_cables = false;
