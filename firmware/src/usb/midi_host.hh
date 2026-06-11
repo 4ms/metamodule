@@ -78,7 +78,7 @@ public:
 
 	USBH_StatusTypeDef receive() {
 		//TODO: if we use double-buffers, swap buffers here
-		return USBH_MIDI_Receive(&usbhost, MSHandle.rx_buffer, 128);
+		return USBH_MIDI_Receive(&usbhost, MSHandle.rx_buffer, MidiStreamingBufferSize);
 	}
 
 	bool transmit(std::span<uint8_t> bytes) {

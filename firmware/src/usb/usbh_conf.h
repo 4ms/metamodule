@@ -45,7 +45,7 @@ static inline void Error_Handler() {
 #define USBH_ERR_LOG_OUTPUT 1
 #define USBH_DBG_LOG_OUTPUT 0
 
-enum { MidiStreamingBufferSize = 256 };
+enum { MidiStreamingBufferSize = 1024 };
 enum { HOST_HS = 0, HOST_FS = 1 };
 
 void *msc_malloc(size_t);
