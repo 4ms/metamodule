@@ -30,6 +30,32 @@ bool connect(M *left, M *right) {
 	return true;
 }
 
+// Detach `m` from its neighbors on both sides, then notify every module
+// whose connection changed. Safe to call on unconnected or null modules.
+template<typename M>
+void disconnect(M *m) {
+	if (!m)
+		return;
+
+	if (auto *left = m->leftExpander.module) {
+		left->rightExpander.module = nullptr;
+		left->rightExpander.moduleId = -1;
+		m->leftExpander.module = nullptr;
+		m->leftExpander.moduleId = -1;
+		left->onExpanderChange({.side = 1});
+		m->onExpanderChange({.side = 0});
+	}
+
+	if (auto *right = m->rightExpander.module) {
+		right->leftExpander.module = nullptr;
+		right->leftExpander.moduleId = -1;
+		m->rightExpander.module = nullptr;
+		m->rightExpander.moduleId = -1;
+		right->onExpanderChange({.side = 0});
+		m->onExpanderChange({.side = 1});
+	}
+}
+
 // Swap producer/consumer messages if a flip was requested.
 // VCV Rack runs this for every module after all modules have processed a frame.
 template<typename M>

@@ -26,6 +26,11 @@ public:
 	// Call once per sample after all modules have been stepped (audio thread).
 	void flip_messages();
 
+	// Detach all connected modules from each other (clearing their Expander
+	// pointers and notifying them) and stop tracking them. Must be called
+	// before any connected module is destroyed (with audio muted).
+	void disconnect_all();
+
 	size_t num_connected() const {
 		return modules.size();
 	}

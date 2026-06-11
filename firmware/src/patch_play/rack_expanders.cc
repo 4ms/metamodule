@@ -39,6 +39,12 @@ void RackExpanders::flip_messages() {
 		ExpanderHookup::flip_messages(module);
 }
 
+void RackExpanders::disconnect_all() {
+	for (auto *module : modules)
+		ExpanderHookup::disconnect(module);
+	modules.clear();
+}
+
 void RackExpanders::clear() {
 	modules.clear();
 }

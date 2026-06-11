@@ -106,6 +106,46 @@ TEST_CASE("expander connect: daisy chain") {
 	CHECK(c.leftExpander.module == &b);
 }
 
+TEST_CASE("expander disconnect: detaches from both neighbors and notifies all") {
+	FakeRackModule a, b, c;
+	a.id = 1;
+	b.id = 2;
+	c.id = 3;
+	ExpanderHookup::connect(&a, &b);
+	ExpanderHookup::connect(&b, &c);
+	a.change_events.clear();
+	b.change_events.clear();
+	c.change_events.clear();
+
+	ExpanderHookup::disconnect(&b);
+
+	CHECK(a.rightExpander.module == nullptr);
+	CHECK(a.rightExpander.moduleId == -1);
+	CHECK(c.leftExpander.module == nullptr);
+	CHECK(c.leftExpander.moduleId == -1);
+	CHECK(b.leftExpander.module == nullptr);
+	CHECK(b.rightExpander.module == nullptr);
+
+	// a's right side changed, c's left side changed, b lost both sides
+	REQUIRE(a.change_events.size() == 1);
+	CHECK(a.change_events[0] == 1);
+	REQUIRE(c.change_events.size() == 1);
+	CHECK(c.change_events[0] == 0);
+	CHECK(b.change_events.size() == 2);
+}
+
+TEST_CASE("expander disconnect: safe on null and unconnected modules") {
+	FakeRackModule a;
+	a.id = 1;
+
+	ExpanderHookup::disconnect<FakeRackModule>(nullptr);
+	ExpanderHookup::disconnect(&a);
+
+	CHECK(a.change_events.empty());
+	CHECK(a.leftExpander.module == nullptr);
+	CHECK(a.rightExpander.module == nullptr);
+}
+
 TEST_CASE("flip_messages: swaps producer/consumer when requested and clears flag") {
 	FakeRackModule a;
 	int buf0 = 0, buf1 = 1;

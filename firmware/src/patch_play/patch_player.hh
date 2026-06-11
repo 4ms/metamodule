@@ -260,14 +260,7 @@ public:
 		}
 
 		// Wire up VCV-style expander module connections
-		rack_expanders.clear();
-		for (auto const &exp : pd.expanders) {
-			if (exp.left_module_id < num_modules && exp.right_module_id < num_modules)
-				rack_expanders.connect(modules[exp.left_module_id].get(),
-									   modules[exp.right_module_id].get(),
-									   exp.left_module_id,
-									   exp.right_module_id);
-		}
+		rewire_expanders();
 
 		calc_multiple_module_indicies();
 
@@ -460,7 +453,7 @@ public:
 
 		smp.join();
 		is_loaded = false;
-		rack_expanders.clear();
+		rack_expanders.disconnect_all();
 		for (size_t i = 0; i < num_modules; i++) {
 			plugin_module_deinit(modules[i]);
 			modules[i].reset(nullptr);
@@ -477,6 +470,7 @@ public:
 		pd.mapped_lights.clear();
 		pd.module_states.clear();
 		pd.bypassed_modules.clear();
+		pd.expanders.clear();
 		pd.midi_maps.set.clear();
 		pd.midi_maps.name = "";
 
@@ -1153,6 +1147,19 @@ public:
 		return true;
 	}
 
+	// Disconnect all expander modules, then re-wire from pd.expanders.
+	// Call with audio muted whenever the loaded modules change.
+	void rewire_expanders() {
+		rack_expanders.disconnect_all();
+		for (auto const &exp : pd.expanders) {
+			if (exp.left_module_id < num_modules && exp.right_module_id < num_modules)
+				rack_expanders.connect(modules[exp.left_module_id].get(),
+									   modules[exp.right_module_id].get(),
+									   exp.left_module_id,
+									   exp.right_module_id);
+		}
+	}
+
 	void remove_module(uint16_t module_idx) {
 		// For all cache structures, if (module_id > deleted_module_idx) module_id -= 1;
 
@@ -1244,6 +1251,7 @@ public:
 
 		pd.remove_module(module_idx);
 
+		rack_expanders.disconnect_all();
 		plugin_module_deinit(modules[module_idx]);
 		modules[module_idx].reset();
 
@@ -1257,6 +1265,8 @@ public:
 				modules[i]->id = i;
 		}
 
+		rewire_expanders();
+
 		rebalance_modules();
 	}
 
@@ -1268,6 +1278,7 @@ public:
 		pr_trace("Subs. module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
 
 		// De-init original module
+		rack_expanders.disconnect_all();
 		plugin_module_deinit(modules[module_idx]);
 		modules[module_idx].reset();
 
@@ -1275,6 +1286,7 @@ public:
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
 		add_module_at_idx(new_slug, module_idx);
+		rewire_expanders();
 	}
 
 	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
@@ -1338,6 +1350,7 @@ public:
 		erase_matching_inner(midi_divclk_pulses);
 
 		// Deinit old module
+		rack_expanders.disconnect_all();
 		plugin_module_deinit(modules[module_idx]);
 		modules[module_idx].reset();
 
@@ -1348,6 +1361,7 @@ public:
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
 		add_module_at_idx(new_slug, module_idx);
+		rewire_expanders();
 	}
 
 	// Jack patched/unpatched status

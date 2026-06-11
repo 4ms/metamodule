@@ -48,6 +48,47 @@ TEST_CASE("patch with expanders field loads and runs safely") {
 	player.unload_patch();
 }
 
+TEST_CASE("removing a module rewires expanders and keeps running safely") {
+	// clang-format off
+	std::string patchyml{R"(PatchData:
+  patch_name: expander_remove_test
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: 'Befaco:PonyVCO'
+    2: 'Befaco:PonyVCO'
+    3: 'Befaco:PonyVCO'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
+  midi_maps:
+    name: ''
+    set: []
+  expanders:
+    - left_module_id: 2
+      right_module_id: 3
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+
+	MetaModule::PatchPlayer player;
+	REQUIRE(player.load_patch(pd).success);
+
+	// Removing a module disconnects and rewires from the fixed-up
+	// patch data (id squash/erase is covered in patch-serial's tests)
+	player.remove_module(1);
+	player.remove_module(2);
+	CHECK(player.expanders().num_connected() == 0);
+
+	for (auto i = 0; i < 16; i++)
+		player.update_patch();
+
+	player.unload_patch();
+}
+
 TEST_CASE("expanders with out-of-range module ids are ignored") {
 	// clang-format off
 	std::string patchyml{R"(PatchData:
