@@ -315,7 +315,6 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		auto &ext_out = audio_block.out_ext_codec[idx];
 		auto const &ext_in = audio_block.in_ext_codec[idx];
 		auto &params = param_block.params[idx];
-		idx++;
 
 		// Set metaparams.ins with input signals
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
@@ -348,17 +347,21 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			}
 		}
 
-		// MIDI
-		midi.process(param_block.metaparams.midi_connected,
-					 params.midi_event,
-					 param_block.metaparams.midi_poly_chans,
-					 &params.raw_msg);
+		// MIDI: consume the incoming message and write back to the shared param block
+		MidiMessage msg = params.raw_msg;
+
+		midi.process(
+			param_block.metaparams.midi_connected, params.midi_event, param_block.metaparams.midi_poly_chans, &msg);
+
+		param_blocks[cur_block].params[idx].raw_msg = msg;
 
 		for (auto &outchan : out.chan)
 			outchan = 0;
 
 		for (auto &extoutchan : ext_out.chan)
 			extoutchan = 0;
+
+		idx++;
 	}
 
 	player.trigger_reading_gui_elements();

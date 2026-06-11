@@ -24,6 +24,17 @@ struct AudioStreamMidi {
 			sync_params.midi_events.put(event);
 		}
 
+		// Consume the incoming message even if MIDI is not connected
+		MidiMessage rx_msg = *raw_msg;
+		*raw_msg = MidiMessage{};
+
+		// Discard MIDI generated while not connected so it won't transmit
+		// on MIDI attachment
+		if (!is_connected) {
+			while (MidiRouter::pop_outgoing_message())
+				;
+		}
+
 		if (!player.is_loaded)
 			return;
 
@@ -40,16 +51,14 @@ struct AudioStreamMidi {
 
 		// Transfer MIDI RX message to router (from hardware)
 		// Ignore active-sensing
-		if (raw_msg->is_sysex() || (raw_msg->status != 0xfe && raw_msg->status != 0)) {
+		if (rx_msg.is_sysex() || (rx_msg.status != 0xfe && rx_msg.status != 0)) {
 			// 50ns with no listeners + ~100ns additional per listener
-			MidiRouter::push_incoming_message(*raw_msg);
+			MidiRouter::push_incoming_message(rx_msg);
 		}
 
 		// Transfer MIDI TX message from router (towards hardware)
 		if (auto tx_msg = MidiRouter::pop_outgoing_message()) {
 			*raw_msg = *tx_msg;
-		} else {
-			*raw_msg = MidiMessage{};
 		}
 
 		if (event.type == Midi::Event::Type::None)
