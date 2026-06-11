@@ -109,10 +109,95 @@ void HAL_HCD_PortDisabled_Callback(HCD_HandleTypeDef *hhcd) {
  * @param  urb_state: URB State
  * @retval None
  */
-// void HAL_HCD_HC_NotifyURBChange_Callback(HCD_HandleTypeDef *hhcd, uint8_t chnum, HCD_URBStateTypeDef urb_state) {
-// 	/* To be used with OS to sync URB state with the global state machine */
-// 	// USBH_LL_NotifyURBChange(hhcd->phost);
-// }
+// Channel-event diagnostics. The HAL invokes this on every channel halt (CHH),
+// classifying by the channel state the HAL assigned: HC_NAK reactivations are
+// the normal bulk-IN poll loop (IN) or a not-yet-rearmed device endpoint (OUT);
+// HC_NYET means a high-speed OUT was accepted but the endpoint is now busy
+// (PING protocol engages); HC_DATATGLERR means the core received a packet with
+// the wrong DATA0/1 toggle -- per USB spec it was ACKed and silently discarded,
+// i.e. one packet was lost. HC_XACTERR is a CRC/timeout retry (lossless unless
+// ErrCnt exceeds the limit -> URB_ERROR).
+//
+// The OUT totals are the key cross-check against the receiving device's URB
+// count: out-done minus device-received = transfers the host believes were
+// delivered but the device never got.
+struct UsbhChannelStats {
+	uint32_t done_in = 0;
+	uint32_t done_out = 0;
+	uint32_t nak_in = 0;
+	uint32_t nak_out = 0;
+	uint32_t nyet = 0;
+	uint32_t dterr = 0;
+	uint32_t xacterr = 0;
+	uint32_t urb_error = 0;
+};
+static UsbhChannelStats hc_stats;
+
+// Number of OUT data submissions attempted by the MIDI class (incl. retries)
+extern uint32_t g_usbh_midi_out_attempts;
+
+void HAL_HCD_HC_NotifyURBChange_Callback(HCD_HandleTypeDef *hhcd, uint8_t chnum, HCD_URBStateTypeDef urb_state) {
+	// Runs in the OTG ISR at the NAK-poll rate: keep this minimal
+	bool is_in = hhcd->hc[chnum].ep_is_in != 0U;
+
+	if (urb_state == URB_DONE) {
+		if (is_in)
+			hc_stats.done_in++;
+		else
+			hc_stats.done_out++;
+	} else if (urb_state == URB_ERROR) {
+		hc_stats.urb_error++;
+	} else if (urb_state == URB_NOTREADY) {
+		auto state = hhcd->hc[chnum].state;
+		if (state == HC_NAK) {
+			if (is_in)
+				hc_stats.nak_in++;
+			else
+				hc_stats.nak_out++;
+		} else if (state == HC_NYET) {
+			hc_stats.nyet++;
+		} else if (state == HC_DATATGLERR) {
+			hc_stats.dterr++;
+		} else if (state == HC_XACTERR) {
+			hc_stats.xacterr++;
+		}
+	}
+}
+
+// Once-per-second channel-event summary (call from the main loop).
+// Quiet unless URBs completed or errors occurred.
+void usbh_print_hc_stats() {
+	static uint32_t last_ms = 0;
+	static uint32_t last_done_in = 0;
+	static uint32_t last_done_out = 0;
+	static uint32_t last_nak_in = 0;
+
+	auto now = HAL_GetTick();
+	if (now - last_ms < 1000)
+		return;
+	auto elapsed_ms = now - last_ms;
+	last_ms = now;
+
+	auto s = hc_stats; // copy: the ISR keeps counting
+	if (s.done_in == last_done_in && s.done_out == last_done_out)
+		return;
+
+	printf("[USBH-HC] in: %u done/s %u nak/s | out: %u done/s, total %u done %u attempts %u nak %u nyet | dterr %u xacterr %u urberr %u\n",
+		   (unsigned)((s.done_in - last_done_in) * 1000 / elapsed_ms),
+		   (unsigned)((s.nak_in - last_nak_in) * 1000 / elapsed_ms),
+		   (unsigned)((s.done_out - last_done_out) * 1000 / elapsed_ms),
+		   (unsigned)s.done_out,
+		   (unsigned)g_usbh_midi_out_attempts,
+		   (unsigned)s.nak_out,
+		   (unsigned)s.nyet,
+		   (unsigned)s.dterr,
+		   (unsigned)s.xacterr,
+		   (unsigned)s.urb_error);
+
+	last_done_in = s.done_in;
+	last_done_out = s.done_out;
+	last_nak_in = s.nak_in;
+}
 
 /*******************************************************************************
 					   LL Driver Interface (USB Host Library --> HCD)

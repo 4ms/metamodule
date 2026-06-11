@@ -29,6 +29,12 @@
 static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost);
 static void MIDI_ProcessReception(USBH_HandleTypeDef *phost);
 
+// Debug: OUT data submissions attempted (each SendData pass, incl. NOTREADY
+// retries). Compared against the host channel's done count and the receiving
+// device's URB count to localize silently lost transfers. Written and read in
+// the main loop (USBH_Process) only.
+uint32_t g_usbh_midi_out_attempts = 0;
+
 /**
  * @brief  USBH_MIDI_InterfaceInit
  *         The function init the MIDI class.
@@ -309,6 +315,7 @@ static void MIDI_ProcessTransmission(USBH_HandleTypeDef *phost)
 
 	switch (MSHandle->data_tx_state) {
 		case MidiStreamingDataState::SendData:
+			g_usbh_midi_out_attempts++;
 			if (MSHandle->TxDataLength > MSHandle->DataItf.OutEP.size) {
 				USBH_BulkSendData(
 					phost, MSHandle->pTxData, MSHandle->DataItf.OutEP.size, MSHandle->DataItf.OutEP.pipe, 1U);
