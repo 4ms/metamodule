@@ -210,6 +210,7 @@ void Controls::start() {
 }
 
 void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
+	_rx_monitor.add_urb(rxbuffer.size());
 	while (rxbuffer.size() >= 4) {
 		auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 		_rx_monitor.log(msg.raw());

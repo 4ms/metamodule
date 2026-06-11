@@ -16,10 +16,17 @@ namespace MetaModule
 // error captured since the last report.
 struct MidiPacketMonitor {
 	static constexpr uint32_t ReportIntervalMs = 1000;
-	static constexpr uint32_t RingSize = 32; // power of 2
+	static constexpr uint32_t RingSize = 64; // power of 2
 
 	UsbMidiPacketChecker checker{};
 	uint32_t transport_drops = 0; // transmit() returned false (caller increments)
+
+	// Transport-level stats, filled by callers that see whole URBs/transfers
+	uint32_t urbs = 0;
+	uint32_t urb_bytes = 0;
+	uint32_t urb_max_len = 0;
+	uint32_t urb_zero_len = 0;
+	uint32_t urb_ragged = 0; // length not a multiple of 4
 
 	MidiPacketMonitor(const char *name)
 		: name{name} {
@@ -43,6 +50,28 @@ struct MidiPacketMonitor {
 		}
 	}
 
+	// ISR context: record a marker word in the ring only (not checked, not
+	// counted as a packet). Markers show up in error snapshots.
+	void mark(uint32_t word) {
+		ring[write_idx & (RingSize - 1)] = word;
+		write_idx++;
+	}
+
+	// Record one URB/transfer and mark its boundary in the ring as
+	// 0xEEnnnnnn (n = length in bytes), so error snapshots show where
+	// transfers began relative to any lost packet.
+	void add_urb(uint32_t len) {
+		urbs++;
+		urb_bytes += len;
+		if (len > urb_max_len)
+			urb_max_len = len;
+		if (len == 0)
+			urb_zero_len++;
+		if (len % 4)
+			urb_ragged++;
+		mark(0xEE000000 | (len & 0x00FFFFFF));
+	}
+
 	// Main loop context only
 	void print_report(uint32_t now_ms) {
 		if (now_ms - last_report_ms < ReportIntervalMs)
@@ -53,10 +82,11 @@ struct MidiPacketMonitor {
 		// Copy counters: log() may run while we read them
 		auto c = checker;
 		auto drops = transport_drops;
+		auto cur_urbs = urbs;
 		auto pkts = c.sysex_packets + c.other_packets + c.zero_packets;
 		auto errors = c.total_errors() + drops;
 
-		if (pkts == last_pkts && errors == last_errors)
+		if (pkts == last_pkts && errors == last_errors && cur_urbs == last_urbs)
 			return; // no traffic, no news
 
 		printf("[%s] %u pkt/s %u msg/s | total: %u pkts %u msgs | err: %u seq %u framing %u zero-pkt %u drop | %u non-sysex\n",
@@ -70,6 +100,19 @@ struct MidiPacketMonitor {
 			   (unsigned)c.zero_packets,
 			   (unsigned)drops,
 			   (unsigned)c.other_packets);
+
+		if (cur_urbs != last_urbs) {
+			auto n_urbs = cur_urbs - last_urbs;
+			printf("[%s] %u urb/s avg %u B | total %u urbs %u B | max %u B, %u zero-len, %u ragged\n",
+				   name,
+				   (unsigned)(n_urbs * 1000 / elapsed_ms),
+				   (unsigned)((urb_bytes - last_urb_bytes) / n_urbs),
+				   (unsigned)cur_urbs,
+				   (unsigned)urb_bytes,
+				   (unsigned)urb_max_len,
+				   (unsigned)urb_zero_len,
+				   (unsigned)urb_ragged);
+		}
 
 		if (c.seq_errors != last_seq_errors)
 			printf("[%s] last seq err: expected %02x got %02x\n", name, c.last_seq_expected, c.last_seq_got);
@@ -92,6 +135,8 @@ struct MidiPacketMonitor {
 		last_errors = errors;
 		last_seq_errors = c.seq_errors;
 		last_framing_errors = c.framing_errors;
+		last_urbs = cur_urbs;
+		last_urb_bytes = urb_bytes;
 	}
 
 private:
@@ -110,6 +155,8 @@ private:
 	uint32_t last_errors = 0;
 	uint32_t last_seq_errors = 0;
 	uint32_t last_framing_errors = 0;
+	uint32_t last_urbs = 0;
+	uint32_t last_urb_bytes = 0;
 };
 
 } // namespace MetaModule
