@@ -60,7 +60,7 @@ struct SplitWidget : ModuleWidget {
 		float first_row = 45.f + space_y / 2;
 
 		for (auto i = 0u; i < Split::MaxPoly; i++)
-			addInput(createOutputCentered<ThemedPJ301MPort>(
+			addOutput(createOutputCentered<ThemedPJ301MPort>(
 				mm2px(Vec(first_col + space_x * int(i / 8), first_row + (i % 8) * space_y)),
 				module,
 				Split::MONO_OUTPUTS + i));
