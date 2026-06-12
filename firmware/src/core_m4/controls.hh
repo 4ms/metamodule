@@ -51,7 +51,6 @@ private:
 	void update_midi_connected();
 	void update_control_expander();
 	void update_rotary();
-	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
 
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 

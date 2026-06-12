@@ -51,7 +51,7 @@ struct AudioStreamMidi {
 
 		// Transfer MIDI RX message to router (from hardware)
 		// Ignore active-sensing
-		if (rx_msg->is_sysex() || (rx_msg->status != 0xfe && rx_msg->status != 0)) {
+		if (rx_msg.is_sysex() || (rx_msg.status != 0xfe && rx_msg.status != 0)) {
 			// 50ns with no listeners + ~100ns additional per listener
 			MidiRouter::push_incoming_message(rx_msg);
 		}
