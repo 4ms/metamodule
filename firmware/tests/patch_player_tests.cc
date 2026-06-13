@@ -4,6 +4,7 @@
 
 #include "patch_play/patch_player.hh"
 #include "stubs/test_module.hh"
+#include "stubs/test_patched_module.hh"
 #include "stubs/test_poly_module.hh"
 #include <fstream>
 #include <string>
@@ -14,11 +15,18 @@ constexpr MetaModule::ModuleInfoView TestPanelInfo{.width_hp = 8};
 constexpr MetaModule::ModuleInfoView TestModuleInfo{.width_hp = 8};
 constexpr MetaModule::ModuleInfoView TestPolyModuleInfo{.width_hp = 8};
 
+constexpr MetaModule::ModuleInfoView TestPatchedModuleInfo{.width_hp = 8};
+
 const std::array register_modules = {
 	MetaModule::ModuleFactory::registerModuleType("HubMedium", TestPanel::create, TestPanelInfo, ""),
 	MetaModule::ModuleFactory::registerModuleType("TestModule", TestModule::create, TestModuleInfo, ""),
 	MetaModule::ModuleFactory::registerModuleType("TestPoly", TestPolyModule::create, TestPolyModuleInfo, ""),
+	MetaModule::ModuleFactory::registerModuleType("PatchedFlag", PatchedFlagModule::create, TestPatchedModuleInfo, ""),
 };
+
+auto *get_patched_flag(MetaModule::PatchPlayer &player, unsigned module_id) {
+	return dynamic_cast<PatchedFlagModule *>(player.modules[module_id].get());
+}
 
 auto *get_test_module(MetaModule::PatchPlayer &player, unsigned module_id) {
 	return dynamic_cast<TestModule *>(player.modules[module_id].get());
@@ -4103,4 +4111,155 @@ PatchData:
 		player.update_patch();
 		CHECK(player.get_panel_output(0) == doctest::Approx(5.0f));
 	}
+}
+
+// ============================================================================
+// Output patched-state desync (regression)
+//
+// Output-normalling modules (DLD, Tapo, SISM) gate audio on isPatched<...Out>() --
+// the patched-state of an OUTPUT jack. Unlike input patched-state (a disengaged
+// std::optional that is self-correcting every frame), output patched-state is a
+// separate bool that the patch player maintains via incremental
+// mark_output_patched()/mark_output_unpatched() events and never recomputes. If an
+// event over- or under-fires, isPatched<...Out>() stays wrong until the next patch
+// event on that jack -- which is why "re-patching fixes it".
+//
+// Repro of the DLD "one side stops working" report: a module output that drives
+// BOTH an internal cable AND a physically-patched panel/hardware output. Removing
+// the internal cable from the input end (disconnect_injack) unconditionally
+// unpatches the cable's source output, ignoring the still-present panel cable.
+// ============================================================================
+TEST_CASE("Output patched-state survives removing one of several connections (DLD OutB desync)") {
+	// Module 1 = "DLD"-like output-normalling module; its output jack 2 == "OutB".
+	// Module 2 = a sink for the internal cable.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: out_patched_desync
+  module_slugs:
+    0: HubMedium
+    1: PatchedFlag
+    2: TestModule
+  int_cables:
+      - out:
+          module_id: 1
+          jack_id: 2
+        ins:
+          - module_id: 2
+            jack_id: 0
+  mapped_ins:
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 2
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+	)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *dld = get_patched_flag(player, 1);
+	REQUIRE(dld != nullptr);
+
+	constexpr unsigned OutB = 2;
+
+	// OutB drives an internal cable, so it is patched after load.
+	REQUIRE(dld->is_output_patched(OutB));
+
+	// Also plug a physical cable into the panel/hardware output mapped to OutB.
+	// (out_patched[0] becomes true; OutB stays patched -- it already was, via the cable.)
+	player.set_output_jack_patched_status(0, true);
+	REQUIRE(dld->is_output_patched(OutB));
+
+	SUBCASE("Removing the internal cable's input keeps OutB patched (panel cable remains)") {
+		// User unpatches the internal cable from the destination (input) end.
+		player.disconnect_injack(Jack{2, 0});
+
+		// The internal cable is gone...
+		CHECK(player.get_int_cables().empty());
+
+		// ...but OutB is still physically patched to panel output 0, so it must
+		// remain marked patched. For DLD this is the difference between Out A
+		// emitting channel A alone (correct) and the (A+B)/2 mono mix (the bug).
+		CHECK(dld->is_output_patched(OutB)); // FAILS today: disconnect_injack over-unpatches
+	}
+
+	SUBCASE("Control: removing the only connection does unpatch OutB") {
+		// No physical panel cable -> once the last connection is removed, OutB
+		// should legitimately become unpatched. Guards against an over-broad fix
+		// that never unpatches.
+		player.set_output_jack_patched_status(0, false);
+		player.disconnect_injack(Jack{2, 0});
+
+		CHECK(player.get_int_cables().empty());
+		CHECK_FALSE(dld->is_output_patched(OutB));
+	}
+}
+
+// ============================================================================
+// Output patched-state not re-applied on patch load (regression, path #2)
+//
+// out_patched[] (the physical panel/hardware jack sense state) persists across
+// patch loads -- a cable stays plugged when you switch patches. But the load path
+// only re-marks module jacks for *internal* cables (mark_patched_jacks); it never
+// re-applies the physical panel state (mark_patched_panel_jacks). So a freshly
+// loaded module whose output is mapped to an already-patched hardware output comes
+// up marked UNPATCHED until a jack event re-syncs it -- the DLD "load a patch and
+// one side is wrong until you wiggle the cable" report.
+// ============================================================================
+TEST_CASE("Panel-patched output is re-applied to the module on patch load (DLD OutB load desync)") {
+	// Module 1 = output-normalling module; output jack 2 == "OutB", mapped to panel out 0.
+	// No internal cable: OutB is held patched solely by the physical panel cable.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: out_patched_load_desync
+  module_slugs:
+    0: HubMedium
+    1: PatchedFlag
+  int_cables:
+  mapped_ins:
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 2
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+	)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+
+	constexpr unsigned OutB = 2;
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	// Plug a physical cable into panel output 0 (which OutB is mapped to). out_patched[0]
+	// is now true and persists across loads.
+	player.set_output_jack_patched_status(0, true);
+	REQUIRE(get_patched_flag(player, 1)->is_output_patched(OutB));
+
+	// Reload the patch with the hardware cable still plugged in. The module is recreated,
+	// so its panel-patched outputs must be re-marked patched as part of the load.
+	player.load_patch(pd);
+
+	// FAILS today: load does not re-apply mark_patched_panel_jacks().
+	CHECK(get_patched_flag(player, 1)->is_output_patched(OutB));
 }
