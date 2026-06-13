@@ -194,6 +194,9 @@ public:
 		mark_patched_jacks();
 		calc_panel_jack_connections();
 
+		// Re-apply physical state so panel-mapped jacks come up patched immediately
+		mark_patched_panel_jacks();
+
 		for (auto [knob_set_idx, knob_set] : enumerate(pd.knob_sets)) {
 			for (auto const &k : knob_set.set) {
 				cache_knob_mapping(knob_set_idx, k);
@@ -751,6 +754,17 @@ public:
 			modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 	}
 
+	bool output_jack_held_by_panel(Jack jack) const {
+		for (auto i = 0u; i < out_conns.size(); i++) {
+			if (!out_patched[i])
+				continue;
+			for (auto const &pj : out_conns[i])
+				if (pj.module_id == jack.module_id && pj.jack_id == jack.jack_id)
+					return true;
+		}
+		return false;
+	}
+
 	void safe_unpatch_input(Jack jack) {
 		if (jack.module_id < num_modules)
 			modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
@@ -780,9 +794,10 @@ public:
 
 		safe_unpatch_input(jack);
 
-		// Unpatch the output if the int_cable has no more inputs
+		// Unpatch the output if the int_cable has no more inputs -- unless that output is still
+		// patched to a physical panel/hardware output
 		if (auto cable = pd.find_internal_cable_with_injack(jack)) {
-			if (cable->ins.size() == 1) {
+			if (cable->ins.size() == 1 && !output_jack_held_by_panel(cable->out)) {
 				safe_unpatch_output(cable->out);
 			}
 		}
