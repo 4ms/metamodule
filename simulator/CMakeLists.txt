@@ -25,7 +25,11 @@ else()
 
 	message("Building Simulator with GUI")
 
-	add_compile_options(-O0 -g2)
+	# DSP code must be optimized to fill the audio callback in real time:
+	# at -O0, ported VCV modules overrun the 10.7ms buffer budget and the
+	# patch plays silence. The simulator target itself overrides this with
+	# -Og (see target_compile_options below) to stay debuggable.
+	add_compile_options(-O2 -g2)
 
 	add_compile_definitions(SIMULATOR)
 
