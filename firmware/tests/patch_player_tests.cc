@@ -3952,7 +3952,8 @@ PatchData:
 	}
 
 	SUBCASE("MIDI CC 0 routes directly to module jack 2, scaled to 0-10V") {
-		player.set_midi_cc(0, 127, 0);
+		// CC values reach set_midi_cc as 14-bit (M4 core left-shifts 7-bit by 7).
+		player.set_midi_cc(0, 127 << 7, 0);
 		CHECK(mono1->get_output(2) == doctest::Approx(127.f / 12.7f));
 	}
 }

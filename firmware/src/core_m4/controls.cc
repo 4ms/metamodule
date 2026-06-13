@@ -110,6 +110,8 @@ void Controls::update_midi_connected() {
 
 	if (cur_metaparams->midi_poly_chans > 0)
 		_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
+
+	_midi_parser.set_14bit_mode(cur_metaparams->midi_14bit_mode);
 }
 
 void Controls::update_control_expander() {
