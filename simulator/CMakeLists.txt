@@ -52,6 +52,12 @@ elseif (ALL_SAN)
 endif()
 
 
+# Default to DEBUG so logging is visible when configuring with plain cmake,
+# matching the Makefile (log_levels.cmake otherwise defaults to NONE, which
+# compiles out even pr_err). A -DLOG_LEVEL=... on the command line still takes
+# precedence.
+set(LOG_LEVEL DEBUG CACHE STRING "Console log level")
+
 include(${FWDIR}/cmake/log_levels.cmake)
 enable_logging()
 

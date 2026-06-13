@@ -21,6 +21,10 @@ make config-sim
 # cmake --fresh --preset Default -DLOG_LEVEL=DEBUG
 ```
 
+By default the simulator logs at the DEBUG level to the console. To change
+this, add `-DLOG_LEVEL=...` (levels: NONE, ERROR, WARN, INFO, DEBUG, TRACE,
+DUMP).
+
 Build it:
 
 ```bash
