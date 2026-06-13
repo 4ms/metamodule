@@ -11,6 +11,7 @@ namespace MetaModule::Midi
 struct MessageParser {
 	std::array<Midi::Note, MaxMidiPolyphony> all_midi_notes;
 	std::span<Midi::Note> midi_notes{all_midi_notes};
+	bool midi_14bit_mode = false;
 
 	void set_poly_num(uint32_t poly_chans) {
 		poly_chans = std::clamp<uint32_t>(poly_chans, 1U, all_midi_notes.size());
@@ -18,6 +19,10 @@ struct MessageParser {
 		if (poly_chans != midi_notes.size()) {
 			midi_notes = std::span{all_midi_notes.begin(), poly_chans};
 		}
+	}
+
+	void set_14bit_mode(bool enabled) {
+		midi_14bit_mode = enabled;
 	}
 
 	Midi::Event parse(MidiMessage msg) {

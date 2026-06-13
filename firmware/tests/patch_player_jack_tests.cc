@@ -2180,7 +2180,9 @@ PatchData:
 	auto m1 = get_test_module(player, 1);
 	REQUIRE(m1);
 
-	player.set_midi_cc(0, 127, 0);
+	// CC values reach set_midi_cc as 14-bit (the M4 core left-shifts 7-bit values by 7),
+	// so 7-bit full-scale 127 arrives as 127<<7 = 16256, which maps to 10V.
+	player.set_midi_cc(0, 127 << 7, 0);
 	CHECK(m1->get_output(0) == doctest::Approx(127.f / 12.7f));
 }
 
