@@ -209,6 +209,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	handle_patch_mod_queue();
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
+	param_block.metaparams.midi_14bit_mode = patch_loader.is_midi_14bit_enabled();
 
 	// Button Expander: block events if Back button is held down
 	if (param_block.metaparams.button_exp_connected != 0 && !param_block.metaparams.meta_buttons[0].is_pressed()) {
@@ -483,6 +484,7 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 void AudioStream::return_cached_params(unsigned block) {
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
+	param_blocks[block].metaparams.midi_14bit_mode = local_params.metaparams.midi_14bit_mode;
 }
 
 void AudioStream::set_block_spans() {
