@@ -731,6 +731,8 @@ lv_obj_t *create_midi_map_label(lv_obj_t *parent, std::string const &title) {
 	lv_obj_set_height(label, LV_SIZE_CONTENT); /// 1
 	lv_obj_set_align(label, LV_ALIGN_CENTER);
 	lv_label_set_text(label, title.data());
+
+	lv_obj_set_style_opa(label, 128, LV_PART_MAIN | LV_STATE_DISABLED);
 	return label;
 }
 
@@ -766,6 +768,8 @@ lv_obj_t *create_midi_map_dropdown(lv_obj_t *parent, std::string const &options)
 	// lv_obj_set_style_border_width(dropdown, 0, LV_PART_MAIN);
 	// lv_obj_set_style_bg_color(dropdown, lv_color_hex(0x999999), LV_PART_MAIN);
 	lv_obj_set_style_text_font(dropdown, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+
+	lv_obj_set_style_opa(dropdown, 128, LV_PART_MAIN | LV_STATE_DISABLED);
 
 	return dropdown;
 }

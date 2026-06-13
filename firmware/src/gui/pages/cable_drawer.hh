@@ -6,7 +6,9 @@
 #include "lvgl.h"
 #include "patch/patch_data.hh"
 #include "src/misc/lv_style.h"
+#include <algorithm>
 #include <cmath>
+#include <functional>
 
 namespace MetaModule
 {
@@ -19,8 +21,17 @@ class CableDrawer {
 	lv_draw_line_dsc_t cable_dsc;
 	lv_draw_line_dsc_t inner_outline_dsc;
 	lv_draw_line_dsc_t outer_outline_dsc;
+	lv_draw_line_dsc_t poly_cable_dsc;
+	lv_draw_line_dsc_t poly_inner_outline_dsc;
+	lv_draw_line_dsc_t poly_outer_outline_dsc;
 	lv_draw_rect_dsc_t injack_dsc;
 	lv_draw_rect_dsc_t outjack_dsc;
+
+	// Returns the live poly channel count for the cable from out jack to in jack (0 or 1 means mono)
+	std::function<unsigned(Jack out, Jack in)> channel_lookup;
+
+	// Channel count of each (out, in) jack pair as of the last draw, used to detect changes
+	std::vector<uint8_t> drawn_channel_counts;
 
 	//LVGL canvas is internally an img, which has 11 bits for height, so max is 2047
 	static constexpr uint32_t Height = std::min<uint32_t>(MaxCanvasHeight, 2047);
@@ -58,6 +69,16 @@ public:
 		outer_outline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 		outer_outline_dsc.color = lv_color_black();
 
+		// Placeholder polyphonic cable style: same as mono but thicker
+		poly_cable_dsc = cable_dsc;
+		poly_cable_dsc.width = 7;
+
+		poly_inner_outline_dsc = inner_outline_dsc;
+		poly_inner_outline_dsc.width = 9;
+
+		poly_outer_outline_dsc = outer_outline_dsc;
+		poly_outer_outline_dsc.width = 11;
+
 		lv_draw_rect_dsc_init(&injack_dsc);
 		injack_dsc.bg_opa = LV_OPA_100;
 		injack_dsc.bg_img_opa = LV_OPA_0;
@@ -83,6 +104,10 @@ public:
 		set_opacity(LV_OPA_60);
 	}
 
+	void set_channel_lookup(std::function<unsigned(Jack out, Jack in)> lookup) {
+		channel_lookup = std::move(lookup);
+	}
+
 	void clear() {
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 	}
@@ -91,16 +116,38 @@ public:
 		lv_obj_set_height(canvas, height);
 	}
 
+	// Returns true if any poly channel count differs from when cables were last drawn
+	bool channel_counts_changed(const PatchData &patch) const {
+		size_t i = 0;
+		for (const auto &cable : patch.int_cables) {
+			for (const auto &in : cable.ins) {
+				if (i >= drawn_channel_counts.size() || drawn_channel_counts[i] != num_channels(cable.out, in))
+					return true;
+				i++;
+			}
+		}
+		return i != drawn_channel_counts.size();
+	}
+
+	void capture_channel_counts(const PatchData &patch) {
+		drawn_channel_counts.clear();
+		for (const auto &cable : patch.int_cables) {
+			for (const auto &in : cable.ins)
+				drawn_channel_counts.push_back(num_channels(cable.out, in));
+		}
+	}
+
 	void draw(const PatchData &patch) {
 		clear();
 		lv_obj_move_foreground(canvas);
+		capture_channel_counts(patch);
 
 		for (const auto &cable : patch.int_cables) {
 			if (auto outpos = find_outjack_xy(cable.out)) {
 
 				for (const auto &in : cable.ins) {
 					if (auto inpos = find_injack_xy(in)) {
-						draw_cable({outpos->x, outpos->y}, {inpos->x, inpos->y}, cable);
+						draw_cable({outpos->x, outpos->y}, {inpos->x, inpos->y}, cable, num_channels(cable.out, in));
 					}
 				}
 			}
@@ -110,18 +157,24 @@ public:
 	void draw_single_module(const PatchData &patch, uint32_t module_id) {
 		clear();
 		lv_obj_move_foreground(canvas);
+		capture_channel_counts(patch);
 
 		for (const auto &cable : patch.int_cables) {
 			if (cable.out.module_id == module_id) {
 				if (auto outpos = find_outjack_xy(cable.out)) {
-					draw_outjack({outpos->x, outpos->y}, cable);
+					// Out jack is poly if it's sending poly to any of its destinations
+					unsigned max_chans = 0;
+					for (const auto &in : cable.ins)
+						max_chans = std::max(max_chans, num_channels(cable.out, in));
+
+					draw_outjack({outpos->x, outpos->y}, cable, max_chans);
 				}
 			}
 
 			for (const auto &in : cable.ins) {
 				if (in.module_id == module_id) {
 					if (auto inpos = find_injack_xy(in)) {
-						draw_injack({inpos->x, inpos->y}, cable);
+						draw_injack({inpos->x, inpos->y}, cable, num_channels(cable.out, in));
 					}
 				}
 			}
@@ -178,42 +231,73 @@ public:
 		return Vec2{x, y};
 	}
 
-	void draw_cable(Vec2 start, Vec2 end, const InternalCable &cable) {
+	unsigned num_channels(Jack out, Jack in) const {
+		return channel_lookup ? channel_lookup(out, in) : 0;
+	}
+
+	void draw_cable(Vec2 start, Vec2 end, const InternalCable &cable, unsigned num_chans = 0) {
 		uint16_t default_color = get_cable_color(cable.out).full;
-		cable_dsc.color.full = cable.color.value_or(default_color);
-		draw_cable(start, end);
+		uint16_t color = cable.color.value_or(default_color);
+
+		if (num_chans > 1) {
+			poly_cable_dsc.color.full = color;
+			draw_curve(start, end, poly_outer_outline_dsc, poly_inner_outline_dsc, poly_cable_dsc);
+		} else {
+			cable_dsc.color.full = color;
+			draw_curve(start, end, outer_outline_dsc, inner_outline_dsc, cable_dsc);
+		}
 	}
 
 	static constexpr size_t MAX_STEPS = 128;
 
-	void draw_cable(Vec2 start, Vec2 end) {
+	void draw_curve(Vec2 start,
+					Vec2 end,
+					const lv_draw_line_dsc_t &outer_dsc,
+					const lv_draw_line_dsc_t &inner_dsc,
+					const lv_draw_line_dsc_t &center_dsc) {
 		float dist_x = std::abs(start.x - end.x);
 		float dist_y = std::abs(start.y - end.y);
 		CableDrawer::Vec2 control{(start.x + end.x) / 2, ((start.y + end.y) / 2) + (int32_t)dist_x};
 		auto steps = std::clamp<unsigned>(dist_x * dist_y / 1000, 8, MAX_STEPS - 1);
-		CableDrawer::draw_bezier(start, end, control, steps);
+		CableDrawer::draw_bezier(start, end, control, steps, outer_dsc, inner_dsc, center_dsc);
 	}
 
-	void draw_injack(Vec2 location, const InternalCable &cable) {
+	void draw_injack(Vec2 location, const InternalCable &cable, unsigned num_chans = 0) {
 		uint16_t default_color = get_cable_color(cable.out).full;
 		injack_dsc.border_color.full = cable.color.value_or(default_color);
 		injack_dsc.bg_color =
 			(injack_dsc.border_color.full == lv_color_black().full) ? lv_color_white() : injack_dsc.border_color;
-		lv_canvas_draw_rect(canvas, location.x - 4, location.y - 4, 9, 9, &injack_dsc);
+
+		// Placeholder polyphonic jack style: larger marker
+		if (num_chans > 1)
+			lv_canvas_draw_rect(canvas, location.x - 6, location.y - 6, 13, 13, &injack_dsc);
+		else
+			lv_canvas_draw_rect(canvas, location.x - 4, location.y - 4, 9, 9, &injack_dsc);
 	}
 
-	void draw_outjack(Vec2 location, const InternalCable &cable) {
+	void draw_outjack(Vec2 location, const InternalCable &cable, unsigned num_chans = 0) {
 		uint16_t default_color = get_cable_color(cable.out).full;
 		outjack_dsc.border_color.full = cable.color.value_or(default_color);
 		outjack_dsc.bg_color = outjack_dsc.border_color;
-		lv_canvas_draw_rect(canvas, location.x - 9, location.y - 9, 19, 19, &outjack_dsc);
+
+		// Placeholder polyphonic jack style: larger marker
+		if (num_chans > 1)
+			lv_canvas_draw_rect(canvas, location.x - 12, location.y - 12, 25, 25, &outjack_dsc);
+		else
+			lv_canvas_draw_rect(canvas, location.x - 9, location.y - 9, 19, 19, &outjack_dsc);
 	}
 
 	static lv_color_t get_cable_color(Jack jack) {
 		return Gui::cable_palette[(jack.jack_id + jack.module_id) % Gui::cable_palette.size()];
 	}
 
-	void draw_bezier(Vec2 start, Vec2 end, Vec2 control, unsigned steps) {
+	void draw_bezier(Vec2 start,
+					 Vec2 end,
+					 Vec2 control,
+					 unsigned steps,
+					 const lv_draw_line_dsc_t &outer_dsc,
+					 const lv_draw_line_dsc_t &inner_dsc,
+					 const lv_draw_line_dsc_t &center_dsc) {
 
 		float step_size = 1.0f / steps;
 		lv_point_t points[MAX_STEPS];
@@ -223,11 +307,11 @@ public:
 		}
 
 		// outlines to make cable stand out on a black or white background
-		lv_canvas_draw_line(canvas, points, steps + 1, &outer_outline_dsc);
-		lv_canvas_draw_line(canvas, points, steps + 1, &inner_outline_dsc);
+		lv_canvas_draw_line(canvas, points, steps + 1, &outer_dsc);
+		lv_canvas_draw_line(canvas, points, steps + 1, &inner_dsc);
 
 		//colored center:
-		lv_canvas_draw_line(canvas, points, steps + 1, &cable_dsc);
+		lv_canvas_draw_line(canvas, points, steps + 1, &center_dsc);
 	}
 
 	static Vec2 get_quadratic_bezier_pt(Vec2 start, Vec2 end, Vec2 control, float step) {

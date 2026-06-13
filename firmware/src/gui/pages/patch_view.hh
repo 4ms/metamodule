@@ -46,6 +46,11 @@ struct PatchViewPage : PageBase {
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
+		// Only ask the player about poly channels when the viewed patch is the playing patch
+		cable_drawer.set_channel_lookup([this](Jack out, Jack in) -> unsigned {
+			return is_patch_playloaded ? patch_playloader.num_poly_cable_channels(out, in) : 0;
+		});
+
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_AddButton, add_module_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_KnobButton, knob_button_cb, LV_EVENT_CLICKED, this);
@@ -433,6 +438,8 @@ struct PatchViewPage : PageBase {
 		// Don't poll for patch changes while file menu is open to prevent races on the filesystem.
 		if (!file_menu.is_visible())
 			poll_patch_file_changed();
+
+		poll_poly_cable_changes();
 	}
 
 private:
@@ -610,6 +617,21 @@ private:
 				cable_drawer.clear();
 		}
 		last_cable_style = page_settings.cable_style;
+	}
+
+	// Re-draw cables when a poly channel count changes after the cables were drawn
+	// (e.g. a cable was added/removed, or a module's poly setting was changed)
+	void poll_poly_cable_changes() {
+		if (page_settings.cable_style.mode != MapRingStyle::Mode::ShowAll)
+			return;
+
+		auto now = get_time();
+		if (now - last_poly_check_tm < 100)
+			return;
+		last_poly_check_tm = now;
+
+		if (cable_drawer.channel_counts_changed(*patch))
+			cable_drawer.draw(*patch);
 	}
 
 	void update_graphic_throttle_setting() {
@@ -835,6 +857,7 @@ private:
 	PatchLocHash displayed_patch_loc_hash;
 	uint32_t patch_revision = 0xFFFFFFFF;
 	uint32_t patch_file_timestamp = 0;
+	uint64_t last_poly_check_tm = 0;
 
 	struct focussed_context {
 		PatchViewPage *page;

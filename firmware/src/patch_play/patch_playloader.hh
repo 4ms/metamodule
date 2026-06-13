@@ -185,6 +185,13 @@ struct PatchPlayLoader {
 		return player_.get_module_light(module_idx, param_idx);
 	}
 
+	// Returns number of poly channels on the cable from out jack to in jack (0 or 1 means mono)
+	unsigned num_poly_cable_channels(Jack out, Jack in) {
+		if (is_loading_patch())
+			return 0;
+		return player_.num_poly_cable_channels(out, in);
+	}
+
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {

@@ -1,5 +1,5 @@
 #include "plugin_module.hh"
-
+#include "CoreModules/CoreProcessor.hh"
 #include "engine/Module.hpp"
 
 namespace MetaModule
@@ -7,6 +7,10 @@ namespace MetaModule
 
 static rack::engine::Module *get_rack_plugin_module(std::unique_ptr<CoreProcessor> &module) {
 	return dynamic_cast<rack::engine::Module *>(module.get());
+}
+
+static CoreProcessorPoly *get_coreprocpoly_plugin_module(std::unique_ptr<CoreProcessor> &module) {
+	return dynamic_cast<CoreProcessorPoly *>(module.get());
 }
 
 void plugin_module_init(std::unique_ptr<CoreProcessor> &module) {
@@ -21,6 +25,30 @@ void plugin_module_deinit(std::unique_ptr<CoreProcessor> &module) {
 		rack::engine::Module::RemoveEvent rm{};
 		rack_module->onRemove(rm);
 	}
+}
+
+CoreProcessor::PolyPortBuffer plugin_module_get_poly_output_buffer(std::unique_ptr<CoreProcessor> &module,
+																   int output_id) {
+	if (auto rack_module = get_rack_plugin_module(module)) {
+		if (output_id < (int)rack_module->outputs.size())
+			return {rack_module->outputs[output_id].voltages.begin(), &rack_module->outputs[output_id].channels};
+	} else if (auto corepoly_module = get_coreprocpoly_plugin_module(module)) {
+		return corepoly_module->get_poly_output_buffer(output_id);
+	}
+
+	return {nullptr, nullptr};
+}
+
+CoreProcessor::PolyPortBuffer plugin_module_get_poly_input_buffer(std::unique_ptr<CoreProcessor> &module,
+																  int input_id) {
+	if (auto rack_module = get_rack_plugin_module(module)) {
+		if (input_id < (int)rack_module->inputs.size())
+			return {rack_module->inputs[input_id].voltages.begin(), &rack_module->inputs[input_id].channels};
+	} else if (auto corepoly_module = get_coreprocpoly_plugin_module(module)) {
+		return corepoly_module->get_poly_input_buffer(input_id);
+	}
+
+	return {nullptr, nullptr};
 }
 
 } // namespace MetaModule
