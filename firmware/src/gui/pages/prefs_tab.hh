@@ -68,6 +68,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(fs_section.startup_patch_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(fs_section.max_patches_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(midi_section.feedback_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(midi_section.midi_14bit_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(midi_section.pc_patch_load_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(midi_section.knobset_control_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(midi_section.knobset_cc_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -90,6 +91,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(fs_section.startup_patch_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(fs_section.max_patches_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(midi_section.feedback_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(midi_section.midi_14bit_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(midi_section.pc_patch_load_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(midi_section.knobset_control_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(midi_section.knobset_cc_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
@@ -235,6 +237,7 @@ private:
 		lv_show(catchup_section.allowjump_cont, catchup.mode == CatchupParam::Mode::ResumeOnEqual);
 
 		lv_check(midi_section.feedback_check, midi.midi_feedback == MidiSettings::MidiFeedback::Enabled);
+		lv_check(midi_section.midi_14bit_check, midi.midi_14bit_cc == MidiSettings::Midi14BitCC::Enabled);
 		lv_check(midi_section.pc_patch_load_check, midi_pc_patch_load.enabled);
 		lv_check(midi_section.knobset_control_check, midi.knobset_control == MidiSettings::KnobsetControl::Enabled);
 		lv_dropdown_set_selected(midi_section.knobset_cc_dropdown, midi.knobset_cc);
@@ -379,6 +382,11 @@ private:
 																				 MidiSettings::MidiFeedback::Disabled;
 	}
 
+	auto read_midi_14bit_check() {
+		return lv_obj_has_state(midi_section.midi_14bit_check, LV_STATE_CHECKED) ? MidiSettings::Midi14BitCC::Enabled :
+																				  MidiSettings::Midi14BitCC::Disabled;
+	}
+
 	bool read_midi_pc_enabled_check() {
 		return lv_obj_has_state(midi_section.pc_patch_load_check, LV_STATE_CHECKED);
 	}
@@ -501,6 +509,12 @@ private:
 		auto midi_feedback = read_midi_feedback_check();
 		if (midi.midi_feedback != midi_feedback) {
 			midi.midi_feedback = midi_feedback;
+			gui_state.do_write_settings = true;
+		}
+
+		auto midi_14bit = read_midi_14bit_check();
+		if (midi.midi_14bit_cc != midi_14bit) {
+			midi.midi_14bit_cc = midi_14bit;
 			gui_state.do_write_settings = true;
 		}
 
@@ -697,6 +711,7 @@ private:
 		auto catchup_exclude_buttons = read_catchup_exclude_check();
 		auto fs_max_patches = read_fs_max_open_patches();
 		auto midi_feedback = read_midi_feedback_check();
+		auto midi_14bit = read_midi_14bit_check();
 		auto midi_pc_enabled = read_midi_pc_enabled_check();
 		auto knobset_control = read_knobset_control_check();
 		auto knobset_cc = read_knobset_cc_dropdown();
@@ -719,7 +734,8 @@ private:
 			knobwake == screensaver.knobs_can_wake && catchupmode == catchup.mode &&
 			catchup_exclude_buttons == catchup.allow_jump_outofrange &&
 			load_initial_patch == settings.load_initial_patch && fs_max_patches == fs.max_open_patches &&
-			midi_feedback == midi.midi_feedback && midi_pc_enabled == midi_pc_patch_load.enabled &&
+			midi_feedback == midi.midi_feedback && midi_14bit == midi.midi_14bit_cc &&
+			midi_pc_enabled == midi_pc_patch_load.enabled &&
 			knobset_control == midi.knobset_control && knobset_cc == midi.knobset_cc &&
 			knobset_channel == midi.knobset_channel && mp_mode == missing_plugins.autoload &&
 			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
