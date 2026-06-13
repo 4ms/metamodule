@@ -28,9 +28,9 @@ target_link_libraries(coreproc_plugin_export PRIVATE
 	CoreModules
 )
 
-if (NOT HEADLESS)
-	target_link_libraries(coreproc_plugin_export PRIVATE ThorVG)
-endif()
+# waveform_display.cc references ThorVG unconditionally, so the headless
+# simulator needs it too (the simulator adds the ThorVG subdirectory either way)
+target_link_libraries(coreproc_plugin_export PRIVATE ThorVG)
 
 
 target_include_directories(coreproc_plugin_export PUBLIC
