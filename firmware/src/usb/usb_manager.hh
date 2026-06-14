@@ -273,6 +273,25 @@ public:
 		return UsbConnection::None;
 	}
 
+	// Full connection status: the connection enum plus, in host mode, the
+	// attached device's descriptor details (vid/pid/manufacturer/product/jacks).
+	// In device mode there is no peripheral descriptor, so details stay empty.
+	UsbConnectionStatus get_status() {
+		using enum FUSB302::Device::ConnectedState;
+		const bool as_host = (state == AsHost) || host_fallback;
+
+		UsbConnectionStatus status = as_host ? usb_host.get_connected_device() : UsbConnectionStatus{};
+		status.connection = get_connection();
+		return status;
+	}
+
+	// Monotonic counter that changes whenever the attached device's details are
+	// (re)captured or cleared. Pair it with get_connection() to decide when to
+	// republish (handles MSC, whose enum flips before its details are ready).
+	uint32_t get_device_info_seq() {
+		return usb_host.get_device_info_seq();
+	}
+
 private:
 	// While CC-attached as a sink, a compliant partner is a host and will
 	// enumerate us promptly. A non-compliant self-powered device presenting

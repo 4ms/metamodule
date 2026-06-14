@@ -3,6 +3,8 @@
 #include "midi_host.hh"
 #include "msc_host.hh"
 #include "pr_dbg.hh"
+#include "usb/usb_connection_status.hh"
+#include "usbh_midi_jacks.hh"
 #include <cstring>
 
 // Defined in usbh_conf.cc: once-per-second host-channel event summary
@@ -102,6 +104,25 @@ public:
 
 	static inline uint8_t connected_classcode = 0xFF;
 
+	// Descriptor details of the currently-attached device (host mode). Populated
+	// at HOST_USER_CLASS_ACTIVE, cleared on disconnect. Only the device fields
+	// are meaningful here (connection is filled in by UsbManager).
+	static inline MetaModule::UsbConnectionStatus connected_device{};
+
+	// Bumped each time connected_device is (re)captured or cleared. Lets the
+	// publisher republish when details arrive even if the connection enum didn't
+	// change -- needed for MSC, whose enum flips at CLASS_SELECTED (early) while
+	// details are captured later at CLASS_ACTIVE.
+	static inline uint32_t device_info_seq = 0;
+
+	MetaModule::UsbConnectionStatus const &get_connected_device() const {
+		return connected_device;
+	}
+
+	uint32_t get_device_info_seq() const {
+		return device_info_seq;
+	}
+
 	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {
 		USBHostHelper host{phost};
 
@@ -139,6 +160,17 @@ public:
 					pr_trace("MSC connected\n");
 					_mschost_instance->connect();
 				}
+
+				// Capture the attached device's descriptor details for the
+				// connection status (host mode only). Manufacturer/Product were
+				// persisted during enumeration; jack counts apply to MIDI.
+				connected_device = {};
+				connected_device.vid = phost->device.DevDesc.idVendor;
+				connected_device.pid = phost->device.DevDesc.idProduct;
+				connected_device.manufacturer.copy((const char *)phost->device.Manufacturer);
+				connected_device.product.copy((const char *)phost->device.Product);
+				count_midi_jacks(phost, &connected_device.num_midi_in_jacks, &connected_device.num_midi_out_jacks);
+				device_info_seq++;
 			} break;
 
 			case HOST_USER_DISCONNECTION: {
@@ -150,6 +182,8 @@ public:
 				else
 					pr_warn("Unknown disconnected class code %d\n", connected_classcode);
 				connected_classcode = 0xFF;
+				connected_device = {};
+				device_info_seq++;
 			} break;
 
 			case HOST_USER_UNRECOVERED_ERROR:

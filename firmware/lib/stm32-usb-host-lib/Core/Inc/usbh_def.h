@@ -443,6 +443,11 @@ typedef struct
   uint8_t                           current_interface;
   USBH_DevDescTypeDef               DevDesc;
   USBH_CfgDescTypeDef               CfgDesc;
+  /* Human-readable strings captured during enumeration (ASCII, null-terminated).
+     The standard stack reads these into the transient Data buffer and only logs
+     them; we persist them here so the app can report the attached device. */
+  uint8_t                           Manufacturer[64];
+  uint8_t                           Product[64];
 } USBH_DeviceTypeDef;
 
 struct _USBH_HandleTypeDef;

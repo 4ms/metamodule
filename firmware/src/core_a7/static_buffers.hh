@@ -5,6 +5,7 @@
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
+#include "usb/usb_connection_status.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "sync_params.hh"
 #include <array>
@@ -38,6 +39,7 @@ extern std::array<uint8_t, 320 * 240 * 3> uvc_shadow_framebuffer;
 extern std::array<uint8_t, 320 * 240 * 2> uvc_shadow_framebuffer;
 #endif
 extern DeviceSettingsMessage icc_device_settings_message;
+extern UsbConnectionStatusBlock usb_connection_status;
 
 void init();
 

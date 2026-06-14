@@ -17,6 +17,8 @@ target_sources(coreproc_plugin_export PRIVATE
 
 	patch/patch.cc
 
+	system/usb.cc
+
 	wav/wav_file_stream.cc
 	wav/dr_wav.c
 

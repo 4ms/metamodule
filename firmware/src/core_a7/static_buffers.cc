@@ -4,6 +4,7 @@
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
+#include "usb/usb_connection_status.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "sync_params.hh"
 #include <array>
@@ -50,6 +51,9 @@ __attribute__((section(".ddma"))) alignas(64) std::array<uint8_t, 320 * 240 * 2>
 #endif
 
 __attribute__((section(".ddma"))) DeviceSettingsMessage icc_device_settings_message;
+
+// Cross-core USB connection status: written by the M4, read by the A7 GUI/SDK.
+__attribute__((section(".ddma"))) UsbConnectionStatusBlock usb_connection_status;
 
 void init() {
 	for (auto &block : param_blocks) {

@@ -17,6 +17,7 @@
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
 #include "system/print_time.hh"
+#include "usb/usb_status_reader.hh"
 
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
@@ -43,6 +44,11 @@ extern "C" void aux_core_main() {
 #endif
 
 	UsbVideoBuffer::set_frame_buffer(SharedMemoryS::ptrs.uvc_framebuffer);
+
+	// Point the A7-side USB status reader at the M4's published block, so the
+	// Info page and plugin SDK can read the attached device's details.
+	usb_status_block = SharedMemoryS::ptrs.usb_connection_status;
+
 	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 
 	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};

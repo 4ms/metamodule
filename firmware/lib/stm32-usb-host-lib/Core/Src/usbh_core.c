@@ -864,6 +864,19 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
 }
 
 
+/* Persist a string descriptor (already parsed to ASCII in device.Data) into a
+   bounded, null-terminated device field so the app can report it after
+   enumeration. dst must hold at least 64 bytes. */
+static void USBH_StoreDevString(uint8_t *dst, const uint8_t *src)
+{
+  uint16_t i = 0U;
+  for (; (i < 63U) && (src[i] != 0U); i++)
+  {
+    dst[i] = src[i];
+  }
+  dst[i] = 0U;
+}
+
 /**
   * @brief  USBH_HandleEnum
   *         This function includes the complete enumeration process
@@ -929,6 +942,11 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       {
         USBH_UsrLog("PID: %xh", phost->device.DevDesc.idProduct);
         USBH_UsrLog("VID: %xh", phost->device.DevDesc.idVendor);
+
+        /* Start fresh: clear any strings left over from a previous device, so
+           a device without string descriptors reports empty (not stale). */
+        phost->device.Manufacturer[0] = 0U;
+        phost->device.Product[0] = 0U;
 
         phost->EnumState = ENUM_SET_ADDR;
       }
@@ -1074,6 +1092,7 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
         {
           /* User callback for Manufacturing string */
           USBH_UsrLog("Manufacturer : %s", (char *)(void *)phost->device.Data);
+          USBH_StoreDevString(phost->device.Manufacturer, phost->device.Data);
           phost->EnumState = ENUM_GET_PRODUCT_STRING_DESC;
 
 #if (USBH_USE_OS == 1U)
@@ -1130,6 +1149,7 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
         {
           /* User callback for Product string */
           USBH_UsrLog("Product : %s", (char *)(void *)phost->device.Data);
+          USBH_StoreDevString(phost->device.Product, phost->device.Data);
           phost->EnumState = ENUM_GET_SERIALNUM_STRING_DESC;
         }
         else if (ReqStatus == USBH_NOT_SUPPORTED)

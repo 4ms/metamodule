@@ -24,6 +24,7 @@
 #include "metamodule-plugin-sdk/core-interface/system/memory.hh"
 #include "metamodule-plugin-sdk/core-interface/system/random.hh"
 #include "metamodule-plugin-sdk/core-interface/system/time.hh"
+#include "metamodule-plugin-sdk/core-interface/system/usb.hh"
 #include "metamodule-plugin-sdk/core-interface/wav/wav_file_stream.hh"
 #include "pffft.h"
 
@@ -161,4 +162,6 @@ void keep_coreproc() {
 	[[maybe_unused]] auto x6 = MetaModule::Audio::get_block_size();
 	MetaModule::Patch::mark_patch_modified();
 	MetaModule::Gui::notify_user("", 0);
+
+	[[maybe_unused]] auto x7 = MetaModule::System::get_usb_connection_status();
 }

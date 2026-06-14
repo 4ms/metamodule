@@ -8,8 +8,10 @@
 #include "metaparams.hh"
 #include "params/expanders.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "usb/usb_status_reader.hh"
 #include "wifi/detection.hh"
 #include <cmath>
+#include <cstdio>
 
 #if !defined(SIMULATOR)
 #include <malloc.h>
@@ -33,6 +35,15 @@ struct InfoTab : SystemMenuTab {
 		lv_obj_set_height(usb_label, LV_SIZE_CONTENT);
 		lv_label_set_long_mode(usb_label, LV_LABEL_LONG_WRAP);
 		lv_obj_set_style_text_font(usb_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+		// Secondary line: attached device details (host mode), smaller font.
+		usb_detail_label = lv_label_create(ui_SystemMenuMainModuleCont);
+		lv_obj_set_width(usb_detail_label, lv_pct(100));
+		lv_obj_set_height(usb_detail_label, LV_SIZE_CONTENT);
+		lv_label_set_long_mode(usb_detail_label, LV_LABEL_LONG_WRAP);
+		lv_obj_set_style_text_font(usb_detail_label, &ui_font_MuseoSansRounded50012, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_hide(usb_detail_label);
+
 		update_usb_status();
 	}
 
@@ -61,6 +72,40 @@ struct InfoTab : SystemMenuTab {
 	void update_usb_status() {
 		if (usb_label)
 			lv_label_set_text(usb_label, usb_connection_text(metaparams.usb_connection));
+
+		if (!usb_detail_label)
+			return;
+
+		// Attached-device details (populated only in host mode). If there's
+		// nothing to show (device mode / idle), hide the secondary line.
+		auto s = get_usb_connection_status_snapshot();
+		bool has_strings = s.manufacturer.length() > 0 || s.product.length() > 0;
+		if (s.vid == 0 && !has_strings) {
+			lv_hide(usb_detail_label);
+			return;
+		}
+
+		std::string d;
+		if (has_strings) {
+			d += s.manufacturer.c_str();
+			if (s.manufacturer.length() > 0 && s.product.length() > 0)
+				d += " ";
+			d += s.product.c_str();
+			d += "\n";
+		}
+
+		char buf[40];
+		std::snprintf(buf, sizeof(buf), "VID:0x%04X  PID:0x%04X", s.vid, s.pid);
+		d += buf;
+
+		if (s.num_midi_in_jacks > 0 || s.num_midi_out_jacks > 0) {
+			std::snprintf(
+				buf, sizeof(buf), "\n%u MIDI in / %u MIDI out jacks", s.num_midi_in_jacks, s.num_midi_out_jacks);
+			d += buf;
+		}
+
+		lv_label_set_text(usb_detail_label, d.c_str());
+		lv_show(usb_detail_label);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -209,5 +254,6 @@ private:
 	WifiInterface::DetectExpander detect_wifi;
 	MetaParams const &metaparams;
 	lv_obj_t *usb_label = nullptr;
+	lv_obj_t *usb_detail_label = nullptr;
 };
 } // namespace MetaModule

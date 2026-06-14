@@ -65,6 +65,7 @@ int main() {
 		&StaticBuffers::console_m4_buff,
 		StaticBuffers::uvc_shadow_framebuffer.data(),
 		&StaticBuffers::icc_device_settings_message,
+		&StaticBuffers::usb_connection_status,
 	};
 
 	A7SharedMemoryS::ptrs = {
