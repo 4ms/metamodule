@@ -24,6 +24,7 @@ TEST_SOURCES += src/user_settings/settings_parse.cc
 TEST_SOURCES += src/user_settings/settings_serialize.cc
 TEST_SOURCES += src/fw_update/hash/md5_hash.h
 TEST_SOURCES += src/fw_update/hash/hash_processor.cc
+TEST_SOURCES += lib/CoreModules/register_module.cc
 TEST_SOURCES += lib/CoreModules/moduleFactory.cc
 TEST_SOURCES += tests/resampler_tests.cc
 TEST_SOURCES += vcv_plugin/export/src/resampler.cc

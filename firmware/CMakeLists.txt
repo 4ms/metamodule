@@ -40,6 +40,7 @@ set(SYMBOLS_BINFILE_DIRS
   --objdir ${CoreProcPluginBinDir} 
   --objdir ${HardwareSupportBinDir} 
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/fs/dirent/
+  --objfile ${CMAKE_BINARY_DIR}/mp1corea7/medium/CoreModules/CMakeFiles/CoreModules.dir/register_module.cc.obj
 
 )
 
