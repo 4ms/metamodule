@@ -5,6 +5,7 @@
 #include "hsem_handler.hh"
 #include "midi_controls.hh"
 #include "patch/midi_def.hh"
+#include "usb/usb_manager.hh"
 #include "util/countzip.hh"
 
 namespace MetaModule
@@ -54,6 +55,8 @@ void Controls::update_params() {
 		update_midi_connected();
 
 		cur_metaparams->midi_connected = _midi_connected;
+
+		cur_metaparams->usb_connection = _usb.get_connection();
 
 		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
 
@@ -236,9 +239,10 @@ void Controls::set_samplerate(unsigned sample_rate) {
 	}
 }
 
-Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host, UsbMidiDevice &midi_device)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host, UsbMidiDevice &midi_device, UsbManager &usb)
 	: _midi_host{midi_host}
 	, _midi_device{midi_device}
+	, _usb{usb}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {

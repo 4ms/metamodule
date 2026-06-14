@@ -2,6 +2,7 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
+#include "usb/usb_connection.hh"
 #include "util/debouncer.hh"
 #include "util/filter.hh"
 #include "util/rotary_motion.hh"
@@ -30,6 +31,9 @@ struct MetaParams {
 
 	// Controls -> Audio
 	bool midi_connected = false;
+
+	// Controls -> GUI (USB connection status: role + active class)
+	UsbConnection usb_connection = UsbConnection::None;
 
 	uint32_t button_exp_connected = 0; //bitmap
 	uint32_t ext_buttons_high_events{};
@@ -95,6 +99,8 @@ struct MetaParams {
 
 		midi_connected = that.midi_connected;
 
+		usb_connection = that.usb_connection;
+
 		midi_poly_chans = that.midi_poly_chans;
 
 		jack_senses = that.jack_senses;
@@ -132,6 +138,8 @@ struct MetaParams {
 			audio_overruns--;
 
 		midi_connected = that.midi_connected;
+
+		usb_connection = that.usb_connection;
 
 		midi_poly_chans = that.midi_poly_chans;
 

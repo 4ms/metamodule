@@ -7,6 +7,7 @@
 #include "drivers/pin_change.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "usb/device_cdc/usb_serial_device.hh"
+#include "usb/usb_connection.hh"
 #include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
 #include "usb/usb_role_mode.hh"
@@ -237,6 +238,39 @@ public:
 			return usb_host.is_msc_mounted();
 		} else
 			return false;
+	}
+
+	// Fold the current data role + active class into a single status for the GUI
+	// (status line + connect notifications). host_fallback means the OTG core is
+	// running HCD (acting as a host) even though the FUSB302 state is AsDevice.
+	UsbConnection get_connection() {
+		using enum FUSB302::Device::ConnectedState;
+		const bool as_host = (state == AsHost) || host_fallback;
+		const bool as_device = (state == AsDevice) && !host_fallback;
+
+		if (as_host) {
+			if (usb_host.is_msc_connected())
+				return UsbConnection::HostUsbDrive;
+			if (usb_host.get_midi_host().is_connected())
+				return UsbConnection::HostMidiDevice;
+			return UsbConnection::HostSearching;
+		}
+
+		if (as_device) {
+			if (usb_device.is_configured()) {
+				switch (usb_device.mode) {
+					case UsbDeviceMode::Midi:
+						return UsbConnection::DeviceMidiHost;
+					case UsbDeviceMode::Video:
+						return UsbConnection::DeviceVideoHost;
+					case UsbDeviceMode::Cdc:
+						return UsbConnection::DeviceConsoleHost;
+				}
+			}
+			return UsbConnection::DeviceWaiting;
+		}
+
+		return UsbConnection::None;
 	}
 
 private:

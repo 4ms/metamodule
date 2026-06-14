@@ -29,8 +29,10 @@ using mdrivlib::DebouncedPin;
 using mdrivlib::GPIOExpander;
 using mdrivlib::PinPolarity;
 
+class UsbManager;
+
 struct Controls {
-	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host, UsbMidiDevice &midi_device);
+	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host, UsbMidiDevice &midi_device, UsbManager &usb);
 
 	void start();
 	void process();
@@ -79,6 +81,7 @@ private:
 	// so both feed the same _midi_rx_buf and TX goes to whichever is connected.
 	MidiHost &_midi_host;
 	UsbMidiDevice &_midi_device;
+	UsbManager &_usb;
 	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
 	MidiPacketMonitor _tx_monitor{"TX"};
 	MidiPacketMonitor _rx_monitor{"RX"};

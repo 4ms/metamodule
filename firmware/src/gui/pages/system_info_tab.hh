@@ -25,6 +25,42 @@ struct InfoTab : SystemMenuTab {
 		, metaparams{metaparams} {
 		lv_label_set_text(ui_SystemMenuExpanders, "No Wi-Fi module found");
 		lv_show(ui_SystemMenuExpanders);
+
+		// The generated UI has no USB-status label, so create one in the main
+		// module container (under the firmware/RAM line), matching that font.
+		usb_label = lv_label_create(ui_SystemMenuMainModuleCont);
+		lv_obj_set_width(usb_label, lv_pct(100));
+		lv_obj_set_height(usb_label, LV_SIZE_CONTENT);
+		lv_label_set_long_mode(usb_label, LV_LABEL_LONG_WRAP);
+		lv_obj_set_style_text_font(usb_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
+		update_usb_status();
+	}
+
+	static const char *usb_connection_text(UsbConnection c) {
+		switch (c) {
+			case UsbConnection::None:
+				return "USB: Not connected";
+			case UsbConnection::HostSearching:
+				return "USB Host mode, searching for a device";
+			case UsbConnection::HostMidiDevice:
+				return "MIDI Host mode, connected to a MIDI device";
+			case UsbConnection::HostUsbDrive:
+				return "USB Host mode, connected to a USB drive";
+			case UsbConnection::DeviceWaiting:
+				return "USB Device mode, waiting for a host";
+			case UsbConnection::DeviceMidiHost:
+				return "MIDI Device mode, connected to a host";
+			case UsbConnection::DeviceVideoHost:
+				return "Video Device mode, connected to a host";
+			case UsbConnection::DeviceConsoleHost:
+				return "Console Device mode, connected to a host";
+		}
+		return "USB: Not connected";
+	}
+
+	void update_usb_status() {
+		if (usb_label)
+			lv_label_set_text(usb_label, usb_connection_text(metaparams.usb_connection));
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -89,6 +125,8 @@ struct InfoTab : SystemMenuTab {
 		}
 		lv_show(ui_SystemMenuButExpander);
 
+		update_usb_status();
+
 		detect_wifi.start();
 		detect_wifi.new_wifi_status_available(lv_tick_get());
 
@@ -119,6 +157,7 @@ struct InfoTab : SystemMenuTab {
 	}
 
 	void update() override {
+		update_usb_status();
 		update_wifi_expander();
 	}
 
@@ -169,5 +208,6 @@ private:
 	lv_group_t *group = nullptr;
 	WifiInterface::DetectExpander detect_wifi;
 	MetaParams const &metaparams;
+	lv_obj_t *usb_label = nullptr;
 };
 } // namespace MetaModule

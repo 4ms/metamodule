@@ -66,7 +66,7 @@ int main() {
 	WifiInterface::start();
 
 	// Controls
-	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host(), usb.get_midi_device()};
+	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host(), usb.get_midi_device(), usb};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
