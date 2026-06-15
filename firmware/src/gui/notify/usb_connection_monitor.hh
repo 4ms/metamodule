@@ -35,6 +35,9 @@ public:
 			case UsbConnection::DeviceVideoHost:
 				msg = "Connected to USB Video Host";
 				break;
+			case UsbConnection::DeviceModePeripheralIgnored:
+				msg = "USB device detected. Set USB Mode to Auto or Host to use it";
+				break;
 			// No notification for None/disconnect, the in-between role states,
 			// or the CDC serial console (used for debugging).
 			case UsbConnection::None:

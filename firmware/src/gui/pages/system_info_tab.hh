@@ -65,6 +65,8 @@ struct InfoTab : SystemMenuTab {
 				return "Video Device mode, connected to a host";
 			case UsbConnection::DeviceConsoleHost:
 				return "Console Device mode, connected to a host";
+			case UsbConnection::DeviceModePeripheralIgnored:
+				return "USB Device mode: a device is attached but unused.\nSet USB Mode to Auto or Host to use it";
 		}
 		return "USB: Not connected";
 	}

@@ -14,6 +14,8 @@ static_assert((uint32_t)UsbConnection::DeviceWaiting == (uint32_t)MetaModule::Us
 static_assert((uint32_t)UsbConnection::DeviceMidiHost == (uint32_t)MetaModule::UsbConnection::DeviceMidiHost);
 static_assert((uint32_t)UsbConnection::DeviceVideoHost == (uint32_t)MetaModule::UsbConnection::DeviceVideoHost);
 static_assert((uint32_t)UsbConnection::DeviceConsoleHost == (uint32_t)MetaModule::UsbConnection::DeviceConsoleHost);
+static_assert((uint32_t)UsbConnection::DeviceModePeripheralIgnored ==
+			  (uint32_t)MetaModule::UsbConnection::DeviceModePeripheralIgnored);
 
 UsbConnectionStatus get_usb_connection_status() {
 	auto s = MetaModule::get_usb_connection_status_snapshot();

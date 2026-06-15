@@ -29,6 +29,16 @@ class UsbManager {
 	uint32_t last_device_link_check = 0;
 	UsbRoleMode role_mode = UsbRoleMode::Auto;
 
+	// Force-device idle device-detection probe. In ForceDevice the port presents
+	// Rd and is blind to a downstream device (a USB drive plugged in here does
+	// nothing), which is confusing. While idle in that role we periodically flip
+	// the FUSB302 to a brief Rp measurement to sense such a device, then surface
+	// it (get_connection -> DeviceModePeripheralIgnored) so the GUI can prompt
+	// the user to switch the USB Mode to Auto or Host. See usbctl.probe_snk_for_device().
+	bool device_detected_in_device_mode = false;
+	uint32_t last_device_probe = 0;
+	static constexpr uint32_t DeviceProbeIntervalMs = 1000;
+
 	// Data-role fallback for non-compliant self-powered devices (e.g. OXI One
 	// "Device Self Powered") that present Rp and source VBUS -- the Type-C
 	// signature of a host -- while expecting to be the USB *data* device.
@@ -72,6 +82,7 @@ public:
 		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 3, 0);
 		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] {
 			using enum FUSB302::Device::ConnectedState;
+			Debug::Pin2::high();
 
 			if (state == AsDevice) {
 				if (host_fallback)
@@ -81,6 +92,7 @@ public:
 			} else if (state == AsHost) {
 				HAL_HCD_IRQHandler(&UsbHostManager::hhcd);
 			}
+			Debug::Pin2::low();
 		});
 	}
 
@@ -89,6 +101,9 @@ public:
 
 		if (auto newstate = usbctl.get_state(); newstate != state) {
 			using enum FUSB302::Device::ConnectedState;
+
+			// Any real attachment supersedes the idle force-device probe result.
+			device_detected_in_device_mode = false;
 
 			if (newstate == AsDevice) {
 				pr_info("Connected as a device\n");
@@ -172,6 +187,23 @@ public:
 				 // usb_device.process_disconnected();
 		}
 
+		// While forced to the device role and idle (no host attached), the port
+		// presents Rd and cannot see a downstream device. Periodically flip to a
+		// brief Rp measurement to sense one (e.g. a USB drive the user plugged in
+		// expecting it to work). Only when truly idle: state == None means no host
+		// is attached, so the probe never disturbs a live device connection.
+		if (role_mode == UsbRoleMode::ForceDevice && state == FUSB302::Device::ConnectedState::None) {
+			if (HAL_GetTick() - last_device_probe > DeviceProbeIntervalMs) {
+				last_device_probe = HAL_GetTick();
+				bool detected = usbctl.probe_snk_for_device();
+				if (detected != device_detected_in_device_mode) {
+					device_detected_in_device_mode = detected;
+					pr_info("USB: downstream device %s while forced to device role\n",
+							detected ? "detected" : "removed");
+				}
+			}
+		}
+
 		//DEBUG: toggle Pin0 when we're DRD polling
 		// if ((HAL_GetTick() - tm) > 400) {
 		// 	tm = HAL_GetTick();
@@ -204,6 +236,11 @@ public:
 		if (mode == role_mode)
 			return;
 		role_mode = mode;
+
+		// The "device ignored" hint only applies while forced to device role and
+		// idle; a mode change re-evaluates from scratch (the idle probe re-runs
+		// if the new mode is still ForceDevice).
+		device_detected_in_device_mode = false;
 
 		using enum FUSB302::Device::ConnectedState;
 		// Re-poll in the new role only if we're not in an active connection.
@@ -269,6 +306,12 @@ public:
 			}
 			return UsbConnection::DeviceWaiting;
 		}
+
+		// Idle in a force-device role, but the idle probe sensed a downstream
+		// device we can't use in this role -- surface it so the GUI can prompt a
+		// USB Mode change. (Set only when role_mode == ForceDevice && state == None.)
+		if (device_detected_in_device_mode)
+			return UsbConnection::DeviceModePeripheralIgnored;
 
 		return UsbConnection::None;
 	}

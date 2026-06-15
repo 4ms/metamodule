@@ -20,6 +20,12 @@ enum class UsbConnection : uint32_t {
 	DeviceMidiHost,	   // Device role: enumerated as a USB-MIDI device by a host
 	DeviceVideoHost,   // Device role: enumerated as a UVC video device by a host
 	DeviceConsoleHost, // Device role: enumerated as a CDC serial console by a host
+
+	// Forced to the device role and idle (no host), but a downstream device
+	// (e.g. a USB drive) was sensed on the port. It can't be used while forced
+	// to device role -- surfaced so the GUI can prompt the user to switch the
+	// USB Mode setting to Auto or Host. Detected by UsbManager's idle probe.
+	DeviceModePeripheralIgnored,
 };
 
 } // namespace MetaModule
