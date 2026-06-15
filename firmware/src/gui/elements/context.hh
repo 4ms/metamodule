@@ -1,10 +1,10 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/elements.hh"
-#include "lvgl.h"
 #include <cstdint>
 #include <optional>
-#include <vector>
+
+typedef struct _lv_obj_t lv_obj_t;
 
 namespace MetaModule
 {
