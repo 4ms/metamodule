@@ -5,7 +5,6 @@
 #include "dynload/preload_plugins.hh"
 #include "gui/button_exp_nav.hh"
 #include "gui/notify/notification.hh"
-#include "gui/notify/usb_connection_monitor.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
@@ -14,6 +13,7 @@
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
 #include "thorvg.h"
+#include "usb/usb_connection_monitor.hh"
 
 namespace MetaModule
 {

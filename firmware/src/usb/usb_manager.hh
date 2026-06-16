@@ -390,6 +390,11 @@ private:
 
 	// Start (or restart) the FUSB302 toggle polling for the current role policy.
 	void start_polling_for_role() {
+		// Hold off the force-device idle probe for one interval after any
+		// (re)poll, so the freshly (re)armed SNK toggle settles before the probe
+		// stops it to measure. Probing a just-reset chip can mis-read.
+		last_device_probe = HAL_GetTick();
+
 		switch (role_mode) {
 			case UsbRoleMode::ForceHost:
 				pr_info("USB: forcing host role (SRC polling)\n");
