@@ -5,9 +5,9 @@
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
-#include "usb/usb_connection_status.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "sync_params.hh"
+#include "usb/usb_connection_status_block.hh"
 #include <array>
 
 namespace MetaModule

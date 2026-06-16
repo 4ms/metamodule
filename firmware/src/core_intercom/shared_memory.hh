@@ -3,13 +3,13 @@
 #include "console/concurrent_buffer.hh"
 #include "intercore_modulefs_message.hh"
 #include "params/param_block.hh"
+#include "usb/usb_connection_status_block.hh"
 
 namespace MetaModule
 {
 //fwd declare to reduce dependencies
 class IntercoreStorageMessage;
 struct DeviceSettingsMessage;
-struct UsbConnectionStatusBlock;
 
 //TODO: Move this structure to static_buffers.hh and declare static inline ptrs there too
 struct SharedMemoryS {

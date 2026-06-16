@@ -291,10 +291,7 @@ public:
 			return false;
 	}
 
-	// Fold the current data role + active class into a single status for the GUI
-	// (status line + connect notifications). host_fallback means the OTG core is
-	// running HCD (acting as a host) even though the FUSB302 state is AsDevice.
-	UsbConnection get_connection() {
+	UsbConnection get_connection_status() {
 		using enum FUSB302::Device::ConnectedState;
 		const bool as_host = (state == AsHost) || host_fallback;
 		const bool as_device = (state == AsDevice) && !host_fallback;
@@ -322,29 +319,24 @@ public:
 		}
 
 		// Idle in a force-device role, but the idle probe sensed a downstream
-		// device we can't use in this role -- surface it so the GUI can prompt a
-		// USB Mode change. (Set only when role_mode == ForceDevice && state == None.)
+		// device we can't use in this role
 		if (device_detected_in_device_mode)
 			return UsbConnection::DeviceModePeripheralIgnored;
 
 		return UsbConnection::None;
 	}
 
-	// Full connection status: the connection enum plus, in host mode, the
-	// attached device's descriptor details (vid/pid/manufacturer/product/jacks).
-	// In device mode there is no peripheral descriptor, so details stay empty.
 	UsbConnectionStatus get_status() {
 		using enum FUSB302::Device::ConnectedState;
 		const bool as_host = (state == AsHost) || host_fallback;
 
 		UsbConnectionStatus status = as_host ? usb_host.get_connected_device() : UsbConnectionStatus{};
-		status.connection = get_connection();
+		status.connection = get_connection_status();
 		return status;
 	}
 
 	// Monotonic counter that changes whenever the attached device's details are
-	// (re)captured or cleared. Pair it with get_connection() to decide when to
-	// republish (handles MSC, whose enum flips before its details are ready).
+	// (re)captured or cleared. Required for MSC
 	uint32_t get_device_info_seq() {
 		return usb_host.get_device_info_seq();
 	}
@@ -356,10 +348,9 @@ private:
 	// swap the OTG core to host mode -- without sourcing VBUS, the partner
 	// already drives it -- and look for their D+ pull-up. If nothing attaches
 	// there either (e.g. a charger, or a host that's just slow), swap back,
-	// alternating until one role succeeds. Only in Auto role mode: ForceDevice
-	// means device, period. The FUSB302 stays in AsDevice throughout, so CC
-	// detach detection (VBUS/BCLevel drop, plus the 250 ms backstop above) is
-	// unaffected.
+	// alternating until one role succeeds. Only in Auto role mode.
+	// The FUSB302 stays in AsDevice throughout, so CC detach detection
+	// (VBUS/BCLevel drop, plus the 250 ms backstop above) is unaffected.
 	void update_role_fallback() {
 		if (role_settled || role_mode != UsbRoleMode::Auto)
 			return;
@@ -374,8 +365,7 @@ private:
 				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 				// Full stop + full host init: the host port only detects
 				// pull-ups after the MspInit USBO force-reset, and resetting
-				// the core with the partner's VBUS hot is proven safe (every
-				// device re-connect to a computer does the same).
+				// the core with the partner's VBUS hot is proven safe.
 				usb_device.stop();
 				usb_host.start(false);
 				host_fallback = true;

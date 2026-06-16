@@ -105,7 +105,7 @@ int main() {
 		usb.process();
 		sd.process();
 
-		auto conn = usb.get_connection();
+		auto conn = usb.get_connection_status();
 		auto info_seq = usb.get_device_info_seq();
 		if (conn != last_published_conn || info_seq != last_published_info_seq) {
 			last_published_conn = conn;

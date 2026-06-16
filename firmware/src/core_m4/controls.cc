@@ -56,7 +56,7 @@ void Controls::update_params() {
 
 		cur_metaparams->midi_connected = _midi_connected;
 
-		cur_metaparams->usb_connection = _usb.get_connection();
+		cur_metaparams->usb_connection = _usb.get_connection_status();
 
 		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
 
@@ -143,13 +143,13 @@ void Controls::parse_midi() {
 			_tx_monitor.log((uint32_t(bytes[0]) << 24) | (uint32_t(bytes[1]) << 16) | (uint32_t(bytes[2]) << 8) |
 							uint32_t(bytes[3]));
 
-            bool ok = false;
+			bool ok = false;
 			if (_midi_host.is_connected())
 				ok = _midi_host.transmit(bytes);
 			else if (_midi_device.is_connected())
 				ok = _midi_device.transmit(bytes);
-            
-            if (!ok)
+
+			if (!ok)
 				_tx_monitor.transport_drops++;
 		}
 	}
@@ -239,7 +239,10 @@ void Controls::set_samplerate(unsigned sample_rate) {
 	}
 }
 
-Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host, UsbMidiDevice &midi_device, UsbManager &usb)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
+				   MidiHost &midi_host,
+				   UsbMidiDevice &midi_device,
+				   UsbManager &usb)
 	: _midi_host{midi_host}
 	, _midi_device{midi_device}
 	, _usb{usb}

@@ -3,7 +3,7 @@
 #include "midi_host.hh"
 #include "msc_host.hh"
 #include "pr_dbg.hh"
-#include "usb/usb_connection_status.hh"
+#include "usb/usb_connection.hh"
 #include "usbh_midi_jacks.hh"
 #include <cstring>
 
@@ -77,6 +77,7 @@ public:
 		return usbhost.device.is_connected;
 	}
 
+	// FIXME: Get rid of magic number!
 	// Raw HPRT0 register (offset 0x440), for diagnostics: bit0 (PCSTS) is the
 	// live electrical port connect status -- set iff a device pull-up is
 	// present on D+/D-, regardless of interrupt handling.
@@ -104,18 +105,12 @@ public:
 
 	static inline uint8_t connected_classcode = 0xFF;
 
-	// Descriptor details of the currently-attached device (host mode). Populated
-	// at HOST_USER_CLASS_ACTIVE, cleared on disconnect. Only the device fields
-	// are meaningful here (connection is filled in by UsbManager).
 	static inline MetaModule::UsbConnectionStatus connected_device{};
 
-	// Bumped each time connected_device is (re)captured or cleared. Lets the
-	// publisher republish when details arrive even if the connection enum didn't
-	// change -- needed for MSC, whose enum flips at CLASS_SELECTED (early) while
-	// details are captured later at CLASS_ACTIVE.
+	// Bumped each time connected_device is (re)captured or cleared.
 	static inline uint32_t device_info_seq = 0;
 
-	MetaModule::UsbConnectionStatus const &get_connected_device() const {
+	MetaModule::System::UsbConnectionStatus const &get_connected_device() const {
 		return connected_device;
 	}
 
@@ -161,9 +156,6 @@ public:
 					_mschost_instance->connect();
 				}
 
-				// Capture the attached device's descriptor details for the
-				// connection status (host mode only). Manufacturer/Product were
-				// persisted during enumeration; jack counts apply to MIDI.
 				connected_device = {};
 				connected_device.vid = phost->device.DevDesc.idVendor;
 				connected_device.pid = phost->device.DevDesc.idProduct;

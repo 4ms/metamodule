@@ -1,5 +1,5 @@
 #pragma once
-#include "usb/usb_connection_status.hh"
+#include "usb/usb_connection_status_block.hh"
 
 namespace MetaModule
 {
