@@ -4,6 +4,7 @@
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "patch/patch_data.hh"
+#include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
 #include "src/core/lv_event.h"
@@ -17,11 +18,13 @@ struct PatchDescriptionPanel {
 
 	PatchDescriptionPanel(PatchPlayLoader &patch_playloader,
 						  OpenPatchManager &patches,
-						  PatchSuggestedAudioSettings &settings)
+						  PatchSuggestedAudioSettings &settings,
+						  PatchModQueue &patch_mod_queue)
 		: group(lv_group_create())
 		, patch_playloader{patch_playloader}
 		, patches{patches}
-		, settings{settings} {
+		, settings{settings}
+		, patch_mod_queue{patch_mod_queue} {
 
 		// Description
 		auto desc_cont = lv_obj_get_parent(ui_Description);
@@ -37,9 +40,11 @@ struct PatchDescriptionPanel {
 		// Patch suggested audio settings
 		create_suggested_audio_controls();
 		lv_obj_move_to_index(ui_DescMIDIPolyNumLabel, 2);
+		lv_obj_move_to_index(poly_cont, 3);
 
 		lv_obj_add_event_cb(suggest_sr_drop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(suggest_bs_drop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(poly_drop, poly_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(apply_settings_button, apply_settings_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_set_style_pad_row(ui_DescriptionPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -54,6 +59,7 @@ struct PatchDescriptionPanel {
 		lv_group_set_wrap(group, false);
 		lv_group_set_editing(group, false);
 		lv_group_add_obj(group, desc_cont);
+		lv_group_add_obj(group, poly_drop);
 		lv_group_add_obj(group, suggest_sr_drop);
 		lv_group_add_obj(group, suggest_bs_drop);
 		lv_group_add_obj(group, ui_DescriptionEditTextArea);
@@ -103,7 +109,11 @@ struct PatchDescriptionPanel {
 	}
 
 	void back_event() {
-		if (lv_dropdown_is_open(suggest_sr_drop)) {
+		if (lv_dropdown_is_open(poly_drop)) {
+			lv_dropdown_close(poly_drop);
+			lv_group_set_editing(group, false);
+
+		} else if (lv_dropdown_is_open(suggest_sr_drop)) {
 			lv_dropdown_close(suggest_sr_drop);
 			lv_group_set_editing(group, false);
 
@@ -145,10 +155,8 @@ struct PatchDescriptionPanel {
 
 		lv_label_set_text(ui_DescPanelFileName, filename.c_str());
 
-		if (patch->midi_poly_num)
-			lv_label_set_text_fmt(ui_DescMIDIPolyNumLabel, "MIDI Poly Chans: %u", (unsigned)patch->midi_poly_num);
-		else
-			lv_label_set_text(ui_DescMIDIPolyNumLabel, "");
+		lv_dropdown_set_selected(poly_drop, patch->midi_poly_num_setting); // 0 = Auto, 1-8 = hard-set
+		update_poly_chans_label();
 
 		set_suggested_audio_dropdowns();
 
@@ -170,6 +178,21 @@ struct PatchDescriptionPanel {
 
 private:
 	void create_suggested_audio_controls() {
+		// Max MIDI poly channels dropdown
+		poly_cont = create_labeled_dropdown(ui_DescriptionPanel);
+		poly_label = lv_obj_get_child(poly_cont, 0);
+		poly_drop = lv_obj_get_child(poly_cont, 1);
+		lv_obj_set_style_pad_ver(poly_cont, 4, LV_STATE_DEFAULT);
+
+		lv_label_set_text(poly_label, "MIDI Poly Chans:");
+		lv_obj_set_style_text_font(poly_label, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+
+		lv_obj_set_style_pad_left(poly_drop, 10, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(poly_drop, 6, LV_STATE_DEFAULT);
+		lv_obj_set_width(poly_drop, 90);
+
+		lv_dropdown_set_options(poly_drop, "Auto\n1\n2\n3\n4\n5\n6\n7\n8");
+
 		suggest_sr_cont = create_labeled_dropdown(ui_DescriptionPanel);
 		suggest_sr_label = lv_obj_get_child(suggest_sr_cont, 0);
 		suggest_sr_drop = lv_obj_get_child(suggest_sr_cont, 1);
@@ -234,6 +257,36 @@ private:
 			}
 		}
 		lv_dropdown_set_selected(suggest_bs_drop, sel);
+	}
+
+	void update_poly_chans_label() {
+		if (patch && patch->midi_poly_num)
+			lv_label_set_text_fmt(ui_DescMIDIPolyNumLabel, "Active poly chans: %u", (unsigned)patch->midi_poly_num);
+		else
+			lv_label_set_text(ui_DescMIDIPolyNumLabel, "");
+	}
+
+	static void poly_changed_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		if (!page->patch)
+			return;
+
+		// Dropdown index maps directly to the setting: 0 = Auto, 1-8 = hard-set
+		uint16_t setting = lv_dropdown_get_selected(page->poly_drop);
+
+		if (page->patch->midi_poly_num_setting == setting)
+			return;
+
+		page->patch->midi_poly_num_setting = setting;
+		page->patch->update_midi_poly_num();
+		page->update_poly_chans_label();
+		page->patches.mark_view_patch_modified();
+
+		// Update the live patch if it's the one being viewed
+		if (page->patches.get_playing_patch() == page->patches.get_view_patch())
+			page->patch_mod_queue.put(SetMidiPolyNum{.poly_num = setting});
 	}
 
 	static void suggested_audio_changed_cb(lv_event_t *event) {
@@ -417,6 +470,10 @@ private:
 	bool kb_visible = false;
 	bool did_save = false;
 
+	lv_obj_t *poly_cont = nullptr;
+	lv_obj_t *poly_label = nullptr;
+	lv_obj_t *poly_drop = nullptr;
+
 	lv_obj_t *suggest_sr_cont = nullptr;
 	lv_obj_t *suggest_sr_label = nullptr;
 	lv_obj_t *suggest_sr_drop = nullptr;
@@ -431,6 +488,7 @@ private:
 	PatchPlayLoader &patch_playloader;
 	OpenPatchManager &patches;
 	PatchSuggestedAudioSettings &settings;
+	PatchModQueue &patch_mod_queue;
 };
 
 } // namespace MetaModule

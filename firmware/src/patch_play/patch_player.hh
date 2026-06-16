@@ -67,10 +67,11 @@ private:
 	static constexpr auto PanelInValsSize = MidiHubOffset + MaxMidiHubSlots;
 	std::array<float, PanelInValsSize> panel_in_vals{};
 
+	std::array<bool, NumOutJacks> out_patched{};
+	std::array<bool, NumInJacks> in_patched{};
+
 	// MIDI
 	bool midi_connected = false;
-
-	ParamWatcher param_watcher;
 
 	struct JackMidi : Jack {
 		uint32_t midi_chan = 0; //0: Omni
@@ -114,11 +115,10 @@ private:
 
 	std::array<MidiPulse, MaxMidiPolyphony> midi_note_retrig;
 
+	ParamWatcher param_watcher;
+
 	std::array<ParamSet, MaxKnobSets> knob_maps;
 	CatchupManager catchup_manager;
-
-	std::array<bool, NumOutJacks> out_patched{};
-	std::array<bool, NumInJacks> in_patched{};
 
 	MulticorePlayer smp;
 	Balancer<MulticorePlayer::NumCores, MAX_MODULES_IN_PATCH> core_balancer;
@@ -782,9 +782,11 @@ public:
 		return std::min(*out_buf.channels, *in_buf.channels);
 	}
 
-	void set_midi_poly_num(uint32_t poly_num) {
-		pd.midi_poly_num = poly_num;
-		set_midi_poly_channel_count(poly_num);
+	// poly_num is the user setting: 0 = Auto (compute from cables), 1-8 = hard-set
+	void set_midi_poly_num(uint16_t poly_num) {
+		pd.midi_poly_num_setting = poly_num;
+		pd.update_midi_poly_num();
+		set_midi_poly_channel_count(pd.midi_poly_num);
 	}
 
 	uint32_t get_midi_poly_num() {

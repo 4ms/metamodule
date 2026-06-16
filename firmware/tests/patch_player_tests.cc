@@ -65,6 +65,7 @@ R"(PatchData:
   mapped_knobs: 
   midi_maps:
   midi_poly_num: 1
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
 )"};
@@ -134,6 +135,7 @@ PatchData:
   mapped_knobs: 
   midi_maps:
   midi_poly_num: 1
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
 	)"};
@@ -696,6 +698,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   vcvModuleStates: []
 )"};
 	// clang-format on
@@ -809,6 +812,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -989,6 +993,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   mapped_lights: []
   vcvModuleStates: []
 )"};
@@ -1102,6 +1107,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -1249,6 +1255,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -1346,6 +1353,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -1404,6 +1412,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -1470,6 +1479,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -1537,6 +1547,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -1631,6 +1642,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -1685,6 +1697,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -1750,6 +1763,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -1881,6 +1895,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2068,6 +2083,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2205,6 +2221,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2299,6 +2316,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2391,6 +2409,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2475,6 +2494,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2553,6 +2573,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2620,6 +2641,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2696,6 +2718,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2773,6 +2796,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2841,6 +2865,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2921,6 +2946,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -2993,6 +3019,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3051,6 +3078,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3117,6 +3145,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3255,6 +3284,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3332,6 +3362,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3395,6 +3426,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 4
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3461,6 +3493,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 4
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3514,6 +3547,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 4
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3568,6 +3602,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 4
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3619,6 +3654,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 4
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3679,6 +3715,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 4
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3748,6 +3785,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 1
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3796,6 +3834,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 1
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3865,6 +3904,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -3929,6 +3969,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 1
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -4000,6 +4041,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -4079,6 +4121,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 0
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
   mapped_lights: []
@@ -4157,6 +4200,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 1
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
 	)"};
@@ -4238,6 +4282,7 @@ PatchData:
   mapped_knobs:
   midi_maps:
   midi_poly_num: 1
+  midi_poly_num_setting: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: 1
 	)"};

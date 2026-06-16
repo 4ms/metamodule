@@ -39,7 +39,7 @@ struct MetaParams {
 	uint32_t jack_senses{};
 
 	// Audio -> Controls
-	uint32_t midi_poly_chans = 1;
+	uint16_t midi_poly_chans = 1;
 	uint32_t sample_rate = 48000;
 
 	// GUI -> GUI
