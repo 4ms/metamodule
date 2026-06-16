@@ -91,6 +91,15 @@ public:
 					HAL_PCD_IRQHandler(&hpcd);
 			} else if (state == AsHost) {
 				HAL_HCD_IRQHandler(&UsbHostManager::hhcd);
+			} else {
+				// No active stack to service (and thereby clear) the interrupt in
+				// this state, so the pending GINTSTS source would never clear and
+				// the IRQ would re-fire forever. As OTG (priority 3) preempts
+				// SysTick (priority 15), that storm starves SysTick and hangs any
+				// HAL_Delay in the main loop. Mask the IRQ here so it can't storm;
+				// the next connect re-inits the core (clearing GINTSTS) and
+				// re-enables it. Backstops the teardown ordering in handle_fusb_int.
+				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 			}
 			Debug::Pin2::low();
 		});
@@ -122,18 +131,23 @@ public:
 				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 
 			} else if (newstate == None) {
+				// Mask the OTG IRQ *before* tearing down. Once we stop servicing
+				// the core (below), its ISR no-ops and a pending GINTSTS source
+				// would storm; since OTG (priority 3) preempts SysTick (priority
+				// 15), that storm starves SysTick and the teardown's HAL_Delays
+				// (vbus_off/stop) would hang forever -- leaving us stuck with
+				// state==None and the IRQ spinning. So disable first, then tear
+				// down. (Use the pre-transition `state` to pick the branch; the
+				// final `state = newstate` below commits None.)
+				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+
 				if (state == AsHost) {
 					pr_info("Stopping host\n");
-					state = None;
 					usb_host.vbus_off();
-					mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 					usb_host.stop();
-				}
 
-				if (state == AsDevice) {
+				} else if (state == AsDevice) {
 					pr_info("Stopping device\n");
-					state = None;
-					mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 					// The OTG core may be running HCD via the data-role fallback
 					if (host_fallback) {
 						usb_host.stop();
