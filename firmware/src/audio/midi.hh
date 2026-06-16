@@ -79,7 +79,9 @@ struct AudioStreamMidi {
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::NoteOff) {
-			player.set_midi_note_gate(event.poly_chan, 0, event.midi_chan);
+			if (event.poly_chan < poly_num) {
+				player.set_midi_note_gate(event.poly_chan, 0, event.midi_chan);
+			}
 			player.set_midi_gate(event.note, 0, event.midi_chan);
 			sync_params.midi_events.put(event);
 
