@@ -38,9 +38,9 @@ struct PatchDescriptionPanel {
 		lv_obj_add_event_cb(ui_DescriptionEditCancelButton, cancel_cb, LV_EVENT_CLICKED, this);
 
 		// Patch suggested audio settings
-		create_suggested_audio_controls();
-		lv_obj_move_to_index(ui_DescMIDIPolyNumLabel, 2);
-		lv_obj_move_to_index(poly_cont, 3);
+		create_controls();
+		lv_obj_move_to_index(poly_cont, 6);
+		lv_obj_move_to_index(ui_DescMIDIPolyNumLabel, 6);
 
 		lv_obj_add_event_cb(suggest_sr_drop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(suggest_bs_drop, suggested_audio_changed_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -59,9 +59,9 @@ struct PatchDescriptionPanel {
 		lv_group_set_wrap(group, false);
 		lv_group_set_editing(group, false);
 		lv_group_add_obj(group, desc_cont);
-		lv_group_add_obj(group, poly_drop);
 		lv_group_add_obj(group, suggest_sr_drop);
 		lv_group_add_obj(group, suggest_bs_drop);
+		lv_group_add_obj(group, poly_drop);
 		lv_group_add_obj(group, ui_DescriptionEditTextArea);
 		lv_group_add_obj(group, ui_DescriptionEditSaveButton);
 		lv_group_add_obj(group, ui_DescriptionEditCancelButton);
@@ -177,7 +177,7 @@ struct PatchDescriptionPanel {
 	}
 
 private:
-	void create_suggested_audio_controls() {
+	void create_controls() {
 		// Max MIDI poly channels dropdown
 		poly_cont = create_labeled_dropdown(ui_DescriptionPanel);
 		poly_label = lv_obj_get_child(poly_cont, 0);
@@ -217,6 +217,7 @@ private:
 		lv_obj_set_width(suggest_bs_drop, 90);
 
 		close_button = create_button(ui_DescriptionPanel, "Close");
+		lv_obj_add_flag(close_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 		apply_settings_button = create_button(ui_DescriptionPanel, "Apply Settings");
 	}
