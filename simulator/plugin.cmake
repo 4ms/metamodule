@@ -37,16 +37,16 @@ function(create_plugin)
 		DEPENDS "${ASSET_DIR}/${PLUGIN_OPTIONS_PLUGIN_NAME}"
 	)
 
-	# The real SDK's create_plugin() defines a `plugin` target, and plugin
-	# CMakeLists legitimately attach POST_BUILD steps to it. Define a no-op
-	# equivalent so those plugins also configure as simulator built-ins.
-	# Target names are global, so only the first built-in plugin gets it:
-	# add_custom_command(TARGET plugin ...) only works in the directory that
-	# created the target.
+    # The real SDK's create_plugin() defines a `plugin` target, and so we need to define
+    # the same target here so that plugin CMakeLists can reference this target (e.g. to call
+    # add_custom_command(TARGET plugin ...). 
+    # Target names are global, so only the first built-in plugin gets it:
+    # add_custom_command(TARGET plugin ...) only works in the directory that
+    # created the target.
 	if (NOT TARGET plugin)
 		add_custom_target(plugin ALL)
 	else()
-		message(STATUS "Target `plugin` already exists, so POST_BUILD steps on it in ${CMAKE_CURRENT_SOURCE_DIR} will fail to configure -- register that plugin first if it needs them")
+		message(STATUS "Target `plugin` already exists, so `add_custom_command(TARGET plugin ...)` in ${CMAKE_CURRENT_SOURCE_DIR} will fail to configure -- register that plugin first")
 	endif()
 
 endfunction()
