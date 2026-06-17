@@ -78,6 +78,8 @@ private:
 	};
 	struct PolyJackMidi : JackMidi {
 		CoreProcessor::PolyPortBuffer buf{};
+		// First poly channel this cable carries: 0 for the 1-4 cable, 4 for the 5-8 cable.
+		uint8_t poly_base = 0;
 	};
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_gate_conns;
@@ -93,7 +95,7 @@ private:
 	std::vector<PolyJackMidi> midi_poly_aft_conns;
 
 	struct MidiPolyPulse {
-		std::array<OneShot, CoreProcessor::MaxPolyChannels> pulses{};
+		std::array<OneShot, MaxMidiPolyphony> pulses{};
 		std::vector<PolyJackMidi> conns;
 	};
 	MidiPolyPulse midi_poly_retrig;
@@ -521,18 +523,21 @@ public:
 		set_all_connected_jacks(midi_note_retrig[poly_chan].conns, val, midi_chan);
 		midi_note_retrig[poly_chan].pulse.start(0.01);
 
-		// Poly cables:
 		set_all_connected_poly_jacks(midi_poly_retrig.conns, poly_chan, val, midi_chan);
-		if (poly_chan < CoreProcessor::MaxPolyChannels)
+		if (poly_chan < MaxMidiPolyphony)
 			midi_poly_retrig.pulses[poly_chan].start(0.01);
 	}
 
 	void set_midi_poly_channel_count(uint32_t poly_num) {
-		uint8_t count = static_cast<uint8_t>(std::min<uint32_t>(poly_num, CoreProcessor::MaxPolyChannels));
-		auto set_count = [count](auto &conns) {
+		// Each cable carries the channels above its poly_base, clamped to MaxPolyChannels.
+		// e.g. poly_num=6: the 1-4 cable reports 4 channels, the 5-8 cable reports 2.
+		auto set_count = [poly_num](auto &conns) {
 			for (auto &jack : conns) {
-				if (jack.buf.channels)
-					*jack.buf.channels = count;
+				if (jack.buf.channels) {
+					uint32_t avail = poly_num > jack.poly_base ? poly_num - jack.poly_base : 0;
+					*jack.buf.channels =
+						static_cast<uint8_t>(std::min<uint32_t>(avail, CoreProcessor::MaxPolyChannels));
+				}
 			}
 		};
 		set_count(midi_poly_pitch_conns);
@@ -686,17 +691,23 @@ private:
 									  unsigned poly_chan,
 									  float val,
 									  uint32_t midi_chan) {
-		if (poly_chan >= CoreProcessor::MaxPolyChannels)
-			return;
-
 		for (auto const &jack : jacks) {
 			if (jack.midi_chan != 0 && jack.midi_chan != uint32_t(midi_chan + 1))
 				continue;
 
-			if (jack.buf.voltages)
-				jack.buf.voltages[poly_chan] = val;
+			// Route to the cable that carries this poly channel (1-4 cable: base 0, 5-8 cable: base 4)
+			if (poly_chan < jack.poly_base)
+				continue;
 
-			else if (poly_chan == 0)
+			auto idx = poly_chan - jack.poly_base;
+
+			if (idx >= CoreProcessor::MaxPolyChannels)
+				continue;
+
+			if (jack.buf.voltages)
+				jack.buf.voltages[idx] = val;
+
+			else if (idx == 0)
 				set_input(jack, val);
 		}
 	}
@@ -719,11 +730,14 @@ private:
 				set_all_connected_jacks(ret.conns, 0);
 		}
 
-		for (unsigned ch = 0; ch < CoreProcessor::MaxPolyChannels; ch++) {
+		for (unsigned ch = 0; ch < MaxMidiPolyphony; ch++) {
 			if (!midi_poly_retrig.pulses[ch].update()) {
 				for (auto &jack : midi_poly_retrig.conns) {
-					if (jack.buf.voltages)
-						jack.buf.voltages[ch] = 0.f;
+					if (ch < jack.poly_base)
+						continue;
+					unsigned idx = ch - jack.poly_base;
+					if (idx < CoreProcessor::MaxPolyChannels && jack.buf.voltages)
+						jack.buf.voltages[idx] = 0.f;
 				}
 			}
 		}
@@ -1635,25 +1649,49 @@ public:
 				plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
 				CoreProcessor::PolyPortBuffer{};
 
+		// The 1-4 and 5-8 poly cables share the same connection vectors; poly_base selects
+		// which group of MIDI poly channels (0-3 vs 4-7) the cable carries.
+		constexpr uint8_t Base5_8 = Midi::MidiPolyCableChanBase;
+
 		if (Midi::midi_note_pitch_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_pitch_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI note poly ch:%u", chan);
+
+		} else if (Midi::midi_note_pitch_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_pitch_conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI note poly 5-8 ch:%u", chan);
 
 		} else if (Midi::midi_note_gate_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_gate_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI gate poly ch:%u", chan);
 
+		} else if (Midi::midi_note_gate_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_gate_conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI gate poly 5-8 ch:%u", chan);
+
 		} else if (Midi::midi_note_vel_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_vel_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI vel poly ch:%u", chan);
+
+		} else if (Midi::midi_note_vel_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_vel_conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI vel poly 5-8 ch:%u", chan);
 
 		} else if (Midi::midi_note_aft_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_aft_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI aft poly ch:%u", chan);
 
+		} else if (Midi::midi_note_aft_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_aft_conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI aft poly 5-8 ch:%u", chan);
+
 		} else if (Midi::midi_note_retrig_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_retrig.conns, input_jack, chan, polybuf);
 			pr_trace("MIDI retrig poly ch:%u", chan);
+
+		} else if (Midi::midi_note_retrig_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_retrig.conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI retrig poly 5-8 ch:%u", chan);
 
 		} else if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_pitch_conns[num.value()], input_jack, chan);
@@ -1780,11 +1818,13 @@ private:
 	static void update_or_add_poly(std::vector<PolyJackMidi> &v,
 								   const Jack &d,
 								   uint32_t midi_chan,
-								   CoreProcessor::PolyPortBuffer buf) {
+								   CoreProcessor::PolyPortBuffer buf,
+								   uint8_t poly_base = 0) {
 		for (auto &el : v) {
 			if (el.module_id == d.module_id && el.jack_id == d.jack_id) {
 				el.midi_chan = midi_chan;
 				el.buf = buf;
+				el.poly_base = poly_base;
 				return;
 			}
 		}
@@ -1792,6 +1832,7 @@ private:
 		static_cast<Jack &>(entry) = d;
 		entry.midi_chan = midi_chan;
 		entry.buf = buf;
+		entry.poly_base = poly_base;
 		v.push_back(entry);
 	}
 

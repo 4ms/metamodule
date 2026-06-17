@@ -272,6 +272,7 @@ struct MidiMapPopup {
 			auto polynum = lv_dropdown_get_selected(ui_MidiMapNotePolyDrop);
 
 			if (polynum == 0) {
+				// "#1-4" poly cable (channels 1-4)
 				return eventnum == 0 ? set_channels(MidiNotePolyJack, 0) :
 					   eventnum == 1 ? set_channels(MidiGatePolyJack, 0) :
 					   eventnum == 2 ? set_channels(MidiVelPolyJack, 0) :
@@ -279,8 +280,18 @@ struct MidiMapPopup {
 					   eventnum == 4 ? set_channels(MidiRetrigPolyJack, 0) :
 									   std::optional<MidiMappings>{std::nullopt};
 
+			} else if (polynum == 1) {
+				// "#5-8" poly cable (channels 5-8)
+				return eventnum == 0 ? set_channels(MidiNotePoly5_8Jack, 0) :
+					   eventnum == 1 ? set_channels(MidiGatePoly5_8Jack, 0) :
+					   eventnum == 2 ? set_channels(MidiVelPoly5_8Jack, 0) :
+					   eventnum == 3 ? set_channels(MidiAftPoly5_8Jack, 0) :
+					   eventnum == 4 ? set_channels(MidiRetrigPoly5_8Jack, 0) :
+									   std::optional<MidiMappings>{std::nullopt};
+
 			} else {
-				polynum = std::min<unsigned>(polynum - 1, 7);
+				// "#1".."#8" mono note channels: dropdown index 2 => channel 1
+				polynum = std::min<unsigned>(polynum - 2, 7);
 
 				return eventnum == 0 ? set_channels(MidiMonoNoteJack, polynum) :
 					   eventnum == 1 ? set_channels(MidiMonoGateJack, polynum) :
@@ -336,7 +347,8 @@ struct MidiMapPopup {
 			check_only(ui_MidiMapNoteCheck);
 			lv_group_focus_obj(ui_MidiMapNoteCheck);
 
-			lv_dropdown_set_selected(ui_MidiMapNotePolyDrop, polychan.value());
+			// Dropdown: index 0="#1-4", 1="#5-8", then mono channels "#1".."#8" at index 2..9
+			lv_dropdown_set_selected(ui_MidiMapNotePolyDrop, polychan.value() + 1);
 			auto event_sel = Midi::midi_note_pitch(midi_jack_id)  ? 0 :
 							 Midi::midi_note_gate(midi_jack_id)	  ? 1 :
 							 Midi::midi_note_vel(midi_jack_id)	  ? 2 :
@@ -351,13 +363,9 @@ struct MidiMapPopup {
 			check_only(ui_MidiMapNoteCheck);
 			lv_group_focus_obj(ui_MidiMapNoteCheck);
 
-			lv_dropdown_set_selected(ui_MidiMapNotePolyDrop, 0); // "Poly 1-4"
-			auto event_sel = midi_jack_id == MidiNotePolyJack	  ? 0 :
-							 midi_jack_id == MidiGatePolyJack	  ? 1 :
-							 Midi::midi_note_vel(midi_jack_id)	  ? 2 :
-							 Midi::midi_note_aft(midi_jack_id)	  ? 3 :
-							 Midi::midi_note_retrig(midi_jack_id) ? 4 :
-																	0;
+			// "#1-4" cable => index 0, "#5-8" cable => index 1
+			lv_dropdown_set_selected(ui_MidiMapNotePolyDrop, Midi::is_midi_poly5_8_cable(midi_jack_id) ? 1 : 0);
+			auto event_sel = Midi::midi_poly_cable_event(midi_jack_id).value_or(0);
 			lv_dropdown_set_selected(ui_MidiMapNoteDrop, event_sel);
 		}
 
