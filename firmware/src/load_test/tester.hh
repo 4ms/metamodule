@@ -8,7 +8,15 @@
 namespace MetaModule
 {
 enum class KnobTestType { Bare, AllStill, AllMovingSlowly };
-enum class JackTestType { NonePatched, AllInputsZero, AllInputsLFO, AllInputsAudio, OneInputLFO, OneInputAudio };
+enum class JackTestType {
+	NonePatched,
+	AllInputsZero,
+	AllInputsLFO,
+	AllInputsAudio,
+	AllInputsPolyAudio,
+	OneInputLFO,
+	OneInputAudio
+};
 
 struct ModuleLoadTester {
 
@@ -105,6 +113,52 @@ struct ModuleLoadTester {
 					},
 					block_size);
 			}
+
+		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllInputsPolyAudio) {
+			patch_all_knobs_static();
+
+			auto other_module_id = patch.add_module("HubMedium");
+			patch_all_input_jacks(other_module_id);
+			patch_all_output_jacks(other_module_id);
+
+			if (load_patch()) {
+				set_all_params(0.25f);
+
+				// One oscillator per (input jack, poly channel) so every channel of
+				// every input carries a distinct audio-rate signal.
+				constexpr unsigned chans = CoreProcessor::MaxPolyChannels;
+				auto oscs = make_oscs<400, 6000>(counts.num_inputs * chans);
+
+				// Poly input buffer pointers are stable for the module's lifetime, so
+				// resolve them once up front (avoids a dynamic_cast in the timed loop).
+				std::vector<CoreProcessor::PolyPortBuffer> in_bufs(counts.num_inputs);
+				for (uint16_t in = 0; in < counts.num_inputs; in++)
+					in_bufs[in] = plugin_module_get_poly_input_buffer(player.modules[module_id], in);
+
+				if (!is_poly_capable(player.modules[module_id])) {
+					pr_dbg("Not poly capable\n");
+					return {};
+				}
+				pr_dbg("Running poly tests...\n");
+
+				result = run_patch(
+					[&, this] {
+						for (uint16_t in = 0; in < counts.num_inputs; in++) {
+							auto &buf = in_bufs[in];
+							if (buf.voltages && buf.channels) {
+								// Poly input: drive all channels
+								for (unsigned ch = 0; ch < chans; ch++)
+									buf.voltages[ch] = oscs[in * chans + ch].process_float() * 10.f - 5.f;
+								*buf.channels = chans;
+							} else {
+								// Mono input: drive channel 0 only
+								auto audio = oscs[in * chans].process_float() * 10.f - 5.f;
+								player.modules[module_id]->set_input(in, audio);
+							}
+						}
+					},
+					block_size);
+			}
 		}
 
 		if (player.is_loaded) {
@@ -165,6 +219,25 @@ struct ModuleLoadTester {
 		}
 
 		return worst;
+	}
+
+	// A module is "poly capable" if any input or output jack exposes a non-null
+	// PolyPortBuffer (a poly voltages array plus a channel count).
+	bool is_poly_capable(std::unique_ptr<CoreProcessor> &module) {
+		if (!module)
+			return false;
+
+		for (auto in = 0u; in < counts.num_inputs; in++) {
+			auto buf = plugin_module_get_poly_input_buffer(module, in);
+			if (buf.voltages && buf.channels)
+				return true;
+		}
+		for (auto out = 0u; out < counts.num_outputs; out++) {
+			auto buf = plugin_module_get_poly_output_buffer(module, out);
+			if (buf.voltages && buf.channels)
+				return true;
+		}
+		return false;
 	}
 
 	uint64_t measure_construction_time() {
