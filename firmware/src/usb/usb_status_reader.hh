@@ -12,7 +12,19 @@ namespace MetaModule
 inline UsbConnectionStatusBlock const *usb_status_block = nullptr;
 
 inline UsbConnectionStatus get_usb_connection_status_snapshot() {
-	return usb_status_block ? usb_status_block->read() : UsbConnectionStatus{};
+	return usb_status_block ? usb_status_block->read_status() : UsbConnectionStatus{};
+}
+
+inline UsbDeviceState get_usb_device_state_snapshot() {
+	return usb_status_block ? usb_status_block->read() : UsbDeviceState{};
+}
+
+inline UsbMidiJackInfo get_usb_midi_in_jack_snapshot(unsigned num) {
+	return usb_status_block ? usb_status_block->read_in_jack(num) : UsbMidiJackInfo{};
+}
+
+inline UsbMidiJackInfo get_usb_midi_out_jack_snapshot(unsigned num) {
+	return usb_status_block ? usb_status_block->read_out_jack(num) : UsbMidiJackInfo{};
 }
 
 } // namespace MetaModule

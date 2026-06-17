@@ -5,17 +5,15 @@ namespace MetaModule::System
 {
 
 UsbConnectionStatus get_usb_connection_status() {
-	auto s = MetaModule::get_usb_connection_status_snapshot();
+	return MetaModule::get_usb_connection_status_snapshot();
+}
 
-	UsbConnectionStatus out;
-	out.connection = static_cast<UsbConnection>(s.connection);
-	out.vid = s.vid;
-	out.pid = s.pid;
-	out.num_midi_in_jacks = s.num_midi_in_jacks;
-	out.num_midi_out_jacks = s.num_midi_out_jacks;
-	out.manufacturer = s.manufacturer;
-	out.product = s.product;
-	return out;
+UsbMidiJackInfo get_usb_midi_in_jack_info(unsigned num) {
+	return MetaModule::get_usb_midi_in_jack_snapshot(num);
+}
+
+UsbMidiJackInfo get_usb_midi_out_jack_info(unsigned num) {
+	return MetaModule::get_usb_midi_out_jack_snapshot(num);
 }
 
 } // namespace MetaModule::System

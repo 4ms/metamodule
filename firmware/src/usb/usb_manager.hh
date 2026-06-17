@@ -326,13 +326,13 @@ public:
 		return UsbConnection::None;
 	}
 
-	UsbConnectionStatus get_status() {
+	UsbDeviceState get_status() {
 		using enum FUSB302::Device::ConnectedState;
 		const bool as_host = (state == AsHost) || host_fallback;
 
-		UsbConnectionStatus status = as_host ? usb_host.get_connected_device() : UsbConnectionStatus{};
-		status.connection = get_connection_status();
-		return status;
+		UsbDeviceState state_out = as_host ? usb_host.get_connected_device() : UsbDeviceState{};
+		state_out.status.connection = get_connection_status();
+		return state_out;
 	}
 
 	// Monotonic counter that changes whenever the attached device's details are

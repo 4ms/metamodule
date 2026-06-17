@@ -105,12 +105,12 @@ public:
 
 	static inline uint8_t connected_classcode = 0xFF;
 
-	static inline MetaModule::UsbConnectionStatus connected_device{};
+	static inline MetaModule::UsbDeviceState connected_device{};
 
 	// Bumped each time connected_device is (re)captured or cleared.
 	static inline uint32_t device_info_seq = 0;
 
-	MetaModule::System::UsbConnectionStatus const &get_connected_device() const {
+	MetaModule::UsbDeviceState const &get_connected_device() const {
 		return connected_device;
 	}
 
@@ -157,11 +157,18 @@ public:
 				}
 
 				connected_device = {};
-				connected_device.vid = phost->device.DevDesc.idVendor;
-				connected_device.pid = phost->device.DevDesc.idProduct;
-				connected_device.manufacturer.copy((const char *)phost->device.Manufacturer);
-				connected_device.product.copy((const char *)phost->device.Product);
-				count_midi_jacks(phost, &connected_device.num_midi_in_jacks, &connected_device.num_midi_out_jacks);
+				connected_device.status.vid = phost->device.DevDesc.idVendor;
+				connected_device.status.pid = phost->device.DevDesc.idProduct;
+				connected_device.status.manufacturer.copy((const char *)phost->device.Manufacturer);
+				connected_device.status.product.copy((const char *)phost->device.Product);
+
+				// For a MIDI device, the jack ids/names were collected during the
+				// class-request phase (just before this callback fired). Copy them
+				// out of the class handle into the device snapshot to publish.
+				if (connected_classcode == AudioClassCode) {
+					if (auto *ms = host.get_class_handle<MidiStreamingHandle>())
+						copy_midi_jacks(ms->jacks, connected_device);
+				}
 				device_info_seq++;
 			} break;
 

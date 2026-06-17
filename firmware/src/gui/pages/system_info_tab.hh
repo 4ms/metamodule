@@ -79,8 +79,10 @@ struct InfoTab : SystemMenuTab {
 			return;
 
 		// Attached-device details (populated only in host mode). If there's
-		// nothing to show (device mode / idle), hide the secondary line.
-		auto s = get_usb_connection_status_snapshot();
+		// nothing to show (device mode / idle), hide the secondary line. We want
+		// status and the jack table together, so take one full-state snapshot.
+		auto st = get_usb_device_state_snapshot();
+		auto const &s = st.status;
 		bool has_strings = s.manufacturer.length() > 0 || s.product.length() > 0;
 		if (s.vid == 0 && !has_strings) {
 			lv_hide(usb_detail_label);
@@ -104,6 +106,20 @@ struct InfoTab : SystemMenuTab {
 			std::snprintf(
 				buf, sizeof(buf), "\n%u MIDI in / %u MIDI out jacks", s.num_midi_in_jacks, s.num_midi_out_jacks);
 			d += buf;
+
+			// List the named jacks (one per line). Only the first MaxMidiJacks per
+			// direction have info; unnamed jacks are skipped.
+			auto append_jack_names = [&d](const char *dir, auto const &jacks, unsigned count) {
+				for (unsigned i = 0; i < count && i < System::MaxMidiJacks; i++) {
+					if (jacks[i].name.length() > 0) {
+						d += "\n  ";
+						d += dir;
+						d += jacks[i].name.c_str();
+					}
+				}
+			};
+			append_jack_names("In: ", st.midi_in_jacks, s.num_midi_in_jacks);
+			append_jack_names("Out: ", st.midi_out_jacks, s.num_midi_out_jacks);
 		}
 
 		lv_label_set_text(usb_detail_label, d.c_str());
