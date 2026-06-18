@@ -214,10 +214,7 @@ public:
 		mark_patched_jacks();
 		calc_panel_jack_connections();
 
-		// out_patched[]/in_patched[] (physical panel jack state) persist across loads, but the
-		// freshly-created modules were just reset. Re-apply that physical state so panel-mapped
-		// jacks come up patched without waiting for a jack event (matters for output-normalling
-		// modules like DLD/Tapo/SISM that read isPatched<...Out>()).
+		// Re-apply physical state so panel-mapped jacks come up patched immediately
 		mark_patched_panel_jacks();
 
 		for (auto [knob_set_idx, knob_set] : enumerate(pd.knob_sets)) {
@@ -926,9 +923,6 @@ public:
 			modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 	}
 
-	// True if module output `jack` is still held patched by a physically-patched panel/hardware
-	// output mapping. Used so removing one of several connections doesn't clear an output's patched
-	// flag while the output is still in use (output-normalling modules like DLD/Tapo/SISM read it).
 	bool output_jack_held_by_panel(Jack jack) const {
 		for (auto i = 0u; i < out_conns.size(); i++) {
 			if (!out_patched[i])
@@ -976,7 +970,7 @@ public:
 		safe_unpatch_input(jack);
 
 		// Unpatch the output if the int_cable has no more inputs -- unless that output is still
-		// patched to a physical panel/hardware output (otherwise we'd falsely mark it unpatched).
+		// patched to a physical panel/hardware output
 		if (auto cable = pd.find_internal_cable_with_injack(jack)) {
 			if (cable->ins.size() == 1 && !output_jack_held_by_panel(cable->out)) {
 				safe_unpatch_output(cable->out);
