@@ -21,6 +21,7 @@ struct Settings {
 	std::string start_page = "";	// page to jump to on startup, e.g. "jackmap"
 	std::string screenshot_path = ""; // if set, capture to this BMP path then exit
 	unsigned screenshot_frames = 120; // UI update cycles to run before capturing
+	std::string input_sequence = ""; // ordered encoder actions to simulate, e.g. "cw cw click"
 
 	void parse(int argc, char *argv[]) {
 
@@ -68,6 +69,11 @@ struct Settings {
 								  "UI update cycles to run before capturing a screenshot",
 								  cxxopts::value<unsigned>()->default_value("120"));
 
+			options.add_options()("input",
+								  "Ordered encoder actions to simulate on startup, e.g. \"cw cw click\" "
+								  "(tokens: cw, ccw, click, back; repeat with cw:3)",
+								  cxxopts::value<std::string>()->default_value(""));
+
 			options.add_options()("h,help", "Print help");
 
 			auto args = options.parse(argc, argv);
@@ -83,6 +89,9 @@ struct Settings {
 
 			if (args.count("screenshot-frames") > 0)
 				screenshot_frames = args["screenshot-frames"].as<unsigned>();
+
+			if (args.count("input") > 0)
+				input_sequence = args["input"].as<std::string>();
 
 			if (args.count("zoom") > 0)
 				zoom = std::clamp(args["zoom"].as<unsigned>(), 25U, 800U);

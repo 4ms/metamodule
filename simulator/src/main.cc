@@ -8,8 +8,72 @@
 #include <chrono>
 #include <iostream>
 #include <optional>
+#include <sstream>
+#include <string>
 #include <string_view>
 #include <thread>
+
+static void run_cycles(MetaModule::Ui &ui, unsigned n) {
+	for (unsigned i = 0; i < n; i++) {
+		ui.update();
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+}
+
+static void push_key(SDL_Keycode keycode, bool down) {
+	SDL_Event e{};
+	e.type = down ? SDL_KEYDOWN : SDL_KEYUP;
+	e.key.state = down ? SDL_PRESSED : SDL_RELEASED;
+	e.key.repeat = 0;
+	e.key.keysym.sym = keycode;
+	SDL_PushEvent(&e);
+}
+
+// Simulate a sequence of encoder actions (e.g. "cw cw click") by synthesizing
+// the same SDL key events the input driver reads, running UI cycles in between
+// so LVGL processes each one.
+static void simulate_input(MetaModule::Ui &ui, const std::string &seq) {
+	auto const &keys = ui.input_keys();
+
+	run_cycles(ui, 12); // let the starting page settle before sending input
+
+	std::istringstream iss(seq);
+	std::string tok;
+	while (iss >> tok) {
+		unsigned count = 1;
+		std::string name = tok;
+		if (auto colon = tok.find(':'); colon != std::string::npos) {
+			name = tok.substr(0, colon);
+			count = (unsigned)std::stoul(tok.substr(colon + 1));
+		}
+
+		for (unsigned c = 0; c < count; c++) {
+			if (name == "cw") {
+				push_key(keys.turn_cw, true);
+				run_cycles(ui, 4);
+				push_key(keys.turn_cw, false);
+				run_cycles(ui, 2);
+			} else if (name == "ccw") {
+				push_key(keys.turn_ccw, true);
+				run_cycles(ui, 4);
+				push_key(keys.turn_ccw, false);
+				run_cycles(ui, 2);
+			} else if (name == "click") {
+				push_key(keys.click, true);
+				run_cycles(ui, 4);
+				push_key(keys.click, false);
+				run_cycles(ui, 6);
+			} else if (name == "back") {
+				push_key(keys.aux_button, true);
+				run_cycles(ui, 4);
+				push_key(keys.aux_button, false);
+				run_cycles(ui, 4);
+			} else {
+				std::cout << "Unknown --input token '" << name << "'\n";
+			}
+		}
+	}
+}
 
 static std::optional<MetaModule::PageId> resolve_page(std::string_view name) {
 	using MetaModule::PageId;
@@ -67,6 +131,10 @@ int main(int argc, char *argv[]) {
 
 	if (auto page = resolve_page(settings.start_page))
 		ui.goto_page(*page);
+
+	// Simulate encoder input (e.g. navigate to and click a list item) before capture
+	if (!settings.input_sequence.empty())
+		simulate_input(ui, settings.input_sequence);
 
 	// Headless screenshot mode: render a few frames so the page settles, then
 	// dump the screen to a BMP file and exit without starting audio.

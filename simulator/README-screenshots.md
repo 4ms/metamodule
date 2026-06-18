@@ -42,6 +42,7 @@ These options are added on top of the simulator's normal options
 | `--page <name>` | Page to jump to on startup (see table below). | (none) |
 | `--screenshot <file>` | Capture the screen to this **BMP** file after rendering, then exit. If omitted, the simulator runs normally. | (none) |
 | `--screenshot-frames <N>` | Number of UI update cycles (~`N`×10 ms) to run before capturing. | `120` |
+| `--input "<seq>"` | Ordered encoder actions to simulate on startup before capture (see below). | (none) |
 
 `--patch` and `--page` also work without `--screenshot`: the simulator will load
 the patch / jump to the page and then run interactively as usual. This is handy
@@ -64,6 +65,39 @@ mechanism, but some — e.g. `moduleview` and `knobmap` — need page arguments
 (a target module/param) to render anything useful when entered directly, which
 this tool does not currently supply. `jackmap` renders from just a loaded patch
 and is the verified target; `midimap`/`patchview` should behave similarly.)
+
+## Simulating encoder input
+
+`--input` drives the rotary encoder so you can navigate a list and activate an
+item, then screenshot the result. It takes a single ordered, space-separated
+sequence of tokens (one string, so order is preserved):
+
+| Token | Action |
+| --- | --- |
+| `cw` | Rotary turn clockwise (focus next item in the group) |
+| `ccw` | Rotary turn counter-clockwise (focus previous item) |
+| `click` | Rotary press+release (activate the focused item) |
+| `back` | Back/aux button press+release |
+
+Repeat a token with `token:N`, e.g. `cw:3`. Each action runs a few UI cycles
+before the next so LVGL processes it.
+
+```sh
+# Open the Jacks page, move focus down two items, click it, and capture the
+# page it navigates to:
+./build/simulator -p patches/ \
+    --patch /test-cable-disp.yml \
+    --page jackmap \
+    --input "cw cw click" \
+    --screenshot /tmp/shot.bmp \
+    --screenshot-frames 40
+```
+
+Focus starts on the first selectable item of the page, so `click` activates it,
+`cw click` the second, `cw cw click` the third, and so on. The synthesized
+events go through the real input driver, so this exercises the actual
+navigation/click code paths. (Key bindings come from `Ui::input_keys()`:
+cw=Right, ccw=Left, click=Down, back=Up.)
 
 ## Notes & caveats
 
