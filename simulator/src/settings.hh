@@ -15,6 +15,13 @@ struct Settings {
 	std::string test_brand = "";
 	float fullscale_volts = 5;
 
+	// Headless screenshot support: load a patch, jump to a page, render some
+	// frames, then dump the screen to a BMP file and exit.
+	std::string startup_patch = ""; // patch filename on the SD card, e.g. "/test-cable-disp.yml"
+	std::string start_page = "";	// page to jump to on startup, e.g. "jackmap"
+	std::string screenshot_path = ""; // if set, capture to this BMP path then exit
+	unsigned screenshot_frames = 120; // UI update cycles to run before capturing
+
 	void parse(int argc, char *argv[]) {
 
 		try {
@@ -46,9 +53,36 @@ struct Settings {
 								  "Volts (peak) which corresponds to full-scale signal sent to sound card",
 								  cxxopts::value<float>()->default_value("5"));
 
+			options.add_options()("patch",
+								  "Patch file on the SD card to load on startup (e.g. /test-cable-disp.yml)",
+								  cxxopts::value<std::string>()->default_value(""));
+
+			options.add_options()(
+				"page", "Page to jump to on startup (e.g. jackmap, midimap)", cxxopts::value<std::string>()->default_value(""));
+
+			options.add_options()("screenshot",
+								  "Capture the screen to this BMP file after rendering, then exit",
+								  cxxopts::value<std::string>()->default_value(""));
+
+			options.add_options()("screenshot-frames",
+								  "UI update cycles to run before capturing a screenshot",
+								  cxxopts::value<unsigned>()->default_value("120"));
+
 			options.add_options()("h,help", "Print help");
 
 			auto args = options.parse(argc, argv);
+
+			if (args.count("patch") > 0)
+				startup_patch = args["patch"].as<std::string>();
+
+			if (args.count("page") > 0)
+				start_page = args["page"].as<std::string>();
+
+			if (args.count("screenshot") > 0)
+				screenshot_path = args["screenshot"].as<std::string>();
+
+			if (args.count("screenshot-frames") > 0)
+				screenshot_frames = args["screenshot-frames"].as<unsigned>();
 
 			if (args.count("zoom") > 0)
 				zoom = std::clamp(args["zoom"].as<unsigned>(), 25U, 800U);

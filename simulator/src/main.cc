@@ -5,7 +5,33 @@
 #include "sdl_audio.hh"
 #include "settings.hh"
 #include "ui.hh"
+#include <chrono>
+#include <iostream>
+#include <optional>
 #include <string_view>
+#include <thread>
+
+static std::optional<MetaModule::PageId> resolve_page(std::string_view name) {
+	using MetaModule::PageId;
+	if (name.empty())
+		return std::nullopt;
+	if (name == "mainmenu")
+		return PageId::MainMenu;
+	if (name == "patchsel")
+		return PageId::PatchSel;
+	if (name == "patchview")
+		return PageId::PatchView;
+	if (name == "moduleview")
+		return PageId::ModuleView;
+	if (name == "modulelist")
+		return PageId::ModuleList;
+	if (name == "jackmap")
+		return PageId::JackMapView;
+	if (name == "midimap")
+		return PageId::MidiMapView;
+	std::cout << "Unknown --page '" << name << "'\n";
+	return std::nullopt;
+}
 
 int main(int argc, char *argv[]) {
 	MetaModuleSim::Settings settings;
@@ -34,6 +60,34 @@ int main(int argc, char *argv[]) {
 	}
 
 	ui.set_audio_fullscale(settings.fullscale_volts);
+
+	// Optional headless startup state for screenshots/testing
+	if (!settings.startup_patch.empty())
+		ui.load_patch(settings.startup_patch, MetaModule::Volume::SDCard);
+
+	if (auto page = resolve_page(settings.start_page))
+		ui.goto_page(*page);
+
+	// Headless screenshot mode: render a few frames so the page settles, then
+	// dump the screen to a BMP file and exit without starting audio.
+	if (!settings.screenshot_path.empty()) {
+		for (unsigned i = 0; i < settings.screenshot_frames; i++) {
+			ui.update();
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+
+		int rc = lv_port_disp_capture(settings.screenshot_path.c_str());
+		if (rc == 0)
+			std::cout << "Saved screenshot to " << settings.screenshot_path << "\n";
+		else
+			std::cout << "Screenshot capture failed (rc=" << rc << ")\n";
+
+		MetaModule::kill_module_threads();
+		lv_port_disp_deinit();
+		lv_deinit();
+		return rc;
+	}
+
 	audio_out.set_callback([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
 	audio_out.unpause();
 

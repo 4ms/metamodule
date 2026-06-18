@@ -37,6 +37,11 @@ public:
 	void play_patch(std::span<Frame> buffer);
 	void set_audio_fullscale(float volts_peak);
 
+	// Load a patch and start viewing/playing it (used for headless screenshots).
+	void load_patch(std::string_view patch_name, Volume vol);
+	// Jump directly to a page by id (used for headless screenshots).
+	void goto_page(PageId page_id);
+
 private:
 	PatchDirList patch_dir_list;
 
