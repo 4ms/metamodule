@@ -369,11 +369,13 @@ private:
 	uint32_t add_or_replace_file(Volume vol, std::string_view filename, std::string_view header) {
 		auto [filesize, timestamp] = get_filesize_timestamp(vol, filename);
 
-		auto patchname = PatchFileIO::extract_patch_name(header);
-		patch_list_helper_.add_file(vol, filename, patchname, filesize, timestamp);
+		if (filename.ends_with(".yml")) {
+			auto patchname = PatchFileIO::extract_patch_name(header);
+			patch_list_helper_.add_file(vol, filename, patchname, filesize, timestamp);
 
-		patch_list_changed_ = true;
-		patch_list_changed_wifi_ = true;
+			patch_list_changed_ = true;
+			patch_list_changed_wifi_ = true;
+		}
 		return timestamp;
 	}
 
