@@ -268,6 +268,10 @@ struct ModuleLoadTester {
 		for (uint16_t param_id = 0; param_id < counts.num_params; param_id++) {
 			player.modules[module_id]->set_param(param_id, val);
 		}
+		// Fix for EnOsc NumOsc getting set low and skewing non-poly results
+		if (patch.module_slugs[module_id].is_equal("4msCompany:EnOsc")) {
+			player.modules[module_id]->set_param(18, 0.9333f);
+		}
 	}
 
 	void patch_all_inputs() {
