@@ -327,29 +327,16 @@ private:
 		}
 	}
 
-	// List every panel input jack summed into `injack`, plus the other inputs sharing each one.
-	// Returns true if any were listed.
+	// List every panel input jack summed into `injack`
 	bool list_panel_in_cables(Jack injack) {
 		bool any = false;
 		for (auto &panel_jack : patch->mapped_ins) {
-			bool contains = false;
 			for (auto &in : panel_jack.ins) {
 				if (in == injack) {
-					contains = true;
+					auto obj = list.create_panel_in_item(panel_jack.panel_jack_id, ui_MapList, panel_jack.alias_name);
+					make_selectable_panel_jack_item(obj, &panel_jack);
+					any = true;
 					break;
-				}
-			}
-			if (!contains)
-				continue;
-
-			auto obj = list.create_panel_in_item(panel_jack.panel_jack_id, ui_MapList, panel_jack.alias_name);
-			make_selectable_panel_jack_item(obj, &panel_jack);
-			any = true;
-
-			for (auto &mappedin : panel_jack.ins) {
-				if (mappedin != injack) {
-					auto in_obj = list.create_cable_item(mappedin, ElementType::Input, *patch, ui_MapList);
-					make_selectable_injack_item(in_obj, mappedin);
 				}
 			}
 		}
