@@ -8,7 +8,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/ui.hh"
-#include "load_test/bmp_writer.hh"
+#include "load_test/png_writer.hh"
 #include "load_test/test_manager.hh"
 #include "lvgl.h"
 #include "patch/module_type_slug.hh"
@@ -26,8 +26,8 @@ namespace MetaModule
 {
 
 // Renders every loaded module's faceplate (exactly as the ModuleView module
-// drawer renders it at 240px height) and saves each as a 24-bit BMP under
-// "module-images/<brand>/<module>.bmp" on the USB drive.
+// drawer renders it at 240px height) and saves each as a PNG under
+// "module-images/<brand>/<module>.png" on the USB drive.
 //
 // Triggered like the CPU load tests: a file named "run_image_gen" on the USB
 // drive whose contents begin with "all" (or, in the future, a brand slug to
@@ -233,7 +233,7 @@ private:
 
 		// The snapshot may be larger than the faceplate: lv_snapshot pads the
 		// area by the object's extended draw size (e.g. light shadows) on all
-		// sides. Crop back to the centered faceplate rectangle so the BMP shows
+		// sides. Crop back to the centered faceplate rectangle so the PNG shows
 		// just the module, with no black margin.
 		const uint32_t target_w = (faceplate_width > 0) ? (uint32_t)faceplate_width : snap_w;
 		const uint32_t target_h = Height;
@@ -259,11 +259,15 @@ private:
 			pixels = std::span<const uint16_t>{src, (size_t)snap_w * snap_h};
 		}
 
-		auto bmp = encode_bmp24_from_rgb565(pixels, out_w, out_h);
+		auto png = encode_png24_from_rgb565(pixels, out_w, out_h);
+		if (png.empty()) {
+			pr_err("PNG encode failed for %.*s\n", (int)module_slug.size(), module_slug.data());
+			return false;
+		}
 
-		std::string path = "module-images/" + std::string(brand) + "/" + std::string(module_slug) + ".bmp";
+		std::string path = "module-images/" + std::string(brand) + "/" + std::string(module_slug) + ".png";
 
-		auto wrote = FS::write_file(file_storage_proxy, std::span<const char>{bmp.data(), bmp.size()}, {path, OutVol});
+		auto wrote = FS::write_file(file_storage_proxy, std::span<const char>{png.data(), png.size()}, {path, OutVol});
 		if (!wrote)
 			pr_err("Failed writing %s\n", path.c_str());
 
