@@ -458,7 +458,7 @@ private:
 		std::string choices;
 		std::optional<unsigned> first_unpatched_jack{};
 
-		if (page->this_jack_type == ElementType::Input && !page->this_jack_has_connections) {
+		if (page->this_jack_type == ElementType::Input) {
 			unsigned num_jacks = PanelDef::NumUserFacingInJacks;
 			num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumInJacks : 0;
 			for (auto i = 0u; i < num_jacks; i++) {
@@ -491,20 +491,11 @@ private:
 			AddJackMapping jackmapping{};
 			jackmapping.panel_jack_id = (uint16_t)(choice - 1);
 
-			if (page->this_jack_type == ElementType::Input) {
-				if (auto *cable = page->patch->find_internal_cable_with_injack(page->this_jack)) {
-					// Input jack that's connected to an output -> Panel Out jack
-					jackmapping.jack = cable->out;
-					jackmapping.type = ElementType::Output;
-				} else {
-					// Input jack that's not connected any output -> Panel In jack
-					jackmapping.jack = page->this_jack;
-					jackmapping.type = ElementType::Input;
-				}
-			} else {
-				jackmapping.jack = page->this_jack;
-				jackmapping.type = ElementType::Output;
-			}
+			// Module input jacks map to panel inputs, module output jacks to panel
+			// outputs. If the input already has an internal cable, the panel input is
+			// summed with it automatically by calc_panel_jack_connections().
+			jackmapping.jack = page->this_jack;
+			jackmapping.type = page->this_jack_type;
 
 			page->patch_mod_queue.put(jackmapping);
 			page->notify_queue.put({"Connected to panel"});
