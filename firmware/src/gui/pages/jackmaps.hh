@@ -78,22 +78,49 @@ struct JackMapViewPage : PageBase {
 				continue;
 			}
 
+			// If the panel jack has an alias, show it as a header carrying the
+			// circle+number; the jack rows then align beneath the alias text.
+			bool has_alias = mapped->alias_name.size() > 0;
+			if (has_alias)
+				add_alias_header(ui_JackMapLeftItems, MapButtonType::Input, pj, mapped->alias_name.data());
+
 			for (auto [k, jack] : enumerate(mapped->ins)) {
 				auto name = get_full_element_name(jack.module_id, jack.jack_id, ElementType::Input, *patch);
-				add_jack_row(ui_JackMapLeftItems,
-							 MapButtonType::Input,
-							 pj,
-							 k == 0,
-							 name,
-							 (uint16_t)jack.module_id,
-							 ElementCount::mark_unused_indices({.input_idx = (uint8_t)jack.jack_id}, {.num_inputs = 1}));
+				add_jack_row(
+					ui_JackMapLeftItems,
+					MapButtonType::Input,
+					pj,
+					!has_alias && k == 0,
+					name,
+					(uint16_t)jack.module_id,
+					ElementCount::mark_unused_indices({.input_idx = (uint8_t)jack.jack_id}, {.num_inputs = 1}));
 			}
 		}
 
 		// Outputs (right column). A panel output jack may be driven from several
 		// module output jacks (across map entries sharing a panel_jack_id).
 		for (unsigned pj = 0; pj < num_outputs; pj++) {
+			// Entries sharing a panel_jack_id carry the same alias; find it and
+			// whether anything is mapped to this panel jack.
+			const char *alias = nullptr;
 			bool any = false;
+			for (auto &map : patch->mapped_outs) {
+				if (map.panel_jack_id != pj)
+					continue;
+				any = true;
+				if (map.alias_name.size())
+					alias = map.alias_name.data();
+			}
+
+			if (!any) {
+				create_mapping_circle_item(ui_JackMapRightItems, MapButtonType::Output, pj, "");
+				continue;
+			}
+
+			if (alias)
+				add_alias_header(ui_JackMapRightItems, MapButtonType::Output, pj, alias);
+
+			bool first = true;
 			for (auto &map : patch->mapped_outs) {
 				if (map.panel_jack_id != pj)
 					continue;
@@ -103,15 +130,12 @@ struct JackMapViewPage : PageBase {
 					ui_JackMapRightItems,
 					MapButtonType::Output,
 					pj,
-					!any,
+					!alias && first,
 					name,
 					(uint16_t)map.out.module_id,
 					ElementCount::mark_unused_indices({.output_idx = (uint8_t)map.out.jack_id}, {.num_outputs = 1}));
-				any = true;
+				first = false;
 			}
-
-			if (!any)
-				create_mapping_circle_item(ui_JackMapRightItems, MapButtonType::Output, pj, "");
 		}
 	}
 
@@ -157,6 +181,16 @@ private:
 		lv_obj_set_user_data(row, CableEndpointUserData{module_id, idx});
 		lv_obj_add_event_cb(row, follow_jack_cb, LV_EVENT_CLICKED, this);
 		lv_group_add_obj(group, row);
+	}
+
+	// Show the panel jack's alias as a non-selectable header line. The circle+
+	// number sits on this line, and the (circle-less) jack rows below align
+	// under the alias text.
+	void add_alias_header(lv_obj_t *parent, MapButtonType type, unsigned panel_jack_id, const char *alias) {
+		auto header = create_mapping_circle_item(parent, type, panel_jack_id, alias);
+		auto label = lv_obj_get_child(header, 1);
+		lv_obj_set_style_text_color(label, Gui::orange_highlight, LV_PART_MAIN);
+		lv_obj_clear_flag(header, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_CLICKABLE);
 	}
 
 	// Make the panel jack circle invisible while keeping its layout footprint,
