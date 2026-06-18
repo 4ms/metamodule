@@ -84,7 +84,7 @@ extern "C" void aux_core_main() {
 	}
 
 	if (ModuleImageGen::should_run(file_storage_proxy)) {
-		ModuleImageGen::run(file_storage_proxy, ui, plugin_manager);
+		ModuleImageGen::run(file_storage_proxy, ui, plugin_manager, *A7SharedMemoryS::ptrs.open_patch_manager);
 	}
 
 	ui.preload_plugins(plugin_manager);

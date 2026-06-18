@@ -3,6 +3,7 @@
 #include "console/pr_dbg.hh"
 #include "dynload/plugin_manager.hh"
 #include "general_io.hh"
+#include "gui/dyn_display.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -11,7 +12,11 @@
 #include "load_test/test_manager.hh"
 #include "lvgl.h"
 #include "patch/module_type_slug.hh"
+#include "patch/patch_data.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "patch_file/open_patch_manager.hh"
+#include "patch_play/patch_player.hh"
+#include "patch_play/patch_playloader.hh"
 #include <algorithm>
 #include <string>
 #include <string_view>
@@ -41,7 +46,8 @@ struct ModuleImageGen {
 		return false;
 	}
 
-	static void run(FileStorageProxy &file_storage_proxy, Ui &ui, PluginManager &plugin_manager) {
+	static void
+	run(FileStorageProxy &file_storage_proxy, Ui &ui, PluginManager &plugin_manager, OpenPatchManager &open_patch_manager) {
 		pr_info("Running module image generation\n");
 
 		std::string contents;
@@ -60,6 +66,12 @@ struct ModuleImageGen {
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
 
+		// A local player is used to instantiate each module so its dynamic
+		// graphic displays can be drawn (the playloader only feeds the
+		// dynamic-display drawer the live module instance via get_plugin_module).
+		PatchPlayer player;
+		PatchPlayLoader playloader{file_storage_proxy, open_patch_manager, player};
+
 		unsigned rendered = 0;
 		unsigned skipped = 0;
 
@@ -74,7 +86,7 @@ struct ModuleImageGen {
 				lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Rendering %s", full_slug.c_str());
 				ui.update_screen();
 
-				if (render_and_save(file_storage_proxy, full_slug, brand, slug))
+				if (render_and_save(file_storage_proxy, player, playloader, full_slug, brand, slug))
 					rendered++;
 				else
 					skipped++;
@@ -101,9 +113,12 @@ private:
 	}
 
 	// Draws one module into an off-screen canvas, snapshots it (canvas + child
-	// element objects), encodes a BMP and writes it. Returns false if the
-	// module has no faceplate or rendering/saving failed.
+	// element objects, including any module-drawn graphic displays), encodes a
+	// BMP and writes it. Returns false if the module has no faceplate or
+	// rendering/saving failed.
 	static bool render_and_save(FileStorageProxy &file_storage_proxy,
+								PatchPlayer &player,
+								PatchPlayLoader &playloader,
 								BrandModuleSlug const &full_slug,
 								std::string_view brand,
 								std::string_view module_slug) {
@@ -115,6 +130,12 @@ private:
 			pr_warn("Skipping %s: no faceplate\n", full_slug.c_str());
 			return false;
 		}
+
+		// Blank patch holding just this module. blank_patch() seeds a HubMedium
+		// at index 0; our module lands at the returned index.
+		PatchData patch;
+		patch.blank_patch(full_slug);
+		auto module_id = patch.add_module(full_slug);
 
 		// Off-screen container parented to the active screen so the canvas gets
 		// real coordinates (needed by the snapshot). It is never flushed to the
@@ -136,16 +157,39 @@ private:
 			return false;
 		}
 
-		drawer.draw_elements(full_slug, canvas);
+		// Static elements (knobs/jacks/lights) plus the empty canvases for any
+		// dynamic graphic displays. A blank patch means no mappings, so
+		// draw_mapped_elements draws no map rings.
+		std::vector<DrawnElement> drawn_elements;
+		drawer.draw_mapped_elements(patch, module_id, 0, canvas, drawn_elements, false);
 
 		// Clear overflow so the snapshot is exactly the faceplate rectangle
 		// (no extra margin around overhanging child draws).
 		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 		lv_obj_update_layout(canvas);
 
+		// Dynamic graphic displays are painted by the live module instance. Load
+		// the module into the player so the dynamic-display drawer can fetch it
+		// via get_plugin_module(); if it can't be instantiated we still save the
+		// static faceplate image. `dyn` owns the display pixel buffers the canvas
+		// objects point at, so it must outlive the snapshot.
+		DynamicDisplay dyn{playloader};
+		auto res = player.load_patch(patch);
+		if (res.success) {
+			player.update_patch_singlecore();
+			dyn.prepare_module(drawn_elements, module_id, canvas);
+			dyn.draw();
+		} else {
+			pr_warn("Could not load %s for dynamic displays: %s\n", full_slug.c_str(), res.error_string.c_str());
+		}
+
 		bool ok = snapshot_and_write(file_storage_proxy, canvas, width, brand, module_slug);
 
+		dyn.blur(); // releases display buffers / calls hide_graphic_display
 		lv_obj_del(container); // frees canvas and all child element objects
+		if (player.is_loaded)
+			player.unload_patch();
+
 		return ok;
 	}
 
