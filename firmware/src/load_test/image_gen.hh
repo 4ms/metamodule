@@ -46,17 +46,16 @@ struct ModuleImageGen {
 		return false;
 	}
 
-	static void
-	run(FileStorageProxy &file_storage_proxy, Ui &ui, PluginManager &plugin_manager, OpenPatchManager &open_patch_manager) {
+	static void run(FileStorageProxy &file_storage_proxy,
+					Ui &ui,
+					PluginManager &plugin_manager,
+					OpenPatchManager &open_patch_manager) {
 		pr_info("Running module image generation\n");
 
 		std::string contents;
 		FS::read_file(file_storage_proxy, contents, {"run_image_gen", Volume::USB});
 		auto filter = read_filter(contents); // "all" => every brand, else a brand slug
 
-		// Load every plugin found on disk (same path the HIL load tests use).
-		// This also extracts each plugin's faceplate/component PNGs to the
-		// ramdisk, so they're available to the LVGL image decoder below.
 		if (!CpuLoadTest::preload_all_plugins(plugin_manager)) {
 			pr_err("Failed preloading plugins for image generation\n");
 			hil_message("*failure\n");
@@ -66,9 +65,6 @@ struct ModuleImageGen {
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
 
-		// A local player is used to instantiate each module so its dynamic
-		// graphic displays can be drawn (the playloader only feeds the
-		// dynamic-display drawer the live module instance via get_plugin_module).
 		PatchPlayer player;
 		PatchPlayLoader playloader{file_storage_proxy, open_patch_manager, player};
 
@@ -185,7 +181,7 @@ private:
 
 		bool ok = snapshot_and_write(file_storage_proxy, canvas, width, brand, module_slug);
 
-		dyn.blur(); // releases display buffers / calls hide_graphic_display
+		dyn.blur();			   // releases display buffers / calls hide_graphic_display
 		lv_obj_del(container); // frees canvas and all child element objects
 		if (player.is_loaded)
 			player.unload_patch();
@@ -208,7 +204,25 @@ private:
 
 		std::vector<uint8_t> snap(buf_size);
 		lv_img_dsc_t dsc;
-		if (lv_snapshot_take_to_buf(canvas, cf, &dsc, snap.data(), buf_size) != LV_RES_OK) {
+
+		// Temporarily widen the display resolution so a full
+		// scanline of the widest module always fits, then restore it.
+		// LVGL's software image blend (lv_draw_sw_img.c) sizes its per-line work
+		// for an alpha or transformed child to `screen_width / image_width`,
+		// and if screen_width < image_width, then the blend loop spins forever.
+		lv_disp_t *disp = lv_obj_get_disp(canvas);
+		const lv_coord_t saved_hor = disp->driver->hor_res;
+		const lv_coord_t saved_ver = disp->driver->ver_res;
+		const lv_coord_t wide = std::max<lv_coord_t>({saved_hor, saved_ver, 2048});
+		disp->driver->hor_res = wide;
+		disp->driver->ver_res = wide;
+
+		auto snap_res = lv_snapshot_take_to_buf(canvas, cf, &dsc, snap.data(), buf_size);
+
+		disp->driver->hor_res = saved_hor;
+		disp->driver->ver_res = saved_ver;
+
+		if (snap_res != LV_RES_OK) {
 			pr_warn("Snapshot failed for %.*s\n", (int)module_slug.size(), module_slug.data());
 			return false;
 		}
