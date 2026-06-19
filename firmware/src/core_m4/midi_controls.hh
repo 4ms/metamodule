@@ -28,6 +28,7 @@ struct MessageParser {
 		if (msg.is_noteoff()) {
 
 			// Find the note in held midi_notes, and get the poly chan if found.
+			event.poly_chan = -1;
 			for (unsigned i = 0; auto &midi_note : midi_notes) {
 				if (midi_note.note == msg.note() && midi_note.gate) {
 					midi_note.gate = false;

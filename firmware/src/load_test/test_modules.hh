@@ -20,6 +20,7 @@ struct ModuleEntry {
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> patched;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> cv_modulated;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> audio_modulated;
+	std::array<ModuleLoadTester::Measurements, blocksizes.size()> poly_audio_modulated;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> knob_tweak;
 
 	int32_t raw_mem_used{};
@@ -105,6 +106,12 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 
 				send_heartbeat();
 
+				pr_trace("Running poly audio-rate test\n");
+				entry.poly_audio_modulated[i] =
+					tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsPolyAudio);
+
+				send_heartbeat();
+
 				i++;
 			}
 
@@ -161,6 +168,11 @@ inline std::string csv_header() {
 		pr_info("InputsAudio-%u,", blocksize);
 	}
 
+	for (unsigned int blocksize : ModuleEntry::blocksizes) {
+		s += "InputsPolyAudio-" + std::to_string(blocksize) + ",";
+		pr_info("InputsPolyAudio-%u,", blocksize);
+	}
+
 	s += "ConstructionTime(ms),FirstRunTime(ms)";
 	pr_info("ConstructionTime(ms),FirstRunTime(ms)");
 
@@ -207,6 +219,10 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 
 	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
 		report_cpu(entry.audio_modulated[i]);
+	}
+
+	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
+		report_cpu(entry.poly_audio_modulated[i]);
 	}
 
 	char buf[32];
