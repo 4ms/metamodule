@@ -265,7 +265,9 @@ target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,hardware_sup
 
 if (CPU_TEST_ALL_MODULES)
   target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)
-  # target_compile_definitions(main.elf PRIVATE MM_LOADTEST_MEASURE_MEMORY=1)
+  # Enabled to dump unfreed-block sizes in the leak-slope diagnostic.
+  # TODO: re-comment after the ModuleWidget leak is fixed (adds an `if(watch)` branch to every operator new/delete).
+  target_compile_definitions(main.elf PRIVATE MM_LOADTEST_MEASURE_MEMORY=1)
 endif()
 if (SUPPRESS_HIL_MESSAGES)
   target_compile_definitions(main.elf PRIVATE SUPPRESS_HIL_MESSAGES=1)

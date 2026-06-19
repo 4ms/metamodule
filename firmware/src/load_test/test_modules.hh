@@ -5,6 +5,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 #include "memory_tester.hh"
+#include <map>
 #endif
 #include "tester.hh"
 
@@ -159,6 +160,56 @@ inline size_t cur_uordblks() {
 }
 #endif
 
+#ifdef MM_LOADTEST_MEASURE_MEMORY
+// Construct+destruct a single module once with the AllocationWatcher armed, then
+// print a histogram (size -> count) of every operator-new block that was NOT freed.
+// The widget tree is built with C++ new, so the leak shows up here by size, which
+// maps directly to a type. (malloc/calloc/realloc are NOT tracked - if the histogram
+// is empty but uordblks still grew, the leak is in C-style allocation instead.)
+inline void dump_unfreed_blocks(std::string_view slug, auto append_file) {
+	static AllocationWatcher w; // ~96KB; static to keep it off the stack
+
+	w.reset();
+	watch = &w;
+	{
+		auto module = ModuleFactory::create(slug);
+		if (module) {
+			plugin_module_init(module);
+			module->set_samplerate(48000.f);
+			module->update();
+			plugin_module_deinit(module);
+		}
+	} // module (and its module_widget) destroyed here
+	watch = nullptr; // stop tracking before we allocate anything for reporting
+
+	std::map<size_t, unsigned> hist;
+	size_t total = 0;
+	size_t count = 0;
+	for (auto const &b : w.allocs) {
+		if (!b.dealloced) {
+			hist[b.size]++;
+			total += b.size;
+			count++;
+		}
+	}
+
+	printf("=== Unfreed operator-new blocks after 1 cycle of %.*s: %zu blocks, %zu bytes ===\n",
+		   (int)slug.size(),
+		   slug.data(),
+		   count,
+		   total);
+	append_file("unfreed_size,count,subtotal\n");
+	for (auto const &[sz, n] : hist) {
+		char buf[64];
+		snprintf(buf, sizeof buf, "%zu,%u,%zu\n", sz, n, sz * n);
+		append_file(buf);
+		printf("  %zu B x %u = %zu B\n", sz, n, sz * n);
+	}
+	if (w.too_many_allocs)
+		printf("  WARNING: >4096 allocs in one cycle - histogram is incomplete\n");
+}
+#endif
+
 // Leak-slope diagnostic.
 //
 // Repeatedly creates and destroys a single module while sampling uordblks
@@ -188,6 +239,11 @@ inline void test_module_leak_slope(std::string_view slug, unsigned iterations, a
 		lv_label_set_text(ui_MainMenuNowPlaying, "Leak test: module not found");
 		return;
 	}
+
+#ifdef MM_LOADTEST_MEASURE_MEMORY
+	// Pinpoint the leak: dump the sizes of blocks left unfreed after one cycle.
+	dump_unfreed_blocks(slug, append_file);
+#endif
 
 	append_file("phase,iter,uordblks,delta_prev,delta_base\n");
 
