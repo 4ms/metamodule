@@ -32,14 +32,26 @@ PatchData:
         - module_id: 4
           jack_id: 1
   mapped_outs:
-    - panel_jack_id: 0
+    - panel_jack_id: 2
       out:
         module_id: 1
         jack_id: 1
-    - panel_jack_id: 0
+      alias_name: Clock
+    - panel_jack_id: 2
       out:
         module_id: 3
         jack_id: 3
+      alias_name: Clock
+    - panel_jack_id: 7
+      out:
+        module_id: 1
+        jack_id: 2
+      alias_name: Clock
+    - panel_jack_id: 7
+      out:
+        module_id: 3
+        jack_id: 2
+      alias_name: Clock
   static_knobs:
     - module_id: 1
       param_id: 0
@@ -141,27 +153,12 @@ PatchData:
       param_id: 1
       value: 1
   mapped_knobs:
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
+    - name: Knob Set 1
       set: []
   midi_maps:
     name: ''
     set: []
-  midi_poly_num: 1
-  midi_poly_num_setting: 0
+  midi_poly_num: 0
   midi_poly_mode: 0
   midi_pitchwheel_range: -1
   mapped_lights: []
