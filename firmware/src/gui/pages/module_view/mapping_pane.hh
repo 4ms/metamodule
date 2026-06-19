@@ -279,80 +279,81 @@ private:
 		bool has_connections = false;
 
 		lv_show(ui_CablePanelAddButton);
-		lv_show(ui_CableMidiAddButton, this_jack_type == ElementType::Input);
 
-		if (auto *cable = find_internal_cable(this_jack_type, this_jack)) {
-			has_connections = true;
-			list_cable_nodes(cable);
-
-		} else if (auto panel_jack_id = drawn_element->gui_element.mapped_panel_id) {
-			has_connections = true;
-
-			if (this_jack_type == ElementType::Input)
-				list_panel_in_cable(this_jack);
-			else if (auto panel_jack = patch->find_mapped_outjack(*panel_jack_id)) {
-				list_panel_out_cable(panel_jack);
+		if (this_jack_type == ElementType::Output) {
+			// Internal cable: this output drives one or more virtual input jacks
+			if (auto *cable = patch->find_internal_cable_with_outjack(this_jack)) {
+				list_cable_inputs(cable);
+				has_connections = true;
 			}
+			// This output may also drive one or more panel output jacks
+			if (list_panel_out_cables(this_jack))
+				has_connections = true;
+
+		} else {
+			// Find all connected internal cables: this input is driven by a virtual output jack
+			for (auto &cable : patch->int_cables) {
+				for (auto &in : cable.ins) {
+					if (in == this_jack) {
+						list_cable_output(cable);
+						has_connections = true;
+					}
+				}
+			}
+
+			// This input may also be summed from one or more panel input jacks
+			if (list_panel_in_cables(this_jack))
+				has_connections = true;
 		}
+
+		// MIDI can only be mapped to an input jack that has no other connections
+		lv_show(ui_CableMidiAddButton, this_jack_type == ElementType::Input && !has_connections);
 
 		this_jack_has_connections = has_connections;
 		prepare_jack_gui();
 	}
 
-	const InternalCable *find_internal_cable(ElementType dir, Jack jack) {
-		if (dir == ElementType::Output)
-			return patch->find_internal_cable_with_outjack(jack);
-		else
-			return patch->find_internal_cable_with_injack(jack);
+	// Viewing an input jack: list the driving output, and co-driven inputs.
+	void list_cable_output(InternalCable const &cable) {
+		auto obj = list.create_cable_item(cable.out, ElementType::Output, *patch, ui_MapList);
+		make_selectable_outjack_item(obj, cable.out);
 	}
 
-	void list_cable_nodes(InternalCable const *cable) {
-		lv_hide(ui_CableMidiAddButton);
-
-		// Each cable has an output:
-		if (!(cable->out == this_jack && this_jack_type == ElementType::Output)) {
-			auto obj = list.create_cable_item(cable->out, ElementType::Output, *patch, ui_MapList);
-			make_selectable_outjack_item(obj, cable->out);
-		}
-
-		// Output might be connected to the panel
-		if (auto panel_jack = patch->find_mapped_outjack(cable->out)) {
-			list_panel_out_cable(panel_jack);
-		}
-
-		// Each cable has 1 or more inputs:
+	// Viewing an output jack: list each virtual input it drives.
+	void list_cable_inputs(InternalCable const *cable) {
 		for (auto &injack : cable->ins) {
-			//draw it if NOT (it's this jack and this jack is an input)
-			if (!(injack == this_jack && this_jack_type == ElementType::Input)) {
-				auto obj = list.create_cable_item(injack, ElementType::Input, *patch, ui_MapList);
-				make_selectable_injack_item(obj, injack);
-			}
+			auto obj = list.create_cable_item(injack, ElementType::Input, *patch, ui_MapList);
+			make_selectable_injack_item(obj, injack);
 		}
 	}
 
-	void list_panel_in_cable(Jack injack) {
-		if (auto panel_jack = patch->find_mapped_injack(injack)) {
-			lv_hide(ui_CablePanelAddButton);
-			lv_hide(ui_CableMidiAddButton);
-
-			auto obj = list.create_panel_in_item(panel_jack->panel_jack_id, ui_MapList, panel_jack->alias_name);
-			make_selectable_panel_jack_item(obj, panel_jack);
-
-			for (auto &mappedin : panel_jack->ins) {
-				if (mappedin != injack) {
-					auto obj = list.create_cable_item(mappedin, ElementType::Input, *patch, ui_MapList);
-					make_selectable_injack_item(obj, mappedin);
+	// List every panel input jack summed into `injack`
+	bool list_panel_in_cables(Jack injack) {
+		bool any = false;
+		for (auto &panel_jack : patch->mapped_ins) {
+			for (auto &in : panel_jack.ins) {
+				if (in == injack) {
+					auto obj = list.create_panel_in_item(panel_jack.panel_jack_id, ui_MapList, panel_jack.alias_name);
+					make_selectable_panel_jack_item(obj, &panel_jack);
+					any = true;
+					break;
 				}
 			}
 		}
+		return any;
 	}
 
-	void list_panel_out_cable(const MappedOutputJack *panel_jack) {
-		lv_hide(ui_CablePanelAddButton);
-		lv_hide(ui_CableMidiAddButton);
-
-		auto obj = list.create_panel_out_item(panel_jack->panel_jack_id, ui_MapList, panel_jack->alias_name);
-		make_selectable_panel_jack_item(obj, panel_jack);
+	// List every panel output jack driven by `outjack`. Returns true if any were listed.
+	bool list_panel_out_cables(Jack outjack) {
+		bool any = false;
+		for (auto &panel_jack : patch->mapped_outs) {
+			if (panel_jack.out == outjack) {
+				auto obj = list.create_panel_out_item(panel_jack.panel_jack_id, ui_MapList, panel_jack.alias_name);
+				make_selectable_panel_jack_item(obj, &panel_jack);
+				any = true;
+			}
+		}
+		return any;
 	}
 
 	void prepare_jack_gui() {

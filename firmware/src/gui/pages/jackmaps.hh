@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/helpers.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
@@ -26,39 +27,24 @@ struct JackMapViewPage : PageBase {
 		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
 	}
 
-	void onJackMapClick(unsigned idx, MapButtonType type) {
-		pr_trace("%s Jack: %d\n", type == MapButtonType::Input ? "Input" : "Output", idx);
+	// Clicking a jack-mapping row jumps to that jack's module in the Module View.
+	static void follow_jack_cb(lv_event_t *event) {
+		auto page = static_cast<JackMapViewPage *>(event->user_data);
+		if (!page || !event->target)
+			return;
 
-		if (type == MapButtonType::Input) {
-			const auto &i = patch->mapped_ins[idx];
-			if (!i.ins.size()) {
-				return;
-			}
-			args.module_id = i.ins[0].module_id;
-			args.element_indices = ElementCount::mark_unused_indices(
-				{.input_idx = static_cast<uint8_t>(i.ins[0].jack_id)}, {.num_inputs = 1});
-		} else {
-			const auto &o = patch->mapped_outs[idx];
-			args.module_id = o.out.module_id;
-			args.element_indices = ElementCount::mark_unused_indices(
-				{.output_idx = static_cast<uint8_t>(o.out.jack_id)}, {.num_outputs = 1});
-		}
+		auto userdata = lv_obj_get_user_data(event->target);
+		if (!userdata)
+			return;
 
-		args.detail_mode = true;
-		page_list.request_new_page(PageId::ModuleView, args);
-	}
-
-	template<MapButtonType type>
-	static void onJackMapClick(lv_event_t *event) {
-		if (const auto page = static_cast<JackMapViewPage *>(event->user_data); page) {
-			const auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
-			page->onJackMapClick(idx, type);
-		}
+		auto endpoint = CableEndpointUserData{userdata};
+		page->args.module_id = endpoint.module_id;
+		page->args.element_indices = endpoint.idx;
+		page->args.detail_mode = true;
+		page->page_list.request_new_page(PageId::ModuleView, page->args);
 	}
 
 	void prepare_focus() override {
-		init_jack_items();
-
 		redraw();
 		lv_group_activate(group);
 
@@ -69,96 +55,89 @@ struct JackMapViewPage : PageBase {
 	void redraw() {
 		patch = patches.get_view_patch();
 
+		lv_obj_clean(ui_JackMapLeftItems);
+		lv_obj_clean(ui_JackMapRightItems);
 		lv_group_remove_all_objs(group);
 
-		// Clear old text
-		for (auto *in_cont : in_conts) {
-			if (!in_cont)
-				continue;
-			if (lv_obj_get_child_cnt(in_cont) > 1)
-				lv_label_set_text(lv_obj_get_child(in_cont, 1), "");
-			lv_obj_remove_event_cb(in_cont, NULL);
-		}
-		for (auto *out_cont : out_conts) {
-			if (!out_cont)
-				continue;
-			if (lv_obj_get_child_cnt(out_cont) > 1)
-				lv_label_set_text(lv_obj_get_child(out_cont, 1), "");
-			lv_obj_remove_event_cb(out_cont, NULL);
-		}
-
-		//Populate new text
-		for (auto [i, map] : enumerate(patch->mapped_ins)) {
-			for (auto &jack : map.ins) {
-				if (map.panel_jack_id < in_conts.size() && in_conts[map.panel_jack_id]) {
-					if (lv_obj_get_child_cnt(in_conts[map.panel_jack_id]) > 1) {
-						lv_obj_set_user_data(in_conts[map.panel_jack_id], (void *)((uintptr_t)i));
-						lv_obj_add_event_cb(
-							in_conts[map.panel_jack_id], onJackMapClick<MapButtonType::Input>, LV_EVENT_CLICKED, this);
-						auto label = lv_obj_get_child(in_conts[map.panel_jack_id], 1);
-						if (!map.alias_name.size()) {
-							auto name = get_full_element_name(jack.module_id, jack.jack_id, ElementType::Input, *patch);
-							lv_label_set_text_fmt(label, "%s %s", name.module_name.data(), name.element_name.data());
-						} else {
-							lv_label_set_text_fmt(label, "%s", map.alias_name.data());
-						}
-					}
-				}
-			}
-		}
-
-		for (auto [i, map] : enumerate(patch->mapped_outs)) {
-			if (map.panel_jack_id < out_conts.size() && out_conts[map.panel_jack_id]) {
-				if (lv_obj_get_child_cnt(out_conts[map.panel_jack_id]) > 1) {
-					lv_obj_set_user_data(out_conts[map.panel_jack_id], (void *)((uintptr_t)i));
-					lv_obj_add_event_cb(
-						out_conts[map.panel_jack_id], onJackMapClick<MapButtonType::Output>, LV_EVENT_CLICKED, this);
-					auto label = lv_obj_get_child(out_conts[map.panel_jack_id], 1);
-					if (!map.alias_name.size()) {
-						auto name =
-							get_full_element_name(map.out.module_id, map.out.jack_id, ElementType::Output, *patch);
-						lv_label_set_text_fmt(label, "%s %s", name.module_name.data(), name.element_name.data());
-					} else {
-						lv_label_set_text_fmt(label, "%s", map.alias_name.data());
-					}
-				}
-			}
-		}
-
-		// Add all populated items to group
-		for (auto *cont : in_conts) {
-			if (cont && lv_obj_get_child_cnt(cont) > 1) {
-				if (lv_label_get_text(lv_obj_get_child(cont, 1))[0] != '\0')
-					lv_group_add_obj(group, cont);
-			}
-		}
-		for (auto *cont : out_conts) {
-			if (cont && lv_obj_get_child_cnt(cont) > 1) {
-				if (lv_label_get_text(lv_obj_get_child(cont, 1))[0] != '\0')
-					lv_group_add_obj(group, cont);
-			}
-		}
-	}
-
-	void init_jack_items() {
-		// Calculate number of inputs and outputs to display
+		// Number of panel jacks to display (plus expander jacks if connected)
 		unsigned num_inputs = PanelDef::NumUserFacingInJacks;
 		unsigned num_outputs = PanelDef::NumUserFacingOutJacks;
-
-		// Show all expander jacks if an expander is connected
 		if (Expanders::get_connected().ext_audio_connected) {
 			num_inputs += AudioExpander::NumInJacks;
 			num_outputs += AudioExpander::NumOutJacks;
 		}
 
-		for (unsigned i = 0; i < num_inputs; i++) {
-			if (in_conts[i] == nullptr)
-				in_conts[i] = create_mapping_circle_item(ui_JackMapLeftItems, MapButtonType::Input, i, "");
+		// Inputs (left column). A panel input jack may be summed from several
+		// module input jacks: show one selectable row per jack, with the
+		// circle+number only on the first row and the following rows' text
+		// aligned beneath it.
+		for (unsigned pj = 0; pj < num_inputs; pj++) {
+			auto *mapped = patch->find_mapped_injack((uint16_t)pj);
+			if (!mapped || mapped->ins.empty()) {
+				create_mapping_circle_item(ui_JackMapLeftItems, MapButtonType::Input, pj, "");
+				continue;
+			}
+
+			// If the panel jack has an alias, show it as a header carrying the
+			// circle+number; the jack rows then align beneath the alias text.
+			lv_obj_t *header =
+				mapped->alias_name.size() ?
+					add_alias_header(ui_JackMapLeftItems, MapButtonType::Input, pj, mapped->alias_name.data()) :
+					nullptr;
+
+			for (auto [k, jack] : enumerate(mapped->ins)) {
+				auto name = get_full_element_name(jack.module_id, jack.jack_id, ElementType::Input, *patch);
+				add_jack_row(ui_JackMapLeftItems,
+							 MapButtonType::Input,
+							 pj,
+							 !header && k == 0,
+							 name,
+							 (uint16_t)jack.module_id,
+							 ElementCount::mark_unused_indices({.input_idx = (uint8_t)jack.jack_id}, {.num_inputs = 1}),
+							 header);
+			}
 		}
 
-		for (unsigned i = 0; i < num_outputs; i++) {
-			if (out_conts[i] == nullptr)
-				out_conts[i] = create_mapping_circle_item(ui_JackMapRightItems, MapButtonType::Output, i, "");
+		// Outputs (right column). A panel output jack may be driven from several
+		// module output jacks (across map entries sharing a panel_jack_id).
+		for (unsigned pj = 0; pj < num_outputs; pj++) {
+			// Entries sharing a panel_jack_id carry the same alias; find it and
+			// whether anything is mapped to this panel jack.
+			const char *alias = nullptr;
+			bool any = false;
+			for (auto &map : patch->mapped_outs) {
+				if (map.panel_jack_id != pj)
+					continue;
+				any = true;
+				if (map.alias_name.size())
+					alias = map.alias_name.data();
+			}
+
+			if (!any) {
+				create_mapping_circle_item(ui_JackMapRightItems, MapButtonType::Output, pj, "");
+				continue;
+			}
+
+			lv_obj_t *header =
+				alias ? add_alias_header(ui_JackMapRightItems, MapButtonType::Output, pj, alias) : nullptr;
+
+			bool first = true;
+			for (auto &map : patch->mapped_outs) {
+				if (map.panel_jack_id != pj)
+					continue;
+
+				auto name = get_full_element_name(map.out.module_id, map.out.jack_id, ElementType::Output, *patch);
+				add_jack_row(
+					ui_JackMapRightItems,
+					MapButtonType::Output,
+					pj,
+					!header && first,
+					name,
+					(uint16_t)map.out.module_id,
+					ElementCount::mark_unused_indices({.output_idx = (uint8_t)map.out.jack_id}, {.num_outputs = 1}),
+					header);
+				first = false;
+			}
 		}
 	}
 
@@ -177,10 +156,91 @@ struct JackMapViewPage : PageBase {
 	}
 
 private:
+	// Create a selectable row for one module jack connected to a panel jack.
+	// `show_circle` draws the panel jack circle+number (first row of a panel
+	// jack); otherwise the circle's space is kept but hidden so the text lines
+	// up under the first row.
+	void add_jack_row(lv_obj_t *parent,
+					  MapButtonType type,
+					  unsigned panel_jack_id,
+					  bool show_circle,
+					  FullElementName const &name,
+					  uint16_t module_id,
+					  ElementCount::Indices idx,
+					  lv_obj_t *alias_header = nullptr) {
+
+		std::string text = name.module_name;
+		if (!name.element_name.empty()) {
+			if (!text.empty())
+				text += " ";
+			text += name.element_name;
+		}
+
+		auto row = create_mapping_circle_item(parent, type, panel_jack_id, text.c_str());
+
+		if (!show_circle)
+			hide_circle(row);
+
+		lv_obj_set_user_data(row, CableEndpointUserData{module_id, idx});
+		lv_obj_add_event_cb(row, follow_jack_cb, LV_EVENT_CLICKED, this);
+
+		// When this row gains focus, also bring its alias header into view so the
+		// panel jack it belongs to stays on screen. Runs after the row's own
+		// scroll-on-focus.
+		if (alias_header)
+			lv_obj_add_event_cb(row, scroll_to_header_cb, LV_EVENT_FOCUSED, alias_header);
+
+		lv_group_add_obj(group, row);
+	}
+
+	// Pull the alias header on-screen when its jack row is focused. Only acts when
+	// the header is actually clipped: issuing a scroll when it's already visible
+	// would cancel the row's own scroll-into-view and leave the selection off
+	// screen. And only when the whole header..row span fits the viewport, so the
+	// selected row is never pushed off just to reveal the header.
+	static void scroll_to_header_cb(lv_event_t *event) {
+		auto header = static_cast<lv_obj_t *>(event->user_data);
+		auto row = event->target;
+		if (!header || !row || lv_obj_is_visible(header))
+			return;
+
+		if (!lv_obj_is_visible(row))
+			return;
+
+		auto cont = lv_obj_get_parent(row);
+		if (!cont)
+			return;
+
+		lv_coord_t span = lv_obj_get_y(row) + lv_obj_get_height(row) - lv_obj_get_y(header);
+		if (span <= lv_obj_get_content_height(cont))
+			lv_obj_scroll_to_view(header, LV_ANIM_ON);
+	}
+
+	// Show the panel jack's alias as a non-selectable header line. The circle+
+	// number sits on this line, and the (circle-less) jack rows below align
+	// under the alias text.
+	lv_obj_t *add_alias_header(lv_obj_t *parent, MapButtonType type, unsigned panel_jack_id, const char *alias) {
+		auto header = create_mapping_circle_item(parent, type, panel_jack_id, alias);
+		auto label = lv_obj_get_child(header, 1);
+		lv_obj_set_style_text_color(label, Gui::grey_highlight, LV_PART_MAIN);
+		lv_obj_clear_flag(header, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_CLICKABLE);
+		return header;
+	}
+
+	// Make the panel jack circle invisible while keeping its layout footprint,
+	// so a continuation row's text aligns with the first row's text.
+	static void hide_circle(lv_obj_t *row) {
+		if (lv_obj_get_child_cnt(row) == 0)
+			return;
+		auto circle = lv_obj_get_child(row, 0);
+		lv_obj_set_style_bg_opa(circle, LV_OPA_TRANSP, LV_PART_MAIN);
+		lv_obj_set_style_border_opa(circle, LV_OPA_TRANSP, LV_PART_MAIN);
+		if (lv_obj_get_child_cnt(circle) > 0)
+			lv_label_set_text(lv_obj_get_child(circle, 0), "");
+	}
+
 	lv_obj_t *base = nullptr;
 	PatchData *patch;
-	std::array<lv_obj_t *, PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks> in_conts{};
-	std::array<lv_obj_t *, PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks> out_conts{};
 	lv_group_t *group;
 };
 

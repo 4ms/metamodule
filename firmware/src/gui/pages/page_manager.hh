@@ -110,6 +110,12 @@ public:
 		button_light.display_knobset(0);
 	}
 
+	// Request a specific page (used by the simulator to jump directly to a page
+	// for screenshots/testing, bypassing manual navigation).
+	void request_page(PageId id, PageArguments args = {}) {
+		page_list.request_initial_page(id, args);
+	}
+
 	void update_current_page() {
 
 		handle_knobset_change();

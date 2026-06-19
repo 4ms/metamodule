@@ -22,7 +22,12 @@ struct HostFileIO {
 
 		std::cout << "Scanning " << _root_dir << " for " << extension << " files...\n";
 
-		fs::current_path(_root_dir);
+		std::error_code cp_ec;
+		fs::current_path(_root_dir, cp_ec);
+		if (cp_ec) {
+			std::cout << "Error: cannot access " << _root_dir << ": " << cp_ec.message() << "\n";
+			return false;
+		}
 
 		fs::path full_path{"."};
 
