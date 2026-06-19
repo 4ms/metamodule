@@ -80,20 +80,21 @@ struct JackMapViewPage : PageBase {
 
 			// If the panel jack has an alias, show it as a header carrying the
 			// circle+number; the jack rows then align beneath the alias text.
-			bool has_alias = mapped->alias_name.size() > 0;
-			if (has_alias)
-				add_alias_header(ui_JackMapLeftItems, MapButtonType::Input, pj, mapped->alias_name.data());
+			lv_obj_t *header =
+				mapped->alias_name.size() ?
+					add_alias_header(ui_JackMapLeftItems, MapButtonType::Input, pj, mapped->alias_name.data()) :
+					nullptr;
 
 			for (auto [k, jack] : enumerate(mapped->ins)) {
 				auto name = get_full_element_name(jack.module_id, jack.jack_id, ElementType::Input, *patch);
-				add_jack_row(
-					ui_JackMapLeftItems,
-					MapButtonType::Input,
-					pj,
-					!has_alias && k == 0,
-					name,
-					(uint16_t)jack.module_id,
-					ElementCount::mark_unused_indices({.input_idx = (uint8_t)jack.jack_id}, {.num_inputs = 1}));
+				add_jack_row(ui_JackMapLeftItems,
+							 MapButtonType::Input,
+							 pj,
+							 !header && k == 0,
+							 name,
+							 (uint16_t)jack.module_id,
+							 ElementCount::mark_unused_indices({.input_idx = (uint8_t)jack.jack_id}, {.num_inputs = 1}),
+							 header);
 			}
 		}
 
@@ -117,8 +118,8 @@ struct JackMapViewPage : PageBase {
 				continue;
 			}
 
-			if (alias)
-				add_alias_header(ui_JackMapRightItems, MapButtonType::Output, pj, alias);
+			lv_obj_t *header =
+				alias ? add_alias_header(ui_JackMapRightItems, MapButtonType::Output, pj, alias) : nullptr;
 
 			bool first = true;
 			for (auto &map : patch->mapped_outs) {
@@ -130,10 +131,11 @@ struct JackMapViewPage : PageBase {
 					ui_JackMapRightItems,
 					MapButtonType::Output,
 					pj,
-					!alias && first,
+					!header && first,
 					name,
 					(uint16_t)map.out.module_id,
-					ElementCount::mark_unused_indices({.output_idx = (uint8_t)map.out.jack_id}, {.num_outputs = 1}));
+					ElementCount::mark_unused_indices({.output_idx = (uint8_t)map.out.jack_id}, {.num_outputs = 1}),
+					header);
 				first = false;
 			}
 		}
@@ -164,7 +166,8 @@ private:
 					  bool show_circle,
 					  FullElementName const &name,
 					  uint16_t module_id,
-					  ElementCount::Indices idx) {
+					  ElementCount::Indices idx,
+					  lv_obj_t *alias_header = nullptr) {
 
 		std::string text = name.module_name;
 		if (!name.element_name.empty()) {
@@ -180,17 +183,48 @@ private:
 
 		lv_obj_set_user_data(row, CableEndpointUserData{module_id, idx});
 		lv_obj_add_event_cb(row, follow_jack_cb, LV_EVENT_CLICKED, this);
+
+		// When this row gains focus, also bring its alias header into view so the
+		// panel jack it belongs to stays on screen. Runs after the row's own
+		// scroll-on-focus.
+		if (alias_header)
+			lv_obj_add_event_cb(row, scroll_to_header_cb, LV_EVENT_FOCUSED, alias_header);
+
 		lv_group_add_obj(group, row);
+	}
+
+	// Pull the alias header on-screen when its jack row is focused. Only acts when
+	// the header is actually clipped: issuing a scroll when it's already visible
+	// would cancel the row's own scroll-into-view and leave the selection off
+	// screen. And only when the whole header..row span fits the viewport, so the
+	// selected row is never pushed off just to reveal the header.
+	static void scroll_to_header_cb(lv_event_t *event) {
+		auto header = static_cast<lv_obj_t *>(event->user_data);
+		auto row = event->target;
+		if (!header || !row || lv_obj_is_visible(header))
+			return;
+
+		if (!lv_obj_is_visible(row))
+			return;
+
+		auto cont = lv_obj_get_parent(row);
+		if (!cont)
+			return;
+
+		lv_coord_t span = lv_obj_get_y(row) + lv_obj_get_height(row) - lv_obj_get_y(header);
+		if (span <= lv_obj_get_content_height(cont))
+			lv_obj_scroll_to_view(header, LV_ANIM_ON);
 	}
 
 	// Show the panel jack's alias as a non-selectable header line. The circle+
 	// number sits on this line, and the (circle-less) jack rows below align
 	// under the alias text.
-	void add_alias_header(lv_obj_t *parent, MapButtonType type, unsigned panel_jack_id, const char *alias) {
+	lv_obj_t *add_alias_header(lv_obj_t *parent, MapButtonType type, unsigned panel_jack_id, const char *alias) {
 		auto header = create_mapping_circle_item(parent, type, panel_jack_id, alias);
 		auto label = lv_obj_get_child(header, 1);
-		lv_obj_set_style_text_color(label, Gui::orange_highlight, LV_PART_MAIN);
+		lv_obj_set_style_text_color(label, Gui::grey_highlight, LV_PART_MAIN);
 		lv_obj_clear_flag(header, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_CLICKABLE);
+		return header;
 	}
 
 	// Make the panel jack circle invisible while keeping its layout footprint,
