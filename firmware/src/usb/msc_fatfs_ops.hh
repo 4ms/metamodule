@@ -1,12 +1,13 @@
 #pragma once
 #include "disk_ops.hh"
+#include "pr_dbg.hh"
 #include "usbh_conf.h"
 #include "usbh_def.h"
 #include "usbh_msc.h"
 
 class MSCOps : public DiskOps {
 	USBH_HandleTypeDef &usbh;
-	uint32_t scratch[FF_MAX_SS / 4];
+	alignas(8) uint32_t scratch[FF_MAX_SS / 4];
 	bool is_mounted_ = false;
 
 public:
@@ -44,7 +45,10 @@ public:
 		USBH_StatusTypeDef status = USBH_OK;
 		uint8_t lun = 0; //????
 
-		if (((DWORD)dst & 3) || (((HCD_HandleTypeDef *)usbh.pData)->Init.dma_enable)) {
+		const bool is_unaligned = ((DWORD)dst & 3) || (((HCD_HandleTypeDef *)usbh.pData)->Init.dma_enable);
+		const uint32_t total_sectors = num_sectors;
+
+		if (is_unaligned) {
 			while ((num_sectors--) && (status == USBH_OK)) {
 				status = USBH_MSC_Read(&usbh, lun, sector_start + num_sectors, (uint8_t *)scratch, 1);
 
@@ -61,6 +65,14 @@ public:
 		if (status == USBH_OK) {
 			res = RES_OK;
 		} else {
+			if (is_unaligned) {
+				pr_err("USB MSC read FAILED on unaligned buffer dst=%p (sector %u, %u sectors) - slow "
+					   "bounce path; suspect a non-word-aligned read buffer\n",
+					   (void *)dst,
+					   sector_start,
+					   total_sectors);
+			}
+
 			USBH_MSC_GetLUNInfo(&usbh, lun, &info);
 
 			switch (info.sense.asc) {
