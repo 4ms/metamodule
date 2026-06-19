@@ -108,6 +108,14 @@ void Ui::set_audio_fullscale(float volts_peak) {
 	audio_stream.volts_peak = volts_peak;
 }
 
+void Ui::load_patch(std::string_view patch_name, Volume vol) {
+	patch_playloader.load_initial_patch(patch_name, vol);
+}
+
+void Ui::goto_page(PageId page_id) {
+	page_manager.request_page(page_id);
+}
+
 void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 	// assert(soundcard_out.size() == out_buffer.size());

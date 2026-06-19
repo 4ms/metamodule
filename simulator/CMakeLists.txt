@@ -7,6 +7,7 @@ set(SIMULATOR 1)
 option(HEADLESS "Build as headless" OFF)
 option(ADDRESS_SAN "Use address sanitizer" OFF)
 option(ALL_SAN "Use address sanitizer and all other sanitizers" OFF)
+option(SIM_DEBUG_O0 "Compile the entire binary (audio DSP included) at -O0 for debugging; set by the `debug` target" OFF)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
@@ -25,7 +26,7 @@ else()
 
 	message("Building Simulator with GUI")
 
-	add_compile_options(-O0 -g2)
+	add_compile_options(-O2 -g2)
 
 	add_compile_definitions(SIMULATOR)
 
@@ -37,6 +38,11 @@ else()
 
 endif()
 
+if (SIM_DEBUG_O0)
+	message("Simulator configured as an -O0 DEBUG build (audio DSP included) -- audio may glitch; use low-CPU patches. Run `make config-sim` to return to an optimized build.")
+	add_compile_options(-O0 -g)
+endif()
+
 if (ADDRESS_SAN)
     add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
     add_link_options(-fsanitize=address)
@@ -45,6 +51,12 @@ elseif (ALL_SAN)
     add_link_options(-fsanitize=address,undefined)
 endif()
 
+
+# Default to DEBUG so logging is visible when configuring with plain cmake,
+# matching the Makefile (log_levels.cmake otherwise defaults to NONE, which
+# compiles out even pr_err). A -DLOG_LEVEL=... on the command line still takes
+# precedence.
+set(LOG_LEVEL DEBUG CACHE STRING "Console log level")
 
 include(${FWDIR}/cmake/log_levels.cmake)
 enable_logging()
@@ -220,7 +232,13 @@ if(NOT HEADLESS)
 	)
 endif()
 
-target_compile_options(simulator PRIVATE -Wall -Og)
+# Per-target options come after the directory-level ones on the command line, so
+# the simulator's own sources need their opt level set here too 
+if (SIM_DEBUG_O0)
+	target_compile_options(simulator PRIVATE -Wall -O0)
+else()
+	target_compile_options(simulator PRIVATE -Wall -Og)
+endif()
 target_compile_options(simulator PRIVATE -Wno-double-promotion)
 
 # Workaround for std::expected not available in clang
@@ -299,9 +317,15 @@ else ()
   set(DEBUG_COMMAND echo "Compiler is ${CMAKE_CXX_COMPILER_ID}, but must be Clang, AppleClang, or GNU to debug")
 endif()
 
+# `debug` forces a full -O0 rebuild of the entire binary before launching the
+# debugger: it reconfigures with SIM_DEBUG_O0=ON, rebuilds the simulator (the
+# changed flags make Ninja recompile everything at -O0), then debugs that
+# binary. The -O0 setting is sticky, so subsequent `make debug` runs only
+# recompile changed files; run `make config-sim` to return to an optimized build.
 add_custom_target(
   debug
-  DEPENDS simulator
+  COMMAND ${CMAKE_COMMAND} -DSIM_DEBUG_O0=ON -S ${CMAKE_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target simulator
   COMMAND ${DEBUG_COMMAND}
   USES_TERMINAL
 )

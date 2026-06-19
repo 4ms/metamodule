@@ -150,6 +150,24 @@ issue is due to one of these limitations or is an actual bug.
   offending text should tell you if this is happening, or you can try building
   the plugin normally and see if you get the same error.
 
+- The `plugin` target that the real SDK's `create_plugin()` defines (which
+  plugins sometimes attach `add_custom_command(TARGET plugin POST_BUILD ...)`
+  steps to) is created as a no-op by the simulator's fake SDK. CMake target
+  names are global, so if you register more than one external plugin, only the
+  first one gets the `plugin` target — POST_BUILD steps on `plugin` in the
+  other plugins will fail to configure. Register that plugin first, or guard
+  the steps by checking which directory owns the target (a bare
+  `if(TARGET plugin)` won't help — the target exists globally, but
+  `add_custom_command(TARGET ...)` only works from the directory that
+  created it):
+
+  ```cmake
+  get_target_property(plugin_dir plugin SOURCE_DIR)
+  if(plugin_dir STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+      add_custom_command(TARGET plugin POST_BUILD ...)
+  endif()
+  ```
+
 
   I would not be surprised if there are other limitations, so please report it
   (via email, the forum, or open a github issue) if you find something.
