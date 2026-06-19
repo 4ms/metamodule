@@ -5,11 +5,74 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "test_modules.hh"
 #include "test_patches.hh"
+#include <cstdlib>
 
 namespace MetaModule
 {
 
 struct CpuLoadTest {
+
+	// Leak-slope diagnostic, triggered by a run_cpu_tests file of the form:
+	//   leak
+	//   Brand:Slug
+	//   <iterations>      (optional, defaults to 100)
+	struct LeakTestParams {
+		bool run = false;
+		std::string slug;
+		unsigned iterations = 100;
+	};
+
+	static LeakTestParams get_leak_test_params(FileStorageProxy &file_storage_proxy) {
+		LeakTestParams params;
+
+		if (!FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value())
+			return params;
+
+		std::string content;
+		FS::read_file(file_storage_proxy, content, {"run_cpu_tests", Volume::USB});
+
+		if (!content.starts_with("leak\n"))
+			return params;
+
+		// Line 1: "leak", Line 2: Brand:Slug, Line 3 (optional): iteration count
+		auto line1_end = content.find('\n');
+		auto slug_start = line1_end + 1;
+		auto slug_end = content.find('\n', slug_start);
+
+		params.slug =
+			content.substr(slug_start, slug_end == std::string::npos ? std::string::npos : slug_end - slug_start);
+
+		// Trim trailing whitespace/newline
+		while (!params.slug.empty() &&
+			   (params.slug.back() == '\r' || params.slug.back() == ' ' || params.slug.back() == '\n'))
+			params.slug.pop_back();
+
+		if (slug_end != std::string::npos) {
+			if (auto n = std::atoi(content.c_str() + slug_end + 1); n > 0)
+				params.iterations = (unsigned)n;
+		}
+
+		params.run = !params.slug.empty();
+		return params;
+	}
+
+	static void run_leak_test(FileStorageProxy &file_storage_proxy, Ui &ui, LeakTestParams const &params) {
+		pr_info("Running module leak-slope test: %s (%u iterations)\n", params.slug.c_str(), params.iterations);
+
+		FS::write_file(file_storage_proxy, std::string("In progress"), {"leak_test.csv", Volume::USB});
+
+		std::string results;
+		results.reserve(64 * 1024);
+		LoadTest::test_module_leak_slope(
+			params.slug, params.iterations, [&file_storage_proxy, &ui, &results](std::string_view line) {
+				results += line;
+				FS::append_file(file_storage_proxy, line, {"leak_test_in_progress.csv", Volume::USB});
+				ui.update_screen();
+			});
+
+		FS::write_file(file_storage_proxy, results, {"leak_test.csv", Volume::USB});
+		hil_message("*success\n");
+	}
 	static bool should_run_hil_tests(FileStorageProxy &file_storage_proxy) {
 		if (FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value()) {
 			std::string should_run;
