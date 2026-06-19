@@ -8,7 +8,10 @@ worry about the SDL window being obscured by other windows.
 
 ## Quick start
 
-Run from the `simulator/` directory (paths below are relative to it):
+The binary can be launched from any working directory — its default resource
+paths (`patches/`, `build/assets.uimg`, `../patches/default/`) are resolved
+relative to the executable's location when they aren't found relative to the
+cwd. The examples below are written as if run from `simulator/`:
 
 ```sh
 # Build the simulator (assets are produced by the firmware build)

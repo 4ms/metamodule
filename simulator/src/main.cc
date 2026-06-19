@@ -6,6 +6,7 @@
 #include "settings.hh"
 #include "ui.hh"
 #include <chrono>
+#include <filesystem>
 #include <iostream>
 #include <optional>
 #include <sstream>
@@ -107,11 +108,39 @@ int main(int argc, char *argv[]) {
 
 	SDLAudio<Frame> audio_out{settings.audioout_dev};
 
-	auto sdcard_path = std::filesystem::absolute(settings.sdcard_path);
+	// The default resource paths (patches/, build/assets.uimg, ../patches/default/)
+	// are relative to the simulator/ directory. So the binary can be launched from
+	// any working directory, fall back to resolving them relative to the executable
+	// (which lives in simulator/build/) when they aren't found relative to the cwd.
+	namespace fs = std::filesystem;
+	fs::path sim_dir;
+	if (argc > 0 && std::string_view(argv[0]).find('/') != std::string_view::npos) {
+		std::error_code ec;
+		auto exe = fs::weakly_canonical(fs::absolute(argv[0], ec), ec);
+		if (!ec)
+			sim_dir = exe.parent_path().parent_path(); // simulator/build/simulator -> simulator/
+	}
 
-	auto flash_path = std::filesystem::absolute(settings.flash_path);
+	auto resolve_resource = [&](const std::string &p) -> fs::path {
+		std::error_code ec;
+		auto cwd_rel = fs::absolute(p, ec);
+		if (!ec && fs::exists(cwd_rel, ec))
+			return cwd_rel;
+		if (!sim_dir.empty()) {
+			auto sim_rel = sim_dir / p;
+			if (fs::exists(sim_rel, ec))
+				return sim_rel;
+		}
+		return cwd_rel; // not found anywhere; reported by the file layer (no longer aborts)
+	};
 
-	auto asset_tar_path = std::filesystem::absolute(settings.asset_file);
+	auto sdcard_path = resolve_resource(settings.sdcard_path);
+	auto flash_path = resolve_resource(settings.flash_path);
+	auto asset_tar_path = resolve_resource(settings.asset_file);
+
+	if (std::error_code ec; !fs::exists(sdcard_path, ec))
+		std::cout << "Warning: SD-card patch dir not found: " << sdcard_path
+				  << " (pass -p <dir> or run from the simulator/ directory)\n";
 
 	MetaModule::Ui ui{sdcard_path.string(), flash_path.string(), asset_tar_path.string(), audio_out.get_block_size()};
 
