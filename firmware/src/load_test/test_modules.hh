@@ -8,6 +8,10 @@
 #endif
 #include "tester.hh"
 
+#ifndef SIMULATOR
+#include <malloc.h>
+#endif
+
 namespace MetaModule::LoadTest
 {
 
@@ -56,8 +60,10 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 			ModuleEntry entry;
 			entry.slug = std::string(brand) + ":" + std::string(slug);
 
-			if (entry.slug == "AmalgamatedHarmonics:Arp32" || entry.slug == "MADZINE:Launchpad" ||
-				entry.slug == "UnfilteredVolume1:PitchDelay")
+			if (entry.slug == "AmalgamatedHarmonics:Arp32"
+				// || entry.slug == "MADZINE:Launchpad"
+				// || entry.slug == "UnfilteredVolume1:PitchDelay"
+			)
 			{
 				pr_info("Skipping %s\n", entry.slug.c_str());
 				continue;
@@ -123,13 +129,13 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 			entry.raw_mem_used = (int32_t)mem_end.uordblks - (int32_t)mem_start.uordblks;
 			pr_info("Mem used: %d\n", entry.raw_mem_used);
 
-			// pr_info("    arena    %zu (total space allocated so far via sbrk)\n", mem_end.arena);
-			// pr_info("    ordblks  %zu (number of non-inuse chunks)\n", mem_end.ordblks);
+			pr_info("    arena    %zu (total space allocated so far via sbrk)\n", mem_end.arena);
+			pr_info("    ordblks  %zu (number of non-inuse chunks)\n", mem_end.ordblks);
 			// pr_info("    hblks    %zu (number of mmapped regions)\n", mem_end.hblks);
 			// pr_info("    hblkhd   %zu (total space in mmapped regions)\n", mem_end.hblkhd);
-			// pr_info("    uordblks %zu (total allocated space)\n", mem_end.uordblks);
-			// pr_info("    fordblks %zu (total non-inuse space)\n", mem_end.fordblks);
-			// pr_info("    keepcost %zu (top-most, releasable via malloc_trim space)\n", mem_end.keepcost);
+			pr_info("    uordblks %zu (total allocated space)\n", mem_end.uordblks);
+			pr_info("    fordblks %zu (total non-inuse space)\n", mem_end.fordblks);
+			pr_info("    keepcost %zu (top-most, releasable via malloc_trim space)\n", mem_end.keepcost);
 #endif
 
 			append_file(entry_to_csv(entry));
@@ -141,6 +147,123 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 
 inline void test_all_modules(auto append_file) {
 	test_module_brand("", append_file);
+}
+
+#ifndef SIMULATOR
+inline size_t cur_uordblks() {
+	return (size_t)mallinfo().uordblks;
+}
+#else
+inline size_t cur_uordblks() {
+	return 0;
+}
+#endif
+
+// Leak-slope diagnostic.
+//
+// Repeatedly creates and destroys a single module while sampling uordblks
+// (in-use heap bytes) after every cycle. The slope tells the two cases apart:
+//   - slope flattens after cycle 0  => one-time per-TYPE allocation (e.g. a
+//     lazily-built static lookup table). Permanent, but bounded per module type.
+//   - slope stays positive          => per-INSTANCE leak: something allocated on
+//     each create/onAdd is not freed on destroy/onRemove. Accumulates without bound.
+//
+// Two phases isolate where it comes from:
+//   "module-only" : ModuleFactory::create -> onAdd -> update -> onRemove -> dtor.
+//                   Isolates the module/rack adaptor. No PatchPlayer involved. Fast.
+//   "full-load"   : player.load_patch -> update -> unload_patch. Matches the real
+//                   load-test path; ~100ms/cycle due to the thread-resume delay in
+//                   load_patch, so use a smaller iteration count for this phase.
+inline void test_module_leak_slope(std::string_view slug, unsigned iterations, auto append_file) {
+	if (iterations < 2)
+		iterations = 2;
+
+	std::string slugstr{slug};
+	printf("=== Leak slope test: %s, %u iterations ===\n", slugstr.c_str(), iterations);
+	lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Leak test %s", slugstr.c_str());
+
+	if (!ModuleFactory::isValidSlug(slug)) {
+		printf("Leak test: module '%s' not found\n", slugstr.c_str());
+		append_file("error,module-not-found\n");
+		lv_label_set_text(ui_MainMenuNowPlaying, "Leak test: module not found");
+		return;
+	}
+
+	append_file("phase,iter,uordblks,delta_prev,delta_base\n");
+
+	auto run_loop = [&](const char *phase, unsigned iters, auto &&cycle) {
+		printf("--- %s (%u cycles) ---\n", phase, iters);
+		size_t base = cur_uordblks();
+		size_t prev = base;
+		size_t first_after = base;
+
+		for (unsigned i = 0; i < iters; i++) {
+			cycle();
+
+			size_t now = cur_uordblks();
+			if (i == 0)
+				first_after = now;
+
+			char buf[96];
+			snprintf(buf, sizeof buf, "%s,%u,%zu,%ld,%ld\n", phase, i, now, (long)now - (long)prev, (long)now - (long)base);
+			append_file(buf);
+			printf("%s", buf);
+
+			prev = now;
+			send_heartbeat();
+		}
+
+		long first_delta = (long)first_after - (long)base;
+		long steady = ((long)prev - (long)first_after) / (long)(iters - 1);
+		long total = (long)prev - (long)base;
+
+		printf("%s SUMMARY: base=%zu  first-cycle=%+ld B  steady=%+ld B/cycle  total=%+ld B over %u cycles\n",
+			   phase,
+			   base,
+			   first_delta,
+			   steady,
+			   total,
+			   iters);
+
+		if (steady > 64)
+			printf("  --> PER-INSTANCE leak: ~%ld bytes not freed every create/destroy\n", steady);
+		else if (first_delta > 1024)
+			printf("  --> ONE-TIME per-type allocation (~%ld B); permanent but does not accumulate\n", first_delta);
+		else
+			printf("  --> clean: no significant growth\n");
+	};
+
+	// Phase A: module only -- isolates the rack module (onAdd/onRemove + ctor/dtor).
+	run_loop("module-only", iterations, [&] {
+		auto module = ModuleFactory::create(slug);
+		if (!module)
+			return;
+		plugin_module_init(module);
+		module->set_samplerate(48000.f);
+		module->update();
+		module->update();
+		plugin_module_deinit(module);
+	});
+
+	// Phase B: full load/unload through the PatchPlayer (matches the real test path).
+	// load_patch has a 100ms thread-resume delay, so cap this phase's cycle count.
+	PatchPlayer player;
+	PatchData patch;
+	patch.blank_patch(slug);
+	patch.add_module(slug);
+
+	run_loop("full-load", std::min(iterations, 40u), [&] {
+		auto res = player.load_patch(patch);
+		if (res.success) {
+			player.update_patch_singlecore();
+			player.update_patch_singlecore();
+		}
+		if (player.is_loaded)
+			player.unload_patch();
+	});
+
+	lv_label_set_text(ui_MainMenuNowPlaying, "Leak test finished");
+	printf("=== Leak slope test complete: %s ===\n", slugstr.c_str());
 }
 
 inline std::string csv_header() {
