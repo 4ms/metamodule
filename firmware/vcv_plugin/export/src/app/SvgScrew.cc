@@ -6,6 +6,8 @@ namespace rack::app
 SvgScrew::SvgScrew()
 	: fb{new widget::FramebufferWidget}
 	, sw{new widget::SvgWidget} {
+	addChild(fb);
+	fb->addChild(sw);
 }
 
 SvgScrew::~SvgScrew() = default;
