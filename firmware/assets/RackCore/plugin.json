@@ -73,6 +73,36 @@
         "External",
         "MIDI"
       ]
+    },
+    {
+      "slug": "Merge",
+      "name": "Merge",
+      "description": "4-voice version of VCV Free Merge (Combines multiple monophonic cables into a polyphonic cable)",
+      "manualUrl": "https://vcvrack.com/Free#Merge",
+      "tags": [
+        "Polyphonic",
+        "Utility"
+      ]
+    },
+    {
+      "slug": "Split",
+      "name": "Split",
+      "description": "4-voice version of VCV Free Split (Splits a polyphonic cable into multiple monophonic cables)",
+      "manualUrl": "https://vcvrack.com/Free#Split",
+      "tags": [
+        "Polyphonic",
+        "Utility"
+      ]
+    },
+    {
+      "slug": "Sum",
+      "name": "Sum",
+      "description": "4-voic version of VCV Free Sum (Sums all channels of a polyphonic cable)",
+      "manualUrl": "https://vcvrack.com/Free#Sum",
+      "tags": [
+        "Polyphonic",
+        "Utility"
+      ]
     }
   ]
 }
