@@ -49,6 +49,9 @@ public:
 		const uint32_t total_sectors = num_sectors;
 
 		if (is_unaligned) {
+			// TODO break up these reads into larger chunks (larger scratch area, and read N sectors each time).
+			// E.g. a 9MB file is broken up into 18k single-sector transfers currently,
+			// which may be the reason we see failure with large unaligned reads.
 			while ((num_sectors--) && (status == USBH_OK)) {
 				status = USBH_MSC_Read(&usbh, lun, sector_start + num_sectors, (uint8_t *)scratch, 1);
 

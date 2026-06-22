@@ -136,11 +136,8 @@ struct ModuleLoadTester {
 					in_bufs[in] = plugin_module_get_poly_input_buffer(player.modules[module_id], in);
 
 				if (!is_poly_capable(player.modules[module_id])) {
-					pr_dbg("Not poly capable\n");
 					return {};
 				}
-				pr_dbg("Running poly tests...\n");
-
 				result = run_patch(
 					[&, this] {
 						for (uint16_t in = 0; in < counts.num_inputs; in++) {
