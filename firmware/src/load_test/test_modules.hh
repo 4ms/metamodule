@@ -56,11 +56,7 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 			ModuleEntry entry;
 			entry.slug = std::string(brand) + ":" + std::string(slug);
 
-			if (entry.slug == "AmalgamatedHarmonics:Arp32"
-				// || entry.slug == "MADZINE:Launchpad"
-				// || entry.slug == "UnfilteredVolume1:PitchDelay"
-			)
-			{
+			if (entry.slug == "AmalgamatedHarmonics:Arp32") {
 				pr_info("Skipping %s\n", entry.slug.c_str());
 				continue;
 			}

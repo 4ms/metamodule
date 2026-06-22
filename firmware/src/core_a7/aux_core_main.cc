@@ -84,6 +84,10 @@ extern "C" void aux_core_main() {
 
 	ui.preload_plugins(plugin_manager);
 
+	if (auto leak_params = CpuLoadTest::get_leak_test_params(file_storage_proxy); leak_params.run) {
+		CpuLoadTest::run_leak_test(file_storage_proxy, ui, leak_params);
+	}
+
 	if (CpuLoadTest::should_run_module_tests(file_storage_proxy)) {
 		CpuLoadTest::run_module_tests(file_storage_proxy, ui);
 	}
