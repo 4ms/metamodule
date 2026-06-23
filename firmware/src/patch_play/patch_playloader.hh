@@ -337,8 +337,6 @@ struct PatchPlayLoader {
 		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
 	}
 
-	// Read by the audio core (A7) and passed to the M4 core via MetaParams, telling
-	// it whether to combine CC pairs into 14-bit values. Comes from the user settings.
 	bool is_midi_14bit_enabled() const {
 		return settings && settings->midi.midi_14bit_cc == MidiSettings::Midi14BitCC::Enabled;
 	}
