@@ -12,12 +12,22 @@ struct MessageParser {
 	std::array<Midi::Note, MaxMidiPolyphony> all_midi_notes;
 	std::span<Midi::Note> midi_notes{all_midi_notes};
 
+	// 14-bit CC mode: when enabled, CC 0-31 are MSBs and CC 32-63 are the matching
+	// LSBs (CC n+32). The last MSB received for each CC is stored so it can be
+	// combined with a later LSB. Storage is not per-channel (see parse()).
+	bool midi_14bit_mode = false;
+	std::array<uint8_t, 32> cc_msb{};
+
 	void set_poly_num(uint32_t poly_chans) {
 		poly_chans = std::clamp<uint32_t>(poly_chans, 1U, all_midi_notes.size());
 
 		if (poly_chans != midi_notes.size()) {
 			midi_notes = std::span{all_midi_notes.begin(), poly_chans};
 		}
+	}
+
+	void set_14bit_mode(bool enabled) {
+		midi_14bit_mode = enabled;
 	}
 
 	Midi::Event parse(MidiMessage msg) {
@@ -67,10 +77,30 @@ struct MessageParser {
 			}
 
 		} else if (msg.is_command<MidiCommand::ControlChange>()) {
+			// The A7 core always treats CC values as 14-bit, so we left-shift 7-bit
+			// values by 7 (CC 127 => 16256) and only build true 14-bit values when
+			// 14-bit mode is on. This keeps the A7 conversion identical in either mode.
 			event.type = Midi::Event::Type::CC;
-			event.note = msg.ccnum();
-			event.val = msg.ccval();
 			event.midi_chan = msg.status.channel;
+			auto ccnum = msg.ccnum();
+			auto ccval = msg.ccval();
+
+			if (midi_14bit_mode && ccnum < 32) {
+				// MSB: store it (resetting the implicit LSB to 0) and emit a coarse value.
+				// Maps on the matching LSB (CC ccnum+32) are ignored, so only emit on ccnum.
+				cc_msb[ccnum] = ccval;
+				event.note = ccnum;
+				event.val = static_cast<int16_t>(ccval << 7);
+			} else if (midi_14bit_mode && ccnum < 64) {
+				// LSB: combine with the last MSB and emit on the MSB's CC number (ccnum-32).
+				auto msb_ccnum = ccnum - 32;
+				event.note = msb_ccnum;
+				event.val = static_cast<int16_t>((cc_msb[msb_ccnum] << 7) | ccval);
+			} else {
+				// 7-bit CC (or CC 64-127 while in 14-bit mode): shift up to 14-bit range.
+				event.note = ccnum;
+				event.val = static_cast<int16_t>(ccval << 7);
+			}
 
 		} else if (msg.is_command<MidiCommand::ProgramChange>()) {
 			event.type = Midi::Event::Type::PC;

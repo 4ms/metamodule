@@ -154,6 +154,13 @@ static bool read(ryml::ConstNodeRef const &node, FilesystemSettings *settings) {
 		settings->knobset_control = MidiSettings{}.knobset_control;
 	}
 
+	if (node.has_child("midi_14bit_cc")) {
+		settings->midi_14bit_cc = node["midi_14bit_cc"].val() == "1" ? MidiSettings::Midi14BitCC::Enabled :
+																	   MidiSettings::Midi14BitCC::Disabled;
+	} else {
+		settings->midi_14bit_cc = MidiSettings{}.midi_14bit_cc;
+	}
+
 	read_or_default(node, "knobset_cc", settings, &MidiSettings::knobset_cc);
 	read_or_default(node, "knobset_channel", settings, &MidiSettings::knobset_channel);
 

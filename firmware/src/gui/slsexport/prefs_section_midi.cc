@@ -15,6 +15,11 @@ void PrefsSectionMidi::create(lv_obj_t *parent) {
 
 	create_prefs_note(midi_cont, "Sends MIDI to controller\nwhen MIDI-mapped params\nchange");
 
+	auto cc14_cont = create_prefs_labeled_check(parent, "14-bit CC:");
+	midi_14bit_check = lv_obj_get_child(cc14_cont, 1);
+
+	create_prefs_note(cc14_cont, "Combine CC 0-31 (MSB)\nwith CC 32-63 (LSB) for\nhigh-resolution control");
+
 	// MIDI PC Patch Load
 	create_prefs_section_title(parent, "MIDI PC PATCH LOAD");
 
