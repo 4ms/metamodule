@@ -185,9 +185,9 @@ void ModuleWidget::addLightSwitch(app::SvgSwitch *widget, app::ModuleLightWidget
 }
 
 void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget *light) {
-	log_widget("addLightSwitch()", widget);
+	log_widget("addLightSlider()", widget);
 	internal->adaptor->addLightParam(widget, light);
-	Widget::addChild(light);
+	Widget::addChild(widget);
 }
 
 //
