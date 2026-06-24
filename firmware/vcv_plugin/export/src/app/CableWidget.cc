@@ -4,6 +4,7 @@ namespace rack::app
 {
 
 CableWidget::CableWidget() {
+	internal = nullptr;
 }
 
 CableWidget::~CableWidget() {

@@ -3,7 +3,9 @@
 namespace rack::app
 {
 
-Switch::Switch() = default;
+Switch::Switch() {
+	internal = nullptr;
+}
 
 Switch::~Switch() = default;
 

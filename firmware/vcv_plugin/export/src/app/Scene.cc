@@ -5,7 +5,9 @@ namespace rack::app
 
 struct Scene::Internal {};
 
-Scene::Scene() = default;
+Scene::Scene() {
+	internal = nullptr;
+}
 
 Scene::~Scene() = default;
 

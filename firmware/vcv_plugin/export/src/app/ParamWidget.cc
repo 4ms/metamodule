@@ -4,7 +4,9 @@
 namespace rack::app
 {
 
-ParamWidget::ParamWidget() = default;
+ParamWidget::ParamWidget() {
+	internal = nullptr;
+}
 ParamWidget::~ParamWidget() = default;
 
 engine::ParamQuantity *ParamWidget::getParamQuantity() {
