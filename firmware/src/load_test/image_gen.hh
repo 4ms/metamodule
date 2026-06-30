@@ -62,6 +62,7 @@ struct ModuleImageGen {
 			return;
 		}
 
+		hil_message("*generating\n");
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
 
