@@ -12,6 +12,7 @@
 #include "internal_interface/plugin_app_if_internal.hh"
 #include "internal_interface/plugin_app_interface.hh"
 #include "internal_plugin_manager.hh"
+#include "load_test/image_gen.hh"
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
 #include "system/print_time.hh"
@@ -80,6 +81,10 @@ extern "C" void aux_core_main() {
 
 	if (CpuLoadTest::should_run_hil_tests(file_storage_proxy)) {
 		CpuLoadTest::run_hil_tests(file_storage_proxy, ui, plugin_manager);
+	}
+
+	if (ModuleImageGen::should_run(file_storage_proxy)) {
+		ModuleImageGen::run(file_storage_proxy, ui, plugin_manager, *A7SharedMemoryS::ptrs.open_patch_manager);
 	}
 
 	ui.preload_plugins(plugin_manager);
