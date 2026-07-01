@@ -418,6 +418,17 @@
         "Hardware clone",
         "Polyphonic"
       ]
+    },
+    {
+      "slug": "Iroi",
+      "name": "Iroi",
+      "description": "Multi-effect and resonator processor",
+      "tags": [
+        "Effect",
+        "Filter",
+        "Delay",
+        "Reverb"
+      ]
     }
   ]
 }
