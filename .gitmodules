@@ -52,3 +52,6 @@
 [submodule "firmware/lib/thorvg/thorvg"]
 	path = firmware/lib/thorvg/thorvg
 	url = https://github.com/4ms/thorvg.git
+[submodule "simulator/rtmidi"]
+	path = simulator/rtmidi
+	url = https://github.com/thestk/rtmidi.git
