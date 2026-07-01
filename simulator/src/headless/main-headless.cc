@@ -1,9 +1,14 @@
 #include "audio_files.hh"
 #include "audio_wrapper.hh"
+#include "coreproc_plugin/async_thread_control.hh"
 #include "file_io.hh"
 #include "patch-serial/yaml_to_patch.hh"
+#include "plugin/Plugin.hpp"
+// must come after plugin/Plugin.hpp:
+#include "ext_plugin_builtin.hh"
 #include "settings.hh"
 #include <chrono>
+#include <list>
 #include <span>
 
 namespace MetaModule::Headless
@@ -45,6 +50,10 @@ int main(int argc, char *argv[]) {
 	MetaModuleSim::Settings settings;
 	settings.parse(argc, argv);
 
+	// Register VCV-ported built-in brands (see ext-plugins.cmake)
+	std::list<rack::plugin::Plugin> builtin_plugins;
+	load_ext_builtin_plugins(builtin_plugins);
+
 	const auto samples_to_run = settings.samples_to_run;
 	const float effective_play_time = samples_to_run / 48000.f;
 	printf("Run for %lu samples (%g sec @ 48kHz)\n", samples_to_run, effective_play_time);
@@ -52,6 +61,8 @@ int main(int argc, char *argv[]) {
 	auto patchdata = read_patch(settings.patch);
 
 	auto input = read_wav(settings.audio_in_file, samples_to_run);
+
+	MetaModule::start_module_threads();
 
 	// Load patch file
 	MetaModule::PatchPlayer player;
@@ -74,6 +85,8 @@ int main(int argc, char *argv[]) {
 		}
 	});
 	printf("Effective load (single core): %g percent\n", (float)duration / (effective_play_time * 10));
+
+	MetaModule::kill_module_threads();
 
 	// Write output to wav file
 	write_wav(output, settings.audio_out_file);
