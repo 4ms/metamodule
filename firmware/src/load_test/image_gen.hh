@@ -83,12 +83,26 @@ struct ModuleImageGen {
 				lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Rendering %s", full_slug.c_str());
 				ui.update_screen();
 
+				struct mallinfo mem_start = mallinfo();
+
 				if (render_and_save(file_storage_proxy, player, playloader, full_slug, brand, slug))
 					rendered++;
 				else
 					skipped++;
 
 				hil_message("*ok\n");
+
+#ifndef SIMULATOR
+				struct mallinfo mem_end = mallinfo();
+				pr_info("Mem used: %d\n", (int32_t)mem_end.uordblks - (int32_t)mem_start.uordblks);
+				pr_info("    arena    %zu (total space allocated so far via sbrk)\n", mem_end.arena);
+				pr_info("    ordblks  %zu (number of non-inuse chunks)\n", mem_end.ordblks);
+				pr_info("    hblks    %zu (number of mmapped regions)\n", mem_end.hblks);
+				pr_info("    hblkhd   %zu (total space in mmapped regions)\n", mem_end.hblkhd);
+				pr_info("    uordblks %zu (total allocated space)\n", mem_end.uordblks);
+				pr_info("    fordblks %zu (total non-inuse space)\n", mem_end.fordblks);
+				pr_info("    keepcost %zu (top-most, releasable via malloc_trim space)\n", mem_end.keepcost);
+#endif
 			}
 		}
 
