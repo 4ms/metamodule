@@ -9,7 +9,11 @@
 namespace MetaModule
 {
 
-Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_view asset_path, size_t block_size)
+Ui::Ui(std::string_view sdcard_path,
+	   std::string_view flash_path,
+	   std::string_view asset_path,
+	   size_t block_size,
+	   SimMidi &midi)
 	: ramdrive{new RamDrive}
 	, ramdisk_ops{*ramdrive}
 	, ramdisk{&ramdisk_ops, Volume::RamDisk}
@@ -30,6 +34,7 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 				   settings,
 				   screensaver,
 				   ramdisk}
+	, sim_midi{midi}
 	, plugin_internal{settings, open_patches_manager, notify_queue}
 	, plugin_interface{plugin_internal}
 	, in_buffer(block_size)

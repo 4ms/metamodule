@@ -4,6 +4,7 @@
 #include "lvgl.h"
 #include "sdl_audio.hh"
 #include "settings.hh"
+#include "sim_midi.hh"
 #include "ui.hh"
 #include <chrono>
 #include <filesystem>
@@ -103,10 +104,20 @@ int main(int argc, char *argv[]) {
 
 	settings.parse(argc, argv);
 
+	if (settings.list_midi) {
+		MetaModule::SimMidi::list_ports();
+		return 0;
+	}
+
 	lv_init();
 	lv_port_disp_init(320, 240, settings.zoom);
 
 	SDLAudio<Frame> audio_out{settings.audioout_dev};
+
+	MetaModule::SimMidi sim_midi{MetaModule::SimMidi::Config{
+		.in_port = settings.midiin_dev,
+		.out_port = settings.midiout_dev,
+	}};
 
 	// The default resource paths (patches/, build/assets.uimg, ../patches/default/)
 	// are relative to the simulator/ directory. So the binary can be launched from
@@ -142,7 +153,8 @@ int main(int argc, char *argv[]) {
 		std::cout << "Warning: SD-card patch dir not found: " << sdcard_path
 				  << " (pass -p <dir> or run from the simulator/ directory)\n";
 
-	MetaModule::Ui ui{sdcard_path.string(), flash_path.string(), asset_tar_path.string(), audio_out.get_block_size()};
+	MetaModule::Ui ui{
+		sdcard_path.string(), flash_path.string(), asset_tar_path.string(), audio_out.get_block_size(), sim_midi};
 
 	MetaModule::start_module_threads();
 

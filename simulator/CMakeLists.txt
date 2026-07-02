@@ -150,9 +150,10 @@ if(HEADLESS)
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
 else()
-	add_executable(simulator 
-		src/main.cc 
+	add_executable(simulator
+		src/main.cc
 		src/ui.cc
+		src/sim_midi.cc
 		stubs/memory/heap.cc
 		stubs/fs/fs_proxy.cc
 		stubs/async_thread_control.cc
@@ -230,6 +231,26 @@ if(NOT HEADLESS)
 			  ${FWDIR}/lib/fatfs/source
 			  ${FWDIR}/src/fs/fatfs
 	)
+endif()
+
+# rtmidi is a git submodule at simulator/rtmidi 
+# If the rtmidi submodule is not present, MIDI is compiled out.
+#   Enable MIDI:  git submodule update --init simulator/rtmidi
+#   Linux also needs ALSA dev headers:  sudo apt install libasound2-dev
+if(NOT HEADLESS)
+	if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/rtmidi/CMakeLists.txt)
+		set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+		set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+		add_subdirectory(rtmidi EXCLUDE_FROM_ALL)
+		target_link_libraries(simulator PRIVATE rtmidi)
+		target_compile_definitions(simulator PRIVATE SIM_HAS_RTMIDI)
+		message("Simulator: rtmidi found -- MIDI enabled")
+	else()
+		message(WARNING
+			"Simulator: rtmidi submodule not found at simulator/rtmidi -- MIDI disabled. "
+			"Enable with: git submodule update --init simulator/rtmidi"
+            "And then re-configure: cd simulator && make clean")
+	endif()
 endif()
 
 # Per-target options come after the directory-level ones on the command line, so

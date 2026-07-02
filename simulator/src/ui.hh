@@ -31,7 +31,11 @@ class Ui {
 	};
 
 public:
-	Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_view asset_path, size_t block_size);
+	Ui(std::string_view sdcard_path,
+	   std::string_view flash_path,
+	   std::string_view asset_path,
+	   size_t block_size,
+	   SimMidi &midi);
 
 	bool update();
 	void play_patch(std::span<Frame> buffer);
@@ -74,7 +78,8 @@ private:
 	PageManager page_manager;
 	ParamsMidiState params;
 	MetaParams metaparams;
-	AudioStream audio_stream{params, patch_player, patch_playloader, patch_mod_queue};
+	SimMidi &sim_midi;
+	AudioStream audio_stream{params, patch_player, patch_playloader, patch_mod_queue, sim_midi};
 	LvglEncoderSimulatorDriver input_driver{keys};
 
 	PluginAppInterface::Internal plugin_internal;
