@@ -9,7 +9,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/ui.hh"
 #include "load_test/png_writer.hh"
-#include "load_test/test_manager.hh"
+#include "load_test/test_modules_memory.hh"
 #include "lvgl.h"
 #include "patch/module_type_slug.hh"
 #include "patch/patch_data.hh"
@@ -46,6 +46,9 @@ struct ModuleImageGen {
 		return false;
 	}
 
+	static constexpr std::string_view ReportPath = "module-images/image_gen_report.csv";
+	static constexpr std::string_view ReportInProgressPath = "module-images/image_gen_report_in_progress.csv";
+
 	static void run(FileStorageProxy &file_storage_proxy,
 					Ui &ui,
 					PluginManager &plugin_manager,
@@ -55,12 +58,6 @@ struct ModuleImageGen {
 		std::string contents;
 		FS::read_file(file_storage_proxy, contents, {"run_image_gen", Volume::USB});
 		auto filter = read_filter(contents); // "all" => every brand, else a brand slug
-
-		if (!CpuLoadTest::preload_all_plugins(plugin_manager)) {
-			pr_err("Failed preloading plugins for image generation\n");
-			hil_message("*failure\n");
-			return;
-		}
 
 		hil_message("*generating\n");
 		lv_show(ui_MainMenuNowPlayingPanel);
@@ -72,39 +69,71 @@ struct ModuleImageGen {
 		unsigned rendered = 0;
 		unsigned skipped = 0;
 
+		std::string csv = "brand:module,status,mem_used_bytes\n";
+		csv.reserve(64 * 1024);
+		FS::write_file(file_storage_proxy, csv, {ReportInProgressPath, OutVol});
+
+		// Handle Built-in brands first
 		for (auto brand : ModuleFactory::getAllBrands()) {
 			if (filter != "all" && filter != brand)
 				continue;
+			render_brand(file_storage_proxy, player, playloader, ui, brand, rendered, skipped, csv);
+		}
 
-			for (auto slug : ModuleFactory::getAllModuleSlugs(brand)) {
-				BrandModuleSlug full_slug = std::string(brand) + ":" + std::string(slug);
-
-				printf("Rendering %s\n", full_slug.c_str());
-				lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Rendering %s", full_slug.c_str());
-				ui.update_screen();
-
-				struct mallinfo mem_start = mallinfo();
-
-				if (render_and_save(file_storage_proxy, player, playloader, full_slug, brand, slug))
-					rendered++;
-				else
-					skipped++;
-
-				hil_message("*ok\n");
-
-#ifndef SIMULATOR
-				struct mallinfo mem_end = mallinfo();
-				printf("Mem used: %d\n", (int32_t)mem_end.uordblks - (int32_t)mem_start.uordblks);
-				printf("    arena    %zu (total space allocated so far via sbrk)\n", mem_end.arena);
-				printf("    ordblks  %zu (number of non-inuse chunks)\n", mem_end.ordblks);
-				printf("    hblks    %zu (number of mmapped regions)\n", mem_end.hblks);
-				printf("    hblkhd   %zu (total space in mmapped regions)\n", mem_end.hblkhd);
-				printf("    uordblks %zu (total allocated space)\n", mem_end.uordblks);
-				printf("    fordblks %zu (total non-inuse space)\n", mem_end.fordblks);
-				printf("    keepcost %zu (top-most, releasable via malloc_trim space)\n", mem_end.keepcost);
-#endif
+		// Load one plugin at a time, render its modules, then unload it
+		plugin_manager.start_loading_plugin_list();
+		while (true) {
+			auto result = plugin_manager.process_loading();
+			if (result.state == PluginFileLoader::State::GotList)
+				break;
+			if (result.state == PluginFileLoader::State::Error) {
+				pr_err("Failed to get plugin list for image generation\n");
+				FS::write_file(file_storage_proxy, csv, {ReportPath, OutVol});
+				hil_message("*failure\n");
+				return;
 			}
 		}
+
+		auto list = plugin_manager.found_plugin_list();
+
+		for (auto i = 0u; i < list->size(); ++i) {
+			auto plugin_file_name = plugin_manager.plugin_name(i);
+			printf("Loading plugin: '%s'\n", plugin_file_name.c_str());
+
+			// Brands are keyed in ModuleFactory by a cleaned-up version of the
+			// metadata's brand_slug (aliases resolved, ':' suffix stripped)
+			// Diffing getAllBrands() before/after gives us the exact brand(s) added
+			auto brands_before = ModuleFactory::getAllBrands();
+
+			plugin_manager.load_plugin(i);
+			bool loaded_ok = true;
+			while (true) {
+				using enum PluginFileLoader::State;
+				auto state = plugin_manager.process_loading().state;
+				if (state == Success) {
+					break;
+				}
+				if (state == RamDiskFull || state == InvalidPlugin || state == Error) {
+					pr_warn("Failed to load plugin '%s' for image generation, skipping\n", plugin_file_name.c_str());
+					loaded_ok = false;
+					break;
+				}
+			}
+
+			if (loaded_ok) {
+				for (auto brand : ModuleFactory::getAllBrands()) {
+					if (std::ranges::find(brands_before, brand) != brands_before.end())
+						continue; // pre-existing brand, not from this plugin
+
+					if (filter == "all" || filter == brand)
+						render_brand(file_storage_proxy, player, playloader, ui, brand, rendered, skipped, csv);
+				}
+
+				plugin_manager.unload_plugin(plugin_file_name);
+			}
+		}
+
+		FS::write_file(file_storage_proxy, csv, {ReportPath, OutVol});
 
 		pr_info("Module image generation finished: %u rendered, %u skipped\n", rendered, skipped);
 		lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Done: %u images, %u skipped", rendered, skipped);
@@ -112,6 +141,53 @@ struct ModuleImageGen {
 	}
 
 private:
+	// Renders and saves every module belonging to `brand` (which must already be
+	// registered in ModuleFactory), appending a CSV row per module with its
+	// render status and heap usage delta.
+	static void render_brand(FileStorageProxy &file_storage_proxy,
+							 PatchPlayer &player,
+							 PatchPlayLoader &playloader,
+							 Ui &ui,
+							 std::string_view brand,
+							 unsigned &rendered,
+							 unsigned &skipped,
+							 std::string &csv) {
+		for (auto slug : ModuleFactory::getAllModuleSlugs(brand)) {
+			BrandModuleSlug full_slug = std::string(brand) + ":" + std::string(slug);
+
+			printf("Rendering %s\n", full_slug.c_str());
+			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Rendering %s", full_slug.c_str());
+			ui.update_screen();
+
+			size_t mem_start = LoadTest::cur_uordblks();
+
+			bool ok = render_and_save(file_storage_proxy, player, playloader, full_slug, brand, slug);
+			if (ok)
+				rendered++;
+			else
+				skipped++;
+
+			hil_message("*ok\n");
+
+			size_t mem_end = LoadTest::cur_uordblks();
+			long mem_used = (long)mem_end - (long)mem_start;
+			pr_info("Mem used: %ld\n", mem_used);
+
+			char line[320];
+			snprintf(line,
+					 sizeof line,
+					 "%.*s:%.*s,%s,%ld\n",
+					 (int)brand.size(),
+					 brand.data(),
+					 (int)slug.size(),
+					 slug.data(),
+					 ok ? "rendered" : "skipped",
+					 mem_used);
+			csv += line;
+			FS::append_file(file_storage_proxy, line, {ReportInProgressPath, OutVol});
+		}
+	}
+
 	// Returns the first whitespace-trimmed line of the trigger file contents.
 	static std::string read_filter(std::string_view contents) {
 		auto end = contents.find_first_of("\r\n");
