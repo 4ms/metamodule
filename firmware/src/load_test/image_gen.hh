@@ -159,18 +159,24 @@ private:
 			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Rendering %s", full_slug.c_str());
 			ui.update_screen();
 
-			size_t mem_start = LoadTest::cur_uordblks();
+			long mem_used = 0;
 
-			bool ok = render_and_save(file_storage_proxy, player, playloader, full_slug, brand, slug);
-			if (ok)
+			// Render + save to disk, but don't count memory usage
+			bool ok = render_and_save(file_storage_proxy, player, playloader, brand, slug, true);
+
+			if (ok) {
 				rendered++;
-			else
+
+				// Render + don't save to disk. Count memory usage
+				long mem_start = LoadTest::cur_uordblks();
+				render_and_save(file_storage_proxy, player, playloader, brand, slug, false);
+				mem_used = (long)LoadTest::cur_uordblks() - mem_start;
+
+			} else
 				skipped++;
 
 			hil_message("*ok\n");
 
-			size_t mem_end = LoadTest::cur_uordblks();
-			long mem_used = (long)mem_end - (long)mem_start;
 			pr_info("Mem used: %ld\n", mem_used);
 
 			char line[320];
@@ -206,11 +212,13 @@ private:
 	static bool render_and_save(FileStorageProxy &file_storage_proxy,
 								PatchPlayer &player,
 								PatchPlayLoader &playloader,
-								BrandModuleSlug const &full_slug,
 								std::string_view brand,
-								std::string_view module_slug) {
+								std::string_view module_slug,
+								bool write_to_disk) {
 
 		ModuleDrawer drawer{.container = nullptr, .height = Height};
+
+		BrandModuleSlug full_slug = std::string(brand) + ":" + std::string(module_slug);
 
 		auto [faceplate, width] = drawer.read_faceplate(full_slug.c_str());
 		if (faceplate.empty() || width <= 0) {
@@ -270,7 +278,9 @@ private:
 			pr_warn("Could not load %s for dynamic displays: %s\n", full_slug.c_str(), res.error_string.c_str());
 		}
 
-		bool ok = snapshot_and_write(file_storage_proxy, canvas, width, brand, module_slug);
+		bool ok = true;
+		if (write_to_disk)
+			ok = snapshot_and_write(file_storage_proxy, canvas, width, brand, module_slug);
 
 		dyn.blur();			   // releases display buffers / calls hide_graphic_display
 		lv_obj_del(container); // frees canvas and all child element objects
