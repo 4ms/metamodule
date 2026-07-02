@@ -86,6 +86,7 @@ static void write(ryml::NodeRef *n, FilesystemSettings const &s) {
 
 	n->append_child() << ryml::key("midi_feedback") << std::to_underlying(s.midi_feedback);
 	n->append_child() << ryml::key("knobset_control") << std::to_underlying(s.knobset_control);
+	n->append_child() << ryml::key("midi_14bit_cc") << std::to_underlying(s.midi_14bit_cc);
 	n->append_child() << ryml::key("knobset_cc") << s.knobset_cc;
 	n->append_child() << ryml::key("knobset_channel") << s.knobset_channel;
 }

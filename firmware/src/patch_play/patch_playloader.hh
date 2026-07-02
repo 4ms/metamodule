@@ -337,6 +337,10 @@ struct PatchPlayLoader {
 		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
 	}
 
+	bool is_midi_14bit_enabled() const {
+		return settings && settings->midi.midi_14bit_cc == MidiSettings::Midi14BitCC::Enabled;
+	}
+
 	void apply_suggested_audio_settings() {
 		if (!settings) {
 			pr_err("Error: PatchPlayLoader not initialized with user settings\n");
