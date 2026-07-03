@@ -42,8 +42,11 @@ patch files can't use modules that weren't built):
 
 ```
 cmake --fresh --preset headless-min
-cmake --build build-headless-min
+cmake --build build-headless
 ```
+
+Both headless presets share the `build-headless/` dir, so to switch between them,
+re-run the configure step (`cmake --fresh --preset ...`) as shown above.
 
 **Purpose:**
 This project is useful for testing the audio stream while developing, for

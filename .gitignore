@@ -1,5 +1,5 @@
 build/
-build-headless*/
+build-headless/
 LOCAL/
 LOCAL
 *.hex

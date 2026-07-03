@@ -32,10 +32,10 @@
             "name": "headless-min",
             "displayName": "Headless, minimum brands (only 4ms)",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build-headless-min",
+            "binaryDir": "${sourceDir}/build-headless",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build-headless-min",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build-headless",
 				"HEADLESS": { "type": "BOOL", "value": "ON" },
 				"OMIT_BRAND_AudibleInstruments": { "type": "BOOL", "value": "ON" },
 				"OMIT_BRAND_Befaco":             { "type": "BOOL", "value": "ON" }, 
