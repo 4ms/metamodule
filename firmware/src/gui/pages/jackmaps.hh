@@ -193,23 +193,29 @@ private:
 		lv_group_add_obj(group, row);
 	}
 
-	// Pull the alias header on-screen when its jack row is focused. Only acts when
-	// the header is actually clipped: issuing a scroll when it's already visible
+	// Scroll to make the alias header visible on-screen when its jack row is focused.
+	// Only acts when the header is actually off screen: issuing a scroll when it's already visible
 	// would cancel the row's own scroll-into-view and leave the selection off
 	// screen. And only when the whole header..row span fits the viewport, so the
 	// selected row is never pushed off just to reveal the header.
 	static void scroll_to_header_cb(lv_event_t *event) {
 		auto header = static_cast<lv_obj_t *>(event->user_data);
 		auto row = event->target;
-		if (!header || !row || lv_obj_is_visible(header))
-			return;
 
-		if (!lv_obj_is_visible(row))
+		if (!header || !row) {
 			return;
+		}
 
 		auto cont = lv_obj_get_parent(row);
-		if (!cont)
+		if (!cont) {
 			return;
+		}
+
+		auto header_bottom = lv_obj_get_y(header) + lv_obj_get_height(header);
+
+		if (lv_obj_get_scroll_y(cont) < header_bottom) {
+			return;
+		}
 
 		lv_coord_t span = lv_obj_get_y(row) + lv_obj_get_height(row) - lv_obj_get_y(header);
 		if (span <= lv_obj_get_content_height(cont))
