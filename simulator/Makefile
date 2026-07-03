@@ -12,7 +12,7 @@ clean:
 config-sim: clean
 
 realclean:
-	rm -rf $(BUILDDIR)
+	rm -rf $(BUILDDIR) build-headless
 
 warnings: 
 	cmake --fresh --preset gcc-warn -DLOG_LEVEL=TRACE
@@ -29,6 +29,14 @@ config-headless:
 
 config-headless-min:
 	cmake --fresh --preset headless-min -DLOG_LEVEL=NONE
-	
 
-.PHONY: all clean warnings run
+headless:
+	@test -f build-headless/CMakeCache.txt || cmake --fresh --preset headless -DLOG_LEVEL=DEBUG
+	cmake --build build-headless
+
+headless-min:
+	@test -f build-headless/CMakeCache.txt || cmake --fresh --preset headless-min -DLOG_LEVEL=NONE
+	cmake --build build-headless
+
+
+.PHONY: all clean warnings run headless headless-min
