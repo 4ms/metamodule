@@ -22,7 +22,7 @@ The project can also be built without a GUI, and run headless.
 The GUI simulator supports MIDI input and output via
 [rtmidi](https://github.com/thestk/rtmidi), which is added as a git submodule.
 
-One-time setup:
+MIDI is on by default (`SIMULATOR_MIDI=ON`). One-time setup for the rtmidi submodule:
 
 ```
 git submodule update --init simulator/rtmidi
@@ -30,8 +30,16 @@ git submodule update --init simulator/rtmidi
 sudo apt install libasound2-dev
 ```
 
-If the submodule is not found, the simulator still builds but MIDI is
-disabled (a warning is printed at configure time).
+To build without MIDI (e.g. if you don't want the rtmidi submodule), configure
+with MIDI disabled:
+
+```
+make config-sim-nomidi    # or: make config-sim MIDI=OFF
+```
+
+`make config-sim` (or `make config-sim-midi`) configures with MIDI enabled. When
+MIDI is enabled but the rtmidi submodule is missing, configuration fails with a
+message telling you how to initialize it or disable MIDI.
 
 Usage:
 

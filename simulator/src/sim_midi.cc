@@ -230,8 +230,8 @@ void SimMidi::list_ports() {
 #else // !SIM_HAS_RTMIDI -- inert stub build
 
 SimMidi::SimMidi(Config) {
-	std::printf("SimMidi: built without rtmidi; MIDI is disabled. "
-				"Run `git submodule update --init simulator/rtmidi` and rebuild.\n");
+	std::printf("SimMidi: built without MIDI support (SIMULATOR_MIDI=OFF). "
+				"Rebuild with `make config-sim-midi` to enable MIDI.\n");
 }
 
 SimMidi::~SimMidi() = default;
@@ -246,8 +246,8 @@ void SimMidi::send(MidiMessage) {
 }
 
 void SimMidi::list_ports() {
-	std::printf("Simulator was built without rtmidi (MIDI disabled).\n"
-				"Run `git submodule update --init simulator/rtmidi` and rebuild to enable MIDI.\n");
+	std::printf("Simulator was built without MIDI support (SIMULATOR_MIDI=OFF).\n"
+				"Rebuild with `make config-sim-midi` to enable MIDI.\n");
 }
 
 #endif

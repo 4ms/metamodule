@@ -233,24 +233,32 @@ if(NOT HEADLESS)
 	)
 endif()
 
-# rtmidi is a git submodule at simulator/rtmidi 
-# If the rtmidi submodule is not present, MIDI is compiled out.
-#   Enable MIDI:  git submodule update --init simulator/rtmidi
-#   Linux also needs ALSA dev headers:  sudo apt install libasound2-dev
-if(NOT HEADLESS)
-	if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/rtmidi/CMakeLists.txt)
-		set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-		set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
-		add_subdirectory(rtmidi EXCLUDE_FROM_ALL)
-		target_link_libraries(simulator PRIVATE rtmidi)
-		target_compile_definitions(simulator PRIVATE SIM_HAS_RTMIDI)
-		message("Simulator: rtmidi found -- MIDI enabled")
-	else()
-		message(WARNING
-			"Simulator: rtmidi submodule not found at simulator/rtmidi -- MIDI disabled. "
-			"Enable with: git submodule update --init simulator/rtmidi"
-            "And then re-configure: cd simulator && make clean")
+# --- Real MIDI I/O via rtmidi (GUI simulator only) ---
+# MIDI support is controlled by the SIMULATOR_MIDI option (ON by default). Toggle
+# it from the Makefile: `make config-sim` (MIDI on) / `make config-sim-nomidi`
+# (MIDI off), or pass -DSIMULATOR_MIDI=ON/OFF at configure time.
+#
+# When enabled, rtmidi (git submodule at simulator/rtmidi) is built and linked;
+# its own CMake auto-selects the platform MIDI API (ALSA / CoreMIDI / WinMM).
+# When disabled, SimMidi compiles to an inert no-op.
+option(SIMULATOR_MIDI "Build the simulator with rtmidi MIDI support" ON)
+
+if(NOT HEADLESS AND SIMULATOR_MIDI)
+	if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/rtmidi/CMakeLists.txt)
+		message(FATAL_ERROR
+			"SIMULATOR_MIDI is ON but the rtmidi submodule is missing.\n"
+			"  Initialize it:  git submodule update --init simulator/rtmidi\n"
+			"  Linux also needs ALSA headers:  sudo apt install libasound2-dev\n"
+			"  Or build without MIDI:  make config-sim-nomidi  (or -DSIMULATOR_MIDI=OFF)")
 	endif()
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+	set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+	add_subdirectory(rtmidi EXCLUDE_FROM_ALL)
+	target_link_libraries(simulator PRIVATE rtmidi)
+	target_compile_definitions(simulator PRIVATE SIM_HAS_RTMIDI)
+	message("Simulator: MIDI enabled (rtmidi)")
+elseif(NOT HEADLESS)
+	message("Simulator: MIDI disabled (SIMULATOR_MIDI=OFF)")
 endif()
 
 # Per-target options come after the directory-level ones on the command line, so
