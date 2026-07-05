@@ -12,7 +12,7 @@ MetaModule is moving to a new hardware revision based on the STM32MP25x (2×Cort
 - **stm32mp2-baremetal** has verified A35 EL3-secure examples: boot/C-runtime, GIC nested interrupts, AArch64 MMU, HPDMA m2m + cache maintenance, SAI audio via HPDMA linked-list circular + I2C **PCM3168** (MetaModule's exact codec), USB device (DWC3 CDC-ACM), dual-A35 SMP — and on the `usb-xhci` branch, verified XHCI USB **host** + dual-role switching + USB MIDI (targets both the ST EV1 and the 4ms devboard v0.1). Its `shared/` code is already near-mdrivlib style (same `register_access.hh` pattern, InterruptManager, FPin).
 - **metamodule** firmware selects its single board ("medium") purely by include path: `firmware/src/medium/conf/*.hh`, no `#ifdef MEDIUM`. `firmware/` is a single-toolchain (arm-none-eabi) CMake project building `main.elf` (A7) + `main_m4.elf` (M4); the simulator is a sibling CMake project consuming `../firmware` sources via curated source lists + stubs. The M4 owns controls, ALL filesystem, and wifi; IPC is HSEM + shared-memory structs (`src/core_intercom/`). Plugin loading is a hand-written ELF relocator handling 32-bit ARM relocs only (`src/dynload/elf_process/elf_relocator.hh`).
 
-## Decisions (proposed — confirm/veto)
+## Decisions (confirmed)
 
 1. **Repo layout: sibling `firmware-mp2/` project in this repo** (hybrid of "new build target" and "new dir like simulator"). A single CMake project for both platforms is mechanically impossible: MP2 needs two toolchains (aarch64-none-elf for A35, arm-none-eabi for M33) while today's firmware project is single-toolchain for A7+M4. A separate repo would force double-committing every shared fix (~40 GUI pages, patch engine, params, plugin adaptors) for the whole transition. So: a new sibling CMake project consuming `firmware/src/` the way `simulator/` already does — include paths + a new canonical `firmware/src/shared_sources.cmake` used by firmware, firmware-mp2, and simulator. New board-conf dir `src/pro/conf/` mirroring `medium/conf/`. Defer any physical `shared/` dir hoist until MP1 is maintenance-only (keeps the MP1 tree stable for backports, preserves blame/bisect).
 
@@ -32,9 +32,9 @@ MetaModule is moving to a new hardware revision based on the STM32MP25x (2×Cort
      simulator/                     # unchanged; migrates onto shared_sources.cmake
    ```
 
-2. **M33 role: abstract now, mirror-the-M4 as the default.** Refactor `src/core_intercom/` so the transport and the A35/M33 responsibility split are movable; start with the MP1 split (controls + FS + wifi on the M-core — the M4 code is Cortex-M 32-bit and ports mostly mechanically) and revisit after eval-board numbers. The alternative (M33 = real-time controls only; FS/USB on the A35s, which are far faster than the A7s were) stays open until bring-up data exists.
+2. **M33 role: abstract now, mirror-the-M4 as the default** (confirmed). Refactor `src/core_intercom/` so the transport and the A35/M33 responsibility split are movable; start with the MP1 split (controls + FS + wifi on the M-core — the M4 code is Cortex-M 32-bit and ports mostly mechanically) and revisit after eval-board numbers. The alternative (M33 = real-time controls only; FS/USB on the A35s, which are far faster than the A7s were) stays open until bring-up data exists.
 
-3. **Exception level: EL3 secure**, as all verified baremetal examples run. Matches MP1's own-the-whole-chip model: no BL31/OP-TEE runtime, manual core-1 start via `CA35SYSCFG->VBAR_CR` + RCC reset, full RIF/RISAB control. The `el1-ns` branch remains the fallback if a need for secure services appears.
+3. **Exception level: EL3 secure** (confirmed), as all verified baremetal examples run. Matches MP1's own-the-whole-chip model: no BL31/OP-TEE runtime, manual core-1 start via `CA35SYSCFG->VBAR_CR` + RCC reset, full RIF/RISAB control. The `el1-ns` branch remains the fallback if a need for secure services appears.
 
 ---
 
