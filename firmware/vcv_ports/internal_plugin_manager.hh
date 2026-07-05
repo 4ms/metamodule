@@ -131,6 +131,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelMixer2);
 		pluginInstance->addModel(modelMuDi);
 		pluginInstance->addModel(modelSlew);
+		pluginInstance->addModel(modelIroi);
 #endif
 
 #ifdef BUILD_INTERNAL_AudibleInstruments
