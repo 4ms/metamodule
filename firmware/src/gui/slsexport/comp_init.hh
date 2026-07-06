@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/slsexport/sls_layout_fixups.hh"
 #include "lvgl.h"
 #include "ui_local.h"
 #include <array>
@@ -13,6 +14,7 @@ struct SlsComponentInit {
 	SlsComponentInit() {
 		ui_init();
 		ui_FileBrowserPage_screen_init();
+		apply_sls_layout_fixups();
 
 		lv_disp_t *dispp = lv_disp_get_default();
 		lv_theme_t *theme = lv_theme_default_init(
