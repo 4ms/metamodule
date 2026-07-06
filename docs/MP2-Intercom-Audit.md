@@ -68,7 +68,9 @@ follows the usual pattern).
 
 ## Status
 
-DONE — the refactor described above has landed:
+DONE — the refactor described above has landed and is **verified on MP1
+hardware** (SD card, USB MSC, USB MIDI, WiFi, and basic functionality all
+working through the converted messages):
 
 - `core_intercom/intercore_types.hh`: `InterCorePtr32<T>`, `InterCoreSpan<T>`,
   `InterCoreOptional<T>`, `InterCoreVariant<Ts...>` (std::visit via
