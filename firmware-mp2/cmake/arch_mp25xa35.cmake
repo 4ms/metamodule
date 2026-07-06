@@ -1,13 +1,11 @@
-# Arch flags for the STM32MP25x Cortex-A35 (AArch64), modeled on
-# firmware/cmake/arch_mp15xa7.cmake and stm32mp2-baremetal/shared/makefile-common.mk.
-# Execution model: EL3 secure (matches mdrivlib target/stm32mp2_ca35 and the
-# verified baremetal examples).
+# Arch flags for the STM32MP25x Cortex-A35 (AArch64)
+# Execution model: EL3 secure (matches mdrivlib target/stm32mp2_ca35)
 
 macro(set_arch_flags)
 add_compile_definitions(
       USE_FULL_LL_DRIVER
       STM32MP2
-      STM32MP257Cxx
+      STM32MP257Dxx
       CORE_CA35
       CORTEX_IN_SECURE_STATE
       RUN_EL3
