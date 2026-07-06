@@ -56,7 +56,7 @@ jobs:
       CXX: g++
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: ''
       - name: 'Build'
@@ -84,7 +84,7 @@ jobs:
       CXX: clang++
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: ''
       - name: 'Build'
@@ -112,7 +112,7 @@ jobs:
       CXX: g++
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: ''
       - name: Install windows dependencies
@@ -147,7 +147,7 @@ jobs:
       CXX: clang++
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: ''
       - name: 'Build'
