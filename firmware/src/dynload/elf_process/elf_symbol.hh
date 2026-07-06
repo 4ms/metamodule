@@ -1,6 +1,7 @@
 #pragma once
 #include "elf_helpers.hh"
 #include "pr_dbg.hh"
+#include "elf_types.hh"
 #include <elf.h>
 #include <string_view>
 
@@ -12,10 +13,10 @@ class ElfDynSymbol {
 };
 
 class ElfSymbol {
-	Elf32_Sym *raw_symbol;
+	Elf_Sym *raw_symbol;
 
 public:
-	ElfSymbol(Elf32_Sym &raw_symbol)
+	ElfSymbol(Elf_Sym &raw_symbol)
 		: raw_symbol{&raw_symbol} {
 	}
 
@@ -27,11 +28,11 @@ public:
 		return raw_symbol->st_name;
 	}
 
-	uint32_t offset() {
+	elf_addr_t offset() {
 		return raw_symbol->st_value;
 	}
 
-	uint32_t size() {
+	elf_addr_t size() {
 		return raw_symbol->st_size;
 	}
 };

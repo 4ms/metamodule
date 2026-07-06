@@ -1,5 +1,6 @@
 #pragma once
 #include "elf_helpers.hh"
+#include "elf_types.hh"
 #include <elf.h>
 #include <span>
 #include <string_view>
@@ -10,24 +11,29 @@ namespace ElfFile
 class ElfSection {
 	const uint8_t *elf_data_start;
 	std::string_view elf_string_table;
-	Elf32_Shdr *header;
+	Elf_Shdr *header;
 
 public:
-	ElfSection(const uint8_t *const elf_data_start, std::string_view string_table, Elf32_Shdr &header)
+	ElfSection(const uint8_t *const elf_data_start, std::string_view string_table, Elf_Shdr &header)
 		: elf_data_start{elf_data_start}
 		, elf_string_table{string_table}
 		, header{&header} {
 	}
 
-	uint32_t offset() {
+	elf_addr_t offset() {
 		return header->sh_offset;
 	}
 
-	uint32_t size_bytes() {
+	// Virtual address of this section when loaded (0 for non-alloc sections)
+	elf_addr_t address() {
+		return header->sh_addr;
+	}
+
+	elf_addr_t size_bytes() {
 		return header->sh_size;
 	}
 
-	uint32_t num_entries() {
+	elf_addr_t num_entries() {
 		return size_bytes() / header->sh_entsize;
 	}
 
@@ -61,9 +67,9 @@ public:
 		return read_string(elf_string_table, header->sh_name);
 	}
 
-	std::span<Elf32_Sym> get_raw_symbols() {
+	std::span<Elf_Sym> get_raw_symbols() {
 		if (header->sh_type == SHT_SYMTAB || header->sh_type == SHT_DYNSYM)
-			return {(Elf32_Sym *)begin(), num_entries()};
+			return {(Elf_Sym *)begin(), num_entries()};
 		else
 			return {};
 	}
@@ -78,23 +84,23 @@ public:
 
 class ElfProgramSegment {
 	const uint8_t *elf_data_start;
-	Elf32_Phdr *header;
+	Elf_Phdr *header;
 
 public:
-	ElfProgramSegment(const uint8_t *const elf_data_start, Elf32_Phdr &header)
+	ElfProgramSegment(const uint8_t *const elf_data_start, Elf_Phdr &header)
 		: elf_data_start{elf_data_start}
 		, header{&header} {
 	}
 
-	uint32_t offset() const {
+	elf_addr_t offset() const {
 		return header->p_offset;
 	}
 
-	uint32_t file_size() const {
+	elf_addr_t file_size() const {
 		return header->p_filesz;
 	}
 
-	uint32_t mem_size() const {
+	elf_addr_t mem_size() const {
 		return header->p_memsz;
 	}
 

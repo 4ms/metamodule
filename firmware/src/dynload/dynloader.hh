@@ -173,14 +173,30 @@ private:
 		}
 
 		using ctor_func_t = void (*)();
-		auto ctors =
-			std::span<ctor_func_t>((ctor_func_t *)initarray_section->begin(), initarray_section->num_entries());
 
-		for (auto ctor : ctors) {
-			auto addr = reinterpret_cast<uint32_t>(ctor);
-			ctor = reinterpret_cast<ctor_func_t>(addr + codeblock.data());
-			pr_trace("Calling ctor %p\n", ctor);
-			ctor();
+		if constexpr (ElfFile::ElfClass64) {
+			// RELA (AArch64): the in-file .init_array holds zeros -- the real entries
+			// were written into the loaded image by R_AARCH64_RELATIVE relocations and
+			// are already absolute addresses.
+			auto ctors = std::span<ctor_func_t>(
+				reinterpret_cast<ctor_func_t *>(codeblock.data() + initarray_section->address()),
+				initarray_section->num_entries());
+
+			for (auto ctor : ctors) {
+				pr_trace("Calling ctor %p\n", ctor);
+				ctor();
+			}
+		} else {
+			// REL (ARM32): the in-file entries hold the unrelocated vaddr; add the load base.
+			auto ctors =
+				std::span<ctor_func_t>((ctor_func_t *)initarray_section->begin(), initarray_section->num_entries());
+
+			for (auto ctor : ctors) {
+				auto addr = reinterpret_cast<uintptr_t>(ctor);
+				ctor = reinterpret_cast<ctor_func_t>(addr + codeblock.data());
+				pr_trace("Calling ctor %p\n", ctor);
+				ctor();
+			}
 		}
 	}
 

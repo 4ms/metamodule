@@ -5,6 +5,7 @@
 #include "elf_symbol.hh"
 #include "pr_dbg.hh"
 #include <algorithm>
+#include "elf_types.hh"
 #include <elf.h>
 #include <optional>
 #include <span>
@@ -18,9 +19,9 @@ namespace ElfFile
 struct Elf {
 	Elf(std::span<uint8_t> elfdata)
 		: rawdata{elfdata}
-		, raw_elf_header((Elf32_Ehdr *)elfdata.data())
-		, raw_section_headers{(Elf32_Shdr *)(elfdata.data() + raw_elf_header->e_shoff), raw_elf_header->e_shnum}
-		, raw_prog_headers{(Elf32_Phdr *)(elfdata.data() + raw_elf_header->e_phoff), raw_elf_header->e_phnum}
+		, raw_elf_header((Elf_Ehdr *)elfdata.data())
+		, raw_section_headers{(Elf_Shdr *)(elfdata.data() + raw_elf_header->e_shoff), raw_elf_header->e_shnum}
+		, raw_prog_headers{(Elf_Phdr *)(elfdata.data() + raw_elf_header->e_phoff), raw_elf_header->e_phnum}
 		, string_table{find_string_table()} {
 
 		// pr_info("elf data is at %08x ++ %x\n", elfdata.data(), elfdata.size_bytes());
@@ -36,8 +37,8 @@ struct Elf {
 
 			find_raw_symbols();
 
-			populate_relocations(".rel.dyn");
-			populate_relocations(".rel.plt");
+			populate_relocations(RelDynSectionName);
+			populate_relocations(RelPltSectionName);
 		}
 	}
 
@@ -84,7 +85,7 @@ struct Elf {
 
 	std::optional<ElfSymbol> find_symbol(std::string_view name) {
 		auto symbol = std::ranges::find_if(
-			raw_symbols, [&](Elf32_Sym &sym) { return read_string(sym_string_table, sym.st_name) == name; });
+			raw_symbols, [&](Elf_Sym &sym) { return read_string(sym_string_table, sym.st_name) == name; });
 		if (symbol != raw_symbols.end())
 			return *symbol;
 		else
@@ -93,7 +94,7 @@ struct Elf {
 
 	std::optional<ElfSymbol> find_dyn_symbol(std::string_view name) {
 		auto symbol = std::ranges::find_if(
-			raw_dyn_symbols, [&](Elf32_Sym &sym) { return read_string(dyn_string_table, sym.st_name) == name; });
+			raw_dyn_symbols, [&](Elf_Sym &sym) { return read_string(dyn_string_table, sym.st_name) == name; });
 		if (symbol != raw_dyn_symbols.end())
 			return *symbol;
 		else
@@ -119,7 +120,7 @@ private:
 
 	void populate_relocations(std::string_view sec_name) {
 		if (auto rel_section = find_section(sec_name)) {
-			raw_rels = {(Elf32_Rel *)rel_section->begin(), rel_section->num_entries()};
+			raw_rels = {(Elf_Rel *)rel_section->begin(), rel_section->num_entries()};
 
 			if (auto linked_symbol_section = get_section(rel_section->linked_section_idx())) {
 				auto linked_symbols = linked_symbol_section->get_raw_symbols();
@@ -196,9 +197,9 @@ private:
 	}
 
 	std::span<uint8_t> rawdata;
-	Elf32_Ehdr *raw_elf_header{};
-	std::span<Elf32_Shdr> raw_section_headers;
-	std::span<Elf32_Phdr> raw_prog_headers;
+	Elf_Ehdr *raw_elf_header{};
+	std::span<Elf_Shdr> raw_section_headers;
+	std::span<Elf_Phdr> raw_prog_headers;
 
 	// String tables:
 	std::string_view string_table;
@@ -209,10 +210,10 @@ private:
 	std::optional<ElfSection> symbol_table{};
 	std::optional<ElfSection> dyn_symbol_table{};
 
-	std::span<Elf32_Sym> raw_symbols{};
-	std::span<Elf32_Sym> raw_dyn_symbols{};
+	std::span<Elf_Sym> raw_symbols{};
+	std::span<Elf_Sym> raw_dyn_symbols{};
 
-	std::span<Elf32_Rel> raw_rels{};
+	std::span<Elf_Rel> raw_rels{};
 };
 
 } // namespace ElfFile

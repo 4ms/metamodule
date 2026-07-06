@@ -2,6 +2,7 @@
 #include "elf_helpers.hh"
 #include "elf_reloc.hh"
 #include "elf_symbol.hh"
+#include "elf_types.hh"
 #include "host_symbol.hh"
 #include "pr_dbg.hh"
 #include <algorithm>
@@ -21,6 +22,77 @@ public:
 		: base_address{reinterpret_cast<uintptr_t>(elf_load_address)}
 		, host_syms{host_symbols} {
 	}
+
+#if defined(METAMODULE_ELF64)
+
+	// AArch64 relocations are RELA-style: the addend is explicit in the relocation
+	// entry (the in-file contents at the relocated address are not meaningful).
+	//   S = symbol address (base + symbol value if defined here, else host symbol)
+	//   A = explicit addend
+	//   Delta(S) = load base
+	bool write(ElfReloc &rel) {
+		bool ok = false;
+
+		auto reloc_address = reinterpret_cast<elf_addr_t *>(rel.reloc_offset() + base_address);
+
+		switch (rel.reloc_type()) {
+
+			case R_AARCH64_RELATIVE: {
+				// Delta(S) + A
+				*reloc_address = base_address + rel.addend();
+				ok = true;
+				pr_dump("R_AARCH64_RELATIVE: write 0x%llx (base + %llx) to address 0x%llx (+%llx)\n",
+						(unsigned long long)*reloc_address,
+						(unsigned long long)rel.addend(),
+						(unsigned long long)(rel.reloc_offset() + base_address),
+						(unsigned long long)rel.reloc_offset());
+			} break;
+
+			// S + A, both handled identically:
+			case R_AARCH64_GLOB_DAT:
+			case R_AARCH64_JUMP_SLOT:
+			case R_AARCH64_ABS64: {
+				if (rel.symbol_value() == 0) {
+					auto sym = std::ranges::find_if(host_syms, [&rel](auto &s) { return s.name == rel.symbol_name(); });
+					if (sym != host_syms.end()) {
+						*reloc_address = sym->address + rel.addend();
+						ok = true;
+						pr_dump("R_AARCH64 sym reloc (%d): %s ", rel.reloc_type(), rel.symbol_name().data());
+						pr_dump("found in host at 0x%llx, write (+A=%llx) to 0x%llx (+%llx)\n",
+								(unsigned long long)sym->address,
+								(unsigned long long)rel.addend(),
+								(unsigned long long)(rel.reloc_offset() + base_address),
+								(unsigned long long)rel.reloc_offset());
+					} else {
+						pr_err("R_AARCH64 sym reloc (%d): %s ", rel.reloc_type(), rel.symbol_name().data());
+						pr_err("\nSymbol value is 0 and name not found in host symbols\n");
+						ok = false;
+					}
+				} else {
+					*reloc_address = base_address + rel.symbol_value() + rel.addend();
+					ok = true;
+					pr_dump("R_AARCH64 sym reloc (%d): %s ", rel.reloc_type(), rel.symbol_name().data());
+					pr_dump("write 0x%llx (base + %llx + A=%llx) to 0x%llx (+%llx)\n",
+							(unsigned long long)*reloc_address,
+							(unsigned long long)rel.symbol_value(),
+							(unsigned long long)rel.addend(),
+							(unsigned long long)(rel.reloc_offset() + base_address),
+							(unsigned long long)rel.reloc_offset());
+				}
+			} break;
+
+			default:
+				pr_err("Unknown reloc (%d) reloc %llx, symbol value %llx\n",
+					   rel.reloc_type(),
+					   (unsigned long long)rel.reloc_offset(),
+					   (unsigned long long)rel.symbol_value());
+				ok = false;
+				break;
+		}
+		return ok;
+	}
+
+#else
 
 	bool write(ElfReloc &rel) {
 		bool ok = false;
@@ -145,6 +217,8 @@ public:
 		}
 		return ok;
 	}
+
+#endif
 };
 
 } // namespace ElfFile
