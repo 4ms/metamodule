@@ -37,12 +37,18 @@ run: all
 debug:
 	cmake --build ${BUILDDIR} --target debug
 
-
 config-headless:
 	cmake --fresh --preset headless -DLOG_LEVEL=DEBUG
 
 config-headless-min:
 	cmake --fresh --preset headless-min -DLOG_LEVEL=NONE
 
+headless:
+	@test -f build-headless/CMakeCache.txt || cmake --fresh --preset headless -DLOG_LEVEL=DEBUG
+	cmake --build build-headless
+
+headless-min:
+	@test -f build-headless/CMakeCache.txt || cmake --fresh --preset headless-min -DLOG_LEVEL=NONE
+	cmake --build build-headless
 
 .PHONY: all clean warnings run config-sim config-sim-midi config-sim-nomidi realclean debug config-headless config-headless-min
