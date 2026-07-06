@@ -51,4 +51,4 @@ headless-min:
 	@test -f build-headless/CMakeCache.txt || cmake --fresh --preset headless-min -DLOG_LEVEL=NONE
 	cmake --build build-headless
 
-.PHONY: all clean warnings run config-sim config-sim-midi config-sim-nomidi realclean debug config-headless config-headless-min
+.PHONY: all clean warnings run headless headless-min config-sim config-sim-midi config-sim-nomidi realclean debug config-headless config-headless-min
