@@ -2,6 +2,7 @@
 
 #include "lib/cxxopts/cxxopts.hpp"
 #include <iostream>
+#include <optional>
 
 namespace MetaModuleSim
 {
@@ -14,6 +15,11 @@ struct Settings {
 	int audioout_dev = 0;
 	std::string test_brand = "";
 	float fullscale_volts = 5;
+
+	// MIDI (rtmidi). If a port index is unset, a virtual port is created instead.
+	std::optional<int> midiin_dev{};  // hardware MIDI input port index
+	std::optional<int> midiout_dev{}; // hardware MIDI output port index
+	bool list_midi = false;			  // print available MIDI ports and exit
 
 	// Headless screenshot support: load a patch, jump to a page, render some
 	// frames, then dump the screen to a BMP file and exit.
@@ -34,6 +40,14 @@ struct Settings {
 
 			options.add_options()(
 				"a,audioout", "Audio output device ID (as seen by SDL)", cxxopts::value<int>()->default_value("0"));
+
+			options.add_options()(
+				"midiin", "MIDI input port index (default: create a virtual port)", cxxopts::value<int>());
+
+			options.add_options()(
+				"midiout", "MIDI output port index (default: create a virtual port)", cxxopts::value<int>());
+
+			options.add_options()("listmidi", "List available MIDI input/output ports and exit");
 
 			options.add_options()("p,sdcarddir",
 								  "Host directory simulating SD Card root",
@@ -110,6 +124,15 @@ struct Settings {
 
 			if (args.count("audioout") > 0)
 				audioout_dev = args["audioout"].as<int>();
+
+			if (args.count("midiin") > 0)
+				midiin_dev = args["midiin"].as<int>();
+
+			if (args.count("midiout") > 0)
+				midiout_dev = args["midiout"].as<int>();
+
+			if (args.count("listmidi") > 0)
+				list_midi = true;
 
 			if (args.count("fullScaleVolts") > 0)
 				fullscale_volts = args["fullScaleVolts"].as<float>();

@@ -57,7 +57,7 @@ jobs:
         run: git config --global --add safe.directory '*'
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
       - name: Install dependencies
@@ -104,7 +104,7 @@ jobs:
           release: '14.2.Rel1'
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
 

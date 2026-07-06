@@ -152,9 +152,10 @@ if(HEADLESS)
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
 else()
-	add_executable(simulator 
-		src/main.cc 
+	add_executable(simulator
+		src/main.cc
 		src/ui.cc
+		src/sim_midi.cc
 		stubs/memory/heap.cc
 		stubs/fs/fs_proxy.cc
 		stubs/async_thread_control.cc
@@ -232,6 +233,34 @@ if(NOT HEADLESS)
 			  ${FWDIR}/lib/fatfs/source
 			  ${FWDIR}/src/fs/fatfs
 	)
+endif()
+
+# --- Real MIDI I/O via rtmidi (GUI simulator only) ---
+# MIDI support is controlled by the SIMULATOR_MIDI option (ON by default). Toggle
+# it from the Makefile: `make config-sim` (MIDI on) / `make config-sim-nomidi`
+# (MIDI off), or pass -DSIMULATOR_MIDI=ON/OFF at configure time.
+#
+# When enabled, rtmidi (git submodule at simulator/rtmidi) is built and linked;
+# its own CMake auto-selects the platform MIDI API (ALSA / CoreMIDI / WinMM).
+# When disabled, SimMidi compiles to an inert no-op.
+option(SIMULATOR_MIDI "Build the simulator with rtmidi MIDI support" ON)
+
+if(NOT HEADLESS AND SIMULATOR_MIDI)
+	if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/rtmidi/CMakeLists.txt)
+		message(FATAL_ERROR
+			"SIMULATOR_MIDI is ON but the rtmidi submodule is missing.\n"
+			"  Initialize it:  git submodule update --init simulator/rtmidi\n"
+			"  Linux also needs ALSA headers:  sudo apt install libasound2-dev\n"
+			"  Or build without MIDI:  make config-sim-nomidi  (or -DSIMULATOR_MIDI=OFF)")
+	endif()
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+	set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+	add_subdirectory(rtmidi EXCLUDE_FROM_ALL)
+	target_link_libraries(simulator PRIVATE rtmidi)
+	target_compile_definitions(simulator PRIVATE SIM_HAS_RTMIDI)
+	message("Simulator: MIDI enabled (rtmidi)")
+elseif(NOT HEADLESS)
+	message("Simulator: MIDI disabled (SIMULATOR_MIDI=OFF)")
 endif()
 
 # Per-target options come after the directory-level ones on the command line, so
