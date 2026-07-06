@@ -545,7 +545,12 @@ public:
 	}
 
 	void set_midi_cc(unsigned ccnum, int16_t val, uint16_t midi_chan) {
-		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) : val / 12.7f; //0-127 => 0-10
+		// CC values arrive as 14-bit from the M4 core (see Midi::u14cc_to_volts). Pitch
+		// bend is a separate signed 14-bit value handled directly.
+		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) :
+												   Midi::u14cc_to_volts<10>(val);
+
+		volts = std::clamp(volts, 0.f, 10.f);
 
 		// Update jacks connected to this CC
 		if (ccnum < midi_cc_conns.size()) {
@@ -558,7 +563,7 @@ public:
 				if (mm.module_id < num_modules) {
 					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
 						modules[mm.module_id]->set_param(mm.param_id,
-														 mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
+														 mm.get_mapped_val(volts / 10.f));
 					}
 				}
 			}

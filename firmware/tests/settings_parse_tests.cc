@@ -424,6 +424,7 @@ TEST_CASE("Serialize settings") {
   midi:
     midi_feedback: 0
     knobset_control: 0
+    midi_14bit_cc: 0
     knobset_cc: 0
     knobset_channel: 16
   midi_pc_patch_load:

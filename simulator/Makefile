@@ -26,7 +26,7 @@ config-sim-nomidi:
 	cmake --fresh --preset Default -DLOG_LEVEL=DEBUG -DSIMULATOR_MIDI=OFF
 
 realclean:
-	rm -rf $(BUILDDIR)
+	rm -rf $(BUILDDIR) build-headless
 
 warnings:
 	cmake --fresh --preset gcc-warn -DLOG_LEVEL=TRACE -DSIMULATOR_MIDI=$(MIDI)

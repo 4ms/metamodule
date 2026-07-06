@@ -88,9 +88,8 @@ endif()
 
 # #################### ThorVG ############################################
 
-if (NOT HEADLESS)
-	add_subdirectory(${FWDIR}/lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
-endif()
+# Needed headless too: coreproc_plugin_export/waveform_display.cc references it
+add_subdirectory(${FWDIR}/lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
 
 
 # #################### RYML ##################################
@@ -135,17 +134,20 @@ if (NOT HEADLESS)
 endif()
 
 if(HEADLESS)
-	add_executable(simulator 
-		src/headless/main-headless.cc 
-		src/headless/audio_files.cc 
+	add_executable(simulator
+		src/headless/main-headless.cc
+		src/headless/audio_files.cc
 		src/headless/nanovg.cc
+		src/headless/gui_stubs.cc
 		stubs/svg.cc
+		stubs/async_thread_control.cc
 		hardware_support/random.cc
 		hardware_support/time.cc
 		hardware_support/memory.cc
 		hardware_support/filesystem_helpers.cc
 
 		${FWDIR}/src/midi/midi_router.cc
+		${FWDIR}/src/patch_play/plugin_module.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
