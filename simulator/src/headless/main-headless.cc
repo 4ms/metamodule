@@ -2,6 +2,7 @@
 #include "audio_wrapper.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "file_io.hh"
+#include "load_internal_plugins.hh"
 #include "patch-serial/yaml_to_patch.hh"
 #include "plugin/Plugin.hpp"
 // must come after plugin/Plugin.hpp:
@@ -50,8 +51,9 @@ int main(int argc, char *argv[]) {
 	MetaModuleSim::Settings settings;
 	settings.parse(argc, argv);
 
-	// Register VCV-ported built-in brands (see ext-plugins.cmake)
+	// Register the bundled vcv_ports brands and any built-ins from ext-plugins.cmake
 	std::list<rack::plugin::Plugin> builtin_plugins;
+	load_internal_plugins(builtin_plugins);
 	load_ext_builtin_plugins(builtin_plugins);
 
 	const auto samples_to_run = settings.samples_to_run;
