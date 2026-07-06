@@ -14,11 +14,16 @@
 #include "drivers/secondary_core_control.hh"
 #include "drivers/system_reg.hh"
 
+// Early console (uart_print.c)
+extern "C" void early_puts(const char *s);
+
 // Weak hook called by startup_ca35.s just before main(): clock setup goes here
 extern "C" void system_init() {
 }
 
 int main() {
+	early_puts("MetaModule MP2\r\n");
+
 	// Placeholder main loop. The generic timer runs at boot; use it as a liveness signal.
 	volatile uint64_t last = mdrivlib::read_cntpct();
 
@@ -26,7 +31,7 @@ int main() {
 		auto now = mdrivlib::read_cntpct();
 		if (now - last > mdrivlib::read_cntfreq()) {
 			last = now;
-			// once per second -- toggle a debug pin / print here during bring-up
+			early_puts("tick\r\n"); // once per second, proves we're alive during bring-up
 		}
 	}
 }

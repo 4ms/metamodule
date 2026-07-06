@@ -14,11 +14,13 @@ include path (the `firmware/src/medium/conf/` mechanism).
 ## Prerequisites
 
 - `aarch64-none-elf-gcc` (same toolchain as stm32mp2-baremetal)
-- A sibling checkout of [4ms/stm32mp2-baremetal](https://github.com/4ms/stm32mp2-baremetal)
-  for the **patched** MP2 CMSIS pack + ST HAL (or set `-DMP2_BAREMETAL_DIR`).
-  Do not substitute stock ST headers: ST's `POSITION_VAL` is broken on 64-bit
-  and the A35 device headers are not in the Cube release.
 - mdrivlib submodule (`firmware/lib/mdrivlib`) with the `target/stm32mp2*` dirs.
+
+The **patched** MP2 CMSIS device pack (STM32MP257D variant) and ST HAL are
+vendored in `lib/cmsis-device/` and `lib/stm32-hal/`; CMSIS Core (+Core_A) comes
+from `firmware/lib/cmsis`. Do not substitute stock ST headers: ST's
+`POSITION_VAL` is broken on 64-bit and the A35 device headers are not in the
+Cube release.
 
 ## Building
 
