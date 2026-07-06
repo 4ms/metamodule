@@ -1,4 +1,0 @@
-/home/user/metamodule/firmware-mp2/build-linux-gnu/CMakeFiles/a35_core.dir
-/home/user/metamodule/firmware-mp2/build-linux-gnu/CMakeFiles/main_a35.elf.dir
-/home/user/metamodule/firmware-mp2/build-linux-gnu/CMakeFiles/edit_cache.dir
-/home/user/metamodule/firmware-mp2/build-linux-gnu/CMakeFiles/rebuild_cache.dir

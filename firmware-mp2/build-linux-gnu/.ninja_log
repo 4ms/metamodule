@@ -1,8 +1,0 @@
-# ninja log v5
-2	21	1783310134076718369	CMakeFiles/a35_core.dir/home/user/metamodule/firmware/lib/mdrivlib/target/stm32mp2_ca35/boot/startup_ca35.s.obj	14cbf5f20a299c38
-5	97	1783310134116773861	CMakeFiles/a35_core.dir/home/user/metamodule/firmware/lib/mdrivlib/target/stm32mp2_ca35/boot/vectors.S.obj	e88c277667ff3da
-7	266	1783310134321359011	CMakeFiles/a35_core.dir/home/user/metamodule/firmware/lib/mdrivlib/target/stm32mp2_ca35/boot/esr_decode.cc.obj	f6ad2762fa1ddd55
-2	1189	1783310135236773836	CMakeFiles/a35_core.dir/system/mmu_ca35.cc.obj	98f791f92fdd9e57
-1	1285	1783310135333250608	CMakeFiles/a35_core.dir/src/core_a35/main.cc.obj	d48627b9e54717b8
-7	1409	1783310135456773831	CMakeFiles/a35_core.dir/home/user/metamodule/firmware/lib/mdrivlib/target/stm32mp2_ca35/boot/irq_init.c.obj	bbfbef8b6d5f9319
-21	1467	1783310135512773829	CMakeFiles/a35_core.dir/home/user/metamodule/firmware/lib/mdrivlib/target/stm32mp2_ca35/drivers/interrupt_handler.cc.obj	1f3d6cf3cac66180
