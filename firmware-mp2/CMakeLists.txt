@@ -27,32 +27,13 @@ set(MDRIVLIB ${FWDIR}/lib/mdrivlib)
 include(cmake/arch_mp25xa35.cmake)
 set_arch_flags()
 
-#
-# The patched MP2 CMSIS pack: ST's POSITION_VAL macro is broken on 64-bit and the
-# A35 device headers are absent from the Cube HAL release, so the corrected pack
-# from stm32mp2-baremetal is required (default: a sibling checkout).
-# TODO: split the pack into its own repo/submodule (~5 MB per device header, so
-# it is not vendored here).
-#
-set(MP2_BAREMETAL_DIR ${CMAKE_CURRENT_LIST_DIR}/../../stm32mp2-baremetal
-    CACHE PATH "Path to a stm32mp2-baremetal checkout (for the patched CMSIS pack + HAL)")
-set(MP2_CMSIS_DEVICE_DIR ${MP2_BAREMETAL_DIR}/shared/cmsis-device CACHE PATH "Patched MP2 CMSIS device pack")
-set(MP2_CMSIS_CORE_DIR ${MP2_BAREMETAL_DIR}/shared/cmsis CACHE PATH "ARM CMSIS Core (+Core_A)")
-set(MP2_HAL_DIR ${MP2_BAREMETAL_DIR}/shared/STM32MP2xx_HAL_Driver CACHE PATH "ST MP2 HAL")
-
-if(NOT EXISTS ${MP2_CMSIS_DEVICE_DIR}/Include/stm32mp2xx.h)
-  message(FATAL_ERROR
-    "Patched MP2 CMSIS pack not found at ${MP2_CMSIS_DEVICE_DIR}.\n"
-    "Clone github.com/4ms/stm32mp2-baremetal as a sibling of this repo, or set "
-    "-DMP2_BAREMETAL_DIR=<path> (do NOT substitute the stock ST headers -- see "
-    "mdrivlib/target/stm32mp2/README.md).")
-endif()
+set(MP2_CMSIS_DEVICE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/cmsis-device/stm32mp257d)
+set(MP2_CMSIS_CORE_DIR ${FWDIR}/lib/cmsis)
+set(MP2_HAL_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/stm32-hal/stm32mp2)
 
 #
 # A35 application
-# (object library so `cmake --build build --target a35_core` compile-checks
-# without linking -- the final link needs the aarch64-none-elf newlib)
-#
+
 add_library(
   a35_core OBJECT
   src/core_a35/main.cc
@@ -72,6 +53,7 @@ target_include_directories(
          ${MDRIVLIB}/target/stm32mp2
          ${MDRIVLIB}/target/stm32mp2_ca35
          ${FWDIR}/lib/cpputil
+         ${MP2_HAL_DIR}/Include
          ${MP2_CMSIS_CORE_DIR}/Include
          ${MP2_CMSIS_CORE_DIR}/Core_A/Include
          ${MP2_CMSIS_DEVICE_DIR}/Include
