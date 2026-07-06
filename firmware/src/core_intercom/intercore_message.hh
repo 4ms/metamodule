@@ -1,4 +1,5 @@
 #pragma once
+#include "core_intercom/intercore_types.hh"
 #include "dynload/plugin_file_list.hh"
 #include "fs/volumes.hh"
 #include "patch_file/patch_dir_list.hh"
@@ -88,33 +89,42 @@ struct IntercoreStorageMessage {
 		NumRequests,
 	};
 
+	// This struct crosses the core boundary: fixed-width members only (no
+	// pointers/span/optional/size_t) -- see intercore_types.hh. The layout must
+	// be identical on both cores (and the simulator); the static_asserts below
+	// pin it.
 	MessageType message_type = MessageType::None;
 
 	uint32_t bytes_read{};
 	Volume vol_id;
 	Volume dest_vol_id;
-	std::span<char> buffer;
-	PatchDirList *patch_dir_list;
+	InterCoreSpan<char> buffer;
+	InterCorePtr32<PatchDirList> patch_dir_list;
 	StaticString<255> filename;
 	StaticString<255> dest_filename;
 
 	uint32_t address;
 	uint32_t length;
 	uint32_t timestamp;
-	std::optional<uint32_t> uncompressed_size;
+	InterCoreOptional<uint32_t> uncompressed_size;
 	StaticString<32> checksum;
-	uint32_t *bytes_processed;
+	InterCorePtr32<uint32_t> bytes_processed;
 	enum FlashTarget : uint8_t { WIFI, QSPI };
 	FlashTarget flashTarget;
 
-	WifiIPResult wifi_ip_result;
+	InterCoreWifiIPResult wifi_ip_result;
 
-	PluginFileList *plugin_file_list;
+	InterCorePtr32<PluginFileList> plugin_file_list;
 
-	DirTree<FileEntry> *dir_entries;
+	InterCorePtr32<DirTree<FileEntry>> dir_entries;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);
+
+// Pin the cross-core ABI: identical on 32-bit ARM, AArch64, and test hosts.
+static_assert(sizeof(Volume) == 4);
+static_assert(std::is_trivially_copyable_v<IntercoreStorageMessage>);
+static_assert(IntercoreStorageMessageSize == 620, "Cross-core struct layout changed: update both cores' builds together");
 
 ///////////////////////////////////////
 // TODO: Use this instead of MessageType

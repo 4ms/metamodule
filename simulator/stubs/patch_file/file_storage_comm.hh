@@ -94,7 +94,7 @@ struct SimulatorFileStorageComm {
 
 					reply.message_type = PatchListUnchanged;
 
-					auto *patch_dir_list_ = msg.patch_dir_list;
+					auto *patch_dir_list_ = msg.patch_dir_list.get();
 
 					if (patch_dir_list_) {
 						if (refresh_required) {
@@ -222,7 +222,7 @@ struct SimulatorFileStorageComm {
 
 					auto path = msg.filename;
 					auto exts = msg.dest_filename;
-					auto *dir_tree = msg.dir_entries;
+					auto *dir_tree = msg.dir_entries.get();
 					dir_tree->files.clear();
 					dir_tree->dirs.clear();
 
