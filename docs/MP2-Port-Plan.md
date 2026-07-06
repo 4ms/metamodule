@@ -107,6 +107,23 @@ console/clocks/MMU/SMP → **audio milestone** (PCM3168 + SAI + HPDMA into Stati
 
 **Phase 3 — transition:** MP1 maintenance-branch policy, SDK dual-arch releases by default, optional physical `shared/` hoist, simulator "pro" flavor (screen size + conf).
 
+## Phase 0 status (July 2026)
+
+Done (this branch):
+- mdrivlib `target/stm32mp2{,_ca35,_cm33}` with all verified baremetal code ported
+  (boot, MMU, GIC, cache, RCC/PLL/XBAR, SMP/SMC, RISAB, HPDMA circular, SAI TDM,
+  I2C); baremetal `interrupts` example converted as the first test-bed proof
+- Build split: `firmware/src/shared_sources.cmake` + simulator migrated (full sim
+  builds unchanged); `firmware-mp2/` scaffold building `main_a35.elf` on the
+  mdrivlib boot path; `src/pro/conf/` started (provisional 720x480 screen conf)
+- AArch64 plugin loader: ELF64/RELA support (`METAMODULE_ELF64`), R_AARCH64
+  relocations, init_array fixes; tested against a real aarch64 .so in the suite
+- Simulator `--screenw/--screenh` for pro-size GUI previews (first findings in
+  the commit log); `docs/MP2-Intercom-Audit.md` for the A35/M33 struct work
+
+Next: intercom abstraction + fixed-width structs, GUI layout constants, LTDC and
+copro-m33 baremetal examples (hardware), mp2-boot/FIP packaging.
+
 ## Open questions / risks
 
 1. EL3 vs EL1-NS (proceeding EL3 — Decision 3).
