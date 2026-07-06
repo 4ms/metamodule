@@ -1,4 +1,5 @@
 #pragma once
+#include "core_intercom/intercore_types.hh"
 #include "ff.h"
 #include "fs/volumes.hh"
 #include "util/static_string.hh"
@@ -12,57 +13,76 @@ namespace MetaModule
 namespace IntercoreModuleFS
 {
 
-// All Message data must be non-cacheable.
-// Any pointers must point to non-cacheable RAM.
+// These messages cross the core boundary: fixed-width members only (see
+// intercore_types.hh). Buffers are InterCoreSpans into non-cacheable RAM.
+//
+// FatFs objects (FIL/DIR) live on the filesystem core only; the other core
+// addresses them with an FsHandle (an index into the fs core's open-object
+// tables). Responses to file operations carry FsFileState so the client can
+// cache fptr/size/err locally (f_tell/f_size/f_eof don't need a round-trip).
+
+using FsHandle = uint32_t;
+inline constexpr FsHandle InvalidFsHandle = 0xFFFF'FFFF;
+
+// File state after an operation, returned by the fs core
+struct FsFileState {
+	uint64_t fptr{};
+	uint64_t objsize{};
+	uint32_t err{};
+};
 
 struct None {};
 
 struct Open {
-	FIL fil{};
+	FsHandle fil = InvalidFsHandle; // response: valid handle, or Invalid on failure
+	FsFileState state{};
 	StaticString<255> path;
 	uint8_t access_mode{};
 	FRESULT res{};
 };
 
 struct Close {
-	FIL fil{};
+	FsHandle fil = InvalidFsHandle;
 	FRESULT res{};
 };
 
 struct Read {
-	FIL fil{};
-	std::span<char> buffer;
+	FsHandle fil = InvalidFsHandle;
+	FsFileState state{};
+	InterCoreSpan<char> buffer;
 	uint32_t bytes_read{};
 	FRESULT res{};
 };
 
 struct GetS {
-	FIL fil{};
-	std::span<char> buffer;
+	FsHandle fil = InvalidFsHandle;
+	FsFileState state{};
+	InterCoreSpan<char> buffer;
 	uint32_t bytes_read{};
-	char *res{};
+	uint32_t res_ok{}; // 1 if f_gets returned non-null (buffer holds the string)
 };
 
 struct Seek {
-	FIL fil{};
+	FsHandle fil = InvalidFsHandle;
+	FsFileState state{};
 	uint64_t file_offset{};
-	enum class Whence { CurrentPos, Beginning, End } whence{Whence::CurrentPos};
+	enum class Whence : uint32_t { CurrentPos, Beginning, End } whence{Whence::CurrentPos};
 	FRESULT res{};
 };
 
 struct OpenDir {
-	DIR dir{};
+	FsHandle dir = InvalidFsHandle; // response: valid handle, or Invalid on failure
 	StaticString<255> path;
 	FRESULT res{};
 };
 
 struct CloseDir {
-	DIR dir{};
+	FsHandle dir = InvalidFsHandle;
 	FRESULT res{};
 };
 
 struct ReadDir {
-	DIR dir{};
+	FsHandle dir = InvalidFsHandle;
 	FILINFO info{};
 	FRESULT res{};
 };
@@ -74,7 +94,7 @@ struct Stat {
 };
 
 struct FindFirst {
-	DIR dir{};
+	FsHandle dir = InvalidFsHandle; // response: valid handle (f_findfirst opens the dir)
 	FILINFO info{};
 	StaticString<255> path;
 	StaticString<63> pattern;
@@ -82,7 +102,7 @@ struct FindFirst {
 };
 
 struct FindNext {
-	DIR dir{};
+	FsHandle dir = InvalidFsHandle;
 	FILINFO info{};
 	FRESULT res{};
 };
@@ -93,25 +113,29 @@ struct MkDir {
 };
 
 struct Write {
-	FIL fil{};
-	std::span<const char> buffer;
+	FsHandle fil = InvalidFsHandle;
+	FsFileState state{};
+	InterCoreSpan<const char> buffer;
 	uint32_t bytes_written{};
 	FRESULT res{};
 };
 
 struct Sync {
-	FIL fil{};
+	FsHandle fil = InvalidFsHandle;
+	FsFileState state{};
 	FRESULT res{};
 };
 
 struct Trunc {
-	FIL fil{};
+	FsHandle fil = InvalidFsHandle;
+	FsFileState state{};
 	FRESULT res{};
 };
 
 struct Puts {
-	FIL fil{};
-	std::span<const char> buffer;
+	FsHandle fil = InvalidFsHandle;
+	FsFileState state{};
+	InterCoreSpan<const char> buffer;
 	uint32_t bytes_written{};
 };
 
@@ -132,6 +156,9 @@ struct Utime {
 	FRESULT res{};
 };
 
+// Business logic uses the std::variant (std::visit etc.); the shared-memory
+// representation is the fixed-layout IccMessage. Conversions happen at the
+// transport boundary (FsProxy / ModuleFSMessageHandler).
 using Message = std::variant<None,
 							 Open,
 							 Close,
@@ -153,8 +180,34 @@ using Message = std::variant<None,
 							 Rename,
 							 Utime>;
 
-static constexpr size_t MessageSize = sizeof(Message);
-//880B with DIR FIL FILINFO
+using IccMessage = InterCoreVariant<None,
+									Open,
+									Close,
+									Read,
+									GetS,
+									Seek,
+									OpenDir,
+									CloseDir,
+									ReadDir,
+									Stat,
+									FindFirst,
+									FindNext,
+									MkDir,
+									Write,
+									Sync,
+									Trunc,
+									Puts,
+									Unlink,
+									Rename,
+									Utime>;
+
+static constexpr size_t MessageSize = sizeof(IccMessage);
+
+// Pin the cross-core ABI: identical on both cores' builds (and the simulator).
+// FILINFO layout depends on the FatFs config, which must match on both cores.
+static_assert(sizeof(FILINFO) == 288, "FatFs configs must match on both cores");
+static_assert(std::is_trivially_copyable_v<IccMessage>);
+static_assert(MessageSize == 632, "Cross-core struct layout changed: update both cores' builds together");
 
 } // namespace IntercoreModuleFS
 

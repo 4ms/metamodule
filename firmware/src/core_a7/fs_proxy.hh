@@ -10,8 +10,8 @@ namespace MetaModule
 
 namespace StaticBuffers
 {
-extern IntercoreModuleFS::Message icc_module_fs_message_core0;
-extern IntercoreModuleFS::Message icc_module_fs_message_core1;
+extern IntercoreModuleFS::IccMessage icc_module_fs_message_core0;
+extern IntercoreModuleFS::IccMessage icc_module_fs_message_core1;
 extern std::array<uint8_t, 128 * 1024> module_fs_buffer_core0;
 extern std::array<uint8_t, 128 * 1024> module_fs_buffer_core1;
 } // namespace StaticBuffers
@@ -72,28 +72,30 @@ private:
 		return __get_MPIDR() & 0b1;
 	}
 
+	// The shared-memory representation is the fixed-layout IccMessage;
+	// business logic uses the std::variant Message. Convert at this boundary.
 	static bool send(IntercoreModuleFS::Message const &message) {
 		if (core() == 1)
-			return comm_core1.send_message(message);
+			return comm_core1.send_message(IntercoreModuleFS::IccMessage{message});
 		else
-			return comm_core0.send_message(message);
+			return comm_core0.send_message(IntercoreModuleFS::IccMessage{message});
 	}
 
 	static IntercoreModuleFS::Message get_message() {
 		if (core() == 1)
-			return comm_core1.get_new_message();
+			return comm_core1.get_new_message().to_variant();
 		else
-			return comm_core0.get_new_message();
+			return comm_core0.get_new_message().to_variant();
 	}
 
 	static constexpr uint32_t IPCC_ChanCore0 = 2;
 	static constexpr uint32_t IPCC_ChanCore1 = 3;
 
 	using CommModuleFS0 =
-		mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, IntercoreModuleFS::Message, IPCC_ChanCore0>;
+		mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, IntercoreModuleFS::IccMessage, IPCC_ChanCore0>;
 
 	using CommModuleFS1 =
-		mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, IntercoreModuleFS::Message, IPCC_ChanCore1>;
+		mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, IntercoreModuleFS::IccMessage, IPCC_ChanCore1>;
 
 	static inline CommModuleFS0 comm_core0{StaticBuffers::icc_module_fs_message_core0};
 	static inline CommModuleFS1 comm_core1{StaticBuffers::icc_module_fs_message_core1};

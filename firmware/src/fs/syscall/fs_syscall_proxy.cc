@@ -1,5 +1,6 @@
 #include "fs_syscall_proxy.hh"
 #include "ff.h"
+#include "fs/fs_handle_cache.hh"
 
 namespace MetaModule
 {
@@ -15,7 +16,6 @@ FsSyscallProxy::~FsSyscallProxy() = default;
 
 bool FsSyscallProxy::open(std::string_view path, FIL *fil, uint8_t mode) {
 	auto msg = IntercoreModuleFS::Open{
-		.fil = *fil, //copy to non-cacheable Message
 		.path = path,
 		.access_mode = mode,
 	};
@@ -24,7 +24,8 @@ bool FsSyscallProxy::open(std::string_view path, FIL *fil, uint8_t mode) {
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Open>(msg, 3000)) {
 		fs_trace("A7: Open response = %d\n", response->res);
-		*fil = response->fil; //copy back
+		if (response->res == FR_OK)
+			FsHandleCache::set_open(*fil, response->fil, response->state);
 		return response->res == FR_OK;
 	}
 
@@ -35,7 +36,7 @@ bool FsSyscallProxy::open(std::string_view path, FIL *fil, uint8_t mode) {
 uint64_t FsSyscallProxy::seek(FIL *fil, int offset, int whence) {
 	using enum IntercoreModuleFS::Seek::Whence;
 	auto msg = IntercoreModuleFS::Seek{
-		.fil = *fil,
+		.fil = FsHandleCache::handle(*fil),
 		.file_offset = (uint64_t)offset,
 		.whence = whence == SEEK_CUR ? CurrentPos :
 				  whence == SEEK_END ? End :
@@ -47,12 +48,12 @@ uint64_t FsSyscallProxy::seek(FIL *fil, int offset, int whence) {
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Seek>(msg, 3000)) {
 		if (response->res == FR_OK) {
-			*fil = response->fil;
-			fs_trace("A7: seek response: f_tell is %llu\n", response->fil.fptr);
+			FsHandleCache::update_state(*fil, response->state);
+			fs_trace("A7: seek response: f_tell is %llu\n", response->state.fptr);
 		} else
 			pr_err("A7: seek responded with error: %d\n", response->res);
 
-		return response->fil.fptr;
+		return response->state.fptr;
 	}
 
 	pr_err("Failed to send seek request\n");
@@ -68,7 +69,7 @@ std::optional<size_t> FsSyscallProxy::read(FIL *fil, std::span<char> buffer) {
 	}
 
 	auto msg = IntercoreModuleFS::Read{
-		.fil = *fil,
+		.fil = FsHandleCache::handle(*fil),
 		.buffer = impl->file_buffer().subspan(0, bytes_to_read),
 	};
 
@@ -77,7 +78,7 @@ std::optional<size_t> FsSyscallProxy::read(FIL *fil, std::span<char> buffer) {
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Read>(msg, 3000)) {
 		std::copy(response->buffer.begin(), std::next(response->buffer.begin(), response->bytes_read), buffer.data());
 
-		*fil = response->fil;
+		FsHandleCache::update_state(*fil, response->state);
 		return response->bytes_read;
 	}
 
@@ -87,13 +88,13 @@ std::optional<size_t> FsSyscallProxy::read(FIL *fil, std::span<char> buffer) {
 
 int FsSyscallProxy::close(FIL *fil) {
 	auto msg = IntercoreModuleFS::Close{
-		.fil = *fil,
+		.fil = FsHandleCache::handle(*fil),
 	};
 
 	fs_trace("A7: close %p\n", fil);
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Close>(msg, 3000)) {
-		*fil = response->fil; //copy FIL back
+		FsHandleCache::set_closed(*fil);
 		return response->res == FR_OK;
 	}
 
@@ -121,7 +122,6 @@ bool FsSyscallProxy::stat(std::string_view path, FILINFO *info) {
 
 bool FsSyscallProxy::opendir(std::string_view path, DIR *dir) {
 	auto msg = IntercoreModuleFS::OpenDir{
-		.dir = *dir, //copy to non-cacheable Message
 		.path = path,
 	};
 
@@ -129,7 +129,8 @@ bool FsSyscallProxy::opendir(std::string_view path, DIR *dir) {
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::OpenDir>(msg, 3000)) {
 		fs_trace("A7: Opendir response = %d\n", response->res);
-		*dir = response->dir; //copy back
+		if (response->res == FR_OK)
+			FsHandleCache::set_open(*dir, response->dir);
 		return response->res == FR_OK;
 	}
 
@@ -139,13 +140,13 @@ bool FsSyscallProxy::opendir(std::string_view path, DIR *dir) {
 
 bool FsSyscallProxy::closedir(DIR *dir) {
 	auto msg = IntercoreModuleFS::CloseDir{
-		.dir = *dir,
+		.dir = FsHandleCache::handle(*dir),
 	};
 
 	fs_trace("A7: closedir %p\n", dir);
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::CloseDir>(msg, 3000)) {
-		*dir = response->dir; //copy DIR back
+		FsHandleCache::set_closed(*dir);
 		return response->res == FR_OK;
 	}
 
@@ -155,7 +156,7 @@ bool FsSyscallProxy::closedir(DIR *dir) {
 
 bool FsSyscallProxy::readdir(DIR *dir, FILINFO *info) {
 	auto msg = IntercoreModuleFS::ReadDir{
-		.dir = *dir,   //copy
+		.dir = FsHandleCache::handle(*dir),
 		.info = *info, //copy to non-cacheable message
 	};
 
@@ -163,7 +164,6 @@ bool FsSyscallProxy::readdir(DIR *dir, FILINFO *info) {
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::ReadDir>(msg, 3000)) {
 		fs_trace("A7: ReadDir response = %d, name='%.255s'\n", response->res, response->info.fname);
-		*dir = response->dir;	//copy back
 		*info = response->info; //copy back
 		return response->info.fname[0] != '\0';
 	}
@@ -188,7 +188,7 @@ std::optional<size_t> FsSyscallProxy::write(FIL *fil, std::span<const char> buff
 		std::copy(chunk_start, chunk_end, impl->file_buffer().begin());
 
 		auto msg = IntercoreModuleFS::Write{
-			.fil = *fil,
+			.fil = FsHandleCache::handle(*fil),
 			.buffer = impl->file_buffer().subspan(0, bytes_to_write),
 		};
 
@@ -196,7 +196,7 @@ std::optional<size_t> FsSyscallProxy::write(FIL *fil, std::span<const char> buff
 		chunk_start = chunk_end;
 
 		if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Write>(msg, 8000)) {
-			*fil = response->fil;
+			FsHandleCache::update_state(*fil, response->state);
 
 			if (response->bytes_written < bytes_to_write) {
 				pr_err("Failed to write, only %zu bytes written. Disk is full?\n", response->bytes_written);
@@ -218,13 +218,13 @@ std::optional<size_t> FsSyscallProxy::write(FIL *fil, std::span<const char> buff
 
 bool FsSyscallProxy::sync(FIL *fil) {
 	auto msg = IntercoreModuleFS::Sync{
-		.fil = *fil,
+		.fil = FsHandleCache::handle(*fil),
 	};
 
 	fs_trace("A7: sync %p\n", fil);
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Sync>(msg, 8000)) {
-		*fil = response->fil;
+		FsHandleCache::update_state(*fil, response->state);
 		return (response->res == FR_OK);
 	}
 

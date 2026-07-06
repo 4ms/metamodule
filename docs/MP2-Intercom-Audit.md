@@ -66,10 +66,31 @@ follows the usual pattern).
   map non-cacheable in the MMU tables (as MP1 does with `.noncachable`) or do
   explicit cache maintenance at the HSEM handoff points.
 
-## What was NOT changed yet
+## Status
 
-No layout changes have been made — MP1 ships this ABI and both its cores agree
-on it. The refactor happens with the `core_intercom` abstraction work (Phase
-0/1), ideally shared with MP1 (the fixed-width idioms are also valid there and
-backportable). Layout-pinning static_asserts for the current MP1 ABI are the
-first mechanical step once the MP1 compile sweep is in CI.
+DONE — the refactor described above has landed:
+
+- `core_intercom/intercore_types.hh`: `InterCorePtr32<T>`, `InterCoreSpan<T>`,
+  `InterCoreOptional<T>`, `InterCoreVariant<Ts...>` (std::visit via
+  to_variant()/assignment round-trip, or in-place visit()). Host-tested.
+- `IntercoreStorageMessage`: fixed-width members, layout pinned at 620 bytes
+  (static_assert compiled on CA7, CM4, and host builds). `wifi_ip_result` uses
+  the fixed `InterCoreWifiIPResult` (std::expected is not ABI-pinned).
+- `IntercoreModuleFS`: FatFs FIL/DIR no longer cross cores. The fs core owns
+  them in `FsObjectTable`s (16 files / 8 dirs) addressed by `FsHandle`;
+  responses carry `FsFileState{fptr, objsize, err}` which clients cache inside
+  their opaque FIL storage (`fs_handle_cache.hh`), so the plugin-facing
+  File/Dir layout and local f_tell/f_size/f_eof/f_error reads are unchanged.
+  The shared representation is the fixed-layout `IccMessage`
+  (`InterCoreVariant`, pinned at 632 bytes); business logic still uses the
+  std::variant `Message` + std::visit, converted at the FsProxy /
+  ModuleFSMessageHandler boundary.
+
+Note: the fs server is now stateful. If a client core restarts without closing
+its files, handles leak until the fs core restarts — the bring-up code should
+reset the tables when a client core reboots (TODO, along with making the
+table sizes a conf setting if 16/8 proves tight).
+
+Still open: `SharedMemoryS::Ptrs` (raw pointers, populated by the A7 and read
+by the M4) and the `static_buffers` placement — convert with the transport
+abstraction when the M33 port lands.

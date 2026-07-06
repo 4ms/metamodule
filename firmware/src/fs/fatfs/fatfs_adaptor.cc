@@ -1,6 +1,7 @@
 #include "filesystem/fatfs_adaptor.hh"
 #include "console/pr_dbg.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
+#include "fs/fs_handle_cache.hh"
 #include "fs_proxy.hh"
 #include <cstdarg>
 #include <cstring>
@@ -13,8 +14,8 @@ namespace MetaModule
 
 namespace StaticBuffers
 {
-extern IntercoreModuleFS::Message icc_module_fs_message_core0;
-extern IntercoreModuleFS::Message icc_module_fs_message_core1;
+extern IntercoreModuleFS::IccMessage icc_module_fs_message_core0;
+extern IntercoreModuleFS::IccMessage icc_module_fs_message_core1;
 } // namespace StaticBuffers
 
 namespace
@@ -101,13 +102,13 @@ FRESULT FatFS::f_open(File *fp, const char *path, uint8_t mode) {
 	fs_trace("f_open(%p, '%s', %d)\n", &fp->fil, fullpath.c_str(), mode);
 
 	auto msg = IntercoreModuleFS::Open{
-		.fil = fp->fil,
 		.path = std::string_view{fullpath},
 		.access_mode = mode,
 	};
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Open>(msg, 3000)) {
-		fp->fil = response->fil; //copy FIL back
+		if (response->res == FR_OK)
+			FsHandleCache::set_open(fp->fil, response->fil, response->state);
 		return response->res;
 	}
 
@@ -118,11 +119,11 @@ FRESULT FatFS::f_close(File *fil) {
 	fs_trace("f_close(%p)\n", &fil->fil);
 
 	auto msg = IntercoreModuleFS::Close{
-		.fil = fil->fil,
+		.fil = FsHandleCache::handle(fil->fil),
 	};
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Close>(msg, 3000)) {
-		fil->fil = response->fil;
+		FsHandleCache::set_closed(fil->fil);
 		return response->res;
 	}
 
@@ -133,13 +134,13 @@ FRESULT FatFS::f_lseek(File *fil, uint64_t offset) {
 	fs_trace("f_lseek(%p, %lld)\n", &fil->fil, offset);
 
 	auto msg = IntercoreModuleFS::Seek{
-		.fil = fil->fil,
+		.fil = FsHandleCache::handle(fil->fil),
 		.file_offset = offset,
 		.whence = IntercoreModuleFS::Seek::Whence::Beginning,
 	};
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Seek>(msg, 3000)) {
-		fil->fil = response->fil; //copy File back
+		FsHandleCache::update_state(fil->fil, response->state);
 		return response->res;
 	}
 
@@ -155,12 +156,12 @@ FRESULT FatFS::f_read(File *fil, void *buff, unsigned bytes_to_read, unsigned *b
 	}
 
 	auto msg = IntercoreModuleFS::Read{
-		.fil = fil->fil,
+		.fil = FsHandleCache::handle(fil->fil),
 		.buffer = impl->file_buffer().subspan(0, bytes_to_read),
 	};
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Read>(msg, 3000)) {
-		fil->fil = response->fil;
+		FsHandleCache::update_state(fil->fil, response->state);
 		*br = response->bytes_read;
 		std::copy(response->buffer.begin(), std::next(response->buffer.begin(), response->bytes_read), (char *)buff);
 
@@ -178,16 +179,16 @@ char *FatFS::f_gets(char *buffer, int len, File *fil) {
 	}
 
 	auto msg = IntercoreModuleFS::GetS{
-		.fil = fil->fil,
+		.fil = FsHandleCache::handle(fil->fil),
 		.buffer = impl->file_buffer().subspan(0, len),
 	};
 
 	auto response = impl->get_response_or_timeout<IntercoreModuleFS::GetS>(msg, 3000);
 	if (response) {
-		fil->fil = response->fil;
+		FsHandleCache::update_state(fil->fil, response->state);
 		// copy buffer until we hit a \0
 		std::strcpy(buffer, response->buffer.data());
-		return msg.res;
+		return response->res_ok ? buffer : nullptr;
 	}
 	return nullptr;
 }
@@ -220,12 +221,12 @@ FRESULT FatFS::f_opendir(Dir *dir, const char *path) {
 	fs_trace("f_opendir(%p, %s)\n", dir, fullpath.c_str());
 
 	auto msg = IntercoreModuleFS::OpenDir{
-		.dir = dir->dir,
 		.path = fullpath.c_str(),
 	};
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::OpenDir>(msg, 3000)) {
-		dir->dir = response->dir;
+		if (response->res == FR_OK)
+			FsHandleCache::set_open(dir->dir, response->dir);
 		return response->res;
 	}
 
@@ -236,11 +237,11 @@ FRESULT FatFS::f_closedir(Dir *dir) {
 	fs_trace("f_closedir(%p)\n", dir);
 
 	auto msg = IntercoreModuleFS::CloseDir{
-		.dir = dir->dir,
+		.dir = FsHandleCache::handle(dir->dir),
 	};
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::CloseDir>(msg, 3000)) {
-		dir->dir = response->dir;
+		FsHandleCache::set_closed(dir->dir);
 		return response->res;
 	}
 
@@ -250,13 +251,13 @@ FRESULT FatFS::f_closedir(Dir *dir) {
 FRESULT FatFS::f_readdir(Dir *dir, Fileinfo *info) {
 	fs_trace("f_readdir(%p, %p)\n", dir, info);
 	auto msg = IntercoreModuleFS::ReadDir{
-		.dir = dir->dir,
-		.info = info->filinfo,
+		.dir = FsHandleCache::handle(dir->dir),
+		.info = info ? info->filinfo : FILINFO{},
 	};
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::ReadDir>(msg, 3000)) {
-		dir->dir = response->dir;
-		info->filinfo = response->info;
+		if (info)
+			info->filinfo = response->info;
 		return response->res;
 	}
 
@@ -269,14 +270,14 @@ FRESULT FatFS::f_findfirst(Dir *dir, Fileinfo *info, const char *path, const cha
 	fs_trace("f_findfirst(%p, %p, %s, %s)\n", dir, info, fullpath.c_str(), pattern);
 
 	auto msg = IntercoreModuleFS::FindFirst{
-		.dir = dir->dir,
 		.info = info->filinfo,
 		.path = fullpath.c_str(),
 		.pattern = pattern,
 	};
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::FindFirst>(msg, 3000)) {
-		dir->dir = response->dir;
+		if (response->res == FR_OK)
+			FsHandleCache::set_open(dir->dir, response->dir);
 		info->filinfo = response->info;
 		return response->res;
 	}
@@ -288,12 +289,11 @@ FRESULT FatFS::f_findnext(Dir *dir, Fileinfo *info) {
 	fs_trace("f_findnext %p\n", dir);
 
 	auto msg = IntercoreModuleFS::FindNext{
-		.dir = dir->dir,
+		.dir = FsHandleCache::handle(dir->dir),
 		.info = info->filinfo,
 	};
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::FindNext>(msg, 3000)) {
-		dir->dir = response->dir;
 		info->filinfo = response->info;
 		return response->res;
 	}

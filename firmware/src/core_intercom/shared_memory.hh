@@ -15,8 +15,8 @@ struct SharedMemoryS {
 		DoubleBufParamBlock *param_block;
 		RamDrive *ramdrive;
 		IntercoreStorageMessage *icc_message;
-		IntercoreModuleFS::Message *icc_modulefs_message_core0;
-		IntercoreModuleFS::Message *icc_modulefs_message_core1;
+		IntercoreModuleFS::IccMessage *icc_modulefs_message_core0;
+		IntercoreModuleFS::IccMessage *icc_modulefs_message_core1;
 		ConcurrentBuffer *console_a7_0_buff;
 		ConcurrentBuffer *console_a7_1_buff;
 		ConcurrentBuffer *console_m4_buff;
