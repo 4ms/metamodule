@@ -37,12 +37,14 @@ set(MP2_HAL_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/stm32-hal/stm32mp2)
 add_library(
   a35_core OBJECT
   src/core_a35/main.cc
+  src/core_a35/uart_print.c
   system/mmu_ca35.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/vectors.S
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/irq_init.c
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/esr_decode.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/drivers/interrupt_handler.cc
+  ${FWDIR}/system/libc_stub.c
 )
 
 target_include_directories(
