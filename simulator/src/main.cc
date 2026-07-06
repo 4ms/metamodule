@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
 	settings.parse(argc, argv);
 
 	lv_init();
-	lv_port_disp_init(320, 240, settings.zoom);
+	lv_port_disp_init(settings.screenw, settings.screenh, settings.zoom);
 
 	SDLAudio<Frame> audio_out{settings.audioout_dev};
 
