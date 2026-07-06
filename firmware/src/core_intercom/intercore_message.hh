@@ -124,7 +124,9 @@ constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessa
 // Pin the cross-core ABI: identical on 32-bit ARM, AArch64, and test hosts.
 static_assert(sizeof(Volume) == 4);
 static_assert(std::is_trivially_copyable_v<IntercoreStorageMessage>);
+#if !defined(SIMULATOR)
 static_assert(IntercoreStorageMessageSize == 620, "Cross-core struct layout changed: update both cores' builds together");
+#endif
 
 ///////////////////////////////////////
 // TODO: Use this instead of MessageType

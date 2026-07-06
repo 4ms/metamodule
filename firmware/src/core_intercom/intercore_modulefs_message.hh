@@ -207,7 +207,9 @@ static constexpr size_t MessageSize = sizeof(IccMessage);
 // FILINFO layout depends on the FatFs config, which must match on both cores.
 static_assert(sizeof(FILINFO) == 288, "FatFs configs must match on both cores");
 static_assert(std::is_trivially_copyable_v<IccMessage>);
+#if !defined(SIMULATOR)
 static_assert(MessageSize == 632, "Cross-core struct layout changed: update both cores' builds together");
+#endif
 
 } // namespace IntercoreModuleFS
 

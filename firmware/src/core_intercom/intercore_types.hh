@@ -37,10 +37,34 @@ struct InterCoreSharedRegion {
 
 // A pointer shared between cores: stored as a 32-bit offset from
 // InterCoreSharedRegion::base. Mimics a raw pointer (->, *, bool).
+//
+// The simulator is a single 64-bit process with no core boundary, and its
+// objects are scattered across a 64-bit address space that a 32-bit offset
+// cannot represent -- so simulator builds store the native pointer instead
+// (same API; the pinned cross-core layout only matters on hardware, where the
+// unit-test build still verifies it).
 template<typename T>
 struct InterCorePtr32 {
 	static constexpr uint32_t NullOffset = 0xFFFF'FFFF;
 
+#if defined(SIMULATOR)
+	T *raw = nullptr;
+
+	InterCorePtr32() = default;
+
+	InterCorePtr32(T *ptr) {
+		raw = ptr;
+	}
+
+	InterCorePtr32 &operator=(T *ptr) {
+		raw = ptr;
+		return *this;
+	}
+
+	T *get() const {
+		return raw;
+	}
+#else
 	uint32_t offset = NullOffset;
 
 	InterCorePtr32() = default;
@@ -58,6 +82,7 @@ struct InterCorePtr32 {
 	T *get() const {
 		return offset == NullOffset ? nullptr : reinterpret_cast<T *>(InterCoreSharedRegion::base + offset);
 	}
+#endif
 
 	T *operator->() const {
 		return get();
@@ -68,7 +93,7 @@ struct InterCorePtr32 {
 	}
 
 	explicit operator bool() const {
-		return offset != NullOffset;
+		return get() != nullptr;
 	}
 };
 
@@ -347,11 +372,14 @@ private:
 	}
 };
 
-// Layout checks: these types must be identical on 32-bit ARM, AArch64, and test hosts
+// Layout checks: these types must be identical on 32-bit ARM, AArch64, and the
+// unit-test host build (the simulator uses native pointers -- see above)
+#if !defined(SIMULATOR)
 static_assert(sizeof(InterCorePtr32<int>) == 4);
 static_assert(sizeof(InterCoreSpan<char>) == 8);
 static_assert(sizeof(InterCoreOptional<uint32_t>) == 8);
 static_assert(alignof(InterCorePtr32<int>) == 4);
 static_assert(alignof(InterCoreSpan<char>) == 4);
+#endif
 
 } // namespace MetaModule
