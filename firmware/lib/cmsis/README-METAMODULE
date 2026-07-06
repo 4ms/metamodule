@@ -1,0 +1,9 @@
+From CMSIS ~2023
+Core_A/
+Include/ (from Core/Include)
+LICENSE.txt
+st_readme.txt
+
+From CMSIS ~2017
+DSP/
+Lib/
