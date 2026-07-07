@@ -6,6 +6,7 @@
 #include "test_modules.hh"
 #include "test_modules_memory.hh"
 #include "test_patches.hh"
+#include <algorithm>
 #include <cstdlib>
 
 namespace MetaModule
@@ -42,14 +43,44 @@ struct CpuLoadTest {
 	static void run_hil_tests(FileStorageProxy &file_storage_proxy, Ui &ui, PluginManager &plugin_manager) {
 		pr_info("Running HIL CPU load tests\n");
 
-		if (!preload_all_plugins(plugin_manager)) {
-			pr_err("Failed preloading plugins for HIL CPU load tests\n");
+		hil_message("*loadtesting\n");
+
+		// clear previous results files
+		FS::write_file(file_storage_proxy, std::string("In progress"), {"cpu_test.csv", Volume::USB});
+		FS::write_file(file_storage_proxy, std::string("\n"), {"cpu_test_in_progress.csv", Volume::USB});
+
+		std::string results;
+		results.reserve(1024 * 1024); // reserve 1MB to reduce memory fragmentation
+
+		auto append_file = [&file_storage_proxy, &ui, &results](std::string_view csv_line) {
+			results += csv_line;
+			FS::append_file(file_storage_proxy, csv_line, {"cpu_test_in_progress.csv", Volume::USB});
+			ui.update_screen();
+		};
+
+		lv_show(ui_MainMenuNowPlayingPanel);
+		lv_show(ui_MainMenuNowPlaying);
+
+		append_file(LoadTest::csv_header());
+
+		PatchPlayer player;
+
+		// Test built-in brands first (registered before any plugin is loaded)
+		for (auto brand : ModuleFactory::getAllBrands())
+			LoadTest::test_brand(brand, player, append_file);
+
+		// Then load one plugin at a time, test its module(s), and unload it.
+		// Loading all plugins at once exhausts memory, so we keep only one resident.
+		if (!test_plugins_one_at_a_time(plugin_manager, player, append_file)) {
+			pr_err("Failed getting plugin list for HIL CPU load tests\n");
 			hil_message("*failure\n");
 			return;
 		}
-		hil_message("*loadtesting\n");
 
-		run_module_tests(file_storage_proxy, ui);
+		lv_label_set_text(ui_MainMenuNowPlaying, "Finished load tests");
+
+		FS::write_file(file_storage_proxy, results, {"cpu_test.csv", Volume::USB});
+		hil_message("*success\n");
 	}
 
 	static void run_module_tests(FileStorageProxy &file_storage_proxy, Ui &ui) {
@@ -148,43 +179,53 @@ struct CpuLoadTest {
 		hil_message("*success\n");
 	}
 
-	static bool preload_all_plugins(PluginManager &plugin_manager) {
+	// Loads each plugin one at a time, running the CPU load test on the module(s)
+	// it registers, then unloads it before moving on — so only a single plugin is
+	// ever resident. The brand(s) a plugin contributes are found by diffing
+	// ModuleFactory::getAllBrands() before/after loading it (same approach as
+	// ModuleImageGen). Returns false only if the plugin list couldn't be read; a
+	// plugin that fails to load is skipped.
+	static bool test_plugins_one_at_a_time(PluginManager &plugin_manager, PatchPlayer &player, auto append_file) {
 		plugin_manager.start_loading_plugin_list();
 
 		while (true) {
 			auto result = plugin_manager.process_loading();
-
-			if (result.state == PluginFileLoader::State::GotList) {
+			if (result.state == PluginFileLoader::State::GotList)
 				break;
-			}
-
-			if (result.state == PluginFileLoader::State::Error) {
+			if (result.state == PluginFileLoader::State::Error)
 				return false;
-			}
 		}
 
 		auto list = plugin_manager.found_plugin_list();
 
 		for (auto i = 0u; i < list->size(); ++i) {
-			printf("Loading plugin: '%s'\n", plugin_manager.plugin_name(i).c_str());
+			auto plugin_file_name = plugin_manager.plugin_name(i);
+			printf("Loading plugin: '%s'\n", plugin_file_name.c_str());
+
+			auto brands_before = ModuleFactory::getAllBrands();
 
 			plugin_manager.load_plugin(i);
-			auto load = true;
-			while (load) {
-				switch (plugin_manager.process_loading().state) {
-					using enum PluginFileLoader::State;
-					case Success:
-						load = false;
-						break;
-
-					case RamDiskFull:
-					case InvalidPlugin:
-					case Error:
-						return false;
-
-					default:
-						continue;
+			bool loaded_ok = true;
+			while (true) {
+				using enum PluginFileLoader::State;
+				auto state = plugin_manager.process_loading().state;
+				if (state == Success)
+					break;
+				if (state == RamDiskFull || state == InvalidPlugin || state == Error) {
+					pr_warn("Failed to load plugin '%s' for CPU load test, skipping\n", plugin_file_name.c_str());
+					loaded_ok = false;
+					break;
 				}
+			}
+
+			if (loaded_ok) {
+				for (auto brand : ModuleFactory::getAllBrands()) {
+					if (std::ranges::find(brands_before, brand) != brands_before.end())
+						continue; // pre-existing brand, not from this plugin
+					LoadTest::test_brand(brand, player, append_file);
+				}
+
+				plugin_manager.unload_plugin(plugin_file_name);
 			}
 		}
 
