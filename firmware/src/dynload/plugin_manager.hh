@@ -30,6 +30,20 @@ public:
 	void unload_plugin(std::string_view name) {
 		for (unsigned i = 0; auto const &plugin : loaded_plugin_list) {
 			if (plugin.fileinfo.plugin_name == name) {
+				// Unregister the brand *first*, while the plugin code is still loaded.
+				// This destroys each module's CreateModuleFunc std::function, whose
+				// type-erasure manager (for a plugin's lambda) lives in the plugin's
+				// code. If we did this after erasing/poisoning the code, that manager
+				// call would jump into freed/poisoned memory (an 0xEAFFFFFE "bl ." spin)
+				// and hang -- which is native-plugin-only, since VCV plugins tear down
+				// their create-funcs earlier in ~Plugin. See commit 167e30f74.
+				// (For VCV plugins ~Plugin's per-module unregister then finds the brand
+				// already gone and logs a harmless "failed to remove module" warning.)
+				if (ModuleFactory::unregisterBrand(name) > 0)
+					pr_dbg("Unregistered brand %s\n", name.data());
+				else
+					pr_dbg("Failed to unregister brand %s\n", name.data());
+
 				// Cleanup files we copied to the ramdisk
 				for (auto const &file : plugin.loaded_files) {
 					if (file.ends_with(".bin")) {
@@ -54,11 +68,6 @@ public:
 				for (auto &x : code) {
 					x = 0xEAFFFFFE; //bl .
 				}
-
-				if (ModuleFactory::unregisterBrand(name) > 0)
-					pr_dbg("Unregistered brand %s\n", name.data());
-				else
-					pr_dbg("Failed to unregistered brand %s\n", name.data());
 
 				break;
 			}
