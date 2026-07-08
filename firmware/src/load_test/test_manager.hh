@@ -225,6 +225,12 @@ struct CpuLoadTest {
 					LoadTest::test_brand(brand, player, append_file);
 				}
 
+				// Never free the plugin's code while the player still holds one of its
+				// modules: unloading the plugin invalidates the module's vtable, and the
+				// next load_patch() would deinit the dangling module and crash.
+				if (player.is_loaded)
+					player.unload_patch();
+
 				plugin_manager.unload_plugin(plugin_file_name);
 			}
 		}
