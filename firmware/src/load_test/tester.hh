@@ -135,26 +135,24 @@ struct ModuleLoadTester {
 				for (uint16_t in = 0; in < counts.num_inputs; in++)
 					in_bufs[in] = plugin_module_get_poly_input_buffer(player.modules[module_id], in);
 
-				if (!is_poly_capable(player.modules[module_id])) {
-					return {};
-				}
-				result = run_patch(
-					[&, this] {
-						for (uint16_t in = 0; in < counts.num_inputs; in++) {
-							auto &buf = in_bufs[in];
-							if (buf.voltages && buf.channels) {
-								// Poly input: drive all channels
-								for (unsigned ch = 0; ch < chans; ch++)
-									buf.voltages[ch] = oscs[in * chans + ch].process_float() * 10.f - 5.f;
-								*buf.channels = chans;
-							} else {
-								// Mono input: drive channel 0 only
-								auto audio = oscs[in * chans].process_float() * 10.f - 5.f;
-								player.modules[module_id]->set_input(in, audio);
+				if (is_poly_capable(player.modules[module_id]))
+					result = run_patch(
+						[&, this] {
+							for (uint16_t in = 0; in < counts.num_inputs; in++) {
+								auto &buf = in_bufs[in];
+								if (buf.voltages && buf.channels) {
+									// Poly input: drive all channels
+									for (unsigned ch = 0; ch < chans; ch++)
+										buf.voltages[ch] = oscs[in * chans + ch].process_float() * 10.f - 5.f;
+									*buf.channels = chans;
+								} else {
+									// Mono input: drive channel 0 only
+									auto audio = oscs[in * chans].process_float() * 10.f - 5.f;
+									player.modules[module_id]->set_input(in, audio);
+								}
 							}
-						}
-					},
-					block_size);
+						},
+						block_size);
 			}
 		}
 

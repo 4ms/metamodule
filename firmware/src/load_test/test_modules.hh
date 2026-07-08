@@ -37,6 +37,93 @@ inline void send_heartbeat() {
 	hil_message("*ok\n");
 }
 
+// Runs the CPU load test on every module of a single (already-registered) brand,
+// emitting one CSV row per module via append_file.
+inline void test_brand(std::string_view brand, PatchPlayer &player, auto append_file) {
+	auto slugs = ModuleFactory::getAllModuleSlugs(brand);
+	for (auto slug : slugs) {
+		ModuleEntry entry;
+		entry.slug = std::string(brand) + ":" + std::string(slug);
+
+		if (entry.slug == "AmalgamatedHarmonics:Arp32") {
+			pr_info("Skipping %s\n", entry.slug.c_str());
+			continue;
+		}
+
+		printf("Testing %s\n", entry.slug.c_str());
+		lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
+
+#ifndef SIMULATOR
+		struct mallinfo mem_start = mallinfo();
+#endif
+#ifdef MM_LOADTEST_MEASURE_MEMORY
+		auto mem_tester = ModuleMemoryTester{entry.slug};
+		pr_info("Running memory test\n");
+		entry.mem_usage = mem_tester.run_test(ModuleMemoryTester::TestType::FirstRun);
+#endif
+
+		for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
+			ModuleLoadTester tester(player, entry.slug);
+
+			pr_trace("Block size %u\n", blocksize);
+
+			send_heartbeat();
+
+			pr_trace("Timing module construction\n");
+			entry.load_time = tester.measure_construction_time();
+
+			send_heartbeat();
+
+			pr_trace("Running all unpatched test\n");
+			entry.isolated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::NonePatched);
+
+			send_heartbeat();
+
+			pr_trace("Running Zero'ed inputs test\n");
+			entry.patched[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsZero);
+
+			send_heartbeat();
+
+			pr_trace("Running LFO test\n");
+			entry.cv_modulated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsLFO);
+
+			send_heartbeat();
+
+			pr_trace("Running audio-rate test\n");
+			entry.audio_modulated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsAudio);
+
+			send_heartbeat();
+
+			pr_trace("Running poly audio-rate test\n");
+			entry.poly_audio_modulated[i] =
+				tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsPolyAudio);
+
+			send_heartbeat();
+
+			i++;
+		}
+
+#ifndef SIMULATOR
+		struct mallinfo mem_end = mallinfo();
+
+		entry.raw_mem_used = (int32_t)mem_end.uordblks - (int32_t)mem_start.uordblks;
+		pr_info("Mem used: %d\n", entry.raw_mem_used);
+
+		// pr_info("    arena    %zu (total space allocated so far via sbrk)\n", mem_end.arena);
+		// pr_info("    ordblks  %zu (number of non-inuse chunks)\n", mem_end.ordblks);
+		// pr_info("    hblks    %zu (number of mmapped regions)\n", mem_end.hblks);
+		// pr_info("    hblkhd   %zu (total space in mmapped regions)\n", mem_end.hblkhd);
+		// pr_info("    uordblks %zu (total allocated space)\n", mem_end.uordblks);
+		// pr_info("    fordblks %zu (total non-inuse space)\n", mem_end.fordblks);
+		// pr_info("    keepcost %zu (top-most, releasable via malloc_trim space)\n", mem_end.keepcost);
+#endif
+
+		append_file(entry_to_csv(entry));
+	}
+}
+
+// Runs the CPU load test on every registered brand (or a single brand if
+// only_brand names one). Assumes all plugins are already loaded.
 inline void test_module_brand(std::string_view only_brand, auto append_file) {
 	lv_show(ui_MainMenuNowPlayingPanel);
 	lv_show(ui_MainMenuNowPlaying);
@@ -45,93 +132,10 @@ inline void test_module_brand(std::string_view only_brand, auto append_file) {
 
 	PatchPlayer player;
 
-	auto brands = ModuleFactory::getAllBrands();
-	for (auto brand : brands) {
-
+	for (auto brand : ModuleFactory::getAllBrands()) {
 		if (only_brand != "all" && only_brand != "" && only_brand != brand)
 			continue;
-
-		auto slugs = ModuleFactory::getAllModuleSlugs(brand);
-		for (auto slug : slugs) {
-			ModuleEntry entry;
-			entry.slug = std::string(brand) + ":" + std::string(slug);
-
-			if (entry.slug == "AmalgamatedHarmonics:Arp32") {
-				pr_info("Skipping %s\n", entry.slug.c_str());
-				continue;
-			}
-
-			printf("Testing %s\n", entry.slug.c_str());
-			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
-
-#ifndef SIMULATOR
-			struct mallinfo mem_start = mallinfo();
-#endif
-#ifdef MM_LOADTEST_MEASURE_MEMORY
-			auto mem_tester = ModuleMemoryTester{entry.slug};
-			pr_info("Running memory test\n");
-			entry.mem_usage = mem_tester.run_test(ModuleMemoryTester::TestType::FirstRun);
-#endif
-
-			for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
-				ModuleLoadTester tester(player, entry.slug);
-
-				pr_trace("Block size %u\n", blocksize);
-
-				send_heartbeat();
-
-				pr_trace("Timing module construction\n");
-				entry.load_time = tester.measure_construction_time();
-
-				send_heartbeat();
-
-				pr_trace("Running all unpatched test\n");
-				entry.isolated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::NonePatched);
-
-				send_heartbeat();
-
-				pr_trace("Running Zero'ed inputs test\n");
-				entry.patched[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsZero);
-
-				send_heartbeat();
-
-				pr_trace("Running LFO test\n");
-				entry.cv_modulated[i] = tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsLFO);
-
-				send_heartbeat();
-
-				pr_trace("Running audio-rate test\n");
-				entry.audio_modulated[i] =
-					tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsAudio);
-
-				send_heartbeat();
-
-				pr_trace("Running poly audio-rate test\n");
-				entry.poly_audio_modulated[i] =
-					tester.run_test(blocksize, KnobTestType::AllStill, JackTestType::AllInputsPolyAudio);
-
-				send_heartbeat();
-
-				i++;
-			}
-
-#ifndef SIMULATOR
-			struct mallinfo mem_end = mallinfo();
-
-			entry.raw_mem_used = (int32_t)mem_end.uordblks - (int32_t)mem_start.uordblks;
-			pr_info("Mem used: %d\n", entry.raw_mem_used);
-
-			// pr_info("    arena    %zu (total space allocated so far via sbrk)\n", mem_end.arena);
-			// pr_info("    ordblks  %zu (number of non-inuse chunks)\n", mem_end.ordblks);
-			// pr_info("    hblks    %zu (number of mmapped regions)\n", mem_end.hblks);
-			// pr_info("    hblkhd   %zu (total space in mmapped regions)\n", mem_end.hblkhd);
-			// pr_info("    uordblks %zu (total allocated space)\n", mem_end.uordblks);
-			// pr_info("    fordblks %zu (total non-inuse space)\n", mem_end.fordblks);
-			// pr_info("    keepcost %zu (top-most, releasable via malloc_trim space)\n", mem_end.keepcost);
-#endif
-
-			append_file(entry_to_csv(entry));
-		}
+		test_brand(brand, player, append_file);
 	}
 
 	lv_label_set_text(ui_MainMenuNowPlaying, "Finished load tests");
