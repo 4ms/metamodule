@@ -89,7 +89,7 @@ Plugin::~Plugin() {
 
 		auto removed_ok = MetaModule::ModuleFactory::unregisterModule(slug, model->slug);
 		if (!removed_ok) {
-			pr_warn("Failed to remove module '%s' in brand '%s'\n", model->slug.c_str(), slug.c_str());
+			pr_warn("Failed to remove VCV module '%s' in brand '%s'\n", model->slug.c_str(), slug.c_str());
 		}
 		delete model;
 	}
