@@ -1,4 +1,5 @@
 #include "console/uart_log.hh"
+#include "safe_log.hh"
 #include <cerrno>
 #include <cstdint>
 
@@ -17,58 +18,12 @@ size_t get_heap_size() {
 	return reinterpret_cast<size_t>(heap_end) - reinterpret_cast<size_t>(&_sheap);
 }
 
-// _sbrk runs underneath malloc, and printf() calls malloc, so we push chars to a stack buffer
-// and flush directly to the uart instead of using printf()
+// _sbrk runs underneath malloc, and printf() calls malloc, so we use SafeLog to push chars
+// to a stack buffer and flush directly to the uart instead of using printf()
 namespace
 {
 
-struct SbrkLog {
-	char buf[192];
-	unsigned pos = 0;
-
-	void ch(char c) {
-		if (pos < sizeof(buf))
-			buf[pos++] = c;
-	}
-
-	void str(const char *s) {
-		while (*s)
-			ch(*s++);
-	}
-
-	void u64(uint64_t v, unsigned base = 10) {
-		char tmp[24];
-		unsigned n = 0;
-		do {
-			unsigned digit = v % base;
-			tmp[n++] = digit < 10 ? char('0' + digit) : char('a' + digit - 10);
-			v /= base;
-		} while (v && n < sizeof(tmp));
-		while (n)
-			ch(tmp[--n]);
-	}
-
-	void i64(int64_t v) {
-		if (v < 0) {
-			ch('-');
-			u64(uint64_t(-v));
-		} else {
-			ch('+');
-			u64(uint64_t(v));
-		}
-	}
-
-	void hex(uintptr_t v) {
-		str("0x");
-		u64(v, 16);
-	}
-
-	void flush() {
-		ch('\n');
-		MetaModule::UartLog::write_stdout(buf, pos);
-		pos = 0;
-	}
-};
+using SbrkLog = MetaModule::SafeLog;
 
 // Running stats, so the OOM report can say whether one giant request blew the heap
 // or whether we simply crept up to the ceiling.
