@@ -1,3 +1,4 @@
+#include "alloc_diag.hh"
 #include <cstdlib>
 #include <new>
 
@@ -6,6 +7,30 @@
 
 AllocationWatcher *watch = nullptr;
 #endif
+
+namespace
+{
+
+void *track(void *ptr, size_t size) {
+#ifdef MM_LOADTEST_MEASURE_MEMORY
+	if (watch && ptr)
+		watch->register_alloc(size, ptr);
+#endif
+	return ptr;
+}
+
+// The throwing forms of operator new must never return nullptr: with exceptions
+// disabled, callers (including everything in libstdc++) do not check, and the
+// resulting crash lands far from the cause. Report and halt at the point of
+// failure instead. The std::nothrow forms are the explicit "I will check for
+// nullptr" opt-in, so they keep honest failure semantics.
+void *checked(void *ptr, size_t size, size_t align) {
+	if (!ptr)
+		MetaModule::alloc_failed(size, align);
+	return ptr;
+}
+
+} // namespace
 
 #ifdef __APPLE__
 static void *aligned_malloc(size_t align, size_t size) {
@@ -28,14 +53,7 @@ static void *aligned_malloc(size_t align, size_t size) {
 #endif
 
 void *operator new(size_t size) THROW_SPEC {
-#ifdef MM_LOADTEST_MEASURE_MEMORY
-	auto ptr = malloc(size);
-	if (watch)
-		watch->register_alloc(size, ptr);
-	return ptr;
-#else
-	return malloc(size);
-#endif
+	return checked(track(malloc(size), size), size, alignof(std::max_align_t));
 }
 
 void operator delete(void *p) noexcept {
@@ -57,7 +75,7 @@ void operator delete[](void *p) noexcept {
 }
 
 void *operator new(size_t size, std::nothrow_t) noexcept {
-	return operator new(size);
+	return track(malloc(size), size);
 }
 
 // Over-aligned types (e.g. classes with NEON float32x4_t members) must get the
@@ -65,14 +83,8 @@ void *operator new(size_t size, std::nothrow_t) noexcept {
 // NEON store to an 8-byte-aligned object raises a Data Abort.
 // Blocks from memalign/posix_memalign are valid to pass to free().
 void *operator new(size_t size, std::align_val_t align) {
-#ifdef MM_LOADTEST_MEASURE_MEMORY
-	auto ptr = aligned_malloc(static_cast<size_t>(align), size);
-	if (watch)
-		watch->register_alloc(size, ptr);
-	return ptr;
-#else
-	return aligned_malloc(static_cast<size_t>(align), size);
-#endif
+	auto al = static_cast<size_t>(align);
+	return checked(track(aligned_malloc(al, size), size), size, al);
 }
 
 void *operator new[](size_t size, std::align_val_t align) {
@@ -100,7 +112,7 @@ void operator delete(void *p, std::size_t, std::align_val_t) noexcept {
 }
 
 void *operator new[](size_t size, std::nothrow_t) noexcept {
-	return operator new(size);
+	return track(malloc(size), size);
 }
 
 void operator delete[](void *p, std::nothrow_t) noexcept {
