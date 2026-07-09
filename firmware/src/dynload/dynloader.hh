@@ -12,6 +12,7 @@
 #include "pr_dbg.hh"
 #include <cstring>
 #include <elf.h>
+#include <new>
 #include <span>
 #include <string>
 #include <vector>
@@ -39,7 +40,10 @@ struct DynLoader {
 			return "Not a valid plugin file";
 		}
 
-		load_executable();
+		if (auto err_msg = load_executable(); err_msg != "") {
+			pr_err("Failed: %s\n", err_msg.c_str());
+			return err_msg;
+		}
 
 		if (auto err_msg = process_relocs(); err_msg != "") {
 			pr_err("Failed: %s\n", err_msg.c_str());
@@ -100,8 +104,20 @@ struct DynLoader {
 	}
 
 private:
-	void load_executable() {
+	// Returns an error message, or "" on success
+	std::string load_executable() {
 		size_t load_size = elf.load_size();
+
+		// Allocate with new(nothrow) and then delete the allocation immediately if it succeeds
+		// (the same block will be re-used for codeblock.resize())
+		// We can't just measure the heap free space because we need a contiguous block.
+		if (auto probe = new (std::nothrow) uint8_t[load_size]) {
+			delete[] probe;
+		} else {
+			auto size_mb = (load_size + (1 << 20) - 1) >> 20;
+			pr_err("Plugin code needs %zu bytes, not enough memory\n", load_size);
+			return "Out of memory: plugin code needs " + std::to_string(size_mb) + " MB";
+		}
 
 		codeblock.clear();
 		codeblock.resize(load_size);
@@ -130,6 +146,8 @@ private:
 		mdrivlib::HWSemaphore<InvalidateICache>::lock();
 		mdrivlib::HWSemaphore<InvalidateICache>::unlock();
 		HAL_Delay(50);
+
+		return "";
 	}
 
 	void init_host_symbol_table() {
