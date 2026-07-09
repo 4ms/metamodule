@@ -1,4 +1,4 @@
-#include "console/uart_log.hh"
+#include "alloc_diag.hh"
 #include "safe_log.hh"
 #include <cerrno>
 #include <cstdint>
@@ -69,6 +69,9 @@ extern "C" size_t _sbrk(int incr) {
 
 	if (heap_end + incr > &_eheap) {
 		log_sbrk(incr, heap_end, true);
+		// Attribute the failure: plugins allocate via their own statically-linked
+		// operator new, so this is the only spot that sees every failed allocation
+		MetaModule::report_alloc_contexts();
 		errno = ENOMEM;
 		return -1;
 		// OOM!!!
