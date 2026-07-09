@@ -9,6 +9,7 @@
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
+#include "system/alloc_diag.hh"
 #include "untar_contents.hh"
 #include "util/monotonic_allocator.hh"
 #include "util/version_tools.hh"
@@ -323,7 +324,13 @@ public:
 
 		pluginInstance = &plugin.rack_plugin;
 		//TODO: trap exceptions, restore state, and return
-		init(&plugin.rack_plugin);
+		{
+			// Name this plugin in the allocation-failure report if its init()
+			// (module registration, and for some plugins module construction)
+			// runs out of memory
+			AllocContext ctx{"plugin init", std::string_view{plugin.fileinfo.plugin_name}};
+			init(&plugin.rack_plugin);
+		}
 
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";
