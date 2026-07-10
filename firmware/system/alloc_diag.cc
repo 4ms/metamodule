@@ -113,6 +113,10 @@ void restore(Context const &prev) {
 		slot.active = false; // keep the strings as a "last completed" breadcrumb
 }
 
+void abandon() {
+	slots[slot_index()].active = false;
+}
+
 } // namespace AllocDiag
 
 void report_alloc_contexts() {

@@ -33,6 +33,12 @@ struct __lock __lock___sfp_recursive_mutex{};
 struct __lock __lock___atexit_recursive_mutex{};
 struct __lock __lock___malloc_recursive_mutex{};
 struct __lock __lock___env_recursive_mutex{};
+
+// Used by alloc_rescue: longjmp'ing while the malloc lock is held would leave
+// the heap locked (and the lock's disabled IRQs off) forever
+int mm_malloc_lock_held() {
+	return __lock___malloc_recursive_mutex.count != 0;
+}
 struct __lock __lock___tz_mutex;
 // Not used, but newlib wants them:
 struct __lock __lock___at_quick_exit_mutex{};

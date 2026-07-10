@@ -10,6 +10,7 @@
 #include "keep-symbols.hh"
 #include "metamodule-plugin-sdk/version.hh"
 #include "pr_dbg.hh"
+#include "system/alloc_rescue.hh"
 #include <cstring>
 #include <elf.h>
 #include <new>
@@ -156,6 +157,16 @@ private:
 			pr_trace("Found %zu host symbols in binary to export for plugins\n", host_symbols.size());
 
 			hostsyms.insert(hostsyms.end(), host_symbols.begin(), host_symbols.end());
+
+			// Rebind allocator imports (malloc, free, ...) to logging wrappers so
+			// that plugin allocations appear in the OOM-rescue undo log. Plugins
+			// carry their own statically-linked operator new, so their allocations
+			// are invisible to firmware's new.cc -- these imports are the only
+			// observation point.
+			for (auto &sym : hostsyms) {
+				if (auto *redirect = AllocRescueHooks::allocator_redirect(sym.name))
+					sym.address = reinterpret_cast<uintptr_t>(redirect);
+			}
 
 			// for (auto sym : hostsyms)
 			// 	pr_dump("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);

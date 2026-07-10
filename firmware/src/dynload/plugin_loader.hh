@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/moduleFactory.hh"
 #include "dynload/dynloader.hh"
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
@@ -14,6 +15,7 @@
 #include "util/monotonic_allocator.hh"
 #include "util/version_tools.hh"
 #include <algorithm>
+#include <csetjmp>
 #include <cstdint>
 #include <string>
 
@@ -323,6 +325,61 @@ public:
 		}
 
 		pluginInstance = &plugin.rack_plugin;
+
+		// Snapshot before init() so a rollback can unregister whatever brands
+		// init() added (copies, not views: unregistering invalidates views)
+		std::vector<std::string> brands_before;
+		for (auto brand : ModuleFactory::getAllBrands())
+			brands_before.emplace_back(brand);
+
+		// Recovery point if init() runs out of memory (or otherwise aborts):
+		// most commonly a module constructor inside the plugin. Roll back and
+		// fail the load; the caller's InvalidPlugin path then cleans up the
+		// ramdisk files and pops the LoadedPlugin.
+		AllocRescue rescue;
+		if (setjmp(rescue.jump_buf()) != 0) {
+			// Ownership-based cleanup first: everything these teardowns free is
+			// recorded in the undo log, so free_survivors() below reclaims only
+			// the genuinely orphaned remainder (the half-constructed module).
+
+			// Collect names first: unregistering invalidates the brand list.
+			std::vector<std::string> new_brands;
+			for (auto brand : ModuleFactory::getAllBrands()) {
+				if (std::ranges::find(brands_before, brand) == brands_before.end())
+					new_brands.emplace_back(brand);
+			}
+			for (auto const &brand : new_brands)
+				ModuleFactory::unregisterBrand(brand);
+
+			// Delete registered models now, while the plugin's code (their
+			// vtables and destructors) is still loaded. ~Plugin would do this
+			// too, but only after ~LoadedPlugin has already freed the code.
+			for (auto *model : plugin.rack_plugin.models)
+				delete model;
+			plugin.rack_plugin.models.clear();
+
+			// Reset the Plugin: init() may have assigned its string fields, and
+			// those buffers would otherwise be freed twice -- once by
+			// free_survivors() and again by ~Plugin when the caller pops the
+			// LoadedPlugin. Assigning a fresh Plugin frees them here, on the
+			// record.
+			plugin.rack_plugin = rack::plugin::Plugin{};
+
+			auto freed = rescue.free_survivors();
+
+			pr_err("Plugin '%s' failed to load: %s. Reclaimed %zu bytes.\n",
+				   plugin.fileinfo.plugin_name.c_str(),
+				   rescue.was_oom() ? "out of memory" : "aborted during init",
+				   freed);
+
+			// The caller pops the LoadedPlugin this points into
+			pluginInstance = nullptr;
+
+			status.error_message = rescue.was_oom() ? "Out of memory loading plugin" : "Plugin failed to initialize";
+			return false;
+		}
+		rescue.arm();
+
 		//TODO: trap exceptions, restore state, and return
 		{
 			// Name this plugin in the allocation-failure report if its init()

@@ -1,4 +1,5 @@
 #include "alloc_diag.hh"
+#include "alloc_rescue.hh"
 #include <cstdlib>
 #include <new>
 
@@ -16,6 +17,7 @@ void *track(void *ptr, size_t size) {
 	if (watch && ptr)
 		watch->register_alloc(size, ptr);
 #endif
+	MetaModule::AllocRescueHooks::log_alloc(ptr, size);
 	return ptr;
 }
 
@@ -25,8 +27,12 @@ void *track(void *ptr, size_t size) {
 // failure instead. The std::nothrow forms are the explicit "I will check for
 // nullptr" opt-in, so they keep honest failure semantics.
 void *checked(void *ptr, size_t size, size_t align) {
-	if (!ptr)
+	if (!ptr) {
+		// If a rescue scope is armed for this process, roll back to it (does
+		// not return). Otherwise report and halt.
+		MetaModule::AllocRescueHooks::try_rescue(MetaModule::AllocRescueHooks::RescueReason::OutOfMemory);
 		MetaModule::alloc_failed(size, align);
+	}
 	return ptr;
 }
 
@@ -60,10 +66,9 @@ void operator delete(void *p) noexcept {
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	if (watch)
 		watch->register_dealloc(p);
-	free(p);
-#else
-	free(p);
 #endif
+	MetaModule::AllocRescueHooks::log_free(p);
+	free(p);
 }
 
 void *operator new[](size_t size) {

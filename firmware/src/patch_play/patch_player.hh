@@ -547,8 +547,7 @@ public:
 	void set_midi_cc(unsigned ccnum, int16_t val, uint16_t midi_chan) {
 		// CC values arrive as 14-bit from the M4 core (see Midi::u14cc_to_volts). Pitch
 		// bend is a separate signed 14-bit value handled directly.
-		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) :
-												   Midi::u14cc_to_volts<10>(val);
+		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) : Midi::u14cc_to_volts<10>(val);
 
 		volts = std::clamp(volts, 0.f, 10.f);
 
@@ -562,8 +561,7 @@ public:
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules) {
 					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
-						modules[mm.module_id]->set_param(mm.param_id,
-														 mm.get_mapped_val(volts / 10.f));
+						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f));
 					}
 				}
 			}
@@ -1040,20 +1038,24 @@ public:
 			modules[module_id]->bypassed = bypassed;
 	}
 
-	void add_module(BrandModuleSlug slug) {
+	bool add_module(BrandModuleSlug slug) {
 		auto module_idx = num_modules;
 
 		pd.module_slugs.push_back(slug);
 		calc_multiple_module_indicies();
 
-		create_module(slug, module_idx);
+		return create_module(slug, module_idx);
 	}
 
-	void create_module(BrandModuleSlug slug, unsigned module_idx) {
+	bool create_module(BrandModuleSlug slug, unsigned module_idx) {
 		modules[module_idx] = ModuleFactory::create(slug);
 		if (modules[module_idx] == nullptr) {
-			pr_err("Module %s not found\n", slug.c_str());
-			return;
+			pr_err("Module %s could not be created\n", slug.c_str());
+			// num_modules already counts this slot, so leaving it null crashes
+			// get_param() etc. Substitute the same inert stand-in that
+			// load_patch() uses for unknown modules.
+			modules[module_idx] = std::make_unique<NullModule>();
+			return false;
 		}
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
@@ -1072,6 +1074,8 @@ public:
 		// Mark jacks patched
 		mark_patched_jacks(module_idx);
 		mark_patched_panel_jacks(module_idx);
+
+		return true;
 	}
 
 	void remove_module(uint16_t module_idx) {

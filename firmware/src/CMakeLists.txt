@@ -112,6 +112,7 @@ add_executable(
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
   ${FWDIR}/system/alloc_diag.cc
+  ${FWDIR}/system/alloc_rescue.cc
   ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
   ${FWDIR}/system/startup_ca7.s

@@ -1,4 +1,5 @@
 #include "alloc_diag.hh"
+#include "alloc_rescue.hh"
 #include "safe_log.hh"
 #include <cerrno>
 #include <cstdint>
@@ -72,6 +73,9 @@ extern "C" size_t _sbrk(int incr) {
 		// Attribute the failure: plugins allocate via their own statically-linked
 		// operator new, so this is the only spot that sees every failed allocation
 		MetaModule::report_alloc_contexts();
+		// If this failure ends in abort() -> _kill, the rescue can report OOM
+		// as the cause rather than a generic abort
+		MetaModule::AllocRescueHooks::note_heap_exhausted();
 		errno = ENOMEM;
 		return -1;
 		// OOM!!!

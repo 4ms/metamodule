@@ -52,6 +52,7 @@ add_executable(
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
   ${FWDIR}/system/alloc_diag.cc
+  ${FWDIR}/system/alloc_rescue.cc
   ${FWDIR}/system/startup_stm32mp157cxx_cm4.s
   ${DRIVERLIB}/drivers/hal_handlers.cc
   ${DRIVERLIB}/drivers/i2c.cc

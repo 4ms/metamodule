@@ -29,6 +29,11 @@ struct Context {
 Context exchange(std::string_view kind, std::string_view name);
 void restore(Context const &prev);
 
+// Mark the current process's context inactive, keeping the strings as a
+// breadcrumb. Used when a rescue longjmp abandons the stack frames whose
+// AllocContext destructors would have restored it.
+void abandon();
+
 } // namespace AllocDiag
 
 // Names the operation currently allocating (which module is being constructed,
