@@ -196,7 +196,7 @@ public:
 			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
-				pr_err("Module %s not found\n", pd.module_slugs[i].data());
+				pr_err("Module %s not found or failed to load\n", pd.module_slugs[i].data());
 				modules[i] = std::make_unique<NullModule>();
 				num_not_found++;
 				if (num_not_found == 1)
@@ -265,11 +265,11 @@ public:
 
 		is_loaded = true;
 		if (num_not_found == 1)
-			return {true, std::string{"Module "} + not_found + std::string{" not known, ignoring."}};
+			return {true, std::string{"Module "} + not_found + std::string{" not known or failed to load, ignoring."}};
 		else if (num_not_found > 1)
 			return {true,
 					std::string{"Module "} + not_found + std::string{" and "} + std::to_string(num_not_found - 1) +
-						std::string{" others not known, ignoring."}};
+						std::string{" others not known or failed to load, ignoring."}};
 
 		else
 			return {true};
