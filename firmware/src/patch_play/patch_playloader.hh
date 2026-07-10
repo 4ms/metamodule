@@ -240,11 +240,6 @@ struct PatchPlayLoader {
 			;
 
 		if (!player_.add_module(slug)) {
-			// Roll the inert stand-in back out of the player, leaving the
-			// view patch untouched
-			player_.remove_module(player_.num_modules - 1);
-			if (should_play)
-				start_audio();
 			return false;
 		}
 

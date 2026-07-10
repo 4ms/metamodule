@@ -1923,14 +1923,14 @@ PatchData:
 
 	// Substitute module 2 (Drum) with a different slug.
 	// Module 2 has no int_cables, but has panel in/out connections and knob maps.
-	p.substitute_module(2, "4msCompany:KPLS");
+	p.substitute_module(2, "TestModule");
 
 	SUBCASE("Module count unchanged") {
 		CHECK(p.get_module_slugs().size() == 4);
 	}
 
 	SUBCASE("Slug is updated") {
-		CHECK(p.get_module_slugs()[2].is_equal("4msCompany:KPLS"));
+		CHECK(p.get_module_slugs()[2].is_equal("TestModule"));
 	}
 
 	SUBCASE("Other slugs unchanged") {
@@ -2106,14 +2106,14 @@ PatchData:
 	CHECK(p.get_module_slugs()[2].is_equal("4msCompany:Drum"));
 
 	// Replace module 2 (Drum) with a different slug
-	p.replace_module(2, "4msCompany:KPLS");
+	p.replace_module(2, "TestModule");
 
 	SUBCASE("Module count unchanged") {
 		CHECK(p.get_module_slugs().size() == 4);
 	}
 
 	SUBCASE("Slug is updated") {
-		CHECK(p.get_module_slugs()[2].is_equal("4msCompany:KPLS"));
+		CHECK(p.get_module_slugs()[2].is_equal("TestModule"));
 	}
 
 	SUBCASE("Other slugs unchanged") {

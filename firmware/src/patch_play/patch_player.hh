@@ -1044,19 +1044,23 @@ public:
 		pd.module_slugs.push_back(slug);
 		calc_multiple_module_indicies();
 
-		return create_module(slug, module_idx);
+		if (!create_module(slug, module_idx)) {
+			// Failed to create: Rollback module_slugs and num_modules
+			pd.module_slugs.pop_back();
+			calc_multiple_module_indicies();
+			return false;
+		}
+
+		return true;
 	}
 
 	bool create_module(BrandModuleSlug slug, unsigned module_idx) {
 		modules[module_idx] = ModuleFactory::create(slug);
 		if (modules[module_idx] == nullptr) {
 			pr_err("Module %s could not be created\n", slug.c_str());
-			// num_modules already counts this slot, so leaving it null crashes
-			// get_param() etc. Substitute the same inert stand-in that
-			// load_patch() uses for unknown modules.
-			modules[module_idx] = std::make_unique<NullModule>();
 			return false;
 		}
+
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
 		modules[module_idx]->id = module_idx;
@@ -1196,10 +1200,13 @@ public:
 		plugin_module_deinit(modules[module_idx]);
 		modules[module_idx].reset();
 
-		// Add new module
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
-		create_module(new_slug, module_idx);
+
+		// Add new module. If it fails, remove the old one
+		if (!create_module(new_slug, module_idx)) {
+			remove_module(module_idx);
+		}
 	}
 
 	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
@@ -1272,7 +1279,10 @@ public:
 		// Create new module in the same slot
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
-		create_module(new_slug, module_idx);
+
+		if (!create_module(new_slug, module_idx)) {
+			remove_module(module_idx);
+		}
 	}
 
 	// Jack patched/unpatched status
