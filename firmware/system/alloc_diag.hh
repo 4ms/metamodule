@@ -1,4 +1,5 @@
 #pragma once
+#include "util/static_string.hh"
 #include <cstddef>
 #include <string_view>
 
@@ -20,8 +21,8 @@ namespace AllocDiag
 {
 
 struct Context {
-	char kind[24]{};
-	char name[96]{};
+	StaticString<24> kind;
+	StaticString<96> name;
 	bool active = false;
 };
 

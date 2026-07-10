@@ -60,12 +60,6 @@ const char *proc_name(unsigned) {
 
 AllocDiag::Context slots[NumSlots];
 
-void copy_sv(char *dst, size_t dst_size, std::string_view src) {
-	auto n = std::min(src.size(), dst_size - 1);
-	std::copy_n(src.data(), n, dst);
-	dst[n] = '\0';
-}
-
 void print_contexts(SafeLog &log, unsigned cur) {
 	if (auto &slot = slots[cur]; slot.name[0]) {
 		log.str(slot.active ? "[alloc] while: " : "[alloc] last completed: ");
@@ -99,8 +93,8 @@ namespace AllocDiag
 Context exchange(std::string_view kind, std::string_view name) {
 	auto &slot = slots[slot_index()];
 	Context prev = slot;
-	copy_sv(slot.kind, sizeof(slot.kind), kind);
-	copy_sv(slot.name, sizeof(slot.name), name);
+	slot.kind.copy(kind);
+	slot.name.copy(name);
 	slot.active = true;
 	return prev;
 }
