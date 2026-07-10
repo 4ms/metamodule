@@ -9,6 +9,7 @@
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "plugin/Model.hpp"
 #include "plugin/Plugin.hpp"
 #include "system/alloc_diag.hh"
 #include "untar_contents.hh"
