@@ -6,6 +6,7 @@
 #include "metamodule-plugin-sdk/version.hh"
 #include "plugin_file_load_states.hh"
 #include <cstdint>
+#include <new>
 #include <span>
 #include <string>
 #include <vector>
@@ -36,6 +37,7 @@ struct PluginLoadUntar {
 		std::string plugin_vers_filename;
 
 		bool ramdisk_full = false;
+		bool out_of_memory = false;
 
 		auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
 			if (filename.ends_with(".so")) {
@@ -52,8 +54,17 @@ struct PluginLoadUntar {
 								 filename.data(),
 								 plugin_file.plugin_name.c_str());
 
-						so_buffer.assign(buffer.begin(), buffer.end());
-						return buffer.size();
+						// Probe before assigning: the .so can be tens of MB, and
+						// vector::assign halts in operator new on failure. A
+						// too-big binary must fail the load cleanly instead.
+						if (auto probe = new (std::nothrow) uint8_t[buffer.size()]) {
+							delete[] probe;
+							so_buffer.assign(buffer.begin(), buffer.end());
+							return buffer.size();
+						} else {
+							out_of_memory = true;
+							return Tar::Archive::FlagAbort;
+						}
 					} else
 						return 0;
 				} else {
@@ -105,6 +116,17 @@ struct PluginLoadUntar {
 
 			return {PluginFileLoaderState::RamDiskFull,
 					"Error: No space in ram disk to load plugin. Free up space by removing other plugins."};
+		}
+
+		if (out_of_memory) {
+			pr_warn("Not enough memory for plugin binary.\n");
+
+			for (auto const &fil : files_copied_to_ramdisk) {
+				ramdisk.delete_file(fil);
+			}
+			clear();
+
+			return {PluginFileLoaderState::InvalidPlugin, "Out of memory: not enough RAM to load plugin binary"};
 		}
 
 		if (!all_ok) {
