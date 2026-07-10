@@ -51,9 +51,27 @@ struct Slot {
 	unsigned count = 0;
 	bool overflowed = false;
 	bool heap_exhausted = false;
+	// Set when the guarded operation frees a block it did not allocate: it is
+	// mutating structures that existed before the scope (a shared cache, a
+	// growing pre-existing vector). Some logged blocks may then be owned by
+	// those structures, so free_survivors() must refuse (leak, never corrupt).
+	bool prescope_free = false;
 };
 
 Slot slots[NumSlots];
+
+// Tombstone the entry for ptr. Returns false if ptr was not allocated within
+// the current log (i.e. it predates the outermost scope).
+bool unlog_block(Slot &s, void *ptr) {
+	// Most recent first: frees usually follow their allocation closely
+	for (unsigned i = s.count; i-- > 0;) {
+		if (s.log[i].ptr == ptr) {
+			s.log[i].ptr = nullptr; // tombstone; indices stay stable for nested scopes
+			return true;
+		}
+	}
+	return false;
+}
 
 } // namespace
 
@@ -97,7 +115,12 @@ AllocRescue::~AllocRescue() {
 }
 
 void AllocRescue::arm() {
-	slots[slot].heap_exhausted = false;
+	auto &s = slots[slot];
+	s.heap_exhausted = false;
+	if (!prev) {
+		s.overflowed = false;
+		s.prescope_free = false;
+	}
 	active = true;
 	logging = true;
 }
@@ -108,6 +131,22 @@ bool AllocRescue::was_oom() const {
 
 size_t AllocRescue::free_survivors() {
 	auto &s = slots[slot];
+
+	if (s.prescope_free) {
+		// The operation freed memory it did not allocate, so it was mutating
+		// structures that predate the scope -- some logged blocks may be owned
+		// by them (e.g. a shared cache grown by this module instance but used
+		// by others). Freeing those corrupts live data: leak instead.
+		auto leaked = leaked_bytes();
+		s.count = log_start;
+
+		SafeLog log;
+		log.str("[rescue] operation modified pre-existing state: leaking ");
+		log.u64(leaked);
+		log.str(" bytes instead of reclaiming (unsafe to free)");
+		log.flush();
+		return 0;
+	}
 
 	size_t freed = 0;
 	for (unsigned i = log_start; i < s.count; i++) {
@@ -161,13 +200,32 @@ void log_free(void *ptr) {
 	if (!RescueState::logging(idx))
 		return;
 	auto &s = slots[idx];
-	// Most recent first: frees usually follow their allocation closely
-	for (unsigned i = s.count; i-- > 0;) {
-		if (s.log[i].ptr == ptr) {
-			s.log[i].ptr = nullptr; // tombstone; indices stay stable for nested scopes
-			return;
-		}
+	if (!unlog_block(s, ptr)) {
+		// Freeing a block the scope didn't allocate: the operation is mutating
+		// pre-existing structures (e.g. growing a shared vector frees its old
+		// buffer). The replacement block is in our log but owned elsewhere, so
+		// reclaiming the log wholesale is no longer safe.
+		s.prescope_free = true;
 	}
+}
+
+// realloc gets its own hook: unlike free(), growing a pre-scope block tells us
+// exactly which new block inherits pre-existing ownership, so we can skip
+// logging it instead of poisoning the whole scope.
+void log_realloc(void *old, void *newptr, size_t size) {
+	if (!newptr)
+		return;
+	auto idx = slot_index();
+	if (!RescueState::logging(idx))
+		return;
+	auto &s = slots[idx];
+	if (old && !unlog_block(s, old))
+		return; // grew a pre-scope block: new block belongs to its owner, not the log
+	if (s.count >= Slot::MaxEntries) {
+		s.overflowed = true;
+		return;
+	}
+	s.log[s.count++] = {newptr, size};
 }
 
 void try_rescue(RescueReason reason) {
@@ -233,10 +291,7 @@ void *mm_plugin_calloc(size_t nmemb, size_t size) {
 
 void *mm_plugin_realloc(void *old, size_t size) {
 	auto *p = realloc(old, size);
-	if (p) {
-		log_free(old);
-		log_alloc(p, size);
-	}
+	log_realloc(old, p, size);
 	return p;
 }
 
@@ -259,10 +314,7 @@ void mm_plugin_free_r(struct _reent *r, void *p) {
 
 void *mm_plugin_realloc_r(struct _reent *r, void *old, size_t size) {
 	auto *p = _realloc_r(r, old, size);
-	if (p) {
-		log_free(old);
-		log_alloc(p, size);
-	}
+	log_realloc(old, p, size);
 	return p;
 }
 

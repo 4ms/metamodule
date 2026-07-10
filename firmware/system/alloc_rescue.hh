@@ -109,6 +109,7 @@ namespace AllocRescueHooks
 // No-ops unless a rescue is armed for the current process.
 void log_alloc(void *ptr, size_t size);
 void log_free(void *ptr);
+void log_realloc(void *old, void *newptr, size_t size);
 
 enum class RescueReason { OutOfMemory, Abort };
 
