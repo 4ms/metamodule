@@ -290,23 +290,18 @@ public:
 	bool load_plugin(LoadedPlugin &plugin) {
 		using InitPluginFunc = void(rack::plugin::Plugin *);
 
-		// Constructed outside the rescue scope: the ctor builds the one-time
-		// static host symbol table, which must survive a rollback. (Its own
-		// members are locals of this frame, so they destruct normally on the
-		// handler's return.)
 		DynLoader dynloader{contents.so_buffer, plugin.code};
 
 		// Snapshot before the scope so a rollback can unregister whatever
-		// brands init() added (copies, not views: unregistering invalidates
-		// views)
+		// brands init() added
 		std::vector<std::string> brands_before;
 		for (auto brand : ModuleFactory::getAllBrands())
 			brands_before.emplace_back(brand);
 
 		// Recovery point if loading the ELF or running init() exhausts memory
-		// (or otherwise aborts) -- most commonly a module constructor inside
-		// the plugin. Roll back and fail the load; the caller's InvalidPlugin
-		// path then cleans up the ramdisk files and pops the LoadedPlugin.
+		// (or otherwise aborts). Roll back and fail the load.
+		// The caller's InvalidPlugin path then cleans up the ramdisk
+		// files and pops the LoadedPlugin.
 		AllocRescue rescue;
 		if (setjmp(rescue.jump_buf()) != 0) {
 			// Ownership-based cleanup first: everything these teardowns free is
