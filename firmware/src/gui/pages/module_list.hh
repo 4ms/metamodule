@@ -458,9 +458,10 @@ private:
 	}
 
 	void add_module(std::string_view slug) {
-		if (!patch_playloader.load_module(slug))
+		if (patch_playloader.load_module(slug))
+			patches.mark_view_patch_modified();
+		else
 			notify_queue.put({"Not enough memory to load module", Notification::Priority::Error, 2500});
-		patches.mark_view_patch_modified();
 	}
 
 	std::string get_selected_combined_slug(unsigned selected_idx) {

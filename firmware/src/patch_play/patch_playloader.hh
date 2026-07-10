@@ -231,7 +231,7 @@ struct PatchPlayLoader {
 	}
 
 	// Returns false if the module could not be created (e.g. out of memory);
-	// an inert stand-in occupies its slot in the player.
+	// in that case the patch is left exactly as it was.
 	bool load_module(std::string_view slug) {
 		bool should_play = is_playing();
 
@@ -239,7 +239,14 @@ struct PatchPlayLoader {
 		while (!is_audio_muted())
 			;
 
-		bool created = player_.add_module(slug);
+		if (!player_.add_module(slug)) {
+			// Roll the inert stand-in back out of the player, leaving the
+			// view patch untouched
+			player_.remove_module(player_.num_modules - 1);
+			if (should_play)
+				start_audio();
+			return false;
+		}
 
 		auto *patch = patches_.get_view_patch();
 		uint16_t module_id = patch->add_module(slug);
@@ -259,7 +266,7 @@ struct PatchPlayLoader {
 		if (should_play)
 			start_audio();
 
-		return created;
+		return true;
 	}
 
 	void change_module(std::string_view slug, unsigned module_id, bool keep_cables_and_maps) {
