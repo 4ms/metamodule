@@ -1,8 +1,8 @@
+#include "core_m4/midi_controls.hh"
 #include "doctest.h"
 #include "patch-serial/yaml_to_patch.hh"
 #include "patch_play/patch_player.hh"
 #include "stubs/test_module.hh"
-#include "core_m4/midi_controls.hh"
 
 // Register TestModule so patches can use slug "TestModule"
 namespace
@@ -2935,4 +2935,36 @@ TEST_CASE("MIDI parser: release and reuse fills freed slot") {
 	// New note should use the freed slot (chan 1)
 	auto e = parser.parse(MidiMessage{0x90, 69, 100});
 	CHECK(e.poly_chan == 1);
+}
+
+TEST_CASE("MIDI parser: notes on multiple MIDI channels don't steal from other channels") {
+	MetaModule::Midi::MessageParser parser;
+	parser.set_poly_num(4);
+
+	// Check that pressing a new note on MIDI channel with no notes will use voice 0,
+	// even if other channels have active voices.
+
+	// Hold three notes down on Chan 10 -- voice 3 is open
+	CHECK(parser.parse(MidiMessage{0x9a, 60, 100}).poly_chan == 0); // chan 10 voice 0 ON (HELD)
+	CHECK(parser.parse(MidiMessage{0x9a, 61, 100}).poly_chan == 1); // chan 10 voice 1 ON (HELD)
+	CHECK(parser.parse(MidiMessage{0x9a, 62, 100}).poly_chan == 2); // chan 10 voice 2 ON (HELD)
+
+	// Press a note on Chan 11 -- should get voice 0
+	// If it gets voice 3, then it stole it from MIDI channel 10
+	CHECK(parser.parse(MidiMessage{0x9b, 60, 100}).poly_chan == 0); // chan 11 voice 0
+}
+
+TEST_CASE("MIDI parser: notes on multiple MIDI channels don't steal from other channels (mono)") {
+	MetaModule::Midi::MessageParser parser;
+	parser.set_poly_num(1);
+
+	// Hold a notes down on Chan 10
+	CHECK(parser.parse(MidiMessage{0x9a, 60, 100}).poly_chan == 0); // chan 10 voice 0 ON (HELD)
+
+	// Press a note on Chan 11 -- should get voice 0
+	// If it gets voice 3, then it stole it from MIDI channel 10
+	CHECK(parser.parse(MidiMessage{0x9b, 60, 100}).poly_chan == 0); // chan 11 voice 0
+
+	CHECK(parser.parse(MidiMessage{0x8a, 60, 100}).poly_chan == 0); // chan 10 voice 0 Off
+	CHECK(parser.parse(MidiMessage{0x8b, 60, 100}).poly_chan == 0); // chan 10 voice 0 Off
 }

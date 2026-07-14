@@ -2,6 +2,7 @@
 #include "midi/midi_message.hh"
 #include "params/midi_params.hh"
 #include "patch/midi_def.hh"
+#include "util/zip.hh"
 #include <algorithm>
 #include <optional>
 
@@ -9,8 +10,16 @@ namespace MetaModule::Midi
 {
 
 struct MessageParser {
-	std::array<Midi::Note, MaxMidiPolyphony> all_midi_notes;
-	std::span<Midi::Note> midi_notes{all_midi_notes};
+	struct Note {
+		uint8_t note = 0;
+		bool gate = 0;
+	};
+	static constexpr unsigned NumMidiChannels = 16;
+
+	std::array<std::array<Note, MaxMidiPolyphony>, NumMidiChannels> all_midi_notes;
+	std::array<std::span<Note>, NumMidiChannels> midi_notes;
+
+	std::array<size_t, NumMidiChannels> last_poly_chan;
 
 	// 14-bit CC mode: when enabled, CC 0-31 are MSBs and CC 32-63 are the matching
 	// LSBs (CC n+32). The last MSB received for each CC is stored so it can be
@@ -18,11 +27,20 @@ struct MessageParser {
 	bool midi_14bit_mode = false;
 	std::array<uint8_t, 32> cc_msb{};
 
+	MessageParser() {
+		for (auto [span, backing] : zip(midi_notes, all_midi_notes)) {
+			span = backing;
+		}
+		std::ranges::fill(last_poly_chan, MaxMidiPolyphony);
+	}
+
 	void set_poly_num(uint32_t poly_chans) {
 		poly_chans = std::clamp<uint32_t>(poly_chans, 1U, all_midi_notes.size());
 
-		if (poly_chans != midi_notes.size()) {
-			midi_notes = std::span{all_midi_notes.begin(), poly_chans};
+		for (auto [chan, backing] : zip(midi_notes, all_midi_notes)) {
+			if (poly_chans != chan.size()) {
+				chan = std::span{backing.begin(), poly_chans};
+			}
 		}
 	}
 
@@ -34,12 +52,14 @@ struct MessageParser {
 
 		Midi::Event event{};
 
+		auto chan = msg.status.channel;
+
 		// Monophonic MIDI CV/Gate
 		if (msg.is_noteoff()) {
 
 			// Find the note in held midi_notes, and get the poly chan if found.
 			event.poly_chan = -1;
-			for (unsigned i = 0; auto &midi_note : midi_notes) {
+			for (unsigned i = 0; auto &midi_note : midi_notes[chan]) {
 				if (midi_note.note == msg.note() && midi_note.gate) {
 					midi_note.gate = false;
 					event.poly_chan = i;
@@ -53,19 +73,19 @@ struct MessageParser {
 
 		} else if (msg.is_command<MidiCommand::NoteOn>()) {
 
-			auto poly_chan = find_polyphonic_slot_rotate(midi_notes, msg.note());
-			Midi::Note &midi_note = midi_notes[poly_chan];
+			last_poly_chan[chan] = find_polyphonic_slot_rotate(midi_notes[chan], msg.note(), last_poly_chan[chan]);
+			Note &midi_note = midi_notes[chan][last_poly_chan[chan]];
 			midi_note.note = msg.note();
 			midi_note.gate = true;
 
 			event.type = Midi::Event::Type::NoteOn;
-			event.poly_chan = poly_chan;
+			event.poly_chan = last_poly_chan[chan];
 			event.note = msg.note();
 			event.val = msg.velocity();
 			event.midi_chan = msg.status.channel;
 
 		} else if (msg.is_command<MidiCommand::PolyKeyPressure>()) { //aka Aftertouch
-			for (unsigned i = 0; auto &midi_note : midi_notes) {
+			for (unsigned i = 0; auto &midi_note : midi_notes[chan]) {
 				if (midi_note.note == msg.note()) {
 					event.type = Midi::Event::Type::Aft;
 					event.poly_chan = i;
@@ -129,17 +149,15 @@ struct MessageParser {
 		return event;
 	}
 
-	size_t last_poly_chan = MaxMidiPolyphony;
-
-	size_t find_polyphonic_slot_rotate(std::span<Midi::Note> midi_notes, uint8_t note) {
-		auto next = last_poly_chan + 1;
+	size_t find_polyphonic_slot_rotate(std::span<Note> midi_notes, uint8_t note, size_t last_poly_ch) {
+		auto next = last_poly_ch + 1;
 		if (next >= midi_notes.size())
 			next = 0;
 
 		auto first = next;
 
 		while (midi_notes[next].gate == true) {
-			if (next == last_poly_chan) {
+			if (next == last_poly_ch) {
 				next = first;
 				break;
 			}
@@ -148,11 +166,10 @@ struct MessageParser {
 			if (next >= midi_notes.size())
 				next = 0;
 		}
-		last_poly_chan = next;
 		return next;
 	}
 
-	size_t find_polyphonic_slot_first_available(std::span<Midi::Note> midi_notes, uint8_t note) {
+	size_t find_polyphonic_slot_first_available(std::span<Note> midi_notes, uint8_t note) {
 		size_t empty_slot = midi_notes.size() - 1;
 
 		for (unsigned i = 0; auto &midi_note : midi_notes) {
@@ -165,10 +182,12 @@ struct MessageParser {
 
 	bool noteoff_seq_in_progress = false;
 	uint8_t noteoff_seq_cur_step = 0;
+	uint8_t noteoff_seq_chan = 0;
 
 	void start_all_notes_off_sequence() {
 		noteoff_seq_in_progress = true;
 		noteoff_seq_cur_step = 0;
+		noteoff_seq_chan = 0;
 	}
 
 	// Sends NoteOff to all poly channels, one by one, each time it's called
@@ -177,11 +196,16 @@ struct MessageParser {
 		if (!noteoff_seq_in_progress)
 			return std::nullopt;
 
-		if (noteoff_seq_cur_step < MaxMidiPolyphony) {
-			auto event = Midi::Event{.type = Midi::Event::Type::NoteOff, .poly_chan = noteoff_seq_cur_step};
-			midi_notes[noteoff_seq_cur_step].gate = false;
+		if (noteoff_seq_chan < NumMidiChannels) {
+			auto event = Midi::Event{
+				.type = Midi::Event::Type::NoteOff, .midi_chan = noteoff_seq_chan, .poly_chan = noteoff_seq_cur_step};
+			midi_notes[noteoff_seq_chan][noteoff_seq_cur_step].gate = false;
 
 			noteoff_seq_cur_step++;
+			if (noteoff_seq_cur_step >= 128) {
+				noteoff_seq_cur_step = 0;
+				noteoff_seq_chan++;
+			}
 			return event;
 		}
 
