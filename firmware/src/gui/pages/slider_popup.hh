@@ -18,8 +18,14 @@ struct SliderPopup {
 		, group(lv_group_create()) {
 		lv_hide(popup);
 
-		lv_obj_set_width(slider, 200);
+		lv_obj_set_width(popup, 200);
+		lv_obj_set_height(popup, LV_SIZE_CONTENT);
+
+		lv_obj_set_width(slider, LV_PCT(75));
 		lv_slider_set_range(slider, 0, Resolution);
+
+		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded50012, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_width(label, LV_PCT(75));
 
 		lv_obj_add_event_cb(slider, value_changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(slider, click_cb, LV_EVENT_CLICKED, this);
