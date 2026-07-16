@@ -16,6 +16,10 @@
 # 
 # See docs/simulator-ext-plugins.md for instructions
 
+list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/CVfunk/metamodule")
+list(APPEND ext_builtin_brand_libname "CVfunk")
+# list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/Bogaudio")
+# list(APPEND ext_builtin_brand_libname "BogaudioModules")
 
 #
 # Asset dir
@@ -62,7 +66,45 @@ foreach(branddir brand slug IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_bra
 	target_link_libraries(${brand} PRIVATE cpputil::cpputil)
 	target_compile_definitions(${brand} PRIVATE METAMODULE METAMODULE_BUILTIN)
 
-	target_link_libraries(_vcv_ports_internal PUBLIC ${brand})
+	# Prelink the brand's static lib into a single relocatable object and localize all
+	# symbols except its entry point (init_${brand}). This keeps each plugin's internal
+	# symbols private, the same as when it's dynamically loaded on hardware. Otherwise,
+	# same-named classes in two statically-linked plugins (e.g. a global-namespace
+	# `DigitalDisplay` in both Valley and CVfunk) get merged by the linker, and one
+	# plugin's vtable/methods silently operate on the other's incompatible object layout.
+	set(brand_localized_obj ${CMAKE_CURRENT_BINARY_DIR}/builtins/${brand}_localized.o)
+
+	if (APPLE)
+		set(brand_exports_file ${CMAKE_CURRENT_BINARY_DIR}/builtins/${brand}_exports.txt)
+		file(WRITE ${brand_exports_file} "*init_${brand}*\n")
+		# -mmacosx-version-min: stamp a floor version so the final link never sees the
+		# prelinked object as "newer" than its target. -Wl,-w: silence the resulting
+		# version-mismatch warnings within this (purely mechanical) prelink step.
+		add_custom_command(
+			OUTPUT ${brand_localized_obj}
+			COMMAND ${CMAKE_CXX_COMPILER} -r -nostdlib -mmacosx-version-min=11.0 -Wl,-w
+					-Wl,-force_load,$<TARGET_FILE:${brand}>
+					-Wl,-exported_symbols_list,${brand_exports_file}
+					-o ${brand_localized_obj}
+			DEPENDS ${brand} ${brand_exports_file}
+			COMMENT "Prelinking ${brand} and localizing all symbols except init_${brand}"
+			VERBATIM
+		)
+	else()
+		add_custom_command(
+			OUTPUT ${brand_localized_obj}
+			COMMAND ${CMAKE_LINKER} -r --whole-archive $<TARGET_FILE:${brand}> --no-whole-archive -o ${brand_localized_obj}.partial.o
+			COMMAND ${CMAKE_OBJCOPY} -w --keep-global-symbol=*init_${brand}* ${brand_localized_obj}.partial.o ${brand_localized_obj}
+			DEPENDS ${brand}
+			COMMENT "Prelinking ${brand} and localizing all symbols except init_${brand}"
+			VERBATIM
+		)
+	endif()
+
+	add_custom_target(${brand}-localized DEPENDS ${brand_localized_obj})
+	add_dependencies(_vcv_ports_internal ${brand}-localized)
+
+	target_link_libraries(_vcv_ports_internal PUBLIC ${brand_localized_obj})
 	add_dependencies(asset-image ${brand}-assets)
 
 	string(APPEND EXT_PLUGIN_INIT_CALLS "\textern void init_${brand}(rack::plugin::Plugin *);\n\tinit_${brand}(&internal_plugins.emplace_back(\"${slug}\"));")
