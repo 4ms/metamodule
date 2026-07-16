@@ -31,14 +31,17 @@ struct PluginModuleMenu {
 		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
 		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_SELECTED);
 
-		lv_obj_set_style_text_color(roller, lv_color_hex(0xCCCCCC), LV_STATE_DEFAULT);
+		lv_obj_set_style_text_color(roller, lv_color_hex(0xFFFFFF), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(roller, 255, LV_STATE_DEFAULT);
 
 		auto hover_label = lv_obj_get_child(roller_hover.get_cont(), 0);
 		lv_obj_set_style_text_font(hover_label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
+		lv_obj_set_style_text_color(hover_label, lv_color_hex(0xFFFFFF), LV_STATE_DEFAULT);
 
-		lv_obj_set_x(roller_hover.get_cont(), 8);
-		lv_obj_set_style_pad_left(hover_label, 14, 0);
+		lv_obj_set_x(roller_hover.get_cont(), 6);
+		lv_obj_set_width(roller_hover.get_cont(), lv_pct(100));
+		lv_obj_set_style_pad_left(hover_label, 10, 0);
+		lv_obj_set_style_pad_right(hover_label, 10, 0);
 	}
 
 	bool create_options_menu(unsigned this_module_id) {
@@ -95,7 +98,7 @@ struct PluginModuleMenu {
 
 	void back_event() {
 		if (slider_popup.is_visible()) {
-			slider_popup.hide();
+			slider_popup.back();
 			close_slider_popup();
 			return;
 		}
@@ -111,7 +114,11 @@ struct PluginModuleMenu {
 	}
 
 	void update() {
-		roller_hover.update();
+		if (!slider_popup.is_visible()) {
+			roller_hover.update();
+		} else {
+			roller_hover.hide();
+		}
 	}
 
 	bool wants_to_close() {
@@ -126,9 +133,13 @@ struct PluginModuleMenu {
 		}
 
 		if (auto slider_edit = plugin_menu->click_item(idx - 1)) {
+			roller_hover.hide();
 			slider_popup.show(
 				[this](float scaled_value) { slider_popup.update_label(plugin_menu->set_slider_value(scaled_value)); },
-				[this]() { close_slider_popup(); },
+				[this]() {
+					close_slider_popup();
+					roller_hover.force_redraw();
+				},
 				slider_edit->label,
 				slider_edit->scaled_value,
 				static_cast<lv_group_t *>(lv_obj_get_group(roller)));
@@ -187,7 +198,7 @@ private:
 		lv_event_send(page->roller, LV_EVENT_PRESSED, nullptr);
 
 		// index might be the same, but content probably changed
-		page->roller_hover.force_redraw();
+		// page->roller_hover.force_redraw();
 	}
 
 	static void roller_scrolled_cb(lv_event_t *event) {
