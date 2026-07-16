@@ -12,8 +12,11 @@
 #
 # If you have more than one external plugin, then you have to specify the slug for ALL of them or NONE of them.
 #
-# Don't forget to change init() => init_BrandSlug(), and add `extern` to the pluginInstance!
-# 
+# No source changes are needed in the plugin: its init() is automatically renamed to
+# init_BrandName and all its other symbols (including pluginInstance) are kept private.
+# (Legacy plugins that #ifdef'd init() => init_BrandName() and made pluginInstance
+# `extern` for the simulator still work, too.)
+#
 # See docs/simulator-ext-plugins.md for instructions
 
 list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/CVfunk/metamodule")
@@ -66,40 +69,77 @@ foreach(branddir brand slug IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_bra
 	target_link_libraries(${brand} PRIVATE cpputil::cpputil)
 	target_compile_definitions(${brand} PRIVATE METAMODULE METAMODULE_BUILTIN)
 
-	# Prelink the brand's static lib into a single relocatable object and localize all
-	# symbols except its entry point (init_${brand}). This keeps each plugin's internal
-	# symbols private, the same as when it's dynamically loaded on hardware. Otherwise,
-	# same-named classes in two statically-linked plugins (e.g. a global-namespace
-	# `DigitalDisplay` in both Valley and CVfunk) get merged by the linker, and one
-	# plugin's vtable/methods silently operate on the other's incompatible object layout.
+	# Prelink the brand's static lib into a single relocatable object, rename its
+	# init() entry point to init_${brand}, and localize all other symbols. This keeps
+	# each plugin's internal symbols (including its `pluginInstance`) private, the same
+	# as when it's dynamically loaded on hardware. Otherwise, same-named symbols in two
+    # statically-linked plugins get merged by the linker, and one plugin's code
+    # silently operates on another plugin's incompatible objects. See
+    # localize-ext-plugin.cmake for details.
 	set(brand_localized_obj ${CMAKE_CURRENT_BINARY_DIR}/builtins/${brand}_localized.o)
 
-	if (APPLE)
-		set(brand_exports_file ${CMAKE_CURRENT_BINARY_DIR}/builtins/${brand}_exports.txt)
-		file(WRITE ${brand_exports_file} "*init_${brand}*\n")
-		# -mmacosx-version-min: stamp a floor version so the final link never sees the
-		# prelinked object as "newer" than its target. -Wl,-w: silence the resulting
-		# version-mismatch warnings within this (purely mechanical) prelink step.
-		add_custom_command(
-			OUTPUT ${brand_localized_obj}
-			COMMAND ${CMAKE_CXX_COMPILER} -r -nostdlib -mmacosx-version-min=11.0 -Wl,-w
-					-Wl,-force_load,$<TARGET_FILE:${brand}>
-					-Wl,-exported_symbols_list,${brand_exports_file}
-					-o ${brand_localized_obj}
-			DEPENDS ${brand} ${brand_exports_file}
-			COMMENT "Prelinking ${brand} and localizing all symbols except init_${brand}"
-			VERBATIM
-		)
-	else()
-		add_custom_command(
-			OUTPUT ${brand_localized_obj}
-			COMMAND ${CMAKE_LINKER} -r --whole-archive $<TARGET_FILE:${brand}> --no-whole-archive -o ${brand_localized_obj}.partial.o
-			COMMAND ${CMAKE_OBJCOPY} -w --keep-global-symbol=*init_${brand}* ${brand_localized_obj}.partial.o ${brand_localized_obj}
-			DEPENDS ${brand}
-			COMMENT "Prelinking ${brand} and localizing all symbols except init_${brand}"
-			VERBATIM
-		)
-	endif()
+	# Collect the brand's own static-library dependencies (transitively), so
+	# multi-library plugins (e.g. Airwindows' airwin-registry) get prelinked and
+	# localized completely. Host-provided targets are excluded: references to them
+	# stay undefined in the prelinked object and resolve against the host at the
+	# final link (same as when the plugin is dynamically loaded on hardware).
+	set(host_provided_targets
+		metamodule::vcv-plugin-interface vcv-plugin-interface
+		cpputil::cpputil cpputil
+		metamodule::CMSISDSP CMSISDSP
+	)
+	set(brand_dep_archives "")
+	set(brand_dep_targets "")
+	set(_pending ${brand})
+	set(_visited "")
+	while(_pending)
+		list(POP_FRONT _pending _dep)
+		if (_dep IN_LIST _visited)
+			continue()
+		endif()
+		list(APPEND _visited ${_dep})
+		if (_dep IN_LIST host_provided_targets)
+			continue()
+		endif()
+		if (NOT TARGET ${_dep})
+			# A raw path to a prebuilt static lib is prelinked in, too
+			if (EXISTS ${_dep} AND _dep MATCHES "\\.a$")
+				list(APPEND brand_dep_archives ${_dep})
+			endif()
+			continue()
+		endif()
+		get_target_property(_dep_type ${_dep} TYPE)
+		if (NOT _dep STREQUAL brand AND _dep_type STREQUAL "STATIC_LIBRARY")
+			list(APPEND brand_dep_archives $<TARGET_FILE:${_dep}>)
+			list(APPEND brand_dep_targets ${_dep})
+		endif()
+		if (_dep_type STREQUAL "INTERFACE_LIBRARY")
+			get_target_property(_dep_deps ${_dep} INTERFACE_LINK_LIBRARIES)
+		else()
+			get_target_property(_dep_deps ${_dep} LINK_LIBRARIES)
+		endif()
+		if (_dep_deps)
+			list(APPEND _pending ${_dep_deps})
+		endif()
+	endwhile()
+	list(JOIN brand_dep_archives "|" brand_dep_archives_joined)
+
+	add_custom_command(
+		OUTPUT ${brand_localized_obj}
+		COMMAND ${CMAKE_COMMAND}
+				-DARCHIVE=$<TARGET_FILE:${brand}>
+				"-DDEP_ARCHIVES=${brand_dep_archives_joined}"
+				-DBRAND=${brand}
+				-DOUTPUT=${brand_localized_obj}
+				-DHOST_APPLE=${APPLE}
+				-DCXX=${CMAKE_CXX_COMPILER}
+				-DLINKER=${CMAKE_LINKER}
+				-DOBJCOPY=${CMAKE_OBJCOPY}
+				-P ${CMAKE_CURRENT_LIST_DIR}/localize-ext-plugin.cmake
+		DEPENDS ${brand} ${brand_dep_targets} ${CMAKE_CURRENT_LIST_DIR}/localize-ext-plugin.cmake
+		COMMENT "Prelinking ${brand}: renaming init() => init_${brand} and localizing internal symbols"
+		VERBATIM
+	)
 
 	add_custom_target(${brand}-localized DEPENDS ${brand_localized_obj})
 	add_dependencies(_vcv_ports_internal ${brand}-localized)
@@ -107,7 +147,7 @@ foreach(branddir brand slug IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_bra
 	target_link_libraries(_vcv_ports_internal PUBLIC ${brand_localized_obj})
 	add_dependencies(asset-image ${brand}-assets)
 
-	string(APPEND EXT_PLUGIN_INIT_CALLS "\textern void init_${brand}(rack::plugin::Plugin *);\n\tinit_${brand}(&internal_plugins.emplace_back(\"${slug}\"));")
+	string(APPEND EXT_PLUGIN_INIT_CALLS "\textern void init_${brand}(rack::plugin::Plugin *);\n\tpluginInstance = &internal_plugins.emplace_back(\"${slug}\");\n\tinit_${brand}(pluginInstance);\n")
 endforeach()
 
 configure_file(src/ext_plugin_builtin.hh.in ${CMAKE_CURRENT_BINARY_DIR}/ext_plugin/ext_plugin_builtin.hh)
