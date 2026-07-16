@@ -171,7 +171,7 @@ private:
 					if (rack_item->rightText.ends_with(CHECKMARK_STRING))
 						item = Gui::yellow_text(CHECKMARK_STRING);
 
-					item += rack_item->text;
+					item += Gui::lt_grey_text(rack_item->text);
 
 					if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
 						item += " " + Gui::yellow_text(rack_item->rightText);
@@ -187,7 +187,7 @@ private:
 				{
 					rack_item->step();
 					if (rack_item->quantity)
-						menu.emplace_back(Gui::grey_text(rack_item->quantity->getString()));
+						menu.emplace_back(Gui::lt_grey_text(rack_item->quantity->getString()));
 				}
 
 				else if (auto rack_item = dynamic_cast<rack::ui::MenuSeparator *>(child))
@@ -208,7 +208,7 @@ private:
 	std::weak_ptr<rack::app::ModuleWidget> module_widget{};
 	std::unique_ptr<rack::widget::Widget> menu_owner;
 
-	rack::ui::Menu *current_menu{}; //can't use smart pointer because must point to a raw pointer in rack API
+	rack::ui::Menu *current_menu{};	   //can't use smart pointer because must point to a raw pointer in rack API
 	rack::ui::Slider *active_slider{}; //the slider currently being adjusted via a SliderPopup, if any
 
 	bool exited = false;
