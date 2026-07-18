@@ -67,7 +67,8 @@ extern "C" size_t _sbrk(int incr) {
 	}
 	prev_heap_end = heap_end;
 
-	if (heap_end + incr > &_eheap) {
+	// Overflow-safe bounds check
+	if (incr > 0 && static_cast<uintptr_t>(incr) > static_cast<uintptr_t>(&_eheap - heap_end)) {
 		log_sbrk(incr, heap_end, true);
 		errno = ENOMEM;
 		return -1;
