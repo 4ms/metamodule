@@ -33,6 +33,9 @@ struct __lock __lock___sfp_recursive_mutex{};
 struct __lock __lock___atexit_recursive_mutex{};
 struct __lock __lock___malloc_recursive_mutex{};
 struct __lock __lock___env_recursive_mutex{};
+// Guards the plugin arena allocator (plugin_arena.cc); gets the same
+// IRQ-disabling treatment as the malloc lock so async threads can allocate
+struct __lock __lock_mm_plugin_arena{};
 struct __lock __lock___tz_mutex;
 // Not used, but newlib wants them:
 struct __lock __lock___at_quick_exit_mutex{};
