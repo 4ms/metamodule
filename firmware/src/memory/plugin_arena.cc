@@ -1,10 +1,8 @@
 #include "plugin_arena.hh"
-#include "system/alloc_diag.hh"
-#include "system/alloc_rescue.hh"
 #include "system/safe_log.hh"
 #include "tlsf/mm_tlsf.h"
-#include <cstdlib>
 #include <cstring>
+#include <new>
 #include <sys/lock.h>
 
 // Defined by the linker: end of the A7 heap. The arena is the top
@@ -65,9 +63,6 @@ void log_arena_oom(size_t size) {
 	log.str(" peak=");
 	log.u64(peak);
 	log.flush();
-
-	// So a subsequent abort-rescue reports OOM as the cause
-	AllocRescueHooks::note_heap_exhausted();
 }
 
 void account_alloc(void *p) {
@@ -139,54 +134,74 @@ size_t peak_bytes() {
 
 } // namespace MetaModule::PluginArena
 
-// ---- Plugin allocator wrappers -------------------------------------------
+using namespace MetaModule;
+
+// ---- free/realloc dispatchers (--wrap) -------------------------------------
+// Ownership legitimately crosses the firmware/plugin boundary in both
+// directions (e.g. a std::string handed across), so every free/realloc must
+// dispatch by the pointer's address. The firmware links with --wrap=free etc.
+// (see src/CMakeLists.txt), which redirects every firmware call site --
+// including newlib-internal ones -- here. Plugin imports of free/_free_r are
+// redirected here as well (allocator_redirect below): --wrap only rewrites
+// link-time references, so a name lookup of "free" in the ELF would find the
+// real newlib function, not the wrapper.
+
+extern "C" {
+
+void __real_free(void *);
+void __real__free_r(struct _reent *, void *);
+void *__real_realloc(void *, size_t);
+void *__real__realloc_r(struct _reent *, void *, size_t);
+
+void __wrap_free(void *p) {
+	if (PluginArena::contains(p))
+		PluginArena::free(p);
+	else
+		__real_free(p);
+}
+
+void __wrap__free_r(struct _reent *r, void *p) {
+	if (PluginArena::contains(p))
+		PluginArena::free(p);
+	else
+		__real__free_r(r, p);
+}
+
+void *__wrap_realloc(void *p, size_t size) {
+	if (PluginArena::contains(p))
+		return PluginArena::realloc(p, size);
+	return __real_realloc(p, size);
+}
+
+void *__wrap__realloc_r(struct _reent *r, void *p, size_t size) {
+	if (PluginArena::contains(p))
+		return PluginArena::realloc(p, size);
+	return __real__realloc_r(r, p, size);
+}
+
+} // extern "C"
+
+// ---- Plugin allocator wrappers ---------------------------------------------
 // Plugins statically link their own operator new/delete/std containers, which
 // call the C allocator functions imported from firmware. The dynloader
 // rebinds those imports (via allocator_redirect below) to these wrappers so
-// that everything plugin code allocates lands in the arena, and every free
-// dispatches by address -- ownership legitimately crosses the firmware/plugin
-// boundary in both directions (e.g. a std::string handed across).
+// that everything plugin code allocates lands in the arena.
 //
-// A failed arena allocation returns nullptr, same as malloc: the plugin gets
-// its chance to handle it, and if it aborts instead (bad_alloc -> terminate),
-// the _kill/_exit hook rescues via the armed scope.
-
-using namespace MetaModule;
-using namespace MetaModule::AllocRescueHooks;
+// A failed arena allocation returns nullptr, same as malloc: the plugin's own
+// operator new then throws its own bad_alloc, which the plugin can catch and
+// recover from; if it doesn't, its terminate handler calls the imported
+// abort() -> firmware _kill/_exit (the stage-2 recovery hook).
 
 namespace
 {
 
-void *plugin_alloc(size_t size) {
-	auto *p = PluginArena::alloc(size);
-	log_alloc(p, size);
-	return p;
-}
-
-void plugin_free(void *p) {
-	if (!p)
-		return;
-	log_free(p);
-	if (PluginArena::contains(p))
-		PluginArena::free(p);
-	else
-		::free(p); // block was allocated by firmware, handed to plugin code
-}
-
 void *plugin_realloc(void *old, size_t size) {
-	// The log only compares the old pointer's value, never dereferences it;
-	// capture as an integer up front to satisfy -Wuse-after-free
-	auto old_addr = reinterpret_cast<uintptr_t>(old);
-
-	void *p;
-	if (old && !PluginArena::contains(old)) {
-		// Growing a firmware-heap block: keep it there (newlib owns it)
-		p = ::realloc(old, size);
-	} else {
-		p = PluginArena::realloc(old, size);
-	}
-	log_realloc(reinterpret_cast<void *>(old_addr), p, size);
-	return p;
+	// A firmware-heap block stays on the firmware heap (newlib owns it); a
+	// null or arena pointer (re)allocates in the arena -- unlike __wrap_realloc,
+	// the caller here is known to be plugin code
+	if (old && !PluginArena::contains(old))
+		return __real_realloc(old, size);
+	return PluginArena::realloc(old, size);
 }
 
 } // namespace
@@ -194,16 +209,12 @@ void *plugin_realloc(void *old, size_t size) {
 extern "C" {
 
 void *mm_plugin_malloc(size_t size) {
-	return plugin_alloc(size);
-}
-
-void mm_plugin_free(void *p) {
-	plugin_free(p);
+	return PluginArena::alloc(size);
 }
 
 void *mm_plugin_calloc(size_t nmemb, size_t size) {
 	auto total = nmemb * size;
-	auto *p = plugin_alloc(total);
+	auto *p = PluginArena::alloc(total);
 	if (p)
 		memset(p, 0, total);
 	return p;
@@ -214,14 +225,11 @@ void *mm_plugin_realloc(void *old, size_t size) {
 }
 
 void *mm_plugin_memalign(size_t align, size_t size) {
-	auto *p = PluginArena::alloc_aligned(align, size);
-	log_alloc(p, size);
-	return p;
+	return PluginArena::alloc_aligned(align, size);
 }
 
 int mm_plugin_posix_memalign(void **memptr, size_t align, size_t size) {
 	auto *p = PluginArena::alloc_aligned(align, size);
-	log_alloc(p, size);
 	if (!p)
 		return 12; // ENOMEM
 	*memptr = p;
@@ -229,18 +237,12 @@ int mm_plugin_posix_memalign(void **memptr, size_t align, size_t size) {
 }
 
 void *mm_plugin_aligned_alloc(size_t align, size_t size) {
-	auto *p = PluginArena::alloc_aligned(align, size);
-	log_alloc(p, size);
-	return p;
+	return PluginArena::alloc_aligned(align, size);
 }
 
 // newlib reentrant entry points: same behavior, reent unused
 void *mm_plugin_malloc_r(struct _reent *, size_t size) {
-	return plugin_alloc(size);
-}
-
-void mm_plugin_free_r(struct _reent *, void *p) {
-	plugin_free(p);
+	return PluginArena::alloc(size);
 }
 
 void *mm_plugin_realloc_r(struct _reent *, void *old, size_t size) {
@@ -256,41 +258,37 @@ void *mm_plugin_memalign_r(struct _reent *, size_t align, size_t size) {
 }
 
 // C++ operator new/delete, for plugins that import them instead of statically
-// linking libstdc++'s. Throwing news must not return nullptr: rescue if a
-// scope is armed, else hard-fail with the report.
+// linking libstdc++'s. The throwing news must not return nullptr; the thrown
+// bad_alloc is the firmware's, and (until cross-boundary unwinding exists)
+// will terminate if no handler is reached before plugin frames.
 void *mm_plugin_op_new(unsigned size) {
-	auto *p = plugin_alloc(size);
-	if (!p) {
-		try_rescue(RescueReason::OutOfMemory);
-		alloc_failed(size, alignof(max_align_t));
-	}
+	auto *p = PluginArena::alloc(size);
+	if (!p)
+		throw std::bad_alloc{};
 	return p;
 }
 
 void *mm_plugin_op_new_nothrow(unsigned size, void const *) {
-	return plugin_alloc(size);
+	return PluginArena::alloc(size);
 }
 
 void *mm_plugin_op_new_aligned(unsigned size, unsigned align) {
 	auto *p = PluginArena::alloc_aligned(align, size);
-	log_alloc(p, size);
-	if (!p) {
-		try_rescue(RescueReason::OutOfMemory);
-		alloc_failed(size, align);
-	}
+	if (!p)
+		throw std::bad_alloc{};
 	return p;
 }
 
 void mm_plugin_op_delete(void *p) {
-	plugin_free(p);
+	__wrap_free(p);
 }
 
 void mm_plugin_op_delete_sized(void *p, unsigned) {
-	plugin_free(p);
+	__wrap_free(p);
 }
 
 void mm_plugin_op_delete_aligned(void *p, unsigned) {
-	plugin_free(p);
+	__wrap_free(p);
 }
 
 } // extern "C"
@@ -301,17 +299,21 @@ namespace MetaModule::PluginArena
 void *allocator_redirect(std::string_view name) {
 	// clang-format off
 	if (name == "malloc")          return reinterpret_cast<void *>(mm_plugin_malloc);
-	if (name == "free")            return reinterpret_cast<void *>(mm_plugin_free);
 	if (name == "calloc")          return reinterpret_cast<void *>(mm_plugin_calloc);
 	if (name == "realloc")         return reinterpret_cast<void *>(mm_plugin_realloc);
 	if (name == "memalign")        return reinterpret_cast<void *>(mm_plugin_memalign);
 	if (name == "posix_memalign")  return reinterpret_cast<void *>(mm_plugin_posix_memalign);
 	if (name == "aligned_alloc")   return reinterpret_cast<void *>(mm_plugin_aligned_alloc);
 	if (name == "_malloc_r")       return reinterpret_cast<void *>(mm_plugin_malloc_r);
-	if (name == "_free_r")         return reinterpret_cast<void *>(mm_plugin_free_r);
 	if (name == "_realloc_r")      return reinterpret_cast<void *>(mm_plugin_realloc_r);
 	if (name == "_calloc_r")       return reinterpret_cast<void *>(mm_plugin_calloc_r);
 	if (name == "_memalign_r")     return reinterpret_cast<void *>(mm_plugin_memalign_r);
+
+	// De-allocation goes to the address-dispatching wrappers: a name lookup
+	// of "free" in the ELF finds real newlib free (--wrap doesn't rename), so
+	// plugins would otherwise free arena pointers into the newlib heap
+	if (name == "free")            return reinterpret_cast<void *>(__wrap_free);
+	if (name == "_free_r")         return reinterpret_cast<void *>(__wrap__free_r);
 
 	// operator new(unsigned), new[], nothrow and aligned variants (arm32 mangling)
 	if (name == "_Znwj")                     return reinterpret_cast<void *>(mm_plugin_op_new);
