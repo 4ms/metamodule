@@ -14,6 +14,20 @@ static char *heap_end = nullptr;
 extern char _sheap;
 extern char _eheap;
 
+#ifdef CORE_CA7
+#include "memory/plugin_arena.hh"
+// The top of the A7 heap region is reserved as the plugin arena: sbrk (and so
+// the firmware heap) must stop at its base. (Computed via uintptr_t: pointer
+// arithmetic on the linker symbol trips -Warray-bounds.)
+static char *heap_limit() {
+	return reinterpret_cast<char *>(reinterpret_cast<uintptr_t>(&_eheap) - MetaModule::PluginArena::Size);
+}
+#else
+static char *heap_limit() {
+	return &_eheap;
+}
+#endif
+
 size_t get_heap_size() {
 	return reinterpret_cast<size_t>(heap_end) - reinterpret_cast<size_t>(&_sheap);
 }
@@ -40,7 +54,7 @@ void log_sbrk(int incr, char *brk, bool oom) {
 	log.u64(uintptr_t(brk) - uintptr_t(&_sheap));
 
 	log.str(" free=");
-	log.u64(uintptr_t(&_eheap) - uintptr_t(brk));
+	log.u64(uintptr_t(heap_limit()) - uintptr_t(brk));
 
 	log.str(" brk=");
 	log.hex(uintptr_t(brk));
@@ -68,7 +82,7 @@ extern "C" size_t _sbrk(int incr) {
 	prev_heap_end = heap_end;
 
 	// Overflow-safe bounds check
-	if (incr > 0 && static_cast<uintptr_t>(incr) > static_cast<uintptr_t>(&_eheap - heap_end)) {
+	if (incr > 0 && static_cast<uintptr_t>(incr) > static_cast<uintptr_t>(heap_limit() - heap_end)) {
 		log_sbrk(incr, heap_end, true);
 		errno = ENOMEM;
 		return -1;

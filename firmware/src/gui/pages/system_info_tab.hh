@@ -12,6 +12,7 @@
 #include <cmath>
 
 #if !defined(SIMULATOR)
+#include "memory/plugin_arena.hh"
 #include <malloc.h>
 #endif
 
@@ -37,10 +38,19 @@ struct InfoTab : SystemMenuTab {
 		int memory_percent_used = 0;
 		size_t memory_used = 1;
 		unsigned memory_total = A7_HEAP_SZ / (1024 * 1024);
+		int arena_percent_used = 0;
+		size_t arena_used = 0;
+		unsigned arena_total = 0;
 
 #if !defined(SIMULATOR)
+		// The top of the A7 heap region is the plugin arena; the firmware heap
+		// (newlib, grown via sbrk) gets the remainder
+		size_t fw_heap_sz = A7_HEAP_SZ - PluginArena::Size;
+
 		struct mallinfo mi = mallinfo();
-		pr_info("HEAP_SZ  %zu (total amount linker reserved for A7 heap)\n", A7_HEAP_SZ);
+		pr_info("HEAP_SZ  %zu (linker reserved for A7 heap, of which %zu is the plugin arena)\n",
+				A7_HEAP_SZ,
+				PluginArena::Size);
 		pr_info("arena    %zu (total space allocated so far via sbrk)\n", mi.arena);
 		pr_info("ordblks  %zu (number of non-inuse chunks)\n", mi.ordblks);
 		pr_info("hblks    %zu (number of mmapped regions)\n", mi.hblks);
@@ -48,17 +58,29 @@ struct InfoTab : SystemMenuTab {
 		pr_info("uordblks %zu (total allocated space)\n", mi.uordblks);
 		pr_info("fordblks %zu (total non-inuse space)\n", mi.fordblks);
 		pr_info("keepcost %zu (top-most, releasable via malloc_trim space)\n", mi.keepcost);
+		pr_info("plugin arena: used %zu of %zu, peak %zu\n",
+				PluginArena::used_bytes(),
+				PluginArena::total_bytes(),
+				PluginArena::peak_bytes());
 
-		memory_percent_used = (int)std::round(100.f * (float)mi.uordblks / (float)A7_HEAP_SZ);
+		memory_percent_used = (int)std::round(100.f * (float)mi.uordblks / (float)fw_heap_sz);
 		memory_used = mi.uordblks / (1024 * 1024);
+		memory_total = fw_heap_sz / (1024 * 1024);
+
+		arena_percent_used = (int)std::round(100.f * (float)PluginArena::used_bytes() / (float)PluginArena::Size);
+		arena_used = PluginArena::used_bytes() / (1024 * 1024);
+		arena_total = PluginArena::total_bytes() / (1024 * 1024);
 #endif
 
 		lv_label_set_text_fmt(ui_SystemMenuFWversion,
-							  "Firmware: %s\nRAM: %d%% (%zu/%u MB)",
+							  "Firmware: %s\nRAM: %d%% (%zu/%u MB)\nPlugin RAM: %d%% (%zu/%u MB)",
 							  fw_version.data(),
 							  memory_percent_used,
 							  memory_used,
-							  memory_total);
+							  memory_total,
+							  arena_percent_used,
+							  arena_used,
+							  arena_total);
 
 		lv_show(ui_SystemMenuExpanders);
 
