@@ -1055,7 +1055,13 @@ public:
 		pd.module_slugs.push_back(slug);
 		calc_multiple_module_indicies();
 
-		return add_module_at_idx(slug, module_idx);
+		if (!add_module_at_idx(slug, module_idx)) {
+			modules[module_idx].reset();
+			pd.module_slugs.pop_back();
+			calc_multiple_module_indicies();
+			return false;
+		}
+		return true;
 	}
 
 	bool add_module_at_idx(BrandModuleSlug slug, unsigned module_idx) {
