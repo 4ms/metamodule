@@ -226,13 +226,14 @@ enum tlsf_public {
 
 /* Private constants: do not modify. */
 enum tlsf_private {
-#if defined (TLSF_64BIT)
-    /* All allocation sizes and addresses are aligned to 8 bytes. */
+    /*
+    ** All allocation sizes and addresses are aligned to 8 bytes (upstream
+    ** tlsf uses 4 on 32-bit targets). This allocator backs plugin malloc(),
+    ** whose ABI contract on ARM EABI is max_align_t = 8-byte alignment:
+    ** GCC emits NEON stores with :64 alignment hints which trap on 
+	** 4-byte aligned addresses.
+    */
     ALIGN_SIZE_LOG2 = 3,
-#else
-    /* All allocation sizes and addresses are aligned to 4 bytes. */
-    ALIGN_SIZE_LOG2 = 2,
-#endif
     ALIGN_SIZE = (1 << ALIGN_SIZE_LOG2),
 
     /*
