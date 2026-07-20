@@ -230,14 +230,15 @@ struct PatchPlayLoader {
 		rename_state_ = RenameState::RequestSaveNew;
 	}
 
-	void load_module(std::string_view slug) {
+	// Returns false if the module could not be created (e.g. out of memory)
+	bool load_module(std::string_view slug) {
 		bool should_play = is_playing();
 
 		stop_audio();
 		while (!is_audio_muted())
 			;
 
-		player_.add_module(slug);
+		bool created = player_.add_module(slug);
 
 		auto *patch = patches_.get_view_patch();
 		uint16_t module_id = patch->add_module(slug);
@@ -256,6 +257,8 @@ struct PatchPlayLoader {
 		pr_info("Heap: %u\n", get_heap_size());
 		if (should_play)
 			start_audio();
+
+		return created;
 	}
 
 	void change_module(std::string_view slug, unsigned module_id, bool keep_cables_and_maps) {
