@@ -27,6 +27,21 @@ struct PluginLoadUntar {
 	}
 
 	std::pair<PluginFileLoaderState, std::string> untar_contents(std::span<uint8_t> buffer, PluginFile &plugin_file) {
+		try {
+			return untar_contents_impl(buffer, plugin_file);
+		} catch (std::bad_alloc &) {
+			pr_err("Out of memory extracting plugin\n");
+			for (auto const &fil : files_copied_to_ramdisk) {
+				ramdisk.delete_file(fil);
+			}
+			clear();
+			return {PluginFileLoaderState::InvalidPlugin, "Out of memory: not enough RAM to load plugin"};
+		}
+	}
+
+private:
+	std::pair<PluginFileLoaderState, std::string> untar_contents_impl(std::span<uint8_t> buffer,
+																	  PluginFile &plugin_file) {
 		auto plugin_tar = Tar::Archive({(char *)buffer.data(), buffer.size()});
 
 		// plugin_tar.print_info();
@@ -136,6 +151,7 @@ struct PluginLoadUntar {
 		}
 	}
 
+public:
 	FatFileIO &ramdisk;
 	std::vector<uint8_t> so_buffer;
 	std::vector<char> json_buffer;
