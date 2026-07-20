@@ -40,7 +40,13 @@ struct DynLoader {
 			return "Not a valid plugin file";
 		}
 
-		load_executable();
+		try {
+			load_executable();
+		} catch (std::bad_alloc &) {
+			auto mb = (elf.load_size() + (1 << 20) - 1) >> 20;
+			pr_err("Out of memory allocating plugin code buffer\n");
+			return "Out of memory: plugin code needs " + std::to_string(mb) + " MB";
+		}
 
 		if (auto err_msg = process_relocs(); err_msg != "") {
 			pr_err("Failed: %s\n", err_msg.c_str());
