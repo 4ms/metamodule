@@ -3,6 +3,11 @@
 #include "lv_port_indev.h"
 #include "lvgl.h"
 #include <SDL2/SDL.h>
+#include <algorithm>
+
+static bool matches(std::vector<SDL_Keycode> const &binding, SDL_Keycode key) {
+	return std::ranges::find(binding, key) != binding.end();
+}
 
 LvglEncoderSimulatorDriver::LvglEncoderSimulatorDriver(RotaryEncoderKeys &keys)
 	: keys{keys} {
@@ -98,15 +103,15 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 		}
 
 		if (e.type == SDL_KEYDOWN && e.key.state == SDL_PRESSED) {
-			if (e.key.keysym.sym == keys.click && e.key.repeat == 0) {
+			if (matches(keys.click, e.key.keysym.sym) && e.key.repeat == 0) {
 				rotary_pressed = ButtonEvent::Pressed;
 			}
 
-			if (e.key.keysym.sym == keys.aux_button) {
+			if (matches(keys.aux_button, e.key.keysym.sym)) {
 				aux_pressed = ButtonEvent::Pressed;
 			}
 
-			if (e.key.keysym.sym == keys.turn_cw) {
+			if (matches(keys.turn_cw, e.key.keysym.sym)) {
 				if (rotary_pressed == ButtonEvent::Pressed)
 					rotary_push_turn++;
 				else {
@@ -115,7 +120,7 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 				}
 			}
 
-			if (e.key.keysym.sym == keys.turn_ccw) {
+			if (matches(keys.turn_ccw, e.key.keysym.sym)) {
 				if (rotary_pressed == ButtonEvent::Pressed)
 					rotary_push_turn--;
 				else {
@@ -142,35 +147,35 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 }
 
 void LvglEncoderSimulatorDriver::handle_key_up(SDL_Keycode key, lv_indev_data_t *data) {
-	if (key == keys.quit) {
+	if (matches(keys.quit, key)) {
 		_instance->set_quit(LV_QUIT);
 	}
 
-	if (key == keys.aux_button) {
+	if (matches(keys.aux_button, key)) {
 		aux_pressed = ButtonEvent::Released;
 	}
 
-	if (key == keys.click) {
+	if (matches(keys.click, key)) {
 		rotary_pressed = ButtonEvent::Released;
 	}
 
-	if (key == keys.param_inc) {
+	if (matches(keys.param_inc, key)) {
 		_instance->param_inc_pressed = true;
 	}
 
-	if (key == keys.param_fine_toggle) {
+	if (matches(keys.param_fine_toggle, key)) {
 		_instance->param_fine_mode = !_instance->param_fine_mode;
 	}
 
-	if (key == keys.param_dec) {
+	if (matches(keys.param_dec, key)) {
 		_instance->param_dec_pressed = true;
 	}
 
-	if (key == keys.next_knobset) {
+	if (matches(keys.next_knobset, key)) {
 		_instance->knobset_change++;
 	}
 
-	if (key == keys.prev_knobset) {
+	if (matches(keys.prev_knobset, key)) {
 		_instance->knobset_change--;
 	}
 

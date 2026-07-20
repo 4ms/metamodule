@@ -1,4 +1,4 @@
-#include "../firmware/src/load_test/test_modules.hh"
+﻿#include "../firmware/src/load_test/test_modules.hh"
 #include "frame.hh"
 #include "lv_port_disp.h"
 #include "lvgl.h"
@@ -51,24 +51,24 @@ static void simulate_input(MetaModule::Ui &ui, const std::string &seq) {
 
 		for (unsigned c = 0; c < count; c++) {
 			if (name == "cw") {
-				push_key(keys.turn_cw, true);
+				push_key(keys.turn_cw.front(), true);
 				run_cycles(ui, 4);
-				push_key(keys.turn_cw, false);
+				push_key(keys.turn_cw.front(), false);
 				run_cycles(ui, 2);
 			} else if (name == "ccw") {
-				push_key(keys.turn_ccw, true);
+				push_key(keys.turn_ccw.front(), true);
 				run_cycles(ui, 4);
-				push_key(keys.turn_ccw, false);
+				push_key(keys.turn_ccw.front(), false);
 				run_cycles(ui, 2);
 			} else if (name == "click") {
-				push_key(keys.click, true);
+				push_key(keys.click.front(), true);
 				run_cycles(ui, 4);
-				push_key(keys.click, false);
+				push_key(keys.click.front(), false);
 				run_cycles(ui, 6);
 			} else if (name == "back") {
-				push_key(keys.aux_button, true);
+				push_key(keys.aux_button.front(), true);
 				run_cycles(ui, 4);
-				push_key(keys.aux_button, false);
+				push_key(keys.aux_button.front(), false);
 				run_cycles(ui, 4);
 			} else {
 				std::cout << "Unknown --input token '" << name << "'\n";

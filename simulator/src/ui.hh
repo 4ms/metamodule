@@ -18,16 +18,16 @@ namespace MetaModule
 class Ui {
 
 	RotaryEncoderKeys keys{
-		.turn_cw = SDLK_RIGHT,
-		.turn_ccw = SDLK_LEFT,
-		.click = SDLK_DOWN,
-		.aux_button = SDLK_UP,
-		.quit = SDLK_ESCAPE,
-		.param_inc = ']',
-		.param_dec = '[',
-		.param_fine_toggle = '\\',
-		.prev_knobset = ',',
-		.next_knobset = '.',
+		.turn_cw = {SDLK_RIGHT},
+		.turn_ccw = {SDLK_LEFT},
+		.click = {SDLK_DOWN, SDLK_RETURN, SDLK_KP_ENTER},
+		.aux_button = {SDLK_UP, SDLK_BACKSPACE},
+		.quit = {SDLK_ESCAPE},
+		.param_inc = {']'},
+		.param_dec = {'['},
+		.param_fine_toggle = {'\\'},
+		.prev_knobset = {','},
+		.next_knobset = {'.'},
 	};
 
 public:
