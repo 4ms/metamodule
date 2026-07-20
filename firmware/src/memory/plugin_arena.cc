@@ -37,6 +37,11 @@ mm_tlsf_t tlsf = nullptr;
 size_t used = 0;
 size_t peak = 0;
 
+// TLSF's natural alignment on 32-bit is 4 and cannot be raised,
+// so in order to support over-aligned types (e.g. NEON stores)
+// we need to over-align all allocations mm_tlsf_memalign.
+inline constexpr size_t MallocAlign = 8;
+
 struct LockGuard {
 	LockGuard() {
 		__retarget_lock_acquire_recursive(&__lock_mm_plugin_arena);
@@ -79,20 +84,13 @@ bool contains(void const *ptr) {
 }
 
 void *alloc(size_t size) {
-	LockGuard guard;
-	ensure_init();
-	auto *p = mm_tlsf_malloc(tlsf, size);
-	if (p)
-		account_alloc(p);
-	else
-		log_arena_oom(size);
-	return p;
+	return alloc_aligned(MallocAlign, size);
 }
 
 void *alloc_aligned(size_t align, size_t size) {
 	LockGuard guard;
 	ensure_init();
-	auto *p = mm_tlsf_memalign(tlsf, align, size);
+	auto *p = mm_tlsf_memalign(tlsf, align < MallocAlign ? MallocAlign : align, size);
 	if (p)
 		account_alloc(p);
 	else
@@ -103,16 +101,33 @@ void *alloc_aligned(size_t align, size_t size) {
 void *realloc(void *ptr, size_t size) {
 	LockGuard guard;
 	ensure_init();
-	if (ptr)
-		used -= mm_tlsf_block_size(ptr);
+	if (!ptr)
+		return alloc(size);
+	if (size == 0) {
+		used -= mm_tlsf_free(tlsf, ptr);
+		return nullptr;
+	}
+	used -= mm_tlsf_block_size(ptr);
 	auto *p = mm_tlsf_realloc(tlsf, ptr, size);
+	if (p && reinterpret_cast<uintptr_t>(p) % MallocAlign) {
+		// tlsf_realloc had to move the data, and its internal malloc is only
+		// 4-aligned: restore the malloc alignment contract with an aligned
+		// copy. (The in-place shrink/merge paths keep the pointer, which was
+		// already aligned.)
+		if (auto *aligned = mm_tlsf_memalign(tlsf, MallocAlign, size)) {
+			memcpy(aligned, p, size);
+			mm_tlsf_free(tlsf, p);
+			p = aligned;
+		}
+		// else: keep the misaligned block rather than lose the data -- only
+		// reachable if the arena is so full that re-allocating what we just
+		// freed fails
+	}
 	if (p) {
 		account_alloc(p);
 	} else {
-		if (ptr)
-			used += mm_tlsf_block_size(ptr); // failed realloc leaves ptr valid
-		if (size > 0)
-			log_arena_oom(size);
+		used += mm_tlsf_block_size(ptr); // failed realloc leaves ptr valid
+		log_arena_oom(size);
 	}
 	return p;
 }
