@@ -111,6 +111,7 @@ add_executable(
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
+  ${FWDIR}/system/cxx_terminate.cc
   ${FWDIR}/src/memory/plugin_arena.cc
   ${FWDIR}/src/memory/tlsf/mm_tlsf.c
   ${FWDIR}/system/mmu_ca7.c
