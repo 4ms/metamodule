@@ -498,7 +498,17 @@ private:
 			pr_warn("Open patch manager is not tracking the playing patch\n");
 		}
 
-		auto result = player_.load_patch(*next_patch);
+		Result result;
+		try {
+			result = player_.load_patch(*next_patch);
+		} catch (std::bad_alloc &) {
+			// Ran out of firmware heap partway through building the patch
+			// (copying patch data, caches, etc). Unload to discard the
+			// partially-built state.
+			pr_err("Out of memory loading patch\n");
+			player_.unload_patch();
+			result = {false, "Out of memory loading this patch"};
+		}
 		if (result.success) {
 			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
