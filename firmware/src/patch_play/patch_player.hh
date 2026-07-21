@@ -20,6 +20,7 @@
 #include "patch_play/plugin_module.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
+#include "system/abort_rescue.hh"
 #include "util/countzip.hh"
 #include "util/oscs.hh"
 #include <algorithm>
@@ -1040,6 +1041,18 @@ public:
 	}
 
 	static std::unique_ptr<CoreProcessor> try_create_module(std::string_view combined_slug) {
+		// A plugin module's constructor cannot throw across the plugin
+		// boundary: an uncaught exception runs the plugin's terminate -> its
+		// imported abort() -> mm_plugin_abort, which longjmps back here.
+		// Whatever the constructor had allocated leaks into the plugin arena
+		// (bounded, reported on console).
+		AbortRescue rescue;
+		if (setjmp(rescue.jb) != 0) {
+			pr_err("Module %.*s crashed while being created\n", (int)combined_slug.size(), combined_slug.data());
+			return nullptr;
+		}
+		rescue.arm();
+
 		try {
 			// Returns nullptr if slug is unknown
 			return ModuleFactory::create(combined_slug);
