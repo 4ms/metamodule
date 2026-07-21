@@ -28,6 +28,7 @@
 #include "pffft.h"
 
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <ctime>
 #include <memory>
@@ -62,10 +63,18 @@ extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp);
 extern "C" void __cxa_pure_virtual();
 extern "C" void *memalign(size_t align, size_t nbytes);
+extern "C" uintptr_t mm_host_find_exidx(uintptr_t pc, int *nrec);
 
 void __attribute__((optimize("-O0"))) keep_symbols() {
 	{
 		auto x = &calloc;
+		(void)x;
+	}
+
+	{
+		// Exported so SDK >= 2.3 plugins can route their unwinder to the
+		// host exidx registry; nothing in firmware calls it by name
+		auto x = &mm_host_find_exidx;
 		(void)x;
 	}
 

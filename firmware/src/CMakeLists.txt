@@ -158,6 +158,7 @@ add_executable(
 
   #
   ${FWDIR}/src/dynload/dynloader.cc
+  ${FWDIR}/src/dynload/exidx_registry.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc
