@@ -36,6 +36,16 @@ struct __lock __lock___env_recursive_mutex{};
 // Guards the plugin arena allocator (plugin_arena.cc); gets the same
 // IRQ-disabling treatment as the malloc lock so async threads can allocate
 struct __lock __lock_mm_plugin_arena{};
+
+// Used by abort_rescue: longjmp'ing while an allocator lock is held would
+// leave the heap/arena locked (and the lock's disabled IRQs off) forever
+int mm_malloc_lock_held() {
+	return __lock___malloc_recursive_mutex.count != 0;
+}
+int mm_arena_lock_held() {
+	return __lock_mm_plugin_arena.count != 0;
+}
+
 struct __lock __lock___tz_mutex;
 // Not used, but newlib wants them:
 struct __lock __lock___at_quick_exit_mutex{};

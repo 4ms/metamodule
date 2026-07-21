@@ -9,6 +9,7 @@
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
+#include "system/abort_rescue.hh"
 #include "untar_contents.hh"
 #include "util/monotonic_allocator.hh"
 #include "util/version_tools.hh"
@@ -353,8 +354,38 @@ public:
 			return false;
 		}
 
+		// Snapshot registered brands so a crashed init can be backed out
+		auto brands_before = ModuleFactory::getAllBrands();
+
+		AbortRescue rescue;
+		if (setjmp(rescue.jb) != 0) {
+			// The plugin died during init() (uncaught exception -> its
+			// terminate -> imported abort() -> mm_plugin_abort longjmps
+			// here; details were printed by the plugin's terminate handler).
+			// Back out everything it registered. Its Model objects live in
+			// the plugin arena: do not run plugin code to destroy them --
+			// drop the references and leak them (bounded, reclaimed on
+			// reboot).
+			// Copy names first: unregistering invalidates registry views
+			std::vector<std::string> new_brands;
+			for (auto brand : ModuleFactory::getAllBrands()) {
+				if (std::ranges::find(brands_before, brand) == brands_before.end())
+					new_brands.emplace_back(brand);
+			}
+			for (auto const &brand : new_brands) {
+				pr_err("Unregistering brand '%s' from crashed plugin\n", brand.c_str());
+				ModuleFactory::unregisterBrand(brand);
+			}
+			plugin.rack_plugin.models.clear();
+			plugin.rack_plugin = {};
+			plugin.code = {};
+			pluginInstance = nullptr;
+			status.error_message = "Plugin crashed while initializing";
+			return false;
+		}
+		rescue.arm();
+
 		pluginInstance = &plugin.rack_plugin;
-		//TODO: trap exceptions, restore state, and return
 		init(&plugin.rack_plugin);
 
 		pr_info("Plugin loaded!\n");

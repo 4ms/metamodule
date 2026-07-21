@@ -1,6 +1,8 @@
 #include "plugin_arena.hh"
+#include "system/abort_rescue.hh"
 #include "system/safe_log.hh"
 #include "tlsf/mm_tlsf.h"
+#include <cstdlib>
 #include <cstring>
 #include <new>
 #include <sys/lock.h>
@@ -294,6 +296,27 @@ void *mm_plugin_op_new_aligned(unsigned size, unsigned align) {
 	return p;
 }
 
+// A plugin that hits an unrecoverable error calls its imported abort() --
+// most commonly via its own std::terminate after an uncaught bad_alloc (its
+// verbose-terminate message has already been printed by the time we get
+// here). Plugin exceptions cannot unwind into firmware frames, so this hook
+// is the only chance to regain control: longjmp back to the rescue scope
+// armed around the call into plugin code (module creation, plugin init).
+// With no scope armed (e.g. death in the audio context), fall through to a
+// real abort and halt.
+void mm_plugin_abort(void) {
+	{
+		SafeLog log;
+		log.str("[abort] plugin called abort(); arena used=");
+		log.u64(PluginArena::used_bytes());
+		log.str(" of ");
+		log.u64(PluginArena::total_bytes());
+		log.flush();
+	}
+	MetaModule::abort_rescue_try("plugin abort");
+	::abort();
+}
+
 void mm_plugin_op_delete(void *p) {
 	__wrap_free(p);
 }
@@ -329,6 +352,10 @@ void *allocator_redirect(std::string_view name) {
 	// plugins would otherwise free arena pointers into the newlib heap
 	if (name == "free")            return reinterpret_cast<void *>(__wrap_free);
 	if (name == "_free_r")         return reinterpret_cast<void *>(__wrap__free_r);
+
+	// Plugin death (uncaught exception -> terminate -> abort) routes to the
+	// rescue hook instead of halting
+	if (name == "abort")           return reinterpret_cast<void *>(mm_plugin_abort);
 
 	// operator new(unsigned), new[], nothrow and aligned variants (arm32 mangling)
 	if (name == "_Znwj")                     return reinterpret_cast<void *>(mm_plugin_op_new);
