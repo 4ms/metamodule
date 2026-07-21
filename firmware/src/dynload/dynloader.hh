@@ -6,6 +6,7 @@
 #include "drivers/hsem.hh"
 #include "elf_process/elf_file.hh"
 #include "elf_process/elf_relocator.hh"
+#include "exidx_registry.hh"
 #include "host_sym_list.hh"
 #include "keep-symbols.hh"
 #include "memory/plugin_arena.hh"
@@ -52,6 +53,8 @@ struct DynLoader {
 			pr_err("Failed: %s\n", err_msg.c_str());
 			return err_msg;
 		}
+
+		register_unwind_table();
 
 		init_globals();
 		return "";
@@ -158,6 +161,24 @@ private:
 			// for (auto sym : hostsyms)
 			// 	pr_dump("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
 		}
+	}
+
+	void register_unwind_table() {
+		// Make the plugin's unwind table visible to the host-side exidx
+		// registry, so exceptions can unwind through this plugin's frames.
+		// Plugins built without exceptions have no .ARM.exidx section; they
+		// are simply not registered. (Manual search: find_section() logs an
+		// error when a section is missing, which is normal here.)
+		for (auto &sec : elf.sections) {
+			if (sec.section_name() == ".ARM.exidx") {
+				auto base = reinterpret_cast<uintptr_t>(codeblock.data());
+				ExidxRegistry::register_range(
+					base, base + codeblock.size(), base + sec.address(), sec.size_bytes() / 8);
+				pr_trace("Registered plugin unwind table: %u entries\n", sec.size_bytes() / 8);
+				return;
+			}
+		}
+		pr_trace("Plugin has no .ARM.exidx section (built without exceptions)\n");
 	}
 
 	std::string process_relocs() {
