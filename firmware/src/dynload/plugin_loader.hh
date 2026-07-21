@@ -217,6 +217,8 @@ public:
 						for (auto const &file : plugin.loaded_files) {
 							ramdisk.delete_file(file);
 						}
+						// pop_back frees the code buffer: retire its unwind table
+						ExidxRegistry::unregister_range(reinterpret_cast<uintptr_t>(plugin.code.data()));
 						loaded_plugins.pop_back();
 					}
 				} catch (std::bad_alloc &) {
@@ -240,6 +242,8 @@ public:
 							for (auto const &file : loaded_plugins.back().loaded_files) {
 								ramdisk.delete_file(file);
 							}
+							ExidxRegistry::unregister_range(
+								reinterpret_cast<uintptr_t>(loaded_plugins.back().code.data()));
 							loaded_plugins.pop_back();
 						}
 						pluginInstance = nullptr;
@@ -357,15 +361,11 @@ public:
 		// Snapshot registered brands so a crashed init can be backed out
 		auto brands_before = ModuleFactory::getAllBrands();
 
-		AbortRescue rescue;
-		if (setjmp(rescue.jb) != 0) {
-			// The plugin died during init() (uncaught exception -> its
-			// terminate -> imported abort() -> mm_plugin_abort longjmps
-			// here; details were printed by the plugin's terminate handler).
-			// Back out everything it registered. Its Model objects live in
-			// the plugin arena: do not run plugin code to destroy them --
-			// drop the references and leak them (bounded, reclaimed on
-			// reboot).
+		// Back out everything a crashed/throwing init() registered. Its
+		// Model objects live in the plugin arena: do not run plugin code to
+		// destroy them -- drop the references and leak them (bounded,
+		// reclaimed on reboot).
+		auto rollback_crashed_init = [&] {
 			// Copy names first: unregistering invalidates registry views
 			std::vector<std::string> new_brands;
 			for (auto brand : ModuleFactory::getAllBrands()) {
@@ -378,15 +378,36 @@ public:
 			}
 			plugin.rack_plugin.models.clear();
 			plugin.rack_plugin = {};
+			ExidxRegistry::unregister_range(reinterpret_cast<uintptr_t>(plugin.code.data()));
 			plugin.code = {};
 			pluginInstance = nullptr;
 			status.error_message = "Plugin crashed while initializing";
+		};
+
+		AbortRescue rescue;
+		if (setjmp(rescue.jb) != 0) {
+			// The plugin died during init() without a catchable exception:
+			// its terminate -> imported abort() -> mm_plugin_abort longjmps
+			// here (details were printed by the plugin's terminate handler)
+			rollback_crashed_init();
 			return false;
 		}
 		rescue.arm();
 
 		pluginInstance = &plugin.rack_plugin;
-		init(&plugin.rack_plugin);
+		try {
+			init(&plugin.rack_plugin);
+		} catch (std::exception &e) {
+			// Plugins built with SDK >= 2.3 propagate exceptions across the
+			// boundary (unified exidx lookup); destructors ran during unwind
+			pr_err("Plugin init threw: %s\n", e.what());
+			rollback_crashed_init();
+			return false;
+		} catch (...) {
+			pr_err("Plugin init threw an exception\n");
+			rollback_crashed_init();
+			return false;
+		}
 
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";
