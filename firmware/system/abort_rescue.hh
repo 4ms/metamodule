@@ -1,19 +1,23 @@
 #pragma once
 #include <csetjmp>
 
-// Rescue scopes for plugin deaths. A plugin that hits an unrecoverable error
-// (typically an uncaught bad_alloc: its own operator new throws, nothing
-// catches, its std::terminate runs) ends up calling its imported abort(),
-// which the dynloader routes to mm_plugin_abort() in plugin_arena.cc. Plugin
-// exceptions cannot unwind through firmware frames (separate self-contained
-// unwinders), so the only way to regain control is to longjmp back to a
-// rescue scope armed just before firmware called into the plugin.
+// Rescue scopes for plugin deaths. A pre-sdk-v2.3 plugin that hits an
+// unrecoverable error will call abort().
+// The dynloader routes abort() to mm_plugin_abort() in plugin_arena.cc.
+// Plugins with sdk before v2.3 cannot unwind exceptions through firmware
+// frames (separate self-contained unwinders), so the only way to regain
+// control is to longjmp back to a rescue scope armed just before firmware
+// called into the plugin.
 //
 // A longjmp skips every destructor between the abort and the scope, so
 // whatever the plugin allocated is leaked into the plugin arena (bounded,
 // reported, reclaimed on reboot -- or by a future arena reset). The caller
 // at the rescue point is responsible for backing out firmware-side state
 // (unregistering brands, substituting a null module, ...).
+
+// Note: SDK v2.3 added the exception handling "bridge" so no memory is leaked
+// if a plugin throws (its stack will be unwound from firmware, calling all
+// destructors, etc).
 
 namespace MetaModule
 {
