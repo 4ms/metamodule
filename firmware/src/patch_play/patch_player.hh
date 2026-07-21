@@ -1040,54 +1040,72 @@ public:
 			modules[module_id]->bypassed = bypassed;
 	}
 
-	static std::unique_ptr<CoreProcessor> try_create_module(std::string_view combined_slug) {
-		// A plugin module's constructor cannot throw across the plugin
-		// boundary: an uncaught exception runs the plugin's terminate -> its
-		// imported abort() -> mm_plugin_abort, which longjmps back here.
-		// Whatever the constructor had allocated leaks into the plugin arena
-		// (bounded, reported on console).
+	// Why module creation failed, so the GUI can tell the user the truth
+	enum class CreateResult { Ok, NotFound, OutOfMemory, Crashed };
+
+	static std::unique_ptr<CoreProcessor> try_create_module(std::string_view combined_slug,
+															CreateResult *result = nullptr) {
+		if (result)
+			*result = CreateResult::Ok;
+
+		// A plugin module's constructor whose exception cannot cross the
+		// plugin boundary (pre-2.3 SDK), or that dies without a catchable
+		// exception, runs the plugin's terminate -> its imported abort() ->
+		// mm_plugin_abort, which longjmps back here. Whatever the constructor
+		// had allocated leaks into the plugin arena (bounded, reported on
+		// console).
 		AbortRescue rescue;
 		if (setjmp(rescue.jb) != 0) {
 			pr_err("Module %.*s crashed while being created\n", (int)combined_slug.size(), combined_slug.data());
+			if (result)
+				*result = CreateResult::Crashed;
 			return nullptr;
 		}
 		rescue.arm();
 
 		try {
-			// Returns nullptr if slug is unknown
-			return ModuleFactory::create(combined_slug);
+			auto module = ModuleFactory::create(combined_slug);
+			if (!module && result)
+				*result = CreateResult::NotFound; // unknown slug
+			return module;
 		} catch (std::bad_alloc &) {
 			pr_err("Out of memory creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
+			if (result)
+				*result = CreateResult::OutOfMemory;
 			return nullptr;
 		} catch (std::exception &e) {
 			// Plugins built with SDK >= 2.3 can propagate exceptions across
 			// the boundary (unified exidx lookup): destructors run during
 			// unwind, so this path reclaims what the constructor allocated
 			pr_err("Exception creating module %.*s: %s\n", (int)combined_slug.size(), combined_slug.data(), e.what());
+			if (result)
+				*result = CreateResult::Crashed;
 			return nullptr;
 		} catch (...) {
 			pr_err("Exception creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
+			if (result)
+				*result = CreateResult::Crashed;
 			return nullptr;
 		}
 	}
 
-	bool add_module(BrandModuleSlug slug) {
+	CreateResult add_module(BrandModuleSlug slug) {
 		auto module_idx = num_modules;
 
 		pd.module_slugs.push_back(slug);
 		calc_multiple_module_indicies();
 
-		if (!add_module_at_idx(slug, module_idx)) {
+		CreateResult result{CreateResult::Ok};
+		if (!add_module_at_idx(slug, module_idx, &result)) {
 			modules[module_idx].reset();
 			pd.module_slugs.pop_back();
 			calc_multiple_module_indicies();
-			return false;
 		}
-		return true;
+		return result;
 	}
 
-	bool add_module_at_idx(BrandModuleSlug slug, unsigned module_idx) {
-		modules[module_idx] = try_create_module(slug);
+	bool add_module_at_idx(BrandModuleSlug slug, unsigned module_idx, CreateResult *result = nullptr) {
+		modules[module_idx] = try_create_module(slug, result);
 		if (modules[module_idx] == nullptr) {
 			pr_err("Could not create module %s\n", slug.c_str());
 			modules[module_idx] = std::make_unique<NullModule>();

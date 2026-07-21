@@ -230,17 +230,18 @@ struct PatchPlayLoader {
 		rename_state_ = RenameState::RequestSaveNew;
 	}
 
-	// Returns false if the module could not be created (e.g. out of memory)
-	bool load_module(std::string_view slug) {
+	// Returns why the module could not be created (Ok on success), so the
+	// caller can inform the user
+	PatchPlayer::CreateResult load_module(std::string_view slug) {
 		bool should_play = is_playing();
 
 		stop_audio();
 		while (!is_audio_muted())
 			;
 
-		bool created = player_.add_module(slug);
+		auto created = player_.add_module(slug);
 
-		if (created) {
+		if (created == PatchPlayer::CreateResult::Ok) {
 			auto *patch = patches_.get_view_patch();
 			uint16_t module_id = patch->add_module(slug);
 			auto info = ModuleFactory::getModuleInfo(slug);

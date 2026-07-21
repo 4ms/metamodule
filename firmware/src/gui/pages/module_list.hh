@@ -458,10 +458,17 @@ private:
 	}
 
 	void add_module(std::string_view slug) {
-		if (patch_playloader.load_module(slug)) {
+		using CreateResult = PatchPlayer::CreateResult;
+
+		auto result = patch_playloader.load_module(slug);
+
+		if (result == CreateResult::Ok) {
 			patches.mark_view_patch_modified();
 		} else {
-			notify_queue.put({"Not enough memory to load module", Notification::Priority::Error, 2500});
+			auto msg = result == CreateResult::OutOfMemory ? "Not enough memory to load module" :
+					   result == CreateResult::Crashed	   ? "Module crashed while loading" :
+															 "Could not load module";
+			notify_queue.put({msg, Notification::Priority::Error, 2500});
 			// The patch is unchanged, but the module list
 			// preview drew into the shared page_pixel_buffer,
 			// so we have to force a redraw
