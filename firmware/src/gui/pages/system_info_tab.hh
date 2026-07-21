@@ -43,14 +43,14 @@ struct InfoTab : SystemMenuTab {
 		unsigned arena_total = 0;
 
 #if !defined(SIMULATOR)
-		// The top of the A7 heap region is the plugin arena; the firmware heap
-		// (newlib, grown via sbrk) gets the remainder
-		size_t fw_heap_sz = A7_HEAP_SZ - PluginArena::Size;
+		// The firmware heap and plugin arena share the A7 heap region with a
+		// dynamic boundary: the arena's claim grows/shrinks with plugin usage,
+		// and the firmware heap can use everything the arena hasn't claimed
+		size_t arena_claimed = PluginArena::claimed_bytes();
+		size_t fw_heap_sz = A7_HEAP_SZ - arena_claimed;
 
 		struct mallinfo mi = mallinfo();
-		pr_info("HEAP_SZ  %zu (linker reserved for A7 heap, of which %zu is the plugin arena)\n",
-				A7_HEAP_SZ,
-				PluginArena::Size);
+		pr_info("HEAP_SZ  %zu (linker reserved for A7 heap, shared by firmware heap and plugin arena)\n", A7_HEAP_SZ);
 		pr_info("arena    %zu (total space allocated so far via sbrk)\n", mi.arena);
 		pr_info("ordblks  %zu (number of non-inuse chunks)\n", mi.ordblks);
 		pr_info("hblks    %zu (number of mmapped regions)\n", mi.hblks);
@@ -58,18 +58,19 @@ struct InfoTab : SystemMenuTab {
 		pr_info("uordblks %zu (total allocated space)\n", mi.uordblks);
 		pr_info("fordblks %zu (total non-inuse space)\n", mi.fordblks);
 		pr_info("keepcost %zu (top-most, releasable via malloc_trim space)\n", mi.keepcost);
-		pr_info("plugin arena: used %zu of %zu, peak %zu\n",
+		pr_info("plugin arena: used %zu of %zu claimed, peak %zu\n",
 				PluginArena::used_bytes(),
-				PluginArena::total_bytes(),
+				arena_claimed,
 				PluginArena::peak_bytes());
 
 		memory_percent_used = (int)std::round(100.f * (float)mi.uordblks / (float)fw_heap_sz);
 		memory_used = mi.uordblks / (1024 * 1024);
 		memory_total = fw_heap_sz / (1024 * 1024);
 
-		arena_percent_used = (int)std::round(100.f * (float)PluginArena::used_bytes() / (float)PluginArena::Size);
+		arena_percent_used =
+			arena_claimed ? (int)std::round(100.f * (float)PluginArena::used_bytes() / (float)arena_claimed) : 0;
 		arena_used = PluginArena::used_bytes() / (1024 * 1024);
-		arena_total = PluginArena::total_bytes() / (1024 * 1024);
+		arena_total = arena_claimed / (1024 * 1024);
 #endif
 
 		lv_label_set_text_fmt(ui_SystemMenuFWversion,

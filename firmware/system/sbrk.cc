@@ -15,21 +15,37 @@ extern char _sheap;
 extern char _eheap;
 
 #ifdef CORE_CA7
-#include "memory/plugin_arena.hh"
-// The top of the A7 heap region is reserved as the plugin arena: sbrk (and so
-// the firmware heap) must stop at its base. (Computed via uintptr_t: pointer
-// arithmetic on the linker symbol trips -Warray-bounds.)
+// The firmware heap shares the A7 heap region with the plugin arena, which
+// claims slabs downward from _eheap: the boundary is dynamic. Growth is
+// authorized by mm_arena_allow_brk() (plugin_arena.cc), which checks against
+// the arena floor and records the firmware's high-water break so arena slab
+// claims keep clear of it.
+extern "C" int mm_arena_allow_brk(uintptr_t new_brk);
+extern "C" uintptr_t mm_arena_floor(void);
+
 static char *heap_limit() {
-	return reinterpret_cast<char *>(reinterpret_cast<uintptr_t>(&_eheap) - MetaModule::PluginArena::Size);
+	return reinterpret_cast<char *>(mm_arena_floor());
+}
+static bool allow_grow(char *new_end) {
+	return mm_arena_allow_brk(reinterpret_cast<uintptr_t>(new_end)) != 0;
 }
 #else
 static char *heap_limit() {
 	return &_eheap;
 }
+static bool allow_grow(char *new_end) {
+	return new_end <= &_eheap;
+}
 #endif
 
 size_t get_heap_size() {
 	return reinterpret_cast<size_t>(heap_end) - reinterpret_cast<size_t>(&_sheap);
+}
+
+// The firmware heap's current break, for the plugin arena's headroom guard
+// and diagnostics
+extern "C" uintptr_t mm_current_brk(void) {
+	return reinterpret_cast<uintptr_t>(heap_end ? heap_end : &_sheap);
 }
 
 // _sbrk runs underneath malloc, and printf() calls malloc, so we use SafeLog to push chars
@@ -81,12 +97,17 @@ extern "C" size_t _sbrk(int incr) {
 	}
 	prev_heap_end = heap_end;
 
-	// Overflow-safe bounds check
-	if (incr > 0 && static_cast<uintptr_t>(incr) > static_cast<uintptr_t>(heap_limit() - heap_end)) {
-		log_sbrk(incr, heap_end, true);
-		errno = ENOMEM;
-		return -1;
-		// OOM!!!
+	// Overflow-safe pre-check against the current limit, then the
+	// authoritative check-and-reserve against the (dynamic) arena boundary
+	if (incr > 0) {
+		if (static_cast<uintptr_t>(incr) > static_cast<uintptr_t>(heap_limit() - heap_end) ||
+			!allow_grow(heap_end + incr))
+		{
+			log_sbrk(incr, heap_end, true);
+			errno = ENOMEM;
+			return -1;
+			// OOM!!!
+		}
 	}
 
 	heap_end += incr;
