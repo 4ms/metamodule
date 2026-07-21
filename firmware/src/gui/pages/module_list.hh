@@ -458,10 +458,15 @@ private:
 	}
 
 	void add_module(std::string_view slug) {
-		if (patch_playloader.load_module(slug))
+		if (patch_playloader.load_module(slug)) {
 			patches.mark_view_patch_modified();
-		else
+		} else {
 			notify_queue.put({"Not enough memory to load module", Notification::Priority::Error, 2500});
+			// The patch is unchanged, but the module list
+			// preview drew into the shared page_pixel_buffer,
+			// so we have to force a redraw
+			gui_state.force_redraw_patch = true;
+		}
 	}
 
 	std::string get_selected_combined_slug(unsigned selected_idx) {
