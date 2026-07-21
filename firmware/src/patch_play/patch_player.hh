@@ -1059,6 +1059,15 @@ public:
 		} catch (std::bad_alloc &) {
 			pr_err("Out of memory creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
 			return nullptr;
+		} catch (std::exception &e) {
+			// Plugins built with SDK >= 2.3 can propagate exceptions across
+			// the boundary (unified exidx lookup): destructors run during
+			// unwind, so this path reclaims what the constructor allocated
+			pr_err("Exception creating module %.*s: %s\n", (int)combined_slug.size(), combined_slug.data(), e.what());
+			return nullptr;
+		} catch (...) {
+			pr_err("Exception creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
+			return nullptr;
 		}
 	}
 
