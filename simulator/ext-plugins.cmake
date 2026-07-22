@@ -19,8 +19,8 @@
 #
 # See docs/simulator-ext-plugins.md for instructions
 
-list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/CVfunk/metamodule")
-list(APPEND ext_builtin_brand_libname "CVfunk")
+# list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/CVfunk/metamodule")
+# list(APPEND ext_builtin_brand_libname "CVfunk")
 # list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/Bogaudio")
 # list(APPEND ext_builtin_brand_libname "BogaudioModules")
 
