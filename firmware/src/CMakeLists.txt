@@ -105,7 +105,8 @@ add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 # instead of the -Ofast set in arch_mp15xa7.cmake
 #
 set(OPT_SIZE_FLAGS "$<$<CONFIG:Release>:-Os>" "$<$<CONFIG:RelWithDebInfo>:-Os>")
-foreach(gui_lib lvgl ThorVG nanovg ui ui_lvgl metamodule-patch-serial ryml c4core jansson)
+
+foreach(gui_lib lvgl ThorVG nanovg ui ui_lvgl jansson)
   if(TARGET ${gui_lib})
     target_compile_options(${gui_lib} PRIVATE ${OPT_SIZE_FLAGS})
   endif()
@@ -264,9 +265,6 @@ set_property(SOURCE
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
   ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
-  ${FWDIR}/src/user_settings/settings_file.cc
-  ${FWDIR}/src/user_settings/settings_parse.cc
-  ${FWDIR}/src/user_settings/settings_serialize.cc
   APPEND PROPERTY COMPILE_OPTIONS ${OPT_SIZE_FLAGS}
 )
 
