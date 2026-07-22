@@ -2,7 +2,6 @@
 #include "CoreModules/elements/element_state_conversion.hh"
 #include "CoreModules/elements/elements.hh"
 #include "util/overloaded.hh"
-#include <charconv>
 #include <string>
 
 namespace MetaModule
@@ -28,9 +27,9 @@ inline std::string custom_display_value_string(Pot const &el, float value, bool 
 		auto sz = std::snprintf(s.data(), s.size(), "%.*g", el.display_precision, v);
 		s.resize(sz);
 	} else {
-		auto res = std::to_chars(s.data(), s.data() + s.size(), v, std::chars_format::fixed, 5);
-		*res.ptr = '\0';
-		s.resize(res.ptr - s.data());
+		// %.5f instead of std::to_chars(v, fixed, 5): float to_chars pulls in ~120KB of libstdc++ ryu tables
+		auto sz = std::snprintf(s.data(), s.size(), "%.5f", v);
+		s.resize(std::min<size_t>(sz, s.size() - 1));
 	}
 
 	if (el.units.length()) {
