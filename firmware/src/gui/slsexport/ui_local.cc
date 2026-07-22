@@ -82,7 +82,7 @@ static void scroll_fully_viewed_cb(lv_event_t *event) {
 }
 
 void format_mapping_circle(lv_obj_t *circle, MapButtonType type, unsigned panel_jack_id) {
-	lv_color_t circle_bgcolor;
+	lv_color_t circle_bgcolor = lv_color_white();
 	lv_color_t circle_bordercolor = lv_color_black();
 	unsigned circle_borderwidth = 0;
 	std::string letterchar = "";
