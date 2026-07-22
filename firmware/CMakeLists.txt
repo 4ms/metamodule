@@ -107,17 +107,37 @@ set(RELEASE_WIFI_ARCHIVE           ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_
 
 set(MANIFEST_FILENAME metamodule.json)
 set(MAIN_FW_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/main.uimg)
+set(MAIN_FULL_UIMG ${CMAKE_CURRENT_BINARY_DIR}/main-full.uimg)
+
+# Full (uncompressed) multi-record uimg with all A7 and M4 segments
+add_custom_command(
+  OUTPUT ${MAIN_FULL_UIMG}
+  COMMAND flashing/elf_to_uimg.py
+          --m4 $<TARGET_FILE:main_m4.elf>
+          --a7 $<TARGET_FILE:main.elf>
+          ${MAIN_FULL_UIMG}
+  DEPENDS main.elf main_m4.elf ${SYMBOLS_FILE} AlwaysCheckGit
+  COMMENT "Creating combined uimg file"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  VERBATIM USES_TERMINAL
+)
+
+# Named target so the selfextract subdirectory can depend on the full uimg
+# across directories without creating a dependency cycle
+add_custom_target(main-full-uimg DEPENDS ${MAIN_FULL_UIMG})
+
+# Wrap it in the self-extracting LZ4 stub; the flashed/booted image is the stub
+add_subdirectory(flashing/selfextract)
 
 add_custom_command(
   OUTPUT ${MAIN_FW_FILENAME}
   COMMAND flashing/elf_to_uimg.py
-          --m4 $<TARGET_FILE:main_m4.elf>
-          --a7 $<TARGET_FILE:main.elf>
+          --a7 $<TARGET_FILE:selfextract_stub.elf>
           ${MAIN_FW_FILENAME}
   COMMAND cp ${MAIN_FW_FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
   COMMAND ls -l ${MAIN_FW_FILENAME}
-  DEPENDS main.elf main_m4.elf ${SYMBOLS_FILE} AlwaysCheckGit
-  COMMENT "Creating combined uimg file"
+  DEPENDS selfextract_stub.elf ${MAIN_FULL_UIMG}
+  COMMENT "Creating self-extracting uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
 )
