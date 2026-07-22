@@ -64,7 +64,7 @@ struct InfoTab : SystemMenuTab {
 		arena_claimed = std::round(PluginArena::claimed_bytes() / (1024 * 1024));
 
 		total_mem_used = (mi.uordblks + PluginArena::used_bytes()) / (1024 * 1024);
-		total_percent_used = std::round(100.f * total_mem_used / A7_HEAP_SZ);
+		total_percent_used = std::round(100.f * (mi.uordblks + PluginArena::used_bytes()) / A7_HEAP_SZ);
 #endif
 
 		lv_label_set_text_fmt(ui_SystemMenuFWversion,
