@@ -5,6 +5,7 @@ add_compile_definitions(
       STM32MP1
       STM32MP157Cxx
       CORE_CA7
+      C4CORE_NO_STD_TOCHARS
 )
 
 # Note: MCU_FLAGS is used with linking as well
