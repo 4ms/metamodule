@@ -1,25 +1,22 @@
 // Self-extracting boot stub for the MetaModule firmware image.
 //
 // MP1-Boot loads this stub (with its embedded LZ4-compressed payload) into
-// the FWBUFFER region and jumps to _start, exactly as it would boot the
-// application directly -- no bootloader changes are needed.
+// the FWBUFFER region (0xCC000040) and jumps to _start, exactly as it would
+// boot the application directly.
 //
 // The payload is the complete multi-record uimg (A7 + M4 segments) that
 // elf_to_uimg.py produces. This stub:
-//   1. LZ4-decompresses it to a staging area in DDR
+//   1. LZ4-decompresses it to a staging area in DDR (0xD0000000)
 //   2. Verifies the CRC32 of the decompressed image
 //   3. Walks the uimg records, copying each payload to its load address
 //      (mirroring BootMediaLoader::load_image in mp1-boot)
 //   4. Jumps to the entry point found in the kernel-type record
 //
-// Memory layout (see system/linker/memory.ld):
-//   0xCC000040  this stub + compressed payload (FWBUFFER region, 20MB;
-//               never a load target of any uimg record)
-//   0xD0000000  staging area for the decompressed uimg (inside the A7_HEAP
-//               region; only VMAs live there, no record loads there)
-//
-// Execution state: ARM mode, interrupts masked, MMU off (so all data
-// accesses are uncached/strongly-ordered -- keep word accesses aligned).
+// On entry, interrupts are masked and MMU is off. Then we enable the MMU
+// with a flat 1:1 section table (DDR cacheable, everything else Device).
+// Before jumping to the app we clean the data cache and return the CPU
+// to the same state mp1-boot hands us: MMU off, D-cache off/clean,
+// I-cache on/invalidated.
 
 #include <stdint.h>
 
@@ -27,6 +24,33 @@
 #ifndef STAGING
 #define STAGING ((uint8_t *)0xD0000000)
 #endif
+
+// L1 translation table location: the _TTB region from system/linker/memory.ld
+// (16KB-aligned). The app builds its own tables there later, after it takes over.
+#define TTB_ADDR 0xC0100000u
+
+// Implemented in start.S (kept out of this file so tests can host-compile it)
+void mmu_on(uint32_t ttb_addr);
+void __attribute__((noreturn)) mmu_off_and_jump(uint32_t entry);
+
+// Flat 1MB-section table: virtual == physical for the whole 4GB space.
+//   DDR (0xC0000000-0xE0000000): Normal cacheable, executable
+//   SYSRAM at 0x2FF00000: Normal non-cacheable, executable (mp1-boot's exception vectors)
+//   everything else: Device (peripherals, SRAM/RETRAM for M4 firmware)
+static void fill_translation_table(void) {
+	volatile uint32_t *ttb = (volatile uint32_t *)TTB_ADDR;
+	for (uint32_t i = 0; i < 4096; i++) {
+		uint32_t base = i << 20;
+		uint32_t desc;
+		if (i >= 0xC00 && i < 0xE00)
+			desc = base | 0x1C0E; // section, TEX=001, AP=11, C, B
+		else if (i == 0x2FF)
+			desc = base | 0x1C02; // section, TEX=001, AP=11, non-cacheable
+		else
+			desc = base | 0xC16; // section, AP=11, B (device), XN
+		ttb[i] = desc;
+	}
+}
 
 #define PACK_MAGIC 0x58534D4Du
 #define UIMG_MAGIC 0x27051956u
@@ -132,10 +156,22 @@ static uint32_t lz4_decompress(const uint8_t *src, uint32_t slen, uint8_t *dst) 
 static uint32_t crc32_calc(const uint8_t *data, uint32_t len) {
 	// Nibble-table CRC-32 (poly 0xEDB88320), matches zlib.crc32
 	static const uint32_t tab[16] = {
-		0x00000000, 0x1DB71064, 0x3B6E20C8, 0x26D930AC,
-		0x76DC4190, 0x6B6B51F4, 0x4DB26158, 0x5005713C,
-		0xEDB88320, 0xF00F9344, 0xD6D6A3E8, 0xCB61B38C,
-		0x9B64C2B0, 0x86D3D2D4, 0xA00AE278, 0xBDBDF21C,
+		0x00000000,
+		0x1DB71064,
+		0x3B6E20C8,
+		0x26D930AC,
+		0x76DC4190,
+		0x6B6B51F4,
+		0x4DB26158,
+		0x5005713C,
+		0xEDB88320,
+		0xF00F9344,
+		0xD6D6A3E8,
+		0xCB61B38C,
+		0x9B64C2B0,
+		0x86D3D2D4,
+		0xA00AE278,
+		0xBDBDF21C,
 	};
 	uint32_t crc = 0xFFFFFFFFu;
 	while (len--) {
@@ -146,23 +182,14 @@ static uint32_t crc32_calc(const uint8_t *data, uint32_t len) {
 	return crc ^ 0xFFFFFFFFu;
 }
 
-static void invalidate_icache_and_predictors(void) {
-#if defined(__arm__)
-	uint32_t zero = 0;
-	// ICIALLU: invalidate entire instruction cache
-	__asm volatile("mcr p15, 0, %0, c7, c5, 0" ::"r"(zero));
-	// BPIALL: invalidate branch predictor array
-	__asm volatile("mcr p15, 0, %0, c7, c5, 6" ::"r"(zero));
-	__asm volatile("dsb");
-	__asm volatile("isb");
-#endif
-}
-
 void __attribute__((noreturn)) stub_main(void) {
 	const struct pack_header *ph = (const struct pack_header *)_payload_start;
 
 	if (ph->magic != PACK_MAGIC)
 		goto fail;
+
+	fill_translation_table();
+	mmu_on(TTB_ADDR);
 
 	uint32_t written = lz4_decompress(_payload_start + sizeof(*ph), ph->csize, STAGING);
 	if (written != ph->usize)
@@ -199,15 +226,13 @@ void __attribute__((noreturn)) stub_main(void) {
 		if (entry == 0)
 			goto fail;
 
-		invalidate_icache_and_predictors();
-
-		typedef void __attribute__((noreturn)) (*entry_t)(void);
-		((entry_t)entry)();
+		// Cleans the D-cache, disables MMU/D-cache, invalidates I-cache, jumps
+		mmu_off_and_jump(entry);
 	}
 
 fail:
 	// Bad flash contents: jumping to garbage helps nobody. Hang here (the
-	// unit can still be recovered over USB DFU).
+	// unit can still be recovered over USB DFU or via SD card boot).
 	for (;;)
 		;
 }
