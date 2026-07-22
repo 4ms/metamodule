@@ -35,19 +35,14 @@ struct InfoTab : SystemMenuTab {
 		if (fw_version.starts_with("firmware-"))
 			fw_version.remove_prefix(9);
 
-		int memory_percent_used = 0;
-		size_t memory_used = 1;
-		unsigned memory_total = A7_HEAP_SZ / (1024 * 1024);
-		int arena_percent_used = 0;
-		size_t arena_used = 0;
-		unsigned arena_total = 0;
+		const unsigned memory_total = std::round(A7_HEAP_SZ / (1024 * 1024));
+		unsigned memory_used = 1;
+		unsigned arena_used = 0;
+		unsigned arena_claimed = 0;
+		unsigned total_mem_used = 0;
+		unsigned total_percent_used = 0;
 
 #if !defined(SIMULATOR)
-		// The firmware heap and plugin arena share the A7 heap region with a
-		// dynamic boundary: the arena's claim grows/shrinks with plugin usage,
-		// and the firmware heap can use everything the arena hasn't claimed
-		size_t arena_claimed = PluginArena::claimed_bytes();
-		size_t fw_heap_sz = A7_HEAP_SZ - arena_claimed;
 
 		struct mallinfo mi = mallinfo();
 		pr_info("HEAP_SZ  %zu (linker reserved for A7 heap, shared by firmware heap and plugin arena)\n", A7_HEAP_SZ);
@@ -60,28 +55,27 @@ struct InfoTab : SystemMenuTab {
 		pr_info("keepcost %zu (top-most, releasable via malloc_trim space)\n", mi.keepcost);
 		pr_info("plugin arena: used %zu of %zu claimed, peak %zu\n",
 				PluginArena::used_bytes(),
-				arena_claimed,
+				PluginArena::claimed_bytes(),
 				PluginArena::peak_bytes());
 
-		memory_percent_used = (int)std::round(100.f * (float)mi.uordblks / (float)fw_heap_sz);
-		memory_used = mi.uordblks / (1024 * 1024);
-		memory_total = fw_heap_sz / (1024 * 1024);
+		memory_used = std::round(mi.uordblks / (1024 * 1024));
 
-		arena_percent_used =
-			arena_claimed ? (int)std::round(100.f * (float)PluginArena::used_bytes() / (float)arena_claimed) : 0;
-		arena_used = PluginArena::used_bytes() / (1024 * 1024);
-		arena_total = arena_claimed / (1024 * 1024);
+		arena_used = std::round(PluginArena::used_bytes() / (1024 * 1024));
+		arena_claimed = std::round(PluginArena::claimed_bytes() / (1024 * 1024));
+
+		total_mem_used = (mi.uordblks + PluginArena::used_bytes()) / (1024 * 1024);
+		total_percent_used = std::round(100.f * total_mem_used / A7_HEAP_SZ);
 #endif
 
 		lv_label_set_text_fmt(ui_SystemMenuFWversion,
-							  "Firmware: %s\nRAM: %d%% (%zu/%u MB)\nPlugin RAM: %d%% (%zu/%u MB)",
+							  "Firmware: %s\n\nRAM: %d%% (%u/%u MB)\n  Main: %u MB\n  Plugins: %u MB (claimed %u MB)",
 							  fw_version.data(),
-							  memory_percent_used,
-							  memory_used,
+							  total_percent_used,
+							  total_mem_used,
 							  memory_total,
-							  arena_percent_used,
+							  memory_used,
 							  arena_used,
-							  arena_total);
+							  arena_claimed);
 
 		lv_show(ui_SystemMenuExpanders);
 
