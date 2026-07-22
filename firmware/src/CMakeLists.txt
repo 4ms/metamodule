@@ -101,6 +101,17 @@ add_subdirectory(${FWDIR}/src/gui/slsexport)
 add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 
 #
+# GUI-only code never runs on the audio threads, so optimize it for size
+# instead of the -Ofast set in arch_mp15xa7.cmake
+#
+set(OPT_SIZE_FLAGS "$<$<CONFIG:Release>:-Os>" "$<$<CONFIG:RelWithDebInfo>:-Os>")
+foreach(gui_lib lvgl ThorVG nanovg ui ui_lvgl metamodule-patch-serial ryml c4core jansson)
+  if(TARGET ${gui_lib})
+    target_compile_options(${gui_lib} PRIVATE ${OPT_SIZE_FLAGS})
+  endif()
+endforeach()
+
+#
 # Main App
 #
 add_executable(
@@ -126,7 +137,6 @@ add_executable(
   ${FWDIR}/src/core_a7/async_thread_control.cc
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
-  ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/audio/audio.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
@@ -135,16 +145,6 @@ add_executable(
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fs/helpers.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
-  ${FWDIR}/src/gui/elements/element_name.cc
-  ${FWDIR}/src/gui/elements/panel_name.cc
-  ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/src/gui/fonts/fonts.cc
-  ${FWDIR}/src/gui/fonts/ttf.cc
-  ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
-  ${FWDIR}/src/gui/pages/module_view/element_roller.cc
-  ${FWDIR}/src/gui/pages/module_view/draw_module.cc
-  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
-  ${FWDIR}/src/gui/pages/tags.cc
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
@@ -168,9 +168,6 @@ add_executable(
   ${FWDIR}/src/fs/general_io.cc
   ${FWDIR}/src/patch_file/reload_patch.cc
   #
-  ${FWDIR}/src/user_settings/settings_file.cc
-  ${FWDIR}/src/user_settings/settings_parse.cc
-  ${FWDIR}/src/user_settings/settings_serialize.cc
   #
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
@@ -213,6 +210,24 @@ add_executable(
   #
   ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
   #
+  # -Os sources (see OPT_SIZE_FLAGS) must come last: inline functions used by
+  # both -Ofast and -Os TUs are emitted in each, and the linker keeps the first
+  # copy it sees. Listing these last ensures the -Ofast copies win, so shared
+  # inline code called from the audio thread stays speed-optimized.
+  ${FWDIR}/src/core_a7/aux_core_main.cc
+  ${FWDIR}/src/gui/elements/element_name.cc
+  ${FWDIR}/src/gui/elements/panel_name.cc
+  ${FWDIR}/src/gui/slsexport/ui_local.cc
+  ${FWDIR}/src/gui/fonts/fonts.cc
+  ${FWDIR}/src/gui/fonts/ttf.cc
+  ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
+  ${FWDIR}/src/gui/pages/module_view/element_roller.cc
+  ${FWDIR}/src/gui/pages/module_view/draw_module.cc
+  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
+  ${FWDIR}/src/gui/pages/tags.cc
+  ${FWDIR}/src/user_settings/settings_file.cc
+  ${FWDIR}/src/user_settings/settings_parse.cc
+  ${FWDIR}/src/user_settings/settings_serialize.cc
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
@@ -233,6 +248,26 @@ set_source_files_properties(
   ${FWDIR}/vcv_plugin/export/osdialog/osdialog-mm.cc
 
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
+)
+
+# GUI-only sources in main.elf: optimize for size (see OPT_SIZE_FLAGS above).
+# Note: aux_core_main.cc is the GUI core entry point and pulls in all the GUI pages.
+set_property(SOURCE
+  ${FWDIR}/src/core_a7/aux_core_main.cc
+  ${FWDIR}/src/gui/elements/element_name.cc
+  ${FWDIR}/src/gui/elements/panel_name.cc
+  ${FWDIR}/src/gui/slsexport/ui_local.cc
+  ${FWDIR}/src/gui/pages/module_view/draw_module.cc
+  ${FWDIR}/src/gui/pages/module_view/element_roller.cc
+  ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
+  ${FWDIR}/src/gui/pages/tags.cc
+  ${FWDIR}/src/gui/fonts/fonts.cc
+  ${FWDIR}/src/gui/fonts/ttf.cc
+  ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
+  ${FWDIR}/src/user_settings/settings_file.cc
+  ${FWDIR}/src/user_settings/settings_parse.cc
+  ${FWDIR}/src/user_settings/settings_serialize.cc
+  APPEND PROPERTY COMPILE_OPTIONS ${OPT_SIZE_FLAGS}
 )
 
 
