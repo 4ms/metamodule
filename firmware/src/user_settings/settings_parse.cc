@@ -12,7 +12,12 @@ namespace MetaModule
 template<typename T>
 void read_or_default(ryml::ConstNodeRef const &n, c4::csubstr name, T *s, auto member_ptr) {
 	if (n.is_map() && n.has_child(name)) {
-		n[name] >> s->*member_ptr;
+		try {
+			n[name] >> s->*member_ptr;
+		} catch (std::exception const &) {
+			// value failed to deserialize (ryml reports this by callback, which throws)
+			s->*member_ptr = T{}.*member_ptr;
+		}
 	} else {
 		s->*member_ptr = T{}.*member_ptr;
 	}
@@ -258,7 +263,7 @@ static bool read(ryml::ConstNodeRef const &node, MissingPluginSettings *settings
 namespace Settings
 {
 
-bool parse(std::span<char> yaml, UserSettings *settings) {
+bool parse(std::span<char> yaml, UserSettings *settings) try {
 	RymlInit::init_once();
 
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yaml.data(), yaml.size()));
@@ -307,6 +312,9 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	}
 
 	return true;
+} catch (std::exception const &) {
+	// ryml reports parse errors by callback, which throws (see ryml_init.cc)
+	return false;
 }
 
 } // namespace Settings

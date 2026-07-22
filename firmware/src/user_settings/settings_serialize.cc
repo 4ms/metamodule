@@ -145,7 +145,7 @@ static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {
 namespace Settings
 {
 
-uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
+uint32_t serialize(UserSettings const &settings, std::span<char> buffer) try {
 	RymlInit::init_once();
 
 	ryml::Tree tree;
@@ -174,6 +174,9 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();
+} catch (std::exception const &) {
+	// ryml reports errors (e.g. buffer overflow) by callback, which throws (see ryml_init.cc)
+	return 0;
 }
 
 //

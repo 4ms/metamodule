@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "ryml.hpp"
+#include "ryml_init.hh"
 #include "ryml_std.hpp"
 
 namespace MetaModule
@@ -76,7 +77,8 @@ struct ManifestParser {
 
 	// returns true if file data is valid manifest json file (does not check md5 or if files exist)
 	// creates the list of files we need
-	std::optional<UpdateManifest> parse(std::span<char> json) {
+	std::optional<UpdateManifest> parse(std::span<char> json) try {
+		RymlInit::init_once();
 
 		// ryml has issues with tabs in json sometimes:
 		std::replace(json.begin(), json.end(), '\t', ' ');
@@ -116,6 +118,10 @@ struct ManifestParser {
 			pr_dbg("Manifest not valid json or yaml\n");
 		}
 
+		return std::nullopt;
+	} catch (std::exception const &) {
+		// ryml reports parse errors by callback, which throws (see ryml_init.cc)
+		pr_dbg("Manifest not valid json or yaml\n");
 		return std::nullopt;
 	}
 };

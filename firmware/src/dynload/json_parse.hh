@@ -73,7 +73,7 @@ static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleMetaData *s) {
 	return true;
 }
 
-inline bool parse_json(std::span<char> file_data, Metadata *metadata) {
+inline bool parse_json(std::span<char> file_data, Metadata *metadata) try {
 	RymlInit::init_once();
 
 	// ryml has issues with tabs in json sometimes:
@@ -104,9 +104,12 @@ inline bool parse_json(std::span<char> file_data, Metadata *metadata) {
 	}
 
 	return true;
+} catch (std::exception const &) {
+	// ryml reports parse errors by callback, which throws (see ryml_init.cc)
+	return false;
 }
 
-inline bool parse_mm_json(std::span<char> file_data, Metadata *metadata) {
+inline bool parse_mm_json(std::span<char> file_data, Metadata *metadata) try {
 	RymlInit::init_once();
 
 	// ryml has issues with tabs in json sometimes:
@@ -137,6 +140,8 @@ inline bool parse_mm_json(std::span<char> file_data, Metadata *metadata) {
 	}
 
 	return true;
+} catch (std::exception const &) {
+	return false;
 }
 
 } // namespace MetaModule::Plugin
