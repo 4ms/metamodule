@@ -114,6 +114,8 @@ add_executable(
   ${FWDIR}/system/cxx_terminate.cc
   ${FWDIR}/system/abort_rescue.cc
   ${FWDIR}/src/memory/plugin_arena.cc
+  ${FWDIR}/src/memory/plugin_allocator.cc
+  ${FWDIR}/src/memory/heap_dispatch.cc
   ${FWDIR}/src/memory/tlsf/mm_tlsf.c
   ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
