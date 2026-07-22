@@ -6,15 +6,8 @@
 namespace TestRymlInit
 {
 void init_once() {
-	static bool already_init = false;
-	static c4::yml::Callbacks callbacks;
-	if (!already_init) {
-		already_init = true;
-		callbacks.m_error = [](const char *msg, size_t /*msg_len*/, c4::yml::Location loc, void * /*user_data*/) {
-			//ignore errors
-		};
-		c4::yml::set_callbacks(callbacks);
-	}
+	// Errors throw and are caught by the parse entry points (see ryml_init.cc)
+	RymlInit::init_once();
 }
 } // namespace TestRymlInit
 
