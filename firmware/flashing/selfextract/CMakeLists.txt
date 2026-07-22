@@ -16,10 +16,15 @@ add_custom_command(
 
 add_executable(selfextract_stub.elf start.S stub.c payload.S)
 
+# -mno-unaligned-access is essential: the stub runs with the MMU off, so all
+# data accesses are Device memory where any unaligned access is a fault (and
+# mp1-boot's exception vectors just hang). Without this flag GCC merges byte
+# reads (e.g. the LZ4 match-offset field) into unaligned ldrh/ldr.
 target_compile_options(selfextract_stub.elf PRIVATE
   -mcpu=cortex-a7
   -marm
   -mfloat-abi=soft
+  -mno-unaligned-access
   -ffreestanding
   -fno-builtin
   -fno-stack-protector
