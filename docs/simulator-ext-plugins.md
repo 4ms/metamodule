@@ -16,29 +16,16 @@ Within the plugin, there must be an `init()` function (or `init(rack::Plugin
 
 ### Building
 
-You must make a few changes to the code to make this hack work:
+No source-code changes to the plugin are needed. The simulator prelinks each
+external plugin and keeps its symbols private, the same isolation it has when
+dynamically loaded on hardware: the plugin's `init()` is automatically renamed
+to `init_BrandName`, its `pluginInstance` global stays private to the plugin,
+and its other symbols cannot collide with the firmware's built-in brands or
+other external plugins. (Plugins that were previously modified for the
+simulator — `#ifdef`'ing `init()` to `init_BrandName()` and making
+`pluginInstance` extern — still work unchanged.)
 
-1. In your plugin, find the `init()` function and change it to `init_PluginSlug()`, 
-   where PluginSlug is the brand slug of your plugin (check your plugin.json file to 
-   find your brand slug). This is needed because we can't have multiple
-   functions with the name `init()`.
-
-2. If you have a global variable in your plugin called `pluginInstance`, you need
-   to make it `extern`. So find this:
-
-```c++
-   Plugin* pluginInstance;
-```
-
-   and change it to this:
-```c++
-   extern Plugin* pluginInstance;
-```
-
-   This is needed because there already is a global variable called pluginInstance, and 
-   we can't have two.
-
-3. In your plugin's CMakeLists.txt file, make sure something like this is at the top:
+1. In your plugin's CMakeLists.txt file, make sure something like this is at the top:
 
 ```cmake
 if(NOT "${METAMODULE_SDK_DIR}" STREQUAL "")
@@ -72,7 +59,7 @@ simulator's fake SDK. Something is wrong with the block of cmake code above, or
 else METAMODULE_SDK_DIR is not being set properly.
 
 
-4. Finally, in the simulator project, open the file `simulator/ext-plugins.cmake`
+2. Next, in the simulator project, open the file `simulator/ext-plugins.cmake`
    and add these two lines at the top:
 
 ```cmake
@@ -98,7 +85,7 @@ or plugin-mm.json file. If the slug is the same as the CMake library name, then 
 
 If you have more than one external plugin, then you need to specify the slug for all of them, or for none of them.
 
-5. Now, you can build the simulator from within the simulator directory (not the firmware dir!) and your plugin should show up as a built-in brand.
+3. Now, you can build the simulator from within the simulator directory (not the firmware dir!) and your plugin should show up as a built-in brand.
 
 ```bash
 cd metamodule/simulator
@@ -126,29 +113,24 @@ Since this is a bit of a hack, there are some limitations:
   MetaModule, there might be other things broken when trying to access files on
   the host computer.
 
-- The global variable `pluginInstance` will not be properly set to your plugin's
+- Legacy-style plugins that declare `extern Plugin* pluginInstance;` for the
+  simulator (instead of defining their own) share one `pluginInstance` global
+  with all the internal brands, so it will not be properly set to your plugin's
   plugin instance during runtime (that is, outside of the init() function). This
   usually shows up as a font or image that's supposed to be loaded during runtime,
-  cannot be found. To work around this, temporarily change
-  `rack::asset::plugin(pluginInstance, "res/path/to/file.svg")` to a hard-coded
-  path like `"MyPluginSlug/path/to/file.png"`. See
-  `firmware/vcv_plugin/export/src/asset.cc` to understand how
-  `rack::asset::plugin` transforms the path.
+  cannot be found. To fix this, remove the `#ifdef METAMODULE_BUILTIN` boilerplate
+  so the plugin defines its own `Plugin* pluginInstance;` like it does when built
+  for hardware — the simulator keeps it private to the plugin automatically.
 
 If you are experiencing an issue along these lines with an external plugin on
 the simulator, testing on actual hardware is the best way to determine if an
 issue is due to one of these limitations or is an actual bug.
 
-- Variable names, function names, and macros (`#define`) might collide. Since
-  the plugin is being built and linked with the simulator code and all the
-  normal built-in modules (Befaco, HetrickCV, 4ms, etc) there's a chance some
-  function or global variable name your plugin uses will already be in use.
-  Hopefully this will cause a compiler error, but in the worst case it could
-  cause a runtime crash (especially with macros). Unfortunately there's not an
-  easy way around this besides renaming your functions/variables, using
-  namespacing, and/or avoiding macros. Searching the metamodule repo for the
-  offending text should tell you if this is happening, or you can try building
-  the plugin normally and see if you get the same error.
+- Macros (`#define`) in the interface headers might collide with names in your
+  plugin, since the plugin is compiled against the simulator's copy of the
+  rack interface headers. (Link-time symbol collisions with the firmware's
+  built-in brands or other external plugins are not an issue: each external
+  plugin's symbols are kept private to that plugin.)
 
 - The `plugin` target that the real SDK's `create_plugin()` defines (which
   plugins sometimes attach `add_custom_command(TARGET plugin POST_BUILD ...)`
