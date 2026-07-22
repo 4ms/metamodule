@@ -10,8 +10,8 @@ struct FatTime {
 	operator uint32_t() const {
 		return ((uint32_t)date << 16) | (uint32_t)time;
 	}
-	uint8_t year() {
-		return static_cast<uint8_t>(date >> 9) + 1980; //top 7 bits are year-1980 1980..2107
+	uint16_t year() {
+		return (date >> 9) + 1980; //top 7 bits are year-1980 1980..2107
 	}
 	uint8_t month() {
 		return static_cast<uint8_t>((date >> 5) & 0x0F); //middle 4 bits are month 1..12
