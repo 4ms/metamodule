@@ -38,6 +38,17 @@
 #define GPIOE_BASE 0x50006000u
 #define SPI4_BASE 0x44005000u
 
+// Handoff to the application: after drawing the logo the stub sets a magic in a
+// retained TAMP backup register. The app's ScreenFrameWriter::init() reads it
+// and skips its own panel reset()+init so the logo stays on screen until the
+// first UI frame. MUST stay in sync with src/screen/screen_writer.hh.
+#define PWR_CR1 0x50001000u		 // PWR_CR1, DBP = bit 8
+#define PWR_CR1_DBP (1u << 8)
+#define TAMP_BASE 0x5C00A000u
+#define TAMP_SMCR (TAMP_BASE + 0x20u)  // BKPRWDPROT[7:0], BKPWDPROT[23:16], TAMPDPROT[31]
+#define TAMP_BKP7R (TAMP_BASE + 0x11Cu) // free (mp1-boot uses BKP6R)
+#define SPLASH_HANDOFF_MAGIC 0x53504C31u // "SPL1"
+
 // GPIO register offsets
 #define GPIO_MODER 0x00u
 #define GPIO_OTYPER 0x04u
@@ -295,9 +306,20 @@ static void draw(void) {
 	}
 }
 
+// Tell the app the panel is already up and showing the logo, so it can skip its
+// own reset+init. Mirrors mp1-boot's unlock_backup_registers() (boot_ddr.hh).
+static void set_splash_flag(void) {
+	reg_write(PWR_CR1, reg_read(PWR_CR1) | PWR_CR1_DBP); // allow backup-domain writes
+	while (!(reg_read(PWR_CR1) & PWR_CR1_DBP))
+		;
+	reg_write(TAMP_SMCR, (1u << 31)); // clear BKP write protection (TAMPDPROT=1)
+	reg_write(TAMP_BKP7R, SPLASH_HANDOFF_MAGIC);
+}
+
 void splash_show(void) {
 	spi_gpio_init();
 	panel_reset();
 	panel_init();
 	draw();
+	set_splash_flag();
 }
