@@ -111,6 +111,12 @@ add_executable(
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
+  ${FWDIR}/system/cxx_terminate.cc
+  ${FWDIR}/system/abort_rescue.cc
+  ${FWDIR}/src/memory/plugin_arena.cc
+  ${FWDIR}/src/memory/plugin_allocator.cc
+  ${FWDIR}/src/memory/heap_dispatch.cc
+  ${FWDIR}/src/memory/tlsf/mm_tlsf.c
   ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
   ${FWDIR}/system/startup_ca7.s
@@ -154,6 +160,7 @@ add_executable(
 
   #
   ${FWDIR}/src/dynload/dynloader.cc
+  ${FWDIR}/src/dynload/exidx_registry.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc
@@ -289,6 +296,19 @@ foreach(brand ${brands})
 	endif()
 endforeach()
 
+
+# Every free/realloc must dispatch by address between the newlib heap and the
+# plugin arena, because ownership crosses the plugin boundary in both
+# directions (e.g. a std::string allocated by plugin code, freed by firmware).
+# --wrap redirects every firmware call site (including newlib-internal ones)
+# to the dispatching wrappers in plugin_arena.cc; plugin imports of these
+# symbols are redirected to the same wrappers by the dynloader.
+target_link_options(main.elf PRIVATE
+  -Wl,--wrap=free
+  -Wl,--wrap=_free_r
+  -Wl,--wrap=realloc
+  -Wl,--wrap=_realloc_r
+)
 
 target_link_script(
   main
