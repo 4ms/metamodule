@@ -43,12 +43,9 @@ inline constexpr size_t MallocAlign = 8;
 // The arena claims slabs downward from _eheap, so the arena region is always
 // the contiguous range [arena_floor, _eheap) and contains() stays a two-
 // comparison check.
-// The firmware heap may grow up to arena_floor (sbrk asks via mm_arena_allow_brk)
-//
+// The firmware heap may grow up to arena_floor (sbrk asks via mm_arena_allow_brk).
 // slab claims must leave FwHeadroom above the firmware's high-water break.
-//
 // All boundary changes happen under the arena lock.
-//
 // contains() reads the floor lock-free (acquire pairs with the release
 // store when the floor moves).
 
@@ -115,7 +112,12 @@ bool grow(size_t needed) {
 	if (!tlsf)
 		overhead += mm_tlsf_size();
 
-	size_t slab_size = needed + overhead;
+	// TLSF's good-fit search rounds a request up by one second-level granule
+	// (needed/32 at these sizes) and only searches buckets that guarantee a
+	// fit: the slab's free block must be that much larger than the request or
+	// the retry after grow() cannot find it. Happens at requests >= ~32 MB,
+	// where the granule exceeds the 1 MB slab rounding.
+	size_t slab_size = needed + needed / 32 + overhead;
 	if (slab_size < MinSlabSize)
 		slab_size = MinSlabSize;
 	slab_size = (slab_size + SlabGranularity - 1) & ~(SlabGranularity - 1);
@@ -126,7 +128,7 @@ bool grow(size_t needed) {
 	uintptr_t new_floor = cur_floor - slab_size;
 
 	// The firmware side records its growth in brk_ceiling via
-	// mm_arena_allow_brk; refresh from the live break for good measure
+	// mm_arena_allow_brk. Refresh from the live break
 	if (auto brk = mm_current_brk(); brk > brk_ceiling)
 		brk_ceiling = brk;
 
@@ -243,10 +245,14 @@ void *alloc_aligned(size_t align, size_t size) {
 		if (grow(size + align))
 			p = mm_tlsf_memalign(tlsf, align, size);
 	}
-	if (p)
+	if (p) {
 		account_alloc(p);
-	else
+	} else {
+		// A slab speculatively claimed by grow() sits empty if the retry
+		// still failed: give it back before reporting
+		try_return_slabs();
 		log_arena_oom(size);
+	}
 	return p;
 }
 
