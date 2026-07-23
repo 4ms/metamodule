@@ -14,7 +14,7 @@ add_custom_command(
   VERBATIM
 )
 
-add_executable(selfextract_stub.elf start.S stub.c payload.S)
+add_executable(selfextract_stub.elf start.S stub.c splash.c payload.S)
 
 # -mno-unaligned-access is essential: the stub runs with the MMU off, so all
 # data accesses are Device memory where any unaligned access is a fault (and

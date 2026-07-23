@@ -33,6 +33,13 @@
 void mmu_on(uint32_t ttb_addr);
 void __attribute__((noreturn)) mmu_off_and_jump(uint32_t entry);
 
+// Boot splash over SPI4 (splash.c). Compiled out of host tests via SELFEXTRACT_NO_SPLASH.
+#ifndef SELFEXTRACT_NO_SPLASH
+void splash_show(void);
+#else
+static inline void splash_show(void) {}
+#endif
+
 // Flat 1MB-section table: virtual == physical for the whole 4GB space.
 //   DDR (0xC0000000-0xE0000000): Normal cacheable, executable
 //   SYSRAM at 0x2FF00000: Normal non-cacheable, executable (mp1-boot's exception vectors)
@@ -190,6 +197,10 @@ void __attribute__((noreturn)) stub_main(void) {
 
 	fill_translation_table();
 	mmu_on(TTB_ADDR);
+
+	// Blank the screen and show the boot logo while we decompress. The app
+	// re-resets and re-inits the panel when it starts, so this is transparent.
+	splash_show();
 
 	uint32_t written = lz4_decompress(_payload_start + sizeof(*ph), ph->csize, STAGING);
 	if (written != ph->usize)
