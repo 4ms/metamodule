@@ -72,7 +72,7 @@ private:
 
 	SensePinReader sense_pin_reader;
 	ControlExpanderManager control_expander;
-	std::array<Toggler, ButtonExpander::NumTotalButtons> ext_buttons{};
+	std::array<Toggler, Expander::Button::NumTotalButtons> ext_buttons{};
 
 	// MIDI
 	MidiHost &_midi_host;
