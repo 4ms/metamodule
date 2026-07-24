@@ -127,6 +127,9 @@ struct ModuleViewPage : PageBase {
 		auto display = alias.empty() ? ModuleFactory::getModuleDisplayName(slug) : alias;
 		lv_label_set_text(ui_ElementRollerModuleName, display.data());
 
+		build_element_groups();
+		current_group = {};
+
 		has_context_menu = module_context_menu.create_options_menu(this_module_id);
 
 		redraw_module();
@@ -195,6 +198,10 @@ struct ModuleViewPage : PageBase {
 			} else if (full_screen_mode) {
 				full_screen_mode = false;
 				resize_module_image(190);
+
+			} else if (mode == ViewMode::List && !current_group.empty()) {
+				// Inside a param group: back returns to the top-level list
+				exit_group();
 
 			} else if (mode == ViewMode::List) {
 				args.module_id = this_module_id;
@@ -468,6 +475,11 @@ private:
 	static void jump_to_roller_cb(lv_event_t *event);
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx);
 
+	// Param-grouping helpers (defined in module_view/element_roller.cc)
+	void build_element_groups();
+	void enter_group(std::string_view group);
+	void exit_group();
+
 	// Defined in module_view/draw_module.cc
 	void prepare_dynamic_elements();
 	unsigned resize_module_image(unsigned max);
@@ -513,6 +525,12 @@ private:
 	std::vector<DrawnElement> drawn_elements;
 	std::vector<int> roller_drawn_el_idx;
 
+	// Param-grouping: elements sharing a group_name collapse into a submenu.
+	// element_groups holds the ordered, unique group names for this module.
+	// current_group is empty at the top level, or the group whose contents are shown.
+	std::vector<std::string_view> element_groups;
+	std::string_view current_group{};
+
 	lv_obj_t *canvas = nullptr;
 	ModuleViewMappingPane mapping_pane;
 
@@ -537,7 +555,18 @@ private:
 
 	std::optional<GuiElement> pending_action_param_clear{};
 
-	enum { RollerHeaderTag = -1, ContextMenuTag = -2 };
+	enum { RollerHeaderTag = -1, ContextMenuTag = -2, BackTag = -3 };
+	// Group rows encode their index as (GroupTagBase - group_index), i.e. -100, -101, ...
+	static constexpr int GroupTagBase = -100;
+	static int group_row_tag(unsigned group_idx) {
+		return GroupTagBase - (int)group_idx;
+	}
+	static bool is_group_tag(int tag) {
+		return tag <= GroupTagBase;
+	}
+	static unsigned group_from_tag(int tag) {
+		return (unsigned)(GroupTagBase - tag);
+	}
 
 	uint16_t selected_input_port = 0;
 	uint16_t selected_output_port = 0;

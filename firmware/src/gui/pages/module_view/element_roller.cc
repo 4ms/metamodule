@@ -1,6 +1,7 @@
 #include "CoreModules/elements/units.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/module_view/roller_helpers.hh"
+#include <algorithm>
 
 namespace MetaModule
 {
@@ -47,11 +48,36 @@ void ModuleViewPage::populate_roller() {
 	size_t num_elements = moduleinfo.elements.size();
 	opts = "";
 	opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
+	roller_drawn_el_idx.clear();
+
+	// Grouping is disabled while patching a cable (params are hidden then anyway)
+	bool const use_groups = !gui_state.new_cable && !element_groups.empty();
+
+	// If we arrived targeting a grouped element (e.g. from the map view), open its group
+	if (use_groups && current_group.empty() && args.element_indices.has_value()) {
+		for (auto const &de : drawn_elements) {
+			if (ElementCount::matched(*args.element_indices, de.gui_element.idx)) {
+				auto g = base_element(de.element).group_name;
+				if (g.size())
+					current_group = g;
+				break;
+			}
+		}
+	}
 
 	// Populate Roller and element highlights
 	unsigned roller_idx = 0;
 	DrawnElement const *cur_el = nullptr;
 	ElementCount::Counts last_type{};
+
+	std::vector<std::string_view> emitted_groups; // group rows already shown at top level
+
+	// Inside a group, the first row returns to the top-level list
+	if (use_groups && !current_group.empty()) {
+		opts += Gui::orange_text(std::string(LV_SYMBOL_LEFT) + " Back") + "\n";
+		roller_drawn_el_idx.push_back(BackTag);
+		roller_idx++;
+	}
 
 	for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 		auto &gui_el = drawn_element.gui_element;
@@ -68,6 +94,28 @@ void ModuleViewPage::populate_roller() {
 
 		if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
 			continue;
+
+		if (use_groups) {
+			if (!current_group.empty()) {
+				// In-group view: show only elements belonging to this group
+				if (base.group_name != current_group)
+					continue;
+			} else if (base.group_name.size()) {
+				// Top level: collapse each group into a single row at its first element
+				if (std::ranges::find(emitted_groups, base.group_name) != emitted_groups.end())
+					continue;
+				emitted_groups.push_back(base.group_name);
+
+				auto git = std::ranges::find(element_groups, base.group_name);
+				unsigned gidx = (unsigned)std::distance(element_groups.begin(), git);
+
+				opts += Gui::orange_text(std::string(base.group_name) + " " + LV_SYMBOL_RIGHT) + "\n";
+				roller_drawn_el_idx.push_back(group_row_tag(gidx));
+				roller_idx++;
+				last_type = {}; // don't carry a type-header across the group row
+				continue;
+			}
+		}
 
 		if (ModView::append_header(opts, last_type, gui_el.count)) {
 			roller_idx++;
@@ -113,7 +161,7 @@ void ModuleViewPage::populate_roller() {
 		roller_idx++;
 	}
 
-	if (is_patch_playloaded) {
+	if (is_patch_playloaded && current_group.empty()) {
 		if (has_context_menu) {
 			opts += Gui::orange_text("Options:") + "\n";
 			opts += " >>>\n";
@@ -281,6 +329,14 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 		return;
 	}
 
+	// Back / group rows: selectable, but have no panel component to highlight
+	if (cur_idx == BackTag || is_group_tag(cur_idx)) {
+		page->unhighlight_component(prev_sel);
+		page->cur_selected = cur_sel;
+		page->roller_hover.hide();
+		return;
+	}
+
 	page->cur_selected = cur_sel;
 
 	// Save current select in args so we can navigate back to this item
@@ -437,10 +493,17 @@ void ModuleViewPage::roller_click_cb(lv_event_t *event) {
 			page->click_normal_element(drawn_element);
 		}
 
-		//Not an element: Is it the Context Menu?
+		//Not an element: Is it the Context Menu, a group row, or Back?
 	} else if (roller_idx < page->roller_drawn_el_idx.size()) {
-		if (page->roller_drawn_el_idx[roller_idx] == ContextMenuTag) {
+		auto tag = page->roller_drawn_el_idx[roller_idx];
+		if (tag == ContextMenuTag) {
 			page->show_context_menu();
+		} else if (tag == BackTag) {
+			page->exit_group();
+		} else if (is_group_tag(tag)) {
+			auto gidx = group_from_tag(tag);
+			if (gidx < page->element_groups.size())
+				page->enter_group(page->element_groups[gidx]);
 		}
 	}
 }
@@ -509,6 +572,45 @@ std::optional<unsigned> ModuleViewPage::get_drawn_idx(unsigned roller_idx) {
 		}
 	}
 	return std::nullopt;
+}
+
+// Collect the ordered, unique group names declared by this module's elements.
+void ModuleViewPage::build_element_groups() {
+	element_groups.clear();
+	for (auto const &el : moduleinfo.elements) {
+		auto g = base_element(el).group_name;
+		if (g.size() && std::ranges::find(element_groups, g) == element_groups.end())
+			element_groups.push_back(g);
+	}
+}
+
+// Open a group: show only its elements, with a "< Back" row at the top.
+void ModuleViewPage::enter_group(std::string_view group) {
+	current_group = group;
+	args.element_indices = std::nullopt; // avoid re-triggering group auto-open on repopulate
+	cur_selected = 1;					 // first element after the "< Back" row
+	populate_roller();
+}
+
+// Return to the top-level list, re-selecting the row of the group we just left.
+void ModuleViewPage::exit_group() {
+	auto left_group = current_group;
+	current_group = {};
+	args.element_indices = std::nullopt;
+	cur_selected = 0;
+	populate_roller();
+
+	auto git = std::ranges::find(element_groups, left_group);
+	if (git != element_groups.end()) {
+		int tag = group_row_tag((unsigned)std::distance(element_groups.begin(), git));
+		for (unsigned i = 0; i < roller_drawn_el_idx.size(); i++) {
+			if (roller_drawn_el_idx[i] == tag) {
+				cur_selected = i;
+				lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
+				break;
+			}
+		}
+	}
 }
 
 } // namespace MetaModule
