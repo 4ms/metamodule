@@ -100,6 +100,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 
 	// provides vtable for Quantity
 	rack::Quantity q;
+	rack::engine::LightInfo li;
 }
 
 void keep_async() {
