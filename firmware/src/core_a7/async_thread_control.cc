@@ -4,6 +4,7 @@
 #include "drivers/timekeeper.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>
+#include <exception>
 #include <optional>
 
 namespace MetaModule
@@ -78,7 +79,20 @@ void start_module_threads() {
 		is_executing[current_core].store(true, std::memory_order_seq_cst);
 		for (auto &task : tasks) {
 			if (task.enabled && task.core_id == current_core) {
-				task.action();
+				// Async tasks run in an IRQ handler: an exception (e.g.
+				// bad_alloc from a firmware allocation) must be caught within
+				// this frame -- unwinding out of an interrupt is fatal.
+				// (Plugin-thrown exceptions never get here: their unwinder
+				// terminates before crossing into firmware frames.)
+				try {
+					task.action();
+				} catch (std::exception &e) {
+					pr_err(
+						"Async task (module id %u) threw: %s\n", task.module ? (unsigned)task.module->id : 0, e.what());
+				} catch (...) {
+					pr_err("Async task (module id %u) threw an exception\n",
+						   task.module ? (unsigned)task.module->id : 0);
+				}
 
 				if (task.one_shot)
 					task.enabled = false;

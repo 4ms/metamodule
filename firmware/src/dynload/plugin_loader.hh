@@ -9,6 +9,7 @@
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
+#include "system/abort_rescue.hh"
 #include "untar_contents.hh"
 #include "util/monotonic_allocator.hh"
 #include "util/version_tools.hh"
@@ -164,53 +165,89 @@ public:
 			} break;
 
 			case State::ProcessingPlugin: {
-				auto &plugin_file = plugin_files[file_idx];
-				auto &plugin = loaded_plugins.emplace_back();
-				plugin.fileinfo = plugin_file;
+				auto num_loaded_before = loaded_plugins.size();
+				bool plugin_inited = false;
+				try {
+					auto &plugin_file = plugin_files[file_idx];
+					auto &plugin = loaded_plugins.emplace_back();
+					plugin.fileinfo = plugin_file;
 
-				pr_info("Put plugin in loaded list: %s\n", plugin.fileinfo.plugin_name.c_str());
+					pr_info("Put plugin in loaded list: %s\n", plugin.fileinfo.plugin_name.c_str());
 
-				// set slug and display name
-				auto metadata = get_plugin_metadata();
-				std::string fallback_name = plugin_file.plugin_name;
-				if (metadata.brand_slug.length() == 0)
-					metadata.brand_slug = fallback_name;
-				plugin.rack_plugin.slug = metadata.brand_slug;
-				plugin.rack_plugin.name = metadata.display_name.length() ? metadata.display_name : fallback_name;
+					// set slug and display name
+					auto metadata = get_plugin_metadata();
+					std::string fallback_name = plugin_file.plugin_name;
+					if (metadata.brand_slug.length() == 0)
+						metadata.brand_slug = fallback_name;
+					plugin.rack_plugin.slug = metadata.brand_slug;
+					plugin.rack_plugin.name = metadata.display_name.length() ? metadata.display_name : fallback_name;
 
-				plugin.loaded_files = std::move(contents.files_copied_to_ramdisk);
+					plugin.loaded_files = std::move(contents.files_copied_to_ramdisk);
 
-				if (load_plugin(plugin)) {
-					if (metadata.display_name.length())
-						ModuleFactory::setBrandDisplayName(metadata.brand_slug, metadata.display_name);
+					if (load_plugin(plugin)) {
+						plugin_inited = true;
 
-					for (auto const &alias : metadata.brand_aliases)
-						ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
+						if (metadata.display_name.length())
+							ModuleFactory::setBrandDisplayName(metadata.brand_slug, metadata.display_name);
 
-					for (auto const &alias : metadata.module_display_names) {
-						if (alias.display_name.length() && alias.slug.length()) {
-							ModuleFactory::setModuleDisplayName(metadata.brand_slug + ":" + alias.slug,
-																alias.display_name);
+						for (auto const &alias : metadata.brand_aliases)
+							ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
+
+						for (auto const &alias : metadata.module_display_names) {
+							if (alias.display_name.length() && alias.slug.length()) {
+								ModuleFactory::setModuleDisplayName(metadata.brand_slug + ":" + alias.slug,
+																	alias.display_name);
+							}
 						}
-					}
 
-					for (auto const &m : metadata.module_extras) {
-						if (!m.slug.empty()) {
-							if (!m.description.empty())
-								ModuleFactory::setModuleDescription(metadata.brand_slug + ":" + m.slug, m.description);
-							if (m.tags.size() > 0)
-								ModuleFactory::setModuleTags(metadata.brand_slug + ":" + m.slug, m.tags);
+						for (auto const &m : metadata.module_extras) {
+							if (!m.slug.empty()) {
+								if (!m.description.empty())
+									ModuleFactory::setModuleDescription(metadata.brand_slug + ":" + m.slug,
+																		m.description);
+								if (m.tags.size() > 0)
+									ModuleFactory::setModuleTags(metadata.brand_slug + ":" + m.slug, m.tags);
+							}
 						}
-					}
 
-					status.state = State::Success;
-				} else {
-					status.state = State::InvalidPlugin;
-					// Cleanup files we copied to the ramdisk
-					for (auto const &file : plugin.loaded_files) {
-						ramdisk.delete_file(file);
+						status.state = State::Success;
+					} else {
+						status.state = State::InvalidPlugin;
+						// Cleanup files we copied to the ramdisk
+						for (auto const &file : plugin.loaded_files) {
+							ramdisk.delete_file(file);
+						}
+						// pop_back frees the code buffer: retire its unwind table
+						ExidxRegistry::unregister_range(reinterpret_cast<uintptr_t>(plugin.code.data()));
+						loaded_plugins.pop_back();
 					}
-					loaded_plugins.pop_back();
+				} catch (std::bad_alloc &) {
+					if (plugin_inited) {
+						// The plugin's init() already ran and its modules are
+						// registered: it is loaded and usable, only some
+						// display metadata may be missing. Rolling back a
+						// registered plugin is not safe, so keep it.
+						pr_err("Out of memory registering plugin metadata (plugin still loaded)\n");
+						status.state = State::Success;
+					} else {
+						pr_err("Out of memory loading plugin\n");
+						status.state = State::InvalidPlugin;
+						status.error_message = "Out of memory loading plugin";
+						// The ramdisk file list may or may not have been moved
+						// into the plugin entry yet: clean up from both places
+						for (auto const &file : contents.files_copied_to_ramdisk) {
+							ramdisk.delete_file(file);
+						}
+						while (loaded_plugins.size() > num_loaded_before) {
+							for (auto const &file : loaded_plugins.back().loaded_files) {
+								ramdisk.delete_file(file);
+							}
+							ExidxRegistry::unregister_range(
+								reinterpret_cast<uintptr_t>(loaded_plugins.back().code.data()));
+							loaded_plugins.pop_back();
+						}
+						pluginInstance = nullptr;
+					}
 				}
 
 			} break;
@@ -321,9 +358,56 @@ public:
 			return false;
 		}
 
+		// Snapshot registered brands so a crashed init can be backed out
+		auto brands_before = ModuleFactory::getAllBrands();
+
+		// Back out everything a crashed/throwing init() registered. Its
+		// Model objects live in the plugin arena: do not run plugin code to
+		// destroy them -- drop the references and leak them (bounded,
+		// reclaimed on reboot).
+		auto rollback_crashed_init = [&] {
+			// Copy names first: unregistering invalidates registry views
+			std::vector<std::string> new_brands;
+			for (auto brand : ModuleFactory::getAllBrands()) {
+				if (std::ranges::find(brands_before, brand) == brands_before.end())
+					new_brands.emplace_back(brand);
+			}
+			for (auto const &brand : new_brands) {
+				pr_err("Unregistering brand '%s' from crashed plugin\n", brand.c_str());
+				ModuleFactory::unregisterBrand(brand);
+			}
+			plugin.rack_plugin.models.clear();
+			plugin.rack_plugin = {};
+			ExidxRegistry::unregister_range(reinterpret_cast<uintptr_t>(plugin.code.data()));
+			plugin.code = {};
+			pluginInstance = nullptr;
+			status.error_message = "Plugin crashed while initializing";
+		};
+
+		AbortRescue rescue;
+		if (setjmp(rescue.jb) != 0) {
+			// The plugin died during init() without a catchable exception:
+			// its terminate -> imported abort() -> mm_plugin_abort longjmps
+			// here (details were printed by the plugin's terminate handler)
+			rollback_crashed_init();
+			return false;
+		}
+		rescue.arm();
+
 		pluginInstance = &plugin.rack_plugin;
-		//TODO: trap exceptions, restore state, and return
-		init(&plugin.rack_plugin);
+		try {
+			init(&plugin.rack_plugin);
+		} catch (std::exception &e) {
+			// Plugins built with SDK >= 2.3 propagate exceptions across the
+			// boundary (unified exidx lookup); destructors ran during unwind
+			pr_err("Plugin init threw: %s\n", e.what());
+			rollback_crashed_init();
+			return false;
+		} catch (...) {
+			pr_err("Plugin init threw an exception\n");
+			rollback_crashed_init();
+			return false;
+		}
 
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";

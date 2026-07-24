@@ -69,6 +69,7 @@ def GetLibcSymbols():
          "__atexit",
          "__aeabi_atexit",
          "__atexit_recursive_mutex",
+         "mm_host_find_exidx",
     ]
     return libc_syms
 
