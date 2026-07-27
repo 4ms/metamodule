@@ -327,6 +327,45 @@ size_t claimed_bytes() {
 	return claimed;
 }
 
+int check() {
+	LockGuard guard;
+	if (!tlsf)
+		return 0;
+
+	int errors = 0;
+
+	// Internal free-list/bitmap consistency
+	if (auto status = mm_tlsf_check(tlsf); status != 0) {
+		errors += (status < 0) ? -status : status;
+		SafeLog log;
+		log.str("[arena] integrity FAIL in allocator control maps: ");
+		log.u64(errors);
+		log.str(" checks failed");
+		log.flush();
+	}
+
+	// Physical block walk of every slab
+	for (unsigned i = 0; i < num_slabs; i++) {
+		if (auto status = mm_tlsf_check_pool(slabs[i].pool); status != 0) {
+			auto n = (status < 0) ? -status : status;
+			errors += n;
+			SafeLog log;
+			log.str("[arena] integrity FAIL in slab ");
+			log.u64(i);
+			log.str(" base=");
+			log.hex(slabs[i].base);
+			log.str(" size=");
+			log.u64(slabs[i].size);
+			log.str(": ");
+			log.u64(n);
+			log.str(" checks failed");
+			log.flush();
+		}
+	}
+
+	return errors;
+}
+
 // ---- Boundary negotiation with sbrk ----------------------------------------
 
 extern "C" {

@@ -147,6 +147,7 @@ void mm_plugin_op_delete_aligned(void *p, unsigned) {
 namespace MetaModule::PluginArena
 {
 
+// Redirects symbols in the plugin to our own wrappers
 void *allocator_redirect(std::string_view name) {
 	// clang-format off
 	if (name == "malloc")          return reinterpret_cast<void *>(mm_plugin_malloc);

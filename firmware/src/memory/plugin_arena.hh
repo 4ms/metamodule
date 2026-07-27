@@ -14,6 +14,9 @@ inline bool contains(void const *) {
 inline void *allocator_redirect(std::string_view) {
 	return nullptr;
 }
+inline int check() {
+	return 0;
+}
 
 #else
 
@@ -38,26 +41,19 @@ inline void *allocator_redirect(std::string_view) {
 // __wrap_* dispatchers in plugin_arena.cc, and plugin imports of those
 // symbols are rebound to the same dispatchers.
 
-// True if ptr is inside the arena region (valid before init; pure address math)
 bool contains(void const *ptr);
 
-// Allocation API. Thread/ISR-safe (guarded by its own retargeted lock, same
-// scheme as the newlib malloc lock). alloc() returns nullptr when the shared
-// pool is exhausted.
 void *alloc(size_t size);
 void *alloc_aligned(size_t align, size_t size);
 void *realloc(void *ptr, size_t size);
 void free(void *ptr);
 
-// Stats for sysinfo / OOM reports. claimed_bytes() is the arena's current
-// share of the heap region (grows and shrinks with slab claims/returns).
 size_t used_bytes();
 size_t peak_bytes();
 size_t claimed_bytes();
 
-// Returns the arena-backed wrapper for an allocator symbol a plugin imports
-// ("malloc", "_malloc_r", "_Znwj", ...), or nullptr if the name is not an
-// allocator. The dynloader applies this to the host symbol table.
+int check();
+
 void *allocator_redirect(std::string_view name);
 
 #endif // SIMULATOR
