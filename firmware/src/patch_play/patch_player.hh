@@ -20,6 +20,7 @@
 #include "patch_play/plugin_module.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
+#include "system/abort_rescue.hh"
 #include "util/countzip.hh"
 #include "util/oscs.hh"
 #include <algorithm>
@@ -186,14 +187,14 @@ public:
 		}
 
 		// First module is the hub
-		modules[0] = ModuleFactory::create(PanelDef::typeID);
+		modules[0] = try_create_module(PanelDef::typeID);
 		if (modules[0] != nullptr)
 			modules[0]->id = 0;
 
 		unsigned num_not_found = 0;
 		std::string not_found;
 		for (size_t i = 1; i < num_modules; i++) {
-			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
+			modules[i] = try_create_module(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
 				pr_err("Module %s not found\n", pd.module_slugs[i].data());
@@ -547,8 +548,8 @@ public:
 	void set_midi_cc(unsigned ccnum, int16_t val, uint16_t midi_chan) {
 		// CC values arrive as 14-bit from the M4 core (see Midi::u14cc_to_volts). Pitch
 		// bend is a separate signed 14-bit value handled directly.
-		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) :
-												   Midi::u14cc_to_volts<10>(val);
+		using namespace Midi;
+		float volts = (ccnum == PitchBendCC) ? s14_to_semitones<2>(val) : u14cc_to_volts<10>(val);
 
 		volts = std::clamp(volts, 0.f, 10.f);
 
@@ -562,8 +563,7 @@ public:
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules) {
 					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
-						modules[mm.module_id]->set_param(mm.param_id,
-														 mm.get_mapped_val(volts / 10.f));
+						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f));
 					}
 				}
 			}
@@ -1040,20 +1040,77 @@ public:
 			modules[module_id]->bypassed = bypassed;
 	}
 
-	void add_module(BrandModuleSlug slug) {
+	// Why module creation failed, so the GUI can tell the user the truth
+	enum class CreateResult { Ok, NotFound, OutOfMemory, Crashed };
+
+	static std::unique_ptr<CoreProcessor> try_create_module(std::string_view combined_slug,
+															CreateResult *result = nullptr) {
+		if (result)
+			*result = CreateResult::Ok;
+
+		// A plugin module's constructor whose exception cannot cross the
+		// plugin boundary (pre-2.3 SDK), or that dies without a catchable
+		// exception, runs the plugin's terminate -> its imported abort() ->
+		// mm_plugin_abort, which longjmps back here. Whatever the constructor
+		// had allocated leaks into the plugin arena (bounded, reported on
+		// console).
+		AbortRescue rescue;
+		if (setjmp(rescue.jb) != 0) {
+			pr_err("Module %.*s crashed while being created\n", (int)combined_slug.size(), combined_slug.data());
+			if (result)
+				*result = CreateResult::Crashed;
+			return nullptr;
+		}
+		rescue.arm();
+
+		try {
+			auto module = ModuleFactory::create(combined_slug);
+			if (!module && result)
+				*result = CreateResult::NotFound; // unknown slug
+			return module;
+		} catch (std::bad_alloc &) {
+			pr_err("Out of memory creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
+			if (result)
+				*result = CreateResult::OutOfMemory;
+			return nullptr;
+		} catch (std::exception &e) {
+			// Plugins built with SDK >= 2.3 can propagate exceptions across
+			// the boundary (unified exidx lookup): destructors run during
+			// unwind, so this path reclaims what the constructor allocated
+			pr_err("Exception creating module %.*s: %s\n", (int)combined_slug.size(), combined_slug.data(), e.what());
+			if (result)
+				*result = CreateResult::Crashed;
+			return nullptr;
+		} catch (...) {
+			pr_err("Exception creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
+			if (result)
+				*result = CreateResult::Crashed;
+			return nullptr;
+		}
+	}
+
+	CreateResult add_module(BrandModuleSlug slug) {
 		auto module_idx = num_modules;
 
 		pd.module_slugs.push_back(slug);
 		calc_multiple_module_indicies();
 
-		create_module(slug, module_idx);
+		CreateResult result{CreateResult::Ok};
+		if (!add_module_at_idx(slug, module_idx, &result)) {
+			modules[module_idx].reset();
+			pd.module_slugs.pop_back();
+			calc_multiple_module_indicies();
+		}
+		return result;
 	}
 
-	void create_module(BrandModuleSlug slug, unsigned module_idx) {
-		modules[module_idx] = ModuleFactory::create(slug);
+	bool add_module_at_idx(BrandModuleSlug slug, unsigned module_idx, CreateResult *result = nullptr) {
+		modules[module_idx] = try_create_module(slug, result);
 		if (modules[module_idx] == nullptr) {
-			pr_err("Module %s not found\n", slug.c_str());
-			return;
+			pr_err("Could not create module %s\n", slug.c_str());
+			modules[module_idx] = std::make_unique<NullModule>();
+			modules[module_idx]->id = module_idx;
+			return false;
 		}
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
@@ -1072,6 +1129,7 @@ public:
 		// Mark jacks patched
 		mark_patched_jacks(module_idx);
 		mark_patched_panel_jacks(module_idx);
+		return true;
 	}
 
 	void remove_module(uint16_t module_idx) {
@@ -1195,7 +1253,7 @@ public:
 		// Add new module
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
-		create_module(new_slug, module_idx);
+		add_module_at_idx(new_slug, module_idx);
 	}
 
 	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
@@ -1268,7 +1326,7 @@ public:
 		// Create new module in the same slot
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
-		create_module(new_slug, module_idx);
+		add_module_at_idx(new_slug, module_idx);
 	}
 
 	// Jack patched/unpatched status
