@@ -7,13 +7,16 @@
 // std::tm: (36 bytes) date and time, minimum 1970, resolution 1 second. Intermediate value
 // time_t: (8 bytes) seconds since 1970
 
+// std::tm conventions: tm_mon is 0-based (0 = January), tm_year is years since 1900.
+// default_poweron_tm represents 2000-01-01 01:00:00, and must stay in a range that
+// mktime()/localtime() can represent on every host (e.g. simulator on Windows, macOS, Linux...)
 static std::tm default_poweron_tm = {
 	.tm_sec = 0,
 	.tm_min = 0,
 	.tm_hour = 1,
 	.tm_mday = 1,
-	.tm_mon = 1,
-	.tm_year = 2000,
+	.tm_mon = 0,
+	.tm_year = 2000 - 1900,
 	.tm_isdst = 0,
 };
 
@@ -43,19 +46,20 @@ FatTime make_fattime(unsigned year, unsigned month, unsigned day, unsigned hour,
 }
 
 FatTime tm_to_fattime(std::tm &t) {
-	return make_fattime(t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
+	// std::tm -> human-readable: year is since 1900, month is 0-based.
+	return make_fattime(t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
 }
 
 std::tm fattime_to_tm(FatTime fattime) {
 	uint16_t fdate = fattime.date;
 	uint16_t ftime = fattime.time;
 	std::tm t;
-	t.tm_year = static_cast<uint8_t>(fdate >> 9) + 1980;  //top 7 bits are year-1980 1980..2107
-	t.tm_mon = static_cast<uint8_t>((fdate >> 5) & 0x0F); //middle 4 bits are month 1..12
-	t.tm_mday = static_cast<uint8_t>(fdate & 0x1F);		  //bottom 5 bits are day 1..31
-	t.tm_hour = static_cast<uint8_t>(ftime >> 11);		  //top 5 bits are hour 0..23
-	t.tm_min = static_cast<uint8_t>((ftime >> 5) & 0x3F); //middle 6 bits are minute 0..59
-	t.tm_sec = static_cast<uint8_t>((ftime & 0x1F) * 2);  //bottom 5 bits are seconds/2 0..29
+	t.tm_year = static_cast<uint8_t>(fdate >> 9) + 1980 - 1900; //top 7 bits are year-1980; tm_year is since 1900
+	t.tm_mon = static_cast<uint8_t>((fdate >> 5) & 0x0F) - 1;	//middle 4 bits are month 1..12; tm_mon is 0-based
+	t.tm_mday = static_cast<uint8_t>(fdate & 0x1F);				//bottom 5 bits are day 1..31
+	t.tm_hour = static_cast<uint8_t>(ftime >> 11);				//top 5 bits are hour 0..23
+	t.tm_min = static_cast<uint8_t>((ftime >> 5) & 0x3F);		//middle 6 bits are minute 0..59
+	t.tm_sec = static_cast<uint8_t>((ftime & 0x1F) * 2);		//bottom 5 bits are seconds/2 0..29
 	t.tm_isdst = 0;
 	return t;
 }
@@ -74,8 +78,11 @@ uint64_t fattime_to_ticks(FatTime fattime) {
 FatTime ticks_to_fattime(uint32_t ticks) {
 	time_t secs = (time_t)(ticks / 1000) + poweron_sec_since_epoch;
 	std::tm *t = std::localtime(&secs);
+	if (!t) //localtime can fail (e.g. out-of-range time_t on Windows); don't crash
+		return make_fattime(1980, 1, 1, 0, 0, 0);
 
-	return make_fattime(t->tm_year, t->tm_mon, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+	// localtime -> human-readable: year is since 1900, month is 0-based.
+	return make_fattime(t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
 }
 
 #if TIME_PRINT_TESTS_ENABLE
@@ -106,8 +113,8 @@ void time_tests() {
 		.tm_min = 40,
 		.tm_hour = 9,
 		.tm_mday = 21,
-		.tm_mon = 11,
-		.tm_year = 2022,
+		.tm_mon = 11,			//December (0-based)
+		.tm_year = 2022 - 1900, //years since 1900
 	};
 	time_t poweron_time = mktime(&poweron_tm);
 	printf_("poweron_time: secs since epoch = %llu", poweron_time);

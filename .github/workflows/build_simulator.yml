@@ -56,7 +56,7 @@ jobs:
       CXX: g++
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
       - name: Install linux dependencies
@@ -83,7 +83,7 @@ jobs:
       CXX: clang++
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
       - name: Install linux dependencies
@@ -110,7 +110,7 @@ jobs:
       CXX: g++
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
       - name: Install windows dependencies
@@ -139,7 +139,7 @@ jobs:
       CXX: clang++
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
       - name: Install mac dependencies

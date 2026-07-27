@@ -23,11 +23,11 @@ public:
 			pr_err("RollerHoverText requires a Roller, which must have a label child\n");
 		}
 
-		lv_obj_set_align(label_cont, LV_ALIGN_CENTER);
+		lv_obj_set_align(label_cont, LV_ALIGN_LEFT_MID);
 		// default: center on roller and no offset
 		lv_obj_set_y(label_cont, lv_obj_get_y(roller) / 2 + 0);
 		lv_obj_set_x(label_cont, 0);
-		lv_obj_set_width(label_cont, lv_pct(109));
+		lv_obj_set_width(label_cont, lv_pct(100));
 		lv_obj_set_height(label_cont, 19);
 		lv_obj_set_style_pad_all(label_cont, 0, LV_PART_MAIN);
 		lv_obj_set_style_radius(label_cont, 0, LV_PART_MAIN);
@@ -56,7 +56,7 @@ public:
 		lv_obj_set_style_pad_top(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_bottom(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_left(label, 15, LV_PART_MAIN);
-		lv_obj_set_style_pad_right(label, 6, LV_PART_MAIN);
+		lv_obj_set_style_pad_right(label, 10, LV_PART_MAIN);
 		lv_obj_set_style_radius(label, 0, LV_PART_MAIN);
 		lv_label_set_recolor(label, true);
 		lv_hide(label);

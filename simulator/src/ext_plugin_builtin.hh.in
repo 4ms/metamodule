@@ -1,3 +1,13 @@
+namespace rack::plugin
+{
+struct Plugin;
+}
+
+// The shared "current plugin" global (defined in vcv_ports/glue/plugin_instance.cc).
+// Mirroring the hardware dynamic loader, it must point at the brand's Plugin while that
+// brand's init() runs, since host code (e.g. Plugin::addModel) reads it.
+extern rack::plugin::Plugin *pluginInstance;
+
 inline void load_ext_builtin_plugins(auto &internal_plugins) {
 ${EXT_PLUGIN_INIT_CALLS}
 }

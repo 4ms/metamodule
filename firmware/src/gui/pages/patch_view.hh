@@ -30,7 +30,7 @@ struct PatchViewPage : PageBase {
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
-		, desc_panel{patch_playloader, patches, settings.patch_suggested_audio}
+		, desc_panel{patch_playloader, patches, settings.patch_suggested_audio, patch_mod_queue}
 		, file_menu{patch_playloader,
 					patch_storage,
 					patches,

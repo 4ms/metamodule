@@ -13,6 +13,8 @@ static lv_disp_drv_t disp_drv;
 static lv_disp_draw_buf_t draw_buf;
 static int DISPLAY_WIDTH;
 static int DISPLAY_HEIGHT;
+// Most recently flushed framebuffer (full_refresh=1, so it holds the whole screen)
+static lv_color_t *last_fb = NULL;
 #ifndef WINDOW_NAME
 #define WINDOW_NAME "MetaModule"
 #endif
@@ -26,7 +28,26 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
 	SDL_UpdateTexture(texture, &r, color_p, r.w * ((LV_COLOR_DEPTH + 7) / 8));
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
 	SDL_RenderPresent(renderer);
+	last_fb = color_p;
 	lv_disp_flush_ready(disp_drv);
+}
+
+// Save the current screen contents to a BMP file. Returns 0 on success.
+int lv_port_disp_capture(const char *path) {
+	if (!last_fb)
+		return -1;
+
+	Uint32 fmt = (LV_COLOR_DEPTH == 32) ? SDL_PIXELFORMAT_ARGB8888 : SDL_PIXELFORMAT_RGB565;
+	int pitch = DISPLAY_WIDTH * ((LV_COLOR_DEPTH + 7) / 8);
+
+	SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom(
+		last_fb, DISPLAY_WIDTH, DISPLAY_HEIGHT, LV_COLOR_DEPTH, pitch, fmt);
+	if (!surf)
+		return -1;
+
+	int ret = SDL_SaveBMP(surf, path);
+	SDL_FreeSurface(surf);
+	return ret;
 }
 
 void lv_port_disp_init(int width, int height, int zoom) {

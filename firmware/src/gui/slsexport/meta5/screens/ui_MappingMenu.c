@@ -2543,7 +2543,7 @@ lv_obj_set_style_pad_top(ui_MidiMapPolyLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT)
 lv_obj_set_style_pad_bottom(ui_MidiMapPolyLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_MidiMapNotePolyDrop = lv_dropdown_create(ui_MidiMapCont);
-lv_dropdown_set_options( ui_MidiMapNotePolyDrop, "#1-4\n#1\n#2\n#3\n#4\n#5\n#6\n#7\n#8" );
+lv_dropdown_set_options( ui_MidiMapNotePolyDrop, "#1-4\n#5-8\n#1\n#2\n#3\n#4\n#5\n#6\n#7\n#8" );
 lv_obj_set_width( ui_MidiMapNotePolyDrop, 70);
 lv_obj_set_height( ui_MidiMapNotePolyDrop, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_MidiMapNotePolyDrop, LV_ALIGN_CENTER );

@@ -5,11 +5,6 @@
 namespace MetaModule::Midi
 {
 
-struct Note {
-	uint8_t note = 0;
-	float gate = 0;
-};
-
 struct Event {
 	enum class Type : uint8_t {
 		None,

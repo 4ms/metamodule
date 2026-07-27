@@ -31,6 +31,7 @@ extern "C" {
  **********************/
 void lv_port_disp_init(int width, int height, int zoom);
 void lv_port_disp_deinit(void);
+int lv_port_disp_capture(const char *path);
 /**********************
  *      MACROS
  **********************/

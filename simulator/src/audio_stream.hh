@@ -1,4 +1,5 @@
 #pragma once
+#include "core_m4/midi_controls.hh"
 #include "expanders.hh"
 #include "midi/midi_router.hh"
 #include "params_state.hh"
@@ -6,6 +7,7 @@
 #include "patch_play/patch_mods.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
+#include "sim_midi.hh"
 #include "stream_conf.hh"
 #include "util/countzip.hh"
 #include "util/edge_detector.hh"
@@ -20,19 +22,25 @@ class AudioStream {
 	PatchPlayer &player;
 	PatchPlayLoader &patch_loader;
 	PatchModQueue &patch_mod_queue;
+	SimMidi &sim_midi;
 
 	CalData cal;
 	CalData ext_cal;
+
+	Midi::MessageParser midi_parser;
+	bool midi_last_connected = false;
 
 public:
 	AudioStream(ParamsState &params_state,
 				PatchPlayer &player,
 				PatchPlayLoader &play_loader,
-				PatchModQueue &patch_mod_queue)
+				PatchModQueue &patch_mod_queue,
+				SimMidi &sim_midi)
 		: param_state{params_state}
 		, player{player}
 		, patch_loader{play_loader}
-		, patch_mod_queue{patch_mod_queue} {
+		, patch_mod_queue{patch_mod_queue}
+		, sim_midi{sim_midi} {
 
 		// Pretend that we found an audio expander
 		Expanders::ext_audio_found(true);
@@ -69,28 +77,7 @@ public:
 				i++;
 			}
 
-			// MIDI output: print to console
-			{
-				if (auto msg = MidiRouter::pop_outgoing_message()) {
-					printf("MIDI TX: %06x\n", msg->raw());
-				}
-			}
-
-			// MIDI: random stream
-			{
-				static unsigned random_midi_ctr = 0;
-				static uint8_t last_note = 0;
-
-				if (random_midi_ctr % 24000 == 0) {
-					last_note = (std::rand() & 0x3F) + 0x20;
-					MidiRouter::push_incoming_message({0x90, last_note, (uint8_t)std::rand()});
-				} else if (random_midi_ctr % 24000 == 12000) {
-					MidiRouter::push_incoming_message({0x80, last_note, 0x00});
-				} else if (random_midi_ctr % 36000 == 0) {
-					MidiRouter::push_incoming_message({0xB0, 0x74, (uint8_t)std::rand()});
-				}
-				random_midi_ctr++;
-			}
+			process_midi();
 
 			// TODO: enable "recording" in SDL
 			// Input jacks
@@ -116,6 +103,95 @@ public:
 					player.set_output_jack_patched_status(i, false);
 				}
 			}
+		}
+	}
+
+	// Process one frame's worth of MIDI I/O. Combines the firmware's M4-side
+	// parse step (Controls::parse_midi) with the A7-side routing/mapping
+	// (AudioStreamMidi::process) since the simulator has no cross-core split.
+	void process_midi() {
+		unsigned poly_num = player.get_midi_poly_num();
+		midi_parser.set_poly_num(poly_num);
+
+		bool connected = sim_midi.is_connected();
+
+		// Pull one received message (if any) and parse it into an event.
+		MidiMessage rx_msg{};
+		Midi::Event event{};
+		if (auto msg = sim_midi.get_incoming()) {
+			rx_msg = *msg;
+			event = midi_parser.parse(*msg);
+		}
+
+		// While disconnected, discard queued outgoing messages so they don't burst
+		// out stale when a device is (re)connected.
+		if (!connected) {
+			while (MidiRouter::pop_outgoing_message())
+				;
+		}
+
+		// Connection edge -> notify the patch player.
+		if (connected != midi_last_connected) {
+			if (connected)
+				player.set_midi_connected();
+			else
+				player.set_midi_disconnected();
+			midi_last_connected = connected;
+		}
+
+		if (!connected)
+			return;
+
+		// Forward the received message to subscribed modules (ignore active sensing).
+		if (rx_msg.is_sysex() || (rx_msg.status != 0xfe && rx_msg.status != 0)) {
+			MidiRouter::push_incoming_message(rx_msg);
+		}
+
+		// Pull one message that a module wants to transmit and send it out.
+		if (auto tx_msg = MidiRouter::pop_outgoing_message()) {
+			sim_midi.send(*tx_msg);
+		}
+
+		// Map the parsed event to CV/gate on the patch player (MIDI-map feature).
+		using Type = Midi::Event::Type;
+		switch (event.type) {
+			case Type::NoteOn:
+				player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note), event.midi_chan);
+				player.set_midi_note_gate(event.poly_chan, 10.f, event.midi_chan);
+				player.set_midi_note_velocity(event.poly_chan, event.val, event.midi_chan);
+				player.set_midi_note_retrig(event.poly_chan, 10.f, event.midi_chan);
+				player.set_midi_gate(event.note, 10.f, event.midi_chan);
+				break;
+
+			case Type::NoteOff:
+				if (event.poly_chan < poly_num)
+					player.set_midi_note_gate(event.poly_chan, 0, event.midi_chan);
+				player.set_midi_gate(event.note, 0, event.midi_chan);
+				break;
+
+			case Type::Aft:
+				player.set_midi_note_aftertouch(event.poly_chan, event.val, event.midi_chan);
+				break;
+
+			case Type::ChanPress:
+				for (unsigned i = 0; i < poly_num; i++)
+					player.set_midi_note_aftertouch(i, event.val, event.midi_chan);
+				break;
+
+			case Type::CC:
+				player.set_midi_cc(event.note, event.val, event.midi_chan);
+				break;
+
+			case Type::Bend:
+				player.set_midi_cc(128, event.val, event.midi_chan);
+				break;
+
+			case Type::Time:
+				player.send_midi_time_event(event.note, 10.f);
+				break;
+
+			default:
+				break;
 		}
 	}
 

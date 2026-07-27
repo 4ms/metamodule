@@ -9,8 +9,8 @@ The simulator simulates the hardware's rotary encoder, button, knobs, and jacks
 
 - `Left Arrow`: Turn encoder counter-clockwise
 - `Right Arrow`: Turn encoder clockwise
-- `Down Arrow`: Press the encoder
-- `Up Arrow`: Press the button (typically goes to the previous page)
+- `Down Arrow` or `Enter`: Press the encoder
+- `Up Arrow` or `Backspace`: Press the button (typically goes to the previous page)
 
 ### Knobs
 

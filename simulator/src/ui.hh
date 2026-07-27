@@ -18,24 +18,37 @@ namespace MetaModule
 class Ui {
 
 	RotaryEncoderKeys keys{
-		.turn_cw = SDLK_RIGHT,
-		.turn_ccw = SDLK_LEFT,
-		.click = SDLK_DOWN,
-		.aux_button = SDLK_UP,
-		.quit = SDLK_ESCAPE,
-		.param_inc = ']',
-		.param_dec = '[',
-		.param_fine_toggle = '\\',
-		.prev_knobset = ',',
-		.next_knobset = '.',
+		.turn_cw = {SDLK_RIGHT},
+		.turn_ccw = {SDLK_LEFT},
+		.click = {SDLK_DOWN, SDLK_RETURN, SDLK_KP_ENTER},
+		.aux_button = {SDLK_UP, SDLK_BACKSPACE},
+		.quit = {SDLK_ESCAPE},
+		.param_inc = {']'},
+		.param_dec = {'['},
+		.param_fine_toggle = {'\\'},
+		.prev_knobset = {','},
+		.next_knobset = {'.'},
 	};
 
 public:
-	Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_view asset_path, size_t block_size);
+	Ui(std::string_view sdcard_path,
+	   std::string_view flash_path,
+	   std::string_view asset_path,
+	   size_t block_size,
+	   SimMidi &midi);
 
 	bool update();
 	void play_patch(std::span<Frame> buffer);
 	void set_audio_fullscale(float volts_peak);
+
+	// Load a patch and start viewing/playing it (used for headless screenshots).
+	void load_patch(std::string_view patch_name, Volume vol);
+	// Jump directly to a page by id (used for headless screenshots).
+	void goto_page(PageId page_id);
+	// Encoder key bindings, so headless tooling can synthesize matching SDL events.
+	const RotaryEncoderKeys &input_keys() const {
+		return keys;
+	}
 
 private:
 	PatchDirList patch_dir_list;
@@ -65,7 +78,8 @@ private:
 	PageManager page_manager;
 	ParamsMidiState params;
 	MetaParams metaparams;
-	AudioStream audio_stream{params, patch_player, patch_playloader, patch_mod_queue};
+	SimMidi &sim_midi;
+	AudioStream audio_stream{params, patch_player, patch_playloader, patch_mod_queue, sim_midi};
 	LvglEncoderSimulatorDriver input_driver{keys};
 
 	PluginAppInterface::Internal plugin_internal;

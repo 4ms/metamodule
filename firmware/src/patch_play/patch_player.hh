@@ -20,6 +20,7 @@
 #include "patch_play/plugin_module.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
+#include "system/abort_rescue.hh"
 #include "util/countzip.hh"
 #include "util/oscs.hh"
 #include <algorithm>
@@ -67,16 +68,19 @@ private:
 	static constexpr auto PanelInValsSize = MidiHubOffset + MaxMidiHubSlots;
 	std::array<float, PanelInValsSize> panel_in_vals{};
 
+	std::array<bool, NumOutJacks> out_patched{};
+	std::array<bool, NumInJacks> in_patched{};
+
 	// MIDI
 	bool midi_connected = false;
-
-	ParamWatcher param_watcher;
 
 	struct JackMidi : Jack {
 		uint32_t midi_chan = 0; //0: Omni
 	};
 	struct PolyJackMidi : JackMidi {
 		CoreProcessor::PolyPortBuffer buf{};
+		// First poly channel this cable carries: 0 for the 1-4 cable, 4 for the 5-8 cable.
+		uint8_t poly_base = 0;
 	};
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<JackMidi>, MaxMidiPolyphony> midi_note_gate_conns;
@@ -92,7 +96,7 @@ private:
 	std::vector<PolyJackMidi> midi_poly_aft_conns;
 
 	struct MidiPolyPulse {
-		std::array<OneShot, CoreProcessor::MaxPolyChannels> pulses{};
+		std::array<OneShot, MaxMidiPolyphony> pulses{};
 		std::vector<PolyJackMidi> conns;
 	};
 	MidiPolyPulse midi_poly_retrig;
@@ -114,11 +118,10 @@ private:
 
 	std::array<MidiPulse, MaxMidiPolyphony> midi_note_retrig;
 
+	ParamWatcher param_watcher;
+
 	std::array<ParamSet, MaxKnobSets> knob_maps;
 	CatchupManager catchup_manager;
-
-	std::array<bool, NumOutJacks> out_patched{};
-	std::array<bool, NumInJacks> in_patched{};
 
 	MulticorePlayer smp;
 	Balancer<MulticorePlayer::NumCores, MAX_MODULES_IN_PATCH> core_balancer;
@@ -184,14 +187,14 @@ public:
 		}
 
 		// First module is the hub
-		modules[0] = ModuleFactory::create(PanelDef::typeID);
+		modules[0] = try_create_module(PanelDef::typeID);
 		if (modules[0] != nullptr)
 			modules[0]->id = 0;
 
 		unsigned num_not_found = 0;
 		std::string not_found;
 		for (size_t i = 1; i < num_modules; i++) {
-			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
+			modules[i] = try_create_module(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
 				pr_err("Module %s not found\n", pd.module_slugs[i].data());
@@ -211,6 +214,9 @@ public:
 
 		mark_patched_jacks();
 		calc_panel_jack_connections();
+
+		// Re-apply physical state so panel-mapped jacks come up patched immediately
+		mark_patched_panel_jacks();
 
 		for (auto [knob_set_idx, knob_set] : enumerate(pd.knob_sets)) {
 			for (auto const &k : knob_set.set) {
@@ -515,18 +521,21 @@ public:
 		set_all_connected_jacks(midi_note_retrig[poly_chan].conns, val, midi_chan);
 		midi_note_retrig[poly_chan].pulse.start(0.01);
 
-		// Poly cables:
 		set_all_connected_poly_jacks(midi_poly_retrig.conns, poly_chan, val, midi_chan);
-		if (poly_chan < CoreProcessor::MaxPolyChannels)
+		if (poly_chan < MaxMidiPolyphony)
 			midi_poly_retrig.pulses[poly_chan].start(0.01);
 	}
 
 	void set_midi_poly_channel_count(uint32_t poly_num) {
-		uint8_t count = static_cast<uint8_t>(std::min<uint32_t>(poly_num, CoreProcessor::MaxPolyChannels));
-		auto set_count = [count](auto &conns) {
+		// Each cable carries the channels above its poly_base, clamped to MaxPolyChannels.
+		// e.g. poly_num=6: the 1-4 cable reports 4 channels, the 5-8 cable reports 2.
+		auto set_count = [poly_num](auto &conns) {
 			for (auto &jack : conns) {
-				if (jack.buf.channels)
-					*jack.buf.channels = count;
+				if (jack.buf.channels) {
+					uint32_t avail = poly_num > jack.poly_base ? poly_num - jack.poly_base : 0;
+					*jack.buf.channels =
+						static_cast<uint8_t>(std::min<uint32_t>(avail, CoreProcessor::MaxPolyChannels));
+				}
 			}
 		};
 		set_count(midi_poly_pitch_conns);
@@ -537,7 +546,12 @@ public:
 	}
 
 	void set_midi_cc(unsigned ccnum, int16_t val, uint16_t midi_chan) {
-		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) : val / 12.7f; //0-127 => 0-10
+		// CC values arrive as 14-bit from the M4 core (see Midi::u14cc_to_volts). Pitch
+		// bend is a separate signed 14-bit value handled directly.
+		using namespace Midi;
+		float volts = (ccnum == PitchBendCC) ? s14_to_semitones<2>(val) : u14cc_to_volts<10>(val);
+
+		volts = std::clamp(volts, 0.f, 10.f);
 
 		// Update jacks connected to this CC
 		if (ccnum < midi_cc_conns.size()) {
@@ -549,8 +563,7 @@ public:
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules) {
 					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
-						modules[mm.module_id]->set_param(mm.param_id,
-														 mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
+						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f));
 					}
 				}
 			}
@@ -680,17 +693,23 @@ private:
 									  unsigned poly_chan,
 									  float val,
 									  uint32_t midi_chan) {
-		if (poly_chan >= CoreProcessor::MaxPolyChannels)
-			return;
-
 		for (auto const &jack : jacks) {
 			if (jack.midi_chan != 0 && jack.midi_chan != uint32_t(midi_chan + 1))
 				continue;
 
-			if (jack.buf.voltages)
-				jack.buf.voltages[poly_chan] = val;
+			// Route to the cable that carries this poly channel (1-4 cable: base 0, 5-8 cable: base 4)
+			if (poly_chan < jack.poly_base)
+				continue;
 
-			else if (poly_chan == 0)
+			auto idx = poly_chan - jack.poly_base;
+
+			if (idx >= CoreProcessor::MaxPolyChannels)
+				continue;
+
+			if (jack.buf.voltages)
+				jack.buf.voltages[idx] = val;
+
+			else if (idx == 0)
 				set_input(jack, val);
 		}
 	}
@@ -713,11 +732,14 @@ private:
 				set_all_connected_jacks(ret.conns, 0);
 		}
 
-		for (unsigned ch = 0; ch < CoreProcessor::MaxPolyChannels; ch++) {
+		for (unsigned ch = 0; ch < MaxMidiPolyphony; ch++) {
 			if (!midi_poly_retrig.pulses[ch].update()) {
 				for (auto &jack : midi_poly_retrig.conns) {
-					if (jack.buf.voltages)
-						jack.buf.voltages[ch] = 0.f;
+					if (ch < jack.poly_base)
+						continue;
+					unsigned idx = ch - jack.poly_base;
+					if (idx < CoreProcessor::MaxPolyChannels && jack.buf.voltages)
+						jack.buf.voltages[idx] = 0.f;
 				}
 			}
 		}
@@ -776,9 +798,11 @@ public:
 		return std::min(*out_buf.channels, *in_buf.channels);
 	}
 
-	void set_midi_poly_num(uint32_t poly_num) {
-		pd.midi_poly_num = poly_num;
-		set_midi_poly_channel_count(poly_num);
+	// poly_num is the user setting: 0 = Auto (compute from cables), 1-8 = hard-set
+	void set_midi_poly_num(uint16_t poly_num) {
+		pd.midi_poly_num_setting = poly_num;
+		pd.update_midi_poly_num();
+		set_midi_poly_channel_count(pd.midi_poly_num);
 	}
 
 	uint32_t get_midi_poly_num() {
@@ -904,6 +928,17 @@ public:
 			modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 	}
 
+	bool output_jack_held_by_panel(Jack jack) const {
+		for (auto i = 0u; i < out_conns.size(); i++) {
+			if (!out_patched[i])
+				continue;
+			for (auto const &pj : out_conns[i])
+				if (pj.module_id == jack.module_id && pj.jack_id == jack.jack_id)
+					return true;
+		}
+		return false;
+	}
+
 	void safe_unpatch_input(Jack jack) {
 		if (jack.module_id < num_modules)
 			modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
@@ -939,9 +974,10 @@ public:
 
 		safe_unpatch_input(jack);
 
-		// Unpatch the output if the int_cable has no more inputs
+		// Unpatch the output if the int_cable has no more inputs -- unless that output is still
+		// patched to a physical panel/hardware output
 		if (auto cable = pd.find_internal_cable_with_injack(jack)) {
-			if (cable->ins.size() == 1) {
+			if (cable->ins.size() == 1 && !output_jack_held_by_panel(cable->out)) {
 				safe_unpatch_output(cable->out);
 			}
 		}
@@ -1004,20 +1040,77 @@ public:
 			modules[module_id]->bypassed = bypassed;
 	}
 
-	void add_module(BrandModuleSlug slug) {
+	// Why module creation failed, so the GUI can tell the user the truth
+	enum class CreateResult { Ok, NotFound, OutOfMemory, Crashed };
+
+	static std::unique_ptr<CoreProcessor> try_create_module(std::string_view combined_slug,
+															CreateResult *result = nullptr) {
+		if (result)
+			*result = CreateResult::Ok;
+
+		// A plugin module's constructor whose exception cannot cross the
+		// plugin boundary (pre-2.3 SDK), or that dies without a catchable
+		// exception, runs the plugin's terminate -> its imported abort() ->
+		// mm_plugin_abort, which longjmps back here. Whatever the constructor
+		// had allocated leaks into the plugin arena (bounded, reported on
+		// console).
+		AbortRescue rescue;
+		if (setjmp(rescue.jb) != 0) {
+			pr_err("Module %.*s crashed while being created\n", (int)combined_slug.size(), combined_slug.data());
+			if (result)
+				*result = CreateResult::Crashed;
+			return nullptr;
+		}
+		rescue.arm();
+
+		try {
+			auto module = ModuleFactory::create(combined_slug);
+			if (!module && result)
+				*result = CreateResult::NotFound; // unknown slug
+			return module;
+		} catch (std::bad_alloc &) {
+			pr_err("Out of memory creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
+			if (result)
+				*result = CreateResult::OutOfMemory;
+			return nullptr;
+		} catch (std::exception &e) {
+			// Plugins built with SDK >= 2.3 can propagate exceptions across
+			// the boundary (unified exidx lookup): destructors run during
+			// unwind, so this path reclaims what the constructor allocated
+			pr_err("Exception creating module %.*s: %s\n", (int)combined_slug.size(), combined_slug.data(), e.what());
+			if (result)
+				*result = CreateResult::Crashed;
+			return nullptr;
+		} catch (...) {
+			pr_err("Exception creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
+			if (result)
+				*result = CreateResult::Crashed;
+			return nullptr;
+		}
+	}
+
+	CreateResult add_module(BrandModuleSlug slug) {
 		auto module_idx = num_modules;
 
 		pd.module_slugs.push_back(slug);
 		calc_multiple_module_indicies();
 
-		create_module(slug, module_idx);
+		CreateResult result{CreateResult::Ok};
+		if (!add_module_at_idx(slug, module_idx, &result)) {
+			modules[module_idx].reset();
+			pd.module_slugs.pop_back();
+			calc_multiple_module_indicies();
+		}
+		return result;
 	}
 
-	void create_module(BrandModuleSlug slug, unsigned module_idx) {
-		modules[module_idx] = ModuleFactory::create(slug);
+	bool add_module_at_idx(BrandModuleSlug slug, unsigned module_idx, CreateResult *result = nullptr) {
+		modules[module_idx] = try_create_module(slug, result);
 		if (modules[module_idx] == nullptr) {
-			pr_err("Module %s not found\n", slug.c_str());
-			return;
+			pr_err("Could not create module %s\n", slug.c_str());
+			modules[module_idx] = std::make_unique<NullModule>();
+			modules[module_idx]->id = module_idx;
+			return false;
 		}
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
@@ -1036,6 +1129,7 @@ public:
 		// Mark jacks patched
 		mark_patched_jacks(module_idx);
 		mark_patched_panel_jacks(module_idx);
+		return true;
 	}
 
 	void remove_module(uint16_t module_idx) {
@@ -1159,7 +1253,7 @@ public:
 		// Add new module
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
-		create_module(new_slug, module_idx);
+		add_module_at_idx(new_slug, module_idx);
 	}
 
 	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
@@ -1232,7 +1326,7 @@ public:
 		// Create new module in the same slot
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
-		create_module(new_slug, module_idx);
+		add_module_at_idx(new_slug, module_idx);
 	}
 
 	// Jack patched/unpatched status
@@ -1612,25 +1706,49 @@ public:
 				plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
 				CoreProcessor::PolyPortBuffer{};
 
+		// The 1-4 and 5-8 poly cables share the same connection vectors; poly_base selects
+		// which group of MIDI poly channels (0-3 vs 4-7) the cable carries.
+		constexpr uint8_t Base5_8 = Midi::MidiPolyCableChanBase;
+
 		if (Midi::midi_note_pitch_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_pitch_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI note poly ch:%u", chan);
+
+		} else if (Midi::midi_note_pitch_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_pitch_conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI note poly 5-8 ch:%u", chan);
 
 		} else if (Midi::midi_note_gate_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_gate_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI gate poly ch:%u", chan);
 
+		} else if (Midi::midi_note_gate_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_gate_conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI gate poly 5-8 ch:%u", chan);
+
 		} else if (Midi::midi_note_vel_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_vel_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI vel poly ch:%u", chan);
+
+		} else if (Midi::midi_note_vel_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_vel_conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI vel poly 5-8 ch:%u", chan);
 
 		} else if (Midi::midi_note_aft_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_aft_conns, input_jack, chan, polybuf);
 			pr_trace("MIDI aft poly ch:%u", chan);
 
+		} else if (Midi::midi_note_aft_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_aft_conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI aft poly 5-8 ch:%u", chan);
+
 		} else if (Midi::midi_note_retrig_poly(panel_jack_id)) {
 			update_or_add_poly(midi_poly_retrig.conns, input_jack, chan, polybuf);
 			pr_trace("MIDI retrig poly ch:%u", chan);
+
+		} else if (Midi::midi_note_retrig_poly5_8(panel_jack_id)) {
+			update_or_add_poly(midi_poly_retrig.conns, input_jack, chan, polybuf, Base5_8);
+			pr_trace("MIDI retrig poly 5-8 ch:%u", chan);
 
 		} else if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
 			update_or_add(midi_note_pitch_conns[num.value()], input_jack, chan);
@@ -1757,11 +1875,13 @@ private:
 	static void update_or_add_poly(std::vector<PolyJackMidi> &v,
 								   const Jack &d,
 								   uint32_t midi_chan,
-								   CoreProcessor::PolyPortBuffer buf) {
+								   CoreProcessor::PolyPortBuffer buf,
+								   uint8_t poly_base = 0) {
 		for (auto &el : v) {
 			if (el.module_id == d.module_id && el.jack_id == d.jack_id) {
 				el.midi_chan = midi_chan;
 				el.buf = buf;
+				el.poly_base = poly_base;
 				return;
 			}
 		}
@@ -1769,6 +1889,7 @@ private:
 		static_cast<Jack &>(entry) = d;
 		entry.midi_chan = midi_chan;
 		entry.buf = buf;
+		entry.poly_base = poly_base;
 		v.push_back(entry);
 	}
 

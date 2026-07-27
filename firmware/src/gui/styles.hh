@@ -98,7 +98,7 @@ struct Gui {
 	}
 
 	static std::string lt_grey_text(std::string_view txt) {
-		return color_text(txt, "^cccccc ");
+		return color_text(txt, "^dddddd ");
 	}
 
 	static inline std::string_view grey_color_html = "^aaaaaa ";

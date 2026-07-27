@@ -1986,3 +1986,288 @@ PatchData:
 	// Panel Out: sums channels from mod 1 only (not summed with mod 2 here)
 	CHECK(player.get_panel_output(0) == doctest::Approx(12.0f));
 }
+
+// ============================================================================
+// Poly channels 5-8 cable (MidiNotePoly5_8Jack = 341 / 0x155, etc.)
+// The 5-8 cable carries MIDI poly channels 5-8 (event poly_chan 4-7) in buffer
+// indices 0-3.
+// ============================================================================
+
+TEST_CASE("Poly 5-8: poly MIDI 5-8 -> poly Module In (channels 4-7 land at buf idx 0-3)") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: Dp58_to_mp
+  module_slugs:
+    0: HubMedium
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 341
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 8
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+	player.set_midi_connected();
+
+	auto *p1 = get_test_poly(player, 1);
+	REQUIRE(p1);
+
+	// Poly channels 4-7 map to the 5-8 cable's buffer indices 0-3
+	player.set_midi_note_pitch(4, 1.5f, 0);
+	player.set_midi_note_pitch(5, 2.5f, 0);
+	player.set_midi_note_pitch(6, 3.5f, 0);
+	player.set_midi_note_pitch(7, -1.0f, 0);
+
+	CHECK(p1->input_poly[0][0] == doctest::Approx(1.5f));
+	CHECK(p1->input_poly[0][1] == doctest::Approx(2.5f));
+	CHECK(p1->input_poly[0][2] == doctest::Approx(3.5f));
+	CHECK(p1->input_poly[0][3] == doctest::Approx(-1.0f));
+
+	// Poly channels 0-3 (the 1-4 cable's range) do NOT affect the 5-8 cable
+	p1->input_poly[0] = {};
+	player.set_midi_note_pitch(0, 9.9f, 0);
+	player.set_midi_note_pitch(3, 9.9f, 0);
+	for (unsigned ch = 0; ch < CoreProcessor::MaxPolyChannels; ch++)
+		CHECK(p1->input_poly[0][ch] == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Poly 5-8: 1-4 cable and 5-8 cable to separate inputs route disjoint channels") {
+	// 1-4 cable (336) -> input 0, 5-8 cable (341) -> input 1
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: Dp14_Dp58
+  module_slugs:
+    0: HubMedium
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 336
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 341
+      ins:
+        - module_id: 1
+          jack_id: 1
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 8
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+	player.set_midi_connected();
+
+	auto *p1 = get_test_poly(player, 1);
+	REQUIRE(p1);
+
+	for (unsigned ch = 0; ch < MaxMidiPolyphony; ch++)
+		player.set_midi_note_pitch(ch, float(ch + 1), 0);
+
+	// Input 0 (1-4 cable): channels 1-4 at indices 0-3
+	CHECK(p1->input_poly[0][0] == doctest::Approx(1.0f));
+	CHECK(p1->input_poly[0][1] == doctest::Approx(2.0f));
+	CHECK(p1->input_poly[0][2] == doctest::Approx(3.0f));
+	CHECK(p1->input_poly[0][3] == doctest::Approx(4.0f));
+
+	// Input 1 (5-8 cable): channels 5-8 at indices 0-3
+	CHECK(p1->input_poly[1][0] == doctest::Approx(5.0f));
+	CHECK(p1->input_poly[1][1] == doctest::Approx(6.0f));
+	CHECK(p1->input_poly[1][2] == doctest::Approx(7.0f));
+	CHECK(p1->input_poly[1][3] == doctest::Approx(8.0f));
+}
+
+TEST_CASE("Poly 5-8: channel count splits across the two cables") {
+	// 1-4 cable (336) -> input 0, 5-8 cable (341) -> input 1
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: Dp_chancount_split
+  module_slugs:
+    0: HubMedium
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 336
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 341
+      ins:
+        - module_id: 1
+          jack_id: 1
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 6
+  midi_poly_num_setting: 6
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+	player.set_midi_connected();
+
+	auto *p1 = get_test_poly(player, 1);
+	REQUIRE(p1);
+
+	// poly_num 6: 1-4 cable carries 4 channels, 5-8 cable carries the remaining 2
+	CHECK(p1->input_channels[0] == 4);
+	CHECK(p1->input_channels[1] == 2);
+
+	player.set_midi_poly_num(8);
+	CHECK(p1->input_channels[0] == 4);
+	CHECK(p1->input_channels[1] == 4);
+
+	player.set_midi_poly_num(4);
+	CHECK(p1->input_channels[0] == 4);
+	CHECK(p1->input_channels[1] == 0);
+
+	player.set_midi_poly_num(2);
+	CHECK(p1->input_channels[0] == 2);
+	CHECK(p1->input_channels[1] == 0);
+}
+
+TEST_CASE("Poly 5-8: Auto poly-count allocates full polyphony when only a 5-8 cable is patched") {
+	// Auto mode (midi_poly_num_setting omitted/0): a lone 5-8 cable must drive
+	// midi_poly_num up to 8 so channels 5-8 are actually generated.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: Dp58_auto
+  module_slugs:
+    0: HubMedium
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 341
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+	player.set_midi_connected();
+
+	CHECK(player.get_midi_poly_num() == MaxMidiPolyphony);
+
+	auto *p1 = get_test_poly(player, 1);
+	REQUIRE(p1);
+	// The 5-8 cable reports a full 4 channels
+	CHECK(p1->input_channels[0] == CoreProcessor::MaxPolyChannels);
+}
+
+TEST_CASE("Poly 5-8: gate poly retrig off zeroes the correct buffer index") {
+	// 5-8 retrig cable (345) -> poly input 0. After the retrig pulse expires,
+	// update_midi_pulses must clear buf index (poly_chan - 4), not poly_chan.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: Dp58_retrig
+  module_slugs:
+    0: HubMedium
+    1: TestPoly
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 345
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 8
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+	player.set_midi_connected();
+
+	auto *p1 = get_test_poly(player, 1);
+	REQUIRE(p1);
+
+	// Retrig poly chan 5 (event poly_chan 4) -> buffer index 0
+	player.set_midi_note_retrig(4, 10.f, 0);
+	CHECK(p1->input_poly[0][0] == doctest::Approx(10.0f));
+
+	// Run the pulse out via update_patch (drives update_midi_pulses each frame):
+	// 0.01s at 48kHz is ~480 samples; iterate well past that.
+	for (unsigned i = 0; i < 2000; i++)
+		player.update_patch();
+
+	CHECK(p1->input_poly[0][0] == doctest::Approx(0.0f));
+}

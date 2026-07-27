@@ -40,6 +40,21 @@
 		  "slug": "Scope",
 		  "name": "Scope",
 		  "displayName": "Scope"
+		},
+		{
+		  "slug": "Merge",
+		  "name": "Merge",
+		  "displayName": "Merge"
+		},
+		{
+		  "slug": "Split",
+		  "name": "Split",
+		  "displayName": "Split"
+		},
+		{
+		  "slug": "Sum",
+		  "name": "Sum",
+		  "displayName": "Sum"
 		}
 	]
 }

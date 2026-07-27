@@ -1,0 +1,172 @@
+PatchData:
+  patch_name: 'test-cable-disp'
+  description: Patch Description
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:MPEG'
+    2: '4msCompany:Seq8'
+    3: '4msCompany:BWAVP'
+    4: '4msCompany:Atvert2'
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 0
+        - module_id: 3
+          jack_id: 0
+      color: 64934
+    - out:
+        module_id: 4
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+      color: 61865
+  mapped_ins:
+    - panel_jack_id: 6
+      ins:
+        - module_id: 3
+          jack_id: 0
+        - module_id: 4
+          jack_id: 1
+  mapped_outs:
+    - panel_jack_id: 2
+      out:
+        module_id: 1
+        jack_id: 1
+      alias_name: Clock
+    - panel_jack_id: 2
+      out:
+        module_id: 3
+        jack_id: 3
+      alias_name: Clock
+    - panel_jack_id: 7
+      out:
+        module_id: 1
+        jack_id: 2
+      alias_name: Clock
+    - panel_jack_id: 7
+      out:
+        module_id: 3
+        jack_id: 2
+      alias_name: Clock
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0.5
+    - module_id: 1
+      param_id: 2
+      value: 1
+    - module_id: 1
+      param_id: 3
+      value: 1
+    - module_id: 1
+      param_id: 4
+      value: 0
+    - module_id: 1
+      param_id: 5
+      value: 0
+    - module_id: 1
+      param_id: 6
+      value: 0
+    - module_id: 1
+      param_id: 7
+      value: 0.5
+    - module_id: 1
+      param_id: 8
+      value: 1
+    - module_id: 1
+      param_id: 9
+      value: 0
+    - module_id: 1
+      param_id: 10
+      value: 0
+    - module_id: 1
+      param_id: 11
+      value: 0.333333
+    - module_id: 1
+      param_id: 12
+      value: 0
+    - module_id: 1
+      param_id: 13
+      value: 0
+    - module_id: 2
+      param_id: 0
+      value: 0.25
+    - module_id: 2
+      param_id: 1
+      value: 0.5
+    - module_id: 2
+      param_id: 2
+      value: 0.875
+    - module_id: 2
+      param_id: 3
+      value: 0.25
+    - module_id: 2
+      param_id: 4
+      value: 0.5
+    - module_id: 2
+      param_id: 5
+      value: 0.875
+    - module_id: 2
+      param_id: 6
+      value: 1
+    - module_id: 2
+      param_id: 7
+      value: 0.25
+    - module_id: 3
+      param_id: 0
+      value: 0
+    - module_id: 3
+      param_id: 1
+      value: 0
+    - module_id: 3
+      param_id: 2
+      value: 0
+    - module_id: 3
+      param_id: 3
+      value: 0.101562
+    - module_id: 3
+      param_id: 4
+      value: 0.25
+    - module_id: 3
+      param_id: 5
+      value: 0.272727
+    - module_id: 3
+      param_id: 6
+      value: 0
+    - module_id: 3
+      param_id: 7
+      value: 0
+    - module_id: 3
+      param_id: 8
+      value: 0
+    - module_id: 4
+      param_id: 0
+      value: 0.50412
+    - module_id: 4
+      param_id: 1
+      value: 1
+  mapped_knobs:
+    - name: Knob Set 1
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: -1
+  mapped_lights: []
+  vcvModuleStates:
+    - module_id: 1
+      data: |-
+        XuzTPgGowwE=
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []

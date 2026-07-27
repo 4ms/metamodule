@@ -2,6 +2,7 @@
 
 #include "pr_dbg.hh"
 #include "util/fixed_vector.hh"
+#include <cstdint>
 
 struct AllocationWatcher {
 	struct Block {

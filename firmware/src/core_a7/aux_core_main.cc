@@ -14,6 +14,7 @@
 #include "internal_interface/plugin_app_if_internal.hh"
 #include "internal_interface/plugin_app_interface.hh"
 #include "internal_plugin_manager.hh"
+#include "load_test/image_gen.hh"
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
 #include "system/print_time.hh"
@@ -105,7 +106,15 @@ extern "C" void aux_core_main() {
 		CpuLoadTest::run_hil_tests(file_storage_proxy, ui, plugin_manager);
 	}
 
+	if (ModuleImageGen::should_run(file_storage_proxy)) {
+		ModuleImageGen::run(file_storage_proxy, ui, plugin_manager, *A7SharedMemoryS::ptrs.open_patch_manager);
+	}
+
 	ui.preload_plugins(plugin_manager);
+
+	if (auto leak_params = CpuLoadTest::get_leak_test_params(file_storage_proxy); leak_params.run) {
+		CpuLoadTest::run_leak_test(file_storage_proxy, ui, leak_params);
+	}
 
 	if (CpuLoadTest::should_run_module_tests(file_storage_proxy)) {
 		CpuLoadTest::run_module_tests(file_storage_proxy, ui);

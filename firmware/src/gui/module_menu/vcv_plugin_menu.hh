@@ -52,15 +52,15 @@ struct RackModuleMenu : BasePluginModuleMenu {
 		return exited;
 	}
 
-	void click_item(unsigned idx) override {
+	std::optional<SliderEdit> click_item(unsigned idx) override {
 		if (!current_menu) {
 			pr_err("VCV module menu not initialized\n");
-			return;
+			return std::nullopt;
 		}
 
 		if (idx > current_menu->children.size()) {
 			pr_err("Clicked vcv module menu out of range\n");
-			return;
+			return std::nullopt;
 		}
 
 		//find the child that was clicked
@@ -74,7 +74,29 @@ struct RackModuleMenu : BasePluginModuleMenu {
 					refresh_menu(mw);
 				}
 			}
+		} else if (auto slider = dynamic_cast<rack::ui::Slider *>(*child)) {
+			if (slider->quantity) {
+				active_slider = slider;
+				return SliderEdit{
+					.label = slider->quantity->getString(),
+					.scaled_value = slider->quantity->getScaledValue(),
+				};
+			}
 		}
+
+		return std::nullopt;
+	}
+
+	std::string set_slider_value(float scaled_value) override {
+		if (active_slider && active_slider->quantity) {
+			active_slider->quantity->setScaledValue(scaled_value);
+			return active_slider->quantity->getString();
+		}
+		return {};
+	}
+
+	void end_slider_edit() override {
+		active_slider = nullptr;
 	}
 
 	void close() override {
@@ -149,7 +171,7 @@ private:
 					if (rack_item->rightText.ends_with(CHECKMARK_STRING))
 						item = Gui::yellow_text(CHECKMARK_STRING);
 
-					item += rack_item->text;
+					item += Gui::lt_grey_text(rack_item->text);
 
 					if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
 						item += " " + Gui::yellow_text(rack_item->rightText);
@@ -165,7 +187,7 @@ private:
 				{
 					rack_item->step();
 					if (rack_item->quantity)
-						menu.emplace_back(Gui::grey_text(rack_item->quantity->getString()));
+						menu.emplace_back(Gui::lt_grey_text(rack_item->quantity->getString()));
 				}
 
 				else if (auto rack_item = dynamic_cast<rack::ui::MenuSeparator *>(child))
@@ -186,7 +208,8 @@ private:
 	std::weak_ptr<rack::app::ModuleWidget> module_widget{};
 	std::unique_ptr<rack::widget::Widget> menu_owner;
 
-	rack::ui::Menu *current_menu{}; //can't use smart pointer because must point to a raw pointer in rack API
+	rack::ui::Menu *current_menu{};	   //can't use smart pointer because must point to a raw pointer in rack API
+	rack::ui::Slider *active_slider{}; //the slider currently being adjusted via a SliderPopup, if any
 
 	bool exited = false;
 };

@@ -89,8 +89,9 @@ struct ModuleViewPage : PageBase {
 		lv_obj_set_y(load_meter, -2);
 		lv_hide(load_meter);
 
-		lv_obj_set_x(roller_hover.get_cont(), 8);
-		lv_obj_set_style_pad_left(lv_obj_get_child(roller_hover.get_cont(), 0), 14, 0);
+		// lv_obj_set_x(roller_hover.get_cont(), 8);
+		lv_obj_set_style_pad_left(lv_obj_get_child(roller_hover.get_cont(), 0), 15, 0);
+		lv_obj_set_style_pad_right(lv_obj_get_child(roller_hover.get_cont(), 0), 10, 0);
 	}
 
 	void prepare_focus() override {

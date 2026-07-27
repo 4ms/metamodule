@@ -2,7 +2,9 @@
 
 namespace rack::app
 {
-ModuleLightWidget::ModuleLightWidget() = default;
+ModuleLightWidget::ModuleLightWidget() {
+	internal = nullptr;
+}
 ModuleLightWidget::~ModuleLightWidget() = default;
 
 engine::Light *ModuleLightWidget::getLight(int colorId) {

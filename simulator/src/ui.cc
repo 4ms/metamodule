@@ -9,7 +9,11 @@
 namespace MetaModule
 {
 
-Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_view asset_path, size_t block_size)
+Ui::Ui(std::string_view sdcard_path,
+	   std::string_view flash_path,
+	   std::string_view asset_path,
+	   size_t block_size,
+	   SimMidi &midi)
 	: ramdrive{new RamDrive}
 	, ramdisk_ops{*ramdrive}
 	, ramdisk{&ramdisk_ops, Volume::RamDisk}
@@ -30,6 +34,7 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 				   settings,
 				   screensaver,
 				   ramdisk}
+	, sim_midi{midi}
 	, plugin_internal{settings, open_patches_manager, notify_queue}
 	, plugin_interface{plugin_internal}
 	, in_buffer(block_size)
@@ -106,6 +111,14 @@ bool Ui::update() {
 
 void Ui::set_audio_fullscale(float volts_peak) {
 	audio_stream.volts_peak = volts_peak;
+}
+
+void Ui::load_patch(std::string_view patch_name, Volume vol) {
+	patch_playloader.load_initial_patch(patch_name, vol);
+}
+
+void Ui::goto_page(PageId page_id) {
+	page_manager.request_page(page_id);
 }
 
 void Ui::play_patch(std::span<Frame> soundcard_out) {

@@ -8,7 +8,7 @@ struct Split : Module {
 
 	enum ParamIds { NUM_PARAMS };
 	enum InputIds { POLY_INPUT, NUM_INPUTS };
-	enum OutputIds { ENUMS(MONO_OUTPUTS, 16), NUM_OUTPUTS };
+	enum OutputIds { ENUMS(MONO_OUTPUTS, 4), NUM_OUTPUTS };
 	enum DisplayIds { ChannelDisplay = 0 };
 
 	int lastChannels = 0;
@@ -16,12 +16,12 @@ struct Split : Module {
 	Split() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, 0);
 		configInput(POLY_INPUT, "Polyphonic");
-		for (int i = 0; i < 16; i++)
+		for (auto i = 0u; i < Split::MaxPoly; i++)
 			configOutput(MONO_OUTPUTS + i, string::f("Channel %d", i + 1));
 	}
 
 	void process(const ProcessArgs &args) override {
-		for (int c = 0; c < 16; c++) {
+		for (auto c = 0u; c < Split::MaxPoly; c++) {
 			float v = inputs[POLY_INPUT].getVoltage(c);
 			// To allow users to debug buggy modules, don't assume that undefined channel voltages are 0V.
 			outputs[MONO_OUTPUTS + c].setVoltage(v);
@@ -60,7 +60,7 @@ struct SplitWidget : ModuleWidget {
 		float first_row = 45.f + space_y / 2;
 
 		for (auto i = 0u; i < Split::MaxPoly; i++)
-			addInput(createOutputCentered<ThemedPJ301MPort>(
+			addOutput(createOutputCentered<ThemedPJ301MPort>(
 				mm2px(Vec(first_col + space_x * int(i / 8), first_row + (i % 8) * space_y)),
 				module,
 				Split::MONO_OUTPUTS + i));
