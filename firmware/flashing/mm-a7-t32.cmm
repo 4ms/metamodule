@@ -4,15 +4,15 @@
 
 // Reboot:
 system.mode down
-reset
 system.resetout
-wait 0.5
+wait 0.1
 
 // (Re-)connect:
 SYStem.CPU STM32MP153D-CA7
 SYStem.config DEBUGPORTTYPE SWD 
 SYStem.JtagClock 50MHz
 CORE.ASSIGN 1. 2.
+
 Trace.DISable
 SYStem.MemAccess DAP
 SYStem.attach
@@ -31,14 +31,13 @@ PRIVATE &elffile
 &elffile=OS.FILE.JOINPATH("&builddir", "../", "build", "mp1corea7", "medium", "main.elf")
 &elffile=OS.FILE.REALPATH("&elffile")
 
-
 Data.LOAD.Binary "&binfile" 0xC0000000 /DUALPORT
 Data.LOAD.Elf "&elffile" /CPP /NoCode
 PER.Set.simple AZSD:0x0:0x5C00A118 %Long 0xC0000000
 
 
 // Run
-;Break main
+// Break main
 Go
 
 // Enable Trace
@@ -48,6 +47,3 @@ ETM.ON
 
 Trace.arm
 ENDDO
-
-// CHANGE THE ADDRESS THAT PLUGIN IS LOADED TO
-// data.load.elf /Users/dann/4ms/stm32/*-debug.so 0xcd4203d0 /cpp /nocode /merge
