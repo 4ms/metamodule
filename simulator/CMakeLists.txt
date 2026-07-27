@@ -160,6 +160,7 @@ else()
 		stubs/fs/fs_proxy.cc
 		stubs/async_thread_control.cc
 		stubs/static_buffers.cc
+		stubs/dynload/exidx_registry.cc
 		hardware_support/random.cc
 		hardware_support/time.cc
 		hardware_support/memory.cc
