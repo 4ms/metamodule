@@ -1,5 +1,6 @@
 #pragma once
 #include "dynload/dynloader.hh"
+#include "dynload/exidx_registry.hh"
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
 #include "dynload/plugin_file_load_states.hh"
