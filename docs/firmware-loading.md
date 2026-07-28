@@ -23,29 +23,30 @@ The instructions are here: [MetaModule Docs](https://metamodule.info/docs/gettin
 
 ### Load in RAM over SWD/JTAG
 
-
 This is the preferred method for active firmware development. It requires a
-JTAG programmer. 
+SWD or JTAG programmer. 
 
 Attach a JTAG debugger to the 10-pin connector at the top of the module labeled
 "SWD". The protocol is actually JTAG, despite the header's name, though SWD may
-work since the only difference is the tRST pin instead of NRST.
-
-If you are already running the application and just need to debug, you can just
-attach without loading.
+work since the only difference is the tRST pin instead of NRST. Pin 1 (the red stripe)
+is on the side next to the 2x4 header.
 
 If you need to load new firmware and then debug it, then follow the guide in
-[Debugging with gdb](firmware-debugging.md).
+[Debugging with gdb](firmware-debugging.md). 
+
+Otherwise, if you just need to load the firmware and run it, continue reading.
 
 
-#### Freeze Jumper
+#### Setup: Install Freeze Jumper
 
-To load firmware (without debugging) with a JLink programmer, you need to install a "Freeze Jumper".
+To load firmware with an SWD or JTAG debugger such as the J-Link or ST-LINK,
+you need to install a "Freeze Jumper".
 
-There are two bootloader versions. If you see a blue light flash when you start up normally,
-then you have the current bootloader. If not, then you have the earlier bootloader.
+There are two bootloader versions. If you see a blue light flash when you start
+up normally, then you have the current bootloader. If not, then you have the
+earlier bootloader.
 
-1a) Current bootloader: The jumper goes on the two left-most pins of the 2x4 debug header. 
+A) Current bootloader: The jumper goes on the two left-most pins of the 2x4 debug header. 
 This is the header located next to the SWD/JTAG header that contains the connections for 
 the UART (RX/TX).
 
@@ -56,9 +57,9 @@ the UART (RX/TX).
      -
 ```
 
-1b) Early bootloader (pre-Nov 2024): The jumper goes on the `Control Expander` header
+B) Early bootloader (pre-Nov 2024): The jumper goes on the `Control Expander` header
 that bridges the top-left pin and the pin just to the right of it. Make sure
-you use the right header, it's the one above the Wifi header, near the `y` and
+you use the right header, it's the one above the Wi-Fi header, near the `y` and
 `z` pots. The jumper should be horizontal, not vertical, on the top row of pins
 all the way to the left:
 
@@ -73,7 +74,7 @@ all the way to the left:
 Up until Nov 1, 2024 all shipped units had the older bootloader unless
 you intentionally installed a newer one. 
 Updating the bootloaders is done via loading a release file that has "-bl-" in the name,
-where the release tag is `firmware-v2.0.0-dev-2` or later.
+where the release tag is `firmware-v2.0.0` or later.
 
 With the Freeze jumper installed powering the MetaModule on will make it halt with the button's blue light on.
 The console will print this:
@@ -91,21 +92,45 @@ Then write the address to the TAMP_BKP6 register at 0x5C00A118
 System will hang until TAMP_BKP6 register is changed...
 ```
 
-#### Loading firmware
+#### Loading firmware via J-Link
 
-With the Freeze jumper installed and a JLink debugger connected, and JLinkExe v9.44 or later on your PATH, run:
+With the Freeze jumper installed and a JLink debugger connected, and JLinkExe
+v9.44 or later on your PATH, run:
 
 ```
 make jprog
 ```
 
-It may take 10-20 seconds, and the firmware will boot automatically.
+It may take 10+ seconds, and the firmware will boot automatically.
 
+**Note:** In May 2026, Segger fixed a long-standing bug in their JLink software
+v9.44 that fixes Cortex-A7 resetting. If you are using earlier than v9.44, then
+you have to manually reset the MetaModule by powering off and back on before
+running `make jprog`. With v9.44, the script will do it for you.
 
-**Note:** In May 2026, Segger fixed a long-standing bug in their JLink software v9.44 that fixes Cortex-A7 resetting.
-If you are using earlier than v9.44, then you have to manually reset the MetaModule by
-powering off and back on before running `make jprog`. With v9.44, the script will do it for you.
+#### Loading firmware via OpenOCD (ST-LINK)
 
+With the Freeze jumper installed and an ST-LINK or other debugger connected, run:
+
+```bash
+make flash-openocd
+```
+
+Loading might take 30 seconds, as typically low-cost debuggers run at a slow rate.
+
+This requires openocd to be on your PATH (v0.12.0 or later). If it's not already
+running, the script will launch openocd in the background, flash the image, and
+then kill openocd. Note: if you already had openocd running, then it will NOT
+kill it (it only kills an instance that it launched), so you are safe to
+intermingle `make flash-openocd` with `make debug` and `make attach`.
+
+#### Loading firmware via TRACE32
+
+With the Freeze jumper installed and a TRACE32 debugger connected, run:
+
+```bash
+make flash-t32
+```
 
  
 ### Load into NOR Flash over USB DFU
