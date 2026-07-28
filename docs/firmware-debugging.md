@@ -1,7 +1,6 @@
 
 # Debugging 
 
-
 Refer to this image to locate pins and pads on the PCB:
 ![PCB header locations](./images/pcb-headers.png)
 
@@ -42,23 +41,51 @@ System will hang until TAMP_BKP6 register is changed...
 At this point you can choose to debug with gdb, Segger Ozone, VSCode, or TRACE32.
 Skip to the relevant section below:
 
-## GDB
+## ST-LINK (via OpenOCD)
 
-First, you need to start a gdb server. Either openocd (v0.12.0) or Segger JLinkGDBServer
-(v7.92) are known to work.
+You need openocd v0.12 or newer.
 
+Run this in a separate terminal window to launch openocd:
 
-For openocd, run this in a separate terminal window to launch openocd:
-
-```
+```bash
 make start-openocd
 ```
 
-For JLinkGDBServer, run this in a separate terminal window to launch the gdb server:
+Now that the gdb server is running in a separate terminal window, start
+debugging using arm-none-eabi-gdb.
 
+```bash
+make debug
 ```
+
+This is a shortcut to launch arm-none-eabi-gdb, connect to openocd at port 3333,
+and run the script in flashing/multi.gdb.
+That script loads the binary uimg to RAM and signals the bootloader to parse the image
+and jump execution to its entry point.
+It also loads the symbols from the elf file into gdb.
+
+The loading may take a while, depending on the debugger hardware and the binary
+size (i.e. whether you compiled the full binary or limited it with `cmake
+--fresh --preset min-brands`).
+
+If you want to attach to an already running program, you can do:
+
+```bash
+make attach
+```
+
+## J-Link
+
+Segger JLinkGDBServer v7.92 is known to work. JLinkGDBServer only works with
+J-Link products.
+
+First, start the JLinkGDBServer. Run this in a separate terminal window to launch the gdb server:
+
+```bash
 make start-jlinkgdb
 ```
+
+Keep it running in the background.
 
 This command expects the Jlink GDB executable to be `JLinkGDBServer`. If that's not the case
 on your system, adjust the following command and use it instead. You also may need
@@ -73,48 +100,42 @@ interface, and set the port to 3333 manually (by default it's 2331). Note: if
 want to use a different port than 3333, you can change the first line in the
 gdbscript (see next step).
 
-Now that the gdb server is running in a separate terminal window, start
-debugging using arm-none-eabi-gdb.
 
+#### JLinkGDBServer v9.44 and later (recommended)
+
+The newer JLink tools fixed a bug so we can now reset from a script. With v9.44
+and later you do not have to power cycle before loading code via JTAG, and so
+the gdb server and gdb client can remain running.
+
+Run this:
+```bash
+## Flash and exit back to the command line:
+make jflash-gdb-bg
+
+## Or run this to flash and stay in gdb:
+make jflash-gdb
 ```
-arm-none-eabi-gdb build/mp1corea7/medium/main.elf
-```
 
-From the gdb, you can run a script to load new firmware:
-
-### JLinkGDBServer v9.44 and later (recommended)
-
-The newer JLink tools fixed a bug so we can now reset from a script. With v9.44 and later you do not have to power cycle before loading code via JTAG, and so the gdb server and gdb client can remain running.
-
-From the gdb prompt, do this:
+Or, if you're already in gdb, from the gdb prompt, you can do this:
 
 ```
 source flashing/jflash.gdb
 ```
 
 
-### OpenOCD and pre-9.44 JLinkGDBServer
+#### Pre-9.44 JLinkGDBServer
 
-If you are using OpenOCD or Segger JLinkGDBServer earlier than v9.44, then make sure you just did a power cycle and can see the 
-Freeze pin message in the console. You probably have to relaunch gdb and possibly the gdb server. 
+If you are using Segger JLinkGDBServer earlier than v9.44, then make sure you
+just did a power cycle and can see the Freeze pin message in the console. You
+probably have to relaunch gdb and possibly the gdb server. 
 
 Then do:
 
+```bash
+make debug
 ```
-source flashing/multi.gdb
-```
 
-
-Either of these scripts connect to the gdb server at port 3333, and then load
-the symbols from the A7 elf file to gdb (not to the MetaModule). Then the script loads
-the multi-uimg file (`build/main.uimg`) to an arbitrary address, 0xC0000000.
-Finally, it notifies the bootloader to start parsing the multi-uimg file by
-writing 0xC0000000 to a designated register (the TAMP_BKP6R register).
-
-The loading may take a while, depending on the debugger hardware (ST-LINK or JLink),
-and the binary size (i.e. whether you compiled the full binary or limited it with
-`cmake --fresh --preset min-brands`).
-
+This is the same command used with OpenOCD (see above).
 
 
 ## Ozone
@@ -133,8 +154,17 @@ overridden via the project file.
 
 Lauterbach TRACE32 can be used to debug as well.
 
-After power-cycling with the Freeze jumper installed, run the
-`flashing/mm-a7-t32.cmm` script to load the firmware and symbols.
+After power-cycling with the Freeze jumper installed, run this:
+
+```bash
+make flash-t32
+```
+
+This runs the script `flashing/flash-t32.py`. You need the TRACE32 python module 
+installed.
+
+You also can use the script `flashing/mm-a7-t32.cmm` from within TRACE32 
+to load the firmware and symbols.
 
 Both A7 cores can be accessed (use the command `Core 0` for the main core, or
 `Core 1` for switch to the secondary A7 core). To debug the M4 core, you can
