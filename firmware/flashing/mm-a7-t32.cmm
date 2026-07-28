@@ -41,7 +41,7 @@ Data.Set EAZSD:0x50000404 %Long 0x1
 
 // Let the reset complete (reading too early gives a bus error), then wait
 // for mp1-boot's ready flag
-WAIT 2.s
+WAIT 0.5s
 PRIVATE &tries
 &tries=0.
 WHILE (Data.Long(EAZSD:0x5C00A118)!=0xFFFFFFFF)&&(&tries<90.)
