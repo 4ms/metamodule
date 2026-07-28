@@ -39,6 +39,10 @@ struct ElfImageAllocator {
 	}
 };
 
-using CodeBuffer = std::vector<uint8_t, ElfImageAllocator<uint8_t, 0x1000>>;
+// Matches p_align of LOAD segments in SDK-built plugins; DynLoader warns if a
+// plugin's ELF requests something larger
+inline constexpr std::size_t CodeBufferAlignment = 0x1000;
+
+using CodeBuffer = std::vector<uint8_t, ElfImageAllocator<uint8_t, CodeBufferAlignment>>;
 
 } // namespace MetaModule
