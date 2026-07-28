@@ -64,8 +64,12 @@ add_custom_command(
           # -v
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/flashing/zero-term.py
           --in ${SYMBOLS_FILE} --out ${SYMBOLS_FILE}
-  COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
-  DEPENDS main.elf 
+  COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf>
+  # The objcopy above modifies main.elf (our dependency) in place, leaving it
+  # newer than our declared output. Touch the output last so this command is
+  # not considered out-of-date on every build.
+  COMMAND ${CMAKE_COMMAND} -E touch ${SYMBOLS_FILE}
+  DEPENDS main.elf
   COMMENT "Generating table of API symbol addresses and installing in firmware binary"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
@@ -79,11 +83,15 @@ cmake_path(SET ASSET_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 set(ASSET_IMG_FILENAME  assets.uimg)
 cmake_path(APPEND ASSET_IMG_PATH  "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FILENAME}")
 
+# CONFIGURE_DEPENDS makes cmake re-glob at build time: modified files re-run
+# the tar via DEPENDS, and added/deleted files trigger a reconfigure.
+file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS ${ASSET_DIR}/*)
+
 add_custom_command(
-  #TODO how to make this run only if any file in the directory is modified, added, or deleted?
-  OUTPUT ${ASSET_IMG_PATH} _always_force_refresh_
+  OUTPUT ${ASSET_IMG_PATH}
   COMMAND ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
+  DEPENDS ${ASSET_FILES}
   COMMENT "Creating assets uimg file"
   WORKING_DIRECTORY ${ASSET_DIR}
   VERBATIM USES_TERMINAL
