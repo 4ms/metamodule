@@ -1,24 +1,14 @@
-; Load a multi-uimg file to DDR RAM, and then trigger MP1-Boot to process it
-; This assumes this script is in flashing/, and the uimg file is build/main.uimg
+; Flash the MetaModule app via TRACE32 without a power cycle.
+; Loads a multi-uimg file to DDR RAM, then triggers MP1-Boot to process it.
+;
+; Requires the Freeze jumper installed, so mp1-boot waits for an image after
+; a reset. This script never needs a power cycle: it soft-resets the SoC via
+; MPSYSRST and hands mp1-boot the image through the TAMP_BKP6R mailbox.
+;
+; This assumes this script is in flashing/, the uimg file is build/main.uimg,
 ; and the elf file (used for symbols) is build/mp1corea7/medium/main.elf
 
-// Reboot:
-system.mode down
-system.resetout
-wait 0.1
-
-// (Re-)connect:
-SYStem.CPU STM32MP153D-CA7
-SYStem.config DEBUGPORTTYPE SWD 
-SYStem.JtagClock 50MHz
-CORE.ASSIGN 1. 2.
-
-Trace.DISable
-SYStem.MemAccess DAP
-SYStem.attach
-break
-
-// Flash binary and load symbols
+// Resolve file paths first, so path problems fail before touching the target
 PRIVATE &builddir
 &builddir=OS.PPF()
 &builddir=OS.FILE.PATH("&builddir")
@@ -31,14 +21,48 @@ PRIVATE &elffile
 &elffile=OS.FILE.JOINPATH("&builddir", "../", "build", "mp1corea7", "medium", "main.elf")
 &elffile=OS.FILE.REALPATH("&elffile")
 
+// Attach if not already attached (never resets or halts the target)
+IF SYStem.Mode()!=11.
+(
+  SYStem.CPU STM32MP153D-CA7
+  SYStem.config DEBUGPORTTYPE SWD
+  SYStem.JtagClock 50MHz
+  CORE.ASSIGN 1. 2.
+  Trace.DISable
+  SYStem.MemAccess DAP
+  SYStem.attach
+)
+
+// Clear the mp1-boot mailbox (TAMP registers survive resets), then trigger a
+// system reset (MPSYSRST). The board reboots into mp1-boot, which writes
+// 0xFFFFFFFF to the mailbox and spins until it is changed.
+Data.Set EAZSD:0x5C00A118 %Long 0x0
+Data.Set EAZSD:0x50000404 %Long 0x1
+
+// Let the reset complete (reading too early gives a bus error), then wait
+// for mp1-boot's ready flag
+WAIT 2.s
+PRIVATE &tries
+&tries=0.
+WHILE (Data.Long(EAZSD:0x5C00A118)!=0xFFFFFFFF)&&(&tries<90.)
+(
+  WAIT 200.ms
+  &tries=&tries+1.
+)
+IF Data.Long(EAZSD:0x5C00A118)!=0xFFFFFFFF
+(
+  PRINT %ERROR "Timed out waiting for mp1-boot ready flag. Is the Freeze jumper installed?"
+  ENDDO
+)
+
+// Load and verify the image (run-time access; the CPU keeps spinning in
+// mp1-boot, no halt needed), and load symbols
 Data.LOAD.Binary "&binfile" 0xC0000000 /DUALPORT
+Data.LOAD.Binary "&binfile" 0xC0000000 /DUALPORT /ComPare
 Data.LOAD.Elf "&elffile" /CPP /NoCode
-PER.Set.simple AZSD:0x0:0x5C00A118 %Long 0xC0000000
 
-
-// Run
-// Break main
-Go
+// Boot: mp1-boot jumps to the image as soon as the mailbox is written
+Data.Set EAZSD:0x5C00A118 %Long 0xC0000000
 
 // Enable Trace
 Trace.METHOD ONCHIP
