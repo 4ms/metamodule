@@ -10,7 +10,10 @@
 
 struct DynLoader {
 
-	DynLoader(std::span<uint8_t> elf_file_data, std::vector<uint8_t> &code_buffer) {
+	// Generic over the buffer type: the firmware uses an over-aligned
+	// CodeBuffer (see src/dynload/code_buffer.hh); the stub doesn't care.
+	template<typename BufferT>
+	DynLoader(std::span<uint8_t> elf_file_data, BufferT &code_buffer) {
 	}
 
 	std::string load() {

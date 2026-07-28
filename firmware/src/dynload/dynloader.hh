@@ -4,6 +4,7 @@
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
+#include "dynload/code_buffer.hh"
 #include "elf_process/elf_file.hh"
 #include "elf_process/elf_relocator.hh"
 #include "exidx_registry.hh"
@@ -24,7 +25,7 @@ namespace MetaModule
 struct DynLoader {
 	static inline bool kept_syms = false;
 
-	DynLoader(std::span<uint8_t> elf_file_data, std::vector<uint8_t> &code_buffer)
+	DynLoader(std::span<uint8_t> elf_file_data, CodeBuffer &code_buffer)
 		: elf{elf_file_data}
 		, codeblock{code_buffer} {
 
@@ -223,7 +224,7 @@ private:
 
 private:
 	ElfFile::Elf elf;
-	std::vector<uint8_t> &codeblock;
+	CodeBuffer &codeblock;
 
 	static std::vector<ElfFile::HostSymbol> hostsyms;
 };
