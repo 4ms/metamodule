@@ -209,6 +209,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	handle_patch_mod_queue();
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
+	param_block.metaparams.midi_14bit_mode = patch_loader.is_midi_14bit_enabled();
 
 	// Button Expander: block events if Back button is held down
 	if (param_block.metaparams.button_exp_connected != 0 && !param_block.metaparams.meta_buttons[0].is_pressed()) {
@@ -315,7 +316,6 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		auto &ext_out = audio_block.out_ext_codec[idx];
 		auto const &ext_in = audio_block.in_ext_codec[idx];
 		auto &params = param_block.params[idx];
-		idx++;
 
 		// Set metaparams.ins with input signals
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
@@ -348,17 +348,24 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			}
 		}
 
-		// MIDI
-		midi.process(param_block.metaparams.midi_connected,
-					 params.midi_event,
-					 param_block.metaparams.midi_poly_chans,
-					 &params.raw_msg);
+		// MIDI: consume the incoming message and write back to the shared
+		// param block (params is a discarded cached copy). The M4 transmits
+		// whatever is left in the shared slot, so skipping the write-back
+		// echoes all incoming MIDI back to the sender.
+		MidiMessage msg = params.raw_msg;
+
+		midi.process(
+			param_block.metaparams.midi_connected, params.midi_event, param_block.metaparams.midi_poly_chans, &msg);
+
+		param_blocks[cur_block].params[idx].raw_msg = msg;
 
 		for (auto &outchan : out.chan)
 			outchan = 0;
 
 		for (auto &extoutchan : ext_out.chan)
 			extoutchan = 0;
+
+		idx++;
 	}
 
 	player.trigger_reading_gui_elements();
@@ -480,6 +487,7 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 void AudioStream::return_cached_params(unsigned block) {
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
+	param_blocks[block].metaparams.midi_14bit_mode = local_params.metaparams.midi_14bit_mode;
 }
 
 void AudioStream::set_block_spans() {

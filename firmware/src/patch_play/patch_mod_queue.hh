@@ -70,7 +70,8 @@ struct SetChanCalibration {
 };
 
 struct SetMidiPolyNum {
-	uint32_t poly_num;
+	// User-set max poly channels: 0 = Auto (compute from cables), 1-8 = hard-set
+	uint16_t poly_num;
 };
 
 struct LoadModuleState {

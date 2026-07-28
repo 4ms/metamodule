@@ -23,6 +23,11 @@ public:
 		return header->sh_offset;
 	}
 
+	// Link-time virtual address (relative to the load base for our plugins)
+	uint32_t address() {
+		return header->sh_addr;
+	}
+
 	uint32_t size_bytes() {
 		return header->sh_size;
 	}

@@ -34,8 +34,19 @@ function(create_plugin)
 	)
 
 	add_custom_target(${PLUGIN_OPTIONS_SOURCE_LIB}-assets ALL
-		DEPENDS "${ASSET_DIR}/${PLUGIN_OPTIONS_PLUGIN_NAME}" 
+		DEPENDS "${ASSET_DIR}/${PLUGIN_OPTIONS_PLUGIN_NAME}"
 	)
 
+    # The real SDK's create_plugin() defines a `plugin` target, and so we need to define
+    # the same target here so that plugin CMakeLists can reference this target (e.g. to call
+    # add_custom_command(TARGET plugin ...). 
+    # Target names are global, so only the first built-in plugin gets it:
+    # add_custom_command(TARGET plugin ...) only works in the directory that
+    # created the target.
+	if (NOT TARGET plugin)
+		add_custom_target(plugin ALL)
+	else()
+		message(STATUS "Target `plugin` already exists, so `add_custom_command(TARGET plugin ...)` in ${CMAKE_CURRENT_SOURCE_DIR} will fail to configure -- register that plugin first")
+	endif()
 
 endfunction()

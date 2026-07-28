@@ -7,6 +7,7 @@ set(SIMULATOR 1)
 option(HEADLESS "Build as headless" OFF)
 option(ADDRESS_SAN "Use address sanitizer" OFF)
 option(ALL_SAN "Use address sanitizer and all other sanitizers" OFF)
+option(SIM_DEBUG_O0 "Compile the entire binary (audio DSP included) at -O0 for debugging; set by the `debug` target" OFF)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
@@ -25,7 +26,7 @@ else()
 
 	message("Building Simulator with GUI")
 
-	add_compile_options(-O0 -g2)
+	add_compile_options(-O2 -g2)
 
 	add_compile_definitions(SIMULATOR)
 
@@ -37,6 +38,11 @@ else()
 
 endif()
 
+if (SIM_DEBUG_O0)
+	message("Simulator configured as an -O0 DEBUG build (audio DSP included) -- audio may glitch; use low-CPU patches. Run `make config-sim` to return to an optimized build.")
+	add_compile_options(-O0 -g)
+endif()
+
 if (ADDRESS_SAN)
     add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
     add_link_options(-fsanitize=address)
@@ -45,6 +51,12 @@ elseif (ALL_SAN)
     add_link_options(-fsanitize=address,undefined)
 endif()
 
+
+# Default to DEBUG so logging is visible when configuring with plain cmake,
+# matching the Makefile (log_levels.cmake otherwise defaults to NONE, which
+# compiles out even pr_err). A -DLOG_LEVEL=... on the command line still takes
+# precedence.
+set(LOG_LEVEL DEBUG CACHE STRING "Console log level")
 
 include(${FWDIR}/cmake/log_levels.cmake)
 enable_logging()
@@ -76,9 +88,8 @@ endif()
 
 # #################### ThorVG ############################################
 
-if (NOT HEADLESS)
-	add_subdirectory(${FWDIR}/lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
-endif()
+# Needed headless too: coreproc_plugin_export/waveform_display.cc references it
+add_subdirectory(${FWDIR}/lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
 
 
 # #################### RYML ##################################
@@ -123,28 +134,33 @@ if (NOT HEADLESS)
 endif()
 
 if(HEADLESS)
-	add_executable(simulator 
-		src/headless/main-headless.cc 
-		src/headless/audio_files.cc 
+	add_executable(simulator
+		src/headless/main-headless.cc
+		src/headless/audio_files.cc
 		src/headless/nanovg.cc
+		src/headless/gui_stubs.cc
 		stubs/svg.cc
+		stubs/async_thread_control.cc
 		hardware_support/random.cc
 		hardware_support/time.cc
 		hardware_support/memory.cc
 		hardware_support/filesystem_helpers.cc
 
 		${FWDIR}/src/midi/midi_router.cc
+		${FWDIR}/src/patch_play/plugin_module.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
 else()
-	add_executable(simulator 
-		src/main.cc 
+	add_executable(simulator
+		src/main.cc
 		src/ui.cc
+		src/sim_midi.cc
 		stubs/memory/heap.cc
 		stubs/fs/fs_proxy.cc
 		stubs/async_thread_control.cc
 		stubs/static_buffers.cc
+		stubs/dynload/exidx_registry.cc
 		hardware_support/random.cc
 		hardware_support/time.cc
 		hardware_support/memory.cc
@@ -220,7 +236,41 @@ if(NOT HEADLESS)
 	)
 endif()
 
-target_compile_options(simulator PRIVATE -Wall -Og)
+# --- Real MIDI I/O via rtmidi (GUI simulator only) ---
+# MIDI support is controlled by the SIMULATOR_MIDI option (ON by default). Toggle
+# it from the Makefile: `make config-sim` (MIDI on) / `make config-sim-nomidi`
+# (MIDI off), or pass -DSIMULATOR_MIDI=ON/OFF at configure time.
+#
+# When enabled, rtmidi (git submodule at simulator/rtmidi) is built and linked;
+# its own CMake auto-selects the platform MIDI API (ALSA / CoreMIDI / WinMM).
+# When disabled, SimMidi compiles to an inert no-op.
+option(SIMULATOR_MIDI "Build the simulator with rtmidi MIDI support" ON)
+
+if(NOT HEADLESS AND SIMULATOR_MIDI)
+	if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/rtmidi/CMakeLists.txt)
+		message(FATAL_ERROR
+			"SIMULATOR_MIDI is ON but the rtmidi submodule is missing.\n"
+			"  Initialize it:  git submodule update --init simulator/rtmidi\n"
+			"  Linux also needs ALSA headers:  sudo apt install libasound2-dev\n"
+			"  Or build without MIDI:  make config-sim-nomidi  (or -DSIMULATOR_MIDI=OFF)")
+	endif()
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+	set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+	add_subdirectory(rtmidi EXCLUDE_FROM_ALL)
+	target_link_libraries(simulator PRIVATE rtmidi)
+	target_compile_definitions(simulator PRIVATE SIM_HAS_RTMIDI)
+	message("Simulator: MIDI enabled (rtmidi)")
+elseif(NOT HEADLESS)
+	message("Simulator: MIDI disabled (SIMULATOR_MIDI=OFF)")
+endif()
+
+# Per-target options come after the directory-level ones on the command line, so
+# the simulator's own sources need their opt level set here too 
+if (SIM_DEBUG_O0)
+	target_compile_options(simulator PRIVATE -Wall -O0)
+else()
+	target_compile_options(simulator PRIVATE -Wall -Og)
+endif()
 target_compile_options(simulator PRIVATE -Wno-double-promotion)
 
 # Workaround for std::expected not available in clang
@@ -299,9 +349,15 @@ else ()
   set(DEBUG_COMMAND echo "Compiler is ${CMAKE_CXX_COMPILER_ID}, but must be Clang, AppleClang, or GNU to debug")
 endif()
 
+# `debug` forces a full -O0 rebuild of the entire binary before launching the
+# debugger: it reconfigures with SIM_DEBUG_O0=ON, rebuilds the simulator (the
+# changed flags make Ninja recompile everything at -O0), then debugs that
+# binary. The -O0 setting is sticky, so subsequent `make debug` runs only
+# recompile changed files; run `make config-sim` to return to an optimized build.
 add_custom_target(
   debug
-  DEPENDS simulator
+  COMMAND ${CMAKE_COMMAND} -DSIM_DEBUG_O0=ON -S ${CMAKE_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target simulator
   COMMAND ${DEBUG_COMMAND}
   USES_TERMINAL
 )

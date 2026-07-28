@@ -11,12 +11,22 @@ TEST_CASE("fatetime->tm") {
 	unsigned second = 52;
 	FatTime ft = make_fattime(year, month, day, hour, minute, second);
 	std::tm t = fattime_to_tm(ft);
-	CHECK(t.tm_year == year);
-	CHECK(t.tm_mon == month);
+	CHECK(t.tm_year == year - 1900); //std::tm: years since 1900
+	CHECK(t.tm_mon == month - 1);	 //std::tm: 0-based month
 	CHECK(t.tm_mday == day);
 	CHECK(t.tm_hour == hour);
 	CHECK(t.tm_min == minute);
 	CHECK(t.tm_sec == second);
+}
+
+TEST_CASE("FatTime field accessors") {
+	FatTime ft = make_fattime(2000, 12, 31, 23, 59, 58);
+	CHECK(ft.year() == 2000); //year() must not truncate to uint8_t (2000 & 0xFF == 208)
+	CHECK(ft.month() == 12);
+	CHECK(ft.day() == 31);
+	CHECK(ft.hour() == 23);
+	CHECK(ft.minute() == 59);
+	CHECK(ft.second() == 58);
 }
 
 void print_tm(std::tm t) {
@@ -36,8 +46,8 @@ TEST_CASE("fattime<->ticks") {
 		.tm_min = 0,
 		.tm_hour = 1,
 		.tm_mday = 1,
-		.tm_mon = 2,
-		.tm_year = 2000,
+		.tm_mon = 1,			//February (0-based)
+		.tm_year = 2000 - 1900, //years since 1900
 	};
 	set_time_now(poweron_tm, 0); //0 ticks since power-on
 
@@ -62,4 +72,32 @@ TEST_CASE("tick -> ft -> tick") {
 	ticks_ms /= 2000;
 	ticks_ms *= 2000;
 	CHECK(ticks_ms == ticks_ms2);
+}
+
+TEST_CASE("default power-on time is a valid absolute time") {
+	// Rebuild the default power-on reference (2000-01-01 01:00:00) and drive conversions off it.
+	std::tm poweron_tm{
+		.tm_sec = 0,
+		.tm_min = 0,
+		.tm_hour = 1,
+		.tm_mday = 1,
+		.tm_mon = 0,			//January (0-based)
+		.tm_year = 2000 - 1900, //years since 1900
+	};
+	set_time_now(poweron_tm, 0);
+
+	time_t poweron = get_poweron_time();
+	CHECK(poweron != (time_t)-1); //mktime succeeded
+
+	std::tm *back = std::localtime(&poweron);
+	REQUIRE(back != nullptr); //localtime succeeded (this is what crashed before)
+	CHECK(back->tm_year + 1900 == 2000);
+	CHECK(back->tm_mon + 1 == 1);
+
+	// 0 ticks since power-on must round-trip back to the power-on date, not year 3900.
+	FatTime ft = ticks_to_fattime(0);
+	std::tm t = fattime_to_tm(ft);
+	CHECK(t.tm_year + 1900 == 2000);
+	CHECK(t.tm_mon + 1 == 1);
+	CHECK(t.tm_mday == 1);
 }

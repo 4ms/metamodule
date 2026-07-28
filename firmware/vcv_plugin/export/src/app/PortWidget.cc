@@ -6,7 +6,9 @@ namespace rack::app
 
 struct PortWidget::Internal {};
 
-PortWidget::PortWidget() = default;
+PortWidget::PortWidget() {
+	internal = nullptr;
+}
 PortWidget::~PortWidget() = default;
 
 engine::Port *PortWidget::getPort() {

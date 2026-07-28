@@ -9,6 +9,7 @@ namespace MetaModule
 
 struct PrefsSectionMidi {
 	lv_obj_t *feedback_check;
+	lv_obj_t *midi_14bit_check;
 	lv_obj_t *pc_patch_load_check;
 	lv_obj_t *knobset_control_check;
 	lv_obj_t *knobset_cc_dropdown;

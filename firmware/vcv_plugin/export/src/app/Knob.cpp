@@ -3,7 +3,9 @@
 namespace rack::app
 {
 
-Knob::Knob() = default;
+Knob::Knob() {
+	internal = nullptr;
+}
 Knob::~Knob() = default;
 
 void Knob::initParamQuantity() {

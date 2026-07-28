@@ -3,6 +3,7 @@
 #include "lvgl.h"
 #include <SDL2/SDL.h>
 #include <array>
+#include <vector>
 
 enum QuitEvent {
 	LV_QUIT_NONE,
@@ -12,17 +13,18 @@ enum QuitEvent {
 	LV_QUIT_OTHER,
 };
 
+// Each action can be bound to multiple keys: any key in the list triggers the action.
 struct RotaryEncoderKeys {
-	SDL_Keycode turn_cw;
-	SDL_Keycode turn_ccw;
-	SDL_Keycode click;
-	SDL_Keycode aux_button;
-	SDL_Keycode quit;
-	SDL_Keycode param_inc;
-	SDL_Keycode param_dec;
-	SDL_Keycode param_fine_toggle;
-	SDL_Keycode prev_knobset;
-	SDL_Keycode next_knobset;
+	std::vector<SDL_Keycode> turn_cw;
+	std::vector<SDL_Keycode> turn_ccw;
+	std::vector<SDL_Keycode> click;
+	std::vector<SDL_Keycode> aux_button;
+	std::vector<SDL_Keycode> quit;
+	std::vector<SDL_Keycode> param_inc;
+	std::vector<SDL_Keycode> param_dec;
+	std::vector<SDL_Keycode> param_fine_toggle;
+	std::vector<SDL_Keycode> prev_knobset;
+	std::vector<SDL_Keycode> next_knobset;
 };
 
 enum class ButtonEvent { None, Pressed, Released };

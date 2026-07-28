@@ -12,19 +12,97 @@
   "changelogUrl": "https://github.com/VCVRack/Rack/blob/v2/CHANGELOG.md",
   "description": "Necessary modules built into VCV Rack",
   "modules": [
-     {
+    {
       "slug": "MIDIToCVInterface",
       "name": "MIDI to CV",
       "description": "Converts MIDI from an external device to CV and gates",
       "manualUrl": "https://vcvrack.com/manual/Core#MIDI-CV",
-      "tags": [ "External", "MIDI" ]
+      "tags": [
+        "External",
+        "MIDI",
+        "Polyphonic"
+      ]
+    },
+    {
+      "slug": "MIDICCToCVInterface",
+      "name": "MIDI CC to CV",
+      "description": "Converts MIDI CC from an external device to CV",
+      "manualUrl": "https://vcvrack.com/manual/Core#MIDI-CC",
+      "tags": [
+        "External",
+        "MIDI"
+      ]
+    },
+    {
+      "slug": "MIDITriggerToCVInterface",
+      "name": "MIDI to Gate",
+      "description": "Converts MIDI notes from an external device to gates",
+      "manualUrl": "https://vcvrack.com/manual/Core#MIDI-Gate",
+      "tags": [
+        "External",
+        "MIDI"
+      ]
     },
     {
       "slug": "CV-MIDI",
       "name": "CV to MIDI",
       "description": "Converts CV to MIDI and sends to an external device",
       "manualUrl": "https://vcvrack.com/manual/Core#CV-MIDI",
-      "tags": [ "External", "MIDI" ]
+      "tags": [
+        "External",
+        "MIDI",
+        "Polyphonic"
+      ]
+    },
+    {
+      "slug": "CV-CC",
+      "name": "CV to MIDI CC",
+      "description": "Converts CV to MIDI CC and sends to an external device",
+      "manualUrl": "https://vcvrack.com/manual/Core#CV-CC",
+      "tags": [
+        "External",
+        "MIDI"
+      ]
+    },
+    {
+      "slug": "CV-Gate",
+      "name": "Gate to MIDI",
+      "description": "Converts gates to MIDI notes and sends to an external device",
+      "manualUrl": "https://vcvrack.com/manual/Core#CV-Gate",
+      "tags": [
+        "External",
+        "MIDI"
+      ]
+    },
+    {
+      "slug": "Merge",
+      "name": "Merge",
+      "description": "4-voice version of VCV Free Merge (Combines multiple monophonic cables into a polyphonic cable)",
+      "manualUrl": "https://vcvrack.com/Free#Merge",
+      "tags": [
+        "Polyphonic",
+        "Utility"
+      ]
+    },
+    {
+      "slug": "Split",
+      "name": "Split",
+      "description": "4-voice version of VCV Free Split (Splits a polyphonic cable into multiple monophonic cables)",
+      "manualUrl": "https://vcvrack.com/Free#Split",
+      "tags": [
+        "Polyphonic",
+        "Utility"
+      ]
+    },
+    {
+      "slug": "Sum",
+      "name": "Sum",
+      "description": "4-voic version of VCV Free Sum (Sums all channels of a polyphonic cable)",
+      "manualUrl": "https://vcvrack.com/Free#Sum",
+      "tags": [
+        "Polyphonic",
+        "Utility"
+      ]
     }
   ]
 }

@@ -28,7 +28,7 @@ inline std::string custom_display_value_string(Pot const &el, float value, bool 
 		auto sz = std::snprintf(s.data(), s.size(), "%.*g", el.display_precision, v);
 		s.resize(sz);
 	} else {
-		auto res = std::to_chars(s.data(), s.data() + s.size(), v, std::chars_format::general, 5);
+		auto res = std::to_chars(s.data(), s.data() + s.size(), v, std::chars_format::fixed, 5);
 		*res.ptr = '\0';
 		s.resize(res.ptr - s.data());
 	}

@@ -21,7 +21,15 @@ struct NativeModuleMenu : BasePluginModuleMenu {
 	void back_event() override {
 	}
 
-	void click_item(unsigned idx) override {
+	std::optional<SliderEdit> click_item(unsigned idx) override {
+		return std::nullopt;
+	}
+
+	std::string set_slider_value(float scaled_value) override {
+		return {};
+	}
+
+	void end_slider_edit() override {
 	}
 
 	bool is_done() override {

@@ -8,6 +8,7 @@ SvgSwitch::SvgSwitch()
 	: fb(new widget::FramebufferWidget)
 	, shadow(new CircularShadow)
 	, sw(new widget::SvgWidget) {
+	internal = nullptr;
 	addChild(fb);
 	fb->addChild(shadow);
 	shadow->box.size = math::Vec();

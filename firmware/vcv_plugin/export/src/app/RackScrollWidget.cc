@@ -3,7 +3,9 @@
 namespace rack::app
 {
 
-RackScrollWidget::RackScrollWidget() = default;
+RackScrollWidget::RackScrollWidget() {
+	internal = nullptr;
+}
 RackScrollWidget::~RackScrollWidget() = default;
 
 void RackScrollWidget::reset() {

@@ -5,6 +5,9 @@
 #include "pr_dbg.hh"
 #include <cstring>
 
+// Defined in usbh_conf.cc: once-per-second host-channel event summary
+void usbh_print_hc_stats();
+
 class UsbHostManager {
 private:
 	mdrivlib::Pin src_enable;
@@ -65,6 +68,8 @@ public:
 
 	void process() {
 		USBH_Process(&usbhost);
+		midi_host.process();
+		usbh_print_hc_stats();
 	}
 
 	static inline uint8_t connected_classcode = 0xFF;

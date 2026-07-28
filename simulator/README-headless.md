@@ -6,9 +6,9 @@ the audio output to a file.
 **Usage:**
 ```
 cd simulator
-cmake --fresh --preset headless 
-cmake --build build
-build/simulator  -p ../patches/default/Djembe4Verb.yml
+cmake --fresh --preset headless
+cmake --build build-headless
+build-headless/simulator  -p ../patches/default/Djembe4verb.yml
 ```
 
 You should see some output like this:
@@ -37,12 +37,16 @@ You can specify the number of samples to process with `-n`, for example `-n
 48000` will process 1 second of sound at 48kHz.
 
 If you want to reduce compilation time by only building 4ms modules and not other brands,
-you can use the cmake preset `headless-min` instead of `headess` (obviously your
+you can use the cmake preset `headless-min` instead of `headless` (obviously your
 patch files can't use modules that weren't built):
 
 ```
 cmake --fresh --preset headless-min
+cmake --build build-headless
 ```
+
+Both headless presets share the `build-headless/` dir, so to switch between them,
+re-run the configure step (`cmake --fresh --preset ...`) as shown above.
 
 **Purpose:**
 This project is useful for testing the audio stream while developing, for

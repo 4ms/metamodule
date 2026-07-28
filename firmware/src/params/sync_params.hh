@@ -54,7 +54,9 @@ public:
 				if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs) {
 					params.midi_ccs[e.note].changed = 1;
 					params.midi_ccs[e.note].val = e.midi_chan;
-					params.midi_ccs[e.note].value = e.val;
+					// e.val is 14-bit from the M4 core; the GUI/knobset-control consumers
+					// of this 8-bit field expect the coarse 7-bit value, so shift back down.
+					params.midi_ccs[e.note].value = e.val >> 7;
 				}
 				if (e.type == Midi::Event::Type::PC) {
 					params.last_midi_pc.changed = true;

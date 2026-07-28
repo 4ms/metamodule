@@ -185,6 +185,13 @@ struct PatchPlayLoader {
 		return player_.get_module_light(module_idx, param_idx);
 	}
 
+	// Returns number of poly channels on the cable from out jack to in jack (0 or 1 means mono)
+	unsigned num_poly_cable_channels(Jack out, Jack in) {
+		if (is_loading_patch())
+			return 0;
+		return player_.num_poly_cable_channels(out, in);
+	}
+
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {
@@ -223,32 +230,39 @@ struct PatchPlayLoader {
 		rename_state_ = RenameState::RequestSaveNew;
 	}
 
-	void load_module(std::string_view slug) {
+	// Returns why the module could not be created (Ok on success), so the
+	// caller can inform the user
+	PatchPlayer::CreateResult load_module(std::string_view slug) {
 		bool should_play = is_playing();
 
 		stop_audio();
 		while (!is_audio_muted())
 			;
 
-		player_.add_module(slug);
+		auto created = player_.add_module(slug);
 
-		auto *patch = patches_.get_view_patch();
-		uint16_t module_id = patch->add_module(slug);
-		auto info = ModuleFactory::getModuleInfo(slug);
+		if (created == PatchPlayer::CreateResult::Ok) {
+			auto *patch = patches_.get_view_patch();
+			uint16_t module_id = patch->add_module(slug);
+			auto info = ModuleFactory::getModuleInfo(slug);
 
-		// Set params to default values
-		for (unsigned i = 0; auto const &element : info.elements) {
-			if (auto def_val = get_normalized_default_value(element); def_val.has_value()) {
-				auto param_id = info.indices[i].param_idx;
-				patch->set_or_add_static_knob_value(module_id, param_id, def_val.value());
-				player_.apply_static_param({.module_id = module_id, .param_id = param_id, .value = def_val.value()});
+			// Set params to default values
+			for (unsigned i = 0; auto const &element : info.elements) {
+				if (auto def_val = get_normalized_default_value(element); def_val.has_value()) {
+					auto param_id = info.indices[i].param_idx;
+					patch->set_or_add_static_knob_value(module_id, param_id, def_val.value());
+					player_.apply_static_param(
+						{.module_id = module_id, .param_id = param_id, .value = def_val.value()});
+				}
+				i++;
 			}
-			i++;
 		}
 
 		pr_info("Heap: %u\n", get_heap_size());
 		if (should_play)
 			start_audio();
+
+		return created;
 	}
 
 	void change_module(std::string_view slug, unsigned module_id, bool keep_cables_and_maps) {
@@ -328,6 +342,10 @@ struct PatchPlayLoader {
 		auto [sr_div100, bs] = current_audio_settings_.load();
 		uint32_t sr = sr_div100 * 100;
 		return {.sample_rate = sr, .block_size = bs, .max_overrun_retries = max_audio_retries};
+	}
+
+	bool is_midi_14bit_enabled() const {
+		return settings && settings->midi.midi_14bit_cc == MidiSettings::Midi14BitCC::Enabled;
 	}
 
 	void apply_suggested_audio_settings() {
@@ -484,7 +502,17 @@ private:
 			pr_warn("Open patch manager is not tracking the playing patch\n");
 		}
 
-		auto result = player_.load_patch(*next_patch);
+		Result result;
+		try {
+			result = player_.load_patch(*next_patch);
+		} catch (std::bad_alloc &) {
+			// Ran out of firmware heap partway through building the patch
+			// (copying patch data, caches, etc). Unload to discard the
+			// partially-built state.
+			pr_err("Out of memory loading patch\n");
+			player_.unload_patch();
+			result = {false, "Out of memory loading this patch"};
+		}
 		if (result.success) {
 			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());

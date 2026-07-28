@@ -39,8 +39,9 @@ struct MetaParams {
 	uint32_t jack_senses{};
 
 	// Audio -> Controls
-	uint32_t midi_poly_chans = 1;
+	uint16_t midi_poly_chans = 1;
 	uint32_t sample_rate = 48000;
+	bool midi_14bit_mode = false; // combine CC 0-31 (MSB) with CC 32-63 (LSB)
 
 	// GUI -> GUI
 	// TODO: move this to a PageManager object like gui_state

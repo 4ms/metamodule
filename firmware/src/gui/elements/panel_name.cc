@@ -89,6 +89,36 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 		name = "MIDI Ret " + id + midi_chan_str;
 	}
 
+	else if (midi_message == MidiNotePolyJack)
+		name = "MIDI Note Poly" + midi_chan_str;
+
+	else if (midi_message == MidiGatePolyJack)
+		name = "MIDI Gate Poly" + midi_chan_str;
+
+	else if (midi_message == MidiVelPolyJack)
+		name = "MIDI Vel. Poly" + midi_chan_str;
+
+	else if (midi_message == MidiAftPolyJack)
+		name = "MIDI Aft. Poly" + midi_chan_str;
+
+	else if (midi_message == MidiRetrigPolyJack)
+		name = "MIDI Ret Poly" + midi_chan_str;
+
+	else if (midi_message == MidiNotePoly5_8Jack)
+		name = "MIDI Note Poly 5-8" + midi_chan_str;
+
+	else if (midi_message == MidiGatePoly5_8Jack)
+		name = "MIDI Gate Poly 5-8" + midi_chan_str;
+
+	else if (midi_message == MidiVelPoly5_8Jack)
+		name = "MIDI Vel. Poly 5-8" + midi_chan_str;
+
+	else if (midi_message == MidiAftPoly5_8Jack)
+		name = "MIDI Aft. Poly 5-8" + midi_chan_str;
+
+	else if (midi_message == MidiRetrigPoly5_8Jack)
+		name = "MIDI Ret Poly 5-8" + midi_chan_str;
+
 	else if (midi_message >= MidiCC0 && midi_message <= MidiCC127)
 		name = "MIDI CC " + std::to_string(midi_message - MidiCC0) + midi_chan_str;
 
@@ -183,6 +213,36 @@ std::string get_panel_brief_name(const JackInput &, uint16_t panel_id) {
 		std::string id = std::to_string(panel_id + 1 - MidiMonoRetrigJack);
 		name = "Rt" + id;
 	}
+
+	else if (panel_id == MidiNotePolyJack)
+		name = "NtP";
+
+	else if (panel_id == MidiGatePolyJack)
+		name = "GtP";
+
+	else if (panel_id == MidiVelPolyJack)
+		name = "VeP";
+
+	else if (panel_id == MidiAftPolyJack)
+		name = "AfP";
+
+	else if (panel_id == MidiRetrigPolyJack)
+		name = "RtP";
+
+	else if (panel_id == MidiNotePoly5_8Jack)
+		name = "NtP8";
+
+	else if (panel_id == MidiGatePoly5_8Jack)
+		name = "GtP8";
+
+	else if (panel_id == MidiVelPoly5_8Jack)
+		name = "VeP8";
+
+	else if (panel_id == MidiAftPoly5_8Jack)
+		name = "AfP8";
+
+	else if (panel_id == MidiRetrigPoly5_8Jack)
+		name = "RtP8";
 
 	else if (panel_id >= MidiCC0 && panel_id <= MidiCC127)
 		name = "CC" + std::to_string(panel_id - MidiCC0);

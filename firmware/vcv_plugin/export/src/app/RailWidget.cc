@@ -5,7 +5,9 @@ namespace rack::app
 
 struct RailWidget::Internal {};
 
-RailWidget::RailWidget() = default;
+RailWidget::RailWidget() {
+	internal = nullptr;
+}
 
 RailWidget::~RailWidget() = default;
 

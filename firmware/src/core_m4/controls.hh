@@ -12,6 +12,7 @@
 #include "metaparams.hh"
 #include "midi/midi_message.hh"
 #include "midi_controls.hh"
+#include "midi_packet_monitor.hh"
 #include "param_block.hh"
 #include "params.hh"
 #include "sense_pin_reader.hh"
@@ -48,6 +49,7 @@ private:
 	void update_midi_connected();
 	void update_control_expander();
 	void update_rotary();
+	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
 
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
@@ -75,6 +77,8 @@ private:
 	// MIDI
 	MidiHost &_midi_host;
 	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
+	MidiPacketMonitor _tx_monitor{"TX"};
+	MidiPacketMonitor _rx_monitor{"RX"};
 	Midi::MessageParser _midi_parser;
 	EdgeStateDetector _midi_connected_raw;
 	bool _midi_connected = false;
