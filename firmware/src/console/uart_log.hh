@@ -8,8 +8,10 @@ namespace MetaModule
 {
 
 struct UartLog {
+private:
 	static inline mdrivlib::LazyUart<LogUartConfig> log_uart;
 
+public:
 	enum class Port { Uart, USB };
 
 	static constexpr size_t NumCores = 2;

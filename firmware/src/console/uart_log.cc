@@ -1,10 +1,47 @@
 #include "uart_log.hh"
+#include "conf/hsem_conf.hh"
+#include "drivers/hsem.hh"
 #include "util/term_codes.hh"
 #include <cstdarg>
 #include <cstring>
 
 namespace MetaModule
 {
+
+namespace
+{
+uint32_t core_id() {
+	// There are two separate static instances of UartLog: one in M4's memory and one in A7's memory
+	// (because this file is compiled+linked once for A7 and once for M4).
+	// The A7 instance has two cores, while the M4 instance just uses core_id() == 0
+#ifdef CORE_CA7
+	return std::min<uint32_t>(__get_MPIDR() & 0xFF, UartLog::NumCores - 1);
+#else
+	return 0;
+#endif
+}
+
+void spin_lock() {
+#ifdef CORE_CA7
+	auto cid = __get_MPIDR() & 0xFF;
+#else
+	auto cid = 2;
+#endif
+	while (mdrivlib::HWSemaphore<UartLock>::lock(cid) != mdrivlib::HWSemaphoreFlag::LockedOk)
+		;
+}
+
+void unlock() {
+#ifdef CORE_CA7
+	auto cid = __get_MPIDR() & 0xFF;
+#else
+	auto cid = 2;
+#endif
+	mdrivlib::HWSemaphore<UartLock>::unlock(cid);
+}
+
+} // namespace
+
 void UartLog::init() {
 	log_uart.init();
 }
@@ -20,20 +57,6 @@ void UartLog::log(const char *format, ...) {
 	va_end(va);
 }
 
-namespace
-{
-static uint32_t core_id() {
-	// There are two separate static instances of UartLog: one in M4's memory and one in A7's memory
-	// (because this file is compiled+linked once for A7 and once for M4).
-	// The A7 instance has two cores, while the M4 instance just uses core_id() == 0
-#ifdef CORE_CA7
-	return std::min<uint32_t>(__get_MPIDR() & 0xFF, UartLog::NumCores - 1);
-#else
-	return 0;
-#endif
-}
-} // namespace
-
 void UartLog::use_usb(ConcurrentBuffer *usb_buffer) {
 	log_usb[core_id()] = usb_buffer;
 	port[core_id()] = UartLog::Port::USB;
@@ -44,15 +67,19 @@ void UartLog::use_uart() {
 }
 
 void UartLog::puts(const char *ptr) {
+	spin_lock();
 	while (*ptr) {
 		UartLog::putchar(*ptr++);
 	}
+	unlock();
 }
 
 void UartLog::write_uart(const char *ptr, size_t len) {
+	spin_lock();
 	for (auto idx = 0u; idx < len; idx++) {
 		UartLog::putchar(*ptr++);
 	}
+	unlock();
 }
 
 //TODO: make this interrupt-safe
