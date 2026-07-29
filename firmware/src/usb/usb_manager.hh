@@ -51,6 +51,20 @@ class UsbManager {
 	uint8_t role_flips = 0;		// failed PCD<->HCD swaps since this CC attach
 	uint32_t cc_attach_tm = 0;	// when the current CC attach (AsDevice) began
 	uint32_t last_pd_tick = 0;
+
+	// CC-level Try.SRC: a partner that presents steady Rp + VBUS but neither
+	// enumerates us nor presents D+ in the data-role trials is a self-powered
+	// DRP stuck in its source role (OXI One "Device Self Powered"): it only
+	// runs its device stack after settling as a CC *sink*. Re-attach with
+	// SRC-only polling (steady Rp, never Rd): losing our Rd forces it out of
+	// Attached.SRC, its toggle meets our Rp, and it settles SNK -- the same
+	// thing it does when plugged into a computer. A real host never fires a
+	// TOGDONE in SRC polling (Rp vs Rp), so the window times out and we return
+	// to DRP polling and re-attach as its device.
+	bool try_src_active = false;
+	bool tried_src_this_attach = false;
+	uint32_t try_src_deadline = 0;
+	static constexpr uint32_t TrySrcWindowMs = 1500;
 	static constexpr uint32_t RolePhaseTimeoutMs = 2000;
 	static constexpr uint32_t PdTickMs = 50;
 	// If the partner hasn't enumerated us (nor swapped roles on its own) by
@@ -133,6 +147,8 @@ public:
 				host_fallback = false;
 				role_settled = false;
 				role_flips = 0;
+				try_src_active = false;
+				tried_src_this_attach = false;
 				role_phase_tm = HAL_GetTick();
 				cc_attach_tm = role_phase_tm;
 				// start() before enabling IRQ: clears pending host-mode GINTSTS events
@@ -140,12 +156,17 @@ public:
 				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 
 			} else if (newstate == AsHost) {
-				// If the partner is already driving VBUS (self-powered device,
-				// e.g. OXI One or a gadget rig), don't parallel our 5V onto it
-				bool partner_vbus = usbctl.read<FUSB302::Status0>().VBusOK;
-				pr_info("Starting host%s\n", partner_vbus ? " (partner sources VBUS)" : "");
+				try_src_active = false; // a Try.SRC pass (if any) succeeded
+				// As the CC source we must always provide VBUS. Do NOT skip it
+				// when the partner was backfeeding VBUS: a self-powered DRP
+				// (OXI One) turns its own source *off* the moment it settles as
+				// a sink, then abandons the attach (pulls Rd) unless VBUS
+				// appears from us within its window. Rigs that backfeed
+				// unconditionally (RPi gadget) tolerate the paralleled 5V --
+				// that was the long-standing behavior.
+				pr_info("Starting host\n");
 				state = newstate;
-				usb_host.start(!partner_vbus);
+				usb_host.start();
 				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 
 			} else if (newstate == None) {
@@ -195,6 +216,16 @@ public:
 		// VBUSOK has been seen not to fire on VBUS decay): while attached as
 		// a device, poll the link status at a low rate and run the normal
 		// interrupt handling if it shows the link down.
+		// Try.SRC window expiry: nothing settled on our Rp (partner is a real
+		// host, or gone) -- return to the configured role polling so a host
+		// can re-attach us as its device
+		if (try_src_active && state == FUSB302::Device::ConnectedState::None &&
+			(int32_t)(HAL_GetTick() - try_src_deadline) > 0) {
+			pr_info("USB: no sink settled on our Rp, resuming normal role polling\n");
+			try_src_active = false;
+			start_polling_for_role();
+		}
+
 		// While attached as sink, poll the PD engine so its timeouts advance
 		// and no RX is left sitting in the FIFO (INT_N covers the fast path)
 		if (state == FUSB302::Device::ConnectedState::AsDevice) {
@@ -450,6 +481,14 @@ private:
 					restart_cc_attach();
 					return;
 				}
+				// Partner neither enumerated us (device trial) nor presented
+				// D+ (this host trial): try the CC-level SRC role once per
+				// attach (see try_src_active)
+				if (!tried_src_this_attach) {
+					tried_src_this_attach = true;
+					start_try_src();
+					return;
+				}
 				// PCSTS (bit0) is the live electrical connect status: if it's 0
 				// here, the partner never presented a D+ pull-up at all
 				pr_info("USB: no device attached (HPRT=0x%08x), trying device data role\n",
@@ -462,6 +501,24 @@ private:
 				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 			}
 		}
+	}
+
+	// Tear down the data stacks and re-poll CC with SRC-only (steady Rp).
+	// Success shows up as a normal AsHost attach (partner's Rd settles on us);
+	// expiry is handled in process(), returning to the role-pref polling.
+	void start_try_src() {
+		pr_info("USB: partner won't enumerate us or present D+; trying SRC CC role for %u ms\n", TrySrcWindowMs);
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		if (host_fallback)
+			usb_host.stop();
+		else
+			usb_device.stop();
+		host_fallback = false;
+		role_flips = 0;
+		state = FUSB302::Device::ConnectedState::None;
+		try_src_active = true;
+		try_src_deadline = HAL_GetTick() + TrySrcWindowMs;
+		usbctl.start_src_polling();
 	}
 
 	// Give up on the current CC attach and restart toggle polling. Re-toggling
