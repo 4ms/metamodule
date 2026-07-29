@@ -48,7 +48,14 @@ class UsbManager {
 	bool host_fallback = false; // OTG core is running HCD while FUSB state is AsDevice
 	bool role_settled = false;	// enumeration succeeded in some role; stop swapping
 	uint32_t role_phase_tm = 0; // when the current PCD/HCD trial phase began
+	uint8_t role_flips = 0;		// failed PCD<->HCD swaps since this CC attach
 	static constexpr uint32_t RolePhaseTimeoutMs = 2000;
+	// After this many failed data-role swaps, give up on this CC attach and
+	// re-poll: the FUSB302 re-toggle drops our CC presentation, so the partner
+	// sees a detach and resets its own state machine. Some partners (OXI One)
+	// only present their device-mode D+ pull-up shortly after a fresh CC
+	// attach, so swapping data roles forever on a stale attach never connects.
+	static constexpr uint8_t MaxRoleFlips = 4;
 
 	// Debug: timer for dumping registers
 	// uint32_t tm;
@@ -119,6 +126,7 @@ public:
 				state = newstate;
 				host_fallback = false;
 				role_settled = false;
+				role_flips = 0;
 				role_phase_tm = HAL_GetTick();
 				// start() before enabling IRQ: clears pending host-mode GINTSTS events
 				usb_device.start();
@@ -358,9 +366,16 @@ private:
 		if (!host_fallback) {
 			if (usb_device.is_configured()) {
 				role_settled = true;
+				// Established: from here on, ride out partner VBUS/CC dips
+				// instead of tearing down the session
+				usbctl.set_link_debounce(true);
 				return;
 			}
 			if (HAL_GetTick() - role_phase_tm > RolePhaseTimeoutMs) {
+				if (++role_flips > MaxRoleFlips) {
+					restart_cc_attach();
+					return;
+				}
 				pr_info("USB: not enumerated by partner, trying host data role (not sourcing VBUS)\n");
 				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 				// Full stop + full host init: the host port only detects
@@ -375,9 +390,14 @@ private:
 		} else {
 			if (usb_host.is_device_attached()) {
 				role_settled = true;
+				usbctl.set_link_debounce(true);
 				return;
 			}
 			if (HAL_GetTick() - role_phase_tm > RolePhaseTimeoutMs) {
+				if (++role_flips > MaxRoleFlips) {
+					restart_cc_attach();
+					return;
+				}
 				// PCSTS (bit0) is the live electrical connect status: if it's 0
 				// here, the partner never presented a D+ pull-up at all
 				pr_info("USB: no device attached (HPRT=0x%08x), trying device data role\n",
@@ -390,6 +410,25 @@ private:
 				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 			}
 		}
+	}
+
+	// Give up on the current CC attach and restart toggle polling. Re-toggling
+	// drops our CC presentation, so the partner sees a Type-C detach and resets
+	// its own connection state machine -- a fresh start for partners that only
+	// offer their data role briefly after attach. Mirrors the teardown ordering
+	// of the None branch in handle_fusb_int (mask the OTG IRQ before stopping,
+	// so a pending GINTSTS source can't storm once nothing services it).
+	void restart_cc_attach() {
+		pr_info("USB: no data role settled after %u swaps, restarting CC attach\n", role_flips - 1);
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		if (host_fallback)
+			usb_host.stop();
+		else
+			usb_device.stop();
+		host_fallback = false;
+		role_flips = 0;
+		state = FUSB302::Device::ConnectedState::None;
+		start_polling_for_role();
 	}
 
 	// Start (or restart) the FUSB302 toggle polling for the current role policy.
