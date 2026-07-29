@@ -49,7 +49,13 @@ class UsbManager {
 	bool role_settled = false;	// enumeration succeeded in some role; stop swapping
 	uint32_t role_phase_tm = 0; // when the current PCD/HCD trial phase began
 	uint8_t role_flips = 0;		// failed PCD<->HCD swaps since this CC attach
+	uint32_t cc_attach_tm = 0;	// when the current CC attach (AsDevice) began
+	uint32_t last_pd_tick = 0;
 	static constexpr uint32_t RolePhaseTimeoutMs = 2000;
+	static constexpr uint32_t PdTickMs = 50;
+	// If the partner hasn't enumerated us (nor swapped roles on its own) by
+	// this long after CC attach, ask for the data-host role via PD DR_Swap
+	static constexpr uint32_t DrSwapRequestMs = 1000;
 	// After this many failed data-role swaps, give up on this CC attach and
 	// re-poll: the FUSB302 re-toggle drops our CC presentation, so the partner
 	// sees a detach and resets its own state machine. Some partners (OXI One)
@@ -128,14 +134,18 @@ public:
 				role_settled = false;
 				role_flips = 0;
 				role_phase_tm = HAL_GetTick();
+				cc_attach_tm = role_phase_tm;
 				// start() before enabling IRQ: clears pending host-mode GINTSTS events
 				usb_device.start();
 				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 
 			} else if (newstate == AsHost) {
-				pr_info("Starting host\n");
+				// If the partner is already driving VBUS (self-powered device,
+				// e.g. OXI One or a gadget rig), don't parallel our 5V onto it
+				bool partner_vbus = usbctl.read<FUSB302::Status0>().VBusOK;
+				pr_info("Starting host%s\n", partner_vbus ? " (partner sources VBUS)" : "");
 				state = newstate;
-				usb_host.start();
+				usb_host.start(!partner_vbus);
 				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 
 			} else if (newstate == None) {
@@ -185,6 +195,15 @@ public:
 		// VBUSOK has been seen not to fire on VBUS decay): while attached as
 		// a device, poll the link status at a low rate and run the normal
 		// interrupt handling if it shows the link down.
+		// While attached as sink, poll the PD engine so its timeouts advance
+		// and no RX is left sitting in the FIFO (INT_N covers the fast path)
+		if (state == FUSB302::Device::ConnectedState::AsDevice) {
+			if (HAL_GetTick() - last_pd_tick > PdTickMs) {
+				last_pd_tick = HAL_GetTick();
+				usbctl.pd.tick();
+			}
+		}
+
 		if (state == FUSB302::Device::ConnectedState::AsDevice) {
 			if (HAL_GetTick() - last_device_link_check > 250) {
 				last_device_link_check = HAL_GetTick();
@@ -371,6 +390,31 @@ private:
 				usbctl.set_link_debounce(true);
 				return;
 			}
+
+			// PD path: once the data roles are swapped (partner-initiated, or
+			// requested below), take the host role immediately
+			if (usbctl.pd.data_role_is_host()) {
+				pr_info("USB: PD data-role swap complete, taking host data role (not sourcing VBUS)\n");
+				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+				usb_device.stop();
+				usb_host.start(false);
+				host_fallback = true;
+				role_phase_tm = HAL_GetTick();
+				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+				return;
+			}
+
+			// Not enumerated a while after attach: ask the partner (if it
+			// speaks PD) to hand us the data-host role properly. No-op unless
+			// a PD contract is in place; at most one request per attach.
+			if (HAL_GetTick() - cc_attach_tm > DrSwapRequestMs)
+				usbctl.pd.request_dr_swap();
+
+			// While PD negotiation is in flight, hold off the blind data-role
+			// experiments -- mixing the two confuses PD-aware partners
+			if (usbctl.pd.busy())
+				role_phase_tm = HAL_GetTick();
+
 			if (HAL_GetTick() - role_phase_tm > RolePhaseTimeoutMs) {
 				if (++role_flips > MaxRoleFlips) {
 					restart_cc_attach();
@@ -395,6 +439,14 @@ private:
 			}
 			if (HAL_GetTick() - role_phase_tm > RolePhaseTimeoutMs) {
 				if (++role_flips > MaxRoleFlips) {
+					restart_cc_attach();
+					return;
+				}
+				// PD agreed we are the data host (DFP): flipping our data role
+				// back would contradict the contract. Re-attach from scratch
+				// instead so both sides restart coherently.
+				if (usbctl.pd.data_role_is_host()) {
+					pr_info("USB: PD-swapped host saw no device, restarting CC attach\n");
 					restart_cc_attach();
 					return;
 				}
