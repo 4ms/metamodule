@@ -85,14 +85,6 @@ public:
 		return *reinterpret_cast<volatile uint32_t *>(reinterpret_cast<uint32_t>(hhcd.Instance) + 0x440U);
 	}
 
-	// Enable our 5V source without (re)starting the host stack. Used by the
-	// manager's Try.SRC pass: a partner settling as a sink abandons the attach
-	// (pulls Rd) if VBUS doesn't appear promptly, and start()'s USBH init runs
-	// long enough to miss that window -- so VBUS goes up front, with Rp.
-	void vbus_on() {
-		src_enable.high();
-	}
-
 	void vbus_off() {
 		src_enable.low();
 		HAL_Delay(250);
