@@ -2,7 +2,6 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
 option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" ON)
-option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
 option(SUPPRESS_HIL_MESSAGES    "Suppress HIL messages" OFF)
 
 
@@ -276,11 +275,6 @@ if (CPU_TEST_ALL_MODULES)
 endif()
 if (SUPPRESS_HIL_MESSAGES)
   target_compile_definitions(main.elf PRIVATE SUPPRESS_HIL_MESSAGES=1)
-endif()
-
-if (CONSOLE_USE_USB)
-  message("USB serial device enabled for console logging")
-  target_compile_definitions(main.elf PRIVATE CONSOLE_USE_USB=1)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
