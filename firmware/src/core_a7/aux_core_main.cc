@@ -18,6 +18,7 @@
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
 #include "system/print_time.hh"
+#include "uart_log.hh"
 #include "usb/usb_status_reader.hh"
 
 using FrameBufferT =
@@ -36,13 +37,12 @@ extern "C" void aux_core_main() {
 	while (HWSemaphore<MainCoreReady>::is_locked() || HWSemaphore<M4CoreReady>::is_locked())
 		;
 
+	// This core's printf() is buffered and drained asynchronously by the M4
+	UartLog::use_buffer(A7SharedMemoryS::ptrs.console_buffer);
+
 	pr_info("A7 Core 2 starting\n");
 
 	start_module_threads();
-
-#ifdef CONSOLE_USE_USB
-	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
-#endif
 
 	UsbVideoBuffer::set_frame_buffer(SharedMemoryS::ptrs.uvc_framebuffer);
 

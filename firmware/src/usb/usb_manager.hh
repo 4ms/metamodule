@@ -303,8 +303,6 @@ public:
 				usb_device.process();
 
 			update_role_fallback();
-		} else { // None or AsHost:
-				 // usb_device.process_disconnected();
 		}
 
 		// While forced to the device role and idle (no host attached), the port

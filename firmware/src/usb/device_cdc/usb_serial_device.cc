@@ -1,4 +1,5 @@
 #include "usb_serial_device.hh"
+#include "console/console_routing.hh"
 #include "console/pr_dbg.hh"
 
 extern USBD_CDC_ItfTypeDef USBD_CDC_fops;
@@ -14,17 +15,12 @@ USBD_CDC_LineCodingTypeDef LineCoding = {
 };
 }
 
-UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice, std::array<ConcurrentBuffer *, 3> console_buffers)
+UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice,
+								 std::array<ConcurrentBuffer *, MetaModule::ConsoleBufferReader::NumBuffers> buffers)
 	: pdev{pDevice}
-	, console_buffers{console_buffers} {
+	, reader{buffers} {
 	rx_buffer.resize(256);
 	_instance = this;
-}
-
-void UsbSerialDevice::init_buffers() {
-	_instance = this;
-	for (auto i = 0u; auto const &buff : console_buffers)
-		current_read_pos[i++] = buff->current_write_pos;
 }
 
 void UsbSerialDevice::start() {
@@ -36,8 +32,6 @@ void UsbSerialDevice::start() {
 		return;
 	}
 
-	init_buffers();
-
 	USBD_RegisterClass(pdev, USBD_CDC_CLASS);
 	USBD_CDC_RegisterInterface(pdev, &USBD_CDC_fops);
 	USBD_Start(pdev);
@@ -46,6 +40,7 @@ void UsbSerialDevice::start() {
 
 void UsbSerialDevice::stop() {
 	pr_info("Stopping UsbSerialDevice\n");
+	set_console_routing(false);
 	USBD_Stop(pdev);
 	USBD_DeInit(pdev);
 }
@@ -56,75 +51,63 @@ void UsbSerialDevice::soft_stop() {
 	// hpcd->State == READY so the next USBD_Init won't re-run MspInit, which
 	// avoids toggling USBO_CLK on a live VBUS bus.
 	pr_info("Stopping UsbSerialDevice\n");
+	set_console_routing(false);
 	USBD_Stop(pdev);
 }
 
-void UsbSerialDevice::transmit_buffers(Destination dest) {
-	auto transmit = [this, dest = dest](uint8_t *ptr, int len) {
-		if (dest == Destination::USB) {
-			USBD_CDC_SetTxBuffer(pdev, ptr, len);
-
-			if (auto err = USBD_CDC_TransmitPacket(pdev) == USBD_OK) {
-				is_transmitting = true;
-				last_transmission_tm = HAL_GetTick();
-
-			} else if (err != USBD_BUSY) {
-				pr_dbg("USB CDC Transmit Error: %d\n", err);
-			}
-		}
-
-		if (dest == Destination::UART) {
-			while (len--)
-				putchar(*ptr++);
-		}
-	};
-
-	// Don't transmit if we already are transmitting
-	// But have a 100ms timeout in case of a USB error
-	if (is_transmitting) {
-		if (HAL_GetTick() - last_transmission_tm > 100) {
-			is_transmitting = false;
-			last_transmission_tm = HAL_GetTick();
-		} else
-			return;
-	}
-
-	// Scan buffers for data to transmit, and exit after first transmission
-	for (auto i = 0u; auto *buff : console_buffers) {
-		buff->use_color = use_color;
-
-		if (buff->writer_ref_count == 0) {
-			auto start_pos = current_read_pos[i];
-			unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
-			end_pos = end_pos & buff->buffer.SIZEMASK;
-
-			if (start_pos > end_pos) {
-				// Data to transmit spans the "seam" of the circular buffer,
-				// Send the first chunk
-				transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
-				current_read_pos[i] = 0;
-				return;
-
-			} else if (start_pos < end_pos) {
-				transmit(&buff->buffer.data[start_pos], end_pos - start_pos);
-				current_read_pos[i] = end_pos;
-				return;
-			}
-		}
-		i++;
+void UsbSerialDevice::set_console_routing(bool active) {
+	if (active == MetaModule::ConsoleRouting::usb_console_active)
+		return;
+	MetaModule::ConsoleRouting::usb_console_active = active;
+	if (active) {
+		// The UART drain already printed everything up to this point
+		reader.resync();
+		is_transmitting = false;
+		tx_pending = 0;
 	}
 }
 
 void UsbSerialDevice::process() {
-	transmit_buffers(Destination::USB);
+	// Only drain the console buffers while a host is enumerated and awake;
+	// otherwise the UART drain does it
+	set_console_routing(pdev->dev_state == USBD_STATE_CONFIGURED);
+
+	if (MetaModule::ConsoleRouting::usb_console_active)
+		transmit_pending();
 }
 
-void UsbSerialDevice::forward_to_uart() {
-	transmit_buffers(Destination::UART);
+void UsbSerialDevice::transmit_pending() {
+	// Don't start a transmission if one is in flight,
+	// but time out after 100ms in case of a USB error
+	if (is_transmitting) {
+		if (HAL_GetTick() - last_transmission_tm > 100)
+			is_transmitting = false;
+		else
+			return;
+	}
+
+	if (tx_pending == 0)
+		tx_pending = reader.next_chunk(tx_bounce);
+	if (tx_pending == 0)
+		return;
+
+	USBD_CDC_SetTxBuffer(pdev, tx_bounce.data(), tx_pending);
+
+	auto err = USBD_CDC_TransmitPacket(pdev);
+	if (err == USBD_OK) {
+		is_transmitting = true;
+		last_transmission_tm = HAL_GetTick();
+		tx_pending = 0; // tx_bounce stays untouched until CDC_TransmitCplt
+
+	} else if (err != USBD_BUSY) {
+		pr_dbg("USB CDC Transmit Error: %d\n", static_cast<int>(err));
+		tx_pending = 0; // unrecoverable: drop the chunk
+	}
+	// USBD_BUSY: keep tx_pending, retry next process()
 }
 
 int8_t UsbSerialDevice::CDC_Itf_Init() {
-	USBD_CDC_SetTxBuffer(_instance->pdev, _instance->console_buffers[0]->buffer.data.data(), 0);
+	USBD_CDC_SetTxBuffer(_instance->pdev, _instance->tx_bounce.data(), 0);
 	USBD_CDC_SetRxBuffer(_instance->pdev, _instance->rx_buffer.data()); // FIXME: how does the driver prevent overflow?
 	return USBD_OK;
 }
@@ -149,9 +132,9 @@ int8_t UsbSerialDevice::CDC_Itf_DeInit() {
   */
 int8_t UsbSerialDevice::CDC_Itf_Receive(uint8_t *Buf, uint32_t *Len) {
 	if (*Buf == 'c')
-		_instance->use_color = true;
+		_instance->reader.set_color(true);
 	if (*Buf == 'm')
-		_instance->use_color = false;
+		_instance->reader.set_color(false);
 
 	pr_dbg("Rx: ");
 	uint32_t len = *Len;
