@@ -174,4 +174,6 @@ void keep_coreproc() {
 	MetaModule::Gui::notify_user("", 0);
 
 	[[maybe_unused]] auto x7 = MetaModule::System::get_usb_connection_status();
+	[[maybe_unused]] auto x8 = MetaModule::System::get_usb_midi_in_jack_info(0);
+	[[maybe_unused]] auto x9 = MetaModule::System::get_usb_midi_out_jack_info(0);
 }
