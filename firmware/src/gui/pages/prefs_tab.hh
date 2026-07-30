@@ -450,13 +450,18 @@ private:
 	}
 
 	static int usb_device_mode_to_index(UsbDeviceMode mode) {
-		// "Console" is a hidden option, not user-facing
-		return mode == UsbDeviceMode::Video ? 1 : 0;
+		return mode == UsbDeviceMode::Video ? 1 : mode == UsbDeviceMode::Cdc ? 2 : 0;
 	}
 
 	UsbDeviceMode read_usb_mode_dropdown() {
-		return lv_dropdown_get_selected(usb_section.device_mode_dropdown) == 1 ? UsbDeviceMode::Video :
-																				 UsbDeviceMode::Midi;
+		switch (lv_dropdown_get_selected(usb_section.device_mode_dropdown)) {
+			case 1:
+				return UsbDeviceMode::Video;
+			case 2:
+				return UsbDeviceMode::Cdc; // "Debug"
+			default:
+				return UsbDeviceMode::Midi;
+		}
 	}
 
 	bool read_video_mirror_check() {
