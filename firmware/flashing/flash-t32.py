@@ -73,7 +73,12 @@ def main():
     # so the poll below can't see a stale value from the last boot.
     write_long(dbg, TAMP_BKP6R, 0)
     print("Resetting board (MPSYSRST)...")
-    write_long(dbg, RCC_MP_GRSTCSETR, 1)
+    try:
+        write_long(dbg, RCC_MP_GRSTCSETR, 1)
+    except Exception:
+        # TRACE32 often reports "target reset detected" on this write -- that
+        # IS the reset we asked for, so carry on to polling for the bootloader
+        pass
 
     print("Waiting for mp1-boot to be ready for an image...")
     deadline = time.time() + 20
