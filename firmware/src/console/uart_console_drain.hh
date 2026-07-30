@@ -4,6 +4,8 @@
 #include "console/console_routing.hh"
 #include "console/uart_log.hh"
 #include "drivers/hsem.hh"
+#include "drivers/rcc.hh"
+#include <cstdio>
 
 namespace MetaModule
 {
@@ -11,18 +13,19 @@ namespace MetaModule
 // Write the console buffers to the UART, as needed. Runs on the M4 in the main
 // context.
 //
-// Typing 'c' into the console enables per-core colored output; 'm' disables it
+// TX uses DMA: process() assembles a chunk into the bounce buffer and starts a
+// DMA transfer (DMA1 Stream1, DMAMUX1 request UART7_TX), and later calls just poll
+// for completion -- the M4 spends no cycles feeding the UART. If the DMA ever
+// reports a transfer error, we permanently fall back to topping up the UART TX
+// FIFO directly (still non-blocking).
 //
-// Future UART-DMA upgrade: everything up to the FIFO top-up is TX-agnostic.
-// When idle, start a DMA transfer of bounce[tx_pos..tx_len) instead of writing
-// TDR here, and poll DMA completion (or use its interrupt) instead of checking
-// TXE_TXFNF. (DMA1/2 stream + DMAMUX request for UART7_TX, mem-to-periph,
-// byte-wise; the bounce buffer is already DMA-friendly M4-local RAM.)
+// Typing 'c' into the console enables per-core colored output; 'm' disables it
 class UartConsoleDrain {
 public:
 	UartConsoleDrain(std::array<ConcurrentBuffer *, ConsoleBufferReader::NumBuffers> buffers)
 		: reader{buffers} {
 		UartLog::init();
+		init_dma();
 	}
 
 	void set_color(bool enabled) {
@@ -44,27 +47,50 @@ public:
 
 		poll_rx(uart);
 
-		while (true) {
-			if (tx_pos >= tx_len) {
-				tx_pos = 0;
-				tx_len = reader.next_chunk(bounce);
-				if (tx_len == 0)
-					return;
+		if (dma_running) {
+			if (DMA1->LISR & DMA_LISR_TEIF1) {
+				// Bus error reading the bounce buffer or writing TDR: give up
+				// on DMA for good, drain via the TX FIFO from now on
+				auto flags = DMA1->LISR;
+				clear_dma_flags();
+				dma_running = false;
+				dma_ok = false;
+				unlock();
+				// Report through the very console we drain: this lands in the
+				// M4's buffer and comes out via the FIFO fallback path below.
+				// Deliberately not pr_err(): must be visible at any log level.
+				printf("<console: UART TX DMA error (LISR=0x%08x), using FIFO fallback>\n", (unsigned)flags);
+			} else if (DMA1->LISR & DMA_LISR_TCIF1) {
+				clear_dma_flags();
+				dma_running = false;
+				tx_pos = tx_len = 0;
+				unlock();
+			} else {
+				return; // still transferring
 			}
+		}
 
-			// Don't interleave with a core doing direct (unbuffered) UART writes.
-			// Those only happen during early boot, so contention is rare: just
-			// try again on the next process() call.
-			if (mdrivlib::HWSemaphore<UartLock>::lock(M4LockId) != mdrivlib::HWSemaphoreFlag::LockedOk)
+		// Fetch the next chunk if none is pending
+		if (tx_pos >= tx_len) {
+			tx_pos = 0;
+			tx_len = reader.next_chunk(bounce);
+			if (tx_len == 0)
 				return;
+		}
 
+		// Exclude cores doing direct (unbuffered) UART writes while we transmit.
+		// Those only happen during early boot, so contention is rare: just try
+		// again on the next process() call.
+		if (mdrivlib::HWSemaphore<UartLock>::lock(M4LockId) != mdrivlib::HWSemaphoreFlag::LockedOk)
+			return;
+
+		if (dma_ok) {
+			start_dma(&bounce[tx_pos], tx_len - tx_pos);
+			// hold the lock until the transfer completes
+		} else {
 			while (tx_pos < tx_len && (uart->ISR & USART_ISR_TXE_TXFNF))
 				uart->TDR = bounce[tx_pos++];
-
-			mdrivlib::HWSemaphore<UartLock>::unlock(M4LockId);
-
-			if (tx_pos < tx_len)
-				return; // TX FIFO full: continue on the next call
+			unlock();
 		}
 	}
 
@@ -82,6 +108,54 @@ private:
 		}
 	}
 
+	void init_dma() {
+		mdrivlib::core_m4::RCC_Enable::DMA1_::set();
+		mdrivlib::core_m4::RCC_Enable::DMAMUX_::set();
+
+		// DMAMUX1 channels 0..7 feed DMA1 streams 0..7
+		DMAMUX1_Channel1->CCR = DMA_REQUEST_UART7_TX;
+
+		DMA1_Stream1->CR = 0;
+		while (DMA1_Stream1->CR & DMA_SxCR_EN)
+			;
+		clear_dma_flags();
+
+		DMA1_Stream1->PAR = reinterpret_cast<uint32_t>(&UartLog::uart_regs()->TDR);
+		// Byte-wise, memory-increment, memory-to-peripheral, direct mode
+		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0;
+		DMA1_Stream1->FCR = 0;
+
+		// UART7 raises a DMA request whenever its TX FIFO has room. Harmless
+		// for direct (CPU putchar) writes while the stream is disabled.
+		UartLog::uart_regs()->CR3 |= USART_CR3_DMAT;
+	}
+
+	void start_dma(const uint8_t *ptr, size_t len) {
+		DMA1_Stream1->M0AR = dma_address(ptr);
+		DMA1_Stream1->NDTR = len;
+		clear_dma_flags();
+		DMA1_Stream1->CR |= DMA_SxCR_EN;
+		dma_running = true;
+	}
+
+	static void clear_dma_flags() {
+		DMA1->LIFCR = DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
+	}
+
+	// The M4 sees MCU SRAM (code/stack, where this object lives) at the
+	// 0x10000000 alias, but the other bus masters -- including DMA1 -- address
+	// the same RAM at 0x30000000. Translate for the DMA.
+	static uint32_t dma_address(const void *p) {
+		auto addr = reinterpret_cast<uint32_t>(p);
+		if (addr >= 0x1000'0000 && addr < 0x1006'0000)
+			return addr + 0x2000'0000;
+		return addr;
+	}
+
+	static void unlock() {
+		mdrivlib::HWSemaphore<UartLock>::unlock(M4LockId);
+	}
+
 	static constexpr uint32_t M4LockId = 2; // same process id UartLog's direct writes use on the M4
 
 	ConsoleBufferReader reader;
@@ -89,6 +163,8 @@ private:
 	size_t tx_pos = 0;
 	size_t tx_len = 0;
 	bool usb_was_active = false;
+	bool dma_running = false;
+	bool dma_ok = true;
 };
 
 } // namespace MetaModule
