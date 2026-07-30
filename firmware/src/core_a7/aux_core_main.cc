@@ -1,6 +1,8 @@
 #include "aux_core_player.hh"
 #include "conf/hsem_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_a7/device_settings_proxy.hh"
+#include "core_intercom/shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
@@ -16,6 +18,7 @@
 #include "load_test/test_manager.hh"
 #include "ramdisk_ops.hh"
 #include "system/print_time.hh"
+#include "usb/usb_status_reader.hh"
 
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
@@ -41,6 +44,12 @@ extern "C" void aux_core_main() {
 	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
 #endif
 
+	UsbVideoBuffer::set_frame_buffer(SharedMemoryS::ptrs.uvc_framebuffer);
+
+	// Point the A7-side USB status reader at the M4's published block, so the
+	// Info page and plugin SDK can read the attached device's details.
+	usb_status_block = SharedMemoryS::ptrs.usb_connection_status;
+
 	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 
 	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};
@@ -56,6 +65,20 @@ extern "C" void aux_core_main() {
 		  *A7SharedMemoryS::ptrs.patch_mod_queue,
 		  plugin_manager,
 		  ramdisk};
+	auto usb_role_mode = ui.get_settings().usb_role_mode;
+	if (usb_role_mode != UsbRoleMode::Auto) {
+		while (!DeviceSettingsProxy::send_role_mode(usb_role_mode))
+			;
+	}
+
+	auto usb_device_mode = ui.get_settings().usb_device_mode;
+	if (usb_device_mode != UsbDeviceMode::Cdc) {
+		while (!DeviceSettingsProxy::send_device_mode(usb_device_mode))
+			;
+	}
+	UsbVideoBuffer::set_mirroring(ui.get_settings().video.mirror);
+	UsbVideoBuffer::enable(usb_device_mode == UsbDeviceMode::Video);
+
 	ui.update_screen();
 	ui.update_page();
 

@@ -4,6 +4,7 @@
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
+#include "dynload/code_buffer.hh"
 #include "elf_process/elf_file.hh"
 #include "elf_process/elf_relocator.hh"
 #include "exidx_registry.hh"
@@ -24,7 +25,7 @@ namespace MetaModule
 struct DynLoader {
 	static inline bool kept_syms = false;
 
-	DynLoader(std::span<uint8_t> elf_file_data, std::vector<uint8_t> &code_buffer)
+	DynLoader(std::span<uint8_t> elf_file_data, CodeBuffer &code_buffer)
 		: elf{elf_file_data}
 		, codeblock{code_buffer} {
 
@@ -121,6 +122,22 @@ private:
 
 		for (auto &seg : elf.segments) {
 			if (seg.is_loadable()) {
+				// The image is placed at codeblock.data() + vaddr, so objects are
+				// only correctly aligned if the buffer's alignment covers the
+				// segment's p_align. Load anyway, but leave a trail in the logs:
+				// a plugin that later crashes on an alignment fault was warned
+				// about here.
+				if (seg.align() > CodeBufferAlignment) {
+					pr_err("Plugin ELF segment requires align 0x%x but code buffer is aligned to 0x%x: "
+						   "NEON or other over-aligned objects in the plugin may crash\n",
+						   seg.align(),
+						   CodeBufferAlignment);
+				} else if (seg.align() < CodeBufferAlignment) {
+					pr_info("Plugin ELF segment align only requires 0x%x but code buffer provides 0x%x\n",
+							seg.align(),
+							CodeBufferAlignment);
+				}
+
 				std::ranges::copy(seg, std::next(codeblock.begin(), seg.address()));
 
 				pr_info("Loading segment with file offset 0x%x - 0x%x to %p - %p\n",
@@ -223,7 +240,7 @@ private:
 
 private:
 	ElfFile::Elf elf;
-	std::vector<uint8_t> &codeblock;
+	CodeBuffer &codeblock;
 
 	static std::vector<ElfFile::HostSymbol> hostsyms;
 };

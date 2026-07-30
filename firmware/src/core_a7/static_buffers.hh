@@ -1,11 +1,13 @@
 #pragma once
 #include "concurrent_buffer.hh"
 #include "conf/ramdisk_conf.hh"
+#include "core_intercom/intercore_devicesettings_message.hh"
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "sync_params.hh"
+#include "usb/usb_connection_status_block.hh"
 #include <array>
 
 namespace MetaModule
@@ -31,6 +33,13 @@ extern RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 extern ConcurrentBuffer console_a7_0_buff;
 extern ConcurrentBuffer console_a7_1_buff;
 extern ConcurrentBuffer console_m4_buff;
+#ifdef USE_UVC_FORMAT_BGR3
+extern std::array<uint8_t, 320 * 240 * 3> uvc_shadow_framebuffer;
+#else
+extern std::array<uint8_t, 320 * 240 * 2> uvc_shadow_framebuffer;
+#endif
+extern DeviceSettingsMessage icc_device_settings_message;
+extern UsbConnectionStatusBlock usb_connection_status;
 
 void init();
 

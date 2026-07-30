@@ -14,6 +14,7 @@ enum SemaphoreLocks {
 	SharedI2CLock,
 	InvalidateICache,
 	RunningPatchTests,
+	UartLock,
 };
 
 } // namespace MetaModule

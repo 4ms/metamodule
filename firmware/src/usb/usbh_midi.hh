@@ -22,6 +22,7 @@
 #include "drivers/callable.hh"
 #include "usb_host_helper.hh"
 #include "usbh_core.h"
+#include "usbh_midi_jacks.hh"
 #include <span>
 
 
@@ -140,6 +141,9 @@ struct MidiStreamingHandle {
 	MidiStreamTxCallbackType tx_callback = _default_tx_cb;
 
 	uint8_t rx_buffer[MidiStreamingBufferSize];
+
+	// In/out jack ids and names, collected during the class-request phase.
+	MidiJackCollection jacks;
 };
 
 USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost);

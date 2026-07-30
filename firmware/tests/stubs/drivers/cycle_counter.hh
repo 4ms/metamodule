@@ -17,6 +17,13 @@ public:
 	void end_measurement() {
 	}
 
+	void start_simple_measurement() {
+	}
+
+	uint32_t stop_simple_measurement() {
+		return 1;
+	}
+
 	uint32_t get_last_measurement_raw() {
 		return 1;
 	}

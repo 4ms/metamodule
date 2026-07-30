@@ -5,6 +5,7 @@
 #include "hsem_handler.hh"
 #include "midi_controls.hh"
 #include "patch/midi_def.hh"
+#include "usb/usb_manager.hh"
 #include "util/countzip.hh"
 
 namespace MetaModule
@@ -55,6 +56,8 @@ void Controls::update_params() {
 
 		cur_metaparams->midi_connected = _midi_connected;
 
+		cur_metaparams->usb_connection = _usb.get_connection_status();
+
 		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
 
 		update_control_expander();
@@ -98,7 +101,7 @@ void Controls::update_rotary() {
 }
 
 void Controls::update_midi_connected() {
-	_midi_connected_raw.update(_midi_host.is_connected());
+	_midi_connected_raw.update(_midi_host.is_connected() || _midi_device.is_connected());
 
 	if (_midi_connected_raw.went_low()) {
 		_midi_parser.start_all_notes_off_sequence();
@@ -133,6 +136,8 @@ void Controls::update_control_expander() {
 
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected.
+	// Copy the slot once: the A7 rewrites it every audio block, so reading it
+	// again later in this function can pick up a different (or empty) message.
 	if (MidiMessage out_msg = cur_params->raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
 		if (_midi_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
@@ -140,7 +145,13 @@ void Controls::parse_midi() {
 			_tx_monitor.log((uint32_t(bytes[0]) << 24) | (uint32_t(bytes[1]) << 16) | (uint32_t(bytes[2]) << 8) |
 							uint32_t(bytes[3]));
 
-			if (!_midi_host.transmit(bytes))
+			bool ok = false;
+			if (_midi_host.is_connected())
+				ok = _midi_host.transmit(bytes);
+			else if (_midi_device.is_connected())
+				ok = _midi_device.transmit(bytes);
+
+			if (!ok)
 				_tx_monitor.transport_drops++;
 		}
 	}
@@ -200,6 +211,8 @@ void Controls::start() {
 		route_usb_midi_rx(rxbuffer);
 		_midi_host.receive();
 	});
+
+	_midi_device.set_rx_callback([this](std::span<uint8_t> rxbuffer) { route_usb_midi_rx(rxbuffer); });
 }
 
 void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
@@ -228,8 +241,13 @@ void Controls::set_samplerate(unsigned sample_rate) {
 	}
 }
 
-Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
+				   MidiHost &midi_host,
+				   UsbMidiDevice &midi_device,
+				   UsbManager &usb)
 	: _midi_host{midi_host}
+	, _midi_device{midi_device}
+	, _usb{usb}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {

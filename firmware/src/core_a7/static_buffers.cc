@@ -1,10 +1,12 @@
 #include "conf/ramdisk_conf.hh"
 #include "console/concurrent_buffer.hh"
+#include "core_intercom/intercore_devicesettings_message.hh"
 #include "core_intercom/intercore_message.hh"
 #include "core_intercom/intercore_modulefs_message.hh"
 #include "param_block.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "sync_params.hh"
+#include "usb/usb_connection_status_block.hh"
 #include <array>
 
 namespace MetaModule
@@ -40,6 +42,18 @@ __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSiz
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff{};
 __attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff{};
+
+// Shadow framebuffer for UVC video streaming, accessible from both A7 and M4.
+#ifdef USE_UVC_FORMAT_BGR3
+__attribute__((section(".ddma"))) alignas(64) std::array<uint8_t, 320 * 240 * 3> uvc_shadow_framebuffer{};
+#else
+__attribute__((section(".ddma"))) alignas(64) std::array<uint8_t, 320 * 240 * 2> uvc_shadow_framebuffer{};
+#endif
+
+__attribute__((section(".ddma"))) DeviceSettingsMessage icc_device_settings_message;
+
+// Cross-core USB connection status: written by the M4, read by the A7 GUI/SDK.
+__attribute__((section(".ddma"))) UsbConnectionStatusBlock usb_connection_status;
 
 void init() {
 	for (auto &block : param_blocks) {

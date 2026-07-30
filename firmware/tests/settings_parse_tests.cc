@@ -79,6 +79,9 @@ TEST_CASE("Parse settings file") {
   notifications:
     amount: Fewer
     animation: 0
+  video:
+    enabled: 1
+    mirror: 1
 )";
 	// clang-format on
 
@@ -148,6 +151,11 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::Fewer);
 	CHECK(settings.notifications.animation == false);
+
+	CHECK(settings.video.mirror == true);
+
+	// No usb_device_mode key -> defaults to MIDI
+	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::Midi);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -298,6 +306,76 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::All);
 	CHECK(settings.notifications.animation == true);
+
+	CHECK(settings.video.mirror == false);
+
+	// No usb_device_mode -> defaults to MIDI
+	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::Midi);
+
+	// No usb_role_mode -> defaults to Auto
+	CHECK(settings.usb_role_mode == MetaModule::UsbRoleMode::Auto);
+}
+
+TEST_CASE("Parse usb_role_mode") {
+	using enum MetaModule::UsbRoleMode;
+
+	auto parse_role = [](std::string const &role_yaml) {
+		MetaModule::UserSettings settings;
+		std::string yaml = "Settings:\n  " + role_yaml + "\n";
+		MetaModule::Settings::parse(yaml, &settings);
+		return settings.usb_role_mode;
+	};
+
+	CHECK(parse_role("usb_role_mode: Auto") == Auto);
+	CHECK(parse_role("usb_role_mode: ForceHost") == ForceHost);
+	CHECK(parse_role("usb_role_mode: ForceDevice") == ForceDevice);
+	CHECK(parse_role("usb_role_mode: garbage") == Auto);		   // unknown -> default
+	CHECK(parse_role("notifications:\n    animation: 0") == Auto); // absent key -> default
+
+	// Round-trip through serialize -> parse
+	for (auto role : {Auto, ForceHost, ForceDevice}) {
+		MetaModule::UserSettings out;
+		out.usb_role_mode = role;
+		std::string buf;
+		buf.resize(2048);
+		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
+		buf.resize(sz);
+
+		MetaModule::UserSettings in;
+		MetaModule::Settings::parse(buf, &in);
+		CHECK(in.usb_role_mode == role);
+	}
+}
+
+TEST_CASE("Parse usb_device_mode") {
+	using enum MetaModule::UsbDeviceMode;
+
+	auto parse_mode = [](std::string const &mode_yaml) {
+		MetaModule::UserSettings settings;
+		std::string yaml = "Settings:\n  " + mode_yaml + "\n";
+		MetaModule::Settings::parse(yaml, &settings);
+		return settings.usb_device_mode;
+	};
+
+	CHECK(parse_mode("usb_device_mode: Console") == Cdc);
+	CHECK(parse_mode("usb_device_mode: Video") == Video);
+	CHECK(parse_mode("usb_device_mode: MIDI") == Midi);
+	CHECK(parse_mode("usb_device_mode: garbage") == Midi);		   // unknown -> default
+	CHECK(parse_mode("notifications:\n    animation: 0") == Midi); // absent key -> default
+
+	// Round-trip through serialize -> parse
+	for (auto mode : {Cdc, Video, Midi}) {
+		MetaModule::UserSettings out;
+		out.usb_device_mode = mode;
+		std::string buf;
+		buf.resize(2048);
+		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
+		buf.resize(sz);
+
+		MetaModule::UserSettings in;
+		MetaModule::Settings::parse(buf, &in);
+		CHECK(in.usb_device_mode == mode);
+	}
 }
 
 TEST_CASE("Serialize settings") {
@@ -439,6 +517,10 @@ TEST_CASE("Serialize settings") {
   notifications:
     amount: OnlyCritical
     animation: 0
+  video:
+    mirror: 0
+  usb_role_mode: Auto
+  usb_device_mode: MIDI
 )";
 	// clang format-on
 

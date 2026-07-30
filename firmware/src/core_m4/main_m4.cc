@@ -7,6 +7,7 @@
 #include "fs/fs_messages.hh"
 #include "fs/module_fs_message_handler.hh"
 #include "hsem_handler.hh"
+#include "usb/device_settings_messages.hh"
 #include "usb/usb_manager.hh"
 
 #include <wifi_interface.hh>
@@ -56,6 +57,8 @@ int main() {
 	if (reload_default_patches)
 		fs_messages.reload_default_patches();
 
+	DeviceSettingsMessages device_settings{SharedMemoryS::ptrs.icc_device_settings_message};
+
 	ModuleFSMessageHandler module_fs_messages{SharedMemoryS::ptrs.icc_modulefs_message_core0,
 											  SharedMemoryS::ptrs.icc_modulefs_message_core1};
 
@@ -63,7 +66,7 @@ int main() {
 	WifiInterface::start();
 
 	// Controls
-	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host()};
+	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host(), usb.get_midi_device(), usb};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
@@ -88,15 +91,37 @@ int main() {
 
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
+	// Publish the detailed USB connection status to the A7 (GUI + plugin SDK)
+	// whenever the connection changes OR the attached device's details are
+	// (re)captured. The device-info seq is needed because for a USB drive the
+	// connection enum flips at CLASS_SELECTED, before the descriptor details are
+	// captured at CLASS_ACTIVE -- so the enum alone would publish empty details.
+	UsbConnection last_published_conn = UsbConnection::None;
+	uint32_t last_published_info_seq = usb.get_device_info_seq();
+
 	while (true) {
 		controls.process();
 
 		usb.process();
 		sd.process();
 
+		auto conn = usb.get_connection_status();
+		auto info_seq = usb.get_device_info_seq();
+		if (conn != last_published_conn || info_seq != last_published_info_seq) {
+			last_published_conn = conn;
+			last_published_info_seq = info_seq;
+			SharedMemoryS::ptrs.usb_connection_status->publish(usb.get_status());
+		}
+
 		fs_messages.process();
 
 		module_fs_messages.process();
+
+		auto ds_result = device_settings.process();
+		if (ds_result.has_mode_change)
+			usb.set_device_mode(ds_result.mode);
+		if (ds_result.has_role_change)
+			usb.set_role_mode(ds_result.role);
 
 		WifiInterface::run();
 	}

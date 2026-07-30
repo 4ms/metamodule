@@ -65,6 +65,9 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost)
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
 
+	// Fresh connection: clear any jack info collected for a previous device.
+	MSHandle->jacks.reset();
+
 	// Look for an optional Audio Control interface
 	interface = USBH_FindInterface(phost, AudioClassCode, AudioControlSubclassCode, AnyProtocol);
 	if ((interface == NoValidInterfaceFound) || (interface >= USBH_MAX_NUM_INTERFACES)) {
@@ -143,6 +146,21 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceDeInit(USBH_HandleTypeDef *phost)
  */
 USBH_StatusTypeDef USBH_MIDI_ClassRequest(USBH_HandleTypeDef *phost)
 {
+	USBHostHelper host{phost};
+	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
+	if (!MSHandle)
+		return USBH_FAIL;
+
+	// Collect the device's MIDI jack ids and names before going active. This runs
+	// in the class-request phase -- the control pipe is free, no bulk transfers
+	// have started -- and is polled: it issues the GET_DESCRIPTOR(STRING) requests
+	// one at a time across successive calls, returning USBH_BUSY until finished.
+	if (!MSHandle->jacks.parsed)
+		parse_midi_jacks(phost, &MSHandle->jacks);
+
+	if (collect_midi_jack_names(phost, &MSHandle->jacks) == USBH_BUSY)
+		return USBH_BUSY;
+
 	if (phost->pUser)
 		phost->pUser(phost, HOST_USER_CLASS_ACTIVE);
 

@@ -24,17 +24,12 @@ struct AudioStreamMidi {
 			sync_params.midi_events.put(event);
 		}
 
-		// Consume the incoming message and clear the slot before any early
-		// return: raw_msg is written back to the shared param block, and the
-		// M4 transmits whatever it finds there. Leaving the received message
-		// in place echoes all incoming MIDI back to the sender.
+		// Consume the incoming message even if MIDI is not connected
 		MidiMessage rx_msg = *raw_msg;
 		*raw_msg = MidiMessage{};
 
-		// MIDI generated while not connected goes nowhere: discard it as it's
-		// produced. Otherwise it accumulates in the router's transmitter
-		// queues (newest 128 messages) and is transmitted as a stale burst
-		// the moment MIDI is attached.
+		// Discard MIDI generated while not connected so it won't transmit
+		// on MIDI attachment
 		if (!is_connected) {
 			while (MidiRouter::pop_outgoing_message())
 				;

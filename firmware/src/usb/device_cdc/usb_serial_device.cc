@@ -21,6 +21,12 @@ UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice, std::array<Concurr
 	_instance = this;
 }
 
+void UsbSerialDevice::init_buffers() {
+	_instance = this;
+	for (auto i = 0u; auto const &buff : console_buffers)
+		current_read_pos[i++] = buff->current_write_pos;
+}
+
 void UsbSerialDevice::start() {
 	_instance = this;
 	auto init_ok = USBD_Init(pdev, &VCP_Desc, 0);
@@ -30,8 +36,7 @@ void UsbSerialDevice::start() {
 		return;
 	}
 
-	for (auto i = 0u; auto const &buff : console_buffers)
-		current_read_pos[i++] = buff->current_write_pos;
+	init_buffers();
 
 	USBD_RegisterClass(pdev, USBD_CDC_CLASS);
 	USBD_CDC_RegisterInterface(pdev, &USBD_CDC_fops);
@@ -43,6 +48,15 @@ void UsbSerialDevice::stop() {
 	pr_info("Stopping UsbSerialDevice\n");
 	USBD_Stop(pdev);
 	USBD_DeInit(pdev);
+}
+
+void UsbSerialDevice::soft_stop() {
+	// Class transition without HAL_PCD_DeInit. USBD_Stop disconnects D+ and
+	// invokes pClass->DeInit (closes endpoints); skipping USBD_DeInit keeps
+	// hpcd->State == READY so the next USBD_Init won't re-run MspInit, which
+	// avoids toggling USBO_CLK on a live VBUS bus.
+	pr_info("Stopping UsbSerialDevice\n");
+	USBD_Stop(pdev);
 }
 
 void UsbSerialDevice::transmit_buffers(Destination dest) {
@@ -64,7 +78,6 @@ void UsbSerialDevice::transmit_buffers(Destination dest) {
 				putchar(*ptr++);
 		}
 	};
-
 
 	// Don't transmit if we already are transmitting
 	// But have a 100ms timeout in case of a USB error

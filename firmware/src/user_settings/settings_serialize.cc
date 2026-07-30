@@ -133,6 +133,12 @@ static void write(ryml::NodeRef *n, MidiPCPatchLoadSettings const &s) {
 	}
 }
 
+static void write(ryml::NodeRef *n, VideoSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("mirror") << s.mirror;
+}
+
 static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {
 	*n |= ryml::MAP;
 
@@ -171,6 +177,21 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["patch_suggested_audio"] << settings.patch_suggested_audio;
 	data["button_exp_knobset"] << settings.button_exp_knobset;
 	data["notifications"] << settings.notifications;
+	data["video"] << settings.video;
+
+	{
+		using enum UsbRoleMode;
+		ryml::csubstr role_string = settings.usb_role_mode == ForceHost	 ? "ForceHost" :
+									settings.usb_role_mode == ForceDevice ? "ForceDevice" :
+																			"Auto";
+		data["usb_role_mode"] << role_string;
+	}
+
+	using enum UsbDeviceMode;
+	ryml::csubstr usb_mode_string = settings.usb_device_mode == Video ? "Video" :
+									settings.usb_device_mode == Midi	 ? "MIDI" :
+																		   "Console";
+	data["usb_device_mode"] << usb_mode_string;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();

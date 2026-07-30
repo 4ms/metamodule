@@ -111,6 +111,10 @@ public:
 		return header->p_vaddr;
 	}
 
+	uint32_t align() const {
+		return header->p_align;
+	}
+
 	uint8_t const *begin() {
 		return elf_data_start + offset();
 	}

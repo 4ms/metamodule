@@ -13,6 +13,7 @@
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
 #include "thorvg.h"
+#include "usb/usb_connection_monitor.hh"
 
 namespace MetaModule
 {
@@ -24,6 +25,7 @@ private:
 
 	NotificationQueue notify_queue;
 	PageManager page_manager;
+	UsbConnectionMonitor usb_monitor;
 	ParamsMidiState params;
 	MetaParams metaparams;
 	UserSettings settings;
@@ -176,6 +178,8 @@ private:
 		}
 
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
+
+		usb_monitor.update(metaparams.usb_connection, notify_queue);
 
 		// Experimental?
 		// button_expander_nav(metaparams);

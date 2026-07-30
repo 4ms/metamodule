@@ -52,7 +52,8 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd) {
 
 		__HAL_RCC_USBO_CLK_ENABLE();
 		__HAL_RCC_USBPHY_CLK_ENABLE();
-		HAL_PWREx_EnableUSBVoltageDetector();
+		// HAL_PWREx_EnableUSBVoltageDetector();
+		HAL_PWREx_DisableUSBVoltageDetector();
 	}
 }
 
@@ -232,7 +233,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	hpcd.Init.low_power_enable = 0;
 	hpcd.Init.lpm_enable = 0;
 	hpcd.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
-	hpcd.Init.Sof_enable = 0;
+	hpcd.Init.Sof_enable = 1;
 	hpcd.Init.speed = PCD_SPEED_HIGH;
 	hpcd.Init.vbus_sensing_enable = 1;
 

@@ -348,10 +348,7 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			}
 		}
 
-		// MIDI: consume the incoming message and write back to the shared
-		// param block (params is a discarded cached copy). The M4 transmits
-		// whatever is left in the shared slot, so skipping the write-back
-		// echoes all incoming MIDI back to the sender.
+		// MIDI: consume the incoming message and write back to the shared param block
 		MidiMessage msg = params.raw_msg;
 
 		midi.process(
@@ -467,6 +464,7 @@ uint32_t AudioStream::get_audio_errors() {
 // It's measurably faster to copy params into cacheable ram
 ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.midi_connected = param_blocks[block].metaparams.midi_connected;
+	local_params.metaparams.usb_connection = param_blocks[block].metaparams.usb_connection;
 	local_params.metaparams.jack_senses = param_blocks[block].metaparams.jack_senses;
 	local_params.metaparams.button_exp_connected = param_blocks[block].metaparams.button_exp_connected;
 	local_params.metaparams.ext_buttons_high_events = param_blocks[block].metaparams.ext_buttons_high_events;

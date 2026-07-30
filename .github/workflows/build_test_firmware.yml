@@ -13,10 +13,10 @@ on:
         required: true
         default: false
         type: boolean
-      usb_logging:
-        description: 'Enable USB serial device for logging'
-        default: false
-        type: boolean
+      # usb_logging:
+      #   description: 'Enable USB serial device for logging'
+      #   default: false
+      #   type: boolean
   push:
     branches:
       - main
@@ -41,7 +41,7 @@ jobs:
     name: "Build firmware"
     runs-on: ubuntu-24.04
     env:
-      preset: ${{ (startsWith(github.ref, 'refs/tags/firmware-debug-v') || inputs.usb_logging) && 'usb-log' || 'full' }}
+      preset: ${{ (startsWith(github.ref, 'refs/tags/firmware-debug-v')) && 'debug-log' || 'full' }}
     steps:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
@@ -72,11 +72,28 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/firmware-v') || startsWith(github.ref, 'refs/tags/firmware-debug-v')
         uses: FranzDiebold/github-env-vars-action@v2
 
+      # Only a bare firmware-vMAJOR.MINOR.PATCH tag is a full release; everything
+      # else (suffixed tags like firmware-v2.3.0-OOM04, and all firmware-debug-v
+      # tags) is marked prerelease. Done in shell because GitHub Actions
+      # expressions have no regex.
+      - name: Determine release type
+        if: startsWith(github.ref, 'refs/tags/firmware-v') || startsWith(github.ref, 'refs/tags/firmware-debug-v')
+        run: |
+          release_re='^firmware-v[0-9]+\.[0-9]+\.[0-9]+$'
+          if [[ "$GITHUB_REF_NAME" =~ $release_re ]]; then
+            echo "Tag '$GITHUB_REF_NAME' is a full release"
+            echo "is_prerelease=false" >> "$GITHUB_ENV"
+          else
+            echo "Tag '$GITHUB_REF_NAME' is a prerelease"
+            echo "is_prerelease=true" >> "$GITHUB_ENV"
+          fi
+
       - name: Release
         if: startsWith(github.ref, 'refs/tags/firmware-v') || startsWith(github.ref, 'refs/tags/firmware-debug-v')
         uses: softprops/action-gh-release@v1
         with:
           name: "Firmware Version: ${{ env.CI_REF_NAME }}"
+          prerelease: ${{ env.is_prerelease }}
           files: |
             firmware/build/metamodule*.zip
             
@@ -88,7 +105,7 @@ jobs:
       run:
         shell: msys2 {0}
     env:
-      preset: ${{ inputs.usb_logging && 'usb-log' || 'full' }}
+      preset: 'full' 
     steps:
       - name: Install windows dependencies
         uses: msys2/setup-msys2@v2

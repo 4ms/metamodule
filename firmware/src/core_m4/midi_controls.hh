@@ -2,6 +2,7 @@
 #include "midi/midi_message.hh"
 #include "params/midi_params.hh"
 #include "patch/midi_def.hh"
+#include "util/fixed_vector.hh"
 #include "util/zip.hh"
 #include <algorithm>
 #include <optional>
@@ -16,8 +17,7 @@ struct MessageParser {
 	};
 	static constexpr unsigned NumMidiChannels = 16;
 
-	std::array<std::array<Note, MaxMidiPolyphony>, NumMidiChannels> all_midi_notes;
-	std::array<std::span<Note>, NumMidiChannels> midi_notes;
+	std::array<FixedVector<Note, MaxMidiPolyphony>, NumMidiChannels> midi_notes;
 
 	std::array<size_t, NumMidiChannels> last_poly_chan;
 
@@ -28,20 +28,17 @@ struct MessageParser {
 	std::array<uint8_t, 32> cc_msb{};
 
 	MessageParser() {
-		for (auto [span, backing] : zip(midi_notes, all_midi_notes)) {
-			span = backing;
-		}
+		for (auto &notes : midi_notes)
+			notes.resize(MaxMidiPolyphony);
+
 		std::ranges::fill(last_poly_chan, MaxMidiPolyphony);
 	}
 
 	void set_poly_num(uint32_t poly_chans) {
-		poly_chans = std::clamp<uint32_t>(poly_chans, 1U, all_midi_notes.size());
+		poly_chans = std::clamp<uint32_t>(poly_chans, 1U, MaxMidiPolyphony);
 
-		for (auto [chan, backing] : zip(midi_notes, all_midi_notes)) {
-			if (poly_chans != chan.size()) {
-				chan = std::span{backing.begin(), poly_chans};
-			}
-		}
+		for (auto &notes : midi_notes)
+			notes.resize(poly_chans);
 	}
 
 	void set_14bit_mode(bool enabled) {
@@ -190,19 +187,26 @@ struct MessageParser {
 		noteoff_seq_chan = 0;
 	}
 
-	// Sends NoteOff to all poly channels, one by one, each time it's called
-	// Returns Event Type None when done, and returns nullopt if not running
+	// MIDI panic: sends one NoteOff per call, covering every MIDI note number
+	// (0..127) on every channel. The A7 clears per-note gate mappings keyed by
+	// event.note, and poly note gates keyed by event.poly_chan. (A7 ignores
+	// poly_chan values >= active poly num)
 	std::optional<Midi::Event> step_all_notes_off_sequence() {
 		if (!noteoff_seq_in_progress)
 			return std::nullopt;
 
 		if (noteoff_seq_chan < NumMidiChannels) {
-			auto event = Midi::Event{
-				.type = Midi::Event::Type::NoteOff, .midi_chan = noteoff_seq_chan, .poly_chan = noteoff_seq_cur_step};
-			midi_notes[noteoff_seq_chan][noteoff_seq_cur_step].gate = false;
+			auto event = Midi::Event{.type = Midi::Event::Type::NoteOff,
+									 .midi_chan = noteoff_seq_chan,
+									 .poly_chan = noteoff_seq_cur_step,
+									 .note = noteoff_seq_cur_step};
+
+			// Also clear our note tracker's gates
+			if (noteoff_seq_cur_step < midi_notes[noteoff_seq_chan].size())
+				midi_notes[noteoff_seq_chan][noteoff_seq_cur_step].gate = false;
 
 			noteoff_seq_cur_step++;
-			if (noteoff_seq_cur_step >= 128) {
+			if (noteoff_seq_cur_step >= NumMidiNotes) {
 				noteoff_seq_cur_step = 0;
 				noteoff_seq_chan++;
 			}
