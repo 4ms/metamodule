@@ -1,6 +1,7 @@
 #include "uart_log.hh"
 #include "conf/hsem_conf.hh"
 #include "drivers/hsem.hh"
+#include "drivers/rcc.hh"
 #include <algorithm>
 #include <array>
 #include <cstdarg>
@@ -103,15 +104,27 @@ void wait_for_space(ConcurrentBuffer *buff, WriteState &st, uint32_t len) {
 } // namespace
 
 void UartLog::init() {
-	log_uart.init();
+	uart_regs();
 }
 
 USART_TypeDef *UartLog::uart_regs() {
+#ifdef CORE_CA7
 	return log_uart.uart();
+#else
+	// Let A7 enable UART, M4 just enables the clock
+	[[maybe_unused]] static bool once = [] {
+		mdrivlib::core_m4::RCC_Enable::UART7_::set();
+		return true;
+	}();
+	return reinterpret_cast<USART_TypeDef *>(LogUartConfig.base_addr);
+#endif
 }
 
 void UartLog::putchar(char c) {
-	log_uart.putchar(c);
+	auto uart = uart_regs();
+	uart->TDR = c;
+	while ((uart->ISR & USART_ISR_TXFE) == 0)
+		;
 }
 
 void UartLog::log(const char *format, ...) {
