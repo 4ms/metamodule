@@ -104,12 +104,8 @@ int main() {
 
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
-	// Publish the detailed USB connection status to the A7 (GUI + plugin SDK)
-	// whenever the connection changes OR the attached device's details are
-	// (re)captured. The device-info seq is needed because for a USB drive the
-	// connection enum flips at CLASS_SELECTED, before the descriptor details are
-	// captured at CLASS_ACTIVE -- so the enum alone would publish empty details.
 	UsbConnection last_published_conn = UsbConnection::None;
+	// usb.get_device_info_seq() increments on disconnection and class activation
 	uint32_t last_published_info_seq = usb.get_device_info_seq();
 
 	while (true) {
