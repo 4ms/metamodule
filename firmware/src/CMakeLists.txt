@@ -146,8 +146,6 @@ add_executable(
   ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
   ${FWDIR}/src/gui/pages/tags.cc
   ${FWDIR}/src/midi/midi_router.cc
-  ${FWDIR}/src/midi/midi_input.cc
-  ${FWDIR}/src/midi/midi_output.cc
   ${FWDIR}/src/params/expanders.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
   ${FWDIR}/src/patch_play/plugin_module.cc

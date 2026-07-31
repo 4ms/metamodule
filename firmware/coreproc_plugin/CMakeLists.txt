@@ -15,6 +15,9 @@ target_sources(coreproc_plugin_export PRIVATE
 
 	gui/notification.cc
 
+	midi/midi_input.cc
+	midi/midi_output.cc
+
 	patch/patch.cc
 
 	system/usb.cc
