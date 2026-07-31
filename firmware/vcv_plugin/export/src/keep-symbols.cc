@@ -36,6 +36,9 @@
 #include <random>
 #include <unordered_map>
 
+#include "midi/midi_in.hh"
+#include "midi/midi_out.hh"
+
 #include "CoreModules/moduleFactory.hh"
 
 namespace MetaModule
@@ -120,7 +123,7 @@ void __attribute__((optimize("-O0"))) keep_math(float x) {
 }
 
 void __attribute__((optimize("-O0"))) keep_register_module() {
-	static auto addr = &MetaModule::register_module;
+	auto addr = &MetaModule::register_module;
 	printf("%p\n", addr);
 }
 
@@ -157,7 +160,7 @@ void keep_dirent() {
 	telldir(d);
 }
 
-void keep_coreproc() {
+void __attribute__((optimize("-O0"))) keep_coreproc() {
 	MetaModule::StreamResampler res{2};
 	MetaModule::BlockResampler res2{2};
 	MetaModule::StreamingWaveformDisplay disp{1, 1};
@@ -176,4 +179,6 @@ void keep_coreproc() {
 	[[maybe_unused]] auto x7 = MetaModule::System::get_usb_connection_status();
 	[[maybe_unused]] auto x8 = MetaModule::System::get_usb_midi_in_jack_info(0);
 	[[maybe_unused]] auto x9 = MetaModule::System::get_usb_midi_out_jack_info(0);
+	[[maybe_unused]] auto x10 = MetaModule::MidiInput{};
+	[[maybe_unused]] auto x11 = MetaModule::MidiOutput{};
 }
