@@ -4,6 +4,8 @@
 #include "patch_play/patch_player.hh"
 #include "stubs/test_module.hh"
 
+using MidiMessage = MetaModule::MidiMessage;
+
 // Register TestModule so patches can use slug "TestModule"
 namespace
 {

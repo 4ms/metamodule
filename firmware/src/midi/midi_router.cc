@@ -1,6 +1,6 @@
-#include "midi_router.hh"
-#include "midi_message.hh"
-#include "midi_queue.hh"
+#include "midi/midi_router.hh"
+#include "midi/midi_message.hh"
+#include "midi/midi_queue.hh"
 #include <list>
 
 namespace MetaModule
@@ -22,7 +22,7 @@ void MidiRouter::unsubscribe_rx(MidiQueue *listener) {
 
 void MidiRouter::push_incoming_message(MidiMessage msg) {
 	for (auto ob : listeners) {
-		ob->put(msg);
+		ob->data.put(msg);
 	}
 }
 
@@ -36,7 +36,7 @@ void MidiRouter::unsubscribe_tx(MidiQueue *outqueue) {
 
 std::optional<MidiMessage> MidiRouter::pop_outgoing_message() {
 	for (auto xmitter : transmitters) {
-		if (auto msg = xmitter->get()) {
+		if (auto msg = xmitter->data.get()) {
 			// return the first outgoing message found
 			return *msg;
 		}

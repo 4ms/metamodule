@@ -30,7 +30,7 @@ bool InputQueue::tryPop(rack::midi::Message *messageOut, int64_t maxFrame) {
 	if (!messageOut)
 		return false;
 
-	if (auto msg = internal->queue.get()) {
+	if (auto msg = internal->queue.data.get()) {
 		// Convert to rack::midi::Message
 		if (channel < 0 || (channel == msg->status.channel)) {
 			messageOut->bytes[0] = msg->status;
@@ -46,7 +46,7 @@ bool InputQueue::tryPop(rack::midi::Message *messageOut, int64_t maxFrame) {
 }
 
 size_t InputQueue::size() {
-	return internal->queue.count();
+	return internal->queue.data.count();
 }
 
 } // namespace rack::midi

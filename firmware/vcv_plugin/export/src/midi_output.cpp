@@ -48,7 +48,9 @@ std::vector<int> Output::getChannels() {
 }
 
 void Output::sendMessage(const Message &message) {
+	using namespace MetaModule;
 	// Convert from rack::midi::Message to MidiMessage
+
 	MidiMessage msg;
 
 	auto status = MidiStatusByte::make(message.bytes[0]);
@@ -68,7 +70,7 @@ void Output::sendMessage(const Message &message) {
 	msg.usb_hdr.cin = message.usb_code;
 	msg.usb_hdr.cable_num = message.getUsbCable();
 
-	internal->queue.put(msg);
+	internal->queue.data.put(msg);
 }
 
 } // namespace rack::midi
