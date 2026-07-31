@@ -179,6 +179,15 @@ void __attribute__((optimize("-O0"))) keep_coreproc() {
 	[[maybe_unused]] auto x7 = MetaModule::System::get_usb_connection_status();
 	[[maybe_unused]] auto x8 = MetaModule::System::get_usb_midi_in_jack_info(0);
 	[[maybe_unused]] auto x9 = MetaModule::System::get_usb_midi_out_jack_info(0);
-	[[maybe_unused]] auto x10 = MetaModule::MidiInput{};
-	[[maybe_unused]] auto x11 = MetaModule::MidiOutput{};
+	[[maybe_unused]] auto x9a = MetaModule::System::get_usb_midi_rx_cable(0);
+	[[maybe_unused]] auto x9b = MetaModule::System::get_usb_midi_tx_cable(0);
+
+	MetaModule::MidiInput midi_in;
+	MetaModule::MidiMessage msg{};
+	[[maybe_unused]] auto x10 = midi_in.pop_message();
+	[[maybe_unused]] auto x11 = midi_in.pop_message(&msg);
+
+	MetaModule::MidiOutput midi_out;
+	midi_out.push_message(msg);
+	[[maybe_unused]] auto x12 = midi_out.is_queue_full();
 }

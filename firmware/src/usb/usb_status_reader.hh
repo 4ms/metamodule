@@ -27,4 +27,12 @@ inline UsbMidiJackInfo get_usb_midi_out_jack_snapshot(unsigned num) {
 	return usb_status_block ? usb_status_block->read_out_jack(num) : UsbMidiJackInfo{};
 }
 
+inline UsbMidiJackInfo get_usb_midi_rx_cable_snapshot(unsigned cable_num) {
+	return usb_status_block ? usb_status_block->read_rx_cable(cable_num) : UsbMidiJackInfo{};
+}
+
+inline UsbMidiJackInfo get_usb_midi_tx_cable_snapshot(unsigned cable_num) {
+	return usb_status_block ? usb_status_block->read_tx_cable(cable_num) : UsbMidiJackInfo{};
+}
+
 } // namespace MetaModule

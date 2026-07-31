@@ -29,6 +29,7 @@ TEST_SOURCES += tests/resampler_tests.cc
 TEST_SOURCES += vcv_plugin/export/src/resampler.cc
 TEST_SOURCES += tests/stubs/plugin_module.cc
 TEST_SOURCES += src/params/expanders.cc
+TEST_SOURCES += src/usb/midi_jack_parse.cc
 TEST_SOURCES += src/gui/elements/element_name.cc
 TEST_SOURCES += src/gui/elements/panel_name.cc
 TEST_SOURCES += coreproc_plugin/dsp/stream_resampler.cc

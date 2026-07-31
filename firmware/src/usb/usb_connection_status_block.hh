@@ -66,6 +66,36 @@ struct UsbConnectionStatusBlock {
 			return {};
 		return read_field([num](UsbDeviceState const &d) { return d.midi_out_jacks[num]; });
 	}
+
+	// The jack serving an rx cable (device -> MetaModule), i.e. an Embedded MIDI
+	// OUT jack. Returns a default (valid == false) entry if there's no such cable.
+	UsbMidiJackInfo read_rx_cable(unsigned cable_num) const {
+		if (cable_num >= System::MaxMidiCables)
+			return {};
+		return read_field([cable_num](UsbDeviceState const &d) -> UsbMidiJackInfo {
+			if (cable_num >= d.status.num_midi_rx_cables)
+				return {};
+			auto idx = d.rx_cable_out_jack_idx[cable_num];
+			if (idx >= System::MaxMidiJacks)
+				return {};
+			return d.midi_out_jacks[idx];
+		});
+	}
+
+	// The jack serving a tx cable (MetaModule -> device), i.e. an Embedded MIDI
+	// IN jack. Returns a default (valid == false) entry if there's no such cable.
+	UsbMidiJackInfo read_tx_cable(unsigned cable_num) const {
+		if (cable_num >= System::MaxMidiCables)
+			return {};
+		return read_field([cable_num](UsbDeviceState const &d) -> UsbMidiJackInfo {
+			if (cable_num >= d.status.num_midi_tx_cables)
+				return {};
+			auto idx = d.tx_cable_in_jack_idx[cable_num];
+			if (idx >= System::MaxMidiJacks)
+				return {};
+			return d.midi_in_jacks[idx];
+		});
+	}
 };
 
 } // namespace MetaModule
