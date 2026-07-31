@@ -103,6 +103,20 @@ public:
 		USBH_DeInit(&usbhost); //sets hhcd to NULL?
 	}
 
+	// Debug aid: snapshot the USBH library state machine (used by the
+	// USB_ATTACH_CYCLE_TEST harness on a failed attach)
+	void print_state_debug() {
+		printf("[usbh] gState=%d Enum=%d Req=%d Ctl.state=%d Ctl.err=%u Timeout=%u PortEnabled=%u RstCnt=%u\n",
+			   (int)usbhost.gState,
+			   (int)usbhost.EnumState,
+			   (int)usbhost.RequestState,
+			   (int)usbhost.Control.state,
+			   (unsigned)usbhost.Control.errorcount,
+			   (unsigned)usbhost.Timeout,
+			   (unsigned)usbhost.device.PortEnabled,
+			   (unsigned)usbhost.device.RstCnt);
+	}
+
 	void process() {
 		USBH_Process(&usbhost);
 		midi_host.process();
