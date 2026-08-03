@@ -15,6 +15,10 @@ inline UsbConnectionStatus get_usb_connection_status_snapshot() {
 	return usb_status_block ? usb_status_block->read_status() : UsbConnectionStatus{};
 }
 
+inline UsbDeviceName get_usb_device_name_snapshot() {
+	return usb_status_block ? usb_status_block->read_name() : UsbDeviceName{};
+}
+
 inline UsbDeviceState get_usb_device_state_snapshot() {
 	return usb_status_block ? usb_status_block->read() : UsbDeviceState{};
 }
@@ -27,12 +31,12 @@ inline UsbMidiJackInfo get_usb_midi_out_jack_snapshot(unsigned num) {
 	return usb_status_block ? usb_status_block->read_out_jack(num) : UsbMidiJackInfo{};
 }
 
-inline UsbMidiJackInfo get_usb_midi_rx_cable_snapshot(unsigned cable_num) {
-	return usb_status_block ? usb_status_block->read_rx_cable(cable_num) : UsbMidiJackInfo{};
+inline UsbMidiCableInfo get_usb_midi_rx_cable_snapshot(unsigned cable_num) {
+	return usb_status_block ? usb_status_block->read_rx_cable(cable_num) : UsbMidiCableInfo{};
 }
 
-inline UsbMidiJackInfo get_usb_midi_tx_cable_snapshot(unsigned cable_num) {
-	return usb_status_block ? usb_status_block->read_tx_cable(cable_num) : UsbMidiJackInfo{};
+inline UsbMidiCableInfo get_usb_midi_tx_cable_snapshot(unsigned cable_num) {
+	return usb_status_block ? usb_status_block->read_tx_cable(cable_num) : UsbMidiCableInfo{};
 }
 
 } // namespace MetaModule

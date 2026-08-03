@@ -165,8 +165,8 @@ public:
 				connected_device = {};
 				connected_device.status.vid = phost->device.DevDesc.idVendor;
 				connected_device.status.pid = phost->device.DevDesc.idProduct;
-				connected_device.status.manufacturer.copy((const char *)phost->device.Manufacturer);
-				connected_device.status.product.copy((const char *)phost->device.Product);
+				connected_device.device_name.manufacturer.copy((const char *)phost->device.Manufacturer);
+				connected_device.device_name.product.copy((const char *)phost->device.Product);
 
 				// For a MIDI device, the jack ids/names were collected during the
 				// class-request phase (just before this callback fired). Copy them

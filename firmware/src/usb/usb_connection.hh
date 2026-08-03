@@ -8,7 +8,9 @@ namespace MetaModule
 
 using UsbConnection = System::UsbConnectionType;
 using UsbConnectionStatus = System::UsbConnectionStatus;
+using UsbDeviceName = System::UsbDeviceName;
 using UsbMidiJackInfo = System::UsbMidiJackInfo;
+using UsbMidiCableInfo = System::UsbMidiCableInfo;
 
 // Marks a cable slot that has no jack in the snapshot (the device associated a
 // jack id we didn't store, or the cable number is past the device's count).
@@ -28,6 +30,7 @@ constexpr CableJackMap empty_cable_map() {
 // Full device state held in shared memory.
 struct UsbDeviceState {
 	UsbConnectionStatus status;
+	UsbDeviceName device_name;
 	UsbMidiJackInfo midi_in_jacks[System::MaxMidiJacks];
 	UsbMidiJackInfo midi_out_jacks[System::MaxMidiJacks];
 

@@ -53,6 +53,11 @@ struct UsbConnectionStatusBlock {
 		return read_field([](UsbDeviceState const &d) { return d.status; });
 	}
 
+	// Name only
+	UsbDeviceName read_name() const {
+		return read_field([](UsbDeviceState const &d) { return d.device_name; });
+	}
+
 	// A single jack. Out-of-range returns a default (valid == false) entry.
 	UsbMidiJackInfo read_in_jack(unsigned num) const {
 		if (num >= System::MaxMidiJacks)
@@ -69,31 +74,40 @@ struct UsbConnectionStatusBlock {
 
 	// The jack serving an rx cable (device -> MetaModule), i.e. an Embedded MIDI
 	// OUT jack. Returns a default (valid == false) entry if there's no such cable.
-	UsbMidiJackInfo read_rx_cable(unsigned cable_num) const {
+	UsbMidiCableInfo read_rx_cable(unsigned cable_num) const {
 		if (cable_num >= System::MaxMidiCables)
 			return {};
-		return read_field([cable_num](UsbDeviceState const &d) -> UsbMidiJackInfo {
+
+		return read_field([cable_num](UsbDeviceState const &d) -> UsbMidiCableInfo {
 			if (cable_num >= d.status.num_midi_rx_cables)
 				return {};
 			auto idx = d.rx_cable_out_jack_idx[cable_num];
 			if (idx >= System::MaxMidiJacks)
 				return {};
-			return d.midi_out_jacks[idx];
+			if (!d.midi_out_jacks[idx].valid)
+				return {};
+			// Report the cable that was asked for, not the jack's own
+			// cable_num: a device may associate one jack with several cables,
+			// and the jack can only remember the last of them.
+			return {d.midi_out_jacks[idx].name, uint8_t(cable_num), true};
 		});
 	}
 
 	// The jack serving a tx cable (MetaModule -> device), i.e. an Embedded MIDI
 	// IN jack. Returns a default (valid == false) entry if there's no such cable.
-	UsbMidiJackInfo read_tx_cable(unsigned cable_num) const {
+	UsbMidiCableInfo read_tx_cable(unsigned cable_num) const {
 		if (cable_num >= System::MaxMidiCables)
 			return {};
-		return read_field([cable_num](UsbDeviceState const &d) -> UsbMidiJackInfo {
+		return read_field([cable_num](UsbDeviceState const &d) -> UsbMidiCableInfo {
 			if (cable_num >= d.status.num_midi_tx_cables)
 				return {};
 			auto idx = d.tx_cable_in_jack_idx[cable_num];
 			if (idx >= System::MaxMidiJacks)
 				return {};
-			return d.midi_in_jacks[idx];
+			if (!d.midi_in_jacks[idx].valid)
+				return {};
+			// See read_rx_cable(): the number comes from the lookup, not the jack.
+			return {d.midi_in_jacks[idx].name, uint8_t(cable_num), true};
 		});
 	}
 };
