@@ -47,6 +47,8 @@ add_custom_target(
   new-api-sym-list
   COMMAND flashing/dump_syms.py
           ${SYMBOLS_BINFILE_DIRS}
+          --keep-list ${CMAKE_CURRENT_LIST_DIR}/flashing/api-keep-list.txt
+          --elf $<TARGET_FILE:main.elf>
           --text-out ${API_SYMBOL_NAMES_FILE}
 		  #-v
   DEPENDS main.elf

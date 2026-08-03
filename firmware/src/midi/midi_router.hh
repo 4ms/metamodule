@@ -1,6 +1,6 @@
 #pragma once
-#include "midi_message.hh"
-#include "midi_queue.hh"
+#include "midi/midi_message.hh"
+#include "midi/midi_queue.hh"
 #include <optional>
 
 namespace MetaModule

@@ -1,7 +1,7 @@
 #pragma once
-#include "midi_message.hh"
-#include "midi_queue.hh"
-#include "midi_router.hh"
+#include "midi/midi_message.hh"
+#include "midi/midi_queue.hh"
+#include "midi/midi_router.hh"
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -60,7 +60,7 @@ public:
 			cc_msg.data.byte[0] = cc_num;
 			cc_msg.data.byte[1] = cc_value;
 
-			midi_out_queue.put(cc_msg);
+			midi_out_queue.data.put(cc_msg);
 
 			// Update stored value
 			cc_val = cc_value;
@@ -80,13 +80,13 @@ public:
 				note_msg.status = MidiStatusByte{midi_chan, MidiCommand::NoteOn};
 				note_msg.data.byte[0] = note_num;
 				note_msg.data.byte[1] = 127;
-				midi_out_queue.put(note_msg);
+				midi_out_queue.data.put(note_msg);
 			} else {
 				MidiMessage note_msg;
 				note_msg.status = MidiStatusByte{midi_chan, MidiCommand::NoteOff};
 				note_msg.data.byte[0] = note_num;
 				note_msg.data.byte[1] = 0;
-				midi_out_queue.put(note_msg);
+				midi_out_queue.data.put(note_msg);
 			}
 
 			// Update stored value
@@ -112,7 +112,7 @@ public:
 			pitchwheel_msg.data.byte[0] = pitchwheel_value & 0x7F;
 			pitchwheel_msg.data.byte[1] = (pitchwheel_value >> 7) & 0x7F;
 
-			midi_out_queue.put(pitchwheel_msg);
+			midi_out_queue.data.put(pitchwheel_msg);
 
 			// Update stored value
 			pitch_val = pitchwheel_value;

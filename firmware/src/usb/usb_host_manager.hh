@@ -92,6 +92,12 @@ public:
 
 	void stop() {
 		HAL_Delay(100);
+		// If a class is still marked connected, the USBH state machine never got
+		// to deliver HOST_USER_DISCONNECTION (a FUSB-initiated teardown can win
+		// the race against USBH_Process seeing is_disconnected). Deliver it here
+		// so the class hosts and the published device info don't go stale.
+		if (connected_classcode != 0xFF)
+			usbh_state_change_callback(&usbhost, HOST_USER_DISCONNECTION);
 		USBH_Stop(&usbhost);
 		usbhost.pData = nullptr;
 		USBH_DeInit(&usbhost); //sets hhcd to NULL?
@@ -159,8 +165,8 @@ public:
 				connected_device = {};
 				connected_device.status.vid = phost->device.DevDesc.idVendor;
 				connected_device.status.pid = phost->device.DevDesc.idProduct;
-				connected_device.status.manufacturer.copy((const char *)phost->device.Manufacturer);
-				connected_device.status.product.copy((const char *)phost->device.Product);
+				connected_device.device_name.manufacturer.copy((const char *)phost->device.Manufacturer);
+				connected_device.device_name.product.copy((const char *)phost->device.Product);
 
 				// For a MIDI device, the jack ids/names were collected during the
 				// class-request phase (just before this callback fired). Copy them
@@ -178,7 +184,7 @@ public:
 					_midihost_instance->disconnect();
 				else if (connected_classcode == USB_MSC_CLASS)
 					_mschost_instance->disconnect();
-				else
+				else if (connected_classcode != 0xFF) // 0xFF: no class was active (e.g. a bounce during attach)
 					pr_warn("Unknown disconnected class code %d\n", connected_classcode);
 				connected_classcode = 0xFF;
 				connected_device = {};

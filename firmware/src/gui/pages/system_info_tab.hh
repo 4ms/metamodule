@@ -84,7 +84,8 @@ struct InfoTab : SystemMenuTab {
 		// status and the jack table together, so take one full-state snapshot.
 		auto st = get_usb_device_state_snapshot();
 		auto const &s = st.status;
-		bool has_strings = s.manufacturer.length() > 0 || s.product.length() > 0;
+		auto const &n = st.device_name;
+		bool has_strings = n.manufacturer.length() > 0 || n.product.length() > 0;
 		if (s.vid == 0 && !has_strings) {
 			lv_hide(usb_detail_label);
 			return;
@@ -92,10 +93,10 @@ struct InfoTab : SystemMenuTab {
 
 		std::string d;
 		if (has_strings) {
-			d += s.manufacturer.c_str();
-			if (s.manufacturer.length() > 0 && s.product.length() > 0)
+			d += n.manufacturer.c_str();
+			if (n.manufacturer.length() > 0 && n.product.length() > 0)
 				d += " ";
-			d += s.product.c_str();
+			d += n.product.c_str();
 			d += "\n";
 		}
 

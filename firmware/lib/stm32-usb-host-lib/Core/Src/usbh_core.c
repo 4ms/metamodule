@@ -1321,7 +1321,15 @@ uint8_t USBH_IsPortEnabled(USBH_HandleTypeDef *phost)
 USBH_StatusTypeDef USBH_LL_Connect(USBH_HandleTypeDef *phost)
 {
   phost->device.is_connected = 1U;
-  phost->device.is_disconnected = 0U;
+  /* 4ms: an unprocessed is_disconnected must NOT be cleared here. Some devices
+     (e.g. Inotech Grid) bounce D+ (disconnect + reconnect within ~10ms) right
+     after port enable, while USBH_Process is blocked in the 100ms
+     HOST_DEV_ATTACHED delay. USBH_LL_Disconnect has already stopped the HCD
+     and freed the control pipes; if the reconnect erases the flag, the state
+     machine continues into HOST_ENUMERATION and waits forever for a SETUP on a
+     disabled port. Leaving the flag set lets HOST_DEV_DISCONNECTED run its
+     cleanup, and since is_connected is set again, HOST_IDLE immediately
+     re-attaches with a fresh port reset. */
   phost->device.is_ReEnumerated = 0U;
 
 
