@@ -34,8 +34,7 @@ struct MIDIExpander {
 	};
 
 	MIDIExpander(mdrivlib::I2CPeriph &i2c, const MIDI_expander_conf &conf)
-		: _conf{conf}
-		, _device_addr(conf.addr << 1)
+		: _device_addr(conf.addr << 1)
 		, _i2c{i2c} {
 	}
 
@@ -47,13 +46,6 @@ struct MIDIExpander {
 		auto err = _i2c.mem_read(_device_addr, Commands::ReadSize, I2C_MEMADD_SIZE_8BIT, _rx_data, HeaderSize);
 		return err == mdrivlib::I2CPeriph::I2C_NO_ERR;
 	}
-
-	// Todo:
-	// Create an EXTI interrupt to respond to chip telling us there's a pin change
-	// void start_ISR(std::function<void(void)> &&cb) {
-	// 	callback = std::move(cb);
-	// 	InterruptManager::registerISR(_conf.IRQn, _conf.pri1, _conf.pri2, [&]() { callback(); });
-	// }
 
 	void set_address(uint8_t dev_addr_unshifted) {
 		_device_addr = dev_addr_unshifted << 1;
@@ -108,7 +100,6 @@ struct MIDIExpander {
 	}
 
 private:
-	const MIDI_expander_conf &_conf;
 	uint8_t _device_addr;
 	mdrivlib::I2CPeriph &_i2c;
 	uint8_t size_0{};
