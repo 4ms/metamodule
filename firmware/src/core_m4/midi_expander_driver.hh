@@ -62,6 +62,8 @@ struct MIDIExpander {
 		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::ReadFailed;
 	}
 
+	// Only call this once read_sizes() has actually completed: the sizes are read
+	// back out of the RX buffer, and a transfer that failed leaves stale bytes there.
 	auto read_payload() {
 		using namespace mdrivlib;
 
@@ -79,7 +81,14 @@ struct MIDIExpander {
 	auto write_payload(std::span<const uint8_t> s0, std::span<const uint8_t> s1) {
 		using namespace mdrivlib;
 
-		if (s0.size() == 0 && s1.size() == 0) { return Error::None; }
+		if (s0.size() == 0 && s1.size() == 0) {
+			return Error::None;
+		}
+
+		// Fail if a bad size was given. The caller must ensure size is <=255.
+		if (s0.size() > MaxPayloadPerJack || s1.size() > MaxPayloadPerJack) {
+			return Error::WriteFailed;
+		}
 
 		const auto payload_size = s0.size() + s1.size() + HeaderSize;
 		_tx_data[0] = s0.size();
