@@ -99,6 +99,14 @@ struct MIDIExpander {
 		return {{{&_rx_data[0], size_0}, {&_rx_data[size_0], size_1}}};
 	}
 
+	// Drop whatever the last read left behind, so a failed transfer can't be
+	// collected as if it were valid MIDI.
+	void discard_payload() {
+		size_0 = 0;
+		size_1 = 0;
+		read_size = 0;
+	}
+
 private:
 	uint8_t _device_addr;
 	mdrivlib::I2CPeriph &_i2c;
