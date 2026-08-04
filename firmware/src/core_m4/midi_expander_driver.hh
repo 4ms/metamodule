@@ -2,6 +2,8 @@
 #include "drivers/i2c.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/pin.hh"
+#include <algorithm>
+#include <array>
 #include <cstdint>
 #include <span>
 #include <utility>
@@ -11,6 +13,10 @@ struct MIDI_expander_conf {
 };
 
 struct MIDIExpander {
+	static constexpr size_t MaxPayloadPerJack = 255;
+	static constexpr size_t HeaderSize = 2;
+	static constexpr size_t MaxPayload = MaxPayloadPerJack * 2;
+
 	enum Commands : uint8_t {
 		Reserved,
 		// return 2 bytes, din size, trs size
@@ -38,7 +44,7 @@ struct MIDIExpander {
 	}
 
 	bool is_present() {
-		auto err = _i2c.mem_read(_device_addr, Commands::ReadSize, I2C_MEMADD_SIZE_8BIT, _data, 2);
+		auto err = _i2c.mem_read(_device_addr, Commands::ReadSize, I2C_MEMADD_SIZE_8BIT, _rx_data, HeaderSize);
 		return err == mdrivlib::I2CPeriph::I2C_NO_ERR;
 	}
 
@@ -60,19 +66,21 @@ struct MIDIExpander {
 	// start/finish_read() can be used to split up blocking time
 	auto read_sizes() {
 		using namespace mdrivlib;
-		auto err = _i2c.mem_read_IT(_device_addr, Commands::ReadSize, I2C_MEMADD_SIZE_8BIT, _data, 2);
-		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::WriteFailed;
+		auto err = _i2c.mem_read_IT(_device_addr, Commands::ReadSize, I2C_MEMADD_SIZE_8BIT, _rx_data, HeaderSize);
+		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::ReadFailed;
 	}
 
 	auto read_payload() {
 		using namespace mdrivlib;
 
-		size_0 = _data[0];
-		size_1 = _data[1];
+		size_0 = _rx_data[0];
+		size_1 = _rx_data[1];
 		read_size = size_0 + size_1;
-		if (!read_size) { return Error::None; }
+		if (!read_size) {
+			return Error::None;
+		}
 
-		const auto err = _i2c.mem_read_IT(_device_addr, Commands::ReadData, I2C_MEMADD_SIZE_8BIT, _data, read_size);
+		const auto err = _i2c.mem_read_IT(_device_addr, Commands::ReadData, I2C_MEMADD_SIZE_8BIT, _rx_data, read_size);
 		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::ReadFailed;
 	}
 
@@ -81,20 +89,22 @@ struct MIDIExpander {
 
 		if (s0.size() == 0 && s1.size() == 0) { return Error::None; }
 
-		const auto payload_size = s0.size() + s1.size() + 2;
-		_data[0] = s0.size();
-		_data[1] = s1.size();
-		std::ranges::copy(s0, &_data[2]);
-		std::ranges::copy(s1, &_data[2 + s0.size()]);
+		const auto payload_size = s0.size() + s1.size() + HeaderSize;
+		_tx_data[0] = s0.size();
+		_tx_data[1] = s1.size();
+		std::ranges::copy(s0, &_tx_data[HeaderSize]);
+		std::ranges::copy(s1, &_tx_data[HeaderSize + s0.size()]);
 
 		const auto err =
-			_i2c.mem_write_IT(_device_addr, Commands::WriteData, I2C_MEMADD_SIZE_8BIT, _data, payload_size);
+			_i2c.mem_write_IT(_device_addr, Commands::WriteData, I2C_MEMADD_SIZE_8BIT, _tx_data, payload_size);
 
-		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::ReadFailed;
+		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::WriteFailed;
 	}
 
+	// The returned spans point into the RX buffer, which the next read overwrites:
+	// consume them before advancing the state machine.
 	std::array<std::span<const uint8_t>, 2> collect_payload() {
-		return {{{&_data[0], size_0}, {&_data[size_0], size_1}}};
+		return {{{&_rx_data[0], size_0}, {&_rx_data[size_0], size_1}}};
 	}
 
 private:
@@ -104,5 +114,9 @@ private:
 	uint8_t size_0{};
 	uint8_t size_1{};
 	uint16_t read_size{};
-	uint8_t _data[255 * 2 + 2]{};
+
+	// RX and TX get their own buffers in case we overlap pre-loading TX while RX is happening
+	// and/or copying/parsing RX while TX is happening
+	uint8_t _rx_data[MaxPayload]{};
+	uint8_t _tx_data[HeaderSize + MaxPayload]{};
 };
