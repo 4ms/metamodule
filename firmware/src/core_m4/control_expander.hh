@@ -130,7 +130,7 @@ public:
 				break;
 			}
 			case ReadPayload: {
-				const auto t = found_midi_exp.driver.read_sizes();
+				const auto t = found_midi_exp.driver.read_payload();
 				if (t != MIDIExpander::None) {
 					handle_midi_error();
 					break;
@@ -160,17 +160,23 @@ public:
 		switch (state) {
 			using enum States;
 			case DoMidi:
-				if (!auxi2c.is_ready()) { return; }
+				if (!auxi2c.is_ready()) {
+					return;
+				}
 				update_midi();
 				break;
 			case DoButtons:
-				if (!auxi2c.is_ready()) { return; }
+				if (!auxi2c.is_ready()) {
+					return;
+				}
 				update_buttons();
 				break;
 			case Pause:
 				const auto now = HAL_GetTick();
 
-				if ((now - tmr) < 10) { return; }
+				if ((now - tmr) < 10) {
+					return;
+				}
 
 				state = DoMidi;
 				break;
