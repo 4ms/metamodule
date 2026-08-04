@@ -111,6 +111,7 @@ public:
 
 				button_ex_state = ReadButtons;
 				state = States::Pause;
+				tmr = HAL_GetTick();
 				break;
 			}
 		}
@@ -144,6 +145,11 @@ public:
 				break;
 			}
 			case Write:
+				// const auto t = found_midi_exp.driver.write_payload(int s0, int s1)
+				// if (t != MIDIExpander::None) {
+				// 	handle_midi_error();
+				// 	break;
+				// }
 				midi_ex_state = ReadSize;
 				state = States::DoButtons;
 				break;
@@ -165,8 +171,6 @@ public:
 				const auto now = HAL_GetTick();
 
 				if ((now - tmr) < 10) { return; }
-
-				tmr = now;
 
 				state = DoMidi;
 				break;

@@ -76,6 +76,23 @@ struct MIDIExpander {
 		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::ReadFailed;
 	}
 
+	auto write_payload(std::span<const uint8_t> s0, std::span<const uint8_t> s1) {
+		using namespace mdrivlib;
+
+		if (s0.size() == 0 && s1.size() == 0) { return Error::None; }
+
+		const auto payload_size = s0.size() + s1.size() + 2;
+		_data[0] = s0.size();
+		_data[1] = s1.size();
+		std::ranges::copy(s0, &_data[2]);
+		std::ranges::copy(s1, &_data[2 + s0.size()]);
+
+		const auto err =
+			_i2c.mem_write_IT(_device_addr, Commands::WriteData, I2C_MEMADD_SIZE_8BIT, _data, payload_size);
+
+		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::ReadFailed;
+	}
+
 	std::array<std::span<const uint8_t>, 2> collect_payload() {
 		return {{{&_data[0], size_0}, {&_data[size_0], size_0 + size_1}}};
 	}
@@ -87,5 +104,5 @@ private:
 	uint8_t size_0{};
 	uint8_t size_1{};
 	uint16_t read_size{};
-	uint8_t _data[512]{};
+	uint8_t _data[255 * 2 + 2]{};
 };
