@@ -94,7 +94,7 @@ struct MIDIExpander {
 	}
 
 	std::array<std::span<const uint8_t>, 2> collect_payload() {
-		return {{{&_data[0], size_0}, {&_data[size_0], size_0 + size_1}}};
+		return {{{&_data[0], size_0}, {&_data[size_0], size_1}}};
 	}
 
 private:
