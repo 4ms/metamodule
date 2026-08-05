@@ -9,6 +9,7 @@
 #include "pr_dbg.hh"
 #include "stm32mp1xx_hal.h"
 #include "usbh_conf.h"
+#include "util/lockfree_fifo_spsc.hh"
 #include <atomic>
 
 namespace MetaModule
@@ -99,10 +100,6 @@ public:
 				if (prev_button_xfer_failed())
 					break;
 
-				// Last xfer had no error
-				if (cur_reading_exp > 0)
-					num_errors[cur_reading_exp - 1] = 0;
-
 				if (cur_reading_exp >= found_button_exps.size()) {
 					cur_reading_exp = 0;
 					button_ex_state = ButtonExStates::CollectReadings;
@@ -157,6 +154,10 @@ public:
 				if (prev_midi_xfer_failed())
 					break;
 
+				// The write went out, so the staged bytes can be dropped. If it
+				// had failed, they stay staged and go again next cycle.
+				midi_tx_len = {};
+
 				const auto t = midi_exp.driver.read_sizes();
 				if (t != MIDIExpander::None) {
 					pr_dbg("Error Reading size\n");
@@ -189,15 +190,30 @@ public:
 				midiexp_state = Write;
 				break;
 			}
-			case Write:
-				// const auto t = found_midi_exp.driver.write_payload(int s0, int s1)
-				// if (t != MIDIExpander::None) {
-				// 	handle_midi_error();
-				// 	break;
-				// }
+			case Write: {
+				// Only refill once the previous write was acknowledged, so a
+				// failed transfer resends the same bytes instead of losing them
+				if (midi_tx_len[0] == 0 && midi_tx_len[1] == 0) {
+					const auto space = midi_exp.driver.tx_space();
+					midi_tx_len[0] = stage_midi_tx(0, space[0]);
+					midi_tx_len[1] = stage_midi_tx(1, space[1]);
+				}
+
+				if (midi_tx_len[0] || midi_tx_len[1]) {
+					const auto t = midi_exp.driver.write_payload({midi_tx_buf[0].data(), midi_tx_len[0]},
+																 {midi_tx_buf[1].data(), midi_tx_len[1]});
+					if (t != MIDIExpander::None) {
+						pr_dbg("Error writing payload\n");
+						handle_midi_error();
+						break;
+					}
+					xfer_owner = XferOwner::Midi;
+				}
+
 				midiexp_state = ReadSize;
 				state = States::DoButtons;
 				break;
+			}
 		}
 	}
 
@@ -236,8 +252,27 @@ public:
 	std::span<const uint8_t> get_midi_din_rx() {
 		return midi_rx_payloads[1];
 	}
+
+	// Tries to queue entire packet, or else returns false
 	bool send_midi(std::span<const uint8_t> bytes, unsigned jack) {
+		if (jack >= midi_tx_queue.size())
+			return false;
+
+		auto &queue = midi_tx_queue[jack];
+
+		if (queue.num_free() < bytes.size()) {
+			midi_tx_drops++;
+			return false;
+		}
+
+		for (auto byte : bytes)
+			queue.put(byte);
+
 		return true;
+	}
+
+	bool midi_expander_connected() const {
+		return midi_exp.found;
 	}
 
 	uint32_t get_buttons() {
@@ -334,6 +369,31 @@ private:
 	uint32_t num_midi_error_retries{};
 
 	//
+	// MIDI output
+	//
+
+	static constexpr size_t MaxMidiTxPerPoll = 128;
+
+	std::array<LockFreeFifoSpsc<uint8_t, 512>, 2> midi_tx_queue;
+
+	// Staged for the current write, and held until the transfer is acknowledged
+	std::array<std::array<uint8_t, MaxMidiTxPerPoll>, 2> midi_tx_buf{};
+	std::array<uint8_t, 2> midi_tx_len{};
+
+	uint32_t midi_tx_drops = 0;
+
+	uint8_t stage_midi_tx(unsigned jack, uint8_t space) {
+		auto &queue = midi_tx_queue[jack];
+
+		const auto n = std::min({queue.num_filled(), size_t(space), MaxMidiTxPerPoll});
+
+		for (auto i = 0u; i < n; i++)
+			midi_tx_buf[jack][i] = queue.get_or_default();
+
+		return n;
+	}
+
+	//
 	// Error handling
 	//
 
@@ -344,17 +404,22 @@ private:
 		const bool failed = auxi2c.had_error();
 		auxi2c.clear_error();
 
-		if (xfer_owner == XferOwner::Midi)
+		if (xfer_owner == XferOwner::Midi) {
 			midi_xfer_error = failed;
-		else
+			if (!failed)
+				num_midi_errors = 0;
+		} else {
 			button_xfer_error = failed;
+			// cur_reading_exp has already moved past the expander that was read
+			if (!failed && cur_reading_exp > 0)
+				num_errors[cur_reading_exp - 1] = 0;
+		}
 
 		xfer_owner = XferOwner::None;
 	}
 
 	bool prev_midi_xfer_failed() {
 		if (!midi_xfer_error) {
-			num_midi_errors = 0;
 			return false;
 		}
 
@@ -421,16 +486,25 @@ private:
 		num_midi_errors++;
 		pr_dbg("ControlExpander: MIDI expander I2C error (%u)\n", num_midi_errors);
 
-		if (num_midi_errors <= 8)
+		if (num_midi_errors <= 8) {
+			// Let Button Expanders try
+			midiexp_state = MidiExStates::ReadSize;
+			state = States::DoButtons;
 			return;
+		}
 
-		// Start counting afresh, so the next reset takes another 8 errors
 		num_midi_errors = 0;
 		num_midi_error_retries++;
 
 		if (num_midi_error_retries > 10) {
 			pr_err("ControlExpander: too many errors on midi exp, disabling\n");
 			midi_exp.found = false;
+
+			// Nothing will drain these now, so drop what's queued rather than
+			// let it fill and stay full
+			for (auto &queue : midi_tx_queue)
+				queue.reset();
+			midi_tx_len = {};
 		}
 
 		reset_bus();
@@ -440,8 +514,13 @@ private:
 		num_errors[cur_reading_exp]++;
 		pr_dbg("ControlExpander %u I2C Error!\n", cur_reading_exp);
 
-		if (num_errors[cur_reading_exp] <= 8)
+		if (num_errors[cur_reading_exp] <= 8) {
+			// As above: end the cycle instead of spinning on a dead expander
+			button_ex_state = ButtonExStates::ReadButtons;
+			state = States::Pause;
+			tmr = HAL_GetTick();
 			return;
+		}
 
 		num_errors[cur_reading_exp] = 0;
 		num_error_retries[cur_reading_exp]++;

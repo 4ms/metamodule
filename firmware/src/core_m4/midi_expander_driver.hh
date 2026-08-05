@@ -18,21 +18,20 @@ struct MIDIExpander {
 	static constexpr size_t MaxPayload = MaxPayloadPerJack * 2;
 
 	enum Commands : uint8_t {
-		// return the 6-byte ID block below
 		ReadId,
-		// return 2 bytes, din size, trs size
 		ReadSize,
-		// return din size + trs size amount of data
 		ReadData,
-
 		WriteData,
 	};
+
+	// ReadSize response
+	static constexpr size_t SizeReportSize = 4;
 
 	// Expected values:
 	static constexpr size_t IdSize = 6;
 	static constexpr std::array<uint8_t, 4> IdSignature{0x04, 0x6d, 0x73, 0x00}; // "4ms\0"
 	static constexpr uint8_t IdDeviceMidiExpander = 0x02;
-	static constexpr uint8_t IdProtocolVersion = 0x01;
+	static constexpr uint8_t IdProtocolVersion = 0x02;
 
 	struct Id {
 		bool responded = false;
@@ -89,17 +88,23 @@ struct MIDIExpander {
 	// start/finish_read() can be used to split up blocking time
 	auto read_sizes() {
 		using namespace mdrivlib;
-		auto err = _i2c.mem_read_IT(_device_addr, Commands::ReadSize, I2C_MEMADD_SIZE_8BIT, _rx_data, HeaderSize);
+		auto err = _i2c.mem_read_IT(_device_addr, Commands::ReadSize, I2C_MEMADD_SIZE_8BIT, _rx_data, SizeReportSize);
 		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::ReadFailed;
 	}
 
-	// Only call this once read_sizes() has actually completed: the sizes are read
-	// back out of the RX buffer, and a transfer that failed leaves stale bytes there.
+	// How many bytes the expander will accept for each jack
+	std::array<uint8_t, 2> tx_space() const {
+		return {_tx_space_0, _tx_space_1};
+	}
+
 	auto read_payload() {
 		using namespace mdrivlib;
 
 		size_0 = _rx_data[0];
 		size_1 = _rx_data[1];
+		_tx_space_0 = _rx_data[2];
+		_tx_space_1 = _rx_data[3];
+
 		read_size = size_0 + size_1;
 		if (!read_size) {
 			return Error::None;
@@ -133,8 +138,6 @@ struct MIDIExpander {
 		return err == I2CPeriph::I2C_NO_ERR ? Error::None : Error::WriteFailed;
 	}
 
-	// The returned spans point into the RX buffer, which the next read overwrites:
-	// consume them before advancing the state machine.
 	std::array<std::span<const uint8_t>, 2> collect_payload() {
 		return {{{&_rx_data[0], size_0}, {&_rx_data[size_0], size_1}}};
 	}
@@ -145,6 +148,10 @@ struct MIDIExpander {
 		size_0 = 0;
 		size_1 = 0;
 		read_size = 0;
+
+		// Don't write against a size report we never actually received
+		_tx_space_0 = 0;
+		_tx_space_1 = 0;
 	}
 
 private:
@@ -152,6 +159,8 @@ private:
 	mdrivlib::I2CPeriph &_i2c;
 	uint8_t size_0{};
 	uint8_t size_1{};
+	uint8_t _tx_space_0{};
+	uint8_t _tx_space_1{};
 	uint16_t read_size{};
 
 	// RX and TX get their own buffers in case we overlap pre-loading TX while RX is happening

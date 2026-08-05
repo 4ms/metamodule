@@ -159,7 +159,7 @@ void Controls::parse_midi() {
 		// TODO: placeholder routing -- every outgoing message goes to both jacks.
 		// Once messages carry a destination port, send only to the ones selected.
 		if (control_expander.midi_expander_connected()) {
-			if (auto len = out_msg.message_size() > 0; len > 0) {
+			if (auto len = out_msg.message_size(); len > 0) {
 				std::array<uint8_t, 3> bytes;
 				out_msg.make_bytes(bytes);
 				control_expander.send_midi({bytes.data(), len}, 0);
