@@ -18,13 +18,27 @@ struct MIDIExpander {
 	static constexpr size_t MaxPayload = MaxPayloadPerJack * 2;
 
 	enum Commands : uint8_t {
-		Reserved,
+		// return the 6-byte ID block below
+		ReadId,
 		// return 2 bytes, din size, trs size
 		ReadSize,
 		// return din size + trs size amount of data
 		ReadData,
 
 		WriteData,
+	};
+
+	// Expected values:
+	static constexpr size_t IdSize = 6;
+	static constexpr std::array<uint8_t, 4> IdSignature{0x04, 0x6d, 0x73, 0x00}; // "4ms\0"
+	static constexpr uint8_t IdDeviceMidiExpander = 0x02;
+	static constexpr uint8_t IdProtocolVersion = 0x01;
+
+	struct Id {
+		bool responded = false;
+		bool signature_ok = false;
+		uint8_t device_type = 0;
+		uint8_t protocol_version = 0;
 	};
 
 	enum Error {
@@ -42,9 +56,26 @@ struct MIDIExpander {
 		return true;
 	}
 
+	// Blocking: only for use at scan time.
+	Id read_id() {
+		Id id{};
+
+		uint8_t data[IdSize]{};
+		auto err = _i2c.mem_read(_device_addr, Commands::ReadId, I2C_MEMADD_SIZE_8BIT, data, IdSize);
+		if (err != mdrivlib::I2CPeriph::I2C_NO_ERR)
+			return id;
+
+		id.responded = true;
+		id.signature_ok = std::ranges::equal(std::span{data}.first(IdSignature.size()), IdSignature);
+		id.device_type = data[4];
+		id.protocol_version = data[5];
+
+		return id;
+	}
+
 	bool is_present() {
-		auto err = _i2c.mem_read(_device_addr, Commands::ReadSize, I2C_MEMADD_SIZE_8BIT, _rx_data, HeaderSize);
-		return err == mdrivlib::I2CPeriph::I2C_NO_ERR;
+		const auto id = read_id();
+		return id.signature_ok && id.device_type == IdDeviceMidiExpander && id.protocol_version == IdProtocolVersion;
 	}
 
 	void set_address(uint8_t dev_addr_unshifted) {
