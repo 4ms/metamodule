@@ -22,7 +22,8 @@ namespace MetaModule
 //    - Tell Controls when we have tx space free, it has to wait until then.
 //    - Make sure Controls deals with entire RX buffer immediately
 // Check I2C bus speed (> 400kHz?)
-// Use usb cable num for TX: 0 = USB, 1 = TRS, 2 = DIN5
+// Pass MIDI events back to A7 along side
+// Use usb cable num for Device mode: 0 = USB, 1 = TRS, 2 = DIN5
 class ControlExpanderManager {
 	using GPIOExpander = mdrivlib::GPIOExpander;
 	using I2CPeriph = mdrivlib::I2CPeriph;
@@ -149,7 +150,7 @@ public:
 			return;
 		}
 
-		switch (midi_ex_state) {
+		switch (midiexp_state) {
 			using enum MidiExStates;
 			case ReadSize: {
 				// Checks the write issued at the end of the previous cycle
@@ -158,11 +159,12 @@ public:
 
 				const auto t = midi_exp.driver.read_sizes();
 				if (t != MIDIExpander::None) {
+					pr_dbg("Error Reading size\n");
 					handle_midi_error();
 					break;
 				}
 				xfer_owner = XferOwner::Midi;
-				midi_ex_state = ReadPayload;
+				midiexp_state = ReadPayload;
 				break;
 			}
 			case ReadPayload: {
@@ -171,20 +173,20 @@ public:
 
 				const auto t = midi_exp.driver.read_payload();
 				if (t != MIDIExpander::None) {
+					pr_dbg("Error Reading payload\n");
 					handle_midi_error();
 					break;
 				}
 				xfer_owner = XferOwner::Midi;
-				midi_ex_state = CollectPayload;
+				midiexp_state = CollectPayload;
 				break;
 			}
 			case CollectPayload: {
 				if (prev_midi_xfer_failed())
 					break;
 
-				const auto streams = midi_exp.driver.collect_payload();
-				// TODO: WHAT TO DO WITH THE MIDI?
-				midi_ex_state = Write;
+				midi_rx_payloads = midi_exp.driver.collect_payload();
+				midiexp_state = Write;
 				break;
 			}
 			case Write:
@@ -193,7 +195,7 @@ public:
 				// 	handle_midi_error();
 				// 	break;
 				// }
-				midi_ex_state = ReadSize;
+				midiexp_state = ReadSize;
 				state = States::DoButtons;
 				break;
 		}
@@ -225,6 +227,14 @@ public:
 				state = DoMidi;
 				break;
 		}
+	}
+
+	std::span<const uint8_t> get_midi_trs_rx() {
+		return midi_rx_payloads[0];
+	}
+
+	std::span<const uint8_t> get_midi_din_rx() {
+		return midi_rx_payloads[1];
 	}
 
 	uint32_t get_buttons() {
@@ -295,6 +305,8 @@ private:
 
 	std::atomic<uint32_t> latest_reading;
 
+	std::array<std::span<const uint8_t>, 2> midi_rx_payloads;
+
 	enum class ButtonExStates {
 		ReadButtons,
 		CollectReadings,
@@ -305,7 +317,7 @@ private:
 		ReadPayload,
 		CollectPayload,
 		Write,
-	} midi_ex_state = MidiExStates::ReadSize;
+	} midiexp_state = MidiExStates::ReadSize;
 
 	enum class States {
 		Pause,
@@ -347,7 +359,7 @@ private:
 		midi_exp.driver.discard_payload();
 		// Go back to ReadSize, since ReadPayload would be unsafe
 		// if ReadSize failed
-		midi_ex_state = MidiExStates::ReadSize;
+		midiexp_state = MidiExStates::ReadSize;
 		handle_midi_error();
 		return true;
 	}
@@ -372,10 +384,12 @@ private:
 		}
 
 		// Timeout for a stuck bus
-		if (bus_stuck_tm == 0) {
-			bus_stuck_tm = HAL_GetTick() == 0 ? 1 : HAL_GetTick();
+		const auto now = HAL_GetTick();
 
-		} else if ((HAL_GetTick() - bus_stuck_tm) >= BusStuckTimeoutMs) {
+		if (bus_stuck_tm == 0) {
+			bus_stuck_tm = (now > 0) ? now : 1; // don't let bus_stuck_tm be 0
+
+		} else if ((now - bus_stuck_tm) >= BusStuckTimeoutMs) {
 			pr_err("ControlExpander: aux I2C stuck, resetting bus\n");
 			reset_bus();
 		}
@@ -392,7 +406,7 @@ private:
 		button_xfer_error = false;
 		cur_reading_exp = 0;
 		button_ex_state = ButtonExStates::ReadButtons;
-		midi_ex_state = MidiExStates::ReadSize;
+		midiexp_state = MidiExStates::ReadSize;
 		midi_exp.driver.discard_payload();
 
 		pause_ms = ErrorPauseMs;
