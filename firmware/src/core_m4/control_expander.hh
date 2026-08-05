@@ -38,17 +38,29 @@ public:
 	}
 
 	void scan_for_midi_expander() {
+		midi_rescan_tmr = HAL_GetTick();
+
 		midi_exp.found = false;
 		midi_exp.driver.set_address(Expander::Midi::addr);
 
 		if (midi_exp.driver.is_present()) {
 			midi_exp.found = true;
 			midi_exp.driver.start();
+
+			// Start clean: this may be a reconnect, so nothing from the old
+			// session should carry over
+			midi_exp.driver.discard_payload();
+			midiexp_state = MidiExStates::ReadSize;
 			num_midi_errors = 0;
 			num_midi_error_retries = 0;
+			midi_missing_logged = false;
+
 			pr_info("MIDI Expander found at addr 0x%x\n", Expander::Midi::addr);
-		} else {
-			pr_dbg("MIDI Expander not found at addr 0x%x\n", Expander::Midi::addr);
+
+		} else if (!midi_missing_logged) {
+			// Only on the first miss: this runs every second until one shows up
+			midi_missing_logged = true;
+			pr_dbg("MIDI Expander not found at addr 0x%x, will keep looking\n", Expander::Midi::addr);
 		}
 	}
 
@@ -142,7 +154,9 @@ public:
 
 	void update_midi() {
 		if (!midi_exp.found) {
-			// TODO: periodically re-scan, so the expander can be hot-plugged
+			if ((HAL_GetTick() - midi_rescan_tmr) >= MidiRescanIntervalMs)
+				scan_for_midi_expander();
+
 			state = States::DoButtons;
 			return;
 		}
@@ -334,6 +348,11 @@ private:
 	static constexpr uint32_t BusStuckTimeoutMs = 100;
 
 	uint32_t bus_stuck_tm = 0;
+
+	static constexpr uint32_t MidiRescanIntervalMs = 2000;
+
+	uint32_t midi_rescan_tmr = 0;
+	bool midi_missing_logged = false;
 
 	// Who started the transfer that's currently in flight, and the outcome of the
 	// last one each state machine started
