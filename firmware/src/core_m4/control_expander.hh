@@ -236,6 +236,9 @@ public:
 	std::span<const uint8_t> get_midi_din_rx() {
 		return midi_rx_payloads[1];
 	}
+	bool send_midi(std::span<const uint8_t> bytes, unsigned jack) {
+		return true;
+	}
 
 	uint32_t get_buttons() {
 		return latest_reading.load();
