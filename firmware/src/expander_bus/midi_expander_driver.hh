@@ -72,7 +72,15 @@ struct MIDIExpander {
 		return id;
 	}
 
+	// Cheap: one address cycle. Says something is there, not that it's ours.
+	bool responds() {
+		return _i2c.probe(_device_addr);
+	}
+
 	bool is_present() {
+		if (!responds())
+			return false;
+
 		const auto id = read_id();
 		return id.signature_ok && id.device_type == IdDeviceMidiExpander && id.protocol_version == IdProtocolVersion;
 	}
