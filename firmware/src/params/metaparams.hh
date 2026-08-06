@@ -30,7 +30,7 @@ struct MetaParams {
 	int8_t audio_overruns = 0;
 
 	// Controls -> Audio
-	bool midi_connected = false;
+	bool midi_usb_connected = false;
 
 	// Controls -> GUI (USB connection status: role + active class)
 	UsbConnection usb_connection = UsbConnection::None;
@@ -38,6 +38,7 @@ struct MetaParams {
 	uint32_t button_exp_connected = 0; //bitmap
 	uint32_t ext_buttons_high_events{};
 	uint32_t ext_buttons_low_events{};
+	bool midi_exp_connected = false;
 
 	// Controls -> Audio, Audio -> GUI (via ParamsState in SyncParams)
 	uint32_t jack_senses{};
@@ -98,7 +99,8 @@ struct MetaParams {
 
 		audio_overruns = std::max(that.audio_overruns, audio_overruns);
 
-		midi_connected = that.midi_connected;
+		midi_usb_connected = that.midi_usb_connected;
+		midi_exp_connected = that.midi_exp_connected;
 
 		usb_connection = that.usb_connection;
 
@@ -138,7 +140,8 @@ struct MetaParams {
 		} else if (audio_overruns > 0)
 			audio_overruns--;
 
-		midi_connected = that.midi_connected;
+		midi_usb_connected = that.midi_usb_connected;
+		midi_exp_connected = that.midi_exp_connected;
 
 		usb_connection = that.usb_connection;
 

@@ -86,8 +86,8 @@ private:
 	MidiPacketMonitor _tx_monitor{"TX"};
 	MidiPacketMonitor _rx_monitor{"RX"};
 	Midi::MessageParser _midi_parser;
-	EdgeStateDetector _midi_connected_raw;
-	bool _midi_connected = false;
+	EdgeStateDetector _midi_usb_connected_raw;
+	bool _midi_usb_connected = false;
 
 	// Params
 	DoubleBufParamBlock &param_blocks;

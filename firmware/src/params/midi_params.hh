@@ -20,10 +20,12 @@ struct Event {
 		PC,
 	} type = Type::None;
 
-	uint8_t midi_chan = 0; //currently not implemented
-	uint8_t poly_chan = 0;
-	uint8_t note = 0; // GateNote: note value; CC: ccnum; Time: event type
-	int16_t val = 0;  //velocity, pitchBend, or on/off
+	enum Port { USB = 0, TRS = 1, DIN5 = 2 };
+	uint8_t port : 4 = 0;
+	uint8_t midi_chan : 4 = 0;
+	uint8_t poly_chan = 0; // (0-7) may expand to 0-15: top 4/5 bits unused
+	uint8_t note = 0;	   // GateNote: note value; CC: ccnum; Time: event type
+	int16_t val = 0;	   //velocity, pitchBend, or on/off
 };
 static constexpr auto sizeofEvent = sizeof(Event);
 

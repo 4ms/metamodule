@@ -53,7 +53,7 @@ void Controls::update_params() {
 
 		update_midi_connected();
 
-		cur_metaparams->midi_connected = _midi_connected;
+		cur_metaparams->midi_usb_connected = _midi_usb_connected;
 
 		cur_metaparams->usb_connection = _usb.get_connection_status();
 
@@ -100,14 +100,14 @@ void Controls::update_rotary() {
 }
 
 void Controls::update_midi_connected() {
-	_midi_connected_raw.update(_midi_host.is_connected() || _midi_device.is_connected());
+	_midi_usb_connected_raw.update(_midi_host.is_connected() || _midi_device.is_connected());
 
-	if (_midi_connected_raw.went_low()) {
+	if (_midi_usb_connected_raw.went_low()) {
 		_midi_parser.start_all_notes_off_sequence();
 	}
 
-	if (_midi_connected_raw.went_high()) {
-		_midi_connected = true;
+	if (_midi_usb_connected_raw.went_high()) {
+		_midi_usb_connected = true;
 	}
 
 	if (cur_metaparams->midi_poly_chans > 0)
@@ -119,6 +119,7 @@ void Controls::update_midi_connected() {
 void Controls::update_control_expander() {
 	// Control expander
 	cur_metaparams->button_exp_connected = control_expander.button_expanders_connected();
+	cur_metaparams->midi_exp_connected = control_expander.midi_expander_connected();
 
 	uint32_t buttons_state = control_expander.get_buttons();
 	cur_metaparams->ext_buttons_high_events = 0;
@@ -136,7 +137,7 @@ void Controls::update_control_expander() {
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected.
 	if (MidiMessage out_msg = cur_params->raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
-		if (_midi_connected_raw.is_high()) {
+		if (_midi_usb_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
 			out_msg.make_usb_msg(bytes);
 			_tx_monitor.log((uint32_t(bytes[0]) << 24) | (uint32_t(bytes[1]) << 16) | (uint32_t(bytes[2]) << 8) |
@@ -172,8 +173,8 @@ void Controls::parse_midi() {
 
 	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence()) {
 		if (noteoff->type == Midi::Event::Type::None) {
-			_midi_connected = false;
-			cur_metaparams->midi_connected = _midi_connected;
+			_midi_usb_connected = false;
+			cur_metaparams->midi_usb_connected = _midi_usb_connected;
 			cur_params->raw_msg = MidiMessage{};
 			cur_params->midi_event.type = Midi::Event::Type::None;
 		} else {
