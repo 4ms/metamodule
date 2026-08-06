@@ -5,6 +5,7 @@
 #include "drivers/i2c.hh"
 #include "expander_bus.hh"
 #include "pr_dbg.hh"
+#include "stm32mp1xx_hal.h"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -13,7 +14,7 @@
 namespace MetaModule
 {
 
-// The Button Expanders on the expander I2C bus.
+// Button Expanders on the expander I2C bus
 //
 // Reads one Button Expander per turn
 class ButtonExpanderManager {
@@ -29,50 +30,44 @@ public:
 		  }} {
 	}
 
-	// Blocking: only for use at startup
+	// Blocking: probes every address we don't already have
+	unsigned auto_scan_idx = 0;
 	void scan() {
-		constexpr std::array<int, Expander::Button::MaxExpanders> addresses{
-			Expander::Button::gpio_chip_conf.addr + 6, // Jumper pos 1: ~0b001
-			Expander::Button::gpio_chip_conf.addr + 5, // Jumper pos 2: ~0b010
-			Expander::Button::gpio_chip_conf.addr + 3, // Jumper pos 3: ~0b100
-			Expander::Button::gpio_chip_conf.addr + 7, // No jumpers  : ~0b000
-
-			// Invalid positions:
-			// addr + 4, // (jumpers pos 1+2)
-			// addr + 2, // (jumpers pos 1+3)
-			// addr + 1, // (jumpers pos 2+3)
-			// addr + 0, // (all jumpers)
-		};
-
-		auto num_found = 0u;
-
-		for (unsigned i = 0; auto &expander : expanders) {
-			auto addr = addresses[i++];
-
-			expander.found = false;
-			expander.driver.set_address(addr);
-
-			if (expander.driver.is_present()) {
-				expander.found = true;
-				expander.driver.start();
-				pr_info("Button Expander found at addr 0x%x\n", addr);
-				num_found++;
-				if (num_found >= Expander::Button::MaxExpanders)
-					break;
-
-			} else {
-				pr_dbg("Button Expander not found at addr 0x%x\n", addr);
-			}
-		}
+		for (auto i = 0u; i < expanders.size(); i++)
+			auto_scan(i);
 	}
 
-	// One turn on the bus. `prev` is how the transfer we started last turn ended.
+	void auto_scan(unsigned idx) {
+		auto &expander = expanders[idx];
+		const auto addr = addresses[idx];
+
+		if (expander.found)
+			return;
+
+		expander.driver.set_address(addr);
+
+		if (expander.driver.is_present()) {
+			expander.found = true;
+			expander.driver.start();
+
+			// Fresh error budget: this may be a reconnect
+			num_errors[idx] = 0;
+			num_error_retries[idx] = 0;
+
+			pr_info("Button Expander found at addr 0x%x\n", addr);
+
+		} else if (first_scan) {
+			// Only on the first pass: after that this runs every couple of
+			// seconds and would just repeat itself
+			pr_dbg("Button Expander not found at addr 0x%x\n", addr);
+		}
+
+		first_scan = false;
+	}
+
 	BusRequest update(XferResult prev) {
 		BusRequest req{};
 
-		// Only a transfer that actually completed proves the device is still
-		// there, so it's the only thing that may clear the error count.
-		// cur_reading has already moved past the expander that was read.
 		if (prev == XferResult::Ok && cur_reading > 0)
 			num_errors[cur_reading - 1] = 0;
 
@@ -84,6 +79,13 @@ public:
 					if (cur_reading > 0)
 						cur_reading--;
 					return handle_error(req);
+				}
+
+				if (cur_reading == 0 && (HAL_GetTick() - rescan_tmr) >= RescanIntervalMs) {
+					rescan_tmr = HAL_GetTick();
+					if (++auto_scan_idx >= expanders.size())
+						auto_scan_idx = 0;
+					auto_scan(auto_scan_idx);
 				}
 
 				if (cur_reading >= expanders.size()) {
@@ -154,6 +156,25 @@ private:
 	// up on it entirely
 	static constexpr uint32_t MaxErrorsBeforeReset = 8;
 	static constexpr uint32_t MaxResetsBeforeDisable = 10;
+
+	// How often to look for expanders that aren't (yet) there
+	static constexpr uint32_t RescanIntervalMs = 1900;
+
+	static constexpr std::array<int, Expander::Button::MaxExpanders> addresses{
+		Expander::Button::gpio_chip_conf.addr + 6, // Jumper pos 1: ~0b001
+		Expander::Button::gpio_chip_conf.addr + 5, // Jumper pos 2: ~0b010
+		Expander::Button::gpio_chip_conf.addr + 3, // Jumper pos 3: ~0b100
+		Expander::Button::gpio_chip_conf.addr + 7, // No jumpers  : ~0b000
+
+		// Invalid positions:
+		// addr + 4, // (jumpers pos 1+2)
+		// addr + 2, // (jumpers pos 1+3)
+		// addr + 1, // (jumpers pos 2+3)
+		// addr + 0, // (all jumpers)
+	};
+
+	uint32_t rescan_tmr = 0;
+	bool first_scan = true;
 
 	struct FoundExpander {
 		bool found = false;
