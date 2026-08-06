@@ -74,6 +74,7 @@ struct MIDIExpander {
 
 	// Cheap: one address cycle. Says something is there, not that it's ours.
 	bool responds() {
+		_i2c.clear_stuck_busy();
 		return _i2c.probe(_device_addr);
 	}
 
