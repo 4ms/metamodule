@@ -45,6 +45,14 @@ struct InfoTab : SystemMenuTab {
 		lv_obj_set_style_text_font(usb_detail_label, &ui_font_MuseoSansRounded50012, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_hide(usb_detail_label);
 
+		// The generated UI has no MIDI-expander label either, so create one in
+		// the expanders container, matching the MetaButtons line above it.
+		midi_exp_label = lv_label_create(ui_SystemMenuExpandersCont);
+		lv_obj_set_width(midi_exp_label, lv_pct(100));
+		lv_obj_set_height(midi_exp_label, LV_SIZE_CONTENT);
+		lv_label_set_long_mode(midi_exp_label, LV_LABEL_LONG_WRAP);
+		lv_obj_set_style_text_font(midi_exp_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
+
 		update_usb_status();
 	}
 
@@ -206,6 +214,10 @@ struct InfoTab : SystemMenuTab {
 		}
 		lv_show(ui_SystemMenuButExpander);
 
+		lv_label_set_text(midi_exp_label,
+						  metaparams.midi_exp_connected ? "MetaMIDI connected" : "No MetaMIDI found");
+		lv_show(midi_exp_label);
+
 		update_usb_status();
 
 		detect_wifi.start();
@@ -291,5 +303,6 @@ private:
 	MetaParams const &metaparams;
 	lv_obj_t *usb_label = nullptr;
 	lv_obj_t *usb_detail_label = nullptr;
+	lv_obj_t *midi_exp_label = nullptr;
 };
 } // namespace MetaModule
