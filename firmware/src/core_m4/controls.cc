@@ -4,7 +4,6 @@
 #include "drivers/hsem.hh"
 #include "hsem_handler.hh"
 #include "midi_controls.hh"
-#include "patch/midi_def.hh"
 #include "usb/usb_manager.hh"
 #include "util/countzip.hh"
 
@@ -136,8 +135,6 @@ void Controls::update_control_expander() {
 
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected.
-	// Copy the slot once: the A7 rewrites it every audio block, so reading it
-	// again later in this function can pick up a different (or empty) message.
 	if (MidiMessage out_msg = cur_params->raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
 		if (_midi_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;

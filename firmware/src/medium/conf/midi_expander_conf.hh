@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core_m4/midi_expander_driver.hh"
+#include "expander_bus/midi_expander_driver.hh"
 
 namespace MetaModule::Expander::Midi
 {
