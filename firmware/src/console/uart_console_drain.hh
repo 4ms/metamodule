@@ -64,6 +64,16 @@ public:
 				tx_pos = tx_len = 0;
 				unlock();
 
+			} else if ((HAL_GetTick() - dma_start_tm) >= DmaTimeoutMs) {
+				// The stream stopped without raising any flag, unknown reasons.
+				// FIXME: why does this happen?
+				// Pick up from wherever it got to.
+				tx_pos = tx_len - DMA1_Stream1->NDTR;
+				stop_dma();
+				unlock();
+				printf("<console: UART TX DMA unknown error (LISR=0x%08x), using FIFO>\n", (unsigned)flags);
+				dma_stalls++;
+
 			} else {
 				return; // still transferring
 			}
@@ -132,6 +142,7 @@ private:
 		clear_dma_flags();
 		DMA1_Stream1->CR |= DMA_SxCR_EN;
 		dma_running = true;
+		dma_start_tm = HAL_GetTick();
 	}
 
 	void stop_dma() {
@@ -160,10 +171,15 @@ private:
 
 	static constexpr uint32_t M4LockId = UartLockM4Drain;
 
+	// A full bounce buffer is ~23ms at 115200 baud
+	static constexpr uint32_t DmaTimeoutMs = 250;
+
 	ConsoleBufferReader reader;
 	std::array<uint8_t, 256> bounce;
 	size_t tx_pos = 0;
 	size_t tx_len = 0;
+	uint32_t dma_start_tm = 0;
+	uint32_t dma_stalls = 0; // transfers that stopped without raising a flag
 	bool usb_was_active = false;
 	bool dma_running = false;
 	bool dma_ok = true;
