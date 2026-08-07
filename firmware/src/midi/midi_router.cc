@@ -20,9 +20,9 @@ void MidiRouter::unsubscribe_rx(MidiQueue *listener) {
 	std::erase(listeners, listener);
 }
 
-void MidiRouter::push_incoming_message(MidiMessage msg) {
+void MidiRouter::push_incoming_message(MidiMessage msg, uint8_t port) {
 	for (auto ob : listeners) {
-		ob->data.put(msg);
+		ob->data.put({msg, port});
 	}
 }
 
@@ -37,8 +37,10 @@ void MidiRouter::unsubscribe_tx(MidiQueue *outqueue) {
 std::optional<MidiMessage> MidiRouter::pop_outgoing_message() {
 	for (auto xmitter : transmitters) {
 		if (auto msg = xmitter->data.get()) {
-			// return the first outgoing message found
-			return *msg;
+			// return the first outgoing message found.
+			// TX carries no port yet: destination routing is still to come, so
+			// the port field on an outgoing message is unused.
+			return msg->msg;
 		}
 	}
 	return {};

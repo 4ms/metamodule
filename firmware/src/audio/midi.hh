@@ -18,7 +18,9 @@ struct AudioStreamMidi {
 		, sync_params{sync_params} {
 	}
 
-	void process(uint8_t ports_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg) {
+	// `rx_port` is the port raw_msg arrived on (Midi::Event::Port)
+	void process(
+		uint8_t ports_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg, uint8_t rx_port) {
 
 		if (event.type == Midi::Event::Type::PC) {
 			sync_params.midi_events.put(event);
@@ -53,7 +55,7 @@ struct AudioStreamMidi {
 		// Ignore active-sensing
 		if (rx_msg.is_sysex() || (rx_msg.status != 0xfe && rx_msg.status != 0)) {
 			// 50ns with no listeners + ~100ns additional per listener
-			MidiRouter::push_incoming_message(rx_msg);
+			MidiRouter::push_incoming_message(rx_msg, rx_port);
 		}
 
 		// Transfer MIDI TX message from router (towards hardware)

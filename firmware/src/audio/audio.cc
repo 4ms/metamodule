@@ -281,7 +281,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		midi.process(param_block.metaparams.midi_ports_connected,
 					 params.midi_event,
 					 param_block.metaparams.midi_poly_chans,
-					 &msg);
+					 &msg,
+					 params.midi_port);
 
 		param_blocks[cur_block].params[idx].raw_msg = msg;
 
@@ -356,7 +357,8 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		midi.process(param_block.metaparams.midi_ports_connected,
 					 params.midi_event,
 					 param_block.metaparams.midi_poly_chans,
-					 &msg);
+					 &msg,
+					 params.midi_port);
 
 		param_blocks[cur_block].params[idx].raw_msg = msg;
 
