@@ -188,37 +188,7 @@ struct InfoTab : SystemMenuTab {
 
 		lv_show(ui_SystemMenuExpanders);
 
-		if (Expanders::get_connected().ext_audio_connected) {
-			lv_label_set_text(ui_SystemMenuAudioExpanders, "MetaAIO connected");
-		} else {
-			lv_label_set_text(ui_SystemMenuAudioExpanders, "MetaAIO not found");
-		}
-		lv_show(ui_SystemMenuAudioExpanders);
-
-		if (metaparams.button_exp_connected != 0) {
-			std::string s;
-			s = "MetaButtons found: ";
-			if (metaparams.button_exp_connected & 0b0001)
-				s += "#1, ";
-			if (metaparams.button_exp_connected & 0b0010)
-				s += "#2, ";
-			if (metaparams.button_exp_connected & 0b0100)
-				s += "#3, ";
-			if (metaparams.button_exp_connected & 0b1000)
-				s += "#4";
-			if (s.ends_with(", "))
-				s = s.substr(0, s.length() - 2);
-
-			lv_label_set_text(ui_SystemMenuButExpander, s.c_str());
-		} else {
-			lv_label_set_text(ui_SystemMenuButExpander, "No MetaButtons found");
-		}
-		lv_show(ui_SystemMenuButExpander);
-
-		lv_label_set_text(midi_exp_label,
-						  (metaparams.midi_ports_connected & ~(1 << Midi::Event::USB)) ? "MetaMIDI connected" :
-																						 "No MetaMIDI found");
-		lv_show(midi_exp_label);
+		update_expanders(ForceRedraw);
 
 		update_usb_status();
 
@@ -253,7 +223,48 @@ struct InfoTab : SystemMenuTab {
 
 	void update() override {
 		update_usb_status();
+		update_expanders();
 		update_wifi_expander();
+	}
+
+	void update_expanders(bool force = false) {
+		const bool audio = Expanders::get_connected().ext_audio_connected;
+		const auto buttons = metaparams.button_exp_connected;
+		const auto midi_ports = metaparams.midi_ports_connected;
+
+		if (!force && audio == last_audio_exp && buttons == last_button_exp && midi_ports == last_midi_ports)
+			return;
+
+		last_audio_exp = audio;
+		last_button_exp = buttons;
+		last_midi_ports = midi_ports;
+
+		lv_label_set_text(ui_SystemMenuAudioExpanders, audio ? "MetaAIO connected" : "MetaAIO not found");
+		lv_show(ui_SystemMenuAudioExpanders);
+
+		if (buttons != 0) {
+			std::string s;
+			s = "MetaButtons found: ";
+			if (buttons & 0b0001)
+				s += "#1, ";
+			if (buttons & 0b0010)
+				s += "#2, ";
+			if (buttons & 0b0100)
+				s += "#3, ";
+			if (buttons & 0b1000)
+				s += "#4";
+			if (s.ends_with(", "))
+				s = s.substr(0, s.length() - 2);
+
+			lv_label_set_text(ui_SystemMenuButExpander, s.c_str());
+		} else {
+			lv_label_set_text(ui_SystemMenuButExpander, "No MetaButtons found");
+		}
+		lv_show(ui_SystemMenuButExpander);
+
+		const bool midi_exp = (midi_ports & ~(1 << Midi::Event::USB)) != 0;
+		lv_label_set_text(midi_exp_label, midi_exp ? "MetaMIDI connected" : "No MetaMIDI found");
+		lv_show(midi_exp_label);
 	}
 
 	bool is_idle() override {
@@ -306,5 +317,10 @@ private:
 	lv_obj_t *usb_label = nullptr;
 	lv_obj_t *usb_detail_label = nullptr;
 	lv_obj_t *midi_exp_label = nullptr;
+
+	static constexpr bool ForceRedraw = true;
+	bool last_audio_exp = false;
+	uint32_t last_button_exp = 0xFFFF'FFFF;
+	uint8_t last_midi_ports = 0xFF;
 };
 } // namespace MetaModule
