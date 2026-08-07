@@ -152,8 +152,9 @@ void MMU_CreateTranslationTable(void) {
 	// M4 vector table (RETRAM: 0x38000000, or 0x00000000 as seen by M4)
 	create_aligned_section(TTB_BASE, M4_VECT_A7, M4_VECT_SZ, Sect_Device_RW); // 1MB (actually is only 64kB)
 
-	//.sysram
-	create_aligned_section(TTB_BASE, A7_SYSRAM_BASE, A7_SYSRAM_SZ, Sect_StronglyOrdered);
+	// .sysram
+	// Use Normal mem so we don't fight aligment issues. Measured same speed with audio loop params copy as StronglyOrdered
+	create_aligned_section(TTB_BASE, A7_SYSRAM_BASE, A7_SYSRAM_SZ, Sect_Normal_NonCache);
 
 	// Peripheral memory
 	// For better security: be more specific and use 4k tables to cover only actual peripherals, as in example file in
