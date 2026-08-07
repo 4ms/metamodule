@@ -158,7 +158,7 @@ private:
 		mdrivlib::HWSemaphore<UartLock>::unlock(M4LockId);
 	}
 
-	static constexpr uint32_t M4LockId = 2; // same process id UartLog's direct writes use on the M4
+	static constexpr uint32_t M4LockId = UartLockM4Drain;
 
 	ConsoleBufferReader reader;
 	std::array<uint8_t, 256> bounce;
