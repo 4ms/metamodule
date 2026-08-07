@@ -139,7 +139,10 @@ void Controls::update_control_expander() {
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected.
 	if (MidiMessage out_msg = cur_params->raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
-		if (_midi_usb_connected_raw.is_high()) {
+		// The sending module chose one destination port; send there and nowhere else.
+		const auto dest_port = cur_params->midi_port;
+
+		if (dest_port == Midi::Event::Port::USB && _midi_usb_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
 			out_msg.make_usb_msg(bytes);
 			_tx_monitor.log((uint32_t(bytes[0]) << 24) | (uint32_t(bytes[1]) << 16) | (uint32_t(bytes[2]) << 8) |
@@ -155,15 +158,14 @@ void Controls::parse_midi() {
 				_tx_monitor.transport_drops++;
 		}
 
-		// MIDI Expander output jacks.
-		// TODO: placeholder routing -- every outgoing message goes to both jacks.
-		// Once messages carry a destination port, send only to the ones selected.
-		if (control_expander.midi_expander_connected()) {
+		// MIDI Expander output jacks. Jack ordering does not match Port ordering.
+		if (dest_port != Midi::Event::Port::USB && control_expander.midi_expander_connected()) {
+			const auto jack = (dest_port == Midi::Event::Port::DIN5) ? MidiExpanderManager::Jack::Din :
+																	   MidiExpanderManager::Jack::Trs;
 			if (auto len = out_msg.message_size(); len > 0) {
 				std::array<uint8_t, 3> bytes;
 				out_msg.make_bytes(bytes);
-				control_expander.send_midi({bytes.data(), len}, 0);
-				control_expander.send_midi({bytes.data(), len}, 1);
+				control_expander.send_midi({bytes.data(), len}, jack);
 			}
 		}
 	}

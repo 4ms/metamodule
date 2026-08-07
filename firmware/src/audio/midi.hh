@@ -18,9 +18,11 @@ struct AudioStreamMidi {
 		, sync_params{sync_params} {
 	}
 
-	// `rx_port` is the port raw_msg arrived on (Midi::Event::Port)
+	// `raw_msg`/`port` are one in/out slot, like Params: on entry they are the
+	// message received from hardware and the port it arrived on; on exit they
+	// are the message to transmit and the port to transmit it on.
 	void process(
-		uint8_t ports_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg, uint8_t rx_port) {
+		uint8_t ports_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg, uint8_t *port) {
 
 		if (event.type == Midi::Event::Type::PC) {
 			sync_params.midi_events.put(event);
@@ -28,7 +30,9 @@ struct AudioStreamMidi {
 
 		// Consume the incoming message even if MIDI is not connected
 		MidiMessage rx_msg = *raw_msg;
+		uint8_t rx_port = *port;
 		*raw_msg = MidiMessage{};
+		*port = 0;
 
 		// Discard MIDI generated while not connected so it won't transmit
 		// on MIDI attachment
@@ -60,7 +64,8 @@ struct AudioStreamMidi {
 
 		// Transfer MIDI TX message from router (towards hardware)
 		if (auto tx_msg = MidiRouter::pop_outgoing_message()) {
-			*raw_msg = *tx_msg;
+			*raw_msg = tx_msg->msg;
+			*port = tx_msg->port;
 		}
 
 		if (event.type == Midi::Event::Type::None)

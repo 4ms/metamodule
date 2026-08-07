@@ -34,13 +34,12 @@ void MidiRouter::unsubscribe_tx(MidiQueue *outqueue) {
 	std::erase(transmitters, outqueue);
 }
 
-std::optional<MidiMessage> MidiRouter::pop_outgoing_message() {
+std::optional<PortedMidiMessage> MidiRouter::pop_outgoing_message() {
 	for (auto xmitter : transmitters) {
 		if (auto msg = xmitter->data.get()) {
-			// return the first outgoing message found.
-			// TX carries no port yet: destination routing is still to come, so
-			// the port field on an outgoing message is unused.
-			return msg->msg;
+			// return the first outgoing message found, carrying the destination
+			// port the sending module chose.
+			return msg;
 		}
 	}
 	return {};

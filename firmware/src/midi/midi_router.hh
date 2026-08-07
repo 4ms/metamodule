@@ -22,10 +22,11 @@ struct MidiRouter {
 
 	static void unsubscribe_tx(MidiQueue *listener);
 
-	// Pop the latest message ready to be sent out via hardware
+	// Pop the latest message ready to be sent out via hardware, tagged with the
+	// port it should leave by.
 	// Audio Stream calls this to get a message
 	// which it forwards to M4 core
-	static std::optional<MidiMessage> pop_outgoing_message();
+	static std::optional<PortedMidiMessage> pop_outgoing_message();
 };
 
 } // namespace MetaModule

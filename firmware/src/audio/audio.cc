@@ -277,14 +277,16 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// MIDI
 		MidiMessage msg = params.raw_msg;
+		uint8_t midi_port = params.midi_port;
 
 		midi.process(param_block.metaparams.midi_ports_connected,
 					 params.midi_event,
 					 param_block.metaparams.midi_poly_chans,
 					 &msg,
-					 params.midi_port);
+					 &midi_port);
 
 		param_blocks[cur_block].params[idx].raw_msg = msg;
+		param_blocks[cur_block].params[idx].midi_port = midi_port;
 
 		// Run each module
 		player.update_patch();
@@ -353,14 +355,16 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 
 		// MIDI: consume the incoming message and write back to the shared param block
 		MidiMessage msg = params.raw_msg;
+		uint8_t midi_port = params.midi_port;
 
 		midi.process(param_block.metaparams.midi_ports_connected,
 					 params.midi_event,
 					 param_block.metaparams.midi_poly_chans,
 					 &msg,
-					 params.midi_port);
+					 &midi_port);
 
 		param_blocks[cur_block].params[idx].raw_msg = msg;
+		param_blocks[cur_block].params[idx].midi_port = midi_port;
 
 		for (auto &outchan : out.chan)
 			outchan = 0;
