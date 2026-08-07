@@ -7,30 +7,43 @@ namespace rack::core
 {
 
 // METAMODULE: a MIDI "device" is one of the hardware's physical ports (USB, TRS,
-// DIN5), so the port a module listens to is just its device id, and AllDevices
-// means don't filter. Shared by every module with a "MIDI port" menu item.
-inline std::string midiPortMenuName(midi::Input &input, int device_id) {
-	auto name = input.getDeviceName(device_id);
-	return device_id == midi::Port::AllDevices ? name : name + " only";
+// DIN5), so the port a module uses is just its device id. Inputs may choose
+// AllDevices, but outputs have to choose one port.
+namespace detail
+{
+
+inline std::string midiPortName(midi::Port &port, int device_id, bool suffix_only) {
+	auto name = port.getDeviceName(device_id);
+	return (suffix_only && device_id != midi::Port::AllDevices) ? name + " only" : name;
 }
 
-// Builds the "MIDI port" submenu. Place it directly above "MIDI channel":
-// the two read as a pair, one narrowing by jack and the other by channel.
-inline MenuItem *createMidiPortMenuItem(midi::Input &input) {
+inline MenuItem *createMidiPortMenu(midi::Port &port, std::vector<int> ids, bool suffix_only) {
 	return createSubmenuItem(
-		"MIDI port", [&] { return midiPortMenuName(input, input.getDeviceId()); }, [&](Menu *menu) {
-			auto add_port = [&](int device_id) {
+		"MIDI port",
+		[&port, suffix_only] { return midiPortName(port, port.getDeviceId(), suffix_only); },
+		[&port, ids, suffix_only](Menu *menu) {
+			for (auto device_id : ids) {
 				menu->addChild(createCheckMenuItem(
-					midiPortMenuName(input, device_id),
+					midiPortName(port, device_id, suffix_only),
 					"",
-					[&, device_id]() { return input.getDeviceId() == device_id; },
-					[&, device_id]() { input.setDeviceId(device_id); }));
-			};
-
-			add_port(midi::Port::AllDevices);
-			for (auto device_id : input.getDeviceIds())
-				add_port(device_id);
+					[&port, device_id] { return port.getDeviceId() == device_id; },
+					[&port, device_id] { port.setDeviceId(device_id); }));
+			}
 		});
+}
+
+} // namespace detail
+
+inline MenuItem *createMidiPortMenuItem(midi::Input &input) {
+	std::vector<int> ids{midi::Port::AllDevices};
+	for (auto device_id : input.getDeviceIds())
+		ids.push_back(device_id);
+
+	return detail::createMidiPortMenu(input, ids, true);
+}
+
+inline MenuItem *createMidiPortMenuItem(midi::Output &output) {
+	return detail::createMidiPortMenu(output, output.getDeviceIds(), false);
 }
 
 } // namespace rack::core

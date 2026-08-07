@@ -247,8 +247,9 @@ struct Gate_MIDIWidget : ModuleWidget {
 
 		menu->addChild(createMenuItem("Reset MIDI (Panic)", "", [=]() { module->midiOutput.panic(); }));
 
-		// METAMODULE: add MIDI Channel to context menu:
+		// METAMODULE: add MIDI Port and Channel to context menu:
 		menu->addChild(new MenuSeparator);
+		menu->addChild(createMidiPortMenuItem(module->midiOutput));
 		menu->addChild(createSubmenuItem(
 			"MIDI channel",
 			[=] {
