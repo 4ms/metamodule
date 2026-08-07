@@ -10,14 +10,9 @@
 namespace MetaModule
 {
 
-// Write the console buffers to the UART, as needed. Runs on the M4 in the main
-// context.
-//
-// TX uses DMA: process() assembles a chunk into the bounce buffer and starts a
-// DMA transfer (DMA1 Stream1, DMAMUX1 request UART7_TX), and later calls just poll
-// for completion -- the M4 spends no cycles feeding the UART. If the DMA ever
-// reports a transfer error, we permanently fall back to topping up the UART TX
-// FIFO directly (still non-blocking).
+// TX uses DMA: process() copies into the tx buffer and starts a DMA transfer
+// If the DMA ever errors out, we permanently fall back to pushing bytes into
+// the UART TX FIFO directly
 //
 // Typing 'c' into the console enables per-core colored output; 'm' disables it
 class UartConsoleDrain {
@@ -48,23 +43,27 @@ public:
 		poll_rx(uart);
 
 		if (dma_running) {
-			if (DMA1->LISR & DMA_LISR_TEIF1) {
-				// Bus error reading the bounce buffer or writing TDR: give up
-				// on DMA for good, drain via the TX FIFO from now on
-				auto flags = DMA1->LISR;
-				clear_dma_flags();
-				dma_running = false;
+			const auto flags = DMA1->LISR;
+
+			if (flags & DMA_LISR_TEIF1) {
+				// Bus error reading the bounce buffer or writing TDR: give up dma for good
+				stop_dma();
 				dma_ok = false;
 				unlock();
-				// Report through the very console we drain: this lands in the
-				// M4's buffer and comes out via the FIFO fallback path below.
-				// Deliberately not pr_err(): must be visible at any log level.
+				// Deliberately not pr_err(): must be visible at any log level
 				printf("<console: UART TX DMA error (LISR=0x%08x), using FIFO fallback>\n", (unsigned)flags);
-			} else if (DMA1->LISR & DMA_LISR_TCIF1) {
-				clear_dma_flags();
-				dma_running = false;
+
+			} else if (flags & (DMA_LISR_FEIF1 | DMA_LISR_DMEIF1)) {
+				// Underrun: the memory bus wasn't granted before UART7 asked for its next byte.
+				tx_pos = tx_len - DMA1_Stream1->NDTR;
+				stop_dma();
+				unlock();
+
+			} else if (flags & DMA_LISR_TCIF1) {
+				stop_dma();
 				tx_pos = tx_len = 0;
 				unlock();
+
 			} else {
 				return; // still transferring
 			}
@@ -78,15 +77,12 @@ public:
 				return;
 		}
 
-		// Exclude cores doing direct (unbuffered) UART writes while we transmit.
-		// Those only happen during early boot, so contention is rare: just try
-		// again on the next process() call.
+		// Lock the UART semaphore while we transmit (held until xfer completes)
 		if (mdrivlib::HWSemaphore<UartLock>::lock(M4LockId) != mdrivlib::HWSemaphoreFlag::LockedOk)
 			return;
 
 		if (dma_ok) {
 			start_dma(&bounce[tx_pos], tx_len - tx_pos);
-			// hold the lock until the transfer completes
 		} else {
 			while (tx_pos < tx_len && (uart->ISR & USART_ISR_TXE_TXFNF))
 				uart->TDR = bounce[tx_pos++];
@@ -121,12 +117,12 @@ private:
 		clear_dma_flags();
 
 		DMA1_Stream1->PAR = reinterpret_cast<uint32_t>(&UartLog::uart_regs()->TDR);
-		// Byte-wise, memory-increment, memory-to-peripheral, direct mode
+		// Byte-wise, memory-increment, memory-to-peripheral
 		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0;
-		DMA1_Stream1->FCR = 0;
 
-		// UART7 raises a DMA request whenever its TX FIFO has room. Harmless
-		// for direct (CPU putchar) writes while the stream is disabled.
+		// Enable FIFO to smooth out memory bus delays
+		DMA1_Stream1->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0 | DMA_SxFCR_FTH_1;
+
 		UartLog::uart_regs()->CR3 |= USART_CR3_DMAT;
 	}
 
@@ -138,13 +134,19 @@ private:
 		dma_running = true;
 	}
 
+	void stop_dma() {
+		DMA1_Stream1->CR &= ~DMA_SxCR_EN;
+		while (DMA1_Stream1->CR & DMA_SxCR_EN)
+			;
+		clear_dma_flags();
+		dma_running = false;
+	}
+
 	static void clear_dma_flags() {
 		DMA1->LIFCR = DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
 	}
 
-	// The M4 sees MCU SRAM (code/stack, where this object lives) at the
-	// 0x10000000 alias, but the other bus masters -- including DMA1 -- address
-	// the same RAM at 0x30000000. Translate for the DMA.
+	// The M4 sees 0x10000000, but DMA sees 0x30000000 (maybe? TODO: this works but is it right?)
 	static uint32_t dma_address(const void *p) {
 		auto addr = reinterpret_cast<uint32_t>(p);
 		if (addr >= 0x1000'0000 && addr < 0x1006'0000)
