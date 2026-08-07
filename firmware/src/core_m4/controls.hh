@@ -11,6 +11,7 @@
 #include "expander_bus/control_expander.hh"
 #include "metaparams.hh"
 #include "midi/midi_message.hh"
+#include "midi/midi_stream_parser.hh"
 #include "midi_controls.hh"
 #include "midi_packet_monitor.hh"
 #include "param_block.hh"
@@ -50,6 +51,8 @@ private:
 
 	void parse_midi();
 	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
+	void read_midi_exp_rx();
+	void clear_rx_message();
 	void update_midi_connected();
 	void update_control_expander();
 	void update_rotary();
@@ -77,12 +80,21 @@ private:
 	ControlExpanderManager control_expander;
 	std::array<Toggler, Expander::Button::NumTotalButtons> ext_buttons{};
 
-	// MIDI. Host and device are never active simultaneously (single OTG core),
+	// MIDI Host and device are never active simultaneously
 	// so both feed the same _midi_rx_buf and TX goes to whichever is connected.
 	MidiHost &_midi_host;
 	UsbMidiDevice &_midi_device;
 	UsbManager &_usb;
-	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
+	LockFreeFifoSpsc<MidiMessage, 256> _midi_usb_rx_buf;
+
+	struct PortedMidiMessage {
+		MidiMessage msg{};
+		Midi::Event::Port port{};
+	};
+	LockFreeFifoSpsc<PortedMidiMessage, 64> _midi_exp_rx_buf;
+
+	std::array<Midi::StreamParser, 2> _midi_exp_parsers;
+
 	MidiPacketMonitor _tx_monitor{"TX"};
 	MidiPacketMonitor _rx_monitor{"RX"};
 	Midi::MessageParser _midi_parser;

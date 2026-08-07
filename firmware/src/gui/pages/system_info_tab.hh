@@ -7,6 +7,7 @@
 #include "ld.h"
 #include "metaparams.hh"
 #include "params/expanders.hh"
+#include "params/midi_params.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "usb/usb_status_reader.hh"
 #include "wifi/detection.hh"
@@ -215,7 +216,8 @@ struct InfoTab : SystemMenuTab {
 		lv_show(ui_SystemMenuButExpander);
 
 		lv_label_set_text(midi_exp_label,
-						  metaparams.midi_exp_connected ? "MetaMIDI connected" : "No MetaMIDI found");
+						  (metaparams.midi_ports_connected & ~(1 << Midi::Event::USB)) ? "MetaMIDI connected" :
+																						 "No MetaMIDI found");
 		lv_show(midi_exp_label);
 
 		update_usb_status();

@@ -50,7 +50,6 @@ public:
 			expander.found = true;
 			expander.driver.start();
 
-			// Fresh error budget: this may be a reconnect
 			num_errors[idx] = 0;
 			num_error_retries[idx] = 0;
 

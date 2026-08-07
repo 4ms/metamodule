@@ -11,14 +11,14 @@ struct AudioStreamMidi {
 	PatchPlayer &player;
 	SyncParams &sync_params;
 
-	bool last_connected = false;
+	uint8_t last_connected = false;
 
 	AudioStreamMidi(PatchPlayer &player, SyncParams &sync_params)
 		: player{player}
 		, sync_params{sync_params} {
 	}
 
-	void process(bool is_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg) {
+	void process(uint8_t ports_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg) {
 
 		if (event.type == Midi::Event::Type::PC) {
 			sync_params.midi_events.put(event);
@@ -30,7 +30,7 @@ struct AudioStreamMidi {
 
 		// Discard MIDI generated while not connected so it won't transmit
 		// on MIDI attachment
-		if (!is_connected) {
+		if (ports_connected == 0) {
 			while (MidiRouter::pop_outgoing_message())
 				;
 		}
@@ -38,15 +38,15 @@ struct AudioStreamMidi {
 		if (!player.is_loaded)
 			return;
 
-		if (is_connected && !last_connected) {
+		if (ports_connected && !last_connected) {
 			player.set_midi_connected();
-		} else if (!is_connected && last_connected) {
+		} else if (!ports_connected && last_connected) {
 			player.set_midi_disconnected();
 		}
 
-		last_connected = is_connected;
+		last_connected = ports_connected;
 
-		if (!is_connected)
+		if (!ports_connected)
 			return;
 
 		// Transfer MIDI RX message to router (from hardware)

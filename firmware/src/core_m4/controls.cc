@@ -53,7 +53,10 @@ void Controls::update_params() {
 
 		update_midi_connected();
 
-		cur_metaparams->midi_usb_connected = _midi_usb_connected;
+		uint8_t midi_con = _midi_usb_connected ? (1 << Midi::Event::USB) : 0;
+		if (control_expander.midi_expander_connected())
+			midi_con |= (1 << Midi::Event::DIN5) | (1 << Midi::Event::TRS);
+		cur_metaparams->midi_ports_connected = midi_con;
 
 		cur_metaparams->usb_connection = _usb.get_connection_status();
 
@@ -119,7 +122,6 @@ void Controls::update_midi_connected() {
 void Controls::update_control_expander() {
 	// Control expander
 	cur_metaparams->button_exp_connected = control_expander.button_expanders_connected();
-	cur_metaparams->midi_exp_connected = control_expander.midi_expander_connected();
 
 	uint32_t buttons_state = control_expander.get_buttons();
 	cur_metaparams->ext_buttons_high_events = 0;
@@ -166,25 +168,36 @@ void Controls::parse_midi() {
 		}
 	}
 
-	// Parse a MIDI message if available
-	if (auto msg = _midi_rx_buf.get(); msg.has_value()) {
+	// Parse a MIDI message if available.
+	// USB is drained first, but it can't starve the expander: this runs once per
+	// audio frame (~48kHz) and a MIDI jack tops out around 1500 messages/sec.
+	if (auto msg = _midi_usb_rx_buf.get(); msg.has_value()) {
 		cur_params->raw_msg = msg.value();
+		cur_params->midi_port = Midi::Event::Port::USB;
 		cur_params->midi_event = _midi_parser.parse(msg.value());
+		cur_params->midi_event.port = Midi::Event::Port::USB;
+
+	} else if (auto exp_msg = _midi_exp_rx_buf.get(); exp_msg.has_value()) {
+		cur_params->raw_msg = exp_msg->msg;
+		cur_params->midi_port = exp_msg->port;
+		cur_params->midi_event = _midi_parser.parse(exp_msg->msg);
+		cur_params->midi_event.port = exp_msg->port;
 
 	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence()) {
 		if (noteoff->type == Midi::Event::Type::None) {
 			_midi_usb_connected = false;
-			cur_metaparams->midi_usb_connected = _midi_usb_connected;
-			cur_params->raw_msg = MidiMessage{};
-			cur_params->midi_event.type = Midi::Event::Type::None;
+			cur_metaparams->midi_ports_connected &= ~Midi::Event::Port::USB;
+			clear_rx_message();
 		} else {
+			// The panic sequence is a USB-disconnect artifact, not something a jack sent
 			cur_params->midi_event = *noteoff;
+			cur_params->midi_event.port = Midi::Event::Port::USB;
 			cur_params->raw_msg = {0x80, noteoff->note, 0};
+			cur_params->midi_port = Midi::Event::Port::USB;
 		}
 
 	} else {
-		cur_params->raw_msg = MidiMessage{};
-		cur_params->midi_event.type = Midi::Event::Type::None;
+		clear_rx_message();
 	}
 }
 
@@ -225,12 +238,36 @@ void Controls::start() {
 	_midi_device.set_rx_callback([this](std::span<uint8_t> rxbuffer) { route_usb_midi_rx(rxbuffer); });
 }
 
+void Controls::clear_rx_message() {
+	cur_params->raw_msg = MidiMessage{};
+	cur_params->midi_port = 0;
+	cur_params->midi_event.type = Midi::Event::Type::None;
+	cur_params->midi_event.port = 0;
+}
+
+// Runs on the main loop. The spans point into the expander driver's RX buffer
+// and are only valid until its next turn on the bus, so they're parsed here and
+// the results queued for parse_midi() to pick up.
+void Controls::read_midi_exp_rx() {
+	using Jack = MidiExpanderManager::Jack;
+	using Port = Midi::Event::Port;
+
+	const auto payloads = control_expander.take_midi_rx();
+
+	for (auto jack : {Jack::Din, Jack::Trs}) {
+		for (auto byte : payloads[jack]) {
+			if (auto msg = _midi_exp_parsers[jack].parse(byte))
+				_midi_exp_rx_buf.put({*msg, (jack == Jack::Din) ? Port::DIN5 : Port::TRS});
+		}
+	}
+}
+
 void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
 	_rx_monitor.add_urb(rxbuffer.size());
 	while (rxbuffer.size() >= 4) {
 		auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 		_rx_monitor.log(msg.raw());
-		_midi_rx_buf.put(msg);
+		_midi_usb_rx_buf.put(msg);
 		rxbuffer = rxbuffer.subspan(4);
 	}
 }
@@ -238,6 +275,7 @@ void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
 void Controls::process() {
 	sense_pin_reader.update();
 	control_expander.update();
+	read_midi_exp_rx();
 
 	auto now = HAL_GetTick();
 	_tx_monitor.print_report(now);

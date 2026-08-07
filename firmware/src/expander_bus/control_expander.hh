@@ -83,12 +83,8 @@ public:
 		return midi.send(bytes, jack);
 	}
 
-	std::span<const uint8_t> get_midi_trs_rx() const {
-		return midi.trs_rx();
-	}
-
-	std::span<const uint8_t> get_midi_din_rx() const {
-		return midi.din_rx();
+	std::array<std::span<const uint8_t>, 2> take_midi_rx() {
+		return midi.take_rx_payloads();
 	}
 
 private:
