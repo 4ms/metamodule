@@ -63,6 +63,7 @@ class PageManager {
 
 	enum class MidiPCLoadState { Idle, Requesting, Loading };
 	PatchLocation midi_pc_target_loc{};
+	PageId midi_pc_target_page = PageId::PatchView;
 
 public:
 	PageBase *cur_page = &page_mainmenu;
@@ -275,6 +276,20 @@ public:
 					auto [filename, vol] = split_volume(entry.path);
 					midi_pc_target_loc = PatchLocation{std::string(filename), vol};
 
+					// Stay on a similar page after the new patch loads, if we're on a
+					// per-patch mapping page. Otherwise fall back to the Patch View page.
+					midi_pc_target_page = [this] {
+						switch (cur_page->id) {
+							case PageId::KnobSetView:
+							case PageId::KnobMap:
+								return PageId::KnobSetView;
+							case PageId::JackMapView:
+								return PageId::JackMapView;
+							default:
+								return PageId::PatchView;
+						}
+					}();
+
 					// Clear cc events so we don't change knobsets with stale events
 					for (auto &cc : info.params.midi_ccs)
 						cc.changed = false;
@@ -282,8 +297,17 @@ public:
 					auto result = patch_switch.jump_to_patch(midi_pc_target_loc, [this]() {
 						PageArguments args;
 						args.patch_loc_hash = PatchLocHash{midi_pc_target_loc};
+
+						if (midi_pc_target_page == PageId::KnobSetView)
+							args.view_knobset_id = page_list.get_active_knobset();
+
+						if (midi_pc_target_page != PageId::PatchView) {
+							std::string msg = "MIDI PC: " + info.open_patch_manager.get_view_patch_filename();
+							info.notify_queue.put({msg, Notification::Priority::Status, 1000});
+						}
+
 						gui_state.force_redraw_patch = true;
-						page_list.request_new_page(PageId::PatchView, args);
+						page_list.request_new_page_no_history(midi_pc_target_page, args);
 						info.patch_playloader.request_load_view_patch();
 					});
 					if (!result.success) {
