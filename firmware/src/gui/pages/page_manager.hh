@@ -297,10 +297,17 @@ public:
 					auto result = patch_switch.jump_to_patch(midi_pc_target_loc, [this]() {
 						PageArguments args;
 						args.patch_loc_hash = PatchLocHash{midi_pc_target_loc};
+
 						if (midi_pc_target_page == PageId::KnobSetView)
 							args.view_knobset_id = page_list.get_active_knobset();
+
+						if (midi_pc_target_page != PageId::PatchView) {
+							std::string msg = "MIDI PC: " + info.open_patch_manager.get_view_patch_filename();
+							info.notify_queue.put({msg, Notification::Priority::Status, 1000});
+						}
+
 						gui_state.force_redraw_patch = true;
-						page_list.request_new_page(midi_pc_target_page, args);
+						page_list.request_new_page_no_history(midi_pc_target_page, args);
 						info.patch_playloader.request_load_view_patch();
 					});
 					if (!result.success) {
