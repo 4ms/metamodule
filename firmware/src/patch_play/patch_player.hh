@@ -564,7 +564,7 @@ public:
 		// Update knobs connected to this CC
 		if (ccnum < midi_cc_knob_maps.size()) {
 			for (auto &mm : midi_cc_knob_maps[ccnum]) {
-				if (mm.module_id < num_modules) {
+				if (mm.module_id < num_modules && Midi::port_allows(mm.midi_port_mask, port)) {
 					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
 						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f));
 					}
@@ -582,6 +582,9 @@ public:
 
 		for (auto &mm : midi_note_knob_maps[note_num]) {
 			if (mm.module_id >= num_modules)
+				continue;
+
+			if (!Midi::port_allows(mm.midi_port_mask, port))
 				continue;
 
 			if (mm.midi_chan > 0 && mm.midi_chan != (midi_chan + 1))
@@ -873,6 +876,7 @@ public:
 				found->max = map.max;
 				found->curve_type = map.curve_type;
 				found->midi_chan = map.midi_chan;
+				found->midi_port_mask = map.midi_port_mask;
 				if (map.panel_knob_id < PanelDef::NumKnobs)
 					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
 			}

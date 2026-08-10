@@ -5,15 +5,19 @@
 
 struct TestModule : public CoreProcessor {
 	static constexpr unsigned NumJacks = 4;
+	static constexpr unsigned NumParams = 8;
 
 	// Mono values
 	std::array<float, NumJacks> outs{};
+	std::array<float, NumParams> params{};
 
 	void update() override {
 	}
 	void set_samplerate(float sr) override {
 	}
 	void set_param(int param_id, float val) override {
+		if ((unsigned)param_id < NumParams)
+			params[param_id] = val;
 	}
 
 	void set_input(int input_id, float val) override {

@@ -30,6 +30,12 @@ struct AddMapPopUp {
 
 		lv_obj_set_width(midi_channel_dropdown, LV_PCT(100));
 
+		midi_port_dropdown = create_midi_map_dropdown(ui_AddMapPopUp, "All Ports\nUSB only\nTRS only\nDIN5 only");
+		lv_obj_set_height(midi_port_dropdown, 28);
+		lv_obj_move_to_index(midi_port_dropdown, -3);
+		lv_obj_set_width(midi_port_dropdown, LV_PCT(100));
+
+		lv_group_add_obj(popup_group, midi_port_dropdown);
 		lv_group_add_obj(popup_group, midi_channel_dropdown);
 		lv_group_add_obj(popup_group, ui_CancelAdd);
 		lv_group_add_obj(popup_group, ui_OkAdd);
@@ -37,15 +43,19 @@ struct AddMapPopUp {
 		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(midi_channel_dropdown, drop_callback, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(midi_port_dropdown, drop_callback, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_hide(midi_channel_dropdown);
+		lv_hide(midi_port_dropdown);
 	}
 
 	void prepare_focus(lv_group_t *group, lv_obj_t *base) {
 		base_group = group;
 		lv_obj_set_parent(ui_AddMapPopUp, base);
 		midi_learn_channel = true;
+		midi_learn_port = true;
 		lv_dropdown_set_selected(midi_channel_dropdown, 0);
+		lv_dropdown_set_selected(midi_port_dropdown, 0);
 	}
 
 	void show(uint32_t knobset_id, uint16_t param_id, uint16_t module_id, PatchData *patchdata) {
@@ -58,6 +68,7 @@ struct AddMapPopUp {
 		if (knobset_id == PatchData::MIDIKnobSet) {
 			lv_label_set_text(ui_AddMappingTitle, "Add a map: Send MIDI Note or CC");
 			lv_show(midi_channel_dropdown);
+			lv_show(midi_port_dropdown);
 		} else {
 			if (metaparams.button_exp_connected != 0) {
 				lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob or press a button");
@@ -65,6 +76,7 @@ struct AddMapPopUp {
 				lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob");
 			}
 			lv_hide(midi_channel_dropdown);
+			lv_hide(midi_port_dropdown);
 		}
 		lv_label_set_text(ui_MapDetected, "");
 		lv_label_set_text(ui_MapExistsLabel, "");
@@ -84,6 +96,9 @@ struct AddMapPopUp {
 	void hide() {
 		if (lv_dropdown_is_open(midi_channel_dropdown)) {
 			lv_dropdown_close(midi_channel_dropdown);
+			lv_group_set_editing(popup_group, false);
+		} else if (lv_dropdown_is_open(midi_port_dropdown)) {
+			lv_dropdown_close(midi_port_dropdown);
 			lv_group_set_editing(popup_group, false);
 		} else {
 			visible = false;
@@ -107,6 +122,7 @@ struct AddMapPopUp {
 				if (cc.num >= 0) {
 					if (midi_learn_channel && cc.channel < 16)
 						lv_dropdown_set_selected(midi_channel_dropdown, cc.channel + 1);
+					learn_port(cc.port);
 
 					selected_knob = MidiCC0 + cc.num;
 					selected_midi_chan = lv_dropdown_get_selected(midi_channel_dropdown);
@@ -120,6 +136,7 @@ struct AddMapPopUp {
 				if (note.num >= 0) {
 					if (midi_learn_channel && note.channel < 16)
 						lv_dropdown_set_selected(midi_channel_dropdown, note.channel + 1);
+					learn_port(note.port);
 
 					selected_knob = MidiGateNote0 + note.num;
 					selected_midi_chan = lv_dropdown_get_selected(midi_channel_dropdown);
@@ -163,6 +180,17 @@ struct AddMapPopUp {
 		}
 	}
 
+	void learn_port(uint8_t port) {
+		if (midi_learn_port && port < Midi::NumPorts)
+			lv_dropdown_set_selected(midi_port_dropdown, port + 1);
+	}
+
+	// Index 0 is "All Ports"; the rest are Midi::Event::Port values offset by one
+	uint8_t selected_port_mask() const {
+		auto sel = lv_dropdown_get_selected(midi_port_dropdown);
+		return sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
+	}
+
 	void set_midi_detected_name() {
 		if (!selected_knob)
 			return;
@@ -201,6 +229,7 @@ struct AddMapPopUp {
 
 				} else if (map.is_midi()) {
 					map.midi_chan = page->selected_midi_chan;
+					map.midi_port_mask = page->selected_port_mask();
 					page->patch_mod_queue.put(AddMidiMap{.map = map});
 				}
 			}
@@ -216,7 +245,12 @@ struct AddMapPopUp {
 			return;
 		auto page = static_cast<AddMapPopUp *>(event->user_data);
 
-		page->midi_learn_channel = false;
+		if (event->target == page->midi_channel_dropdown)
+			page->midi_learn_channel = false;
+
+		if (event->target == page->midi_port_dropdown)
+			page->midi_learn_port = false;
+
 		page->selected_midi_chan = lv_dropdown_get_selected(page->midi_channel_dropdown);
 		page->set_midi_detected_name();
 	}
@@ -225,8 +259,10 @@ struct AddMapPopUp {
 	lv_group_t *base_group = nullptr;
 	lv_group_t *popup_group = nullptr;
 	lv_obj_t *midi_channel_dropdown;
+	lv_obj_t *midi_port_dropdown;
 	MetaParams const &metaparams;
 	bool midi_learn_channel = true;
+	bool midi_learn_port = true;
 
 	PatchData *patch = nullptr;
 
