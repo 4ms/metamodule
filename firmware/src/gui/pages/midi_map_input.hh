@@ -13,6 +13,8 @@ namespace MetaModule
 {
 
 struct MidiMapPopup {
+	lv_obj_t *midi_port_dropdown;
+	lv_obj_t *midi_port_label;
 	lv_obj_t *midi_channel_dropdown;
 	lv_obj_t *midi_channel_label;
 	lv_obj_t *title_header;
@@ -23,6 +25,11 @@ struct MidiMapPopup {
 
 		title_header = create_title_level_2(ui_MIDIMapPanel, "Map MIDI to jack");
 		lv_obj_move_to_index(title_header, 0);
+
+		midi_port_label = create_midi_map_label(ui_MidiMapCont, "Port: ");
+		lv_obj_add_flag(midi_port_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		midi_port_dropdown = create_midi_map_dropdown(ui_MidiMapCont, "All\nUSB\nTRS\nDIN5");
+		lv_obj_set_width(midi_port_dropdown, 90);
 
 		midi_channel_label = create_midi_map_label(ui_MidiMapCont, "Channel: ");
 		lv_obj_add_flag(midi_channel_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
@@ -39,6 +46,8 @@ struct MidiMapPopup {
 		lv_obj_set_style_border_width(div, 1, 0);
 		lv_obj_set_style_border_color(div, lv_color_white(), 0);
 
+		lv_obj_move_to_index(midi_port_label, -12);
+		lv_obj_move_to_index(midi_port_dropdown, -11);
 		lv_obj_move_to_index(midi_channel_label, -10);
 		lv_obj_move_to_index(midi_channel_dropdown, -9);
 		lv_obj_move_to_index(div, -8);
@@ -48,7 +57,7 @@ struct MidiMapPopup {
 			{.checkbox = ui_MidiMapCCCheck, .dropdowns = {ui_MidiMapCCDrop}},
 			{.checkbox = ui_MidiMapPitchWheelCheck, .dropdowns = {}},
 			{.checkbox = ui_MidiMapGateCheck, .dropdowns = {ui_MidiMapGateDrop}},
-			{.checkbox = nullptr, .dropdowns = {midi_channel_dropdown}},
+			{.checkbox = nullptr, .dropdowns = {midi_port_dropdown, midi_channel_dropdown}},
 			{.checkbox = ui_MidiMapClockCheck, .dropdowns = {ui_MidiMapClockDrop}},
 			{.checkbox = ui_MidiMapTransportCheck, .dropdowns = {ui_MidiMapTransportDrop}},
 		}};
@@ -138,24 +147,22 @@ struct MidiMapPopup {
 
 	void update() {
 		if (midi_learn) {
-			for (auto ccnum = 0u; auto &cc : params.midi_ccs) {
-				if (cc.changed) {
-					cc.changed = 0;
-					if (ccnum < lv_dropdown_get_option_cnt(ui_MidiMapCCDrop))
-						lv_dropdown_set_selected(ui_MidiMapCCDrop, ccnum);
-					if (midi_learn_channel && cc.val < 16)
-						lv_dropdown_set_selected(midi_channel_dropdown, cc.val + 1);
-				}
-				ccnum++;
+			auto &cc = params.last_midi_cc;
+			if (cc.num >= 0) {
+				if (cc.num < lv_dropdown_get_option_cnt(ui_MidiMapCCDrop))
+					lv_dropdown_set_selected(ui_MidiMapCCDrop, cc.num);
+				if (midi_learn_channel && cc.channel < 16)
+					lv_dropdown_set_selected(midi_channel_dropdown, cc.channel + 1);
+				cc.num = -1;
 			}
 
 			auto &note = params.last_midi_note;
-			if (note.changed) {
-				note.changed = 0;
-				if (note.val < lv_dropdown_get_option_cnt(ui_MidiMapGateDrop))
-					lv_dropdown_set_selected(ui_MidiMapGateDrop, note.val);
-				if (midi_learn_channel && params.last_midi_note_channel < 16)
-					lv_dropdown_set_selected(midi_channel_dropdown, params.last_midi_note_channel + 1);
+			if (note.num >= 0) {
+				if (note.num < lv_dropdown_get_option_cnt(ui_MidiMapGateDrop))
+					lv_dropdown_set_selected(ui_MidiMapGateDrop, note.num);
+				if (midi_learn_channel && note.channel < 16)
+					lv_dropdown_set_selected(midi_channel_dropdown, note.channel + 1);
+				note.num = -1;
 			}
 		}
 	}
@@ -260,7 +267,22 @@ struct MidiMapPopup {
 				  (source_check != ui_MidiMapClockCheck) && (source_check != ui_MidiMapTransportCheck));
 	}
 
+	// Port mask for the current dropdown selection: index 0 is "All", and the rest
+	// are Midi::Event::Port values offset by one.
+	uint8_t selected_port_mask() {
+		auto sel = lv_dropdown_get_selected(midi_port_dropdown);
+		return sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
+	}
+
 	std::optional<MidiMappings> calc_midi_signal_number() {
+		auto signal = calc_midi_signal();
+		if (!signal)
+			return std::nullopt;
+
+		return Midi::set_port_mask(*signal, selected_port_mask());
+	}
+
+	std::optional<MidiMappings> calc_midi_signal() {
 		auto midi_chan = lv_dropdown_get_selected(midi_channel_dropdown);
 
 		auto set_channels = [=](MidiMappings m, unsigned offset) -> std::optional<MidiMappings> {
@@ -339,6 +361,9 @@ struct MidiMapPopup {
 	void select_options(uint32_t panel_jack_id) {
 		auto midi_chan = Midi::midi_channel(panel_jack_id);
 		lv_dropdown_set_selected(midi_channel_dropdown, midi_chan);
+
+		auto port = Midi::selected_port(Midi::port_mask(panel_jack_id));
+		lv_dropdown_set_selected(midi_port_dropdown, port.has_value() ? *port + 1 : 0);
 
 		auto polychan = Midi::polychan(panel_jack_id); //1-8 for poly note chan, or nullopt for poly cables
 		auto midi_jack_id = Midi::strip_midi_channel(panel_jack_id);
@@ -434,7 +459,6 @@ protected:
 	lv_group_t *group;
 	lv_group_t *orig_group{};
 	ParamsMidiState &params;
-	uint16_t panel_jack_id = MidiMonoNoteJack;
 
 	bool visible = false;
 	bool done = true;

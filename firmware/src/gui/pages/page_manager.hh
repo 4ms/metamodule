@@ -185,15 +185,16 @@ public:
 				std::optional<int> next_knobset = std::nullopt;
 				int cur_knobset = info.page_list.get_active_knobset();
 
-				// Detecrt MIDI CC
+				// Detect MIDI CC
 				if (info.settings.midi.knobset_control == MidiSettings::KnobsetControl::Enabled) {
-					auto &cc = info.params.midi_ccs[info.settings.midi.knobset_cc & 127];
-
+					auto last_cc = info.params.last_midi_cc;
+					int8_t ks_cc = info.settings.midi.knobset_cc & 127;
 					auto midi_chan = info.settings.midi.knobset_channel - 1;
-					if (cc.changed && cc.val == midi_chan) {
-						if (cc.value != cur_knobset && cc.value < num_knobsets) {
-							next_knobset = cc.value;
-							cc.changed = false;
+
+					if (last_cc.num == ks_cc && last_cc.channel == midi_chan) {
+						if (last_cc.value != cur_knobset && last_cc.value < num_knobsets) {
+							next_knobset = last_cc.value;
+							last_cc.num = -1;
 						}
 					}
 				}
@@ -266,18 +267,15 @@ public:
 		if (!info.settings.midi_pc_patch_load.enabled)
 			return;
 
-		if (auto &pc = info.params.last_midi_pc; pc.changed) {
-			pc.changed = false;
-
+		if (auto &pc = info.params.last_midi_pc; pc.num >= 0) {
 			for (auto const &entry : info.settings.midi_pc_patch_load.entries) {
 				bool chan_match = (entry.channel == 0) || (entry.channel == (uint32_t)pc.channel + 1);
-				if (chan_match && entry.pc == pc.pc) {
+				if (chan_match && entry.pc == (uint32_t)pc.num) {
 					auto [filename, vol] = split_volume(entry.path);
 					midi_pc_target_loc = PatchLocation{std::string(filename), vol};
 
 					// Clear cc events so we don't change knobsets with stale events
-					for (auto &cc : info.params.midi_ccs)
-						cc.changed = false;
+					info.params.last_midi_cc.num = -1;
 
 					auto result = patch_switch.jump_to_patch(midi_pc_target_loc, [this]() {
 						PageArguments args;
@@ -293,6 +291,7 @@ public:
 					}
 				}
 			}
+			pc.num = -1;
 		}
 	}
 

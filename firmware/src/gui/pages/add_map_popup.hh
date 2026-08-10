@@ -103,30 +103,28 @@ struct AddMapPopUp {
 
 			if (set_id == PatchData::MIDIKnobSet) {
 				// Detect MIDI CC
-				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
-					if (cc.changed) {
-						cc.changed = 0;
-						if (midi_learn_channel && cc.val < 16)
-							lv_dropdown_set_selected(midi_channel_dropdown, cc.val + 1);
+				auto &cc = params.last_midi_cc;
+				if (cc.num >= 0) {
+					if (midi_learn_channel && cc.channel < 16)
+						lv_dropdown_set_selected(midi_channel_dropdown, cc.channel + 1);
 
-						selected_knob = MidiCC0 + ccnum;
-						selected_midi_chan = lv_dropdown_get_selected(midi_channel_dropdown);
+					selected_knob = MidiCC0 + cc.num;
+					selected_midi_chan = lv_dropdown_get_selected(midi_channel_dropdown);
 
-						set_midi_detected_name();
-					}
-					ccnum++;
+					cc.num = -1;
+					set_midi_detected_name();
 				}
 
 				// Detect MIDI Note On/Off
 				auto &note = params.last_midi_note;
-				if (note.changed) {
-					note.changed = 0;
-					if (midi_learn_channel && params.last_midi_note_channel < 16)
-						lv_dropdown_set_selected(midi_channel_dropdown, params.last_midi_note_channel + 1);
+				if (note.num >= 0) {
+					if (midi_learn_channel && note.channel < 16)
+						lv_dropdown_set_selected(midi_channel_dropdown, note.channel + 1);
 
-					selected_knob = MidiGateNote0 + note.val;
+					selected_knob = MidiGateNote0 + note.num;
 					selected_midi_chan = lv_dropdown_get_selected(midi_channel_dropdown);
 
+					note.num = -1;
 					set_midi_detected_name();
 				}
 

@@ -53,7 +53,8 @@ struct RemoveJackMappings {
 };
 
 struct AddJackMapping {
-	uint16_t panel_jack_id;
+	// Full width: MIDI mappings carry channel and port bits above the jack id
+	uint32_t panel_jack_id;
 	Jack jack;
 	ElementType type;
 };

@@ -73,36 +73,36 @@ struct AudioStreamMidi {
 
 		// All other MIDI events: 150ns min (no listeners) + more... 150-600ns for some listeners
 		if (event.type == Midi::Event::Type::NoteOn) {
-			player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note), event.midi_chan);
-			player.set_midi_note_gate(event.poly_chan, 10.f, event.midi_chan);
-			player.set_midi_note_velocity(event.poly_chan, event.val, event.midi_chan);
-			player.set_midi_note_retrig(event.poly_chan, 10.f, event.midi_chan);
-			player.set_midi_gate(event.note, 10.f, event.midi_chan);
+			player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note), event.midi_chan, event.port);
+			player.set_midi_note_gate(event.poly_chan, 10.f, event.midi_chan, event.port);
+			player.set_midi_note_velocity(event.poly_chan, event.val, event.midi_chan, event.port);
+			player.set_midi_note_retrig(event.poly_chan, 10.f, event.midi_chan, event.port);
+			player.set_midi_gate(event.note, 10.f, event.midi_chan, event.port);
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::NoteOff) {
 			if (event.poly_chan < poly_num) {
-				player.set_midi_note_gate(event.poly_chan, 0, event.midi_chan);
+				player.set_midi_note_gate(event.poly_chan, 0, event.midi_chan, event.port);
 			}
-			player.set_midi_gate(event.note, 0, event.midi_chan);
+			player.set_midi_gate(event.note, 0, event.midi_chan, event.port);
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::Aft) {
-			player.set_midi_note_aftertouch(event.poly_chan, event.val, event.midi_chan);
+			player.set_midi_note_aftertouch(event.poly_chan, event.val, event.midi_chan, event.port);
 
 		} else if (event.type == Midi::Event::Type::ChanPress) {
 			for (unsigned i = 0; i < poly_num; i++)
-				player.set_midi_note_aftertouch(i, event.val, event.midi_chan);
+				player.set_midi_note_aftertouch(i, event.val, event.midi_chan, event.port);
 
 		} else if (event.type == Midi::Event::Type::CC) {
-			player.set_midi_cc(event.note, event.val, event.midi_chan);
+			player.set_midi_cc(event.note, event.val, event.midi_chan, event.port);
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::Bend) {
-			player.set_midi_cc(128, event.val, event.midi_chan);
+			player.set_midi_cc(128, event.val, event.midi_chan, event.port);
 
 		} else if (event.type == Midi::Event::Type::Time) {
-			player.send_midi_time_event(event.note, 10.f);
+			player.send_midi_time_event(event.note, 10.f, event.port);
 		}
 	}
 };

@@ -27,9 +27,8 @@ void ModuleViewPage::handle_quick_assign() {
 		metaparams.ext_buttons_high_events = 0;
 
 		if (gui_state.midi_quick_mapping_mode) {
-			for (auto &cc : params.midi_ccs)
-				cc.changed = false;
-			params.last_midi_note.changed = false;
+			params.last_midi_cc.num = -1;
+			params.last_midi_note.num = -1;
 		}
 	}
 
@@ -62,22 +61,20 @@ void ModuleViewPage::handle_quick_assign() {
 
 			if (gui_state.midi_quick_mapping_mode) {
 				// MIDI CC quick assign: hold encoder + send MIDI CC
-				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
-					if (cc.changed) {
-						cc.changed = 0; // Clear the flag
-						perform_midi_assign(MidiCC0 + ccnum, current_element);
-						roller_hover.force_redraw();
-						return;
-					}
-					ccnum++;
+				auto &cc = params.last_midi_cc;
+				if (cc.num >= 0) {
+					perform_midi_assign(MidiCC0 + cc.num, current_element);
+					roller_hover.force_redraw();
+					cc.num = -1; // Clear the flag
+					return;
 				}
 
 				// MIDI Note quick assign: hold encoder + send MIDI note
 				auto &note = params.last_midi_note;
-				if (note.changed) {
-					note.changed = 0; // Clear the flag
-					perform_midi_assign(MidiGateNote0 + note.val, current_element);
+				if (note.num >= 0) {
+					perform_midi_assign(MidiGateNote0 + note.num, current_element);
 					roller_hover.force_redraw();
+					note.num = -1; // Clear the flag
 					return;
 				}
 			}
