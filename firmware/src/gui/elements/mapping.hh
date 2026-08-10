@@ -11,14 +11,14 @@ namespace MetaModule
 namespace ElementMapping
 {
 
-inline std::optional<uint16_t>
+inline std::optional<uint32_t>
 find_mapping(const BaseElement &, const PatchData &, uint16_t, unsigned, ElementCount::Indices const) {
 	return {};
 }
 
 // Finds mappings in the given knob_set OR in the MIDI knob set
 // If there are mappings in both, then it prioritizes returning the non-MIDI mapping
-inline std::optional<uint16_t> find_mapping(const ParamElement &,
+inline std::optional<uint32_t> find_mapping(const ParamElement &,
 											const PatchData &patch,
 											uint16_t module_idx,
 											unsigned knob_set,
@@ -41,7 +41,7 @@ inline std::optional<uint16_t> find_mapping(const ParamElement &,
 // Finds panel mappings to the given input jack.
 // If knob_set is MIDIKnobSet, then it will look for MIDI maps, otherwise it returns the first mapping it finds
 // TODO: make this prioritize non-MIDI mappings?
-inline std::optional<uint16_t> find_mapping(const JackInput &,
+inline std::optional<uint32_t> find_mapping(const JackInput &,
 											const PatchData &patch,
 											uint16_t module_idx,
 											unsigned knob_set,
@@ -58,7 +58,7 @@ inline std::optional<uint16_t> find_mapping(const JackInput &,
 
 // Finds panel mappings to the given output jack
 // We don't support MIDI output maps, so the knob_set parameter is ignored
-inline std::optional<uint16_t> find_mapping(const JackOutput &,
+inline std::optional<uint32_t> find_mapping(const JackOutput &,
 											const PatchData &patch,
 											uint16_t module_idx,
 											unsigned knob_set,
