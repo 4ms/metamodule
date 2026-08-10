@@ -143,6 +143,7 @@ struct MidiMapPopup {
 		visible = true;
 		done = false;
 		midi_learn_channel = true;
+		midi_learn_port = true;
 	}
 
 	void update() {
@@ -153,6 +154,7 @@ struct MidiMapPopup {
 					lv_dropdown_set_selected(ui_MidiMapCCDrop, cc.num);
 				if (midi_learn_channel && cc.channel < 16)
 					lv_dropdown_set_selected(midi_channel_dropdown, cc.channel + 1);
+				learn_port(cc.port);
 				cc.num = -1;
 			}
 
@@ -162,9 +164,15 @@ struct MidiMapPopup {
 					lv_dropdown_set_selected(ui_MidiMapGateDrop, note.num);
 				if (midi_learn_channel && note.channel < 16)
 					lv_dropdown_set_selected(midi_channel_dropdown, note.channel + 1);
+				learn_port(note.port);
 				note.num = -1;
 			}
 		}
+	}
+
+	void learn_port(uint8_t port) {
+		if (midi_learn_port && port < Midi::NumPorts)
+			lv_dropdown_set_selected(midi_port_dropdown, port + 1);
 	}
 
 	void hide() {
@@ -240,9 +248,12 @@ struct MidiMapPopup {
 		if (!page)
 			return;
 
-		// Channel dropdown: if user sets it manually then don't overwrite with midi learn
+		// Channel and Port dropdowns: if user sets one manually then don't overwrite with midi learn
 		if (event->target == page->midi_channel_dropdown)
 			page->midi_learn_channel = false;
+
+		if (event->target == page->midi_port_dropdown)
+			page->midi_learn_port = false;
 
 		auto source_check = static_cast<lv_obj_t *>(lv_obj_get_user_data(event->target));
 		if (!source_check)
@@ -464,6 +475,7 @@ protected:
 	bool done = true;
 	bool midi_learn = true;
 	bool midi_learn_channel = true;
+	bool midi_learn_port = true;
 
 	std::function<void(std::optional<MidiMappings>)> callback;
 
