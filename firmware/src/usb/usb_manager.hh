@@ -12,28 +12,6 @@
 #include "usb/usb_host_manager.hh"
 #include "usb/usb_role_mode.hh"
 
-// Set to 1 to build the static sink+host characterization firmware:
-// - FUSB302 presents Rd on both CCs, statically -- no toggling, no probes, no
-//   PD, nothing ever perturbs the CC lines
-// - The host data stack (HCD) runs from boot; the device stack (PCD) never
-//   starts, so OUR D+ pull-up never appears: every D+ edge on a scope is the
-//   partner's
-// - VBUS_ENABLE is never driven
-// - One compact log line per 200ms: CC levels, VBUS, HPRT, attach state.
-// If the partner enumerates, the full MIDI path runs normally.
-// For characterizing partners like the OXI One "Device Self Powered".
-#ifndef USB_STATIC_SINK_HOST_TEST
-#define USB_STATIC_SINK_HOST_TEST 0
-#endif
-
-// Variant for the test above: 0 = present Rd (sink persona; partner Rp reads
-// BC_LVL 1/2), 1 = present Rp (source persona; partner Rd reads BC_LVL 1/2,
-// open line reads 3). Tests whether a partner (OXI One) latches its data role
-// from what its CC sees at cable-insert.
-#ifndef USB_STATIC_TEST_PRESENT_RP
-#define USB_STATIC_TEST_PRESENT_RP 1
-#endif
-
 namespace MetaModule
 {
 
@@ -78,7 +56,6 @@ class UsbManager {
 	// are handled at the CC level in the FUSB302 driver: on the CC-drop-with-
 	// VBUS signature it flips to a static-Rp host attach; see
 	// FUSB302::Device::attach_as_static_src.)
-	uint32_t static_test_log_tm = 0;
 	static constexpr uint32_t RolePhaseTimeoutMs = 2000;
 	static constexpr uint32_t PdTickMs = 50;
 	// If the partner hasn't enumerated us (nor swapped roles on its own) by
@@ -112,24 +89,8 @@ public:
 		else
 			pr_err("Can't communicate with FUSB302\n");
 
-#if USB_STATIC_SINK_HOST_TEST
-		pr_info("USB: STATIC %s+HOST TEST (HCD from boot, no PCD, no VBUS sourcing)\n",
-				USB_STATIC_TEST_PRESENT_RP ? "SRC (Rp presented)" : "SINK (Rd presented)");
-		usb_host.init();
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 3, 0);
-		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&UsbHostManager::hhcd); });
-#if USB_STATIC_TEST_PRESENT_RP
-		usbctl.configure_static_src();
-#else
-		usbctl.configure_static_sink();
-#endif
-		state = FUSB302::Device::ConnectedState::AsDevice;
-		host_fallback = true;
-		usb_host.start(false); // never source VBUS in this experiment
-		mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
-		return;
-#endif
+		if (start_static_sink_host_test())
+			return;
 
 		// tm = HAL_GetTick();
 		pr_dbg("Starting USB role polling\n");
@@ -242,21 +203,8 @@ public:
 	}
 
 	void process() {
-#if USB_STATIC_SINK_HOST_TEST
-		usb_host.process();
-		if (HAL_GetTick() - static_test_log_tm >= 200) {
-			static_test_log_tm = HAL_GetTick();
-			auto cc = usbctl.read_both_cc();
-			pr_info("[%u] CC1=%u CC2=%u VBUS=%u HPRT=%08x attached=%d\n",
-					(unsigned)static_test_log_tm,
-					cc.cc1,
-					cc.cc2,
-					cc.vbusok,
-					(unsigned)usb_host.read_port_status(),
-					(int)usb_host.is_device_attached());
-		}
-		return;
-#endif
+		if (process_static_sink_host_test())
+			return;
 
 		// INT_N is a level interrupt: the FUSB302 holds it asserted while any
 		// unmasked event is pending, releasing it only when handle_interrupt()
@@ -303,8 +251,6 @@ public:
 				usb_device.process();
 
 			update_role_fallback();
-		} else { // None or AsHost:
-				 // usb_device.process_disconnected();
 		}
 
 		// While forced to the device role and idle (no host attached), the port
@@ -323,6 +269,8 @@ public:
 				}
 			}
 		}
+
+		run_attach_cycle_test();
 
 		//DEBUG: toggle Pin0 when we're DRD polling
 		// if ((HAL_GetTick() - tm) > 400) {
@@ -448,6 +396,12 @@ public:
 	}
 
 private:
+	// Test/characterization hooks -- defined in usb_manager_tests.hh; no-ops
+	// unless the corresponding macro there is enabled
+	bool start_static_sink_host_test();
+	bool process_static_sink_host_test();
+	void run_attach_cycle_test();
+
 	// While CC-attached as a sink, a compliant partner is a host and will
 	// enumerate us promptly. A non-compliant self-powered device presenting
 	// Rp + VBUS never will. If we haven't been enumerated after a timeout,
@@ -587,3 +541,8 @@ private:
 	}
 };
 } // namespace MetaModule
+
+// Test/characterization builds (USB_STATIC_SINK_HOST_TEST, USB_STATIC_TEST_PRESENT_RP,
+// USB_ATTACH_CYCLE_TEST) are in usb_manager_tests.hh.
+// With the test macros off (the default) the hooks are no-ops.
+#include "usb/usb_manager_tests.hh"

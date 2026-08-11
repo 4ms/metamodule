@@ -1,4 +1,5 @@
 #include "conf/hsem_conf.hh"
+#include "console/uart_console_drain.hh"
 #include "controls.hh"
 #include "core_intercom/shared_memory.hh"
 #include "drivers/hsem.hh"
@@ -43,6 +44,11 @@ int main() {
 
 	pr_info("M4 starting\n");
 
+	// Drains all cores' buffered printf() output to the UART (in the loops below)
+	UartConsoleDrain console_drain{{SharedMemoryS::ptrs.console_a7_0_buff,
+									SharedMemoryS::ptrs.console_a7_1_buff,
+									SharedMemoryS::ptrs.console_m4_buff}};
+
 	// USB
 	UsbManager usb{{SharedMemoryS::ptrs.console_a7_0_buff,
 					SharedMemoryS::ptrs.console_a7_1_buff,
@@ -65,6 +71,11 @@ int main() {
 	WifiInterface::init(&fs_messages.get_patch_storage());
 	WifiInterface::start();
 
+	// From here on, this core's printf() is buffered and drained asynchronously
+	// by console_drain (everything above logs synchronously, so a hang during
+	// early M4 init still shows its logs)
+	UartLog::use_buffer(SharedMemoryS::ptrs.console_m4_buff);
+
 	// Controls
 	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host(), usb.get_midi_device(), usb};
 
@@ -78,12 +89,14 @@ int main() {
 		controls.process();
 		usb.process();
 		sd.process();
+		console_drain.process();
 	}
 
 	// Wait until drive is mounted
 	if (usb.is_drive_detected()) {
 		while (!usb.is_drive_mounted()) {
 			usb.process();
+			console_drain.process();
 		}
 	}
 
@@ -91,12 +104,8 @@ int main() {
 
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
-	// Publish the detailed USB connection status to the A7 (GUI + plugin SDK)
-	// whenever the connection changes OR the attached device's details are
-	// (re)captured. The device-info seq is needed because for a USB drive the
-	// connection enum flips at CLASS_SELECTED, before the descriptor details are
-	// captured at CLASS_ACTIVE -- so the enum alone would publish empty details.
 	UsbConnection last_published_conn = UsbConnection::None;
+	// usb.get_device_info_seq() increments on disconnection and class activation
 	uint32_t last_published_info_seq = usb.get_device_info_seq();
 
 	while (true) {
@@ -104,6 +113,7 @@ int main() {
 
 		usb.process();
 		sd.process();
+		console_drain.process();
 
 		auto conn = usb.get_connection_status();
 		auto info_seq = usb.get_device_info_seq();

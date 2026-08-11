@@ -115,12 +115,6 @@ struct UsbDeviceManager {
 			midi.process(); // idle-kick drain of any app-queued TX
 	}
 
-	void process_disconnected() {
-		if (mode == UsbDeviceMode::Cdc)
-			// Still process serial because if USB is not connected, we forward console messages to UART
-			serial.forward_to_uart();
-	}
-
 #ifdef USE_RAMDISK_USB
 	RamDiskOps ramdiskops;
 	UsbDriveDevice drive;
