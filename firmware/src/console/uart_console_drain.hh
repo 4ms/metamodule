@@ -14,10 +14,9 @@ namespace MetaModule
 // context.
 //
 // TX uses DMA: process() assembles a chunk into the bounce buffer and starts a
-// DMA transfer (DMA1 Stream1, DMAMUX1 request UART7_TX), and later calls just poll
-// for completion -- the M4 spends no cycles feeding the UART. If the DMA ever
-// reports a transfer error, we permanently fall back to topping up the UART TX
-// FIFO directly (still non-blocking).
+// DMA transfer.
+// If the DMA reports a transfer error, we permanently fall back feeding UART->TDR
+// fifo directly.
 //
 // Typing 'c' into the console enables per-core colored output; 'm' disables it
 class UartConsoleDrain {
@@ -56,9 +55,7 @@ public:
 				dma_running = false;
 				dma_ok = false;
 				unlock();
-				// Report through the very console we drain: this lands in the
-				// M4's buffer and comes out via the FIFO fallback path below.
-				// Deliberately not pr_err(): must be visible at any log level.
+				// Report through the same UART we drain, using printf so it's always visible
 				printf("<console: UART TX DMA error (LISR=0x%08x), using FIFO fallback>\n", (unsigned)flags);
 			} else if (DMA1->LISR & DMA_LISR_TCIF1) {
 				clear_dma_flags();
@@ -78,9 +75,8 @@ public:
 				return;
 		}
 
-		// Exclude cores doing direct (unbuffered) UART writes while we transmit.
-		// Those only happen during early boot, so contention is rare: just try
-		// again on the next process() call.
+		// Exclude cores doing direct UART writes while we transmit.
+		// Those only happen during early boot
 		if (mdrivlib::HWSemaphore<UartLock>::lock(M4LockId) != mdrivlib::HWSemaphoreFlag::LockedOk)
 			return;
 
@@ -125,8 +121,6 @@ private:
 		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0;
 		DMA1_Stream1->FCR = 0;
 
-		// UART7 raises a DMA request whenever its TX FIFO has room. Harmless
-		// for direct (CPU putchar) writes while the stream is disabled.
 		UartLog::uart_regs()->CR3 |= USART_CR3_DMAT;
 	}
 

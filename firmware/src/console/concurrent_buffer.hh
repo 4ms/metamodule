@@ -26,13 +26,13 @@ struct ConcurrentBuffer {
 		// inner-shareable i.e. not the M4).
 		asm volatile("dmb sy" ::: "memory");
 #else
-		// Host builds (tests/simulator): ordinary threads on one OS
+		// Host builds (tests/simulator)
 		std::atomic_thread_fence(std::memory_order_seq_cst);
 #endif
 	}
 
 	// Copy data into the ring at pos without publishing it. Re-entrant: callers
-	// writing to disjoint [pos, pos+size) regions can safely interrupt each other.
+	// writing to non-overlapping regions can safely interrupt each other.
 	void copy_in(std::span<const uint8_t> data, uint32_t pos) {
 		buffer.write(data, pos);
 	}
