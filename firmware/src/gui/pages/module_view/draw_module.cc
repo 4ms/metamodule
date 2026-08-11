@@ -3,6 +3,8 @@
 #include "gui/elements/redraw_display.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/pages/module_view/module_view.hh"
+#include "util/countzip.hh"
+#include <algorithm>
 
 namespace MetaModule
 {
@@ -33,6 +35,8 @@ unsigned ModuleViewPage::resize_module_image(unsigned max) {
 }
 
 void ModuleViewPage::redraw_module() {
+	save_element_stacking_order();
+
 	reset_module_page();
 
 	size_t num_elements = moduleinfo.elements.size();
@@ -59,7 +63,11 @@ void ModuleViewPage::redraw_module() {
 		});
 	}
 
+	restore_element_stacking_order();
+
 	raise_mapped_params(drawn_elements);
+
+	stack_order_module_id = this_module_id;
 
 	// Populate Roller and highlighter buttons
 	populate_element_objects();
@@ -82,6 +90,43 @@ void ModuleViewPage::redraw_module() {
 
 	dynamic_elements_prepared = false;
 	update_graphic_throttle_setting();
+}
+
+// Records the stacking order of the currently drawn elements, so it can be re-applied
+// after re-drawing the module. Otherwise overlapping controls (e.g. concentric knobs)
+// would jump back to param order every time the module is re-drawn.
+void ModuleViewPage::save_element_stacking_order() {
+	element_stack_order.clear();
+
+	// Elements are for a different module: nothing to preserve
+	if (stack_order_module_id != this_module_id)
+		return;
+
+	for (auto [idx, drawn_el] : enumerate(drawn_elements)) {
+		if (drawn_el.gui_element.obj)
+			element_stack_order.push_back(idx);
+	}
+
+	std::ranges::stable_sort(element_stack_order, {}, [this](uint16_t idx) {
+		return lv_obj_get_index(drawn_elements[idx].gui_element.obj);
+	});
+}
+
+void ModuleViewPage::restore_element_stacking_order() {
+	for (auto idx : element_stack_order) {
+		if (idx >= drawn_elements.size())
+			continue;
+
+		auto &gui_el = drawn_elements[idx].gui_element;
+		if (!gui_el.obj)
+			continue;
+
+		lv_obj_move_foreground(gui_el.obj);
+
+		// Keep the map ring above its own control, as when it was drawn
+		if (gui_el.map_ring)
+			lv_obj_move_foreground(gui_el.map_ring);
+	}
 }
 
 void ModuleViewPage::watch_element(DrawnElement const &drawn_element) {

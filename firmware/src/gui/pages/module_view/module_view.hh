@@ -267,6 +267,8 @@ struct ModuleViewPage : PageBase {
 			patch = patches.get_view_patch();
 			auto ok = read_slug();
 			if (!ok || prev_slug != slug) {
+				// A different module is at this module_id now: its stacking order does not apply
+				stack_order_module_id.reset();
 				page_list.request_new_page(PageId::PatchView, args);
 			} else {
 				if (gui_state.force_redraw_patch)
@@ -472,6 +474,8 @@ private:
 	void prepare_dynamic_elements();
 	unsigned resize_module_image(unsigned max);
 	void redraw_module();
+	void save_element_stacking_order();
+	void restore_element_stacking_order();
 	void watch_element(DrawnElement const &drawn_element);
 	void redraw_elements();
 	void update_map_ring_style();
@@ -511,6 +515,12 @@ private:
 
 	std::vector<lv_obj_t *> element_highlights;
 	std::vector<DrawnElement> drawn_elements;
+
+	// Drawn element indices, ordered back to front: used to keep the stacking order of
+	// overlapping controls (e.g. concentric knobs) when the module is re-drawn
+	std::vector<uint16_t> element_stack_order;
+	std::optional<uint16_t> stack_order_module_id;
+
 	std::vector<int> roller_drawn_el_idx;
 
 	lv_obj_t *canvas = nullptr;
