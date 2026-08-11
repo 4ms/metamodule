@@ -61,10 +61,6 @@ struct IntercoreStorageMessage {
 		PluginFileListOK,
 		PluginFileListFail,
 
-		RequestCopyPluginAssets,
-		CopyPluginAssetsOK,
-		CopyPluginAssetsFail,
-
 		RequestDeleteFile,
 		DeleteFileFailed,
 		DeleteFileSuccess,
