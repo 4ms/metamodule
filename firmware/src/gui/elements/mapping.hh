@@ -24,9 +24,10 @@ inline std::optional<uint32_t> find_mapping(const ParamElement &,
 											unsigned knob_set,
 											ElementCount::Indices const indices) {
 	if (knob_set == PatchData::MIDIKnobSet) {
-		if (auto panel_map = patch.find_midi_map(module_idx, indices.param_idx))
-			return panel_map->panel_knob_id;
-		else
+		if (auto panel_map = patch.find_midi_map(module_idx, indices.param_idx)) {
+			auto port = panel_map->midi_port_mask;
+			return panel_map->panel_knob_id | port << 16;
+		} else
 			return {};
 	} else {
 		if (auto panel_map = patch.find_mapped_knob(knob_set, module_idx, indices.param_idx))

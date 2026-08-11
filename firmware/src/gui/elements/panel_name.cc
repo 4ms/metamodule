@@ -56,7 +56,7 @@ std::string get_panel_name(const ParamElement &, uint32_t panel_id) {
 			name += " Ch " + std::to_string(mk.midi_chan);
 	}
 
-	return name;
+	return name + midi_port_suffix(panel_id);
 }
 
 std::string get_panel_name(const JackInput &, uint32_t panel_id) {
