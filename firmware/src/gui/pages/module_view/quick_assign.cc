@@ -31,6 +31,11 @@ void ModuleViewPage::handle_quick_assign() {
 				cc.changed = false;
 			params.last_midi_note.changed = false;
 		}
+
+		// Clear all events
+		for (auto &knob : params.knobs) {
+			knob.changed = false;
+		}
 	}
 
 	if (quickmap_rotary_button.is_pressed()) {
