@@ -76,6 +76,7 @@ inline void load_internal_plugins(std::list<rack::plugin::Plugin> &internal_plug
 	pluginInstance->addModel(modelSlew);
 	pluginInstance->addModel(modelIroi);
 	pluginInstance->addModel(modelMex);
+	pluginInstance->addModel(modelRandom8);
 #endif
 
 #ifdef BUILD_INTERNAL_AudibleInstruments
