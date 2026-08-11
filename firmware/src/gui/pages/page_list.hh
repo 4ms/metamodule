@@ -83,7 +83,10 @@ public:
 		_page_history.push_back({.page = PageId::MainMenu});
 	}
 
+	// Go to a new page but don't push the current one into history
 	void request_new_page_no_history(PageId pageid, PageArguments args) {
+		// Requesting the same page that's most recent page in history
+		// is just like going back, so pop
 		auto last = _page_history.back();
 		if (last.has_value() && last->page == pageid && last->args == args) {
 			_page_history.pop_back();
@@ -93,6 +96,7 @@ public:
 		_new_page_requested = true;
 	}
 
+	// Go to a new page and push the current one into history
 	void request_new_page(PageId pageid, PageArguments args) {
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop -- don't push
