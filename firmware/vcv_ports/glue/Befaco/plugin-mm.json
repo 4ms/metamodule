@@ -120,6 +120,10 @@
 	{
 		"slug": "Voltio",
 		"name": "Voltio"
+	},
+	{ 
+		"slug": "Iroi",
+		"name": "Iroi"
 	}
 	]
 }
