@@ -53,6 +53,14 @@ void ModuleViewPage::redraw_module() {
 
 	lv_obj_update_layout(canvas);
 
+	if (is_patch_playloaded) {
+		redraw_all_params(drawn_elements, [this](uint16_t module_idx, uint16_t param_idx) {
+			return patch_playloader.param_value(module_idx, param_idx);
+		});
+	}
+
+	raise_mapped_params(drawn_elements);
+
 	// Populate Roller and highlighter buttons
 	populate_element_objects();
 	populate_roller();
