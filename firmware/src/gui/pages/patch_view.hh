@@ -266,6 +266,14 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
+		if (is_patch_playloaded) {
+			redraw_all_params(drawn_elements, [this](uint16_t module_idx, uint16_t param_idx) {
+				return patch_playloader.param_value(module_idx, param_idx);
+			});
+		}
+
+		raise_mapped_params(drawn_elements);
+
 		if (modules_skipped_for_size) {
 			std::string msg = "Not displaying: " + modules_skipped_slugs + "because graphics buffer is full";
 			notify_queue.put({msg, Notification::Priority::Info, 4000});
@@ -299,6 +307,9 @@ struct PatchViewPage : PageBase {
 			ModuleDrawer{modules_cont, page_settings.view_height_px}.draw_mapped_ring(
 				*patch, module_id, knobset, canvas, drawn_el);
 		}
+
+		raise_mapped_params(drawn_elements);
+
 		update_map_ring_style();
 	}
 
