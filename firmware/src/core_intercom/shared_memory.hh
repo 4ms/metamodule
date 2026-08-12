@@ -3,6 +3,7 @@
 #include "console/concurrent_buffer.hh"
 #include "intercore_modulefs_message.hh"
 #include "params/param_block.hh"
+#include "usb/dev_drive_block.hh"
 #include "usb/usb_connection_status_block.hh"
 
 namespace MetaModule
@@ -25,6 +26,7 @@ struct SharedMemoryS {
 		uint8_t *uvc_framebuffer;
 		DeviceSettingsMessage *icc_device_settings_message;
 		UsbConnectionStatusBlock *usb_connection_status;
+		DevDriveBlock *dev_drive;
 	};
 
 	static Ptrs ptrs;

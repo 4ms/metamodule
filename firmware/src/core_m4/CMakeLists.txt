@@ -40,7 +40,7 @@ add_executable(
   # ${FWDIR}/src/usb/device_cdc/usbd_cdc_interface.c
   ${FWDIR}/src/usb/device_composite/usbd_composite.c
   ${FWDIR}/src/usb/device_composite/usbd_composite_desc.c
-  # ${FWDIR}/src/usb/device_msc/usb_drive_device.cc
+  ${FWDIR}/src/usb/device_msc/usb_drive_device.cc
   # ${FWDIR}/src/usb/device_msc/usbd_desc.c
 
   ${FWDIR}/lib/fatfs/source/ff.c

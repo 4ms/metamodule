@@ -34,8 +34,10 @@
  * are what a host shows for the serial port and the MIDI port. */
 #define USBD_CDC_FUNCTION_STRING "MetaModule Console"
 #define USBD_MIDI_FUNCTION_STRING "MetaModule MIDI"
+#define USBD_MSC_FUNCTION_STRING "MetaModule Dev Drive"
 #define CMPSIT_STR_IDX_CDC 0x06U
 #define CMPSIT_STR_IDX_MIDI 0x07U
+#define CMPSIT_STR_IDX_MSC 0x08U
 
 static uint8_t *CMPSIT_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
 static uint8_t *CMPSIT_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length);
@@ -169,6 +171,10 @@ static uint8_t *CMPSIT_UserStrDescriptor(USBD_SpeedTypeDef speed, uint8_t idx, u
 
 		case CMPSIT_STR_IDX_MIDI:
 			USBD_GetString((uint8_t *)USBD_MIDI_FUNCTION_STRING, USBD_CMPSIT_StrDesc, length);
+			return USBD_CMPSIT_StrDesc;
+
+		case CMPSIT_STR_IDX_MSC:
+			USBD_GetString((uint8_t *)USBD_MSC_FUNCTION_STRING, USBD_CMPSIT_StrDesc, length);
 			return USBD_CMPSIT_StrDesc;
 
 		default:

@@ -1,8 +1,10 @@
 #pragma once
 #include "console/concurrent_buffer.hh"
+#include "core_intercom/shared_memory.hh"
 #include "debug.hh"
 #include "device_cdc/usb_serial_device.hh"
 #include "device_composite/usbd_composite_builder.h"
+#include "device_msc/usb_drive_device.hh"
 #include "device_video/usb_video_device.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
@@ -31,6 +33,7 @@ struct UsbDeviceManager {
 	UsbSerialDevice serial;
 	MetaModule::UsbVideoDevice video{&USBD_Device};
 	MetaModule::UsbMidiDevice midi{&USBD_Device};
+	MetaModule::UsbDriveDevice drive{*MetaModule::SharedMemoryS::ptrs.dev_drive};
 	UsbDeviceMode mode = UsbDeviceMode::MidiConsole;
 
 	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers,
@@ -59,9 +62,18 @@ struct UsbDeviceManager {
 			pr_info("Starting USB video device\n");
 			video.register_class();
 		} else {
-			pr_info("Starting USB MIDI + console device\n");
+			// The drive is only offered when the A7 has one ready. Sampled here,
+			// so switching developer mode on or off re-enumerates.
+			auto *dev_drive = MetaModule::SharedMemoryS::ptrs.dev_drive;
+			bool with_drive = dev_drive && dev_drive->is_served();
+			USBD_CMPSIT_SetDriveEnabled(with_drive);
+
+			pr_info("Starting USB MIDI + console device%s\n", with_drive ? " + developer drive" : "");
 			serial.register_class();
 			midi.register_class();
+
+			if (with_drive)
+				drive.register_class(&USBD_Device);
 		}
 
 		// Every slot below NumClasses must be filled: the device core walks

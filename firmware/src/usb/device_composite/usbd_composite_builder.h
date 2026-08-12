@@ -44,11 +44,17 @@ extern "C" {
 #define CMPSIT_IF_CDC_DATA 1U
 #define CMPSIT_IF_MIDI_AC 2U
 #define CMPSIT_IF_MIDI_MS 3U
+#define CMPSIT_IF_MSC 4U
 
 typedef enum {
 	UsbCompositeProfile_MidiConsole = 0,
 	UsbCompositeProfile_Video,
 } UsbCompositeProfile;
+
+/* Whether the MidiConsole configuration carries the developer-mode MSC drive.
+ * Sampled when the descriptor is built, so changing it re-enumerates. */
+void USBD_CMPSIT_SetDriveEnabled(uint8_t enabled);
+uint8_t USBD_CMPSIT_IsDriveEnabled(void);
 
 /* Select which configuration descriptor is served. Call before USBD_Init():
  * USBD_LL_Init() also sizes the OTG FIFOs from the selected profile. */
@@ -59,6 +65,7 @@ UsbCompositeProfile USBD_CMPSIT_GetProfile(void);
  * the order AddClass() consumes them in; see usbd_composite.c. */
 extern uint8_t CMPSIT_CDC_EpAdd[3];
 extern uint8_t CMPSIT_MIDI_EpAdd[2];
+extern uint8_t CMPSIT_MSC_EpAdd[2];
 extern uint8_t CMPSIT_VIDEO_EpAdd[1];
 
 /* Called by USBD_RegisterClassComposite() in usbd_core.c */

@@ -13,10 +13,17 @@
 #include "usbd_conf.h"
 #include "usbd_core.h"
 #include "usbd_ctlreq.h"
+#include "usbd_msc.h"
 #include "usbd_video.h"
 
 /* 9 config + [8 IAD + 35 CDC comm + 23 CDC data] + [8 IAD + 18 MIDI AC + 74 MIDI MS] */
 #define CMPSIT_CONFIG_DESC_SIZ 175U
+
+/* ... plus [9 MSC interface + 7 + 7 endpoints] when the developer drive is on.
+   The MSC descriptors sit at the end of the array so one set of bytes serves
+   both configurations: with the drive off we report the shorter length. */
+#define CMPSIT_MSC_DESC_SIZ 23U
+#define CMPSIT_CONFIG_DESC_SIZ_WITH_DRIVE (CMPSIT_CONFIG_DESC_SIZ + CMPSIT_MSC_DESC_SIZ)
 
 #if (USBD_SELF_POWERED == 1U)
 #define CMPSIT_BMATTRIBUTES 0xC0U
@@ -30,13 +37,17 @@
  * usbd_composite_desc.c. */
 #define CMPSIT_STR_IDX_CDC 0x06U
 #define CMPSIT_STR_IDX_MIDI 0x07U
+#define CMPSIT_STR_IDX_MSC 0x08U
 
 static UsbCompositeProfile s_profile = UsbCompositeProfile_MidiConsole;
 static USBD_HandleTypeDef *s_pdev;
 
 uint8_t CMPSIT_CDC_EpAdd[3] = {CMPSIT_CDC_IN_EP, CMPSIT_CDC_OUT_EP, CMPSIT_CDC_CMD_EP};
 uint8_t CMPSIT_MIDI_EpAdd[2] = {CMPSIT_MIDI_IN_EP, CMPSIT_MIDI_OUT_EP};
+uint8_t CMPSIT_MSC_EpAdd[2] = {CMPSIT_MSC_IN_EP, CMPSIT_MSC_OUT_EP};
 uint8_t CMPSIT_VIDEO_EpAdd[1] = {UVC_IN_EP};
+
+static uint8_t s_drive_enabled;
 
 /* Initialised at full-speed packet sizes; the bulk endpoints and the CDC
  * notification interval are patched in place for high speed, the way ST's own
@@ -155,9 +166,29 @@ __ALIGN_BEGIN static uint8_t USBD_CMPSIT_CfgDesc[] __ALIGN_END = {
 	LOBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), HIBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), 0x00, 0x00, 0x00,
 	/* Class-specific MS bulk IN endpoint: fed by Embedded OUT jack 3 */
 	0x05, 0x25, 0x01, 0x01, 0x03,
+
+	/* ========= Function 3: MSC (developer-mode drive), optional =========
+	 * Everything from here on is only reported when the drive is enabled; a
+	 * single interface, so no IAD is needed. */
+	0x09,					 /* bLength */
+	USB_DESC_TYPE_INTERFACE, /* bDescriptorType */
+	CMPSIT_IF_MSC,			 /* bInterfaceNumber */
+	0x00,					 /* bAlternateSetting */
+	0x02,					 /* bNumEndpoints */
+	0x08,					 /* bInterfaceClass: Mass Storage */
+	0x06,					 /* bInterfaceSubClass: SCSI transparent */
+	0x50,					 /* bInterfaceProtocol: Bulk-Only Transport */
+	CMPSIT_STR_IDX_MSC,		 /* iInterface */
+
+	/* Bulk IN */
+	0x07, USB_DESC_TYPE_ENDPOINT, CMPSIT_MSC_IN_EP, 0x02,
+	LOBYTE(MSC_MAX_FS_PACKET), HIBYTE(MSC_MAX_FS_PACKET), 0x00,
+	/* Bulk OUT */
+	0x07, USB_DESC_TYPE_ENDPOINT, CMPSIT_MSC_OUT_EP, 0x02,
+	LOBYTE(MSC_MAX_FS_PACKET), HIBYTE(MSC_MAX_FS_PACKET), 0x00,
 };
 
-_Static_assert(sizeof(USBD_CMPSIT_CfgDesc) == CMPSIT_CONFIG_DESC_SIZ,
+_Static_assert(sizeof(USBD_CMPSIT_CfgDesc) == CMPSIT_CONFIG_DESC_SIZ_WITH_DRIVE,
 			   "composite config descriptor size does not match wTotalLength");
 
 /* USB Standard Device Qualifier Descriptor (high-speed capable) */
@@ -173,6 +204,14 @@ __ALIGN_BEGIN static uint8_t USBD_CMPSIT_DeviceQualifierDesc[USB_LEN_DEV_QUALIFI
 	0x01,
 	0x00,
 };
+
+void USBD_CMPSIT_SetDriveEnabled(uint8_t enabled) {
+	s_drive_enabled = enabled;
+}
+
+uint8_t USBD_CMPSIT_IsDriveEnabled(void) {
+	return s_drive_enabled;
+}
 
 void USBD_CMPSIT_SelectProfile(UsbCompositeProfile profile) {
 	s_profile = profile;
@@ -226,6 +265,14 @@ uint8_t USBD_CMPSIT_AddClass(USBD_HandleTypeDef *pdev,
 			e->NumIf = 2U;
 			e->Ifs[0] = CMPSIT_IF_MIDI_AC;
 			e->Ifs[1] = CMPSIT_IF_MIDI_MS;
+			e->NumEps = 2U;
+			set_ep(e, 0U, e->EpAdd[0], USBD_EP_TYPE_BULK); /* IN  */
+			set_ep(e, 1U, e->EpAdd[1], USBD_EP_TYPE_BULK); /* OUT */
+			break;
+
+		case CLASS_TYPE_MSC:
+			e->NumIf = 1U;
+			e->Ifs[0] = CMPSIT_IF_MSC;
 			e->NumEps = 2U;
 			set_ep(e, 0U, e->EpAdd[0], USBD_EP_TYPE_BULK); /* IN  */
 			set_ep(e, 1U, e->EpAdd[1], USBD_EP_TYPE_BULK); /* OUT */
@@ -293,17 +340,30 @@ static void set_bulk_mps(uint8_t ep, uint16_t mps) {
 }
 
 static uint8_t *cmpsit_cfg_desc(uint16_t *length, uint8_t high_speed) {
+	/* The MSC descriptors are physically present in the array either way; the
+	   host only learns about them when the drive is on. This has to happen
+	   before the endpoint fixups below: USBD_GetEpDesc walks the descriptor
+	   using wTotalLength, so with the old (shorter) value in place it would
+	   never reach the MSC endpoints and they would keep full-speed packet
+	   sizes -- illegal for a high-speed bulk endpoint. */
+	const uint16_t total = s_drive_enabled ? CMPSIT_CONFIG_DESC_SIZ_WITH_DRIVE : CMPSIT_CONFIG_DESC_SIZ;
+	USBD_CMPSIT_CfgDesc[2] = LOBYTE(total);
+	USBD_CMPSIT_CfgDesc[3] = HIBYTE(total);
+	USBD_CMPSIT_CfgDesc[4] = s_drive_enabled ? 5U : 4U; /* bNumInterfaces */
+
 	/* Bulk endpoints must report 512 at high speed and 64 at full speed */
 	set_bulk_mps(CMPSIT_CDC_IN_EP, high_speed ? CDC_DATA_HS_MAX_PACKET_SIZE : CDC_DATA_FS_MAX_PACKET_SIZE);
 	set_bulk_mps(CMPSIT_CDC_OUT_EP, high_speed ? CDC_DATA_HS_MAX_PACKET_SIZE : CDC_DATA_FS_MAX_PACKET_SIZE);
 	set_bulk_mps(CMPSIT_MIDI_IN_EP, high_speed ? MIDI_DATA_HS_MAX_PACKET_SIZE : MIDI_DATA_FS_MAX_PACKET_SIZE);
 	set_bulk_mps(CMPSIT_MIDI_OUT_EP, high_speed ? MIDI_DATA_HS_MAX_PACKET_SIZE : MIDI_DATA_FS_MAX_PACKET_SIZE);
+	set_bulk_mps(CMPSIT_MSC_IN_EP, high_speed ? MSC_MAX_HS_PACKET : MSC_MAX_FS_PACKET);
+	set_bulk_mps(CMPSIT_MSC_OUT_EP, high_speed ? MSC_MAX_HS_PACKET : MSC_MAX_FS_PACKET);
 
 	USBD_EpDescTypeDef *cmd = USBD_GetEpDesc(USBD_CMPSIT_CfgDesc, CMPSIT_CDC_CMD_EP);
 	if (cmd != NULL)
 		cmd->bInterval = high_speed ? CDC_HS_BINTERVAL : CDC_FS_BINTERVAL;
 
-	*length = (uint16_t)sizeof(USBD_CMPSIT_CfgDesc);
+	*length = total;
 	return USBD_CMPSIT_CfgDesc;
 }
 

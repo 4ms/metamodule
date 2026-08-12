@@ -7,6 +7,7 @@
 #include "param_block.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "sync_params.hh"
+#include "usb/dev_drive_block.hh"
 #include "usb/usb_connection_status_block.hh"
 #include <array>
 
@@ -40,6 +41,7 @@ extern std::array<uint8_t, 320 * 240 * 2> uvc_shadow_framebuffer;
 #endif
 extern DeviceSettingsMessage icc_device_settings_message;
 extern UsbConnectionStatusBlock usb_connection_status;
+extern DevDriveBlock dev_drive_block;
 
 void init();
 

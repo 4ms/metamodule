@@ -135,9 +135,8 @@ public:
 	}
 
 	void hand_to_host() {
-		// TODO: may need to invalidate first
 		if (is_enabled())
-			mdrivlib::SystemCache::clean_dcache_by_range(base_, DevDriveSizeBytes);
+			mdrivlib::SystemCache::clean_and_invalidate_dcache_by_range(base_, DevDriveSizeBytes);
 	}
 
 	void take_from_host() {
@@ -152,7 +151,12 @@ private:
 			return false;
 		}
 
-		fileio_.set_label(DevDriveLabel);
+		if (!fileio_.set_label(DevDriveLabel)) {
+			// Not fatal -- an unlabelled drive still works -- but the host will
+			// mount it at an unpredictable path, which breaks scripted installs
+			pr_err("DevDrive: could not set the volume label\n");
+		}
+
 		return fileio_.mount_disk();
 	}
 

@@ -237,13 +237,17 @@ static void set_fifo_sizes() {
 		// CDC bulk (EP1), CDC notifications (EP2), MIDI bulk (EP3). The Rx FIFO
 		// is shared by both bulk OUT endpoints; 384 words is comfortably above
 		// the ~160-word minimum for a 512 B packet with two OUT endpoints.
-		// Total: 384 + 64 + 128 + 16 + 128 = 720 words, leaving room for the
-		// developer-mode MSC drive (EP4, another 128).
+		// Total: 384 + 64 + 128 + 16 + 128 + 128 = 848 words of the ~952
+		// usable. The MSC FIFO is allocated whether or not the developer drive
+		// is being served -- an unused Tx FIFO costs nothing but its space, and
+		// keeping the layout fixed means enabling the drive cannot disturb the
+		// endpoints that were already working.
 		HAL_PCDEx_SetRxFiFo(&hpcd, 0x180);
 		HAL_PCDEx_SetTxFiFo(&hpcd, 0, 0x40); // EP0
 		HAL_PCDEx_SetTxFiFo(&hpcd, 1, 0x80); // CDC data IN
 		HAL_PCDEx_SetTxFiFo(&hpcd, 2, 0x10); // CDC notifications
 		HAL_PCDEx_SetTxFiFo(&hpcd, 3, 0x80); // MIDI IN
+		HAL_PCDEx_SetTxFiFo(&hpcd, 4, 0x80); // MSC IN (developer drive)
 	}
 }
 

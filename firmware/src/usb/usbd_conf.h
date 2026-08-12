@@ -58,8 +58,8 @@ extern "C" {
 #define USBD_MAX_CLASS_INTERFACES 2U
 #define USBD_MAX_CLASS_ENDPOINTS 3U /* CDC: bulk IN + bulk OUT + interrupt IN */
 
-/* CDC(2) + MIDI(2). UVC uses 2 of these when it is the active mode. */
-#define USBD_MAX_NUM_INTERFACES 4U
+/* CDC(2) + MIDI(2) + MSC(1). UVC uses 2 of these when it is the active mode. */
+#define USBD_MAX_NUM_INTERFACES 5U
 #define USBD_MAX_NUM_CONFIGURATION 1U
 
 /* Endpoint map for the composite (MIDI + Console) mode. Kept contiguous from
@@ -69,13 +69,15 @@ extern "C" {
  *   EP1 IN/OUT  bulk       CDC data
  *   EP2 IN      interrupt  CDC notifications
  *   EP3 IN/OUT  bulk       MIDI
- *   EP4 IN/OUT  bulk       reserved for MSC (developer-mode drive)
+ *   EP4 IN/OUT  bulk       MSC (developer-mode drive)
  */
 #define CMPSIT_CDC_IN_EP 0x81U
 #define CMPSIT_CDC_OUT_EP 0x01U
 #define CMPSIT_CDC_CMD_EP 0x82U
 #define CMPSIT_MIDI_IN_EP 0x83U
 #define CMPSIT_MIDI_OUT_EP 0x03U
+#define CMPSIT_MSC_IN_EP 0x84U
+#define CMPSIT_MSC_OUT_EP 0x04U
 #define USBD_MAX_STR_DESC_SIZ 0x100U
 #define USBD_SELF_POWERED 1U
 #define USBD_DEBUG_LEVEL 1U /*used in usbd lib, so keep this*/
