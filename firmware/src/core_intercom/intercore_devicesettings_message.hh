@@ -14,7 +14,7 @@ struct DeviceSettingsMessage {
 	};
 
 	Type type = Type::None;
-	UsbDeviceMode mode = UsbDeviceMode::Cdc;
+	UsbDeviceMode mode = UsbDeviceMode::MidiConsole;
 	UsbRoleMode role = UsbRoleMode::Auto;
 };
 

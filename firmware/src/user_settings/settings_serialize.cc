@@ -188,9 +188,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	}
 
 	using enum UsbDeviceMode;
-	ryml::csubstr usb_mode_string = settings.usb_device_mode == Video ? "Video" :
-									settings.usb_device_mode == Midi	 ? "MIDI" :
-																		   "Console";
+	ryml::csubstr usb_mode_string = settings.usb_device_mode == Video ? "Video" : "MidiConsole";
 	data["usb_device_mode"] << usb_mode_string;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));

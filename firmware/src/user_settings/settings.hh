@@ -46,7 +46,7 @@ struct UserSettings {
 
 	// Which USB device class the OTG core presents (Console/Video/MIDI), mutually
 	// exclusive.
-	UsbDeviceMode usb_device_mode = UsbDeviceMode::Midi;
+	UsbDeviceMode usb_device_mode = UsbDeviceMode::MidiConsole;
 };
 
 } // namespace MetaModule

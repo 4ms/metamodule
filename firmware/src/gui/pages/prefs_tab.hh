@@ -450,17 +450,15 @@ private:
 	}
 
 	static int usb_device_mode_to_index(UsbDeviceMode mode) {
-		return mode == UsbDeviceMode::Video ? 1 : mode == UsbDeviceMode::Cdc ? 2 : 0;
+		return mode == UsbDeviceMode::Video ? 1 : 0;
 	}
 
 	UsbDeviceMode read_usb_mode_dropdown() {
 		switch (lv_dropdown_get_selected(usb_section.device_mode_dropdown)) {
 			case 1:
 				return UsbDeviceMode::Video;
-			case 2:
-				return UsbDeviceMode::Cdc; // "Debug"
 			default:
-				return UsbDeviceMode::Midi;
+				return UsbDeviceMode::MidiConsole;
 		}
 	}
 

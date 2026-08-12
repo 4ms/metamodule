@@ -74,7 +74,7 @@ extern "C" void aux_core_main() {
 	// Tell the M4 which USB device class to present (MIDI, Video, or the
 	// Debug Console). The M4 defaults to MIDI until this arrives.
 	auto usb_device_mode = ui.get_settings().usb_device_mode;
-	if (usb_device_mode != UsbDeviceMode::Midi) {
+	if (usb_device_mode != UsbDeviceMode::MidiConsole) {
 		while (!DeviceSettingsProxy::send_device_mode(usb_device_mode))
 			;
 	}

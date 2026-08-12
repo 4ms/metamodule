@@ -154,8 +154,8 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.video.mirror == true);
 
-	// No usb_device_mode key -> defaults to MIDI
-	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::Midi);
+	// No usb_device_mode key -> defaults to MIDI + Console
+	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::MidiConsole);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -309,8 +309,8 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.video.mirror == false);
 
-	// No usb_device_mode -> defaults to MIDI
-	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::Midi);
+	// No usb_device_mode -> defaults to MIDI + Console
+	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::MidiConsole);
 
 	// No usb_role_mode -> defaults to Auto
 	CHECK(settings.usb_role_mode == MetaModule::UsbRoleMode::Auto);
@@ -357,14 +357,17 @@ TEST_CASE("Parse usb_device_mode") {
 		return settings.usb_device_mode;
 	};
 
-	CHECK(parse_mode("usb_device_mode: Console") == Cdc);
+	CHECK(parse_mode("usb_device_mode: MidiConsole") == MidiConsole);
 	CHECK(parse_mode("usb_device_mode: Video") == Video);
-	CHECK(parse_mode("usb_device_mode: MIDI") == Midi);
-	CHECK(parse_mode("usb_device_mode: garbage") == Midi);		   // unknown -> default
-	CHECK(parse_mode("notifications:\n    animation: 0") == Midi); // absent key -> default
+	// "MIDI" and "Console" were separate modes before they were combined into
+	// one composite device; settings files written by older firmware map onto it
+	CHECK(parse_mode("usb_device_mode: MIDI") == MidiConsole);
+	CHECK(parse_mode("usb_device_mode: Console") == MidiConsole);
+	CHECK(parse_mode("usb_device_mode: garbage") == MidiConsole);		  // unknown -> default
+	CHECK(parse_mode("notifications:\n    animation: 0") == MidiConsole); // absent key -> default
 
 	// Round-trip through serialize -> parse
-	for (auto mode : {Cdc, Video, Midi}) {
+	for (auto mode : {MidiConsole, Video}) {
 		MetaModule::UserSettings out;
 		out.usb_device_mode = mode;
 		std::string buf;
@@ -520,7 +523,7 @@ TEST_CASE("Serialize settings") {
   video:
     mirror: 0
   usb_role_mode: Auto
-  usb_device_mode: MIDI
+  usb_device_mode: MidiConsole
 )";
 	// clang format-on
 
