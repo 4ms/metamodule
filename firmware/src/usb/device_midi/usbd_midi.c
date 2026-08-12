@@ -142,15 +142,25 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER
 	0x00,
 };
 
+/* Static pointers to the class handle and the interface ops.
+ * The USB device library keeps these per-class in pClassDataCmsit[classId] /
+ * pUserData[classId] and selects them with pdev->classId before calling a class 
+ * callback. But when we call class functions from the main context, classId is not
+ * set properly. */
+static USBD_MIDI_HandleTypeDef *hmidi_inst = NULL;
+static USBD_MIDI_ItfTypeDef *midi_fops = NULL;
+
 static uint8_t USBD_MIDI_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
 	UNUSED(cfgidx);
 
 	USBD_MIDI_HandleTypeDef *hmidi = USBD_malloc(sizeof(USBD_MIDI_HandleTypeDef));
 	if (hmidi == NULL) {
-		pdev->pClassData = NULL;
+		pdev->pClassDataCmsit[pdev->classId] = NULL;
 		return (uint8_t)USBD_EMEM;
 	}
-	pdev->pClassData = (void *)hmidi;
+	pdev->pClassDataCmsit[pdev->classId] = (void *)hmidi;
+	pdev->pClassData = pdev->pClassDataCmsit[pdev->classId];
+	hmidi_inst = hmidi;
 
 	uint16_t mps =
 		(pdev->dev_speed == USBD_SPEED_HIGH) ? MIDI_DATA_HS_MAX_PACKET_SIZE : MIDI_DATA_FS_MAX_PACKET_SIZE;
@@ -162,8 +172,8 @@ static uint8_t USBD_MIDI_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
 	pdev->ep_out[MIDI_OUT_EP & 0xFU].is_used = 1U;
 
 	/* Init physical interface (sets Rx/Tx buffers via SetRxBuffer/SetTxBuffer) */
-	if (pdev->pUserData != NULL)
-		((USBD_MIDI_ItfTypeDef *)pdev->pUserData)->Init();
+	if (midi_fops != NULL)
+		midi_fops->Init();
 
 	hmidi->TxState = 0U;
 
@@ -182,11 +192,13 @@ static uint8_t USBD_MIDI_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
 	(void)USBD_LL_CloseEP(pdev, MIDI_OUT_EP);
 	pdev->ep_out[MIDI_OUT_EP & 0xFU].is_used = 0U;
 
-	if (pdev->pClassData != NULL) {
-		if (pdev->pUserData != NULL)
-			((USBD_MIDI_ItfTypeDef *)pdev->pUserData)->DeInit();
-		(void)USBD_free(pdev->pClassData);
+	if (pdev->pClassDataCmsit[pdev->classId] != NULL) {
+		if (midi_fops != NULL)
+			midi_fops->DeInit();
+		(void)USBD_free(pdev->pClassDataCmsit[pdev->classId]);
+		pdev->pClassDataCmsit[pdev->classId] = NULL;
 		pdev->pClassData = NULL;
+		hmidi_inst = NULL;
 	}
 
 	return (uint8_t)USBD_OK;
@@ -241,7 +253,7 @@ static uint8_t USBD_MIDI_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *r
 }
 
 static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum) {
-	USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassData;
+	USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
 	PCD_HandleTypeDef *hpcd = pdev->pData;
 
 	if (hmidi == NULL)
@@ -255,23 +267,23 @@ static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum) {
 	} else {
 		hmidi->TxState = 0U;
 
-		if ((pdev->pUserData != NULL) && (((USBD_MIDI_ItfTypeDef *)pdev->pUserData)->TransmitCplt != NULL))
-			((USBD_MIDI_ItfTypeDef *)pdev->pUserData)->TransmitCplt(hmidi->TxBuffer, &hmidi->TxLength, epnum);
+		if ((midi_fops != NULL) && (midi_fops->TransmitCplt != NULL))
+			midi_fops->TransmitCplt(hmidi->TxBuffer, &hmidi->TxLength, epnum);
 	}
 
 	return (uint8_t)USBD_OK;
 }
 
 static uint8_t USBD_MIDI_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum) {
-	USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassData;
+	USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
 
 	if (hmidi == NULL)
 		return (uint8_t)USBD_FAIL;
 
 	hmidi->RxLength = USBD_LL_GetRxDataSize(pdev, epnum);
 
-	if (pdev->pUserData != NULL)
-		((USBD_MIDI_ItfTypeDef *)pdev->pUserData)->Receive(hmidi->RxBuffer, &hmidi->RxLength);
+	if (midi_fops != NULL)
+		midi_fops->Receive(hmidi->RxBuffer, &hmidi->RxLength);
 
 	return (uint8_t)USBD_OK;
 }
@@ -300,12 +312,13 @@ uint8_t USBD_MIDI_RegisterInterface(USBD_HandleTypeDef *pdev, USBD_MIDI_ItfTypeD
 	if (fops == NULL)
 		return (uint8_t)USBD_FAIL;
 
-	pdev->pUserData = fops;
+	midi_fops = fops;
+	pdev->pUserData[pdev->classId] = fops;
 	return (uint8_t)USBD_OK;
 }
 
 uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint32_t length) {
-	USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassData;
+	USBD_MIDI_HandleTypeDef *hmidi = hmidi_inst;
 	if (hmidi == NULL)
 		return (uint8_t)USBD_FAIL;
 
@@ -315,7 +328,7 @@ uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint32_t
 }
 
 uint8_t USBD_MIDI_SetRxBuffer(USBD_HandleTypeDef *pdev, uint8_t *pbuff) {
-	USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassData;
+	USBD_MIDI_HandleTypeDef *hmidi = hmidi_inst;
 	if (hmidi == NULL)
 		return (uint8_t)USBD_FAIL;
 
@@ -324,7 +337,7 @@ uint8_t USBD_MIDI_SetRxBuffer(USBD_HandleTypeDef *pdev, uint8_t *pbuff) {
 }
 
 uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev) {
-	USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassData;
+	USBD_MIDI_HandleTypeDef *hmidi = hmidi_inst;
 	USBD_StatusTypeDef ret = USBD_BUSY;
 
 	if (hmidi == NULL)
@@ -341,7 +354,7 @@ uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev) {
 }
 
 uint8_t USBD_MIDI_ReceivePacket(USBD_HandleTypeDef *pdev) {
-	USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassData;
+	USBD_MIDI_HandleTypeDef *hmidi = hmidi_inst;
 
 	if (hmidi == NULL)
 		return (uint8_t)USBD_FAIL;
