@@ -83,6 +83,9 @@ typedef struct _USBD_STORAGE
   int8_t (* Write)(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len);
   int8_t (* GetMaxLun)(void);
   int8_t *pInquiry;
+  /* 4ms local addition: notified when the host ejects the medium
+     (SCSI START_STOP_UNIT with START=0, LOEJ=1). May be NULL. */
+  int8_t (* Eject)(uint8_t lun);
 
 } USBD_StorageTypeDef;
 

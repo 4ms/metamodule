@@ -103,8 +103,8 @@ extern "C" {
 
 #define UVC_INTERVAL(n)                               (10000000U/(n))
 
-#define UVC_MIN_BIT_RATE(n)                           (UVC_WIDTH * UVC_HEIGHT * 16U * (n)) /* 16 bit */
-#define UVC_MAX_BIT_RATE(n)                           (UVC_WIDTH * UVC_HEIGHT * 16U * (n)) /* 16 bit */
+#define UVC_MIN_BIT_RATE(n)                           (UVC_WIDTH * UVC_HEIGHT * UVC_BITS_PER_PIXEL * (n))
+#define UVC_MAX_BIT_RATE(n)                           (UVC_WIDTH * UVC_HEIGHT * UVC_BITS_PER_PIXEL * (n))
 
 #define UVC_PACKETS_IN_FRAME(n)                       (UVC_MAX_FRAME_SIZE / (n))
 
@@ -126,8 +126,10 @@ extern "C" {
 #define UVC_VS_IF_NUM                                 0x01U
 #define UVC_TOTAL_IF_NUM                              0x02U
 
-#ifdef USBD_UVC_FORMAT_UNCOMPRESSED
-#define UVC_CONFIG_DESC_SIZ                           (0x88U + 0x16U)
+#if defined(USBD_UVC_FORMAT_UNCOMPRESSED)
+#define UVC_CONFIG_DESC_SIZ                           (0x88U + 0x16U)       /* 158 */
+#elif defined(USBD_UVC_FORMAT_FRAME_BASED)
+#define UVC_CONFIG_DESC_SIZ                           (0x88U + 0x16U + 1U)  /* 159: +1 for bVariableSize */
 #else
 #define UVC_CONFIG_DESC_SIZ                           0x88U
 #endif /* USBD_UVC_FORMAT_UNCOMPRESSED */
@@ -162,18 +164,28 @@ extern "C" {
 #define VIDEO_OUT_TERMINAL_DESC_SIZE                  0x09U
 #define VIDEO_VS_IF_IN_HEADER_DESC_SIZE               0x0EU
 
-#define VS_FORMAT_UNCOMPRESSED_DESC_SIZE              0x1BU
+#define VS_FORMAT_UNCOMPRESSED_DESC_SIZE              0x1BU  /* 27 */
+#define VS_FORMAT_FRAME_BASED_DESC_SIZE               0x1CU  /* 28: uncompressed + bVariableSize */
 #define VS_FORMAT_MJPEG_DESC_SIZE                     0x0BU
-#define VS_FRAME_DESC_SIZE                            0x1EU
+#define VS_FRAME_DESC_SIZE                            0x1EU  /* 30, same for Uncompressed/MJPEG/Frame-Based */
 #define VS_COLOR_MATCHING_DESC_SIZE                   0x06U
 
-#ifdef USBD_UVC_FORMAT_UNCOMPRESSED
+#if defined(USBD_UVC_FORMAT_UNCOMPRESSED)
 #define VS_FORMAT_DESC_SIZE                           VS_FORMAT_UNCOMPRESSED_DESC_SIZE
 #define VS_FORMAT_SUBTYPE                             VS_FORMAT_UNCOMPRESSED
 #define VS_FRAME_SUBTYPE                              VS_FRAME_UNCOMPRESSED
 
 #define VC_HEADER_SIZE (VIDEO_VS_IF_IN_HEADER_DESC_SIZE + \
                         VS_FORMAT_UNCOMPRESSED_DESC_SIZE + \
+                        VS_FRAME_DESC_SIZE + \
+                        VS_COLOR_MATCHING_DESC_SIZE)
+#elif defined(USBD_UVC_FORMAT_FRAME_BASED)
+#define VS_FORMAT_DESC_SIZE                           VS_FORMAT_FRAME_BASED_DESC_SIZE
+#define VS_FORMAT_SUBTYPE                             VS_FORMAT_FRAME_BASED
+#define VS_FRAME_SUBTYPE                              VS_FRAME_FRAME_BASED
+
+#define VC_HEADER_SIZE (VIDEO_VS_IF_IN_HEADER_DESC_SIZE + \
+                        VS_FORMAT_FRAME_BASED_DESC_SIZE + \
                         VS_FRAME_DESC_SIZE + \
                         VS_COLOR_MATCHING_DESC_SIZE)
 #else
@@ -535,6 +547,28 @@ typedef struct
   uint8_t           bFrameIntervalType;
   uint32_t          dwMinFrameInterval;
 } __PACKED USBD_VIDEO_VSFrameDescTypeDef;
+
+/* Frame Based frame descriptor (subtype 0x11). Field order differs from
+ * the Uncompressed frame descriptor: dwMaxVideoFrameBufSize is removed,
+ * dwDefaultFrameInterval moves up, and dwBytesPerLine sits after
+ * bFrameIntervalType. Kept as a separate type so runtime patching writes
+ * to the correct byte offsets. */
+typedef struct
+{
+  uint8_t  bLength;
+  uint8_t  bDescriptorType;
+  uint8_t  bDescriptorSubType;
+  uint8_t  bFrameIndex;
+  uint8_t  bmCapabilities;
+  uint16_t wWidth;
+  uint16_t wHeight;
+  uint32_t dwMinBitRate;
+  uint32_t dwMaxBitRate;
+  uint32_t dwDefaultFrameInterval;
+  uint8_t  bFrameIntervalType;
+  uint32_t dwBytesPerLine;
+  uint32_t dwFrameInterval;  /* first (and only) discrete interval */
+} __PACKED USBD_VIDEO_VSFrameBasedFrameDescTypeDef;
 
 extern USBD_ClassTypeDef    USBD_VIDEO;
 #define USBD_VIDEO_CLASS    &USBD_VIDEO
