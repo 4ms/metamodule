@@ -29,8 +29,9 @@ void Plugin::addModel(Model *model) {
 		return;
 	}
 
-	auto module = model->createModule();
-	auto modulewidget = model->createModuleWidget(module);
+	// auto module = model->createModule();
+	// auto modulewidget = model->createModuleWidget(module);
+	auto modulewidget = model->createModuleWidget(nullptr);
 
 	modulewidget->populate_elements_indices(model);
 	model->move_strings();
@@ -69,7 +70,7 @@ void Plugin::addModel(Model *model) {
 	models.push_back(model);
 
 	delete modulewidget;
-	delete module;
+	// delete module;
 }
 
 Plugin::Plugin()
