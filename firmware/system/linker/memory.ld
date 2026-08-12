@@ -59,7 +59,6 @@ _DMABUF_END		= 0xE0000000;
 _M4_VECT		= 0x00000000; 
 _M4_VECT_A7		= 0x38000000; /* Address from A7's perspective*/
 _M4_VECT_SZ		= 0x440;
-_M4_VECT_END	= 0x10050000;
 
 _M4_CODE		= 0x10000000;	
 _M4_CODE_A7		= 0x30000000; /* Address from A7's perspective*/
