@@ -2,6 +2,7 @@
 #include "console/concurrent_buffer.hh"
 #include "debug.hh"
 #include "device_cdc/usb_serial_device.hh"
+#include "device_composite/usbd_composite_builder.h"
 #include "device_video/usb_video_device.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
@@ -10,15 +11,18 @@
 #include "usb_device_mode.hh"
 #include "usb_midi_device.hh"
 
-#ifdef USE_RAMDISK_USB
-#include "device_msc/usb_drive_device.hh"
-#endif
-
 extern "C" PCD_HandleTypeDef hpcd;
+extern "C" USBD_DescriptorsTypeDef CMPSIT_Desc;
+extern "C" USBD_DescriptorsTypeDef UVC_Desc;
 
-//TODO: Add support for multiple usb interfaces (CDC/MIDI): "AddClass()" not RegisterClass
-// Will need to modify USBD_HandleTypeDef such that pClass and pConfDesc are arrays (and maybe more fields?)
-
+// Owns the USB device: which classes it carries, and its lifecycle.
+//
+// Each UsbDeviceMode is a distinct USB device with its own descriptors and
+// product id, so switching modes re-enumerates. MidiConsole is a composite of
+// CDC + USB-MIDI; Video is UVC alone. The per-class wrappers below only supply
+// class behavior (buffers, callbacks) and register themselves -- USBD_Init /
+// USBD_Start / USBD_Stop happen here, once, because a composite device has
+// several classes sharing one device handle.
 struct UsbDeviceManager {
 	using UsbDeviceMode = MetaModule::UsbDeviceMode;
 
@@ -27,69 +31,74 @@ struct UsbDeviceManager {
 	UsbSerialDevice serial;
 	MetaModule::UsbVideoDevice video{&USBD_Device};
 	MetaModule::UsbMidiDevice midi{&USBD_Device};
-	UsbDeviceMode mode = UsbDeviceMode::Cdc;
+	UsbDeviceMode mode = UsbDeviceMode::MidiConsole;
 
-#ifndef USE_RAMDISK_USB
 	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers,
-					 UsbDeviceMode initial_mode = UsbDeviceMode::Cdc)
+					 UsbDeviceMode initial_mode = UsbDeviceMode::MidiConsole)
 		: serial{&USBD_Device, console_buffers}
 		, mode{initial_mode} {
 	}
-#endif
 
-	void start() {
-		switch (mode) {
-			case UsbDeviceMode::Video:
-				pr_info("Starting video device\n");
-				video.start();
-				break;
-			case UsbDeviceMode::Midi:
-				pr_info("Starting MIDI device\n");
-				midi.start();
-				break;
-			case UsbDeviceMode::Cdc:
-			default:
-				pr_info("Starting serial device\n");
-				serial.start();
-				break;
+	// start()/stop() are called from several places in UsbManager's role state
+	// machine. They are cold and, once USBD_Init and the class registration are
+	// inlined into them, large -- so keep one copy.
+	__attribute__((noinline)) void start() {
+		// Selects the config descriptor USBD_CMPSIT serves, and the FIFO split
+		// USBD_LL_Init programs; must precede USBD_Init.
+		USBD_CMPSIT_SelectProfile(mode == UsbDeviceMode::Video ? UsbCompositeProfile_Video :
+																 UsbCompositeProfile_MidiConsole);
+
+		auto *descriptors = (mode == UsbDeviceMode::Video) ? &UVC_Desc : &CMPSIT_Desc;
+
+		if (auto err = USBD_Init(&USBD_Device, descriptors, 0); err != USBD_OK) {
+			pr_err("USB device failed to initialize! Error %d\n", static_cast<int>(err));
+			return;
 		}
+
+		if (mode == UsbDeviceMode::Video) {
+			pr_info("Starting USB video device\n");
+			video.register_class();
+		} else {
+			pr_info("Starting USB MIDI + console device\n");
+			serial.register_class();
+			midi.register_class();
+		}
+
+		// Every slot below NumClasses must be filled: the device core walks
+		// pClass[0..NumClasses) when a host asks for a string descriptor, and
+		// dereferences it without a NULL check. An empty slot means a class was
+		// registered at the wrong index (see UsbComposite::add_class), and shows
+		// up as a hard fault inside the OTG interrupt on the first enumeration.
+		for (uint32_t i = 0; i < USBD_Device.NumClasses; i++) {
+			if (USBD_Device.pClass[i] == nullptr)
+				pr_err("USB: class slot %u of %u was not filled\n", (unsigned)i, (unsigned)USBD_Device.NumClasses);
+		}
+
+		USBD_Start(&USBD_Device);
 	}
 
-	void stop() {
-		switch (mode) {
-			case UsbDeviceMode::Video:
-				video.stop();
-				break;
-			case UsbDeviceMode::Midi:
-				midi.stop();
-				break;
-			case UsbDeviceMode::Cdc:
-			default:
-				serial.stop();
-				break;
-		}
+	__attribute__((noinline)) void stop() {
+		pr_info("Stopping USB device\n");
+		serial.on_stopped();
+		USBD_Stop(&USBD_Device);
+		USBD_DeInit(&USBD_Device);
+	}
+
+	__attribute__((noinline)) void soft_stop() {
+		// Class transition without HAL_PCD_DeInit. USBD_Stop disconnects D+ and
+		// invokes each class's DeInit (closing endpoints); skipping USBD_DeInit
+		// keeps hpcd->State == READY so the next USBD_Init won't re-run MspInit,
+		// which avoids toggling USBO_CLK on a live VBUS bus.
+		pr_info("Stopping USB device\n");
+		serial.on_stopped();
+		USBD_Stop(&USBD_Device);
 	}
 
 	void set_mode(UsbDeviceMode new_mode) {
 		if (new_mode == mode)
 			return;
-		// Soft stop: skip USBD_DeInit so HAL_PCD_DeInit/MspDeInit don't run.
-		// hpcd->State stays READY, so the next start()'s HAL_PCD_Init skips
-		// MspInit and avoids toggling USBO_CLK while VBUS is held by the host.
-		// Global IRQ is disabled at the peripheral by USBD_Stop and re-enabled
-		// by USBD_Start, so NVIC state can be left alone.
-		switch (mode) {
-			case UsbDeviceMode::Video:
-				video.soft_stop();
-				break;
-			case UsbDeviceMode::Midi:
-				midi.soft_stop();
-				break;
-			case UsbDeviceMode::Cdc:
-			default:
-				serial.soft_stop();
-				break;
-		}
+
+		soft_stop();
 		mode = new_mode;
 		start();
 	}
@@ -100,7 +109,6 @@ struct UsbDeviceManager {
 		mode = new_mode;
 	}
 
-
 	// True if a host has enumerated us (SetConfiguration received), including
 	// if the bus was subsequently suspended. Class-agnostic.
 	bool is_configured() {
@@ -109,19 +117,9 @@ struct UsbDeviceManager {
 	}
 
 	void process() {
-		if (mode == UsbDeviceMode::Cdc)
+		if (mode == UsbDeviceMode::MidiConsole) {
 			serial.process();
-		else if (mode == UsbDeviceMode::Midi)
 			midi.process(); // idle-kick drain of any app-queued TX
+		}
 	}
-
-#ifdef USE_RAMDISK_USB
-	RamDiskOps ramdiskops;
-	UsbDriveDevice drive;
-
-	UsbDeviceManager(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
-		: ramdiskops{rmdisk}
-		, drive{ramdiskops} {
-	}
-#endif
 };

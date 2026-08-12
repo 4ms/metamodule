@@ -1,9 +1,9 @@
 #include "usb_serial_device.hh"
+#include "device_composite/add_class.hh"
 #include "console/console_routing.hh"
 #include "console/pr_dbg.hh"
 
 extern USBD_CDC_ItfTypeDef USBD_CDC_fops;
-extern USBD_DescriptorsTypeDef VCP_Desc;
 
 namespace
 {
@@ -23,36 +23,20 @@ UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice,
 	_instance = this;
 }
 
-void UsbSerialDevice::start() {
+void UsbSerialDevice::register_class() {
 	_instance = this;
-	auto init_ok = USBD_Init(pdev, &VCP_Desc, 0);
-	if (init_ok != USBD_OK) {
-		pr_err("USB Serial Device failed to initialize!\r\n");
-		pr_err("Error code: %d", static_cast<int>(init_ok));
-		return;
-	}
 
-	USBD_RegisterClass(pdev, USBD_CDC_CLASS);
-	USBD_CDC_RegisterInterface(pdev, &USBD_CDC_fops);
-	USBD_Start(pdev);
-	pr_info("Started UsbSerialDevice\n");
+	auto ok = MetaModule::UsbComposite::add_class(
+		pdev, USBD_CDC_CLASS, CLASS_TYPE_CDC, CMPSIT_CDC_EpAdd, [this] {
+			USBD_CDC_RegisterInterface(pdev, &USBD_CDC_fops);
+		});
+
+	if (ok)
+		pr_info("Registered USB CDC console\n");
 }
 
-void UsbSerialDevice::stop() {
-	pr_info("Stopping UsbSerialDevice\n");
+void UsbSerialDevice::on_stopped() {
 	set_console_routing(false);
-	USBD_Stop(pdev);
-	USBD_DeInit(pdev);
-}
-
-void UsbSerialDevice::soft_stop() {
-	// Class transition without HAL_PCD_DeInit. USBD_Stop disconnects D+ and
-	// invokes pClass->DeInit (closes endpoints); skipping USBD_DeInit keeps
-	// hpcd->State == READY so the next USBD_Init won't re-run MspInit, which
-	// avoids toggling USBO_CLK on a live VBUS bus.
-	pr_info("Stopping UsbSerialDevice\n");
-	set_console_routing(false);
-	USBD_Stop(pdev);
 }
 
 void UsbSerialDevice::set_console_routing(bool active) {
@@ -91,9 +75,9 @@ void UsbSerialDevice::transmit_pending() {
 	if (tx_pending == 0)
 		return;
 
-	USBD_CDC_SetTxBuffer(pdev, tx_bounce.data(), tx_pending);
+	USBD_CDC_SetTxBuffer(pdev, tx_bounce.data(), tx_pending, cdc_class_id());
 
-	auto err = USBD_CDC_TransmitPacket(pdev);
+	auto err = USBD_CDC_TransmitPacket(pdev, cdc_class_id());
 	if (err == USBD_OK) {
 		is_transmitting = true;
 		last_transmission_tm = HAL_GetTick();
@@ -106,8 +90,18 @@ void UsbSerialDevice::transmit_pending() {
 	// USBD_BUSY: keep tx_pending, retry next process()
 }
 
+// Which composite slot the CDC class landed in. pdev->classId only identifies
+// the class inside a class callback -- from the main loop it holds whichever
+// class the OTG ISR last dispatched to -- so the app-facing CDC calls must pass
+// the id explicitly.
+uint8_t UsbSerialDevice::cdc_class_id() const {
+	return _cdc_class_id;
+}
+
 int8_t UsbSerialDevice::CDC_Itf_Init() {
-	USBD_CDC_SetTxBuffer(_instance->pdev, _instance->tx_bounce.data(), 0);
+	// Inside a class callback: classId is ours
+	_instance->_cdc_class_id = (uint8_t)_instance->pdev->classId;
+	USBD_CDC_SetTxBuffer(_instance->pdev, _instance->tx_bounce.data(), 0, _instance->_cdc_class_id);
 	USBD_CDC_SetRxBuffer(_instance->pdev, _instance->rx_buffer.data()); // FIXME: how does the driver prevent overflow?
 	return USBD_OK;
 }
