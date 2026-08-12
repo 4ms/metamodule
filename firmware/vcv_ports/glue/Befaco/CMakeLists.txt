@@ -65,5 +65,10 @@ target_compile_options(
 
 target_compile_definitions(BefacoLibrary PRIVATE METAMODULE VCV)
 
+# fastpow.c type-puns int bits to float via a pointer cast, which trips
+# -Wstrict-aliasing (and is UB under strict aliasing)
+set_source_files_properties(${BEFACO_DIR}/libs/OwlProgram/LibSource/fastpow.c
+                            PROPERTIES COMPILE_OPTIONS -fno-strict-aliasing)
+
 # set_property(TARGET BefacoLibrary PROPERTY METAMODULE_DISABLE_IPO TRUE)
 set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 23)
