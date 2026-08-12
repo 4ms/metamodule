@@ -18,20 +18,7 @@ namespace rack::plugin
 namespace
 {
 
-// At plugin-load time we build a ModuleWidget with no Module, in order to avoid
-// allocating a rack::engine::Module for every model of every plugin.
-// Everything that comes from the ParamQuantity is therefore missing at that point:
-// element names, default value, min/max, display units, and the number/names of
-// switch positions. Worse, make_element() picks the Element variant based on the
-// ParamQuantity (Knob vs. KnobSnapped vs. Encoder, Slider vs. SlideSwitch, ...),
-// so the element types themselves can be wrong.
-//
-// So: the first time a real module of this model is created, re-run the element
-// population using that instance's ModuleWidget, which does have a Module.
-//
-// Note that Model::strings is a std::deque, so appending to it is address-stable:
-// string_views handed out earlier (including the faceplate filename) stay valid.
-// Never erase from it.
+// Runs for populate_elements_indices() -> move_strings() -> update Info in ModuleFactory
 bool populate_element_data(Model *model, std::string const &combined_slug, CoreProcessor *proc) {
 	auto module = dynamic_cast<rack::engine::Module *>(proc);
 	if (!module) {
@@ -55,8 +42,8 @@ bool populate_element_data(Model *model, std::string const &combined_slug, CoreP
 	model->move_strings();
 
 	if (model->elements.size() != prev_num_elements) {
-		// The element vectors may have been re-allocated, which invalidates any copy of the
-		// ModuleInfoView that was taken before now (the one in the registry is refreshed below).
+		// The element vector changed size, so it might have been re-allocated, which invalidates
+		// the ModuleInfoView
 		pr_warn("Module %s: element count changed from %zu to %zu when populating with a live module\n",
 				combined_slug.c_str(),
 				prev_num_elements,
@@ -96,8 +83,7 @@ void Plugin::addModel(Model *model) {
 		return;
 	}
 
-	// auto module = model->createModule();
-	// auto modulewidget = model->createModuleWidget(module);
+	// Build a ModuleWidget with no Module, in order to avoid allocating a rack::engine::Module
 	auto modulewidget = model->createModuleWidget(nullptr);
 
 	modulewidget->populate_elements_indices(model);
@@ -131,22 +117,24 @@ void Plugin::addModel(Model *model) {
 	ModuleInfoView info{
 		.description = "", .width_hp = 1, .elements = model->elements, .indices = model->indices, .bypass_routes = {}};
 
-	// Wrap the creation func so that the first module instance can fill in the
-	// element data that requires a live Module (see populate_element_data()).
-	// The flag is kept here and not in Model, because Model is allocated by the plugin
-	// (in createModel<>) so adding a field to it would break already-built plugins.
 	std::string combined_slug = std::string(brand) + ":" + std::string(slug);
 	auto is_populated = std::make_shared<bool>(false);
 
+	// Wrapper for model->creation_func(): lazily run populate_element_data() when module is first constructed
 	auto create_module = [model, combined_slug, is_populated]() -> std::unique_ptr<CoreProcessor> {
 		if (!model->creation_func)
 			return nullptr;
 
+		// Temporarily set pluginInstance so paths to assets work
+		auto prev_plugin_instance = pluginInstance;
+		pluginInstance = model->plugin;
+
 		auto module = model->creation_func();
+
+		pluginInstance = prev_plugin_instance;
 
 		if (module && !*is_populated) {
 			populate_element_data(model, combined_slug, module.get());
-			// Don't retry if it failed: it will fail the same way every time
 			*is_populated = true;
 		}
 
@@ -159,7 +147,6 @@ void Plugin::addModel(Model *model) {
 	models.push_back(model);
 
 	delete modulewidget;
-	// delete module;
 }
 
 Plugin::Plugin()
