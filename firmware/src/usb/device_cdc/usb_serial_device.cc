@@ -1,7 +1,7 @@
 #include "usb_serial_device.hh"
-#include "device_composite/add_class.hh"
 #include "console/console_routing.hh"
 #include "console/pr_dbg.hh"
+#include "device_composite/add_class.hh"
 
 extern USBD_CDC_ItfTypeDef USBD_CDC_fops;
 
@@ -19,17 +19,17 @@ UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice,
 								 std::array<ConcurrentBuffer *, MetaModule::ConsoleBufferReader::NumBuffers> buffers)
 	: pdev{pDevice}
 	, reader{buffers} {
-	rx_buffer.resize(256);
+	// The class arms this endpoint for a full max-size packet (512)
+	rx_buffer.resize(CDC_DATA_HS_OUT_PACKET_SIZE);
 	_instance = this;
 }
 
 void UsbSerialDevice::register_class() {
 	_instance = this;
 
-	auto ok = MetaModule::UsbComposite::add_class(
-		pdev, USBD_CDC_CLASS, CLASS_TYPE_CDC, CMPSIT_CDC_EpAdd, [this] {
-			USBD_CDC_RegisterInterface(pdev, &USBD_CDC_fops);
-		});
+	auto ok = MetaModule::UsbComposite::add_class(pdev, USBD_CDC_CLASS, CLASS_TYPE_CDC, CMPSIT_CDC_EpAdd, [this] {
+		USBD_CDC_RegisterInterface(pdev, &USBD_CDC_fops);
+	});
 
 	if (ok)
 		pr_info("Registered USB CDC console\n");
@@ -102,7 +102,7 @@ int8_t UsbSerialDevice::CDC_Itf_Init() {
 	// Inside a class callback: classId is ours
 	_instance->_cdc_class_id = (uint8_t)_instance->pdev->classId;
 	USBD_CDC_SetTxBuffer(_instance->pdev, _instance->tx_bounce.data(), 0, _instance->_cdc_class_id);
-	USBD_CDC_SetRxBuffer(_instance->pdev, _instance->rx_buffer.data()); // FIXME: how does the driver prevent overflow?
+	USBD_CDC_SetRxBuffer(_instance->pdev, _instance->rx_buffer.data());
 	return USBD_OK;
 }
 
