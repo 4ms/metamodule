@@ -71,12 +71,17 @@ volatile uint32_t mm_abort_fault_info[16];
 
 } // extern "C"
 
-// Re-route a data or instruction/prefetch abort, if there's a recovery point set
-// then longjmp to it.
-extern "C" void mm_abort_reroute(uint32_t fault_addr, uint32_t fault_pc, uint32_t fsr, uint32_t is_prefetch) {
+// Re-route a data abort, prefetch abort, or undefined instruction: if there's
+// a recovery point set then longjmp to it.
+extern "C" void mm_abort_reroute(uint32_t fault_addr, uint32_t fault_pc, uint32_t fsr, uint32_t fault_type) {
+	const char *what = fault_type == 0 ? "data abort" :
+					   fault_type == 1 ? "prefetch abort" :
+										 "undefined instruction";
 	{
 		MetaModule::SafeLog log;
-		log.str(is_prefetch ? "[abort] prefetch abort: pc " : "[abort] data abort: pc ");
+		log.str("[abort] ");
+		log.str(what);
+		log.str(": pc ");
 		log.hex(fault_pc);
 		log.str(" addr ");
 		log.hex(fault_addr);
@@ -89,7 +94,7 @@ extern "C" void mm_abort_reroute(uint32_t fault_addr, uint32_t fault_pc, uint32_
 	asm volatile("mrc p15, 0, %0, c0, c0, 5" : "=r"(mpidr));
 	mm_abort_reroute_active[mpidr & 3] = 0;
 
-	MetaModule::abort_rescue_try(is_prefetch ? "prefetch abort" : "data abort");
+	MetaModule::abort_rescue_try(what);
 
 	// Failed to rescue: halt here until a debugger can attach
 	while (true)

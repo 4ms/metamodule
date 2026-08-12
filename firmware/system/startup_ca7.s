@@ -84,6 +84,10 @@ svc_loop:
 	msr cpsr_c, MODE_ABT
 	ldr sp, =_abt_stack0_end
 
+													// Undef-mode stack (holds the Undef_Handler register snapshot)
+	msr cpsr_c, MODE_UND
+	ldr sp, =_und_stack0_end
+
 													// USER and SYS mode stack
 	msr cpsr_c, MODE_SYS
     ldr r1, =_user_stack_start
@@ -124,6 +128,9 @@ aux_core_start:
 
 	msr cpsr_c, MODE_ABT 							// Abort-mode stack (holds the DAbt/PAbt handlers' register snapshot)
 	ldr sp, =_abt_stack1_end
+
+	msr cpsr_c, MODE_UND 							// Undef-mode stack (holds the Undef_Handler register snapshot)
+	ldr sp, =_und_stack1_end
 
 	msr cpsr_c, MODE_SYS 							// Setup secondary core user/sys mode stack
 	ldr r1, =_auxcore_user_stack_start
@@ -166,13 +173,17 @@ Undef_Handler:
 	mov r2, #1
 	str r2, [r1, r0, lsl #2]
 
-	mrc p15, 0, r0, c6, c0, 2						// arg0: IFAR (faulting address)
-	sub r1, r14, #4 								// arg1: faulting instruction
-	mrc p15, 0, r2, c5, c0, 1						// arg2: IFSR
-	mov r3, #1 										// arg3: 1 = prefetch abort
+	mrs r2, spsr 									// arg1: faulting instruction: lr - 4, or lr - 2 in Thumb
+	tst r2, #(1 << 5)
+	subeq r1, r14, #4
+	subne r1, r14, #2
+	mov r0, r1 										// arg0: undef has no fault-address register: use the pc
+	mov r2, #0 										// arg2: undef has no fault-status register
+	mov r3, #2 										// arg3: 2 = undefined instruction
 	b Abort_Reroute
 
 Undef_Spin:
+	pop {r0-r4}
 	b .
 
 PAbt_Handler:
@@ -296,6 +307,12 @@ _abt_stack0_end:
 _abt_stack1_start:
 	.space 256
 _abt_stack1_end:
+_und_stack0_start:
+	.space 256
+_und_stack0_end:
+_und_stack1_start:
+	.space 256
+_und_stack1_end:
 _abort_rescue_stack0_start:
 	.space 2048
 _abort_rescue_stack0_end:
