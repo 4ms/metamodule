@@ -88,12 +88,16 @@ static uint8_t USBD_VIDEO_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static uint8_t USBD_VIDEO_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static uint8_t USBD_VIDEO_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 
-#ifndef USE_USBD_COMPOSITE
+/* 4ms local change: keep the config-descriptor accessors in composite
+   builds. UVC is presented on its own (not merged with CDC/MIDI), but a
+   composite-enabled core only dispatches DataIn/DataOut to classes that
+   are in pdev->tclasslist, so UVC is still registered via
+   USBD_RegisterClassComposite and our USBD_CMPSIT forwards descriptor
+   requests straight back to these. */
 static uint8_t *USBD_VIDEO_GetFSCfgDesc(uint16_t *length);
 static uint8_t *USBD_VIDEO_GetHSCfgDesc(uint16_t *length);
 static uint8_t *USBD_VIDEO_GetOtherSpeedCfgDesc(uint16_t *length);
 static uint8_t *USBD_VIDEO_GetDeviceQualifierDesc(uint16_t *length);
-#endif /* USE_USBD_COMPOSITE */
 
 static uint8_t USBD_VIDEO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
 static uint8_t USBD_VIDEO_SOF(USBD_HandleTypeDef *pdev);
@@ -103,9 +107,7 @@ static uint8_t USBD_VIDEO_IsoINIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnu
 static void VIDEO_REQ_GetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 static void VIDEO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 
-#ifndef USE_USBD_COMPOSITE
 static void *USBD_VIDEO_GetVSFrameDesc(uint8_t *pConfDesc);
-#endif /* USE_USBD_COMPOSITE */
 
 static void *USBD_VIDEO_GetVideoHeaderDesc(uint8_t *pConfDesc);
 
@@ -129,17 +131,10 @@ USBD_ClassTypeDef  USBD_VIDEO =
   USBD_VIDEO_SOF,
   USBD_VIDEO_IsoINIncomplete,
   NULL,
-#ifdef USE_USBD_COMPOSITE
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-#else
   USBD_VIDEO_GetHSCfgDesc,
   USBD_VIDEO_GetFSCfgDesc,
   USBD_VIDEO_GetOtherSpeedCfgDesc,
   USBD_VIDEO_GetDeviceQualifierDesc,
-#endif /* USE_USBD_COMPOSITE */
 #if (USBD_SUPPORT_USER_STRING_DESC == 1U)
   NULL,
 #endif /* USBD_SUPPORT_USER_STRING_DESC  */
@@ -335,7 +330,6 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_CfgDesc[] __ALIGN_END =
   0x01,                                          /* bInterval: 1 frame interval */
 };
 
-#ifndef USE_USBD_COMPOSITE
 /* USB Standard Device Descriptor */
 __ALIGN_BEGIN static uint8_t USBD_VIDEO_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] __ALIGN_END =
 {
@@ -350,7 +344,6 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIE
   0x01,
   0x00,
 };
-#endif /* USE_USBD_COMPOSITE */
 
 static uint8_t VIDEOinEpAdd = UVC_IN_EP;
 
@@ -910,7 +903,6 @@ static void VIDEO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   }
 }
 
-#ifndef USE_USBD_COMPOSITE
 /**
   * @brief  USBD_VIDEO_GetFSCfgDesc
   *         return configuration descriptor
@@ -1078,7 +1070,6 @@ static void *USBD_VIDEO_GetVSFrameDesc(uint8_t *pConfDesc)
 
   return (void *)pVSFrameDesc;
 }
-#endif /* USE_USBD_COMPOSITE */
 
 /**
   * @brief  USBD_VIDEO_GetVideoHeaderDesc
