@@ -80,6 +80,10 @@ svc_loop:
     strlt r0, [r1], #4
     blt svc_loop
 
+													// Abort-mode stack (holds the DAbt/PAbt handlers' register snapshot)
+	msr cpsr_c, MODE_ABT
+	ldr sp, =_abt_stack0_end
+
 													// USER and SYS mode stack
 	msr cpsr_c, MODE_SYS
     ldr r1, =_user_stack_start
@@ -118,6 +122,9 @@ aux_core_start:
 	ldr    r0, =_Reset
 	mcr    p15, 0, r0, c12, c0, 0
 
+	msr cpsr_c, MODE_ABT 							// Abort-mode stack (holds the DAbt/PAbt handlers' register snapshot)
+	ldr sp, =_abt_stack1_end
+
 	msr cpsr_c, MODE_SYS 							// Setup secondary core user/sys mode stack
 	ldr r1, =_auxcore_user_stack_start
 	ldr sp, =_auxcore_user_stack_end
@@ -134,25 +141,124 @@ auxcore_usrsys_loop:
 	bl aux_core_main 								// Go to secondary core main code
 
 
+//The CP15 SCTLR.TE bit is used to specify whether exception handlers will use ARM or Thumb.
 
 Abort_Exception:
 	b .
 
+// Data/prefetch aborts in SYS mode are routed to mm_abort_reroute (abort_rescue.cc).
+// Uses a private stack (per core). Stores crash details in mm_abort_fault_info 
+// (8 words per core: addr, pc, fsr, type, spsr, count)
+
 Undef_Handler:
+	push {r0-r4}
+	mrs r0, spsr
+	and r0, r0, #0x1F
+	cmp r0, #MODE_SYS
+	bne Undef_Spin									// Spin if we crash in IRQ/FIQ/SVC mode
+
+	mrc p15, 0, r0, c0, c0, 5						// Per-core re-entry guard
+	and r0, r0, #3
+	ldr r1, =mm_abort_reroute_active
+	ldr r2, [r1, r0, lsl #2]
+	cmp r2, #0
+	bne Undef_Spin									// Spin if we fault from our fault handler
+	mov r2, #1
+	str r2, [r1, r0, lsl #2]
+
+	mrc p15, 0, r0, c6, c0, 2						// arg0: IFAR (faulting address)
+	sub r1, r14, #4 								// arg1: faulting instruction
+	mrc p15, 0, r2, c5, c0, 1						// arg2: IFSR
+	mov r3, #1 										// arg3: 1 = prefetch abort
+	b Abort_Reroute
+
+Undef_Spin:
 	b .
 
-//The CP15 SCTLR.TE bit is used to specify whether exception handlers will use ARM or Thumb.
 PAbt_Handler:
+	push {r0-r4}
+	mrs r0, spsr
+	and r0, r0, #0x1F
+	cmp r0, #MODE_SYS
+	bne PAbt_Spin									// Spin if we crash in IRQ/FIQ/SVC mode
+
+	mrc p15, 0, r0, c0, c0, 5						// Per-core re-entry guard
+	and r0, r0, #3
+	ldr r1, =mm_abort_reroute_active
+	ldr r2, [r1, r0, lsl #2]
+	cmp r2, #0
+	bne PAbt_Spin									// Spin if we fault from our fault handler
+	mov r2, #1
+	str r2, [r1, r0, lsl #2]
+
+	mrc p15, 0, r0, c6, c0, 2						// arg0: IFAR (faulting address)
+	sub r1, r14, #4 								// arg1: faulting instruction
+	mrc p15, 0, r2, c5, c0, 1						// arg2: IFSR
+	mov r3, #1 										// arg3: 1 = prefetch abort
+	b Abort_Reroute
+
+PAbt_Spin:
+	pop {r0-r4}
 	subs pc, r14, #4
-	msr cpsr_c, MODE_SYS
-	bx lr
-	b .
 
 DAbt_Handler:
+	push {r0-r4}
+	mrs r0, spsr
+	and r0, r0, #0x1F
+	cmp r0, #MODE_SYS
+	bne DAbt_Spin
+
+	mrc p15, 0, r0, c0, c0, 5						// Per-core re-entry guard
+	and r0, r0, #3
+	ldr r1, =mm_abort_reroute_active
+	ldr r2, [r1, r0, lsl #2]
+	cmp r2, #0
+	bne DAbt_Spin
+	mov r2, #1
+	str r2, [r1, r0, lsl #2]
+
+	mrc p15, 0, r0, c6, c0, 0						// arg0: DFAR (address whose access faulted)
+	sub r1, r14, #8 								// arg1: faulting instruction
+	mrc p15, 0, r2, c5, c0, 0						// arg2: DFSR
+	mov r3, #0 										// arg3: 0 = data abort
+	b Abort_Reroute
+
+DAbt_Spin:
+	pop {r0-r4}
 	subs pc, r14, #8
-	msr cpsr_c, MODE_SYS
-	bx lr
-	b .
+
+Abort_Reroute:
+	add sp, sp, #20 								// Drop the r0-r4 snapshot: this context is abandoned
+
+	mrc p15, 0, r5, c0, c0, 5						// Record fault info where a debugger can always find it
+	and r5, r5, #3
+	ldr r4, =mm_abort_fault_info
+	add r4, r4, r5, lsl #5 							// 8 words per core
+	stmia r4, {r0-r3}								// [0]=addr [1]=pc [2]=fsr [3]=type
+	mrs r5, spsr
+	str r5, [r4, #16]								// [4]=spsr of the faulted context
+	ldr r5, [r4, #20]
+	add r5, r5, #1
+	str r5, [r4, #20]								// [5]=count of re-routed aborts
+
+	ldr lr, =mm_abort_reroute_entry
+	mrs r4, spsr
+	tst lr, #1 										// Match SPSR.T to the target's instruction set,
+	biceq r4, r4, #(1 << 5)							// and clear any Thumb IT-block state
+	orrne r4, r4, #(1 << 5)
+	bic r4, r4, #(0x3 << 25)
+	bic r4, r4, #(0x3F << 10)
+	msr spsr_cxsf, r4
+	bic lr, lr, #1
+	subs pc, lr, #0 								// Exception-return into mm_abort_reroute_entry
+													// (r0-r3 carry mm_abort_reroute's args)
+
+mm_abort_reroute_entry: 							// Now in SYS mode. Run the rescue on a private
+	mrc p15, 0, r4, c0, c0, 5						// per-core stack: the faulted thread's SP may be
+	ands r4, r4, #3 								// unusable (and is abandoned regardless)
+	ldr sp, =_abort_rescue_stack0_end
+	ldrne sp, =_abort_rescue_stack1_end
+	b mm_abort_reroute
 
 
 // Useful macros for flipping pin PG9 to debug:
@@ -178,3 +284,21 @@ DebugPinLow:
 	mov r6, #(1 << 25)
 	str r6, [r4] 									// Pin low
 	bx lr
+
+// Per-core stacks for the abort handlers: a few words for the ABT-mode
+// register snapshot, and a working stack for mm_abort_reroute (SafeLog +
+// rescue), used instead of the faulted thread's stack.
+.section .bss.abort_stacks, "aw", %nobits
+.align 3
+_abt_stack0_start:
+	.space 256
+_abt_stack0_end:
+_abt_stack1_start:
+	.space 256
+_abt_stack1_end:
+_abort_rescue_stack0_start:
+	.space 2048
+_abort_rescue_stack0_end:
+_abort_rescue_stack1_start:
+	.space 2048
+_abort_rescue_stack1_end:
