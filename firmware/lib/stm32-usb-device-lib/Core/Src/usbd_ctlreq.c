@@ -568,6 +568,15 @@ static void USBD_GetDescriptor(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *r
 
           for (uint32_t idx = 0U; (idx < pdev->NumClasses); idx++)
           {
+            /* 4ms local addition: NULL check on the class itself. Every other
+               pClass[] walk in the core guards this; this one does not, so a
+               registration bug turns a host's GET_DESCRIPTOR(STRING) into a
+               NULL dereference inside the OTG interrupt. */
+            if (pdev->pClass[idx] == NULL)
+            {
+              continue;
+            }
+
             if (pdev->pClass[idx]->GetUsrStrDescriptor != NULL)
             {
               pdev->classId = idx;
