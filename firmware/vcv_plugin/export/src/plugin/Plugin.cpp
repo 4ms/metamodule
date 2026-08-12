@@ -1,8 +1,11 @@
 #include "console/pr_dbg.hh"
 #include "module_widget_adaptor.hh"
 #include <app/ModuleWidget.hpp>
+#include <engine/Module.hpp>
+#include <memory>
 #include <plugin/Model.hpp>
 #include <plugin/Plugin.hpp>
+#include <string>
 #include <string_view>
 
 #include "CoreModules/moduleFactory.hh"
@@ -11,6 +14,70 @@ extern rack::plugin::Plugin *pluginInstance;
 
 namespace rack::plugin
 {
+
+namespace
+{
+
+// At plugin-load time we build a ModuleWidget with no Module, in order to avoid
+// allocating a rack::engine::Module for every model of every plugin.
+// Everything that comes from the ParamQuantity is therefore missing at that point:
+// element names, default value, min/max, display units, and the number/names of
+// switch positions. Worse, make_element() picks the Element variant based on the
+// ParamQuantity (Knob vs. KnobSnapped vs. Encoder, Slider vs. SlideSwitch, ...),
+// so the element types themselves can be wrong.
+//
+// So: the first time a real module of this model is created, re-run the element
+// population using that instance's ModuleWidget, which does have a Module.
+//
+// Note that Model::strings is a std::deque, so appending to it is address-stable:
+// string_views handed out earlier (including the faceplate filename) stay valid.
+// Never erase from it.
+bool populate_element_data(Model *model, std::string const &combined_slug, CoreProcessor *proc) {
+	auto module = dynamic_cast<rack::engine::Module *>(proc);
+	if (!module) {
+		pr_warn("Cannot populate element data for %s: not a rack module\n", combined_slug.c_str());
+		return false;
+	}
+
+	auto module_widget = module->module_widget.get();
+	if (!module_widget) {
+		pr_warn("Cannot populate element data for %s: module has no ModuleWidget\n", combined_slug.c_str());
+		return false;
+	}
+
+	// VCV always has these set; the create_vcv_module() path does not set them
+	module->model = model;
+	module_widget->setModel(model);
+
+	auto prev_num_elements = model->elements.size();
+
+	module_widget->populate_elements_indices(model);
+	model->move_strings();
+
+	if (model->elements.size() != prev_num_elements) {
+		// The element vectors may have been re-allocated, which invalidates any copy of the
+		// ModuleInfoView that was taken before now (the one in the registry is refreshed below).
+		pr_warn("Module %s: element count changed from %zu to %zu when populating with a live module\n",
+				combined_slug.c_str(),
+				prev_num_elements,
+				model->elements.size());
+	}
+
+	if (MetaModule::ModuleFactory::isValidSlug(combined_slug)) {
+		auto &info = MetaModule::ModuleFactory::getModuleInfo(combined_slug);
+		info.elements = model->elements;
+		info.indices = model->indices;
+	} else {
+		pr_err("Cannot re-register element data: %s is not a valid slug\n", combined_slug.c_str());
+		return false;
+	}
+
+	pr_trace("Populated element data for %s (%zu elements)\n", combined_slug.c_str(), model->elements.size());
+
+	return true;
+}
+
+} // namespace
 
 void Plugin::addModel(Model *model) {
 	if (!model)
@@ -64,7 +131,29 @@ void Plugin::addModel(Model *model) {
 	ModuleInfoView info{
 		.description = "", .width_hp = 1, .elements = model->elements, .indices = model->indices, .bypass_routes = {}};
 
-	ModuleFactory::registerModuleType(brand, slug, model->creation_func, info, panel_filename);
+	// Wrap the creation func so that the first module instance can fill in the
+	// element data that requires a live Module (see populate_element_data()).
+	// The flag is kept here and not in Model, because Model is allocated by the plugin
+	// (in createModel<>) so adding a field to it would break already-built plugins.
+	std::string combined_slug = std::string(brand) + ":" + std::string(slug);
+	auto is_populated = std::make_shared<bool>(false);
+
+	auto create_module = [model, combined_slug, is_populated]() -> std::unique_ptr<CoreProcessor> {
+		if (!model->creation_func)
+			return nullptr;
+
+		auto module = model->creation_func();
+
+		if (module && !*is_populated) {
+			populate_element_data(model, combined_slug, module.get());
+			// Don't retry if it failed: it will fail the same way every time
+			*is_populated = true;
+		}
+
+		return module;
+	};
+
+	ModuleFactory::registerModuleType(brand, slug, create_module, info, panel_filename);
 
 	model->plugin = this;
 	models.push_back(model);
