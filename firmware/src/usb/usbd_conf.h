@@ -43,9 +43,39 @@ extern "C" {
  * @{
  */
 
-// MIDI (AudioControl + MIDIStreaming) and CDC both use 2 interfaces.
-#define USBD_MAX_NUM_INTERFACES 2U
+/* Composite device support.
+ *
+ * The "MIDI + Console" mode presents CDC (2 interfaces) and USB-MIDI (2
+ * interfaces) at once; UVC video is presented on its own. The config
+ * descriptors are not built by ST's usbd_composite_builder.c -- we supply our
+ * own USBD_CMPSIT in device_composite/ (ST's builder has no USB-MIDI support,
+ * and hand-writing the descriptor keeps control of interface strings). Only
+ * the *core's* composite support is used: pClass[]/pClassDataCmsit[] and the
+ * USBD_CoreFindIF()/USBD_CoreFindEP() routing.
+ */
+#define USE_USBD_COMPOSITE
+#define USBD_MAX_SUPPORTED_CLASS 3U /* CDC + MIDI, with room for MSC */
+#define USBD_MAX_CLASS_INTERFACES 2U
+#define USBD_MAX_CLASS_ENDPOINTS 3U /* CDC: bulk IN + bulk OUT + interrupt IN */
+
+/* CDC(2) + MIDI(2). UVC uses 2 of these when it is the active mode. */
+#define USBD_MAX_NUM_INTERFACES 4U
 #define USBD_MAX_NUM_CONFIGURATION 1U
+
+/* Endpoint map for the composite (MIDI + Console) mode. Kept contiguous from
+ * EP1 up: a TX FIFO is allocated per IN endpoint number, and the OTG core wants
+ * the used TX FIFOs packed at the bottom. UVC, which is a mode of its own,
+ * keeps EP1 IN (UVC_IN_EP below).
+ *   EP1 IN/OUT  bulk       CDC data
+ *   EP2 IN      interrupt  CDC notifications
+ *   EP3 IN/OUT  bulk       MIDI
+ *   EP4 IN/OUT  bulk       reserved for MSC (developer-mode drive)
+ */
+#define CMPSIT_CDC_IN_EP 0x81U
+#define CMPSIT_CDC_OUT_EP 0x01U
+#define CMPSIT_CDC_CMD_EP 0x82U
+#define CMPSIT_MIDI_IN_EP 0x83U
+#define CMPSIT_MIDI_OUT_EP 0x03U
 #define USBD_MAX_STR_DESC_SIZ 0x100U
 #define USBD_SELF_POWERED 1U
 #define USBD_DEBUG_LEVEL 1U /*used in usbd lib, so keep this*/

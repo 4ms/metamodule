@@ -17,10 +17,15 @@
  */
 
 /* Includes ------------------------------------------------------------------ */
+#include "device_composite/usbd_composite_builder.h"
+#include "device_midi/usbd_midi.h"
 #include "device_msc/usb_drive_device.hh"
 #include "drivers/stm32xx.h"
+#include "usbd_cdc.h"
 #include "usbd_core.h"
 #include "usbd_msc.h"
+#include "usbd_video.h"
+#include <algorithm>
 
 PCD_HandleTypeDef hpcd;
 
@@ -214,11 +219,40 @@ void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd) {
 					   LL Driver Interface (USB Device Library --> PCD)
 *******************************************************************************/
 
+// The OTG core has 4 KB (1024 words) of FIFO RAM shared by the Rx FIFO and one
+// Tx FIFO per IN endpoint; with DMA enabled the core also reserves a few words
+// per channel, leaving ~952 usable. A Tx FIFO must hold at least one max-size
+// packet, so a high-speed bulk IN endpoint needs >= 128 words. The two device
+// modes have different endpoint sets, and USBD_LL_Init runs on every mode
+// change, so the split is chosen per mode rather than sized for the worst case.
+static void reset_class_arena();
+
+static void set_fifo_sizes() {
+	if (USBD_CMPSIT_GetProfile() == UsbCompositeProfile_Video) {
+		// EP1 IN isochronous, 1024 B/packet. Total: 512 + 64 + 256 = 832 words.
+		HAL_PCDEx_SetRxFiFo(&hpcd, 0x200);
+		HAL_PCDEx_SetTxFiFo(&hpcd, 0, 0x40);  // EP0
+		HAL_PCDEx_SetTxFiFo(&hpcd, 1, 0x100); // UVC iso IN
+	} else {
+		// CDC bulk (EP1), CDC notifications (EP2), MIDI bulk (EP3). The Rx FIFO
+		// is shared by both bulk OUT endpoints; 384 words is comfortably above
+		// the ~160-word minimum for a 512 B packet with two OUT endpoints.
+		// Total: 384 + 64 + 128 + 16 + 128 = 720 words, leaving room for the
+		// developer-mode MSC drive (EP4, another 128).
+		HAL_PCDEx_SetRxFiFo(&hpcd, 0x180);
+		HAL_PCDEx_SetTxFiFo(&hpcd, 0, 0x40); // EP0
+		HAL_PCDEx_SetTxFiFo(&hpcd, 1, 0x80); // CDC data IN
+		HAL_PCDEx_SetTxFiFo(&hpcd, 2, 0x10); // CDC notifications
+		HAL_PCDEx_SetTxFiFo(&hpcd, 3, 0x80); // MIDI IN
+	}
+}
+
 /**
  * @brief  Initializes the Low Level portion of the Device driver.
  * @param  pdev: Device handle
  * @retval USBD Status
  */
+
 USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	/* Set LL Driver parameters */
 	hpcd.Instance = USB_OTG_HS;
@@ -248,9 +282,9 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	if (HAL_PCD_Init(&hpcd) != HAL_OK)
 		return USBD_FAIL;
 
-	HAL_PCDEx_SetRxFiFo(&hpcd, 0x200);
-	HAL_PCDEx_SetTxFiFo(&hpcd, 0, 0x40);
-	HAL_PCDEx_SetTxFiFo(&hpcd, 1, 0x100);
+	reset_class_arena();
+
+	set_fifo_sizes();
 
 	return USBD_OK;
 }
@@ -410,9 +444,45 @@ uint32_t USBD_LL_GetRxDataSize(USBD_HandleTypeDef *pdev, uint8_t ep_addr) {
  * @param  size: Size of allocated memory
  * @retval None
  */
+// Each registered class allocates its handle here during SetConfiguration and
+// releases it on ClrClassConfig. A composite configuration has several classes
+// live at once, so this cannot hand out one shared block the way ST's template
+// does -- it bump-allocates from an arena instead, and rewinds once every
+// allocation has been released. USBD_LL_Init() resets it outright: a fresh
+// USBD_Init means every previously handed-out handle is dead.
+//
+// Sized for the largest device mode: MIDI + Console (plus the MSC handle, which
+// is the biggest of the four and is what the developer-mode drive will add).
+static constexpr uint32_t round4(uint32_t n) {
+	return (n + 3u) & ~3u;
+}
+
+static constexpr uint32_t ArenaSize = std::max(round4(sizeof(USBD_CDC_HandleTypeDef)) +
+												   round4(sizeof(USBD_MIDI_HandleTypeDef)) +
+												   round4(sizeof(USBD_MSC_BOT_HandleTypeDef)),
+											   round4(sizeof(USBD_VIDEO_HandleTypeDef)));
+
+static uint32_t class_arena[ArenaSize / 4];
+static uint32_t arena_used;   // bytes handed out
+static uint32_t arena_allocs; // outstanding allocations
+
+static void reset_class_arena() {
+	arena_used = 0;
+	arena_allocs = 0;
+}
+
 void *USBD_static_malloc(uint32_t size) {
-	static uint32_t mem[(sizeof(USBD_MSC_BOT_HandleTypeDef) / 4) + 1]; /* On 32-bit boundary */
-	return mem;
+	size = round4(size);
+
+	if (arena_used + size > sizeof(class_arena)) {
+		// The caller (a class Init) reports this to the core as USBD_EMEM
+		return nullptr;
+	}
+
+	void *p = reinterpret_cast<uint8_t *>(class_arena) + arena_used;
+	arena_used += size;
+	arena_allocs++;
+	return p;
 }
 
 /**
@@ -421,6 +491,13 @@ void *USBD_static_malloc(uint32_t size) {
  * @retval None
  */
 void USBD_static_free(void *p) {
+	if (p != nullptr && arena_allocs > 0) {
+		// Classes are torn down as a group (USBD_ClrClassConfig / USBD_DeInit),
+		// so rewinding when the last one goes is enough to keep this stable
+		// across re-enumeration; individual frees are otherwise no-ops.
+		if (--arena_allocs == 0)
+			arena_used = 0;
+	}
 }
 
 /**
