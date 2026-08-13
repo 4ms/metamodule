@@ -248,6 +248,24 @@ static int8_t SCSI_TestUnitReady(USBD_HandleTypeDef *pdev, uint8_t lun, uint8_t 
     return -1;
   }
 
+  /* 4ms local addition: the storage layer can put the medium back on its own
+     (the developer drive does, once it has installed what the host copied).
+     Report the change and clear the ejected state, so a host that is still
+     attached can mount the drive again: SCSI_MEDIUM_EJECTED is otherwise only
+     cleared by a START_STOP_UNIT that a host has no reason to send after it
+     ejected. Checked before the ejected test for that reason. */
+  {
+    USBD_StorageTypeDef *pStorage = (USBD_StorageTypeDef *)pdev->pUserData[pdev->classId];
+
+    if ((pStorage->MediumChanged != NULL) && (pStorage->MediumChanged(lun) != 0))
+    {
+      hmsc->scsi_medium_state = SCSI_MEDIUM_UNLOCKED;
+      SCSI_SenseCode(pdev, lun, UNIT_ATTENTION, MEDIUM_HAVE_CHANGED);
+      hmsc->bot_state = USBD_BOT_NO_DATA;
+      return -1;
+    }
+  }
+
   if (hmsc->scsi_medium_state == SCSI_MEDIUM_EJECTED)
   {
     SCSI_SenseCode(pdev, lun, NOT_READY, MEDIUM_NOT_PRESENT);

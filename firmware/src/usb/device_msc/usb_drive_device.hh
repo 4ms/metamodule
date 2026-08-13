@@ -26,8 +26,13 @@ private:
 	static int8_t write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len);
 	static int8_t get_max_lun();
 	static int8_t eject(uint8_t lun);
+	static int8_t medium_changed(uint8_t lun);
 
 	static inline DevDriveBlock *_block = nullptr;
+
+	// Tracks `present` so the transition back to present can be reported to the
+	// host once, as a medium change
+	static inline bool _was_present = false;
 };
 
 } // namespace MetaModule

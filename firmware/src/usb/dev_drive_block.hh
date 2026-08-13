@@ -26,7 +26,8 @@ enum class DevDriveCommand : uint32_t {
 //   M4: sees serve, includes MSC in the composite at the next enumeration
 //   host: writes files, ejects
 //   M4: sets ejected, reports medium-not-present to the host
-//   A7: sees ejected, invalidates caches, mounts, installs plugins, remounts
+//   A7: sees ejected, invalidates caches, mounts, installs plugins, and puts
+//       the medium back (the host still has to be told to mount it)
 struct DevDriveBlock {
 	// A7 -> M4
 	std::atomic<uint32_t> base{0};	  // start of the drive memory, 0 if none

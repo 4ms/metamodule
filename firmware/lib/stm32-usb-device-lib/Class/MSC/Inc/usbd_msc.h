@@ -87,6 +87,11 @@ typedef struct _USBD_STORAGE
      (SCSI START_STOP_UNIT with START=0, LOEJ=1). May be NULL. */
   int8_t (* Eject)(uint8_t lun);
 
+  /* 4ms local addition: return nonzero once after the medium has been put back,
+     so the host is told MEDIUM_HAVE_CHANGED and re-reads the drive rather than
+     assuming it still holds what it saw last. May be NULL. */
+  int8_t (* MediumChanged)(uint8_t lun);
+
 } USBD_StorageTypeDef;
 
 typedef struct

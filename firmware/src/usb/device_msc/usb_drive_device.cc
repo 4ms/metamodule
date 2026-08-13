@@ -44,6 +44,7 @@ USBD_StorageTypeDef UsbDriveDevice::ops = {
 	get_max_lun,
 	reinterpret_cast<int8_t *>(&inquiry_data),
 	eject,
+	medium_changed,
 };
 
 UsbDriveDevice::UsbDriveDevice(DevDriveBlock &block) {
@@ -59,14 +60,17 @@ void UsbDriveDevice::register_class(USBD_HandleTypeDef *pdev) {
 		pr_info("Registered USB developer drive\n");
 }
 
-// Note: a drive that reports itself ready after an eject gets remounted by the
-// host within seconds, which would defeat the eject-to-install flow. So every
-// command below checks `present`, which the A7 restores once it has finished
-// scanning the drive.
+// Note: every command below checks `present`, so that while the A7 has the
+// drive -- after an eject, or during an INSTALL -- the host is told there is no
+// medium rather than being served sectors that are being rewritten underneath
+// it. The A7 sets `present` again when it has finished.
 
 int8_t UsbDriveDevice::init(uint8_t lun) {
 	if (lun != 0 || !_block)
 		return USBD_FAIL;
+
+	// The medium is present as we start, so do not open with a change report
+	_was_present = _block->is_present();
 
 	pr_info("USB dev drive: host connected\n");
 	return USBD_OK;
@@ -82,6 +86,19 @@ int8_t UsbDriveDevice::eject(uint8_t lun) {
 	// restores `present` when it has finished scanning.
 	_block->note_eject();
 	return USBD_OK;
+}
+
+// Nonzero exactly once after the A7 has put the medium back, which the class
+// turns into UNIT_ATTENTION / MEDIUM_HAVE_CHANGED. The host polls TEST UNIT
+// READY on removable media, so this is where the transition is noticed.
+int8_t UsbDriveDevice::medium_changed(uint8_t lun) {
+	(void)lun;
+
+	bool present = _block && _block->is_present();
+	bool changed = present && !_was_present;
+	_was_present = present;
+
+	return changed ? 1 : 0;
 }
 
 int8_t UsbDriveDevice::is_ready(uint8_t lun) {
