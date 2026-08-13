@@ -134,6 +134,10 @@ public:
 			return std::nullopt;
 	}
 
+	PageId current_page() const {
+		return _current_state.page;
+	}
+
 	// Clears history and resets internal state
 	void clear_history() {
 		_page_history.clear();

@@ -1,5 +1,4 @@
 #pragma once
-#include "core_a7/dev_drive_proxy.hh"
 #include "core_a7/device_settings_proxy.hh"
 #include "fs/helpers.hh"
 #include "gui/gui_state.hh"
@@ -698,35 +697,15 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
-		// Claiming the drive's memory can fail, so the setting only sticks if
-		// the drive actually came up. The USB device only picks the change up
-		// at its next enumeration -- the developer has to re-plug the cable.
 		auto dev_drive = read_dev_drive_check();
 		if (developer.enabled != dev_drive) {
-			auto status = dev_drive ? DevDriveProxy::enable() : DevDriveStatus::Ok;
-
-			if (status != DevDriveStatus::Ok) {
-				notify_queue.put(
-					{status == DevDriveStatus::OutOfMemory ?
-						 "Not enough free memory for the developer drive.\nUnload a plugin and try again." :
-						 "Could not create the developer drive.\nSee the console for details.",
-					 Notification::Priority::Error,
-					 3000});
-				lv_check(usb_section.dev_drive_check, false);
-			} else {
-				if (!dev_drive)
-					DevDriveProxy::disable();
-
-				developer.enabled = dev_drive;
-				gui_state.do_write_settings = true;
-
-				notify_queue.put({dev_drive ? "Developer drive enabled. Re-plug the USB cable to use it." :
-											  "Developer drive disabled.",
+			developer.enabled = dev_drive;
+			gui_state.do_write_settings = true;
+			if (dev_drive)
+				notify_queue.put({"(Re-)plug USB cable to a computer to use the Developer drive",
 								  Notification::Priority::Status,
 								  3000});
-			}
 		}
-
 		lv_disable(save_button);
 		lv_disable(revert_button);
 	}

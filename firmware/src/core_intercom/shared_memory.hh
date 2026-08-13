@@ -26,7 +26,7 @@ struct SharedMemoryS {
 		uint8_t *uvc_framebuffer;
 		DeviceSettingsMessage *icc_device_settings_message;
 		UsbConnectionStatusBlock *usb_connection_status;
-		DevDriveBlock *dev_drive;
+		DevDriveBlock *dev_drive_msgs;
 	};
 
 	static Ptrs ptrs;

@@ -3,6 +3,7 @@
 #include "dynload/plugin_manager.hh"
 #include "fs/dev_drive.hh"
 #include "gui/notify/queue.hh"
+#include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
 #include <string>
 #include <vector>
@@ -14,9 +15,13 @@ namespace MetaModule
 // Checks for .mmplugin files and installs them (TODO).
 class DevDriveService {
 public:
-	DevDriveService(DevDrive &drive, PluginManager &plugin_manager, NotificationQueue &notify_queue)
+	DevDriveService(DevDrive &drive,
+					PluginManager &plugin_manager,
+					PatchPlayLoader &play_loader,
+					NotificationQueue &notify_queue)
 		: drive_{drive}
 		, plugin_manager_{plugin_manager}
+		, play_loader_{play_loader}
 		, notify_queue_{notify_queue} {
 	}
 
@@ -27,7 +32,7 @@ public:
 			return;
 		}
 
-		auto *block = SharedMemoryS::ptrs.dev_drive;
+		auto *block = SharedMemoryS::ptrs.dev_drive_msgs;
 		if (!block || !drive_.is_enabled())
 			return;
 
@@ -46,32 +51,25 @@ private:
 
 		drive_.take_from_host();
 
-		// The host rewrote the filesystem, so the mount we did at format time
-		// describes a drive that no longer exists
 		if (!drive_.files().mount_disk()) {
 			pr_err("DevDrive: could not mount after eject\n");
 			notify_queue_.put(
-				{"Developer drive is unreadable.\nIt will be reformatted.", Notification::Priority::Error, 3000});
-			reformat(block);
+				{"Developer drive is unreadable and will be reformatted", Notification::Priority::Error, 3000});
+			reformat();
 			return;
 		}
 
 		auto plugins = find_plugins();
 
 		if (plugins.empty()) {
-			// Nothing to do -- likely an eject without copying anything, or the
-			// files went into a subdirectory
 			pr_info("DevDrive: no .mmplugin files in the root directory\n");
 			put_medium_back(block);
 			return;
 		}
 
 		for (auto const &name : plugins)
-			pr_info("DevDrive: found %s\n", name.c_str());
+			pr_info("DevDrive: found plugin %s\n", name.c_str());
 
-		// The medium stays away until every install has finished: the loader
-		// reads the drive as it works, and a host remounting mid-install would
-		// be writing underneath it.
 		queue_ = std::move(plugins);
 		installing_ = true;
 		start_next_install();
@@ -90,16 +88,14 @@ private:
 		if (status.state == Success) {
 			pr_info("DevDrive: installed %s\n", current_.c_str());
 
-			// Remove it so the next eject does not install it again. The
-			// developer sees an empty drive, which is the confirmation.
+			// Remove it so the next eject does not install it again
 			drive_.files().delete_file(current_);
 
 			notify_queue_.put({"Installed " + current_, Notification::Priority::Status, 3000});
 
 		} else {
-			auto why = status.error_message.empty() ?
-						   ("loader stopped in state " + std::to_string((int)status.state)) :
-						   status.error_message;
+			auto why = status.error_message.empty() ? ("loader stopped in state " + std::to_string((int)status.state)) :
+													  status.error_message;
 			pr_err("DevDrive: could not install %s: %s\n", current_.c_str(), why.c_str());
 			notify_queue_.put({"Could not install " + current_ + "\n" + why, Notification::Priority::Error, 4000});
 		}
@@ -112,7 +108,7 @@ private:
 			installing_ = false;
 			current_.clear();
 
-			if (auto *block = SharedMemoryS::ptrs.dev_drive)
+			if (auto *block = SharedMemoryS::ptrs.dev_drive_msgs)
 				put_medium_back(*block);
 			return;
 		}
@@ -122,7 +118,14 @@ private:
 
 		pr_info("DevDrive: installing %s\n", current_.c_str());
 
-		if (!plugin_manager_.install_local_plugin(drive_.files(), current_)) {
+		auto name = PluginManager::plugin_name_of(current_);
+		if (plugin_manager_.is_plugin_loaded(name)) {
+			pr_info("DevDrive: unloading %.*s first\n", (int)name.size(), name.data());
+			play_loader_.prepare_patch_for_plugin_change(name);
+			plugin_manager_.unload_plugin(name);
+		}
+
+		if (!plugin_manager_.start_local_install(drive_.files(), current_)) {
 			pr_err("DevDrive: could not start installing %s\n", current_.c_str());
 			notify_queue_.put({"Could not install " + current_, Notification::Priority::Error, 3000});
 			start_next_install();
@@ -150,17 +153,24 @@ private:
 		pr_info("DevDrive: medium restored\n");
 	}
 
-	void reformat(DevDriveBlock &block) {
+public:
+	DevDriveStatus reformat() {
+		auto *block = SharedMemoryS::ptrs.dev_drive_msgs;
+
 		drive_.disable();
-		if (drive_.enable() == DevDriveStatus::Ok) {
+		auto status = drive_.enable();
+		if (status == DevDriveStatus::Ok) {
 			drive_.hand_to_host();
 			auto mem = drive_.memory();
-			block.publish(reinterpret_cast<uint32_t>(mem.data()), mem.size());
+			block->publish(reinterpret_cast<uint32_t>(mem.data()), mem.size());
 		}
+		return status;
 	}
 
+private:
 	DevDrive &drive_;
 	PluginManager &plugin_manager_;
+	PatchPlayLoader &play_loader_;
 	NotificationQueue &notify_queue_;
 	uint32_t last_eject_count_ = 0;
 

@@ -21,10 +21,7 @@ extern "C" USBD_DescriptorsTypeDef UVC_Desc;
 //
 // Each UsbDeviceMode is a distinct USB device with its own descriptors and
 // product id, so switching modes re-enumerates. MidiConsole is a composite of
-// CDC + USB-MIDI; Video is UVC alone. The per-class wrappers below only supply
-// class behavior (buffers, callbacks) and register themselves -- USBD_Init /
-// USBD_Start / USBD_Stop happen here, once, because a composite device has
-// several classes sharing one device handle.
+// CDC + USB-MIDI. Video is UVC alone.
 struct UsbDeviceManager {
 	using UsbDeviceMode = MetaModule::UsbDeviceMode;
 
@@ -33,7 +30,7 @@ struct UsbDeviceManager {
 	UsbSerialDevice serial;
 	MetaModule::UsbVideoDevice video{&USBD_Device};
 	MetaModule::UsbMidiDevice midi{&USBD_Device};
-	MetaModule::UsbDriveDevice drive{*MetaModule::SharedMemoryS::ptrs.dev_drive};
+	MetaModule::UsbDriveDevice drive{*MetaModule::SharedMemoryS::ptrs.dev_drive_msgs};
 	UsbDeviceMode mode = UsbDeviceMode::MidiConsole;
 
 	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers,
@@ -64,7 +61,7 @@ struct UsbDeviceManager {
 		} else {
 			// The drive is only offered when the A7 has one ready. Sampled here,
 			// so switching developer mode on or off re-enumerates.
-			auto *dev_drive = MetaModule::SharedMemoryS::ptrs.dev_drive;
+			auto *dev_drive = MetaModule::SharedMemoryS::ptrs.dev_drive_msgs;
 			bool with_drive = dev_drive && dev_drive->is_served();
 			USBD_CMPSIT_SetDriveEnabled(with_drive);
 

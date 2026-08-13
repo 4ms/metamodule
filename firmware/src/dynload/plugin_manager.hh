@@ -76,25 +76,35 @@ public:
 		ramdisk.debug_print_disk_info();
 	}
 
-	bool install_local_plugin(FatFileIO &fileio, std::string_view filename) {
-		auto name = filename;
-		if (name.ends_with(".mmplugin"))
-			name.remove_suffix(9);
+	// The brand a plugin file would install as: the filename without its
+	// extension, and without a "-vX.Y" version suffix so a rebuild with a
+	// bumped version still matches the copy that is loaded. Only a "-v"
+	// followed by a digit counts, so "Guitar-vibrato-v1.2.3" splits at the
+	// version and not at "vibrato" (same rule as PluginFileLoader).
+	static std::string_view plugin_name_of(std::string_view filename) {
+		if (filename.ends_with(".mmplugin"))
+			filename.remove_suffix(9);
 
-		// Trim any "-vX.Y" so a rebuild with a bumped version still replaces
-		// the copy that is loaded.
-		// FIXME: `Guitar-vibrato-v1.2.3.mmplugin` would fail here
-		if (auto v = name.find("-v"); v != std::string_view::npos)
-			name = name.substr(0, v);
-
-		for (auto const &plugin : loaded_plugin_list) {
-			if (std::string_view{plugin.fileinfo.plugin_name} == name) {
-				pr_info("Unloading %.*s before re-installing it\n", (int)name.size(), name.data());
-				unload_plugin(name);
-				break;
-			}
+		for (auto v = filename.find("-v"); v != std::string_view::npos; v = filename.find("-v", v + 2)) {
+			if (v + 2 < filename.size() && isdigit(filename[v + 2]))
+				return filename.substr(0, v);
 		}
 
+		return filename;
+	}
+
+	bool is_plugin_loaded(std::string_view name) {
+		for (auto const &plugin : loaded_plugin_list) {
+			if (std::string_view{plugin.fileinfo.plugin_name} == name)
+				return true;
+		}
+		return false;
+	}
+
+	// Install a plugin file from a volume the A7 can read itself (the developer
+	// drive). An already-loaded copy must be unloaded by the caller first --
+	// see DevDriveService, which runs the same sequence as the Plugin tab.
+	bool start_local_install(FatFileIO &fileio, std::string_view filename) {
 		return plugin_file_loader.load_local_plugin(fileio, filename);
 	}
 
