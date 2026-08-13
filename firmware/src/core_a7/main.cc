@@ -69,6 +69,8 @@ int main() {
 		&StaticBuffers::dev_drive_block,
 	};
 
+	StaticBuffers::dev_drive_block.reset();
+
 	A7SharedMemoryS::ptrs = {
 		&patch_player,
 		&patch_playloader,

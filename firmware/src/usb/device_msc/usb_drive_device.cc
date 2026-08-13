@@ -80,8 +80,7 @@ int8_t UsbDriveDevice::eject(uint8_t lun) {
 
 	// Stop reporting a medium, and tell the A7 to take the drive back. It
 	// restores `present` when it has finished scanning.
-	_block->present.store(0, std::memory_order_relaxed);
-	_block->ejected.store(1, std::memory_order_release);
+	_block->note_eject();
 	return USBD_OK;
 }
 

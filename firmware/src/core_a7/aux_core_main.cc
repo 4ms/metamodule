@@ -1,6 +1,8 @@
 #include "aux_core_player.hh"
 #include "conf/hsem_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_a7/dev_drive_proxy.hh"
+#include "core_a7/dev_drive_service.hh"
 #include "core_a7/device_settings_proxy.hh"
 #include "core_intercom/shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
@@ -57,6 +59,7 @@ extern "C" void aux_core_main() {
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
 	DevDrive dev_drive;
+	DevDriveProxy::register_drive(&dev_drive);
 
 	AssetFS asset_fs{AssetVolFlashOffset};
 	Filesystem::init(ramdisk);
@@ -82,6 +85,13 @@ extern "C" void aux_core_main() {
 		while (!DeviceSettingsProxy::send_device_mode(usb_device_mode))
 			;
 	}
+
+	// Attempt to mount the dev drive
+	if (ui.get_settings().developer.enabled) {
+		if (DevDriveProxy::enable() != DevDriveStatus::Ok)
+			pr_err("Could not restore the developer drive\n");
+	}
+
 	UsbVideoBuffer::set_mirroring(ui.get_settings().video.mirror);
 	UsbVideoBuffer::enable(usb_device_mode == UsbDeviceMode::Video);
 
@@ -138,9 +148,14 @@ extern "C" void aux_core_main() {
 
 	ui.load_initial_patch();
 
+	// Watches for the host ejecting the developer drive, which is the cue to
+	// look for plugin files on it
+	DevDriveService dev_drive_service{dev_drive, ui.get_notify_queue()};
+
 	while (true) {
 		ui.update_screen();
 		ui.update_page();
+		dev_drive_service.process();
 		__NOP();
 	}
 }
