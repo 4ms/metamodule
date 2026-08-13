@@ -84,6 +84,9 @@ private:
 
 // The developer-mode USB drive, from the A7's side: claim the memory, format
 // it, and hand it to (or take it back from) the M4's MSC class.
+// Why enable() failed, so the caller can tell the developer something true.
+enum class DevDriveStatus { Ok, OutOfMemory, FormatFailed, NotAvailable };
+
 class DevDrive {
 public:
 	DevDrive()
@@ -103,25 +106,26 @@ public:
 	}
 
 	// Claim the drive's memory and put an empty FAT filesystem on it
-	bool enable() {
+	DevDriveStatus enable() {
 		if (is_enabled())
-			return true;
+			return DevDriveStatus::Ok;
 
 		base_ = static_cast<uint8_t *>(PluginArena::alloc_aligned(DevDriveAlignment, DevDriveSizeBytes));
 		if (!base_) {
-			pr_err("DevDrive: could not claim %u bytes for the developer drive\n", (unsigned)DevDriveSizeBytes);
-			return false;
+			pr_err("DevDrive: arena could not supply %u bytes\n", (unsigned)DevDriveSizeBytes);
+			return DevDriveStatus::OutOfMemory;
 		}
+
+		pr_info("DevDrive: claimed %u MB at %p\n", (unsigned)(DevDriveSizeBytes / (1024 * 1024)), (void *)base_);
 
 		ops_.set_memory({base_, DevDriveSizeBytes});
 
 		if (!format()) {
 			disable();
-			return false;
+			return DevDriveStatus::FormatFailed;
 		}
 
-		pr_info("DevDrive: %u MB at %p\n", (unsigned)(DevDriveSizeBytes / (1024 * 1024)), (void *)base_);
-		return true;
+		return DevDriveStatus::Ok;
 	}
 
 	void disable() {
