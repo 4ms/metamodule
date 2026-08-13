@@ -117,8 +117,13 @@ private:
 		clear_dma_flags();
 
 		DMA1_Stream1->PAR = reinterpret_cast<uint32_t>(&UartLog::uart_regs()->TDR);
-		// Byte-wise, memory-increment, memory-to-peripheral, direct mode
-		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0;
+		// Byte-wise, memory-increment, memory-to-peripheral, direct mode.
+		// Bit 20 (TRBUFF, reserved in RM0436 but implemented): alternate
+		// REQ/ACK protocol, required on UART streams or else the stream can
+		// lock up when another stream transfers concurrently (MP15 errata
+		// "DMA stream locked when transferring data to/from USART/UART")
+		constexpr uint32_t DMA_SxCR_TRBUFF = 1u << 20;
+		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0 | DMA_SxCR_TRBUFF;
 		DMA1_Stream1->FCR = 0;
 
 		UartLog::uart_regs()->CR3 |= USART_CR3_DMAT;
