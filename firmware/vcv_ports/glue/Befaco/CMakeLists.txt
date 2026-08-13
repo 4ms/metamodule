@@ -20,6 +20,7 @@ list(REMOVE_ITEM BEFACO_MODULE_SOURCES
   ${BEFACO_DIR}/src/plugin.cpp
   ${BEFACO_DIR}/src/Bypass.cpp
   ${BEFACO_DIR}/src/MidiThing.cpp
+  ${BEFACO_DIR}/src/Random8.cpp
 )
 
 file(GLOB_RECURSE BEFACO_NOISE_PLETHORA_SOURCES CONFIGURE_DEPENDS
