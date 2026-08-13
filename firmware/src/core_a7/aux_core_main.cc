@@ -150,7 +150,7 @@ extern "C" void aux_core_main() {
 
 	// Watches for the host ejecting the developer drive, which is the cue to
 	// look for plugin files on it
-	DevDriveService dev_drive_service{dev_drive, ui.get_notify_queue()};
+	DevDriveService dev_drive_service{dev_drive, plugin_manager, ui.get_notify_queue()};
 
 	while (true) {
 		ui.update_screen();

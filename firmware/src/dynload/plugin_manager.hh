@@ -30,13 +30,13 @@ public:
 	void unload_plugin(std::string_view name) {
 		for (unsigned i = 0; auto const &plugin : loaded_plugin_list) {
 			if (plugin.fileinfo.plugin_name == name) {
-				// Unregister the brand *first*, while the plugin code is still loaded.
+				// Unregister the brand first, while the plugin code is still loaded.
 				// This destroys each module's CreateModuleFunc std::function, whose
 				// type-erasure manager (for a plugin's lambda) lives in the plugin's
 				// code. If we did this after erasing/poisoning the code, that manager
 				// call would jump into freed/poisoned memory (an 0xEAFFFFFE "bl ." spin)
 				// and hang -- which is native-plugin-only, since VCV plugins tear down
-				// their create-funcs earlier in ~Plugin. See commit 167e30f74.
+				// their create-funcs earlier in ~Plugin.
 				// (For VCV plugins ~Plugin's per-module unregister then finds the brand
 				// already gone and logs a harmless "failed to remove module" warning.)
 				if (ModuleFactory::unregisterBrand(name) > 0)
@@ -74,6 +74,28 @@ public:
 			i++;
 		}
 		ramdisk.debug_print_disk_info();
+	}
+
+	bool install_local_plugin(FatFileIO &fileio, std::string_view filename) {
+		auto name = filename;
+		if (name.ends_with(".mmplugin"))
+			name.remove_suffix(9);
+
+		// Trim any "-vX.Y" so a rebuild with a bumped version still replaces
+		// the copy that is loaded.
+		// FIXME: `Guitar-vibrato-v1.2.3.mmplugin` would fail here
+		if (auto v = name.find("-v"); v != std::string_view::npos)
+			name = name.substr(0, v);
+
+		for (auto const &plugin : loaded_plugin_list) {
+			if (std::string_view{plugin.fileinfo.plugin_name} == name) {
+				pr_info("Unloading %.*s before re-installing it\n", (int)name.size(), name.data());
+				unload_plugin(name);
+				break;
+			}
+		}
+
+		return plugin_file_loader.load_local_plugin(fileio, filename);
 	}
 
 	auto process_loading() {

@@ -1,5 +1,6 @@
 #pragma once
 #include "core_intercom/shared_memory.hh"
+#include "dynload/plugin_manager.hh"
 #include "fs/dev_drive.hh"
 #include "gui/notify/queue.hh"
 #include "pr_dbg.hh"
@@ -13,12 +14,19 @@ namespace MetaModule
 // Checks for .mmplugin files and installs them (TODO).
 class DevDriveService {
 public:
-	DevDriveService(DevDrive &drive, NotificationQueue &notify_queue)
+	DevDriveService(DevDrive &drive, PluginManager &plugin_manager, NotificationQueue &notify_queue)
 		: drive_{drive}
+		, plugin_manager_{plugin_manager}
 		, notify_queue_{notify_queue} {
 	}
 
 	void process() {
+		// An install already under way owns the drive until it finishes
+		if (installing_) {
+			process_install();
+			return;
+		}
+
 		auto *block = SharedMemoryS::ptrs.dev_drive;
 		if (!block || !drive_.is_enabled())
 			return;
@@ -54,18 +62,69 @@ private:
 			// Nothing to do -- likely an eject without copying anything, or the
 			// files went into a subdirectory
 			pr_info("DevDrive: no .mmplugin files in the root directory\n");
-		} else {
-			for (auto const &name : plugins)
-				pr_info("DevDrive: found %s\n", name.c_str());
-
-			// TODO: install each plugin here, then move it aside so a remount
-			// does not offer to install it again
-			notify_queue_.put({"Found " + std::to_string(plugins.size()) + " plugin file(s) on the developer drive",
-							   Notification::Priority::Status,
-							   3000});
+			put_medium_back(block);
+			return;
 		}
 
-		put_medium_back(block);
+		for (auto const &name : plugins)
+			pr_info("DevDrive: found %s\n", name.c_str());
+
+		// The medium stays away until every install has finished: the loader
+		// reads the drive as it works, and a host remounting mid-install would
+		// be writing underneath it.
+		queue_ = std::move(plugins);
+		installing_ = true;
+		start_next_install();
+	}
+
+	// One install at a time, one step per main-loop pass, so the GUI keeps
+	// running while a plugin is unpacked and linked.
+	void process_install() {
+		auto status = plugin_manager_.process_loading();
+
+		if (!plugin_manager_.is_idle())
+			return;
+
+		using enum PluginFileLoaderState;
+
+		if (status.state == Success) {
+			pr_info("DevDrive: installed %s\n", current_.c_str());
+
+			// Remove it so the next eject does not install it again. The
+			// developer sees an empty drive, which is the confirmation.
+			drive_.files().delete_file(current_);
+
+			notify_queue_.put({"Installed " + current_, Notification::Priority::Status, 3000});
+
+		} else {
+			auto why = status.error_message.empty() ? std::string{"see console"} : status.error_message;
+			pr_err("DevDrive: could not install %s: %s\n", current_.c_str(), why.c_str());
+			notify_queue_.put({"Could not install " + current_ + "\n" + why, Notification::Priority::Error, 4000});
+		}
+
+		start_next_install();
+	}
+
+	void start_next_install() {
+		if (queue_.empty()) {
+			installing_ = false;
+			current_.clear();
+
+			if (auto *block = SharedMemoryS::ptrs.dev_drive)
+				put_medium_back(*block);
+			return;
+		}
+
+		current_ = queue_.front();
+		queue_.erase(queue_.begin());
+
+		pr_info("DevDrive: installing %s\n", current_.c_str());
+
+		if (!plugin_manager_.install_local_plugin(drive_.files(), current_)) {
+			pr_err("DevDrive: could not start installing %s\n", current_.c_str());
+			notify_queue_.put({"Could not install " + current_, Notification::Priority::Error, 3000});
+			start_next_install();
+		}
 	}
 
 	std::vector<std::string> find_plugins() {
@@ -99,8 +158,13 @@ private:
 	}
 
 	DevDrive &drive_;
+	PluginManager &plugin_manager_;
 	NotificationQueue &notify_queue_;
 	uint32_t last_eject_count_ = 0;
+
+	std::vector<std::string> queue_;
+	std::string current_;
+	bool installing_ = false;
 };
 
 } // namespace MetaModule
