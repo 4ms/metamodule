@@ -12,7 +12,7 @@ namespace MetaModule
 {
 
 // Aux core monitor for ejecct events on the developer drive.
-// Checks for .mmplugin files and installs them (TODO).
+// Checks for .mmplugin files and installs them
 class DevDriveService {
 public:
 	DevDriveService(DevDrive &drive,
@@ -54,6 +54,7 @@ public:
 		if (count != last_eject_count_) {
 			last_eject_count_ = count;
 			pr_info("DevDrive: host ejected\n");
+			host_ejected_ = true;
 			scan_and_install(*block);
 			return;
 		}
@@ -70,6 +71,7 @@ private:
 	void handle_command(DevDriveBlock &block, DevDriveCommand cmd) {
 		switch (cmd) {
 			case DevDriveCommand::Install:
+				host_ejected_ = false;
 				block.present.store(0, std::memory_order_release);
 				printf("Installing from the developer drive\n");
 				scan_and_install(block);
@@ -209,7 +211,17 @@ private:
 	void put_medium_back(DevDriveBlock &block) {
 		drive_.hand_to_host();
 		block.present.store(1, std::memory_order_release);
-		pr_info("DevDrive: medium restored\n");
+
+		if (host_ejected_) {
+			// A host that ejected the drive has stopped talking to it.
+			// The device has to leave the bus and come back by re-enumerating
+			// to get the computer to see it again.
+			host_ejected_ = false;
+			pr_info("DevDrive: medium restored, re-enumerating so the host sees it\n");
+			block.request_reenumerate();
+		} else {
+			pr_info("DevDrive: medium restored\n");
+		}
 	}
 
 public:
@@ -233,6 +245,7 @@ private:
 	NotificationQueue &notify_queue_;
 	uint32_t last_eject_count_ = 0;
 	uint32_t last_command_count_ = 0;
+	bool host_ejected_ = false;
 
 	std::vector<std::string> queue_;
 	std::string current_;

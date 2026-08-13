@@ -14,7 +14,7 @@ enum class DevDriveCommand : uint32_t {
 	Install, // scan the drive, install what is on it, then give it back
 	Eject,	 // remove the medium, as if the host had ejected it
 	Mount,	 // put the medium back
-	Status,  // report to the console
+	Status,	 // report to the console
 };
 
 // Handoff of the developer-mode USB drive between the cores.
@@ -44,6 +44,9 @@ struct DevDriveBlock {
 	std::atomic<uint32_t> command{0};
 	std::atomic<uint32_t> command_count{0};
 
+	// A7 -> M4: re-enumerate the USB device.
+	std::atomic<uint32_t> reenumerate_count{0};
+
 	// The block lives in a NOLOAD section, so needs to be manually zeroed
 	void reset() {
 		base.store(0, std::memory_order_relaxed);
@@ -53,12 +56,18 @@ struct DevDriveBlock {
 		eject_count.store(0, std::memory_order_relaxed);
 		host_wrote.store(0, std::memory_order_relaxed);
 		command.store(0, std::memory_order_relaxed);
-		command_count.store(0, std::memory_order_release);
+		command_count.store(0, std::memory_order_relaxed);
+		reenumerate_count.store(0, std::memory_order_release);
 	}
 
 	void note_eject() {
 		present.store(0, std::memory_order_relaxed);
 		eject_count.store(eject_count.load(std::memory_order_relaxed) + 1, std::memory_order_release);
+	}
+
+	// Single writer (the aux core)
+	void request_reenumerate() {
+		reenumerate_count.store(reenumerate_count.load(std::memory_order_relaxed) + 1, std::memory_order_release);
 	}
 
 	// Single writer (the M4's console parser)

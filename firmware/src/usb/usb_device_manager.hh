@@ -32,6 +32,7 @@ struct UsbDeviceManager {
 	MetaModule::UsbMidiDevice midi{&USBD_Device};
 	MetaModule::UsbDriveDevice drive{*MetaModule::SharedMemoryS::ptrs.dev_drive_msgs};
 	UsbDeviceMode mode = UsbDeviceMode::MidiConsole;
+	uint32_t last_reenumerate_count_ = 0;
 
 	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers,
 					 UsbDeviceMode initial_mode = UsbDeviceMode::MidiConsole)
@@ -39,9 +40,6 @@ struct UsbDeviceManager {
 		, mode{initial_mode} {
 	}
 
-	// start()/stop() are called from several places in UsbManager's role state
-	// machine. They are cold and, once USBD_Init and the class registration are
-	// inlined into them, large -- so keep one copy.
 	__attribute__((noinline)) void start() {
 		// Selects the config descriptor USBD_CMPSIT serves, and the FIFO split
 		// USBD_LL_Init programs; must precede USBD_Init.
@@ -94,10 +92,6 @@ struct UsbDeviceManager {
 	}
 
 	__attribute__((noinline)) void soft_stop() {
-		// Class transition without HAL_PCD_DeInit. USBD_Stop disconnects D+ and
-		// invokes each class's DeInit (closing endpoints); skipping USBD_DeInit
-		// keeps hpcd->State == READY so the next USBD_Init won't re-run MspInit,
-		// which avoids toggling USBO_CLK on a live VBUS bus.
 		pr_info("Stopping USB device\n");
 		serial.on_stopped();
 		USBD_Stop(&USBD_Device);
@@ -125,7 +119,35 @@ struct UsbDeviceManager {
 			   (USBD_Device.dev_state == USBD_STATE_SUSPENDED && USBD_Device.dev_old_state == USBD_STATE_CONFIGURED);
 	}
 
+	// Drop off the bus and come back, so the host enumerates us again.
+	__attribute__((noinline)) void reenumerate() {
+		pr_info("Re-enumerating USB device\n");
+
+		soft_stop();
+
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+
+		// Adjust if needed: needs to be long enough for
+		// the host to see the disconnect and then re-connect
+		HAL_Delay(200);
+
+		mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+
+		start();
+	}
+
 	void process() {
+		// The aux core asks for this after installing from a drive the host
+		// ejected
+		if (auto *block = MetaModule::SharedMemoryS::ptrs.dev_drive_msgs) {
+			auto count = block->reenumerate_count.load(std::memory_order_acquire);
+			if (count != last_reenumerate_count_) {
+				last_reenumerate_count_ = count;
+				reenumerate();
+				return;
+			}
+		}
+
 		if (mode == UsbDeviceMode::MidiConsole) {
 			serial.process();
 			midi.process(); // idle-kick drain of any app-queued TX
