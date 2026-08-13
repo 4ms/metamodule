@@ -125,16 +125,8 @@ int8_t UsbSerialDevice::CDC_Itf_DeInit() {
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
 int8_t UsbSerialDevice::CDC_Itf_Receive(uint8_t *Buf, uint32_t *Len) {
-	if (*Buf == 'c')
-		_instance->reader.set_color(true);
-	if (*Buf == 'm')
-		_instance->reader.set_color(false);
-
-	pr_dbg("Rx: ");
-	uint32_t len = *Len;
-	while (len--)
-		pr_dbg("%c", *Buf++);
-	pr_dbg("\n");
+	for (uint32_t i = 0; i < *Len; i++)
+		_instance->commands.put(Buf[i]);
 
 	// Indicate that we're ready to receive more
 	USBD_CDC_ReceivePacket(_instance->pdev);

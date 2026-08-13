@@ -6,6 +6,17 @@
 namespace MetaModule
 {
 
+// Commands the console (M4) asks the aux core to carry out. Installing means
+// taking the drive back from the host for the duration, so it cannot be done
+// on the M4 side.
+enum class DevDriveCommand : uint32_t {
+	None = 0,
+	Install, // scan the drive, install what is on it, then give it back
+	Eject,	 // remove the medium, as if the host had ejected it
+	Mount,	 // put the medium back
+	Status,  // report to the console
+};
+
 // Handoff of the developer-mode USB drive between the cores.
 //
 // The A7 owns the drive memory and puts the filesystem there.
@@ -27,6 +38,11 @@ struct DevDriveBlock {
 	std::atomic<uint32_t> eject_count{0}; // bumped once per host eject
 	std::atomic<uint32_t> host_wrote{0};  // host has written at least one sector this session
 
+	// Console commands, M4 -> A7. The command is stored first and the counter
+	// last, so a reader that sees a new count also sees the command.
+	std::atomic<uint32_t> command{0};
+	std::atomic<uint32_t> command_count{0};
+
 	// The block lives in a NOLOAD section, so needs to be manually zeroed
 	void reset() {
 		base.store(0, std::memory_order_relaxed);
@@ -34,12 +50,20 @@ struct DevDriveBlock {
 		serve.store(0, std::memory_order_relaxed);
 		present.store(0, std::memory_order_relaxed);
 		eject_count.store(0, std::memory_order_relaxed);
-		host_wrote.store(0, std::memory_order_release);
+		host_wrote.store(0, std::memory_order_relaxed);
+		command.store(0, std::memory_order_relaxed);
+		command_count.store(0, std::memory_order_release);
 	}
 
 	void note_eject() {
 		present.store(0, std::memory_order_relaxed);
 		eject_count.store(eject_count.load(std::memory_order_relaxed) + 1, std::memory_order_release);
+	}
+
+	// Single writer (the M4's console parser)
+	void send_command(DevDriveCommand cmd) {
+		command.store(static_cast<uint32_t>(cmd), std::memory_order_relaxed);
+		command_count.store(command_count.load(std::memory_order_relaxed) + 1, std::memory_order_release);
 	}
 
 	void publish(uint32_t drive_base, uint32_t drive_size) {

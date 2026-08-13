@@ -49,19 +49,65 @@ public:
 		if (!block || !drive_.is_enabled())
 			return;
 
-		// The M4 bumps this from the OTG interrupt on each host eject
+		// The M4 bumps this each host eject
 		auto count = block->eject_count.load(std::memory_order_acquire);
-		if (count == last_eject_count_)
+		if (count != last_eject_count_) {
+			last_eject_count_ = count;
+			pr_info("DevDrive: host ejected\n");
+			scan_and_install(*block);
 			return;
+		}
 
-		last_eject_count_ = count;
-		handle_eject(*block);
+		// M4 bumps this once per console command
+		auto cmd_count = block->command_count.load(std::memory_order_acquire);
+		if (cmd_count != last_command_count_) {
+			last_command_count_ = cmd_count;
+			handle_command(*block, (DevDriveCommand)block->command.load(std::memory_order_relaxed));
+		}
 	}
 
 private:
-	void handle_eject(DevDriveBlock &block) {
-		pr_info("DevDrive: host ejected, scanning\n");
+	void handle_command(DevDriveBlock &block, DevDriveCommand cmd) {
+		switch (cmd) {
+			case DevDriveCommand::Install:
+				block.present.store(0, std::memory_order_release);
+				printf("Installing from the developer drive\n");
+				scan_and_install(block);
+				break;
 
+			case DevDriveCommand::Eject:
+				block.present.store(0, std::memory_order_release);
+				printf("Developer drive removed\n");
+				break;
+
+			case DevDriveCommand::Mount:
+				put_medium_back(block);
+				printf("Developer drive restored\n");
+				break;
+
+			case DevDriveCommand::Status:
+				report_status(block);
+				break;
+
+			case DevDriveCommand::None:
+				break;
+		}
+	}
+
+	void report_status(DevDriveBlock &block) {
+		printf("Developer drive: %s, medium %s\n",
+			   drive_.is_enabled() ? "enabled" : "disabled",
+			   block.is_present() ? "present" : "removed");
+
+		if (!drive_.is_enabled())
+			return;
+
+		drive_.files().foreach_file_with_ext(".mmplugin", [](std::string_view name, uint32_t, uint32_t size) {
+			printf("  %.*s (%u bytes)\n", (int)name.size(), name.data(), (unsigned)size);
+		});
+	}
+
+	void scan_and_install(DevDriveBlock &block) {
 		drive_.take_from_host();
 
 		if (!drive_.files().mount_disk()) {
@@ -186,6 +232,7 @@ private:
 	PatchPlayLoader &play_loader_;
 	NotificationQueue &notify_queue_;
 	uint32_t last_eject_count_ = 0;
+	uint32_t last_command_count_ = 0;
 
 	std::vector<std::string> queue_;
 	std::string current_;

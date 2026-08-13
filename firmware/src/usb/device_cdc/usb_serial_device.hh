@@ -1,5 +1,6 @@
 #pragma once
 #include "console/console_buffer_reader.hh"
+#include "device_cdc/console_commands.hh"
 #include "usbd_cdc.h"
 #include "usbd_core.h"
 #include <array>
@@ -30,6 +31,7 @@ private:
 	uint8_t _cdc_class_id = 0;
 
 	MetaModule::ConsoleBufferReader reader;
+	MetaModule::ConsoleCommands commands{reader};
 
 	std::vector<uint8_t> rx_buffer{}; // force to be on heap
 
