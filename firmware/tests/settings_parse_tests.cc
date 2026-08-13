@@ -347,6 +347,33 @@ TEST_CASE("Parse usb_role_mode") {
 	}
 }
 
+TEST_CASE("Parse developer settings") {
+	auto parse_dev = [](std::string const &yaml_body) {
+		MetaModule::UserSettings settings;
+		std::string yaml = "Settings:\n  " + yaml_body + "\n";
+		MetaModule::Settings::parse(yaml, &settings);
+		return settings.developer.enabled;
+	};
+
+	CHECK(parse_dev("developer:\n    enabled: 1") == true);
+	CHECK(parse_dev("developer:\n    enabled: 0") == false);
+	CHECK(parse_dev("notifications:\n    animation: 0") == false); // absent -> default off
+
+	// Round-trip
+	for (auto enabled : {false, true}) {
+		MetaModule::UserSettings out;
+		out.developer.enabled = enabled;
+		std::string buf;
+		buf.resize(4096);
+		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
+		buf.resize(sz);
+
+		MetaModule::UserSettings in;
+		CHECK(MetaModule::Settings::parse(buf, &in));
+		CHECK(in.developer.enabled == enabled);
+	}
+}
+
 TEST_CASE("Parse usb_device_mode") {
 	using enum MetaModule::UsbDeviceMode;
 
@@ -522,6 +549,8 @@ TEST_CASE("Serialize settings") {
     animation: 0
   video:
     mirror: 0
+  developer:
+    enabled: 0
   usb_role_mode: Auto
   usb_device_mode: MidiConsole
 )";

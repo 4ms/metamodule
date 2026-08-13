@@ -139,6 +139,12 @@ static void write(ryml::NodeRef *n, VideoSettings const &s) {
 	n->append_child() << ryml::key("mirror") << s.mirror;
 }
 
+static void write(ryml::NodeRef *n, DeveloperSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("enabled") << s.enabled;
+}
+
 static void write(ryml::NodeRef *n, MissingPluginSettings const &s) {
 	*n |= ryml::MAP;
 
@@ -178,6 +184,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["button_exp_knobset"] << settings.button_exp_knobset;
 	data["notifications"] << settings.notifications;
 	data["video"] << settings.video;
+	data["developer"] << settings.developer;
 
 	{
 		using enum UsbRoleMode;

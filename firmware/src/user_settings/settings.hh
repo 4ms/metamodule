@@ -5,6 +5,7 @@
 #include "fs/volumes.hh"
 #include "usb/usb_device_mode.hh"
 #include "usb/usb_role_mode.hh"
+#include "user_settings/developer_settings.hh"
 #include "user_settings/fs_settings.hh"
 #include "user_settings/midi_pc_settings.hh"
 #include "user_settings/midi_settings.hh"
@@ -40,6 +41,7 @@ struct UserSettings {
 	ButtonExpKnobSetSettings button_exp_knobset{};
 	NotificationSettings notifications{};
 	VideoSettings video{};
+	DeveloperSettings developer{};
 
 	// How the USB-C port chooses its data role (Auto DRP / ForceHost / ForceDevice).
 	UsbRoleMode usb_role_mode = UsbRoleMode::Auto;
