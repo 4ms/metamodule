@@ -76,11 +76,7 @@ public:
 		ramdisk.debug_print_disk_info();
 	}
 
-	// The brand a plugin file would install as: the filename without its
-	// extension, and without a "-vX.Y" version suffix so a rebuild with a
-	// bumped version still matches the copy that is loaded. Only a "-v"
-	// followed by a digit counts, so "Guitar-vibrato-v1.2.3" splits at the
-	// version and not at "vibrato" (same rule as PluginFileLoader).
+	// Strip suffix ".mmplugin" and version "-vX.X.X" from filename
 	static std::string_view plugin_name_of(std::string_view filename) {
 		if (filename.ends_with(".mmplugin"))
 			filename.remove_suffix(9);
@@ -105,7 +101,12 @@ public:
 	// drive). An already-loaded copy must be unloaded by the caller first --
 	// see DevDriveService, which runs the same sequence as the Plugin tab.
 	bool start_local_install(FatFileIO &fileio, std::string_view filename) {
-		return plugin_file_loader.load_local_plugin(fileio, filename);
+		if (plugin_file_loader.is_idle()) {
+			return plugin_file_loader.load_local_plugin(fileio, filename);
+		} else {
+			pr_err("Plugin File Loader busy, cannot install %.*s now\n", (int)filename.size(), filename.data());
+			return false;
+		}
 	}
 
 	auto process_loading() {

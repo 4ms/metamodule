@@ -25,11 +25,24 @@ public:
 		, notify_queue_{notify_queue} {
 	}
 
-	void process() {
+	uint32_t retries = 10;
+
+	void process(bool should_enable) {
 		// An install already under way owns the drive until it finishes
 		if (installing_) {
 			process_install();
 			return;
+		}
+
+		if (!should_enable) {
+			retries = 10;
+			drive_.disable();
+			return;
+		}
+
+		if (should_enable && !drive_.is_enabled()) {
+			if (reformat() != DevDriveStatus::Ok)
+				retries--;
 		}
 
 		auto *block = SharedMemoryS::ptrs.dev_drive_msgs;

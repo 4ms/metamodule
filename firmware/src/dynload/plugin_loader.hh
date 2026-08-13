@@ -52,17 +52,13 @@ public:
 	}
 
 	// Install a plugin from a volume this core can read itself
+	// TODO: this would be cleaner if we populated plugin_files[] with the list of local
+	// plugins to load. And then changed the RequestReadPlugin state handler to
+	// check if the current plugin_files[file_idx] volume is the dev drive, and if so then load
+	// via the devdrive FatFileIO (which we'll need to pass in from DevDriveService when
+	// we initiate the local plugin list loading). The LoadingPlugin state is a no-op in this case.
 	bool load_local_plugin(FatFileIO &fileio, std::string_view filename) {
-		if (!is_idle()) {
-			pr_err("Busy, cannot install %.*s now\n", (int)filename.size(), filename.data());
-			return false;
-		}
-
 		auto file_size = fileio.get_file_size(filename);
-		if (file_size == 0) {
-			status = {State::InvalidPlugin, std::string{filename}, "Plugin file is empty or missing"};
-			return false;
-		}
 
 		allocator.reset();
 		buffer = {allocator.allocate(file_size), file_size};
@@ -85,8 +81,7 @@ public:
 		parse_version(local_file);
 		use_local_file = true;
 
-		// The bytes are already in the buffer, so pick the state machine up
-		// where the M4-read path would have left it
+		// Pick the state machine up where the M4-read path would have left it
 		status = {State::UntarPlugin, std::string{name}, ""};
 		return true;
 	}

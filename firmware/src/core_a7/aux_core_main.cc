@@ -142,15 +142,11 @@ extern "C" void aux_core_main() {
 	ui.load_initial_patch();
 
 	DevDriveService dev_drive_service{dev_drive, plugin_manager, patch_playloader, ui.get_notify_queue()};
-	if (ui.get_settings().developer.enabled) {
-		if (dev_drive_service.reformat() != DevDriveStatus::Ok)
-			pr_err("Could not restore the developer drive\n");
-	}
 
 	while (true) {
 		ui.update_screen();
 		ui.update_page();
-		dev_drive_service.process();
+		dev_drive_service.process(ui.get_settings().developer.enabled);
 		__NOP();
 	}
 }
