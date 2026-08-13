@@ -114,7 +114,7 @@ public:
 	}
 
 	Status process(LoadedPluginList &loaded_plugins) {
-		if (!plugin_file_list)
+		if (!plugin_file_list && !use_local_file)
 			status.state = State::NotInit;
 
 		switch (status.state) {

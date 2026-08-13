@@ -97,7 +97,9 @@ private:
 			notify_queue_.put({"Installed " + current_, Notification::Priority::Status, 3000});
 
 		} else {
-			auto why = status.error_message.empty() ? std::string{"see console"} : status.error_message;
+			auto why = status.error_message.empty() ?
+						   ("loader stopped in state " + std::to_string((int)status.state)) :
+						   status.error_message;
 			pr_err("DevDrive: could not install %s: %s\n", current_.c_str(), why.c_str());
 			notify_queue_.put({"Could not install " + current_ + "\n" + why, Notification::Priority::Error, 4000});
 		}
