@@ -7,41 +7,82 @@
 #include "test_modules_memory.hh"
 #include "test_patches.hh"
 #include <algorithm>
+#include <array>
 #include <cstdlib>
+#include <optional>
+#include <string_view>
 
 namespace MetaModule
 {
 
 struct CpuLoadTest {
 
-	static bool should_run_hil_tests(FileStorageProxy &file_storage_proxy) {
-		if (FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value()) {
-			std::string should_run;
-			FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
-			return should_run.starts_with("hil\n");
-		}
-		return false;
+	// The first line of the run_cpu_tests file selects what to run: one of
+	// these keywords, or - for the HIL cpu load test - the name of a single
+	// brand to test instead of all of them.
+	static constexpr std::array<std::string_view, 5> keywords{"hil", "all", "modules", "patches", "leak"};
+
+	// Returns the first line of run_cpu_tests, stripped of trailing whitespace,
+	// or "" if the file does not exist.
+	static std::string read_command(FileStorageProxy &file_storage_proxy) {
+		if (!FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value())
+			return "";
+
+		std::string content;
+		FS::read_file(file_storage_proxy, content, {"run_cpu_tests", Volume::USB});
+
+		auto line = content.substr(0, content.find('\n'));
+		while (!line.empty() && (line.back() == '\r' || line.back() == ' ' || line.back() == '\t'))
+			line.pop_back();
+
+		return line;
 	}
-	static bool should_run_module_tests(FileStorageProxy &file_storage_proxy) {
-		if (FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value()) {
-			std::string should_run;
-			FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
-			return should_run.starts_with("all\n") || should_run.starts_with("modules\n");
+
+	struct HilTestParams {
+		bool run = false;
+		std::string brand; // empty => test every brand
+	};
+
+	static HilTestParams get_hil_test_params(FileStorageProxy &file_storage_proxy) {
+		HilTestParams params;
+
+		auto cmd = read_command(file_storage_proxy);
+		if (cmd.empty())
+			return params;
+
+		if (cmd == "hil") {
+			params.run = true;
+			return params;
 		}
-		return false;
+
+		// Another test's keyword, not ours
+		if (std::ranges::find(keywords, cmd) != keywords.end())
+			return params;
+
+		// Anything else names a single brand to load test
+		params.run = true;
+		params.brand = cmd;
+		return params;
+	}
+
+	static bool should_run_module_tests(FileStorageProxy &file_storage_proxy) {
+		auto cmd = read_command(file_storage_proxy);
+		return cmd == "all" || cmd == "modules";
 	}
 
 	static bool should_run_patch_tests(FileStorageProxy &file_storage_proxy) {
-		if (FS::file_size(file_storage_proxy, {"run_cpu_tests", Volume::USB}).has_value()) {
-			std::string should_run;
-			FS::read_file(file_storage_proxy, should_run, {"run_cpu_tests", Volume::USB});
-			return should_run.starts_with("all\n") || should_run.starts_with("patches\n");
-		}
-		return false;
+		auto cmd = read_command(file_storage_proxy);
+		return cmd == "all" || cmd == "patches";
 	}
 
-	static void run_hil_tests(FileStorageProxy &file_storage_proxy, Ui &ui, PluginManager &plugin_manager) {
-		pr_info("Running HIL CPU load tests\n");
+	static void run_hil_tests(FileStorageProxy &file_storage_proxy,
+							  Ui &ui,
+							  PluginManager &plugin_manager,
+							  std::string_view only_brand = "") {
+		if (only_brand.size())
+			pr_info("Running HIL CPU load tests for brand '%.*s'\n", (int)only_brand.size(), only_brand.data());
+		else
+			pr_info("Running HIL CPU load tests\n");
 
 		hil_message("*loadtesting\n");
 
@@ -66,13 +107,32 @@ struct CpuLoadTest {
 		PatchPlayer player;
 
 		// Test built-in brands first (registered before any plugin is loaded)
-		for (auto brand : ModuleFactory::getAllBrands())
+		bool tested_a_brand = false;
+		for (auto brand : ModuleFactory::getAllBrands()) {
+			if (only_brand.size() && only_brand != brand)
+				continue;
 			LoadTest::test_brand(brand, player, append_file);
+			tested_a_brand = true;
+		}
 
 		// Then load one plugin at a time, test its module(s), and unload it.
 		// Loading all plugins at once exhausts memory, so we keep only one resident.
-		if (!test_plugins_one_at_a_time(plugin_manager, player, append_file)) {
-			pr_err("Failed getting plugin list for HIL CPU load tests\n");
+		// Testing a single built-in brand needs no plugins loaded at all.
+		if (!tested_a_brand || only_brand.empty()) {
+			auto tested = test_plugins_one_at_a_time(plugin_manager, player, append_file, only_brand);
+			if (!tested.has_value()) {
+				pr_err("Failed getting plugin list for HIL CPU load tests\n");
+				hil_message("*failure\n");
+				return;
+			}
+			tested_a_brand |= *tested;
+		}
+
+		// A brand that never showed up (typo, or its plugin failed to load) would
+		// otherwise look like a successful run that happened to test nothing.
+		if (only_brand.size() && !tested_a_brand) {
+			pr_err(
+				"Brand '%.*s' not found in any built-in module or plugin\n", (int)only_brand.size(), only_brand.data());
 			hil_message("*failure\n");
 			return;
 		}
@@ -183,9 +243,18 @@ struct CpuLoadTest {
 	// it registers, then unloads it before moving on — so only a single plugin is
 	// ever resident. The brand(s) a plugin contributes are found by diffing
 	// ModuleFactory::getAllBrands() before/after loading it (same approach as
-	// ModuleImageGen). Returns false only if the plugin list couldn't be read; a
-	// plugin that fails to load is skipped.
-	static bool test_plugins_one_at_a_time(PluginManager &plugin_manager, PatchPlayer &player, auto append_file) {
+	// ModuleImageGen). If only_brand is set, every other brand is skipped and
+	// loading stops as soon as the plugin providing it has been tested.
+	// Returns nullopt only if the plugin list couldn't be read (a plugin that
+	// fails to load is skipped); otherwise, whether any brand was tested.
+	static std::optional<bool> test_plugins_one_at_a_time(PluginManager &plugin_manager,
+														  PatchPlayer &player,
+														  auto append_file,
+														  std::string_view only_brand = "") {
+		// Scanning for plugins is silent too, and when a single brand is being
+		// tested it is the very first thing that happens after *loadtesting
+		LoadTest::send_heartbeat();
+
 		plugin_manager.start_loading_plugin_list();
 
 		while (true) {
@@ -193,14 +262,21 @@ struct CpuLoadTest {
 			if (result.state == PluginFileLoader::State::GotList)
 				break;
 			if (result.state == PluginFileLoader::State::Error)
-				return false;
+				return std::nullopt;
 		}
 
 		auto list = plugin_manager.found_plugin_list();
+		bool tested_a_brand = false;
 
 		for (auto i = 0u; i < list->size(); ++i) {
 			auto plugin_file_name = plugin_manager.plugin_name(i);
 			printf("Loading plugin: '%s'\n", plugin_file_name.c_str());
+
+			// Loading a plugin produces no test output, so without this the host
+			// sees no traffic while plugins are skipped. Testing a single brand
+			// can skip dozens of plugins in a row before finding its own, which
+			// is well past the host's inter-message timeout.
+			LoadTest::send_heartbeat();
 
 			auto brands_before = ModuleFactory::getAllBrands();
 
@@ -219,10 +295,15 @@ struct CpuLoadTest {
 			}
 
 			if (loaded_ok) {
+				bool tested_this_plugin = false;
+
 				for (auto brand : ModuleFactory::getAllBrands()) {
 					if (std::ranges::find(brands_before, brand) != brands_before.end())
 						continue; // pre-existing brand, not from this plugin
+					if (only_brand.size() && only_brand != brand)
+						continue;
 					LoadTest::test_brand(brand, player, append_file);
+					tested_this_plugin = true;
 				}
 
 				// Never free the plugin's code while the player still holds one of its
@@ -232,10 +313,17 @@ struct CpuLoadTest {
 					player.unload_patch();
 
 				plugin_manager.unload_plugin(plugin_file_name);
+
+				tested_a_brand |= tested_this_plugin;
+
+				// The brand we were asked for has been found and tested, so there's
+				// no reason to keep loading the rest of the plugins.
+				if (only_brand.size() && tested_this_plugin)
+					break;
 			}
 		}
 
-		return true;
+		return tested_a_brand;
 	}
 };
 
