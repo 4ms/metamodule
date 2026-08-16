@@ -20,7 +20,9 @@ struct CpuLoadTest {
 	// The first line of the run_cpu_tests file selects what to run: one of
 	// these keywords, or - for the HIL cpu load test - the name of a single
 	// brand to test instead of all of them.
-	static constexpr std::array<std::string_view, 5> keywords{"hil", "all", "modules", "patches", "leak"};
+	//   hil     : built-ins and all brands that the plugins on the USB drive register
+	//   plugins : only the brands the plugins on the USB drive register
+	static constexpr std::array<std::string_view, 6> keywords{"hil", "plugins", "all", "modules", "patches", "leak"};
 
 	// Returns the first line of run_cpu_tests, stripped of trailing whitespace,
 	// or "" if the file does not exist.
@@ -40,7 +42,8 @@ struct CpuLoadTest {
 
 	struct HilTestParams {
 		bool run = false;
-		std::string brand; // empty => test every brand
+		bool plugins_only = false; // skip the built-in brands
+		std::string brand;		   // empty => test every brand in scope
 	};
 
 	static HilTestParams get_hil_test_params(FileStorageProxy &file_storage_proxy) {
@@ -52,6 +55,12 @@ struct CpuLoadTest {
 
 		if (cmd == "hil") {
 			params.run = true;
+			return params;
+		}
+
+		if (cmd == "plugins") {
+			params.run = true;
+			params.plugins_only = true;
 			return params;
 		}
 
@@ -78,9 +87,12 @@ struct CpuLoadTest {
 	static void run_hil_tests(FileStorageProxy &file_storage_proxy,
 							  Ui &ui,
 							  PluginManager &plugin_manager,
-							  std::string_view only_brand = "") {
+							  std::string_view only_brand = "",
+							  bool plugins_only = false) {
 		if (only_brand.size())
 			pr_info("Running HIL CPU load tests for brand '%.*s'\n", (int)only_brand.size(), only_brand.data());
+		else if (plugins_only)
+			pr_info("Running HIL CPU load tests for the drive's plugins only\n");
 		else
 			pr_info("Running HIL CPU load tests\n");
 
@@ -108,11 +120,13 @@ struct CpuLoadTest {
 
 		// Test built-in brands first (registered before any plugin is loaded)
 		bool tested_a_brand = false;
-		for (auto brand : ModuleFactory::getAllBrands()) {
-			if (only_brand.size() && only_brand != brand)
-				continue;
-			LoadTest::test_brand(brand, player, append_file);
-			tested_a_brand = true;
+		if (!plugins_only) {
+			for (auto brand : ModuleFactory::getAllBrands()) {
+				if (only_brand.size() && only_brand != brand)
+					continue;
+				LoadTest::test_brand(brand, player, append_file);
+				tested_a_brand = true;
+			}
 		}
 
 		// Then load one plugin at a time, test its module(s), and unload it.
@@ -128,11 +142,17 @@ struct CpuLoadTest {
 			tested_a_brand |= *tested;
 		}
 
-		// A brand that never showed up (typo, or its plugin failed to load) would
-		// otherwise look like a successful run that happened to test nothing.
-		if (only_brand.size() && !tested_a_brand) {
-			pr_err(
-				"Brand '%.*s' not found in any built-in module or plugin\n", (int)only_brand.size(), only_brand.data());
+		// An empty result set would otherwise look like a successful run that
+		// happened to test nothing: a brand that never showed up (typo, or its
+		// plugin failed to load), or a plugins-only run with no loadable plugin
+		// on the drive.
+		if (!tested_a_brand) {
+			if (only_brand.size())
+				pr_err("Brand '%.*s' not found in any built-in module or plugin\n",
+					   (int)only_brand.size(),
+					   only_brand.data());
+			else
+				pr_err("No plugin brands found to test\n");
 			hil_message("*failure\n");
 			return;
 		}
