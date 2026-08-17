@@ -1,3 +1,4 @@
+#include "abort_rescue.hh"
 #include "safe_log.hh"
 #include <cstdlib>
 #include <cxxabi.h>
@@ -36,13 +37,18 @@ void __verbose_terminate_handler() {
 		} catch (std::exception &e) {
 			log.str(": ");
 			log.str(e.what());
-		} catch (...) {
-		}
+		} catch (...) {}
 	} else {
 		log.str("called without an active exception");
 	}
 
 	log.flush();
+
+	// Try to recover from an uncaught exception, if a rescue scope is armed
+	terminating = false; // no return if rescued: re-arm the guard for a future terminate
+	MetaModule::abort_rescue_try("uncaught exception");
+	terminating = true;
+
 	std::abort();
 }
 

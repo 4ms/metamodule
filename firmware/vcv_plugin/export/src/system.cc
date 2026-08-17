@@ -42,20 +42,28 @@ std::vector<std::string> getEntries(const std::string &dirPath, int depth) {
 	return entries;
 }
 
+// Note: use the std::error_code overloads, which report failures as false/0
+// instead of throwing.
+
 bool exists(const std::string &path) {
-	return fs::exists(fs::path(path));
+	std::error_code ec;
+	return fs::exists(fs::path(path), ec);
 }
 
 bool isFile(const std::string &path) {
-	return fs::is_regular_file(fs::path(path));
+	std::error_code ec;
+	return fs::is_regular_file(fs::path(path), ec);
 }
 
 bool isDirectory(const std::string &path) {
-	return fs::is_directory(fs::path(path));
+	std::error_code ec;
+	return fs::is_directory(fs::path(path), ec);
 }
 
 uint64_t getFileSize(const std::string &path) {
-	return fs::file_size(fs::path(path));
+	std::error_code ec;
+	auto size = fs::file_size(fs::path(path), ec);
+	return ec ? 0 : size;
 }
 
 bool rename(const std::string &srcPath, const std::string &destPath) {
