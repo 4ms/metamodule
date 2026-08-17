@@ -58,7 +58,7 @@ IF Data.Long(EAZSD:0x5C00A118)!=0xFFFFFFFF
 // Load and verify the image (run-time access; the CPU keeps spinning in
 // mp1-boot, no halt needed), and load symbols
 Data.LOAD.Binary "&binfile" 0xC0000000 /DUALPORT
-Data.LOAD.Binary "&binfile" 0xC0000000 /DUALPORT /ComPare
+//Data.LOAD.Binary "&binfile" 0xC0000000 /DUALPORT /ComPare
 Data.LOAD.Elf "&elffile" /CPP /NoCode
 
 // Boot: mp1-boot jumps to the image as soon as the mailbox is written
