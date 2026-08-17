@@ -60,8 +60,19 @@ public:
 			} else if (DMA1->LISR & DMA_LISR_TCIF1) {
 				clear_dma_flags();
 				dma_running = false;
+				dma_stalls = 0;
 				tx_pos = tx_len = 0;
 				unlock();
+			} else if (dma_stalled()) {
+				// FEIF with no progress: try to recover, give up if it
+				// keeps happening
+				abort_dma();
+				dma_running = false;
+				unlock();
+				if (++dma_stalls >= MaxDmaStalls) {
+					dma_ok = false;
+					printf("<console: UART TX DMA stalled %u times, using FIFO fallback>\n", (unsigned)dma_stalls);
+				}
 			} else {
 				return; // still transferring
 			}
@@ -117,8 +128,13 @@ private:
 		clear_dma_flags();
 
 		DMA1_Stream1->PAR = reinterpret_cast<uint32_t>(&UartLog::uart_regs()->TDR);
-		// Byte-wise, memory-increment, memory-to-peripheral, direct mode
-		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0;
+		// Byte-wise, memory-increment, memory-to-peripheral, direct mode.
+		// Bit 20 (TRBUFF, reserved in RM0436 but implemented): alternate
+		// REQ/ACK protocol, required on UART streams or else the stream can
+		// lock up when another stream transfers concurrently (MP15 errata
+		// "DMA stream locked when transferring data to/from USART/UART")
+		constexpr uint32_t DMA_SxCR_TRBUFF = 1u << 20;
+		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0 | DMA_SxCR_TRBUFF;
 		DMA1_Stream1->FCR = 0;
 
 		UartLog::uart_regs()->CR3 |= USART_CR3_DMAT;
@@ -128,8 +144,35 @@ private:
 		DMA1_Stream1->M0AR = dma_address(ptr);
 		DMA1_Stream1->NDTR = len;
 		clear_dma_flags();
+		last_ndtr = len;
+		last_progress_tm = HAL_GetTick();
 		DMA1_Stream1->CR |= DMA_SxCR_EN;
 		dma_running = true;
+	}
+
+	bool dma_stalled() {
+		if (!(DMA1->LISR & DMA_LISR_FEIF1))
+			return false;
+		auto ndtr = DMA1_Stream1->NDTR;
+		auto now = HAL_GetTick();
+		if (ndtr != last_ndtr) {
+			last_ndtr = ndtr;
+			last_progress_tm = now;
+			return false;
+		}
+		return (now - last_progress_tm) > StallTimeoutMs;
+	}
+
+	// Stop the stream and adjust tx_pos so the next transfer resumes where
+	// this one stopped. The byte preloaded into the DMA FIFO (direct mode) is
+	// counted by NDTR as sent but may be discarded, so up to one character of
+	// output can be lost
+	void abort_dma() {
+		DMA1_Stream1->CR &= ~DMA_SxCR_EN;
+		while (DMA1_Stream1->CR & DMA_SxCR_EN)
+			;
+		tx_pos = tx_len - DMA1_Stream1->NDTR;
+		clear_dma_flags();
 	}
 
 	static void clear_dma_flags() {
@@ -152,10 +195,17 @@ private:
 
 	static constexpr uint32_t M4LockId = 2; // same process id UartLog's direct writes use on the M4
 
+	// A 256-byte chunk takes ~22ms at 115200 baud, set the stall timeout to ~4x that
+	static constexpr uint32_t StallTimeoutMs = 100;
+	static constexpr uint32_t MaxDmaStalls = 8; // consecutive, reset by any completed transfer
+
 	ConsoleBufferReader reader;
 	std::array<uint8_t, 256> bounce;
 	size_t tx_pos = 0;
 	size_t tx_len = 0;
+	uint32_t last_ndtr = 0;
+	uint32_t last_progress_tm = 0;
+	uint32_t dma_stalls = 0;
 	bool usb_was_active = false;
 	bool dma_running = false;
 	bool dma_ok = true;

@@ -104,8 +104,8 @@ extern "C" void aux_core_main() {
 
 	AutoUpdater::run(file_storage_proxy, ui);
 
-	if (CpuLoadTest::should_run_hil_tests(file_storage_proxy)) {
-		CpuLoadTest::run_hil_tests(file_storage_proxy, ui, plugin_manager);
+	if (auto hil_params = CpuLoadTest::get_hil_test_params(file_storage_proxy); hil_params.run) {
+		CpuLoadTest::run_hil_tests(file_storage_proxy, ui, plugin_manager, hil_params.brand, hil_params.plugins_only);
 	}
 
 	if (ModuleImageGen::should_run(file_storage_proxy)) {
