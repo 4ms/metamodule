@@ -469,6 +469,11 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
   /* Parse configuration descriptor */
   cfg_desc->bLength             = *(uint8_t *)(buf + 0U);
   cfg_desc->bDescriptorType     = *(uint8_t *)(buf + 1U);
+  if (((uint16_t)LE16(buf + 2U)) > ((uint16_t)USBH_MAX_SIZE_CONFIGURATION)) {
+    USBH_ErrLog("Config descriptor wTotalLength %u exceeds max %u: truncating, some interfaces may be unusable",
+          (uint16_t)LE16(buf + 2U),
+          (uint16_t)USBH_MAX_SIZE_CONFIGURATION);
+  }
   cfg_desc->wTotalLength        = MIN(((uint16_t) LE16(buf + 2U)), ((uint16_t)USBH_MAX_SIZE_CONFIGURATION));
   cfg_desc->bNumInterfaces      = *(uint8_t *)(buf + 4U);
   cfg_desc->bConfigurationValue = *(uint8_t *)(buf + 5U);
