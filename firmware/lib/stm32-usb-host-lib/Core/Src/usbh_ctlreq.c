@@ -488,20 +488,28 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
 
     while ((if_ix < USBH_MAX_NUM_INTERFACES) && (ptr < cfg_desc->wTotalLength))
     {
-
-      /* GetNextDesc advances ptr before we read the header, so pdesc can land at or
-         past wTotalLength (and past the end of CfgDesc_Raw when truncated). Stop if
-         the header is not fully inside the data, or the descriptor claims to extend
-         past it (zero bLength also stops us: GetNextDesc would never advance). */
-      if ((uint16_t)(ptr + USB_LEN_DESC_HDR) > cfg_desc->wTotalLength) {
-        break;
-      }
-      if ((pdesc->bLength == 0U) || ((uint16_t)(ptr + pdesc->bLength) > cfg_desc->wTotalLength)) {
-        USBH_DbgLog("Descriptor invalid (length %u at offset %u), aborting", pdesc->bLength, ptr);
+      /* ptr is the end offset of the current descriptor, which is where the next
+         descriptor's header starts. Stop if that header is not fully inside the
+         data */
+      if ((uint16_t)(ptr + USB_LEN_DESC_HDR) > cfg_desc->wTotalLength)
+      {
         break;
       }
 
       pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
+
+      /* ptr is now the end offset of the descriptor pdesc points to */
+      if (pdesc->bLength == 0U)
+      {
+        USBH_DbgLog("Descriptor invalid (length 0 ending at offset %u), aborting", ptr);
+        break;
+      }
+      if (ptr > cfg_desc->wTotalLength)
+      {
+        USBH_DbgLog("Descriptor truncated (length %u ending at offset %u), aborting", pdesc->bLength, ptr);
+        break;
+      }
+
       if (pdesc->bDescriptorType == USB_DESC_TYPE_INTERFACE)
       {
         /* Make sure that the interface descriptor's bLength is equal to USB_INTERFACE_DESC_SIZE */
@@ -520,14 +528,22 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
 
         while ((ep_ix < pif->bNumEndpoints) && (ptr < cfg_desc->wTotalLength))
         {
-          pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
-
           /* Same bounds checks as the interface loop above */
-          if ((uint16_t)(ptr + USB_LEN_DESC_HDR) > cfg_desc->wTotalLength) {
+          if ((uint16_t)(ptr + USB_LEN_DESC_HDR) > cfg_desc->wTotalLength)
+          {
             break;
           }
-          if ((pdesc->bLength == 0U) || ((uint16_t)(ptr + pdesc->bLength) > cfg_desc->wTotalLength)) {
-            USBH_DbgLog("Descriptor invalid (length %u at offset %u), aborting", pdesc->bLength, ptr);
+
+          pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
+
+          if (pdesc->bLength == 0U)
+          {
+            USBH_DbgLog("Descriptor invalid (length 0 ending at offset %u), aborting", ptr);
+            break;
+          }
+          if (ptr > cfg_desc->wTotalLength)
+          {
+            USBH_DbgLog("Descriptor truncated (length %u ending at offset %u), aborting", pdesc->bLength, ptr);
             break;
           }
 
