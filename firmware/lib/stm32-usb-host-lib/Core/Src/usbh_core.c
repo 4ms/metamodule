@@ -302,7 +302,12 @@ USBH_StatusTypeDef USBH_SelectInterface(USBH_HandleTypeDef *phost, uint8_t inter
 {
   USBH_StatusTypeDef status = USBH_OK;
 
-  if (interface < phost->device.CfgDesc.bNumInterfaces)
+  /* "interface" is an index into Itf_Desc[], which holds one slot per parsed
+     interface descriptor including alternate settings, so valid indexes can
+     exceed bNumInterfaces (the device's count of distinct interfaces).
+     A parsed slot has a non-zero bLength; unused slots are zeroed. */
+  if ((interface < USBH_MAX_NUM_INTERFACES) &&
+      (phost->device.CfgDesc.Itf_Desc[interface].bLength != 0U))
   {
     phost->device.current_interface = interface;
     USBH_UsrLog("Switching to Interface (#%d)", interface);
@@ -713,9 +718,17 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
           }
 
           USBH_UsrLog("Looking for classcode 0x%x (%.16s)", phost->pClass[idx]->ClassCode, phost->pClass[idx]->Name);
-          for (unsigned itf = 0U; itf < phost->device.CfgDesc.bNumInterfaces; itf++)
+          /* Scan all parsed interface slots (alt settings get their own slots,
+             so there can be more slots than bNumInterfaces). Slots are filled
+             in order; the first zeroed slot marks the end. */
+          for (unsigned itf = 0U; itf < USBH_MAX_NUM_INTERFACES; itf++)
           {
-            USBH_InterfaceDescTypeDef *interface = &phost->device.CfgDesc.Itf_Desc[itf]; 
+            USBH_InterfaceDescTypeDef *interface = &phost->device.CfgDesc.Itf_Desc[itf];
+
+            if (interface->bLength == 0U)
+            {
+              break;
+            }
 
             // TODO: keep a user preference table of phost->device.DevDesc.idVendor, idDevice and which itf to choose
             // Double-check the chosen itf matches, otherwise fall back to picking the first one
