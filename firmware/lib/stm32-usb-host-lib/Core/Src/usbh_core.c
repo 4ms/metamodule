@@ -710,14 +710,22 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       {
         phost->pActiveClass = NULL;
 
-        for (idx = 0U; idx < USBH_MAX_NUM_SUPPORTED_CLASS; idx++)
+        /* Try each registered class in registration order. A class is a
+           candidate if some interface matches its ClassCode and SubClassCode
+           (0 = any subclass) and has endpoints. If a candidate's Init fails,
+           clean up and try the next registered class instead of aborting. */
+        for (idx = 0U; (idx < USBH_MAX_NUM_SUPPORTED_CLASS) && (phost->pActiveClass == NULL); idx++)
         {
+          uint8_t class_matches = 0U;
+
           if (phost->pClass[idx] == NULL)
           {
             continue;
           }
 
-          USBH_UsrLog("Looking for classcode 0x%x (%.16s)", phost->pClass[idx]->ClassCode, phost->pClass[idx]->Name);
+          USBH_UsrLog("Looking for classcode 0x%x sub-class 0x%x (%.16s)",
+                      phost->pClass[idx]->ClassCode, phost->pClass[idx]->SubClassCode, phost->pClass[idx]->Name);
+
           /* Scan all parsed interface slots (alt settings get their own slots,
              so there can be more slots than bNumInterfaces). Slots are filled
              in order; the first zeroed slot marks the end. */
@@ -734,26 +742,25 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
             // Double-check the chosen itf matches, otherwise fall back to picking the first one
             // Also report back to A7 all the matching itf found
 
-            if (phost->pClass[idx]->ClassCode == interface->bInterfaceClass)
+            if ((phost->pClass[idx]->ClassCode == interface->bInterfaceClass) &&
+                ((phost->pClass[idx]->SubClassCode == 0U) ||
+                 (phost->pClass[idx]->SubClassCode == interface->bInterfaceSubClass)))
             {
-              USBH_UsrLog("Found interface #%u with same classcode, and %u endpoints", itf, interface->bNumEndpoints);
-              if (interface->bNumEndpoints > 0)
+              USBH_UsrLog("Found matching interface #%u with %u endpoints", itf, interface->bNumEndpoints);
+              if (interface->bNumEndpoints > 0U)
               {
-                if (phost->pActiveClass == NULL)
-                  phost->pActiveClass = phost->pClass[idx];
-                  // break; // DEBUG: don't break on the first one found
-                else 
-                {
-                  USBH_UsrLog("Found multiple interfaces of classes we can host, with > 0 endpoints. Picked the first one");
-                  // phost->pActiveClass = phost->pClass[idx];
-                }
+                class_matches = 1U;
               }
             }
           }
-        }
 
-        if (phost->pActiveClass != NULL)
-        {
+          if (class_matches == 0U)
+          {
+            continue;
+          }
+
+          phost->pActiveClass = phost->pClass[idx];
+
           if (phost->pActiveClass->Init(phost) == USBH_OK)
           {
             phost->gState = HOST_CLASS_REQUEST;
@@ -764,14 +771,22 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
           }
           else
           {
-            phost->gState = HOST_ABORT_STATE;
-            USBH_UsrLog("Device not supporting %s class.", phost->pActiveClass->Name);
+            USBH_UsrLog("Device not supporting %s class, trying the next registered class.",
+                        phost->pActiveClass->Name);
+
+            /* Release anything a partial Init left behind (pipes, memory) */
+            if (phost->pActiveClass->DeInit != NULL)
+            {
+              (void)phost->pActiveClass->DeInit(phost);
+            }
+            phost->pActiveClass = NULL;
           }
         }
-        else
+
+        if (phost->pActiveClass == NULL)
         {
           phost->gState = HOST_ABORT_STATE;
-          USBH_UsrLog("No registered class for this device.");
+          USBH_UsrLog("No registered class supports this device.");
         }
       }
 
