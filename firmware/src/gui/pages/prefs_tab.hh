@@ -480,8 +480,11 @@ private:
 
 	void update_usb_device_items(bool enabled) {
 		lv_enable(usb_section.device_mode_dropdown, enabled);
+		lv_enable(usb_section.dev_drive_check, enabled);
+
 		auto opa = enabled ? LV_OPA_100 : LV_OPA_50;
 		lv_obj_set_style_opa(lv_obj_get_parent(usb_section.device_mode_dropdown), opa, LV_PART_MAIN);
+		lv_obj_set_style_opa(lv_obj_get_parent(usb_section.dev_drive_check), opa, LV_PART_MAIN);
 	}
 
 	void update_usb_video_items(bool enabled) {
