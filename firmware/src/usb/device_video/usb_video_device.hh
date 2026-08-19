@@ -10,9 +10,7 @@ class UsbVideoDevice {
 public:
 	UsbVideoDevice(USBD_HandleTypeDef *pDevice);
 
-	void start();
-	void stop();
-	void soft_stop();
+	void register_class();
 
 	// Set the pointer to the shadow framebuffer (pre-converted on A7).
 	// Contents are either YUY2 (2 bytes/pixel) or BGR24 (3 bytes/pixel),

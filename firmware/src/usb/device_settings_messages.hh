@@ -13,7 +13,7 @@ struct DeviceSettingsMessages {
 
 	struct Result {
 		bool has_mode_change = false;
-		UsbDeviceMode mode = UsbDeviceMode::Cdc;
+		UsbDeviceMode mode = UsbDeviceMode::MidiConsole;
 		bool has_role_change = false;
 		UsbRoleMode role = UsbRoleMode::Auto;
 	};

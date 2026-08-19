@@ -53,6 +53,7 @@ extern USBD_ClassTypeDef USBD_MIDI;
 #define USBD_MIDI_CLASS &USBD_MIDI
 
 uint8_t USBD_MIDI_RegisterInterface(USBD_HandleTypeDef *pdev, USBD_MIDI_ItfTypeDef *fops);
+USBD_MIDI_HandleTypeDef *USBD_MIDI_GetHandle(void);
 uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev, uint8_t *pbuff, uint32_t length);
 uint8_t USBD_MIDI_SetRxBuffer(USBD_HandleTypeDef *pdev, uint8_t *pbuff);
 uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev);

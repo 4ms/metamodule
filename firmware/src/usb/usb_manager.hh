@@ -78,7 +78,7 @@ class UsbManager {
 
 public:
 	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: usb_device{console_buffers, UsbDeviceMode::Midi}
+		: usb_device{console_buffers, UsbDeviceMode::MidiConsole}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		found_fusb = usbctl.init(); //NOLINT
 	}
@@ -361,12 +361,12 @@ public:
 		if (as_device) {
 			if (usb_device.is_configured()) {
 				switch (usb_device.mode) {
-					case UsbDeviceMode::Midi:
+					case UsbDeviceMode::MidiConsole:
+						// The SDK's UsbConnectionType has no composite entry, and MIDI
+						// is the user-facing half of this mode
 						return UsbConnection::DeviceMidiHost;
 					case UsbDeviceMode::Video:
 						return UsbConnection::DeviceVideoHost;
-					case UsbDeviceMode::Cdc:
-						return UsbConnection::DeviceConsoleHost;
 				}
 			}
 			return UsbConnection::DeviceWaiting;

@@ -6,6 +6,7 @@
 #include "param_block.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "sync_params.hh"
+#include "usb/dev_drive_block.hh"
 #include "usb/usb_connection_status_block.hh"
 #include <array>
 
@@ -54,6 +55,8 @@ __attribute__((section(".ddma"))) DeviceSettingsMessage icc_device_settings_mess
 
 // Cross-core USB connection status: written by the M4, read by the A7 GUI/SDK.
 __attribute__((section(".ddma"))) UsbConnectionStatusBlock usb_connection_status;
+
+__attribute__((section(".ddma"))) DevDriveBlock dev_drive_block;
 
 void init() {
 	for (auto &block : param_blocks) {

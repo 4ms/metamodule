@@ -66,7 +66,6 @@ extern uint32_t _M4_CODE_END[];
 extern uint32_t _M4_VECT[];
 extern uint32_t _M4_VECT_A7[];
 extern uint32_t _M4_VECT_SZ[];
-extern uint32_t _M4_VECT_END[];
 
 extern uint32_t _M4_STACK[];
 extern uint32_t _M4_STACK_SZ[];
@@ -118,7 +117,6 @@ static const uint32_t SHAREDMEM_SZ = (uint32_t)_SHAREDMEM_SZ;
 static const uint32_t M4_VECT = (uint32_t)_M4_VECT;
 static const uint32_t M4_VECT_A7 = (uint32_t)_M4_VECT_A7;
 static const uint32_t M4_VECT_SZ = (uint32_t)_M4_VECT_SZ;
-static const uint32_t M4_VECT_END = (uint32_t)_M4_VECT_END;
 
 static const uint32_t M4_CODE = (uint32_t)_M4_CODE;
 static const uint32_t M4_CODE_A7 = (uint32_t)_M4_CODE_A7;

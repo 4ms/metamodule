@@ -169,6 +169,18 @@ public:
 		} else {
 			gui_state.file_browser_visible.register_state(false);
 
+			// If we're on any page related to a patch and the view patch ptr gets set to null:
+			// that means an external event unloaded it (e.g. Developer Drive loaded a plugin)
+			// So, immediately jump to MainMenu
+			auto cur_page_id = page_list.current_page();
+			if (cur_page_id != PageId::MainMenu && cur_page_id != PageId::PatchSel &&
+				cur_page_id != PageId::SystemMenu && !info.open_patch_manager.get_view_patch())
+			{
+				page_list.request_new_page_no_history(PageId::MainMenu, {});
+				cur_page = page_list.page(PageId::MainMenu);
+				cur_page->focus({});
+			}
+
 			cur_page->update();
 
 			// Don't let old events do surprising things when you change pages

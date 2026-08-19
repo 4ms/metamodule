@@ -1,8 +1,9 @@
 #include "usb_video_device.hh"
+#include "device_composite/add_class.hh"
+#include "console/pr_dbg.hh"
 #include "debug.hh"
 #include <cstring>
 
-extern "C" USBD_DescriptorsTypeDef UVC_Desc;
 
 static USBD_VIDEO_ItfTypeDef video_fops = {
 	MetaModule::UsbVideoDevice::Video_Itf_Init,
@@ -21,22 +22,17 @@ UsbVideoDevice::UsbVideoDevice(USBD_HandleTypeDef *pDevice)
 	: pdev{pDevice} {
 }
 
-void UsbVideoDevice::start() {
-	USBD_Init(pdev, &UVC_Desc, 0);
-	USBD_RegisterClass(pdev, USBD_VIDEO_CLASS);
-	USBD_VIDEO_RegisterInterface(pdev, &video_fops);
-	USBD_Start(pdev);
-}
+void UsbVideoDevice::register_class() {
+	// UVC is presented on its own, not merged with CDC/MIDI, but still goes
+	// through the composite registration path: a composite-enabled core only
+	// routes DataIn/DataOut to classes listed in pdev->tclasslist. Our
+	// USBD_CMPSIT forwards descriptor requests straight back to USBD_VIDEO.
+	auto ok = UsbComposite::add_class(pdev, USBD_VIDEO_CLASS, CLASS_TYPE_VIDEO, CMPSIT_VIDEO_EpAdd, [this] {
+		USBD_VIDEO_RegisterInterface(pdev, &video_fops);
+	});
 
-void UsbVideoDevice::stop() {
-	USBD_Stop(pdev);
-	USBD_DeInit(pdev);
-}
-
-void UsbVideoDevice::soft_stop() {
-	// See UsbSerialDevice::soft_stop -- skip USBD_DeInit so hpcd->State stays
-	// READY and the next USBD_Init won't toggle USBO_CLK via MspInit.
-	USBD_Stop(pdev);
+	if (ok)
+		pr_info("Registered USB video device\n");
 }
 
 void UsbVideoDevice::set_framebuffer(uint8_t *fb) {

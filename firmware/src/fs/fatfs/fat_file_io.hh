@@ -116,6 +116,19 @@ public:
 		return true;
 	}
 
+	// Some hosts mount by label (/Volumes/<label> on macOS).
+	bool set_label(std::string_view label) {
+		// f_setlabel takes "<drive>:<label>"
+		std::string vol_label{_fatvol};
+		vol_label += label;
+
+		if (auto res = f_setlabel(vol_label.c_str()); res != FR_OK) {
+			pr_err("Setting volume label failed with error code %d\n", res);
+			return false;
+		}
+		return true;
+	}
+
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
 		FILINFO fno;
 

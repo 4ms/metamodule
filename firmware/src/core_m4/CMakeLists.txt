@@ -38,8 +38,9 @@ add_executable(
   ${FWDIR}/src/usb/usbh_midi.cc
   ${FWDIR}/src/usb/device_cdc/usb_serial_device.cc
   # ${FWDIR}/src/usb/device_cdc/usbd_cdc_interface.c
-  ${FWDIR}/src/usb/device_cdc/usbd_desc.c
-  # ${FWDIR}/src/usb/device_msc/usb_drive_device.cc
+  ${FWDIR}/src/usb/device_composite/usbd_composite.c
+  ${FWDIR}/src/usb/device_composite/usbd_composite_desc.c
+  ${FWDIR}/src/usb/device_msc/usb_drive_device.cc
   # ${FWDIR}/src/usb/device_msc/usbd_desc.c
 
   ${FWDIR}/lib/fatfs/source/ff.c
@@ -93,7 +94,6 @@ add_executable(
   ${FWDIR}/src/usb/device_video/usb_video_device.cc
   ${FWDIR}/src/usb/device_video/usbd_video_desc.c
   ${FWDIR}/src/usb/device_midi/usbd_midi.c
-  ${FWDIR}/src/usb/device_midi/usbd_midi_desc.c
   ${FWDIR}/src/usb/usb_midi_device.cc
   ${FWDIR}/src/usb/usbh_midi_jacks.cc
   ${FWDIR}/src/usb/midi_jack_parse.cc
@@ -132,6 +132,7 @@ target_include_directories(
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/src/usb
+          ${FWDIR}/src/usb/device_composite
           ${USBHOST_LIBDIR}/Core/Inc
           ${USBHOST_LIBDIR}/Class/MSC/Inc
           ${USBDEV_LIBDIR}/Core/Inc
