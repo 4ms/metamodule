@@ -40,7 +40,7 @@ public:
 			return;
 		}
 
-		if (should_enable && !drive_.is_enabled()) {
+		if (should_enable && !drive_.is_enabled() && retries) {
 			if (reformat() != DevDriveStatus::Ok)
 				retries--;
 		}
