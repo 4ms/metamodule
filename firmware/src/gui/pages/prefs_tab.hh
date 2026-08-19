@@ -295,7 +295,8 @@ private:
 
 		update_usb_video_items(settings.usb_device_mode == UsbDeviceMode::Video &&
 							   settings.usb_role_mode != UsbRoleMode::ForceHost);
-		update_usb_device_items(settings.usb_role_mode != UsbRoleMode::ForceHost);
+		update_usb_device_items(settings.usb_device_mode != UsbDeviceMode::Video &&
+								settings.usb_role_mode != UsbRoleMode::ForceHost);
 
 		gui_state.do_write_settings = false;
 
@@ -491,6 +492,10 @@ private:
 		lv_enable(usb_section.mirror_check, enabled);
 		auto opa = enabled ? LV_OPA_100 : LV_OPA_50;
 		lv_obj_set_style_opa(lv_obj_get_parent(usb_section.mirror_check), opa, LV_PART_MAIN);
+
+		// Turn off Dev Drive if in Video mode
+		if (enabled)
+			lv_disable(usb_section.dev_drive_check);
 	}
 
 	MissingPluginSettings::Autoload read_missing_plugins_dropdown() {
