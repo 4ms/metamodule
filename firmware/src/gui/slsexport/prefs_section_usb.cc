@@ -29,7 +29,7 @@ void PrefsSectionUSB::create(lv_obj_t *parent) {
 	dev_drive_check = lv_obj_get_child(dev_drive_cont, 1);
 
 	create_prefs_note(dev_drive_cont,
-					  "Adds a USB drive for installing\nplugins from a computer.\nUses 8MB of plugin memory.");
+					  "Adds a USB drive for installing\nplugins over USB.\nUses 16MB of plugin memory.");
 }
 
 } // namespace MetaModule
