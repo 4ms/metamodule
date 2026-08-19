@@ -68,22 +68,35 @@ USBH_StatusTypeDef USBH_MIDI_InterfaceInit(USBH_HandleTypeDef *phost)
 	// Fresh connection: clear any jack info collected for a previous device.
 	MSHandle->jacks.reset();
 
-	// Look for an optional Audio Control interface
-	interface = USBH_FindInterface(phost, AudioClassCode, AudioControlSubclassCode, AnyProtocol);
-	if ((interface == NoValidInterfaceFound) || (interface >= USBH_MAX_NUM_INTERFACES)) {
-		USBH_DbgLog("Did not find an audio control interface, continuing\n");
-	} else {
-		USBH_DbgLog("Found Audio Control subclass\n");
-		host.link_endpoint_pipe(MSHandle->ControlItf.ControlEP, interface, 0);
-		host.open_pipe(MSHandle->ControlItf.ControlEP, EndPointType::Intr); // TODO: Is it an Intr EP type?
-		host.set_toggle(MSHandle->ControlItf.ControlEP, 0);
-	}
-
-	// Look for MidiStreamingSubClass
+	// Look for the MidiStreaming interface
 	interface = USBH_FindInterface(phost, AudioClassCode, MidiStreamingSubClass, AnyProtocol);
 	if ((interface == NoValidInterfaceFound) || (interface >= USBH_MAX_NUM_INTERFACES)) {
 		USBH_DbgLog("Cannot find the interface for MIDI subclass: %s.", phost->pActiveClass->Name);
 		return USBH_FAIL;
+	}
+
+	// Look for this MIDI function's (optional) Audio Control interface: the
+	// nearest AC interface preceding the MS interface. A function's interfaces
+	// are contiguous, so searching the whole device could land on another
+	// function's AC (e.g. the UAC2 audio function of a composite device).
+	// A MIDI-only function's AC usually declares no endpoints: only open a
+	// pipe when one exists (linking a zeroed Ep_Desc would claim a bogus pipe
+	// on endpoint address 0).
+	for (uint8_t ac = interface; ac > 0;) {
+		ac--;
+		auto const &ac_itf = phost->device.CfgDesc.Itf_Desc[ac];
+		if (ac_itf.bInterfaceClass != AudioClassCode || ac_itf.bInterfaceSubClass != AudioControlSubclassCode)
+			continue;
+
+		if (ac_itf.bNumEndpoints > 0) {
+			USBH_DbgLog("Found Audio Control interface #%u with an endpoint\n", ac);
+			host.link_endpoint_pipe(MSHandle->ControlItf.ControlEP, ac, 0);
+			host.open_pipe(MSHandle->ControlItf.ControlEP, EndPointType::Intr); // TODO: Is it an Intr EP type?
+			host.set_toggle(MSHandle->ControlItf.ControlEP, 0);
+		} else {
+			USBH_DbgLog("Audio Control interface #%u has no endpoints, continuing\n", ac);
+		}
+		break;
 	}
 
 	status = USBH_SelectInterface(phost, interface);
@@ -234,9 +247,13 @@ USBH_StatusTypeDef USBH_MIDI_Stop(USBH_HandleTypeDef *phost)
 	if (phost->gState == HOST_CLASS) {
 		MSHandle->state = MidiStreamingState::Idle;
 
-		USBH_ClosePipe(phost, MSHandle->ControlItf.ControlEP.pipe);
-		USBH_ClosePipe(phost, MSHandle->DataItf.InEP.pipe);
-		USBH_ClosePipe(phost, MSHandle->DataItf.OutEP.pipe);
+		// pipe 0 = never opened (closing 0 would close a control-pipe channel)
+		if (MSHandle->ControlItf.ControlEP.pipe)
+			USBH_ClosePipe(phost, MSHandle->ControlItf.ControlEP.pipe);
+		if (MSHandle->DataItf.InEP.pipe)
+			USBH_ClosePipe(phost, MSHandle->DataItf.InEP.pipe);
+		if (MSHandle->DataItf.OutEP.pipe)
+			USBH_ClosePipe(phost, MSHandle->DataItf.OutEP.pipe);
 	}
 	return USBH_OK;
 }
