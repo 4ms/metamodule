@@ -6,7 +6,7 @@
 //
 // Memory comes from the plugin arena
 //
-static constexpr uint32_t DevDriveSizeBytes = 8 * 1024 * 1024;
+static constexpr uint32_t DevDriveSizeBytes = 16 * 1024 * 1024;
 static constexpr uint32_t DevDriveBlockSize = 512;
 
 static constexpr uint32_t DevDriveAlignment = 4096;
