@@ -148,8 +148,17 @@ void count_midi_jacks(std::span<uint8_t const> cfg_desc, uint8_t *num_in_jacks, 
 	uint8_t in_jacks = 0;
 	uint8_t out_jacks = 0;
 
+	// Only CS_INTERFACE descriptors inside a MIDIStreaming interface are jacks:
+	// CDC functional and audio-class terminal descriptors share type 0x24, and
+	// their subtypes collide with MIDI_IN_JACK/MIDI_OUT_JACK.
+	bool in_ms_itf = false;
+
 	for_each_descriptor(cfg_desc, [&](std::span<uint8_t const> d) {
-		if (d[1] != CS_INTERFACE || d.size() < 3)
+		if (d[1] == INTERFACE_DESC && d.size() >= 9) {
+			in_ms_itf = (d[5] == AudioClass && d[6] == MidiStreamingSubclass);
+			return;
+		}
+		if (!in_ms_itf || d[1] != CS_INTERFACE || d.size() < 3)
 			return;
 		if (d[2] == MIDI_IN_JACK)
 			in_jacks++;
@@ -165,8 +174,15 @@ void count_midi_jacks(std::span<uint8_t const> cfg_desc, uint8_t *num_in_jacks, 
 
 void parse_midi_jacks(std::span<uint8_t const> cfg_desc, MidiJackCollection *jacks) {
 
+	// See count_midi_jacks(): jacks only live inside a MIDIStreaming interface
+	bool in_ms_itf = false;
+
 	for_each_descriptor(cfg_desc, [&](std::span<uint8_t const> d) {
-		if (d[1] != CS_INTERFACE || d.size() < 3)
+		if (d[1] == INTERFACE_DESC && d.size() >= 9) {
+			in_ms_itf = (d[5] == AudioClass && d[6] == MidiStreamingSubclass);
+			return;
+		}
+		if (!in_ms_itf || d[1] != CS_INTERFACE || d.size() < 3)
 			return;
 
 		if (d[2] == MIDI_IN_JACK && d.size() >= 6) {
