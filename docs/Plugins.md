@@ -7,7 +7,7 @@ The [MetaModule Plugin SDK](https://github.com/4ms/metamodule-plugin-sdk) is use
 
 For examples, see [metamodule-plugin-examples](https://github.com/4ms/metamodule-plugin-examples)
 
-When doing plugin development, use the `Developer Mode` to transfer plugins from your computer to the MetaModule. See [Developer Drive](developer-drive.md).
+When doing plugin development, use the `Developer Mode` to transfer plugins from your computer to the MetaModule. See [Developer Drive](../firmware/metamodule-plugin-sdk/docs/developer-drive.md).
 
 ### VCV Rack plugins
 
