@@ -25,6 +25,7 @@ class MidiHost {
 		USBH_MIDI_Process,
 		USBH_MIDI_SOFProcess,
 		&MSHandle,
+		MidiStreamingSubClass, // only claim devices with a MIDIStreaming interface
 	};
 	bool _is_connected = false;
 
