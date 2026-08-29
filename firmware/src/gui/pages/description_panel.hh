@@ -1,14 +1,17 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/pages/load_balance_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "params/metaparams.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
 #include "src/core/lv_event.h"
 #include "user_settings/audio_settings.hh"
+#include "user_settings/view_settings.hh"
 #include <string>
 
 namespace MetaModule
@@ -19,15 +22,18 @@ struct PatchDescriptionPanel {
 	PatchDescriptionPanel(PatchPlayLoader &patch_playloader,
 						  OpenPatchManager &patches,
 						  PatchSuggestedAudioSettings &settings,
-						  PatchModQueue &patch_mod_queue)
+						  PatchModQueue &patch_mod_queue,
+						  MetaParams const &metaparams,
+						  ModuleDisplaySettings const &view_settings)
 		: group(lv_group_create())
 		, patch_playloader{patch_playloader}
 		, patches{patches}
 		, settings{settings}
-		, patch_mod_queue{patch_mod_queue} {
+		, patch_mod_queue{patch_mod_queue}
+		, load_balance_panel{patch_playloader, patches, metaparams, view_settings} {
 
 		// Description
-		auto desc_cont = lv_obj_get_parent(ui_Description);
+		desc_cont = lv_obj_get_parent(ui_Description);
 		lv_obj_add_style(desc_cont, &Gui::focus_style, LV_STATE_FOCUSED);
 		lv_obj_add_style(desc_cont, &Gui::focus_style, LV_STATE_FOCUS_KEY);
 
@@ -51,6 +57,7 @@ struct PatchDescriptionPanel {
 		lv_obj_set_style_pad_column(ui_DescriptionPanel, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 		lv_obj_add_event_cb(close_button, closebut_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(load_balance_button, load_balance_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_hide(ui_DescriptionEditPanel);
 		lv_hide(ui_PatchNameEditTextArea);
@@ -65,6 +72,7 @@ struct PatchDescriptionPanel {
 		lv_group_add_obj(group, ui_DescriptionEditTextArea);
 		lv_group_add_obj(group, ui_DescriptionEditSaveButton);
 		lv_group_add_obj(group, ui_DescriptionEditCancelButton);
+		lv_group_add_obj(group, load_balance_button);
 		lv_group_add_obj(group, close_button);
 		lv_group_add_obj(group, apply_settings_button);
 	}
@@ -76,6 +84,7 @@ struct PatchDescriptionPanel {
 
 	void set_patch(PatchData *cur_patch) {
 		patch = cur_patch;
+		load_balance_panel.set_patch(cur_patch);
 	}
 
 	void set_filename(std::string_view name) {
@@ -83,10 +92,12 @@ struct PatchDescriptionPanel {
 	}
 
 	bool is_visible() {
-		return is_showing;
+		return is_showing || load_balance_panel.is_visible();
 	}
 
 	void update() {
+		load_balance_panel.update();
+
 		bool show_manual_apply = false;
 
 		if (patch && patches.get_playing_patch() == patches.get_view_patch()) {
@@ -109,7 +120,10 @@ struct PatchDescriptionPanel {
 	}
 
 	void back_event() {
-		if (lv_dropdown_is_open(poly_drop)) {
+		if (load_balance_panel.is_visible()) {
+			load_balance_panel.back_event();
+
+		} else if (lv_dropdown_is_open(poly_drop)) {
 			lv_dropdown_close(poly_drop);
 			lv_group_set_editing(group, false);
 
@@ -140,8 +154,9 @@ struct PatchDescriptionPanel {
 		lv_obj_move_background(ui_DescPanelPatchName);
 
 		lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		lv_group_focus_obj(close_button);
-		lv_obj_scroll_to_view_recursive(close_button, LV_ANIM_OFF);
+		// Focus the first item, so the panel opens scrolled to the top
+		lv_group_focus_obj(desc_cont);
+		lv_obj_scroll_to_view_recursive(desc_cont, LV_ANIM_OFF);
 		lv_group_set_editing(group, false);
 		is_showing = true;
 		edit_panel_visible = false;
@@ -166,6 +181,7 @@ struct PatchDescriptionPanel {
 	}
 
 	void hide() {
+		load_balance_panel.hide();
 		lv_hide(ui_DescriptionPanel);
 		lv_hide(ui_DescriptionEditPanel);
 		lv_hide(ui_Keyboard);
@@ -215,6 +231,17 @@ private:
 		lv_obj_set_style_pad_left(suggest_bs_drop, 10, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_ver(suggest_bs_drop, 6, LV_STATE_DEFAULT);
 		lv_obj_set_width(suggest_bs_drop, 90);
+
+		load_balance_button = create_button(ui_DescriptionPanel, "CPU Load Balancing");
+		lv_obj_add_flag(load_balance_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+
+		auto button_spacer = lv_obj_create(ui_DescriptionPanel);
+		lv_obj_set_size(button_spacer, lv_pct(100), 6);
+		lv_obj_add_flag(button_spacer, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_clear_flag(button_spacer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_set_style_bg_opa(button_spacer, 0, LV_PART_MAIN);
+		lv_obj_set_style_border_width(button_spacer, 0, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(button_spacer, 0, LV_PART_MAIN);
 
 		close_button = create_button(ui_DescriptionPanel, "Close");
 		lv_obj_add_flag(close_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
@@ -352,6 +379,13 @@ private:
 		page->patch_playloader.request_new_audio_settings(sr, bs, current.max_overrun_retries);
 	}
 
+	static void load_balance_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		page->load_balance_panel.show(page->group);
+	}
+
 	static void closebut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
 		page->hide();
@@ -485,11 +519,15 @@ private:
 
 	lv_obj_t *apply_settings_button = nullptr;
 	lv_obj_t *close_button = nullptr;
+	lv_obj_t *load_balance_button = nullptr;
+	lv_obj_t *desc_cont = nullptr;
 
 	PatchPlayLoader &patch_playloader;
 	OpenPatchManager &patches;
 	PatchSuggestedAudioSettings &settings;
 	PatchModQueue &patch_mod_queue;
+
+	LoadBalancePanel load_balance_panel;
 };
 
 } // namespace MetaModule

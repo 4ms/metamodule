@@ -258,6 +258,8 @@ struct PatchPlayLoader {
 			}
 		}
 
+		copy_load_balance_to_patch();
+
 		pr_info("Heap: %u\n", get_heap_size());
 		if (should_play)
 			start_audio();
@@ -283,6 +285,8 @@ struct PatchPlayLoader {
 			player_.replace_module(module_id, slug);
 		}
 
+		copy_load_balance_to_patch();
+
 		pr_info("Heap: %u\n", get_heap_size());
 		if (should_play)
 			start_audio();
@@ -294,9 +298,58 @@ struct PatchPlayLoader {
 			;
 
 		player_.remove_module(module_id);
+		copy_load_balance_to_patch();
 
 		pr_info("Heap: %u\n", get_heap_size());
 		start_audio();
+	}
+
+	// Measures the modules again and picks a new way to split them between the cores.
+	// Only meaningful while the patch is playing.
+	void recalculate_load_balance() {
+		if (!player_.is_loaded)
+			return;
+
+		bool should_play = is_playing();
+
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		player_.rebalance_modules(PatchPlayer::Balance::Recalculate);
+		copy_load_balance_to_patch();
+
+		if (should_play)
+			start_audio();
+	}
+
+	// Puts back a load balance the user had before (Undo), without re-measuring
+	void apply_load_balance(std::vector<uint16_t> const &module_cores, std::vector<uint32_t> const &module_loads) {
+		if (!player_.is_loaded)
+			return;
+
+		bool should_play = is_playing();
+
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		player_.set_load_balance(module_cores, module_loads);
+		copy_load_balance_to_patch();
+
+		if (should_play)
+			start_audio();
+	}
+
+	// The player works on its own copy of the patch data, so the load balance it
+	// calculated has to be copied back into the open patch in order to be saved.
+	void copy_load_balance_to_patch() {
+		auto *patch = patches_.get_playing_patch();
+		if (!patch)
+			return;
+
+		patch->module_cores = player_.get_module_cores();
+		patch->module_loads = player_.get_module_loads();
 	}
 
 	void prepare_patch_for_plugin_change(std::string_view brand_slug) {
@@ -516,6 +569,11 @@ private:
 		if (result.success) {
 			delay_ms(20); //let Async threads run
 			pr_info("Heap: %u\n", get_heap_size());
+
+			// The patch may not have had a load balance stored in it (e.g. it was saved
+			// by VCV), in which case the player just calculated one. Keep it, so it gets
+			// written out if the user saves the patch.
+			copy_load_balance_to_patch();
 
 			apply_suggested_audio_settings();
 

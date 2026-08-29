@@ -276,19 +276,41 @@ public:
 			return {true};
 	}
 
-	void rebalance_modules() {
+	enum class Balance {
+		// Re-use the load balance stored in the patch, if it has one
+		UseStored,
+		// Measure the modules and calculate a new load balance
+		Recalculate,
+	};
+
+	void rebalance_modules(Balance mode = Balance::UseStored) {
 		if (num_modules > 2) {
-			auto cpu_times = core_balancer.measure_modules(
-				modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
 
-			core_balancer.balance_loads(cpu_times);
+			if (mode == Balance::UseStored && pd.has_load_balance(MulticorePlayer::NumCores)) {
+				core_balancer.apply_stored_balance(pd.module_cores);
 
-			core_balancer.print_times(cpu_times, pd.module_slugs);
+			} else {
+				auto cpu_times = core_balancer.measure_modules(
+					modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
+
+				// When re-calculating, pass the previous assignment so the balancer
+				// prefers a different one (if a different one is about as good)
+				auto prev = std::span<const uint16_t>{};
+				if (mode == Balance::Recalculate && pd.has_load_balance(MulticorePlayer::NumCores))
+					prev = pd.module_cores;
+
+				auto arrangement = core_balancer.balance_loads(cpu_times, prev);
+
+				store_load_balance(arrangement, cpu_times);
+
+				core_balancer.print_times(cpu_times, pd.module_slugs);
+			}
 
 		} else {
 			core_balancer.cores.parts[0].clear();
 			core_balancer.cores.parts[0].push_back(1);
 			core_balancer.cores.parts[1].clear();
+			pd.clear_load_balance();
 		}
 
 		// Tell other SMP core which modules it's been assigned
@@ -301,6 +323,36 @@ public:
 		}
 
 		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
+	}
+
+	// Records the load balance in the patch data, so it can be saved to the patch file
+	// and re-used (instead of re-measured) the next time the patch is loaded.
+	void store_load_balance(auto const &arrangement, std::span<const unsigned> cpu_times) {
+		pd.module_cores.assign(num_modules, 0);
+		pd.module_loads.assign(num_modules, 0);
+
+		for (auto module_id = 1u; module_id < num_modules; module_id++) {
+			pd.module_cores[module_id] = arrangement.core_of[module_id];
+			pd.module_loads[module_id] = core_balancer.ticks_to_ppm(cpu_times[module_id - 1], samplerate);
+		}
+	}
+
+	std::vector<uint16_t> const &get_module_cores() const {
+		return pd.module_cores;
+	}
+
+	std::vector<uint32_t> const &get_module_loads() const {
+		return pd.module_loads;
+	}
+
+	// Applies a load balance the user chose, without re-measuring anything
+	void set_load_balance(std::vector<uint16_t> const &module_cores, std::vector<uint32_t> const &module_loads) {
+		if (module_cores.size() != num_modules)
+			return;
+
+		pd.module_cores = module_cores;
+		pd.module_loads = module_loads;
+		rebalance_modules(Balance::UseStored);
 	}
 
 	// Runs the patch
@@ -1252,6 +1304,8 @@ public:
 
 		// Add new module
 		pd.module_slugs[module_idx] = new_slug;
+		// The new module's CPU load is unknown, so the balance has to be measured again
+		pd.clear_load_balance();
 		calc_multiple_module_indicies();
 		add_module_at_idx(new_slug, module_idx);
 	}
