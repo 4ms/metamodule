@@ -212,7 +212,7 @@ private:
 
 		if (module_id < patch->module_loads.size()) {
 			auto ppm = patch->module_loads[module_id];
-			lv_label_set_text_fmt(module_load_label, "%u.%u%%", ppm / 10000, (ppm / 1000) % 10);
+			lv_label_set_text_fmt(module_load_label, "%u.%u%%", unsigned(ppm / 10000), unsigned((ppm / 1000) % 10));
 		} else {
 			lv_label_set_text(module_load_label, "");
 		}
