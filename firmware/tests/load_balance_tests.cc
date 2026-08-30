@@ -126,12 +126,11 @@ TEST_CASE("A stored balance is applied without measuring") {
 	CHECK(balancer.cores.parts[1][2] == 4);
 }
 
-TEST_CASE("Ticks convert to a percentage of one core") {
-	// 24MHz counter, 48kHz sample rate => 500 ticks available per sample.
+TEST_CASE("Ticks convert to a percentage of one core at 48kHz") {
+	// 24MHz counter, 48kHz reference => 500 ticks available per sample.
 	// A module using 50 ticks per sample uses 10% of one core.
-	auto ticks = 50u * Balancer::NumIterations;
-	CHECK(Balancer::ticks_to_ppm(ticks, 48000.f) == 100'000);
+	CHECK(MetaModule::LoadBalanceRefSamplerate == 48000);
 
-	CHECK(Balancer::ticks_to_ppm(0, 48000.f) == 0);
-	CHECK(Balancer::ticks_to_ppm(1000, 0.f) == 0);
+	CHECK(Balancer::ticks_to_ppm(50u * Balancer::NumIterations) == 100'000);
+	CHECK(Balancer::ticks_to_ppm(0) == 0);
 }

@@ -287,14 +287,16 @@ public:
 		if (num_modules > 2) {
 
 			if (mode == Balance::UseStored && pd.has_load_balance(MulticorePlayer::NumCores)) {
+				// The patch contained load balance info, so use it
 				core_balancer.apply_stored_balance(pd.module_cores);
 
-			} else {
+			} else { // Re-calculating, or calculating for the first time
+
 				auto cpu_times = core_balancer.measure_modules(
 					modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
 
 				// When re-calculating, pass the previous assignment so the balancer
-				// prefers a different one (if a different one is about as good)
+				// prefers a different one
 				auto prev = std::span<const uint16_t>{};
 				if (mode == Balance::Recalculate && pd.has_load_balance(MulticorePlayer::NumCores))
 					prev = pd.module_cores;
@@ -326,14 +328,14 @@ public:
 	}
 
 	// Records the load balance in the patch data, so it can be saved to the patch file
-	// and re-used (instead of re-measured) the next time the patch is loaded.
+	// and re-used the next time the patch is loaded.
 	void store_load_balance(auto const &arrangement, std::span<const unsigned> cpu_times) {
 		pd.module_cores.assign(num_modules, 0);
 		pd.module_loads.assign(num_modules, 0);
 
 		for (auto module_id = 1u; module_id < num_modules; module_id++) {
 			pd.module_cores[module_id] = arrangement.core_of[module_id];
-			pd.module_loads[module_id] = core_balancer.ticks_to_ppm(cpu_times[module_id - 1], samplerate);
+			pd.module_loads[module_id] = core_balancer.ticks_to_ppm(cpu_times[module_id - 1]);
 		}
 	}
 

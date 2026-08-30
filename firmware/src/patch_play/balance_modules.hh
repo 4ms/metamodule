@@ -17,6 +17,11 @@
 namespace MetaModule
 {
 
+// Measured module loads are always stored as a share of one core at this sample rate,
+// whatever rate they were actually measured at: a module takes the same amount of time
+// per sample either way. Anything displaying them scales by (current rate / this).
+inline constexpr uint32_t LoadBalanceRefSamplerate = 48000;
+
 template<size_t NumCores, size_t MaxModules>
 struct Balancer {
 	Partition<NumCores, MaxModules> cores;
@@ -54,14 +59,11 @@ struct Balancer {
 		return times;
 	}
 
-	// Converts a raw measurement from measure_modules() into parts-per-million of
-	// the time one core has available to process a single sample.
-	static uint32_t ticks_to_ppm(unsigned ticks, float samplerate) {
-		if (samplerate <= 0.f)
-			return 0;
-
+	// Converts a raw measurement from measure_modules() into parts-per-million of the
+	// time one core has to process a single sample, at LoadBalanceRefSamplerate (48kHz).
+	static uint32_t ticks_to_ppm(unsigned ticks) {
 		auto ticks_per_sample = (float)ticks / (float)NumIterations;
-		auto ticks_available = (float)CounterHz / samplerate;
+		auto ticks_available = (float)CounterHz / (float)LoadBalanceRefSamplerate;
 		return (uint32_t)(ticks_per_sample / ticks_available * 1'000'000.f);
 	}
 
@@ -74,7 +76,7 @@ struct Balancer {
 	};
 
 	// Greedy longest-processing-time-first:
-	// Sort modules by time, then put each module on the core with the smallest sum
+	// Sort modules by time, then put each module on the core with the smallest sum.
 	// seed == 0 gives the deterministic result. Any other seed shuffles
 	// modules of similar size before assigning them, giving a different arrangement
 	// of usually similar quality.
@@ -93,7 +95,7 @@ struct Balancer {
 
 		if (seed != 0) {
 			// Randomly swap neighbors in the sorted order. Neighbors are similar in
-			// size, so this perturbs the result without wrecking the greedy heuristic.
+			// size, so this perturbs the result with minimal total change
 			uint32_t rng = seed;
 			auto next_rand = [&rng] {
 				rng ^= rng << 13;
@@ -173,6 +175,7 @@ struct Balancer {
 			if (differs(best) == false) {
 				constexpr unsigned MaxTries = 16;
 				for (auto try_i = 1u; try_i <= MaxTries; try_i++) {
+					// psuedo-random seed to try different arrangements
 					auto candidate = make_arrangement(times, try_i * 2654435761u);
 					if (candidate.imbalance <= threshold && differs(candidate)) {
 						best = candidate;

@@ -115,7 +115,7 @@ private:
 				auto core = patch->module_cores[module_id];
 				if (core >= NumCores)
 					continue;
-				add_box(core, module_id, patch->module_loads[module_id]);
+				add_box(core, module_id, load_ppm(module_id));
 			}
 
 			for (auto core = 0u; core < NumCores; core++)
@@ -163,19 +163,33 @@ private:
 			lv_label_set_text_fmt(cpu_load_label, "Total CPU: %d%%", metaparams.audio_load);
 	}
 
+	// Scale ppm to current sample rate
+	uint32_t load_ppm(unsigned module_id) const {
+		if (module_id >= patch->module_loads.size())
+			return 0;
+
+		auto ppm = patch->module_loads[module_id];
+
+		auto cur_sr = patch_playloader.get_audio_settings().sample_rate;
+		if (cur_sr > 0 && cur_sr != LoadBalanceRefSamplerate)
+			ppm = (uint32_t)((uint64_t)ppm * cur_sr / LoadBalanceRefSamplerate);
+
+		return ppm;
+	}
+
 	unsigned core_load_percent(unsigned core) const {
 		uint32_t sum = 0;
 		for (auto module_id = 1u; module_id < patch->module_cores.size(); module_id++) {
 			if (patch->module_cores[module_id] == core)
-				sum += patch->module_loads[module_id];
+				sum += load_ppm(module_id);
 		}
 		return sum / 10000;
 	}
 
-	void add_box(unsigned core, unsigned module_id, uint32_t load_ppm) {
+	void add_box(unsigned core, unsigned module_id, uint32_t ppm) {
 		auto box = lv_obj_create(bar_rows[core]);
 
-		auto width_pct = (lv_coord_t)std::min<uint32_t>(load_ppm / 10000, 100);
+		auto width_pct = (lv_coord_t)std::min<uint32_t>(ppm / 10000, 100);
 		lv_obj_set_width(box, lv_pct(std::max<lv_coord_t>(width_pct, 1)));
 		lv_obj_set_height(box, lv_pct(100));
 		lv_obj_set_style_radius(box, 0, LV_PART_MAIN);
@@ -211,7 +225,7 @@ private:
 		lv_label_set_text(module_name_label, module_display_name(module_id).c_str());
 
 		if (module_id < patch->module_loads.size()) {
-			auto ppm = patch->module_loads[module_id];
+			auto ppm = load_ppm(module_id);
 			lv_label_set_text_fmt(module_load_label, "%u.%u%%", unsigned(ppm / 10000), unsigned((ppm / 1000) % 10));
 		} else {
 			lv_label_set_text(module_load_label, "");
@@ -319,7 +333,6 @@ private:
 	}
 
 	void create_objects() {
-		// Full screen: anything showing around the edges is just a distraction
 		panel = lv_obj_create(lv_layer_top());
 		lv_obj_set_size(panel, lv_pct(100), lv_pct(100));
 		lv_obj_set_pos(panel, 0, 0);
@@ -380,8 +393,6 @@ private:
 			lv_obj_set_width(row, lv_pct(100));
 			lv_obj_set_height(row, 24);
 			lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-			// Room for the focus outline of the boxes inside, which lvgl would
-			// otherwise clip to the row
 			lv_obj_set_style_pad_all(row, 2, LV_PART_MAIN);
 			lv_obj_set_style_pad_column(row, 1, LV_PART_MAIN);
 			lv_obj_set_style_radius(row, 0, LV_PART_MAIN);
@@ -410,7 +421,6 @@ private:
 		lv_obj_set_height(button_row, LV_SIZE_CONTENT);
 		lv_obj_set_flex_flow(button_row, LV_FLEX_FLOW_ROW_WRAP);
 		lv_obj_set_flex_align(button_row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
-		// Pad enough that the focus outline (drawn outside the button) isn't clipped
 		lv_obj_set_style_pad_all(button_row, 4, LV_PART_MAIN);
 		lv_obj_set_style_pad_column(button_row, 8, LV_PART_MAIN);
 		lv_obj_set_style_pad_row(button_row, 8, LV_PART_MAIN);
