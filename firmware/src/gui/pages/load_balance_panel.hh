@@ -111,11 +111,22 @@ private:
 		}
 
 		if (has_balance) {
-			for (auto module_id = 1u; module_id < patch->module_cores.size(); module_id++) {
-				auto core = patch->module_cores[module_id];
-				if (core >= NumCores)
-					continue;
-				add_box(core, module_id, load_ppm(module_id));
+			// Scale bars to fit screen if over 100%
+			bar_scale_ppm = OneCorePpm;
+			for (auto core = 0u; core < NumCores; core++)
+				bar_scale_ppm = std::max(bar_scale_ppm, core_load_ppm(core));
+
+			for (auto core = 0u; core < NumCores; core++) {
+				for (auto module_id = 1u; module_id < patch->module_cores.size(); module_id++) {
+					if (patch->module_cores[module_id] == core)
+						add_box(core, module_id, load_ppm(module_id));
+				}
+			}
+
+			// Put a marker at 100% if any bar is over 100%
+			if (bar_scale_ppm > OneCorePpm) {
+				for (auto core = 0u; core < NumCores; core++)
+					add_full_core_marker(core);
 			}
 
 			for (auto core = 0u; core < NumCores; core++)
@@ -177,19 +188,42 @@ private:
 		return ppm;
 	}
 
-	unsigned core_load_percent(unsigned core) const {
+	uint32_t core_load_ppm(unsigned core) const {
 		uint32_t sum = 0;
 		for (auto module_id = 1u; module_id < patch->module_cores.size(); module_id++) {
 			if (patch->module_cores[module_id] == core)
 				sum += load_ppm(module_id);
 		}
-		return sum / 10000;
+		return sum;
+	}
+
+	unsigned core_load_percent(unsigned core) const {
+		return core_load_ppm(core) / 10000;
+	}
+
+	// Where 100% of a core falls, as a percentage of the bar's width
+	lv_coord_t full_core_pct() const {
+		return (lv_coord_t)((uint64_t)OneCorePpm * 100 / bar_scale_ppm);
+	}
+
+	// A line across the bar at the 100% point, drawn on top of the modules
+	void add_full_core_marker(unsigned core) {
+		auto marker = lv_obj_create(bar_rows[core]);
+		lv_obj_add_flag(marker, LV_OBJ_FLAG_FLOATING);
+		lv_obj_clear_flag(marker, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_set_size(marker, 2, lv_pct(100));
+		lv_obj_set_x(marker, lv_pct(full_core_pct()));
+		lv_obj_set_style_radius(marker, 0, LV_PART_MAIN);
+		lv_obj_set_style_border_width(marker, 0, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(marker, 0, LV_PART_MAIN);
+		lv_obj_set_style_bg_color(marker, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+		lv_obj_set_style_bg_opa(marker, LV_OPA_COVER, LV_PART_MAIN);
 	}
 
 	void add_box(unsigned core, unsigned module_id, uint32_t ppm) {
 		auto box = lv_obj_create(bar_rows[core]);
 
-		auto width_pct = (lv_coord_t)std::min<uint32_t>(ppm / 10000, 100);
+		auto width_pct = (lv_coord_t)std::min<uint64_t>((uint64_t)ppm * 100 / bar_scale_ppm, 100);
 		lv_obj_set_width(box, lv_pct(std::max<lv_coord_t>(width_pct, 1)));
 		lv_obj_set_height(box, lv_pct(100));
 		lv_obj_set_style_radius(box, 0, LV_PART_MAIN);
@@ -441,6 +475,13 @@ private:
 	}
 
 	static constexpr unsigned NumCores = MulticorePlayer::NumCores;
+
+	// 100% of one core, in the parts-per-million the loads are stored in
+	static constexpr uint32_t OneCorePpm = 1'000'000;
+
+	// How much CPU time a full-width bar represents. Normally one core, but more than
+	// that when a core is overloaded and its modules wouldn't otherwise fit.
+	uint32_t bar_scale_ppm = OneCorePpm;
 
 	lv_group_t *group;
 	lv_group_t *parent_group = nullptr;
