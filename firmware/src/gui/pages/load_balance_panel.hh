@@ -151,16 +151,12 @@ private:
 	}
 
 	void clear_focus_states() {
-		auto unfocus = [](lv_obj_t *obj) {
-			lv_obj_clear_state(obj, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
-		};
-
 		for (auto *button : {recalc_button, save_button, undo_button, close_button})
-			unfocus(button);
+			lv_obj_clear_state(button, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
 
 		for (auto const &core_boxes : boxes) {
 			for (auto *box : core_boxes)
-				unfocus(box);
+				lv_obj_clear_state(box, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
 		}
 	}
 
@@ -180,11 +176,13 @@ private:
 
 		if (show_live) {
 			lv_label_set_text_fmt(live_load_label,
-								  "Cables: %u.%u%%  Mappings: %u.%u%%\nSync: %u.%u%%  Overhead: %u.%u%%",
+								  "Cables: %u.%u%%  Mappings: %u.%u%% MIDI: %u.%u%%\nSync: %u.%u%%  Overhead: %u.%u%%",
 								  live.cables / 10u,
 								  live.cables % 10u,
 								  live.mappings / 10u,
 								  live.mappings % 10u,
+								  live.midi_pulse / 10u,
+								  live.midi_pulse % 10u,
 								  live.sync / 10u,
 								  live.sync % 10u,
 								  live.overhead / 10u,

@@ -383,22 +383,30 @@ public:
 			}
 			auto module_ticks = section_time.stop_simple_measurement();
 
+			section_time.start_simple_measurement();
 			process_outputs_samecore<0>();
+			auto cable_ticks = section_time.stop_simple_measurement();
 
 			// Synchronize cores here before they update each other's module's inputs
 			section_time.start_simple_measurement();
 			smp.join();
 			auto sync_ticks = section_time.stop_simple_measurement();
 
+			section_time.start_simple_measurement();
 			update_midi_pulses();
+			auto midi_ticks = section_time.stop_simple_measurement();
 
 			smp.process_cables();
+
+			section_time.start_simple_measurement();
 			process_outputs_diffcore<0>();
 			process_summed_inputs<0>();
+			cable_ticks += section_time.stop_simple_measurement();
 
 			smp.join();
 
-			live_load.tally_update_patch(update_patch_time.stop_simple_measurement(), module_ticks, sync_ticks);
+			live_load.tally_update_patch(
+				update_patch_time.stop_simple_measurement(), module_ticks, sync_ticks, cable_ticks, midi_ticks);
 		}
 	}
 
@@ -493,12 +501,18 @@ public:
 		}
 		auto module_ticks = section_time.stop_simple_measurement();
 
+		section_time.start_simple_measurement();
 		process_outputs_samecore<0>();
 		process_outputs_diffcore<0>();
 		process_summed_inputs<0>();
-		update_midi_pulses();
+		auto cable_ticks = section_time.stop_simple_measurement();
 
-		live_load.tally_update_patch(update_patch_time.stop_simple_measurement(), module_ticks, 0);
+		section_time.start_simple_measurement();
+		update_midi_pulses();
+		auto midi_ticks = section_time.stop_simple_measurement();
+
+		live_load.tally_update_patch(
+			update_patch_time.stop_simple_measurement(), module_ticks, 0, cable_ticks, midi_ticks);
 	}
 
 	void trigger_reading_gui_elements() {
