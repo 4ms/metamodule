@@ -77,7 +77,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin0::high();
+		Debug::Pin0::high();
 
 		load_measure.start_simple_measurement();
 		{
@@ -109,6 +109,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		auto tm = load_measure.stop_simple_measurement();
 		auto duty = float(tm) / audio_period_;
 
+		if (patch_loader.is_playing())
+			player.live_load.finish_block(tm, audio_period_);
+
 		if (load_lpf == 0)
 			load_lpf = duty;
 		else
@@ -122,7 +125,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		} else
 			param_blocks[block].metaparams.audio_overruns = 0;
 
-		// Debug::Pin0::low();
+		Debug::Pin0::low();
 		update_audio_settings();
 	};
 
@@ -218,6 +221,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	}
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
+		frame_measure.start_simple_measurement();
+
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
 		auto &ext_out = audio_block.out_ext_codec[idx];
@@ -297,6 +302,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			for (auto [i, extoutchan] : countzip(ext_out.chan))
 				extoutchan = get_ext_audio_output(i);
 		}
+
+		player.live_load.tally_frame(frame_measure.stop_simple_measurement());
 
 		idx++;
 	}

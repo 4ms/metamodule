@@ -341,6 +341,11 @@ struct PatchPlayLoader {
 			start_audio();
 	}
 
+	// Live measurements of where the playing patch's audio time goes
+	LiveLoadMeter::Loads get_live_load() const {
+		return player_.live_load.get();
+	}
+
 	// The player works on its own copy of the patch data, so the load balance it
 	// calculated has to be copied back into the open patch in order to be saved.
 	void copy_load_balance_to_patch() {

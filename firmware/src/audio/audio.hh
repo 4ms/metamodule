@@ -85,6 +85,7 @@ private:
 
 	// Load measurement
 	mdrivlib::CycleCounter load_measure;
+	mdrivlib::CycleCounter frame_measure;
 	float load_lpf = 0.f;
 
 	// Start/Pause State

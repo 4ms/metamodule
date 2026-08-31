@@ -172,6 +172,35 @@ private:
 
 		if (!already_on_screen && playing)
 			lv_label_set_text_fmt(cpu_load_label, "Total CPU: %d%%", metaparams.audio_load);
+
+		auto live = patch_playloader.get_live_load();
+		bool show_live = playing && live.valid;
+
+		lv_show(live_load_label, show_live);
+
+		if (show_live) {
+			lv_label_set_text_fmt(live_load_label,
+								  "Cables: %u.%u%%  Mappings: %u.%u%%\nSync: %u.%u%%  Overhead: %u.%u%%",
+								  live.cables / 10u,
+								  live.cables % 10u,
+								  live.mappings / 10u,
+								  live.mappings % 10u,
+								  live.sync / 10u,
+								  live.sync % 10u,
+								  live.overhead / 10u,
+								  live.overhead % 10u);
+
+			if (patch && patch->has_load_balance(NumCores)) {
+				for (auto core = 0u; core < NumCores && core < live.core_modules.size(); core++) {
+					lv_label_set_text_fmt(core_labels[core],
+										  "Core %u: %u%% (now: %u.%u%%)",
+										  core + 1,
+										  core_load_percent(core),
+										  live.core_modules[core] / 10u,
+										  live.core_modules[core] % 10u);
+				}
+			}
+		}
 	}
 
 	// Scale ppm to current sample rate
@@ -305,6 +334,7 @@ private:
 			return;
 		auto page = static_cast<LoadBalancePanel *>(event->user_data);
 		page->show_module_info((unsigned)(uintptr_t)lv_obj_get_user_data(event->target));
+		lv_obj_scroll_to_y(page->panel, 0, LV_ANIM_ON);
 	}
 
 	// Moving off a module (onto another module or onto a button) clears the name:
@@ -438,6 +468,14 @@ private:
 			bar_rows[core] = row;
 		}
 
+		live_load_label = lv_label_create(panel);
+		lv_label_set_long_mode(live_load_label, LV_LABEL_LONG_WRAP);
+		lv_obj_set_width(live_load_label, lv_pct(100));
+		lv_obj_set_style_text_font(live_load_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+		lv_obj_set_style_text_color(live_load_label, Gui::grey_highlight, LV_PART_MAIN);
+		lv_label_set_text(live_load_label, "");
+		lv_hide(live_load_label);
+
 		module_name_label = lv_label_create(panel);
 		lv_label_set_long_mode(module_name_label, LV_LABEL_LONG_DOT);
 		lv_obj_set_width(module_name_label, lv_pct(100));
@@ -462,7 +500,7 @@ private:
 		lv_obj_set_style_bg_opa(button_row, 0, LV_PART_MAIN);
 		lv_obj_clear_flag(button_row, LV_OBJ_FLAG_SCROLLABLE);
 
-		recalc_button = create_button(button_row, "Re-calculate");
+		recalc_button = create_button(button_row, "Re-balance");
 		save_button = create_button(button_row, "Save");
 		undo_button = create_button(button_row, "Undo");
 		close_button = create_button(button_row, "Close");
@@ -497,6 +535,7 @@ private:
 	lv_obj_t *panel = nullptr;
 	lv_obj_t *no_balance_label = nullptr;
 	lv_obj_t *cpu_load_label = nullptr;
+	lv_obj_t *live_load_label = nullptr;
 	std::array<lv_obj_t *, NumCores> bar_conts{};
 	std::array<lv_obj_t *, NumCores> bar_rows{};
 	std::array<lv_obj_t *, NumCores> core_labels{};

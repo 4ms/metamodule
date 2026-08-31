@@ -1,5 +1,6 @@
 #pragma once
 #include "core_a7/smp_api.hh"
+#include "drivers/cycle_counter.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
 #include "gui/ui.hh"
@@ -16,6 +17,8 @@ struct AuxPlayer {
 	Ui &ui;
 
 	FixedVector<unsigned, 64> module_ids;
+
+	mdrivlib::CycleCounter module_time;
 
 	// MIDI sync instance
 	MidiSync midi_sync;
@@ -39,9 +42,11 @@ struct AuxPlayer {
 	}
 
 	void play_modules() {
+		module_time.start_simple_measurement();
 		for (auto module_i : module_ids) {
 			patch_player.step_module(module_i);
 		}
+		patch_player.live_load.tally_core2_modules(module_time.stop_simple_measurement());
 
 		patch_player.process_outputs_samecore<1>();
 		mdrivlib::SMPThread::signal_done();
