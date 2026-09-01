@@ -397,11 +397,26 @@ public:
 
 			smp.update_modules();
 
-			section_time.start_simple_measurement();
-			for (auto module_i : core_balancer.cores.parts[0]) {
-				step_module(module_i);
+			uint32_t module_ticks = 0;
+			if (live_load.detailed()) {
+				// Chained per-module timing: one counter read marks both the
+				// end of one module and the start of the next
+				section_time.start_measurement();
+				for (auto module_i : core_balancer.cores.parts[0]) {
+					step_module(module_i);
+
+					section_time.start_measurement();
+					auto ticks = section_time.get_last_period_raw();
+					live_load.tally_module(module_i, ticks);
+					module_ticks += ticks;
+				}
+			} else {
+				section_time.start_simple_measurement();
+				for (auto module_i : core_balancer.cores.parts[0]) {
+					step_module(module_i);
+				}
+				module_ticks = section_time.stop_simple_measurement();
 			}
-			auto module_ticks = section_time.stop_simple_measurement();
 
 			section_time.start_simple_measurement();
 			process_outputs_samecore<0>();
@@ -515,11 +530,26 @@ public:
 	void update_patch_singlecore() {
 		update_patch_time.start_simple_measurement();
 
-		section_time.start_simple_measurement();
-		for (size_t module_i = 1; module_i < num_modules; module_i++) {
-			step_module(module_i);
+		uint32_t module_ticks = 0;
+		if (live_load.detailed()) {
+			// Chained per-module timing: one counter read marks both the end of
+			// one module and the start of the next
+			section_time.start_measurement();
+			for (size_t module_i = 1; module_i < num_modules; module_i++) {
+				step_module(module_i);
+
+				section_time.start_measurement();
+				auto ticks = section_time.get_last_period_raw();
+				live_load.tally_module(module_i, ticks);
+				module_ticks += ticks;
+			}
+		} else {
+			section_time.start_simple_measurement();
+			for (size_t module_i = 1; module_i < num_modules; module_i++) {
+				step_module(module_i);
+			}
+			module_ticks = section_time.stop_simple_measurement();
 		}
-		auto module_ticks = section_time.stop_simple_measurement();
 
 		section_time.start_simple_measurement();
 		process_outputs_samecore<0>();

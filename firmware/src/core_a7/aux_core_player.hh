@@ -42,11 +42,28 @@ struct AuxPlayer {
 	}
 
 	void play_modules() {
-		module_time.start_simple_measurement();
-		for (auto module_i : module_ids) {
-			patch_player.step_module(module_i);
+		if (patch_player.live_load.detailed()) {
+			// Chained per-module timing: one counter read marks both the end of
+			// one module and the start of the next
+			uint32_t total_ticks = 0;
+			module_time.start_measurement();
+			for (auto module_i : module_ids) {
+				patch_player.step_module(module_i);
+
+				module_time.start_measurement();
+				auto ticks = module_time.get_last_period_raw();
+				patch_player.live_load.tally_module(module_i, ticks);
+				total_ticks += ticks;
+			}
+			patch_player.live_load.tally_core2_modules(total_ticks);
+
+		} else {
+			module_time.start_simple_measurement();
+			for (auto module_i : module_ids) {
+				patch_player.step_module(module_i);
+			}
+			patch_player.live_load.tally_core2_modules(module_time.stop_simple_measurement());
 		}
-		patch_player.live_load.tally_core2_modules(module_time.stop_simple_measurement());
 
 		patch_player.process_outputs_samecore<1>();
 		mdrivlib::SMPThread::signal_done();

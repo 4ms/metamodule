@@ -346,6 +346,12 @@ struct PatchPlayLoader {
 		return player_.live_load.get();
 	}
 
+	// Per-module live measurement costs a few percent CPU, so it only runs
+	// while a page displaying it is open
+	void set_live_load_detail(bool on) {
+		player_.live_load.set_detailed(on);
+	}
+
 	// The player works on its own copy of the patch data, so the load balance it
 	// calculated has to be copied back into the open patch in order to be saved.
 	void copy_load_balance_to_patch() {

@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/patch_conf.hh"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -11,6 +12,7 @@ namespace MetaModule
 class LiveLoadMeter {
 public:
 	static constexpr unsigned MaxCores = 2;
+	static constexpr unsigned MaxModules = MAX_MODULES_IN_PATCH;
 
 	// All loads are percent of the audio block period, in tenths of a percent
 	// (e.g. 123 => 12.3%)
@@ -21,6 +23,7 @@ public:
 		uint16_t cables;
 		std::array<uint16_t, MaxCores> core_modules;
 		uint16_t midi;
+		std::array<uint16_t, MaxModules> modules;
 		bool valid;
 	};
 
@@ -48,7 +51,26 @@ public:
 		core1_cable_ticks += cable_ticks;
 	}
 
-	void finish_block(uint32_t block_ticks, uint32_t period_ticks) {
+	// -- Either core, for the modules it runs --
+
+	// Per-module measurement costs ~2-3% on medium patches, so it only runs
+	// while something is displaying it (the Load Balance panel)
+	bool detailed() const {
+		return detailed_.load(std::memory_order_relaxed);
+	}
+
+	void set_detailed(bool on) {
+		detailed_.store(on, std::memory_order_relaxed);
+	}
+
+	// Free-running totals: each core adds time for its own modules, and
+	// finish_block() (on Core 1) samples the deltas
+	void tally_module(unsigned module_id, uint32_t ticks) {
+		if (module_id < MaxModules)
+			module_ticks_total[module_id].fetch_add(ticks, std::memory_order_relaxed);
+	}
+
+	void finish_block(uint32_t block_ticks, uint32_t period_ticks, unsigned num_modules) {
 		if (period_ticks == 0)
 			return;
 
@@ -79,15 +101,31 @@ public:
 			lpf[i] = published.valid ? lpf[i] + (frac - lpf[i]) * Alpha : frac;
 		}
 
-		published = Loads{
+		Loads new_loads{
 			.overhead = to_tenths(lpf[0]),
 			.mappings = to_tenths(lpf[1]),
 			.sync = to_tenths(lpf[2]),
 			.cables = to_tenths(lpf[3]),
 			.core_modules = {to_tenths(lpf[4]), to_tenths(lpf[5])},
 			.midi = to_tenths(lpf[6]),
+			.modules = {},
 			.valid = true,
 		};
+
+		// Per-module loads (module 0 is the hub, which isn't stepped)
+		if (detailed()) {
+			auto num = std::min(num_modules, MaxModules);
+			for (auto i = 1u; i < num; i++) {
+				auto total = module_ticks_total[i].load(std::memory_order_relaxed);
+				float frac = (float)(total - last_module_totals[i]) / (float)period_ticks;
+				last_module_totals[i] = total;
+
+				module_lpf[i] = published.valid ? module_lpf[i] + (frac - module_lpf[i]) * Alpha : frac;
+				new_loads.modules[i] = to_tenths(module_lpf[i]);
+			}
+		}
+
+		published = new_loads;
 	}
 
 	void reset() {
@@ -100,6 +138,11 @@ public:
 		midi_stream_ticks = 0;
 		last_core2_total = core2_module_ticks.load(std::memory_order_relaxed);
 		lpf.fill(0.f);
+
+		for (auto i = 0u; i < MaxModules; i++)
+			last_module_totals[i] = module_ticks_total[i].load(std::memory_order_relaxed);
+		module_lpf.fill(0.f);
+
 		published = Loads{};
 	}
 
@@ -135,8 +178,14 @@ private:
 	uint32_t midi_pulse_ticks = 0;
 	uint32_t midi_stream_ticks = 0;
 
+	std::atomic<bool> detailed_{false};
+
 	std::atomic<uint32_t> core2_module_ticks{0};
 	uint32_t last_core2_total = 0;
+
+	std::array<std::atomic<uint32_t>, MaxModules> module_ticks_total{};
+	std::array<uint32_t, MaxModules> last_module_totals{};
+	std::array<float, MaxModules> module_lpf{};
 
 	std::array<float, NumCategories> lpf{};
 

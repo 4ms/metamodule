@@ -112,7 +112,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		auto duty = float(tm) / audio_period_;
 
 		if (patch_loader.is_playing())
-			player.live_load.finish_block(tm, audio_period_);
+			player.live_load.finish_block(tm, audio_period_, player.num_modules);
 
 		if (load_lpf == 0)
 			load_lpf = duty;

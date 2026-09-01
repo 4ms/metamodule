@@ -59,6 +59,8 @@ struct LoadBalancePanel {
 		undo_loads = patch->module_loads;
 		did_change = false;
 
+		patch_playloader.set_live_load_detail(true);
+
 		refresh();
 
 		lv_show(panel);
@@ -69,6 +71,8 @@ struct LoadBalancePanel {
 	}
 
 	void hide() {
+		patch_playloader.set_live_load_detail(false);
+
 		lv_hide(panel);
 		if (parent_group)
 			lv_group_activate(parent_group);
@@ -203,6 +207,32 @@ private:
 										  (unsigned)std::round(live.core_modules[core] / 10.f));
 				}
 			}
+
+			update_module_load_label(live);
+		}
+	}
+
+	// Estimated load (measured when the balance was calculated) plus the live
+	// measurement, for the currently focused module
+	void update_module_load_label(LiveLoadMeter::Loads const &live) {
+		if (info_module_id == 0 || !patch || info_module_id >= patch->module_loads.size()) {
+			lv_label_set_text(module_load_label, "");
+			return;
+		}
+
+		auto ppm = load_ppm(info_module_id);
+
+		bool playing = patch_playloader.is_view_patch_playing();
+		if (playing && live.valid && info_module_id < live.modules.size()) {
+			auto tenths = live.modules[info_module_id];
+			lv_label_set_text_fmt(module_load_label,
+								  "%u.%u%% (now: %u.%u%%)",
+								  unsigned(ppm / 10000),
+								  unsigned((ppm / 1000) % 10),
+								  tenths / 10u,
+								  tenths % 10u);
+		} else {
+			lv_label_set_text_fmt(module_load_label, "%u.%u%%", unsigned(ppm / 10000), unsigned((ppm / 1000) % 10));
 		}
 	}
 
@@ -283,19 +313,15 @@ private:
 	// module_id of 0 (the hub) means "nothing selected"
 	void show_module_info(unsigned module_id) {
 		if (module_id == 0 || !patch || module_id >= patch->module_slugs.size()) {
+			info_module_id = 0;
 			lv_label_set_text(module_name_label, "");
 			lv_label_set_text(module_load_label, "");
 			return;
 		}
 
+		info_module_id = module_id;
 		lv_label_set_text(module_name_label, module_display_name(module_id).c_str());
-
-		if (module_id < patch->module_loads.size()) {
-			auto ppm = load_ppm(module_id);
-			lv_label_set_text_fmt(module_load_label, "%u.%u%%", unsigned(ppm / 10000), unsigned((ppm / 1000) % 10));
-		} else {
-			lv_label_set_text(module_load_label, "");
-		}
+		update_module_load_label(patch_playloader.get_live_load());
 	}
 
 	// e.g. "Ensemble Oscillator #1/4", or the user's alias if the module has one
@@ -531,6 +557,9 @@ private:
 
 	bool is_showing = false;
 	bool did_change = false;
+
+	// Module whose name/load are shown in the info labels (0 = none)
+	unsigned info_module_id = 0;
 
 	std::vector<uint16_t> undo_cores;
 	std::vector<uint32_t> undo_loads;
