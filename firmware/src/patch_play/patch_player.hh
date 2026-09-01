@@ -2,6 +2,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "conf/jack_sense_conf.hh"
 #include "conf/patch_conf.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "delay.hh"
@@ -132,6 +133,13 @@ private:
 	// For live_load measurements:
 	mdrivlib::CycleCounter update_patch_time;
 	mdrivlib::CycleCounter section_time;
+
+	// Cached facts about what the patch uses, so the audio stream can skip
+	// iterating jacks or knobs
+	uint32_t used_input_jacks_ = 0;
+	uint32_t used_output_jacks_ = 0;
+	bool has_knob_maps_ = false;
+	bool has_midi_pulse_conns = false;
 
 	float samplerate = 48000.f;
 
@@ -315,9 +323,19 @@ public:
 				core_balancer.print_times(cpu_times, pd.module_slugs);
 			}
 
+		} else if (num_modules == 2) {
+			// A single module doesn't get split, but still measure it so its load can be shown
+			if (!(mode == Balance::UseStored && pd.has_load_balance(MulticorePlayer::NumCores))) {
+				auto cpu_times = core_balancer.measure_modules(
+					modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
+
+				// Default arrangement: the module runs on core 0
+				store_load_balance(decltype(core_balancer)::Arrangement{}, cpu_times);
+			}
+			core_balancer.apply_stored_balance(pd.module_cores);
+
 		} else {
 			core_balancer.cores.parts[0].clear();
-			core_balancer.cores.parts[0].push_back(1);
 			core_balancer.cores.parts[1].clear();
 			pd.clear_load_balance();
 		}
@@ -366,13 +384,15 @@ public:
 
 	// Runs the patch
 	void update_patch() {
-		if (num_modules == 2) {
+		if (num_modules < 2)
+			return;
+
+		if (core_balancer.cores.parts[1].size() == 0) {
 			update_patch_singlecore();
 			return;
 		}
 
-		else if (num_modules > 2)
-		{
+		else {
 			update_patch_time.start_simple_measurement();
 
 			smp.update_modules();
@@ -571,6 +591,22 @@ public:
 		if (jack_id < NumInJacks)
 			panel_in_vals[jack_id] = val;
 		set_all_connected_jacks(in_conns[jack_id], val);
+	}
+
+	// Bitmask of panel input jacks that are mapped
+	// Bit positions match ParamsState::jack_senses
+	uint32_t used_input_jacks() const {
+		return used_input_jacks_;
+	}
+
+	// Bitmask of panel output jacks that are mapped (jack_senses bit positions)
+	uint32_t used_output_jacks() const {
+		return used_output_jacks_;
+	}
+
+	// True if any knobset maps a panel knob
+	bool has_knob_maps() const {
+		return has_knob_maps_;
 	}
 
 	void set_active_knob_set(unsigned num) {
@@ -807,31 +843,42 @@ private:
 	}
 
 	void update_midi_pulses() {
+		if (!has_midi_pulse_conns)
+			return;
+
 		for (auto &mp : midi_pulses) {
+			if (mp.conns.empty())
+				continue;
 			if (!mp.pulse.update()) {
 				set_all_connected_jacks(mp.conns, 0);
 			}
 		}
 
 		for (auto &mp : midi_divclk_pulses) {
+			if (mp.conns.empty())
+				continue;
 			if (!mp.pulse.update()) {
 				set_all_connected_jacks(mp.conns, 0);
 			}
 		}
 
 		for (auto &ret : midi_note_retrig) {
+			if (ret.conns.empty())
+				continue;
 			if (!ret.pulse.update())
 				set_all_connected_jacks(ret.conns, 0);
 		}
 
-		for (unsigned ch = 0; ch < MaxMidiPolyphony; ch++) {
-			if (!midi_poly_retrig.pulses[ch].update()) {
-				for (auto &jack : midi_poly_retrig.conns) {
-					if (ch < jack.poly_base)
-						continue;
-					unsigned idx = ch - jack.poly_base;
-					if (idx < CoreProcessor::MaxPolyChannels && jack.buf.voltages)
-						jack.buf.voltages[idx] = 0.f;
+		if (!midi_poly_retrig.conns.empty()) {
+			for (unsigned ch = 0; ch < MaxMidiPolyphony; ch++) {
+				if (!midi_poly_retrig.pulses[ch].update()) {
+					for (auto &jack : midi_poly_retrig.conns) {
+						if (ch < jack.poly_base)
+							continue;
+						unsigned idx = ch - jack.poly_base;
+						if (idx < CoreProcessor::MaxPolyChannels && jack.buf.voltages)
+							jack.buf.voltages[idx] = 0.f;
+					}
 				}
 			}
 		}
@@ -979,6 +1026,7 @@ public:
 		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
 		modules[out.module_id]->mark_output_patched(out.jack_id);
 		modules[in.module_id]->mark_input_patched(in.jack_id);
+		refresh_conn_flags();
 	}
 
 	void add_injack_mapping(uint16_t panel_jack_id, Jack jack) {
@@ -1000,6 +1048,8 @@ public:
 
 		if (panel_patched && jack.module_id < num_modules)
 			modules[jack.module_id]->mark_input_patched(jack.jack_id);
+
+		refresh_conn_flags();
 	}
 
 	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
@@ -1013,6 +1063,8 @@ public:
 			if (out_patched[panel_jack_id] && jack.module_id < num_modules)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
 		}
+
+		refresh_conn_flags();
 	}
 
 	void safe_unpatch_output(Jack jack) {
@@ -1077,6 +1129,8 @@ public:
 		pd.disconnect_injack(jack);
 
 		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
+
+		refresh_conn_flags();
 	}
 
 	void remove_injack_mappings(Jack jack) {
@@ -1089,6 +1143,8 @@ public:
 		}
 
 		pd.remove_injack_mappings(jack);
+
+		refresh_conn_flags();
 	}
 
 	void disconnect_outjack(Jack jack) {
@@ -1107,6 +1163,8 @@ public:
 		pd.disconnect_outjack(jack);
 
 		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
+
+		refresh_conn_flags();
 	}
 
 	void remove_outjack_mappings(Jack jack) {
@@ -1120,6 +1178,8 @@ public:
 		}
 
 		pd.remove_outjack_mappings(jack);
+
+		refresh_conn_flags();
 	}
 
 	void reset_module(uint16_t module_id, std::string_view data = "") {
@@ -1328,6 +1388,8 @@ public:
 				modules[i]->id = i;
 		}
 
+		refresh_conn_flags();
+
 		rebalance_modules();
 	}
 
@@ -1421,6 +1483,8 @@ public:
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
 		add_module_at_idx(new_slug, module_idx);
+
+		refresh_conn_flags();
 	}
 
 	// Jack patched/unpatched status
@@ -1658,6 +1722,57 @@ private:
 		midi_poly_vel_conns.clear();
 		midi_poly_aft_conns.clear();
 		midi_poly_retrig.conns.clear();
+
+		refresh_conn_flags();
+	}
+
+	void refresh_conn_flags() {
+		// Convert an in_conns[]/out_conns[] index to its jack_senses bit position.
+		// Bits 24 is unused in jack_senses, so it's a safe bit to set if an invalid panel idx is given
+		auto in_sense_bit = [](unsigned panel_in_idx) {
+			return main_jacksense_input_bit(panel_in_idx)
+				.value_or(AudioExpander::jacksense_input_bit(panel_in_idx).value_or(24));
+		};
+		auto out_sense_bit = [](unsigned panel_out_idx) {
+			return main_jacksense_output_bit(panel_out_idx)
+				.value_or(AudioExpander::jacksense_output_bit(panel_out_idx).value_or(24));
+		};
+
+		uint32_t in_mask = 0;
+		for (auto i = 0u; i < in_conns.size(); i++) {
+			if (!in_conns[i].empty())
+				in_mask |= (1u << in_sense_bit(i));
+		}
+
+		uint32_t out_mask = 0;
+		for (auto i = 0u; i < out_conns.size(); i++) {
+			if (!out_conns[i].empty())
+				out_mask |= (1u << out_sense_bit(i));
+
+			// Direct panel-in to panel-out passthroughs read panel_in_vals via
+			// out_conns and int_cables without an in_conns entry
+			for (auto const &pj : out_conns[i]) {
+				if (pj.module_id == 0 && pj.jack_id < NumInJacks)
+					in_mask |= (1u << in_sense_bit(pj.jack_id));
+			}
+		}
+		for (auto const &cable : pd.int_cables) {
+			if (cable.out.module_id == 0 && cable.out.jack_id < NumInJacks)
+				in_mask |= (1u << in_sense_bit(cable.out.jack_id));
+		}
+
+		used_input_jacks_ = in_mask;
+		used_output_jacks_ = out_mask;
+
+		has_knob_maps_ = std::ranges::any_of(knob_maps, [](auto const &param_set) {
+			return std::ranges::any_of(param_set, [](auto const &maps) { return !maps.empty(); });
+		});
+
+		auto any_conns = [](auto const &pulses) {
+			return std::ranges::any_of(pulses, [](auto const &mp) { return !mp.conns.empty(); });
+		};
+		has_midi_pulse_conns = any_conns(midi_pulses) || any_conns(midi_divclk_pulses) || any_conns(midi_note_retrig) ||
+							   !midi_poly_retrig.conns.empty();
 	}
 
 	// Returns the index in int_cables[] for a cable that has the given Jack as an input
@@ -1789,6 +1904,8 @@ public:
 					 cable.out.jack_id,
 					 panel_jack_id);
 		}
+
+		refresh_conn_flags();
 	}
 
 	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack) {
@@ -2004,6 +2121,7 @@ private:
 			CatchupParam f{};
 			f.mode = catchup_manager.get_default_mode();
 			knob_maps[knob_set][k.panel_knob_id].push_back({k, f});
+			refresh_conn_flags();
 		} else
 			pr_err("Cannot map panel knob id %u\n", k.panel_knob_id);
 	}
@@ -2015,6 +2133,7 @@ private:
 		if (k.panel_knob_id >= knob_maps[knob_set].size())
 			return;
 		std::erase_if(knob_maps[knob_set][k.panel_knob_id], [&k](auto m) { return (k.maps_to_same_as(m.map)); });
+		refresh_conn_flags();
 	}
 
 	void cache_midi_mapping(const MappedKnob &k) {

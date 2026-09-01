@@ -20,7 +20,7 @@ public:
 		uint16_t sync;
 		uint16_t cables;
 		std::array<uint16_t, MaxCores> core_modules;
-		uint16_t midi_pulse;
+		uint16_t midi;
 		bool valid;
 	};
 
@@ -29,6 +29,12 @@ public:
 	// Time to process one audio frame in AudioStream::process()
 	void tally_frame(uint32_t loop_ticks) {
 		frame_loop_ticks += loop_ticks;
+	}
+
+	// Time AudioStream::process() spends handling the MIDI stream (counted as
+	// MIDI, not Mappings, even though it happens inside the frame loop)
+	void tally_midi_stream(uint32_t midi_ticks) {
+		midi_stream_ticks += midi_ticks;
 	}
 
 	// Times from PatchPlayer::update_patch(): total time, time running this core's modules,
@@ -50,14 +56,13 @@ public:
 
 		std::array<uint32_t, NumCategories> ticks{
 			sat_sub(update_patch_ticks, core1_module_ticks + sync_ticks + core1_cable_ticks + midi_pulse_ticks) +
-				sat_sub(block_ticks, frame_loop_ticks),	   // Overhead
-			sat_sub(frame_loop_ticks, update_patch_ticks), // Mappings
-			sync_ticks,									   // Sync
-			core1_cable_ticks,
-			//sat_sub(update_patch_ticks, core1_module_ticks + sync_ticks), // Cables
+				sat_sub(block_ticks, frame_loop_ticks),							  // Overhead
+			sat_sub(frame_loop_ticks, update_patch_ticks + midi_stream_ticks),	  // Mappings
+			sync_ticks,															  // Sync
+			core1_cable_ticks,													  // Cables
 			core1_module_ticks,
 			core2_total - last_core2_total,
-			midi_pulse_ticks,
+			midi_pulse_ticks + midi_stream_ticks, // MIDI
 		};
 		last_core2_total = core2_total;
 
@@ -67,6 +72,7 @@ public:
 		sync_ticks = 0;
 		core1_cable_ticks = 0;
 		midi_pulse_ticks = 0;
+		midi_stream_ticks = 0;
 
 		for (auto i = 0u; i < NumCategories; i++) {
 			float frac = (float)ticks[i] / (float)period_ticks;
@@ -79,7 +85,7 @@ public:
 			.sync = to_tenths(lpf[2]),
 			.cables = to_tenths(lpf[3]),
 			.core_modules = {to_tenths(lpf[4]), to_tenths(lpf[5])},
-			.midi_pulse = to_tenths(lpf[6]),
+			.midi = to_tenths(lpf[6]),
 			.valid = true,
 		};
 	}
@@ -91,6 +97,7 @@ public:
 		sync_ticks = 0;
 		core1_cable_ticks = 0;
 		midi_pulse_ticks = 0;
+		midi_stream_ticks = 0;
 		last_core2_total = core2_module_ticks.load(std::memory_order_relaxed);
 		lpf.fill(0.f);
 		published = Loads{};
@@ -126,6 +133,7 @@ private:
 	uint32_t sync_ticks = 0;
 	uint32_t core1_cable_ticks = 0;
 	uint32_t midi_pulse_ticks = 0;
+	uint32_t midi_stream_ticks = 0;
 
 	std::atomic<uint32_t> core2_module_ticks{0};
 	uint32_t last_core2_total = 0;

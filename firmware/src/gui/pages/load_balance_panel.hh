@@ -99,9 +99,8 @@ private:
 		bool has_balance = patch && patch->has_load_balance(NumCores);
 
 		if (!has_balance) {
-			// A patch with only one module doesn't get split between the cores at all
-			if (patch && patch->module_slugs.size() <= 2)
-				lv_label_set_text(no_balance_label, "This patch is too small to need load balancing.");
+			if (patch && patch->module_slugs.size() <= 1)
+				lv_label_set_text(no_balance_label, "This patch has no modules.");
 			else
 				lv_label_set_text(no_balance_label, "Play this patch to calculate its load balance.");
 		}
@@ -142,8 +141,7 @@ private:
 		show_module_info(0);
 		update_cpu_load();
 
-		// Nothing to measure unless this patch is the one that's playing
-		lv_enable(recalc_button, patch_playloader.is_view_patch_playing());
+		lv_enable(recalc_button, patch_playloader.is_view_patch_playing() && patch && patch->module_slugs.size() > 2);
 		lv_enable(undo_button, did_change);
 		lv_enable(save_button, can_save());
 
@@ -175,27 +173,34 @@ private:
 		lv_show(live_load_label, show_live);
 
 		if (show_live) {
+			// Detailed view:
+			// lv_label_set_text_fmt(live_load_label,
+			// 					  "Cables: %u.%u%%  Mappings: %u.%u%% MIDI: %u.%u%%\nSync: %u.%u%%  Overhead: %u.%u%%",
+			// 					  live.cables / 10u,
+			// 					  live.cables % 10u,
+			// 					  live.mappings / 10u,
+			// 					  live.mappings % 10u,
+			// 					  live.midi / 10u,
+			// 					  live.midi % 10u,
+			// 					  live.sync / 10u,
+			// 					  live.sync % 10u,
+			// 					  live.overhead / 10u,
+			// 					  live.overhead % 10u);
 			lv_label_set_text_fmt(live_load_label,
-								  "Cables: %u.%u%%  Mappings: %u.%u%% MIDI: %u.%u%%\nSync: %u.%u%%  Overhead: %u.%u%%",
-								  live.cables / 10u,
-								  live.cables % 10u,
-								  live.mappings / 10u,
-								  live.mappings % 10u,
-								  live.midi_pulse / 10u,
-								  live.midi_pulse % 10u,
-								  live.sync / 10u,
-								  live.sync % 10u,
-								  live.overhead / 10u,
-								  live.overhead % 10u);
+								  "Cables: %u%%  Mappings: %u%% MIDI: %u%%\nSync: %u%%  Overhead: %u%%",
+								  (unsigned)std::round(live.cables / 10.f),
+								  (unsigned)std::round(live.mappings / 10.f),
+								  (unsigned)std::round(live.midi / 10.f),
+								  (unsigned)std::round(live.sync / 10.f),
+								  (unsigned)std::round(live.overhead / 10.f));
 
 			if (patch && patch->has_load_balance(NumCores)) {
 				for (auto core = 0u; core < NumCores && core < live.core_modules.size(); core++) {
 					lv_label_set_text_fmt(core_labels[core],
-										  "Core %u: %u%% (now: %u.%u%%)",
+										  "Core %u: %u%% (now: %u%%)",
 										  core + 1,
 										  core_load_percent(core),
-										  live.core_modules[core] / 10u,
-										  live.core_modules[core] % 10u);
+										  (unsigned)std::round(live.core_modules[core] / 10.f));
 				}
 			}
 		}
