@@ -60,6 +60,11 @@ public:
 	}
 
 	void set_detailed(bool on) {
+		// Seed the per-module smoothing from the first fully-measured blocks,
+		// so the values are usable right away instead of slowly ramping up
+		if (on && !detailed())
+			module_seed_blocks.store(2, std::memory_order_relaxed);
+
 		detailed_.store(on, std::memory_order_relaxed);
 	}
 
@@ -78,10 +83,10 @@ public:
 
 		std::array<uint32_t, NumCategories> ticks{
 			sat_sub(update_patch_ticks, core1_module_ticks + sync_ticks + core1_cable_ticks + midi_pulse_ticks) +
-				sat_sub(block_ticks, frame_loop_ticks),							  // Overhead
-			sat_sub(frame_loop_ticks, update_patch_ticks + midi_stream_ticks),	  // Mappings
-			sync_ticks,															  // Sync
-			core1_cable_ticks,													  // Cables
+				sat_sub(block_ticks, frame_loop_ticks),						   // Overhead
+			sat_sub(frame_loop_ticks, update_patch_ticks + midi_stream_ticks), // Mappings
+			sync_ticks,														   // Sync
+			core1_cable_ticks,												   // Cables
 			core1_module_ticks,
 			core2_total - last_core2_total,
 			midi_pulse_ticks + midi_stream_ticks, // MIDI
@@ -112,17 +117,22 @@ public:
 			.valid = true,
 		};
 
-		// Per-module loads (module 0 is the hub, which isn't stepped)
+		// Per-module loads
 		if (detailed()) {
+			auto seeding = module_seed_blocks.load(std::memory_order_relaxed);
+
 			auto num = std::min(num_modules, MaxModules);
 			for (auto i = 1u; i < num; i++) {
 				auto total = module_ticks_total[i].load(std::memory_order_relaxed);
 				float frac = (float)(total - last_module_totals[i]) / (float)period_ticks;
 				last_module_totals[i] = total;
 
-				module_lpf[i] = published.valid ? module_lpf[i] + (frac - module_lpf[i]) * Alpha : frac;
+				module_lpf[i] = (published.valid && !seeding) ? module_lpf[i] + (frac - module_lpf[i]) * Alpha : frac;
 				new_loads.modules[i] = to_tenths(module_lpf[i]);
 			}
+
+			if (seeding)
+				module_seed_blocks.store(seeding - 1, std::memory_order_relaxed);
 		}
 
 		published = new_loads;
@@ -179,6 +189,7 @@ private:
 	uint32_t midi_stream_ticks = 0;
 
 	std::atomic<bool> detailed_{false};
+	std::atomic<uint32_t> module_seed_blocks{0};
 
 	std::atomic<uint32_t> core2_module_ticks{0};
 	uint32_t last_core2_total = 0;

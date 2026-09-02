@@ -60,6 +60,7 @@ struct LoadBalancePanel {
 		did_change = false;
 
 		patch_playloader.set_live_load_detail(true);
+		last_box_update_tick = lv_tick_get();
 
 		refresh();
 
@@ -84,8 +85,17 @@ struct LoadBalancePanel {
 	}
 
 	void update() {
-		if (is_showing)
-			update_cpu_load();
+		if (!is_showing)
+			return;
+
+		update_cpu_load();
+
+		// Re-scale the module boxes to the live loads, slowly so they don't jitter
+		auto now = lv_tick_get();
+		if (now - last_box_update_tick >= BoxUpdatePeriodMs) {
+			last_box_update_tick = now;
+			update_box_widths();
+		}
 	}
 
 private:
@@ -93,11 +103,12 @@ private:
 		for (auto core = 0u; core < NumCores; core++) {
 			auto row = bar_rows[core];
 
-			// Remove the boxes from the previous refresh
+			// Remove the boxes and markers from the previous refresh
 			for (auto *box : boxes[core])
 				lv_group_remove_obj(box);
 			lv_obj_clean(row);
 			boxes[core].clear();
+			full_core_markers[core] = nullptr;
 		}
 
 		bool has_balance = patch && patch->has_load_balance(NumCores);
@@ -126,14 +137,14 @@ private:
 				}
 			}
 
-			// Put a marker at 100% if any bar is over 100%
-			if (bar_scale_ppm > OneCorePpm) {
-				for (auto core = 0u; core < NumCores; core++)
-					add_full_core_marker(core);
+			// Marker at the 100% point, shown when a bar is scaled to over 100%
+			for (auto core = 0u; core < NumCores; core++) {
+				add_full_core_marker(core);
+				lv_show(full_core_markers[core], bar_scale_ppm > OneCorePpm);
 			}
 
 			for (auto core = 0u; core < NumCores; core++)
-				lv_label_set_text_fmt(core_labels[core], "Core %u: %u%%", core + 1, core_load_percent(core));
+				lv_label_set_text_fmt(core_labels[core], "Core %u: %u%%", core + 1, core_load_ppm(core) / 10000);
 		}
 
 		// put the buttons at the end of the group
@@ -177,19 +188,6 @@ private:
 		lv_show(live_load_label, show_live);
 
 		if (show_live) {
-			// Detailed view:
-			// lv_label_set_text_fmt(live_load_label,
-			// 					  "Cables: %u.%u%%  Mappings: %u.%u%% MIDI: %u.%u%%\nSync: %u.%u%%  Overhead: %u.%u%%",
-			// 					  live.cables / 10u,
-			// 					  live.cables % 10u,
-			// 					  live.mappings / 10u,
-			// 					  live.mappings % 10u,
-			// 					  live.midi / 10u,
-			// 					  live.midi % 10u,
-			// 					  live.sync / 10u,
-			// 					  live.sync % 10u,
-			// 					  live.overhead / 10u,
-			// 					  live.overhead % 10u);
 			lv_label_set_text_fmt(live_load_label,
 								  "Cables: %u%%  Mappings: %u%% MIDI: %u%%\nSync: %u%%  Overhead: %u%%",
 								  (unsigned)std::round(live.cables / 10.f),
@@ -201,9 +199,8 @@ private:
 			if (patch && patch->has_load_balance(NumCores)) {
 				for (auto core = 0u; core < NumCores && core < live.core_modules.size(); core++) {
 					lv_label_set_text_fmt(core_labels[core],
-										  "Core %u: %u%% (now: %u%%)",
+										  "Core %u: %u%%",
 										  core + 1,
-										  core_load_percent(core),
 										  (unsigned)std::round(live.core_modules[core] / 10.f));
 				}
 			}
@@ -220,20 +217,14 @@ private:
 			return;
 		}
 
-		auto ppm = load_ppm(info_module_id);
-
 		bool playing = patch_playloader.is_view_patch_playing();
+		auto load = 0u;
 		if (playing && live.valid && info_module_id < live.modules.size()) {
-			auto tenths = live.modules[info_module_id];
-			lv_label_set_text_fmt(module_load_label,
-								  "%u.%u%% (now: %u.%u%%)",
-								  unsigned(ppm / 10000),
-								  unsigned((ppm / 1000) % 10),
-								  tenths / 10u,
-								  tenths % 10u);
+			load = (unsigned)std::round(live.modules[info_module_id] / 10.f);
 		} else {
-			lv_label_set_text_fmt(module_load_label, "%u.%u%%", unsigned(ppm / 10000), unsigned((ppm / 1000) % 10));
+			load = (unsigned)std::round(load_ppm(info_module_id) / 10000.f);
 		}
+		lv_label_set_text_fmt(module_load_label, "%u%%", load);
 	}
 
 	// Scale ppm to current sample rate
@@ -259,10 +250,6 @@ private:
 		return sum;
 	}
 
-	unsigned core_load_percent(unsigned core) const {
-		return core_load_ppm(core) / 10000;
-	}
-
 	// Where 100% of a core falls, as a percentage of the bar's width
 	lv_coord_t full_core_pct() const {
 		return (lv_coord_t)((uint64_t)OneCorePpm * 100 / bar_scale_ppm);
@@ -280,13 +267,55 @@ private:
 		lv_obj_set_style_pad_all(marker, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_color(marker, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(marker, LV_OPA_COVER, LV_PART_MAIN);
+
+		full_core_markers[core] = marker;
+	}
+
+	void set_box_width(lv_obj_t *box, uint32_t ppm) {
+		auto width_pct = (lv_coord_t)std::min<uint64_t>((uint64_t)ppm * 100 / bar_scale_ppm, 100);
+		lv_obj_set_width(box, lv_pct(std::max<lv_coord_t>(width_pct, 1)));
+	}
+
+	// Re-scale the module boxes and the 100% markers to the live measurements
+	void update_box_widths() {
+		if (!patch || !patch->has_load_balance(NumCores) || !patch_playloader.is_view_patch_playing())
+			return;
+
+		auto live = patch_playloader.get_live_load();
+		if (!live.valid)
+			return;
+
+		// Live loads are tenths of a percent; boxes are scaled in ppm
+		auto live_ppm = [&live](unsigned module_id) -> uint32_t {
+			return module_id < live.modules.size() ? live.modules[module_id] * 1000u : 0;
+		};
+
+		// Scale bars to fit screen if over 100%
+		bar_scale_ppm = OneCorePpm;
+		for (auto core = 0u; core < NumCores; core++) {
+			uint32_t sum = 0;
+			for (auto module_id = 1u; module_id < patch->module_cores.size(); module_id++) {
+				if (patch->module_cores[module_id] == core)
+					sum += live_ppm(module_id);
+			}
+			bar_scale_ppm = std::max(bar_scale_ppm, sum);
+		}
+
+		for (auto core = 0u; core < NumCores; core++) {
+			for (auto *box : boxes[core])
+				set_box_width(box, live_ppm((unsigned)(uintptr_t)lv_obj_get_user_data(box)));
+
+			if (auto *marker = full_core_markers[core]) {
+				lv_show(marker, bar_scale_ppm > OneCorePpm);
+				lv_obj_set_x(marker, lv_pct(full_core_pct()));
+			}
+		}
 	}
 
 	void add_box(unsigned core, unsigned module_id, uint32_t ppm) {
 		auto box = lv_obj_create(bar_rows[core]);
 
-		auto width_pct = (lv_coord_t)std::min<uint64_t>((uint64_t)ppm * 100 / bar_scale_ppm, 100);
-		lv_obj_set_width(box, lv_pct(std::max<lv_coord_t>(width_pct, 1)));
+		set_box_width(box, ppm);
 		lv_obj_set_height(box, lv_pct(100));
 		lv_obj_set_style_radius(box, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_width(box, 0, LV_PART_MAIN);
@@ -561,6 +590,10 @@ private:
 	// Module whose name/load are shown in the info labels (0 = none)
 	unsigned info_module_id = 0;
 
+	// The boxes re-scale to live loads at a slow rate, so they don't jitter
+	static constexpr uint32_t BoxUpdatePeriodMs = 200;
+	uint32_t last_box_update_tick = 0;
+
 	std::vector<uint16_t> undo_cores;
 	std::vector<uint32_t> undo_loads;
 
@@ -571,6 +604,7 @@ private:
 	std::array<lv_obj_t *, NumCores> bar_conts{};
 	std::array<lv_obj_t *, NumCores> bar_rows{};
 	std::array<lv_obj_t *, NumCores> core_labels{};
+	std::array<lv_obj_t *, NumCores> full_core_markers{};
 	std::array<std::vector<lv_obj_t *>, NumCores> boxes{};
 	lv_obj_t *module_name_label = nullptr;
 	lv_obj_t *module_load_label = nullptr;
