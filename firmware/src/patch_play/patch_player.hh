@@ -128,7 +128,8 @@ private:
 	CatchupManager catchup_manager;
 
 	MulticorePlayer smp;
-	Balancer<MulticorePlayer::NumCores, MAX_MODULES_IN_PATCH> core_balancer;
+	using CoreBalancer = Balancer<MulticorePlayer::NumCores, MAX_MODULES_IN_PATCH>;
+	CoreBalancer core_balancer;
 
 	// For live_load measurements:
 	mdrivlib::CycleCounter update_patch_time;
@@ -330,7 +331,7 @@ public:
 					modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
 
 				// Default arrangement: the module runs on core 0
-				store_load_balance(decltype(core_balancer)::Arrangement{}, cpu_times);
+				store_load_balance(CoreBalancer::Arrangement{}, cpu_times);
 			}
 			core_balancer.apply_stored_balance(pd.module_cores);
 
@@ -370,6 +371,43 @@ public:
 
 	std::vector<uint32_t> const &get_module_loads() const {
 		return pd.module_loads;
+	}
+
+	// Distinct candidate core assignments for the rebalance trials
+	struct BalanceCandidates {
+		std::vector<std::vector<uint16_t>> cores;
+		std::vector<uint32_t> loads_ppm;
+	};
+
+	BalanceCandidates make_balance_candidates(unsigned num_seeds) {
+		BalanceCandidates result;
+
+		if (num_modules <= 2)
+			return result;
+
+		auto cpu_times =
+			core_balancer.measure_modules(modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
+
+		result.loads_ppm.assign(num_modules, 0);
+		for (auto module_id = 1u; module_id < num_modules; module_id++)
+			result.loads_ppm[module_id] = core_balancer.ticks_to_ppm(cpu_times[module_id - 1]);
+
+		if (pd.has_load_balance(MulticorePlayer::NumCores))
+			result.cores.push_back(pd.module_cores);
+
+		for (auto seed = 0u; seed < num_seeds; seed++) {
+			auto arr = CoreBalancer::make_arrangement(cpu_times, seed == 0 ? 0 : seed * 2654435761u);
+
+			std::vector<uint16_t> cores(num_modules, 0);
+			for (auto module_id = 1u; module_id < num_modules; module_id++)
+				cores[module_id] = arr.core_of[module_id];
+
+			// Skip duplicates: different seeds often produce the same arrangement
+			if (std::ranges::find(result.cores, cores) == result.cores.end())
+				result.cores.push_back(cores);
+		}
+
+		return result;
 	}
 
 	// Applies a load balance the user chose, without re-measuring anything

@@ -72,6 +72,11 @@ struct LoadBalancePanel {
 	}
 
 	void hide() {
+		if (trials_running) {
+			patch_playloader.abort_rebalance_trials();
+			trials_running = false;
+		}
+
 		patch_playloader.set_live_load_detail(false);
 
 		lv_hide(panel);
@@ -88,11 +93,26 @@ struct LoadBalancePanel {
 		if (!is_showing)
 			return;
 
+		if (trials_running) {
+			patch_playloader.update_rebalance_trials(lv_tick_get());
+
+			if (patch_playloader.rebalance_trials_active()) {
+				lv_label_set_text_fmt(module_name_label,
+									  "Trying arrangement %u of %u...",
+									  patch_playloader.rebalance_trials_current(),
+									  patch_playloader.rebalance_trials_total());
+			} else {
+				trials_running = false;
+				refresh();
+				lv_group_focus_obj(recalc_button);
+			}
+		}
+
 		update_cpu_load();
 
 		// Re-scale the module boxes to the live loads, slowly so they don't jitter
 		auto now = lv_tick_get();
-		if (now - last_box_update_tick >= BoxUpdatePeriodMs) {
+		if (!trials_running && now - last_box_update_tick >= BoxUpdatePeriodMs) {
 			last_box_update_tick = now;
 			update_box_widths();
 		}
@@ -416,12 +436,13 @@ private:
 		if (!page->patch_playloader.is_view_patch_playing())
 			return;
 
-		page->patch_playloader.recalculate_load_balance();
+		// Try several arrangements live and keep the best
+		page->patch_playloader.start_rebalance_trials(lv_tick_get());
+		page->trials_running = true;
 		page->patches.mark_view_patch_modified();
 		page->did_change = true;
 
-		page->refresh();
-		lv_group_focus_obj(page->recalc_button);
+		lv_enable(page->recalc_button, false);
 	}
 
 	static void undo_cb(lv_event_t *event) {
@@ -598,6 +619,9 @@ private:
 	// The boxes re-scale to live loads at a slow rate, so they don't jitter
 	static constexpr uint32_t BoxUpdatePeriodMs = 200;
 	uint32_t last_box_update_tick = 0;
+
+	// Rebalance trials in progress (started by the Re-calculate button)
+	bool trials_running = false;
 
 	std::vector<uint16_t> undo_cores;
 	std::vector<uint32_t> undo_loads;

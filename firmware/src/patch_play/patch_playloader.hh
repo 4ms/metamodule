@@ -323,6 +323,130 @@ struct PatchPlayLoader {
 			start_audio();
 	}
 
+	// -- Rebalance trials --
+	// Try several candidate arrangements live and keep the one with the
+	// lowest measured audio load. The trials run as a state machine advanced by
+	// update_rebalance_trials() from the GUI loop, so the GUI stays responsive.
+
+	// Measures the modules (audio briefly stopped), generates candidates, and
+	// starts playing the first one. Only meaningful while the patch is playing.
+	void start_rebalance_trials(uint32_t now_ms) {
+		if (trials_.state != RebalanceTrials::State::Idle)
+			return;
+
+		if (!player_.is_loaded || !is_playing())
+			return;
+
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		auto candidates = player_.make_balance_candidates(NumRebalanceSeeds);
+
+		if (candidates.cores.empty()) {
+			start_audio();
+			return;
+		}
+
+		trials_.cores = std::move(candidates.cores);
+		trials_.loads = std::move(candidates.loads_ppm);
+		trials_.cur = 0;
+		trials_.best_idx = 0;
+		trials_.best_ticks_per_block = 0xFFFFFFFF;
+
+		player_.set_load_balance(trials_.cores[0], trials_.loads);
+		start_audio();
+
+		if (trials_.cores.size() == 1) {
+			// Nothing to compare
+			copy_load_balance_to_patch();
+			trials_.state = RebalanceTrials::State::Idle;
+		} else {
+			trials_.t0 = now_ms;
+			trials_.state = RebalanceTrials::State::Warmup;
+		}
+	}
+
+	bool rebalance_trials_active() const {
+		return trials_.state != RebalanceTrials::State::Idle;
+	}
+
+	// For displaying progress: which candidate is being tried, out of how many
+	unsigned rebalance_trials_current() const {
+		return trials_.cur + 1;
+	}
+
+	unsigned rebalance_trials_total() const {
+		return trials_.cores.size();
+	}
+
+	void update_rebalance_trials(uint32_t now_ms) {
+		using State = RebalanceTrials::State;
+
+		if (trials_.state == State::Idle)
+			return;
+
+		if (!is_playing()) {
+			// The patch stopped out from under us: keep whatever is applied
+			copy_load_balance_to_patch();
+			trials_.state = State::Idle;
+			return;
+		}
+
+		if (trials_.state == State::Warmup) {
+			if (now_ms - trials_.t0 >= TrialWarmupMs) {
+				auto totals = player_.live_load.block_totals();
+				trials_.ticks0 = totals.ticks;
+				trials_.blocks0 = totals.blocks;
+				trials_.t0 = now_ms;
+				trials_.state = State::Measure;
+			}
+
+		} else if (trials_.state == State::Measure) {
+			if (now_ms - trials_.t0 >= TrialMeasureMs) {
+				auto totals = player_.live_load.block_totals();
+				auto blocks = totals.blocks - trials_.blocks0;
+				if (blocks == 0) {
+					// No audio ran yet? Extend the window
+					trials_.t0 = now_ms;
+					return;
+				}
+
+				auto avg = (totals.ticks - trials_.ticks0) / blocks;
+				if (avg < trials_.best_ticks_per_block) {
+					trials_.best_ticks_per_block = avg;
+					trials_.best_idx = trials_.cur;
+				}
+
+				trials_.cur++;
+				if (trials_.cur < trials_.cores.size()) {
+					apply_trial_candidate(trials_.cur);
+					trials_.t0 = now_ms;
+					trials_.state = State::Warmup;
+				} else {
+					// Keep the winner (it may already be playing)
+					if (trials_.best_idx != trials_.cores.size() - 1)
+						apply_trial_candidate(trials_.best_idx);
+
+					copy_load_balance_to_patch();
+					trials_.state = State::Idle;
+				}
+			}
+		}
+	}
+
+	// E.g. the panel is closing mid-trials: keep the best candidate found so far
+	void abort_rebalance_trials() {
+		if (trials_.state == RebalanceTrials::State::Idle)
+			return;
+
+		if (player_.is_loaded && is_playing())
+			apply_trial_candidate(trials_.best_ticks_per_block == 0xFFFFFFFF ? 0 : trials_.best_idx);
+
+		copy_load_balance_to_patch();
+		trials_.state = RebalanceTrials::State::Idle;
+	}
+
 	// Puts back a load balance the user had before (Undo), without re-measuring
 	void apply_load_balance(std::vector<uint16_t> const &module_cores, std::vector<uint32_t> const &module_loads) {
 		if (!player_.is_loaded)
@@ -643,6 +767,35 @@ private:
 		}
 
 		return {true, ""};
+	}
+
+	// Rebalance trials state (see start_rebalance_trials)
+	static constexpr unsigned NumRebalanceSeeds = 5;
+	static constexpr uint32_t TrialWarmupMs = 100;
+	static constexpr uint32_t TrialMeasureMs = 150;
+
+	struct RebalanceTrials {
+		enum class State { Idle, Warmup, Measure };
+		State state = State::Idle;
+
+		std::vector<std::vector<uint16_t>> cores;
+		std::vector<uint32_t> loads;
+		unsigned cur = 0;
+		unsigned best_idx = 0;
+		uint32_t best_ticks_per_block = 0xFFFFFFFF;
+		uint32_t t0 = 0;
+		uint32_t ticks0 = 0;
+		uint32_t blocks0 = 0;
+	};
+	RebalanceTrials trials_;
+
+	void apply_trial_candidate(unsigned idx) {
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		player_.set_load_balance(trials_.cores[idx], trials_.loads);
+		start_audio();
 	}
 
 	PatchPlayer &player_;
