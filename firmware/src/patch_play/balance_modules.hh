@@ -34,7 +34,7 @@ struct Balancer {
 	static constexpr uint32_t CounterHz = 24'000'000;
 
 	// Core 2 needs extra time to respond to its interrupt (units of 1/CounterHz)
-	static constexpr unsigned SecondCoreBias = 1000;
+	static constexpr unsigned SecondCoreBias = 10000;
 
 	std::vector<unsigned>
 	measure_modules(std::span<std::unique_ptr<CoreProcessor>> modules, unsigned num_modules, auto run) {
