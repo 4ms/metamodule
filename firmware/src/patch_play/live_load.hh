@@ -158,7 +158,10 @@ public:
 		published = new_loads;
 	}
 
-	void reset() {
+	// Forget tallies accumulated since the last block, without disturbing the
+	// smoothed values. Used when patch processing ran outside the audio context
+	// (overrun retry), which would otherwise pollute the next block's numbers.
+	void discard_block() {
 		frame_loop_ticks = 0;
 		update_patch_ticks = 0;
 		core1_module_ticks = 0;
@@ -169,13 +172,21 @@ public:
 		sync2_ticks = 0;
 		last_core2_total = core2_module_ticks.load(std::memory_order_relaxed);
 		last_core2_cables = core2_cable_ticks.load(std::memory_order_relaxed);
-		lpf.fill(0.f);
 
 		for (auto i = 0u; i < MaxModules; i++)
 			last_module_totals[i] = module_ticks_total[i].load(std::memory_order_relaxed);
-		module_lpf.fill(0.f);
+	}
 
+	void reset() {
+		discard_block();
+		lpf.fill(0.f);
+		module_lpf.fill(0.f);
 		published = Loads{};
+	}
+
+	// The audio callback found the block took too long
+	void tally_overrun() {
+		overruns_total.fetch_add(1, std::memory_order_relaxed);
 	}
 
 	// -- AuxPlayer (Core 2) --
@@ -195,14 +206,18 @@ public:
 	}
 
 	// Running totals over all blocks: sampling these before and after a trial
-	// period gives the average time per block, for comparing arrangements
+	// period gives the average time per block and the overrun count, for
+	// comparing arrangements
 	struct BlockTotals {
 		uint32_t ticks;
 		uint32_t blocks;
+		uint32_t overruns;
 	};
 
 	BlockTotals block_totals() const {
-		return {block_ticks_total.load(std::memory_order_relaxed), blocks_total.load(std::memory_order_relaxed)};
+		return {block_ticks_total.load(std::memory_order_relaxed),
+				blocks_total.load(std::memory_order_relaxed),
+				overruns_total.load(std::memory_order_relaxed)};
 	}
 
 private:
@@ -237,6 +252,7 @@ private:
 
 	std::atomic<uint32_t> block_ticks_total{0};
 	std::atomic<uint32_t> blocks_total{0};
+	std::atomic<uint32_t> overruns_total{0};
 
 	std::array<std::atomic<uint32_t>, MaxModules> module_ticks_total{};
 	std::array<uint32_t, MaxModules> last_module_totals{};

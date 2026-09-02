@@ -187,7 +187,9 @@ private:
 		show_module_info(0);
 		update_cpu_load();
 
-		lv_enable(recalc_button, patch_playloader.is_view_patch_playing() && patch && patch->module_slugs.size() > 2);
+		// Enabled even when the patch stopped (e.g. from overloads): re-balancing
+		// starts it playing again
+		lv_enable(recalc_button, patch_playloader.is_view_patch_loaded() && patch && patch->module_slugs.size() > 2);
 		lv_enable(undo_button, did_change);
 		lv_enable(save_button, can_save());
 
@@ -533,7 +535,7 @@ private:
 			return;
 		auto page = static_cast<LoadBalancePanel *>(event->user_data);
 
-		if (!page->patch_playloader.is_view_patch_playing())
+		if (!page->patch_playloader.is_view_patch_loaded())
 			return;
 
 		// Try several arrangements live and keep the best

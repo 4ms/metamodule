@@ -91,7 +91,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 			cur_block = block;
 
-			if (!overrun_handler.is_retrying()) {
+			bool did_process = !overrun_handler.is_retrying();
+			if (did_process) {
 
 				handle_fade_inout();
 
@@ -107,25 +108,31 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			// 3.5us w/both MIDIs
 			sync_params.write_sync(param_state, param_blocks[block].metaparams);
 			param_state.reset_change_flags();
+
+			auto tm = load_measure.stop_simple_measurement();
+			auto duty = float(tm) / audio_period_;
+
+			// Blocks where processing was skipped (overrun retry) would dilute
+			// the measurements with near-zero samples, so they don't count
+			if (did_process) {
+				if (patch_loader.is_playing())
+					player.live_load.finish_block(tm, audio_period_, player.num_modules);
+
+				if (load_lpf == 0)
+					load_lpf = duty;
+				else
+					load_lpf += (duty - load_lpf) * 0.05f;
+
+				param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
+			}
+
+			if (duty > 0.985f) {
+				player.live_load.tally_overrun();
+				overrun_handler.start_retrying();
+				param_blocks[block].metaparams.audio_overruns = 10;
+			} else
+				param_blocks[block].metaparams.audio_overruns = 0;
 		}
-		auto tm = load_measure.stop_simple_measurement();
-		auto duty = float(tm) / audio_period_;
-
-		if (patch_loader.is_playing())
-			player.live_load.finish_block(tm, audio_period_, player.num_modules);
-
-		if (load_lpf == 0)
-			load_lpf = duty;
-		else
-			load_lpf += (duty - load_lpf) * 0.05f;
-
-		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
-
-		if (duty > 0.985f) {
-			overrun_handler.start_retrying();
-			param_blocks[block].metaparams.audio_overruns = 10;
-		} else
-			param_blocks[block].metaparams.audio_overruns = 0;
 
 		Debug::Pin0::low();
 		update_audio_settings();
@@ -156,6 +163,10 @@ void AudioStream::handle_overruns() {
 			// resume here? so that gui stays active in case step() takes a really long time
 			// codec_.resume_irq();
 			step();
+
+			// step() ran the patch outside the audio context: drop its tallies so
+			// they don't pollute the next measured block
+			player.live_load.discard_block();
 		} else {
 			patch_loader.notify_audio_overrun();
 			// codec_.resume_irq();

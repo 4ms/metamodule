@@ -165,6 +165,11 @@ struct PatchPlayLoader {
 		return is_playing() && patches_.get_view_patch() == patches_.get_playing_patch();
 	}
 
+	// true even if audio is paused
+	bool is_view_patch_loaded() {
+		return player_.is_loaded && patches_.get_view_patch() == patches_.get_playing_patch();
+	}
+
 	bool did_audio_overrun() {
 		return audio_overrun_;
 	}
@@ -326,15 +331,12 @@ struct PatchPlayLoader {
 	// -- Rebalance trials --
 	// Try several candidate arrangements live and keep the one with the
 	// lowest measured audio load. The trials run as a state machine advanced by
-	// update_rebalance_trials() from the GUI loop, so the GUI stays responsive.
-
-	// Measures the modules (audio briefly stopped), generates candidates, and
-	// starts playing the first one. Only meaningful while the patch is playing.
+	// update_rebalance_trials() from the GUI loop
 	void start_rebalance_trials(uint32_t now_ms) {
 		if (trials_.state != RebalanceTrials::State::Idle)
 			return;
 
-		if (!player_.is_loaded || !is_playing())
+		if (!player_.is_loaded)
 			return;
 
 		stop_audio();
@@ -353,6 +355,7 @@ struct PatchPlayLoader {
 		trials_.cur = 0;
 		trials_.best_idx = 0;
 		trials_.best_ticks_per_block = 0xFFFFFFFF;
+		trials_.best_overruns = 0xFFFFFFFF;
 
 		player_.set_load_balance(trials_.cores[0], trials_.loads);
 		start_audio();
@@ -386,10 +389,15 @@ struct PatchPlayLoader {
 		if (trials_.state == State::Idle)
 			return;
 
-		if (!is_playing()) {
-			// The patch stopped out from under us: keep whatever is applied
-			copy_load_balance_to_patch();
+		if (!player_.is_loaded) {
+			// The patch was unloaded out from under us: give up
 			trials_.state = State::Idle;
+			return;
+		}
+
+		if (!is_playing()) {
+			// This candidate overloaded badly enough to stop the patch => worst possible score
+			advance_rebalance_trials(now_ms, 0xFFFFFFFF, 0xFFFFFFFF);
 			return;
 		}
 
@@ -398,6 +406,7 @@ struct PatchPlayLoader {
 				auto totals = player_.live_load.block_totals();
 				trials_.ticks0 = totals.ticks;
 				trials_.blocks0 = totals.blocks;
+				trials_.overruns0 = totals.overruns;
 				trials_.t0 = now_ms;
 				trials_.state = State::Measure;
 			}
@@ -412,36 +421,20 @@ struct PatchPlayLoader {
 					return;
 				}
 
-				auto avg = (totals.ticks - trials_.ticks0) / blocks;
-				if (avg < trials_.best_ticks_per_block) {
-					trials_.best_ticks_per_block = avg;
-					trials_.best_idx = trials_.cur;
-				}
-
-				trials_.cur++;
-				if (trials_.cur < trials_.cores.size()) {
-					apply_trial_candidate(trials_.cur);
-					trials_.t0 = now_ms;
-					trials_.state = State::Warmup;
-				} else {
-					// Keep the winner (it may already be playing)
-					if (trials_.best_idx != trials_.cores.size() - 1)
-						apply_trial_candidate(trials_.best_idx);
-
-					copy_load_balance_to_patch();
-					trials_.state = State::Idle;
-				}
+				advance_rebalance_trials(
+					now_ms, (totals.ticks - trials_.ticks0) / blocks, totals.overruns - trials_.overruns0);
 			}
 		}
 	}
 
-	// E.g. the panel is closing mid-trials: keep the best candidate found so far
+	// E.g. the panel is closing mid-trials: keep the best candidate found so far.
+	// Restarts audio even if the current candidate had stopped the patch.
 	void abort_rebalance_trials() {
 		if (trials_.state == RebalanceTrials::State::Idle)
 			return;
 
-		if (player_.is_loaded && is_playing())
-			apply_trial_candidate(trials_.best_ticks_per_block == 0xFFFFFFFF ? 0 : trials_.best_idx);
+		if (player_.is_loaded)
+			apply_trial_candidate(trials_.best_overruns == 0xFFFFFFFF ? 0 : trials_.best_idx);
 
 		copy_load_balance_to_patch();
 		trials_.state = RebalanceTrials::State::Idle;
@@ -783,9 +776,11 @@ private:
 		unsigned cur = 0;
 		unsigned best_idx = 0;
 		uint32_t best_ticks_per_block = 0xFFFFFFFF;
+		uint32_t best_overruns = 0xFFFFFFFF;
 		uint32_t t0 = 0;
 		uint32_t ticks0 = 0;
 		uint32_t blocks0 = 0;
+		uint32_t overruns0 = 0;
 	};
 	RebalanceTrials trials_;
 
@@ -796,6 +791,33 @@ private:
 
 		player_.set_load_balance(trials_.cores[idx], trials_.loads);
 		start_audio();
+	}
+
+	// Scores the candidate that was just tried, then starts the next one or
+	// finishes with the winner. Fewest overruns wins; average time per block
+	// breaks ties.
+	void advance_rebalance_trials(uint32_t now_ms, uint32_t avg_ticks, uint32_t overruns) {
+		if (overruns < trials_.best_overruns ||
+			(overruns == trials_.best_overruns && avg_ticks < trials_.best_ticks_per_block))
+		{
+			trials_.best_overruns = overruns;
+			trials_.best_ticks_per_block = avg_ticks;
+			trials_.best_idx = trials_.cur;
+		}
+
+		trials_.cur++;
+		if (trials_.cur < trials_.cores.size()) {
+			apply_trial_candidate(trials_.cur);
+			trials_.t0 = now_ms;
+			trials_.state = RebalanceTrials::State::Warmup;
+		} else {
+			// Keep the winner (it may already be playing)
+			if (trials_.best_idx != trials_.cores.size() - 1)
+				apply_trial_candidate(trials_.best_idx);
+
+			copy_load_balance_to_patch();
+			trials_.state = RebalanceTrials::State::Idle;
+		}
 	}
 
 	PatchPlayer &player_;
