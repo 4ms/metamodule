@@ -188,12 +188,17 @@ private:
 		lv_show(live_load_label, show_live);
 
 		if (show_live) {
+			// Cables and Sync show core 1 + core 2's part: for Cables that's cable
+			// processing done on core 2, for Sync it's the second join (waiting
+			// for core 2's cables)
 			lv_label_set_text_fmt(live_load_label,
-								  "Cables: %u%%  Mappings: %u%% MIDI: %u%%\nSync: %u%%  Overhead: %u%%",
+								  "Cables: %u%%+%u%%  Mappings: %u%% MIDI: %u%%\nSync: %u%%+%u%%  Overhead: %u%%",
 								  (unsigned)std::round(live.cables / 10.f),
+								  (unsigned)std::round(live.core2_cables / 10.f),
 								  (unsigned)std::round(live.mappings / 10.f),
 								  (unsigned)std::round(live.midi / 10.f),
 								  (unsigned)std::round(live.sync / 10.f),
+								  (unsigned)std::round(live.sync2 / 10.f),
 								  (unsigned)std::round(live.overhead / 10.f));
 
 			if (patch && patch->has_load_balance(NumCores)) {

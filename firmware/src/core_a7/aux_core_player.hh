@@ -65,13 +65,18 @@ struct AuxPlayer {
 			patch_player.live_load.tally_core2_modules(module_time.stop_simple_measurement());
 		}
 
+		module_time.start_simple_measurement();
 		patch_player.process_outputs_samecore<1>();
+		patch_player.live_load.tally_core2_cables(module_time.stop_simple_measurement());
+
 		mdrivlib::SMPThread::signal_done();
 	}
 
 	void process_cables() {
+		module_time.start_simple_measurement();
 		patch_player.process_outputs_diffcore<1>();
 		patch_player.process_summed_inputs<1>();
+		patch_player.live_load.tally_core2_cables(module_time.stop_simple_measurement());
 
 		mdrivlib::SMPThread::signal_done();
 	}

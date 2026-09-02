@@ -23,6 +23,8 @@ public:
 		uint16_t cables;
 		std::array<uint16_t, MaxCores> core_modules;
 		uint16_t midi;
+		uint16_t sync2;		   // Core 1 waiting at the second join (for Core 2's cables)
+		uint16_t core2_cables; // Core 2's cable processing (parallel work, not Core 1 time)
 		std::array<uint16_t, MaxModules> modules;
 		bool valid;
 	};
@@ -41,14 +43,20 @@ public:
 	}
 
 	// Times from PatchPlayer::update_patch(): total time, time running this core's modules,
-	// and time spent waiting for the other core to finish its modules
-	void tally_update_patch(
-		uint32_t total_ticks, uint32_t module_ticks, uint32_t wait_ticks, uint32_t cable_ticks, uint32_t midi_ticks) {
+	// time spent waiting for the other core to finish its modules (first join),
+	// and time spent waiting for the other core's cables (second join)
+	void tally_update_patch(uint32_t total_ticks,
+							uint32_t module_ticks,
+							uint32_t wait_ticks,
+							uint32_t cable_ticks,
+							uint32_t midi_ticks,
+							uint32_t wait2_ticks) {
 		update_patch_ticks += total_ticks;
 		core1_module_ticks += module_ticks;
 		sync_ticks += wait_ticks;
 		midi_pulse_ticks += midi_ticks;
 		core1_cable_ticks += cable_ticks;
+		sync2_ticks += wait2_ticks;
 	}
 
 	// -- Either core, for the modules it runs --
@@ -79,10 +87,16 @@ public:
 		if (period_ticks == 0)
 			return;
 
+		// Running totals used by rebalance trials to compare arrangements
+		block_ticks_total.fetch_add(block_ticks, std::memory_order_relaxed);
+		blocks_total.fetch_add(1, std::memory_order_relaxed);
+
 		auto core2_total = core2_module_ticks.load(std::memory_order_relaxed);
+		auto core2_cables_now = core2_cable_ticks.load(std::memory_order_relaxed);
 
 		std::array<uint32_t, NumCategories> ticks{
-			sat_sub(update_patch_ticks, core1_module_ticks + sync_ticks + core1_cable_ticks + midi_pulse_ticks) +
+			sat_sub(update_patch_ticks,
+					core1_module_ticks + sync_ticks + core1_cable_ticks + midi_pulse_ticks + sync2_ticks) +
 				sat_sub(block_ticks, frame_loop_ticks),						   // Overhead
 			sat_sub(frame_loop_ticks, update_patch_ticks + midi_stream_ticks), // Mappings
 			sync_ticks,														   // Sync
@@ -90,8 +104,11 @@ public:
 			core1_module_ticks,
 			core2_total - last_core2_total,
 			midi_pulse_ticks + midi_stream_ticks, // MIDI
+			sync2_ticks,
+			core2_cables_now - last_core2_cables,
 		};
 		last_core2_total = core2_total;
+		last_core2_cables = core2_cables_now;
 
 		frame_loop_ticks = 0;
 		update_patch_ticks = 0;
@@ -100,6 +117,7 @@ public:
 		core1_cable_ticks = 0;
 		midi_pulse_ticks = 0;
 		midi_stream_ticks = 0;
+		sync2_ticks = 0;
 
 		for (auto i = 0u; i < NumCategories; i++) {
 			float frac = (float)ticks[i] / (float)period_ticks;
@@ -113,6 +131,8 @@ public:
 			.cables = to_tenths(lpf[3]),
 			.core_modules = {to_tenths(lpf[4]), to_tenths(lpf[5])},
 			.midi = to_tenths(lpf[6]),
+			.sync2 = to_tenths(lpf[7]),
+			.core2_cables = to_tenths(lpf[8]),
 			.modules = {},
 			.valid = true,
 		};
@@ -146,7 +166,9 @@ public:
 		core1_cable_ticks = 0;
 		midi_pulse_ticks = 0;
 		midi_stream_ticks = 0;
+		sync2_ticks = 0;
 		last_core2_total = core2_module_ticks.load(std::memory_order_relaxed);
+		last_core2_cables = core2_cable_ticks.load(std::memory_order_relaxed);
 		lpf.fill(0.f);
 
 		for (auto i = 0u; i < MaxModules; i++)
@@ -162,14 +184,29 @@ public:
 		core2_module_ticks.fetch_add(module_ticks, std::memory_order_relaxed);
 	}
 
+	void tally_core2_cables(uint32_t cable_ticks) {
+		core2_cable_ticks.fetch_add(cable_ticks, std::memory_order_relaxed);
+	}
+
 	// -- GUI --
 
 	Loads get() const {
 		return published;
 	}
 
+	// Running totals over all blocks: sampling these before and after a trial
+	// period gives the average time per block, for comparing arrangements
+	struct BlockTotals {
+		uint32_t ticks;
+		uint32_t blocks;
+	};
+
+	BlockTotals block_totals() const {
+		return {block_ticks_total.load(std::memory_order_relaxed), blocks_total.load(std::memory_order_relaxed)};
+	}
+
 private:
-	static constexpr unsigned NumCategories = 7;
+	static constexpr unsigned NumCategories = 9;
 	static constexpr float Alpha = 0.05f;
 
 	static uint32_t sat_sub(uint32_t a, uint32_t b) {
@@ -187,12 +224,19 @@ private:
 	uint32_t core1_cable_ticks = 0;
 	uint32_t midi_pulse_ticks = 0;
 	uint32_t midi_stream_ticks = 0;
+	uint32_t sync2_ticks = 0;
 
 	std::atomic<bool> detailed_{false};
 	std::atomic<uint32_t> module_seed_blocks{0};
 
 	std::atomic<uint32_t> core2_module_ticks{0};
 	uint32_t last_core2_total = 0;
+
+	std::atomic<uint32_t> core2_cable_ticks{0};
+	uint32_t last_core2_cables = 0;
+
+	std::atomic<uint32_t> block_ticks_total{0};
+	std::atomic<uint32_t> blocks_total{0};
 
 	std::array<std::atomic<uint32_t>, MaxModules> module_ticks_total{};
 	std::array<uint32_t, MaxModules> last_module_totals{};

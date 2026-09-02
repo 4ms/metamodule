@@ -438,10 +438,16 @@ public:
 			process_summed_inputs<0>();
 			cable_ticks += section_time.stop_simple_measurement();
 
+			section_time.start_simple_measurement();
 			smp.join();
+			auto sync2_ticks = section_time.stop_simple_measurement();
 
-			live_load.tally_update_patch(
-				update_patch_time.stop_simple_measurement(), module_ticks, sync_ticks, cable_ticks, midi_ticks);
+			live_load.tally_update_patch(update_patch_time.stop_simple_measurement(),
+										 module_ticks,
+										 sync_ticks,
+										 cable_ticks,
+										 midi_ticks,
+										 sync2_ticks);
 		}
 	}
 
@@ -562,7 +568,7 @@ public:
 		auto midi_ticks = section_time.stop_simple_measurement();
 
 		live_load.tally_update_patch(
-			update_patch_time.stop_simple_measurement(), module_ticks, 0, cable_ticks, midi_ticks);
+			update_patch_time.stop_simple_measurement(), module_ticks, 0, cable_ticks, midi_ticks, 0);
 	}
 
 	void trigger_reading_gui_elements() {

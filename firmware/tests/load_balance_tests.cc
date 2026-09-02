@@ -18,7 +18,7 @@ TEST_CASE("Plain balance splits the load evenly") {
 	// times are indexed by (module id - 1).
 	// They need to be much larger than the bias given to the second core,
 	// which is what a real measurement looks like.
-	auto times = std::array{10000u, 9000u, 8000u, 7000u, 6000u, 5000u};
+	auto times = std::array{100000u, 90000u, 80000u, 70000u, 60000u, 50000u};
 
 	auto arr = Balancer::make_arrangement(times, 0);
 
