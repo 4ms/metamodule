@@ -24,13 +24,15 @@ struct PatchDescriptionPanel {
 						  PatchSuggestedAudioSettings &settings,
 						  PatchModQueue &patch_mod_queue,
 						  MetaParams const &metaparams,
-						  ModuleDisplaySettings const &view_settings)
+						  ModuleDisplaySettings const &view_settings,
+						  PageList &page_list,
+						  PageArguments &page_args)
 		: group(lv_group_create())
 		, patch_playloader{patch_playloader}
 		, patches{patches}
 		, settings{settings}
 		, patch_mod_queue{patch_mod_queue}
-		, load_balance_panel{patch_playloader, patches, metaparams, view_settings} {
+		, load_balance_panel{patch_playloader, patches, metaparams, view_settings, page_list, page_args} {
 
 		// Description
 		desc_cont = lv_obj_get_parent(ui_Description);
@@ -232,9 +234,6 @@ private:
 		lv_obj_set_style_pad_ver(suggest_bs_drop, 6, LV_STATE_DEFAULT);
 		lv_obj_set_width(suggest_bs_drop, 90);
 
-		load_balance_button = create_button(ui_DescriptionPanel, "CPU Load Balancing");
-		lv_obj_add_flag(load_balance_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
-
 		auto button_spacer = lv_obj_create(ui_DescriptionPanel);
 		lv_obj_set_size(button_spacer, lv_pct(100), 6);
 		lv_obj_add_flag(button_spacer, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
@@ -243,8 +242,11 @@ private:
 		lv_obj_set_style_border_width(button_spacer, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_all(button_spacer, 0, LV_PART_MAIN);
 
+		load_balance_button = create_button(ui_DescriptionPanel, "CPU Load");
+		lv_obj_add_flag(load_balance_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+
 		close_button = create_button(ui_DescriptionPanel, "Close");
-		lv_obj_add_flag(close_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_clear_flag(close_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 		apply_settings_button = create_button(ui_DescriptionPanel, "Apply Settings");
 	}

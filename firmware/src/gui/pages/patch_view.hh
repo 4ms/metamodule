@@ -35,7 +35,9 @@ struct PatchViewPage : PageBase {
 					 settings.patch_suggested_audio,
 					 patch_mod_queue,
 					 metaparams,
-					 settings.patch_view}
+					 settings.patch_view,
+					 page_list,
+					 args}
 		, file_menu{patch_playloader,
 					patch_storage,
 					patches,

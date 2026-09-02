@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -24,12 +25,16 @@ struct LoadBalancePanel {
 	LoadBalancePanel(PatchPlayLoader &patch_playloader,
 					 OpenPatchManager &patches,
 					 MetaParams const &metaparams,
-					 ModuleDisplaySettings const &view_settings)
+					 ModuleDisplaySettings const &view_settings,
+					 PageList &page_list,
+					 PageArguments &page_args)
 		: group(lv_group_create())
 		, patch_playloader{patch_playloader}
 		, patches{patches}
 		, metaparams{metaparams}
-		, view_settings{view_settings} {
+		, view_settings{view_settings}
+		, page_list{page_list}
+		, page_args{page_args} {
 
 		create_objects();
 
@@ -126,9 +131,12 @@ private:
 			// Remove the boxes and markers from the previous refresh
 			for (auto *box : boxes[core])
 				lv_group_remove_obj(box);
+			if (cable_boxes[core])
+				lv_group_remove_obj(cable_boxes[core]);
 			lv_obj_clean(row);
 			boxes[core].clear();
 			full_core_markers[core] = nullptr;
+			cable_boxes[core] = nullptr;
 		}
 
 		bool has_balance = patch && patch->has_load_balance(NumCores);
@@ -155,6 +163,9 @@ private:
 					if (patch->module_cores[module_id] == core)
 						add_box(core, module_id, load_ppm(module_id));
 				}
+
+				// Each core's cable-processing time, sized by the live measurements
+				add_cable_box(core);
 			}
 
 			// Marker at the 100% point, shown when a bar is scaled to over 100%
@@ -191,6 +202,11 @@ private:
 			for (auto *box : core_boxes)
 				lv_obj_clear_state(box, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
 		}
+
+		for (auto *box : cable_boxes) {
+			if (box)
+				lv_obj_clear_state(box, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
+		}
 	}
 
 	void update_cpu_load() {
@@ -208,13 +224,10 @@ private:
 		lv_show(live_load_label, show_live);
 
 		if (show_live) {
-			// Cables and Sync show core 1 + core 2's part: for Cables that's cable
-			// processing done on core 2, for Sync it's the second join (waiting
-			// for core 2's cables)
+			// Cable loads show as grey boxes in the bars (highlight one to see its %).
+			// Sync shows core 1's waits at the first + second join
 			lv_label_set_text_fmt(live_load_label,
-								  "Cables: %u%%+%u%%  Mappings: %u%% MIDI: %u%%\nSync: %u%%+%u%%  Overhead: %u%%",
-								  (unsigned)std::round(live.cables / 10.f),
-								  (unsigned)std::round(live.core2_cables / 10.f),
+								  "Mappings: %u%% MIDI: %u%%\nSync: %u%%+%u%%  Overhead: %u%%",
 								  (unsigned)std::round(live.mappings / 10.f),
 								  (unsigned)std::round(live.midi / 10.f),
 								  (unsigned)std::round(live.sync / 10.f),
@@ -235,8 +248,19 @@ private:
 	}
 
 	// Estimated load (measured when the balance was calculated) plus the live
-	// measurement, for the currently focused module
+	// measurement, for the currently focused module or cable box
 	void update_module_load_label(LiveLoadMeter::Loads const &live) {
+		if (info_cables_core >= 0) {
+			bool playing = patch_playloader.is_view_patch_playing();
+			if (playing && live.valid) {
+				auto tenths = info_cables_core == 0 ? live.cables : live.core2_cables;
+				lv_label_set_text_fmt(module_load_label, "%u.%u%%", tenths / 10u, tenths % 10u);
+			} else {
+				lv_label_set_text(module_load_label, "");
+			}
+			return;
+		}
+
 		if (info_module_id == 0 || !patch || info_module_id >= patch->module_loads.size()) {
 			lv_label_set_text(module_load_label, "");
 			return;
@@ -285,7 +309,7 @@ private:
 		auto marker = lv_obj_create(bar_rows[core]);
 		lv_obj_add_flag(marker, LV_OBJ_FLAG_FLOATING);
 		lv_obj_clear_flag(marker, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_set_size(marker, 2, lv_pct(100));
+		lv_obj_set_size(marker, 3, lv_pct(100));
 		lv_obj_set_x(marker, lv_pct(full_core_pct()));
 		lv_obj_set_style_radius(marker, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_width(marker, 0, LV_PART_MAIN);
@@ -299,6 +323,36 @@ private:
 	void set_box_width(lv_obj_t *box, uint32_t ppm) {
 		auto width_pct = (lv_coord_t)std::min<uint64_t>((uint64_t)ppm * 100 / bar_scale_ppm, 100);
 		lv_obj_set_width(box, lv_pct(std::max<lv_coord_t>(width_pct, 1)));
+	}
+
+	// A box at the end of the bar showing the core's cable-processing time.
+	void add_cable_box(unsigned core) {
+		auto box = lv_obj_create(bar_rows[core]);
+
+		lv_obj_set_width(box, lv_pct(1));
+		lv_obj_set_height(box, lv_pct(100));
+		lv_obj_set_style_radius(box, 0, LV_PART_MAIN);
+		lv_obj_set_style_border_width(box, 0, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(box, 0, LV_PART_MAIN);
+		lv_obj_set_style_bg_opa(box, LV_OPA_COVER, LV_PART_MAIN);
+		lv_obj_set_style_bg_color(box, lv_color_hex(0x888888), LV_PART_MAIN);
+		lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
+
+		for (auto state : {LV_STATE_FOCUSED, LV_STATE_FOCUS_KEY}) {
+			lv_obj_set_style_outline_color(box, Gui::orange_highlight, LV_PART_MAIN | state);
+			lv_obj_set_style_outline_opa(box, LV_OPA_COVER, LV_PART_MAIN | state);
+			lv_obj_set_style_outline_width(box, 2, LV_PART_MAIN | state);
+			lv_obj_set_style_outline_pad(box, 0, LV_PART_MAIN | state);
+		}
+
+		lv_obj_set_user_data(box, (void *)(uintptr_t)core);
+		lv_obj_add_event_cb(box, cable_box_focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(box, box_defocus_cb, LV_EVENT_DEFOCUSED, this);
+
+		lv_group_add_obj(group, box);
+		lv_hide(box);
+
+		cable_boxes[core] = box;
 	}
 
 	// Re-scale the module boxes and the 100% markers to the live measurements
@@ -315,10 +369,15 @@ private:
 			return module_id < live.modules.size() ? live.modules[module_id] * 1000u : 0;
 		};
 
+		std::array<uint32_t, NumCores> cable_ppm{};
+		cable_ppm[0] = live.cables * 1000u;
+		if constexpr (NumCores > 1)
+			cable_ppm[1] = live.core2_cables * 1000u;
+
 		// Scale bars to fit screen if over 100%
 		bar_scale_ppm = OneCorePpm;
 		for (auto core = 0u; core < NumCores; core++) {
-			uint32_t sum = 0;
+			uint32_t sum = cable_ppm[core];
 			for (auto module_id = 1u; module_id < patch->module_cores.size(); module_id++) {
 				if (patch->module_cores[module_id] == core)
 					sum += live_ppm(module_id);
@@ -329,6 +388,11 @@ private:
 		for (auto core = 0u; core < NumCores; core++) {
 			for (auto *box : boxes[core])
 				set_box_width(box, live_ppm((unsigned)(uintptr_t)lv_obj_get_user_data(box)));
+
+			if (auto *cable_box = cable_boxes[core]) {
+				set_box_width(cable_box, cable_ppm[core]);
+				lv_show(cable_box, true);
+			}
 
 			if (auto *marker = full_core_markers[core]) {
 				lv_show(marker, bar_scale_ppm > OneCorePpm);
@@ -346,7 +410,7 @@ private:
 		lv_obj_set_style_border_width(box, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_all(box, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(box, LV_OPA_COVER, LV_PART_MAIN);
-		lv_obj_set_style_bg_color(box, Gui::knob_palette[module_id % Gui::knob_palette.size()], LV_PART_MAIN);
+		lv_obj_set_style_bg_color(box, Gui::knob_palette[module_id % 6], LV_PART_MAIN);
 		lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
 
 		for (auto state : {LV_STATE_FOCUSED, LV_STATE_FOCUS_KEY}) {
@@ -359,6 +423,7 @@ private:
 		lv_obj_set_user_data(box, (void *)(uintptr_t)module_id);
 		lv_obj_add_event_cb(box, box_focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(box, box_defocus_cb, LV_EVENT_DEFOCUSED, this);
+		lv_obj_add_event_cb(box, box_click_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, box);
 		boxes[core].push_back(box);
@@ -366,6 +431,8 @@ private:
 
 	// module_id of 0 (the hub) means "nothing selected"
 	void show_module_info(unsigned module_id) {
+		info_cables_core = -1;
+
 		if (module_id == 0 || !patch || module_id >= patch->module_slugs.size()) {
 			info_module_id = 0;
 			lv_label_set_text(module_name_label, "");
@@ -375,6 +442,14 @@ private:
 
 		info_module_id = module_id;
 		lv_label_set_text(module_name_label, module_display_name(module_id).c_str());
+		update_module_load_label(patch_playloader.get_live_load());
+	}
+
+	void show_cables_info(unsigned core) {
+		info_module_id = 0;
+		info_cables_core = (int)core;
+
+		lv_label_set_text_fmt(module_name_label, "Cables (Core %u)", core + 1);
 		update_module_load_label(patch_playloader.get_live_load());
 	}
 
@@ -426,6 +501,31 @@ private:
 		if (!event || !event->user_data)
 			return;
 		static_cast<LoadBalancePanel *>(event->user_data)->show_module_info(0);
+	}
+
+	static void cable_box_focus_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<LoadBalancePanel *>(event->user_data);
+		page->show_cables_info((unsigned)(uintptr_t)lv_obj_get_user_data(event->target));
+	}
+
+	// Clicking a module's box jumps to it in ModuleView. Changing pages closes
+	// this panel (PatchViewPage::blur() -> desc_panel.hide() -> this->hide())
+	static void box_click_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<LoadBalancePanel *>(event->user_data);
+
+		auto module_id = (unsigned)(uintptr_t)lv_obj_get_user_data(event->target);
+		if (module_id == 0 || !page->patch || module_id >= page->patch->module_slugs.size())
+			return;
+
+		page->page_args.module_id = module_id;
+		page->page_args.element_indices = {};
+		page->page_args.detail_mode = false;
+		page->page_list.update_state(PageId::PatchView, page->page_args);
+		page->page_list.request_new_page(PageId::ModuleView, page->page_args);
 	}
 
 	static void recalc_cb(lv_event_t *event) {
@@ -616,6 +716,9 @@ private:
 	// Module whose name/load are shown in the info labels (0 = none)
 	unsigned info_module_id = 0;
 
+	// Core whose cable box is focused (-1 = none)
+	int info_cables_core = -1;
+
 	// The boxes re-scale to live loads at a slow rate, so they don't jitter
 	static constexpr uint32_t BoxUpdatePeriodMs = 200;
 	uint32_t last_box_update_tick = 0;
@@ -634,6 +737,7 @@ private:
 	std::array<lv_obj_t *, NumCores> bar_rows{};
 	std::array<lv_obj_t *, NumCores> core_labels{};
 	std::array<lv_obj_t *, NumCores> full_core_markers{};
+	std::array<lv_obj_t *, NumCores> cable_boxes{};
 	std::array<std::vector<lv_obj_t *>, NumCores> boxes{};
 	lv_obj_t *module_name_label = nullptr;
 	lv_obj_t *module_load_label = nullptr;
@@ -646,6 +750,8 @@ private:
 	OpenPatchManager &patches;
 	MetaParams const &metaparams;
 	ModuleDisplaySettings const &view_settings;
+	PageList &page_list;
+	PageArguments &page_args;
 };
 
 } // namespace MetaModule
