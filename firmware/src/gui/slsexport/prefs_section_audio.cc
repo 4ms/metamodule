@@ -43,6 +43,15 @@ void PrefsSectionAudio::create(lv_obj_t *parent) {
 		create_prefs_labeled_dropdown(parent, "Overrun retries:", "None\n4\n8\n16\n32\n64\n128\n256");
 	overrun_retries = lv_obj_get_child(audio_retry_cont, 1);
 	lv_obj_set_width(overrun_retries, 75);
+
+	// Auto Re-balance (options must match AudioSettings::ValidAutoRebalance)
+	auto auto_rebalance_cont =
+		create_prefs_labeled_dropdown(parent, "Auto Re-balance:", "Off\nAfter Overload\nEvery Patch Load");
+
+	auto_rebalance_dropdown = lv_obj_get_child(auto_rebalance_cont, 1);
+	lv_obj_set_width(auto_rebalance_dropdown, 140);
+
+	prefs_cont_justify_multiline(auto_rebalance_cont);
 }
 
 } // namespace MetaModule

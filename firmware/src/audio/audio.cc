@@ -208,6 +208,14 @@ void AudioStream::handle_fade_inout() {
 
 	} else if (patch_loader.should_fade_up_audio()) {
 		patch_loader.notify_audio_not_muted();
+
+		if (patch_loader.audio_silenced()) {
+			// Rebalance trials: process and measure normally but keep the outputs silent
+			output_fade_amt = 0.f;
+			output_fade_delta = 0.f;
+			return;
+		}
+
 		output_fade_delta = 1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt >= 1.f) {
 			output_fade_amt = 1.f;
@@ -584,7 +592,7 @@ void AudioStream::set_block_spans() {
 }
 
 void AudioStream::update_audio_settings() {
-	auto [sample_rate, block_size, max_retries] = patch_loader.get_audio_settings();
+	auto [sample_rate, block_size, max_retries, _] = patch_loader.get_audio_settings();
 
 	overrun_handler.set_max_retry(max_retries);
 

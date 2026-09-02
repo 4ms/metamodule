@@ -99,8 +99,6 @@ struct LoadBalancePanel {
 			return;
 
 		if (trials_running) {
-			patch_playloader.update_rebalance_trials(lv_tick_get());
-
 			if (patch_playloader.rebalance_trials_active()) {
 				lv_label_set_text_fmt(module_name_label,
 									  "Trying arrangement %u of %u...",

@@ -46,6 +46,12 @@ static void write(ryml::NodeRef *n, AudioSettings const &s) {
 	n->append_child() << ryml::key("sample_rate") << s.sample_rate;
 	n->append_child() << ryml::key("block_size") << s.block_size;
 	n->append_child() << ryml::key("max_overrun_retries") << s.max_overrun_retries;
+
+	using enum AudioSettings::AutoRebalance;
+	ryml::csubstr auto_rebalance_string = s.auto_rebalance == Off		? "Off" :
+										  s.auto_rebalance == EveryLoad ? "EveryLoad" :
+																		  "AfterOverload";
+	n->append_child() << ryml::key("auto_rebalance") << auto_rebalance_string;
 }
 
 static void write(ryml::NodeRef *n, PluginPreloadSettings const &s) {

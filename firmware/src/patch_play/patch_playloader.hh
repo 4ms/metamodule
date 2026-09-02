@@ -157,6 +157,12 @@ struct PatchPlayLoader {
 		return audio_is_muted_;
 	}
 
+	// While set, audio runs and is measured normally but the outputs are held
+	// silent (so the rebalance trials aren't heard)
+	bool audio_silenced() const {
+		return silent_audio_.load(std::memory_order_relaxed);
+	}
+
 	bool is_playing() {
 		return !audio_is_muted_ && player_.is_loaded;
 	}
@@ -352,18 +358,28 @@ struct PatchPlayLoader {
 
 		trials_.cores = std::move(candidates.cores);
 		trials_.loads = std::move(candidates.loads_ppm);
+		trials_.for_patch = patches_.get_playing_patch();
 		trials_.cur = 0;
 		trials_.best_idx = 0;
 		trials_.best_ticks_per_block = 0xFFFFFFFF;
 		trials_.best_overruns = 0xFFFFFFFF;
 
+		if (trials_.cores.size() > 1) {
+			// Hold the outputs silent for the whole trial run
+			silent_audio_.store(true, std::memory_order_relaxed);
+		}
+
 		player_.set_load_balance(trials_.cores[0], trials_.loads);
 		start_audio();
+
+		// A pre-existing overload-stop is being handled by these trials; from here
+		// on the flag means "the current candidate overloaded"
+		stopped_because_of_overrun_ = false;
 
 		if (trials_.cores.size() == 1) {
 			// Nothing to compare
 			copy_load_balance_to_patch();
-			trials_.state = RebalanceTrials::State::Idle;
+			finish_rebalance_trials();
 		} else {
 			trials_.t0 = now_ms;
 			trials_.state = RebalanceTrials::State::Warmup;
@@ -386,18 +402,33 @@ struct PatchPlayLoader {
 	void update_rebalance_trials(uint32_t now_ms) {
 		using State = RebalanceTrials::State;
 
-		if (trials_.state == State::Idle)
+		if (trials_.state == State::Idle) {
+			// An automatic re-balance was requested (per the Auto Re-balance pref)
+			if (request_auto_rebalance_) {
+				request_auto_rebalance_ = false;
+				if (notify_queue)
+					notify_queue->put({"Optimizing CPU load balance...", Notification::Priority::Status, 1500});
+				start_rebalance_trials(now_ms);
+			}
 			return;
+		}
 
-		if (!player_.is_loaded) {
-			// The patch was unloaded out from under us: give up
-			trials_.state = State::Idle;
+		if (!player_.is_loaded || is_loading_patch() || patches_.get_playing_patch() != trials_.for_patch) {
+			// The patch changed out from under us: give up
+			finish_rebalance_trials();
 			return;
 		}
 
 		if (!is_playing()) {
-			// This candidate overloaded badly enough to stop the patch => worst possible score
-			advance_rebalance_trials(now_ms, 0xFFFFFFFF, 0xFFFFFFFF);
+			if (stopped_because_of_overrun_) {
+				// This candidate overloaded badly enough to stop the patch => worst possible score
+				stopped_because_of_overrun_ = false;
+				advance_rebalance_trials(now_ms, 0xFFFFFFFF, 0xFFFFFFFF);
+			} else {
+				// User stopped the patch, abort
+				finish_rebalance_trials();
+				copy_load_balance_to_patch();
+			}
 			return;
 		}
 
@@ -433,11 +464,12 @@ struct PatchPlayLoader {
 		if (trials_.state == RebalanceTrials::State::Idle)
 			return;
 
+		finish_rebalance_trials();
+
 		if (player_.is_loaded)
 			apply_trial_candidate(trials_.best_overruns == 0xFFFFFFFF ? 0 : trials_.best_idx);
 
 		copy_load_balance_to_patch();
-		trials_.state = RebalanceTrials::State::Idle;
 	}
 
 	// Puts back a load balance the user had before (Undo), without re-measuring
@@ -539,7 +571,7 @@ struct PatchPlayLoader {
 		if (!patch)
 			return;
 
-		auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
+		auto [cur_sr, cur_bs, max_retries, _] = get_audio_settings();
 
 		auto sugg_sr = patch->suggested_samplerate;
 		if (!sugg_sr)
@@ -708,6 +740,19 @@ private:
 			if (start_audio_immediately)
 				start_audio();
 
+			// Auto re-balance per user preference. Only for normal patches (not
+			// calibration), with enough modules to have alternatives.
+			// stopped_because_of_overrun_ still holds the pre-load value here.
+			if (start_audio_immediately && next_patch == patches_.get_playing_patch() && player_.num_modules > 2 &&
+				settings)
+			{
+				using enum AudioSettings::AutoRebalance;
+				auto mode = settings->audio.auto_rebalance;
+
+				if (mode == EveryLoad || (mode == AfterOverload && stopped_because_of_overrun_))
+					request_auto_rebalance_ = true;
+			}
+
 		} else {
 			patches_.close_playing_patch();
 		}
@@ -773,6 +818,7 @@ private:
 
 		std::vector<std::vector<uint16_t>> cores;
 		std::vector<uint32_t> loads;
+		PatchData *for_patch = nullptr;
 		unsigned cur = 0;
 		unsigned best_idx = 0;
 		uint32_t best_ticks_per_block = 0xFFFFFFFF;
@@ -783,6 +829,9 @@ private:
 		uint32_t overruns0 = 0;
 	};
 	RebalanceTrials trials_;
+
+	std::atomic<bool> silent_audio_ = false;
+	bool request_auto_rebalance_ = false;
 
 	void apply_trial_candidate(unsigned idx) {
 		stop_audio();
@@ -811,13 +860,17 @@ private:
 			trials_.t0 = now_ms;
 			trials_.state = RebalanceTrials::State::Warmup;
 		} else {
-			// Keep the winner (it may already be playing)
-			if (trials_.best_idx != trials_.cores.size() - 1)
-				apply_trial_candidate(trials_.best_idx);
-
+			// Keep the winner. Un-silence first so re-applying fades it in
+			finish_rebalance_trials();
+			apply_trial_candidate(trials_.best_idx);
 			copy_load_balance_to_patch();
-			trials_.state = RebalanceTrials::State::Idle;
 		}
+	}
+
+	// Ends the trials and lets the audio outputs fade up again
+	void finish_rebalance_trials() {
+		silent_audio_.store(false, std::memory_order_relaxed);
+		trials_.state = RebalanceTrials::State::Idle;
 	}
 
 	PatchPlayer &player_;

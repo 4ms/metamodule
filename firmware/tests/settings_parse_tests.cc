@@ -45,6 +45,7 @@ TEST_CASE("Parse settings file") {
     sample_rate: 96000
     block_size: 128
     max_overrun_retries: 4
+    auto_rebalance: EveryLoad
 
   plugin_autoload:
     - Plugin One
@@ -114,6 +115,7 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.audio.sample_rate == 96000);
 	CHECK(settings.audio.block_size == 128);
 	CHECK(settings.audio.max_overrun_retries == 4);
+	CHECK(settings.audio.auto_rebalance == MetaModule::AudioSettings::AutoRebalance::EveryLoad);
 
 	CHECK(settings.plugin_preload.slugs.at(0) == "Plugin One");
 	CHECK(settings.plugin_preload.slugs.at(1) == "Plugin Two");
@@ -219,6 +221,12 @@ TEST_CASE("Get default settings if file is missing fields") {
 	SUBCASE("Bad audio overrun settings:") {
 		yaml = R"(Settings:
   max_overrun_retries: 94
+)";
+	}
+	SUBCASE("Bad auto rebalance setting:") {
+		yaml = R"(Settings:
+  audio:
+    auto_rebalance: Sometimes
 )";
 	}
 	SUBCASE("Bad catchup settings:") {
@@ -437,6 +445,7 @@ TEST_CASE("Serialize settings") {
 	settings.audio.sample_rate = 24000;
 	settings.audio.block_size = 512;
 	settings.audio.max_overrun_retries = 4;
+	settings.audio.auto_rebalance = MetaModule::AudioSettings::AutoRebalance::EveryLoad;
 
 	settings.plugin_preload.slugs.emplace_back("Plugin One");
 	settings.plugin_preload.slugs.emplace_back("Plugin Two");
@@ -512,6 +521,7 @@ TEST_CASE("Serialize settings") {
     sample_rate: 24000
     block_size: 512
     max_overrun_retries: 4
+    auto_rebalance: EveryLoad
   plugin_autoload:
     - Plugin One
     - Plugin Two
