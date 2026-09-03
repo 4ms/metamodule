@@ -787,7 +787,7 @@ private:
 					page->gui_state.force_redraw_patch = true;
 				} else {
 					page->patch_playloader.apply_suggested_audio_settings();
-					page->patch_playloader.start_audio();
+					page->patch_playloader.resume_audio();
 				}
 			});
 

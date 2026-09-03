@@ -89,6 +89,20 @@ struct PatchPlayLoader {
 		clear_audio_overrun();
 	}
 
+	// Start audio, rebalancing load if needed
+	void resume_audio() {
+		bool was_overrun_stopped = stopped_because_of_overrun_;
+		stopped_because_of_overrun_ = false;
+
+		start_audio();
+
+		if (was_overrun_stopped && player_.num_modules > 2 && settings &&
+			settings->audio.auto_rebalance != AudioSettings::AutoRebalance::Off)
+		{
+			request_auto_rebalance_ = true;
+		}
+	}
+
 	void request_load_view_patch() {
 		next_patch = patches_.get_view_patch();
 		loading_new_patch_ = true;
@@ -409,6 +423,7 @@ struct PatchPlayLoader {
 				if (notify_queue)
 					notify_queue->put({"Optimizing CPU load balance...", Notification::Priority::Status, 1500});
 				start_rebalance_trials(now_ms);
+				auto_trials_ = rebalance_trials_active();
 			}
 			return;
 		}
@@ -832,6 +847,7 @@ private:
 
 	std::atomic<bool> silent_audio_ = false;
 	bool request_auto_rebalance_ = false;
+	bool auto_trials_ = false;
 
 	void apply_trial_candidate(unsigned idx) {
 		stop_audio();
@@ -861,15 +877,20 @@ private:
 			trials_.state = RebalanceTrials::State::Warmup;
 		} else {
 			// Keep the winner. Un-silence first so re-applying fades it in
+			bool announce = auto_trials_;
 			finish_rebalance_trials();
 			apply_trial_candidate(trials_.best_idx);
 			copy_load_balance_to_patch();
+
+			if (announce && notify_queue)
+				notify_queue->put({"Re-balancing complete", Notification::Priority::Status, 750});
 		}
 	}
 
 	// Ends the trials and lets the audio outputs fade up again
 	void finish_rebalance_trials() {
 		silent_audio_.store(false, std::memory_order_relaxed);
+		auto_trials_ = false;
 		trials_.state = RebalanceTrials::State::Idle;
 	}
 
