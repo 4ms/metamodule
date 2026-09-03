@@ -1,4 +1,5 @@
 #pragma once
+#include "delay.hh"
 #include "dynload/plugin_manager.hh"
 #include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
