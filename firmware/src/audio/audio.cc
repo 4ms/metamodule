@@ -146,33 +146,19 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		s.set_size(block_size_ / GuiJackDecimation);
 }
 
-void AudioStream::step() {
-	player.update_patch();
-}
-
 void AudioStream::start() {
 	if (ext_audio_connected)
 		codec_ext_.start();
 	codec_.start();
 }
 
+// Called from main context: stop audio if we have too many overruns
 void AudioStream::handle_overruns() {
 	if (overrun_handler.is_retrying()) {
-		// Debug::Pin3::high();
-		if (overrun_handler.handle()) {
-			// resume here? so that gui stays active in case step() takes a really long time
-			// codec_.resume_irq();
-			step();
-
-			// step() ran the patch outside the audio context: drop its tallies so
-			// they don't pollute the next measured block
-			player.live_load.discard_block();
-		} else {
+		if (!overrun_handler.handle())
 			patch_loader.notify_audio_overrun();
-			// codec_.resume_irq();
-		}
+
 		overrun_handler.reset();
-		// Debug::Pin3::low();
 	}
 }
 
@@ -241,6 +227,19 @@ void AudioStream::handle_patch_just_loaded() {
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	player.sync();
 	handle_patch_mod_queue();
+
+	// Update patch from knobs that moved while the patch was stopped.
+	// This allows user to adjust knobs to "fix" a patch that stopped due to overruns.
+	// v2.3.1 and earlier firmware did NOT update the patch's mappings with knobs that
+	// moved while the patch was paused, but it's unclear which way is the expected
+	// behavior.
+	if (knobs_moved_while_stopped) {
+		for (auto i = 0u; i < param_state.knobs.size(); i++) {
+			if (knobs_moved_while_stopped & (1u << i))
+				player.set_panel_param(i, param_state.knobs[i].val);
+		}
+		knobs_moved_while_stopped = 0;
+	}
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 	param_block.metaparams.midi_14bit_mode = patch_loader.is_midi_14bit_enabled();
@@ -417,10 +416,17 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			}
 		}
 
-		// Pass Knob values to modules
+		// Reset the knob-moved flags when loading a new patch
+		if (patch_loader.is_loading_patch())
+			knobs_moved_while_stopped = 0;
+
+		// Pass Knob values to catchup manager
 		for (auto [i, knob_val, knob_state] : countzip(params.knobs, param_state.knobs)) {
 			if (knob_state.store_changed(knob_val)) {
 				player.set_panel_param_no_play(i, knob_val);
+
+				// Mark knob as moved so that when we re-start audio, the new position can be re-applied
+				knobs_moved_while_stopped |= (1u << i);
 			}
 		}
 

@@ -93,6 +93,10 @@ private:
 	// they are processed every Nth frame instead of at the full sample rate
 	static constexpr uint32_t GuiJackDecimation = 16;
 
+	// Knobs that moved while the patch was stopped (bit per panel knob):
+	// replayed into the patch when it resumes playing
+	uint32_t knobs_moved_while_stopped = 0;
+
 	// Start/Pause State
 	float output_fade_amt = -1.f;
 	float output_fade_delta = 0.f;
@@ -108,7 +112,6 @@ private:
 	int32_t calibrated_0v[PanelDef::NumAudioOut];
 	int32_t ext_calibrated_0v[AudioExpander::NumOutJacks];
 
-	void step();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 
 	AudioConf::SampleT get_audio_output(int output_id);
