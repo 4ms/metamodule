@@ -20,17 +20,10 @@ void PatchPlayer::edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
 		return;
 
 	if (knobset_id == PatchData::MIDIKnobSet) {
-
-		auto *knobconn = map.is_midi_cc()		? &midi_cc_knob_maps[map.cc_num()] :
-						 map.is_midi_notegate() ? &midi_note_knob_maps[map.notegate_num()] :
-												  nullptr;
-		if (!knobconn)
+		if (!map.is_midi_cc() && !map.is_midi_notegate())
 			return;
 
-		auto found = std::ranges::find_if(
-			*knobconn, [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
-
-		if (found != knobconn->end()) {
+		if (auto *found = midi.find_knob_map(map)) {
 			found->min = map.min;
 			found->max = map.max;
 			found->curve_type = map.curve_type;
@@ -58,7 +51,7 @@ void PatchPlayer::edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
 void PatchPlayer::remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
 	if (pd.remove_mapping(knobset_id, map)) {
 		if (knobset_id == PatchData::MIDIKnobSet) {
-			uncache_midi_mapping(map);
+			midi.uncache_knob_map(map);
 			param_watcher.stop_watching_param(map);
 		} else {
 			uncache_knob_mapping(knobset_id, map);
@@ -68,7 +61,7 @@ void PatchPlayer::remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map)
 
 void PatchPlayer::add_midi_mapped_knob(const MappedKnob &map) {
 	if (pd.add_update_midi_map(map)) {
-		cache_midi_mapping(map);
+		midi.cache_knob_map(map);
 		param_watcher.start_watching_param(map);
 	}
 }
@@ -87,7 +80,7 @@ void PatchPlayer::add_injack_mapping(uint16_t panel_jack_id, Jack jack) {
 	update_or_add_input_panel_conn(panel_jack_id, jack);
 
 	if (Midi::is_midi_poly_cable(panel_jack_id))
-		set_midi_poly_channel_count(pd.midi_poly_num);
+		midi.set_poly_channel_count(pd.midi_poly_num);
 
 	bool panel_patched = false;
 	if (panel_jack_id < in_conns.size()) {
@@ -95,7 +88,7 @@ void PatchPlayer::add_injack_mapping(uint16_t panel_jack_id, Jack jack) {
 
 		// TODO:
 	} else if (panel_jack_id > LastPossibleKnob) {
-		panel_patched = midi_connected;
+		panel_patched = midi.connected;
 	}
 
 	if (panel_patched && jack.module_id < num_modules)
@@ -143,30 +136,7 @@ void PatchPlayer::safe_unpatch_input(Jack jack) {
 void PatchPlayer::disconnect_injack(Jack jack) {
 	for (auto &ins : in_conns)
 		std::erase(ins, jack);
-	for (auto &ins : midi_note_pitch_conns)
-		std::erase(ins, jack);
-	for (auto &ins : midi_note_gate_conns)
-		std::erase(ins, jack);
-	for (auto &ins : midi_note_vel_conns)
-		std::erase(ins, jack);
-	for (auto &ins : midi_note_aft_conns)
-		std::erase(ins, jack);
-	for (auto &ins : midi_cc_conns)
-		std::erase(ins, jack);
-	for (auto &ins : midi_gate_conns)
-		std::erase(ins, jack);
-	for (auto &mp : midi_pulses)
-		std::erase(mp.conns, jack);
-	for (auto &mp : midi_divclk_pulses)
-		std::erase(mp.conns, jack);
-	for (auto &mp : midi_note_retrig)
-		std::erase(mp.conns, jack);
-
-	std::erase(midi_poly_pitch_conns, jack);
-	std::erase(midi_poly_gate_conns, jack);
-	std::erase(midi_poly_vel_conns, jack);
-	std::erase(midi_poly_aft_conns, jack);
-	std::erase(midi_poly_retrig.conns, jack);
+	midi.erase_jack(jack);
 
 	safe_unpatch_input(jack);
 
@@ -238,7 +208,7 @@ void PatchPlayer::remove_outjack_mappings(Jack jack) {
 void PatchPlayer::set_midi_poly_num(uint16_t poly_num) {
 	pd.midi_poly_num_setting = poly_num;
 	pd.update_midi_poly_num();
-	set_midi_poly_channel_count(pd.midi_poly_num);
+	midi.set_poly_channel_count(pd.midi_poly_num);
 }
 
 // Returns the number of poly channels flowing from out jack to in jack,

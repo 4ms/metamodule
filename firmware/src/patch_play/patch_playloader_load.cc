@@ -126,7 +126,7 @@ Result PatchPlayLoader::load_patch(bool start_audio_immediately) {
 			auto mode = settings->audio.auto_rebalance;
 
 			if (mode == EveryLoad || (mode == AfterOverload && stopped_because_of_overrun_))
-				request_auto_rebalance_ = true;
+				trials_.request_auto();
 		}
 
 	} else {

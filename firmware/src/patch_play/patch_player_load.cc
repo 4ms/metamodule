@@ -90,7 +90,7 @@ Result PatchPlayer::load_patch(const PatchData &patchdata) {
 	pd.update_midi_poly_num();
 
 	for (auto const &mm : pd.midi_maps.set) {
-		cache_midi_mapping(mm);
+		midi.cache_knob_map(mm);
 		param_watcher.start_watching_param(mm);
 	}
 
@@ -172,14 +172,7 @@ void PatchPlayer::unload_patch() {
 void PatchPlayer::set_samplerate(float hz) {
 	samplerate = hz;
 
-	for (auto &mp : midi_pulses)
-		mp.pulse.set_update_rate_hz(samplerate);
-
-	for (auto &mp : midi_divclk_pulses)
-		mp.pulse.set_update_rate_hz(samplerate);
-
-	for (auto &p : midi_poly_retrig.pulses)
-		p.set_update_rate_hz(samplerate);
+	midi.set_samplerate(samplerate);
 
 	for (size_t i = 1; i < num_modules; i++) {
 		modules[i]->set_samplerate(samplerate);

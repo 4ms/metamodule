@@ -6,6 +6,7 @@
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
 #include "patch_play/patch_player.hh"
+#include "patch_play/rebalance_trials.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include "user_settings/settings.hh"
@@ -25,7 +26,8 @@ namespace MetaModule
 //   patch_playloader_load.cc    - loading a patch into the player
 //   patch_playloader_modules.cc - adding/changing/removing modules in the playing patch
 //   patch_playloader_save.cc    - saving and renaming patch files
-//   patch_playloader_balance.cc - load balancing and the re-balance trials
+//   patch_playloader_balance.cc - load balancing
+//   rebalance_trials.hh/.cc     - the live re-balance trials
 struct PatchPlayLoader {
 	PatchPlayLoader(FileStorageProxy &patch_storage, OpenPatchManager &patches, PatchPlayer &patchplayer)
 		: player_{patchplayer}
@@ -70,7 +72,7 @@ struct PatchPlayLoader {
 		if (was_overrun_stopped && player_.num_modules > 2 && settings &&
 			settings->audio.auto_rebalance != AudioSettings::AutoRebalance::Off)
 		{
-			request_auto_rebalance_ = true;
+			trials_.request_auto();
 		}
 	}
 
@@ -190,7 +192,7 @@ struct PatchPlayLoader {
 	// While set, audio runs and is measured normally but the outputs are held
 	// silent (so the rebalance trials aren't heard)
 	bool audio_silenced() const {
-		return silent_audio_.load(std::memory_order_relaxed);
+		return trials_.audio_silenced();
 	}
 
 	bool is_view_patch_playing() {
@@ -296,29 +298,33 @@ struct PatchPlayLoader {
 	// Only meaningful while the patch is playing.
 	void recalculate_load_balance();
 
-	// -- Rebalance trials --
+	// -- Rebalance trials (see rebalance_trials.hh) --
 	// Try several candidate arrangements live and keep the one with the
-	// lowest measured audio load. The trials run as a state machine advanced by
-	// update_rebalance_trials() from the GUI loop
-	void start_rebalance_trials(uint32_t now_ms);
+	// lowest measured audio load. Advanced by update_rebalance_trials() from the GUI loop
+	void start_rebalance_trials(uint32_t now_ms) {
+		trials_.start(now_ms);
+	}
 
-	void update_rebalance_trials(uint32_t now_ms);
+	void update_rebalance_trials(uint32_t now_ms) {
+		trials_.update(now_ms);
+	}
 
-	// E.g. the panel is closing mid-trials: keep the best candidate found so far.
-	// Restarts audio even if the current candidate had stopped the patch.
-	void abort_rebalance_trials();
+	// E.g. the panel is closing mid-trials: keep the best candidate found so far
+	void abort_rebalance_trials() {
+		trials_.abort();
+	}
 
 	bool rebalance_trials_active() const {
-		return trials_.state != RebalanceTrials::State::Idle;
+		return trials_.active();
 	}
 
 	// For displaying progress: which candidate is being tried, out of how many
 	unsigned rebalance_trials_current() const {
-		return trials_.cur + 1;
+		return trials_.current();
 	}
 
 	unsigned rebalance_trials_total() const {
-		return trials_.cores.size();
+		return trials_.total();
 	}
 
 	// Puts back a load balance the user had before (Undo), without re-measuring
@@ -386,37 +392,9 @@ private:
 	Result check_delete_file_status();
 	Result process_renaming();
 
-	// patch_playloader_balance.cc
-	void apply_trial_candidate(unsigned idx);
-	void advance_rebalance_trials(uint32_t now_ms, uint32_t avg_ticks, uint32_t overruns);
-	void finish_rebalance_trials();
-
-	// Rebalance trials state (see start_rebalance_trials)
-	static constexpr unsigned NumRebalanceSeeds = 5;
-	static constexpr uint32_t TrialWarmupMs = 100;
-	static constexpr uint32_t TrialMeasureMs = 150;
-
-	struct RebalanceTrials {
-		enum class State { Idle, Warmup, Measure };
-		State state = State::Idle;
-
-		std::vector<std::vector<uint16_t>> cores;
-		std::vector<uint32_t> loads;
-		PatchData *for_patch = nullptr;
-		unsigned cur = 0;
-		unsigned best_idx = 0;
-		uint32_t best_ticks_per_block = 0xFFFFFFFF;
-		uint32_t best_overruns = 0xFFFFFFFF;
-		uint32_t t0 = 0;
-		uint32_t ticks0 = 0;
-		uint32_t blocks0 = 0;
-		uint32_t overruns0 = 0;
-	};
-	RebalanceTrials trials_;
-
-	std::atomic<bool> silent_audio_ = false;
-	bool request_auto_rebalance_ = false;
-	bool auto_trials_ = false;
+	// The trials reach into the loader's audio start/stop and patch state
+	friend class RebalanceTrials;
+	RebalanceTrials trials_{*this};
 
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;

@@ -146,6 +146,7 @@ add_executable(
   ${FWDIR}/src/gui/pages/tags.cc
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
+  ${FWDIR}/src/patch_play/midi_connections.cc
   ${FWDIR}/src/patch_play/patch_player_balance.cc
   ${FWDIR}/src/patch_play/patch_player_cache.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
@@ -156,6 +157,7 @@ add_executable(
   ${FWDIR}/src/patch_play/patch_playloader_load.cc
   ${FWDIR}/src/patch_play/patch_playloader_modules.cc
   ${FWDIR}/src/patch_play/patch_playloader_save.cc
+  ${FWDIR}/src/patch_play/rebalance_trials.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
 
   #

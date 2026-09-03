@@ -63,15 +63,6 @@ void PatchPlayer::remove_module(uint16_t module_idx) {
 		}
 	};
 
-	auto erase_and_squash_inner = [=](auto &container) {
-		for (auto &item : container) {
-			std::erase_if(item.conns, [=](auto &map) { return (map.module_id == module_idx); });
-			for (auto &map : item.conns) {
-				squash_module_id(map.module_id);
-			}
-		}
-	};
-
 	// Panel Input connections
 	erase_and_squash(in_conns);
 
@@ -110,30 +101,7 @@ void PatchPlayer::remove_module(uint16_t module_idx) {
 		}
 	}
 
-	erase_and_squash(midi_cc_knob_maps);
-	erase_and_squash(midi_note_knob_maps);
-	erase_and_squash(midi_note_pitch_conns);
-	erase_and_squash(midi_note_gate_conns);
-	erase_and_squash(midi_note_vel_conns);
-	erase_and_squash(midi_note_aft_conns);
-	erase_and_squash(midi_cc_conns);
-	erase_and_squash(midi_gate_conns);
-	erase_and_squash_inner(midi_note_retrig);
-	erase_and_squash_inner(midi_pulses);
-	erase_and_squash_inner(midi_divclk_pulses);
-
-	// Poly cable flat vectors
-	auto erase_and_squash_flat = [=, &squash_module_id](auto &vec) {
-		std::erase_if(vec, [=](auto &map) { return (map.module_id == module_idx); });
-		for (auto &map : vec) {
-			squash_module_id(map.module_id);
-		}
-	};
-	erase_and_squash_flat(midi_poly_pitch_conns);
-	erase_and_squash_flat(midi_poly_gate_conns);
-	erase_and_squash_flat(midi_poly_vel_conns);
-	erase_and_squash_flat(midi_poly_aft_conns);
-	erase_and_squash_flat(midi_poly_retrig.conns);
+	midi.erase_module(module_idx, squash_module_id);
 
 	pd.remove_module(module_idx);
 
@@ -188,12 +156,6 @@ void PatchPlayer::replace_module(uint16_t module_idx, BrandModuleSlug new_slug) 
 		}
 	};
 
-	auto erase_matching_inner = [=](auto &container) {
-		for (auto &item : container) {
-			std::erase_if(item.conns, [=](auto &map) { return (map.module_id == module_idx); });
-		}
-	};
-
 	// Panel connections
 	erase_matching(in_conns);
 	erase_matching(out_conns);
@@ -222,17 +184,7 @@ void PatchPlayer::replace_module(uint16_t module_idx, BrandModuleSlug new_slug) 
 	}
 
 	// MIDI maps
-	erase_matching(midi_cc_knob_maps);
-	erase_matching(midi_note_knob_maps);
-	erase_matching(midi_note_pitch_conns);
-	erase_matching(midi_note_gate_conns);
-	erase_matching(midi_note_vel_conns);
-	erase_matching(midi_note_aft_conns);
-	erase_matching(midi_cc_conns);
-	erase_matching(midi_gate_conns);
-	erase_matching_inner(midi_note_retrig);
-	erase_matching_inner(midi_pulses);
-	erase_matching_inner(midi_divclk_pulses);
+	midi.erase_module(module_idx);
 
 	// Deinit old module
 	plugin_module_deinit(modules[module_idx]);
