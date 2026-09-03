@@ -447,42 +447,4 @@ void PatchPlayer::uncache_midi_mapping(const MappedKnob &k) {
 	}
 }
 
-// Jack patched/unpatched status
-
-// Follow every internal cable and tell the modules that their jacks are patched
-// Optionally filter by module id
-void PatchPlayer::mark_patched_jacks(std::optional<uint16_t> module_id) {
-	for (auto const &cable : pd.int_cables) {
-		if (!module_id.has_value() || cable.out.module_id == module_id.value())
-			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
-
-		for (auto const &input_jack : cable.ins) {
-			if (input_jack.module_id < num_modules)
-				if (!module_id.has_value() || input_jack.module_id == module_id.value())
-					modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
-		}
-	}
-}
-
-void PatchPlayer::mark_patched_panel_jacks(std::optional<uint16_t> module_idx) {
-	for (auto i = 0u; auto const &panel_out : out_conns) {
-		if (out_patched[i]) {
-			for (auto const &c : panel_out) {
-				if (!module_idx.has_value() || c.module_id == module_idx)
-					modules[c.module_id]->mark_output_patched(c.jack_id);
-			}
-		}
-		i++;
-	}
-	for (auto i = 0u; auto const &panel_in : in_conns) {
-		if (in_patched[i]) {
-			for (auto const &c : panel_in) {
-				if (!module_idx.has_value() || c.module_id == module_idx)
-					modules[c.module_id]->mark_input_patched(c.jack_id);
-			}
-		}
-		i++;
-	}
-}
-
 } // namespace MetaModule

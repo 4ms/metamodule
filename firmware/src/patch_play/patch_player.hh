@@ -176,34 +176,19 @@ public:
 	//
 
 	void copy_patch_data(const PatchData &patchdata);
-
-	// Loads the given patch as the active patch, and caches some pre-calculated values
 	Result load_patch(const PatchData &patchdata);
-
 	void unload_patch();
-
 	void set_samplerate(float hz);
-
+	void calc_multiple_module_indicies();
 	enum class CreateResult { Ok, NotFound, OutOfMemory, Crashed };
-
 	static std::unique_ptr<CoreProcessor> try_create_module(std::string_view combined_slug,
 															CreateResult *result = nullptr);
-
-	// Check for multiple instances of same module type, and cache the results
-	// This is used to create unique names for modules (e.g. LFO#1, LFO#2,...)
-	void calc_multiple_module_indicies();
 
 	//
 	// Load balancing (patch_player_balance.cc)
 	//
 
-	enum class Balance {
-		// Re-use the load balance stored in the patch, if it has one
-		UseStored,
-		// Measure the modules and calculate a new load balance
-		Recalculate,
-	};
-
+	enum class Balance { UseStored, Recalculate };
 	void rebalance_modules(Balance mode = Balance::UseStored);
 
 	std::vector<uint16_t> const &get_module_cores() const {
@@ -214,15 +199,11 @@ public:
 		return pd.module_loads;
 	}
 
-	// Distinct candidate core assignments for the rebalance trials
 	struct BalanceCandidates {
 		std::vector<std::vector<uint16_t>> cores;
 		std::vector<uint32_t> loads_ppm;
 	};
-
 	BalanceCandidates make_balance_candidates(unsigned num_seeds);
-
-	// Applies a load balance the user chose, without re-measuring anything
 	void set_load_balance(std::vector<uint16_t> const &module_cores, std::vector<uint32_t> const &module_loads);
 
 	//
@@ -258,13 +239,10 @@ public:
 	void remove_injack_mappings(Jack jack);
 	void disconnect_outjack(Jack jack);
 	void remove_outjack_mappings(Jack jack);
+	unsigned num_poly_cable_channels(Jack out, Jack in);
 
 	// poly_num is the user setting: 0 = Auto (compute from cables), 1-8 = hard-set
 	void set_midi_poly_num(uint16_t poly_num);
-
-	// Returns the number of poly channels flowing from out jack to in jack,
-	// or 0 if the connection is mono (or unknowable, e.g. no patch loaded)
-	unsigned num_poly_cable_channels(Jack out, Jack in);
 
 	//
 	// Knob catchup (patch_player_catchup.cc)
@@ -287,20 +265,8 @@ public:
 	// Connection cache (patch_player_cache.cc)
 	//
 
-	// Map all the panel jack connections into in_conns[] and out_conns[]
-	// which are indexed by panel_jack_id.
-	// This speeds up propagating I/O from user to virtual modules
 	void calc_panel_jack_connections();
-
 	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack);
-
-	// Jack patched/unpatched status
-
-	// Follow every internal cable and tell the modules that their jacks are patched
-	// Optionally filter by module id
-	void mark_patched_jacks(std::optional<uint16_t> module_id = std::nullopt);
-
-	void mark_patched_panel_jacks(std::optional<uint16_t> module_idx = std::nullopt);
 
 	//
 	// Audio context: running the patch
@@ -875,6 +841,42 @@ public:
 						modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 				}
 			}
+		}
+	}
+
+	// Follow every internal cable and tell the modules that their jacks are patched
+	// Optionally filter by module id
+	void mark_patched_jacks(std::optional<uint16_t> module_id) {
+		for (auto const &cable : pd.int_cables) {
+			if (!module_id.has_value() || cable.out.module_id == module_id.value())
+				modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
+
+			for (auto const &input_jack : cable.ins) {
+				if (input_jack.module_id < num_modules)
+					if (!module_id.has_value() || input_jack.module_id == module_id.value())
+						modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
+			}
+		}
+	}
+
+	void mark_patched_panel_jacks(std::optional<uint16_t> module_idx) {
+		for (auto i = 0u; auto const &panel_out : out_conns) {
+			if (out_patched[i]) {
+				for (auto const &c : panel_out) {
+					if (!module_idx.has_value() || c.module_id == module_idx)
+						modules[c.module_id]->mark_output_patched(c.jack_id);
+				}
+			}
+			i++;
+		}
+		for (auto i = 0u; auto const &panel_in : in_conns) {
+			if (in_patched[i]) {
+				for (auto const &c : panel_in) {
+					if (!module_idx.has_value() || c.module_id == module_idx)
+						modules[c.module_id]->mark_input_patched(c.jack_id);
+				}
+			}
+			i++;
 		}
 	}
 
