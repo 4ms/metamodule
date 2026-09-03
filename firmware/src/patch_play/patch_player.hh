@@ -4,8 +4,6 @@
 #include "CoreModules/moduleFactory.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/patch_conf.hh"
-#include "coreproc_plugin/async_thread_control.hh"
-#include "delay.hh"
 #include "null_module.hh"
 #include "params/catchup_manager.hh"
 #include "params/catchup_param.hh"
@@ -22,13 +20,12 @@
 #include "patch_play/plugin_module.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
-#include "system/abort_rescue.hh"
-#include "util/countzip.hh"
 #include "util/oscs.hh"
 #include <algorithm>
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -37,6 +34,17 @@
 namespace MetaModule
 {
 
+// PatchPlayer owns the running patch: the module instances, the internal cable cache,
+// and the lookup tables that route panel jacks, knobs and MIDI to module ports.
+//
+// This header holds the data members and every function that runs in the audio
+// context (which must stay inline). The non-audio duties are implemented in:
+//   patch_player_load.cc     - loading/unloading a patch, module creation
+//   patch_player_balance.cc  - splitting modules between cores
+//   patch_player_modules.cc  - adding/removing/replacing modules in a loaded patch
+//   patch_player_mappings.cc - patch mods: knob maps, MIDI maps, cables, jack mappings
+//   patch_player_cache.cc    - building the panel/MIDI connection tables
+//   patch_player_catchup.cc  - knob catchup modes
 class PatchPlayer {
 public:
 	// TODO: modules should be a FixedVector, and then num_modules is replaced by modules.size()
@@ -153,144 +161,41 @@ private:
 	unsigned active_knob_set = 0;
 	static inline ModuleTypeSlug no_patch_loaded{"(Not Loaded)"};
 
-public:
-	PatchPlayer() {
-		clear_cache();
-	}
+	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
 
-	~PatchPlayer() {
-		if (is_loaded) {
-			unload_patch();
-		}
-	}
+public:
+	PatchPlayer();
+	~PatchPlayer();
 
 	ParamWatcher &watched_params() {
 		return param_watcher;
 	}
 
-	void copy_patch_data(const PatchData &patchdata) {
-		if (is_loaded)
-			unload_patch();
+	//
+	// Loading/unloading a patch (patch_player_load.cc)
+	//
 
-		//Copy so that the currently playing PatchData is immune to edits of the saved version
-		pd = patchdata;
-	}
+	void copy_patch_data(const PatchData &patchdata);
 
-public:
 	// Loads the given patch as the active patch, and caches some pre-calculated values
-	Result load_patch(const PatchData &patchdata) {
+	Result load_patch(const PatchData &patchdata);
 
-		// load_patch must only be called from the GUI context (Core 1, not in an interrupt).
-		// AsyncThreads will interrupt the GUI context on Core 1, and run concurrently on Core 0.
-		// Otherwise if the current context blocks AsyncThreads, then is_any_thread_executing() may hang forever
-		// and/or an AsyncThread could crash since its module * is no longer valid after we call unload_patch
-		pause_module_threads();
-		while (is_any_thread_executing()) {}
+	void unload_patch();
 
-		if (patchdata.patch_name.length() == 0)
-			return {false, "Cannot load: patch does not have a name"};
+	void set_samplerate(float hz);
 
-		if (patchdata.module_slugs.size() == 0)
-			return {false, "Cannot load: patch does not have any modules"};
+	enum class CreateResult { Ok, NotFound, OutOfMemory, Crashed };
 
-		copy_patch_data(patchdata);
+	static std::unique_ptr<CoreProcessor> try_create_module(std::string_view combined_slug,
+															CreateResult *result = nullptr);
 
-		num_modules = pd.module_slugs.size();
+	// Check for multiple instances of same module type, and cache the results
+	// This is used to create unique names for modules (e.g. LFO#1, LFO#2,...)
+	void calc_multiple_module_indicies();
 
-		if (num_modules > MAX_MODULES_IN_PATCH) {
-			return {false, "Too many modules in the patch! Max is 64"};
-		}
-
-		// First module is the hub
-		modules[0] = try_create_module(PanelDef::typeID);
-		if (modules[0] != nullptr)
-			modules[0]->id = 0;
-
-		unsigned num_not_found = 0;
-		std::string not_found;
-		for (size_t i = 1; i < num_modules; i++) {
-			modules[i] = try_create_module(pd.module_slugs[i]);
-
-			if (modules[i] == nullptr) {
-				pr_err("Module %s not found\n", pd.module_slugs[i].data());
-				modules[i] = std::make_unique<NullModule>();
-				num_not_found++;
-				if (num_not_found == 1)
-					not_found = std::string_view{pd.module_slugs[i]};
-			} else {
-				pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
-
-				modules[i]->id = i;
-				modules[i]->mark_all_inputs_unpatched();
-				modules[i]->mark_all_outputs_unpatched();
-				modules[i]->set_samplerate(samplerate);
-			}
-		}
-
-		mark_patched_jacks();
-		calc_panel_jack_connections();
-
-		// Re-apply physical state so panel-mapped jacks come up patched immediately
-		mark_patched_panel_jacks();
-
-		for (auto [knob_set_idx, knob_set] : enumerate(pd.knob_sets)) {
-			for (auto const &k : knob_set.set) {
-				cache_knob_mapping(knob_set_idx, k);
-			}
-		}
-
-		pd.update_midi_poly_num();
-
-		for (auto const &mm : pd.midi_maps.set) {
-			cache_midi_mapping(mm);
-			param_watcher.start_watching_param(mm);
-		}
-
-		// Init modules
-		for (size_t module_idx = 1; module_idx < num_modules; module_idx++) {
-			// Load module state (for vcv modules, this calls dataFromJson)
-			// To mimic VCV, this must be done before plugin_module_init (which calls onAdd)
-			auto ms = std::ranges::find(pd.module_states, module_idx, &ModuleInitState::module_id);
-			if (ms != pd.module_states.end())
-				modules[module_idx]->load_state(ms->state_data);
-
-			plugin_module_init(modules[module_idx]);
-		}
-
-		// Set static (non-mapped) knobs
-		for (auto const &k : pd.static_knobs)
-			modules[k.module_id]->set_param(k.param_id, k.value);
-
-		// Apply bypass state
-		for (auto id : pd.bypassed_modules) {
-			if (id < num_modules)
-				modules[id]->bypassed = true;
-		}
-
-		calc_multiple_module_indicies();
-
-		active_knob_set = 0;
-		catchup_manager.reset(modules, knob_maps[active_knob_set]);
-
-		rebalance_modules();
-
-		resume_module_threads(0);
-		// Some delay to reduce simultaneous load on both cores
-		delay_ms(100);
-		resume_module_threads(1);
-
-		live_load.reset();
-		is_loaded = true;
-		if (num_not_found == 1)
-			return {true, std::string{"Module "} + not_found + std::string{" not known, ignoring."}};
-		else if (num_not_found > 1)
-			return {true,
-					std::string{"Module "} + not_found + std::string{" and "} + std::to_string(num_not_found - 1) +
-						std::string{" others not known, ignoring."}};
-
-		else
-			return {true};
-	}
+	//
+	// Load balancing (patch_player_balance.cc)
+	//
 
 	enum class Balance {
 		// Re-use the load balance stored in the patch, if it has one
@@ -299,71 +204,7 @@ public:
 		Recalculate,
 	};
 
-	void rebalance_modules(Balance mode = Balance::UseStored) {
-		if (num_modules > 2) {
-
-			if (mode == Balance::UseStored && pd.has_load_balance(MulticorePlayer::NumCores)) {
-				// The patch contained load balance info, so use it
-				core_balancer.apply_stored_balance(pd.module_cores);
-
-			} else { // Re-calculating, or calculating for the first time
-
-				auto cpu_times = core_balancer.measure_modules(
-					modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
-
-				// When re-calculating, pass the previous assignment so the balancer
-				// prefers a different one
-				auto prev = std::span<const uint16_t>{};
-				if (mode == Balance::Recalculate && pd.has_load_balance(MulticorePlayer::NumCores))
-					prev = pd.module_cores;
-
-				auto arrangement = core_balancer.balance_loads(cpu_times, prev);
-
-				store_load_balance(arrangement, cpu_times);
-
-				core_balancer.print_times(cpu_times, pd.module_slugs);
-			}
-
-		} else if (num_modules == 2) {
-			// A single module doesn't get split, but still measure it so its load can be shown
-			if (!(mode == Balance::UseStored && pd.has_load_balance(MulticorePlayer::NumCores))) {
-				auto cpu_times = core_balancer.measure_modules(
-					modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
-
-				// Default arrangement: the module runs on core 0
-				store_load_balance(CoreBalancer::Arrangement{}, cpu_times);
-			}
-			core_balancer.apply_stored_balance(pd.module_cores);
-
-		} else {
-			core_balancer.cores.parts[0].clear();
-			core_balancer.cores.parts[1].clear();
-			pd.clear_load_balance();
-		}
-
-		// Tell other SMP core which modules it's been assigned
-		smp.assign_modules(core_balancer.cores.parts[MulticorePlayer::NumCores - 1]);
-
-		for (auto core_id = 0u; core_id < core_balancer.cores.parts.size(); core_id++) {
-			for (auto id : core_balancer.cores.parts[core_id]) {
-				peg_task_to_core(id, core_id);
-			}
-		}
-
-		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
-	}
-
-	// Records the load balance in the patch data, so it can be saved to the patch file
-	// and re-used the next time the patch is loaded.
-	void store_load_balance(auto const &arrangement, std::span<const unsigned> cpu_times) {
-		pd.module_cores.assign(num_modules, 0);
-		pd.module_loads.assign(num_modules, 0);
-
-		for (auto module_id = 1u; module_id < num_modules; module_id++) {
-			pd.module_cores[module_id] = arrangement.core_of[module_id];
-			pd.module_loads[module_id] = core_balancer.ticks_to_ppm(cpu_times[module_id - 1]);
-		}
-	}
+	void rebalance_modules(Balance mode = Balance::UseStored);
 
 	std::vector<uint16_t> const &get_module_cores() const {
 		return pd.module_cores;
@@ -379,46 +220,91 @@ public:
 		std::vector<uint32_t> loads_ppm;
 	};
 
-	BalanceCandidates make_balance_candidates(unsigned num_seeds) {
-		BalanceCandidates result;
-
-		if (num_modules <= 2)
-			return result;
-
-		auto cpu_times =
-			core_balancer.measure_modules(modules, num_modules, [this](unsigned module_i) { step_module(module_i); });
-
-		result.loads_ppm.assign(num_modules, 0);
-		for (auto module_id = 1u; module_id < num_modules; module_id++)
-			result.loads_ppm[module_id] = core_balancer.ticks_to_ppm(cpu_times[module_id - 1]);
-
-		if (pd.has_load_balance(MulticorePlayer::NumCores))
-			result.cores.push_back(pd.module_cores);
-
-		for (auto seed = 0u; seed < num_seeds; seed++) {
-			auto arr = CoreBalancer::make_arrangement(cpu_times, seed == 0 ? 0 : seed * 2654435761u);
-
-			std::vector<uint16_t> cores(num_modules, 0);
-			for (auto module_id = 1u; module_id < num_modules; module_id++)
-				cores[module_id] = arr.core_of[module_id];
-
-			// Skip duplicates: different seeds often produce the same arrangement
-			if (std::ranges::find(result.cores, cores) == result.cores.end())
-				result.cores.push_back(cores);
-		}
-
-		return result;
-	}
+	BalanceCandidates make_balance_candidates(unsigned num_seeds);
 
 	// Applies a load balance the user chose, without re-measuring anything
-	void set_load_balance(std::vector<uint16_t> const &module_cores, std::vector<uint32_t> const &module_loads) {
-		if (module_cores.size() != num_modules)
-			return;
+	void set_load_balance(std::vector<uint16_t> const &module_cores, std::vector<uint32_t> const &module_loads);
 
-		pd.module_cores = module_cores;
-		pd.module_loads = module_loads;
-		rebalance_modules(Balance::UseStored);
-	}
+	//
+	// Adding/removing modules in a loaded patch (patch_player_modules.cc)
+	//
+
+	CreateResult add_module(BrandModuleSlug slug);
+	bool add_module_at_idx(BrandModuleSlug slug, unsigned module_idx, CreateResult *result = nullptr);
+	void remove_module(uint16_t module_idx);
+
+	// replace a module without changing any mappings or cables
+	void substitute_module(unsigned module_idx, BrandModuleSlug new_slug);
+
+	// replace a module, discarding all its mappings and cables
+	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug);
+
+	void reset_module(uint16_t module_id, std::string_view data = "");
+	void set_module_bypass(uint16_t module_id, bool bypassed);
+
+	//
+	// Patch Mods (patch_player_mappings.cc)
+	//
+
+	void apply_static_param(const StaticParam &sparam);
+	void add_mapped_knob(uint32_t knobset_id, const MappedKnob &map);
+	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map);
+	void remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map);
+	void add_midi_mapped_knob(const MappedKnob &map);
+	void add_internal_cable(Jack in, Jack out);
+	void add_injack_mapping(uint16_t panel_jack_id, Jack jack);
+	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack);
+	void disconnect_injack(Jack jack);
+	void remove_injack_mappings(Jack jack);
+	void disconnect_outjack(Jack jack);
+	void remove_outjack_mappings(Jack jack);
+
+	// poly_num is the user setting: 0 = Auto (compute from cables), 1-8 = hard-set
+	void set_midi_poly_num(uint16_t poly_num);
+
+	// Returns the number of poly channels flowing from out jack to in jack,
+	// or 0 if the connection is mono (or unknowable, e.g. no patch loaded)
+	unsigned num_poly_cable_channels(Jack out, Jack in);
+
+	//
+	// Knob catchup (patch_player_catchup.cc)
+	//
+
+	// Set mode for all maps
+	void set_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange);
+
+	// Set mode for one mapping only
+	void set_catchup_mode(int knob_set_idx, unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
+
+	// Set mode for one module/param, in any knobset
+	void set_catchup_mode(unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
+
+	bool is_param_tracking(unsigned module_id, unsigned param_id);
+
+	std::optional<unsigned> panel_knob_catchup_inaccessible();
+
+	//
+	// Connection cache (patch_player_cache.cc)
+	//
+
+	// Map all the panel jack connections into in_conns[] and out_conns[]
+	// which are indexed by panel_jack_id.
+	// This speeds up propagating I/O from user to virtual modules
+	void calc_panel_jack_connections();
+
+	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack);
+
+	// Jack patched/unpatched status
+
+	// Follow every internal cable and tell the modules that their jacks are patched
+	// Optionally filter by module id
+	void mark_patched_jacks(std::optional<uint16_t> module_id = std::nullopt);
+
+	void mark_patched_panel_jacks(std::optional<uint16_t> module_idx = std::nullopt);
+
+	//
+	// Audio context: running the patch
+	//
 
 	// Runs the patch
 	void update_patch() {
@@ -549,7 +435,6 @@ public:
 							si.in_buf.voltages[ch] += si.out_bufs[i].voltages[ch];
 					} else {
 						// Mono source: add to channel 0
-						// si.in_buf.voltages[0] += modules[si.outs[i].module_id]->get_output(si.outs[i].jack_id);
 						si.in_buf.voltages[0] += get_output(si.outs[i]);
 					}
 				}
@@ -560,7 +445,6 @@ public:
 				float sum = 0.f;
 				for (auto const &out : si.outs) {
 					sum += get_output(out);
-					// sum += modules[out.module_id]->get_output(out.jack_id);
 				}
 				modules[si.in.module_id]->set_input(si.in.jack_id, sum);
 			}
@@ -621,36 +505,9 @@ public:
 		smp.refresh_patch_gui_elements();
 	}
 
-	void unload_patch() {
-		param_watcher.stop_watching_all();
-
-		smp.join();
-		is_loaded = false;
-		for (size_t i = 0; i < num_modules; i++) {
-			plugin_module_deinit(modules[i]);
-			modules[i].reset(nullptr);
-		}
-		cables.clear();
-
-		pd.module_slugs.clear();
-		pd.int_cables.clear();
-		pd.mapped_ins.clear();
-		pd.mapped_outs.clear();
-		pd.static_knobs.clear();
-		pd.knob_sets.clear();
-		pd.module_slugs.clear();
-		pd.mapped_lights.clear();
-		pd.module_states.clear();
-		pd.bypassed_modules.clear();
-		pd.midi_maps.set.clear();
-		pd.midi_maps.name = "";
-
-		num_modules = 0;
-
-		clear_cache();
-	}
-
-	// Interface with audio stream:
+	//
+	// Audio context: interface with audio stream
+	//
 
 	void set_panel_param(unsigned panel_knob_id, float val) {
 		catchup_manager.set_panel_param(modules, knob_maps[active_knob_set], panel_knob_id, val);
@@ -834,23 +691,6 @@ public:
 		}
 	}
 
-	void set_samplerate(float hz) {
-		samplerate = hz;
-
-		for (auto &mp : midi_pulses)
-			mp.pulse.set_update_rate_hz(samplerate);
-
-		for (auto &mp : midi_divclk_pulses)
-			mp.pulse.set_update_rate_hz(samplerate);
-
-		for (auto &p : midi_poly_retrig.pulses)
-			p.set_update_rate_hz(samplerate);
-
-		for (size_t i = 1; i < num_modules; i++) {
-			modules[i]->set_samplerate(samplerate);
-		}
-	}
-
 private:
 	// Returns module output, or the cached midi/hub passthrough value
 	float get_output(Jack out) {
@@ -994,610 +834,13 @@ public:
 			return 0;
 	}
 
-	// Returns the number of poly channels flowing from out jack to in jack,
-	// or 0 if the connection is mono (or unknowable, e.g. no patch loaded)
-	unsigned num_poly_cable_channels(Jack out, Jack in) {
-		if (!is_loaded || out.module_id >= num_modules || in.module_id >= num_modules)
-			return 0;
-
-		auto out_buf = plugin_module_get_poly_output_buffer(modules[out.module_id], out.jack_id);
-		if (!out_buf.channels || *out_buf.channels <= 1)
-			return 0;
-
-		auto in_buf = plugin_module_get_poly_input_buffer(modules[in.module_id], in.jack_id);
-		if (!in_buf.channels || *in_buf.channels <= 1)
-			return 0;
-
-		return std::min(*out_buf.channels, *in_buf.channels);
-	}
-
-	// poly_num is the user setting: 0 = Auto (compute from cables), 1-8 = hard-set
-	void set_midi_poly_num(uint16_t poly_num) {
-		pd.midi_poly_num_setting = poly_num;
-		pd.update_midi_poly_num();
-		set_midi_poly_channel_count(pd.midi_poly_num);
-	}
-
 	uint32_t get_midi_poly_num() {
 		return pd.midi_poly_num;
 	}
 
-	// Patch Mods:
-
-	void apply_static_param(const StaticParam &sparam) {
-		if (sparam.module_id < num_modules && modules[sparam.module_id])
-			modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
-		//Also set it in the patch?
-	}
-
-	void add_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
-		if (pd.add_update_mapped_knob(knobset_id, map)) {
-			cache_knob_mapping(knobset_id, map);
-		}
-	}
-
-	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
-		if (knobset_id != PatchData::MIDIKnobSet && knobset_id >= knob_maps.size())
-			return;
-
-		if (knobset_id == PatchData::MIDIKnobSet) {
-
-			auto *knobconn = map.is_midi_cc()		? &midi_cc_knob_maps[map.cc_num()] :
-							 map.is_midi_notegate() ? &midi_note_knob_maps[map.notegate_num()] :
-													  nullptr;
-			if (!knobconn)
-				return;
-
-			auto found = std::ranges::find_if(
-				*knobconn, [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
-
-			if (found != knobconn->end()) {
-				found->min = map.min;
-				found->max = map.max;
-				found->curve_type = map.curve_type;
-				found->midi_chan = map.midi_chan;
-				if (map.panel_knob_id < PanelDef::NumKnobs)
-					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
-			}
-
-			param_watcher.update_watched_param(map);
-
-		} else {
-			auto &knobconn = knob_maps[knobset_id][map.panel_knob_id];
-			auto found = std::ranges::find_if(knobconn, [&map](auto m) {
-				return map.param_id == m.map.param_id && map.module_id == m.map.module_id;
-			});
-			if (found != knobconn.end()) {
-				found->map.min = map.min;
-				found->map.max = map.max;
-				found->map.curve_type = map.curve_type;
-				if (map.panel_knob_id < PanelDef::NumKnobs)
-					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
-			}
-		}
-	}
-
-	void remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
-		if (pd.remove_mapping(knobset_id, map)) {
-			if (knobset_id == PatchData::MIDIKnobSet) {
-				uncache_midi_mapping(map);
-				param_watcher.stop_watching_param(map);
-			} else {
-				uncache_knob_mapping(knobset_id, map);
-			}
-		}
-	}
-
-	void add_midi_mapped_knob(const MappedKnob &map) {
-		if (pd.add_update_midi_map(map)) {
-			cache_midi_mapping(map);
-			param_watcher.start_watching_param(map);
-		}
-	}
-
-	void add_internal_cable(Jack in, Jack out) {
-		pd.add_internal_cable(in, out);
-		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
-		modules[out.module_id]->mark_output_patched(out.jack_id);
-		modules[in.module_id]->mark_input_patched(in.jack_id);
-		refresh_conn_flags();
-	}
-
-	void add_injack_mapping(uint16_t panel_jack_id, Jack jack) {
-		pd.add_mapped_injack(panel_jack_id, jack);
-
-		update_or_add_input_panel_conn(panel_jack_id, jack);
-
-		if (Midi::is_midi_poly_cable(panel_jack_id))
-			set_midi_poly_channel_count(pd.midi_poly_num);
-
-		bool panel_patched = false;
-		if (panel_jack_id < in_conns.size()) {
-			panel_patched = in_patched[panel_jack_id];
-
-			// TODO:
-		} else if (panel_jack_id > LastPossibleKnob) {
-			panel_patched = midi_connected;
-		}
-
-		if (panel_patched && jack.module_id < num_modules)
-			modules[jack.module_id]->mark_input_patched(jack.jack_id);
-
-		refresh_conn_flags();
-	}
-
-	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
-		pd.add_mapped_outjack(panel_jack_id, jack);
-
-		PolyJack poly_jack{jack};
-		poly_jack.buf = plugin_module_get_poly_output_buffer(modules[jack.module_id], jack.jack_id);
-		if (panel_jack_id < out_conns.size()) {
-			out_conns[panel_jack_id].push_back(poly_jack);
-
-			if (out_patched[panel_jack_id] && jack.module_id < num_modules)
-				modules[jack.module_id]->mark_output_patched(jack.jack_id);
-		}
-
-		refresh_conn_flags();
-	}
-
-	void safe_unpatch_output(Jack jack) {
-		if (jack.module_id < num_modules)
-			modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
-	}
-
-	bool output_jack_held_by_panel(Jack jack) const {
-		for (auto i = 0u; i < out_conns.size(); i++) {
-			if (!out_patched[i])
-				continue;
-			for (auto const &pj : out_conns[i])
-				if (pj.module_id == jack.module_id && pj.jack_id == jack.jack_id)
-					return true;
-		}
-		return false;
-	}
-
-	void safe_unpatch_input(Jack jack) {
-		if (jack.module_id < num_modules)
-			modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
-	}
-
-	void disconnect_injack(Jack jack) {
-		for (auto &ins : in_conns)
-			std::erase(ins, jack);
-		for (auto &ins : midi_note_pitch_conns)
-			std::erase(ins, jack);
-		for (auto &ins : midi_note_gate_conns)
-			std::erase(ins, jack);
-		for (auto &ins : midi_note_vel_conns)
-			std::erase(ins, jack);
-		for (auto &ins : midi_note_aft_conns)
-			std::erase(ins, jack);
-		for (auto &ins : midi_cc_conns)
-			std::erase(ins, jack);
-		for (auto &ins : midi_gate_conns)
-			std::erase(ins, jack);
-		for (auto &mp : midi_pulses)
-			std::erase(mp.conns, jack);
-		for (auto &mp : midi_divclk_pulses)
-			std::erase(mp.conns, jack);
-		for (auto &mp : midi_note_retrig)
-			std::erase(mp.conns, jack);
-
-		std::erase(midi_poly_pitch_conns, jack);
-		std::erase(midi_poly_gate_conns, jack);
-		std::erase(midi_poly_vel_conns, jack);
-		std::erase(midi_poly_aft_conns, jack);
-		std::erase(midi_poly_retrig.conns, jack);
-
-		safe_unpatch_input(jack);
-
-		// Unpatch the output if the int_cable has no more inputs -- unless that output is still
-		// patched to a physical panel/hardware output
-		if (auto cable = pd.find_internal_cable_with_injack(jack)) {
-			if (cable->ins.size() == 1 && !output_jack_held_by_panel(cable->out)) {
-				safe_unpatch_output(cable->out);
-			}
-		}
-
-		pd.disconnect_injack(jack);
-
-		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
-
-		refresh_conn_flags();
-	}
-
-	void remove_injack_mappings(Jack jack) {
-		for (auto &ins : in_conns)
-			std::erase(ins, jack);
-
-		if (pd.find_internal_cable_with_injack(jack) == nullptr) {
-			// unpatch the module's jack if it has no cables connected
-			safe_unpatch_input(jack);
-		}
-
-		pd.remove_injack_mappings(jack);
-
-		refresh_conn_flags();
-	}
-
-	void disconnect_outjack(Jack jack) {
-		for (auto &outs : out_conns) {
-			std::erase(outs, jack);
-		}
-		safe_unpatch_output(jack);
-
-		// Disconnect all inputs
-		if (auto cable = pd.find_internal_cable_with_outjack(jack)) {
-			for (auto in : cable->ins) {
-				safe_unpatch_input(in);
-			}
-		}
-
-		pd.disconnect_outjack(jack);
-
-		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
-
-		refresh_conn_flags();
-	}
-
-	void remove_outjack_mappings(Jack jack) {
-		for (auto &outs : out_conns) {
-			std::erase(outs, jack);
-		}
-
-		if (pd.find_internal_cable_with_outjack(jack) == nullptr) {
-			// unpatch the module's jack if it has no cables connected
-			safe_unpatch_output(jack);
-		}
-
-		pd.remove_outjack_mappings(jack);
-
-		refresh_conn_flags();
-	}
-
-	void reset_module(uint16_t module_id, std::string_view data = "") {
-		if (module_id < num_modules)
-			modules[module_id]->load_state(data);
-	}
-
-	void set_module_bypass(uint16_t module_id, bool bypassed) {
-		if (module_id < num_modules)
-			modules[module_id]->bypassed = bypassed;
-	}
-
-	// Why module creation failed, so the GUI can tell the user the truth
-	enum class CreateResult { Ok, NotFound, OutOfMemory, Crashed };
-
-	static std::unique_ptr<CoreProcessor> try_create_module(std::string_view combined_slug,
-															CreateResult *result = nullptr) {
-		if (result)
-			*result = CreateResult::Ok;
-
-		// A plugin module's constructor whose exception cannot cross the
-		// plugin boundary (pre-2.3 SDK), or that dies without a catchable
-		// exception, runs the plugin's terminate -> its imported abort() ->
-		// mm_plugin_abort, which longjmps back here. Whatever the constructor
-		// had allocated leaks into the plugin arena (bounded, reported on
-		// console).
-		AbortRescue rescue;
-		if (setjmp(rescue.jb) != 0) {
-			pr_err("Module %.*s crashed while being created\n", (int)combined_slug.size(), combined_slug.data());
-			if (result)
-				*result = CreateResult::Crashed;
-			return nullptr;
-		}
-		rescue.arm();
-
-		try {
-			auto module = ModuleFactory::create(combined_slug);
-			if (!module && result)
-				*result = CreateResult::NotFound; // unknown slug
-			return module;
-		} catch (std::bad_alloc &) {
-			pr_err("Out of memory creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
-			if (result)
-				*result = CreateResult::OutOfMemory;
-			return nullptr;
-		} catch (std::exception &e) {
-			// Plugins built with SDK >= 2.3 can propagate exceptions across
-			// the boundary (unified exidx lookup): destructors run during
-			// unwind, so this path reclaims what the constructor allocated
-			pr_err("Exception creating module %.*s: %s\n", (int)combined_slug.size(), combined_slug.data(), e.what());
-			if (result)
-				*result = CreateResult::Crashed;
-			return nullptr;
-		} catch (...) {
-			pr_err("Exception creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());
-			if (result)
-				*result = CreateResult::Crashed;
-			return nullptr;
-		}
-	}
-
-	CreateResult add_module(BrandModuleSlug slug) {
-		auto module_idx = num_modules;
-
-		pd.module_slugs.push_back(slug);
-		calc_multiple_module_indicies();
-
-		CreateResult result{CreateResult::Ok};
-		if (!add_module_at_idx(slug, module_idx, &result)) {
-			modules[module_idx].reset();
-			pd.module_slugs.pop_back();
-			calc_multiple_module_indicies();
-		}
-		return result;
-	}
-
-	bool add_module_at_idx(BrandModuleSlug slug, unsigned module_idx, CreateResult *result = nullptr) {
-		modules[module_idx] = try_create_module(slug, result);
-		if (modules[module_idx] == nullptr) {
-			pr_err("Could not create module %s\n", slug.c_str());
-			modules[module_idx] = std::make_unique<NullModule>();
-			modules[module_idx]->id = module_idx;
-			return false;
-		}
-		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
-
-		modules[module_idx]->id = module_idx;
-
-		// Match order that VCV does: fromJson (via load_state), then onAdd (via plugin_module_init)
-		reset_module(module_idx);
-		plugin_module_init(modules[module_idx]);
-
-		modules[module_idx]->mark_all_inputs_unpatched();
-		modules[module_idx]->mark_all_outputs_unpatched();
-		modules[module_idx]->set_samplerate(samplerate);
-
-		rebalance_modules();
-
-		// Mark jacks patched
-		mark_patched_jacks(module_idx);
-		mark_patched_panel_jacks(module_idx);
-		return true;
-	}
-
-	void remove_module(uint16_t module_idx) {
-		// For all cache structures, if (module_id > deleted_module_idx) module_id -= 1;
-
-		auto squash_module_id = [gap = module_idx](auto &module_id) {
-			if (module_id > gap && module_id != disconnected_jack.module_id)
-				module_id--;
-		};
-
-		auto erase_and_squash = [=](auto &container) {
-			for (auto &item : container) {
-				std::erase_if(item, [=](auto &map) { return (map.module_id == module_idx); });
-				for (auto &map : item) {
-					squash_module_id(map.module_id);
-				}
-			}
-		};
-
-		auto erase_and_squash_inner = [=](auto &container) {
-			for (auto &item : container) {
-				std::erase_if(item.conns, [=](auto &map) { return (map.module_id == module_idx); });
-				for (auto &map : item.conns) {
-					squash_module_id(map.module_id);
-				}
-			}
-		};
-
-		// Panel Input connections
-		erase_and_squash(in_conns);
-
-		// Panel Output connections
-		erase_and_squash(out_conns);
-
-		// Internal cables
-		// Inform other modules connected to this one
-		// that their jacks are to be disconnected
-		for (auto &cable : pd.int_cables) {
-
-			unsigned ins_to_disconnect = 0;
-			for (auto in : cable.ins) {
-				if (cable.out.module_id == module_idx) {
-					modules[in.module_id]->mark_input_unpatched(in.jack_id);
-				}
-
-				if (in.module_id == module_idx) {
-					ins_to_disconnect++;
-				}
-			}
-
-			if (ins_to_disconnect == cable.ins.size()) {
-				modules[cable.out.module_id]->mark_output_unpatched(cable.out.jack_id);
-			}
-		}
-
-		// Knob and MIDI connections
-		for (auto &param_set : knob_maps) {
-			// erase_and_squash(knob_set);
-			for (auto &set : param_set) {
-				std::erase_if(set, [=](auto &map) { return (map.map.module_id == module_idx); });
-				for (auto &map : set) {
-					squash_module_id(map.map.module_id);
-				}
-			}
-		}
-
-		erase_and_squash(midi_cc_knob_maps);
-		erase_and_squash(midi_note_knob_maps);
-		erase_and_squash(midi_note_pitch_conns);
-		erase_and_squash(midi_note_gate_conns);
-		erase_and_squash(midi_note_vel_conns);
-		erase_and_squash(midi_note_aft_conns);
-		erase_and_squash(midi_cc_conns);
-		erase_and_squash(midi_gate_conns);
-		erase_and_squash_inner(midi_note_retrig);
-		erase_and_squash_inner(midi_pulses);
-		erase_and_squash_inner(midi_divclk_pulses);
-
-		// Poly cable flat vectors
-		auto erase_and_squash_flat = [=, &squash_module_id](auto &vec) {
-			std::erase_if(vec, [=](auto &map) { return (map.module_id == module_idx); });
-			for (auto &map : vec) {
-				squash_module_id(map.module_id);
-			}
-		};
-		erase_and_squash_flat(midi_poly_pitch_conns);
-		erase_and_squash_flat(midi_poly_gate_conns);
-		erase_and_squash_flat(midi_poly_vel_conns);
-		erase_and_squash_flat(midi_poly_aft_conns);
-		erase_and_squash_flat(midi_poly_retrig.conns);
-
-		pd.remove_module(module_idx);
-
-		plugin_module_deinit(modules[module_idx]);
-		modules[module_idx].reset();
-
-		// Move [i+1...end) to i
-		std::move(std::next(modules.begin(), module_idx + 1), modules.end(), std::next(modules.begin(), module_idx));
-
-		calc_multiple_module_indicies();
-
-		for (auto i = 0u; i < num_modules; i++) {
-			if (modules[i])
-				modules[i]->id = i;
-		}
-
-		refresh_conn_flags();
-
-		rebalance_modules();
-	}
-
-	// replace a module without changing any mappings or cables
-	void substitute_module(unsigned module_idx, BrandModuleSlug new_slug) {
-		if (module_idx >= num_modules)
-			return;
-
-		pr_trace("Subs. module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
-
-		// De-init original module
-		plugin_module_deinit(modules[module_idx]);
-		modules[module_idx].reset();
-
-		// Add new module
-		pd.module_slugs[module_idx] = new_slug;
-		// The new module's CPU load is unknown, so the balance has to be measured again
-		pd.clear_load_balance();
-		calc_multiple_module_indicies();
-		add_module_at_idx(new_slug, module_idx);
-	}
-
-	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
-		if (module_idx >= num_modules)
-			return;
-
-		pr_trace("Replace module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
-
-		//  Erase cached connections referencing this module (unlike remove_module, there is no squashing)
-
-		auto erase_matching = [=](auto &container) {
-			for (auto &item : container) {
-				std::erase_if(item, [=](auto &map) { return (map.module_id == module_idx); });
-			}
-		};
-
-		auto erase_matching_inner = [=](auto &container) {
-			for (auto &item : container) {
-				std::erase_if(item.conns, [=](auto &map) { return (map.module_id == module_idx); });
-			}
-		};
-
-		// Panel connections
-		erase_matching(in_conns);
-		erase_matching(out_conns);
-
-		// Inform other modules their jacks are disconnected
-		for (auto &cable : pd.int_cables) {
-			unsigned ins_to_disconnect = 0;
-			for (auto in : cable.ins) {
-				if (cable.out.module_id == module_idx) {
-					modules[in.module_id]->mark_input_unpatched(in.jack_id);
-				}
-				if (in.module_id == module_idx) {
-					ins_to_disconnect++;
-				}
-			}
-			if (ins_to_disconnect == cable.ins.size()) {
-				modules[cable.out.module_id]->mark_output_unpatched(cable.out.jack_id);
-			}
-		}
-
-		// Knob maps
-		for (auto &param_set : knob_maps) {
-			for (auto &set : param_set) {
-				std::erase_if(set, [=](auto &map) { return (map.map.module_id == module_idx); });
-			}
-		}
-
-		// MIDI maps
-		erase_matching(midi_cc_knob_maps);
-		erase_matching(midi_note_knob_maps);
-		erase_matching(midi_note_pitch_conns);
-		erase_matching(midi_note_gate_conns);
-		erase_matching(midi_note_vel_conns);
-		erase_matching(midi_note_aft_conns);
-		erase_matching(midi_cc_conns);
-		erase_matching(midi_gate_conns);
-		erase_matching_inner(midi_note_retrig);
-		erase_matching_inner(midi_pulses);
-		erase_matching_inner(midi_divclk_pulses);
-
-		// Deinit old module
-		plugin_module_deinit(modules[module_idx]);
-		modules[module_idx].reset();
-
-		// Clean up PatchData (cables, mapped_ins/outs, static_knobs, etc.)
-		pd.blank_out_module(module_idx);
-
-		// Create new module in the same slot
-		pd.module_slugs[module_idx] = new_slug;
-		calc_multiple_module_indicies();
-		add_module_at_idx(new_slug, module_idx);
-
-		refresh_conn_flags();
-	}
-
-	// Jack patched/unpatched status
-
-	// Follow every internal cable and tell the modules that their jacks are patched
-	// Optionally filter by module id
-	void mark_patched_jacks(std::optional<uint16_t> module_id = std::nullopt) {
-		for (auto const &cable : pd.int_cables) {
-			if (!module_id.has_value() || cable.out.module_id == module_id.value())
-				modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
-
-			for (auto const &input_jack : cable.ins) {
-				if (input_jack.module_id < num_modules)
-					if (!module_id.has_value() || input_jack.module_id == module_id.value())
-						modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
-			}
-		}
-	}
-
-	void mark_patched_panel_jacks(std::optional<uint16_t> module_idx = std::nullopt) {
-		for (auto i = 0u; auto const &panel_out : out_conns) {
-			if (out_patched[i]) {
-				for (auto const &c : panel_out) {
-					if (!module_idx.has_value() || c.module_id == module_idx)
-						modules[c.module_id]->mark_output_patched(c.jack_id);
-				}
-			}
-			i++;
-		}
-		for (auto i = 0u; auto const &panel_in : in_conns) {
-			if (in_patched[i]) {
-				for (auto const &c : panel_in) {
-					if (!module_idx.has_value() || c.module_id == module_idx)
-						modules[c.module_id]->mark_input_patched(c.jack_id);
-				}
-			}
-			i++;
-		}
-	}
+	//
+	// Audio context: jack sense and MIDI connect/disconnect events
+	//
 
 	void set_input_jack_patched_status(uint32_t panel_in_jack_id, bool is_patched) {
 		if (panel_in_jack_id >= in_conns.size())
@@ -1731,512 +974,49 @@ public:
 		midi_connected = false;
 	}
 
-	// Set mode for all maps
-	void set_catchup_mode(CatchupParam::Mode mode, bool allow_jump_outofrange);
-
-	// Set mode for one mapping only
-	void set_catchup_mode(int knob_set_idx, unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
-
-	// Set mode for one module/param, in any knobset
-	void set_catchup_mode(unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
-
-	bool is_param_tracking(unsigned module_id, unsigned param_id);
-
-	std::optional<unsigned> panel_knob_catchup_inaccessible();
-
 private:
-	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
+	//
+	// Non-audio private helpers
+	//
 
-	// Cache functions:
-	void clear_cache() {
-		for (auto i = 0u; i < dup_module_index.size(); i++) // NOLINT
-			dup_module_index[i] = 0;
-		// gcc 12.3 complains of writing past end of array
-		// when using range-based for loop
-		// for (auto &d : dup_module_index)
-		// 	d = 0;
+	// patch_player_balance.cc
+	// Records the load balance in the patch data, so it can be saved to the patch file
+	// and re-used the next time the patch is loaded.
+	void store_load_balance(CoreBalancer::Arrangement const &arrangement, std::span<const unsigned> cpu_times);
 
-		for (auto &out_conn : out_conns)
-			out_conn.clear();
+	// patch_player_mappings.cc
+	void safe_unpatch_output(Jack jack);
+	void safe_unpatch_input(Jack jack);
+	bool output_jack_held_by_panel(Jack jack) const;
 
-		for (auto &in_conn : in_conns)
-			in_conn.clear();
-
-		panel_in_vals = {};
-
-		for (auto &knob_set : knob_maps)
-			for (auto &mappings : knob_set)
-				mappings.clear();
-
-		for (auto &conn : midi_cc_knob_maps)
-			conn.clear();
-		for (auto &conn : midi_note_knob_maps)
-			conn.clear();
-		for (auto &conn : midi_note_pitch_conns)
-			conn.clear();
-		for (auto &conn : midi_note_gate_conns)
-			conn.clear();
-		for (auto &conn : midi_note_vel_conns)
-			conn.clear();
-		for (auto &conn : midi_note_aft_conns)
-			conn.clear();
-		for (auto &ret : midi_note_retrig)
-			ret.conns.clear();
-		for (auto &conn : midi_cc_conns)
-			conn.clear();
-		for (auto &conn : midi_gate_conns)
-			conn.clear();
-		for (auto &mp : midi_pulses)
-			mp.conns.clear();
-		for (auto &mp : midi_divclk_pulses)
-			mp.conns.clear();
-
-		midi_poly_pitch_conns.clear();
-		midi_poly_gate_conns.clear();
-		midi_poly_vel_conns.clear();
-		midi_poly_aft_conns.clear();
-		midi_poly_retrig.conns.clear();
-
-		refresh_conn_flags();
-	}
-
-	void refresh_conn_flags() {
-		// Convert an in_conns[]/out_conns[] index to its jack_senses bit position.
-		// Bits 24 is unused in jack_senses, so it's a safe bit to set if an invalid panel idx is given
-		auto in_sense_bit = [](unsigned panel_in_idx) {
-			return main_jacksense_input_bit(panel_in_idx)
-				.value_or(AudioExpander::jacksense_input_bit(panel_in_idx).value_or(24));
-		};
-		auto out_sense_bit = [](unsigned panel_out_idx) {
-			return main_jacksense_output_bit(panel_out_idx)
-				.value_or(AudioExpander::jacksense_output_bit(panel_out_idx).value_or(24));
-		};
-
-		uint32_t in_mask = 0;
-		for (auto i = 0u; i < in_conns.size(); i++) {
-			if (!in_conns[i].empty())
-				in_mask |= (1u << in_sense_bit(i));
-		}
-
-		uint32_t out_mask = 0;
-		for (auto i = 0u; i < out_conns.size(); i++) {
-			if (!out_conns[i].empty())
-				out_mask |= (1u << out_sense_bit(i));
-
-			// Direct panel-in to panel-out passthroughs read panel_in_vals via
-			// out_conns and int_cables without an in_conns entry
-			for (auto const &pj : out_conns[i]) {
-				if (pj.module_id == 0 && pj.jack_id < NumInJacks)
-					in_mask |= (1u << in_sense_bit(pj.jack_id));
-			}
-		}
-		for (auto const &cable : pd.int_cables) {
-			if (cable.out.module_id == 0 && cable.out.jack_id < NumInJacks)
-				in_mask |= (1u << in_sense_bit(cable.out.jack_id));
-		}
-
-		used_input_jacks_ = in_mask;
-		used_output_jacks_ = out_mask;
-
-		has_knob_maps_ = std::ranges::any_of(knob_maps, [](auto const &param_set) {
-			return std::ranges::any_of(param_set, [](auto const &maps) { return !maps.empty(); });
-		});
-
-		auto any_conns = [](auto const &pulses) {
-			return std::ranges::any_of(pulses, [](auto const &mp) { return !mp.conns.empty(); });
-		};
-		has_midi_pulse_conns = any_conns(midi_pulses) || any_conns(midi_divclk_pulses) || any_conns(midi_note_retrig) ||
-							   !midi_poly_retrig.conns.empty();
-	}
+	// patch_player_cache.cc
+	void clear_cache();
+	void refresh_conn_flags();
 
 	// Returns the index in int_cables[] for a cable that has the given Jack as an input
 	// Return -1 if does not exist
-	int find_int_cable_input_jack(Jack in) {
-		for (auto [net_i, cable] : enumerate(pd.int_cables)) {
-			for (auto &input_jack : cable.ins) {
-				if (in == input_jack)
-					return net_i;
-			}
-		}
-		return -1;
-	}
+	int find_int_cable_input_jack(Jack in);
+	bool has_other_mapped_in(Jack j);
 
-	bool has_other_mapped_in(Jack j) {
-		int found = 0;
-		for (auto const &cable : pd.mapped_ins) {
-			for (auto const &in : cable.ins) {
-				if (in == j) {
-					if (++found == 2)
-						return true;
-				}
-			}
-		}
-		return false;
-	};
-
-public:
-	// Map all the panel jack connections into in_conns[] and out_conns[]
-	// which are indexed by panel_jack_id.
-	// This speeds up propagating I/O from user to virtual modules
-	void calc_panel_jack_connections() {
-		uint16_t next_midi_hub_slot = MidiHubOffset;
-
-		for (auto const &cable : pd.mapped_ins) {
-			uint16_t panel_jack_id = cable.panel_jack_id;
-
-			for (auto const &input_jack : cable.ins) {
-				auto jack_id = input_jack.jack_id;
-				auto module_id = input_jack.module_id;
-
-				if (module_id < 0 || jack_id < 0)
-					break;
-
-				if (input_jack.module_id == 0) {
-					// mapped_ins->Hub passthrough:
-					// MIDI or Panel In (panel_jack_id) -> Panel Out (input_jack.jack_id)
-					if (Midi::is_midi_poly_cable(panel_jack_id) || Midi::is_midi_panel_id(panel_jack_id)) {
-						// MIDI->Hub passthrough: allocate a unique slot in panel_in_vals
-						// The slot index is stored in midi_*_conns[]
-						if (next_midi_hub_slot >= PanelInValsSize) {
-							pr_err("Too many MIDI-to-Hub connections\n");
-							break;
-						}
-						auto midi_hub_jack = Jack{.module_id = 0, .jack_id = next_midi_hub_slot++};
-						update_or_add_input_panel_conn(panel_jack_id, midi_hub_jack);
-						pr_trace(" to jack: m=%d, p=%d (passthrough jack)\n", module_id, midi_hub_jack.jack_id);
-
-						// Hub passthrough jack->Panel Out jack:
-						out_conns[input_jack.jack_id].push_back({midi_hub_jack, {}});
-						pr_trace("Connect MIDI %d to panel out %d via hub\n", panel_jack_id, input_jack.jack_id);
-					} else {
-						out_conns[input_jack.jack_id].push_back(PolyJack{{0, panel_jack_id}, {}});
-						pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
-					}
-
-				} else if (find_int_cable_input_jack(input_jack) >= 0 || has_other_mapped_in(input_jack)) {
-					// The module input jack also has an internal cable or multiple panel input mappings.
-					// In order to sum inputs, we map the panel/MIDI input to the Hub input (passthrough),
-					// and then add a second internal cable from Hub output to the
-					// original module input jack. Then the summing happens automatically via cable_cache.
-
-					pr_trace("Panel in %d summed to m=%d j=%d\n", panel_jack_id, module_id, jack_id);
-
-					// Jack source_jack =
-					// 	(Midi::is_midi_poly_cable(panel_jack_id) || Midi::is_midi_panel_id(panel_jack_id)) ?
-					// 		Jack{.module_id = 0, .jack_id = next_midi_hub_slot++} :
-					// 		Jack{.module_id = 0, .jack_id = panel_jack_id};
-
-					// if (source_jack.jack_id >= PanelInValsSize) {
-					// 		pr_err("Too many MIDI-to-Hub connections\n");
-					//   	break;
-					// }
-					// 	update_or_add_input_panel_conn(panel_jack_id, source_jack);
-					// 	pr_trace(" to hub passthrough slot %d\n", source_jack.jack_id);
-					// 	pd.add_internal_cable(input_jack, source_jack);
-
-					if (Midi::is_midi_poly_cable(panel_jack_id) || Midi::is_midi_panel_id(panel_jack_id)) {
-						// MIDI summed with internal cable: allocate a hub slot for the MIDI value
-						if (next_midi_hub_slot >= PanelInValsSize) {
-							pr_err("Too many MIDI-to-Hub connections\n");
-							break;
-						}
-						auto midi_hub_jack = Jack{.module_id = 0, .jack_id = next_midi_hub_slot++};
-						update_or_add_input_panel_conn(panel_jack_id, midi_hub_jack);
-						pr_trace(" to hub passthrough slot %d\n", midi_hub_jack.jack_id);
-
-						pd.add_internal_cable(input_jack, midi_hub_jack);
-					} else {
-
-						// Connect panel input to hub input:
-						update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
-						pr_trace(" to hub passthrough slot %d\n", panel_jack_id);
-
-						// Add cable from hub output to the original panel-mapped jack
-						pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = panel_jack_id});
-					}
-
-				} else {
-					// Simple connection with no summing — route Panel In directly to module input
-					update_or_add_input_panel_conn(panel_jack_id, input_jack);
-					pr_trace(" to jack: m=%d, in=%d\n", module_id, jack_id);
-				}
-			}
-		}
-
-		for (auto const &cable : pd.mapped_outs) {
-			auto panel_jack_id = cable.panel_jack_id;
-			if (panel_jack_id >= out_conns.size())
-				break;
-
-			PolyJack poly_jack{cable.out};
-			if (cable.out.module_id < num_modules)
-				poly_jack.buf = plugin_module_get_poly_output_buffer(modules[cable.out.module_id], cable.out.jack_id);
-
-			out_conns[panel_jack_id].push_back(poly_jack);
-			pr_trace("Connect module %d out jack %d to panel out %d\n",
-					 cable.out.module_id,
-					 cable.out.jack_id,
-					 panel_jack_id);
-		}
-
-		refresh_conn_flags();
-	}
-
-	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack) {
-		pr_trace("update_or_add_input_panel_conn: %x\n", panel_jack_id);
-		const auto chan = Midi::midi_channel(panel_jack_id);
-
-		const auto polybuf =
-			(input_jack.module_id < num_modules) ?
-				plugin_module_get_poly_input_buffer(modules[input_jack.module_id], input_jack.jack_id) :
-				CoreProcessor::PolyPortBuffer{};
-
-		// The 1-4 and 5-8 poly cables share the same connection vectors; poly_base selects
-		// which group of MIDI poly channels (0-3 vs 4-7) the cable carries.
-		constexpr uint8_t Base5_8 = Midi::MidiPolyCableChanBase;
-
-		if (Midi::midi_note_pitch_poly(panel_jack_id)) {
-			update_or_add_poly(midi_poly_pitch_conns, input_jack, chan, polybuf);
-			pr_trace("MIDI note poly ch:%u", chan);
-
-		} else if (Midi::midi_note_pitch_poly5_8(panel_jack_id)) {
-			update_or_add_poly(midi_poly_pitch_conns, input_jack, chan, polybuf, Base5_8);
-			pr_trace("MIDI note poly 5-8 ch:%u", chan);
-
-		} else if (Midi::midi_note_gate_poly(panel_jack_id)) {
-			update_or_add_poly(midi_poly_gate_conns, input_jack, chan, polybuf);
-			pr_trace("MIDI gate poly ch:%u", chan);
-
-		} else if (Midi::midi_note_gate_poly5_8(panel_jack_id)) {
-			update_or_add_poly(midi_poly_gate_conns, input_jack, chan, polybuf, Base5_8);
-			pr_trace("MIDI gate poly 5-8 ch:%u", chan);
-
-		} else if (Midi::midi_note_vel_poly(panel_jack_id)) {
-			update_or_add_poly(midi_poly_vel_conns, input_jack, chan, polybuf);
-			pr_trace("MIDI vel poly ch:%u", chan);
-
-		} else if (Midi::midi_note_vel_poly5_8(panel_jack_id)) {
-			update_or_add_poly(midi_poly_vel_conns, input_jack, chan, polybuf, Base5_8);
-			pr_trace("MIDI vel poly 5-8 ch:%u", chan);
-
-		} else if (Midi::midi_note_aft_poly(panel_jack_id)) {
-			update_or_add_poly(midi_poly_aft_conns, input_jack, chan, polybuf);
-			pr_trace("MIDI aft poly ch:%u", chan);
-
-		} else if (Midi::midi_note_aft_poly5_8(panel_jack_id)) {
-			update_or_add_poly(midi_poly_aft_conns, input_jack, chan, polybuf, Base5_8);
-			pr_trace("MIDI aft poly 5-8 ch:%u", chan);
-
-		} else if (Midi::midi_note_retrig_poly(panel_jack_id)) {
-			update_or_add_poly(midi_poly_retrig.conns, input_jack, chan, polybuf);
-			pr_trace("MIDI retrig poly ch:%u", chan);
-
-		} else if (Midi::midi_note_retrig_poly5_8(panel_jack_id)) {
-			update_or_add_poly(midi_poly_retrig.conns, input_jack, chan, polybuf, Base5_8);
-			pr_trace("MIDI retrig poly 5-8 ch:%u", chan);
-
-		} else if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_pitch_conns[num.value()], input_jack, chan);
-			pr_trace("MIDI note (poly %d) ch:%u", num.value(), chan);
-
-		} else if (auto num = Midi::midi_note_gate(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_gate_conns[num.value()], input_jack, chan);
-			pr_trace("MIDI gate (poly %d) ch:%u", num.value(), chan);
-
-		} else if (auto num = Midi::midi_note_vel(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_vel_conns[num.value()], input_jack, chan);
-			pr_trace("MIDI vel (poly %d) ch:%u", num.value(), chan);
-
-		} else if (auto num = Midi::midi_note_aft(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_aft_conns[num.value()], input_jack, chan);
-			pr_trace("MIDI aftertouch (poly %d) ch:%u", num.value(), chan);
-
-		} else if (auto num = Midi::midi_note_retrig(panel_jack_id); num.has_value()) {
-			update_or_add(midi_note_retrig[num.value()].conns, input_jack, chan);
-			pr_trace("MIDI retrig (poly %d) ch:%u", num.value(), chan);
-
-		} else if (auto num = Midi::midi_gate(panel_jack_id); num.has_value()) {
-			update_or_add(midi_gate_conns[num.value()], input_jack, chan);
-			pr_trace("MIDI note %d gate ch:%u", num.value(), chan);
-
-		} else if (auto num = Midi::midi_cc(panel_jack_id); num.has_value()) {
-			update_or_add(midi_cc_conns[num.value()], input_jack, chan);
-			pr_trace("MIDI CC/PW %d ch:%u", num.value(), chan);
-
-		} else if (auto num = Midi::midi_clk(panel_jack_id); num.has_value()) {
-			update_or_add(midi_pulses[TimingEvents::Clock].conns, input_jack);
-			pr_trace("MIDI Clk");
-
-		} else if (auto num = Midi::midi_divclk(panel_jack_id); num.has_value()) {
-			uint8_t div_event = *num == 0  ? Midi::DivClock1 :
-								*num == 1  ? Midi::DivClock2 :
-								*num == 2  ? Midi::DivClock3 :
-								*num == 5  ? Midi::DivClock6 :
-								*num == 11 ? Midi::DivClock12 :
-								*num == 23 ? Midi::DivClock24 :
-								*num == 47 ? Midi::DivClock48 :
-								*num == 95 ? Midi::DivClock96 :
-											 0xFF;
-			if (div_event == 0xFF) {
-				pr_err("Error: Unknown MIDI clock division: %d. Using /24\n", *num);
-				div_event = Midi::DivClock24;
-			}
-			update_or_add(midi_divclk_pulses[div_event].conns, input_jack);
-			pr_trace("MIDI Div %d Clk", num.value() + 1);
-
-		} else if (auto num = Midi::midi_transport(panel_jack_id); num.has_value()) {
-			update_or_add(midi_pulses[num.value() + TimingEvents::Start].conns, input_jack);
-			pr_trace("MIDI %s", num.value() == 0 ? "Start" : num.value() == 1 ? "Stop" : "Cont");
-
-		} else if (panel_jack_id >= 0 && panel_jack_id < in_conns.size()) {
-			update_or_add(in_conns[panel_jack_id], input_jack);
-			pr_trace("Map %d", panel_jack_id);
-
-		} else
-			pr_err("Bad panel jack mapping: panel_jack_id=%d", panel_jack_id);
-	}
-
-	// Check for multiple instances of same module type, and cache the results
-	// This is used to create unique names for modules (e.g. LFO#1, LFO#2,...)
-	void calc_multiple_module_indicies() {
-
-		num_modules = pd.module_slugs.size(); //refresh this anytime we are refreshing dup_module_index
-
-		// Todo: this is a naive implementation, perhaps can be made more efficient
-		for (size_t i = 0; i < num_modules; i++) {
-
-			unsigned found = 1;
-			unsigned this_index = 0;
-			for (size_t j = 0; j < num_modules; j++) {
-				if (i == j) {
-					this_index = found;
-					continue;
-				}
-
-				auto &this_slug = pd.module_slugs[i];
-				auto &that_slug = pd.module_slugs[j];
-				if (that_slug == this_slug) {
-					found++;
-				}
-			}
-			if (found == 1)
-				this_index = 0;
-			dup_module_index[i] = this_index;
-		}
-	}
-
-private:
-	static void update_or_add(std::vector<Jack> &v, const Jack &d) {
-		if (auto found = std::ranges::find(v, d); found == v.end())
-			v.push_back(d);
-	}
-
-	static void update_or_add(std::vector<MappedKnob> &v, const MappedKnob &d) {
-		for (auto &el : v) {
-			if (el.maps_to_same_as(d)) {
-				el = d;
-				return;
-			}
-		}
-		v.push_back(d);
-	}
+	static void update_or_add(std::vector<Jack> &v, const Jack &d);
+	static void update_or_add(std::vector<MappedKnob> &v, const MappedKnob &d);
 
 	template<typename T>
 	static void update_or_add(std::vector<T> &v, const Jack &d, uint32_t midi_chan = 0)
-		requires std::derived_from<T, JackMidi>
-	{
-		for (auto &el : v) {
-			if (el.module_id == d.module_id && el.jack_id == d.jack_id) {
-				el.midi_chan = midi_chan;
-				return;
-			}
-		}
-		T entry{};
-		static_cast<Jack &>(entry) = d;
-		entry.midi_chan = midi_chan;
-		v.push_back(entry);
-	}
+		requires std::derived_from<T, JackMidi>;
 
 	static void update_or_add_poly(std::vector<PolyJackMidi> &v,
 								   const Jack &d,
 								   uint32_t midi_chan,
 								   CoreProcessor::PolyPortBuffer buf,
-								   uint8_t poly_base = 0) {
-		for (auto &el : v) {
-			if (el.module_id == d.module_id && el.jack_id == d.jack_id) {
-				el.midi_chan = midi_chan;
-				el.buf = buf;
-				el.poly_base = poly_base;
-				return;
-			}
-		}
-		PolyJackMidi entry{};
-		static_cast<Jack &>(entry) = d;
-		entry.midi_chan = midi_chan;
-		entry.buf = buf;
-		entry.poly_base = poly_base;
-		v.push_back(entry);
-	}
+								   uint8_t poly_base = 0);
 
 	// Cache a panel knob mapping into knob_conns[]
-	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
-		if (knob_set >= knob_maps.size())
-			return;
-
-		if (k.is_panel_knob() || k.is_button()) {
-			// Update existing, if present
-			for (auto &el : knob_maps[knob_set][k.panel_knob_id]) {
-				if (el.map.maps_to_same_as(k)) {
-					el.map = k;
-					return;
-				}
-			}
-			// Create new entry:
-			CatchupParam f{};
-			f.mode = catchup_manager.get_default_mode();
-			knob_maps[knob_set][k.panel_knob_id].push_back({k, f});
-			refresh_conn_flags();
-		} else
-			pr_err("Cannot map panel knob id %u\n", k.panel_knob_id);
-	}
-
+	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k);
 	//Remove a mapping
-	void uncache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
-		if (knob_set >= knob_maps.size())
-			return;
-		if (k.panel_knob_id >= knob_maps[knob_set].size())
-			return;
-		std::erase_if(knob_maps[knob_set][k.panel_knob_id], [&k](auto m) { return (k.maps_to_same_as(m.map)); });
-		refresh_conn_flags();
-	}
-
-	void cache_midi_mapping(const MappedKnob &k) {
-		if (k.is_midi_cc()) {
-			pr_trace("Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
-			update_or_add(midi_cc_knob_maps[k.cc_num()], k);
-
-		} else if (k.is_midi_notegate()) {
-			pr_trace("Midi Map: Note %d to m:%d p:%d\n", k.notegate_num(), k.module_id, k.param_id);
-			update_or_add(midi_note_knob_maps[k.notegate_num()], k);
-
-		} else {
-			pr_warn("Bad Midi Map: panel_knob_id:%d to m:%d p:%d\n", k.panel_knob_id, k.module_id, k.param_id);
-		}
-	}
-
-	void uncache_midi_mapping(const MappedKnob &k) {
-		if (k.is_midi_cc()) {
-			pr_trace("Midi un-map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
-			std::erase_if(midi_cc_knob_maps[k.cc_num()], [&k](auto m) { return (k.maps_to_same_as(m)); });
-
-		} else if (k.is_midi_notegate()) {
-			pr_trace("Midi un-map: Note %d to m:%d p:%d\n", k.notegate_num(), k.module_id, k.param_id);
-			std::erase_if(midi_note_knob_maps[k.notegate_num()], [&k](auto m) { return (k.maps_to_same_as(m)); });
-
-		} else {
-			pr_warn("Cannot unmap MIDI: raw panel_knob_id:%d to m:%d p:%d\n", k.panel_knob_id, k.module_id, k.param_id);
-		}
-	}
+	void uncache_knob_mapping(unsigned knob_set, const MappedKnob &k);
+	void cache_midi_mapping(const MappedKnob &k);
+	void uncache_midi_mapping(const MappedKnob &k);
 
 ///////////////////////////////////////
 #if defined(TESTPROJECT)
