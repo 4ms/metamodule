@@ -1082,6 +1082,7 @@ public:
 			auto module = ModuleFactory::create(combined_slug);
 			if (!module && result)
 				*result = CreateResult::NotFound; // unknown slug
+			plugin_module_set_model(module, combined_slug);
 			return module;
 		} catch (std::bad_alloc &) {
 			pr_err("Out of memory creating module %.*s\n", (int)combined_slug.size(), combined_slug.data());

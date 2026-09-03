@@ -2,12 +2,14 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "engine/Module.hpp"
 #include <memory>
+#include <string_view>
 
 namespace MetaModule
 {
 
 rack::engine::Module *as_rack_module(CoreProcessor *module);
 
+void plugin_module_set_model(std::unique_ptr<CoreProcessor> &module, std::string_view combined_slug);
 void plugin_module_init(std::unique_ptr<CoreProcessor> &module);
 void plugin_module_deinit(std::unique_ptr<CoreProcessor> &module);
 

@@ -6,6 +6,7 @@ set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../)
 
 add_library(vcv_plugin_internal STATIC 
 	make_element.cc
+	rack_model_lookup.cc
 )
 
 target_include_directories(vcv_plugin_internal PRIVATE 

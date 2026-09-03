@@ -14,6 +14,7 @@
 #include "untar_contents.hh"
 #include "util/monotonic_allocator.hh"
 #include "util/version_tools.hh"
+#include "vcv_plugin/internal/rack_model_lookup.hh"
 #include <algorithm>
 #include <cstdint>
 #include <string>
@@ -376,6 +377,7 @@ public:
 			for (auto const &brand : new_brands) {
 				pr_err("Unregistering brand '%s' from crashed plugin\n", brand.c_str());
 				ModuleFactory::unregisterBrand(brand);
+				RackModelLookup::remove_brand(brand);
 			}
 			plugin.rack_plugin.models.clear();
 			plugin.rack_plugin = {};

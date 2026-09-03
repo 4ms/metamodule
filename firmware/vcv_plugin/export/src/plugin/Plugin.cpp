@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "CoreModules/moduleFactory.hh"
+#include "vcv_plugin/internal/rack_model_lookup.hh"
 
 extern rack::plugin::Plugin *pluginInstance;
 
@@ -64,6 +65,7 @@ void Plugin::addModel(Model *model) {
 		.description = "", .width_hp = 1, .elements = model->elements, .indices = model->indices, .bypass_routes = {}};
 
 	ModuleFactory::registerModuleType(brand, slug, model->creation_func, info, panel_filename);
+	RackModelLookup::add(brand, slug, model);
 
 	model->plugin = this;
 	models.push_back(model);
@@ -81,6 +83,7 @@ Plugin::Plugin(std::string slug)
 }
 
 Plugin::~Plugin() {
+	MetaModule::RackModelLookup::remove_brand(slug);
 	for (Model *model : models) {
 		// In VCV Rack: don't delete model because it's allocated once and referenced by a global.
 

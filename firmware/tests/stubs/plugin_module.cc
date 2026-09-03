@@ -1,6 +1,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "test_poly_module.hh"
 #include <memory>
+#include <string_view>
 
 namespace rack::engine
 {
@@ -14,6 +15,8 @@ rack::engine::Module *as_rack_module(CoreProcessor *) {
 	return nullptr;
 }
 
+void plugin_module_set_model(std::unique_ptr<CoreProcessor> &module, std::string_view combined_slug) {
+}
 void plugin_module_init(std::unique_ptr<CoreProcessor> &module) {
 }
 void plugin_module_deinit(std::unique_ptr<CoreProcessor> &module) {
