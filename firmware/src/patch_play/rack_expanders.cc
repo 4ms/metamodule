@@ -1,7 +1,7 @@
 #include "patch_play/rack_expanders.hh"
 #include "patch_play/expander_hookup.hh"
+#include "plugin_module.hh"
 #include "pr_dbg.hh"
-#include "vcv_plugin/internal/rack_module_registry.hh"
 #include <algorithm>
 #include <engine/Module.hpp>
 
@@ -9,8 +9,8 @@ namespace MetaModule
 {
 
 bool RackExpanders::connect(CoreProcessor *left, CoreProcessor *right, uint16_t left_id, uint16_t right_id) {
-	auto *left_module = RackModuleRegistry::as_rack_module(left);
-	auto *right_module = RackModuleRegistry::as_rack_module(right);
+	auto *left_module = as_rack_module(left);
+	auto *right_module = as_rack_module(right);
 
 	if (!left_module || !right_module) {
 		pr_warn("Expander connection %u -> %u skipped: not rack modules\n", left_id, right_id);

@@ -2,8 +2,17 @@
 #include "test_poly_module.hh"
 #include <memory>
 
+namespace rack::engine
+{
+struct Module;
+}
+
 namespace MetaModule
 {
+
+rack::engine::Module *as_rack_module(CoreProcessor *) {
+	return nullptr;
+}
 
 void plugin_module_init(std::unique_ptr<CoreProcessor> &module) {
 }

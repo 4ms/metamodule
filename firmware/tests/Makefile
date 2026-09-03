@@ -37,7 +37,6 @@ TEST_SOURCES += coreproc_plugin/dsp/block_resampler.cc
 TEST_SOURCES += coreproc_plugin/wav/wav_file_stream.cc
 TEST_SOURCES += $(TEST_DIR)/stubs/async_thread_control.cc
 TEST_SOURCES += src/patch_play/rack_expanders.cc
-TEST_SOURCES += $(TEST_DIR)/stubs/rack_module_registry.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
