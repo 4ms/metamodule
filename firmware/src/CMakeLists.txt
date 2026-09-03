@@ -152,6 +152,10 @@ add_executable(
   ${FWDIR}/src/patch_play/patch_player_load.cc
   ${FWDIR}/src/patch_play/patch_player_mappings.cc
   ${FWDIR}/src/patch_play/patch_player_modules.cc
+  ${FWDIR}/src/patch_play/patch_playloader_balance.cc
+  ${FWDIR}/src/patch_play/patch_playloader_load.cc
+  ${FWDIR}/src/patch_play/patch_playloader_modules.cc
+  ${FWDIR}/src/patch_play/patch_playloader_save.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
 
   #
