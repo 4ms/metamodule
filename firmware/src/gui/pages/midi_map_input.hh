@@ -3,6 +3,8 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "metaparams.hh"
+#include "midi/midi_message.hh"
 #include "params_state.hh"
 #include "patch-serial/patch/midi_def.hh"
 #include <functional>
@@ -19,9 +21,10 @@ struct MidiMapPopup {
 	lv_obj_t *midi_channel_label;
 	lv_obj_t *title_header;
 
-	MidiMapPopup(ParamsMidiState &params)
+	MidiMapPopup(ParamsMidiState &params, MetaParams &metaparams)
 		: group(lv_group_create())
-		, params{params} {
+		, params{params}
+		, metaparams{metaparams} {
 
 		title_header = create_title_level_2(ui_MIDIMapPanel, "Map MIDI to jack");
 		lv_obj_move_to_index(title_header, 0);
@@ -121,6 +124,10 @@ struct MidiMapPopup {
 	}
 
 	void show(auto cb, std::optional<uint32_t> panel_jack_id) {
+		auto midi_exp_found = metaparams.midi_ports_connected & ((1 << Midi::Port::DIN5) | (1 << Midi::Port::TRS));
+		lv_show(midi_port_dropdown, midi_exp_found);
+		lv_show(midi_port_label, midi_exp_found);
+
 		callback = std::move(cb);
 
 		//TODO: limit polyphony menu to patch's max poly number
@@ -168,6 +175,9 @@ struct MidiMapPopup {
 				note.num = -1;
 			}
 		}
+		auto midi_exp_found = metaparams.midi_ports_connected & ((1 << Midi::Port::DIN5) | (1 << Midi::Port::TRS));
+		lv_show(midi_port_dropdown, midi_exp_found);
+		lv_show(midi_port_label, midi_exp_found);
 	}
 
 	void learn_port(uint8_t port) {
@@ -278,19 +288,19 @@ struct MidiMapPopup {
 				  (source_check != ui_MidiMapClockCheck) && (source_check != ui_MidiMapTransportCheck));
 	}
 
-	// Port mask for the current dropdown selection: index 0 is "All", and the rest
-	// are Midi::Event::Port values offset by one.
-	uint8_t selected_port_mask() {
-		auto sel = lv_dropdown_get_selected(midi_port_dropdown);
-		return sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
-	}
-
 	std::optional<MidiMappings> calc_midi_signal_number() {
 		auto signal = calc_midi_signal();
 		if (!signal)
 			return std::nullopt;
 
-		return Midi::set_port_mask(*signal, selected_port_mask());
+		// If the port drop down is hidden, the use "All Ports" for the port
+		auto port = Midi::AllPorts;
+		if (!lv_obj_has_flag(midi_port_dropdown, LV_OBJ_FLAG_HIDDEN)) {
+			auto sel = lv_dropdown_get_selected(midi_port_dropdown);
+			port = sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
+		}
+
+		return Midi::set_port_mask(*signal, port);
 	}
 
 	std::optional<MidiMappings> calc_midi_signal() {
@@ -470,6 +480,7 @@ protected:
 	lv_group_t *group;
 	lv_group_t *orig_group{};
 	ParamsMidiState &params;
+	MetaParams &metaparams;
 
 	bool visible = false;
 	bool done = true;

@@ -43,7 +43,7 @@ struct ModuleViewMappingPane {
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue, metaparams}
 		, control_popup{patches, patch_mod_queue, playloader}
-		, midi_map_popup{params}
+		, midi_map_popup{params, metaparams}
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
 

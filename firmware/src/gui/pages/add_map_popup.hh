@@ -68,7 +68,8 @@ struct AddMapPopUp {
 		if (knobset_id == PatchData::MIDIKnobSet) {
 			lv_label_set_text(ui_AddMappingTitle, "Add a map: Send MIDI Note or CC");
 			lv_show(midi_channel_dropdown);
-			lv_show(midi_port_dropdown);
+			auto midi_exp_found = metaparams.midi_ports_connected & ((1 << Midi::Port::DIN5) | (1 << Midi::Port::TRS));
+			lv_show(midi_port_dropdown, midi_exp_found);
 		} else {
 			if (metaparams.button_exp_connected != 0) {
 				lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob or press a button");
@@ -145,6 +146,10 @@ struct AddMapPopUp {
 					set_midi_detected_name();
 				}
 
+				auto midi_exp_found =
+					metaparams.midi_ports_connected & ((1 << Midi::Port::DIN5) | (1 << Midi::Port::TRS));
+				lv_show(midi_port_dropdown, midi_exp_found);
+
 			} else {
 				for (unsigned i = 0; auto &knob : params.knobs) {
 					if (knob.did_change()) {
@@ -185,10 +190,16 @@ struct AddMapPopUp {
 			lv_dropdown_set_selected(midi_port_dropdown, port + 1);
 	}
 
-	// Index 0 is "All Ports"; the rest are Midi::Event::Port values offset by one
 	uint8_t selected_port_mask() const {
-		auto sel = lv_dropdown_get_selected(midi_port_dropdown);
-		return sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
+		// If the port drop down is hidden, the use "All Ports" for the port
+		auto port = Midi::AllPorts;
+
+		if (!lv_obj_has_flag(midi_port_dropdown, LV_OBJ_FLAG_HIDDEN)) {
+			auto sel = lv_dropdown_get_selected(midi_port_dropdown);
+			port = sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
+		}
+
+		return port;
 	}
 
 	void set_midi_detected_name() {
