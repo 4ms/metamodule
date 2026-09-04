@@ -10,9 +10,13 @@
 namespace MetaModule
 {
 
-// TX uses DMA: process() copies into the tx buffer and starts a DMA transfer
-// If the DMA ever errors out, we permanently fall back to pushing bytes into
-// the UART TX FIFO directly
+// Write the console buffers to the UART, as needed. Runs on the M4 in the main
+// context.
+//
+// TX uses DMA: process() assembles a chunk into the bounce buffer and starts a
+// DMA transfer.
+// If the DMA reports a transfer error, or keeps stalling, we permanently fall
+// back to feeding UART->TDR fifo directly.
 //
 // Typing 'c' into the console enables per-core colored output; 'm' disables it
 class UartConsoleDrain {
@@ -53,26 +57,23 @@ public:
 				// Deliberately not pr_err(): must be visible at any log level
 				printf("<console: UART TX DMA error (LISR=0x%08x), using FIFO fallback>\n", (unsigned)flags);
 
-			} else if (flags & (DMA_LISR_FEIF1 | DMA_LISR_DMEIF1)) {
-				// Underrun: the memory bus wasn't granted before UART7 asked for its next byte.
-				tx_pos = tx_len - DMA1_Stream1->NDTR;
-				stop_dma();
-				unlock();
-
 			} else if (flags & DMA_LISR_TCIF1) {
 				stop_dma();
 				tx_pos = tx_len = 0;
+				dma_stalls = 0;
 				unlock();
 
-			} else if ((HAL_GetTick() - dma_start_tm) >= DmaTimeoutMs) {
-				// The stream stopped without raising any flag, unknown reasons.
-				// FIXME: why does this happen?
-				// Pick up from wherever it got to.
-				tx_pos = tx_len - DMA1_Stream1->NDTR;
-				stop_dma();
+			} else if (dma_stalled(flags) || dma_timed_out()) {
+				// The stream stopped making progress: pick up from wherever it
+				// got to, and give up on DMA if it keeps happening
+				abort_dma();
 				unlock();
-				printf("<console: UART TX DMA unknown error (LISR=0x%08x), using FIFO>\n", (unsigned)flags);
-				dma_stalls++;
+				if (++dma_stalls >= MaxDmaStalls) {
+					dma_ok = false;
+					printf("<console: UART TX DMA stalled %u times (LISR=0x%08x), using FIFO fallback>\n",
+						   (unsigned)dma_stalls,
+						   (unsigned)flags);
+				}
 
 			} else {
 				return; // still transferring
@@ -87,7 +88,8 @@ public:
 				return;
 		}
 
-		// Lock the UART semaphore while we transmit (held until xfer completes)
+		// Exclude cores doing direct UART writes while we transmit.
+		// Those only happen during early boot. Held until the xfer completes
 		if (mdrivlib::HWSemaphore<UartLock>::lock(M4LockId) != mdrivlib::HWSemaphoreFlag::LockedOk)
 			return;
 
@@ -127,12 +129,21 @@ private:
 		clear_dma_flags();
 
 		DMA1_Stream1->PAR = reinterpret_cast<uint32_t>(&UartLog::uart_regs()->TDR);
-		// Byte-wise, memory-increment, memory-to-peripheral
-		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0;
+		// Byte-wise, memory-increment, memory-to-peripheral, direct mode.
+		// Bit 20 (TRBUFF, reserved in RM0436 but implemented): alternate
+		// REQ/ACK protocol, required on UART streams or else the stream can
+		// lock up when another stream transfers concurrently (MP15 errata
+		// ES0438 2.6.1 "USART/UART/LPUART DMA transfer abort")
+		constexpr uint32_t DMA_SxCR_TRBUFF = 1u << 20;
+		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0 | DMA_SxCR_TRBUFF;
 
-		// Enable FIFO to smooth out memory bus delays
-		DMA1_Stream1->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH_0 | DMA_SxFCR_FTH_1;
+		// Direct mode: at 115200 baud there's no bus latency for a FIFO to
+		// smooth out, and aborting a transfer would silently drop whatever
+		// bytes the FIFO still held (NDTR counts them as sent)
+		DMA1_Stream1->FCR = 0;
 
+		// UART7 raises a DMA request whenever its TX FIFO has room. Harmless
+		// for direct (CPU putchar) writes while the stream is disabled.
 		UartLog::uart_regs()->CR3 |= USART_CR3_DMAT;
 	}
 
@@ -140,6 +151,8 @@ private:
 		DMA1_Stream1->M0AR = dma_address(ptr);
 		DMA1_Stream1->NDTR = len;
 		clear_dma_flags();
+		last_ndtr = len;
+		last_progress_tm = HAL_GetTick();
 		DMA1_Stream1->CR |= DMA_SxCR_EN;
 		dma_running = true;
 		dma_start_tm = HAL_GetTick();
@@ -149,6 +162,39 @@ private:
 		DMA1_Stream1->CR &= ~DMA_SxCR_EN;
 		while (DMA1_Stream1->CR & DMA_SxCR_EN)
 			;
+		clear_dma_flags();
+		dma_running = false;
+	}
+
+	// FIFO/direct-mode error with NDTR not advancing: the stream is wedged
+	bool dma_stalled(uint32_t flags) {
+		if (!(flags & (DMA_LISR_FEIF1 | DMA_LISR_DMEIF1)))
+			return false;
+		auto ndtr = DMA1_Stream1->NDTR;
+		auto now = HAL_GetTick();
+		if (ndtr != last_ndtr) {
+			last_ndtr = ndtr;
+			last_progress_tm = now;
+			return false;
+		}
+		return (now - last_progress_tm) > StallTimeoutMs;
+	}
+
+	// Backstop for a stream that stops without raising any flag at all:
+	// without this, dma_running would never clear and the console would wedge
+	bool dma_timed_out() const {
+		return (HAL_GetTick() - dma_start_tm) >= DmaTimeoutMs;
+	}
+
+	// Stop the stream and adjust tx_pos so the next transfer resumes where
+	// this one stopped. The byte preloaded into the DMA FIFO (direct mode) is
+	// counted by NDTR as sent but may be discarded, so up to one character of
+	// output can be lost
+	void abort_dma() {
+		DMA1_Stream1->CR &= ~DMA_SxCR_EN;
+		while (DMA1_Stream1->CR & DMA_SxCR_EN)
+			;
+		tx_pos = tx_len - DMA1_Stream1->NDTR;
 		clear_dma_flags();
 		dma_running = false;
 	}
@@ -174,12 +220,18 @@ private:
 	// A full bounce buffer is ~23ms at 115200 baud
 	static constexpr uint32_t DmaTimeoutMs = 250;
 
+	// A 256-byte chunk takes ~22ms at 115200 baud, set the stall timeout to ~4x that
+	static constexpr uint32_t StallTimeoutMs = 100;
+	static constexpr uint32_t MaxDmaStalls = 8; // consecutive, reset by any completed transfer
+
 	ConsoleBufferReader reader;
 	std::array<uint8_t, 256> bounce;
 	size_t tx_pos = 0;
 	size_t tx_len = 0;
+	uint32_t last_ndtr = 0;
+	uint32_t last_progress_tm = 0;
 	uint32_t dma_start_tm = 0;
-	uint32_t dma_stalls = 0; // transfers that stopped without raising a flag
+	uint32_t dma_stalls = 0;
 	bool usb_was_active = false;
 	bool dma_running = false;
 	bool dma_ok = true;

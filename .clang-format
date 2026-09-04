@@ -8,8 +8,8 @@ AccessModifierOffset : -4
 AlignAfterOpenBracket: true
 AlignOperands : "AlignAfterOperator"
 AllowAllArgumentsOnNextLine : "true"
-AllowShortBlocksOnASingleLine : "Empty"
-AllowShortFunctionsOnASingleLine: "None"
+AllowShortBlocksOnASingleLine : "false"
+AllowShortFunctionsOnASingleLine: "false"
 AllowShortLambdasOnASingleLine: "Inline"
 AllowShortIfStatementsOnASingleLine : "Never"
 AlwaysBreakTemplateDeclarations : "true"

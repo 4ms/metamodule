@@ -35,6 +35,8 @@ TAMP_BKP6R = 0x5C00A118  # mp1-boot's "DDR image address" mailbox register
 BOOTLOADER_READY = 0xFFFFFFFF  # mp1-boot writes this when waiting for an image
 SYSTEM_MODE_UP = 11
 
+do_verify = False
+
 basepath = Path(__file__).parent.parent
 binpath = basepath / "build" / "main.uimg"
 elfpath = basepath / "build" / "mp1corea7" / "medium" / "main.elf"
@@ -107,6 +109,8 @@ def main():
                     sys.exit(f"Verify FAILED after retry: {e}")
                 print("  Verify failed, retrying load...")
     print(f"  Loaded and verified in {time.time() - t_start:.1f}s")
+
+    print(f"  Loaded in {time.time() - t_start:.1f}s")
 
     dbg.cmd(f"Data.LOAD.Elf {elfpath} /CPP /NoCode")
 
