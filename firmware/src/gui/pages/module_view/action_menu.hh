@@ -3,6 +3,7 @@
 #include "fat_file_io.hh"
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/helpers/module_name.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/module_view/automap.hh"
@@ -15,6 +16,7 @@
 #include "patch_play/randomize_param.hh"
 #include "patch_play/reset_param.hh"
 #include <algorithm>
+#include <string>
 #include <vector>
 
 namespace MetaModule
@@ -49,7 +51,8 @@ public:
 		, moduleViewActionBypassBut{create_lv_list_button(ui_ModuleViewActionMenu, "Bypass: Off")}
 		, moduleViewActionRenameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Rename...")}
 		, moduleViewActionResetNameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Reset name")}
-		, moduleViewActionReplaceBut{create_lv_list_button(ui_ModuleViewActionMenu, "Replace...")} {
+		, moduleViewActionReplaceBut{create_lv_list_button(ui_ModuleViewActionMenu, "Replace...")}
+		, moduleViewActionExpanderBut{create_lv_list_button(ui_ModuleViewActionMenu, "Expanders...")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
 		lv_show(moduleViewActionPresetBut);
@@ -86,6 +89,9 @@ public:
 		lv_obj_add_event_cb(moduleViewActionRenameBut, rename_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionResetNameBut, reset_name_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionReplaceBut, replace_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(moduleViewActionExpanderBut, expander_but_cb, LV_EVENT_CLICKED, this);
+
+		lv_group_remove_all_objs(group);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
@@ -97,12 +103,15 @@ public:
 		lv_group_add_obj(group, moduleViewActionRenameBut);
 		lv_group_add_obj(group, moduleViewActionResetNameBut);
 		lv_group_add_obj(group, moduleViewActionReplaceBut);
+		lv_group_add_obj(group, moduleViewActionExpanderBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
+
 		lv_group_set_wrap(group, false);
 	}
 
-	void prepare_focus(lv_group_t *parent_group, unsigned module_idx) {
+	void prepare_focus(lv_group_t *parent_group, unsigned module_idx, bool is_patch_playing) {
 		this->module_idx = module_idx;
+		this->is_patch_playing = is_patch_playing;
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), group);
 		reset_name_popup.init(lv_layer_top(), base_group);
@@ -145,7 +154,14 @@ public:
 		} else {
 			lv_disable(moduleViewActionPresetBut);
 		}
-		preset_popup.init(lv_layer_sys(), group);
+
+		preset_popup.init(lv_layer_top(), group);
+
+		expander_popup.init(lv_layer_top(), group);
+		lv_obj_set_size(expander_popup.popup, 320, 140);
+		lv_obj_set_size(expander_popup.roller, 300, 80);
+		lv_obj_set_style_text_font(expander_popup.roller, &ui_font_MuseoSansRounded70014, 0);
+		lv_obj_set_align(expander_popup.popup, LV_ALIGN_CENTER);
 
 		update_midi_map_text();
 	}
@@ -153,6 +169,8 @@ public:
 	void back() {
 		if (preset_popup.is_visible()) {
 			preset_popup.hide();
+		} else if (expander_popup.is_visible()) {
+			expander_popup.hide();
 		} else if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
 		} else if (reset_name_popup.is_visible()) {
@@ -168,9 +186,18 @@ public:
 
 	void hide() {
 		preset_popup.hide();
+		expander_popup.hide();
 		confirm_popup.hide();
 		reset_name_popup.hide();
 		hide_menu();
+	}
+
+	// Open the Expanders popup directly (e.g. after an expander was attached in the patch view)
+	void show_expanders() {
+		lv_show(ui_ModuleViewActionMenu);
+		lv_obj_set_x(ui_ModuleViewActionMenu, 0);
+		visible = true;
+		show_expander_popup();
 	}
 
 	void hide_menu() {
@@ -207,12 +234,17 @@ public:
 		return keyboard_entry.is_visible() || reset_name_popup.is_visible();
 	}
 
+	bool popup_visible() {
+		return preset_popup.is_visible() || expander_popup.is_visible() || confirm_popup.is_visible();
+	}
+
 	void reactivate_group() {
 		lv_group_activate(group);
 	}
 
 	void update() {
 		process_delete_module();
+		process_expander_actions();
 		auto_map.update();
 	}
 
@@ -425,11 +457,11 @@ private:
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
 		std::string_view text = lv_textarea_get_text(page->rename_textarea);
 		auto *pd = page->patches.get_view_patch();
-		std::string_view display = text.empty()
-			? (page->pending_alias.empty()
-				? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
-				: std::string_view{page->pending_alias})
-			: text;
+		std::string_view display =
+			text.empty() ?
+				(page->pending_alias.empty() ? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx]) :
+											   std::string_view{page->pending_alias}) :
+				text;
 		lv_label_set_text(ui_ElementRollerModuleName, display.data());
 	}
 
@@ -446,6 +478,135 @@ private:
 		page->page_list.request_new_page(PageId::ModuleList, new_args);
 	}
 
+	// Expanders
+
+	std::string expander_option_text(ExpanderSide side) {
+		auto *pd = patches.get_view_patch();
+		std::string text{expander_side_name(side)};
+		text += ": ";
+
+		auto conn = pd->find_expander(static_cast<uint16_t>(module_idx), side);
+		if (!conn) {
+			text += "none";
+			return text;
+		}
+
+		auto other_id = side == ExpanderSide::Left ? conn->left_module_id : conn->right_module_id;
+		text += module_display_name(*pd, other_id);
+
+		// Keep suffixes short: the roller is narrow
+		if (is_patch_playing) {
+			switch (patch_playloader.expander_status(*conn)) {
+				case PatchPlayer::ExpanderStatus::Active:
+					// The modules are exchanging expander messages
+					text += " (active)";
+					break;
+				case PatchPlayer::ExpanderStatus::Connected:
+					break;
+				case PatchPlayer::ExpanderStatus::NotConnected:
+					// In the patch but not wired: not both rack modules, or the player hasn't processed it yet
+					text += " (no link)";
+					break;
+			}
+		}
+		return text;
+	}
+
+	void show_expander_popup() {
+		expander_options = expander_option_text(ExpanderSide::Left) + "\n" + expander_option_text(ExpanderSide::Right);
+
+		expander_popup.show(
+			[this](unsigned opt) { expander_side_clicked(opt == 0 ? ExpanderSide::Left : ExpanderSide::Right); },
+			"Expanders",
+			expander_options.c_str(),
+			0);
+	}
+
+	// Called from the roller popup's click callback. The popup restores input
+	// focus to this menu after the callback returns, so anything that changes
+	// focus (another popup, a page change) is deferred to process_expander_actions()
+	void expander_side_clicked(ExpanderSide side) {
+		auto *pd = patches.get_view_patch();
+		auto this_id = static_cast<uint16_t>(module_idx);
+
+		if (auto conn = pd->find_expander(this_id, side))
+			pending_detach = *conn;
+		else
+			pending_attach = side;
+	}
+
+	void process_expander_actions() {
+		auto this_id = static_cast<uint16_t>(module_idx);
+
+		if (pending_attach) {
+			// Free side: go pick the module to attach, like making a cable
+			auto side = *pending_attach;
+			pending_attach.reset();
+
+			gui_state.new_expander = GuiState::ExpanderBeginning{.module_id = this_id, .side = side};
+
+			auto msg = "Select the module to attach to the " + std::string{expander_side_name(side)} + " side of " +
+					   module_display_name(*patches.get_view_patch(), this_id);
+			notify_queue.put({msg, Notification::Priority::Status, 3000});
+
+			hide();
+			page_list.request_new_page(PageId::PatchView,
+									   PageArguments{.patch_loc_hash = patches.get_view_patch_loc_hash()});
+			return;
+		}
+
+		if (pending_detach) {
+			// Already attached: confirm removing it
+			auto conn = *pending_detach;
+			pending_detach.reset();
+
+			auto side = conn.left_module_id == this_id ? ExpanderSide::Right : ExpanderSide::Left;
+			auto other_id = side == ExpanderSide::Left ? conn.left_module_id : conn.right_module_id;
+			auto msg = "Detach '" + module_display_name(*patches.get_view_patch(), other_id) + "' from the " +
+					   std::string{expander_side_name(side)} + " side of this module?";
+
+			confirm_popup.show(
+				[this, conn](unsigned choice) {
+					if (choice == 1) {
+						// Update our copy now so the re-opened popup shows it. The module view
+						// also applies this to the view patch and forwards it to the player
+						patches.get_view_patch()->remove_expander(conn);
+						patch_mod_queue.put(RemoveExpander{.conn = conn});
+						notify_queue.put({"Detached expander", Notification::Priority::Status, 1000});
+						reopen_expander_popup = true;
+					}
+				},
+				msg.c_str(),
+				"Detach");
+			return;
+		}
+
+		if (reopen_expander_popup) {
+			reopen_expander_popup = false;
+			show_expander_popup();
+			return;
+		}
+
+		// While the popup is open, keep it current: the player wires the connection
+		// (and later sees the first message) shortly after we attach it
+		if (expander_popup.is_visible()) {
+			auto text = expander_option_text(ExpanderSide::Left) + "\n" + expander_option_text(ExpanderSide::Right);
+			if (text != expander_options) {
+				expander_options = text;
+				auto selected = lv_roller_get_selected(expander_popup.roller);
+				lv_roller_set_options(expander_popup.roller, expander_options.c_str(), LV_ROLLER_MODE_NORMAL);
+				lv_roller_set_selected(expander_popup.roller, selected, LV_ANIM_OFF);
+			}
+		}
+	}
+
+	static void expander_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		page->show_expander_popup();
+	}
+
 	static void rename_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -455,9 +616,8 @@ private:
 		auto alias = pd->get_module_alias(static_cast<uint16_t>(page->module_idx));
 
 		// Show current alias (or module name) as greyed-out placeholder; don't pre-fill
-		std::string_view placeholder = alias.empty()
-			? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
-			: alias;
+		std::string_view placeholder =
+			alias.empty() ? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx]) : alias;
 		lv_textarea_set_placeholder_text(page->rename_textarea, placeholder.data());
 		lv_textarea_set_text(page->rename_textarea, "");
 		lv_label_set_text(ui_ElementRollerModuleName, placeholder.data());
@@ -474,9 +634,8 @@ private:
 				pd->set_module_alias(static_cast<uint16_t>(page->module_idx), actual);
 				page->patches.mark_view_patch_modified();
 
-				std::string_view display = actual.empty()
-					? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx])
-					: actual;
+				std::string_view display =
+					actual.empty() ? ModuleFactory::getModuleDisplayName(pd->module_slugs[page->module_idx]) : actual;
 				lv_label_set_text(ui_ElementRollerModuleName, display.data());
 			},
 			/*hide_field_on_dismiss=*/true);
@@ -500,6 +659,7 @@ private:
 	ResetParams reset_params_;
 
 	unsigned module_idx = 0;
+	bool is_patch_playing = false;
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
@@ -509,6 +669,7 @@ private:
 	lv_obj_t *moduleViewActionRenameBut;
 	lv_obj_t *moduleViewActionResetNameBut;
 	lv_obj_t *moduleViewActionReplaceBut;
+	lv_obj_t *moduleViewActionExpanderBut;
 	lv_obj_t *rename_textarea = nullptr;
 	std::string pending_alias{};
 	KeyboardEntry keyboard_entry;
@@ -517,6 +678,11 @@ private:
 	std::string presets{};
 	std::vector<Preset> preset_map{};
 	RollerPopup preset_popup{"Select Preset"};
+	RollerPopup expander_popup{"Expanders"};
+	std::string expander_options{};
+	std::optional<ExpanderSide> pending_attach{};
+	std::optional<ExpanderConnection> pending_detach{};
+	bool reopen_expander_popup = false;
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 };

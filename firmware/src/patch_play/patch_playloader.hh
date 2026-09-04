@@ -192,6 +192,14 @@ struct PatchPlayLoader {
 		return player_.num_poly_cable_channels(out, in);
 	}
 
+	// Whether an expander connection in the playing patch is wired up, and if
+	// the two modules have exchanged any expander messages
+	PatchPlayer::ExpanderStatus expander_status(ExpanderConnection conn) {
+		if (is_loading_patch())
+			return PatchPlayer::ExpanderStatus::NotConnected;
+		return player_.expander_status(conn);
+	}
+
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {

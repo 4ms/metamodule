@@ -1215,6 +1215,21 @@ public:
 		return removed;
 	}
 
+	enum class ExpanderStatus { NotConnected, Connected, Active };
+
+	// Whether the two modules are wired together, and if they have exchanged any messages
+	ExpanderStatus expander_status(ExpanderConnection conn) const {
+		if (conn.left_module_id >= num_modules || conn.right_module_id >= num_modules)
+			return ExpanderStatus::NotConnected;
+		auto *left = modules[conn.left_module_id].get();
+		auto *right = modules[conn.right_module_id].get();
+		if (rack_expanders.is_active(left, right))
+			return ExpanderStatus::Active;
+		if (rack_expanders.is_connected(left, right))
+			return ExpanderStatus::Connected;
+		return ExpanderStatus::NotConnected;
+	}
+
 	void remove_module(uint16_t module_idx) {
 		// For all cache structures, if (module_id > deleted_module_idx) module_id -= 1;
 

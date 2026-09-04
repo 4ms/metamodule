@@ -7,6 +7,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/make_cable.hh"
+#include "gui/pages/make_expander.hh"
 #include "gui/pages/module_view/action_menu.hh"
 #include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/module_view/settings_menu.hh"
@@ -135,13 +136,14 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_AutoMapSelectPanel);
 		lv_hide(ui_MIDIMapPanel);
 
-		if (gui_state.new_cable) {
+		if (gui_state.new_cable || gui_state.new_expander) {
 			lv_hide(ui_ModuleViewHideBut);
 			lv_hide(ui_ModuleViewActionBut);
 			lv_hide(ui_ModuleViewSettingsBut);
 			lv_show(ui_ModuleViewCableCancelBut);
 			lv_show(ui_ModuleViewCableCreateLabel);
-			lv_label_set_text(ui_ModuleViewCableCreateLabel, "Creating a cable");
+			lv_label_set_text(ui_ModuleViewCableCreateLabel,
+							  gui_state.new_cable ? "Creating a cable" : "Attaching an expander");
 			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_flex_align(
@@ -157,7 +159,13 @@ struct ModuleViewPage : PageBase {
 			lv_obj_set_flex_align(
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 			settings_menu.prepare_focus(group);
-			action_menu.prepare_focus(group, this_module_id);
+			action_menu.prepare_focus(group, this_module_id, is_patch_playloaded);
+
+			// Coming back from attaching an expander: show the result
+			if (gui_state.reopen_expander_menu) {
+				gui_state.reopen_expander_menu = false;
+				show_expanders_on_update = true;
+			}
 		}
 
 		quick_control_mode = false;
@@ -171,6 +179,11 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
+		if (show_expanders_on_update) {
+			show_expanders_on_update = false;
+			action_menu.show_expanders();
+		}
+
 		// Back button
 		if (gui_state.back_button.is_just_released()) {
 
@@ -260,6 +273,7 @@ struct ModuleViewPage : PageBase {
 		if (gui_state.force_redraw_patch || gui_state.view_patch_file_changed) {
 
 			abort_cable(gui_state, notify_queue);
+			abort_expander(gui_state, notify_queue);
 
 			// Check if module slug changed: go to patch view if it did
 			// Otherwise re-draw the patch
@@ -283,7 +297,8 @@ struct ModuleViewPage : PageBase {
 			redraw_module();
 			mapping_pane.refresh();
 
-			if (action_menu.is_visible()) {
+			// Don't steal focus from a popup the action menu has open (e.g. the Expanders list)
+			if (action_menu.is_visible() && !action_menu.popup_visible()) {
 				focus_button_bar();
 				action_menu.reactivate_group();
 			}
@@ -433,6 +448,7 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		abort_cable(page->gui_state, page->notify_queue);
+		abort_expander(page->gui_state, page->notify_queue);
 		page->page_list.request_new_page(PageId::PatchView, page->args);
 	}
 
@@ -539,6 +555,7 @@ private:
 	unsigned dyn_draw_throttle = 16;
 
 	bool full_screen_mode = false;
+	bool show_expanders_on_update = false;
 
 	std::optional<GuiElement> pending_action_param_clear{};
 

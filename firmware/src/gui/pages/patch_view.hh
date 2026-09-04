@@ -8,10 +8,12 @@
 #include "gui/elements/redraw_light.hh"
 #include "gui/helpers/load_meter.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/helpers/module_name.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
 #include "gui/pages/make_cable.hh"
+#include "gui/pages/make_expander.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
@@ -369,6 +371,7 @@ struct PatchViewPage : PageBase {
 			gui_state.view_patch_file_changed = false;
 
 			abort_cable(gui_state, notify_queue);
+			abort_expander(gui_state, notify_queue);
 
 			// Preserve the currently selected module, so we can restore that after redrawing
 			if (auto obj = lv_group_get_focused(group)) {
@@ -394,6 +397,9 @@ struct PatchViewPage : PageBase {
 
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
+
+			} else if (gui_state.new_expander) {
+				abort_expander(gui_state, notify_queue);
 
 			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
 				printf("Focus on play but %p in group %p\n", ui_PlayButton, group);
@@ -701,11 +707,51 @@ private:
 		auto obj = event->current_target;
 		if (!obj)
 			return;
-		page->args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+		auto module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+
+		// Choosing the module to attach as an expander: finish here instead of opening the module
+		if (page->gui_state.new_expander) {
+			page->finish_expander(static_cast<uint16_t>(module_id));
+			return;
+		}
+
+		page->args.module_id = module_id;
 		page->args.element_indices = {};
 		page->args.detail_mode = false;
 		page->page_list.update_state(PageId::PatchView, page->args);
 		page->page_list.request_new_page(PageId::ModuleView, page->args);
+	}
+
+	// Attach the clicked module to the side chosen in the module view, then go
+	// back to that module with the Expanders menu open to show the result.
+	void finish_expander(uint16_t target_id) {
+		auto beginning = gui_state.new_expander.value();
+
+		if (auto err = expander_target_error(*patch, beginning, target_id)) {
+			notify_queue.put({err, Notification::Priority::Error, 2000});
+			return;
+		}
+
+		auto conn = ExpanderConnection::make(beginning.module_id, beginning.side, target_id);
+		patch->add_expander(conn);
+		patches.mark_view_patch_modified();
+
+		if (is_patch_playloaded)
+			patch_mod_queue.put(AddExpander{.conn = conn});
+
+		gui_state.new_expander = std::nullopt;
+		gui_state.reopen_expander_menu = true;
+
+		auto msg = "Attached " + module_display_name(*patch, target_id) + " to the " +
+				   std::string{expander_side_name(beginning.side)} + " side of " +
+				   module_display_name(*patch, beginning.module_id);
+		notify_queue.put({msg, Notification::Priority::Status, 2000});
+
+		args.module_id = beginning.module_id;
+		args.element_indices = {};
+		args.detail_mode = false;
+		page_list.update_state(PageId::PatchView, args);
+		page_list.request_new_page(PageId::ModuleView, args);
 	}
 
 	static void module_focus_cb(lv_event_t *event) {
@@ -802,6 +848,7 @@ private:
 		if (!page)
 			return;
 		abort_cable(page->gui_state, page->notify_queue);
+		abort_expander(page->gui_state, page->notify_queue);
 		page->load_page(PageId::ModuleList, page->args);
 	}
 
@@ -811,6 +858,7 @@ private:
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 
 		abort_cable(page->gui_state, page->notify_queue);
+		abort_expander(page->gui_state, page->notify_queue);
 		page->load_page(PageId::KnobSetView,
 						{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->active_knobset});
 	}
@@ -818,6 +866,7 @@ private:
 	static void desc_open_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		abort_cable(page->gui_state, page->notify_queue);
+		abort_expander(page->gui_state, page->notify_queue);
 		page->show_desc_panel();
 	}
 
