@@ -40,7 +40,8 @@ TEST_CASE("patch with expanders field loads and runs safely") {
 	CHECK(result.success);
 
 	// No rack modules in the test build, so nothing got wired:
-	CHECK(player.expanders().num_connected() == 0);
+	CHECK(player.expanders().num_connections() == 0);
+
 
 	for (auto i = 0; i < 16; i++)
 		player.update_patch();
@@ -48,7 +49,7 @@ TEST_CASE("patch with expanders field loads and runs safely") {
 	player.unload_patch();
 }
 
-TEST_CASE("removing a module rewires expanders and keeps running safely") {
+TEST_CASE("removing a module keeps the remaining expanders and keeps running safely") {
 	// clang-format off
 	std::string patchyml{R"(PatchData:
   patch_name: expander_remove_test
@@ -77,11 +78,13 @@ TEST_CASE("removing a module rewires expanders and keeps running safely") {
 	MetaModule::PatchPlayer player;
 	REQUIRE(player.load_patch(pd).success);
 
-	// Removing a module disconnects and rewires from the fixed-up
-	// patch data (id squash/erase is covered in patch-serial's tests)
+	// Removing an unrelated module shifts the ids in the patch data
+	// (id squash/erase is covered in patch-serial's tests)
 	player.remove_module(1);
+
+	// Removing a module in the pair removes the connection
 	player.remove_module(2);
-	CHECK(player.expanders().num_connected() == 0);
+	CHECK(player.expanders().num_connections() == 0);
 
 	for (auto i = 0; i < 16; i++)
 		player.update_patch();
@@ -118,8 +121,9 @@ TEST_CASE("expanders with out-of-range module ids are ignored") {
 	MetaModule::PatchPlayer player;
 	auto result = player.load_patch(pd);
 	CHECK(result.success);
-	CHECK(player.expanders().num_connected() == 0);
+	CHECK(player.expanders().num_connections() == 0);
 
 	player.update_patch();
 	player.unload_patch();
 }
+

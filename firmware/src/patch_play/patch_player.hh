@@ -265,7 +265,7 @@ public:
 		}
 
 		// Wire up VCV-style expander module connections
-		rewire_expanders();
+		connect_all_expanders();
 
 		calc_multiple_module_indicies();
 
@@ -1165,16 +1165,26 @@ public:
 			rack_module->id = next_rack_module_id++;
 	}
 
-	// Disconnect all expander modules, then re-wire from pd.expanders.
-	// Call with audio muted whenever the loaded modules change.
-	void rewire_expanders() {
-		rack_expanders.disconnect_all();
+	// Expanders
+
+	bool connect_expander(ExpanderConnection conn) {
+		if (conn.left_module_id >= num_modules || conn.right_module_id >= num_modules)
+			return false;
+		return rack_expanders.connect(modules[conn.left_module_id].get(), modules[conn.right_module_id].get());
+	}
+
+	// Wire every connection in pd.expanders (used when loading a patch)
+	void connect_all_expanders() {
+		for (auto const &exp : pd.expanders)
+			connect_expander(exp);
+	}
+
+	// Wire only the connections in pd.expanders that involve module_idx
+	// (used after a module is created in an existing slot)
+	void connect_expanders_for(unsigned module_idx) {
 		for (auto const &exp : pd.expanders) {
-			if (exp.left_module_id < num_modules && exp.right_module_id < num_modules)
-				rack_expanders.connect(modules[exp.left_module_id].get(),
-									   modules[exp.right_module_id].get(),
-									   exp.left_module_id,
-									   exp.right_module_id);
+			if (exp.left_module_id == module_idx || exp.right_module_id == module_idx)
+				connect_expander(exp);
 		}
 	}
 
@@ -1269,7 +1279,9 @@ public:
 
 		pd.remove_module(module_idx);
 
-		rack_expanders.disconnect_all();
+		// Only the removed module's expander connections change: its
+		// neighbors are notified, everything else keeps its pointers
+		rack_expanders.disconnect(modules[module_idx].get());
 		plugin_module_deinit(modules[module_idx]);
 		modules[module_idx].reset();
 
@@ -1283,8 +1295,6 @@ public:
 				modules[i]->id = i;
 		}
 
-		rewire_expanders();
-
 		rebalance_modules();
 	}
 
@@ -1296,7 +1306,7 @@ public:
 		pr_trace("Subs. module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
 
 		// De-init original module
-		rack_expanders.disconnect_all();
+		rack_expanders.disconnect(modules[module_idx].get());
 		plugin_module_deinit(modules[module_idx]);
 		modules[module_idx].reset();
 
@@ -1304,7 +1314,9 @@ public:
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
 		add_module_at_idx(new_slug, module_idx);
-		rewire_expanders();
+
+		// Expander connections are kept in the patch: re-attach the new module to its neighbors
+		connect_expanders_for(module_idx);
 	}
 
 	void replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
@@ -1368,18 +1380,17 @@ public:
 		erase_matching_inner(midi_divclk_pulses);
 
 		// Deinit old module
-		rack_expanders.disconnect_all();
+		rack_expanders.disconnect(modules[module_idx].get());
 		plugin_module_deinit(modules[module_idx]);
 		modules[module_idx].reset();
 
-		// Clean up PatchData (cables, mapped_ins/outs, static_knobs, etc.)
+		// Clean up PatchData (cables, mapped_ins/outs, static_knobs, expanders, etc.)
 		pd.blank_out_module(module_idx);
 
 		// Create new module in the same slot
 		pd.module_slugs[module_idx] = new_slug;
 		calc_multiple_module_indicies();
 		add_module_at_idx(new_slug, module_idx);
-		rewire_expanders();
 	}
 
 	// Jack patched/unpatched status

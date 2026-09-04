@@ -187,3 +187,156 @@ TEST_CASE("flip_messages: handles both sides independently") {
 	CHECK(a.leftExpander.producerMessage == &lbuf1);
 	CHECK(a.rightExpander.producerMessage == &rbuf0);
 }
+
+TEST_CASE("disconnect_pair: only detaches the given pair") {
+	FakeRackModule a, b, c;
+	a.id = 1;
+	b.id = 2;
+	c.id = 3;
+	ExpanderHookup::connect(&a, &b);
+	ExpanderHookup::connect(&b, &c);
+
+	// Not connected in that direction: no-op
+	CHECK_FALSE(ExpanderHookup::disconnect_pair(&b, &a));
+	CHECK(a.rightExpander.module == &b);
+
+	CHECK(ExpanderHookup::disconnect_pair(&a, &b));
+	CHECK(a.rightExpander.module == nullptr);
+	CHECK(b.leftExpander.module == nullptr);
+	// b <-> c untouched
+	CHECK(b.rightExpander.module == &c);
+	CHECK(c.leftExpander.module == &b);
+}
+
+TEST_CASE("Connections: tracks pairs and only notifies the modules involved") {
+	FakeRackModule a, b, c, d;
+	a.id = 1;
+	b.id = 2;
+	c.id = 3;
+	d.id = 4;
+
+	ExpanderHookup::Connections<FakeRackModule> conns;
+	conns.reserve(8);
+
+	CHECK(conns.connect(&a, &b));
+	CHECK(conns.connect(&c, &d));
+	CHECK(conns.num_connections() == 2);
+	CHECK(conns.is_connected(&a, &b));
+	CHECK(conns.is_connected(&c, &d));
+	CHECK_FALSE(conns.is_connected(&b, &a));
+
+	// Duplicate and occupied-side connections are rejected and not tracked
+	CHECK_FALSE(conns.connect(&a, &b));
+	CHECK_FALSE(conns.connect(&a, &d));
+	CHECK(conns.num_connections() == 2);
+
+	a.change_events.clear();
+	b.change_events.clear();
+	c.change_events.clear();
+	d.change_events.clear();
+
+	// Removing b: a is notified, c and d are untouched
+	conns.disconnect(&b);
+	CHECK(conns.num_connections() == 1);
+	CHECK_FALSE(conns.is_connected(&a, &b));
+	CHECK(conns.is_connected(&c, &d));
+	CHECK(a.rightExpander.module == nullptr);
+	CHECK(a.change_events.size() == 1);
+	CHECK(b.change_events.size() == 1);
+	CHECK(c.change_events.empty());
+	CHECK(d.change_events.empty());
+	CHECK(c.rightExpander.module == &d);
+
+	// Disconnecting an unconnected module is a no-op
+	conns.disconnect(&b);
+	conns.disconnect(nullptr);
+	CHECK(conns.num_connections() == 1);
+
+	conns.disconnect_all();
+	CHECK(conns.num_connections() == 0);
+	CHECK(c.rightExpander.module == nullptr);
+	CHECK(d.leftExpander.module == nullptr);
+}
+
+TEST_CASE("Connections: disconnect_pair removes exactly one pair") {
+	FakeRackModule a, b, c;
+	a.id = 1;
+	b.id = 2;
+	c.id = 3;
+
+	ExpanderHookup::Connections<FakeRackModule> conns;
+	conns.connect(&a, &b);
+	conns.connect(&b, &c);
+
+	CHECK_FALSE(conns.disconnect_pair(&a, &c));
+	CHECK(conns.disconnect_pair(&a, &b));
+	CHECK(conns.num_connections() == 1);
+	CHECK(conns.is_connected(&b, &c));
+	CHECK(b.leftExpander.module == nullptr);
+	CHECK(b.rightExpander.module == &c);
+
+	// A pair can be re-connected after being removed
+	CHECK(conns.connect(&a, &b));
+	CHECK(conns.num_connections() == 2);
+}
+
+TEST_CASE("Connections: flip_messages flips both directions and marks the pair active") {
+	FakeRackModule a, b;
+	a.id = 1;
+	b.id = 2;
+
+	ExpanderHookup::Connections<FakeRackModule> conns;
+	conns.connect(&a, &b);
+
+	int buf0 = 0, buf1 = 1;
+	// b writes into a's rightExpander (message to a), a's buffers:
+	a.rightExpander.producerMessage = &buf0;
+	a.rightExpander.consumerMessage = &buf1;
+
+	CHECK_FALSE(conns.is_active(&a, &b));
+
+	// Nothing requested: no flip, not active
+	conns.flip_messages();
+	CHECK(a.rightExpander.producerMessage == &buf0);
+	CHECK_FALSE(conns.is_active(&a, &b));
+
+	a.rightExpander.messageFlipRequested = true;
+	conns.flip_messages();
+	CHECK(a.rightExpander.producerMessage == &buf1);
+	CHECK(a.rightExpander.consumerMessage == &buf0);
+	CHECK_FALSE(a.rightExpander.messageFlipRequested);
+	CHECK(conns.is_active(&a, &b));
+
+	// The other direction (a -> b lands in b's leftExpander)
+	int buf2 = 2, buf3 = 3;
+	b.leftExpander.producerMessage = &buf2;
+	b.leftExpander.consumerMessage = &buf3;
+	b.leftExpander.messageFlipRequested = true;
+	conns.flip_messages();
+	CHECK(b.leftExpander.producerMessage == &buf3);
+
+	// Re-connecting starts inactive again
+	conns.disconnect_pair(&a, &b);
+	conns.connect(&a, &b);
+	CHECK_FALSE(conns.is_active(&a, &b));
+}
+
+TEST_CASE("Connections: modules keep their ids when neighbors change") {
+	// Stable ids: connect records the ids as they are, and reconnecting
+	// after an unrelated change does not alter them
+	FakeRackModule a, b, c;
+	a.id = 0x10001;
+	b.id = 0x10002;
+	c.id = 0x10003;
+
+	ExpanderHookup::Connections<FakeRackModule> conns;
+	conns.connect(&a, &b);
+	conns.connect(&b, &c);
+	CHECK(a.rightExpander.moduleId == 0x10002);
+	CHECK(c.leftExpander.moduleId == 0x10002);
+
+	conns.disconnect(&a);
+	CHECK(b.leftExpander.moduleId == -1);
+	CHECK(c.leftExpander.moduleId == 0x10002);
+	CHECK(b.rightExpander.moduleId == 0x10003);
+}

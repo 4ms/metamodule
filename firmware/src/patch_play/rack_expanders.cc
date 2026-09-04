@@ -1,52 +1,61 @@
 #include "patch_play/rack_expanders.hh"
-#include "patch_play/expander_hookup.hh"
+#include "conf/patch_conf.hh"
 #include "plugin_module.hh"
 #include "pr_dbg.hh"
-#include <algorithm>
 #include <engine/Module.hpp>
 
 namespace MetaModule
 {
 
-bool RackExpanders::connect(CoreProcessor *left, CoreProcessor *right, uint16_t left_id, uint16_t right_id) {
+RackExpanders::RackExpanders() {
+	// Avoid allocating on the audio thread when connections are added
+	conns.reserve(MAX_MODULES_IN_PATCH);
+}
+
+bool RackExpanders::connect(CoreProcessor *left, CoreProcessor *right) {
 	auto *left_module = as_rack_module(left);
 	auto *right_module = as_rack_module(right);
 
 	if (!left_module || !right_module) {
-		pr_warn("Expander connection %u -> %u skipped: not rack modules\n", left_id, right_id);
+		pr_warn("Expander connection skipped: not rack modules\n");
 		return false;
 	}
 
-	left_module->id = left_id;
-	right_module->id = right_id;
-
-	if (!ExpanderHookup::connect(left_module, right_module)) {
-		pr_warn("Expander connection %u -> %u skipped: invalid or duplicate\n", left_id, right_id);
+	if (!conns.connect(left_module, right_module)) {
+		pr_warn("Expander connection skipped: invalid or side already in use\n");
 		return false;
 	}
 
-	if (std::find(modules.begin(), modules.end(), left_module) == modules.end())
-		modules.push_back(left_module);
-	if (std::find(modules.begin(), modules.end(), right_module) == modules.end())
-		modules.push_back(right_module);
-
-	pr_info("Connected expander: module %u <-> module %u\n", left_id, right_id);
+	pr_info("Connected expander: rack module %lld <-> %lld\n", (long long)left_module->id, (long long)right_module->id);
 	return true;
 }
 
-void RackExpanders::flip_messages() {
-	for (auto *module : modules)
-		ExpanderHookup::flip_messages(module);
+bool RackExpanders::disconnect_pair(CoreProcessor *left, CoreProcessor *right) {
+	return conns.disconnect_pair(as_rack_module(left), as_rack_module(right));
+}
+
+void RackExpanders::disconnect(CoreProcessor *m) {
+	conns.disconnect(as_rack_module(m));
 }
 
 void RackExpanders::disconnect_all() {
-	for (auto *module : modules)
-		ExpanderHookup::disconnect(module);
-	modules.clear();
+	conns.disconnect_all();
+}
+
+void RackExpanders::flip_messages() {
+	conns.flip_messages();
+}
+
+bool RackExpanders::is_connected(CoreProcessor *left, CoreProcessor *right) const {
+	return conns.is_connected(as_rack_module(left), as_rack_module(right));
+}
+
+bool RackExpanders::is_active(CoreProcessor *left, CoreProcessor *right) const {
+	return conns.is_active(as_rack_module(left), as_rack_module(right));
 }
 
 void RackExpanders::clear() {
-	modules.clear();
+	conns.clear();
 }
 
 } // namespace MetaModule
