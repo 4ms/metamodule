@@ -1,5 +1,6 @@
 #pragma once
 #include "midi/midi_message.hh"
+#include "midi/midi_queue.hh"
 #include "util/lockfree_fifo_spsc.hh"
 #include <optional>
 #include <vector>
@@ -50,7 +51,7 @@ public:
 	}
 
 	// Send an outgoing message out the MIDI port (audio thread).
-	void send(MidiMessage msg);
+	void send(PortedMidiMessage msg);
 
 	// Print the available MIDI input/output ports to stdout (for `--listmidi`).
 	static void list_ports();

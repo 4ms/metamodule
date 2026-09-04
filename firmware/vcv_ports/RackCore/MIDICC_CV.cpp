@@ -293,8 +293,9 @@ struct MIDICC_CVWidget : ModuleWidget {
 
 		menu->addChild(createBoolPtrMenuItem("14-bit CC 0-31 / 32-63", "", &module->lsbMode));
 
-		// METAMODULE: add MIDI Channel to context menu:
+		// METAMODULE: add MIDI Port and Channel to context menu:
 		menu->addChild(new MenuSeparator);
+		menu->addChild(createMidiPortMenuItem(module->midiInput));
 		menu->addChild(createSubmenuItem(
 			"MIDI channel",
 			[=] {

@@ -1,6 +1,7 @@
 #include <tuple>
 #include <utility>
 
+#include "midi/midi_message.hh" // MetaModule::Midi::Port
 #include <context.hpp>
 #include <engine/Engine.hpp>
 #include <midi.hpp>
@@ -68,7 +69,9 @@ int Port::getDriverId() {
 
 void Port::setDriverId(int driverId) {
 	this->driverId = 0;
-	setDeviceId(0);
+	// There's only one driver, so changing it just resets the device choice.
+	// Use the default rather than 0, which is a real port (USB).
+	setDeviceId(getDefaultDeviceId());
 }
 
 Device *Port::getDevice() {
@@ -98,11 +101,11 @@ json_t *Port::toJson() {
 	json_t *rootJ = json_object();
 	json_object_set_new(rootJ, "driver", json_integer(getDriverId()));
 
-	if (device) {
-		std::string deviceName = device->getName();
-		if (!deviceName.empty())
-			json_object_set_new(rootJ, "deviceName", json_string(deviceName.c_str()));
-	}
+	// METAMODULE: there are no Device objects -- a device is a physical MIDI
+	// port -- so ask the port itself for the name rather than Device::getName().
+	std::string deviceName = getDeviceName(getDeviceId());
+	if (!deviceName.empty())
+		json_object_set_new(rootJ, "deviceName", json_string(deviceName.c_str()));
 
 	json_object_set_new(rootJ, "channel", json_integer(getChannel()));
 	return rootJ;
@@ -115,11 +118,15 @@ void Port::fromJson(json_t *rootJ) {
 	if (driverJ)
 		setDriverId(json_integer_value(driverJ));
 
-	if (driver) {
-		json_t *deviceNameJ = json_object_get(rootJ, "deviceName");
-		if (deviceNameJ) {
-			std::string deviceName = json_string_value(deviceNameJ);
-			// Search for device ID with equal name
+	// METAMODULE: match by name as Rack does, but without needing a Driver.
+	// AllDevices is named too, so it round-trips like any other choice.
+	json_t *deviceNameJ = json_object_get(rootJ, "deviceName");
+	if (deviceNameJ) {
+		std::string deviceName = json_string_value(deviceNameJ);
+
+		if (getDeviceName(AllDevices) == deviceName) {
+			setDeviceId(AllDevices);
+		} else {
 			for (int deviceId : getDeviceIds()) {
 				if (getDeviceName(deviceId) == deviceName) {
 					setDeviceId(deviceId);
@@ -147,19 +154,32 @@ Input::~Input() = default;
 void Input::reset() {
 }
 
+// METAMODULE: a MIDI "device" is one of the hardware's physical MIDI ports.
+// Modules pick one through the standard Rack device API, and messages from the
+// others are filtered out (see InputQueue::tryPop).
 std::vector<int> Input::getDeviceIds() {
-	return {};
+	return {MetaModule::Midi::USB, MetaModule::Midi::TRS, MetaModule::Midi::DIN5};
 }
 
 int Input::getDefaultDeviceId() {
-	return -1;
+	return AllDevices;
 }
 
 void Input::setDeviceId(int deviceId) {
+	this->deviceId = deviceId;
 }
 
 std::string Input::getDeviceName(int deviceId) {
-	return "";
+	switch (deviceId) {
+		case MetaModule::Midi::USB:
+			return "USB";
+		case MetaModule::Midi::TRS:
+			return "TRS";
+		case MetaModule::Midi::DIN5:
+			return "DIN5";
+		default:
+			return "All";
+	}
 }
 
 std::vector<int> Input::getChannels() {

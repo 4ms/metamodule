@@ -2,16 +2,31 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "midi/midi_message.hh"
 #include "patch/patch.hh"
+#include <array>
 #include <string>
+#include <string_view>
 
 namespace MetaModule
 {
 
-std::string get_panel_name(const BaseElement &, uint16_t) {
+namespace
+{
+// Indexed by Midi::Event::Port. A mapping that listens to every port shows nothing.
+constexpr std::array<std::string_view, Midi::NumPorts> MidiPortNames{"USB", "TRS", "DIN"};
+
+std::string midi_port_suffix(uint32_t panel_id) {
+	if (auto port = Midi::selected_port(Midi::port_mask(panel_id)))
+		return " " + std::string(MidiPortNames[*port]);
+	else
+		return "";
+}
+} // namespace
+
+std::string get_panel_name(const BaseElement &, uint32_t) {
 	return "";
 }
 
-std::string get_panel_name(const ParamElement &, uint16_t panel_id) {
+std::string get_panel_name(const ParamElement &, uint32_t panel_id) {
 	std::string name;
 	name.reserve(8);
 
@@ -41,10 +56,10 @@ std::string get_panel_name(const ParamElement &, uint16_t panel_id) {
 			name += " Ch " + std::to_string(mk.midi_chan);
 	}
 
-	return name;
+	return name + midi_port_suffix(panel_id);
 }
 
-std::string get_panel_name(const JackInput &, uint16_t panel_id) {
+std::string get_panel_name(const JackInput &, uint32_t panel_id) {
 	std::string name{16};
 
 	if (PanelDef::is_main_panel_input(panel_id)) {
@@ -146,10 +161,10 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 	else
 		name = "?";
 
-	return name;
+	return name + midi_port_suffix(panel_id);
 }
 
-std::string get_panel_name(const JackOutput &, uint16_t panel_id) {
+std::string get_panel_name(const JackOutput &, uint32_t panel_id) {
 	std::string name{8};
 	if (panel_id < PanelDef::NumUserFacingOutJacks) {
 		name = PanelDef::get_map_outjack_name(panel_id);

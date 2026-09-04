@@ -39,7 +39,8 @@ unsigned run_noteoff_sequence(Midi::MessageParser &parser) {
 
 		CHECK(event->type == Midi::Event::Type::NoteOff);
 		CHECK(event->note < NumMidiNotes);
-		CHECK(event->midi_chan < Midi::MessageParser::NumMidiChannels);
+		// midi_chan is a bitfield: copy it out, since CHECK takes a reference
+		CHECK(unsigned(event->midi_chan) < Midi::MessageParser::NumMidiChannels);
 		// poly_chan mirrors the note number so the A7 clears poly note gates
 		// (it ignores poly_chan >= the active poly count)
 		CHECK(event->poly_chan == event->note);
@@ -62,7 +63,7 @@ TEST_CASE("Panic sequence emits NoteOff for every note number on every channel")
 			auto event = parser.step_all_notes_off_sequence();
 			REQUIRE(event.has_value());
 			CHECK(event->type == Midi::Event::Type::NoteOff);
-			CHECK(event->midi_chan == chan);
+			CHECK(unsigned(event->midi_chan) == chan);
 			CHECK(event->note == note);
 		}
 	}

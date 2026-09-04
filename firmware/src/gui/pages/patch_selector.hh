@@ -361,8 +361,7 @@ struct PatchSelectorPage : PageBase {
 			case State::LoadPatchFile: {
 				hide_spinner();
 				// Clear cc events so we don't change knobsets with stale events
-				for (auto &cc : params.midi_ccs)
-					cc.changed = false;
+				params.last_midi_cc.num = -1;
 
 				auto result = patch_switch.jump_to_patch(selected_patch, [this]() { exit_to_patch_view_page(); });
 				if (result.success) {
@@ -373,33 +372,6 @@ struct PatchSelectorPage : PageBase {
 					state = State::Idle;
 				}
 
-				// If the patch is not open, or if it's opened but been modified via wifi or disk,
-				// then (re)load it from disk
-				// if (patchloader.needs_reloading(selected_patch)) {
-				// 	auto result = patchloader.reload_patch_file(selected_patch, [] { lv_timer_handler(); });
-				// 	if (!result.success) {
-				// 		lv_group_set_editing(group, true);
-				// 		notify_queue.put({.message = result.error_string, .priority = Notification::Priority::Error});
-				// 		state = State::Idle;
-				// 		break;
-				// 	}
-				// }
-				// patches.start_viewing(selected_patch);
-
-				// // If patch is unmodifed in RAM, then check for missing plugins
-				// if (patches.get_view_patch_modification_count() == 0) {
-				// 	missing_plugins.start(patches.get_view_patch(), group, [this](bool did_reload) {
-				// 		// If we loaded new plugins AND the patch was already playing, then reload patch into the player
-				// 		if (did_reload && patch_playloader.is_view_patch_playing())
-				// 			patch_playloader.request_load_view_patch();
-				// 		exit_to_patch_view_page();
-				// 	});
-				// 	state = State::Closing;
-
-				// } else {
-				// 	// Otherwise the patch has unsaved changes so just view it, don't reload/load anything
-				// 	exit_to_patch_view_page();
-				// }
 			} break;
 
 			case State::Closing:

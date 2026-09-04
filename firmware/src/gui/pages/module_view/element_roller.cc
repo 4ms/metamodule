@@ -82,12 +82,17 @@ void ModuleViewPage::populate_roller() {
 		using namespace std::literals;
 		opts.append(base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv)));
 
-		if (gui_el.mapped_panel_id) {
-			append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
-		}
-		if (gui_el.midi_mapped_id && gui_el.midi_mapped_id != gui_el.mapped_panel_id) {
-			opts.append("/");
+		if (gui_el.midi_mapped_id) {
+			// If the mapping and the MIDI mapping are different, then show both
+			// Compare stripped ports because mapped_panel_id never has a port
+			if (gui_el.mapped_panel_id && Midi::strip_port(*gui_el.midi_mapped_id) != *gui_el.mapped_panel_id) {
+				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
+				opts.append("/");
+			}
 			append_panel_name(opts, drawn_element.element, gui_el.midi_mapped_id.value());
+
+		} else if (gui_el.mapped_panel_id) {
+			append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
 		}
 
 		if (settings.module_view.show_jack_aliases) {

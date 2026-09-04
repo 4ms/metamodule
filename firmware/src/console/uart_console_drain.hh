@@ -215,7 +215,7 @@ private:
 		mdrivlib::HWSemaphore<UartLock>::unlock(M4LockId);
 	}
 
-	static constexpr uint32_t M4LockId = 2;
+	static constexpr uint32_t M4LockId = UartLockM4Drain;
 
 	// A full bounce buffer is ~23ms at 115200 baud
 	static constexpr uint32_t DmaTimeoutMs = 250;

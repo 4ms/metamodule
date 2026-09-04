@@ -30,7 +30,7 @@ struct MetaParams {
 	int8_t audio_overruns = 0;
 
 	// Controls -> Audio
-	bool midi_connected = false;
+	uint8_t midi_ports_connected = 0; //bitfield using Midi::Event::Port
 
 	// Controls -> GUI (USB connection status: role + active class)
 	UsbConnection usb_connection = UsbConnection::None;
@@ -98,7 +98,7 @@ struct MetaParams {
 
 		audio_overruns = std::max(that.audio_overruns, audio_overruns);
 
-		midi_connected = that.midi_connected;
+		midi_ports_connected = that.midi_ports_connected;
 
 		usb_connection = that.usb_connection;
 
@@ -138,7 +138,7 @@ struct MetaParams {
 		} else if (audio_overruns > 0)
 			audio_overruns--;
 
-		midi_connected = that.midi_connected;
+		midi_ports_connected = that.midi_ports_connected;
 
 		usb_connection = that.usb_connection;
 

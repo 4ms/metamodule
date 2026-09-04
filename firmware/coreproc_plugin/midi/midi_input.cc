@@ -20,7 +20,12 @@ MidiInput::~MidiInput() {
 
 // Return a the next MIDI message, or std::nullopt if there are no new messages
 std::optional<MidiMessage> MidiInput::pop_message() {
-	return internal->queue.data.get();
+	// The queue carries the port alongside the message; this API predates that
+	// and only exposes the message itself, so drop the port here.
+	if (auto ported = internal->queue.data.get())
+		return ported->msg;
+
+	return std::nullopt;
 }
 
 // Same as pop_message() but with a different interface:

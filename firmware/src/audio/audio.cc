@@ -277,11 +277,16 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// MIDI
 		MidiMessage msg = params.raw_msg;
+		uint8_t midi_port = params.midi_port;
 
-		midi.process(
-			param_block.metaparams.midi_connected, params.midi_event, param_block.metaparams.midi_poly_chans, &msg);
+		midi.process(param_block.metaparams.midi_ports_connected,
+					 params.midi_event,
+					 param_block.metaparams.midi_poly_chans,
+					 &msg,
+					 &midi_port);
 
 		param_blocks[cur_block].params[idx].raw_msg = msg;
+		param_blocks[cur_block].params[idx].midi_port = midi_port;
 
 		// Run each module
 		player.update_patch();
@@ -350,11 +355,16 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 
 		// MIDI: consume the incoming message and write back to the shared param block
 		MidiMessage msg = params.raw_msg;
+		uint8_t midi_port = params.midi_port;
 
-		midi.process(
-			param_block.metaparams.midi_connected, params.midi_event, param_block.metaparams.midi_poly_chans, &msg);
+		midi.process(param_block.metaparams.midi_ports_connected,
+					 params.midi_event,
+					 param_block.metaparams.midi_poly_chans,
+					 &msg,
+					 &midi_port);
 
 		param_blocks[cur_block].params[idx].raw_msg = msg;
+		param_blocks[cur_block].params[idx].midi_port = midi_port;
 
 		for (auto &outchan : out.chan)
 			outchan = 0;
@@ -463,7 +473,7 @@ uint32_t AudioStream::get_audio_errors() {
 
 // It's measurably faster to copy params into cacheable ram
 ParamBlock &AudioStream::cache_params(unsigned block) {
-	local_params.metaparams.midi_connected = param_blocks[block].metaparams.midi_connected;
+	local_params.metaparams.midi_ports_connected = param_blocks[block].metaparams.midi_ports_connected;
 	local_params.metaparams.usb_connection = param_blocks[block].metaparams.usb_connection;
 	local_params.metaparams.jack_senses = param_blocks[block].metaparams.jack_senses;
 	local_params.metaparams.button_exp_connected = param_blocks[block].metaparams.button_exp_connected;
