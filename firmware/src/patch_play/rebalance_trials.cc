@@ -139,14 +139,9 @@ void RebalanceTrials::advance(uint32_t now_ms, uint32_t avg_ticks, uint32_t over
 		t0_ = now_ms;
 		state_ = State::Warmup;
 	} else {
-		// Keep the winner. Un-silence first so re-applying fades it in
-		bool announce = auto_trials_;
 		finish();
 		apply_candidate(best_idx_);
 		loader_.copy_load_balance_to_patch();
-
-		if (announce && loader_.notify_queue)
-			loader_.notify_queue->put({"Re-balancing complete", Notification::Priority::Status, 750});
 	}
 }
 

@@ -173,7 +173,7 @@ private:
 			}
 
 			for (auto core = 0u; core < NumCores; core++)
-				lv_label_set_text_fmt(core_labels[core], "Core %u: %u%%", core + 1, core_load_ppm(core) / 10000);
+				lv_label_set_text_fmt(core_labels[core], "Core %u: %u%%", core + 1, (unsigned)(core_load_ppm(core) / 10000));
 		}
 
 		// put the buttons at the end of the group

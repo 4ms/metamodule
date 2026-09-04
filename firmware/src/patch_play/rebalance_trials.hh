@@ -60,8 +60,8 @@ private:
 	void finish();
 
 	static constexpr unsigned NumSeeds = 5;
-	static constexpr uint32_t WarmupMs = 100;
-	static constexpr uint32_t MeasureMs = 150;
+	static constexpr uint32_t WarmupMs = 25;
+	static constexpr uint32_t MeasureMs = 100;
 
 	enum class State { Idle, Warmup, Measure };
 
