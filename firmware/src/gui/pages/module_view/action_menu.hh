@@ -568,11 +568,8 @@ private:
 			confirm_popup.show(
 				[this, conn](unsigned choice) {
 					if (choice == 1) {
-						// Update our copy now so the re-opened popup shows it. The module view
-						// also applies this to the view patch and forwards it to the player
 						patches.get_view_patch()->remove_expander(conn);
 						patch_mod_queue.put(RemoveExpander{.conn = conn});
-						notify_queue.put({"Detached expander", Notification::Priority::Status, 1000});
 						reopen_expander_popup = true;
 					}
 				},

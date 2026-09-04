@@ -20,6 +20,9 @@ struct DisplayNotification {
 		lv_label_set_text(ui_MessageLabel, msg.message.c_str());
 
 		auto duration = (msg.duration_ms > 0) ? msg.duration_ms : 5000;
+
+		lv_obj_move_foreground(ui_MessagePanel);
+
 		if (animate) {
 			slide_down_up_animation(ui_MessagePanel, duration);
 		} else {
@@ -42,14 +45,14 @@ struct DisplayNotification {
 
 		lv_anim_t anim;
 		lv_anim_init(&anim);
-		lv_anim_set_time(&anim, 400);
+		lv_anim_set_time(&anim, 250);
 		lv_anim_set_exec_cb(&anim, (lv_anim_exec_xcb_t)lv_obj_set_y);
 		lv_anim_set_var(&anim, obj);
 		lv_anim_set_values(&anim, -1 * offscreen_y, 0);
 		lv_anim_set_path_cb(&anim, lv_anim_path_ease_in_out);
 		lv_anim_set_delay(&anim, 0);
-		lv_anim_set_playback_time(&anim, 400);
-		lv_anim_set_playback_delay(&anim, hold_time + 400);
+		lv_anim_set_playback_time(&anim, 250);
+		lv_anim_set_playback_delay(&anim, hold_time + 250);
 		lv_anim_set_early_apply(&anim, false);
 		lv_anim_start(&anim);
 	}
