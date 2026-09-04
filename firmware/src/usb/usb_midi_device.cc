@@ -1,11 +1,11 @@
 #include "usb_midi_device.hh"
+#include "device_composite/add_class.hh"
 #include "console/pr_dbg.hh"
 #include "drivers/interrupt_control.hh"
 #include "util/lockfree_fifo_spsc.hh"
 #include <array>
 #include <cstring>
 
-extern "C" USBD_DescriptorsTypeDef MIDI_Desc;
 
 namespace MetaModule
 {
@@ -51,30 +51,15 @@ UsbMidiDevice::UsbMidiDevice(USBD_HandleTypeDef *pDevice)
 	_instance = this;
 }
 
-void UsbMidiDevice::start() {
+void UsbMidiDevice::register_class() {
 	_instance = this;
-	auto init_ok = USBD_Init(pdev, &MIDI_Desc, 0);
-	if (init_ok != USBD_OK) {
-		pr_err("USB MIDI Device failed to initialize! Error %d\n", static_cast<int>(init_ok));
-		return;
-	}
-	USBD_RegisterClass(pdev, USBD_MIDI_CLASS);
-	USBD_MIDI_RegisterInterface(pdev, &fops);
-	USBD_Start(pdev);
-	pr_info("Started UsbMidiDevice\n");
-}
 
-void UsbMidiDevice::stop() {
-	pr_info("Stopping UsbMidiDevice\n");
-	USBD_Stop(pdev);
-	USBD_DeInit(pdev);
-}
+	auto ok = UsbComposite::add_class(pdev, USBD_MIDI_CLASS, CLASS_TYPE_MIDI, CMPSIT_MIDI_EpAdd, [this] {
+		USBD_MIDI_RegisterInterface(pdev, &fops);
+	});
 
-void UsbMidiDevice::soft_stop() {
-	// See UsbVideoDevice::soft_stop -- skip USBD_DeInit so hpcd->State stays
-	// READY and the next USBD_Init won't toggle USBO_CLK via MspInit.
-	pr_info("Stopping UsbMidiDevice\n");
-	USBD_Stop(pdev);
+	if (ok)
+		pr_info("Registered USB MIDI device\n");
 }
 
 // Drain the TX FIFO into the IN endpoint. Only starts a transfer when the
@@ -83,7 +68,7 @@ void UsbMidiDevice::soft_stop() {
 // the OTG-masked main-loop drain) -- never from the app/FrameRate ISR, which
 // would clobber the shared midi_tx_buf mid-DMA.
 void UsbMidiDevice::pump_tx() {
-	auto *hmidi = static_cast<USBD_MIDI_HandleTypeDef *>(pdev->pClassData);
+	auto *hmidi = USBD_MIDI_GetHandle();
 	if (hmidi == nullptr || hmidi->TxState != 0U)
 		return; // not configured, or a transfer is already in flight
 

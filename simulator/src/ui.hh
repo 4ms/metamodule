@@ -44,7 +44,8 @@ public:
 	// Load a patch and start viewing/playing it (used for headless screenshots).
 	void load_patch(std::string_view patch_name, Volume vol);
 	// Jump directly to a page by id (used for headless screenshots).
-	void goto_page(PageId page_id);
+	// Pages that show a patch (patchview, moduleview, ...) get the loaded patch as their argument.
+	void goto_page(PageId page_id, std::optional<unsigned> module_id = {});
 	// Encoder key bindings, so headless tooling can synthesize matching SDL events.
 	const RotaryEncoderKeys &input_keys() const {
 		return keys;

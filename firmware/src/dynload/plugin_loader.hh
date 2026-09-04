@@ -51,8 +51,44 @@ public:
 		}
 	}
 
+	// Install a plugin from a volume this core can read itself
+	// TODO: this would be cleaner if we populated plugin_files[] with the list of local
+	// plugins to load. And then changed the RequestReadPlugin state handler to
+	// check if the current plugin_files[file_idx] volume is the dev drive, and if so then load
+	// via the devdrive FatFileIO (which we'll need to pass in from DevDriveService when
+	// we initiate the local plugin list loading). The LoadingPlugin state is a no-op in this case.
+	bool load_local_plugin(FatFileIO &fileio, std::string_view filename) {
+		auto file_size = fileio.get_file_size(filename);
+
+		allocator.reset();
+		buffer = {allocator.allocate(file_size), file_size};
+		if (!buffer.data()) {
+			status = {
+				State::Error, std::string{filename}, "Failed to allocate " + std::to_string(file_size) + " bytes"};
+			return false;
+		}
+
+		if (fileio.read_file(filename, {(char *)buffer.data(), buffer.size()}) != file_size) {
+			status = {State::InvalidPlugin, std::string{filename}, "Could not read the plugin file"};
+			return false;
+		}
+
+		auto name = filename;
+		if (name.ends_with(".mmplugin"))
+			name.remove_suffix(9);
+
+		local_file = {fileio.vol_id(), std::string{filename}.c_str(), name, file_size, ""};
+		parse_version(local_file);
+		use_local_file = true;
+
+		// Pick the state machine up where the M4-read path would have left it
+		status = {State::UntarPlugin, std::string{name}, ""};
+		return true;
+	}
+
 	void load_plugin(unsigned idx) {
 		if (idx < plugin_files.size()) {
+			use_local_file = false;
 			status.state = State::PrepareForReadingPlugin;
 			file_idx = idx;
 		} else {
@@ -73,7 +109,7 @@ public:
 	}
 
 	Status process(LoadedPluginList &loaded_plugins) {
-		if (!plugin_file_list)
+		if (!plugin_file_list && !use_local_file)
 			status.state = State::NotInit;
 
 		switch (status.state) {
@@ -148,7 +184,7 @@ public:
 			} break;
 
 			case State::UntarPlugin: {
-				auto &plugin_file = plugin_files[file_idx];
+				auto &plugin_file = current_file();
 				auto [result, err] = contents.untar_contents(buffer, plugin_file);
 
 				if (result == PluginFileLoaderState::RamDiskFull) {
@@ -169,7 +205,7 @@ public:
 				auto num_loaded_before = loaded_plugins.size();
 				bool plugin_inited = false;
 				try {
-					auto &plugin_file = plugin_files[file_idx];
+					auto &plugin_file = current_file();
 					auto &plugin = loaded_plugins.emplace_back();
 					plugin.fileinfo = plugin_file;
 
@@ -303,22 +339,29 @@ public:
 	}
 
 	// Splits plugin names at the first "-v"
+	PluginFile &current_file() {
+		return use_local_file ? local_file : plugin_files[file_idx];
+	}
+
 	void parse_versions() {
-		for (auto &plugin : plugin_files) {
-			plugin.version_in_filename = "";
+		for (auto &plugin : plugin_files)
+			parse_version(plugin);
+	}
 
-			const auto name = std::string{plugin.plugin_name};
+	static void parse_version(PluginFile &plugin) {
+		plugin.version_in_filename = "";
 
-			// Make sure the char after the -v is a digit
-			auto v = name.find("-v");
-			while (v != std::string_view::npos) {
-				if (isdigit(name[v + 2])) {
-					plugin.plugin_name.copy(name.substr(0, v));
-					plugin.version_in_filename.copy(name.substr(v + 2));
-					break;
-				}
-				v = name.find("-v", v + 2);
+		const auto name = std::string{plugin.plugin_name};
+
+		// Make sure the char after the -v is a digit
+		auto v = name.find("-v");
+		while (v != std::string_view::npos) {
+			if (isdigit(name[v + 2])) {
+				plugin.plugin_name.copy(name.substr(0, v));
+				plugin.version_in_filename.copy(name.substr(v + 2));
+				break;
 			}
+			v = name.find("-v", v + 2);
 		}
 	}
 
@@ -432,6 +475,9 @@ private:
 	PluginFileList *plugin_file_list = nullptr;
 
 	PluginFileList plugin_files;
+
+	PluginFile local_file;
+	bool use_local_file = false;
 };
 
 } // namespace MetaModule

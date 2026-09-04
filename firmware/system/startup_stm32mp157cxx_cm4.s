@@ -50,6 +50,17 @@ defined in linker script */
   .type Reset_Handler, %function
 Reset_Handler:
   ldr   sp, =_estack
+
+  ldr  r0, =_M4_STACK /* fill stack with canary value */
+  ldr  r1, =_estack
+  ldr  r2, =0xAA55FF00
+  b  LoopFillStackCanary
+FillStackCanary:
+  str  r2, [r0], #4
+LoopFillStackCanary:
+  cmp  r0, r1
+  bcc  FillStackCanary
+
   movs  r1, #0
 
   ldr  r0, =_sdata  /*Skip initializing data section if it's empty */

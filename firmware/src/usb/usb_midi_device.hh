@@ -16,9 +16,9 @@ class UsbMidiDevice {
 public:
 	UsbMidiDevice(USBD_HandleTypeDef *pDevice);
 
-	void start();
-	void stop();
-	void soft_stop();
+	// Add the MIDI class to the device being built; the device lifecycle
+	// (USBD_Init/Start/Stop) belongs to UsbDeviceManager.
+	void register_class();
 
 	// Idle-kick TX drain; call from the main loop (UsbDeviceManager::process).
 	void process();

@@ -168,8 +168,14 @@ void *allocator_redirect(std::string_view name) {
 	if (name == "_free_r")         return reinterpret_cast<void *>(__wrap__free_r);
 
 	// Plugin death (uncaught exception -> terminate -> abort) routes to the
-	// rescue hook instead of halting
+	// rescue hook instead of halting. A plugin with newlib's abort statically
+	// linked bypasses the "abort" import but still reaches these before dying,
+	// so they get the same treatment (no plugin has a legitimate use for them).
 	if (name == "abort")           return reinterpret_cast<void *>(mm_plugin_abort);
+	if (name == "raise")           return reinterpret_cast<void *>(mm_plugin_abort);
+	if (name == "_kill")           return reinterpret_cast<void *>(mm_plugin_abort);
+	if (name == "_kill_r")         return reinterpret_cast<void *>(mm_plugin_abort);
+	if (name == "_exit")           return reinterpret_cast<void *>(mm_plugin_abort);
 
 	// operator new(unsigned), new[], nothrow and aligned variants (arm32 mangling)
 	if (name == "_Znwj")                     return reinterpret_cast<void *>(mm_plugin_op_new);

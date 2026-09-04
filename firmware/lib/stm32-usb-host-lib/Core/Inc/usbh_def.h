@@ -463,6 +463,11 @@ typedef struct
   USBH_StatusTypeDef(*BgndProcess)(struct _USBH_HandleTypeDef *phost);
   USBH_StatusTypeDef(*SOFProcess)(struct _USBH_HandleTypeDef *phost);
   void                *pData;
+  /* Interface subclass this class requires when scanning a device's interfaces.
+     0 = any subclass matches (only ClassCode is checked). Lets a class whose
+     ClassCode is shared across functions (e.g. MIDI = audio class 1, subclass 3)
+     avoid claiming devices it can't actually drive. */
+  uint8_t              SubClassCode;
 } USBH_ClassTypeDef;
 
 /* USB Host handle structure */

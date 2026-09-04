@@ -111,6 +111,7 @@ USBH_ClassTypeDef  USBH_msc =
   USBH_MSC_Process,
   USBH_MSC_SOFProcess,
   NULL,
+  MSC_TRANSPARENT, /* InterfaceInit requires subclass 6 (SCSI transparent) anyway */
 };
 
 /**
@@ -235,6 +236,13 @@ static USBH_StatusTypeDef USBH_MSC_InterfaceInit(USBH_HandleTypeDef *phost)
 static USBH_StatusTypeDef USBH_MSC_InterfaceDeInit(USBH_HandleTypeDef *phost)
 {
   MSC_HandleTypeDef *MSC_Handle = (MSC_HandleTypeDef *) phost->pActiveClass->pData;
+
+  /* InterfaceInit can fail before allocating pData (no interface found, or
+     SelectInterface failed); DeInit is called on that path to clean up */
+  if (MSC_Handle == NULL)
+  {
+    return USBH_OK;
+  }
 
   if ((MSC_Handle->OutPipe) != 0U)
   {

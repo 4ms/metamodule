@@ -1,12 +1,14 @@
 #include "aux_core_player.hh"
 #include "conf/hsem_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_a7/dev_drive_service.hh"
 #include "core_a7/device_settings_proxy.hh"
 #include "core_intercom/shared_memory.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "dynload/plugin_manager.hh"
+#include "fs/dev_drive.hh"
 #include "fs/norflash_layout.hh"
 #include "fs/syscall/filesystem.hh"
 #include "fw_update/auto_updater.hh"
@@ -54,30 +56,35 @@ extern "C" void aux_core_main() {
 
 	RamDiskOps ramdisk_ops{*A7SharedMemoryS::ptrs.ramdrive};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
+
+	DevDrive dev_drive;
+
 	AssetFS asset_fs{AssetVolFlashOffset};
 	Filesystem::init(ramdisk);
 	auto &file_storage_proxy = *A7SharedMemoryS::ptrs.patch_storage;
 	PluginManager plugin_manager{file_storage_proxy, ramdisk};
-	Ui ui{*A7SharedMemoryS::ptrs.patch_playloader,
+	PatchPlayLoader &patch_playloader{*A7SharedMemoryS::ptrs.patch_playloader};
+	Ui ui{patch_playloader,
 		  file_storage_proxy,
 		  *A7SharedMemoryS::ptrs.open_patch_manager,
 		  *A7SharedMemoryS::ptrs.sync_params,
 		  *A7SharedMemoryS::ptrs.patch_mod_queue,
 		  plugin_manager,
 		  ramdisk};
+
 	auto usb_role_mode = ui.get_settings().usb_role_mode;
 	if (usb_role_mode != UsbRoleMode::Auto) {
 		while (!DeviceSettingsProxy::send_role_mode(usb_role_mode))
 			;
 	}
 
-	// Tell the M4 which USB device class to present (MIDI, Video, or the
-	// Debug Console). The M4 defaults to MIDI until this arrives.
+	// Tell the M4 which USB device class to present
 	auto usb_device_mode = ui.get_settings().usb_device_mode;
-	if (usb_device_mode != UsbDeviceMode::Midi) {
+	if (usb_device_mode != UsbDeviceMode::MidiConsole) {
 		while (!DeviceSettingsProxy::send_device_mode(usb_device_mode))
 			;
 	}
+
 	UsbVideoBuffer::set_mirroring(ui.get_settings().video.mirror);
 	UsbVideoBuffer::enable(usb_device_mode == UsbDeviceMode::Video);
 
@@ -104,8 +111,8 @@ extern "C" void aux_core_main() {
 
 	AutoUpdater::run(file_storage_proxy, ui);
 
-	if (CpuLoadTest::should_run_hil_tests(file_storage_proxy)) {
-		CpuLoadTest::run_hil_tests(file_storage_proxy, ui, plugin_manager);
+	if (auto hil_params = CpuLoadTest::get_hil_test_params(file_storage_proxy); hil_params.run) {
+		CpuLoadTest::run_hil_tests(file_storage_proxy, ui, plugin_manager, hil_params.brand, hil_params.plugins_only);
 	}
 
 	if (ModuleImageGen::should_run(file_storage_proxy)) {
@@ -134,9 +141,12 @@ extern "C" void aux_core_main() {
 
 	ui.load_initial_patch();
 
+	DevDriveService dev_drive_service{dev_drive, plugin_manager, patch_playloader, ui.get_notify_queue()};
+
 	while (true) {
 		ui.update_screen();
 		ui.update_page();
+		dev_drive_service.process(ui.get_settings().developer.enabled);
 		__NOP();
 	}
 }

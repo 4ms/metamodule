@@ -23,8 +23,9 @@ public:
 	enum class Mode { Direct, Buffered };
 
 	// There are two separate static instances of these: one in the M4's memory and
-	// one in the A7's (this file is compiled+linked once for each image). The A7
-	// instance has two cores; the M4 instance just uses index 0.
+	// one in the A7's (this file is compiled+linked once for each image).
+	// With NumCores == 2, A7 will have two buffers pointers, and M4 will have two also
+	// but M4 will always have the second one as nullptr since nothing uses it.
 	static constexpr size_t NumCores = 2;
 
 	static inline std::array<ConcurrentBuffer *, NumCores> log_buff = {nullptr, nullptr};

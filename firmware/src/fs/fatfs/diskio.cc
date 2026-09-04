@@ -5,18 +5,21 @@
 #include <cstdio>
 #include <cstring>
 
-constexpr size_t MaxNumDisks = 4;
+constexpr size_t MaxNumDisks = 6;
 
 // required by fatfs:
 PARTITION VolToPart[FF_VOLUMES] = {
 	{0, 0}, /* "0:" ==> Auto detect partition on USB */
 	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
 	{2, 0}, /* "2:" ==> auto detect partition on Ramdisk */
+	{3, 0}, /* "3:" ==> unused (NorFlash is littlefs, not FatFS) */
+	{4, 0}, /* "4:" ==> unused */
+	{5, 0}, /* "5:" ==> developer-mode USB drive */
 };
 
 namespace
 {
-std::array<DiskOps *, MaxNumDisks> _diskops{nullptr, nullptr, nullptr, nullptr};
+std::array<DiskOps *, MaxNumDisks> _diskops{};
 }
 
 // Register a set of disk operations with the FatFS filesystem.

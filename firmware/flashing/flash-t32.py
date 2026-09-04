@@ -108,8 +108,7 @@ def main():
                 if attempt == 2:
                     sys.exit(f"Verify FAILED after retry: {e}")
                 print("  Verify failed, retrying load...")
-    print(f"  Loaded and verified in {time.time() - t_start:.1f}s")
-
+    
     print(f"  Loaded in {time.time() - t_start:.1f}s")
 
     dbg.cmd(f"Data.LOAD.Elf {elfpath} /CPP /NoCode")

@@ -1,5 +1,6 @@
 #pragma once
 #include "console/console_buffer_reader.hh"
+#include "device_cdc/console_commands.hh"
 #include "usbd_cdc.h"
 #include "usbd_core.h"
 #include <array>
@@ -14,14 +15,23 @@ public:
 	UsbSerialDevice(USBD_HandleTypeDef *pDevice,
 					std::array<ConcurrentBuffer *, MetaModule::ConsoleBufferReader::NumBuffers> console_buffers);
 	void process();
-	void start();
-	void stop();
-	void soft_stop();
+
+	// Add the CDC class to the device being built. The device itself (USBD_Init
+	// / USBD_Start / USBD_Stop) is owned by UsbDeviceManager, since in the
+	// MIDI + Console mode one device carries two classes.
+	void register_class();
+
+	// The device has been stopped: hand the console back to the UART drain.
+	void on_stopped();
 
 private:
 	USBD_HandleTypeDef *pdev;
 
+	uint8_t cdc_class_id() const;
+	uint8_t _cdc_class_id = 0;
+
 	MetaModule::ConsoleBufferReader reader;
+	MetaModule::ConsoleCommands commands{reader};
 
 	std::vector<uint8_t> rx_buffer{}; // force to be on heap
 

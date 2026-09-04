@@ -30,9 +30,10 @@ namespace MetaModule
 // "module-images/<brand>/<module>.png" on the USB drive.
 //
 // Triggered like the CPU load tests: a file named "run_image_gen" on the USB
-// drive whose contents begin with "all" (or, in the future, a brand slug to
-// filter by). Requires LV_USE_SNAPSHOT to capture the canvas plus its child
-// element objects (knobs/jacks/lights).
+// drive whose first line selects what to render:
+//   all     : every brand, built-in and plugins
+//   plugins : only the brands the plugins on the drive register
+//   <brand> : just that brand
 struct ModuleImageGen {
 	static constexpr uint32_t Height = 240;
 	static constexpr Volume OutVol = Volume::USB;
@@ -57,7 +58,9 @@ struct ModuleImageGen {
 
 		std::string contents;
 		FS::read_file(file_storage_proxy, contents, {"run_image_gen", Volume::USB});
-		auto filter = read_filter(contents); // "all" => every brand, else a brand slug
+		auto filter = read_filter(contents);
+		bool all_brands = (filter == "all");
+		bool plugins_only = (filter == "plugins");
 
 		hil_message("*generating\n");
 		lv_show(ui_MainMenuNowPlayingPanel);
@@ -74,11 +77,15 @@ struct ModuleImageGen {
 		FS::write_file(file_storage_proxy, csv, {ReportInProgressPath, OutVol});
 
 		// Handle Built-in brands first
-		for (auto brand : ModuleFactory::getAllBrands()) {
-			if (filter != "all" && filter != brand)
-				continue;
-			render_brand(file_storage_proxy, player, playloader, ui, brand, rendered, skipped, csv);
+		if (!plugins_only) {
+			for (auto brand : ModuleFactory::getAllBrands()) {
+				if (!all_brands && filter != brand)
+					continue;
+				render_brand(file_storage_proxy, player, playloader, ui, brand, rendered, skipped, csv);
+			}
 		}
+
+		hil_message("*ok\n");
 
 		// Load one plugin at a time, render its modules, then unload it
 		plugin_manager.start_loading_plugin_list();
@@ -99,6 +106,9 @@ struct ModuleImageGen {
 		for (auto i = 0u; i < list->size(); ++i) {
 			auto plugin_file_name = plugin_manager.plugin_name(i);
 			printf("Loading plugin: '%s'\n", plugin_file_name.c_str());
+
+			// A plugin whose brand is filtered out renders nothing, so we need to emit *ok here
+			hil_message("*ok\n");
 
 			// Brands are keyed in ModuleFactory by a cleaned-up version of the
 			// metadata's brand_slug (aliases resolved, ':' suffix stripped)
@@ -121,19 +131,33 @@ struct ModuleImageGen {
 			}
 
 			if (loaded_ok) {
+				bool rendered_this_plugin = false;
+
 				for (auto brand : ModuleFactory::getAllBrands()) {
 					if (std::ranges::find(brands_before, brand) != brands_before.end())
 						continue; // pre-existing brand, not from this plugin
 
-					if (filter == "all" || filter == brand)
+					if (all_brands || plugins_only || filter == brand) {
 						render_brand(file_storage_proxy, player, playloader, ui, brand, rendered, skipped, csv);
+						rendered_this_plugin = true;
+					}
 				}
 
 				plugin_manager.unload_plugin(plugin_file_name);
+
+				// Rendering one brand: its plugin has been found and drawn, so stop
+				if (!all_brands && !plugins_only && rendered_this_plugin)
+					break;
 			}
 		}
 
 		FS::write_file(file_storage_proxy, csv, {ReportPath, OutVol});
+
+		if (!all_brands && rendered == 0 && skipped == 0) {
+			pr_err("No modules matched '%s' for image generation\n", filter.c_str());
+			hil_message("*failure\n");
+			return;
+		}
 
 		pr_info("Module image generation finished: %u rendered, %u skipped\n", rendered, skipped);
 		lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Done: %u images, %u skipped", rendered, skipped);

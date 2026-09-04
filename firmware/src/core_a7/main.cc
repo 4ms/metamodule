@@ -66,7 +66,10 @@ int main() {
 		StaticBuffers::uvc_shadow_framebuffer.data(),
 		&StaticBuffers::icc_device_settings_message,
 		&StaticBuffers::usb_connection_status,
+		&StaticBuffers::dev_drive_block,
 	};
+
+	StaticBuffers::dev_drive_block.reset();
 
 	A7SharedMemoryS::ptrs = {
 		&patch_player,

@@ -23,8 +23,7 @@ public:
 	}
 
 	// Drop any pending backlog: continue from each buffer's current position.
-	// Call when taking over as the active drain (the previously active drain
-	// already output the earlier data).
+	// Call when switching UART<->USB CDC
 	void resync() {
 		for (auto i = 0u; i < NumBuffers; i++) {
 			read_pos[i] = buffers[i]->write_pos;
@@ -36,9 +35,8 @@ public:
 		use_color = enabled;
 	}
 
-	// Copy the next pending chunk from one of the buffers into `out` (wrapped in
-	// color codes if enabled). Returns the number of bytes written to `out`, or 0
-	// if no buffer has pending data. Scans the buffers round-robin for fairness.
+	// Copy the next pending chunk from one of the buffers into `out`
+	// Returns the number of bytes written.
 	size_t next_chunk(std::span<uint8_t> out) {
 		for (auto scan = 0u; scan < NumBuffers; scan++) {
 			auto i = next_idx;

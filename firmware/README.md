@@ -14,3 +14,5 @@ The following guides are available:
 - [Debugging](../docs/firmware-debugging.md)
 
 - [Firmware Boot Process](../docs/Firmware-Boot.md)
+
+- [Plugins](../docs/Plugins.md)

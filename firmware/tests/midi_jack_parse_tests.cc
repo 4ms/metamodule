@@ -215,6 +215,52 @@ TEST_CASE("Endpoints outside a MIDIStreaming interface are ignored") {
 	CHECK(jacks.out_jacks[0].cable_num == 0);
 }
 
+TEST_CASE("Composite device: CDC and audio class-specific descriptors are not mistaken for jacks") {
+	// The shape of a Linux composite gadget (e.g. Torso S-4): CDC-ECM and UAC2
+	// audio functions precede the MIDI function. Their class-specific interface
+	// descriptors share type 0x24 with MIDI jacks, and their subtypes collide:
+	// UAC2 INPUT_TERMINAL = 0x02 = MIDI_IN_JACK, OUTPUT_TERMINAL = 0x03 =
+	// MIDI_OUT_JACK, CDC ACM = 0x02.
+	ConfigBuilder c;
+	c.interface(0, 1, 0x02, 0x06);					   // CDC-ECM control
+	c.raw({5, 0x24, 0x00, 0x10, 0x01});				   // CDC header functional
+	c.raw({5, 0x24, 0x06, 0x00, 0x01});				   // CDC union functional
+	c.raw({13, 0x24, 0x0F, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0}); // CDC ethernet functional
+	c.endpoint(0x82);
+	c.interface(1, 2, 0x0A, 0x00); // CDC data
+	c.endpoint(0x01);
+	c.endpoint(0x81);
+	c.interface(2, 1, 0x01, 0x01);							  // UAC2 AudioControl
+	c.raw({17, 0x24, 0x02, 1, 1, 1, 3, 0, 2, 0, 0, 0, 0, 0, 0, 0, 5}); // input terminal (iTerminal = 5)
+	c.raw({12, 0x24, 0x03, 2, 1, 3, 0, 1, 1, 0, 0, 0});		  // output terminal
+	c.endpoint(0x83);
+	c.midi_streaming_itf(3, 2);
+	c.in_jack(Embedded, 1);
+	c.out_jack(Embedded, 2, 0);
+	c.endpoint(0x02);
+	c.cs_endpoint({1});
+	c.endpoint(0x82);
+	c.cs_endpoint({2});
+
+	auto cfg = c.finish();
+
+	uint8_t num_in = 0;
+	uint8_t num_out = 0;
+	count_midi_jacks(cfg, &num_in, &num_out);
+	CHECK(num_in == 1);
+	CHECK(num_out == 1);
+
+	auto jacks = parse(cfg);
+	CHECK(jacks.num_in_jacks == 1);
+	CHECK(jacks.num_out_jacks == 1);
+	CHECK(jacks.in_jacks[0].jack_id == 1);
+	CHECK(jacks.out_jacks[0].jack_id == 2);
+	CHECK(jacks.num_rx_cables == 1);
+	CHECK(jacks.num_tx_cables == 1);
+	CHECK(jacks.rx_cable_out_jack_idx[0] == 0);
+	CHECK(jacks.tx_cable_in_jack_idx[0] == 0);
+}
+
 TEST_CASE("A cable naming a jack we didn't store still counts, but maps to no jack") {
 	// The device associates jack id 99, which it never declared.
 	ConfigBuilder c;

@@ -117,8 +117,16 @@ void Ui::load_patch(std::string_view patch_name, Volume vol) {
 	patch_playloader.load_initial_patch(patch_name, vol);
 }
 
-void Ui::goto_page(PageId page_id) {
-	page_manager.request_page(page_id);
+void Ui::goto_page(PageId page_id, std::optional<unsigned> module_id) {
+	PageArguments args{};
+
+	if (open_patches_manager.get_view_patch())
+		args.patch_loc_hash = open_patches_manager.get_view_patch_loc_hash();
+
+	if (module_id)
+		args.module_id = static_cast<uint16_t>(*module_id);
+
+	page_manager.request_page(page_id, args);
 }
 
 void Ui::play_patch(std::span<Frame> soundcard_out) {
