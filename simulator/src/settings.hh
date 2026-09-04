@@ -28,6 +28,7 @@ struct Settings {
 	std::string screenshot_path = ""; // if set, capture to this BMP path then exit
 	unsigned screenshot_frames = 120; // UI update cycles to run before capturing
 	std::string input_sequence = ""; // ordered encoder actions to simulate, e.g. "cw cw click"
+	std::optional<unsigned> start_module{}; // module index to open when jumping to moduleview
 
 	void parse(int argc, char *argv[]) {
 
@@ -88,9 +89,16 @@ struct Settings {
 								  "(tokens: cw, ccw, click, back; repeat with cw:3)",
 								  cxxopts::value<std::string>()->default_value(""));
 
+			options.add_options()("module",
+								  "Module index in the loaded patch to open when jumping to moduleview",
+								  cxxopts::value<unsigned>());
+
 			options.add_options()("h,help", "Print help");
 
 			auto args = options.parse(argc, argv);
+
+			if (args.count("module") > 0)
+				start_module = args["module"].as<unsigned>();
 
 			if (args.count("patch") > 0)
 				startup_patch = args["patch"].as<std::string>();
