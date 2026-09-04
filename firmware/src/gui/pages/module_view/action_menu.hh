@@ -7,6 +7,7 @@
 #include "gui/notify/queue.hh"
 #include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/module_view/automap.hh"
+#include "gui/pages/module_view/expander_popup.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/roller_popup.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -16,6 +17,7 @@
 #include "patch_play/randomize_param.hh"
 #include "patch_play/reset_param.hh"
 #include <algorithm>
+#include <array>
 #include <string>
 #include <vector>
 
@@ -158,10 +160,6 @@ public:
 		preset_popup.init(lv_layer_top(), group);
 
 		expander_popup.init(lv_layer_top(), group);
-		lv_obj_set_size(expander_popup.popup, 320, 140);
-		lv_obj_set_size(expander_popup.roller, 300, 80);
-		lv_obj_set_style_text_font(expander_popup.roller, &ui_font_MuseoSansRounded70014, 0);
-		lv_obj_set_align(expander_popup.popup, LV_ALIGN_CENTER);
 
 		update_midi_map_text();
 	}
@@ -238,8 +236,12 @@ public:
 		return preset_popup.is_visible() || expander_popup.is_visible() || confirm_popup.is_visible();
 	}
 
+	// Make the menu, or the popup it has open, the input target again
 	void reactivate_group() {
-		lv_group_activate(group);
+		if (expander_popup.is_visible())
+			expander_popup.activate();
+		else if (!popup_visible())
+			lv_group_activate(group);
 	}
 
 	void update() {
@@ -480,7 +482,7 @@ private:
 
 	// Expanders
 
-	std::string expander_option_text(ExpanderSide side) {
+	std::string expander_slot_text(ExpanderSide side) {
 		auto *pd = patches.get_view_patch();
 		std::string text{expander_side_name(side)};
 		text += ": ";
@@ -494,7 +496,7 @@ private:
 		auto other_id = side == ExpanderSide::Left ? conn->left_module_id : conn->right_module_id;
 		text += module_display_name(*pd, other_id);
 
-		// Keep suffixes short: the roller is narrow
+		// Keep suffixes short: the slot is narrow
 		if (is_patch_playing) {
 			switch (patch_playloader.expander_status(*conn)) {
 				case PatchPlayer::ExpanderStatus::Active:
@@ -512,27 +514,44 @@ private:
 		return text;
 	}
 
-	void show_expander_popup() {
-		expander_options = expander_option_text(ExpanderSide::Left) + "\n" + expander_option_text(ExpanderSide::Right);
-
-		expander_popup.show(
-			[this](unsigned opt) { expander_side_clicked(opt == 0 ? ExpanderSide::Left : ExpanderSide::Right); },
-			"Expanders",
-			expander_options.c_str(),
-			0);
+	// Refresh both slots from the view patch (and the player's link status)
+	void update_expander_slots() {
+		auto *pd = patches.get_view_patch();
+		for (auto side : {ExpanderSide::Left, ExpanderSide::Right}) {
+			auto text = expander_slot_text(side);
+			auto &shown = expander_slot_texts[side == ExpanderSide::Left ? 0 : 1];
+			if (text != shown) {
+				shown = text;
+				bool filled = pd->find_expander(static_cast<uint16_t>(module_idx), side).has_value();
+				expander_popup.set_slot(side, text, filled);
+			}
+		}
 	}
 
-	// Called from the roller popup's click callback. The popup restores input
-	// focus to this menu after the callback returns, so anything that changes
-	// focus (another popup, a page change) is deferred to process_expander_actions()
-	void expander_side_clicked(ExpanderSide side) {
+	void show_expander_popup() {
+		expander_slot_texts = {};
+		update_expander_slots();
+
+		expander_popup.show([this](ExpanderSide side) { expander_slot_clicked(side); },
+							[this](ExpanderSide side) { expander_remove_clicked(side); });
+	}
+
+	// Called from the popup's click callbacks. Anything that changes focus
+	// (another popup, a page change) is deferred to process_expander_actions()
+	void expander_slot_clicked(ExpanderSide side) {
 		auto *pd = patches.get_view_patch();
 		auto this_id = static_cast<uint16_t>(module_idx);
 
-		if (auto conn = pd->find_expander(this_id, side))
-			pending_detach = *conn;
+		if (auto other_id = pd->find_expander_module(this_id, side))
+			pending_goto_module = *other_id;
 		else
 			pending_attach = side;
+	}
+
+	void expander_remove_clicked(ExpanderSide side) {
+		auto *pd = patches.get_view_patch();
+		if (auto conn = pd->find_expander(static_cast<uint16_t>(module_idx), side))
+			pending_detach = *conn;
 	}
 
 	void process_expander_actions() {
@@ -555,8 +574,20 @@ private:
 			return;
 		}
 
+		if (pending_goto_module) {
+			// Filled slot: open the attached module
+			auto other_id = *pending_goto_module;
+			pending_goto_module.reset();
+
+			hide();
+			page_list.request_new_page(
+				PageId::ModuleView,
+				PageArguments{.patch_loc_hash = patches.get_view_patch_loc_hash(), .module_id = other_id});
+			return;
+		}
+
 		if (pending_detach) {
-			// Already attached: confirm removing it
+			// X button on a filled slot: confirm removing it
 			auto conn = *pending_detach;
 			pending_detach.reset();
 
@@ -564,6 +595,9 @@ private:
 			auto other_id = side == ExpanderSide::Left ? conn.left_module_id : conn.right_module_id;
 			auto msg = "Detach '" + module_display_name(*patches.get_view_patch(), other_id) + "' from the " +
 					   std::string{expander_side_name(side)} + " side of this module?";
+
+			// Close the popup so focus returns to the menu if the user cancels
+			expander_popup.hide();
 
 			confirm_popup.show(
 				[this, conn](unsigned choice) {
@@ -586,15 +620,8 @@ private:
 
 		// While the popup is open, keep it current: the player wires the connection
 		// (and later sees the first message) shortly after we attach it
-		if (expander_popup.is_visible()) {
-			auto text = expander_option_text(ExpanderSide::Left) + "\n" + expander_option_text(ExpanderSide::Right);
-			if (text != expander_options) {
-				expander_options = text;
-				auto selected = lv_roller_get_selected(expander_popup.roller);
-				lv_roller_set_options(expander_popup.roller, expander_options.c_str(), LV_ROLLER_MODE_NORMAL);
-				lv_roller_set_selected(expander_popup.roller, selected, LV_ANIM_OFF);
-			}
-		}
+		if (expander_popup.is_visible())
+			update_expander_slots();
 	}
 
 	static void expander_but_cb(lv_event_t *event) {
@@ -675,10 +702,11 @@ private:
 	std::string presets{};
 	std::vector<Preset> preset_map{};
 	RollerPopup preset_popup{"Select Preset"};
-	RollerPopup expander_popup{"Expanders"};
-	std::string expander_options{};
+	ExpanderPopup expander_popup;
+	std::array<std::string, 2> expander_slot_texts{};
 	std::optional<ExpanderSide> pending_attach{};
 	std::optional<ExpanderConnection> pending_detach{};
+	std::optional<uint16_t> pending_goto_module{};
 	bool reopen_expander_popup = false;
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;

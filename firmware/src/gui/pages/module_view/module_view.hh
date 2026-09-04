@@ -297,9 +297,11 @@ struct ModuleViewPage : PageBase {
 			redraw_module();
 			mapping_pane.refresh();
 
-			// Don't steal focus from a popup the action menu has open (e.g. the Expanders list)
-			if (action_menu.is_visible() && !action_menu.popup_visible()) {
-				focus_button_bar();
+			// Redrawing hands input back to this page: return it to the action
+			// menu, or to the popup it has open (e.g. the Expanders list)
+			if (action_menu.is_visible()) {
+				if (!action_menu.popup_visible())
+					focus_button_bar();
 				action_menu.reactivate_group();
 			}
 		}
