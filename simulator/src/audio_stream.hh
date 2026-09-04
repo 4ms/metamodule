@@ -144,7 +144,7 @@ public:
 
 		// Forward the received message to subscribed modules (ignore active sensing).
 		if (rx_msg.is_sysex() || (rx_msg.status != 0xfe && rx_msg.status != 0)) {
-			MidiRouter::push_incoming_message(rx_msg);
+			MidiRouter::push_incoming_message(rx_msg, 0);
 		}
 
 		// Pull one message that a module wants to transmit and send it out.
