@@ -1188,6 +1188,33 @@ public:
 		}
 	}
 
+	bool add_expander(ExpanderConnection conn) {
+		/// TODO: check if this works: (why would rack_expanders.connect() fail?)
+		// if (pd.add_expander(conn)) {
+		// 	if (connect_expander(conn))
+		// 		return true;
+		// 	else
+		// 		pd.remove_expander(conn);
+		// }
+		// return false;
+
+		if (!pd.can_add_expander(conn))
+			return false;
+
+		if (!connect_expander(conn))
+			return false;
+
+		pd.expanders.push_back(conn);
+		return true;
+	}
+
+	bool remove_expander(ExpanderConnection conn) {
+		bool removed = pd.remove_expander(conn);
+		if (conn.left_module_id < num_modules && conn.right_module_id < num_modules)
+			rack_expanders.disconnect_pair(modules[conn.left_module_id].get(), modules[conn.right_module_id].get());
+		return removed;
+	}
+
 	void remove_module(uint16_t module_idx) {
 		// For all cache structures, if (module_id > deleted_module_idx) module_id -= 1;
 

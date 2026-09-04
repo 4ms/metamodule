@@ -92,8 +92,7 @@ public:
 		M *right{};
 		// Set once a message flip has been requested across this pair,
 		// i.e. the two modules recognized each other and are exchanging data.
-		// Written on the audio thread, read on the GUI thread: a bool is
-		// atomic on all targets we build for.
+		// Written on the audio thread, read on the GUI thread
 		bool active{};
 	};
 

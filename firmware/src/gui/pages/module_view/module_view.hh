@@ -358,6 +358,11 @@ struct ModuleViewPage : PageBase {
 							   patch->set_module_bypassed(mod.module_id, mod.bypassed);
 							   refresh = true;
 						   },
+						   [&, this](AddExpander &mod) { refresh = patch->add_expander(mod.conn); },
+						   [&, this](RemoveExpander &mod) {
+							   patch->remove_expander(mod.conn);
+							   refresh = true;
+						   },
 						   [&](auto &m) { refresh = false; },
 					   },
 					   patch_mod.value());

@@ -52,6 +52,8 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 					   [&new_cal_state](CalibrationOnOff &mod) { new_cal_state = mod.enable; },
 					   [&player](LoadModuleState &mod) { player.reset_module(mod.module_id, mod.data); },
 					   [&player](SetModuleBypass &mod) { player.set_module_bypass(mod.module_id, mod.bypassed); },
+					   [&player](AddExpander &mod) { player.add_expander(mod.conn); },
+					   [&player](RemoveExpander &mod) { player.remove_expander(mod.conn); },
 				   },
 				   patch_mod);
 	}
