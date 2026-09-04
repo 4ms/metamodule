@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
 		ui.load_patch(settings.startup_patch, MetaModule::Volume::SDCard);
 
 	if (auto page = resolve_page(settings.start_page))
-		ui.goto_page(*page);
+		ui.goto_page(*page, settings.start_module);
 
 	// Simulate encoder input (e.g. navigate to and click a list item) before capture
 	if (!settings.input_sequence.empty())

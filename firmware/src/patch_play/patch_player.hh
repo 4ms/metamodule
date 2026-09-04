@@ -190,7 +190,7 @@ public:
 	void remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map);
 	void add_midi_mapped_knob(const MappedKnob &map);
 	void add_internal_cable(Jack in, Jack out);
-	void add_injack_mapping(uint16_t panel_jack_id, Jack jack);
+	void add_injack_mapping(uint32_t panel_jack_id, Jack jack);
 	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack);
 	void disconnect_injack(Jack jack);
 	void remove_injack_mappings(Jack jack);
@@ -239,7 +239,8 @@ public:
 			return;
 		}
 
-		else {
+		else
+		{
 			update_patch_time.start_simple_measurement();
 
 			smp.update_modules();
@@ -473,42 +474,42 @@ public:
 		}
 	}
 
-	void set_midi_note_pitch(unsigned poly_chan, float val, uint16_t midi_chan) {
-		set_all_connected_jacks(midi.note_pitch_conns[poly_chan], val, midi_chan);
-		set_all_connected_poly_jacks(midi.poly_pitch_conns, poly_chan, val, midi_chan);
+	void set_midi_note_pitch(unsigned poly_chan, float val, uint16_t midi_chan, uint8_t port = 0) {
+		set_all_connected_jacks(midi.note_pitch_conns[poly_chan], val, midi_chan, port);
+		set_all_connected_poly_jacks(midi.poly_pitch_conns, poly_chan, val, midi_chan, port);
 	}
 
-	void set_midi_note_gate(unsigned poly_chan, float val, uint16_t midi_chan) {
-		set_all_connected_jacks(midi.note_gate_conns[poly_chan], val, midi_chan);
-		set_all_connected_poly_jacks(midi.poly_gate_conns, poly_chan, val, midi_chan);
+	void set_midi_note_gate(unsigned poly_chan, float val, uint16_t midi_chan, uint8_t port = 0) {
+		set_all_connected_jacks(midi.note_gate_conns[poly_chan], val, midi_chan, port);
+		set_all_connected_poly_jacks(midi.poly_gate_conns, poly_chan, val, midi_chan, port);
 	}
 
-	void set_midi_note_velocity(unsigned poly_chan, int16_t val, uint16_t midi_chan) {
+	void set_midi_note_velocity(unsigned poly_chan, int16_t val, uint16_t midi_chan, uint8_t port = 0) {
 		float volts = float(val) / 12.7f;
 
-		set_all_connected_jacks(midi.note_vel_conns[poly_chan], volts, midi_chan);
-		set_all_connected_poly_jacks(midi.poly_vel_conns, poly_chan, volts, midi_chan);
+		set_all_connected_jacks(midi.note_vel_conns[poly_chan], volts, midi_chan, port);
+		set_all_connected_poly_jacks(midi.poly_vel_conns, poly_chan, volts, midi_chan, port);
 	}
 
-	void set_midi_note_aftertouch(unsigned poly_chan, int16_t val, uint16_t midi_chan) {
+	void set_midi_note_aftertouch(unsigned poly_chan, int16_t val, uint16_t midi_chan, uint8_t port = 0) {
 		float volts = float(val) / 12.7f;
 
 		// Mono cables:
-		set_all_connected_jacks(midi.note_aft_conns[poly_chan], volts, midi_chan);
-		set_all_connected_poly_jacks(midi.poly_aft_conns, poly_chan, volts, midi_chan);
+		set_all_connected_jacks(midi.note_aft_conns[poly_chan], volts, midi_chan, port);
+		set_all_connected_poly_jacks(midi.poly_aft_conns, poly_chan, volts, midi_chan, port);
 	}
 
-	void set_midi_note_retrig(unsigned poly_chan, float val, uint16_t midi_chan) {
+	void set_midi_note_retrig(unsigned poly_chan, float val, uint16_t midi_chan, uint8_t port = 0) {
 		// Mono cables:
-		set_all_connected_jacks(midi.note_retrig[poly_chan].conns, val, midi_chan);
+		set_all_connected_jacks(midi.note_retrig[poly_chan].conns, val, midi_chan, port);
 		midi.note_retrig[poly_chan].pulse.start(0.01);
 
-		set_all_connected_poly_jacks(midi.poly_retrig.conns, poly_chan, val, midi_chan);
+		set_all_connected_poly_jacks(midi.poly_retrig.conns, poly_chan, val, midi_chan, port);
 		if (poly_chan < MaxMidiPolyphony)
 			midi.poly_retrig.pulses[poly_chan].start(0.01);
 	}
 
-	void set_midi_cc(unsigned ccnum, int16_t val, uint16_t midi_chan) {
+	void set_midi_cc(unsigned ccnum, int16_t val, uint16_t midi_chan, uint8_t port = 0) {
 		// CC values arrive as 14-bit from the M4 core (see Midi::u14cc_to_volts). Pitch
 		// bend is a separate signed 14-bit value handled directly.
 		using namespace Midi;
@@ -518,13 +519,13 @@ public:
 
 		// Update jacks connected to this CC
 		if (ccnum < midi.cc_conns.size()) {
-			set_all_connected_jacks(midi.cc_conns[ccnum], volts, midi_chan);
+			set_all_connected_jacks(midi.cc_conns[ccnum], volts, midi_chan, port);
 		}
 
 		// Update knobs connected to this CC
 		if (ccnum < midi.cc_knob_maps.size()) {
 			for (auto &mm : midi.cc_knob_maps[ccnum]) {
-				if (mm.module_id < num_modules) {
+				if (mm.module_id < num_modules && Midi::port_allows(mm.midi_port_mask, port)) {
 					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
 						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f));
 					}
@@ -533,15 +534,18 @@ public:
 		}
 	}
 
-	void set_midi_gate(unsigned note_num, float volts, uint16_t midi_chan) {
+	void set_midi_gate(unsigned note_num, float volts, uint16_t midi_chan, uint8_t port = 0) {
 		if (note_num < midi.gate_conns.size())
-			set_all_connected_jacks(midi.gate_conns[note_num], volts, midi_chan);
+			set_all_connected_jacks(midi.gate_conns[note_num], volts, midi_chan, port);
 
 		if (note_num >= midi.note_knob_maps.size())
 			return;
 
 		for (auto &mm : midi.note_knob_maps[note_num]) {
 			if (mm.module_id >= num_modules)
+				continue;
+
+			if (!Midi::port_allows(mm.midi_port_mask, port))
 				continue;
 
 			if (mm.midi_chan > 0 && mm.midi_chan != (midi_chan + 1))
@@ -560,28 +564,35 @@ public:
 
 	// Event must be either Clock, or Start, Stop, or Cont.
 	// Div clocks are calculated here on each Clock event
-	void send_midi_time_event(uint8_t event, float val) {
+	void send_midi_time_event(uint8_t event, float val, uint8_t port = 0) {
+		if (port >= Midi::NumPorts)
+			return;
+
+		// Timing events carry no MIDI channel, so pass Omni and filter on port alone
+		constexpr uint32_t OmniChan = 0;
+
 		if (event == TimingEvents::Cont || event == TimingEvents::Stop || event == TimingEvents::Start ||
 			event == TimingEvents::Clock)
 		{
 
-			set_all_connected_jacks(midi.pulses[event].conns, val);
+			set_all_connected_jacks(midi.pulses[event].conns, val, OmniChan, port);
 			midi.pulses[event].pulse.start(0.01);
 		}
 
 		if (event == TimingEvents::Start) {
-			midi.reset_divclocks();
+			midi.reset_divclocks(port);
 		}
 
 		// Handle DivClocks
 		if (event == TimingEvents::Clock) {
 			unsigned idx = 0;
 			for (auto &divclk_pulse : midi.divclk_pulses) {
-				divclk_pulse.divclk_ctr++;
-				if (divclk_pulse.divclk_ctr >= Midi::DivClockAmt[idx]) {
-					divclk_pulse.divclk_ctr = 0;
+				auto &ctr = divclk_pulse.divclk_ctr[port];
+				ctr++;
+				if (ctr >= Midi::DivClockAmt[idx]) {
+					ctr = 0;
 					divclk_pulse.pulse.start(0.01);
-					set_all_connected_jacks(divclk_pulse.conns, val);
+					set_all_connected_jacks(divclk_pulse.conns, val, OmniChan, port);
 				}
 				idx++;
 			}
@@ -619,8 +630,11 @@ private:
 	}
 
 	template<typename JackMidiT>
-	void set_all_connected_jacks(std::vector<JackMidiT> const &jacks, float val, uint32_t midi_chan) {
+	void set_all_connected_jacks(std::vector<JackMidiT> const &jacks, float val, uint32_t midi_chan, uint8_t port = 0) {
 		for (auto const &jack : jacks) {
+			if (!Midi::port_allows(jack.port_mask, port))
+				continue;
+
 			if (jack.midi_chan == 0 || jack.midi_chan == (midi_chan + 1)) {
 				set_input(jack, val);
 			}
@@ -628,11 +642,12 @@ private:
 	}
 
 	template<typename JackMidiT>
-	void set_all_connected_poly_jacks(std::vector<JackMidiT> const &jacks,
-									  unsigned poly_chan,
-									  float val,
-									  uint32_t midi_chan) {
+	void set_all_connected_poly_jacks(
+		std::vector<JackMidiT> const &jacks, unsigned poly_chan, float val, uint32_t midi_chan, uint8_t port = 0) {
 		for (auto const &jack : jacks) {
+			if (!Midi::port_allows(jack.port_mask, port))
+				continue;
+
 			if (jack.midi_chan != 0 && jack.midi_chan != uint32_t(midi_chan + 1))
 				continue;
 

@@ -25,7 +25,7 @@ bool spin_lock() {
 #ifdef CORE_CA7
 	auto cid = __get_MPIDR() & 0xFF;
 #else
-	auto cid = 2;
+	auto cid = uint32_t{UartLockM4Direct};
 #endif
 	uint32_t tmout = 800'000'000;
 	while (mdrivlib::HWSemaphore<UartLock>::lock(cid) != mdrivlib::HWSemaphoreFlag::LockedOk) {
@@ -39,7 +39,7 @@ void unlock() {
 #ifdef CORE_CA7
 	auto cid = __get_MPIDR() & 0xFF;
 #else
-	auto cid = 2;
+	auto cid = uint32_t{UartLockM4Direct};
 #endif
 	mdrivlib::HWSemaphore<UartLock>::unlock(cid);
 }

@@ -106,7 +106,7 @@ void PatchPlayer::calc_panel_jack_connections() {
 	uint16_t next_midi_hub_slot = MidiHubOffset;
 
 	for (auto const &cable : pd.mapped_ins) {
-		uint16_t panel_jack_id = cable.panel_jack_id;
+		uint32_t panel_jack_id = cable.panel_jack_id;
 
 		for (auto const &input_jack : cable.ins) {
 			auto jack_id = input_jack.jack_id;
@@ -133,7 +133,7 @@ void PatchPlayer::calc_panel_jack_connections() {
 					out_conns[input_jack.jack_id].push_back({midi_hub_jack, {}});
 					pr_trace("Connect MIDI %d to panel out %d via hub\n", panel_jack_id, input_jack.jack_id);
 				} else {
-					out_conns[input_jack.jack_id].push_back(PolyJack{{0, panel_jack_id}, {}});
+					out_conns[input_jack.jack_id].push_back(PolyJack{{0, uint16_t(panel_jack_id)}, {}});
 					pr_trace("Connect panel in %d to panel out %d\n", panel_jack_id, input_jack.jack_id);
 				}
 
@@ -159,11 +159,12 @@ void PatchPlayer::calc_panel_jack_connections() {
 				} else {
 
 					// Connect panel input to hub input:
-					update_or_add_input_panel_conn(panel_jack_id, Jack{.module_id = 0, .jack_id = panel_jack_id});
+					update_or_add_input_panel_conn(panel_jack_id,
+												   Jack{.module_id = 0, .jack_id = uint16_t(panel_jack_id)});
 					pr_trace(" to hub passthrough slot %d\n", panel_jack_id);
 
 					// Add cable from hub output to the original panel-mapped jack
-					pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = panel_jack_id});
+					pd.add_internal_cable(input_jack, {.module_id = 0, .jack_id = uint16_t(panel_jack_id)});
 				}
 
 			} else {

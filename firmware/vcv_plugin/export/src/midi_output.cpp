@@ -27,20 +27,34 @@ void Output::reset() {
 	channel = 0;
 }
 
+// METAMODULE: a MIDI "device" is one of the hardware's physical MIDI ports.
 std::vector<int> Output::getDeviceIds() {
-	return {1};
+	return {MetaModule::Midi::USB, MetaModule::Midi::TRS, MetaModule::Midi::DIN5};
 }
 
 void Output::setDeviceId(int deviceId) {
-	//
+	this->deviceId = deviceId;
 }
 
 int Output::getDefaultDeviceId() {
-	return -1;
+	// Patches saved before the expander existed have no stored port, and their
+	// MIDI went out the USB-C jack. Keep that the default so they load unchanged.
+	return MetaModule::Midi::USB;
 }
 
 std::string Output::getDeviceName(int deviceId) {
-	return "USB-C MIDI";
+	switch (deviceId) {
+		case MetaModule::Midi::USB:
+			return "USB";
+		case MetaModule::Midi::TRS:
+			return "TRS";
+		case MetaModule::Midi::DIN5:
+			return "DIN5";
+		default:
+			// Not a port, so it never matches a stored name in Port::fromJson,
+			// and Port::toJson skips writing it.
+			return "";
+	}
 }
 
 std::vector<int> Output::getChannels() {
@@ -70,7 +84,9 @@ void Output::sendMessage(const Message &message) {
 	msg.usb_hdr.cin = message.usb_code;
 	msg.usb_hdr.cable_num = message.getUsbCable();
 
-	internal->queue.data.put(msg);
+	// Tag with the destination jack the module is set to, so the router and the
+	// M4 can send it out that port and no other.
+	internal->queue.data.put({msg, uint8_t(getDeviceId())});
 }
 
 } // namespace rack::midi

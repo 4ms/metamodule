@@ -68,8 +68,10 @@ extern uint32_t _M4_VECT_A7[];
 extern uint32_t _M4_VECT_SZ[];
 
 extern uint32_t _M4_STACK[];
+extern uint32_t _M4_STACK_A7[];
 extern uint32_t _M4_STACK_SZ[];
 extern uint32_t _M4_STACK_END[];
+extern uint32_t _M4_STACK_CANARY[];
 
 //SRAM4: Device-RW
 extern uint32_t _M4_SHARED_LIST[];
@@ -122,6 +124,12 @@ static const uint32_t M4_CODE = (uint32_t)_M4_CODE;
 static const uint32_t M4_CODE_A7 = (uint32_t)_M4_CODE_A7;
 static const uint32_t M4_CODE_SZ = (uint32_t)_M4_CODE_SZ;
 static const uint32_t M4_CODE_END = (uint32_t)_M4_CODE_END;
+
+static const uint32_t M4_STACK = (uint32_t)_M4_STACK;
+static const uint32_t M4_STACK_A7 = (uint32_t)_M4_STACK_A7;
+static const uint32_t M4_STACK_SZ = (uint32_t)_M4_STACK_SZ;
+static const uint32_t M4_STACK_END = (uint32_t)_M4_STACK_END;
+static const uint32_t M4_STACK_CANARY = (uint32_t)_M4_STACK_CANARY;
 
 static const uint32_t A7_SYMS = (uint32_t)_A7_SYMS;
 static const uint32_t A7_SYMS_SZ = (uint32_t)_A7_SYMS_SZ;

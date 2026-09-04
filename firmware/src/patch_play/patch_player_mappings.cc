@@ -28,6 +28,7 @@ void PatchPlayer::edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
 			found->max = map.max;
 			found->curve_type = map.curve_type;
 			found->midi_chan = map.midi_chan;
+			found->midi_port_mask = map.midi_port_mask;
 			if (map.panel_knob_id < PanelDef::NumKnobs)
 				catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
 		}
@@ -74,7 +75,7 @@ void PatchPlayer::add_internal_cable(Jack in, Jack out) {
 	refresh_conn_flags();
 }
 
-void PatchPlayer::add_injack_mapping(uint16_t panel_jack_id, Jack jack) {
+void PatchPlayer::add_injack_mapping(uint32_t panel_jack_id, Jack jack) {
 	pd.add_mapped_injack(panel_jack_id, jack);
 
 	update_or_add_input_panel_conn(panel_jack_id, jack);

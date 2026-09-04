@@ -124,18 +124,15 @@ struct HardwareCheckPopup {
 						injack_labels[i], b(i) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
 			}
 
-			for (auto ccnum = 0u; auto &cc : params.midi_ccs) {
-				if (cc.changed) {
-					cc.changed = 0;
-					lv_label_set_text_fmt(ui_HWTestMidiLabel, "CC:%d=%d", ccnum, (int)cc.val);
-				}
-				ccnum++;
+			if (params.last_midi_cc.num >= 0) {
+				lv_label_set_text_fmt(ui_HWTestMidiLabel, "CC%d", params.last_midi_cc.num);
+				params.last_midi_cc.num = -1;
 			}
 
-			if (params.last_midi_note.changed) {
-				params.last_midi_note.changed = 0;
+			if (params.last_midi_note.num >= 0) {
 				lv_label_set_text_fmt(
-					ui_HWTestMidiLabel, "Note: %s", MidiMessage::note_name(params.last_midi_note.val).c_str());
+					ui_HWTestMidiLabel, "Note: %s", MidiMessage::note_name(params.last_midi_note.num).c_str());
+				params.last_midi_note.num = -1;
 			}
 
 			lv_obj_set_style_border_width(ui_HWTestMidiLabel, 0, LV_PART_MAIN);

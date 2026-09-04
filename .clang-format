@@ -5,10 +5,10 @@ TabWidth : 4
 IndentWidth : 4
 ColumnLimit : 120
 AccessModifierOffset : -4
-AlignAfterOpenBracket: "Align"
+AlignAfterOpenBracket: true
 AlignOperands : "AlignAfterOperator"
 AllowAllArgumentsOnNextLine : "true"
-AllowShortBlocksOnASingleLine : "Empty"
+AllowShortBlocksOnASingleLine : "false"
 AllowShortFunctionsOnASingleLine: "false"
 AllowShortLambdasOnASingleLine: "Inline"
 AllowShortIfStatementsOnASingleLine : "Never"

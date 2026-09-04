@@ -15,6 +15,7 @@ namespace MetaModule
 struct MidiConnections {
 	struct JackMidi : Jack {
 		uint32_t midi_chan = 0; //0: Omni
+		uint8_t port_mask = 0;	//0: listen to all ports. Bit N set = ignore port N
 	};
 
 	struct PolyJackMidi : JackMidi {
@@ -30,8 +31,10 @@ struct MidiConnections {
 
 	struct PulseDivider {
 		OneShot pulse{};
-		std::vector<Jack> conns;
-		uint32_t divclk_ctr = 0;
+		std::vector<JackMidi> conns;
+		// One counter per port, so a second port sending clock can't advance the
+		// division a mapping is counting on. Ports also each keep their own phase.
+		std::array<uint32_t, Midi::NumPorts> divclk_ctr{};
 	};
 
 	struct PolyPulse {
@@ -106,6 +109,10 @@ struct MidiConnections {
 
 	void set_samplerate(float hz);
 
+	// Resets the counters for one port only: another port's clock keeps its own phase
+	void reset_divclocks(uint8_t port);
+
+	// Resets every port's counters
 	void reset_divclocks();
 
 	// Each poly cable carries the channels above its poly_base, clamped to MaxPolyChannels.
@@ -221,15 +228,15 @@ private:
 	}
 
 	template<typename T>
-	static void update_or_add(std::vector<T> &v, const Jack &d, uint32_t midi_chan = 0)
+	static void update_or_add(std::vector<T> &v, const Jack &d, uint32_t midi_chan = 0, uint8_t port_mask = 0)
 		requires std::derived_from<T, JackMidi>;
 
-	static void update_or_add(std::vector<Jack> &v, const Jack &d);
 	static void update_or_add(std::vector<MappedKnob> &v, const MappedKnob &d);
 
 	static void update_or_add_poly(std::vector<PolyJackMidi> &v,
 								   const Jack &d,
 								   uint32_t midi_chan,
+								   uint8_t port_mask,
 								   CoreProcessor::PolyPortBuffer buf,
 								   uint8_t poly_base = 0);
 };

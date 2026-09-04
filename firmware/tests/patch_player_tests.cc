@@ -4442,3 +4442,237 @@ PatchData:
 	// FAILS today: load does not re-apply mark_patched_panel_jacks().
 	CHECK(get_patched_flag(player, 1)->is_output_patched(OutB));
 }
+
+// MIDI port filtering. Port numbers match Midi::Event::Port: 0=USB, 1=TRS, 2=DIN5.
+// A mapping's port mask lives in bits 16-23 of panel_jack_id, where a set bit means
+// "ignore that port", so an all-zero mask (every pre-expander patch) listens to all.
+namespace
+{
+constexpr uint8_t PortUSB = 0;
+constexpr uint8_t PortTRS = 1;
+constexpr uint8_t PortDIN5 = 2;
+
+std::string port_filter_patch(std::string_view panel_jack_id) {
+	return std::string{R"(
+PatchData:
+  patch_name: midi_port_filter
+  module_slugs:
+    0: HubMedium
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: )"} +
+		   std::string{panel_jack_id} + R"(
+      ins:
+        - module_id: 0
+          jack_id: 1
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_num_setting: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)";
+}
+
+void load_port_filter_patch(MetaModule::PatchPlayer &player, std::string_view panel_jack_id) {
+	auto patchyml = port_filter_patch(panel_jack_id);
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	player.load_patch(pd);
+	player.set_midi_connected();
+}
+} // namespace
+
+TEST_CASE("MIDI note mapping without port bits listens to every port") {
+	MetaModule::PatchPlayer player;
+	load_port_filter_patch(player, "0x100"); // MidiMonoNoteJack, mask 0
+
+	player.set_midi_note_pitch(0, 1.f, 0, PortUSB);
+	CHECK(player.get_panel_output(1) == doctest::Approx(1.f));
+
+	player.set_midi_note_pitch(0, 2.f, 0, PortTRS);
+	CHECK(player.get_panel_output(1) == doctest::Approx(2.f));
+
+	player.set_midi_note_pitch(0, 3.f, 0, PortDIN5);
+	CHECK(player.get_panel_output(1) == doctest::Approx(3.f));
+}
+
+TEST_CASE("MIDI note mapping filtered to one port ignores the others") {
+	MetaModule::PatchPlayer player;
+	// MidiMonoNoteJack, mask 0b101 = ignore USB and DIN5, i.e. "TRS only"
+	load_port_filter_patch(player, "0x50100");
+
+	player.set_midi_note_pitch(0, 5.f, 0, PortTRS);
+	CHECK(player.get_panel_output(1) == doctest::Approx(5.f));
+
+	player.set_midi_note_pitch(0, 9.f, 0, PortUSB);
+	CHECK(player.get_panel_output(1) == doctest::Approx(5.f));
+
+	player.set_midi_note_pitch(0, 9.f, 0, PortDIN5);
+	CHECK(player.get_panel_output(1) == doctest::Approx(5.f));
+}
+
+TEST_CASE("MIDI Transport mapping is filtered by port") {
+	MetaModule::PatchPlayer player;
+	// MidiStartJack, mask 0b011 = ignore USB and TRS, i.e. "DIN5 only"
+	load_port_filter_patch(player, "0x30500");
+
+	player.send_midi_time_event(TimingEvents::Start, 10.f, PortUSB);
+	CHECK(player.get_panel_output(1) == doctest::Approx(0.f));
+
+	player.send_midi_time_event(TimingEvents::Start, 10.f, PortDIN5);
+	CHECK(player.get_panel_output(1) == doctest::Approx(10.f));
+}
+
+TEST_CASE("MIDI divided clock is filtered by port") {
+	MetaModule::PatchPlayer player;
+	// MidiClockDiv2Jack (fires every 2nd clock), mask 0b101 = "TRS only"
+	load_port_filter_patch(player, "0x50402");
+
+	// Clocks from an ignored port never reach the jack, however many arrive
+	for (int i = 0; i < 8; i++)
+		player.send_midi_time_event(TimingEvents::Clock, 10.f, PortUSB);
+	CHECK(player.get_panel_output(1) == doctest::Approx(0.f));
+
+	player.send_midi_time_event(TimingEvents::Clock, 10.f, PortTRS);
+	CHECK(player.get_panel_output(1) == doctest::Approx(0.f)); // 1 of 2
+
+	player.send_midi_time_event(TimingEvents::Clock, 10.f, PortTRS);
+	CHECK(player.get_panel_output(1) == doctest::Approx(10.f));
+}
+
+TEST_CASE("MIDI divided clock counts each port separately") {
+	MetaModule::PatchPlayer player;
+	load_port_filter_patch(player, "0x402"); // MidiClockDiv2Jack, all ports
+
+	// One clock on each of two ports is not two clocks on one port: each port
+	// keeps its own phase, so neither has reached the division yet.
+	player.send_midi_time_event(TimingEvents::Clock, 10.f, PortUSB);
+	player.send_midi_time_event(TimingEvents::Clock, 10.f, PortTRS);
+	CHECK(player.get_panel_output(1) == doctest::Approx(0.f));
+
+	player.send_midi_time_event(TimingEvents::Clock, 10.f, PortUSB);
+	CHECK(player.get_panel_output(1) == doctest::Approx(10.f));
+}
+
+TEST_CASE("MIDI Start resets the divided clock only for the port that sent it") {
+	MetaModule::PatchPlayer player;
+	load_port_filter_patch(player, "0x402"); // MidiClockDiv2Jack, all ports
+
+	player.send_midi_time_event(TimingEvents::Clock, 10.f, PortTRS); // TRS at 1 of 2
+
+	// Start on another port must not disturb TRS's phase
+	player.send_midi_time_event(TimingEvents::Start, 10.f, PortUSB);
+
+	player.send_midi_time_event(TimingEvents::Clock, 10.f, PortTRS);
+	CHECK(player.get_panel_output(1) == doctest::Approx(10.f));
+}
+
+// MIDI-to-knob mappings filter by port too, but store the mask in a MappedKnob
+// field rather than in panel_knob_id (which the is_midi_cc()/is_button()
+// predicates compare raw, with no strip_midi_channel() step).
+namespace
+{
+std::string knob_port_filter_patch(std::string_view panel_knob_id, std::string_view port_mask_line) {
+	return std::string{R"(
+PatchData:
+  patch_name: midi_knob_port_filter
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+  int_cables:
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+    name: MIDI
+    set:
+      - panel_knob_id: )"} +
+		   std::string{panel_knob_id} + R"(
+        module_id: 1
+        param_id: 0
+        curve_type: 0
+        min: 0.0
+        max: 1.0
+)" + std::string{port_mask_line} +
+		   R"(
+  midi_poly_num: 1
+  midi_poly_num_setting: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)";
+}
+
+TestModule *load_knob_port_filter_patch(MetaModule::PatchPlayer &player,
+										std::string_view panel_knob_id,
+										std::string_view port_mask_line) {
+	auto patchyml = knob_port_filter_patch(panel_knob_id, port_mask_line);
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	player.load_patch(pd);
+	player.set_midi_connected();
+	return get_test_module(player, 1);
+}
+} // namespace
+
+TEST_CASE("MIDI CC knob mapping without a port mask listens to every port") {
+	MetaModule::PatchPlayer player;
+	auto *mod = load_knob_port_filter_patch(player, "517", ""); // MidiCC0 + 5
+	REQUIRE(mod != nullptr);
+
+	player.set_midi_cc(5, 127 << 7, 0, PortUSB);
+	CHECK(mod->params[0] == doctest::Approx(1.f));
+
+	player.set_midi_cc(5, 0, 0, PortTRS);
+	CHECK(mod->params[0] == doctest::Approx(0.f));
+
+	player.set_midi_cc(5, 127 << 7, 0, PortDIN5);
+	CHECK(mod->params[0] == doctest::Approx(1.f));
+}
+
+TEST_CASE("MIDI CC knob mapping filtered to one port ignores the others") {
+	MetaModule::PatchPlayer player;
+	// mask 0b101 = ignore USB and DIN5, i.e. "TRS only"
+	auto *mod = load_knob_port_filter_patch(player, "517", "        midi_port_mask: 5");
+	REQUIRE(mod != nullptr);
+
+	player.set_midi_cc(5, 127 << 7, 0, PortTRS);
+	CHECK(mod->params[0] == doctest::Approx(1.f));
+
+	player.set_midi_cc(5, 0, 0, PortUSB);
+	CHECK(mod->params[0] == doctest::Approx(1.f));
+
+	player.set_midi_cc(5, 0, 0, PortDIN5);
+	CHECK(mod->params[0] == doctest::Approx(1.f));
+}
+
+TEST_CASE("MIDI note-gate knob mapping filtered to one port ignores the others") {
+	MetaModule::PatchPlayer player;
+	// MidiGateNote0 + 60, mask 0b011 = "DIN5 only"
+	auto *mod = load_knob_port_filter_patch(player, "828", "        midi_port_mask: 3");
+	REQUIRE(mod != nullptr);
+
+	player.set_midi_gate(60, 10.f, 0, PortDIN5);
+	CHECK(mod->params[0] == doctest::Approx(1.f));
+
+	player.set_midi_gate(60, 0.f, 0, PortUSB);
+	CHECK(mod->params[0] == doctest::Approx(1.f));
+
+	player.set_midi_gate(60, 0.f, 0, PortDIN5);
+	CHECK(mod->params[0] == doctest::Approx(0.f));
+}

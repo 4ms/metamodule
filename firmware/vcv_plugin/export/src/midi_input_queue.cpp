@@ -30,14 +30,21 @@ bool InputQueue::tryPop(rack::midi::Message *messageOut, int64_t maxFrame) {
 	if (!messageOut)
 		return false;
 
-	if (auto msg = internal->queue.data.get()) {
+	if (auto ported = internal->queue.data.get()) {
+		auto const &msg = ported->msg;
+
+		// A "device" here is a physical MIDI port, so the device id selects
+		// which jack to listen to. AllDevices lets every port through.
+		if (deviceId != AllDevices && deviceId != ported->port)
+			return false;
+
 		// Convert to rack::midi::Message
-		if (channel < 0 || (channel == msg->status.channel)) {
-			messageOut->bytes[0] = msg->status;
-			messageOut->bytes[1] = msg->data.byte[0];
-			messageOut->bytes[2] = msg->data.byte[1];
-			messageOut->usb_cable = msg->usb_hdr.cable_num;
-			messageOut->usb_code = msg->usb_hdr.cin;
+		if (channel < 0 || (channel == msg.status.channel)) {
+			messageOut->bytes[0] = msg.status;
+			messageOut->bytes[1] = msg.data.byte[0];
+			messageOut->bytes[2] = msg.data.byte[1];
+			messageOut->usb_cable = msg.usb_hdr.cable_num;
+			messageOut->usb_code = msg.usb_hdr.cin;
 			return true;
 		}
 	}

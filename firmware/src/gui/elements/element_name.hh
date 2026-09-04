@@ -23,7 +23,7 @@ void append_connected_jack_name(std::string &opts,
 								uint16_t module_idx,
 								PatchData const &patch);
 
-void append_panel_name(std::string &opts, Element const &el, uint16_t panel_jack_id);
+void append_panel_name(std::string &opts, Element const &el, uint32_t panel_jack_id);
 
 void append_jack_alias(std::string &opts, GuiElement const &gui_element, PatchData *patch);
 

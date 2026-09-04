@@ -14,18 +14,19 @@ struct MidiRouter {
 	static void unsubscribe_rx(MidiQueue *listener);
 
 	// When hardware receives a MIDI message, it calls this
-	// to forward the msg to all listeners
-	static void push_incoming_message(MidiMessage msg);
+	// to forward the msg to all listeners, tagged with the port it arrived on
+	static void push_incoming_message(MidiMessage msg, uint8_t port);
 
 	// MIDI TX:
 	static void subscribe_tx(MidiQueue *listener);
 
 	static void unsubscribe_tx(MidiQueue *listener);
 
-	// Pop the latest message ready to be sent out via hardware
+	// Pop the latest message ready to be sent out via hardware, tagged with the
+	// port it should leave by.
 	// Audio Stream calls this to get a message
 	// which it forwards to M4 core
-	static std::optional<MidiMessage> pop_outgoing_message();
+	static std::optional<PortedMidiMessage> pop_outgoing_message();
 };
 
 } // namespace MetaModule
