@@ -129,6 +129,8 @@ private:
 
 	RackExpanders rack_expanders;
 
+	int64_t next_rack_module_id = FirstRackModuleId;
+
 	float samplerate = 48000.f;
 
 	// Index of each module that appears more than once.
@@ -193,6 +195,8 @@ public:
 			return {false, "Too many modules in the patch! Max is 64"};
 		}
 
+		next_rack_module_id = FirstRackModuleId;
+
 		// First module is the hub
 		modules[0] = try_create_module(PanelDef::typeID);
 		if (modules[0] != nullptr)
@@ -213,6 +217,7 @@ public:
 				pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
 				modules[i]->id = i;
+				assign_rack_module_id(i);
 				modules[i]->mark_all_inputs_unpatched();
 				modules[i]->mark_all_outputs_unpatched();
 				modules[i]->set_samplerate(samplerate);
@@ -1130,6 +1135,7 @@ public:
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
 		modules[module_idx]->id = module_idx;
+		assign_rack_module_id(module_idx);
 
 		// Match order that VCV does: fromJson (via load_state), then onAdd (via plugin_module_init)
 		reset_module(module_idx);
@@ -1145,6 +1151,18 @@ public:
 		mark_patched_jacks(module_idx);
 		mark_patched_panel_jacks(module_idx);
 		return true;
+	}
+
+	// Rack modules get a stable id that never changes even when modules are
+	// removed and the MM module indices shift.
+	static constexpr int64_t FirstRackModuleId = 0x10000;
+	static_assert(FirstRackModuleId > MAX_MODULES_IN_PATCH);
+
+	void assign_rack_module_id(unsigned module_idx) {
+		if (module_idx >= num_modules)
+			return;
+		if (auto *rack_module = as_rack_module(modules[module_idx].get()))
+			rack_module->id = next_rack_module_id++;
 	}
 
 	// Disconnect all expander modules, then re-wire from pd.expanders.
