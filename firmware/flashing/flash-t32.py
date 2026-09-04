@@ -109,6 +109,8 @@ def main():
 
     print(f"  Loaded in {time.time() - t_start:.1f}s")
 
+    print(f"  Loaded in {time.time() - t_start:.1f}s")
+
     dbg.cmd(f"Data.LOAD.Elf {elfpath} /CPP /NoCode")
 
     print("Booting image (writing address to TAMP_BKP6R)...")

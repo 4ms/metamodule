@@ -15,8 +15,8 @@ namespace MetaModule
 //
 // TX uses DMA: process() assembles a chunk into the bounce buffer and starts a
 // DMA transfer.
-// If the DMA reports a transfer error, we permanently fall back feeding UART->TDR
-// fifo directly.
+// If the DMA reports a transfer error, or keeps stalling, we permanently fall
+// back to feeding UART->TDR fifo directly.
 //
 // Typing 'c' into the console enables per-core colored output; 'm' disables it
 class UartConsoleDrain {
@@ -57,22 +57,25 @@ public:
 				unlock();
 				// Report through the same UART we drain, using printf so it's always visible
 				printf("<console: UART TX DMA error (LISR=0x%08x), using FIFO fallback>\n", (unsigned)flags);
-			} else if (DMA1->LISR & DMA_LISR_TCIF1) {
-				clear_dma_flags();
-				dma_running = false;
-				dma_stalls = 0;
+
+			} else if (flags & DMA_LISR_TCIF1) {
+				stop_dma();
 				tx_pos = tx_len = 0;
+				dma_stalls = 0;
 				unlock();
-			} else if (dma_stalled()) {
-				// FEIF with no progress: try to recover, give up if it
-				// keeps happening
+
+			} else if (dma_stalled(flags) || dma_timed_out()) {
+				// The stream stopped making progress: pick up from wherever it
+				// got to, and give up on DMA if it keeps happening
 				abort_dma();
-				dma_running = false;
 				unlock();
 				if (++dma_stalls >= MaxDmaStalls) {
 					dma_ok = false;
-					printf("<console: UART TX DMA stalled %u times, using FIFO fallback>\n", (unsigned)dma_stalls);
+					printf("<console: UART TX DMA stalled %u times (LISR=0x%08x), using FIFO fallback>\n",
+						   (unsigned)dma_stalls,
+						   (unsigned)flags);
 				}
+
 			} else {
 				return; // still transferring
 			}
@@ -87,7 +90,7 @@ public:
 		}
 
 		// Exclude cores doing direct UART writes while we transmit.
-		// Those only happen during early boot
+		// Those only happen during early boot. Held until the xfer completes
 		if (mdrivlib::HWSemaphore<UartLock>::lock(M4LockId) != mdrivlib::HWSemaphoreFlag::LockedOk)
 			return;
 
@@ -132,11 +135,17 @@ private:
 		// Bit 20 (TRBUFF, reserved in RM0436 but implemented): alternate
 		// REQ/ACK protocol, required on UART streams or else the stream can
 		// lock up when another stream transfers concurrently (MP15 errata
-		// "DMA stream locked when transferring data to/from USART/UART")
+		// ES0438 2.6.1 "USART/UART/LPUART DMA transfer abort")
 		constexpr uint32_t DMA_SxCR_TRBUFF = 1u << 20;
 		DMA1_Stream1->CR = DMA_SxCR_MINC | DMA_SxCR_DIR_0 | DMA_SxCR_TRBUFF;
+
+		// Direct mode: at 115200 baud there's no bus latency for a FIFO to
+		// smooth out, and aborting a transfer would silently drop whatever
+		// bytes the FIFO still held (NDTR counts them as sent)
 		DMA1_Stream1->FCR = 0;
 
+		// UART7 raises a DMA request whenever its TX FIFO has room. Harmless
+		// for direct (CPU putchar) writes while the stream is disabled.
 		UartLog::uart_regs()->CR3 |= USART_CR3_DMAT;
 	}
 
@@ -175,6 +184,39 @@ private:
 		clear_dma_flags();
 	}
 
+	// FIFO/direct-mode error with NDTR not advancing: the stream is wedged
+	bool dma_stalled(uint32_t flags) {
+		if (!(flags & (DMA_LISR_FEIF1 | DMA_LISR_DMEIF1)))
+			return false;
+		auto ndtr = DMA1_Stream1->NDTR;
+		auto now = HAL_GetTick();
+		if (ndtr != last_ndtr) {
+			last_ndtr = ndtr;
+			last_progress_tm = now;
+			return false;
+		}
+		return (now - last_progress_tm) > StallTimeoutMs;
+	}
+
+	// Backstop for a stream that stops without raising any flag at all:
+	// without this, dma_running would never clear and the console would wedge
+	bool dma_timed_out() const {
+		return (HAL_GetTick() - dma_start_tm) >= DmaTimeoutMs;
+	}
+
+	// Stop the stream and adjust tx_pos so the next transfer resumes where
+	// this one stopped. The byte preloaded into the DMA FIFO (direct mode) is
+	// counted by NDTR as sent but may be discarded, so up to one character of
+	// output can be lost
+	void abort_dma() {
+		DMA1_Stream1->CR &= ~DMA_SxCR_EN;
+		while (DMA1_Stream1->CR & DMA_SxCR_EN)
+			;
+		tx_pos = tx_len - DMA1_Stream1->NDTR;
+		clear_dma_flags();
+		dma_running = false;
+	}
+
 	static void clear_dma_flags() {
 		DMA1->LIFCR = DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
 	}
@@ -199,12 +241,17 @@ private:
 	static constexpr uint32_t StallTimeoutMs = 100;
 	static constexpr uint32_t MaxDmaStalls = 8; // consecutive, reset by any completed transfer
 
+	// A 256-byte chunk takes ~22ms at 115200 baud, set the stall timeout to ~4x that
+	static constexpr uint32_t StallTimeoutMs = 100;
+	static constexpr uint32_t MaxDmaStalls = 8; // consecutive, reset by any completed transfer
+
 	ConsoleBufferReader reader;
 	std::array<uint8_t, 256> bounce;
 	size_t tx_pos = 0;
 	size_t tx_len = 0;
 	uint32_t last_ndtr = 0;
 	uint32_t last_progress_tm = 0;
+	uint32_t dma_start_tm = 0;
 	uint32_t dma_stalls = 0;
 	bool usb_was_active = false;
 	bool dma_running = false;
