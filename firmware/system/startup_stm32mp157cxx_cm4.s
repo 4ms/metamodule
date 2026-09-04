@@ -53,7 +53,7 @@ Reset_Handler:
 
   ldr  r0, =_M4_STACK /* fill stack with canary value */
   ldr  r1, =_estack
-  ldr  r2, =0xAA55FF00
+  ldr  r2, =_M4_STACK_CANARY /* defined in system/linker/memory.ld */
   b  LoopFillStackCanary
 FillStackCanary:
   str  r2, [r0], #4

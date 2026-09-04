@@ -15,6 +15,7 @@
 #include <cstdio>
 
 #if !defined(SIMULATOR)
+#include "core_a7/m4_stack_usage.hh"
 #include "memory/plugin_arena.hh"
 #include <malloc.h>
 #endif
@@ -166,6 +167,9 @@ struct InfoTab : SystemMenuTab {
 				PluginArena::used_bytes(),
 				PluginArena::claimed_bytes(),
 				PluginArena::peak_bytes());
+
+		auto m4_stack = m4_stack_usage();
+		pr_info("M4 stack: %u bytes unused (high-water %u of %u)\n", m4_stack.unused, m4_stack.used, m4_stack.total);
 
 		memory_used = std::round(mi.uordblks / (1024 * 1024));
 
