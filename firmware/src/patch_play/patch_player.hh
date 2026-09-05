@@ -239,8 +239,7 @@ public:
 			return;
 		}
 
-		else
-		{
+		else {
 			update_patch_time.start_simple_measurement();
 
 			smp.update_modules();
@@ -426,6 +425,8 @@ public:
 	}
 
 	void notify_audio_resumed() {
+		// This could get missed if audio thread sends it at the same time (race),
+		// but that's not a problem as long as someone calls it every once in a while.
 		smp.refresh_patch_gui_elements();
 	}
 
