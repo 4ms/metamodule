@@ -72,6 +72,9 @@ void PatchPlayer::refresh_conn_flags() {
 	});
 
 	has_midi_pulse_conns = midi.any_pulse_conns();
+
+	// pd.midi_maps also covers pitch-wheel param maps, which have no entry in midi's tables
+	has_midi_conns_ = midi.any_conns() || !pd.midi_maps.set.empty();
 }
 
 // Returns the index in int_cables[] for a cable that has the given Jack as an input

@@ -176,6 +176,17 @@ bool MidiConnections::any_pulse_conns() const {
 	return any_conns(pulses) || any_conns(divclk_pulses) || any_conns(note_retrig) || !poly_retrig.conns.empty();
 }
 
+bool MidiConnections::any_conns() const {
+	auto any_nonempty = [](auto const &vecs) {
+		return std::ranges::any_of(vecs, [](auto const &v) { return !v.empty(); });
+	};
+
+	return any_nonempty(note_pitch_conns) || any_nonempty(note_gate_conns) || any_nonempty(note_vel_conns) ||
+		   any_nonempty(note_aft_conns) || any_nonempty(cc_conns) || any_nonempty(gate_conns) ||
+		   !poly_pitch_conns.empty() || !poly_gate_conns.empty() || !poly_vel_conns.empty() ||
+		   !poly_aft_conns.empty() || any_nonempty(cc_knob_maps) || any_nonempty(note_knob_maps) || any_pulse_conns();
+}
+
 void MidiConnections::set_samplerate(float hz) {
 	for (auto &mp : pulses)
 		mp.pulse.set_update_rate_hz(hz);

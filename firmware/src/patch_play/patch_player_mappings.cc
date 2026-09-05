@@ -54,6 +54,7 @@ void PatchPlayer::remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map)
 		if (knobset_id == PatchData::MIDIKnobSet) {
 			midi.uncache_knob_map(map);
 			param_watcher.stop_watching_param(map);
+			refresh_conn_flags();
 		} else {
 			uncache_knob_mapping(knobset_id, map);
 		}
@@ -64,6 +65,7 @@ void PatchPlayer::add_midi_mapped_knob(const MappedKnob &map) {
 	if (pd.add_update_midi_map(map)) {
 		midi.cache_knob_map(map);
 		param_watcher.start_watching_param(map);
+		refresh_conn_flags();
 	}
 }
 

@@ -6,6 +6,7 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "expanders.hh"
+#include "midi/midi_router.hh"
 #include "param_block.hh"
 #include "patch_play/patch_mods.hh"
 #include "patch_play/patch_player.hh"
@@ -259,6 +260,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	auto const knobs_mapped = player.has_knob_maps();
 
+	auto const midi_every_frame = player.patch_uses_midi() || MidiRouter::has_patch_subscribers();
+
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		frame_measure.start_simple_measurement();
 
@@ -336,8 +339,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		MidiMessage msg = MidiMessage{};
 		uint8_t midi_port = 0;
 
+		bool const do_midi = midi_every_frame || idx == 0 || params.midi_event.type != Midi::Event::Type::None;
+
 		// Process MIDI stream at block rate to drain stale outgong messages and handle disconnect event
-		if (param_block.metaparams.midi_ports_connected || midi.last_connected || idx == 0) {
+		if ((param_block.metaparams.midi_ports_connected || midi.last_connected || idx == 0) && do_midi) {
 			midi_measure.start_simple_measurement();
 
 			msg = params.raw_msg;

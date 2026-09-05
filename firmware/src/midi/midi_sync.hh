@@ -25,11 +25,11 @@ private:
 
 public:
 	MidiSync() {
-		MetaModule::MidiRouter::subscribe_tx(&midi_out_queue);
+		MetaModule::MidiRouter::subscribe_tx_system(&midi_out_queue);
 	}
 
 	~MidiSync() {
-		MetaModule::MidiRouter::unsubscribe_tx(&midi_out_queue);
+		MetaModule::MidiRouter::unsubscribe_tx_system(&midi_out_queue);
 	}
 
 	// Clear all stored last values

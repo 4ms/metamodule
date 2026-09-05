@@ -106,6 +106,7 @@ private:
 	uint32_t used_output_jacks_ = 0;
 	bool has_knob_maps_ = false;
 	bool has_midi_pulse_conns = false;
+	bool has_midi_conns_ = false;
 
 	float samplerate = 48000.f;
 
@@ -239,7 +240,8 @@ public:
 			return;
 		}
 
-		else {
+		else
+		{
 			update_patch_time.start_simple_measurement();
 
 			smp.update_modules();
@@ -463,6 +465,12 @@ public:
 	// True if any knobset maps a panel knob
 	bool has_knob_maps() const {
 		return has_knob_maps_;
+	}
+
+	// True if the patch has any MIDI cable or MIDI param map.
+	// The audio stream uses this to skip per-sample MIDI processing.
+	bool patch_uses_midi() const {
+		return has_midi_conns_;
 	}
 
 	void set_active_knob_set(unsigned num) {

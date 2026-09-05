@@ -10,7 +10,6 @@ struct MidiRouter {
 
 	// MIDI RX:
 	static void subscribe_rx(MidiQueue *listener);
-
 	static void unsubscribe_rx(MidiQueue *listener);
 
 	// When hardware receives a MIDI message, it calls this
@@ -19,14 +18,18 @@ struct MidiRouter {
 
 	// MIDI TX:
 	static void subscribe_tx(MidiQueue *listener);
-
 	static void unsubscribe_tx(MidiQueue *listener);
 
-	// Pop the latest message ready to be sent out via hardware, tagged with the
-	// port it should leave by.
-	// Audio Stream calls this to get a message
-	// which it forwards to M4 core
+	// Used by MidiSync since it's always subscribed,
+	// but shouldn't count towards has_patch_subscribers().
+	static void subscribe_tx_system(MidiQueue *outqueue);
+	static void unsubscribe_tx_system(MidiQueue *outqueue);
+
+	// Pop the latest message ready to be sent out via hardware
 	static std::optional<PortedMidiMessage> pop_outgoing_message();
+
+	// True if the there are any patch-level input or output subscribers
+	static bool has_patch_subscribers();
 };
 
 } // namespace MetaModule

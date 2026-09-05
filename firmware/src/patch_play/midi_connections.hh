@@ -107,6 +107,9 @@ struct MidiConnections {
 
 	bool any_pulse_conns() const;
 
+	// True if the patch has any MIDI cable or MIDI param map at all
+	bool any_conns() const;
+
 	void set_samplerate(float hz);
 
 	// Resets the counters for one port only: another port's clock keeps its own phase

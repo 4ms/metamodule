@@ -18,11 +18,10 @@ struct AudioStreamMidi {
 		, sync_params{sync_params} {
 	}
 
-	// `raw_msg`/`port` are one in/out slot, like Params: on entry they are the
-	// message received from hardware and the port it arrived on; on exit they
-	// are the message to transmit and the port to transmit it on.
-	void process(
-		uint8_t ports_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg, uint8_t *port) {
+	// raw_msg/port are in/out params: on entry they're what's received from hardware
+	// and on function return they are what's transmitted out to hardware
+	void
+	process(uint8_t ports_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg, uint8_t *port) {
 
 		if (event.type == Midi::Event::Type::PC) {
 			sync_params.midi_events.put(event);
