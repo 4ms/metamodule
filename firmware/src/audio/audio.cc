@@ -333,12 +333,15 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// MIDI
-		MidiMessage msg = params.raw_msg;
-		uint8_t midi_port = params.midi_port;
+		MidiMessage msg = MidiMessage{};
+		uint8_t midi_port = 0;
 
 		// Process MIDI stream at block rate to drain stale outgong messages and handle disconnect event
 		if (param_block.metaparams.midi_ports_connected || midi.last_connected || idx == 0) {
 			midi_measure.start_simple_measurement();
+
+			msg = params.raw_msg;
+			midi_port = params.midi_port;
 
 			midi.process(param_block.metaparams.midi_ports_connected,
 						 params.midi_event,
@@ -349,7 +352,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			player.live_load.tally_midi_stream(midi_measure.stop_simple_measurement());
 		}
 
-		// FIXME: if midi.process() is skipped, won't these form a loopback?
 		param_blocks[cur_block].params[idx].raw_msg = msg;
 		param_blocks[cur_block].params[idx].midi_port = midi_port;
 
