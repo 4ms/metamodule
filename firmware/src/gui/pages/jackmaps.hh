@@ -1,4 +1,5 @@
 #pragma once
+#include "util/countzip.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/helpers.hh"

@@ -1,4 +1,5 @@
 #pragma once
+#include "delay.hh"
 #include "CoreModules/elements/element_counter.hh"
 #include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
@@ -30,7 +31,14 @@ struct PatchViewPage : PageBase {
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
-		, desc_panel{patch_playloader, patches, settings.patch_suggested_audio, patch_mod_queue}
+		, desc_panel{patch_playloader,
+					 patches,
+					 settings.patch_suggested_audio,
+					 patch_mod_queue,
+					 metaparams,
+					 settings.patch_view,
+					 page_list,
+					 args}
 		, file_menu{patch_playloader,
 					patch_storage,
 					patches,
@@ -780,7 +788,7 @@ private:
 					page->gui_state.force_redraw_patch = true;
 				} else {
 					page->patch_playloader.apply_suggested_audio_settings();
-					page->patch_playloader.start_audio();
+					page->patch_playloader.resume_audio();
 				}
 			});
 

@@ -1,13 +1,12 @@
 #pragma once
 #include "calibrate/calibration_patch.hh"
-#include "delay.hh"
+#include "coreproc_plugin/async_thread_control.hh"
 #include "gui/notify/queue.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
-#include "patch_play/modules_helpers.hh"
 #include "patch_play/patch_player.hh"
-#include "patch_to_yaml.hh"
+#include "patch_play/rebalance_trials.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include "user_settings/settings.hh"
@@ -18,7 +17,17 @@ size_t get_heap_size();
 namespace MetaModule
 {
 
-// PatchLoader handles loading of patches from storage into PatchPlayer
+// PatchPlayLoader sits between the GUI, the file storage, and the PatchPlayer:
+// it loads patches into the player, starts/stops the audio stream around
+// changes to the running patch, and saves patches back to storage.
+//
+// This header holds the state flags and the small functions the audio stream
+// polls. The larger duties are implemented in:
+//   patch_playloader_load.cc    - loading a patch into the player
+//   patch_playloader_modules.cc - adding/changing/removing modules in the playing patch
+//   patch_playloader_save.cc    - saving and renaming patch files
+//   patch_playloader_balance.cc - load balancing
+//   rebalance_trials.hh/.cc     - the live re-balance trials
 struct PatchPlayLoader {
 	PatchPlayLoader(FileStorageProxy &patch_storage, OpenPatchManager &patches, PatchPlayer &patchplayer)
 		: player_{patchplayer}
@@ -26,56 +35,20 @@ struct PatchPlayLoader {
 		, patches_{patches} {
 	}
 
-	void load_initial_patch(std::string_view patchname, Volume patch_vol) {
-		uint32_t tries = 10000;
-
-		if (patchname.length() == 0) {
-			patchname = "/SlothDrone.yml";
-			patch_vol = Volume::NorFlash;
-		}
-
-		PatchLocation initial_patch_loc{patchname, patch_vol};
-		while (--tries) {
-			if (storage_.request_load_patch(initial_patch_loc))
-				break;
-		}
-		if (tries == 0) {
-			pr_err("ERROR: sending request to load initial patch timed out.\n");
-			return;
-		}
-
-		tries = 2000;
-		while (--tries) {
-			auto message = storage_.get_message();
-
-			if (message.message_type == FileStorageProxy::LoadFileOK) {
-				auto raw_patch_file = storage_.get_patch_data(message.bytes_read);
-				if (!patches_.open_patch(raw_patch_file, initial_patch_loc, message.timestamp))
-					pr_err("ERROR: could not parse initial patch\n");
-				else {
-					patches_.start_viewing(initial_patch_loc);
-					next_patch = patches_.get_view_patch();
-					load_patch();
-				}
-
-				break;
-			}
-			if (message.message_type == FileStorageProxy::LoadFileFailed) {
-				pr_err("ERROR: initial patch '%s' failed to load from vol %u\n", patchname.data(), patch_vol);
-				break;
-			}
-
-			delay_ms(1);
-		}
-		if (tries == 0) {
-			pr_err("ERROR: timed out while waiting for response to request to load initial patch.\n");
-			return;
-		}
-	}
+	//
+	// Starting and stopping audio
+	//
 
 	void stop_audio() {
 		starting_audio_ = false;
 		stopping_audio_ = true;
+	}
+
+	// Stops audio and blocks until the audio stream confirms it's no longer playing the patch
+	void stop_audio_and_wait() {
+		stop_audio();
+		while (!is_audio_muted())
+			;
 	}
 
 	void start_audio() {
@@ -88,6 +61,56 @@ struct PatchPlayLoader {
 		player_.notify_audio_resumed();
 		clear_audio_overrun();
 	}
+
+	// Start audio, rebalancing load if needed
+	void resume_audio() {
+		bool was_overrun_stopped = stopped_because_of_overrun_;
+		stopped_because_of_overrun_ = false;
+
+		start_audio();
+
+		if (was_overrun_stopped && player_.num_modules > 2 && settings &&
+			settings->audio.auto_rebalance != AudioSettings::AutoRebalance::Off)
+		{
+			trials_.request_auto();
+		}
+	}
+
+	bool is_playing() {
+		return !audio_is_muted_ && player_.is_loaded;
+	}
+
+	// Stops audio (waiting until it's muted) for the lifetime of the object,
+	// so the patch can be modified safely. When the object goes out of scope,
+	// audio is started again: either only if it had been playing, or always.
+	class AudioPause {
+	public:
+		enum class Restart { IfWasPlaying, Always };
+
+		explicit AudioPause(PatchPlayLoader &loader, Restart restart = Restart::IfWasPlaying)
+			: loader_{loader}
+			, should_restart_{restart == Restart::Always || loader.is_playing()} {
+			loader_.stop_audio_and_wait();
+		}
+
+		~AudioPause() {
+			if (should_restart_)
+				loader_.start_audio();
+		}
+
+		AudioPause(AudioPause const &) = delete;
+		AudioPause &operator=(AudioPause const &) = delete;
+
+	private:
+		PatchPlayLoader &loader_;
+		bool should_restart_;
+	};
+
+	//
+	// Loading patches (patch_playloader_load.cc)
+	//
+
+	void load_initial_patch(std::string_view patchname, Volume patch_vol);
 
 	void request_load_view_patch() {
 		next_patch = patches_.get_view_patch();
@@ -119,6 +142,15 @@ struct PatchPlayLoader {
 			should_play_when_loaded_ = !audio_is_muted_ || stopped_because_of_overrun_;
 		}
 	}
+
+	// Concurrency: Called from UI thread
+	Result handle_file_events();
+
+	void apply_suggested_audio_settings();
+
+	//
+	// Audio stream state (polled from the audio context)
+	//
 
 	bool is_loading_patch() {
 		return loading_new_patch_;
@@ -157,12 +189,19 @@ struct PatchPlayLoader {
 		return audio_is_muted_;
 	}
 
-	bool is_playing() {
-		return !audio_is_muted_ && player_.is_loaded;
+	// While set, audio runs and is measured normally but the outputs are held
+	// silent (so the rebalance trials aren't heard)
+	bool audio_silenced() const {
+		return trials_.audio_silenced();
 	}
 
 	bool is_view_patch_playing() {
 		return is_playing() && patches_.get_view_patch() == patches_.get_playing_patch();
+	}
+
+	// true even if audio is paused
+	bool is_view_patch_loaded() {
+		return player_.is_loaded && patches_.get_view_patch() == patches_.get_playing_patch();
 	}
 
 	bool did_audio_overrun() {
@@ -172,6 +211,10 @@ struct PatchPlayLoader {
 	void clear_audio_overrun() {
 		audio_overrun_ = false;
 	}
+
+	//
+	// Queries about the playing patch
+	//
 
 	std::optional<unsigned> is_panel_knob_catchup_inaccessible() {
 		return player_.panel_knob_catchup_inaccessible();
@@ -192,25 +235,32 @@ struct PatchPlayLoader {
 		return player_.num_poly_cable_channels(out, in);
 	}
 
-	// Concurrency: Called from UI thread
-	Result handle_file_events() {
-		if (loading_new_patch_ && audio_is_muted_) {
-			auto result = load_patch(should_play_when_loaded_);
-			should_play_when_loaded_ = true;
-			stopped_because_of_overrun_ = false;
-			return result;
-		}
-
-		if (rename_state_ != RenameState::Idle) {
-			return process_renaming();
-		} else if (should_save_patch_) {
-			return save_patch();
-		} else if (saving_patch_) {
-			return check_save_patch_status();
-		}
-
-		return {true, ""};
+	template<typename PluginModuleType>
+	PluginModuleType *get_plugin_module(int32_t module_idx) {
+		if (module_idx >= 0 && module_idx < (int32_t)player_.num_modules)
+			return dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get());
+		else
+			return nullptr;
 	}
+
+	CoreProcessor *get_plugin_module(int32_t module_idx) {
+		return player_.modules[module_idx].get();
+	}
+
+	bool is_param_tracking(unsigned module_id, unsigned param_id) {
+		return player_.is_param_tracking(module_id, param_id);
+	}
+
+	void update_param_catchup_mode() {
+		player_.set_catchup_mode(settings->catchup.mode, settings->catchup.allow_jump_outofrange);
+	}
+
+	// Copies the modules' current state and param values into the playing patch
+	void get_module_states();
+
+	//
+	// Saving and renaming (patch_playloader_save.cc)
+	//
 
 	void request_save_patch() {
 		should_save_patch_ = true;
@@ -224,107 +274,80 @@ struct PatchPlayLoader {
 		return rename_state_ == RenameState::Idle;
 	}
 
-	void request_rename_view_patch(PatchLocation const &loc) {
-		old_loc = {patches_.get_view_patch_filename(), patches_.get_view_patch_vol()};
-		new_loc = loc;
-		rename_state_ = RenameState::RequestSaveNew;
-	}
+	void request_rename_view_patch(PatchLocation const &loc);
+
+	//
+	// Modifying the modules in the playing patch (patch_playloader_modules.cc)
+	//
 
 	// Returns why the module could not be created (Ok on success), so the
 	// caller can inform the user
-	PatchPlayer::CreateResult load_module(std::string_view slug) {
-		bool should_play = is_playing();
+	PatchPlayer::CreateResult load_module(std::string_view slug);
 
-		stop_audio();
-		while (!is_audio_muted())
-			;
+	void change_module(std::string_view slug, unsigned module_id, bool keep_cables_and_maps);
 
-		auto created = player_.add_module(slug);
+	void remove_module(unsigned module_id);
 
-		if (created == PatchPlayer::CreateResult::Ok) {
-			auto *patch = patches_.get_view_patch();
-			uint16_t module_id = patch->add_module(slug);
-			auto info = ModuleFactory::getModuleInfo(slug);
+	void prepare_patch_for_plugin_change(std::string_view brand_slug);
 
-			// Set params to default values
-			for (unsigned i = 0; auto const &element : info.elements) {
-				if (auto def_val = get_normalized_default_value(element); def_val.has_value()) {
-					auto param_id = info.indices[i].param_idx;
-					patch->set_or_add_static_knob_value(module_id, param_id, def_val.value());
-					player_.apply_static_param(
-						{.module_id = module_id, .param_id = param_id, .value = def_val.value()});
-				}
-				i++;
-			}
-		}
+	//
+	// Load balancing (patch_playloader_balance.cc)
+	//
 
-		pr_info("Heap: %u\n", get_heap_size());
-		if (should_play)
-			start_audio();
+	// Measures the modules again and picks a new way to split them between the cores.
+	// Only meaningful while the patch is playing.
+	void recalculate_load_balance();
 
-		return created;
+	// -- Rebalance trials (see rebalance_trials.hh) --
+	// Try several candidate arrangements live and keep the one with the
+	// lowest measured audio load. Advanced by update_rebalance_trials() from the GUI loop
+	void start_rebalance_trials(uint32_t now_ms) {
+		trials_.start(now_ms);
 	}
 
-	void change_module(std::string_view slug, unsigned module_id, bool keep_cables_and_maps) {
-		bool should_play = is_playing();
-
-		stop_audio();
-		while (!is_audio_muted())
-			;
-
-		auto *patch = patches_.get_view_patch();
-
-		if (keep_cables_and_maps) {
-			patch->module_slugs[module_id] = slug;
-			player_.substitute_module(module_id, slug);
-		} else {
-			patch->blank_out_module(module_id);
-			patch->module_slugs[module_id] = slug;
-			player_.replace_module(module_id, slug);
-		}
-
-		pr_info("Heap: %u\n", get_heap_size());
-		if (should_play)
-			start_audio();
+	void update_rebalance_trials(uint32_t now_ms) {
+		trials_.update(now_ms);
 	}
 
-	void remove_module(unsigned module_id) {
-		stop_audio();
-		while (!is_audio_muted())
-			;
-
-		player_.remove_module(module_id);
-
-		pr_info("Heap: %u\n", get_heap_size());
-		start_audio();
+	// E.g. the panel is closing mid-trials: keep the best candidate found so far
+	void abort_rebalance_trials() {
+		trials_.abort();
 	}
 
-	void prepare_patch_for_plugin_change(std::string_view brand_slug) {
-		auto playing_patch = patches_.get_playing_patch();
-		if (!playing_patch)
-			return;
-
-		bool patch_contains_brand = false;
-
-		std::string brand_to_remove = ModuleFactory::cleanupBrandName(brand_slug);
-		for (std::string_view combined_slug : playing_patch->module_slugs) {
-
-			if (ModuleFactory::cleanupBrandName(combined_slug) == brand_to_remove) {
-				patch_contains_brand = true;
-				break;
-			}
-		}
-
-		if (patch_contains_brand) {
-			pr_dbg("Currently playing patch contains a module in the plugin to be removed. Stopping\n");
-			stop_audio();
-			while (!is_audio_muted())
-				;
-			player_.unload_patch();
-			// TODO: can we force it to reload from disk, but not forget its location?
-			patches_.close_playing_patch();
-		}
+	bool rebalance_trials_active() const {
+		return trials_.active();
 	}
+
+	// For displaying progress: which candidate is being tried, out of how many
+	unsigned rebalance_trials_current() const {
+		return trials_.current();
+	}
+
+	unsigned rebalance_trials_total() const {
+		return trials_.total();
+	}
+
+	// Puts back a load balance the user had before (Undo), without re-measuring
+	void apply_load_balance(std::vector<uint16_t> const &module_cores, std::vector<uint32_t> const &module_loads);
+
+	// The player works on its own copy of the patch data, so the load balance it
+	// calculated has to be copied back into the open patch in order to be saved.
+	void copy_load_balance_to_patch();
+
+	// Live measurements of where the playing patch's audio time goes
+	LiveLoadMeter::Loads get_live_load() const {
+		return player_.live_load.get();
+	}
+
+	// Per-module live measurement costs a few percent CPU, so it only runs
+	// while a page displaying it is open
+	void set_live_load_detail(bool on) {
+		player_.live_load.set_detailed(on);
+	}
+
+	//
+	// Audio and user settings
+	//
 
 	struct AudioSRBlock {
 		uint16_t sample_rate;
@@ -348,36 +371,6 @@ struct PatchPlayLoader {
 		return settings && settings->midi.midi_14bit_cc == MidiSettings::Midi14BitCC::Enabled;
 	}
 
-	void apply_suggested_audio_settings() {
-		if (!settings) {
-			pr_err("Error: PatchPlayLoader not initialized with user settings\n");
-			return;
-		}
-
-		auto patch = patches_.get_playing_patch();
-		if (!patch)
-			return;
-
-		auto [cur_sr, cur_bs, max_retries] = get_audio_settings();
-
-		auto sugg_sr = patch->suggested_samplerate;
-		if (!sugg_sr)
-			sugg_sr = settings->audio.sample_rate;
-
-		auto sugg_bs = patch->suggested_blocksize;
-		if (!sugg_bs)
-			sugg_bs = settings->audio.block_size;
-
-		bool change_sr = settings->patch_suggested_audio.apply_samplerate && (sugg_sr > 0 && sugg_sr != cur_sr);
-		bool change_bs = settings->patch_suggested_audio.apply_blocksize && (sugg_bs > 0 && sugg_bs != cur_bs);
-
-		if (change_sr || change_bs) {
-			uint32_t new_sr = change_sr ? sugg_sr : cur_sr;
-			uint16_t new_bs = change_bs ? sugg_bs : cur_bs;
-			request_new_audio_settings(new_sr, new_bs, max_retries);
-		}
-	}
-
 	void connect_user_settings(UserSettings *settings) {
 		this->settings = settings;
 		request_new_audio_settings(
@@ -388,193 +381,20 @@ struct PatchPlayLoader {
 		notify_queue = notification_queue;
 	}
 
-	template<typename PluginModuleType>
-	PluginModuleType *get_plugin_module(int32_t module_idx) {
-		if (module_idx >= 0 && module_idx < (int32_t)player_.num_modules)
-			return dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get());
-		else
-			return nullptr;
-	}
-
-	CoreProcessor *get_plugin_module(int32_t module_idx) {
-		return player_.modules[module_idx].get();
-	}
-
-	bool is_param_tracking(unsigned module_id, unsigned param_id) {
-		return player_.is_param_tracking(module_id, param_id);
-	}
-
-	void update_param_catchup_mode() {
-		player_.set_catchup_mode(settings->catchup.mode, settings->catchup.allow_jump_outofrange);
-	}
-
-	void get_module_states() {
-		if (auto playing_patch = patches_.get_playing_patch()) {
-			playing_patch->module_states = player_.patch_query.get_module_states();
-			playing_patch->static_knobs = player_.patch_query.get_all_params();
-		}
-	}
-
 private:
-	Result save_patch(PatchLocation const &loc) {
-		auto view_patch = patches_.get_view_patch();
+	// patch_playloader_load.cc
+	Result load_patch(bool start_audio_immediately = true);
 
-		if (view_patch && view_patch == patches_.get_playing_patch()) {
-			get_module_states();
-		}
+	// patch_playloader_save.cc
+	Result save_patch(PatchLocation const &loc);
+	Result save_patch();
+	Result check_save_patch_status();
+	Result check_delete_file_status();
+	Result process_renaming();
 
-		std::span<char> filedata = storage_.get_patch_data();
-		patch_to_yaml_buffer(*view_patch, filedata);
-
-		auto res = storage_.request_write_file(filedata, loc.vol, loc.filename);
-
-		if (res == FileStorageProxy::WriteResult::Success) {
-			should_save_patch_ = false;
-			saving_patch_ = true;
-			return {true, "Saving..."};
-
-		} else if (res == FileStorageProxy::WriteResult::Busy) {
-			// message system is busy, try again next time
-			return {true, ""};
-
-		} else {
-			// error with filename or volume, do not retry
-			should_save_patch_ = false;
-			saving_patch_ = false;
-			return {false, "File name or volume invalid"};
-		}
-	}
-
-	Result save_patch() {
-		return save_patch({patches_.get_view_patch_filename(), patches_.get_view_patch_vol()});
-	}
-
-	Result check_save_patch_status() {
-		auto msg = storage_.get_message();
-
-		if (msg.message_type == FileStorageProxy::WriteFileFail) {
-			saving_patch_ = false;
-			return {false, "Failed to write patch."};
-
-		} else if (msg.message_type == FileStorageProxy::WriteFileOK) {
-			saving_patch_ = false;
-			patches_.reset_view_patch_modification_count();
-			patches_.set_view_patch_timestamp(msg.timestamp);
-			patches_.set_view_patch_filesize(msg.length);
-			return {true, "Saved"};
-
-		} else {
-			return {true, ""};
-		}
-	}
-
-	Result check_delete_file_status() {
-		auto msg = storage_.get_message();
-
-		if (msg.message_type == FileStorageProxy::DeleteFileFailed) {
-			return {false, "Failed to remove original patch."};
-
-		} else if (msg.message_type == FileStorageProxy::DeleteFileSuccess) {
-			return {true, "Patch Moved"};
-
-		} else {
-			return {true, ""};
-		}
-	}
-
-	Result load_patch(bool start_audio_immediately = true) {
-		if (!next_patch) {
-			pr_err("Internal error loading patch\n");
-			loading_new_patch_ = false;
-			return {false, "Internal error loading patch"};
-		}
-
-		pr_trace("Attempting play patch: %.31s\n", next_patch->patch_name.data());
-
-		// Change the currently playing patch to point to the new patch
-		// This ensures that modules that use the patch location during
-		// construction will be given the right path.
-		if (next_patch == patches_.get_view_patch()) {
-			patches_.play_view_patch();
-		} else if (next_patch != patches_.get_playing_patch()) {
-			// This happens when loading calibration patches
-			// It might also happen if we implement MIDI PC -> patch load
-			pr_warn("Open patch manager is not tracking the playing patch\n");
-		}
-
-		Result result;
-		try {
-			result = player_.load_patch(*next_patch);
-		} catch (std::bad_alloc &) {
-			// Ran out of firmware heap partway through building the patch
-			// (copying patch data, caches, etc). Unload to discard the
-			// partially-built state.
-			pr_err("Out of memory loading patch\n");
-			player_.unload_patch();
-			result = {false, "Out of memory loading this patch"};
-		}
-		if (result.success) {
-			delay_ms(20); //let Async threads run
-			pr_info("Heap: %u\n", get_heap_size());
-
-			apply_suggested_audio_settings();
-
-			if (start_audio_immediately)
-				start_audio();
-
-		} else {
-			patches_.close_playing_patch();
-		}
-
-		loading_new_patch_ = false;
-		return result;
-	}
-
-	Result process_renaming() {
-		if (rename_state_ == RenameState::RequestSaveNew) {
-			auto res = save_patch(new_loc);
-			if (saving_patch_) {
-				rename_state_ = RenameState::SavingNew;
-			}
-			return res;
-		}
-
-		if (rename_state_ == RenameState::SavingNew) {
-			auto res = check_save_patch_status();
-			if (saving_patch_ == false) {
-				if (res.success) {
-					attempts = 0;
-					patches_.rename_view_patch_file(new_loc.filename, new_loc.vol);
-					rename_state_ = RenameState::RequestDeleteOld;
-				} else {
-					rename_state_ = RenameState::Idle; //Fail
-				}
-			}
-			return res;
-		}
-
-		if (rename_state_ == RenameState::RequestDeleteOld) {
-			if (storage_.request_delete_file(old_loc.filename, old_loc.vol)) {
-				rename_state_ = RenameState::DeletingOld;
-				return {true, ""};
-			} else {
-				if (attempts++ > 100) {
-					rename_state_ = RenameState::Idle;
-					return {false, "Failed to request deleting old file"};
-				}
-			}
-		}
-
-		if (rename_state_ == RenameState::DeletingOld) {
-			auto res = check_delete_file_status();
-			if (res.error_string.length() > 0) {
-				rename_state_ = RenameState::Idle;
-			}
-			return res;
-		}
-
-		return {true, ""};
-	}
+	// The trials reach into the loader's audio start/stop and patch state
+	friend class RebalanceTrials;
+	RebalanceTrials trials_{*this};
 
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;

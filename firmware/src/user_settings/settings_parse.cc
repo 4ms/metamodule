@@ -52,6 +52,15 @@ static bool read(ryml::ConstNodeRef const &node, AudioSettings *audio) {
 	read_or_default(node, "sample_rate", audio, &AudioSettings::sample_rate);
 	read_or_default(node, "block_size", audio, &AudioSettings::block_size);
 	read_or_default(node, "max_overrun_retries", audio, &AudioSettings::max_overrun_retries);
+
+	using enum AudioSettings::AutoRebalance;
+	if (node.has_child("auto_rebalance")) {
+		auto val = node["auto_rebalance"].val();
+		audio->auto_rebalance = val == "Off" ? Off : val == "EveryLoad" ? EveryLoad : AfterOverload;
+	} else {
+		audio->auto_rebalance = AudioSettings::DefaultAutoRebalance;
+	}
+
 	audio->make_valid();
 
 	return true;

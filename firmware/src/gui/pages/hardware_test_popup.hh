@@ -1,3 +1,4 @@
+#include "delay.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"

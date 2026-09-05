@@ -389,7 +389,10 @@ public:
 
 	void handle_audio_errors() {
 		if (info.patch_playloader.did_audio_overrun()) {
-			info.notify_queue.put({"Audio stopped: patch load > 99%.", Notification::Priority::Error, 1000});
+			// Overloads during re-balancing trials are expected, so don't send notifications
+			if (!info.patch_playloader.rebalance_trials_active())
+				info.notify_queue.put({"Audio stopped: patch load > 99%.", Notification::Priority::Error, 1000});
+
 			info.patch_playloader.clear_audio_overrun();
 		}
 	}

@@ -103,7 +103,7 @@ public:
 		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 3, 0);
 		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] {
 			using enum FUSB302::Device::ConnectedState;
-			Debug::Pin2::high();
+			// Debug::Pin2::high();
 
 			if (state == AsDevice) {
 				if (host_fallback)
@@ -122,7 +122,7 @@ public:
 				// re-enables it. Backstops the teardown ordering in handle_fusb_int.
 				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 			}
-			Debug::Pin2::low();
+			// Debug::Pin2::low();
 		});
 	}
 

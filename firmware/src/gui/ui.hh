@@ -1,4 +1,5 @@
 #pragma once
+#include "delay.hh"
 #include "debug.hh"
 #include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
@@ -200,6 +201,10 @@ private:
 		} else if (load_status.error_string.size()) {
 			notify_queue.put({load_status.error_string, Notification::Priority::Status, 1500});
 		}
+
+		// Advance the load re-balancing trials (started by the Load Balance
+		// panel or automatically, per the Auto Re-balance preference)
+		patch_playloader.update_rebalance_trials(lv_tick_get());
 	}
 
 	uint32_t last_page_update_tm = 0;

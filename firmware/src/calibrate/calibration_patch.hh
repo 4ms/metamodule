@@ -45,6 +45,16 @@ struct CalibrationPatch {
 		patch.add_mapped_outjack(13, {.module_id = src3, .jack_id = 1});
 		patch.add_mapped_outjack(14, {.module_id = src4, .jack_id = 0});
 		patch.add_mapped_outjack(15, {.module_id = src4, .jack_id = 1});
+
+		// Connect inputs to dummy module so they appear patched and are reported to the GUI
+		uint16_t dummy = patch.add_module("4msCompany:Atvert2");
+		patch.set_or_add_static_knob_value(dummy, 0, 0.5f);
+		patch.set_or_add_static_knob_value(dummy, 1, 0.5f);
+
+		// Main audio ins 0-5, expander ins 8-13
+		for (uint16_t panel_in : {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13})
+			patch.add_mapped_injack(panel_in, {.module_id = dummy, .jack_id = uint16_t(panel_in % 2)});
+
 		return &patch;
 	}
 
@@ -87,6 +97,16 @@ struct CalibrationPatch {
 		patch.add_mapped_outjack(13, {.module_id = src1, .jack_id = 0});
 		patch.add_mapped_outjack(14, {.module_id = src1, .jack_id = 0});
 		patch.add_mapped_outjack(15, {.module_id = src1, .jack_id = 0});
+
+		// Connect inputs to dummy module so they appear patched and are reported to the GUI
+		uint16_t dummy = patch.add_module("4msCompany:Atvert2");
+		patch.set_or_add_static_knob_value(dummy, 0, 0.5f);
+		patch.set_or_add_static_knob_value(dummy, 1, 0.5f);
+
+		// Main audio ins 0-5, expander ins 8-13
+		for (uint16_t panel_in : {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13})
+			patch.add_mapped_injack(panel_in, {.module_id = dummy, .jack_id = uint16_t(panel_in % 2)});
+
 		return &patch;
 	}
 
@@ -151,7 +171,6 @@ struct CalibrationPatch {
 		return &patch;
 	}
 
-private:
 	PatchData patch;
 };
 } // namespace MetaModule

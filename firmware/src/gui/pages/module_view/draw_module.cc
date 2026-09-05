@@ -1,3 +1,4 @@
+#include "delay.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_display.hh"

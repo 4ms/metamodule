@@ -71,6 +71,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(audio_section.samplerate_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(audio_section.auto_rebalance_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ssaver_section.time_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ssaver_section.knobs_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(catchup_section.mode_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -98,6 +99,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.samplerate_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(audio_section.auto_rebalance_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ssaver_section.time_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ssaver_section.knobs_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(catchup_section.mode_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
@@ -234,6 +236,10 @@ private:
 								  [this](auto t) { return t == audio_settings.max_overrun_retries; });
 		lv_dropdown_set_selected(audio_section.overrun_retries, ovr_item >= 0 ? ovr_item : 1);
 
+		auto ar_item = get_index(AudioSettings::ValidAutoRebalance,
+								 [this](auto t) { return t.value == audio_settings.auto_rebalance; });
+		lv_dropdown_set_selected(audio_section.auto_rebalance_dropdown, ar_item >= 0 ? ar_item : 1);
+
 		auto screensaver_item = get_index(ScreensaverSettings::ValidOptions,
 										  [this](auto t) { return t.timeout_ms == screensaver.timeout_ms; });
 		lv_dropdown_set_selected(ssaver_section.time_dropdown, screensaver_item >= 0 ? screensaver_item : 1);
@@ -307,7 +313,7 @@ private:
 	}
 
 	void update_audio_override_status() {
-		auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
+		auto [cur_sr, cur_bs, _mr, _ar] = patch_playloader.get_audio_settings();
 
 		if (cur_sr >= 0 && cur_sr != settings.audio.sample_rate) {
 			std::string msg = "Sample Rate:\n(default)";
@@ -362,6 +368,15 @@ private:
 			return AudioSettings::ValidOverrunRetries[ovr_item];
 		else
 			return AudioSettings::DefaultOverrunRetries;
+	}
+
+	AudioSettings::AutoRebalance read_auto_rebalance_dropdown() {
+		auto item = lv_dropdown_get_selected(audio_section.auto_rebalance_dropdown);
+
+		if (item >= 0 && item < AudioSettings::ValidAutoRebalance.size())
+			return AudioSettings::ValidAutoRebalance[item].value;
+		else
+			return AudioSettings::DefaultAutoRebalance;
 	}
 
 	bool read_patch_suggest_samplerate_check() {
@@ -560,6 +575,12 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		auto auto_rebalance = read_auto_rebalance_dropdown();
+		if (audio_settings.auto_rebalance != auto_rebalance) {
+			audio_settings.auto_rebalance = auto_rebalance;
+			gui_state.do_write_settings = true;
+		}
+
 		auto timeout = read_timeout_dropdown();
 		auto knobwake = read_knobwake_check();
 
@@ -628,7 +649,7 @@ private:
 			settings.patch_suggested_audio.apply_blocksize != apply_bs)
 		{
 
-			auto [cur_sr, cur_bs, cur_mr] = patch_playloader.get_audio_settings();
+			auto [cur_sr, cur_bs, cur_mr, _ar] = patch_playloader.get_audio_settings();
 
 			// If user flipped one or both overrides off, then undo the override by applying the current settings
 			bool flipped_sr_off = !apply_sr && settings.patch_suggested_audio.apply_samplerate;
@@ -738,6 +759,12 @@ private:
 			lv_group_set_editing(group, false);
 			return true;
 
+		} else if (lv_dropdown_is_open(audio_section.auto_rebalance_dropdown)) {
+			lv_dropdown_close(audio_section.auto_rebalance_dropdown);
+			lv_group_focus_obj(audio_section.auto_rebalance_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
 		} else if (lv_dropdown_is_open(ssaver_section.time_dropdown)) {
 			lv_dropdown_close(ssaver_section.time_dropdown);
 			lv_group_focus_obj(ssaver_section.time_dropdown);
@@ -837,6 +864,7 @@ private:
 		auto block_size = read_blocksize_dropdown();
 		auto sample_rate = read_samplerate_dropdown();
 		auto overrun_retries = read_overrun_dropdown();
+		auto auto_rebalance = read_auto_rebalance_dropdown();
 		auto timeout = read_timeout_dropdown();
 		auto knobwake = read_knobwake_check();
 		auto catchupmode = read_catchup_mode_dropdown();
@@ -879,7 +907,8 @@ private:
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
 			notif_anim == notifications.animation && usb_role == settings.usb_role_mode &&
-			usb_mode == settings.usb_device_mode && video_mirror == video.mirror && dev_drive == developer.enabled)
+			usb_mode == settings.usb_device_mode && video_mirror == video.mirror && dev_drive == developer.enabled &&
+			auto_rebalance == audio_settings.auto_rebalance)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);

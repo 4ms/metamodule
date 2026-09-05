@@ -1,4 +1,5 @@
 #pragma once
+#include "delay.hh"
 #include "fs/dir_entry_kind.hh"
 #include "gui/helpers/dir_entry_info.hh"
 #include "gui/helpers/load_meter.hh"

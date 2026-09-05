@@ -62,12 +62,12 @@ _M4_VECT_SZ		= 0x440;
 
 _M4_CODE		= 0x10000000;	
 _M4_CODE_A7		= 0x30000000; /* Address from A7's perspective*/
-_M4_CODE_SZ		= 324K;		  /*0x00050000*/
-_M4_CODE_END	= 0x10053000;
+_M4_CODE_SZ		= 336K;		  /*0x00050000*/
+_M4_CODE_END	= 0x10054000;
 
-_M4_STACK		= 0x10053000;
-_M4_STACK_A7	= 0x30053000; /* Address from A7's perspective*/
-_M4_STACK_SZ	= 52K - 256;
+_M4_STACK		= 0x10054000;
+_M4_STACK_A7	= 0x30054000; /* Address from A7's perspective*/
+_M4_STACK_SZ	= 48K - 256;
 _M4_STACK_END	= 0x1005FF00;
 
 /* The M4 startup code fills its whole stack with this word before main(), so the
