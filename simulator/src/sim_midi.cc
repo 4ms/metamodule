@@ -244,7 +244,7 @@ void SimMidi::rx_callback(double, std::vector<unsigned char> *, void *) {
 void SimMidi::push_incoming(const std::vector<unsigned char> &) {
 }
 
-void SimMidi::send(MidiMessage) {
+void SimMidi::send(PortedMidiMessage) {
 }
 
 void SimMidi::list_ports() {
