@@ -156,6 +156,7 @@ if(HEADLESS)
 		${FWDIR}/src/patch_play/patch_player_mappings.cc
 		${FWDIR}/src/patch_play/patch_player_modules.cc
 		${FWDIR}/src/patch_play/plugin_module.cc
+		${FWDIR}/src/patch_play/rack_expanders.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
 		)
@@ -193,6 +194,7 @@ else()
 		${FWDIR}/src/patch_play/patch_player_balance.cc
 		${FWDIR}/src/patch_play/patch_player_cache.cc
 		${FWDIR}/src/patch_play/patch_player_catchup.cc
+		${FWDIR}/src/patch_play/patch_player_expanders.cc
 		${FWDIR}/src/patch_play/patch_player_load.cc
 		${FWDIR}/src/patch_play/patch_player_mappings.cc
 		${FWDIR}/src/patch_play/patch_player_modules.cc
@@ -202,6 +204,7 @@ else()
 		${FWDIR}/src/patch_play/patch_playloader_save.cc
 		${FWDIR}/src/patch_play/rebalance_trials.cc
 		${FWDIR}/src/patch_play/plugin_module.cc
+		${FWDIR}/src/patch_play/rack_expanders.cc
         ${FWDIR}/src/patch_file/reload_patch.cc
 		src/file_browser_adaptor.cc
 

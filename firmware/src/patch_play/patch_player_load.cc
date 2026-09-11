@@ -49,6 +49,8 @@ Result PatchPlayer::load_patch(const PatchData &patchdata) {
 		return {false, "Too many modules in the patch! Max is 64"};
 	}
 
+	next_rack_module_id = FirstRackModuleId;
+
 	// First module is the hub
 	modules[0] = try_create_module(PanelDef::typeID);
 	if (modules[0] != nullptr)
@@ -69,6 +71,7 @@ Result PatchPlayer::load_patch(const PatchData &patchdata) {
 			pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
 			modules[i]->id = i;
+			assign_rack_module_id(i);
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
 			modules[i]->set_samplerate(samplerate);
@@ -115,6 +118,9 @@ Result PatchPlayer::load_patch(const PatchData &patchdata) {
 			modules[id]->bypassed = true;
 	}
 
+	// Wire up VCV-style expander module connections
+	connect_all_expanders();
+
 	calc_multiple_module_indicies();
 
 	active_knob_set = 0;
@@ -145,6 +151,7 @@ void PatchPlayer::unload_patch() {
 
 	smp.join();
 	is_loaded = false;
+	rack_expanders.disconnect_all();
 	for (size_t i = 0; i < num_modules; i++) {
 		plugin_module_deinit(modules[i]);
 		modules[i].reset(nullptr);
@@ -161,6 +168,7 @@ void PatchPlayer::unload_patch() {
 	pd.mapped_lights.clear();
 	pd.module_states.clear();
 	pd.bypassed_modules.clear();
+	pd.expanders.clear();
 	pd.midi_maps.set.clear();
 	pd.midi_maps.name = "";
 

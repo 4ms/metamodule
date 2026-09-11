@@ -19,6 +19,7 @@
 #include "patch_play/param_watch.hh"
 #include "patch_play/patch_player_query_patch.hh"
 #include "patch_play/plugin_module.hh"
+#include "patch_play/rack_expanders.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include <algorithm>
@@ -39,13 +40,14 @@ namespace MetaModule
 //
 // This header holds the data members and every function that runs in the audio
 // context (which must stay inline). The non-audio duties are implemented in:
-//   patch_player_load.cc     - loading/unloading a patch, module creation
-//   patch_player_balance.cc  - splitting modules between cores
-//   patch_player_modules.cc  - adding/removing/replacing modules in a loaded patch
-//   patch_player_mappings.cc - patch mods: knob maps, MIDI maps, cables, jack mappings
-//   patch_player_cache.cc    - building the panel/MIDI connection tables
-//   patch_player_catchup.cc  - knob catchup modes
-//   midi_connections.hh/.cc  - the MIDI routing tables
+//   patch_player_load.cc      - loading/unloading a patch, module creation
+//   patch_player_balance.cc   - splitting modules between cores
+//   patch_player_modules.cc   - adding/removing/replacing modules in a loaded patch
+//   patch_player_mappings.cc  - patch mods: knob maps, MIDI maps, cables, jack mappings
+//   patch_player_cache.cc     - building the panel/MIDI connection tables
+//   patch_player_catchup.cc   - knob catchup modes
+//   patch_player_expanders.cc - VCV-style expander connections between modules
+//   midi_connections.hh/.cc   - the MIDI routing tables
 class PatchPlayer {
 public:
 	// TODO: modules should be a FixedVector, and then num_modules is replaced by modules.size()
@@ -96,6 +98,10 @@ private:
 	using CoreBalancer = Balancer<MulticorePlayer::NumCores, MAX_MODULES_IN_PATCH>;
 	CoreBalancer core_balancer;
 
+	RackExpanders rack_expanders;
+
+	int64_t next_rack_module_id = FirstRackModuleId;
+
 	// For live_load measurements:
 	mdrivlib::CycleCounter update_patch_time;
 	mdrivlib::CycleCounter section_time;
@@ -127,6 +133,10 @@ public:
 
 	ParamWatcher &watched_params() {
 		return param_watcher;
+	}
+
+	RackExpanders &expanders() {
+		return rack_expanders;
 	}
 
 	//
@@ -180,6 +190,33 @@ public:
 
 	void reset_module(uint16_t module_id, std::string_view data = "");
 	void set_module_bypass(uint16_t module_id, bool bypassed);
+
+	//
+	// Expanders (patch_player_expanders.cc)
+	//
+
+	// Rack modules get a stable id that never changes even when modules are
+	// removed and the MM module indices shift.
+	static constexpr int64_t FirstRackModuleId = 0x10000;
+	static_assert(FirstRackModuleId > MAX_MODULES_IN_PATCH);
+
+	void assign_rack_module_id(unsigned module_idx);
+
+	// Add/remove a connection in both the patch data and the running patch
+	bool add_expander(ExpanderConnection conn);
+	bool remove_expander(ExpanderConnection conn);
+
+	// Wire every connection in pd.expanders (used when loading a patch)
+	void connect_all_expanders();
+
+	// Wire only the connections in pd.expanders that involve module_idx
+	// (used after a module is created in an existing slot)
+	void connect_expanders_for(unsigned module_idx);
+
+	enum class ExpanderStatus { NotConnected, Connected, Active };
+
+	// Whether the two modules are wired together, and if they have exchanged any messages
+	ExpanderStatus expander_status(ExpanderConnection conn) const;
 
 	//
 	// Patch Mods (patch_player_mappings.cc)
@@ -275,6 +312,8 @@ public:
 			section_time.start_simple_measurement();
 			smp.join();
 			auto sync_ticks = section_time.stop_simple_measurement();
+
+			rack_expanders.flip_messages();
 
 			section_time.start_simple_measurement();
 			update_midi_pulses();
@@ -403,6 +442,8 @@ public:
 			}
 			module_ticks = section_time.stop_simple_measurement();
 		}
+
+		rack_expanders.flip_messages();
 
 		section_time.start_simple_measurement();
 		process_outputs_samecore<0>();
@@ -838,6 +879,9 @@ private:
 	void safe_unpatch_output(Jack jack);
 	void safe_unpatch_input(Jack jack);
 	bool output_jack_held_by_panel(Jack jack) const;
+
+	// patch_player_expanders.cc
+	bool connect_expander(ExpanderConnection conn);
 
 	// patch_player_cache.cc
 	void clear_cache();

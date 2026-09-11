@@ -8,7 +8,7 @@ namespace MetaModule
 
 struct RollerPopup {
 	RollerPopup(const std::string_view label)
-		: popup{create_lv_labeled_popup(lv_layer_sys(), label.data())}
+		: popup{create_lv_labeled_popup(lv_layer_top(), label.data())}
 		, roller(create_lv_roller(popup))
 		, group(lv_group_create()) {
 		lv_hide(popup);

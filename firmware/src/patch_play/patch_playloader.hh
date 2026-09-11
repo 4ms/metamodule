@@ -235,6 +235,14 @@ struct PatchPlayLoader {
 		return player_.num_poly_cable_channels(out, in);
 	}
 
+	// Whether an expander connection in the playing patch is wired up, and if
+	// the two modules have exchanged any expander messages
+	PatchPlayer::ExpanderStatus expander_status(ExpanderConnection conn) {
+		if (is_loading_patch())
+			return PatchPlayer::ExpanderStatus::NotConnected;
+		return player_.expander_status(conn);
+	}
+
 	template<typename PluginModuleType>
 	PluginModuleType *get_plugin_module(int32_t module_idx) {
 		if (module_idx >= 0 && module_idx < (int32_t)player_.num_modules)

@@ -16,6 +16,16 @@ struct GuiState {
 	std::optional<CableBeginning> new_cable{};
 	bool already_displayed_cable_instructions = false;
 
+	struct ExpanderBeginning {
+		uint16_t module_id;
+		ExpanderSide side;
+	};
+	std::optional<ExpanderBeginning> new_expander{};
+
+	// Set after an expander connection is made, so the module view re-opens
+	// the Expanders menu (showing the new connection) when it comes back into focus
+	bool reopen_expander_menu = false;
+
 	bool force_redraw_patch{};
 	bool view_patch_file_changed{};
 

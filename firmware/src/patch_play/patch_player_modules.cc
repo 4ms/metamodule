@@ -29,6 +29,7 @@ bool PatchPlayer::add_module_at_idx(BrandModuleSlug slug, unsigned module_idx, C
 	pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
 	modules[module_idx]->id = module_idx;
+	assign_rack_module_id(module_idx);
 
 	// Match order that VCV does: fromJson (via load_state), then onAdd (via plugin_module_init)
 	reset_module(module_idx);
@@ -105,6 +106,9 @@ void PatchPlayer::remove_module(uint16_t module_idx) {
 
 	pd.remove_module(module_idx);
 
+	// Only the removed module's expander connections change: its
+	// neighbors are notified, everything else keeps its pointers
+	rack_expanders.disconnect(modules[module_idx].get());
 	plugin_module_deinit(modules[module_idx]);
 	modules[module_idx].reset();
 
@@ -131,6 +135,7 @@ void PatchPlayer::substitute_module(unsigned module_idx, BrandModuleSlug new_slu
 	pr_trace("Subs. module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
 
 	// De-init original module
+	rack_expanders.disconnect(modules[module_idx].get());
 	plugin_module_deinit(modules[module_idx]);
 	modules[module_idx].reset();
 
@@ -140,6 +145,9 @@ void PatchPlayer::substitute_module(unsigned module_idx, BrandModuleSlug new_slu
 	pd.clear_load_balance();
 	calc_multiple_module_indicies();
 	add_module_at_idx(new_slug, module_idx);
+
+	// Expander connections are kept in the patch: re-attach the new module to its neighbors
+	connect_expanders_for(module_idx);
 }
 
 void PatchPlayer::replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {
@@ -187,10 +195,11 @@ void PatchPlayer::replace_module(uint16_t module_idx, BrandModuleSlug new_slug) 
 	midi.erase_module(module_idx);
 
 	// Deinit old module
+	rack_expanders.disconnect(modules[module_idx].get());
 	plugin_module_deinit(modules[module_idx]);
 	modules[module_idx].reset();
 
-	// Clean up PatchData (cables, mapped_ins/outs, static_knobs, etc.)
+	// Clean up PatchData (cables, mapped_ins/outs, static_knobs, expanders, etc.)
 	pd.blank_out_module(module_idx);
 
 	// Create new module in the same slot
