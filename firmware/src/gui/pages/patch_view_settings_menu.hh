@@ -18,6 +18,17 @@ struct PatchViewSettingsMenu {
 
 		auto graphics_title = create_settings_menu_title(ui_PVSettingsMenu, "GRAPHICS");
 
+		auto zoom_label = create_settings_menu_slider(ui_PVSettingsMenu, "Module Size");
+		lv_obj_set_style_text_font(zoom_label, &ui_font_MuseoSansRounded50014, 0);
+		lv_obj_set_width(zoom_label, lv_pct(100));
+		lv_obj_set_align(zoom_label, LV_ALIGN_LEFT_MID);
+
+		zoom_slider = lv_obj_get_child(zoom_label, 0);
+		lv_obj_set_width(zoom_slider, lv_pct(40));
+		lv_slider_set_range(zoom_slider, 0, ModuleDisplaySettings::ZoomLevels.size() - 1);
+		lv_slider_set_value(
+			zoom_slider, ModuleDisplaySettings::zoom_level_index(ModuleDisplaySettings::DefaultZoomLevel), LV_ANIM_OFF);
+
 		auto graphics_settings = create_settings_menu_switch(ui_PVSettingsMenu, "Draw Screens");
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
 
@@ -33,8 +44,9 @@ struct PatchViewSettingsMenu {
 			graphics_update_rate_slider, ModuleDisplaySettings::ThrottleAmounts.size() - 2, LV_ANIM_OFF);
 
 		lv_obj_move_to_index(graphics_title, 1);
-		lv_obj_move_to_index(graphics_settings, 2);
-		lv_obj_move_to_index(graphics_update_rate_label, 3);
+		lv_obj_move_to_index(zoom_label, 2);
+		lv_obj_move_to_index(graphics_settings, 3);
+		lv_obj_move_to_index(graphics_update_rate_label, 4);
 
 		auto bar_title = create_settings_menu_title(ui_PVSettingsMenu, "STATUS BAR");
 
@@ -48,10 +60,10 @@ struct PatchViewSettingsMenu {
 		auto show_knobset_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show KnobSet Name");
 		show_knobset_name_check = lv_obj_get_child(show_knobset_cont, 1);
 
-		lv_obj_move_to_index(bar_title, 4);
-		lv_obj_move_to_index(show_samplerate_cont, 5);
-		lv_obj_move_to_index(float_samplerate_cont, 6);
-		lv_obj_move_to_index(show_knobset_cont, 7);
+		lv_obj_move_to_index(bar_title, 5);
+		lv_obj_move_to_index(show_samplerate_cont, 6);
+		lv_obj_move_to_index(float_samplerate_cont, 7);
+		lv_obj_move_to_index(show_knobset_cont, 8);
 
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
@@ -73,6 +85,8 @@ struct PatchViewSettingsMenu {
 
 		lv_obj_set_x(ui_PVSettingsMenu, 220);
 
+		lv_obj_add_event_cb(zoom_slider, zoom_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+
 		lv_obj_add_event_cb(graphics_show_check, graphics_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(
 			graphics_update_rate_slider, graphics_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -87,6 +101,7 @@ struct PatchViewSettingsMenu {
 		lv_group_set_editing(settings_menu_group, false);
 		lv_group_add_obj(settings_menu_group, ui_PVSettingsCloseButton);
 
+		lv_group_add_obj(settings_menu_group, zoom_slider);
 		lv_group_add_obj(settings_menu_group, graphics_show_check);
 		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
 
@@ -152,6 +167,7 @@ struct PatchViewSettingsMenu {
 			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
 			lv_slider_set_value(ui_PVCablesTranspSlider, opacity, LV_ANIM_OFF);
 		}
+		lv_slider_set_value(zoom_slider, ModuleDisplaySettings::zoom_level_index(settings.view_height_px), LV_ANIM_OFF);
 		{
 			int slider_val = ModuleDisplaySettings::ThrottleAmounts.size() - 2;
 			auto throttle = settings.graphic_screen_throttle;
@@ -348,6 +364,20 @@ private:
 		page->changed_while_visible = true;
 	}
 
+	static void zoom_value_change_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
+
+		auto val = lv_slider_get_value(page->zoom_slider);
+		val = std::clamp<int32_t>(val, 0, ModuleDisplaySettings::ZoomLevels.size() - 1);
+		page->settings.view_height_px = ModuleDisplaySettings::ZoomLevels[val];
+
+		page->settings.changed = true;
+		page->changed_while_visible = true;
+	}
+
 	static void graphics_settings_value_change_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -393,6 +423,8 @@ private:
 
 	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
+
+	lv_obj_t *zoom_slider;
 
 	lv_obj_t *graphics_show_check;
 	lv_obj_t *graphics_update_rate_label;

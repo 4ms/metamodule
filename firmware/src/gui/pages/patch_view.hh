@@ -160,6 +160,8 @@ struct PatchViewPage : PageBase {
 	}
 
 	void redraw_patch() {
+		drawn_view_height_px = page_settings.view_height_px;
+
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
 
@@ -181,6 +183,10 @@ struct PatchViewPage : PageBase {
 
 		module_canvases.reserve(patch->module_slugs.size());
 		module_ids.reserve(patch->module_slugs.size());
+
+		// Re-populating the group re-focusses a toolbar button, which would otherwise
+		// close any open menu (see button_focussed_cb)
+		is_redrawing = true;
 
 		lv_group_add_obj(group, ui_PlayButton);
 		lv_group_add_obj(group, ui_InfoButton);
@@ -204,6 +210,7 @@ struct PatchViewPage : PageBase {
 		auto last_module = lv_obj_get_child(modules_cont, -1);
 		auto last_bottom = lv_obj_get_y(last_module) + lv_obj_get_height(last_module);
 		cable_drawer.set_height(last_bottom + 30);
+		cable_drawer.set_module_height(page_settings.view_height_px);
 
 		update_cable_style(true);
 
@@ -212,6 +219,8 @@ struct PatchViewPage : PageBase {
 
 		patch = patches.get_view_patch();
 		desc_panel.prepare_focus(group);
+
+		is_redrawing = false;
 
 		// missing_plugin_popup.init(ui_PatchViewPage, group);
 
@@ -345,6 +354,17 @@ struct PatchViewPage : PageBase {
 		patch = patches.get_view_patch();
 
 		is_patch_playloaded = patch_is_playing(displayed_patch_loc_hash);
+
+		// Zoom changed in the settings menu: module graphics are rasterized at a fixed
+		// size, so everything has to be drawn again. Unlike gui_state.force_redraw_patch
+		// this keeps the settings menu open, so the slider can be adjusted with live feedback.
+		if (drawn_view_height_px != page_settings.view_height_px) {
+			// dyn_draws point into the module canvases that redraw_patch() is about to delete
+			dyn_draws.clear();
+			dynamic_elements_prepared = false;
+			redraw_patch();
+			return;
+		}
 
 		if (is_patch_playloaded != last_is_patch_playloaded || page_settings.changed) {
 			page_settings.changed = false;
@@ -852,8 +872,11 @@ private:
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 		page->highlighted_module_id = std::nullopt;
 		page->update_map_ring_style();
-		page->settings_menu.hide();
-		page->file_menu.hide();
+
+		if (!page->is_redrawing) {
+			page->settings_menu.hide();
+			page->file_menu.hide();
+		}
 
 		if (event->target == ui_SaveButton) {
 			lv_label_set_text(ui_PatchName, page->patches.get_view_patch_filename().c_str());
@@ -923,6 +946,8 @@ private:
 	bool is_ready = false;
 
 	PatchLocHash displayed_patch_loc_hash;
+	unsigned drawn_view_height_px = ModuleDisplaySettings::DefaultZoomLevel;
+	bool is_redrawing = false;
 	uint32_t patch_revision = 0xFFFFFFFF;
 	uint32_t patch_file_timestamp = 0;
 	uint64_t last_poly_check_tm = 0;

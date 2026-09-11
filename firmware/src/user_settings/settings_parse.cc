@@ -85,6 +85,9 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	read_or_default(node, "map_ring_flash_active", s, &ModuleDisplaySettings::map_ring_flash_active);
 	read_or_default(node, "scroll_to_active_param", s, &ModuleDisplaySettings::scroll_to_active_param);
 	read_or_default(node, "view_height_px", s, &ModuleDisplaySettings::view_height_px);
+	// Snap to a valid zoom level, in case it was hand-edited or written by a
+	// firmware version with a different set of levels
+	s->view_height_px = ModuleDisplaySettings::nearest_zoom_level(s->view_height_px);
 	read_or_default(node, "param_style", s, &ModuleDisplaySettings::param_style);
 	read_or_default(node, "paneljack_style", s, &ModuleDisplaySettings::paneljack_style);
 	read_or_default(node, "cable_style", s, &ModuleDisplaySettings::cable_style);

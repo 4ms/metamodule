@@ -573,3 +573,26 @@ TEST_CASE("Serialize settings") {
 
 	CHECK(parsed == expected);
 }
+
+TEST_CASE("view_height_px snaps to a valid zoom level") {
+	using MetaModule::ModuleDisplaySettings;
+
+	auto parse_height = [](std::string const &height) {
+		std::string yaml = "Settings:\n  patch_view:\n    view_height_px: " + height + "\n";
+		MetaModule::UserSettings settings;
+		MetaModule::Settings::parse({yaml.data(), yaml.size()}, &settings);
+		return settings.patch_view.view_height_px;
+	};
+
+	// Every level survives a round-trip
+	for (auto level : ModuleDisplaySettings::ZoomLevels)
+		CHECK(parse_height(std::to_string(level)) == level);
+
+	// Anything else snaps to the closest level
+	CHECK(parse_height("0") == 120);
+	CHECK(parse_height("100") == 120);
+	CHECK(parse_height("134") == 120);
+	CHECK(parse_height("136") == 150);
+	CHECK(parse_height("200") == 210);
+	CHECK(parse_height("1000") == 240);
+}
