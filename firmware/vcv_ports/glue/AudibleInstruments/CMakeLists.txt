@@ -176,7 +176,7 @@ set_source_files_properties(
 target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs)
 
 set_source_files_properties(
-  ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc PROPERTIES COMPILE_OPTIONS "-Wno-asm-operand-widths"
+  ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wno-asm-operand-widths>"
 )
 
 # Silence warning for synth_string_part.cc (used by Rings.cc) which writes 8B into a 4B space.

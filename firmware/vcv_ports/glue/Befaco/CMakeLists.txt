@@ -60,7 +60,7 @@ target_include_directories(
 
 target_compile_options(
   BefacoLibrary PRIVATE -Wno-double-promotion $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-float-conversion>
-                        -Wno-asm-operand-widths
+                        $<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wno-asm-operand-widths>
                         -include ${CMAKE_CURRENT_LIST_DIR}/OwlProgramMetaModuleCompat.h
 )
 
@@ -80,6 +80,12 @@ set_source_files_properties(${BEFACO_DIR}/src/Iroi.cpp
 set_source_files_properties(${BEFACO_DIR}/libs/OwlProgram/LibSource/ShortArray.cpp
                             PROPERTIES COMPILE_OPTIONS
                             "$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wno-absolute-value>")
+
+# -Wfree-nonheap-object: GCC 16 false positive on the vector<string> temporaries
+# passed to configSwitch() in the AxBC constructor
+set_source_files_properties(${BEFACO_DIR}/src/AxBC.cpp
+                            PROPERTIES COMPILE_OPTIONS
+                            "$<$<CXX_COMPILER_ID:GNU>:-Wno-free-nonheap-object>")
 
 # set_property(TARGET BefacoLibrary PROPERTY METAMODULE_DISABLE_IPO TRUE)
 set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 23)
