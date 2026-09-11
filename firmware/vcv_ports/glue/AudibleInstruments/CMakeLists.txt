@@ -148,9 +148,15 @@ target_compile_options(AudibleInstrumentsLibrary
     $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-volatile>>
     $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:AppleClang>:-Wno-deprecated-volatile>>    
     $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wno-class-memaccess>>
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:Clang>:-Wno-nontrivial-memcall>>
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:AppleClang>:-Wno-nontrivial-memcall>>
     )
+
+# Clang's equivalent of -Wclass-memaccess only exists in newer versions (not
+# Apple clang 17), so probe for it rather than keying on the compiler ID
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-Wnontrivial-memcall AUDIBLE_HAS_WNONTRIVIAL_MEMCALL)
+if(AUDIBLE_HAS_WNONTRIVIAL_MEMCALL)
+  target_compile_options(AudibleInstrumentsLibrary PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-nontrivial-memcall>)
+endif()
 
 # Fixes for compiler warnings in AudibleInstruments:
 set_source_files_properties(

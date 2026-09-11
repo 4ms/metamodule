@@ -127,7 +127,7 @@ set_source_files_properties(
 	FilteringFunctions/arm_fir_interpolate_f32.c 
 	FilteringFunctions/arm_fir_decimate_f32.c 
 	FilteringFunctions/arm_biquad_cascade_df1_f32.c 
-	PROPERTIES COMPILE_OPTIONS "-Wno-maybe-uninitialized"
+	PROPERTIES COMPILE_OPTIONS "$<$<C_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>"
 )
 
 
