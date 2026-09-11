@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/context_menu.hh"
 #include "gui/module_menu/base_plugin_menu.hh"
 #include "gui/styles.hh"
 #include <vector>
@@ -8,13 +9,14 @@ namespace MetaModule
 {
 
 // Renders a native (CoreProcessor) module's context menu into the options roller.
-// The items come from CoreProcessor::get_context_menu_items(); clicks and slider
-// edits are forwarded back to the module via context_menu_action() /
-// context_menu_set_value(). This is the native-module counterpart to RackModuleMenu.
+// The items and click/slider handling come from the ContextMenuHandlers the plugin
+// registered for the module's slug with register_context_menu().
+// This is the native-module counterpart to RackModuleMenu.
 struct NativeModuleMenu : BasePluginModuleMenu {
 
-	NativeModuleMenu(CoreProcessor *module)
-		: module{module} {
+	NativeModuleMenu(CoreProcessor *module, ContextMenuHandlers const *handlers)
+		: module{module}
+		, handlers{handlers} {
 	}
 
 	~NativeModuleMenu() override = default;
@@ -22,15 +24,15 @@ struct NativeModuleMenu : BasePluginModuleMenu {
 	std::vector<std::string> get_items() override {
 		items.clear();
 
-		if (!module)
+		if (!module || !handlers)
 			return {};
 
-		items = module->get_context_menu_items();
+		items = handlers->get_items(module);
 
 		std::vector<std::string> item_strings;
 		item_strings.reserve(items.size());
 
-		using Type = CoreProcessor::ContextMenuItem::Type;
+		using Type = ContextMenuItem::Type;
 		for (auto const &item : items) {
 			auto &str = item_strings.emplace_back();
 
@@ -69,16 +71,19 @@ struct NativeModuleMenu : BasePluginModuleMenu {
 	}
 
 	std::optional<SliderEdit> click_item(unsigned idx) override {
-		if (!module || idx >= items.size())
+		if (!module || !handlers || idx >= items.size())
 			return std::nullopt;
 
 		auto const &item = items[idx];
 
-		using Type = CoreProcessor::ContextMenuItem::Type;
+		using Type = ContextMenuItem::Type;
 		switch (item.type) {
 			case Type::Action:
+				handlers->on_change(module, idx, 1.f);
+				break;
+
 			case Type::Checkbox:
-				module->context_menu_action(idx);
+				handlers->on_change(module, idx, item.checked ? 0.f : 1.f);
 				break;
 
 			case Type::Slider:
@@ -98,13 +103,13 @@ struct NativeModuleMenu : BasePluginModuleMenu {
 	}
 
 	std::string set_slider_value(float scaled_value) override {
-		if (!module || active_slider_idx >= items.size())
+		if (!module || !handlers || active_slider_idx >= items.size())
 			return {};
 
-		module->context_menu_set_value(active_slider_idx, scaled_value);
+		handlers->on_change(module, active_slider_idx, scaled_value);
 
 		// Re-read the item so the popup can show the module's updated value text
-		auto updated = module->get_context_menu_items();
+		auto updated = handlers->get_items(module);
 		if (active_slider_idx < updated.size())
 			return updated[active_slider_idx].value_text;
 
@@ -129,7 +134,8 @@ private:
 	static constexpr unsigned no_slider = 0xFFFFFFFF;
 
 	CoreProcessor *module{};
-	std::vector<CoreProcessor::ContextMenuItem> items;
+	ContextMenuHandlers const *handlers{};
+	std::vector<ContextMenuItem> items;
 	unsigned active_slider_idx = no_slider;
 	bool exited = false;
 };

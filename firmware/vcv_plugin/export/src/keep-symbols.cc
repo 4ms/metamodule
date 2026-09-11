@@ -16,6 +16,7 @@
 #include "widget/TransformWidget.hpp"
 
 #include "CoreModules/async_thread.hh"
+#include "CoreModules/context_menu.hh"
 #include "dirent.h"
 #include "jansson.h"
 #include "metamodule-plugin-sdk/core-interface/audio/settings.hh"
@@ -110,6 +111,12 @@ void __attribute__((optimize("-O0"))) keep_math(float x) {
 
 void __attribute__((optimize("-O0"))) keep_register_module() {
 	static auto addr = &MetaModule::register_module;
+	printf("%p\n", addr);
+}
+
+void __attribute__((optimize("-O0"))) keep_register_context_menu() {
+	static bool (*addr)(std::string_view, std::string_view, MetaModule::ContextMenuHandlers) =
+		&MetaModule::register_context_menu;
 	printf("%p\n", addr);
 }
 
