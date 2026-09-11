@@ -27,6 +27,8 @@
 # keep-symbols.cc
 MetaModule::register_module
 
+# Kept alive by keep_register_context_menu() in keep-symbols.cc
+MetaModule::register_context_menu
 
 # libc/libstdc++ and syscalls the firmware provides. These are in main.elf but
 # there's no easy way to find them by scanning the export objects.
@@ -41,6 +43,7 @@ _realloc_r
 _free_r
 _times_r
 memalign
+_memalign_r
 
 abort
 __assert_func

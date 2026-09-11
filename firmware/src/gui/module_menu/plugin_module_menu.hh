@@ -45,8 +45,8 @@ struct PluginModuleMenu {
 
 	bool create_options_menu(std::string_view slug, unsigned this_module_id) {
 		if (plugin_menu) {
-            pr_err("Error: Plugin menu was not deleted\n"); 
-        }
+			pr_err("Error: Plugin menu was not deleted\n");
+		}
 
 		if (auto rack_module = patch_playloader.get_plugin_module<rack::engine::Module>(this_module_id)) {
 			plugin_menu = std::make_unique<RackModuleMenu>(rack_module->module_widget);
