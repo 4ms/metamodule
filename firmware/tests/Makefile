@@ -73,8 +73,8 @@ CXXFLAGS = 	-Wall \
 			-DTESTPROJECT \
 			-g3 -O0 \
 
-$(BUILDDIR)/src/gui/elements/element_name.o: CXXFLAGS += -Wno-deprecated-anon-enum-enum-conversion
-$(BUILDDIR)/tests/auto_map_tests.o: CXXFLAGS += -Wno-deprecated-enum-enum-conversion -Wno-deprecated-anon-enum-enum-conversion
+$(BUILDDIR)/src/gui/elements/element_name.o: CXXFLAGS += -Wno-deprecated-enum-enum-conversion -Wno-deprecated-anon-enum-enum-conversion
+$(BUILDDIR)/tests/auto_map_tests.o:          CXXFLAGS += -Wno-deprecated-enum-enum-conversion -Wno-deprecated-anon-enum-enum-conversion
 
 ### Boilerplate below here:
 
