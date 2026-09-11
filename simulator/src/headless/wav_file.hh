@@ -74,75 +74,9 @@ public:
 			return;
 		}
 
-		char data[] = "\0\0\0\0\0\0\0\0";
-
-		if (!(fread(data, 1, 4, fp) == 4 && data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F')) {
-			printf("bad WAV format (RIFF)\n");
+		valid = parse_header();
+		if (!valid)
 			close();
-			return;
-		}
-
-		uint32_t len; // file size - 8 bytes
-		fread(&len, 4, 1, fp);
-
-		if (!(fread(data, 1, 8, fp) == 8 && data[0] == 'W' && data[1] == 'A' && data[2] == 'V' && data[3] == 'E' &&
-			  data[4] == 'f' && data[5] == 'm' && data[6] == 't' && data[7] == ' '))
-		{
-			printf("bad WAV format (WAVEfmt)\n");
-			close();
-			return;
-		}
-
-		uint32_t bs; // size of header section
-		fread(&bs, 4, 1, fp);
-		if (bs != 0x12 && bs != 0x10) {
-			printf("bad WAV format (bs)\n");
-			close();
-			return;
-		}
-
-		uint16_t fmt; // 1=PCM, 3=  float32
-		fread(&fmt, 2, 1, fp);
-		if (fmt != 0x1 && fmt != 0x3) {
-			printf("bad WAV format (fmt)\n");
-			close();
-			return;
-		}
-
-		fread(&num_channels_, 2, 1, fp);
-		fread(&sample_rate_, 4, 1, fp);
-
-		uint32_t bytes_per_second;
-		fread(&bytes_per_second, 4, 1, fp);
-
-		uint16_t block_align;
-		fread(&block_align, 2, 1, fp);
-
-		if (bytes_per_second != sample_rate_ * block_align) {
-			printf("bad WAV format (bpb)\n");
-			close();
-			return;
-		}
-
-		uint16_t bpsamples; // bits per samples
-		fread(&bpsamples, 2, 1, fp);
-
-		if (bs == 0x12) {
-			uint16_t ext_size;
-			fread(&ext_size, 2, 1, fp);
-		}
-
-		if (!(fread(data, 1, 4, fp) == 4 && data[0] == 'd' && data[1] == 'a' && data[2] == 't' && data[3] == 'a')) {
-			printf("bad WAV format (data)\n");
-			close();
-			return;
-		}
-
-		uint32_t datasize;
-		fread(&datasize, 4, 1, fp);
-		size_ = datasize * 8 / num_channels_ / bpsamples;
-
-		valid = true;
 	}
 
 	template<typename T>
@@ -174,5 +108,65 @@ public:
 
 	int num_channels() {
 		return num_channels_;
+	}
+
+private:
+	template<typename T>
+	bool read_val(T &val) {
+		return fread(&val, sizeof(T), 1, fp) == 1;
+	}
+
+	bool bad_format(const char *what) {
+		printf("bad WAV format (%s)\n", what);
+		return false;
+	}
+
+	bool parse_header() {
+		char data[] = "\0\0\0\0\0\0\0\0";
+
+		if (!(fread(data, 1, 4, fp) == 4 && data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F'))
+			return bad_format("RIFF");
+
+		uint32_t len; // file size - 8 bytes
+		if (!read_val(len))
+			return bad_format("len");
+
+		if (!(fread(data, 1, 8, fp) == 8 && data[0] == 'W' && data[1] == 'A' && data[2] == 'V' && data[3] == 'E' &&
+			  data[4] == 'f' && data[5] == 'm' && data[6] == 't' && data[7] == ' '))
+			return bad_format("WAVEfmt");
+
+		uint32_t bs; // size of header section
+		if (!read_val(bs) || (bs != 0x12 && bs != 0x10))
+			return bad_format("bs");
+
+		uint16_t fmt; // 1=PCM, 3=  float32
+		if (!read_val(fmt) || (fmt != 0x1 && fmt != 0x3))
+			return bad_format("fmt");
+
+		uint32_t bytes_per_second;
+		uint16_t block_align;
+		if (!read_val(num_channels_) || !read_val(sample_rate_) || !read_val(bytes_per_second) ||
+			!read_val(block_align) || bytes_per_second != sample_rate_ * block_align)
+			return bad_format("bpb");
+
+		uint16_t bpsamples; // bits per samples
+		if (!read_val(bpsamples))
+			return bad_format("bpsamples");
+
+		if (bs == 0x12) {
+			uint16_t ext_size;
+			if (!read_val(ext_size))
+				return bad_format("ext_size");
+		}
+
+		if (!(fread(data, 1, 4, fp) == 4 && data[0] == 'd' && data[1] == 'a' && data[2] == 't' && data[3] == 'a'))
+			return bad_format("data");
+
+		uint32_t datasize;
+		if (!read_val(datasize))
+			return bad_format("datasize");
+		size_ = datasize * 8 / num_channels_ / bpsamples;
+
+		return true;
 	}
 };

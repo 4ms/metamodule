@@ -71,8 +71,15 @@ target_compile_definitions(BefacoLibrary PRIVATE METAMODULE VCV)
 set_source_files_properties(${BEFACO_DIR}/libs/OwlProgram/LibSource/fastpow.c
                             PROPERTIES COMPILE_OPTIONS -fno-strict-aliasing)
 
+# -Wabsolute-value: fabs() on integers (libs/Iroi/Clock.h, OwlProgram
+# ShortArray.cpp). Only clang with libstdc++ warns; libc++ has integer overloads
 set_source_files_properties(${BEFACO_DIR}/src/Iroi.cpp
-                            PROPERTIES COMPILE_OPTIONS -Wno-unused-but-set-variable)
+                            PROPERTIES COMPILE_OPTIONS
+                            "-Wno-unused-but-set-variable;$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wno-absolute-value>")
+
+set_source_files_properties(${BEFACO_DIR}/libs/OwlProgram/LibSource/ShortArray.cpp
+                            PROPERTIES COMPILE_OPTIONS
+                            "$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wno-absolute-value>")
 
 # set_property(TARGET BefacoLibrary PROPERTY METAMODULE_DISABLE_IPO TRUE)
 set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 23)

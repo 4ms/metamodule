@@ -193,7 +193,8 @@ std::vector<uint8_t> readFile(const std::string &path) {
 
 		data.resize(len);
 
-		std::fread(data.data(), 1, len, f);
+		// Trim to what was actually read, in case of a short read
+		data.resize(std::fread(data.data(), 1, len, f));
 		std::fclose(f);
 	}
 
@@ -209,7 +210,8 @@ uint8_t *readFile(const std::string &path, size_t *size) {
 			pr_err("rack::readFile(%s, sz) failed to allocate %zu bytes\n", path.c_str(), len);
 			return data;
 		}
-		std::fread(data, 1, len, f);
+		// Report what was actually read, in case of a short read
+		len = std::fread(data, 1, len, f);
 		std::fclose(f);
 
 		if (size)
