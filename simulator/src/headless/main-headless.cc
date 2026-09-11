@@ -37,7 +37,7 @@ auto measure_time_ms(auto &&process) {
 	using namespace std::literals;
 	const auto end = std::chrono::high_resolution_clock::now();
 	auto duration = (end - start) / 1ms;
-	printf("Process time: %lld ms\n", duration);
+	printf("Process time: %lld ms\n", (long long)duration);
 
 	return duration;
 }

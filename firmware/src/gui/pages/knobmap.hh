@@ -46,6 +46,16 @@ struct KnobMapPage : PageBase {
 
 		lv_obj_add_event_cb(ui_EditMapMidiChannelDropdown, midichan_cb, LV_EVENT_VALUE_CHANGED, this);
 
+		midi_port_dropdown =
+			create_midi_map_dropdown(ui_EditMapMidiChannelCont, "All Ports\nUSB only\nTRS only\nDIN5 only");
+		lv_obj_set_height(midi_port_dropdown, 28);
+		lv_obj_set_width(midi_port_dropdown, 110);
+		lv_obj_move_to_index(midi_port_dropdown, lv_obj_get_index(ui_EditMapMidiChannelDropdown));
+
+		lv_obj_add_event_cb(midi_port_dropdown, midiport_cb, LV_EVENT_VALUE_CHANGED, this);
+
+		lv_hide(ui_EditMapMidiChannelTitle);
+
 		lv_hide(ui_Keyboard);
 		lv_hide(ui_EditMapMidiChannelCont);
 
@@ -56,6 +66,7 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_MaxSlider);
 		lv_group_add_obj(group, ui_ModuleMapToggleSwitch);
 		lv_group_add_obj(group, ui_AliasTextArea);
+		lv_group_add_obj(group, midi_port_dropdown);
 		lv_group_add_obj(group, ui_EditMapMidiChannelDropdown);
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
@@ -148,6 +159,9 @@ struct KnobMapPage : PageBase {
 		}
 		lv_dropdown_set_selected(ui_EditMapMidiChannelDropdown, map.midi_chan);
 
+		auto port = Midi::selected_port(map.midi_port_mask);
+		lv_dropdown_set_selected(midi_port_dropdown, port.has_value() ? *port + 1 : 0);
+
 		// Knob arc
 
 		float knob_val = static_param ? map.unmap_val(static_param->value) : 0;
@@ -187,6 +201,10 @@ struct KnobMapPage : PageBase {
 
 			} else if (del_popup.is_visible()) {
 				del_popup.hide();
+
+			} else if (lv_dropdown_is_open(midi_port_dropdown)) {
+				lv_dropdown_close(midi_port_dropdown);
+				lv_group_set_editing(group, false);
 
 			} else if (lv_dropdown_is_open(ui_EditMapMidiChannelDropdown)) {
 				lv_dropdown_close(ui_EditMapMidiChannelDropdown);
@@ -373,9 +391,26 @@ private:
 			return;
 
 		page->map.midi_chan = lv_dropdown_get_selected(ui_EditMapMidiChannelDropdown);
-		page->patch_mod_queue.put(ModifyMapping{.map = page->map, .set_id = PatchData::MIDIKnobSet});
-		page->patch->add_update_midi_map(page->map);
-		page->patches.mark_view_patch_modified();
+		page->commit_midi_map();
+	}
+
+	static void midiport_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+		if (!page)
+			return;
+
+		// Index 0 is "All Ports"; the rest are Midi::Event::Port values offset by one
+		auto sel = lv_dropdown_get_selected(page->midi_port_dropdown);
+		page->map.midi_port_mask = sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
+		page->commit_midi_map();
+	}
+
+	void commit_midi_map() {
+		patch_mod_queue.put(ModifyMapping{.map = map, .set_id = PatchData::MIDIKnobSet});
+		patch->add_update_midi_map(map);
+		patches.mark_view_patch_modified();
 	}
 
 	void update_alias_text_area() {
@@ -393,6 +428,7 @@ private:
 private:
 	lv_obj_t *base = nullptr;
 	lv_obj_t *indicator = nullptr;
+	lv_obj_t *midi_port_dropdown = nullptr;
 	PatchData *patch;
 	MappedKnob map{};
 	const StaticParam *static_param = nullptr;

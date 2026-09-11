@@ -11,31 +11,31 @@ struct AudioStreamMidi {
 	PatchPlayer &player;
 	SyncParams &sync_params;
 
-	bool last_connected = false;
+	uint8_t last_connected = false;
 
 	AudioStreamMidi(PatchPlayer &player, SyncParams &sync_params)
 		: player{player}
 		, sync_params{sync_params} {
 	}
 
-	void process(bool is_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg) {
+	// raw_msg/port are in/out params: on entry they're what's received from hardware
+	// and on function return they are what's transmitted out to hardware
+	void
+	process(uint8_t ports_connected, Midi::Event const &event, unsigned poly_num, MidiMessage *raw_msg, uint8_t *port) {
 
 		if (event.type == Midi::Event::Type::PC) {
 			sync_params.midi_events.put(event);
 		}
 
-		// Consume the incoming message and clear the slot before any early
-		// return: raw_msg is written back to the shared param block, and the
-		// M4 transmits whatever it finds there. Leaving the received message
-		// in place echoes all incoming MIDI back to the sender.
+		// Consume the incoming message even if MIDI is not connected
 		MidiMessage rx_msg = *raw_msg;
+		uint8_t rx_port = *port;
 		*raw_msg = MidiMessage{};
+		*port = 0;
 
-		// MIDI generated while not connected goes nowhere: discard it as it's
-		// produced. Otherwise it accumulates in the router's transmitter
-		// queues (newest 128 messages) and is transmitted as a stale burst
-		// the moment MIDI is attached.
-		if (!is_connected) {
+		// Discard MIDI generated while not connected so it won't transmit
+		// on MIDI attachment
+		if (ports_connected == 0) {
 			while (MidiRouter::pop_outgoing_message())
 				;
 		}
@@ -43,27 +43,28 @@ struct AudioStreamMidi {
 		if (!player.is_loaded)
 			return;
 
-		if (is_connected && !last_connected) {
+		if (ports_connected && !last_connected) {
 			player.set_midi_connected();
-		} else if (!is_connected && last_connected) {
+		} else if (!ports_connected && last_connected) {
 			player.set_midi_disconnected();
 		}
 
-		last_connected = is_connected;
+		last_connected = ports_connected;
 
-		if (!is_connected)
+		if (!ports_connected)
 			return;
 
 		// Transfer MIDI RX message to router (from hardware)
 		// Ignore active-sensing
 		if (rx_msg.is_sysex() || (rx_msg.status != 0xfe && rx_msg.status != 0)) {
 			// 50ns with no listeners + ~100ns additional per listener
-			MidiRouter::push_incoming_message(rx_msg);
+			MidiRouter::push_incoming_message(rx_msg, rx_port);
 		}
 
 		// Transfer MIDI TX message from router (towards hardware)
 		if (auto tx_msg = MidiRouter::pop_outgoing_message()) {
-			*raw_msg = *tx_msg;
+			*raw_msg = tx_msg->msg;
+			*port = tx_msg->port;
 		}
 
 		if (event.type == Midi::Event::Type::None)
@@ -71,36 +72,36 @@ struct AudioStreamMidi {
 
 		// All other MIDI events: 150ns min (no listeners) + more... 150-600ns for some listeners
 		if (event.type == Midi::Event::Type::NoteOn) {
-			player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note), event.midi_chan);
-			player.set_midi_note_gate(event.poly_chan, 10.f, event.midi_chan);
-			player.set_midi_note_velocity(event.poly_chan, event.val, event.midi_chan);
-			player.set_midi_note_retrig(event.poly_chan, 10.f, event.midi_chan);
-			player.set_midi_gate(event.note, 10.f, event.midi_chan);
+			player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note), event.midi_chan, event.port);
+			player.set_midi_note_gate(event.poly_chan, 10.f, event.midi_chan, event.port);
+			player.set_midi_note_velocity(event.poly_chan, event.val, event.midi_chan, event.port);
+			player.set_midi_note_retrig(event.poly_chan, 10.f, event.midi_chan, event.port);
+			player.set_midi_gate(event.note, 10.f, event.midi_chan, event.port);
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::NoteOff) {
 			if (event.poly_chan < poly_num) {
-				player.set_midi_note_gate(event.poly_chan, 0, event.midi_chan);
+				player.set_midi_note_gate(event.poly_chan, 0, event.midi_chan, event.port);
 			}
-			player.set_midi_gate(event.note, 0, event.midi_chan);
+			player.set_midi_gate(event.note, 0, event.midi_chan, event.port);
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::Aft) {
-			player.set_midi_note_aftertouch(event.poly_chan, event.val, event.midi_chan);
+			player.set_midi_note_aftertouch(event.poly_chan, event.val, event.midi_chan, event.port);
 
 		} else if (event.type == Midi::Event::Type::ChanPress) {
 			for (unsigned i = 0; i < poly_num; i++)
-				player.set_midi_note_aftertouch(i, event.val, event.midi_chan);
+				player.set_midi_note_aftertouch(i, event.val, event.midi_chan, event.port);
 
 		} else if (event.type == Midi::Event::Type::CC) {
-			player.set_midi_cc(event.note, event.val, event.midi_chan);
+			player.set_midi_cc(event.note, event.val, event.midi_chan, event.port);
 			sync_params.midi_events.put(event);
 
 		} else if (event.type == Midi::Event::Type::Bend) {
-			player.set_midi_cc(128, event.val, event.midi_chan);
+			player.set_midi_cc(128, event.val, event.midi_chan, event.port);
 
 		} else if (event.type == Midi::Event::Type::Time) {
-			player.send_midi_time_event(event.note, 10.f);
+			player.send_midi_time_event(event.note, 10.f, event.port);
 		}
 	}
 };

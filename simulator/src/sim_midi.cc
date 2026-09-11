@@ -1,4 +1,5 @@
 #include "sim_midi.hh"
+#include "midi/midi_queue.hh"
 #include <cstdint>
 #include <cstdio>
 
@@ -179,7 +180,8 @@ void SimMidi::push_incoming(const std::vector<unsigned char> &bytes) {
 	rx_fifo_.put(MidiMessage{status, d0, d1});
 }
 
-void SimMidi::send(MidiMessage msg) {
+void SimMidi::send(PortedMidiMessage pmsg) {
+	auto &msg = pmsg.msg;
 	if (!impl_ || !impl_->out)
 		return;
 
@@ -242,7 +244,7 @@ void SimMidi::rx_callback(double, std::vector<unsigned char> *, void *) {
 void SimMidi::push_incoming(const std::vector<unsigned char> &) {
 }
 
-void SimMidi::send(MidiMessage) {
+void SimMidi::send(PortedMidiMessage) {
 }
 
 void SimMidi::list_ports() {

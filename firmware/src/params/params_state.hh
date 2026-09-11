@@ -118,22 +118,18 @@ struct ParamsState {
 };
 
 struct ParamsMidiState : ParamsState {
-	struct MidiChangedVal {
-		uint8_t changed : 1;
-		uint8_t val : 7;
-		uint8_t value;
-	};
-	std::array<MidiChangedVal, NumMidiCCs> midi_ccs;
-	MidiChangedVal last_midi_note;
-	uint8_t last_midi_note_channel;
-	bool midi_gate = false;
-
-	struct MidiPCEvent {
-		bool changed = false;
+	struct MidiEvent {
+		int8_t num = -1;	 //Note number, PC number, or CC number 0-127. -1=none
+		int8_t value = -1;	 //CC value, Velocity for notes (not read anywhere), or -1 for PC
 		uint8_t channel = 0; // MIDI channel 0-15
-		uint8_t pc = 0;      // Program Change number 0-127
+		uint8_t port = 0;	 // USB/TRS/DIN5
 	};
-	MidiPCEvent last_midi_pc;
+
+	MidiEvent last_midi_note;
+	MidiEvent last_midi_cc;
+	MidiEvent last_midi_pc;
+
+	bool midi_gate = false;
 
 	TextDisplayWatcher text_displays;
 
@@ -142,12 +138,11 @@ struct ParamsMidiState : ParamsState {
 
 		text_displays.stop_watching_all();
 
-		for (auto &cc : midi_ccs)
-			cc.changed = 0;
+		last_midi_cc.num = -1;
+		last_midi_note.num = -1;
+		last_midi_pc.num = -1;
 
 		midi_gate = false;
-		last_midi_note.changed = 0;
-		last_midi_pc.changed = false;
 	}
 };
 

@@ -302,7 +302,12 @@ USBH_StatusTypeDef USBH_SelectInterface(USBH_HandleTypeDef *phost, uint8_t inter
 {
   USBH_StatusTypeDef status = USBH_OK;
 
-  if (interface < phost->device.CfgDesc.bNumInterfaces)
+  /* "interface" is an index into Itf_Desc[], which holds one slot per parsed
+     interface descriptor including alternate settings, so valid indexes can
+     exceed bNumInterfaces (the device's count of distinct interfaces).
+     A parsed slot has a non-zero bLength; unused slots are zeroed. */
+  if ((interface < USBH_MAX_NUM_INTERFACES) &&
+      (phost->device.CfgDesc.Itf_Desc[interface].bLength != 0U))
   {
     phost->device.current_interface = interface;
     USBH_UsrLog("Switching to Interface (#%d)", interface);
@@ -705,42 +710,57 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
       {
         phost->pActiveClass = NULL;
 
-        for (idx = 0U; idx < USBH_MAX_NUM_SUPPORTED_CLASS; idx++)
+        /* Try each registered class in registration order. A class is a
+           candidate if some interface matches its ClassCode and SubClassCode
+           (0 = any subclass) and has endpoints. If a candidate's Init fails,
+           clean up and try the next registered class instead of aborting. */
+        for (idx = 0U; (idx < USBH_MAX_NUM_SUPPORTED_CLASS) && (phost->pActiveClass == NULL); idx++)
         {
+          uint8_t class_matches = 0U;
+
           if (phost->pClass[idx] == NULL)
           {
             continue;
           }
 
-          USBH_UsrLog("Looking for classcode 0x%x (%.16s)", phost->pClass[idx]->ClassCode, phost->pClass[idx]->Name);
-          for (unsigned itf = 0U; itf < phost->device.CfgDesc.bNumInterfaces; itf++)
+          USBH_UsrLog("Looking for classcode 0x%x sub-class 0x%x (%.16s)",
+                      phost->pClass[idx]->ClassCode, phost->pClass[idx]->SubClassCode, phost->pClass[idx]->Name);
+
+          /* Scan all parsed interface slots (alt settings get their own slots,
+             so there can be more slots than bNumInterfaces). Slots are filled
+             in order; the first zeroed slot marks the end. */
+          for (unsigned itf = 0U; itf < USBH_MAX_NUM_INTERFACES; itf++)
           {
-            USBH_InterfaceDescTypeDef *interface = &phost->device.CfgDesc.Itf_Desc[itf]; 
+            USBH_InterfaceDescTypeDef *interface = &phost->device.CfgDesc.Itf_Desc[itf];
+
+            if (interface->bLength == 0U)
+            {
+              break;
+            }
 
             // TODO: keep a user preference table of phost->device.DevDesc.idVendor, idDevice and which itf to choose
             // Double-check the chosen itf matches, otherwise fall back to picking the first one
             // Also report back to A7 all the matching itf found
 
-            if (phost->pClass[idx]->ClassCode == interface->bInterfaceClass)
+            if ((phost->pClass[idx]->ClassCode == interface->bInterfaceClass) &&
+                ((phost->pClass[idx]->SubClassCode == 0U) ||
+                 (phost->pClass[idx]->SubClassCode == interface->bInterfaceSubClass)))
             {
-              USBH_UsrLog("Found interface #%u with same classcode, and %u endpoints", itf, interface->bNumEndpoints);
-              if (interface->bNumEndpoints > 0)
+              USBH_UsrLog("Found matching interface #%u with %u endpoints", itf, interface->bNumEndpoints);
+              if (interface->bNumEndpoints > 0U)
               {
-                if (phost->pActiveClass == NULL)
-                  phost->pActiveClass = phost->pClass[idx];
-                  // break; // DEBUG: don't break on the first one found
-                else 
-                {
-                  USBH_UsrLog("Found multiple interfaces of classes we can host, with > 0 endpoints. Picked the first one");
-                  // phost->pActiveClass = phost->pClass[idx];
-                }
+                class_matches = 1U;
               }
             }
           }
-        }
 
-        if (phost->pActiveClass != NULL)
-        {
+          if (class_matches == 0U)
+          {
+            continue;
+          }
+
+          phost->pActiveClass = phost->pClass[idx];
+
           if (phost->pActiveClass->Init(phost) == USBH_OK)
           {
             phost->gState = HOST_CLASS_REQUEST;
@@ -751,14 +771,22 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
           }
           else
           {
-            phost->gState = HOST_ABORT_STATE;
-            USBH_UsrLog("Device not supporting %s class.", phost->pActiveClass->Name);
+            USBH_UsrLog("Device not supporting %s class, trying the next registered class.",
+                        phost->pActiveClass->Name);
+
+            /* Release anything a partial Init left behind (pipes, memory) */
+            if (phost->pActiveClass->DeInit != NULL)
+            {
+              (void)phost->pActiveClass->DeInit(phost);
+            }
+            phost->pActiveClass = NULL;
           }
         }
-        else
+
+        if (phost->pActiveClass == NULL)
         {
           phost->gState = HOST_ABORT_STATE;
-          USBH_UsrLog("No registered class for this device.");
+          USBH_UsrLog("No registered class supports this device.");
         }
       }
 
@@ -864,6 +892,19 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
 }
 
 
+/* Persist a string descriptor (already parsed to ASCII in device.Data) into a
+   bounded, null-terminated device field so the app can report it after
+   enumeration. dst must hold at least 64 bytes. */
+static void USBH_StoreDevString(uint8_t *dst, const uint8_t *src)
+{
+  uint16_t i = 0U;
+  for (; (i < 63U) && (src[i] != 0U); i++)
+  {
+    dst[i] = src[i];
+  }
+  dst[i] = 0U;
+}
+
 /**
   * @brief  USBH_HandleEnum
   *         This function includes the complete enumeration process
@@ -929,6 +970,11 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
       {
         USBH_UsrLog("PID: %xh", phost->device.DevDesc.idProduct);
         USBH_UsrLog("VID: %xh", phost->device.DevDesc.idVendor);
+
+        /* Start fresh: clear any strings left over from a previous device, so
+           a device without string descriptors reports empty (not stale). */
+        phost->device.Manufacturer[0] = 0U;
+        phost->device.Product[0] = 0U;
 
         phost->EnumState = ENUM_SET_ADDR;
       }
@@ -1074,6 +1120,7 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
         {
           /* User callback for Manufacturing string */
           USBH_UsrLog("Manufacturer : %s", (char *)(void *)phost->device.Data);
+          USBH_StoreDevString(phost->device.Manufacturer, phost->device.Data);
           phost->EnumState = ENUM_GET_PRODUCT_STRING_DESC;
 
 #if (USBH_USE_OS == 1U)
@@ -1130,6 +1177,7 @@ static USBH_StatusTypeDef USBH_HandleEnum(USBH_HandleTypeDef *phost)
         {
           /* User callback for Product string */
           USBH_UsrLog("Product : %s", (char *)(void *)phost->device.Data);
+          USBH_StoreDevString(phost->device.Product, phost->device.Data);
           phost->EnumState = ENUM_GET_SERIALNUM_STRING_DESC;
         }
         else if (ReqStatus == USBH_NOT_SUPPORTED)
@@ -1301,7 +1349,15 @@ uint8_t USBH_IsPortEnabled(USBH_HandleTypeDef *phost)
 USBH_StatusTypeDef USBH_LL_Connect(USBH_HandleTypeDef *phost)
 {
   phost->device.is_connected = 1U;
-  phost->device.is_disconnected = 0U;
+  /* 4ms: an unprocessed is_disconnected must NOT be cleared here. Some devices
+     (e.g. Inotech Grid) bounce D+ (disconnect + reconnect within ~10ms) right
+     after port enable, while USBH_Process is blocked in the 100ms
+     HOST_DEV_ATTACHED delay. USBH_LL_Disconnect has already stopped the HCD
+     and freed the control pipes; if the reconnect erases the flag, the state
+     machine continues into HOST_ENUMERATION and waits forever for a SETUP on a
+     disabled port. Leaving the flag set lets HOST_DEV_DISCONNECTED run its
+     cleanup, and since is_connected is set again, HOST_IDLE immediately
+     re-attaches with a fresh port reset. */
   phost->device.is_ReEnumerated = 0U;
 
 

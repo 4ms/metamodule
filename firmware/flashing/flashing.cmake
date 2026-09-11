@@ -92,3 +92,29 @@ add_custom_target(
   COMMAND openocd -f board/stm32mp15x_dk2.cfg
   VERBATIM USES_TERMINAL
 )
+
+add_custom_target(
+  attach
+  COMMENT "Attach gdb to the running target without flashing (openocd must be running)"
+  COMMAND ${CMAKE_GDB} --command=flashing/attach.gdb
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
+
+add_custom_target(
+  flash-openocd
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMENT "Reset, flash, and boot via openocd (launches openocd if not already running)"
+  COMMAND python3 flashing/flash-openocd.py ${MAIN_UIMG}
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
+
+add_custom_target(
+  flash-t32
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMENT "Reset, flash, and boot via TRACE32"
+  COMMAND python3 flashing/flash-t32.py
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)

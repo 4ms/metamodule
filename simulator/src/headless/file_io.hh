@@ -14,7 +14,10 @@ struct FileIO {
 			contents.resize(file_sz);
 			auto sz_read = host_fileio.read_file(filename, contents);
 			if (sz_read != file_sz) {
-				printf("Error: file %s is %llu bytes but %llu read\n", filename.data(), file_sz, sz_read);
+				printf("Error: file %s is %llu bytes but %llu read\n",
+					   filename.data(),
+					   (unsigned long long)file_sz,
+					   (unsigned long long)sz_read);
 			}
 		}
 

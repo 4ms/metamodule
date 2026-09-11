@@ -74,6 +74,7 @@ static uint32_t Sect_Device_RO;	 // device, non-shareable, non-executable, ro, d
 static uint32_t Sect_Device_RW;	 // as Sect_Device_RO, but writeable
 static uint32_t Sect_StronglyOrdered;
 static uint32_t Sect_Normal_NonCache;
+static uint32_t Sect_Normal_NonCache_Shared;
 
 static uint32_t Sect_NormalShared;
 
@@ -121,6 +122,9 @@ void MMU_CreateTranslationTable(void) {
 	section_normal(Sect_NormalShared, region);
 	MMU_SharedSection(&Sect_NormalShared, SHARED);
 
+	section_normal_nc(Sect_Normal_NonCache_Shared, region);
+	MMU_SharedSection(&Sect_Normal_NonCache_Shared, SHARED);
+
 	create_aligned_section(TTB_BASE, A7_CODE, A7_CODE_SZ, Sect_Normal);
 
 	create_aligned_section(TTB_BASE, A7_RAM, A7_RAM_SZ, Sect_Normal_RW);
@@ -152,8 +156,11 @@ void MMU_CreateTranslationTable(void) {
 	// M4 vector table (RETRAM: 0x38000000, or 0x00000000 as seen by M4)
 	create_aligned_section(TTB_BASE, M4_VECT_A7, M4_VECT_SZ, Sect_Device_RW); // 1MB (actually is only 64kB)
 
-	//.sysram
-	create_aligned_section(TTB_BASE, A7_SYSRAM_BASE, A7_SYSRAM_SZ, Sect_StronglyOrdered);
+	// .sysram
+	// Use Normal mem so we don't fight aligment issues. Measured same speed with audio loop params copy as StronglyOrdered
+	// Must be Shareable: both A7 cores hand off through here (SMPControl::regs lives in .noncachable),
+	// and the DMB ISH that the C++ atomics emit only covers the inner shareable domain.
+	create_aligned_section(TTB_BASE, A7_SYSRAM_BASE, A7_SYSRAM_SZ, Sect_Normal_NonCache_Shared);
 
 	// Peripheral memory
 	// For better security: be more specific and use 4k tables to cover only actual peripherals, as in example file in

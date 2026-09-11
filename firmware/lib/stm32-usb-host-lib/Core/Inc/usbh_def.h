@@ -443,6 +443,11 @@ typedef struct
   uint8_t                           current_interface;
   USBH_DevDescTypeDef               DevDesc;
   USBH_CfgDescTypeDef               CfgDesc;
+  /* Human-readable strings captured during enumeration (ASCII, null-terminated).
+     The standard stack reads these into the transient Data buffer and only logs
+     them; we persist them here so the app can report the attached device. */
+  uint8_t                           Manufacturer[64];
+  uint8_t                           Product[64];
 } USBH_DeviceTypeDef;
 
 struct _USBH_HandleTypeDef;
@@ -458,6 +463,11 @@ typedef struct
   USBH_StatusTypeDef(*BgndProcess)(struct _USBH_HandleTypeDef *phost);
   USBH_StatusTypeDef(*SOFProcess)(struct _USBH_HandleTypeDef *phost);
   void                *pData;
+  /* Interface subclass this class requires when scanning a device's interfaces.
+     0 = any subclass matches (only ClassCode is checked). Lets a class whose
+     ClassCode is shared across functions (e.g. MIDI = audio class 1, subclass 3)
+     avoid claiming devices it can't actually drive. */
+  uint8_t              SubClassCode;
 } USBH_ClassTypeDef;
 
 /* USB Host handle structure */

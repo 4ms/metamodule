@@ -1,5 +1,6 @@
 #pragma once
 #include "core_a7/smp_api.hh"
+#include "drivers/cycle_counter.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/smp.hh"
 #include "gui/ui.hh"
@@ -16,6 +17,8 @@ struct AuxPlayer {
 	Ui &ui;
 
 	FixedVector<unsigned, 64> module_ids;
+
+	mdrivlib::CycleCounter module_time;
 
 	// MIDI sync instance
 	MidiSync midi_sync;
@@ -39,17 +42,41 @@ struct AuxPlayer {
 	}
 
 	void play_modules() {
-		for (auto module_i : module_ids) {
-			patch_player.step_module(module_i);
+		if (patch_player.live_load.detailed()) {
+			// Chained per-module timing: one counter read marks both the end of
+			// one module and the start of the next
+			uint32_t total_ticks = 0;
+			module_time.start_measurement();
+			for (auto module_i : module_ids) {
+				patch_player.step_module(module_i);
+
+				module_time.start_measurement();
+				auto ticks = module_time.get_last_period_raw();
+				patch_player.live_load.tally_module(module_i, ticks);
+				total_ticks += ticks;
+			}
+			patch_player.live_load.tally_core2_modules(total_ticks);
+
+		} else {
+			module_time.start_simple_measurement();
+			for (auto module_i : module_ids) {
+				patch_player.step_module(module_i);
+			}
+			patch_player.live_load.tally_core2_modules(module_time.stop_simple_measurement());
 		}
 
+		module_time.start_simple_measurement();
 		patch_player.process_outputs_samecore<1>();
+		patch_player.live_load.tally_core2_cables(module_time.stop_simple_measurement());
+
 		mdrivlib::SMPThread::signal_done();
 	}
 
 	void process_cables() {
+		module_time.start_simple_measurement();
 		patch_player.process_outputs_diffcore<1>();
 		patch_player.process_summed_inputs<1>();
+		patch_player.live_load.tally_core2_cables(module_time.stop_simple_measurement());
 
 		mdrivlib::SMPThread::signal_done();
 	}

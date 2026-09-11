@@ -88,12 +88,17 @@ public:
 
 	void init() {
 		SpiDmaDataCmdDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
-		reset();
-		using InitCommands =
-			mdrivlib::ST77XX::ST7789Init<ScreenWriterConfT::width,
-										 ScreenWriterConfT::height,
-										 ScreenWriterConfT::IsInverted ? ST77XX::Inverted : ST77XX::NotInverted>;
-		init_display_driver(InitCommands::cmds);
+		if (!consume_stub_splash_flag()) {
+			reset();
+			using InitCommands =
+				mdrivlib::ST77XX::ST7789Init<ScreenWriterConfT::width,
+											 ScreenWriterConfT::height,
+											 ScreenWriterConfT::IsInverted ? ST77XX::Inverted : ST77XX::NotInverted>;
+			init_display_driver(InitCommands::cmds);
+		}
+		// In the skipped path the panel is already reset+inited by the boot stub
+		// and shows the logo; set_rotation just (re)asserts MADCTL and geometry,
+		// which does not blank the panel, so the logo persists until the first flush.
 		set_rotation(ScreenWriterConfT::rotation);
 
 		////TESTS:
@@ -159,9 +164,7 @@ public:
 					mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
 					mem_xfer.register_callback([&]() {
 						config_dma_transfer(dst_addr, HalfFrameSize);
-						start_dma_transfer([&]() {
-							HWSemaphore<ScreenFrameWriteLock>::unlock();
-						});
+						start_dma_transfer([&]() { HWSemaphore<ScreenFrameWriteLock>::unlock(); });
 					});
 					mem_xfer.start_transfer();
 				});
@@ -212,6 +215,21 @@ public:
 		HAL_Delay(10);
 		reset_pin.high();
 		HAL_Delay(120);
+	}
+
+	// Self-extracting splash screen sets the TAMP->BKP7R if it ran,
+	// so in that case we can skip init()
+	static bool consume_stub_splash_flag() {
+		constexpr uint32_t FlagAddr = 0x5C00A11C; // TAMP->BKP7R
+		constexpr uint32_t Magic = 0x53504C31;	  // "SPL1"
+		auto *flag = reinterpret_cast<volatile uint32_t *>(FlagAddr);
+		if (*flag != Magic)
+			return false;
+		// Consume it, so a later re-init or a non-stub boot does a full reset.
+		// The stub left the backup domain unlocked; assert DBP again to be safe.
+		*reinterpret_cast<volatile uint32_t *>(0x50001000) |= (1u << 8); // PWR_CR1.DBP
+		*flag = 0;
+		return true;
 	}
 
 protected:

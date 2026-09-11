@@ -63,7 +63,13 @@ int main() {
 		&StaticBuffers::console_a7_0_buff,
 		&StaticBuffers::console_a7_1_buff,
 		&StaticBuffers::console_m4_buff,
+		StaticBuffers::uvc_shadow_framebuffer.data(),
+		&StaticBuffers::icc_device_settings_message,
+		&StaticBuffers::usb_connection_status,
+		&StaticBuffers::dev_drive_block,
 	};
+
+	StaticBuffers::dev_drive_block.reset();
 
 	A7SharedMemoryS::ptrs = {
 		&patch_player,
@@ -96,11 +102,9 @@ int main() {
 	pr_info("A7 Core 1 initialized\n");
 	// Note: from after the HAL_Delay(50) until here, it takes 20ms
 
-#ifdef CONSOLE_USE_USB
-	printf("Stopping UART buffer\n");
-	UartLog::use_usb(&StaticBuffers::console_a7_0_buff);
-	printf("Using USB buffer\n");
-#endif
+	// From here on, this core's printf() is buffered and drained asynchronously
+	// by the M4 (to the console UART, or to USB CDC when a console host connects)
+	UartLog::use_buffer(&StaticBuffers::console_a7_0_buff);
 
 	mdrivlib::HWSemaphore<RunningPatchTests>::lock();
 

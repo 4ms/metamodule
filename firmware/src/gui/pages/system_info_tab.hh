@@ -7,11 +7,16 @@
 #include "ld.h"
 #include "metaparams.hh"
 #include "params/expanders.hh"
+#include "params/midi_params.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "usb/usb_status_reader.hh"
 #include "wifi/detection.hh"
 #include <cmath>
+#include <cstdio>
 
 #if !defined(SIMULATOR)
+#include "core_a7/m4_stack_usage.hh"
+#include "memory/plugin_arena.hh"
 #include <malloc.h>
 #endif
 
@@ -25,6 +30,112 @@ struct InfoTab : SystemMenuTab {
 		, metaparams{metaparams} {
 		lv_label_set_text(ui_SystemMenuExpanders, "No Wi-Fi module found");
 		lv_show(ui_SystemMenuExpanders);
+
+		// The generated UI has no USB-status label, so create one in the main
+		// module container (under the firmware/RAM line), matching that font.
+		usb_label = lv_label_create(ui_SystemMenuMainModuleCont);
+		lv_obj_set_width(usb_label, lv_pct(100));
+		lv_obj_set_height(usb_label, LV_SIZE_CONTENT);
+		lv_label_set_long_mode(usb_label, LV_LABEL_LONG_WRAP);
+		lv_obj_set_style_text_font(usb_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+		// Secondary line: attached device details (host mode), smaller font.
+		usb_detail_label = lv_label_create(ui_SystemMenuMainModuleCont);
+		lv_obj_set_width(usb_detail_label, lv_pct(100));
+		lv_obj_set_height(usb_detail_label, LV_SIZE_CONTENT);
+		lv_label_set_long_mode(usb_detail_label, LV_LABEL_LONG_WRAP);
+		lv_obj_set_style_text_font(usb_detail_label, &ui_font_MuseoSansRounded50012, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_hide(usb_detail_label);
+
+		// The generated UI has no MIDI-expander label either, so create one in
+		// the expanders container, matching the MetaButtons line above it.
+		midi_exp_label = lv_label_create(ui_SystemMenuExpandersCont);
+		lv_obj_set_width(midi_exp_label, lv_pct(100));
+		lv_obj_set_height(midi_exp_label, LV_SIZE_CONTENT);
+		lv_label_set_long_mode(midi_exp_label, LV_LABEL_LONG_WRAP);
+		lv_obj_set_style_text_font(midi_exp_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+		update_usb_status();
+	}
+
+	static const char *usb_connection_text(UsbConnection c) {
+		switch (c) {
+			case UsbConnection::None:
+				return "USB: Not connected";
+			case UsbConnection::HostSearching:
+				return "USB Host mode, searching for a device";
+			case UsbConnection::HostMidiDevice:
+				return "MIDI Host mode, connected to a MIDI device";
+			case UsbConnection::HostUsbDrive:
+				return "USB Host mode, connected to a USB drive";
+			case UsbConnection::DeviceWaiting:
+				return "USB Device mode, waiting for a host";
+			case UsbConnection::DeviceMidiHost:
+				return "MIDI Device mode, connected to a host";
+			case UsbConnection::DeviceVideoHost:
+				return "Video Device mode, connected to a host";
+			case UsbConnection::DeviceConsoleHost:
+				return "Console Device mode, connected to a host";
+			case UsbConnection::DeviceModePeripheralIgnored:
+				return "USB Device Only mode: the attached device is ignored.\nSet USB Mode to Auto or Host to use it";
+		}
+		return "USB: Not connected";
+	}
+
+	void update_usb_status() {
+		if (usb_label)
+			lv_label_set_text(usb_label, usb_connection_text(metaparams.usb_connection));
+
+		if (!usb_detail_label)
+			return;
+
+		// Attached-device details (populated only in host mode). If there's
+		// nothing to show (device mode / idle), hide the secondary line. We want
+		// status and the jack table together, so take one full-state snapshot.
+		auto st = get_usb_device_state_snapshot();
+		auto const &s = st.status;
+		auto const &n = st.device_name;
+		bool has_strings = n.manufacturer.length() > 0 || n.product.length() > 0;
+		if (s.vid == 0 && !has_strings) {
+			lv_hide(usb_detail_label);
+			return;
+		}
+
+		std::string d;
+		if (has_strings) {
+			d += n.manufacturer.c_str();
+			if (n.manufacturer.length() > 0 && n.product.length() > 0)
+				d += " ";
+			d += n.product.c_str();
+			d += "\n";
+		}
+
+		char buf[40];
+		std::snprintf(buf, sizeof(buf), "VID:0x%04X  PID:0x%04X", s.vid, s.pid);
+		d += buf;
+
+		if (s.num_midi_in_jacks > 0 || s.num_midi_out_jacks > 0) {
+			std::snprintf(
+				buf, sizeof(buf), "\n%u MIDI in / %u MIDI out jacks", s.num_midi_in_jacks, s.num_midi_out_jacks);
+			d += buf;
+
+			// List the named jacks (one per line). Only the first MaxMidiJacks per
+			// direction have info; unnamed jacks are skipped.
+			auto append_jack_names = [&d](const char *dir, auto const &jacks, unsigned count) {
+				for (unsigned i = 0; i < count && i < System::MaxMidiJacks; i++) {
+					if (jacks[i].name.length() > 0) {
+						d += "\n  ";
+						d += dir;
+						d += jacks[i].name.c_str();
+					}
+				}
+			};
+			append_jack_names("In: ", st.midi_in_jacks, s.num_midi_in_jacks);
+			append_jack_names("Out: ", st.midi_out_jacks, s.num_midi_out_jacks);
+		}
+
+		lv_label_set_text(usb_detail_label, d.c_str());
+		lv_show(usb_detail_label);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -34,13 +145,17 @@ struct InfoTab : SystemMenuTab {
 		if (fw_version.starts_with("firmware-"))
 			fw_version.remove_prefix(9);
 
-		int memory_percent_used = 0;
-		size_t memory_used = 1;
-		unsigned memory_total = A7_HEAP_SZ / (1024 * 1024);
+		const unsigned memory_total = std::round(A7_HEAP_SZ / (1024 * 1024));
+		unsigned memory_used = 1;
+		unsigned arena_used = 0;
+		unsigned arena_claimed = 0;
+		unsigned total_mem_used = 0;
+		unsigned total_percent_used = 0;
 
 #if !defined(SIMULATOR)
+
 		struct mallinfo mi = mallinfo();
-		pr_info("HEAP_SZ  %zu (total amount linker reserved for A7 heap)\n", A7_HEAP_SZ);
+		pr_info("HEAP_SZ  %zu (linker reserved for A7 heap, shared by firmware heap and plugin arena)\n", A7_HEAP_SZ);
 		pr_info("arena    %zu (total space allocated so far via sbrk)\n", mi.arena);
 		pr_info("ordblks  %zu (number of non-inuse chunks)\n", mi.ordblks);
 		pr_info("hblks    %zu (number of mmapped regions)\n", mi.hblks);
@@ -48,46 +163,38 @@ struct InfoTab : SystemMenuTab {
 		pr_info("uordblks %zu (total allocated space)\n", mi.uordblks);
 		pr_info("fordblks %zu (total non-inuse space)\n", mi.fordblks);
 		pr_info("keepcost %zu (top-most, releasable via malloc_trim space)\n", mi.keepcost);
+		pr_info("plugin arena: used %zu of %zu claimed, peak %zu\n",
+				PluginArena::used_bytes(),
+				PluginArena::claimed_bytes(),
+				PluginArena::peak_bytes());
 
-		memory_percent_used = (int)std::round(100.f * (float)mi.uordblks / (float)A7_HEAP_SZ);
-		memory_used = mi.uordblks / (1024 * 1024);
+		auto m4_stack = m4_stack_usage();
+		pr_info("M4 stack: %u bytes unused (high-water %u of %u)\n", m4_stack.unused, m4_stack.used, m4_stack.total);
+
+		memory_used = std::round(mi.uordblks / (1024 * 1024));
+
+		arena_used = std::round(PluginArena::used_bytes() / (1024 * 1024));
+		arena_claimed = std::round(PluginArena::claimed_bytes() / (1024 * 1024));
+
+		total_mem_used = (mi.uordblks + PluginArena::used_bytes()) / (1024 * 1024);
+		total_percent_used = std::round(100.f * (mi.uordblks + PluginArena::used_bytes()) / A7_HEAP_SZ);
 #endif
 
 		lv_label_set_text_fmt(ui_SystemMenuFWversion,
-							  "Firmware: %s\nRAM: %d%% (%zu/%u MB)",
+							  "Firmware: %s\n\nRAM: %d%% (%u/%u MB)\n  Main: %u MB\n  Plugins: %u MB (claimed %u MB)",
 							  fw_version.data(),
-							  memory_percent_used,
+							  total_percent_used,
+							  total_mem_used,
+							  memory_total,
 							  memory_used,
-							  memory_total);
+							  arena_used,
+							  arena_claimed);
 
 		lv_show(ui_SystemMenuExpanders);
 
-		if (Expanders::get_connected().ext_audio_connected) {
-			lv_label_set_text(ui_SystemMenuAudioExpanders, "MetaAIO connected");
-		} else {
-			lv_label_set_text(ui_SystemMenuAudioExpanders, "MetaAIO not found");
-		}
-		lv_show(ui_SystemMenuAudioExpanders);
+		update_expanders(ForceRedraw);
 
-		if (metaparams.button_exp_connected != 0) {
-			std::string s;
-			s = "MetaButtons found: ";
-			if (metaparams.button_exp_connected & 0b0001)
-				s += "#1, ";
-			if (metaparams.button_exp_connected & 0b0010)
-				s += "#2, ";
-			if (metaparams.button_exp_connected & 0b0100)
-				s += "#3, ";
-			if (metaparams.button_exp_connected & 0b1000)
-				s += "#4";
-			if (s.ends_with(", "))
-				s = s.substr(0, s.length() - 2);
-
-			lv_label_set_text(ui_SystemMenuButExpander, s.c_str());
-		} else {
-			lv_label_set_text(ui_SystemMenuButExpander, "No MetaButtons found");
-		}
-		lv_show(ui_SystemMenuButExpander);
+		update_usb_status();
 
 		detect_wifi.start();
 		detect_wifi.new_wifi_status_available(lv_tick_get());
@@ -119,7 +226,49 @@ struct InfoTab : SystemMenuTab {
 	}
 
 	void update() override {
+		update_usb_status();
+		update_expanders();
 		update_wifi_expander();
+	}
+
+	void update_expanders(bool force = false) {
+		const bool audio = Expanders::get_connected().ext_audio_connected;
+		const auto buttons = metaparams.button_exp_connected;
+		const auto midi_ports = metaparams.midi_ports_connected;
+
+		if (!force && audio == last_audio_exp && buttons == last_button_exp && midi_ports == last_midi_ports)
+			return;
+
+		last_audio_exp = audio;
+		last_button_exp = buttons;
+		last_midi_ports = midi_ports;
+
+		lv_label_set_text(ui_SystemMenuAudioExpanders, audio ? "MetaAIO connected" : "MetaAIO not found");
+		lv_show(ui_SystemMenuAudioExpanders);
+
+		if (buttons != 0) {
+			std::string s;
+			s = "MetaButtons found: ";
+			if (buttons & 0b0001)
+				s += "#1, ";
+			if (buttons & 0b0010)
+				s += "#2, ";
+			if (buttons & 0b0100)
+				s += "#3, ";
+			if (buttons & 0b1000)
+				s += "#4";
+			if (s.ends_with(", "))
+				s = s.substr(0, s.length() - 2);
+
+			lv_label_set_text(ui_SystemMenuButExpander, s.c_str());
+		} else {
+			lv_label_set_text(ui_SystemMenuButExpander, "No MetaButtons found");
+		}
+		lv_show(ui_SystemMenuButExpander);
+
+		const bool midi_exp = (midi_ports & ~(1 << Midi::Event::USB)) != 0;
+		lv_label_set_text(midi_exp_label, midi_exp ? "MetaMIDI connected" : "No MetaMIDI found");
+		lv_show(midi_exp_label);
 	}
 
 	bool is_idle() override {
@@ -169,5 +318,13 @@ private:
 	lv_group_t *group = nullptr;
 	WifiInterface::DetectExpander detect_wifi;
 	MetaParams const &metaparams;
+	lv_obj_t *usb_label = nullptr;
+	lv_obj_t *usb_detail_label = nullptr;
+	lv_obj_t *midi_exp_label = nullptr;
+
+	static constexpr bool ForceRedraw = true;
+	bool last_audio_exp = false;
+	uint32_t last_button_exp = 0xFFFF'FFFF;
+	uint8_t last_midi_ports = 0xFF;
 };
 } // namespace MetaModule

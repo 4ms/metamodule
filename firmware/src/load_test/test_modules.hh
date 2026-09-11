@@ -3,6 +3,7 @@
 #include "delay.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "memory/plugin_arena.hh"
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 #include "memory_tester.hh"
 #endif
@@ -101,6 +102,16 @@ inline void test_brand(std::string_view brand, PatchPlayer &player, auto append_
 			send_heartbeat();
 
 			i++;
+		}
+
+		// Catch modules that corrupt the plugin arena (e.g. writing past the
+		// end of a heap block, which stamps the neighboring TLSF header):
+		// verify every allocator invariant while the damage is still
+		// attributable to this module
+		if (auto errors = PluginArena::check(); errors != 0) {
+			pr_err(
+				"*** ARENA CORRUPTED after testing %s: %d failed integrity checks ***\n", entry.slug.c_str(), errors);
+			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "ARENA CORRUPT: %s", entry.slug.c_str());
 		}
 
 #ifndef SIMULATOR

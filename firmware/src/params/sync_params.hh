@@ -52,27 +52,31 @@ public:
 			if (auto event = midi_events.get(); event.has_value()) {
 				auto e = event.value();
 				if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs) {
-					params.midi_ccs[e.note].changed = 1;
-					params.midi_ccs[e.note].val = e.midi_chan;
-					// e.val is 14-bit from the M4 core; the GUI/knobset-control consumers
-					// of this 8-bit field expect the coarse 7-bit value, so shift back down.
-					params.midi_ccs[e.note].value = e.val >> 7;
+					params.last_midi_cc.num = e.note;
+					params.last_midi_cc.channel = e.midi_chan;
+					params.last_midi_cc.port = e.port;
+					// e.val is 14-bit from the M4 core. GUI/knobset-control consumers
+					// of this expect the coarse 7-bit value, so shift back down
+					params.last_midi_cc.value = e.val >> 7;
 				}
 				if (e.type == Midi::Event::Type::PC) {
-					params.last_midi_pc.changed = true;
+					params.last_midi_pc.num = static_cast<uint8_t>(e.val);
+					params.last_midi_pc.value = -1;
 					params.last_midi_pc.channel = e.midi_chan;
-					params.last_midi_pc.pc = static_cast<uint8_t>(e.val);
+					params.last_midi_pc.port = e.port;
 				}
 				if (e.type == Midi::Event::Type::NoteOn && e.note < NumMidiNotes) {
-					params.last_midi_note.changed = 1;
-					params.last_midi_note.val = e.note;
-					params.last_midi_note_channel = e.midi_chan;
+					params.last_midi_note.num = e.note;
+					params.last_midi_note.value = static_cast<int8_t>(e.val); //velocity
+					params.last_midi_note.channel = e.midi_chan;
+					params.last_midi_note.port = e.port;
 					params.midi_gate = true;
 				}
 				if (e.type == Midi::Event::Type::NoteOff && e.note < NumMidiNotes) {
-					params.last_midi_note.changed = 1;
-					params.last_midi_note.val = e.note;
-					params.last_midi_note_channel = e.midi_chan;
+					params.last_midi_note.num = e.note;
+					params.last_midi_note.value = 0;
+					params.last_midi_note.channel = e.midi_chan;
+					params.last_midi_note.port = e.port;
 					params.midi_gate = false;
 				}
 			} else

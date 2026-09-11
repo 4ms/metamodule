@@ -245,7 +245,8 @@ void Module::onRandomize(const RandomizeEvent &e) {
 }
 
 bool Module::isBypassed() {
-	return false;
+	// CoreProcessor::bypassed is maintained by the MetaModule engine
+	return bypassed;
 }
 
 void Module::show_graphic_display(int display_id, std::span<uint32_t> pix_buffer, unsigned width, lv_obj_t *canvas) {

@@ -13,6 +13,10 @@ static CoreProcessorPoly *get_coreprocpoly_plugin_module(std::unique_ptr<CorePro
 	return dynamic_cast<CoreProcessorPoly *>(module.get());
 }
 
+rack::engine::Module *as_rack_module(CoreProcessor *module) {
+	return dynamic_cast<rack::engine::Module *>(module);
+}
+
 void plugin_module_init(std::unique_ptr<CoreProcessor> &module) {
 	if (auto rack_module = get_rack_plugin_module(module)) {
 		rack::engine::Module::AddEvent a{};

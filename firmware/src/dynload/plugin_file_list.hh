@@ -8,6 +8,7 @@ namespace MetaModule
 {
 
 static constexpr std::string_view PluginDirName{"metamodule-plugins"};
+static constexpr std::string_view PluginUserDirName{"user-plugins"};
 
 struct PluginFile {
 	// No dynamic memory allowed because this is shared between M4 and A7

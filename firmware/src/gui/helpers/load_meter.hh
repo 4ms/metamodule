@@ -14,7 +14,7 @@ inline void update_audio_meter(bool is_patch_playloaded,
 							   ModuleDisplaySettings const &settings,
 							   lv_obj_t *meter) {
 
-	auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
+	auto [cur_sr, cur_bs, _mr, _ar] = patch_playloader.get_audio_settings();
 
 	if (metaparams.audio_load > 0 && is_patch_playloaded && !patch_playloader.is_audio_muted()) {
 		// Playing: show load regardless of other settings

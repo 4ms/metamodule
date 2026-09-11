@@ -65,7 +65,7 @@ static std::string get_mapped_color(Element const &element, uint16_t panel_id) {
 		element);
 }
 
-void append_panel_name(std::string &opts, Element const &el, uint16_t mapped_panel_id) {
+void append_panel_name(std::string &opts, Element const &el, uint32_t mapped_panel_id) {
 	const auto name = std::visit([=](auto &e) { return get_panel_name(e, mapped_panel_id); }, el);
 	if (name.size() < 0)
 		return;

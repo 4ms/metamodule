@@ -21,7 +21,7 @@ struct SystemMenuPage : PageBase {
 		: PageBase{info, PageId::SystemMenu}
 		, info_tab{patch_storage, info.metaparams}
 		, plugin_tab{info.plugin_manager, info.settings.plugin_preload, info.notify_queue, gui_state, patch_playloader}
-		, prefs_tab{info.patch_playloader, info.settings, gui_state}
+		, prefs_tab{info.patch_playloader, info.settings, gui_state, info.notify_queue}
 		, system_tab{patch_storage,
 					 params,
 					 metaparams,

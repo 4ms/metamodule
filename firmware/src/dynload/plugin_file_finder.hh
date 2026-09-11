@@ -39,12 +39,14 @@ private:
 		bool usb_ok = false;
 		if (usbdrive_.is_mounted()) {
 			usb_ok = scan_volume(usbdrive_, *message.plugin_file_list, PluginDirName);
+			usb_ok = scan_volume(usbdrive_, *message.plugin_file_list, PluginUserDirName);
 			usb_ok |= scan_volume(usbdrive_, *message.plugin_file_list, "/");
 		}
 
 		bool sd_ok = false;
 		if (sdcard_.is_mounted()) {
 			sd_ok = scan_volume(sdcard_, *message.plugin_file_list, PluginDirName);
+			sd_ok = scan_volume(sdcard_, *message.plugin_file_list, PluginUserDirName);
 			sd_ok |= scan_volume(sdcard_, *message.plugin_file_list, "/");
 		}
 

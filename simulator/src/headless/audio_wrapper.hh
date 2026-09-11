@@ -1,5 +1,6 @@
 #pragma once
 #include "patch_play/patch_player.hh"
+#include "util/countzip.hh"
 #include "stream_conf.hh"
 
 namespace MetaModule::Headless

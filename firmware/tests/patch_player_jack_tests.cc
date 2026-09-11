@@ -4,6 +4,8 @@
 #include "patch_play/patch_player.hh"
 #include "stubs/test_module.hh"
 
+using MidiMessage = MetaModule::MidiMessage;
+
 // Register TestModule so patches can use slug "TestModule"
 namespace
 {
@@ -2967,4 +2969,137 @@ TEST_CASE("MIDI parser: notes on multiple MIDI channels don't steal from other c
 
 	CHECK(parser.parse(MidiMessage{0x8a, 60, 100}).poly_chan == 0); // chan 10 voice 0 Off
 	CHECK(parser.parse(MidiMessage{0x8b, 60, 100}).poly_chan == 0); // chan 10 voice 0 Off
+}
+
+// ============================================================================
+// patch_uses_midi(): tells the audio stream whether MIDI must run every sample
+// ============================================================================
+
+namespace
+{
+// clang-format off
+std::string make_patch_yml(std::string_view name, std::string_view mapped_ins) {
+	return std::string{R"(
+PatchData:
+  patch_name: )"} + std::string{name} + R"(
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+  int_cables:
+  mapped_ins:
+)" + std::string{mapped_ins} + R"(  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)";
+}
+// clang-format on
+} // namespace
+
+TEST_CASE("patch_uses_midi() is false for a patch with no MIDI cables or maps") {
+	// Panel In 0 -> Module In 0
+	auto patchyml = make_patch_yml("no_midi", R"(    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+)");
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	CHECK(player.patch_uses_midi() == false);
+}
+
+TEST_CASE("patch_uses_midi() is true for a patch with a MIDI cable") {
+	// MIDI Note Pitch (256) -> Module In 0
+	auto patchyml = make_patch_yml("midi_cable", R"(    - panel_jack_id: 256
+      ins:
+        - module_id: 1
+          jack_id: 0
+)");
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	CHECK(player.patch_uses_midi() == true);
+}
+
+TEST_CASE("patch_uses_midi() follows MIDI param maps added and removed while playing") {
+	auto patchyml = make_patch_yml("midi_learn", R"(    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+)");
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	CHECK(player.patch_uses_midi() == false);
+
+	MappedKnob map{.panel_knob_id = MidiCC0 + 3, .module_id = 1, .param_id = 0, .min = 0.f, .max = 1.f};
+
+	player.add_midi_mapped_knob(map);
+	CHECK(player.patch_uses_midi() == true);
+
+	player.remove_mapped_knob(MetaModule::PatchData::MIDIKnobSet, map);
+	CHECK(player.patch_uses_midi() == false);
+}
+
+TEST_CASE("patch_uses_midi() is true for a patch whose only MIDI use is a pitch-wheel param map") {
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: midi_map_only
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+  int_cables:
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+    name: 'MIDI'
+    set:
+      - panel_knob_id: 640
+        module_id: 1
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	REQUIRE(pd.midi_maps.set.size() == 1);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	CHECK(player.patch_uses_midi() == true);
 }

@@ -30,13 +30,13 @@ public:
 	void unload_plugin(std::string_view name) {
 		for (unsigned i = 0; auto const &plugin : loaded_plugin_list) {
 			if (plugin.fileinfo.plugin_name == name) {
-				// Unregister the brand *first*, while the plugin code is still loaded.
+				// Unregister the brand first, while the plugin code is still loaded.
 				// This destroys each module's CreateModuleFunc std::function, whose
 				// type-erasure manager (for a plugin's lambda) lives in the plugin's
 				// code. If we did this after erasing/poisoning the code, that manager
 				// call would jump into freed/poisoned memory (an 0xEAFFFFFE "bl ." spin)
 				// and hang -- which is native-plugin-only, since VCV plugins tear down
-				// their create-funcs earlier in ~Plugin. See commit 167e30f74.
+				// their create-funcs earlier in ~Plugin.
 				// (For VCV plugins ~Plugin's per-module unregister then finds the brand
 				// already gone and logs a harmless "failed to remove module" warning.)
 				if (ModuleFactory::unregisterBrand(name) > 0)
@@ -74,6 +74,39 @@ public:
 			i++;
 		}
 		ramdisk.debug_print_disk_info();
+	}
+
+	// Strip suffix ".mmplugin" and version "-vX.X.X" from filename
+	static std::string_view plugin_name_of(std::string_view filename) {
+		if (filename.ends_with(".mmplugin"))
+			filename.remove_suffix(9);
+
+		for (auto v = filename.find("-v"); v != std::string_view::npos; v = filename.find("-v", v + 2)) {
+			if (v + 2 < filename.size() && isdigit(filename[v + 2]))
+				return filename.substr(0, v);
+		}
+
+		return filename;
+	}
+
+	bool is_plugin_loaded(std::string_view name) {
+		for (auto const &plugin : loaded_plugin_list) {
+			if (std::string_view{plugin.fileinfo.plugin_name} == name)
+				return true;
+		}
+		return false;
+	}
+
+	// Install a plugin file from a volume the A7 can read itself (the developer
+	// drive). An already-loaded copy must be unloaded by the caller first --
+	// see DevDriveService, which runs the same sequence as the Plugin tab.
+	bool start_local_install(FatFileIO &fileio, std::string_view filename) {
+		if (plugin_file_loader.is_idle()) {
+			return plugin_file_loader.load_local_plugin(fileio, filename);
+		} else {
+			pr_err("Plugin File Loader busy, cannot install %.*s now\n", (int)filename.size(), filename.data());
+			return false;
+		}
 	}
 
 	auto process_loading() {

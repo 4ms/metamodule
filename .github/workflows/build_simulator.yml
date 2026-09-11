@@ -23,6 +23,16 @@ on:
         required: true
         default: true
         type: boolean
+      lin_gcc_headless:
+        description: 'Build Headless Simulator on Linux gcc'
+        required: true
+        default: true
+        type: boolean
+      lin_gcc_nomidi:
+        description: 'Build Simulator without MIDI on Linux gcc'
+        required: true
+        default: true
+        type: boolean
   push:
     branches:
       - main
@@ -151,8 +161,56 @@ jobs:
           cmake -G Ninja -B build
           cmake --build build
 
+  build-lin-gcc-headless:
+    if: ${{ github.event_name == 'push' || inputs.lin_gcc_headless }}
+    name: linux-gcc-headless
+    strategy:
+      fail-fast: false
+    runs-on: 'ubuntu-24.04'
+    defaults:
+      run:
+        shell: 'bash {0}'
+    env:
+      CC: gcc
+      CXX: g++
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+      - name: Install linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build libsdl2-dev
+      - name: 'Build'
+        run: |
+          cd simulator
+          cmake --preset headless
+          cmake --build build-headless
 
-
-
-
-
+  build-lin-gcc-nomidi:
+    if: ${{ github.event_name == 'push' || inputs.lin_gcc_nomidi }}
+    name: linux-gcc-no-midi
+    strategy:
+      fail-fast: false
+    runs-on: 'ubuntu-24.04'
+    defaults:
+      run:
+        shell: 'bash {0}'
+    env:
+      CC: gcc
+      CXX: g++
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+      - name: Install linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build libsdl2-dev
+      - name: 'Build'
+        run: |
+          cd simulator
+          cmake -G Ninja -B build-nomidi -DSIMULATOR_MIDI=OFF
+          cmake --build build-nomidi

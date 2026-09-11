@@ -23,6 +23,11 @@ public:
 		return header->sh_offset;
 	}
 
+	// Link-time virtual address (relative to the load base for our plugins)
+	uint32_t address() {
+		return header->sh_addr;
+	}
+
 	uint32_t size_bytes() {
 		return header->sh_size;
 	}
@@ -104,6 +109,10 @@ public:
 
 	uintptr_t address() const {
 		return header->p_vaddr;
+	}
+
+	uint32_t align() const {
+		return header->p_align;
 	}
 
 	uint8_t const *begin() {

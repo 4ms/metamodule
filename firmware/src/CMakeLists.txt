@@ -2,7 +2,6 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
 option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and preloaded plugins)" ON)
-option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
 option(SUPPRESS_HIL_MESSAGES    "Suppress HIL messages" OFF)
 
 
@@ -111,6 +110,12 @@ add_executable(
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/sbrk.cc
+  ${FWDIR}/system/cxx_terminate.cc
+  ${FWDIR}/system/abort_rescue.cc
+  ${FWDIR}/src/memory/plugin_arena.cc
+  ${FWDIR}/src/memory/plugin_allocator.cc
+  ${FWDIR}/src/memory/heap_dispatch.cc
+  ${FWDIR}/src/memory/tlsf/mm_tlsf.c
   ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
   ${FWDIR}/system/startup_ca7.s
@@ -141,8 +146,21 @@ add_executable(
   ${FWDIR}/src/gui/pages/tags.cc
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
+  ${FWDIR}/src/patch_play/midi_connections.cc
+  ${FWDIR}/src/patch_play/patch_player_balance.cc
+  ${FWDIR}/src/patch_play/patch_player_cache.cc
   ${FWDIR}/src/patch_play/patch_player_catchup.cc
+  ${FWDIR}/src/patch_play/patch_player_expanders.cc
+  ${FWDIR}/src/patch_play/patch_player_load.cc
+  ${FWDIR}/src/patch_play/patch_player_mappings.cc
+  ${FWDIR}/src/patch_play/patch_player_modules.cc
+  ${FWDIR}/src/patch_play/patch_playloader_balance.cc
+  ${FWDIR}/src/patch_play/patch_playloader_load.cc
+  ${FWDIR}/src/patch_play/patch_playloader_modules.cc
+  ${FWDIR}/src/patch_play/patch_playloader_save.cc
+  ${FWDIR}/src/patch_play/rebalance_trials.cc
   ${FWDIR}/src/patch_play/plugin_module.cc
+  ${FWDIR}/src/patch_play/rack_expanders.cc
 
   #
   ${FWDIR}/src/fs/syscall/syscalls.cc
@@ -154,6 +172,7 @@ add_executable(
 
   #
   ${FWDIR}/src/dynload/dynloader.cc
+  ${FWDIR}/src/dynload/exidx_registry.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc
@@ -196,7 +215,7 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/drivers/qspi_flash_driver.cc
   ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3168.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1/drivers/sai_tdm.cc
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/system_ca7.c
+  ${FWDIR}/system/system_ca7.c
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
@@ -271,11 +290,6 @@ if (SUPPRESS_HIL_MESSAGES)
   target_compile_definitions(main.elf PRIVATE SUPPRESS_HIL_MESSAGES=1)
 endif()
 
-if (CONSOLE_USE_USB)
-  message("USB serial device enabled for console logging")
-  target_compile_definitions(main.elf PRIVATE CONSOLE_USE_USB=1)
-endif()
-
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
 foreach(brand ${brands})
 	if (DEFINED BUILD_DYN_PLUGIN_${brand})
@@ -289,6 +303,19 @@ foreach(brand ${brands})
 	endif()
 endforeach()
 
+
+# Every free/realloc must dispatch by address between the newlib heap and the
+# plugin arena, because ownership crosses the plugin boundary in both
+# directions (e.g. a std::string allocated by plugin code, freed by firmware).
+# --wrap redirects every firmware call site (including newlib-internal ones)
+# to the dispatching wrappers in plugin_arena.cc; plugin imports of these
+# symbols are redirected to the same wrappers by the dynloader.
+target_link_options(main.elf PRIVATE
+  -Wl,--wrap=free
+  -Wl,--wrap=_free_r
+  -Wl,--wrap=realloc
+  -Wl,--wrap=_realloc_r
+)
 
 target_link_script(
   main

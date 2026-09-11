@@ -2,6 +2,7 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
+#include "usb/usb_connection.hh"
 #include "util/debouncer.hh"
 #include "util/filter.hh"
 #include "util/rotary_motion.hh"
@@ -29,7 +30,10 @@ struct MetaParams {
 	int8_t audio_overruns = 0;
 
 	// Controls -> Audio
-	bool midi_connected = false;
+	uint8_t midi_ports_connected = 0; //bitfield using Midi::Event::Port
+
+	// Controls -> GUI (USB connection status: role + active class)
+	UsbConnection usb_connection = UsbConnection::None;
 
 	uint32_t button_exp_connected = 0; //bitmap
 	uint32_t ext_buttons_high_events{};
@@ -94,7 +98,9 @@ struct MetaParams {
 
 		audio_overruns = std::max(that.audio_overruns, audio_overruns);
 
-		midi_connected = that.midi_connected;
+		midi_ports_connected = that.midi_ports_connected;
+
+		usb_connection = that.usb_connection;
 
 		midi_poly_chans = that.midi_poly_chans;
 
@@ -132,7 +138,9 @@ struct MetaParams {
 		} else if (audio_overruns > 0)
 			audio_overruns--;
 
-		midi_connected = that.midi_connected;
+		midi_ports_connected = that.midi_ports_connected;
+
+		usb_connection = that.usb_connection;
 
 		midi_poly_chans = that.midi_poly_chans;
 

@@ -4,7 +4,7 @@
 #include "drivers/hsem.hh"
 #include "hsem_handler.hh"
 #include "midi_controls.hh"
-#include "patch/midi_def.hh"
+#include "usb/usb_manager.hh"
 #include "util/countzip.hh"
 
 namespace MetaModule
@@ -53,7 +53,12 @@ void Controls::update_params() {
 
 		update_midi_connected();
 
-		cur_metaparams->midi_connected = _midi_connected;
+		uint8_t midi_con = _midi_usb_connected ? (1 << Midi::Event::USB) : 0;
+		if (control_expander.midi_expander_connected())
+			midi_con |= (1 << Midi::Event::DIN5) | (1 << Midi::Event::TRS);
+		cur_metaparams->midi_ports_connected = midi_con;
+
+		cur_metaparams->usb_connection = _usb.get_connection_status();
 
 		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
 
@@ -98,14 +103,14 @@ void Controls::update_rotary() {
 }
 
 void Controls::update_midi_connected() {
-	_midi_connected_raw.update(_midi_host.is_connected());
+	_midi_usb_connected_raw.update(_midi_host.is_connected() || _midi_device.is_connected());
 
-	if (_midi_connected_raw.went_low()) {
+	if (_midi_usb_connected_raw.went_low()) {
 		_midi_parser.start_all_notes_off_sequence();
 	}
 
-	if (_midi_connected_raw.went_high()) {
-		_midi_connected = true;
+	if (_midi_usb_connected_raw.went_high()) {
+		_midi_usb_connected = true;
 	}
 
 	if (cur_metaparams->midi_poly_chans > 0)
@@ -134,36 +139,67 @@ void Controls::update_control_expander() {
 void Controls::parse_midi() {
 	// Parse outgoing MIDI message if available and connected.
 	if (MidiMessage out_msg = cur_params->raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
-		if (_midi_connected_raw.is_high()) {
+		// The sending module chose one destination port; send there and nowhere else.
+		const auto dest_port = cur_params->midi_port;
+
+		if (dest_port == Midi::Event::Port::USB && _midi_usb_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
 			out_msg.make_usb_msg(bytes);
 			_tx_monitor.log((uint32_t(bytes[0]) << 24) | (uint32_t(bytes[1]) << 16) | (uint32_t(bytes[2]) << 8) |
 							uint32_t(bytes[3]));
 
-			if (!_midi_host.transmit(bytes))
+			bool ok = false;
+			if (_midi_host.is_connected())
+				ok = _midi_host.transmit(bytes);
+			else if (_midi_device.is_connected())
+				ok = _midi_device.transmit(bytes);
+
+			if (!ok)
 				_tx_monitor.transport_drops++;
+		}
+
+		// MIDI Expander output jacks. Jack ordering does not match Port ordering.
+		if (dest_port != Midi::Event::Port::USB && control_expander.midi_expander_connected()) {
+			const auto jack = (dest_port == Midi::Event::Port::DIN5) ? MidiExpanderManager::Jack::Din :
+																	   MidiExpanderManager::Jack::Trs;
+			if (auto len = out_msg.message_size(); len > 0) {
+				std::array<uint8_t, 3> bytes;
+				out_msg.make_bytes(bytes);
+				control_expander.send_midi({bytes.data(), len}, jack);
+			}
 		}
 	}
 
-	// Parse a MIDI message if available
-	if (auto msg = _midi_rx_buf.get(); msg.has_value()) {
+	// Parse a MIDI message if available.
+	// USB is drained first, but it can't starve the expander: this runs once per
+	// audio frame (~48kHz) and a MIDI jack tops out around 1500 messages/sec.
+	if (auto msg = _midi_usb_rx_buf.get(); msg.has_value()) {
 		cur_params->raw_msg = msg.value();
+		cur_params->midi_port = Midi::Event::Port::USB;
 		cur_params->midi_event = _midi_parser.parse(msg.value());
+		cur_params->midi_event.port = Midi::Event::Port::USB;
+
+	} else if (auto exp_msg = _midi_exp_rx_buf.get(); exp_msg.has_value()) {
+		cur_params->raw_msg = exp_msg->msg;
+		cur_params->midi_port = exp_msg->port;
+		cur_params->midi_event = _midi_parser.parse(exp_msg->msg);
+		cur_params->midi_event.port = exp_msg->port;
 
 	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence()) {
 		if (noteoff->type == Midi::Event::Type::None) {
-			_midi_connected = false;
-			cur_metaparams->midi_connected = _midi_connected;
-			cur_params->raw_msg = MidiMessage{};
-			cur_params->midi_event.type = Midi::Event::Type::None;
+			_midi_usb_connected = false;
+			cur_metaparams->midi_ports_connected &= ~Midi::Event::Port::USB;
+			clear_rx_message();
 		} else {
+			// The panic sequence is a USB-disconnect artifact, not something a jack sent
 			cur_params->midi_event = *noteoff;
+			cur_params->midi_event.port = Midi::Event::Port::USB;
 			cur_params->raw_msg = {0x80, noteoff->note, 0};
+			cur_params->midi_port = Midi::Event::Port::USB;
 		}
 
 	} else {
-		cur_params->raw_msg = MidiMessage{};
-		cur_params->midi_event.type = Midi::Event::Type::None;
+		clear_rx_message();
 	}
 }
 
@@ -200,6 +236,32 @@ void Controls::start() {
 		route_usb_midi_rx(rxbuffer);
 		_midi_host.receive();
 	});
+
+	_midi_device.set_rx_callback([this](std::span<uint8_t> rxbuffer) { route_usb_midi_rx(rxbuffer); });
+}
+
+void Controls::clear_rx_message() {
+	cur_params->raw_msg = MidiMessage{};
+	cur_params->midi_port = 0;
+	cur_params->midi_event.type = Midi::Event::Type::None;
+	cur_params->midi_event.port = 0;
+}
+
+// Runs on the main loop. The spans point into the expander driver's RX buffer
+// and are only valid until its next turn on the bus, so they're parsed here and
+// the results queued for parse_midi() to pick up.
+void Controls::read_midi_exp_rx() {
+	using Jack = MidiExpanderManager::Jack;
+	using Port = Midi::Event::Port;
+
+	const auto payloads = control_expander.take_midi_rx();
+
+	for (auto jack : {Jack::Din, Jack::Trs}) {
+		for (auto byte : payloads[jack]) {
+			if (auto msg = _midi_exp_parsers[jack].parse(byte))
+				_midi_exp_rx_buf.put({*msg, (jack == Jack::Din) ? Port::DIN5 : Port::TRS});
+		}
+	}
 }
 
 void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
@@ -207,7 +269,7 @@ void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
 	while (rxbuffer.size() >= 4) {
 		auto msg = MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 		_rx_monitor.log(msg.raw());
-		_midi_rx_buf.put(msg);
+		_midi_usb_rx_buf.put(msg);
 		rxbuffer = rxbuffer.subspan(4);
 	}
 }
@@ -215,6 +277,7 @@ void Controls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
 void Controls::process() {
 	sense_pin_reader.update();
 	control_expander.update();
+	read_midi_exp_rx();
 
 	auto now = HAL_GetTick();
 	_tx_monitor.print_report(now);
@@ -228,8 +291,13 @@ void Controls::set_samplerate(unsigned sample_rate) {
 	}
 }
 
-Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
+				   MidiHost &midi_host,
+				   UsbMidiDevice &midi_device,
+				   UsbManager &usb)
 	: _midi_host{midi_host}
+	, _midi_device{midi_device}
+	, _usb{usb}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams) {

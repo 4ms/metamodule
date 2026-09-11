@@ -3,6 +3,8 @@
 #include "midi_host.hh"
 #include "msc_host.hh"
 #include "pr_dbg.hh"
+#include "usb/usb_connection.hh"
+#include "usbh_midi_jacks.hh"
 #include <cstring>
 
 // Defined in usbh_conf.cc: once-per-second host-channel event summary
@@ -12,7 +14,6 @@ class UsbHostManager {
 private:
 	mdrivlib::Pin src_enable;
 	USBH_HandleTypeDef usbhost{};
-	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
 	MSCHost msc_host{usbhost, MetaModule::Volume::USB};
 
@@ -21,6 +22,8 @@ private:
 	static inline MSCHost *_mschost_instance;
 
 public:
+	static inline HCD_HandleTypeDef hhcd;
+
 	UsbHostManager(mdrivlib::PinDef enable_5v)
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
 		usbhost.pActiveClass = nullptr;
@@ -36,7 +39,17 @@ public:
 		init_hhcd();
 	}
 
-	void start() {
+	// source_vbus = false starts the host stack without enabling our 5V
+	// source. Used for the data-role fallback against non-compliant
+	// self-powered devices that present Rp and source VBUS themselves --
+	// driving our own VBUS against theirs must be avoided.
+	//
+	// Note: a "soft" host start (skipping HAL_HCD_MspInit's USBO force-reset
+	// by pre-marking hhcd READY) was tried and does NOT work: the port powers
+	// up but never detects device pull-ups. The OTG core needs the reset to
+	// become a functional host after running as a device. Resetting with the
+	// partner's VBUS hot is fine (device re-connects do it routinely).
+	void start(bool source_vbus = true) {
 		init_hhcd();
 
 		auto status = USBH_Init(&usbhost, usbh_state_change_callback, 0);
@@ -47,23 +60,61 @@ public:
 		midi_host.init();
 		msc_host.init();
 
-		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
 		auto err = USBH_Start(&usbhost);
 		if (err != USBH_OK)
 			pr_err("Error starting host\n");
 
-		src_enable.high();
-		pr_trace("VBus high, starting host\n");
+		if (source_vbus) {
+			src_enable.high();
+			pr_trace("VBus high, starting host\n");
+		}
 		// HAL_Delay(500);
 	}
-	void stop() {
+
+	// True if the HCD has detected a device attached (D+ pull-up seen),
+	// whether or not it has enumerated yet.
+	bool is_device_attached() {
+		return usbhost.device.is_connected;
+	}
+
+	// FIXME: Get rid of magic number!
+	// Raw HPRT0 register (offset 0x440), for diagnostics: bit0 (PCSTS) is the
+	// live electrical port connect status -- set iff a device pull-up is
+	// present on D+/D-, regardless of interrupt handling.
+	uint32_t read_port_status() {
+		return *reinterpret_cast<volatile uint32_t *>(reinterpret_cast<uint32_t>(hhcd.Instance) + 0x440U);
+	}
+
+	void vbus_off() {
 		src_enable.low();
 		HAL_Delay(250);
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-		HAL_Delay(250);
+	}
+
+	void stop() {
+		HAL_Delay(100);
+		// If a class is still marked connected, the USBH state machine never got
+		// to deliver HOST_USER_DISCONNECTION (a FUSB-initiated teardown can win
+		// the race against USBH_Process seeing is_disconnected). Deliver it here
+		// so the class hosts and the published device info don't go stale.
+		if (connected_classcode != 0xFF)
+			usbh_state_change_callback(&usbhost, HOST_USER_DISCONNECTION);
 		USBH_Stop(&usbhost);
 		usbhost.pData = nullptr;
 		USBH_DeInit(&usbhost); //sets hhcd to NULL?
+	}
+
+	// Debug aid: snapshot the USBH library state machine (used by the
+	// USB_ATTACH_CYCLE_TEST harness on a failed attach)
+	void print_state_debug() {
+		printf("[usbh] gState=%d Enum=%d Req=%d Ctl.state=%d Ctl.err=%u Timeout=%u PortEnabled=%u RstCnt=%u\n",
+			   (int)usbhost.gState,
+			   (int)usbhost.EnumState,
+			   (int)usbhost.RequestState,
+			   (int)usbhost.Control.state,
+			   (unsigned)usbhost.Control.errorcount,
+			   (unsigned)usbhost.Timeout,
+			   (unsigned)usbhost.device.PortEnabled,
+			   (unsigned)usbhost.device.RstCnt);
 	}
 
 	void process() {
@@ -73,6 +124,19 @@ public:
 	}
 
 	static inline uint8_t connected_classcode = 0xFF;
+
+	static inline MetaModule::UsbDeviceState connected_device{};
+
+	// Bumped each time connected_device is (re)captured or cleared.
+	static inline uint32_t device_info_seq = 0;
+
+	MetaModule::UsbDeviceState const &get_connected_device() const {
+		return connected_device;
+	}
+
+	uint32_t get_device_info_seq() const {
+		return device_info_seq;
+	}
 
 	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {
 		USBHostHelper host{phost};
@@ -111,6 +175,21 @@ public:
 					pr_trace("MSC connected\n");
 					_mschost_instance->connect();
 				}
+
+				connected_device = {};
+				connected_device.status.vid = phost->device.DevDesc.idVendor;
+				connected_device.status.pid = phost->device.DevDesc.idProduct;
+				connected_device.device_name.manufacturer.copy((const char *)phost->device.Manufacturer);
+				connected_device.device_name.product.copy((const char *)phost->device.Product);
+
+				// For a MIDI device, the jack ids/names were collected during the
+				// class-request phase (just before this callback fired). Copy them
+				// out of the class handle into the device snapshot to publish.
+				if (connected_classcode == AudioClassCode) {
+					if (auto *ms = host.get_class_handle<MidiStreamingHandle>())
+						copy_midi_jacks(ms->jacks, connected_device);
+				}
+				device_info_seq++;
 			} break;
 
 			case HOST_USER_DISCONNECTION: {
@@ -119,9 +198,11 @@ public:
 					_midihost_instance->disconnect();
 				else if (connected_classcode == USB_MSC_CLASS)
 					_mschost_instance->disconnect();
-				else
+				else if (connected_classcode != 0xFF) // 0xFF: no class was active (e.g. a bounce during attach)
 					pr_warn("Unknown disconnected class code %d\n", connected_classcode);
 				connected_classcode = 0xFF;
+				connected_device = {};
+				device_info_seq++;
 			} break;
 
 			case HOST_USER_UNRECOVERED_ERROR:

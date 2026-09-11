@@ -212,8 +212,9 @@ struct CV_MIDICCWidget : ModuleWidget {
 				}));
 		}
 
+		// METAMODULE: add MIDI Port and Channel to context menu:
 		menu->addChild(new MenuSeparator);
-
+		menu->addChild(createMidiPortMenuItem(module->midiOutput));
 		menu->addChild(createSubmenuItem(
 			"MIDI channel",
 			[=] {

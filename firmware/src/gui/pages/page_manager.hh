@@ -63,6 +63,7 @@ class PageManager {
 
 	enum class MidiPCLoadState { Idle, Requesting, Loading };
 	PatchLocation midi_pc_target_loc{};
+	PageId midi_pc_target_page = PageId::PatchView;
 
 public:
 	PageBase *cur_page = &page_mainmenu;
@@ -168,6 +169,18 @@ public:
 		} else {
 			gui_state.file_browser_visible.register_state(false);
 
+			// If we're on any page related to a patch and the view patch ptr gets set to null:
+			// that means an external event unloaded it (e.g. Developer Drive loaded a plugin)
+			// So, immediately jump to MainMenu
+			auto cur_page_id = page_list.current_page();
+			if (cur_page_id != PageId::MainMenu && cur_page_id != PageId::PatchSel &&
+				cur_page_id != PageId::SystemMenu && !info.open_patch_manager.get_view_patch())
+			{
+				page_list.request_new_page_no_history(PageId::MainMenu, {});
+				cur_page = page_list.page(PageId::MainMenu);
+				cur_page->focus({});
+			}
+
 			cur_page->update();
 
 			// Don't let old events do surprising things when you change pages
@@ -185,15 +198,16 @@ public:
 				std::optional<int> next_knobset = std::nullopt;
 				int cur_knobset = info.page_list.get_active_knobset();
 
-				// Detecrt MIDI CC
+				// Detect MIDI CC
 				if (info.settings.midi.knobset_control == MidiSettings::KnobsetControl::Enabled) {
-					auto &cc = info.params.midi_ccs[info.settings.midi.knobset_cc & 127];
-
+					auto last_cc = info.params.last_midi_cc;
+					int8_t ks_cc = info.settings.midi.knobset_cc & 127;
 					auto midi_chan = info.settings.midi.knobset_channel - 1;
-					if (cc.changed && cc.val == midi_chan) {
-						if (cc.value != cur_knobset && cc.value < num_knobsets) {
-							next_knobset = cc.value;
-							cc.changed = false;
+
+					if (last_cc.num == ks_cc && last_cc.channel == midi_chan) {
+						if (last_cc.value != cur_knobset && last_cc.value < num_knobsets) {
+							next_knobset = last_cc.value;
+							last_cc.num = -1;
 						}
 					}
 				}
@@ -266,24 +280,44 @@ public:
 		if (!info.settings.midi_pc_patch_load.enabled)
 			return;
 
-		if (auto &pc = info.params.last_midi_pc; pc.changed) {
-			pc.changed = false;
-
+		if (auto &pc = info.params.last_midi_pc; pc.num >= 0) {
 			for (auto const &entry : info.settings.midi_pc_patch_load.entries) {
 				bool chan_match = (entry.channel == 0) || (entry.channel == (uint32_t)pc.channel + 1);
-				if (chan_match && entry.pc == pc.pc) {
+				if (chan_match && entry.pc == (uint32_t)pc.num) {
 					auto [filename, vol] = split_volume(entry.path);
 					midi_pc_target_loc = PatchLocation{std::string(filename), vol};
 
+					// Stay on a similar page after the new patch loads, if we're on a
+					// per-patch mapping page. Otherwise fall back to the Patch View page.
+					midi_pc_target_page = [this] {
+						switch (cur_page->id) {
+							case PageId::KnobSetView:
+							case PageId::KnobMap:
+								return PageId::KnobSetView;
+							case PageId::JackMapView:
+								return PageId::JackMapView;
+							default:
+								return PageId::PatchView;
+						}
+					}();
+
 					// Clear cc events so we don't change knobsets with stale events
-					for (auto &cc : info.params.midi_ccs)
-						cc.changed = false;
+					info.params.last_midi_cc.num = -1;
 
 					auto result = patch_switch.jump_to_patch(midi_pc_target_loc, [this]() {
 						PageArguments args;
 						args.patch_loc_hash = PatchLocHash{midi_pc_target_loc};
+
+						if (midi_pc_target_page == PageId::KnobSetView)
+							args.view_knobset_id = page_list.get_active_knobset();
+
+						if (midi_pc_target_page != PageId::PatchView) {
+							std::string msg = "MIDI PC: " + info.open_patch_manager.get_view_patch_filename();
+							info.notify_queue.put({msg, Notification::Priority::Status, 1000});
+						}
+
 						gui_state.force_redraw_patch = true;
-						page_list.request_new_page(PageId::PatchView, args);
+						page_list.request_new_page_no_history(midi_pc_target_page, args);
 						info.patch_playloader.request_load_view_patch();
 					});
 					if (!result.success) {
@@ -293,6 +327,7 @@ public:
 					}
 				}
 			}
+			pc.num = -1;
 		}
 	}
 
@@ -354,7 +389,10 @@ public:
 
 	void handle_audio_errors() {
 		if (info.patch_playloader.did_audio_overrun()) {
-			info.notify_queue.put({"Audio stopped: patch load > 99%.", Notification::Priority::Error, 1000});
+			// Overloads during re-balancing trials are expected, so don't send notifications
+			if (!info.patch_playloader.rebalance_trials_active())
+				info.notify_queue.put({"Audio stopped: patch load > 99%.", Notification::Priority::Error, 1000});
+
 			info.patch_playloader.clear_audio_overrun();
 		}
 	}

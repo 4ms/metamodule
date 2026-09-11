@@ -26,7 +26,7 @@ struct MIDI_CV : Module {
 		CONTINUE_OUTPUT,
 		NUM_OUTPUTS
 	};
-	enum LightIds { NUM_LIGHTS };
+	enum LightIds { TEXT_DISPLAY, NUM_LIGHTS };
 
 	midi::InputQueue midiInput;
 
@@ -124,8 +124,9 @@ struct MIDI_CV : Module {
 		while (midiInput.tryPop(&msg, args.frame)) {
 			//METAMODULE
 			// Do not put Timing clock or Active Sending messages in the history window
-			if (msg.bytes[0] & 0x80 && msg.bytes[0] != 0xf8 && msg.bytes[0] != 0xfe)
+			if (msg.bytes[0] & 0x80 && msg.bytes[0] != 0xf8 && msg.bytes[0] != 0xfe) {
 				msg_history.put(msg);
+			}
 			////////
 			processMessage(msg);
 		}
@@ -402,8 +403,7 @@ struct MIDI_CV : Module {
 			}
 		}
 		// Clear notes that are not held if polyphonic
-		else
-		{
+		else {
 			for (int c = 0; c < channels; c++) {
 				if (!gates[c])
 					continue;
@@ -444,6 +444,7 @@ struct MIDI_CV : Module {
 			json_object_set_new(rootJ, "lastPitch", json_integer(pws[0]));
 			json_object_set_new(rootJ, "lastMod", json_integer(mods[0]));
 		}
+		// The selected MIDI port rides along in here as the device name
 		json_object_set_new(rootJ, "midi", midiInput.toJson());
 		return rootJ;
 	}
@@ -548,6 +549,9 @@ struct MIDI_CVWidget : ModuleWidget {
 		auto *module = dynamic_cast<MIDI_CV *>(this->module);
 
 		menu->addChild(new MenuSeparator);
+
+		// METAMODULE: pick which physical MIDI port to listen to
+		menu->addChild(createMidiPortMenuItem(module->midiInput));
 
 		// METAMODULE: add MIDI channel selection to menu
 		menu->addChild(createSubmenuItem(

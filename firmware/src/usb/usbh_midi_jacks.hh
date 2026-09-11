@@ -1,21 +1,22 @@
 #pragma once
+#include "usb/midi_jack_parse.hh"
 #include "usbh_def.h"
 
-void parse_midistream_itf_desc(USBH_DescHeader_t const *pdesc);
-void parse_midistream_injack_desc(USBH_DescHeader_t const *pdesc);
-void parse_midistream_outjack_desc(USBH_DescHeader_t const *pdesc);
-void parse_bulk_ep_desc(USBH_DescHeader_t const *pdesc);
-void parse_midistream_cs_bulk_ep_desc(USBH_DescHeader_t const *pdesc);
-void scan_all_descriptors(USBH_HandleTypeDef const *phost);
+// USB-stack-facing half of MIDI jack discovery. The descriptor parsing itself
+// (and MidiJackCollection) lives in midi_jack_parse.hh, which is pure and unit
+// tested; this file just feeds it the host's config descriptor and drives the
+// control transfers needed to read the jack name strings.
 
-// Notes of MIDI devices with multiple "ports":
-// One MIDI device might have multiple MIDI Out Jacks or In Jacks.
-// Each Jack has a MIDIIn/OutJackDescriptor, which provides the jack_id and
-// a string index for the name.
-// When a controller is used on a computer, the app will display these jacks names, e.g.
-// "Kontrol DAW", "Kontrol Main", "Kontrol Ext."
-//
-// We should collect the names and jack IDs, and store that in the MIDI class handle.
-// Then the GUI could allow the user to display, browse, and choose a Jack.
-//
-// TODO: figure out how to change jacks? It seems like they all have the same endpoint addr?
+void count_midi_jacks(USBH_HandleTypeDef const *phost, uint8_t *num_in_jacks, uint8_t *num_out_jacks);
+
+// Fill jack ids, types, counts, cable numbers and name string indices from the
+// already-fetched configuration descriptor. Synchronous; no USB transfers.
+// Sets jacks->parsed.
+void parse_midi_jacks(USBH_HandleTypeDef const *phost, MidiJackCollection *jacks);
+
+// Drive the name-string reads. Call repeatedly (it issues one control transfer at
+// a time): returns USBH_BUSY while a name is still being fetched, USBH_OK once all
+// names are collected. Best-effort -- a jack whose name read fails is left with an
+// empty name rather than failing the whole connection. Requires parse_midi_jacks()
+// to have run first. Sets jacks->done.
+USBH_StatusTypeDef collect_midi_jack_names(USBH_HandleTypeDef *phost, MidiJackCollection *jacks);

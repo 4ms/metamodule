@@ -1,0 +1,77 @@
+# API symbols to keep, that scanning the export objects can't find on its own.
+#
+# dump_syms.py builds the plugin API symbol list by scanning the object files of
+# the export libraries (vcv_plugin_export, coreproc_plugin_export,
+# hardware_support) for symbols they define, plus the symbols keep-symbols.cc
+# refers to. Two kinds of symbol slip through both nets:
+#
+#   - compiler-generated symbols for a class (vtable, typeinfo), which no C++
+#     code can name directly
+#   - functions implemented in the firmware proper whose overloads aren't all
+#     referenced by keep-symbols.cc
+#
+# List them here by C++ name and every mangled symbol belonging to that name is
+# exported -- all overloads, all ctor/dtor variants, vtable, and typeinfo.
+#
+# Line formats:
+#   MetaModule::MidiInput      a C++ qualified name (class, function, or namespace)
+#   sym: some_c_function       an exact symbol name, used as-is
+#   re: ^_ZN4rack4midi         a regex matched against mangled symbol names
+#
+# Every entry must match at least one symbol defined in main.elf, or the build
+# logs an error: an entry that matches nothing means the linker garbage-collected
+# the function (nothing in the firmware references it -- see keep-symbols.cc) or
+# the name was misspelled.
+
+# Implemented in coreproc_plugin, but only one overload is referenced by
+# keep-symbols.cc
+MetaModule::register_module
+
+
+# libc/libstdc++ and syscalls the firmware provides. These are in main.elf but
+# there's no easy way to find them by scanning the export objects.
+
+malloc
+calloc
+realloc
+free
+_malloc_r
+_calloc_r
+_realloc_r
+_free_r
+_times_r
+memalign
+
+abort
+__assert_func
+
+_impure_ptr
+_impure_data
+__cxa_pure_virtual
+
+_exit
+_fini
+_getpid_r
+_open_r
+_close_r
+_fstat_r
+stat
+_isatty_r
+_write_r
+_kill_r
+_read_r
+_lseek_r
+_sbrk_r
+gettimeofday
+_gettimeofday
+_gettimeofday_r
+
+expm1l
+log1pl
+
+__atexit
+__aeabi_atexit
+__atexit_recursive_mutex
+
+# Lets a plugin's unwinder find its own exception tables
+mm_host_find_exidx

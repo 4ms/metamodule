@@ -129,12 +129,6 @@ struct SimulatorFileStorageComm {
 						reply = {PluginFileListFail};
 				} break;
 
-				case RequestCopyPluginAssets: {
-					storage.ramdisk.mount_disk();
-					bool ok = PatchFileIO::deep_copy_dirs(storage.sd_hostfs, storage.ramdisk, msg.filename);
-					reply.message_type = ok ? CopyPluginAssetsOK : CopyPluginAssetsFail;
-				} break;
-
 				case RequestWriteFile: {
 					bool ok = false;
 					uint32_t timestamp = 0;
