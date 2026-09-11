@@ -71,5 +71,8 @@ target_compile_definitions(BefacoLibrary PRIVATE METAMODULE VCV)
 set_source_files_properties(${BEFACO_DIR}/libs/OwlProgram/LibSource/fastpow.c
                             PROPERTIES COMPILE_OPTIONS -fno-strict-aliasing)
 
+set_source_files_properties(${BEFACO_DIR}/src/Iroi.cpp
+                            PROPERTIES COMPILE_OPTIONS -Wno-unused-but-set-variable)
+
 # set_property(TARGET BefacoLibrary PROPERTY METAMODULE_DISABLE_IPO TRUE)
 set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 23)
