@@ -574,10 +574,20 @@ public:
 
 		// Update knobs connected to this CC
 		if (ccnum < midi.cc_knob_maps.size()) {
+			// Toggle maps flip the param only when the CC crosses from low (0-63) to high (64-127).
+			// 64 << 7 is 7-bit value 64 in 14-bit (i.e. MSB >= 64)
+			bool cc_is_high = val >= (64 << 7);
+
 			for (auto &mm : midi.cc_knob_maps[ccnum]) {
 				if (mm.module_id < num_modules && Midi::port_allows(mm.midi_port_mask, port)) {
 					if (mm.midi_chan == 0 || mm.midi_chan == (midi_chan + 1)) {
-						modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f));
+						if (is_toggle(mm)) {
+							if (cc_is_high && !mm.cc_is_high)
+								toggle_param(modules[mm.module_id], mm);
+						} else {
+							modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f));
+						}
+						mm.cc_is_high = cc_is_high;
 					}
 				}
 			}

@@ -157,16 +157,17 @@ void MidiConnections::uncache_knob_map(MappedKnob const &k) {
 }
 
 MappedKnob *MidiConnections::find_knob_map(MappedKnob const &k) {
-	auto *maps = k.is_midi_cc()		  ? &cc_knob_maps[k.cc_num()] :
-				 k.is_midi_notegate() ? &note_knob_maps[k.notegate_num()] :
-										nullptr;
-	if (!maps)
-		return nullptr;
+	auto find_in = [&k](auto &maps) -> MappedKnob * {
+		auto found = std::ranges::find_if(
+			maps, [&k](auto const &m) { return k.param_id == m.param_id && k.module_id == m.module_id; });
+		return found != maps.end() ? &*found : nullptr;
+	};
 
-	auto found = std::ranges::find_if(
-		*maps, [&k](auto const &m) { return k.param_id == m.param_id && k.module_id == m.module_id; });
-
-	return found != maps->end() ? &*found : nullptr;
+	if (k.is_midi_cc())
+		return find_in(cc_knob_maps[k.cc_num()]);
+	if (k.is_midi_notegate())
+		return find_in(note_knob_maps[k.notegate_num()]);
+	return nullptr;
 }
 
 bool MidiConnections::any_pulse_conns() const {
@@ -242,14 +243,17 @@ void MidiConnections::zero_poly_buffers() {
 	});
 }
 
-void MidiConnections::update_or_add(std::vector<MappedKnob> &v, const MappedKnob &d) {
+template<typename T>
+void MidiConnections::update_or_add(std::vector<T> &v, const MappedKnob &d)
+	requires std::derived_from<T, MappedKnob>
+{
 	for (auto &el : v) {
 		if (el.maps_to_same_as(d)) {
-			el = d;
+			static_cast<MappedKnob &>(el) = d;
 			return;
 		}
 	}
-	v.push_back(d);
+	static_cast<MappedKnob &>(v.emplace_back()) = d;
 }
 
 template<typename T>
