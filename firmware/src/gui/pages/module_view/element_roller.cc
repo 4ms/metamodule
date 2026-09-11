@@ -53,6 +53,7 @@ void ModuleViewPage::populate_roller() {
 	unsigned roller_idx = 0;
 	DrawnElement const *cur_el = nullptr;
 	ElementCount::Counts last_type{};
+	bool last_is_altparam = false;
 
 	for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 		auto &gui_el = drawn_element.gui_element;
@@ -70,11 +71,13 @@ void ModuleViewPage::populate_roller() {
 		if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
 			continue;
 
-		if (ModView::append_header(opts, last_type, gui_el.count)) {
+		auto this_is_altparam = ModView::is_altparam(drawn_element.element);
+		if (ModView::append_header(opts, last_type, last_is_altparam, gui_el.count, this_is_altparam)) {
 			roller_idx++;
 			roller_drawn_el_idx.push_back(RollerHeaderTag);
 		}
 		last_type = gui_el.count;
+		last_is_altparam = this_is_altparam;
 
 		opts.append(" ");
 
