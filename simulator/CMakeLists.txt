@@ -133,13 +133,8 @@ if (NOT HEADLESS)
 	target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
 endif()
 
-if(HEADLESS)
-	add_executable(simulator
-		src/headless/main-headless.cc
-		src/headless/audio_files.cc
-		src/headless/nanovg.cc
-		src/headless/gui_stubs.cc
-		stubs/svg.cc
+
+set(SOURCES_COMMON
 		stubs/async_thread_control.cc
 		hardware_support/random.cc
 		hardware_support/time.cc
@@ -147,11 +142,13 @@ if(HEADLESS)
 		hardware_support/filesystem_helpers.cc
 
 		${FWDIR}/src/midi/midi_router.cc
+
 		${FWDIR}/src/patch_play/midi_connections.cc
 		${FWDIR}/src/patch_play/modules_helpers.cc
 		${FWDIR}/src/patch_play/patch_player_balance.cc
 		${FWDIR}/src/patch_play/patch_player_cache.cc
 		${FWDIR}/src/patch_play/patch_player_catchup.cc
+		${FWDIR}/src/patch_play/patch_player_expanders.cc
 		${FWDIR}/src/patch_play/patch_player_load.cc
 		${FWDIR}/src/patch_play/patch_player_mappings.cc
 		${FWDIR}/src/patch_play/patch_player_modules.cc
@@ -159,6 +156,16 @@ if(HEADLESS)
 		${FWDIR}/src/patch_play/rack_expanders.cc
 
 		${FWDIR}/metamodule-plugin-sdk/version.cc
+)
+
+if(HEADLESS)
+	add_executable(simulator
+		src/headless/main-headless.cc
+		src/headless/audio_files.cc
+		src/headless/nanovg.cc
+		src/headless/gui_stubs.cc
+		stubs/svg.cc
+		${SOURCES_COMMON} 
 		)
 else()
 	add_executable(simulator
@@ -167,19 +174,14 @@ else()
 		src/sim_midi.cc
 		stubs/memory/heap.cc
 		stubs/fs/fs_proxy.cc
-		stubs/async_thread_control.cc
 		stubs/static_buffers.cc
 		stubs/dynload/exidx_registry.cc
-		hardware_support/random.cc
-		hardware_support/time.cc
-		hardware_support/memory.cc
-		hardware_support/filesystem_helpers.cc
 
+		${SOURCES_COMMON} 
 		${FWDIR}/src/gui/elements/element_name.cc
 		${FWDIR}/src/gui/elements/panel_name.cc
 		${FWDIR}/src/gui/slsexport/ui_local.cc
 		${FWDIR}/src/fs/helpers.cc
-		# ${FWDIR}/src/gui/slsexport/prefs_menu.cc
 		${FWDIR}/src/gui/fonts/fonts.cc
 		${FWDIR}/src/gui/fonts/ttf.cc
 		${FWDIR}/src/gui/pages/module_view/element_roller.cc
@@ -187,25 +189,13 @@ else()
 		${FWDIR}/src/gui/pages/module_view/draw_module.cc
 		${FWDIR}/src/gui/pages/tags.cc
 		${FWDIR}/src/fw_update/updater_proxy.cc
-		${FWDIR}/src/patch_play/modules_helpers.cc
-		${FWDIR}/src/midi/midi_router.cc
 		${FWDIR}/src/params/expanders.cc
-		${FWDIR}/src/patch_play/midi_connections.cc
-		${FWDIR}/src/patch_play/patch_player_balance.cc
-		${FWDIR}/src/patch_play/patch_player_cache.cc
-		${FWDIR}/src/patch_play/patch_player_catchup.cc
-		${FWDIR}/src/patch_play/patch_player_expanders.cc
-		${FWDIR}/src/patch_play/patch_player_load.cc
-		${FWDIR}/src/patch_play/patch_player_mappings.cc
-		${FWDIR}/src/patch_play/patch_player_modules.cc
 		${FWDIR}/src/patch_play/patch_playloader_balance.cc
 		${FWDIR}/src/patch_play/patch_playloader_load.cc
 		${FWDIR}/src/patch_play/patch_playloader_modules.cc
 		${FWDIR}/src/patch_play/patch_playloader_save.cc
 		${FWDIR}/src/patch_play/rebalance_trials.cc
-		${FWDIR}/src/patch_play/plugin_module.cc
-		${FWDIR}/src/patch_play/rack_expanders.cc
-        ${FWDIR}/src/patch_file/reload_patch.cc
+		${FWDIR}/src/patch_file/reload_patch.cc
 		src/file_browser_adaptor.cc
 
 		#Fatfs:
@@ -224,7 +214,6 @@ else()
 		${FWDIR}/src/user_settings/settings_parse.cc
 		${FWDIR}/src/user_settings/settings_serialize.cc
 
-		${FWDIR}/metamodule-plugin-sdk/version.cc
 
 		${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
 		)
