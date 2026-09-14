@@ -2188,6 +2188,97 @@ PatchData:
 	CHECK(m1->get_output(0) == doctest::Approx(127.f / 12.7f));
 }
 
+TEST_CASE("MIDI CC -> Param map with Toggle curve type") {
+	// CC7 = panel_knob_id 0x207 = 519
+	// Map to param 2 is Toggle, map to param 3 is Normal
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: cc_toggle
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+  int_cables:
+  mapped_ins:
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+    name: MIDI
+    set:
+      - panel_knob_id: 519
+        module_id: 1
+        param_id: 2
+        curve_type: 1
+        min: 0
+        max: 1
+      - panel_knob_id: 519
+        module_id: 1
+        param_id: 3
+        curve_type: 0
+        min: 0
+        max: 1
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+  mapped_lights: []
+  vcvModuleStates: []
+  suggested_samplerate: 0
+  suggested_blocksize: 0
+  bypassed_modules: []
+  module_aliases: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto m1 = get_test_module(player, 1);
+	REQUIRE(m1);
+
+	auto send_cc = [&](int16_t val7) { player.set_midi_cc(7, val7 << 7, 0); };
+
+	CHECK(m1->params[2] == 0.f);
+
+	// Values within the low region do not toggle
+	send_cc(10);
+	CHECK(m1->params[2] == 0.f);
+	send_cc(63);
+	CHECK(m1->params[2] == 0.f);
+
+	// Low -> high toggles
+	send_cc(64);
+	CHECK(m1->params[2] == 1.f);
+
+	// Values within the high region do not toggle
+	send_cc(127);
+	CHECK(m1->params[2] == 1.f);
+	send_cc(64);
+	CHECK(m1->params[2] == 1.f);
+
+	// High -> low does not toggle
+	send_cc(63);
+	CHECK(m1->params[2] == 1.f);
+	send_cc(0);
+	CHECK(m1->params[2] == 1.f);
+
+	// Low -> high toggles back
+	send_cc(100);
+	CHECK(m1->params[2] == 0.f);
+
+	// Normal map follows the CC value
+	CHECK(m1->params[3] == doctest::Approx(100.f / 127.f));
+
+	// 14-bit values: threshold is MSB >= 64
+	send_cc(0);
+	player.set_midi_cc(7, (63 << 7) | 127, 0);
+	CHECK(m1->params[2] == 0.f);
+	player.set_midi_cc(7, 64 << 7, 0);
+	CHECK(m1->params[2] == 1.f);
+}
+
 TEST_CASE("Simple: MIDI Gate -> Panel Out (via Hub)") {
 	// clang-format off
 	std::string patchyml{R"(
