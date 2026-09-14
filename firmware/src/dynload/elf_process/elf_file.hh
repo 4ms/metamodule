@@ -80,7 +80,7 @@ struct Elf {
 	}
 
 	std::optional<ElfSection> get_section(size_t index) {
-		if (index <= sections.size())
+		if (index < sections.size())
 			return sections[index];
 		else {
 			pr_err("Section index %d out of range\n", index);
