@@ -164,7 +164,10 @@ struct PatchViewSettingsMenu {
 
 	void prepare_focus(lv_group_t *group) {
 		base_group = group;
+		refresh_from_settings();
+	}
 
+	void refresh_from_settings() {
 		fix_forbidden_states();
 
 		using enum MapRingStyle::Mode;
@@ -225,6 +228,8 @@ struct PatchViewSettingsMenu {
 
 	void show() {
 		if (!visible) {
+			refresh_from_settings();
+
 			DropInFromLeft_Animation(ui_PVSettingsMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
