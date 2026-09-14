@@ -29,6 +29,20 @@ struct PatchViewSettingsMenu {
 		lv_slider_set_value(
 			zoom_slider, ModuleDisplaySettings::zoom_level_index(ModuleDisplaySettings::DefaultZoomLevel), LV_ANIM_OFF);
 
+		auto auto_width_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Auto Width");
+		auto_rack_width_check = lv_obj_get_child(auto_width_cont, 1);
+
+		auto rack_width_label = create_settings_menu_slider(ui_PVSettingsMenu, "Rack Width");
+		lv_obj_set_style_text_font(rack_width_label, &ui_font_MuseoSansRounded50014, 0);
+		lv_obj_set_width(rack_width_label, lv_pct(100));
+		lv_obj_set_align(rack_width_label, LV_ALIGN_LEFT_MID);
+
+		rack_width_slider = lv_obj_get_child(rack_width_label, 0);
+		lv_obj_set_width(rack_width_slider, lv_pct(40));
+		lv_slider_set_range(
+			rack_width_slider, ModuleDisplaySettings::MinRackWidthHP, ModuleDisplaySettings::MaxRackWidthHP);
+		lv_slider_set_value(rack_width_slider, ModuleDisplaySettings::DefaultRackWidthHP, LV_ANIM_OFF);
+
 		auto graphics_settings = create_settings_menu_switch(ui_PVSettingsMenu, "Draw Screens");
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
 
@@ -45,8 +59,10 @@ struct PatchViewSettingsMenu {
 
 		lv_obj_move_to_index(graphics_title, 1);
 		lv_obj_move_to_index(zoom_label, 2);
-		lv_obj_move_to_index(graphics_settings, 3);
-		lv_obj_move_to_index(graphics_update_rate_label, 4);
+		lv_obj_move_to_index(auto_width_cont, 3);
+		lv_obj_move_to_index(rack_width_label, 4);
+		lv_obj_move_to_index(graphics_settings, 5);
+		lv_obj_move_to_index(graphics_update_rate_label, 6);
 
 		auto bar_title = create_settings_menu_title(ui_PVSettingsMenu, "STATUS BAR");
 
@@ -60,10 +76,10 @@ struct PatchViewSettingsMenu {
 		auto show_knobset_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show KnobSet Name");
 		show_knobset_name_check = lv_obj_get_child(show_knobset_cont, 1);
 
-		lv_obj_move_to_index(bar_title, 5);
-		lv_obj_move_to_index(show_samplerate_cont, 6);
-		lv_obj_move_to_index(float_samplerate_cont, 7);
-		lv_obj_move_to_index(show_knobset_cont, 8);
+		lv_obj_move_to_index(bar_title, 7);
+		lv_obj_move_to_index(show_samplerate_cont, 8);
+		lv_obj_move_to_index(float_samplerate_cont, 9);
+		lv_obj_move_to_index(show_knobset_cont, 10);
 
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
@@ -86,6 +102,8 @@ struct PatchViewSettingsMenu {
 		lv_obj_set_x(ui_PVSettingsMenu, 220);
 
 		lv_obj_add_event_cb(zoom_slider, zoom_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(auto_rack_width_check, rack_width_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(rack_width_slider, rack_width_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(graphics_show_check, graphics_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(
@@ -102,6 +120,8 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_PVSettingsCloseButton);
 
 		lv_group_add_obj(settings_menu_group, zoom_slider);
+		lv_group_add_obj(settings_menu_group, auto_rack_width_check);
+		lv_group_add_obj(settings_menu_group, rack_width_slider);
 		lv_group_add_obj(settings_menu_group, graphics_show_check);
 		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
 
@@ -144,6 +164,7 @@ struct PatchViewSettingsMenu {
 					 settings.paneljack_style.mode == ShowAll || settings.paneljack_style.mode == ShowAllIfPlaying);
 
 		lv_check(graphics_show_check, settings.show_graphic_screens);
+		lv_check(auto_rack_width_check, settings.auto_rack_width);
 
 		lv_check(show_samplerate_check, settings.show_samplerate);
 		lv_check(float_audioload_check, settings.float_loadmeter);
@@ -168,6 +189,7 @@ struct PatchViewSettingsMenu {
 			lv_slider_set_value(ui_PVCablesTranspSlider, opacity, LV_ANIM_OFF);
 		}
 		lv_slider_set_value(zoom_slider, ModuleDisplaySettings::zoom_level_index(settings.view_height_px), LV_ANIM_OFF);
+		lv_slider_set_value(rack_width_slider, settings.rack_width_hp, LV_ANIM_OFF);
 		{
 			int slider_val = ModuleDisplaySettings::ThrottleAmounts.size() - 2;
 			auto throttle = settings.graphic_screen_throttle;
@@ -268,6 +290,7 @@ private:
 		lv_enable(ui_PVJackMapTranspSlider, show_jack_maps);
 		lv_enable(ui_PVCablesTranspSlider, show_cables);
 		lv_enable(graphics_update_rate_slider, show_graphics);
+		lv_enable(rack_width_slider, !lv_obj_has_state(auto_rack_width_check, LV_STATE_CHECKED));
 
 		if (!show_control_maps && !show_jack_maps) {
 			lv_disable(ui_PVShowMapsAlwaysCheck);
@@ -378,6 +401,23 @@ private:
 		page->changed_while_visible = true;
 	}
 
+	static void rack_width_value_change_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
+
+		page->settings.auto_rack_width = lv_obj_has_state(page->auto_rack_width_check, LV_STATE_CHECKED);
+
+		auto hp = lv_slider_get_value(page->rack_width_slider);
+		page->settings.rack_width_hp = ModuleDisplaySettings::clamp_rack_width(hp);
+
+		page->update_interactive_states();
+
+		page->settings.changed = true;
+		page->changed_while_visible = true;
+	}
+
 	static void graphics_settings_value_change_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -425,6 +465,8 @@ private:
 	lv_group_t *settings_menu_group = nullptr;
 
 	lv_obj_t *zoom_slider;
+	lv_obj_t *auto_rack_width_check;
+	lv_obj_t *rack_width_slider;
 
 	lv_obj_t *graphics_show_check;
 	lv_obj_t *graphics_update_rate_label;

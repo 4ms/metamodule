@@ -37,9 +37,14 @@ class CableDrawer {
 	static constexpr unsigned ReferenceHeight = 180;
 	float zoom = 1.f;
 
-	//LVGL canvas is internally an img, which has 11 bits for height, so max is 2047
-	static constexpr uint32_t Height = std::min<uint32_t>(MaxCanvasHeight, 2047);
-	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, Height)> cable_buf;
+	//LVGL canvas is internally an img, which has 11 bits for each dimension, so max is 2047
+	static constexpr uint32_t MaxDim = 2047;
+	static constexpr uint32_t Height = std::min<uint32_t>(MaxCanvasHeight, MaxDim);
+	static constexpr uint32_t Width = 320;
+	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(Width, Height)> cable_buf;
+
+	int32_t canvas_w = Width;
+	int32_t canvas_h = Height;
 
 	struct Vec2 {
 		int32_t x;
@@ -50,11 +55,10 @@ public:
 	CableDrawer(lv_obj_t *parent, const std::vector<DrawnElement> &drawn_elements)
 		: drawn{drawn_elements}
 		, canvas(lv_canvas_create(parent)) {
-		lv_obj_set_size(canvas, 320, Height);
 		lv_obj_set_align(canvas, LV_ALIGN_TOP_LEFT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_IGNORE_LAYOUT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
-		lv_canvas_set_buffer(canvas, cable_buf.data(), 320, Height, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		set_size(Width, Height);
 
 		lv_draw_line_dsc_init(&cable_dsc);
 		cable_dsc.opa = LV_OPA_100;
@@ -108,8 +112,21 @@ public:
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 	}
 
-	void set_height(int16_t height) {
-		lv_obj_set_height(canvas, std::min<int32_t>(height, Height));
+	// The rack can be wider than the screen, so the canvas is re-shaped to fit it.
+	// cable_buf holds a fixed number of pixels; width wins and the height is capped
+	// to what is left, so cables below the cut-off simply aren't drawn.
+	void set_size(int32_t width, int32_t height) {
+		canvas_w = std::clamp<int32_t>(width, 1, MaxDim);
+
+		auto max_height = cable_buf.size() / (LV_IMG_PX_SIZE_ALPHA_BYTE * canvas_w);
+		canvas_h = std::clamp<int32_t>(height, 1, std::min<int32_t>(max_height, MaxDim));
+
+		lv_obj_set_size(canvas, canvas_w, canvas_h);
+		lv_canvas_set_buffer(canvas, cable_buf.data(), canvas_w, canvas_h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+	}
+
+	void set_height(int32_t height) {
+		set_size(canvas_w, height);
 	}
 
 	// Scales cable and jack-marker sizes for modules drawn at the given faceplate height

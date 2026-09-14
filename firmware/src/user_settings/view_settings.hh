@@ -6,6 +6,16 @@
 namespace MetaModule
 {
 
+// 1 HP is 5.08mm wide and a 3U faceplate is 128.5mm tall, so pixels-per-HP follows
+// the height the faceplate is drawn at
+constexpr float px_per_hp(unsigned faceplate_height_px) {
+	return 5.08f * (float)faceplate_height_px / 128.5f;
+}
+
+constexpr unsigned hp_across_screen(unsigned view_width_px, unsigned faceplate_height_px) {
+	return (unsigned)((float)view_width_px / px_per_hp(faceplate_height_px));
+}
+
 struct MapRingStyle {
 	enum class Mode {
 		HideAlways,
@@ -46,6 +56,24 @@ struct ModuleDisplaySettings {
 	constexpr static unsigned nearest_zoom_level(unsigned height_px) {
 		return ZoomLevels[zoom_level_index(height_px)];
 	}
+
+	// Width in px available to modules in PatchView (the modules panel's content area)
+	constexpr static unsigned ViewWidthPx = 308;
+
+	// Min HP is the width of the screen when fully zoomed in (huge modules)
+	constexpr static unsigned MinRackWidthHP = hp_across_screen(ViewWidthPx, ZoomLevels.back());
+	// Max HP is 2 screens wide when fully zoomed out (tiny modules)
+	constexpr static unsigned MaxRackWidthHP = hp_across_screen(ViewWidthPx * 2, ZoomLevels.front());
+	constexpr static unsigned DefaultRackWidthHP = hp_across_screen(ViewWidthPx, DefaultZoomLevel);
+
+	constexpr static unsigned clamp_rack_width(unsigned hp) {
+		return hp < MinRackWidthHP ? MinRackWidthHP : hp > MaxRackWidthHP ? MaxRackWidthHP : hp;
+	}
+
+	// When auto, modules wrap at the screen edge, so zooming rearranges them.
+	// Otherwise they wrap at a fixed rack_width_hp and zooming only changes the scale.
+	bool auto_rack_width = true;
+	unsigned rack_width_hp = DefaultRackWidthHP;
 	bool changed = true; //???unused but keep for backward compat
 	bool show_graphic_screens = true;
 

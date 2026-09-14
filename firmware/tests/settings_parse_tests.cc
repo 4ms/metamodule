@@ -441,6 +441,8 @@ TEST_CASE("Serialize settings") {
 	settings.module_view.cable_style.mode = HideAlways;
 	settings.module_view.cable_style.opa = 0;
 	settings.module_view.view_height_px = 240;
+	settings.module_view.auto_rack_width = false;
+	settings.module_view.rack_width_hp = 50;
 
 	settings.audio.sample_rate = 24000;
 	settings.audio.block_size = 512;
@@ -479,6 +481,8 @@ TEST_CASE("Serialize settings") {
     map_ring_flash_active: 1
     scroll_to_active_param: 0
     view_height_px: 180
+    auto_rack_width: 1
+    rack_width_hp: 43
     param_style:
       mode: CurModuleIfPlaying
       opa: 129
@@ -500,6 +504,8 @@ TEST_CASE("Serialize settings") {
     map_ring_flash_active: 0
     scroll_to_active_param: 1
     view_height_px: 240
+    auto_rack_width: 0
+    rack_width_hp: 50
     param_style:
       mode: CurModule
       opa: 128
@@ -595,4 +601,28 @@ TEST_CASE("view_height_px snaps to a valid zoom level") {
 	CHECK(parse_height("136") == 150);
 	CHECK(parse_height("200") == 210);
 	CHECK(parse_height("1000") == 240);
+}
+
+TEST_CASE("rack_width_hp is clamped to the usable range") {
+	using MetaModule::ModuleDisplaySettings;
+
+	auto parse_hp = [](std::string const &hp) {
+		std::string yaml = "Settings:\n  patch_view:\n    rack_width_hp: " + hp + "\n";
+		MetaModule::UserSettings settings;
+		MetaModule::Settings::parse({yaml.data(), yaml.size()}, &settings);
+		return settings.patch_view.rack_width_hp;
+	};
+
+	// The narrowest rack fills the screen at the largest zoom, the widest at the smallest zoom
+	CHECK(ModuleDisplaySettings::MinRackWidthHP ==
+		  MetaModule::hp_across_screen(ModuleDisplaySettings::ViewWidthPx, ModuleDisplaySettings::ZoomLevels.back()));
+	CHECK(ModuleDisplaySettings::MaxRackWidthHP ==
+		  MetaModule::hp_across_screen(ModuleDisplaySettings::ViewWidthPx, ModuleDisplaySettings::ZoomLevels.front()));
+	CHECK(ModuleDisplaySettings::MinRackWidthHP < ModuleDisplaySettings::DefaultRackWidthHP);
+	CHECK(ModuleDisplaySettings::DefaultRackWidthHP < ModuleDisplaySettings::MaxRackWidthHP);
+
+	CHECK(parse_hp("0") == ModuleDisplaySettings::MinRackWidthHP);
+	CHECK(parse_hp("1000") == ModuleDisplaySettings::MaxRackWidthHP);
+	CHECK(parse_hp(std::to_string(ModuleDisplaySettings::DefaultRackWidthHP)) ==
+		  ModuleDisplaySettings::DefaultRackWidthHP);
 }

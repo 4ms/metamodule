@@ -159,8 +159,47 @@ struct PatchViewPage : PageBase {
 		redraw_patch();
 	}
 
+	// The module graphics are rasterized at a fixed size and the rack wraps at a fixed
+	// width, so a change to either means the whole patch has to be drawn again
+	struct RackLayout {
+		unsigned view_height_px;
+		bool auto_width;
+		unsigned width_hp;
+		bool operator==(RackLayout const &) const = default;
+	};
+
+	RackLayout rack_layout() const {
+		return {page_settings.view_height_px, page_settings.auto_rack_width, page_settings.rack_width_hp};
+	}
+
+	// Width in px the modules wrap at. Auto tracks the screen; otherwise the rack is a
+	// fixed number of HP, so zooming scales it instead of re-flowing the modules.
+	lv_coord_t rack_width_px() const {
+		if (page_settings.auto_rack_width)
+			return ModuleDisplaySettings::ViewWidthPx;
+
+		auto px = page_settings.rack_width_hp * px_per_hp(page_settings.view_height_px);
+		return std::lround(px);
+	}
+
+	void apply_rack_width() {
+		if (page_settings.auto_rack_width)
+			lv_obj_set_width(modules_cont, lv_pct(100));
+		else
+			lv_obj_set_content_width(modules_cont, rack_width_px());
+
+		// Only allow panning sideways when there is something off-screen to pan to
+		auto scrolls_sideways = rack_width_px() > (lv_coord_t)ModuleDisplaySettings::ViewWidthPx;
+		lv_obj_set_scroll_dir(base, scrolls_sideways ? LV_DIR_ALL : LV_DIR_VER);
+		if (!scrolls_sideways)
+			lv_obj_scroll_to_x(base, 0, LV_ANIM_OFF);
+
+		lv_obj_refr_size(modules_cont);
+	}
+
 	void redraw_patch() {
-		drawn_view_height_px = page_settings.view_height_px;
+		drawn_rack_layout = rack_layout();
+		apply_rack_width();
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -209,7 +248,8 @@ struct PatchViewPage : PageBase {
 
 		auto last_module = lv_obj_get_child(modules_cont, -1);
 		auto last_bottom = lv_obj_get_y(last_module) + lv_obj_get_height(last_module);
-		cable_drawer.set_height(last_bottom + 30);
+		// A little slack past the rack on each axis so cables to edge jacks aren't clipped
+		cable_drawer.set_size(lv_obj_get_content_width(modules_cont) + 12, last_bottom + 30);
 		cable_drawer.set_module_height(page_settings.view_height_px);
 
 		update_cable_style(true);
@@ -355,10 +395,9 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playloaded = patch_is_playing(displayed_patch_loc_hash);
 
-		// Zoom changed in the settings menu: module graphics are rasterized at a fixed
-		// size, so everything has to be drawn again. Unlike gui_state.force_redraw_patch
-		// this keeps the settings menu open, so the slider can be adjusted with live feedback.
-		if (drawn_view_height_px != page_settings.view_height_px) {
+		// Zoom or rack width changed in the settings menu. Unlike gui_state.force_redraw_patch
+		// this keeps the settings menu open, so the sliders give live feedback.
+		if (drawn_rack_layout != rack_layout()) {
 			// dyn_draws point into the module canvases that redraw_patch() is about to delete
 			dyn_draws.clear();
 			dynamic_elements_prepared = false;
@@ -697,6 +736,9 @@ private:
 
 		lv_show(ui_ModuleName);
 
+		auto module_x = lv_obj_get_x(highlighted_module_obj);
+		lv_obj_set_x(ui_ModuleName, module_x - lv_obj_get_scroll_left(ui_PatchViewPage));
+
 		auto module_y = lv_obj_get_y(highlighted_module_obj);
 		auto scroll_y = lv_obj_get_scroll_top(ui_PatchViewPage);
 		auto header_y = lv_obj_get_y(ui_ModulesPanel);
@@ -824,9 +866,6 @@ private:
 			lv_label_set_text(ui_ModuleName, "");
 		}
 
-		auto module_x = lv_obj_get_x(page->highlighted_module_obj);
-		lv_obj_set_x(ui_ModuleName, module_x);
-
 		page->redraw_modulename();
 
 		page->update_map_ring_style();
@@ -946,7 +985,7 @@ private:
 	bool is_ready = false;
 
 	PatchLocHash displayed_patch_loc_hash;
-	unsigned drawn_view_height_px = ModuleDisplaySettings::DefaultZoomLevel;
+	RackLayout drawn_rack_layout{};
 	bool is_redrawing = false;
 	uint32_t patch_revision = 0xFFFFFFFF;
 	uint32_t patch_file_timestamp = 0;

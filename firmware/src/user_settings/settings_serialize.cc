@@ -27,6 +27,8 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("map_ring_flash_active") << s.map_ring_flash_active;
 	n->append_child() << ryml::key("scroll_to_active_param") << s.scroll_to_active_param;
 	n->append_child() << ryml::key("view_height_px") << s.view_height_px;
+	n->append_child() << ryml::key("auto_rack_width") << s.auto_rack_width;
+	n->append_child() << ryml::key("rack_width_hp") << s.rack_width_hp;
 	n->append_child() << ryml::key("param_style") << s.param_style;
 	n->append_child() << ryml::key("paneljack_style") << s.paneljack_style;
 	n->append_child() << ryml::key("cable_style") << s.cable_style;
