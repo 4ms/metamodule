@@ -442,7 +442,7 @@ TEST_CASE("Serialize settings") {
 	settings.module_view.cable_style.opa = 0;
 	settings.module_view.view_height_px = 240;
 	settings.module_view.auto_rack_width = false;
-	settings.module_view.rack_width_hp = 50;
+	settings.module_view.rack_width_hp = 52;
 
 	settings.audio.sample_rate = 24000;
 	settings.audio.block_size = 512;
@@ -482,7 +482,7 @@ TEST_CASE("Serialize settings") {
     scroll_to_active_param: 0
     view_height_px: 180
     auto_rack_width: 1
-    rack_width_hp: 43
+    rack_width_hp: 40
     param_style:
       mode: CurModuleIfPlaying
       opa: 129
@@ -505,7 +505,7 @@ TEST_CASE("Serialize settings") {
     scroll_to_active_param: 1
     view_height_px: 240
     auto_rack_width: 0
-    rack_width_hp: 50
+    rack_width_hp: 52
     param_style:
       mode: CurModule
       opa: 128
@@ -613,16 +613,27 @@ TEST_CASE("rack_width_hp is clamped to the usable range") {
 		return settings.patch_view.rack_width_hp;
 	};
 
-	// The narrowest rack fills the screen at the largest zoom, the widest at the smallest zoom
-	CHECK(ModuleDisplaySettings::MinRackWidthHP ==
-		  MetaModule::hp_across_screen(ModuleDisplaySettings::ViewWidthPx, ModuleDisplaySettings::ZoomLevels.back()));
-	CHECK(ModuleDisplaySettings::MaxRackWidthHP ==
-		  MetaModule::hp_across_screen(ModuleDisplaySettings::ViewWidthPx, ModuleDisplaySettings::ZoomLevels.front()));
+	// The narrowest rack fits on screen even at the largest zoom, so it never needs panning
+	CHECK(ModuleDisplaySettings::MinRackWidthHP * MetaModule::px_per_hp(ModuleDisplaySettings::ZoomLevels.back()) <=
+		  ModuleDisplaySettings::ViewWidthPx);
+
+	// ...and the default sits between the extremes
 	CHECK(ModuleDisplaySettings::MinRackWidthHP < ModuleDisplaySettings::DefaultRackWidthHP);
 	CHECK(ModuleDisplaySettings::DefaultRackWidthHP < ModuleDisplaySettings::MaxRackWidthHP);
 
 	CHECK(parse_hp("0") == ModuleDisplaySettings::MinRackWidthHP);
 	CHECK(parse_hp("1000") == ModuleDisplaySettings::MaxRackWidthHP);
+
+	// Widths snap down onto the step grid, and every step is reachable
+	for (auto step = 0u; step <= ModuleDisplaySettings::rack_width_steps(); step++) {
+		auto hp = ModuleDisplaySettings::rack_width_for_step(step);
+		CHECK(hp == ModuleDisplaySettings::MinRackWidthHP + step * ModuleDisplaySettings::RackWidthStepHP);
+		CHECK(ModuleDisplaySettings::rack_width_step(hp) == step);
+		CHECK(parse_hp(std::to_string(hp)) == hp);
+		CHECK(parse_hp(std::to_string(hp + 1)) == hp);
+	}
+	CHECK(ModuleDisplaySettings::rack_width_for_step(ModuleDisplaySettings::rack_width_steps()) ==
+		  ModuleDisplaySettings::MaxRackWidthHP);
 	CHECK(parse_hp(std::to_string(ModuleDisplaySettings::DefaultRackWidthHP)) ==
 		  ModuleDisplaySettings::DefaultRackWidthHP);
 }

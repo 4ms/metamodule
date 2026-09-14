@@ -1,6 +1,6 @@
 #pragma once
-#include "delay.hh"
 #include "CoreModules/elements/element_counter.hh"
+#include "delay.hh"
 #include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -29,7 +29,7 @@ struct PatchViewPage : PageBase {
 	PatchViewPage(PatchContext info, FileSaveDialog &file_save_dialog)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
-		, modules_cont(ui_ModulesPanel)
+		, modules_cont(create_rack_container(ui_ModulesPanel))
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
@@ -75,6 +75,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(ui_AddButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 
 		lv_obj_add_event_cb(ui_PatchViewPage, scroll_end_cb, LV_EVENT_SCROLL, this);
+		lv_obj_add_event_cb(ui_ModulesPanel, scroll_end_cb, LV_EVENT_SCROLL, this);
 
 		desc_panel.hide();
 
@@ -159,6 +160,32 @@ struct PatchViewPage : PageBase {
 		redraw_patch();
 	}
 
+	// The rack container scrolls horizontally only, and the whole screen scrolls vertically only
+	// This keeps the button bar from scrolling left/right if the rack is wider than the screen.
+	static lv_obj_t *create_rack_container(lv_obj_t *viewport) {
+		lv_obj_add_flag(viewport, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_set_scroll_dir(viewport, LV_DIR_HOR);
+		lv_obj_set_scrollbar_mode(viewport, LV_SCROLLBAR_MODE_OFF);
+		lv_obj_set_style_pad_row(viewport, 0, LV_PART_MAIN);
+		lv_obj_set_style_pad_column(viewport, 0, LV_PART_MAIN);
+
+		// Spacing between modules moves here from the viewport
+		auto rack = lv_obj_create(viewport);
+		lv_obj_set_height(rack, LV_SIZE_CONTENT);
+		lv_obj_set_flex_flow(rack, LV_FLEX_FLOW_ROW_WRAP);
+		lv_obj_set_flex_align(rack, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+		lv_obj_clear_flag(rack,
+						  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
+							  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_set_style_bg_opa(rack, LV_OPA_0, LV_PART_MAIN);
+		lv_obj_set_style_border_width(rack, 0, LV_PART_MAIN);
+		lv_obj_set_style_radius(rack, 0, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(rack, 0, LV_PART_MAIN);
+		lv_obj_set_style_pad_row(rack, 3, LV_PART_MAIN);
+		lv_obj_set_style_pad_column(rack, 3, LV_PART_MAIN);
+		return rack;
+	}
+
 	// The module graphics are rasterized at a fixed size and the rack wraps at a fixed
 	// width, so a change to either means the whole patch has to be drawn again
 	struct RackLayout {
@@ -186,13 +213,13 @@ struct PatchViewPage : PageBase {
 		if (page_settings.auto_rack_width)
 			lv_obj_set_width(modules_cont, lv_pct(100));
 		else
-			lv_obj_set_content_width(modules_cont, rack_width_px());
+			lv_obj_set_width(modules_cont, rack_width_px());
 
 		// Only allow panning sideways when there is something off-screen to pan to
 		auto scrolls_sideways = rack_width_px() > (lv_coord_t)ModuleDisplaySettings::ViewWidthPx;
-		lv_obj_set_scroll_dir(base, scrolls_sideways ? LV_DIR_ALL : LV_DIR_VER);
+		lv_obj_set_scroll_dir(ui_ModulesPanel, scrolls_sideways ? LV_DIR_HOR : LV_DIR_NONE);
 		if (!scrolls_sideways)
-			lv_obj_scroll_to_x(base, 0, LV_ANIM_OFF);
+			lv_obj_scroll_to_x(ui_ModulesPanel, 0, LV_ANIM_OFF);
 
 		lv_obj_refr_size(modules_cont);
 	}
@@ -249,7 +276,7 @@ struct PatchViewPage : PageBase {
 		auto last_module = lv_obj_get_child(modules_cont, -1);
 		auto last_bottom = lv_obj_get_y(last_module) + lv_obj_get_height(last_module);
 		// A little slack past the rack on each axis so cables to edge jacks aren't clipped
-		cable_drawer.set_size(lv_obj_get_content_width(modules_cont) + 12, last_bottom + 30);
+		cable_drawer.set_size(lv_obj_get_width(modules_cont) + 12, last_bottom + 30);
 		cable_drawer.set_module_height(page_settings.view_height_px);
 
 		update_cable_style(true);
@@ -635,7 +662,7 @@ private:
 
 			auto module_top_to_obj = lv_obj_get_y(drawn_el.gui_element.obj);
 			auto panel_top_to_module_top = lv_obj_get_y(lv_obj_get_parent(drawn_el.gui_element.obj));
-			auto panel_top_pos = lv_obj_get_y(ui_ModulesPanel);
+			auto panel_top_pos = lv_obj_get_y(ui_ModulesPanel) + lv_obj_get_y(modules_cont);
 			auto ypos = module_top_to_obj + panel_top_to_module_top + panel_top_pos;
 			auto y2pos = ypos + lv_obj_get_height(drawn_el.gui_element.obj);
 
@@ -736,10 +763,10 @@ private:
 
 		lv_show(ui_ModuleName);
 
-		auto module_x = lv_obj_get_x(highlighted_module_obj);
-		lv_obj_set_x(ui_ModuleName, module_x - lv_obj_get_scroll_left(ui_PatchViewPage));
+		auto module_x = lv_obj_get_x(highlighted_module_obj) + lv_obj_get_x(modules_cont);
+		lv_obj_set_x(ui_ModuleName, module_x - lv_obj_get_scroll_left(ui_ModulesPanel));
 
-		auto module_y = lv_obj_get_y(highlighted_module_obj);
+		auto module_y = lv_obj_get_y(highlighted_module_obj) + lv_obj_get_y(modules_cont);
 		auto scroll_y = lv_obj_get_scroll_top(ui_PatchViewPage);
 		auto header_y = lv_obj_get_y(ui_ModulesPanel);
 		int16_t module_top_on_screen = header_y - scroll_y + module_y;

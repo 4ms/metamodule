@@ -29,19 +29,30 @@ struct PatchViewSettingsMenu {
 		lv_slider_set_value(
 			zoom_slider, ModuleDisplaySettings::zoom_level_index(ModuleDisplaySettings::DefaultZoomLevel), LV_ANIM_OFF);
 
-		auto auto_width_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Auto Width");
+		auto auto_width_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Auto Rack Width");
 		auto_rack_width_check = lv_obj_get_child(auto_width_cont, 1);
 
-		auto rack_width_label = create_settings_menu_slider(ui_PVSettingsMenu, "Rack Width");
+		auto rack_width_label = create_settings_menu_slider(ui_PVSettingsMenu, "Width");
 		lv_obj_set_style_text_font(rack_width_label, &ui_font_MuseoSansRounded50014, 0);
 		lv_obj_set_width(rack_width_label, lv_pct(100));
 		lv_obj_set_align(rack_width_label, LV_ALIGN_LEFT_MID);
 
 		rack_width_slider = lv_obj_get_child(rack_width_label, 0);
 		lv_obj_set_width(rack_width_slider, lv_pct(40));
-		lv_slider_set_range(
-			rack_width_slider, ModuleDisplaySettings::MinRackWidthHP, ModuleDisplaySettings::MaxRackWidthHP);
-		lv_slider_set_value(rack_width_slider, ModuleDisplaySettings::DefaultRackWidthHP, LV_ANIM_OFF);
+		// The slider picks a step, not an HP value, so one click moves RackWidthStepHP
+		lv_slider_set_range(rack_width_slider, 0, ModuleDisplaySettings::rack_width_steps());
+		lv_slider_set_value(rack_width_slider,
+							ModuleDisplaySettings::rack_width_step(ModuleDisplaySettings::DefaultRackWidthHP),
+							LV_ANIM_OFF);
+
+		// Live readout of the width in HP, sitting between the "Width" text and the slider
+		rack_width_hp_label = lv_label_create(rack_width_label);
+		lv_obj_set_align(rack_width_hp_label, LV_ALIGN_TOP_RIGHT);
+		lv_obj_set_x(rack_width_hp_label, lv_pct(-43));
+		lv_obj_set_y(rack_width_hp_label, 3);
+		lv_obj_set_style_text_font(rack_width_hp_label, &ui_font_MuseoSansRounded50012, 0);
+		lv_obj_set_style_text_color(rack_width_hp_label, lv_color_hex(0xAAAAAA), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_color(rack_width_hp_label, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DISABLED);
 
 		auto graphics_settings = create_settings_menu_switch(ui_PVSettingsMenu, "Draw Screens");
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
@@ -102,8 +113,9 @@ struct PatchViewSettingsMenu {
 		lv_obj_set_x(ui_PVSettingsMenu, 220);
 
 		lv_obj_add_event_cb(zoom_slider, zoom_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(auto_rack_width_check, rack_width_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(auto_rack_width_check, auto_rack_width_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(rack_width_slider, rack_width_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(rack_width_slider, rack_width_defocus_cb, LV_EVENT_DEFOCUSED, this);
 
 		lv_obj_add_event_cb(graphics_show_check, graphics_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(
@@ -189,7 +201,10 @@ struct PatchViewSettingsMenu {
 			lv_slider_set_value(ui_PVCablesTranspSlider, opacity, LV_ANIM_OFF);
 		}
 		lv_slider_set_value(zoom_slider, ModuleDisplaySettings::zoom_level_index(settings.view_height_px), LV_ANIM_OFF);
-		lv_slider_set_value(rack_width_slider, settings.rack_width_hp, LV_ANIM_OFF);
+		pending_rack_width_hp = settings.rack_width_hp;
+		lv_slider_set_value(
+			rack_width_slider, ModuleDisplaySettings::rack_width_step(settings.rack_width_hp), LV_ANIM_OFF);
+		update_rack_width_label();
 		{
 			int slider_val = ModuleDisplaySettings::ThrottleAmounts.size() - 2;
 			auto throttle = settings.graphic_screen_throttle;
@@ -218,6 +233,8 @@ struct PatchViewSettingsMenu {
 
 	void hide() {
 		if (visible) {
+			commit_rack_width();
+
 			DropOutToRight_Animation(ui_PVSettingsMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
@@ -290,7 +307,9 @@ private:
 		lv_enable(ui_PVJackMapTranspSlider, show_jack_maps);
 		lv_enable(ui_PVCablesTranspSlider, show_cables);
 		lv_enable(graphics_update_rate_slider, show_graphics);
-		lv_enable(rack_width_slider, !lv_obj_has_state(auto_rack_width_check, LV_STATE_CHECKED));
+		auto fixed_rack_width = !lv_obj_has_state(auto_rack_width_check, LV_STATE_CHECKED);
+		lv_enable(rack_width_slider, fixed_rack_width);
+		lv_enable(rack_width_hp_label, fixed_rack_width);
 
 		if (!show_control_maps && !show_jack_maps) {
 			lv_disable(ui_PVShowMapsAlwaysCheck);
@@ -397,11 +416,22 @@ private:
 		val = std::clamp<int32_t>(val, 0, ModuleDisplaySettings::ZoomLevels.size() - 1);
 		page->settings.view_height_px = ModuleDisplaySettings::ZoomLevels[val];
 
+		page->update_rack_width_label();
+
 		page->settings.changed = true;
 		page->changed_while_visible = true;
 	}
 
-	static void rack_width_value_change_cb(lv_event_t *event) {
+	// Shows the width the rack actually has: in auto mode that's however many HP the
+	// screen holds at the current zoom, which changes as Module Size is adjusted
+	void update_rack_width_label() {
+		auto hp = settings.auto_rack_width ?
+					  hp_across_screen(ModuleDisplaySettings::ViewWidthPx, settings.view_height_px) :
+					  pending_rack_width_hp;
+		lv_label_set_text_fmt(rack_width_hp_label, "%uHP", hp);
+	}
+
+	static void auto_rack_width_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 
@@ -409,13 +439,43 @@ private:
 
 		page->settings.auto_rack_width = lv_obj_has_state(page->auto_rack_width_check, LV_STATE_CHECKED);
 
-		auto hp = lv_slider_get_value(page->rack_width_slider);
-		page->settings.rack_width_hp = ModuleDisplaySettings::clamp_rack_width(hp);
-
+		page->update_rack_width_label();
 		page->update_interactive_states();
 
 		page->settings.changed = true;
 		page->changed_while_visible = true;
+	}
+
+	// Applying a width re-rasterizes every module in the patch, which is far too slow to do
+	// on each step of the slider. So only the HP readout follows the slider, and the width
+	// is applied once focus leaves it (see commit_rack_width).
+	static void rack_width_value_change_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
+
+		auto step = std::clamp<int32_t>(
+			lv_slider_get_value(page->rack_width_slider), 0, ModuleDisplaySettings::rack_width_steps());
+		page->pending_rack_width_hp = ModuleDisplaySettings::rack_width_for_step(step);
+
+		page->update_rack_width_label();
+	}
+
+	static void rack_width_defocus_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		static_cast<PatchViewSettingsMenu *>(event->user_data)->commit_rack_width();
+	}
+
+	void commit_rack_width() {
+		if (settings.rack_width_hp == pending_rack_width_hp)
+			return;
+
+		settings.rack_width_hp = pending_rack_width_hp;
+		settings.changed = true;
+		changed_while_visible = true;
 	}
 
 	static void graphics_settings_value_change_cb(lv_event_t *event) {
@@ -467,6 +527,8 @@ private:
 	lv_obj_t *zoom_slider;
 	lv_obj_t *auto_rack_width_check;
 	lv_obj_t *rack_width_slider;
+	lv_obj_t *rack_width_hp_label;
+	unsigned pending_rack_width_hp = ModuleDisplaySettings::DefaultRackWidthHP;
 
 	lv_obj_t *graphics_show_check;
 	lv_obj_t *graphics_update_rate_label;

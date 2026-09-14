@@ -16,6 +16,11 @@ constexpr unsigned hp_across_screen(unsigned view_width_px, unsigned faceplate_h
 	return (unsigned)((float)view_width_px / px_per_hp(faceplate_height_px));
 }
 
+// Rounds a width down onto a grid of `step` HP counting up from `min_hp`
+constexpr unsigned on_hp_step_grid(unsigned hp, unsigned min_hp, unsigned step) {
+	return hp <= min_hp ? min_hp : min_hp + (hp - min_hp) / step * step;
+}
+
 struct MapRingStyle {
 	enum class Mode {
 		HideAlways,
@@ -60,14 +65,40 @@ struct ModuleDisplaySettings {
 	// Width in px available to modules in PatchView (the modules panel's content area)
 	constexpr static unsigned ViewWidthPx = 308;
 
+	// The rack width is picked in steps of this many HP, counting up from MinRackWidthHP
+	constexpr static unsigned RackWidthStepHP = 4;
+
 	// Min HP is the width of the screen when fully zoomed in (huge modules)
 	constexpr static unsigned MinRackWidthHP = hp_across_screen(ViewWidthPx, ZoomLevels.back());
+
+	// Both are rounded down onto the step grid, so every selectable width still fits
+	// what it is meant to fit, and the widest one is actually reachable on the slider
+
 	// Max HP is 2 screens wide when fully zoomed out (tiny modules)
-	constexpr static unsigned MaxRackWidthHP = hp_across_screen(ViewWidthPx * 2, ZoomLevels.front());
-	constexpr static unsigned DefaultRackWidthHP = hp_across_screen(ViewWidthPx, DefaultZoomLevel);
+	constexpr static unsigned MaxRackWidthHP =
+		on_hp_step_grid(hp_across_screen(ViewWidthPx * 2, ZoomLevels.front()), MinRackWidthHP, RackWidthStepHP);
+	constexpr static unsigned DefaultRackWidthHP =
+		on_hp_step_grid(hp_across_screen(ViewWidthPx, DefaultZoomLevel), MinRackWidthHP, RackWidthStepHP);
 
 	constexpr static unsigned clamp_rack_width(unsigned hp) {
 		return hp < MinRackWidthHP ? MinRackWidthHP : hp > MaxRackWidthHP ? MaxRackWidthHP : hp;
+	}
+
+	constexpr static unsigned rack_width_steps() {
+		return (MaxRackWidthHP - MinRackWidthHP) / RackWidthStepHP;
+	}
+
+	constexpr static unsigned rack_width_for_step(unsigned step) {
+		return clamp_rack_width(MinRackWidthHP + step * RackWidthStepHP);
+	}
+
+	// Index of the largest step that isn't wider than hp
+	constexpr static unsigned rack_width_step(unsigned hp) {
+		return (clamp_rack_width(hp) - MinRackWidthHP) / RackWidthStepHP;
+	}
+
+	constexpr static unsigned snap_rack_width(unsigned hp) {
+		return on_hp_step_grid(clamp_rack_width(hp), MinRackWidthHP, RackWidthStepHP);
 	}
 
 	// When auto, modules wrap at the screen edge, so zooming rearranges them.
