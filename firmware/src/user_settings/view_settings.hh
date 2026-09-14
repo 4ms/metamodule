@@ -38,6 +38,17 @@ struct ModuleDisplaySettings {
 	MapRingStyle param_style = {.mode = MapRingStyle::Mode::CurModuleIfPlaying, .opa = 128};
 	MapRingStyle paneljack_style = {.mode = MapRingStyle::Mode::CurModuleIfPlaying, .opa = 128};
 	MapRingStyle cable_style = {.mode = MapRingStyle::Mode::ShowAll, .opa = 128};
+
+	// How taut the cables are drawn: 100 hangs them in a straight line, 0 is maximum droop.
+	// The default reproduces the sag cables have always had.
+	constexpr static uint8_t MaxCableTension = 100;
+	constexpr static uint8_t DefaultCableTension = 50;
+	uint8_t cable_tension = DefaultCableTension;
+
+	constexpr static uint8_t clamp_cable_tension(unsigned tension) {
+		return tension > MaxCableTension ? MaxCableTension : (uint8_t)tension;
+	}
+
 	// Height in px of a module faceplate in PatchView (240 = full screen height)
 	constexpr static std::array<unsigned, 5> ZoomLevels = {120, 150, 180, 210, 240};
 	constexpr static unsigned DefaultZoomLevel = 180;

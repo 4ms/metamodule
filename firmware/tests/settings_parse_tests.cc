@@ -443,6 +443,7 @@ TEST_CASE("Serialize settings") {
 	settings.module_view.view_height_px = 240;
 	settings.module_view.auto_rack_width = false;
 	settings.module_view.rack_width_hp = 52;
+	settings.module_view.cable_tension = 80;
 
 	settings.audio.sample_rate = 24000;
 	settings.audio.block_size = 512;
@@ -492,6 +493,7 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: ShowAll
       opa: 100
+    cable_tension: 50
     show_graphic_screens: 1
     graphic_screen_throttle: 1
     show_samplerate: 1
@@ -515,6 +517,7 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: HideAlways
       opa: 0
+    cable_tension: 80
     show_graphic_screens: 1
     graphic_screen_throttle: 1
     show_samplerate: 1
@@ -636,4 +639,26 @@ TEST_CASE("rack_width_hp is clamped to the usable range") {
 		  ModuleDisplaySettings::MaxRackWidthHP);
 	CHECK(parse_hp(std::to_string(ModuleDisplaySettings::DefaultRackWidthHP)) ==
 		  ModuleDisplaySettings::DefaultRackWidthHP);
+}
+
+TEST_CASE("cable_tension is clamped") {
+	using MetaModule::ModuleDisplaySettings;
+
+	auto parse_tension = [](std::string const &tension) {
+		std::string yaml = "Settings:\n  patch_view:\n    cable_tension: " + tension + "\n";
+		MetaModule::UserSettings settings;
+		MetaModule::Settings::parse({yaml.data(), yaml.size()}, &settings);
+		return settings.patch_view.cable_tension;
+	};
+
+	CHECK(parse_tension("0") == 0);
+	CHECK(parse_tension("50") == 50);
+	CHECK(parse_tension("100") == ModuleDisplaySettings::MaxCableTension);
+	CHECK(parse_tension("200") == ModuleDisplaySettings::MaxCableTension);
+
+	// Missing key falls back to the sag cables have always had
+	MetaModule::UserSettings defaults;
+	std::string empty = "Settings:\n  patch_view:\n";
+	MetaModule::Settings::parse({empty.data(), empty.size()}, &defaults);
+	CHECK(defaults.patch_view.cable_tension == ModuleDisplaySettings::DefaultCableTension);
 }

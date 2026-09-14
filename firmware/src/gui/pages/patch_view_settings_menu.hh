@@ -92,6 +92,11 @@ struct PatchViewSettingsMenu {
 		lv_obj_move_to_index(float_samplerate_cont, 9);
 		lv_obj_move_to_index(show_knobset_cont, 10);
 
+		auto cable_tension_label = create_settings_menu_slider(ui_PVSettingsMenu, "Tension");
+		cable_tension_slider = lv_obj_get_child(cable_tension_label, 0);
+		lv_slider_set_range(cable_tension_slider, 0, ModuleDisplaySettings::MaxCableTension);
+		lv_slider_set_value(cable_tension_slider, ModuleDisplaySettings::DefaultCableTension, LV_ANIM_OFF);
+
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
 
@@ -109,6 +114,7 @@ struct PatchViewSettingsMenu {
 
 		lv_obj_add_event_cb(ui_PVShowAllCablesCheck, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_PVCablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(cable_tension_slider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_set_x(ui_PVSettingsMenu, 220);
 
@@ -153,6 +159,7 @@ struct PatchViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, ui_PVShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_PVCablesTranspSlider);
+		lv_group_add_obj(settings_menu_group, cable_tension_slider);
 	}
 
 	void prepare_focus(lv_group_t *group) {
@@ -200,6 +207,7 @@ struct PatchViewSettingsMenu {
 			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
 			lv_slider_set_value(ui_PVCablesTranspSlider, opacity, LV_ANIM_OFF);
 		}
+		lv_slider_set_value(cable_tension_slider, settings.cable_tension, LV_ANIM_OFF);
 		lv_slider_set_value(zoom_slider, ModuleDisplaySettings::zoom_level_index(settings.view_height_px), LV_ANIM_OFF);
 		pending_rack_width_hp = settings.rack_width_hp;
 		lv_slider_set_value(
@@ -306,6 +314,7 @@ private:
 		lv_enable(ui_PVControlMapTranspSlider, show_control_maps);
 		lv_enable(ui_PVJackMapTranspSlider, show_jack_maps);
 		lv_enable(ui_PVCablesTranspSlider, show_cables);
+		lv_enable(cable_tension_slider, show_cables);
 		lv_enable(graphics_update_rate_slider, show_graphics);
 		auto fixed_rack_width = !lv_obj_has_state(auto_rack_width_check, LV_STATE_CHECKED);
 		lv_enable(rack_width_slider, fixed_rack_width);
@@ -401,6 +410,9 @@ private:
 		auto opacity = lv_slider_get_value(ui_PVCablesTranspSlider); //0..100
 		opacity = (float)opacity * 2.5f;
 		page->settings.cable_style.opa = opacity;
+
+		page->settings.cable_tension =
+			ModuleDisplaySettings::clamp_cable_tension(lv_slider_get_value(page->cable_tension_slider));
 
 		page->settings.changed = true;
 		page->changed_while_visible = true;
@@ -527,6 +539,7 @@ private:
 	lv_obj_t *zoom_slider;
 	lv_obj_t *auto_rack_width_check;
 	lv_obj_t *rack_width_slider;
+	lv_obj_t *cable_tension_slider;
 	lv_obj_t *rack_width_hp_label;
 	unsigned pending_rack_width_hp = ModuleDisplaySettings::DefaultRackWidthHP;
 

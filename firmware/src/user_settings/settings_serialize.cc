@@ -32,6 +32,7 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("param_style") << s.param_style;
 	n->append_child() << ryml::key("paneljack_style") << s.paneljack_style;
 	n->append_child() << ryml::key("cable_style") << s.cable_style;
+	n->append_child() << ryml::key("cable_tension") << s.cable_tension;
 	n->append_child() << ryml::key("show_graphic_screens") << s.show_graphic_screens;
 	n->append_child() << ryml::key("graphic_screen_throttle") << s.graphic_screen_throttle;
 	n->append_child() << ryml::key("show_samplerate") << s.show_samplerate;

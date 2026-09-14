@@ -94,6 +94,8 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	read_or_default(node, "param_style", s, &ModuleDisplaySettings::param_style);
 	read_or_default(node, "paneljack_style", s, &ModuleDisplaySettings::paneljack_style);
 	read_or_default(node, "cable_style", s, &ModuleDisplaySettings::cable_style);
+	read_or_default(node, "cable_tension", s, &ModuleDisplaySettings::cable_tension);
+	s->cable_tension = ModuleDisplaySettings::clamp_cable_tension(s->cable_tension);
 	read_or_default(node, "show_graphic_screens", s, &ModuleDisplaySettings::show_graphic_screens);
 	read_or_default(node, "graphic_screen_throttle", s, &ModuleDisplaySettings::graphic_screen_throttle);
 	read_or_default(node, "show_samplerate", s, &ModuleDisplaySettings::show_samplerate);

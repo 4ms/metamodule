@@ -37,6 +37,12 @@ class CableDrawer {
 	static constexpr unsigned ReferenceHeight = 180;
 	float zoom = 1.f;
 
+	static constexpr unsigned MaxTension = 100;
+
+	// Sag at zero tension is this many px (at ReferenceHeight) plus the length of the cable
+	static constexpr float SagOffsetPx = 70.f;
+	float slack = 0.5f;
+
 	//LVGL canvas is internally an img, which has 11 bits for each dimension, so max is 2047
 	static constexpr uint32_t MaxDim = 2047;
 	static constexpr uint32_t Height = std::min<uint32_t>(MaxCanvasHeight, MaxDim);
@@ -127,6 +133,11 @@ public:
 
 	void set_height(int32_t height) {
 		set_size(canvas_w, height);
+	}
+
+	// 0 is maximum droop, 100 hangs the cables in a straight line
+	void set_tension(unsigned tension) {
+		slack = (float)(MaxTension - std::min(tension, MaxTension)) / (float)MaxTension;
 	}
 
 	// Scales cable and jack-marker sizes for modules drawn at the given faceplate height
@@ -286,7 +297,14 @@ public:
 					const lv_draw_line_dsc_t &center_dsc) {
 		float dist_x = std::abs(start.x - end.x);
 		float dist_y = std::abs(start.y - end.y);
-		CableDrawer::Vec2 control{(start.x + end.x) / 2, ((start.y + end.y) / 2) + (int32_t)dist_x};
+		float dist = std::sqrt(dist_x * dist_x + dist_y * dist_y);
+
+		// Sag is a fixed offset plus the straight-line length of the cable, the way VCV Rack
+		// does it. Tracking the length rather than the horizontal span alone keeps long runs
+		// from hanging right off the bottom of a wide rack.
+		float sag = slack * (SagOffsetPx * zoom + dist);
+
+		CableDrawer::Vec2 control{(start.x + end.x) / 2, (int32_t)((start.y + end.y) / 2 + sag)};
 		auto steps = std::clamp<unsigned>(dist_x * dist_y / 1000, 8, MAX_STEPS - 1);
 		CableDrawer::draw_bezier(start, end, control, steps, outer_dsc, inner_dsc, center_dsc);
 	}

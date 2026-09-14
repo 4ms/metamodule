@@ -1,6 +1,6 @@
 #pragma once
-#include "CoreModules/elements/element_counter.hh"
 #include "delay.hh"
+#include "CoreModules/elements/element_counter.hh"
 #include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -721,7 +721,12 @@ private:
 
 		cable_drawer.set_opacity(page_settings.cable_style.opa);
 
-		if (force || page_settings.cable_style.mode != last_cable_style.mode) {
+		// Tension changes the shape of every cable, so they have to be drawn again
+		auto tension_changed = drawn_cable_tension != page_settings.cable_tension;
+		drawn_cable_tension = page_settings.cable_tension;
+		cable_drawer.set_tension(page_settings.cable_tension);
+
+		if (force || tension_changed || page_settings.cable_style.mode != last_cable_style.mode) {
 			if (page_settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
 				cable_drawer.draw(*patch);
 			else
@@ -1013,6 +1018,7 @@ private:
 
 	PatchLocHash displayed_patch_loc_hash;
 	RackLayout drawn_rack_layout{};
+	uint8_t drawn_cable_tension = ModuleDisplaySettings::DefaultCableTension;
 	bool is_redrawing = false;
 	uint32_t patch_revision = 0xFFFFFFFF;
 	uint32_t patch_file_timestamp = 0;
