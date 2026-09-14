@@ -63,14 +63,20 @@ struct Elf {
 		return highest_addr - lowest_addr + 1;
 	}
 
-	std::optional<ElfSection> find_section(std::string_view name) {
+	std::optional<ElfSection> try_find_section(std::string_view name) {
 		auto section = std::ranges::find_if(sections, [&](auto &sec) { return (sec.section_name() == name); });
 		if (section != sections.end())
 			return *section;
-		else {
-			pr_err("Section %.*s not found\n", (int)name.size(), name.data());
+		else
 			return {};
-		}
+	}
+
+	// same as try_find_section, but print an error if section not found
+	std::optional<ElfSection> find_section(std::string_view name) {
+		auto section = try_find_section(name);
+		if (!section)
+			pr_err("Section %.*s not found\n", (int)name.size(), name.data());
+		return section;
 	}
 
 	std::optional<ElfSection> get_section(size_t index) {
