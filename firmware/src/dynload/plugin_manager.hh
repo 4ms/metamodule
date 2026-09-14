@@ -5,6 +5,9 @@
 #include "plugin_loader.hh"
 
 #include "gui/fonts/fonts.hh"
+#include <csetjmp>
+#include <ranges>
+#include <span>
 
 namespace MetaModule
 {
@@ -43,6 +46,9 @@ public:
 					pr_dbg("Unregistered brand %s\n", name.data());
 				else
 					pr_dbg("Failed to unregister brand %s\n", name.data());
+
+				// Mirror of the .init_array constructors run at load time
+				run_fini_array(plugin);
 
 				// Cleanup files we copied to the ramdisk
 				for (auto const &file : plugin.loaded_files) {
@@ -134,6 +140,40 @@ public:
 	}
 
 private:
+	// Run the plugin's .fini_array destructors, in reverse order (per the ELF spec)
+	static void run_fini_array(LoadedPlugin const &plugin) {
+		using dtor_func_t = void (*)();
+
+		if (plugin.fini_array.count == 0)
+			return;
+
+		auto code_start = reinterpret_cast<uintptr_t>(plugin.code.data());
+		auto code_end = code_start + plugin.code.size();
+
+		// The table in the code buffer was relocated at load, so entries are absolute addresses
+		auto dtors = std::span<dtor_func_t const>(
+			reinterpret_cast<dtor_func_t const *>(plugin.code.data() + plugin.fini_array.offset),
+			plugin.fini_array.count);
+
+		// A crashing destructor must not take down the unload
+		AbortRescue rescue;
+		if (setjmp(rescue.jb) != 0) {
+			pr_err("Plugin crashed while running .fini_array destructors\n");
+			return;
+		}
+		rescue.arm();
+
+		for (auto dtor : std::views::reverse(dtors)) {
+			auto addr = reinterpret_cast<uintptr_t>(dtor);
+			if (addr < code_start || addr >= code_end) {
+				pr_err("Skipping .fini_array entry %p: outside plugin code\n", dtor);
+				continue;
+			}
+			pr_trace("Calling dtor %p\n", dtor);
+			dtor();
+		}
+	}
+
 	PluginFileLoader plugin_file_loader;
 	LoadedPluginList loaded_plugin_list;
 	FatFileIO &ramdisk;
