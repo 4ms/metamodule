@@ -91,6 +91,9 @@ Result PatchPlayLoader::load_patch(bool start_audio_immediately) {
 		pr_warn("Open patch manager is not tracking the playing patch\n");
 	}
 
+	// The player starts the new patch on knob set 0
+	knob_set_was_reset_ = true;
+
 	Result result;
 	try {
 		result = player_.load_patch(*next_patch);

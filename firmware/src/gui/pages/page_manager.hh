@@ -190,6 +190,10 @@ public:
 
 	void handle_knobset_change() {
 
+		// Sync to knobset changes due to loading/reloading a patch
+		if (info.patch_playloader.did_reset_knob_set())
+			info.page_list.set_active_knobset(0);
+
 		// Patch must be valid, playing, and have at least one knobset
 		if (auto patch = info.open_patch_manager.get_playing_patch(); patch != nullptr) {
 			if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
