@@ -128,7 +128,7 @@ struct ModuleViewPage : PageBase {
 		auto display = alias.empty() ? ModuleFactory::getModuleDisplayName(slug) : alias;
 		lv_label_set_text(ui_ElementRollerModuleName, display.data());
 
-		has_context_menu = module_context_menu.create_options_menu(this_module_id);
+		has_context_menu = module_context_menu.create_options_menu(slug, this_module_id);
 
 		redraw_module();
 
