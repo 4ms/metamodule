@@ -650,7 +650,7 @@ TEST_CASE("cable_tension is clamped") {
 		return settings.patch_view.cable_tension;
 	};
 
-	CHECK(parse_tension("0") == 0);
+	CHECK(parse_tension("0") == ModuleDisplaySettings::MinCableTension);
 	CHECK(parse_tension("50") == 50);
 	CHECK(parse_tension("100") == ModuleDisplaySettings::MaxCableTension);
 	CHECK(parse_tension("200") == ModuleDisplaySettings::MaxCableTension);

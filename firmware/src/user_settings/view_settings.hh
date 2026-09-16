@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -83,7 +84,7 @@ struct ModuleDisplaySettings {
 	uint8_t cable_tension = DefaultCableTension;
 
 	constexpr static uint8_t clamp_cable_tension(unsigned tension) {
-		return tension > MaxCableTension ? MaxCableTension : (uint8_t)tension;
+		return std::clamp<uint8_t>(tension, MinCableTension, MaxCableTension);
 	}
 
 	// Height in px of a module faceplate in PatchView (240 = full screen height)

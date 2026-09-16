@@ -92,7 +92,7 @@ struct PatchViewSettingsMenu {
 		auto cable_tension_label = create_settings_menu_slider(ui_PVSettingsMenu, "Tension");
 		cable_tension_slider = lv_obj_get_child(cable_tension_label, 0);
 		lv_slider_set_range(
-			cable_tension_slider, ModuleDisplaySettings::MaxCableTension, ModuleDisplaySettings::MaxCableTension);
+			cable_tension_slider, ModuleDisplaySettings::MinCableTension, ModuleDisplaySettings::MaxCableTension);
 		lv_slider_set_value(cable_tension_slider, ModuleDisplaySettings::DefaultCableTension, LV_ANIM_OFF);
 
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
