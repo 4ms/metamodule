@@ -143,6 +143,12 @@ struct PatchPlayLoader {
 		}
 	}
 
+	bool did_reset_knob_set() {
+		auto t = knob_set_was_reset_;
+		knob_set_was_reset_ = false;
+		return t;
+	}
+
 	// Concurrency: Called from UI thread
 	Result handle_file_events();
 
@@ -420,6 +426,7 @@ private:
 	std::atomic<bool> audio_overrun_ = false;
 	bool stopped_because_of_overrun_ = false;
 	bool should_play_when_loaded_ = true;
+	bool knob_set_was_reset_ = false;
 
 	UserSettings *settings = nullptr;
 	std::atomic<AudioSRBlock> current_audio_settings_ = {};

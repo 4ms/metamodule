@@ -58,12 +58,25 @@ inline bool should_skip_for_cable_mode(std::optional<GuiState::CableBeginning> c
 	return false;
 }
 
-inline bool append_header(std::string &opts, ElementCount::Counts last_type, ElementCount::Counts this_type) {
-	if (last_type.num_params == 0 && this_type.num_params > 0) {
-		if (last_type.num_outputs || last_type.num_inputs || last_type.num_lights)
-			opts += Gui::orange_text("Options:") + "\n";
-		else
-			opts += Gui::orange_text("Params:") + "\n";
+inline bool is_altparam(Element const &element) {
+	return std::visit(overloaded{
+						  [](BaseElement const &) { return false; },
+						  [](AltParamElement const &) { return true; },
+					  },
+					  element);
+}
+
+inline bool append_header(std::string &opts,
+						  ElementCount::Counts last_type,
+						  bool last_is_altparam,
+						  ElementCount::Counts this_type,
+						  bool this_is_altparam) {
+	if (this_is_altparam && !last_is_altparam) {
+		opts += Gui::orange_text("Options:") + "\n";
+		return true;
+
+	} else if (!this_is_altparam && this_type.num_params > 0 && (last_type.num_params == 0 || last_is_altparam)) {
+		opts += Gui::orange_text("Params:") + "\n";
 		return true;
 
 	} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&

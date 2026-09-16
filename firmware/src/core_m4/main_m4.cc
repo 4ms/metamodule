@@ -44,12 +44,13 @@ int main() {
 
 	pr_info("M4 starting\n");
 
-	// Drains all cores' buffered printf() output to the UART (in the loops below)
+	// Sends all cores' printf() output to the UART (in the loops below)
 	UartConsoleDrain console_drain{{SharedMemoryS::ptrs.console_a7_0_buff,
 									SharedMemoryS::ptrs.console_a7_1_buff,
 									SharedMemoryS::ptrs.console_m4_buff}};
 
 	// USB
+	// Optionally sends all cores' printf() output to USB console device
 	UsbManager usb{{SharedMemoryS::ptrs.console_a7_0_buff,
 					SharedMemoryS::ptrs.console_a7_1_buff,
 					SharedMemoryS::ptrs.console_m4_buff}};
@@ -72,8 +73,7 @@ int main() {
 	WifiInterface::start();
 
 	// From here on, this core's printf() is buffered and drained asynchronously
-	// by console_drain (everything above logs synchronously, so a hang during
-	// early M4 init still shows its logs)
+	// by console_drain (everything above prints immediately/blocking to UART)
 	UartLog::use_buffer(SharedMemoryS::ptrs.console_m4_buff);
 
 	// Controls
@@ -99,6 +99,10 @@ int main() {
 			console_drain.process();
 		}
 	}
+
+	// The first scan of mounted volumes can be slow, so do it before other
+	// cores start making fs requests
+	fs_messages.process();
 
 	pr_info("M4 initialized\n");
 

@@ -21,7 +21,7 @@ struct PortedMidiMessage {
 };
 
 struct MidiQueue {
-	CircularBufferOpt<PortedMidiMessage, 128> data;
+	CircularBufferOpt<PortedMidiMessage, 512> data;
 };
 
 } // namespace MetaModule

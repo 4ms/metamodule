@@ -54,6 +54,10 @@ public:
 		return header->sh_type == SHT_INIT_ARRAY;
 	}
 
+	bool is_fini_array() {
+		return header->sh_type == SHT_FINI_ARRAY;
+	}
+
 	uint8_t const *begin() {
 		return elf_data_start + offset();
 	}

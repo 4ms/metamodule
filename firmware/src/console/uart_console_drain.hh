@@ -17,8 +17,6 @@ namespace MetaModule
 // DMA transfer.
 // If the DMA reports a transfer error, or keeps stalling, we permanently fall
 // back to feeding UART->TDR fifo directly.
-//
-// Typing 'c' into the console enables per-core colored output; 'm' disables it
 class UartConsoleDrain {
 public:
 	UartConsoleDrain(std::array<ConcurrentBuffer *, ConsoleBufferReader::NumBuffers> buffers)

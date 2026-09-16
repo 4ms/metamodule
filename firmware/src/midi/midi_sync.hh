@@ -55,6 +55,9 @@ public:
 		auto &cc_val = cc_values[midi_chan][cc_num];
 
 		if (cc_val != cc_value) {
+			if (midi_out_queue.data.full())
+				return;
+
 			MidiMessage cc_msg;
 			cc_msg.status = MidiStatusByte{midi_chan, MidiCommand::ControlChange};
 			cc_msg.data.byte[0] = cc_num;
@@ -75,6 +78,9 @@ public:
 		auto &note_val = note_gate_values[midi_chan][note_num];
 
 		if (note_val != gate_on) {
+			if (midi_out_queue.data.full())
+				return;
+
 			if (gate_on) {
 				MidiMessage note_msg;
 				note_msg.status = MidiStatusByte{midi_chan, MidiCommand::NoteOn};
@@ -107,6 +113,9 @@ public:
 		auto &pitch_val = pitchwheel_values[midi_chan];
 
 		if (pitch_val != pitchwheel_value) {
+			if (midi_out_queue.data.full())
+				return;
+
 			MidiMessage pitchwheel_msg;
 			pitchwheel_msg.status = MidiStatusByte{midi_chan, MidiCommand::PitchBend};
 			pitchwheel_msg.data.byte[0] = pitchwheel_value & 0x7F;

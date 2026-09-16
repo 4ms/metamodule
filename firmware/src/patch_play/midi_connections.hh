@@ -64,7 +64,10 @@ struct MidiConnections {
 	std::array<PulseDivider, Midi::NumDivClocks> divclk_pulses;
 
 	// MIDI -> module param maps
-	std::array<std::vector<MappedKnob>, NumMidiCCs> cc_knob_maps;
+	struct CCKnobMap : MappedKnob {
+		bool cc_is_high = false; // Last CC value received was 64-127. Toggle maps flip on a low->high transition
+	};
+	std::array<std::vector<CCKnobMap>, NumMidiCCs> cc_knob_maps;
 	std::array<std::vector<MappedKnob>, NumMidiNotes> note_knob_maps;
 
 	bool connected = false;
@@ -234,7 +237,9 @@ private:
 	static void update_or_add(std::vector<T> &v, const Jack &d, uint32_t midi_chan = 0, uint8_t port_mask = 0)
 		requires std::derived_from<T, JackMidi>;
 
-	static void update_or_add(std::vector<MappedKnob> &v, const MappedKnob &d);
+	template<typename T>
+	static void update_or_add(std::vector<T> &v, const MappedKnob &d)
+		requires std::derived_from<T, MappedKnob>;
 
 	static void update_or_add_poly(std::vector<PolyJackMidi> &v,
 								   const Jack &d,

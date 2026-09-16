@@ -453,6 +453,9 @@ public:
 			return false;
 		}
 
+		// Only a successfully initialized plugin gets its destructors run at unload
+		plugin.fini_array = dynloader.fini_array();
+
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";
 		return true;

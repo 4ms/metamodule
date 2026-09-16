@@ -1,6 +1,6 @@
 #pragma once
-#include "delay.hh"
 #include "debug.hh"
+#include "delay.hh"
 #include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
@@ -62,10 +62,10 @@ public:
 		Gui::init_lvgl_styles();
 
 		if (!Settings::read_settings(patch_storage, &settings, Volume::NorFlash)) {
+			pr_err("Could not read settings file: running with defaults, leaving the file alone\n");
 			settings = UserSettings{};
-			if (!Settings::write_settings(patch_storage, settings, Volume::NorFlash)) {
-				pr_err("Failed to write settings file\n");
-			}
+			// Note: don't write defaults back to disk: a temporary glitch in reading (M4 stuck on
+			// a bad SD card or USB drive) should not mean the user's setting are wiped out.
 		}
 
 		patch_playloader.connect_user_settings(&settings);

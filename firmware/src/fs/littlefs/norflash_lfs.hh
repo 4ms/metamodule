@@ -104,6 +104,33 @@ public:
 		return Status::NewlyFormatted;
 	}
 
+	// RAII guards to ensure every file and dir object is cleaned up.
+	struct FileCloser {
+		lfs_t &lfs;
+		lfs_file_t &file;
+		bool closed = false;
+
+		int close() {
+			if (closed)
+				return 0;
+			closed = true;
+			return lfs_file_close(&lfs, &file);
+		}
+
+		~FileCloser() {
+			close();
+		}
+	};
+
+	struct DirCloser {
+		lfs_t &lfs;
+		lfs_dir_t &dir;
+
+		~DirCloser() {
+			lfs_dir_close(&lfs, &dir);
+		}
+	};
+
 	uint32_t write_file(const std::string_view filename, const std::span<const char> data, int flags) {
 		TimeFile file;
 
@@ -112,6 +139,8 @@ public:
 			pr_err("LFS: Open failed with err %d\n", err);
 			return 0;
 		}
+
+		FileCloser closer{lfs, file.file};
 
 		file.timestamp = get_fattime();
 
@@ -122,7 +151,7 @@ public:
 			return 0;
 		}
 
-		if (err = lfs_file_close(&lfs, &file.file); err < 0) {
+		if (err = closer.close(); err < 0) {
 			pr_err("LFS: Closing failed with err %d\n", err);
 			return 0;
 		}
@@ -166,15 +195,18 @@ public:
 		if (err < 0)
 			return 0;
 
+		FileCloser closer{lfs, file};
+
 		auto seek_err = lfs_file_seek(&lfs, &file, offset, LFS_SEEK_SET);
-		if (seek_err < 0)
+		if (seek_err < 0) {
+			pr_err("LFS: Seek failed with err %d\n", (int)seek_err);
 			return 0;
+		}
 
 		auto bytes_read = time_file_read(&tfile, buffer.data(), buffer.size_bytes());
 		if (bytes_read <= 0)
 			return 0;
 
-		lfs_file_close(&lfs, &file);
 		return bytes_read;
 	}
 
@@ -185,12 +217,20 @@ public:
 		if (lfs_dir_open(&lfs, &dir, "/") < 0)
 			return false;
 
+		DirCloser closer{lfs, dir};
+
 		lfs_dir_rewind(&lfs, &dir);
 
+		// lfs_dir_read returns >0 for an entry, 0 at the end of the directory, <0 on error
 		lfs_info info{};
-		while (int err = lfs_dir_read(&lfs, &dir, &info) != 0) {
-			if (err < 0)
+		while (true) {
+			int err = lfs_dir_read(&lfs, &dir, &info);
+			if (err < 0) {
+				pr_err("LFS: Reading dir failed with err %d\n", err);
 				return false;
+			}
+			if (err == 0)
+				break;
 
 			if (std::string_view{info.name}.ends_with(extension)) {
 				auto timestamp = get_file_timestamp(info.name);
@@ -198,8 +238,6 @@ public:
 					action(info.name, timestamp, info.size);
 			}
 		}
-
-		lfs_dir_close(&lfs, &dir);
 
 		return true;
 	}
@@ -210,12 +248,19 @@ public:
 		if (lfs_dir_open(&lfs, &dir, "/") < 0)
 			return false;
 
+		DirCloser closer{lfs, dir};
+
 		lfs_dir_rewind(&lfs, &dir);
 
 		lfs_info info{};
-		while (int err = lfs_dir_read(&lfs, &dir, &info) != 0) {
-			if (err < 0)
+		while (true) {
+			int err = lfs_dir_read(&lfs, &dir, &info);
+			if (err < 0) {
+				pr_err("LFS: Reading dir failed with err %d\n", err);
 				return false;
+			}
+			if (err == 0)
+				break;
 
 			auto entry_type = info.type == LFS_TYPE_DIR ? DirEntryKind::Dir : DirEntryKind::File;
 
@@ -223,8 +268,6 @@ public:
 			if (timestamp)
 				action(info.name, timestamp, info.size, entry_type);
 		}
-
-		lfs_dir_close(&lfs, &dir);
 
 		return true;
 	}
