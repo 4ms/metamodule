@@ -62,6 +62,11 @@ public:
 		norflash_changes_.reset();
 
 		refresh_patch_list();
+
+		// Populate removeable drives on the first call to process()
+		// This gives the drives time to be mounted
+		sd_changes_.reset();
+		usb_changes_.reset();
 	}
 
 	void reload_default_patches() {
