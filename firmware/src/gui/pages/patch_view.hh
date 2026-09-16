@@ -53,6 +53,7 @@ struct PatchViewPage : PageBase {
 					missing_plugins}
 		, map_ring_display{settings.patch_view} {
 
+		lv_obj_set_style_pad_all(ui_ModulesPanel, 0, LV_PART_MAIN);
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
@@ -165,24 +166,21 @@ struct PatchViewPage : PageBase {
 	static lv_obj_t *create_rack_container(lv_obj_t *viewport) {
 		lv_obj_add_flag(viewport, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_set_scroll_dir(viewport, LV_DIR_HOR);
-		lv_obj_set_scrollbar_mode(viewport, LV_SCROLLBAR_MODE_OFF);
+		lv_obj_set_scrollbar_mode(viewport, LV_SCROLLBAR_MODE_ACTIVE);
 		lv_obj_set_style_pad_row(viewport, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_column(viewport, 0, LV_PART_MAIN);
+		lv_obj_set_style_pad_right(viewport, 2, LV_PART_MAIN);
+		lv_obj_set_style_bg_opa(viewport, LV_OPA_0, LV_PART_MAIN);
 
-		// Spacing between modules moves here from the viewport
 		auto rack = lv_obj_create(viewport);
-		lv_obj_set_height(rack, LV_SIZE_CONTENT);
-		lv_obj_set_flex_flow(rack, LV_FLEX_FLOW_ROW_WRAP);
-		lv_obj_set_flex_align(rack, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 		lv_obj_clear_flag(rack,
 						  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
 							  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_set_style_bg_opa(rack, LV_OPA_0, LV_PART_MAIN);
+		lv_obj_set_style_bg_opa(rack, LV_OPA_100, LV_PART_MAIN);
+		lv_obj_set_style_bg_color(rack, lv_color_hex(0x222222), LV_PART_MAIN);
 		lv_obj_set_style_border_width(rack, 0, LV_PART_MAIN);
 		lv_obj_set_style_radius(rack, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_all(rack, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_row(rack, 3, LV_PART_MAIN);
-		lv_obj_set_style_pad_column(rack, 3, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(rack, 2, LV_PART_MAIN);
 		return rack;
 	}
 
@@ -203,15 +201,17 @@ struct PatchViewPage : PageBase {
 		if (page_settings.auto_rack_width)
 			return RackSize::ViewWidthPx;
 
+		// Round up: faceplate images are their ideal width rounded to whole pixels, so a rack
+		// rounded down could come up a fraction short of holding its full complement of modules
 		auto px = page_settings.rack_width_hp * RackSize::px_per_hp(page_settings.view_height_px);
-		return std::lround(px);
+		return (lv_coord_t)std::ceil(px);
 	}
 
 	void apply_rack_width() {
 		if (page_settings.auto_rack_width)
 			lv_obj_set_width(modules_cont, lv_pct(100));
 		else
-			lv_obj_set_width(modules_cont, rack_width_px());
+			lv_obj_set_width(modules_cont, rack_width_px() + 2);
 
 		// Only allow panning sideways when there is something off-screen to pan to
 		auto scrolls_sideways = rack_width_px() > (lv_coord_t)RackSize::ViewWidthPx;
@@ -271,10 +271,11 @@ struct PatchViewPage : PageBase {
 		highlighted_module_obj = nullptr;
 		update_map_ring_style();
 
-		auto last_module = lv_obj_get_child(modules_cont, -1);
-		auto last_bottom = lv_obj_get_y(last_module) + lv_obj_get_height(last_module);
+		auto last_bottom = rack_height_px();
+		lv_obj_set_height(modules_cont, last_bottom + BottomMarginPx);
+
 		// A little slack past the rack on each axis so cables to edge jacks aren't clipped
-		cable_drawer.set_size(lv_obj_get_width(modules_cont) + 12, last_bottom + 30);
+		cable_drawer.set_size(lv_obj_get_width(modules_cont) + 12, last_bottom + BottomMarginPx);
 		cable_drawer.set_module_height(page_settings.view_height_px);
 
 		update_cable_style(true);
@@ -295,11 +296,31 @@ struct PatchViewPage : PageBase {
 		update_graphic_throttle_setting();
 	}
 
+	void place_module(lv_obj_t *canvas) {
+		auto width = lv_obj_get_width(canvas);
+
+		if (place_cursor_x > 0 && place_cursor_x + width > rack_width_px()) {
+			place_cursor_x = 0;
+			place_cursor_y += page_settings.view_height_px + RowGapPx;
+		}
+
+		lv_obj_set_pos(canvas, place_cursor_x, place_cursor_y);
+		place_cursor_x += width;
+	}
+
+	// Height of the laid-out rack, including the row the cursor is currently on
+	lv_coord_t rack_height_px() const {
+		return place_cursor_y + page_settings.view_height_px;
+	}
+
 	void draw_modules() {
 		auto module_drawer = ModuleDrawer{modules_cont, page_settings.view_height_px};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
 		lv_obj_t *initial_selected_module = nullptr;
+
+		place_cursor_x = 0;
+		place_cursor_y = 0;
 
 		unsigned modules_skipped_for_size = 0;
 		std::string modules_skipped_slugs;
@@ -334,6 +355,7 @@ struct PatchViewPage : PageBase {
 			canvas_buf = canvas_buf.subspan(lv_obj_get_width(canvas) * page_settings.view_height_px);
 
 			module_canvases.push_back(canvas);
+			place_module(canvas);
 			style_module(canvas);
 			if (patch->is_module_bypassed(module_idx))
 				lv_obj_set_style_opa(canvas, LV_OPA_50, LV_PART_MAIN);
@@ -343,6 +365,7 @@ struct PatchViewPage : PageBase {
 			lv_obj_add_event_cb(canvas, module_click_cb, LV_EVENT_CLICKED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+
 			if (args.module_id.has_value()) {
 				if (args.module_id.value() == module_idx) {
 					initial_selected_module = canvas;
@@ -885,6 +908,10 @@ private:
 		page->highlighted_module_id = module_id;
 		page->highlighted_module_obj = this_module_obj;
 
+		// move currently focussed module to the front z-index so its outline displays
+		lv_obj_move_foreground(this_module_obj);
+		page->cable_drawer.move_foreground();
+
 		const auto this_slug = page->patch->module_slugs[module_id];
 		auto alias = page->patch->get_module_alias(static_cast<uint16_t>(module_id));
 		if (!alias.empty()) {
@@ -1015,6 +1042,12 @@ private:
 
 	PatchLocHash displayed_patch_loc_hash;
 	RackLayout drawn_rack_layout{};
+
+	// Where the next module goes, while draw_modules() is laying them out
+	static constexpr lv_coord_t RowGapPx = 3;
+	static constexpr lv_coord_t BottomMarginPx = 30;
+	lv_coord_t place_cursor_x = 0;
+	lv_coord_t place_cursor_y = 0;
 	uint8_t drawn_cable_tension = ModuleDisplaySettings::DefaultCableTension;
 	bool is_redrawing = false;
 	uint32_t patch_revision = 0xFFFFFFFF;

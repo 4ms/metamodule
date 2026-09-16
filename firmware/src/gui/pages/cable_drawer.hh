@@ -108,6 +108,11 @@ public:
 		set_opacity(LV_OPA_60);
 	}
 
+	// Keeps the cable layer above the modules when one of them is raised
+	void move_foreground() {
+		lv_obj_move_foreground(canvas);
+	}
+
 	void set_channel_lookup(std::function<unsigned(Jack out, Jack in)> lookup) {
 		channel_lookup = std::move(lookup);
 	}
