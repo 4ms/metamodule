@@ -90,7 +90,7 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	s->view_height_px = ModuleDisplaySettings::nearest_zoom_level(s->view_height_px);
 	read_or_default(node, "auto_rack_width", s, &ModuleDisplaySettings::auto_rack_width);
 	read_or_default(node, "rack_width_hp", s, &ModuleDisplaySettings::rack_width_hp);
-	s->rack_width_hp = ModuleDisplaySettings::snap_rack_width(s->rack_width_hp);
+	s->rack_width_hp = RackSize::snap_rack_width(s->rack_width_hp);
 	read_or_default(node, "param_style", s, &ModuleDisplaySettings::param_style);
 	read_or_default(node, "paneljack_style", s, &ModuleDisplaySettings::paneljack_style);
 	read_or_default(node, "cable_style", s, &ModuleDisplaySettings::cable_style);

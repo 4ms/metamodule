@@ -1,6 +1,4 @@
 #pragma once
-#include "CoreModules/elements/element_info.hh"
-#include "CoreModules/moduleFactory.hh"
 #include "gui/elements/context.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
@@ -13,8 +11,10 @@
 namespace MetaModule
 {
 
-template<unsigned MaxCanvasHeight>
+template<unsigned DefaultHeight>
 class CableDrawer {
+	static_assert(DefaultHeight <= 2047, "LVGL canvas maximum dimension is 2047");
+
 	const std::vector<DrawnElement> &drawn;
 
 	lv_obj_t *canvas;
@@ -33,24 +33,22 @@ class CableDrawer {
 	// Channel count of each (out, in) jack pair as of the last draw, used to detect changes
 	std::vector<uint8_t> drawn_channel_counts;
 
-	// Cable and jack-marker sizes are tuned for a module height of ReferenceHeight px
+	// Module height (zoom) at which cable line width sizes are tuned
 	static constexpr unsigned ReferenceHeight = 180;
-	float zoom = 1.f;
-
 	static constexpr unsigned MaxTension = 100;
 
-	// Sag at zero tension is this many px (at ReferenceHeight) plus the length of the cable
+	// Maximum "sag" of cable under zero tension is (SagOffsetPx + CableLength)
 	static constexpr float SagOffsetPx = 70.f;
+
 	float slack = 0.5f;
+	float zoom = 1.f;
 
-	//LVGL canvas is internally an img, which has 11 bits for each dimension, so max is 2047
 	static constexpr uint32_t MaxDim = 2047;
-	static constexpr uint32_t Height = std::min<uint32_t>(MaxCanvasHeight, MaxDim);
-	static constexpr uint32_t Width = 320;
-	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(Width, Height)> cable_buf;
+	static constexpr uint32_t DefaultWidth = 320;
+	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(DefaultWidth, DefaultHeight)> cable_buf;
 
-	int32_t canvas_w = Width;
-	int32_t canvas_h = Height;
+	int32_t canvas_w = DefaultWidth;
+	int32_t canvas_h = DefaultHeight;
 
 	struct Vec2 {
 		int32_t x;
@@ -64,7 +62,7 @@ public:
 		lv_obj_set_align(canvas, LV_ALIGN_TOP_LEFT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_IGNORE_LAYOUT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
-		set_size(Width, Height);
+		set_size(DefaultWidth, DefaultHeight);
 
 		lv_draw_line_dsc_init(&cable_dsc);
 		cable_dsc.opa = LV_OPA_100;
@@ -118,12 +116,11 @@ public:
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 	}
 
-	// The rack can be wider than the screen, so the canvas is re-shaped to fit it.
-	// cable_buf holds a fixed number of pixels; width wins and the height is capped
-	// to what is left, so cables below the cut-off simply aren't drawn.
 	void set_size(int32_t width, int32_t height) {
+		// Width of cable buffer matches width of rack
 		canvas_w = std::clamp<int32_t>(width, 1, MaxDim);
 
+		// Try to make height of cable buffer match height of rack, but don't exceed buffer size
 		auto max_height = cable_buf.size() / (LV_IMG_PX_SIZE_ALPHA_BYTE * canvas_w);
 		canvas_h = std::clamp<int32_t>(height, 1, std::min<int32_t>(max_height, MaxDim));
 
@@ -299,9 +296,6 @@ public:
 		float dist_y = std::abs(start.y - end.y);
 		float dist = std::sqrt(dist_x * dist_x + dist_y * dist_y);
 
-		// Sag is a fixed offset plus the straight-line length of the cable, the way VCV Rack
-		// does it. Tracking the length rather than the horizontal span alone keeps long runs
-		// from hanging right off the bottom of a wide rack.
 		float sag = slack * (SagOffsetPx * zoom + dist);
 
 		CableDrawer::Vec2 control{(start.x + end.x) / 2, (int32_t)((start.y + end.y) / 2 + sag)};

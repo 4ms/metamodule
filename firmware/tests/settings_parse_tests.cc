@@ -493,7 +493,7 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: ShowAll
       opa: 100
-    cable_tension: 50
+    cable_tension: 70
     show_graphic_screens: 1
     graphic_screen_throttle: 1
     show_samplerate: 1
@@ -608,6 +608,7 @@ TEST_CASE("view_height_px snaps to a valid zoom level") {
 
 TEST_CASE("rack_width_hp is clamped to the usable range") {
 	using MetaModule::ModuleDisplaySettings;
+	using MetaModule::RackSize;
 
 	auto parse_hp = [](std::string const &hp) {
 		std::string yaml = "Settings:\n  patch_view:\n    rack_width_hp: " + hp + "\n";
@@ -617,28 +618,26 @@ TEST_CASE("rack_width_hp is clamped to the usable range") {
 	};
 
 	// The narrowest rack fits on screen even at the largest zoom, so it never needs panning
-	CHECK(ModuleDisplaySettings::MinRackWidthHP * MetaModule::px_per_hp(ModuleDisplaySettings::ZoomLevels.back()) <=
-		  ModuleDisplaySettings::ViewWidthPx);
+	CHECK(RackSize::MinRackWidthHP * RackSize::px_per_hp(ModuleDisplaySettings::ZoomLevels.back()) <=
+		  RackSize::ViewWidthPx);
 
 	// ...and the default sits between the extremes
-	CHECK(ModuleDisplaySettings::MinRackWidthHP < ModuleDisplaySettings::DefaultRackWidthHP);
-	CHECK(ModuleDisplaySettings::DefaultRackWidthHP < ModuleDisplaySettings::MaxRackWidthHP);
+	CHECK(RackSize::MinRackWidthHP <= RackSize::DefaultRackWidthHP);
+	CHECK(RackSize::DefaultRackWidthHP <= RackSize::MaxRackWidthHP);
 
-	CHECK(parse_hp("0") == ModuleDisplaySettings::MinRackWidthHP);
-	CHECK(parse_hp("1000") == ModuleDisplaySettings::MaxRackWidthHP);
+	CHECK(parse_hp("0") == RackSize::MinRackWidthHP);
+	CHECK(parse_hp("1000") == RackSize::MaxRackWidthHP);
 
 	// Widths snap down onto the step grid, and every step is reachable
-	for (auto step = 0u; step <= ModuleDisplaySettings::rack_width_steps(); step++) {
-		auto hp = ModuleDisplaySettings::rack_width_for_step(step);
-		CHECK(hp == ModuleDisplaySettings::MinRackWidthHP + step * ModuleDisplaySettings::RackWidthStepHP);
-		CHECK(ModuleDisplaySettings::rack_width_step(hp) == step);
+	for (auto step = 0u; step <= RackSize::num_rack_width_steps(); step++) {
+		auto hp = RackSize::rack_width_for_step(step);
+		CHECK(hp == RackSize::MinRackWidthHP + step * RackSize::RackWidthStepHP);
+		CHECK(RackSize::rack_width_step(hp) == step);
 		CHECK(parse_hp(std::to_string(hp)) == hp);
 		CHECK(parse_hp(std::to_string(hp + 1)) == hp);
 	}
-	CHECK(ModuleDisplaySettings::rack_width_for_step(ModuleDisplaySettings::rack_width_steps()) ==
-		  ModuleDisplaySettings::MaxRackWidthHP);
-	CHECK(parse_hp(std::to_string(ModuleDisplaySettings::DefaultRackWidthHP)) ==
-		  ModuleDisplaySettings::DefaultRackWidthHP);
+	CHECK(RackSize::rack_width_for_step(RackSize::num_rack_width_steps()) == RackSize::MaxRackWidthHP);
+	CHECK(parse_hp(std::to_string(RackSize::DefaultRackWidthHP)) == RackSize::DefaultRackWidthHP);
 }
 
 TEST_CASE("cable_tension is clamped") {

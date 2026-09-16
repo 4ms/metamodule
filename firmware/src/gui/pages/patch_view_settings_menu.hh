@@ -39,11 +39,8 @@ struct PatchViewSettingsMenu {
 
 		rack_width_slider = lv_obj_get_child(rack_width_label, 0);
 		lv_obj_set_width(rack_width_slider, lv_pct(40));
-		// The slider picks a step, not an HP value, so one click moves RackWidthStepHP
-		lv_slider_set_range(rack_width_slider, 0, ModuleDisplaySettings::rack_width_steps());
-		lv_slider_set_value(rack_width_slider,
-							ModuleDisplaySettings::rack_width_step(ModuleDisplaySettings::DefaultRackWidthHP),
-							LV_ANIM_OFF);
+		lv_slider_set_range(rack_width_slider, 0, RackSize::num_rack_width_steps());
+		lv_slider_set_value(rack_width_slider, RackSize::rack_width_step(RackSize::DefaultRackWidthHP), LV_ANIM_OFF);
 
 		// Live readout of the width in HP, sitting between the "Width" text and the slider
 		rack_width_hp_label = lv_label_create(rack_width_label);
@@ -94,7 +91,8 @@ struct PatchViewSettingsMenu {
 
 		auto cable_tension_label = create_settings_menu_slider(ui_PVSettingsMenu, "Tension");
 		cable_tension_slider = lv_obj_get_child(cable_tension_label, 0);
-		lv_slider_set_range(cable_tension_slider, 0, ModuleDisplaySettings::MaxCableTension);
+		lv_slider_set_range(
+			cable_tension_slider, ModuleDisplaySettings::MaxCableTension, ModuleDisplaySettings::MaxCableTension);
 		lv_slider_set_value(cable_tension_slider, ModuleDisplaySettings::DefaultCableTension, LV_ANIM_OFF);
 
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
@@ -213,8 +211,7 @@ struct PatchViewSettingsMenu {
 		lv_slider_set_value(cable_tension_slider, settings.cable_tension, LV_ANIM_OFF);
 		lv_slider_set_value(zoom_slider, ModuleDisplaySettings::zoom_level_index(settings.view_height_px), LV_ANIM_OFF);
 		pending_rack_width_hp = settings.rack_width_hp;
-		lv_slider_set_value(
-			rack_width_slider, ModuleDisplaySettings::rack_width_step(settings.rack_width_hp), LV_ANIM_OFF);
+		lv_slider_set_value(rack_width_slider, RackSize::rack_width_step(settings.rack_width_hp), LV_ANIM_OFF);
 		update_rack_width_label();
 		{
 			int slider_val = ModuleDisplaySettings::ThrottleAmounts.size() - 2;
@@ -442,9 +439,8 @@ private:
 	// Shows the width the rack actually has: in auto mode that's however many HP the
 	// screen holds at the current zoom, which changes as Module Size is adjusted
 	void update_rack_width_label() {
-		auto hp = settings.auto_rack_width ?
-					  hp_across_screen(ModuleDisplaySettings::ViewWidthPx, settings.view_height_px) :
-					  pending_rack_width_hp;
+		auto hp =
+			settings.auto_rack_width ? RackSize::hp_across_screen(settings.view_height_px) : pending_rack_width_hp;
 		lv_label_set_text_fmt(rack_width_hp_label, "%uHP", hp);
 	}
 
@@ -472,9 +468,9 @@ private:
 
 		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
 
-		auto step = std::clamp<int32_t>(
-			lv_slider_get_value(page->rack_width_slider), 0, ModuleDisplaySettings::rack_width_steps());
-		page->pending_rack_width_hp = ModuleDisplaySettings::rack_width_for_step(step);
+		auto step =
+			std::clamp<int32_t>(lv_slider_get_value(page->rack_width_slider), 0, RackSize::num_rack_width_steps());
+		page->pending_rack_width_hp = RackSize::rack_width_for_step(step);
 
 		page->update_rack_width_label();
 	}
@@ -546,7 +542,7 @@ private:
 	lv_obj_t *rack_width_slider;
 	lv_obj_t *cable_tension_slider;
 	lv_obj_t *rack_width_hp_label;
-	unsigned pending_rack_width_hp = ModuleDisplaySettings::DefaultRackWidthHP;
+	unsigned pending_rack_width_hp = RackSize::DefaultRackWidthHP;
 
 	lv_obj_t *graphics_show_check;
 	lv_obj_t *graphics_update_rate_label;

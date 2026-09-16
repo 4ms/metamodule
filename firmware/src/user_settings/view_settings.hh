@@ -6,20 +6,56 @@
 namespace MetaModule
 {
 
-// 1 HP is 5.08mm wide and a 3U faceplate is 128.5mm tall, so pixels-per-HP follows
-// the height the faceplate is drawn at
-constexpr float px_per_hp(unsigned faceplate_height_px) {
-	return 5.08f * (float)faceplate_height_px / 128.5f;
-}
+// Size of the PatchView module canvas
+struct RackSize {
+	constexpr static unsigned ViewWidthPx = 308;
+	constexpr static unsigned RackWidthStepHP = 4;
+	constexpr static unsigned MinRackWidthHP = 28;
 
-constexpr unsigned hp_across_screen(unsigned view_width_px, unsigned faceplate_height_px) {
-	return (unsigned)((float)view_width_px / px_per_hp(faceplate_height_px));
-}
+	// Max HP is 2 screens wide when fully zoomed out (tiny modules)
+	constexpr static unsigned MaxRackWidthHP = 128;
+	constexpr static unsigned DefaultRackWidthHP = 40;
 
-// Rounds a width down onto a grid of `step` HP counting up from `min_hp`
-constexpr unsigned on_hp_step_grid(unsigned hp, unsigned min_hp, unsigned step) {
-	return hp <= min_hp ? min_hp : min_hp + (hp - min_hp) / step * step;
-}
+	constexpr static unsigned clamp_rack_width(unsigned hp) {
+		return hp < MinRackWidthHP ? MinRackWidthHP : hp > MaxRackWidthHP ? MaxRackWidthHP : hp;
+	}
+
+	constexpr static unsigned num_rack_width_steps() {
+		return (MaxRackWidthHP - MinRackWidthHP) / RackWidthStepHP;
+	}
+
+	// HP of step index `step`
+	constexpr static unsigned rack_width_for_step(unsigned step) {
+		return clamp_rack_width(MinRackWidthHP + step * RackWidthStepHP);
+	}
+
+	// Index of the largest step that isn't wider than hp
+	constexpr static unsigned rack_width_step(unsigned hp) {
+		return (clamp_rack_width(hp) - MinRackWidthHP) / RackWidthStepHP;
+	}
+
+	constexpr static unsigned snap_rack_width(unsigned hp) {
+		return RackSize::on_hp_step_grid(clamp_rack_width(hp));
+	}
+
+	// 1 HP is 5.08mm wide and a 3U faceplate is 128.5mm tall, so pixels-per-HP follows
+	// the height the faceplate is drawn at
+	constexpr static float px_per_hp(unsigned faceplate_height_px) {
+		return 5.08f * (float)faceplate_height_px / 128.5f;
+	}
+
+	constexpr static unsigned hp_across_screen(unsigned faceplate_height_px) {
+		auto view_width_px = ViewWidthPx;
+		return (unsigned)((float)view_width_px / px_per_hp(faceplate_height_px));
+	}
+
+	// Rounds a width down onto a grid of `step` HP counting up from `min_hp`
+	constexpr static unsigned on_hp_step_grid(unsigned hp) {
+		constexpr auto step = RackWidthStepHP;
+		constexpr auto min_hp = MinRackWidthHP;
+		return hp <= min_hp ? min_hp : min_hp + (hp - min_hp) / step * step;
+	}
+};
 
 struct MapRingStyle {
 	enum class Mode {
@@ -41,8 +77,9 @@ struct ModuleDisplaySettings {
 
 	// How taut the cables are drawn: 100 hangs them in a straight line, 0 is maximum droop.
 	// The default reproduces the sag cables have always had.
+	constexpr static uint8_t MinCableTension = 50;
 	constexpr static uint8_t MaxCableTension = 100;
-	constexpr static uint8_t DefaultCableTension = 50;
+	constexpr static uint8_t DefaultCableTension = 70;
 	uint8_t cable_tension = DefaultCableTension;
 
 	constexpr static uint8_t clamp_cable_tension(unsigned tension) {
@@ -73,49 +110,10 @@ struct ModuleDisplaySettings {
 		return ZoomLevels[zoom_level_index(height_px)];
 	}
 
-	// Width in px available to modules in PatchView (the modules panel's content area)
-	constexpr static unsigned ViewWidthPx = 308;
-
-	// The rack width is picked in steps of this many HP, counting up from MinRackWidthHP
-	constexpr static unsigned RackWidthStepHP = 4;
-
-	// Min HP is the width of the screen when fully zoomed in (huge modules)
-	constexpr static unsigned MinRackWidthHP = hp_across_screen(ViewWidthPx, ZoomLevels.back());
-
-	// Both are rounded down onto the step grid, so every selectable width still fits
-	// what it is meant to fit, and the widest one is actually reachable on the slider
-
-	// Max HP is 2 screens wide when fully zoomed out (tiny modules)
-	constexpr static unsigned MaxRackWidthHP =
-		on_hp_step_grid(hp_across_screen(ViewWidthPx * 2, ZoomLevels.front()), MinRackWidthHP, RackWidthStepHP);
-	constexpr static unsigned DefaultRackWidthHP =
-		on_hp_step_grid(hp_across_screen(ViewWidthPx, DefaultZoomLevel), MinRackWidthHP, RackWidthStepHP);
-
-	constexpr static unsigned clamp_rack_width(unsigned hp) {
-		return hp < MinRackWidthHP ? MinRackWidthHP : hp > MaxRackWidthHP ? MaxRackWidthHP : hp;
-	}
-
-	constexpr static unsigned rack_width_steps() {
-		return (MaxRackWidthHP - MinRackWidthHP) / RackWidthStepHP;
-	}
-
-	constexpr static unsigned rack_width_for_step(unsigned step) {
-		return clamp_rack_width(MinRackWidthHP + step * RackWidthStepHP);
-	}
-
-	// Index of the largest step that isn't wider than hp
-	constexpr static unsigned rack_width_step(unsigned hp) {
-		return (clamp_rack_width(hp) - MinRackWidthHP) / RackWidthStepHP;
-	}
-
-	constexpr static unsigned snap_rack_width(unsigned hp) {
-		return on_hp_step_grid(clamp_rack_width(hp), MinRackWidthHP, RackWidthStepHP);
-	}
-
 	// When auto, modules wrap at the screen edge, so zooming rearranges them.
 	// Otherwise they wrap at a fixed rack_width_hp and zooming only changes the scale.
 	bool auto_rack_width = true;
-	unsigned rack_width_hp = DefaultRackWidthHP;
+	unsigned rack_width_hp = RackSize::DefaultRackWidthHP;
 	bool changed = true; //???unused but keep for backward compat
 	bool show_graphic_screens = true;
 

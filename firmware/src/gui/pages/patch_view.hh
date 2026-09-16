@@ -1,6 +1,6 @@
 #pragma once
-#include "delay.hh"
 #include "CoreModules/elements/element_counter.hh"
+#include "delay.hh"
 #include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -199,13 +199,11 @@ struct PatchViewPage : PageBase {
 		return {page_settings.view_height_px, page_settings.auto_rack_width, page_settings.rack_width_hp};
 	}
 
-	// Width in px the modules wrap at. Auto tracks the screen; otherwise the rack is a
-	// fixed number of HP, so zooming scales it instead of re-flowing the modules.
 	lv_coord_t rack_width_px() const {
 		if (page_settings.auto_rack_width)
-			return ModuleDisplaySettings::ViewWidthPx;
+			return RackSize::ViewWidthPx;
 
-		auto px = page_settings.rack_width_hp * px_per_hp(page_settings.view_height_px);
+		auto px = page_settings.rack_width_hp * RackSize::px_per_hp(page_settings.view_height_px);
 		return std::lround(px);
 	}
 
@@ -216,7 +214,7 @@ struct PatchViewPage : PageBase {
 			lv_obj_set_width(modules_cont, rack_width_px());
 
 		// Only allow panning sideways when there is something off-screen to pan to
-		auto scrolls_sideways = rack_width_px() > (lv_coord_t)ModuleDisplaySettings::ViewWidthPx;
+		auto scrolls_sideways = rack_width_px() > (lv_coord_t)RackSize::ViewWidthPx;
 		lv_obj_set_scroll_dir(ui_ModulesPanel, scrolls_sideways ? LV_DIR_HOR : LV_DIR_NONE);
 		if (!scrolls_sideways)
 			lv_obj_scroll_to_x(ui_ModulesPanel, 0, LV_ANIM_OFF);
@@ -721,7 +719,6 @@ private:
 
 		cable_drawer.set_opacity(page_settings.cable_style.opa);
 
-		// Tension changes the shape of every cable, so they have to be drawn again
 		auto tension_changed = drawn_cable_tension != page_settings.cable_tension;
 		drawn_cable_tension = page_settings.cable_tension;
 		cable_drawer.set_tension(page_settings.cable_tension);
