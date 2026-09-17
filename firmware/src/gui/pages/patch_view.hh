@@ -538,8 +538,11 @@ struct PatchViewPage : PageBase {
 			return;
 		}
 
-		if (is_patch_playloaded != last_is_patch_playloaded || page_settings.changed) {
-			page_settings.changed = false;
+		// Taken unconditionally: `||` would short-circuit past it whenever the play state
+		// changed too, and the edit would go unapplied
+		auto display_changed = settings_menu.take_display_changed();
+
+		if (is_patch_playloaded != last_is_patch_playloaded || display_changed) {
 			update_map_ring_style();
 			update_cable_style();
 			update_graphic_throttle_setting();

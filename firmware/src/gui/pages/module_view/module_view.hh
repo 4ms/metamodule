@@ -257,8 +257,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		// Settings changed
-		if (page_settings.changed) {
-			page_settings.changed = false;
+		if (settings_menu.take_display_changed()) {
 			update_map_ring_style();
 			update_cable_style();
 			update_graphic_throttle_setting();

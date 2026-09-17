@@ -7,6 +7,7 @@
 #include "lvgl.h"
 #include "user_settings/view_settings.hh"
 #include <algorithm>
+#include <utility>
 
 namespace MetaModule
 {
@@ -211,6 +212,11 @@ struct ModuleViewSettingsMenu {
 		}
 	}
 
+	// reads and clears `display_changed`
+	[[nodiscard]] bool take_display_changed() {
+		return std::exchange(display_changed, false);
+	}
+
 	bool is_visible() {
 		return visible;
 	}
@@ -316,8 +322,7 @@ private:
 
 		page->settings.map_ring_flash_active = flash_active;
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void cable_settings_value_change_cb(lv_event_t *event) {
@@ -334,8 +339,7 @@ private:
 		opacity = (float)opacity * 2.5f;
 		page->settings.cable_style.opa = opacity;
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void graphics_settings_value_change_cb(lv_event_t *event) {
@@ -354,8 +358,7 @@ private:
 
 		page->update_interactive_states();
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void scroll_menu_down_cb(lv_event_t *event) {
@@ -375,8 +378,7 @@ private:
 		page->settings.show_jack_aliases = lv_obj_has_state(page->show_jack_aliases_check, LV_STATE_CHECKED);
 		page->settings.show_knob_aliases = lv_obj_has_state(page->show_knob_aliases_check, LV_STATE_CHECKED);
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void nav_wrapping_cb(lv_event_t *event) {
@@ -386,8 +388,7 @@ private:
 
 		page->settings.nav_wrapping = lv_obj_has_state(page->nav_wrapping_check, LV_STATE_CHECKED);
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void show_titlebar_cb(lv_event_t *event) {
@@ -401,8 +402,7 @@ private:
 
 		page->update_interactive_states();
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	lv_group_t *base_group = nullptr;
@@ -419,6 +419,14 @@ private:
 	lv_obj_t *float_audioload_check;
 
 	bool visible = false;
+	// Both flags move together on every edit: one for the page to re-apply the setting now,
+	// one to remember that the settings are worth saving when the menu closes.
+	void mark_changed() {
+		display_changed = true;
+		changed_while_visible = true;
+	}
+
+	bool display_changed = false;
 	bool changed_while_visible = false;
 	ModuleDisplaySettings &settings;
 	GuiState &gui_state;

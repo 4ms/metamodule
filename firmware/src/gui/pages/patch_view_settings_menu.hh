@@ -6,6 +6,7 @@
 #include "lvgl.h"
 #include "user_settings/view_settings.hh"
 #include <algorithm>
+#include <utility>
 
 namespace MetaModule
 {
@@ -245,7 +246,7 @@ struct PatchViewSettingsMenu {
 			lv_obj_scroll_to_y(ui_PVSettingsMenu, 0, LV_ANIM_OFF);
 
 			visible = true;
-			changed_while_visible = false;
+			settings_needs_saving = false;
 		}
 	}
 
@@ -263,9 +264,16 @@ struct PatchViewSettingsMenu {
 
 			visible = false;
 
-			if (changed_while_visible)
+			if (settings_needs_saving)
 				gui_state.do_write_settings = true;
 		}
+	}
+
+	// True once after any edit, and cleared by whoever acts on it. Kept apart from
+	// `changed_while_visible`, which has to survive until the menu closes so that hide() knows
+	// whether the settings are worth saving.
+	bool take_display_changed() {
+		return std::exchange(display_changed, false);
 	}
 
 	bool is_visible() {
@@ -404,8 +412,7 @@ private:
 
 		page->settings.map_ring_flash_active = flash_active;
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void cable_settings_value_change_cb(lv_event_t *event) {
@@ -428,8 +435,7 @@ private:
 		page->settings.cable_tension =
 			ModuleDisplaySettings::clamp_cable_tension(lv_slider_get_value(page->cable_tension_slider));
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void zoom_value_change_cb(lv_event_t *event) {
@@ -444,8 +450,7 @@ private:
 
 		page->update_rack_width_label();
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	// Shows the width the rack actually has: in auto mode that's however many HP the
@@ -468,8 +473,7 @@ private:
 		page->update_rack_width_label();
 		page->update_interactive_states();
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	// Applying a width re-rasterizes every module in the patch, which is far too slow to do
@@ -500,8 +504,7 @@ private:
 			return;
 
 		settings.rack_width_hp = pending_rack_width_hp;
-		settings.changed = true;
-		changed_while_visible = true;
+		mark_changed();
 	}
 
 	static void graphics_settings_value_change_cb(lv_event_t *event) {
@@ -520,8 +523,7 @@ private:
 
 		page->update_interactive_states();
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void scroll_menu_down_cb(lv_event_t *event) {
@@ -543,8 +545,7 @@ private:
 		page->settings.float_loadmeter = lv_obj_has_state(page->float_audioload_check, LV_STATE_CHECKED);
 		page->settings.show_knobset_name = lv_obj_has_state(page->show_knobset_name_check, LV_STATE_CHECKED);
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	lv_group_t *base_group = nullptr;
@@ -567,7 +568,14 @@ private:
 	lv_obj_t *show_knobset_name_check;
 
 	bool visible = false;
-	bool changed_while_visible = false;
+
+	void mark_changed() {
+		display_changed = true;
+		settings_needs_saving = true;
+	}
+
+	bool display_changed = false;
+	bool settings_needs_saving = false;
 	ModuleDisplaySettings &settings;
 	GuiState &gui_state;
 };
