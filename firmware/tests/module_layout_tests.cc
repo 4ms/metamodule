@@ -169,11 +169,46 @@ TEST_CASE("Modules that cannot be fitted are counted") {
 	CHECK(r.num_unplaced > 0);
 	CHECK(r.height <= ModuleLayout::MaxCanvasDim);
 
-	// A module wider than the canvas can never be placed
-	std::vector<Box> too_wide{Box{.width = 400, .height = H}};
+	// Only a module too wide for the canvas itself can never be placed
+	std::vector<Box> too_wide{Box{.width = ModuleLayout::MaxCanvasDim + 1, .height = H}};
 	auto r2 = ModuleLayout::arrange(too_wide, 308, RowPitch, false);
 	CHECK(r2.num_unplaced == 1);
 	CHECK(!r2.positions[0].has_value());
+}
+
+TEST_CASE("A module wider than the rack widens the rack instead of being dropped") {
+	// 48HP is 341px at the default zoom, well past the 308px of a screen-width rack
+	std::vector<Box> boxes{
+		Box{.width = 341, .height = H},
+		Box{.width = 28, .height = H},
+	};
+
+	auto r = ModuleLayout::arrange(boxes, 308, RowPitch, false);
+
+	CHECK(r.num_unplaced == 0);
+	CHECK(r.positions[0] == Coord{0, 0});
+
+	// The bound grew to 341, but 341 + 28 still doesn't fit, so the small one wraps
+	CHECK(r.positions[1] == Coord{0, RowPitch});
+	CHECK(r.width == 341);
+}
+
+TEST_CASE("Widening for one module lets the others use the extra room") {
+	std::vector<Box> boxes{
+		Box{.width = 341, .height = H},
+		Box{.width = 100, .height = H},
+		Box{.width = 100, .height = H},
+		Box{.width = 100, .height = H},
+	};
+
+	auto r = ModuleLayout::arrange(boxes, 308, RowPitch, false);
+
+	CHECK(r.num_unplaced == 0);
+	CHECK(r.positions[0] == Coord{0, 0});
+	// Three 100px modules now share a row, because the rack is 341 wide
+	CHECK(r.positions[1] == Coord{0, RowPitch});
+	CHECK(r.positions[2] == Coord{100, RowPitch});
+	CHECK(r.positions[3] == Coord{200, RowPitch});
 }
 
 TEST_CASE("Nothing placed overlaps anything else") {

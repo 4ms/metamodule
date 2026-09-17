@@ -48,6 +48,11 @@ struct ModuleLayout {
 
 		if (row_pitch <= 0)
 			row_pitch = 1;
+
+		// Make sure the rack is wide enough for the widest module to fit
+		for (auto const &box : boxes)
+			width_bound = std::max(width_bound, box.width);
+
 		width_bound = std::min(width_bound, MaxCanvasDim);
 
 		std::vector<Rect> placed;
