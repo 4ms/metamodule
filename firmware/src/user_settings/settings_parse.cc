@@ -88,6 +88,7 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	// Snap to a valid zoom level, in case it was hand-edited or written by a
 	// firmware version with a different set of levels
 	s->view_height_px = ModuleDisplaySettings::nearest_zoom_level(s->view_height_px);
+	read_or_default(node, "auto_layout", s, &ModuleDisplaySettings::auto_layout);
 	read_or_default(node, "auto_rack_width", s, &ModuleDisplaySettings::auto_rack_width);
 	read_or_default(node, "rack_width_hp", s, &ModuleDisplaySettings::rack_width_hp);
 	s->rack_width_hp = RackSize::snap_rack_width(s->rack_width_hp);

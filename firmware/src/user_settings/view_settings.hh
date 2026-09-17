@@ -111,11 +111,9 @@ struct ModuleDisplaySettings {
 		return ZoomLevels[zoom_level_index(height_px)];
 	}
 
-	// When auto, modules wrap at the screen edge, so zooming rearranges them.
-	// Otherwise they wrap at a fixed rack_width_hp and zooming only changes the scale.
-	bool auto_rack_width = true;
+	bool auto_layout = true;	 // automatically compact layout
+	bool auto_rack_width = true; // wrap at screen edge
 	unsigned rack_width_hp = RackSize::DefaultRackWidthHP;
-	bool changed = true; //???unused but keep for backward compat
 	bool show_graphic_screens = true;
 
 	// Status bar:

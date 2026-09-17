@@ -11,8 +11,10 @@
 namespace MetaModule
 {
 
-template<unsigned DefaultHeight>
+// Cable canvas is DefaultWidth x DefaultHeight pixels (can be re-sized dynamically)
+template<unsigned DefaultWidth, unsigned DefaultHeight>
 class CableDrawer {
+	static_assert(DefaultWidth <= 2047, "LVGL canvas maximum dimension is 2047");
 	static_assert(DefaultHeight <= 2047, "LVGL canvas maximum dimension is 2047");
 
 	const std::vector<DrawnElement> &drawn;
@@ -44,7 +46,6 @@ class CableDrawer {
 	float zoom = 1.f;
 
 	static constexpr uint32_t MaxDim = 2047;
-	static constexpr uint32_t DefaultWidth = 320;
 	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(DefaultWidth, DefaultHeight)> cable_buf;
 
 	int32_t canvas_w = DefaultWidth;

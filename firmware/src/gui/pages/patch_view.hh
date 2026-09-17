@@ -1,6 +1,6 @@
 #pragma once
-#include "CoreModules/elements/element_counter.hh"
 #include "delay.hh"
+#include "CoreModules/elements/element_counter.hh"
 #include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -13,8 +13,10 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
+#include "gui/pages/hscroll_bar.hh"
 #include "gui/pages/make_cable.hh"
 #include "gui/pages/make_expander.hh"
+#include "gui/pages/module_layout.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
@@ -188,13 +190,17 @@ struct PatchViewPage : PageBase {
 	// width, so a change to either means the whole patch has to be drawn again
 	struct RackLayout {
 		unsigned view_height_px;
+		bool auto_layout;
 		bool auto_width;
 		unsigned width_hp;
 		bool operator==(RackLayout const &) const = default;
 	};
 
 	RackLayout rack_layout() const {
-		return {page_settings.view_height_px, page_settings.auto_rack_width, page_settings.rack_width_hp};
+		return {page_settings.view_height_px,
+				page_settings.auto_layout,
+				page_settings.auto_rack_width,
+				page_settings.rack_width_hp};
 	}
 
 	lv_coord_t rack_width_px() const {
@@ -207,14 +213,21 @@ struct PatchViewPage : PageBase {
 		return (lv_coord_t)std::ceil(px);
 	}
 
-	void apply_rack_width() {
-		if (page_settings.auto_rack_width)
+	// Sizes the rack around whatever arrange_modules() worked out. Fit-to-screen only holds
+	// while we are the ones doing the layout: a patch's own positions can run wider than the
+	// screen, and then the rack has to be big enough to hold them.
+	void fit_rack_container() {
+		// Anything that fits on screen just fills it, so the rack looks the same however it was
+		// laid out. Only a rack that runs wider than the screen gets an explicit width.
+		if (arranged_width <= (lv_coord_t)RackSize::ViewWidthPx)
 			lv_obj_set_width(modules_cont, lv_pct(100));
 		else
-			lv_obj_set_width(modules_cont, rack_width_px() + 2);
+			lv_obj_set_width(modules_cont, arranged_width + 2);
+
+		lv_obj_set_height(modules_cont, arranged_height + BottomMarginPx);
 
 		// Only allow panning sideways when there is something off-screen to pan to
-		auto scrolls_sideways = rack_width_px() > (lv_coord_t)RackSize::ViewWidthPx;
+		auto scrolls_sideways = arranged_width > (lv_coord_t)RackSize::ViewWidthPx;
 		lv_obj_set_scroll_dir(ui_ModulesPanel, scrolls_sideways ? LV_DIR_HOR : LV_DIR_NONE);
 		if (!scrolls_sideways)
 			lv_obj_scroll_to_x(ui_ModulesPanel, 0, LV_ANIM_OFF);
@@ -224,7 +237,6 @@ struct PatchViewPage : PageBase {
 
 	void redraw_patch() {
 		drawn_rack_layout = rack_layout();
-		apply_rack_width();
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -271,11 +283,12 @@ struct PatchViewPage : PageBase {
 		highlighted_module_obj = nullptr;
 		update_map_ring_style();
 
-		auto last_bottom = rack_height_px();
-		lv_obj_set_height(modules_cont, last_bottom + BottomMarginPx);
+		fit_rack_container();
+		scroll_to_initial_view();
+		hscroll_bar.show();
 
 		// A little slack past the rack on each axis so cables to edge jacks aren't clipped
-		cable_drawer.set_size(lv_obj_get_width(modules_cont) + 12, last_bottom + BottomMarginPx);
+		cable_drawer.set_size(lv_obj_get_width(modules_cont) + 12, arranged_height + BottomMarginPx);
 		cable_drawer.set_module_height(page_settings.view_height_px);
 
 		update_cable_style(true);
@@ -296,31 +309,85 @@ struct PatchViewPage : PageBase {
 		update_graphic_throttle_setting();
 	}
 
-	void place_module(lv_obj_t *canvas) {
-		auto width = lv_obj_get_width(canvas);
-
-		if (place_cursor_x > 0 && place_cursor_x + width > rack_width_px()) {
-			place_cursor_x = 0;
-			place_cursor_y += page_settings.view_height_px + RowGapPx;
-		}
-
-		lv_obj_set_pos(canvas, place_cursor_x, place_cursor_y);
-		place_cursor_x += width;
+	lv_coord_t row_pitch_px() const {
+		return page_settings.view_height_px + RowGapPx;
 	}
 
-	// Height of the laid-out rack, including the row the cursor is currently on
-	lv_coord_t rack_height_px() const {
-		return place_cursor_y + page_settings.view_height_px;
+	// The position a patch stores is in grid units: x in HP, y in whole rows
+	ModuleLayout::Coord to_px(ModulePosition const &pos) const {
+		auto x = std::lround(pos.x * RackSize::px_per_hp(page_settings.view_height_px));
+		return {(int32_t)x, (int32_t)pos.y * row_pitch_px()};
+	}
+
+	std::optional<ModuleLayout::Coord> wanted_position(uint32_t module_idx) const {
+		if (page_settings.auto_layout)
+			return {};
+
+		for (auto const &pos : patch->module_positions) {
+			if (pos.module_id == module_idx)
+				return to_px(pos);
+		}
+		return {};
+	}
+
+	// Arranges every drawn module and moves it into place. Returns how many wouldn't fit.
+	unsigned arrange_modules() {
+		std::vector<ModuleLayout::Box> boxes;
+		boxes.reserve(module_canvases.size());
+
+		for (auto *canvas : module_canvases) {
+			lv_obj_refr_size(canvas);
+
+			// module_ids has an entry for every module in the patch, but module_canvases only
+			// for the ones actually drawn, so they don't line up -- the canvas carries a
+			// pointer to its own id (set in draw_modules)
+			auto *id = static_cast<uint32_t *>(lv_obj_get_user_data(canvas));
+
+			boxes.push_back({.width = lv_obj_get_width(canvas),
+							 .height = (int32_t)page_settings.view_height_px,
+							 .wanted = id ? wanted_position(*id) : std::nullopt});
+		}
+
+		// Auto layout wraps at whatever width the user picked. With the patch's own positions
+		// the modules may already spread wider than that, so leftovers get the same room.
+		int32_t bound = rack_width_px();
+		if (!page_settings.auto_layout) {
+			for (auto const &box : boxes) {
+				if (box.wanted)
+					bound = std::max(bound, box.wanted->x + box.width);
+			}
+		}
+
+		auto layout = ModuleLayout::arrange(boxes, bound, row_pitch_px(), !page_settings.auto_layout);
+
+		topleft_module = nullptr;
+		ModuleLayout::Coord topleft{};
+
+		for (auto [i, canvas] : enumerate(module_canvases)) {
+			if (auto at = layout.positions[i]) {
+				lv_obj_set_pos(canvas, at->x, at->y);
+				lv_show(canvas);
+
+				if (!topleft_module || at->y < topleft.y || (at->y == topleft.y && at->x < topleft.x)) {
+					topleft_module = canvas;
+					topleft = *at;
+				}
+			} else {
+				// Nowhere to put it: keep it out of the way rather than stacked at 0,0
+				lv_hide(canvas);
+			}
+		}
+
+		arranged_width = std::max<lv_coord_t>(layout.width, rack_width_px());
+		arranged_height = layout.height;
+		return layout.num_unplaced;
 	}
 
 	void draw_modules() {
 		auto module_drawer = ModuleDrawer{modules_cont, page_settings.view_height_px};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
-		lv_obj_t *initial_selected_module = nullptr;
-
-		place_cursor_x = 0;
-		place_cursor_y = 0;
+		initial_selected_module = nullptr;
 
 		unsigned modules_skipped_for_size = 0;
 		std::string modules_skipped_slugs;
@@ -355,7 +422,6 @@ struct PatchViewPage : PageBase {
 			canvas_buf = canvas_buf.subspan(lv_obj_get_width(canvas) * page_settings.view_height_px);
 
 			module_canvases.push_back(canvas);
-			place_module(canvas);
 			style_module(canvas);
 			if (patch->is_module_bypassed(module_idx))
 				lv_obj_set_style_opa(canvas, LV_OPA_50, LV_PART_MAIN);
@@ -373,6 +439,8 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
+		auto modules_skipped_for_space = arrange_modules();
+
 		if (is_patch_playloaded) {
 			redraw_all_params(drawn_elements, [this](uint16_t module_idx, uint16_t param_idx) {
 				return patch_playloader.param_value(module_idx, param_idx);
@@ -386,14 +454,30 @@ struct PatchViewPage : PageBase {
 			notify_queue.put({msg, Notification::Priority::Info, 4000});
 		}
 
-		if (initial_selected_module) {
-			lv_obj_refr_size(base);
-			lv_obj_refr_pos(base);
-			lv_group_focus_obj(initial_selected_module);
-			lv_obj_scroll_to_view_recursive(initial_selected_module, LV_ANIM_OFF);
-		} else {
-			lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
+		if (modules_skipped_for_space) {
+			std::string msg = "Not displaying " + std::to_string(modules_skipped_for_space) +
+							  " module(s): no room left on the canvas";
+			notify_queue.put({msg, Notification::Priority::Info, 4000});
 		}
+
+		if (initial_selected_module)
+			lv_group_focus_obj(initial_selected_module);
+	}
+
+	// Has to run after fit_rack_container(), or there is nothing to scroll within yet
+	void scroll_to_initial_view() {
+		lv_obj_refr_size(base);
+		lv_obj_refr_pos(base);
+		lv_obj_update_layout(modules_cont);
+
+		// A patch can put its first module well away from the origin, and scrolling to the top
+		// left would then open onto empty canvas
+		auto *show = initial_selected_module ? initial_selected_module : topleft_module;
+
+		if (show)
+			lv_obj_scroll_to_view_recursive(show, LV_ANIM_OFF);
+		else
+			lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 	}
 
 	void redraw_map_rings() {
@@ -431,6 +515,7 @@ struct PatchViewPage : PageBase {
 		dynamic_elements_prepared = false;
 
 		lv_hide(load_meter);
+		hscroll_bar.hide();
 	}
 
 	void update() override {
@@ -572,6 +657,8 @@ struct PatchViewPage : PageBase {
 			poll_patch_file_changed();
 
 		poll_poly_cable_changes();
+
+		hscroll_bar.update();
 	}
 
 private:
@@ -813,6 +900,8 @@ private:
 		}
 		highlighted_module_obj = nullptr;
 		highlighted_module_id = std::nullopt;
+		topleft_module = nullptr;
+		initial_selected_module = nullptr;
 
 		module_canvases.clear();
 		drawn_elements.clear();
@@ -930,6 +1019,7 @@ private:
 	static void scroll_end_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		page->redraw_modulename();
+		page->hscroll_bar.show();
 	}
 
 	static void playbut_cb(lv_event_t *event) {
@@ -1016,7 +1106,7 @@ private:
 private:
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
-	CableDrawer<MaxBufferHeight> cable_drawer;
+	CableDrawer<DefaultBufferWidth, MaxBufferHeight> cable_drawer;
 
 	ModuleDisplaySettings &page_settings;
 	PatchViewSettingsMenu settings_menu;
@@ -1046,8 +1136,14 @@ private:
 	// Where the next module goes, while draw_modules() is laying them out
 	static constexpr lv_coord_t RowGapPx = 3;
 	static constexpr lv_coord_t BottomMarginPx = 30;
-	lv_coord_t place_cursor_x = 0;
-	lv_coord_t place_cursor_y = 0;
+
+	// Top-left-most module as arranged, so the view can open on it
+	lv_obj_t *topleft_module = nullptr;
+	lv_obj_t *initial_selected_module = nullptr;
+
+	// Extent of the modules as arranged, filled in by arrange_modules()
+	lv_coord_t arranged_width = RackSize::ViewWidthPx;
+	lv_coord_t arranged_height = 0;
 	uint8_t drawn_cable_tension = ModuleDisplaySettings::DefaultCableTension;
 	bool is_redrawing = false;
 	uint32_t patch_revision = 0xFFFFFFFF;
@@ -1066,6 +1162,8 @@ private:
 	bool dynamic_elements_prepared = false;
 
 	lv_obj_t *load_meter;
+
+	HScrollBar hscroll_bar{ui_PatchViewPage, ui_ModulesPanel};
 };
 
 } // namespace MetaModule

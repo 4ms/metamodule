@@ -444,6 +444,7 @@ TEST_CASE("Serialize settings") {
 	settings.module_view.auto_rack_width = false;
 	settings.module_view.rack_width_hp = 52;
 	settings.module_view.cable_tension = 80;
+	settings.module_view.auto_layout = false;
 
 	settings.audio.sample_rate = 24000;
 	settings.audio.block_size = 512;
@@ -482,6 +483,7 @@ TEST_CASE("Serialize settings") {
     map_ring_flash_active: 1
     scroll_to_active_param: 0
     view_height_px: 180
+    auto_layout: 1
     auto_rack_width: 1
     rack_width_hp: 40
     param_style:
@@ -506,6 +508,7 @@ TEST_CASE("Serialize settings") {
     map_ring_flash_active: 0
     scroll_to_active_param: 1
     view_height_px: 240
+    auto_layout: 0
     auto_rack_width: 0
     rack_width_hp: 52
     param_style:

@@ -517,7 +517,7 @@ private:
 	void perform_jack_assign(const DrawnElement *element, ElementType jack_type);
 	bool cycle_port_selection(const DrawnElement *element, int motion, ElementType jack_type);
 
-	CableDrawer<240> cable_drawer;
+	CableDrawer<320, 240> cable_drawer;
 
 	ModuleInfoView moduleinfo;
 	PatchModQueue module_mods;

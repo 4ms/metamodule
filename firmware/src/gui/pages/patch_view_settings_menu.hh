@@ -29,8 +29,12 @@ struct PatchViewSettingsMenu {
 		lv_slider_set_value(
 			zoom_slider, ModuleDisplaySettings::zoom_level_index(ModuleDisplaySettings::DefaultZoomLevel), LV_ANIM_OFF);
 
-		auto auto_width_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Auto Rack Width");
+		auto auto_layout_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Compact Layout");
+		auto_layout_check = lv_obj_get_child(auto_layout_cont, 1);
+
+		auto auto_width_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Fit width to screen");
 		auto_rack_width_check = lv_obj_get_child(auto_width_cont, 1);
+		lv_obj_set_style_border_width(auto_width_cont, 0, 0);
 
 		auto rack_width_label = create_settings_menu_slider(ui_PVSettingsMenu, "Width");
 		lv_obj_set_style_text_font(rack_width_label, &ui_font_MuseoSansRounded50014, 0);
@@ -67,10 +71,11 @@ struct PatchViewSettingsMenu {
 
 		lv_obj_move_to_index(graphics_title, 1);
 		lv_obj_move_to_index(zoom_label, 2);
-		lv_obj_move_to_index(auto_width_cont, 3);
-		lv_obj_move_to_index(rack_width_label, 4);
-		lv_obj_move_to_index(graphics_settings, 5);
-		lv_obj_move_to_index(graphics_update_rate_label, 6);
+		lv_obj_move_to_index(auto_layout_cont, 3);
+		lv_obj_move_to_index(auto_width_cont, 4);
+		lv_obj_move_to_index(rack_width_label, 5);
+		lv_obj_move_to_index(graphics_settings, 6);
+		lv_obj_move_to_index(graphics_update_rate_label, 7);
 
 		auto bar_title = create_settings_menu_title(ui_PVSettingsMenu, "STATUS BAR");
 
@@ -84,10 +89,10 @@ struct PatchViewSettingsMenu {
 		auto show_knobset_cont = create_settings_menu_switch(ui_PVSettingsMenu, "Show KnobSet Name");
 		show_knobset_name_check = lv_obj_get_child(show_knobset_cont, 1);
 
-		lv_obj_move_to_index(bar_title, 7);
-		lv_obj_move_to_index(show_samplerate_cont, 8);
-		lv_obj_move_to_index(float_samplerate_cont, 9);
-		lv_obj_move_to_index(show_knobset_cont, 10);
+		lv_obj_move_to_index(bar_title, 8);
+		lv_obj_move_to_index(show_samplerate_cont, 9);
+		lv_obj_move_to_index(float_samplerate_cont, 10);
+		lv_obj_move_to_index(show_knobset_cont, 11);
 
 		auto cable_tension_label = create_settings_menu_slider(ui_PVSettingsMenu, "Tension");
 		cable_tension_slider = lv_obj_get_child(cable_tension_label, 0);
@@ -117,6 +122,7 @@ struct PatchViewSettingsMenu {
 		lv_obj_set_x(ui_PVSettingsMenu, 220);
 
 		lv_obj_add_event_cb(zoom_slider, zoom_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(auto_layout_check, auto_rack_width_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(auto_rack_width_check, auto_rack_width_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(rack_width_slider, rack_width_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(rack_width_slider, rack_width_defocus_cb, LV_EVENT_DEFOCUSED, this);
@@ -136,6 +142,7 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_PVSettingsCloseButton);
 
 		lv_group_add_obj(settings_menu_group, zoom_slider);
+		lv_group_add_obj(settings_menu_group, auto_layout_check);
 		lv_group_add_obj(settings_menu_group, auto_rack_width_check);
 		lv_group_add_obj(settings_menu_group, rack_width_slider);
 		lv_group_add_obj(settings_menu_group, graphics_show_check);
@@ -184,6 +191,7 @@ struct PatchViewSettingsMenu {
 					 settings.paneljack_style.mode == ShowAll || settings.paneljack_style.mode == ShowAllIfPlaying);
 
 		lv_check(graphics_show_check, settings.show_graphic_screens);
+		lv_check(auto_layout_check, settings.auto_layout);
 		lv_check(auto_rack_width_check, settings.auto_rack_width);
 
 		lv_check(show_samplerate_check, settings.show_samplerate);
@@ -318,9 +326,13 @@ private:
 		lv_enable(ui_PVCablesTranspSlider, show_cables);
 		lv_enable(cable_tension_slider, show_cables);
 		lv_enable(graphics_update_rate_slider, show_graphics);
+		// The width controls only decide anything while we are the ones laying the rack out
+		auto auto_layout = lv_obj_has_state(auto_layout_check, LV_STATE_CHECKED);
 		auto fixed_rack_width = !lv_obj_has_state(auto_rack_width_check, LV_STATE_CHECKED);
-		lv_enable(rack_width_slider, fixed_rack_width);
-		lv_enable(rack_width_hp_label, fixed_rack_width);
+
+		lv_enable(auto_rack_width_check, auto_layout);
+		lv_enable(rack_width_slider, auto_layout && fixed_rack_width);
+		lv_enable(rack_width_hp_label, auto_layout && fixed_rack_width);
 
 		if (!show_control_maps && !show_jack_maps) {
 			lv_disable(ui_PVShowMapsAlwaysCheck);
@@ -450,6 +462,7 @@ private:
 
 		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
 
+		page->settings.auto_layout = lv_obj_has_state(page->auto_layout_check, LV_STATE_CHECKED);
 		page->settings.auto_rack_width = lv_obj_has_state(page->auto_rack_width_check, LV_STATE_CHECKED);
 
 		page->update_rack_width_label();
@@ -538,6 +551,7 @@ private:
 	lv_group_t *settings_menu_group = nullptr;
 
 	lv_obj_t *zoom_slider;
+	lv_obj_t *auto_layout_check;
 	lv_obj_t *auto_rack_width_check;
 	lv_obj_t *rack_width_slider;
 	lv_obj_t *cable_tension_slider;
