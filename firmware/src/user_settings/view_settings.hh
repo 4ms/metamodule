@@ -125,6 +125,9 @@ struct ModuleDisplaySettings {
 	bool show_jack_aliases = false;
 	bool show_knob_aliases = false;
 
+	// In ModuleView's fullscreen mode, scale a module that is wider than the screen to fit to the width
+	bool fit_width_in_fullscreen = false;
+
 	bool nav_wrapping = false;
 
 	constexpr static std::array<unsigned, 6> ThrottleAmounts = {32, 16, 8, 4, 2, 1};

@@ -11,6 +11,10 @@ bool write_settings(FileStorageProxy &proxy, UserSettings const &settings, Volum
 	std::array<char, 16384> buffer{};
 
 	auto sz = Settings::serialize(settings, buffer);
+	if (sz == 0) {
+		pr_err("Refusing to write settings.yml: nothing was serialized\n");
+		return false;
+	}
 
 	auto yaml_clean = std::span<char>{buffer.data(), sz};
 

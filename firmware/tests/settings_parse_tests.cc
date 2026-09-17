@@ -345,7 +345,7 @@ TEST_CASE("Parse usb_role_mode") {
 		MetaModule::UserSettings out;
 		out.usb_role_mode = role;
 		std::string buf;
-		buf.resize(2048);
+		buf.resize(4096);
 		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
 		buf.resize(sz);
 
@@ -406,7 +406,7 @@ TEST_CASE("Parse usb_device_mode") {
 		MetaModule::UserSettings out;
 		out.usb_device_mode = mode;
 		std::string buf;
-		buf.resize(2048);
+		buf.resize(4096);
 		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
 		buf.resize(sz);
 
@@ -503,6 +503,7 @@ TEST_CASE("Serialize settings") {
     show_knobset_name: 0
     show_jack_aliases: 0
     show_knob_aliases: 0
+    fit_width_in_fullscreen: 0
     nav_wrapping: 0
   module_view:
     map_ring_flash_active: 0
@@ -528,6 +529,7 @@ TEST_CASE("Serialize settings") {
     show_knobset_name: 0
     show_jack_aliases: 0
     show_knob_aliases: 0
+    fit_width_in_fullscreen: 0
     nav_wrapping: 0
   audio:
     sample_rate: 24000
@@ -579,7 +581,7 @@ TEST_CASE("Serialize settings") {
 	// clang format-on
 
 	std::string parsed;
-	parsed.resize(2048);
+	parsed.resize(4096);
 	auto bytes_size = MetaModule::Settings::serialize(settings, {parsed.data(), parsed.size()});
 	parsed.resize(bytes_size);
 

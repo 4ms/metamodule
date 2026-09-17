@@ -1,4 +1,5 @@
 #include "settings_serialize.hh"
+#include "pr_dbg.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"
@@ -41,6 +42,7 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("show_knobset_name") << s.show_knobset_name;
 	n->append_child() << ryml::key("show_jack_aliases") << s.show_jack_aliases;
 	n->append_child() << ryml::key("show_knob_aliases") << s.show_knob_aliases;
+	n->append_child() << ryml::key("fit_width_in_fullscreen") << s.fit_width_in_fullscreen;
 	n->append_child() << ryml::key("nav_wrapping") << s.nav_wrapping;
 }
 
@@ -119,9 +121,7 @@ static void write(ryml::NodeRef *n, NotificationSettings const &s) {
 	*n |= ryml::MAP;
 
 	using enum NotificationSettings::Amount;
-	ryml::csubstr amount_string = s.amount == Fewer		   ? "Fewer" :
-								  s.amount == OnlyCritical ? "OnlyCritical" :
-															 "All";
+	ryml::csubstr amount_string = s.amount == Fewer ? "Fewer" : s.amount == OnlyCritical ? "OnlyCritical" : "All";
 	n->append_child() << ryml::key("amount") << amount_string;
 	n->append_child() << ryml::key("animation") << s.animation;
 }
@@ -198,7 +198,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 
 	{
 		using enum UsbRoleMode;
-		ryml::csubstr role_string = settings.usb_role_mode == ForceHost	 ? "ForceHost" :
+		ryml::csubstr role_string = settings.usb_role_mode == ForceHost	  ? "ForceHost" :
 									settings.usb_role_mode == ForceDevice ? "ForceDevice" :
 																			"Auto";
 		data["usb_role_mode"] << role_string;
@@ -209,6 +209,17 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["usb_device_mode"] << usb_mode_string;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
+
+	// When the buffer is too small ryml writes nothing and reports the size it would have
+	// needed. Returning that would have the caller read (and write to storage) far past the
+	// end of the buffer, so say "nothing written" instead.
+	if (res.len > buffer.size()) {
+		pr_err("Settings need %u bytes to serialize, but the buffer is only %u\n",
+			   (unsigned)res.len,
+			   (unsigned)buffer.size());
+		return 0;
+	}
+
 	return res.size();
 }
 

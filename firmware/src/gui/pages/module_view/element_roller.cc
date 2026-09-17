@@ -1,7 +1,7 @@
-#include "util/countzip.hh"
 #include "CoreModules/elements/units.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/module_view/roller_helpers.hh"
+#include "util/countzip.hh"
 
 namespace MetaModule
 {
@@ -173,11 +173,14 @@ void ModuleViewPage::add_element_highlight(DrawnElement const &drawn_element) {
 	lv_obj_remove_style(b, &Gui::invisible_style, LV_PART_MAIN);
 	lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 
+	// Vertically position the highlights the same as the module canvas
+	auto canvas_y = module_y_offset();
+
 	if (obj) {
 		float width = lv_obj_get_width(obj);
 		float height = lv_obj_get_height(obj);
 		float c_x = (float)lv_obj_get_x(obj) + width / 2.f;
-		float c_y = (float)lv_obj_get_y(obj) + height / 2.f;
+		float c_y = (float)lv_obj_get_y(obj) + (float)canvas_y + height / 2.f;
 
 		auto x_padding = std::min(width * 0.75f, 12.f);
 		auto y_padding = std::min(height * 0.75f, 12.f);
@@ -193,8 +196,8 @@ void ModuleViewPage::add_element_highlight(DrawnElement const &drawn_element) {
 		auto h = base_element(drawn_element.element).height_mm;
 		auto x = base_element(drawn_element.element).x_mm;
 		auto y = base_element(drawn_element.element).y_mm;
-		lv_obj_set_pos(b, mm_to_px(x, 240), mm_to_px(y, 240));
-		lv_obj_set_size(b, mm_to_px(w, 240), mm_to_px(h, 240));
+		lv_obj_set_pos(b, mm_to_px(x, module_height), mm_to_px(y, module_height) + canvas_y);
+		lv_obj_set_size(b, mm_to_px(w, module_height), mm_to_px(h, module_height));
 	}
 }
 
