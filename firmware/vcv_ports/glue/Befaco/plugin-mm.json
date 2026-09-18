@@ -121,9 +121,13 @@
 		"slug": "Voltio",
 		"name": "Voltio"
 	},
-	{ 
+	{
 		"slug": "Iroi",
 		"name": "Iroi"
+	},
+	{
+		"slug": "Random8",
+		"name": "Random8"
 	}
 	]
 }

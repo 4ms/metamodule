@@ -32,6 +32,7 @@ extern rack::plugin::Model *modelMixer2;
 extern rack::plugin::Model *modelMuDi;
 extern rack::plugin::Model *modelSlew;
 extern rack::plugin::Model *modelIroi;
+extern rack::plugin::Model *modelRandom8;
 
 extern rack::plugin::Model *modelBraids;
 extern rack::plugin::Model *modelPlaits;
