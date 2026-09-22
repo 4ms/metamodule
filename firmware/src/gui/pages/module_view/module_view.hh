@@ -130,6 +130,9 @@ struct ModuleViewPage : PageBase {
 
 		has_context_menu = module_context_menu.create_options_menu(slug, this_module_id);
 
+		current_group.reset();
+		open_group_for_target = true;
+
 		redraw_module();
 
 		lv_hide(ui_ModuleViewActionMenu);
@@ -208,6 +211,10 @@ struct ModuleViewPage : PageBase {
 			} else if (full_screen_mode) {
 				full_screen_mode = false;
 				resize_module_image(190);
+
+			} else if (mode == ViewMode::List && current_group) {
+				// Inside an element group: back returns to the top-level list
+				exit_group();
 
 			} else if (mode == ViewMode::List) {
 				args.module_id = this_module_id;
@@ -464,7 +471,7 @@ private:
 		page->resize_module_image(320);
 		lv_obj_scroll_to_x(ui_ModuleImage, 0, LV_ANIM_ON);
 
-		page->cur_selected = 1;
+		page->cur_selected = page->first_selectable_row();
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_roller_set_selected(ui_ElementRoller, page->cur_selected, LV_ANIM_OFF);
 		lv_event_send(ui_ElementRoller, LV_EVENT_SCROLL, nullptr);
@@ -492,6 +499,15 @@ private:
 	static void roller_pressed_cb(lv_event_t *event);
 	static void jump_to_roller_cb(lv_event_t *event);
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx);
+	unsigned first_selectable_row() const;
+
+	// Element grouping and ordering (defined in module_view/element_roller.cc)
+	void build_element_layout();
+	std::optional<unsigned> resolve_element_ref(ElementRef const &ref) const;
+	std::optional<unsigned> find_group(ElementRef const &ref) const;
+	std::optional<unsigned> find_drawn_idx(ElementCount::Indices indices) const;
+	void enter_group(unsigned group_idx);
+	void exit_group();
 
 	// Defined in module_view/draw_module.cc
 	void prepare_dynamic_elements();
@@ -546,6 +562,27 @@ private:
 
 	std::vector<int> roller_drawn_el_idx;
 
+	// Element grouping and ordering: the elements of a group collapse into a single roller
+	// row, which opens a list of just that group's elements.
+	// group_names[g] is the group's display name.
+	// group_members[g] is the group's drawn element indices, in the order they're shown.
+	// element_group[i] is the group that drawn_elements[i] belongs to, or NoGroup.
+	// top_level_entries is the top-level list, in the order it's shown.
+	// current_group is empty at the top level, or the group being shown.
+	struct RollerEntry {
+		bool is_group;
+		unsigned idx; // group index, or drawn element index
+	};
+	std::vector<std::string_view> group_names;
+	std::vector<std::vector<unsigned>> group_members;
+	std::vector<int16_t> element_group;
+	std::vector<RollerEntry> top_level_entries;
+	std::optional<unsigned> current_group{};
+	// Set when the page is (re)entered: the element we were sent to opens its
+	// group, once. Without this, any later re-populate (a settings change, say)
+	// would re-open a group the user had just backed out of.
+	bool open_group_for_target = false;
+
 	lv_obj_t *canvas = nullptr;
 	ModuleViewMappingPane mapping_pane;
 
@@ -571,7 +608,21 @@ private:
 
 	std::optional<GuiElement> pending_action_param_clear{};
 
-	enum { RollerHeaderTag = -1, ContextMenuTag = -2 };
+	enum { RollerHeaderTag = -1, ContextMenuTag = -2, BackTag = -3 };
+
+	static constexpr int16_t NoGroup = -1;
+
+	// Roller rows that open a group are tagged GroupTagBase - group_idx
+	static constexpr int GroupTagBase = -100;
+	static constexpr int group_row_tag(unsigned group_idx) {
+		return GroupTagBase - (int)group_idx;
+	}
+	static constexpr bool is_group_tag(int tag) {
+		return tag <= GroupTagBase;
+	}
+	static constexpr unsigned group_from_tag(int tag) {
+		return (unsigned)(GroupTagBase - tag);
+	}
 
 	uint16_t selected_input_port = 0;
 	uint16_t selected_output_port = 0;

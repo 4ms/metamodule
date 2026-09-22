@@ -35,26 +35,26 @@ cmake_path(APPEND ASSET_IMG_PATH "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FILE
 message("set ASSET_DIR to ${ASSET_DIR}")
 message("set ASSET_IMG_PATH to ${ASSET_IMG_PATH}")
 
+# Ninja won't re-run a command whose only output is a directory, and a directory named
+# as a dependency doesn't look changed when the files inside it do. So both of these
+# steps use a stamp file and depend on the actual files, or the asset image goes stale:
+# edits to the firmware's assets, or to a built-in plugin's manifest, never reach it.
+#
+# CONFIGURE_DEPENDS re-globs at build time, so added or deleted files trigger a
+# reconfigure and modified ones re-run the copy.
+file(GLOB_RECURSE FW_ASSET_FILES CONFIGURE_DEPENDS ${FWDIR}/assets/*)
+
+set(FW_ASSET_STAMP ${CMAKE_CURRENT_BINARY_DIR}/fw-assets.stamp)
+
 add_custom_command(
-  OUTPUT ${ASSET_DIR}
+  OUTPUT ${FW_ASSET_STAMP}
   COMMAND ${CMAKE_COMMAND} -E echo Copying "${FWDIR}/assets" to "${ASSET_DIR}"
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${FWDIR}/assets" "${ASSET_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E touch ${FW_ASSET_STAMP}
+  DEPENDS ${FW_ASSET_FILES}
   COMMENT "Copying assets/ dir from ${FWDIR}/assets to ${ASSET_DIR}"
   VERBATIM USES_TERMINAL
 )
-
-add_custom_command(
-  OUTPUT ${ASSET_IMG_PATH}
-  COMMAND cd ${ASSET_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
-  COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
-  COMMENT "Creating assets uimg file at ${ASSET_IMG_PATH}"
-  DEPENDS ${ASSET_DIR}
-  VERBATIM USES_TERMINAL
-)
-
- add_custom_target(asset-image ALL 
-	DEPENDS ${ASSET_IMG_PATH}
- )
 
  set(EXT_PLUGIN_INIT_CALLS "")
 
@@ -145,10 +145,28 @@ foreach(branddir brand slug IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_bra
 	add_dependencies(_vcv_ports_internal ${brand}-localized)
 
 	target_link_libraries(_vcv_ports_internal PUBLIC ${brand_localized_obj})
-	add_dependencies(asset-image ${brand}-assets)
+	# No add_dependencies(asset-image ...) needed: the image depends on this plugin's
+	# asset stamp by file, which also makes it rebuild when the assets change
 
 	string(APPEND EXT_PLUGIN_INIT_CALLS "\textern void init_${brand}(rack::plugin::Plugin *);\n\tpluginInstance = &internal_plugins.emplace_back(\"${slug}\");\n\tinit_${brand}(pluginInstance);\n")
 endforeach()
+
+# Defined after the loop so it can depend on each built-in plugin's asset stamp,
+# which create_plugin() records as it runs (see plugin.cmake)
+get_property(PLUGIN_ASSET_STAMPS GLOBAL PROPERTY MM_PLUGIN_ASSET_STAMPS)
+
+add_custom_command(
+  OUTPUT ${ASSET_IMG_PATH}
+  COMMAND cd ${ASSET_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
+  COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
+  COMMENT "Creating assets uimg file at ${ASSET_IMG_PATH}"
+  DEPENDS ${FW_ASSET_STAMP} ${PLUGIN_ASSET_STAMPS}
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_target(asset-image ALL
+  DEPENDS ${ASSET_IMG_PATH}
+)
 
 configure_file(src/ext_plugin_builtin.hh.in ${CMAKE_CURRENT_BINARY_DIR}/ext_plugin/ext_plugin_builtin.hh)
 target_include_directories(simulator PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ext_plugin)

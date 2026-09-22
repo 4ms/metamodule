@@ -119,10 +119,16 @@ int main(int argc, char *argv[]) {
 		.out_port = settings.midiout_dev,
 	}};
 
-	// The default resource paths (patches/, build/assets.uimg, ../patches/default/)
-	// are relative to the simulator/ directory. So the binary can be launched from
-	// any working directory, fall back to resolving them relative to the executable
-	// (which lives in simulator/build/) when they aren't found relative to the cwd.
+	// The default resource paths are patches/, build/assets.uimg, and ../patches/default/.
+	// These are normally valid paths relative to the simulator/ directory, but if a matching dir
+	// is found relative to the CWD, then it will be used instead.
+
+	// Note that the simulator/ dir is assumed to be the simulator binary's parent's parent
+	// (i.e. simulator/build/simulator/../../ => simulator/)
+	//
+	// Specifying a relative path with a CLI option (-p, -s, or -f) will override the
+	// default resource path, but the same rules apply for searching relative to CWD first,
+	// then the simulator/ dir
 	namespace fs = std::filesystem;
 	fs::path sim_dir;
 	if (argc > 0 && std::string_view(argv[0]).find('/') != std::string_view::npos) {

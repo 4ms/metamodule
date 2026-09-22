@@ -26,8 +26,11 @@ struct InternalPluginManager {
 		prepare_ramdisk();
 		load_internal_assets();
 		load_internal_plugins(internal_plugins);
-		parse_plugin_jsons();
+		// Ext-builtin brands must register their modules before the manifests are
+		// parsed: parse_plugin_jsons() applies metadata (display names, element
+		// groups) to modules that are already in the ModuleFactory.
 		load_ext_builtin_plugins(internal_plugins);
+		parse_plugin_jsons();
 		ModuleFactory::setBrandDisplayName("4msCompany", "4ms");
 	}
 
@@ -100,9 +103,17 @@ struct InternalPluginManager {
 			ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
 
 		for (auto const &alias : metadata.module_display_names) {
-			if (alias.display_name.length() && alias.slug.length()) {
+			if (!alias.slug.length())
+				continue;
+
+			if (alias.display_name.length())
 				ModuleFactory::setModuleDisplayName(metadata.brand_slug + ":" + alias.slug, alias.display_name);
-			}
+
+			if (alias.element_groups.size())
+				ModuleFactory::setElementGroups(metadata.brand_slug, alias.slug, alias.element_groups);
+
+			if (alias.element_order.size())
+				ModuleFactory::setElementOrder(metadata.brand_slug, alias.slug, alias.element_order);
 		}
 
 		for (auto const &m : metadata.module_extras) {

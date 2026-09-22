@@ -72,6 +72,7 @@ void ModuleViewPage::redraw_module() {
 
 	// Populate Roller and highlighter buttons
 	populate_element_objects();
+	build_element_layout();
 	populate_roller();
 
 	//Size Module Image and Roller
