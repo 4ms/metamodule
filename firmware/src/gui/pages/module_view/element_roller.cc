@@ -344,6 +344,15 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 
 	// Back and group rows are selectable, but have no panel component to highlight
 	if (cur_idx == BackTag || is_group_tag(cur_idx)) {
+		// Scrolling up from one of these rows at the top of the roller -> focus the button bar.
+		auto key = lv_event_get_key(event);
+		bool const scrolled_up = key == LV_KEY_LEFT || key == LV_KEY_UP;
+		if (scrolled_up && cur_sel == 0 && prev_sel == 0 && !page->full_screen_mode) {
+			page->focus_button_bar();
+			page->roller_hover.hide();
+			return;
+		}
+
 		page->unhighlight_component(prev_sel);
 		page->cur_selected = cur_sel;
 		page->roller_hover.hide();
@@ -375,10 +384,10 @@ void ModuleViewPage::focus_button_bar(bool first_item) {
 		if (first_item) {
 			auto cur_sel = lv_roller_get_option_cnt(ui_ElementRoller) - 1;
 			lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
-			cur_selected = roller_drawn_el_idx[cur_sel];
+			cur_selected = cur_sel;
 			unhighlight_component(cur_sel);
 		} else {
-			cur_selected = 1;
+			cur_selected = first_selectable_row();
 			lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 			unhighlight_component(cur_selected);
 		}
@@ -545,12 +554,12 @@ void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 			if (page->settings.module_view.nav_wrapping && page->last_button_focused == ui_ModuleViewHideBut) {
 				auto cur_sel = lv_roller_get_option_cnt(ui_ElementRoller) - 1;
 				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
-				page->cur_selected = page->roller_drawn_el_idx[cur_sel];
+				page->cur_selected = cur_sel;
 			}
 			if (page->last_button_focused == ui_ModuleViewSettingsBut) {
-				auto cur_sel = 1;
+				auto cur_sel = page->first_selectable_row();
 				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
-				page->cur_selected = page->roller_drawn_el_idx[cur_sel];
+				page->cur_selected = cur_sel;
 			}
 
 			// Must send a PRESS event to enter "edit" mode
@@ -715,6 +724,15 @@ void ModuleViewPage::exit_group() {
 			break;
 		}
 	}
+}
+
+// The row to select when coming into the roller from the top: the first row,
+// unless it's a type header. (In a group the first row is "< Back", and at the top
+// level it can be a group row: both are selectable)
+unsigned ModuleViewPage::first_selectable_row() const {
+	if (!roller_drawn_el_idx.empty() && roller_drawn_el_idx[0] != RollerHeaderTag)
+		return 0;
+	return 1;
 }
 
 std::optional<unsigned> ModuleViewPage::get_drawn_idx(unsigned roller_idx) {

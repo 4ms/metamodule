@@ -471,7 +471,7 @@ private:
 		page->resize_module_image(320);
 		lv_obj_scroll_to_x(ui_ModuleImage, 0, LV_ANIM_ON);
 
-		page->cur_selected = 1;
+		page->cur_selected = page->first_selectable_row();
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_roller_set_selected(ui_ElementRoller, page->cur_selected, LV_ANIM_OFF);
 		lv_event_send(ui_ElementRoller, LV_EVENT_SCROLL, nullptr);
@@ -499,6 +499,7 @@ private:
 	static void roller_pressed_cb(lv_event_t *event);
 	static void jump_to_roller_cb(lv_event_t *event);
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx);
+	unsigned first_selectable_row() const;
 
 	// Element grouping (defined in module_view/element_roller.cc)
 	void build_element_groups();
