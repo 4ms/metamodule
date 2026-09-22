@@ -503,7 +503,7 @@ private:
 
 	// Element grouping (defined in module_view/element_roller.cc)
 	void build_element_groups();
-	std::optional<unsigned> resolve_element_ref(ElementRef ref) const;
+	std::optional<unsigned> resolve_element_ref(ElementRef const &ref) const;
 	std::optional<unsigned> find_drawn_idx(ElementCount::Indices indices) const;
 	void enter_group(unsigned group_idx);
 	void exit_group();

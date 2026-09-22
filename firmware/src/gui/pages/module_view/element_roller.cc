@@ -586,11 +586,45 @@ void ModuleViewPage::jump_to_roller_cb(lv_event_t *event) {
 	}
 }
 
-// Resolve the element that an ElementRef refers to.
-// Native modules index into the Elements array; modules ported from VCV Rack
-// can't know that index, so they refer to elements by param/jack/light id.
-std::optional<unsigned> ModuleViewPage::resolve_element_ref(ElementRef ref) const {
+static bool iequals(std::string_view a, std::string_view b) {
+	return std::ranges::equal(
+		a, b, [](char x, char y) { return std::tolower((unsigned char)x) == std::tolower((unsigned char)y); });
+}
+
+// getInputName()/getOutputName() append " In"/" Out" to a jack's name when it doesn't
+// already contain that word. Accept the name as it reads in the plugin's source, so
+// the author doesn't have to know that rule.
+static bool matches_with_jack_suffix(std::string_view element_name, std::string_view ref_name) {
+	if (element_name.size() <= ref_name.size())
+		return false;
+
+	if (!iequals(element_name.substr(0, ref_name.size()), ref_name))
+		return false;
+
+	auto suffix = element_name.substr(ref_name.size());
+	return iequals(suffix, " In") || iequals(suffix, " Out");
+}
+
+// Resolve the element that an ElementRef refers to: by name, by index into the
+// module's Elements array, or by param/jack/light id.
+std::optional<unsigned> ModuleViewPage::resolve_element_ref(ElementRef const &ref) const {
 	constexpr auto NoIdx = ElementCount::Indices::NoElementMarker;
+
+	if (ref.kind == ElementRef::Kind::Name) {
+		// An exact name wins over one that only matches once " In"/" Out" is
+		// allowed, so "Pitch" finds the knob even if there's also a "Pitch In" jack
+		for (auto [i, drawn_element] : enumerate(drawn_elements)) {
+			if (iequals(base_element(drawn_element.element).short_name, ref.name))
+				return i;
+		}
+
+		for (auto [i, drawn_element] : enumerate(drawn_elements)) {
+			if (matches_with_jack_suffix(base_element(drawn_element.element).short_name, ref.name))
+				return i;
+		}
+
+		return std::nullopt;
+	}
 
 	if (ref.kind == ElementRef::Kind::ElementIdx) {
 		if (ref.idx < drawn_elements.size())
@@ -655,12 +689,19 @@ void ModuleViewPage::build_element_groups() {
 			auto drawn_idx = resolve_element_ref(ref);
 
 			if (!drawn_idx) {
-				pr_warn("Module %.*s: element group '%s' refers to an element that does not exist (kind %u, id %u)\n",
-						(int)slug.size(),
-						slug.data(),
-						group.name.c_str(),
-						(unsigned)ref.kind,
-						ref.idx);
+				if (ref.kind == ElementRef::Kind::Name)
+					pr_warn("Module %.*s: element group '%s': no element named '%s'\n",
+							(int)slug.size(),
+							slug.data(),
+							group.name.c_str(),
+							ref.name.c_str());
+				else
+					pr_warn("Module %.*s: element group '%s': no element with kind %u id %u\n",
+							(int)slug.size(),
+							slug.data(),
+							group.name.c_str(),
+							(unsigned)ref.kind,
+							ref.idx);
 				continue;
 			}
 

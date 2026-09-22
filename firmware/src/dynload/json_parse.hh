@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/element_group.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"
@@ -20,10 +21,12 @@ struct Metadata {
 	// When loading a patch, consider use of these names as equivalent to using the brand_slug
 	std::vector<std::string> brand_aliases;
 
-	// From plugin-mm.json: display names shown on the MetaModule screen
+	// From plugin-mm.json: display names shown on the MetaModule screen,
+	// and the module's element groups (optional)
 	struct ModuleDisplayName {
 		std::string slug;
 		std::string display_name;
+		std::vector<ElementGroup> element_groups;
 	};
 
 	std::vector<ModuleDisplayName> module_display_names;
@@ -40,6 +43,27 @@ struct Metadata {
 	std::vector<ModuleMetaData> module_extras;
 };
 
+// "groups" is a map of group name => list of element references, in the order the
+// groups should appear in the module view:
+//   "groups": { "Filter": ["Cutoff", "Resonance", "param:7"], "Envelope": ["Attack"] }
+static void read_element_groups(ryml::ConstNodeRef const &n, std::vector<ElementGroup> *groups) {
+	if (!n.is_map())
+		return;
+
+	for (auto const &group_node : n.children()) {
+		if (!group_node.has_key() || !group_node.is_seq())
+			continue;
+
+		auto &group = groups->emplace_back();
+		group.name = std::string{std::string_view{group_node.key()}};
+
+		for (auto const &member : group_node.children()) {
+			if (member.has_val())
+				group.members.push_back(ElementRef::parse(std::string_view{member.val()}));
+		}
+	}
+}
+
 static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
 	if (!n.is_map())
 		return false;
@@ -50,6 +74,9 @@ static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
 			n["displayName"] >> s->display_name;
 		} else if (n.has_child("name")) {
 			n["name"] >> s->display_name;
+		}
+		if (n.has_child("groups")) {
+			read_element_groups(n["groups"], &s->element_groups);
 		}
 	}
 	return true;
