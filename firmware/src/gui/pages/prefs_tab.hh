@@ -1,4 +1,5 @@
 #pragma once
+#include "core_a7/device_settings_proxy.hh"
 #include "fs/helpers.hh"
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -12,9 +13,11 @@
 #include "gui/slsexport/prefs_section_missing_plugins.hh"
 #include "gui/slsexport/prefs_section_notifications.hh"
 #include "gui/slsexport/prefs_section_screensaver.hh"
+#include "gui/slsexport/prefs_section_usb.hh"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "patch_play/patch_playloader.hh"
+#include "screen/usb_video_buffer.hh"
 #include "user_settings/audio_settings.hh"
 
 namespace MetaModule
@@ -22,7 +25,10 @@ namespace MetaModule
 
 struct PrefsTab : SystemMenuTab {
 
-	PrefsTab(PatchPlayLoader &patch_playloader, UserSettings &settings, GuiState &gui_state)
+	PrefsTab(PatchPlayLoader &patch_playloader,
+			 UserSettings &settings,
+			 GuiState &gui_state,
+			 NotificationQueue &notify_queue)
 		: patch_playloader{patch_playloader}
 		, audio_settings{settings.audio}
 		, screensaver{settings.screensaver}
@@ -34,6 +40,9 @@ struct PrefsTab : SystemMenuTab {
 		, missing_plugins{settings.missing_plugins}
 		, button_exp_knobset{settings.button_exp_knobset}
 		, notifications{settings.notifications}
+		, video{settings.video}
+		, developer{settings.developer}
+		, notify_queue{notify_queue}
 		, settings{settings} {
 
 		audio_section.create(ui_SystemMenuPrefsTab);
@@ -44,6 +53,7 @@ struct PrefsTab : SystemMenuTab {
 		buttonexpknobset_section.create(ui_SystemMenuPrefsTab);
 		missingplugins_section.create(ui_SystemMenuPrefsTab);
 		notifications_section.create(ui_SystemMenuPrefsTab);
+		usb_section.create(ui_SystemMenuPrefsTab);
 
 		auto btns = create_save_revert_buttons(ui_SystemMenuPrefsTab);
 		save_button = lv_obj_get_child(btns, 1);
@@ -61,6 +71,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(audio_section.samplerate_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(audio_section.auto_rebalance_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ssaver_section.time_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ssaver_section.knobs_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(catchup_section.mode_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -80,10 +91,15 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(usb_section.role_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(usb_section.device_mode_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(usb_section.mirror_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(usb_section.dev_drive_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(audio_section.blocksize_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.overrun_retries, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(audio_section.samplerate_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(audio_section.auto_rebalance_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ssaver_section.time_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ssaver_section.knobs_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(catchup_section.mode_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
@@ -103,6 +119,10 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(buttonexpknobset_section.require_back_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(usb_section.role_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(usb_section.device_mode_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(usb_section.mirror_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(usb_section.dev_drive_check, focus_cb, LV_EVENT_FOCUSED, this);
 
 		std::string opts;
 		for (auto item : AudioSettings::ValidBlockSizes) {
@@ -216,6 +236,10 @@ private:
 								  [this](auto t) { return t == audio_settings.max_overrun_retries; });
 		lv_dropdown_set_selected(audio_section.overrun_retries, ovr_item >= 0 ? ovr_item : 1);
 
+		auto ar_item = get_index(AudioSettings::ValidAutoRebalance,
+								 [this](auto t) { return t.value == audio_settings.auto_rebalance; });
+		lv_dropdown_set_selected(audio_section.auto_rebalance_dropdown, ar_item >= 0 ? ar_item : 1);
+
 		auto screensaver_item = get_index(ScreensaverSettings::ValidOptions,
 										  [this](auto t) { return t.timeout_ms == screensaver.timeout_ms; });
 		lv_dropdown_set_selected(ssaver_section.time_dropdown, screensaver_item >= 0 ? screensaver_item : 1);
@@ -269,6 +293,17 @@ private:
 		lv_dropdown_set_selected(notifications_section.amount_dropdown, notif_item >= 0 ? notif_item : 0);
 		lv_check(notifications_section.animation_check, notifications.animation);
 
+		// USB/video
+		lv_dropdown_set_selected(usb_section.role_dropdown, usb_role_to_index(settings.usb_role_mode));
+		lv_dropdown_set_selected(usb_section.device_mode_dropdown, usb_device_mode_to_index(settings.usb_device_mode));
+		lv_check(usb_section.mirror_check, video.mirror);
+		lv_check(usb_section.dev_drive_check, developer.enabled);
+
+		update_usb_video_items(settings.usb_device_mode == UsbDeviceMode::Video &&
+							   settings.usb_role_mode != UsbRoleMode::ForceHost);
+		update_usb_device_items(settings.usb_device_mode != UsbDeviceMode::Video &&
+								settings.usb_role_mode != UsbRoleMode::ForceHost);
+
 		gui_state.do_write_settings = false;
 
 		lv_disable(save_button);
@@ -278,7 +313,7 @@ private:
 	}
 
 	void update_audio_override_status() {
-		auto [cur_sr, cur_bs, _] = patch_playloader.get_audio_settings();
+		auto [cur_sr, cur_bs, _mr, _ar] = patch_playloader.get_audio_settings();
 
 		if (cur_sr >= 0 && cur_sr != settings.audio.sample_rate) {
 			std::string msg = "Sample Rate:\n(default)";
@@ -335,6 +370,15 @@ private:
 			return AudioSettings::DefaultOverrunRetries;
 	}
 
+	AudioSettings::AutoRebalance read_auto_rebalance_dropdown() {
+		auto item = lv_dropdown_get_selected(audio_section.auto_rebalance_dropdown);
+
+		if (item >= 0 && item < AudioSettings::ValidAutoRebalance.size())
+			return AudioSettings::ValidAutoRebalance[item].value;
+		else
+			return AudioSettings::DefaultAutoRebalance;
+	}
+
 	bool read_patch_suggest_samplerate_check() {
 		return lv_obj_has_state(audio_section.sr_override_check, LV_STATE_CHECKED);
 	}
@@ -384,7 +428,7 @@ private:
 
 	auto read_midi_14bit_check() {
 		return lv_obj_has_state(midi_section.midi_14bit_check, LV_STATE_CHECKED) ? MidiSettings::Midi14BitCC::Enabled :
-																				  MidiSettings::Midi14BitCC::Disabled;
+																				   MidiSettings::Midi14BitCC::Disabled;
 	}
 
 	bool read_midi_pc_enabled_check() {
@@ -411,6 +455,62 @@ private:
 
 	uint32_t read_knobset_channel_dropdown() {
 		return lv_dropdown_get_selected(midi_section.knobset_channel_dropdown) + 1;
+	}
+
+	// USB role dropdown order: 0 = Auto, 1 = Force Host, 2 = Force Device.
+	static int usb_role_to_index(UsbRoleMode role) {
+		return role == UsbRoleMode::ForceHost ? 1 : role == UsbRoleMode::ForceDevice ? 2 : 0;
+	}
+
+	UsbRoleMode read_usb_role_dropdown() {
+		switch (lv_dropdown_get_selected(usb_section.role_dropdown)) {
+			case 1:
+				return UsbRoleMode::ForceHost;
+			case 2:
+				return UsbRoleMode::ForceDevice;
+			default:
+				return UsbRoleMode::Auto;
+		}
+	}
+
+	static int usb_device_mode_to_index(UsbDeviceMode mode) {
+		return mode == UsbDeviceMode::Video ? 1 : 0;
+	}
+
+	UsbDeviceMode read_usb_mode_dropdown() {
+		switch (lv_dropdown_get_selected(usb_section.device_mode_dropdown)) {
+			case 1:
+				return UsbDeviceMode::Video;
+			default:
+				return UsbDeviceMode::MidiConsole;
+		}
+	}
+
+	bool read_video_mirror_check() {
+		return lv_obj_has_state(usb_section.mirror_check, LV_STATE_CHECKED);
+	}
+
+	bool read_dev_drive_check() {
+		return lv_obj_has_state(usb_section.dev_drive_check, LV_STATE_CHECKED);
+	}
+
+	void update_usb_device_items(bool enabled) {
+		lv_enable(usb_section.device_mode_dropdown, enabled);
+		lv_enable(usb_section.dev_drive_check, enabled);
+
+		auto opa = enabled ? LV_OPA_100 : LV_OPA_50;
+		lv_obj_set_style_opa(lv_obj_get_parent(usb_section.device_mode_dropdown), opa, LV_PART_MAIN);
+		lv_obj_set_style_opa(lv_obj_get_parent(usb_section.dev_drive_check), opa, LV_PART_MAIN);
+	}
+
+	void update_usb_video_items(bool enabled) {
+		lv_enable(usb_section.mirror_check, enabled);
+		auto opa = enabled ? LV_OPA_100 : LV_OPA_50;
+		lv_obj_set_style_opa(lv_obj_get_parent(usb_section.mirror_check), opa, LV_PART_MAIN);
+
+		// Turn off Dev Drive if in Video mode
+		if (enabled)
+			lv_disable(usb_section.dev_drive_check);
 	}
 
 	MissingPluginSettings::Autoload read_missing_plugins_dropdown() {
@@ -472,6 +572,12 @@ private:
 			// hide/show overrides
 			update_audio_override_status();
 
+			gui_state.do_write_settings = true;
+		}
+
+		auto auto_rebalance = read_auto_rebalance_dropdown();
+		if (audio_settings.auto_rebalance != auto_rebalance) {
+			audio_settings.auto_rebalance = auto_rebalance;
 			gui_state.do_write_settings = true;
 		}
 
@@ -543,7 +649,7 @@ private:
 			settings.patch_suggested_audio.apply_blocksize != apply_bs)
 		{
 
-			auto [cur_sr, cur_bs, cur_mr] = patch_playloader.get_audio_settings();
+			auto [cur_sr, cur_bs, cur_mr, _ar] = patch_playloader.get_audio_settings();
 
 			// If user flipped one or both overrides off, then undo the override by applying the current settings
 			bool flipped_sr_off = !apply_sr && settings.patch_suggested_audio.apply_samplerate;
@@ -595,6 +701,40 @@ private:
 			gui_state.do_write_settings = true;
 		}
 
+		// USB role (Auto / Force Host / Force Device)
+		auto usb_role = read_usb_role_dropdown();
+		if (settings.usb_role_mode != usb_role) {
+			settings.usb_role_mode = usb_role;
+			while (!DeviceSettingsProxy::send_role_mode(usb_role))
+				;
+			gui_state.do_write_settings = true;
+		}
+
+		// USB device mode (Console / Video / MIDI)
+		auto usb_mode = read_usb_mode_dropdown();
+		auto video_mirror = read_video_mirror_check();
+		if (settings.usb_device_mode != usb_mode) {
+			settings.usb_device_mode = usb_mode;
+			while (!DeviceSettingsProxy::send_device_mode(usb_mode))
+				;
+			UsbVideoBuffer::enable(usb_mode == UsbDeviceMode::Video);
+			gui_state.do_write_settings = true;
+		}
+		if (video.mirror != video_mirror) {
+			video.mirror = video_mirror;
+			UsbVideoBuffer::set_mirroring(video_mirror);
+			gui_state.do_write_settings = true;
+		}
+
+		auto dev_drive = read_dev_drive_check();
+		if (developer.enabled != dev_drive) {
+			developer.enabled = dev_drive;
+			gui_state.do_write_settings = true;
+			if (dev_drive)
+				notify_queue.put({"(Re-)plug USB cable to a computer to use the Developer drive",
+								  Notification::Priority::Status,
+								  3000});
+		}
 		lv_disable(save_button);
 		lv_disable(revert_button);
 	}
@@ -616,6 +756,12 @@ private:
 		} else if (lv_dropdown_is_open(audio_section.overrun_retries)) {
 			lv_dropdown_close(audio_section.overrun_retries);
 			lv_group_focus_obj(audio_section.overrun_retries);
+			lv_group_set_editing(group, false);
+			return true;
+
+		} else if (lv_dropdown_is_open(audio_section.auto_rebalance_dropdown)) {
+			lv_dropdown_close(audio_section.auto_rebalance_dropdown);
+			lv_group_focus_obj(audio_section.auto_rebalance_dropdown);
 			lv_group_set_editing(group, false);
 			return true;
 
@@ -669,6 +815,19 @@ private:
 
 		} else if (midi_section.close_popup()) {
 			return true;
+
+		} else if (lv_dropdown_is_open(usb_section.role_dropdown)) {
+			lv_dropdown_close(usb_section.role_dropdown);
+			lv_group_focus_obj(usb_section.role_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
+		} else if (lv_dropdown_is_open(usb_section.device_mode_dropdown)) {
+			lv_dropdown_close(usb_section.device_mode_dropdown);
+			lv_group_focus_obj(usb_section.device_mode_dropdown);
+			lv_group_set_editing(group, false);
+			return true;
+
 		} else {
 			update_settings_from_dropdown();
 			return false;
@@ -705,6 +864,7 @@ private:
 		auto block_size = read_blocksize_dropdown();
 		auto sample_rate = read_samplerate_dropdown();
 		auto overrun_retries = read_overrun_dropdown();
+		auto auto_rebalance = read_auto_rebalance_dropdown();
 		auto timeout = read_timeout_dropdown();
 		auto knobwake = read_knobwake_check();
 		auto catchupmode = read_catchup_mode_dropdown();
@@ -724,10 +884,16 @@ private:
 		auto bexp_back = read_require_back_check();
 		auto notif_amount = read_notification_amount_dropdown();
 		auto notif_anim = read_notification_animation_check();
+		auto usb_role = read_usb_role_dropdown();
+		auto usb_mode = read_usb_mode_dropdown();
+		auto video_mirror = read_video_mirror_check();
+		auto dev_drive = read_dev_drive_check();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 		update_knobset_control_items(knobset_control == MidiSettings::KnobsetControl::Enabled);
 		update_require_back_enabled(bexp != 0);
+		update_usb_video_items(usb_mode == UsbDeviceMode::Video && usb_role != UsbRoleMode::ForceHost);
+		update_usb_device_items(usb_role != UsbRoleMode::ForceHost);
 
 		if (block_size == audio_settings.block_size && sample_rate == audio_settings.sample_rate &&
 			overrun_retries == audio_settings.max_overrun_retries && timeout == screensaver.timeout_ms &&
@@ -735,13 +901,14 @@ private:
 			catchup_exclude_buttons == catchup.allow_jump_outofrange &&
 			load_initial_patch == settings.load_initial_patch && fs_max_patches == fs.max_open_patches &&
 			midi_feedback == midi.midi_feedback && midi_14bit == midi.midi_14bit_cc &&
-			midi_pc_enabled == midi_pc_patch_load.enabled &&
-			knobset_control == midi.knobset_control && knobset_cc == midi.knobset_cc &&
-			knobset_channel == midi.knobset_channel && mp_mode == missing_plugins.autoload &&
-			apply_sr == settings.patch_suggested_audio.apply_samplerate &&
+			midi_pc_enabled == midi_pc_patch_load.enabled && knobset_control == midi.knobset_control &&
+			knobset_cc == midi.knobset_cc && knobset_channel == midi.knobset_channel &&
+			mp_mode == missing_plugins.autoload && apply_sr == settings.patch_suggested_audio.apply_samplerate &&
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
-			notif_anim == notifications.animation)
+			notif_anim == notifications.animation && usb_role == settings.usb_role_mode &&
+			usb_mode == settings.usb_device_mode && video_mirror == video.mirror && dev_drive == developer.enabled &&
+			auto_rebalance == audio_settings.auto_rebalance)
 		{
 			lv_disable(save_button);
 			lv_disable(revert_button);
@@ -760,9 +927,10 @@ private:
 		auto target = event->target;
 
 		// scroll to bottom if we select last items
-		if (target == page->notifications_section.amount_dropdown ||
-			target == page->notifications_section.animation_check)
-		{
+		if (target == page->usb_section.role_dropdown) {
+			lv_obj_scroll_to_view_recursive(lv_obj_get_parent(page->usb_section.role_dropdown), LV_ANIM_ON);
+
+		} else if (target == page->usb_section.dev_drive_check) {
 			lv_obj_scroll_to_view_recursive(page->save_button, LV_ANIM_ON);
 
 			// scroll to top if we select first items
@@ -784,6 +952,9 @@ private:
 	MissingPluginSettings &missing_plugins;
 	ButtonExpKnobSetSettings &button_exp_knobset;
 	NotificationSettings &notifications;
+	VideoSettings &video;
+	DeveloperSettings &developer;
+	NotificationQueue &notify_queue;
 	UserSettings &settings;
 
 	lv_group_t *group = nullptr;
@@ -796,6 +967,7 @@ private:
 	PrefsSectionMissingPlugins missingplugins_section;
 	PrefsSectionButtonExpKnobSet buttonexpknobset_section;
 	PrefsSectionNotifications notifications_section;
+	PrefsSectionUSB usb_section;
 
 	lv_obj_t *save_button;
 	lv_obj_t *revert_button;

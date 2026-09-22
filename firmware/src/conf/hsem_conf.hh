@@ -14,6 +14,14 @@ enum SemaphoreLocks {
 	SharedI2CLock,
 	InvalidateICache,
 	RunningPatchTests,
+	UartLock,
+};
+
+enum UartLockProcID {
+	UartLockA7Core0 = 0, // must be 0, comes from MPIDR
+	UartLockA7Core1 = 1, // must be 1, comes from MPIDR
+	UartLockM4Direct = 2,
+	UartLockM4Drain = 3,
 };
 
 } // namespace MetaModule

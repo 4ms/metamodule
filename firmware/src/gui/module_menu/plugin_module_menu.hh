@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/moduleFactory.hh"
 #include "console/pr_dbg.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/roller_hover_text.hh"
@@ -7,9 +8,7 @@
 #include "gui/module_menu/vcv_plugin_menu.hh"
 #include "gui/pages/slider_popup.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "lvgl.h"
 #include "patch_play/patch_playloader.hh"
-#include "util/overloaded.hh"
 #include <functional>
 
 namespace MetaModule
@@ -44,7 +43,7 @@ struct PluginModuleMenu {
 		lv_obj_set_style_pad_right(hover_label, 10, 0);
 	}
 
-	bool create_options_menu(unsigned this_module_id) {
+	bool create_options_menu(std::string_view slug, unsigned this_module_id) {
 		if (plugin_menu) {
 			pr_err("Error: Plugin menu was not deleted\n");
 		}
@@ -54,8 +53,10 @@ struct PluginModuleMenu {
 			return populate_menu_items() > 0;
 
 		} else if (auto native_module = patch_playloader.get_plugin_module<CoreProcessor>(this_module_id)) {
-			plugin_menu = std::make_unique<NativeModuleMenu>(native_module);
-			return populate_menu_items() > 0;
+			if (auto handlers = ModuleFactory::getContextMenu(slug)) {
+				plugin_menu = std::make_unique<NativeModuleMenu>(native_module, handlers);
+				return populate_menu_items() > 0;
+			}
 		}
 
 		return false;

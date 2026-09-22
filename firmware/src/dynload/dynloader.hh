@@ -4,10 +4,14 @@
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
+#include "dynload/code_buffer.hh"
+#include "dynload/loaded_plugin.hh"
 #include "elf_process/elf_file.hh"
 #include "elf_process/elf_relocator.hh"
+#include "exidx_registry.hh"
 #include "host_sym_list.hh"
 #include "keep-symbols.hh"
+#include "memory/plugin_arena.hh"
 #include "metamodule-plugin-sdk/version.hh"
 #include "pr_dbg.hh"
 #include <cstring>
@@ -22,7 +26,7 @@ namespace MetaModule
 struct DynLoader {
 	static inline bool kept_syms = false;
 
-	DynLoader(std::span<uint8_t> elf_file_data, std::vector<uint8_t> &code_buffer)
+	DynLoader(std::span<uint8_t> elf_file_data, CodeBuffer &code_buffer)
 		: elf{elf_file_data}
 		, codeblock{code_buffer} {
 
@@ -39,15 +43,31 @@ struct DynLoader {
 			return "Not a valid plugin file";
 		}
 
-		load_executable();
+		try {
+			load_executable();
+		} catch (std::bad_alloc &) {
+			auto mb = (elf.load_size() + (1 << 20) - 1) >> 20;
+			pr_err("Out of memory allocating plugin code buffer\n");
+			return "Out of memory: plugin code needs " + std::to_string(mb) + " MB";
+		}
 
 		if (auto err_msg = process_relocs(); err_msg != "") {
 			pr_err("Failed: %s\n", err_msg.c_str());
 			return err_msg;
 		}
 
+		register_unwind_table();
+
+		find_fini_array();
+
 		init_globals();
 		return "";
+	}
+
+	// Where the destructors are, for running them when the plugin is unloaded.
+	// Valid after load()
+	PluginFiniArray fini_array() const {
+		return fini;
 	}
 
 	std::optional<Version> get_sdk_version() {
@@ -111,6 +131,22 @@ private:
 
 		for (auto &seg : elf.segments) {
 			if (seg.is_loadable()) {
+				// The image is placed at codeblock.data() + vaddr, so objects are
+				// only correctly aligned if the buffer's alignment covers the
+				// segment's p_align. Load anyway, but leave a trail in the logs:
+				// a plugin that later crashes on an alignment fault was warned
+				// about here.
+				if (seg.align() > CodeBufferAlignment) {
+					pr_err("Plugin ELF segment requires align 0x%x but code buffer is aligned to 0x%x: "
+						   "NEON or other over-aligned objects in the plugin may crash\n",
+						   seg.align(),
+						   CodeBufferAlignment);
+				} else if (seg.align() < CodeBufferAlignment) {
+					pr_info("Plugin ELF segment align only requires 0x%x but code buffer provides 0x%x\n",
+							seg.align(),
+							CodeBufferAlignment);
+				}
+
 				std::ranges::copy(seg, std::next(codeblock.begin(), seg.address()));
 
 				pr_info("Loading segment with file offset 0x%x - 0x%x to %p - %p\n",
@@ -139,9 +175,29 @@ private:
 
 			hostsyms.insert(hostsyms.end(), host_symbols.begin(), host_symbols.end());
 
+			// Route plugin allocations/frees to our dispatchers instead of the newlib functions
+			for (auto &sym : hostsyms) {
+				if (auto *redirect = PluginArena::allocator_redirect(sym.name))
+					sym.address = reinterpret_cast<uintptr_t>(redirect);
+			}
+
 			// for (auto sym : hostsyms)
 			// 	pr_dump("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
 		}
+	}
+
+	void register_unwind_table() {
+		// Make the plugin's unwind table visible to the host-side exidx
+		// registry, so exceptions can unwind through the plugin's frames.
+		// Plugins built without exceptions are silently skipped.
+		if (auto sec = elf.try_find_section(".ARM.exidx")) {
+			auto base = reinterpret_cast<uintptr_t>(codeblock.data());
+			ExidxRegistry::register_range(base, base + codeblock.size(), base + sec->address(), sec->size_bytes() / 8);
+			pr_trace("Registered plugin unwind table: %u entries\n", sec->size_bytes() / 8);
+			return;
+		}
+
+		pr_trace("Plugin has no .ARM.exidx section (built without exceptions)\n");
 	}
 
 	std::string process_relocs() {
@@ -184,9 +240,30 @@ private:
 		}
 	}
 
+	void find_fini_array() {
+		// Save the fini_array in `fini`, if it exists
+		if (auto sec = elf.try_find_section(".fini_array")) {
+			if (!sec->is_fini_array()) {
+				pr_err(".fini_array section is not a FINIARRAY type\n");
+				return;
+			}
+			if (sec->address() + sec->size_bytes() > codeblock.size()) {
+				pr_err(".fini_array section is outside the loaded image\n");
+				return;
+			}
+			fini = {sec->address(), sec->num_entries()};
+			pr_trace("Plugin has %u entries in .fini_array\n", fini.count);
+			return;
+		}
+
+		// Not found: not an error
+		pr_trace("Plugin has no .fini_array section\n");
+	}
+
 private:
 	ElfFile::Elf elf;
-	std::vector<uint8_t> &codeblock;
+	CodeBuffer &codeblock;
+	PluginFiniArray fini{};
 
 	static std::vector<ElfFile::HostSymbol> hostsyms;
 };

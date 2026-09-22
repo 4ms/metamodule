@@ -1,4 +1,5 @@
 #pragma once
+#include "delay.hh"
 #include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"

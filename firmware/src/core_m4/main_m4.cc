@@ -1,4 +1,5 @@
 #include "conf/hsem_conf.hh"
+#include "console/uart_console_drain.hh"
 #include "controls.hh"
 #include "core_intercom/shared_memory.hh"
 #include "drivers/hsem.hh"
@@ -7,6 +8,7 @@
 #include "fs/fs_messages.hh"
 #include "fs/module_fs_message_handler.hh"
 #include "hsem_handler.hh"
+#include "usb/device_settings_messages.hh"
 #include "usb/usb_manager.hh"
 
 #include <wifi_interface.hh>
@@ -42,7 +44,13 @@ int main() {
 
 	pr_info("M4 starting\n");
 
+	// Sends all cores' printf() output to the UART (in the loops below)
+	UartConsoleDrain console_drain{{SharedMemoryS::ptrs.console_a7_0_buff,
+									SharedMemoryS::ptrs.console_a7_1_buff,
+									SharedMemoryS::ptrs.console_m4_buff}};
+
 	// USB
+	// Optionally sends all cores' printf() output to USB console device
 	UsbManager usb{{SharedMemoryS::ptrs.console_a7_0_buff,
 					SharedMemoryS::ptrs.console_a7_1_buff,
 					SharedMemoryS::ptrs.console_m4_buff}};
@@ -56,14 +64,20 @@ int main() {
 	if (reload_default_patches)
 		fs_messages.reload_default_patches();
 
+	DeviceSettingsMessages device_settings{SharedMemoryS::ptrs.icc_device_settings_message};
+
 	ModuleFSMessageHandler module_fs_messages{SharedMemoryS::ptrs.icc_modulefs_message_core0,
 											  SharedMemoryS::ptrs.icc_modulefs_message_core1};
 
 	WifiInterface::init(&fs_messages.get_patch_storage());
 	WifiInterface::start();
 
+	// From here on, this core's printf() is buffered and drained asynchronously
+	// by console_drain (everything above prints immediately/blocking to UART)
+	UartLog::use_buffer(SharedMemoryS::ptrs.console_m4_buff);
+
 	// Controls
-	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host()};
+	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host(), usb.get_midi_device(), usb};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
@@ -75,28 +89,53 @@ int main() {
 		controls.process();
 		usb.process();
 		sd.process();
+		console_drain.process();
 	}
 
 	// Wait until drive is mounted
 	if (usb.is_drive_detected()) {
 		while (!usb.is_drive_mounted()) {
 			usb.process();
+			console_drain.process();
 		}
 	}
+
+	// The first scan of mounted volumes can be slow, so do it before other
+	// cores start making fs requests
+	fs_messages.process();
 
 	pr_info("M4 initialized\n");
 
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
+
+	UsbConnection last_published_conn = UsbConnection::None;
+	// usb.get_device_info_seq() increments on disconnection and class activation
+	uint32_t last_published_info_seq = usb.get_device_info_seq();
 
 	while (true) {
 		controls.process();
 
 		usb.process();
 		sd.process();
+		console_drain.process();
+
+		auto conn = usb.get_connection_status();
+		auto info_seq = usb.get_device_info_seq();
+		if (conn != last_published_conn || info_seq != last_published_info_seq) {
+			last_published_conn = conn;
+			last_published_info_seq = info_seq;
+			SharedMemoryS::ptrs.usb_connection_status->publish(usb.get_status());
+		}
 
 		fs_messages.process();
 
 		module_fs_messages.process();
+
+		auto ds_result = device_settings.process();
+		if (ds_result.has_mode_change)
+			usb.set_device_mode(ds_result.mode);
+		if (ds_result.has_role_change)
+			usb.set_role_mode(ds_result.role);
 
 		WifiInterface::run();
 	}

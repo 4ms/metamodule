@@ -450,6 +450,7 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
   USBH_EpDescTypeDef           *pep;
   USBH_DescHeader_t            *pdesc;
   uint16_t                     ptr;
+  uint16_t                     desc_start;
   uint8_t                      if_ix = 0U;
   uint8_t                      ep_ix = 0U;
 
@@ -469,6 +470,11 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
   /* Parse configuration descriptor */
   cfg_desc->bLength             = *(uint8_t *)(buf + 0U);
   cfg_desc->bDescriptorType     = *(uint8_t *)(buf + 1U);
+  if (((uint16_t)LE16(buf + 2U)) > ((uint16_t)USBH_MAX_SIZE_CONFIGURATION)) {
+    USBH_ErrLog("Config descriptor wTotalLength %u exceeds max %u: truncating, some interfaces may be unusable",
+          (uint16_t)LE16(buf + 2U),
+          (uint16_t)USBH_MAX_SIZE_CONFIGURATION);
+  }
   cfg_desc->wTotalLength        = MIN(((uint16_t) LE16(buf + 2U)), ((uint16_t)USBH_MAX_SIZE_CONFIGURATION));
   cfg_desc->bNumInterfaces      = *(uint8_t *)(buf + 4U);
   cfg_desc->bConfigurationValue = *(uint8_t *)(buf + 5U);
@@ -484,6 +490,29 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
     while ((if_ix < USBH_MAX_NUM_INTERFACES) && (ptr < cfg_desc->wTotalLength))
     {
       pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
+
+      /* ptr trails the walk by a constant USB_LEN_CFG_DESC bytes: it starts at
+         USB_LEN_CFG_DESC while pdesc starts at buf[0], and USBH_GetNextDesc
+         advances both by the same amount. So the descriptor pdesc points to
+         starts at ptr - USB_LEN_CFG_DESC. */
+      desc_start = (uint16_t)(ptr - USB_LEN_CFG_DESC);
+
+      /* End of data: no room left for another descriptor header */
+      if ((uint16_t)(desc_start + USB_LEN_DESC_HDR) > cfg_desc->wTotalLength)
+      {
+        break;
+      }
+      if (pdesc->bLength == 0U)
+      {
+        USBH_DbgLog("Descriptor invalid (length 0 at offset %u), aborting", desc_start);
+        break;
+      }
+      if ((uint16_t)(desc_start + pdesc->bLength) > cfg_desc->wTotalLength)
+      {
+        USBH_DbgLog("Descriptor truncated (length %u at offset %u), aborting", pdesc->bLength, desc_start);
+        break;
+      }
+
       if (pdesc->bDescriptorType == USB_DESC_TYPE_INTERFACE)
       {
         /* Make sure that the interface descriptor's bLength is equal to USB_INTERFACE_DESC_SIZE */
@@ -494,8 +523,8 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
 
         pif = &cfg_desc->Itf_Desc[if_ix];
         USBH_ParseInterfaceDesc(pif, (uint8_t *)(void *)pdesc);
-		USBH_DbgLog("Found interface %u: class %u, sub-class %u, protocol %u, endpts %u", 
-				if_ix, pif->bInterfaceClass, pif->bInterfaceSubClass, pif->bInterfaceProtocol, pif->bNumEndpoints);
+        USBH_DbgLog("Found interface %u: class %u, sub-class %u, protocol %u, endpts %u", 
+                     if_ix, pif->bInterfaceClass, pif->bInterfaceSubClass, pif->bInterfaceProtocol, pif->bNumEndpoints);
 
         ep_ix = 0U;
         pep = (USBH_EpDescTypeDef *)NULL;
@@ -504,10 +533,23 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
         {
           pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
 
-		  if (pdesc->bLength == 0) {
-			  USBH_DbgLog("Descriptor invalid (length 0), aborting");
-			  break;
-		  }
+          /* Same bounds checks as the interface loop above */
+          desc_start = (uint16_t)(ptr - USB_LEN_CFG_DESC);
+
+          if ((uint16_t)(desc_start + USB_LEN_DESC_HDR) > cfg_desc->wTotalLength)
+          {
+            break;
+          }
+          if (pdesc->bLength == 0U)
+          {
+            USBH_DbgLog("Descriptor invalid (length 0 at offset %u), aborting", desc_start);
+            break;
+          }
+          if ((uint16_t)(desc_start + pdesc->bLength) > cfg_desc->wTotalLength)
+          {
+            USBH_DbgLog("Descriptor truncated (length %u at offset %u), aborting", pdesc->bLength, desc_start);
+            break;
+          }
 
           if (pdesc->bDescriptorType == USB_DESC_TYPE_ENDPOINT)
           {

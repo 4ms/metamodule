@@ -2,21 +2,23 @@
 #include "CoreModules/hub/button_expander_defs.hh"
 #include "conf/control_conf.hh"
 #include "conf/pin_conf.hh"
-#include "control_expander.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
+#include "expander_bus/control_expander.hh"
 #include "metaparams.hh"
 #include "midi/midi_message.hh"
+#include "midi/midi_stream_parser.hh"
 #include "midi_controls.hh"
 #include "midi_packet_monitor.hh"
 #include "param_block.hh"
 #include "params.hh"
 #include "sense_pin_reader.hh"
 #include "usb/midi_host.hh"
+#include "usb/usb_midi_device.hh"
 #include "util/edge_detector.hh"
 #include "util/interp_param.hh"
 #include "util/lockfree_fifo_spsc.hh"
@@ -28,8 +30,10 @@ using mdrivlib::DebouncedPin;
 using mdrivlib::GPIOExpander;
 using mdrivlib::PinPolarity;
 
+class UsbManager;
+
 struct Controls {
-	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host);
+	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host, UsbMidiDevice &midi_device, UsbManager &usb);
 
 	void start();
 	void process();
@@ -46,10 +50,12 @@ private:
 	void start_param_block();
 
 	void parse_midi();
+	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
+	void read_midi_exp_rx();
+	void clear_rx_message();
 	void update_midi_connected();
 	void update_control_expander();
 	void update_rotary();
-	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
 
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
@@ -72,16 +78,28 @@ private:
 
 	SensePinReader sense_pin_reader;
 	ControlExpanderManager control_expander;
-	std::array<Toggler, ButtonExpander::NumTotalButtons> ext_buttons{};
+	std::array<Toggler, Expander::Button::NumTotalButtons> ext_buttons{};
 
-	// MIDI
+	// MIDI Host and device are never active simultaneously
+	// so both feed the same _midi_rx_buf and TX goes to whichever is connected.
 	MidiHost &_midi_host;
-	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
+	UsbMidiDevice &_midi_device;
+	UsbManager &_usb;
+	LockFreeFifoSpsc<MidiMessage, 256> _midi_usb_rx_buf;
+
+	struct PortedMidiMessage {
+		MidiMessage msg{};
+		Midi::Event::Port port{};
+	};
+	LockFreeFifoSpsc<PortedMidiMessage, 64> _midi_exp_rx_buf;
+
+	std::array<Midi::StreamParser, 2> _midi_exp_parsers;
+
 	MidiPacketMonitor _tx_monitor{"TX"};
 	MidiPacketMonitor _rx_monitor{"RX"};
 	Midi::MessageParser _midi_parser;
-	EdgeStateDetector _midi_connected_raw;
-	bool _midi_connected = false;
+	EdgeStateDetector _midi_usb_connected_raw;
+	bool _midi_usb_connected = false;
 
 	// Params
 	DoubleBufParamBlock &param_blocks;

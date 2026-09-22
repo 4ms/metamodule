@@ -188,6 +188,7 @@ void stop() {
 void run() {
 
 	if (BufferedUSART2::detectedOverrunSinceLastCall()) {
+		pr_warn("UART5: RX overrun\n");
 		deframer.reset();
 	}
 

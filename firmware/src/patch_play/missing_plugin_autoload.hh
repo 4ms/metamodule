@@ -1,4 +1,5 @@
 #pragma once
+#include "delay.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"

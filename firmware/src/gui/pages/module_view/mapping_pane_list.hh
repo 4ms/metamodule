@@ -74,7 +74,7 @@ struct MappingPaneList {
 		return obj;
 	}
 
-	static lv_obj_t *create_panel_in_item(uint16_t panel_jack_id, lv_obj_t *parent, std::string_view alias_name) {
+	static lv_obj_t *create_panel_in_item(uint32_t panel_jack_id, lv_obj_t *parent, std::string_view alias_name) {
 		if (Midi::is_midi_panel_id(panel_jack_id)) {
 			// TODO: create item with textarea so we can add aliases to MIDI jack mappings
 			auto obj = create_mapping_circle_item(parent, MapButtonType::MIDIJack, panel_jack_id, alias_name.data());
@@ -107,7 +107,7 @@ struct MappingPaneList {
 		return obj;
 	}
 
-	static void style_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *obj, std::string_view alias_name) {
+	static void style_panel_incable_item(uint32_t panel_jack_id, lv_obj_t *obj, std::string_view alias_name) {
 		if (lv_obj_get_child_cnt(obj) < 2) {
 			pr_err("style_panel_outcable_item(): object is corrupted\n");
 			return;

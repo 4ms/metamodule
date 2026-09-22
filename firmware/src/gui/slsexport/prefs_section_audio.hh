@@ -20,6 +20,8 @@ struct PrefsSectionAudio {
 
 	lv_obj_t *overrun_retries;
 
+	lv_obj_t *auto_rebalance_dropdown;
+
 	void create(lv_obj_t *parent);
 };
 

@@ -1,3 +1,4 @@
+#pragma once
 #include "conf/screen_buffer_conf.hh"
 #include "conf/screen_conf.hh"
 #include "drivers/screen_ST77XX.hh"
@@ -8,6 +9,7 @@
 #include "params/params.hh"
 #include "screen/screen_writer.hh"
 #include "uart_log.hh"
+#include "usb_video_buffer.hh"
 #include <span>
 
 // #define MONKEYROTARY
@@ -98,6 +100,8 @@ public:
 		last_used_disp_drv = disp_drv;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
+
+		UsbVideoBuffer::flush(area->x1, area->y1, area->x2, area->y2, pixbuf);
 
 		last_transfer_start_time = HAL_GetTick();
 		last_area = *area;

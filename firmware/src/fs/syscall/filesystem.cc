@@ -7,6 +7,7 @@
 #include "fs/helpers.hh"
 #include "fs_syscall_proxy.hh"
 #include "time_convert.hh"
+#include <cerrno>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -220,6 +221,10 @@ int stat(const char *filename, struct stat *st) {
 	}
 
 	pr_err("stat() on file %s on vol %d failed\n", filename, (int)volume);
+
+	// Report the failure as "no such file" (FatFS doesn't tell us more).
+	// Without this, std::filesystem throws filesystem_error:
+	errno = ENOENT;
 	return -1;
 }
 

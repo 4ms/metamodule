@@ -11,12 +11,16 @@ namespace rack::app
 {
 
 struct ModuleWidget::Internal {
+	// Graphic displays use the light_idx field for display id.
+	// Make this high enough to avoid colliding with any light IDs
+	static constexpr unsigned GraphicDisplayIdxBase = 1024;
+
 	app::SvgPanel *panel = nullptr;
 	std::unique_ptr<MetaModule::ModuleWidgetAdaptor> adaptor;
 	std::vector<ModuleWidget::WidgetElement> drawable_widgets;
 
-	unsigned first_graphic_idx = 0;
-	unsigned graphic_display_idx = 200;
+	unsigned first_graphic_idx = GraphicDisplayIdxBase;
+	unsigned graphic_display_idx = GraphicDisplayIdxBase;
 };
 
 std::vector<ModuleWidget::WidgetElement> &ModuleWidget::get_drawable_widgets() {
@@ -48,16 +52,13 @@ engine::Module *ModuleWidget::getModule() {
 
 void ModuleWidget::setModule(engine::Module *m) {
 	if (!m) {
-		pr_err("ModuleWidget is not allowed to delete Module\n");
+		// pr_err("ModuleWidget is not allowed to delete Module\n");
 		return;
 	}
 	if (this->module) {
 		pr_err("Error: Setting the module of a ModuleWidget when a module is already set!\n");
 	}
 	this->module = m;
-
-	internal->graphic_display_idx = std::max(m->lights.size(), m->lightInfos.size());
-	internal->first_graphic_idx = internal->graphic_display_idx;
 
 	if (model && model->slug.size())
 		pr_trace("setModule for %s\n", model->slug.c_str());
@@ -167,8 +168,7 @@ void ModuleWidget::addParam(app::ParamWidget *widget) {
 		log_widget("addParam(Switch)", w);
 		internal->adaptor->addParam(w);
 		Widget::addChild(w);
-	} 
-	else {
+	} else {
 		log_widget("addParam(unknown ParamWidget)", widget);
 		Widget::addChild(widget);
 	}

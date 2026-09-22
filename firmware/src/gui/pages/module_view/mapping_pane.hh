@@ -43,7 +43,7 @@ struct ModuleViewMappingPane {
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue, metaparams}
 		, control_popup{patches, patch_mod_queue, playloader}
-		, midi_map_popup{params}
+		, midi_map_popup{params, metaparams}
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
 
@@ -736,8 +736,7 @@ private:
 
 		// Clear all CC events
 		if (knobset_id == PatchData::MIDIKnobSet) {
-			for (auto &cc : page->params.midi_ccs)
-				cc.changed = false;
+			page->params.last_midi_cc.num = -1;
 		}
 
 		auto module_id = page->drawn_element->gui_element.module_idx;

@@ -1,0 +1,103 @@
+#include "usb_video_device.hh"
+#include "device_composite/add_class.hh"
+#include "console/pr_dbg.hh"
+#include "debug.hh"
+#include <cstring>
+
+
+static USBD_VIDEO_ItfTypeDef video_fops = {
+	MetaModule::UsbVideoDevice::Video_Itf_Init,
+	MetaModule::UsbVideoDevice::Video_Itf_DeInit,
+	MetaModule::UsbVideoDevice::Video_Itf_Control,
+	MetaModule::UsbVideoDevice::Video_Itf_Data,
+};
+
+// Packet buffer for USB transmission (4-byte aligned for DMA)
+static uint8_t packet_buf[UVC_PACKET_SIZE] __attribute__((aligned(4)));
+
+namespace MetaModule
+{
+
+UsbVideoDevice::UsbVideoDevice(USBD_HandleTypeDef *pDevice)
+	: pdev{pDevice} {
+}
+
+void UsbVideoDevice::register_class() {
+	// UVC is presented on its own, not merged with CDC/MIDI, but still goes
+	// through the composite registration path: a composite-enabled core only
+	// routes DataIn/DataOut to classes listed in pdev->tclasslist. Our
+	// USBD_CMPSIT forwards descriptor requests straight back to USBD_VIDEO.
+	auto ok = UsbComposite::add_class(pdev, USBD_VIDEO_CLASS, CLASS_TYPE_VIDEO, CMPSIT_VIDEO_EpAdd, [this] {
+		USBD_VIDEO_RegisterInterface(pdev, &video_fops);
+	});
+
+	if (ok)
+		pr_info("Registered USB video device\n");
+}
+
+void UsbVideoDevice::set_framebuffer(uint8_t *fb) {
+	shadow_fb = fb;
+}
+
+int8_t UsbVideoDevice::Video_Itf_Init() {
+	packet_index = 0;
+	pixel_offset = 0;
+	return 0;
+}
+
+int8_t UsbVideoDevice::Video_Itf_DeInit() {
+	return 0;
+}
+
+int8_t UsbVideoDevice::Video_Itf_Control(uint8_t cmd, uint8_t *pbuf, uint16_t length) {
+	(void)cmd;
+	(void)pbuf;
+	(void)length;
+	return 0;
+}
+
+int8_t UsbVideoDevice::Video_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t *pcktidx) {
+	if (shadow_fb == nullptr) {
+		*psize = 2;
+		*pcktidx = 0;
+		return 0;
+	}
+
+	// Shadow buffer is already in the UVC pixel format (YUY2 or BGR24,
+	// selected at compile time in usbd_conf.h and converted on A7 side).
+	constexpr uint32_t payload_per_packet = UVC_PACKET_SIZE - 2;
+	// Align to 4 bytes for USB DMA; works for both YUY2 (4-byte macro-pixel)
+	// and BGR24 (3-byte pixel — 1020 bytes = 340 whole pixels).
+	constexpr uint32_t bytes_per_packet = payload_per_packet & ~3u;
+	constexpr uint32_t total_bytes = UVC_WIDTH * UVC_HEIGHT * (UVC_BITS_PER_PIXEL / 8U);
+
+	// ~22% load
+	if (pixel_offset < total_bytes) {
+		uint32_t remaining = total_bytes - pixel_offset;
+		uint32_t bytes_this_packet = (remaining < bytes_per_packet) ? remaining : bytes_per_packet;
+
+		// Direct memcpy from pre-converted shadow buffer
+		auto *src = shadow_fb + pixel_offset;
+		std::memcpy(packet_buf, src, bytes_this_packet);
+
+		*pbuf = packet_buf;
+		*psize = (uint16_t)(bytes_this_packet + 2); // +2 for UVC header
+		pixel_offset += bytes_this_packet;
+	} else {
+		// End of frame: header-only packet signals new frame
+		*psize = 2;
+	}
+
+	*pcktidx = (uint16_t)packet_index;
+
+	if (pixel_offset >= total_bytes) {
+		pixel_offset = 0;
+		packet_index = 0;
+	} else {
+		packet_index++;
+	}
+
+	return 0;
+}
+
+} // namespace MetaModule

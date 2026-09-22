@@ -7,6 +7,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/make_cable.hh"
+#include "gui/pages/make_expander.hh"
 #include "gui/pages/module_view/action_menu.hh"
 #include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/module_view/settings_menu.hh"
@@ -130,7 +131,7 @@ struct ModuleViewPage : PageBase {
 		build_element_groups();
 		current_group = {};
 
-		has_context_menu = module_context_menu.create_options_menu(this_module_id);
+		has_context_menu = module_context_menu.create_options_menu(slug, this_module_id);
 
 		redraw_module();
 
@@ -138,13 +139,14 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_AutoMapSelectPanel);
 		lv_hide(ui_MIDIMapPanel);
 
-		if (gui_state.new_cable) {
+		if (gui_state.new_cable || gui_state.new_expander) {
 			lv_hide(ui_ModuleViewHideBut);
 			lv_hide(ui_ModuleViewActionBut);
 			lv_hide(ui_ModuleViewSettingsBut);
 			lv_show(ui_ModuleViewCableCancelBut);
 			lv_show(ui_ModuleViewCableCreateLabel);
-			lv_label_set_text(ui_ModuleViewCableCreateLabel, "Creating a cable");
+			lv_label_set_text(ui_ModuleViewCableCreateLabel,
+							  gui_state.new_cable ? "Creating a cable" : "Attaching an expander");
 			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_flex_align(
@@ -160,7 +162,13 @@ struct ModuleViewPage : PageBase {
 			lv_obj_set_flex_align(
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 			settings_menu.prepare_focus(group);
-			action_menu.prepare_focus(group, this_module_id);
+			action_menu.prepare_focus(group, this_module_id, is_patch_playloaded);
+
+			// Coming back from attaching an expander: show the result
+			if (gui_state.reopen_expander_menu) {
+				gui_state.reopen_expander_menu = false;
+				show_expanders_on_update = true;
+			}
 		}
 
 		quick_control_mode = false;
@@ -174,6 +182,11 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
+		if (show_expanders_on_update) {
+			show_expanders_on_update = false;
+			action_menu.show_expanders();
+		}
+
 		// Back button
 		if (gui_state.back_button.is_just_released()) {
 
@@ -267,6 +280,7 @@ struct ModuleViewPage : PageBase {
 		if (gui_state.force_redraw_patch || gui_state.view_patch_file_changed) {
 
 			abort_cable(gui_state, notify_queue);
+			abort_expander(gui_state, notify_queue);
 
 			// Check if module slug changed: go to patch view if it did
 			// Otherwise re-draw the patch
@@ -274,6 +288,8 @@ struct ModuleViewPage : PageBase {
 			patch = patches.get_view_patch();
 			auto ok = read_slug();
 			if (!ok || prev_slug != slug) {
+				// A different module is at this module_id now: its stacking order does not apply
+				stack_order_module_id.reset();
 				page_list.request_new_page(PageId::PatchView, args);
 			} else {
 				if (gui_state.force_redraw_patch)
@@ -290,8 +306,11 @@ struct ModuleViewPage : PageBase {
 			redraw_module();
 			mapping_pane.refresh();
 
+			// Redrawing hands input back to this page: return it to the action
+			// menu, or to the popup it has open (e.g. the Expanders list)
 			if (action_menu.is_visible()) {
-				focus_button_bar();
+				if (!action_menu.popup_visible())
+					focus_button_bar();
 				action_menu.reactivate_group();
 			}
 		}
@@ -365,6 +384,11 @@ struct ModuleViewPage : PageBase {
 							   patch->set_module_bypassed(mod.module_id, mod.bypassed);
 							   refresh = true;
 						   },
+						   [&, this](AddExpander &mod) { refresh = patch->add_expander(mod.conn); },
+						   [&, this](RemoveExpander &mod) {
+							   patch->remove_expander(mod.conn);
+							   refresh = true;
+						   },
 						   [&](auto &m) { refresh = false; },
 					   },
 					   patch_mod.value());
@@ -435,6 +459,7 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		abort_cable(page->gui_state, page->notify_queue);
+		abort_expander(page->gui_state, page->notify_queue);
 		page->page_list.request_new_page(PageId::PatchView, page->args);
 	}
 
@@ -484,6 +509,8 @@ private:
 	void prepare_dynamic_elements();
 	unsigned resize_module_image(unsigned max);
 	void redraw_module();
+	void save_element_stacking_order();
+	void restore_element_stacking_order();
 	void watch_element(DrawnElement const &drawn_element);
 	void redraw_elements();
 	void update_map_ring_style();
@@ -523,6 +550,12 @@ private:
 
 	std::vector<lv_obj_t *> element_highlights;
 	std::vector<DrawnElement> drawn_elements;
+
+	// Drawn element indices, ordered back to front: used to keep the stacking order of
+	// overlapping controls (e.g. concentric knobs) when the module is re-drawn
+	std::vector<uint16_t> element_stack_order;
+	std::optional<uint16_t> stack_order_module_id;
+
 	std::vector<int> roller_drawn_el_idx;
 
 	// Param-grouping: elements sharing a group_name collapse into a submenu.
@@ -552,6 +585,7 @@ private:
 	unsigned dyn_draw_throttle = 16;
 
 	bool full_screen_mode = false;
+	bool show_expanders_on_update = false;
 
 	std::optional<GuiElement> pending_action_param_clear{};
 

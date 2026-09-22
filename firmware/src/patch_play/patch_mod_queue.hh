@@ -53,7 +53,8 @@ struct RemoveJackMappings {
 };
 
 struct AddJackMapping {
-	uint16_t panel_jack_id;
+	// Full width: MIDI mappings carry channel and port bits above the jack id
+	uint32_t panel_jack_id;
 	Jack jack;
 	ElementType type;
 };
@@ -84,6 +85,15 @@ struct SetModuleBypass {
 	bool bypassed;
 };
 
+// Attach conn.right_module_id as the right-side expander of conn.left_module_id
+struct AddExpander {
+	ExpanderConnection conn;
+};
+
+struct RemoveExpander {
+	ExpanderConnection conn;
+};
+
 using PatchModRequest = std::variant<SetStaticParam,
 									 AddMapping,
 									 ModifyMapping,
@@ -98,7 +108,9 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 SetChanCalibration,
 									 SetMidiPolyNum,
 									 LoadModuleState,
-									 SetModuleBypass>;
+									 SetModuleBypass,
+									 AddExpander,
+									 RemoveExpander>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 128>;
 

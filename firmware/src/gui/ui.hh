@@ -1,5 +1,6 @@
 #pragma once
 #include "debug.hh"
+#include "delay.hh"
 #include "drivers/fusb302.hh"
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
@@ -13,6 +14,7 @@
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
 #include "thorvg.h"
+#include "usb/usb_connection_monitor.hh"
 
 namespace MetaModule
 {
@@ -24,6 +26,7 @@ private:
 
 	NotificationQueue notify_queue;
 	PageManager page_manager;
+	UsbConnectionMonitor usb_monitor;
 	ParamsMidiState params;
 	MetaParams metaparams;
 	UserSettings settings;
@@ -59,10 +62,10 @@ public:
 		Gui::init_lvgl_styles();
 
 		if (!Settings::read_settings(patch_storage, &settings, Volume::NorFlash)) {
+			pr_err("Could not read settings file: running with defaults, leaving the file alone\n");
 			settings = UserSettings{};
-			if (!Settings::write_settings(patch_storage, settings, Volume::NorFlash)) {
-				pr_err("Failed to write settings file\n");
-			}
+			// Note: don't write defaults back to disk: a temporary glitch in reading (M4 stuck on
+			// a bad SD card or USB drive) should not mean the user's setting are wiped out.
 		}
 
 		patch_playloader.connect_user_settings(&settings);
@@ -108,6 +111,11 @@ public:
 
 		if (settings.plugin_preload.slugs.size())
 			delay_ms(600); //allow time for ???
+
+		// Put known large allocators to the front
+		std::ranges::partition(settings.plugin_preload.slugs, [](auto const &s) {
+			return s == "UnfilteredVolume1" || s == "4ms-ROMplers" || s == "MADZINE";
+		});
 
 		auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
 
@@ -177,6 +185,8 @@ private:
 
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
+		usb_monitor.update(metaparams.usb_connection, notify_queue);
+
 		// Experimental?
 		// button_expander_nav(metaparams);
 
@@ -191,6 +201,10 @@ private:
 		} else if (load_status.error_string.size()) {
 			notify_queue.put({load_status.error_string, Notification::Priority::Status, 1500});
 		}
+
+		// Advance the load re-balancing trials (started by the Load Balance
+		// panel or automatically, per the Auto Re-balance preference)
+		patch_playloader.update_rebalance_trials(lv_tick_get());
 	}
 
 	uint32_t last_page_update_tm = 0;

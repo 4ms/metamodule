@@ -62,6 +62,11 @@ public:
 		norflash_changes_.reset();
 
 		refresh_patch_list();
+
+		// Populate removeable drives on the first call to process()
+		// This gives the drives time to be mounted
+		sd_changes_.reset();
+		usb_changes_.reset();
 	}
 
 	void reload_default_patches() {
@@ -193,34 +198,6 @@ public:
 		if (message.message_type == RequestReloadDefaultPatches) {
 			IntercoreStorageMessage result{.message_type = ReloadDefaultPatchesDone};
 			reload_default_patches();
-
-			return result;
-		}
-
-		if (message.message_type == RequestCopyPluginAssets) {
-			IntercoreStorageMessage result{};
-			bool ok = false;
-			std::string path = message.filename;
-			ramdisk_.mount_disk();
-			switch (message.vol_id) {
-				case Volume::NorFlash:
-					ok = PatchFileIO::deep_copy_dirs(norflash_, ramdisk_, path);
-					break;
-				case Volume::SDCard:
-					ok = PatchFileIO::deep_copy_dirs(sdcard_, ramdisk_, path);
-					break;
-				case Volume::USB:
-					ok = PatchFileIO::deep_copy_dirs(usbdrive_, ramdisk_, path);
-					break;
-				default:
-					break;
-			}
-
-			if (!ramdisk_.unmount_drive())
-				pr_err("Failed to unmount ramdisk\n");
-
-			// ramdisk_.print_dir("/", 4);
-			result.message_type = ok ? CopyPluginAssetsOK : CopyPluginAssetsFail;
 
 			return result;
 		}

@@ -45,6 +45,7 @@ TEST_CASE("Parse settings file") {
     sample_rate: 96000
     block_size: 128
     max_overrun_retries: 4
+    auto_rebalance: EveryLoad
 
   plugin_autoload:
     - Plugin One
@@ -79,6 +80,9 @@ TEST_CASE("Parse settings file") {
   notifications:
     amount: Fewer
     animation: 0
+  video:
+    enabled: 1
+    mirror: 1
 )";
 	// clang-format on
 
@@ -111,6 +115,7 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.audio.sample_rate == 96000);
 	CHECK(settings.audio.block_size == 128);
 	CHECK(settings.audio.max_overrun_retries == 4);
+	CHECK(settings.audio.auto_rebalance == MetaModule::AudioSettings::AutoRebalance::EveryLoad);
 
 	CHECK(settings.plugin_preload.slugs.at(0) == "Plugin One");
 	CHECK(settings.plugin_preload.slugs.at(1) == "Plugin Two");
@@ -148,6 +153,11 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::Fewer);
 	CHECK(settings.notifications.animation == false);
+
+	CHECK(settings.video.mirror == true);
+
+	// No usb_device_mode key -> defaults to MIDI + Console
+	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::MidiConsole);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -211,6 +221,12 @@ TEST_CASE("Get default settings if file is missing fields") {
 	SUBCASE("Bad audio overrun settings:") {
 		yaml = R"(Settings:
   max_overrun_retries: 94
+)";
+	}
+	SUBCASE("Bad auto rebalance setting:") {
+		yaml = R"(Settings:
+  audio:
+    auto_rebalance: Sometimes
 )";
 	}
 	SUBCASE("Bad catchup settings:") {
@@ -298,6 +314,106 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::All);
 	CHECK(settings.notifications.animation == true);
+
+	CHECK(settings.video.mirror == false);
+
+	// No usb_device_mode -> defaults to MIDI + Console
+	CHECK(settings.usb_device_mode == MetaModule::UsbDeviceMode::MidiConsole);
+
+	// No usb_role_mode -> defaults to Auto
+	CHECK(settings.usb_role_mode == MetaModule::UsbRoleMode::Auto);
+}
+
+TEST_CASE("Parse usb_role_mode") {
+	using enum MetaModule::UsbRoleMode;
+
+	auto parse_role = [](std::string const &role_yaml) {
+		MetaModule::UserSettings settings;
+		std::string yaml = "Settings:\n  " + role_yaml + "\n";
+		MetaModule::Settings::parse(yaml, &settings);
+		return settings.usb_role_mode;
+	};
+
+	CHECK(parse_role("usb_role_mode: Auto") == Auto);
+	CHECK(parse_role("usb_role_mode: ForceHost") == ForceHost);
+	CHECK(parse_role("usb_role_mode: ForceDevice") == ForceDevice);
+	CHECK(parse_role("usb_role_mode: garbage") == Auto);		   // unknown -> default
+	CHECK(parse_role("notifications:\n    animation: 0") == Auto); // absent key -> default
+
+	// Round-trip through serialize -> parse
+	for (auto role : {Auto, ForceHost, ForceDevice}) {
+		MetaModule::UserSettings out;
+		out.usb_role_mode = role;
+		std::string buf;
+		buf.resize(2048);
+		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
+		buf.resize(sz);
+
+		MetaModule::UserSettings in;
+		MetaModule::Settings::parse(buf, &in);
+		CHECK(in.usb_role_mode == role);
+	}
+}
+
+TEST_CASE("Parse developer settings") {
+	auto parse_dev = [](std::string const &yaml_body) {
+		MetaModule::UserSettings settings;
+		std::string yaml = "Settings:\n  " + yaml_body + "\n";
+		MetaModule::Settings::parse(yaml, &settings);
+		return settings.developer.enabled;
+	};
+
+	CHECK(parse_dev("developer:\n    enabled: 1") == true);
+	CHECK(parse_dev("developer:\n    enabled: 0") == false);
+	CHECK(parse_dev("notifications:\n    animation: 0") == false); // absent -> default off
+
+	// Round-trip
+	for (auto enabled : {false, true}) {
+		MetaModule::UserSettings out;
+		out.developer.enabled = enabled;
+		std::string buf;
+		buf.resize(4096);
+		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
+		buf.resize(sz);
+
+		MetaModule::UserSettings in;
+		CHECK(MetaModule::Settings::parse(buf, &in));
+		CHECK(in.developer.enabled == enabled);
+	}
+}
+
+TEST_CASE("Parse usb_device_mode") {
+	using enum MetaModule::UsbDeviceMode;
+
+	auto parse_mode = [](std::string const &mode_yaml) {
+		MetaModule::UserSettings settings;
+		std::string yaml = "Settings:\n  " + mode_yaml + "\n";
+		MetaModule::Settings::parse(yaml, &settings);
+		return settings.usb_device_mode;
+	};
+
+	CHECK(parse_mode("usb_device_mode: MidiConsole") == MidiConsole);
+	CHECK(parse_mode("usb_device_mode: Video") == Video);
+	// "MIDI" and "Console" were separate modes before they were combined into
+	// one composite device; settings files written by older firmware map onto it
+	CHECK(parse_mode("usb_device_mode: MIDI") == MidiConsole);
+	CHECK(parse_mode("usb_device_mode: Console") == MidiConsole);
+	CHECK(parse_mode("usb_device_mode: garbage") == MidiConsole);		  // unknown -> default
+	CHECK(parse_mode("notifications:\n    animation: 0") == MidiConsole); // absent key -> default
+
+	// Round-trip through serialize -> parse
+	for (auto mode : {MidiConsole, Video}) {
+		MetaModule::UserSettings out;
+		out.usb_device_mode = mode;
+		std::string buf;
+		buf.resize(2048);
+		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
+		buf.resize(sz);
+
+		MetaModule::UserSettings in;
+		MetaModule::Settings::parse(buf, &in);
+		CHECK(in.usb_device_mode == mode);
+	}
 }
 
 TEST_CASE("Serialize settings") {
@@ -329,6 +445,7 @@ TEST_CASE("Serialize settings") {
 	settings.audio.sample_rate = 24000;
 	settings.audio.block_size = 512;
 	settings.audio.max_overrun_retries = 4;
+	settings.audio.auto_rebalance = MetaModule::AudioSettings::AutoRebalance::EveryLoad;
 
 	settings.plugin_preload.slugs.emplace_back("Plugin One");
 	settings.plugin_preload.slugs.emplace_back("Plugin Two");
@@ -404,6 +521,7 @@ TEST_CASE("Serialize settings") {
     sample_rate: 24000
     block_size: 512
     max_overrun_retries: 4
+    auto_rebalance: EveryLoad
   plugin_autoload:
     - Plugin One
     - Plugin Two
@@ -439,6 +557,12 @@ TEST_CASE("Serialize settings") {
   notifications:
     amount: OnlyCritical
     animation: 0
+  video:
+    mirror: 0
+  developer:
+    enabled: 0
+  usb_role_mode: Auto
+  usb_device_mode: MidiConsole
 )";
 	// clang format-on
 

@@ -43,8 +43,41 @@ extern "C" {
  * @{
  */
 
-#define USBD_MAX_NUM_INTERFACES 1U
+/* Composite device support.
+ *
+ * The "MIDI + Console" mode presents CDC (2 interfaces) and USB-MIDI (2
+ * interfaces) at once; UVC video is presented on its own. The config
+ * descriptors are not built by ST's usbd_composite_builder.c -- we supply our
+ * own USBD_CMPSIT in device_composite/ (ST's builder has no USB-MIDI support,
+ * and hand-writing the descriptor keeps control of interface strings). Only
+ * the *core's* composite support is used: pClass[]/pClassDataCmsit[] and the
+ * USBD_CoreFindIF()/USBD_CoreFindEP() routing.
+ */
+#define USE_USBD_COMPOSITE
+#define USBD_MAX_SUPPORTED_CLASS 3U /* CDC + MIDI, with room for MSC */
+#define USBD_MAX_CLASS_INTERFACES 2U
+#define USBD_MAX_CLASS_ENDPOINTS 3U /* CDC: bulk IN + bulk OUT + interrupt IN */
+
+/* CDC(2) + MIDI(2) + MSC(1). UVC uses 2 of these when it is the active mode. */
+#define USBD_MAX_NUM_INTERFACES 5U
 #define USBD_MAX_NUM_CONFIGURATION 1U
+
+/* Endpoint map for the composite (MIDI + Console) mode. Kept contiguous from
+ * EP1 up: a TX FIFO is allocated per IN endpoint number, and the OTG core wants
+ * the used TX FIFOs packed at the bottom. UVC, which is a mode of its own,
+ * keeps EP1 IN (UVC_IN_EP below).
+ *   EP1 IN/OUT  bulk       CDC data
+ *   EP2 IN      interrupt  CDC notifications
+ *   EP3 IN/OUT  bulk       MIDI
+ *   EP4 IN/OUT  bulk       MSC (developer-mode drive)
+ */
+#define CMPSIT_CDC_IN_EP 0x81U
+#define CMPSIT_CDC_OUT_EP 0x01U
+#define CMPSIT_CDC_CMD_EP 0x82U
+#define CMPSIT_MIDI_IN_EP 0x83U
+#define CMPSIT_MIDI_OUT_EP 0x03U
+#define CMPSIT_MSC_IN_EP 0x84U
+#define CMPSIT_MSC_OUT_EP 0x04U
 #define USBD_MAX_STR_DESC_SIZ 0x100U
 #define USBD_SELF_POWERED 1U
 #define USBD_DEBUG_LEVEL 1U /*used in usbd lib, so keep this*/
@@ -65,14 +98,47 @@ extern "C" {
 #define USBD_CLASS_BOS_ENABLED 1U
 #define USB_BB_MAX_NUM_ALT_MODE 0x2U
 
+/* UVC Video Class Configuration */
+#include "device_video/uvc_format_config.hh"
+
+#define UVC_WIDTH 320U
+#define UVC_HEIGHT 240U
+
 /* bEndpointAddress in Endpoint Descriptor */
 #define UVC_IN_EP 0x81U
 
 #define UVC_CAM_FPS_FS 10U
-#define UVC_CAM_FPS_HS 5U
+#define UVC_CAM_FPS_HS 15U
 
 #define UVC_ISO_FS_MPS 512U
-#define UVC_ISO_HS_MPS 512U
+#define UVC_ISO_HS_MPS 1024U
+#define UVC_PACKET_SIZE 1024U
+
+#ifdef USE_UVC_FORMAT_BGR3
+// BGR24 advertised via UVC "Frame Based" format (VS_FORMAT_FRAME_BASED, subtype 0x10).
+// Uncompressed subtype (0x04) only officially supports YUV GUIDs (YUY2/NV12/...),
+// so macOS and Windows reject non-YUV GUIDs there. Frame Based permits any GUID.
+// GUID: {e436eb7d-524f-11ce-9f53-0020af0ba770}  (MEDIASUBTYPE_RGB24 / "BGR3")
+#define USBD_UVC_FORMAT_FRAME_BASED
+#define UVC_BITS_PER_PIXEL 24U
+#define UVC_UNCOMPRESSED_GUID 0xE436EB7DU
+#define UVC_GUID_SUFFIX_BYTES 0x4F, 0x52, 0xCE, 0x11, 0x9F, 0x53, 0x00, 0x20, 0xAF, 0x0B, 0xA7, 0x70
+// No RGB->YUV matrix was applied (BGR24 pass-through), so report "Unspecified"
+// instead of the library default of BT.601 (0x04).
+#define UVC_MATRIX_COEFFICIENTS 0x00U
+#else
+// YUY2 4:2:2 advertised via UVC "Uncompressed" format (subtype 0x04).
+// GUID: {32595559-0000-0010-8000-00AA00389B71}
+#define USBD_UVC_FORMAT_UNCOMPRESSED
+#define UVC_BITS_PER_PIXEL 16U
+#define UVC_UNCOMPRESSED_GUID 0x32595559U
+#define UVC_GUID_SUFFIX_BYTES 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71
+#endif
+
+// ST library formula has a bug (*16/2 instead of *16/8), override with correct value
+#define UVC_MAX_FRAME_SIZE (UVC_WIDTH * UVC_HEIGHT * UVC_BITS_PER_PIXEL / 8U)
+
+#include <string.h>
 
 /* Memory management macros make sure to use static memory allocation */
 /** Alias for memory allocation. */

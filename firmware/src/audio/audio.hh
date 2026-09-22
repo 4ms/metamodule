@@ -85,7 +85,17 @@ private:
 
 	// Load measurement
 	mdrivlib::CycleCounter load_measure;
+	mdrivlib::CycleCounter frame_measure;
+	mdrivlib::CycleCounter midi_measure;
 	float load_lpf = 0.f;
+
+	// Knob changes and smoothed input levels are only for control/display, so
+	// they are processed every Nth frame instead of at the full sample rate
+	static constexpr uint32_t GuiJackDecimation = 16;
+
+	// Knobs that moved while the patch was stopped (bit per panel knob):
+	// replayed into the patch when it resumes playing
+	uint32_t knobs_moved_while_stopped = 0;
 
 	// Start/Pause State
 	float output_fade_amt = -1.f;
@@ -99,11 +109,15 @@ private:
 
 	bool ext_audio_connected = false;
 
-	void step();
+	int32_t calibrated_0v[PanelDef::NumAudioOut];
+	int32_t ext_calibrated_0v[AudioExpander::NumOutJacks];
+
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	AudioConf::SampleT get_ext_audio_output(int output_id);
+	AudioConf::SampleT get_silent_audio_output(int output_id);
+	AudioConf::SampleT get_silent_ext_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
@@ -115,6 +129,7 @@ private:
 	void handle_patch_just_loaded();
 	void disable_calibration();
 	void re_enable_calibration();
+	void update_calibrated_0v();
 	void handle_patch_mod_queue();
 	uint32_t calc_audio_period();
 	void set_block_spans();

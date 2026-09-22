@@ -1,7 +1,7 @@
 #pragma once
-#include "midi_message.hh"
-#include "midi_queue.hh"
-#include "midi_router.hh"
+#include "midi/midi_message.hh"
+#include "midi/midi_queue.hh"
+#include "midi/midi_router.hh"
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -25,11 +25,11 @@ private:
 
 public:
 	MidiSync() {
-		MetaModule::MidiRouter::subscribe_tx(&midi_out_queue);
+		MetaModule::MidiRouter::subscribe_tx_system(&midi_out_queue);
 	}
 
 	~MidiSync() {
-		MetaModule::MidiRouter::unsubscribe_tx(&midi_out_queue);
+		MetaModule::MidiRouter::unsubscribe_tx_system(&midi_out_queue);
 	}
 
 	// Clear all stored last values
@@ -55,12 +55,15 @@ public:
 		auto &cc_val = cc_values[midi_chan][cc_num];
 
 		if (cc_val != cc_value) {
+			if (midi_out_queue.data.full())
+				return;
+
 			MidiMessage cc_msg;
 			cc_msg.status = MidiStatusByte{midi_chan, MidiCommand::ControlChange};
 			cc_msg.data.byte[0] = cc_num;
 			cc_msg.data.byte[1] = cc_value;
 
-			midi_out_queue.put(cc_msg);
+			midi_out_queue.data.put(cc_msg);
 
 			// Update stored value
 			cc_val = cc_value;
@@ -75,18 +78,21 @@ public:
 		auto &note_val = note_gate_values[midi_chan][note_num];
 
 		if (note_val != gate_on) {
+			if (midi_out_queue.data.full())
+				return;
+
 			if (gate_on) {
 				MidiMessage note_msg;
 				note_msg.status = MidiStatusByte{midi_chan, MidiCommand::NoteOn};
 				note_msg.data.byte[0] = note_num;
 				note_msg.data.byte[1] = 127;
-				midi_out_queue.put(note_msg);
+				midi_out_queue.data.put(note_msg);
 			} else {
 				MidiMessage note_msg;
 				note_msg.status = MidiStatusByte{midi_chan, MidiCommand::NoteOff};
 				note_msg.data.byte[0] = note_num;
 				note_msg.data.byte[1] = 0;
-				midi_out_queue.put(note_msg);
+				midi_out_queue.data.put(note_msg);
 			}
 
 			// Update stored value
@@ -107,12 +113,15 @@ public:
 		auto &pitch_val = pitchwheel_values[midi_chan];
 
 		if (pitch_val != pitchwheel_value) {
+			if (midi_out_queue.data.full())
+				return;
+
 			MidiMessage pitchwheel_msg;
 			pitchwheel_msg.status = MidiStatusByte{midi_chan, MidiCommand::PitchBend};
 			pitchwheel_msg.data.byte[0] = pitchwheel_value & 0x7F;
 			pitchwheel_msg.data.byte[1] = (pitchwheel_value >> 7) & 0x7F;
 
-			midi_out_queue.put(pitchwheel_msg);
+			midi_out_queue.data.put(pitchwheel_msg);
 
 			// Update stored value
 			pitch_val = pitchwheel_value;

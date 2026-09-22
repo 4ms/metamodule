@@ -3,6 +3,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(metamodule-simulator LANGUAGES C CXX)
 
+# Let CMake drop repeated static libs from the link line (else Apple ld warns
+# "ignoring duplicate libraries")
+if(POLICY CMP0156)
+    cmake_policy(SET CMP0156 NEW)
+endif()
+
+include(CheckCXXCompilerFlag)
+
 set(SIMULATOR 1)
 option(HEADLESS "Build as headless" OFF)
 option(ADDRESS_SAN "Use address sanitizer" OFF)
@@ -13,34 +21,41 @@ set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
 
 if (HEADLESS)
-	message("Building Headless")
+    message("Building Headless")
 
-	add_compile_options(
-		-Ofast
-		-ffast-math
-		-funsafe-math-optimizations
-	)
-	set(METAMODULE_HEADLESS 1)
+    add_compile_options(
+        -O3
+        -ffast-math
+        -funsafe-math-optimizations
+    )
+    # -ffast-math makes inf/NaN undefined, and clang flags every use of them in
+    # third-party code (rapidyaml, gcem, thorvg, ...). Keep fast-math to match
+    # the firmware, and silence the warning.
+    check_cxx_compiler_flag(-Wnan-infinity-disabled SIM_HAS_WNAN_INFINITY_DISABLED)
+    if(SIM_HAS_WNAN_INFINITY_DISABLED)
+        add_compile_options(-Wno-nan-infinity-disabled)
+    endif()
+    set(METAMODULE_HEADLESS 1)
 
 else()
 
-	message("Building Simulator with GUI")
+    message("Building Simulator with GUI")
 
-	add_compile_options(-O2 -g2)
+    add_compile_options(-O2 -g2)
 
-	add_compile_definitions(SIMULATOR)
+    add_compile_definitions(SIMULATOR)
 
-	set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
+    set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
 
-	set(LV_CONF_PATH
-		${CMAKE_CURRENT_LIST_DIR}/lv_conf.h
-		CACHE STRING "" FORCE)
+    set(LV_CONF_PATH
+        ${CMAKE_CURRENT_LIST_DIR}/lv_conf.h
+        CACHE STRING "" FORCE)
 
 endif()
 
 if (SIM_DEBUG_O0)
-	message("Simulator configured as an -O0 DEBUG build (audio DSP included) -- audio may glitch; use low-CPU patches. Run `make config-sim` to return to an optimized build.")
-	add_compile_options(-O0 -g)
+    message("Simulator configured as an -O0 DEBUG build (audio DSP included) -- audio may glitch; use low-CPU patches. Run `make config-sim` to return to an optimized build.")
+    add_compile_options(-O0 -g)
 endif()
 
 if (ADDRESS_SAN)
@@ -71,18 +86,18 @@ target_compile_definitions(cpputil PUBLIC CPPUTIL_STATIC_STRING_USE_STD_STRING)
 # #################### LVGL Simulator Driver #################################
 
 if (NOT HEADLESS)
-	add_subdirectory(lvgl_drv)
+    add_subdirectory(lvgl_drv)
 endif()
 
 # #################### LVGL ############################################
 
 if (NOT HEADLESS)
-	get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
-	include(${LVGL_DIR}/CMakeLists.txt)
-	target_include_directories(lvgl PRIVATE 
-			  ${FWDIR}/lib/fatfs/source
-			  ${FWDIR}/src/fs/fatfs
-	)
+    get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
+    include(${LVGL_DIR}/CMakeLists.txt)
+    target_include_directories(lvgl PRIVATE 
+              ${FWDIR}/lib/fatfs/source
+              ${FWDIR}/src/fs/fatfs
+    )
 
 endif()
 
@@ -98,8 +113,8 @@ add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial
 
 # #################### SLS Export ##################################
 if (NOT HEADLESS)
-	add_subdirectory(${FWDIR}/src/gui/slsexport ${CMAKE_CURRENT_BINARY_DIR}/ui)
-	# target_link_libraries(ui PRIVATE lvgl)
+    add_subdirectory(${FWDIR}/src/gui/slsexport ${CMAKE_CURRENT_BINARY_DIR}/ui)
+    # target_link_libraries(ui PRIVATE lvgl)
 endif()
 
 # #################### VCV Adaptor ##################################
@@ -130,81 +145,93 @@ target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 target_link_libraries(CoreModules-4ms PUBLIC coreproc_plugin_export)
 
 if (NOT HEADLESS)
-	target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
+    target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
 endif()
 
+
+set(SOURCES_COMMON
+    stubs/async_thread_control.cc
+    hardware_support/random.cc
+    hardware_support/time.cc
+    hardware_support/memory.cc
+    hardware_support/filesystem_helpers.cc
+
+    ${FWDIR}/src/midi/midi_router.cc
+
+    ${FWDIR}/src/patch_play/midi_connections.cc
+    ${FWDIR}/src/patch_play/modules_helpers.cc
+    ${FWDIR}/src/patch_play/patch_player_balance.cc
+    ${FWDIR}/src/patch_play/patch_player_cache.cc
+    ${FWDIR}/src/patch_play/patch_player_catchup.cc
+    ${FWDIR}/src/patch_play/patch_player_expanders.cc
+    ${FWDIR}/src/patch_play/patch_player_load.cc
+    ${FWDIR}/src/patch_play/patch_player_mappings.cc
+    ${FWDIR}/src/patch_play/patch_player_modules.cc
+    ${FWDIR}/src/patch_play/plugin_module.cc
+    ${FWDIR}/src/patch_play/rack_expanders.cc
+
+    ${FWDIR}/metamodule-plugin-sdk/version.cc
+)
+
 if(HEADLESS)
-	add_executable(simulator
-		src/headless/main-headless.cc
-		src/headless/audio_files.cc
-		src/headless/nanovg.cc
-		src/headless/gui_stubs.cc
-		stubs/svg.cc
-		stubs/async_thread_control.cc
-		hardware_support/random.cc
-		hardware_support/time.cc
-		hardware_support/memory.cc
-		hardware_support/filesystem_helpers.cc
-
-		${FWDIR}/src/midi/midi_router.cc
-		${FWDIR}/src/patch_play/plugin_module.cc
-
-		${FWDIR}/metamodule-plugin-sdk/version.cc
-		)
+    add_executable(simulator
+        src/headless/main-headless.cc
+        src/headless/audio_files.cc
+        src/headless/nanovg.cc
+        src/headless/gui_stubs.cc
+        stubs/svg.cc
+        ${SOURCES_COMMON} 
+        )
 else()
-	add_executable(simulator
-		src/main.cc
-		src/ui.cc
-		src/sim_midi.cc
-		stubs/memory/heap.cc
-		stubs/fs/fs_proxy.cc
-		stubs/async_thread_control.cc
-		stubs/static_buffers.cc
-		hardware_support/random.cc
-		hardware_support/time.cc
-		hardware_support/memory.cc
-		hardware_support/filesystem_helpers.cc
+    add_executable(simulator
+        src/main.cc
+        src/ui.cc
+        src/sim_midi.cc
+        stubs/memory/heap.cc
+        stubs/fs/fs_proxy.cc
+        stubs/static_buffers.cc
+        stubs/dynload/exidx_registry.cc
 
-		${FWDIR}/src/gui/elements/element_name.cc
-		${FWDIR}/src/gui/elements/panel_name.cc
-		${FWDIR}/src/gui/slsexport/ui_local.cc
-		${FWDIR}/src/fs/helpers.cc
-		# ${FWDIR}/src/gui/slsexport/prefs_menu.cc
-		${FWDIR}/src/gui/fonts/fonts.cc
-		${FWDIR}/src/gui/fonts/ttf.cc
-		${FWDIR}/src/gui/pages/module_view/element_roller.cc
-		${FWDIR}/src/gui/pages/module_view/quick_assign.cc
-		${FWDIR}/src/gui/pages/module_view/draw_module.cc
-		${FWDIR}/src/gui/pages/tags.cc
-		${FWDIR}/src/fw_update/updater_proxy.cc
-		${FWDIR}/src/patch_play/modules_helpers.cc
-		${FWDIR}/src/midi/midi_router.cc
-		${FWDIR}/src/params/expanders.cc
-		${FWDIR}/src/patch_play/patch_player_catchup.cc
-		${FWDIR}/src/patch_play/plugin_module.cc
+        ${SOURCES_COMMON} 
+        ${FWDIR}/src/gui/elements/element_name.cc
+        ${FWDIR}/src/gui/elements/panel_name.cc
+        ${FWDIR}/src/gui/slsexport/ui_local.cc
+        ${FWDIR}/src/fs/helpers.cc
+        ${FWDIR}/src/gui/fonts/fonts.cc
+        ${FWDIR}/src/gui/fonts/ttf.cc
+        ${FWDIR}/src/gui/pages/module_view/element_roller.cc
+        ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
+        ${FWDIR}/src/gui/pages/module_view/draw_module.cc
+        ${FWDIR}/src/gui/pages/tags.cc
+        ${FWDIR}/src/fw_update/updater_proxy.cc
+        ${FWDIR}/src/params/expanders.cc
+        ${FWDIR}/src/patch_play/patch_playloader_balance.cc
+        ${FWDIR}/src/patch_play/patch_playloader_load.cc
+        ${FWDIR}/src/patch_play/patch_playloader_modules.cc
+        ${FWDIR}/src/patch_play/patch_playloader_save.cc
+        ${FWDIR}/src/patch_play/rebalance_trials.cc
         ${FWDIR}/src/patch_file/reload_patch.cc
-		src/file_browser_adaptor.cc
+        src/file_browser_adaptor.cc
 
-		#Fatfs:
-		stubs/fattime.cc
-		${FWDIR}/lib/fatfs/source/ff.c
-		${FWDIR}/lib/fatfs/source/ffunicode.c
-		${FWDIR}/src/fs/fatfs/diskio.cc
-		${FWDIR}/src/fs/fatfs/delete_node.cc
-		${FWDIR}/src/fs/time_convert.cc
-		${FWDIR}/src/fs/general_io.cc
-		#Tar:
-		${FWDIR}/src/fs/asset_drive/untar.cc
+        #Fatfs:
+        stubs/fattime.cc
+        ${FWDIR}/lib/fatfs/source/ff.c
+        ${FWDIR}/lib/fatfs/source/ffunicode.c
+        ${FWDIR}/src/fs/fatfs/diskio.cc
+        ${FWDIR}/src/fs/fatfs/delete_node.cc
+        ${FWDIR}/src/fs/time_convert.cc
+        ${FWDIR}/src/fs/general_io.cc
+        #Tar:
+        ${FWDIR}/src/fs/asset_drive/untar.cc
 
 
-		${FWDIR}/src/user_settings/settings_file.cc
-		${FWDIR}/src/user_settings/settings_parse.cc
-		${FWDIR}/src/user_settings/settings_serialize.cc
+        ${FWDIR}/src/user_settings/settings_file.cc
+        ${FWDIR}/src/user_settings/settings_parse.cc
+        ${FWDIR}/src/user_settings/settings_serialize.cc
 
-		${FWDIR}/metamodule-plugin-sdk/version.cc
 
-		${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
-		)
+        ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
+        )
 
 # see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
 if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -216,23 +243,23 @@ endif()
 target_include_directories(
   simulator
   PRIVATE src/headless
-  		  src
+          src
           stubs
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/medium
-		  ${FWDIR}
-            .
+          ${FWDIR}
+          .
 )
 
 if(NOT HEADLESS)
-	target_include_directories(
-	  simulator
-	  PRIVATE sdl_audio
-			  ${FWDIR}/src/params
-			  ${FWDIR}/lib/fatfs/source
-			  ${FWDIR}/src/fs/fatfs
-	)
+    target_include_directories(
+      simulator
+      PRIVATE sdl_audio
+              ${FWDIR}/src/params
+              ${FWDIR}/lib/fatfs/source
+              ${FWDIR}/src/fs/fatfs
+    )
 endif()
 
 # --- Real MIDI I/O via rtmidi (GUI simulator only) ---
@@ -246,29 +273,34 @@ endif()
 option(SIMULATOR_MIDI "Build the simulator with rtmidi MIDI support" ON)
 
 if(NOT HEADLESS AND SIMULATOR_MIDI)
-	if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/rtmidi/CMakeLists.txt)
-		message(FATAL_ERROR
-			"SIMULATOR_MIDI is ON but the rtmidi submodule is missing.\n"
-			"  Initialize it:  git submodule update --init simulator/rtmidi\n"
-			"  Linux also needs ALSA headers:  sudo apt install libasound2-dev\n"
-			"  Or build without MIDI:  make config-sim-nomidi  (or -DSIMULATOR_MIDI=OFF)")
-	endif()
-	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-	set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
-	add_subdirectory(rtmidi EXCLUDE_FROM_ALL)
-	target_link_libraries(simulator PRIVATE rtmidi)
-	target_compile_definitions(simulator PRIVATE SIM_HAS_RTMIDI)
-	message("Simulator: MIDI enabled (rtmidi)")
+    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/rtmidi/CMakeLists.txt)
+        message(FATAL_ERROR
+            "SIMULATOR_MIDI is ON but the rtmidi submodule is missing.\n"
+            "  Initialize it:  git submodule update --init simulator/rtmidi\n"
+            "  Linux also needs ALSA headers:  sudo apt install libasound2-dev\n"
+            "  Or build without MIDI:  make config-sim-nomidi  (or -DSIMULATOR_MIDI=OFF)")
+    endif()
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+    add_subdirectory(rtmidi EXCLUDE_FROM_ALL)
+    # rtmidi (third-party) uses a VLA, which clang flags as an extension
+    check_cxx_compiler_flag(-Wvla-cxx-extension SIM_HAS_WVLA_CXX_EXTENSION)
+    if(SIM_HAS_WVLA_CXX_EXTENSION)
+        target_compile_options(rtmidi PRIVATE -Wno-vla-cxx-extension)
+    endif()
+    target_link_libraries(simulator PRIVATE rtmidi)
+    target_compile_definitions(simulator PRIVATE SIM_HAS_RTMIDI)
+    message("Simulator: MIDI enabled (rtmidi)")
 elseif(NOT HEADLESS)
-	message("Simulator: MIDI disabled (SIMULATOR_MIDI=OFF)")
+    message("Simulator: MIDI disabled (SIMULATOR_MIDI=OFF)")
 endif()
 
 # Per-target options come after the directory-level ones on the command line, so
 # the simulator's own sources need their opt level set here too 
 if (SIM_DEBUG_O0)
-	target_compile_options(simulator PRIVATE -Wall -O0)
+    target_compile_options(simulator PRIVATE -Wall -O0)
 else()
-	target_compile_options(simulator PRIVATE -Wall -Og)
+    target_compile_options(simulator PRIVATE -Wall -Og)
 endif()
 target_compile_options(simulator PRIVATE -Wno-double-promotion)
 
@@ -286,18 +318,18 @@ endif()
 
 
 target_link_libraries(simulator PRIVATE 
-	metamodule::patch-serial
-	vcv_ports
+    metamodule::patch-serial
+    vcv_ports
 )
 
 if(NOT HEADLESS)
-	target_link_libraries(simulator PRIVATE 
-		${SDL2_LIBRARIES}
-		lvglsdl
-		SDL2
-		ui_lvgl
-		ThorVG
-	)
+    target_link_libraries(simulator PRIVATE 
+        ${SDL2_LIBRARIES}
+        lvglsdl
+        SDL2
+        ui_lvgl
+        ThorVG
+    )
 endif()
 
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
@@ -354,24 +386,24 @@ endif()
 # binary. The -O0 setting is sticky, so subsequent `make debug` runs only
 # recompile changed files; run `make config-sim` to return to an optimized build.
 add_custom_target(
-  debug
-  COMMAND ${CMAKE_COMMAND} -DSIM_DEBUG_O0=ON -S ${CMAKE_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}
-  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target simulator
-  COMMAND ${DEBUG_COMMAND}
-  USES_TERMINAL
+    debug
+    COMMAND ${CMAKE_COMMAND} -DSIM_DEBUG_O0=ON -S ${CMAKE_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target simulator
+    COMMAND ${DEBUG_COMMAND}
+    USES_TERMINAL
 )
 
 include(${FWDIR}/vcv_ports/brands.cmake)
 foreach(brand ${brands})
-	if (DEFINED BUILD_DYN_PLUGIN_${brand})
-	target_compile_definitions(simulator PRIVATE -DBUILD_DYN_PLUGIN_${brand})
+    if (DEFINED BUILD_DYN_PLUGIN_${brand})
+        target_compile_definitions(simulator PRIVATE -DBUILD_DYN_PLUGIN_${brand})
 
-	elseif (DEFINED OMIT_BRAND_${brand})
-	target_compile_definitions(simulator PRIVATE -DOMIT_BRAND_${brand})
+    elseif (DEFINED OMIT_BRAND_${brand})
+        target_compile_definitions(simulator PRIVATE -DOMIT_BRAND_${brand})
 
     else()
-	target_compile_definitions(simulator PRIVATE -DBUILD_INTERNAL_${brand})
-	endif()
+        target_compile_definitions(simulator PRIVATE -DBUILD_INTERNAL_${brand})
+    endif()
 endforeach()
 
 include(ext-plugins.cmake)

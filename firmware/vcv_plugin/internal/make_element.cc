@@ -382,7 +382,8 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 	} else {
 		// Gracefully handle an unconfigured param:
 		element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, element.pos_names.size());
-		pr_warn("Warning: In %s SvgSwitch not configured with configParam or configSwitch\n", module_name(widget));
+		if (auto modname = module_name(widget); modname[0] != '?')
+			pr_warn("Warning: In %s SvgSwitch not configured with configParam or configSwitch\n", modname);
 	}
 
 	for (unsigned i = 0; i < std::min<size_t>(FlipSwitch::MaxPositions, widget->frames.size()); i++) {

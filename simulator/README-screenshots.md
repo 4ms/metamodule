@@ -46,6 +46,7 @@ These options are added on top of the simulator's normal options
 | `--screenshot <file>` | Capture the screen to this **BMP** file after rendering, then exit. If omitted, the simulator runs normally. | (none) |
 | `--screenshot-frames <N>` | Number of UI update cycles (~`N`×10 ms) to run before capturing. | `120` |
 | `--input "<seq>"` | Ordered encoder actions to simulate on startup before capture (see below). | (none) |
+| `--module <N>` | Module index in the loaded patch to open when `--page moduleview` is used. | (none) |
 
 `--patch` and `--page` also work without `--screenshot`: the simulator will load
 the patch / jump to the page and then run interactively as usual. This is handy
@@ -63,11 +64,11 @@ for jumping straight to the screen you're working on.
 | `jackmap` | Jack map (panel in/out mappings) |
 | `midimap` | MIDI map |
 
-(Unknown names print a warning and are ignored. All pages use the same jump
-mechanism, but some — e.g. `moduleview` and `knobmap` — need page arguments
-(a target module/param) to render anything useful when entered directly, which
-this tool does not currently supply. `jackmap` renders from just a loaded patch
-and is the verified target; `midimap`/`patchview` should behave similarly.)
+(Unknown names print a warning and are ignored. Pages are entered with the
+loaded patch as their argument, so `patchview` and `jackmap` render the patch
+directly. `moduleview` additionally needs a module: pass `--module <index>`
+(index into the patch's `module_slugs`; `0` is the hub). Other pages that need
+arguments, e.g. `knobmap`, are not supplied anything beyond the patch.)
 
 ## Simulating encoder input
 

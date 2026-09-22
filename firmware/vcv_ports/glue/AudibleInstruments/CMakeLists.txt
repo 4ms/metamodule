@@ -148,9 +148,15 @@ target_compile_options(AudibleInstrumentsLibrary
     $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-volatile>>
     $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:AppleClang>:-Wno-deprecated-volatile>>    
     $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wno-class-memaccess>>
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:Clang>:-Wno-nontrivial-memcall>>
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:AppleClang>:-Wno-nontrivial-memcall>>
     )
+
+# Clang's equivalent of -Wclass-memaccess only exists in newer versions (not
+# Apple clang 17), so probe for it rather than keying on the compiler ID
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-Wnontrivial-memcall AUDIBLE_HAS_WNONTRIVIAL_MEMCALL)
+if(AUDIBLE_HAS_WNONTRIVIAL_MEMCALL)
+  target_compile_options(AudibleInstrumentsLibrary PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-nontrivial-memcall>)
+endif()
 
 # Fixes for compiler warnings in AudibleInstruments:
 set_source_files_properties(
@@ -170,7 +176,7 @@ set_source_files_properties(
 target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs)
 
 set_source_files_properties(
-  ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc PROPERTIES COMPILE_OPTIONS "-Wno-asm-operand-widths"
+  ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc PROPERTIES COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wno-asm-operand-widths>"
 )
 
 # Silence warning for synth_string_part.cc (used by Rings.cc) which writes 8B into a 4B space.

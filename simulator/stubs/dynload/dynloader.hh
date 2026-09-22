@@ -1,4 +1,5 @@
 #pragma once
+#include "dynload/loaded_plugin.hh"
 #include "metamodule-plugin-sdk/version.hh"
 #include "plugin/Plugin.hpp"
 // #include <chrono>
@@ -10,7 +11,10 @@
 
 struct DynLoader {
 
-	DynLoader(std::span<uint8_t> elf_file_data, std::vector<uint8_t> &code_buffer) {
+	// Generic over the buffer type: the firmware uses an over-aligned
+	// CodeBuffer (see src/dynload/code_buffer.hh); the stub doesn't care.
+	template<typename BufferT>
+	DynLoader(std::span<uint8_t> elf_file_data, BufferT &code_buffer) {
 	}
 
 	std::string load() {
@@ -25,6 +29,10 @@ struct DynLoader {
 		// std::this_thread::sleep_for(1000ms);
 		printf("Pretending plugin has same version as firmware\n");
 		return MetaModule::sdk_version();
+	}
+
+	MetaModule::PluginFiniArray fini_array() const {
+		return {};
 	}
 
 	template<typename PluginInitFunc>

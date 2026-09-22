@@ -7,6 +7,7 @@
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 #include <cmath>
+#include <span>
 
 namespace MetaModule
 {
@@ -180,6 +181,28 @@ inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }
 
+// Raise all params mapped in the active knob set above the un-mapped ones
+// so that stacked controls (e.g. concentric knobs) show the ones in use.
+// Note: controls are drawn at their zero position, and redrawing a control moves it to the
+// foreground, so this must be called after all params have been drawn at their current value.
+inline void raise_mapped_params(std::span<DrawnElement> drawn_elements) {
+	for (auto &drawn_el : drawn_elements) {
+		auto &gui_el = drawn_el.gui_element;
+
+		if (gui_el.count.num_params == 0 || !gui_el.obj)
+			continue;
+
+		if (!gui_el.mapped_panel_id.has_value())
+			continue;
+
+		lv_obj_move_foreground(gui_el.obj);
+
+		// Keep the map ring above its own control, as when it was drawn
+		if (gui_el.map_ring)
+			lv_obj_move_foreground(gui_el.map_ring);
+	}
+}
+
 inline bool redraw_param(DrawnElement &drawn_el, float value) {
 	bool was_redrawn = false;
 
@@ -194,6 +217,17 @@ inline bool redraw_param(DrawnElement &drawn_el, float value) {
 			drawn_el.element);
 	}
 	return was_redrawn;
+}
+
+// Draws every param at its current value: used just after drawing a module, so that the
+// first regular redraw pass doesn't move controls to the foreground in param order.
+template<typename GetParamValue>
+inline void redraw_all_params(std::span<DrawnElement> drawn_elements, GetParamValue &&get_value) {
+	for (auto &drawn_el : drawn_elements) {
+		auto &gui_el = drawn_el.gui_element;
+		if (gui_el.count.num_params > 0 && gui_el.obj)
+			redraw_param(drawn_el, get_value(gui_el.module_idx, gui_el.idx.param_idx));
+	}
 }
 
 } // namespace MetaModule

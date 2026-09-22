@@ -16,6 +16,7 @@
 #include "widget/TransformWidget.hpp"
 
 #include "CoreModules/async_thread.hh"
+#include "CoreModules/context_menu.hh"
 #include "dirent.h"
 #include "jansson.h"
 #include "metamodule-plugin-sdk/core-interface/audio/settings.hh"
@@ -24,15 +25,20 @@
 #include "metamodule-plugin-sdk/core-interface/system/memory.hh"
 #include "metamodule-plugin-sdk/core-interface/system/random.hh"
 #include "metamodule-plugin-sdk/core-interface/system/time.hh"
+#include "metamodule-plugin-sdk/core-interface/system/usb.hh"
 #include "metamodule-plugin-sdk/core-interface/wav/wav_file_stream.hh"
 #include "pffft.h"
 
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <ctime>
 #include <memory>
 #include <random>
 #include <unordered_map>
+
+#include "midi/midi_in.hh"
+#include "midi/midi_out.hh"
 
 #include "CoreModules/moduleFactory.hh"
 
@@ -62,10 +68,18 @@ extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp);
 extern "C" void __cxa_pure_virtual();
 extern "C" void *memalign(size_t align, size_t nbytes);
+extern "C" uintptr_t mm_host_find_exidx(uintptr_t pc, int *nrec);
 
 void __attribute__((optimize("-O0"))) keep_symbols() {
 	{
 		auto x = &calloc;
+		(void)x;
+	}
+
+	{
+		// Exported so SDK >= 2.3 plugins can route their unwinder to the
+		// host exidx registry; nothing in firmware calls it by name
+		auto x = &mm_host_find_exidx;
 		(void)x;
 	}
 
@@ -91,6 +105,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 
 	// provides vtable for Quantity
 	rack::Quantity q;
+	rack::engine::LightInfo li;
 }
 
 void keep_async() {
@@ -109,7 +124,13 @@ void __attribute__((optimize("-O0"))) keep_math(float x) {
 }
 
 void __attribute__((optimize("-O0"))) keep_register_module() {
-	static auto addr = &MetaModule::register_module;
+	auto addr = &MetaModule::register_module;
+	printf("%p\n", addr);
+}
+
+void __attribute__((optimize("-O0"))) keep_register_context_menu() {
+	static bool (*addr)(std::string_view, std::string_view, MetaModule::ContextMenuHandlers) =
+		&MetaModule::register_context_menu;
 	printf("%p\n", addr);
 }
 
@@ -146,7 +167,7 @@ void keep_dirent() {
 	telldir(d);
 }
 
-void keep_coreproc() {
+void __attribute__((optimize("-O0"))) keep_coreproc() {
 	MetaModule::StreamResampler res{2};
 	MetaModule::BlockResampler res2{2};
 	MetaModule::StreamingWaveformDisplay disp{1, 1};
@@ -161,4 +182,20 @@ void keep_coreproc() {
 	[[maybe_unused]] auto x6 = MetaModule::Audio::get_block_size();
 	MetaModule::Patch::mark_patch_modified();
 	MetaModule::Gui::notify_user("", 0);
+
+	[[maybe_unused]] auto x7 = MetaModule::System::get_usb_connection_status();
+	[[maybe_unused]] auto x7a = MetaModule::System::get_usb_device_name();
+	[[maybe_unused]] auto x8 = MetaModule::System::get_usb_midi_in_jack_info(0);
+	[[maybe_unused]] auto x9 = MetaModule::System::get_usb_midi_out_jack_info(0);
+	[[maybe_unused]] auto x9a = MetaModule::System::get_usb_midi_rx_cable(0);
+	[[maybe_unused]] auto x9b = MetaModule::System::get_usb_midi_tx_cable(0);
+
+	MetaModule::MidiInput midi_in;
+	MetaModule::MidiMessage msg{};
+	[[maybe_unused]] auto x10 = midi_in.pop_message();
+	[[maybe_unused]] auto x11 = midi_in.pop_message(&msg);
+
+	MetaModule::MidiOutput midi_out;
+	midi_out.push_message(msg);
+	[[maybe_unused]] auto x12 = midi_out.is_queue_full();
 }
