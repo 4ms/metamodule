@@ -321,6 +321,20 @@ TEST_CASE("Normalizing keeps the modules' spacing relative to each other") {
 	CHECK(r.positions[1] == Coord{120, 0});
 }
 
+TEST_CASE("Stored positions keep their offset when not normalizing") {
+	// While re-arranging, moving the top-left module mustn't slide everything else around
+	std::vector<Box> boxes{
+		Box{.width = 40, .height = H, .wanted = Coord{80, RowPitch}},
+		Box{.width = 40, .height = H, .wanted = Coord{120, RowPitch * 2}},
+	};
+
+	auto r = ModuleLayout::arrange(boxes, 308, RowPitch, true, false);
+
+	CHECK(r.num_unplaced == 0);
+	CHECK(r.positions[0] == Coord{80, RowPitch});
+	CHECK(r.positions[1] == Coord{120, RowPitch * 2});
+}
+
 TEST_CASE("Negative stored positions are normalized in rather than dropped") {
 	std::vector<Box> boxes{
 		Box{.width = 40, .height = H, .wanted = Coord{-80, -RowPitch}},
