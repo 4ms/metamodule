@@ -583,43 +583,4 @@ std::optional<unsigned> ModuleViewPage::get_drawn_idx(unsigned roller_idx) {
 	return std::nullopt;
 }
 
-// Collect the ordered, unique group names declared by this module's elements.
-void ModuleViewPage::build_element_groups() {
-	element_groups.clear();
-	for (auto const &el : moduleinfo.elements) {
-		auto g = base_element(el).group_name;
-		if (g.size() && std::ranges::find(element_groups, g) == element_groups.end())
-			element_groups.push_back(g);
-	}
-}
-
-// Open a group: show only its elements, with a "< Back" row at the top.
-void ModuleViewPage::enter_group(std::string_view group) {
-	current_group = group;
-	args.element_indices = std::nullopt; // avoid re-triggering group auto-open on repopulate
-	cur_selected = 1;					 // first element after the "< Back" row
-	populate_roller();
-}
-
-// Return to the top-level list, re-selecting the row of the group we just left.
-void ModuleViewPage::exit_group() {
-	auto left_group = current_group;
-	current_group = {};
-	args.element_indices = std::nullopt;
-	cur_selected = 0;
-	populate_roller();
-
-	auto git = std::ranges::find(element_groups, left_group);
-	if (git != element_groups.end()) {
-		int tag = group_row_tag((unsigned)std::distance(element_groups.begin(), git));
-		for (unsigned i = 0; i < roller_drawn_el_idx.size(); i++) {
-			if (roller_drawn_el_idx[i] == tag) {
-				cur_selected = i;
-				lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
-				break;
-			}
-		}
-	}
-}
-
 } // namespace MetaModule
