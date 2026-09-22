@@ -111,6 +111,9 @@ struct InternalPluginManager {
 
 			if (alias.element_groups.size())
 				ModuleFactory::setElementGroups(metadata.brand_slug, alias.slug, alias.element_groups);
+
+			if (alias.element_order.size())
+				ModuleFactory::setElementOrder(metadata.brand_slug, alias.slug, alias.element_order);
 		}
 
 		for (auto const &m : metadata.module_extras) {

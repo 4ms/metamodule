@@ -27,6 +27,7 @@ struct Metadata {
 		std::string slug;
 		std::string display_name;
 		std::vector<ElementGroup> element_groups;
+		std::vector<ElementRef> element_order;
 	};
 
 	std::vector<ModuleDisplayName> module_display_names;
@@ -64,6 +65,18 @@ static void read_element_groups(ryml::ConstNodeRef const &n, std::vector<Element
 	}
 }
 
+// "order" lists the top level of the element list: group names and element references
+//   "order": ["Tap Tempo", "Channel 1", "Channel 2", "out:0"]
+static void read_element_order(ryml::ConstNodeRef const &n, std::vector<ElementRef> *order) {
+	if (!n.is_seq())
+		return;
+
+	for (auto const &item : n.children()) {
+		if (item.has_val())
+			order->push_back(ElementRef::parse(std::string_view{item.val()}));
+	}
+}
+
 static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
 	if (!n.is_map())
 		return false;
@@ -77,6 +90,9 @@ static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
 		}
 		if (n.has_child("groups")) {
 			read_element_groups(n["groups"], &s->element_groups);
+		}
+		if (n.has_child("order")) {
+			read_element_order(n["order"], &s->element_order);
 		}
 	}
 	return true;
