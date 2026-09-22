@@ -363,7 +363,8 @@ include(flashing/flashing.cmake)
 #
 add_custom_target(
   simulate
-  COMMAND make -C ${PROJECT_SOURCE_DIR}/../simulator run
+  COMMAND make && ./build/simulator -s ../firmware/build/assets.uimg
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../simulator 
   VERBATIM USES_TERMINAL
 )
 
