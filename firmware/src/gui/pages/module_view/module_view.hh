@@ -501,9 +501,10 @@ private:
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx);
 	unsigned first_selectable_row() const;
 
-	// Element grouping (defined in module_view/element_roller.cc)
-	void build_element_groups();
+	// Element grouping and ordering (defined in module_view/element_roller.cc)
+	void build_element_layout();
 	std::optional<unsigned> resolve_element_ref(ElementRef const &ref) const;
+	std::optional<unsigned> find_group(ElementRef const &ref) const;
 	std::optional<unsigned> find_drawn_idx(ElementCount::Indices indices) const;
 	void enter_group(unsigned group_idx);
 	void exit_group();
@@ -561,13 +562,21 @@ private:
 
 	std::vector<int> roller_drawn_el_idx;
 
-	// Element grouping: the elements of a group collapse into a single roller row,
-	// which opens a list of just that group's elements.
+	// Element grouping and ordering: the elements of a group collapse into a single roller
+	// row, which opens a list of just that group's elements.
 	// group_names[g] is the group's display name.
+	// group_members[g] is the group's drawn element indices, in the order they're shown.
 	// element_group[i] is the group that drawn_elements[i] belongs to, or NoGroup.
+	// top_level_entries is the top-level list, in the order it's shown.
 	// current_group is empty at the top level, or the group being shown.
+	struct RollerEntry {
+		bool is_group;
+		unsigned idx; // group index, or drawn element index
+	};
 	std::vector<std::string_view> group_names;
+	std::vector<std::vector<unsigned>> group_members;
 	std::vector<int16_t> element_group;
+	std::vector<RollerEntry> top_level_entries;
 	std::optional<unsigned> current_group{};
 	// Set when the page is (re)entered: the element we were sent to opens its
 	// group, once. Without this, any later re-populate (a settings change, say)
