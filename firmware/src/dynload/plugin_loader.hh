@@ -231,9 +231,21 @@ public:
 							ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
 
 						for (auto const &alias : metadata.module_display_names) {
-							if (alias.display_name.length() && alias.slug.length()) {
+							if (!alias.slug.length())
+								continue;
+
+							if (alias.display_name.length()) {
 								ModuleFactory::setModuleDisplayName(metadata.brand_slug + ":" + alias.slug,
 																	alias.display_name);
+							}
+
+							if (alias.element_groups.size()) {
+								ModuleFactory::setElementGroups(
+									metadata.brand_slug, alias.slug, alias.element_groups);
+							}
+
+							if (alias.element_order.size()) {
+								ModuleFactory::setElementOrder(metadata.brand_slug, alias.slug, alias.element_order);
 							}
 						}
 

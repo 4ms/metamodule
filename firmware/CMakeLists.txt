@@ -89,13 +89,38 @@ cmake_path(APPEND ASSET_IMG_PATH  "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FIL
 # the tar via DEPENDS, and added/deleted files trigger a reconfigure.
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS ${ASSET_DIR}/*)
 
+# The assets are staged into the build dir before being tarred, so that each built-in
+# brand's plugin-mm.json can have its element-group members rewritten from enumerator
+# names ("CutoffKnob") into typed indices ("elem:3"). The names are resolved against
+# the firmware's own debug info, the same way the plugin SDK resolves them for a
+# .mmplugin. The assets/ source tree is left untouched.
+set(ASSET_STAGE_DIR ${CMAKE_CURRENT_BINARY_DIR}/staged-assets)
+set(RESOLVE_ELEMENT_GROUPS ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk/scripts/resolve_element_groups.py)
+
+file(GLOB ASSET_MM_JSONS CONFIGURE_DEPENDS ${ASSET_DIR}/*/plugin-mm.json)
+
+set(RESOLVE_GROUPS_COMMANDS "")
+foreach(mm_json IN LISTS ASSET_MM_JSONS)
+  cmake_path(GET mm_json PARENT_PATH brand_dir)
+  cmake_path(GET brand_dir FILENAME brand)
+  list(APPEND RESOLVE_GROUPS_COMMANDS
+    COMMAND ${RESOLVE_ELEMENT_GROUPS}
+            --in ${mm_json}
+            --out ${ASSET_STAGE_DIR}/${brand}/plugin-mm.json
+            --elf $<TARGET_FILE:main.elf>
+  )
+endforeach()
+
 add_custom_command(
   OUTPUT ${ASSET_IMG_PATH}
-  COMMAND ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${ASSET_STAGE_DIR}
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${ASSET_DIR} ${ASSET_STAGE_DIR}
+  ${RESOLVE_GROUPS_COMMANDS}
+  COMMAND cd ${ASSET_STAGE_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
-  DEPENDS ${ASSET_FILES}
+  DEPENDS ${ASSET_FILES} ${RESOLVE_ELEMENT_GROUPS} main.elf
   COMMENT "Creating assets uimg file"
-  WORKING_DIRECTORY ${ASSET_DIR}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
 )
 
@@ -338,7 +363,8 @@ include(flashing/flashing.cmake)
 #
 add_custom_target(
   simulate
-  COMMAND make -C ${PROJECT_SOURCE_DIR}/../simulator run
+  COMMAND make && ./build/simulator -s ../firmware/build/assets.uimg
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../simulator 
   VERBATIM USES_TERMINAL
 )
 

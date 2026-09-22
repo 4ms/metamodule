@@ -31,11 +31,21 @@
 	},
 	{
 		"slug": "DEV",
-		"name": "Dual EnvVCA"
+		"name": "Dual EnvVCA",
+		"class": "DEVInfo",
+		"groups": {
+			"Channel A": ["RiseASwitch", "FallASwitch", "CycleAButton", "RiseASlider", "FallASlider", "LevelAKnob", "OffsetAKnob", "RiseAKnob", "FallAKnob", "TrigAIn", "FollowAIn", "TimeCvAIn", "AudioAIn", "VcaCvAIn", "EorAOut", "EnvAOut", "AudioAOut"],
+			"Channel B": ["RiseBSwitch", "FallBSwitch", "CycleBButton", "RiseBSlider", "FallBSlider", "LevelBKnob", "OffsetBKnob", "RiseBKnob", "FallBKnob", "TrigBIn", "FollowBIn", "TimeCvBIn", "AudioBIn", "VcaCvBIn", "EofBOut", "EnvBOut", "AudioBOut"]
+		}
 	},
 	{
 		"slug": "DLD",
-		"name": "Dual Looping Delay"
+		"name": "Dual Looping Delay",
+		"class": "DLDInfo",
+		"groups": {
+			"Channel A": ["TimeAKnob", "TimeMultASwitch", "FeedbackAKnob", "ReverseAButton", "HoldAButton", "DelayFeedAKnob", "MixAKnob", "InAIn", "ReturnAIn", "ReverseAJackIn", "HoldAJackIn", "TimeAJackIn", "FeedbackAJackIn", "DelayFeedAJackIn", "SendAOut", "LoopAOut", "OutAOut", "SoftClipAAltParam", "AutomuteAAltParam", "HoldAAltParam", "Rev_AAltParam", "DelayfeedATaperAltParam", "TimeAAutoNUnqAltParam", "StereoModeAAltParam", "CrossfadeAAltParam"],
+			"Channel B": ["TimeBKnob", "TimeMultBSwitch", "FeedbackBKnob", "ReverseBButton", "HoldBButton", "DelayFeedBKnob", "MixBKnob", "InBIn", "ReturnBIn", "ReverseBJackIn", "HoldBJackIn", "TimeBJackIn", "FeedbackBJackIn", "DelayFeedBJackIn", "SendBOut", "LoopBOut", "OutBOut", "SoftClipBAltParam", "AutomuteBAltParam", "HoldBAltParam", "Rev_BAltParam", "DelayfeedBTaperAltParam", "TimeBAutoNUnqAltParam", "StereoModeBAltParam", "CrossfadeBAltParam"]
+		}
 	},
 	{
 		"slug": "Detune",
@@ -111,7 +121,12 @@
 	},
 	{
 		"slug": "PEG",
-		"name": "PEG"
+		"name": "PEG",
+		"class": "PEGInfo",
+		"groups": {
+			"Red": ["PingRedButton", "CycleRedButton", "PingDivMultRedKnob", "ScaleRedKnob", "SkewRedKnob", "CurveRedKnob", "BiNPolarRedButton", "PingRedJackIn", "QntRedIn", "AsyncRedIn", "DivRedJackIn", "SkewRedJackIn", "CurveRedJackIn", "EnvRedOut", "P5VEnvRedOut", "EofRedOut", "EorOut", "AsyncRedModeAltParam", "FreeNRunningPingRedAltParam", "SkewLimitRedAltParam", "EofRedModeAltParam", "EorRedModeAltParam"],
+			"Blue": ["PingBlueButton", "CycleBlueButton", "PingDivMultBlueKnob", "ScaleBlueKnob", "SkewBlueKnob", "CurveBlueKnob", "BiNPolarBlueButton", "PingBlueJackIn", "QntBlueIn", "AsyncBlueIn", "DivBlueJackIn", "SkewBlueJackIn", "CurveBlueJackIn", "EnvBlueOut", "P5VEnvBlueOut", "EofBlueOut", "HalfROut", "AsyncBlueModeAltParam", "FreeNRunningPingBlueAltParam", "SkewLimitBlueAltParam", "EofBlueModeAltParam", "HalfNRBlueModeAltParam"]
+		}
 	},
 	{
 		"slug": "PI",
@@ -131,11 +146,26 @@
 	},
 	{
 		"slug": "QCD",
-		"name": "QCD"
+		"name": "QCD",
+		"class": "QCDInfo",
+		"groups": {
+			"Channel 1": ["DivMult1Knob", "DivMultCv1Knob", "GatePw1Knob", "GatePwAtt1Knob", "InvMode1Switch", "ClkIn1In", "Reset1In", "DivMultCv1JackIn", "GatePwCv1In", "Out1Out", "InvOut1Out"],
+			"Channel 2": ["DivMult2Knob", "DivMultCv2Knob", "GatePw2Knob", "GatePwAtt2Knob", "InvMode2Switch", "ClkIn2In", "Reset2In", "DivMultCv2JackIn", "GatePwCv2In", "Out2Out", "InvOut2Out"],
+			"Channel 3": ["DivMult3Knob", "DivMultCv3Knob", "GatePw3Knob", "GatePwAtt3Knob", "InvMode3Switch", "ClkIn3In", "Reset3In", "DivMultCv3JackIn", "GatePwCv3In", "Out3Out", "InvOut3Out"],
+			"Channel 4": ["DivMult4Knob", "DivMultCv4Knob", "GatePw4Knob", "GatePwAtt4Knob", "InvMode4Switch", "ClkIn4In", "Reset4In", "DivMultCv4JackIn", "GatePwCv4In", "Out4Out", "InvOut4Out"]
+		},
+		"order": ["Tap Tempo", "Tap Out", "Channel 1", "Channel 2", "Channel 3", "Channel 4"]
 	},
 	{
 		"slug": "QPLFO",
-		"name": "QPLFO"
+		"name": "QPLFO",
+		"class": "QPLFOInfo",
+		"groups": {
+			"Channel 1": ["Skew1Knob", "Ping1Button", "On1Button", "Ping1JackIn", "Skew1CvIn", "Reset1In", "Out1Out", "FireOnUnmuteCh1AltParam"],
+			"Channel 2": ["Skew2Knob", "Ping2Button", "On2Button", "Ping2JackIn", "Skew2JackIn", "Reset2In", "Out2Out", "FireOnUnmuteCh2AltParam"],
+			"Channel 3": ["Skew3Knob", "Ping3Button", "On3Button", "Ping3JackIn", "Skew3JackIn", "Reset3In", "Out3Out", "FireOnUnmuteCh3AltParam"],
+			"Channel 4": ["Skew4Knob", "Ping4Button", "On4Button", "Ping4JackIn", "Skew4JackIn", "Reset4In", "Out4Out", "FireOnUnmuteCh4AltParam"]
+		}
 	},
 	{
 		"slug": "RCD",
@@ -147,7 +177,12 @@
 	},
 	{
 		"slug": "SHEV",
-		"name": "Shaped Dual EnvVCA"
+		"name": "Shaped Dual EnvVCA",
+		"class": "SHEVInfo",
+		"groups": {
+			"Channel A": ["CycleAButton", "RiseASwitch", "FallASwitch", "TrigModeASwitch", "LevelAKnob", "OffsetAKnob", "RiseASlider", "FallASlider", "ShapeASlider", "ShapeAKnob", "RiseAKnob", "FallAKnob", "TrigAIn", "ShapeCvAIn", "FollowAIn", "TimeCvAIn", "AudioAIn", "VcaCvAIn", "EorAOut", "EnvAOut", "OutAOut", "Lin5VAOut"],
+			"Channel B": ["CycleBButton", "RiseBSwitch", "FallBSwitch", "TrigModeBSwitch", "LevelBKnob", "OffsetBKnob", "RiseBSlider", "FallBSlider", "ShapeBSlider", "ShapeBKnob", "RiseBKnob", "FallBKnob", "TrigBIn", "ShapeCvBIn", "FollowBIn", "TimeCvBIn", "AudioBIn", "VcaCvBIn", "EofBOut", "EnvBOut", "OutBOut", "Lin5VBOut"]
+		}
 	},
 	{
 		"slug": "SH",
@@ -155,7 +190,14 @@
 	},
 	{
 		"slug": "SISM",
-		"name": "SISM"
+		"name": "SISM",
+		"class": "SISMInfo",
+		"groups": {
+			"Channel 1": ["Ch_1ScaleKnob", "Ch_1ShiftKnob", "Ch_1In", "Ch_1Out"],
+			"Channel 2": ["Ch_2ScaleKnob", "Ch_2ShiftKnob", "Ch_2In", "Ch_2Out"],
+			"Channel 3": ["Ch_3ScaleKnob", "Ch_3ShiftKnob", "Ch_3In", "Ch_3Out"],
+			"Channel 4": ["Ch_4ScaleKnob", "Ch_4ShiftKnob", "Ch_4In", "Ch_4Out"]
+		}
 	},
 	{
 		"slug": "Seq8",
@@ -187,7 +229,15 @@
 	},
 	{
 		"slug": "VCAM",
-		"name": "VCAMatrix"
+		"name": "VCAMatrix",
+		"class": "VCAMInfo",
+		"groups": {
+			"Levels": ["A1LevelKnob", "A2LevelKnob", "A3LevelKnob", "A4LevelKnob", "B1LevelKnob", "B2LevelKnob", "B3LevelKnob", "B4LevelKnob", "C1LevelKnob", "C2LevelKnob", "C3LevelKnob", "C4LevelKnob", "D1LevelKnob", "D2LevelKnob", "D3LevelKnob", "D4LevelKnob"],
+			"Mutes": ["A1Button", "A2Button", "A3Button", "A4Button", "B1Button", "B2Button", "B3Button", "B4Button", "C1Button", "C2Button", "C3Button", "C4Button", "D1Button", "D2Button", "D3Button", "D4Button"],
+			"Inputs": ["InAIn", "InBIn", "InCIn", "InDIn"],
+			"Outputs": ["Out1Out", "Out2Out", "Out3Out", "Out4Out"],
+			"Level CV": ["A1JackIn", "A2JackIn", "A3JackIn", "A4JackIn", "B1JackIn", "B2JackIn", "B3JackIn", "B4JackIn", "C1JackIn", "C2JackIn", "C3JackIn", "C4JackIn", "D1JackIn", "D2JackIn", "D3JackIn", "D4JackIn"]
+		}
 	},
 	{
 		"slug": "Verb",
