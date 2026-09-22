@@ -41,8 +41,12 @@ struct ModuleLayout {
 
 	// width_bound: x coord where modules wrap
 	// row_pitch: y distance from one row of modules to the next
-	static Result
-	arrange(std::span<const Box> boxes, int32_t width_bound, int32_t row_pitch, bool use_wanted_positions) {
+	// normalize: shift wanted positions so the top-most and left-most modules are at 0
+	static Result arrange(std::span<const Box> boxes,
+						  int32_t width_bound,
+						  int32_t row_pitch,
+						  bool use_wanted_positions,
+						  bool normalize = true) {
 		Result result;
 		result.positions.resize(boxes.size());
 
@@ -76,7 +80,8 @@ struct ModuleLayout {
 		auto shift = Coord{};
 
 		if (use_wanted_positions) {
-			shift = origin_of(boxes);
+			if (normalize)
+				shift = origin_of(boxes);
 
 			std::vector<size_t> order;
 			for (auto i = 0u; i < boxes.size(); i++) {

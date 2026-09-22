@@ -12,17 +12,21 @@
 #include "gui/helpers/module_name.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
+#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/description_panel.hh"
 #include "gui/pages/hscroll_bar.hh"
 #include "gui/pages/make_cable.hh"
 #include "gui/pages/make_expander.hh"
 #include "gui/pages/module_layout.hh"
+#include "gui/pages/module_rearrange.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/styles.hh"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
+#include <cmath>
+#include <utility>
 
 namespace MetaModule
 {
@@ -238,6 +242,9 @@ struct PatchViewPage : PageBase {
 	void redraw_patch() {
 		drawn_rack_layout = rack_layout();
 
+		// The canvases are about to be re-created
+		rearranging.reset();
+
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
 
@@ -295,6 +302,7 @@ struct PatchViewPage : PageBase {
 
 		settings_menu.prepare_focus(group);
 		file_menu.prepare_focus(group);
+		rearrange_confirm.init(lv_layer_top(), group);
 
 		patch = patches.get_view_patch();
 		desc_panel.prepare_focus(group);
@@ -358,7 +366,10 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
-		auto layout = ModuleLayout::arrange(boxes, bound, row_pitch_px(), !page_settings.auto_layout);
+		// Normalizing while re-arranging would slide every module over whenever the top-left one moved
+		auto layout =
+			ModuleLayout::arrange(boxes, bound, row_pitch_px(), !page_settings.auto_layout, !rearranging.has_value());
+		arranged_positions = layout.positions;
 
 		topleft_module = nullptr;
 		ModuleLayout::Coord topleft{};
@@ -381,6 +392,25 @@ struct PatchViewPage : PageBase {
 		arranged_width = std::max<lv_coord_t>(layout.width, rack_width_px());
 		arranged_height = layout.height;
 		return layout.num_unplaced;
+	}
+
+	// Turning the encoder goes through the modules in reading order (left to right, top to bottom),
+	// not patch order. Modules that didn't fit on the canvas are left out.
+	void add_modules_to_group() {
+		std::vector<size_t> order;
+		for (auto i = 0u; i < module_canvases.size() && i < arranged_positions.size(); i++) {
+			if (arranged_positions[i])
+				order.push_back(i);
+		}
+
+		std::ranges::sort(order, [this](size_t a, size_t b) {
+			auto const &pa = *arranged_positions[a];
+			auto const &pb = *arranged_positions[b];
+			return pa.y != pb.y ? pa.y < pb.y : pa.x < pb.x;
+		});
+
+		for (auto i : order)
+			lv_group_add_obj(group, module_canvases[i]);
 	}
 
 	void draw_modules() {
@@ -430,6 +460,7 @@ struct PatchViewPage : PageBase {
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_click_cb, LV_EVENT_CLICKED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
+			lv_obj_add_event_cb(canvas, module_key_cb, LV_EVENT_KEY, (void *)this);
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 			if (args.module_id.has_value()) {
@@ -440,6 +471,7 @@ struct PatchViewPage : PageBase {
 		}
 
 		auto modules_skipped_for_space = arrange_modules();
+		add_modules_to_group();
 
 		if (is_patch_playloaded) {
 			redraw_all_params(drawn_elements, [this](uint16_t module_idx, uint16_t param_idx) {
@@ -505,6 +537,15 @@ struct PatchViewPage : PageBase {
 	}
 
 	void blur() override {
+		if (rearranging) {
+			// The group is set up for re-arranging, so make sure it gets rebuilt next time
+			rearranging.reset();
+			lv_group_set_editing(group, false);
+			for (auto *canvas : module_canvases)
+				lv_obj_clear_state(canvas, RearrangingState);
+			patch_revision = 0xFFFFFFFF;
+		}
+
 		settings_menu.hide();
 		desc_panel.hide();
 		file_menu.hide();
@@ -537,6 +578,22 @@ struct PatchViewPage : PageBase {
 			redraw_patch();
 			return;
 		}
+
+		if (gui_state.rearrange_request && is_ready) {
+			auto carry_id = gui_state.rearrange_request->carry_module_id;
+			gui_state.rearrange_request.reset();
+			request_rearrange(carry_id);
+		}
+
+		// Compact Layout was just turned off, and the patch re-drawn with its stored positions
+		if (pending_rearrange && is_ready && !page_settings.auto_layout) {
+			auto carry_id = *pending_rearrange;
+			pending_rearrange.reset();
+			enter_rearrange(carry_id);
+		}
+
+		if (rearranging)
+			update_rearrange();
 
 		// Taken unconditionally: `||` would short-circuit past it whenever the play state
 		// changed too, and the edit would go unapplied
@@ -600,7 +657,10 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (gui_state.back_button.is_just_released()) {
-			if (settings_menu.is_visible()) {
+			if (rearrange_confirm.is_visible()) {
+				rearrange_confirm.hide();
+
+			} else if (settings_menu.is_visible()) {
 				settings_menu.hide();
 
 			} else if (desc_panel.is_visible()) {
@@ -608,6 +668,9 @@ struct PatchViewPage : PageBase {
 
 			} else if (file_menu.is_visible()) {
 				file_menu.back();
+
+			} else if (rearranging) {
+				exit_rearrange();
 
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
@@ -626,6 +689,8 @@ struct PatchViewPage : PageBase {
 		}
 
 		desc_panel.update();
+		if (desc_panel.take_rearrange_request())
+			request_rearrange({});
 		if (desc_panel.did_update_names()) {
 			patches.mark_view_patch_modified();
 			update_title_bar();
@@ -912,16 +977,260 @@ private:
 	}
 
 	void style_module(lv_obj_t *canvas) {
-		lv_group_add_obj(group, canvas);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SNAPPABLE);
 
 		lv_obj_remove_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
 		lv_obj_remove_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
+		lv_obj_remove_style(canvas, &Gui::rearrange_module_style, LV_STATE_FOCUS_KEY | RearrangingState);
+		lv_obj_remove_style(canvas, &Gui::carried_module_style, LV_STATE_EDITED | RearrangingState);
 
 		lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
 		lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
+		// While re-arranging, so it's clear which mode we're in. LVGL uses the style whose
+		// state selector has the highest value, so these win over the plain focus style,
+		// and carried (the group is in edit mode) wins over the other two
+		lv_obj_add_style(canvas, &Gui::rearrange_module_style, LV_STATE_FOCUS_KEY | RearrangingState);
+		lv_obj_add_style(canvas, &Gui::carried_module_style, LV_STATE_EDITED | RearrangingState);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+	}
+
+	///////// Re-arranging modules
+
+	// Stored positions are only used with Compact Layout off, so ask to turn it off first
+	void request_rearrange(std::optional<uint16_t> carry_id) {
+		if (!page_settings.auto_layout) {
+			enter_rearrange(carry_id);
+			return;
+		}
+
+		rearrange_confirm.show(
+			[this, carry_id](unsigned choice) {
+				if (choice != 1)
+					return;
+				// update() sees the layout setting change and re-draws the patch with its stored
+				// positions, then starts re-arranging
+				page_settings.auto_layout = false;
+				gui_state.do_write_settings = true;
+				pending_rearrange = carry_id;
+			},
+			"To re-arrange modules you must turn off Compact Layout. Do that now?",
+			"OK");
+	}
+
+	void enter_rearrange(std::optional<uint16_t> carry_id) {
+		if (!patch || !is_ready || rearranging || page_settings.auto_layout)
+			return;
+
+		abort_cable(gui_state, notify_queue);
+		abort_expander(gui_state, notify_queue);
+		settings_menu.hide();
+		file_menu.hide();
+
+		auto px_per_hp = RackSize::px_per_hp(page_settings.view_height_px);
+		auto slots = slots_as_arranged(px_per_hp);
+		if (slots.empty())
+			return;
+
+		auto canvas_width = (int32_t)std::floor(rack_width_px() / px_per_hp);
+		auto max_width = (int32_t)std::floor(ModuleLayout::MaxCanvasDim / px_per_hp) - 1;
+		auto max_row = (ModuleLayout::MaxCanvasDim - (int32_t)page_settings.view_height_px) / row_pitch_px();
+
+		// Positions are only written to the patch once something actually moves.
+		// Until then the modules stay where they're drawn now.
+		rearranging.emplace(ModuleRearrange{std::move(slots), canvas_width, max_width, max_row});
+
+		for (auto *canvas : module_canvases)
+			lv_obj_add_state(canvas, RearrangingState);
+
+		rebuild_rearrange_group(carry_id);
+
+		if (carry_id && canvas_for(*carry_id)) {
+			rearranging->carried = carry_id;
+			lv_group_set_editing(group, true);
+		}
+
+		notify_queue.put({"Re-arrange: click to pick up/place, push+turn to change rows, Back when done",
+						  Notification::Priority::Status,
+						  4000});
+	}
+
+	void exit_rearrange() {
+		std::optional<lv_obj_t *> focused;
+		if (auto obj = lv_group_get_focused(group))
+			focused = obj;
+
+		rearranging.reset();
+		lv_group_set_editing(group, false);
+
+		for (auto *canvas : module_canvases)
+			lv_obj_clear_state(canvas, RearrangingState);
+
+		// Back to the normal layout rules, and the normal group with the toolbar buttons
+		relayout_rearranged();
+
+		lv_group_remove_all_objs(group);
+		is_redrawing = true;
+		lv_group_add_obj(group, ui_PlayButton);
+		lv_group_add_obj(group, ui_InfoButton);
+		lv_group_add_obj(group, ui_KnobButton);
+		lv_group_add_obj(group, ui_AddButton);
+		lv_group_add_obj(group, ui_SaveButton);
+		lv_group_add_obj(group, ui_SettingsButton);
+		add_modules_to_group();
+		is_redrawing = false;
+
+		if (focused)
+			lv_group_focus_obj(*focused);
+	}
+
+	// Converts the modules' pixel positions to the HP/row grid.
+	// Modules can be a fraction of a pixel narrower than their HP, which adds up along a row,
+	// so modules that are flush in pixels are made flush in HP too
+	std::vector<ModuleRearrange::Slot> slots_as_arranged(float px_per_hp) const {
+		struct Placed {
+			lv_obj_t *canvas;
+			ModuleLayout::Coord at;
+		};
+		std::vector<Placed> placed;
+
+		for (auto [i, canvas] : enumerate(module_canvases)) {
+			if (i < arranged_positions.size() && arranged_positions[i] && lv_obj_get_user_data(canvas))
+				placed.push_back({canvas, *arranged_positions[i]});
+		}
+
+		std::ranges::sort(placed, [](Placed const &a, Placed const &b) {
+			return a.at.y != b.at.y ? a.at.y < b.at.y : a.at.x < b.at.x;
+		});
+
+		std::vector<ModuleRearrange::Slot> slots;
+		int32_t row = -1;
+		int32_t prev_right_px = 0;
+		int32_t prev_right_hp = 0;
+
+		for (auto const &p : placed) {
+			auto id = *static_cast<uint32_t *>(lv_obj_get_user_data(p.canvas));
+			auto width_px = lv_obj_get_width(p.canvas);
+			auto this_row = (int32_t)std::lround((float)p.at.y / row_pitch_px());
+			auto width_hp = std::max<int32_t>(1, std::lround(width_px / px_per_hp));
+
+			int32_t x_hp = (this_row != row) ? std::lround(p.at.x / px_per_hp) :
+											   prev_right_hp + std::lround((p.at.x - prev_right_px) / px_per_hp);
+
+			slots.push_back({.module_id = (uint16_t)id, .x = x_hp, .row = this_row, .width = width_hp});
+
+			row = this_row;
+			prev_right_px = p.at.x + width_px;
+			prev_right_hp = x_hp + width_hp;
+		}
+
+		return slots;
+	}
+
+	void store_rearranged_positions() {
+		for (auto const &slot : rearranging->layout.slots()) {
+			ModulePosition pos{.module_id = slot.module_id, .x = (int16_t)slot.x, .y = (int16_t)slot.row};
+
+			auto existing = std::ranges::find(patch->module_positions, slot.module_id, &ModulePosition::module_id);
+			if (existing != patch->module_positions.end())
+				*existing = pos;
+			else
+				patch->module_positions.push_back(pos);
+		}
+	}
+
+	// Moves the canvases to match the patch's positions, without re-drawing them
+	void relayout_rearranged() {
+		arrange_modules();
+		fit_rack_container();
+
+		// The cable drawer finds jacks from the canvases' coords, which LVGL only updates
+		// in a layout pass. Without this, cables are drawn where the modules were before this move
+		lv_obj_update_layout(modules_cont);
+
+		cable_drawer.set_size(lv_obj_get_width(modules_cont) + 12, arranged_height + BottomMarginPx);
+		update_cable_style(true);
+
+		if (auto obj = lv_group_get_focused(group); obj && std::ranges::find(module_canvases, obj) != module_canvases.end()) {
+			lv_obj_scroll_to_view_recursive(obj, LV_ANIM_OFF);
+			redraw_modulename();
+		}
+	}
+
+	// Modules are browsed in the order they appear on screen, and the toolbar is left out
+	void rebuild_rearrange_group(std::optional<uint16_t> focus_id) {
+		lv_group_remove_all_objs(group);
+
+		add_modules_to_group();
+
+		if (focus_id) {
+			if (auto canvas = canvas_for(*focus_id))
+				lv_group_focus_obj(canvas);
+		}
+	}
+
+	lv_obj_t *canvas_for(uint32_t module_id) const {
+		for (auto *canvas : module_canvases) {
+			if (auto id = static_cast<uint32_t *>(lv_obj_get_user_data(canvas)); id && *id == module_id)
+				return canvas;
+		}
+		return nullptr;
+	}
+
+	void rearrange_click(uint16_t module_id) {
+		if (std::exchange(suppress_next_click, false))
+			return;
+
+		if (rearranging->carried) {
+			// Put it down. The group order follows the new layout
+			rearranging->carried.reset();
+			lv_group_set_editing(group, false);
+			rebuild_rearrange_group(module_id);
+		} else {
+			// Pick it up: in edit mode, turning sends keys to the module rather than moving focus
+			rearranging->carried = module_id;
+			lv_group_set_editing(group, true);
+		}
+	}
+
+	void rearrange_step(int dir, bool vertical) {
+		if (!rearranging || !rearranging->carried)
+			return;
+
+		auto id = *rearranging->carried;
+		auto &layout = rearranging->layout;
+
+		if (!(vertical ? layout.step_vert(id, dir) : layout.step_horiz(id, dir)))
+			return;
+
+		store_rearranged_positions();
+		patches.mark_view_patch_modified();
+		// Positions changing doesn't need a full redraw when this page comes back into focus
+		patch_revision = patches.get_view_patch_modification_count();
+
+		relayout_rearranged();
+	}
+
+	void update_rearrange() {
+		// Push+turn changes rows. Always take the motion, so it doesn't build up while browsing
+		if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
+			suppress_next_click = true;
+
+			for (auto i = 0; i < std::abs(motion); i++)
+				rearrange_step(motion > 0 ? 1 : -1, true);
+		}
+	}
+
+	static void module_key_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		if (!page || !page->rearranging || !page->rearranging->carried)
+			return;
+
+		auto key = lv_event_get_key(event);
+		if (key == LV_KEY_RIGHT)
+			page->rearrange_step(1, false);
+		else if (key == LV_KEY_LEFT)
+			page->rearrange_step(-1, false);
 	}
 
 	static void module_click_cb(lv_event_t *event) {
@@ -933,6 +1242,11 @@ private:
 		if (!obj)
 			return;
 		auto module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+
+		if (page->rearranging) {
+			page->rearrange_click(static_cast<uint16_t>(module_id));
+			return;
+		}
 
 		// Choosing the module to attach as an expander: finish here instead of opening the module
 		if (page->gui_state.new_expander) {
@@ -1147,6 +1461,21 @@ private:
 	// Extent of the modules as arranged, filled in by arrange_modules()
 	lv_coord_t arranged_width = RackSize::ViewWidthPx;
 	lv_coord_t arranged_height = 0;
+	// Where arrange_modules() put each of module_canvases (nullopt if it didn't fit)
+	std::vector<std::optional<ModuleLayout::Coord>> arranged_positions;
+
+	struct Rearranging {
+		ModuleRearrange layout;
+		std::optional<uint16_t> carried{};
+	};
+	std::optional<Rearranging> rearranging;
+	// Set on every module canvas while re-arranging, to change its focus outline
+	static constexpr lv_state_t RearrangingState = LV_STATE_USER_1;
+	// Waiting for the patch to be re-drawn without Compact Layout (holds the module to pick up, if any)
+	std::optional<std::optional<uint16_t>> pending_rearrange;
+	ConfirmPopup rearrange_confirm;
+	// The release at the end of a push+turn still reaches LVGL as a click
+	bool suppress_next_click = false;
 	uint8_t drawn_cable_tension = ModuleDisplaySettings::DefaultCableTension;
 	bool is_redrawing = false;
 	uint32_t patch_revision = 0xFFFFFFFF;
