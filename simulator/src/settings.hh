@@ -86,7 +86,7 @@ struct Settings {
 
 			options.add_options()("input",
 								  "Ordered encoder actions to simulate on startup, e.g. \"cw cw click\" "
-								  "(tokens: cw, ccw, click, back; repeat with cw:3)",
+								  "(tokens: cw, ccw, click, back, pcw, pccw (push+turn); repeat with cw:3)",
 								  cxxopts::value<std::string>()->default_value(""));
 
 			options.add_options()("module",
