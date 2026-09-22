@@ -35,6 +35,40 @@ unsigned ModuleViewPage::resize_module_image(unsigned max) {
 	return display_widthpx;
 }
 
+// Height to draw the module at. Normally the full screen height, but a module wider than the
+// screen is scaled down in fullscreen mode (if the user asked for it) so its whole width is
+// visible at once instead of having to be scrolled.
+unsigned ModuleViewPage::module_draw_height() {
+	if (!full_screen_mode || !settings.module_view.fit_width_in_fullscreen)
+		return FullHeightPx;
+
+	auto natural_width = ModuleDrawer{.container = ui_ModuleImage, .height = FullHeightPx}.read_faceplate(slug).second;
+	if (natural_width <= (lv_coord_t)ScreenWidthPx || natural_width <= 0)
+		return FullHeightPx;
+
+	// Integer division rounds down, so the scaled width lands at or just under the screen
+	return FullHeightPx * ScreenWidthPx / natural_width;
+}
+
+void ModuleViewPage::enter_fullscreen() {
+	full_screen_mode = true;
+
+	// Only worth the cost of re-rasterizing when the module actually has to change size
+	if (module_draw_height() != module_height)
+		redraw_module();
+	else
+		resize_module_image(ScreenWidthPx);
+}
+
+void ModuleViewPage::exit_fullscreen() {
+	full_screen_mode = false;
+
+	if (module_height != FullHeightPx)
+		redraw_module();
+	else
+		resize_module_image(190);
+}
+
 void ModuleViewPage::redraw_module() {
 	save_element_stacking_order();
 
@@ -43,7 +77,8 @@ void ModuleViewPage::redraw_module() {
 	size_t num_elements = moduleinfo.elements.size();
 	drawn_elements.reserve(num_elements);
 
-	auto module_drawer = ModuleDrawer{.container = ui_ModuleImage, .height = 240};
+	module_height = module_draw_height();
+	auto module_drawer = ModuleDrawer{.container = ui_ModuleImage, .height = module_height};
 
 	auto [faceplate, width] = module_drawer.read_faceplate(slug);
 	canvas = module_drawer.draw_faceplate(faceplate, width, buffer);
@@ -55,6 +90,8 @@ void ModuleViewPage::redraw_module() {
 
 	module_drawer.draw_mapped_elements(
 		*patch, this_module_id, active_knobset, canvas, drawn_elements, is_patch_playloaded);
+
+	lv_obj_set_y(canvas, module_y_offset());
 
 	lv_obj_update_layout(canvas);
 
@@ -77,8 +114,7 @@ void ModuleViewPage::redraw_module() {
 	//Size Module Image and Roller
 	lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
 
-	resize_module_image(170);
-	full_screen_mode = false;
+	resize_module_image(full_screen_mode ? ScreenWidthPx : 170);
 
 	update_map_ring_style();
 

@@ -1,6 +1,4 @@
 #pragma once
-#include "CoreModules/elements/element_info.hh"
-#include "CoreModules/moduleFactory.hh"
 #include "gui/elements/context.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
@@ -13,8 +11,12 @@
 namespace MetaModule
 {
 
-template<unsigned MaxCanvasHeight>
+// Cable canvas is DefaultWidth x DefaultHeight pixels (can be re-sized dynamically)
+template<unsigned DefaultWidth, unsigned DefaultHeight>
 class CableDrawer {
+	static_assert(DefaultWidth <= 2047, "LVGL canvas maximum dimension is 2047");
+	static_assert(DefaultHeight <= 2047, "LVGL canvas maximum dimension is 2047");
+
 	const std::vector<DrawnElement> &drawn;
 
 	lv_obj_t *canvas;
@@ -33,9 +35,21 @@ class CableDrawer {
 	// Channel count of each (out, in) jack pair as of the last draw, used to detect changes
 	std::vector<uint8_t> drawn_channel_counts;
 
-	//LVGL canvas is internally an img, which has 11 bits for height, so max is 2047
-	static constexpr uint32_t Height = std::min<uint32_t>(MaxCanvasHeight, 2047);
-	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, Height)> cable_buf;
+	// Module height (zoom) at which cable line width sizes are tuned
+	static constexpr unsigned ReferenceHeight = 180;
+	static constexpr unsigned MaxTension = 100;
+
+	// Maximum "sag" of cable under zero tension is (SagOffsetPx + CableLength)
+	static constexpr float SagOffsetPx = 70.f;
+
+	float slack = 0.5f;
+	float zoom = 1.f;
+
+	static constexpr uint32_t MaxDim = 2047;
+	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(DefaultWidth, DefaultHeight)> cable_buf;
+
+	int32_t canvas_w = DefaultWidth;
+	int32_t canvas_h = DefaultHeight;
 
 	struct Vec2 {
 		int32_t x;
@@ -46,38 +60,29 @@ public:
 	CableDrawer(lv_obj_t *parent, const std::vector<DrawnElement> &drawn_elements)
 		: drawn{drawn_elements}
 		, canvas(lv_canvas_create(parent)) {
-		lv_obj_set_size(canvas, 320, Height);
 		lv_obj_set_align(canvas, LV_ALIGN_TOP_LEFT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_IGNORE_LAYOUT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
-		lv_canvas_set_buffer(canvas, cable_buf.data(), 320, Height, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		set_size(DefaultWidth, DefaultHeight);
 
 		lv_draw_line_dsc_init(&cable_dsc);
-		cable_dsc.width = 3;
 		cable_dsc.opa = LV_OPA_100;
 		cable_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 
 		lv_draw_line_dsc_init(&inner_outline_dsc);
-		inner_outline_dsc.width = 5;
 		inner_outline_dsc.opa = LV_OPA_100;
 		inner_outline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 		inner_outline_dsc.color = lv_color_white();
 
 		lv_draw_line_dsc_init(&outer_outline_dsc);
-		outer_outline_dsc.width = 7;
 		outer_outline_dsc.opa = LV_OPA_100;
 		outer_outline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 		outer_outline_dsc.color = lv_color_black();
 
 		// Placeholder polyphonic cable style: same as mono but thicker
 		poly_cable_dsc = cable_dsc;
-		poly_cable_dsc.width = 7;
-
 		poly_inner_outline_dsc = inner_outline_dsc;
-		poly_inner_outline_dsc.width = 9;
-
 		poly_outer_outline_dsc = outer_outline_dsc;
-		poly_outer_outline_dsc.width = 11;
 
 		lv_draw_rect_dsc_init(&injack_dsc);
 		injack_dsc.bg_opa = LV_OPA_100;
@@ -86,7 +91,6 @@ public:
 		injack_dsc.shadow_opa = LV_OPA_0;
 		injack_dsc.border_opa = LV_OPA_100;
 		injack_dsc.border_color = lv_color_black();
-		injack_dsc.border_width = 4;
 		injack_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 		injack_dsc.radius = 2;
 
@@ -97,11 +101,17 @@ public:
 		outjack_dsc.shadow_opa = LV_OPA_0;
 		outjack_dsc.border_opa = LV_OPA_100;
 		outjack_dsc.border_color = lv_color_black();
-		outjack_dsc.border_width = 3;
 		outjack_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 		outjack_dsc.radius = 2;
 
+		set_module_height(ReferenceHeight);
+
 		set_opacity(LV_OPA_60);
+	}
+
+	// Keeps the cable layer above the modules when one of them is raised
+	void move_foreground() {
+		lv_obj_move_foreground(canvas);
 	}
 
 	void set_channel_lookup(std::function<unsigned(Jack out, Jack in)> lookup) {
@@ -112,8 +122,41 @@ public:
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 	}
 
-	void set_height(int16_t height) {
-		lv_obj_set_height(canvas, height);
+	void set_size(int32_t width, int32_t height) {
+		// Width of cable buffer matches width of rack
+		canvas_w = std::clamp<int32_t>(width, 1, MaxDim);
+
+		// Try to make height of cable buffer match height of rack, but don't exceed buffer size
+		auto max_height = cable_buf.size() / (LV_IMG_PX_SIZE_ALPHA_BYTE * canvas_w);
+		canvas_h = std::clamp<int32_t>(height, 1, std::min<int32_t>(max_height, MaxDim));
+
+		lv_obj_set_size(canvas, canvas_w, canvas_h);
+		lv_canvas_set_buffer(canvas, cable_buf.data(), canvas_w, canvas_h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+	}
+
+	void set_height(int32_t height) {
+		set_size(canvas_w, height);
+	}
+
+	// 0 is maximum droop, 100 hangs the cables in a straight line
+	void set_tension(unsigned tension) {
+		slack = (float)(MaxTension - std::min(tension, MaxTension)) / (float)MaxTension;
+	}
+
+	// Scales cable and jack-marker sizes for modules drawn at the given faceplate height
+	void set_module_height(unsigned module_height_px) {
+		zoom = (float)module_height_px / (float)ReferenceHeight;
+
+		cable_dsc.width = scale_width(3);
+		inner_outline_dsc.width = cable_dsc.width + 2;
+		outer_outline_dsc.width = cable_dsc.width + 4;
+
+		poly_cable_dsc.width = scale_width(7);
+		poly_inner_outline_dsc.width = poly_cable_dsc.width + 2;
+		poly_outer_outline_dsc.width = poly_cable_dsc.width + 4;
+
+		injack_dsc.border_width = scale_width(4);
+		outjack_dsc.border_width = scale_width(3);
 	}
 
 	// Returns true if any poly channel count differs from when cables were last drawn
@@ -257,7 +300,11 @@ public:
 					const lv_draw_line_dsc_t &center_dsc) {
 		float dist_x = std::abs(start.x - end.x);
 		float dist_y = std::abs(start.y - end.y);
-		CableDrawer::Vec2 control{(start.x + end.x) / 2, ((start.y + end.y) / 2) + (int32_t)dist_x};
+		float dist = std::sqrt(dist_x * dist_x + dist_y * dist_y);
+
+		float sag = slack * (SagOffsetPx * zoom + dist);
+
+		CableDrawer::Vec2 control{(start.x + end.x) / 2, (int32_t)((start.y + end.y) / 2 + sag)};
 		auto steps = std::clamp<unsigned>(dist_x * dist_y / 1000, 8, MAX_STEPS - 1);
 		CableDrawer::draw_bezier(start, end, control, steps, outer_dsc, inner_dsc, center_dsc);
 	}
@@ -270,9 +317,9 @@ public:
 
 		// Placeholder polyphonic jack style: larger marker
 		if (num_chans > 1)
-			lv_canvas_draw_rect(canvas, location.x - 6, location.y - 6, 13, 13, &injack_dsc);
+			draw_marker(location, scale_width(13), injack_dsc);
 		else
-			lv_canvas_draw_rect(canvas, location.x - 4, location.y - 4, 9, 9, &injack_dsc);
+			draw_marker(location, scale_width(9), injack_dsc);
 	}
 
 	void draw_outjack(Vec2 location, const InternalCable &cable, unsigned num_chans = 0) {
@@ -282,9 +329,19 @@ public:
 
 		// Placeholder polyphonic jack style: larger marker
 		if (num_chans > 1)
-			lv_canvas_draw_rect(canvas, location.x - 12, location.y - 12, 25, 25, &outjack_dsc);
+			draw_marker(location, scale_width(25), outjack_dsc);
 		else
-			lv_canvas_draw_rect(canvas, location.x - 9, location.y - 9, 19, 19, &outjack_dsc);
+			draw_marker(location, scale_width(19), outjack_dsc);
+	}
+
+	// Scales a width/size that was tuned at ReferenceHeight.
+	// Floor of 2px: at 1px the black/white outlines swallow the colored core.
+	int32_t scale_width(int32_t width_at_reference) const {
+		return std::max<int32_t>(2, std::lround(width_at_reference * zoom));
+	}
+
+	void draw_marker(Vec2 center, int32_t size, const lv_draw_rect_dsc_t &dsc) {
+		lv_canvas_draw_rect(canvas, center.x - size / 2, center.y - size / 2, size, size, &dsc);
 	}
 
 	static lv_color_t get_cable_color(Jack jack) {
