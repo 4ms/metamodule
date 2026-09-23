@@ -75,6 +75,16 @@
       ]
     },
     {
+      "slug": "Scope",
+      "name": "Scope",
+      "description": "Oscilloscope, two-channel signal visualizer. Ported from VCV Free",
+      "manualUrl": "https://vcvrack.com/Free#Scope",
+      "tags": [
+        "Polyphonic",
+        "Utility"
+      ]
+    },
+    {
       "slug": "Merge",
       "name": "Merge",
       "description": "4-voice version of VCV Free Merge (Combines multiple monophonic cables into a polyphonic cable)",

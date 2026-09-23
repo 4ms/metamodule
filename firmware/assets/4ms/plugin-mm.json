@@ -1,9 +1,9 @@
 {
 	"MetaModuleBrandName": "4ms",
 	"MetaModulePluginMaintainer": "4ms Company",
-	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerEmail": "4ms@4mscompany.com",
 	"MetaModulePluginMaintainerUrl": "https://4mscompany.com",
-	"MetaModuleDescription": "",
+	"MetaModuleDescription": "Built-in 4ms modules",
 	"MetaModuleIncludedModules": [
 	{
 		"slug": "Atvert2",
@@ -192,6 +192,26 @@
 	{
 		"slug": "Verb",
 		"name": "Verb"
+    },
+    {
+      "slug": "OctoPush",
+      "name": "Octo Push"
+    },
+    {
+      "slug": "SoloPush",
+      "name": "Solo Push"
+    },
+    {
+      "slug": "Keyboard",
+      "name": "Keyboard"
+    },
+    {
+      "slug": "FadeOut",
+      "name": "Fade Out"
+    },
+    {
+      "slug": "FadeIn",
+      "name": "Fade In"
 	}
 	]
 }
