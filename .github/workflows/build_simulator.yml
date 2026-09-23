@@ -187,6 +187,10 @@ jobs:
           cd simulator
           cmake --preset headless
           cmake --build build-headless
+      - name: 'Check assets plugin.json and plugin-mm.json'
+        run: |
+          cd simulator
+          cmake --build build-headless --target check-plugin-jsons
 
   build-lin-gcc-nomidi:
     if: ${{ github.event_name == 'push' || inputs.lin_gcc_nomidi }}
