@@ -56,8 +56,14 @@ void UsbSerialDevice::process() {
 	// otherwise the UART drain does it
 	set_console_routing(pdev->dev_state == USBD_STATE_CONFIGURED);
 
-	if (MetaModule::ConsoleRouting::usb_console_active)
+	if (MetaModule::ConsoleRouting::usb_console_active) {
+		// After set_console_routing(), since its resync would drop the prompt
+		if (prompt_pending) {
+			prompt_pending = false;
+			MetaModule::ConsoleCommands::print_prompt();
+		}
 		transmit_pending();
+	}
 }
 
 void UsbSerialDevice::transmit_pending() {
@@ -203,9 +209,12 @@ int8_t UsbSerialDevice::CDC_Itf_Control(uint8_t cmd, uint8_t *pbuf, uint16_t len
 			pbuf[6] = LineCoding.datatype;
 			break;
 
-		case CDC_SET_CONTROL_LINE_STATE:
-			/* Add your code here */
-			break;
+		case CDC_SET_CONTROL_LINE_STATE: {
+			// No data stage: pbuf is the setup request, and wValue bit 0 is DTR
+			auto req = reinterpret_cast<USBD_SetupReqTypedef *>(pbuf);
+			if (req->wValue & 0x01)
+				_instance->prompt_pending = true;
+		} break;
 
 		case CDC_SEND_BREAK:
 			/* Add your code here */

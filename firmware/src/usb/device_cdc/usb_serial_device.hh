@@ -39,6 +39,9 @@ private:
 	std::array<uint8_t, 512> tx_bounce{};
 	size_t tx_pending = 0;
 
+	// Set when a terminal opens the port (DTR), so process() shows the prompt
+	bool prompt_pending = false;
+
 	bool is_transmitting = false;
 	uint32_t last_transmission_tm = 0;
 
