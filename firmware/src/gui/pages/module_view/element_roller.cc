@@ -808,8 +808,8 @@ void ModuleViewPage::enter_group(unsigned group_idx) {
 	cur_selected = 1;
 	populate_roller();
 
-	// Land on the group's first element, not on the Back row or a type header.
-	// A group with nothing listed (while patching a cable, say) is just the Back row.
+	// Land on the group's first element, not on the Back row or a type header,
+	// unless the group is empty (while patch a cable), then default to the Back row (0)
 	cur_selected = 0;
 	for (auto [i, drawn_idx] : enumerate(roller_drawn_el_idx)) {
 		if (drawn_idx >= 0) {
