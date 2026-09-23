@@ -58,6 +58,10 @@
 		"name": "Clocked Noise"
 	},
 	{
+		"slug": "ClockToPhasor",
+		"name": "Clock to Phasor"
+	},
+	{
 		"slug": "Comparator",
 		"name": "Comparator"
 	},
@@ -128,6 +132,10 @@
 	{
 		"slug": "MinMax",
 		"name": "Min-Max"
+	},
+	{
+		"slug": "Normals",
+		"name": "Normals"
 	},
 	{
 		"slug": "PhaseDrivenSequencer",
@@ -250,8 +258,16 @@
 		"name": "Phasor To LFO"
 	},
 	{
+		"slug": "PhasorToRandom",
+		"name": "Phasor to Random"
+	},
+	{
 		"slug": "PhasorToWaveforms",
 		"name": "Phasor To Waveforms"
+	},
+	{
+		"slug": "PolymetricPhasors",
+		"name": "Polymetric Phasors"
 	},
 	{
 		"slug": "Probability",
