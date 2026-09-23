@@ -89,11 +89,15 @@ cmake_path(APPEND ASSET_IMG_PATH  "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FIL
 # the tar via DEPENDS, and added/deleted files trigger a reconfigure.
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS ${ASSET_DIR}/*)
 
+# Copies vcv_ports/BRAND/plugin.json to assets/BRAND/plugin.json when a submodule's copy changes
+include(${CMAKE_CURRENT_SOURCE_DIR}/vcv_ports/sync_plugin_jsons.cmake)
+
 add_custom_command(
   OUTPUT ${ASSET_IMG_PATH}
+  COMMAND ${SYNC_PLUGIN_JSONS_COMMAND}
   COMMAND ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
-  DEPENDS ${ASSET_FILES}
+  DEPENDS ${ASSET_FILES} ${SYNC_PLUGIN_JSONS_SOURCES}
   COMMENT "Creating assets uimg file"
   WORKING_DIRECTORY ${ASSET_DIR}
   VERBATIM USES_TERMINAL

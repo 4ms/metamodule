@@ -35,10 +35,15 @@ cmake_path(APPEND ASSET_IMG_PATH "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FILE
 message("set ASSET_DIR to ${ASSET_DIR}")
 message("set ASSET_IMG_PATH to ${ASSET_IMG_PATH}")
 
+# Copies vcv_ports/BRAND/plugin.json to assets/BRAND/plugin.json when a submodule's copy changes
+include(${FWDIR}/vcv_ports/sync_plugin_jsons.cmake)
+
 add_custom_command(
   OUTPUT ${ASSET_DIR}
+  COMMAND ${SYNC_PLUGIN_JSONS_COMMAND}
   COMMAND ${CMAKE_COMMAND} -E echo Copying "${FWDIR}/assets" to "${ASSET_DIR}"
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${FWDIR}/assets" "${ASSET_DIR}"
+  DEPENDS ${SYNC_PLUGIN_JSONS_SOURCES}
   COMMENT "Copying assets/ dir from ${FWDIR}/assets to ${ASSET_DIR}"
   VERBATIM USES_TERMINAL
 )
