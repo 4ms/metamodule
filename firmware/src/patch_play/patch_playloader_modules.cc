@@ -62,23 +62,22 @@ void PatchPlayLoader::remove_module(unsigned module_id) {
 	pr_info("Heap: %u\n", get_heap_size());
 }
 
-void PatchPlayLoader::prepare_patch_for_plugin_change(std::string_view brand_slug) {
+bool PatchPlayLoader::playing_patch_uses_brand(std::string_view brand_slug) {
 	auto playing_patch = patches_.get_playing_patch();
 	if (!playing_patch)
-		return;
+		return false;
 
-	bool patch_contains_brand = false;
-
-	std::string brand_to_remove = ModuleFactory::cleanupBrandName(brand_slug);
+	std::string brand = ModuleFactory::cleanupBrandName(brand_slug);
 	for (std::string_view combined_slug : playing_patch->module_slugs) {
-
-		if (ModuleFactory::cleanupBrandName(combined_slug) == brand_to_remove) {
-			patch_contains_brand = true;
-			break;
-		}
+		if (ModuleFactory::cleanupBrandName(combined_slug) == brand)
+			return true;
 	}
 
-	if (patch_contains_brand) {
+	return false;
+}
+
+void PatchPlayLoader::prepare_patch_for_plugin_change(std::string_view brand_slug) {
+	if (playing_patch_uses_brand(brand_slug)) {
 		pr_dbg("Currently playing patch contains a module in the plugin to be removed. Stopping\n");
 		stop_audio_and_wait();
 		player_.unload_patch();

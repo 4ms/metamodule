@@ -158,6 +158,11 @@ public:
 		}
 	}
 
+	// Release any GUI objects created by plugin code, before a plugin is unloaded
+	void release_plugin_objects() {
+		page_manager.leave_patch_pages();
+	}
+
 	void notify_error(std::string const &message) {
 		notify_queue.put({message, Notification::Priority::Error, 2000});
 	}

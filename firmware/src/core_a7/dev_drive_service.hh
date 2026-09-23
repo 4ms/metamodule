@@ -5,6 +5,7 @@
 #include "gui/notify/queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -18,11 +19,13 @@ public:
 	DevDriveService(DevDrive &drive,
 					PluginManager &plugin_manager,
 					PatchPlayLoader &play_loader,
-					NotificationQueue &notify_queue)
+					NotificationQueue &notify_queue,
+					std::function<void()> release_gui_plugin_objects)
 		: drive_{drive}
 		, plugin_manager_{plugin_manager}
 		, play_loader_{play_loader}
-		, notify_queue_{notify_queue} {
+		, notify_queue_{notify_queue}
+		, release_gui_plugin_objects_{std::move(release_gui_plugin_objects)} {
 	}
 
 	uint32_t retries = 10;
@@ -182,6 +185,12 @@ private:
 		auto name = PluginManager::plugin_name_of(current_);
 		if (plugin_manager_.is_plugin_loaded(name)) {
 			pr_info("DevDrive: unloading %.*s first\n", (int)name.size(), name.data());
+
+			// The GUI may hold objects created by the plugin (e.g. ModuleView's context menu):
+			// they must be destroyed while the plugin code is still loaded
+			if (play_loader_.playing_patch_uses_brand(name) && release_gui_plugin_objects_)
+				release_gui_plugin_objects_();
+
 			play_loader_.prepare_patch_for_plugin_change(name);
 			plugin_manager_.unload_plugin(name);
 		}
@@ -243,6 +252,7 @@ private:
 	PluginManager &plugin_manager_;
 	PatchPlayLoader &play_loader_;
 	NotificationQueue &notify_queue_;
+	std::function<void()> release_gui_plugin_objects_;
 	uint32_t last_eject_count_ = 0;
 	uint32_t last_command_count_ = 0;
 	bool host_ejected_ = false;
