@@ -11,6 +11,7 @@ struct Settings {
 	std::string patch = "../patches/default/Djembe4verb.yml";
 	std::string audio_in_file = "audio_in.wav";
 	std::string audio_out_file = "audio_out.wav";
+	bool list_modules = false;
 
 	void parse(int argc, char *argv[]) {
 
@@ -33,6 +34,9 @@ struct Settings {
 								  "Output signal raw data (floats, interleaved 2 channels)",
 								  cxxopts::value<std::string>()->default_value("audio_out.raw"));
 
+			options.add_options()("list-modules",
+								  "Print every registered module as `module<TAB>brand<TAB>slug` and exit (used by check_plugin_jsons.py)");
+
 			options.add_options()("h,help", "Print help");
 
 			auto args = options.parse(argc, argv);
@@ -48,6 +52,9 @@ struct Settings {
 
 			if (args.count("in") > 0)
 				audio_in_file = args["in"].as<std::string>();
+
+			if (args.count("list-modules") > 0)
+				list_modules = true;
 
 			if (args.count("help") || args.count("?") || args.count("h")) {
 				std::cout << options.help() << std::endl;

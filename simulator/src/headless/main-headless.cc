@@ -56,6 +56,14 @@ int main(int argc, char *argv[]) {
 	load_internal_plugins(builtin_plugins);
 	load_ext_builtin_plugins(builtin_plugins);
 
+	if (settings.list_modules) {
+		for (auto brand : ModuleFactory::getAllBrands()) {
+			for (auto slug : ModuleFactory::getAllModuleSlugs(brand))
+				printf("module\t%.*s\t%.*s\n",(int)brand.size(), brand.data(), (int)slug.size(), slug.data());
+		}
+		return 0;
+	}
+
 	const auto samples_to_run = settings.samples_to_run;
 	const float effective_play_time = samples_to_run / 48000.f;
 	printf("Run for %lu samples (%g sec @ 48kHz)\n", samples_to_run, effective_play_time);
