@@ -407,3 +407,14 @@ foreach(brand ${brands})
 endforeach()
 
 include(ext-plugins.cmake)
+
+# Checks that firmware/assets/BRAND/plugin-mm.json and plugin.json list every registered module
+if(HEADLESS)
+  find_package(Python3 COMPONENTS Interpreter)
+  add_custom_target(
+    check-plugin-jsons
+    COMMAND ${Python3_EXECUTABLE} ${FWDIR}/vcv_ports/check_plugin_jsons.py --simulator $<TARGET_FILE:simulator>
+    DEPENDS simulator
+    VERBATIM USES_TERMINAL
+  )
+endif()
