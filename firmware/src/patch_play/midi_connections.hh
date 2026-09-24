@@ -64,11 +64,14 @@ struct MidiConnections {
 	std::array<PulseDivider, Midi::NumDivClocks> divclk_pulses;
 
 	// MIDI -> module param maps
-	struct CCKnobMap : MappedKnob {
+	struct MidiKnobMap : MappedKnob {
+		uint16_t num_pos = 0; // Number of discrete positions of the module param (0 = continuous), used by Cycle maps
+	};
+	struct CCKnobMap : MidiKnobMap {
 		bool cc_is_high = false; // Last CC value received was 64-127. Toggle maps flip on a low->high transition
 	};
 	std::array<std::vector<CCKnobMap>, NumMidiCCs> cc_knob_maps;
-	std::array<std::vector<MappedKnob>, NumMidiNotes> note_knob_maps;
+	std::array<std::vector<MidiKnobMap>, NumMidiNotes> note_knob_maps;
 
 	bool connected = false;
 
@@ -102,7 +105,8 @@ struct MidiConnections {
 		});
 	}
 
-	void cache_knob_map(MappedKnob const &k);
+	// num_pos: number of discrete positions of the mapped module param (0 = continuous)
+	void cache_knob_map(MappedKnob const &k, unsigned num_pos = 0);
 	void uncache_knob_map(MappedKnob const &k);
 
 	// Finds the cached map for the same MIDI CC/note and module param, or nullptr
@@ -238,7 +242,7 @@ private:
 		requires std::derived_from<T, JackMidi>;
 
 	template<typename T>
-	static void update_or_add(std::vector<T> &v, const MappedKnob &d)
+	static T &update_or_add(std::vector<T> &v, const MappedKnob &d)
 		requires std::derived_from<T, MappedKnob>;
 
 	static void update_or_add_poly(std::vector<PolyJackMidi> &v,
