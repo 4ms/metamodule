@@ -4,6 +4,7 @@
 #include "lvgl.h"
 #include <SDL2/SDL.h>
 #include <algorithm>
+#include <utility>
 
 static bool matches(std::vector<SDL_Keycode> const &binding, SDL_Keycode key) {
 	return std::ranges::find(binding, key) != binding.end();
@@ -107,8 +108,17 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 				rotary_pressed = ButtonEvent::Pressed;
 			}
 
-			if (matches(keys.aux_button, e.key.keysym.sym)) {
+			if (matches(keys.aux_button, e.key.keysym.sym) && e.key.repeat == 0) {
 				aux_pressed = ButtonEvent::Pressed;
+			}
+
+			// Shift + 1-8 press buttons 1-8 on Button Expander 1
+			if ((e.key.keysym.mod & KMOD_SHIFT) && e.key.repeat == 0) {
+				if (auto key = e.key.keysym.sym; key >= '1' && key <= '8') {
+					auto bit = 1u << (key - '1');
+					_instance->ext_buttons_held |= bit;
+					_instance->ext_buttons_pressed |= bit;
+				}
 			}
 
 			if (matches(keys.turn_cw, e.key.keysym.sym)) {
@@ -181,28 +191,16 @@ void LvglEncoderSimulatorDriver::handle_key_up(SDL_Keycode key, lv_indev_data_t 
 
 	// 1-8 select which patch output to route to the soundcard left output.
 	// Patch output (L + 1) % 8 will be routed to the soundcard right output.
+	// If the key was pressed with Shift, it's a Button Expander button: release it
+	// (even if Shift was let go first)
 	if (key >= '1' && key <= '8') {
-		last_selected_outchan = key - '1';
+		auto bit = 1u << (key - '1');
+		if (ext_buttons_held & bit) {
+			ext_buttons_held &= ~bit;
+			ext_buttons_released |= bit;
+		} else
+			last_selected_outchan = key - '1';
 	}
-	// Shift + 1-8 select which patch input to connect to the soundcard left input channel.
-	// Soundcard right input channel is routed to patch input (L+1)%8
-	// Patch inputs 7 and 8 are Gate In 1 and 2.
-	if (key == '!')
-		last_selected_inchan = 0;
-	if (key == '@')
-		last_selected_inchan = 1;
-	if (key == '#')
-		last_selected_inchan = 2;
-	if (key == '$')
-		last_selected_inchan = 3;
-	if (key == '%')
-		last_selected_inchan = 4;
-	if (key == '^')
-		last_selected_inchan = 5;
-	if (key == '&')
-		last_selected_inchan = 6;
-	if (key == '*')
-		last_selected_inchan = 7;
 
 	// Keys A - F select params 0 - 5 (knobs A,B,C,D,E,F)
 	// Keys u - z select params 6 - 11 (knobs u,v,w,x,y,z)
@@ -240,6 +238,14 @@ bool LvglEncoderSimulatorDriver::aux_button_just_released() {
 		return true;
 	}
 	return false;
+}
+
+uint32_t LvglEncoderSimulatorDriver::ext_buttons_just_pressed() {
+	return std::exchange(ext_buttons_pressed, 0);
+}
+
+uint32_t LvglEncoderSimulatorDriver::ext_buttons_just_released() {
+	return std::exchange(ext_buttons_released, 0);
 }
 
 int LvglEncoderSimulatorDriver::rotary_push_turn_motion() {
