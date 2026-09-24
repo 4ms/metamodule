@@ -14,6 +14,14 @@
 namespace MetaModule
 {
 
+// Bitfield: problems reading the jack sense GPIO expanders over I2C
+struct JackSenseFault {
+	enum : uint8_t {
+		MainFailed = 1 << 0, // Main chip (or the whole bus) not responding: all jacks reported as patched
+		ExtLost = 1 << 1,	 // Audio Expander stopped responding: its jacks are reported as patched
+	};
+};
+
 // A catch-all of data shared between cores
 // TODO: separate out into data that follows the same paths
 struct MetaParams {
@@ -41,6 +49,9 @@ struct MetaParams {
 
 	// Controls -> Audio, Audio -> GUI (via ParamsState in SyncParams)
 	uint32_t jack_senses{};
+
+	// Controls -> GUI
+	uint8_t jack_sense_faults = 0; // bitfield using JackSenseFault
 
 	// Audio -> Controls
 	uint16_t midi_poly_chans = 1;
@@ -105,6 +116,8 @@ struct MetaParams {
 		midi_poly_chans = that.midi_poly_chans;
 
 		jack_senses = that.jack_senses;
+
+		jack_sense_faults = that.jack_sense_faults;
 	}
 
 	// For buttons: moves events from `that` to `this`, removing them from `this`
@@ -145,6 +158,8 @@ struct MetaParams {
 		midi_poly_chans = that.midi_poly_chans;
 
 		jack_senses = that.jack_senses;
+
+		jack_sense_faults = that.jack_sense_faults;
 	}
 };
 
