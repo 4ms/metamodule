@@ -11,6 +11,7 @@
 #include "stream_conf.hh"
 #include "util/countzip.hh"
 #include "util/edge_detector.hh"
+#include <atomic>
 #include <iostream>
 #include <span>
 
@@ -48,7 +49,17 @@ public:
 
 	std::array<float, PanelDef::NumPot> last_knob_val{};
 
+	// Called from the UI thread
+	void add_ext_button_events(uint32_t high_events, uint32_t low_events) {
+		ext_buttons_high_events.fetch_or(high_events);
+		ext_buttons_low_events.fetch_or(low_events);
+	}
+
 	void process(StreamConfSim::Audio::AudioInBuffer in_buff, StreamConfSim::Audio::AudioOutBuffer out_buff) {
+
+		// Take the events even if not playing, so they don't pile up
+		auto ext_high_events = ext_buttons_high_events.exchange(0);
+		auto ext_low_events = ext_buttons_low_events.exchange(0);
 
 		if (!is_playing_patch()) {
 			output_silence(out_buff);
@@ -57,6 +68,9 @@ public:
 
 		std::optional<bool> update_cal;
 		handle_patch_mods(patch_mod_queue, player, {&cal, &ext_cal}, update_cal);
+
+		handle_button_events(ext_high_events, 1.f);
+		handle_button_events(ext_low_events, 0.f);
 
 		if (in_buff.size() != out_buff.size()) {
 			std::cout << "Buffer size mis-match!\n";
@@ -103,6 +117,17 @@ public:
 					player.set_output_jack_patched_status(i, false);
 				}
 			}
+		}
+	}
+
+	void handle_button_events(uint32_t event_bitmask, float param_val) {
+		unsigned i = 0;
+		while (event_bitmask) {
+			if (event_bitmask & 0b1) {
+				player.set_panel_param(i + FirstButton, param_val);
+			}
+			event_bitmask >>= 1;
+			i++;
 		}
 	}
 
@@ -252,6 +277,9 @@ public:
 				chan = 0;
 		}
 	}
+
+	std::atomic<uint32_t> ext_buttons_high_events{};
+	std::atomic<uint32_t> ext_buttons_low_events{};
 
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 	float output_fade_amt = -1.f;
