@@ -5,6 +5,7 @@
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "gui/button_exp_nav.hh"
+#include "gui/notify/jack_sense_monitor.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params_dbg_print.hh"
@@ -27,6 +28,7 @@ private:
 	NotificationQueue notify_queue;
 	PageManager page_manager;
 	UsbConnectionMonitor usb_monitor;
+	JackSenseMonitor jack_sense_monitor;
 	ParamsMidiState params;
 	MetaParams metaparams;
 	UserSettings settings;
@@ -191,6 +193,7 @@ private:
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		usb_monitor.update(metaparams.usb_connection, notify_queue);
+		jack_sense_monitor.update(metaparams.jack_sense_faults, notify_queue);
 
 		// Experimental?
 		// button_expander_nav(metaparams);
