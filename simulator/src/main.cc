@@ -65,6 +65,17 @@ static void simulate_input(MetaModule::Ui &ui, const std::string &seq) {
 				run_cycles(ui, 4);
 				push_key(keys.click.front(), false);
 				run_cycles(ui, 6);
+			} else if (name == "pcw" || name == "pccw") {
+				// Push+turn: hold the button while turning
+				auto turn = name == "pcw" ? keys.turn_cw.front() : keys.turn_ccw.front();
+				push_key(keys.click.front(), true);
+				run_cycles(ui, 4);
+				push_key(turn, true);
+				run_cycles(ui, 4);
+				push_key(turn, false);
+				run_cycles(ui, 2);
+				push_key(keys.click.front(), false);
+				run_cycles(ui, 6);
 			} else if (name == "back") {
 				push_key(keys.aux_button.front(), true);
 				run_cycles(ui, 4);

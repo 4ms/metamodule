@@ -1,4 +1,5 @@
 #include "settings_serialize.hh"
+#include "pr_dbg.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"
@@ -27,9 +28,13 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("map_ring_flash_active") << s.map_ring_flash_active;
 	n->append_child() << ryml::key("scroll_to_active_param") << s.scroll_to_active_param;
 	n->append_child() << ryml::key("view_height_px") << s.view_height_px;
+	n->append_child() << ryml::key("auto_layout") << s.auto_layout;
+	n->append_child() << ryml::key("auto_rack_width") << s.auto_rack_width;
+	n->append_child() << ryml::key("rack_width_hp") << s.rack_width_hp;
 	n->append_child() << ryml::key("param_style") << s.param_style;
 	n->append_child() << ryml::key("paneljack_style") << s.paneljack_style;
 	n->append_child() << ryml::key("cable_style") << s.cable_style;
+	n->append_child() << ryml::key("cable_tension") << s.cable_tension;
 	n->append_child() << ryml::key("show_graphic_screens") << s.show_graphic_screens;
 	n->append_child() << ryml::key("graphic_screen_throttle") << s.graphic_screen_throttle;
 	n->append_child() << ryml::key("show_samplerate") << s.show_samplerate;
@@ -37,6 +42,7 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("show_knobset_name") << s.show_knobset_name;
 	n->append_child() << ryml::key("show_jack_aliases") << s.show_jack_aliases;
 	n->append_child() << ryml::key("show_knob_aliases") << s.show_knob_aliases;
+	n->append_child() << ryml::key("fit_width_in_fullscreen") << s.fit_width_in_fullscreen;
 	n->append_child() << ryml::key("nav_wrapping") << s.nav_wrapping;
 }
 
@@ -115,9 +121,7 @@ static void write(ryml::NodeRef *n, NotificationSettings const &s) {
 	*n |= ryml::MAP;
 
 	using enum NotificationSettings::Amount;
-	ryml::csubstr amount_string = s.amount == Fewer		   ? "Fewer" :
-								  s.amount == OnlyCritical ? "OnlyCritical" :
-															 "All";
+	ryml::csubstr amount_string = s.amount == Fewer ? "Fewer" : s.amount == OnlyCritical ? "OnlyCritical" : "All";
 	n->append_child() << ryml::key("amount") << amount_string;
 	n->append_child() << ryml::key("animation") << s.animation;
 }
@@ -194,7 +198,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 
 	{
 		using enum UsbRoleMode;
-		ryml::csubstr role_string = settings.usb_role_mode == ForceHost	 ? "ForceHost" :
+		ryml::csubstr role_string = settings.usb_role_mode == ForceHost	  ? "ForceHost" :
 									settings.usb_role_mode == ForceDevice ? "ForceDevice" :
 																			"Auto";
 		data["usb_role_mode"] << role_string;
@@ -205,6 +209,17 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["usb_device_mode"] << usb_mode_string;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
+
+	// When the buffer is too small ryml writes nothing and reports the size it would have
+	// needed. Returning that would have the caller read (and write to storage) far past the
+	// end of the buffer, so say "nothing written" instead.
+	if (res.len > buffer.size()) {
+		pr_err("Settings need %u bytes to serialize, but the buffer is only %u\n",
+			   (unsigned)res.len,
+			   (unsigned)buffer.size());
+		return 0;
+	}
+
 	return res.size();
 }
 
