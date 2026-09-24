@@ -1,4 +1,5 @@
 #include "gui/pages/module_view/module_view.hh"
+#include "params/param_num_positions.hh"
 
 namespace MetaModule
 {
@@ -200,6 +201,7 @@ void ModuleViewPage::perform_knob_assign(uint16_t knob_id, const DrawnElement *e
 		.min = 0.f,
 		.max = 1.f,
 	};
+	map.curve_type = default_curve_type(map, *patch);
 
 	// Queue the modification - this will be processed by handle_patch_mods() which will
 	// update the patch data and call refresh() automatically
@@ -229,6 +231,7 @@ void ModuleViewPage::perform_midi_assign(uint16_t midi_id, const DrawnElement *e
 		.min = 0.f,
 		.max = 1.f,
 	};
+	map.curve_type = default_curve_type(map, *patch);
 
 	module_mods.put(AddMidiMap{.map = map});
 

@@ -33,7 +33,7 @@ struct KnobMapPage : PageBase {
 
 		// Button Behavior dropdown replaces the Toggle switch
 		lv_hide(ui_ModuleMapToggleSwitch);
-		behavior_dropdown = create_midi_map_dropdown(ui_ModuleMapToggleSwitchCont, "Normal\nToggle\nCycle");
+		behavior_dropdown = create_midi_map_dropdown(ui_ModuleMapToggleSwitchCont, "Normal\nToggle\nStep");
 		lv_obj_set_height(behavior_dropdown, 28);
 		lv_obj_set_width(behavior_dropdown, 110);
 		lv_obj_add_event_cb(behavior_dropdown, behavior_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -159,11 +159,11 @@ struct KnobMapPage : PageBase {
 			lv_show(ui_ModuleMapToggleSwitchCont);
 			lv_label_set_text(ui_ModuleMapToggleSwitchLabel, "Button Behavior:");
 
-			// Show how many positions Cycle will step through (auto-detected from the param's element)
+			// Show how many positions Step (CurveType::Cycle) will step through (auto-detected from the param's element)
 			auto num_pos = map.module_id < patch->module_slugs.size() ?
 							   get_param_num_positions(patch->module_slugs[map.module_id], map.param_id) :
 							   0;
-			std::string opts = "Normal\nToggle\nCycle";
+			std::string opts = "Normal\nToggle\nStep";
 			if (num_pos > 2)
 				opts += " (" + std::to_string(num_pos) + ")";
 			lv_dropdown_set_options(behavior_dropdown, opts.c_str());
@@ -324,7 +324,7 @@ private:
 		if (!page)
 			return;
 
-		// Dropdown index is the CurveType: Normal, Toggle, Cycle
+		// Dropdown index is the CurveType: Normal, Toggle, Cycle ("Step")
 		page->map.curve_type = lv_dropdown_get_selected(page->behavior_dropdown);
 		page->commit_map();
 	}

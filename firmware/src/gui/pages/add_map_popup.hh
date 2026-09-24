@@ -8,6 +8,7 @@
 #include "gui/styles.hh"
 #include "metaparams.hh"
 #include "midi/midi_message.hh"
+#include "params/param_num_positions.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
 
@@ -234,6 +235,9 @@ struct AddMapPopUp {
 					.min = 0.f,
 					.max = 1.f,
 				};
+				if (page->patch)
+					map.curve_type = default_curve_type(map, *page->patch);
+
 				if (map.is_panel_knob() || map.is_button()) {
 					// TODO: just have AddMapping type (not AddMidiMap) and use set_id to indicate MidiMap?
 					page->patch_mod_queue.put(AddMapping{.map = map, .set_id = page->set_id});

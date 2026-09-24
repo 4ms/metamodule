@@ -253,3 +253,34 @@ PatchData:
 	play_note();
 	CHECK(m1->params[1] == doctest::Approx(0.25f));
 }
+
+TEST_CASE("New button and MIDI note maps default to Cycle for params with more than 2 positions") {
+	using namespace MetaModule;
+	PatchData pd;
+	pd.module_slugs.push_back("HubMedium");
+	pd.module_slugs.push_back("TestSwitchModule");
+
+	auto map_to = [](uint16_t panel_knob_id, uint16_t param_id) {
+		return MappedKnob{.panel_knob_id = panel_knob_id, .module_id = 1, .param_id = param_id, .min = 0, .max = 1};
+	};
+	constexpr uint16_t Button = FirstButton;
+	constexpr uint16_t Knob = 0;
+	constexpr uint16_t Note = MidiGateNote0 + 60;
+	constexpr uint16_t CC = MidiCC0 + 7;
+
+	// Param 0: 3-pos switch, param 1: 5-pos snapped knob, param 2: continuous knob
+	CHECK(default_curve_type(map_to(Button, 0), pd) == MappedKnob::Cycle);
+	CHECK(default_curve_type(map_to(Button, 1), pd) == MappedKnob::Cycle);
+	CHECK(default_curve_type(map_to(Button, 2), pd) == MappedKnob::Normal);
+	CHECK(default_curve_type(map_to(Note, 0), pd) == MappedKnob::Cycle);
+	CHECK(default_curve_type(map_to(Note, 2), pd) == MappedKnob::Normal);
+
+	// Knobs and CCs sweep through the positions
+	CHECK(default_curve_type(map_to(Knob, 0), pd) == MappedKnob::Normal);
+	CHECK(default_curve_type(map_to(CC, 0), pd) == MappedKnob::Normal);
+
+	// Unknown module
+	auto bad = map_to(Button, 0);
+	bad.module_id = 5;
+	CHECK(default_curve_type(bad, pd) == MappedKnob::Normal);
+}
