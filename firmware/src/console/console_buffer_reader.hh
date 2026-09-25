@@ -35,6 +35,10 @@ public:
 		use_color = enabled;
 	}
 
+	bool using_color() const {
+		return use_color;
+	}
+
 	// Copy the next pending chunk from one of the buffers into `out`
 	// Returns the number of bytes written.
 	size_t next_chunk(std::span<uint8_t> out) {

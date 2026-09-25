@@ -57,8 +57,12 @@ public:
 		return false;
 	}
 
-	static void print_prompt() {
+	void print_prompt() {
+		if (reader_.using_color())
+			echo(Term::Red);
 		echo("> ");
+		if (reader_.using_color())
+			echo(Term::Normal);
 	}
 
 private:
