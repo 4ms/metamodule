@@ -1,4 +1,5 @@
 #include "CoreModules/elements/units.hh"
+#include "gui/pages/module_view/group_member_name.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/module_view/roller_helpers.hh"
 #include "util/countzip.hh"
@@ -113,7 +114,13 @@ void ModuleViewPage::populate_roller() {
 		// Handle names that contain a newline or null char
 		// Must use sv literal so the trailing \0 is considered a char, not a terminator
 		using namespace std::literals;
-		opts.append(base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv)));
+		auto name = base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv));
+
+		// Inside a group, the group's name is shown in the header, so don't repeat it
+		if (current_group)
+			opts.append(ModView::group_member_name(name, group_names[*current_group]));
+		else
+			opts.append(name);
 
 		if (gui_el.midi_mapped_id) {
 			// If the mapping and the MIDI mapping are different, then show both
