@@ -113,13 +113,6 @@ public:
 			} else if (state == AsHost) {
 				HAL_HCD_IRQHandler(&UsbHostManager::hhcd);
 			} else {
-				// No active stack to service (and thereby clear) the interrupt in
-				// this state, so the pending GINTSTS source would never clear and
-				// the IRQ would re-fire forever. As OTG (priority 3) preempts
-				// SysTick (priority 15), that storm starves SysTick and hangs any
-				// HAL_Delay in the main loop. Mask the IRQ here so it can't storm;
-				// the next connect re-inits the core (clearing GINTSTS) and
-				// re-enables it. Backstops the teardown ordering in handle_fusb_int.
 				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 			}
 			// Debug::Pin2::low();
@@ -159,9 +152,7 @@ public:
 						usb_device.stop();
 					}
 				}
-				// A partner that sources VBUS itself (OXI One, gadget rigs)
-				// keeps it up for the whole session -- don't parallel our 5V
-				// onto it. Everyone else gets VBUS from us, immediately.
+				// Only source VBUS if the partner does not
 				bool partner_vbus = usbctl.host_partner_sources_vbus;
 				pr_info("Starting host%s\n", partner_vbus ? " (partner sources VBUS)" : "");
 				state = newstate;
@@ -169,14 +160,7 @@ public:
 				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 
 			} else if (newstate == None) {
-				// Mask the OTG IRQ *before* tearing down. Once we stop servicing
-				// the core (below), its ISR no-ops and a pending GINTSTS source
-				// would storm; since OTG (priority 3) preempts SysTick (priority
-				// 15), that storm starves SysTick and the teardown's HAL_Delays
-				// (vbus_off/stop) would hang forever -- leaving us stuck with
-				// state==None and the IRQ spinning. So disable first, then tear
-				// down. (Use the pre-transition `state` to pick the branch; the
-				// final `state = newstate` below commits None.)
+				// Must disable IRQ first, before doing stop()
 				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 
 				if (state == AsHost) {
@@ -222,12 +206,10 @@ public:
 			}
 		}
 
-		// Backstop for unplug events the FUSB302 never raises an interrupt
-		// for (VBUSOK has been seen not to fire on VBUS decay): poll the link
-		// status at a low rate and run the normal interrupt handling if it
-		// shows the link down. AsDevice rides on VBUS/BC_LVL; AsHost against a
-		// VBUS-sourcing partner (OXI One, gadget rigs) rides on VBUS only --
-		// such partners toggle CC forever, so BC_LVL means nothing there.
+		// Sometimes the VBusOK bit can change but no interrrupt happens. So, periodically
+		// read the VBusOK bit and manually call handle_fusb_int() if the link is down.
+		// Note: we don't poll BCLevel in AsHost mode because some devices (OXI One)
+		// toggle the CC lines continuously while connected
 		if (HAL_GetTick() - last_device_link_check > 250) {
 			last_device_link_check = HAL_GetTick();
 			if (state == FUSB302::Device::ConnectedState::AsDevice) {
