@@ -5,7 +5,9 @@
 #include "gui/notify/queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
+#include <cstdio>
 #include <functional>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -20,11 +22,13 @@ public:
 					PluginManager &plugin_manager,
 					PatchPlayLoader &play_loader,
 					NotificationQueue &notify_queue,
+					DevDriveBlock &dev_drive_msgs,
 					std::function<void()> release_gui_plugin_objects)
 		: drive_{drive}
 		, plugin_manager_{plugin_manager}
 		, play_loader_{play_loader}
 		, notify_queue_{notify_queue}
+		, dev_block{dev_drive_msgs}
 		, release_gui_plugin_objects_{std::move(release_gui_plugin_objects)} {
 	}
 
@@ -40,6 +44,7 @@ public:
 		if (!should_enable) {
 			retries = 10;
 			drive_.disable();
+			poll_command();
 			return;
 		}
 
@@ -48,29 +53,53 @@ public:
 				retries--;
 		}
 
-		auto *block = SharedMemoryS::ptrs.dev_drive_msgs;
-		if (!block || !drive_.is_enabled())
+		if (!drive_.is_enabled()) {
+			poll_command();
 			return;
+		}
 
 		// The M4 bumps this each host eject
-		auto count = block->eject_count.load(std::memory_order_acquire);
+		auto count = dev_block.eject_count.load(std::memory_order_acquire);
 		if (count != last_eject_count_) {
 			last_eject_count_ = count;
 			pr_info("DevDrive: host ejected\n");
 			host_ejected_ = true;
-			scan_and_install(*block);
+			scan_and_install(dev_block);
 			return;
 		}
 
-		// M4 bumps this once per console command
-		auto cmd_count = block->command_count.load(std::memory_order_acquire);
-		if (cmd_count != last_command_count_) {
-			last_command_count_ = cmd_count;
-			handle_command(*block, (DevDriveCommand)block->command.load(std::memory_order_relaxed));
-		}
+		poll_command();
 	}
 
 private:
+	// Handles a new console command, if the M4 sent one, and reports it finished
+	void poll_command() {
+		// M4 bumps this once per console command
+		auto cmd_count = dev_block.command_count.load(std::memory_order_acquire);
+		if (cmd_count == last_command_count_)
+			return;
+		last_command_count_ = cmd_count;
+
+		auto cmd = (DevDriveCommand)dev_block.command.load(std::memory_order_relaxed);
+
+		if (drive_.is_enabled())
+			handle_command(dev_block, cmd);
+		else
+			printf("Developer drive: disabled\n");
+
+		// An install finishes over several passes: report it when the queue is done
+		if (installing_)
+			finish_after_install_ = cmd_count;
+		else
+			finish_command(dev_block, cmd_count);
+	}
+
+	void finish_command(DevDriveBlock &block, uint32_t cmd_count) {
+		// The command's output must be in the console buffer before the M4 prints the prompt
+		fflush(stdout);
+		block.finish_command(cmd_count);
+	}
+
 	void handle_command(DevDriveBlock &block, DevDriveCommand cmd) {
 		switch (cmd) {
 			case DevDriveCommand::Install:
@@ -172,8 +201,12 @@ private:
 			installing_ = false;
 			current_.clear();
 
-			if (auto *block = SharedMemoryS::ptrs.dev_drive_msgs)
-				put_medium_back(*block);
+			put_medium_back(dev_block);
+
+			if (finish_after_install_) {
+				finish_command(dev_block, *finish_after_install_);
+				finish_after_install_.reset();
+			}
 			return;
 		}
 
@@ -235,14 +268,12 @@ private:
 
 public:
 	DevDriveStatus reformat() {
-		auto *block = SharedMemoryS::ptrs.dev_drive_msgs;
-
 		drive_.disable();
 		auto status = drive_.enable();
 		if (status == DevDriveStatus::Ok) {
 			drive_.hand_to_host();
 			auto mem = drive_.memory();
-			block->publish(reinterpret_cast<uint32_t>(mem.data()), mem.size());
+			dev_block.publish(reinterpret_cast<uint32_t>(mem.data()), mem.size());
 		}
 		return status;
 	}
@@ -252,9 +283,11 @@ private:
 	PluginManager &plugin_manager_;
 	PatchPlayLoader &play_loader_;
 	NotificationQueue &notify_queue_;
+	DevDriveBlock &dev_block;
 	std::function<void()> release_gui_plugin_objects_;
 	uint32_t last_eject_count_ = 0;
 	uint32_t last_command_count_ = 0;
+	std::optional<uint32_t> finish_after_install_{};
 	bool host_ejected_ = false;
 
 	std::vector<std::string> queue_;
