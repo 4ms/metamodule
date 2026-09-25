@@ -247,6 +247,10 @@ public:
 							if (alias.element_order.size()) {
 								ModuleFactory::setElementOrder(metadata.brand_slug, alias.slug, alias.element_order);
 							}
+
+							if (alias.element_names.size()) {
+								ModuleFactory::setElementNames(metadata.brand_slug, alias.slug, alias.element_names);
+							}
 						}
 
 						for (auto const &m : metadata.module_extras) {

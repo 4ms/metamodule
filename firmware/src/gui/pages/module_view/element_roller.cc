@@ -116,8 +116,10 @@ void ModuleViewPage::populate_roller() {
 		using namespace std::literals;
 		auto name = base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv));
 
-		// Inside a group, the group's name is shown in the header, so don't repeat it
-		if (current_group)
+		// A custom name is shown as it's written. Otherwise, inside groups remove the group words
+		if (element_display_name[drawn_el_idx].size())
+			opts.append(element_display_name[drawn_el_idx]);
+		else if (current_group)
 			opts.append(ModView::group_member_name(name, group_names[*current_group]));
 		else
 			opts.append(name);
@@ -712,20 +714,13 @@ std::optional<unsigned> ModuleViewPage::find_group(ElementRef const &ref) const 
 	return std::nullopt;
 }
 
-// Resolve this module's registered groups and order against its drawn elements.
-//
-// A group lists its members in the order they're written. An element that appears in
-// more than one group stays in the first one; a member that doesn't resolve is
-// dropped, and the rest of the group still works.
-//
-// The top level lists the items named in the module's order first -- groups by name,
-// and elements -- then everything else in panel order, with each remaining group at
-// the position of its first element.
+// Resolve this module's registered groups, order, and custom names against its drawn elements.
 void ModuleViewPage::build_element_layout() {
 	group_names.clear();
 	group_members.clear();
 	top_level_entries.clear();
 	element_group.assign(drawn_elements.size(), NoGroup);
+	element_display_name.assign(drawn_elements.size(), {});
 
 	auto warn = [this](char const *context, std::string const &message) {
 		pr_warn("Module %.*s: %s: %s\n", (int)slug.size(), slug.data(), context, message.c_str());
@@ -755,6 +750,23 @@ void ModuleViewPage::build_element_layout() {
 			group_names.push_back(group.name);
 			group_members.push_back(std::move(members));
 		}
+	}
+
+	for (auto const &name : ModuleFactory::getElementNames(slug)) {
+		auto drawn_idx = resolve_element_ref(name.element);
+
+		if (!drawn_idx) {
+			warn("element names", "no element '" + describe(name.element) + "'");
+			continue;
+		}
+
+		// First name given for an element is the one used
+		if (element_display_name[*drawn_idx].size()) {
+			warn("element names", "'" + describe(name.element) + "' already has a name");
+			continue;
+		}
+
+		element_display_name[*drawn_idx] = name.name;
 	}
 
 	std::vector<bool> element_placed(drawn_elements.size(), false);

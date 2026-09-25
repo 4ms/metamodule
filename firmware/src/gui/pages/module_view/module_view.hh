@@ -562,24 +562,20 @@ private:
 
 	std::vector<int> roller_drawn_el_idx;
 
-	// Element grouping and ordering: the elements of a group collapse into a single roller
-	// row, which opens a list of just that group's elements.
-	// group_names[g] is the group's display name.
-	// group_members[g] is the group's drawn element indices, in the order they're shown.
-	// element_group[i] is the group that drawn_elements[i] belongs to, or NoGroup.
-	// top_level_entries is the top-level list, in the order it's shown.
-	// current_group is empty at the top level, or the group being shown.
+	// Element grouping and ordering
 	struct RollerEntry {
 		bool is_group;
 		unsigned idx; // group index, or drawn element index
 	};
 	std::vector<std::string_view> group_names;
 	std::vector<std::vector<unsigned>> group_members;
-	std::vector<int16_t> element_group;
+	std::vector<int16_t> element_group; // the group that each drawn_element belongs to
+	std::vector<std::string_view> element_display_name;
 	std::vector<RollerEntry> top_level_entries;
 	std::optional<unsigned> current_group{};
+
 	// Set when the page is (re)entered: the element we were sent to opens its
-	// group, once. Without this, any later re-populate (a settings change, say)
+	// group. Without this, any later re-populate (a settings change, say)
 	// would re-open a group the user had just backed out of.
 	bool open_group_for_target = false;
 

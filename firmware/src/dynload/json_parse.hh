@@ -28,6 +28,7 @@ struct Metadata {
 		std::string display_name;
 		std::vector<ElementGroup> element_groups;
 		std::vector<ElementRef> element_order;
+		std::vector<ElementName> element_names;
 	};
 
 	std::vector<ModuleDisplayName> module_display_names;
@@ -77,6 +78,22 @@ static void read_element_order(ryml::ConstNodeRef const &n, std::vector<ElementR
 	}
 }
 
+// "names" is a map of element reference => the name to show for it in the element list
+//   "names": { "Red Speed": "Rate", "param:3": "Mix" }
+static void read_element_names(ryml::ConstNodeRef const &n, std::vector<ElementName> *names) {
+	if (!n.is_map())
+		return;
+
+	for (auto const &item : n.children()) {
+		if (!item.has_key() || !item.has_val())
+			continue;
+
+		auto name = std::string_view{item.val()};
+		if (name.size())
+			names->push_back({ElementRef::parse(std::string_view{item.key()}), std::string(name)});
+	}
+}
+
 static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
 	if (!n.is_map())
 		return false;
@@ -93,6 +110,9 @@ static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
 		}
 		if (n.has_child("order")) {
 			read_element_order(n["order"], &s->element_order);
+		}
+		if (n.has_child("names")) {
+			read_element_names(n["names"], &s->element_names);
 		}
 	}
 	return true;
