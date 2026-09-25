@@ -14,8 +14,9 @@ namespace MetaModule
 // Line-based commands typed (or scripted) into the USB console.
 class ConsoleCommands {
 public:
-	explicit ConsoleCommands(ConsoleBufferReader &reader)
-		: reader_{reader} {
+	ConsoleCommands(ConsoleBufferReader &reader, DevDriveBlock &dev_drive_msgs)
+		: reader_{reader}
+		, message_block{dev_drive_msgs} {
 	}
 
 	// Feed received console bytes, echoing them back. Returns true if the byte completed a line.
@@ -132,8 +133,8 @@ private:
 			printf("Unknown command '%.*s'. Type help for a list.\n", (int)cmd.size(), cmd.data());
 	}
 
-	static void send(DevDriveCommand cmd) {
-		if (auto *block = SharedMemoryS::ptrs.dev_drive_msgs)
+	uint32_t send(DevDriveCommand cmd) {
+		return message_block.send_command(cmd);
 			block->send_command(cmd);
 		else
 			printf("Developer drive is not available\n");
@@ -162,6 +163,7 @@ private:
 	std::array<char, 32> line_{};
 	size_t len_ = 0;
 	bool last_was_cr_ = false;
+	DevDriveBlock &message_block;
 
 	enum class Esc { None, Start, Csi, Ss3 };
 	Esc esc_ = Esc::None;

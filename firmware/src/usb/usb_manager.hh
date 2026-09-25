@@ -77,8 +77,8 @@ class UsbManager {
 	// being sunk/used) and Host+Source (e.g. a computer).
 
 public:
-	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
-		: usb_device{console_buffers, UsbDeviceMode::MidiConsole}
+	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers, DevDriveBlock &dev_drive_msgs)
+		: usb_device{console_buffers, UsbDeviceMode::MidiConsole, dev_drive_msgs}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		found_fusb = usbctl.init(); //NOLINT
 	}

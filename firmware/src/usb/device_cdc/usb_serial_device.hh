@@ -13,7 +13,8 @@ class UsbSerialDevice {
 
 public:
 	UsbSerialDevice(USBD_HandleTypeDef *pDevice,
-					std::array<ConcurrentBuffer *, MetaModule::ConsoleBufferReader::NumBuffers> console_buffers);
+					std::array<ConcurrentBuffer *, MetaModule::ConsoleBufferReader::NumBuffers> console_buffers,
+					MetaModule::DevDriveBlock &dev_drive_msgs);
 	void process();
 
 	// Add the CDC class to the device being built. The device itself (USBD_Init
@@ -31,7 +32,7 @@ private:
 	uint8_t _cdc_class_id = 0;
 
 	MetaModule::ConsoleBufferReader reader;
-	MetaModule::ConsoleCommands commands{reader};
+	MetaModule::ConsoleCommands commands;
 
 	std::vector<uint8_t> rx_buffer{}; // force to be on heap
 

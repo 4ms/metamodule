@@ -16,9 +16,11 @@ USBD_CDC_LineCodingTypeDef LineCoding = {
 }
 
 UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice,
-								 std::array<ConcurrentBuffer *, MetaModule::ConsoleBufferReader::NumBuffers> buffers)
+								 std::array<ConcurrentBuffer *, MetaModule::ConsoleBufferReader::NumBuffers> buffers,
+								 MetaModule::DevDriveBlock &dev_drive_msgs)
 	: pdev{pDevice}
-	, reader{buffers} {
+	, reader{buffers}
+	, commands{reader, dev_drive_msgs} {
 	// The class arms this endpoint for a full max-size packet (512)
 	rx_buffer.resize(CDC_DATA_HS_OUT_PACKET_SIZE);
 	_instance = this;
