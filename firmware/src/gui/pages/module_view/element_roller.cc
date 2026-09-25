@@ -69,8 +69,11 @@ void ModuleViewPage::populate_roller() {
 	ElementCount::Counts last_type{};
 	bool last_is_altparam = false;
 
-	// Inside a group, the first row returns to the top-level list
 	if (current_group) {
+		opts += Gui::blue_text(std::string(group_names[*current_group])) + "\n";
+		roller_drawn_el_idx.push_back(RollerHeaderTag);
+		roller_idx++;
+
 		opts += Gui::yellow_text(LV_SYMBOL_LEFT " Back") + "\n";
 		roller_drawn_el_idx.push_back(BackTag);
 		roller_idx++;
@@ -185,7 +188,6 @@ void ModuleViewPage::populate_roller() {
 		}
 	}
 
-	// Inside a group there's always the Back row, and an empty group is just that
 	if (roller_idx <= 1 && !current_group) {
 		if (gui_state.new_cable) {
 			opts.append("No available jacks to patch\n");
@@ -545,8 +547,7 @@ void ModuleViewPage::roller_pressed_cb(lv_event_t *event) {
 void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 	auto page = static_cast<ModuleViewPage *>(event->user_data);
 	if (page) {
-		// Nothing to select: go to the button bar. Inside a group the Back row is always
-		// there to select, even when the group is otherwise empty (patching a cable)
+		// Nothing to select: go to the button bar
 		if (page->roller_drawn_el_idx.size() <= 1 && !page->current_group) {
 			page->focus_button_bar();
 			page->roller_hover.hide();
@@ -808,9 +809,9 @@ void ModuleViewPage::enter_group(unsigned group_idx) {
 	cur_selected = 1;
 	populate_roller();
 
-	// Land on the group's first element, not on the Back row or a type header,
-	// unless the group is empty (while patch a cable), then default to the Back row (0)
-	cur_selected = 0;
+	// Start on the group's first element after the Back row or a header,
+	// unless the group is empty (while patching a cable), then default to the Back row (1)
+	cur_selected = 1;
 	for (auto [i, drawn_idx] : enumerate(roller_drawn_el_idx)) {
 		if (drawn_idx >= 0) {
 			cur_selected = i;
@@ -848,7 +849,7 @@ void ModuleViewPage::exit_group() {
 }
 
 // The row to select when coming into the roller from the top: the first row might be a type
-// header or a "< Back" item, or a group name
+// header or a group's name header (skip it), or a group row
 unsigned ModuleViewPage::first_selectable_row() const {
 	if (!roller_drawn_el_idx.empty() && roller_drawn_el_idx[0] != RollerHeaderTag)
 		return 0;
