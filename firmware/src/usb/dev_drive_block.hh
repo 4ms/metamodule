@@ -44,6 +44,10 @@ struct DevDriveBlock {
 	std::atomic<uint32_t> command{0};
 	std::atomic<uint32_t> command_count{0};
 
+	// A7 -> M4: the command_count of the last command that has finished, including
+	// printing its output. The console waits for this before showing the next prompt.
+	std::atomic<uint32_t> command_done_count{0};
+
 	// A7 -> M4: re-enumerate the USB device.
 	std::atomic<uint32_t> reenumerate_count{0};
 
@@ -57,6 +61,7 @@ struct DevDriveBlock {
 		host_wrote.store(0, std::memory_order_relaxed);
 		command.store(0, std::memory_order_relaxed);
 		command_count.store(0, std::memory_order_relaxed);
+		command_done_count.store(0, std::memory_order_relaxed);
 		reenumerate_count.store(0, std::memory_order_release);
 	}
 
@@ -70,10 +75,23 @@ struct DevDriveBlock {
 		reenumerate_count.store(reenumerate_count.load(std::memory_order_relaxed) + 1, std::memory_order_release);
 	}
 
-	// Single writer (the M4's console parser)
-	void send_command(DevDriveCommand cmd) {
+	// Single writer (the M4's console parser). Returns the command's count, which
+	// command_done_count will be set to when it finishes.
+	uint32_t send_command(DevDriveCommand cmd) {
 		command.store(static_cast<uint32_t>(cmd), std::memory_order_relaxed);
-		command_count.store(command_count.load(std::memory_order_relaxed) + 1, std::memory_order_release);
+		auto count = command_count.load(std::memory_order_relaxed) + 1;
+		command_count.store(count, std::memory_order_release);
+		return count;
+	}
+
+	// Single writer (the A7 aux core)
+	void finish_command(uint32_t count) {
+		command_done_count.store(count, std::memory_order_release);
+	}
+
+	// Single reader (m4 core)
+	bool is_command_done(uint32_t count) const {
+		return command_done_count.load(std::memory_order_acquire) == count;
 	}
 
 	void publish(uint32_t drive_base, uint32_t drive_size) {

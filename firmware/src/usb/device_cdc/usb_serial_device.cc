@@ -46,7 +46,6 @@ void UsbSerialDevice::set_console_routing(bool active) {
 		return;
 	MetaModule::ConsoleRouting::usb_console_active = active;
 	if (active) {
-		// The UART drain already printed everything up to this point
 		reader.resync();
 		is_transmitting = false;
 		tx_pending = 0;
@@ -54,16 +53,11 @@ void UsbSerialDevice::set_console_routing(bool active) {
 }
 
 void UsbSerialDevice::process() {
-	// Only drain the console buffers while a host is enumerated and awake;
-	// otherwise the UART drain does it
+	// host is configured and not suspended: route console to USB
 	set_console_routing(pdev->dev_state == USBD_STATE_CONFIGURED);
 
 	if (MetaModule::ConsoleRouting::usb_console_active) {
-		// After set_console_routing(), since its resync would drop the prompt
-		if (prompt_pending) {
-			prompt_pending = false;
-			MetaModule::ConsoleCommands::print_prompt();
-		}
+		commands.process(HAL_GetTick());
 		transmit_pending();
 	}
 }
@@ -98,10 +92,8 @@ void UsbSerialDevice::transmit_pending() {
 	// USBD_BUSY: keep tx_pending, retry next process()
 }
 
-// Which composite slot the CDC class landed in. pdev->classId only identifies
-// the class inside a class callback -- from the main loop it holds whichever
-// class the OTG ISR last dispatched to -- so the app-facing CDC calls must pass
-// the id explicitly.
+// Which composite slot the CDC class was assigned.
+// Can't use pdev->classId because that changes as the OTG ISR runs
 uint8_t UsbSerialDevice::cdc_class_id() const {
 	return _cdc_class_id;
 }
@@ -213,9 +205,13 @@ int8_t UsbSerialDevice::CDC_Itf_Control(uint8_t cmd, uint8_t *pbuf, uint16_t len
 
 		case CDC_SET_CONTROL_LINE_STATE: {
 			// No data stage: pbuf is the setup request, and wValue bit 0 is DTR
-			auto req = reinterpret_cast<USBD_SetupReqTypedef *>(pbuf);
-			if (req->wValue & 0x01)
-				_instance->prompt_pending = true;
+
+			// When DTR is set, a console has connected, so we could do something useful here,
+			// but it's not guaraneteed all consoles will issue DTR, so we can't rely on it.
+			// auto req = reinterpret_cast<USBD_SetupReqTypedef *>(pbuf);
+			// if (req->wValue & 0x01)
+			// 	_instance->prompt_pending = true;
+
 		} break;
 
 		case CDC_SEND_BREAK:
