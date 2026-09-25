@@ -181,6 +181,48 @@ inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }
 
+// Brings to the foreground any light element that overlaps and is on top of the given element.
+// Used to handle modules that have a separate LED and button element. When a mapped button element
+// changed values, it moves to the foreground, so its LED needs to move with it.
+inline void raise_lights_over(std::span<DrawnElement> drawn_elements, DrawnElement const &control) {
+	auto *obj = control.gui_element.obj;
+	if (!obj)
+		return;
+
+	auto *parent = lv_obj_get_parent(obj);
+
+	lv_obj_update_layout(obj);
+	lv_area_t control_area;
+	lv_obj_get_coords(obj, &control_area);
+
+	bool is_drawn_after = false;
+	for (auto &drawn_el : drawn_elements) {
+		if (&drawn_el == &control) {
+			is_drawn_after = true;
+			continue;
+		}
+		if (!is_drawn_after)
+			continue;
+
+		auto &gui_el = drawn_el.gui_element;
+		if (!gui_el.obj || gui_el.count.num_params > 0 || gui_el.count.num_lights == 0)
+			continue;
+
+		if (lv_obj_get_parent(gui_el.obj) != parent)
+			continue;
+
+		lv_area_t light_area;
+		lv_obj_get_coords(gui_el.obj, &light_area);
+		if (_lv_area_is_on(&control_area, &light_area))
+			lv_obj_move_foreground(gui_el.obj);
+	}
+}
+
+// Redrawing a knob moves it to the foreground (see redraw_element(Knob))
+inline bool is_raised_on_redraw(Element const &element) {
+	return std::visit([]<typename T>(T const &) { return std::derived_from<T, Knob>; }, element);
+}
+
 // Raise all params mapped in the active knob set above the un-mapped ones
 // so that stacked controls (e.g. concentric knobs) show the ones in use.
 // Note: controls are drawn at their zero position, and redrawing a control moves it to the
@@ -196,6 +238,8 @@ inline void raise_mapped_params(std::span<DrawnElement> drawn_elements) {
 			continue;
 
 		lv_obj_move_foreground(gui_el.obj);
+
+		raise_lights_over(drawn_elements, drawn_el);
 
 		// Keep the map ring above its own control, as when it was drawn
 		if (gui_el.map_ring)
@@ -219,6 +263,16 @@ inline bool redraw_param(DrawnElement &drawn_el, float value) {
 	return was_redrawn;
 }
 
+// Redraws a param (keeping any overlapping lights on top)
+inline bool redraw_param(std::span<DrawnElement> drawn_elements, DrawnElement &drawn_el, float value) {
+	bool was_redrawn = redraw_param(drawn_el, value);
+
+	if (was_redrawn && is_raised_on_redraw(drawn_el.element))
+		raise_lights_over(drawn_elements, drawn_el);
+
+	return was_redrawn;
+}
+
 // Draws every param at its current value: used just after drawing a module, so that the
 // first regular redraw pass doesn't move controls to the foreground in param order.
 template<typename GetParamValue>
@@ -226,7 +280,7 @@ inline void redraw_all_params(std::span<DrawnElement> drawn_elements, GetParamVa
 	for (auto &drawn_el : drawn_elements) {
 		auto &gui_el = drawn_el.gui_element;
 		if (gui_el.count.num_params > 0 && gui_el.obj)
-			redraw_param(drawn_el, get_value(gui_el.module_idx, gui_el.idx.param_idx));
+			redraw_param(drawn_elements, drawn_el, get_value(gui_el.module_idx, gui_el.idx.param_idx));
 	}
 }
 

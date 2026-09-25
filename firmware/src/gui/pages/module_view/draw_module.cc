@@ -177,7 +177,7 @@ void ModuleViewPage::redraw_elements() {
 		auto &gui_el = drawn_el.gui_element;
 
 		auto value = patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
-		auto was_redrawn = redraw_param(drawn_el, value);
+		auto was_redrawn = redraw_param(drawn_elements, drawn_el, value);
 
 		if (was_redrawn && page_settings.map_ring_flash_active) {
 			map_ring_display.flash_once(gui_el.map_ring, true);

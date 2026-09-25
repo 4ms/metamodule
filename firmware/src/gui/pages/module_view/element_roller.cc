@@ -1,4 +1,5 @@
 #include "CoreModules/elements/units.hh"
+#include "gui/elements/redraw.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/module_view/roller_helpers.hh"
 #include "util/countzip.hh"
@@ -6,7 +7,7 @@
 namespace MetaModule
 {
 
-static void move_selected_control_foreground(DrawnElement const &drawn_element) {
+static void move_selected_control_foreground(std::span<DrawnElement> drawn_elements, DrawnElement const &drawn_element) {
 	auto *obj = drawn_element.gui_element.obj;
 	if (!obj)
 		return;
@@ -15,6 +16,7 @@ static void move_selected_control_foreground(DrawnElement const &drawn_element) 
 		std::holds_alternative<KnobSnapped>(drawn_element.element))
 	{
 		lv_obj_move_foreground(obj);
+		raise_lights_over(drawn_elements, drawn_element);
 	}
 }
 
@@ -152,7 +154,7 @@ void ModuleViewPage::populate_roller() {
 	// Highlight the selected component
 	if (auto drawn_idx = get_drawn_idx(cur_selected)) {
 		highlight_component(*drawn_idx);
-		move_selected_control_foreground(drawn_elements[*drawn_idx]);
+		move_selected_control_foreground(drawn_elements, drawn_elements[*drawn_idx]);
 	}
 
 	if (cur_el && args.detail_mode == true) {
@@ -303,7 +305,7 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 		page->highlight_component(cur_idx);
 	}
 
-	move_selected_control_foreground(page->drawn_elements[cur_idx]);
+	move_selected_control_foreground(page->drawn_elements, page->drawn_elements[cur_idx]);
 	page->roller_hover.hide();
 }
 
@@ -496,7 +498,7 @@ void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 		}
 		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
 			page->highlight_component(*drawn_idx);
-			move_selected_control_foreground(page->drawn_elements[*drawn_idx]);
+			move_selected_control_foreground(page->drawn_elements, page->drawn_elements[*drawn_idx]);
 		}
 		page->last_button_focused = nullptr;
 	}

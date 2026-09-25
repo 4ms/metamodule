@@ -850,7 +850,7 @@ private:
 			if (drawn_el.gui_element.count.num_params > 0) {
 				auto value =
 					patch_playloader.param_value(drawn_el.gui_element.module_idx, drawn_el.gui_element.idx.param_idx);
-				auto was_redrawn = redraw_param(drawn_el, value);
+				auto was_redrawn = redraw_param(drawn_elements, drawn_el, value);
 
 				if (was_redrawn) {
 					if (page_settings.map_ring_flash_active)
