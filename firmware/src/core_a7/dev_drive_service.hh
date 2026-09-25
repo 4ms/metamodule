@@ -91,13 +91,7 @@ private:
 		if (installing_)
 			finish_after_install_ = cmd_count;
 		else
-			finish_command(dev_block, cmd_count);
-	}
-
-	void finish_command(DevDriveBlock &block, uint32_t cmd_count) {
-		// The command's output must be in the console buffer before the M4 prints the prompt
-		fflush(stdout);
-		block.finish_command(cmd_count);
+			dev_block.finish_command(cmd_count);
 	}
 
 	void handle_command(DevDriveBlock &block, DevDriveCommand cmd) {
@@ -204,7 +198,7 @@ private:
 			put_medium_back(dev_block);
 
 			if (finish_after_install_) {
-				finish_command(dev_block, *finish_after_install_);
+				dev_block.finish_command(*finish_after_install_);
 				finish_after_install_.reset();
 			}
 			return;
