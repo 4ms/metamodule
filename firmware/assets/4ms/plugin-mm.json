@@ -36,7 +36,9 @@
 		"groups": {
 			"Channel A": ["RiseASwitch", "FallASwitch", "CycleAButton", "RiseASlider", "FallASlider", "LevelAKnob", "OffsetAKnob", "RiseAKnob", "FallAKnob", "TrigAIn", "FollowAIn", "TimeCvAIn", "AudioAIn", "VcaCvAIn", "EorAOut", "EnvAOut", "AudioAOut"],
 			"Channel B": ["RiseBSwitch", "FallBSwitch", "CycleBButton", "RiseBSlider", "FallBSlider", "LevelBKnob", "OffsetBKnob", "RiseBKnob", "FallBKnob", "TrigBIn", "FollowBIn", "TimeCvBIn", "AudioBIn", "VcaCvBIn", "EofBOut", "EnvBOut", "AudioBOut"]
-		}
+		},
+		"names": { "RiseAKnob": "Rise CV", "FallAKnob": "Fall CV", "RiseBKnob": "Rise CV Atten.", "FallBKnob": "Fall CV Atten." }
+
 	},
 	{
 		"slug": "DLD",
