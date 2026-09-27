@@ -124,9 +124,8 @@ struct ModuleViewPage : PageBase {
 			return;
 		}
 
-		auto alias = patch->get_module_alias(static_cast<uint16_t>(this_module_id));
-		auto display = alias.empty() ? ModuleFactory::getModuleDisplayName(slug) : alias;
-		lv_label_set_text(ui_ElementRollerModuleName, display.data());
+		lv_label_set_text(ui_ElementRollerModuleName, module_display_name(*patch, this_module_id).c_str());
+		lv_label_set_recolor(ui_ElementRollerModuleName, true);
 
 		has_context_menu = module_context_menu.create_options_menu(slug, this_module_id);
 

@@ -64,6 +64,10 @@ void ModuleViewPage::populate_roller() {
 	}
 	open_group_for_target = false;
 
+	std::string title =
+		current_group ? Gui::blue_text(group_names[*current_group]) : module_display_name(*patch, this_module_id);
+	lv_label_set_text(ui_ElementRollerModuleName, title.c_str());
+
 	// Populate Roller and element highlights
 	unsigned roller_idx = 0;
 	DrawnElement const *cur_el = nullptr;
@@ -71,10 +75,6 @@ void ModuleViewPage::populate_roller() {
 	bool last_is_altparam = false;
 
 	if (current_group) {
-		opts += Gui::blue_text(std::string(group_names[*current_group])) + "\n";
-		roller_drawn_el_idx.push_back(RollerHeaderTag);
-		roller_idx++;
-
 		opts += Gui::yellow_text(LV_SYMBOL_LEFT " Back") + "\n";
 		roller_drawn_el_idx.push_back(BackTag);
 		roller_idx++;
@@ -828,9 +828,9 @@ void ModuleViewPage::enter_group(unsigned group_idx) {
 	cur_selected = 1;
 	populate_roller();
 
-	// Start on the group's first element after the Back row or a header,
-	// unless the group is empty (while patching a cable), then default to the Back row (1)
-	cur_selected = 1;
+	// Start on the group's first highlight-able element unless the group is
+	// empty (while patching a cable), then default to the Back row (0)
+	cur_selected = 0;
 	for (auto [i, drawn_idx] : enumerate(roller_drawn_el_idx)) {
 		if (drawn_idx >= 0) {
 			cur_selected = i;
@@ -867,8 +867,7 @@ void ModuleViewPage::exit_group() {
 	}
 }
 
-// The row to select when coming into the roller from the top: the first row might be a type
-// header or a group's name header (skip it), or a group row
+// The row to select when coming into the roller from the top (skip headers)
 unsigned ModuleViewPage::first_selectable_row() const {
 	if (!roller_drawn_el_idx.empty() && roller_drawn_el_idx[0] != RollerHeaderTag)
 		return 0;
