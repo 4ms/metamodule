@@ -200,6 +200,7 @@ else()
         ${FWDIR}/src/gui/fonts/fonts.cc
         ${FWDIR}/src/gui/fonts/ttf.cc
         ${FWDIR}/src/gui/pages/module_view/element_roller.cc
+        ${FWDIR}/src/gui/pages/module_view/element_layout.cc
         ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
         ${FWDIR}/src/gui/pages/module_view/draw_module.cc
         ${FWDIR}/src/gui/pages/tags.cc

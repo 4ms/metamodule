@@ -53,20 +53,20 @@ void ModuleViewPage::populate_roller() {
 	opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
 	roller_drawn_el_idx.clear();
 
-	if (current_group && *current_group >= group_names.size())
+	if (current_group && *current_group >= layout.group_names.size())
 		current_group.reset();
 
 	// Arriving at an element that's in a group (e.g. from the map view) opens its group
 	if (open_group_for_target && !current_group && args.element_indices) {
 		if (auto drawn_idx = find_drawn_idx(*args.element_indices)) {
-			if (element_group[*drawn_idx] != NoGroup)
-				current_group = element_group[*drawn_idx];
+			if (layout.element_group[*drawn_idx] != ElementLayout::NoGroup)
+				current_group = layout.element_group[*drawn_idx];
 		}
 	}
 	open_group_for_target = false;
 
 	std::string title =
-		current_group ? Gui::blue_text(group_names[*current_group]) : module_display_name(*patch, this_module_id);
+		current_group ? Gui::blue_text(layout.group_names[*current_group]) : module_display_name(*patch, this_module_id);
 	lv_label_set_text(ui_ElementRollerModuleName, title.c_str());
 
 	// Populate Roller and element highlights
@@ -118,10 +118,10 @@ void ModuleViewPage::populate_roller() {
 		auto name = base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv));
 
 		// A custom name is shown as it's written. Otherwise, inside groups remove the group words
-		if (element_display_name[drawn_el_idx].size())
-			opts.append(element_display_name[drawn_el_idx]);
+		if (layout.element_display_name[drawn_el_idx].size())
+			opts.append(layout.element_display_name[drawn_el_idx]);
 		else if (current_group)
-			opts.append(ModView::group_member_name(name, group_names[*current_group]));
+			opts.append(ModView::group_member_name(name, layout.group_names[*current_group]));
 		else
 			opts.append(name);
 
@@ -164,10 +164,10 @@ void ModuleViewPage::populate_roller() {
 	auto append_group_row = [&](unsigned group) {
 		// A group only gets a row if it has something listable, even if we're currently
 		// hiding all its members because we're patching a cable
-		if (std::ranges::none_of(group_members[group], is_listable))
+		if (std::ranges::none_of(layout.group_members[group], is_listable))
 			return;
 
-		opts += Gui::blue_text(std::string(group_names[group]) + " " LV_SYMBOL_RIGHT) + "\n";
+		opts += Gui::blue_text(std::string(layout.group_names[group]) + " " LV_SYMBOL_RIGHT) + "\n";
 		roller_drawn_el_idx.push_back(group_row_tag(group));
 		roller_idx++;
 
@@ -176,11 +176,11 @@ void ModuleViewPage::populate_roller() {
 	};
 
 	if (current_group) {
-		for (auto drawn_el_idx : group_members[*current_group])
+		for (auto drawn_el_idx : layout.group_members[*current_group])
 			append_element(drawn_el_idx);
 
 	} else {
-		for (auto entry : top_level_entries) {
+		for (auto entry : layout.top_level_entries) {
 			if (entry.is_group)
 				append_group_row(entry.idx);
 			else
@@ -602,75 +602,6 @@ void ModuleViewPage::jump_to_roller_cb(lv_event_t *event) {
 	}
 }
 
-// getInputName()/getOutputName() append " In"/" Out" to a jack's name when it doesn't
-// already contain that word. Accept the name as it reads in the plugin's source, so
-// the author doesn't have to know that rule.
-static bool matches_with_jack_suffix(std::string_view element_name, std::string_view ref_name) {
-	if (element_name.size() <= ref_name.size())
-		return false;
-
-	if (!equal_ci(element_name.substr(0, ref_name.size()), ref_name))
-		return false;
-
-	auto suffix = element_name.substr(ref_name.size());
-	return equal_ci(suffix, " In") || equal_ci(suffix, " Out");
-}
-
-// Resolve the element that an ElementRef refers to: by name, by index into the
-// module's Elements array, or by param/jack/light id.
-std::optional<unsigned> ModuleViewPage::resolve_element_ref(ElementRef const &ref) const {
-	constexpr auto NoIdx = ElementCount::Indices::NoElementMarker;
-
-	if (ref.kind == ElementRef::Kind::Name) {
-		// An exact name wins over one that only matches once " In"/" Out" is
-		// allowed, so "Pitch" finds the knob even if there's also a "Pitch In" jack
-		for (auto [i, drawn_element] : enumerate(drawn_elements)) {
-			if (equal_ci(base_element(drawn_element.element).short_name, ref.name))
-				return i;
-		}
-
-		for (auto [i, drawn_element] : enumerate(drawn_elements)) {
-			if (matches_with_jack_suffix(base_element(drawn_element.element).short_name, ref.name))
-				return i;
-		}
-
-		return std::nullopt;
-	}
-
-	if (ref.kind == ElementRef::Kind::ElementIdx) {
-		if (ref.idx < drawn_elements.size())
-			return ref.idx;
-		return std::nullopt;
-	}
-
-	for (auto [i, drawn_element] : enumerate(drawn_elements)) {
-		auto const &idx = drawn_element.gui_element.idx;
-
-		switch (ref.kind) {
-			case ElementRef::Kind::Param:
-				if (idx.param_idx != NoIdx && idx.param_idx == ref.idx)
-					return i;
-				break;
-			case ElementRef::Kind::Input:
-				if (idx.input_idx != NoIdx && idx.input_idx == ref.idx)
-					return i;
-				break;
-			case ElementRef::Kind::Output:
-				if (idx.output_idx != NoIdx && idx.output_idx == ref.idx)
-					return i;
-				break;
-			case ElementRef::Kind::Light:
-				if (idx.light_idx != NoIdx && idx.light_idx == ref.idx)
-					return i;
-				break;
-			default:
-				break;
-		}
-	}
-
-	return std::nullopt;
-}
-
 std::optional<unsigned> ModuleViewPage::find_drawn_idx(ElementCount::Indices indices) const {
 	for (auto [i, drawn_element] : enumerate(drawn_elements)) {
 		if (ElementCount::matched(indices, drawn_element.gui_element.idx))
@@ -679,126 +610,20 @@ std::optional<unsigned> ModuleViewPage::find_drawn_idx(ElementCount::Indices ind
 	return std::nullopt;
 }
 
-// A name in a module's order that names one of its groups
-std::optional<unsigned> ModuleViewPage::find_group(ElementRef const &ref) const {
-	if (ref.kind != ElementRef::Kind::Name)
-		return std::nullopt;
-
-	for (auto [i, group_name] : enumerate(group_names)) {
-		if (equal_ci(group_name, ref.name))
-			return i;
-	}
-	return std::nullopt;
-}
-
 // Resolve this module's registered groups, order, and custom names against its drawn elements.
 void ModuleViewPage::build_element_layout() {
-	group_names.clear();
-	group_members.clear();
-	top_level_entries.clear();
-	element_group.assign(drawn_elements.size(), NoGroup);
-	element_display_name.assign(drawn_elements.size(), {});
+	layout.build(slug, drawn_elements);
 
 	std::string err_notif;
-	int err_count = 0;
+	for (auto const &[i, error] : enumerate(layout.errors)) {
+		pr_err("Module %.*s: %s\n", (int)slug.size(), slug.data(), error.c_str());
 
-	auto err = [&err_count, &err_notif, this](std::string const &message) {
-		pr_err("Module %.*s: %s\n", (int)slug.size(), slug.data(), message.c_str());
-
-		err_count++;
-		if (err_count < 4)
-			err_notif += message + "\n";
-		else if (err_count == 4)
+		if (i < 3)
+			err_notif += error + "\n";
+		else if (i == 3)
 			err_notif += "...and more\n";
-	};
-
-	for (auto const &group : ModuleFactory::getElementGroups(slug)) {
-		auto group_idx = (int16_t)group_names.size();
-		std::vector<unsigned> members;
-
-		for (auto const &ref : group.members) {
-			auto drawn_idx = resolve_element_ref(ref);
-
-			if (!drawn_idx) {
-				err("group '" + group.name + "' has no element '" + ref.describe() + "'");
-				continue;
-			}
-
-			// First group to claim an element keeps it
-			if (element_group[*drawn_idx] != NoGroup)
-				continue;
-
-			element_group[*drawn_idx] = group_idx;
-			members.push_back(*drawn_idx);
-		}
-
-		if (members.size()) {
-			group_names.push_back(group.name);
-			group_members.push_back(std::move(members));
-		}
 	}
-
-	for (auto const &name : ModuleFactory::getElementNames(slug)) {
-		auto drawn_idx = resolve_element_ref(name.element);
-
-		if (!drawn_idx) {
-			err("names: '" + name.element.describe() + "' is unknown");
-			continue;
-		}
-
-		// First name given for an element is the one used
-		if (element_display_name[*drawn_idx].size()) {
-			err("names: '" + name.element.describe() + "' appears more than once");
-			continue;
-		}
-
-		element_display_name[*drawn_idx] = name.name;
-	}
-
-	std::vector<bool> element_placed(drawn_elements.size(), false);
-	std::vector<bool> group_placed(group_names.size(), false);
-
-	auto place_group = [&](unsigned group) {
-		if (!group_placed[group]) {
-			group_placed[group] = true;
-			top_level_entries.push_back({.is_group = true, .idx = group});
-		}
-	};
-
-	auto place_element = [&](unsigned drawn_idx) {
-		if (!element_placed[drawn_idx]) {
-			element_placed[drawn_idx] = true;
-			top_level_entries.push_back({.is_group = false, .idx = drawn_idx});
-		}
-	};
-
-	// A name is a group's name before it's an element's
-	for (auto const &ref : ModuleFactory::getElementOrder(slug)) {
-		if (auto group = find_group(ref)) {
-			place_group(*group);
-			continue;
-		}
-
-		auto drawn_idx = resolve_element_ref(ref);
-		if (!drawn_idx) {
-			err("order: '" + ref.describe() + "' is unknown");
-			continue;
-		}
-
-		if (auto group = element_group[*drawn_idx]; group != NoGroup) {
-			err("order: " + ref.describe() + " is already in group '" + std::string(group_names[group]) + "'");
-			continue;
-		}
-
-		place_element(*drawn_idx);
-	}
-
-	for (unsigned i = 0; i < drawn_elements.size(); i++) {
-		if (auto group = element_group[i]; group != NoGroup)
-			place_group(group);
-		else
-			place_element(i);
-	}
+	auto err_count = layout.errors.size();
 
 #ifdef SIMULATOR
 	const bool do_show_error_notif = true;
@@ -817,7 +642,7 @@ void ModuleViewPage::build_element_layout() {
 
 // Open a group: show only its elements, with a "< Back" row above them
 void ModuleViewPage::enter_group(unsigned group_idx) {
-	if (group_idx >= group_names.size())
+	if (group_idx >= layout.group_names.size())
 		return;
 
 	unhighlight_component(cur_selected);

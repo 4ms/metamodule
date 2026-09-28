@@ -6,6 +6,7 @@
 #include "gui/dyn_display.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/pages/module_view/element_layout.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/ui.hh"
 #include "load_test/png_writer.hh"
@@ -29,6 +30,10 @@ namespace MetaModule
 // drawer renders it at 240px height) and saves each as a PNG under
 // "module-images/<brand>/<module>.png" on the USB drive.
 //
+// Also checks each module's element groups, order, and names from plugin-mm.json, the
+// same way the module view resolves them (ElementLayout). Any errors are listed in
+// "module-images/plugin_mm_errors.txt", counted in the report, and fail the run.
+//
 // Triggered like the CPU load tests: a file named "run_image_gen" on the USB
 // drive whose first line selects what to render:
 //   all     : every brand, built-in and plugins
@@ -49,6 +54,15 @@ struct ModuleImageGen {
 
 	static constexpr std::string_view ReportPath = "module-images/image_gen_report.csv";
 	static constexpr std::string_view ReportInProgressPath = "module-images/image_gen_report_in_progress.csv";
+	static constexpr std::string_view LayoutErrorsPath = "module-images/plugin_mm_errors.txt";
+
+	// Totals for a run
+	struct Counts {
+		unsigned rendered = 0;
+		unsigned skipped = 0;
+		unsigned layout_errors = 0;
+		std::string layout_error_report;
+	};
 
 	static void run(FileStorageProxy &file_storage_proxy,
 					Ui &ui,
@@ -69,10 +83,9 @@ struct ModuleImageGen {
 		PatchPlayer player;
 		PatchPlayLoader playloader{file_storage_proxy, open_patch_manager, player};
 
-		unsigned rendered = 0;
-		unsigned skipped = 0;
+		Counts counts;
 
-		std::string csv = "brand:module,status,mem_used_bytes\n";
+		std::string csv = "brand:module,status,mem_used_bytes,plugin_mm_errors\n";
 		csv.reserve(64 * 1024);
 		FS::write_file(file_storage_proxy, csv, {ReportInProgressPath, OutVol});
 
@@ -81,7 +94,7 @@ struct ModuleImageGen {
 			for (auto brand : ModuleFactory::getAllBrands()) {
 				if (!all_brands && filter != brand)
 					continue;
-				render_brand(file_storage_proxy, player, playloader, ui, brand, rendered, skipped, csv);
+				render_brand(file_storage_proxy, player, playloader, ui, brand, counts, csv);
 			}
 		}
 
@@ -138,7 +151,7 @@ struct ModuleImageGen {
 						continue; // pre-existing brand, not from this plugin
 
 					if (all_brands || plugins_only || filter == brand) {
-						render_brand(file_storage_proxy, player, playloader, ui, brand, rendered, skipped, csv);
+						render_brand(file_storage_proxy, player, playloader, ui, brand, counts, csv);
 						rendered_this_plugin = true;
 					}
 				}
@@ -152,29 +165,46 @@ struct ModuleImageGen {
 		}
 
 		FS::write_file(file_storage_proxy, csv, {ReportPath, OutVol});
+		FS::write_file(file_storage_proxy, counts.layout_error_report, {LayoutErrorsPath, OutVol});
 
-		if (!all_brands && rendered == 0 && skipped == 0) {
+		if (!all_brands && counts.rendered == 0 && counts.skipped == 0) {
 			pr_err("No modules matched '%s' for image generation\n", filter.c_str());
 			hil_message("*failure\n");
 			return;
 		}
 
-		pr_info("Module image generation finished: %u rendered, %u skipped\n", rendered, skipped);
-		lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Done: %u images, %u skipped", rendered, skipped);
+		pr_info("Module image generation finished: %u rendered, %u skipped, %u plugin-mm.json errors\n",
+				counts.rendered,
+				counts.skipped,
+				counts.layout_errors);
+		lv_label_set_text_fmt(ui_MainMenuNowPlaying,
+							  "Done: %u images, %u skipped, %u plugin-mm errors",
+							  counts.rendered,
+							  counts.skipped,
+							  counts.layout_errors);
+
+		if (counts.layout_errors) {
+			pr_err("Found %u errors in plugin-mm.json groups/order/names, see %.*s\n",
+				   counts.layout_errors,
+				   (int)LayoutErrorsPath.size(),
+				   LayoutErrorsPath.data());
+			hil_message("*failure\n");
+			return;
+		}
+
 		hil_message("*success\n");
 	}
 
 private:
 	// Renders and saves every module belonging to `brand` (which must already be
 	// registered in ModuleFactory), appending a CSV row per module with its
-	// render status and heap usage delta.
+	// render status, heap usage delta, and number of plugin-mm.json errors.
 	static void render_brand(FileStorageProxy &file_storage_proxy,
 							 PatchPlayer &player,
 							 PatchPlayLoader &playloader,
 							 Ui &ui,
 							 std::string_view brand,
-							 unsigned &rendered,
-							 unsigned &skipped,
+							 Counts &counts,
 							 std::string &csv) {
 		for (auto slug : ModuleFactory::getAllModuleSlugs(brand)) {
 			BrandModuleSlug full_slug = std::string(brand) + ":" + std::string(slug);
@@ -185,11 +215,18 @@ private:
 
 			long mem_used = 0;
 
-			// Render + save to disk, but don't count memory usage
-			bool ok = render_and_save(file_storage_proxy, player, playloader, brand, slug, true);
+			// Render + save to disk, and check the module's groups/order/names, but don't count memory usage
+			std::vector<std::string> layout_errors;
+			bool ok = render_and_save(file_storage_proxy, player, playloader, brand, slug, true, &layout_errors);
+
+			for (auto const &error : layout_errors) {
+				pr_err("Module %s: plugin-mm.json: %s\n", full_slug.c_str(), error.c_str());
+				counts.layout_error_report += std::string(full_slug) + ": " + error + "\n";
+			}
+			counts.layout_errors += layout_errors.size();
 
 			if (ok) {
-				rendered++;
+				counts.rendered++;
 
 				// Render + don't save to disk. Count memory usage
 				long mem_start = LoadTest::cur_uordblks();
@@ -197,7 +234,7 @@ private:
 				mem_used = (long)LoadTest::cur_uordblks() - mem_start;
 
 			} else
-				skipped++;
+				counts.skipped++;
 
 			hil_message("*ok\n");
 
@@ -206,13 +243,14 @@ private:
 			char line[320];
 			snprintf(line,
 					 sizeof line,
-					 "%.*s:%.*s,%s,%ld\n",
+					 "%.*s:%.*s,%s,%ld,%zu\n",
 					 (int)brand.size(),
 					 brand.data(),
 					 (int)slug.size(),
 					 slug.data(),
 					 ok ? "rendered" : "skipped",
-					 mem_used);
+					 mem_used,
+					 layout_errors.size());
 			csv += line;
 			FS::append_file(file_storage_proxy, line, {ReportInProgressPath, OutVol});
 		}
@@ -233,12 +271,15 @@ private:
 	// element objects, including any module-drawn graphic displays), encodes a
 	// BMP and writes it. Returns false if the module has no faceplate or
 	// rendering/saving failed.
+	// If layout_errors is given, the module's groups/order/names are resolved against the
+	// drawn elements exactly as the module view does, and any errors are added to it.
 	static bool render_and_save(FileStorageProxy &file_storage_proxy,
 								PatchPlayer &player,
 								PatchPlayLoader &playloader,
 								std::string_view brand,
 								std::string_view module_slug,
-								bool write_to_disk) {
+								bool write_to_disk,
+								std::vector<std::string> *layout_errors = nullptr) {
 
 		ModuleDrawer drawer{.container = nullptr, .height = Height};
 
@@ -281,6 +322,12 @@ private:
 		// draw_mapped_elements draws no map rings.
 		std::vector<DrawnElement> drawn_elements;
 		drawer.draw_mapped_elements(patch, module_id, 0, canvas, drawn_elements, false);
+
+		if (layout_errors) {
+			ElementLayout layout;
+			layout.build(full_slug, drawn_elements);
+			*layout_errors = std::move(layout.errors);
+		}
 
 		// Clear overflow so the snapshot is exactly the faceplate rectangle
 		// (no extra margin around overhanging child draws).

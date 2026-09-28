@@ -9,6 +9,7 @@
 #include "gui/pages/make_cable.hh"
 #include "gui/pages/make_expander.hh"
 #include "gui/pages/module_view/action_menu.hh"
+#include "gui/pages/module_view/element_layout.hh"
 #include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/module_view/settings_menu.hh"
 #include "gui/pages/page_list.hh"
@@ -502,8 +503,6 @@ private:
 
 	// Element grouping and ordering (defined in module_view/element_roller.cc)
 	void build_element_layout();
-	std::optional<unsigned> resolve_element_ref(ElementRef const &ref) const;
-	std::optional<unsigned> find_group(ElementRef const &ref) const;
 	std::optional<unsigned> find_drawn_idx(ElementCount::Indices indices) const;
 	void enter_group(unsigned group_idx);
 	void exit_group();
@@ -561,16 +560,8 @@ private:
 
 	std::vector<int> roller_drawn_el_idx;
 
-	// Element grouping and ordering
-	struct RollerEntry {
-		bool is_group;
-		unsigned idx; // group index, or drawn element index
-	};
-	std::vector<std::string_view> group_names;
-	std::vector<std::vector<unsigned>> group_members;
-	std::vector<int16_t> element_group; // the group that each drawn_element belongs to
-	std::vector<std::string_view> element_display_name;
-	std::vector<RollerEntry> top_level_entries;
+	// Element grouping, ordering, and custom names
+	ElementLayout layout;
 	std::optional<unsigned> current_group{};
 
 	// Set when the page is (re)entered: the element we were sent to opens its
@@ -605,7 +596,6 @@ private:
 
 	enum { RollerHeaderTag = -1, ContextMenuTag = -2, BackTag = -3 };
 
-	static constexpr int16_t NoGroup = -1;
 
 	// Roller rows that open a group are tagged GroupTagBase - group_idx
 	static constexpr int GroupTagBase = -100;

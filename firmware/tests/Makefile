@@ -32,6 +32,7 @@ TEST_SOURCES += src/params/expanders.cc
 TEST_SOURCES += src/usb/midi_jack_parse.cc
 TEST_SOURCES += src/gui/elements/element_name.cc
 TEST_SOURCES += src/gui/elements/panel_name.cc
+TEST_SOURCES += src/gui/pages/module_view/element_layout.cc
 TEST_SOURCES += coreproc_plugin/dsp/stream_resampler.cc
 TEST_SOURCES += coreproc_plugin/dsp/block_resampler.cc
 TEST_SOURCES += coreproc_plugin/wav/wav_file_stream.cc
