@@ -699,8 +699,17 @@ void ModuleViewPage::build_element_layout() {
 	element_group.assign(drawn_elements.size(), NoGroup);
 	element_display_name.assign(drawn_elements.size(), {});
 
-	auto warn = [this](char const *context, std::string const &message) {
-		pr_warn("Module %.*s: %s: %s\n", (int)slug.size(), slug.data(), context, message.c_str());
+	std::string err_notif;
+	int err_count = 0;
+
+	auto err = [&err_count, &err_notif, this](std::string const &message) {
+		pr_err("Module %.*s: %s\n", (int)slug.size(), slug.data(), message.c_str());
+
+		err_count++;
+		if (err_count < 4)
+			err_notif += message + "\n";
+		else if (err_count == 4)
+			err_notif += "...and more. See console log";
 	};
 
 	for (auto const &group : ModuleFactory::getElementGroups(slug)) {
@@ -711,7 +720,7 @@ void ModuleViewPage::build_element_layout() {
 			auto drawn_idx = resolve_element_ref(ref);
 
 			if (!drawn_idx) {
-				warn("element groups", "group '" + group.name + "' has no element '" + ref.describe() + "'");
+				err("group '" + group.name + "' has no element '" + ref.describe() + "'");
 				continue;
 			}
 
@@ -733,13 +742,13 @@ void ModuleViewPage::build_element_layout() {
 		auto drawn_idx = resolve_element_ref(name.element);
 
 		if (!drawn_idx) {
-			warn("element names", "no element '" + name.element.describe() + "'");
+			err("Unknown element '" + name.element.describe() + "'");
 			continue;
 		}
 
 		// First name given for an element is the one used
 		if (element_display_name[*drawn_idx].size()) {
-			warn("element names", "'" + name.element.describe() + "' already has a name");
+			err("names: '" + name.element.describe() + "' already has a name");
 			continue;
 		}
 
@@ -772,14 +781,13 @@ void ModuleViewPage::build_element_layout() {
 
 		auto drawn_idx = resolve_element_ref(ref);
 		if (!drawn_idx) {
-			warn("element order", "no group or element '" + ref.describe() + "'");
+			err("Error in `order`: '" + ref.describe() + "' unknown.");
 			continue;
 		}
 
 		if (auto group = element_group[*drawn_idx]; group != NoGroup) {
-			warn("element order",
-				 "'" + ref.describe() + "' is in group '" + std::string(group_names[group]) +
-					 "', so it's listed there");
+			err("Error in `order`: " + ref.describe() + " is already in group '" + std::string(group_names[group]) +
+				"'");
 			continue;
 		}
 
@@ -791,6 +799,18 @@ void ModuleViewPage::build_element_layout() {
 			place_group(group);
 		else
 			place_element(i);
+	}
+
+#ifdef SIMULATOR
+	const bool do_show_error_notif = true;
+#else
+	const bool do_show_error_notif = settings.developer.enabled;
+#endif
+	if (err_count && do_show_error_notif) {
+		notify_queue.put({"Found " + std::to_string(err_count) + " errors for '" + std::string(slug) +
+							  "' in plugin-mm.json:\n" + err_notif,
+						  Notification::Priority::Error,
+						  10000});
 	}
 }
 
