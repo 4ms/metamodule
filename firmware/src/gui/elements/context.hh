@@ -17,6 +17,14 @@ struct GuiElement {
 	ElementCount::Indices idx;				 //index within cateogry in module: param_idx, injack_idx, etc
 	std::optional<uint32_t> mapped_panel_id; //patch mapping
 	std::optional<uint32_t> midi_mapped_id;	 //midi map panel_id
+
+	GuiElement() = default;
+
+	GuiElement(Element const &element, ElementCount::Indices const &indices, uint16_t module_idx)
+		: module_idx{module_idx}
+		, count{ElementCount::count(element)}
+		, idx{ElementCount::mark_unused_indices(indices, count)} {
+	}
 };
 
 // Element and its context in a patch, drawn on the screen

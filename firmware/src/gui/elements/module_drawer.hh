@@ -103,10 +103,12 @@ struct ModuleDrawer {
 						ElementMapping::find_mapping(el, patch, module_idx, PatchData::MIDIKnobSet, indices);
 					auto mapped_ring = MapRingDrawer::draw_mapped_ring(el, obj, canvas, mapping_id, height);
 
-					auto count = ElementCount::count(el);
-					auto el_idx = ElementCount::mark_unused_indices(indices, count);
-
-					return GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, el_idx, mapping_id, midi_map_id};
+					auto gui_element = GuiElement(el, indices, (uint16_t)module_idx);
+					gui_element.obj = obj;
+					gui_element.map_ring = mapped_ring;
+					gui_element.mapped_panel_id = mapping_id;
+					gui_element.midi_mapped_id = midi_map_id;
+					return gui_element;
 				},
 				element);
 			i++;

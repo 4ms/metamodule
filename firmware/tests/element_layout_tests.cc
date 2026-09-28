@@ -1,5 +1,5 @@
-#include "doctest.h"
 #include "CoreModules/moduleFactory.hh"
+#include "doctest.h"
 #include "gui/pages/module_view/element_layout.hh"
 #include <vector>
 
@@ -28,7 +28,9 @@ std::vector<Element> const elements{
 std::vector<DrawnElement> drawn_elements() {
 	std::vector<DrawnElement> drawn;
 	auto add = [&](unsigned el, ElementCount::Indices idx) {
-		drawn.push_back({.gui_element = {.idx = idx}, .element = elements[el]});
+		GuiElement gui_el;
+		gui_el.idx = idx;
+		drawn.push_back({.gui_element = gui_el, .element = elements[el]});
 	};
 	add(0, {.param_idx = 0, .light_idx = NoIdx, .input_idx = NoIdx, .output_idx = NoIdx});
 	add(1, {.param_idx = 1, .light_idx = NoIdx, .input_idx = NoIdx, .output_idx = NoIdx});
