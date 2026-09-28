@@ -18,6 +18,7 @@ struct DisplayNotification {
 
 	static void show(Notification const &msg, bool animate) {
 		lv_label_set_text(ui_MessageLabel, msg.message.c_str());
+		lv_obj_refr_size(ui_MessageLabel);
 
 		auto duration = (msg.duration_ms > 0) ? msg.duration_ms : 5000;
 
