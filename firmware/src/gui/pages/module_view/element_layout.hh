@@ -25,8 +25,8 @@ struct ElementLayout {
 	};
 
 	std::vector<std::string_view> group_names;
-	std::vector<std::vector<unsigned>> group_members; // drawn element indices, in the order they're shown
-	std::vector<int16_t> element_group;				  // the group that each drawn element belongs to, or NoGroup
+	std::vector<std::vector<unsigned>> group_members;	// drawn element indices, in the order they're shown
+	std::vector<int16_t> element_group;					// the group that each drawn element belongs to, or NoGroup
 	std::vector<std::string_view> element_display_name; // custom name for each drawn element, or empty
 	std::vector<Entry> top_level_entries;				// the top-level list, in the order it's shown
 
@@ -38,6 +38,9 @@ struct ElementLayout {
 	// A name in a module's order that names one of its groups
 	std::optional<unsigned> find_group(ElementRef const &ref) const;
 };
+
+// return the DrawnElements without the LVGL and mapping fields populated
+std::vector<DrawnElement> nondrawn_elements(std::string_view slug);
 
 // The drawn element that an ElementRef refers to: by name, by index into the module's
 // Elements array, or by param/jack/light id

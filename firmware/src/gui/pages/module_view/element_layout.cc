@@ -20,6 +20,19 @@ static bool matches_with_jack_suffix(std::string_view element_name, std::string_
 	return equal_ci(suffix, " In") || equal_ci(suffix, " Out");
 }
 
+std::vector<DrawnElement> nondrawn_elements(std::string_view slug) {
+	auto const &info = ModuleFactory::getModuleInfo(slug);
+
+	std::vector<DrawnElement> drawn;
+	drawn.reserve(info.elements.size());
+
+	for (auto i = 0u; i < info.elements.size() && i < info.indices.size(); i++) {
+		drawn.push_back({GuiElement{info.elements[i], info.indices[i], 0}, info.elements[i]});
+	}
+
+	return drawn;
+}
+
 std::optional<unsigned> resolve_element_ref(std::vector<DrawnElement> const &drawn_elements, ElementRef const &ref) {
 	constexpr auto NoIdx = ElementCount::Indices::NoElementMarker;
 

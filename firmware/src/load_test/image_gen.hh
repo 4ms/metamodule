@@ -271,8 +271,8 @@ private:
 	// element objects, including any module-drawn graphic displays), encodes a
 	// BMP and writes it. Returns false if the module has no faceplate or
 	// rendering/saving failed.
-	// If layout_errors is given, the module's groups/order/names are resolved against the
-	// drawn elements exactly as the module view does, and any errors are added to it.
+	// If layout_errors is given, the module's groups/order/names are resolved (with
+	// ElementLayout, as the module view does) and any errors are put in it.
 	static bool render_and_save(FileStorageProxy &file_storage_proxy,
 								PatchPlayer &player,
 								PatchPlayLoader &playloader,
@@ -323,12 +323,6 @@ private:
 		std::vector<DrawnElement> drawn_elements;
 		drawer.draw_mapped_elements(patch, module_id, 0, canvas, drawn_elements, false);
 
-		if (layout_errors) {
-			ElementLayout layout;
-			layout.build(full_slug, drawn_elements);
-			*layout_errors = std::move(layout.errors);
-		}
-
 		// Clear overflow so the snapshot is exactly the faceplate rectangle
 		// (no extra margin around overhanging child draws).
 		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
@@ -347,6 +341,14 @@ private:
 			dyn.draw();
 		} else {
 			pr_warn("Could not load %s for dynamic displays: %s\n", full_slug.c_str(), res.error_string.c_str());
+		}
+
+		// Now that the module has been created, its element names are final
+		// Check for errors
+		if (layout_errors) {
+			ElementLayout layout;
+			layout.build(full_slug, nondrawn_elements(full_slug));
+			*layout_errors = std::move(layout.errors);
 		}
 
 		bool ok = true;
