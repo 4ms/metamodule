@@ -1,5 +1,6 @@
 #include "audio_files.hh"
 #include "audio_wrapper.hh"
+#include "check_element_layout.hh"
 #include "coreproc_plugin/async_thread_control.hh"
 #include "file_io.hh"
 #include "load_internal_plugins.hh"
@@ -55,6 +56,9 @@ int main(int argc, char *argv[]) {
 	std::list<rack::plugin::Plugin> builtin_plugins;
 	load_internal_plugins(builtin_plugins);
 	load_ext_builtin_plugins(builtin_plugins);
+
+	if (settings.check_element_layout)
+		return check_element_layout(settings);
 
 	const auto samples_to_run = settings.samples_to_run;
 	const float effective_play_time = samples_to_run / 48000.f;

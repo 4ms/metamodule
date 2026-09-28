@@ -179,6 +179,7 @@ if(HEADLESS)
         src/headless/audio_files.cc
         src/headless/nanovg.cc
         src/headless/gui_stubs.cc
+        ${FWDIR}/src/gui/pages/module_view/element_layout.cc
         stubs/svg.cc
         ${SOURCES_COMMON} 
         )
