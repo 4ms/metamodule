@@ -683,25 +683,6 @@ std::optional<unsigned> ModuleViewPage::find_drawn_idx(ElementCount::Indices ind
 	return std::nullopt;
 }
 
-// For log messages: an ElementRef as it was written in plugin-mm.json
-static std::string describe(ElementRef const &ref) {
-	switch (ref.kind) {
-		case ElementRef::Kind::Name:
-			return ref.name;
-		case ElementRef::Kind::ElementIdx:
-			return "elem:" + std::to_string(ref.idx);
-		case ElementRef::Kind::Param:
-			return "param:" + std::to_string(ref.idx);
-		case ElementRef::Kind::Input:
-			return "in:" + std::to_string(ref.idx);
-		case ElementRef::Kind::Output:
-			return "out:" + std::to_string(ref.idx);
-		case ElementRef::Kind::Light:
-			return "light:" + std::to_string(ref.idx);
-	}
-	return "?";
-}
-
 // A name in a module's order that names one of its groups
 std::optional<unsigned> ModuleViewPage::find_group(ElementRef const &ref) const {
 	if (ref.kind != ElementRef::Kind::Name)
@@ -734,7 +715,7 @@ void ModuleViewPage::build_element_layout() {
 			auto drawn_idx = resolve_element_ref(ref);
 
 			if (!drawn_idx) {
-				warn("element groups", "group '" + group.name + "' has no element '" + describe(ref) + "'");
+				warn("element groups", "group '" + group.name + "' has no element '" + ref.describe() + "'");
 				continue;
 			}
 
@@ -756,13 +737,13 @@ void ModuleViewPage::build_element_layout() {
 		auto drawn_idx = resolve_element_ref(name.element);
 
 		if (!drawn_idx) {
-			warn("element names", "no element '" + describe(name.element) + "'");
+			warn("element names", "no element '" + name.element.describe() + "'");
 			continue;
 		}
 
 		// First name given for an element is the one used
 		if (element_display_name[*drawn_idx].size()) {
-			warn("element names", "'" + describe(name.element) + "' already has a name");
+			warn("element names", "'" + name.element.describe() + "' already has a name");
 			continue;
 		}
 
@@ -795,13 +776,14 @@ void ModuleViewPage::build_element_layout() {
 
 		auto drawn_idx = resolve_element_ref(ref);
 		if (!drawn_idx) {
-			warn("element order", "no group or element '" + describe(ref) + "'");
+			warn("element order", "no group or element '" + ref.describe() + "'");
 			continue;
 		}
 
 		if (auto group = element_group[*drawn_idx]; group != NoGroup) {
 			warn("element order",
-				 "'" + describe(ref) + "' is in group '" + std::string(group_names[group]) + "', so it's listed there");
+				 "'" + ref.describe() + "' is in group '" + std::string(group_names[group]) +
+					 "', so it's listed there");
 			continue;
 		}
 
