@@ -142,7 +142,9 @@ inline bool parse_json(std::span<char> file_data, Metadata *metadata) {
 	// ryml has issues with tabs in json sometimes:
 	std::ranges::replace(file_data, '\t', ' ');
 
-	ryml::Tree tree = ryml::parse_in_place(ryml::substr(file_data.data(), file_data.size()));
+	ryml::Tree tree;
+	if (!RymlInit::parse_in_place(ryml::substr(file_data.data(), file_data.size()), &tree))
+		return false;
 
 	if (tree.num_children(0) == 0)
 		return false;
@@ -175,7 +177,9 @@ inline bool parse_mm_json(std::span<char> file_data, Metadata *metadata) {
 	// ryml has issues with tabs in json sometimes:
 	std::ranges::replace(file_data, '\t', ' ');
 
-	ryml::Tree tree = ryml::parse_in_place(ryml::substr(file_data.data(), file_data.size()));
+	ryml::Tree tree;
+	if (!RymlInit::parse_in_place(ryml::substr(file_data.data(), file_data.size()), &tree))
+		return false;
 
 	if (tree.num_children(0) == 0)
 		return false;

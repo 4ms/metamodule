@@ -79,3 +79,25 @@ TEST_CASE("element names") {
 	CHECK(names[2].element.name == "Level CV In");
 	CHECK(names[2].name == "Lvl CV");
 }
+
+TEST_CASE("malformed json fails to parse instead of hanging") {
+	// A map written with [] instead of {}: ryml reports an error, and must not keep parsing
+	std::string yaml = R"({
+  "MetaModuleBrandName": "4ms",
+  "MetaModuleIncludedModules": [
+  {
+    "slug": "Mod",
+    "names": ["Channel 1 In": "Input 1", "Ch2In":"Input 2"],
+  }
+  ]
+}
+)";
+
+	MetaModule::Plugin::Metadata metadata;
+	CHECK_FALSE(MetaModule::Plugin::parse_mm_json(yaml, &metadata));
+
+	// And the parser still works afterwards
+	std::string good = R"({"MetaModuleBrandName": "4ms"})";
+	CHECK(MetaModule::Plugin::parse_mm_json(good, &metadata));
+	CHECK(metadata.display_name == "4ms");
+}
