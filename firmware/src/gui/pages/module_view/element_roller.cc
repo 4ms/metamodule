@@ -3,6 +3,7 @@
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/module_view/roller_helpers.hh"
 #include "util/countzip.hh"
+#include "util/string_compare.hh"
 #include <algorithm>
 
 namespace MetaModule
@@ -601,11 +602,6 @@ void ModuleViewPage::jump_to_roller_cb(lv_event_t *event) {
 	}
 }
 
-static bool iequals(std::string_view a, std::string_view b) {
-	return std::ranges::equal(
-		a, b, [](char x, char y) { return std::tolower((unsigned char)x) == std::tolower((unsigned char)y); });
-}
-
 // getInputName()/getOutputName() append " In"/" Out" to a jack's name when it doesn't
 // already contain that word. Accept the name as it reads in the plugin's source, so
 // the author doesn't have to know that rule.
@@ -613,11 +609,11 @@ static bool matches_with_jack_suffix(std::string_view element_name, std::string_
 	if (element_name.size() <= ref_name.size())
 		return false;
 
-	if (!iequals(element_name.substr(0, ref_name.size()), ref_name))
+	if (!equal_ci(element_name.substr(0, ref_name.size()), ref_name))
 		return false;
 
 	auto suffix = element_name.substr(ref_name.size());
-	return iequals(suffix, " In") || iequals(suffix, " Out");
+	return equal_ci(suffix, " In") || equal_ci(suffix, " Out");
 }
 
 // Resolve the element that an ElementRef refers to: by name, by index into the
@@ -629,7 +625,7 @@ std::optional<unsigned> ModuleViewPage::resolve_element_ref(ElementRef const &re
 		// An exact name wins over one that only matches once " In"/" Out" is
 		// allowed, so "Pitch" finds the knob even if there's also a "Pitch In" jack
 		for (auto [i, drawn_element] : enumerate(drawn_elements)) {
-			if (iequals(base_element(drawn_element.element).short_name, ref.name))
+			if (equal_ci(base_element(drawn_element.element).short_name, ref.name))
 				return i;
 		}
 
@@ -689,7 +685,7 @@ std::optional<unsigned> ModuleViewPage::find_group(ElementRef const &ref) const 
 		return std::nullopt;
 
 	for (auto [i, group_name] : enumerate(group_names)) {
-		if (iequals(group_name, ref.name))
+		if (equal_ci(group_name, ref.name))
 			return i;
 	}
 	return std::nullopt;
