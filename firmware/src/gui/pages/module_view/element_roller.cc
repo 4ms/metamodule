@@ -742,13 +742,13 @@ void ModuleViewPage::build_element_layout() {
 		auto drawn_idx = resolve_element_ref(name.element);
 
 		if (!drawn_idx) {
-			err("Unknown element '" + name.element.describe() + "'");
+			err("names: '" + name.element.describe() + "' is unknown");
 			continue;
 		}
 
 		// First name given for an element is the one used
 		if (element_display_name[*drawn_idx].size()) {
-			err("names: '" + name.element.describe() + "' already has a name");
+			err("names: '" + name.element.describe() + "' appears more than once");
 			continue;
 		}
 
@@ -781,13 +781,12 @@ void ModuleViewPage::build_element_layout() {
 
 		auto drawn_idx = resolve_element_ref(ref);
 		if (!drawn_idx) {
-			err("Error in `order`: '" + ref.describe() + "' unknown.");
+			err("order: '" + ref.describe() + "' is unknown");
 			continue;
 		}
 
 		if (auto group = element_group[*drawn_idx]; group != NoGroup) {
-			err("Error in `order`: " + ref.describe() + " is already in group '" + std::string(group_names[group]) +
-				"'");
+			err("order: " + ref.describe() + " is already in group '" + std::string(group_names[group]) + "'");
 			continue;
 		}
 
@@ -810,7 +809,7 @@ void ModuleViewPage::build_element_layout() {
 		std::string leader =
 			err_count == 1 ? "Found an error for '" : "Found " + std::to_string(err_count) + " errors for '";
 
-		notify_queue.put({leader + std::string(slug) + "' in plugin-mm.json:\nSee console log." + err_notif,
+		notify_queue.put({leader + std::string(slug) + "' in plugin-mm.json:\n" + err_notif + "See console log",
 						  Notification::Priority::Error,
 						  10000});
 	}
