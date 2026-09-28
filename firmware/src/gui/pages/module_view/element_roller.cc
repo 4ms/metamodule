@@ -709,7 +709,7 @@ void ModuleViewPage::build_element_layout() {
 		if (err_count < 4)
 			err_notif += message + "\n";
 		else if (err_count == 4)
-			err_notif += "...and more. See console log";
+			err_notif += "...and more\n";
 	};
 
 	for (auto const &group : ModuleFactory::getElementGroups(slug)) {
@@ -807,8 +807,10 @@ void ModuleViewPage::build_element_layout() {
 	const bool do_show_error_notif = settings.developer.enabled;
 #endif
 	if (err_count && do_show_error_notif) {
-		notify_queue.put({"Found " + std::to_string(err_count) + " errors for '" + std::string(slug) +
-							  "' in plugin-mm.json:\n" + err_notif,
+		std::string leader =
+			err_count == 1 ? "Found an error for '" : "Found " + std::to_string(err_count) + " errors for '";
+
+		notify_queue.put({leader + std::string(slug) + "' in plugin-mm.json:\nSee console log." + err_notif,
 						  Notification::Priority::Error,
 						  10000});
 	}
