@@ -35,6 +35,23 @@ function(create_plugin)
 		list(APPEND PLUGIN_MANIFESTS "${PLUGIN_OPTIONS_PLUGIN_JSON}")
 	endif()
 
+	# Validate plugin-mm.json the same way the SDK's create_plugin() does: JSON syntax,
+	# the shape of groups/order/names, and that each module slug is in plugin.json.
+	# Like the SDK, this runs on every build. A JSON syntax error fails the build;
+	# anything else is a warning.
+	set(PLUGIN_VALIDATE_TARGET "")
+	if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plugin-mm.json")
+		add_custom_target(${PLUGIN_OPTIONS_SOURCE_LIB}-validate-plugin-mm-json ALL
+			COMMAND ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../firmware/metamodule-plugin-sdk/scripts/check_plugin_mm_json.py
+				--plugin-mm-json "${CMAKE_CURRENT_SOURCE_DIR}/plugin-mm.json"
+				--plugin-json "${PLUGIN_OPTIONS_PLUGIN_JSON}"
+			VERBATIM
+			USES_TERMINAL
+			COMMENT "Validating ${PLUGIN_OPTIONS_PLUGIN_NAME}'s plugin-mm.json"
+		)
+		set(PLUGIN_VALIDATE_TARGET ${PLUGIN_OPTIONS_SOURCE_LIB}-validate-plugin-mm-json)
+	endif()
+
 	# The SDK's create_plugin() rewrites element-group members written as enumerator
 	# names into typed indices, reading the plugin's DWARF. Built-in plugins here are
 	# compiled natively, so there may be no ELF to read: --best-effort leaves those
@@ -50,34 +67,41 @@ function(create_plugin)
 				--elf $<TARGET_FILE:${PLUGIN_OPTIONS_SOURCE_LIB}>
 				--best-effort
 			DEPENDS "${PLUGIN_MM_JSON_SOURCE}" ${PLUGIN_OPTIONS_SOURCE_LIB}
+				${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../firmware/metamodule-plugin-sdk/scripts/resolve_element_groups.py
 			COMMENT "Resolving element groups in ${PLUGIN_OPTIONS_PLUGIN_NAME}'s plugin-mm.json"
 			VERBATIM
 		)
 		list(APPEND PLUGIN_MANIFESTS "${PLUGIN_MM_JSON_RESOLVED}")
 	endif()
 
-	# Use a stamp file, not the asset directory, as the output: ninja doesn't re-run a
-	# command whose only output is a directory, so edits to the manifests would never
-	# reach the asset dir.
-	set(PLUGIN_ASSET_STAMP "${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_OPTIONS_PLUGIN_NAME}-assets.stamp")
+	# The asset image (see ext-plugins.cmake) copies this plugin's assets and manifests
+	# into the asset dir itself, rebuilding the whole dir each time. So nothing here
+	# copies into the asset dir: a separate copy step, tracked by a stamp file, goes
+	# stale when the asset dir is deleted but the stamp isn't.
+	#
+	# CONFIGURE_DEPENDS re-globs at build time, so added or deleted asset files trigger
+	# a reconfigure and modified ones rebuild the image.
+	set(PLUGIN_ASSET_FILES "")
+	if (IS_DIRECTORY "${PLUGIN_OPTIONS_SOURCE_ASSETS}")
+		file(GLOB_RECURSE PLUGIN_ASSET_FILES CONFIGURE_DEPENDS "${PLUGIN_OPTIONS_SOURCE_ASSETS}/*")
+	endif()
 
-	add_custom_command(
-		OUTPUT "${PLUGIN_ASSET_STAMP}"
-		COMMAND ${CMAKE_COMMAND} -E copy_directory "${PLUGIN_OPTIONS_SOURCE_ASSETS}" "${ASSET_DIR}/${PLUGIN_OPTIONS_PLUGIN_NAME}"
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PLUGIN_MANIFESTS} "${ASSET_DIR}/${PLUGIN_OPTIONS_PLUGIN_NAME}/"
-		COMMAND ${CMAKE_COMMAND} -E touch "${PLUGIN_ASSET_STAMP}"
-		COMMENT "Copying ${PLUGIN_OPTIONS_SOURCE_ASSETS} and manifests to ${ASSET_DIR}/${PLUGIN_OPTIONS_PLUGIN_NAME}"
-		DEPENDS ${PLUGIN_MANIFESTS}
-		VERBATIM
-	)
-
+	# A custom command's rule is only generated if a target in the same directory uses
+	# it, so without this the resolved plugin-mm.json would never be (re)built
 	add_custom_target(${PLUGIN_OPTIONS_SOURCE_LIB}-assets ALL
-		DEPENDS "${PLUGIN_ASSET_STAMP}"
+		DEPENDS ${PLUGIN_MANIFESTS}
 	)
+	if (PLUGIN_VALIDATE_TARGET)
+		add_dependencies(${PLUGIN_OPTIONS_SOURCE_LIB}-assets ${PLUGIN_VALIDATE_TARGET})
+	endif()
 
-	# The asset image (see ext-plugins.cmake) depends on these, so that a change to a
-	# plugin's assets or manifest actually rebuilds it
-	set_property(GLOBAL APPEND PROPERTY MM_PLUGIN_ASSET_STAMPS "${PLUGIN_ASSET_STAMP}")
+	# One entry per plugin in each list: ext-plugins.cmake zips them together.
+	# The manifests are joined with | since a global property can't hold nested lists.
+	list(JOIN PLUGIN_MANIFESTS "|" PLUGIN_MANIFESTS_JOINED)
+	set_property(GLOBAL APPEND PROPERTY MM_PLUGIN_ASSET_NAMES "${PLUGIN_OPTIONS_PLUGIN_NAME}")
+	set_property(GLOBAL APPEND PROPERTY MM_PLUGIN_ASSET_SOURCE_DIRS "${PLUGIN_OPTIONS_SOURCE_ASSETS}")
+	set_property(GLOBAL APPEND PROPERTY MM_PLUGIN_ASSET_MANIFESTS "${PLUGIN_MANIFESTS_JOINED}")
+	set_property(GLOBAL APPEND PROPERTY MM_PLUGIN_ASSET_DEPENDS ${PLUGIN_MANIFESTS} ${PLUGIN_ASSET_FILES})
 
     # The real SDK's create_plugin() defines a `plugin` target, and so we need to define
     # the same target here so that plugin CMakeLists can reference this target (e.g. to call

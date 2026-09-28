@@ -35,26 +35,9 @@ cmake_path(APPEND ASSET_IMG_PATH "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FILE
 message("set ASSET_DIR to ${ASSET_DIR}")
 message("set ASSET_IMG_PATH to ${ASSET_IMG_PATH}")
 
-# Ninja won't re-run a command whose only output is a directory, and a directory named
-# as a dependency doesn't look changed when the files inside it do. So both of these
-# steps use a stamp file and depend on the actual files, or the asset image goes stale:
-# edits to the firmware's assets, or to a built-in plugin's manifest, never reach it.
-#
 # CONFIGURE_DEPENDS re-globs at build time, so added or deleted files trigger a
-# reconfigure and modified ones re-run the copy.
+# reconfigure and modified ones rebuild the asset image.
 file(GLOB_RECURSE FW_ASSET_FILES CONFIGURE_DEPENDS ${FWDIR}/assets/*)
-
-set(FW_ASSET_STAMP ${CMAKE_CURRENT_BINARY_DIR}/fw-assets.stamp)
-
-add_custom_command(
-  OUTPUT ${FW_ASSET_STAMP}
-  COMMAND ${CMAKE_COMMAND} -E echo Copying "${FWDIR}/assets" to "${ASSET_DIR}"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory "${FWDIR}/assets" "${ASSET_DIR}"
-  COMMAND ${CMAKE_COMMAND} -E touch ${FW_ASSET_STAMP}
-  DEPENDS ${FW_ASSET_FILES}
-  COMMENT "Copying assets/ dir from ${FWDIR}/assets to ${ASSET_DIR}"
-  VERBATIM USES_TERMINAL
-)
 
  set(EXT_PLUGIN_INIT_CALLS "")
 
@@ -146,21 +129,45 @@ foreach(branddir brand slug IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_bra
 
 	target_link_libraries(_vcv_ports_internal PUBLIC ${brand_localized_obj})
 	# No add_dependencies(asset-image ...) needed: the image depends on this plugin's
-	# asset stamp by file, which also makes it rebuild when the assets change
+	# asset files and manifests, which create_plugin() records (see plugin.cmake)
 
 	string(APPEND EXT_PLUGIN_INIT_CALLS "\textern void init_${brand}(rack::plugin::Plugin *);\n\tpluginInstance = &internal_plugins.emplace_back(\"${slug}\");\n\tinit_${brand}(pluginInstance);\n")
 endforeach()
 
-# Defined after the loop so it can depend on each built-in plugin's asset stamp,
-# which create_plugin() records as it runs (see plugin.cmake)
-get_property(PLUGIN_ASSET_STAMPS GLOBAL PROPERTY MM_PLUGIN_ASSET_STAMPS)
+# The asset dir is rebuilt from scratch every time the image is: the firmware's assets,
+# then each built-in plugin's assets and manifests. Nothing else writes to it, so it
+# can't get out of step with the image (e.g. if build/assets is deleted).
+#
+# Defined after the loop so it can use each built-in plugin's assets, which
+# create_plugin() records as it runs (see plugin.cmake)
+get_property(PLUGIN_ASSET_NAMES GLOBAL PROPERTY MM_PLUGIN_ASSET_NAMES)
+get_property(PLUGIN_ASSET_SOURCE_DIRS GLOBAL PROPERTY MM_PLUGIN_ASSET_SOURCE_DIRS)
+get_property(PLUGIN_ASSET_MANIFESTS GLOBAL PROPERTY MM_PLUGIN_ASSET_MANIFESTS)
+get_property(PLUGIN_ASSET_DEPENDS GLOBAL PROPERTY MM_PLUGIN_ASSET_DEPENDS)
+
+set(PLUGIN_ASSET_COPY_COMMANDS "")
+foreach(name source_dir manifests IN ZIP_LISTS PLUGIN_ASSET_NAMES PLUGIN_ASSET_SOURCE_DIRS PLUGIN_ASSET_MANIFESTS)
+  if (IS_DIRECTORY "${source_dir}")
+    list(APPEND PLUGIN_ASSET_COPY_COMMANDS
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_dir} ${ASSET_DIR}/${name})
+  endif()
+  if (manifests)
+    string(REPLACE "|" ";" manifests "${manifests}")
+    list(APPEND PLUGIN_ASSET_COPY_COMMANDS
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${ASSET_DIR}/${name}
+      COMMAND ${CMAKE_COMMAND} -E copy ${manifests} ${ASSET_DIR}/${name}/)
+  endif()
+endforeach()
 
 add_custom_command(
   OUTPUT ${ASSET_IMG_PATH}
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${ASSET_DIR}
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets ${ASSET_DIR}
+  ${PLUGIN_ASSET_COPY_COMMANDS}
   COMMAND cd ${ASSET_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
   COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
   COMMENT "Creating assets uimg file at ${ASSET_IMG_PATH}"
-  DEPENDS ${FW_ASSET_STAMP} ${PLUGIN_ASSET_STAMPS}
+  DEPENDS ${FW_ASSET_FILES} ${PLUGIN_ASSET_DEPENDS}
   VERBATIM USES_TERMINAL
 )
 
