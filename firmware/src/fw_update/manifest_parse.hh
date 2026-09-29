@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "ryml.hpp"
+#include "ryml_init.hh"
 #include "ryml_std.hpp"
 
 namespace MetaModule
@@ -81,9 +82,11 @@ struct ManifestParser {
 		// ryml has issues with tabs in json sometimes:
 		std::replace(json.begin(), json.end(), '\t', ' ');
 
-		ryml::Tree tree = ryml::parse_in_place(ryml::substr(json.data(), json.size()));
+		RymlInit::init_once();
+		ryml::Tree tree;
+		bool parsed = RymlInit::parse_in_place(ryml::substr(json.data(), json.size()), &tree);
 
-		if (tree.num_children(0) > 0) {
+		if (parsed && tree.num_children(0) > 0) {
 			ryml::ConstNodeRef root = tree.rootref();
 
 			if (root.has_child("version")) {
