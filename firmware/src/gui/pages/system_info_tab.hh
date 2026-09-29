@@ -233,17 +233,23 @@ struct InfoTab : SystemMenuTab {
 
 	void update_expanders(bool force = false) {
 		const bool audio = Expanders::get_connected().ext_audio_connected;
+		const bool audio_exp_lost = metaparams.jack_sense_faults & JackSenseFault::ExtLost;
 		const auto buttons = metaparams.button_exp_connected;
 		const auto midi_ports = metaparams.midi_ports_connected;
 
-		if (!force && audio == last_audio_exp && buttons == last_button_exp && midi_ports == last_midi_ports)
+		if (!force && audio == last_audio_exp && audio_exp_lost == last_audio_exp_lost && buttons == last_button_exp &&
+			midi_ports == last_midi_ports)
 			return;
 
 		last_audio_exp = audio;
+		last_audio_exp_lost = audio_exp_lost;
 		last_button_exp = buttons;
 		last_midi_ports = midi_ports;
 
-		lv_label_set_text(ui_SystemMenuAudioExpanders, audio ? "MetaAIO connected" : "MetaAIO not found");
+		const char *audio_text = !audio				 ? "MetaAIO not found" :
+								 audio_exp_lost ? "MetaAIO connection lost (restart)" :
+												  "MetaAIO connected";
+		lv_label_set_text(ui_SystemMenuAudioExpanders, audio_text);
 		lv_show(ui_SystemMenuAudioExpanders);
 
 		if (buttons != 0) {
@@ -324,6 +330,7 @@ private:
 
 	static constexpr bool ForceRedraw = true;
 	bool last_audio_exp = false;
+	bool last_audio_exp_lost = false;
 	uint32_t last_button_exp = 0xFFFF'FFFF;
 	uint8_t last_midi_ports = 0xFF;
 };

@@ -304,6 +304,8 @@ struct PatchPlayLoader {
 
 	void prepare_patch_for_plugin_change(std::string_view brand_slug);
 
+	bool playing_patch_uses_brand(std::string_view brand_slug);
+
 	//
 	// Load balancing (patch_playloader_balance.cc)
 	//

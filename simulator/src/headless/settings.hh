@@ -13,6 +13,7 @@ struct Settings {
 	std::string patch = "../patches/default/Djembe4verb.yml";
 	std::string audio_in_file = "audio_in.wav";
 	std::string audio_out_file = "audio_out.wav";
+	bool list_modules = false;
 
 	// Instead of playing a patch, check a plugin's element groups/order/names
 	bool check_element_layout = false;
@@ -41,6 +42,9 @@ struct Settings {
 								  "Output signal raw data (floats, interleaved 2 channels)",
 								  cxxopts::value<std::string>()->default_value("audio_out.raw"));
 
+			options.add_options()("list-modules",
+								  "Print every registered module as `module<TAB>brand<TAB>slug` and exit (used by check_plugin_jsons.py)");
+
 			options.add_options()("check-element-layout",
 								  "Check a plugin's element groups, order, and names in plugin-mm.json, then exit. "
 								  "The plugin must be built in as an ext-plugin");
@@ -68,6 +72,9 @@ struct Settings {
 
 			if (args.count("in") > 0)
 				audio_in_file = args["in"].as<std::string>();
+
+			if (args.count("list-modules") > 0)
+				list_modules = true;
 
 			check_element_layout = args.count("check-element-layout") > 0;
 

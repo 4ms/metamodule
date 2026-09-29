@@ -10,6 +10,7 @@ namespace MetaModule
 struct MappedParam {
 	MappedKnob map;
 	CatchupParam catchup;
+	uint16_t num_pos = 0; // Number of discrete positions of the module param (0 = continuous), used by Cycle maps
 };
 //[0-11] knobs
 //[12-43] buttons
@@ -35,8 +36,8 @@ public:
 			auto &map = knob_map.map;
 
 			if (map.is_button()) {
-				if (is_toggle(map)) {
-					toggle_button(modules[map.module_id], map, val);
+				if (is_latching(map)) {
+					latch_button(modules[map.module_id], map, knob_map.num_pos, val);
 				} else {
 					modules[map.module_id]->set_param(map.param_id, map.get_mapped_val(val));
 				}

@@ -5,6 +5,7 @@
 #include "dynload/plugin_manager.hh"
 #include "dynload/preload_plugins.hh"
 #include "gui/button_exp_nav.hh"
+#include "gui/notify/jack_sense_monitor.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params_dbg_print.hh"
@@ -27,6 +28,7 @@ private:
 	NotificationQueue notify_queue;
 	PageManager page_manager;
 	UsbConnectionMonitor usb_monitor;
+	JackSenseMonitor jack_sense_monitor;
 	ParamsMidiState params;
 	MetaParams metaparams;
 	UserSettings settings;
@@ -158,6 +160,11 @@ public:
 		}
 	}
 
+	// Release any GUI objects created by plugin code, before a plugin is unloaded
+	void release_plugin_objects() {
+		page_manager.leave_patch_pages();
+	}
+
 	void notify_error(std::string const &message) {
 		notify_queue.put({message, Notification::Priority::Error, 2000});
 	}
@@ -186,6 +193,7 @@ private:
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		usb_monitor.update(metaparams.usb_connection, notify_queue);
+		jack_sense_monitor.update(metaparams.jack_sense_faults, notify_queue);
 
 		// Experimental?
 		// button_expander_nav(metaparams);

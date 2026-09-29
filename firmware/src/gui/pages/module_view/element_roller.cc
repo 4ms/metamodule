@@ -1,4 +1,5 @@
 #include "CoreModules/elements/units.hh"
+#include "gui/elements/redraw.hh"
 #include "gui/pages/module_view/group_member_name.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/module_view/roller_helpers.hh"
@@ -9,7 +10,7 @@
 namespace MetaModule
 {
 
-static void move_selected_control_foreground(DrawnElement const &drawn_element) {
+static void move_selected_control_foreground(std::span<DrawnElement> drawn_elements, DrawnElement const &drawn_element) {
 	auto *obj = drawn_element.gui_element.obj;
 	if (!obj)
 		return;
@@ -18,6 +19,7 @@ static void move_selected_control_foreground(DrawnElement const &drawn_element) 
 		std::holds_alternative<KnobSnapped>(drawn_element.element))
 	{
 		lv_obj_move_foreground(obj);
+		raise_lights_over(drawn_elements, drawn_element);
 	}
 }
 
@@ -225,11 +227,14 @@ void ModuleViewPage::add_element_highlight(DrawnElement const &drawn_element) {
 	lv_obj_remove_style(b, &Gui::invisible_style, LV_PART_MAIN);
 	lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 
+	// Vertically position the highlights the same as the module canvas
+	auto canvas_y = module_y_offset();
+
 	if (obj) {
 		float width = lv_obj_get_width(obj);
 		float height = lv_obj_get_height(obj);
 		float c_x = (float)lv_obj_get_x(obj) + width / 2.f;
-		float c_y = (float)lv_obj_get_y(obj) + height / 2.f;
+		float c_y = (float)lv_obj_get_y(obj) + (float)canvas_y + height / 2.f;
 
 		auto x_padding = std::min(width * 0.75f, 12.f);
 		auto y_padding = std::min(height * 0.75f, 12.f);
@@ -245,8 +250,8 @@ void ModuleViewPage::add_element_highlight(DrawnElement const &drawn_element) {
 		auto h = base_element(drawn_element.element).height_mm;
 		auto x = base_element(drawn_element.element).x_mm;
 		auto y = base_element(drawn_element.element).y_mm;
-		lv_obj_set_pos(b, mm_to_px(x, 240), mm_to_px(y, 240));
-		lv_obj_set_size(b, mm_to_px(w, 240), mm_to_px(h, 240));
+		lv_obj_set_pos(b, mm_to_px(x, module_height), mm_to_px(y, module_height) + canvas_y);
+		lv_obj_set_size(b, mm_to_px(w, module_height), mm_to_px(h, module_height));
 	}
 }
 
@@ -274,7 +279,7 @@ void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
 void ModuleViewPage::highlight_row(uint32_t roller_idx) {
 	if (auto drawn_idx = get_drawn_idx(roller_idx)) {
 		highlight_component(*drawn_idx);
-		move_selected_control_foreground(drawn_elements[*drawn_idx]);
+		move_selected_control_foreground(drawn_elements, drawn_elements[*drawn_idx]);
 
 	} else if (auto group = get_group_idx(roller_idx)) {
 		// Scroll to the first member, where opening the group will start
@@ -397,7 +402,7 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 		page->highlight_component(cur_idx);
 	}
 
-	move_selected_control_foreground(page->drawn_elements[cur_idx]);
+	move_selected_control_foreground(page->drawn_elements, page->drawn_elements[cur_idx]);
 	page->roller_hover.hide();
 }
 
@@ -669,7 +674,7 @@ void ModuleViewPage::enter_group(unsigned group_idx) {
 		if (drawn_idx >= 0) {
 			cur_selected = i;
 			highlight_component(drawn_idx);
-			move_selected_control_foreground(drawn_elements[drawn_idx]);
+			move_selected_control_foreground(drawn_elements, drawn_elements[drawn_idx]);
 			break;
 		}
 	}

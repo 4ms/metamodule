@@ -85,9 +85,18 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	read_or_default(node, "map_ring_flash_active", s, &ModuleDisplaySettings::map_ring_flash_active);
 	read_or_default(node, "scroll_to_active_param", s, &ModuleDisplaySettings::scroll_to_active_param);
 	read_or_default(node, "view_height_px", s, &ModuleDisplaySettings::view_height_px);
+	// Snap to a valid zoom level, in case it was hand-edited or written by a
+	// firmware version with a different set of levels
+	s->view_height_px = ModuleDisplaySettings::nearest_zoom_level(s->view_height_px);
+	read_or_default(node, "auto_layout", s, &ModuleDisplaySettings::auto_layout);
+	read_or_default(node, "auto_rack_width", s, &ModuleDisplaySettings::auto_rack_width);
+	read_or_default(node, "rack_width_hp", s, &ModuleDisplaySettings::rack_width_hp);
+	s->rack_width_hp = RackSize::snap_rack_width(s->rack_width_hp);
 	read_or_default(node, "param_style", s, &ModuleDisplaySettings::param_style);
 	read_or_default(node, "paneljack_style", s, &ModuleDisplaySettings::paneljack_style);
 	read_or_default(node, "cable_style", s, &ModuleDisplaySettings::cable_style);
+	read_or_default(node, "cable_tension", s, &ModuleDisplaySettings::cable_tension);
+	s->cable_tension = ModuleDisplaySettings::clamp_cable_tension(s->cable_tension);
 	read_or_default(node, "show_graphic_screens", s, &ModuleDisplaySettings::show_graphic_screens);
 	read_or_default(node, "graphic_screen_throttle", s, &ModuleDisplaySettings::graphic_screen_throttle);
 	read_or_default(node, "show_samplerate", s, &ModuleDisplaySettings::show_samplerate);
@@ -95,6 +104,7 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	read_or_default(node, "show_knobset_name", s, &ModuleDisplaySettings::show_knobset_name);
 	read_or_default(node, "show_jack_aliases", s, &ModuleDisplaySettings::show_jack_aliases);
 	read_or_default(node, "show_knob_aliases", s, &ModuleDisplaySettings::show_knob_aliases);
+	read_or_default(node, "fit_width_in_fullscreen", s, &ModuleDisplaySettings::fit_width_in_fullscreen);
 	read_or_default(node, "nav_wrapping", s, &ModuleDisplaySettings::nav_wrapping);
 
 	return true;

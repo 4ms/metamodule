@@ -764,23 +764,6 @@ private:
 		}
 	}
 
-	static void reset_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-
-		if (auto def_val = get_normalized_default_value(page->drawn_element->element); def_val.has_value()) {
-			StaticParam sp{
-				.module_id = page->drawn_element->gui_element.module_idx,
-				.param_id = page->drawn_element->gui_element.idx.param_idx,
-				.value = def_val.value(),
-			};
-			page->patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
-			page->patch_mod_queue.put(SetStaticParam{.param = sp});
-		}
-	}
-
 	static void click_panel_jack_item_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;

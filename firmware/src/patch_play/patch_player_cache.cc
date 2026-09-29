@@ -1,4 +1,5 @@
 #include "patch_play/patch_player.hh"
+#include "params/param_num_positions.hh"
 #include "util/countzip.hh"
 
 namespace MetaModule
@@ -234,10 +235,16 @@ void PatchPlayer::cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
 		// Create new entry:
 		CatchupParam f{};
 		f.mode = catchup_manager.get_default_mode();
-		knob_maps[knob_set][k.panel_knob_id].push_back({k, f});
+		knob_maps[knob_set][k.panel_knob_id].push_back({k, f, uint16_t(param_num_positions(k))});
 		refresh_conn_flags();
 	} else
 		pr_err("Cannot map panel knob id %u\n", k.panel_knob_id);
+}
+
+unsigned PatchPlayer::param_num_positions(const MappedKnob &k) const {
+	if (k.module_id >= pd.module_slugs.size())
+		return 0;
+	return get_param_num_positions(pd.module_slugs[k.module_id], k.param_id);
 }
 
 //Remove a mapping

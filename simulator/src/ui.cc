@@ -93,6 +93,7 @@ bool Ui::update() {
 	tm = lv_tick_get();
 	if (tm - last_page_task_tm >= 16) {
 		transfer_aux_button_events();
+		transfer_ext_button_events();
 
 		metaparams.rotary_pushed.add_motion({.abs_pos = {}, .motion = input_driver.rotary_push_turn_motion()});
 		metaparams.rotary.add_motion({.abs_pos = {}, .motion = input_driver.rotary_turn_motion()});
@@ -207,10 +208,23 @@ void Ui::page_update_task() { //60Hz
 void Ui::transfer_aux_button_events() {
 	// Transfer aux button events SDL => LVGL => metaparams
 	if (input_driver.aux_button_just_pressed())
-		metaparams.meta_buttons[0].register_falling_edge();
+		metaparams.meta_buttons[0].register_rising_edge();
 
 	if (input_driver.aux_button_just_released())
-		metaparams.meta_buttons[0].register_rising_edge();
+		metaparams.meta_buttons[0].register_falling_edge();
+}
+
+void Ui::transfer_ext_button_events() {
+	// Button Expander button events SDL => metaparams (GUI) and audio (patch)
+	auto pressed = input_driver.ext_buttons_just_pressed();
+	auto released = input_driver.ext_buttons_just_released();
+
+	metaparams.ext_buttons_high_events |= pressed;
+	metaparams.ext_buttons_low_events |= released;
+
+	// Like the firmware, block events from reaching the patch while Back is held
+	if (metaparams.button_exp_connected != 0 && !metaparams.meta_buttons[0].is_pressed())
+		audio_stream.add_ext_button_events(pressed, released);
 }
 
 void Ui::transfer_params() {

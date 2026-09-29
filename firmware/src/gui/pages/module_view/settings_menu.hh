@@ -7,6 +7,7 @@
 #include "lvgl.h"
 #include "user_settings/view_settings.hh"
 #include <algorithm>
+#include <utility>
 
 namespace MetaModule
 {
@@ -34,19 +35,23 @@ struct ModuleViewSettingsMenu {
 		lv_slider_set_value(
 			graphics_update_rate_slider, ModuleDisplaySettings::ThrottleAmounts.size() - 2, LV_ANIM_OFF);
 
+		auto fit_fullscreen_cont = create_settings_menu_switch(ui_MVSettingsMenu, "Fit Width in Fullscreen");
+		fit_fullscreen_check = lv_obj_get_child(fit_fullscreen_cont, 1);
+
 		lv_obj_move_to_index(title, 1);
 		lv_obj_move_to_index(graphics_settings, 2);
 		lv_obj_move_to_index(graphics_update_rate_label, 3);
+		lv_obj_move_to_index(fit_fullscreen_cont, 4);
 
 		auto show_knob_aliases_cont = create_settings_menu_switch(ui_MVSettingsMenu, "Show Control Aliases");
 		lv_obj_set_style_border_width(show_knob_aliases_cont, 0, 0);
 		show_knob_aliases_check = lv_obj_get_child(show_knob_aliases_cont, 1);
-		lv_obj_move_to_index(show_knob_aliases_cont, 8);
+		lv_obj_move_to_index(show_knob_aliases_cont, 9);
 
 		auto show_jack_aliases_cont = create_settings_menu_switch(ui_MVSettingsMenu, "Show Jack Aliases");
 		lv_obj_set_style_border_width(show_jack_aliases_cont, 0, 0);
 		show_jack_aliases_check = lv_obj_get_child(show_jack_aliases_cont, 1);
-		lv_obj_move_to_index(show_jack_aliases_cont, 11);
+		lv_obj_move_to_index(show_jack_aliases_cont, 12);
 
 		auto bar_title = create_settings_menu_title(ui_MVSettingsMenu, "STATUS BAR");
 
@@ -62,11 +67,13 @@ struct ModuleViewSettingsMenu {
 		auto nav_wrapping_cont = create_settings_menu_switch(ui_MVSettingsMenu, "Allow Wrapping");
 		nav_wrapping_check = lv_obj_get_child(nav_wrapping_cont, 1);
 
-		lv_obj_move_to_index(bar_title, 4);
-		lv_obj_move_to_index(float_samplerate_cont, 5);
-		lv_obj_move_to_index(show_samplerate_cont, 6);
-		lv_obj_move_to_index(nav_title, 7);
-		lv_obj_move_to_index(nav_wrapping_cont, 8);
+		lv_obj_move_to_index(bar_title, 5);
+		lv_obj_move_to_index(float_samplerate_cont, 6);
+		lv_obj_move_to_index(show_samplerate_cont, 7);
+		lv_obj_move_to_index(nav_title, 8);
+		lv_obj_move_to_index(nav_wrapping_cont, 9);
+
+		lv_obj_add_event_cb(fit_fullscreen_check, fit_fullscreen_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, settings_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MVSettingsCloseButton, settings_button_cb, LV_EVENT_CLICKED, this);
@@ -103,6 +110,7 @@ struct ModuleViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, graphics_show_check);
 		lv_group_add_obj(settings_menu_group, graphics_update_rate_slider);
+		lv_group_add_obj(settings_menu_group, fit_fullscreen_check);
 
 		lv_group_add_obj(settings_menu_group, float_audioload_check);
 		lv_group_add_obj(settings_menu_group, show_samplerate_check);
@@ -140,6 +148,7 @@ struct ModuleViewSettingsMenu {
 		lv_check(ui_MVFlashMapCheck, settings.map_ring_flash_active);
 
 		lv_check(graphics_show_check, settings.show_graphic_screens);
+		lv_check(fit_fullscreen_check, settings.fit_width_in_fullscreen);
 
 		lv_check(ui_MVShowMapsAlwaysCheck,
 				 settings.param_style.mode == ShowAll || settings.paneljack_style.mode == ShowAll);
@@ -209,6 +218,11 @@ struct ModuleViewSettingsMenu {
 				gui_state.do_write_settings = true;
 			}
 		}
+	}
+
+	// reads and clears `display_changed`
+	[[nodiscard]] bool take_display_changed() {
+		return std::exchange(display_changed, false);
 	}
 
 	bool is_visible() {
@@ -316,8 +330,7 @@ private:
 
 		page->settings.map_ring_flash_active = flash_active;
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void cable_settings_value_change_cb(lv_event_t *event) {
@@ -334,8 +347,7 @@ private:
 		opacity = (float)opacity * 2.5f;
 		page->settings.cable_style.opa = opacity;
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void graphics_settings_value_change_cb(lv_event_t *event) {
@@ -354,8 +366,7 @@ private:
 
 		page->update_interactive_states();
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void scroll_menu_down_cb(lv_event_t *event) {
@@ -375,8 +386,7 @@ private:
 		page->settings.show_jack_aliases = lv_obj_has_state(page->show_jack_aliases_check, LV_STATE_CHECKED);
 		page->settings.show_knob_aliases = lv_obj_has_state(page->show_knob_aliases_check, LV_STATE_CHECKED);
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void nav_wrapping_cb(lv_event_t *event) {
@@ -386,8 +396,7 @@ private:
 
 		page->settings.nav_wrapping = lv_obj_has_state(page->nav_wrapping_check, LV_STATE_CHECKED);
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	static void show_titlebar_cb(lv_event_t *event) {
@@ -401,14 +410,14 @@ private:
 
 		page->update_interactive_states();
 
-		page->settings.changed = true;
-		page->changed_while_visible = true;
+		page->mark_changed();
 	}
 
 	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
 
 	lv_obj_t *graphics_show_check;
+	lv_obj_t *fit_fullscreen_check;
 	lv_obj_t *graphics_update_rate_label;
 	lv_obj_t *graphics_update_rate_slider;
 	lv_obj_t *show_jack_aliases_check;
@@ -419,6 +428,23 @@ private:
 	lv_obj_t *float_audioload_check;
 
 	bool visible = false;
+	// Both flags move together on every edit: one for the page to re-apply the setting now,
+	// one to remember that the settings are worth saving when the menu closes.
+	static void fit_fullscreen_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+		page->settings.fit_width_in_fullscreen = lv_obj_has_state(page->fit_fullscreen_check, LV_STATE_CHECKED);
+		page->mark_changed();
+	}
+
+	void mark_changed() {
+		display_changed = true;
+		changed_while_visible = true;
+	}
+
+	bool display_changed = false;
 	bool changed_while_visible = false;
 	ModuleDisplaySettings &settings;
 	GuiState &gui_state;

@@ -16,9 +16,11 @@ USBD_CDC_LineCodingTypeDef LineCoding = {
 }
 
 UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice,
-								 std::array<ConcurrentBuffer *, MetaModule::ConsoleBufferReader::NumBuffers> buffers)
+								 std::array<ConcurrentBuffer *, MetaModule::ConsoleBufferReader::NumBuffers> buffers,
+								 MetaModule::DevDriveBlock &dev_drive_msgs)
 	: pdev{pDevice}
-	, reader{buffers} {
+	, reader{buffers}
+	, commands{reader, dev_drive_msgs} {
 	// The class arms this endpoint for a full max-size packet (512)
 	rx_buffer.resize(CDC_DATA_HS_OUT_PACKET_SIZE);
 	_instance = this;
@@ -44,7 +46,6 @@ void UsbSerialDevice::set_console_routing(bool active) {
 		return;
 	MetaModule::ConsoleRouting::usb_console_active = active;
 	if (active) {
-		// The UART drain already printed everything up to this point
 		reader.resync();
 		is_transmitting = false;
 		tx_pending = 0;
@@ -52,12 +53,13 @@ void UsbSerialDevice::set_console_routing(bool active) {
 }
 
 void UsbSerialDevice::process() {
-	// Only drain the console buffers while a host is enumerated and awake;
-	// otherwise the UART drain does it
+	// host is configured and not suspended: route console to USB
 	set_console_routing(pdev->dev_state == USBD_STATE_CONFIGURED);
 
-	if (MetaModule::ConsoleRouting::usb_console_active)
+	if (MetaModule::ConsoleRouting::usb_console_active) {
+		commands.process(HAL_GetTick());
 		transmit_pending();
+	}
 }
 
 void UsbSerialDevice::transmit_pending() {
@@ -90,10 +92,8 @@ void UsbSerialDevice::transmit_pending() {
 	// USBD_BUSY: keep tx_pending, retry next process()
 }
 
-// Which composite slot the CDC class landed in. pdev->classId only identifies
-// the class inside a class callback -- from the main loop it holds whichever
-// class the OTG ISR last dispatched to -- so the app-facing CDC calls must pass
-// the id explicitly.
+// Which composite slot the CDC class was assigned.
+// Can't use pdev->classId because that changes as the OTG ISR runs
 uint8_t UsbSerialDevice::cdc_class_id() const {
 	return _cdc_class_id;
 }
@@ -203,9 +203,16 @@ int8_t UsbSerialDevice::CDC_Itf_Control(uint8_t cmd, uint8_t *pbuf, uint16_t len
 			pbuf[6] = LineCoding.datatype;
 			break;
 
-		case CDC_SET_CONTROL_LINE_STATE:
-			/* Add your code here */
-			break;
+		case CDC_SET_CONTROL_LINE_STATE: {
+			// No data stage: pbuf is the setup request, and wValue bit 0 is DTR
+
+			// When DTR is set, a console has connected, so we could do something useful here,
+			// but it's not guaraneteed all consoles will issue DTR, so we can't rely on it.
+			// auto req = reinterpret_cast<USBD_SetupReqTypedef *>(pbuf);
+			// if (req->wValue & 0x01)
+			// 	_instance->prompt_pending = true;
+
+		} break;
 
 		case CDC_SEND_BREAK:
 			/* Add your code here */

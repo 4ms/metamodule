@@ -35,8 +35,9 @@ struct UsbDeviceManager {
 	uint32_t last_reenumerate_count_ = 0;
 
 	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers,
-					 UsbDeviceMode initial_mode = UsbDeviceMode::MidiConsole)
-		: serial{&USBD_Device, console_buffers}
+					 UsbDeviceMode initial_mode,
+					 MetaModule::DevDriveBlock &dev_drive_msgs)
+		: serial{&USBD_Device, console_buffers, dev_drive_msgs}
 		, mode{initial_mode} {
 	}
 

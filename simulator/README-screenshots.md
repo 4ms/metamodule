@@ -82,6 +82,7 @@ sequence of tokens (one string, so order is preserved):
 | `ccw` | Rotary turn counter-clockwise (focus previous item) |
 | `click` | Rotary press+release (activate the focused item) |
 | `back` | Back/aux button press+release |
+| `pcw` / `pccw` | Push+turn: hold the rotary button while turning clockwise/counter-clockwise |
 
 Repeat a token with `token:N`, e.g. `cw:3`. Each action runs a few UI cycles
 before the next so LVGL processes it.

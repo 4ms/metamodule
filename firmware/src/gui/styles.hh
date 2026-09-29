@@ -44,6 +44,9 @@ struct Gui {
 
 	// module selected in patch view
 	static inline lv_style_t selected_module_style;
+	// Module focussed while re-arranging the patch view, and one that's been picked up
+	static inline lv_style_t rearrange_module_style;
+	static inline lv_style_t carried_module_style;
 
 	// Volume or subdir name in Drives panel on PatchSelector
 	static inline lv_style_t subdir_panel_item_style;
@@ -338,6 +341,20 @@ struct Gui {
 		lv_style_set_outline_width(&selected_module_style, 3);
 		lv_style_set_outline_opa(&selected_module_style, LV_OPA_100);
 		lv_style_set_radius(&selected_module_style, 0);
+
+		// rearrange_module_style
+		lv_style_init(&rearrange_module_style);
+		lv_style_set_outline_color(&rearrange_module_style, red_highlight);
+		lv_style_set_outline_width(&rearrange_module_style, 3);
+		lv_style_set_outline_opa(&rearrange_module_style, LV_OPA_100);
+		lv_style_set_radius(&rearrange_module_style, 0);
+
+		// carried_module_style
+		lv_style_init(&carried_module_style);
+		lv_style_set_outline_color(&carried_module_style, yellow_highlight);
+		lv_style_set_outline_width(&carried_module_style, 4);
+		lv_style_set_outline_opa(&carried_module_style, LV_OPA_100);
+		lv_style_set_radius(&carried_module_style, 0);
 
 		// roller_style
 		lv_style_init(&roller_style);

@@ -147,6 +147,19 @@ public:
 		screensaver.update();
 	}
 
+	// Blur the current page and jump to MainMenu if we're on a page related to a patch.
+	// Pages like ModuleView hold objects created by plugin code (e.g. a VCV context menu),
+	// so this must be called before a plugin is unloaded.
+	void leave_patch_pages() {
+		auto cur_page_id = page_list.current_page();
+		if (cur_page_id != PageId::MainMenu && cur_page_id != PageId::PatchSel && cur_page_id != PageId::SystemMenu) {
+			cur_page->blur();
+			page_list.request_new_page_no_history(PageId::MainMenu, {});
+			cur_page = page_list.page(PageId::MainMenu);
+			cur_page->focus({});
+		}
+	}
+
 	void handle_dialog_popups() {
 		if (file_browser.is_visible()) {
 			if (gui_state.back_button.is_just_released())
@@ -170,16 +183,10 @@ public:
 			gui_state.file_browser_visible.register_state(false);
 
 			// If we're on any page related to a patch and the view patch ptr gets set to null:
-			// that means an external event unloaded it (e.g. Developer Drive loaded a plugin)
+			// that means an external event unloaded it (e.g. failed patch load via MIDI PC)
 			// So, immediately jump to MainMenu
-			auto cur_page_id = page_list.current_page();
-			if (cur_page_id != PageId::MainMenu && cur_page_id != PageId::PatchSel &&
-				cur_page_id != PageId::SystemMenu && !info.open_patch_manager.get_view_patch())
-			{
-				page_list.request_new_page_no_history(PageId::MainMenu, {});
-				cur_page = page_list.page(PageId::MainMenu);
-				cur_page->focus({});
-			}
+			if (!info.open_patch_manager.get_view_patch())
+				leave_patch_pages();
 
 			cur_page->update();
 

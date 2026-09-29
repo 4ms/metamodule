@@ -3,6 +3,7 @@
 #include "lvgl.h"
 #include <SDL2/SDL.h>
 #include <array>
+#include <cstdint>
 #include <vector>
 
 enum QuitEvent {
@@ -40,6 +41,8 @@ struct LvglEncoderSimulatorDriver {
 	int rotary_turn_motion();
 	int rotary_push_turn_motion();
 	bool rotary_is_pressed();
+	uint32_t ext_buttons_just_pressed();
+	uint32_t ext_buttons_just_released();
 
 	bool param_inc();
 	bool param_dec();
@@ -63,6 +66,11 @@ private:
 
 	ButtonEvent rotary_pressed = ButtonEvent::None;
 	ButtonEvent aux_pressed = ButtonEvent::None;
+
+	// Button Expander buttons (bitmasks)
+	uint32_t ext_buttons_held = 0;
+	uint32_t ext_buttons_pressed = 0;
+	uint32_t ext_buttons_released = 0;
 
 	int rotary_push_turn = 0;
 	int rotary_turn = 0;

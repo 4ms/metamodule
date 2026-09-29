@@ -93,7 +93,7 @@ Result PatchPlayer::load_patch(const PatchData &patchdata) {
 	pd.update_midi_poly_num();
 
 	for (auto const &mm : pd.midi_maps.set) {
-		midi.cache_knob_map(mm);
+		midi.cache_knob_map(mm, param_num_positions(mm));
 		param_watcher.start_watching_param(mm);
 	}
 

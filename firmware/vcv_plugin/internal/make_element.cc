@@ -4,6 +4,8 @@
 #include "console/pr_dbg.hh"
 #include "util/math.hh"
 #include "util/overloaded.hh"
+#include <algorithm>
+#include <cmath>
 #include <concepts>
 
 namespace MetaModule
@@ -28,7 +30,8 @@ static const char *module_name(rack::app::ParamWidget *widget) {
 }
 
 static float getScaledDefaultValue(rack::app::ParamWidget *widget);
-static unsigned getDefaultValue(rack::app::ParamWidget *widget);
+static int getNumPositions(rack::engine::ParamQuantity *pq);
+static unsigned getDefaultPosition(rack::app::ParamWidget *widget, unsigned num_pos);
 
 template<typename MatchType>
 requires std::derived_from<MatchType, rack::widget::Widget>
@@ -118,7 +121,7 @@ static Element create_base_knob(rack::app::Knob *widget) {
 
 	if (auto pq = widget->getParamQuantity(); pq && pq->snapEnabled) {
 		KnobSnapped snapped_knob{knob};
-		snapped_knob.num_pos = pq->maxValue - pq->minValue + 1;
+		snapped_knob.num_pos = getNumPositions(pq);
 
 		auto clamped_num_pos = std::min<size_t>(pq->labels.size(), snapped_knob.pos_names.size());
 
@@ -229,19 +232,19 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 		element.image = widget->background->svg->filename();
 	}
 
-	element.default_value = getDefaultValue(widget);
-
 	if (widget->handle->svg->filename().length())
 		element.image_handle = widget->handle->svg->filename();
 
 	auto pq = widget->getParamQuantity();
 
-	element.num_pos = pq->maxValue - pq->minValue + 1;
+	auto num_pos = getNumPositions(pq);
 
-	if (element.num_pos < 2 || element.num_pos > element.pos_names.size()) {
-		pr_warn("Warning: %s: SvgSlider max-min+1 is %d, but must be 2..8\n", module_name(widget), element.num_pos);
-		element.num_pos = std::clamp<size_t>(element.num_pos, 2, element.pos_names.size());
+	if (num_pos < 2 || num_pos > (int)element.pos_names.size()) {
+		pr_warn("Warning: %s: SvgSlider max-min+1 is %d, but must be 2..8\n", module_name(widget), num_pos);
+		num_pos = std::clamp<int>(num_pos, 2, element.pos_names.size());
 	}
+	element.num_pos = num_pos;
+	element.default_value = getDefaultPosition(widget, element.num_pos);
 
 	if (pq) {
 		for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
@@ -336,7 +339,7 @@ static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
 
 	if (auto pq = widget->getParamQuantity(); pq) {
 		// Set the number of positions based on the max/min values set in configSwitch or configParam
-		element.num_pos = pq->maxValue - pq->minValue + 1;
+		element.num_pos = getNumPositions(pq);
 
 		if (element.num_pos < 2 || element.num_pos > element.pos_names.size()) {
 			pr_warn("Warning: In %s, SvgSwitch as SlideSwitch (max-min+1) is %d, but must be 2-8\n",
@@ -358,7 +361,7 @@ static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
 
 	element.image_handle = "no-image";
 	element.image = widget->frames[0]->filename();
-	element.default_value = getDefaultValue(widget);
+	element.default_value = getDefaultPosition(widget, element.num_pos);
 	return element;
 }
 
@@ -367,7 +370,7 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 
 	if (auto pq = widget->getParamQuantity(); pq) {
 		// Set the number of positions based on the max/min values set in configSwitch or configParam
-		element.num_pos = pq->maxValue - pq->minValue + 1;
+		element.num_pos = getNumPositions(pq);
 
 		if (element.num_pos < 2 || element.num_pos > FlipSwitch::MaxPositions) {
 			pr_warn("Warning: In %s, SvgSwitch (max-min+1) is %d, but must be 2-10\n",
@@ -390,7 +393,7 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 		element.frames[i] = widget->frames[i]->filename();
 	}
 
-	element.default_value = getDefaultValue(widget);
+	element.default_value = getDefaultPosition(widget, element.num_pos);
 	return element;
 }
 
@@ -405,7 +408,7 @@ Element make_element(rack::app::Switch *widget) {
 		log_make_element("rack::app::Switch latching button", widget->paramId);
 		FlipSwitch element{};
 		element.num_pos = 2;
-		element.default_value = 0;
+		element.default_value = getDefaultPosition(widget, element.num_pos);
 		if (pq && pq->labels.size() >= 1)
 			element.pos_names[0] = pq->labels[0];
 		if (pq && pq->labels.size() >= 2)
@@ -417,8 +420,8 @@ Element make_element(rack::app::Switch *widget) {
 		// For now, we use Slide Switches since they can be drawn without SVGs.
 		log_make_element("rack::app::Switch slide", widget->paramId);
 		SlideSwitch element{};
-		element.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, element.pos_names.size());
-		element.default_value = getDefaultValue(widget);
+		element.num_pos = std::clamp<int>(getNumPositions(pq), 2, element.pos_names.size());
+		element.default_value = getDefaultPosition(widget, element.num_pos);
 		return element;
 	}
 }
@@ -436,7 +439,7 @@ Element make_element(rack::app::SvgSwitch *widget) {
 		return make_momentary(widget);
 	} else {
 		if (auto pq = widget->getParamQuantity(); pq) {
-			if ((pq->maxValue - pq->minValue + 1) > FlipSwitch::MaxPositions) {
+			if (getNumPositions(pq) > (int)FlipSwitch::MaxPositions) {
 				log_make_element("SvgSwitch slide", widget->paramId);
 				return make_slideswitch(widget);
 			}
@@ -659,11 +662,20 @@ static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
 	return defaultValue;
 }
 
-static unsigned getDefaultValue(rack::app::ParamWidget *widget) {
-	if (!widget)
+// Number of integer values between min and max (inclusive). Handles reversed ranges (max < min)
+static int getNumPositions(rack::engine::ParamQuantity *pq) {
+	if (!pq)
 		return 0;
-	auto pq = widget->getParamQuantity();
-	return pq ? pq->getDefaultValue() : 0;
+	return std::lround(std::abs(pq->maxValue - pq->minValue)) + 1;
+}
+
+// Default value as a switch position 0..num_pos-1, where position N has the normalized value N/(num_pos-1).
+// Position 0 is always minValue, even if the range is reversed (max < min) or doesn't start at 0.
+static unsigned getDefaultPosition(rack::app::ParamWidget *widget, unsigned num_pos) {
+	if (num_pos < 2)
+		return 0;
+	auto pos = std::lround(getScaledDefaultValue(widget) * (num_pos - 1));
+	return std::clamp<long>(pos, 0, num_pos - 1);
 }
 
 } // namespace MetaModule

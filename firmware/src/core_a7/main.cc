@@ -80,6 +80,7 @@ int main() {
 		&patch_mod_queue,
 		&StaticBuffers::virtdrive,
 		&StaticBuffers::console_a7_1_buff,
+		&StaticBuffers::dev_drive_block,
 	};
 
 	{

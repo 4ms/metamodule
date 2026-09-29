@@ -128,14 +128,14 @@ void MidiConnections::erase_module(unsigned module_idx) {
 		[=](auto &v) { std::erase_if(v, [=](auto &map) { return map.module_id == module_idx; }); });
 }
 
-void MidiConnections::cache_knob_map(MappedKnob const &k) {
+void MidiConnections::cache_knob_map(MappedKnob const &k, unsigned num_pos) {
 	if (k.is_midi_cc()) {
 		pr_trace("Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
-		update_or_add(cc_knob_maps[k.cc_num()], k);
+		update_or_add(cc_knob_maps[k.cc_num()], k).num_pos = num_pos;
 
 	} else if (k.is_midi_notegate()) {
 		pr_trace("Midi Map: Note %d to m:%d p:%d\n", k.notegate_num(), k.module_id, k.param_id);
-		update_or_add(note_knob_maps[k.notegate_num()], k);
+		update_or_add(note_knob_maps[k.notegate_num()], k).num_pos = num_pos;
 
 	} else {
 		pr_warn("Bad Midi Map: panel_knob_id:%d to m:%d p:%d\n", k.panel_knob_id, k.module_id, k.param_id);
@@ -244,16 +244,18 @@ void MidiConnections::zero_poly_buffers() {
 }
 
 template<typename T>
-void MidiConnections::update_or_add(std::vector<T> &v, const MappedKnob &d)
+T &MidiConnections::update_or_add(std::vector<T> &v, const MappedKnob &d)
 	requires std::derived_from<T, MappedKnob>
 {
 	for (auto &el : v) {
 		if (el.maps_to_same_as(d)) {
 			static_cast<MappedKnob &>(el) = d;
-			return;
+			return el;
 		}
 	}
-	static_cast<MappedKnob &>(v.emplace_back()) = d;
+	auto &el = v.emplace_back();
+	static_cast<MappedKnob &>(el) = d;
+	return el;
 }
 
 template<typename T>

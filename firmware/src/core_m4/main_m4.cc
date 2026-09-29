@@ -50,10 +50,10 @@ int main() {
 									SharedMemoryS::ptrs.console_m4_buff}};
 
 	// USB
-	// Optionally sends all cores' printf() output to USB console device
 	UsbManager usb{{SharedMemoryS::ptrs.console_a7_0_buff,
 					SharedMemoryS::ptrs.console_a7_1_buff,
-					SharedMemoryS::ptrs.console_m4_buff}};
+					SharedMemoryS::ptrs.console_m4_buff},
+				   *SharedMemoryS::ptrs.dev_drive_msgs};
 	usb.start();
 
 	// SD Card

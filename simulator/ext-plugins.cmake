@@ -49,6 +49,9 @@ message("set ASSET_IMG_PATH to ${ASSET_IMG_PATH}")
 # reconfigure and modified ones rebuild the asset image.
 file(GLOB_RECURSE FW_ASSET_FILES CONFIGURE_DEPENDS ${FWDIR}/assets/*)
 
+# Copies vcv_ports/BRAND/plugin.json to assets/BRAND/plugin.json when a submodule's copy changes
+include(${FWDIR}/vcv_ports/sync_plugin_jsons.cmake)
+
  set(EXT_PLUGIN_INIT_CALLS "")
 
 foreach(branddir brand slug IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_brand_libname ext_builtin_brand_slug)
@@ -144,8 +147,9 @@ foreach(branddir brand slug IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_bra
 	string(APPEND EXT_PLUGIN_INIT_CALLS "\textern void init_${brand}(rack::plugin::Plugin *);\n\tpluginInstance = &internal_plugins.emplace_back(\"${slug}\");\n\tinit_${brand}(pluginInstance);\n")
 endforeach()
 
-# The asset dir is rebuilt from scratch every time the image is: the firmware's assets,
-# then each built-in plugin's assets and manifests. Nothing else writes to it, so it
+# The asset dir is rebuilt from scratch every time the image is: the firmware's assets
+# (after syncing their plugin.json files with vcv_ports/, see above), then each built-in
+# plugin's assets and manifests. Nothing else writes to it, so it
 # can't get out of step with the image (e.g. if build/assets is deleted).
 #
 # Defined after the loop so it can use each built-in plugin's assets, which
@@ -171,13 +175,14 @@ endforeach()
 
 add_custom_command(
   OUTPUT ${ASSET_IMG_PATH}
+  COMMAND ${SYNC_PLUGIN_JSONS_COMMAND}
   COMMAND ${CMAKE_COMMAND} -E rm -rf ${ASSET_DIR}
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets ${ASSET_DIR}
   ${PLUGIN_ASSET_COPY_COMMANDS}
   COMMAND cd ${ASSET_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
   COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
   COMMENT "Creating assets uimg file at ${ASSET_IMG_PATH}"
-  DEPENDS ${FW_ASSET_FILES} ${PLUGIN_ASSET_DEPENDS}
+  DEPENDS ${FW_ASSET_FILES} ${SYNC_PLUGIN_JSONS_SOURCES} ${PLUGIN_ASSET_DEPENDS}
   VERBATIM USES_TERMINAL
 )
 

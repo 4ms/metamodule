@@ -11,6 +11,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "params/param_num_positions.hh"
 
 namespace MetaModule
 {
@@ -29,7 +30,13 @@ struct KnobMapPage : PageBase {
 		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MinSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MaxSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_ModuleMapToggleSwitch, slider_cb, LV_EVENT_VALUE_CHANGED, this);
+
+		// Button Behavior dropdown replaces the Toggle switch
+		lv_hide(ui_ModuleMapToggleSwitch);
+		behavior_dropdown = create_midi_map_dropdown(ui_ModuleMapToggleSwitchCont, "Normal\nToggle\nStep");
+		lv_obj_set_height(behavior_dropdown, 28);
+		lv_obj_set_width(behavior_dropdown, 110);
+		lv_obj_add_event_cb(behavior_dropdown, behavior_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_ListButton, list_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_EditButton, edit_cb, LV_EVENT_RELEASED, this);
@@ -64,7 +71,7 @@ struct KnobMapPage : PageBase {
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_MinSlider);
 		lv_group_add_obj(group, ui_MaxSlider);
-		lv_group_add_obj(group, ui_ModuleMapToggleSwitch);
+		lv_group_add_obj(group, behavior_dropdown);
 		lv_group_add_obj(group, ui_AliasTextArea);
 		lv_group_add_obj(group, midi_port_dropdown);
 		lv_group_add_obj(group, ui_EditMapMidiChannelDropdown);
@@ -150,12 +157,22 @@ struct KnobMapPage : PageBase {
 
 		if (map.is_midi_notegate() || map.is_midi_cc() || map.is_button()) {
 			lv_show(ui_ModuleMapToggleSwitchCont);
-			lv_check(ui_ModuleMapToggleSwitch, map.curve_type == MappedKnob::CurveType::Toggle);
-			lv_label_set_text(ui_ModuleMapToggleSwitchLabel, "Button Behavior: Toggle");
+			lv_label_set_text(ui_ModuleMapToggleSwitchLabel, "Button Behavior:");
+
+			// Show how many positions Step (CurveType::Cycle) will step through (auto-detected from the param's element)
+			auto num_pos = map.module_id < patch->module_slugs.size() ?
+							   get_param_num_positions(patch->module_slugs[map.module_id], map.param_id) :
+							   0;
+			std::string opts = "Normal\nToggle\nStep";
+			if (num_pos > 2)
+				opts += " (" + std::to_string(num_pos) + ")";
+			lv_dropdown_set_options(behavior_dropdown, opts.c_str());
+
+			auto curve = map.curve_type <= MappedKnob::CurveType::Cycle ? map.curve_type : MappedKnob::CurveType::Normal;
+			lv_dropdown_set_selected(behavior_dropdown, curve);
 
 		} else {
 			lv_hide(ui_ModuleMapToggleSwitchCont);
-			lv_check(ui_ModuleMapToggleSwitch, false);
 		}
 		lv_dropdown_set_selected(ui_EditMapMidiChannelDropdown, map.midi_chan);
 
@@ -208,6 +225,10 @@ struct KnobMapPage : PageBase {
 
 			} else if (lv_dropdown_is_open(ui_EditMapMidiChannelDropdown)) {
 				lv_dropdown_close(ui_EditMapMidiChannelDropdown);
+				lv_group_set_editing(group, false);
+
+			} else if (lv_dropdown_is_open(behavior_dropdown)) {
+				lv_dropdown_close(behavior_dropdown);
 				lv_group_set_editing(group, false);
 
 			} else {
@@ -277,7 +298,7 @@ private:
 			return;
 
 		auto obj = event->current_target;
-		if (obj != ui_MinSlider && obj != ui_MaxSlider && obj != ui_ModuleMapToggleSwitch) {
+		if (obj != ui_MinSlider && obj != ui_MaxSlider) {
 			return;
 		}
 
@@ -286,20 +307,32 @@ private:
 			page->map.min = val / 100.f;
 			lv_label_set_text_fmt(ui_MinValue, "%d%%", (int)val);
 
-		} else if (obj == ui_MaxSlider) {
+		} else {
 			auto val = lv_slider_get_value(obj);
 			page->map.max = val / 100.f;
 			lv_label_set_text_fmt(ui_MaxValue, "%d%%", (int)val);
-
-		} else {
-			auto checked = lv_obj_has_state(ui_ModuleMapToggleSwitch, LV_STATE_CHECKED);
-			page->map.curve_type = checked ? MappedKnob::CurveType::Toggle : MappedKnob::CurveType::Normal;
 		}
 
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});
-		page->patch_mod_queue.put(ModifyMapping{.map = page->map, .set_id = page->view_set_idx});
-		page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
-		page->patches.mark_view_patch_modified();
+		page->commit_map();
+	}
+
+	static void behavior_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+		if (!page)
+			return;
+
+		// Dropdown index is the CurveType: Normal, Toggle, Cycle ("Step")
+		page->map.curve_type = lv_dropdown_get_selected(page->behavior_dropdown);
+		page->commit_map();
+	}
+
+	void commit_map() {
+		patch_mod_queue.put(ModifyMapping{.map = map, .set_id = view_set_idx});
+		patch->add_update_mapped_knob(view_set_idx, map);
+		patches.mark_view_patch_modified();
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
@@ -429,6 +462,7 @@ private:
 	lv_obj_t *base = nullptr;
 	lv_obj_t *indicator = nullptr;
 	lv_obj_t *midi_port_dropdown = nullptr;
+	lv_obj_t *behavior_dropdown = nullptr;
 	PatchData *patch;
 	MappedKnob map{};
 	const StaticParam *static_param = nullptr;

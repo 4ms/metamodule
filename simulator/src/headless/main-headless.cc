@@ -57,6 +57,14 @@ int main(int argc, char *argv[]) {
 	load_internal_plugins(builtin_plugins);
 	load_ext_builtin_plugins(builtin_plugins);
 
+	if (settings.list_modules) {
+		for (auto brand : ModuleFactory::getAllBrands()) {
+			for (auto slug : ModuleFactory::getAllModuleSlugs(brand))
+				printf("module\t%.*s\t%.*s\n",(int)brand.size(), brand.data(), (int)slug.size(), slug.data());
+		}
+		return 0;
+	}
+
 	if (settings.check_element_layout)
 		return check_element_layout(settings);
 

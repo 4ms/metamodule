@@ -15,8 +15,8 @@ struct TidesInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 23> Elements{{
-		Toggle3posHoriz{{to_mm<72>(32.24), to_mm<72>(62.935), Center, "Output Mode", ""}, {"AD", "Osc", "ASR"}},
-		Toggle3posHoriz{{to_mm<72>(32.24), to_mm<72>(102.555), Center, "Frequency Range", ""}, {"L", "M", "H"}},
+		Toggle3posHoriz{{to_mm<72>(32.24), to_mm<72>(62.935), Center, "Output Mode", ""}, {"AD", "Osc", "ASR"}, Toggle3posHoriz::State_t::CENTER},
+		Toggle3posHoriz{{to_mm<72>(32.24), to_mm<72>(102.555), Center, "Frequency Range", ""}, {"L", "M", "H"}, Toggle3posHoriz::State_t::CENTER},
 		BlueLargeKnob{{to_mm<72>(100.67), to_mm<72>(82.74), Center, "Frequency", ""}, -48.f, 48.f, 0.f},
 		BlueMediumKnob{{to_mm<72>(169.1), to_mm<72>(82.74), Center, "FM", ""}, -12.f, 12.f, 0.f},
 		WhiteMediumKnob{{to_mm<72>(32.24), to_mm<72>(167.33), Center, "Shape", ""}, -1.f, 1.f, 0},

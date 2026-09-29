@@ -2,6 +2,7 @@
 #include "concurrent_buffer.hh"
 #include "conf/ramdisk_conf.hh"
 #include "patch_play/patch_mod_queue.hh"
+#include "usb/dev_drive_block.hh"
 
 namespace MetaModule
 {
@@ -22,6 +23,7 @@ struct A7SharedMemoryS {
 		PatchModQueue *patch_mod_queue{};
 		RamDrive *ramdrive{};
 		ConcurrentBuffer *console_buffer{};
+		DevDriveBlock *dev_drive_msgs{};
 	};
 
 	static Ptrs ptrs;

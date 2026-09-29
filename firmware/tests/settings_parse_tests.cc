@@ -345,7 +345,7 @@ TEST_CASE("Parse usb_role_mode") {
 		MetaModule::UserSettings out;
 		out.usb_role_mode = role;
 		std::string buf;
-		buf.resize(2048);
+		buf.resize(4096);
 		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
 		buf.resize(sz);
 
@@ -406,7 +406,7 @@ TEST_CASE("Parse usb_device_mode") {
 		MetaModule::UserSettings out;
 		out.usb_device_mode = mode;
 		std::string buf;
-		buf.resize(2048);
+		buf.resize(4096);
 		auto sz = MetaModule::Settings::serialize(out, {buf.data(), buf.size()});
 		buf.resize(sz);
 
@@ -441,6 +441,10 @@ TEST_CASE("Serialize settings") {
 	settings.module_view.cable_style.mode = HideAlways;
 	settings.module_view.cable_style.opa = 0;
 	settings.module_view.view_height_px = 240;
+	settings.module_view.auto_rack_width = false;
+	settings.module_view.rack_width_hp = 52;
+	settings.module_view.cable_tension = 80;
+	settings.module_view.auto_layout = false;
 
 	settings.audio.sample_rate = 24000;
 	settings.audio.block_size = 512;
@@ -479,6 +483,9 @@ TEST_CASE("Serialize settings") {
     map_ring_flash_active: 1
     scroll_to_active_param: 0
     view_height_px: 180
+    auto_layout: 1
+    auto_rack_width: 1
+    rack_width_hp: 40
     param_style:
       mode: CurModuleIfPlaying
       opa: 129
@@ -488,6 +495,7 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: ShowAll
       opa: 100
+    cable_tension: 70
     show_graphic_screens: 1
     graphic_screen_throttle: 1
     show_samplerate: 1
@@ -495,11 +503,15 @@ TEST_CASE("Serialize settings") {
     show_knobset_name: 0
     show_jack_aliases: 0
     show_knob_aliases: 0
+    fit_width_in_fullscreen: 0
     nav_wrapping: 0
   module_view:
     map_ring_flash_active: 0
     scroll_to_active_param: 1
     view_height_px: 240
+    auto_layout: 0
+    auto_rack_width: 0
+    rack_width_hp: 52
     param_style:
       mode: CurModule
       opa: 128
@@ -509,6 +521,7 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: HideAlways
       opa: 0
+    cable_tension: 80
     show_graphic_screens: 1
     graphic_screen_throttle: 1
     show_samplerate: 1
@@ -516,6 +529,7 @@ TEST_CASE("Serialize settings") {
     show_knobset_name: 0
     show_jack_aliases: 0
     show_knob_aliases: 0
+    fit_width_in_fullscreen: 0
     nav_wrapping: 0
   audio:
     sample_rate: 24000
@@ -567,9 +581,88 @@ TEST_CASE("Serialize settings") {
 	// clang format-on
 
 	std::string parsed;
-	parsed.resize(2048);
+	parsed.resize(4096);
 	auto bytes_size = MetaModule::Settings::serialize(settings, {parsed.data(), parsed.size()});
 	parsed.resize(bytes_size);
 
 	CHECK(parsed == expected);
+}
+
+TEST_CASE("view_height_px snaps to a valid zoom level") {
+	using MetaModule::ModuleDisplaySettings;
+
+	auto parse_height = [](std::string const &height) {
+		std::string yaml = "Settings:\n  patch_view:\n    view_height_px: " + height + "\n";
+		MetaModule::UserSettings settings;
+		MetaModule::Settings::parse({yaml.data(), yaml.size()}, &settings);
+		return settings.patch_view.view_height_px;
+	};
+
+	// Every level survives a round-trip
+	for (auto level : ModuleDisplaySettings::ZoomLevels)
+		CHECK(parse_height(std::to_string(level)) == level);
+
+	// Anything else snaps to the closest level
+	CHECK(parse_height("0") == 120);
+	CHECK(parse_height("100") == 120);
+	CHECK(parse_height("134") == 120);
+	CHECK(parse_height("136") == 150);
+	CHECK(parse_height("200") == 210);
+	CHECK(parse_height("1000") == 240);
+}
+
+TEST_CASE("rack_width_hp is clamped to the usable range") {
+	using MetaModule::ModuleDisplaySettings;
+	using MetaModule::RackSize;
+
+	auto parse_hp = [](std::string const &hp) {
+		std::string yaml = "Settings:\n  patch_view:\n    rack_width_hp: " + hp + "\n";
+		MetaModule::UserSettings settings;
+		MetaModule::Settings::parse({yaml.data(), yaml.size()}, &settings);
+		return settings.patch_view.rack_width_hp;
+	};
+
+	// The narrowest rack fits on screen even at the largest zoom, so it never needs panning
+	CHECK(RackSize::MinRackWidthHP * RackSize::px_per_hp(ModuleDisplaySettings::ZoomLevels.back()) <=
+		  RackSize::ViewWidthPx);
+
+	// ...and the default sits between the extremes
+	CHECK(RackSize::MinRackWidthHP <= RackSize::DefaultRackWidthHP);
+	CHECK(RackSize::DefaultRackWidthHP <= RackSize::MaxRackWidthHP);
+
+	CHECK(parse_hp("0") == RackSize::MinRackWidthHP);
+	CHECK(parse_hp("1000") == RackSize::MaxRackWidthHP);
+
+	// Widths snap down onto the step grid, and every step is reachable
+	for (auto step = 0u; step <= RackSize::num_rack_width_steps(); step++) {
+		auto hp = RackSize::rack_width_for_step(step);
+		CHECK(hp == RackSize::MinRackWidthHP + step * RackSize::RackWidthStepHP);
+		CHECK(RackSize::rack_width_step(hp) == step);
+		CHECK(parse_hp(std::to_string(hp)) == hp);
+		CHECK(parse_hp(std::to_string(hp + 1)) == hp);
+	}
+	CHECK(RackSize::rack_width_for_step(RackSize::num_rack_width_steps()) == RackSize::MaxRackWidthHP);
+	CHECK(parse_hp(std::to_string(RackSize::DefaultRackWidthHP)) == RackSize::DefaultRackWidthHP);
+}
+
+TEST_CASE("cable_tension is clamped") {
+	using MetaModule::ModuleDisplaySettings;
+
+	auto parse_tension = [](std::string const &tension) {
+		std::string yaml = "Settings:\n  patch_view:\n    cable_tension: " + tension + "\n";
+		MetaModule::UserSettings settings;
+		MetaModule::Settings::parse({yaml.data(), yaml.size()}, &settings);
+		return settings.patch_view.cable_tension;
+	};
+
+	CHECK(parse_tension("0") == ModuleDisplaySettings::MinCableTension);
+	CHECK(parse_tension("50") == 50);
+	CHECK(parse_tension("100") == ModuleDisplaySettings::MaxCableTension);
+	CHECK(parse_tension("200") == ModuleDisplaySettings::MaxCableTension);
+
+	// Missing key falls back to the sag cables have always had
+	MetaModule::UserSettings defaults;
+	std::string empty = "Settings:\n  patch_view:\n";
+	MetaModule::Settings::parse({empty.data(), empty.size()}, &defaults);
+	CHECK(defaults.patch_view.cable_tension == ModuleDisplaySettings::DefaultCableTension);
 }

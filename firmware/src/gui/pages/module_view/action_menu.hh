@@ -54,6 +54,7 @@ public:
 		, moduleViewActionRenameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Rename...")}
 		, moduleViewActionResetNameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Reset name")}
 		, moduleViewActionReplaceBut{create_lv_list_button(ui_ModuleViewActionMenu, "Replace...")}
+		, moduleViewActionMoveBut{create_lv_list_button(ui_ModuleViewActionMenu, "Move")}
 		, moduleViewActionExpanderBut{create_lv_list_button(ui_ModuleViewActionMenu, "Expanders...")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
@@ -91,6 +92,7 @@ public:
 		lv_obj_add_event_cb(moduleViewActionRenameBut, rename_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionResetNameBut, reset_name_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionReplaceBut, replace_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(moduleViewActionMoveBut, move_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionExpanderBut, expander_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_remove_all_objs(group);
@@ -105,6 +107,7 @@ public:
 		lv_group_add_obj(group, moduleViewActionRenameBut);
 		lv_group_add_obj(group, moduleViewActionResetNameBut);
 		lv_group_add_obj(group, moduleViewActionReplaceBut);
+		lv_group_add_obj(group, moduleViewActionMoveBut);
 		lv_group_add_obj(group, moduleViewActionExpanderBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 
@@ -624,6 +627,20 @@ private:
 			update_expander_slots();
 	}
 
+	// Starts re-arranging the patch view, with this module already picked up
+	static void move_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		auto this_id = static_cast<uint16_t>(page->module_idx);
+
+		page->gui_state.rearrange_request = GuiState::RearrangeRequest{.carry_module_id = this_id};
+		page->hide();
+		page->page_list.request_new_page(
+			PageId::PatchView,
+			PageArguments{.patch_loc_hash = page->patches.get_view_patch_loc_hash(), .module_id = this_id});
+	}
+
 	static void expander_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -693,6 +710,7 @@ private:
 	lv_obj_t *moduleViewActionRenameBut;
 	lv_obj_t *moduleViewActionResetNameBut;
 	lv_obj_t *moduleViewActionReplaceBut;
+	lv_obj_t *moduleViewActionMoveBut;
 	lv_obj_t *moduleViewActionExpanderBut;
 	lv_obj_t *rename_textarea = nullptr;
 	std::string pending_alias{};

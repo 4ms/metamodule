@@ -89,11 +89,15 @@ cmake_path(APPEND ASSET_IMG_PATH  "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FIL
 # the tar via DEPENDS, and added/deleted files trigger a reconfigure.
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS ${ASSET_DIR}/*)
 
+# Copies vcv_ports/BRAND/plugin.json to assets/BRAND/plugin.json when a submodule's copy changes
+include(${CMAKE_CURRENT_SOURCE_DIR}/vcv_ports/sync_plugin_jsons.cmake)
+
 # The assets are staged into the build dir before being tarred, so that each built-in
 # brand's plugin-mm.json can have its element-group members rewritten from enumerator
 # names ("CutoffKnob") into typed indices ("elem:3"). The names are resolved against
 # the firmware's own debug info, the same way the plugin SDK resolves them for a
-# .mmplugin. The assets/ source tree is left untouched.
+# .mmplugin. Staging doesn't change the assets/ source tree (only the plugin.json sync
+# above does).
 set(ASSET_STAGE_DIR ${CMAKE_CURRENT_BINARY_DIR}/staged-assets)
 set(RESOLVE_ELEMENT_GROUPS ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk/scripts/resolve_element_groups.py)
 
@@ -113,12 +117,13 @@ endforeach()
 
 add_custom_command(
   OUTPUT ${ASSET_IMG_PATH}
+  COMMAND ${SYNC_PLUGIN_JSONS_COMMAND}
   COMMAND ${CMAKE_COMMAND} -E rm -rf ${ASSET_STAGE_DIR}
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${ASSET_DIR} ${ASSET_STAGE_DIR}
   ${RESOLVE_GROUPS_COMMANDS}
   COMMAND cd ${ASSET_STAGE_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
-  DEPENDS ${ASSET_FILES} ${RESOLVE_ELEMENT_GROUPS} main.elf
+  DEPENDS ${ASSET_FILES} ${SYNC_PLUGIN_JSONS_SOURCES} ${RESOLVE_ELEMENT_GROUPS} main.elf
   COMMENT "Creating assets uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL

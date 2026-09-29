@@ -26,6 +26,11 @@ struct GuiState {
 	// the Expanders menu (showing the new connection) when it comes back into focus
 	bool reopen_expander_menu = false;
 
+	struct RearrangeRequest {
+		std::optional<uint16_t> carry_module_id;
+	};
+	std::optional<RearrangeRequest> rearrange_request{};
+
 	bool force_redraw_patch{};
 	bool view_patch_file_changed{};
 

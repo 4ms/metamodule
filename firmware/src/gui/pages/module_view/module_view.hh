@@ -132,6 +132,7 @@ struct ModuleViewPage : PageBase {
 
 		current_group.reset();
 		open_group_for_target = true;
+		full_screen_mode = false;
 
 		redraw_module();
 
@@ -209,8 +210,7 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.hide_control_popup();
 
 			} else if (full_screen_mode) {
-				full_screen_mode = false;
-				resize_module_image(190);
+				exit_fullscreen();
 
 			} else if (mode == ViewMode::List && current_group) {
 				// Inside an element group: back returns to the top-level list
@@ -264,8 +264,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		// Settings changed
-		if (page_settings.changed) {
-			page_settings.changed = false;
+		if (settings_menu.take_display_changed()) {
 			update_map_ring_style();
 			update_cable_style();
 			update_graphic_throttle_setting();
@@ -468,15 +467,13 @@ private:
 			return;
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
-		page->resize_module_image(320);
+		page->enter_fullscreen();
 		lv_obj_scroll_to_x(ui_ModuleImage, 0, LV_ANIM_ON);
 
 		page->cur_selected = page->first_selectable_row();
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_roller_set_selected(ui_ElementRoller, page->cur_selected, LV_ANIM_OFF);
 		lv_event_send(ui_ElementRoller, LV_EVENT_SCROLL, nullptr);
-
-		page->full_screen_mode = true;
 	}
 
 	// Defined in module_view/element_roller.cc:
@@ -514,8 +511,20 @@ private:
 
 	// Defined in module_view/draw_module.cc
 	void prepare_dynamic_elements();
+	static constexpr unsigned FullHeightPx = 240;
+	static constexpr unsigned ScreenWidthPx = 320;
+
 	unsigned resize_module_image(unsigned max);
 	void redraw_module();
+	unsigned module_draw_height();
+
+	// Center vertically in case module is scaled to fit to screen width
+	lv_coord_t module_y_offset() const {
+		return (lv_coord_t)(FullHeightPx - module_height) / 2;
+	}
+
+	void enter_fullscreen();
+	void exit_fullscreen();
 	void save_element_stacking_order();
 	void restore_element_stacking_order();
 	void watch_element(DrawnElement const &drawn_element);
@@ -536,7 +545,7 @@ private:
 	void perform_jack_assign(const DrawnElement *element, ElementType jack_type);
 	bool cycle_port_selection(const DrawnElement *element, int motion, ElementType jack_type);
 
-	CableDrawer<240> cable_drawer;
+	CableDrawer<320, 240> cable_drawer;
 
 	ModuleInfoView moduleinfo;
 	PatchModQueue module_mods;
@@ -595,6 +604,9 @@ private:
 	unsigned dyn_draw_throttle = 16;
 
 	bool full_screen_mode = false;
+
+	// Height the module is currently rasterized at
+	unsigned module_height = FullHeightPx;
 	bool show_expanders_on_update = false;
 
 	std::optional<GuiElement> pending_action_param_clear{};

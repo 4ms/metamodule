@@ -61,6 +61,7 @@ void Controls::update_params() {
 		cur_metaparams->usb_connection = _usb.get_connection_status();
 
 		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
+		cur_metaparams->jack_sense_faults = sense_pin_reader.faults();
 
 		update_control_expander();
 

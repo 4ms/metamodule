@@ -105,6 +105,7 @@ private:
 	void lvgl_update_task();
 	void page_update_task();
 	void transfer_aux_button_events();
+	void transfer_ext_button_events();
 	void transfer_params();
 	void change_knobset();
 	void update_channel_selections();

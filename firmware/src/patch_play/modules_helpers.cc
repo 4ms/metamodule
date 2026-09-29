@@ -5,8 +5,8 @@ namespace MetaModule
 {
 
 std::optional<float> get_normalized_default_value(Element const &element) {
-	// clang-format off
 	return std::visit(overloaded{
+		// clang-format off
 			[](BaseElement const &el) { 
 				return std::optional<float>{}; 
 			},
@@ -14,7 +14,7 @@ std::optional<float> get_normalized_default_value(Element const &element) {
 			[&]<typename T>(T const &el)
 				requires(std::derived_from<T, AltParamChoice> || std::derived_from<T, Switch>)
 			{ 
-				return std::optional<float>{el.num_pos > 0 ? (float)el.default_value / (float)el.num_pos : 0};
+				return std::optional<float>{el.num_pos > 1 ? (float)el.default_value / (float)(el.num_pos - 1) : 0};
 			},
 
 			[&]<typename T>(T const &el)
@@ -26,9 +26,9 @@ std::optional<float> get_normalized_default_value(Element const &element) {
 			{ 
 				return std::optional<float>((float)el.default_value); 
 			},
+		// clang-format on
 		},
 		element);
-	// clang-format on
 }
 
 } // namespace MetaModule

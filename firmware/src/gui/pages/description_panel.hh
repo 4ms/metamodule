@@ -13,6 +13,7 @@
 #include "user_settings/audio_settings.hh"
 #include "user_settings/view_settings.hh"
 #include <string>
+#include <utility>
 
 namespace MetaModule
 {
@@ -60,6 +61,7 @@ struct PatchDescriptionPanel {
 
 		lv_obj_add_event_cb(close_button, closebut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(load_balance_button, load_balance_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(rearrange_button, rearrange_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_hide(ui_DescriptionEditPanel);
 		lv_hide(ui_PatchNameEditTextArea);
@@ -75,6 +77,7 @@ struct PatchDescriptionPanel {
 		lv_group_add_obj(group, ui_DescriptionEditSaveButton);
 		lv_group_add_obj(group, ui_DescriptionEditCancelButton);
 		lv_group_add_obj(group, load_balance_button);
+		lv_group_add_obj(group, rearrange_button);
 		lv_group_add_obj(group, close_button);
 		lv_group_add_obj(group, apply_settings_button);
 	}
@@ -113,6 +116,11 @@ struct PatchDescriptionPanel {
 		}
 
 		lv_show(apply_settings_button, show_manual_apply);
+	}
+
+	// The patch view does the re-arranging, since that's where the modules are
+	bool take_rearrange_request() {
+		return std::exchange(rearrange_requested, false);
 	}
 
 	bool did_update_names() {
@@ -234,19 +242,29 @@ private:
 		lv_obj_set_style_pad_ver(suggest_bs_drop, 6, LV_STATE_DEFAULT);
 		lv_obj_set_width(suggest_bs_drop, 90);
 
-		auto button_spacer = lv_obj_create(ui_DescriptionPanel);
-		lv_obj_set_size(button_spacer, lv_pct(100), 6);
-		lv_obj_add_flag(button_spacer, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
-		lv_obj_clear_flag(button_spacer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_set_style_bg_opa(button_spacer, 0, LV_PART_MAIN);
-		lv_obj_set_style_border_width(button_spacer, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_all(button_spacer, 0, LV_PART_MAIN);
+		// The panel has no gap between rows, so button rows need a spacer above them
+		auto add_button_spacer = [] {
+			auto button_spacer = lv_obj_create(ui_DescriptionPanel);
+			lv_obj_set_size(button_spacer, lv_pct(100), 6);
+			lv_obj_add_flag(button_spacer, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+			lv_obj_clear_flag(button_spacer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+			lv_obj_set_style_bg_opa(button_spacer, 0, LV_PART_MAIN);
+			lv_obj_set_style_border_width(button_spacer, 0, LV_PART_MAIN);
+			lv_obj_set_style_pad_all(button_spacer, 0, LV_PART_MAIN);
+		};
+
+		add_button_spacer();
 
 		load_balance_button = create_button(ui_DescriptionPanel, "CPU Load");
 		lv_obj_add_flag(load_balance_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
+		rearrange_button = create_button(ui_DescriptionPanel, "Re-arrange Modules");
+		lv_obj_clear_flag(rearrange_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+
+		add_button_spacer();
+
 		close_button = create_button(ui_DescriptionPanel, "Close");
-		lv_obj_clear_flag(close_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_add_flag(close_button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 		apply_settings_button = create_button(ui_DescriptionPanel, "Apply Settings");
 	}
@@ -388,6 +406,14 @@ private:
 		page->load_balance_panel.show(page->group);
 	}
 
+	static void rearrange_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		page->hide();
+		page->rearrange_requested = true;
+	}
+
 	static void closebut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
 		page->hide();
@@ -506,6 +532,7 @@ private:
 	bool edit_panel_visible = false;
 	bool kb_visible = false;
 	bool did_save = false;
+	bool rearrange_requested = false;
 
 	lv_obj_t *poly_cont = nullptr;
 	lv_obj_t *poly_label = nullptr;
@@ -522,6 +549,7 @@ private:
 	lv_obj_t *apply_settings_button = nullptr;
 	lv_obj_t *close_button = nullptr;
 	lv_obj_t *load_balance_button = nullptr;
+	lv_obj_t *rearrange_button = nullptr;
 	lv_obj_t *desc_cont = nullptr;
 
 	PatchPlayLoader &patch_playloader;
