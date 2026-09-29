@@ -81,13 +81,6 @@ void ModuleViewPage::populate_roller() {
 		roller_idx++;
 	}
 
-	// Elements that are ever listed. While patching a cable, some of these are also
-	// filtered out (see append_element), but groups and order are kept as they are.
-	auto is_listable = [this](unsigned drawn_el_idx) {
-		auto const &drawn_element = drawn_elements[drawn_el_idx];
-		return base_element(drawn_element.element).short_name.size() > 0 && !ModView::is_light_only(drawn_element);
-	};
-
 	auto append_element = [&](unsigned drawn_el_idx) {
 		auto const &drawn_element = drawn_elements[drawn_el_idx];
 		auto const &gui_el = drawn_element.gui_element;
@@ -96,10 +89,7 @@ void ModuleViewPage::populate_roller() {
 		if (base.short_name.size() == 0)
 			pr_info("Element roller: Skipping element with no name\n");
 
-		if (!is_listable(drawn_el_idx))
-			return;
-
-		if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
+		if (!is_listed(drawn_el_idx))
 			return;
 
 		auto this_is_altparam = ModView::is_altparam(drawn_element.element);
@@ -164,7 +154,7 @@ void ModuleViewPage::populate_roller() {
 	auto append_group_row = [&](unsigned group) {
 		// A group only gets a row if it has something listable, even if we're currently
 		// hiding all its members because we're patching a cable
-		if (std::ranges::none_of(layout.group_members[group], is_listable))
+		if (std::ranges::none_of(layout.group_members[group], [this](unsigned i) { return is_listable(i); }))
 			return;
 
 		opts += Gui::blue_text(std::string(layout.group_names[group]) + " " LV_SYMBOL_RIGHT) + "\n";
@@ -215,11 +205,7 @@ void ModuleViewPage::populate_roller() {
 
 	lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
-	// Highlight the selected component
-	if (auto drawn_idx = get_drawn_idx(cur_selected)) {
-		highlight_component(*drawn_idx);
-		move_selected_control_foreground(drawn_elements[*drawn_idx]);
-	}
+	highlight_row(cur_selected);
 
 	if (cur_el && args.detail_mode == true) {
 		mode = ViewMode::Mapping;
@@ -264,20 +250,45 @@ void ModuleViewPage::add_element_highlight(DrawnElement const &drawn_element) {
 	}
 }
 
-void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
-	if (auto prev_idx = get_drawn_idx(prev_sel)) {
-		if (lv_obj_get_height(element_highlights[*prev_idx]) > 100 ||
-			lv_obj_get_width(element_highlights[*prev_idx]) > 100)
-		{
-			lv_obj_remove_style(element_highlights[*prev_idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+void ModuleViewPage::unhighlight_element(size_t idx) {
+	if (idx < element_highlights.size()) {
+		if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
+			lv_obj_remove_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 		} else {
-			lv_obj_remove_style(element_highlights[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			lv_obj_remove_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
-		lv_event_send(element_highlights[*prev_idx], LV_EVENT_REFRESH, nullptr);
+		lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
 	}
 }
 
-void ModuleViewPage::highlight_component(size_t idx) {
+void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
+	if (auto prev_idx = get_drawn_idx(prev_sel)) {
+		unhighlight_element(*prev_idx);
+	} else if (auto group = get_group_idx(prev_sel)) {
+		for (auto drawn_idx : layout.group_members[*group])
+			unhighlight_element(drawn_idx);
+	}
+}
+
+// Highlight what a roller row stands for on the panel: its element, or each listed member of its group
+void ModuleViewPage::highlight_row(uint32_t roller_idx) {
+	if (auto drawn_idx = get_drawn_idx(roller_idx)) {
+		highlight_component(*drawn_idx);
+		move_selected_control_foreground(drawn_elements[*drawn_idx]);
+
+	} else if (auto group = get_group_idx(roller_idx)) {
+		// Scroll to the first member, where opening the group will start
+		bool scroll_into_view = true;
+		for (auto drawn_idx : layout.group_members[*group]) {
+			if (is_listed(drawn_idx)) {
+				highlight_component(drawn_idx, scroll_into_view);
+				scroll_into_view = false;
+			}
+		}
+	}
+}
+
+void ModuleViewPage::highlight_component(size_t idx, bool scroll_into_view) {
 	if (idx < element_highlights.size()) {
 		if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
 			lv_obj_remove_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
@@ -287,7 +298,8 @@ void ModuleViewPage::highlight_component(size_t idx) {
 			lv_obj_add_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
 		lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
-		lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
+		if (scroll_into_view)
+			lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
 	}
 }
 
@@ -358,7 +370,7 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 		return;
 	}
 
-	// Back and group rows are selectable, but have no panel component to highlight
+	// Back and group rows don't select an element. A group row highlights its members.
 	if (cur_idx == BackTag || is_group_tag(cur_idx)) {
 		// Scrolling up from one of these rows at the top of the roller -> focus the button bar.
 		bool const scrolled_up = key == LV_KEY_LEFT || key == LV_KEY_UP;
@@ -369,6 +381,7 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 		}
 
 		page->unhighlight_component(prev_sel);
+		page->highlight_row(cur_sel);
 		page->cur_selected = cur_sel;
 		page->roller_hover.hide();
 		return;
@@ -583,10 +596,7 @@ void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 			// This sends another FOCUSED event:
 			lv_group_set_editing(page->group, true);
 		}
-		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-			page->highlight_component(*drawn_idx);
-			move_selected_control_foreground(page->drawn_elements[*drawn_idx]);
-		}
+		page->highlight_row(page->cur_selected);
 		page->last_button_focused = nullptr;
 	}
 }
@@ -684,8 +694,11 @@ void ModuleViewPage::exit_group() {
 	auto tag = group_row_tag(*left_group);
 	for (auto [i, drawn_idx] : enumerate(roller_drawn_el_idx)) {
 		if (drawn_idx == tag) {
+			// populate_roller() highlighted the first row
+			unhighlight_component(cur_selected);
 			cur_selected = i;
 			lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
+			highlight_row(cur_selected);
 			break;
 		}
 	}
@@ -696,6 +709,29 @@ unsigned ModuleViewPage::first_selectable_row() const {
 	if (!roller_drawn_el_idx.empty() && roller_drawn_el_idx[0] != RollerHeaderTag)
 		return 0;
 	return 1;
+}
+
+std::optional<unsigned> ModuleViewPage::get_group_idx(unsigned roller_idx) const {
+	if (roller_idx < roller_drawn_el_idx.size()) {
+		auto tag = roller_drawn_el_idx[roller_idx];
+		if (is_group_tag(tag) && group_from_tag(tag) < layout.group_members.size())
+			return group_from_tag(tag);
+	}
+	return std::nullopt;
+}
+
+// Elements that are ever listed. While patching a cable, some of these are also
+// filtered out (see is_listed), but groups and order are kept as they are.
+bool ModuleViewPage::is_listable(unsigned drawn_idx) const {
+	auto const &drawn_element = drawn_elements[drawn_idx];
+	return base_element(drawn_element.element).short_name.size() > 0 && !ModView::is_light_only(drawn_element);
+}
+
+// Elements that are listed right now
+bool ModuleViewPage::is_listed(unsigned drawn_idx) const {
+	return is_listable(drawn_idx) &&
+		   !ModView::should_skip_for_cable_mode(
+			   gui_state.new_cable, drawn_elements[drawn_idx].gui_element, gui_state, patch, this_module_id);
 }
 
 std::optional<unsigned> ModuleViewPage::get_drawn_idx(unsigned roller_idx) {

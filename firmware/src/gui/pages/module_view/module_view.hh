@@ -485,7 +485,9 @@ private:
 	void populate_element_objects();
 	void add_element_highlight(DrawnElement const &drawn_element);
 	void unhighlight_component(uint32_t prev_sel);
-	void highlight_component(size_t idx);
+	void unhighlight_element(size_t idx);
+	void highlight_row(uint32_t roller_idx);
+	void highlight_component(size_t idx, bool scroll_into_view = true);
 	void focus_button_bar(bool first_button = false);
 	void click_cable_destination(unsigned drawn_idx);
 	void click_altparam_action(DrawnElement const &drawn_element);
@@ -499,6 +501,9 @@ private:
 	static void roller_pressed_cb(lv_event_t *event);
 	static void jump_to_roller_cb(lv_event_t *event);
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx);
+	std::optional<unsigned> get_group_idx(unsigned roller_idx) const;
+	bool is_listable(unsigned drawn_idx) const;
+	bool is_listed(unsigned drawn_idx) const;
 	unsigned first_selectable_row() const;
 
 	// Element grouping and ordering (defined in module_view/element_roller.cc)
