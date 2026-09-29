@@ -93,7 +93,7 @@ inline int check_element_layout(MetaModuleSim::Settings const &settings) {
 			printf("%s: Warning: could not create module, element names might not be final\n", slug.c_str());
 
 		ElementLayout layout;
-		layout.build(combined_slug, undrawn_elements(combined_slug));
+		layout.build(combined_slug, nondrawn_elements(combined_slug));
 
 		for (auto const &error : layout.errors)
 			printf("%s: Error: %s\n", slug.c_str(), error.c_str());
