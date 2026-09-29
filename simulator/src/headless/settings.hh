@@ -2,6 +2,8 @@
 
 #include "lib/cxxopts/cxxopts.hpp"
 #include <iostream>
+#include <string>
+#include <vector>
 
 namespace MetaModuleSim
 {
@@ -12,6 +14,12 @@ struct Settings {
 	std::string audio_in_file = "audio_in.wav";
 	std::string audio_out_file = "audio_out.wav";
 	bool list_modules = false;
+
+	// Instead of playing a patch, check a plugin's element groups/order/names
+	bool check_element_layout = false;
+	std::string plugin_json;
+	std::string plugin_mm_json;
+	std::vector<std::string> modules; // empty means all modules
 
 	void parse(int argc, char *argv[]) {
 
@@ -37,6 +45,18 @@ struct Settings {
 			options.add_options()("list-modules",
 								  "Print every registered module as `module<TAB>brand<TAB>slug` and exit (used by check_plugin_jsons.py)");
 
+			options.add_options()("check-element-layout",
+								  "Check a plugin's element groups, order, and names in plugin-mm.json, then exit. "
+								  "The plugin must be built in as an ext-plugin");
+			options.add_options()(
+				"plugin-json", "plugin.json of the plugin to check", cxxopts::value<std::string>());
+			options.add_options()("plugin-mm-json",
+								  "plugin-mm.json of the plugin to check (with enum names resolved)",
+								  cxxopts::value<std::string>());
+			options.add_options()("module",
+								  "Module slug to check (repeat, or comma-separate, for more). Default: all modules",
+								  cxxopts::value<std::vector<std::string>>());
+
 			options.add_options()("h,help", "Print help");
 
 			auto args = options.parse(argc, argv);
@@ -55,6 +75,17 @@ struct Settings {
 
 			if (args.count("list-modules") > 0)
 				list_modules = true;
+
+			check_element_layout = args.count("check-element-layout") > 0;
+
+			if (args.count("plugin-json") > 0)
+				plugin_json = args["plugin-json"].as<std::string>();
+
+			if (args.count("plugin-mm-json") > 0)
+				plugin_mm_json = args["plugin-mm-json"].as<std::string>();
+
+			if (args.count("module") > 0)
+				modules = args["module"].as<std::vector<std::string>>();
 
 			if (args.count("help") || args.count("?") || args.count("h")) {
 				std::cout << options.help() << std::endl;

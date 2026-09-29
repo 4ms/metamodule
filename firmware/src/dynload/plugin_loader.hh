@@ -4,6 +4,7 @@
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
 #include "dynload/plugin_file_load_states.hh"
+#include "dynload/register_metadata.hh"
 #include "dynload/version_sort.hh"
 #include "fat_file_io.hh"
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
@@ -224,28 +225,7 @@ public:
 					if (load_plugin(plugin)) {
 						plugin_inited = true;
 
-						if (metadata.display_name.length())
-							ModuleFactory::setBrandDisplayName(metadata.brand_slug, metadata.display_name);
-
-						for (auto const &alias : metadata.brand_aliases)
-							ModuleFactory::registerBrandAlias(metadata.brand_slug, alias);
-
-						for (auto const &alias : metadata.module_display_names) {
-							if (alias.display_name.length() && alias.slug.length()) {
-								ModuleFactory::setModuleDisplayName(metadata.brand_slug + ":" + alias.slug,
-																	alias.display_name);
-							}
-						}
-
-						for (auto const &m : metadata.module_extras) {
-							if (!m.slug.empty()) {
-								if (!m.description.empty())
-									ModuleFactory::setModuleDescription(metadata.brand_slug + ":" + m.slug,
-																		m.description);
-								if (m.tags.size() > 0)
-									ModuleFactory::setModuleTags(metadata.brand_slug + ":" + m.slug, m.tags);
-							}
-						}
+						Plugin::register_metadata(metadata);
 
 						status.state = State::Success;
 					} else {

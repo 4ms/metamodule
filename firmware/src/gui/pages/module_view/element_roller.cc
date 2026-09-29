@@ -1,8 +1,11 @@
 #include "CoreModules/elements/units.hh"
 #include "gui/elements/redraw.hh"
+#include "gui/pages/module_view/group_member_name.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/module_view/roller_helpers.hh"
 #include "util/countzip.hh"
+#include "util/string_compare.hh"
+#include <algorithm>
 
 namespace MetaModule
 {
@@ -50,6 +53,23 @@ void ModuleViewPage::populate_roller() {
 	size_t num_elements = moduleinfo.elements.size();
 	opts = "";
 	opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
+	roller_drawn_el_idx.clear();
+
+	if (current_group && *current_group >= layout.group_names.size())
+		current_group.reset();
+
+	// Arriving at an element that's in a group (e.g. from the map view) opens its group
+	if (open_group_for_target && !current_group && args.element_indices) {
+		if (auto drawn_idx = find_drawn_idx(*args.element_indices)) {
+			if (layout.element_group[*drawn_idx] != ElementLayout::NoGroup)
+				current_group = layout.element_group[*drawn_idx];
+		}
+	}
+	open_group_for_target = false;
+
+	std::string title = current_group ? Gui::blue_text(layout.group_names[*current_group]) :
+										module_display_name(*patch, this_module_id);
+	lv_label_set_text(ui_ElementRollerModuleName, title.c_str());
 
 	// Populate Roller and element highlights
 	unsigned roller_idx = 0;
@@ -57,21 +77,22 @@ void ModuleViewPage::populate_roller() {
 	ElementCount::Counts last_type{};
 	bool last_is_altparam = false;
 
-	for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
-		auto &gui_el = drawn_element.gui_element;
+	if (current_group) {
+		opts += Gui::yellow_text(LV_SYMBOL_LEFT " Back") + "\n";
+		roller_drawn_el_idx.push_back(BackTag);
+		roller_idx++;
+	}
 
+	auto append_element = [&](unsigned drawn_el_idx) {
+		auto const &drawn_element = drawn_elements[drawn_el_idx];
+		auto const &gui_el = drawn_element.gui_element;
 		auto base = base_element(drawn_element.element);
 
-		if (base.short_name.size() == 0) {
+		if (base.short_name.size() == 0)
 			pr_info("Element roller: Skipping element with no name\n");
-			continue;
-		}
 
-		if (ModView::is_light_only(drawn_element))
-			continue;
-
-		if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
-			continue;
+		if (!is_listed(drawn_el_idx))
+			return;
 
 		auto this_is_altparam = ModView::is_altparam(drawn_element.element);
 		if (ModView::append_header(opts, last_type, last_is_altparam, gui_el.count, this_is_altparam)) {
@@ -86,7 +107,15 @@ void ModuleViewPage::populate_roller() {
 		// Handle names that contain a newline or null char
 		// Must use sv literal so the trailing \0 is considered a char, not a terminator
 		using namespace std::literals;
-		opts.append(base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv)));
+		auto name = base.short_name.substr(0, base.short_name.find_first_of("\n\0"sv));
+
+		// A custom name is shown as it's written. Otherwise, inside groups remove the group words
+		if (layout.element_display_name[drawn_el_idx].size())
+			opts.append(layout.element_display_name[drawn_el_idx]);
+		else if (current_group)
+			opts.append(ModView::group_member_name(name, layout.group_names[*current_group]));
+		else
+			opts.append(name);
 
 		if (gui_el.midi_mapped_id) {
 			// If the mapping and the MIDI mapping are different, then show both
@@ -122,9 +151,36 @@ void ModuleViewPage::populate_roller() {
 		}
 
 		roller_idx++;
+	};
+
+	auto append_group_row = [&](unsigned group) {
+		// A group only gets a row if it has something listable, even if we're currently
+		// hiding all its members because we're patching a cable
+		if (std::ranges::none_of(layout.group_members[group], [this](unsigned i) { return is_listable(i); }))
+			return;
+
+		opts += Gui::blue_text(std::string(layout.group_names[group]) + " " LV_SYMBOL_RIGHT) + "\n";
+		roller_drawn_el_idx.push_back(group_row_tag(group));
+		roller_idx++;
+
+		// last_type is left alone: the type headers describe the elements
+		// that are actually listed, and a group row shouldn't repeat one
+	};
+
+	if (current_group) {
+		for (auto drawn_el_idx : layout.group_members[*current_group])
+			append_element(drawn_el_idx);
+
+	} else {
+		for (auto entry : layout.top_level_entries) {
+			if (entry.is_group)
+				append_group_row(entry.idx);
+			else
+				append_element(entry.idx);
+		}
 	}
 
-	if (is_patch_playloaded) {
+	if (is_patch_playloaded && !current_group) {
 		if (has_context_menu) {
 			opts += Gui::orange_text("Options:") + "\n";
 			opts += " >>>\n";
@@ -134,7 +190,7 @@ void ModuleViewPage::populate_roller() {
 		}
 	}
 
-	if (roller_idx <= 1) {
+	if (roller_idx <= 1 && !current_group) {
 		if (gui_state.new_cable) {
 			opts.append("No available jacks to patch\n");
 		}
@@ -151,11 +207,7 @@ void ModuleViewPage::populate_roller() {
 
 	lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
-	// Highlight the selected component
-	if (auto drawn_idx = get_drawn_idx(cur_selected)) {
-		highlight_component(*drawn_idx);
-		move_selected_control_foreground(drawn_elements, drawn_elements[*drawn_idx]);
-	}
+	highlight_row(cur_selected);
 
 	if (cur_el && args.detail_mode == true) {
 		mode = ViewMode::Mapping;
@@ -203,20 +255,45 @@ void ModuleViewPage::add_element_highlight(DrawnElement const &drawn_element) {
 	}
 }
 
-void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
-	if (auto prev_idx = get_drawn_idx(prev_sel)) {
-		if (lv_obj_get_height(element_highlights[*prev_idx]) > 100 ||
-			lv_obj_get_width(element_highlights[*prev_idx]) > 100)
-		{
-			lv_obj_remove_style(element_highlights[*prev_idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
+void ModuleViewPage::unhighlight_element(size_t idx) {
+	if (idx < element_highlights.size()) {
+		if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
+			lv_obj_remove_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
 		} else {
-			lv_obj_remove_style(element_highlights[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			lv_obj_remove_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
-		lv_event_send(element_highlights[*prev_idx], LV_EVENT_REFRESH, nullptr);
+		lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
 	}
 }
 
-void ModuleViewPage::highlight_component(size_t idx) {
+void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
+	if (auto prev_idx = get_drawn_idx(prev_sel)) {
+		unhighlight_element(*prev_idx);
+	} else if (auto group = get_group_idx(prev_sel)) {
+		for (auto drawn_idx : layout.group_members[*group])
+			unhighlight_element(drawn_idx);
+	}
+}
+
+// Highlight what a roller row stands for on the panel: its element, or each listed member of its group
+void ModuleViewPage::highlight_row(uint32_t roller_idx) {
+	if (auto drawn_idx = get_drawn_idx(roller_idx)) {
+		highlight_component(*drawn_idx);
+		move_selected_control_foreground(drawn_elements, drawn_elements[*drawn_idx]);
+
+	} else if (auto group = get_group_idx(roller_idx)) {
+		// Scroll to the first member, where opening the group will start
+		bool scroll_into_view = true;
+		for (auto drawn_idx : layout.group_members[*group]) {
+			if (is_listed(drawn_idx)) {
+				highlight_component(drawn_idx, scroll_into_view);
+				scroll_into_view = false;
+			}
+		}
+	}
+}
+
+void ModuleViewPage::highlight_component(size_t idx, bool scroll_into_view) {
 	if (idx < element_highlights.size()) {
 		if (lv_obj_get_height(element_highlights[idx]) > 100 || lv_obj_get_width(element_highlights[idx]) > 100) {
 			lv_obj_remove_style(element_highlights[idx], &Gui::panel_large_highlight_style, LV_PART_MAIN);
@@ -226,7 +303,8 @@ void ModuleViewPage::highlight_component(size_t idx) {
 			lv_obj_add_style(element_highlights[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
 		lv_event_send(element_highlights[idx], LV_EVENT_REFRESH, nullptr);
-		lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
+		if (scroll_into_view)
+			lv_obj_scroll_to_view(element_highlights[idx], LV_ANIM_ON);
 	}
 }
 
@@ -242,8 +320,10 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 	auto prev_sel = page->cur_selected;
 	auto cur_idx = page->roller_drawn_el_idx[cur_sel];
 
-	// Wrap off bottom back to button bar:
-	if (page->settings.module_view.nav_wrapping) {
+	// Wrap off bottom back to button bar when scrolling down
+	auto key = lv_event_get_key(event);
+	bool const scrolled_down = key == LV_KEY_RIGHT || key == LV_KEY_DOWN;
+	if (page->settings.module_view.nav_wrapping && scrolled_down) {
 		if (prev_sel == (uint32_t)cur_sel && cur_sel == lv_roller_get_option_cnt(ui_ElementRoller) - 1) {
 			page->focus_button_bar(true);
 			page->roller_hover.hide();
@@ -295,6 +375,23 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 		return;
 	}
 
+	// Back and group rows don't select an element. A group row highlights its members.
+	if (cur_idx == BackTag || is_group_tag(cur_idx)) {
+		// Scrolling up from one of these rows at the top of the roller -> focus the button bar.
+		bool const scrolled_up = key == LV_KEY_LEFT || key == LV_KEY_UP;
+		if (scrolled_up && cur_sel == 0 && prev_sel == 0 && !page->full_screen_mode) {
+			page->focus_button_bar();
+			page->roller_hover.hide();
+			return;
+		}
+
+		page->unhighlight_component(prev_sel);
+		page->highlight_row(cur_sel);
+		page->cur_selected = cur_sel;
+		page->roller_hover.hide();
+		return;
+	}
+
 	page->cur_selected = cur_sel;
 
 	// Save current select in args so we can navigate back to this item
@@ -320,10 +417,10 @@ void ModuleViewPage::focus_button_bar(bool first_item) {
 		if (first_item) {
 			auto cur_sel = lv_roller_get_option_cnt(ui_ElementRoller) - 1;
 			lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
-			cur_selected = roller_drawn_el_idx[cur_sel];
+			cur_selected = cur_sel;
 			unhighlight_component(cur_sel);
 		} else {
-			cur_selected = 1;
+			cur_selected = first_selectable_row();
 			lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 			unhighlight_component(cur_selected);
 		}
@@ -451,11 +548,18 @@ void ModuleViewPage::roller_click_cb(lv_event_t *event) {
 			page->click_normal_element(drawn_element);
 		}
 
-		//Not an element: Is it the Context Menu?
+		//Not an element: Is it the Context Menu, a group row, or Back?
 	} else if (roller_idx < page->roller_drawn_el_idx.size()) {
-		if (page->roller_drawn_el_idx[roller_idx] == ContextMenuTag) {
+		auto tag = page->roller_drawn_el_idx[roller_idx];
+
+		if (tag == ContextMenuTag)
 			page->show_context_menu();
-		}
+
+		else if (tag == BackTag)
+			page->exit_group();
+
+		else if (is_group_tag(tag))
+			page->enter_group(group_from_tag(tag));
 	}
 }
 
@@ -471,7 +575,8 @@ void ModuleViewPage::roller_pressed_cb(lv_event_t *event) {
 void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 	auto page = static_cast<ModuleViewPage *>(event->user_data);
 	if (page) {
-		if (page->roller_drawn_el_idx.size() <= 1) {
+		// Nothing to select: go to the button bar
+		if (page->roller_drawn_el_idx.size() <= 1 && !page->current_group) {
 			page->focus_button_bar();
 			page->roller_hover.hide();
 			return;
@@ -483,12 +588,12 @@ void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 			if (page->settings.module_view.nav_wrapping && page->last_button_focused == ui_ModuleViewHideBut) {
 				auto cur_sel = lv_roller_get_option_cnt(ui_ElementRoller) - 1;
 				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
-				page->cur_selected = page->roller_drawn_el_idx[cur_sel];
+				page->cur_selected = cur_sel;
 			}
 			if (page->last_button_focused == ui_ModuleViewSettingsBut) {
-				auto cur_sel = 1;
+				auto cur_sel = page->first_selectable_row();
 				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
-				page->cur_selected = page->roller_drawn_el_idx[cur_sel];
+				page->cur_selected = cur_sel;
 			}
 
 			// Must send a PRESS event to enter "edit" mode
@@ -496,10 +601,7 @@ void ModuleViewPage::roller_focus_cb(lv_event_t *event) {
 			// This sends another FOCUSED event:
 			lv_group_set_editing(page->group, true);
 		}
-		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-			page->highlight_component(*drawn_idx);
-			move_selected_control_foreground(page->drawn_elements, page->drawn_elements[*drawn_idx]);
-		}
+		page->highlight_row(page->cur_selected);
 		page->last_button_focused = nullptr;
 	}
 }
@@ -513,6 +615,128 @@ void ModuleViewPage::jump_to_roller_cb(lv_event_t *event) {
 	} else {
 		page->last_button_focused = event->target;
 	}
+}
+
+std::optional<unsigned> ModuleViewPage::find_drawn_idx(ElementCount::Indices indices) const {
+	for (auto [i, drawn_element] : enumerate(drawn_elements)) {
+		if (ElementCount::matched(indices, drawn_element.gui_element.idx))
+			return i;
+	}
+	return std::nullopt;
+}
+
+// Resolve this module's registered groups, order, and custom names against its drawn elements.
+void ModuleViewPage::build_element_layout() {
+	layout.build(slug, drawn_elements);
+
+	std::string err_notif;
+	for (auto const &[i, error] : enumerate(layout.errors)) {
+		pr_dev("Module %.*s: plugin-mm.json: %s\n", (int)slug.size(), slug.data(), error.c_str());
+
+		if (i < 3)
+			err_notif += error + "\n";
+		else if (i == 3)
+			err_notif += "...and more\n";
+	}
+	auto err_count = layout.errors.size();
+
+#ifdef SIMULATOR
+	const bool do_show_error_notif = true;
+#else
+	const bool do_show_error_notif = settings.developer.enabled;
+#endif
+	if (err_count && do_show_error_notif) {
+		std::string leader =
+			err_count == 1 ? "Found an error for '" : "Found " + std::to_string(err_count) + " errors for '";
+
+		notify_queue.put({leader + std::string(slug) + "' in plugin-mm.json:\n" + err_notif + "See console log",
+						  Notification::Priority::Error,
+						  10000});
+	}
+}
+
+// Open a group: show only its elements, with a "< Back" row above them
+void ModuleViewPage::enter_group(unsigned group_idx) {
+	if (group_idx >= layout.group_names.size())
+		return;
+
+	unhighlight_component(cur_selected);
+
+	current_group = group_idx;
+	args.element_indices = std::nullopt; // don't re-open the group we came from
+	cur_selected = 1;
+	populate_roller();
+
+	// Start on the group's first highlight-able element unless the group is
+	// empty (while patching a cable), then default to the Back row (0)
+	cur_selected = 0;
+	for (auto [i, drawn_idx] : enumerate(roller_drawn_el_idx)) {
+		if (drawn_idx >= 0) {
+			cur_selected = i;
+			highlight_component(drawn_idx);
+			move_selected_control_foreground(drawn_elements, drawn_elements[drawn_idx]);
+			break;
+		}
+	}
+	lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
+}
+
+// Return to the top-level list, with the group we just left selected
+void ModuleViewPage::exit_group() {
+	auto left_group = current_group;
+
+	// The element we were on isn't in the top-level list
+	unhighlight_component(cur_selected);
+
+	current_group.reset();
+	args.element_indices = std::nullopt;
+	cur_selected = 0;
+	populate_roller();
+
+	if (!left_group)
+		return;
+
+	auto tag = group_row_tag(*left_group);
+	for (auto [i, drawn_idx] : enumerate(roller_drawn_el_idx)) {
+		if (drawn_idx == tag) {
+			// populate_roller() highlighted the first row
+			unhighlight_component(cur_selected);
+			cur_selected = i;
+			lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
+			highlight_row(cur_selected);
+			break;
+		}
+	}
+}
+
+// The row to select when coming into the roller from the top (skip headers)
+unsigned ModuleViewPage::first_selectable_row() const {
+	if (!roller_drawn_el_idx.empty() && roller_drawn_el_idx[0] != RollerHeaderTag)
+		return 0;
+	return 1;
+}
+
+std::optional<unsigned> ModuleViewPage::get_group_idx(unsigned roller_idx) const {
+	if (roller_idx < roller_drawn_el_idx.size()) {
+		auto tag = roller_drawn_el_idx[roller_idx];
+		if (is_group_tag(tag) && group_from_tag(tag) < layout.group_members.size())
+			return group_from_tag(tag);
+	}
+	return std::nullopt;
+}
+
+// Elements that are ever listed. While patching a cable, some of these are also
+// filtered out (see is_listed), but groups and order are kept as they are.
+bool ModuleViewPage::is_listable(unsigned drawn_idx) const {
+	auto const &drawn_element = drawn_elements[drawn_idx];
+	return base_element(drawn_element.element).short_name.size() > 0 && !ModView::is_light_only(drawn_element);
+}
+
+// Elements that are listed right now
+bool ModuleViewPage::is_listed(unsigned drawn_idx) const {
+	return is_listable(drawn_idx) &&
+		   !ModView::should_skip_for_cable_mode(
+			   gui_state.new_cable, drawn_elements[drawn_idx].gui_element, gui_state, patch, this_module_id);
 }
 
 std::optional<unsigned> ModuleViewPage::get_drawn_idx(unsigned roller_idx) {

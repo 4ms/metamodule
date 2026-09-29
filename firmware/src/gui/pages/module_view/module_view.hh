@@ -9,6 +9,7 @@
 #include "gui/pages/make_cable.hh"
 #include "gui/pages/make_expander.hh"
 #include "gui/pages/module_view/action_menu.hh"
+#include "gui/pages/module_view/element_layout.hh"
 #include "gui/pages/module_view/mapping_pane.hh"
 #include "gui/pages/module_view/settings_menu.hh"
 #include "gui/pages/page_list.hh"
@@ -124,13 +125,15 @@ struct ModuleViewPage : PageBase {
 			return;
 		}
 
-		auto alias = patch->get_module_alias(static_cast<uint16_t>(this_module_id));
-		auto display = alias.empty() ? ModuleFactory::getModuleDisplayName(slug) : alias;
-		lv_label_set_text(ui_ElementRollerModuleName, display.data());
+		lv_label_set_text(ui_ElementRollerModuleName, module_display_name(*patch, this_module_id).c_str());
+		lv_label_set_recolor(ui_ElementRollerModuleName, true);
 
 		has_context_menu = module_context_menu.create_options_menu(slug, this_module_id);
 
+		current_group.reset();
+		open_group_for_target = true;
 		full_screen_mode = false;
+
 		redraw_module();
 
 		lv_hide(ui_ModuleViewActionMenu);
@@ -208,6 +211,10 @@ struct ModuleViewPage : PageBase {
 
 			} else if (full_screen_mode) {
 				exit_fullscreen();
+
+			} else if (mode == ViewMode::List && current_group) {
+				// Inside an element group: back returns to the top-level list
+				exit_group();
 
 			} else if (mode == ViewMode::List) {
 				args.module_id = this_module_id;
@@ -463,7 +470,7 @@ private:
 		page->enter_fullscreen();
 		lv_obj_scroll_to_x(ui_ModuleImage, 0, LV_ANIM_ON);
 
-		page->cur_selected = 1;
+		page->cur_selected = page->first_selectable_row();
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_roller_set_selected(ui_ElementRoller, page->cur_selected, LV_ANIM_OFF);
 		lv_event_send(ui_ElementRoller, LV_EVENT_SCROLL, nullptr);
@@ -475,7 +482,9 @@ private:
 	void populate_element_objects();
 	void add_element_highlight(DrawnElement const &drawn_element);
 	void unhighlight_component(uint32_t prev_sel);
-	void highlight_component(size_t idx);
+	void unhighlight_element(size_t idx);
+	void highlight_row(uint32_t roller_idx);
+	void highlight_component(size_t idx, bool scroll_into_view = true);
 	void focus_button_bar(bool first_button = false);
 	void click_cable_destination(unsigned drawn_idx);
 	void click_altparam_action(DrawnElement const &drawn_element);
@@ -489,6 +498,16 @@ private:
 	static void roller_pressed_cb(lv_event_t *event);
 	static void jump_to_roller_cb(lv_event_t *event);
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx);
+	std::optional<unsigned> get_group_idx(unsigned roller_idx) const;
+	bool is_listable(unsigned drawn_idx) const;
+	bool is_listed(unsigned drawn_idx) const;
+	unsigned first_selectable_row() const;
+
+	// Element grouping and ordering (defined in module_view/element_roller.cc)
+	void build_element_layout();
+	std::optional<unsigned> find_drawn_idx(ElementCount::Indices indices) const;
+	void enter_group(unsigned group_idx);
+	void exit_group();
 
 	// Defined in module_view/draw_module.cc
 	void prepare_dynamic_elements();
@@ -555,6 +574,15 @@ private:
 
 	std::vector<int> roller_drawn_el_idx;
 
+	// Element grouping, ordering, and custom names
+	ElementLayout layout;
+	std::optional<unsigned> current_group{};
+
+	// Set when the page is (re)entered: the element we were sent to opens its
+	// group. Without this, any later re-populate (a settings change, say)
+	// would re-open a group the user had just backed out of.
+	bool open_group_for_target = false;
+
 	lv_obj_t *canvas = nullptr;
 	ModuleViewMappingPane mapping_pane;
 
@@ -583,7 +611,20 @@ private:
 
 	std::optional<GuiElement> pending_action_param_clear{};
 
-	enum { RollerHeaderTag = -1, ContextMenuTag = -2 };
+	enum { RollerHeaderTag = -1, ContextMenuTag = -2, BackTag = -3 };
+
+
+	// Roller rows that open a group are tagged GroupTagBase - group_idx
+	static constexpr int GroupTagBase = -100;
+	static constexpr int group_row_tag(unsigned group_idx) {
+		return GroupTagBase - (int)group_idx;
+	}
+	static constexpr bool is_group_tag(int tag) {
+		return tag <= GroupTagBase;
+	}
+	static constexpr unsigned group_from_tag(int tag) {
+		return (unsigned)(GroupTagBase - tag);
+	}
 
 	uint16_t selected_input_port = 0;
 	uint16_t selected_output_port = 0;

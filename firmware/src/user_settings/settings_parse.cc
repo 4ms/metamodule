@@ -299,7 +299,9 @@ namespace Settings
 bool parse(std::span<char> yaml, UserSettings *settings) {
 	RymlInit::init_once();
 
-	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yaml.data(), yaml.size()));
+	ryml::Tree tree;
+	if (!RymlInit::parse_in_place(ryml::substr(yaml.data(), yaml.size()), &tree))
+		return false;
 
 	if (tree.num_children(0) == 0)
 		return false;

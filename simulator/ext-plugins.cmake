@@ -24,6 +24,16 @@
 # list(APPEND ext_builtin_brand_paths "${CMAKE_CURRENT_LIST_DIR}/../../metamodule-plugin-examples/Bogaudio")
 # list(APPEND ext_builtin_brand_libname "BogaudioModules")
 
+# Ext plugins can also be given on the cmake command line, which replaces any listed above.
+# (The SDK's scripts/check_element_layout.py uses this):
+#   -DEXT_BUILTIN_BRAND_PATHS="path1;path2" -DEXT_BUILTIN_BRAND_LIBNAMES="Lib1;Lib2"
+#   -DEXT_BUILTIN_BRAND_SLUGS="slug1;slug2" (optional)
+if (DEFINED EXT_BUILTIN_BRAND_PATHS)
+  set(ext_builtin_brand_paths ${EXT_BUILTIN_BRAND_PATHS})
+  set(ext_builtin_brand_libname ${EXT_BUILTIN_BRAND_LIBNAMES})
+  set(ext_builtin_brand_slug ${EXT_BUILTIN_BRAND_SLUGS})
+endif()
+
 #
 # Asset dir
 #
@@ -35,31 +45,12 @@ cmake_path(APPEND ASSET_IMG_PATH "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FILE
 message("set ASSET_DIR to ${ASSET_DIR}")
 message("set ASSET_IMG_PATH to ${ASSET_IMG_PATH}")
 
+# CONFIGURE_DEPENDS re-globs at build time, so added or deleted files trigger a
+# reconfigure and modified ones rebuild the asset image.
+file(GLOB_RECURSE FW_ASSET_FILES CONFIGURE_DEPENDS ${FWDIR}/assets/*)
+
 # Copies vcv_ports/BRAND/plugin.json to assets/BRAND/plugin.json when a submodule's copy changes
 include(${FWDIR}/vcv_ports/sync_plugin_jsons.cmake)
-
-add_custom_command(
-  OUTPUT ${ASSET_DIR}
-  COMMAND ${SYNC_PLUGIN_JSONS_COMMAND}
-  COMMAND ${CMAKE_COMMAND} -E echo Copying "${FWDIR}/assets" to "${ASSET_DIR}"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory "${FWDIR}/assets" "${ASSET_DIR}"
-  DEPENDS ${SYNC_PLUGIN_JSONS_SOURCES}
-  COMMENT "Copying assets/ dir from ${FWDIR}/assets to ${ASSET_DIR}"
-  VERBATIM USES_TERMINAL
-)
-
-add_custom_command(
-  OUTPUT ${ASSET_IMG_PATH}
-  COMMAND cd ${ASSET_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
-  COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
-  COMMENT "Creating assets uimg file at ${ASSET_IMG_PATH}"
-  DEPENDS ${ASSET_DIR}
-  VERBATIM USES_TERMINAL
-)
-
- add_custom_target(asset-image ALL 
-	DEPENDS ${ASSET_IMG_PATH}
- )
 
  set(EXT_PLUGIN_INIT_CALLS "")
 
@@ -150,10 +141,54 @@ foreach(branddir brand slug IN ZIP_LISTS ext_builtin_brand_paths ext_builtin_bra
 	add_dependencies(_vcv_ports_internal ${brand}-localized)
 
 	target_link_libraries(_vcv_ports_internal PUBLIC ${brand_localized_obj})
-	add_dependencies(asset-image ${brand}-assets)
+	# No add_dependencies(asset-image ...) needed: the image depends on this plugin's
+	# asset files and manifests, which create_plugin() records (see plugin.cmake)
 
 	string(APPEND EXT_PLUGIN_INIT_CALLS "\textern void init_${brand}(rack::plugin::Plugin *);\n\tpluginInstance = &internal_plugins.emplace_back(\"${slug}\");\n\tinit_${brand}(pluginInstance);\n")
 endforeach()
+
+# The asset dir is rebuilt from scratch every time the image is: the firmware's assets
+# (after syncing their plugin.json files with vcv_ports/, see above), then each built-in
+# plugin's assets and manifests. Nothing else writes to it, so it
+# can't get out of step with the image (e.g. if build/assets is deleted).
+#
+# Defined after the loop so it can use each built-in plugin's assets, which
+# create_plugin() records as it runs (see plugin.cmake)
+get_property(PLUGIN_ASSET_NAMES GLOBAL PROPERTY MM_PLUGIN_ASSET_NAMES)
+get_property(PLUGIN_ASSET_SOURCE_DIRS GLOBAL PROPERTY MM_PLUGIN_ASSET_SOURCE_DIRS)
+get_property(PLUGIN_ASSET_MANIFESTS GLOBAL PROPERTY MM_PLUGIN_ASSET_MANIFESTS)
+get_property(PLUGIN_ASSET_DEPENDS GLOBAL PROPERTY MM_PLUGIN_ASSET_DEPENDS)
+
+set(PLUGIN_ASSET_COPY_COMMANDS "")
+foreach(name source_dir manifests IN ZIP_LISTS PLUGIN_ASSET_NAMES PLUGIN_ASSET_SOURCE_DIRS PLUGIN_ASSET_MANIFESTS)
+  if (IS_DIRECTORY "${source_dir}")
+    list(APPEND PLUGIN_ASSET_COPY_COMMANDS
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_dir} ${ASSET_DIR}/${name})
+  endif()
+  if (manifests)
+    string(REPLACE "|" ";" manifests "${manifests}")
+    list(APPEND PLUGIN_ASSET_COPY_COMMANDS
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${ASSET_DIR}/${name}
+      COMMAND ${CMAKE_COMMAND} -E copy ${manifests} ${ASSET_DIR}/${name}/)
+  endif()
+endforeach()
+
+add_custom_command(
+  OUTPUT ${ASSET_IMG_PATH}
+  COMMAND ${SYNC_PLUGIN_JSONS_COMMAND}
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${ASSET_DIR}
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets ${ASSET_DIR}
+  ${PLUGIN_ASSET_COPY_COMMANDS}
+  COMMAND cd ${ASSET_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
+  COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
+  COMMENT "Creating assets uimg file at ${ASSET_IMG_PATH}"
+  DEPENDS ${FW_ASSET_FILES} ${SYNC_PLUGIN_JSONS_SOURCES} ${PLUGIN_ASSET_DEPENDS}
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_target(asset-image ALL
+  DEPENDS ${ASSET_IMG_PATH}
+)
 
 configure_file(src/ext_plugin_builtin.hh.in ${CMAKE_CURRENT_BINARY_DIR}/ext_plugin/ext_plugin_builtin.hh)
 target_include_directories(simulator PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ext_plugin)

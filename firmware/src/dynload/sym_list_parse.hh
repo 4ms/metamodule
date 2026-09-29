@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ryml.hpp"
+#include "ryml_init.hh"
 #include "ryml_std.hpp"
 
 namespace MetaModule
@@ -31,9 +32,11 @@ inline bool read(ryml::ConstNodeRef const &n, ElfFile::HostSymbol *symbol) {
 inline std::vector<ElfFile::HostSymbol> parse_symlist(std::string_view yaml) {
 	std::vector<ElfFile::HostSymbol> syms;
 
-	ryml::Tree tree = ryml::parse_in_arena(ryml::csubstr(yaml.data(), yaml.size()));
+	RymlInit::init_once();
+	ryml::Tree tree;
+	bool parsed = RymlInit::parse_in_arena(ryml::csubstr(yaml.data(), yaml.size()), &tree);
 
-	if (tree.num_children(0) <= 0) {
+	if (!parsed || tree.num_children(0) <= 0) {
 		pr_err("Host symbol file not valid yaml\n");
 		return {};
 	}

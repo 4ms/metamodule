@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/element_group.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"
@@ -20,10 +21,14 @@ struct Metadata {
 	// When loading a patch, consider use of these names as equivalent to using the brand_slug
 	std::vector<std::string> brand_aliases;
 
-	// From plugin-mm.json: display names shown on the MetaModule screen
+	// From plugin-mm.json: display names shown on the MetaModule screen,
+	// and the module's element groups (optional)
 	struct ModuleDisplayName {
 		std::string slug;
 		std::string display_name;
+		std::vector<ElementGroup> element_groups;
+		std::vector<ElementRef> element_order;
+		std::vector<ElementName> element_names;
 	};
 
 	std::vector<ModuleDisplayName> module_display_names;
@@ -40,6 +45,55 @@ struct Metadata {
 	std::vector<ModuleMetaData> module_extras;
 };
 
+// "groups" is a map of group name => list of element references, in the order the
+// groups should appear in the module view:
+//   "groups": { "Filter": ["Cutoff", "Resonance", "param:7"], "Envelope": ["Attack"] }
+static void read_element_groups(ryml::ConstNodeRef const &n, std::vector<ElementGroup> *groups) {
+	if (!n.is_map())
+		return;
+
+	for (auto const &group_node : n.children()) {
+		if (!group_node.has_key() || !group_node.is_seq())
+			continue;
+
+		auto &group = groups->emplace_back();
+		group.name = std::string{std::string_view{group_node.key()}};
+
+		for (auto const &member : group_node.children()) {
+			if (member.has_val())
+				group.members.push_back(ElementRef::parse(std::string_view{member.val()}));
+		}
+	}
+}
+
+// "order" lists the top level of the element list: group names and element references
+//   "order": ["Tap Tempo", "Channel 1", "Channel 2", "out:0"]
+static void read_element_order(ryml::ConstNodeRef const &n, std::vector<ElementRef> *order) {
+	if (!n.is_seq())
+		return;
+
+	for (auto const &item : n.children()) {
+		if (item.has_val())
+			order->push_back(ElementRef::parse(std::string_view{item.val()}));
+	}
+}
+
+// "names" is a map of element reference => the name to show for it in the element list
+//   "names": { "Red Speed": "Rate", "param:3": "Mix" }
+static void read_element_names(ryml::ConstNodeRef const &n, std::vector<ElementName> *names) {
+	if (!n.is_map())
+		return;
+
+	for (auto const &item : n.children()) {
+		if (!item.has_key() || !item.has_val())
+			continue;
+
+		auto name = std::string_view{item.val()};
+		if (name.size())
+			names->push_back({ElementRef::parse(std::string_view{item.key()}), std::string(name)});
+	}
+}
+
 static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
 	if (!n.is_map())
 		return false;
@@ -50,6 +104,15 @@ static bool read(ryml::ConstNodeRef const &n, Metadata::ModuleDisplayName *s) {
 			n["displayName"] >> s->display_name;
 		} else if (n.has_child("name")) {
 			n["name"] >> s->display_name;
+		}
+		if (n.has_child("groups")) {
+			read_element_groups(n["groups"], &s->element_groups);
+		}
+		if (n.has_child("order")) {
+			read_element_order(n["order"], &s->element_order);
+		}
+		if (n.has_child("names")) {
+			read_element_names(n["names"], &s->element_names);
 		}
 	}
 	return true;
@@ -79,7 +142,9 @@ inline bool parse_json(std::span<char> file_data, Metadata *metadata) {
 	// ryml has issues with tabs in json sometimes:
 	std::ranges::replace(file_data, '\t', ' ');
 
-	ryml::Tree tree = ryml::parse_in_place(ryml::substr(file_data.data(), file_data.size()));
+	ryml::Tree tree;
+	if (!RymlInit::parse_in_place(ryml::substr(file_data.data(), file_data.size()), &tree))
+		return false;
 
 	if (tree.num_children(0) == 0)
 		return false;
@@ -112,7 +177,9 @@ inline bool parse_mm_json(std::span<char> file_data, Metadata *metadata) {
 	// ryml has issues with tabs in json sometimes:
 	std::ranges::replace(file_data, '\t', ' ');
 
-	ryml::Tree tree = ryml::parse_in_place(ryml::substr(file_data.data(), file_data.size()));
+	ryml::Tree tree;
+	if (!RymlInit::parse_in_place(ryml::substr(file_data.data(), file_data.size()), &tree))
+		return false;
 
 	if (tree.num_children(0) == 0)
 		return false;

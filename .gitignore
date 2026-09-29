@@ -1,5 +1,6 @@
 build/
 build-headless/
+build-layout-check/
 LOCAL/
 LOCAL
 *.hex
