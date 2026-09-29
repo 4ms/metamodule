@@ -26,16 +26,18 @@
 namespace MetaModule
 {
 
-// Renders every loaded module's faceplate (exactly as the ModuleView module
-// drawer renders it at 240px height) and saves each as a PNG under
+// Renders every loaded module's faceplate exactly as module_drawer renders it at
+// 240px height and saves each as a PNG under
 // "module-images/<brand>/<module>.png" on the USB drive.
 //
 // Also checks each module's element groups, order, and names from plugin-mm.json, the
-// same way the module view resolves them (ElementLayout). Any errors are listed in
-// "module-images/plugin_mm_errors.txt", counted in the report, and fail the run.
+// same way ModuleView resolves them.
 //
-// Triggered like the CPU load tests: a file named "run_image_gen" on the USB
-// drive whose first line selects what to render:
+// Results (errors, and why a module was skipped) are printed with printf or pr_dev
+// so they're in the console log even with release firmware (LOG_LEVEL=NONE).
+//
+// The imagegen tests are triggered like the CPU load tests:
+// a file named "run_image_gen" on the USB drive whose first line selects what to render:
 //   all     : every brand, built-in and plugins
 //   plugins : only the brands the plugins on the drive register
 //   <brand> : just that brand
@@ -107,7 +109,7 @@ struct ModuleImageGen {
 			if (result.state == PluginFileLoader::State::GotList)
 				break;
 			if (result.state == PluginFileLoader::State::Error) {
-				pr_err("Failed to get plugin list for image generation\n");
+				printf("Failed to get plugin list for image generation\n");
 				FS::write_file(file_storage_proxy, csv, {ReportPath, OutVol});
 				hil_message("*failure\n");
 				return;
@@ -137,7 +139,7 @@ struct ModuleImageGen {
 					break;
 				}
 				if (state == RamDiskFull || state == InvalidPlugin || state == Error) {
-					pr_warn("Failed to load plugin '%s' for image generation, skipping\n", plugin_file_name.c_str());
+					printf("Failed to load plugin '%s' for image generation, skipping\n", plugin_file_name.c_str());
 					loaded_ok = false;
 					break;
 				}
@@ -168,15 +170,15 @@ struct ModuleImageGen {
 		FS::write_file(file_storage_proxy, counts.layout_error_report, {LayoutErrorsPath, OutVol});
 
 		if (!all_brands && counts.rendered == 0 && counts.skipped == 0) {
-			pr_err("No modules matched '%s' for image generation\n", filter.c_str());
+			printf("No modules matched '%s' for image generation\n", filter.c_str());
 			hil_message("*failure\n");
 			return;
 		}
 
-		pr_info("Module image generation finished: %u rendered, %u skipped, %u plugin-mm.json errors\n",
-				counts.rendered,
-				counts.skipped,
-				counts.layout_errors);
+		printf("Module image generation finished: %u rendered, %u skipped, %u plugin-mm.json errors\n",
+			   counts.rendered,
+			   counts.skipped,
+			   counts.layout_errors);
 		lv_label_set_text_fmt(ui_MainMenuNowPlaying,
 							  "Done: %u images, %u skipped, %u plugin-mm errors",
 							  counts.rendered,
@@ -184,7 +186,7 @@ struct ModuleImageGen {
 							  counts.layout_errors);
 
 		if (counts.layout_errors) {
-			pr_err("Found %u errors in plugin-mm.json groups/order/names, see %.*s\n",
+			printf("Found %u errors in plugin-mm.json groups/order/names, see %.*s\n",
 				   counts.layout_errors,
 				   (int)LayoutErrorsPath.size(),
 				   LayoutErrorsPath.data());
@@ -220,7 +222,7 @@ private:
 			bool ok = render_and_save(file_storage_proxy, player, playloader, brand, slug, true, &layout_errors);
 
 			for (auto const &error : layout_errors) {
-				pr_err("Module %s: plugin-mm.json: %s\n", full_slug.c_str(), error.c_str());
+				printf("Module %s: plugin-mm.json: %s\n", full_slug.c_str(), error.c_str());
 				counts.layout_error_report += std::string(full_slug) + ": " + error + "\n";
 			}
 			counts.layout_errors += layout_errors.size();
@@ -287,7 +289,7 @@ private:
 
 		auto [faceplate, width] = drawer.read_faceplate(full_slug.c_str());
 		if (faceplate.empty() || width <= 0) {
-			pr_warn("Skipping %s: no faceplate\n", full_slug.c_str());
+			printf("Skipping %s: no faceplate\n", full_slug.c_str());
 			return false;
 		}
 
@@ -340,7 +342,7 @@ private:
 			dyn.prepare_module(drawn_elements, module_id, canvas);
 			dyn.draw();
 		} else {
-			pr_warn("Could not load %s for dynamic displays: %s\n", full_slug.c_str(), res.error_string.c_str());
+			printf("Could not load %s for dynamic displays: %s\n", full_slug.c_str(), res.error_string.c_str());
 		}
 
 		// Now that the module has been created, its element names are final
@@ -372,7 +374,7 @@ private:
 		const auto cf = LV_IMG_CF_TRUE_COLOR; // RGB565, 2 bytes/pixel
 		uint32_t buf_size = lv_snapshot_buf_size_needed(canvas, cf);
 		if (buf_size == 0) {
-			pr_warn("Snapshot size unavailable for %.*s\n", (int)module_slug.size(), module_slug.data());
+			printf("Snapshot size unavailable for %.*s\n", (int)module_slug.size(), module_slug.data());
 			return false;
 		}
 
@@ -397,7 +399,7 @@ private:
 		disp->driver->ver_res = saved_ver;
 
 		if (snap_res != LV_RES_OK) {
-			pr_warn("Snapshot failed for %.*s\n", (int)module_slug.size(), module_slug.data());
+			printf("Snapshot failed for %.*s\n", (int)module_slug.size(), module_slug.data());
 			return false;
 		}
 
@@ -435,7 +437,7 @@ private:
 
 		auto png = encode_png24_from_rgb565(pixels, out_w, out_h);
 		if (png.empty()) {
-			pr_err("PNG encode failed for %.*s\n", (int)module_slug.size(), module_slug.data());
+			printf("PNG encode failed for %.*s\n", (int)module_slug.size(), module_slug.data());
 			return false;
 		}
 
@@ -443,7 +445,7 @@ private:
 
 		auto wrote = FS::write_file(file_storage_proxy, std::span<const char>{png.data(), png.size()}, {path, OutVol});
 		if (!wrote)
-			pr_err("Failed writing %s\n", path.c_str());
+			printf("Failed writing %s\n", path.c_str());
 
 		return wrote;
 	}

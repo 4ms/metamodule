@@ -16,6 +16,12 @@ inline void _do_printf_impl(auto... args) {
 	printf(args...);
 }
 
+// Messages plugin developers needs to see regarding a plugin being tested
+// Run-time switched to print in Developer mode only
+inline void pr_dev(auto... args) {
+	_do_printf_impl(args...);
+}
+
 // Error: unexpected conditions that may lead to program failure
 inline void pr_err(auto... args) {
 #if LOG_LEVEL > 0

@@ -4,6 +4,7 @@
 // #define pr_trace printf
 // #define pr_info printf
 // #define pr_dump printf
+#define pr_dev printf
 
 #define pr_dbg(...)
 #define pr_err(...)
@@ -11,3 +12,4 @@
 #define pr_trace(...)
 #define pr_info(...)
 #define pr_dump(...)
+// #define pr_dev(...)

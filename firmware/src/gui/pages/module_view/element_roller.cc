@@ -65,8 +65,8 @@ void ModuleViewPage::populate_roller() {
 	}
 	open_group_for_target = false;
 
-	std::string title =
-		current_group ? Gui::blue_text(layout.group_names[*current_group]) : module_display_name(*patch, this_module_id);
+	std::string title = current_group ? Gui::blue_text(layout.group_names[*current_group]) :
+										module_display_name(*patch, this_module_id);
 	lv_label_set_text(ui_ElementRollerModuleName, title.c_str());
 
 	// Populate Roller and element highlights
@@ -616,7 +616,7 @@ void ModuleViewPage::build_element_layout() {
 
 	std::string err_notif;
 	for (auto const &[i, error] : enumerate(layout.errors)) {
-		pr_err("Module %.*s: %s\n", (int)slug.size(), slug.data(), error.c_str());
+		pr_dev("Module %.*s: plugin-mm.json: %s\n", (int)slug.size(), slug.data(), error.c_str());
 
 		if (i < 3)
 			err_notif += error + "\n";
