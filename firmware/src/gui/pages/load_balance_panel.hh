@@ -150,11 +150,14 @@ private:
 			lv_show(bar_conts[core], has_balance);
 		}
 
+		// Overhead is only known from live measurements (see update_box_widths())
+		lv_hide(overhead_cont);
+
 		if (has_balance) {
-			// Scale bars to fit screen if over 100%
-			bar_scale_ppm = OneCorePpm;
+			uint32_t max_core_ppm = 0;
 			for (auto core = 0u; core < NumCores; core++)
-				bar_scale_ppm = std::max(bar_scale_ppm, core_load_ppm(core));
+				max_core_ppm = std::max(max_core_ppm, core_load_ppm(core));
+			set_bar_layout(max_core_ppm, 0);
 
 			for (auto core = 0u; core < NumCores; core++) {
 				for (auto module_id = 1u; module_id < patch->module_cores.size(); module_id++) {
@@ -167,16 +170,19 @@ private:
 			}
 
 			// Marker at the 100% point, shown when a bar is scaled to over 100%
-			for (auto core = 0u; core < NumCores; core++) {
-				add_full_core_marker(core);
-				lv_show(full_core_markers[core], bar_scale_ppm > OneCorePpm);
-			}
+			for (auto core = 0u; core < NumCores; core++)
+				full_core_markers[core] = create_full_core_marker(bar_rows[core]);
+			place_full_core_markers();
 
 			for (auto core = 0u; core < NumCores; core++)
 				lv_label_set_text_fmt(core_labels[core], "Core %u: %u%%", core + 1, (unsigned)(core_load_ppm(core) / 10000));
 		}
 
-		// put the buttons at the end of the group
+		// put the overhead boxes after the modules, and the buttons at the end of the group
+		for (auto *box : overhead_boxes) {
+			lv_group_remove_obj(box);
+			lv_group_add_obj(group, box);
+		}
 		for (auto *button : {recalc_button, save_button, undo_button, close_button}) {
 			lv_group_remove_obj(button);
 			lv_group_add_obj(group, button);
@@ -184,6 +190,10 @@ private:
 
 		show_module_info(0);
 		update_cpu_load();
+
+		// Show the live sizes and overhead right away, if playing
+		if (has_balance && !trials_running)
+			update_box_widths();
 
 		// Enabled even when the patch stopped (e.g. from overloads): re-balancing
 		// starts it playing again
@@ -207,6 +217,9 @@ private:
 			if (box)
 				lv_obj_clear_state(box, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
 		}
+
+		for (auto *box : overhead_boxes)
+			lv_obj_clear_state(box, LV_STATE_FOCUSED | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
 	}
 
 	void update_cpu_load() {
@@ -221,19 +234,7 @@ private:
 		auto live = patch_playloader.get_live_load();
 		bool show_live = playing && live.valid;
 
-		lv_show(live_load_label, show_live);
-
 		if (show_live) {
-			// Cable loads show as grey boxes in the bars (highlight one to see its %).
-			// Sync shows core 1's waits at the first + second join
-			lv_label_set_text_fmt(live_load_label,
-								  "Mappings: %u%% MIDI: %u%%\nSync: %u%%+%u%%  Overhead: %u%%",
-								  (unsigned)std::round(live.mappings / 10.f),
-								  (unsigned)std::round(live.midi / 10.f),
-								  (unsigned)std::round(live.sync / 10.f),
-								  (unsigned)std::round(live.sync2 / 10.f),
-								  (unsigned)std::round(live.overhead / 10.f));
-
 			if (patch && patch->has_load_balance(NumCores)) {
 				for (auto core = 0u; core < NumCores && core < live.core_modules.size(); core++) {
 					lv_label_set_text_fmt(core_labels[core],
@@ -250,6 +251,17 @@ private:
 	// Estimated load (measured when the balance was calculated) plus the live
 	// measurement, for the currently focused module or cable box
 	void update_module_load_label(LiveLoadMeter::Loads const &live) {
+		if (info_overhead_part >= 0) {
+			bool playing = patch_playloader.is_view_patch_playing();
+			if (playing && live.valid) {
+				auto tenths = (unsigned)std::round(overhead_ppm[info_overhead_part] / 1000.f);
+				lv_label_set_text_fmt(module_load_label, "%u.%u%%", tenths / 10u, tenths % 10u);
+			} else {
+				lv_label_set_text(module_load_label, "");
+			}
+			return;
+		}
+
 		if (info_cables_core >= 0) {
 			bool playing = patch_playloader.is_view_patch_playing();
 			if (playing && live.valid) {
@@ -299,43 +311,116 @@ private:
 		return sum;
 	}
 
-	// Where 100% of a core falls, as a percentage of the bar's width
-	lv_coord_t full_core_pct() const {
-		return (lv_coord_t)((uint64_t)OneCorePpm * 100 / bar_scale_ppm);
+	// Sizes the rows so the panel's full width is bar_scale_ppm of CPU time. The core
+	// rows are as wide as the busier core, and the overhead row fills the rest, so the
+	// bars read like a timeline of one audio block: both cores run their modules and
+	// cables in parallel, then Core 1 does the overhead.
+	void set_bar_layout(uint32_t max_core_ppm, uint32_t overhead_total_ppm) {
+		core_row_ppm = std::max<uint32_t>(max_core_ppm, 1);
+		bar_scale_ppm = std::max(OneCorePpm, core_row_ppm + overhead_total_ppm);
+
+		// The overhead starts where the core rows end
+		auto core_row_pct = (lv_coord_t)std::clamp<uint64_t>((uint64_t)core_row_ppm * 100 / bar_scale_ppm, 1, 100);
+		if constexpr (FullWidthRows) {
+			lv_obj_set_width(overhead_spacer, lv_pct(core_row_pct));
+		} else {
+			for (auto *row : bar_rows)
+				lv_obj_set_width(row, lv_pct(core_row_pct));
+			lv_obj_set_x(overhead_row, lv_pct(core_row_pct));
+			lv_obj_set_width(overhead_row, lv_pct(100 - core_row_pct));
+		}
 	}
 
-	// A line across the bar at the 100% point, drawn on top of the modules
-	void add_full_core_marker(unsigned core) {
-		auto marker = lv_obj_create(bar_rows[core]);
+	// CPU time represented by the full width of a core row
+	uint32_t core_boxes_ppm() const {
+		return FullWidthRows ? bar_scale_ppm : core_row_ppm;
+	}
+
+	// CPU time represented by the full width of the overhead row
+	uint32_t overhead_row_ppm() const {
+		return FullWidthRows ? bar_scale_ppm : std::max<uint32_t>(bar_scale_ppm - core_row_ppm, 1);
+	}
+
+	// A line across the bars at the 100% point, drawn on top of the boxes
+	lv_obj_t *create_full_core_marker(lv_obj_t *row) {
+		auto marker = lv_obj_create(row);
 		lv_obj_add_flag(marker, LV_OBJ_FLAG_FLOATING);
 		lv_obj_clear_flag(marker, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_set_size(marker, 3, lv_pct(100));
-		lv_obj_set_x(marker, lv_pct(full_core_pct()));
 		lv_obj_set_style_radius(marker, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_width(marker, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_all(marker, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_color(marker, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(marker, LV_OPA_COVER, LV_PART_MAIN);
-
-		full_core_markers[core] = marker;
+		return marker;
 	}
 
-	void set_box_width(lv_obj_t *box, uint32_t ppm) {
-		auto width_pct = (lv_coord_t)std::min<uint64_t>((uint64_t)ppm * 100 / bar_scale_ppm, 100);
+	// Show the 100% marker when the bars are scaled to over 100%. With full width rows, it's
+	// in all of them. Otherwise it's in the core rows if a core is over 100%, or else in the
+	// overhead row.
+	void place_full_core_markers() {
+		bool scaled = bar_scale_ppm > OneCorePpm;
+
+		if constexpr (FullWidthRows) {
+			auto pct = lv_pct((lv_coord_t)((uint64_t)OneCorePpm * 100 / bar_scale_ppm));
+			for (auto *marker : full_core_markers) {
+				if (marker) {
+					lv_show(marker, scaled);
+					lv_obj_set_x(marker, pct);
+				}
+			}
+			lv_show(overhead_marker, scaled);
+			lv_obj_set_x(overhead_marker, pct);
+			return;
+		}
+
+		bool in_core_rows = OneCorePpm <= core_row_ppm;
+
+		for (auto *marker : full_core_markers) {
+			if (!marker)
+				continue;
+			lv_show(marker, scaled && in_core_rows);
+			lv_obj_set_x(marker, lv_pct((lv_coord_t)((uint64_t)OneCorePpm * 100 / core_row_ppm)));
+		}
+
+		lv_show(overhead_marker, scaled && !in_core_rows);
+		if (!in_core_rows)
+			lv_obj_set_x(overhead_marker,
+						 lv_pct((lv_coord_t)((uint64_t)(OneCorePpm - core_row_ppm) * 100 / overhead_row_ppm())));
+	}
+
+	// Width of a box, as a portion of its row which represents row_ppm of CPU time
+	static void set_box_width(lv_obj_t *box, uint32_t ppm, uint32_t row_ppm) {
+		auto width_pct = (lv_coord_t)std::min<uint64_t>((uint64_t)ppm * 100 / row_ppm, 100);
 		lv_obj_set_width(box, lv_pct(std::max<lv_coord_t>(width_pct, 1)));
 	}
 
-	// A box at the end of the bar showing the core's cable-processing time.
-	void add_cable_box(unsigned core) {
-		auto box = lv_obj_create(bar_rows[core]);
+	static lv_obj_t *create_bar_row(lv_obj_t *parent) {
+		auto row = lv_obj_create(parent);
+		lv_obj_set_width(row, lv_pct(100));
+		lv_obj_set_height(row, BarHeight);
+		lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+		lv_obj_set_style_pad_all(row, 2, LV_PART_MAIN);
+		lv_obj_set_style_pad_column(row, 1, LV_PART_MAIN);
+		lv_obj_set_style_radius(row, 0, LV_PART_MAIN);
+		lv_obj_set_style_border_width(row, 1, LV_PART_MAIN);
+		lv_obj_set_style_border_color(row, lv_color_hex(0x000000), LV_PART_MAIN);
+		lv_obj_set_style_bg_color(row, lv_color_hex(0x111111), LV_PART_MAIN);
+		lv_obj_set_style_bg_opa(row, 255, LV_PART_MAIN);
+		lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
+		return row;
+	}
 
+	// A focusable box in a bar
+	lv_obj_t *create_box(lv_obj_t *row, lv_color_t color) {
+		auto box = lv_obj_create(row);
 		lv_obj_set_width(box, lv_pct(1));
 		lv_obj_set_height(box, lv_pct(100));
 		lv_obj_set_style_radius(box, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_width(box, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_all(box, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(box, LV_OPA_COVER, LV_PART_MAIN);
-		lv_obj_set_style_bg_color(box, lv_color_hex(0x888888), LV_PART_MAIN);
+		lv_obj_set_style_bg_color(box, color, LV_PART_MAIN);
 		lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
 
 		for (auto state : {LV_STATE_FOCUSED, LV_STATE_FOCUS_KEY}) {
@@ -345,17 +430,22 @@ private:
 			lv_obj_set_style_outline_pad(box, 0, LV_PART_MAIN | state);
 		}
 
+		lv_obj_add_event_cb(box, box_defocus_cb, LV_EVENT_DEFOCUSED, this);
+		lv_group_add_obj(group, box);
+		return box;
+	}
+
+	// A box at the end of the bar showing the core's cable-processing time.
+	void add_cable_box(unsigned core) {
+		auto box = create_box(bar_rows[core], lv_color_hex(0x888888));
 		lv_obj_set_user_data(box, (void *)(uintptr_t)core);
 		lv_obj_add_event_cb(box, cable_box_focus_cb, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(box, box_defocus_cb, LV_EVENT_DEFOCUSED, this);
-
-		lv_group_add_obj(group, box);
 		lv_hide(box);
 
 		cable_boxes[core] = box;
 	}
 
-	// Re-scale the module boxes and the 100% markers to the live measurements
+	// Re-scale the module boxes, the overhead, and the 100% markers to the live measurements
 	void update_box_widths() {
 		if (!patch || !patch->has_load_balance(NumCores) || !patch_playloader.is_view_patch_playing())
 			return;
@@ -374,64 +464,65 @@ private:
 		if constexpr (NumCores > 1)
 			cable_ppm[1] = live.core2_cables * 1000u;
 
-		// Scale bars to fit screen if over 100%
-		bar_scale_ppm = OneCorePpm;
+		// Each core's modules + cables: this is the part the cores run in parallel
+		std::array<uint32_t, NumCores> core_ppm{};
 		for (auto core = 0u; core < NumCores; core++) {
-			uint32_t sum = cable_ppm[core];
+			core_ppm[core] = cable_ppm[core];
 			for (auto module_id = 1u; module_id < patch->module_cores.size(); module_id++) {
 				if (patch->module_cores[module_id] == core)
-					sum += live_ppm(module_id);
+					core_ppm[core] += live_ppm(module_id);
 			}
-			bar_scale_ppm = std::max(bar_scale_ppm, sum);
 		}
+		auto max_core_ppm = *std::ranges::max_element(core_ppm);
+
+		// Core 1's time outside the parallel part. Core 1 waiting for Core 2 (Sync) already
+		// shows as the gap after Core 1's bar, so only the waiting beyond that is counted.
+		auto core1_parallel_ppm = core_ppm[0] + (live.sync + live.sync2) * 1000u;
+		overhead_ppm[MappingsPart] = live.mappings * 1000u;
+		overhead_ppm[MidiPart] = live.midi * 1000u;
+		overhead_ppm[SyncPart] = core1_parallel_ppm > max_core_ppm ? core1_parallel_ppm - max_core_ppm : 0;
+		overhead_ppm[OtherPart] = live.overhead * 1000u;
+
+		uint32_t overhead_total_ppm = 0;
+		for (auto ppm : overhead_ppm)
+			overhead_total_ppm += ppm;
+
+		set_bar_layout(max_core_ppm, overhead_total_ppm);
 
 		for (auto core = 0u; core < NumCores; core++) {
 			for (auto *box : boxes[core])
-				set_box_width(box, live_ppm((unsigned)(uintptr_t)lv_obj_get_user_data(box)));
+				set_box_width(box, live_ppm((unsigned)(uintptr_t)lv_obj_get_user_data(box)), core_boxes_ppm());
 
 			if (auto *cable_box = cable_boxes[core]) {
-				set_box_width(cable_box, cable_ppm[core]);
+				set_box_width(cable_box, cable_ppm[core], core_boxes_ppm());
 				lv_show(cable_box, true);
 			}
-
-			if (auto *marker = full_core_markers[core]) {
-				lv_show(marker, bar_scale_ppm > OneCorePpm);
-				lv_obj_set_x(marker, lv_pct(full_core_pct()));
-			}
 		}
+
+		for (auto part = 0u; part < NumOverheadParts; part++)
+			set_box_width(overhead_boxes[part], overhead_ppm[part], overhead_row_ppm());
+
+		lv_label_set_text_fmt(overhead_label, "Overhead: %u%%", (unsigned)std::round(overhead_total_ppm / 10000.f));
+		lv_show(overhead_cont);
+
+		place_full_core_markers();
 	}
 
 	void add_box(unsigned core, unsigned module_id, uint32_t ppm) {
-		auto box = lv_obj_create(bar_rows[core]);
-
-		set_box_width(box, ppm);
-		lv_obj_set_height(box, lv_pct(100));
-		lv_obj_set_style_radius(box, 0, LV_PART_MAIN);
-		lv_obj_set_style_border_width(box, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_all(box, 0, LV_PART_MAIN);
-		lv_obj_set_style_bg_opa(box, LV_OPA_COVER, LV_PART_MAIN);
-		lv_obj_set_style_bg_color(box, Gui::knob_palette[module_id % 6], LV_PART_MAIN);
-		lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
-
-		for (auto state : {LV_STATE_FOCUSED, LV_STATE_FOCUS_KEY}) {
-			lv_obj_set_style_outline_color(box, Gui::orange_highlight, LV_PART_MAIN | state);
-			lv_obj_set_style_outline_opa(box, LV_OPA_COVER, LV_PART_MAIN | state);
-			lv_obj_set_style_outline_width(box, 2, LV_PART_MAIN | state);
-			lv_obj_set_style_outline_pad(box, 0, LV_PART_MAIN | state);
-		}
+		auto box = create_box(bar_rows[core], Gui::knob_palette[module_id % 6]);
+		set_box_width(box, ppm, core_boxes_ppm());
 
 		lv_obj_set_user_data(box, (void *)(uintptr_t)module_id);
 		lv_obj_add_event_cb(box, box_focus_cb, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(box, box_defocus_cb, LV_EVENT_DEFOCUSED, this);
 		lv_obj_add_event_cb(box, box_click_cb, LV_EVENT_CLICKED, this);
 
-		lv_group_add_obj(group, box);
 		boxes[core].push_back(box);
 	}
 
 	// module_id of 0 (the hub) means "nothing selected"
 	void show_module_info(unsigned module_id) {
 		info_cables_core = -1;
+		info_overhead_part = -1;
 
 		if (module_id == 0 || !patch || module_id >= patch->module_slugs.size()) {
 			info_module_id = 0;
@@ -447,9 +538,22 @@ private:
 
 	void show_cables_info(unsigned core) {
 		info_module_id = 0;
+		info_overhead_part = -1;
 		info_cables_core = (int)core;
 
 		lv_label_set_text_fmt(module_name_label, "Cables (Core %u)", core + 1);
+		update_module_load_label(patch_playloader.get_live_load());
+	}
+
+	void show_overhead_info(unsigned part) {
+		if (part >= NumOverheadParts)
+			return;
+
+		info_module_id = 0;
+		info_cables_core = -1;
+		info_overhead_part = (int)part;
+
+		lv_label_set_text(module_name_label, OverheadPartNames[part]);
 		update_module_load_label(patch_playloader.get_live_load());
 	}
 
@@ -508,6 +612,13 @@ private:
 			return;
 		auto page = static_cast<LoadBalancePanel *>(event->user_data);
 		page->show_cables_info((unsigned)(uintptr_t)lv_obj_get_user_data(event->target));
+	}
+
+	static void overhead_box_focus_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<LoadBalancePanel *>(event->user_data);
+		page->show_overhead_info((unsigned)(uintptr_t)lv_obj_get_user_data(event->target));
 	}
 
 	// Clicking a module's box jumps to it in ModuleView. Changing pages closes
@@ -637,28 +748,54 @@ private:
 			lv_obj_set_style_text_color(core_labels[core], lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 			lv_label_set_text(core_labels[core], "");
 
-			auto row = lv_obj_create(cont);
-			lv_obj_set_width(row, lv_pct(100));
-			lv_obj_set_height(row, 24);
-			lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-			lv_obj_set_style_pad_all(row, 2, LV_PART_MAIN);
-			lv_obj_set_style_pad_column(row, 1, LV_PART_MAIN);
-			lv_obj_set_style_radius(row, 0, LV_PART_MAIN);
-			lv_obj_set_style_border_width(row, 1, LV_PART_MAIN);
-			lv_obj_set_style_border_color(row, lv_color_hex(0x000000), LV_PART_MAIN);
-			lv_obj_set_style_bg_color(row, lv_color_hex(0x111111), LV_PART_MAIN);
-			lv_obj_set_style_bg_opa(row, 255, LV_PART_MAIN);
-			lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
-			bar_rows[core] = row;
+			bar_rows[core] = create_bar_row(cont);
 		}
 
-		live_load_label = lv_label_create(panel);
-		lv_label_set_long_mode(live_load_label, LV_LABEL_LONG_WRAP);
-		lv_obj_set_width(live_load_label, lv_pct(100));
-		lv_obj_set_style_text_font(live_load_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
-		lv_obj_set_style_text_color(live_load_label, Gui::grey_highlight, LV_PART_MAIN);
-		lv_label_set_text(live_load_label, "");
-		lv_hide(live_load_label);
+		// Overhead: the label is at the left, and the bar starts where the core bars end
+		overhead_cont = lv_obj_create(panel);
+		lv_obj_set_width(overhead_cont, lv_pct(100));
+		lv_obj_set_height(overhead_cont, LV_SIZE_CONTENT);
+		lv_obj_set_flex_flow(overhead_cont, LV_FLEX_FLOW_COLUMN);
+		lv_obj_set_style_pad_all(overhead_cont, 0, LV_PART_MAIN);
+		lv_obj_set_style_pad_row(overhead_cont, 2, LV_PART_MAIN);
+		lv_obj_set_style_border_width(overhead_cont, 0, LV_PART_MAIN);
+		lv_obj_set_style_bg_opa(overhead_cont, 0, LV_PART_MAIN);
+		lv_obj_clear_flag(overhead_cont, LV_OBJ_FLAG_SCROLLABLE);
+
+		overhead_label = lv_label_create(overhead_cont);
+		lv_obj_set_style_text_font(overhead_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+		lv_obj_set_style_text_color(overhead_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+		lv_label_set_text(overhead_label, "");
+
+		// Full width, so the bar can be positioned in it (flex layout would place it at the left)
+		auto overhead_holder = lv_obj_create(overhead_cont);
+		lv_obj_set_width(overhead_holder, lv_pct(100));
+		lv_obj_set_height(overhead_holder, BarHeight);
+		lv_obj_set_style_pad_all(overhead_holder, 0, LV_PART_MAIN);
+		lv_obj_set_style_border_width(overhead_holder, 0, LV_PART_MAIN);
+		lv_obj_set_style_bg_opa(overhead_holder, 0, LV_PART_MAIN);
+		lv_obj_clear_flag(overhead_holder, LV_OBJ_FLAG_SCROLLABLE);
+
+		overhead_row = create_bar_row(overhead_holder);
+
+		// Empty space at the start of the overhead row, as wide as the core bars (FullWidthRows only)
+		overhead_spacer = lv_obj_create(overhead_row);
+		lv_obj_set_height(overhead_spacer, lv_pct(100));
+		lv_obj_set_style_pad_all(overhead_spacer, 0, LV_PART_MAIN);
+		lv_obj_set_style_border_width(overhead_spacer, 0, LV_PART_MAIN);
+		lv_obj_set_style_bg_opa(overhead_spacer, 0, LV_PART_MAIN);
+		lv_obj_clear_flag(overhead_spacer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+		lv_show(overhead_spacer, FullWidthRows);
+
+		for (auto part = 0u; part < NumOverheadParts; part++) {
+			auto box = create_box(overhead_row, lv_color_hex(OverheadPartColors[part]));
+			lv_obj_set_user_data(box, (void *)(uintptr_t)part);
+			lv_obj_add_event_cb(box, overhead_box_focus_cb, LV_EVENT_FOCUSED, this);
+			overhead_boxes[part] = box;
+		}
+		overhead_marker = create_full_core_marker(overhead_row);
+		lv_hide(overhead_marker);
+		lv_hide(overhead_cont);
 
 		module_name_label = lv_label_create(panel);
 		lv_label_set_long_mode(module_name_label, LV_LABEL_LONG_DOT);
@@ -701,9 +838,26 @@ private:
 	// 100% of one core, in the parts-per-million the loads are stored in
 	static constexpr uint32_t OneCorePpm = 1'000'000;
 
-	// How much CPU time a full-width bar represents. Normally one core, but more than
-	// that when a core is overloaded and its modules wouldn't otherwise fit.
+	// How much CPU time the full width of the bars represents. Normally one core, but more
+	// than that when the patch is overloaded and the bars wouldn't otherwise fit.
 	uint32_t bar_scale_ppm = OneCorePpm;
+
+	// How much CPU time the width of the core bars represents: the busier core's load
+	uint32_t core_row_ppm = OneCorePpm;
+
+	static constexpr lv_coord_t BarHeight = 24;
+
+	// true: every row's background is the full panel width, and the overhead boxes start
+	// where the core bars end. false: the core rows end at the busier core, and the
+	// overhead row starts there.
+	static constexpr bool FullWidthRows = true;
+
+	// Core 1's time outside the part where both cores run modules and cables
+	enum OverheadPart : unsigned { MappingsPart, MidiPart, SyncPart, OtherPart, NumOverheadParts };
+	static constexpr std::array<char const *, NumOverheadParts> OverheadPartNames{
+		"Mappings", "MIDI", "Sync (beyond core imbalance)", "Other overhead"};
+	static constexpr std::array<uint32_t, NumOverheadParts> OverheadPartColors{0x8A7F52, 0x6E4C05, 0x4F6A8A, 0x777777};
+	std::array<uint32_t, NumOverheadParts> overhead_ppm{};
 
 	lv_group_t *group;
 	lv_group_t *parent_group = nullptr;
@@ -719,6 +873,9 @@ private:
 	// Core whose cable box is focused (-1 = none)
 	int info_cables_core = -1;
 
+	// OverheadPart whose box is focused (-1 = none)
+	int info_overhead_part = -1;
+
 	// The boxes re-scale to live loads at a slow rate, so they don't jitter
 	static constexpr uint32_t BoxUpdatePeriodMs = 200;
 	uint32_t last_box_update_tick = 0;
@@ -732,13 +889,18 @@ private:
 	lv_obj_t *panel = nullptr;
 	lv_obj_t *no_balance_label = nullptr;
 	lv_obj_t *cpu_load_label = nullptr;
-	lv_obj_t *live_load_label = nullptr;
 	std::array<lv_obj_t *, NumCores> bar_conts{};
 	std::array<lv_obj_t *, NumCores> bar_rows{};
 	std::array<lv_obj_t *, NumCores> core_labels{};
 	std::array<lv_obj_t *, NumCores> full_core_markers{};
 	std::array<lv_obj_t *, NumCores> cable_boxes{};
 	std::array<std::vector<lv_obj_t *>, NumCores> boxes{};
+	lv_obj_t *overhead_cont = nullptr;
+	lv_obj_t *overhead_label = nullptr;
+	lv_obj_t *overhead_row = nullptr;
+	lv_obj_t *overhead_marker = nullptr;
+	lv_obj_t *overhead_spacer = nullptr;
+	std::array<lv_obj_t *, NumOverheadParts> overhead_boxes{};
 	lv_obj_t *module_name_label = nullptr;
 	lv_obj_t *module_load_label = nullptr;
 	lv_obj_t *recalc_button = nullptr;
