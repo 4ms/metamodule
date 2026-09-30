@@ -428,7 +428,7 @@ private:
 
 		opts.clear();
 		roller_drawn_el_idx.clear();
-		cur_selected = 1;
+		cur_selected = std::numeric_limits<decltype(cur_selected)>().max(); // No row selected
 	}
 
 	bool read_slug() {
@@ -502,6 +502,7 @@ private:
 	bool is_listable(unsigned drawn_idx) const;
 	bool is_listed(unsigned drawn_idx) const;
 	unsigned first_selectable_row() const;
+	unsigned default_row() const;
 
 	// Element grouping and ordering (defined in module_view/element_roller.cc)
 	void build_element_layout();
@@ -612,7 +613,6 @@ private:
 	std::optional<GuiElement> pending_action_param_clear{};
 
 	enum { RollerHeaderTag = -1, ContextMenuTag = -2, BackTag = -3 };
-
 
 	// Roller rows that open a group are tagged GroupTagBase - group_idx
 	static constexpr int GroupTagBase = -100;

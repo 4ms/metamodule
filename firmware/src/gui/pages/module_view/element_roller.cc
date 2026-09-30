@@ -10,7 +10,8 @@
 namespace MetaModule
 {
 
-static void move_selected_control_foreground(std::span<DrawnElement> drawn_elements, DrawnElement const &drawn_element) {
+static void move_selected_control_foreground(std::span<DrawnElement> drawn_elements,
+											 DrawnElement const &drawn_element) {
 	auto *obj = drawn_element.gui_element.obj;
 	if (!obj)
 		return;
@@ -204,6 +205,9 @@ void ModuleViewPage::populate_roller() {
 
 	// Add text list to roller options
 	lv_roller_set_options(ui_ElementRoller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
+
+	if (cur_selected >= roller_drawn_el_idx.size())
+		cur_selected = default_row();
 
 	lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
@@ -714,6 +718,14 @@ unsigned ModuleViewPage::first_selectable_row() const {
 	if (!roller_drawn_el_idx.empty() && roller_drawn_el_idx[0] != RollerHeaderTag)
 		return 0;
 	return 1;
+}
+
+unsigned ModuleViewPage::default_row() const {
+	for (auto [i, tag] : enumerate(roller_drawn_el_idx)) {
+		if (tag >= 0 || is_group_tag(tag))
+			return i;
+	}
+	return first_selectable_row();
 }
 
 std::optional<unsigned> ModuleViewPage::get_group_idx(unsigned roller_idx) const {
