@@ -21,13 +21,6 @@ void PatchPlayer::connect_all_expanders() {
 		connect_expander(exp);
 }
 
-void PatchPlayer::connect_expanders_for(unsigned module_idx) {
-	for (auto const &exp : pd.expanders) {
-		if (exp.left_module_id == module_idx || exp.right_module_id == module_idx)
-			connect_expander(exp);
-	}
-}
-
 bool PatchPlayer::add_expander(ExpanderConnection conn) {
 	/// TODO: check if this works: (why would rack_expanders.connect() fail?)
 	// if (pd.add_expander(conn)) {

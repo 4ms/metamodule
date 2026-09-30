@@ -40,6 +40,7 @@ void PatchPlayLoader::change_module(std::string_view slug, unsigned module_id, b
 	auto *patch = patches_.get_view_patch();
 
 	if (keep_cables_and_maps) {
+		patch->remove_expanders(module_id);
 		patch->module_slugs[module_id] = slug;
 		player_.substitute_module(module_id, slug);
 	} else {

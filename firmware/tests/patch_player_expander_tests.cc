@@ -128,6 +128,56 @@ TEST_CASE("expanders with out-of-range module ids are ignored") {
 	player.unload_patch();
 }
 
+TEST_CASE("substitute_module removes the module's expander connections") {
+	// clang-format off
+	std::string patchyml{R"(PatchData:
+  patch_name: expander_substitute_test
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: 'Befaco:PonyVCO'
+    2: 'Befaco:PonyVCO'
+    3: 'Befaco:PonyVCO'
+    4: 'Befaco:PonyVCO'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
+  midi_maps:
+    name: ''
+    set: []
+  expanders:
+    - left_module_id: 1
+      right_module_id: 2
+    - left_module_id: 2
+      right_module_id: 3
+    - left_module_id: 3
+      right_module_id: 4
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+
+	MetaModule::PatchPlayer player;
+	REQUIRE(player.load_patch(pd).success);
+	REQUIRE(player.get_expanders().size() == 3);
+
+	// Module 2 is on the right of one connection and the left of another: both go
+	player.substitute_module(2, "Befaco:Kickall");
+
+	REQUIRE(player.get_expanders().size() == 1);
+	CHECK(player.get_expanders()[0].left_module_id == 3);
+	CHECK(player.get_expanders()[0].right_module_id == 4);
+	CHECK(player.expander_status({1, 2}) == MetaModule::PatchPlayer::ExpanderStatus::NotConnected);
+	CHECK(player.expander_status({2, 3}) == MetaModule::PatchPlayer::ExpanderStatus::NotConnected);
+
+	for (auto i = 0; i < 16; i++)
+		player.update_patch();
+
+	player.unload_patch();
+}
+
 TEST_CASE("add_expander/remove_expander at runtime") {
 	// clang-format off
 	std::string patchyml{R"(PatchData:

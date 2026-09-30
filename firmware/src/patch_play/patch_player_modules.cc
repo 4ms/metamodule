@@ -127,15 +127,19 @@ void PatchPlayer::remove_module(uint16_t module_idx) {
 	rebalance_modules();
 }
 
-// replace a module without changing any mappings or cables
+// Replace a module without changing any mappings or cables.
 void PatchPlayer::substitute_module(unsigned module_idx, BrandModuleSlug new_slug) {
 	if (module_idx >= num_modules)
 		return;
 
 	pr_trace("Subs. module %u (%s) with %s\n", module_idx, pd.module_slugs[module_idx].c_str(), new_slug.c_str());
 
-	// De-init original module
+	// Remove expanders (they are not kept since it's rare that two different
+	// modules could take the same expander)
 	rack_expanders.disconnect(modules[module_idx].get());
+	pd.remove_expanders(module_idx);
+
+	// De-init original module
 	plugin_module_deinit(modules[module_idx]);
 	modules[module_idx].reset();
 
@@ -145,9 +149,6 @@ void PatchPlayer::substitute_module(unsigned module_idx, BrandModuleSlug new_slu
 	pd.clear_load_balance();
 	calc_multiple_module_indicies();
 	add_module_at_idx(new_slug, module_idx);
-
-	// Expander connections are kept in the patch: re-attach the new module to its neighbors
-	connect_expanders_for(module_idx);
 }
 
 void PatchPlayer::replace_module(uint16_t module_idx, BrandModuleSlug new_slug) {

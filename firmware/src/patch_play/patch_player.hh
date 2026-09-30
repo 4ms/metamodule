@@ -209,10 +209,6 @@ public:
 	// Wire every connection in pd.expanders (used when loading a patch)
 	void connect_all_expanders();
 
-	// Wire only the connections in pd.expanders that involve module_idx
-	// (used after a module is created in an existing slot)
-	void connect_expanders_for(unsigned module_idx);
-
 	enum class ExpanderStatus { NotConnected, Connected, Active };
 
 	// Whether the two modules are wired together, and if they have exchanged any messages
@@ -277,8 +273,7 @@ public:
 			return;
 		}
 
-		else
-		{
+		else {
 			update_patch_time.start_simple_measurement();
 
 			smp.update_modules();
@@ -975,6 +970,10 @@ public:
 
 	auto const &get_module_slugs() {
 		return pd.module_slugs;
+	}
+
+	auto const &get_expanders() {
+		return pd.expanders;
 	}
 
 #endif
