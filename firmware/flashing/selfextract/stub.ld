@@ -31,4 +31,8 @@ SECTIONS
 
 	/* The stub must stay self-contained: nothing zeroes .bss before stub_main runs */
 	ASSERT(SIZEOF(.bss) == 0, "self-extract stub must not use .bss (nothing zeroes it)")
+
+	/* make jprog-assets and flash-t32-assets load assets.uimg at 0xCCC00000 (see memory.ld).
+	   The stub must end before that, or it will be overwritten (see asset_fs.hh) */
+	ASSERT(ADDR(.bss) + SIZEOF(.bss) <= 0xCCC00000, "self-extract stub overlaps the RAM-loaded assets image")
 }

@@ -1,7 +1,8 @@
 ResetX 100
 Halt
 LoadFile build/main-uimg.bin 0xC0000000 noreset
-W4 0x5C00A120 0
+LoadFile build/assets-uimg.bin 0xCCC00000 noreset
+W4 0x5C00A120 0xCCC00000
 W4 0x5C00A118 0xC0000000
 Go
 quit

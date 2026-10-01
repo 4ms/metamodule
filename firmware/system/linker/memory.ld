@@ -38,6 +38,9 @@ _SHAREDMEM		 = 0xCBF00000;
 _SHAREDMEM_SZ	 = 1M;		/*0x00100000*/
 _SHAREDMEM_END	 = 0xCC000000;
 
+/* The self-extract stub runs from here at boot, with its stack at the end.
+   Development only: make jprog-assets and make flash-t32-assets load assets.uimg (max 4MB)
+   at 0xCCC00000, between the stub (max 12MB) and its stack. See asset_fs.hh */
 _FWBUFFER		= 0xCC000000;
 _FWBUFFER_SZ	= 20M;		/*0x01400000*/
 _FWBUFFER_END	= 0xCD400000;

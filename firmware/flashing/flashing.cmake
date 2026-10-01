@@ -55,6 +55,25 @@ add_custom_target(
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
+# Like jprog, but also loads the assets image into RAM, which the firmware uses instead of
+# the assets in flash (for this boot only). See AssetFS::read_ram_image()
+add_custom_target(
+  jprog-assets
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${ASSET_IMG_PATH}
+  COMMENT "Using JLinkExe v9.44 or later to program firmware + assets via JTAG (Note: JLinkExe must be on your PATH)"
+  COMMAND ${CMAKE_COMMAND} -E copy ${ASSET_IMG_PATH} ${CMAKE_CURRENT_BINARY_DIR}/assets-uimg.bin #Jlink requires .bin extension
+  COMMAND time -p JLinkExe -device STM32MP15XX_A7 -if JTAG -speed 25000 -jtagconf -1,-1 -nogui 1 -AutoConnect 1
+          -CommandFile ${PROJECT_SOURCE_DIR}/flashing/program-assets.jlink
+  COMMAND ${CMAKE_COMMAND} -E echo "-----------------"
+  COMMAND ${CMAKE_COMMAND} -E echo "If the longest time shown above is less than 1 second, then this failed."
+  COMMAND ${CMAKE_COMMAND} -E echo
+          "You must do a hard reset with the Freeze jumper installed before running this command."
+  COMMAND ${CMAKE_COMMAND} -E echo
+          "The assets in RAM are used for this boot only: they are not written to flash."
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
+
 add_custom_target(
   jflash-gdb
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
@@ -115,6 +134,17 @@ add_custom_target(
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
   COMMENT "Reset, flash, and boot via TRACE32"
   COMMAND python3 flashing/flash-t32.py
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
+
+# Like flash-t32, but also loads the assets image into RAM, which the firmware uses instead
+# of the assets in flash (for this boot only). See AssetFS::read_ram_image()
+add_custom_target(
+  flash-t32-assets
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${ASSET_IMG_PATH}
+  COMMENT "Reset, flash firmware + assets to RAM, and boot via TRACE32"
+  COMMAND python3 flashing/flash-t32.py --assets ${ASSET_IMG_PATH}
   VERBATIM USES_TERMINAL
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )

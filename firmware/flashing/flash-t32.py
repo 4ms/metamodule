@@ -18,9 +18,14 @@ Flow (mirrors flash-openocd.py):
   5. Load ELF symbols, write the image address to TAMP_BKP6R (mp1-boot jumps
      to the app immediately), and re-arm the ETM trace.
 
+With --assets <assets.uimg>, step 4 also loads the assets image to DDR and writes its
+address to TAMP_BKP8R. The app uses it instead of the assets in NOR flash, for that boot
+only (see AssetFS::read_ram_image() in src/fs/asset_drive/asset_fs.hh).
+
 Typical cycle time: ~10 seconds for a 6MB image.
 """
 
+import argparse
 import sys
 import time
 from pathlib import Path
@@ -32,10 +37,10 @@ do_verify = False
 LOAD_ADDR = 0xC0000000
 RCC_MP_GRSTCSETR = 0x50000404  # bit 0 = MPSYSRST: software system reset
 TAMP_BKP6R = 0x5C00A118  # mp1-boot's "DDR image address" mailbox register
+TAMP_BKP8R = 0x5C00A120  # app's "assets image in RAM" mailbox register (0 = use flash)
+ASSETS_LOAD_ADDR = 0xCCC00000  # in FWBUFFER, see system/linker/memory.ld
 BOOTLOADER_READY = 0xFFFFFFFF  # mp1-boot writes this when waiting for an image
 SYSTEM_MODE_UP = 11
-
-do_verify = False
 
 basepath = Path(__file__).parent.parent
 binpath = basepath / "build" / "main.uimg"
@@ -62,7 +67,29 @@ def attach_if_needed(dbg):
     dbg.cmd("SYStem.attach")
 
 
+def load_binary(dbg, path, addr):
+    for attempt in (1, 2):
+        print(f"Loading {path.name} to {addr:#x} (run-time access, no halt)...")
+        dbg.cmd(f"Data.LOAD.Binary {path} {addr:#x} /DUALPORT")
+        if do_verify:
+            try:
+                dbg.cmd(f"Data.LOAD.Binary {path} {addr:#x} /DUALPORT /ComPare")
+                break
+            except Exception as e:
+                if attempt == 2:
+                    sys.exit(f"Verify FAILED after retry: {e}")
+                print("  Verify failed, retrying load...")
+
+
 def main():
+    parser = argparse.ArgumentParser(description="Flash the MetaModule app via TRACE32")
+    parser.add_argument("--assets", type=Path,
+                        help="Also load this assets.uimg into RAM, to use instead of the assets in flash")
+    args = parser.parse_args()
+
+    if args.assets and not args.assets.is_file():
+        sys.exit(f"Assets image not found: {args.assets}")
+
     try:
         dbg = t32.connect()
     except Exception as e:
@@ -97,18 +124,16 @@ def main():
                      "Is the Freeze jumper installed?")
         time.sleep(0.2)
 
-    for attempt in (1, 2):
-        print(f"Loading {binpath.name} to {LOAD_ADDR:#x} (run-time access, no halt)...")
-        dbg.cmd(f"Data.LOAD.Binary {binpath} {LOAD_ADDR:#x} /DUALPORT")
-        if do_verify:
-            try:
-                dbg.cmd(f"Data.LOAD.Binary {binpath} {LOAD_ADDR:#x} /DUALPORT /ComPare")
-                break
-            except Exception as e:
-                if attempt == 2:
-                    sys.exit(f"Verify FAILED after retry: {e}")
-                print("  Verify failed, retrying load...")
-    
+    load_binary(dbg, binpath, LOAD_ADDR)
+
+    # The app reads (and clears) this when it starts. Clear it when not loading assets, in
+    # case an earlier run left an address there.
+    if args.assets:
+        load_binary(dbg, args.assets, ASSETS_LOAD_ADDR)
+        write_long(dbg, TAMP_BKP8R, ASSETS_LOAD_ADDR)
+    else:
+        write_long(dbg, TAMP_BKP8R, 0)
+
     print(f"  Loaded in {time.time() - t_start:.1f}s")
 
     dbg.cmd(f"Data.LOAD.Elf {elfpath} /CPP /NoCode")
