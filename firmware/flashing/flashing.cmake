@@ -129,6 +129,17 @@ add_custom_target(
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
+# Like flash-openocd, but also loads the assets image into RAM, which the firmware uses
+# instead of the assets in flash (for this boot only). See AssetFS::read_ram_image()
+add_custom_target(
+  flash-openocd-assets
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${ASSET_IMG_PATH}
+  COMMENT "Reset, flash firmware + assets to RAM, and boot via openocd (launches openocd if not already running)"
+  COMMAND python3 flashing/flash-openocd.py ${MAIN_UIMG} --assets ${ASSET_IMG_PATH}
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
+
 add_custom_target(
   flash-t32
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg

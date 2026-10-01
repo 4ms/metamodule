@@ -24,9 +24,14 @@ Flow:
   6. Write the image address to TAMP_BKP6R -- mp1-boot jumps to the app
      immediately.
 
+With --assets <assets.uimg>, the assets image is also loaded (and verified) to DDR, and
+its address is written to TAMP_BKP8R before booting. The app uses it instead of the assets
+in NOR flash, for that boot only (see AssetFS::read_ram_image() in
+src/fs/asset_drive/asset_fs.hh).
+
 Typical cycle time: ~25 seconds for a 6MB image.
 
-Usage: flash-openocd.py path/to/main.uimg [--port 4444] [--verify] [--no-reset] [--no-boot]
+Usage: flash-openocd.py path/to/main.uimg [--assets path/to/assets.uimg] [--port 4444] [--verify] [--no-reset] [--no-boot]
 """
 
 import argparse
@@ -41,6 +46,8 @@ import time
 LOAD_ADDR = 0xC0000000
 RCC_MP_GRSTCSETR = 0x50000404  # bit 0 = MPSYSRST: software system reset
 TAMP_BKP6R = 0x5C00A118  # mp1-boot's "DDR image address" mailbox register
+TAMP_BKP8R = 0x5C00A120  # app's "assets image in RAM" mailbox register (0 = use flash)
+ASSETS_LOAD_ADDR = 0xCCC00000  # in FWBUFFER, see system/linker/memory.ld
 BOOTLOADER_READY = 0xFFFFFFFF  # mp1-boot writes this when waiting for an image
 AXI = "stm32mp15x.axi"
 PRIME_SIZE = 16 * 1024
@@ -148,11 +155,11 @@ def file_word(data, offset):
     return struct.unpack_from("<I", data, offset)[0]
 
 
-def verify(ocd, image, tmpdir, full):
+def verify(ocd, image, addr, tmpdir, full):
     """Return None if the loaded image matches, else a description of the first mismatch."""
     check_size = len(image) if full else min(32 * 1024, len(image))
     readback_path = os.path.join(tmpdir, "readback.bin")
-    ocd.dump_image(readback_path, LOAD_ADDR, check_size)
+    ocd.dump_image(readback_path, addr, check_size)
     with open(readback_path, "rb") as f:
         readback = f.read()
     if readback != image[:check_size]:
@@ -165,14 +172,34 @@ def verify(ocd, image, tmpdir, full):
     step = max(4, (len(image) // 16) & ~3)
     offsets = list(range(check_size, len(image) - 4, step)) + [(len(image) - 4) & ~3]
     for offset in offsets:
-        if ocd.read_word(LOAD_ADDR + offset) != file_word(image, offset):
+        if ocd.read_word(addr + offset) != file_word(image, offset):
             return f"mismatch at offset 0x{offset:X}"
     return None
+
+
+def load_and_verify(ocd, path, image, addr, tmpdir, full_verify, prime_path=None):
+    """Load an image to DDR and verify it, retrying the load once on mismatch."""
+    for attempt in (1, 2):
+        if prime_path:
+            # Sacrificial write to absorb post-reset first-transfer corruption
+            ocd.load_image(prime_path, addr)
+
+        print(f"Loading {len(image)} bytes to 0x{addr:08X} via AXI debug port...")
+        print("  " + ocd.load_image(path, addr))
+
+        error = verify(ocd, image, addr, tmpdir, full_verify)
+        if error is None:
+            return
+        if attempt == 2:
+            sys.exit(f"Verify FAILED after retry: {error}")
+        print(f"  Verify failed ({error}), retrying load...")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("uimg", help="path to main.uimg")
+    parser.add_argument("--assets",
+                        help="also load this assets.uimg into RAM, to use instead of the assets in flash")
     parser.add_argument("--port", type=int, default=4444, help="openocd telnet port")
     parser.add_argument("--verify", action="store_true",
                         help="verify the entire image after loading (adds ~20s)")
@@ -185,10 +212,18 @@ def main():
     with open(args.uimg, "rb") as f:
         image = f.read()
 
+    assets = None
+    if args.assets:
+        try:
+            with open(args.assets, "rb") as f:
+                assets = f.read()
+        except OSError as e:
+            sys.exit(f"Cannot read assets image: {e}")
+
     t_start = time.time()
     ocd, launched_proc = connect_or_launch(args.port)
     try:
-        run(ocd, image, args, t_start, external_openocd=launched_proc is None)
+        run(ocd, image, assets, args, t_start, external_openocd=launched_proc is None)
     finally:
         ocd.close()
         if launched_proc:
@@ -197,7 +232,7 @@ def main():
             print("Stopped the openocd instance this script launched.")
 
 
-def run(ocd, image, args, t_start, external_openocd):
+def run(ocd, image, assets, args, t_start, external_openocd):
     if not args.no_reset:
         # TAMP backup registers survive a system reset: clear the ready flag
         # first so the poll below can't see a stale value from the last boot.
@@ -223,19 +258,16 @@ def run(ocd, image, args, t_start, external_openocd):
         with open(prime_path, "wb") as f:
             f.write(image[:PRIME_SIZE])
 
-        for attempt in (1, 2):
-            # Sacrificial write to absorb post-reset first-transfer corruption
-            ocd.load_image(prime_path, LOAD_ADDR)
+        load_and_verify(ocd, args.uimg, image, LOAD_ADDR, tmpdir, args.verify, prime_path)
 
-            print(f"Loading {len(image)} bytes to 0x{LOAD_ADDR:08X} via AXI debug port...")
-            print("  " + ocd.load_image(args.uimg, LOAD_ADDR))
+        # The app reads (and clears) this when it starts. Clear it when not loading assets,
+        # in case an earlier run left an address there.
+        if assets is not None:
+            load_and_verify(ocd, args.assets, assets, ASSETS_LOAD_ADDR, tmpdir, args.verify)
+            ocd.write_word(TAMP_BKP8R, ASSETS_LOAD_ADDR)
+        else:
+            ocd.write_word(TAMP_BKP8R, 0)
 
-            error = verify(ocd, image, tmpdir, args.verify)
-            if error is None:
-                break
-            if attempt == 2:
-                sys.exit(f"Verify FAILED after retry: {error}")
-            print(f"  Verify failed ({error}), retrying load...")
         print(f"  Loaded and verified in {time.time() - t_start:.1f}s")
 
     if args.no_boot:
