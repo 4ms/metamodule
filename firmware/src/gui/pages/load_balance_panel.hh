@@ -311,34 +311,14 @@ private:
 		return sum;
 	}
 
-	// Sizes the rows so the panel's full width is bar_scale_ppm of CPU time. The core
-	// rows are as wide as the busier core, and the overhead row fills the rest, so the
-	// bars read like a timeline of one audio block: both cores run their modules and
-	// cables in parallel, then Core 1 does the overhead.
+	// Scales the bars so their full width is bar_scale_ppm of CPU time. The bars read like a
+	// timeline of one audio block: both cores run their modules and cables in parallel, then
+	// Core 1 does the overhead. So the overhead boxes start where the busier core's bar ends.
 	void set_bar_layout(uint32_t max_core_ppm, uint32_t overhead_total_ppm) {
-		core_row_ppm = std::max<uint32_t>(max_core_ppm, 1);
-		bar_scale_ppm = std::max(OneCorePpm, core_row_ppm + overhead_total_ppm);
+		bar_scale_ppm = std::max(OneCorePpm, max_core_ppm + overhead_total_ppm);
 
-		// The overhead starts where the core rows end
-		auto core_row_pct = (lv_coord_t)std::clamp<uint64_t>((uint64_t)core_row_ppm * 100 / bar_scale_ppm, 1, 100);
-		if constexpr (FullWidthRows) {
-			lv_obj_set_width(overhead_spacer, lv_pct(core_row_pct));
-		} else {
-			for (auto *row : bar_rows)
-				lv_obj_set_width(row, lv_pct(core_row_pct));
-			lv_obj_set_x(overhead_row, lv_pct(core_row_pct));
-			lv_obj_set_width(overhead_row, lv_pct(100 - core_row_pct));
-		}
-	}
-
-	// CPU time represented by the full width of a core row
-	uint32_t core_boxes_ppm() const {
-		return FullWidthRows ? bar_scale_ppm : core_row_ppm;
-	}
-
-	// CPU time represented by the full width of the overhead row
-	uint32_t overhead_row_ppm() const {
-		return FullWidthRows ? bar_scale_ppm : std::max<uint32_t>(bar_scale_ppm - core_row_ppm, 1);
+		auto spacer_pct = (lv_coord_t)std::min<uint64_t>((uint64_t)max_core_ppm * 100 / bar_scale_ppm, 100);
+		lv_obj_set_width(overhead_spacer, lv_pct(spacer_pct));
 	}
 
 	// A line across the bars at the 100% point, drawn on top of the boxes
@@ -355,43 +335,23 @@ private:
 		return marker;
 	}
 
-	// Show the 100% marker when the bars are scaled to over 100%. With full width rows, it's
-	// in all of them. Otherwise it's in the core rows if a core is over 100%, or else in the
-	// overhead row.
+	// Show the 100% marker in all the bars when they're scaled to over 100%
 	void place_full_core_markers() {
 		bool scaled = bar_scale_ppm > OneCorePpm;
-
-		if constexpr (FullWidthRows) {
-			auto pct = lv_pct((lv_coord_t)((uint64_t)OneCorePpm * 100 / bar_scale_ppm));
-			for (auto *marker : full_core_markers) {
-				if (marker) {
-					lv_show(marker, scaled);
-					lv_obj_set_x(marker, pct);
-				}
-			}
-			lv_show(overhead_marker, scaled);
-			lv_obj_set_x(overhead_marker, pct);
-			return;
-		}
-
-		bool in_core_rows = OneCorePpm <= core_row_ppm;
+		auto x = lv_pct((lv_coord_t)((uint64_t)OneCorePpm * 100 / bar_scale_ppm));
 
 		for (auto *marker : full_core_markers) {
-			if (!marker)
-				continue;
-			lv_show(marker, scaled && in_core_rows);
-			lv_obj_set_x(marker, lv_pct((lv_coord_t)((uint64_t)OneCorePpm * 100 / core_row_ppm)));
+			if (marker) {
+				lv_show(marker, scaled);
+				lv_obj_set_x(marker, x);
+			}
 		}
-
-		lv_show(overhead_marker, scaled && !in_core_rows);
-		if (!in_core_rows)
-			lv_obj_set_x(overhead_marker,
-						 lv_pct((lv_coord_t)((uint64_t)(OneCorePpm - core_row_ppm) * 100 / overhead_row_ppm())));
+		lv_show(overhead_marker, scaled);
+		lv_obj_set_x(overhead_marker, x);
 	}
 
-	// Width of a box, as a portion of its row which represents row_ppm of CPU time
-	static void set_box_width(lv_obj_t *box, uint32_t ppm, uint32_t row_ppm) {
-		auto width_pct = (lv_coord_t)std::min<uint64_t>((uint64_t)ppm * 100 / row_ppm, 100);
+	void set_box_width(lv_obj_t *box, uint32_t ppm) {
+		auto width_pct = (lv_coord_t)std::min<uint64_t>((uint64_t)ppm * 100 / bar_scale_ppm, 100);
 		lv_obj_set_width(box, lv_pct(std::max<lv_coord_t>(width_pct, 1)));
 	}
 
@@ -491,16 +451,16 @@ private:
 
 		for (auto core = 0u; core < NumCores; core++) {
 			for (auto *box : boxes[core])
-				set_box_width(box, live_ppm((unsigned)(uintptr_t)lv_obj_get_user_data(box)), core_boxes_ppm());
+				set_box_width(box, live_ppm((unsigned)(uintptr_t)lv_obj_get_user_data(box)));
 
 			if (auto *cable_box = cable_boxes[core]) {
-				set_box_width(cable_box, cable_ppm[core], core_boxes_ppm());
+				set_box_width(cable_box, cable_ppm[core]);
 				lv_show(cable_box, true);
 			}
 		}
 
 		for (auto part = 0u; part < NumOverheadParts; part++)
-			set_box_width(overhead_boxes[part], overhead_ppm[part], overhead_row_ppm());
+			set_box_width(overhead_boxes[part], overhead_ppm[part]);
 
 		lv_label_set_text_fmt(overhead_label, "Overhead: %u%%", (unsigned)std::round(overhead_total_ppm / 10000.f));
 		lv_show(overhead_cont);
@@ -510,7 +470,7 @@ private:
 
 	void add_box(unsigned core, unsigned module_id, uint32_t ppm) {
 		auto box = create_box(bar_rows[core], Gui::knob_palette[module_id % 6]);
-		set_box_width(box, ppm, core_boxes_ppm());
+		set_box_width(box, ppm);
 
 		lv_obj_set_user_data(box, (void *)(uintptr_t)module_id);
 		lv_obj_add_event_cb(box, box_focus_cb, LV_EVENT_FOCUSED, this);
@@ -751,7 +711,7 @@ private:
 			bar_rows[core] = create_bar_row(cont);
 		}
 
-		// Overhead: the label is at the left, and the bar starts where the core bars end
+		// Overhead: the label, and a bar whose boxes start where the busier core's bar ends
 		overhead_cont = lv_obj_create(panel);
 		lv_obj_set_width(overhead_cont, lv_pct(100));
 		lv_obj_set_height(overhead_cont, LV_SIZE_CONTENT);
@@ -767,25 +727,15 @@ private:
 		lv_obj_set_style_text_color(overhead_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 		lv_label_set_text(overhead_label, "");
 
-		// Full width, so the bar can be positioned in it (flex layout would place it at the left)
-		auto overhead_holder = lv_obj_create(overhead_cont);
-		lv_obj_set_width(overhead_holder, lv_pct(100));
-		lv_obj_set_height(overhead_holder, BarHeight);
-		lv_obj_set_style_pad_all(overhead_holder, 0, LV_PART_MAIN);
-		lv_obj_set_style_border_width(overhead_holder, 0, LV_PART_MAIN);
-		lv_obj_set_style_bg_opa(overhead_holder, 0, LV_PART_MAIN);
-		lv_obj_clear_flag(overhead_holder, LV_OBJ_FLAG_SCROLLABLE);
+		overhead_row = create_bar_row(overhead_cont);
 
-		overhead_row = create_bar_row(overhead_holder);
-
-		// Empty space at the start of the overhead row, as wide as the core bars (FullWidthRows only)
+		// Empty space at the start of the overhead row, as wide as the busier core's bar
 		overhead_spacer = lv_obj_create(overhead_row);
 		lv_obj_set_height(overhead_spacer, lv_pct(100));
 		lv_obj_set_style_pad_all(overhead_spacer, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_width(overhead_spacer, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(overhead_spacer, 0, LV_PART_MAIN);
 		lv_obj_clear_flag(overhead_spacer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-		lv_show(overhead_spacer, FullWidthRows);
 
 		for (auto part = 0u; part < NumOverheadParts; part++) {
 			auto box = create_box(overhead_row, lv_color_hex(OverheadPartColors[part]));
@@ -842,15 +792,7 @@ private:
 	// than that when the patch is overloaded and the bars wouldn't otherwise fit.
 	uint32_t bar_scale_ppm = OneCorePpm;
 
-	// How much CPU time the width of the core bars represents: the busier core's load
-	uint32_t core_row_ppm = OneCorePpm;
-
 	static constexpr lv_coord_t BarHeight = 24;
-
-	// true: every row's background is the full panel width, and the overhead boxes start
-	// where the core bars end. false: the core rows end at the busier core, and the
-	// overhead row starts there.
-	static constexpr bool FullWidthRows = true;
 
 	// Core 1's time outside the part where both cores run modules and cables
 	enum OverheadPart : unsigned { MappingsPart, MidiPart, SyncPart, OtherPart, NumOverheadParts };
