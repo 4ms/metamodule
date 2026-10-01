@@ -30,24 +30,110 @@
 		"name": "ComplexEG"
 	},
 	{
-		"slug": "DEV",
-		"name": "Dual EnvVCA",
-		"class": "DEVInfo",
-		"groups": {
-			"Channel A": ["RiseASwitch", "FallASwitch", "CycleAButton", "RiseASlider", "FallASlider", "LevelAKnob", "OffsetAKnob", "RiseAKnob", "FallAKnob", "TrigAIn", "FollowAIn", "TimeCvAIn", "AudioAIn", "VcaCvAIn", "EorAOut", "EnvAOut", "AudioAOut"],
-			"Channel B": ["RiseBSwitch", "FallBSwitch", "CycleBButton", "RiseBSlider", "FallBSlider", "LevelBKnob", "OffsetBKnob", "RiseBKnob", "FallBKnob", "TrigBIn", "FollowBIn", "TimeCvBIn", "AudioBIn", "VcaCvBIn", "EofBOut", "EnvBOut", "AudioBOut"]
-		},
-		"names": { "RiseAKnob": "Rise CV", "FallAKnob": "Fall CV", "RiseBKnob": "Rise CV Atten.", "FallBKnob": "Fall CV Atten." }
-
+	  "slug": "DEV",
+	  "name": "Dual EnvVCA",
+	  "class": "DEVInfo",
+	  "groups": {
+		"Channel A": [
+		  "CycleAButton",
+		  "RiseASlider", "FallASlider", "RiseASwitch", "FallASwitch",
+		  "LevelAKnob", "OffsetAKnob",
+		  "RiseAKnob", "FallAKnob",
+		  "TrigAIn", "FollowAIn",
+		  "TimeCvAIn", "VcaCvAIn",
+		  "EorAOut",
+		  "EnvAOut",
+		  "AudioAIn", "AudioAOut"
+		],
+		"Channel B": [
+		  "CycleBButton",
+		  "RiseBSlider", "FallBSlider", "RiseBSwitch", "FallBSwitch",
+		  "LevelBKnob", "OffsetBKnob",
+		  "RiseBKnob", "FallBKnob",
+		  "TrigBIn", "FollowBIn",
+		  "TimeCvBIn", "VcaCvBIn",
+		  "EofBOut",
+		  "EnvBOut",
+		  "AudioBIn", "AudioBOut"
+		]
+	  },
+	  "names": {
+		"RiseAKnob": "Rise CV Atten.",
+		"FallAKnob": "Fall CV Atten.",
+		"RiseBKnob": "Rise CV Atten.",
+		"FallBKnob": "Fall CV Atten.",
+		"TrigAIn": "Trigger",
+		"TrigBIn": "Trigger"
+	  }
 	},
 	{
-		"slug": "DLD",
-		"name": "Dual Looping Delay",
-		"class": "DLDInfo",
-		"groups": {
-			"Channel A": ["TimeAKnob", "TimeMultASwitch", "FeedbackAKnob", "ReverseAButton", "HoldAButton", "DelayFeedAKnob", "MixAKnob", "InAIn", "ReturnAIn", "ReverseAJackIn", "HoldAJackIn", "TimeAJackIn", "FeedbackAJackIn", "DelayFeedAJackIn", "SendAOut", "LoopAOut", "OutAOut", "SoftClipAAltParam", "AutomuteAAltParam", "HoldAAltParam", "Rev_AAltParam", "DelayfeedATaperAltParam", "TimeAAutoNUnqAltParam", "StereoModeAAltParam", "CrossfadeAAltParam"],
-			"Channel B": ["TimeBKnob", "TimeMultBSwitch", "FeedbackBKnob", "ReverseBButton", "HoldBButton", "DelayFeedBKnob", "MixBKnob", "InBIn", "ReturnBIn", "ReverseBJackIn", "HoldBJackIn", "TimeBJackIn", "FeedbackBJackIn", "DelayFeedBJackIn", "SendBOut", "LoopBOut", "OutBOut", "SoftClipBAltParam", "AutomuteBAltParam", "HoldBAltParam", "Rev_BAltParam", "DelayfeedBTaperAltParam", "TimeBAutoNUnqAltParam", "StereoModeBAltParam", "CrossfadeBAltParam"]
-		}
+	  "slug": "DLD",
+	  "name": "Dual Looping Delay",
+	  "class": "DLDInfo",
+	  "groups": {
+		"Channel A": [
+		  "TimeAKnob",
+		  "TimeMultASwitch",
+		  "FeedbackAKnob",
+		  "DelayFeedAKnob",
+		  "MixAKnob",
+		  "ReverseAButton",
+		  "HoldAButton",
+		  "InAIn",
+		  "OutAOut",
+		  "SendAOut",
+		  "ReturnAIn",
+		  "ReverseAJackIn",
+		  "HoldAJackIn",
+		  "TimeAJackIn",
+		  "FeedbackAJackIn",
+		  "DelayFeedAJackIn",
+		  "LoopAOut",
+		  "SoftClipAAltParam",
+		  "AutomuteAAltParam",
+		  "HoldAAltParam",
+		  "Rev_AAltParam",
+		  "DelayfeedATaperAltParam",
+		  "TimeAAutoNUnqAltParam",
+		  "StereoModeAAltParam",
+		  "CrossfadeAAltParam"
+		],
+		"Channel B": [
+		  "TimeBKnob",
+		  "TimeMultBSwitch",
+		  "FeedbackBKnob",
+		  "DelayFeedBKnob",
+		  "MixBKnob",
+		  "ReverseBButton",
+		  "HoldBButton",
+		  "InBIn",
+		  "OutBOut",
+		  "SendBOut",
+		  "ReturnBIn",
+		  "ReverseBJackIn",
+		  "HoldBJackIn",
+		  "TimeBJackIn",
+		  "FeedbackBJackIn",
+		  "DelayFeedBJackIn",
+		  "LoopBOut",
+		  "SoftClipBAltParam",
+		  "AutomuteBAltParam",
+		  "HoldBAltParam",
+		  "Rev_BAltParam",
+		  "DelayfeedBTaperAltParam",
+		  "TimeBAutoNUnqAltParam",
+		  "StereoModeBAltParam",
+		  "CrossfadeBAltParam"
+		]
+	  },
+	  "names": {
+		  "LoopAOut": "Loop Clock Out",
+		  "LoopBOut": "Loop Clock Out"
+	  },
+	  "order": [
+		"Channel A",
+		"Channel B"
+	  ]
 	},
 	{
 		"slug": "Detune",
@@ -178,13 +264,45 @@
 		"name": "Shuffling Clock Multiplier"
 	},
 	{
-		"slug": "SHEV",
-		"name": "Shaped Dual EnvVCA",
-		"class": "SHEVInfo",
-		"groups": {
-			"Channel A": ["CycleAButton", "RiseASwitch", "FallASwitch", "TrigModeASwitch", "LevelAKnob", "OffsetAKnob", "RiseASlider", "FallASlider", "ShapeASlider", "ShapeAKnob", "RiseAKnob", "FallAKnob", "TrigAIn", "ShapeCvAIn", "FollowAIn", "TimeCvAIn", "AudioAIn", "VcaCvAIn", "EorAOut", "EnvAOut", "OutAOut", "Lin5VAOut"],
-			"Channel B": ["CycleBButton", "RiseBSwitch", "FallBSwitch", "TrigModeBSwitch", "LevelBKnob", "OffsetBKnob", "RiseBSlider", "FallBSlider", "ShapeBSlider", "ShapeBKnob", "RiseBKnob", "FallBKnob", "TrigBIn", "ShapeCvBIn", "FollowBIn", "TimeCvBIn", "AudioBIn", "VcaCvBIn", "EofBOut", "EnvBOut", "OutBOut", "Lin5VBOut"]
-		}
+	  "slug": "SHEV",
+	  "name": "Shaped Dual EnvVCA",
+	  "class": "SHEVInfo",
+	  "groups": {
+		"Channel A": [
+		  "CycleAButton",
+		  "RiseASlider", "FallASlider", "RiseASwitch", "FallASwitch", "ShapeASlider",
+		  "LevelAKnob", "OffsetAKnob",
+		  "RiseAKnob", "FallAKnob", "ShapeAKnob",
+		  "TrigModeASwitch",
+		  "TrigAIn", "FollowAIn",
+		  "TimeCvAIn", "ShapeCvAIn", "VcaCvAIn",
+		  "EnvAOut", "Lin5VAOut",
+		  "EorAOut",
+		  "AudioAIn", "OutAOut"
+		],
+		"Channel B": [
+		  "CycleBButton",
+		  "RiseBSlider", "FallBSlider", "RiseBSwitch", "FallBSwitch", "ShapeBSlider",
+		  "LevelBKnob", "OffsetBKnob",
+		  "RiseBKnob", "FallBKnob", "ShapeBKnob",
+		  "TrigModeBSwitch",
+		  "TrigBIn", "FollowBIn",
+		  "TimeCvBIn", "ShapeCvBIn", "VcaCvBIn",
+		  "EnvBOut", "Lin5VBOut",
+		  "EofBOut",
+		  "AudioBIn", "OutBOut"
+		]
+	  },
+	  "names": {
+		"RiseAKnob": "Rise CV Atten.",
+		"FallAKnob": "Fall CV Atten.",
+		"RiseBKnob": "Rise CV Atten.",
+		"FallBKnob": "Fall CV Atten.",
+		"ShapeAKnob": "Shape CV Atten.",
+		"ShapeBKnob": "Shape CV Atten.",
+		"TrigAIn": "Trigger",
+		"TrigBIn": "Trigger"
+	  }
 	},
 	{
 		"slug": "SH",
@@ -199,6 +317,12 @@
 			"Channel 2": ["Ch_2ScaleKnob", "Ch_2ShiftKnob", "Ch_2In", "Ch_2Out"],
 			"Channel 3": ["Ch_3ScaleKnob", "Ch_3ShiftKnob", "Ch_3In", "Ch_3Out"],
 			"Channel 4": ["Ch_4ScaleKnob", "Ch_4ShiftKnob", "Ch_4In", "Ch_4Out"]
+		},
+		"names": {
+			"Ch_1ScaleKnob": "Scale", "Ch_1ShiftKnob": "Shift", "Ch_1In": "In", "Ch_1Out": "Out",
+			"Ch_2ScaleKnob": "Scale", "Ch_2ShiftKnob": "Shift", "Ch_2In": "In", "Ch_2Out": "Out",
+			"Ch_3ScaleKnob": "Scale", "Ch_3ShiftKnob": "Shift", "Ch_3In": "In", "Ch_3Out": "Out",
+			"Ch_4ScaleKnob": "Scale", "Ch_4ShiftKnob": "Shift", "Ch_4In": "In", "Ch_4Out": "Out"
 		}
 	},
 	{
@@ -236,8 +360,7 @@
 		"groups": {
 			"Levels": ["A1LevelKnob", "A2LevelKnob", "A3LevelKnob", "A4LevelKnob", "B1LevelKnob", "B2LevelKnob", "B3LevelKnob", "B4LevelKnob", "C1LevelKnob", "C2LevelKnob", "C3LevelKnob", "C4LevelKnob", "D1LevelKnob", "D2LevelKnob", "D3LevelKnob", "D4LevelKnob"],
 			"Mutes": ["A1Button", "A2Button", "A3Button", "A4Button", "B1Button", "B2Button", "B3Button", "B4Button", "C1Button", "C2Button", "C3Button", "C4Button", "D1Button", "D2Button", "D3Button", "D4Button"],
-			"Inputs": ["InAIn", "InBIn", "InCIn", "InDIn"],
-			"Outputs": ["Out1Out", "Out2Out", "Out3Out", "Out4Out"],
+			"Audio In/Out": ["InAIn", "InBIn", "InCIn", "InDIn", "Out1Out", "Out2Out", "Out3Out", "Out4Out"],
 			"Level CV": ["A1JackIn", "A2JackIn", "A3JackIn", "A4JackIn", "B1JackIn", "B2JackIn", "B3JackIn", "B4JackIn", "C1JackIn", "C2JackIn", "C3JackIn", "C4JackIn", "D1JackIn", "D2JackIn", "D3JackIn", "D4JackIn"]
 		}
 	},
