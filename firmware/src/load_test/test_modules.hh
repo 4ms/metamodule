@@ -46,11 +46,6 @@ inline void test_brand(std::string_view brand, PatchPlayer &player, auto append_
 		ModuleEntry entry;
 		entry.slug = std::string(brand) + ":" + std::string(slug);
 
-		if (entry.slug == "AmalgamatedHarmonics:Arp32") {
-			pr_info("Skipping %s\n", entry.slug.c_str());
-			continue;
-		}
-
 		printf("Testing %s\n", entry.slug.c_str());
 		lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
 
