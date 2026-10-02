@@ -213,11 +213,12 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 	s = entry.slug + ",";
 	pr_info("%s,", entry.slug.c_str());
 
+	// Worst block load, not including the first block
 	auto report_cpu = [&s](auto entryitem) {
 		char buf[16];
-		snprintf(buf, 16, "%.3f,", entryitem.average_run_time_after_first / sampletime);
+		snprintf(buf, 16, "%.3f,", entryitem.average_run_time / sampletime);
 		s += buf;
-		pr_info("%.3f,", entryitem.average_run_time_after_first / sampletime);
+		pr_info("%.3f,", entryitem.average_run_time / sampletime);
 	};
 
 	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
@@ -245,18 +246,20 @@ inline std::string entry_to_csv(ModuleEntry const &entry) {
 	s += buf;
 	pr_info("%llu,", entry.load_time / 1000);
 
+	// Longest single sample during any test's first block
 	float worst_first_run_time = 0;
 	for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
 		worst_first_run_time = std::max(worst_first_run_time, (float)entry.isolated[i].first_run_time);
 		worst_first_run_time = std::max(worst_first_run_time, (float)entry.patched[i].first_run_time);
 		worst_first_run_time = std::max(worst_first_run_time, (float)entry.cv_modulated[i].first_run_time);
 		worst_first_run_time = std::max(worst_first_run_time, (float)entry.audio_modulated[i].first_run_time);
+		worst_first_run_time = std::max(worst_first_run_time, (float)entry.poly_audio_modulated[i].first_run_time);
 	}
 	worst_first_run_time /= 1000.f; // us => ms
 
-	snprintf(buf, 32, "%.1f,", worst_first_run_time);
+	snprintf(buf, 32, "%.2f,", worst_first_run_time);
 	s += buf;
-	pr_info("%.1f", worst_first_run_time);
+	pr_info("%.2f", worst_first_run_time);
 
 #ifdef MM_LOADTEST_MEASURE_MEMORY
 	if (entry.mem_usage.results_invalid) {
