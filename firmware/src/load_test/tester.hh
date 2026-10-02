@@ -179,6 +179,16 @@ struct ModuleLoadTester {
 	}
 
 	Measurements run_patch(auto control_func, size_t block_size) {
+		// Record the worst-case time for one audio frame in the first block of 512 frames
+		// This picks up on modules that have one-time spikes on init
+		// or when params change value (in these tests, changing to 25% on patch load)
+		static constexpr size_t FirstRunSamples = 512;
+		uint64_t first_run_time = 0;
+		for (size_t i = 0; i < FirstRunSamples; i++) {
+			control_func();
+			first_run_time = std::max(first_run_time, measure([&]() { player.step_module(module_id); }));
+		}
+
 		// Always run at least this many iterations and return
 		// the worst measurements from any block_size.
 		// This accounts for modules that process in blocks <= 2048
@@ -187,6 +197,7 @@ struct ModuleLoadTester {
 		std::vector<uint64_t> times(block_size, 0);
 
 		Measurements worst{};
+		worst.first_run_time = first_run_time;
 
 		size_t iterations = 0;
 		while (iterations < min_total_iterations) {
@@ -197,18 +208,16 @@ struct ModuleLoadTester {
 
 			auto current = Measurements{times};
 
-			worst.first_run_time = std::max(worst.first_run_time, current.first_run_time);
 			worst.average_run_time = std::max(worst.average_run_time, current.average_run_time);
 			worst.worst_run_time_after_first =
 				std::max(worst.worst_run_time_after_first, current.worst_run_time_after_first);
 			worst.average_run_time_after_first =
 				std::max(worst.average_run_time_after_first, current.average_run_time_after_first);
 
-			pr_dump("it %d: avg:%f first:%f worst(>1):%f\n",
+			pr_dump("it %zu: avg:%f worst(>1):%llu\n",
 					iterations,
 					worst.average_run_time,
-					worst.first_run_time,
-					worst.worst_run_time_after_first);
+					(unsigned long long)worst.worst_run_time_after_first);
 
 			iterations += block_size;
 		}
