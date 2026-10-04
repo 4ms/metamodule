@@ -60,7 +60,7 @@ private:
 			lv_obj_set_style_bg_opa(pill, 192, LV_PART_MAIN);
 			lv_obj_set_style_radius(pill, 3, LV_PART_MAIN);
 			lv_obj_set_style_pad_all(pill, 0, LV_PART_MAIN);
-			lv_obj_set_style_pad_top(pill, compact ? 1 : 2, LV_PART_MAIN);
+			lv_obj_set_style_pad_top(pill, compact ? 0 : 1, LV_PART_MAIN);
 			lv_obj_clear_flag(pill, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 			lv_hide(pill);
 			pills[i] = pill;
