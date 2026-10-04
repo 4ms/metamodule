@@ -14,6 +14,9 @@ void PrefsSectionNotifications::create(lv_obj_t *parent) {
 
 	auto anim_cont = create_prefs_labeled_check(parent, "Animations:");
 	animation_check = lv_obj_get_child(anim_cont, 1);
+
+	auto clip_cont = create_prefs_labeled_check(parent, "Clip Indicators:");
+	clip_check = lv_obj_get_child(clip_cont, 1);
 }
 
 } // namespace MetaModule

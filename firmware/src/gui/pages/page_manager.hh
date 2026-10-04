@@ -2,6 +2,7 @@
 #include "fs/helpers.hh"
 #include "gui/elements/screensaver.hh"
 #include "gui/knobset_button.hh"
+#include "gui/notify/clip_indicators.hh"
 #include "gui/notify/display.hh"
 #include "gui/notify/queue.hh"
 #include "gui/slsexport/comp_init.hh"
@@ -45,6 +46,7 @@ class PageManager {
 	PageList page_list;
 	GuiState gui_state;
 	ButtonLight button_light;
+	ClipIndicators clip_indicators;
 	Screensaver &screensaver;
 	ReloadPatch patch_reloader;
 	PatchSwitcher patch_switch;
@@ -388,6 +390,10 @@ public:
 
 		// Handle audio overload flashing red
 		DisplayNotification::flash_overload(info.metaparams.audio_overruns);
+
+		// Output clip indicators
+		clip_indicators.update(info.metaparams.clipped_outs, lv_tick_get(), info.settings.notifications.clip_indicators);
+		info.metaparams.clipped_outs = 0;
 
 		// Handle catchup notification from patch player
 		if (auto panel_knob_id = info.patch_playloader.is_panel_knob_catchup_inaccessible()) {
