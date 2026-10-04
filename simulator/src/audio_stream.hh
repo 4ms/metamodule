@@ -50,6 +50,11 @@ public:
 	std::array<float, PanelDef::NumPot> last_knob_val{};
 
 	// Called from the UI thread
+	uint32_t take_clipped_outs() {
+		return clipped_outs.exchange(0);
+	}
+
+	// Called from the UI thread
 	void add_ext_button_events(uint32_t high_events, uint32_t low_events) {
 		ext_buttons_high_events.fetch_or(high_events);
 		ext_buttons_low_events.fetch_or(low_events);
@@ -76,6 +81,8 @@ public:
 			std::cout << "Buffer size mis-match!\n";
 			return;
 		}
+
+		uint32_t clipped = 0;
 
 		for (unsigned i = 0; auto &out : out_buff) {
 			auto &in = in_buff[i++];
@@ -110,7 +117,10 @@ public:
 			// Get outputs
 			for (auto [i, outjack] : enumerate(out.chan)) {
 				if (param_state.is_output_plugged(i)) {
-					outjack = player.get_panel_output(i) / volts_peak;
+					auto volts = player.get_panel_output(i);
+					if (std::abs(volts) > volts_peak)
+						clipped |= 1u << i;
+					outjack = volts / volts_peak;
 					player.set_output_jack_patched_status(i, true);
 				} else {
 					outjack = 0;
@@ -118,6 +128,9 @@ public:
 				}
 			}
 		}
+
+		if (clipped)
+			clipped_outs.fetch_or(clipped);
 	}
 
 	void handle_button_events(uint32_t event_bitmask, float param_val) {
@@ -280,6 +293,7 @@ public:
 
 	std::atomic<uint32_t> ext_buttons_high_events{};
 	std::atomic<uint32_t> ext_buttons_low_events{};
+	std::atomic<uint32_t> clipped_outs{}; // bit n: panel output n exceeded volts_peak
 
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 	float output_fade_amt = -1.f;
