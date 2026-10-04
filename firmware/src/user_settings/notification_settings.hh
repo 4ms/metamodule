@@ -23,6 +23,7 @@ struct NotificationSettings {
 
 	Amount amount = DefaultAmount;
 	bool animation = true;
+	bool clip_indicators = true;
 
 	void make_valid() {
 		bool valid = false;

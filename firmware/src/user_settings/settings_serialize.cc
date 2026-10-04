@@ -124,6 +124,7 @@ static void write(ryml::NodeRef *n, NotificationSettings const &s) {
 	ryml::csubstr amount_string = s.amount == Fewer ? "Fewer" : s.amount == OnlyCritical ? "OnlyCritical" : "All";
 	n->append_child() << ryml::key("amount") << amount_string;
 	n->append_child() << ryml::key("animation") << s.animation;
+	n->append_child() << ryml::key("clip_indicators") << s.clip_indicators;
 }
 
 static void write(ryml::NodeRef *n, MidiPCPatchLoadSettings const &s) {
