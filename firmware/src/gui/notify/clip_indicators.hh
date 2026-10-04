@@ -11,7 +11,9 @@
 namespace MetaModule
 {
 
-// Row of red numbered pills at the top of the screen, one per output that is clipping
+// Row of red numbered pills at the top of the screen, one per output that is clipping.
+// They sit at the bottom of the top layer: above every page, but below notifications,
+// dialogs, and anything on the sys layer (OVER, screensaver)
 class ClipIndicators {
 	static constexpr unsigned MaxOutputs = PanelDef::NumAudioOut + AudioExpander::NumOutJacks;
 	static constexpr unsigned SlotsPerRow = 8;
@@ -49,7 +51,8 @@ private:
 			int col = i % SlotsPerRow;
 			int y = compact ? 2 + row * 14 : 3;
 
-			auto pill = lv_label_create(lv_layer_sys());
+			auto pill = lv_label_create(lv_layer_top());
+			lv_obj_move_background(pill);
 			lv_obj_set_size(pill, SlotWidth, height);
 			lv_obj_set_pos(pill, SlotX0 + col * SlotPitch, y);
 			lv_label_set_text_fmt(pill, "%u", i + 1);
