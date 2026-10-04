@@ -29,13 +29,15 @@ public:
 		clear();
 	}
 
-	void write_sync(ParamsState &params, MetaParams &metaparams) {
+	bool write_sync(ParamsState &params, MetaParams &metaparams) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
 			copy(p, params);
 			m.update_with(metaparams);
 			HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
+			return true;
 		}
+		return false;
 	}
 
 	bool read_sync(ParamsMidiState &params, MetaParams &metaparams) {

@@ -108,6 +108,7 @@ private:
 	alignas(64) ParamBlock local_params;
 
 	bool ext_audio_connected = false;
+	uint32_t clipped_outs = 0; // bit n: panel output n clipped since last successful sync
 
 	int32_t calibrated_0v[PanelDef::NumAudioOut];
 	int32_t ext_calibrated_0v[AudioExpander::NumOutJacks];
