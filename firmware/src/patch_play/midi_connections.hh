@@ -88,6 +88,9 @@ struct MidiConnections {
 	// Removes every connection to the given module input jack
 	void erase_jack(Jack jack);
 
+	// Removes every jack connection, leaving the param maps
+	void clear_jack_conns();
+
 	// Removes every connection and param map referring to the module
 	void erase_module(unsigned module_idx);
 

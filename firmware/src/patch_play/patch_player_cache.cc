@@ -196,6 +196,28 @@ void PatchPlayer::calc_panel_jack_connections() {
 	refresh_conn_flags();
 }
 
+// Re-calculates the panel and MIDI jack connections from scratch, after pd.mapped_ins/outs changed
+// in a way that the incremental updates can't follow (e.g. a summed mapping was removed)
+void PatchPlayer::rebuild_panel_jack_connections() {
+	// Remove the Hub cables that calc_panel_jack_connections() added to sum panel/MIDI inputs.
+	// Patches only connect to the Hub with mapped_ins/mapped_outs, never with internal cables.
+	std::erase_if(pd.int_cables, [](auto const &cable) { return cable.out.module_id == 0; });
+
+	for (auto &in_conn : in_conns)
+		in_conn.clear();
+
+	for (auto &out_conn : out_conns)
+		out_conn.clear();
+
+	midi.clear_jack_conns();
+
+	calc_panel_jack_connections();
+
+	midi.set_poly_channel_count(pd.midi_poly_num);
+
+	cables.build(pd.int_cables, core_balancer.cores.parts, modules);
+}
+
 void PatchPlayer::update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack) {
 	pr_trace("update_or_add_input_panel_conn: %x\n", panel_jack_id);
 

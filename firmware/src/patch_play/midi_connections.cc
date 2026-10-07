@@ -122,6 +122,10 @@ void MidiConnections::erase_jack(Jack jack) {
 	for_each_jack_vector([&](auto &v) { std::erase(v, jack); });
 }
 
+void MidiConnections::clear_jack_conns() {
+	for_each_jack_vector([](auto &v) { v.clear(); });
+}
+
 void MidiConnections::erase_module(unsigned module_idx) {
 	for_each_jack_vector([=](auto &v) { std::erase_if(v, [=](auto &jack) { return jack.module_id == module_idx; }); });
 	for_each_knob_map_vector(

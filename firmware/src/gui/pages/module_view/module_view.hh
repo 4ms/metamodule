@@ -375,6 +375,16 @@ struct ModuleViewPage : PageBase {
 																 patch->remove_injack_mappings(mod.jack);
 							   refresh = true;
 						   },
+						   [&, this](RemoveInternalCable &mod) {
+							   patch->remove_internal_cable(mod.out, mod.in);
+							   refresh = true;
+						   },
+						   [&, this](RemoveJackMapping &mod) {
+							   mod.type == ElementType::Output ?
+								   patch->remove_mapped_outjack(mod.panel_jack_id, mod.jack) :
+								   patch->remove_mapped_injack(mod.panel_jack_id, mod.jack);
+							   refresh = true;
+						   },
 						   [&, this](RemoveMapping &mod) {
 							   patch->remove_mapping(mod.set_id, mod.map);
 							   refresh = true;

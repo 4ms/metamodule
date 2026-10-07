@@ -14,6 +14,7 @@
 #include "gui/pages/midi_map_input.hh"
 #include "gui/pages/module_view/mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/roller_popup.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "metaparams.hh"
 #include "params/expanders.hh"
@@ -56,6 +57,8 @@ struct ModuleViewMappingPane {
 
 		lv_obj_set_style_pad_hor(ui_MapList, 3, LV_PART_MAIN);
 		lv_obj_set_style_pad_ver(ui_MapList, 3, LV_PART_MAIN);
+
+		lv_obj_set_width(disconnect_popup.roller, 240);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -68,6 +71,7 @@ struct ModuleViewMappingPane {
 		add_cable_popup.init(ui_MappingMenu, pane_group);
 		panel_cable_popup.init(ui_MappingMenu, pane_group);
 		midi_map_popup.init(ui_MappingMenu, pane_group);
+		disconnect_popup.init(ui_MappingMenu, pane_group);
 
 		lv_obj_set_y(ui_Keyboard, 144);
 	}
@@ -110,6 +114,7 @@ struct ModuleViewMappingPane {
 
 		displayed_knobsets = 0;
 		displayed_cable_endpts = 0;
+		listed_connections.clear();
 		std::visit([this](auto &el) { prepare_for_element(el); }, drawn_el.element);
 
 		lv_show(ui_MappingParameters);
@@ -161,6 +166,8 @@ struct ModuleViewMappingPane {
 		add_map_popup.hide();
 		control_popup.hide();
 		keyboard_entry.hide();
+		if (disconnect_popup.is_visible())
+			disconnect_popup.hide();
 
 		if (base_group) {
 			lv_indev_set_group(lv_indev_get_next(nullptr), base_group);
@@ -238,11 +245,19 @@ struct ModuleViewMappingPane {
 		else if (keyboard_entry.is_visible())
 			keyboard_entry.back();
 
+		else if (disconnect_popup.is_visible())
+			disconnect_popup.hide();
+
 		else
 			should_close = true;
 	}
 
 private:
+	struct ListedConnection {
+		std::variant<Jack, uint32_t> endpoint; // Jack at the other end of a cable, or panel jack id
+		std::string name;
+	};
+
 	void remove_all_items() {
 		for (auto &obj : map_list_items) {
 			lv_obj_del_async(obj);
@@ -317,6 +332,7 @@ private:
 	void list_cable_output(InternalCable const &cable) {
 		auto obj = list.create_cable_item(cable.out, ElementType::Output, *patch, ui_MapList);
 		make_selectable_outjack_item(obj, cable.out);
+		listed_connections.push_back({cable.out, cable_name(cable.out, ElementType::Output)});
 	}
 
 	// Viewing an output jack: list each virtual input it drives.
@@ -324,6 +340,7 @@ private:
 		for (auto &injack : cable->ins) {
 			auto obj = list.create_cable_item(injack, ElementType::Input, *patch, ui_MapList);
 			make_selectable_injack_item(obj, injack);
+			listed_connections.push_back({injack, cable_name(injack, ElementType::Input)});
 		}
 	}
 
@@ -335,6 +352,8 @@ private:
 				if (in == injack) {
 					auto obj = list.create_panel_in_item(panel_jack.panel_jack_id, ui_MapList, panel_jack.alias_name);
 					make_selectable_panel_jack_item(obj, &panel_jack);
+					listed_connections.push_back(
+						{panel_jack.panel_jack_id, panel_in_name(panel_jack.panel_jack_id, panel_jack.alias_name)});
 					any = true;
 					break;
 				}
@@ -350,6 +369,8 @@ private:
 			if (panel_jack.out == outjack) {
 				auto obj = list.create_panel_out_item(panel_jack.panel_jack_id, ui_MapList, panel_jack.alias_name);
 				make_selectable_panel_jack_item(obj, &panel_jack);
+				listed_connections.push_back(
+					{panel_jack.panel_jack_id, panel_out_name(panel_jack.panel_jack_id, panel_jack.alias_name)});
 				any = true;
 			}
 		}
@@ -552,15 +573,75 @@ private:
 			panel_jack_id);
 	}
 
+	std::string cable_name(Jack jack, ElementType type) {
+		auto name = get_full_element_name(jack.module_id, jack.jack_id, type, *patch);
+		return name.module_name.substr(0, 16) + " " + name.element_name.substr(0, 16);
+	}
+
+	static std::string panel_in_name(uint32_t panel_jack_id, std::string_view alias) {
+		if (alias.length())
+			return std::string(alias);
+		else if (Midi::is_midi_panel_id(panel_jack_id))
+			return get_panel_name(JackInput{}, panel_jack_id);
+		else
+			return "Panel " + get_panel_name(JackInput{}, panel_jack_id);
+	}
+
+	static std::string panel_out_name(uint32_t panel_jack_id, std::string_view alias) {
+		return alias.length() ? std::string(alias) : "Panel " + get_panel_name(JackOutput{}, panel_jack_id);
+	}
+
+	void disconnect_all() {
+		DisconnectJack disconnect{.jack = this_jack, .type = this_jack_type};
+		patch_mod_queue.put(disconnect);
+		notify_queue.put({"Disconnected jack"});
+		gui_state.new_cable = std::nullopt;
+	}
+
+	void disconnect_one(ListedConnection const &conn) {
+		if (auto *other_jack = std::get_if<Jack>(&conn.endpoint)) {
+			if (this_jack_type == ElementType::Input)
+				patch_mod_queue.put(RemoveInternalCable{.out = *other_jack, .in = this_jack});
+			else
+				patch_mod_queue.put(RemoveInternalCable{.out = this_jack, .in = *other_jack});
+
+		} else if (auto *panel_jack_id = std::get_if<uint32_t>(&conn.endpoint)) {
+			patch_mod_queue.put(
+				RemoveJackMapping{.panel_jack_id = *panel_jack_id, .jack = this_jack, .type = this_jack_type});
+		}
+
+		notify_queue.put({"Disconnected " + conn.name});
+		gui_state.new_cable = std::nullopt;
+	}
+
 	static void disconnect_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		DisconnectJack disconnect{.jack = page->this_jack, .type = page->this_jack_type};
-		page->patch_mod_queue.put(disconnect);
-		page->notify_queue.put({"Disconnected jack"});
-		page->gui_state.new_cable = std::nullopt;
+		if (page->listed_connections.size() <= 1) {
+			page->disconnect_all();
+			return;
+		}
+
+		// Multiple connections: ask which one to remove
+		std::string options;
+		for (auto const &conn : page->listed_connections) {
+			options += conn.name;
+			options += "\n";
+		}
+		options += "Remove all";
+
+		page->disconnect_popup.show(
+			[page](unsigned idx) {
+				if (idx < page->listed_connections.size())
+					page->disconnect_one(page->listed_connections[idx]);
+				else
+					page->disconnect_all();
+			},
+			"",
+			options.c_str(),
+			0);
 	}
 
 	static void follow_cable_button_cb(lv_event_t *event) {
@@ -836,9 +917,13 @@ private:
 	ElementType this_jack_type{};
 	bool this_jack_has_connections = false;
 
+	// Each cable or panel/MIDI mapping listed under "Connected To:", in the same order
+	std::vector<ListedConnection> listed_connections;
+
 	ConfirmPopup add_cable_popup;
 	ChoicePopup panel_cable_popup;
 	MidiMapPopup midi_map_popup;
+	RollerPopup disconnect_popup{"Disconnect:"};
 	PatchModQueue &patch_mod_queue;
 
 	OpenPatchManager &patches;

@@ -230,6 +230,9 @@ public:
 	void remove_injack_mappings(Jack jack);
 	void disconnect_outjack(Jack jack);
 	void remove_outjack_mappings(Jack jack);
+	void remove_internal_cable(Jack out, Jack in);
+	void remove_injack_mapping(uint32_t panel_jack_id, Jack jack);
+	void remove_outjack_mapping(uint16_t panel_jack_id, Jack jack);
 	unsigned num_poly_cable_channels(Jack out, Jack in);
 
 	// poly_num is the user setting: 0 = Auto (compute from cables), 1-8 = hard-set
@@ -257,6 +260,7 @@ public:
 	//
 
 	void calc_panel_jack_connections();
+	void rebuild_panel_jack_connections();
 	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack);
 
 	//
@@ -884,6 +888,8 @@ private:
 	void safe_unpatch_output(Jack jack);
 	void safe_unpatch_input(Jack jack);
 	bool output_jack_held_by_panel(Jack jack) const;
+	bool input_jack_held_by_panel(Jack jack) const;
+	bool input_jack_has_module_cable(Jack jack) const;
 
 	// patch_player_expanders.cc
 	bool connect_expander(ExpanderConnection conn);

@@ -36,6 +36,16 @@ auto *get_test_poly(MetaModule::PatchPlayer &player, unsigned module_id) {
 	return dynamic_cast<TestPolyModule *>(player.modules[module_id].get());
 }
 
+// The player's internal cables, minus the Hub cables it adds to sum panel inputs
+std::vector<InternalCable> module_cables(MetaModule::PatchPlayer &player) {
+	std::vector<InternalCable> cables;
+	for (auto const &cable : player.get_int_cables()) {
+		if (cable.out.module_id != 0)
+			cables.push_back(cable);
+	}
+	return cables;
+}
+
 } // namespace
 
 TEST_CASE("Simple output jack mapping") {
@@ -4675,4 +4685,329 @@ TEST_CASE("MIDI note-gate knob mapping filtered to one port ignores the others")
 
 	player.set_midi_gate(60, 0.f, 0, PortDIN5);
 	CHECK(mod->params[0] == doctest::Approx(0.f));
+}
+
+// ============================================================================
+// Removing one connection from a jack that has several (ModuleView Disconnect menu)
+// ============================================================================
+TEST_CASE("Remove one connection, leaving the jack's other connections in place") {
+	// Module 1 Out 0 drives an internal cable to Module 2 In 0 and Module 3 In 0,
+	// and also drives Panel Outs 0 and 1.
+	// Module 2 In 0 is also summed with Panel Ins 0 and 1.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: remove_one_conn
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+    2: TestModule
+    3: TestModule
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+        - module_id: 3
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+    - panel_jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 0
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto m1 = get_test_module(player, 1);
+	auto m2 = get_test_module(player, 2);
+	auto m3 = get_test_module(player, 3);
+	REQUIRE(m1);
+	REQUIRE(m2);
+	REQUIRE(m3);
+
+	m1->set_input(0, 1.0f);
+	player.set_panel_input(0, 2.0f);
+	player.set_panel_input(1, 4.0f);
+	player.update_patch();
+	REQUIRE(m2->get_output(0) == doctest::Approx(7.0f));
+	REQUIRE(m3->get_output(0) == doctest::Approx(1.0f));
+	REQUIRE(player.get_panel_output(0) == doctest::Approx(1.0f));
+	REQUIRE(player.get_panel_output(1) == doctest::Approx(1.0f));
+
+	SUBCASE("Remove one input from a split internal cable") {
+		player.remove_internal_cable(Jack{1, 0}, Jack{3, 0});
+
+		auto cables = module_cables(player);
+		REQUIRE(cables.size() == 1);
+		REQUIRE(cables[0].ins.size() == 1);
+		CHECK(cables[0].ins[0] == Jack{2, 0});
+
+		m1->set_input(0, 10.0f);
+		player.update_patch();
+		CHECK(m2->get_output(0) == doctest::Approx(16.0f)); // still fed by the cable and both panel ins
+		CHECK(m3->get_output(0) == doctest::Approx(1.0f));	// no longer fed: keeps its last value
+		CHECK(player.get_panel_output(0) == doctest::Approx(10.0f));
+		CHECK(player.get_panel_output(1) == doctest::Approx(10.0f));
+	}
+
+	SUBCASE("Remove the last input of an internal cable removes the cable") {
+		player.remove_internal_cable(Jack{1, 0}, Jack{3, 0});
+		player.remove_internal_cable(Jack{1, 0}, Jack{2, 0});
+
+		CHECK(module_cables(player).empty());
+
+		m1->set_input(0, 10.0f);
+		player.update_patch();
+		CHECK(m2->get_output(0) == doctest::Approx(6.0f)); // panel ins only
+		CHECK(player.get_panel_output(0) == doctest::Approx(10.0f));
+	}
+
+	SUBCASE("Removing a cable that doesn't exist does nothing") {
+		player.remove_internal_cable(Jack{1, 0}, Jack{3, 1});
+		player.remove_internal_cable(Jack{2, 0}, Jack{3, 0});
+
+		auto cables = module_cables(player);
+		REQUIRE(cables.size() == 1);
+		CHECK(cables[0].ins.size() == 2);
+	}
+
+	SUBCASE("Remove one panel input mapping") {
+		player.remove_injack_mapping(0, Jack{2, 0});
+
+		player.set_panel_input(0, 20.0f);
+		player.set_panel_input(1, 40.0f);
+		player.update_patch();
+		CHECK(m2->get_output(0) == doctest::Approx(41.0f)); // cable + panel in 1 only
+	}
+
+	SUBCASE("Remove one panel output mapping") {
+		player.remove_outjack_mapping(0, Jack{1, 0});
+
+		m1->set_input(0, 10.0f);
+		player.update_patch();
+		CHECK(player.get_panel_output(0) != doctest::Approx(10.0f));
+		CHECK(player.get_panel_output(1) == doctest::Approx(10.0f));
+		CHECK(m2->get_output(0) == doctest::Approx(16.0f));
+		CHECK(m3->get_output(0) == doctest::Approx(10.0f));
+	}
+}
+
+TEST_CASE("Remove one of several MIDI and panel mappings summed into the same jack") {
+	// Panel In 0, MIDI Note pitch, and MIDI Gate all sum into Module 1 In 0
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: remove_one_midi
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+  int_cables:
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 256
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 272
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto m1 = get_test_module(player, 1);
+	REQUIRE(m1);
+
+	player.set_panel_input(0, 1.0f);
+	player.set_midi_note_pitch(0, 3.0f, 0);
+	player.set_midi_note_gate(0, 8.0f, 0);
+	player.update_patch();
+	REQUIRE(m1->get_output(0) == doctest::Approx(12.0f));
+
+	SUBCASE("Remove the MIDI note mapping") {
+		player.remove_injack_mapping(256, Jack{1, 0});
+
+		player.set_panel_input(0, 10.0f);
+		player.set_midi_note_pitch(0, 30.0f, 0);
+		player.set_midi_note_gate(0, 80.0f, 0);
+		player.update_patch();
+		CHECK(m1->get_output(0) == doctest::Approx(90.0f)); // panel + gate
+	}
+
+	SUBCASE("Remove the panel mapping") {
+		player.remove_injack_mapping(0, Jack{1, 0});
+
+		player.set_panel_input(0, 10.0f);
+		player.set_midi_note_pitch(0, 30.0f, 0);
+		player.set_midi_note_gate(0, 80.0f, 0);
+		player.update_patch();
+		CHECK(m1->get_output(0) == doctest::Approx(110.0f)); // note + gate
+	}
+
+	SUBCASE("Remove all but one mapping") {
+		player.remove_injack_mapping(0, Jack{1, 0});
+		player.remove_injack_mapping(272, Jack{1, 0});
+
+		player.set_panel_input(0, 10.0f);
+		player.set_midi_note_gate(0, 80.0f, 0);
+		player.set_midi_note_pitch(0, 30.0f, 0);
+		player.update_patch();
+		CHECK(m1->get_output(0) == doctest::Approx(30.0f)); // note only
+	}
+}
+
+TEST_CASE("Removing one connection keeps jacks patched while other connections remain") {
+	// Module 1 (PatchedFlag) Out 2 drives an internal cable to Module 2 In 0 and Module 3 In 0,
+	// and is mapped to Panel Out 0.
+	// Module 2 In 0 is also mapped to Panel In 0.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: remove_one_patched
+  module_slugs:
+    0: HubMedium
+    1: PatchedFlag
+    2: PatchedFlag
+    3: PatchedFlag
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 2
+      ins:
+        - module_id: 2
+          jack_id: 0
+        - module_id: 3
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 2
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *m1 = get_patched_flag(player, 1);
+	auto *m2 = get_patched_flag(player, 2);
+	auto *m3 = get_patched_flag(player, 3);
+	REQUIRE(m1);
+	REQUIRE(m2);
+	REQUIRE(m3);
+
+	constexpr unsigned Out = 2;
+
+	REQUIRE(m1->is_output_patched(Out));
+	REQUIRE(m2->is_input_patched(0));
+	REQUIRE(m3->is_input_patched(0));
+
+	SUBCASE("Removing one cable input unpatches only that input") {
+		player.remove_internal_cable(Jack{1, Out}, Jack{3, 0});
+		CHECK_FALSE(m3->is_input_patched(0));
+		CHECK(m2->is_input_patched(0));
+		CHECK(m1->is_output_patched(Out));
+	}
+
+	SUBCASE("Removing the last cable input keeps the output patched if a physical panel cable holds it") {
+		player.set_output_jack_patched_status(0, true);
+		player.remove_internal_cable(Jack{1, Out}, Jack{3, 0});
+		player.remove_internal_cable(Jack{1, Out}, Jack{2, 0});
+		CHECK(module_cables(player).empty());
+		CHECK(m1->is_output_patched(Out));
+	}
+
+	SUBCASE("Removing the last cable input unpatches the output if no physical panel cable holds it") {
+		player.set_output_jack_patched_status(0, false);
+		player.remove_internal_cable(Jack{1, Out}, Jack{3, 0});
+		player.remove_internal_cable(Jack{1, Out}, Jack{2, 0});
+		CHECK(module_cables(player).empty());
+		CHECK_FALSE(m1->is_output_patched(Out));
+	}
+
+	SUBCASE("Removing a cable keeps an input patched if a physical panel cable holds it") {
+		player.set_input_jack_patched_status(0, true);
+		player.remove_internal_cable(Jack{1, Out}, Jack{2, 0});
+		CHECK(m2->is_input_patched(0));
+	}
+
+	SUBCASE("Removing a cable unpatches an input if its panel mapping has no physical cable") {
+		player.set_input_jack_patched_status(0, false);
+		player.remove_internal_cable(Jack{1, Out}, Jack{2, 0});
+		CHECK_FALSE(m2->is_input_patched(0));
+	}
+
+	SUBCASE("Removing a panel input mapping keeps the input patched by its internal cable") {
+		player.remove_injack_mapping(0, Jack{2, 0});
+		CHECK(m2->is_input_patched(0));
+	}
+
+	SUBCASE("Removing a panel output mapping keeps the output patched by its internal cable") {
+		player.remove_outjack_mapping(0, Jack{1, Out});
+		CHECK(m1->is_output_patched(Out));
+	}
+
+	SUBCASE("Removing a panel output mapping unpatches the output when it has no other connections") {
+		player.remove_internal_cable(Jack{1, Out}, Jack{3, 0});
+		player.set_output_jack_patched_status(0, true);
+		player.remove_internal_cable(Jack{1, Out}, Jack{2, 0});
+		REQUIRE(m1->is_output_patched(Out));
+
+		player.remove_outjack_mapping(0, Jack{1, Out});
+		CHECK_FALSE(m1->is_output_patched(Out));
+	}
 }
