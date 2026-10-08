@@ -224,6 +224,7 @@ static bool read(ryml::ConstNodeRef const &node, NotificationSettings *settings)
 	}
 
 	read_or_default(node, "animation", settings, &NotificationSettings::animation);
+	read_or_default(node, "clip_indicators", settings, &NotificationSettings::clip_indicators);
 	settings->make_valid();
 
 	return true;

@@ -107,7 +107,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			return_cached_params(block);
 
 			// 3.5us w/both MIDIs
-			sync_params.write_sync(param_state, param_blocks[block].metaparams);
+			param_blocks[block].metaparams.clipped_outs = clipped_outs;
+			if (sync_params.write_sync(param_state, param_blocks[block].metaparams))
+				clipped_outs = 0;
 			param_state.reset_change_flags();
 
 			auto tm = load_measure.stop_simple_measurement();
@@ -165,13 +167,22 @@ void AudioStream::handle_overruns() {
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	float output_volts = player.get_panel_output(output_id) * output_fade_amt;
-	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
+	int32_t val = cal.out_cal[output_id].adjust(output_volts);
+	int32_t sat = MathTools::signed_saturate(val, 24);
+	if (sat != val)
+		clipped_outs |= 1u << output_id;
+	return sat;
 }
 
 AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
 	output_id = AudioExpander::out_order[output_id];
-	float output_volts = player.get_panel_output(output_id + PanelDef::NumAudioOut) * output_fade_amt;
-	return MathTools::signed_saturate(ext_cal.out_cal[output_id].adjust(output_volts), 24);
+	unsigned panel_out = output_id + PanelDef::NumAudioOut;
+	float output_volts = player.get_panel_output(panel_out) * output_fade_amt;
+	int32_t val = ext_cal.out_cal[output_id].adjust(output_volts);
+	int32_t sat = MathTools::signed_saturate(val, 24);
+	if (sat != val)
+		clipped_outs |= 1u << panel_out;
+	return sat;
 }
 
 // 0V, calibrated

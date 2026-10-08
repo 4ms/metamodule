@@ -36,6 +36,7 @@ struct MetaParams {
 	// Audio -> GUI
 	uint8_t audio_load = 0;
 	int8_t audio_overruns = 0;
+	uint32_t clipped_outs = 0; // bit n: panel output n clipped. Event: OR-accumulated, cleared by consumer
 
 	// Controls -> Audio
 	uint8_t midi_ports_connected = 0; //bitfield using Midi::Event::Port
@@ -77,6 +78,7 @@ struct MetaParams {
 		rotary_pushed.abs_pos = 0;
 		audio_load = 0;
 		audio_overruns = 0;
+		clipped_outs = 0;
 		jack_senses = 0;
 		ext_buttons_high_events = 0;
 		ext_buttons_low_events = 0;
@@ -108,6 +110,9 @@ struct MetaParams {
 		button_exp_connected = that.button_exp_connected;
 
 		audio_overruns = std::max(that.audio_overruns, audio_overruns);
+
+		clipped_outs |= that.clipped_outs;
+		that.clipped_outs = 0;
 
 		midi_ports_connected = that.midi_ports_connected;
 
@@ -150,6 +155,9 @@ struct MetaParams {
 			that.audio_overruns = 0;
 		} else if (audio_overruns > 0)
 			audio_overruns--;
+
+		clipped_outs |= that.clipped_outs;
+		that.clipped_outs = 0;
 
 		midi_ports_connected = that.midi_ports_connected;
 
