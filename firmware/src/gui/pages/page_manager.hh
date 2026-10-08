@@ -392,7 +392,8 @@ public:
 		DisplayNotification::flash_overload(info.metaparams.audio_overruns);
 
 		// Output clip indicators
-		clip_indicators.update(info.metaparams.clipped_outs, lv_tick_get(), info.settings.notifications.clip_indicators);
+		clip_indicators.update(
+			info.metaparams.clipped_outs, lv_tick_get(), info.settings.notifications.clip_indicators);
 		info.metaparams.clipped_outs = 0;
 
 		// Handle catchup notification from patch player

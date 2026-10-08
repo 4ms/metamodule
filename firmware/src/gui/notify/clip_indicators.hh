@@ -21,9 +21,18 @@ class ClipIndicators {
 	static constexpr int SlotPitch = 27;
 	static constexpr int SlotWidth = 23;
 
+	// One row: 8 outputs. Two rows (Audio Expander): shorter pills, smaller font
+	static constexpr int OneRowY = 3;
+	static constexpr int OneRowHeight = 16;
+	static constexpr int OneRowPadTop = 1; // centers the numeral vertically
+	static constexpr int TwoRowY = 2;
+	static constexpr int TwoRowHeight = 12;
+	static constexpr int TwoRowPitch = 14;
+
 	ClipHold<MaxOutputs> hold;
 	std::array<lv_obj_t *, MaxOutputs> pills{};
 	unsigned num_outputs = 0;
+	uint32_t lit = 0; // bit n: pill n is showing
 
 public:
 	void update(uint32_t mask, uint32_t now_ms, bool enabled) {
@@ -32,8 +41,22 @@ public:
 
 		hold.update(mask, now_ms);
 
-		for (unsigned i = 0; i < num_outputs; i++)
-			lv_show(pills[i], enabled && hold.is_lit(i, now_ms));
+		uint32_t now_lit = 0;
+		if (enabled) {
+			for (unsigned i = 0; i < num_outputs; i++) {
+				if (hold.is_lit(i, now_ms))
+					now_lit |= 1u << i;
+			}
+		}
+
+		// Showing or hiding an LVGL object invalidates it, so only touch pills whose state changed
+		if (auto changed = now_lit ^ lit) {
+			for (unsigned i = 0; i < num_outputs; i++) {
+				if (changed & (1u << i))
+					lv_show(pills[i], now_lit & (1u << i));
+			}
+			lit = now_lit;
+		}
 	}
 
 private:
@@ -42,14 +65,14 @@ private:
 		if (Expanders::get_connected().ext_audio_connected)
 			num_outputs += AudioExpander::NumOutJacks;
 
-		bool compact = num_outputs > SlotsPerRow;
-		int height = compact ? 12 : 16;
-		auto font = compact ? &ui_font_MuseoSansRounded50010 : &ui_font_MuseoSansRounded50012;
+		bool two_rows = num_outputs > SlotsPerRow;
+		int height = two_rows ? TwoRowHeight : OneRowHeight;
+		auto font = two_rows ? &ui_font_MuseoSansRounded50010 : &ui_font_MuseoSansRounded50012;
 
 		for (unsigned i = 0; i < num_outputs; i++) {
 			int row = i / SlotsPerRow;
 			int col = i % SlotsPerRow;
-			int y = compact ? 2 + row * 14 : 3;
+			int y = two_rows ? TwoRowY + row * TwoRowPitch : OneRowY;
 
 			auto pill = lv_label_create(lv_layer_top());
 			lv_obj_move_background(pill);
@@ -63,7 +86,7 @@ private:
 			lv_obj_set_style_bg_opa(pill, 192, LV_PART_MAIN);
 			lv_obj_set_style_radius(pill, 3, LV_PART_MAIN);
 			lv_obj_set_style_pad_all(pill, 0, LV_PART_MAIN);
-			lv_obj_set_style_pad_top(pill, compact ? 0 : 1, LV_PART_MAIN);
+			lv_obj_set_style_pad_top(pill, two_rows ? 0 : OneRowPadTop, LV_PART_MAIN);
 			lv_obj_clear_flag(pill, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 			lv_hide(pill);
 			pills[i] = pill;

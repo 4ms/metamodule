@@ -919,8 +919,8 @@ private:
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
 			notif_anim == notifications.animation && notif_clip == notifications.clip_indicators &&
-			usb_role == settings.usb_role_mode &&
-			usb_mode == settings.usb_device_mode && video_mirror == video.mirror && dev_drive == developer.enabled &&
+			usb_role == settings.usb_role_mode && usb_mode == settings.usb_device_mode &&
+			video_mirror == video.mirror && dev_drive == developer.enabled &&
 			auto_rebalance == audio_settings.auto_rebalance)
 		{
 			lv_disable(save_button);

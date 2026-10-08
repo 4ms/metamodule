@@ -53,3 +53,12 @@ TEST_CASE("ClipHold: tick wraparound") {
 	CHECK_FALSE(h.is_lit(0, t + 500));
 	CHECK_FALSE(h.is_lit(0, t + 0x8000'0000u)); // long after: not stuck on
 }
+
+TEST_CASE("ClipHold: expired slot doesn't relight when the tick counter wraps all the way around") {
+	ClipHold<16> h;
+	h.update(0b1, 1000);
+	h.update(0, 2000); // expired: slot retired
+
+	// 2^32 ms later, the counter reads 1100 again
+	CHECK_FALSE(h.is_lit(0, 1100));
+}

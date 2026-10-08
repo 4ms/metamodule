@@ -12,6 +12,7 @@
 #include "util/countzip.hh"
 #include "util/edge_detector.hh"
 #include <atomic>
+#include <cmath>
 #include <iostream>
 #include <span>
 

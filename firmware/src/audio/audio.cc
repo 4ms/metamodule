@@ -1,5 +1,4 @@
 #include "audio/audio.hh"
-#include "audio/clip_detect.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "calibrate/calibration_data_reader.hh"
 #include "conf/hsem_conf.hh"
@@ -169,19 +168,21 @@ void AudioStream::handle_overruns() {
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	float output_volts = player.get_panel_output(output_id) * output_fade_amt;
 	int32_t val = cal.out_cal[output_id].adjust(output_volts);
-	if (ClipDetect::exceeds_24bit(val))
+	int32_t sat = MathTools::signed_saturate(val, 24);
+	if (sat != val)
 		clipped_outs |= 1u << output_id;
-	return MathTools::signed_saturate(val, 24);
+	return sat;
 }
 
 AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
-	auto clip_bit = ClipDetect::ext_output_bit(output_id);
 	output_id = AudioExpander::out_order[output_id];
-	float output_volts = player.get_panel_output(output_id + PanelDef::NumAudioOut) * output_fade_amt;
+	unsigned panel_out = output_id + PanelDef::NumAudioOut;
+	float output_volts = player.get_panel_output(panel_out) * output_fade_amt;
 	int32_t val = ext_cal.out_cal[output_id].adjust(output_volts);
-	if (ClipDetect::exceeds_24bit(val))
-		clipped_outs |= 1u << clip_bit;
-	return MathTools::signed_saturate(val, 24);
+	int32_t sat = MathTools::signed_saturate(val, 24);
+	if (sat != val)
+		clipped_outs |= 1u << panel_out;
+	return sat;
 }
 
 // 0V, calibrated
