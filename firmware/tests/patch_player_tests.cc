@@ -5011,3 +5011,153 @@ PatchData:
 		CHECK_FALSE(m1->is_output_patched(Out));
 	}
 }
+
+// ============================================================================
+// Removing all panel/MIDI mappings from an input jack (e.g. before re-mapping it to MIDI)
+// ============================================================================
+TEST_CASE("remove_injack_mappings disconnects MIDI and summed panel mappings") {
+	// Module 1 In 0: MIDI Note pitch only
+	// Module 2 In 0: internal cable from Module 1 Out 1, summed with Panel In 0
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: remove_injack_mappings
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+    2: TestModule
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 256
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto m1 = get_test_module(player, 1);
+	auto m2 = get_test_module(player, 2);
+	REQUIRE(m1);
+	REQUIRE(m2);
+
+	player.set_midi_note_pitch(0, 3.0f, 0);
+	m1->set_input(1, 1.0f);
+	player.set_panel_input(0, 2.0f);
+	player.update_patch();
+	REQUIRE(m1->get_output(0) == doctest::Approx(3.0f));
+	REQUIRE(m2->get_output(0) == doctest::Approx(3.0f));
+
+	SUBCASE("MIDI mapping is removed") {
+		player.remove_injack_mappings(Jack{1, 0});
+
+		player.set_midi_note_pitch(0, 5.0f, 0);
+		player.update_patch();
+		CHECK(m1->get_output(0) == doctest::Approx(3.0f)); // no longer fed: keeps its last value
+	}
+
+	SUBCASE("Re-mapping a jack to a different MIDI signal drops the old one") {
+		// Same sequence the MIDI map popup sends: RemoveJackMappings, then AddJackMapping
+		player.remove_injack_mappings(Jack{1, 0});
+		player.add_injack_mapping(272, Jack{1, 0});
+
+		player.set_midi_note_gate(0, 8.0f, 0);
+		player.update_patch();
+		CHECK(m1->get_output(0) == doctest::Approx(8.0f));
+
+		player.set_midi_note_pitch(0, 5.0f, 0);
+		player.update_patch();
+		CHECK(m1->get_output(0) == doctest::Approx(8.0f)); // note pitch no longer reaches the jack
+	}
+
+	SUBCASE("Summed panel mapping is removed, internal cable stays") {
+		player.remove_injack_mappings(Jack{2, 0});
+
+		m1->set_input(1, 10.0f);
+		player.set_panel_input(0, 20.0f);
+		player.update_patch();
+		CHECK(m2->get_output(0) == doctest::Approx(10.0f)); // cable only
+	}
+}
+
+TEST_CASE("remove_injack_mappings patched-state") {
+	// Module 1 In 0: internal cable from Module 3 Out 0, summed with Panel In 0
+	// Module 2 In 0: Panel In 0 only
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: remove_injack_mappings_patched
+  module_slugs:
+    0: HubMedium
+    1: PatchedFlag
+    2: PatchedFlag
+    3: PatchedFlag
+  int_cables:
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+        - module_id: 2
+          jack_id: 0
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *m1 = get_patched_flag(player, 1);
+	auto *m2 = get_patched_flag(player, 2);
+	REQUIRE(m1);
+	REQUIRE(m2);
+
+	player.set_input_jack_patched_status(0, true);
+	REQUIRE(m1->is_input_patched(0));
+	REQUIRE(m2->is_input_patched(0));
+
+	SUBCASE("Jack with an internal cable stays patched") {
+		player.remove_injack_mappings(Jack{1, 0});
+		CHECK(m1->is_input_patched(0));
+	}
+
+	SUBCASE("Jack with only a panel mapping is unpatched") {
+		player.remove_injack_mappings(Jack{2, 0});
+		CHECK_FALSE(m2->is_input_patched(0));
+	}
+}

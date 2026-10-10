@@ -182,17 +182,15 @@ void PatchPlayer::disconnect_injack(Jack jack) {
 }
 
 void PatchPlayer::remove_injack_mappings(Jack jack) {
-	for (auto &ins : in_conns)
-		std::erase(ins, jack);
-
-	if (pd.find_internal_cable_with_injack(jack) == nullptr) {
-		// unpatch the module's jack if it has no cables connected
-		safe_unpatch_input(jack);
-	}
-
 	pd.remove_injack_mappings(jack);
 
-	refresh_conn_flags();
+	// The jack's MIDI connections and any Hub cables summing panel/MIDI inputs into it
+	// must go too, so re-calculate all panel connections
+	rebuild_panel_jack_connections();
+
+	// unpatch the module's jack if it has no cables connected
+	if (!input_jack_has_module_cable(jack))
+		safe_unpatch_input(jack);
 }
 
 void PatchPlayer::disconnect_outjack(Jack jack) {
