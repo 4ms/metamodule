@@ -3,6 +3,7 @@
 #include "gui/elements/screensaver.hh"
 #include "gui/knobset_button.hh"
 #include "gui/notify/clip_indicators.hh"
+#include "gui/notify/clip_patched.hh"
 #include "gui/notify/display.hh"
 #include "gui/notify/queue.hh"
 #include "gui/slsexport/comp_init.hh"
@@ -392,8 +393,11 @@ public:
 		DisplayNotification::flash_overload(info.metaparams.audio_overruns);
 
 		// Output clip indicators
-		clip_indicators.update(
-			info.metaparams.clipped_outs, lv_tick_get(), info.settings.notifications.clip_indicators);
+		auto &notif = info.settings.notifications;
+		uint32_t visible = ~0u;
+		if (notif.clip_patched_only)
+			visible = patched_outputs_mask(info.metaparams.jack_senses, ClipIndicators::MaxOutputs);
+		clip_indicators.update(info.metaparams.clipped_outs, lv_tick_get(), notif.clip_indicators, visible);
 		info.metaparams.clipped_outs = 0;
 
 		// Handle catchup notification from patch player

@@ -16,7 +16,10 @@ namespace MetaModule
 // They sit at the bottom of the top layer: above every page, but below notifications,
 // dialogs, and anything on the sys layer (OVER, screensaver)
 class ClipIndicators {
+public:
 	static constexpr unsigned MaxOutputs = PanelDef::NumAudioOut + AudioExpander::NumOutJacks;
+
+private:
 	static constexpr int ScreenWidth = ScreenBufferConf::viewWidth;
 	static constexpr int ScreenHeight = ScreenBufferConf::viewHeight;
 
@@ -39,7 +42,8 @@ class ClipIndicators {
 	uint32_t lit = 0; // bit n: pill n is showing
 
 public:
-	void update(uint32_t mask, uint32_t now_ms, bool enabled) {
+	// visible: bit n clear hides pill n regardless of clipping (e.g. jack not patched)
+	void update(uint32_t mask, uint32_t now_ms, bool enabled, uint32_t visible) {
 		if (num_outputs == 0)
 			create();
 
@@ -52,6 +56,7 @@ public:
 					now_lit |= 1u << i;
 			}
 		}
+		now_lit &= visible;
 
 		// Showing or hiding an LVGL object invalidates it, so only touch pills whose state changed
 		if (auto changed = now_lit ^ lit) {
