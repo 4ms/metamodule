@@ -24,6 +24,7 @@ struct NotificationSettings {
 	Amount amount = DefaultAmount;
 	bool animation = true;
 	bool clip_indicators = true;
+	bool clip_patched_only = true;
 
 	void make_valid() {
 		bool valid = false;

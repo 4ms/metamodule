@@ -92,6 +92,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(notifications_section.clip_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(notifications_section.clip_patched_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(usb_section.role_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(usb_section.device_mode_dropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(usb_section.mirror_check, changed_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -121,6 +122,7 @@ struct PrefsTab : SystemMenuTab {
 		lv_obj_add_event_cb(notifications_section.amount_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.animation_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(notifications_section.clip_check, focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(notifications_section.clip_patched_check, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(usb_section.role_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(usb_section.device_mode_dropdown, focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(usb_section.mirror_check, focus_cb, LV_EVENT_FOCUSED, this);
@@ -295,6 +297,8 @@ private:
 		lv_dropdown_set_selected(notifications_section.amount_dropdown, notif_item >= 0 ? notif_item : 0);
 		lv_check(notifications_section.animation_check, notifications.animation);
 		lv_check(notifications_section.clip_check, notifications.clip_indicators);
+		lv_check(notifications_section.clip_patched_check, notifications.clip_patched_only);
+		update_clip_patched_enabled(notifications.clip_indicators);
 
 		// USB/video
 		lv_dropdown_set_selected(usb_section.role_dropdown, usb_role_to_index(settings.usb_role_mode));
@@ -553,6 +557,16 @@ private:
 		return lv_obj_has_state(notifications_section.clip_check, LV_STATE_CHECKED);
 	}
 
+	bool read_notification_clip_patched_check() {
+		return lv_obj_has_state(notifications_section.clip_patched_check, LV_STATE_CHECKED);
+	}
+
+	void update_clip_patched_enabled(bool clip_enabled) {
+		lv_enable(notifications_section.clip_patched_check, clip_enabled);
+		auto opa = clip_enabled ? LV_OPA_100 : LV_OPA_50;
+		lv_obj_set_style_opa(notifications_section.clip_patched_cont, opa, LV_PART_MAIN);
+	}
+
 	void update_require_back_enabled(bool expander_enabled) {
 		lv_enable(buttonexpknobset_section.require_back_check, expander_enabled);
 		auto opa = expander_enabled ? LV_OPA_100 : LV_OPA_50;
@@ -703,12 +717,14 @@ private:
 		auto notif_amount = read_notification_amount_dropdown();
 		auto notif_anim = read_notification_animation_check();
 		auto notif_clip = read_notification_clip_check();
+		auto notif_clip_patched = read_notification_clip_patched_check();
 		if (notifications.amount != notif_amount || notifications.animation != notif_anim ||
-			notifications.clip_indicators != notif_clip)
+			notifications.clip_indicators != notif_clip || notifications.clip_patched_only != notif_clip_patched)
 		{
 			notifications.amount = notif_amount;
 			notifications.animation = notif_anim;
 			notifications.clip_indicators = notif_clip;
+			notifications.clip_patched_only = notif_clip_patched;
 			gui_state.do_write_settings = true;
 		}
 
@@ -896,6 +912,7 @@ private:
 		auto notif_amount = read_notification_amount_dropdown();
 		auto notif_anim = read_notification_animation_check();
 		auto notif_clip = read_notification_clip_check();
+		auto notif_clip_patched = read_notification_clip_patched_check();
 		auto usb_role = read_usb_role_dropdown();
 		auto usb_mode = read_usb_mode_dropdown();
 		auto video_mirror = read_video_mirror_check();
@@ -904,6 +921,7 @@ private:
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 		update_knobset_control_items(knobset_control == MidiSettings::KnobsetControl::Enabled);
 		update_require_back_enabled(bexp != 0);
+		update_clip_patched_enabled(notif_clip);
 		update_usb_video_items(usb_mode == UsbDeviceMode::Video && usb_role != UsbRoleMode::ForceHost);
 		update_usb_device_items(usb_role != UsbRoleMode::ForceHost);
 
@@ -919,8 +937,8 @@ private:
 			apply_bs == settings.patch_suggested_audio.apply_blocksize && bexp == button_exp_knobset.button_expander &&
 			bexp_back == button_exp_knobset.require_back && notif_amount == notifications.amount &&
 			notif_anim == notifications.animation && notif_clip == notifications.clip_indicators &&
-			usb_role == settings.usb_role_mode && usb_mode == settings.usb_device_mode &&
-			video_mirror == video.mirror && dev_drive == developer.enabled &&
+			notif_clip_patched == notifications.clip_patched_only && usb_role == settings.usb_role_mode &&
+			usb_mode == settings.usb_device_mode && video_mirror == video.mirror && dev_drive == developer.enabled &&
 			auto_rebalance == audio_settings.auto_rebalance)
 		{
 			lv_disable(save_button);

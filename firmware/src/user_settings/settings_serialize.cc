@@ -125,6 +125,7 @@ static void write(ryml::NodeRef *n, NotificationSettings const &s) {
 	n->append_child() << ryml::key("amount") << amount_string;
 	n->append_child() << ryml::key("animation") << s.animation;
 	n->append_child() << ryml::key("clip_indicators") << s.clip_indicators;
+	n->append_child() << ryml::key("clip_patched_only") << s.clip_patched_only;
 }
 
 static void write(ryml::NodeRef *n, MidiPCPatchLoadSettings const &s) {

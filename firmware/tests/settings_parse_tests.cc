@@ -81,6 +81,7 @@ TEST_CASE("Parse settings file") {
     amount: Fewer
     animation: 0
     clip_indicators: 0
+    clip_patched_only: 0
   video:
     enabled: 1
     mirror: 1
@@ -155,6 +156,7 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::Fewer);
 	CHECK(settings.notifications.animation == false);
 	CHECK(settings.notifications.clip_indicators == false);
+	CHECK(settings.notifications.clip_patched_only == false);
 
 	CHECK(settings.video.mirror == true);
 
@@ -317,6 +319,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.notifications.amount == MetaModule::NotificationSettings::Amount::All);
 	CHECK(settings.notifications.animation == true);
 	CHECK(settings.notifications.clip_indicators == true);
+	CHECK(settings.notifications.clip_patched_only == true);
 
 	CHECK(settings.video.mirror == false);
 
@@ -480,6 +483,7 @@ TEST_CASE("Serialize settings") {
 	settings.notifications.amount = MetaModule::NotificationSettings::Amount::OnlyCritical;
 	settings.notifications.animation = false;
 	settings.notifications.clip_indicators = false;
+	settings.notifications.clip_patched_only = false;
 
 	// clang format-off
 	std::string expected = R"(Settings:
@@ -576,6 +580,7 @@ TEST_CASE("Serialize settings") {
     amount: OnlyCritical
     animation: 0
     clip_indicators: 0
+    clip_patched_only: 0
   video:
     mirror: 0
   developer:

@@ -17,6 +17,9 @@ void PrefsSectionNotifications::create(lv_obj_t *parent) {
 
 	auto clip_cont = create_prefs_labeled_check(parent, "Clip Indicators:");
 	clip_check = lv_obj_get_child(clip_cont, 1);
+
+	clip_patched_cont = create_prefs_labeled_check(parent, "Only Patched Jacks:");
+	clip_patched_check = lv_obj_get_child(clip_patched_cont, 1);
 }
 
 } // namespace MetaModule
