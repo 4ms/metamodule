@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/panel_conf.hh"
+#include "conf/screen_buffer_conf.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/clip_hold.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -11,23 +12,26 @@
 namespace MetaModule
 {
 
-// Row of red numbered pills at the top of the screen, one per output that is clipping.
+// Row of red numbered pills along the bottom of the screen, one per output that is clipping.
 // They sit at the bottom of the top layer: above every page, but below notifications,
 // dialogs, and anything on the sys layer (OVER, screensaver)
 class ClipIndicators {
 	static constexpr unsigned MaxOutputs = PanelDef::NumAudioOut + AudioExpander::NumOutJacks;
+	static constexpr int ScreenWidth = ScreenBufferConf::viewWidth;
+	static constexpr int ScreenHeight = ScreenBufferConf::viewHeight;
+
+	// Spread across the full width of the screen
 	static constexpr unsigned SlotsPerRow = 8;
-	static constexpr int SlotX0 = 4;
-	static constexpr int SlotPitch = 27;
-	static constexpr int SlotWidth = 23;
+	static constexpr int SlotPitch = ScreenWidth / SlotsPerRow;
+	static constexpr int SlotGap = 2;
+	static constexpr int SlotWidth = SlotPitch - SlotGap;
+	static constexpr int SlotX0 = SlotGap / 2;
 
 	// One row: 8 outputs. Two rows (Audio Expander): shorter pills, smaller font
-	static constexpr int OneRowY = 3;
 	static constexpr int OneRowHeight = 16;
 	static constexpr int OneRowPadTop = 1; // centers the numeral vertically
-	static constexpr int TwoRowY = 2;
 	static constexpr int TwoRowHeight = 12;
-	static constexpr int TwoRowPitch = 14;
+	static constexpr int RowGap = 2;
 
 	ClipHold<MaxOutputs> hold;
 	std::array<lv_obj_t *, MaxOutputs> pills{};
@@ -68,11 +72,13 @@ private:
 		bool two_rows = num_outputs > SlotsPerRow;
 		int height = two_rows ? TwoRowHeight : OneRowHeight;
 		auto font = two_rows ? &ui_font_MuseoSansRounded50010 : &ui_font_MuseoSansRounded50012;
+		unsigned num_rows = two_rows ? 2 : 1;
 
 		for (unsigned i = 0; i < num_outputs; i++) {
 			int row = i / SlotsPerRow;
 			int col = i % SlotsPerRow;
-			int y = two_rows ? TwoRowY + row * TwoRowPitch : OneRowY;
+			// Last row sits flush with the bottom of the screen
+			int y = ScreenHeight - height - int(num_rows - 1 - row) * (height + RowGap);
 
 			auto pill = lv_label_create(lv_layer_top());
 			lv_obj_move_background(pill);
@@ -83,7 +89,7 @@ private:
 			lv_obj_set_style_text_color(pill, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 			lv_obj_set_style_text_align(pill, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 			lv_obj_set_style_bg_color(pill, lv_color_hex(0xFF0000), LV_PART_MAIN);
-			lv_obj_set_style_bg_opa(pill, 192, LV_PART_MAIN);
+			lv_obj_set_style_bg_opa(pill, LV_OPA_COVER, LV_PART_MAIN);
 			lv_obj_set_style_radius(pill, 3, LV_PART_MAIN);
 			lv_obj_set_style_pad_all(pill, 0, LV_PART_MAIN);
 			lv_obj_set_style_pad_top(pill, two_rows ? 0 : OneRowPadTop, LV_PART_MAIN);
