@@ -107,9 +107,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			return_cached_params(block);
 
 			// 3.5us w/both MIDIs
-			param_blocks[block].metaparams.clipped_outs = clipped_outs;
-			if (sync_params.write_sync(param_state, param_blocks[block].metaparams))
-				clipped_outs = 0;
+			sync_params.write_sync(param_state, param_blocks[block].metaparams);
 			param_state.reset_change_flags();
 
 			auto tm = load_measure.stop_simple_measurement();
@@ -170,7 +168,7 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	int32_t val = cal.out_cal[output_id].adjust(output_volts);
 	int32_t sat = MathTools::signed_saturate(val, 24);
 	if (sat != val)
-		clipped_outs |= 1u << output_id;
+		local_params.metaparams.clipped_outs |= 1u << output_id;
 	return sat;
 }
 
@@ -181,7 +179,7 @@ AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
 	int32_t val = ext_cal.out_cal[output_id].adjust(output_volts);
 	int32_t sat = MathTools::signed_saturate(val, 24);
 	if (sat != val)
-		clipped_outs |= 1u << panel_out;
+		local_params.metaparams.clipped_outs |= 1u << panel_out;
 	return sat;
 }
 
@@ -595,6 +593,7 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.ext_buttons_low_events = param_blocks[block].metaparams.ext_buttons_low_events;
 	local_params.metaparams.meta_buttons[0].set_state_no_events(
 		param_blocks[block].metaparams.meta_buttons[0].is_pressed());
+	local_params.metaparams.clipped_outs = 0;
 
 	// 31.5 - 31.7us
 	std::memcpy((void *)local_params.params.data(), &param_blocks[block].params, sizeof(Params) * block_size_);
@@ -610,6 +609,7 @@ void AudioStream::return_cached_params(unsigned block) {
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
 	param_blocks[block].metaparams.midi_14bit_mode = local_params.metaparams.midi_14bit_mode;
+	param_blocks[block].metaparams.clipped_outs = local_params.metaparams.clipped_outs;
 }
 
 void AudioStream::set_block_spans() {
