@@ -14,7 +14,6 @@
 #include "gui/pages/midi_map_input.hh"
 #include "gui/pages/module_view/mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/roller_popup.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "metaparams.hh"
 #include "params/expanders.hh"
@@ -57,8 +56,6 @@ struct ModuleViewMappingPane {
 
 		lv_obj_set_style_pad_hor(ui_MapList, 3, LV_PART_MAIN);
 		lv_obj_set_style_pad_ver(ui_MapList, 3, LV_PART_MAIN);
-
-		lv_obj_set_width(disconnect_popup.roller, 240);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -71,7 +68,6 @@ struct ModuleViewMappingPane {
 		add_cable_popup.init(ui_MappingMenu, pane_group);
 		panel_cable_popup.init(ui_MappingMenu, pane_group);
 		midi_map_popup.init(ui_MappingMenu, pane_group);
-		disconnect_popup.init(ui_MappingMenu, pane_group);
 
 		lv_obj_set_y(ui_Keyboard, 144);
 	}
@@ -115,6 +111,7 @@ struct ModuleViewMappingPane {
 		displayed_knobsets = 0;
 		displayed_cable_endpts = 0;
 		listed_connections.clear();
+		disconnecting = false;
 		std::visit([this](auto &el) { prepare_for_element(el); }, drawn_el.element);
 
 		lv_show(ui_MappingParameters);
@@ -133,7 +130,14 @@ struct ModuleViewMappingPane {
 
 		is_visible = true;
 
-		lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_OFF);
+		if (disconnecting) {
+			// Keep the focused item in view (layout must be current to scroll to it)
+			lv_obj_update_layout(ui_MappingParameters);
+			if (auto focused = lv_group_get_focused(pane_group))
+				lv_obj_scroll_to_view_recursive(focused, LV_ANIM_OFF);
+		} else {
+			lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_OFF);
+		}
 	}
 
 	void show_control_popup(lv_group_t *parent_group, lv_obj_t *parent, const DrawnElement &drawn_el) {
@@ -166,8 +170,6 @@ struct ModuleViewMappingPane {
 		add_map_popup.hide();
 		control_popup.hide();
 		keyboard_entry.hide();
-		if (disconnect_popup.is_visible())
-			disconnect_popup.hide();
 
 		if (base_group) {
 			lv_indev_set_group(lv_indev_get_next(nullptr), base_group);
@@ -178,6 +180,11 @@ struct ModuleViewMappingPane {
 	}
 
 	void update() {
+		if (needs_refresh) {
+			needs_refresh = false;
+			refresh();
+		}
+
 		add_map_popup.update(params, metaparams);
 
 		if (midi_map_popup.is_visible())
@@ -245,11 +252,16 @@ struct ModuleViewMappingPane {
 		else if (keyboard_entry.is_visible())
 			keyboard_entry.back();
 
-		else if (disconnect_popup.is_visible())
-			disconnect_popup.hide();
+		else if (disconnecting)
+			exit_disconnect_mode();
 
 		else
 			should_close = true;
+	}
+
+	// Leave disconnect mode without redrawing (e.g. the pane is closing)
+	void reset_disconnect_mode() {
+		disconnect_target.reset();
 	}
 
 private:
@@ -258,8 +270,15 @@ private:
 		std::string name;
 	};
 
+	struct DisconnectTarget {
+		Jack jack;
+		ElementType type;
+	};
+
 	void remove_all_items() {
 		for (auto &obj : map_list_items) {
+			// Hide now so it's out of the layout until it's actually deleted
+			lv_hide(obj);
 			lv_obj_del_async(obj);
 		}
 		map_list_items.clear();
@@ -293,7 +312,8 @@ private:
 	void prepare_for_jack() {
 		bool has_connections = false;
 
-		lv_show(ui_CablePanelAddButton);
+		disconnecting =
+			disconnect_target && disconnect_target->jack == this_jack && disconnect_target->type == this_jack_type;
 
 		if (this_jack_type == ElementType::Output) {
 			// Internal cable: this output drives one or more virtual input jacks
@@ -321,8 +341,11 @@ private:
 				has_connections = true;
 		}
 
-		// MIDI can only be mapped to an input jack that has no other connections
-		lv_show(ui_CableMidiAddButton, this_jack_type == ElementType::Input && !has_connections);
+		// Nothing left to disconnect
+		if (!has_connections) {
+			disconnecting = false;
+			disconnect_target.reset();
+		}
 
 		this_jack_has_connections = has_connections;
 		prepare_jack_gui();
@@ -382,12 +405,18 @@ private:
 		lv_hide(ui_ControlAlert);
 		lv_hide(ui_AddMapPopUp);
 
+		if (disconnecting) {
+			prepare_disconnect_gui();
+			return;
+		}
+
 		if (this_jack_has_connections) {
 			lv_show(ui_MappedPanel);
 			lv_show(ui_CableRemoveButton);
 			lv_hide(ui_MappedItemHeader);
-			lv_label_set_text(ui_MappedListTitle, "Connected To:");
+			set_list_title("Connected To:", Gui::orange_highlight);
 			lv_label_set_text(ui_CableAddLabel, "New cable");
+			lv_label_set_text(ui_CableRemoveButtonLabel, "Disconnect");
 
 		} else {
 			lv_hide(ui_MappedPanel);
@@ -395,6 +424,11 @@ private:
 			lv_label_set_text(ui_CableAddLabel, "New cable");
 		}
 		lv_show(ui_CableAddButton);
+		lv_show(ui_CablePanelAddButton);
+
+		// MIDI can only be mapped to an input jack that has no other connections
+		lv_show(ui_CableMidiAddButton, this_jack_type == ElementType::Input && !this_jack_has_connections);
+
 		lv_group_add_obj(pane_group, ui_CableAddButton);
 		lv_group_add_obj(pane_group, ui_CablePanelAddButton);
 		lv_group_add_obj(pane_group, ui_CableMidiAddButton);
@@ -402,12 +436,42 @@ private:
 		lv_group_focus_obj(ui_CableAddButton);
 	}
 
+	// Disconnect mode: the list of connections is used to pick a cable to remove
+	void prepare_disconnect_gui() {
+		lv_show(ui_MappedPanel);
+		lv_hide(ui_MappedItemHeader);
+		set_list_title("Disconnect:", Gui::light_red_highlight);
+
+		lv_hide(ui_CableAddButton);
+		lv_hide(ui_CablePanelAddButton);
+		lv_hide(ui_CableMidiAddButton);
+
+		lv_show(ui_CableRemoveButton);
+		lv_label_set_text(ui_CableRemoveButtonLabel, "Cancel");
+
+		auto remove_all = list.create_remove_all_item(ui_MapList);
+		map_list_items.push_back(remove_all);
+		lv_group_add_obj(pane_group, remove_all);
+		lv_obj_add_event_cb(remove_all, disconnect_item_cb, LV_EVENT_CLICKED, this);
+
+		lv_group_add_obj(pane_group, ui_CableRemoveButton);
+
+		// Stay at the same position in the list, so the next item is ready to remove
+		auto focus_idx = std::min<size_t>(disconnect_focus_idx, map_list_items.size() - 1);
+		lv_group_focus_obj(map_list_items[focus_idx]);
+	}
+
+	static void set_list_title(const char *text, lv_color_t color) {
+		lv_label_set_text(ui_MappedListTitle, text);
+		lv_obj_set_style_text_color(ui_MappedListTitle, color, LV_PART_MAIN);
+	}
+
 	void make_selectable_panel_jack_item(lv_obj_t *obj, const MappedOutputJack *panel_jack) {
 		map_list_items.push_back(obj);
 
 		lv_group_add_obj(pane_group, obj);
 
-		lv_obj_add_event_cb(obj, click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(obj, disconnecting ? disconnect_item_cb : click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_set_user_data(obj, PanelJackMapUserData{panel_jack->panel_jack_id, ElementType::Output});
 	}
@@ -417,7 +481,9 @@ private:
 
 		lv_group_add_obj(pane_group, obj);
 
-		if (Midi::is_midi_panel_id(panel_jack->panel_jack_id))
+		if (disconnecting)
+			lv_obj_add_event_cb(obj, disconnect_item_cb, LV_EVENT_CLICKED, this);
+		else if (Midi::is_midi_panel_id(panel_jack->panel_jack_id))
 			lv_obj_add_event_cb(obj, add_midi_cable_button_cb, LV_EVENT_CLICKED, this);
 		else
 			lv_obj_add_event_cb(obj, click_panel_jack_item_cb, LV_EVENT_CLICKED, this);
@@ -439,7 +505,7 @@ private:
 		map_list_items.push_back(obj);
 		lv_group_add_obj(pane_group, obj);
 
-		lv_obj_add_event_cb(obj, follow_cable_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(obj, disconnecting ? disconnect_item_cb : follow_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_set_user_data(obj, CableEndpointUserData{module_id, idx});
 	}
 
@@ -619,29 +685,48 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
+		// In disconnect mode, this is the Cancel button
+		if (page->disconnecting) {
+			page->exit_disconnect_mode();
+			return;
+		}
+
 		if (page->listed_connections.size() <= 1) {
 			page->disconnect_all();
 			return;
 		}
 
-		// Multiple connections: ask which one to remove
-		std::string options;
-		for (auto const &conn : page->listed_connections) {
-			options += conn.name;
-			options += "\n";
-		}
-		options += "Remove all";
+		// Multiple connections: let the user pick from the list which to remove
+		page->disconnect_target = DisconnectTarget{page->this_jack, page->this_jack_type};
+		page->disconnect_focus_idx = page->listed_connections.size(); // "Remove All"
+		page->needs_refresh = true;
+	}
 
-		page->disconnect_popup.show(
-			[page](unsigned idx) {
-				if (idx < page->listed_connections.size())
-					page->disconnect_one(page->listed_connections[idx]);
-				else
-					page->disconnect_all();
-			},
-			"",
-			options.c_str(),
-			0);
+	void exit_disconnect_mode() {
+		disconnect_target.reset();
+		needs_refresh = true;
+	}
+
+	// Clicked an item in disconnect mode: remove that connection, or all of them
+	static void disconnect_item_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		auto &items = page->map_list_items;
+		auto it = std::ranges::find(items, event->target);
+		if (it == items.end())
+			return;
+		auto idx = std::distance(items.begin(), it);
+
+		if (idx < std::ssize(page->listed_connections)) {
+			// The patch mod triggers a refresh, which rebuilds the list without this item
+			page->disconnect_one(page->listed_connections[idx]);
+			page->disconnect_focus_idx = idx;
+		} else {
+			page->disconnect_all();
+			page->disconnect_target.reset();
+		}
 	}
 
 	static void follow_cable_button_cb(lv_event_t *event) {
@@ -677,7 +762,7 @@ private:
 
 		lv_show(ui_ControlButton, is_patch_playing);
 		lv_label_set_text(ui_ControlButtonLabel, "Adjust");
-		lv_label_set_text(ui_MappedListTitle, "Mappings:");
+		set_list_title("Mappings:", Gui::orange_highlight);
 
 		if (is_patch_playing) {
 			lv_group_add_obj(pane_group, ui_ControlButton);
@@ -920,10 +1005,15 @@ private:
 	// Each cable or panel/MIDI mapping listed under "Connected To:", in the same order
 	std::vector<ListedConnection> listed_connections;
 
+	// Disconnect mode: set while the user is picking connections of this jack to remove
+	std::optional<DisconnectTarget> disconnect_target;
+	bool disconnecting = false; // showing the disconnect list for the current element
+	unsigned disconnect_focus_idx = 0;
+	bool needs_refresh = false;
+
 	ConfirmPopup add_cable_popup;
 	ChoicePopup panel_cable_popup;
 	MidiMapPopup midi_map_popup;
-	RollerPopup disconnect_popup{"Disconnect:"};
 	PatchModQueue &patch_mod_queue;
 
 	OpenPatchManager &patches;

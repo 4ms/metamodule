@@ -107,6 +107,15 @@ struct MappingPaneList {
 		return obj;
 	}
 
+	static lv_obj_t *create_remove_all_item(lv_obj_t *parent) {
+		auto obj = ui_UnmappedSetItem_create(parent);
+		if (lv_obj_get_child_cnt(obj) > 0) {
+			auto label = lv_obj_get_child(obj, 0);
+			lv_label_set_text(label, LV_SYMBOL_CLOSE " REMOVE ALL");
+		}
+		return obj;
+	}
+
 	static void style_panel_incable_item(uint32_t panel_jack_id, lv_obj_t *obj, std::string_view alias_name) {
 		if (lv_obj_get_child_cnt(obj) < 2) {
 			pr_err("style_panel_outcable_item(): object is corrupted\n");

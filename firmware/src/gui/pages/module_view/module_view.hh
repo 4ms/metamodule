@@ -411,6 +411,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
+		mapping_pane.reset_disconnect_mode();
 		module_context_menu.blur();
 		dyn_draw.blur();
 		params.text_displays.stop_watching_all();
