@@ -228,6 +228,16 @@ void PatchPlayer::remove_outjack_mappings(Jack jack) {
 	refresh_conn_flags();
 }
 
+void PatchPlayer::update_input_patched_state(Jack jack) {
+	if (jack.module_id == 0 || jack.module_id >= num_modules)
+		return;
+
+	if (input_jack_has_module_cable(jack) || input_jack_held_by_panel(jack))
+		modules[jack.module_id]->mark_input_patched(jack.jack_id);
+	else
+		modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+}
+
 // Removes one input from an internal cable. The cable's other inputs, and any panel
 // mappings on either jack, stay connected
 void PatchPlayer::remove_internal_cable(Jack out, Jack in) {

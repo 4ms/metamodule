@@ -5161,3 +5161,140 @@ PatchData:
 		CHECK_FALSE(m2->is_input_patched(0));
 	}
 }
+
+// ============================================================================
+// Patched-state of input jacks fed by panel/MIDI mappings
+//
+// A jack fed by several panel/MIDI mappings is summed via Hub cables, so it never
+// appears in in_conns[]/the MIDI tables. Its patched-state must still follow the
+// physical panel cables and the MIDI connection.
+// ============================================================================
+TEST_CASE("Patched-state of an input summed from panel and MIDI mappings") {
+	// Module 1 In 0: Panel Ins 0 and 1 summed
+	// Module 1 In 1: MIDI Note pitch and Gate summed
+	// Module 2 In 0: internal cable from Module 3 Out 0
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: summed_patched
+  module_slugs:
+    0: HubMedium
+    1: PatchedFlag
+    2: PatchedFlag
+    3: PatchedFlag
+  int_cables:
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 256
+      ins:
+        - module_id: 1
+          jack_id: 1
+    - panel_jack_id: 272
+      ins:
+        - module_id: 1
+          jack_id: 1
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+)"};
+	// clang-format on
+
+	// 3:out0 ---> 2:in0
+	//
+	// Panel In 0 -+-> 1:in0
+	// Panel In 1 -|
+	//
+	// MIDI256 -+-> 1:in1
+	// MIDI272 -|
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+	MetaModule::PatchPlayer player;
+
+	SUBCASE("Plugging and unplugging panel cables") {
+		player.load_patch(pd);
+		auto *m1 = get_patched_flag(player, 1);
+		REQUIRE(m1);
+		// Panel In 0 and 1 are not patched, so Module1 In0 should not be patched
+		CHECK_FALSE(m1->is_input_patched(0));
+
+		// Patch panel in 0 -> now module 1 In0 should now be patched
+		player.set_input_jack_patched_status(0, true);
+		CHECK(m1->is_input_patched(0));
+
+		// Unpatch panel in 0, patch panel In 1 -> Module 1 In0 should still be patched
+		player.set_input_jack_patched_status(1, true);
+		player.set_input_jack_patched_status(0, false);
+		CHECK(m1->is_input_patched(0)); // Panel In 1 still plugged
+
+		// Unpatch both panel jacks -> Should go back to unpatched state
+		player.set_input_jack_patched_status(1, false);
+		CHECK_FALSE(m1->is_input_patched(0));
+	}
+
+	SUBCASE("Panel cable already plugged in when the patch loads") {
+		player.set_input_jack_patched_status(1, true);
+		player.load_patch(pd);
+		auto *m1 = get_patched_flag(player, 1);
+		REQUIRE(m1);
+		CHECK(m1->is_input_patched(0));
+		player.set_input_jack_patched_status(1, false);
+	}
+
+	SUBCASE("MIDI connect and disconnect") {
+		player.load_patch(pd);
+		auto *m1 = get_patched_flag(player, 1);
+		REQUIRE(m1);
+		CHECK_FALSE(m1->is_input_patched(1));
+
+		player.set_midi_connected();
+		CHECK(m1->is_input_patched(1));
+
+		player.set_midi_disconnected();
+		CHECK_FALSE(m1->is_input_patched(1));
+	}
+
+	SUBCASE("Unplugging a panel cable doesn't unpatch a jack that also has an internal cable") {
+		player.load_patch(pd);
+		auto *m2 = get_patched_flag(player, 2);
+		REQUIRE(m2);
+
+		// Added while playing: cached directly in in_conns[], not summed via the Hub
+		player.add_injack_mapping(2, Jack{2, 0});
+		player.set_input_jack_patched_status(2, true);
+		REQUIRE(m2->is_input_patched(0));
+
+		player.set_input_jack_patched_status(2, false);
+		CHECK(m2->is_input_patched(0));
+	}
+
+	SUBCASE("MIDI disconnecting doesn't unpatch a jack that also has an internal cable") {
+		player.load_patch(pd);
+		auto *m2 = get_patched_flag(player, 2);
+		REQUIRE(m2);
+
+		player.add_injack_mapping(256, Jack{2, 0});
+		player.set_midi_connected();
+		REQUIRE(m2->is_input_patched(0));
+
+		player.set_midi_disconnected();
+		CHECK(m2->is_input_patched(0));
+	}
+}

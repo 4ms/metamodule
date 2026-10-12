@@ -277,7 +277,8 @@ public:
 			return;
 		}
 
-		else {
+		else
+		{
 			update_patch_time.start_simple_measurement();
 
 			smp.update_modules();
@@ -784,13 +785,22 @@ public:
 
 		in_patched[panel_in_jack_id] = is_patched;
 
+		// Hub jacks that pass this panel jack on to be summed into module jacks
 		for (auto const &jack : in_conns[panel_in_jack_id]) {
-			if (jack.module_id < num_modules) {
+			if (jack.module_id == 0 && jack.module_id < num_modules) {
 				if (is_patched)
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
 				else
 					modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
 			}
+		}
+
+		// Module jacks mapped to this panel jack, which may also have other connections
+		for (auto const &map : pd.mapped_ins) {
+			if (panel_in_jack_id != map.panel_jack_id)
+				continue;
+			for (auto const &jack : map.ins)
+				update_input_patched_state(jack);
 		}
 	}
 
@@ -839,39 +849,57 @@ public:
 			}
 			i++;
 		}
+		// Hub jacks that pass panel jacks on to be summed into module jacks
 		for (auto i = 0u; auto const &panel_in : in_conns) {
 			if (in_patched[i]) {
 				for (auto const &c : panel_in) {
-					if (!module_idx.has_value() || c.module_id == module_idx)
+					if (c.module_id == 0 && (!module_idx.has_value() || c.module_id == module_idx))
 						modules[c.module_id]->mark_input_patched(c.jack_id);
 				}
 			}
 			i++;
 		}
+
+		// Module jacks mapped to a plugged-in panel jack, or to MIDI while it's connected.
+		// (Summed mappings go through Hub cables, so aren't in in_conns[] or the MIDI tables)
+		for (auto const &map : pd.mapped_ins) {
+			for (auto const &jack : map.ins) {
+				if (jack.module_id == 0 || jack.module_id >= num_modules)
+					continue;
+				if (module_idx.has_value() && jack.module_id != module_idx)
+					continue;
+				if (input_jack_held_by_panel(jack))
+					modules[jack.module_id]->mark_input_patched(jack.jack_id);
+			}
+		}
 	}
 
 	void set_midi_connected() {
-		midi.for_each_jack([this](Jack const &jack) {
-			if (jack.module_id > 0 && jack.module_id < num_modules)
-				modules[jack.module_id]->mark_input_patched(jack.jack_id);
-		});
+		midi.connected = true;
+
+		for (auto const &map : pd.mapped_ins) {
+			if (!Midi::is_midi_panel_id(map.panel_jack_id))
+				continue;
+			for (auto const &jack : map.ins)
+				update_input_patched_state(jack);
+		}
 
 		midi.set_poly_channel_count(pd.midi_poly_num);
 
 		midi.reset_divclocks();
-
-		midi.connected = true;
 	}
 
 	void set_midi_disconnected() {
-		midi.for_each_jack([this](Jack const &jack) {
-			if (jack.module_id > 0 && jack.module_id < num_modules)
-				modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
-		});
+		midi.connected = false;
+
+		for (auto const &map : pd.mapped_ins) {
+			if (!Midi::is_midi_panel_id(map.panel_jack_id))
+				continue;
+			for (auto const &jack : map.ins)
+				update_input_patched_state(jack);
+		}
 
 		midi.zero_poly_buffers();
-
-		midi.connected = false;
 	}
 
 private:
@@ -890,6 +918,20 @@ private:
 	bool output_jack_held_by_panel(Jack jack) const;
 	bool input_jack_held_by_panel(Jack jack) const;
 	bool input_jack_has_module_cable(Jack jack) const;
+
+	// Marks a module input jack patched if anything is connected to it: a module output,
+	// a panel jack with a cable plugged in, or MIDI while it's connected
+	void update_input_patched_state(Jack jack);
+
+	// Updates the patched state of every module jack with a mapping whose panel_jack_id passes the filter
+	void update_mapped_input_patched_states(auto &&panel_jack_id_filter) {
+		for (auto const &map : pd.mapped_ins) {
+			if (!panel_jack_id_filter(map.panel_jack_id))
+				continue;
+			for (auto const &jack : map.ins)
+				update_input_patched_state(jack);
+		}
+	}
 
 	// patch_player_expanders.cc
 	bool connect_expander(ExpanderConnection conn);
