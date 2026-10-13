@@ -19,6 +19,7 @@ void PrefsSectionNotifications::create(lv_obj_t *parent) {
 	clip_check = lv_obj_get_child(clip_cont, 1);
 
 	clip_patched_cont = create_prefs_labeled_check(parent, "Only Patched Jacks:");
+	create_prefs_note(clip_patched_cont, "Hide indicators for\nunplugged outputs");
 	clip_patched_check = lv_obj_get_child(clip_patched_cont, 1);
 }
 
