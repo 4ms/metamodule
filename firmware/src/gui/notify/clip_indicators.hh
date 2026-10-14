@@ -1,12 +1,12 @@
 #pragma once
 #include "CoreModules/hub/audio_expander_defs.hh"
-#include "conf/panel_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/clip_hold.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
 #include "params/expanders.hh"
+#include "params/params_state.hh"
 #include <array>
 
 namespace MetaModule
@@ -42,21 +42,20 @@ private:
 	uint32_t lit = 0; // bit n: pill n is showing
 
 public:
-	// visible: bit n clear hides pill n regardless of clipping (e.g. jack not patched)
-	void update(uint32_t mask, uint32_t now_ms, bool enabled, uint32_t visible) {
+	// A pill only lights if its jack's bit (jack_senses bit order) in jack_enabled is set.
+	// Pass jack_senses to show only patched outputs, ~0u to show all, 0 to show none
+	void update(uint32_t mask, uint32_t now_ms, uint32_t jack_enabled) {
 		if (num_outputs == 0)
 			create();
 
 		hold.update(mask, now_ms);
 
 		uint32_t now_lit = 0;
-		if (enabled) {
-			for (unsigned i = 0; i < num_outputs; i++) {
-				if (hold.is_lit(i, now_ms))
-					now_lit |= 1u << i;
-			}
+		for (unsigned i = 0; i < num_outputs; i++) {
+			bool enabled = jack_enabled & (1u << ParamsState::output_bit(i));
+			if (enabled && hold.is_lit(i, now_ms))
+				now_lit |= 1u << i;
 		}
-		now_lit &= visible;
 
 		// Showing or hiding an LVGL object invalidates it, so only touch pills whose state changed
 		if (auto changed = now_lit ^ lit) {
