@@ -103,8 +103,8 @@ struct DevDriveBlock {
 	}
 
 	void withdraw() {
+		present.store(0, std::memory_order_relaxed); // first: the MSC callbacks stop touching the memory
 		serve.store(0, std::memory_order_release);
-		present.store(0, std::memory_order_relaxed);
 		base.store(0, std::memory_order_relaxed);
 		size.store(0, std::memory_order_relaxed);
 	}

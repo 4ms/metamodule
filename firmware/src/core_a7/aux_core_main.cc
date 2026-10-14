@@ -146,7 +146,10 @@ extern "C" void aux_core_main() {
 									  patch_playloader,
 									  ui.get_notify_queue(),
 									  *A7SharedMemoryS::ptrs.dev_drive_msgs,
-									  [&ui] { ui.release_plugin_objects(); }};
+									  [&ui] { ui.release_plugin_objects(); },
+									  [&ui](std::span<char> file_data, std::string_view name) {
+										  return ui.play_patch_file(file_data, name);
+									  }};
 
 	while (true) {
 		ui.update_screen();
