@@ -13,8 +13,8 @@ namespace MetaModule
 {
 
 // Row of red numbered pills along the bottom of the screen, one per output that is clipping.
-// They sit at the bottom of the top layer: above every page, but below notifications,
-// dialogs, and anything on the sys layer (OVER, screensaver)
+// They sit at the bottom of the top layer: above every page, but below dialogs and the
+// sys layer (screensaver)
 class ClipIndicators {
 public:
 	static constexpr unsigned MaxOutputs = PanelDef::NumAudioOut + AudioExpander::NumOutJacks;
@@ -42,17 +42,17 @@ private:
 	uint32_t lit = 0; // bit n: pill n is showing
 
 public:
-	// A pill only lights if its jack's bit (jack_senses bit order) in jack_enabled is set.
-	// Pass jack_senses to show only patched outputs, ~0u to show all, 0 to show none
-	void update(uint32_t mask, uint32_t now_ms, uint32_t jack_enabled) {
+	// `clipping_jacks` is a bit mask in panel jack order (main outs 1-8, expander outs 9-16)
+	// `enabled_jacks` is a bit mask in ParamsState::jack_sense order
+	void update(uint32_t clipping_jacks, uint32_t enabled_jacks, uint32_t now_ms) {
 		if (num_outputs == 0)
 			create();
 
-		hold.update(mask, now_ms);
+		hold.update(clipping_jacks, now_ms);
 
 		uint32_t now_lit = 0;
 		for (unsigned i = 0; i < num_outputs; i++) {
-			bool enabled = jack_enabled & (1u << ParamsState::output_bit(i));
+			bool enabled = enabled_jacks & (1u << ParamsState::output_bit(i));
 			if (enabled && hold.is_lit(i, now_ms))
 				now_lit |= 1u << i;
 		}

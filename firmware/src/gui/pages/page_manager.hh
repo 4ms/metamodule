@@ -396,7 +396,7 @@ public:
 								 info.settings.notifications.clip_patched_only ? info.metaparams.jack_senses :
 																				 ~0u;
 
-		clip_indicators.update(info.metaparams.clipped_outs, lv_tick_get(), enabled_jacks);
+		clip_indicators.update(info.metaparams.clipped_outs, enabled_jacks, lv_tick_get());
 
 		info.metaparams.clipped_outs = 0;
 
