@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-# dev_drive.sh: install a plugin onto a MetaModule over the developer drive.
+# dev_drive.sh: install a plugin onto a MetaModule over the developer drive,
+# and/or play a patch.
 #
-# It mounts the drive, copies the plugin to the drive, unmounts it
+# It mounts the drive, copies the plugin(s) and patch to the drive, unmounts it
 # sends the INSTALL command via the console, and waits for the
-# drive to come back.
+# drive to come back. Plugins are installed first, then the patch is played.
 # 
 # Requires Developer Mode to be enabled in Preferences > USB.
 #
@@ -12,13 +13,13 @@
 #
 # MacOS:
 # diskutil mount DEV_MM 
-# cp plugin.mmplugin /Volumes/DEV_MM
+# cp plugin.mmplugin patch.yml /Volumes/DEV_MM
 # diskutil unmount /Volumes/DEV_MM 
 # echo "INSTALL" > /dev/console-device
 #
 # Linux:
 # mount -L "DEV_MM"
-# cp plugin.mmplugin `findmnt -rn -S "LABEL=DEV_MM" -o TARGET`
+# cp plugin.mmplugin patch.yml `findmnt -rn -S "LABEL=DEV_MM" -o TARGET`
 # umount `findmnt -rn -S "LABEL=DEV_MM" -o TARGET`
 # echo "INSTALL" > /dev/console-device
 
@@ -31,9 +32,13 @@ TIMEOUT_SEC=30
 usage() {
 	cat <<EOF
 Usage:
-  dev_drive.sh plugin.mmplugin /dev/console-device [volume-label]
+  dev_drive.sh [plugin.mmplugin ...] [patch.yml] /dev/console-device [volume-label]
 
-Where: plugin.mmplugin is the plugin file to install.
+Where: plugin.mmplugin is a plugin file to install.
+
+       patch.yml is a patch file to play, after the plugins are installed.
+       At least one plugin or patch file must be given. If more than one
+       patch file is given, only the first is played.
 
        /dev/console-device is the MetaModule's USB console, typically
        /dev/cu.usbmodemXXXXXX on macOS, or /dev/ttyACM0 on Linux
@@ -45,18 +50,28 @@ EOF
 	exit 1
 }
 
-if [[ $# -lt 2 || $# -gt 3 ]]; then
+files=()
+console=
+label=$DEFAULT_LABEL
+
+for arg in "$@"; do
+	case "$arg" in
+		*.mmplugin | *.yml) files+=("$arg") ;;
+		/dev/*) [[ -z $console ]] && console=$arg || usage ;;
+		*) label=$arg ;;
+	esac
+done
+
+if [[ ${#files[@]} -eq 0 || -z $console ]]; then
 	usage
 fi
 
-plugin=$1
-console=$2
-label=${3:-$DEFAULT_LABEL}
-
-if [[ ! -f $plugin ]]; then
-	echo "Plugin file '$plugin' does not exist" >&2
-	exit 1
-fi
+for f in "${files[@]}"; do
+	if [[ ! -f $f ]]; then
+		echo "File '$f' does not exist" >&2
+		exit 1
+	fi
+done
 
 if [[ ! -e $console ]]; then
 	echo "Console device '$console' does not exist" >&2
@@ -126,13 +141,15 @@ if [[ -z $mnt ]]; then
 	echo "Developer drive '$label' is not mounted, trying to mount it..."
 	mnt=$(wait_for_drive) || {
 		echo "Could not find the developer drive '$label'" >&2
-		echo "Is Developer Mode enabled, and the USB cable re-plugged since?" >&2
+		echo "Is Developer Mode enabled, and the USB cable connected?" >&2
 		exit 1
 	}
 fi
 
-echo "Copying $(basename "$plugin") to $mnt"
-cp "$plugin" "$mnt/" || exit 1
+for f in "${files[@]}"; do
+	echo "Copying $(basename "$f") to $mnt"
+	cp "$f" "$mnt/" || exit 1
+done
 sync
 
 # The host caches the filesystem, so it has to let go before the MetaModule

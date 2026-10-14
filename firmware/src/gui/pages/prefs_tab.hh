@@ -731,10 +731,6 @@ private:
 		if (developer.enabled != dev_drive) {
 			developer.enabled = dev_drive;
 			gui_state.do_write_settings = true;
-			if (dev_drive)
-				notify_queue.put({"(Re-)plug USB cable to a computer to use the Developer drive",
-								  Notification::Priority::Status,
-								  3000});
 		}
 		lv_disable(save_button);
 		lv_disable(revert_button);
@@ -956,7 +952,8 @@ private:
 	NotificationSettings &notifications;
 	VideoSettings &video;
 	DeveloperSettings &developer;
-	NotificationQueue &notify_queue;
+	// This may come in handy for some settings, keep this here:
+	[[maybe_unused]] NotificationQueue &notify_queue;
 	UserSettings &settings;
 
 	lv_group_t *group = nullptr;

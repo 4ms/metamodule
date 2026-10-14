@@ -5,9 +5,11 @@
 #include "gui/notify/queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "pr_dbg.hh"
+#include "result_t.hh"
 #include <cstdio>
 #include <functional>
 #include <optional>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -15,21 +17,27 @@ namespace MetaModule
 {
 
 // Aux core monitor for ejecct events on the developer drive.
-// Checks for .mmplugin files and installs them
+// Checks for .mmplugin files and installs them, then plays a .yml patch file
+// if there is one.
 class DevDriveService {
 public:
+	// Parses the patch file contents and starts playing it (the name is its filename)
+	using PlayPatchFunc = std::function<Result(std::span<char> file_data, std::string_view name)>;
+
 	DevDriveService(DevDrive &drive,
 					PluginManager &plugin_manager,
 					PatchPlayLoader &play_loader,
 					NotificationQueue &notify_queue,
 					DevDriveBlock &dev_drive_msgs,
-					std::function<void()> release_gui_plugin_objects)
+					std::function<void()> release_gui_plugin_objects,
+					PlayPatchFunc play_patch)
 		: drive_{drive}
 		, plugin_manager_{plugin_manager}
 		, play_loader_{play_loader}
 		, notify_queue_{notify_queue}
 		, dev_block{dev_drive_msgs}
-		, release_gui_plugin_objects_{std::move(release_gui_plugin_objects)} {
+		, release_gui_plugin_objects_{std::move(release_gui_plugin_objects)}
+		, play_patch_{std::move(play_patch)} {
 	}
 
 	uint32_t retries = 10;
@@ -135,9 +143,11 @@ private:
 		if (!drive_.is_enabled())
 			return;
 
-		drive_.files().foreach_file_with_ext(".mmplugin", [](std::string_view name, uint32_t, uint32_t size) {
+		auto print_file = [](std::string_view name, uint32_t, uint32_t size) {
 			printf("  %.*s (%u bytes)\n", (int)name.size(), name.data(), (unsigned)size);
-		});
+		};
+		drive_.files().foreach_file_with_ext(".mmplugin", print_file);
+		drive_.files().foreach_file_with_ext(".yml", print_file);
 	}
 
 	void scan_and_install(DevDriveBlock &block) {
@@ -152,9 +162,11 @@ private:
 		}
 
 		auto plugins = find_plugins();
+		patch_file_ = find_patch();
 
 		if (plugins.empty()) {
 			pr_info("DevDrive: no .mmplugin files in the root directory\n");
+			play_patch_from_drive();
 			put_medium_back(block);
 			return;
 		}
@@ -199,6 +211,9 @@ private:
 		if (queue_.empty()) {
 			installing_ = false;
 			current_.clear();
+
+			// After the plugins, so the patch can use them
+			play_patch_from_drive();
 
 			put_medium_back(dev_block);
 
@@ -249,6 +264,62 @@ private:
 		return found;
 	}
 
+	// The patch file to play, or empty if there is none.
+	std::string find_patch() {
+		std::vector<std::string> found;
+
+		drive_.files().foreach_file_with_ext(".yml", [&found](std::string_view name, uint32_t, uint32_t size) {
+			if (name.starts_with("."))
+				return;
+			if (size == 0)
+				return;
+
+			found.emplace_back(name);
+		});
+
+		if (found.empty())
+			return {};
+
+		if (found.size() > 1) {
+			printf("Warning: developer drive has %u patch files, only playing %s\n",
+				   (unsigned)found.size(),
+				   found.front().c_str());
+		}
+
+		return found.front();
+	}
+
+	// Plays the patch file found by scan_and_install(), if any. Must be called
+	// while the drive is taken from the host.
+	void play_patch_from_drive() {
+		if (patch_file_.empty())
+			return;
+
+		auto name = std::move(patch_file_);
+		patch_file_.clear();
+
+		auto &files = drive_.files();
+		std::vector<char> data(files.get_file_size(name));
+		auto bytes_read = files.read_file(name, data);
+
+		// Remove it so the next eject does not play it again
+		files.delete_file(name);
+
+		if (data.empty() || bytes_read != data.size()) {
+			pr_err("DevDrive: could not read patch %s\n", name.c_str());
+			notify_queue_.put({"Could not read " + name, Notification::Priority::Error, 3000});
+			return;
+		}
+
+		pr_info("DevDrive: playing patch %s\n", name.c_str());
+
+		if (auto result = play_patch_(data, name); !result.success) {
+			pr_err("DevDrive: could not play %s: %s\n", name.c_str(), result.error_string.c_str());
+			notify_queue_.put(
+				{"Could not play " + name + "\n" + result.error_string, Notification::Priority::Error, 4000});
+		}
+	}
+
 	void put_medium_back(DevDriveBlock &block) {
 		drive_.hand_to_host();
 		block.present.store(1, std::memory_order_release);
@@ -284,6 +355,7 @@ private:
 	NotificationQueue &notify_queue_;
 	DevDriveBlock &dev_block;
 	std::function<void()> release_gui_plugin_objects_;
+	PlayPatchFunc play_patch_;
 	uint32_t last_eject_count_ = 0;
 	uint32_t last_command_count_ = 0;
 	std::optional<uint32_t> finish_after_install_{};
@@ -291,6 +363,7 @@ private:
 
 	std::vector<std::string> queue_;
 	std::string current_;
+	std::string patch_file_;
 	bool installing_ = false;
 };
 

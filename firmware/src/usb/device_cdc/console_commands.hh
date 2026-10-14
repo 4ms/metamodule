@@ -193,9 +193,10 @@ private:
 	static void print_help() {
 		printf("Commands:\n"
 			   "  install  install any .mmplugin files on the developer drive,\n"
-			   "           then give the drive back to the host\n"
-			   "  eject    remove the drive from the host\n"
-			   "  mount    give the drive back to the host\n"
+			   "           play a .yml patch file if there is one, then give\n"
+			   "           the drive back to the host computer\n"
+			   "  eject    remove the drive from the host computer\n"
+			   "  mount    give the drive back to the host computer\n"
 			   "  status   report the developer drive state\n"
 			   "  col      console color on\n"
 			   "  mono     console color off (default)\n"
