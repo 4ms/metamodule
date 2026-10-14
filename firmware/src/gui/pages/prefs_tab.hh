@@ -299,15 +299,17 @@ private:
 		lv_check(usb_section.mirror_check, video.mirror);
 		lv_check(usb_section.dev_drive_check, developer.enabled);
 
-		update_usb_video_items(settings.usb_device_mode == UsbDeviceMode::Video &&
-							   settings.usb_role_mode != UsbRoleMode::ForceHost);
-		update_usb_device_items(settings.usb_device_mode != UsbDeviceMode::Video &&
-								settings.usb_role_mode != UsbRoleMode::ForceHost);
+		update_usb_items(settings.usb_role_mode, settings.usb_device_mode);
 
 		gui_state.do_write_settings = false;
 
 		lv_disable(save_button);
 		lv_disable(revert_button);
+
+		// Stored settings may have Developer Mode on in Video mode, which update_usb_items() unchecked.
+		// Allow saving the corrected value.
+		if (read_dev_drive_check() != developer.enabled)
+			lv_enable(save_button);
 
 		update_audio_override_status();
 	}
@@ -494,23 +496,22 @@ private:
 		return lv_obj_has_state(usb_section.dev_drive_check, LV_STATE_CHECKED);
 	}
 
-	void update_usb_device_items(bool enabled) {
-		lv_enable(usb_section.device_mode_dropdown, enabled);
-		lv_enable(usb_section.dev_drive_check, enabled);
+	void update_usb_items(UsbRoleMode role, UsbDeviceMode mode) {
+		bool device_allowed = role != UsbRoleMode::ForceHost;
+		bool is_video = mode == UsbDeviceMode::Video;
 
-		auto opa = enabled ? LV_OPA_100 : LV_OPA_50;
-		lv_obj_set_style_opa(lv_obj_get_parent(usb_section.device_mode_dropdown), opa, LV_PART_MAIN);
-		lv_obj_set_style_opa(lv_obj_get_parent(usb_section.dev_drive_check), opa, LV_PART_MAIN);
+		// Developer Mode cannot be used in Video mode
+		if (is_video)
+			lv_check(usb_section.dev_drive_check, false);
+
+		set_usb_item_enabled(usb_section.device_mode_dropdown, device_allowed);
+		set_usb_item_enabled(usb_section.mirror_check, device_allowed && is_video);
+		set_usb_item_enabled(usb_section.dev_drive_check, device_allowed && !is_video);
 	}
 
-	void update_usb_video_items(bool enabled) {
-		lv_enable(usb_section.mirror_check, enabled);
-		auto opa = enabled ? LV_OPA_100 : LV_OPA_50;
-		lv_obj_set_style_opa(lv_obj_get_parent(usb_section.mirror_check), opa, LV_PART_MAIN);
-
-		// Turn off Dev Drive if in Video mode
-		if (enabled)
-			lv_disable(usb_section.dev_drive_check);
+	static void set_usb_item_enabled(lv_obj_t *obj, bool enabled) {
+		lv_enable(obj, enabled);
+		lv_obj_set_style_opa(lv_obj_get_parent(obj), enabled ? LV_OPA_100 : LV_OPA_50, LV_PART_MAIN);
 	}
 
 	MissingPluginSettings::Autoload read_missing_plugins_dropdown() {
@@ -887,13 +888,14 @@ private:
 		auto usb_role = read_usb_role_dropdown();
 		auto usb_mode = read_usb_mode_dropdown();
 		auto video_mirror = read_video_mirror_check();
+
+		// May uncheck Developer Mode, so read it afterwards
+		update_usb_items(usb_role, usb_mode);
 		auto dev_drive = read_dev_drive_check();
 
 		lv_show(catchup_section.allowjump_cont, catchupmode == CatchupParam::Mode::ResumeOnEqual);
 		update_knobset_control_items(knobset_control == MidiSettings::KnobsetControl::Enabled);
 		update_require_back_enabled(bexp != 0);
-		update_usb_video_items(usb_mode == UsbDeviceMode::Video && usb_role != UsbRoleMode::ForceHost);
-		update_usb_device_items(usb_role != UsbRoleMode::ForceHost);
 
 		if (block_size == audio_settings.block_size && sample_rate == audio_settings.sample_rate &&
 			overrun_retries == audio_settings.max_overrun_retries && timeout == screensaver.timeout_ms &&
