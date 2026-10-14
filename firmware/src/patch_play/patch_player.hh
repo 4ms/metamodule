@@ -277,8 +277,7 @@ public:
 			return;
 		}
 
-		else
-		{
+		else {
 			update_patch_time.start_simple_measurement();
 
 			smp.update_modules();
@@ -787,7 +786,7 @@ public:
 
 		// Hub jacks that pass this panel jack on to be summed into module jacks
 		for (auto const &jack : in_conns[panel_in_jack_id]) {
-			if (jack.module_id == 0 && jack.module_id < num_modules) {
+			if (jack.module_id == 0) {
 				if (is_patched)
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
 				else
@@ -797,10 +796,10 @@ public:
 
 		// Module jacks mapped to this panel jack, which may also have other connections
 		for (auto const &map : pd.mapped_ins) {
-			if (panel_in_jack_id != map.panel_jack_id)
-				continue;
-			for (auto const &jack : map.ins)
-				update_input_patched_state(jack);
+			if (panel_in_jack_id == map.panel_jack_id) {
+				for (auto const &jack : map.ins)
+					update_input_patched_state(jack);
+			}
 		}
 	}
 
@@ -922,16 +921,6 @@ private:
 	// Marks a module input jack patched if anything is connected to it: a module output,
 	// a panel jack with a cable plugged in, or MIDI while it's connected
 	void update_input_patched_state(Jack jack);
-
-	// Updates the patched state of every module jack with a mapping whose panel_jack_id passes the filter
-	void update_mapped_input_patched_states(auto &&panel_jack_id_filter) {
-		for (auto const &map : pd.mapped_ins) {
-			if (!panel_jack_id_filter(map.panel_jack_id))
-				continue;
-			for (auto const &jack : map.ins)
-				update_input_patched_state(jack);
-		}
-	}
 
 	// patch_player_expanders.cc
 	bool connect_expander(ExpanderConnection conn);
