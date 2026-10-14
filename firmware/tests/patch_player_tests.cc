@@ -4379,7 +4379,7 @@ PatchData:
 		// ...but OutB is still physically patched to panel output 0, so it must
 		// remain marked patched. For DLD this is the difference between Out A
 		// emitting channel A alone (correct) and the (A+B)/2 mono mix (the bug).
-		CHECK(dld->is_output_patched(OutB)); // FAILS today: disconnect_injack over-unpatches
+		CHECK(dld->is_output_patched(OutB));
 	}
 
 	SUBCASE("Control: removing the only connection does unpatch OutB") {
@@ -4391,6 +4391,83 @@ PatchData:
 
 		CHECK(player.get_int_cables().empty());
 		CHECK_FALSE(dld->is_output_patched(OutB));
+	}
+}
+
+TEST_CASE("disconnect_injack unpatches every connection to the input") {
+	// Module 3 input 0 is driven by two module outputs (1:0 and 2:0).
+	// Module 3 input 1 is mapped to panel input 0 only.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: disconnect_injack_all
+  module_slugs:
+    0: HubMedium
+    1: PatchedFlag
+    2: PatchedFlag
+    3: PatchedFlag
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 1
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_num_setting: 0
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+	)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto *src1 = get_patched_flag(player, 1);
+	auto *src2 = get_patched_flag(player, 2);
+	auto *sink = get_patched_flag(player, 3);
+	REQUIRE(src1 != nullptr);
+	REQUIRE(src2 != nullptr);
+	REQUIRE(sink != nullptr);
+
+	SUBCASE("Input driven by two module outputs: both outputs are unpatched") {
+		REQUIRE(src1->is_output_patched(0));
+		REQUIRE(src2->is_output_patched(0));
+		REQUIRE(sink->is_input_patched(0));
+
+		player.disconnect_injack(Jack{3, 0});
+
+		CHECK(player.get_int_cables().empty());
+		CHECK_FALSE(src1->is_output_patched(0));
+		CHECK_FALSE(src2->is_output_patched(0));
+		CHECK_FALSE(sink->is_input_patched(0));
+	}
+
+	SUBCASE("Input with only a panel mapping is unpatched, even with a physical cable plugged in") {
+		player.set_input_jack_patched_status(0, true);
+		REQUIRE(sink->is_input_patched(1));
+
+		player.disconnect_injack(Jack{3, 1});
+
+		CHECK_FALSE(sink->is_input_patched(1));
 	}
 }
 

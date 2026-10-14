@@ -166,12 +166,11 @@ void PatchPlayer::disconnect_injack(Jack jack) {
 
 	safe_unpatch_input(jack);
 
-	// Unpatch the output if the int_cable has no more inputs -- unless that output is still
+	// Unpatch each output whose cable has no other inputs -- unless that output is still
 	// patched to a physical panel/hardware output
-	if (auto cable = pd.find_internal_cable_with_injack(jack)) {
-		if (cable->ins.size() == 1 && !output_jack_held_by_panel(cable->out)) {
-			safe_unpatch_output(cable->out);
-		}
+	for (auto const &cable : pd.int_cables) {
+		if (cable.ins.size() == 1 && cable.ins[0] == jack && !output_jack_held_by_panel(cable.out))
+			safe_unpatch_output(cable.out);
 	}
 
 	pd.disconnect_injack(jack);
