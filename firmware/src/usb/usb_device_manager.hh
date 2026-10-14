@@ -34,6 +34,9 @@ struct UsbDeviceManager {
 	UsbDeviceMode mode = UsbDeviceMode::MidiConsole;
 	uint32_t last_reenumerate_count_ = 0;
 
+	// Whether the descriptor the host enumerated includes the developer drive
+	bool drive_offered_ = false;
+
 	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers,
 					 UsbDeviceMode initial_mode,
 					 MetaModule::DevDriveBlock &dev_drive_msgs)
@@ -54,15 +57,18 @@ struct UsbDeviceManager {
 			return;
 		}
 
+		drive_offered_ = false;
+
 		if (mode == UsbDeviceMode::Video) {
 			pr_info("Starting USB video device\n");
 			video.register_class();
 		} else {
-			// The drive is only offered when the A7 has one ready. Sampled here,
-			// so switching developer mode on or off re-enumerates.
+			// Enable the drive if the A7 is serving it.
+			// process() re-enumerates if the state changes.
 			auto *dev_drive = MetaModule::SharedMemoryS::ptrs.dev_drive_msgs;
 			bool with_drive = dev_drive && dev_drive->is_served();
 			USBD_CMPSIT_SetDriveEnabled(with_drive);
+			drive_offered_ = with_drive;
 
 			pr_info("Starting USB MIDI + console device%s\n", with_drive ? " + developer drive" : "");
 			serial.register_class();
@@ -138,12 +144,19 @@ struct UsbDeviceManager {
 	}
 
 	void process() {
-		// The aux core asks for this after installing from a drive the host
-		// ejected
 		if (auto *block = MetaModule::SharedMemoryS::ptrs.dev_drive_msgs) {
+			// Re-enumerate because the aux core asked us to after installing plugins or a patch from a drive
 			auto count = block->reenumerate_count.load(std::memory_order_acquire);
 			if (count != last_reenumerate_count_) {
 				last_reenumerate_count_ = count;
+				reenumerate();
+				return;
+			}
+
+			// Re-enumerate because the A7 published or withdrew the drive since the host enumerated us:
+			// developer mode was toggled, or at boot the A7 got the drive ready after a host was already attached.
+			if (mode == UsbDeviceMode::MidiConsole && block->is_served() != drive_offered_) {
+				pr_info("USB: developer drive %s\n", drive_offered_ ? "withdrawn" : "ready");
 				reenumerate();
 				return;
 			}

@@ -43,7 +43,12 @@ public:
 
 		if (!should_enable) {
 			retries = 10;
-			drive_.disable();
+			if (drive_.is_enabled()) {
+				// First, tell M4 to stop serving the drive
+				dev_block.withdraw();
+				// Free the drive's memory
+				drive_.disable();
+			}
 			poll_command();
 			return;
 		}
