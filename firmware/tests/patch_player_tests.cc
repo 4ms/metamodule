@@ -4974,6 +4974,132 @@ PatchData:
 	}
 }
 
+TEST_CASE("Removing a connection from a summed input leaves the remaining connections working") {
+	// Module 2 Out 0 drives an internal cable to Module 1 In 0 and In 1.
+	// Module 1 In 0 is also mapped to Panel In 0 (summed with the cable via a Hub cable).
+	// Module 1 In 1 is also mapped to MIDI note pitch (summed with the cable via a MIDI Hub slot).
+	// TestModule passes each input through to the same-numbered output.
+	// clang-format off
+	std::string patchyml{R"(
+PatchData:
+  patch_name: unsum
+  module_slugs:
+    0: HubMedium
+    1: TestModule
+    2: TestModule
+  int_cables:
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+        - module_id: 1
+          jack_id: 1
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 256
+      ins:
+        - module_id: 1
+          jack_id: 1
+  mapped_outs:
+  static_knobs:
+  mapped_knobs:
+  midi_maps:
+  midi_poly_num: 1
+  midi_poly_mode: 0
+  midi_pitchwheel_range: 1
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	REQUIRE(yaml_string_to_patch(patchyml, pd));
+	MetaModule::PatchPlayer player;
+	player.load_patch(pd);
+
+	auto sink = get_test_module(player, 1);
+	auto src = get_test_module(player, 2);
+	REQUIRE(sink);
+	REQUIRE(src);
+
+	auto run = [&](float panel, float note, float cable) {
+		player.set_panel_input(0, panel);
+		player.set_midi_note_pitch(0, note, 0);
+		src->outs[0] = cable;
+		player.update_patch();
+	};
+
+	auto has_hub_cable_to = [&](Jack jack) {
+		return std::ranges::any_of(player.get_int_cables(), [=](auto const &cable) {
+			return cable.out.module_id == 0 && std::ranges::find(cable.ins, jack) != cable.ins.end();
+		});
+	};
+
+	run(1.f, 10.f, 100.f);
+	REQUIRE(sink->get_output(0) == doctest::Approx(101.f)); // panel + cable
+	REQUIRE(sink->get_output(1) == doctest::Approx(110.f)); // note + cable
+
+	SUBCASE("Removing the cable leaves the panel mapping working") {
+		player.remove_internal_cable(Jack{2, 0}, Jack{1, 0});
+
+		run(2.f, 20.f, 200.f);
+		CHECK(sink->get_output(0) == doctest::Approx(2.f));
+		CHECK(sink->get_output(1) == doctest::Approx(220.f));
+		CHECK_FALSE(has_hub_cable_to(Jack{1, 0}));
+	}
+
+	SUBCASE("Removing the cable leaves the MIDI mapping working") {
+		player.remove_internal_cable(Jack{2, 0}, Jack{1, 1});
+
+		run(2.f, 20.f, 200.f);
+		CHECK(sink->get_output(0) == doctest::Approx(202.f));
+		CHECK(sink->get_output(1) == doctest::Approx(20.f));
+		CHECK_FALSE(has_hub_cable_to(Jack{1, 1}));
+	}
+
+	SUBCASE("Disconnecting the cable's output leaves both mappings working") {
+		player.disconnect_outjack(Jack{2, 0});
+
+		run(2.f, 20.f, 200.f);
+		CHECK(sink->get_output(0) == doctest::Approx(2.f));
+		CHECK(sink->get_output(1) == doctest::Approx(20.f));
+		CHECK_FALSE(has_hub_cable_to(Jack{1, 0}));
+		CHECK_FALSE(has_hub_cable_to(Jack{1, 1}));
+	}
+
+	SUBCASE("Removing the panel mapping leaves the cable working") {
+		player.remove_injack_mapping(0, Jack{1, 0});
+
+		run(2.f, 20.f, 200.f);
+		CHECK(sink->get_output(0) == doctest::Approx(200.f));
+		CHECK(sink->get_output(1) == doctest::Approx(220.f));
+		CHECK_FALSE(has_hub_cable_to(Jack{1, 0}));
+	}
+
+	SUBCASE("Removing the MIDI mapping leaves the cable working") {
+		player.remove_injack_mapping(256, Jack{1, 1});
+
+		run(2.f, 20.f, 200.f);
+		CHECK(sink->get_output(0) == doctest::Approx(202.f));
+		CHECK(sink->get_output(1) == doctest::Approx(200.f));
+		CHECK_FALSE(has_hub_cable_to(Jack{1, 1}));
+	}
+
+	SUBCASE("Removing all mappings of each jack leaves the cable working") {
+		player.remove_injack_mappings(Jack{1, 0});
+		player.remove_injack_mappings(Jack{1, 1});
+
+		run(2.f, 20.f, 200.f);
+		CHECK(sink->get_output(0) == doctest::Approx(200.f));
+		CHECK(sink->get_output(1) == doctest::Approx(200.f));
+		CHECK(std::ranges::none_of(player.get_int_cables(), [](auto const &c) { return c.out.module_id == 0; }));
+		CHECK(player.get_inconns()[0].empty());
+	}
+}
+
 TEST_CASE("Removing one connection keeps jacks patched while other connections remain") {
 	// Module 1 (PatchedFlag) Out 2 drives an internal cable to Module 2 In 0 and Module 3 In 0,
 	// and is mapped to Panel Out 0.

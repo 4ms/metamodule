@@ -260,7 +260,6 @@ public:
 	//
 
 	void calc_panel_jack_connections();
-	void rebuild_panel_jack_connections();
 	void update_or_add_input_panel_conn(uint32_t panel_jack_id, Jack input_jack);
 
 	//
@@ -917,6 +916,8 @@ private:
 	bool output_jack_held_by_panel(Jack jack) const;
 	bool input_jack_held_by_panel(Jack jack) const;
 	bool input_jack_has_module_cable(Jack jack) const;
+	bool remove_hub_cable_with_injack(Jack jack, auto &&hub_out_filter);
+	bool route_lone_mapping_directly(Jack jack);
 
 	// Marks a module input jack patched if anything is connected to it: a module output,
 	// a panel jack with a cable plugged in, or MIDI while it's connected

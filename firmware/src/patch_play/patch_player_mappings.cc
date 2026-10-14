@@ -3,6 +3,10 @@
 namespace MetaModule
 {
 
+//
+// Params
+//
+
 void PatchPlayer::apply_static_param(const StaticParam &sparam) {
 	if (sparam.module_id < num_modules && modules[sparam.module_id])
 		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
@@ -69,6 +73,10 @@ void PatchPlayer::add_midi_mapped_knob(const MappedKnob &map) {
 	}
 }
 
+//
+// Internal Cables
+//
+
 void PatchPlayer::add_internal_cable(Jack in, Jack out) {
 	pd.add_internal_cable(in, out);
 	cables.build(pd.int_cables, core_balancer.cores.parts, modules);
@@ -76,6 +84,35 @@ void PatchPlayer::add_internal_cable(Jack in, Jack out) {
 	modules[in.module_id]->mark_input_patched(in.jack_id);
 	refresh_conn_flags();
 }
+
+// Removes one input from an internal cable. The cable's other inputs, and any panel
+// mappings on either jack, stay connected
+void PatchPlayer::remove_internal_cable(Jack out, Jack in) {
+	auto cable = pd.find_internal_cable_with_outjack(out);
+	if (!cable || std::ranges::find(cable->ins, in) == cable->ins.end())
+		return;
+
+	bool const removing_last_input = cable->ins.size() == 1;
+
+	pd.remove_internal_cable(out, in);
+
+	// A panel/MIDI mapping that was summed with this cable is now alone
+	route_lone_mapping_directly(in);
+
+	if (!input_jack_has_module_cable(in) && !input_jack_held_by_panel(in))
+		safe_unpatch_input(in);
+
+	if (removing_last_input && !output_jack_held_by_panel(out))
+		safe_unpatch_output(out);
+
+	cables.build(pd.int_cables, core_balancer.cores.parts, modules);
+
+	refresh_conn_flags();
+}
+
+//
+// Panel Jack/MIDI mappings: adding
+//
 
 void PatchPlayer::add_injack_mapping(uint32_t panel_jack_id, Jack jack) {
 	pd.add_mapped_injack(panel_jack_id, jack);
@@ -115,20 +152,244 @@ void PatchPlayer::add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
 	refresh_conn_flags();
 }
 
+//
+// Panel Jack/MIDI mappings: removing
+//
+
+void PatchPlayer::safe_unpatch_input(Jack jack) {
+	if (jack.module_id < num_modules)
+		modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+}
+
 void PatchPlayer::safe_unpatch_output(Jack jack) {
 	if (jack.module_id < num_modules)
 		modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 }
 
-bool PatchPlayer::output_jack_held_by_panel(Jack jack) const {
-	for (auto i = 0u; i < out_conns.size(); i++) {
-		if (!out_patched[i])
-			continue;
-		for (auto const &pj : out_conns[i])
-			if (pj.module_id == jack.module_id && pj.jack_id == jack.jack_id)
-				return true;
+// Disconnect all mappings and cables from an input jack
+void PatchPlayer::disconnect_injack(Jack jack) {
+	for (auto &ins : in_conns)
+		std::erase(ins, jack);
+	midi.erase_jack(jack);
+
+	safe_unpatch_input(jack);
+
+	// Unpatch each output whose cable has no other inputs -- unless that output is still
+	// patched to a physical panel/hardware output
+	for (auto const &cable : pd.int_cables) {
+		if (cable.ins.size() == 1 && cable.ins[0] == jack && !output_jack_held_by_panel(cable.out))
+			safe_unpatch_output(cable.out);
 	}
-	return false;
+
+	pd.disconnect_injack(jack);
+
+	cables.build(pd.int_cables, core_balancer.cores.parts, modules);
+
+	refresh_conn_flags();
+}
+
+// Disconnect all mappings and cables from an output jack
+void PatchPlayer::disconnect_outjack(Jack jack) {
+	for (auto &outs : out_conns) {
+		std::erase(outs, jack);
+	}
+	safe_unpatch_output(jack);
+
+	// Disconnect all inputs
+	std::vector<Jack> ins;
+	if (auto cable = pd.find_internal_cable_with_outjack(jack))
+		ins = cable->ins;
+
+	pd.disconnect_outjack(jack);
+
+	for (auto in : ins) {
+		// A panel/MIDI mapping that was summed with this cable is now alone
+		route_lone_mapping_directly(in);
+
+		if (!input_jack_has_module_cable(in) && !input_jack_held_by_panel(in))
+			safe_unpatch_input(in);
+	}
+
+	cables.build(pd.int_cables, core_balancer.cores.parts, modules);
+
+	refresh_conn_flags();
+}
+
+// Remove all mappings to an input jack (leaving internal cables in place)
+void PatchPlayer::remove_injack_mappings(Jack jack) {
+	pd.remove_injack_mappings(jack);
+
+	// Direct routes: panel or MIDI -> this jack
+	for (auto &ins : in_conns)
+		std::erase(ins, jack);
+	midi.erase_jack(jack);
+
+	// Summed routes: panel or MIDI -> Hub passthrough -> Hub cable -> this jack
+	if (remove_hub_cable_with_injack(jack, [](Jack) { return true; }))
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
+
+	midi.set_poly_channel_count(pd.midi_poly_num);
+
+	// unpatch the module's jack if it has no cables connected
+	if (!input_jack_has_module_cable(jack))
+		safe_unpatch_input(jack);
+
+	refresh_conn_flags();
+}
+
+// Remove all mappings from an out jack (leaving internal cables in place)
+void PatchPlayer::remove_outjack_mappings(Jack jack) {
+	for (auto &outs : out_conns) {
+		std::erase(outs, jack);
+	}
+
+	if (pd.find_internal_cable_with_outjack(jack) == nullptr) {
+		// unpatch the module's jack if it has no cables connected
+		safe_unpatch_output(jack);
+	}
+
+	pd.remove_outjack_mappings(jack);
+
+	refresh_conn_flags();
+}
+
+// Remove one mapping to an input jack
+void PatchPlayer::remove_injack_mapping(uint32_t panel_jack_id, Jack jack) {
+	if (!pd.remove_mapped_injack(panel_jack_id, jack))
+		return;
+
+	bool const is_midi = Midi::is_midi_panel_id(panel_jack_id);
+
+	// Direct route: panel or MIDI -> this jack
+	if (is_midi)
+		midi.erase_jack_conn(panel_jack_id, jack);
+	else if (panel_jack_id < in_conns.size())
+		std::erase(in_conns[panel_jack_id], jack);
+
+	// Summed route: panel or MIDI -> Hub passthrough -> Hub cable -> this jack
+	bool cables_changed = remove_hub_cable_with_injack(jack, [&](Jack hub_out) {
+		return is_midi ? midi.has_jack_conn(panel_jack_id, hub_out) : hub_out.jack_id == panel_jack_id;
+	});
+
+	// If that leaves the jack with one mapping and no module cables, it's no longer summed.
+	// Otherwise the remaining Hub cables still work (and are direct again after a patch reload)
+	cables_changed |= route_lone_mapping_directly(jack);
+
+	if (cables_changed)
+		cables.build(pd.int_cables, core_balancer.cores.parts, modules);
+
+	midi.set_poly_channel_count(pd.midi_poly_num);
+
+	if (!input_jack_has_module_cable(jack) && !input_jack_held_by_panel(jack))
+		safe_unpatch_input(jack);
+
+	refresh_conn_flags();
+}
+
+// Remove one mapping from an output jack
+void PatchPlayer::remove_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
+	if (!pd.remove_mapped_outjack(panel_jack_id, jack))
+		return;
+
+	if (panel_jack_id < out_conns.size())
+		std::erase(out_conns[panel_jack_id], jack);
+
+	if (!pd.find_internal_cable_with_outjack(jack) && !output_jack_held_by_panel(jack))
+		safe_unpatch_output(jack);
+
+	refresh_conn_flags();
+}
+
+// Removes `jack` from each Hub cable that sums a panel/MIDI input into it,
+// if the Hub passthrough jack driving the cable passes the filter.
+// A Hub passthrough left with no cable inputs is disconnected from its panel/MIDI input.
+// Returns true if any cable changed: the caller must rebuild the cable cache.
+bool PatchPlayer::remove_hub_cable_with_injack(Jack jack, auto &&hub_out_filter) {
+	bool changed = false;
+
+	for (auto &cable : pd.int_cables) {
+		if (cable.out.module_id != 0 || std::ranges::find(cable.ins, jack) == cable.ins.end())
+			continue;
+		if (!hub_out_filter(cable.out))
+			continue;
+
+		std::erase(cable.ins, jack);
+		changed = true;
+
+		if (cable.ins.empty()) {
+			// Panel passthroughs use the panel jack id as the Hub jack id, MIDI ones use a slot above that
+			if (cable.out.jack_id < in_conns.size())
+				std::erase(in_conns[cable.out.jack_id], cable.out);
+			else
+				midi.erase_jack(cable.out);
+		}
+	}
+
+	if (changed)
+		std::erase_if(pd.int_cables, [](auto const &cable) { return cable.ins.empty(); });
+
+	return changed;
+}
+
+// Hub cables are only used to sum panel/MIDI mappings with other signals. So when we
+// remove other connections, if only a lone hub cable remains, we have to convert it
+// back to a normal mapping like calc_panel_jack_connections() would.
+// Returns true if any cable changed: the caller must rebuild the cable cache.
+bool PatchPlayer::route_lone_mapping_directly(Jack jack) {
+	if (jack.module_id == 0 || input_jack_has_module_cable(jack))
+		return false;
+
+	MappedInputJack const *lone_map = nullptr;
+	for (auto const &map : pd.mapped_ins) {
+		if (std::ranges::find(map.ins, jack) != map.ins.end()) {
+			if (lone_map)
+				return false; // still summing two or more mappings
+			lone_map = &map;
+		}
+	}
+	if (!lone_map)
+		return false;
+
+	if (!remove_hub_cable_with_injack(jack, [](Jack) { return true; }))
+		return false; // already direct
+
+	update_or_add_input_panel_conn(lone_map->panel_jack_id, jack);
+
+	if (Midi::is_midi_poly_cable(lone_map->panel_jack_id))
+		midi.set_poly_channel_count(pd.midi_poly_num);
+
+	return true;
+}
+
+//
+// Helpers
+//
+
+void PatchPlayer::update_input_patched_state(Jack jack) {
+	if (jack.module_id == 0 || jack.module_id >= num_modules)
+		return;
+
+	if (input_jack_has_module_cable(jack) || input_jack_held_by_panel(jack))
+		modules[jack.module_id]->mark_input_patched(jack.jack_id);
+	else
+		modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+}
+
+// Returns the number of poly channels flowing from out jack to in jack,
+// or 0 if the connection is mono (or unknowable, e.g. no patch loaded)
+unsigned PatchPlayer::num_poly_cable_channels(Jack out, Jack in) {
+	if (!is_loaded || out.module_id >= num_modules || in.module_id >= num_modules)
+		return 0;
+
+	auto out_buf = plugin_module_get_poly_output_buffer(modules[out.module_id], out.jack_id);
+	if (!out_buf.channels || *out_buf.channels <= 1)
+		return 0;
+
+	auto in_buf = plugin_module_get_poly_input_buffer(modules[in.module_id], in.jack_id);
+	if (!in_buf.channels || *in_buf.channels <= 1)
+		return 0;
+
+	return std::min(*out_buf.channels, *in_buf.channels);
 }
 
 // True if the jack is mapped to a panel input with a physical cable plugged in, or to MIDI while MIDI is connected
@@ -154,136 +415,15 @@ bool PatchPlayer::input_jack_has_module_cable(Jack jack) const {
 	});
 }
 
-void PatchPlayer::safe_unpatch_input(Jack jack) {
-	if (jack.module_id < num_modules)
-		modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
-}
-
-void PatchPlayer::disconnect_injack(Jack jack) {
-	for (auto &ins : in_conns)
-		std::erase(ins, jack);
-	midi.erase_jack(jack);
-
-	safe_unpatch_input(jack);
-
-	// Unpatch each output whose cable has no other inputs -- unless that output is still
-	// patched to a physical panel/hardware output
-	for (auto const &cable : pd.int_cables) {
-		if (cable.ins.size() == 1 && cable.ins[0] == jack && !output_jack_held_by_panel(cable.out))
-			safe_unpatch_output(cable.out);
+bool PatchPlayer::output_jack_held_by_panel(Jack jack) const {
+	for (auto i = 0u; i < out_conns.size(); i++) {
+		if (!out_patched[i])
+			continue;
+		for (auto const &pj : out_conns[i])
+			if (pj.module_id == jack.module_id && pj.jack_id == jack.jack_id)
+				return true;
 	}
-
-	pd.disconnect_injack(jack);
-
-	cables.build(pd.int_cables, core_balancer.cores.parts, modules);
-
-	refresh_conn_flags();
-}
-
-void PatchPlayer::remove_injack_mappings(Jack jack) {
-	pd.remove_injack_mappings(jack);
-
-	// The jack's MIDI connections and any Hub cables summing panel/MIDI inputs into it
-	// must go too, so re-calculate all panel connections
-	rebuild_panel_jack_connections();
-
-	// unpatch the module's jack if it has no cables connected
-	if (!input_jack_has_module_cable(jack))
-		safe_unpatch_input(jack);
-}
-
-void PatchPlayer::disconnect_outjack(Jack jack) {
-	for (auto &outs : out_conns) {
-		std::erase(outs, jack);
-	}
-	safe_unpatch_output(jack);
-
-	// Disconnect all inputs
-	if (auto cable = pd.find_internal_cable_with_outjack(jack)) {
-		for (auto in : cable->ins) {
-			safe_unpatch_input(in);
-		}
-	}
-
-	pd.disconnect_outjack(jack);
-
-	cables.build(pd.int_cables, core_balancer.cores.parts, modules);
-
-	refresh_conn_flags();
-}
-
-void PatchPlayer::remove_outjack_mappings(Jack jack) {
-	for (auto &outs : out_conns) {
-		std::erase(outs, jack);
-	}
-
-	if (pd.find_internal_cable_with_outjack(jack) == nullptr) {
-		// unpatch the module's jack if it has no cables connected
-		safe_unpatch_output(jack);
-	}
-
-	pd.remove_outjack_mappings(jack);
-
-	refresh_conn_flags();
-}
-
-void PatchPlayer::update_input_patched_state(Jack jack) {
-	if (jack.module_id == 0 || jack.module_id >= num_modules)
-		return;
-
-	if (input_jack_has_module_cable(jack) || input_jack_held_by_panel(jack))
-		modules[jack.module_id]->mark_input_patched(jack.jack_id);
-	else
-		modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
-}
-
-// Removes one input from an internal cable. The cable's other inputs, and any panel
-// mappings on either jack, stay connected
-void PatchPlayer::remove_internal_cable(Jack out, Jack in) {
-	auto cable = pd.find_internal_cable_with_outjack(out);
-	if (!cable || std::ranges::find(cable->ins, in) == cable->ins.end())
-		return;
-
-	bool const removing_last_input = cable->ins.size() == 1;
-
-	pd.remove_internal_cable(out, in);
-
-	if (!input_jack_has_module_cable(in) && !input_jack_held_by_panel(in))
-		safe_unpatch_input(in);
-
-	if (removing_last_input && !output_jack_held_by_panel(out))
-		safe_unpatch_output(out);
-
-	cables.build(pd.int_cables, core_balancer.cores.parts, modules);
-
-	refresh_conn_flags();
-}
-
-// Removes one panel or MIDI mapping to an input jack, leaving its other connections in place
-void PatchPlayer::remove_injack_mapping(uint32_t panel_jack_id, Jack jack) {
-	if (!pd.remove_mapped_injack(panel_jack_id, jack))
-		return;
-
-	// The mapping may have been summed with others via a Hub cable or a MIDI Hub slot,
-	// so re-calculate all panel connections rather than trying to unpick it
-	rebuild_panel_jack_connections();
-
-	if (!input_jack_has_module_cable(jack) && !input_jack_held_by_panel(jack))
-		safe_unpatch_input(jack);
-}
-
-// Removes one panel mapping from an output jack, leaving its other connections in place
-void PatchPlayer::remove_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
-	if (!pd.remove_mapped_outjack(panel_jack_id, jack))
-		return;
-
-	if (panel_jack_id < out_conns.size())
-		std::erase(out_conns[panel_jack_id], jack);
-
-	if (!pd.find_internal_cable_with_outjack(jack) && !output_jack_held_by_panel(jack))
-		safe_unpatch_output(jack);
-
-	refresh_conn_flags();
+	return false;
 }
 
 // poly_num is the user setting: 0 = Auto (compute from cables), 1-8 = hard-set
@@ -291,23 +431,6 @@ void PatchPlayer::set_midi_poly_num(uint16_t poly_num) {
 	pd.midi_poly_num_setting = poly_num;
 	pd.update_midi_poly_num();
 	midi.set_poly_channel_count(pd.midi_poly_num);
-}
-
-// Returns the number of poly channels flowing from out jack to in jack,
-// or 0 if the connection is mono (or unknowable, e.g. no patch loaded)
-unsigned PatchPlayer::num_poly_cable_channels(Jack out, Jack in) {
-	if (!is_loaded || out.module_id >= num_modules || in.module_id >= num_modules)
-		return 0;
-
-	auto out_buf = plugin_module_get_poly_output_buffer(modules[out.module_id], out.jack_id);
-	if (!out_buf.channels || *out_buf.channels <= 1)
-		return 0;
-
-	auto in_buf = plugin_module_get_poly_input_buffer(modules[in.module_id], in.jack_id);
-	if (!in_buf.channels || *in_buf.channels <= 1)
-		return 0;
-
-	return std::min(*out_buf.channels, *in_buf.channels);
 }
 
 } // namespace MetaModule
