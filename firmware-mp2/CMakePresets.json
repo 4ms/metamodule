@@ -1,0 +1,20 @@
+{
+	"version": 3,
+	"configurePresets": [
+		{
+			"name": "pro",
+			"displayName": "MP2 pro (aarch64-none-elf)",
+			"binaryDir": "${sourceDir}/build",
+			"generator": "Ninja"
+		},
+		{
+			"name": "pro-linux-gnu",
+			"displayName": "MP2 pro compile-check (aarch64-linux-gnu; objects only, link needs newlib)",
+			"binaryDir": "${sourceDir}/build-linux-gnu",
+			"generator": "Ninja",
+			"cacheVariables": {
+				"TOOLCHAIN_TRIPLE": "aarch64-linux-gnu"
+			}
+		}
+	]
+}

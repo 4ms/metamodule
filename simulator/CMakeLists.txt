@@ -18,6 +18,8 @@ option(ALL_SAN "Use address sanitizer and all other sanitizers" OFF)
 option(SIM_DEBUG_O0 "Compile the entire binary (audio DSP included) at -O0 for debugging; set by the `debug` target" OFF)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
+set(METAMODULE_FW_DIR ${FWDIR})
+include(${FWDIR}/src/shared_sources.cmake)
 set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
 
 if (HEADLESS)
@@ -156,21 +158,7 @@ set(SOURCES_COMMON
     hardware_support/memory.cc
     hardware_support/filesystem_helpers.cc
 
-    ${FWDIR}/src/midi/midi_router.cc
-
-    ${FWDIR}/src/patch_play/midi_connections.cc
-    ${FWDIR}/src/patch_play/modules_helpers.cc
-    ${FWDIR}/src/patch_play/patch_player_balance.cc
-    ${FWDIR}/src/patch_play/patch_player_cache.cc
-    ${FWDIR}/src/patch_play/patch_player_catchup.cc
-    ${FWDIR}/src/patch_play/patch_player_expanders.cc
-    ${FWDIR}/src/patch_play/patch_player_load.cc
-    ${FWDIR}/src/patch_play/patch_player_mappings.cc
-    ${FWDIR}/src/patch_play/patch_player_modules.cc
-    ${FWDIR}/src/patch_play/plugin_module.cc
-    ${FWDIR}/src/patch_play/rack_expanders.cc
-
-    ${FWDIR}/metamodule-plugin-sdk/version.cc
+    ${MM_SHARED_CORE_SOURCES}
 )
 
 if(HEADLESS)
@@ -194,45 +182,9 @@ else()
         stubs/dynload/exidx_registry.cc
 
         ${SOURCES_COMMON} 
-        ${FWDIR}/src/gui/elements/element_name.cc
-        ${FWDIR}/src/gui/elements/panel_name.cc
-        ${FWDIR}/src/gui/slsexport/ui_local.cc
-        ${FWDIR}/src/fs/helpers.cc
-        ${FWDIR}/src/gui/fonts/fonts.cc
-        ${FWDIR}/src/gui/fonts/ttf.cc
-        ${FWDIR}/src/gui/pages/module_view/element_roller.cc
-        ${FWDIR}/src/gui/pages/module_view/element_layout.cc
-        ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
-        ${FWDIR}/src/gui/pages/module_view/draw_module.cc
-        ${FWDIR}/src/gui/pages/tags.cc
-        ${FWDIR}/src/fw_update/updater_proxy.cc
-        ${FWDIR}/src/params/expanders.cc
-        ${FWDIR}/src/patch_play/patch_playloader_balance.cc
-        ${FWDIR}/src/patch_play/patch_playloader_load.cc
-        ${FWDIR}/src/patch_play/patch_playloader_modules.cc
-        ${FWDIR}/src/patch_play/patch_playloader_save.cc
-        ${FWDIR}/src/patch_play/rebalance_trials.cc
-        ${FWDIR}/src/patch_file/reload_patch.cc
+        ${MM_SHARED_APP_SOURCES}
         src/file_browser_adaptor.cc
-
-        #Fatfs:
         stubs/fattime.cc
-        ${FWDIR}/lib/fatfs/source/ff.c
-        ${FWDIR}/lib/fatfs/source/ffunicode.c
-        ${FWDIR}/src/fs/fatfs/diskio.cc
-        ${FWDIR}/src/fs/fatfs/delete_node.cc
-        ${FWDIR}/src/fs/time_convert.cc
-        ${FWDIR}/src/fs/general_io.cc
-        #Tar:
-        ${FWDIR}/src/fs/asset_drive/untar.cc
-
-
-        ${FWDIR}/src/user_settings/settings_file.cc
-        ${FWDIR}/src/user_settings/settings_parse.cc
-        ${FWDIR}/src/user_settings/settings_serialize.cc
-
-
-        ${FWDIR}/coreproc_plugin/internal_interface/plugin_app_interface.cc
         )
 
 # see https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
