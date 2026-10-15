@@ -165,6 +165,10 @@ public:
 		page_manager.leave_patch_pages();
 	}
 
+	Result play_patch_file(std::span<char> file_data, std::string_view filename) {
+		return page_manager.play_patch_file(file_data, filename);
+	}
+
 	void notify_error(std::string const &message) {
 		notify_queue.put({message, Notification::Priority::Error, 2000});
 	}

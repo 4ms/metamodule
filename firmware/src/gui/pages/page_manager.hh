@@ -162,6 +162,36 @@ public:
 		}
 	}
 
+	// Opens a patch from file data that didn't come from a patch volume (e.g.
+	// Dev Drive), jumps to PatchView and plays it. The patch is in RamDisk,
+	// like a new untitled patch.
+	Result play_patch_file(std::span<char> file_data, std::string_view filename) {
+		auto &patches = info.open_patch_manager;
+		PatchLocation loc{filename, Volume::RamDisk};
+
+		// Pages might be displaying the patch that's about to be replaced
+		leave_patch_pages();
+
+		// Replace a previous version of this patch
+		if (auto existing = patches.find_open_patch(loc))
+			patches.close_open_patch(existing);
+
+		auto max_open_patches = std::max<uint32_t>(info.settings.filesystem.max_open_patches, 2u) - 1;
+		if (!patches.have_space_to_open_patch(max_open_patches))
+			return {false, "Too many unsaved patches open! Save or close some."};
+
+		if (!patches.open_patch(file_data, loc, 0))
+			return {false, "Error parsing patch"};
+
+		patches.start_viewing(loc);
+
+		gui_state.force_redraw_patch = true;
+		page_list.request_new_page_no_history(PageId::PatchView, {.patch_loc_hash = PatchLocHash{loc}});
+		info.patch_playloader.request_load_view_patch();
+
+		return {.success = true};
+	}
+
 	void handle_dialog_popups() {
 		if (file_browser.is_visible()) {
 			if (gui_state.back_button.is_just_released())
