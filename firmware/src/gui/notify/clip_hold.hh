@@ -10,7 +10,7 @@ namespace MetaModule
 template<unsigned N>
 struct ClipHold {
 	static_assert(N <= 32, "mask is a uint32_t");
-	static constexpr uint32_t HoldMs = 500;
+	static constexpr uint32_t HoldMs = 100;
 
 	void update(uint32_t mask, uint32_t now_ms) {
 		for (unsigned i = 0; i < N; i++) {
