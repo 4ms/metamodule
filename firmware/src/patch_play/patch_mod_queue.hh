@@ -52,6 +52,20 @@ struct RemoveJackMappings {
 	ElementType type;
 };
 
+// Removes one input from an internal cable
+struct RemoveInternalCable {
+	Jack out;
+	Jack in;
+};
+
+// Removes one panel (or MIDI) mapping to a jack
+struct RemoveJackMapping {
+	// Full width: MIDI mappings carry channel and port bits above the jack id
+	uint32_t panel_jack_id;
+	Jack jack;
+	ElementType type;
+};
+
 struct AddJackMapping {
 	// Full width: MIDI mappings carry channel and port bits above the jack id
 	uint32_t panel_jack_id;
@@ -104,6 +118,8 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 AddJackMapping,
 									 DisconnectJack,
 									 RemoveJackMappings,
+									 RemoveInternalCable,
+									 RemoveJackMapping,
 									 CalibrationOnOff,
 									 SetChanCalibration,
 									 SetMidiPolyNum,

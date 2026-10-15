@@ -103,6 +103,7 @@ struct Gui {
 	static std::string lt_grey_text(std::string_view txt) {
 		return color_text(txt, "^dddddd ");
 	}
+	static inline lv_color_t light_red_highlight = lv_color_hex(0xff4040);
 
 	static inline std::string_view grey_color_html = "^aaaaaa ";
 	static inline std::string_view brown_highlight_html = "^A26E3E ";

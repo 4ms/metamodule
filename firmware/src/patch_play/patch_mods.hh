@@ -33,6 +33,11 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 						   mod.type == ElementType::Input ? player.remove_injack_mappings(mod.jack) :
 															player.remove_outjack_mappings(mod.jack);
 					   },
+					   [&player](RemoveInternalCable &mod) { player.remove_internal_cable(mod.out, mod.in); },
+					   [&player](RemoveJackMapping &mod) {
+						   mod.type == ElementType::Input ? player.remove_injack_mapping(mod.panel_jack_id, mod.jack) :
+															player.remove_outjack_mapping(mod.panel_jack_id, mod.jack);
+					   },
 					   [&](SetMidiPolyNum mod) { player.set_midi_poly_num(mod.poly_num); },
 
 					   [&caldatas](SetChanCalibration &mod) {

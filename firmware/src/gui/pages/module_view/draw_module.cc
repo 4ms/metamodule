@@ -18,6 +18,8 @@ unsigned ModuleViewPage::resize_module_image(unsigned max) {
 	lv_obj_refr_size(ui_ModuleImage);
 	if (lv_obj_get_width(ui_ModuleImage) > width_px) {
 		lv_obj_clear_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
+		// The whole module fits, so don't leave it scrolled
+		lv_obj_scroll_to_x(ui_ModuleImage, 0, LV_ANIM_OFF);
 	} else {
 		lv_obj_add_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
 	}
@@ -70,6 +72,8 @@ void ModuleViewPage::exit_fullscreen() {
 }
 
 void ModuleViewPage::redraw_module() {
+	bool const is_new_module = stack_order_module_id != this_module_id;
+
 	save_element_stacking_order();
 
 	reset_module_page();
@@ -107,24 +111,29 @@ void ModuleViewPage::redraw_module() {
 
 	stack_order_module_id = this_module_id;
 
+	// Size Module Image and Roller before populating the roller, which scrolls the selected
+	// element into view: the scroll must be computed against this module's width, not the last one's
+	lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
+
+	resize_module_image(full_screen_mode ? ScreenWidthPx : 170);
+
+	// Clear any scroll left over from the previously drawn module
+	if (is_new_module)
+		lv_obj_scroll_to_x(ui_ModuleImage, 0, LV_ANIM_OFF);
+
+	lv_obj_refr_size(ui_ElementRollerPanel);
+	auto roller_width = lv_obj_get_width(ui_ElementRollerPanel);
+	mapping_pane.prepare_focus(group, roller_width, is_patch_playloaded);
+
 	// Populate Roller and highlighter buttons
 	populate_element_objects();
 	build_element_layout();
 	populate_roller();
 
-	//Size Module Image and Roller
-	lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
-
-	resize_module_image(full_screen_mode ? ScreenWidthPx : 170);
-
 	update_map_ring_style();
 
 	cable_drawer.set_height(240);
 	update_cable_style(true);
-
-	lv_obj_refr_size(ui_ElementRollerPanel);
-	auto roller_width = lv_obj_get_width(ui_ElementRollerPanel);
-	mapping_pane.prepare_focus(group, roller_width, is_patch_playloaded);
 
 	dynamic_elements_prepared = false;
 	update_graphic_throttle_setting();

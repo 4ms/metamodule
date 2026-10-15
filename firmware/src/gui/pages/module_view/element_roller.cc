@@ -30,6 +30,7 @@ void ModuleViewPage::show_roller() {
 		metaparams.rotary_pushed.use_motion();
 		module_context_menu.hide();
 		mode = ViewMode::List;
+		mapping_pane.reset_disconnect_mode();
 		mapping_pane.hide();
 		lv_show(ui_ElementRoller);
 		lv_show(ui_ElementRollerPanel);

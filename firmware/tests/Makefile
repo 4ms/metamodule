@@ -49,7 +49,7 @@ TEST_SOURCES += src/patch_play/patch_player_modules.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
-			-I$(DOCTEST_DIR) \
+			-I$(DOCTESTHEADER_DIR) \
 			-I$(TEST_DIR) \
 			-I$(TEST_DIR)/stubs \
 			-I../$(TEST_DIR)/stubs \
@@ -81,7 +81,7 @@ $(BUILDDIR)/tests/auto_map_tests.o:          CXXFLAGS += -Wno-deprecated-enum-en
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
 DEPDIR := $(BUILDDIR)
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
+DEPFLAGS = -MT $@ -MD -MP -MF $(DEPDIR)/$(basename $<).d
 TMPFILE = $(BUILDDIR)/runtests.out
 
 .PHONY: all tests clean patches

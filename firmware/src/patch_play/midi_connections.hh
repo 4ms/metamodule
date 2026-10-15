@@ -88,6 +88,13 @@ struct MidiConnections {
 	// Removes every connection to the given module input jack
 	void erase_jack(Jack jack);
 
+	// Removes the connection from panel_jack_id (a MIDI jack) to the given jack.
+	// Returns false if there was no such connection
+	bool erase_jack_conn(uint32_t panel_jack_id, Jack jack);
+
+	// True if panel_jack_id (a MIDI jack, including its channel and ports) connects to the given jack
+	bool has_jack_conn(uint32_t panel_jack_id, Jack jack);
+
 	// Removes every connection and param map referring to the module
 	void erase_module(unsigned module_idx);
 
@@ -193,6 +200,9 @@ struct MidiConnections {
 	}
 
 private:
+	// Calls f(conns, midi_chan, poly_base) with the connection vector that panel_jack_id routes to
+	bool visit_jack_conns(uint32_t panel_jack_id, auto &&f);
+
 	// Calls f(std::vector<T>&) for every vector of jacks (mono, poly, and pulse conns)
 	void for_each_jack_vector(auto &&f) {
 		for (auto &v : note_pitch_conns)
@@ -242,8 +252,7 @@ private:
 		requires std::derived_from<T, JackMidi>;
 
 	template<typename T>
-	static T &update_or_add(std::vector<T> &v, const MappedKnob &d)
-		requires std::derived_from<T, MappedKnob>;
+	static T &update_or_add(std::vector<T> &v, const MappedKnob &d) requires std::derived_from<T, MappedKnob>;
 
 	static void update_or_add_poly(std::vector<PolyJackMidi> &v,
 								   const Jack &d,

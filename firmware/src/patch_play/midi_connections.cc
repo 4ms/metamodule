@@ -10,85 +10,69 @@ void MidiConnections::clear() {
 	for_each_knob_map_vector([](auto &v) { v.clear(); });
 }
 
-bool MidiConnections::add_jack_conn(uint32_t panel_jack_id, Jack input_jack, CoreProcessor::PolyPortBuffer polybuf) {
+// Calls f(conns, midi_chan, poly_base) with the connection vector that panel_jack_id routes to.
+// conns is a std::vector<JackMidi> or std::vector<PolyJackMidi>.
+// Returns false (and does nothing) if panel_jack_id is not a MIDI jack.
+bool MidiConnections::visit_jack_conns(uint32_t panel_jack_id, auto &&f) {
 	const auto chan = Midi::midi_channel(panel_jack_id);
-	const auto ports = Midi::port_mask(panel_jack_id);
 
 	// The 1-4 and 5-8 poly cables share the same connection vectors; poly_base selects
 	// which group of MIDI poly channels (0-3 vs 4-7) the cable carries.
 	constexpr uint8_t Base5_8 = Midi::MidiPolyCableChanBase;
 
 	if (Midi::midi_note_pitch_poly(panel_jack_id)) {
-		update_or_add_poly(poly_pitch_conns, input_jack, chan, ports, polybuf);
-		pr_trace("MIDI note poly ch:%u", chan);
+		f(poly_pitch_conns, chan, 0);
 
 	} else if (Midi::midi_note_pitch_poly5_8(panel_jack_id)) {
-		update_or_add_poly(poly_pitch_conns, input_jack, chan, ports, polybuf, Base5_8);
-		pr_trace("MIDI note poly 5-8 ch:%u", chan);
+		f(poly_pitch_conns, chan, Base5_8);
 
 	} else if (Midi::midi_note_gate_poly(panel_jack_id)) {
-		update_or_add_poly(poly_gate_conns, input_jack, chan, ports, polybuf);
-		pr_trace("MIDI gate poly ch:%u", chan);
+		f(poly_gate_conns, chan, 0);
 
 	} else if (Midi::midi_note_gate_poly5_8(panel_jack_id)) {
-		update_or_add_poly(poly_gate_conns, input_jack, chan, ports, polybuf, Base5_8);
-		pr_trace("MIDI gate poly 5-8 ch:%u", chan);
+		f(poly_gate_conns, chan, Base5_8);
 
 	} else if (Midi::midi_note_vel_poly(panel_jack_id)) {
-		update_or_add_poly(poly_vel_conns, input_jack, chan, ports, polybuf);
-		pr_trace("MIDI vel poly ch:%u", chan);
+		f(poly_vel_conns, chan, 0);
 
 	} else if (Midi::midi_note_vel_poly5_8(panel_jack_id)) {
-		update_or_add_poly(poly_vel_conns, input_jack, chan, ports, polybuf, Base5_8);
-		pr_trace("MIDI vel poly 5-8 ch:%u", chan);
+		f(poly_vel_conns, chan, Base5_8);
 
 	} else if (Midi::midi_note_aft_poly(panel_jack_id)) {
-		update_or_add_poly(poly_aft_conns, input_jack, chan, ports, polybuf);
-		pr_trace("MIDI aft poly ch:%u", chan);
+		f(poly_aft_conns, chan, 0);
 
 	} else if (Midi::midi_note_aft_poly5_8(panel_jack_id)) {
-		update_or_add_poly(poly_aft_conns, input_jack, chan, ports, polybuf, Base5_8);
-		pr_trace("MIDI aft poly 5-8 ch:%u", chan);
+		f(poly_aft_conns, chan, Base5_8);
 
 	} else if (Midi::midi_note_retrig_poly(panel_jack_id)) {
-		update_or_add_poly(poly_retrig.conns, input_jack, chan, ports, polybuf);
-		pr_trace("MIDI retrig poly ch:%u", chan);
+		f(poly_retrig.conns, chan, 0);
 
 	} else if (Midi::midi_note_retrig_poly5_8(panel_jack_id)) {
-		update_or_add_poly(poly_retrig.conns, input_jack, chan, ports, polybuf, Base5_8);
-		pr_trace("MIDI retrig poly 5-8 ch:%u", chan);
+		f(poly_retrig.conns, chan, Base5_8);
 
 	} else if (auto num = Midi::midi_note_pitch(panel_jack_id); num.has_value()) {
-		update_or_add(note_pitch_conns[num.value()], input_jack, chan, ports);
-		pr_trace("MIDI note (poly %d) ch:%u", num.value(), chan);
+		f(note_pitch_conns[num.value()], chan, 0);
 
 	} else if (auto num = Midi::midi_note_gate(panel_jack_id); num.has_value()) {
-		update_or_add(note_gate_conns[num.value()], input_jack, chan, ports);
-		pr_trace("MIDI gate (poly %d) ch:%u", num.value(), chan);
+		f(note_gate_conns[num.value()], chan, 0);
 
 	} else if (auto num = Midi::midi_note_vel(panel_jack_id); num.has_value()) {
-		update_or_add(note_vel_conns[num.value()], input_jack, chan, ports);
-		pr_trace("MIDI vel (poly %d) ch:%u", num.value(), chan);
+		f(note_vel_conns[num.value()], chan, 0);
 
 	} else if (auto num = Midi::midi_note_aft(panel_jack_id); num.has_value()) {
-		update_or_add(note_aft_conns[num.value()], input_jack, chan, ports);
-		pr_trace("MIDI aftertouch (poly %d) ch:%u", num.value(), chan);
+		f(note_aft_conns[num.value()], chan, 0);
 
 	} else if (auto num = Midi::midi_note_retrig(panel_jack_id); num.has_value()) {
-		update_or_add(note_retrig[num.value()].conns, input_jack, chan, ports);
-		pr_trace("MIDI retrig (poly %d) ch:%u", num.value(), chan);
+		f(note_retrig[num.value()].conns, chan, 0);
 
 	} else if (auto num = Midi::midi_gate(panel_jack_id); num.has_value()) {
-		update_or_add(gate_conns[num.value()], input_jack, chan, ports);
-		pr_trace("MIDI note %d gate ch:%u", num.value(), chan);
+		f(gate_conns[num.value()], chan, 0);
 
 	} else if (auto num = Midi::midi_cc(panel_jack_id); num.has_value()) {
-		update_or_add(cc_conns[num.value()], input_jack, chan, ports);
-		pr_trace("MIDI CC/PW %d ch:%u", num.value(), chan);
+		f(cc_conns[num.value()], chan, 0);
 
 	} else if (auto num = Midi::midi_clk(panel_jack_id); num.has_value()) {
-		update_or_add(pulses[TimingEvents::Clock].conns, input_jack, 0, ports);
-		pr_trace("MIDI Clk");
+		f(pulses[TimingEvents::Clock].conns, 0, 0);
 
 	} else if (auto num = Midi::midi_divclk(panel_jack_id); num.has_value()) {
 		uint8_t div_event = *num == 0  ? Midi::DivClock1 :
@@ -104,18 +88,50 @@ bool MidiConnections::add_jack_conn(uint32_t panel_jack_id, Jack input_jack, Cor
 			pr_err("Error: Unknown MIDI clock division: %d. Using /24\n", *num);
 			div_event = Midi::DivClock24;
 		}
-		update_or_add(divclk_pulses[div_event].conns, input_jack, 0, ports);
-		pr_trace("MIDI Div %d Clk", num.value() + 1);
+		f(divclk_pulses[div_event].conns, 0, 0);
 
 	} else if (auto num = Midi::midi_transport(panel_jack_id); num.has_value()) {
-		update_or_add(pulses[num.value() + TimingEvents::Start].conns, input_jack, 0, ports);
-		pr_trace("MIDI %s", num.value() == 0 ? "Start" : num.value() == 1 ? "Stop" : "Cont");
+		f(pulses[num.value() + TimingEvents::Start].conns, 0, 0);
 
 	} else {
 		return false;
 	}
 
 	return true;
+}
+
+bool MidiConnections::add_jack_conn(uint32_t panel_jack_id, Jack input_jack, CoreProcessor::PolyPortBuffer polybuf) {
+	const auto ports = Midi::port_mask(panel_jack_id);
+
+	return visit_jack_conns(panel_jack_id, [&](auto &conns, uint32_t chan, uint8_t poly_base) {
+		pr_trace("MIDI %x ch:%u -> m=%d j=%d\n", panel_jack_id, chan, input_jack.module_id, input_jack.jack_id);
+
+		if constexpr (std::is_same_v<std::remove_cvref_t<decltype(conns)>, std::vector<PolyJackMidi>>)
+			update_or_add_poly(conns, input_jack, chan, ports, polybuf, poly_base);
+		else
+			update_or_add(conns, input_jack, chan, ports);
+	});
+}
+
+bool MidiConnections::erase_jack_conn(uint32_t panel_jack_id, Jack jack) {
+	bool erased = false;
+	visit_jack_conns(panel_jack_id, [&](auto &conns, uint32_t, uint8_t) { erased = std::erase(conns, jack) > 0; });
+	return erased;
+}
+
+bool MidiConnections::has_jack_conn(uint32_t panel_jack_id, Jack jack) {
+	const auto ports = Midi::port_mask(panel_jack_id);
+
+	bool found = false;
+	visit_jack_conns(panel_jack_id, [&](auto &conns, uint32_t chan, uint8_t poly_base) {
+		found = std::ranges::any_of(conns, [&](auto const &c) {
+			bool same_poly_base = true;
+			if constexpr (requires { c.poly_base; })
+				same_poly_base = c.poly_base == poly_base;
+			return c == jack && c.midi_chan == chan && c.port_mask == ports && same_poly_base;
+		});
+	});
+	return found;
 }
 
 void MidiConnections::erase_jack(Jack jack) {
