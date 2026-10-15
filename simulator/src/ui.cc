@@ -100,6 +100,8 @@ bool Ui::update() {
 		metaparams.rotary_button.register_state(input_driver.rotary_is_pressed());
 
 		transfer_params();
+		metaparams.clipped_outs |= audio_stream.take_clipped_outs();
+		metaparams.jack_senses = params.jack_senses;
 		change_knobset();
 		update_channel_selections();
 		page_update_task();

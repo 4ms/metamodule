@@ -165,13 +165,22 @@ void AudioStream::handle_overruns() {
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	float output_volts = player.get_panel_output(output_id) * output_fade_amt;
-	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
+	int32_t val = cal.out_cal[output_id].adjust(output_volts);
+	int32_t sat = MathTools::signed_saturate(val, 24);
+	if (sat != val)
+		local_params.metaparams.clipped_outs |= 1u << output_id;
+	return sat;
 }
 
 AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
 	output_id = AudioExpander::out_order[output_id];
-	float output_volts = player.get_panel_output(output_id + PanelDef::NumAudioOut) * output_fade_amt;
-	return MathTools::signed_saturate(ext_cal.out_cal[output_id].adjust(output_volts), 24);
+	unsigned panel_out = output_id + PanelDef::NumAudioOut;
+	float output_volts = player.get_panel_output(panel_out) * output_fade_amt;
+	int32_t val = ext_cal.out_cal[output_id].adjust(output_volts);
+	int32_t sat = MathTools::signed_saturate(val, 24);
+	if (sat != val)
+		local_params.metaparams.clipped_outs |= 1u << panel_out;
+	return sat;
 }
 
 // 0V, calibrated
@@ -584,6 +593,7 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.ext_buttons_low_events = param_blocks[block].metaparams.ext_buttons_low_events;
 	local_params.metaparams.meta_buttons[0].set_state_no_events(
 		param_blocks[block].metaparams.meta_buttons[0].is_pressed());
+	local_params.metaparams.clipped_outs = 0;
 
 	// 31.5 - 31.7us
 	std::memcpy((void *)local_params.params.data(), &param_blocks[block].params, sizeof(Params) * block_size_);
@@ -599,6 +609,7 @@ void AudioStream::return_cached_params(unsigned block) {
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
 	param_blocks[block].metaparams.midi_14bit_mode = local_params.metaparams.midi_14bit_mode;
+	param_blocks[block].metaparams.clipped_outs = local_params.metaparams.clipped_outs;
 }
 
 void AudioStream::set_block_spans() {
