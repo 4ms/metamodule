@@ -81,7 +81,10 @@ struct InterCoreSpan {
 
 	InterCoreSpan() = default;
 
-	InterCoreSpan(std::span<T> sp) {
+	// Accepts spans of T, and of non-const T when T is const (like std::span)
+	template<typename U>
+		requires std::is_convertible_v<U (*)[], T (*)[]>
+	InterCoreSpan(std::span<U> sp) {
 		*this = sp;
 	}
 
@@ -90,8 +93,10 @@ struct InterCoreSpan {
 		this->count = static_cast<uint32_t>(count);
 	}
 
-	InterCoreSpan &operator=(std::span<T> sp) {
-		ptr = sp.data();
+	template<typename U>
+		requires std::is_convertible_v<U (*)[], T (*)[]>
+	InterCoreSpan &operator=(std::span<U> sp) {
+		ptr = static_cast<T *>(sp.data());
 		count = static_cast<uint32_t>(sp.size());
 		return *this;
 	}
