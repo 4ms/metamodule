@@ -129,7 +129,7 @@ public:
 
 			if (patch_list_changed_) {
 				// Make a copy
-				patch_list_helper_.copy_patchlist(message.patch_dir_list);
+				patch_list_helper_.copy_patchlist(message.patch_dir_list.get());
 
 				result.message_type = patch_list_changed_ ? PatchListChanged : PatchListUnchanged;
 				patch_list_changed_ = false;
@@ -244,7 +244,7 @@ public:
 
 			auto path = message.filename;
 			auto exts = message.dest_filename;
-			auto *dir_tree = message.dir_entries;
+			auto *dir_tree = message.dir_entries.get();
 			dir_tree->files.clear();
 			dir_tree->dirs.clear();
 
