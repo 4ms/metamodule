@@ -27,6 +27,15 @@ set(MDRIVLIB ${FWDIR}/lib/mdrivlib)
 include(cmake/arch_mp25xa35.cmake)
 set_arch_flags()
 
+# Until p1 boards arrive, bring-up runs on the mp2-devboard with a test carrier
+# (the stm32mp2-baremetal breakout + a PCM3168 module). Select its wiring with:
+#   cmake --preset pro -DMP2_TEST_CARRIER=ON
+option(MP2_TEST_CARRIER "Build for the mp2-devboard test carrier instead of the pro p1 board" OFF)
+if(MP2_TEST_CARRIER)
+  add_compile_definitions(MP2_TEST_CARRIER)
+  message(STATUS "Building for the mp2-devboard test carrier (not pro p1)")
+endif()
+
 set(MP2_CMSIS_DEVICE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/cmsis-device/stm32mp257d)
 set(MP2_CMSIS_CORE_DIR ${FWDIR}/lib/cmsis)
 set(MP2_HAL_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/stm32-hal/stm32mp2)
