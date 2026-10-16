@@ -9,7 +9,7 @@
 //  1. console
 //  2. probe every I2C device on the board and report present/missing
 //  3. button LEDs: light each RGB button
-//  4. display: LVGL test screen (rendered in landscape view coords, rotated into the portrait panel)
+//  4. display: the MetaModule GUI screens (SquareLine export), Main Menu showing
 //  5. codec: init PCM3168 + SAI1 TDM, output a triangle wave on all 8 outs
 //  6. loop: print control-expander changes (encoders/buttons) and direct GPIO controls
 
@@ -25,6 +25,7 @@
 #include "drivers/pin.hh"
 #include "drivers/system_reg.hh"
 #include "drivers/uart.hh"
+#include "gui/slsexport/comp_init.hh"
 #include "lvgl.h"
 #include "lvgl_display.hh"
 #include <array>
@@ -95,56 +96,6 @@ void fill_audio_block(unsigned half) {
 // Display memory
 __attribute__((section(".framebuffers"))) alignas(4096) std::array<uint32_t, 720 * 1280> framebuffer;
 std::array<lv_color_t, 1280 * 80> lvgl_draw_buffer; // partial render buffer: 1/9 of the view
-
-lv_obj_t *uptime_label;
-
-void create_lvgl_test_screen() {
-	auto scr = lv_scr_act();
-	lv_obj_set_style_bg_color(scr, lv_color_hex(0x202020), 0);
-
-	auto title = lv_label_create(scr);
-	lv_obj_set_style_text_font(title, &lv_font_montserrat_28, 0);
-	lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
-	lv_label_set_text(title, "MetaModule Pro");
-	lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 40);
-
-	auto subtitle = lv_label_create(scr);
-	lv_obj_set_style_text_color(subtitle, lv_color_hex(0xAAAAAA), 0);
-	lv_label_set_text(subtitle, "LVGL " LVGL_VERSION_INFO " - 1280x720 view, rotated into the 720x1280 DSI panel");
-	lv_obj_align_to(subtitle, title, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
-
-	auto spinner = lv_spinner_create(scr, 1000, 60);
-	lv_obj_set_size(spinner, 200, 200);
-	lv_obj_center(spinner);
-
-	uptime_label = lv_label_create(scr);
-	lv_obj_set_style_text_font(uptime_label, &lv_font_montserrat_20, 0);
-	lv_obj_set_style_text_color(uptime_label, lv_color_hex(0xFFC000), 0);
-	lv_obj_align(uptime_label, LV_ALIGN_BOTTOM_MID, 0, -60);
-	lv_timer_create(
-		[](lv_timer_t *) { lv_label_set_text_fmt(uptime_label, "Uptime: %u s", unsigned(HAL_GetTick() / 1000)); },
-		200,
-		nullptr);
-
-	// Corner labels: check the rotation (none should be mirrored or missing).
-	// Inset by 4px: view column 0 is not visible on this panel.
-	struct Corner {
-		lv_align_t align;
-		int x, y;
-		const char *text;
-	};
-	for (auto [align, x, y, text] : {Corner{LV_ALIGN_TOP_LEFT, 4, 4, "top-left"},
-									 Corner{LV_ALIGN_TOP_RIGHT, -4, 4, "top-right"},
-									 Corner{LV_ALIGN_BOTTOM_LEFT, 4, -4, "bottom-left"},
-									 Corner{LV_ALIGN_BOTTOM_RIGHT, -4, -40, "bottom-right"}})
-	{
-		auto label = lv_label_create(scr);
-		lv_obj_set_style_text_font(label, &lv_font_montserrat_20, 0);
-		lv_obj_set_style_text_color(label, lv_color_hex(0x00FF80), 0);
-		lv_label_set_text(label, text);
-		lv_obj_align(label, align, x, y);
-	}
-}
 
 } // namespace
 
@@ -228,7 +179,8 @@ int main() {
 	static LvglDisplay lvgl_display;
 	lvgl_display.init(framebuffer, lvgl_draw_buffer);
 	lv_log_register_print_cb([](const char *msg) { print(msg); });
-	create_lvgl_test_screen();
+	// The real MetaModule screens, as the GUI's PageManager sets them up (loads the Main Menu)
+	static SlsComponentInit sls_comp_init;
 	print("LVGL started\n");
 
 	//

@@ -102,12 +102,20 @@ add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
 target_link_libraries(lvgl PRIVATE mp2_interface)
 
 #
+# MetaModule GUI: SquareLine Studio export (screens, fonts, images) and its C++ helpers
+
+add_subdirectory(${FWDIR}/src/gui/slsexport ${CMAKE_CURRENT_BINARY_DIR}/slsexport)
+target_include_directories(ui_lvgl PRIVATE ${FWDIR}/lib)
+
+
+#
 # A35 application
 
 add_library(
   a35_core OBJECT
   src/core_a35/main.cc
   src/core_a35/system_init.cc
+  ${FWDIR}/src/gui/slsexport/ui_local.cc
   src/core_a35/uart_print.c
   system/mmu_ca35.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
@@ -118,7 +126,7 @@ add_library(
   ${FWDIR}/system/libc_stub.c
 )
 
-target_link_libraries(a35_core PUBLIC mp2_interface lvgl::lvgl)
+target_link_libraries(a35_core PUBLIC mp2_interface lvgl::lvgl ui_lvgl)
 # LVGL's headers OR together values from different enums (deprecated in C++20); MP1 silences this too
 target_compile_options(a35_core PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
 
@@ -126,11 +134,16 @@ target_include_directories(
   a35_core
   PUBLIC src
          src/pro
+         ${FWDIR}
+         ${FWDIR}/src
          ${FWDIR}/lib
+         ${FWDIR}/lib/patch-serial
+         ${FWDIR}/metamodule-plugin-sdk/core-interface
+         ${FWDIR}/metamodule-plugin-sdk/core-interface/filesystem
 )
 
 add_executable(main_a35.elf $<TARGET_OBJECTS:a35_core> $<TARGET_OBJECTS:mp2_mdrivlib> $<TARGET_OBJECTS:mp2_hal>)
-target_link_libraries(main_a35.elf PRIVATE lvgl::lvgl)
+target_link_libraries(main_a35.elf PRIVATE ui_lvgl lvgl::lvgl)
 
 set(LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/system/stm32mp2xx_ca35.ld)
 target_link_options(main_a35.elf PRIVATE -T${LINKER_SCRIPT} -Wl,-Map,main_a35.map,--cref)
