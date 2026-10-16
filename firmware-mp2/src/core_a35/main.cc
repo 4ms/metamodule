@@ -9,7 +9,7 @@
 //  1. console
 //  2. probe every I2C device on the board and report present/missing
 //  3. button LEDs: light each RGB button
-//  4. display: color bars, with a white square marking the panel's first pixel (top-left in hardware coords)
+//  4. display: color bars, with an orange square near the panel's first pixel (0,0 in hardware coords)
 //  5. codec: init PCM3168 + SAI1 TDM, output a triangle wave on all 8 outs
 //  6. loop: print control-expander changes (encoders/buttons) and direct GPIO controls
 
@@ -64,24 +64,28 @@ bool probe(mdrivlib::I2CPeriph &i2c, const char *bus, uint8_t addr7, const char 
 }
 
 // Audio test: 440Hz triangle on all outputs, 6 inputs captured
-constexpr uint32_t BlockSize = 64;
+constexpr uint32_t BlockSize = 256;
 constexpr uint32_t NumOuts = 8;
 constexpr uint32_t NumIns = 6;
 alignas(64) std::array<int32_t, 2 * BlockSize * NumOuts> audio_out;
 alignas(64) std::array<int32_t, 2 * BlockSize * NumIns> audio_in;
-float phase = 0;
+std::array<float, NumOuts> phases{};
 
 void fill_audio_block(unsigned half) {
+	constexpr float freq[NumOuts]{40.f, 100.f, 210.f, 440.f, 2000.f, 5000.f, 10000.f, 20000.f};
 	auto *out = &audio_out[half * BlockSize * NumOuts];
-	for (unsigned i = 0; i < BlockSize; i++) {
-		phase += 440.f / 48000.f;
-		if (phase >= 1.f)
-			phase -= 1.f;
-		// Triangle, 24-bit left-justified in 32 bits, at -12dB
-		float tri = phase < 0.5f ? (4.f * phase - 1.f) : (3.f - 4.f * phase);
-		auto s = static_cast<int32_t>(tri * 0x1FFFFF) << 8;
-		for (unsigned ch = 0; ch < NumOuts; ch++)
+	for (unsigned ch = 0; ch < NumOuts; ch++) {
+		auto &phase = phases[ch];
+		for (unsigned i = 0; i < BlockSize; i++) {
+			phase += freq[ch] / 48000.f;
+			if (phase >= 1.f)
+				phase -= 1.f;
+			// Triangle at -12dB. 24-bit samples are right-aligned in the 32-bit slot:
+			// the SAI (DataSize 24) transmits bits [23:0] (same as MP1's AudioFrame::scaleOutput)
+			float tri = phase < 0.5f ? (4.f * phase - 1.f) : (3.f - 4.f * phase);
+			auto s = static_cast<int32_t>(tri * 0x1FFFFF);
 			out[i * NumOuts + ch] = s;
+		}
 	}
 	mdrivlib::SystemCache::clean_dcache_by_range(out, BlockSize * NumOuts * sizeof(int32_t));
 }
@@ -89,15 +93,40 @@ void fill_audio_block(unsigned half) {
 void draw_test_pattern(uint32_t *fb, uint32_t w, uint32_t h) {
 	constexpr uint32_t bars[8] = {
 		0xFFFFFFFF, 0xFFFFFF00, 0xFF00FFFF, 0xFF00FF00, 0xFFFF00FF, 0xFFFF0000, 0xFF0000FF, 0xFF000000};
+
+	// First and last 4 hardware lines each get their own color, to see exactly which lines are
+	// visible at each edge (and if a line wraps to the other end of the frame):
+	// lines 0,1,2,3 = red, green, blue, magenta (on the white bar)
+	// lines h-1,h-2,h-3,h-4 = orange, cyan, yellow, white (on the black bar)
+	constexpr uint32_t first_lines[4] = {0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFF00FF};
+	constexpr uint32_t last_lines[4] = {0xFFFF8000, 0xFF00FFFF, 0xFFFFFF00, 0xFFFFFFFF};
+
 	for (uint32_t y = 0; y < h; y++) {
 		for (uint32_t x = 0; x < w; x++) {
 			uint32_t color = bars[(y * 8) / h]; // bars are horizontal in hardware coords = vertical when viewed landscape
-			if (x < 64 && y < 64)
-				color = 0xFFFFFFFF; // marks pixel (0,0)
-			if (x == 0 || y == 0 || x == w - 1 || y == h - 1)
-				color = 0xFFFF0000; // 1px red border: checks for cropping
+			if (x >= 8 && x < 72 && y >= 8 && y < 72)
+				color = 0xFFFF8000; // orange square near pixel (0,0): shows the panel's scan origin
+			if (x == 0 || x == w - 1)
+				color = 0xFFFF0000; // 1px red border at the first/last pixel of each line
+			if (y < 4)
+				color = first_lines[y];
+			if (y >= h - 4)
+				color = last_lines[h - 1 - y];
 			fb[y * w + x] = color;
 		}
+	}
+}
+
+// Black, with isolated single lines at each end of the frame, to see which edge lines the panel shows
+void draw_edge_lines_pattern(uint32_t *fb, uint32_t w, uint32_t h) {
+	for (uint32_t y = 0; y < h; y++) {
+		uint32_t color = y == 0	   ? 0xFFFF0000 // line 0: red
+					   : y == 2	   ? 0xFF00FF00 // line 2: green
+					   : y == h - 1 ? 0xFFFF8000 // last line: orange
+					   : y == h - 3 ? 0xFF00FFFF // third from last: cyan
+									: 0xFF000000;
+		for (uint32_t x = 0; x < w; x++)
+			fb[y * w + x] = color;
 	}
 }
 
@@ -117,7 +146,6 @@ int main() {
 	print("I2C devices:\n");
 
 	auto &codec_i2c = Hardware::i2c; // I2C4, also used by the codec driver
-	probe(codec_i2c, "I2C4", 0x44, "PCM3168 codec");
 	probe(codec_i2c, "I2C4", JackSense::gpio_expander_conf.addr, "TCA9555 jack sense (U1212)");
 	probe(codec_i2c, "I2C4", 0x22, "FUSB302 USB-C");
 
@@ -169,11 +197,18 @@ int main() {
 	auto fb = reinterpret_cast<uint32_t *>(FramebufferAddr);
 	draw_test_pattern(fb, screen.width(), screen.height());
 	screen.clean_framebuffer_cache(fb);
+
+	// Second framebuffer, right after the first. The main loop flips between them every 2 seconds.
+	auto fb2 = fb + screen.width() * screen.height();
+	draw_edge_lines_pattern(fb2, screen.width(), screen.height());
+	screen.clean_framebuffer_cache(fb2);
 	auto screen_err = screen.init(FramebufferAddr);
 	if (screen_err == mdrivlib::DsiScreen::Error::None) {
 		print("ok, ");
 		console.write(screen.refresh_rate_millihz());
-		print(" mHz refresh\n");
+		print(" mHz refresh, ");
+		console.write(screen.dcs_write_errors());
+		print(" DCS write errors\n");
 	} else {
 		print("FAILED (error ");
 		console.write(static_cast<uint32_t>(screen_err));
@@ -187,6 +222,8 @@ int main() {
 	auto &codec = Hardware::codec;
 	if (codec.init() == CodecT::CODEC_NO_ERR) {
 		print("ok\n");
+		// The codec only answers I2C once init() has released its reset pin
+		probe(codec_i2c, "I2C4", CodecAddr7bit, "PCM3168 codec");
 		fill_audio_block(0);
 		fill_audio_block(1);
 		codec.set_tx_buffer(std::span<int32_t>{audio_out}, BlockSize);
@@ -222,6 +259,9 @@ int main() {
 	uint32_t last_direct = 0;
 
 	uint16_t last_jacks = 0;
+
+	uint64_t last_flip = mdrivlib::read_cntpct();
+	bool showing_fb2 = false;
 
 	print("Polling controls...\n");
 	while (true) {
@@ -264,6 +304,16 @@ int main() {
 				print_hex(reading, 4);
 				print("\n");
 				last_jacks = reading;
+			}
+		}
+
+		// Flip between the two test patterns every 2 seconds
+		if (screen_err == mdrivlib::DsiScreen::Error::None) {
+			auto now = mdrivlib::read_cntpct();
+			if (now - last_flip > 2 * mdrivlib::read_cntfreq()) {
+				last_flip = now;
+				showing_fb2 = !showing_fb2;
+				screen.set_framebuffer(showing_fb2 ? fb2 : fb);
 			}
 		}
 

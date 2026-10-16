@@ -35,7 +35,10 @@ extern "C" {
 /**
  * @brief This is the list of modules to be used in the HAL driver
  */
-#define USE_HAL_I2C_REGISTER_CALLBACKS 1
+// Must be 0: with register-callbacks on, HAL_I2C_DeInit()/Init() call through the handle's
+// callback pointers, which are garbage in a non-zeroed (e.g. stack-allocated) I2CPeriph.
+// mdrivlib's I2C driver doesn't use registered callbacks.
+#define USE_HAL_I2C_REGISTER_CALLBACKS 0U
 
 #define HAL_MODULE_ENABLED
 #if defined(CORE_CA35)

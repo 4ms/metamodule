@@ -16,6 +16,14 @@
 namespace MetaModule
 {
 
+// PCM3168 ADR1:ADR0 pins. I2C address = 0x44 + this
+#ifdef MP2_TEST_CARRIER
+constexpr uint8_t CodecBusAddress = 0b01; // test carrier's PCM3168 module: ADR0 = 3.3V, ADR1 = GND -> 0x45
+#else
+constexpr uint8_t CodecBusAddress = 0b00; // p1: ADR0 = ADR1 = GND -> 0x44
+#endif
+constexpr uint8_t CodecAddr7bit = 0x44 + CodecBusAddress;
+
 const mdrivlib::SaiConfig codec_sai_conf = {
 	.sai = SAI1,
 	.tx_block = SAI1_Block_A,
@@ -55,7 +63,7 @@ const mdrivlib::SaiConfig codec_sai_conf = {
 
 	.reset_pin = {mdrivlib::GPIO::D, mdrivlib::PinNum::_2, mdrivlib::PinAF::AFNone},
 
-	.bus_address = 0b00, // ADR0 = ADR1 = GND -> 0x44
+	.bus_address = CodecBusAddress,
 
 	.num_tdm_ins = 6,
 	.num_tdm_outs = 8,
