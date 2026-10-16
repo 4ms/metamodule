@@ -20,7 +20,8 @@ cmake --preset pro
 cmake --build build
 ```
 
-Produces `main_a35.elf` / `main_a35.bin`. Boot it the same way as the
+Produces `main_a35.elf` / `main_a35.bin`. For now `main()` is a hardware bring-up test for the pro p1 board:
+it probes every I2C device, lights the button LEDs, plays a triangle wave on all outputs, and prints control changes. Boot it the same way as the
 stm32mp2-baremetal examples for now: TF-A BL2 (4ms fork) + FIP on SD card, or
 load over SWD (see that repo's README). 
 
@@ -32,8 +33,9 @@ For CI machines that only have `aarch64-linux-gnu-gcc`:
 ## Layout
 
 Board conf for this is in `firmware-mp2/src/pro/conf/` vs. for the original MetaModule it's in `firmware/src/medium/conf/`.
+The pro p1 pin map and its known hardware issues are in [src/pro/conf/README.md](src/pro/conf/README.md).
 
-Shared sources are in `firmware/src/shared/shared_sources.cmake`
+Shared sources are in `firmware/src/shared_sources.cmake`
 
 The patched MP2 CMSIS device files are in `firmware-mp2/lib/cmsis-device/`
 

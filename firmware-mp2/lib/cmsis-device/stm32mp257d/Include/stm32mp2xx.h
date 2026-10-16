@@ -379,72 +379,12 @@ typedef enum
 #define MODIFY_REG(REG, CLEARMASK, SETMASK)  WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
 
 #if defined(CORE_CA35)
+// Position of the least-significant set bit (count trailing zeros).
+// Must match the semantics of ST's 32-bit version below, __CLZ(__RBIT(VAL)):
+// the HAL passes multi-bit values (e.g. ADC channel literals) and uses the
+// LOWEST bit position, so a highest-bit/log2 implementation is incorrect here.
 inline uint64_t POSITION_VAL(uint64_t x) {
-    if (x <= (1ULL<<0)) return 0;
-    if (x <= (1ULL<<1)) return 1;
-    if (x <= (1ULL<<2)) return 2;
-    if (x <= (1ULL<<3)) return 3;
-    if (x <= (1ULL<<4)) return 4;
-    if (x <= (1ULL<<5)) return 5;
-    if (x <= (1ULL<<6)) return 6;
-    if (x <= (1ULL<<7)) return 7;
-    if (x <= (1ULL<<8)) return 8;
-    if (x <= (1ULL<<9)) return 9;
-    if (x <= (1ULL<<10)) return 10;
-    if (x <= (1ULL<<11)) return 11;
-    if (x <= (1ULL<<12)) return 12;
-    if (x <= (1ULL<<13)) return 13;
-    if (x <= (1ULL<<14)) return 14;
-    if (x <= (1ULL<<15)) return 15;
-    if (x <= (1ULL<<16)) return 16;
-    if (x <= (1ULL<<17)) return 17;
-    if (x <= (1ULL<<18)) return 18;
-    if (x <= (1ULL<<19)) return 19;
-    if (x <= (1ULL<<20)) return 20;
-    if (x <= (1ULL<<21)) return 21;
-    if (x <= (1ULL<<22)) return 22;
-    if (x <= (1ULL<<23)) return 23;
-    if (x <= (1ULL<<24)) return 24;
-    if (x <= (1ULL<<25)) return 25;
-    if (x <= (1ULL<<26)) return 26;
-    if (x <= (1ULL<<27)) return 27;
-    if (x <= (1ULL<<28)) return 28;
-    if (x <= (1ULL<<29)) return 29;
-    if (x <= (1ULL<<30)) return 30;
-    if (x <= (1ULL<<31)) return 31;
-    if (x <= (1ULL<<32)) return 32;
-    if (x <= (1ULL<<33)) return 33;
-    if (x <= (1ULL<<34)) return 34;
-    if (x <= (1ULL<<35)) return 35;
-    if (x <= (1ULL<<36)) return 36;
-    if (x <= (1ULL<<37)) return 37;
-    if (x <= (1ULL<<38)) return 38;
-    if (x <= (1ULL<<39)) return 39;
-    if (x <= (1ULL<<40)) return 40;
-    if (x <= (1ULL<<41)) return 41;
-    if (x <= (1ULL<<42)) return 42;
-    if (x <= (1ULL<<43)) return 43;
-    if (x <= (1ULL<<44)) return 44;
-    if (x <= (1ULL<<45)) return 45;
-    if (x <= (1ULL<<46)) return 46;
-    if (x <= (1ULL<<47)) return 47;
-    if (x <= (1ULL<<48)) return 48;
-    if (x <= (1ULL<<49)) return 49;
-    if (x <= (1ULL<<50)) return 50;
-    if (x <= (1ULL<<51)) return 51;
-    if (x <= (1ULL<<52)) return 52;
-    if (x <= (1ULL<<53)) return 53;
-    if (x <= (1ULL<<54)) return 54;
-    if (x <= (1ULL<<55)) return 55;
-    if (x <= (1ULL<<56)) return 56;
-    if (x <= (1ULL<<57)) return 57;
-    if (x <= (1ULL<<58)) return 58;
-    if (x <= (1ULL<<59)) return 59;
-    if (x <= (1ULL<<60)) return 60;
-    if (x <= (1ULL<<61)) return 61;
-    if (x <= (1ULL<<62)) return 62;
-    if (x <= (1ULL<<63)) return 63;
-    return 0;
+    return (x == 0) ? 32 : (uint64_t)__builtin_ctzll(x);
 }
 #else
 #define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL)))

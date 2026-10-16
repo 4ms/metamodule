@@ -32,11 +32,63 @@ set(MP2_CMSIS_CORE_DIR ${FWDIR}/lib/cmsis)
 set(MP2_HAL_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/stm32-hal/stm32mp2)
 
 #
+# ST HAL (only the modules enabled in src/core_a35/stm32mp2xx_hal_conf.h)
+
+set(MP2_HAL_MODULES
+  hal
+  hal_dma
+  hal_dma_ex
+  hal_dsi
+  hal_i2c
+  hal_i2c_ex
+  hal_ltdc
+  hal_rcc
+  hal_rcc_ex
+  hal_sai
+  hal_sai_ex
+)
+list(TRANSFORM MP2_HAL_MODULES PREPEND ${MP2_HAL_DIR}/Src/stm32mp2xx_)
+list(TRANSFORM MP2_HAL_MODULES APPEND .c)
+
+add_library(mp2_hal OBJECT ${MP2_HAL_MODULES})
+target_include_directories(mp2_hal PUBLIC
+  src/core_a35
+  ${MP2_HAL_DIR}/Inc
+  ${MP2_CMSIS_CORE_DIR}/Include
+  ${MP2_CMSIS_CORE_DIR}/Core_A/Include
+  ${MP2_CMSIS_DEVICE_DIR}/Include
+)
+# ST's HAL casts pointers to uint32_t throughout (32-bit assumption); the
+# peripheral addresses all fit in 32 bits so the truncation is harmless.
+target_compile_options(mp2_hal PRIVATE -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -Wno-unused-variable)
+
+#
+# mdrivlib drivers
+
+add_library(mp2_mdrivlib OBJECT
+  ${MDRIVLIB}/drivers/pin.cc
+  ${MDRIVLIB}/drivers/i2c.cc
+  ${MDRIVLIB}/drivers/codec_PCM3168.cc
+  ${MDRIVLIB}/target/stm32mp2/drivers/sai_tdm.cc
+  ${MDRIVLIB}/target/stm32mp2/drivers/dsi_screen.cc
+  ${MDRIVLIB}/target/stm32mp2/drivers/risab.cc
+  ${MDRIVLIB}/target/stm32mp2_ca35/drivers/hal_cnt.cc
+)
+target_link_libraries(mp2_mdrivlib PUBLIC mp2_hal)
+target_include_directories(mp2_mdrivlib PUBLIC
+  ${MDRIVLIB}
+  ${MDRIVLIB}/target/stm32mp2
+  ${MDRIVLIB}/target/stm32mp2_ca35
+  ${FWDIR}/lib/cpputil
+)
+
+#
 # A35 application
 
 add_library(
   a35_core OBJECT
   src/core_a35/main.cc
+  src/core_a35/system_init.cc
   src/core_a35/uart_print.c
   system/mmu_ca35.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
@@ -47,21 +99,16 @@ add_library(
   ${FWDIR}/system/libc_stub.c
 )
 
+target_link_libraries(a35_core PUBLIC mp2_mdrivlib)
+
 target_include_directories(
   a35_core
   PUBLIC src
          src/pro
-         ${MDRIVLIB}
-         ${MDRIVLIB}/target/stm32mp2
-         ${MDRIVLIB}/target/stm32mp2_ca35
-         ${FWDIR}/lib/cpputil
-         ${MP2_HAL_DIR}/Include
-         ${MP2_CMSIS_CORE_DIR}/Include
-         ${MP2_CMSIS_CORE_DIR}/Core_A/Include
-         ${MP2_CMSIS_DEVICE_DIR}/Include
+         ${FWDIR}/lib
 )
 
-add_executable(main_a35.elf $<TARGET_OBJECTS:a35_core>)
+add_executable(main_a35.elf $<TARGET_OBJECTS:a35_core> $<TARGET_OBJECTS:mp2_mdrivlib> $<TARGET_OBJECTS:mp2_hal>)
 
 set(LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/system/stm32mp2xx_ca35.ld)
 target_link_options(main_a35.elf PRIVATE -T${LINKER_SCRIPT} -Wl,-Map,main_a35.map,--cref)

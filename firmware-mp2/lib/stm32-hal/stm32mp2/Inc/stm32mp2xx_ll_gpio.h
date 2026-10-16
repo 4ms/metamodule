@@ -2073,7 +2073,7 @@ __STATIC_INLINE uint32_t LL_GPIO_GetPinSemaphoreCid(const GPIO_TypeDef *GPIOx, u
   * @}
   */
 
-#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+#if defined(CORE_CA35) || (defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U))
 
 /**
   * @brief  Enable secure write only access for several pin of dedicated port.

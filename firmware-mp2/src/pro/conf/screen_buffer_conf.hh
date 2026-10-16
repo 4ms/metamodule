@@ -3,22 +3,22 @@
 #include <array>
 #include <cstdint>
 
-// PROVISIONAL -- the final panel and resolution are not chosen yet (LTDC
-// parallel-RGB vs MIPI DSI is an open hardware decision). 1280x720 is the
-// working assumption for GUI layout work; preview pages at this size with the
-// simulator's --screenw/--screenh flags.
+// Pro p1 panel: ER-TFT050-10 (ILI9881C, MIPI DSI), native 720x1280 portrait,
+// viewed as 1280x720 landscape. Preview pages at this size with the simulator's
+// --screenw/--screenh flags.
+// TODO: confirm the mounting direction on hardware (CW90 vs CCW90). The LTDC cannot
+// rotate, so the rotation is done when rendering (LVGL now, GPU later).
 
 namespace MetaModule
 {
 struct ScreenBufferConf {
 	//The width x height as defined by the screen hardware
-	static constexpr uint32_t width = 1280; // TBD: final panel resolution
-	static constexpr uint32_t height = 720; // TBD: final panel resolution
+	static constexpr uint32_t width = 720;
+	static constexpr uint32_t height = 1280;
 
 	//The rotation we must to do hardware coordinates to get the view coordinates
-	// (LTDC scans out in view orientation, unlike the MP1 SPI panel's CW90)
 	enum Rotation { None, CW90, Flip180, CCW90 };
-	static constexpr Rotation rotation = None;
+	static constexpr Rotation rotation = CW90; // TODO: verify on hardware
 
 	//The width x height as viewed by the User:
 	static constexpr uint32_t viewWidth = 1280;

@@ -3,6 +3,7 @@
 
 macro(set_arch_flags)
 add_compile_definitions(
+      USE_HAL_DRIVER
       USE_FULL_LL_DRIVER
       STM32MP2
       STM32MP257Dxx
@@ -10,8 +11,7 @@ add_compile_definitions(
       CORTEX_IN_SECURE_STATE
       RUN_EL3
 )
-# Note: USE_HAL_DRIVER is added per-target once a stm32mp2xx_hal_conf.h exists
-# for this project (the HAL-based drivers -- SAI, I2C, HPDMA -- need it).
+# USE_HAL_DRIVER pulls in src/core_a35/stm32mp2xx_hal_conf.h (via stm32mp2xx.h)
 
 # Note: MCU_FLAGS is used with linking as well
 set(MCU_FLAGS
