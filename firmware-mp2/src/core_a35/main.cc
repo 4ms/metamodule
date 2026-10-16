@@ -9,7 +9,7 @@
 //  1. console
 //  2. probe every I2C device on the board and report present/missing
 //  3. button LEDs: light each RGB button
-//  4. display: color bars, with an orange square near the panel's first pixel (0,0 in hardware coords)
+//  4. display: LVGL test screen (rendered in landscape view coords, rotated into the portrait panel)
 //  5. codec: init PCM3168 + SAI1 TDM, output a triangle wave on all 8 outs
 //  6. loop: print control-expander changes (encoders/buttons) and direct GPIO controls
 
@@ -25,6 +25,8 @@
 #include "drivers/pin.hh"
 #include "drivers/system_reg.hh"
 #include "drivers/uart.hh"
+#include "lvgl.h"
+#include "lvgl_display.hh"
 #include <array>
 
 namespace
@@ -90,43 +92,57 @@ void fill_audio_block(unsigned half) {
 	mdrivlib::SystemCache::clean_dcache_by_range(out, BlockSize * NumOuts * sizeof(int32_t));
 }
 
-void draw_test_pattern(uint32_t *fb, uint32_t w, uint32_t h) {
-	constexpr uint32_t bars[8] = {
-		0xFFFFFFFF, 0xFFFFFF00, 0xFF00FFFF, 0xFF00FF00, 0xFFFF00FF, 0xFFFF0000, 0xFF0000FF, 0xFF000000};
+// Display memory
+__attribute__((section(".framebuffers"))) alignas(4096) std::array<uint32_t, 720 * 1280> framebuffer;
+std::array<lv_color_t, 1280 * 80> lvgl_draw_buffer; // partial render buffer: 1/9 of the view
 
-	// First and last 4 hardware lines each get their own color, to see exactly which lines are
-	// visible at each edge (and if a line wraps to the other end of the frame):
-	// lines 0,1,2,3 = red, green, blue, magenta (on the white bar)
-	// lines h-1,h-2,h-3,h-4 = orange, cyan, yellow, white (on the black bar)
-	constexpr uint32_t first_lines[4] = {0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFF00FF};
-	constexpr uint32_t last_lines[4] = {0xFFFF8000, 0xFF00FFFF, 0xFFFFFF00, 0xFFFFFFFF};
+lv_obj_t *uptime_label;
 
-	for (uint32_t y = 0; y < h; y++) {
-		for (uint32_t x = 0; x < w; x++) {
-			uint32_t color = bars[(y * 8) / h]; // bars are horizontal in hardware coords = vertical when viewed landscape
-			if (x >= 8 && x < 72 && y >= 8 && y < 72)
-				color = 0xFFFF8000; // orange square near pixel (0,0): shows the panel's scan origin
-			if (x == 0 || x == w - 1)
-				color = 0xFFFF0000; // 1px red border at the first/last pixel of each line
-			if (y < 4)
-				color = first_lines[y];
-			if (y >= h - 4)
-				color = last_lines[h - 1 - y];
-			fb[y * w + x] = color;
-		}
-	}
-}
+void create_lvgl_test_screen() {
+	auto scr = lv_scr_act();
+	lv_obj_set_style_bg_color(scr, lv_color_hex(0x202020), 0);
 
-// Black, with isolated single lines at each end of the frame, to see which edge lines the panel shows
-void draw_edge_lines_pattern(uint32_t *fb, uint32_t w, uint32_t h) {
-	for (uint32_t y = 0; y < h; y++) {
-		uint32_t color = y == 0	   ? 0xFFFF0000 // line 0: red
-					   : y == 2	   ? 0xFF00FF00 // line 2: green
-					   : y == h - 1 ? 0xFFFF8000 // last line: orange
-					   : y == h - 3 ? 0xFF00FFFF // third from last: cyan
-									: 0xFF000000;
-		for (uint32_t x = 0; x < w; x++)
-			fb[y * w + x] = color;
+	auto title = lv_label_create(scr);
+	lv_obj_set_style_text_font(title, &lv_font_montserrat_28, 0);
+	lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
+	lv_label_set_text(title, "MetaModule Pro");
+	lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 40);
+
+	auto subtitle = lv_label_create(scr);
+	lv_obj_set_style_text_color(subtitle, lv_color_hex(0xAAAAAA), 0);
+	lv_label_set_text(subtitle, "LVGL " LVGL_VERSION_INFO " - 1280x720 view, rotated into the 720x1280 DSI panel");
+	lv_obj_align_to(subtitle, title, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+
+	auto spinner = lv_spinner_create(scr, 1000, 60);
+	lv_obj_set_size(spinner, 200, 200);
+	lv_obj_center(spinner);
+
+	uptime_label = lv_label_create(scr);
+	lv_obj_set_style_text_font(uptime_label, &lv_font_montserrat_20, 0);
+	lv_obj_set_style_text_color(uptime_label, lv_color_hex(0xFFC000), 0);
+	lv_obj_align(uptime_label, LV_ALIGN_BOTTOM_MID, 0, -60);
+	lv_timer_create(
+		[](lv_timer_t *) { lv_label_set_text_fmt(uptime_label, "Uptime: %u s", unsigned(HAL_GetTick() / 1000)); },
+		200,
+		nullptr);
+
+	// Corner labels: check the rotation (none should be mirrored or missing).
+	// Inset by 4px: view column 0 is not visible on this panel.
+	struct Corner {
+		lv_align_t align;
+		int x, y;
+		const char *text;
+	};
+	for (auto [align, x, y, text] : {Corner{LV_ALIGN_TOP_LEFT, 4, 4, "top-left"},
+									 Corner{LV_ALIGN_TOP_RIGHT, -4, 4, "top-right"},
+									 Corner{LV_ALIGN_BOTTOM_LEFT, 4, -4, "bottom-left"},
+									 Corner{LV_ALIGN_BOTTOM_RIGHT, -4, -40, "bottom-right"}})
+	{
+		auto label = lv_label_create(scr);
+		lv_obj_set_style_text_font(label, &lv_font_montserrat_20, 0);
+		lv_obj_set_style_text_color(label, lv_color_hex(0x00FF80), 0);
+		lv_label_set_text(label, text);
+		lv_obj_align(label, align, x, y);
 	}
 }
 
@@ -194,15 +210,9 @@ int main() {
 	//
 	print("Display init: ");
 	static mdrivlib::DsiScreen screen{ScreenConf};
-	auto fb = reinterpret_cast<uint32_t *>(FramebufferAddr);
-	draw_test_pattern(fb, screen.width(), screen.height());
-	screen.clean_framebuffer_cache(fb);
-
-	// Second framebuffer, right after the first. The main loop flips between them every 2 seconds.
-	auto fb2 = fb + screen.width() * screen.height();
-	draw_edge_lines_pattern(fb2, screen.width(), screen.height());
-	screen.clean_framebuffer_cache(fb2);
-	auto screen_err = screen.init(FramebufferAddr);
+	framebuffer.fill(0xFF000000);
+	screen.clean_framebuffer_cache(framebuffer.data());
+	auto screen_err = screen.init(framebuffer.data());
 	if (screen_err == mdrivlib::DsiScreen::Error::None) {
 		print("ok, ");
 		console.write(screen.refresh_rate_millihz());
@@ -214,6 +224,12 @@ int main() {
 		console.write(static_cast<uint32_t>(screen_err));
 		print(")\n");
 	}
+
+	static LvglDisplay lvgl_display;
+	lvgl_display.init(framebuffer, lvgl_draw_buffer);
+	lv_log_register_print_cb([](const char *msg) { print(msg); });
+	create_lvgl_test_screen();
+	print("LVGL started\n");
 
 	//
 	// Codec + SAI: triangle wave on all outputs
@@ -260,9 +276,6 @@ int main() {
 
 	uint16_t last_jacks = 0;
 
-	uint64_t last_flip = mdrivlib::read_cntpct();
-	bool showing_fb2 = false;
-
 	print("Polling controls...\n");
 	while (true) {
 		for (unsigned i = 0; i < Controls::Expanders.size(); i++) {
@@ -307,15 +320,7 @@ int main() {
 			}
 		}
 
-		// Flip between the two test patterns every 2 seconds
-		if (screen_err == mdrivlib::DsiScreen::Error::None) {
-			auto now = mdrivlib::read_cntpct();
-			if (now - last_flip > 2 * mdrivlib::read_cntfreq()) {
-				last_flip = now;
-				showing_fb2 = !showing_fb2;
-				screen.set_framebuffer(showing_fb2 ? fb2 : fb);
-			}
-		}
+		lv_timer_handler();
 
 		delay_ms(5);
 	}

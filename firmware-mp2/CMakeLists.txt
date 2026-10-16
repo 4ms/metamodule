@@ -59,14 +59,23 @@ set(MP2_HAL_MODULES
 list(TRANSFORM MP2_HAL_MODULES PREPEND ${MP2_HAL_DIR}/Src/stm32mp2xx_)
 list(TRANSFORM MP2_HAL_MODULES APPEND .c)
 
-add_library(mp2_hal OBJECT ${MP2_HAL_MODULES})
-target_include_directories(mp2_hal PUBLIC
+# Include paths for HAL, CMSIS, and mdrivlib, used by every target.
+# (An INTERFACE target, since linking an OBJECT library into a static library would copy its objects.)
+add_library(mp2_interface INTERFACE)
+target_include_directories(mp2_interface INTERFACE
   src/core_a35
   ${MP2_HAL_DIR}/Inc
   ${MP2_CMSIS_CORE_DIR}/Include
   ${MP2_CMSIS_CORE_DIR}/Core_A/Include
   ${MP2_CMSIS_DEVICE_DIR}/Include
+  ${MDRIVLIB}
+  ${MDRIVLIB}/target/stm32mp2
+  ${MDRIVLIB}/target/stm32mp2_ca35
+  ${FWDIR}/lib/cpputil
 )
+
+add_library(mp2_hal OBJECT ${MP2_HAL_MODULES})
+target_link_libraries(mp2_hal PUBLIC mp2_interface)
 # ST's HAL casts pointers to uint32_t throughout (32-bit assumption); the
 # peripheral addresses all fit in 32 bits so the truncation is harmless.
 target_compile_options(mp2_hal PRIVATE -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -Wno-unused-variable)
@@ -83,13 +92,14 @@ add_library(mp2_mdrivlib OBJECT
   ${MDRIVLIB}/target/stm32mp2/drivers/risab.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/drivers/hal_cnt.cc
 )
-target_link_libraries(mp2_mdrivlib PUBLIC mp2_hal)
-target_include_directories(mp2_mdrivlib PUBLIC
-  ${MDRIVLIB}
-  ${MDRIVLIB}/target/stm32mp2
-  ${MDRIVLIB}/target/stm32mp2_ca35
-  ${FWDIR}/lib/cpputil
-)
+target_link_libraries(mp2_mdrivlib PUBLIC mp2_interface)
+
+#
+# LVGL (same library and config as MP1, with MP2 overrides in src/core_a35/lv_conf.h)
+
+set(LV_CONF_PATH ${CMAKE_CURRENT_LIST_DIR}/src/core_a35/lv_conf.h CACHE STRING "" FORCE)
+add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
+target_link_libraries(lvgl PRIVATE mp2_interface)
 
 #
 # A35 application
@@ -108,7 +118,9 @@ add_library(
   ${FWDIR}/system/libc_stub.c
 )
 
-target_link_libraries(a35_core PUBLIC mp2_mdrivlib)
+target_link_libraries(a35_core PUBLIC mp2_interface lvgl::lvgl)
+# LVGL's headers OR together values from different enums (deprecated in C++20); MP1 silences this too
+target_compile_options(a35_core PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
 
 target_include_directories(
   a35_core
@@ -118,6 +130,7 @@ target_include_directories(
 )
 
 add_executable(main_a35.elf $<TARGET_OBJECTS:a35_core> $<TARGET_OBJECTS:mp2_mdrivlib> $<TARGET_OBJECTS:mp2_hal>)
+target_link_libraries(main_a35.elf PRIVATE lvgl::lvgl)
 
 set(LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/system/stm32mp2xx_ca35.ld)
 target_link_options(main_a35.elf PRIVATE -T${LINKER_SCRIPT} -Wl,-Map,main_a35.map,--cref)

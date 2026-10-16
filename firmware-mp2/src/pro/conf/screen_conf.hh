@@ -21,13 +21,6 @@ constexpr mdrivlib::DsiScreenConf ScreenConf{
 	.irq_pri2 = 0,
 };
 
-// DDR usable by our secure context is only what TF-A's RISAF4 region 1 opens:
-// 0x8000'0000 - 0x9FFF'FFFF (512MB, the `ddrram` node in the TF-A dts). Outside of that,
-// LTDC reads are blocked and return zeros (black screen, no error).
-// Within it: 0x81FC'0000-0x83FF'FFFF is TF-A BL31 context + OP-TEE, 0x8800'0000 is our code
-// image (16MB) and 0x9000'0000 is .data/.bss/heap/stacks (16MB), per the linker script.
-constexpr uint32_t FramebufferAddr = 0x9100'0000;
-constexpr uint32_t SecureDDREnd = 0xA000'0000;
-constexpr uint32_t NumFramebuffers = 2; // double-buffered
-static_assert(FramebufferAddr + NumFramebuffers * ScreenConf.panel.h_active * ScreenConf.panel.v_active * 4 <= SecureDDREnd);
+// Framebuffers go in the .framebuffers linker section (FRAMEBUF region, see
+// system/stm32mp2xx_ca35.ld), which is inside the DDR that TF-A opens to the LTDC.
 } // namespace MetaModule
