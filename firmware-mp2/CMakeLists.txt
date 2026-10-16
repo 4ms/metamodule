@@ -55,6 +55,9 @@ set(MP2_HAL_MODULES
   hal_rcc_ex
   hal_sai
   hal_sai_ex
+  hal_sd
+  hal_sd_ex
+  ll_sdmmc
 )
 list(TRANSFORM MP2_HAL_MODULES PREPEND ${MP2_HAL_DIR}/Src/stm32mp2xx_)
 list(TRANSFORM MP2_HAL_MODULES APPEND .c)
@@ -116,8 +119,14 @@ add_library(
   src/core_a35/main.cc
   src/core_a35/system_init.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
+  ${FWDIR}/lib/fatfs/source/ff.c
+  ${FWDIR}/lib/fatfs/source/ffunicode.c
+  ${FWDIR}/src/fs/fatfs/diskio.cc
+  ${FWDIR}/src/fs/fatfs/fattime.cc
+  ${FWDIR}/src/fs/time_convert.cc
   src/core_a35/uart_print.c
   system/mmu_ca35.cc
+  system/sbrk.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/vectors.S
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/irq_init.c
@@ -140,6 +149,8 @@ target_include_directories(
          ${FWDIR}/lib/patch-serial
          ${FWDIR}/metamodule-plugin-sdk/core-interface
          ${FWDIR}/metamodule-plugin-sdk/core-interface/filesystem
+         ${FWDIR}/lib/fatfs/source
+         ${FWDIR}/src/fs/fatfs
 )
 
 add_executable(main_a35.elf $<TARGET_OBJECTS:a35_core> $<TARGET_OBJECTS:mp2_mdrivlib> $<TARGET_OBJECTS:mp2_hal>)
