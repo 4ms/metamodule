@@ -8,10 +8,14 @@ OUTPUT_ARCH(aarch64)
 
 ENTRY(_Reset)
 
+/* All regions must stay inside the DDR that TF-A's RISAF4 opens to secure masters:
+   0x80000000 - 0x9FFFFFFF (the `ddrram` node in the TF-A dts). Outside it, CPU and DMA
+   (e.g. LTDC) accesses are silently blocked. TF-A BL31 context + OP-TEE use 0x81FC0000 - 0x83FFFFFF. */
 MEMORY
 {
-    ROM (rx) : ORIGIN = 0x88000040, LENGTH = 16M
-    RAM (rwx): ORIGIN = 0x90000000, LENGTH = 16M
+    ROM (rx)       : ORIGIN = 0x88000040, LENGTH = 16M - 0x40
+    RAM (rwx)      : ORIGIN = 0x90000000, LENGTH = 128M
+    FRAMEBUF (rw)  : ORIGIN = 0x98000000, LENGTH = 32M
 }
 
 __HEAP_SIZE = 0x40000;
@@ -110,20 +114,37 @@ SECTIONS
 		_eheap = .;
 	} > RAM
 
-    _fiq_stack_start = ADDR(.heap) + SIZEOF(.heap);
-    _fiq_stack_end = _fiq_stack_start + 0x1000; /* 64 KB */
+	/* Stacks: in a NOLOAD section so the linker checks they fit in RAM */
+	.stacks (NOLOAD):
+	{
+		. = ALIGN(16);
+		_fiq_stack_start = .;
+		. += 16K;
+		_fiq_stack_end = .;
 
-    _irq_stack_start = _fiq_stack_end;
-    _irq_stack_end = _irq_stack_start + 0x1000; /* 64 KB */
+		_irq_stack_start = .;
+		. += 16K;
+		_irq_stack_end = .;
 
-    _stack_start = _irq_stack_end;
-    _stack_end = _stack_start + 0x1000; /* 64 KB */
+		_stack_start = .;
+		. += 64K;
+		_stack_end = .;
 
-    _cpu1_stack_start = _stack_end;
-    _cpu1_stack_end = _cpu1_stack_start + 0x1000; /* 64 KB */
+		_cpu1_stack_start = .;
+		. += 64K;
+		_cpu1_stack_end = .;
+	} > RAM
 
-    _irq_stack_size = _irq_stack_end - _irq_stack_start;
-    _fiq_stack_size = _fiq_stack_end - _fiq_stack_start;
+	_irq_stack_size = _irq_stack_end - _irq_stack_start;
+	_fiq_stack_size = _fiq_stack_end - _fiq_stack_start;
+
+	/* Display framebuffers (LTDC scans these out). Not zeroed at startup. */
+	.framebuffers (NOLOAD):
+	{
+		. = ALIGN(4096);
+		*(.framebuffers)
+		*(.framebuffers*)
+	} > FRAMEBUF
 
 	/*
 	.dma_buffer (NOLOAD) :
