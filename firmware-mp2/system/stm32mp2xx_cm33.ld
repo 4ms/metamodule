@@ -98,6 +98,14 @@ SECTIONS
 	_estack = M33_LOAD_ADDR + M33_REGION_SIZE;
 	_eheap = _estack - _Min_Stack_Size;
 
+	/* Memory shared with the A35 (see the A35 linker script): only the index of pointers is
+	   linked here, at the same fixed address as on the A35. */
+	.sharedmemindex SHAREDMEM_ADDR (NOLOAD) :
+	{
+		KEEP(*(.sharedmemindex))
+		KEEP(*(.sharedmemindex*))
+	}
+
 	.ARM.attributes 0 : { *(.ARM.attributes) }
 }
 

@@ -76,6 +76,11 @@ static void populate_tables()
 	L1_ddr1.fill_block_entries(0x80000000, 0xC0000000, MMU::MemType::Normal, MMU::AccessRW);
 	L1_ddr2.fill_block_entries(0xC0000000, 0x100000000, MMU::MemType::Normal, MMU::AccessRW);
 
+	// Memory shared with the M33 (not cache-coherent with the A35): non-cacheable
+	static_assert(SHAREDMEM_ADDR % (2 * 1024 * 1024) == 0 && SHAREDMEM_SIZE == 2 * 1024 * 1024,
+				  "SHAREDMEM must be one 2MB block");
+	L1_ddr1.block_entry(SHAREDMEM_ADDR, MMU::MemType::Noncache, MMU::AccessRW);
+
 	is_init = true;
 	dsb_sy();
 }

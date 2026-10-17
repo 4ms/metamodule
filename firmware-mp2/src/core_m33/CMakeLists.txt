@@ -22,11 +22,16 @@ project(
 
 set(M33_LOAD_ADDR "" CACHE STRING "Address the A35 loads the M33 image to (set by the parent project)")
 set(M33_REGION_SIZE "" CACHE STRING "Size of the M33 memory region (set by the parent project)")
-if(NOT M33_LOAD_ADDR OR NOT M33_REGION_SIZE)
-  message(FATAL_ERROR "M33_LOAD_ADDR and M33_REGION_SIZE must be set (build this via the firmware-mp2 project)")
+set(SHAREDMEM_ADDR "" CACHE STRING "Address of the memory shared with the A35 (set by the parent project)")
+set(SHAREDMEM_SIZE "" CACHE STRING "Size of the memory shared with the A35 (set by the parent project)")
+if(NOT M33_LOAD_ADDR OR NOT M33_REGION_SIZE OR NOT SHAREDMEM_ADDR OR NOT SHAREDMEM_SIZE)
+  message(FATAL_ERROR "M33_LOAD_ADDR, M33_REGION_SIZE, SHAREDMEM_ADDR, SHAREDMEM_SIZE must be set (build this via the firmware-mp2 project)")
 endif()
 
-add_compile_definitions(M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE})
+add_compile_definitions(
+  M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE} SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
+  SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
+)
 
 option(MP2_TEST_CARRIER "Build for the mp2-devboard test carrier instead of the pro p1 board" OFF)
 if(MP2_TEST_CARRIER)
@@ -42,6 +47,8 @@ set_arch_flags()
 add_executable(
   main_m33.elf
   main.cc
+  system_init.cc
+  ${MP2_DIR}/lib/stm32-hal/stm32mp2/Src/stm32mp2xx_hal_dcache.c
   ${MDRIVLIB}/target/stm32mp2_cm33/boot/startup_cm33.s
   ${MDRIVLIB}/target/stm32mp2_cm33/drivers/interrupt_handler.cc
   ${MDRIVLIB}/target/stm32mp2_cm33/drivers/hal_tick_stgen.cc
@@ -69,6 +76,8 @@ target_link_options(
   -T${LINKER_SCRIPT}
   -Wl,--defsym=M33_LOAD_ADDR=${M33_LOAD_ADDR}
   -Wl,--defsym=M33_REGION_SIZE=${M33_REGION_SIZE}
+  -Wl,--defsym=SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
+  -Wl,--defsym=SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
   -Wl,-Map,main_m33.map,--cref
   --specs=nano.specs
   --specs=nosys.specs

@@ -138,6 +138,24 @@ SECTIONS
 	_irq_stack_size = _irq_stack_end - _irq_stack_start;
 	_fiq_stack_size = _fiq_stack_end - _fiq_stack_start;
 
+	/* Memory shared with the M33, at SHAREDMEM_ADDR/SIZE (from CMake). Non-cacheable (mmu_ca35.cc),
+	   opened to the M33 in RISAF4. Not zeroed at startup: the A35 initializes what it puts here.
+	   .sharedmemindex: pointers to the shared objects, at a fixed address the M33 links too. */
+	.sharedmemindex SHAREDMEM_ADDR (NOLOAD) :
+	{
+		KEEP(*(.sharedmemindex))
+		KEEP(*(.sharedmemindex*))
+	}
+	ASSERT(SIZEOF(.sharedmemindex) <= 0x1000, ".sharedmemindex is bigger than 4kB")
+
+	.sharedmem (SHAREDMEM_ADDR + 0x1000) (NOLOAD) :
+	{
+		. = ALIGN(64);
+		*(.sharedmem)
+		*(.sharedmem*)
+	}
+	ASSERT(ADDR(.sharedmem) + SIZEOF(.sharedmem) <= SHAREDMEM_ADDR + SHAREDMEM_SIZE, ".sharedmem doesn't fit in SHAREDMEM_SIZE")
+
 	/* Display framebuffers (LTDC scans these out). Not zeroed at startup. */
 	.framebuffers (NOLOAD):
 	{

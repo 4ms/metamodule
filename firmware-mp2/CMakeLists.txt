@@ -122,12 +122,19 @@ target_include_directories(ui_lvgl PRIVATE ${FWDIR}/lib)
 set(M33_LOAD_ADDR 0x8C000000)
 set(M33_REGION_SIZE 0x2000000)
 
+# Memory shared by the A35 and M33: non-cacheable on both, opened to both cores in RISAF4.
+# Starts with .sharedmemindex (the pointers to the shared objects, at a fixed address both
+# cores link), followed by .sharedmem (the objects). 2MB-aligned: the A35 MMU maps it as one block.
+set(SHAREDMEM_ADDR 0x9A000000)
+set(SHAREDMEM_SIZE 0x200000)
+
 include(ExternalProject)
 ExternalProject_Add(
   core_m33
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src/core_m33
   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/core_m33
   CMAKE_ARGS -DM33_LOAD_ADDR=${M33_LOAD_ADDR} -DM33_REGION_SIZE=${M33_REGION_SIZE}
+             -DSHAREDMEM_ADDR=${SHAREDMEM_ADDR} -DSHAREDMEM_SIZE=${SHAREDMEM_SIZE}
              -DMP2_TEST_CARRIER=${MP2_TEST_CARRIER}
   INSTALL_COMMAND ""
   BUILD_ALWAYS ON
@@ -162,7 +169,10 @@ add_library(
 
 target_link_libraries(a35_core PUBLIC mp2_interface lvgl::lvgl ui_lvgl)
 add_dependencies(a35_core core_m33)
-target_compile_definitions(a35_core PRIVATE M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE})
+target_compile_definitions(
+  a35_core PRIVATE M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE} SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
+                   SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
+)
 set_source_files_properties(
   src/core_a35/m33_firmware.S PROPERTIES COMPILE_DEFINITIONS "M33_FIRMWARE_BIN=\"${M33_BIN}\"" OBJECT_DEPENDS ${M33_BIN}
 )
@@ -187,7 +197,10 @@ add_executable(main_a35.elf $<TARGET_OBJECTS:a35_core> $<TARGET_OBJECTS:mp2_mdri
 target_link_libraries(main_a35.elf PRIVATE ui_lvgl lvgl::lvgl)
 
 set(LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/system/stm32mp2xx_ca35.ld)
-target_link_options(main_a35.elf PRIVATE -T${LINKER_SCRIPT} -Wl,-Map,main_a35.map,--cref)
+target_link_options(
+  main_a35.elf PRIVATE -T${LINKER_SCRIPT} -Wl,-Map,main_a35.map,--cref -Wl,--defsym=SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
+  -Wl,--defsym=SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
+)
 set_target_properties(main_a35.elf PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
 
 add_custom_command(

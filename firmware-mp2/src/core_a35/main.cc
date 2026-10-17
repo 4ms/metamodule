@@ -332,7 +332,24 @@ int main() {
 	mdrivlib::HWSemaphoreGlobalBase::init_peripheral();
 	mdrivlib::IPCC_<1>::init_peripheral();
 	hsem_ready = true;
-	BringupIPC::shared_message() = {};
+
+	// Shared memory: open it to the M33 in the DDR firewall, create the shared objects in
+	// .sharedmem, and publish pointers to them in the index the M33 reads
+	{
+		using namespace mdrivlib::RISAF;
+		constexpr unsigned SharedMemRegionIndex = 10;
+		if (!add_ddr_region(SharedMemRegionIndex,
+							SHAREDMEM_ADDR,
+							SHAREDMEM_ADDR + SHAREDMEM_SIZE - 1,
+							CID_A35 | CID_M33,
+							CID_A35 | CID_M33,
+							true))
+			print("Shared memory: RISAF4 is locked, can't open it to the M33!\n");
+	}
+	__attribute__((section(".sharedmem"))) static BringupIPC::Message bringup_message;
+	bringup_message = {};
+	BringupIPC::shared_index().message = &bringup_message;
+	BringupIPC::shared_index().magic = BringupIPC::SharedIndex::ValidMagic;
 
 	if constexpr (M33_LOAD_ADDR >= mdrivlib::RISAF::DDRBase) {
 		// TF-A's DDR region only allows CID0/CID1: open the M33's region to it (CID2)
@@ -490,7 +507,7 @@ int main() {
 
 	// A35 <-> M33 messaging test (bringup_ipc.hh): ping every second, print the reply
 	using IPC = mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, BringupIPC::Message, BringupIPC::Channel>;
-	static IPC ipc{BringupIPC::shared_message()};
+	static IPC ipc{*BringupIPC::shared_index().message};
 	uint32_t ipc_seq = 0;
 	uint64_t ipc_sent_at = 0;
 	uint32_t last_ipc_send = HAL_GetTick();
