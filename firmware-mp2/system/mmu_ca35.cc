@@ -60,7 +60,9 @@ static void populate_tables()
 
 	// 2MB entries for SYSRAM:
 	L1_sram.block_entry(0x0A000000, MMU::MemType::Normal, MMU::AccessRW | MMU::NonSecure);
-	L1_sram.block_entry(0x0E000000, MMU::MemType::Normal, MMU::AccessRW);
+	// SRAM1/SRAM2 (secure alias): non-cacheable, since the M33 runs from and shares memory here
+	// and is not cache-coherent with the A35
+	L1_sram.block_entry(0x0E000000, MMU::MemType::Noncache, MMU::AccessRW);
 	L1_sram.block_entry(0x20000000, MMU::MemType::Normal, MMU::AccessRW | MMU::NonSecure | MMU::PrivExecuteNever);
 	L1_sram.block_entry(0x30000000, MMU::MemType::Normal, MMU::AccessRW | MMU::PrivExecuteNever);
 

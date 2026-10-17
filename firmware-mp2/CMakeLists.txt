@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.22)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # The A35 (AArch64) application project for the MetaModule MP2 ("pro").
-# The M33 coprocessor firmware is a separate arm-none-eabi project added later
-# (see src/core_m33/README.md); a single CMake project cannot mix the two
-# toolchains, which is why this is a sibling project to firmware/ rather than a
+# The M33 coprocessor firmware is a separate arm-none-eabi project (src/core_m33),
+# built as an ExternalProject and embedded in the A35 image; a single CMake project
+# cannot mix the two toolchains, which is also why this is a sibling project to firmware/ rather than a
 # target inside it. Portable app code is consumed from ../firmware/src the same
 # way the simulator does (include paths + firmware/src/shared_sources.cmake).
 
@@ -112,12 +112,37 @@ target_include_directories(ui_lvgl PRIVATE ${FWDIR}/lib)
 
 
 #
+# Cortex-M33 firmware: a separate project (arm-none-eabi toolchain), embedded in the A35 image
+
+# Where the A35 loads the M33 image, and the M33's whole memory (code, data, heap, stack).
+# DDR: inside TF-A's 512MB secure DDR window (0x80000000-0x9FFFFFFF), clear of TF-A/OP-TEE
+# (0x81FC0000-0x83FFFFFF), the A35 image (0x88000000), and A35 RAM/framebuffers (0x90000000+).
+# The A35 opens it to the M33 with an extra RISAF4 region before starting it.
+# (The M33 also runs from SRAM2: 0x0E060000 with size 0x1F000, its secure instruction-fetch alias.)
+set(M33_LOAD_ADDR 0x8C000000)
+set(M33_REGION_SIZE 0x2000000)
+
+include(ExternalProject)
+ExternalProject_Add(
+  core_m33
+  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src/core_m33
+  BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/core_m33
+  CMAKE_ARGS -DM33_LOAD_ADDR=${M33_LOAD_ADDR} -DM33_REGION_SIZE=${M33_REGION_SIZE}
+             -DMP2_TEST_CARRIER=${MP2_TEST_CARRIER}
+  INSTALL_COMMAND ""
+  BUILD_ALWAYS ON
+  BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/core_m33/main_m33.bin
+)
+set(M33_BIN ${CMAKE_CURRENT_BINARY_DIR}/core_m33/main_m33.bin)
+
+#
 # A35 application
 
 add_library(
   a35_core OBJECT
   src/core_a35/main.cc
   src/core_a35/system_init.cc
+  src/core_a35/m33_firmware.S
   ${FWDIR}/src/gui/slsexport/ui_local.cc
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
@@ -136,6 +161,11 @@ add_library(
 )
 
 target_link_libraries(a35_core PUBLIC mp2_interface lvgl::lvgl ui_lvgl)
+add_dependencies(a35_core core_m33)
+target_compile_definitions(a35_core PRIVATE M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE})
+set_source_files_properties(
+  src/core_a35/m33_firmware.S PROPERTIES COMPILE_DEFINITIONS "M33_FIRMWARE_BIN=\"${M33_BIN}\"" OBJECT_DEPENDS ${M33_BIN}
+)
 # LVGL's headers OR together values from different enums (deprecated in C++20); MP1 silences this too
 target_compile_options(a35_core PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
 

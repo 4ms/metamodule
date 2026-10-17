@@ -6,7 +6,7 @@
 // I/O supplies, audio PLL, kernel clocks) -> main().
 //
 // This is a bring-up test for the MetaModule Pro p1 board, not the app:
-//  1. console
+//  1. console, then load and start the Cortex-M33
 //  2. probe every I2C device on the board and report present/missing
 //  3. button LEDs: light each RGB button
 //  4. display: the MetaModule GUI screens (SquareLine export), Main Menu showing
@@ -14,7 +14,9 @@
 //  6. codec: init PCM3168 + SAI1 TDM, output a triangle wave on all 8 outs
 //  7. loop: print control-expander changes (encoders/buttons) and direct GPIO controls
 
+#include "bringup_ipc.hh"
 #include "conf/board_codec_conf.hh"
+#include "conf/hsem_conf.hh"
 #include "conf/console_uart_conf.hh"
 #include "conf/control_expander_conf.hh"
 #include "conf/i2c_conf.hh"
@@ -22,6 +24,11 @@
 #include "conf/led_driver_conf.hh"
 #include "conf/screen_conf.hh"
 #include "drivers/cache.hh"
+#include "drivers/copro_control.hh"
+#include "drivers/hsem.hh"
+#include "drivers/inter_core_comm.hh"
+#include "drivers/ipcc.hh"
+#include "drivers/risaf.hh"
 #include "drivers/led_driver_lp5024.hh"
 #include "drivers/pin.hh"
 #include "drivers/system_reg.hh"
@@ -34,13 +41,40 @@
 #include <array>
 
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id); // fs/fatfs/diskio.cc
+extern "C" const uint8_t m33_firmware[];	 // m33_firmware.S
+extern "C" const uint8_t m33_firmware_end[]; // m33_firmware.S
 
 namespace
 {
 mdrivlib::Uart<LogUartConfig> console;
 
+// Console output is shared with the M33: lock the UART semaphore once the HSEM is up
+// (before that, the M33 isn't running)
+bool hsem_ready = false;
+
 void print(const char *s) {
+	using UartSem = mdrivlib::HWSemaphore<MetaModule::UartLock>;
+	if (hsem_ready) {
+		while (UartSem::lock(MetaModule::UartLockA7Core0) != mdrivlib::HWSemaphoreFlag::LockedOk)
+			;
+	}
 	console.write(s);
+	if (hsem_ready)
+		UartSem::unlock(MetaModule::UartLockA7Core0);
+}
+
+void print_num(uint32_t v) {
+	char buf[11];
+	int len = 0;
+	do {
+		buf[len++] = '0' + (v % 10);
+		v /= 10;
+	} while (v);
+	char out[11];
+	for (int i = 0; i < len; i++)
+		out[i] = buf[len - 1 - i];
+	out[len] = '\0';
+	print(out);
 }
 
 void print_hex(uint32_t v, unsigned digits = 2) {
@@ -49,7 +83,7 @@ void print_hex(uint32_t v, unsigned digits = 2) {
 		auto nibble = (v >> ((digits - 1 - i) * 4)) & 0xF;
 		buf[i] = nibble < 10 ? '0' + nibble : 'A' + nibble - 10;
 	}
-	console.write(buf);
+	print(buf);
 }
 
 void delay_ms(uint32_t ms) {
@@ -121,7 +155,7 @@ void sd_write_test() {
 	FIL f;
 	if (auto res = f_open(&f, path, FA_CREATE_ALWAYS | FA_WRITE); res != FR_OK) {
 		print("f_open for write FAILED: ");
-		console.write(static_cast<uint32_t>(res));
+		print_num(static_cast<uint32_t>(res));
 		print("\n");
 		return;
 	}
@@ -133,7 +167,7 @@ void sd_write_test() {
 		UINT written = 0;
 		if (auto res = f_write(&f, chunk.data(), sizeof(chunk), &written); res != FR_OK || written != sizeof(chunk)) {
 			print("f_write FAILED: ");
-			console.write(static_cast<uint32_t>(res));
+			print_num(static_cast<uint32_t>(res));
 			print("\n");
 			f_close(&f);
 			return;
@@ -141,7 +175,7 @@ void sd_write_test() {
 	}
 	if (auto res = f_close(&f); res != FR_OK) {
 		print("f_close FAILED: ");
-		console.write(static_cast<uint32_t>(res));
+		print_num(static_cast<uint32_t>(res));
 		print("\n");
 		return;
 	}
@@ -149,7 +183,7 @@ void sd_write_test() {
 
 	if (auto res = f_open(&f, path, FA_READ); res != FR_OK) {
 		print("f_open for read FAILED: ");
-		console.write(static_cast<uint32_t>(res));
+		print_num(static_cast<uint32_t>(res));
 		print("\n");
 		return;
 	}
@@ -160,7 +194,7 @@ void sd_write_test() {
 		UINT bytes_read = 0;
 		if (auto res = f_read(&f, chunk.data(), sizeof(chunk), &bytes_read); res != FR_OK || bytes_read != sizeof(chunk)) {
 			print("f_read FAILED: ");
-			console.write(static_cast<uint32_t>(res));
+			print_num(static_cast<uint32_t>(res));
 			print("\n");
 			f_close(&f);
 			return;
@@ -179,20 +213,20 @@ void sd_write_test() {
 
 	if (mismatches == 0) {
 		print("OK. Wrote 1MB in ");
-		console.write(write_ms);
+		print_num(write_ms);
 		print(" ms, read back and verified in ");
-		console.write(read_ms);
+		print_num(read_ms);
 		print(" ms\n");
 	} else {
 		print("VERIFY FAILED: ");
-		console.write(mismatches);
+		print_num(mismatches);
 		print(" bad words, first at byte offset ");
-		console.write(first_bad_word * 4);
+		print_num(first_bad_word * 4);
 		print("\n");
 	}
 	if (unlink_res != FR_OK) {
 		print("  f_unlink FAILED: ");
-		console.write(static_cast<uint32_t>(unlink_res));
+		print_num(static_cast<uint32_t>(unlink_res));
 		print("\n");
 	}
 }
@@ -220,7 +254,7 @@ void sd_card_test() {
 
 	uint32_t num_sectors = 0;
 	sd_ops.ioctl(GET_SECTOR_COUNT, reinterpret_cast<uint8_t *>(&num_sectors));
-	console.write(num_sectors / 2048);
+	print_num(num_sectors / 2048);
 	print(" MB\n");
 
 	// Raw read speed: 1MB in 64kB reads
@@ -230,14 +264,14 @@ void sd_card_test() {
 	for (uint32_t sector = 0; sector < 2048; sector += SectorsPerRead) {
 		if (sd_ops.read(buf.data(), sector, SectorsPerRead) != RES_OK) {
 			print("  Read FAILED at sector ");
-			console.write(sector);
+			print_num(sector);
 			print("\n");
 			return;
 		}
 	}
 	auto ms = HAL_GetTick() - start;
 	print("  Read 1MB in ");
-	console.write(ms);
+	print_num(ms);
 	print(" ms\n");
 
 	// FatFS: drive "1:" is the SD card (see VolToPart in fs/fatfs/diskio.cc)
@@ -248,7 +282,7 @@ void sd_card_test() {
 	static FATFS fs;
 	if (auto res = f_mount(&fs, "1:", 1); res != FR_OK) {
 		print("  f_mount FAILED: ");
-		console.write(static_cast<uint32_t>(res));
+		print_num(static_cast<uint32_t>(res));
 		print("\n");
 		return;
 	}
@@ -270,7 +304,7 @@ void sd_card_test() {
 		print(info.fname);
 		if (!(info.fattrib & AM_DIR)) {
 			print("  (");
-			console.write(static_cast<uint32_t>(info.fsize));
+			print_num(static_cast<uint32_t>(info.fsize));
 			print(" bytes)");
 		}
 		print("\n");
@@ -289,6 +323,44 @@ int main() {
 	print("\n\nMetaModule Pro p1 bring-up\n");
 
 	HAL_Init();
+
+	//
+	// Cortex-M33
+	//
+	// Park the M33 before (re)initializing the peripherals it uses
+	mdrivlib::CoproController::reset();
+	mdrivlib::HWSemaphoreGlobalBase::init_peripheral();
+	mdrivlib::IPCC_<1>::init_peripheral();
+	hsem_ready = true;
+	BringupIPC::shared_message() = {};
+
+	if constexpr (M33_LOAD_ADDR >= mdrivlib::RISAF::DDRBase) {
+		// TF-A's DDR region only allows CID0/CID1: open the M33's region to it (CID2)
+		using namespace mdrivlib::RISAF;
+		constexpr unsigned M33RegionIndex = 11;
+		if (!add_ddr_region(M33RegionIndex,
+							M33_LOAD_ADDR,
+							M33_LOAD_ADDR + M33_REGION_SIZE - 1,
+							CID_A35 | CID_M33,
+							CID_A35 | CID_M33,
+							true))
+			print("M33: RISAF4 is locked, can't open DDR to the M33!\n");
+	}
+
+	print("M33: loading ");
+	print_num(uint32_t(m33_firmware_end - m33_firmware));
+	print(" bytes to 0x");
+	print_hex(M33_LOAD_ADDR, 8);
+	print(" and starting\n");
+	mdrivlib::CoproController::load_and_start({m33_firmware, size_t(m33_firmware_end - m33_firmware)}, M33_LOAD_ADDR);
+	delay_ms(10);
+	using mdrivlib::CoproController;
+	auto crumb0 = CoproController::read_breadcrumb(M33_LOAD_ADDR, 0);
+	auto crumb1 = CoproController::read_breadcrumb(M33_LOAD_ADDR, 1);
+	print("M33 boot breadcrumbs: reset handler ");
+	print(crumb0 == CoproController::BreadcrumbResetRan ? "ran" : "DID NOT RUN");
+	print(", main() ");
+	print(crumb1 == CoproController::BreadcrumbReachedMain ? "reached\n" : "NOT REACHED\n");
 
 	//
 	// I2C device probe
@@ -349,13 +421,13 @@ int main() {
 	auto screen_err = screen.init(framebuffer.data());
 	if (screen_err == mdrivlib::DsiScreen::Error::None) {
 		print("ok, ");
-		console.write(screen.refresh_rate_millihz());
+		print_num(screen.refresh_rate_millihz());
 		print(" mHz refresh, ");
-		console.write(screen.dcs_write_errors());
+		print_num(screen.dcs_write_errors());
 		print(" DCS write errors\n");
 	} else {
 		print("FAILED (error ");
-		console.write(static_cast<uint32_t>(screen_err));
+		print_num(static_cast<uint32_t>(screen_err));
 		print(")\n");
 	}
 
@@ -416,6 +488,13 @@ int main() {
 
 	uint16_t last_jacks = 0;
 
+	// A35 <-> M33 messaging test (bringup_ipc.hh): ping every second, print the reply
+	using IPC = mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, BringupIPC::Message, BringupIPC::Channel>;
+	static IPC ipc{BringupIPC::shared_message()};
+	uint32_t ipc_seq = 0;
+	uint64_t ipc_sent_at = 0;
+	uint32_t last_ipc_send = HAL_GetTick();
+
 	print("Polling controls...\n");
 	while (true) {
 		for (unsigned i = 0; i < Controls::Expanders.size(); i++) {
@@ -461,6 +540,27 @@ int main() {
 		}
 
 		lv_timer_handler();
+
+		// A35 <-> M33 messaging
+		if (auto reply = ipc.get_new_message(); reply.seq) {
+			auto round_trip_us = uint32_t((mdrivlib::read_cntpct() - ipc_sent_at) * 1'000'000 / mdrivlib::read_cntfreq());
+			print("IPC: sent ");
+			print_num(reply.seq);
+			print(reply.value == reply.seq * 2 ? ", M33 replied ok (" : ", M33 replied WRONG VALUE (");
+			print_num(reply.value);
+			print("), round trip ");
+			print_num(round_trip_us);
+			print(" us\n");
+		}
+		if (HAL_GetTick() - last_ipc_send >= 1000) {
+			last_ipc_send = HAL_GetTick();
+			ipc_sent_at = mdrivlib::read_cntpct();
+			if (ipc.send_message({.seq = ++ipc_seq, .value = 0}) == false) {
+				print("IPC: send ");
+				print_num(ipc_seq);
+				print(" skipped: M33 hasn't replied to the last one\n");
+			}
+		}
 
 		// SD card insert/remove
 		static uint32_t last_sd_check = 0;

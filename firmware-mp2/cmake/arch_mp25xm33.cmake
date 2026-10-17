@@ -9,7 +9,7 @@ macro(set_arch_flags)
 add_compile_definitions(
     USE_HAL_DRIVER
     USE_FULL_LL_DRIVER
-    STM32MP257Cxx
+    STM32MP257Dxx
     STM32MP2
     CORE_CM33
     ARM_MATH_CM33
