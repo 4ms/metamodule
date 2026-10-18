@@ -1,18 +1,21 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "gui/helpers/module_name.hh"
 #include "gui/pages/page_args.hh"
 #include "patch/patch_data.hh"
 #include <optional>
+#include <string>
 
 namespace MetaModule
 {
 
-// A graphic display that can be shown full-screen, and so can be a screensaver.
-// Tiny displays are treated as lights (see ModView::is_light_only)
+// A graphic display that the module view lists and can show full-screen, and so can be a
+// screensaver. Tiny displays are treated as lights (see ModView::is_light_only), and
+// unnamed elements are not listed.
 inline DynamicGraphicDisplay const *fullscreen_display(Element const &el) {
 	auto display = std::get_if<DynamicGraphicDisplay>(&el);
-	if (display && (display->width_mm >= 5 || display->height_mm >= 5))
+	if (display && (display->width_mm >= 5 || display->height_mm >= 5) && display->short_name.size())
 		return display;
 	return nullptr;
 }
@@ -24,6 +27,17 @@ inline unsigned count_fullscreen_displays(ModuleInfoView const &info) {
 			count++;
 	}
 	return count;
+}
+
+inline std::string screensaver_set_message(PatchData const &pd, uint16_t module_id, Element const &el) {
+	using namespace std::literals;
+	auto name = base_element(el).short_name;
+	name = name.substr(0, name.find_first_of("\n\0"sv));
+
+	std::string msg = "Screensaver set to ";
+	if (name.size())
+		msg += "'" + std::string{name} + "' on ";
+	return msg + module_display_name(pd, module_id);
 }
 
 // Page arguments to show the patch's screensaver display on the FullscreenGraphic page,

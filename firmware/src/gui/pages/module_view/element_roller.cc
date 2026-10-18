@@ -1,5 +1,6 @@
 #include "CoreModules/elements/units.hh"
 #include "gui/elements/redraw.hh"
+#include "gui/helpers/screensaver_display.hh"
 #include "gui/pages/module_view/group_member_name.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "gui/pages/module_view/roller_helpers.hh"
@@ -141,6 +142,9 @@ void ModuleViewPage::populate_roller() {
 
 		append_connected_jack_name(opts, gui_el.idx, gui_el.module_idx, *patch);
 
+		if (is_assigned_screensaver(drawn_element))
+			opts += " " + Gui::green_text("Screensaver");
+
 		opts += "\n";
 		roller_drawn_el_idx.push_back(drawn_el_idx);
 
@@ -157,8 +161,12 @@ void ModuleViewPage::populate_roller() {
 
 	auto append_group_row = [&](unsigned group) {
 		// A group only gets a row if it has something listable, even if we're currently
-		// hiding all its members because we're patching a cable
-		if (std::ranges::none_of(layout.group_members[group], [this](unsigned i) { return is_listable(i); }))
+		// hiding all its members because we're patching a cable.
+		// When choosing a screensaver, only groups with a display get a row.
+		auto has_row = [this](unsigned i) {
+			return choosing_screensaver ? is_listed(i) : is_listable(i);
+		};
+		if (std::ranges::none_of(layout.group_members[group], has_row))
 			return;
 
 		opts += Gui::blue_text(std::string(layout.group_names[group]) + " " LV_SYMBOL_RIGHT) + "\n";
@@ -182,7 +190,7 @@ void ModuleViewPage::populate_roller() {
 		}
 	}
 
-	if (is_patch_playloaded && !current_group) {
+	if (is_patch_playloaded && !current_group && !choosing_screensaver) {
 		if (has_context_menu) {
 			opts += Gui::orange_text("Options:") + "\n";
 			opts += " >>>\n";
@@ -413,7 +421,7 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 
 void ModuleViewPage::focus_button_bar(bool first_item) {
 	if (!full_screen_mode) {
-		if (gui_state.new_cable)
+		if (gui_state.new_cable || choosing_screensaver)
 			lv_group_focus_obj(ui_ModuleViewCableCancelBut);
 		else
 			lv_group_focus_obj(first_item ? ui_ModuleViewHideBut : ui_ModuleViewSettingsBut);
@@ -496,6 +504,12 @@ void ModuleViewPage::manual_control_popup(DrawnElement const &drawn_element) {
 }
 
 void ModuleViewPage::click_graphic_display(DrawnElement const &drawn_element, DynamicGraphicDisplay const *el) {
+	// Ignore click if we just did a quick assignment
+	if (suppress_next_click) {
+		suppress_next_click = false;
+		return;
+	}
+
 	args.element_indices = drawn_element.gui_element.idx;
 
 	PageArguments nextargs = {
@@ -505,6 +519,11 @@ void ModuleViewPage::click_graphic_display(DrawnElement const &drawn_element, Dy
 		.element_mm = std::pair<float, float>{el->width_mm, el->height_mm},
 	};
 	page_list.update_state(PageId::ModuleView, nextargs);
+
+	// The patch's screensaver display opens in screensaver mode: any input returns here
+	if (is_assigned_screensaver(drawn_element))
+		nextargs.screensaver_mode = true;
+
 	page_list.request_new_page(PageId::FullscreenGraphic, nextargs);
 	roller_hover.hide();
 }
@@ -536,6 +555,9 @@ void ModuleViewPage::roller_click_cb(lv_event_t *event) {
 
 		if (page->gui_state.new_cable) {
 			page->click_cable_destination(*drawn_idx);
+
+		} else if (page->choosing_screensaver) {
+			page->assign_screensaver(drawn_element);
 
 		} else if (std::get_if<AltParamAction>(&drawn_element.element)) {
 			page->click_altparam_action(drawn_element);
@@ -747,6 +769,9 @@ bool ModuleViewPage::is_listable(unsigned drawn_idx) const {
 
 // Elements that are listed right now
 bool ModuleViewPage::is_listed(unsigned drawn_idx) const {
+	if (choosing_screensaver && !fullscreen_display(drawn_elements[drawn_idx].element))
+		return false;
+
 	return is_listable(drawn_idx) &&
 		   !ModView::should_skip_for_cable_mode(
 			   gui_state.new_cable, drawn_elements[drawn_idx].gui_element, gui_state, patch, this_module_id);
