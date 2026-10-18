@@ -403,6 +403,12 @@ struct ModuleViewPage : PageBase {
 		return refresh;
 	}
 
+	// Only the plain element list can be left and returned to without losing anything
+	bool can_leave_for_screensaver() final {
+		return mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible() &&
+			   !mapping_pane.control_popup_visible() && !choosing_screensaver;
+	}
+
 	void blur() final {
 		mapping_pane.reset_disconnect_mode();
 		module_context_menu.blur();

@@ -402,6 +402,10 @@ public:
 		if (screensaver.in_display_mode() && cur_page != &page_fullscreen_graphic)
 			screensaver.reset_display_mode();
 
+		// Wait for a requested patch load: until then the playing patch is the old one
+		if (info.patch_playloader.is_loading_patch())
+			return;
+
 		if (screensaver.is_active() || !screensaver.timed_out())
 			return;
 
@@ -415,8 +419,11 @@ public:
 	}
 
 	std::optional<PageArguments> screensaver_display_args() {
-		// Don't navigate away from a dialog that's in use
+		// Don't navigate away from a dialog, the keyboard, or a page that's in use
 		if (file_browser.is_visible() || file_save_dialog.is_visible() || missing_plugins.is_active())
+			return std::nullopt;
+
+		if (lv_obj_is_visible(ui_Keyboard) || !cur_page->can_leave_for_screensaver())
 			return std::nullopt;
 
 		auto patch = info.open_patch_manager.get_playing_patch();
