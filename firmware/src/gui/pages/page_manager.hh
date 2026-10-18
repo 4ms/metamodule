@@ -1,6 +1,7 @@
 #pragma once
 #include "fs/helpers.hh"
 #include "gui/elements/screensaver.hh"
+#include "gui/helpers/screensaver_display.hh"
 #include "gui/knobset_button.hh"
 #include "gui/notify/clip_indicators.hh"
 #include "gui/notify/display.hh"
@@ -135,6 +136,9 @@ public:
 				cur_page = newpage->page;
 				// debug_print_args(newpage);
 				cur_page->focus(newpage->args);
+
+				if (cur_page == &page_fullscreen_graphic && newpage->args->screensaver_mode.value_or(false))
+					screensaver.enter_display_mode();
 			}
 		} else {
 			handle_dialog_popups();
@@ -146,7 +150,7 @@ public:
 
 		handle_write_settings();
 
-		screensaver.update();
+		update_screensaver_timeout();
 	}
 
 	// Blur the current page and jump to MainMenu if we're on a page related to a patch.
@@ -384,6 +388,42 @@ public:
 				}
 			}
 		}
+	}
+
+	void update_screensaver_timeout() {
+		// The display screensaver was woken: go back to the page we were on
+		if (screensaver.take_display_wake()) {
+			if (cur_page == &page_fullscreen_graphic)
+				page_list.request_last_page();
+			return;
+		}
+
+		// Something else took us off the display (e.g. the patch was unloaded)
+		if (screensaver.in_display_mode() && cur_page != &page_fullscreen_graphic)
+			screensaver.reset_display_mode();
+
+		if (screensaver.is_active() || !screensaver.timed_out())
+			return;
+
+		if (auto args = screensaver_display_args()) {
+			page_list.request_new_page(PageId::FullscreenGraphic, *args);
+			// Swallow input until the page change lands, then enter_display_mode() is called
+			screensaver.enter_display_mode();
+		} else {
+			screensaver.show_blank();
+		}
+	}
+
+	std::optional<PageArguments> screensaver_display_args() {
+		// Don't navigate away from a dialog that's in use
+		if (file_browser.is_visible() || file_save_dialog.is_visible() || missing_plugins.is_active())
+			return std::nullopt;
+
+		auto patch = info.open_patch_manager.get_playing_patch();
+		if (!patch)
+			return std::nullopt;
+
+		return screensaver_page_args(*patch, info.open_patch_manager.get_playing_patch_loc_hash());
 	}
 
 	void handle_back_event() {
