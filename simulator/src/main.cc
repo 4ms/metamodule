@@ -76,6 +76,9 @@ static void simulate_input(MetaModule::Ui &ui, const std::string &seq) {
 				run_cycles(ui, 2);
 				push_key(keys.click.front(), false);
 				run_cycles(ui, 6);
+			} else if (name == "wait") {
+				// Idle for one UI cycle (e.g. wait:600 to let the screensaver time out)
+				run_cycles(ui, 1);
 			} else if (name == "back") {
 				push_key(keys.aux_button.front(), true);
 				run_cycles(ui, 4);
