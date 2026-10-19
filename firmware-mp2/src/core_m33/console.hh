@@ -8,6 +8,8 @@
 // The M33 never reconfigures it.
 // Hold a Lock while printing a line, so lines from the two cores don't interleave:
 //    { M33Console::Lock lock; M33Console::print("..."); ... }
+// or use log(), which holds the lock while printing all its arguments:
+//    M33Console::log("Read ", num_bytes, " bytes\n");
 
 namespace MetaModule::M33Console
 {
@@ -53,6 +55,12 @@ inline void print_hex(uint32_t v) {
 		auto nibble = (v >> i) & 0xF;
 		putchar(nibble < 10 ? '0' + nibble : 'A' + nibble - 10);
 	}
+}
+
+template<typename... Ts>
+void log(Ts... args) {
+	Lock lock;
+	(print(args), ...);
 }
 
 } // namespace MetaModule::M33Console

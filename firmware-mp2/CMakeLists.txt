@@ -55,9 +55,6 @@ set(MP2_HAL_MODULES
   hal_rcc_ex
   hal_sai
   hal_sai_ex
-  hal_sd
-  hal_sd_ex
-  ll_sdmmc
 )
 list(TRANSFORM MP2_HAL_MODULES PREPEND ${MP2_HAL_DIR}/Src/stm32mp2xx_)
 list(TRANSFORM MP2_HAL_MODULES APPEND .c)
@@ -151,11 +148,6 @@ add_library(
   src/core_a35/system_init.cc
   src/core_a35/m33_firmware.S
   ${FWDIR}/src/gui/slsexport/ui_local.cc
-  ${FWDIR}/lib/fatfs/source/ff.c
-  ${FWDIR}/lib/fatfs/source/ffunicode.c
-  ${FWDIR}/src/fs/fatfs/diskio.cc
-  ${FWDIR}/src/fs/fatfs/fattime.cc
-  ${FWDIR}/src/fs/time_convert.cc
   src/core_a35/uart_print.c
   system/mmu_ca35.cc
   system/sbrk.cc

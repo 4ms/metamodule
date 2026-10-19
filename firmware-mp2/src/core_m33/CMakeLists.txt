@@ -44,14 +44,35 @@ set(MDRIVLIB ${FWDIR}/lib/mdrivlib)
 include(${MP2_DIR}/cmake/arch_mp25xm33.cmake)
 set_arch_flags()
 
+# ST HAL (only the modules used here: see stm32mp2xx_hal_conf.h)
+set(M33_HAL_MODULES
+  hal_dcache
+  hal_rcc
+  hal_rcc_ex
+  hal_sd
+  hal_sd_ex
+  ll_sdmmc
+)
+list(TRANSFORM M33_HAL_MODULES PREPEND ${MP2_DIR}/lib/stm32-hal/stm32mp2/Src/stm32mp2xx_)
+list(TRANSFORM M33_HAL_MODULES APPEND .c)
+set_source_files_properties(${M33_HAL_MODULES} PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable")
+
 add_executable(
   main_m33.elf
   main.cc
+  sd_test.cc
   system_init.cc
-  ${MP2_DIR}/lib/stm32-hal/stm32mp2/Src/stm32mp2xx_hal_dcache.c
+  ${M33_HAL_MODULES}
   ${MDRIVLIB}/target/stm32mp2_cm33/boot/startup_cm33.s
   ${MDRIVLIB}/target/stm32mp2_cm33/drivers/interrupt_handler.cc
   ${MDRIVLIB}/target/stm32mp2_cm33/drivers/hal_tick_stgen.cc
+  ${MDRIVLIB}/drivers/pin.cc
+  ${FWDIR}/lib/fatfs/source/ff.c
+  ${FWDIR}/lib/fatfs/source/ffunicode.c
+  ${FWDIR}/src/fs/fatfs/diskio.cc
+  ${FWDIR}/src/fs/fatfs/fattime.cc
+  ${FWDIR}/src/fs/time_convert.cc
+  ${MP2_DIR}/system/sbrk.cc
   ${FWDIR}/system/libc_stub.c
 )
 
@@ -61,6 +82,8 @@ target_include_directories(
           ${MP2_DIR}/src
           ${MP2_DIR}/src/pro
           ${FWDIR}/src
+          ${FWDIR}/lib/fatfs/source
+          ${FWDIR}/src/fs/fatfs
           ${MDRIVLIB}
           ${MDRIVLIB}/target/stm32mp2
           ${MDRIVLIB}/target/stm32mp2_cm33

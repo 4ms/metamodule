@@ -10,7 +10,7 @@
  */
 ENTRY(Reset_Handler)
 
-_Min_Stack_Size = 0x1000;
+_Min_Stack_Size = 0x4000;
 
 SECTIONS
 {

@@ -6,13 +6,12 @@
 // I/O supplies, audio PLL, kernel clocks) -> main().
 //
 // This is a bring-up test for the MetaModule Pro p1 board, not the app:
-//  1. console, then load and start the Cortex-M33
+//  1. console, then load and start the Cortex-M33 (which tests the SD card: see core_m33/main.cc)
 //  2. probe every I2C device on the board and report present/missing
 //  3. button LEDs: light each RGB button
 //  4. display: the MetaModule GUI screens (SquareLine export), Main Menu showing
-//  5. SD card: raw read speed, mount FatFS, list the root directory, then a write/verify test file
-//  6. codec: init PCM3168 + SAI1 TDM, output a triangle wave on all 8 outs
-//  7. loop: print control-expander changes (encoders/buttons) and direct GPIO controls
+//  5. codec: init PCM3168 + SAI1 TDM, output a triangle wave on all 8 outs
+//  6. loop: print control-expander changes (encoders/buttons) and direct GPIO controls
 
 #include "bringup_ipc.hh"
 #include "conf/board_codec_conf.hh"
@@ -33,14 +32,11 @@
 #include "drivers/pin.hh"
 #include "drivers/system_reg.hh"
 #include "drivers/uart.hh"
-#include "ff.h"
-#include "fs/fatfs/sdcard_ops.hh"
 #include "gui/slsexport/comp_init.hh"
 #include "lvgl.h"
 #include "lvgl_display.hh"
 #include <array>
 
-bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id); // fs/fatfs/diskio.cc
 extern "C" const uint8_t m33_firmware[];	 // m33_firmware.S
 extern "C" const uint8_t m33_firmware_end[]; // m33_firmware.S
 
@@ -136,184 +132,6 @@ void fill_audio_block(unsigned half) {
 __attribute__((section(".framebuffers"))) alignas(4096) std::array<uint32_t, 720 * 1280> framebuffer;
 std::array<lv_color_t, 1280 * 80> lvgl_draw_buffer; // partial render buffer: 1/9 of the view
 
-// FatFS write test: write 1MB with a position-dependent pattern, read back and verify, then delete.
-// Each 32-bit word encodes its own offset, so misplaced or shifted data shows up as a mismatch.
-void sd_write_test() {
-	constexpr const char *path = "1:/mp2_write_test.bin";
-	constexpr uint32_t ChunkWords = 16 * 1024; // 64kB
-	constexpr uint32_t NumChunks = 16;		   // 1MB total
-	static std::array<uint32_t, ChunkWords> chunk;
-
-	auto pattern = [](uint32_t word_index) {
-		return (word_index * 2654435761u) ^ 0xA5A5A5A5u;
-	};
-
-	print("  Write test (");
-	print(path);
-	print("): ");
-
-	FIL f;
-	if (auto res = f_open(&f, path, FA_CREATE_ALWAYS | FA_WRITE); res != FR_OK) {
-		print("f_open for write FAILED: ");
-		print_num(static_cast<uint32_t>(res));
-		print("\n");
-		return;
-	}
-
-	auto start = HAL_GetTick();
-	for (uint32_t c = 0; c < NumChunks; c++) {
-		for (uint32_t i = 0; i < ChunkWords; i++)
-			chunk[i] = pattern(c * ChunkWords + i);
-		UINT written = 0;
-		if (auto res = f_write(&f, chunk.data(), sizeof(chunk), &written); res != FR_OK || written != sizeof(chunk)) {
-			print("f_write FAILED: ");
-			print_num(static_cast<uint32_t>(res));
-			print("\n");
-			f_close(&f);
-			return;
-		}
-	}
-	if (auto res = f_close(&f); res != FR_OK) {
-		print("f_close FAILED: ");
-		print_num(static_cast<uint32_t>(res));
-		print("\n");
-		return;
-	}
-	auto write_ms = HAL_GetTick() - start;
-
-	if (auto res = f_open(&f, path, FA_READ); res != FR_OK) {
-		print("f_open for read FAILED: ");
-		print_num(static_cast<uint32_t>(res));
-		print("\n");
-		return;
-	}
-	start = HAL_GetTick();
-	uint32_t mismatches = 0;
-	uint32_t first_bad_word = 0;
-	for (uint32_t c = 0; c < NumChunks; c++) {
-		UINT bytes_read = 0;
-		if (auto res = f_read(&f, chunk.data(), sizeof(chunk), &bytes_read); res != FR_OK || bytes_read != sizeof(chunk)) {
-			print("f_read FAILED: ");
-			print_num(static_cast<uint32_t>(res));
-			print("\n");
-			f_close(&f);
-			return;
-		}
-		for (uint32_t i = 0; i < ChunkWords; i++) {
-			if (chunk[i] != pattern(c * ChunkWords + i)) {
-				if (mismatches++ == 0)
-					first_bad_word = c * ChunkWords + i;
-			}
-		}
-	}
-	auto read_ms = HAL_GetTick() - start;
-	f_close(&f);
-
-	auto unlink_res = f_unlink(path);
-
-	if (mismatches == 0) {
-		print("OK. Wrote 1MB in ");
-		print_num(write_ms);
-		print(" ms, read back and verified in ");
-		print_num(read_ms);
-		print(" ms\n");
-	} else {
-		print("VERIFY FAILED: ");
-		print_num(mismatches);
-		print(" bad words, first at byte offset ");
-		print_num(first_bad_word * 4);
-		print("\n");
-	}
-	if (unlink_res != FR_OK) {
-		print("  f_unlink FAILED: ");
-		print_num(static_cast<uint32_t>(unlink_res));
-		print("\n");
-	}
-}
-
-auto &sd_card_ops() {
-	using namespace MetaModule;
-#ifdef MP2_TEST_CARRIER
-	// Drive the common side of the detect switch low before the SD driver first reads it
-	static mdrivlib::Pin detect_common{SDCardDetectCommonPin, mdrivlib::PinMode::Output};
-	detect_common.low();
-#endif
-	static SDCardOps<SDCardConf> ops;
-	return ops;
-}
-
-void sd_card_test() {
-	using namespace MetaModule;
-
-	print("SD card: ");
-	auto &sd_ops = sd_card_ops();
-	if (sd_ops.initialize() != 0) {
-		print("no card\n");
-		return;
-	}
-
-	uint32_t num_sectors = 0;
-	sd_ops.ioctl(GET_SECTOR_COUNT, reinterpret_cast<uint8_t *>(&num_sectors));
-	print_num(num_sectors / 2048);
-	print(" MB\n");
-
-	// Raw read speed: 1MB in 64kB reads
-	static std::array<uint8_t, 64 * 1024> buf;
-	constexpr uint32_t SectorsPerRead = buf.size() / 512;
-	auto start = HAL_GetTick();
-	for (uint32_t sector = 0; sector < 2048; sector += SectorsPerRead) {
-		if (sd_ops.read(buf.data(), sector, SectorsPerRead) != RES_OK) {
-			print("  Read FAILED at sector ");
-			print_num(sector);
-			print("\n");
-			return;
-		}
-	}
-	auto ms = HAL_GetTick() - start;
-	print("  Read 1MB in ");
-	print_num(ms);
-	print(" ms\n");
-
-	// FatFS: drive "1:" is the SD card (see VolToPart in fs/fatfs/diskio.cc)
-	if (!fatfs_register_disk(&sd_ops, 1)) {
-		print("  fatfs_register_disk FAILED\n");
-		return;
-	}
-	static FATFS fs;
-	if (auto res = f_mount(&fs, "1:", 1); res != FR_OK) {
-		print("  f_mount FAILED: ");
-		print_num(static_cast<uint32_t>(res));
-		print("\n");
-		return;
-	}
-
-	DIR dir;
-	if (f_opendir(&dir, "1:/") != FR_OK) {
-		print("  f_opendir FAILED\n");
-		return;
-	}
-	print("  Root directory:\n");
-	FILINFO info;
-	unsigned count = 0;
-	while (f_readdir(&dir, &info) == FR_OK && info.fname[0] != 0) {
-		if (++count > 30) {
-			print("    ...\n");
-			break;
-		}
-		print((info.fattrib & AM_DIR) ? "    [dir] " : "    ");
-		print(info.fname);
-		if (!(info.fattrib & AM_DIR)) {
-			print("  (");
-			print_num(static_cast<uint32_t>(info.fsize));
-			print(" bytes)");
-		}
-		print("\n");
-	}
-	f_closedir(&dir);
-
-	sd_write_test();
-}
-
 } // namespace
 
 int main() {
@@ -370,14 +188,22 @@ int main() {
 	print_hex(M33_LOAD_ADDR, 8);
 	print(" and starting\n");
 	mdrivlib::CoproController::load_and_start({m33_firmware, size_t(m33_firmware_end - m33_firmware)}, M33_LOAD_ADDR);
-	delay_ms(10);
-	using mdrivlib::CoproController;
-	auto crumb0 = CoproController::read_breadcrumb(M33_LOAD_ADDR, 0);
-	auto crumb1 = CoproController::read_breadcrumb(M33_LOAD_ADDR, 1);
-	print("M33 boot breadcrumbs: reset handler ");
-	print(crumb0 == CoproController::BreadcrumbResetRan ? "ran" : "DID NOT RUN");
-	print(", main() ");
-	print(crumb1 == CoproController::BreadcrumbReachedMain ? "reached\n" : "NOT REACHED\n");
+	{
+		using mdrivlib::CoproController;
+		auto reset_us = CoproController::wait_for_breadcrumb(M33_LOAD_ADDR, 0, CoproController::BreadcrumbResetRan, 100);
+		auto main_us = CoproController::wait_for_breadcrumb(M33_LOAD_ADDR, 1, CoproController::BreadcrumbReachedMain, 1000);
+		print("M33 boot breadcrumbs: reset handler ");
+		if (reset_us >= 0) {
+			print("ran, main() ");
+			if (main_us >= 0) {
+				print("reached after ");
+				print_num(reset_us + main_us);
+				print(" us\n");
+			} else
+				print("NOT REACHED\n");
+		} else
+			print("DID NOT RUN\n");
+	}
 
 	//
 	// I2C device probe
@@ -454,11 +280,6 @@ int main() {
 	// The real MetaModule screens, as the GUI's PageManager sets them up (loads the Main Menu)
 	static SlsComponentInit sls_comp_init;
 	print("LVGL started\n");
-
-	//
-	// SD card
-	//
-	sd_card_test();
 
 	//
 	// Codec + SAI: triangle wave on all outputs
@@ -576,20 +397,6 @@ int main() {
 				print("IPC: send ");
 				print_num(ipc_seq);
 				print(" skipped: M33 hasn't replied to the last one\n");
-			}
-		}
-
-		// SD card insert/remove
-		static uint32_t last_sd_check = 0;
-		static uint8_t last_sd_present = 0xFF;
-		if (HAL_GetTick() - last_sd_check > 500) {
-			last_sd_check = HAL_GetTick();
-			uint8_t present = 0;
-			sd_card_ops().ioctl(MMC_GET_SDSTAT, &present);
-			if (present != last_sd_present) {
-				if (last_sd_present != 0xFF)
-					print(present ? "SD card inserted\n" : "SD card removed\n");
-				last_sd_present = present;
 			}
 		}
 

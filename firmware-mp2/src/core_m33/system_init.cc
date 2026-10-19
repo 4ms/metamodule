@@ -1,5 +1,8 @@
 #include "drivers/stm32xx.h"
 
+// Used by the HAL (e.g. timeouts). The M33 clock is set by TF-A.
+uint32_t SystemCoreClock = 400'000'000;
+
 // Called by startup_cm33.s before C++ static constructors.
 //
 // MPU: what the DCACHE may cache. Region 0 is the M33's own memory (code, data, heap, stack in
@@ -8,7 +11,8 @@
 // (PRIVDEFENA). The default map treats 0x80000000-0x9FFFFFFF as cacheable, so the shared
 // region must be carved out explicitly before the DCACHE is enabled.
 //
-// The DCACHE itself is enabled later (see main.cc).
+// The DCACHE itself is enabled at the start of main(), not here: startup_cm33.s writes the
+// "reached main" breadcrumb after this returns, and the A35 must see it in DDR, not in our cache.
 
 namespace
 {
