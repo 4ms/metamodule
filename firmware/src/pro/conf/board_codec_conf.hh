@@ -10,11 +10,32 @@ namespace MetaModule
 
 using CodecT = mdrivlib::CodecPCM3168;
 
-// Pro p1 has a single codec and no audio expander header
-// (MP1 also has codec_ext: audio.cc will need adapting).
+// Pro p1 has a single codec and no audio expander header.
 struct Hardware {
 	static inline mdrivlib::I2CPeriph i2c{codec_jack_i2c_conf};
 	static inline CodecT codec{i2c, codec_sai_conf};
+
+	// MP1's AudioStream (audio/audio.cc) also runs the audio expander's codec, if init() finds one.
+	// There's no expander, so there's never one to find.
+	struct NoAudioExpanderCodec {
+		CodecT::Error init() {
+			return CodecT::CODEC_I2C_ERR;
+		}
+		CodecT::Error change_samplerate_blocksize(uint32_t, uint32_t) {
+			return CodecT::CODEC_NO_ERR;
+		}
+		template<typename T>
+		void set_tx_buffer(std::span<T>, uint32_t) {
+		}
+		template<typename T>
+		void set_rx_buffer(std::span<T>, uint32_t) {
+		}
+		void start() {
+		}
+		void stop() {
+		}
+	};
+	static inline NoAudioExpanderCodec codec_ext;
 
 	// MP1's audio expander has its calibration data in an EEPROM. There's no expander, so no
 	// memory to read or write.

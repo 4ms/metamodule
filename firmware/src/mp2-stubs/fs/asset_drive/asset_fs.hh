@@ -35,11 +35,14 @@ struct AssetFS {
 			return {};
 		}
 
-		auto tar_image_size = Uimg::be32_to_cpu(header.ih_size);
-		if (tar_image_size > image_size - sizeof header) {
-			pr_err("Embedded assets image is an invalid size: %u\n", unsigned(tar_image_size));
+		// ih_size includes the header (see flashing/uimg_header.py)
+		auto uimg_size = Uimg::be32_to_cpu(header.ih_size);
+		if (uimg_size < sizeof header || uimg_size > image_size) {
+			pr_err("Embedded assets image is an invalid size: %u (embedded %zu bytes)\n", unsigned(uimg_size), image_size);
 			return {};
 		}
+		auto tar_image_size = uimg_size - sizeof header;
+		pr_info("Embedded assets image: %zu bytes\n", tar_image_size);
 
 		auto *tar = assets_image + sizeof header;
 		return std::vector<char>(tar, tar + tar_image_size);

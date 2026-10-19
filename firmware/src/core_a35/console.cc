@@ -1,6 +1,7 @@
 #include "console.hh"
 #include "conf/console_uart_conf.hh"
 #include "conf/hsem_conf.hh"
+#include "console/uart_log.hh"
 #include "drivers/hsem.hh"
 #include "drivers/uart.hh"
 
@@ -52,8 +53,9 @@ bool receive(uint8_t &c) {
 
 } // namespace MetaModule::A35Console
 
-// printf() etc. output (pr_err(), pr_info(), ...)
-extern "C" int _write(int, char *ptr, int len) {
+// printf() etc. output (pr_err(), pr_info(), ...): newlib's _write() calls this for stdout and
+// stderr (src/fs/syscall)
+void MetaModule::UartLog::write_stdout(const char *ptr, int len) {
 	using namespace MetaModule::A35Console;
 	Lock lock;
 	for (int i = 0; i < len; i++) {
@@ -61,5 +63,4 @@ extern "C" int _write(int, char *ptr, int len) {
 			uart.putchar('\r');
 		uart.putchar(ptr[i]);
 	}
-	return len;
 }

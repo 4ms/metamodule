@@ -115,15 +115,20 @@ add_subdirectory(src/gui/slsexport ${CMAKE_CURRENT_BINARY_DIR}/slsexport)
 target_include_directories(ui_lvgl PRIVATE lib)
 
 #
-# App libraries: the same ones MP1's A7 app uses (src/CMakeLists.txt), except the vcv_ports brands
-# (none are BUILD_INTERNAL_ yet) and the dynamic plugin loader
+# App libraries: the same ones MP1's A7 app uses (src/CMakeLists.txt), except the dynamic plugin loader
 
 set(LIBDIR ${FWDIR}/lib)
+
+set(CMSISCORE ${FWDIR}/lib/cmsis)
+add_subdirectory(lib/cmsis-dsp ${CMAKE_CURRENT_BINARY_DIR}/cmsis-dsp)
 
 add_subdirectory(lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
 
 # VCV Rack adaptor
 add_subdirectory(vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
+
+# Brands: VCV Rack plugins ported to MetaModule (built-in unless OMIT_BRAND_x or BUILD_DYN_PLUGIN_x is set)
+add_subdirectory(vcv_ports ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
 
 # 4ms modules
 add_subdirectory(lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
@@ -163,6 +168,11 @@ set(M33_REGION_SIZE 0x2000000)
 # Whole 2MB blocks: the A35 MMU maps it in 2MB blocks.
 set(SHAREDMEM_ADDR 0x9A000000)
 set(SHAREDMEM_SIZE 0x2000000)
+
+# Non-cacheable memory for DMA buffers (audio), after the shared memory. A35 only.
+# Whole 2MB blocks, like SHAREDMEM. (MP1 uses SYSRAM for this)
+set(DMABUF_ADDR 0x9C000000)
+set(DMABUF_SIZE 0x200000)
 
 include(ExternalProject)
 ExternalProject_Add(
@@ -211,8 +221,12 @@ add_library(
   src/core_a35/static_buffers.cc
   src/core_a35/no_plugins.cc
   src/core_a35/gettimeofday.cc
-  src/core_a35/no_file_syscalls.cc
-  vcv_ports/glue/plugin_instance.cc
+  src/core_a35/fs_syscall_proxy.cc
+  src/fs/syscall/syscalls.cc
+  src/fs/syscall/filedesc_manager.cc
+  src/fs/syscall/filesystem.cc
+  src/fs/dirent/dirent.cc
+  src/audio/audio.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/drivers/cycle_counter.cc
   ${MM_SHARED_CORE_SOURCES}
   ${MM_SHARED_APP_SOURCES}
@@ -222,7 +236,6 @@ add_library(
   system/mmu_ca35.cc
   system/sbrk_mp2.cc
   system/eh_frame_ca35.cc
-  system/syscall_stubs_mp2.c
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/vectors.S
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/irq_init.c
@@ -245,11 +258,24 @@ target_link_libraries(
          cpputil
          ThorVG
          vcv_plugin
+         vcv_ports
 )
+
+# Same as MP1 (src/CMakeLists.txt)
+include(vcv_ports/brands.cmake)
+foreach(brand ${brands})
+  if(DEFINED BUILD_DYN_PLUGIN_${brand})
+    target_compile_definitions(a35_core PRIVATE -DBUILD_DYN_PLUGIN_${brand})
+  elseif(DEFINED OMIT_BRAND_${brand})
+    target_compile_definitions(a35_core PRIVATE -DOMIT_BRAND_${brand})
+  else()
+    target_compile_definitions(a35_core PRIVATE -DBUILD_INTERNAL_${brand})
+  endif()
+endforeach()
 add_dependencies(a35_core core_m33)
 target_compile_definitions(
   a35_core PRIVATE M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE} SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
-                   SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
+                   SHAREDMEM_SIZE=${SHAREDMEM_SIZE} DMABUF_ADDR=${DMABUF_ADDR} DMABUF_SIZE=${DMABUF_SIZE}
 )
 target_compile_definitions(a35_core PUBLIC CPPUTIL_STATIC_STRING_USE_STD_STRING SUPPRESS_HIL_MESSAGES=1)
 set_source_files_properties(
@@ -284,9 +310,6 @@ target_include_directories(
          lib
          lib/fatfs/source
          src/fs/fatfs
-         vcv_ports
-         vcv_ports/glue
-         vcv_ports/glue/ext_plugin
          ${CMAKE_BINARY_DIR}/checkgit
 )
 
@@ -297,7 +320,7 @@ target_link_libraries(main_a35.elf PRIVATE a35_core)
 set(LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/system/linker/stm32mp2xx_ca35.ld)
 target_link_options(
   main_a35.elf PRIVATE -T${LINKER_SCRIPT} -Wl,-Map,main_a35.map,--cref -Wl,--defsym=SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
-  -Wl,--defsym=SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
+  -Wl,--defsym=SHAREDMEM_SIZE=${SHAREDMEM_SIZE} -Wl,--defsym=DMABUF_ADDR=${DMABUF_ADDR} -Wl,--defsym=DMABUF_SIZE=${DMABUF_SIZE}
 )
 set_target_properties(main_a35.elf PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
 

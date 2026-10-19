@@ -5,14 +5,14 @@
 // MMU+caches via system/mmu_ca35.cc, GIC init) -> system_init() (system_init.cc:
 // I/O supplies, audio PLL, kernel clocks) -> main().
 //
-// main() starts the Cortex-M33, which runs patch storage (SD card, NOR flash), then the display
-// and MP1's GUI (PageManager and its pages), which reaches patch storage with FileStorageProxy.
-// Not yet ported: audio (a stand-in answers the patch loader, see audio_stand_in.hh), controls
-// (the serial console navigates the GUI, see console_keys.hh), plugins, USB, WiFi, the second
-// A35 core.
+// main() starts the Cortex-M33, which runs patch storage (SD card, NOR flash), then the display,
+// MP1's audio stream (audio/audio.cc, which plays the patch in the codec's DMA interrupt), and
+// MP1's GUI (PageManager and its pages), which reaches patch storage with FileStorageProxy.
+// Not yet ported: controls and jack sense (the serial console navigates the GUI, see
+// console_keys.hh), MIDI, calibration, plugins, USB, WiFi, the second A35 core.
 
-#include "audio_stand_in.hh"
-#include "conf/board_codec_conf.hh"
+#include "audio/audio.hh"
+#include "calibrate/calibration_data.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "conf/screen_conf.hh"
@@ -26,6 +26,7 @@
 #include "dynload/plugin_manager.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
+#include "fs/syscall/filesystem.hh"
 #include "git_version.h"
 #include "internal_interface/plugin_app_if_internal.hh"
 #include "internal_interface/plugin_app_interface.hh"
@@ -36,6 +37,7 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
+#include "static_buffers.hh"
 #include "ui.hh"
 #include <array>
 #include <cstdio>
@@ -57,11 +59,6 @@ std::array<lv_color_t, ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeigh
 __attribute__((section(".sharedmem"))) IntercoreStorageMessage storage_message;
 __attribute__((section(".sharedmem"))) std::array<char, 1024 * 1024> raw_patch_data;
 __attribute__((section(".sharedmem"))) std::array<char, 256 * 1024> storage_list_buffer;
-
-// Audio: silent for now (see audio_stand_in.hh)
-constexpr uint32_t AudioBlockSize = 256;
-alignas(64) std::array<int32_t, 2 * AudioBlockSize * StreamConf::Audio::NumOutChans> audio_out{};
-alignas(64) std::array<int32_t, 2 * AudioBlockSize * StreamConf::Audio::NumInChans> audio_in{};
 
 void start_m33() {
 	// Park the M33 before (re)initializing the peripherals it uses
@@ -120,20 +117,6 @@ void start_display() {
 		printf("Display init FAILED (error %u)\n", unsigned(err));
 }
 
-void start_audio(AudioStandIn &audio) {
-	auto &codec = Hardware::codec;
-	if (codec.init() != CodecT::CODEC_NO_ERR) {
-		printf("Codec init FAILED: patches can't be loaded (nothing answers the patch loader)\n");
-		return;
-	}
-
-	mdrivlib::SystemCache::clean_dcache_by_range(audio_out.data(), sizeof audio_out);
-	codec.set_tx_buffer(std::span<int32_t>{audio_out}, AudioBlockSize);
-	codec.set_rx_buffer(std::span<int32_t>{audio_in}, AudioBlockSize);
-	codec.set_callbacks([&audio] { audio.process(); }, [&audio] { audio.process(); });
-	codec.start();
-}
-
 } // namespace
 
 int main() {
@@ -145,6 +128,8 @@ int main() {
 	setvbuf(stdout, nullptr, _IOLBF, 256);
 
 	HAL_Init();
+
+	StaticBuffers::init();
 
 	start_m33();
 	start_display();
@@ -162,16 +147,37 @@ int main() {
 	static PatchPlayLoader patch_playloader{file_storage, open_patches_manager, patch_player};
 	static PatchModQueue patch_mod_queue;
 
-	static AudioStandIn audio{patch_playloader};
-	start_audio(audio);
+	// Initializes the codec. The audio starts once the GUI is up.
+	static AudioStream audio{patch_player,
+							 StaticBuffers::audio_in_dma_block,
+							 StaticBuffers::audio_out_dma_block,
+							 StaticBuffers::sync_params,
+							 patch_playloader,
+							 StaticBuffers::param_blocks,
+							 patch_mod_queue};
+	{
+		// FIXME: MP1 reads the calibration from flash (calibrate/calibration_data_reader.hh)
+		CalData cal;
+		cal.reset_to_default();
+		audio.set_calibration(cal);
+	}
 
 	// The RamDisk holds the assets and plugin files. It's big, so it's on the heap rather than in
 	// .bss (which is cleared at startup)
 	static RamDiskOps ramdisk_ops{*new RamDrive};
 	static FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
+	// libc file access (fopen, etc), used by modules for their assets
+	Filesystem::init(ramdisk);
 
 	static PluginManager plugin_manager{file_storage, ramdisk};
-	static Ui ui{lvgl_display, patch_playloader, file_storage, open_patches_manager, patch_mod_queue, plugin_manager, ramdisk};
+	static Ui ui{lvgl_display,
+				 StaticBuffers::sync_params,
+				 patch_playloader,
+				 file_storage,
+				 open_patches_manager,
+				 patch_mod_queue,
+				 plugin_manager,
+				 ramdisk};
 
 	static PluginAppInterface::Internal plugin_internal{ui.get_settings(), open_patches_manager, ui.get_notify_queue()};
 	static PluginAppInterface plugin_interface{plugin_internal};
@@ -184,7 +190,18 @@ int main() {
 	ui.start();
 	printf("GUI started. Navigate with the console: arrows (or a/d) turn, Enter clicks, Backspace is Back\n");
 
+	StaticBuffers::sync_params.clear();
+	audio.start();
+
 	while (true) {
 		ui.update();
+
+		// Same as MP1's main loop (core_a7/main.cc)
+		audio.handle_overruns();
+
+		if (audio.get_audio_errors() > 0) {
+			pr_err("Audio error\n");
+			audio.start();
+		}
 	}
 }

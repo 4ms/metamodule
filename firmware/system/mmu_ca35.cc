@@ -81,6 +81,11 @@ static void populate_tables()
 				  "SHAREDMEM must be whole 2MB blocks");
 	L1_ddr1.fill_block_entries(SHAREDMEM_ADDR, SHAREDMEM_ADDR + SHAREDMEM_SIZE, MMU::MemType::Noncache, MMU::AccessRW);
 
+	// DMA buffers: non-cacheable
+	static_assert(DMABUF_ADDR % (2 * 1024 * 1024) == 0 && DMABUF_SIZE % (2 * 1024 * 1024) == 0,
+				  "DMABUF must be whole 2MB blocks");
+	L1_ddr1.fill_block_entries(DMABUF_ADDR, DMABUF_ADDR + DMABUF_SIZE, MMU::MemType::Noncache, MMU::AccessRW);
+
 	is_init = true;
 	dsb_sy();
 }

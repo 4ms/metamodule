@@ -47,9 +47,13 @@ another), so build MP1 first.
 - **M33:** patch storage (MP1's `PatchStorage`): SD card, and NOR flash (a
   RAM-backed stub until there's an OSPI driver).
 - **A35:** MP1's GUI (`PageManager` and all the pages), rendered at MP1's
-  320x240 and scaled 3x into the middle of the panel. Patches load, but don't
-  play: there's no audio yet (`src/core_a35/audio_stand_in.hh` answers the
-  patch loader). No plugins, USB, WiFi, or hardware controls yet.
+  320x240 and scaled 3x into the middle of the panel, and MP1's audio stream
+  (`src/audio/audio.cc`), which plays the patch in the codec's DMA interrupt.
+  Built-in modules: the 4ms modules and the `vcv_ports` brands. The assets
+  are unpacked into a RamDisk, which modules can read with libc (`fopen`, etc).
+- **Not yet:** the hardware controls, jack sense (all jacks are reported as
+  patched), MIDI, calibration (defaults are used), plugins, USB, WiFi, and libc
+  file access on the SD card and USB.
 
 Until the controls work, navigate the GUI from the serial console:
 Right/Left arrows (or `d`/`a`) turn the encoder, Enter (or Down, `s`) clicks
@@ -73,8 +77,7 @@ MP2-only files in `firmware/`:
 - `src/core_intercom/shared_index.hh`: pointers to the objects the A35 and M33 share
 - `cmake/mp2.cmake`, `cmake/aarch64-none-elf-gcc.cmake`, `cmake/arch_mp25x*.cmake`
 - `system/linker/stm32mp2xx_*.ld`, `system/mmu_ca35.cc`
-- `system/sbrk_mp2.cc`, `system/syscall_stubs_mp2.c`: temporary, until MP2
-  uses MP1's allocation and newlib support (`system/sbrk.cc`, `system/newlib/`)
+- `system/sbrk_mp2.cc`: temporary, until MP2 uses MP1's allocation (`system/sbrk.cc`)
 - `system/eh_frame_ca35.cc`: registers the unwind tables for C++ exceptions
   (the A35 links without `crtbegin.o`)
 - `lib/cmsis-device/stm32mp257d/`: the patched MP2 CMSIS device files

@@ -159,6 +159,16 @@ SECTIONS
 	}
 	ASSERT(ADDR(.sharedmem) + SIZEOF(.sharedmem) <= SHAREDMEM_ADDR + SHAREDMEM_SIZE, ".sharedmem doesn't fit in SHAREDMEM_SIZE")
 
+	/* DMA buffers (e.g. audio), at DMABUF_ADDR/SIZE (from CMake). Non-cacheable (mmu_ca35.cc).
+	   Not zeroed at startup. */
+	.dmabuf DMABUF_ADDR (NOLOAD) :
+	{
+		. = ALIGN(64);
+		*(.dmabuf)
+		*(.dmabuf*)
+	}
+	ASSERT(ADDR(.dmabuf) + SIZEOF(.dmabuf) <= DMABUF_ADDR + DMABUF_SIZE, ".dmabuf doesn't fit in DMABUF_SIZE")
+
 	/* Display framebuffers (LTDC scans these out). Not zeroed at startup. */
 	.framebuffers (NOLOAD):
 	{
@@ -167,16 +177,6 @@ SECTIONS
 		*(.framebuffers*)
 	} > FRAMEBUF
 
-	/*
-	.dma_buffer (NOLOAD) :
-	{
-		. = ALIGN(8);
-		*(.dma_buffer)
-		*(.dma_buffer*)
-		. = ALIGN(8);
-	} > SRAM3
-	*/
-	
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :

@@ -9,6 +9,7 @@
 #include "params/params_state.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_playloader.hh"
+#include "sync_params.hh"
 #include "thorvg.h"
 #include "user_settings/settings_file.hh"
 
@@ -16,9 +17,9 @@ namespace MetaModule
 {
 
 // MP2's version of MP1's Ui (gui/ui.hh): the GUI pages and their state.
-// No params from the audio/controls yet (MP1's SyncParams), no USB or jack sense monitors.
-// Input is from the serial console keys (console_keys.hh).
+// No USB or jack sense monitors yet. Input is from the serial console keys (console_keys.hh).
 class Ui {
+	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
 
 	NotificationQueue notify_queue;
@@ -31,13 +32,15 @@ class Ui {
 
 public:
 	Ui(LvglDisplay &display,
+	   SyncParams &sync_params,
 	   PatchPlayLoader &patch_playloader,
 	   FileStorageProxy &patch_storage,
 	   OpenPatchManager &open_patch_manager,
 	   PatchModQueue &patch_mod_queue,
 	   PluginManager &plugin_manager,
 	   FatFileIO &ramdisk)
-		: patch_playloader{patch_playloader}
+		: sync_params{sync_params}
+		, patch_playloader{patch_playloader}
 		, page_manager{patch_storage,
 					   open_patch_manager,
 					   patch_playloader,
@@ -62,6 +65,10 @@ public:
 
 		patch_playloader.connect_user_settings(&settings);
 		patch_playloader.connect_notification_queue(&notify_queue);
+
+		patch_playloader.request_new_audio_settings(
+			settings.audio.sample_rate, settings.audio.block_size, settings.audio.max_overrun_retries);
+
 		patch_playloader.update_param_catchup_mode();
 
 		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
@@ -89,7 +96,6 @@ public:
 
 		if (now - last_page_update_tm >= 16) {
 			last_page_update_tm = now;
-			keys.update(metaparams);
 			page_update_task();
 		}
 	}
@@ -110,10 +116,14 @@ private:
 	uint32_t last_page_update_tm = 0;
 	uint32_t last_lv_update_tm = 0;
 
-	// Same as MP1, minus reading the params from the audio/controls
+	// Same as MP1, minus the USB and jack sense monitors
 	void page_update_task() {
+		// Clear all accumulated knob change events
 		for (auto &knob : params.knobs)
 			knob.changed = false;
+
+		sync_params.read_sync(params, metaparams);
+		keys.update(metaparams);
 
 		page_manager.update_current_page();
 
