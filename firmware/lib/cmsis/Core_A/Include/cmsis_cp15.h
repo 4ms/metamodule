@@ -332,7 +332,12 @@ __STATIC_FORCEINLINE uint32_t __get_CNTP_TVAL(void)
 __STATIC_FORCEINLINE uint64_t __get_CNTPCT(void)
 {
   uint64_t result;
+#if defined(__aarch64__)
+  /* AArch64 (e.g. the STM32MP2's Cortex-A35) has no coprocessor instructions */
+  __ASM volatile("mrs %0, cntpct_el0" : "=r" (result) : : "memory");
+#else
   __get_CP64(15, 0, result, 14);
+#endif
   return result;
 }
 
