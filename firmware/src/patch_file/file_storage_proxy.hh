@@ -1,5 +1,6 @@
 #pragma once
 #include "core_intercom/intercore_message.hh"
+#include "patch_file/dir_list_serial.hh"
 #include "patch_file/file_storage_comm.hh"
 #include "patch_file/patch_location.hh"
 #include "pr_dbg.hh"
@@ -14,14 +15,40 @@ public:
 
 	//TODO: use a general-purpose buffer instead of raw_patch_data and patch_dir_list
 
-	FileStorageProxy(std::span<char> raw_patch_data, FileStorageComm &comm, PatchDirList &patch_dir_list)
+	// list_buffer: if given, the patch list and dir entries are sent serialized into this buffer
+	// (which must be in memory both cores can access), and unpacked here by get_message(), instead
+	// of the other core filling in our PatchDirList/DirTree directly. Needed when the cores don't
+	// share a memory layout (MP2). See dir_list_serial.hh.
+	FileStorageProxy(std::span<char> raw_patch_data,
+					 FileStorageComm &comm,
+					 PatchDirList &patch_dir_list,
+					 std::span<char> list_buffer = {})
 		: comm_{comm}
 		, patch_dir_list_{patch_dir_list}
-		, raw_patch_data_{raw_patch_data} {
+		, raw_patch_data_{raw_patch_data}
+		, list_buffer_{list_buffer} {
 	}
 
 	IntercoreStorageMessage get_message() {
-		return comm_.get_new_message();
+		auto message = comm_.get_new_message();
+
+		if (!list_buffer_.empty()) {
+			if (message.message_type == PatchListChanged) {
+				if (!DirListSerial::deserialize(list_buffer_.first(message.bytes_read), patch_dir_list_))
+					pr_err("Error: received a corrupt patch list\n");
+
+			} else if (message.message_type == DirEntriesSuccess && pending_dir_tree_) {
+				if (!DirListSerial::deserialize(list_buffer_.first(message.bytes_read), *pending_dir_tree_)) {
+					pr_err("Error: received corrupt dir entries\n");
+					message.message_type = DirEntriesFailed;
+				}
+			}
+
+			if (message.message_type == DirEntriesSuccess || message.message_type == DirEntriesFailed)
+				pending_dir_tree_ = nullptr;
+		}
+
+		return message;
 	}
 
 	// TODO: consider passing raw_patch_data_ as a param here,
@@ -49,6 +76,11 @@ public:
 			.message_type = RequestRefreshPatchList,
 			.patch_dir_list = &patch_dir_list_, // this is where we want M4 to copy the patch_dir_list
 		};
+
+		if (!list_buffer_.empty()) {
+			message.patch_dir_list = nullptr;
+			message.buffer = list_buffer_;
+		}
 
 		return comm_.send_message(message);
 	}
@@ -207,12 +239,23 @@ public:
 			.dir_entries = dir_tree,	// this is where we want M4 to copy the dir tree
 		};
 
-		return comm_.send_message(message);
+		if (!list_buffer_.empty()) {
+			message.dir_entries = nullptr;
+			message.buffer = list_buffer_;
+		}
+
+		if (!comm_.send_message(message))
+			return false;
+
+		pending_dir_tree_ = dir_tree;
+		return true;
 	}
 
 private:
 	FileStorageComm &comm_;
 	PatchDirList &patch_dir_list_;
 	std::span<char> raw_patch_data_;
+	std::span<char> list_buffer_;
+	DirTree<FileEntry> *pending_dir_tree_ = nullptr;
 };
 } // namespace MetaModule
