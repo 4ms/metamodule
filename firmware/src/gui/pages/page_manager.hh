@@ -429,6 +429,15 @@ public:
 			return;
 		}
 
+		// The patch stopped while its display was showing: a frozen display would burn in, so go blank
+		if (screensaver.in_display_mode() && cur_page == &page_fullscreen_graphic &&
+			!info.patch_playloader.is_playing())
+		{
+			page_list.request_last_page();
+			screensaver.show_blank();
+			return;
+		}
+
 		// Something else took us off the display (e.g. the patch was unloaded)
 		if (screensaver.in_display_mode() && cur_page != &page_fullscreen_graphic)
 			screensaver.reset_display_mode();
@@ -459,6 +468,10 @@ public:
 			return std::nullopt;
 
 		if (lv_obj_is_visible(ui_Keyboard) || !cur_page->can_leave_for_screensaver())
+			return std::nullopt;
+
+		// A stopped patch's display doesn't change, so it would burn in: go blank instead
+		if (!info.patch_playloader.is_playing())
 			return std::nullopt;
 
 		auto patch = info.open_patch_manager.get_playing_patch();
