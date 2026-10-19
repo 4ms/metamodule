@@ -6,7 +6,7 @@
 //
 // So far:
 // - storage: MP1's PatchStorage answers the A35's FileStorageProxy requests (storage_messages.hh).
-//   Volumes: SD card, NOR flash (a RAM-backed stub until there's an OSPI driver), and USB
+//   Volumes: SD card, NOR flash, and USB
 //   (always unmounted until there's a USB host driver).
 
 #include "console.hh"

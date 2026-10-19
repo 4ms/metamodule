@@ -44,16 +44,31 @@ another), so build MP1 first.
 
 ## What runs
 
-- **M33:** patch storage (MP1's `PatchStorage`): SD card, and NOR flash (a
-  RAM-backed stub until there's an OSPI driver).
+- **M33:** patch storage (MP1's `PatchStorage`): SD card, and the internal
+  patch volume on the NOR flash.
 - **A35:** MP1's GUI (`PageManager` and all the pages), rendered at MP1's
   320x240 and scaled 3x into the middle of the panel, and MP1's audio stream
   (`src/audio/audio.cc`), which plays the patch in the codec's DMA interrupt.
+  The patch is split between the two A35 cores the same way as on MP1: the
+  second core runs MP1's `AuxPlayer` (`src/core_a35/aux_core.cc`). Unlike MP1,
+  the GUI stays on the first core, so the second core only plays modules.
   Built-in modules: the 4ms modules and the `vcv_ports` brands. The assets
   are unpacked into a RamDisk, which modules can read with libc (`fopen`, etc).
 - **Not yet:** the hardware controls, jack sense (all jacks are reported as
-  patched), MIDI, calibration (defaults are used), plugins, USB, WiFi, and libc
-  file access on the SD card and USB.
+  patched), MIDI, plugins, USB, WiFi, and libc file access on the SD card and USB.
+
+## NOR flash
+
+The 16MB W25Q128JV on OCTOSPI1 (on the mp2-devboard) is driven by mdrivlib's
+`OSpiFlash` (`target/stm32mp2/drivers/ospi_flash_driver.hh`), which has the same
+API as MP1's QSPI driver; `src/mp2-stubs/drivers/qspi_flash_driver.hh` makes it
+the `QSpiFlash` that shared code uses. The layout is MP1's
+(`src/fs/norflash_layout.hh`): the boot loader (TF-A) in the first 512kB, the
+patch volume (LittleFS) in the top 2MB
+minus 4kB, and the calibration data in the top 4kB.
+
+Only one core may use it at a time: the A35 reads the calibration at startup,
+before it starts the M33, and after that the M33 owns it.
 
 Until the controls work, navigate the GUI from the serial console:
 Right/Left arrows (or `d`/`a`) turn the encoder, Enter (or Down, `s`) clicks
@@ -72,8 +87,8 @@ MP2-only files in `firmware/`:
   its known hardware issues are in [src/pro/conf/README.md](../firmware/src/pro/conf/README.md).
 - `src/mp2-stubs/`: MP2 versions of MP1 headers, found first in the include
   paths so they replace MP1's: stand-ins for drivers and features MP2 doesn't
-  have yet (a RAM-backed QSPI NOR flash, the plugin loader, the assets in
-  flash, ...), and headers that are MP1-specific (`ld.h`, the file buffer)
+  have yet (the plugin loader, the assets in flash, ...), the OSPI flash
+  driver as `QSpiFlash`, and headers that are MP1-specific (`ld.h`, the file buffer)
 - `src/core_intercom/shared_index.hh`: pointers to the objects the A35 and M33 share
 - `cmake/mp2.cmake`, `cmake/aarch64-none-elf-gcc.cmake`, `cmake/arch_mp25x*.cmake`
 - `system/linker/stm32mp2xx_*.ld`, `system/mmu_ca35.cc`

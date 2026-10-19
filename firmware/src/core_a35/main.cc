@@ -8,11 +8,13 @@
 // main() starts the Cortex-M33, which runs patch storage (SD card, NOR flash), then the display,
 // MP1's audio stream (audio/audio.cc, which plays the patch in the codec's DMA interrupt), and
 // MP1's GUI (PageManager and its pages), which reaches patch storage with FileStorageProxy.
+// The second A35 core plays part of the patch (aux_core.cc).
 // Not yet ported: controls and jack sense (the serial console navigates the GUI, see
-// console_keys.hh), MIDI, calibration, plugins, USB, WiFi, the second A35 core.
+// console_keys.hh), MIDI, plugins, USB, WiFi.
 
 #include "audio/audio.hh"
-#include "calibrate/calibration_data.hh"
+#include "aux_core.hh"
+#include "calibrate/calibration_data_reader.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "conf/screen_conf.hh"
@@ -131,6 +133,9 @@ int main() {
 
 	StaticBuffers::init();
 
+	// Once the M33 is running, it owns the NOR flash (patch storage), so read the calibration first
+	auto cal = CalibrationDataReader::read_calibration_or_defaults(FlashLoader{}, CalDataFlashOffset);
+
 	start_m33();
 	start_display();
 
@@ -155,12 +160,7 @@ int main() {
 							 patch_playloader,
 							 StaticBuffers::param_blocks,
 							 patch_mod_queue};
-	{
-		// FIXME: MP1 reads the calibration from flash (calibrate/calibration_data_reader.hh)
-		CalData cal;
-		cal.reset_to_default();
-		audio.set_calibration(cal);
-	}
+	audio.set_calibration(cal);
 
 	// The RamDisk holds the assets and plugin files. It's big, so it's on the heap rather than in
 	// .bss (which is cleared at startup)
@@ -178,6 +178,9 @@ int main() {
 				 patch_mod_queue,
 				 plugin_manager,
 				 ramdisk};
+
+	// Core 1 plays part of the patch, so it must be running before a patch loads
+	start_aux_core(patch_player, ui);
 
 	static PluginAppInterface::Internal plugin_internal{ui.get_settings(), open_patches_manager, ui.get_notify_queue()};
 	static PluginAppInterface plugin_interface{plugin_internal};

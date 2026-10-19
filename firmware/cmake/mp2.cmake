@@ -56,6 +56,7 @@ set(MP2_HAL_MODULES
   hal_i2c_ex
   hal_ltdc
   hal_rcc
+  hal_ospi
   hal_rcc_ex
   hal_sai
   hal_sai_ex
@@ -95,6 +96,7 @@ add_library(mp2_mdrivlib OBJECT
   ${MDRIVLIB}/target/stm32mp2/drivers/sai_tdm.cc
   ${MDRIVLIB}/target/stm32mp2/drivers/dsi_screen.cc
   ${MDRIVLIB}/target/stm32mp2/drivers/risab.cc
+  ${MDRIVLIB}/target/stm32mp2/drivers/ospi_flash_driver.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/drivers/hal_cnt.cc
 )
 target_link_libraries(mp2_mdrivlib PUBLIC mdrivlib_interface)
@@ -212,6 +214,7 @@ include(src/shared_sources.cmake)
 add_library(
   a35_core OBJECT
   src/core_a35/main.cc
+  src/core_a35/aux_core.cc
   src/core_a35/system_init.cc
   src/core_a35/m33_firmware.S
   src/core_a35/assets_image.S
@@ -222,6 +225,7 @@ add_library(
   src/core_a35/no_plugins.cc
   src/core_a35/gettimeofday.cc
   src/core_a35/fs_syscall_proxy.cc
+  src/flash_loader/flash_loader.cc
   src/fs/syscall/syscalls.cc
   src/fs/syscall/filedesc_manager.cc
   src/fs/syscall/filesystem.cc
@@ -237,6 +241,7 @@ add_library(
   system/sbrk_mp2.cc
   system/eh_frame_ca35.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
+  ${MDRIVLIB}/target/stm32mp2_ca35/boot/aux_core_startup.s
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/vectors.S
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/irq_init.c
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/esr_decode.cc

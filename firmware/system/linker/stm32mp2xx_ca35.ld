@@ -124,8 +124,9 @@ SECTIONS
 		. += 16M;
 		_stack_end = .;
 
+		/* Core 1 only plays modules (core_a35/aux_core.cc) */
 		_cpu1_stack_start = .;
-		. += 64K;
+		. += 1M;
 		_cpu1_stack_end = .;
 	} > RAM
 

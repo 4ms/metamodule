@@ -12,6 +12,7 @@
 #include "sync_params.hh"
 #include "thorvg.h"
 #include "user_settings/settings_file.hh"
+#include <atomic>
 
 namespace MetaModule
 {
@@ -112,6 +113,18 @@ public:
 		return notify_queue;
 	}
 
+	// For core 1's AuxPlayer (core_a7/aux_core_player.hh), same as MP1's Ui
+	TextDisplayWatcher &displays() {
+		return params.text_displays;
+	}
+
+	bool midi_feedback_enabled() const {
+		return settings.midi.midi_feedback == MidiSettings::MidiFeedback::Enabled;
+	}
+
+	// Set by AuxPlayer when it has read the watched text displays, cleared after each page update
+	std::atomic<bool> new_patch_data = false;
+
 private:
 	uint32_t last_page_update_tm = 0;
 	uint32_t last_lv_update_tm = 0;
@@ -126,6 +139,8 @@ private:
 		keys.update(metaparams);
 
 		page_manager.update_current_page();
+
+		new_patch_data.store(false, std::memory_order_release);
 
 		auto load_status = patch_playloader.handle_file_events();
 		if (!load_status.success) {

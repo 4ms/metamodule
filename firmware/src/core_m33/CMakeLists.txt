@@ -49,6 +49,7 @@ set_arch_flags()
 # ST HAL (only the modules used here: see stm32mp2xx_hal_conf.h)
 set(M33_HAL_MODULES
   hal_dcache
+  hal_ospi
   hal_rcc
   hal_rcc_ex
   hal_sd
@@ -69,6 +70,7 @@ add_executable(
   ${MDRIVLIB}/target/stm32mp2_cm33/drivers/interrupt_handler.cc
   ${MDRIVLIB}/target/stm32mp2_cm33/drivers/hal_tick_stgen.cc
   ${MDRIVLIB}/drivers/pin.cc
+  ${MDRIVLIB}/target/stm32mp2/drivers/ospi_flash_driver.cc
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
   ${FWDIR}/lib/littlefs/lfs.c
