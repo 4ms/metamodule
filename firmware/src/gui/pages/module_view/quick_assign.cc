@@ -27,6 +27,7 @@ void ModuleViewPage::handle_quick_assign() {
 	// Clear events when the button is first pressed
 	if (quickmap_rotary_button.is_just_pressed()) {
 		metaparams.ext_buttons_high_events = 0;
+		screensaver_toggled_this_press = false;
 
 		if (gui_state.midi_quick_mapping_mode) {
 			params.last_midi_cc.num = -1;
@@ -99,13 +100,17 @@ void ModuleViewPage::handle_quick_assign() {
 			}
 		}
 
-		// Screensaver quick assign: push+turn encoder
+		// Screensaver quick assign: push+turn encoder toggles it, once per press
 		else if (fullscreen_display(current_element->element))
 		{
 			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
 				suppress_next_click = true;
-				if (!is_assigned_screensaver(*current_element)) {
-					assign_screensaver(*current_element);
+				if (!screensaver_toggled_this_press) {
+					screensaver_toggled_this_press = true;
+					if (is_assigned_screensaver(*current_element))
+						remove_screensaver();
+					else
+						assign_screensaver(*current_element);
 					roller_hover.force_redraw();
 				}
 				return;

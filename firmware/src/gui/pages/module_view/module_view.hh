@@ -694,6 +694,7 @@ private:
 	// Listing only this module's displays, to pick one as the patch's screensaver
 	bool choosing_screensaver = false;
 	bool quick_control_mode = false;
+	bool screensaver_toggled_this_press = false;
 	Toggler quickmap_rotary_button;
 
 	uint64_t last_poly_check_tm = 0;
