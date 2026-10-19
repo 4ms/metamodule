@@ -673,7 +673,7 @@ void AudioStream::update_audio_settings() {
 }
 
 uint32_t AudioStream::calc_audio_period() {
-	return (24'000'000 / sample_rate_) * block_size_;
+	return (GenericTimerHz / sample_rate_) * block_size_;
 }
 
 } // namespace MetaModule

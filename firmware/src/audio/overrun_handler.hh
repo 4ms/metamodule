@@ -7,6 +7,14 @@
 namespace MetaModule
 {
 
+// Ticks per second of the ARM generic timer (PL1_GetCurrentPhysicalValue(), mdrivlib::CycleCounter):
+// 24MHz on MP1's A7, 64MHz on MP2's A35
+#if defined(CORE_CA35)
+constexpr uint32_t GenericTimerHz = 64'000'000;
+#else
+constexpr uint32_t GenericTimerHz = 24'000'000;
+#endif
+
 struct AudioOverrunHandler {
 	void start_retrying() {
 		retrying = true;
@@ -27,7 +35,7 @@ struct AudioOverrunHandler {
 	bool handle() {
 		// if we've gone 0.1 sec without overrunning, then consider this a new overrun
 		uint64_t tm = PL1_GetCurrentPhysicalValue();
-		if (tm - last_overrun < 2'400'000) {
+		if (tm - last_overrun < GenericTimerHz / 10) {
 			overrun_count++;
 		} else {
 			last_overrun = tm;
