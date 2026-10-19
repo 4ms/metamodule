@@ -6,14 +6,14 @@
 // I/O supplies, audio PLL, kernel clocks) -> main().
 //
 // This is a bring-up test for the MetaModule Pro p1 board, not the app:
-//  1. console, then load and start the Cortex-M33 (which tests the SD card: see core_m33/main.cc)
+//  1. console, then load and start the Cortex-M33, which runs patch storage (SD card, NOR flash)
 //  2. probe every I2C device on the board and report present/missing
 //  3. button LEDs: light each RGB button
 //  4. display: the MetaModule GUI screens (SquareLine export), Main Menu showing
 //  5. codec: init PCM3168 + SAI1 TDM, output a triangle wave on all 8 outs
-//  6. loop: print control-expander changes (encoders/buttons) and direct GPIO controls
+//  6. loop: print control-expander changes (encoders/buttons) and direct GPIO controls,
+//     and test FileStorageProxy (storage_test.hh): print the patch list, load a patch, list files
 
-#include "bringup_ipc.hh"
 #include "conf/board_codec_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/console_uart_conf.hh"
@@ -35,7 +35,11 @@
 #include "gui/slsexport/comp_init.hh"
 #include "lvgl.h"
 #include "lvgl_display.hh"
+#include "patch_file/file_storage_proxy.hh"
+#include "shared_index.hh"
+#include "storage_test.hh"
 #include <array>
+#include <cstdio>
 
 extern "C" const uint8_t m33_firmware[];	 // m33_firmware.S
 extern "C" const uint8_t m33_firmware_end[]; // m33_firmware.S
@@ -81,6 +85,25 @@ void print_hex(uint32_t v, unsigned digits = 2) {
 	}
 	print(buf);
 }
+
+} // namespace
+
+// printf() etc. output (pr_err(), pr_info(), ...)
+extern "C" int _write(int, char *ptr, int len) {
+	using UartSem = mdrivlib::HWSemaphore<MetaModule::UartLock>;
+	if (hsem_ready) {
+		while (UartSem::lock(MetaModule::UartLockA7Core0) != mdrivlib::HWSemaphoreFlag::LockedOk)
+			;
+	}
+	for (int i = 0; i < len; i++)
+		console.putchar(ptr[i]);
+	if (hsem_ready)
+		UartSem::unlock(MetaModule::UartLockA7Core0);
+	return len;
+}
+
+namespace
+{
 
 void delay_ms(uint32_t ms) {
 	auto start = mdrivlib::read_cntpct();
@@ -132,6 +155,13 @@ void fill_audio_block(unsigned half) {
 __attribute__((section(".framebuffers"))) alignas(4096) std::array<uint32_t, 720 * 1280> framebuffer;
 std::array<lv_color_t, 1280 * 80> lvgl_draw_buffer; // partial render buffer: 1/9 of the view
 
+// Shared with the M33 (shared_index.hh). The M33 reads files into raw_patch_data, and writes the
+// patch list and dir entries into storage_list_buffer serialized (see dir_list_serial.hh).
+__attribute__((section(".sharedmem"))) MetaModule::BringupIPC::Message bringup_message;
+__attribute__((section(".sharedmem"))) MetaModule::IntercoreStorageMessage storage_message;
+__attribute__((section(".sharedmem"))) std::array<char, 1024 * 1024> raw_patch_data;
+__attribute__((section(".sharedmem"))) std::array<char, 256 * 1024> storage_list_buffer;
+
 } // namespace
 
 int main() {
@@ -139,6 +169,8 @@ int main() {
 
 	console.init();
 	print("\n\nMetaModule Pro p1 bring-up\n");
+	// Line-buffered, so lines from the two cores don't interleave
+	setvbuf(stdout, nullptr, _IOLBF, 256);
 
 	HAL_Init();
 
@@ -164,10 +196,12 @@ int main() {
 							true))
 			print("Shared memory: RISAF4 is locked, can't open it to the M33!\n");
 	}
-	__attribute__((section(".sharedmem"))) static BringupIPC::Message bringup_message;
 	bringup_message = {};
-	BringupIPC::shared_index().message = &bringup_message;
-	BringupIPC::shared_index().magic = BringupIPC::SharedIndex::ValidMagic;
+	storage_message = {};
+	auto &index = shared_index();
+	index.bringup_message = &bringup_message;
+	index.storage_message = &storage_message;
+	index.magic = SharedIndex::ValidMagic;
 
 	if constexpr (M33_LOAD_ADDR >= mdrivlib::RISAF::DDRBase) {
 		// TF-A's DDR region only allows CID0/CID1: open the M33's region to it (CID2)
@@ -326,9 +360,15 @@ int main() {
 
 	uint16_t last_jacks = 0;
 
-	// A35 <-> M33 messaging test (bringup_ipc.hh): ping every second, print the reply
+	// A35 <-> M33 messaging test (shared_index.hh): ping every second, print the reply
 	using IPC = mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, BringupIPC::Message, BringupIPC::Channel>;
-	static IPC ipc{*BringupIPC::shared_index().message};
+	static IPC ipc{bringup_message};
+
+	// Patch storage, on the M33
+	static FileStorageComm storage_comm{storage_message};
+	static PatchDirList patch_dir_list;
+	static FileStorageProxy file_storage{raw_patch_data, storage_comm, patch_dir_list, storage_list_buffer};
+	static StorageTest storage_test{file_storage};
 	uint32_t ipc_seq = 0;
 	uint64_t ipc_sent_at = 0;
 	uint32_t last_ipc_send = HAL_GetTick();
@@ -378,6 +418,8 @@ int main() {
 		}
 
 		lv_timer_handler();
+
+		storage_test.process();
 
 		// A35 <-> M33 messaging
 		if (auto reply = ipc.get_new_message(); reply.seq) {

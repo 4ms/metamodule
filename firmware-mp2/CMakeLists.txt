@@ -36,6 +36,11 @@ if(MP2_TEST_CARRIER)
   message(STATUS "Building for the mp2-devboard test carrier (not pro p1)")
 endif()
 
+# Console log level for pr_err(), pr_warn(), etc. (shared with the M33 build)
+set(LOG_LEVEL WARN CACHE STRING "Console log level")
+include(${FWDIR}/cmake/log_levels.cmake)
+enable_logging()
+
 set(MP2_CMSIS_DEVICE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/cmsis-device/stm32mp257d)
 set(MP2_CMSIS_CORE_DIR ${FWDIR}/lib/cmsis)
 set(MP2_HAL_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/stm32-hal/stm32mp2)
@@ -132,7 +137,7 @@ ExternalProject_Add(
   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/core_m33
   CMAKE_ARGS -DM33_LOAD_ADDR=${M33_LOAD_ADDR} -DM33_REGION_SIZE=${M33_REGION_SIZE}
              -DSHAREDMEM_ADDR=${SHAREDMEM_ADDR} -DSHAREDMEM_SIZE=${SHAREDMEM_SIZE}
-             -DMP2_TEST_CARRIER=${MP2_TEST_CARRIER}
+             -DMP2_TEST_CARRIER=${MP2_TEST_CARRIER} -DLOG_LEVEL=${LOG_LEVEL}
   INSTALL_COMMAND ""
   BUILD_ALWAYS ON
   BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/core_m33/main_m33.bin
@@ -151,6 +156,7 @@ add_library(
   src/core_a35/uart_print.c
   system/mmu_ca35.cc
   system/sbrk.cc
+  system/syscall_stubs.c
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/vectors.S
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/irq_init.c
@@ -177,6 +183,7 @@ target_include_directories(
          src/pro
          ${FWDIR}
          ${FWDIR}/src
+         ${FWDIR}/src/console
          ${FWDIR}/lib
          ${FWDIR}/lib/patch-serial
          ${FWDIR}/metamodule-plugin-sdk/core-interface

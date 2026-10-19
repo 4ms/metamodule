@@ -10,7 +10,7 @@
  */
 ENTRY(Reset_Handler)
 
-_Min_Stack_Size = 0x4000;
+_Min_Stack_Size = 0x10000; /* MP1's M4 has 48kB: PatchStorage, FatFS, and LittleFS use a lot of stack */
 
 SECTIONS
 {
@@ -92,8 +92,18 @@ SECTIONS
 		_ebss = .;
 	}
 
-	/* Heap: from the end of .bss up to the stack. Stack: at the top of the region. */
-	_sheap = ALIGN(_ebss, 8);
+	/* Not zeroed at startup: keeps its contents when the A35 restarts the M33 */
+	.noinit (NOLOAD) :
+	{
+		. = ALIGN(4);
+		*(.noinit)
+		*(.noinit*)
+		. = ALIGN(4);
+		_enoinit = .;
+	}
+
+	/* Heap: from the end of .noinit up to the stack. Stack: at the top of the region. */
+	_sheap = ALIGN(_enoinit, 8);
 	end = _sheap;
 	_estack = M33_LOAD_ADDR + M33_REGION_SIZE;
 	_eheap = _estack - _Min_Stack_Size;

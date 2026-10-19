@@ -41,6 +41,9 @@ endif()
 set(FWDIR ${MP2_DIR}/../firmware)
 set(MDRIVLIB ${FWDIR}/lib/mdrivlib)
 
+include(${FWDIR}/cmake/log_levels.cmake)
+enable_logging()
+
 include(${MP2_DIR}/cmake/arch_mp25xm33.cmake)
 set_arch_flags()
 
@@ -60,8 +63,8 @@ set_source_files_properties(${M33_HAL_MODULES} PROPERTIES COMPILE_OPTIONS "-Wno-
 add_executable(
   main_m33.elf
   main.cc
-  sd_test.cc
   system_init.cc
+  write.cc
   ${M33_HAL_MODULES}
   ${MDRIVLIB}/target/stm32mp2_cm33/boot/startup_cm33.s
   ${MDRIVLIB}/target/stm32mp2_cm33/drivers/interrupt_handler.cc
@@ -69,8 +72,12 @@ add_executable(
   ${MDRIVLIB}/drivers/pin.cc
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
+  ${FWDIR}/lib/littlefs/lfs.c
+  ${FWDIR}/lib/littlefs/lfs_util.c
   ${FWDIR}/src/fs/fatfs/diskio.cc
+  ${FWDIR}/src/fs/fatfs/delete_node.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
+  ${FWDIR}/src/fs/helpers.cc
   ${FWDIR}/src/fs/time_convert.cc
   ${MP2_DIR}/system/sbrk.cc
   ${FWDIR}/system/libc_stub.c
@@ -79,9 +86,15 @@ add_executable(
 target_include_directories(
   main_m33.elf
   PRIVATE ${CMAKE_CURRENT_LIST_DIR}
+          ${MP2_DIR}/src/stubs
           ${MP2_DIR}/src
           ${MP2_DIR}/src/pro
+          ${FWDIR}
           ${FWDIR}/src
+          ${FWDIR}/src/console
+          ${FWDIR}/src/params
+          ${FWDIR}/lib
+          ${FWDIR}/lib/patch-serial
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${MDRIVLIB}
@@ -101,11 +114,15 @@ target_link_options(
   -Wl,--defsym=M33_REGION_SIZE=${M33_REGION_SIZE}
   -Wl,--defsym=SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
   -Wl,--defsym=SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
+  # RamDiskOps checks the RamDisk size against this MP1 linker symbol: = RamDiskSizeBytes (src/pro/conf/ramdisk_conf.hh)
+  -Wl,--defsym=_VIRTDRIVE_SZ=0x10000
   -Wl,-Map,main_m33.map,--cref
   --specs=nano.specs
   --specs=nosys.specs
 )
 set_target_properties(main_m33.elf PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
+
+set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 
 add_custom_command(
   TARGET main_m33.elf
