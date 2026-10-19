@@ -6,8 +6,15 @@ namespace MetaModule
 {
 
 bool ModuleViewPage::is_assigned_screensaver(DrawnElement const &drawn_element) const {
-	return fullscreen_display(drawn_element.element) &&
-		   patch->is_screensaver_display(this_module_id, drawn_element.gui_element.idx.light_idx);
+	if (!fullscreen_display(drawn_element.element))
+		return false;
+
+	auto ss = patch->find_screensaver_display();
+	if (!ss || ss->module_id != this_module_id)
+		return false;
+
+	// Resolve the entry, which may refer to the display by position
+	return screensaver_light_idx(*patch) == drawn_element.gui_element.idx.light_idx;
 }
 
 void ModuleViewPage::assign_screensaver(DrawnElement const &drawn_element) {
