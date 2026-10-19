@@ -18,8 +18,6 @@ MEMORY
     FRAMEBUF (rw)  : ORIGIN = 0x98000000, LENGTH = 32M
 }
 
-__HEAP_SIZE = 0x40000;
-
 SECTIONS
 {
     .text : {
@@ -29,7 +27,6 @@ SECTIONS
 					/* Todo: check if we need the next 3 lines */
 		*(.glue_7)         /* glue arm to thumb code */
 		*(.glue_7t)        /* glue thumb to arm code */
-		*(.eh_frame)
 
 		KEEP (*(.init)) /* libc ctors */
 		KEEP (*(.fini)) /* libc dtors */
@@ -43,16 +40,20 @@ SECTIONS
 		. = ALIGN(8);
 		*(.rodata)         
 		*(.rodata*) 
+		*(.gcc_except_table*) /* C++ exception handling: language-specific data */
 		. = ALIGN(8);
 	} > ROM
 
-	/* used for unwinding (probably not used, but is ignored if your app doens't use exceptions */
-	.ARM.extab	 : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >ROM
-	.ARM : {
-		__exidx_start = .;
-		*(.ARM.exidx*)
-		__exidx_end = .;
-	} >ROM
+	/* C++ exception handling: the unwind tables. We link without crtbegin.o/crtend.o, so the
+	   app registers them with the unwinder itself (system/eh_frame_ca35.cc), and the zero
+	   word that crtend.o normally provides terminates them. */
+	.eh_frame :
+	{
+		. = ALIGN(8);
+		__eh_frame_start = .;
+		KEEP(*(.eh_frame))
+		LONG(0)
+	} > ROM
 
 	.preinit_array :
 	{
@@ -106,14 +107,6 @@ SECTIONS
         _bss_end = .;
     } > RAM
 
-	.heap (NOLOAD):
-	{
-		. = ALIGN(16);
-		_sheap = .;
-		. += __HEAP_SIZE;
-		_eheap = .;
-	} > RAM
-
 	/* Stacks: in a NOLOAD section so the linker checks they fit in RAM */
 	.stacks (NOLOAD):
 	{
@@ -126,13 +119,23 @@ SECTIONS
 		. += 16K;
 		_irq_stack_end = .;
 
+		/* Same as MP1's A7 (the GUI, patch loading and modules can use a lot of stack) */
 		_stack_start = .;
-		. += 64K;
+		. += 16M;
 		_stack_end = .;
 
 		_cpu1_stack_start = .;
 		. += 64K;
 		_cpu1_stack_end = .;
+	} > RAM
+
+	/* The heap is the rest of RAM */
+	.heap (NOLOAD):
+	{
+		. = ALIGN(16);
+		_sheap = .;
+		. = ORIGIN(RAM) + LENGTH(RAM);
+		_eheap = .;
 	} > RAM
 
 	_irq_stack_size = _irq_stack_end - _irq_stack_start;

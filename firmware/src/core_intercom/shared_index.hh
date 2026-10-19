@@ -14,30 +14,15 @@ namespace MetaModule
 
 struct IntercoreStorageMessage;
 
-// Bring-up test of the A35 <-> M33 messaging path: mdrivlib::InterCoreComm over IPCC1.
-// The A35 (Initiator) sends a sequence number; the M33 (Responder) replies with seq * 2.
-namespace BringupIPC
-{
-struct Message {
-	uint32_t seq; // 0 = no message
-	uint32_t value;
-};
-static_assert(sizeof(Message) == 8);
-
-// IPCC1 channels 1-4 are used by MP1's messages (storage, module fs x2, device settings)
-constexpr uint32_t Channel = 8;
-} // namespace BringupIPC
-
 // Crosses the core boundary: no raw pointers (8 bytes on the A35, 4 on the M33).
 // Both cores see shared DDR at the same addresses, so InterCoreSharedRegion::base stays 0.
 struct SharedIndex {
 	static constexpr uint32_t ValidMagic = 0x5EA4ED01;
 	uint32_t magic; // set by the A35 once the pointers below are valid
 
-	InterCorePtr32<BringupIPC::Message> bringup_message;
 	InterCorePtr32<IntercoreStorageMessage> storage_message; // FileStorageProxy (A35) <-> PatchStorage (M33)
 };
-static_assert(sizeof(SharedIndex) == 12);
+static_assert(sizeof(SharedIndex) == 8);
 
 // At the start of the shared region (SHAREDMEM_ADDR), where both cores see it.
 // Deliberately not a defined object: InterCorePtr32 has a default member initializer, so

@@ -605,6 +605,42 @@ __STATIC_FORCEINLINE  void __CLREX(void)
   __ASM volatile ("clrex" ::: "memory");
 }
 
+#if defined(__aarch64__)
+/* AArch64 (e.g. the STM32MP2's Cortex-A35) has no SSAT/USAT instructions */
+
+/**
+  \brief   Signed Saturate
+  \details Saturates a signed value.
+  \param [in]  value  Value to be saturated
+  \param [in]    sat  Bit position to saturate to (1..32)
+  \return             Saturated value
+ */
+#define __SSAT(ARG1, ARG2) \
+__extension__ \
+({                          \
+  int32_t __ARG1 = (ARG1); \
+  const int32_t __MAX = (int32_t)((1U << ((ARG2) - 1U)) - 1U); \
+  const int32_t __MIN = -1 - __MAX; \
+  (__ARG1 > __MAX) ? __MAX : (__ARG1 < __MIN) ? __MIN : __ARG1; \
+ })
+
+/**
+  \brief   Unsigned Saturate
+  \details Saturates an unsigned value.
+  \param [in]  value  Value to be saturated
+  \param [in]    sat  Bit position to saturate to (0..31)
+  \return             Saturated value
+ */
+#define __USAT(ARG1, ARG2) \
+__extension__ \
+({                          \
+  int32_t __ARG1 = (ARG1); \
+  const int32_t __MAX = (int32_t)((1U << (ARG2)) - 1U); \
+  (uint32_t)((__ARG1 > __MAX) ? __MAX : (__ARG1 < 0) ? 0 : __ARG1); \
+ })
+
+#else
+
 /**
   \brief   Signed Saturate
   \details Saturates a signed value.
@@ -635,6 +671,8 @@ __extension__ \
   __ASM volatile ("usat %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) : "cc" ); \
   __RES; \
  })
+
+#endif
 
 /* ###########################  Core Function Access  ########################### */
 

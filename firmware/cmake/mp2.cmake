@@ -63,10 +63,11 @@ set(MP2_HAL_MODULES
 list(TRANSFORM MP2_HAL_MODULES PREPEND ${MP2_HAL_DIR}/Src/stm32mp2xx_)
 list(TRANSFORM MP2_HAL_MODULES APPEND .c)
 
-# Include paths for HAL, CMSIS, and mdrivlib, used by every target.
+# Include paths for HAL, CMSIS, and mdrivlib, used by every target. Same name as MP1's, since shared
+# CMakeLists (e.g. src/hardware_support) link to it.
 # (An INTERFACE target, since linking an OBJECT library into a static library would copy its objects.)
-add_library(mp2_interface INTERFACE)
-target_include_directories(mp2_interface INTERFACE
+add_library(mdrivlib_interface INTERFACE)
+target_include_directories(mdrivlib_interface INTERFACE
   src/core_a35
   ${MP2_HAL_DIR}/Inc
   ${MP2_CMSIS_CORE_DIR}/Include
@@ -79,7 +80,7 @@ target_include_directories(mp2_interface INTERFACE
 )
 
 add_library(mp2_hal OBJECT ${MP2_HAL_MODULES})
-target_link_libraries(mp2_hal PUBLIC mp2_interface)
+target_link_libraries(mp2_hal PUBLIC mdrivlib_interface)
 # ST's HAL casts pointers to uint32_t throughout (32-bit assumption); the
 # peripheral addresses all fit in 32 bits so the truncation is harmless.
 target_compile_options(mp2_hal PRIVATE -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -Wno-unused-variable)
@@ -96,20 +97,52 @@ add_library(mp2_mdrivlib OBJECT
   ${MDRIVLIB}/target/stm32mp2/drivers/risab.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/drivers/hal_cnt.cc
 )
-target_link_libraries(mp2_mdrivlib PUBLIC mp2_interface)
+target_link_libraries(mp2_mdrivlib PUBLIC mdrivlib_interface)
 
 #
 # LVGL (same library and config as MP1, with MP2 overrides in src/core_a35/lv_conf.h)
 
 set(LV_CONF_PATH ${PROJECT_SOURCE_DIR}/src/core_a35/lv_conf.h CACHE STRING "" FORCE)
 add_subdirectory(lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
-target_link_libraries(lvgl PRIVATE mp2_interface)
+target_link_libraries(lvgl PRIVATE mdrivlib_interface)
+
+target_include_directories(lvgl PRIVATE lib/fatfs/source src/fs/fatfs)
 
 #
 # MetaModule GUI: SquareLine Studio export (screens, fonts, images) and its C++ helpers
 
 add_subdirectory(src/gui/slsexport ${CMAKE_CURRENT_BINARY_DIR}/slsexport)
 target_include_directories(ui_lvgl PRIVATE lib)
+
+#
+# App libraries: the same ones MP1's A7 app uses (src/CMakeLists.txt), except the vcv_ports brands
+# (none are BUILD_INTERNAL_ yet) and the dynamic plugin loader
+
+set(LIBDIR ${FWDIR}/lib)
+
+add_subdirectory(lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
+
+# VCV Rack adaptor
+add_subdirectory(vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
+
+# 4ms modules
+add_subdirectory(lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
+target_link_libraries(CoreModules-4ms PRIVATE ThorVG)
+
+# Patch format and serialization
+add_subdirectory(lib/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
+
+if(NOT TARGET jansson)
+  add_subdirectory(lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
+endif()
+
+add_subdirectory(lib/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
+
+if(NOT TARGET cpputil::cpputil)
+  add_subdirectory(lib/cpputil ${CMAKE_CURRENT_BINARY_DIR}/cpputil)
+endif()
+
+add_subdirectory(coreproc_plugin ${CMAKE_CURRENT_BINARY_DIR}/coreproc_plugin)
 
 
 #
@@ -125,9 +158,11 @@ set(M33_REGION_SIZE 0x2000000)
 
 # Memory shared by the A35 and M33: non-cacheable on both, opened to both cores in RISAF4.
 # Starts with .sharedmemindex (the pointers to the shared objects, at a fixed address both
-# cores link), followed by .sharedmem (the objects). 2MB-aligned: the A35 MMU maps it as one block.
+# cores link), followed by .sharedmem (the objects). Every buffer the A35 asks the M33 to read a
+# file into (or write one from) must be in here.
+# Whole 2MB blocks: the A35 MMU maps it in 2MB blocks.
 set(SHAREDMEM_ADDR 0x9A000000)
-set(SHAREDMEM_SIZE 0x200000)
+set(SHAREDMEM_SIZE 0x2000000)
 
 include(ExternalProject)
 ExternalProject_Add(
@@ -144,17 +179,49 @@ ExternalProject_Add(
 set(M33_BIN ${CMAKE_CURRENT_BINARY_DIR}/core_m33/main_m33.bin)
 
 #
-# A35 application
+# A35 application: MP1's A7 app (src/CMakeLists.txt), minus what MP2 doesn't have yet
+# (audio, plugins, USB, WiFi, OSPI flash)
+
+# Git commit hash (git_version.h)
+include(cmake/CheckGit.cmake)
+CheckGitSetup()
+
+# Same as MP1's hardware_support (system API for plugins), with MP2 versions of the hardware parts
+add_library(hardware_support STATIC
+  src/core_a35/hardware_support/random.cc
+  src/core_a35/hardware_support/memory.cc
+  src/hardware_support/time.cc
+  src/hardware_support/filesystem_helpers.cc
+)
+target_link_libraries(hardware_support PRIVATE mdrivlib_interface)
+target_compile_options(hardware_support PRIVATE -fno-function-sections -fno-data-sections)
+
+set(METAMODULE_FW_DIR ${FWDIR})
+include(src/shared_sources.cmake)
 
 add_library(
   a35_core OBJECT
   src/core_a35/main.cc
   src/core_a35/system_init.cc
   src/core_a35/m33_firmware.S
-  src/gui/slsexport/ui_local.cc
+  src/core_a35/assets_image.S
   src/core_a35/uart_print.c
+  src/core_a35/async_thread_control.cc
+  src/core_a35/console.cc
+  src/core_a35/static_buffers.cc
+  src/core_a35/no_plugins.cc
+  src/core_a35/gettimeofday.cc
+  src/core_a35/no_file_syscalls.cc
+  vcv_ports/glue/plugin_instance.cc
+  ${MDRIVLIB}/target/stm32mp2_ca35/drivers/cycle_counter.cc
+  ${MM_SHARED_CORE_SOURCES}
+  ${MM_SHARED_APP_SOURCES}
+  src/gui/pages/file_browser/file_browser_adaptor.cc
+  src/fs/fatfs/fattime.cc
+  src/mp2-stubs/dynload/exidx_registry.cc
   system/mmu_ca35.cc
   system/sbrk_mp2.cc
+  system/eh_frame_ca35.cc
   system/syscall_stubs_mp2.c
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/vectors.S
@@ -162,36 +229,70 @@ add_library(
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/esr_decode.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/drivers/interrupt_handler.cc
   system/libc_stub.c
+  ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
-target_link_libraries(a35_core PUBLIC mp2_interface lvgl::lvgl ui_lvgl)
+target_link_libraries(
+  a35_core
+  PUBLIC mdrivlib_interface
+         lvgl::lvgl
+         ui_lvgl
+         CoreModules
+         "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>"
+         "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>"
+         "$<LINK_LIBRARY:WHOLE_ARCHIVE,hardware_support>"
+         metamodule::patch-serial
+         cpputil
+         ThorVG
+         vcv_plugin
+)
 add_dependencies(a35_core core_m33)
 target_compile_definitions(
   a35_core PRIVATE M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE} SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
                    SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
 )
+target_compile_definitions(a35_core PUBLIC CPPUTIL_STATIC_STRING_USE_STD_STRING SUPPRESS_HIL_MESSAGES=1)
 set_source_files_properties(
   src/core_a35/m33_firmware.S PROPERTIES COMPILE_DEFINITIONS "M33_FIRMWARE_BIN=\"${M33_BIN}\"" OBJECT_DEPENDS ${M33_BIN}
 )
+# The assets image is embedded in the firmware image (src/core_a35/assets_image.S), since MP2 can't
+# read it from flash yet. The MP2 build doesn't make one yet: it uses the MP1 build's.
+set(MP2_ASSETS_UIMG ${FWDIR}/build/assets.uimg CACHE FILEPATH "Assets image to embed in the firmware")
+if(EXISTS ${MP2_ASSETS_UIMG})
+  set_source_files_properties(
+    src/core_a35/assets_image.S PROPERTIES COMPILE_DEFINITIONS "ASSETS_IMAGE=\"${MP2_ASSETS_UIMG}\"" OBJECT_DEPENDS
+                                           ${MP2_ASSETS_UIMG}
+  )
+else()
+  message(WARNING "No assets image at ${MP2_ASSETS_UIMG}: the firmware will have no module images or fonts. "
+                  "Build MP1 first (cmake --preset full && cmake --build --preset full), then re-run cmake.")
+endif()
 # LVGL's headers OR together values from different enums (deprecated in C++20); MP1 silences this too
-target_compile_options(a35_core PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
+target_compile_options(
+  a35_core PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion -Wno-deprecated-anon-enum-enum-conversion>
+)
 
 target_include_directories(
   a35_core
-  PUBLIC src/pro # before src, so pro's conf/ headers are found before the shared ones in src/conf/
+  PUBLIC src/mp2-stubs # first: stands in for drivers and features MP2 doesn't have yet
+         src/pro # before src, so pro's conf/ headers are found before the shared ones in src/conf/
          src
          .
          src/console
+         src/params
+         src/fs
          lib
-         lib/patch-serial
-         metamodule-plugin-sdk/core-interface
-         metamodule-plugin-sdk/core-interface/filesystem
          lib/fatfs/source
          src/fs/fatfs
+         vcv_ports
+         vcv_ports/glue
+         vcv_ports/glue/ext_plugin
+         ${CMAKE_BINARY_DIR}/checkgit
 )
 
-add_executable(main_a35.elf $<TARGET_OBJECTS:a35_core> $<TARGET_OBJECTS:mp2_mdrivlib> $<TARGET_OBJECTS:mp2_hal>)
-target_link_libraries(main_a35.elf PRIVATE ui_lvgl lvgl::lvgl)
+# (Linking the a35_core OBJECT library adds its objects, and the libraries it links)
+add_executable(main_a35.elf $<TARGET_OBJECTS:mp2_mdrivlib> $<TARGET_OBJECTS:mp2_hal>)
+target_link_libraries(main_a35.elf PRIVATE a35_core)
 
 set(LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/system/linker/stm32mp2xx_ca35.ld)
 target_link_options(

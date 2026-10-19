@@ -112,8 +112,6 @@ target_link_options(
   -Wl,--defsym=M33_REGION_SIZE=${M33_REGION_SIZE}
   -Wl,--defsym=SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
   -Wl,--defsym=SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
-  # RamDiskOps checks the RamDisk size against this MP1 linker symbol: = RamDiskSizeBytes (src/pro/conf/ramdisk_conf.hh)
-  -Wl,--defsym=_VIRTDRIVE_SZ=0x10000
   -Wl,-Map,main_m33.map,--cref
   --specs=nano.specs
   --specs=nosys.specs

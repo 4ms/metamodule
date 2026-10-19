@@ -4,8 +4,11 @@
 #include <cstdint>
 
 // Pro p1 panel: ER-TFT050-10 (ILI9881C, MIPI DSI), native 720x1280 portrait,
-// viewed as 1280x720 landscape. Preview pages at this size with the simulator's
-// --screenw/--screenh flags.
+// viewed as 1280x720 landscape (the panel view).
+//
+// For now the GUI renders at MP1's 320x240 (viewWidth x viewHeight, the size the pages are laid
+// out for) and is scaled up 3x into the middle of the panel view (960x720, centered) when flushed.
+// Preview pages at the full panel size with the simulator's --screenw/--screenh flags.
 // Mounting (observed on the test carrier with a test pattern): the panel's first
 // scan line is on the viewer's left, and pixel 0 of each line is at the bottom.
 // That is, the panel is mounted rotated 90 degrees counter-clockwise from portrait:
@@ -28,8 +31,16 @@ struct ScreenBufferConf {
 	enum Rotation { None, CW90, Flip180, CCW90 };
 	static constexpr Rotation rotation = CCW90; // hardware -> view, see the mapping above
 
-	//The width x height as viewed by the User:
-	static constexpr uint32_t viewWidth = 1280;
-	static constexpr uint32_t viewHeight = 720;
+	//The width x height of the panel as viewed by the User:
+	static constexpr uint32_t panelViewWidth = 1280;
+	static constexpr uint32_t panelViewHeight = 720;
+
+	//The width x height the GUI renders at, and how it's scaled into the panel view:
+	static constexpr uint32_t viewWidth = 320;
+	static constexpr uint32_t viewHeight = 240;
+	static constexpr uint32_t viewScale = 3;
+	static constexpr uint32_t viewOffsetX = (panelViewWidth - viewWidth * viewScale) / 2;
+	static constexpr uint32_t viewOffsetY = (panelViewHeight - viewHeight * viewScale) / 2;
+	static_assert(viewWidth * viewScale <= panelViewWidth && viewHeight * viewScale <= panelViewHeight);
 };
 } // namespace MetaModule

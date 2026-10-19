@@ -1,3 +1,4 @@
+import argparse
 import sys
 import lauterbach.trace32.rcl as t32
 from pathlib import Path
@@ -5,8 +6,12 @@ from pathlib import Path
 # MP2 (STM32MP25x A35) version of flash-t32.py. Usually run via `make PRESET=mp2 flash-t32`.
 # Usage: flash-t32-mp2.py [path/to/main_a35.elf]
 # Relative paths are resolved against the calling directory. Defaults to build-mp2/main_a35.elf.
-elfarg = sys.argv[1] if len(sys.argv) > 1 else "build-mp2/main_a35.elf"
-elfpath = (Path.cwd() / elfarg).resolve()
+
+parser = argparse.ArgumentParser()
+parser.add_argument("elf", nargs="?", default="build-mp2/main_a35.elf")
+args = parser.parse_args()
+
+elfpath = (Path.cwd() / args.elf).resolve()
 
 if not elfpath.is_file():
     print(f"ERROR: ELF not found: {elfpath}")

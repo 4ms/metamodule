@@ -2,10 +2,16 @@
 #include "fs/ramdisk.hh"
 #include <cstdint>
 
-// FIXME: MP1's RamDisk is 60MB, in memory shared by all cores, and the A7 uses it for plugin
-// loading and assets. On MP2 nothing uses it yet: PatchStorage just needs one to exist.
-// Make it full size and shared when the A35 needs it.
+// The A35 has a full-size RamDisk (60MB, same as MP1), in its own RAM: the GUI unpacks the assets
+// into it, and loads plugin files into it.
+// FIXME: on MP1 the RamDisk is in memory shared by all cores, so the M4 can present it over USB.
+// Share it with the M33 when it does USB. Until then, the M33 just has a token one, since
+// PatchStorage needs one to exist.
+#if defined(CORE_CA35)
+static constexpr uint32_t RamDiskSizeBytes = 60 * 1024 * 1024;
+#else
 static constexpr uint32_t RamDiskSizeBytes = 64 * 1024;
+#endif
 static constexpr uint32_t RamDiskBlockSize = 512;
 
 using RamDrive = RamDisk<RamDiskSizeBytes, RamDiskBlockSize>;

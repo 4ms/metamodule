@@ -1,4 +1,4 @@
-// Minimal newlib syscalls for printf() to the console (_write is in src/core_a35/main.cc).
+// Minimal newlib syscalls for printf() to the console (_write is in src/core_a35/console.cc).
 // There's no file I/O through libc: files go through FatFS (and on the M33, PatchStorage).
 #include <errno.h>
 #include <sys/stat.h>
@@ -35,3 +35,4 @@ int _read(int fd, char *ptr, int len) {
 	errno = EBADF;
 	return -1;
 }
+

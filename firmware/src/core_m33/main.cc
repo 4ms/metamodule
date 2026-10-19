@@ -8,13 +8,10 @@
 // - storage: MP1's PatchStorage answers the A35's FileStorageProxy requests (storage_messages.hh).
 //   Volumes: SD card, NOR flash (a RAM-backed stub until there's an OSPI driver), and USB
 //   (always unmounted until there's a USB host driver).
-// - bring-up test: respond to the A35's ping messages, woken by the IPCC1 RX-occupied interrupt
 
 #include "console.hh"
 #include "core_intercom/shared_memory.hh"
 #include "drivers/cache.hh"
-#include "drivers/inter_core_comm.hh"
-#include "drivers/ipcc.hh"
 #include "drivers/stm32xx.h"
 #include "fs/fatfs/sd_host.hh"
 #include "core_intercom/shared_index.hh"
@@ -29,11 +26,6 @@ MetaModule::SharedMemoryS::Ptrs MetaModule::SharedMemoryS::ptrs{};
 
 namespace
 {
-using IPC = mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Responder, BringupIPC::Message, BringupIPC::Channel>;
-using IPCChan = mdrivlib::IPCC_<2>::HalfDuplexMode<BringupIPC::Channel>;
-
-volatile bool request_pending = false;
-
 // USB host isn't ported yet: a drive that's never present
 struct NoDiskOps : DiskOps {
 	DSTATUS status() override {
@@ -102,20 +94,6 @@ int main() {
 	storage.process();
 	printf("M33: patch storage ready (%lu ms)\n", (unsigned long)(HAL_GetTick() - start));
 
-	//
-	// Bring-up IPC test
-	//
-	static IPC ipc{*index.bringup_message};
-
-	// The A35's request holds the channel's RX-occupied flag high until we reply, so the ISR
-	// masks the channel; the main loop unmasks it again after replying.
-	IPCChan::enable_chan_isr(1, 0, [] {
-		IPCChan::disable_chan_isr();
-		request_pending = true;
-	});
-
-	uint32_t num_requests = 0;
-	uint32_t last_print = HAL_GetTick();
 	bool sd_was_mounted = sd.is_mounted();
 
 	while (true) {
@@ -125,24 +103,6 @@ int main() {
 		if (sd.is_mounted() != sd_was_mounted) {
 			sd_was_mounted = sd.is_mounted();
 			printf("M33: SD card %s\n", sd_was_mounted ? "mounted" : "unmounted");
-		}
-
-		if (request_pending) {
-			request_pending = false;
-
-			auto msg = ipc.get_new_message();
-			if (msg.seq) {
-				num_requests++;
-				if (!ipc.send_message({.seq = msg.seq, .value = msg.seq * 2}))
-					printf("M33: reply FAILED (not my turn)\n");
-			}
-			IPCChan::enable_chan_isr();
-		}
-
-		auto now = HAL_GetTick();
-		if (now - last_print >= 10000) {
-			last_print = now;
-			printf("M33: uptime %lu s, answered %lu pings\n", (unsigned long)(now / 1000), (unsigned long)num_requests);
 		}
 	}
 }

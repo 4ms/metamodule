@@ -21,3 +21,7 @@ extern "C" void *_sbrk(ptrdiff_t incr) {
 	heap_end += incr;
 	return prev_heap_end;
 }
+
+size_t get_heap_size() {
+	return size_t((heap_end ? heap_end : &_sheap) - &_sheap);
+}
