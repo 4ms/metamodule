@@ -11,6 +11,7 @@
 #include "git_version.h"
 #include "hsem_handler.hh"
 #include "load_test/test_manager.hh"
+#include "params/param_block.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"

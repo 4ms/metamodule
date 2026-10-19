@@ -8,6 +8,7 @@
 #include "fs/fs_messages.hh"
 #include "fs/module_fs_message_handler.hh"
 #include "hsem_handler.hh"
+#include "params/param_block.hh"
 #include "usb/device_settings_messages.hh"
 #include "usb/usb_manager.hh"
 

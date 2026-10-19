@@ -2,15 +2,17 @@
 #include "conf/ramdisk_conf.hh"
 #include "console/concurrent_buffer.hh"
 #include "intercore_modulefs_message.hh"
-#include "params/param_block.hh"
 #include "usb/dev_drive_block.hh"
 #include "usb/usb_connection_status_block.hh"
+#include <array>
 
 namespace MetaModule
 {
 //fwd declare to reduce dependencies
-class IntercoreStorageMessage;
+struct IntercoreStorageMessage;
 struct DeviceSettingsMessage;
+struct ParamBlock; // params/param_block.hh: depends on the panel's conf
+using DoubleBufParamBlock = std::array<ParamBlock, 2>;
 
 //TODO: Move this structure to static_buffers.hh and declare static inline ptrs there too
 struct SharedMemoryS {
