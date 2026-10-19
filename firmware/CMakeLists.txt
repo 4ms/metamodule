@@ -2,6 +2,19 @@ cmake_minimum_required(VERSION 3.22)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
 
+# Hardware platform (the presets set this):
+#   mp1: MetaModule (STM32MP15x: Cortex-A7 + M4), the rest of this file
+#   mp2: MetaModule Pro (STM32MP25x: Cortex-A35 + M33), cmake/mp2.cmake
+set(METAMODULE_PLATFORM "mp1" CACHE STRING "Hardware platform to build for")
+set_property(CACHE METAMODULE_PLATFORM PROPERTY STRINGS mp1 mp2)
+
+if(METAMODULE_PLATFORM STREQUAL "mp2")
+  include(cmake/mp2.cmake)
+  return()
+elseif(NOT METAMODULE_PLATFORM STREQUAL "mp1")
+  message(FATAL_ERROR "Unknown METAMODULE_PLATFORM: ${METAMODULE_PLATFORM} (use mp1 or mp2)")
+endif()
+
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 project(

@@ -6,7 +6,7 @@
 #include <cstdint>
 
 // STUB: stands in for mdrivlib's QSPI NOR flash driver until the MP2 OSPI driver exists.
-// Found before mdrivlib's drivers/qspi_flash_driver.hh because src/stubs is first in the include path.
+// Found before mdrivlib's drivers/qspi_flash_driver.hh because src/mp2-stubs is first in the M33 include path.
 //
 // It's a RAM-backed "flash", so LittleFS and PatchStorage work unchanged: on first boot the volume
 // is formatted and the default patches are written to it. The RAM covers only the top of the

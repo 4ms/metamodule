@@ -72,6 +72,36 @@
       }
     },
     {
+      "name": "mp2",
+      "description": "MetaModule MP2 (pro): A35 + M33",
+      "generator": "Ninja",
+      "binaryDir": "build-mp2",
+      "cacheVariables": {
+        "METAMODULE_PLATFORM":  { "type": "STRING", "value": "mp2" },
+        "TOOLCHAIN_BASE_DIR":   { "type": "FILEPATH", "value": "" },
+        "CMAKE_TOOLCHAIN_FILE": { "type": "STRING", "value": "cmake/aarch64-none-elf-gcc.cmake" },
+        "MP2_TEST_CARRIER":     { "type": "BOOL", "value": "OFF" }
+      }
+    },
+    {
+      "name": "mp2-test-carrier",
+      "description": "MetaModule MP2 on the mp2-devboard test carrier (until p1 boards arrive)",
+      "inherits": "mp2",
+      "binaryDir": "build-mp2-test-carrier",
+      "cacheVariables": {
+        "MP2_TEST_CARRIER":     { "type": "BOOL", "value": "ON" }
+      }
+    },
+    {
+      "name": "mp2-linux-gnu",
+      "description": "MetaModule MP2 compile-check with aarch64-linux-gnu (objects only, link needs newlib): build target a35_core",
+      "inherits": "mp2",
+      "binaryDir": "build-mp2-linux-gnu",
+      "cacheVariables": {
+        "TOOLCHAIN_TRIPLE":     { "type": "STRING", "value": "aarch64-linux-gnu" }
+      }
+    },
+    {
       "name": "audible",
       "inherits": "full",
       "cacheVariables": {
@@ -102,6 +132,14 @@
     {
       "name": "min-brands",
       "configurePreset": "min-brands"
+    },
+    {
+      "name": "mp2",
+      "configurePreset": "mp2"
+    },
+    {
+      "name": "mp2-test-carrier",
+      "configurePreset": "mp2-test-carrier"
     }
   ]
 }

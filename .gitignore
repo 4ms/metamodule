@@ -1,6 +1,7 @@
 build/
 build-headless/
 build-layout-check/
+build-mp2*/
 LOCAL/
 LOCAL
 *.hex

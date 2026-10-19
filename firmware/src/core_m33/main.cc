@@ -17,7 +17,7 @@
 #include "drivers/ipcc.hh"
 #include "drivers/stm32xx.h"
 #include "fs/fatfs/sd_host.hh"
-#include "shared_index.hh"
+#include "core_intercom/shared_index.hh"
 #include "storage_messages.hh"
 #include <cstdio>
 

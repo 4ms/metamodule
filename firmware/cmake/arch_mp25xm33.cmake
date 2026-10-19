@@ -1,5 +1,5 @@
 # Arch flags for the STM32MP25x Cortex-M33 coprocessor, modeled on
-# firmware/cmake/arch_mp15xm4.cmake. The M33 build is a separate CMake project
+# cmake/arch_mp15xm4.cmake. The M33 build is a separate CMake project
 # (arm-none-eabi toolchain); this file is included by it, not by the A35 build.
 #
 # Role (confirmed): the M33 mirrors the MP1 M4 by default -- controls/gate

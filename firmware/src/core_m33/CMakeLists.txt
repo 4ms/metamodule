@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.22)
 
 # Cortex-M33 (CPU2) firmware for the MetaModule MP2 ("pro").
-# Built as an ExternalProject of firmware-mp2/CMakeLists.txt (it needs the arm-none-eabi
+# Built as an ExternalProject of cmake/mp2.cmake (it needs the arm-none-eabi
 # toolchain, so it can't be a target of the A35 project). The A35 embeds main_m33.bin
 # and loads it to M33_LOAD_ADDR.
 
-set(MP2_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
 if(NOT CMAKE_TOOLCHAIN_FILE)
-  set(CMAKE_TOOLCHAIN_FILE ${MP2_DIR}/cmake/arm-none-eabi-gcc.cmake)
+  set(CMAKE_TOOLCHAIN_FILE ${FWDIR}/cmake/arm-none-eabi-gcc.cmake)
 endif()
 
 set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "")
@@ -25,7 +25,7 @@ set(M33_REGION_SIZE "" CACHE STRING "Size of the M33 memory region (set by the p
 set(SHAREDMEM_ADDR "" CACHE STRING "Address of the memory shared with the A35 (set by the parent project)")
 set(SHAREDMEM_SIZE "" CACHE STRING "Size of the memory shared with the A35 (set by the parent project)")
 if(NOT M33_LOAD_ADDR OR NOT M33_REGION_SIZE OR NOT SHAREDMEM_ADDR OR NOT SHAREDMEM_SIZE)
-  message(FATAL_ERROR "M33_LOAD_ADDR, M33_REGION_SIZE, SHAREDMEM_ADDR, SHAREDMEM_SIZE must be set (build this via the firmware-mp2 project)")
+  message(FATAL_ERROR "M33_LOAD_ADDR, M33_REGION_SIZE, SHAREDMEM_ADDR, SHAREDMEM_SIZE must be set (build this via cmake --preset mp2)")
 endif()
 
 add_compile_definitions(
@@ -38,13 +38,12 @@ if(MP2_TEST_CARRIER)
   add_compile_definitions(MP2_TEST_CARRIER)
 endif()
 
-set(FWDIR ${MP2_DIR}/../firmware)
 set(MDRIVLIB ${FWDIR}/lib/mdrivlib)
 
 include(${FWDIR}/cmake/log_levels.cmake)
 enable_logging()
 
-include(${MP2_DIR}/cmake/arch_mp25xm33.cmake)
+include(${FWDIR}/cmake/arch_mp25xm33.cmake)
 set_arch_flags()
 
 # ST HAL (only the modules used here: see stm32mp2xx_hal_conf.h)
@@ -56,7 +55,7 @@ set(M33_HAL_MODULES
   hal_sd_ex
   ll_sdmmc
 )
-list(TRANSFORM M33_HAL_MODULES PREPEND ${MP2_DIR}/lib/stm32-hal/stm32mp2/Src/stm32mp2xx_)
+list(TRANSFORM M33_HAL_MODULES PREPEND ${FWDIR}/lib/stm32-hal/stm32mp2/Src/stm32mp2xx_)
 list(TRANSFORM M33_HAL_MODULES APPEND .c)
 set_source_files_properties(${M33_HAL_MODULES} PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable")
 
@@ -79,18 +78,17 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/helpers.cc
   ${FWDIR}/src/fs/time_convert.cc
-  ${MP2_DIR}/system/sbrk.cc
+  ${FWDIR}/system/sbrk_mp2.cc
   ${FWDIR}/system/libc_stub.c
 )
 
 target_include_directories(
   main_m33.elf
   PRIVATE ${CMAKE_CURRENT_LIST_DIR}
-          ${MP2_DIR}/src/stubs
-          ${MP2_DIR}/src
-          ${MP2_DIR}/src/pro
-          ${FWDIR}
+          ${FWDIR}/src/mp2-stubs
+          ${FWDIR}/src/pro # before src, so pro's conf/ headers are found before the shared ones in src/conf/
           ${FWDIR}/src
+          ${FWDIR}
           ${FWDIR}/src/console
           ${FWDIR}/src/params
           ${FWDIR}/lib
@@ -101,12 +99,12 @@ target_include_directories(
           ${MDRIVLIB}/target/stm32mp2
           ${MDRIVLIB}/target/stm32mp2_cm33
           ${FWDIR}/lib/cpputil
-          ${MP2_DIR}/lib/stm32-hal/stm32mp2/Inc
+          ${FWDIR}/lib/stm32-hal/stm32mp2/Inc
           ${FWDIR}/lib/cmsis/Include
-          ${MP2_DIR}/lib/cmsis-device/stm32mp257d/Include
+          ${FWDIR}/lib/cmsis-device/stm32mp257d/Include
 )
 
-set(LINKER_SCRIPT ${MP2_DIR}/system/stm32mp2xx_cm33.ld)
+set(LINKER_SCRIPT ${FWDIR}/system/linker/stm32mp2xx_cm33.ld)
 target_link_options(
   main_m33.elf PRIVATE
   -T${LINKER_SCRIPT}

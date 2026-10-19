@@ -36,7 +36,7 @@
 #include "lvgl.h"
 #include "lvgl_display.hh"
 #include "patch_file/file_storage_proxy.hh"
-#include "shared_index.hh"
+#include "core_intercom/shared_index.hh"
 #include "storage_test.hh"
 #include <array>
 #include <cstdio>
