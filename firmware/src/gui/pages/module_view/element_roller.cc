@@ -520,8 +520,9 @@ void ModuleViewPage::click_graphic_display(DrawnElement const &drawn_element, Dy
 	};
 	page_list.update_state(PageId::ModuleView, nextargs);
 
-	// The patch's screensaver display opens in screensaver mode: any input returns here
-	if (is_assigned_screensaver(drawn_element))
+	// The patch's screensaver display opens in screensaver mode: any input returns here.
+	// A patch that isn't playing can't show a display, so it's not a screensaver.
+	if (is_patch_playloaded && is_assigned_screensaver(drawn_element))
 		nextargs.screensaver_mode = true;
 
 	page_list.request_new_page(PageId::FullscreenGraphic, nextargs);

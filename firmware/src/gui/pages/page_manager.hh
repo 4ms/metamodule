@@ -131,13 +131,20 @@ public:
 		handle_back_event();
 
 		if (auto newpage = page_list.get_requested_page()) {
-			if (newpage->page) {
+			bool screensaver_page =
+				newpage->page == &page_fullscreen_graphic && newpage->args->screensaver_mode.value_or(false);
+
+			if (screensaver_page && screensaver.take_display_wake()) {
+				// The screensaver was woken before its page was shown: stay on this page
+				page_list.cancel_requested_page();
+
+			} else if (newpage->page) {
 				cur_page->blur();
 				cur_page = newpage->page;
 				// debug_print_args(newpage);
 				cur_page->focus(newpage->args);
 
-				if (cur_page == &page_fullscreen_graphic && newpage->args->screensaver_mode.value_or(false))
+				if (screensaver_page)
 					screensaver.enter_display_mode();
 			}
 		} else {
@@ -404,6 +411,10 @@ public:
 
 		// Wait for a requested patch load: until then the playing patch is the old one
 		if (info.patch_playloader.is_loading_patch())
+			return;
+
+		// Let a requested page be shown first, so it's the one we return to on waking
+		if (page_list.has_requested_page())
 			return;
 
 		if (screensaver.is_active() || !screensaver.timed_out())
