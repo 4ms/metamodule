@@ -64,6 +64,8 @@ class PageManager {
 	MidiMapViewPage page_midimap{info};
 	FullscreenGraphicPage page_fullscreen_graphic{info};
 
+	std::optional<PatchLocHash> checked_screensaver_patch{};
+
 	enum class MidiPCLoadState { Idle, Requesting, Loading };
 	PatchLocation midi_pc_target_loc{};
 	PageId midi_pc_target_page = PageId::PatchView;
@@ -156,6 +158,8 @@ public:
 		handle_notifications();
 
 		handle_write_settings();
+
+		check_screensaver_display();
 
 		update_screensaver_timeout();
 	}
@@ -394,6 +398,26 @@ public:
 					break;
 				}
 			}
+		}
+	}
+
+	// Warn once when a patch starts playing if its screensaver display can't be found,
+	// e.g. a patch made in VCV Rack that refers to a display this module doesn't have here
+	void check_screensaver_display() {
+		auto patch = info.open_patch_manager.get_playing_patch();
+		if (!patch || info.patch_playloader.is_loading_patch())
+			return;
+
+		auto loc_hash = info.open_patch_manager.get_playing_patch_loc_hash();
+		if (checked_screensaver_patch == loc_hash)
+			return;
+		checked_screensaver_patch = loc_hash;
+
+		if (auto ss = patch->find_screensaver_display(); ss && !screensaver_light_idx(*patch)) {
+			info.notify_queue.put({"Screensaver display not found on " + module_display_name(*patch, ss->module_id) +
+									   ": the screensaver will be blank",
+								   Notification::Priority::Info,
+								   3000});
 		}
 	}
 
