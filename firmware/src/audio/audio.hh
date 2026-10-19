@@ -67,8 +67,10 @@ private:
 	unsigned cur_block = 0;
 
 	// Hardware interface
+	// (A board without an audio expander has a stand-in codec_ext: see the MP2's board_codec_conf.hh)
+	using CodecExtT = decltype(Hardware::codec_ext);
 	CodecT &codec_;
-	CodecT &codec_ext_;
+	CodecExtT &codec_ext_;
 	uint32_t sample_rate_;
 	uint32_t block_size_;
 	uint32_t audio_period_;
