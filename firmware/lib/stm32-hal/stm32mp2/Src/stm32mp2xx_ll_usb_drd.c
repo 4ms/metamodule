@@ -423,7 +423,7 @@ static void USB_PHYUnInit(void)
   return;
 }
 
-uint32_t SystemCoreClock = 1200000;
+__weak uint32_t SystemCoreClock = 1200000; /* 4ms: weak, so the application's definition is used */
 
 static void USB_Delay(uint32_t time_in_us)
 {
