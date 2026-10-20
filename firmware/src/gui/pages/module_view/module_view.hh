@@ -140,28 +140,9 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_AutoMapSelectPanel);
 		lv_hide(ui_MIDIMapPanel);
 
-		if (gui_state.new_cable || gui_state.new_expander) {
-			lv_hide(ui_ModuleViewHideBut);
-			lv_hide(ui_ModuleViewActionBut);
-			lv_hide(ui_ModuleViewSettingsBut);
-			lv_show(ui_ModuleViewCableCancelBut);
-			lv_show(ui_ModuleViewCableCreateLabel);
-			lv_label_set_text(ui_ModuleViewCableCreateLabel,
-							  gui_state.new_cable ? "Creating a cable" : "Attaching an expander");
-			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
-			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
-			lv_obj_set_flex_align(
-				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-		} else {
-			lv_show(ui_ModuleViewHideBut);
-			lv_show(ui_ModuleViewActionBut);
-			lv_show(ui_ModuleViewSettingsBut);
-			lv_hide(ui_ModuleViewCableCancelBut);
-			lv_hide(ui_ModuleViewCableCreateLabel);
-			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 2, LV_PART_MAIN);
-			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, -4, LV_PART_MAIN);
-			lv_obj_set_flex_align(
-				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+		update_button_bar();
+
+		if (!gui_state.new_cable && !gui_state.new_expander) {
 			settings_menu.prepare_focus(group);
 			action_menu.prepare_focus(group, this_module_id, is_patch_playloaded);
 
@@ -216,6 +197,9 @@ struct ModuleViewPage : PageBase {
 				// Inside an element group: back returns to the top-level list
 				exit_group();
 
+			} else if (mode == ViewMode::List && choosing_screensaver) {
+				exit_choose_screensaver();
+
 			} else if (mode == ViewMode::List) {
 				args.module_id = this_module_id;
 				load_prev_page();
@@ -251,6 +235,15 @@ struct ModuleViewPage : PageBase {
 		// Action menu
 		if (action_menu.is_visible()) {
 			action_menu.update();
+		}
+
+		if (action_menu.take_choose_screensaver_request()) {
+			enter_choose_screensaver();
+		}
+
+		// Refresh the list once the menu is closed, so it doesn't take focus from the menu
+		if (!action_menu.is_visible() && action_menu.take_screensaver_changed()) {
+			populate_roller();
 		}
 
 		// Knobset changed
@@ -410,6 +403,12 @@ struct ModuleViewPage : PageBase {
 		return refresh;
 	}
 
+	// Only the plain element list can be left and returned to without losing anything
+	bool can_leave_for_screensaver() final {
+		return mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible() &&
+			   !mapping_pane.control_popup_visible() && !choosing_screensaver;
+	}
+
 	void blur() final {
 		mapping_pane.reset_disconnect_mode();
 		module_context_menu.blur();
@@ -420,6 +419,7 @@ struct ModuleViewPage : PageBase {
 		lv_hide(load_meter);
 		lv_enable_long_press();
 		last_button_focused = nullptr;
+		choosing_screensaver = false;
 	}
 
 private:
@@ -468,9 +468,50 @@ private:
 			return;
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
+		if (page->choosing_screensaver) {
+			page->exit_choose_screensaver();
+			return;
+		}
+
 		abort_cable(page->gui_state, page->notify_queue);
 		abort_expander(page->gui_state, page->notify_queue);
 		page->page_list.request_new_page(PageId::PatchView, page->args);
+	}
+
+	// While patching a cable, attaching an expander, or choosing a screensaver, the
+	// button bar only has a Cancel button and a label saying what we're doing
+	void update_button_bar() {
+		if (gui_state.new_cable || gui_state.new_expander || choosing_screensaver) {
+			lv_hide(ui_ModuleViewHideBut);
+			lv_hide(ui_ModuleViewActionBut);
+			lv_hide(ui_ModuleViewSettingsBut);
+			lv_show(ui_ModuleViewCableCancelBut);
+			lv_show(ui_ModuleViewCableCreateLabel);
+			lv_label_set_text(ui_ModuleViewCableCreateLabel,
+							  gui_state.new_cable	 ? "Creating a cable" :
+							  gui_state.new_expander ? "Attaching an expander" :
+													   "Choosing a screensaver");
+			lv_label_set_text(ui_ModuleViewCabelCancelLabel, choosing_screensaver ? "Cancel" : "Cancel Cable");
+			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
+			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
+			lv_obj_set_flex_align(
+				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+		} else {
+			lv_show(ui_ModuleViewHideBut);
+			lv_show(ui_ModuleViewActionBut);
+			lv_show(ui_ModuleViewSettingsBut);
+			lv_hide(ui_ModuleViewCableCancelBut);
+			lv_hide(ui_ModuleViewCableCreateLabel);
+			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 2, LV_PART_MAIN);
+			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, -4, LV_PART_MAIN);
+			lv_obj_set_flex_align(
+				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+		}
+
+		// Resize the roller now, so the roller and its hover text are positioned for the new bar
+		lv_obj_update_layout(ui_ElementRollerButtonCont);
+		lv_obj_set_height(ui_ElementRoller, 240 - lv_obj_get_height(ui_ElementRollerButtonCont));
+		roller_hover.hide();
 	}
 
 	static void fullscreen_but_cb(lv_event_t *event) {
@@ -545,6 +586,14 @@ private:
 	void update_cable_style(bool force = false);
 	void poll_poly_cable_changes();
 	void update_graphic_throttle_setting();
+
+	// Defined in module_view/screensaver.cc
+	bool is_assigned_screensaver(DrawnElement const &drawn_element) const;
+	void assign_screensaver(DrawnElement const &drawn_element);
+	void remove_screensaver();
+	void enter_choose_screensaver();
+	void exit_choose_screensaver();
+	void change_roller_listing();
 
 	// Defined in module_view/quick_assign.cc
 	void handle_quick_assign();
@@ -641,7 +690,11 @@ private:
 	uint16_t selected_output_port = 0;
 
 	bool suppress_next_click = false;
+
+	// Listing only this module's displays, to pick one as the patch's screensaver
+	bool choosing_screensaver = false;
 	bool quick_control_mode = false;
+	bool screensaver_toggled_this_press = false;
 	Toggler quickmap_rotary_button;
 
 	uint64_t last_poly_check_tm = 0;
