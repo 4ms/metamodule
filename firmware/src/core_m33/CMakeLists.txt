@@ -55,6 +55,7 @@ set(M33_HAL_MODULES
   hal_sd
   hal_sd_ex
   ll_sdmmc
+  ll_tim
 )
 list(TRANSFORM M33_HAL_MODULES PREPEND ${FWDIR}/lib/stm32-hal/stm32mp2/Src/stm32mp2xx_)
 list(TRANSFORM M33_HAL_MODULES APPEND .c)
@@ -63,6 +64,7 @@ set_source_files_properties(${M33_HAL_MODULES} PROPERTIES COMPILE_OPTIONS "-Wno-
 add_executable(
   main_m33.elf
   main.cc
+  panel_controls.cc
   system_init.cc
   write.cc
   ${M33_HAL_MODULES}
@@ -70,6 +72,8 @@ add_executable(
   ${MDRIVLIB}/target/stm32mp2_cm33/drivers/interrupt_handler.cc
   ${MDRIVLIB}/target/stm32mp2_cm33/drivers/hal_tick_stgen.cc
   ${MDRIVLIB}/drivers/pin.cc
+  ${MDRIVLIB}/drivers/tim.cc
+  ${MDRIVLIB}/drivers/timekeeper.cc
   ${MDRIVLIB}/target/stm32mp2/drivers/ospi_flash_driver.cc
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
@@ -95,6 +99,7 @@ target_include_directories(
           ${FWDIR}/src/params
           ${FWDIR}/lib
           ${FWDIR}/lib/patch-serial
+          ${FWDIR}/metamodule-plugin-sdk/core-interface
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${MDRIVLIB}

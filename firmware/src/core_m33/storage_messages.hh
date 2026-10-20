@@ -9,10 +9,6 @@
 namespace MetaModule
 {
 
-// Answers the A35's FileStorageProxy requests. MP2's version of MP1's FilesystemMessages
-// (fs/fs_messages.hh), with only PatchStorage so far: no firmware update, plugin file list,
-// calibration, or WiFi handlers yet. Those requests get a failure response (see not_ported_response()).
-//
 // The A35 can't read a PatchDirList or DirTree built on this core (64-bit vs 32-bit layouts), so its
 // FileStorageProxy asks for them serialized into a buffer instead (patch_dir_list/dir_entries null).
 // PatchStorage fills in local copies as on MP1, and those get serialized here (see dir_list_serial.hh).
@@ -59,6 +55,9 @@ private:
 	DirTree<FileEntry> dir_entries;
 
 	std::optional<IntercoreStorageMessage> handle_message(IntercoreStorageMessage message) {
+		// Intercept PatchList and DirEntries messages, and deserialize them
+		// All other messages just pass through to PatchStorage
+
 		if (message.message_type == RequestRefreshPatchList && !message.patch_dir_list) {
 			message.patch_dir_list = &patch_dir_list;
 			auto response = patch_storage.handle_message(message);

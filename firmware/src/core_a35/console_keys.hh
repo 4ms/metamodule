@@ -6,7 +6,7 @@
 namespace MetaModule
 {
 
-// Navigate the GUI with keys typed into the serial console, until the hardware controls work.
+// Navigate the GUI with keys typed into the serial console (alongside the hardware controls).
 // Same keys as the simulator:
 //   Right / Left arrow (or d / a): turn the encoder
 //   Enter (or Down arrow, s):      click the encoder
@@ -22,12 +22,10 @@ public:
 
 	// Call before each GUI page update, after the GUI reads the params from the audio (which
 	// overwrite the button states): each click or Back is a press for one update, and a release
-	// for the next
+	// for the next. Between clicks, the button states are left alone, so the hardware buttons work.
 	void update(MetaParams &m) {
-		m.rotary_button.set_state_no_events(encoder_pressed);
-		m.meta_buttons[0].set_state_no_events(back_pressed);
-
 		if (encoder_pressed) {
+			m.rotary_button.set_state_no_events(1);
 			m.rotary_button.register_state(0);
 			encoder_pressed = false;
 		} else if (clicks) {
@@ -37,6 +35,7 @@ public:
 		}
 
 		if (back_pressed) {
+			m.meta_buttons[0].set_state_no_events(1);
 			m.meta_buttons[0].register_state(0);
 			back_pressed = false;
 		} else if (backs) {

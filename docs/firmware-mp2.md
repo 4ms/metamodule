@@ -32,6 +32,9 @@ PCM3168 module).
 Produces `build-mp2/main_a35.elf` / `main_a35.bin` (`build-mp2-test-carrier/`
 for the test carrier), with the M33 image (`core_m33/main_m33.bin`) embedded.
 
+For CI machines that only have `aarch64-linux-gnu-gcc`:
+`cmake --preset mp2-linux-gnu && cmake --build build-mp2-linux-gnu --target a35_core`
+
 Load and boot it over SWD with TRACE32: `make PRESET=mp2 flash-t32`
 (`flashing/flash-t32-mp2.py`). Or boot it the same way as the
 stm32mp2-baremetal examples: TF-A BL2 (4ms fork) + FIP on SD card (see that
@@ -45,7 +48,8 @@ another), so build MP1 first.
 ## What runs
 
 - **M33:** patch storage (MP1's `PatchStorage`): SD card, and the internal
-  patch volume on the NOR flash.
+  patch volume on the NOR flash. And the controls, which it writes into the
+  param blocks the audio stream reads, as MP1's M4 does (see Controls below).
 - **A35:** MP1's GUI (`PageManager` and all the pages), rendered at MP1's
   320x240 and scaled 3x into the middle of the panel, and MP1's audio stream
   (`src/audio/audio.cc`), which plays the patch in the codec's DMA interrupt.
@@ -54,7 +58,7 @@ another), so build MP1 first.
   the GUI stays on the first core, so the second core only plays modules.
   Built-in modules: the 4ms modules and the `vcv_ports` brands. The assets
   are unpacked into a RamDisk, which modules can read with libc (`fopen`, etc).
-- **Not yet:** the hardware controls, jack sense (all jacks are reported as
+- **Not yet:** most of the hardware controls, jack sense (all jacks are reported as
   patched), MIDI, plugins, USB, WiFi, and libc file access on the SD card and USB.
 
 ## NOR flash
@@ -70,12 +74,24 @@ minus 4kB, and the calibration data in the top 4kB.
 Only one core may use it at a time: the A35 reads the calibration at startup,
 before it starts the M33, and after that the M33 owns it.
 
-Until the controls work, navigate the GUI from the serial console:
-Right/Left arrows (or `d`/`a`) turn the encoder, Enter (or Down, `s`) clicks
-it, Backspace (or Up, `w`) is the Back button.
+## Controls
 
-For CI machines that only have `aarch64-linux-gnu-gcc`:
-`cmake --preset mp2-linux-gnu && cmake --build build-mp2-linux-gnu --target a35_core`
+The M33's `PanelControls` (`src/core_m33/panel_controls.hh`) is MP2's version
+of MP1's `Controls` (`src/core_m4/controls.hh`). The param blocks
+(`StaticBuffers::param_blocks`) are in `.sharedmem`, published in `SharedIndex`.
+As on MP1, the audio stream releases a param block's HSEM when it's done with
+it, and the M33 then fills that block. A 48kHz timer (TIM6) polls the controls,
+in place of MP1's LRCLK pin interrupt.
+
+So far only the control encoder (PC3/PC9, button PH10) and the Back button
+(PA9) work, as MP1's rotary and button. Next: the 16 knob encoders and the
+buttons on the I2C expanders. The knob encoders will be relative: the M33 sends
+each one's motion, and the A35 adds it to the mapped parameter's value, so
+nothing jumps when the knob set or patch changes.
+
+The serial console can also navigate the GUI: Right/Left arrows (or `d`/`a`)
+turn the encoder, Enter (or Down, `s`) clicks it, Backspace (or Up, `w`) is
+the Back button.
 
 
 ## Layout

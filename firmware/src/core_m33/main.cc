@@ -5,16 +5,18 @@
 // On MP1 the M4 runs patch storage, controls, USB, and MIDI; on MP2 the M33 takes that role.
 //
 // So far:
+// - controls: the control encoder and Back button, for the GUI (panel_controls.hh).
 // - storage: MP1's PatchStorage answers the A35's FileStorageProxy requests (storage_messages.hh).
 //   Volumes: SD card, NOR flash, and USB
 //   (always unmounted until there's a USB host driver).
 
 #include "console.hh"
+#include "core_intercom/shared_index.hh"
 #include "core_intercom/shared_memory.hh"
 #include "drivers/cache.hh"
 #include "drivers/stm32xx.h"
 #include "fs/fatfs/sd_host.hh"
-#include "core_intercom/shared_index.hh"
+#include "panel_controls.hh"
 #include "storage_messages.hh"
 #include <cstdio>
 
@@ -69,6 +71,12 @@ int main() {
 	}
 	SharedMemoryS::ptrs.ramdrive = &ramdrive;
 	SharedMemoryS::ptrs.icc_message = index.storage_message.get();
+
+	//
+	// Controls
+	//
+	static PanelControls controls{*index.param_blocks.get()};
+	controls.start();
 
 	//
 	// Storage

@@ -62,7 +62,7 @@ extern "C" {
 #define HAL_GPIO_MODULE_ENABLED
 // #define HAL_HASH_MODULE_ENABLED
 // #define HAL_HSEM_MODULE_ENABLED
-// #define HAL_I2C_MODULE_ENABLED
+#define HAL_I2C_MODULE_ENABLED
 // #define HAL_I2S_MODULE_ENABLED
 /* #define HAL_I3C_MODULE_ENABLED */ /* Disabled because I3C HAL not available yet */
 // #define HAL_ICACHE_MODULE_ENABLED
@@ -289,6 +289,9 @@ extern "C" {
 #include "stm32mp2xx_hal_gpio.h"
 #include "stm32mp2xx_ll_gpio.h"
 #endif /* HAL_GPIO_MODULE_ENABLED */
+
+/* mdrivlib's Timekeeper uses the LL TIM driver */
+#include "stm32mp2xx_ll_tim.h"
 
 #ifdef HAL_HASH_MODULE_ENABLED
 #include "stm32mp2xx_hal_hash.h"

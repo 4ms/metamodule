@@ -9,8 +9,9 @@
 // MP1's audio stream (audio/audio.cc, which plays the patch in the codec's DMA interrupt), and
 // MP1's GUI (PageManager and its pages), which reaches patch storage with FileStorageProxy.
 // The second A35 core plays part of the patch (aux_core.cc).
-// Not yet ported: controls and jack sense (the serial console navigates the GUI, see
-// console_keys.hh), MIDI, plugins, USB, WiFi.
+// The M33 reads the controls into the param blocks (core_m33/panel_controls.hh): so far only the
+// control encoder and Back button. The serial console can also navigate the GUI (console_keys.hh).
+// Not yet ported: the other controls, jack sense, MIDI, plugins, USB, WiFi.
 
 #include "audio/audio.hh"
 #include "aux_core.hh"
@@ -84,6 +85,7 @@ void start_m33() {
 	storage_message = {};
 	auto &index = shared_index();
 	index.storage_message = &storage_message;
+	index.param_blocks = &StaticBuffers::param_blocks;
 	index.magic = SharedIndex::ValidMagic;
 
 	if constexpr (M33_LOAD_ADDR >= mdrivlib::RISAF::DDRBase) {
@@ -191,7 +193,8 @@ int main() {
 	static InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
 
 	ui.start();
-	printf("GUI started. Navigate with the console: arrows (or a/d) turn, Enter clicks, Backspace is Back\n");
+	printf("GUI started. Navigate with the control encoder and Back button, or the console: arrows (or a/d) "
+		   "turn, Enter clicks, Backspace is Back\n");
 
 	StaticBuffers::sync_params.clear();
 	audio.start();

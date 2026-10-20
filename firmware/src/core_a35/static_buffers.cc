@@ -17,7 +17,8 @@ std::span<uint8_t> fw_buffer{fw_buffer_mem};
 __attribute__((section(".dmabuf"))) StreamConf::Audio::AudioInBlock audio_in_dma_block;
 __attribute__((section(".dmabuf"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block;
 
-DoubleBufParamBlock param_blocks{};
+// The M33 writes these (controls)
+__attribute__((section(".sharedmem"))) DoubleBufParamBlock param_blocks{};
 SyncParams sync_params;
 
 // Same as MP1's (src/core_a7/static_buffers.cc)

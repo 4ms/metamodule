@@ -18,7 +18,8 @@ namespace MetaModule
 {
 
 // MP2's version of MP1's Ui (gui/ui.hh): the GUI pages and their state.
-// No USB or jack sense monitors yet. Input is from the serial console keys (console_keys.hh).
+// No USB or jack sense monitors yet. Input is from the controls (via the audio stream
+// and sync_params), and the serial console keys (console_keys.hh).
 class Ui {
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;

@@ -20,8 +20,7 @@ extern std::span<uint8_t> fw_buffer;
 extern StreamConf::Audio::AudioInBlock audio_in_dma_block;
 extern StreamConf::Audio::AudioOutBlock audio_out_dma_block;
 
-// Controls -> Audio. FIXME: on MP1 the M4 writes these, from the controls and MIDI. Until the M33
-// does that, nothing writes them.
+// Controls -> Audio. The M33 writes these (core_m33/controls.hh), as the M4 does on MP1.
 extern DoubleBufParamBlock param_blocks;
 
 // Audio -> GUI
