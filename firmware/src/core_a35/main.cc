@@ -15,6 +15,7 @@
 #include "drivers/hsem.hh"
 #include "drivers/ipcc.hh"
 #include "drivers/risaf.hh"
+#include "drivers/usb3dr.hh"
 #include "dynload/plugin_manager.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
@@ -62,6 +63,10 @@ void start_m33() {
 	mdrivlib::IPCC_<1>::init_peripheral();
 	A35Console::use_hsem_lock();
 
+	// USB runs on the M33: its DMA uses the M33's compartment ID (CID2), so it can reach the
+	// M33's memory
+	mdrivlib::Usb3DR::init_rif(2);
+
 	// Shared memory: open it to the M33 in the DDR firewall, create the shared objects in
 	// .sharedmem, and publish pointers to them in the index the M33 reads
 	using namespace mdrivlib::RISAF;
@@ -78,6 +83,8 @@ void start_m33() {
 	auto &index = shared_index();
 	index.storage_message = &storage_message;
 	index.param_blocks = &StaticBuffers::param_blocks;
+	dev_drive_block.reset();
+	index.dev_drive_msgs = &dev_drive_block;
 	index.magic = SharedIndex::ValidMagic;
 
 	if constexpr (M33_LOAD_ADDR >= mdrivlib::RISAF::DDRBase) {
