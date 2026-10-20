@@ -11,6 +11,8 @@
 ENTRY(Reset_Handler)
 
 _Min_Stack_Size = 0x10000; /* MP1's M4 has 48kB: PatchStorage, FatFS, and LittleFS use a lot of stack */
+_DMA_NC_Size = 0x100000;	/* A whole 1MB, so the MPU region boundaries stay simple */
+_sdma_nc = M33_LOAD_ADDR + M33_REGION_SIZE - _DMA_NC_Size;
 
 SECTIONS
 {
@@ -102,10 +104,19 @@ SECTIONS
 		_enoinit = .;
 	}
 
-	/* Heap: from the end of .noinit up to the stack. Stack: at the top of the region. */
+	/* Non-cacheable memory for DMA (the USB controller's event buffers, TRBs, and data buffers),
+	   at the top of the region. system_init() zeroes it and makes it non-cacheable in the MPU. */
+	.dma_nc _sdma_nc (NOLOAD) :
+	{
+		*(.dma_nc)
+		*(.dma_nc*)
+		_edma_nc = .;
+	}
+
+	/* Heap: from the end of .noinit up to the stack. Stack: below the DMA memory. */
 	_sheap = ALIGN(_enoinit, 8);
 	end = _sheap;
-	_estack = M33_LOAD_ADDR + M33_REGION_SIZE;
+	_estack = _sdma_nc;
 	_eheap = _estack - _Min_Stack_Size;
 
 	/* Memory shared with the A35 (see the A35 linker script): only the index of pointers is
@@ -120,4 +131,5 @@ SECTIONS
 }
 
 ASSERT(_sheap <= _eheap, "M33 image + .bss + stack don't fit in M33_REGION_SIZE")
+ASSERT(_edma_nc <= M33_LOAD_ADDR + M33_REGION_SIZE, ".dma_nc is bigger than _DMA_NC_Size")
 ASSERT((M33_LOAD_ADDR & 0x7FF) == 0, "M33_LOAD_ADDR must be 2kB-aligned (VTOR)")
