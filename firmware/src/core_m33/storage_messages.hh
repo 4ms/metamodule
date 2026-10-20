@@ -11,7 +11,7 @@ namespace MetaModule
 
 // Answers the A35's FileStorageProxy requests. MP2's version of MP1's FilesystemMessages
 // (fs/fs_messages.hh), with only PatchStorage so far: no firmware update, plugin file list,
-// calibration, or WiFi handlers yet.
+// calibration, or WiFi handlers yet. Those requests get a failure response (see not_ported_response()).
 //
 // The A35 can't read a PatchDirList or DirTree built on this core (64-bit vs 32-bit layouts), so its
 // FileStorageProxy asks for them serialized into a buffer instead (patch_dir_list/dir_entries null).
@@ -34,7 +34,11 @@ struct StorageMessages {
 		if (message.message_type == None)
 			return;
 
-		if (auto response = handle_message(message); response) {
+		auto response = handle_message(message);
+		if (!response)
+			response = not_ported_response(message);
+
+		if (response) {
 			// try to send response infinitely
 			while (!intercore_comm.send_message(*response))
 				;
@@ -86,6 +90,31 @@ private:
 		}
 
 		return patch_storage.handle_message(message);
+	}
+
+	// Requests for handlers that aren't ported yet get a failure response. The A35 can't send another
+	// request until this one is answered, so ignoring it would block all its other requests.
+	static std::optional<IntercoreStorageMessage> not_ported_response(const IntercoreStorageMessage &message) {
+		switch (message.message_type) {
+			case RequestWifiIP: {
+				// What MP1 answers when no WiFi expander responds
+				IntercoreStorageMessage response{.message_type = WifiIPSuccess};
+				response.wifi_ip_result = std::unexpected(WifiIPError::NO_MODULE_CONNECTED);
+				return response;
+			}
+			case RequestFirmwareFile:
+				return IntercoreStorageMessage{.message_type = FirmwareFileNotFound};
+			case StartChecksumCompare:
+				return IntercoreStorageMessage{.message_type = ChecksumFailed};
+			case StartFlashing:
+				return IntercoreStorageMessage{.message_type = FlashingFailed};
+			case RequestReadFlash:
+				return IntercoreStorageMessage{.message_type = ReadFlashFailed};
+			case RequestPluginFileList:
+				return IntercoreStorageMessage{.message_type = PluginFileListFail};
+			default:
+				return std::nullopt;
+		}
 	}
 };
 
