@@ -1,4 +1,5 @@
 #include "usb_midi_device.hh"
+#include "conf/usb_conf.hh"
 #include "device_composite/add_class.hh"
 #include "console/pr_dbg.hh"
 #include "drivers/interrupt_control.hh"
@@ -103,9 +104,9 @@ void UsbMidiDevice::pump_tx() {
 // Idle-kick drain, called from the main loop (UsbDeviceManager::process). Masks
 // the OTG IRQ so this pump can't overlap the TransmitCplt-driven pump.
 void UsbMidiDevice::process() {
-	mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+	mdrivlib::InterruptControl::disable_irq(UsbIRQn);
 	pump_tx();
-	mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+	mdrivlib::InterruptControl::enable_irq(UsbIRQn);
 
 	print_pump_stats();
 }

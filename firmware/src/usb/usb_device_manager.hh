@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/usb_conf.hh"
 #include "console/concurrent_buffer.hh"
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
@@ -8,8 +9,8 @@
 #include "device_video/usb_video_device.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
+#include "drivers/stm32xx.h"
 #include "pr_dbg.hh"
-#include "stm32mp1xx.h"
 #include "usb_device_mode.hh"
 #include "usb_midi_device.hh"
 
@@ -132,13 +133,13 @@ struct UsbDeviceManager {
 
 		soft_stop();
 
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		mdrivlib::InterruptControl::disable_irq(MetaModule::UsbIRQn);
 
 		// Adjust if needed: needs to be long enough for
 		// the host to see the disconnect and then re-connect
 		HAL_Delay(200);
 
-		mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+		mdrivlib::InterruptControl::enable_irq(MetaModule::UsbIRQn);
 
 		start();
 	}
