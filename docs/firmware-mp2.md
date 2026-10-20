@@ -50,6 +50,7 @@ another), so build MP1 first.
 - **M33:** patch storage (MP1's `PatchStorage`): SD card, and the internal
   patch volume on the NOR flash. And the controls, which it writes into the
   param blocks the audio stream reads, as MP1's M4 does (see Controls below).
+  And the USB device (see USB below).
 - **A35:** MP1's GUI (`PageManager` and all the pages), rendered at MP1's
   320x240 and scaled 3x into the middle of the panel, and MP1's audio stream
   (`src/audio/audio.cc`), which plays the patch in the codec's DMA interrupt.
@@ -59,7 +60,7 @@ another), so build MP1 first.
   Built-in modules: the 4ms modules and the `vcv_ports` brands. The assets
   are unpacked into a RamDisk, which modules can read with libc (`fopen`, etc).
 - **Not yet:** most of the hardware controls, jack sense (all jacks are reported as
-  patched), MIDI, plugins, USB, WiFi, and libc file access on the SD card and USB.
+  patched), MIDI, plugins, USB host mode, WiFi, and libc file access on the SD card and USB.
 
 ## NOR flash
 
@@ -92,6 +93,45 @@ nothing jumps when the knob set or patch changes.
 The serial console can also navigate the GUI: Right/Left arrows (or `d`/`a`)
 turn the encoder, Enter (or Down, `s`) clicks it, Backspace (or Up, `w`) is
 the Back button.
+
+## USB
+
+The USB jack is on the USB3DR controller (a Synopsys DWC3), in USB2-only mode
+through USB2PHY2. MP1's OTG core (DWC2) is different hardware, so only the
+layers above the HAL are shared.
+
+So far the M33 runs it as a device, always on: MP1's `UsbDeviceManager`
+(`src/usb/usb_device_manager.hh`), the MIDI + CDC console composite, on ST's
+DWC3 device HAL (`stm32mp2xx_hal_pcd_drd.c`). The MP2 parts:
+
+- `mdrivlib::Usb3DR` (`target/stm32mp2/drivers/usb3dr.hh`): the clock, reset,
+  and PHY sequence, from the stm32mp2-baremetal `usb-drd` example. Before it
+  starts the M33, the A35 makes the controller secure and gives its DMA the
+  M33's compartment ID (CID2), so the DMA can reach the M33's memory.
+- `src/core_m33/usbd_conf.cc`: MP2's version of `src/usb/usbd_conf.cc`. The
+  DWC3 always uses DMA and the HAL does no cache maintenance, so the HAL handle
+  (event buffer, TRBs) and the class handles are in `.dma_nc`, a non-cacheable
+  1MB at the top of the M33's memory (see `system_init.cc` and the linker
+  script). IN data is cleaned from the cache before it's sent, and OUT data
+  arrives in a per-endpoint buffer in `.dma_nc` and is copied to the class's
+  buffer.
+- ST's HAL only picks its DWC3 driver for the MP257C (`#if defined(STM32MP257Cxx)`),
+  so the generic `stm32mp2xx_hal_pcd.h`/`_ex.h`/`ll_usb.h` were changed to check
+  `USB3DRD_BASE`, and the M33 compiles the `_drd.c` files directly.
+
+Not yet:
+- **VBUS sensing and role detection:** the FUSB302. Until then, the controller is
+  told VBUS is always valid.
+- **The console over USB:** the CDC console sends MP1's per-core console
+  buffers, but on MP2 each core writes to the UART directly, so they're empty.
+- **MIDI routing:** received USB MIDI is printed on the console.
+- **The developer drive:** the A35 publishes a `DevDriveBlock` in `SharedIndex`, but
+  doesn't serve a drive yet.
+- **Host mode:** the DWC3 is an xHCI host, and ST's HAL has no host driver for
+  it. The stm32mp2-baremetal `usb-drd` example's host side is U-Boot's xHCI
+  driver (GPL-2.0+, so it can be used here), behind MP1's USB host library.
+  (Its device side is U-Boot's DWC3 gadget driver, GPL-2.0 only, which is why
+  device mode uses ST's HAL instead.)
 
 
 ## Layout
