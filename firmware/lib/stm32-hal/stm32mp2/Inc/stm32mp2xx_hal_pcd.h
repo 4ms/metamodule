@@ -20,7 +20,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#if defined(STM32MP257Cxx)
+#if defined(USB3DRD_BASE) /* 4ms: all MP25x have the USB3DR (DWC3), not only MP257C */
 #include "stm32mp2xx_hal_pcd_drd.h"
 #else
 #include "stm32mp2xx_hal_pcd_otg.h"
