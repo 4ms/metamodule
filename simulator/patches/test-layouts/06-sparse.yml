@@ -1,0 +1,20 @@
+PatchData:
+  patch_name: '06-sparse'
+  description: One module at 40HP/row 3, rest unpositioned
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:Atvert2'
+    2: '4msCompany:Atvert2'
+    3: '4msCompany:Atvert2'
+    4: '4msCompany:Atvert2'
+    5: '4msCompany:Atvert2'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
+  knob_sets: []
+  module_positions:
+    - module_id: 1
+      x: 40
+      y: 3

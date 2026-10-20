@@ -1,0 +1,13 @@
+PatchData:
+  patch_name: '12-phasemirror'
+  description: 48HP module for fullscreen fit
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4ms_PhaseMirror:PhaseMirror'
+    2: '4msCompany:Atvert2'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
+  knob_sets: []

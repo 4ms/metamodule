@@ -1,0 +1,14 @@
+PatchData:
+  patch_name: '11-wide-module'
+  description: A module wider than a narrow rack
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:OctoPush'
+    2: '4msCompany:Atvert2'
+    3: '4msCompany:Atvert2'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
+  knob_sets: []

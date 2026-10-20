@@ -1,0 +1,44 @@
+PatchData:
+  patch_name: '01-simple-row'
+  description: Positions on one row, 8HP gap between module 4 and 5
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:Atvert2'
+    2: '4msCompany:Atvert2'
+    3: '4msCompany:Atvert2'
+    4: '4msCompany:Atvert2'
+    5: '4msCompany:Atvert2'
+    6: '4msCompany:Atvert2'
+    7: '4msCompany:Atvert2'
+    8: '4msCompany:Atvert2'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
+  knob_sets: []
+  module_positions:
+    - module_id: 1
+      x: 0
+      y: 0
+    - module_id: 2
+      x: 4
+      y: 0
+    - module_id: 3
+      x: 8
+      y: 0
+    - module_id: 4
+      x: 12
+      y: 0
+    - module_id: 5
+      x: 24
+      y: 0
+    - module_id: 6
+      x: 28
+      y: 0
+    - module_id: 7
+      x: 32
+      y: 0
+    - module_id: 8
+      x: 36
+      y: 0

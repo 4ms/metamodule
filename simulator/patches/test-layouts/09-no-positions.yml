@@ -1,0 +1,22 @@
+PatchData:
+  patch_name: '09-no-positions'
+  description: No module_positions key at all
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:Atvert2'
+    2: '4msCompany:Atvert2'
+    3: '4msCompany:Atvert2'
+    4: '4msCompany:Atvert2'
+    5: '4msCompany:Atvert2'
+    6: '4msCompany:Atvert2'
+    7: '4msCompany:Atvert2'
+    8: '4msCompany:Atvert2'
+    9: '4msCompany:Atvert2'
+    10: '4msCompany:Atvert2'
+    11: '4msCompany:Atvert2'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
+  knob_sets: []

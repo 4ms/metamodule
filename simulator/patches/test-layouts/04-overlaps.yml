@@ -1,0 +1,32 @@
+PatchData:
+  patch_name: '04-overlaps'
+  description: Modules 2,3,4 all claim overlapping spots
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:Atvert2'
+    2: '4msCompany:Atvert2'
+    3: '4msCompany:Atvert2'
+    4: '4msCompany:Atvert2'
+    5: '4msCompany:Atvert2'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
+  knob_sets: []
+  module_positions:
+    - module_id: 1
+      x: 0
+      y: 0
+    - module_id: 2
+      x: 4
+      y: 0
+    - module_id: 3
+      x: 4
+      y: 0
+    - module_id: 4
+      x: 6
+      y: 0
+    - module_id: 5
+      x: 20
+      y: 0

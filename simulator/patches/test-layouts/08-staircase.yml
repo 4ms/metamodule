@@ -1,0 +1,36 @@
+PatchData:
+  patch_name: '08-staircase'
+  description: Each module one row down and 4HP right
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:Atvert2'
+    2: '4msCompany:Atvert2'
+    3: '4msCompany:Atvert2'
+    4: '4msCompany:Atvert2'
+    5: '4msCompany:Atvert2'
+    6: '4msCompany:Atvert2'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
+  knob_sets: []
+  module_positions:
+    - module_id: 1
+      x: 0
+      y: 0
+    - module_id: 2
+      x: 4
+      y: 1
+    - module_id: 3
+      x: 8
+      y: 2
+    - module_id: 4
+      x: 12
+      y: 3
+    - module_id: 5
+      x: 16
+      y: 4
+    - module_id: 6
+      x: 20
+      y: 5
