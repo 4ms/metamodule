@@ -15,6 +15,7 @@ namespace MetaModule
 {
 
 struct IntercoreStorageMessage;
+struct DevDriveBlock;
 
 // Crosses the core boundary: no raw pointers (8 bytes on the A35, 4 on the M33).
 // Both cores see shared DDR at the same addresses, so InterCoreSharedRegion::base stays 0.
@@ -24,8 +25,9 @@ struct SharedIndex {
 
 	InterCorePtr32<IntercoreStorageMessage> storage_message; // FileStorageProxy (A35) <-> PatchStorage (M33)
 	InterCorePtr32<DoubleBufParamBlock> param_blocks;		 // Controls (M33) -> audio (A35)
+	InterCorePtr32<DevDriveBlock> dev_drive_msgs;			 // USB device (M33) <-> developer drive (A35)
 };
-static_assert(sizeof(SharedIndex) == 12);
+static_assert(sizeof(SharedIndex) == 16);
 
 // Both cores use ParamBlock directly, so it must have the same layout on the 64-bit A35 and the
 // 32-bit M33 (no pointers, size_t, or long). If these fail after a change to Params or MetaParams,

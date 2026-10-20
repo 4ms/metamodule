@@ -1,16 +1,5 @@
 // MetaModule MP2 ("pro") A35 firmware.
-//
-// Boot path (all from mdrivlib target/stm32mp2_ca35): TF-A BL2 loads this image
-// at 0x88000040 in EL3 secure -> boot/startup_ca35.s (stack, .bss, vectors, FPU,
-// MMU+caches via system/mmu_ca35.cc, GIC init) -> system_init() (system_init.cc:
-// I/O supplies, audio PLL, kernel clocks) -> main().
-//
-// main() starts the Cortex-M33, which runs patch storage (SD card, NOR flash), then the display,
-// MP1's audio stream (audio/audio.cc, which plays the patch in the codec's DMA interrupt), and
-// MP1's GUI (PageManager and its pages), which reaches patch storage with FileStorageProxy.
-// The second A35 core plays part of the patch (aux_core.cc).
-// The M33 reads the controls into the param blocks (core_m33/panel_controls.hh): so far only the
-// control encoder and Back button. The serial console can also navigate the GUI (console_keys.hh).
+
 // Not yet ported: the other controls, jack sense, MIDI, plugins, USB, WiFi.
 
 #include "audio/audio.hh"
@@ -42,6 +31,7 @@
 #include "patch_play/patch_playloader.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
+#include "usb/dev_drive_block.hh"
 #include <array>
 #include <cstdio>
 
@@ -62,6 +52,8 @@ std::array<lv_color_t, ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeigh
 __attribute__((section(".sharedmem"))) IntercoreStorageMessage storage_message;
 __attribute__((section(".sharedmem"))) std::array<char, 1024 * 1024> raw_patch_data;
 __attribute__((section(".sharedmem"))) std::array<char, 256 * 1024> storage_list_buffer;
+// The developer drive's handoff between the USB device (M33) and us. Not served yet.
+__attribute__((section(".sharedmem"))) DevDriveBlock dev_drive_block;
 
 void start_m33() {
 	// Park the M33 before (re)initializing the peripherals it uses
