@@ -65,6 +65,8 @@ class PageManager {
 	FullscreenGraphicPage page_fullscreen_graphic{info};
 
 	std::optional<PatchLocHash> checked_screensaver_patch{};
+	// The screensaver display was already being shown when the screensaver started
+	bool screensaver_in_place = false;
 
 	enum class MidiPCLoadState { Idle, Requesting, Loading };
 	PatchLocation midi_pc_target_loc{};
@@ -424,8 +426,9 @@ public:
 	void update_screensaver_timeout() {
 		// The display screensaver was woken: go back to the page we were on
 		if (screensaver.take_display_wake()) {
-			if (cur_page == &page_fullscreen_graphic)
+			if (cur_page == &page_fullscreen_graphic && !screensaver_in_place)
 				page_list.request_last_page();
+			screensaver_in_place = false;
 			return;
 		}
 
@@ -433,14 +436,18 @@ public:
 		if (screensaver.in_display_mode() && cur_page == &page_fullscreen_graphic &&
 			!info.patch_playloader.is_playing())
 		{
-			page_list.request_last_page();
+			if (!screensaver_in_place)
+				page_list.request_last_page();
+			screensaver_in_place = false;
 			screensaver.show_blank();
 			return;
 		}
 
 		// Something else took us off the display (e.g. the patch was unloaded)
-		if (screensaver.in_display_mode() && cur_page != &page_fullscreen_graphic)
+		if (screensaver.in_display_mode() && cur_page != &page_fullscreen_graphic) {
 			screensaver.reset_display_mode();
+			screensaver_in_place = false;
+		}
 
 		// Wait for a requested patch load: until then the playing patch is the old one
 		if (info.patch_playloader.is_loading_patch())
@@ -454,12 +461,26 @@ public:
 			return;
 
 		if (auto args = screensaver_display_args()) {
+			// Already showing this display: keep it as it is, rather than redrawing it from scratch
+			if (is_showing_display(*args)) {
+				screensaver_in_place = true;
+				screensaver.enter_display_mode();
+				return;
+			}
+
 			page_list.request_new_page(PageId::FullscreenGraphic, *args);
 			// Swallow input until the page change lands, then enter_display_mode() is called
 			screensaver.enter_display_mode();
 		} else {
 			screensaver.show_blank();
 		}
+	}
+
+	bool is_showing_display(PageArguments const &args) const {
+		auto const &cur = page_fullscreen_graphic.args;
+		return cur_page == &page_fullscreen_graphic && cur.patch_loc_hash == args.patch_loc_hash &&
+			   cur.module_id == args.module_id && cur.element_indices.has_value() && args.element_indices.has_value() &&
+			   cur.element_indices->light_idx == args.element_indices->light_idx;
 	}
 
 	std::optional<PageArguments> screensaver_display_args() {
