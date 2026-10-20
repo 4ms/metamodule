@@ -78,7 +78,7 @@ extern "C" {
 // #define HAL_NOR_MODULE_ENABLED
 #define HAL_OSPI_MODULE_ENABLED
 // #define HAL_OTFDEC_MODULE_ENABLED
-// #define HAL_PCD_MODULE_ENABLED
+#define HAL_PCD_MODULE_ENABLED // USB device (DWC3 flavor: see the USB3DRD_BASE checks in stm32mp2xx_hal_pcd.h)
 // #define HAL_PKA_MODULE_ENABLED
 // #define HAL_PSSI_MODULE_ENABLED
 // #define HAL_PWR_MODULE_ENABLED

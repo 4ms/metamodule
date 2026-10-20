@@ -9,6 +9,9 @@
 // - storage: MP1's PatchStorage answers the A35's FileStorageProxy requests (storage_messages.hh).
 //   Volumes: SD card, NOR flash, and USB
 //   (always unmounted until there's a USB host driver).
+// - USB device: MP1's UsbDeviceManager (MIDI + console composite) on the USB3DR (usbd_conf.cc).
+//   Device mode only, and always on: no host mode or role detection (FUSB302) yet. The console
+//   buffers it sends over USB are empty until the console is buffered, like MP1's.
 
 #include "console.hh"
 #include "core_intercom/shared_index.hh"
@@ -18,7 +21,10 @@
 #include "fs/fatfs/sd_host.hh"
 #include "panel_controls.hh"
 #include "storage_messages.hh"
+#include "usb/usb_device_manager.hh"
+#include "util/lockfree_fifo_spsc.hh"
 #include <cstdio>
+#include <cstring>
 
 using namespace MetaModule;
 
@@ -50,6 +56,9 @@ struct NoDiskOps : DiskOps {
 // Not used yet (see conf/ramdisk_conf.hh), but PatchStorage needs one
 RamDrive ramdrive;
 
+// What MP1's USB CDC console sends to the host. Nothing writes to them yet.
+std::array<ConcurrentBuffer, 3> console_buffers;
+
 } // namespace
 
 int main() {
@@ -71,6 +80,7 @@ int main() {
 	}
 	SharedMemoryS::ptrs.ramdrive = &ramdrive;
 	SharedMemoryS::ptrs.icc_message = index.storage_message.get();
+	SharedMemoryS::ptrs.dev_drive_msgs = index.dev_drive_msgs.get();
 
 	//
 	// Controls
@@ -102,11 +112,32 @@ int main() {
 	storage.process();
 	printf("M33: patch storage ready (%lu ms)\n", (unsigned long)(HAL_GetTick() - start));
 
+	//
+	// USB
+	//
+	static UsbDeviceManager usb_device{{&console_buffers[0], &console_buffers[1], &console_buffers[2]},
+									   UsbDeviceMode::MidiConsole,
+									   *SharedMemoryS::ptrs.dev_drive_msgs};
+	// No MIDI routing yet: print what arrives (the callback runs in the USB interrupt)
+	static LockFreeFifoSpsc<uint32_t, 64> midi_in;
+	usb_device.midi.set_rx_callback([](std::span<uint8_t> packets) {
+		for (auto i = 0u; i + 4 <= packets.size(); i += 4) {
+			uint32_t packet;
+			std::memcpy(&packet, &packets[i], 4);
+			midi_in.put(packet);
+		}
+	});
+	usb_device.start();
+
 	bool sd_was_mounted = sd.is_mounted();
 
 	while (true) {
 		sd.process();
 		storage.process();
+		usb_device.process();
+
+		while (auto packet = midi_in.get())
+			printf("M33: USB MIDI in: %08lx\n", (unsigned long)__builtin_bswap32(*packet));
 
 		if (sd.is_mounted() != sd_was_mounted) {
 			sd_was_mounted = sd.is_mounted();

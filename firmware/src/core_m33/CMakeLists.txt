@@ -39,6 +39,8 @@ if(MP2_TEST_CARRIER)
 endif()
 
 set(MDRIVLIB ${FWDIR}/lib/mdrivlib)
+set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
+set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
 
 include(${FWDIR}/cmake/log_levels.cmake)
 enable_logging()
@@ -56,6 +58,10 @@ set(M33_HAL_MODULES
   hal_sd_ex
   ll_sdmmc
   ll_tim
+  # USB device, DWC3 flavor (the generic hal_pcd.c etc only pick these for MP257C)
+  hal_pcd_drd
+  hal_pcd_drd_ex
+  ll_usb_drd
 )
 list(TRANSFORM M33_HAL_MODULES PREPEND ${FWDIR}/lib/stm32-hal/stm32mp2/Src/stm32mp2xx_)
 list(TRANSFORM M33_HAL_MODULES APPEND .c)
@@ -86,6 +92,25 @@ add_executable(
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/system/sbrk_mp2.cc
   ${FWDIR}/system/libc_stub.c
+  # USB device: MP1's classes and device manager, on our usbd_conf.cc
+  usbd_conf.cc
+  ${FWDIR}/src/usb/device_cdc/usb_serial_device.cc
+  ${FWDIR}/src/usb/device_composite/usbd_composite.c
+  ${FWDIR}/src/usb/device_composite/usbd_composite_desc.c
+  ${FWDIR}/src/usb/device_msc/usb_drive_device.cc
+  ${FWDIR}/src/usb/device_video/usb_video_device.cc
+  ${FWDIR}/src/usb/device_video/usbd_video_desc.c
+  ${FWDIR}/src/usb/device_midi/usbd_midi.c
+  ${FWDIR}/src/usb/usb_midi_device.cc
+  ${USBDEV_LIBDIR}/Core/Src/usbd_core.c
+  ${USBDEV_LIBDIR}/Core/Src/usbd_ctlreq.c
+  ${USBDEV_LIBDIR}/Core/Src/usbd_ioreq.c
+  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc.c
+  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_bot.c
+  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_data.c
+  ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_scsi.c
+  ${USBDEV_LIBDIR}/Class/CDC/Src/usbd_cdc.c
+  ${USBDEV_LIBDIR}/Class/VIDEO/Src/usbd_video.c
 )
 
 target_include_directories(
@@ -102,6 +127,14 @@ target_include_directories(
           ${FWDIR}/metamodule-plugin-sdk/core-interface
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
+          ${FWDIR}/src/usb
+          ${FWDIR}/src/usb/device_composite
+          ${USBHOST_LIBDIR}/Core/Inc
+          ${USBHOST_LIBDIR}/Class/MSC/Inc
+          ${USBDEV_LIBDIR}/Core/Inc
+          ${USBDEV_LIBDIR}/Class/MSC/Inc
+          ${USBDEV_LIBDIR}/Class/CDC/Inc
+          ${USBDEV_LIBDIR}/Class/VIDEO/Inc
           ${MDRIVLIB}
           ${MDRIVLIB}/target/stm32mp2
           ${MDRIVLIB}/target/stm32mp2_cm33
