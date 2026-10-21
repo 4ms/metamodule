@@ -137,11 +137,9 @@ static void reset_class_arena();
 
 USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	hpcd.Instance = USB3;
-	// Full speed: the baremetal usb-drd example found that the test carrier's D+/D- stubs make High
-	// speed fail (not tried here yet)
-	hpcd.Init.speed = PCD_SPEED_FULL;
+	hpcd.Init.speed = PCD_SPEED_HIGH;
 	hpcd.Init.phy_itface = PCD_PHY_UTMI;
-	hpcd.Init.ep0_mps = PCD_SPEED_FULL_MAXPACKETSIZE;
+	hpcd.Init.ep0_mps = PCD_SPEED_HIGH_MAXPACKETSIZE;
 	hpcd.Init.Sof_enable = true;
 	hpcd.Init.low_power_enable = false;
 	hpcd.Init.lpm_enable = false;

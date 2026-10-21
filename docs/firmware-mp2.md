@@ -118,6 +118,20 @@ DWC3 device HAL (`stm32mp2xx_hal_pcd_drd.c`). The MP2 parts:
 - ST's HAL only picks its DWC3 driver for the MP257C (`#if defined(STM32MP257Cxx)`),
   so the generic `stm32mp2xx_hal_pcd.h`/`_ex.h`/`ll_usb.h` were changed to check
   `USB3DRD_BASE`, and the M33 compiles the `_drd.c` files directly.
+- The DWC3 HAL sends a control transfer's data stage as one transfer and reports
+  it once, when the host moves to the status stage. MP1's USB device library
+  expects one report per 64-byte packet, so the M33 builds it with
+  `USBD_AVOID_PACKET_SPLIT_MPS` (without it, enumeration stops at the
+  configuration descriptor). In this mode, a data stage that's a multiple of 64
+  bytes and shorter than the host asked for doesn't end with a zero-length
+  packet; nothing has needed one yet.
+- It runs at high speed on the test carrier (verified), though the
+  stm32mp2-baremetal `usb-drd` example had to use full speed there.
+- The test carrier's USB-C jack had D+/D- swapped (the devboard's swap jumpers
+  are after the split to the carrier). With the pair swapped, the host sees a
+  low-speed device and resets it over and over.
+- The M33 prints faults (`src/core_m33/fault_handlers.cc`) instead of hanging
+  silently.
 
 Not yet:
 - **VBUS sensing and role detection:** the FUSB302. Until then, the controller is
@@ -132,7 +146,6 @@ Not yet:
   driver (GPL-2.0+, so it can be used here), behind MP1's USB host library.
   (Its device side is U-Boot's DWC3 gadget driver, GPL-2.0 only, which is why
   device mode uses ST's HAL instead.)
-
 
 ## Layout
 
