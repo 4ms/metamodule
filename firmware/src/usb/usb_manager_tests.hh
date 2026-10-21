@@ -48,9 +48,9 @@ inline bool UsbManager::start_static_sink_host_test() {
 	pr_info("USB: STATIC %s+HOST TEST (HCD from boot, no PCD, no VBUS sourcing)\n",
 			USB_STATIC_TEST_PRESENT_RP ? "SRC (Rp presented)" : "SINK (Rd presented)");
 	usb_host.init();
-	mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-	mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 3, 0);
-	mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&UsbHostManager::hhcd); });
+	mdrivlib::InterruptControl::disable_irq(UsbIRQn);
+	mdrivlib::InterruptControl::set_irq_priority(UsbIRQn, 3, 0);
+	mdrivlib::InterruptManager::register_isr(UsbIRQn, [] { HAL_HCD_IRQHandler(&UsbHostManager::hhcd); });
 #if USB_STATIC_TEST_PRESENT_RP
 	usbctl.configure_static_src();
 #else
@@ -59,7 +59,7 @@ inline bool UsbManager::start_static_sink_host_test() {
 	state = FUSB302::Device::ConnectedState::AsDevice;
 	host_fallback = true;
 	usb_host.start(false); // never source VBUS in this experiment
-	mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+	mdrivlib::InterruptControl::enable_irq(UsbIRQn);
 	return true;
 #else
 	return false;
@@ -121,12 +121,12 @@ inline void UsbManager::run_attach_cycle_test() {
 		   (unsigned)elapsed,
 		   (unsigned)usb_host.read_port_status(),
 		   (int)usb_host.is_device_attached(),
-		   (unsigned)NVIC_GetEnableIRQ(OTG_IRQn));
+		   (unsigned)NVIC_GetEnableIRQ(UsbIRQn));
 	if (!ok)
 		usb_host.print_state_debug();
 
 	// Tear down exactly like the None branch of handle_fusb_int, then re-poll
-	mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+	mdrivlib::InterruptControl::disable_irq(UsbIRQn);
 	usb_host.vbus_off();
 	usb_host.stop();
 	host_fallback = false;

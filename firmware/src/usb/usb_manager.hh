@@ -1,10 +1,10 @@
 #pragma once
 #include "conf/fusb30x_conf.hh"
+#include "conf/usb_conf.hh"
 #include "console/concurrent_buffer.hh"
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
 #include "drivers/fusb302.hh"
-#include "drivers/pin_change.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "usb/device_cdc/usb_serial_device.hh"
 #include "usb/usb_connection.hh"
@@ -99,9 +99,9 @@ public:
 		usb_device.start();
 		usb_host.init();
 
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 3, 0);
-		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] {
+		mdrivlib::InterruptControl::disable_irq(UsbIRQn);
+		mdrivlib::InterruptControl::set_irq_priority(UsbIRQn, 3, 0);
+		mdrivlib::InterruptManager::register_isr(UsbIRQn, [this] {
 			using enum FUSB302::Device::ConnectedState;
 			// Debug::Pin2::high();
 
@@ -113,7 +113,7 @@ public:
 			} else if (state == AsHost) {
 				HAL_HCD_IRQHandler(&UsbHostManager::hhcd);
 			} else {
-				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::disable_irq(UsbIRQn);
 			}
 			// Debug::Pin2::low();
 		});
@@ -138,10 +138,10 @@ public:
 				cc_attach_tm = role_phase_tm;
 				// start() before enabling IRQ: clears pending host-mode GINTSTS events
 				usb_device.start();
-				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::enable_irq(UsbIRQn);
 
 			} else if (newstate == AsHost) {
-				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::disable_irq(UsbIRQn);
 				// The driver can flip AsDevice -> AsHost directly (toggling
 				// self-powered partner): stop whichever data stack is running
 				if (state == AsDevice) {
@@ -157,11 +157,11 @@ public:
 				pr_info("Starting host%s\n", partner_vbus ? " (partner sources VBUS)" : "");
 				state = newstate;
 				usb_host.start(!partner_vbus);
-				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::enable_irq(UsbIRQn);
 
 			} else if (newstate == None) {
 				// Must disable IRQ first, before doing stop()
-				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::disable_irq(UsbIRQn);
 
 				if (state == AsHost) {
 					pr_info("Stopping host\n");
@@ -410,12 +410,12 @@ private:
 			// requested below), take the host role immediately
 			if (usbctl.pd.data_role_is_host()) {
 				pr_info("USB: PD data-role swap complete, taking host data role (not sourcing VBUS)\n");
-				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::disable_irq(UsbIRQn);
 				usb_device.stop();
 				usb_host.start(false);
 				host_fallback = true;
 				role_phase_tm = HAL_GetTick();
-				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::enable_irq(UsbIRQn);
 				return;
 			}
 
@@ -436,7 +436,7 @@ private:
 					return;
 				}
 				pr_info("USB: not enumerated by partner, trying host data role (not sourcing VBUS)\n");
-				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::disable_irq(UsbIRQn);
 				// Full stop + full host init: the host port only detects
 				// pull-ups after the MspInit USBO force-reset, and resetting
 				// the core with the partner's VBUS hot is proven safe.
@@ -444,7 +444,7 @@ private:
 				usb_host.start(false);
 				host_fallback = true;
 				role_phase_tm = HAL_GetTick();
-				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::enable_irq(UsbIRQn);
 			}
 		} else {
 			if (usb_host.is_device_attached()) {
@@ -469,12 +469,12 @@ private:
 				// here, the partner never presented a D+ pull-up at all
 				pr_info("USB: no device attached (HPRT=0x%08x), trying device data role\n",
 						(unsigned)usb_host.read_port_status());
-				mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::disable_irq(UsbIRQn);
 				usb_host.stop();
 				usb_device.start();
 				host_fallback = false;
 				role_phase_tm = HAL_GetTick();
-				mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+				mdrivlib::InterruptControl::enable_irq(UsbIRQn);
 			}
 		}
 	}
@@ -487,7 +487,7 @@ private:
 	// so a pending GINTSTS source can't storm once nothing services it).
 	void restart_cc_attach() {
 		pr_info("USB: no data role settled after %u swaps, restarting CC attach\n", role_flips - 1);
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		mdrivlib::InterruptControl::disable_irq(UsbIRQn);
 		if (host_fallback)
 			usb_host.stop();
 		else
