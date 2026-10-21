@@ -16,10 +16,12 @@ namespace MetaModule
 
 namespace
 {
+// TODO: no globals needed: follow pattern of core_a7/aux_core_player
 PatchPlayer *aux_patch_player;
 Ui *aux_ui;
 std::atomic<bool> aux_ready = false;
 
+// TODO: Move to mdrivlib
 // CPUECTLR_EL1.SMPEN: the core takes part in the cluster's cache coherency
 bool smp_enabled() {
 	uint64_t cpuectlr;
