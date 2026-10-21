@@ -22,7 +22,6 @@
 #include "panel_controls.hh"
 #include "storage_messages.hh"
 #include "usb/usb_device_manager.hh"
-#include "usb_link_stats.hh"
 #include "util/lockfree_fifo_spsc.hh"
 #include <cstdio>
 #include <cstring>
@@ -132,11 +131,6 @@ int main() {
 
 	bool sd_was_mounted = sd.is_mounted();
 
-	// USB link activity, once a second while it changes
-	UsbLinkStats last_usb_stats{};
-	uint8_t last_usb_state = 0xFF;
-	uint32_t last_usb_report = 0;
-
 	while (true) {
 		sd.process();
 		storage.process();
@@ -144,30 +138,6 @@ int main() {
 
 		while (auto packet = midi_in.get())
 			printf("M33: USB MIDI in: %08lx\n", (unsigned long)__builtin_bswap32(*packet));
-
-		if (HAL_GetTick() - last_usb_report >= 1000) {
-			last_usb_report = HAL_GetTick();
-			UsbLinkStats now;
-			std::memcpy(&now, (const void *)&usb_link_stats, sizeof now);
-			auto state = usb_device.USBD_Device.dev_state;
-			if (state != last_usb_state || now.resets != last_usb_stats.resets ||
-				now.setups != last_usb_stats.setups || now.disconnects != last_usb_stats.disconnects)
-			{
-				// DSTS: link state in bits 21:18, frame number (counts SOFs) in bits 16:3
-				printf("M33: USB: state %u, irqs %lu, resets %lu, setups %lu, suspends %lu, disconnects %lu, "
-					   "speed %s, DSTS %08lx\n",
-					   state,
-					   (unsigned long)now.irqs,
-					   (unsigned long)now.resets,
-					   (unsigned long)now.setups,
-					   (unsigned long)now.suspends,
-					   (unsigned long)now.disconnects,
-					   now.speed == PCD_SPEED_HIGH ? "high" : "full",
-					   (unsigned long)USB3->DEVREGS.DSTS);
-			}
-			last_usb_stats = now;
-			last_usb_state = state;
-		}
 
 		if (sd.is_mounted() != sd_was_mounted) {
 			sd_was_mounted = sd.is_mounted();

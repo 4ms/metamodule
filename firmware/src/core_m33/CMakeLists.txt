@@ -38,6 +38,10 @@ if(MP2_TEST_CARRIER)
   add_compile_definitions(MP2_TEST_CARRIER)
 endif()
 
+# The DWC3 HAL sends a control transfer's data stage as one transfer, and reports it once (when the
+# host moves on to the status stage), so the USB device library must not split it into packets
+add_compile_definitions(USBD_AVOID_PACKET_SPLIT_MPS)
+
 set(MDRIVLIB ${FWDIR}/lib/mdrivlib)
 set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
 set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
