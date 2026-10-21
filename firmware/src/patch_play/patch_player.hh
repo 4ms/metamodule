@@ -16,6 +16,7 @@
 #include "patch_play/live_load.hh"
 #include "patch_play/midi_connections.hh"
 #include "patch_play/multicore_play.hh"
+#include "patch_play/param_value_string.hh"
 #include "patch_play/param_watch.hh"
 #include "patch_play/patch_player_query_patch.hh"
 #include "patch_play/plugin_module.hh"
@@ -760,6 +761,20 @@ public:
 			return modules[module_id]->get_display_text(light_id, text);
 		else
 			return 0;
+	}
+
+	// Fills the watcher with the module's text for the watched param's value
+	void read_param_value_string(ParamValueStringWatcher &watcher) {
+		if (!watcher.is_active())
+			return;
+
+		auto req = watcher.start_fill();
+		size_t sz = 0;
+		if (is_loaded && watcher.module_id < num_modules) {
+			auto text = std::span<char>(watcher.text._data, watcher.text.capacity + 1);
+			sz = plugin_module_get_param_value_string(modules[watcher.module_id].get(), watcher.param_id, text);
+		}
+		watcher.finish_fill(req, sz > 0);
 	}
 
 	float get_param(uint16_t module_id, uint16_t param_id) const {

@@ -1,6 +1,7 @@
 #include "plugin_module.hh"
 #include "CoreModules/CoreProcessor.hh"
 #include "engine/Module.hpp"
+#include <algorithm>
 
 namespace MetaModule
 {
@@ -53,6 +54,26 @@ CoreProcessor::PolyPortBuffer plugin_module_get_poly_input_buffer(std::unique_pt
 	}
 
 	return {nullptr, nullptr};
+}
+
+size_t plugin_module_get_param_value_string(CoreProcessor *module, int param_id, std::span<char> text) {
+	if (text.size() == 0)
+		return 0;
+
+	auto rack_module = as_rack_module(module);
+	if (!rack_module || param_id < 0 || param_id >= (int)rack_module->paramQuantities.size())
+		return 0;
+
+	auto pq = rack_module->paramQuantities[param_id];
+	if (!pq)
+		return 0;
+
+	auto s = pq->getDisplayValueString() + pq->getUnit();
+
+	auto sz = std::min(s.size(), text.size() - 1);
+	std::copy_n(s.data(), sz, text.data());
+	text[sz] = '\0';
+	return sz;
 }
 
 } // namespace MetaModule

@@ -3,6 +3,7 @@
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
 #include "patch/midi_def.hh"
+#include "patch_play/param_value_string.hh"
 #include "patch_play/text_display.hh"
 #include "util/debouncer.hh"
 #include "util/filter.hh"
@@ -132,11 +133,13 @@ struct ParamsMidiState : ParamsState {
 	bool midi_gate = false;
 
 	TextDisplayWatcher text_displays;
+	ParamValueStringWatcher param_value_string;
 
 	void clear() {
 		ParamsState::clear();
 
 		text_displays.stop_watching_all();
+		param_value_string.stop_watching();
 
 		last_midi_cc.num = -1;
 		last_midi_note.num = -1;

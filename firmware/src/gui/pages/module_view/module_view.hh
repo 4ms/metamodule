@@ -230,6 +230,8 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		mapping_pane.update_control_popup();
+
 		// Mapping pane
 		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
@@ -415,6 +417,7 @@ struct ModuleViewPage : PageBase {
 		module_context_menu.blur();
 		dyn_draw.blur();
 		params.text_displays.stop_watching_all();
+		params.param_value_string.stop_watching();
 		settings_menu.hide();
 		action_menu.hide();
 		lv_hide(load_meter);
