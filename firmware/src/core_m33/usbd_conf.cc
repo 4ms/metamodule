@@ -9,13 +9,12 @@
 //   .dma_nc and copied to the class's buffer when it arrives.
 // - No FIFO sizing: the DWC3 sizes its FIFOs itself.
 // - The clocks, resets, and PHY are set up by mdrivlib::Usb3DR (drivers/usb3dr.hh).
+// - As on MP1, UsbManager (src/usb/usb_manager.hh) owns the USB interrupt.
 
-#include "conf/usb_conf.hh"
 #include "console/pr_dbg.hh"
 #include "device_composite/usbd_composite_builder.h"
 #include "device_midi/usbd_midi.h"
 #include "drivers/cache.hh"
-#include "drivers/interrupt.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/usb3dr.hh"
 #include "usbd_cdc.h"
@@ -65,7 +64,8 @@ void clean_dcache(void *addr, uint32_t size) {
 void HAL_PCD_MspInit(PCD_HandleTypeDef *) {
 	mdrivlib::Usb3DR::init(mdrivlib::Usb3DR::Role::Device);
 
-	// TODO: VBUS sensing (FUSB302). Until then, act as if a host is always supplying VBUS
+	// UsbManager only starts the device once the FUSB302 sees a host attached (supplying VBUS),
+	// and stops it on detach
 	mdrivlib::Usb3DR::set_vbus_valid(true);
 }
 
@@ -169,14 +169,10 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	out_transfers = {};
 	reset_class_arena();
 
-	mdrivlib::InterruptManager::register_and_start_isr(
-		MetaModule::UsbIRQn, 3, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
-
 	return USBD_OK;
 }
 
 USBD_StatusTypeDef USBD_LL_DeInit(USBD_HandleTypeDef *pdev) {
-	mdrivlib::InterruptControl::disable_irq(MetaModule::UsbIRQn);
 	HAL_PCD_DeInit((PCD_HandleTypeDef *)pdev->pData);
 	return USBD_OK;
 }

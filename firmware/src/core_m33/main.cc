@@ -9,11 +9,13 @@
 // - storage: MP1's PatchStorage answers the A35's FileStorageProxy requests (storage_messages.hh).
 //   Volumes: SD card, NOR flash, and USB
 //   (always unmounted until there's a USB host driver).
-// - USB device: MP1's UsbDeviceManager (MIDI + console composite) on the USB3DR (usbd_conf.cc).
-//   Device mode only, and always on: no host mode or role detection (FUSB302) yet. The console
-//   buffers it sends over USB are empty until the console is buffered, like MP1's.
+// - USB: MP1's UsbManager, with the FUSB302 deciding the role. As a device: MIDI + console
+//   composite on the USB3DR (usbd_conf.cc). As a host: VBUS only, no host driver yet
+//   (usb/usb_host_manager.hh). The console buffers it sends over USB are empty until the console
+//   is buffered, like MP1's.
 
 #include "console.hh"
+#include "core_intercom/shared_i2c_lock.hh"
 #include "core_intercom/shared_index.hh"
 #include "core_intercom/shared_memory.hh"
 #include "drivers/cache.hh"
@@ -21,7 +23,7 @@
 #include "fs/fatfs/sd_host.hh"
 #include "panel_controls.hh"
 #include "storage_messages.hh"
-#include "usb/usb_device_manager.hh"
+#include "usb/usb_manager.hh"
 #include "util/lockfree_fifo_spsc.hh"
 #include <cstdio>
 #include <cstring>
@@ -98,8 +100,8 @@ int main() {
 #endif
 	SDCardHost sd;
 
-	NoDiskOps usb_ops;
-	FatFileIO usb{&usb_ops, Volume::USB};
+	NoDiskOps usb_drive_ops;
+	FatFileIO usb_drive{&usb_drive_ops, Volume::USB};
 
 	// Give the SD card time to mount, so the first patch scan includes it
 	for (auto start = HAL_GetTick(); HAL_GetTick() - start < 500;)
@@ -107,7 +109,7 @@ int main() {
 	printf("M33: SD card %s\n", sd.is_mounted() ? "mounted" : "not mounted");
 
 	auto start = HAL_GetTick();
-	static StorageMessages storage{usb, sd.get_fileio(), *SharedMemoryS::ptrs.icc_message};
+	static StorageMessages storage{usb_drive, sd.get_fileio(), *SharedMemoryS::ptrs.icc_message};
 	// The first scan of the volumes can be slow, so do it before the A35 makes requests
 	storage.process();
 	printf("M33: patch storage ready (%lu ms)\n", (unsigned long)(HAL_GetTick() - start));
@@ -115,26 +117,34 @@ int main() {
 	//
 	// USB
 	//
-	static UsbDeviceManager usb_device{{&console_buffers[0], &console_buffers[1], &console_buffers[2]},
-									   UsbDeviceMode::MidiConsole,
-									   *SharedMemoryS::ptrs.dev_drive_msgs};
+	// The FUSB302 is on I2C4, which the A35 also uses (codec): hold the bus whenever UsbManager may
+	// use it. (Constructing it initializes the I2C peripheral.)
+	auto &usb = []() -> UsbManager & {
+		SharedI2CGuard i2c;
+		static UsbManager usb{{&console_buffers[0], &console_buffers[1], &console_buffers[2]},
+							  *SharedMemoryS::ptrs.dev_drive_msgs};
+		usb.start();
+		return usb;
+	}();
 	// No MIDI routing yet: print what arrives (the callback runs in the USB interrupt)
 	static LockFreeFifoSpsc<uint32_t, 64> midi_in;
-	usb_device.midi.set_rx_callback([](std::span<uint8_t> packets) {
+	usb.get_midi_device().set_rx_callback([](std::span<uint8_t> packets) {
 		for (auto i = 0u; i + 4 <= packets.size(); i += 4) {
 			uint32_t packet;
 			std::memcpy(&packet, &packets[i], 4);
 			midi_in.put(packet);
 		}
 	});
-	usb_device.start();
 
 	bool sd_was_mounted = sd.is_mounted();
 
 	while (true) {
 		sd.process();
 		storage.process();
-		usb_device.process();
+		{
+			SharedI2CGuard i2c;
+			usb.process();
+		}
 
 		while (auto packet = midi_in.get())
 			printf("M33: USB MIDI in: %08lx\n", (unsigned long)__builtin_bswap32(*packet));
