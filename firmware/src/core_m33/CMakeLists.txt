@@ -70,6 +70,7 @@ set_source_files_properties(${M33_HAL_MODULES} PROPERTIES COMPILE_OPTIONS "-Wno-
 add_executable(
   main_m33.elf
   main.cc
+  fault_handlers.cc
   panel_controls.cc
   system_init.cc
   write.cc
