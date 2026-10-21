@@ -100,9 +100,25 @@ The USB jack is on the USB3DR controller (a Synopsys DWC3), in USB2-only mode
 through USB2PHY2. MP1's OTG core (DWC2) is different hardware, so only the
 layers above the HAL are shared.
 
-So far the M33 runs it as a device, always on: MP1's `UsbDeviceManager`
-(`src/usb/usb_device_manager.hh`), the MIDI + CDC console composite, on ST's
-DWC3 device HAL (`stm32mp2xx_hal_pcd_drd.c`). The MP2 parts:
+The M33 runs MP1's `UsbManager` (`src/usb/usb_manager.hh`) unchanged: the
+FUSB302 picks the role (and handles PD and the awkward partners, as on MP1). As
+a device it runs MP1's `UsbDeviceManager`, the MIDI + CDC console composite, on
+ST's DWC3 device HAL (`stm32mp2xx_hal_pcd_drd.c`). As a host it only turns on
+VBUS so far. The MP2 parts:
+
+- `src/pro/conf/fusb30x_conf.hh`: the FUSB302's pins. On the test carrier
+  (`MP2_TEST_CARRIER`): INT_N on PD13, VBUS load switch on PB4. On the pro p1:
+  INT_N on PE9, load switch on PD13.
+- The FUSB302 is on I2C4, which the A35 also uses (the codec; on the pro, jack
+  sense too). Both cores hold the `SharedI2CLock` hardware semaphore
+  (`src/core_intercom/shared_i2c_lock.hh`) while using it: the A35 around the
+  codec's `init()` (the only codec call that uses I2C, see
+  `src/pro/conf/board_codec_conf.hh`), the M33 around constructing `UsbManager`
+  (which resets and initializes I2C4) and each `UsbManager::process()`.
+- `src/core_m33/usb/usb_host_manager.hh`: an MP2 stand-in for MP1's
+  `UsbHostManager`, found first in the M33's include path. It only switches
+  VBUS. Its `get_midi_host()` and `get_msc_fileio()` aren't defined, so using
+  them is a link error until host mode is ported.
 
 - `mdrivlib::Usb3DR` (`target/stm32mp2/drivers/usb3dr.hh`): the clock, reset,
   and PHY sequence, from the stm32mp2-baremetal `usb-drd` example. Before it
@@ -134,13 +150,14 @@ DWC3 device HAL (`stm32mp2xx_hal_pcd_drd.c`). The MP2 parts:
   silently.
 
 Not yet:
-- **VBUS sensing and role detection:** the FUSB302. Until then, the controller is
-  told VBUS is always valid.
 - **The console over USB:** the CDC console sends MP1's per-core console
   buffers, but on MP2 each core writes to the UART directly, so they're empty.
 - **MIDI routing:** received USB MIDI is printed on the console.
 - **The developer drive:** the A35 publishes a `DevDriveBlock` in `SharedIndex`, but
   doesn't serve a drive yet.
+- **USB settings and status:** the A35's USB role setting (Auto/Host/Device)
+  and the connection status the GUI shows aren't passed between the cores yet,
+  so the role policy is always Auto.
 - **Host mode:** the DWC3 is an xHCI host, and ST's HAL has no host driver for
   it. The stm32mp2-baremetal `usb-drd` example's host side is U-Boot's xHCI
   driver (GPL-2.0+, so it can be used here), behind MP1's USB host library.
