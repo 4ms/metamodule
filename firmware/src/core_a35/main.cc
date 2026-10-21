@@ -43,6 +43,8 @@ namespace
 {
 using namespace MetaModule;
 
+//////////////////////////////////////////
+// TODO: Move these to StaticBuffers
 // Display memory
 __attribute__((section(".framebuffers"))) alignas(4096) std::array<uint32_t, 720 * 1280> framebuffer;
 // Partial render buffer: 1/4 of the GUI, same as MP1
@@ -55,7 +57,9 @@ __attribute__((section(".sharedmem"))) std::array<char, 1024 * 1024> raw_patch_d
 __attribute__((section(".sharedmem"))) std::array<char, 256 * 1024> storage_list_buffer;
 // The developer drive's handoff between the USB device (M33) and us. Not served yet.
 __attribute__((section(".sharedmem"))) DevDriveBlock dev_drive_block;
+//////////////////////////////////////////////
 
+// TODO: Move to core_a35/copro.hh
 void start_m33() {
 	// Park the M33 before (re)initializing the peripherals it uses
 	mdrivlib::CoproController::reset();
@@ -112,6 +116,7 @@ void start_m33() {
 		printf("M33: reset handler ran, main() NOT REACHED\n");
 }
 
+// TODO: Move to aux_core_main
 void start_display() {
 	static mdrivlib::DsiScreen screen{ScreenConf};
 	framebuffer.fill(0xFF000000);
