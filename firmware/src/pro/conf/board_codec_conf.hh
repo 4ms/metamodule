@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/codec_sai_conf.hh"
 #include "conf/i2c_conf.hh"
+#include "core_intercom/shared_i2c_lock.hh"
 #include "drivers/codec_PCM3168.hh"
 #include <cstdint>
 #include <span>
@@ -8,7 +9,17 @@
 namespace MetaModule
 {
 
-using CodecT = mdrivlib::CodecPCM3168;
+// The codec's I2C4 is shared with the M33, so hold the bus while the codec uses it (only in init())
+struct CodecPCM3168SharedI2C : mdrivlib::CodecPCM3168 {
+	using CodecPCM3168::CodecPCM3168;
+
+	Error init() {
+		SharedI2CGuard lock;
+		return CodecPCM3168::init();
+	}
+};
+
+using CodecT = CodecPCM3168SharedI2C;
 
 // Pro p1 has a single codec and no audio expander header.
 struct Hardware {
