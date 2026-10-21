@@ -1,6 +1,7 @@
 #include "console/pr_dbg.hh"
 #include "module_widget_adaptor.hh"
 #include <app/ModuleWidget.hpp>
+#include <asset.hpp>
 #include <engine/Module.hpp>
 #include <memory>
 #include <plugin/Model.hpp>
@@ -95,13 +96,14 @@ void Plugin::addModel(Model *model) {
 		panelsvg = modulewidget->getPanel()->svg->filename();
 	}
 
-	std::string_view panel_filename = "";
-
-	if (panelsvg.size()) {
-		panel_filename = model->add_string(panelsvg);
-	} else {
-		pr_err("No faceplate for %s\n", model->slug.c_str());
+	// Modules that draw their panel in code (no SvgPanel) can provide a faceplate image
+	// in their assets at faceplates/<module slug>.png
+	if (panelsvg.empty()) {
+		panelsvg = asset::plugin(this, "res/faceplates/" + model->slug + ".svg");
+		pr_trace("No panel SVG for %s, using faceplate %s\n", model->slug.c_str(), panelsvg.c_str());
 	}
+
+	std::string_view panel_filename = model->add_string(panelsvg);
 
 	// if (slug == "MotionMTR")
 	// 	model->debug_dump_strings();
