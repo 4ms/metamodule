@@ -18,12 +18,14 @@
 #include "drivers/interrupt.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/usb3dr.hh"
+#include "usb_link_stats.hh"
 #include "usbd_cdc.h"
 #include "usbd_core.h"
 #include "usbd_msc.h"
 #include "usbd_video.h"
 #include <algorithm>
 #include <array>
+#include <cstdio>
 #include <cstring>
 
 #define DMA_NC __attribute__((section(".dma_nc")))
@@ -31,6 +33,8 @@
 extern "C" char _sdma_nc[]; // linker script
 
 DMA_NC PCD_HandleTypeDef hpcd;
+
+volatile MetaModule::UsbLinkStats MetaModule::usb_link_stats;
 
 namespace
 {
@@ -62,10 +66,26 @@ void clean_dcache(void *addr, uint32_t size) {
 } // namespace
 
 void HAL_PCD_MspInit(PCD_HandleTypeDef *) {
+	printf("M33: USB: clocks, resets, PHY\n");
 	mdrivlib::Usb3DR::init(mdrivlib::Usb3DR::Role::Device);
 
 	// TODO: VBUS sensing (FUSB302). Until then, act as if a host is always supplying VBUS
 	mdrivlib::Usb3DR::set_vbus_valid(true);
+
+	// Debug: the PHY's reference clock (flexgen ch58) and whether the RCC lets us write it (RCC
+	// local resource 58), and the PHY's settings
+	printf("M33: USB: ch58 xbar %08lx prediv %08lx findiv %08lx; RCC res58 sec %lu cid %08lx; "
+		   "USB2PHY2CFGR %08lx\n",
+		   (unsigned long)RCC->XBARxCFGR[58],
+		   (unsigned long)RCC->PREDIVxCFGR[58],
+		   (unsigned long)RCC->FINDIVxCFGR[58],
+		   (unsigned long)((RCC->SECCFGR[58 / 32] >> (58 % 32)) & 1),
+		   (unsigned long)RCC->R[58].CIDCFGR,
+		   (unsigned long)RCC->USB2PHY2CFGR);
+	// (Separate line: the console cuts lines at 128 characters)
+	printf("M33: USB: SYSCFG USB2PHY2CR %08lx USB3DRCR %08lx\n",
+		   (unsigned long)SYSCFG->USB2PHY2CR,
+		   (unsigned long)SYSCFG->USB3DRCR);
 }
 
 void HAL_PCD_MspDeInit(PCD_HandleTypeDef *) {
@@ -77,6 +97,7 @@ void HAL_PCD_MspDeInit(PCD_HandleTypeDef *) {
 *******************************************************************************/
 
 void HAL_PCD_SetupStageCallback(PCD_HandleTypeDef *hpcd) {
+	MetaModule::usb_link_stats.setups = MetaModule::usb_link_stats.setups + 1;
 	USBD_LL_SetupStage((USBD_HandleTypeDef *)hpcd->pData, (uint8_t *)hpcd->Setup);
 }
 
@@ -100,12 +121,15 @@ void HAL_PCD_SOFCallback(PCD_HandleTypeDef *hpcd) {
 void HAL_PCD_ResetCallback(PCD_HandleTypeDef *hpcd) {
 	// The HAL has read the enumerated speed into Init.speed
 	auto speed = hpcd->Init.speed == PCD_SPEED_HIGH ? USBD_SPEED_HIGH : USBD_SPEED_FULL;
+	MetaModule::usb_link_stats.speed = hpcd->Init.speed;
+	MetaModule::usb_link_stats.resets = MetaModule::usb_link_stats.resets + 1;
 
 	USBD_LL_Reset((USBD_HandleTypeDef *)hpcd->pData);
 	USBD_LL_SetSpeed((USBD_HandleTypeDef *)hpcd->pData, speed);
 }
 
 void HAL_PCD_SuspendCallback(PCD_HandleTypeDef *hpcd) {
+	MetaModule::usb_link_stats.suspends = MetaModule::usb_link_stats.suspends + 1;
 	USBD_LL_Suspend((USBD_HandleTypeDef *)hpcd->pData);
 }
 
@@ -126,6 +150,7 @@ void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd) {
 }
 
 void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd) {
+	MetaModule::usb_link_stats.disconnects = MetaModule::usb_link_stats.disconnects + 1;
 	USBD_LL_DevDisconnected((USBD_HandleTypeDef *)hpcd->pData);
 }
 
@@ -136,9 +161,11 @@ static void reset_class_arena();
 
 USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	hpcd.Instance = USB3;
-	hpcd.Init.speed = PCD_SPEED_HIGH;
+	// Full speed: the test carrier's D+/D- stubs make High speed fail (as in the baremetal usb-drd
+	// example)
+	hpcd.Init.speed = PCD_SPEED_FULL;
 	hpcd.Init.phy_itface = PCD_PHY_UTMI;
-	hpcd.Init.ep0_mps = PCD_SPEED_HIGH_MAXPACKETSIZE;
+	hpcd.Init.ep0_mps = PCD_SPEED_FULL_MAXPACKETSIZE;
 	hpcd.Init.Sof_enable = true;
 	hpcd.Init.low_power_enable = false;
 	hpcd.Init.lpm_enable = false;
@@ -155,8 +182,10 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	// Force this to null, so ST USB library doesn't try to de-init it
 	((USBD_HandleTypeDef *)hpcd.pData)->pClassData = nullptr;
 
-	if (HAL_PCD_Init(&hpcd) != HAL_OK)
+	if (auto err = HAL_PCD_Init(&hpcd); err != HAL_OK) {
+		printf("M33: USB: HAL_PCD_Init failed (%d)\n", err);
 		return USBD_FAIL;
+	}
 
 	// AHB bursts: INCR4 only, as in ST's stm32mp257f-ev1 device tree (the HAL enables INCR4/8/16).
 	// Longer bursts can trip up the AHB5/RISAF path.
@@ -167,7 +196,16 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	reset_class_arena();
 
 	mdrivlib::InterruptManager::register_and_start_isr(
-		MetaModule::UsbIRQn, 3, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
+		MetaModule::UsbIRQn, 3, 0, [] {
+			MetaModule::usb_link_stats.irqs = MetaModule::usb_link_stats.irqs + 1;
+			HAL_PCD_IRQHandler(&hpcd);
+		});
+	printf("M33: USB: controller ready. GUSB2PHYCFG %08lx GCTL %08lx DCFG %08lx DCTL %08lx DEVTEN %08lx\n",
+		   (unsigned long)USB3->GBLREGS.GUSB2PHYCFG,
+		   (unsigned long)USB3->GBLREGS.GCTL,
+		   (unsigned long)USB3->DEVREGS.DCFG,
+		   (unsigned long)USB3->DEVREGS.DCTL,
+		   (unsigned long)USB3->DEVREGS.DEVTEN);
 
 	return USBD_OK;
 }
