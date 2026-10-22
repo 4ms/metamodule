@@ -102,8 +102,19 @@ add_executable(
   ${FWDIR}/system/libc_stub.c
   # USB device: MP1's classes and device manager, on our usbd_conf.cc
   usbd_conf.cc
-  # USB host: lib/xhci's platform functions
+  # USB host: MP1's class drivers on ST's USB host library, on lib/xhci (usb/usbh_conf.cc)
+  usb/usbh_conf.cc
   usb/xhci_platform.cc
+  ${FWDIR}/src/usb/usbh_midi.cc
+  ${FWDIR}/src/usb/usbh_midi_jacks.cc
+  ${FWDIR}/src/usb/midi_jack_parse.cc
+  ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc.c
+  ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_bot.c
+  ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_scsi.c
+  ${USBHOST_LIBDIR}/Core/Src/usbh_core.c
+  ${USBHOST_LIBDIR}/Core/Src/usbh_ctlreq.c
+  ${USBHOST_LIBDIR}/Core/Src/usbh_ioreq.c
+  ${USBHOST_LIBDIR}/Core/Src/usbh_pipes.c
   ${FWDIR}/src/usb/device_cdc/usb_serial_device.cc
   ${FWDIR}/src/usb/device_composite/usbd_composite.c
   ${FWDIR}/src/usb/device_composite/usbd_composite_desc.c

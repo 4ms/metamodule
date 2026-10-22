@@ -5,16 +5,15 @@
 // On MP1 the M4 runs patch storage, controls, USB, and MIDI; on MP2 the M33 takes that role.
 //
 // So far:
-// - controls: the control encoder and Back button, for the GUI, and USB MIDI to and from the patch
-//   (panel_controls.hh).
+// - controls: the control encoder and Back button, for the GUI, and USB MIDI (host or device) to
+//   and from the patch (panel_controls.hh).
 // - storage: MP1's PatchStorage answers the A35's FileStorageProxy requests (storage_messages.hh).
-//   Volumes: SD card, NOR flash, and USB
-//   (always unmounted until there's a USB host driver).
+//   Volumes: SD card, NOR flash, and USB drive.
 // - USB: MP1's UsbManager, with the FUSB302 deciding the role. Takes the USB settings from the
 //   GUI, and publishes the connection status for it. As a device: MIDI + console
-//   composite on the USB3DR (usbd_conf.cc). As a host: VBUS only, no host driver yet
-//   (usb/usb_host_manager.hh). The console buffers it sends over USB are empty until the console
-//   is buffered, like MP1's.
+//   composite on the USB3DR (usbd_conf.cc). As a host: MIDI devices and USB drives, including
+//   through a hub (usb/usb_host_manager.hh). The console buffers it sends over USB are empty until
+//   the console is buffered, like MP1's.
 
 #include "console.hh"
 #include "core_intercom/shared_i2c_lock.hh"
@@ -37,25 +36,6 @@ MetaModule::SharedMemoryS::Ptrs MetaModule::SharedMemoryS::ptrs{};
 
 namespace
 {
-// USB host isn't ported yet: a drive that's never present
-struct NoDiskOps : DiskOps {
-	DSTATUS status() override {
-		return STA_NOINIT | STA_NODISK;
-	}
-	DSTATUS initialize() override {
-		return STA_NODISK;
-	}
-	DRESULT read(uint8_t *, uint32_t, uint32_t) override {
-		return RES_NOTRDY;
-	}
-	DRESULT write(const uint8_t *, uint32_t, uint32_t) override {
-		return RES_NOTRDY;
-	}
-	DRESULT ioctl(uint8_t, uint8_t *) override {
-		return RES_NOTRDY;
-	}
-};
-
 // Not used yet (see conf/ramdisk_conf.hh), but PatchStorage needs one
 RamDrive ramdrive;
 
@@ -94,30 +74,6 @@ int main() {
 	controls.start();
 
 	//
-	// Storage
-	//
-#ifdef MP2_TEST_CARRIER
-	// Drive the common side of the devboard slot's detect switch low before the SD driver reads it
-	mdrivlib::Pin sd_detect_common{SDCardDetectCommonPin, mdrivlib::PinMode::Output};
-	sd_detect_common.low();
-#endif
-	SDCardHost sd;
-
-	NoDiskOps usb_drive_ops;
-	FatFileIO usb_drive{&usb_drive_ops, Volume::USB};
-
-	// Give the SD card time to mount, so the first patch scan includes it
-	for (auto start = HAL_GetTick(); HAL_GetTick() - start < 500;)
-		sd.process();
-	printf("M33: SD card %s\n", sd.is_mounted() ? "mounted" : "not mounted");
-
-	auto start = HAL_GetTick();
-	static StorageMessages storage{usb_drive, sd.get_fileio(), *SharedMemoryS::ptrs.icc_message};
-	// The first scan of the volumes can be slow, so do it before the A35 makes requests
-	storage.process();
-	printf("M33: patch storage ready (%lu ms)\n", (unsigned long)(HAL_GetTick() - start));
-
-	//
 	// USB
 	//
 	// The FUSB302 is on I2C4, which the A35 also uses (codec): hold the bus whenever UsbManager may
@@ -130,7 +86,28 @@ int main() {
 		return usb;
 	}();
 	// USB MIDI <-> the patch
-	controls.start_midi(usb.get_midi_device(), index.audio_block_size);
+	controls.start_midi(usb.get_midi_host(), usb.get_midi_device(), index.audio_block_size);
+
+	//
+	// Storage
+	//
+#ifdef MP2_TEST_CARRIER
+	// Drive the common side of the devboard slot's detect switch low before the SD driver reads it
+	mdrivlib::Pin sd_detect_common{SDCardDetectCommonPin, mdrivlib::PinMode::Output};
+	sd_detect_common.low();
+#endif
+	SDCardHost sd;
+
+	// Give the SD card time to mount, so the first patch scan includes it
+	for (auto start = HAL_GetTick(); HAL_GetTick() - start < 500;)
+		sd.process();
+	printf("M33: SD card %s\n", sd.is_mounted() ? "mounted" : "not mounted");
+
+	auto start = HAL_GetTick();
+	static StorageMessages storage{usb.get_msc_fileio(), sd.get_fileio(), *SharedMemoryS::ptrs.icc_message};
+	// The first scan of the volumes can be slow, so do it before the A35 makes requests
+	storage.process();
+	printf("M33: patch storage ready (%lu ms)\n", (unsigned long)(HAL_GetTick() - start));
 
 	// USB settings from the GUI, and the connection status for it (same as MP1's M4 main loop)
 	static DeviceSettingsMessages device_settings{SharedMemoryS::ptrs.icc_device_settings_message};
@@ -152,6 +129,8 @@ int main() {
 			if (ds_result.has_role_change)
 				usb.set_role_mode(ds_result.role);
 		}
+		// The USB host's work doesn't use the I2C bus (see UsbHostManager::process())
+		UsbHostManager::run();
 
 		auto conn = usb.get_connection_status();
 		controls.set_usb_connection(conn);

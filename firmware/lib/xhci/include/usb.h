@@ -232,7 +232,6 @@ struct usb_hub_device {
 /* Non-DM function declarations used by xHCI */
 struct usb_device *usb_get_dev_index(int index);
 int usb_alloc_new_device(void *controller, struct usb_device **devp);
-void usb_free_device(void *controller);
 int usb_new_device(struct usb_device *dev);
 int usb_alloc_device(struct usb_device *dev);
 int usb_update_hub_device(struct usb_device *dev);

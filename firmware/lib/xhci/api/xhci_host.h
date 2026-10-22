@@ -5,8 +5,8 @@
 #ifndef XHCI_BAREMETAL_H
 #define XHCI_BAREMETAL_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,6 +73,82 @@ struct xhci_host_device_info {
  * xhci_host_get_device_info - Describe an enumerated device (from xhci_host_poll())
  */
 void xhci_host_get_device_info(struct usb_device *dev, struct xhci_host_device_info *info);
+
+/*
+ * xhci_host_set_disconnect_callback - Called for each device that's gone (including the devices
+ * behind a hub that's gone), from xhci_host_poll(), just before the device is freed
+ */
+void xhci_host_set_disconnect_callback(void (*callback)(struct usb_device *dev));
+
+/*
+ * xhci_host_find_interface - The number of the device's first interface (in its default setting)
+ * with this class and subclass, or -1 if it has none
+ */
+int xhci_host_find_interface(struct usb_device *dev, uint8_t intf_class, uint8_t intf_subclass);
+
+/* The device's speed, as for xhci_host_device_info */
+uint8_t xhci_host_device_speed(struct usb_device *dev);
+
+/*
+ * xhci_host_device_present - Whether the device is still connected (for when its transfers fail
+ * between xhci_host_poll() calls). Asks each hub on the way (blocking).
+ */
+bool xhci_host_device_present(struct usb_device *dev);
+
+/*
+ * xhci_host_control - A control transfer on endpoint 0 (blocking). setup is the 8-byte request; the
+ * data stage is its wLength bytes of data. Returns the number of bytes transferred, -EPIPE if the
+ * device stalled, or another negative errno.
+ */
+int xhci_host_control(struct usb_device *dev, const uint8_t setup[8], void *data);
+
+/*
+ * Non-blocking bulk and interrupt transfers: one transfer at a time per endpoint, each described by
+ * an xhci_xfer that stays valid until it's no longer busy or it's cancelled.
+ * xhci_host_process_events() completes them (as do the blocking calls, which process the events
+ * that arrive while they wait).
+ */
+enum xhci_xfer_status {
+	XHCI_XFER_IDLE,
+	XHCI_XFER_BUSY,
+	XHCI_XFER_DONE,
+	XHCI_XFER_STALL,
+	XHCI_XFER_ERROR,
+};
+
+struct xhci_xfer {
+	/* Set by the caller */
+	struct usb_device *dev;
+	uint8_t ep_addr; /* endpoint number, | 0x80 for IN */
+
+	/* Set by the library */
+	enum xhci_xfer_status status;
+	int actual; /* bytes transferred, when done */
+
+	/* Private */
+	int length;
+	int slot_id;
+	int ep_index;
+	uint64_t trb;
+	struct xhci_xfer *next;
+};
+
+/*
+ * xhci_xfer_submit - Start a transfer. buf must be DMA-safe (see xhci_platform.h), and mustn't
+ * cross a 64kB boundary. Cancels the xfer's transfer if it's busy, and first recovers the endpoint
+ * if a transfer halted it (e.g. stalled). Returns 0 or a negative errno.
+ */
+int xhci_xfer_submit(struct xhci_xfer *xfer, void *buf, int length);
+
+/*
+ * xhci_xfer_cancel - Stop the xfer's transfer, if it's busy. (Its status becomes IDLE.)
+ */
+void xhci_xfer_cancel(struct xhci_xfer *xfer);
+
+/*
+ * xhci_host_process_events - Handle the controller's events (completing transfers). Call often.
+ */
+void xhci_host_process_events(void);
 
 #ifdef __cplusplus
 }

@@ -25,7 +25,19 @@
 #include <linux/bitops.h>
 #include <linux/delay.h>
 #include <usb/xhci.h>
+#include <xhci_host.h>
 #include <xhci_platform.h>
+
+/*
+ * MetaModule: the non-blocking transfers (xhci_xfer_*, at the end of this file) share the event ring
+ * with the blocking ones. While a blocking transfer waits for its event, the events for the
+ * non-blocking ones go to them (or are dropped, if their transfer was cancelled).
+ */
+static struct xhci_xfer *xfers_busy;
+static int waiting_slot_id; /* the blocking transfer being waited for (slot 0: none) */
+static int waiting_ep_index;
+
+static bool xfer_take_event(struct xhci_ctrl *ctrl, union xhci_trb *event);
 
 /**
  * Is this TRB a link TRB or was the last TRB the last TRB in this event ring
@@ -498,6 +510,11 @@ union xhci_trb *xhci_wait_for_event(struct xhci_ctrl *ctrl, trb_type expected)
 			continue;
 
 		type = TRB_FIELD_TO_TYPE(le32_to_cpu(event->event_cmd.flags));
+		if (type == TRB_TRANSFER && xfer_take_event(ctrl, event)) {
+			xhci_acknowledge_event(ctrl);
+			continue;
+		}
+
 		if (type == expected)
 			return event;
 
@@ -531,6 +548,19 @@ union xhci_trb *xhci_wait_for_event(struct xhci_ctrl *ctrl, trb_type expected)
 	if (expected == TRB_COMPLETION)
 		xhci_abort_cmd_ring(ctrl);
 	return NULL;
+}
+
+/* MetaModule: waits for a blocking transfer's event (see xfers_busy) */
+static union xhci_trb *wait_for_transfer(struct xhci_ctrl *ctrl, int slot_id,
+					 int ep_index)
+{
+	union xhci_trb *event;
+
+	waiting_slot_id = slot_id;
+	waiting_ep_index = ep_index;
+	event = xhci_wait_for_event(ctrl, TRB_TRANSFER);
+	waiting_slot_id = 0;
+	return event;
 }
 
 /*
@@ -581,7 +611,7 @@ static void abort_td(struct usb_device *udev, int ep_index)
 
 	xhci_queue_command(ctrl, NULL, udev->slot_id, ep_index, TRB_STOP_RING);
 
-	event = xhci_wait_for_event(ctrl, TRB_TRANSFER);
+	event = wait_for_transfer(ctrl, udev->slot_id, ep_index);
 	if (event) {
 		field = le32_to_cpu(event->trans_event.flags);
 		BUG_ON(TRB_TO_SLOT_ID(field) != udev->slot_id);
@@ -809,7 +839,7 @@ static int xhci_bulk_tx_dma(struct usb_device *udev, unsigned long pipe,
 	giveback_first_trb(udev, ep_index, start_cycle, start_trb);
 
 again:
-	event = xhci_wait_for_event(ctrl, TRB_TRANSFER);
+	event = wait_for_transfer(ctrl, slot_id, ep_index);
 	if (!event) {
 		abort_td(udev, ep_index);
 		udev->status = USB_ST_NAK_REC;  /* closest thing to a timeout */
@@ -1009,7 +1039,7 @@ static int xhci_ctrl_tx_dma(struct usb_device *udev, unsigned long pipe,
 
 	giveback_first_trb(udev, ep_index, start_cycle, start_trb);
 
-	event = xhci_wait_for_event(ctrl, TRB_TRANSFER);
+	event = wait_for_transfer(ctrl, slot_id, ep_index);
 	if (!event)
 		goto abort;
 	field = le32_to_cpu(event->trans_event.flags);
@@ -1031,7 +1061,7 @@ static int xhci_ctrl_tx_dma(struct usb_device *udev, unsigned long pipe,
 	if (GET_COMP_CODE(le32_to_cpu(event->trans_event.transfer_len))
 			== COMP_SHORT_TX) {
 		/* Short data stage, clear up additional status stage event */
-		event = xhci_wait_for_event(ctrl, TRB_TRANSFER);
+		event = wait_for_transfer(ctrl, slot_id, ep_index);
 		if (!event)
 			goto abort;
 		BUG_ON(TRB_TO_SLOT_ID(field) != slot_id);
@@ -1092,4 +1122,185 @@ int xhci_ctrl_tx(struct usb_device *udev, unsigned long pipe,
 	if (dma_buf != buffer && (req->requesttype & USB_DIR_IN) && udev->act_len > 0)
 		memcpy(buffer, dma_buf, min(udev->act_len, length));
 	return ret;
+}
+
+/**** MetaModule: non-blocking transfers (see xhci_host.h) ****/
+
+static void xfer_unlink(struct xhci_xfer *xfer)
+{
+	for (struct xhci_xfer **p = &xfers_busy; *p; p = &(*p)->next) {
+		if (*p == xfer) {
+			*p = xfer->next;
+			break;
+		}
+	}
+	xfer->next = NULL;
+}
+
+static void xfer_complete(struct xhci_xfer *xfer, union xhci_trb *event)
+{
+	u32 transfer_len = le32_to_cpu(event->trans_event.transfer_len);
+	int remaining = EVENT_TRB_LEN(transfer_len);
+
+	xfer->actual = remaining < xfer->length ? xfer->length - remaining : 0;
+
+	switch (GET_COMP_CODE(transfer_len)) {
+	case COMP_SUCCESS:
+	case COMP_SHORT_TX:
+		xfer->status = XHCI_XFER_DONE;
+		break;
+	case COMP_STALL:
+		xfer->status = XHCI_XFER_STALL;
+		break;
+	default:
+		printf("xHCI: transfer on slot %d EP %d failed (code %u)\n",
+		       xfer->slot_id, xfer->ep_index,
+		       (unsigned)GET_COMP_CODE(transfer_len));
+		xfer->status = XHCI_XFER_ERROR;
+		break;
+	}
+	xfer_unlink(xfer);
+}
+
+/*
+ * A transfer event: if it's not for the blocking transfer being waited for, give it to its xfer
+ * (or drop it if it has none). Returns true if the event was taken.
+ */
+static bool xfer_take_event(struct xhci_ctrl *ctrl, union xhci_trb *event)
+{
+	u32 flags = le32_to_cpu(event->trans_event.flags);
+	int slot_id = TRB_TO_SLOT_ID(flags);
+	int ep_index = TRB_TO_EP_INDEX(flags);
+
+	if (slot_id == waiting_slot_id && ep_index == waiting_ep_index)
+		return false;
+
+	for (struct xhci_xfer *xfer = xfers_busy; xfer; xfer = xfer->next) {
+		if (xfer->slot_id == slot_id && xfer->ep_index == ep_index &&
+		    le64_to_cpu(event->trans_event.buffer) == xfer->trb) {
+			xfer_complete(xfer, event);
+			return true;
+		}
+	}
+
+	/* A cancelled transfer's, or the leftovers of a blocking transfer that timed out */
+	debug("xHCI: dropping transfer event for slot %d EP %d\n", slot_id, ep_index);
+	return true;
+}
+
+void xhci_host_process_events(void)
+{
+	struct xhci_ctrl *ctrl = xhci_host_get_ctrl();
+
+	if (!ctrl->event_ring)
+		return;
+
+	while (event_ready(ctrl)) {
+		union xhci_trb *event = ctrl->event_ring->dequeue;
+		trb_type type = TRB_FIELD_TO_TYPE(le32_to_cpu(event->event_cmd.flags));
+
+		if (type == TRB_TRANSFER)
+			xfer_take_event(ctrl, event);
+		else if (type != TRB_PORT_STATUS) /* xhci_host_poll() reads the ports */
+			printf("xHCI: unexpected event type %d\n", type);
+		xhci_acknowledge_event(ctrl);
+	}
+}
+
+/* Forget the transfers on a device that's gone (its slot is about to be disabled), or on all devices
+ * (udev NULL: the controller's stopping) */
+void xhci_xfer_forget_device(struct usb_device *udev)
+{
+	struct xhci_xfer **p = &xfers_busy;
+
+	while (*p) {
+		struct xhci_xfer *xfer = *p;
+
+		if (!udev || xfer->slot_id == (int)udev->slot_id) {
+			*p = xfer->next;
+			xfer->next = NULL;
+			xfer->status = XHCI_XFER_ERROR;
+		} else {
+			p = &xfer->next;
+		}
+	}
+}
+
+void xhci_xfer_cancel(struct xhci_xfer *xfer)
+{
+	if (xfer->status != XHCI_XFER_BUSY)
+		return;
+
+	/* It may have finished already */
+	xhci_host_process_events();
+	if (xfer->status != XHCI_XFER_BUSY)
+		return;
+
+	xfer_unlink(xfer);
+	xfer->status = XHCI_XFER_IDLE;
+	abort_td(xfer->dev, xfer->ep_index);
+}
+
+int xhci_xfer_submit(struct xhci_xfer *xfer, void *buf, int length)
+{
+	struct usb_device *udev = xfer->dev;
+	struct xhci_ctrl *ctrl = xhci_get_ctrl(udev);
+	int ep_num = xfer->ep_addr & USB_ENDPOINT_NUMBER_MASK;
+	bool is_in = xfer->ep_addr & USB_DIR_IN;
+	int ep_index = ep_num * 2 - (is_in ? 0 : 1);
+	struct xhci_virt_device *virt_dev;
+	struct xhci_ep_ctx *ep_ctx;
+	struct xhci_ring *ring;
+	struct xhci_generic_trb *trb;
+	int start_cycle;
+	u32 ep_state;
+	u32 trb_fields[4];
+	u64 addr = length > 0 ? xhci_virt_to_bus(ctrl, buf) : 0;
+	int ret;
+
+	if (ep_num == 0 || udev->slot_id == 0)
+		return -EINVAL;
+	virt_dev = ctrl->devs[udev->slot_id];
+	if (!virt_dev || !virt_dev->eps[ep_index].ring)
+		return -ENODEV;
+
+	/* One TRB, so the buffer can't cross a 64kB boundary */
+	if (length < 0 || (addr & (TRB_MAX_BUFF_SIZE - 1)) + length > TRB_MAX_BUFF_SIZE)
+		return -EINVAL;
+
+	xhci_xfer_cancel(xfer);
+
+	ep_ctx = xhci_get_ep_ctx(ctrl, virt_dev->out_ctx, ep_index);
+	ep_state = le32_to_cpu(ep_ctx->ep_info) & EP_STATE_MASK;
+	if (ep_state == EP_STATE_HALTED) {
+		/* A stall or error halted it: skip the failed transfer and restart the endpoint */
+		reset_ep(udev, ep_index);
+		ep_state = le32_to_cpu(ep_ctx->ep_info) & EP_STATE_MASK;
+	}
+
+	ring = virt_dev->eps[ep_index].ring;
+	ret = prepare_ring(ctrl, ring, ep_state);
+	if (ret < 0)
+		return ret;
+
+	/* As xhci_bulk_tx_dma(): the TRB goes to the hardware when giveback_first_trb() sets its cycle bit */
+	start_cycle = ring->cycle_state;
+	trb_fields[0] = lower_32_bits(addr);
+	trb_fields[1] = upper_32_bits(addr);
+	trb_fields[2] = TRB_LEN(length) | TRB_TD_SIZE(0) | TRB_INTR_TARGET(0);
+	trb_fields[3] = (start_cycle ? 0 : TRB_CYCLE) | TRB_IOC |
+			(is_in ? TRB_ISP : 0) | TRB_TYPE(TRB_NORMAL);
+	trb = queue_trb(ctrl, ring, false, trb_fields);
+
+	xfer->length = length;
+	xfer->actual = 0;
+	xfer->slot_id = udev->slot_id;
+	xfer->ep_index = ep_index;
+	xfer->trb = xhci_virt_to_bus(ctrl, trb);
+	xfer->status = XHCI_XFER_BUSY;
+	xfer->next = xfers_busy;
+	xfers_busy = xfer;
+
+	giveback_first_trb(udev, ep_index, start_cycle, trb);
+	return 0;
 }

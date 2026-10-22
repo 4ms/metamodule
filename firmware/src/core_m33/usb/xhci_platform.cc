@@ -22,7 +22,7 @@ namespace
 constexpr uint32_t PoolSize = 384 * 1024;
 DMA_NC alignas(4096) std::array<uint8_t, PoolSize> pool;
 
-// Transfers whose buffers aren't in .dma_nc go through this (one transfer at a time)
+// Blocking transfers whose buffers aren't in .dma_nc go through this (one at a time)
 constexpr uint32_t BounceSize = 64 * 1024;
 DMA_NC alignas(64) std::array<uint8_t, BounceSize> bounce;
 

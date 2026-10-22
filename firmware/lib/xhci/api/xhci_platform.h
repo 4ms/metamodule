@@ -20,7 +20,7 @@ void xhci_platform_free(void *ptr);
 
 /* A buffer the controller can DMA len bytes to or from, for the transfer buffer buf: buf itself if
  * it's DMA-safe, or else a bounce buffer (the library copies the data in and out). NULL if len is
- * too big to bounce. Only one transfer is in flight at a time. */
+ * too big to bounce. Only the blocking transfers use it, one at a time. */
 void *xhci_platform_dma_buffer(void *buf, size_t len);
 
 /* Busy-wait delays, and milliseconds since base */

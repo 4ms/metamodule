@@ -17,37 +17,40 @@
 
 /* ---- USB device table (non-DM) ---- */
 
+/* MetaModule: entries are freed one at a time (devices behind a hub come and go) */
 static struct usb_device usb_dev_table[USB_MAX_DEVICE];
-static int usb_dev_count;
+static bool usb_dev_used[USB_MAX_DEVICE];
 
 struct usb_device *usb_get_dev_index(int index)
 {
-	if (index < 0 || index >= usb_dev_count)
+	if (index < 0 || index >= USB_MAX_DEVICE || !usb_dev_used[index])
 		return NULL;
 	return &usb_dev_table[index];
 }
 
 int usb_alloc_new_device(void *controller, struct usb_device **devp)
 {
-	if (usb_dev_count >= USB_MAX_DEVICE) {
+	int i = 0;
+	while (i < USB_MAX_DEVICE && usb_dev_used[i])
+		i++;
+	if (i == USB_MAX_DEVICE) {
 		printf("usb_alloc_new_device: too many devices\n");
 		return -1;
 	}
-	struct usb_device *dev = &usb_dev_table[usb_dev_count];
+	struct usb_device *dev = &usb_dev_table[i];
 	memset(dev, 0, sizeof(*dev));
-	dev->devnum = usb_dev_count + 1; /* USB devnum starts at 1 */
+	dev->devnum = i + 1; /* USB devnum starts at 1 */
 	dev->controller = controller;
 	dev->maxpacketsize = PACKET_SIZE_64;
 	dev->speed = USB_SPEED_UNKNOWN;
+	usb_dev_used[i] = true;
 	*devp = dev;
-	usb_dev_count++;
 	return 0;
 }
 
-void usb_free_device(void *controller)
+static void free_device_entry(struct usb_device *dev)
 {
-	if (usb_dev_count > 0)
-		usb_dev_count--;
+	usb_dev_used[dev->devnum - 1] = false;
 }
 
 int usb_maxpacket(struct usb_device *dev, unsigned long pipe)
@@ -139,6 +142,7 @@ static struct xhci_ctrl xhci_ctrl_instance;
 static struct usb_device *root_hub;
 static bool device_connected;
 static int max_ports;
+static void (*disconnect_callback)(struct usb_device *dev);
 
 static const char *speed_str(enum usb_device_speed speed)
 {
@@ -204,7 +208,8 @@ static int usb_get_string(struct usb_device *dev, int index,
 
 /* Forward declarations */
 static int hub_configure(struct usb_device *dev);
-static void xhci_free_virt_device(struct xhci_ctrl *ctrl, int slot_id);
+static void disable_slot(struct xhci_ctrl *ctrl, struct usb_device *dev);
+static void remove_device(struct usb_device *dev);
 
 /*
  * Undo a partially-enumerated device (slot allocated but enumeration failed)
@@ -213,16 +218,8 @@ static void xhci_free_virt_device(struct xhci_ctrl *ctrl, int slot_id);
  */
 static void enum_failed_cleanup(struct xhci_ctrl *ctrl, struct usb_device *dev)
 {
-	if (dev->slot_id) {
-		xhci_queue_command(ctrl, NULL, dev->slot_id, 0,
-				   TRB_DISABLE_SLOT);
-		union xhci_trb *event = xhci_wait_for_event(ctrl,
-							    TRB_COMPLETION);
-		if (event)
-			xhci_acknowledge_event(ctrl);
-		xhci_free_virt_device(ctrl, dev->slot_id);
-	}
-	usb_free_device(ctrl);
+	disable_slot(ctrl, dev);
+	free_device_entry(dev);
 }
 
 /*
@@ -235,7 +232,8 @@ static void enum_failed_cleanup(struct xhci_ctrl *ctrl, struct usb_device *dev)
  *   6. If hub, configure hub ports
  */
 static int xhci_enumerate_device(struct usb_device *parent, int port,
-				 enum usb_device_speed speed)
+				 enum usb_device_speed speed,
+				 struct usb_device **devp)
 {
 	struct xhci_ctrl *ctrl = &xhci_ctrl_instance;
 	struct usb_device *dev;
@@ -260,7 +258,7 @@ static int xhci_enumerate_device(struct usb_device *parent, int port,
 	ret = usb_alloc_device(dev);
 	if (ret) {
 		printf("  Enable Slot failed: %d\n", ret);
-		usb_free_device(ctrl);
+		free_device_entry(dev);
 		return ret;
 	}
 	printf("  Slot %d assigned\n", dev->slot_id);
@@ -371,8 +369,12 @@ static int xhci_enumerate_device(struct usb_device *parent, int port,
 		if (dtype == USB_DT_INTERFACE && dlen >= 9) {
 			struct usb_interface_descriptor *intf =
 				(struct usb_interface_descriptor *)&cfg_buf[pos];
-			cur_if = intf->bInterfaceNumber;
-			if (cur_if < USB_MAXINTERFACES) {
+			/* MetaModule: an interface's alternate settings aren't
+			 * active after Set Configuration, so don't configure
+			 * their endpoints (they'd replace the default's) */
+			cur_if = intf->bAlternateSetting == 0 ?
+				 intf->bInterfaceNumber : -1;
+			if (cur_if >= 0 && cur_if < USB_MAXINTERFACES) {
 				memcpy(&dev->config.if_desc[cur_if].desc,
 				       intf, sizeof(*intf));
 				dev->config.if_desc[cur_if].no_of_ep =
@@ -429,6 +431,7 @@ static int xhci_enumerate_device(struct usb_device *parent, int port,
 
 	dev->configno = cfg_hdr.bConfigurationValue;
 	device_connected = true;
+	*devp = dev;
 
 	/* If this device is a hub, configure it */
 	if (desc->bDeviceClass == USB_CLASS_HUB) {
@@ -559,6 +562,61 @@ static enum usb_device_speed hub_port_speed(u16 portstatus)
 }
 
 /*
+ * MetaModule: a hub port's connection changed. Whatever was on it is gone (a
+ * reconnect is a new device); if a device is there now, reset the port and
+ * enumerate it. Returns the new device, or NULL.
+ */
+static struct usb_device *hub_port_changed(struct usb_device *hubdev, int p,
+					   u16 status)
+{
+	struct usb_port_status ps;
+	int ret;
+
+	if (hubdev->children[p - 1]) {
+		printf("Hub port %d: device disconnected\n", p);
+		remove_device(hubdev->children[p - 1]);
+	}
+
+	if (!(status & USB_PORT_STAT_CONNECTION))
+		return NULL;
+
+	printf("Hub port %d: device connected\n", p);
+
+	/* Reset the port */
+	usb_control_msg(hubdev, usb_sndctrlpipe(hubdev, 0),
+			USB_REQ_SET_FEATURE, USB_RT_PORT,
+			USB_PORT_FEAT_RESET, p,
+			NULL, 0, USB_CNTL_TIMEOUT);
+	mdelay(50);
+
+	/* Clear reset change */
+	usb_control_msg(hubdev, usb_sndctrlpipe(hubdev, 0),
+			USB_REQ_CLEAR_FEATURE, USB_RT_PORT,
+			USB_PORT_FEAT_C_RESET, p,
+			NULL, 0, USB_CNTL_TIMEOUT);
+
+	/* Re-read status for speed */
+	ret = usb_get_port_status(hubdev, p, &ps);
+	if (ret < 0)
+		return NULL;
+	status = le16_to_cpu(ps.wPortStatus);
+
+	if (!(status & USB_PORT_STAT_ENABLE)) {
+		printf("Hub port %d: not enabled after reset\n", p);
+		return NULL;
+	}
+
+	struct usb_device *newdev;
+	ret = xhci_enumerate_device(hubdev, p, hub_port_speed(status), &newdev);
+	if (ret) {
+		printf("Hub port %d: enumeration failed: %d\n", p, ret);
+		return NULL;
+	}
+	hubdev->children[p - 1] = newdev;
+	return newdev;
+}
+
+/*
  * Poll all registered hubs for port status changes.
  * Handles connect/disconnect on hub ports.
  * Returns a newly enumerated device, or NULL.
@@ -587,61 +645,12 @@ static struct usb_device *hub_poll(void)
 					USB_PORT_FEAT_C_CONNECTION, p,
 					NULL, 0, USB_CNTL_TIMEOUT);
 
-			if (status & USB_PORT_STAT_CONNECTION) {
-				printf("Hub port %d: device connected\n", p);
-
-				/* Reset the port */
-				usb_control_msg(hubdev,
-						usb_sndctrlpipe(hubdev, 0),
-						USB_REQ_SET_FEATURE,
-						USB_RT_PORT,
-						USB_PORT_FEAT_RESET, p,
-						NULL, 0, USB_CNTL_TIMEOUT);
-				mdelay(50);
-
-				/* Clear reset change */
-				usb_control_msg(hubdev,
-						usb_sndctrlpipe(hubdev, 0),
-						USB_REQ_CLEAR_FEATURE,
-						USB_RT_PORT,
-						USB_PORT_FEAT_C_RESET, p,
-						NULL, 0, USB_CNTL_TIMEOUT);
-
-				/* Re-read status for speed */
-				ret = usb_get_port_status(hubdev, p, &ps);
-				if (ret < 0)
-					continue;
-				status = le16_to_cpu(ps.wPortStatus);
-
-				if (!(status & USB_PORT_STAT_ENABLE)) {
-					printf("Hub port %d: not enabled after reset\n", p);
-					continue;
-				}
-
-				enum usb_device_speed spd = hub_port_speed(status);
-				ret = xhci_enumerate_device(hubdev, p, spd);
-				if (ret) {
-					printf("Hub port %d: enumeration failed: %d\n",
-					       p, ret);
-				} else {
-					struct usb_device *newdev =
-						usb_get_dev_index(usb_dev_count - 1);
-					hubdev->children[p - 1] = newdev;
-					return newdev;
-				}
-			} else {
-				printf("Hub port %d: device disconnected\n", p);
-				hubdev->children[p - 1] = NULL;
-				/* Device cleanup handled by root disconnect */
-			}
+			/* MetaModule: one change per poll, since removing a
+			 * device can remove hubs */
+			return hub_port_changed(hubdev, p, status);
 		}
 	}
 	return NULL;
-}
-
-static void hub_reset_all(void)
-{
-	num_hubs = 0;
 }
 
 /*
@@ -669,42 +678,65 @@ static void xhci_free_virt_device(struct xhci_ctrl *ctrl, int slot_id)
 	ctrl->devs[slot_id] = NULL;
 }
 
-/*
- * Clean up after a device disconnect:
- *   1. Disable the xHCI slot
- *   2. Free the virtual device
- *   3. Reset device table (keep root hub at index 0)
- */
-static void xhci_disconnect_device(struct xhci_ctrl *ctrl)
+/* Disable the device's xHCI slot (if it has one) and free its resources */
+static void disable_slot(struct xhci_ctrl *ctrl, struct usb_device *dev)
 {
-	device_connected = false;
-	hub_reset_all();
+	if (!dev->slot_id)
+		return;
 
-	/* Walk all non-root-hub devices and disable their slots */
-	for (int i = 1; i < usb_dev_count; i++) {
-		struct usb_device *dev = &usb_dev_table[i];
-		if (dev->slot_id == 0)
-			continue;
-
-		/* Issue Disable Slot command */
-		xhci_queue_command(ctrl, NULL, dev->slot_id, 0,
-				   TRB_DISABLE_SLOT);
-		union xhci_trb *event = xhci_wait_for_event(ctrl,
-							     TRB_COMPLETION);
-		if (event) {
-			u32 comp = GET_COMP_CODE(
-				le32_to_cpu(event->event_cmd.status));
-			if (comp != COMP_SUCCESS)
-				printf("Disable Slot %d: comp code %d\n",
-				       dev->slot_id, comp);
-			xhci_acknowledge_event(ctrl);
-		}
-
-		xhci_free_virt_device(ctrl, dev->slot_id);
+	xhci_queue_command(ctrl, NULL, dev->slot_id, 0, TRB_DISABLE_SLOT);
+	union xhci_trb *event = xhci_wait_for_event(ctrl, TRB_COMPLETION);
+	if (event) {
+		u32 comp = GET_COMP_CODE(le32_to_cpu(event->event_cmd.status));
+		if (comp != COMP_SUCCESS)
+			printf("Disable Slot %d: comp code %d\n",
+			       dev->slot_id, comp);
+		xhci_acknowledge_event(ctrl);
 	}
 
-	/* Reset device table — keep only root hub (index 0) */
-	usb_dev_count = 1;
+	xhci_free_virt_device(ctrl, dev->slot_id);
+	dev->slot_id = 0;
+}
+
+/*
+ * MetaModule: a device is gone (unplugged, or behind a hub that is). Removes
+ * the devices behind it first, tells the disconnect callback, then frees it.
+ */
+static void remove_device(struct usb_device *dev)
+{
+	struct xhci_ctrl *ctrl = &xhci_ctrl_instance;
+
+	for (int p = 0; p < USB_MAXCHILDREN; p++) {
+		if (dev->children[p])
+			remove_device(dev->children[p]);
+	}
+
+	for (int h = 0; h < num_hubs; h++) {
+		if (hubs[h].dev == dev) {
+			hubs[h] = hubs[--num_hubs];
+			break;
+		}
+	}
+
+	if (dev->parent) {
+		for (int p = 0; p < USB_MAXCHILDREN; p++) {
+			if (dev->parent->children[p] == dev)
+				dev->parent->children[p] = NULL;
+		}
+	}
+
+	if (disconnect_callback)
+		disconnect_callback(dev);
+
+	xhci_xfer_forget_device(dev);
+	disable_slot(ctrl, dev);
+	free_device_entry(dev);
+
+	device_connected = false;
+	for (int i = 0; i < USB_MAX_DEVICE; i++) {
+		if (usb_dev_used[i] && &usb_dev_table[i] != root_hub)
+			device_connected = true;
+	}
 }
 
 /*
@@ -826,6 +858,14 @@ struct usb_device *xhci_host_poll(void)
 
 		/* Connection Status Change */
 		if (portsc & PORT_CSC) {
+			/* MetaModule: whatever was on the port is gone (a
+			 * reconnect is a new device) */
+			if (root_hub->children[port_idx]) {
+				printf("Device disconnected on port %d\n",
+				       port_idx + 1);
+				remove_device(root_hub->children[port_idx]);
+			}
+
 			if (portsc & PORT_CONNECT) {
 				printf("Device connected on port %d\n",
 				       port_idx + 1);
@@ -870,11 +910,14 @@ struct usb_device *xhci_host_poll(void)
 					}
 
 					/* Enumerate — port number is 1-based */
+					struct usb_device *newdev;
 					int ret = xhci_enumerate_device(
-						root_hub, port_idx + 1, speed);
-					if (!ret)
-						return usb_get_dev_index(
-							usb_dev_count - 1);
+						root_hub, port_idx + 1, speed,
+						&newdev);
+					if (!ret) {
+						root_hub->children[port_idx] = newdev;
+						return newdev;
+					}
 
 					printf("Enumeration attempt %d failed: %d\n",
 					       attempt, ret);
@@ -887,10 +930,6 @@ struct usb_device *xhci_host_poll(void)
 					}
 				}
 
-			} else {
-				printf("Device disconnected on port %d\n",
-				       port_idx + 1);
-				xhci_disconnect_device(ctrl);
 			}
 		}
 	}
@@ -911,7 +950,7 @@ int xhci_host_init(uintptr_t dwc3_base)
 	struct xhci_hcor *hcor;
 
 	memset(&xhci_ctrl_instance, 0, sizeof(xhci_ctrl_instance));
-	usb_dev_count = 0;
+	memset(usb_dev_used, 0, sizeof(usb_dev_used));
 	device_connected = false;
 	num_hubs = 0;
 
@@ -930,6 +969,8 @@ int xhci_host_init(uintptr_t dwc3_base)
 	}
 
 	max_ports = HCS_MAX_PORTS(xhci_readl(&hccr->cr_hcsparams1));
+	if (max_ports > USB_MAXCHILDREN) /* root_hub->children[] */
+		max_ports = USB_MAXCHILDREN;
 	printf("xHCI: initialized, %d port(s)\n", max_ports);
 
 	/* Allocate root hub as device 0 */
@@ -982,6 +1023,7 @@ struct xhci_ctrl *xhci_host_get_ctrl(void)
 
 void xhci_host_shutdown(void)
 {
+	xhci_xfer_forget_device(NULL);
 	xhci_deregister_bare(&xhci_ctrl_instance);
 }
 
@@ -1000,4 +1042,58 @@ void xhci_host_get_device_info(struct usb_device *dev, struct xhci_host_device_i
 		info->depth++;
 	memcpy(info->manufacturer, dev->mf, sizeof(info->manufacturer) - 1);
 	memcpy(info->product, dev->prod, sizeof(info->product) - 1);
+}
+
+void xhci_host_set_disconnect_callback(void (*callback)(struct usb_device *dev))
+{
+	disconnect_callback = callback;
+}
+
+int xhci_host_find_interface(struct usb_device *dev, uint8_t intf_class, uint8_t intf_subclass)
+{
+	for (int i = 0; i < dev->config.no_of_if && i < USB_MAXINTERFACES; i++) {
+		struct usb_interface_descriptor *desc = &dev->config.if_desc[i].desc;
+		if (desc->bLength && desc->bInterfaceClass == intf_class &&
+		    desc->bInterfaceSubClass == intf_subclass)
+			return desc->bInterfaceNumber;
+	}
+	return -1;
+}
+
+uint8_t xhci_host_device_speed(struct usb_device *dev)
+{
+	return dev->speed;
+}
+
+int xhci_host_control(struct usb_device *dev, const uint8_t setup[8], void *data)
+{
+	struct devrequest req;
+	unsigned long pipe;
+	int ret;
+
+	memcpy(&req, setup, sizeof(req));
+	pipe = (req.requesttype & USB_DIR_IN) ? usb_rcvctrlpipe(dev, 0) :
+						usb_sndctrlpipe(dev, 0);
+
+	ret = xhci_ctrl_tx(dev, pipe, &req, le16_to_cpu(req.length), data);
+	if (ret < 0)
+		return ret;
+	if (dev->status == USB_ST_STALLED)
+		return -EPIPE;
+	return dev->act_len;
+}
+
+bool xhci_host_device_present(struct usb_device *dev)
+{
+	for (; dev->parent && dev->parent != root_hub; dev = dev->parent) {
+		struct usb_port_status ps;
+		if (usb_get_port_status(dev->parent, dev->portnr, &ps) < 0)
+			return false;
+		if (!(le16_to_cpu(ps.wPortStatus) & USB_PORT_STAT_CONNECTION))
+			return false;
+	}
+
+	if (dev->portnr < 1 || dev->portnr > max_ports)
+		return false;
+	return xhci_readl(&xhci_ctrl_instance.hcor->portregs[dev->portnr - 1].or_portsc) & PORT_CONNECT;
 }
