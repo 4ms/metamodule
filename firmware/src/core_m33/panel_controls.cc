@@ -60,9 +60,19 @@ void PanelControls::start_param_block() {
 	new_block = true;
 }
 
-void PanelControls::start_midi(UsbMidiDevice &midi_device, volatile uint32_t const &audio_block_size) {
+void PanelControls::start_midi(MidiHost &midi_host,
+							   UsbMidiDevice &midi_device,
+							   volatile uint32_t const &audio_block_size) {
 	this->audio_block_size = &audio_block_size;
+	this->midi_host = &midi_host;
+
+	// Same as MP1's Controls::start()
+	midi_host.set_rx_callback([this, &midi_host](std::span<uint8_t> rxbuffer) {
+		route_usb_midi_rx(rxbuffer);
+		midi_host.receive();
+	});
 	midi_device.set_rx_callback([this](std::span<uint8_t> rxbuffer) { route_usb_midi_rx(rxbuffer); });
+
 	// Last: update() checks this
 	this->midi_device = &midi_device;
 }
@@ -103,9 +113,9 @@ void PanelControls::update_midi() {
 		process_midi_frame(params);
 }
 
-// Same as MP1's Controls::update_midi_connected(), without the USB MIDI host
+// Same as MP1's Controls::update_midi_connected()
 void PanelControls::update_midi_connected() {
-	midi_usb_connected_raw.update(midi_device->is_connected());
+	midi_usb_connected_raw.update(midi_host->is_connected() || midi_device->is_connected());
 
 	if (midi_usb_connected_raw.went_low())
 		midi_parser.start_all_notes_off_sequence();
@@ -119,14 +129,17 @@ void PanelControls::update_midi_connected() {
 	midi_parser.set_14bit_mode(cur_metaparams->midi_14bit_mode);
 }
 
-// MP1's Controls::parse_midi(), for one frame, without the MIDI expander or the USB MIDI host
+// MP1's Controls::parse_midi(), for one frame, without the MIDI expander
 void PanelControls::process_midi_frame(Params &params) {
 	// The audio stream left this frame's outgoing message here
 	if (MidiMessage out_msg = params.raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
 		if (params.midi_port == Midi::Event::Port::USB && midi_usb_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
 			out_msg.make_usb_msg(bytes);
-			midi_device->transmit(bytes);
+			if (midi_host->is_connected())
+				midi_host->transmit(bytes);
+			else if (midi_device->is_connected())
+				midi_device->transmit(bytes);
 		}
 	}
 
@@ -154,7 +167,7 @@ void PanelControls::process_midi_frame(Params &params) {
 	}
 }
 
-// USB interrupt
+// USB interrupt (device) or main loop (host)
 void PanelControls::route_usb_midi_rx(std::span<uint8_t> rxbuffer) {
 	while (rxbuffer.size() >= 4) {
 		midi_usb_rx_buf.put(MidiMessage{rxbuffer[0], rxbuffer[1], rxbuffer[2], rxbuffer[3]});

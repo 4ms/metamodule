@@ -6,6 +6,7 @@
 #include "drivers/timekeeper.hh"
 #include "midi/midi_message.hh"
 #include "param_block.hh"
+#include "usb/midi_host.hh"
 #include "usb/usb_connection.hh"
 #include "usb/usb_midi_device.hh"
 #include "util/edge_detector.hh"
@@ -47,9 +48,9 @@ public:
 		usb_connection = conn;
 	}
 
-	// Routes USB MIDI between the USB device and the patch. audio_block_size is published by the A35.
-	// (No USB MIDI host yet.)
-	void start_midi(UsbMidiDevice &midi_device, volatile uint32_t const &audio_block_size);
+	// Routes USB MIDI between the patch and the USB MIDI host or device (whichever is connected).
+	// audio_block_size is published by the A35.
+	void start_midi(MidiHost &midi_host, UsbMidiDevice &midi_device, volatile uint32_t const &audio_block_size);
 
 private:
 	void update();
@@ -76,9 +77,11 @@ private:
 	volatile bool new_block = false;
 	volatile UsbConnection usb_connection = UsbConnection::None;
 
+	MidiHost *midi_host = nullptr;
 	UsbMidiDevice *midi_device = nullptr;
 	volatile uint32_t const *audio_block_size = nullptr;
-	LockFreeFifoSpsc<MidiMessage, 256> midi_usb_rx_buf; // USB interrupt -> update()
+	// USB interrupt (device) or main loop (host: only one is connected at a time) -> update()
+	LockFreeFifoSpsc<MidiMessage, 256> midi_usb_rx_buf;
 	Midi::MessageParser midi_parser;
 	EdgeStateDetector midi_usb_connected_raw;
 	bool midi_usb_connected = false;
