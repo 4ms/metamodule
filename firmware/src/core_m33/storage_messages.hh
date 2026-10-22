@@ -1,6 +1,9 @@
 #pragma once
+#include "conf/plugin_file_conf.hh"
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
+#include "dynload/plugin_file_scan.hh"
+#include "dynload/plugin_list_serial.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "patch_file/dir_list_serial.hh"
 #include "patch_file/patch_storage.hh"
@@ -9,9 +12,11 @@
 namespace MetaModule
 {
 
-// The A35 can't read a PatchDirList or DirTree built on this core (64-bit vs 32-bit layouts), so its
-// FileStorageProxy asks for them serialized into a buffer instead (patch_dir_list/dir_entries null).
-// PatchStorage fills in local copies as on MP1, and those get serialized here (see dir_list_serial.hh).
+// The A35 can't read a PatchDirList, DirTree or PluginFileList built on this core (64-bit vs 32-bit
+// layouts), so its FileStorageProxy asks for them serialized into a buffer instead
+// (patch_dir_list/dir_entries/plugin_file_list null). PatchStorage fills in local copies as on MP1,
+// and those get serialized here (see dir_list_serial.hh). The plugin file list is scanned straight
+// into the buffer (see plugin_list_serial.hh).
 //
 // TODO: if we can free up some code space on the M4, then we could serialize in PatchStorage directly
 // on mp1 and mp2
@@ -20,6 +25,8 @@ struct StorageMessages {
 
 	StorageMessages(FatFileIO &usb_fileio, FatFileIO &sd_fileio, IntercoreStorageMessage &shared_message)
 		: intercore_comm{shared_message}
+		, usb_fileio{usb_fileio}
+		, sd_fileio{sd_fileio}
 		, patch_storage{sd_fileio, usb_fileio} {
 	}
 
@@ -49,6 +56,8 @@ struct StorageMessages {
 
 private:
 	mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Responder, IntercoreStorageMessage> intercore_comm;
+	FatFileIO &usb_fileio;
+	FatFileIO &sd_fileio;
 	PatchStorage patch_storage;
 
 	PatchDirList patch_dir_list; // what the A35 was last sent
@@ -88,7 +97,41 @@ private:
 			return response;
 		}
 
+		if (message.message_type == RequestPluginFileList && !message.plugin_file_list) {
+			pr_dbg("M33: scanning volumes for plugin files (metamodule-plugins/*" PLUGIN_FILE_EXTENSION ")\n");
+
+			PluginListSerial::Writer plugin_files{message.buffer};
+			bool ok = scan_plugin_volumes(plugin_files);
+			auto bytes = plugin_files.finish();
+			if (bytes == 0) {
+				pr_err("M33: plugin file list does not fit in the %u byte buffer\n", (unsigned)message.buffer.size());
+				ok = false;
+			}
+			return IntercoreStorageMessage{.message_type = ok ? PluginFileListOK : PluginFileListFail,
+										   .bytes_read = bytes};
+		}
+
 		return patch_storage.handle_message(message);
+	}
+
+	// Same as MP1's PluginFileFinder::find_plugin_files() (dynload/plugin_file_finder.hh), which can't
+	// be shared without changing the MP1 M4 binary
+	bool scan_plugin_volumes(PluginListSerial::Writer &plugin_files) {
+		bool usb_ok = false;
+		if (usb_fileio.is_mounted()) {
+			usb_ok = scan_volume(usb_fileio, plugin_files, PluginDirName);
+			usb_ok = scan_volume(usb_fileio, plugin_files, PluginUserDirName);
+			usb_ok |= scan_volume(usb_fileio, plugin_files, "/");
+		}
+
+		bool sd_ok = false;
+		if (sd_fileio.is_mounted()) {
+			sd_ok = scan_volume(sd_fileio, plugin_files, PluginDirName);
+			sd_ok = scan_volume(sd_fileio, plugin_files, PluginUserDirName);
+			sd_ok |= scan_volume(sd_fileio, plugin_files, "/");
+		}
+
+		return usb_ok || sd_ok;
 	}
 
 	// Requests for handlers that aren't ported yet get a failure response. The A35 can't send another
@@ -109,8 +152,6 @@ private:
 				return IntercoreStorageMessage{.message_type = FlashingFailed};
 			case RequestReadFlash:
 				return IntercoreStorageMessage{.message_type = ReadFlashFailed};
-			case RequestPluginFileList:
-				return IntercoreStorageMessage{.message_type = PluginFileListFail};
 			default:
 				return std::nullopt;
 		}

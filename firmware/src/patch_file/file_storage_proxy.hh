@@ -1,5 +1,6 @@
 #pragma once
 #include "core_intercom/intercore_message.hh"
+#include "dynload/plugin_list_serial.hh"
 #include "patch_file/dir_list_serial.hh"
 #include "patch_file/file_storage_comm.hh"
 #include "patch_file/patch_location.hh"
@@ -15,10 +16,10 @@ public:
 
 	//TODO: use a general-purpose buffer instead of raw_patch_data and patch_dir_list
 
-	// list_buffer: if given, the patch list and dir entries are sent serialized into this buffer
-	// (which must be in memory both cores can access), and unpacked here by get_message(), instead
-	// of the other core filling in our PatchDirList/DirTree directly. Needed when the cores don't
-	// share a memory layout (MP2). See dir_list_serial.hh.
+	// list_buffer: if given, the patch list, dir entries and plugin file list are sent serialized into
+	// this buffer (which must be in memory both cores can access), and unpacked here by get_message(),
+	// instead of the other core filling in our PatchDirList/DirTree/PluginFileList directly. Needed
+	// when the cores don't share a memory layout (MP2). See dir_list_serial.hh and plugin_list_serial.hh.
 	FileStorageProxy(std::span<char> raw_patch_data,
 					 FileStorageComm &comm,
 					 PatchDirList &patch_dir_list,
@@ -46,6 +47,16 @@ public:
 
 			if (message.message_type == DirEntriesSuccess || message.message_type == DirEntriesFailed)
 				pending_dir_tree_ = nullptr;
+
+			if (message.message_type == PluginFileListOK && pending_plugin_list_) {
+				if (!PluginListSerial::deserialize(list_buffer_.first(message.bytes_read), *pending_plugin_list_)) {
+					pr_err("Error: received a corrupt plugin file list\n");
+					message.message_type = PluginFileListFail;
+				}
+			}
+
+			if (message.message_type == PluginFileListOK || message.message_type == PluginFileListFail)
+				pending_plugin_list_ = nullptr;
 		}
 
 		return message;
@@ -210,7 +221,17 @@ public:
 
 	bool request_plugin_file_list(PluginFileList *plugin_file_list) {
 		IntercoreStorageMessage message{.message_type = RequestPluginFileList, .plugin_file_list = plugin_file_list};
-		return comm_.send_message(message);
+
+		if (!list_buffer_.empty()) {
+			message.plugin_file_list = nullptr;
+			message.buffer = list_buffer_;
+		}
+
+		if (!comm_.send_message(message))
+			return false;
+
+		pending_plugin_list_ = plugin_file_list;
+		return true;
 	}
 
 	// Query the patch file cache (faster than reading from disk)
@@ -257,5 +278,6 @@ private:
 	std::span<char> raw_patch_data_;
 	std::span<char> list_buffer_;
 	DirTree<FileEntry> *pending_dir_tree_ = nullptr;
+	PluginFileList *pending_plugin_list_ = nullptr;
 };
 } // namespace MetaModule

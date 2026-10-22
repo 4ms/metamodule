@@ -7,7 +7,9 @@
 namespace MetaModule
 {
 
-inline bool scan_volume(FileIoC auto &fileio, PluginFileList &plugin_files, std::string_view dir) {
+// plugin_files: a PluginFileList, or anything with its push_back() and max_size()
+// (e.g. PluginListSerial::Writer)
+inline bool scan_volume(FileIoC auto &fileio, auto &plugin_files, std::string_view dir) {
 	pr_trace("Scanning dir %s on volume %d\n", dir.data(), fileio.vol_id());
 
 	bool ok = fileio.foreach_dir_entry(

@@ -1,6 +1,6 @@
 // MetaModule MP2 ("pro") A35 firmware.
 
-// Not yet ported: the other controls, jack sense, MIDI, plugins, USB, WiFi.
+// Not yet ported: the other controls, jack sense, MIDI, USB, WiFi.
 
 #include "audio/audio.hh"
 #include "aux_core.hh"
@@ -221,6 +221,8 @@ int main() {
 	static AssetFS asset_fs{0};
 	static InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
 
+	ui.preload_plugins(plugin_manager);
+
 	ui.start();
 	printf("GUI started. Navigate with the control encoder and Back button, or the console: arrows (or a/d) "
 		   "turn, Enter clicks, Backspace is Back\n");
@@ -229,7 +231,6 @@ int main() {
 	audio.start();
 
 	// The developer drive (Developer Mode): MP1 runs this on core 1 (core_a7/aux_core_main.cc).
-	// Installing plugins fails, since MP2 can't load them yet (mp2-stubs/dynload/dynloader.hh).
 	static DevDrive dev_drive;
 	static DevDriveService dev_drive_service{dev_drive,
 											 plugin_manager,

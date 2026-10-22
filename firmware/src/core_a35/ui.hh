@@ -1,6 +1,8 @@
 #pragma once
 #include "console_keys.hh"
+#include "delay.hh"
 #include "dynload/plugin_manager.hh"
+#include "dynload/preload_plugins.hh"
 #include "gui/elements/screensaver.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_manager.hh"
@@ -76,6 +78,48 @@ public:
 		tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 	}
 
+	// Loads the plugins set to load at startup (Settings > Plugins), showing progress on the main menu.
+	// Same as MP1's Ui::preload_plugins (gui/ui.hh)
+	void preload_plugins(PluginManager &plugin_manager) {
+		lv_show(ui_MainMenuNowPlayingPanel);
+		lv_show(ui_MainMenuNowPlaying);
+
+		if (settings.plugin_preload.slugs.size())
+			delay_ms(600); //allow time for ???
+
+		// Put known large allocators to the front
+		std::ranges::partition(settings.plugin_preload.slugs, [](auto const &s) {
+			return s == "UnfilteredVolume1" || s == "4ms-ROMplers" || s == "MADZINE";
+		});
+
+		auto preloader = PreLoader{plugin_manager, settings.plugin_preload.slugs};
+
+		while (true) {
+			auto status = preloader.process();
+
+			if (status.state == PreLoader::State::Error) {
+				notify_queue.put({status.message, Notification::Priority::Error, 2000});
+				break;
+
+			} else if (status.state == PreLoader::State::Warning) {
+				notify_queue.put({status.message, Notification::Priority::Error, 2000});
+
+			} else if (status.state == PreLoader::State::Done) {
+				break;
+
+			} else {
+				if (status.message.length()) {
+					lv_label_set_text(ui_MainMenuNowPlaying, status.message.c_str());
+				}
+			}
+
+			update_screen();
+			page_manager.handle_notifications();
+		}
+
+		lv_label_set_text(ui_MainMenuNowPlaying, "");
+	}
+
 	void start() {
 		page_manager.init();
 
@@ -90,12 +134,9 @@ public:
 	void update() {
 		keys.poll();
 
-		auto now = lv_tick_get();
-		if (now - last_lv_update_tm >= 2) {
-			last_lv_update_tm = now;
-			lv_timer_handler();
-		}
+		update_screen();
 
+		auto now = lv_tick_get();
 		if (now - last_page_update_tm >= 16) {
 			last_page_update_tm = now;
 			page_update_task();
@@ -138,6 +179,14 @@ public:
 private:
 	uint32_t last_page_update_tm = 0;
 	uint32_t last_lv_update_tm = 0;
+
+	void update_screen() {
+		auto now = lv_tick_get();
+		if (now - last_lv_update_tm >= 2) {
+			last_lv_update_tm = now;
+			lv_timer_handler();
+		}
+	}
 
 	// Same as MP1, minus the USB and jack sense monitors
 	void page_update_task() {
