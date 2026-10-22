@@ -68,7 +68,9 @@ extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp);
 extern "C" void __cxa_pure_virtual();
 extern "C" void *memalign(size_t align, size_t nbytes);
+#if !defined(CORE_CA35)
 extern "C" uintptr_t mm_host_find_exidx(uintptr_t pc, int *nrec);
+#endif
 
 void __attribute__((optimize("-O0"))) keep_symbols() {
 	{
@@ -76,12 +78,14 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 		(void)x;
 	}
 
+#if !defined(CORE_CA35)
 	{
 		// Exported so SDK >= 2.3 plugins can route their unwinder to the
 		// host exidx registry; nothing in firmware calls it by name
 		auto x = &mm_host_find_exidx;
 		(void)x;
 	}
+#endif
 
 	{
 		auto x = &memalign;

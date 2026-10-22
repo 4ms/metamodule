@@ -1,6 +1,6 @@
 // MP2 versions of the plugin memory arena (src/memory/plugin_arena.cc) and abort rescue
-// (system/abort_rescue.cc). MP2 can't load plugins yet (see mp2-stubs/dynload/dynloader.hh), so
-// there's no arena and nothing to rescue.
+// (system/abort_rescue.cc). MP2 has neither yet: plugins allocate from the firmware's heap (their
+// malloc etc. are the firmware's), and a plugin that aborts isn't rescued.
 #include "drivers/risaf.hh"
 #include "memory/plugin_arena.hh"
 #include "pr_dbg.hh"
@@ -66,6 +66,15 @@ void free(void *ptr) {
 	mdrivlib::RISAF::remove_ddr_region(DevDriveRegionIndex);
 	heap_release_top(ptr);
 	dev_drive_mem = nullptr;
+}
+
+// No arena: plugins' allocations aren't redirected
+void *allocator_redirect(std::string_view) {
+	return nullptr;
+}
+
+bool contains(void const *) {
+	return false;
 }
 
 size_t used_bytes() {

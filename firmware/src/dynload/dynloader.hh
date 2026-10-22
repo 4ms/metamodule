@@ -161,11 +161,16 @@ private:
 		// Invalidate any instructions in the Instruction cache, forcing the processor
 		// to read the new code from main memory
 		mdrivlib::SystemCache::clean_dcache_by_range(codeblock.data(), codeblock.size());
+#if defined(CORE_CA35)
+		// MP2: one instruction does both cores
+		mdrivlib::SystemCache::invalidate_icache_inner_shareable();
+#else
 		mdrivlib::SystemCache::invalidate_icache();
 		HAL_Delay(10);
 		mdrivlib::HWSemaphore<InvalidateICache>::lock();
 		mdrivlib::HWSemaphore<InvalidateICache>::unlock();
 		HAL_Delay(50);
+#endif
 	}
 
 	void init_host_symbol_table() {
@@ -187,6 +192,17 @@ private:
 	}
 
 	void register_unwind_table() {
+#if defined(METAMODULE_ELF64)
+		// AArch64 (MP2): the plugin's .eh_frame, registered with the firmware's unwinder (see
+		// mp2-stubs/dynload/exidx_registry.cc)
+		if (auto sec = elf.try_find_section(".eh_frame")) {
+			auto base = reinterpret_cast<uintptr_t>(codeblock.data());
+			ExidxRegistry::register_range(base, base + codeblock.size(), base + sec->address(), 0);
+			pr_trace("Registered plugin unwind table: %u bytes\n", unsigned(sec->size_bytes()));
+			return;
+		}
+#endif
+
 		// Make the plugin's unwind table visible to the host-side exidx
 		// registry, so exceptions can unwind through the plugin's frames.
 		// Plugins built without exceptions are silently skipped.
@@ -267,7 +283,7 @@ private:
 				pr_err(".fini_array section is outside the loaded image\n");
 				return;
 			}
-			fini = {sec->address(), sec->num_entries()};
+			fini = {uint32_t(sec->address()), uint32_t(sec->num_entries())};
 			pr_trace("Plugin has %u entries in .fini_array\n", fini.count);
 			return;
 		}

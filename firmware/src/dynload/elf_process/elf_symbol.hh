@@ -35,6 +35,10 @@ public:
 	elf_addr_t size() {
 		return raw_symbol->st_size;
 	}
+
+	bool is_weak() {
+		return (raw_symbol->st_info >> 4) == STB_WEAK;
+	}
 };
 
 } // namespace ElfFile

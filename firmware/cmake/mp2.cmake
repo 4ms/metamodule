@@ -117,7 +117,7 @@ add_subdirectory(src/gui/slsexport ${CMAKE_CURRENT_BINARY_DIR}/slsexport)
 target_include_directories(ui_lvgl PRIVATE lib)
 
 #
-# App libraries: the same ones MP1's A7 app uses (src/CMakeLists.txt), except the dynamic plugin loader
+# App libraries: the same ones MP1's A7 app uses (src/CMakeLists.txt)
 
 set(LIBDIR ${FWDIR}/lib)
 
@@ -128,6 +128,8 @@ add_subdirectory(lib/thorvg ${CMAKE_CURRENT_BINARY_DIR}/thorvg)
 
 # VCV Rack adaptor
 add_subdirectory(vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
+# References what plugins may use but the firmware doesn't, so it's linked in (same as MP1)
+target_sources(vcv_plugin_export PRIVATE vcv_plugin/export/src/keep-symbols.cc)
 
 # Brands: VCV Rack plugins ported to MetaModule (built-in unless OMIT_BRAND_x or BUILD_DYN_PLUGIN_x is set)
 add_subdirectory(vcv_ports ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
@@ -236,10 +238,12 @@ add_library(
   ${MM_SHARED_APP_SOURCES}
   src/gui/pages/file_browser/file_browser_adaptor.cc
   src/fs/fatfs/fattime.cc
+  src/dynload/dynloader.cc
   src/mp2-stubs/dynload/exidx_registry.cc
   system/mmu_ca35.cc
   system/sbrk_mp2.cc
   system/eh_frame_ca35.cc
+  system/time.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/aux_core_startup.s
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/vectors.S
@@ -283,6 +287,8 @@ target_compile_definitions(
                    SHAREDMEM_SIZE=${SHAREDMEM_SIZE} DMABUF_ADDR=${DMABUF_ADDR} DMABUF_SIZE=${DMABUF_SIZE}
 )
 target_compile_definitions(a35_core PUBLIC CPPUTIL_STATIC_STRING_USE_STD_STRING SUPPRESS_HIL_MESSAGES=1)
+# Plugins are AArch64 ELF64 shared objects (src/dynload/elf_process/elf_types.hh)
+target_compile_definitions(a35_core PUBLIC METAMODULE_ELF64)
 set_source_files_properties(
   src/core_a35/m33_firmware.S PROPERTIES COMPILE_DEFINITIONS "M33_FIRMWARE_BIN=\"${M33_BIN}\"" OBJECT_DEPENDS ${M33_BIN}
 )
@@ -329,12 +335,51 @@ target_link_options(
 )
 set_target_properties(main_a35.elf PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
 
+#
+# The symbols plugins can use, as on MP1 (see CMakeLists.txt): their names are in the SDK
+# (api-symbols-mp2.txt, made by the new-api-sym-list-mp2 target), and after linking, a table of
+# their addresses goes in the firmware's .symlist section (see src/dynload/host_sym_list.hh).
+
+set(MP2_API_SYMBOL_NAMES_FILE ${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/api-symbols-mp2.txt)
+set(MP2_SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a35_symbols.yaml)
+set(MP2_SYMLIST_SIZE 0x100000) # .symlist in system/linker/stm32mp2xx_ca35.ld
+
+add_custom_target(
+  new-api-sym-list-mp2
+  COMMAND flashing/dump_syms.py
+          --objdir $<TARGET_PROPERTY:vcv_plugin_export,BINARY_DIR>
+          --objdir $<TARGET_PROPERTY:coreproc_plugin_export,BINARY_DIR>
+          --objdir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/hardware_support.dir
+          --objdir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/a35_core.dir/src/fs/dirent/
+          --keep-list ${PROJECT_SOURCE_DIR}/flashing/api-keep-list-mp2.txt
+          --elf $<TARGET_FILE:main_a35.elf>
+          --text-out ${MP2_API_SYMBOL_NAMES_FILE}
+  DEPENDS main_a35.elf
+  COMMENT "Creating new MP2 API symbol list file in the SDK directory ${MP2_API_SYMBOL_NAMES_FILE}"
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  VERBATIM USES_TERMINAL
+)
+
+if(EXISTS ${MP2_API_SYMBOL_NAMES_FILE})
+  set(MP2_INSTALL_SYMLIST
+      COMMAND flashing/find_syms.py --symbols ${MP2_API_SYMBOL_NAMES_FILE} --elf $<TARGET_FILE:main_a35.elf> --out
+              ${MP2_SYMBOLS_FILE}
+      COMMAND flashing/zero-term.py --in ${MP2_SYMBOLS_FILE} --out ${MP2_SYMBOLS_FILE} --pad-to ${MP2_SYMLIST_SIZE}
+      COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${MP2_SYMBOLS_FILE} $<TARGET_FILE:main_a35.elf>
+  )
+else()
+  message(WARNING "No ${MP2_API_SYMBOL_NAMES_FILE}: the firmware won't be able to load plugins. "
+                  "Build, run the new-api-sym-list-mp2 target, then build again.")
+endif()
+
 add_custom_command(
   TARGET main_a35.elf
   POST_BUILD
-  COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:main_a35.elf> main_a35.bin
+  ${MP2_INSTALL_SYMLIST}
+  COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:main_a35.elf> ${CMAKE_CURRENT_BINARY_DIR}/main_a35.bin
   COMMAND ${CMAKE_SIZE_UTIL} $<TARGET_FILE:main_a35.elf>
   COMMENT "Creating main_a35.bin"
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
 #

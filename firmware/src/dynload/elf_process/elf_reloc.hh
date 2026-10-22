@@ -54,6 +54,10 @@ public:
 	elf_addr_t symbol_value() {
 		return symbol.offset();
 	}
+
+	bool symbol_is_weak() {
+		return symbol.is_weak();
+	}
 };
 
 } // namespace ElfFile

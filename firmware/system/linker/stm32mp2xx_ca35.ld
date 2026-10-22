@@ -24,6 +24,11 @@ SECTIONS
         *(.vector_table)
         *(.text)
         *(.text*)
+
+		/* Keep symbols that we want to export to plugin API (same as MP1) */
+		KEEP(*vcv_plugin*:(.text*))
+		KEEP(*jansson*:(.text*))
+		KEEP(*pffft*:(.text*))
 					/* Todo: check if we need the next 3 lines */
 		*(.glue_7)         /* glue arm to thumb code */
 		*(.glue_7t)        /* glue thumb to arm code */
@@ -82,6 +87,17 @@ SECTIONS
 		KEEP (*(.fini_array*))
 		PROVIDE_HIDDEN (__fini_array_end = .);
 		. = ALIGN(8);
+	} > ROM
+
+	/* The names and addresses of the symbols plugins can use (see src/dynload/host_sym_list.hh),
+	   filled in after linking (cmake/mp2.cmake). Fixed size, so filling it in moves nothing. */
+	.symlist :
+	{
+		. = ALIGN(8);
+		_A7_SYMS = .;
+		BYTE(0)
+		. = _A7_SYMS + 1M;
+		_A7_SYMS_END = .;
 	} > ROM
 
 

@@ -63,6 +63,14 @@ public:
 								(unsigned long long)rel.addend(),
 								(unsigned long long)(rel.reloc_offset() + base_address),
 								(unsigned long long)rel.reloc_offset());
+					} else if (rel.symbol_is_weak()) {
+						// An undefined weak symbol the host doesn't have is 0 (e.g. the plugin's
+						// libc's references to __fini_array_start, which only executables define)
+						*reloc_address = rel.addend();
+						ok = true;
+						pr_trace("R_AARCH64 sym reloc (%d): weak %s not in host symbols, 0\n",
+								 rel.reloc_type(),
+								 rel.symbol_name().data());
 					} else {
 						pr_err("R_AARCH64 sym reloc (%d): %s ", rel.reloc_type(), rel.symbol_name().data());
 						pr_err("\nSymbol value is 0 and name not found in host symbols\n");
