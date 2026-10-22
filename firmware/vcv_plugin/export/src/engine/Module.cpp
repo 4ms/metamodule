@@ -136,11 +136,19 @@ void Module::config(int num_params, int num_inputs, int num_outputs, int num_lig
 	for (auto &x : lights)
 		x.value = 0;
 
+	// As in Rack, every param and port gets a default ParamQuantity or PortInfo, which the module's
+	// own config*() calls replace. (Lights don't need to be configured.)
 	paramQuantities.resize(num_params);
+	for (int i = 0; i < num_params; i++)
+		configParam(i, 0.f, 1.f, 0.f);
 
 	inputInfos.resize(num_inputs);
+	for (int i = 0; i < num_inputs; i++)
+		configInput(i);
 
 	outputInfos.resize(num_outputs);
+	for (int i = 0; i < num_outputs; i++)
+		configOutput(i);
 
 	lightInfos.resize(num_lights);
 }
