@@ -9,6 +9,7 @@
 #include "conf/screen_buffer_conf.hh"
 #include "conf/screen_conf.hh"
 #include "console.hh"
+#include "console/uart_log.hh"
 #include "core_intercom/shared_index.hh"
 #include "drivers/cache.hh"
 #include "drivers/copro_control.hh"
@@ -32,6 +33,7 @@
 #include "patch_play/patch_playloader.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
+#include "core_a7/dev_drive_service.hh"
 #include "core_a7/device_settings_proxy.hh"
 #include "usb/dev_drive_block.hh"
 #include "usb/usb_status_reader.hh"
@@ -57,7 +59,7 @@ std::array<lv_color_t, ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeigh
 __attribute__((section(".sharedmem"))) IntercoreStorageMessage storage_message;
 __attribute__((section(".sharedmem"))) std::array<char, 1024 * 1024> raw_patch_data;
 __attribute__((section(".sharedmem"))) std::array<char, 256 * 1024> storage_list_buffer;
-// The developer drive's handoff between the USB device (M33) and us. Not served yet.
+// The developer drive's handoff between the USB device (M33) and us (DevDriveService)
 __attribute__((section(".sharedmem"))) DevDriveBlock dev_drive_block;
 //////////////////////////////////////////////
 
@@ -93,6 +95,7 @@ void start_m33() {
 	index.dev_drive_msgs = &dev_drive_block;
 	index.device_settings_message = &StaticBuffers::icc_device_settings_message;
 	index.usb_connection_status = &StaticBuffers::usb_connection_status;
+	index.console_buffers = StaticBuffers::console_buffers.data();
 	index.audio_block_size = 0;
 	index.magic = SharedIndex::ValidMagic;
 
@@ -119,6 +122,11 @@ void start_m33() {
 		printf("M33: reset handler DID NOT RUN\n");
 	else if (main_us < 0)
 		printf("M33: reset handler ran, main() NOT REACHED\n");
+	else {
+		// The M33 sends the console buffers on (to the UART, or the USB console). If it's not
+		// running, keep writing to the UART.
+		UartLog::use_buffer(&StaticBuffers::console_buffers[0]);
+	}
 }
 
 // TODO: Move to aux_core_main
@@ -221,8 +229,22 @@ int main() {
 	StaticBuffers::sync_params.clear();
 	audio.start();
 
+	// The developer drive (Developer Mode): MP1 runs this on core 1 (core_a7/aux_core_main.cc).
+	// Installing plugins fails, since MP2 can't load them yet (mp2-stubs/dynload/dynloader.hh).
+	static DevDrive dev_drive;
+	static DevDriveService dev_drive_service{dev_drive,
+											 plugin_manager,
+											 patch_playloader,
+											 ui.get_notify_queue(),
+											 dev_drive_block,
+											 [] { ui.release_plugin_objects(); },
+											 [](std::span<char> file_data, std::string_view name) {
+												 return ui.play_patch_file(file_data, name);
+											 }};
+
 	while (true) {
 		ui.update();
+		dev_drive_service.process(ui.get_settings().developer.enabled);
 
 		// Same as MP1's main loop (core_a7/main.cc)
 		audio.handle_overruns();

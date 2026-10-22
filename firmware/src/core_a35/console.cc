@@ -1,9 +1,12 @@
 #include "console.hh"
 #include "conf/console_uart_conf.hh"
 #include "conf/hsem_conf.hh"
+#include "console/console_buffer_writer.hh"
 #include "console/uart_log.hh"
 #include "drivers/hsem.hh"
+#include "drivers/system_reg.hh"
 #include "drivers/uart.hh"
+#include <array>
 
 namespace MetaModule::A35Console
 {
@@ -28,6 +31,33 @@ struct Lock {
 			UartSem::unlock(UartLockA7Core0);
 	}
 };
+
+// Masks IRQs and FIQs (handlers can nest: see vectors.S)
+struct IrqGuard {
+	uint64_t daif = mdrivlib::read_daif();
+	IrqGuard() {
+		asm volatile("msr daifset, #3" ::: "memory");
+	}
+	~IrqGuard() {
+		mdrivlib::write_daif(daif);
+	}
+};
+
+// One per core
+std::array<ConsoleBufferWriter<IrqGuard>, 2> writers;
+
+ConsoleBufferWriter<IrqGuard> &this_core_writer() {
+	return writers[std::min<uint64_t>(mdrivlib::get_mpid() & 0xFF, writers.size() - 1)];
+}
+
+void write_uart(const char *ptr, int len) {
+	Lock lock;
+	for (int i = 0; i < len; i++) {
+		if (ptr[i] == '\n')
+			uart.putchar('\r');
+		uart.putchar(ptr[i]);
+	}
+}
 } // namespace
 
 void init() {
@@ -41,6 +71,10 @@ void use_hsem_lock() {
 void write(const char *str) {
 	Lock lock;
 	uart.write(str);
+}
+
+bool core0_buffered() {
+	return writers[0].attached();
 }
 
 bool receive(uint8_t &c) {
@@ -57,10 +91,16 @@ bool receive(uint8_t &c) {
 // stderr (src/fs/syscall)
 void MetaModule::UartLog::write_stdout(const char *ptr, int len) {
 	using namespace MetaModule::A35Console;
-	Lock lock;
-	for (int i = 0; i < len; i++) {
-		if (ptr[i] == '\n')
-			uart.putchar('\r');
-		uart.putchar(ptr[i]);
-	}
+	if (auto &writer = this_core_writer(); writer.attached())
+		writer.write(ptr, len, true);
+	else
+		write_uart(ptr, len);
+}
+
+void MetaModule::UartLog::use_buffer(ConcurrentBuffer *buffer) {
+	MetaModule::A35Console::this_core_writer().attach(buffer);
+}
+
+void MetaModule::UartLog::use_direct() {
+	MetaModule::A35Console::this_core_writer().detach();
 }

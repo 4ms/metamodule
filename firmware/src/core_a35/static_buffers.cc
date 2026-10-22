@@ -25,11 +25,20 @@ SyncParams sync_params;
 __attribute__((section(".sharedmem"))) DeviceSettingsMessage icc_device_settings_message;
 __attribute__((section(".sharedmem"))) UsbConnectionStatusBlock usb_connection_status;
 
+__attribute__((section(".sharedmem"))) std::array<ConcurrentBuffer, 3> console_buffers;
+static_assert(sizeof(ConcurrentBuffer) == ConcurrentBuffer::Size + 8, "Same on the A35 and M33");
+
 // Same as MP1's (src/core_a7/static_buffers.cc)
 void init() {
 	// .sharedmem isn't loaded or cleared at startup
 	icc_device_settings_message = {};
 	std::construct_at(&usb_connection_status);
+
+	// (Only the positions: the data needn't be cleared)
+	for (auto &buff : console_buffers) {
+		buff.write_pos = 0;
+		buff.read_pos = 0;
+	}
 
 	for (auto &block : param_blocks) {
 		for (auto &param : block.params) {

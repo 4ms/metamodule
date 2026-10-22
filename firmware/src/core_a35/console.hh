@@ -16,4 +16,8 @@ void write(const char *str);
 // Reads a received character, if there is one
 bool receive(uint8_t &c);
 
+// Whether core 0 writes to its console buffer (UartLog::use_buffer()), which it does once the M33,
+// which sends the buffers on, is running
+bool core0_buffered();
+
 } // namespace MetaModule::A35Console

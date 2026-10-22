@@ -12,10 +12,13 @@
 // - USB: MP1's UsbManager, with the FUSB302 deciding the role. Takes the USB settings from the
 //   GUI, and publishes the connection status for it. As a device: MIDI + console
 //   composite on the USB3DR (usbd_conf.cc). As a host: MIDI devices and USB drives, including
-//   through a hub (usb/usb_host_manager.hh). The console buffers it sends over USB are empty until
-//   the console is buffered, like MP1's.
+//   through a hub (usb/usb_host_manager.hh).
+// - console: as on MP1, all cores write their console output to buffers, which we send to the
+//   UART (console_drain.hh), or to the USB console when a computer connects to it.
 
 #include "console.hh"
+#include "console/uart_log.hh"
+#include "console_drain.hh"
 #include "core_intercom/shared_i2c_lock.hh"
 #include "core_intercom/shared_index.hh"
 #include "core_intercom/shared_memory.hh"
@@ -38,9 +41,6 @@ namespace
 {
 // Not used yet (see conf/ramdisk_conf.hh), but PatchStorage needs one
 RamDrive ramdrive;
-
-// What MP1's USB CDC console sends to the host. Nothing writes to them yet.
-std::array<ConcurrentBuffer, 3> console_buffers;
 
 } // namespace
 
@@ -68,6 +68,16 @@ int main() {
 	SharedMemoryS::ptrs.usb_connection_status = index.usb_connection_status.get();
 
 	//
+	// Console: every core's printf() goes into its buffer (the A35's, once we're running), and we
+	// send them on to the UART, or USB (UsbSerialDevice)
+	//
+	auto *console_buffers = index.console_buffers.get();
+	std::array<ConcurrentBuffer *, NumConsoleBuffers> console_buffer_ptrs{
+		&console_buffers[0], &console_buffers[1], &console_buffers[2]};
+	UartLog::use_buffer(console_buffer_ptrs[2]);
+	static ConsoleDrain console_drain{console_buffer_ptrs};
+
+	//
 	// Controls
 	//
 	static PanelControls controls{*index.param_blocks.get()};
@@ -78,10 +88,9 @@ int main() {
 	//
 	// The FUSB302 is on I2C4, which the A35 also uses (codec): hold the bus whenever UsbManager may
 	// use it. (Constructing it initializes the I2C peripheral.)
-	auto &usb = []() -> UsbManager & {
+	auto &usb = [&]() -> UsbManager & {
 		SharedI2CGuard i2c;
-		static UsbManager usb{{&console_buffers[0], &console_buffers[1], &console_buffers[2]},
-							  *SharedMemoryS::ptrs.dev_drive_msgs};
+		static UsbManager usb{console_buffer_ptrs, *SharedMemoryS::ptrs.dev_drive_msgs};
 		usb.start();
 		return usb;
 	}();
@@ -99,8 +108,10 @@ int main() {
 	SDCardHost sd;
 
 	// Give the SD card time to mount, so the first patch scan includes it
-	for (auto start = HAL_GetTick(); HAL_GetTick() - start < 500;)
+	for (auto start = HAL_GetTick(); HAL_GetTick() - start < 500;) {
 		sd.process();
+		console_drain.process();
+	}
 	printf("M33: SD card %s\n", sd.is_mounted() ? "mounted" : "not mounted");
 
 	auto start = HAL_GetTick();
@@ -117,6 +128,7 @@ int main() {
 	bool sd_was_mounted = sd.is_mounted();
 
 	while (true) {
+		console_drain.process();
 		sd.process();
 		storage.process();
 		{

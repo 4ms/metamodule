@@ -114,6 +114,15 @@ public:
 		return notify_queue;
 	}
 
+	// For the developer drive (core_a7/dev_drive_service.hh), same as MP1's Ui
+	void release_plugin_objects() {
+		page_manager.leave_patch_pages();
+	}
+
+	Result play_patch_file(std::span<char> file_data, std::string_view filename) {
+		return page_manager.play_patch_file(file_data, filename);
+	}
+
 	// For core 1's AuxPlayer (core_a7/aux_core_player.hh), same as MP1's Ui
 	TextDisplayWatcher &displays() {
 		return params.text_displays;

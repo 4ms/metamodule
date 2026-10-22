@@ -4,8 +4,11 @@
 // Unlike MP1, the GUI stays on core 0, so core 1 only does this.
 
 #include "aux_core.hh"
+#include "console.hh"
+#include "console/uart_log.hh"
 #include "core_a7/aux_core_player.hh"
 #include "drivers/secondary_core_control.hh"
+#include "static_buffers.hh"
 #include <atomic>
 #include <cstdio>
 
@@ -57,6 +60,10 @@ bool start_aux_core(PatchPlayer &patch_player, Ui &ui) {
 // Called by aux_core_startup on core 1, after it enables its MMU, caches and GIC interface
 extern "C" void aux_main() {
 	using namespace MetaModule;
+
+	// Like core 0's
+	if (A35Console::core0_buffered())
+		UartLog::use_buffer(&StaticBuffers::console_buffers[1]);
 
 	// Registers the SGI handlers. They must be enabled from this core (the GIC banks SGIs per core)
 	AuxPlayer aux_player{*aux_patch_player, *aux_ui};

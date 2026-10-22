@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <cstdint>
 
+struct ConcurrentBuffer;
+
 // Objects shared between the A35 and the M33.
 //
 // The A35 creates them in .sharedmem (DDR, non-cacheable on both cores) and publishes pointers
@@ -30,12 +32,16 @@ struct SharedIndex {
 	InterCorePtr32<DevDriveBlock> dev_drive_msgs;			 // USB device (M33) <-> developer drive (A35)
 	InterCorePtr32<DeviceSettingsMessage> device_settings_message;		// USB settings: GUI (A35) -> M33
 	InterCorePtr32<UsbConnectionStatusBlock> usb_connection_status; // USB status: M33 -> GUI (A35)
+	InterCorePtr32<ConcurrentBuffer> console_buffers; // [3]: A35 core 0, A35 core 1, M33 -> M33 (console)
 
 	// Frames of each param block the audio stream uses (0 until it's running): A35 -> M33. The
 	// M33 fills in only these frames' MIDI (see core_m33/panel_controls.hh).
 	volatile uint32_t audio_block_size;
 };
-static_assert(sizeof(SharedIndex) == 28);
+static_assert(sizeof(SharedIndex) == 32);
+
+// The console buffers: for all cores, so the same layout on the A35 and the M33
+inline constexpr unsigned NumConsoleBuffers = 3;
 
 // Both cores use these directly, so they must have the same layout on the A35 and the M33
 static_assert(sizeof(DeviceSettingsMessage) == 12);

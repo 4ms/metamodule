@@ -21,9 +21,9 @@ struct ConcurrentBuffer {
 	std::atomic<uint32_t> read_pos{0};
 
 	static void barrier() {
-#if defined(CORE_CA7) || defined(CORE_CM4)
+#if defined(CORE_CA7) || defined(CORE_CM4) || defined(CORE_CA35) || defined(CORE_CM33)
 		// Full-system barrier ("dmb sy") is required (not "dmb ish" which is only for
-		// inner-shareable i.e. not the M4).
+		// inner-shareable i.e. not the M4/M33).
 		asm volatile("dmb sy" ::: "memory");
 #else
 		// Host builds (tests/simulator)

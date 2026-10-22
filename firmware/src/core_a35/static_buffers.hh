@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/stream_conf.hh"
+#include "console/concurrent_buffer.hh"
 #include "core_intercom/intercore_devicesettings_message.hh"
 #include "fs/dir_tree.hh"
 #include "param_block.hh"
@@ -32,6 +33,10 @@ extern SyncParams sync_params;
 // connection status (M33 -> GUI, see usb/usb_status_reader.hh)
 extern DeviceSettingsMessage icc_device_settings_message;
 extern UsbConnectionStatusBlock usb_connection_status;
+
+// Console output, shared with the M33, which sends it to the UART or the USB console: one per core
+// (A35 core 0, A35 core 1, M33)
+extern std::array<ConcurrentBuffer, 3> console_buffers;
 
 void init();
 

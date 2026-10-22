@@ -18,6 +18,9 @@ void print(const char *str) {
 } // namespace
 
 extern "C" [[noreturn]] void report_fault(const ExceptionFrame *frame, uint32_t exc_return) {
+	// The main loop sends the console buffer on, and it's not running anymore
+	MetaModule::UartLog::use_direct();
+
 	char buf[160];
 	auto ipsr = __get_IPSR();
 
