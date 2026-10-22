@@ -31,6 +31,18 @@ def GetDefinedSymbolNames(elf_file):
     with open(elf_file, "rb") as f:
         return set(GetRequiredSymbolNames(f))
 
+# Every global symbol main.elf defines, of any visibility. An exact keep-list name may be hidden:
+# e.g. the AArch64 toolchain's libgcc unwinder (_Unwind_*) is, but the firmware can still export it.
+def GetDefinedSymbolNamesAnyVisibility(elf_file):
+    names = set()
+    with open(elf_file, "rb") as f:
+        symtab = ELFFile(f).get_section_by_name(".symtab")
+        if isinstance(symtab, SymbolTableSection):
+            for s in symtab.iter_symbols():
+                if s.name != "" and s['st_info']['bind'] == "STB_GLOBAL" and s['st_shndx'] != 'SHN_UNDEF':
+                    names.add(s.name)
+    return names
+
 # Convert a C++ qualified name to the substring it produces in a mangled name:
 #   MetaModule::MidiInput  ->  10MetaModule9MidiInput
 #
@@ -100,6 +112,7 @@ if __name__ == "__main__":
     scanned_syms = set(needed_syms)
 
     defined_in_elf = GetDefinedSymbolNames(args.elf) if args.elf else None
+    exact = []
 
     # Names we can't discover by scanning objects: libc/libstdc++ functions the
     # firmware provides, vtables, typeinfo, and anything whose definition lives in
@@ -134,13 +147,15 @@ if __name__ == "__main__":
     # --gc-sections dropped the function because nothing in the firmware calls it
     # (referring to it in keep-symbols.cc is what prevents that).
     if defined_in_elf:
-        missing = [s for s in needed_syms if s not in defined_in_elf]
+        defined_any = GetDefinedSymbolNamesAnyVisibility(args.elf)
+        exact_set = set(exact)
+        missing = [s for s in needed_syms if s not in defined_in_elf and not (s in exact_set and s in defined_any)]
         if missing:
             logging.error("****************************************************************")
             for s in missing:
                 logging.error(f"** ERROR: not defined in main.elf, dropping from API: {s} **")
             logging.error("****************************************************************")
-            needed_syms = [s for s in needed_syms if s in defined_in_elf]
+            needed_syms = [s for s in needed_syms if s not in missing]
 
     logging.info(f"Exporting {len(needed_syms)} API symbols")
 
