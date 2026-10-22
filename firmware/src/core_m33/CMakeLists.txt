@@ -102,6 +102,8 @@ add_executable(
   ${FWDIR}/system/libc_stub.c
   # USB device: MP1's classes and device manager, on our usbd_conf.cc
   usbd_conf.cc
+  # USB host: lib/xhci's platform functions
+  usb/xhci_platform.cc
   ${FWDIR}/src/usb/device_cdc/usb_serial_device.cc
   ${FWDIR}/src/usb/device_composite/usbd_composite.c
   ${FWDIR}/src/usb/device_composite/usbd_composite_desc.c
@@ -151,6 +153,23 @@ target_include_directories(
           ${FWDIR}/lib/cmsis/Include
           ${FWDIR}/lib/cmsis-device/stm32mp257d/Include
 )
+
+# xHCI host: U-Boot's driver, by way of stm32mp2-baremetal (GPL-2.0+: see lib/xhci/README.md). Its
+# U-Boot stand-in headers (malloc.h, usb.h, ...) are private to it: users see only lib/xhci/api.
+add_library(
+  xhci STATIC
+  ${FWDIR}/lib/xhci/src/xhci.c
+  ${FWDIR}/lib/xhci/src/xhci-mem.c
+  ${FWDIR}/lib/xhci/src/xhci-ring.c
+  ${FWDIR}/lib/xhci/src/xhci_host.c
+)
+target_include_directories(
+  xhci
+  PRIVATE ${FWDIR}/lib/xhci/include ${FWDIR}/lib/xhci/api
+  INTERFACE ${FWDIR}/lib/xhci/api
+)
+target_compile_options(xhci PRIVATE -Wno-sign-compare -Wno-unused-but-set-variable)
+target_link_libraries(main_m33.elf PRIVATE xhci)
 
 set(LINKER_SCRIPT ${FWDIR}/system/linker/stm32mp2xx_cm33.ld)
 target_link_options(
