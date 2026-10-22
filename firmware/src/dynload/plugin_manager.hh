@@ -68,7 +68,11 @@ public:
 
 				// Fill the code with an infinite loop while it's still ours (so a stale call into it hangs
 				// there, instead of running whatever is allocated there next), then free it
+#if defined(CORE_CA35)
+				constexpr uint32_t BranchToSelf = 0x14000000; // AArch64 b .
+#else
 				constexpr uint32_t BranchToSelf = 0xEAFFFFFE; // ARM b .
+#endif
 				pr_dbg("Clearing code block %p to %p (0x%x)\n", code.data(), code.end(), code.size_bytes());
 				std::ranges::fill(code, BranchToSelf);
 
