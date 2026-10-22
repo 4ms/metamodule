@@ -115,6 +115,18 @@ VBUS so far. The MP2 parts:
   codec's `init()` (the only codec call that uses I2C, see
   `src/pro/conf/board_codec_conf.hh`), the M33 around constructing `UsbManager`
   (which resets and initializes I2C4) and each `UsbManager::process()`.
+- Settings and status cross the cores as on MP1: the GUI sends the USB role
+  and device mode with `DeviceSettingsProxy` (IPCC channel 4), and the M33
+  publishes the connection status into a `UsbConnectionStatusBlock` that the
+  GUI reads (`usb/usb_status_reader.hh`). Both live in the A35's `.sharedmem`,
+  published in `SharedIndex`.
+- USB MIDI to and from the patch: `PanelControls` (`src/core_m33/panel_controls.hh`)
+  does what MP1's `Controls::parse_midi()` does, but a whole param block at a
+  time, when the block starts: MP2's controls aren't synced to the audio frames,
+  so filling one frame per tick would put MIDI in frames the audio stream never
+  reads. The A35 publishes how many frames it reads
+  (`SharedIndex::audio_block_size`). Costs up to one block of latency more than
+  MP1.
 - `src/core_m33/usb/usb_host_manager.hh`: an MP2 stand-in for MP1's
   `UsbHostManager`, found first in the M33's include path. It only switches
   VBUS. Its `get_midi_host()` and `get_msc_fileio()` aren't defined, so using
@@ -152,17 +164,16 @@ VBUS so far. The MP2 parts:
 Not yet:
 - **The console over USB:** the CDC console sends MP1's per-core console
   buffers, but on MP2 each core writes to the UART directly, so they're empty.
-- **MIDI routing:** received USB MIDI is printed on the console.
 - **The developer drive:** the A35 publishes a `DevDriveBlock` in `SharedIndex`, but
   doesn't serve a drive yet.
-- **USB settings and status:** the A35's USB role setting (Auto/Host/Device)
-  and the connection status the GUI shows aren't passed between the cores yet,
-  so the role policy is always Auto.
-- **Host mode:** the DWC3 is an xHCI host, and ST's HAL has no host driver for
-  it. The stm32mp2-baremetal `usb-drd` example's host side is U-Boot's xHCI
-  driver (GPL-2.0+, so it can be used here), behind MP1's USB host library.
-  (Its device side is U-Boot's DWC3 gadget driver, GPL-2.0 only, which is why
-  device mode uses ST's HAL instead.)
+- **Host mode** (in progress): the DWC3 is an xHCI host, and ST's HAL has no host driver for
+  it. `lib/xhci` is U-Boot's xHCI driver (GPL-2.0+) as ported in stm32mp2-baremetal, including its
+  hub support; see its README. Phase 1 (`src/core_m33/usb/usb_host_manager.hh`,
+  `xhci_platform.cc`): the M33 runs it in the host role, enumerates devices (also behind hubs),
+  and publishes the device's name and IDs. Next: a non-blocking transfer layer and `USBH_LL_*`
+  glue, so MP1's `MidiHost` and `MSCHost` run on enumerated devices; then several devices at once
+  behind a hub. (stm32mp2-baremetal's device side is U-Boot's DWC3 gadget driver, GPL-2.0 only,
+  which is why device mode uses ST's HAL instead.)
 
 ## Layout
 
