@@ -32,7 +32,9 @@
 #include "patch_play/patch_playloader.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
+#include "core_a7/device_settings_proxy.hh"
 #include "usb/dev_drive_block.hh"
+#include "usb/usb_status_reader.hh"
 #include <array>
 #include <cstdio>
 
@@ -89,6 +91,9 @@ void start_m33() {
 	index.param_blocks = &StaticBuffers::param_blocks;
 	dev_drive_block.reset();
 	index.dev_drive_msgs = &dev_drive_block;
+	index.device_settings_message = &StaticBuffers::icc_device_settings_message;
+	index.usb_connection_status = &StaticBuffers::usb_connection_status;
+	index.audio_block_size = 0;
 	index.magic = SharedIndex::ValidMagic;
 
 	if constexpr (M33_LOAD_ADDR >= mdrivlib::RISAF::DDRBase) {
@@ -185,6 +190,19 @@ int main() {
 				 plugin_manager,
 				 ramdisk};
 
+	// USB, on the M33 (as on MP1, core_a7/aux_core_main.cc): the GUI reads the connection status it
+	// publishes, and we tell it the USB settings that aren't the defaults
+	usb_status_block = &StaticBuffers::usb_connection_status;
+
+	if (auto role = ui.get_settings().usb_role_mode; role != UsbRoleMode::Auto) {
+		while (!DeviceSettingsProxy::send_role_mode(role))
+			;
+	}
+	if (auto mode = ui.get_settings().usb_device_mode; mode != UsbDeviceMode::MidiConsole) {
+		while (!DeviceSettingsProxy::send_device_mode(mode))
+			;
+	}
+
 	// Core 1 plays part of the patch, so it must be running before a patch loads
 	start_aux_core(patch_player, ui);
 
@@ -208,6 +226,9 @@ int main() {
 
 		// Same as MP1's main loop (core_a7/main.cc)
 		audio.handle_overruns();
+
+		// The M33 fills in this many frames of each param block (MIDI)
+		shared_index().audio_block_size = audio.get_block_size();
 
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");

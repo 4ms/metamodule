@@ -1,8 +1,10 @@
 #pragma once
 #include "conf/stream_conf.hh"
+#include "core_intercom/intercore_devicesettings_message.hh"
 #include "fs/dir_tree.hh"
 #include "param_block.hh"
 #include "sync_params.hh"
+#include "usb/usb_connection_status_block.hh"
 #include <cstdint>
 #include <span>
 
@@ -25,6 +27,11 @@ extern DoubleBufParamBlock param_blocks;
 
 // Audio -> GUI
 extern SyncParams sync_params;
+
+// USB, shared with the M33: settings (GUI -> M33, see core_a7/device_settings_proxy.hh), and
+// connection status (M33 -> GUI, see usb/usb_status_reader.hh)
+extern DeviceSettingsMessage icc_device_settings_message;
+extern UsbConnectionStatusBlock usb_connection_status;
 
 void init();
 

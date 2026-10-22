@@ -52,6 +52,11 @@ public:
 	void set_calibration(CalData const &caldata);
 	void update_audio_settings();
 
+	// Frames per param block in use
+	uint32_t get_block_size() const {
+		return block_size_;
+	}
+
 private:
 	SyncParams &sync_params;
 	ParamsState param_state;

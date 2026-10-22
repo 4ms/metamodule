@@ -1,9 +1,16 @@
 #pragma once
 #include "conf/control_expander_conf.hh"
+#include "core_m4/midi_controls.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/rotary.hh"
 #include "drivers/timekeeper.hh"
+#include "midi/midi_message.hh"
 #include "param_block.hh"
+#include "usb/usb_connection.hh"
+#include "usb/usb_midi_device.hh"
+#include "util/edge_detector.hh"
+#include "util/lockfree_fifo_spsc.hh"
+#include <span>
 
 namespace MetaModule
 {
@@ -20,16 +27,38 @@ namespace MetaModule
 // MP1 runs the controls at the frame rate from an LRCLK pin interrupt; here a timer runs them at
 // 48kHz. That's enough for debouncing, but per-frame data (gate ins) will need it synced to the
 // audio frames.
+//
+// USB MIDI (MP1's Controls::parse_midi()): MP1 fills in one frame's MIDI per audio frame. Without
+// frame sync, we'd fill frames the audio stream doesn't read (it reads the first block-size frames):
+// a received message put there would be lost, and later read back as outgoing MIDI. So instead,
+// when a block starts, we do all of its MIDI at once, for exactly the frames the audio stream uses
+// (SharedIndex::audio_block_size): send the patch's outgoing USB MIDI, and put the received
+// messages in, one per frame. The A35 doesn't touch the block again until the next one starts. The
+// cost is up to one more block of latency than MP1.
 class PanelControls {
 public:
 	PanelControls(DoubleBufParamBlock &param_blocks);
 
 	void start();
 
+	// The USB connection status, for the GUI (MP1's Controls asks UsbManager from its interrupt; here
+	// the main loop passes it in)
+	void set_usb_connection(UsbConnection conn) {
+		usb_connection = conn;
+	}
+
+	// Routes USB MIDI between the USB device and the patch. audio_block_size is published by the A35.
+	// (No USB MIDI host yet.)
+	void start_midi(UsbMidiDevice &midi_device, volatile uint32_t const &audio_block_size);
+
 private:
 	void update();
 	void update_metaparams();
 	void update_rotary();
+	void update_midi();
+	void update_midi_connected();
+	void process_midi_frame(Params &params);
+	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
 
 	template<size_t block_num>
 	void start_param_block();
@@ -43,7 +72,16 @@ private:
 
 	DoubleBufParamBlock &param_blocks;
 	MetaParams *cur_metaparams;
+	Params *cur_params;
 	volatile bool new_block = false;
+	volatile UsbConnection usb_connection = UsbConnection::None;
+
+	UsbMidiDevice *midi_device = nullptr;
+	volatile uint32_t const *audio_block_size = nullptr;
+	LockFreeFifoSpsc<MidiMessage, 256> midi_usb_rx_buf; // USB interrupt -> update()
+	Midi::MessageParser midi_parser;
+	EdgeStateDetector midi_usb_connected_raw;
+	bool midi_usb_connected = false;
 };
 
 } // namespace MetaModule

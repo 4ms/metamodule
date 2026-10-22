@@ -5,11 +5,13 @@
 // On MP1 the M4 runs patch storage, controls, USB, and MIDI; on MP2 the M33 takes that role.
 //
 // So far:
-// - controls: the control encoder and Back button, for the GUI (panel_controls.hh).
+// - controls: the control encoder and Back button, for the GUI, and USB MIDI to and from the patch
+//   (panel_controls.hh).
 // - storage: MP1's PatchStorage answers the A35's FileStorageProxy requests (storage_messages.hh).
 //   Volumes: SD card, NOR flash, and USB
 //   (always unmounted until there's a USB host driver).
-// - USB: MP1's UsbManager, with the FUSB302 deciding the role. As a device: MIDI + console
+// - USB: MP1's UsbManager, with the FUSB302 deciding the role. Takes the USB settings from the
+//   GUI, and publishes the connection status for it. As a device: MIDI + console
 //   composite on the USB3DR (usbd_conf.cc). As a host: VBUS only, no host driver yet
 //   (usb/usb_host_manager.hh). The console buffers it sends over USB are empty until the console
 //   is buffered, like MP1's.
@@ -23,10 +25,9 @@
 #include "fs/fatfs/sd_host.hh"
 #include "panel_controls.hh"
 #include "storage_messages.hh"
+#include "usb/device_settings_messages.hh"
 #include "usb/usb_manager.hh"
-#include "util/lockfree_fifo_spsc.hh"
 #include <cstdio>
-#include <cstring>
 
 using namespace MetaModule;
 
@@ -83,6 +84,8 @@ int main() {
 	SharedMemoryS::ptrs.ramdrive = &ramdrive;
 	SharedMemoryS::ptrs.icc_message = index.storage_message.get();
 	SharedMemoryS::ptrs.dev_drive_msgs = index.dev_drive_msgs.get();
+	SharedMemoryS::ptrs.icc_device_settings_message = index.device_settings_message.get();
+	SharedMemoryS::ptrs.usb_connection_status = index.usb_connection_status.get();
 
 	//
 	// Controls
@@ -126,15 +129,13 @@ int main() {
 		usb.start();
 		return usb;
 	}();
-	// No MIDI routing yet: print what arrives (the callback runs in the USB interrupt)
-	static LockFreeFifoSpsc<uint32_t, 64> midi_in;
-	usb.get_midi_device().set_rx_callback([](std::span<uint8_t> packets) {
-		for (auto i = 0u; i + 4 <= packets.size(); i += 4) {
-			uint32_t packet;
-			std::memcpy(&packet, &packets[i], 4);
-			midi_in.put(packet);
-		}
-	});
+	// USB MIDI <-> the patch
+	controls.start_midi(usb.get_midi_device(), index.audio_block_size);
+
+	// USB settings from the GUI, and the connection status for it (same as MP1's M4 main loop)
+	static DeviceSettingsMessages device_settings{SharedMemoryS::ptrs.icc_device_settings_message};
+	UsbConnection last_published_conn = UsbConnection::None;
+	uint32_t last_published_info_seq = usb.get_device_info_seq();
 
 	bool sd_was_mounted = sd.is_mounted();
 
@@ -144,10 +145,22 @@ int main() {
 		{
 			SharedI2CGuard i2c;
 			usb.process();
+
+			auto ds_result = device_settings.process();
+			if (ds_result.has_mode_change)
+				usb.set_device_mode(ds_result.mode);
+			if (ds_result.has_role_change)
+				usb.set_role_mode(ds_result.role);
 		}
 
-		while (auto packet = midi_in.get())
-			printf("M33: USB MIDI in: %08lx\n", (unsigned long)__builtin_bswap32(*packet));
+		auto conn = usb.get_connection_status();
+		controls.set_usb_connection(conn);
+		auto info_seq = usb.get_device_info_seq();
+		if (conn != last_published_conn || info_seq != last_published_info_seq) {
+			last_published_conn = conn;
+			last_published_info_seq = info_seq;
+			SharedMemoryS::ptrs.usb_connection_status->publish(usb.get_status());
+		}
 
 		if (sd.is_mounted() != sd_was_mounted) {
 			sd_was_mounted = sd.is_mounted();

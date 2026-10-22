@@ -74,6 +74,10 @@ public:
 	MidiHost &get_midi_host();
 	FatFileIO &get_msc_fileio();
 
+	bool is_midi_connected() {
+		return false;
+	}
+
 	bool is_msc_connected() {
 		return false;
 	}

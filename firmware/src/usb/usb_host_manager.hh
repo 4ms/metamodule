@@ -238,6 +238,10 @@ public:
 		return midi_host;
 	}
 
+	bool is_midi_connected() {
+		return midi_host.is_connected();
+	}
+
 	FatFileIO &get_msc_fileio() {
 		return msc_host.get_fileio();
 	}

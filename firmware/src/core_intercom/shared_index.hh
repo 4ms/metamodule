@@ -1,6 +1,8 @@
 #pragma once
+#include "core_intercom/intercore_devicesettings_message.hh"
 #include "core_intercom/intercore_types.hh"
 #include "param_block.hh"
+#include "usb/usb_connection_status_block.hh"
 #include <cstddef>
 #include <cstdint>
 
@@ -26,8 +28,18 @@ struct SharedIndex {
 	InterCorePtr32<IntercoreStorageMessage> storage_message; // FileStorageProxy (A35) <-> PatchStorage (M33)
 	InterCorePtr32<DoubleBufParamBlock> param_blocks;		 // Controls (M33) -> audio (A35)
 	InterCorePtr32<DevDriveBlock> dev_drive_msgs;			 // USB device (M33) <-> developer drive (A35)
+	InterCorePtr32<DeviceSettingsMessage> device_settings_message;		// USB settings: GUI (A35) -> M33
+	InterCorePtr32<UsbConnectionStatusBlock> usb_connection_status; // USB status: M33 -> GUI (A35)
+
+	// Frames of each param block the audio stream uses (0 until it's running): A35 -> M33. The
+	// M33 fills in only these frames' MIDI (see core_m33/panel_controls.hh).
+	volatile uint32_t audio_block_size;
 };
-static_assert(sizeof(SharedIndex) == 16);
+static_assert(sizeof(SharedIndex) == 28);
+
+// Both cores use these directly, so they must have the same layout on the A35 and the M33
+static_assert(sizeof(DeviceSettingsMessage) == 12);
+static_assert(sizeof(UsbConnectionStatusBlock) == 1360);
 
 // Both cores use ParamBlock directly, so it must have the same layout on the 64-bit A35 and the
 // 32-bit M33 (no pointers, size_t, or long). If these fail after a change to Params or MetaParams,

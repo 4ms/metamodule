@@ -335,7 +335,7 @@ public:
 		if (as_host) {
 			if (usb_host.is_msc_connected())
 				return UsbConnection::HostUsbDrive;
-			if (usb_host.get_midi_host().is_connected())
+			if (usb_host.is_midi_connected())
 				return UsbConnection::HostMidiDevice;
 			return UsbConnection::HostSearching;
 		}

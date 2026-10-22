@@ -1,5 +1,6 @@
 #include "static_buffers.hh"
 #include <array>
+#include <memory>
 
 namespace MetaModule::StaticBuffers
 {
@@ -21,8 +22,15 @@ __attribute__((section(".dmabuf"))) StreamConf::Audio::AudioOutBlock audio_out_d
 __attribute__((section(".sharedmem"))) DoubleBufParamBlock param_blocks{};
 SyncParams sync_params;
 
+__attribute__((section(".sharedmem"))) DeviceSettingsMessage icc_device_settings_message;
+__attribute__((section(".sharedmem"))) UsbConnectionStatusBlock usb_connection_status;
+
 // Same as MP1's (src/core_a7/static_buffers.cc)
 void init() {
+	// .sharedmem isn't loaded or cleared at startup
+	icc_device_settings_message = {};
+	std::construct_at(&usb_connection_status);
+
 	for (auto &block : param_blocks) {
 		for (auto &param : block.params) {
 			param.clear();
