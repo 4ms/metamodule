@@ -31,7 +31,7 @@ void renderFill(void *uptr,
 				const NVGpath *paths,
 				int npaths) {
 
-	if (npaths < 0 || npaths > 1024) {
+	if (npaths <= 0 || npaths > 1024) {
 		// pr_dbg("Invalid number of paths in RenderFill: %d\n", npaths);
 		return;
 	}
