@@ -6,12 +6,14 @@
 #include "util/countzip.hh"
 #include "util/string_compare.hh"
 #include <algorithm>
+#include <ranges>
 
 namespace MetaModule
 {
 
-static void move_selected_control_foreground(std::span<DrawnElement> drawn_elements,
-											 DrawnElement const &drawn_element) {
+// Raise a highlighted knob (and any lights on it) above other controls at the same spot.
+// This lasts until lower_raised_elements() is called.
+void ModuleViewPage::raise_element(DrawnElement const &drawn_element) {
 	auto *obj = drawn_element.gui_element.obj;
 	if (!obj)
 		return;
@@ -19,9 +21,25 @@ static void move_selected_control_foreground(std::span<DrawnElement> drawn_eleme
 	if (std::holds_alternative<Knob>(drawn_element.element) ||
 		std::holds_alternative<KnobSnapped>(drawn_element.element))
 	{
-		lv_obj_move_foreground(obj);
-		raise_lights_over(drawn_elements, drawn_element);
+		auto raise = [this](lv_obj_t *o) {
+			raised_objs.emplace_back(o, lv_obj_get_index(o));
+			lv_obj_move_foreground(o);
+		};
+		raise(obj);
+		for_each_light_over(drawn_elements, drawn_element, raise);
+
+		// Keep the map ring above its own control, as when it was drawn
+		if (drawn_element.gui_element.map_ring)
+			raise(drawn_element.gui_element.map_ring);
 	}
+}
+
+// Put raised elements back where they were in the stack.
+// Other objects moved in the meantime (e.g. a knob that was turned) stay on top.
+void ModuleViewPage::lower_raised_elements() {
+	for (auto [obj, index] : std::views::reverse(raised_objs))
+		lv_obj_move_to_index(obj, index);
+	raised_objs.clear();
 }
 
 void ModuleViewPage::show_roller() {
@@ -272,6 +290,8 @@ void ModuleViewPage::unhighlight_element(size_t idx) {
 }
 
 void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
+	lower_raised_elements();
+
 	if (auto prev_idx = get_drawn_idx(prev_sel)) {
 		unhighlight_element(*prev_idx);
 	} else if (auto group = get_group_idx(prev_sel)) {
@@ -282,9 +302,12 @@ void ModuleViewPage::unhighlight_component(uint32_t prev_sel) {
 
 // Highlight what a roller row stands for on the panel: its element, or each listed member of its group
 void ModuleViewPage::highlight_row(uint32_t roller_idx) {
+	// Only one row's elements are raised at a time
+	lower_raised_elements();
+
 	if (auto drawn_idx = get_drawn_idx(roller_idx)) {
 		highlight_component(*drawn_idx);
-		move_selected_control_foreground(drawn_elements, drawn_elements[*drawn_idx]);
+		raise_element(drawn_elements[*drawn_idx]);
 
 	} else if (auto group = get_group_idx(roller_idx)) {
 		// Scroll to the first member, where opening the group will start
@@ -292,7 +315,7 @@ void ModuleViewPage::highlight_row(uint32_t roller_idx) {
 		for (auto drawn_idx : layout.group_members[*group]) {
 			if (is_listed(drawn_idx)) {
 				highlight_component(drawn_idx, scroll_into_view);
-				move_selected_control_foreground(drawn_elements, drawn_elements[drawn_idx]);
+				raise_element(drawn_elements[drawn_idx]);
 				scroll_into_view = false;
 			}
 		}
@@ -408,7 +431,8 @@ void ModuleViewPage::roller_scrolled_cb(lv_event_t *event) {
 		page->highlight_component(cur_idx);
 	}
 
-	move_selected_control_foreground(page->drawn_elements, page->drawn_elements[cur_idx]);
+	page->lower_raised_elements();
+	page->raise_element(page->drawn_elements[cur_idx]);
 	page->roller_hover.hide();
 }
 
@@ -679,8 +703,7 @@ void ModuleViewPage::enter_group(unsigned group_idx) {
 	for (auto [i, drawn_idx] : enumerate(roller_drawn_el_idx)) {
 		if (drawn_idx >= 0) {
 			cur_selected = i;
-			highlight_component(drawn_idx);
-			move_selected_control_foreground(drawn_elements, drawn_elements[drawn_idx]);
+			highlight_row(cur_selected);
 			break;
 		}
 	}

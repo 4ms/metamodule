@@ -74,6 +74,8 @@ void ModuleViewPage::exit_fullscreen() {
 void ModuleViewPage::redraw_module() {
 	bool const is_new_module = stack_order_module_id != this_module_id;
 
+	// The highlighted element is raised only temporarily, so don't save it that way
+	lower_raised_elements();
 	save_element_stacking_order();
 
 	reset_module_page();

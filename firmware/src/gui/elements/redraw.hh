@@ -181,10 +181,9 @@ inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }
 
-// Brings to the foreground any light element that overlaps and is on top of the given element.
-// Used to handle modules that have a separate LED and button element. When a mapped button element
-// changed values, it moves to the foreground, so its LED needs to move with it.
-inline void raise_lights_over(std::span<DrawnElement> drawn_elements, DrawnElement const &control) {
+// Calls func(obj) for each light element that overlaps and is on top of the given element, back to front
+template<typename Func>
+inline void for_each_light_over(std::span<DrawnElement> drawn_elements, DrawnElement const &control, Func &&func) {
 	auto *obj = control.gui_element.obj;
 	if (!obj)
 		return;
@@ -214,8 +213,15 @@ inline void raise_lights_over(std::span<DrawnElement> drawn_elements, DrawnEleme
 		lv_area_t light_area;
 		lv_obj_get_coords(gui_el.obj, &light_area);
 		if (_lv_area_is_on(&control_area, &light_area))
-			lv_obj_move_foreground(gui_el.obj);
+			func(gui_el.obj);
 	}
+}
+
+// Brings to the foreground any light element that overlaps and is on top of the given element.
+// Used to handle modules that have a separate LED and button element. When a mapped button element
+// changed values, it moves to the foreground, so its LED needs to move with it.
+inline void raise_lights_over(std::span<DrawnElement> drawn_elements, DrawnElement const &control) {
+	for_each_light_over(drawn_elements, control, lv_obj_move_foreground);
 }
 
 // Redrawing a knob moves it to the foreground (see redraw_element(Knob))

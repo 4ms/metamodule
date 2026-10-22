@@ -431,6 +431,9 @@ private:
 			lv_obj_del(b);
 		element_highlights.clear();
 
+		// These are about to be deleted along with the canvas
+		raised_objs.clear();
+
 		dyn_draw.blur();
 
 		// This should delete all canvas children
@@ -499,6 +502,8 @@ private:
 	void unhighlight_element(size_t idx);
 	void highlight_row(uint32_t roller_idx);
 	void highlight_component(size_t idx, bool scroll_into_view = true);
+	void raise_element(DrawnElement const &drawn_element);
+	void lower_raised_elements();
 	void focus_button_bar(bool first_button = false);
 	void click_cable_destination(unsigned drawn_idx);
 	void click_altparam_action(DrawnElement const &drawn_element);
@@ -586,6 +591,10 @@ private:
 	// overlapping controls (e.g. concentric knobs) when the module is re-drawn
 	std::vector<uint16_t> element_stack_order;
 	std::optional<uint16_t> stack_order_module_id;
+
+	// Objects raised while their roller row is highlighted, in the order they were raised,
+	// with their stacking index from just before. Undone in reverse to put them back.
+	std::vector<std::pair<lv_obj_t *, uint32_t>> raised_objs;
 
 	std::vector<int> roller_drawn_el_idx;
 
