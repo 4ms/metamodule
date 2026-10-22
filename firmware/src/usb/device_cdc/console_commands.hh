@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/plugin_file_conf.hh"
 #include "console/console_buffer_reader.hh"
 #include "console/uart_log.hh"
 #include "usb/dev_drive_block.hh"
@@ -192,7 +193,7 @@ private:
 
 	static void print_help() {
 		printf("Commands:\n"
-			   "  install  install any .mmplugin files on the developer drive,\n"
+			   "  install  install any " PLUGIN_FILE_EXTENSION " files on the developer drive,\n"
 			   "           play a .yml patch file if there is one, then give\n"
 			   "           the drive back to the host computer\n"
 			   "  eject    remove the drive from the host computer\n"

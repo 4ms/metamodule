@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/plugin_file_conf.hh"
 #include "core_intercom/shared_memory.hh"
 #include "dynload/plugin_manager.hh"
 #include "fs/dev_drive.hh"
@@ -17,7 +18,7 @@ namespace MetaModule
 {
 
 // Aux core monitor for ejecct events on the developer drive.
-// Checks for .mmplugin files and installs them, then plays a .yml patch file
+// Checks for plugin files (.mmplugin, MP2: .mm2plugin) and installs them, then plays a .yml patch file
 // if there is one.
 class DevDriveService {
 public:
@@ -146,7 +147,7 @@ private:
 		auto print_file = [](std::string_view name, uint32_t, uint32_t size) {
 			printf("  %.*s (%u bytes)\n", (int)name.size(), name.data(), (unsigned)size);
 		};
-		drive_.files().foreach_file_with_ext(".mmplugin", print_file);
+		drive_.files().foreach_file_with_ext(PLUGIN_FILE_EXTENSION, print_file);
 		drive_.files().foreach_file_with_ext(".yml", print_file);
 	}
 
@@ -165,7 +166,7 @@ private:
 		patch_file_ = find_patch();
 
 		if (plugins.empty()) {
-			pr_info("DevDrive: no .mmplugin files in the root directory\n");
+			pr_info("DevDrive: no " PLUGIN_FILE_EXTENSION " files in the root directory\n");
 			play_patch_from_drive();
 			put_medium_back(block);
 			return;
@@ -252,7 +253,7 @@ private:
 	std::vector<std::string> find_plugins() {
 		std::vector<std::string> found;
 
-		drive_.files().foreach_file_with_ext(".mmplugin", [&found](std::string_view name, uint32_t, uint32_t size) {
+		drive_.files().foreach_file_with_ext(PLUGIN_FILE_EXTENSION, [&found](std::string_view name, uint32_t, uint32_t size) {
 			if (name.starts_with("."))
 				return;
 			if (size == 0)

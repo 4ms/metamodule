@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/plugin_file_conf.hh"
 #include "dynload/dynloader.hh"
 #include "dynload/exidx_registry.hh"
 #include "dynload/json_parse.hh"
@@ -75,8 +76,8 @@ public:
 		}
 
 		auto name = filename;
-		if (name.ends_with(".mmplugin"))
-			name.remove_suffix(9);
+		if (name.ends_with(PLUGIN_FILE_EXTENSION))
+			name.remove_suffix(sizeof(PLUGIN_FILE_EXTENSION) - 1);
 
 		local_file = {fileio.vol_id(), std::string{filename}.c_str(), name, file_size, ""};
 		parse_version(local_file);

@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/plugin_file_conf.hh"
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "dynload/plugin_file_scan.hh"
@@ -32,7 +33,7 @@ struct PluginFileFinder {
 
 private:
 	IntercoreStorageMessage find_plugin_files(const IntercoreStorageMessage &message) {
-		pr_dbg("M4: scanning volumes for plugin files (metamodule-plugins/*.mmplugin)\n");
+		pr_dbg("M4: scanning volumes for plugin files (metamodule-plugins/*" PLUGIN_FILE_EXTENSION ")\n");
 
 		message.plugin_file_list->clear();
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/plugin_file_conf.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "gui/fonts/ttf.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -80,10 +81,10 @@ public:
 		ramdisk.debug_print_disk_info();
 	}
 
-	// Strip suffix ".mmplugin" and version "-vX.X.X" from filename
+	// Strip suffix (PLUGIN_FILE_EXTENSION) and version "-vX.X.X" from filename
 	static std::string_view plugin_name_of(std::string_view filename) {
-		if (filename.ends_with(".mmplugin"))
-			filename.remove_suffix(9);
+		if (filename.ends_with(PLUGIN_FILE_EXTENSION))
+			filename.remove_suffix(sizeof(PLUGIN_FILE_EXTENSION) - 1);
 
 		for (auto v = filename.find("-v"); v != std::string_view::npos; v = filename.find("-v", v + 2)) {
 			if (v + 2 < filename.size() && isdigit(filename[v + 2]))

@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/plugin_file_conf.hh"
 #include "console/pr_dbg.hh"
 #include "dynload/plugin_file_list.hh"
 #include "fs/fileio_t.hh"
@@ -15,10 +16,10 @@ inline bool scan_volume(FileIoC auto &fileio, PluginFileList &plugin_files, std:
 				dir.remove_suffix(1);
 			std::string full_path = std::string(dir) + std::string("/") + std::string(entryname);
 
-			// Add each file ending in .mmplugin
+			// Add each plugin file (PLUGIN_FILE_EXTENSION)
 			if (kind == DirEntryKind::File) {
-				if (entryname.ends_with(".mmplugin") && !entryname.starts_with(".")) {
-					entryname.remove_suffix(9);
+				if (entryname.ends_with(PLUGIN_FILE_EXTENSION) && !entryname.starts_with(".")) {
+					entryname.remove_suffix(sizeof(PLUGIN_FILE_EXTENSION) - 1);
 					if (plugin_files.push_back({fileio.vol_id(), full_path.c_str(), entryname, filesize, ""}))
 						pr_trace("Found plugin file %s\n", full_path.c_str());
 					else
