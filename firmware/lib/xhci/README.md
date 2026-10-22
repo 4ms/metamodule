@@ -25,7 +25,16 @@ An xHCI USB host controller driver, for the STM32MP25's USB3DR (Synopsys DWC3) i
   buffers that aren't DMA-safe go through the platform's bounce buffer (`xhci_ctrl_tx()` and
   `xhci_bulk_tx()` in `xhci-ring.c`).
 - `BUG()`/`BUG_ON()` log instead of halting, and errno values are the C library's.
-- `xhci_host_get_device_info()`.
+- Non-blocking bulk and interrupt transfers (`xhci_xfer_*()`, `xhci_host_process_events()`, at
+  the end of `xhci-ring.c`). They share the event ring with the blocking transfers and commands:
+  while a blocking call waits, `xhci_wait_for_event()` passes the other transfers' events to them.
+  A transfer that halts its endpoint (e.g. a stall) is cleared when the next one is submitted.
+- Devices come and go one at a time: the device table frees entries, a device unplugged from a hub
+  (or a hub, with the devices behind it) is removed and reported
+  (`xhci_host_set_disconnect_callback()`), and a reconnect on a port replaces what was there.
+- Only an interface's default setting's endpoints are configured (the others' would replace them).
+- `xhci_host_get_device_info()`, `xhci_host_find_interface()`, `xhci_host_control()`,
+  `xhci_host_device_present()`.
 
 ## Using it
 
