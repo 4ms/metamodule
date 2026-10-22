@@ -103,8 +103,8 @@ layers above the HAL are shared.
 The M33 runs MP1's `UsbManager` (`src/usb/usb_manager.hh`) unchanged: the
 FUSB302 picks the role (and handles PD and the awkward partners, as on MP1). As
 a device it runs MP1's `UsbDeviceManager`, the MIDI + CDC console composite, on
-ST's DWC3 device HAL (`stm32mp2xx_hal_pcd_drd.c`). As a host it only turns on
-VBUS so far. The MP2 parts:
+ST's DWC3 device HAL (`stm32mp2xx_hal_pcd_drd.c`). As a host it runs MP1's
+MIDI and USB drive class drivers on an xHCI driver (see Host mode, below). The MP2 parts:
 
 - `src/pro/conf/fusb30x_conf.hh`: the FUSB302's pins. On the test carrier
   (`MP2_TEST_CARRIER`): INT_N on PD13, VBUS load switch on PB4. On the pro p1:
@@ -161,11 +161,18 @@ VBUS so far. The MP2 parts:
 - The M33 prints faults (`src/core_m33/fault_handlers.cc`) instead of hanging
   silently.
 
-Not yet:
-- **The console over USB:** the CDC console sends MP1's per-core console
-  buffers, but on MP2 each core writes to the UART directly, so they're empty.
-- **The developer drive:** the A35 publishes a `DevDriveBlock` in `SharedIndex`, but
-  doesn't serve a drive yet.
+- **The console**, as on MP1: once the M33 is running, each core (A35 core 0, A35 core 1, M33)
+  writes its console output to its `ConcurrentBuffer` in shared memory
+  (`console/console_buffer_writer.hh`, `SharedIndex::console_buffers`). The M33 sends them to the
+  UART (`src/core_m33/console_drain.hh`, which adds the `\r`s), or, while a computer is connected
+  to the CDC console, MP1's `UsbSerialDevice` sends them there, and takes console commands. The
+  A35 still reads the UART's RX (GUI navigation keys). M33 faults go back to direct UART writes.
+- **The developer drive**, as on MP1: the A35 runs MP1's `DevDriveService` in its main loop (MP1
+  runs it on core 1), and the M33 serves the drive in the composite device. Its 16MB comes from the
+  top of the A35's heap region while Developer Mode is on (`src/core_a35/no_plugins.cc`,
+  `system/sbrk_mp2.cc`), opened to the M33 in
+  RISAF4 (region 12); the M33 doesn't cache the A35's RAM (MPU region 3). Installing a
+  `.mmplugin` fails ("Plugins are not supported on MP2 yet"), but playing a `.yml` patch works.
 - **Host mode**: the DWC3 is an xHCI host, and ST's HAL has no host driver for it. `lib/xhci` is
   U-Boot's xHCI driver (GPL-2.0+) as ported in stm32mp2-baremetal, including its hub support, plus
   non-blocking bulk/interrupt transfers; see its README. It enumerates the devices (also behind
