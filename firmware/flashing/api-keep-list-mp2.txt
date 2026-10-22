@@ -1,0 +1,62 @@
+# MP2 (A35, AArch64) version of api-keep-list.txt: API symbols to keep that scanning the export
+# objects can't find on its own. See api-keep-list.txt for the format.
+#
+# Differences from MP1:
+#   - No data symbols (_impure_ptr, __atexit, ...): an MP2 plugin's libc is the toolchain's
+#     (not compiled -fPIC), which can't refer to data in the firmware, so each plugin has its own
+#     (see the SDK's cmake/make_plugin_libc_mp2.cmake).
+#   - The unwinder (_Unwind_*): plugins use the firmware's, which has their .eh_frame registered
+#     (src/mp2-stubs/dynload/exidx_registry.cc). MP1 plugins have their own, and find their exidx
+#     tables with mm_host_find_exidx.
+
+MetaModule::register_module
+MetaModule::register_context_menu
+
+malloc
+calloc
+realloc
+free
+_malloc_r
+_calloc_r
+_realloc_r
+_free_r
+_times_r
+memalign
+_memalign_r
+
+abort
+__assert_func
+
+__cxa_pure_virtual
+
+_exit
+_getpid_r
+_open_r
+_close_r
+_fstat_r
+stat
+_isatty_r
+_write_r
+_kill_r
+_read_r
+_lseek_r
+_sbrk_r
+gettimeofday
+_gettimeofday
+_gettimeofday_r
+
+expm1l
+log1pl
+
+# The unwinder functions plugins' libsupc++ uses (hidden in libgcc, so they're listed by name)
+_Unwind_DeleteException
+_Unwind_GetDataRelBase
+_Unwind_GetIPInfo
+_Unwind_GetLanguageSpecificData
+_Unwind_GetRegionStart
+_Unwind_GetTextRelBase
+_Unwind_RaiseException
+_Unwind_Resume
+_Unwind_Resume_or_Rethrow
+_Unwind_SetGR
+_Unwind_SetIP
