@@ -81,8 +81,12 @@ The M33's `PanelControls` (`src/core_m33/panel_controls.hh`) is MP2's version
 of MP1's `Controls` (`src/core_m4/controls.hh`). The param blocks
 (`StaticBuffers::param_blocks`) are in `.sharedmem`, published in `SharedIndex`.
 As on MP1, the audio stream releases a param block's HSEM when it's done with
-it, and the M33 then fills that block. A 48kHz timer (TIM6) polls the controls,
-in place of MP1's LRCLK pin interrupt.
+it, and the M33 then fills that block, one frame per audio frame, from an
+interrupt on the SAI's frame clock (LRCLK, PE11, EXTI1 line 11:
+`src/pro/conf/frame_rate_conf.hh`, mdrivlib's `stm32mp2_cm33/drivers/pin_change.hh`),
+like MP1's LRCLK pin interrupt. The HSEM interrupt only flags the new block; the
+frame interrupt switches to it. The M33 says on the console once the frame clock
+interrupts start (or that they haven't, 15s after it starts).
 
 So far only the control encoder (PC3/PC9, button PH10) and the Back button
 (PA9) work, as MP1's rotary and button. Next: the 16 knob encoders and the
@@ -121,16 +125,10 @@ MIDI and USB drive class drivers on an xHCI driver (see Host mode, below). The M
   GUI reads (`usb/usb_status_reader.hh`). Both live in the A35's `.sharedmem`,
   published in `SharedIndex`.
 - USB MIDI to and from the patch: `PanelControls` (`src/core_m33/panel_controls.hh`)
-  does what MP1's `Controls::parse_midi()` does, but a whole param block at a
-  time, when the block starts: MP2's controls aren't synced to the audio frames,
-  so filling one frame per tick would put MIDI in frames the audio stream never
-  reads. The A35 publishes how many frames it reads
-  (`SharedIndex::audio_block_size`). Costs up to one block of latency more than
-  MP1.
-- `src/core_m33/usb/usb_host_manager.hh`: an MP2 stand-in for MP1's
-  `UsbHostManager`, found first in the M33's include path. It only switches
-  VBUS. Its `get_midi_host()` and `get_msc_fileio()` aren't defined, so using
-  them is a link error until host mode is ported.
+  does what MP1's `Controls::parse_midi()` does, each audio frame, with the USB
+  MIDI host or device (whichever is connected).
+- `src/core_m33/usb/usb_host_manager.hh`: MP2's version of MP1's
+  `UsbHostManager`, found first in the M33's include path (see Host mode, below).
 
 - `mdrivlib::Usb3DR` (`target/stm32mp2/drivers/usb3dr.hh`): the clock, reset,
   and PHY sequence, from the stm32mp2-baremetal `usb-drd` example. Before it
