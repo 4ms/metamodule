@@ -292,6 +292,7 @@ void ModuleViewPage::highlight_row(uint32_t roller_idx) {
 		for (auto drawn_idx : layout.group_members[*group]) {
 			if (is_listed(drawn_idx)) {
 				highlight_component(drawn_idx, scroll_into_view);
+				move_selected_control_foreground(drawn_elements, drawn_elements[drawn_idx]);
 				scroll_into_view = false;
 			}
 		}
