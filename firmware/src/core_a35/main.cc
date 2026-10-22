@@ -96,7 +96,6 @@ void start_m33() {
 	index.device_settings_message = &StaticBuffers::icc_device_settings_message;
 	index.usb_connection_status = &StaticBuffers::usb_connection_status;
 	index.console_buffers = StaticBuffers::console_buffers.data();
-	index.audio_block_size = 0;
 	index.magic = SharedIndex::ValidMagic;
 
 	if constexpr (M33_LOAD_ADDR >= mdrivlib::RISAF::DDRBase) {
@@ -248,9 +247,6 @@ int main() {
 
 		// Same as MP1's main loop (core_a7/main.cc)
 		audio.handle_overruns();
-
-		// The M33 fills in this many frames of each param block (MIDI)
-		shared_index().audio_block_size = audio.get_block_size();
 
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");

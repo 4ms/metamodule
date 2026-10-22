@@ -95,7 +95,7 @@ int main() {
 		return usb;
 	}();
 	// USB MIDI <-> the patch
-	controls.start_midi(usb.get_midi_host(), usb.get_midi_device(), index.audio_block_size);
+	controls.start_midi(usb.get_midi_host(), usb.get_midi_device());
 
 	//
 	// Storage

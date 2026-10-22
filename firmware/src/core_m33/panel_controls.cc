@@ -1,7 +1,6 @@
 #include "panel_controls.hh"
 #include "conf/hsem_conf.hh"
 #include "drivers/hsem.hh"
-#include <algorithm>
 
 namespace MetaModule
 {
@@ -10,15 +9,6 @@ using namespace mdrivlib;
 
 namespace
 {
-// Lower priority than the HSEM interrupt (0: see HWSemaphoreGlobalBase::enable_all_handlers()), so
-// a new block can start during update(), but update() never interrupts start_param_block()
-const TimekeeperConfig FrameTimerConf{
-	.TIMx = TIM6,
-	.period_ns = TimekeeperConfig::Hz(48000),
-	.priority1 = 1,
-	.priority2 = 0,
-};
-
 // Same as MP1's Controls::clear_rx_message()
 void clear_rx_message(Params &params) {
 	params.raw_msg = MidiMessage{};
@@ -31,7 +21,8 @@ void clear_rx_message(Params &params) {
 PanelControls::PanelControls(DoubleBufParamBlock &param_blocks)
 	: param_blocks{param_blocks}
 	, cur_metaparams{&param_blocks[0].metaparams}
-	, cur_params{param_blocks[0].params.data()} {
+	, cur_params{param_blocks[0].params.data()}
+	, cur_params_end{cur_params + param_blocks[0].params.size()} {
 }
 
 void PanelControls::start() {
@@ -48,22 +39,18 @@ void PanelControls::start() {
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 	HWSemaphoreGlobalBase::enable_all_handlers();
 
-	frame_timer.init(FrameTimerConf, [this] { update(); });
-	frame_timer.start();
+	frame_task.init([this] { update(); });
+	frame_task.start();
 }
 
-// The A35 just released the other block's semaphore: it's done with that block
+// The A35 just released the other block's semaphore: it's done with that block. The next frame
+// starts filling it. (The HSEM interrupt can preempt update(), so update() makes the switch.)
 template<size_t block_num>
 void PanelControls::start_param_block() {
-	cur_metaparams = &param_blocks[block_num].metaparams;
-	cur_params = param_blocks[block_num].params.data();
-	new_block = true;
+	next_block.store(block_num, std::memory_order_relaxed);
 }
 
-void PanelControls::start_midi(MidiHost &midi_host,
-							   UsbMidiDevice &midi_device,
-							   volatile uint32_t const &audio_block_size) {
-	this->audio_block_size = &audio_block_size;
+void PanelControls::start_midi(MidiHost &midi_host, UsbMidiDevice &midi_device) {
 	this->midi_host = &midi_host;
 
 	// Same as MP1's Controls::start()
@@ -77,16 +64,36 @@ void PanelControls::start_midi(MidiHost &midi_host,
 	this->midi_device = &midi_device;
 }
 
+// Each audio frame: MP1's read_controls_task
 void PanelControls::update() {
+	frame_count = frame_count + 1;
+
 	rotary.update();
 	rotary_button.update();
 	back_button.update();
 
-	// Like MP1, the metaparams are written once per block, at its first frame
-	if (new_block) {
-		new_block = false;
+	if (auto block = next_block.exchange(-1, std::memory_order_relaxed); block >= 0) {
+		auto &param_block = param_blocks[block];
+		cur_metaparams = &param_block.metaparams;
+		cur_params = param_block.params.data();
+		cur_params_end = cur_params + param_block.params.size();
+		first_frame = true;
+		block_full = false;
+	}
+
+	if (block_full)
+		return;
+
+	if (first_frame) {
+		first_frame = false;
 		update_metaparams();
 	}
+
+	if (midi_device)
+		process_midi_frame(*cur_params);
+
+	if (++cur_params == cur_params_end)
+		block_full = true;
 }
 
 void PanelControls::update_metaparams() {
@@ -96,21 +103,10 @@ void PanelControls::update_metaparams() {
 
 	cur_metaparams->usb_connection = usb_connection;
 
-	update_midi();
-}
-
-// The block's MIDI, all at once: see the header comment
-void PanelControls::update_midi() {
-	if (!midi_device)
-		return;
-
-	update_midi_connected();
-	cur_metaparams->midi_ports_connected = midi_usb_connected ? (1 << Midi::Event::USB) : 0;
-
-	uint32_t block_size = *audio_block_size;
-	block_size = std::min<uint32_t>(block_size, StreamConf::Audio::MaxBlockSize);
-	for (auto &params : std::span{cur_params, block_size})
-		process_midi_frame(params);
+	if (midi_device) {
+		update_midi_connected();
+		cur_metaparams->midi_ports_connected = midi_usb_connected ? (1 << Midi::Event::USB) : 0;
+	}
 }
 
 // Same as MP1's Controls::update_midi_connected()

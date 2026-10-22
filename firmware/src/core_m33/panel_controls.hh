@@ -1,9 +1,10 @@
 #pragma once
 #include "conf/control_expander_conf.hh"
+#include "conf/frame_rate_conf.hh"
 #include "core_m4/midi_controls.hh"
 #include "drivers/debounced_switch.hh"
+#include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
-#include "drivers/timekeeper.hh"
 #include "midi/midi_message.hh"
 #include "param_block.hh"
 #include "usb/midi_host.hh"
@@ -11,6 +12,7 @@
 #include "usb/usb_midi_device.hh"
 #include "util/edge_detector.hh"
 #include "util/lockfree_fifo_spsc.hh"
+#include <atomic>
 #include <span>
 
 namespace MetaModule
@@ -24,18 +26,11 @@ namespace MetaModule
 // button (MP1's rotary), and the Back button (MP1's button 0). Not yet: the nav encoder, the gate
 // ins, jack sense, and the knob encoders and buttons on the I2C expanders.
 //
-// As on MP1, when the A35 releases a param block's semaphore, we start filling the other block.
-// MP1 runs the controls at the frame rate from an LRCLK pin interrupt; here a timer runs them at
-// 48kHz. That's enough for debouncing, but per-frame data (gate ins) will need it synced to the
-// audio frames.
-//
-// USB MIDI (MP1's Controls::parse_midi()): MP1 fills in one frame's MIDI per audio frame. Without
-// frame sync, we'd fill frames the audio stream doesn't read (it reads the first block-size frames):
-// a received message put there would be lost, and later read back as outgoing MIDI. So instead,
-// when a block starts, we do all of its MIDI at once, for exactly the frames the audio stream uses
-// (SharedIndex::audio_block_size): send the patch's outgoing USB MIDI, and put the received
-// messages in, one per frame. The A35 doesn't touch the block again until the next one starts. The
-// cost is up to one more block of latency than MP1.
+// As on MP1: when the A35 releases a param block's semaphore, we start filling the other block,
+// one frame per audio frame, from an interrupt on the SAI's frame clock (LRCLK), so we fill the
+// frames the audio stream reads (the first block-size frames) at the sample rate. The metaparams
+// are written at a block's first frame. Each frame sends the patch's outgoing USB MIDI and takes
+// one received message (MP1's Controls::parse_midi()).
 class PanelControls {
 public:
 	PanelControls(DoubleBufParamBlock &param_blocks);
@@ -48,15 +43,18 @@ public:
 		usb_connection = conn;
 	}
 
-	// Routes USB MIDI between the patch and the USB MIDI host or device (whichever is connected).
-	// audio_block_size is published by the A35.
-	void start_midi(MidiHost &midi_host, UsbMidiDevice &midi_device, volatile uint32_t const &audio_block_size);
+	// Routes USB MIDI between the patch and the USB MIDI host or device (whichever is connected)
+	void start_midi(MidiHost &midi_host, UsbMidiDevice &midi_device);
+
+	// Audio frames so far (the frame clock interrupts)
+	uint32_t num_frames() const {
+		return frame_count;
+	}
 
 private:
 	void update();
 	void update_metaparams();
 	void update_rotary();
-	void update_midi();
 	void update_midi_connected();
 	void process_midi_frame(Params &params);
 	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
@@ -64,7 +62,7 @@ private:
 	template<size_t block_num>
 	void start_param_block();
 
-	mdrivlib::Timekeeper frame_timer;
+	mdrivlib::PinChangeInt<FrameRatePinChangeConf> frame_task;
 
 	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, Controls::Direct::CtlEncA, Controls::Direct::CtlEncB> rotary;
 	mdrivlib::DebouncedPin<Controls::Direct::CtlEncBut, mdrivlib::PinPolarity::Inverted> rotary_button;
@@ -74,12 +72,16 @@ private:
 	DoubleBufParamBlock &param_blocks;
 	MetaParams *cur_metaparams;
 	Params *cur_params;
-	volatile bool new_block = false;
+	Params *cur_params_end;
+	bool first_frame = true;
+	bool block_full = false;
+	volatile uint32_t frame_count = 0;
+	// Set by the HSEM interrupt, and taken by update(), which owns the pointers above
+	std::atomic<int> next_block = -1;
 	volatile UsbConnection usb_connection = UsbConnection::None;
 
 	MidiHost *midi_host = nullptr;
 	UsbMidiDevice *midi_device = nullptr;
-	volatile uint32_t const *audio_block_size = nullptr;
 	// USB interrupt (device) or main loop (host: only one is connected at a time) -> update()
 	LockFreeFifoSpsc<MidiMessage, 256> midi_usb_rx_buf;
 	Midi::MessageParser midi_parser;
