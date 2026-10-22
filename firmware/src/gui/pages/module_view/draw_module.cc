@@ -6,6 +6,7 @@
 #include "gui/pages/module_view/module_view.hh"
 #include "util/countzip.hh"
 #include <algorithm>
+#include <ranges>
 
 namespace MetaModule
 {
@@ -107,9 +108,15 @@ void ModuleViewPage::redraw_module() {
 		});
 	}
 
-	restore_element_stacking_order();
+	build_element_layout();
 
-	raise_mapped_params(drawn_elements);
+	if (is_new_module)
+		stack_elements_in_roller_order();
+	else
+		restore_element_stacking_order();
+
+	// Keep the order that mapped params were just put in, relative to each other
+	raise_mapped_params(drawn_elements, current_stacking_order());
 
 	stack_order_module_id = this_module_id;
 
@@ -129,7 +136,6 @@ void ModuleViewPage::redraw_module() {
 
 	// Populate Roller and highlighter buttons
 	populate_element_objects();
-	build_element_layout();
 	populate_roller();
 
 	update_map_ring_style();
@@ -151,14 +157,58 @@ void ModuleViewPage::save_element_stacking_order() {
 	if (stack_order_module_id != this_module_id)
 		return;
 
+	element_stack_order = current_stacking_order();
+}
+
+// Drawn element indices, ordered back to front as they are currently stacked
+std::vector<uint16_t> ModuleViewPage::current_stacking_order() const {
+	std::vector<uint16_t> order;
+
 	for (auto [idx, drawn_el] : enumerate(drawn_elements)) {
 		if (drawn_el.gui_element.obj)
-			element_stack_order.push_back(idx);
+			order.push_back(idx);
 	}
 
-	std::ranges::stable_sort(element_stack_order, {}, [this](uint16_t idx) {
-		return lv_obj_get_index(drawn_elements[idx].gui_element.obj);
-	});
+	std::ranges::stable_sort(
+		order, {}, [this](uint16_t idx) { return lv_obj_get_index(drawn_elements[idx].gui_element.obj); });
+
+	return order;
+}
+
+// Stack overlapping controls so that the one listed first in the element roller is on top:
+// top-level elements first, then the members of each group.
+// Elements that aren't listed (e.g. lights) stay underneath, except for lights on top of a control.
+void ModuleViewPage::stack_elements_in_roller_order() {
+	std::vector<unsigned> top_first;
+
+	for (auto entry : layout.top_level_entries) {
+		if (!entry.is_group && is_listable(entry.idx))
+			top_first.push_back(entry.idx);
+	}
+
+	for (auto entry : layout.top_level_entries) {
+		if (entry.is_group) {
+			for (auto drawn_idx : layout.group_members[entry.idx]) {
+				if (is_listable(drawn_idx))
+					top_first.push_back(drawn_idx);
+			}
+		}
+	}
+
+	for (auto drawn_idx : std::views::reverse(top_first)) {
+		auto &drawn_el = drawn_elements[drawn_idx];
+		auto &gui_el = drawn_el.gui_element;
+		if (!gui_el.obj)
+			continue;
+
+		lv_obj_move_foreground(gui_el.obj);
+
+		raise_lights_over(drawn_elements, drawn_el);
+
+		// Keep the map ring above its own control, as when it was drawn
+		if (gui_el.map_ring)
+			lv_obj_move_foreground(gui_el.map_ring);
+	}
 }
 
 void ModuleViewPage::restore_element_stacking_order() {

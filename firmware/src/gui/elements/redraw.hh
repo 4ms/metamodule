@@ -7,7 +7,9 @@
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 #include <cmath>
+#include <numeric>
 #include <span>
+#include <vector>
 
 namespace MetaModule
 {
@@ -233,8 +235,13 @@ inline bool is_raised_on_redraw(Element const &element) {
 // so that stacked controls (e.g. concentric knobs) show the ones in use.
 // Note: controls are drawn at their zero position, and redrawing a control moves it to the
 // foreground, so this must be called after all params have been drawn at their current value.
-inline void raise_mapped_params(std::span<DrawnElement> drawn_elements) {
-	for (auto &drawn_el : drawn_elements) {
+// Mapped params are raised in the given order (drawn element indices), so the last one ends up on top.
+inline void raise_mapped_params(std::span<DrawnElement> drawn_elements, std::span<uint16_t const> order) {
+	for (auto idx : order) {
+		if (idx >= drawn_elements.size())
+			continue;
+
+		auto &drawn_el = drawn_elements[idx];
 		auto &gui_el = drawn_el.gui_element;
 
 		if (gui_el.count.num_params == 0 || !gui_el.obj)
@@ -251,6 +258,13 @@ inline void raise_mapped_params(std::span<DrawnElement> drawn_elements) {
 		if (gui_el.map_ring)
 			lv_obj_move_foreground(gui_el.map_ring);
 	}
+}
+
+// Raise mapped params in drawn element order
+inline void raise_mapped_params(std::span<DrawnElement> drawn_elements) {
+	std::vector<uint16_t> order(drawn_elements.size());
+	std::iota(order.begin(), order.end(), 0);
+	raise_mapped_params(drawn_elements, order);
 }
 
 inline bool redraw_param(DrawnElement &drawn_el, float value) {

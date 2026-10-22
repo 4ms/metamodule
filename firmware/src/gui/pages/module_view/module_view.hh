@@ -547,6 +547,8 @@ private:
 	void exit_fullscreen();
 	void save_element_stacking_order();
 	void restore_element_stacking_order();
+	std::vector<uint16_t> current_stacking_order() const;
+	void stack_elements_in_roller_order();
 	void watch_element(DrawnElement const &drawn_element);
 	void redraw_elements();
 	void update_map_ring_style();
