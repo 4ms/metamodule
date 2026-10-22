@@ -343,7 +343,7 @@ public:
 		if (status == DevDriveStatus::Ok) {
 			drive_.hand_to_host();
 			auto mem = drive_.memory();
-			dev_block.publish(reinterpret_cast<uint32_t>(mem.data()), mem.size());
+			dev_block.publish(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(mem.data())), mem.size());
 		}
 		return status;
 	}
