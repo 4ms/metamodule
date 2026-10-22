@@ -43,11 +43,6 @@ struct ModuleWidgetAdaptor {
 		if (widget) {
 			Element element = make_element(widget);
 
-			// Rack doesn't draw a hidden widget, so make it a param with no image:
-			// it's still listed and can be mapped, but nothing is drawn
-			if (!widget->isVisible())
-				element = ParamElement{};
-
 			ElementCount::Indices indices = clear();
 			indices.param_idx = widget->paramId;
 			elem_idx.emplace_back(element, indices, widget);
