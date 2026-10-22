@@ -189,7 +189,7 @@ void Controls::parse_midi() {
 	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence()) {
 		if (noteoff->type == Midi::Event::Type::None) {
 			_midi_usb_connected = false;
-			cur_metaparams->midi_ports_connected &= ~Midi::Event::Port::USB;
+			cur_metaparams->midi_ports_connected &= ~(1 << Midi::Event::USB);
 			clear_rx_message();
 		} else {
 			// The panic sequence is a USB-disconnect artifact, not something a jack sent
