@@ -36,9 +36,9 @@ struct ScreenBufferConf {
 	static constexpr uint32_t panelViewHeight = 720;
 
 	//The width x height the GUI renders at, and how it's scaled into the panel view:
-	static constexpr uint32_t viewWidth = 320;
-	static constexpr uint32_t viewHeight = 240;
-	static constexpr uint32_t viewScale = 3;
+	static constexpr uint32_t viewWidth = 1280;
+	static constexpr uint32_t viewHeight = 720;
+	static constexpr uint32_t viewScale = 1;
 	static constexpr uint32_t viewOffsetX = (panelViewWidth - viewWidth * viewScale) / 2;
 	static constexpr uint32_t viewOffsetY = (panelViewHeight - viewHeight * viewScale) / 2;
 	static_assert(viewWidth * viewScale <= panelViewWidth && viewHeight * viewScale <= panelViewHeight);

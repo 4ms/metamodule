@@ -248,7 +248,7 @@ add_library(
   system/mmu_ca35.cc
   system/sbrk_ca35.cc
   system/lock_ca35.cc
-  system/per_core_ca35.cc
+  system/reent_ca35.cc
   system/eh_frame_ca35.cc
   system/time.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s

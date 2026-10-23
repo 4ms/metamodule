@@ -1,70 +1,90 @@
-// newlib's locks, for the A35's two cores (MP2). The toolchain's newlib uses retargetable locking,
-// and its own versions of these do nothing; defining them here replaces them (libc's lock.o).
-// MP1's are in system/lock.cc.
+// newlib's locks, for the A35's two cores (MP2): MP1's (system/lock.cc), ported. The toolchain's
+// newlib uses retargetable locking, and its own versions of these do nothing; defining them here
+// replaces them (libc's lock.o).
 //
-// A lock belongs to a core while it's held, and the core can take it again (recursive locks count).
-// The other core spins until it's released.
+// As on MP1, a lock belongs to a process (system/reent_ca35.cc: a core's main loop, or one of its
+// interrupts) while it's held, and that process can take it again (recursive locks count). Any
+// other process spins until it's released.
 //
-// Interrupts: an interrupt handler that takes a lock the code it interrupted holds can't wait for
-// it (that code can't run until the handler returns). So:
-//  - Locks that are only ever held briefly (malloc's, and the other static ones below) mask the
-//    core's interrupts while held. A handler can then never find them held by its own core.
-//  - The others (FILE locks, which are held for the whole of a read or write, and the stdio list
-//    lock, held while flushing every FILE) can be held too long to mask interrupts for. A handler on
-//    the core that holds one goes ahead as if the lock were recursive, so it doesn't deadlock: it's
-//    as unprotected against the code it interrupted as it was before there were locks. Handlers
-//    shouldn't use stdio on FILEs that thread code uses.
+// Interrupts: a process must never spin on a lock held by code it interrupted, which can't run
+// until it returns. So, as on MP1, taking a lock disables the interrupts on the same core that take
+// locks and can preempt the process. Audio interrupts are never disabled: audio code must not take
+// locks (malloc, stdio, ...), as on MP1.
+//
+// Also as on MP1, FILEs have no locks (newlib ignores null locks).
 //
 // Plugins import these functions too (flashing/api-keep-list-mp2.txt), so the linker script keeps
-// them all, including the ones the firmware doesn't use. The lock layout is shared with plugins (metamodule-plugin-sdk plugin-libc/glue/mp2_locks.c
-// defines their static locks: plugins call these functions on them).
+// them all, including the ones the firmware doesn't use. The lock layout is shared with plugins
+// (metamodule-plugin-sdk plugin-libc/glue/mp2_locks.c defines their static locks: plugins call these
+// functions on them).
 
+#include "drivers/interrupt_control.hh"
+#include "reent_mm.hh"
+#include <array>
 #include <atomic>
 #include <cstdint>
-#include <cstdlib>
 #include <sys/lock.h>
+
+using MetaModule::Processes;
 
 namespace
 {
-unsigned this_core() {
-	uint64_t mpidr;
-	asm volatile("mrs %0, mpidr_el1" : "=r"(mpidr));
-	return mpidr & 0xFF;
+// The interrupts that take locks (bit n in __lock::irqs_to_reenable is LockingIRQs[n])
+constexpr std::array LockingIRQs{
+	SGI1_IRQn, // SMPCommand::ReadPatchGuiElements, on core 1
+};
+
+// Disables the interrupts that take locks and can preempt proc, returning the ones it disabled
+uint32_t disable_higher_priority_irqs(Processes proc) {
+	uint32_t disabled = 0;
+
+	auto disable = [&](unsigned i) {
+		if (mdrivlib::InterruptControl::is_enabled_irq(LockingIRQs[i])) {
+			mdrivlib::InterruptControl::disable_irq(LockingIRQs[i]);
+			disabled |= 1u << i;
+		}
+	};
+
+	// FIXME: when MP2 runs async threads (src/core_a35/async_thread_control.cc), Core0Main and Core1Main
+	// must also disable their core's async thread interrupt, as on MP1
+	if (proc == Processes::Core1AsyncThread || proc == Processes::Core1Main)
+		disable(0);
+
+	if (disabled) {
+		__DSB();
+		__ISB();
+	}
+
+	return disabled;
 }
 
-// Masks IRQ and FIQ, returning the previous mask state
-uint64_t mask_irqs() {
-	uint64_t daif;
-	asm volatile("mrs %0, daif\n\tmsr daifset, #3" : "=r"(daif) : : "memory");
-	return daif;
-}
-
-void restore_irqs(uint64_t daif) {
-	asm volatile("msr daif, %0" : : "r"(daif) : "memory");
+void reenable_irqs(uint32_t irqs) {
+	for (auto i = 0u; i < LockingIRQs.size(); i++) {
+		if (irqs & (1u << i))
+			mdrivlib::InterruptControl::reenable_irq(LockingIRQs[i]);
+	}
 }
 } // namespace
 
 extern "C" {
 
 struct __lock {
-	// 0 = free, otherwise the owning core + 1 (so a zeroed lock is free)
+	// 0 = free, otherwise the owning process + 1 (so a zeroed lock is free)
 	std::atomic<uint32_t> owner;
 	uint32_t count;
-	// Mask interrupts while held (only for locks that are held briefly)
-	uint32_t masks_irqs;
-	uint32_t reserved;
-	// The interrupt mask state to restore when released
-	uint64_t saved_daif;
+	// The interrupts the owner disabled when it took the lock
+	uint32_t irqs_to_reenable;
+	uint32_t reserved[3];
 };
 static_assert(sizeof(__lock) == 24, "Plugins (SDK plugin-libc/glue/mp2_locks.c) assume this layout");
 
-struct __lock __lock___malloc_recursive_mutex{.masks_irqs = 1};
-struct __lock __lock___atexit_recursive_mutex{.masks_irqs = 1};
-struct __lock __lock___env_recursive_mutex{.masks_irqs = 1};
-struct __lock __lock___tz_mutex{.masks_irqs = 1};
-struct __lock __lock___at_quick_exit_mutex{.masks_irqs = 1};
-struct __lock __lock___dd_hash_mutex{.masks_irqs = 1};
-struct __lock __lock___arc4random_mutex{.masks_irqs = 1};
+struct __lock __lock___malloc_recursive_mutex{};
+struct __lock __lock___atexit_recursive_mutex{};
+struct __lock __lock___env_recursive_mutex{};
+struct __lock __lock___tz_mutex{};
+struct __lock __lock___at_quick_exit_mutex{};
+struct __lock __lock___dd_hash_mutex{};
+struct __lock __lock___arc4random_mutex{};
 struct __lock __lock___sfp_recursive_mutex{};
 
 static bool try_acquire(_LOCK_T lock, uint32_t me) {
@@ -82,75 +102,62 @@ static bool try_acquire(_LOCK_T lock, uint32_t me) {
 	return false;
 }
 
+// Unlike MP1, the disabled interrupts are recorded in the lock only once it's ours: until then the
+// owner can be on the other core, releasing it (and re-enabling the interrupts it recorded)
 static void acquire(_LOCK_T lock) {
 	if (!lock)
 		return;
 
-	auto me = this_core() + 1;
+	auto proc = MetaModule::get_current_proc();
+	auto me = uint32_t(proc) + 1;
 
-	if (lock->masks_irqs) {
-		auto daif = mask_irqs();
-		while (!try_acquire(lock, me))
-			;
-		if (lock->count == 1)
-			lock->saved_daif = daif;
-	} else {
-		while (!try_acquire(lock, me))
-			;
-	}
+	auto disabled = disable_higher_priority_irqs(proc);
+	while (!try_acquire(lock, me))
+		;
+	lock->irqs_to_reenable |= disabled;
 }
 
+// Unlike MP1, this disables interrupts like acquire() does
 static int try_acquire_once(_LOCK_T lock) {
 	if (!lock)
 		return 0;
 
-	auto me = this_core() + 1;
+	auto proc = MetaModule::get_current_proc();
+	auto me = uint32_t(proc) + 1;
 
-	if (lock->masks_irqs) {
-		auto daif = mask_irqs();
-		if (!try_acquire(lock, me)) {
-			restore_irqs(daif);
-			return 0;
-		}
-		if (lock->count == 1)
-			lock->saved_daif = daif;
-		return 1;
+	auto disabled = disable_higher_priority_irqs(proc);
+	if (!try_acquire(lock, me)) {
+		reenable_irqs(disabled);
+		return 0;
 	}
-
-	return try_acquire(lock, me) ? 1 : 0;
+	lock->irqs_to_reenable |= disabled;
+	return 1;
 }
 
 static void release(_LOCK_T lock) {
-	if (!lock || lock->owner.load(std::memory_order_relaxed) != this_core() + 1)
+	if (!lock || lock->owner.load(std::memory_order_relaxed) != uint32_t(MetaModule::get_current_proc()) + 1)
 		return;
 
 	if (--lock->count > 0)
 		return;
 
-	auto daif = lock->saved_daif;
+	auto irqs = lock->irqs_to_reenable;
+	lock->irqs_to_reenable = 0;
 	lock->owner.store(0, std::memory_order_release);
-	if (lock->masks_irqs)
-		restore_irqs(daif);
+	reenable_irqs(irqs);
 }
 
-// FILE locks: newlib makes one per FILE
+// FILE locks: newlib asks for one per FILE. As on MP1, there are none
 void __retarget_lock_init_recursive(_LOCK_T *lock) {
-	if (!lock)
-		return;
-	// If this fails, the FILE has no lock (null locks are ignored), as before there were locks
-	*lock = static_cast<_LOCK_T>(calloc(1, sizeof(__lock)));
 }
 
 void __retarget_lock_init(_LOCK_T *lock) {
-	__retarget_lock_init_recursive(lock);
 }
 
 void __retarget_lock_close_recursive(_LOCK_T lock) {
-	free(lock);
 }
 
 void __retarget_lock_close(_LOCK_T lock) {
-	__retarget_lock_close_recursive(lock);
 }
 
 void __retarget_lock_acquire_recursive(_LOCK_T lock) {
