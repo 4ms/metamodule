@@ -83,7 +83,10 @@ void __retarget_lock_close_recursive(_LOCK_T lock) {
 	}
 }
 
-static void disable_higher_priority_irqs(MetaModule::Processes cur_proc, _LOCK_T lock) {
+using IrqList = FixedVector<IRQn_Type, 4>;
+
+// Returns the IRQs it disabled
+static IrqList disable_higher_priority_irqs(MetaModule::Processes cur_proc) {
 	// To avoid deadlock, lower-priority processes must disable higher-priority interrupts before taking a lock.
 	// Otherwise, the higher-priority interrupt might spin forever waiting for a lock which the lower-priority
 	// interrupt is holding.
@@ -96,11 +99,13 @@ static void disable_higher_priority_irqs(MetaModule::Processes cur_proc, _LOCK_T
 	//
 	// We will only spin-wait if the other core is holding a lock, regardless of anything related to interrupts.
 
+	IrqList disabled;
+
 	if (cur_proc == MetaModule::Processes::Core0Main) {
 		// Disable AsyncThread0
 		if (mdrivlib::InterruptControl::is_enabled_irq(TIM7_IRQn)) {
 			mdrivlib::InterruptControl::disable_irq(TIM7_IRQn);
-			lock->irqs_to_reenable.push_back(TIM7_IRQn);
+			disabled.push_back(TIM7_IRQn);
 		}
 	}
 
@@ -108,7 +113,7 @@ static void disable_higher_priority_irqs(MetaModule::Processes cur_proc, _LOCK_T
 		// Disable AsyncThread1
 		if (mdrivlib::InterruptControl::is_enabled_irq(TIM6_IRQn)) {
 			mdrivlib::InterruptControl::disable_irq(TIM6_IRQn);
-			lock->irqs_to_reenable.push_back(TIM6_IRQn);
+			disabled.push_back(TIM6_IRQn);
 		}
 	}
 
@@ -116,16 +121,37 @@ static void disable_higher_priority_irqs(MetaModule::Processes cur_proc, _LOCK_T
 		// Disable ReadPatchGuiElements
 		if (mdrivlib::InterruptControl::is_enabled_irq(SGI1_IRQn)) {
 			mdrivlib::InterruptControl::disable_irq(SGI1_IRQn);
-			lock->irqs_to_reenable.push_back(SGI1_IRQn);
+			disabled.push_back(SGI1_IRQn);
 		}
+	}
+
+	return disabled;
+}
+
+static void reenable_irqs(IrqList const &irqs) {
+	for (auto irq : irqs) {
+		mdrivlib::InterruptControl::reenable_irq(irq);
 	}
 }
 
-static void reenable_irqs(_LOCK_T lock) {
-	for (auto irq : lock->irqs_to_reenable) {
-		mdrivlib::InterruptControl::reenable_irq(irq);
+// Only once the lock is ours: until then, its owner can be on the other core, releasing it and
+// re-enabling (on its own core) the IRQs recorded in it
+static void record_irqs_to_reenable(_LOCK_T lock, IrqList const &irqs) {
+	for (auto irq : irqs) {
+		lock->irqs_to_reenable.push_back(irq);
 	}
+}
+
+// Takes the IRQs to re-enable out of the lock before releasing it: once it's released, the other core
+// can take it and record its own
+static void release_lock(_LOCK_T lock) {
+	auto irqs = lock->irqs_to_reenable;
 	lock->irqs_to_reenable.clear();
+
+	lock->proc_id = -1;
+	lock->count.store(0, std::memory_order_seq_cst);
+
+	reenable_irqs(irqs);
 }
 
 static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
@@ -153,27 +179,12 @@ static int try_acquire_recursive(_LOCK_T lock, int proc_id) {
 	return 0;
 }
 
-void __retarget_lock_acquire(_LOCK_T lock) {
-	if (!lock)
-		return;
-
-	disable_higher_priority_irqs(MetaModule::get_current_proc(), lock);
-
-	//spin until we can claim the lock
-	while (__retarget_lock_try_acquire(lock) == 0) {
-	}
-}
-
-// Only non-recursive lock seen so far is lock_tz_mutex, on Core1Main
-int __retarget_lock_try_acquire(_LOCK_T lock) {
-	if (!lock)
-		return 0;
-
+static int try_acquire(_LOCK_T lock, int proc_id) {
 	unsigned expected = 0;
 
 	// If count == 0 then we claim the lock, otherwise fail
 	if (lock->count.compare_exchange_strong(expected, 1, std::memory_order_seq_cst)) {
-		lock->proc_id = MetaModule::get_current_proc_id();
+		lock->proc_id = proc_id;
 		log_proclock('n', lock); //n1 means acquired
 		return 1;
 	} else {
@@ -181,8 +192,54 @@ int __retarget_lock_try_acquire(_LOCK_T lock) {
 	}
 }
 
+void __retarget_lock_acquire(_LOCK_T lock) {
+	if (!lock)
+		return;
+
+	auto cur_proc = MetaModule::get_current_proc();
+
+	auto irqs = disable_higher_priority_irqs(cur_proc);
+
+	//spin until we can claim the lock
+	while (try_acquire(lock, std::to_underlying(cur_proc)) == 0) {
+	}
+
+	record_irqs_to_reenable(lock, irqs);
+}
+
+// Only non-recursive lock seen so far is lock_tz_mutex, on Core1Main
+int __retarget_lock_try_acquire(_LOCK_T lock) {
+	if (!lock)
+		return 0;
+
+	auto cur_proc = MetaModule::get_current_proc();
+
+	auto irqs = disable_higher_priority_irqs(cur_proc);
+
+	if (try_acquire(lock, std::to_underlying(cur_proc)) == 0) {
+		reenable_irqs(irqs);
+		return 0;
+	}
+
+	record_irqs_to_reenable(lock, irqs);
+	return 1;
+}
+
 int __retarget_lock_try_acquire_recursive(_LOCK_T lock) {
-	return try_acquire_recursive(lock, MetaModule::get_current_proc_id());
+	if (!lock)
+		return 0;
+
+	auto cur_proc = MetaModule::get_current_proc();
+
+	auto irqs = disable_higher_priority_irqs(cur_proc);
+
+	if (try_acquire_recursive(lock, std::to_underlying(cur_proc)) == 0) {
+		reenable_irqs(irqs);
+		return 0;
+	}
+
+	record_irqs_to_reenable(lock, irqs);
+	return 1;
 }
 
 void __retarget_lock_acquire_recursive(_LOCK_T lock) {
@@ -191,11 +248,13 @@ void __retarget_lock_acquire_recursive(_LOCK_T lock) {
 
 	auto cur_proc = MetaModule::get_current_proc();
 
-	disable_higher_priority_irqs(cur_proc, lock);
+	auto irqs = disable_higher_priority_irqs(cur_proc);
 
 	//spin until we can claim the lock
 	while (try_acquire_recursive(lock, std::to_underlying(cur_proc)) == 0) {
 	}
+
+	record_irqs_to_reenable(lock, irqs);
 }
 
 void __retarget_lock_release(_LOCK_T lock) {
@@ -207,10 +266,7 @@ void __retarget_lock_release(_LOCK_T lock) {
 	// If we own the lock, release it
 	if (proc_id == lock->proc_id) {
 		log_proclock('v', lock); //v with count==1 will be printed as v0
-		lock->proc_id = -1;
-		lock->count.store(0, std::memory_order_seq_cst);
-
-		reenable_irqs(lock);
+		release_lock(lock);
 		return;
 	} else {
 		dbg_puts("Error: release on not our lock\n");
@@ -235,10 +291,7 @@ void __retarget_lock_release_recursive(_LOCK_T lock) {
 		if (lock->count == 1) {
 			log_proclock('_', lock); //_ with count==1 will be printed as _0
 
-			lock->proc_id = -1;
-			lock->count.store(0, std::memory_order_seq_cst);
-
-			reenable_irqs(lock);
+			release_lock(lock);
 		} else {
 			// if count > 1, we keep the lock and decrement the count
 			lock->count = lock->count - 1;
