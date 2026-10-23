@@ -59,8 +59,11 @@ another), so build MP1 first.
   the GUI stays on the first core, so the second core only plays modules.
   Built-in modules: the 4ms modules and the `vcv_ports` brands. The assets
   are unpacked into a RamDisk, which modules can read with libc (`fopen`, etc).
+- **Plugins:** `.mm2plugin` files (AArch64 builds, made by the plugin SDK next to the
+  `.mmplugin`), loaded by MP1's plugin loader from the SD card, USB drive, or developer drive. The
+  M33 finds them and sends the A35 the list (`src/dynload/plugin_list_serial.hh`).
 - **Not yet:** most of the hardware controls, jack sense (all jacks are reported as
-  patched), MIDI, plugins, USB host mode, WiFi, and libc file access on the SD card and USB.
+  patched), MIDI, WiFi, and libc file access on the SD card and USB (from modules and plugins).
 
 ## NOR flash
 
@@ -168,9 +171,8 @@ MIDI and USB drive class drivers on an xHCI driver (see Host mode, below). The M
 - **The developer drive**, as on MP1: the A35 runs MP1's `DevDriveService` in its main loop (MP1
   runs it on core 1), and the M33 serves the drive in the composite device. Its 16MB comes from the
   top of the A35's heap region while Developer Mode is on (`src/core_a35/no_plugins.cc`,
-  `system/sbrk_mp2.cc`), opened to the M33 in
-  RISAF4 (region 12); the M33 doesn't cache the A35's RAM (MPU region 3). Installing a
-  `.mmplugin` fails ("Plugins are not supported on MP2 yet"), but playing a `.yml` patch works.
+  `system/sbrk_ca35.cc`), opened to the M33 in RISAF4 (region 12); the M33 doesn't cache the A35's
+  heap (MPU regions 3 and 4). Installing a `.mm2plugin` and playing a `.yml` patch both work.
 - **Host mode**: the DWC3 is an xHCI host, and ST's HAL has no host driver for it. `lib/xhci` is
   U-Boot's xHCI driver (GPL-2.0+) as ported in stm32mp2-baremetal, including its hub support, plus
   non-blocking bulk/interrupt transfers; see its README. It enumerates the devices (also behind
@@ -181,6 +183,31 @@ MIDI and USB drive class drivers on an xHCI driver (see Host mode, below). The M
   through a hub (but not two of either). The host is polled from the main loop, outside the I2C
   lock (`UsbHostManager::run()`). (stm32mp2-baremetal's device side is U-Boot's DWC3 gadget
   driver, GPL-2.0 only, which is why device mode uses ST's HAL instead.)
+
+## Memory and the two A35 cores
+
+- **DDR**: the devboard has 2GB (0x80000000-0xFFFFFFFF), but TF-A opens only 0x80000000-0x9FFFFFFF
+  to secure masters in the DDR firewall (RISAF4). The A35 image, its RAM, the framebuffers, the
+  M33's memory and the shared memory are in there (`cmake/mp2.cmake`,
+  `system/linker/stm32mp2xx_ca35.ld`). Accesses outside the regions opened in RISAF4 are silently
+  blocked (reads return 0).
+- **The A35's heap** is 1GB of DDR of its own, `A35_HEAP_ADDR`/`SIZE` (0xA0000000-0xDFFFFFFF), which
+  `system/sbrk_ca35.cc` opens to the A35 in RISAF4 (region 9) on the first allocation. It ends
+  below 0xE0000000 because that's the M33's private peripheral bus, and the M33 reads and writes the
+  top of the heap for the developer drive. If RISAF4 is locked, the heap is the rest of the A35's
+  RAM instead (about 90MB, too little for big plugins), and the A35 says so on the console at boot.
+- **Locks**: the toolchain's newlib has retargetable locks that do nothing. `system/lock_ca35.cc`
+  is MP1's `system/lock.cc`, ported: spin locks owned by a process (a core's main loop, or one of
+  its interrupts: `system/reent_ca35.cc`). Taking a lock disables the interrupts on the same core
+  that take locks and could preempt the owner (so far, core 1's ReadPatchGuiElements SGI). Audio
+  interrupts are never disabled, so as on MP1, audio code must not take locks (no malloc or stdio).
+  As on MP1, FILEs have no locks.
+- **Per-process state** (`system/reent_ca35.cc`): `errno`, and the C++ exception globals (the
+  caught exceptions and the uncaught count). newlib's other state (`_impure_ptr`, stdio) is shared
+  by both cores, and is protected by the locks.
+- **Plugins** import the lock functions and the exception globals from the firmware (the SDK's
+  `cmake/make_plugin_libc_mp2.cmake` removes the toolchain's from the plugin's libc). Each plugin
+  keeps its own `_impure_ptr` and static locks, which the AArch64 toolchain's libc can't import.
 
 ## Layout
 
@@ -196,7 +223,9 @@ MP2-only files in `firmware/`:
 - `src/core_intercom/shared_index.hh`: pointers to the objects the A35 and M33 share
 - `cmake/mp2.cmake`, `cmake/aarch64-none-elf-gcc.cmake`, `cmake/arch_mp25x*.cmake`
 - `system/linker/stm32mp2xx_*.ld`, `system/mmu_ca35.cc`
-- `system/sbrk_mp2.cc`: temporary, until MP2 uses MP1's allocation (`system/sbrk.cc`)
+- `system/sbrk_ca35.cc`: the A35's heap; `system/sbrk_mp2.cc`: the M33's. Temporary, until MP2 uses
+  MP1's allocation (`system/sbrk.cc`)
+- `system/lock_ca35.cc`, `system/reent_ca35.cc`: newlib's locks, and per-process runtime state
 - `system/eh_frame_ca35.cc`: registers the unwind tables for C++ exceptions
   (the A35 links without `crtbegin.o`)
 - `lib/cmsis-device/stm32mp257d/`: the patched MP2 CMSIS device files
