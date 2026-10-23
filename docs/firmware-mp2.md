@@ -186,12 +186,15 @@ MIDI and USB drive class drivers on an xHCI driver (see Host mode, below). The M
 
 ## Memory and the two A35 cores
 
+- **The memory map** is in `system/linker/memory_mp2.ld` (MP1's is `memory.ld`): the one place
+  MP2's addresses are set. Both cores' linker scripts include it, and `src/mp2-stubs/ld.h` brings
+  it into C and C++ (as link-time values, so not usable in `constexpr`: checks on the addresses
+  are `ASSERT`s in `memory_mp2.ld`).
 - **DDR**: the devboard has 2GB (0x80000000-0xFFFFFFFF), but TF-A opens only 0x80000000-0x9FFFFFFF
   to secure masters in the DDR firewall (RISAF4). The A35 image, its RAM, the framebuffers, the
-  M33's memory and the shared memory are in there (`cmake/mp2.cmake`,
-  `system/linker/stm32mp2xx_ca35.ld`). Accesses outside the regions opened in RISAF4 are silently
+  M33's memory and the shared memory are in there. Accesses outside the regions opened in RISAF4 are silently
   blocked (reads return 0).
-- **The A35's heap** is 1GB of DDR of its own, `A35_HEAP_ADDR`/`SIZE` (0xA0000000-0xDFFFFFFF), which
+- **The A35's heap** is 1GB of DDR of its own, `_A35_HEAP` (0xA0000000-0xDFFFFFFF), which
   `system/sbrk_ca35.cc` opens to the A35 in RISAF4 (region 9) on the first allocation. It ends
   below 0xE0000000 because that's the M33's private peripheral bus, and the M33 reads and writes the
   top of the heap for the developer drive. If RISAF4 is locked, the heap is the rest of the A35's
@@ -222,7 +225,7 @@ MP2-only files in `firmware/`:
   driver as `QSpiFlash`, and headers that are MP1-specific (`ld.h`, the file buffer)
 - `src/core_intercom/shared_index.hh`: pointers to the objects the A35 and M33 share
 - `cmake/mp2.cmake`, `cmake/aarch64-none-elf-gcc.cmake`, `cmake/arch_mp25x*.cmake`
-- `system/linker/stm32mp2xx_*.ld`, `system/mmu_ca35.cc`
+- `system/linker/memory_mp2.ld`, `system/linker/stm32mp2xx_*.ld`, `system/mmu_ca35.cc`
 - `system/sbrk_ca35.cc`: the A35's heap; `system/sbrk_mp2.cc`: the M33's. Temporary, until MP2 uses
   MP1's allocation (`system/sbrk.cc`)
 - `system/lock_ca35.cc`, `system/reent_ca35.cc`: newlib's locks, and per-process runtime state
