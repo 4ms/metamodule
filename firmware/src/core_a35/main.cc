@@ -6,19 +6,12 @@
 #include "aux_core.hh"
 #include "calibrate/calibration_data_reader.hh"
 #include "conf/hsem_conf.hh"
-#include "conf/screen_buffer_conf.hh"
 #include "conf/screen_conf.hh"
 #include "console.hh"
-#include "console/uart_log.hh"
+#include "copro.hh"
 #include "core_a7/dev_drive_service.hh"
 #include "core_a7/device_settings_proxy.hh"
-#include "core_intercom/shared_index.hh"
 #include "drivers/cache.hh"
-#include "drivers/copro_control.hh"
-#include "drivers/hsem.hh"
-#include "drivers/ipcc.hh"
-#include "drivers/risaf.hh"
-#include "drivers/usb3dr.hh"
 #include "dynload/plugin_manager.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
@@ -36,13 +29,9 @@
 #include "patch_play/patch_playloader.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
-#include "usb/dev_drive_block.hh"
 #include "usb/usb_status_reader.hh"
 #include <array>
 #include <cstdio>
-
-extern "C" const uint8_t m33_firmware[];	 // m33_firmware.S
-extern "C" const uint8_t m33_firmware_end[]; // m33_firmware.S
 
 // system/sbrk_ca35.cc
 uintptr_t heap_region_start();
@@ -52,81 +41,10 @@ namespace
 {
 using namespace MetaModule;
 
-//////////////////////////////////////////
-// TODO: Move these to StaticBuffers
-// Display memory
-__attribute__((section(".framebuffers"))) alignas(4096) std::array<uint32_t, 720 * 1280> framebuffer;
-// Partial render buffer: 1/4 of the GUI, same as MP1
-std::array<lv_color_t, ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight / 4> lvgl_draw_buffer;
-
-// Shared with the M33 (shared_index.hh). The M33 reads files into raw_patch_data, and writes the
-// patch list and dir entries into storage_list_buffer serialized (see dir_list_serial.hh).
-__attribute__((section(".sharedmem"))) IntercoreStorageMessage storage_message;
-__attribute__((section(".sharedmem"))) std::array<char, 1024 * 1024> raw_patch_data;
-__attribute__((section(".sharedmem"))) std::array<char, 256 * 1024> storage_list_buffer;
-// The developer drive's handoff between the USB device (M33) and us (DevDriveService)
-__attribute__((section(".sharedmem"))) DevDriveBlock dev_drive_block;
-//////////////////////////////////////////////
-
-// TODO: Move to core_a35/copro.hh
-void start_m33() {
-	// Park the M33 before (re)initializing the peripherals it uses
-	mdrivlib::CoproController::reset();
-	mdrivlib::HWSemaphoreGlobalBase::init_peripheral();
-	mdrivlib::IPCC_<1>::init_peripheral();
-	A35Console::use_hsem_lock();
-
-	// USB runs on the M33: its DMA uses the M33's compartment ID (CID2), so it can reach the
-	// M33's memory
-	mdrivlib::Usb3DR::init_rif(2);
-
-	// Shared memory: open it to the M33 in the DDR firewall, create the shared objects in
-	// .sharedmem, and publish pointers to them in the index the M33 reads
-	using namespace mdrivlib::RISAF;
-	constexpr unsigned SharedMemRegionIndex = 10;
-	if (!add_ddr_region(
-			SharedMemRegionIndex, SHAREDMEM, SHAREDMEM + SHAREDMEM_SZ - 1, CID_A35 | CID_M33, CID_A35 | CID_M33, true))
-		printf("Shared memory: RISAF4 is locked, can't open it to the M33!\n");
-
-	storage_message = {};
-	auto &index = shared_index();
-	index.storage_message = &storage_message;
-	index.param_blocks = &StaticBuffers::param_blocks;
-	dev_drive_block.reset();
-	index.dev_drive_msgs = &dev_drive_block;
-	index.device_settings_message = &StaticBuffers::icc_device_settings_message;
-	index.usb_connection_status = &StaticBuffers::usb_connection_status;
-	index.console_buffers = StaticBuffers::console_buffers.data();
-	index.magic = SharedIndex::ValidMagic;
-
-	if (M33_REGION >= mdrivlib::RISAF::DDRBase) {
-		// TF-A's DDR region only allows CID0/CID1: open the M33's region to it (CID2)
-		constexpr unsigned M33RegionIndex = 11;
-		if (!add_ddr_region(M33RegionIndex, M33_REGION, M33_REGION_END - 1, CID_A35 | CID_M33, CID_A35 | CID_M33, true))
-			printf("M33: RISAF4 is locked, can't open DDR to the M33!\n");
-	}
-
-	auto size = size_t(m33_firmware_end - m33_firmware);
-	printf("M33: loading %zu bytes to 0x%08x and starting\n", size, unsigned(M33_REGION));
-	mdrivlib::CoproController::load_and_start({m33_firmware, size}, M33_REGION);
-
-	using mdrivlib::CoproController;
-	auto reset_us = CoproController::wait_for_breadcrumb(M33_REGION, 0, CoproController::BreadcrumbResetRan, 100);
-	auto main_us = CoproController::wait_for_breadcrumb(M33_REGION, 1, CoproController::BreadcrumbReachedMain, 1000);
-	if (reset_us < 0)
-		printf("M33: reset handler DID NOT RUN\n");
-	else if (main_us < 0)
-		printf("M33: reset handler ran, main() NOT REACHED\n");
-	else {
-		// The M33 sends the console buffers on (to the UART, or the USB console). If it's not
-		// running, keep writing to the UART.
-		UartLog::use_buffer(&StaticBuffers::console_buffers[0]);
-	}
-}
-
 // TODO: Move to aux_core_main
 void start_display() {
 	static mdrivlib::DsiScreen screen{ScreenConf};
+	auto &framebuffer = StaticBuffers::framebuffer;
 	framebuffer.fill(0xFF000000);
 	screen.clean_framebuffer_cache(framebuffer.data());
 	if (auto err = screen.init(framebuffer.data()); err != mdrivlib::DsiScreen::Error::None)
@@ -159,12 +77,13 @@ int main() {
 	start_display();
 
 	static LvglDisplay lvgl_display;
-	lvgl_display.init(framebuffer, lvgl_draw_buffer);
+	lvgl_display.init(StaticBuffers::framebuffer, StaticBuffers::lvgl_draw_buffer);
 
 	// Patch storage, on the M33
-	static FileStorageComm storage_comm{storage_message};
+	static FileStorageComm storage_comm{StaticBuffers::storage_message};
 	static PatchDirList patch_dir_list;
-	static FileStorageProxy file_storage{raw_patch_data, storage_comm, patch_dir_list, storage_list_buffer};
+	static FileStorageProxy file_storage{
+		StaticBuffers::raw_patch_data, storage_comm, patch_dir_list, StaticBuffers::storage_list_buffer};
 
 	static PatchPlayer patch_player;
 	static OpenPatchManager open_patches_manager;
@@ -238,7 +157,7 @@ int main() {
 		plugin_manager,
 		patch_playloader,
 		ui.get_notify_queue(),
-		dev_drive_block,
+		StaticBuffers::dev_drive_block,
 		[] { ui.release_plugin_objects(); },
 		[](std::span<char> file_data, std::string_view name) { return ui.play_patch_file(file_data, name); }};
 

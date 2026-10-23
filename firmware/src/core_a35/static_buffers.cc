@@ -5,6 +5,16 @@
 namespace MetaModule::StaticBuffers
 {
 
+__attribute__((section(".framebuffers"))) alignas(4096)
+std::array<uint32_t, ScreenBufferConf::width * ScreenBufferConf::height> framebuffer;
+std::array<lv_color_t, ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight / 4> lvgl_draw_buffer;
+
+__attribute__((section(".sharedmem"))) IntercoreStorageMessage storage_message;
+__attribute__((section(".sharedmem"))) std::array<char, 1024 * 1024> raw_patch_data;
+__attribute__((section(".sharedmem"))) std::array<char, 256 * 1024> storage_list_buffer;
+
+__attribute__((section(".sharedmem"))) DevDriveBlock dev_drive_block;
+
 DirTree<FileEntry> dir_tree;
 
 // The M33 reads files into it, so it's in memory shared with the M33. Same size as MP1's FW buffer.
