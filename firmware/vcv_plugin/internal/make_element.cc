@@ -30,6 +30,7 @@ static const char *module_name(rack::app::ParamWidget *widget) {
 }
 
 static float getScaledDefaultValue(rack::app::ParamWidget *widget);
+static bool hasLabeledPositions(rack::engine::ParamQuantity *pq);
 static int getNumPositions(rack::engine::ParamQuantity *pq);
 static unsigned getDefaultPosition(rack::app::ParamWidget *widget, unsigned num_pos);
 
@@ -262,7 +263,7 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 
 Element make_element(rack::app::SvgSlider *widget) {
 
-	if (auto pq = widget->getParamQuantity(); pq && pq->snapEnabled) {
+	if (auto pq = widget->getParamQuantity(); pq && (pq->snapEnabled || hasLabeledPositions(pq))) {
 		log_make_element("SvgSlider switch", widget->paramId);
 		return make_slideswitch(widget);
 	}
@@ -662,10 +663,20 @@ static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
 	return defaultValue;
 }
 
-// Number of integer values between min and max (inclusive). Handles reversed ranges (max < min)
+// A param that isn't snapped but has labels has a position for each label, evenly spaced over its
+// range (configSwitch() always snaps, so this is a plugin's choice). E.g. SurgeXT's int params,
+// which are 0..1 in Rack.
+static bool hasLabeledPositions(rack::engine::ParamQuantity *pq) {
+	return pq && !pq->snapEnabled && pq->labels.size() >= 2;
+}
+
+// Number of integer values between min and max (inclusive), or of labeled positions (see above).
+// Handles reversed ranges (max < min)
 static int getNumPositions(rack::engine::ParamQuantity *pq) {
 	if (!pq)
 		return 0;
+	if (hasLabeledPositions(pq))
+		return pq->labels.size();
 	return std::lround(std::abs(pq->maxValue - pq->minValue)) + 1;
 }
 
