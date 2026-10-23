@@ -12,9 +12,11 @@ uint32_t SystemCoreClock = 400'000'000;
 // MPU: what the DCACHE may cache. Region 0 is the M33's own memory (code, data, heap, stack in
 // DDR): write-back cacheable. Region 1 is the memory shared with the A35, which isn't
 // cache-coherent with the M33: non-cacheable. Region 2 is the top of the M33's memory, .dma_nc,
-// for DMA masters that don't do cache maintenance (the USB controller): non-cacheable. Region 3
-// is the A35's RAM, which we only touch to serve the developer drive (the A35 allocates its memory
-// there while Developer Mode is on, see core_a35/no_plugins.cc): non-cacheable.
+// for DMA masters that don't do cache maintenance (the USB controller): non-cacheable. Regions 3
+// and 4 are the A35's heap, which we only touch to serve the developer drive (the A35 allocates its
+// memory at the top of its heap while Developer Mode is on, see core_a35/no_plugins.cc):
+// non-cacheable. The heap is region 4 (A35_HEAP_ADDR), or the rest of the A35's RAM (region 3) if
+// the A35 couldn't open that in the DDR firewall (system/sbrk_ca35.cc).
 // Everything else uses the default memory map (PRIVDEFENA). The default map treats
 // 0x80000000-0x9FFFFFFF as cacheable, so the shared region must be carved out explicitly before
 // the DCACHE is enabled. (ARMv8-M MPU regions can't overlap.)
@@ -53,6 +55,9 @@ extern "C" void system_init() {
 	ARM_MPU_SetRegion(3,
 					  ARM_MPU_RBAR(A35RamStart, ARM_MPU_SH_NON, 0, 1, 1),
 					  ARM_MPU_RLAR(A35RamStart + A35RamSize - 1, AttrNonCacheable));
+	ARM_MPU_SetRegion(4,
+					  ARM_MPU_RBAR(A35_HEAP_ADDR, ARM_MPU_SH_NON, 0, 1, 1),
+					  ARM_MPU_RLAR(A35_HEAP_ADDR + A35_HEAP_SIZE - 1, AttrNonCacheable));
 
 	ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk);
 

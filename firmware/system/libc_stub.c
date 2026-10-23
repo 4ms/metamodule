@@ -22,9 +22,11 @@ __attribute__((used)) int _getpid() {
 	return -1;
 }
 
+#if !defined(CORE_CA35) // MP2's A35 keeps errno per core (system/per_core_ca35.cc)
 __attribute__((used)) int *__errno() {
 	static int errno = 0;
 	return &errno;
 }
+#endif
 
 void *__dso_handle = (void *)&__dso_handle;

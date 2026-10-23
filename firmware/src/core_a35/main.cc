@@ -43,6 +43,10 @@
 extern "C" const uint8_t m33_firmware[];	 // m33_firmware.S
 extern "C" const uint8_t m33_firmware_end[]; // m33_firmware.S
 
+// system/sbrk_ca35.cc
+uintptr_t heap_region_start();
+size_t heap_region_size();
+
 namespace
 {
 using namespace MetaModule;
@@ -150,6 +154,11 @@ int main() {
 	HAL_Init();
 
 	StaticBuffers::init();
+
+	if (heap_region_start() != A35_HEAP_ADDR)
+		printf("Heap: RISAF4 is locked, can't open DDR at 0x%08x to the A35: using the %zu MB left in RAM\n",
+			   unsigned(A35_HEAP_ADDR),
+			   heap_region_size() / (1024 * 1024));
 
 	// Once the M33 is running, it owns the NOR flash (patch storage), so read the calibration first
 	auto cal = CalibrationDataReader::read_calibration_or_defaults(FlashLoader{}, CalDataFlashOffset);

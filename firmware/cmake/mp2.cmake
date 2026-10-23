@@ -44,25 +44,6 @@ set(MP2_CMSIS_DEVICE_DIR ${PROJECT_SOURCE_DIR}/lib/cmsis-device/stm32mp257d)
 set(MP2_CMSIS_CORE_DIR ${PROJECT_SOURCE_DIR}/lib/cmsis)
 set(MP2_HAL_DIR ${PROJECT_SOURCE_DIR}/lib/stm32-hal/stm32mp2)
 
-#
-# ST HAL (only the modules enabled in src/core_a35/stm32mp2xx_hal_conf.h)
-
-set(MP2_HAL_MODULES
-  hal
-  hal_dma
-  hal_dma_ex
-  hal_dsi
-  hal_i2c
-  hal_i2c_ex
-  hal_ltdc
-  hal_rcc
-  hal_ospi
-  hal_rcc_ex
-  hal_sai
-  hal_sai_ex
-)
-list(TRANSFORM MP2_HAL_MODULES PREPEND ${MP2_HAL_DIR}/Src/stm32mp2xx_)
-list(TRANSFORM MP2_HAL_MODULES APPEND .c)
 
 # Include paths for HAL, CMSIS, and mdrivlib, used by every target. Same name as MP1's, since shared
 # CMakeLists (e.g. src/hardware_support) link to it.
@@ -80,7 +61,23 @@ target_include_directories(mdrivlib_interface INTERFACE
   lib/cpputil
 )
 
-add_library(mp2_hal OBJECT ${MP2_HAL_MODULES})
+#
+# ST HAL (only the modules enabled in src/core_a35/stm32mp2xx_hal_conf.h)
+add_library(mp2_hal OBJECT
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_dma.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_dma_ex.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_dsi.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_i2c.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_i2c_ex.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_ltdc.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_rcc.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_ospi.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_rcc_ex.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_sai.c
+  ${MP2_HAL_DIR}/Src/stm32mp2xx_hal_sai_ex.c
+)
+
 target_link_libraries(mp2_hal PUBLIC mdrivlib_interface)
 # ST's HAL casts pointers to uint32_t throughout (32-bit assumption); the
 # peripheral addresses all fit in 32 bits so the truncation is harmless.
@@ -111,7 +108,7 @@ target_link_libraries(lvgl PRIVATE mdrivlib_interface)
 target_include_directories(lvgl PRIVATE lib/fatfs/source src/fs/fatfs)
 
 #
-# MetaModule GUI: SquareLine Studio export (screens, fonts, images) and its C++ helpers
+# MetaModule GUI
 
 add_subdirectory(src/gui/slsexport ${CMAKE_CURRENT_BINARY_DIR}/slsexport)
 target_include_directories(ui_lvgl PRIVATE lib)
@@ -178,6 +175,13 @@ set(SHAREDMEM_SIZE 0x2000000)
 set(DMABUF_ADDR 0x9C000000)
 set(DMABUF_SIZE 0x200000)
 
+# The A35's heap: 1GB of DDR above TF-A's secure window, which the A35 opens to itself in RISAF4 at
+# startup (system/sbrk_ca35.cc). The devboard has 2GB (0x80000000-0xFFFFFFFF). It ends below
+# 0xE0000000, where the M33's address map has its private peripheral bus: the M33 reads and writes
+# the top of the heap while serving the developer drive.
+set(A35_HEAP_ADDR 0xA0000000)
+set(A35_HEAP_SIZE 0x40000000)
+
 include(ExternalProject)
 ExternalProject_Add(
   core_m33
@@ -185,6 +189,7 @@ ExternalProject_Add(
   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/core_m33
   CMAKE_ARGS -DM33_LOAD_ADDR=${M33_LOAD_ADDR} -DM33_REGION_SIZE=${M33_REGION_SIZE}
              -DSHAREDMEM_ADDR=${SHAREDMEM_ADDR} -DSHAREDMEM_SIZE=${SHAREDMEM_SIZE}
+             -DA35_HEAP_ADDR=${A35_HEAP_ADDR} -DA35_HEAP_SIZE=${A35_HEAP_SIZE}
              -DMP2_TEST_CARRIER=${MP2_TEST_CARRIER} -DLOG_LEVEL=${LOG_LEVEL}
   INSTALL_COMMAND ""
   BUILD_ALWAYS ON
@@ -241,7 +246,9 @@ add_library(
   src/dynload/dynloader.cc
   src/mp2-stubs/dynload/exidx_registry.cc
   system/mmu_ca35.cc
-  system/sbrk_mp2.cc
+  system/sbrk_ca35.cc
+  system/lock_ca35.cc
+  system/per_core_ca35.cc
   system/eh_frame_ca35.cc
   system/time.cc
   ${MDRIVLIB}/target/stm32mp2_ca35/boot/startup_ca35.s
@@ -285,6 +292,7 @@ add_dependencies(a35_core core_m33)
 target_compile_definitions(
   a35_core PRIVATE M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE} SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
                    SHAREDMEM_SIZE=${SHAREDMEM_SIZE} DMABUF_ADDR=${DMABUF_ADDR} DMABUF_SIZE=${DMABUF_SIZE}
+                   A35_HEAP_ADDR=${A35_HEAP_ADDR} A35_HEAP_SIZE=${A35_HEAP_SIZE}
 )
 target_compile_definitions(a35_core PUBLIC CPPUTIL_STATIC_STRING_USE_STD_STRING SUPPRESS_HIL_MESSAGES=1)
 # Plugins are AArch64 ELF64 shared objects (src/dynload/elf_process/elf_types.hh)

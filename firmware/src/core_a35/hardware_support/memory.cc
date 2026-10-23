@@ -1,16 +1,16 @@
+#include <cstddef>
 #include <cstdint>
 #include <malloc.h>
 
 // MP2 version of src/hardware_support/memory.cc
 
-extern char _sheap;
-extern char _eheap;
+size_t heap_region_size(); // system/sbrk_ca35.cc
 
 namespace MetaModule::System
 {
 
 uint32_t total_memory() {
-	return uint32_t(&_eheap - &_sheap);
+	return uint32_t(heap_region_size());
 }
 
 uint32_t free_memory() {

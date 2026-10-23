@@ -10,7 +10,9 @@ ENTRY(_Reset)
 
 /* All regions must stay inside the DDR that TF-A's RISAF4 opens to secure masters:
    0x80000000 - 0x9FFFFFFF (the `ddrram` node in the TF-A dts). Outside it, CPU and DMA
-   (e.g. LTDC) accesses are silently blocked. TF-A BL31 context + OP-TEE use 0x81FC0000 - 0x83FFFFFF. */
+   (e.g. LTDC) accesses are silently blocked. TF-A BL31 context + OP-TEE use 0x81FC0000 - 0x83FFFFFF.
+   The heap is outside it, at A35_HEAP_ADDR (cmake/mp2.cmake), which system/sbrk_ca35.cc opens in
+   RISAF4. */
 MEMORY
 {
     ROM (rx)       : ORIGIN = 0x88000040, LENGTH = 16M - 0x40
@@ -29,6 +31,8 @@ SECTIONS
 		KEEP(*vcv_plugin*:(.text*))
 		KEEP(*jansson*:(.text*))
 		KEEP(*pffft*:(.text*))
+		/* newlib's lock functions, which plugins import (system/lock_ca35.cc) */
+		KEEP(*lock_ca35*(.text*))
 					/* Todo: check if we need the next 3 lines */
 		*(.glue_7)         /* glue arm to thumb code */
 		*(.glue_7t)        /* glue thumb to arm code */
@@ -146,7 +150,7 @@ SECTIONS
 		_cpu1_stack_end = .;
 	} > RAM
 
-	/* The heap is the rest of RAM */
+	/* The rest of RAM: the heap, if system/sbrk_ca35.cc can't open its own region of DDR */
 	.heap (NOLOAD):
 	{
 		. = ALIGN(16);

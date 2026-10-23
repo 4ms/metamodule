@@ -8,10 +8,9 @@
 // MP2's RamDisk is an ordinary object, sized by its conf
 static constexpr uint32_t VIRTDRIVE_SZ = RamDiskSizeBytes;
 
-// Linker script
-extern char _sheap;
-extern char _eheap;
-static const uint32_t A7_HEAP_SZ = uint32_t(&_eheap - &_sheap);
+// The heap region (system/sbrk_ca35.cc), which is chosen at startup
+size_t heap_region_size();
+#define A7_HEAP_SZ heap_region_size()
 
 // The table of symbols plugins can use (.symlist), filled in after linking (cmake/mp2.cmake)
 extern char _A7_SYMS[];

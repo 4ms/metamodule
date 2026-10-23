@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cstdint>
 
-// system/sbrk_mp2.cc
+// system/sbrk_ca35.cc
 void *heap_claim_top(size_t size, size_t align);
 void heap_release_top(void *ptr);
 size_t get_heap_size();
