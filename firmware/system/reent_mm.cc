@@ -19,24 +19,26 @@ static bool init_all_reents = [] {
 
 Processes get_current_proc() {
 	const auto core = __get_MPIDR() & 0b1; //0 = CA7 Core 1, 1 = CA7 Core 2
+	// An interrupt stays active while one that preempted it runs, so check the higher priority ones
+	// first: audio (priority 1), then ReadPatchGuiElements (2), then the async threads (3)
 	if (core == 1) {
-		if (GIC_GetIRQStatus(TIM6_IRQn) & 0b10) {
-			return Processes::Core1AsyncThread;
+		if (GIC_GetIRQStatus(SGI4_IRQn) & 0b10) { // SMPCommand::PlayModuleList
+			return Processes::Core1Audio;
 		}
 		if (GIC_GetIRQStatus(SGI1_IRQn) & 0b10) { // SMPCommand::ReadPatchGuiElements
 			return Processes::Core1ReadPatchElements;
 		}
-		if (GIC_GetIRQStatus(SGI4_IRQn) & 0b10) { // SMPCommand::PlayModuleList
-			return Processes::Core1Audio;
+		if (GIC_GetIRQStatus(TIM6_IRQn) & 0b10) {
+			return Processes::Core1AsyncThread;
 		}
 		return Processes::Core1Main;
 
 	} else {
-		if (GIC_GetIRQStatus(TIM7_IRQn) & 0b10) {
-			return Processes::Core0AsyncThread;
-		}
 		if (GIC_GetIRQStatus(DMA2_Stream1_IRQn) & 0b10) { // Audio SAI TX DMA
 			return Processes::Core0Audio;
+		}
+		if (GIC_GetIRQStatus(TIM7_IRQn) & 0b10) {
+			return Processes::Core0AsyncThread;
 		}
 		return Processes::Core0Main;
 	}
