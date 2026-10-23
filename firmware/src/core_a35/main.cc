@@ -10,6 +10,8 @@
 #include "conf/screen_conf.hh"
 #include "console.hh"
 #include "console/uart_log.hh"
+#include "core_a7/dev_drive_service.hh"
+#include "core_a7/device_settings_proxy.hh"
 #include "core_intercom/shared_index.hh"
 #include "drivers/cache.hh"
 #include "drivers/copro_control.hh"
@@ -34,8 +36,6 @@
 #include "patch_play/patch_playloader.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
-#include "core_a7/dev_drive_service.hh"
-#include "core_a7/device_settings_proxy.hh"
 #include "usb/dev_drive_block.hh"
 #include "usb/usb_status_reader.hh"
 #include <array>
@@ -84,12 +84,8 @@ void start_m33() {
 	// .sharedmem, and publish pointers to them in the index the M33 reads
 	using namespace mdrivlib::RISAF;
 	constexpr unsigned SharedMemRegionIndex = 10;
-	if (!add_ddr_region(SharedMemRegionIndex,
-						SHAREDMEM,
-						SHAREDMEM + SHAREDMEM_SZ - 1,
-						CID_A35 | CID_M33,
-						CID_A35 | CID_M33,
-						true))
+	if (!add_ddr_region(
+			SharedMemRegionIndex, SHAREDMEM, SHAREDMEM + SHAREDMEM_SZ - 1, CID_A35 | CID_M33, CID_A35 | CID_M33, true))
 		printf("Shared memory: RISAF4 is locked, can't open it to the M33!\n");
 
 	storage_message = {};
@@ -106,12 +102,7 @@ void start_m33() {
 	if (M33_REGION >= mdrivlib::RISAF::DDRBase) {
 		// TF-A's DDR region only allows CID0/CID1: open the M33's region to it (CID2)
 		constexpr unsigned M33RegionIndex = 11;
-		if (!add_ddr_region(M33RegionIndex,
-							M33_REGION,
-							M33_REGION_END - 1,
-							CID_A35 | CID_M33,
-							CID_A35 | CID_M33,
-							true))
+		if (!add_ddr_region(M33RegionIndex, M33_REGION, M33_REGION_END - 1, CID_A35 | CID_M33, CID_A35 | CID_M33, true))
 			printf("M33: RISAF4 is locked, can't open DDR to the M33!\n");
 	}
 
@@ -242,15 +233,14 @@ int main() {
 
 	// The developer drive (Developer Mode): MP1 runs this on core 1 (core_a7/aux_core_main.cc).
 	static DevDrive dev_drive;
-	static DevDriveService dev_drive_service{dev_drive,
-											 plugin_manager,
-											 patch_playloader,
-											 ui.get_notify_queue(),
-											 dev_drive_block,
-											 [] { ui.release_plugin_objects(); },
-											 [](std::span<char> file_data, std::string_view name) {
-												 return ui.play_patch_file(file_data, name);
-											 }};
+	static DevDriveService dev_drive_service{
+		dev_drive,
+		plugin_manager,
+		patch_playloader,
+		ui.get_notify_queue(),
+		dev_drive_block,
+		[] { ui.release_plugin_objects(); },
+		[](std::span<char> file_data, std::string_view name) { return ui.play_patch_file(file_data, name); }};
 
 	while (true) {
 		ui.update();
