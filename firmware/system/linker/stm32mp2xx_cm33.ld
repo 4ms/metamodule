@@ -1,22 +1,23 @@
-/* Cortex-M33 (CPU2) firmware, embedded in the A35 image and copied to M33_LOAD_ADDR by the A35.
+/* Cortex-M33 (CPU2) firmware, embedded in the A35 image and copied to _M33_REGION by the A35.
  *
  * The whole image (vectors, code, rodata, data) is one contiguous block, so the A35 can copy
  * it as a flat binary. .bss is NOLOAD (not in the binary); heap and stack are just the space
  * above it, up to the end of the region.
  *
- * M33_LOAD_ADDR and M33_REGION_SIZE come from CMake (-Wl,--defsym), the same values the A35 uses.
- * In SRAM2, the address is the M33's secure instruction-fetch alias (0x0E060000), which the
- * A35 also has mapped.
+ * The addresses are in memory_mp2.ld, which the A35 uses too. In SRAM2, the address is the M33's
+ * secure instruction-fetch alias (0x0E060000), which the A35 also has mapped.
  */
 ENTRY(Reset_Handler)
 
+INCLUDE system/linker/memory_mp2.ld
+
 _Min_Stack_Size = 0x10000; /* MP1's M4 has 48kB: PatchStorage, FatFS, and LittleFS use a lot of stack */
 _DMA_NC_Size = 0x100000;	/* A whole 1MB, so the MPU region boundaries stay simple */
-_sdma_nc = M33_LOAD_ADDR + M33_REGION_SIZE - _DMA_NC_Size;
+_sdma_nc = _M33_REGION_END - _DMA_NC_Size;
 
 SECTIONS
 {
-	.isr_vector M33_LOAD_ADDR :
+	.isr_vector _M33_REGION :
 	{
 		KEEP(*(.isr_vector))
 	}
@@ -121,7 +122,7 @@ SECTIONS
 
 	/* Memory shared with the A35 (see the A35 linker script): only the index of pointers is
 	   linked here, at the same fixed address as on the A35. */
-	.sharedmemindex SHAREDMEM_ADDR (NOLOAD) :
+	.sharedmemindex _SHAREDMEM (NOLOAD) :
 	{
 		KEEP(*(.sharedmemindex))
 		KEEP(*(.sharedmemindex*))
@@ -130,6 +131,5 @@ SECTIONS
 	.ARM.attributes 0 : { *(.ARM.attributes) }
 }
 
-ASSERT(_sheap <= _eheap, "M33 image + .bss + stack don't fit in M33_REGION_SIZE")
-ASSERT(_edma_nc <= M33_LOAD_ADDR + M33_REGION_SIZE, ".dma_nc is bigger than _DMA_NC_Size")
-ASSERT((M33_LOAD_ADDR & 0x7FF) == 0, "M33_LOAD_ADDR must be 2kB-aligned (VTOR)")
+ASSERT(_sheap <= _eheap, "M33 image + .bss + stack don't fit in _M33_REGION")
+ASSERT(_edma_nc <= _M33_REGION_END, ".dma_nc is bigger than _DMA_NC_Size")

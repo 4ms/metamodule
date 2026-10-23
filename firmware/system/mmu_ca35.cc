@@ -4,6 +4,7 @@
 
 #include "drivers/system_reg.hh"
 #include "boot/page_table.hh"
+#include "ld.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -76,15 +77,12 @@ static void populate_tables()
 	L1_ddr1.fill_block_entries(0x80000000, 0xC0000000, MMU::MemType::Normal, MMU::AccessRW);
 	L1_ddr2.fill_block_entries(0xC0000000, 0x100000000, MMU::MemType::Normal, MMU::AccessRW);
 
-	// Memory shared with the M33 (not cache-coherent with the A35): non-cacheable
-	static_assert(SHAREDMEM_ADDR % (2 * 1024 * 1024) == 0 && SHAREDMEM_SIZE % (2 * 1024 * 1024) == 0,
-				  "SHAREDMEM must be whole 2MB blocks");
-	L1_ddr1.fill_block_entries(SHAREDMEM_ADDR, SHAREDMEM_ADDR + SHAREDMEM_SIZE, MMU::MemType::Noncache, MMU::AccessRW);
+	// Memory shared with the M33 (not cache-coherent with the A35): non-cacheable. memory_mp2.ld
+	// checks it's whole 2MB blocks, as is DMABUF
+	L1_ddr1.fill_block_entries(SHAREDMEM, SHAREDMEM + SHAREDMEM_SZ, MMU::MemType::Noncache, MMU::AccessRW);
 
 	// DMA buffers: non-cacheable
-	static_assert(DMABUF_ADDR % (2 * 1024 * 1024) == 0 && DMABUF_SIZE % (2 * 1024 * 1024) == 0,
-				  "DMABUF must be whole 2MB blocks");
-	L1_ddr1.fill_block_entries(DMABUF_ADDR, DMABUF_ADDR + DMABUF_SIZE, MMU::MemType::Noncache, MMU::AccessRW);
+	L1_ddr1.fill_block_entries(DMABUF, DMABUF + DMABUF_SZ, MMU::MemType::Noncache, MMU::AccessRW);
 
 	is_init = true;
 	dsb_sy();

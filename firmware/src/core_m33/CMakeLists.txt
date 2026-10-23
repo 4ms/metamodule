@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 # Cortex-M33 (CPU2) firmware for the MetaModule MP2 ("pro").
 # Built as an ExternalProject of cmake/mp2.cmake (it needs the arm-none-eabi
 # toolchain, so it can't be a target of the A35 project). The A35 embeds main_m33.bin
-# and loads it to M33_LOAD_ADDR.
+# and loads it to _M33_REGION (system/linker/memory_mp2.ld).
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
@@ -18,21 +18,6 @@ project(
   VERSION 0.1
   DESCRIPTION "MetaModule MP2 (pro) Cortex-M33"
   LANGUAGES C CXX ASM
-)
-
-set(M33_LOAD_ADDR "" CACHE STRING "Address the A35 loads the M33 image to (set by the parent project)")
-set(M33_REGION_SIZE "" CACHE STRING "Size of the M33 memory region (set by the parent project)")
-set(SHAREDMEM_ADDR "" CACHE STRING "Address of the memory shared with the A35 (set by the parent project)")
-set(SHAREDMEM_SIZE "" CACHE STRING "Size of the memory shared with the A35 (set by the parent project)")
-set(A35_HEAP_ADDR "" CACHE STRING "Address of the A35's heap (set by the parent project)")
-set(A35_HEAP_SIZE "" CACHE STRING "Size of the A35's heap (set by the parent project)")
-if(NOT M33_LOAD_ADDR OR NOT M33_REGION_SIZE OR NOT SHAREDMEM_ADDR OR NOT SHAREDMEM_SIZE OR NOT A35_HEAP_ADDR OR NOT A35_HEAP_SIZE)
-  message(FATAL_ERROR "M33_LOAD_ADDR, M33_REGION_SIZE, SHAREDMEM_ADDR, SHAREDMEM_SIZE, A35_HEAP_ADDR, A35_HEAP_SIZE must be set (build this via cmake --preset mp2)")
-endif()
-
-add_compile_definitions(
-  M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE} SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
-  SHAREDMEM_SIZE=${SHAREDMEM_SIZE} A35_HEAP_ADDR=${A35_HEAP_ADDR} A35_HEAP_SIZE=${A35_HEAP_SIZE}
 )
 
 option(MP2_TEST_CARRIER "Build for the mp2-devboard test carrier instead of the pro p1 board" OFF)
@@ -188,15 +173,12 @@ set(LINKER_SCRIPT ${FWDIR}/system/linker/stm32mp2xx_cm33.ld)
 target_link_options(
   main_m33.elf PRIVATE
   -T${LINKER_SCRIPT}
-  -Wl,--defsym=M33_LOAD_ADDR=${M33_LOAD_ADDR}
-  -Wl,--defsym=M33_REGION_SIZE=${M33_REGION_SIZE}
-  -Wl,--defsym=SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
-  -Wl,--defsym=SHAREDMEM_SIZE=${SHAREDMEM_SIZE}
+  -L${FWDIR}
   -Wl,-Map,main_m33.map,--cref
   --specs=nano.specs
   --specs=nosys.specs
 )
-set_target_properties(main_m33.elf PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
+set_target_properties(main_m33.elf PROPERTIES LINK_DEPENDS "${LINKER_SCRIPT};${FWDIR}/system/linker/memory_mp2.ld")
 
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 

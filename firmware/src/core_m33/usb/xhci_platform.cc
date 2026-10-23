@@ -3,6 +3,7 @@
 // cached, so nothing needs cache maintenance.
 
 #include "drivers/stm32xx.h"
+#include "ld.h"
 #include "xhci_platform.h"
 #include <algorithm>
 #include <array>
@@ -48,7 +49,7 @@ void remove_block(unsigned idx) {
 
 bool is_dma_safe(const void *p, size_t len) {
 	auto addr = reinterpret_cast<uintptr_t>(p);
-	return addr >= reinterpret_cast<uintptr_t>(_sdma_nc) && addr + len <= M33_LOAD_ADDR + M33_REGION_SIZE;
+	return addr >= reinterpret_cast<uintptr_t>(_sdma_nc) && addr + len <= M33_REGION_END;
 }
 
 } // namespace

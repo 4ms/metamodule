@@ -25,6 +25,7 @@
 #include "internal_interface/plugin_app_if_internal.hh"
 #include "internal_interface/plugin_app_interface.hh"
 #include "internal_plugin_manager.hh"
+#include "ld.h"
 #include "lvgl.h"
 #include "lvgl_display.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -84,8 +85,8 @@ void start_m33() {
 	using namespace mdrivlib::RISAF;
 	constexpr unsigned SharedMemRegionIndex = 10;
 	if (!add_ddr_region(SharedMemRegionIndex,
-						SHAREDMEM_ADDR,
-						SHAREDMEM_ADDR + SHAREDMEM_SIZE - 1,
+						SHAREDMEM,
+						SHAREDMEM + SHAREDMEM_SZ - 1,
 						CID_A35 | CID_M33,
 						CID_A35 | CID_M33,
 						true))
@@ -102,12 +103,12 @@ void start_m33() {
 	index.console_buffers = StaticBuffers::console_buffers.data();
 	index.magic = SharedIndex::ValidMagic;
 
-	if constexpr (M33_LOAD_ADDR >= mdrivlib::RISAF::DDRBase) {
+	if (M33_REGION >= mdrivlib::RISAF::DDRBase) {
 		// TF-A's DDR region only allows CID0/CID1: open the M33's region to it (CID2)
 		constexpr unsigned M33RegionIndex = 11;
 		if (!add_ddr_region(M33RegionIndex,
-							M33_LOAD_ADDR,
-							M33_LOAD_ADDR + M33_REGION_SIZE - 1,
+							M33_REGION,
+							M33_REGION_END - 1,
 							CID_A35 | CID_M33,
 							CID_A35 | CID_M33,
 							true))
@@ -115,12 +116,12 @@ void start_m33() {
 	}
 
 	auto size = size_t(m33_firmware_end - m33_firmware);
-	printf("M33: loading %zu bytes to 0x%08x and starting\n", size, unsigned(M33_LOAD_ADDR));
-	mdrivlib::CoproController::load_and_start({m33_firmware, size}, M33_LOAD_ADDR);
+	printf("M33: loading %zu bytes to 0x%08x and starting\n", size, unsigned(M33_REGION));
+	mdrivlib::CoproController::load_and_start({m33_firmware, size}, M33_REGION);
 
 	using mdrivlib::CoproController;
-	auto reset_us = CoproController::wait_for_breadcrumb(M33_LOAD_ADDR, 0, CoproController::BreadcrumbResetRan, 100);
-	auto main_us = CoproController::wait_for_breadcrumb(M33_LOAD_ADDR, 1, CoproController::BreadcrumbReachedMain, 1000);
+	auto reset_us = CoproController::wait_for_breadcrumb(M33_REGION, 0, CoproController::BreadcrumbResetRan, 100);
+	auto main_us = CoproController::wait_for_breadcrumb(M33_REGION, 1, CoproController::BreadcrumbReachedMain, 1000);
 	if (reset_us < 0)
 		printf("M33: reset handler DID NOT RUN\n");
 	else if (main_us < 0)
@@ -155,9 +156,9 @@ int main() {
 
 	StaticBuffers::init();
 
-	if (heap_region_start() != A35_HEAP_ADDR)
+	if (heap_region_start() != A35_HEAP)
 		printf("Heap: RISAF4 is locked, can't open DDR at 0x%08x to the A35: using the %zu MB left in RAM\n",
-			   unsigned(A35_HEAP_ADDR),
+			   unsigned(A35_HEAP),
 			   heap_region_size() / (1024 * 1024));
 
 	// Once the M33 is running, it owns the NOR flash (patch storage), so read the calibration first

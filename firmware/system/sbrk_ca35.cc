@@ -1,7 +1,7 @@
 // The A35's heap for newlib malloc (MP2). A minimal version of firmware/system/sbrk.cc (which also
 // shares the heap with the plugin arena). The M33 uses system/sbrk_mp2.cc.
 //
-// The heap is a region of DDR of its own, A35_HEAP_ADDR/SIZE (cmake/mp2.cmake). It's outside the
+// The heap is a region of DDR of its own, _A35_HEAP (system/linker/memory_mp2.ld). It's outside the
 // DDR that TF-A opens to secure masters, so the first call here opens it to the A35 in the DDR
 // firewall (RISAF4). If that's not possible (RISAF4 is locked), the heap is the rest of RAM
 // instead (the .heap section in the linker script), which is much smaller.
@@ -10,6 +10,7 @@
 // malloc's reach until it's released (heap_claim_top()). Big, occasional blocks come from there,
 // so they don't depend on finding a big enough hole in malloc's heap each time.
 #include "drivers/risaf.hh"
+#include "ld.h"
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
@@ -33,10 +34,10 @@ void init_heap() {
 		return;
 
 	using namespace mdrivlib::RISAF;
-	if (add_ddr_region(HeapRegionIndex, A35_HEAP_ADDR, A35_HEAP_ADDR + A35_HEAP_SIZE - 1, CID_A35, CID_A35, true)) {
+	if (add_ddr_region(HeapRegionIndex, A35_HEAP, A35_HEAP + A35_HEAP_SZ - 1, CID_A35, CID_A35, true)) {
 		asm volatile("dsb sy" ::: "memory");
-		heap_start = reinterpret_cast<char *>(A35_HEAP_ADDR);
-		heap_top = heap_start + A35_HEAP_SIZE;
+		heap_start = reinterpret_cast<char *>(A35_HEAP);
+		heap_top = heap_start + A35_HEAP_SZ;
 	} else {
 		heap_start = &_sheap;
 		heap_top = &_eheap;

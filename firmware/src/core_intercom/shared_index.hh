@@ -1,6 +1,7 @@
 #pragma once
 #include "core_intercom/intercore_devicesettings_message.hh"
 #include "core_intercom/intercore_types.hh"
+#include "ld.h"
 #include "param_block.hh"
 #include "usb/usb_connection_status_block.hh"
 #include <cstddef>
@@ -51,12 +52,12 @@ static_assert(sizeof(MetaParams) == 76);
 static_assert(offsetof(ParamBlock, metaparams) == sizeof(Params) * StreamConf::Audio::MaxBlockSize);
 static_assert(alignof(ParamBlock) == 64);
 
-// At the start of the shared region (SHAREDMEM_ADDR), where both cores see it.
+// At the start of the shared region (SHAREDMEM), where both cores see it.
 // Deliberately not a defined object: InterCorePtr32 has a default member initializer, so
 // a defined object would get a static constructor on *each* core, and the M33's would wipe
 // the pointers the A35 published. The A35 sets every field explicitly before starting the M33.
 inline SharedIndex &shared_index() {
-	return *reinterpret_cast<SharedIndex *>(SHAREDMEM_ADDR);
+	return *reinterpret_cast<SharedIndex *>(SHAREDMEM);
 }
 
 } // namespace MetaModule

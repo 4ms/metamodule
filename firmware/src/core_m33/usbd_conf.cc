@@ -17,6 +17,7 @@
 #include "drivers/cache.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/usb3dr.hh"
+#include "ld.h"
 #include "usbd_cdc.h"
 #include "usbd_core.h"
 #include "usbd_msc.h"
@@ -47,7 +48,7 @@ std::array<OutTransfer, NumEndpoints> out_transfers;
 
 bool is_dma_nc(const void *p) {
 	auto addr = reinterpret_cast<uintptr_t>(p);
-	return addr >= reinterpret_cast<uintptr_t>(_sdma_nc) && addr < M33_LOAD_ADDR + M33_REGION_SIZE;
+	return addr >= reinterpret_cast<uintptr_t>(_sdma_nc) && addr < M33_REGION_END;
 }
 
 // The DCACHE maintenance commands aren't re-entrant: don't let the USB interrupt (or any other)

@@ -1,4 +1,5 @@
 #include "drivers/stm32xx.h"
+#include "ld.h"
 #include <cstring>
 
 extern "C" char _sdma_nc[]; // linker script
@@ -15,7 +16,7 @@ uint32_t SystemCoreClock = 400'000'000;
 // for DMA masters that don't do cache maintenance (the USB controller): non-cacheable. Regions 3
 // and 4 are the A35's heap, which we only touch to serve the developer drive (the A35 allocates its
 // memory at the top of its heap while Developer Mode is on, see core_a35/no_plugins.cc):
-// non-cacheable. The heap is region 4 (A35_HEAP_ADDR), or the rest of the A35's RAM (region 3) if
+// non-cacheable. The heap is region 4 (_A35_HEAP), or the rest of the A35's RAM (region 3) if
 // the A35 couldn't open that in the DDR firewall (system/sbrk_ca35.cc).
 // Everything else uses the default memory map (PRIVDEFENA). The default map treats
 // 0x80000000-0x9FFFFFFF as cacheable, so the shared region must be carved out explicitly before
@@ -28,10 +29,6 @@ namespace
 {
 constexpr uint32_t AttrWriteBack = 0;
 constexpr uint32_t AttrNonCacheable = 1;
-
-// RAM in stm32mp2xx_ca35.ld
-constexpr uint32_t A35RamStart = 0x90000000;
-constexpr uint32_t A35RamSize = 128 * 1024 * 1024;
 } // namespace
 
 extern "C" void system_init() {
@@ -44,20 +41,20 @@ extern "C" void system_init() {
 
 	// RBAR(base, shareability, read-only, non-privileged access, execute-never)
 	ARM_MPU_SetRegion(0,
-					  ARM_MPU_RBAR(M33_LOAD_ADDR, ARM_MPU_SH_NON, 0, 1, 0),
+					  ARM_MPU_RBAR(M33_REGION, ARM_MPU_SH_NON, 0, 1, 0),
 					  ARM_MPU_RLAR(dma_nc_start - 1, AttrWriteBack));
 	ARM_MPU_SetRegion(1,
-					  ARM_MPU_RBAR(SHAREDMEM_ADDR, ARM_MPU_SH_NON, 0, 1, 1),
-					  ARM_MPU_RLAR(SHAREDMEM_ADDR + SHAREDMEM_SIZE - 1, AttrNonCacheable));
+					  ARM_MPU_RBAR(SHAREDMEM, ARM_MPU_SH_NON, 0, 1, 1),
+					  ARM_MPU_RLAR(SHAREDMEM + SHAREDMEM_SZ - 1, AttrNonCacheable));
 	ARM_MPU_SetRegion(2,
 					  ARM_MPU_RBAR(dma_nc_start, ARM_MPU_SH_NON, 0, 1, 1),
-					  ARM_MPU_RLAR(M33_LOAD_ADDR + M33_REGION_SIZE - 1, AttrNonCacheable));
+					  ARM_MPU_RLAR(M33_REGION_END - 1, AttrNonCacheable));
 	ARM_MPU_SetRegion(3,
-					  ARM_MPU_RBAR(A35RamStart, ARM_MPU_SH_NON, 0, 1, 1),
-					  ARM_MPU_RLAR(A35RamStart + A35RamSize - 1, AttrNonCacheable));
+					  ARM_MPU_RBAR(A35_RAM, ARM_MPU_SH_NON, 0, 1, 1),
+					  ARM_MPU_RLAR(A35_RAM + A35_RAM_SZ - 1, AttrNonCacheable));
 	ARM_MPU_SetRegion(4,
-					  ARM_MPU_RBAR(A35_HEAP_ADDR, ARM_MPU_SH_NON, 0, 1, 1),
-					  ARM_MPU_RLAR(A35_HEAP_ADDR + A35_HEAP_SIZE - 1, AttrNonCacheable));
+					  ARM_MPU_RBAR(A35_HEAP, ARM_MPU_SH_NON, 0, 1, 1),
+					  ARM_MPU_RLAR(A35_HEAP + A35_HEAP_SZ - 1, AttrNonCacheable));
 
 	ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk);
 

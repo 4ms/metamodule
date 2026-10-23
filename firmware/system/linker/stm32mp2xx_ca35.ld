@@ -1,23 +1,19 @@
-/* Linker script template for STM32MP2 CA35 apps loaded by TF-A BL2 at 0x88000040.
-   Copy into your project and adjust memory regions/heap/stack sizes.
+/* The A35 app (MP2). The addresses are in memory_mp2.ld.
    From 4ms/stm32mp2-baremetal multicore_smp/linkscript.ld (includes the cpu1 stack
-   region needed by boot/aux_core_startup.s; harmless for single-core apps). */
+   region needed by boot/aux_core_startup.s). */
 
 OUTPUT_FORMAT(elf64-littleaarch64)
 OUTPUT_ARCH(aarch64)
 
 ENTRY(_Reset)
 
-/* All regions must stay inside the DDR that TF-A's RISAF4 opens to secure masters:
-   0x80000000 - 0x9FFFFFFF (the `ddrram` node in the TF-A dts). Outside it, CPU and DMA
-   (e.g. LTDC) accesses are silently blocked. TF-A BL31 context + OP-TEE use 0x81FC0000 - 0x83FFFFFF.
-   The heap is outside it, at A35_HEAP_ADDR (cmake/mp2.cmake), which system/sbrk_ca35.cc opens in
-   RISAF4. */
+INCLUDE system/linker/memory_mp2.ld
+
 MEMORY
 {
-    ROM (rx)       : ORIGIN = 0x88000040, LENGTH = 16M - 0x40
-    RAM (rwx)      : ORIGIN = 0x90000000, LENGTH = 128M
-    FRAMEBUF (rw)  : ORIGIN = 0x98000000, LENGTH = 32M
+    ROM (rx)       : ORIGIN = _A35_CODE,	LENGTH = _A35_CODE_SZ
+    RAM (rwx)      : ORIGIN = _A35_RAM,		LENGTH = _A35_RAM_SZ
+    FRAMEBUF (rw)  : ORIGIN = _FRAMEBUF,	LENGTH = _FRAMEBUF_SZ
 }
 
 SECTIONS
@@ -100,7 +96,7 @@ SECTIONS
 		. = ALIGN(8);
 		_A7_SYMS = .;
 		BYTE(0)
-		. = _A7_SYMS + 1M;
+		. = _A7_SYMS + _A35_SYMS_SZ;
 		_A7_SYMS_END = .;
 	} > ROM
 
@@ -162,33 +158,33 @@ SECTIONS
 	_irq_stack_size = _irq_stack_end - _irq_stack_start;
 	_fiq_stack_size = _fiq_stack_end - _fiq_stack_start;
 
-	/* Memory shared with the M33, at SHAREDMEM_ADDR/SIZE (from CMake). Non-cacheable (mmu_ca35.cc),
+	/* Memory shared with the M33 (_SHAREDMEM). Non-cacheable (mmu_ca35.cc),
 	   opened to the M33 in RISAF4. Not zeroed at startup: the A35 initializes what it puts here.
 	   .sharedmemindex: pointers to the shared objects, at a fixed address the M33 links too. */
-	.sharedmemindex SHAREDMEM_ADDR (NOLOAD) :
+	.sharedmemindex _SHAREDMEM (NOLOAD) :
 	{
 		KEEP(*(.sharedmemindex))
 		KEEP(*(.sharedmemindex*))
 	}
 	ASSERT(SIZEOF(.sharedmemindex) <= 0x1000, ".sharedmemindex is bigger than 4kB")
 
-	.sharedmem (SHAREDMEM_ADDR + 0x1000) (NOLOAD) :
+	.sharedmem (_SHAREDMEM + 0x1000) (NOLOAD) :
 	{
 		. = ALIGN(64);
 		*(.sharedmem)
 		*(.sharedmem*)
 	}
-	ASSERT(ADDR(.sharedmem) + SIZEOF(.sharedmem) <= SHAREDMEM_ADDR + SHAREDMEM_SIZE, ".sharedmem doesn't fit in SHAREDMEM_SIZE")
+	ASSERT(ADDR(.sharedmem) + SIZEOF(.sharedmem) <= _SHAREDMEM_END, ".sharedmem doesn't fit in _SHAREDMEM")
 
-	/* DMA buffers (e.g. audio), at DMABUF_ADDR/SIZE (from CMake). Non-cacheable (mmu_ca35.cc).
+	/* DMA buffers (e.g. audio), in _DMABUF. Non-cacheable (mmu_ca35.cc).
 	   Not zeroed at startup. */
-	.dmabuf DMABUF_ADDR (NOLOAD) :
+	.dmabuf _DMABUF (NOLOAD) :
 	{
 		. = ALIGN(64);
 		*(.dmabuf)
 		*(.dmabuf*)
 	}
-	ASSERT(ADDR(.dmabuf) + SIZEOF(.dmabuf) <= DMABUF_ADDR + DMABUF_SIZE, ".dmabuf doesn't fit in DMABUF_SIZE")
+	ASSERT(ADDR(.dmabuf) + SIZEOF(.dmabuf) <= _DMABUF_END, ".dmabuf doesn't fit in _DMABUF")
 
 	/* Display framebuffers (LTDC scans these out). Not zeroed at startup. */
 	.framebuffers (NOLOAD):

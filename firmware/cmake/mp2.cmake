@@ -154,43 +154,12 @@ add_subdirectory(coreproc_plugin ${CMAKE_CURRENT_BINARY_DIR}/coreproc_plugin)
 #
 # Cortex-M33 firmware: a separate project (arm-none-eabi toolchain), embedded in the A35 image
 
-# Where the A35 loads the M33 image, and the M33's whole memory (code, data, heap, stack).
-# DDR: inside TF-A's 512MB secure DDR window (0x80000000-0x9FFFFFFF), clear of TF-A/OP-TEE
-# (0x81FC0000-0x83FFFFFF), the A35 image (0x88000000), and A35 RAM/framebuffers (0x90000000+).
-# The A35 opens it to the M33 with an extra RISAF4 region before starting it.
-# (The M33 also runs from SRAM2: 0x0E060000 with size 0x1F000, its secure instruction-fetch alias.)
-set(M33_LOAD_ADDR 0x8C000000)
-set(M33_REGION_SIZE 0x2000000)
-
-# Memory shared by the A35 and M33: non-cacheable on both, opened to both cores in RISAF4.
-# Starts with .sharedmemindex (the pointers to the shared objects, at a fixed address both
-# cores link), followed by .sharedmem (the objects). Every buffer the A35 asks the M33 to read a
-# file into (or write one from) must be in here.
-# Whole 2MB blocks: the A35 MMU maps it in 2MB blocks.
-set(SHAREDMEM_ADDR 0x9A000000)
-set(SHAREDMEM_SIZE 0x2000000)
-
-# Non-cacheable memory for DMA buffers (audio), after the shared memory. A35 only.
-# Whole 2MB blocks, like SHAREDMEM. (MP1 uses SYSRAM for this)
-set(DMABUF_ADDR 0x9C000000)
-set(DMABUF_SIZE 0x200000)
-
-# The A35's heap: 1GB of DDR above TF-A's secure window, which the A35 opens to itself in RISAF4 at
-# startup (system/sbrk_ca35.cc). The devboard has 2GB (0x80000000-0xFFFFFFFF). It ends below
-# 0xE0000000, where the M33's address map has its private peripheral bus: the M33 reads and writes
-# the top of the heap while serving the developer drive.
-set(A35_HEAP_ADDR 0xA0000000)
-set(A35_HEAP_SIZE 0x40000000)
-
 include(ExternalProject)
 ExternalProject_Add(
   core_m33
   SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/core_m33
   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/core_m33
-  CMAKE_ARGS -DM33_LOAD_ADDR=${M33_LOAD_ADDR} -DM33_REGION_SIZE=${M33_REGION_SIZE}
-             -DSHAREDMEM_ADDR=${SHAREDMEM_ADDR} -DSHAREDMEM_SIZE=${SHAREDMEM_SIZE}
-             -DA35_HEAP_ADDR=${A35_HEAP_ADDR} -DA35_HEAP_SIZE=${A35_HEAP_SIZE}
-             -DMP2_TEST_CARRIER=${MP2_TEST_CARRIER} -DLOG_LEVEL=${LOG_LEVEL}
+  CMAKE_ARGS -DMP2_TEST_CARRIER=${MP2_TEST_CARRIER} -DLOG_LEVEL=${LOG_LEVEL}
   INSTALL_COMMAND ""
   BUILD_ALWAYS ON
   BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/core_m33/main_m33.bin
@@ -289,11 +258,6 @@ foreach(brand ${brands})
   endif()
 endforeach()
 add_dependencies(a35_core core_m33)
-target_compile_definitions(
-  a35_core PRIVATE M33_LOAD_ADDR=${M33_LOAD_ADDR} M33_REGION_SIZE=${M33_REGION_SIZE} SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
-                   SHAREDMEM_SIZE=${SHAREDMEM_SIZE} DMABUF_ADDR=${DMABUF_ADDR} DMABUF_SIZE=${DMABUF_SIZE}
-                   A35_HEAP_ADDR=${A35_HEAP_ADDR} A35_HEAP_SIZE=${A35_HEAP_SIZE}
-)
 target_compile_definitions(a35_core PUBLIC CPPUTIL_STATIC_STRING_USE_STD_STRING SUPPRESS_HIL_MESSAGES=1)
 # Plugins are AArch64 ELF64 shared objects (src/dynload/elf_process/elf_types.hh)
 target_compile_definitions(a35_core PUBLIC METAMODULE_ELF64)
@@ -338,10 +302,9 @@ target_link_libraries(main_a35.elf PRIVATE a35_core)
 
 set(LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/system/linker/stm32mp2xx_ca35.ld)
 target_link_options(
-  main_a35.elf PRIVATE -T${LINKER_SCRIPT} -Wl,-Map,main_a35.map,--cref -Wl,--defsym=SHAREDMEM_ADDR=${SHAREDMEM_ADDR}
-  -Wl,--defsym=SHAREDMEM_SIZE=${SHAREDMEM_SIZE} -Wl,--defsym=DMABUF_ADDR=${DMABUF_ADDR} -Wl,--defsym=DMABUF_SIZE=${DMABUF_SIZE}
+  main_a35.elf PRIVATE -T${LINKER_SCRIPT} -L${PROJECT_SOURCE_DIR} -Wl,-Map,main_a35.map,--cref
 )
-set_target_properties(main_a35.elf PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
+set_target_properties(main_a35.elf PROPERTIES LINK_DEPENDS "${LINKER_SCRIPT};${PROJECT_SOURCE_DIR}/system/linker/memory_mp2.ld")
 
 #
 # The symbols plugins can use, as on MP1 (see CMakeLists.txt): their names are in the SDK
@@ -350,7 +313,6 @@ set_target_properties(main_a35.elf PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
 
 set(MP2_API_SYMBOL_NAMES_FILE ${PROJECT_SOURCE_DIR}/metamodule-plugin-sdk/api-symbols-mp2.txt)
 set(MP2_SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a35_symbols.yaml)
-set(MP2_SYMLIST_SIZE 0x100000) # .symlist in system/linker/stm32mp2xx_ca35.ld
 
 add_custom_target(
   new-api-sym-list-mp2
@@ -372,7 +334,7 @@ if(EXISTS ${MP2_API_SYMBOL_NAMES_FILE})
   set(MP2_INSTALL_SYMLIST
       COMMAND flashing/find_syms.py --symbols ${MP2_API_SYMBOL_NAMES_FILE} --elf $<TARGET_FILE:main_a35.elf> --out
               ${MP2_SYMBOLS_FILE}
-      COMMAND flashing/zero-term.py --in ${MP2_SYMBOLS_FILE} --out ${MP2_SYMBOLS_FILE} --pad-to ${MP2_SYMLIST_SIZE}
+      COMMAND flashing/zero-term.py --in ${MP2_SYMBOLS_FILE} --out ${MP2_SYMBOLS_FILE} --pad-to-section $<TARGET_FILE:main_a35.elf> .symlist
       COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${MP2_SYMBOLS_FILE} $<TARGET_FILE:main_a35.elf>
   )
 else()
