@@ -3,8 +3,8 @@
 // errno, and the C++ exception handling globals (the stack of caught exceptions, and the uncaught
 // count). The toolchain's versions are single, shared by everything.
 //
-// The processes are MP1's (reent_mm.hh), but MP2 runs the GUI on core 0 (Core0Main), and core 1's
-// main loop only waits for interrupts. MP2 doesn't run async threads yet.
+// The processes are MP1's (reent_mm.hh): the GUI is core 1's main loop (Core1Main). MP2 doesn't run
+// async threads yet.
 
 #include "reent_mm.hh"
 #include "drivers/stm32xx.h"

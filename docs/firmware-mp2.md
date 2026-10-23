@@ -55,8 +55,10 @@ another), so build MP1 first.
   320x240 and scaled 3x into the middle of the panel, and MP1's audio stream
   (`src/audio/audio.cc`), which plays the patch in the codec's DMA interrupt.
   The patch is split between the two A35 cores the same way as on MP1: the
-  second core runs MP1's `AuxPlayer` (`src/core_a35/aux_core.cc`). Unlike MP1,
-  the GUI stays on the first core, so the second core only plays modules.
+  second core runs MP1's `AuxPlayer` (`src/core_a35/aux_core.cc`). As on MP1,
+  the second core also runs the GUI: only the first core does the parts of each
+  audio frame that aren't split between the cores, so the second core has time
+  left for the GUI even when the first is overloaded.
   Built-in modules: the 4ms modules and the `vcv_ports` brands. The assets
   are unpacked into a RamDisk, which modules can read with libc (`fopen`, etc).
 - **Plugins:** `.mm2plugin` files (AArch64 builds, made by the plugin SDK next to the

@@ -140,9 +140,9 @@ SECTIONS
 		. += 16M;
 		_stack_end = .;
 
-		/* Core 1 only plays modules (core_a35/aux_core.cc) */
+		/* Core 1 runs the GUI and plays modules (core_a35/aux_core.cc): same as MP1's A7 core 2 */
 		_cpu1_stack_start = .;
-		. += 1M;
+		. += 16M;
 		_cpu1_stack_end = .;
 	} > RAM
 
