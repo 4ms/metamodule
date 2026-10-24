@@ -20,6 +20,7 @@ TEST_SOURCES += lib/patch-serial/ryml/ryml_init.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 TEST_SOURCES += src/fs/time_convert.cc
+TEST_SOURCES += src/fs/helpers.cc
 TEST_SOURCES += src/user_settings/settings_parse.cc
 TEST_SOURCES += src/user_settings/settings_serialize.cc
 TEST_SOURCES += src/fw_update/hash/md5_hash.h
@@ -76,6 +77,8 @@ CXXFLAGS = 	-Wall \
 
 $(BUILDDIR)/src/gui/elements/element_name.o: CXXFLAGS += -Wno-deprecated-enum-enum-conversion -Wno-deprecated-anon-enum-enum-conversion
 $(BUILDDIR)/tests/auto_map_tests.o:          CXXFLAGS += -Wno-deprecated-enum-enum-conversion -Wno-deprecated-anon-enum-enum-conversion
+$(BUILDDIR)/src/fs/helpers.o:               CXXFLAGS += -Isrc/fs -Isrc/fs/fatfs -Ilib/fatfs/source
+$(BUILDDIR)/tests/split_volume_tests.o:      CXXFLAGS += -Isrc/fs -Isrc/fs/fatfs -Ilib/fatfs/source
 
 ### Boilerplate below here:
 
