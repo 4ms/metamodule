@@ -265,6 +265,28 @@ void ModuleWidget::addChild(app::SvgScrew *widget) {
 }
 
 void ModuleWidget::addChild(Widget *widget) {
+	// In VCV, a param, port, or light can be added with addChild(). Here, the overload is chosen by
+	// the pointer's static type, so check the dynamic type of a widget added as a plain Widget.
+	if (auto w = dynamic_cast<app::ParamWidget *>(widget)) {
+		addParam(w);
+		return;
+	}
+	if (auto w = dynamic_cast<app::PortWidget *>(widget)) {
+		if (w->type == engine::Port::INPUT)
+			addInput(w);
+		else
+			addOutput(w);
+		return;
+	}
+	if (auto w = dynamic_cast<MetaModule::VCVTextDisplay *>(widget)) {
+		addChild(w);
+		return;
+	}
+	if (auto w = dynamic_cast<app::ModuleLightWidget *>(widget)) {
+		addChild(w);
+		return;
+	}
+
 	log_widget("addChild(unknown Widget)", widget);
 	Widget::addChild(widget);
 
