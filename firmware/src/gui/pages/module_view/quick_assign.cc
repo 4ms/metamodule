@@ -58,11 +58,14 @@ void ModuleViewPage::handle_quick_assign() {
 
 			// Push+turn to adjust param manually
 			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
-				mapping_pane.show_control_popup(group, ui_ElementRollerPanel, *current_element);
-				lv_arc_set_value(ui_ControlArc, lv_arc_get_value(ui_ControlArc) + motion);
-				lv_event_send(ui_ControlArc, LV_EVENT_VALUE_CHANGED, nullptr);
+				// Only the playing patch can be adjusted
+				if (is_patch_playloaded) {
+					mapping_pane.show_control_popup(group, ui_ElementRollerPanel, *current_element);
+					lv_arc_set_value(ui_ControlArc, lv_arc_get_value(ui_ControlArc) + motion);
+					lv_event_send(ui_ControlArc, LV_EVENT_VALUE_CHANGED, nullptr);
+					quick_control_mode = true;
+				}
 				suppress_next_click = true;
-				quick_control_mode = true;
 			}
 
 			if (gui_state.midi_quick_mapping_mode) {
