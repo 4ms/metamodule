@@ -61,6 +61,8 @@ void FramebufferWidget::step() {
 }
 
 void FramebufferWidget::draw(const DrawArgs &args) {
+	// There's no framebuffer to cache the children's drawing in, so draw them directly
+	Widget::draw(args);
 }
 
 void FramebufferWidget::render(math::Vec scale, math::Vec offsetF, math::Rect clipBox) {
