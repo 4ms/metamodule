@@ -66,10 +66,13 @@ struct ManualControlPopUp {
 		float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 		lv_arc_set_value(ui_ControlArc, std::round(value * range) + lv_arc_get_min_value(ui_ControlArc));
 
-		// Ask the module for its own value text, shown by update() when the player has read it
+		// Leave the value blank until we know if the module has getDisplayValueString() or not
 		has_module_text = false;
 		module_text.clear();
 		param_value_string.start_watching(module_id, param_id);
+
+		waiting_for_module_text = !std::holds_alternative<Encoder>(drawn_el->element);
+		waiting_start_tm = lv_tick_get();
 		update_control_arc_text();
 	}
 
@@ -78,14 +81,24 @@ struct ManualControlPopUp {
 		if (!visible || !drawn_el || std::holds_alternative<Encoder>(drawn_el->element))
 			return;
 
-		if (auto text = param_value_string.get_text(); text && text->size()) {
+		auto text = param_value_string.get_text();
+
+		if (text && text->size()) {
 			has_module_text = true;
+			waiting_for_module_text = false;
 
 			// Some modules add more lines (like a VCV tooltip): show just the value
 			auto value_text = text->substr(0, text->find('\n'));
 			if (value_text != module_text) {
 				module_text = value_text;
 				lv_label_set_text(ui_ControlAlertAmount, module_text.c_str());
+			}
+
+		} else if (waiting_for_module_text) {
+			// Use our own text if the module has none, or the player hasn't answered in time (e.g. audio is paused)
+			if (text || (lv_tick_get() - waiting_start_tm) > MaxModuleTextWait) {
+				waiting_for_module_text = false;
+				update_control_arc_text();
 			}
 		}
 	}
@@ -320,7 +333,7 @@ private:
 
 	void update_control_arc_text() {
 		// The module's text for the new value will be shown by update()
-		if (has_module_text)
+		if (has_module_text || waiting_for_module_text)
 			return;
 
 		auto range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
@@ -372,6 +385,10 @@ private:
 
 	bool has_module_text = false;
 	std::string module_text;
+
+	bool waiting_for_module_text = false;
+	uint32_t waiting_start_tm = 0;
+	static constexpr uint32_t MaxModuleTextWait = 100; //ms
 
 	lv_group_t *controlarc_group = nullptr;
 	lv_group_t *prev_group = nullptr;
