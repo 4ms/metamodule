@@ -265,17 +265,18 @@ dirent *readdir(DIR *dir) {
 	if (!dirdesc)
 		return nullptr;
 
-	if (dirdesc->vol == Volume::RamDisk) {
-		//TODO
-	}
+	FILINFO info;
+	bool ok = false;
+
+	if (dirdesc->vol == Volume::RamDisk && mRamdisk)
+		ok = mRamdisk->readdir(dirdesc->dir, &info);
 
 	else if (dirdesc->vol == Volume::SDCard || dirdesc->vol == Volume::USB)
-	{
-		FILINFO info;
-		if (fs_proxy.readdir(dirdesc->dir, &info)) {
-			strncpy(dirdesc->cur_entry.d_name, info.fname, 256);
-			return &dirdesc->cur_entry;
-		}
+		ok = fs_proxy.readdir(dirdesc->dir, &info);
+
+	if (ok) {
+		strncpy(dirdesc->cur_entry.d_name, info.fname, 256);
+		return &dirdesc->cur_entry;
 	}
 	return nullptr;
 }
@@ -288,8 +289,8 @@ void rewinddir(DIR *dir) {
 	if (!dirdesc)
 		return;
 
-	if (dirdesc->vol == Volume::RamDisk) {
-		//TODO
+	if (dirdesc->vol == Volume::RamDisk && mRamdisk) {
+		mRamdisk->rewinddir(dirdesc->dir);
 	}
 
 	else if (dirdesc->vol == Volume::SDCard || dirdesc->vol == Volume::USB)

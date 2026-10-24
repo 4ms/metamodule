@@ -391,17 +391,30 @@ public:
 	}
 
 	bool opendir(std::string_view path, DIR *dir) {
-		if (!dir)
+		if (!dir || !path.data())
 			return false;
 
-		if (f_opendir(dir, _fatvol) != FR_OK) {
+		f_chdrive(_fatvol);
+
+		if (f_opendir(dir, path.data()) != FR_OK) {
 			if (!mount_disk())
 				return false;
-			if (f_opendir(dir, _fatvol) != FR_OK)
+			if (f_opendir(dir, path.data()) != FR_OK)
 				return false;
 		}
 
 		return true;
+	}
+
+	// Returns false at the end of the dir (or on error)
+	bool readdir(DIR *dir, FILINFO *info) {
+		if (f_readdir(dir, info) != FR_OK)
+			return false;
+		return info->fname[0] != '\0';
+	}
+
+	void rewinddir(DIR *dir) {
+		f_rewinddir(dir);
 	}
 
 	bool closedir(DIR *dir) {
