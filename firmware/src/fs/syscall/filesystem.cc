@@ -215,7 +215,7 @@ int stat(const char *filename, struct stat *st) {
 
 			st->st_size = filinfo.fsize;
 
-			st->st_mode = S_IFREG;
+			st->st_mode = (filinfo.fattrib & AM_DIR) ? S_IFDIR : S_IFREG;
 			return 0;
 		}
 	}
