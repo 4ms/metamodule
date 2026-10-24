@@ -10,6 +10,7 @@
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "patch_file/open_patch_manager.hh"
+#include "patch_play/param_value_string.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "util/overloaded.hh"
@@ -19,10 +20,14 @@ namespace MetaModule
 
 struct ManualControlPopUp {
 
-	ManualControlPopUp(OpenPatchManager &patches, PatchModQueue &patch_mod_queue, PatchPlayLoader &playloader)
+	ManualControlPopUp(OpenPatchManager &patches,
+					   PatchModQueue &patch_mod_queue,
+					   PatchPlayLoader &playloader,
+					   ParamValueStringWatcher &param_value_string)
 		: patch_mod_queue{patch_mod_queue}
 		, patches{patches}
 		, playloader{playloader}
+		, param_value_string{param_value_string}
 		, controlarc_group(lv_group_create()) {
 
 		lv_group_add_obj(controlarc_group, ui_ControlArc);
@@ -60,12 +65,48 @@ struct ManualControlPopUp {
 		auto value = playloader.param_value(module_id, param_id);
 		float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 		lv_arc_set_value(ui_ControlArc, std::round(value * range) + lv_arc_get_min_value(ui_ControlArc));
+
+		// Leave the value blank until we know if the module has getDisplayValueString() or not
+		has_module_text = false;
+		module_text.clear();
+		param_value_string.start_watching(module_id, param_id);
+
+		waiting_for_module_text = !std::holds_alternative<Encoder>(drawn_el->element);
+		waiting_start_tm = lv_tick_get();
 		update_control_arc_text();
+	}
+
+	// Call periodically: shows the module's text for the value, if it has any
+	void update() {
+		if (!visible || !drawn_el || std::holds_alternative<Encoder>(drawn_el->element))
+			return;
+
+		auto text = param_value_string.get_text();
+
+		if (text && text->size()) {
+			has_module_text = true;
+			waiting_for_module_text = false;
+
+			// Some modules add more lines (like a VCV tooltip): show just the value
+			auto value_text = text->substr(0, text->find('\n'));
+			if (value_text != module_text) {
+				module_text = value_text;
+				lv_label_set_text(ui_ControlAlertAmount, module_text.c_str());
+			}
+
+		} else if (waiting_for_module_text) {
+			// Use our own text if the module has none, or the player hasn't answered in time (e.g. audio is paused)
+			if (text || (lv_tick_get() - waiting_start_tm) > MaxModuleTextWait) {
+				waiting_for_module_text = false;
+				update_control_arc_text();
+			}
+		}
 	}
 
 	void hide() {
 		if (visible) {
 			visible = false;
+			param_value_string.stop_watching();
 
 			if (prev_group)
 				lv_indev_set_group(lv_indev_get_next(nullptr), prev_group);
@@ -291,6 +332,10 @@ private:
 	}
 
 	void update_control_arc_text() {
+		// The module's text for the new value will be shown by update()
+		if (has_module_text || waiting_for_module_text)
+			return;
+
 		auto range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 		auto value = lv_arc_get_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 
@@ -336,6 +381,14 @@ private:
 	PatchModQueue &patch_mod_queue;
 	OpenPatchManager &patches;
 	PatchPlayLoader &playloader;
+	ParamValueStringWatcher &param_value_string;
+
+	bool has_module_text = false;
+	std::string module_text;
+
+	bool waiting_for_module_text = false;
+	uint32_t waiting_start_tm = 0;
+	static constexpr uint32_t MaxModuleTextWait = 100; //ms
 
 	lv_group_t *controlarc_group = nullptr;
 	lv_group_t *prev_group = nullptr;

@@ -119,6 +119,8 @@ struct AuxPlayer {
 				}
 			}
 
+			patch_player.read_param_value_string(ui.param_value_string());
+
 			if (ui.midi_feedback_enabled()) {
 				for (auto &p : patch_player.watched_params().active_watched_params()) {
 					if (p.is_active()) {

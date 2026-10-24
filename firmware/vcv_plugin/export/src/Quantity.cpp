@@ -1,4 +1,5 @@
 #include <Quantity.hpp>
+#include <string.hpp>
 
 namespace rack
 {
@@ -17,7 +18,9 @@ int Quantity::getDisplayPrecision() {
 
 std::string Quantity::getDisplayValueString() {
 	float v = getDisplayValue();
-	return std::to_string(v);
+	if (std::isnan(v))
+		return "NaN";
+	return string::f("%.*g", getDisplayPrecision(), math::normalizeZero(v));
 }
 
 void Quantity::setDisplayValueString(std::string s) {

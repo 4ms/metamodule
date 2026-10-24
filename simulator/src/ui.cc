@@ -166,6 +166,8 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 		}
 	}
 
+	patch_player.read_param_value_string(params.param_value_string);
+
 	if (settings.midi.midi_feedback == MidiSettings::MidiFeedback::Enabled) {
 		for (auto &p : patch_player.watched_params().active_watched_params()) {
 			if (p.is_active()) {
