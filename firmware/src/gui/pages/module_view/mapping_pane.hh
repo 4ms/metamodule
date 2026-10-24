@@ -42,7 +42,7 @@ struct ModuleViewMappingPane {
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue, metaparams}
-		, control_popup{patches, patch_mod_queue, playloader}
+		, control_popup{patches, patch_mod_queue, playloader, params.param_value_string}
 		, midi_map_popup{params, metaparams}
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
@@ -155,6 +155,10 @@ struct ModuleViewMappingPane {
 
 	bool control_popup_visible() {
 		return control_popup.is_visible();
+	}
+
+	void update_control_popup() {
+		control_popup.update();
 	}
 
 	void refresh() {

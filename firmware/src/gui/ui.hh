@@ -107,6 +107,10 @@ public:
 		return params.text_displays;
 	}
 
+	ParamValueStringWatcher &param_value_string() {
+		return params.param_value_string;
+	}
+
 	void preload_plugins(PluginManager &plugin_manager) {
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
