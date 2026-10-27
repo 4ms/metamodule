@@ -391,15 +391,18 @@ public:
 	}
 
 	bool opendir(std::string_view path, DIR *dir) {
-		if (!dir || !path.data())
+		if (!dir)
 			return false;
 
 		f_chdrive(_fatvol);
 
-		if (f_opendir(dir, path.data()) != FR_OK) {
+		// Force null-termination: FatFS uses const char*
+		auto spath = std::string{path};
+
+		if (f_opendir(dir, spath.c_str()) != FR_OK) {
 			if (!mount_disk())
 				return false;
-			if (f_opendir(dir, path.data()) != FR_OK)
+			if (f_opendir(dir, spath.c_str()) != FR_OK)
 				return false;
 		}
 

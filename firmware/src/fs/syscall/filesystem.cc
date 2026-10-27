@@ -247,7 +247,7 @@ DIR *opendir(std::string_view fullpath) {
 			}
 		}
 
-		pr_err("Opening dir %s on vol %d failed\n", fullpath.data(), (int)volume);
+		pr_err("Opening dir %.*s on vol %d failed\n", (int)fullpath.size(), fullpath.data(), (int)volume);
 		FileDescManager::dealloc_dir(dirdesc);
 		return nullptr;
 
