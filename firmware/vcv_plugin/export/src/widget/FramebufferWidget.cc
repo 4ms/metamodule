@@ -62,6 +62,13 @@ void FramebufferWidget::step() {
 
 void FramebufferWidget::draw(const DrawArgs &args) {
 	// There's no framebuffer to cache the children's drawing in, so draw them directly
+	printf("FramebufferWidget::draw() @%f,%f->%f,%f. fbSize:%f x %f\n",
+		   box.getLeft(),
+		   box.getTop(),
+		   box.getRight(),
+		   box.getBottom(),
+		   internal->fbSize.x,
+		   internal->fbSize.y);
 	Widget::draw(args);
 }
 
