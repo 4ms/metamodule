@@ -1,5 +1,5 @@
 #include "helpers.hh"
-#include "console/pr_dbg.hh"
+#include "pr_dbg.hh"
 
 namespace MetaModule
 {
@@ -47,7 +47,7 @@ std::pair<std::string_view, Volume> split_volume(std::string_view filename) {
 	std::string_view path = filename;
 
 	auto strip_slash = [](auto f) {
-		return f[0] == '/' ? f.substr(1) : f;
+		return f.starts_with('/') ? f.substr(1) : f;
 	};
 
 	for (auto &label : volume_labels) {
