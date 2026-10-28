@@ -111,6 +111,8 @@ void PanelControls::update() {
 		update_metaparams();
 	}
 
+	cur_params->gate_ins = (gate_in_1.is_high() ? 0b01 : 0b00) | (gate_in_2.is_high() ? 0b10 : 0b00);
+
 	if (midi_device)
 		process_midi_frame(*cur_params);
 
@@ -124,6 +126,9 @@ void PanelControls::update_metaparams() {
 	cur_metaparams->meta_buttons[0].transfer_events(back_button);
 
 	cur_metaparams->usb_connection = usb_connection;
+
+	cur_metaparams->jack_senses = jack_senses.load(std::memory_order_relaxed);
+	cur_metaparams->jack_sense_faults = jack_sense_faults.load(std::memory_order_relaxed);
 
 	if (midi_device) {
 		update_midi_connected();
@@ -257,6 +262,16 @@ void PanelControls::update_jack_sense(mdrivlib::I2CPeriph &i2c4) {
 		if (!jack_sense_failed)
 			printf("M33: jack sense expander U1212: read FAILED\n");
 		jack_sense_failed = true;
+
+		jack_sense_errors++;
+		jack_sense_good_reads = 0;
+		if (!jack_sense_failsafe && jack_sense_errors >= JackSenseFailSafeErrors &&
+			now - jack_sense_last_ok_tm >= JackSenseFailSafeMs)
+		{
+			jack_sense_failsafe = true;
+			printf("M33: jack sense expander not responding: reporting all jacks as patched\n");
+		}
+		publish_jack_sense();
 		return;
 	}
 	jack_sense_failed = false;
@@ -264,6 +279,14 @@ void PanelControls::update_jack_sense(mdrivlib::I2CPeriph &i2c4) {
 	uint16_t reading = (rx[1] << 8) | rx[0];
 	auto prev = jack_sense_reading;
 	jack_sense_reading = reading;
+
+	jack_sense_errors = 0;
+	jack_sense_last_ok_tm = now;
+	if (jack_sense_failsafe && ++jack_sense_good_reads >= JackSenseRecoverReads) {
+		jack_sense_failsafe = false;
+		printf("M33: jack sense expander responding again\n");
+	}
+	publish_jack_sense();
 
 	if (!prev) {
 		printf("Jack sense: 0x%04x\n", reading);
@@ -281,7 +304,16 @@ void PanelControls::update_jack_sense(mdrivlib::I2CPeriph &i2c4) {
 	}
 }
 
-// Bring-up: reports the controls that aren't passed on to the param blocks yet
+// Same as MP1's SensePinReader::publish(): the pins are low when patched
+void PanelControls::publish_jack_sense() {
+	uint16_t main_jacksense = (jack_sense_failsafe || !jack_sense_reading) ? 0xFFFF : uint16_t(~*jack_sense_reading);
+	uint16_t ext_jacksense = 0xFFFF;
+	jack_senses.store(main_jacksense | (uint32_t(ext_jacksense) << 16), std::memory_order_relaxed);
+	jack_sense_faults.store(jack_sense_failsafe ? JackSenseFault::MainFailed : 0, std::memory_order_relaxed);
+}
+
+// Bring-up: reports the controls that aren't passed on to the param blocks yet (and the gate ins and
+// jack sense)
 void PanelControls::print_changes() {
 	for (unsigned i = 0; i < ExpanderControls::NumEncoders; i++) {
 		auto pos = expanders.encoder_position(i);

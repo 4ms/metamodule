@@ -26,12 +26,13 @@ namespace MetaModule
 // into the param blocks that the A35's audio stream reads (and passes on to the GUI).
 // (Named PanelControls because the pro conf's pins are in namespace Controls.)
 //
-// Into the param blocks so far: only the controls that MP1's GUI uses, the nav encoder (ENC102) and
-// its button (MP1's rotary), and the Back button (MP1's button 0).
+// Into the param blocks so far, as on MP1: the nav encoder (ENC102) and its button (MP1's rotary), the
+// Back button (MP1's button 0), the gate ins, and jack sense.
 //
 // The rest are read, but not passed on yet (there's no pro panel definition): the knob encoders and
-// buttons on the I2C expanders (expander_controls.hh), the control encoder (ENC103) and its button,
-// the gate ins, and jack sense. For bring-up, print_changes() reports them on the console.
+// buttons on the I2C expanders (expander_controls.hh), and the control encoder (ENC103) and its
+// button. For bring-up, print_changes() reports them on the console (and the gate ins and jack
+// sense).
 //
 // The headphone amp is on only while headphones are plugged in: the frame interrupt drives
 // HP_SHUTDOWN low while HP_SENSE is (debounced) high.
@@ -61,6 +62,8 @@ public:
 
 	// Main loop: reads the jack sense expander (U1212) on I2C4, every JackSensePollMs. The caller
 	// holds the shared I2C4 lock, and passes the M33's I2C4 peripheral (UsbManager's).
+	// As MP1's SensePinReader: until the first good read, and while the expander isn't answering
+	// (fail-safe), all jacks are reported as patched.
 	void update_jack_sense(mdrivlib::I2CPeriph &i2c4);
 
 	// Audio frames so far (the frame clock interrupts)
@@ -113,6 +116,20 @@ private:
 	uint32_t last_jack_sense_tm = 0;
 	std::optional<uint16_t> jack_sense_reading; // bit set = pin high
 	bool jack_sense_failed = false;
+	// Fail-safe, same as MP1's SensePinReader: this many errors, and this long without a good read
+	static constexpr uint32_t JackSenseFailSafeErrors = 8;
+	static constexpr uint32_t JackSenseFailSafeMs = 5000;
+	// Good reads in a row needed to leave the fail-safe state
+	static constexpr uint32_t JackSenseRecoverReads = 2;
+	uint32_t jack_sense_errors = 0;
+	uint32_t jack_sense_last_ok_tm = 0;
+	uint32_t jack_sense_good_reads = 0;
+	bool jack_sense_failsafe = false;
+	void publish_jack_sense();
+	// Main loop -> update_metaparams(). As MetaParams::jack_senses: 1 = patched. The upper 16 bits
+	// are MP1's Audio Expander, which the pro doesn't have: reported as patched, as MP1 does.
+	std::atomic<uint32_t> jack_senses{0xFFFF'FFFF};
+	std::atomic<uint8_t> jack_sense_faults{0};
 
 	// print_changes(): what it last reported
 	std::array<int32_t, ExpanderControls::NumEncoders> printed_enc_positions{};
