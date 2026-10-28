@@ -78,14 +78,15 @@ private:
 
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> frame_task;
 
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, Controls::Direct::NavEncA, Controls::Direct::NavEncB> rotary;
+	// The direct encoders' B is RotaryEnc's A, and vice versa: with A first, they count backwards
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, Controls::Direct::NavEncB, Controls::Direct::NavEncA> rotary;
 	mdrivlib::DebouncedPin<Controls::Direct::NavEncBut, mdrivlib::PinPolarity::Inverted> rotary_button;
 	mdrivlib::DebouncedPin<Controls::Direct::BackBut, mdrivlib::PinPolarity::Inverted> back_button;
 	bool rotary_moved_while_pressed = false;
 
 	ExpanderControls expanders;
 
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, Controls::Direct::CtlEncA, Controls::Direct::CtlEncB> ctl_encoder;
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, Controls::Direct::CtlEncB, Controls::Direct::CtlEncA> ctl_encoder;
 	mdrivlib::DebouncedPin<Controls::Direct::CtlEncBut, mdrivlib::PinPolarity::Inverted> ctl_encoder_button;
 	volatile int32_t ctl_encoder_pos = 0;
 	mdrivlib::DebouncedPin<Controls::Direct::GateIn1, mdrivlib::PinPolarity::Normal> gate_in_1;
