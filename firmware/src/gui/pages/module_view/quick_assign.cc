@@ -1,4 +1,4 @@
-#include "gui/helpers/screensaver_display.hh"
+#include "gui/helpers/selected_display.hh"
 #include "gui/pages/module_view/module_view.hh"
 #include "params/param_num_positions.hh"
 
@@ -27,7 +27,7 @@ void ModuleViewPage::handle_quick_assign() {
 	// Clear events when the button is first pressed
 	if (quickmap_rotary_button.is_just_pressed()) {
 		metaparams.ext_buttons_high_events = 0;
-		screensaver_toggled_this_press = false;
+		display_toggled_this_press = false;
 
 		if (gui_state.midi_quick_mapping_mode) {
 			params.last_midi_cc.num = -1;
@@ -100,17 +100,17 @@ void ModuleViewPage::handle_quick_assign() {
 			}
 		}
 
-		// Screensaver quick assign: push+turn encoder toggles it, once per press
+		// Selected display quick assign: push+turn encoder toggles it, once per press
 		else if (fullscreen_display(current_element->element))
 		{
 			if (auto motion = metaparams.rotary_pushed.use_motion(); motion != 0) {
 				suppress_next_click = true;
-				if (!screensaver_toggled_this_press) {
-					screensaver_toggled_this_press = true;
-					if (is_assigned_screensaver(*current_element))
-						remove_screensaver();
+				if (!display_toggled_this_press) {
+					display_toggled_this_press = true;
+					if (is_selected_display(*current_element))
+						deselect_display();
 					else
-						assign_screensaver(*current_element);
+						select_display(*current_element);
 					roller_hover.force_redraw();
 				}
 				return;
@@ -166,8 +166,8 @@ void ModuleViewPage::handle_encoder_back_removal() {
 
 		module_mods.put(RemoveJackMappings{.jack = module_jack, .type = ElementType::Output});
 
-	} else if (is_assigned_screensaver(*current_element)) {
-		remove_screensaver();
+	} else if (is_selected_display(*current_element)) {
+		deselect_display();
 
 	} else
 		return;

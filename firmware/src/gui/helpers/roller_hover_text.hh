@@ -66,6 +66,10 @@ public:
 		is_centered_on_roller = do_center;
 	}
 
+	void set_font(lv_font_t const *font) {
+		lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
+	}
+
 	void set_y_offset(int32_t offset) {
 		y_offset = offset;
 	}

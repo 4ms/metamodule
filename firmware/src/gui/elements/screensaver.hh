@@ -31,6 +31,9 @@ public:
 		wake();
 	}
 
+	// How long the selected display is shown before the screen goes black
+	static constexpr uint64_t MaxSelectedDisplayMs = 3 * 60 * 60 * 1000;
+
 	// Blank: the black overlay. Display: a module display is shown full-screen (by the PageManager)
 	enum class Mode { Off, Blank, Display };
 
@@ -56,6 +59,11 @@ public:
 
 	bool timed_out() const {
 		return lv_disp_get_inactive_time(nullptr) >= s.timeout_ms;
+	}
+
+	// The selected display has been shown long enough that a still part of it could burn into the screen
+	bool display_timed_out() const {
+		return uint64_t{lv_disp_get_inactive_time(nullptr)} >= uint64_t{s.timeout_ms} + MaxSelectedDisplayMs;
 	}
 
 	void show_blank() {

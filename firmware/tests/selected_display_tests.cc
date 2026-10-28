@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "gui/helpers/screensaver_display.hh"
+#include "gui/helpers/selected_display.hh"
 #include <array>
 
 using namespace MetaModule;
@@ -39,30 +39,30 @@ ModuleInfoView info() {
 
 } // namespace
 
-TEST_CASE("find_screensaver_element by light id") {
-	CHECK(find_screensaver_element(info(), {.module_id = 1, .light_id = 1026}) == 3u);
-	CHECK(find_screensaver_element(info(), {.module_id = 1, .light_id = 1024}) == 0u);
+TEST_CASE("find_selected_display_element by light id") {
+	CHECK(find_selected_display_element(info(), {.module_id = 1, .light_id = 1026}) == 3u);
+	CHECK(find_selected_display_element(info(), {.module_id = 1, .light_id = 1024}) == 0u);
 
 	// Not full-screen capable
-	CHECK_FALSE(find_screensaver_element(info(), {.module_id = 1, .light_id = 1025}));
+	CHECK_FALSE(find_selected_display_element(info(), {.module_id = 1, .light_id = 1025}));
 	// Unknown
-	CHECK_FALSE(find_screensaver_element(info(), {.module_id = 1, .light_id = 7}));
+	CHECK_FALSE(find_selected_display_element(info(), {.module_id = 1, .light_id = 7}));
 }
 
-TEST_CASE("find_screensaver_element by position") {
+TEST_CASE("find_selected_display_element by position") {
 	auto at = [](float x, float y) {
-		return ScreensaverDisplay{.module_id = 1, .position_mm = std::pair{x, y}};
+		return SelectedDisplay{.module_id = 1, .position_mm = std::pair{x, y}};
 	};
 
-	CHECK(find_screensaver_element(info(), at(2, 10)) == 0u);
-	CHECK(find_screensaver_element(info(), at(2.6f, 9.4f)) == 0u);
+	CHECK(find_selected_display_element(info(), at(2, 10)) == 0u);
+	CHECK(find_selected_display_element(info(), at(2.6f, 9.4f)) == 0u);
 
 	// Center coords are compared by their top-left corner (17-15, 50-10)
-	CHECK(find_screensaver_element(info(), at(2, 40)) == 3u);
+	CHECK(find_selected_display_element(info(), at(2, 40)) == 3u);
 
 	// More than 1mm away
-	CHECK_FALSE(find_screensaver_element(info(), at(3.5f, 10)));
+	CHECK_FALSE(find_selected_display_element(info(), at(3.5f, 10)));
 
 	// A tiny display at that spot is not a candidate
-	CHECK_FALSE(find_screensaver_element(info(), at(20, 10)));
+	CHECK_FALSE(find_selected_display_element(info(), at(20, 10)));
 }

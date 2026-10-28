@@ -14,6 +14,10 @@
 #include "gui/pages/module_view/settings_menu.hh"
 #include "gui/pages/page_list.hh"
 
+extern "C" {
+LV_FONT_DECLARE(ui_font_Star16);
+}
+
 namespace MetaModule
 {
 
@@ -58,6 +62,13 @@ struct ModuleViewPage : PageBase {
 
 		auto roller_label = lv_obj_get_child(ui_ElementRoller, 0);
 		lv_label_set_recolor(roller_label, true);
+
+		// The roller font has no star, which marks the selected display: fall back to a font that does
+		roller_font = ui_font_MuseoSansRounded70016;
+		roller_font.fallback = &ui_font_Star16;
+		lv_obj_set_style_text_font(ui_ElementRoller, &roller_font, LV_PART_MAIN);
+		lv_obj_set_style_text_font(ui_ElementRoller, &roller_font, LV_PART_SELECTED);
+		roller_hover.set_font(&roller_font);
 
 		lv_hide(ui_ModuleViewCableCancelBut);
 
@@ -197,8 +208,8 @@ struct ModuleViewPage : PageBase {
 				// Inside an element group: back returns to the top-level list
 				exit_group();
 
-			} else if (mode == ViewMode::List && choosing_screensaver) {
-				exit_choose_screensaver();
+			} else if (mode == ViewMode::List && choosing_display) {
+				exit_choose_display();
 
 			} else if (mode == ViewMode::List) {
 				args.module_id = this_module_id;
@@ -237,12 +248,12 @@ struct ModuleViewPage : PageBase {
 			action_menu.update();
 		}
 
-		if (action_menu.take_choose_screensaver_request()) {
-			enter_choose_screensaver();
+		if (action_menu.take_choose_display_request()) {
+			enter_choose_display();
 		}
 
 		// Refresh the list once the menu is closed, so it doesn't take focus from the menu
-		if (!action_menu.is_visible() && action_menu.take_screensaver_changed()) {
+		if (!action_menu.is_visible() && action_menu.take_selected_display_changed()) {
 			populate_roller();
 		}
 
@@ -406,7 +417,7 @@ struct ModuleViewPage : PageBase {
 	// Only the plain element list can be left and returned to without losing anything
 	bool can_leave_for_screensaver() final {
 		return mode == ViewMode::List && !action_menu.is_visible() && !settings_menu.is_visible() &&
-			   !mapping_pane.control_popup_visible() && !choosing_screensaver;
+			   !mapping_pane.control_popup_visible() && !choosing_display;
 	}
 
 	void blur() final {
@@ -419,7 +430,7 @@ struct ModuleViewPage : PageBase {
 		lv_hide(load_meter);
 		lv_enable_long_press();
 		last_button_focused = nullptr;
-		choosing_screensaver = false;
+		choosing_display = false;
 	}
 
 private:
@@ -468,8 +479,8 @@ private:
 			return;
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
-		if (page->choosing_screensaver) {
-			page->exit_choose_screensaver();
+		if (page->choosing_display) {
+			page->exit_choose_display();
 			return;
 		}
 
@@ -478,10 +489,10 @@ private:
 		page->page_list.request_new_page(PageId::PatchView, page->args);
 	}
 
-	// While patching a cable, attaching an expander, or choosing a screensaver, the
+	// While patching a cable, attaching an expander, or choosing a display, the
 	// button bar only has a Cancel button and a label saying what we're doing
 	void update_button_bar() {
-		if (gui_state.new_cable || gui_state.new_expander || choosing_screensaver) {
+		if (gui_state.new_cable || gui_state.new_expander || choosing_display) {
 			lv_hide(ui_ModuleViewHideBut);
 			lv_hide(ui_ModuleViewActionBut);
 			lv_hide(ui_ModuleViewSettingsBut);
@@ -490,8 +501,8 @@ private:
 			lv_label_set_text(ui_ModuleViewCableCreateLabel,
 							  gui_state.new_cable	 ? "Creating a cable" :
 							  gui_state.new_expander ? "Attaching an expander" :
-													   "Choosing a screensaver");
-			lv_label_set_text(ui_ModuleViewCabelCancelLabel, choosing_screensaver ? "Cancel" : "Cancel Cable");
+													   "Choosing a display");
+			lv_label_set_text(ui_ModuleViewCabelCancelLabel, choosing_display ? "Cancel" : "Cancel Cable");
 			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_flex_align(
@@ -587,12 +598,12 @@ private:
 	void poll_poly_cable_changes();
 	void update_graphic_throttle_setting();
 
-	// Defined in module_view/screensaver.cc
-	bool is_assigned_screensaver(DrawnElement const &drawn_element) const;
-	void assign_screensaver(DrawnElement const &drawn_element);
-	void remove_screensaver();
-	void enter_choose_screensaver();
-	void exit_choose_screensaver();
+	// Defined in module_view/selected_display.cc
+	bool is_selected_display(DrawnElement const &drawn_element) const;
+	void select_display(DrawnElement const &drawn_element);
+	void deselect_display();
+	void enter_choose_display();
+	void exit_choose_display();
 	void change_roller_listing();
 
 	// Defined in module_view/quick_assign.cc
@@ -652,6 +663,9 @@ private:
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};
 	lv_draw_img_dsc_t img_dsc{};
 
+	// The roller's font, with a fallback for the star
+	lv_font_t roller_font{};
+
 	enum class ViewMode { List, Mapping, ModuleContextMenu } mode{ViewMode::List};
 
 	RollerHoverText roller_hover;
@@ -691,10 +705,10 @@ private:
 
 	bool suppress_next_click = false;
 
-	// Listing only this module's displays, to pick one as the patch's screensaver
-	bool choosing_screensaver = false;
+	// Listing only this module's displays, to pick one as the patch's selected display
+	bool choosing_display = false;
 	bool quick_control_mode = false;
-	bool screensaver_toggled_this_press = false;
+	bool display_toggled_this_press = false;
 	Toggler quickmap_rotary_button;
 
 	uint64_t last_poly_check_tm = 0;

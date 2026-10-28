@@ -12,8 +12,8 @@
 namespace MetaModule
 {
 
-// A graphic display that the module view lists and can show full-screen, and so can be a
-// screensaver. Tiny displays are treated as lights (see ModView::is_light_only), and
+// A graphic display that the module view lists and can show full-screen, and so can be the
+// patch's selected display. Tiny displays are treated as lights (see ModView::is_light_only), and
 // unnamed elements are not listed.
 inline DynamicGraphicDisplay const *fullscreen_display(Element const &el) {
 	auto display = std::get_if<DynamicGraphicDisplay>(&el);
@@ -31,21 +31,21 @@ inline unsigned count_fullscreen_displays(ModuleInfoView const &info) {
 	return count;
 }
 
-inline std::string screensaver_set_message(PatchData const &pd, uint16_t module_id, Element const &el) {
+inline std::string selected_display_message(PatchData const &pd, uint16_t module_id, Element const &el) {
 	using namespace std::literals;
 	auto name = base_element(el).short_name;
 	name = name.substr(0, name.find_first_of("\n\0"sv));
 
-	std::string msg = "Screensaver set to ";
+	std::string msg = "Selected display: ";
 	if (name.size())
 		msg += "'" + std::string{name} + "' on ";
 	return msg + module_display_name(pd, module_id);
 }
 
-// Index in info.elements of the display a screensaver entry refers to, or nullopt if there's
+// Index in info.elements of the display a selected display entry refers to, or nullopt if there's
 // no such full-screen display. Entries with a position (from VCV Rack) match the display whose
 // top-left corner is nearest, within 1mm.
-inline std::optional<unsigned> find_screensaver_element(ModuleInfoView const &info, ScreensaverDisplay const &ss) {
+inline std::optional<unsigned> find_selected_display_element(ModuleInfoView const &info, SelectedDisplay const &ss) {
 	constexpr float Tolerance_mm = 1.f;
 
 	std::optional<unsigned> found{};
@@ -76,27 +76,27 @@ inline std::optional<unsigned> find_screensaver_element(ModuleInfoView const &in
 	return found;
 }
 
-// Light index of the patch's screensaver display, if it matches a display of its module
-inline std::optional<uint16_t> screensaver_light_idx(PatchData const &patch) {
-	auto ss = patch.find_screensaver_display();
+// Light index of the patch's selected display, if it matches a display of its module
+inline std::optional<uint16_t> selected_display_light_idx(PatchData const &patch) {
+	auto ss = patch.find_selected_display();
 	if (!ss || ss->module_id >= patch.module_slugs.size())
 		return std::nullopt;
 
 	auto info = ModuleFactory::getModuleInfo(patch.module_slugs[ss->module_id]);
-	if (auto i = find_screensaver_element(info, *ss))
+	if (auto i = find_selected_display_element(info, *ss))
 		return info.indices[*i].light_idx;
 	return std::nullopt;
 }
 
-// Page arguments to show the patch's screensaver display on the FullscreenGraphic page,
+// Page arguments to show the patch's selected display on the FullscreenGraphic page,
 // or nullopt if it has none, or it no longer matches a display of that module
-inline std::optional<PageArguments> screensaver_page_args(PatchData const &patch, PatchLocHash patch_loc_hash) {
-	auto ss = patch.find_screensaver_display();
+inline std::optional<PageArguments> selected_display_page_args(PatchData const &patch, PatchLocHash patch_loc_hash) {
+	auto ss = patch.find_selected_display();
 	if (!ss || ss->module_id >= patch.module_slugs.size())
 		return std::nullopt;
 
 	auto info = ModuleFactory::getModuleInfo(patch.module_slugs[ss->module_id]);
-	auto i = find_screensaver_element(info, *ss);
+	auto i = find_selected_display_element(info, *ss);
 	if (!i)
 		return std::nullopt;
 
