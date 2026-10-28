@@ -284,7 +284,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// Audio inputs
 		if (active_ins) {
-			for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
+			for (auto [panel_jack_i, inchan] : zip(audio_in_order, in.chan)) {
 
 				// Skip unpatched jacks and jacks the patch doesn't use
 				if (!jack_is_patched(active_ins, panel_jack_i))
@@ -375,9 +375,18 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		// Get outputs from modules
 		output_fade_amt += output_fade_delta;
 
-		for (auto [i, outchan] : countzip(out.chan)) {
-			bool used = jack_is_patched(used_outs, i + PanelDef::NumUserFacingInJacks);
-			outchan = used ? get_audio_output(i) : get_silent_audio_output(i);
+		// Using a constexpr panel_out_of_codec_chan(chan) for MP1 results in a tiny overhead
+		if constexpr (codec_outs_match_panel_order) {
+			for (auto [i, outchan] : countzip(out.chan)) {
+				bool used = jack_is_patched(used_outs, i + PanelDef::NumUserFacingInJacks);
+				outchan = used ? get_audio_output(i) : get_silent_audio_output(i);
+			}
+		} else {
+			for (auto [chan, outchan] : countzip(out.chan)) {
+				auto i = panel_out_of_codec_chan(chan);
+				bool used = jack_is_patched(used_outs, i + PanelDef::NumUserFacingInJacks);
+				outchan = used ? get_audio_output(i) : get_silent_audio_output(i);
+			}
 		}
 
 		// Ext audio modules:
@@ -414,7 +423,7 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 
 		// Set metaparams.ins with input signals
 		if (do_params) {
-			for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
+			for (auto [panel_jack_i, inchan] : zip(audio_in_order, in.chan)) {
 				float scaled_input = jack_is_patched(param_state.jack_senses, panel_jack_i) ?
 										 cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
 										 0;

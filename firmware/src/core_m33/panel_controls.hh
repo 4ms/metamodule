@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/audio_pins_conf.hh"
 #include "conf/control_expander_conf.hh"
 #include "conf/frame_rate_conf.hh"
 #include "core_m4/midi_controls.hh"
@@ -31,6 +32,9 @@ namespace MetaModule
 // The rest are read, but not passed on yet (there's no pro panel definition): the knob encoders and
 // buttons on the I2C expanders (expander_controls.hh), the control encoder (ENC103) and its button,
 // the gate ins, and jack sense. For bring-up, print_changes() reports them on the console.
+//
+// The headphone amp is on only while headphones are plugged in: the frame interrupt drives
+// HP_SHUTDOWN low while HP_SENSE is (debounced) high.
 //
 // As on MP1: when the A35 releases a param block's semaphore, we start filling the other block,
 // one frame per audio frame, from an interrupt on the SAI's frame clock (LRCLK), so we fill the
@@ -70,6 +74,7 @@ private:
 	void update_rotary();
 	void update_midi_connected();
 	void print_changes();
+	void update_headphone_amp();
 	void process_midi_frame(Params &params);
 	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
 
@@ -92,6 +97,18 @@ private:
 	mdrivlib::DebouncedPin<Controls::Direct::GateIn1, mdrivlib::PinPolarity::Normal> gate_in_1;
 	mdrivlib::DebouncedPin<Controls::Direct::GateIn2, mdrivlib::PinPolarity::Normal> gate_in_2;
 
+	// HP_SENSE is high when headphones are plugged in. It needs the internal pull-up.
+	using HpSensePin = mdrivlib::FPin<Headphone::SensePin.gpio, Headphone::SensePin.pin, mdrivlib::PinMode::Input>;
+	using HpShutdownPin =
+		mdrivlib::FPin<Headphone::ShutdownPin.gpio, Headphone::ShutdownPin.pin, mdrivlib::PinMode::Output>;
+	HpSensePin hp_sense_pin{mdrivlib::PinPull::Up};
+	HpShutdownPin hp_shutdown_pin{mdrivlib::PinPull::None, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::PushPull};
+	// Sampled every HpSenseFrames frames (1ms at 48kHz), so the debouncer needs ~12ms of no bouncing
+	static constexpr uint32_t HpSenseFrames = 48;
+	uint32_t hp_sense_ctr = 0;
+	Debouncer<> hp_sense;
+	volatile bool headphones_plugged = false;
+
 	static constexpr uint32_t JackSensePollMs = 50;
 	uint32_t last_jack_sense_tm = 0;
 	std::optional<uint16_t> jack_sense_reading; // bit set = pin high
@@ -102,6 +119,7 @@ private:
 	int32_t printed_ctl_encoder_pos = 0;
 	bool printed_gate_in_1 = false;
 	bool printed_gate_in_2 = false;
+	bool printed_headphones_plugged = false;
 
 	DoubleBufParamBlock &param_blocks;
 	MetaParams *cur_metaparams;

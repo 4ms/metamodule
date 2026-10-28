@@ -11,7 +11,8 @@
 // The pro p1 jack layout matches the medium panel: 6 audio ins, 2 gate ins, 8 outs,
 // so PanelDef (panel_medium_defs.hh) is used for now.
 //
-// TODO: verify sense polarity on hardware (MP1 reads 1 = patched)
+// Polarity, verified on p1: a pin reads 0 when its jack is patched, 1 when it's not. Same as MP1, so
+// as there, the reading is inverted before jack_is_patched() (1 = patched) sees it.
 
 namespace MetaModule::JackSense
 {

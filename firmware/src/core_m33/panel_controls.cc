@@ -33,6 +33,8 @@ PanelControls::PanelControls(DoubleBufParamBlock &param_blocks)
 	, cur_metaparams{&param_blocks[0].metaparams}
 	, cur_params{param_blocks[0].params.data()}
 	, cur_params_end{cur_params + param_blocks[0].params.size()} {
+	// Headphone amp off until headphones are plugged in
+	HpShutdownPin::high();
 }
 
 void PanelControls::start() {
@@ -90,6 +92,7 @@ void PanelControls::update() {
 	gate_in_1.update();
 	gate_in_2.update();
 	expanders.update();
+	update_headphone_amp();
 
 	if (auto block = next_block.exchange(-1, std::memory_order_relaxed); block >= 0) {
 		auto &param_block = param_blocks[block];
@@ -219,6 +222,23 @@ void PanelControls::update_rotary() {
 namespace MetaModule
 {
 
+void PanelControls::update_headphone_amp() {
+	if (++hp_sense_ctr < HpSenseFrames)
+		return;
+	hp_sense_ctr = 0;
+
+	hp_sense.register_state(HpSensePin::read());
+
+	if (hp_sense.just_went_high()) {
+		HpShutdownPin::low();
+		headphones_plugged = true;
+	}
+	if (hp_sense.just_went_low()) {
+		HpShutdownPin::high();
+		headphones_plugged = false;
+	}
+}
+
 void PanelControls::process() {
 	expanders.process();
 	print_changes();
@@ -301,6 +321,11 @@ void PanelControls::print_changes() {
 	if (bool g = gate_in_2.is_high(); g != printed_gate_in_2) {
 		printf("GateIn2 %s\n", g ? "high" : "low");
 		printed_gate_in_2 = g;
+	}
+
+	if (bool hp = headphones_plugged; hp != printed_headphones_plugged) {
+		printf("Headphones %s: amp %s\n", hp ? "plugged in" : "unplugged", hp ? "on" : "off");
+		printed_headphones_plugged = hp;
 	}
 }
 
