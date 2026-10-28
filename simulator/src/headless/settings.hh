@@ -21,6 +21,9 @@ struct Settings {
 	std::string plugin_mm_json;
 	std::vector<std::string> modules; // empty means all modules
 
+	// Instead of playing a patch, print these modules' elements (Brand:Module slugs)
+	std::vector<std::string> dump_elements;
+
 	void parse(int argc, char *argv[]) {
 
 		try {
@@ -57,6 +60,11 @@ struct Settings {
 								  "Module slug to check (repeat, or comma-separate, for more). Default: all modules",
 								  cxxopts::value<std::vector<std::string>>());
 
+			options.add_options()("dump-elements",
+								  "Create a module and print its elements, then exit. Give the Brand:Module slug "
+								  "(repeat, or comma-separate, for more)",
+								  cxxopts::value<std::vector<std::string>>());
+
 			options.add_options()("h,help", "Print help");
 
 			auto args = options.parse(argc, argv);
@@ -86,6 +94,9 @@ struct Settings {
 
 			if (args.count("module") > 0)
 				modules = args["module"].as<std::vector<std::string>>();
+
+			if (args.count("dump-elements") > 0)
+				dump_elements = args["dump-elements"].as<std::vector<std::string>>();
 
 			if (args.count("help") || args.count("?") || args.count("h")) {
 				std::cout << options.help() << std::endl;
