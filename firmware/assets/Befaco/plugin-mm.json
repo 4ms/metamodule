@@ -99,7 +99,32 @@
 	},
 	{
 		"slug": "Random8",
-		"name": "Random8"
+		"name": "Random8",
+		"groups": {
+			"Channel 1": ["param:64", "param:0", "param:8", "param:16", "param:24", "param:32", "param:40", "param:48", "param:56", "in:0", "out:0"],
+			"Channel 2": ["param:65", "param:1", "param:9", "param:17", "param:25", "param:33", "param:41", "param:49", "param:57", "in:1", "out:1"],
+			"Channel 3": ["param:66", "param:2", "param:10", "param:18", "param:26", "param:34", "param:42", "param:50", "param:58", "in:2", "out:2"],
+			"Channel 4": ["param:67", "param:3", "param:11", "param:19", "param:27", "param:35", "param:43", "param:51", "param:59", "in:3", "out:3"],
+			"Channel 5": ["param:68", "param:4", "param:12", "param:20", "param:28", "param:36", "param:44", "param:52", "param:60", "in:4", "out:4"],
+			"Channel 6": ["param:69", "param:5", "param:13", "param:21", "param:29", "param:37", "param:45", "param:53", "param:61", "in:5", "out:5"],
+			"Channel 7": ["param:70", "param:6", "param:14", "param:22", "param:30", "param:38", "param:46", "param:54", "param:62", "in:6", "out:6"],
+			"Channel 8": ["param:71", "param:7", "param:15", "param:23", "param:31", "param:39", "param:47", "param:55", "param:63", "in:7", "out:7"]
+		},
+		"order": ["Channel 1", "Channel 2", "Channel 3", "Channel 4", "Channel 5", "Channel 6", "Channel 7", "Channel 8"],
+		"names": {
+			"param:64": "Button", "param:65": "Button", "param:66": "Button", "param:67": "Button",
+			"param:68": "Button", "param:69": "Button", "param:70": "Button", "param:71": "Button",
+			"param:0": "Gain", "param:1": "Gain", "param:2": "Gain", "param:3": "Gain", "param:4": "Gain", "param:5": "Gain", "param:6": "Gain", "param:7": "Gain",
+			"param:8": "Divider", "param:9": "Divider", "param:10": "Divider", "param:11": "Divider", "param:12": "Divider", "param:13": "Divider", "param:14": "Divider", "param:15": "Divider",
+			"param:16": "Probability", "param:17": "Probability", "param:18": "Probability", "param:19": "Probability", "param:20": "Probability", "param:21": "Probability", "param:22": "Probability", "param:23": "Probability",
+			"param:24": "Style", "param:25": "Style", "param:26": "Style", "param:27": "Style", "param:28": "Style", "param:29": "Style", "param:30": "Style", "param:31": "Style",
+			"param:32": "Offset", "param:33": "Offset", "param:34": "Offset", "param:35": "Offset", "param:36": "Offset", "param:37": "Offset", "param:38": "Offset", "param:39": "Offset",
+			"param:40": "Scale", "param:41": "Scale", "param:42": "Scale", "param:43": "Scale", "param:44": "Scale", "param:45": "Scale", "param:46": "Scale", "param:47": "Scale",
+			"param:48": "Slide", "param:49": "Slide", "param:50": "Slide", "param:51": "Slide", "param:52": "Slide", "param:53": "Slide", "param:54": "Slide", "param:55": "Slide",
+			"param:56": "Steps", "param:57": "Steps", "param:58": "Steps", "param:59": "Steps", "param:60": "Steps", "param:61": "Steps", "param:62": "Steps", "param:63": "Steps",
+			"in:0": "Trigger", "in:1": "Trigger", "in:2": "Trigger", "in:3": "Trigger", "in:4": "Trigger", "in:5": "Trigger", "in:6": "Trigger", "in:7": "Trigger",
+			"out:0": "Output", "out:1": "Output", "out:2": "Output", "out:3": "Output", "out:4": "Output", "out:5": "Output", "out:6": "Output", "out:7": "Output"
+		}
 	},
 	{
 		"slug": "STMix",
@@ -131,7 +156,31 @@
 	},
 	{
 		"slug": "Iroi",
-		"name": "Iroi"
+		"name": "Iroi",
+		"groups": {
+			"Alternate controls": ["param:18", "param:19", "param:20", "param:21", "param:22", "param:23"],
+			"Mod amounts": ["param:24", "param:25", "param:26", "param:27", "param:28", "param:29", "param:30", "param:31"],
+			"CV amounts": ["param:32", "param:33", "param:34", "param:35", "param:36", "param:37", "param:38", "param:39"],
+			"Random amounts": ["param:40", "param:41", "param:42", "param:43", "param:44", "param:45", "param:46", "param:47"]
+		},
+		"order": [
+			"param:0", "param:1", "param:2", "param:3", "param:4", "param:5", "param:6", "param:7",
+			"param:8", "param:9", "param:10", "param:11", "param:12", "param:13", "param:14",
+			"param:16", "param:49",
+			"Alternate controls", "Mod amounts", "CV amounts", "Random amounts",
+			"in:0", "in:1", "in:2", "in:3", "in:4", "in:5", "in:6", "in:7", "in:8", "in:9", "in:10", "in:11",
+			"out:0", "out:1"
+		],
+		"names": {
+			"param:18": "Modulation type", "param:19": "Filter mode", "param:20": "Filter position",
+			"param:21": "Resonator dissonance", "param:22": "Echo filter", "param:23": "Ambience auto-pan",
+			"param:24": "Filter cutoff", "param:25": "Resonance", "param:26": "Resonator tune", "param:27": "Resonator feedback",
+			"param:28": "Echo density", "param:29": "Echo repeats", "param:30": "Ambience spacetime", "param:31": "Ambience decay",
+			"param:32": "Filter cutoff", "param:33": "Resonance", "param:34": "Resonator tune", "param:35": "Resonator feedback",
+			"param:36": "Echo density", "param:37": "Echo repeats", "param:38": "Ambience spacetime", "param:39": "Ambience decay",
+			"param:40": "Filter cutoff", "param:41": "Resonance", "param:42": "Resonator tune", "param:43": "Resonator feedback",
+			"param:44": "Echo density", "param:45": "Echo repeats", "param:46": "Ambience spacetime", "param:47": "Ambience decay"
+		}
 	}
 	]
 }
