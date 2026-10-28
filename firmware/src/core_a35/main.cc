@@ -9,6 +9,7 @@
 #include "console.hh"
 #include "copro.hh"
 #include "git_version.h"
+#include "i2c_scan.hh"
 #include "ld.h"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
@@ -65,6 +66,10 @@ int main() {
 							 StaticBuffers::param_blocks,
 							 patch_mod_queue};
 	audio.set_calibration(cal);
+
+#ifndef MP2_TEST_CARRIER
+	scan_i2c_buses();
+#endif
 
 	// Core 1 runs the GUI and plays part of the patch. This returns once it's ready for the audio.
 	static AuxCoreObjects aux_objects{patch_player, patch_playloader, file_storage, open_patches_manager, patch_mod_queue};
