@@ -18,8 +18,16 @@ constexpr uint8_t led_chip_addr_8bit(unsigned chip) {
 	return LedChipAddr7bit[chip] << 1;
 }
 
-// Each RGB LED is three consecutive outputs (R, G, B), so it is addressed as
+// Each RGB LED is three consecutive outputs, so it is addressed as
 // rgb_led_id = first output / 3 in LP5024::Device::set_rgb_led()
+//
+// The outputs are in R, B, G order: the schematic's LED_BUTn_G and LED_BUTn_B net names are
+// swapped (the button's pin 7 is B and pin 6 is G, as its symbol's pin names say). Verified on p1.
+// So use rgb_to_outputs() for the values passed to set_rgb_led().
+constexpr std::array<uint8_t, 3> rgb_to_outputs(uint8_t r, uint8_t g, uint8_t b) {
+	return {r, b, g};
+}
+
 struct RgbLed {
 	uint8_t chip;
 	uint8_t rgb_led_id;
