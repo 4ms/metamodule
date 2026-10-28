@@ -1,6 +1,5 @@
 #pragma once
 #include "conf/board_codec_conf.hh"
-#include "conf/control_expander_conf.hh"
 #include "conf/fusb30x_conf.hh"
 #include "conf/i2c_conf.hh"
 #include "conf/jack_sense_conf.hh"
@@ -10,9 +9,12 @@
 #include <array>
 #include <cstdio>
 
-// Pro p1 bring-up check: probes every address on each I2C bus, and prints which of the devices that
-// should be there answered (see conf/README.md), and anything else that did. For the TCA9555s that
-// answer, it reads their inputs too.
+// Pro p1 bring-up check: probes every address on each I2C bus the A35 uses, and prints which of the
+// devices that should be there answered (see conf/README.md), and anything else that did. For the
+// TCA9555s that answer, it reads their inputs too.
+//
+// Not I2C2 and I2C3: the M33 owns them (the control expanders: core_m33/expander_controls.hh), and
+// it checks those expanders when it starts.
 //
 // Not for the test carrier: its wiring is different (PB4, which is I2C2 here, is its VBUS enable).
 
@@ -84,26 +86,9 @@ inline void scan_bus(mdrivlib::I2CPeriph &i2c, Bus const &bus) {
 // initialized (so it's out of reset, and answers).
 inline void scan_i2c_buses() {
 	using namespace I2CScan;
-	using Controls::Expanders;
 	using ButtonLEDs::LedChipAddr7bit;
 
 	printf("I2C scan:\n");
-
-	{
-		mdrivlib::I2CPeriph i2c{controls_a_i2c_conf};
-		scan_bus(i2c,
-				 {"  I2C2 (PB5/PB4, needs the SDA/SCL swap bodge)",
-				  controls_a_i2c_conf,
-				  {{{Expanders[0].chip.addr, "U1210 TCA9555", true}, {Expanders[1].chip.addr, "U1211 TCA9555", true}}}});
-	}
-
-	{
-		mdrivlib::I2CPeriph i2c{controls_b_i2c_conf};
-		scan_bus(i2c,
-				 {"  I2C3 (PG2/PG1)",
-				  controls_b_i2c_conf,
-				  {{{Expanders[2].chip.addr, "U1213 TCA9555", true}, {Expanders[3].chip.addr, "U1209 TCA9555", true}}}});
-	}
 
 	{
 		SharedI2CGuard lock;

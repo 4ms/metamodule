@@ -309,6 +309,11 @@ public:
 		return usb_device.midi;
 	}
 
+	// MP2: the M33 reads jack sense on the same bus as the FUSB302
+	mdrivlib::I2CPeriph &i2c() {
+		return usbi2c;
+	}
+
 	FatFileIO &get_msc_fileio() {
 		return usb_host.get_msc_fileio();
 	}

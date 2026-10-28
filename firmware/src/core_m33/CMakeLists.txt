@@ -42,6 +42,8 @@ set_arch_flags()
 # ST HAL (only the modules used here: see stm32mp2xx_hal_conf.h)
 set(M33_HAL_MODULES
   hal_dcache
+  hal_dma # the interrupt-driven I2C transfers' error handling calls it
+  hal_dma_ex
   hal_i2c
   hal_i2c_ex
   hal_ospi
@@ -58,11 +60,12 @@ set(M33_HAL_MODULES
 )
 list(TRANSFORM M33_HAL_MODULES PREPEND ${FWDIR}/lib/stm32-hal/stm32mp2/Src/stm32mp2xx_)
 list(TRANSFORM M33_HAL_MODULES APPEND .c)
-set_source_files_properties(${M33_HAL_MODULES} PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable")
+set_source_files_properties(${M33_HAL_MODULES} PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable;-Wno-maybe-uninitialized")
 
 add_executable(
   main_m33.elf
   main.cc
+  expander_controls.cc
   fault_handlers.cc
   panel_controls.cc
   system_init.cc

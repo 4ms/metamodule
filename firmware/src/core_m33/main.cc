@@ -5,8 +5,8 @@
 // On MP1 the M4 runs patch storage, controls, USB, and MIDI; on MP2 the M33 takes that role.
 //
 // So far:
-// - controls: the control encoder and Back button, for the GUI, and USB MIDI (host or device) to
-//   and from the patch (panel_controls.hh).
+// - controls: the nav encoder and Back button, for the GUI, and USB MIDI (host or device) to and
+//   from the patch (panel_controls.hh). The other controls are read, and reported on the console.
 // - storage: MP1's PatchStorage answers the A35's FileStorageProxy requests (storage_messages.hh).
 //   Volumes: SD card, NOR flash, and USB drive.
 // - USB: MP1's UsbManager, with the FUSB302 deciding the role. Takes the USB settings from the
@@ -129,11 +129,13 @@ int main() {
 
 	while (true) {
 		console_drain.process();
+		controls.process();
 		sd.process();
 		storage.process();
 		{
 			SharedI2CGuard i2c;
 			usb.process();
+			controls.update_jack_sense(usb.i2c());
 
 			auto ds_result = device_settings.process();
 			if (ds_result.has_mode_change)

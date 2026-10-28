@@ -121,12 +121,12 @@ constexpr std::array<ExpBit, 16> Buttons{{
 // Controls wired directly to MCU GPIOs
 namespace Direct
 {
-// Main "control" encoder (next to the screen)
+// "Control" encoder ENC103 (/CTLENC_*)
 constexpr mdrivlib::PinDef CtlEncA{mdrivlib::GPIO::C, mdrivlib::PinNum::_3};
 constexpr mdrivlib::PinDef CtlEncB{mdrivlib::GPIO::C, mdrivlib::PinNum::_9};
 constexpr mdrivlib::PinDef CtlEncBut{mdrivlib::GPIO::H, mdrivlib::PinNum::_10};
 
-// Navigation encoder
+// Navigation encoder ENC102 (/NAVENC_*): the GUI's rotary (MP1's rotary)
 constexpr mdrivlib::PinDef NavEncA{mdrivlib::GPIO::C, mdrivlib::PinNum::_6};
 constexpr mdrivlib::PinDef NavEncB{mdrivlib::GPIO::A, mdrivlib::PinNum::_10};
 constexpr mdrivlib::PinDef NavEncBut{mdrivlib::GPIO::A, mdrivlib::PinNum::_5};

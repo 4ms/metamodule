@@ -2,7 +2,9 @@
 #include "conf/control_expander_conf.hh"
 #include "conf/frame_rate_conf.hh"
 #include "core_m4/midi_controls.hh"
+#include "expander_controls.hh"
 #include "drivers/debounced_switch.hh"
+#include "drivers/i2c.hh"
 #include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
 #include "midi/midi_message.hh"
@@ -13,6 +15,7 @@
 #include "util/edge_detector.hh"
 #include "util/lockfree_fifo_spsc.hh"
 #include <atomic>
+#include <optional>
 #include <span>
 
 namespace MetaModule
@@ -22,9 +25,12 @@ namespace MetaModule
 // into the param blocks that the A35's audio stream reads (and passes on to the GUI).
 // (Named PanelControls because the pro conf's pins are in namespace Controls.)
 //
-// So far, only the controls wired to MCU pins that MP1's GUI uses: the control encoder and its
-// button (MP1's rotary), and the Back button (MP1's button 0). Not yet: the nav encoder, the gate
-// ins, jack sense, and the knob encoders and buttons on the I2C expanders.
+// Into the param blocks so far: only the controls that MP1's GUI uses, the nav encoder (ENC102) and
+// its button (MP1's rotary), and the Back button (MP1's button 0).
+//
+// The rest are read, but not passed on yet (there's no pro panel definition): the knob encoders and
+// buttons on the I2C expanders (expander_controls.hh), the control encoder (ENC103) and its button,
+// the gate ins, and jack sense. For bring-up, print_changes() reports them on the console.
 //
 // As on MP1: when the A35 releases a param block's semaphore, we start filling the other block,
 // one frame per audio frame, from an interrupt on the SAI's frame clock (LRCLK), so we fill the
@@ -46,6 +52,13 @@ public:
 	// Routes USB MIDI between the patch and the USB MIDI host or device (whichever is connected)
 	void start_midi(MidiHost &midi_host, UsbMidiDevice &midi_device);
 
+	// Main loop
+	void process();
+
+	// Main loop: reads the jack sense expander (U1212) on I2C4, every JackSensePollMs. The caller
+	// holds the shared I2C4 lock, and passes the M33's I2C4 peripheral (UsbManager's).
+	void update_jack_sense(mdrivlib::I2CPeriph &i2c4);
+
 	// Audio frames so far (the frame clock interrupts)
 	uint32_t num_frames() const {
 		return frame_count;
@@ -56,6 +69,7 @@ private:
 	void update_metaparams();
 	void update_rotary();
 	void update_midi_connected();
+	void print_changes();
 	void process_midi_frame(Params &params);
 	void route_usb_midi_rx(std::span<uint8_t> rxbuffer);
 
@@ -64,10 +78,29 @@ private:
 
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> frame_task;
 
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, Controls::Direct::CtlEncA, Controls::Direct::CtlEncB> rotary;
-	mdrivlib::DebouncedPin<Controls::Direct::CtlEncBut, mdrivlib::PinPolarity::Inverted> rotary_button;
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, Controls::Direct::NavEncA, Controls::Direct::NavEncB> rotary;
+	mdrivlib::DebouncedPin<Controls::Direct::NavEncBut, mdrivlib::PinPolarity::Inverted> rotary_button;
 	mdrivlib::DebouncedPin<Controls::Direct::BackBut, mdrivlib::PinPolarity::Inverted> back_button;
 	bool rotary_moved_while_pressed = false;
+
+	ExpanderControls expanders;
+
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, Controls::Direct::CtlEncA, Controls::Direct::CtlEncB> ctl_encoder;
+	mdrivlib::DebouncedPin<Controls::Direct::CtlEncBut, mdrivlib::PinPolarity::Inverted> ctl_encoder_button;
+	volatile int32_t ctl_encoder_pos = 0;
+	mdrivlib::DebouncedPin<Controls::Direct::GateIn1, mdrivlib::PinPolarity::Normal> gate_in_1;
+	mdrivlib::DebouncedPin<Controls::Direct::GateIn2, mdrivlib::PinPolarity::Normal> gate_in_2;
+
+	static constexpr uint32_t JackSensePollMs = 50;
+	uint32_t last_jack_sense_tm = 0;
+	std::optional<uint16_t> jack_sense_reading; // bit set = pin high
+	bool jack_sense_failed = false;
+
+	// print_changes(): what it last reported
+	std::array<int32_t, ExpanderControls::NumEncoders> printed_enc_positions{};
+	int32_t printed_ctl_encoder_pos = 0;
+	bool printed_gate_in_1 = false;
+	bool printed_gate_in_2 = false;
 
 	DoubleBufParamBlock &param_blocks;
 	MetaParams *cur_metaparams;

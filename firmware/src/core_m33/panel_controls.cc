@@ -1,6 +1,8 @@
 #include "panel_controls.hh"
 #include "conf/hsem_conf.hh"
+#include "conf/jack_sense_conf.hh"
 #include "drivers/hsem.hh"
+#include <cstdio>
 
 namespace MetaModule
 {
@@ -16,6 +18,14 @@ void clear_rx_message(Params &params) {
 	params.midi_event.type = Midi::Event::Type::None;
 	params.midi_event.port = 0;
 }
+
+// In Controls::Button order
+constexpr std::array<const char *, ExpanderControls::NumButtons> ButtonNames{
+	"BUT1", "BUT2", "BUT3", "BUT4", "BUT5", "BUT6", "BUT7", "BUT8",
+	"NAV1", "NAV2", "NAV3", "NAV4", "NAV5", "NAV6", "KNOBSET", "PLAY",
+};
+
+constexpr uint8_t TCA9555_InputPort0 = 0x00;
 } // namespace
 
 PanelControls::PanelControls(DoubleBufParamBlock &param_blocks)
@@ -38,6 +48,8 @@ void PanelControls::start() {
 	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 	HWSemaphoreGlobalBase::enable_all_handlers();
+
+	expanders.start();
 
 	frame_task.init([this] { update(); });
 	frame_task.start();
@@ -71,6 +83,13 @@ void PanelControls::update() {
 	rotary.update();
 	rotary_button.update();
 	back_button.update();
+
+	ctl_encoder.update();
+	ctl_encoder_pos = ctl_encoder_pos + ctl_encoder.read();
+	ctl_encoder_button.update();
+	gate_in_1.update();
+	gate_in_2.update();
+	expanders.update();
 
 	if (auto block = next_block.exchange(-1, std::memory_order_relaxed); block >= 0) {
 		auto &param_block = param_blocks[block];
@@ -193,6 +212,96 @@ void PanelControls::update_rotary() {
 	cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
 	// If the rotary was turned at any point since the button was pressed
 	rotary_moved_while_pressed |= pressed && (new_rotary_motion != 0);
+}
+
+} // namespace MetaModule
+
+namespace MetaModule
+{
+
+void PanelControls::process() {
+	expanders.process();
+	print_changes();
+}
+
+void PanelControls::update_jack_sense(mdrivlib::I2CPeriph &i2c4) {
+	auto now = HAL_GetTick();
+	if (now - last_jack_sense_tm < JackSensePollMs)
+		return;
+	last_jack_sense_tm = now;
+
+	std::array<uint8_t, 2> rx{};
+	if (i2c4.mem_read(JackSense::gpio_expander_conf.addr << 1, TCA9555_InputPort0, 1, rx.data(), rx.size()) !=
+		mdrivlib::I2CPeriph::I2C_NO_ERR)
+	{
+		if (!jack_sense_failed)
+			printf("M33: jack sense expander U1212: read FAILED\n");
+		jack_sense_failed = true;
+		return;
+	}
+	jack_sense_failed = false;
+
+	uint16_t reading = (rx[1] << 8) | rx[0];
+	auto prev = jack_sense_reading;
+	jack_sense_reading = reading;
+
+	if (!prev) {
+		printf("Jack sense: 0x%04x\n", reading);
+		return;
+	}
+
+	// jacksense_pin_order: panel jacks (ins, then outs) -> bits
+	for (unsigned jack = 0; jack < std::size(jacksense_pin_order); jack++) {
+		auto bit = jacksense_pin_order[jack];
+		if (((reading ^ *prev) >> bit) & 1) {
+			auto name = jack < PanelDef::NumUserFacingInJacks ? PanelDef::InJackNames[jack] :
+																PanelDef::OutJackNames[jack - PanelDef::NumUserFacingInJacks];
+			printf("Jack sense: %.*s = %u\n", int(name.size()), name.data(), (reading >> bit) & 1);
+		}
+	}
+}
+
+// Bring-up: reports the controls that aren't passed on to the param blocks yet
+void PanelControls::print_changes() {
+	for (unsigned i = 0; i < ExpanderControls::NumEncoders; i++) {
+		auto pos = expanders.encoder_position(i);
+		if (pos != printed_enc_positions[i]) {
+			printf("ENC%u %+ld (%ld)\n", i + 1, long(pos - printed_enc_positions[i]), long(pos));
+			printed_enc_positions[i] = pos;
+		}
+
+		auto &but = expanders.encoder_button(i);
+		if (but.is_just_pressed())
+			printf("ENC%u button pressed\n", i + 1);
+		if (but.is_just_released())
+			printf("ENC%u button released\n", i + 1);
+	}
+
+	for (unsigned i = 0; i < ExpanderControls::NumButtons; i++) {
+		auto &but = expanders.button(i);
+		if (but.is_just_pressed())
+			printf("%s pressed\n", ButtonNames[i]);
+		if (but.is_just_released())
+			printf("%s released\n", ButtonNames[i]);
+	}
+
+	if (int32_t pos = ctl_encoder_pos; pos != printed_ctl_encoder_pos) {
+		printf("CTLENC %+ld (%ld)\n", long(pos - printed_ctl_encoder_pos), long(pos));
+		printed_ctl_encoder_pos = pos;
+	}
+	if (ctl_encoder_button.is_just_pressed())
+		printf("CTLENC button pressed\n");
+	if (ctl_encoder_button.is_just_released())
+		printf("CTLENC button released\n");
+
+	if (bool g = gate_in_1.is_high(); g != printed_gate_in_1) {
+		printf("GateIn1 %s\n", g ? "high" : "low");
+		printed_gate_in_1 = g;
+	}
+	if (bool g = gate_in_2.is_high(); g != printed_gate_in_2) {
+		printf("GateIn2 %s\n", g ? "high" : "low");
+		printed_gate_in_2 = g;
+	}
 }
 
 } // namespace MetaModule

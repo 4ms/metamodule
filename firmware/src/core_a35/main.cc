@@ -5,7 +5,6 @@
 
 #include "audio/audio.hh"
 #include "aux_core.hh"
-#include "button_led_test.hh"
 #include "calibrate/calibration_data_reader.hh"
 #include "console.hh"
 #include "copro.hh"
@@ -70,8 +69,6 @@ int main() {
 
 #ifndef MP2_TEST_CARRIER
 	scan_i2c_buses();
-	static ButtonLedTest button_led_test;
-	button_led_test.start();
 #endif
 
 	// Core 1 runs the GUI and plays part of the patch. This returns once it's ready for the audio.
@@ -85,9 +82,6 @@ int main() {
 	// Same as MP1's main loop (core_a7/main.cc)
 	while (true) {
 		audio.handle_overruns();
-#ifndef MP2_TEST_CARRIER
-		button_led_test.update();
-#endif
 
 		if (audio.get_audio_errors() > 0) {
 			pr_err("Audio error\n");
