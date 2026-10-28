@@ -38,12 +38,12 @@ The jack board (PCM3168, jack-sense expander, MIDI, HP amp) connects to the main
 | USB_5V_ENABLE | PD13 | D25 | TPS22919 load switch ON |
 | DIN MIDI IN | PF4 | AF10 | USART6_RX AF6 |
 | DIN MIDI OUT | PF5 | AA11 | USART6_TX AF6 |
-| GATE_IN1 | PF0 | AA15 | |
-| GATE_IN2 | PC10 | AG10 | |
-| HP_SENSE | PF2 | AC15 | |
-| HP_SHUTDOWN | PF3 | AF11 | |
-| CTLENC A / B / BUT | PC3 / PC9 / PH10 | | no timer encoder-mode pair |
-| NAVENC A / B / BUT | PC6 / PA10 / PA5 | | no timer encoder-mode pair |
+| GATE_IN1 | PF0 | AA15 | high = gate high |
+| GATE_IN2 | PC10 | AG10 | high = gate high |
+| HP_SENSE | PF2 | AC15 | needs the internal pull-up. High = headphones plugged in |
+| HP_SHUTDOWN | PF3 | AF11 | TPA6111A2 SHUTDOWN: low = amp on |
+| CTLENC A / B / BUT | PC3 / PC9 / PH10 | | ENC103. No timer encoder-mode pair |
+| NAVENC A / B / BUT | PC6 / PA10 / PA5 | | ENC102, the GUI's rotary. No timer encoder-mode pair |
 | BACK_BUT | PA9 | AF15 | |
 | ESP RX (MCU TX) | PH7 | AE16 | ESP32-C6 RXD0. Only UART4_TX (AF4) |
 | ESP TX (MCU RX) | PH5 | AG18 | ESP32-C6 TXD0. Only UART7_RX (AF8) |
@@ -99,6 +99,22 @@ LED_BUT9 is the KNOBSET button (SW109) and LED_BUT10 is PLAY (SW110). The LEDs' 
 Each LED's three outputs are R, B, G, not R, G, B: the schematic's LED_BUTn_G and LED_BUTn_B net names are swapped (verified on p1).
 
 All the buttons (RGB and NAV) are active low. They switch to GND, and the TCA9555's internal pull-ups hold them high.
+
+## Verified on p1
+
+Found by testing on the p1 board (the firmware handles all of these):
+
+- **Audio outputs:** the codec's output channels 1..8 drive Out8..Out1 (`panel_out_of_codec_chan()` in
+  `panel_conf.hh`).
+- **Audio inputs:** codec input channels 1 and 2 read In2 and In1, and channels 3..6 read In3..In6
+  (`audio_in_order` in `panel_conf.hh`). Not MP1's order.
+- **Jack sense (U1212):** a pin reads 0 when its jack is patched, 1 when it's not. Same as MP1.
+- **Gate ins:** in the right order, and high = gate high.
+- **NAVENC and CTLENC:** count backwards with A and B as the nets name them, so the firmware swaps them
+  (`core_m33/panel_controls.hh`).
+- **Knob encoders ENC1..16:** one step per click, and the right direction with A and B as named. (They may
+  be replaced by encoders with the signals reversed.)
+- **Headphone amp:** HP_SENSE goes high when headphones are plugged in; the M33 then drives HP_SHUTDOWN low.
 
 ## Codec
 
