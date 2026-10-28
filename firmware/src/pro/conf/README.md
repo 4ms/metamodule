@@ -94,7 +94,11 @@ All four have their supply-valid bits set in `system_init()`.
 | U5 | 0x28 | BUT4 RGB | BUT3 RGB | BUT2 RGB | BUT1 RGB | BUT9 RGB |
 | U8 | 0x29 | BUT10 RGB | BUT8 RGB | BUT7 RGB | BUT6 RGB | BUT5 RGB |
 
-LED_BUT9 is the KNOBSET button (SW109) and LED_BUT10 is PLAY (SW110). The RGB button switches connect to +3V3 (active high).
+LED_BUT9 is the KNOBSET button (SW109) and LED_BUT10 is PLAY (SW110). The LEDs' common anodes connect to +3V3.
+
+Each LED's three outputs are R, B, G, not R, G, B: the schematic's LED_BUTn_G and LED_BUTn_B net names are swapped (verified on p1).
+
+All the buttons (RGB and NAV) are active low. They switch to GND, and the TCA9555's internal pull-ups hold them high.
 
 ## Codec
 
