@@ -18,6 +18,7 @@ struct PageArguments {
 	std::optional<bool> detail_mode{};
 	std::optional<std::pair<float, float>> element_mm{};
 	std::optional<bool> replace_module{};
+	std::optional<bool> screensaver_mode{};
 
 	bool operator==(PageArguments const &that) const = default;
 };

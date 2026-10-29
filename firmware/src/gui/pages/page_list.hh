@@ -47,6 +47,13 @@ class PageList {
 
 	PageHistory _current_state{};
 
+	// How to undo the last request_new_page(), until the page is shown
+	struct RequestUndo {
+		enum class Action { None, Pushed, Popped } action = Action::None;
+		PageHistory prev_state{};
+		PageHistory popped{};
+	} _undo{};
+
 public:
 	void set_active_knobset(uint32_t id) {
 		_active_knobset_id = id;
@@ -69,6 +76,7 @@ public:
 	}
 
 	void request_initial_page(PageId pageid, PageArguments args) {
+		_undo.action = RequestUndo::Action::None;
 		_current_state = {pageid, args};
 		_new_page_requested = true;
 	}
@@ -85,6 +93,8 @@ public:
 
 	// Go to a new page but don't push the current one into history
 	void request_new_page_no_history(PageId pageid, PageArguments args) {
+		_undo.action = RequestUndo::Action::None;
+
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop
 		auto last = _page_history.back();
@@ -100,20 +110,47 @@ public:
 	void request_new_page(PageId pageid, PageArguments args) {
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop -- don't push
+		_undo.prev_state = _current_state;
+
 		auto last = _page_history.back();
 		if (last.has_value() && last->page == pageid && last->args == args) {
 			_page_history.pop_back();
+			_undo.action = RequestUndo::Action::Popped;
+			_undo.popped = *last;
 		} else {
 			_page_history.push_back(_current_state);
+			_undo.action = RequestUndo::Action::Pushed;
 		}
 
 		_current_state = {pageid, args};
 		_new_page_requested = true;
 	}
 
+	// Undo the last request_new_page() (even if get_requested_page() returned it), as long
+	// as the page wasn't shown. The current page and history are as they were before it.
+	void cancel_requested_page() {
+		using enum RequestUndo::Action;
+		if (_undo.action == None)
+			return;
+
+		if (_undo.action == Pushed)
+			_page_history.pop_back();
+		else
+			_page_history.push_back(_undo.popped);
+
+		_current_state = _undo.prev_state;
+		_new_page_requested = false;
+		_undo.action = None;
+	}
+
+	bool has_requested_page() const {
+		return _new_page_requested;
+	}
+
 	// Requests to jump to the previous page in history
 	// Returns false if history is empty
 	bool request_last_page() {
+		_undo.action = RequestUndo::Action::None;
 		auto last = _page_history.pop_back();
 		if (!last) {
 			return false;
