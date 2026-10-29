@@ -1,6 +1,7 @@
 #include "panel_controls.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
+#include "CoreModules/hub/button_expander_defs.hh"
 #include "drivers/hsem.hh"
 #include <cstdio>
 
@@ -127,12 +128,33 @@ void PanelControls::update_metaparams() {
 
 	cur_metaparams->usb_connection = usb_connection;
 
+	update_button_expander();
+
 	cur_metaparams->jack_senses = jack_senses.load(std::memory_order_relaxed);
 	cur_metaparams->jack_sense_faults = jack_sense_faults.load(std::memory_order_relaxed);
 
 	if (midi_device) {
 		update_midi_connected();
 		cur_metaparams->midi_ports_connected = midi_usb_connected ? (1 << Midi::Event::USB) : 0;
+	}
+}
+
+// BUT1-8 act as MP1's first Button Expander (MP1's Controls::update_control_expander()): bit n is
+// BUTn+1. They're always there, so it's always connected.
+void PanelControls::update_button_expander() {
+	using Expander::Button::NumButtonsPerExpander;
+	static_assert(unsigned(Controls::Button::But8) == NumButtonsPerExpander - 1);
+
+	cur_metaparams->button_exp_connected = 0b1;
+	cur_metaparams->ext_buttons_high_events = 0;
+	cur_metaparams->ext_buttons_low_events = 0;
+
+	for (unsigned i = 0; i < NumButtonsPerExpander; i++) {
+		auto &but = expanders.button(i);
+		if (but.just_went_high())
+			cur_metaparams->ext_buttons_high_events |= (1 << i);
+		if (but.just_went_low())
+			cur_metaparams->ext_buttons_low_events |= (1 << i);
 	}
 }
 
@@ -329,7 +351,8 @@ void PanelControls::print_changes() {
 			printf("ENC%u button released\n", i + 1);
 	}
 
-	for (unsigned i = 0; i < ExpanderControls::NumButtons; i++) {
+	// BUT1-8 are passed on (update_button_expander() takes their events)
+	for (unsigned i = Expander::Button::NumButtonsPerExpander; i < ExpanderControls::NumButtons; i++) {
 		auto &but = expanders.button(i);
 		if (but.is_just_pressed())
 			printf("%s pressed\n", ButtonNames[i]);

@@ -27,12 +27,13 @@ namespace MetaModule
 // (Named PanelControls because the pro conf's pins are in namespace Controls.)
 //
 // Into the param blocks so far, as on MP1: the nav encoder (ENC102) and its button (MP1's rotary), the
-// Back button (MP1's button 0), the gate ins, and jack sense.
+// Back button (MP1's button 0), the gate ins, jack sense, and BUT1-8, which are MP1's first Button
+// Expander.
 //
 // The rest are read, but not passed on yet (there's no pro panel definition): the knob encoders and
-// buttons on the I2C expanders (expander_controls.hh), and the control encoder (ENC103) and its
-// button. For bring-up, print_changes() reports them on the console (and the gate ins and jack
-// sense).
+// the other buttons on the I2C expanders (expander_controls.hh), and the control encoder (ENC103)
+// and its button. For bring-up, print_changes() reports them on the console (and the gate ins and
+// jack sense).
 //
 // The headphone amp is on only while headphones are plugged in: the frame interrupt drives
 // HP_SHUTDOWN low while HP_SENSE is (debounced) high.
@@ -76,6 +77,7 @@ private:
 	void update_metaparams();
 	void update_rotary();
 	void update_midi_connected();
+	void update_button_expander();
 	void print_changes();
 	void update_headphone_amp();
 	void process_midi_frame(Params &params);
