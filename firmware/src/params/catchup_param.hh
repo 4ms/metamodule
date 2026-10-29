@@ -111,6 +111,22 @@ public:
 		last_module_val = val;
 	}
 
+	// Encoders (the pro's) don't catch up: a turn steps the param from its value. These keep the
+	// encoder's position (in the map's 0..1 range) unrounded, so that a module that rounds the values
+	// it's set to can still be stepped in small steps. The position is only good while the module's
+	// value is the one it gave (module_val).
+	std::optional<T> encoder_pos(T module_val) const {
+		if (state == State::Tracking && last_module_val == module_val)
+			return last_phys_val;
+		return {};
+	}
+
+	void set_encoder_pos(T pos, T module_val) {
+		last_phys_val = pos;
+		last_module_val = module_val;
+		state = State::Tracking;
+	}
+
 private:
 	std::optional<T> update_resume_equal(T scaled_phys_val, T module_val) {
 		// Exit catchup mode if module and physical values are close

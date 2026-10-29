@@ -6,6 +6,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "params/panel_knob.hh"
 #include "lvgl.h"
 #include "patch/patch.hh"
 #include <string_view>
@@ -43,7 +44,7 @@ struct MappingPaneList {
 		auto name = get_panel_name(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text(label, name.c_str());
 
-		if (map.is_panel_knob())
+		if (is_panel_knob(map))
 			format_knob_map_circle(map.panel_knob_id, circle, label);
 
 		else if (map.is_button())

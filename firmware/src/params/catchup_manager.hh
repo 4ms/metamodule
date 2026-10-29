@@ -1,7 +1,10 @@
 #pragma once
 #include "catchup_param.hh"
+#include "panel_knob.hh"
 #include "patch-serial/patch/patch.hh"
 #include "toggle_param.hh"
+#include <algorithm>
+#include <cmath>
 #include <vector>
 
 namespace MetaModule
@@ -76,6 +79,33 @@ public:
 		}
 	}
 
+	// Pro: a panel encoder turned `clicks` clicks (positive = clockwise). Each param it's mapped to
+	// moves from its value by `step` per click (in the map's 0..1 range), or by one position per click
+	// if it has discrete positions. There's no catchup: nothing jumps.
+	void step_panel_encoder(auto &modules, ParamSet &active_knob_maps, unsigned panel_knob_id, int clicks, float step) {
+		if (panel_knob_id >= PanelDef::NumKnobs)
+			return;
+
+		for (auto &knob_map : active_knob_maps[panel_knob_id]) {
+			auto &map = knob_map.map;
+			auto &module = modules[map.module_id];
+			auto module_val = module->get_param(map.param_id);
+
+			float pos;
+			if (knob_map.num_pos > 1) {
+				float const last_pos = knob_map.num_pos - 1;
+				int const dir = map.max < map.min ? -1 : 1;
+				pos = map.unmap_val((std::round(module_val * last_pos) + dir * clicks) / last_pos);
+			} else {
+				pos = knob_map.catchup.encoder_pos(module_val).value_or(map.unmap_val(module_val)) + clicks * step;
+			}
+			pos = std::clamp(pos, 0.f, 1.f);
+
+			module->set_param(map.param_id, map.get_mapped_val(pos));
+			knob_map.catchup.set_encoder_pos(pos, module->get_param(map.param_id));
+		}
+	}
+
 	std::optional<float> check_out_of_range(float panel_val, float module_val, MappedKnob const &map) {
 		// If user moves the knob to the extreme position (0 or 1), and the module's knob
 		// is still not reachable, then mark this catchup as inaccessible.
@@ -120,6 +150,10 @@ public:
 	}
 
 	void recalc_panel_param(auto &modules, ParamSet &active_knob_maps, unsigned panel_knob_id) {
+		// An encoder has no position to set its params to
+		if (PanelDef::is_encoder(panel_knob_id))
+			return;
+
 		if (panel_knob_id < catchup_inaccessible.size())
 			catchup_inaccessible[panel_knob_id] = false;
 		set_panel_param(modules, active_knob_maps, panel_knob_id, panel_knobs[panel_knob_id]);
@@ -132,7 +166,7 @@ public:
 		for (unsigned i = 0u; auto &knob : active_knob_maps) {
 
 			for (auto &knob_map : knob) {
-				if (knob_map.map.is_button())
+				if (knob_map.map.is_button() || is_panel_encoder(knob_map.map))
 					continue;
 
 				auto module_val = modules[knob_map.map.module_id]->get_param(knob_map.map.param_id);

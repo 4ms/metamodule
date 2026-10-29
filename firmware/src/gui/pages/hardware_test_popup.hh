@@ -66,29 +66,34 @@ struct HardwareCheckPopup {
 
 	void update() {
 
-		for (auto [i, pot] : enumerate(params.knobs)) {
-			if (pot < pot_min[i])
-				pot_min[i] = pot;
-			if (pot > pot_max[i])
-				pot_max[i] = pot;
-			pot_iir[i] = pot_iir[i] * iir_coef_inv + pot * iir_coef;
+		// The pro's knobs are encoders: there are no pot positions to show
+		if constexpr (PanelDef::NumKnobs == PanelDef::NumPot) {
+			for (auto [i, pot] : enumerate(params.knobs)) {
+				if (pot < pot_min[i])
+					pot_min[i] = pot;
+				if (pot > pot_max[i])
+					pot_max[i] = pot;
+				pot_iir[i] = pot_iir[i] * iir_coef_inv + pot * iir_coef;
+			}
 		}
 
 		if ((last_refresh_check_tm - get_time()) > 200) {
 			last_refresh_check_tm = get_time();
 
-			for (auto [i, pot] : enumerate(params.knobs)) {
-				auto clamped_val = std::clamp<unsigned>(pot_iir[i] * 100.f, 0u, 99u);
-				if (clamped_val != last_pot_vals[i]) {
-					lv_label_set_text_fmt(knob_labels[i], "%02d", clamped_val);
-					last_pot_vals[i] = clamped_val;
-					lv_obj_set_style_text_color(knob_labels[i], Gui::palette_main[0], LV_PART_MAIN);
-				} else
-					lv_obj_set_style_text_color(knob_labels[i], lv_color_white(), LV_PART_MAIN);
+			if constexpr (PanelDef::NumKnobs == PanelDef::NumPot) {
+				for (auto [i, pot] : enumerate(params.knobs)) {
+					auto clamped_val = std::clamp<unsigned>(pot_iir[i] * 100.f, 0u, 99u);
+					if (clamped_val != last_pot_vals[i]) {
+						lv_label_set_text_fmt(knob_labels[i], "%02d", clamped_val);
+						last_pot_vals[i] = clamped_val;
+						lv_obj_set_style_text_color(knob_labels[i], Gui::palette_main[0], LV_PART_MAIN);
+					} else
+						lv_obj_set_style_text_color(knob_labels[i], lv_color_white(), LV_PART_MAIN);
 
-				pot_iir[i] = pot;
-				pot_min[i] = 4096.f;
-				pot_max[i] = 0.f;
+					pot_iir[i] = pot;
+					pot_min[i] = 4096.f;
+					pot_max[i] = 0.f;
+				}
 			}
 
 			auto b = [j = params.jack_senses](uint32_t bit) -> int {

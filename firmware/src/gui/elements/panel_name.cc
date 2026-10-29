@@ -1,6 +1,8 @@
 #include "CoreModules/elements/base_element.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
+#include "conf/panel_conf.hh"
 #include "midi/midi_message.hh"
+#include "params/panel_knob.hh"
 #include "patch/patch.hh"
 #include <array>
 #include <string>
@@ -33,7 +35,7 @@ std::string get_panel_name(const ParamElement &, uint32_t panel_id) {
 	auto mk = MappedKnob{.panel_knob_id = (uint16_t)Midi::strip_midi_channel(panel_id),
 						 .midi_chan = (uint8_t)Midi::midi_channel(panel_id)};
 
-	if (mk.is_panel_knob())
+	if (is_panel_knob(mk))
 		name = PanelDef::get_map_param_name(panel_id);
 
 	else if (auto butnum = mk.ext_button()) {

@@ -3,6 +3,7 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/jack_sense_conf.hh"
+#include "conf/panel_conf.hh"
 #include "conf/patch_conf.hh"
 #include "null_module.hh"
 #include "params/catchup_manager.hh"
@@ -481,6 +482,11 @@ public:
 
 	void set_panel_param_no_play(unsigned panel_knob_id, float val) {
 		catchup_manager.set_panel_param_no_play(panel_knob_id, val);
+	}
+
+	// Pro: a panel encoder turned (CatchupManager::step_panel_encoder())
+	void step_panel_encoder(unsigned panel_knob_id, int clicks, float step) {
+		catchup_manager.step_panel_encoder(modules, knob_maps[active_knob_set], panel_knob_id, clicks, step);
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {

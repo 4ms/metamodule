@@ -260,6 +260,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		handle_button_events(param_block.metaparams.ext_buttons_low_events, 0.f);
 	}
 
+	panel_encoders.process(param_block.metaparams.encoder_clicks, block_size_, sample_rate_, player, param_state);
+
 	// Input jacks that are plugged in and used by the patch
 	auto const used_ins = player.used_input_jacks();
 	auto const active_ins = used_ins & param_state.jack_senses;
@@ -412,6 +414,8 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 	handle_patch_mod_queue();
 
 	param_state.jack_senses = param_block.metaparams.jack_senses;
+
+	panel_encoders.mark_moved(param_block.metaparams.encoder_clicks, block_size_, sample_rate_, param_state);
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
@@ -600,6 +604,7 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams.button_exp_connected = param_blocks[block].metaparams.button_exp_connected;
 	local_params.metaparams.ext_buttons_high_events = param_blocks[block].metaparams.ext_buttons_high_events;
 	local_params.metaparams.ext_buttons_low_events = param_blocks[block].metaparams.ext_buttons_low_events;
+	local_params.metaparams.encoder_clicks = param_blocks[block].metaparams.encoder_clicks;
 	local_params.metaparams.meta_buttons[0].set_state_no_events(
 		param_blocks[block].metaparams.meta_buttons[0].is_pressed());
 	local_params.metaparams.clipped_outs = 0;

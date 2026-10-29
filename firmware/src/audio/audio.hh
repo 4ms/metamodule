@@ -1,5 +1,6 @@
 #pragma once
 #include "audio/midi.hh"
+#include "audio/panel_encoders.hh"
 #include "calibrate/calibration_data.hh"
 #include "conf/board_codec_conf.hh"
 #include "conf/stream_conf.hh"
@@ -103,6 +104,9 @@ private:
 	// Knobs that moved while the patch was stopped (bit per panel knob):
 	// replayed into the patch when it resumes playing
 	uint32_t knobs_moved_while_stopped = 0;
+
+	// The pro's encoders (empty on MP1)
+	[[no_unique_address]] PanelEncoders<NumPanelEncoders> panel_encoders;
 
 	// Start/Pause State
 	float output_fade_amt = -1.f;

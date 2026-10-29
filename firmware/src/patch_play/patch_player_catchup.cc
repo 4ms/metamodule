@@ -50,7 +50,8 @@ bool PatchPlayer::is_param_tracking(unsigned module_id, unsigned param_id) {
 	for (auto const &knob : knob_maps[active_knob_set]) {
 		for (auto const &map : knob) {
 			if (map.map.module_id == module_id && map.map.param_id == param_id) {
-				return map.catchup.is_tracking();
+				// Encoders don't catch up
+				return is_panel_encoder(map.map) || map.catchup.is_tracking();
 			}
 		}
 	}

@@ -47,8 +47,8 @@ static_assert(sizeof(UsbConnectionStatusBlock) == 1360);
 // Both cores use ParamBlock directly, so it must have the same layout on the 64-bit A35 and the
 // 32-bit M33 (no pointers, size_t, or long). If these fail after a change to Params or MetaParams,
 // check that both cores agree before updating the numbers.
-static_assert(sizeof(Params) == PanelDef::NumPot * sizeof(float) + 12);
-static_assert(sizeof(MetaParams) == 76);
+static_assert(sizeof(Params) == Params_Size);
+static_assert(sizeof(MetaParams) == 76 + NumPanelEncoders);
 static_assert(offsetof(ParamBlock, metaparams) == sizeof(Params) * StreamConf::Audio::MaxBlockSize);
 static_assert(alignof(ParamBlock) == 64);
 

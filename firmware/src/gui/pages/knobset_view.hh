@@ -9,6 +9,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "params/panel_knob.hh"
 #include "src/core/lv_event.h"
 
 namespace MetaModule
@@ -120,7 +121,8 @@ struct KnobSetViewPage : PageBase {
 
 			lv_obj_t *cont{};
 
-			if (map.is_panel_knob()) {
+			// FIXME: there are panes for 12 knobs, so the pro's ENC13..16 maps aren't shown
+			if (is_panel_knob(map) && map.panel_knob_id < panes.size()) {
 				cont = create_knob_item(idx, map);
 			} else if (map.is_button()) {
 				cont = button_exp.create_button_item(idx, map, patch);
@@ -226,7 +228,7 @@ struct KnobSetViewPage : PageBase {
 				if (arcs[idx])
 					lv_arc_set_value(arcs[idx], arc_val);
 
-				if (map.is_panel_knob()) {
+				if (is_panel_knob(map)) {
 					auto phys_val = params.knobs[map.panel_knob_id].val;
 					auto mapped_phys_val = map.get_mapped_val(phys_val);
 

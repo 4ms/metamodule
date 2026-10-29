@@ -198,6 +198,8 @@ struct Gui {
 	static lv_color_t get_knob_color(uint16_t panel_id) {
 		MappedKnob map{.panel_knob_id = panel_id};
 
+		// FIXME: the pro's ENC13..16 get jack colors (this can't see the panel's knobs: the VCV plugin
+		// library builds it without the board conf)
 		if (map.is_panel_knob())
 			return knob_palette[panel_id % 6];
 

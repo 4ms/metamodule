@@ -16,7 +16,8 @@ namespace MetaModule
 {
 
 struct ParamsState {
-	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
+	// MP1's pots, or the pro's encoders (only `changed` is used for those: the encoder turned)
+	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumKnobs> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
 
 	std::array<ResizingOversampler, PanelDef::NumAudioIn + AudioExpander::NumInJacks> smoothed_ins;

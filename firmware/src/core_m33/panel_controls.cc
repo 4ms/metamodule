@@ -3,6 +3,8 @@
 #include "conf/jack_sense_conf.hh"
 #include "CoreModules/hub/button_expander_defs.hh"
 #include "drivers/hsem.hh"
+#include <algorithm>
+#include <cstdint>
 #include <cstdio>
 
 namespace MetaModule
@@ -129,6 +131,7 @@ void PanelControls::update_metaparams() {
 	cur_metaparams->usb_connection = usb_connection;
 
 	update_button_expander();
+	update_encoders();
 
 	cur_metaparams->jack_senses = jack_senses.load(std::memory_order_relaxed);
 	cur_metaparams->jack_sense_faults = jack_sense_faults.load(std::memory_order_relaxed);
@@ -136,6 +139,18 @@ void PanelControls::update_metaparams() {
 	if (midi_device) {
 		update_midi_connected();
 		cur_metaparams->midi_ports_connected = midi_usb_connected ? (1 << Midi::Event::USB) : 0;
+	}
+}
+
+// The knob encoders ENC1..16: their clicks since the last block
+void PanelControls::update_encoders() {
+	static_assert(NumPanelEncoders == ExpanderControls::NumEncoders);
+
+	for (unsigned i = 0; i < ExpanderControls::NumEncoders; i++) {
+		int32_t clicks = expanders.encoder_position(i) - sent_enc_positions[i];
+		clicks = std::clamp<int32_t>(clicks, INT8_MIN, INT8_MAX);
+		cur_metaparams->encoder_clicks.clicks[i] = clicks;
+		sent_enc_positions[i] += clicks;
 	}
 }
 
@@ -337,13 +352,8 @@ void PanelControls::publish_jack_sense() {
 // Bring-up: reports the controls that aren't passed on to the param blocks yet (and the gate ins and
 // jack sense)
 void PanelControls::print_changes() {
+	// The encoders' turns are passed on (update_encoders())
 	for (unsigned i = 0; i < ExpanderControls::NumEncoders; i++) {
-		auto pos = expanders.encoder_position(i);
-		if (pos != printed_enc_positions[i]) {
-			printf("ENC%u %+ld (%ld)\n", i + 1, long(pos - printed_enc_positions[i]), long(pos));
-			printed_enc_positions[i] = pos;
-		}
-
 		auto &but = expanders.encoder_button(i);
 		if (but.is_just_pressed())
 			printf("ENC%u button pressed\n", i + 1);

@@ -35,8 +35,9 @@ struct Params {
 	}
 };
 
-// 60B -- copied every audio block, so keep it that way
+// 60B (14B on the pro, with no pots) -- copied every audio block, so keep it that way
 static constexpr auto Params_Size = sizeof(Params);
-static_assert(Params_Size == PanelDef::NumPot * sizeof(float) + 12, "Params grew: check the audio block copy cost");
+static_assert(Params_Size == (PanelDef::NumPot > 0 ? PanelDef::NumPot * sizeof(float) + 12 : 14),
+			  "Params grew: check the audio block copy cost");
 
 } // namespace MetaModule

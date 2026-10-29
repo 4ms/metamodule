@@ -28,12 +28,11 @@ namespace MetaModule
 //
 // Into the param blocks so far, as on MP1: the nav encoder (ENC102) and its button (MP1's rotary), the
 // Back button (MP1's button 0), the gate ins, jack sense, and BUT1-8, which are MP1's first Button
-// Expander.
+// Expander. And the knob encoders ENC1..16: their clicks per block (MetaParams::encoder_clicks).
 //
-// The rest are read, but not passed on yet (there's no pro panel definition): the knob encoders and
-// the other buttons on the I2C expanders (expander_controls.hh), and the control encoder (ENC103)
-// and its button. For bring-up, print_changes() reports them on the console (and the gate ins and
-// jack sense).
+// The rest are read, but not passed on yet: the encoders' buttons and the other buttons on the I2C
+// expanders (expander_controls.hh), and the control encoder (ENC103) and its button. For bring-up,
+// print_changes() reports them on the console (and the gate ins and jack sense).
 //
 // The headphone amp is on only while headphones are plugged in: the frame interrupt drives
 // HP_SHUTDOWN low while HP_SENSE is (debounced) high.
@@ -78,6 +77,7 @@ private:
 	void update_rotary();
 	void update_midi_connected();
 	void update_button_expander();
+	void update_encoders();
 	void print_changes();
 	void update_headphone_amp();
 	void process_midi_frame(Params &params);
@@ -133,8 +133,10 @@ private:
 	std::atomic<uint32_t> jack_senses{0xFFFF'FFFF};
 	std::atomic<uint8_t> jack_sense_faults{0};
 
+	// update_encoders(): the encoder positions sent so far
+	std::array<int32_t, ExpanderControls::NumEncoders> sent_enc_positions{};
+
 	// print_changes(): what it last reported
-	std::array<int32_t, ExpanderControls::NumEncoders> printed_enc_positions{};
 	int32_t printed_ctl_encoder_pos = 0;
 	bool printed_gate_in_1 = false;
 	bool printed_gate_in_2 = false;
