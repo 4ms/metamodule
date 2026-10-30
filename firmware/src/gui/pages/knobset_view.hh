@@ -5,6 +5,7 @@
 #include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/knob_arc.hh"
 #include "gui/pages/knobset_view_buttonexp.hh"
+#include "gui/pages/knobset_view_panes.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
@@ -121,8 +122,7 @@ struct KnobSetViewPage : PageBase {
 
 			lv_obj_t *cont{};
 
-			// FIXME: there are panes for 12 knobs, so the pro's ENC13..16 maps aren't shown
-			if (is_panel_knob(map) && map.panel_knob_id < panes.size()) {
+			if (is_panel_knob(map)) {
 				cont = create_knob_item(idx, map);
 			} else if (is_button(map)) {
 				cont = button_exp.create_button_item(idx, map, patch);
@@ -163,7 +163,7 @@ struct KnobSetViewPage : PageBase {
 		}
 
 		// Add all items to the group
-		for (auto [idx, pane] : enumerate(panes)) {
+		for (auto [idx, pane] : enumerate(knob_panes.panes)) {
 			if (num_maps[idx])
 				lv_foreach_child(pane, [this](lv_obj_t *cont, int idx) { lv_group_add_obj(group, cont); });
 		}
@@ -186,8 +186,7 @@ struct KnobSetViewPage : PageBase {
 		if (num_maps[map.panel_knob_id] == 0) {
 			cont = get_container(map.panel_knob_id);
 		} else {
-			cont = (map.panel_knob_id < 6) ? ui_KnobContainerBig_create(panes[map.panel_knob_id]) :
-											 ui_KnobContainer_create(panes[map.panel_knob_id]);
+			cont = knob_panes.create_container(map.panel_knob_id);
 		}
 		num_maps[map.panel_knob_id]++;
 
@@ -292,7 +291,7 @@ struct KnobSetViewPage : PageBase {
 
 	void blur() final {
 		// Clear all containers except for the original ones
-		for (auto [pane, cont] : zip(panes, containers)) {
+		for (auto [pane, cont] : zip(knob_panes.panes, knob_panes.containers)) {
 			auto num_children = lv_obj_get_child_cnt(pane);
 			for (auto i = 0u; i < num_children; i++) {
 				auto child = lv_obj_get_child(pane, i);
@@ -306,7 +305,7 @@ struct KnobSetViewPage : PageBase {
 
 private:
 	void clear_containers() {
-		for (unsigned i = 0; auto cont : containers) {
+		for (unsigned i = 0; auto cont : knob_panes.containers) {
 			set_for_knob(cont, i);
 
 			auto knob = get_knob(cont);
@@ -364,7 +363,7 @@ private:
 	void display_active_status() {
 		lv_show(ui_ActivateKnobSet, !is_actively_playing && is_patch_playing);
 
-		for (auto [knob_i, pane] : enumerate(panes)) {
+		for (auto [knob_i, pane] : enumerate(knob_panes.panes)) {
 			auto num_children = lv_obj_get_child_cnt(pane);
 			for (auto i = 0u; i < num_children; i++) {
 				auto child = lv_obj_get_child(pane, i);
@@ -532,44 +531,14 @@ private:
 
 	KeyboardEntry keyboard_entry;
 
-	// The panes are the areas where mapping containers go
-	// If one knob maps to multiple things, then there will be multiple containers in that knob's pane
-	std::array<lv_obj_t *, 12> panes{
-		ui_KnobPanelA,
-		ui_KnobPanelB,
-		ui_KnobPanelC,
-		ui_KnobPanelD,
-		ui_KnobPanelE,
-		ui_KnobPanelF,
-		ui_KnobPanelU,
-		ui_KnobPanelV,
-		ui_KnobPanelW,
-		ui_KnobPanelX,
-		ui_KnobPanelY,
-		ui_KnobPanelZ,
-	};
-
-	// These are the first container in each pane. We always keep one here
-	// so that a disabled knob shows up as grey-ed out
-	std::array<lv_obj_t *, 12> containers{
-		ui_KnobContainerA,
-		ui_KnobContainerB,
-		ui_KnobContainerC,
-		ui_KnobContainerD,
-		ui_KnobContainerE,
-		ui_KnobContainerF,
-		ui_KnobContainerU,
-		ui_KnobContainerV,
-		ui_KnobContainerW,
-		ui_KnobContainerX,
-		ui_KnobContainerY,
-		ui_KnobContainerZ,
-	};
+	// Where each knob's mapping containers go (one per mapping)
+	KnobSetPanes knob_panes;
+	static_assert(std::tuple_size_v<decltype(KnobSetPanes::panes)> == PanelDef::NumKnobs);
 
 	//////////// Helpers
 
 	lv_obj_t *get_container(unsigned panel_knob_id) {
-		return containers[panel_knob_id];
+		return knob_panes.containers[panel_knob_id];
 	}
 
 	lv_obj_t *get_knob(lv_obj_t *container) {
