@@ -1,5 +1,4 @@
 #include "CoreModules/elements/base_element.hh"
-#include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/panel_conf.hh"
 #include "midi/midi_message.hh"
 #include "params/panel_knob.hh"
@@ -38,7 +37,7 @@ std::string get_panel_name(const ParamElement &, uint32_t panel_id) {
 	if (is_panel_knob(mk))
 		name = PanelDef::get_map_param_name(panel_id);
 
-	else if (auto butnum = mk.ext_button()) {
+	else if (auto butnum = ext_button(mk)) {
 		name = "B1-1";
 		name[1] = '1' + unsigned(*butnum / 8);
 		name[3] = '1' + unsigned(*butnum % 8);

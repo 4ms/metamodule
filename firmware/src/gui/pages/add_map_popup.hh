@@ -239,7 +239,7 @@ struct AddMapPopUp {
 				if (page->patch)
 					map.curve_type = default_curve_type(map, *page->patch);
 
-				if (is_panel_knob(map) || map.is_button()) {
+				if (is_panel_knob(map) || is_button(map)) {
 					// TODO: just have AddMapping type (not AddMidiMap) and use set_id to indicate MidiMap?
 					page->patch_mod_queue.put(AddMapping{.map = map, .set_id = page->set_id});
 

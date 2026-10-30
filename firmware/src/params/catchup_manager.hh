@@ -38,7 +38,7 @@ public:
 		for (auto &knob_map : active_knob_maps[panel_knob_id]) {
 			auto &map = knob_map.map;
 
-			if (map.is_button()) {
+			if (is_button(map)) {
 				if (is_latching(map)) {
 					latch_button(modules[map.module_id], map, knob_map.num_pos, val);
 				} else {
@@ -166,7 +166,7 @@ public:
 		for (unsigned i = 0u; auto &knob : active_knob_maps) {
 
 			for (auto &knob_map : knob) {
-				if (knob_map.map.is_button() || is_panel_encoder(knob_map.map))
+				if (is_button(knob_map.map) || is_panel_encoder(knob_map.map))
 					continue;
 
 				auto module_val = modules[knob_map.map.module_id]->get_param(knob_map.map.param_id);

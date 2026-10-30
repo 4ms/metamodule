@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "panel_knob.hh"
 #include "patch/patch_data.hh"
 #include "util/overloaded.hh"
 #include <string_view>
@@ -34,7 +35,7 @@ inline unsigned get_param_num_positions(std::string_view module_slug, unsigned p
 
 // Buttons mapped to params with num_pos > 2 default to Cycle mode. Everything else defaults to Normal.
 inline MappedKnob::CurveType default_curve_type(MappedKnob const &map, PatchData const &patch) {
-	if (!map.is_button() && !map.is_midi_notegate())
+	if (!is_button(map) && !map.is_midi_notegate())
 		return MappedKnob::Normal;
 
 	if (map.module_id >= patch.module_slugs.size())

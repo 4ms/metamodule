@@ -11,6 +11,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "params/panel_knob.hh"
 #include "params/param_num_positions.hh"
 
 namespace MetaModule
@@ -155,7 +156,7 @@ struct KnobMapPage : PageBase {
 		lv_slider_set_value(ui_MinSlider, intmin, LV_ANIM_OFF);
 		lv_slider_set_value(ui_MaxSlider, intmax, LV_ANIM_OFF);
 
-		if (map.is_midi_notegate() || map.is_midi_cc() || map.is_button()) {
+		if (map.is_midi_notegate() || map.is_midi_cc() || is_button(map)) {
 			lv_show(ui_ModuleMapToggleSwitchCont);
 			lv_label_set_text(ui_ModuleMapToggleSwitchLabel, "Button Behavior:");
 
@@ -192,12 +193,12 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
 		lv_label_set_text(ui_EditMappingLetter, panel_name.c_str());
 
-		if (map.is_midi() || map.is_button() || panel_name.size() > 3)
+		if (map.is_midi() || is_button(map) || panel_name.size() > 3)
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
-		if (map.is_button())
+		if (is_button(map))
 			lv_obj_set_style_text_color(ui_EditMappingLetter, lv_color_white(), LV_PART_MAIN);
 		else
 			lv_obj_set_style_text_color(ui_EditMappingLetter, lv_color_black(), LV_PART_MAIN);

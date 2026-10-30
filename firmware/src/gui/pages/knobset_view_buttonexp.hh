@@ -8,6 +8,7 @@
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "metaparams.hh"
+#include "params/panel_knob.hh"
 #include "patch/patch.hh"
 #include "util/countzip.hh"
 
@@ -30,9 +31,9 @@ struct ButtonExpanderMapsView {
 	lv_obj_t *create_button_item(unsigned idx, MappedKnob const &map, PatchData *patch) {
 		lv_obj_t *cont;
 
-		if (!map.ext_button().has_value())
+		if (!ext_button(map).has_value())
 			return nullptr;
-		auto button_id = map.ext_button().value();
+		auto button_id = ext_button(map).value();
 
 		if (num_maps[button_id] == 0) {
 			cont = lv_obj_get_child(panes[button_id], 0);
