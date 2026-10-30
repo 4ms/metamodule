@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/audio_expander_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
 #include "patch/midi_def.hh"

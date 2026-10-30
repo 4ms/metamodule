@@ -1,3 +1,4 @@
+#include "conf/audio_expander_conf.hh"
 #include "patch_play/patch_player.hh"
 #include "params/param_num_positions.hh"
 #include "util/countzip.hh"
