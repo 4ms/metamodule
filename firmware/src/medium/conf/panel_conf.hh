@@ -1,14 +1,13 @@
 #pragma once
-#include "CoreModules/hub/panel_medium_defs.hh"
+#include "patch/panels/panel_medium_defs.hh"
+
+using PanelDef = MediumPanelDef;
 
 namespace MetaModule
 {
 
 // The panel input jack (0 = In1) that each codec input channel reads
-inline constexpr auto &audio_in_order = PanelDef::audioin_order;
-
-// The panel's knobs are pots, not encoders
-inline constexpr unsigned NumPanelEncoders = 0;
+inline constexpr std::array<uint32_t, PanelDef::NumAudioIn> audio_in_order{3, 2, 1, 0, 5, 4};
 
 constexpr bool codec_outs_match_panel_order = true;
 
