@@ -81,15 +81,30 @@ struct Balancer {
 	// modules of similar size before assigning them, giving a different arrangement
 	// of usually similar quality.
 	// `times` is indexed by (module id - 1), as returned by measure_modules().
-	static Arrangement make_arrangement(std::span<const unsigned> times, uint32_t seed) {
+	// Modules flagged in `on_last_core` (indexed by module id) are always put on the
+	// last core: these have BlockJobs, which always run there.
+	static Arrangement
+	make_arrangement(std::span<const unsigned> times, uint32_t seed, std::span<const bool> on_last_core = {}) {
 		struct IdVal {
 			unsigned val;
 			uint16_t module_id;
 		};
 
+		std::array<unsigned, NumCores> sums{};
+		if constexpr (NumCores == 2)
+			sums[1] = SecondCoreBias;
+
+		Arrangement arr;
+
 		FixedVector<IdVal, MaxModules> ordered;
-		for (auto i = 0u; i < times.size(); i++)
-			ordered.push_back({times[i], (uint16_t)(i + 1)});
+		for (auto i = 0u; i < times.size(); i++) {
+			auto module_id = (uint16_t)(i + 1);
+			if (module_id < on_last_core.size() && on_last_core[module_id]) {
+				arr.core_of[module_id] = NumCores - 1;
+				sums[NumCores - 1] += times[i];
+			} else
+				ordered.push_back({times[i], module_id});
+		}
 
 		std::ranges::sort(ordered, std::greater{}, &IdVal::val);
 
@@ -108,12 +123,6 @@ struct Balancer {
 					std::swap(ordered[i - 1], ordered[i]);
 			}
 		}
-
-		std::array<unsigned, NumCores> sums{};
-		if constexpr (NumCores == 2)
-			sums[1] = SecondCoreBias;
-
-		Arrangement arr;
 
 		for (auto const &[val, module_id] : ordered) {
 			auto min_sum = std::ranges::min_element(sums);
@@ -153,10 +162,12 @@ struct Balancer {
 	// If `prev_cores` holds an assignment (from an earlier run), this prefers to
 	// produce a different one -- but only if a different one is nearly as good.
 	// Returns the arrangement used, so the caller can store it in the patch.
-	Arrangement balance_loads(std::span<const unsigned> times, std::span<const uint16_t> prev_cores = {}) {
+	Arrangement balance_loads(std::span<const unsigned> times,
+							  std::span<const uint16_t> prev_cores = {},
+							  std::span<const bool> on_last_core = {}) {
 		auto num_modules = times.size() + 1;
 
-		auto best = make_arrangement(times, 0);
+		auto best = make_arrangement(times, 0, on_last_core);
 
 		if (prev_cores.size() > 0) {
 			auto total = std::accumulate(times.begin(), times.end(), 0u);
@@ -176,7 +187,7 @@ struct Balancer {
 				constexpr unsigned MaxTries = 16;
 				for (auto try_i = 1u; try_i <= MaxTries; try_i++) {
 					// psuedo-random seed to try different arrangements
-					auto candidate = make_arrangement(times, try_i * 2654435761u);
+					auto candidate = make_arrangement(times, try_i * 2654435761u, on_last_core);
 					if (candidate.imbalance <= threshold && differs(candidate)) {
 						best = candidate;
 						break;

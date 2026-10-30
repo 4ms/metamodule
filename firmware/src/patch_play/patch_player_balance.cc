@@ -1,8 +1,18 @@
 #include "coreproc_plugin/async_thread_control.hh"
+#include "coreproc_plugin/block_job_control.hh"
 #include "patch_play/patch_player.hh"
 
 namespace MetaModule
 {
+
+// Modules with BlockJobs, which have to go on the last core: their jobs always run
+// there, and the jobs' time is counted as part of the module's measured load
+std::array<bool, MAX_MODULES_IN_PATCH> PatchPlayer::modules_on_last_core() {
+	std::array<bool, MAX_MODULES_IN_PATCH> on_last_core{};
+	for (auto module_id = 1u; module_id < num_modules; module_id++)
+		on_last_core[module_id] = BlockJobControl::has_block_job(modules[module_id].get());
+	return on_last_core;
+}
 
 void PatchPlayer::rebalance_modules(Balance mode) {
 	if (num_modules > 2) {
@@ -22,7 +32,8 @@ void PatchPlayer::rebalance_modules(Balance mode) {
 			if (mode == Balance::Recalculate && pd.has_load_balance(MulticorePlayer::NumCores))
 				prev = pd.module_cores;
 
-			auto arrangement = core_balancer.balance_loads(cpu_times, prev);
+			auto on_last_core = modules_on_last_core();
+			auto arrangement = core_balancer.balance_loads(cpu_times, prev, on_last_core);
 
 			store_load_balance(arrangement, cpu_times);
 
@@ -87,8 +98,11 @@ PatchPlayer::BalanceCandidates PatchPlayer::make_balance_candidates(unsigned num
 	if (pd.has_load_balance(MulticorePlayer::NumCores))
 		result.cores.push_back(pd.module_cores);
 
+	auto on_last_core = modules_on_last_core();
+
 	for (auto seed = 0u; seed < num_seeds; seed++) {
-		auto arr = CoreBalancer::make_arrangement(cpu_times, seed == 0 ? 0 : seed * 2654435761u);
+		auto arr =
+			CoreBalancer::make_arrangement(cpu_times, seed == 0 ? 0 : seed * 2654435761u, on_last_core);
 
 		std::vector<uint16_t> cores(num_modules, 0);
 		for (auto module_id = 1u; module_id < num_modules; module_id++)

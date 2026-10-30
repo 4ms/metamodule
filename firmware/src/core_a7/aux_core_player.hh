@@ -1,4 +1,5 @@
 #pragma once
+#include "coreproc_plugin/block_job_control.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/cycle_counter.hh"
 #include "drivers/interrupt.hh"
@@ -20,6 +21,13 @@ struct AuxPlayer {
 
 	mdrivlib::CycleCounter module_time;
 
+	// Background runner for BlockJobs. It runs below the frame interrupts, so
+	// they preempt it: the time spent in them is subtracted from the job times
+	static constexpr IRQn_Type BlockJobsIRQn = SGI6_IRQn;
+	mdrivlib::CycleCounter frame_isr_time;
+	mdrivlib::CycleCounter job_time;
+	std::atomic<uint32_t> frame_isr_ticks{0};
+
 	// MIDI sync instance
 	MidiSync midi_sync;
 
@@ -39,9 +47,21 @@ struct AuxPlayer {
 
 		constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchGuiElements);
 		InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [this]() { read_patch_gui_elements(); });
+
+		// Below ReadPatchGuiElements, so Core 1 never waits for a job to read the GUI elements;
+		// above the async thread timer, so a long async task can't hold up a job that's due
+		InterruptManager::register_and_start_isr(BlockJobsIRQn, 3, 0, [this]() { run_block_jobs(); });
+
+		// Either core can submit a job. A DSB makes sure Core 2 sees the job before it takes the SGI
+		BlockJobControl::set_runner_notify([] {
+			__DSB();
+			SecondaryCore::send_sgi(BlockJobsIRQn);
+		});
 	}
 
 	void play_modules() {
+		frame_isr_time.start_simple_measurement();
+
 		if (patch_player.live_load.detailed()) {
 			// Chained per-module timing: one counter read marks both the end of
 			// one module and the start of the next
@@ -69,6 +89,7 @@ struct AuxPlayer {
 		patch_player.process_outputs_samecore<1>();
 		patch_player.live_load.tally_core2_cables(module_time.stop_simple_measurement());
 
+		frame_isr_ticks.fetch_add(frame_isr_time.stop_simple_measurement(), std::memory_order_relaxed);
 		mdrivlib::SMPThread::signal_done();
 	}
 
@@ -76,9 +97,31 @@ struct AuxPlayer {
 		module_time.start_simple_measurement();
 		patch_player.process_outputs_diffcore<1>();
 		patch_player.process_summed_inputs<1>();
-		patch_player.live_load.tally_core2_cables(module_time.stop_simple_measurement());
+		auto cable_ticks = module_time.stop_simple_measurement();
+		patch_player.live_load.tally_core2_cables(cable_ticks);
 
+		frame_isr_ticks.fetch_add(cable_ticks, std::memory_order_relaxed);
 		mdrivlib::SMPThread::signal_done();
+	}
+
+	void run_block_jobs() {
+		while (true) {
+			auto preempted0 = frame_isr_ticks.load(std::memory_order_relaxed);
+			job_time.start_simple_measurement();
+
+			auto *module = BlockJobControl::run_next_job();
+			if (!module)
+				break;
+
+			auto elapsed = job_time.stop_simple_measurement();
+			auto preempted = frame_isr_ticks.load(std::memory_order_relaxed) - preempted0;
+			auto ticks = elapsed > preempted ? elapsed - preempted : 0;
+
+			auto &live_load = patch_player.live_load;
+			if (live_load.detailed())
+				live_load.tally_module(module->id, ticks);
+			live_load.tally_core2_modules(ticks);
+		}
 	}
 
 	void assign_module_list() {

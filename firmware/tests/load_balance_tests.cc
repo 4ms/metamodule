@@ -134,3 +134,26 @@ TEST_CASE("Ticks convert to a percentage of one core at 48kHz") {
 	CHECK(Balancer::ticks_to_ppm(50u * Balancer::NumIterations) == 100'000);
 	CHECK(Balancer::ticks_to_ppm(0) == 0);
 }
+
+TEST_CASE("Modules flagged for the last core always go there, and count toward its load") {
+	// Module 1 is the biggest, so normally it would go on core 0
+	auto times = std::array{100000u, 60000u, 50000u, 40000u, 30000u};
+
+	std::array<bool, 6> on_last_core{};
+	on_last_core[1] = true;
+
+	for (auto seed : {0u, 2654435761u, 2u * 2654435761u}) {
+		auto arr = Balancer::make_arrangement(times, seed, on_last_core);
+		CHECK(arr.core_of[1] == 1);
+
+		// The rest fill core 0 first, since core 1 starts with module 1's load
+		auto core0 = core_sum(arr, times, 0);
+		auto core1 = core_sum(arr, times, 1);
+		CHECK(core0 + core1 == std::accumulate(times.begin(), times.end(), 0u));
+		CHECK(arr.imbalance <= 40000u + Balancer::SecondCoreBias);
+	}
+
+	Balancer balancer;
+	auto arr = balancer.balance_loads(times, {}, on_last_core);
+	CHECK(arr.core_of[1] == 1);
+}

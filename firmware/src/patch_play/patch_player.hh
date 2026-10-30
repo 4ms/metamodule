@@ -3,6 +3,7 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/jack_sense_conf.hh"
+#include "coreproc_plugin/block_job_control.hh"
 #include "conf/patch_conf.hh"
 #include "null_module.hh"
 #include "params/catchup_manager.hh"
@@ -280,6 +281,12 @@ public:
 		else {
 			update_patch_time.start_simple_measurement();
 
+			// Wait for any background job a module needs this frame. Core 2 isn't
+			// in a frame interrupt yet, so its job runner can finish it
+			section_time.start_simple_measurement();
+			BlockJobControl::begin_frame();
+			auto job_wait_ticks = section_time.stop_simple_measurement();
+
 			smp.update_modules();
 
 			uint32_t module_ticks = 0;
@@ -331,7 +338,7 @@ public:
 
 			live_load.tally_update_patch(update_patch_time.stop_simple_measurement(),
 										 module_ticks,
-										 sync_ticks,
+										 sync_ticks + job_wait_ticks,
 										 cable_ticks,
 										 midi_ticks,
 										 sync2_ticks);
@@ -421,6 +428,11 @@ public:
 	void update_patch_singlecore() {
 		update_patch_time.start_simple_measurement();
 
+		// Background jobs still run on Core 2
+		section_time.start_simple_measurement();
+		BlockJobControl::begin_frame();
+		auto job_wait_ticks = section_time.stop_simple_measurement();
+
 		uint32_t module_ticks = 0;
 		if (live_load.detailed()) {
 			// Chained per-module timing: one counter read marks both the end of
@@ -455,7 +467,7 @@ public:
 		auto midi_ticks = section_time.stop_simple_measurement();
 
 		live_load.tally_update_patch(
-			update_patch_time.stop_simple_measurement(), module_ticks, 0, cable_ticks, midi_ticks, 0);
+			update_patch_time.stop_simple_measurement(), module_ticks, job_wait_ticks, cable_ticks, midi_ticks, 0);
 	}
 
 	void trigger_reading_gui_elements() {
@@ -924,6 +936,7 @@ private:
 	// Records the load balance in the patch data, so it can be saved to the patch file
 	// and re-used the next time the patch is loaded.
 	void store_load_balance(CoreBalancer::Arrangement const &arrangement, std::span<const unsigned> cpu_times);
+	std::array<bool, MAX_MODULES_IN_PATCH> modules_on_last_core();
 
 	// patch_player_mappings.cc
 	void safe_unpatch_output(Jack jack);
