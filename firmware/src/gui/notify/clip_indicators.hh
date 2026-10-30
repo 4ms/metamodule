@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/hub/audio_expander_defs.hh"
+#include "conf/panel_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/clip_hold.hh"

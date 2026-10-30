@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/hub/panel_medium_defs.hh"
+#include "conf/panel_conf.hh"
 #include <cstdint>
 #include <optional>
 

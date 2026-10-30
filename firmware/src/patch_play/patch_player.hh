@@ -1,6 +1,5 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
-#include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"

@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/hub/button_expander_defs.hh"
+#include "patch-serial/patch/panels/medium/button_expander_defs.hh"
 #include "conf/control_conf.hh"
 #include "conf/pin_conf.hh"
 #include "drivers/adc_builtin.hh"

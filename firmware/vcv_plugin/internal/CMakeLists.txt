@@ -11,6 +11,7 @@ add_library(vcv_plugin_internal STATIC
 target_include_directories(vcv_plugin_internal PRIVATE 
 	../export 
 	${MM_ROOT}/firmware/lib
+	${MM_ROOT}/firmware/lib/patch-serial
 	${MM_ROOT}/firmware/src
 )
 

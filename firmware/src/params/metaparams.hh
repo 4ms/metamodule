@@ -1,5 +1,4 @@
 #pragma once
-#include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
 #include "encoder_clicks.hh"
@@ -41,7 +40,7 @@ struct MetaParams {
 
 	// Controls -> Audio
 	uint8_t midi_ports_connected = 0; //bitfield using Midi::Event::Port
-	[[no_unique_address]] EncoderClicks<NumPanelEncoders> encoder_clicks{};
+	[[no_unique_address]] EncoderClicks<PanelDef::NumEncoders> encoder_clicks{};
 
 	// Controls -> GUI (USB connection status: role + active class)
 	UsbConnection usb_connection = UsbConnection::None;

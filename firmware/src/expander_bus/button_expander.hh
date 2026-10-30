@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/hub/button_expander_defs.hh"
+#include "patch-serial/patch/panels/medium/button_expander_defs.hh"
 #include "conf/button_expander_conf.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/i2c.hh"

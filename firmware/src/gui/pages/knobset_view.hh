@@ -124,7 +124,7 @@ struct KnobSetViewPage : PageBase {
 			// FIXME: there are panes for 12 knobs, so the pro's ENC13..16 maps aren't shown
 			if (is_panel_knob(map) && map.panel_knob_id < panes.size()) {
 				cont = create_knob_item(idx, map);
-			} else if (map.is_button()) {
+			} else if (is_button(map)) {
 				cont = button_exp.create_button_item(idx, map, patch);
 			}
 
@@ -238,7 +238,7 @@ struct KnobSetViewPage : PageBase {
 					if (arcs[idx])
 						update_knob(arcs[idx], is_tracking, arc_val);
 
-				} else if (map.is_button()) {
+				} else if (is_button(map)) {
 					button_exp.update_button(map.module_id, map.param_id, value);
 				}
 

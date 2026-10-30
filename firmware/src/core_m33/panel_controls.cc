@@ -1,7 +1,7 @@
 #include "panel_controls.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
-#include "CoreModules/hub/button_expander_defs.hh"
+#include "patch-serial/patch/panels/medium/button_expander_defs.hh"
 #include "drivers/hsem.hh"
 #include <algorithm>
 #include <cstdint>
@@ -144,7 +144,7 @@ void PanelControls::update_metaparams() {
 
 // The knob encoders ENC1..16: their clicks since the last block
 void PanelControls::update_encoders() {
-	static_assert(NumPanelEncoders == ExpanderControls::NumEncoders);
+	static_assert(PanelDef::NumEncoders == ExpanderControls::NumEncoders);
 
 	for (unsigned i = 0; i < ExpanderControls::NumEncoders; i++) {
 		int32_t clicks = expanders.encoder_position(i) - sent_enc_positions[i];

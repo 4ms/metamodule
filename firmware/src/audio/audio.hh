@@ -106,7 +106,7 @@ private:
 	uint32_t knobs_moved_while_stopped = 0;
 
 	// The pro's encoders (empty on MP1)
-	[[no_unique_address]] PanelEncoders<NumPanelEncoders> panel_encoders;
+	[[no_unique_address]] PanelEncoders<PanelDef::NumEncoders> panel_encoders;
 
 	// Start/Pause State
 	float output_fade_amt = -1.f;

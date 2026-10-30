@@ -68,6 +68,8 @@ add_subdirectory(../lib/thorvg ${CMAKE_BINARY_DIR}/thorvg)
 #
 add_subdirectory(../vcv_plugin ${CMAKE_BINARY_DIR}/vcv_plugin)
 target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.cc)
+# The panel's conf/ headers (e.g. the GUI's styles.hh needs PanelDef), after src/ as for main.elf
+target_include_directories(vcv_plugin_internal PRIVATE ${FWDIR}/src/medium)
 
 #
 # Brands

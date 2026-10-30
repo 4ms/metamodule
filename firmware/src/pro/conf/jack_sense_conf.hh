@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/hub/panel_medium_defs.hh"
+#include "conf/panel_conf.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/pin.hh"
 #include <cstdint>
@@ -8,8 +8,7 @@
 // Jack sense: TCA9555 U1212 on the jack board, on the same I2C4 bus as the codec
 // (codec_jack_i2c_conf in i2c_conf.hh). Its INT goes to PH9.
 //
-// The pro p1 jack layout matches the medium panel: 6 audio ins, 2 gate ins, 8 outs,
-// so PanelDef (panel_medium_defs.hh) is used for now.
+// The pro p1 jack layout matches the medium panel: 6 audio ins, 2 gate ins, 8 outs.
 //
 // Polarity, verified on p1: a pin reads 0 when its jack is patched, 1 when it's not. Same as MP1, so
 // as there, the reading is inverted before jack_is_patched() (1 = patched) sees it.
