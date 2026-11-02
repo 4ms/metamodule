@@ -20,6 +20,7 @@ namespace MetaModule::WifiInterface
 
 PatchStorage *patchStorage;
 DoubleBufParamBlock *paramBlocks;
+WifiLiveBlock *liveBlock;
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
 
@@ -170,11 +171,12 @@ void send_heartbeat() {
 
 ////////////////////////////////
 
-void init(PatchStorage *storage, DoubleBufParamBlock *param_blocks) {
+void init(PatchStorage *storage, DoubleBufParamBlock *param_blocks, WifiLiveBlock *live_block) {
 	pr_info("Initializing Wifi\n");
 
 	patchStorage = storage;
 	paramBlocks = param_blocks;
+	liveBlock = live_block;
 }
 
 void start() {
@@ -241,6 +243,33 @@ void handle_management_channel(std::span<uint8_t> payload) {
 
 		lastIPAnswerTime = getTimestamp();
 	}
+}
+
+// Status with the playing patch's per-module loads. Also keeps the A7 measuring them.
+flatbuffers::Offset<Status> CreateStatusWithModules(flatbuffers::FlatBufferBuilder &fbb, MetaParams const &metaparams) {
+	liveBlock->request_detail();
+
+	auto live = liveBlock->read();
+	if (!live)
+		return CreateStatus(fbb, metaparams.audio_load, metaparams.patch_playing);
+
+	auto name = fbb.CreateString(std::string_view{live->patch_name});
+	auto num_modules = std::min<size_t>(live->num_modules, live->modules.size());
+	auto loads = fbb.CreateVector(live->modules.data(), num_modules);
+	auto num_cores = std::min<size_t>(live->num_module_cores, live->module_cores.size());
+	auto cores = fbb.CreateVector(live->module_cores.data(), num_cores);
+	auto core_loads = fbb.CreateVector(live->core_loads.data(), live->core_loads.size());
+
+	return CreateStatus(fbb,
+						metaparams.audio_load,
+						metaparams.patch_playing,
+						false,
+						name,
+						loads,
+						live->overhead,
+						live->modules_valid && live->playing,
+						cores,
+						core_loads);
 }
 
 void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
@@ -314,7 +343,8 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 			auto const &metaparams = (*paramBlocks)[0].metaparams;
 
 			flatbuffers::FlatBufferBuilder fbb;
-			auto status = CreateStatus(fbb, metaparams.audio_load, metaparams.patch_playing);
+			auto status = statusMessage->include_modules() ? CreateStatusWithModules(fbb, metaparams) :
+															 CreateStatus(fbb, metaparams.audio_load, metaparams.patch_playing);
 			auto message = CreateMessage(fbb, AnyMessage_Status, status.Union());
 			fbb.Finish(message);
 

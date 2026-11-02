@@ -14,6 +14,9 @@ TEST_CASE("published live data reads back") {
 	data.num_modules = 3;
 	data.modules[1] = 123;
 	data.modules[2] = 7;
+	data.module_cores[1] = 0;
+	data.module_cores[2] = 1;
+	data.core_loads = {210, 255};
 	block.publish(data);
 
 	auto read = block.read();
@@ -25,6 +28,9 @@ TEST_CASE("published live data reads back") {
 	CHECK(read->num_modules == 3);
 	CHECK(read->modules[1] == 123);
 	CHECK(read->modules[2] == 7);
+	CHECK(read->module_cores[2] == 1);
+	CHECK(read->core_loads[0] == 210);
+	CHECK(read->core_loads[1] == 255);
 }
 
 TEST_CASE("nothing published yet reads as not playing") {

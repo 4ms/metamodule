@@ -69,7 +69,7 @@ int main() {
 	ModuleFSMessageHandler module_fs_messages{SharedMemoryS::ptrs.icc_modulefs_message_core0,
 											  SharedMemoryS::ptrs.icc_modulefs_message_core1};
 
-	WifiInterface::init(&fs_messages.get_patch_storage(), SharedMemoryS::ptrs.param_block);
+	WifiInterface::init(&fs_messages.get_patch_storage(), SharedMemoryS::ptrs.param_block, SharedMemoryS::ptrs.wifi_live);
 	WifiInterface::start();
 
 	// From here on, this core's printf() is buffered and drained asynchronously

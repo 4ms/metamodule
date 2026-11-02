@@ -16,6 +16,7 @@ struct LiveOverhead {
 	uint32_t sync = 0; // Core 1 waiting beyond the busiest core
 	uint32_t other = 0;
 	uint32_t max_core = 0; // busiest core's modules + cables
+	std::array<uint32_t, LiveLoadMeter::MaxCores> cores{}; // each core's modules + cables
 
 	uint32_t total() const {
 		return mappings + midi + sync + other;
@@ -23,6 +24,10 @@ struct LiveOverhead {
 
 	uint16_t total_tenths() const {
 		return static_cast<uint16_t>((total() + 500u) / 1000u);
+	}
+
+	uint16_t core_tenths(unsigned core) const {
+		return core < cores.size() ? static_cast<uint16_t>((cores[core] + 500u) / 1000u) : 0;
 	}
 };
 
@@ -43,6 +48,7 @@ inline LiveOverhead live_overhead(LiveLoadMeter::Loads const &live, std::span<co
 	}
 
 	LiveOverhead oh;
+	oh.cores = core_ppm;
 	oh.max_core = *std::ranges::max_element(core_ppm);
 	oh.mappings = live.mappings * 1000u;
 	oh.midi = live.midi * 1000u;

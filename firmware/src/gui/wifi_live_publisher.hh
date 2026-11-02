@@ -42,12 +42,19 @@ public:
 			data.patch_name = patch->patch_name;
 
 			auto live = playloader.get_live_load();
-			data.overhead = live_overhead(live, patch->module_cores).total_tenths();
+			auto overhead = live_overhead(live, patch->module_cores);
+			data.overhead = overhead.total_tenths();
+			for (auto core = 0u; core < data.core_loads.size(); core++)
+				data.core_loads[core] = overhead.core_tenths(core);
 			data.modules_valid = live.valid && was_detailed && playloader.is_live_load_detailed();
 
 			auto num = std::min<size_t>(patch->module_slugs.size(), data.modules.size());
 			data.num_modules = static_cast<uint16_t>(num);
 			std::copy_n(live.modules.begin(), std::min(num, live.modules.size()), data.modules.begin());
+			auto num_cores = std::min(num, patch->module_cores.size());
+			data.num_module_cores = static_cast<uint16_t>(num_cores);
+			for (auto i = 0u; i < num_cores; i++)
+				data.module_cores[i] = static_cast<uint8_t>(patch->module_cores[i]);
 		}
 
 		block->publish(data);

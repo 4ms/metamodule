@@ -32,6 +32,10 @@ TEST_CASE("overhead is computed like the Load Balance panel") {
 	auto oh = live_overhead(live, cores);
 
 	// core 0: cables 10 + module 200 = 210; core 1: cables 5 + 150 + 100 = 255 (busiest)
+	CHECK(oh.cores[0] == 210'000);
+	CHECK(oh.cores[1] == 255'000);
+	CHECK(oh.core_tenths(0) == 210);
+	CHECK(oh.core_tenths(1) == 255);
 	CHECK(oh.max_core == 255'000);
 	// core 0 runs 210 + sync 60 = 270, which is 15 beyond the busiest core
 	CHECK(oh.sync == 15'000);

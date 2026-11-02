@@ -4,11 +4,12 @@
 #include <cstdint>
 #include <expected>
 #include <params/param_block.hh>
+#include <wifi/wifi_live_block.hh>
 #include <patch_file/patch_storage.hh>
 
 namespace MetaModule::WifiInterface
 {
-	void init(PatchStorage *, DoubleBufParamBlock *);
+	void init(PatchStorage *, DoubleBufParamBlock *, WifiLiveBlock *);
 
 	void run();
 	void start();

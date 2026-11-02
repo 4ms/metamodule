@@ -17,6 +17,9 @@ struct WifiLiveData {
 	uint16_t overhead = 0;		// tenths of a percent
 	uint16_t num_modules = 0;
 	std::array<uint16_t, MAX_MODULES_IN_PATCH> modules{}; // tenths of a percent, index = module id in patch
+	uint16_t num_module_cores = 0; // 0 if the patch has no load balancing info
+	std::array<uint8_t, MAX_MODULES_IN_PATCH> module_cores{}; // core each module runs on
+	std::array<uint16_t, 2> core_loads{}; // each core's modules + cables, tenths of a percent
 };
 
 // Shared between A7 (GUI) and M4 (Wi-Fi). Each field has a single writer:
