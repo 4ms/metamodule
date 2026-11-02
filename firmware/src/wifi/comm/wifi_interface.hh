@@ -3,11 +3,12 @@
 #include <span>
 #include <cstdint>
 #include <expected>
+#include <params/param_block.hh>
 #include <patch_file/patch_storage.hh>
 
 namespace MetaModule::WifiInterface
 {
-	void init(PatchStorage*);
+	void init(PatchStorage *, DoubleBufParamBlock *);
 
 	void run();
 	void start();

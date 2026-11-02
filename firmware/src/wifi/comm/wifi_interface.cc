@@ -19,6 +19,7 @@ namespace MetaModule::WifiInterface
 /////////////////////////
 
 PatchStorage *patchStorage;
+DoubleBufParamBlock *paramBlocks;
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
 
@@ -169,10 +170,11 @@ void send_heartbeat() {
 
 ////////////////////////////////
 
-void init(PatchStorage *storage) {
+void init(PatchStorage *storage, DoubleBufParamBlock *param_blocks) {
 	pr_info("Initializing Wifi\n");
 
 	patchStorage = storage;
+	paramBlocks = param_blocks;
 }
 
 void start() {
@@ -304,6 +306,17 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 				fbb.Finish(message);
 			}
+
+			sendResponse(fbb.GetBufferSpan());
+
+		} else if (auto statusMessage = message->content_as_Status(); statusMessage) {
+			// Audio updates the two blocks alternately, so block 0 is at most one block old
+			auto const &metaparams = (*paramBlocks)[0].metaparams;
+
+			flatbuffers::FlatBufferBuilder fbb;
+			auto status = CreateStatus(fbb, metaparams.audio_load, metaparams.patch_playing);
+			auto message = CreateMessage(fbb, AnyMessage_Status, status.Union());
+			fbb.Finish(message);
 
 			sendResponse(fbb.GetBufferSpan());
 
