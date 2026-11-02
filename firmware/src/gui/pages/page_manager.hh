@@ -26,6 +26,7 @@
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"
 #include "gui/pages/system_menu.hh"
+#include "gui/wifi_live_publisher.hh"
 
 #include "vcv_plugin/internal/osdialog-mm.hh"
 
@@ -62,6 +63,8 @@ class PageManager {
 	JackMapViewPage page_jackmap{info};
 	MidiMapViewPage page_midimap{info};
 	FullscreenGraphicPage page_fullscreen_graphic{info};
+
+	WifiLivePublisher wifi_live;
 
 	enum class MidiPCLoadState { Idle, Requesting, Loading };
 	PatchLocation midi_pc_target_loc{};
@@ -102,7 +105,8 @@ public:
 			   .missing_plugins = missing_plugins}
 		, screensaver{screensaver}
 		, patch_reloader{patch_storage, open_patch_manager, settings.filesystem}
-		, patch_switch{patch_reloader, info.patch_playloader, missing_plugins} {
+		, patch_switch{patch_reloader, info.patch_playloader, missing_plugins}
+		, wifi_live{open_patch_manager, patch_playloader} {
 
 		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
 		register_file_browser_vcv(file_browser, file_save_dialog);
@@ -119,11 +123,17 @@ public:
 		page_list.request_initial_page(id, args);
 	}
 
+	void set_wifi_live_block(WifiLiveBlock *block) {
+		wifi_live.set_block(block);
+	}
+
 	void update_current_page() {
 
 		handle_knobset_change();
 
 		handle_midi_pc_patch_load();
+
+		wifi_live.update(lv_tick_get());
 
 		update_screensaver();
 
