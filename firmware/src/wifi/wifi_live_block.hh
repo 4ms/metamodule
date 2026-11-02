@@ -12,6 +12,7 @@ namespace MetaModule
 // What the Wi-Fi interface reports about the playing patch
 struct WifiLiveData {
 	PatchName patch_name{""};
+	uint32_t fingerprint = 0; // patch_fingerprint() of the playing patch
 	bool playing = false;
 	bool modules_valid = false; // per-module loads are being measured
 	uint16_t overhead = 0;		// tenths of a percent

@@ -1,5 +1,6 @@
 #pragma once
 #include "patch_file/open_patch_manager.hh"
+#include "patch_file/patch_fingerprint.hh"
 #include "patch_play/live_overhead.hh"
 #include "patch_play/patch_playloader.hh"
 #include "wifi/live_detail_request.hh"
@@ -40,6 +41,7 @@ public:
 
 		if (patch) {
 			data.patch_name = patch->patch_name;
+			data.fingerprint = patch_fingerprint(patch->module_slugs);
 
 			auto live = playloader.get_live_load();
 			auto overhead = live_overhead(live, patch->module_cores);
