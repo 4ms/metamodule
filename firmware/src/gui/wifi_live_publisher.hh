@@ -62,7 +62,15 @@ public:
 		block->publish(data);
 	}
 
+	// A patch file the Wi-Fi interface asked to load and play (once per request)
+	std::optional<PatchLocation> take_load_request() {
+		if (!block)
+			return std::nullopt;
+		return block->take_load_request(last_load_request_id);
+	}
+
 private:
+	uint32_t last_load_request_id = 0;
 	OpenPatchManager &patches;
 	PatchPlayLoader &playloader;
 	WifiLiveBlock *block = nullptr;

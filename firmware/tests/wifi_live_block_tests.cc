@@ -51,12 +51,64 @@ TEST_CASE("read during a write gives up instead of returning torn data") {
 TEST_CASE("reset clears what was left in memory from before a reboot") {
 	WifiLiveBlock block;
 	block.data_seq = 7; // odd: would block reading forever
+	block.load_seq = 3;
+	block.load_id = 42;
+	block.load_loc = {"stale.yml", Volume::SDCard};
 	block.detail_request_count = 9;
 
 	block.reset();
 
 	CHECK(block.read().has_value());
+	uint32_t last_handled = 0;
+	CHECK_FALSE(block.take_load_request(last_handled).has_value());
 	CHECK(block.detail_requests() == 0);
+}
+
+TEST_CASE("no load request until one is made") {
+	WifiLiveBlock block;
+	uint32_t last_handled = 0;
+	CHECK_FALSE(block.take_load_request(last_handled).has_value());
+}
+
+TEST_CASE("a load request is taken once") {
+	WifiLiveBlock block;
+	uint32_t last_handled = 0;
+
+	block.request_load({"My Patch.yml", Volume::SDCard});
+
+	auto req = block.take_load_request(last_handled);
+	REQUIRE(req.has_value());
+	CHECK(std::string_view{req->filename} == "My Patch.yml");
+	CHECK(req->vol == Volume::SDCard);
+
+	CHECK_FALSE(block.take_load_request(last_handled).has_value());
+
+	block.request_load({"Other.yml", Volume::USB});
+	req = block.take_load_request(last_handled);
+	REQUIRE(req.has_value());
+	CHECK(std::string_view{req->filename} == "Other.yml");
+}
+
+TEST_CASE("load request read during a write is retried later") {
+	WifiLiveBlock block;
+	uint32_t last_handled = 0;
+	block.request_load({"My Patch.yml", Volume::SDCard});
+
+	block.load_seq = block.load_seq + 1; // odd: writer mid-update
+	CHECK_FALSE(block.take_load_request(last_handled).has_value());
+
+	block.load_seq = block.load_seq + 1;
+	CHECK(block.take_load_request(last_handled).has_value());
+}
+
+TEST_CASE("Wi-Fi load is skipped for the patch that's already playing") {
+	PatchLocation sent{"My Patch.yml", Volume::SDCard};
+
+	CHECK(needs_wifi_load(sent, std::nullopt));
+	CHECK(needs_wifi_load(sent, PatchLocation{"Other.yml", Volume::SDCard}));
+	CHECK(needs_wifi_load(sent, PatchLocation{"My Patch.yml", Volume::USB}));
+	// Already playing: the file change checker reloads it
+	CHECK_FALSE(needs_wifi_load(sent, PatchLocation{"My Patch.yml", Volume::SDCard}));
 }
 
 TEST_CASE("detail requests are counted") {

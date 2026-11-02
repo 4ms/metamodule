@@ -65,6 +65,7 @@ class PageManager {
 	FullscreenGraphicPage page_fullscreen_graphic{info};
 
 	WifiLivePublisher wifi_live;
+	PatchLocation wifi_target_loc{};
 
 	enum class MidiPCLoadState { Idle, Requesting, Loading };
 	PatchLocation midi_pc_target_loc{};
@@ -134,6 +135,8 @@ public:
 		handle_midi_pc_patch_load();
 
 		wifi_live.update(lv_tick_get());
+
+		handle_wifi_patch_load();
 
 		update_screensaver();
 
@@ -381,6 +384,32 @@ public:
 				}
 			}
 			pc.num = -1;
+		}
+	}
+
+	// Load and play a patch sent over Wi-Fi with "load after save" (same as MIDI PC patch load)
+	void handle_wifi_patch_load() {
+		auto loc = wifi_live.take_load_request();
+		if (!loc)
+			return;
+
+		auto &patches = info.open_patch_manager;
+		auto playing = patches.get_playing_patch() ? std::optional{patches.get_playing_patch_loc()} : std::nullopt;
+		if (!needs_wifi_load(*loc, playing))
+			return;
+
+		wifi_target_loc = *loc;
+
+		auto result = patch_switch.jump_to_patch(wifi_target_loc, [this]() {
+			gui_state.force_redraw_patch = true;
+			page_list.request_new_page_no_history(PageId::PatchView,
+												  {.patch_loc_hash = PatchLocHash{wifi_target_loc}});
+			info.patch_playloader.request_load_view_patch();
+		});
+
+		if (!result.success) {
+			info.notify_queue.put(
+				{"Wi-Fi: error loading patch: " + result.error_string, Notification::Priority::Error, 2000});
 		}
 	}
 

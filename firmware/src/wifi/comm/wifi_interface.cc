@@ -320,7 +320,12 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				auto timestamp = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
 
 				if (timestamp != 0) {
-					auto result = CreateResult(fbb, true);
+					// Ask the GUI (A7) to load and play the patch that was just saved
+					bool load = uploadPatchMessage->load_after_save();
+					if (load)
+						liveBlock->request_load(PatchLocation{filename, *thisVolume});
+
+					auto result = CreateResult(fbb, true, 0, load);
 					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 					fbb.Finish(message);
 

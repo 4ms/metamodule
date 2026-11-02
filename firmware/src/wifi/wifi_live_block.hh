@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/patch_conf.hh"
 #include "patch/module_type_slug.hh"
+#include "patch_file/patch_location.hh"
 #include <array>
 #include <atomic>
 #include <cstdint>
@@ -32,11 +33,19 @@ struct WifiLiveBlock {
 
 	volatile uint32_t detail_request_count = 0;
 
+	// M4 -> A7: load and play a patch file (seqlock, single writer: M4)
+	volatile uint32_t load_seq = 0;
+	uint32_t load_id = 0; // increases with each request
+	PatchLocation load_loc{};
+
 	// The block lives in a NOLOAD section, and DDR survives a warm reboot: zero it before use
 	void reset() {
 		data_seq = 0;
 		data = WifiLiveData{};
 		detail_request_count = 0;
+		load_seq = 0;
+		load_id = 0;
+		load_loc = PatchLocation{};
 	}
 
 	// A7 GUI
@@ -73,6 +82,39 @@ struct WifiLiveBlock {
 	uint32_t detail_requests() const {
 		return detail_request_count;
 	}
+
+	// M4
+	void request_load(PatchLocation const &loc) {
+		load_seq = load_seq + 1;
+		std::atomic_thread_fence(std::memory_order_release);
+		load_id = load_id + 1;
+		load_loc = loc;
+		std::atomic_thread_fence(std::memory_order_release);
+		load_seq = load_seq + 1;
+	}
+
+	// A7 GUI: a request newer than last_handled_id, or nullopt (none, or M4 is mid-write: try again later)
+	std::optional<PatchLocation> take_load_request(uint32_t &last_handled_id) const {
+		uint32_t s1 = load_seq;
+		std::atomic_thread_fence(std::memory_order_acquire);
+		if (s1 & 1u)
+			return std::nullopt;
+
+		uint32_t id = load_id;
+		PatchLocation loc = load_loc;
+		std::atomic_thread_fence(std::memory_order_acquire);
+		if (s1 != load_seq || id == last_handled_id)
+			return std::nullopt;
+
+		last_handled_id = id;
+		return loc;
+	}
 };
+
+// A patch sent over Wi-Fi with "load after save" only needs loading if it's not the
+// one playing: the playing patch is reloaded by the file change checker anyway.
+inline bool needs_wifi_load(PatchLocation const &requested, std::optional<PatchLocation> const &playing) {
+	return !playing || !(*playing == requested);
+}
 
 } // namespace MetaModule
