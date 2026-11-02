@@ -127,6 +127,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 				param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 			}
 
+			param_blocks[block].metaparams.patch_playing = patch_loader.is_playing();
+
 			if (duty > 0.985f) {
 				player.live_load.tally_overrun();
 				overrun_handler.start_retrying();

@@ -59,6 +59,9 @@ struct MetaParams {
 	uint32_t sample_rate = 48000;
 	bool midi_14bit_mode = false; // combine CC 0-31 (MSB) with CC 32-63 (LSB)
 
+	// Audio -> Wi-Fi (read by M4 directly from the ParamBlock)
+	bool patch_playing = false; // a patch is loaded and audio is not muted
+
 	// GUI -> GUI
 	// TODO: move this to a PageManager object like gui_state
 	RotaryMotion rotary_with_metabutton{};
@@ -79,6 +82,7 @@ struct MetaParams {
 		audio_load = 0;
 		audio_overruns = 0;
 		clipped_outs = 0;
+		patch_playing = false;
 		jack_senses = 0;
 		ext_buttons_high_events = 0;
 		ext_buttons_low_events = 0;
