@@ -1,6 +1,7 @@
 #include "panel_controls.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
+#include "conf/jack_sense_expander_conf.hh"
 #include "patch-serial/patch/panels/medium/button_expander_defs.hh"
 #include "drivers/hsem.hh"
 #include <algorithm>

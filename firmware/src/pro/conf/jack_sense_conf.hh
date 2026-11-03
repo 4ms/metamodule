@@ -1,27 +1,15 @@
 #pragma once
 #include "conf/panel_conf.hh"
-#include "drivers/gpio_expander.hh"
-#include "drivers/pin.hh"
 #include <cstdint>
 #include <optional>
 
-// Jack sense: TCA9555 U1212 on the jack board, on the same I2C4 bus as the codec
-// (codec_jack_i2c_conf in i2c_conf.hh). Its INT goes to PH9.
+// Jack sense: which bit of the TCA9555 U1212 reading is which panel jack.
+// (The expander's address and INT pin are in jack_sense_expander_conf.hh)
 //
 // The pro p1 jack layout matches the medium panel: 6 audio ins, 2 gate ins, 8 outs.
 //
 // Polarity, verified on p1: a pin reads 0 when its jack is patched, 1 when it's not. Same as MP1, so
 // as there, the reading is inverted before jack_is_patched() (1 = patched) sees it.
-
-namespace MetaModule::JackSense
-{
-const mdrivlib::GPIO_expander_conf gpio_expander_conf = {
-	.addr = 0x20, // A0=A1=A2=GND
-	.config = mdrivlib::GPIO_expander_conf::AllInputs(),
-};
-
-constexpr mdrivlib::PinDef IntPin{mdrivlib::GPIO::H, mdrivlib::PinNum::_9};
-} // namespace MetaModule::JackSense
 
 // Bit in the 16-bit expander reading (port 0 = bits 0-7, port 1 = bits 8-15) for each panel jack
 // U1212: P00 GATEIN1, P01 GATEIN2, P02 In5, P03 In6, P04 In3, P05 In4, P06 In1, P07 In2,

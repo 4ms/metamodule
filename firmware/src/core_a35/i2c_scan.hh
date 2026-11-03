@@ -2,7 +2,7 @@
 #include "conf/board_codec_conf.hh"
 #include "conf/fusb30x_conf.hh"
 #include "conf/i2c_conf.hh"
-#include "conf/jack_sense_conf.hh"
+#include "conf/jack_sense_expander_conf.hh"
 #include "conf/led_driver_conf.hh"
 #include "core_intercom/shared_i2c_lock.hh"
 #include "drivers/i2c.hh"

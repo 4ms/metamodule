@@ -5,7 +5,7 @@
 #include <cstdint>
 
 // Encoders and buttons on the four TCA9555 control expanders.
-// (The fifth TCA9555, for jack sense, is in jack_sense_conf.hh)
+// (The fifth TCA9555, for jack sense, is in jack_sense_expander_conf.hh)
 //
 // Bit numbering: a 16-bit expander reading has port 0 (P00..P07) in bits 0..7
 // and port 1 (P10..P17) in bits 8..15.
