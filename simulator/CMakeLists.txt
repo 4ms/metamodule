@@ -18,6 +18,21 @@ option(ALL_SAN "Use address sanitizer and all other sanitizers" OFF)
 option(SIM_DEBUG_O0 "Compile the entire binary (audio DSP included) at -O0 for debugging; set by the `debug` target" OFF)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
+
+# Hardware platform to simulate (the presets set this), as in the firmware:
+#   mp1: MetaModule, panel conf headers in src/medium
+#   mp2: MetaModule Pro, panel conf headers in src/pro
+set(METAMODULE_PLATFORM "mp1" CACHE STRING "Hardware platform to simulate")
+set_property(CACHE METAMODULE_PLATFORM PROPERTY STRINGS mp1 mp2)
+
+if(METAMODULE_PLATFORM STREQUAL "mp2")
+    set(PANEL_DIR ${FWDIR}/src/pro)
+elseif(METAMODULE_PLATFORM STREQUAL "mp1")
+    set(PANEL_DIR ${FWDIR}/src/medium)
+else()
+    message(FATAL_ERROR "Unknown METAMODULE_PLATFORM: ${METAMODULE_PLATFORM} (use mp1 or mp2)")
+endif()
+message("Simulating platform ${METAMODULE_PLATFORM} (${PANEL_DIR})")
 set(METAMODULE_FW_DIR ${FWDIR})
 include(${FWDIR}/src/shared_sources.cmake)
 set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
@@ -122,8 +137,8 @@ endif()
 # #################### VCV Adaptor ##################################
 
 add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
-# The panel's conf/ headers (e.g. the GUI's styles.hh needs PanelDef), after src/ as for the simulator
-target_include_directories(vcv_plugin_internal PRIVATE ${FWDIR}/src/medium)
+# The panel's conf/ headers (e.g. the GUI's styles.hh needs PanelDef), before src/ as for the simulator
+target_include_directories(vcv_plugin_internal BEFORE PRIVATE ${PANEL_DIR})
 
 # #################### Other brands ##################################
  
@@ -201,9 +216,9 @@ target_include_directories(
   PRIVATE src/headless
           src
           stubs
+          ${PANEL_DIR} # before src, so the panel's conf/ headers are found before the shared ones in src/conf/
           ${FWDIR}/src
           ${FWDIR}/src/console
-          ${FWDIR}/src/medium
           ${FWDIR}
           .
 )

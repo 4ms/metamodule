@@ -1,19 +1,20 @@
 #pragma once
 
+#include "conf/screen_buffer_conf.hh"
 #include "lib/cxxopts/cxxopts.hpp"
 #include <iostream>
 #include <optional>
+#include <string>
 
 namespace MetaModuleSim
 {
 
 struct Settings {
 	unsigned zoom = 100;
-	// Display size in view coordinates. Defaults match the MP1 "medium" hardware;
-	// override (e.g. --screenw=720 --screenh=480) to preview GUI pages at the
-	// MP2 "pro" screen size before hardware exists.
-	unsigned screenw = 320;
-	unsigned screenh = 240;
+	// Display size in view coordinates. Defaults match the platform the simulator
+	// was built for (METAMODULE_PLATFORM): 320x240 for MP1, 1280x720 for MP2
+	unsigned screenw = MetaModule::ScreenBufferConf::viewWidth;
+	unsigned screenh = MetaModule::ScreenBufferConf::viewHeight;
 	std::string sdcard_path = "patches/";
 	std::string flash_path = "../patches/default/";
 	std::string asset_file = "build/assets.uimg";
@@ -45,12 +46,12 @@ struct Settings {
 				"z,zoom", "Initial display zoom percentage", cxxopts::value<unsigned>()->default_value("100"));
 
 			options.add_options()("screenw",
-								  "Display width in pixels (default matches hardware; try 720 for 'pro' preview)",
-								  cxxopts::value<unsigned>()->default_value("320"));
+								  "Display width in pixels (default matches hardware)",
+								  cxxopts::value<unsigned>()->default_value(std::to_string(screenw)));
 
 			options.add_options()("screenh",
-								  "Display height in pixels (default matches hardware; try 480 for 'pro' preview)",
-								  cxxopts::value<unsigned>()->default_value("240"));
+								  "Display height in pixels (default matches hardware)",
+								  cxxopts::value<unsigned>()->default_value(std::to_string(screenh)));
 
 			options.add_options()(
 				"a,audioout", "Audio output device ID (as seen by SDL)", cxxopts::value<int>()->default_value("0"));

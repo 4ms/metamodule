@@ -53,6 +53,26 @@ build/simulator --help
 
 See the [Simulator Usage guide](simulator-usage.md) for arguments details.
 
+## Simulating MetaModule MP2 (pro)
+
+By default the simulator is built for MP1 (MetaModule). To build for MP2
+(MetaModule Pro), add `PRESET=mp2` to any of the make commands above:
+
+```bash
+make PRESET=mp2 config-sim
+make PRESET=mp2
+make PRESET=mp2 run
+
+# The above are shortcuts for:
+# cmake --fresh --preset mp2 -DLOG_LEVEL=DEBUG
+# cmake --build build-mp2
+# build-mp2/simulator
+```
+
+The MP2 simulator builds in `build-mp2/`, so it doesn't overwrite the MP1 build
+in `build/`. Its screen defaults to 1280x720 (MP1's is 320x240); use
+`--screenw` and `--screenh` to change this.
+
 ## Debug builds
 
 Debugging with gdb and lldb is usually easier with optimizations off (-O0). 

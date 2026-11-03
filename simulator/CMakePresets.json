@@ -18,6 +18,16 @@
             }
         },
         {
+            "name": "mp2",
+            "displayName": "Simulator for MetaModule MP2 (pro)",
+            "inherits": "Default",
+            "binaryDir": "${sourceDir}/build-mp2",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build-mp2",
+                "METAMODULE_PLATFORM": { "type": "STRING", "value": "mp2" }
+            }
+        },
+        {
             "name": "headless",
             "displayName": "Headless processing",
             "generator": "Ninja",

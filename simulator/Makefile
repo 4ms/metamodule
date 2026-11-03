@@ -1,4 +1,12 @@
+# Simulator preset (see CMakePresets.json): Default simulates MP1, mp2 simulates MP2 (pro).
+# e.g. `make PRESET=mp2` or `make PRESET=mp2 run`. Each preset has its own build dir.
+PRESET ?= Default
+
+ifeq ($(PRESET),Default)
 BUILDDIR := build
+else
+BUILDDIR := build-$(PRESET)
+endif
 
 # MIDI support (rtmidi) in the GUI simulator. Override on the command line, e.g.
 # `make config-sim MIDI=OFF`, or use the config-sim-midi / config-sim-nomidi targets.
@@ -11,19 +19,19 @@ all: | $(BUILDDIR)
 	cmake --build $(BUILDDIR)
 
 $(BUILDDIR):
-	cmake --fresh --preset Default -DLOG_LEVEL=DEBUG -DSIMULATOR_MIDI=$(MIDI)
+	cmake --fresh --preset $(PRESET) -DLOG_LEVEL=DEBUG -DSIMULATOR_MIDI=$(MIDI)
 
 clean:
-	cmake --fresh --preset Default -DLOG_LEVEL=DEBUG -DSIMULATOR_MIDI=$(MIDI)
+	cmake --fresh --preset $(PRESET) -DLOG_LEVEL=DEBUG -DSIMULATOR_MIDI=$(MIDI)
 
 config-sim: clean
 
 # Reconfigure with MIDI explicitly enabled or disabled
 config-sim-midi:
-	cmake --fresh --preset Default -DLOG_LEVEL=DEBUG -DSIMULATOR_MIDI=ON
+	cmake --fresh --preset $(PRESET) -DLOG_LEVEL=DEBUG -DSIMULATOR_MIDI=ON
 
 config-sim-nomidi:
-	cmake --fresh --preset Default -DLOG_LEVEL=DEBUG -DSIMULATOR_MIDI=OFF
+	cmake --fresh --preset $(PRESET) -DLOG_LEVEL=DEBUG -DSIMULATOR_MIDI=OFF
 
 realclean:
 	rm -rf $(BUILDDIR) build-headless
@@ -32,7 +40,7 @@ warnings:
 	cmake --fresh --preset gcc-warn -DLOG_LEVEL=TRACE -DSIMULATOR_MIDI=$(MIDI)
 
 run: all
-	build/simulator
+	$(BUILDDIR)/simulator
 
 debug:
 	cmake --build ${BUILDDIR} --target debug
