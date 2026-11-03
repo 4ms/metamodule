@@ -232,22 +232,23 @@ bool FsSyscallProxy::sync(FIL *fil) {
 	return false;
 }
 
-bool FsSyscallProxy::mkdir(std::string_view path) {
-	if (path.length() == 0)
-		return false;
+FRESULT FsSyscallProxy::mkdir(std::string_view path) {
+	// A path too long for the message would be truncated, creating the wrong dir
+	if (path.length() == 0 || path.length() > decltype(IntercoreModuleFS::MkDir::path)::capacity)
+		return FR_INVALID_NAME;
 
 	auto msg = IntercoreModuleFS::MkDir{
 		.path = path,
 	};
 
-	fs_trace("A7: mkdir %.*s\n", path.data(), path.size());
+	fs_trace("A7: mkdir %.*s\n", (int)path.size(), path.data());
 
 	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::MkDir>(msg, 8000)) {
-		return response->res == FR_OK;
+		return response->res;
 	}
 
 	pr_err("Failed to send mkdir request\n");
-	return false;
+	return FR_TIMEOUT;
 }
 
 bool FsSyscallProxy::unlink(std::string_view path) {
