@@ -322,7 +322,7 @@ int mkdir(const char *fullpath) {
 	}
 
 	// The M4 needs the volume prefix to pick the drive
-	auto res = fs_proxy.mkdir(fullpath);
+	auto res = fs_proxy.mkdir(make_full_path(volume, path));
 
 	switch (res) {
 		case FR_OK:
