@@ -346,6 +346,7 @@ int mkdir(const char *fullpath) {
 		case FR_TIMEOUT:
 			errno = ETIMEDOUT;
 			break;
+		case FR_DISK_ERR: // what a missing USB drive reports
 		case FR_NOT_READY:
 		case FR_INVALID_DRIVE:
 		case FR_NOT_ENABLED:
