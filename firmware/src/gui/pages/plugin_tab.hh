@@ -146,6 +146,9 @@ struct PluginTab : SystemMenuTab {
 			lv_hide(ui_PluginTabSpinner);
 			move_found_plugin_to_loaded();
 
+			if (result.warning_message.length())
+				notify_queue.put({result.warning_message, Notification::Priority::Error, 5000});
+
 			loading_done = true;
 		}
 
@@ -231,7 +234,7 @@ private:
 	}
 
 	void unload_plugin(std::string_view plugin_name) {
-		play_loader.prepare_patch_for_plugin_change(plugin_manager.brands_of(plugin_name));
+		play_loader.prepare_patch_for_plugin_change(plugin_manager.module_slugs_of(plugin_name));
 		plugin_manager.unload_plugin(plugin_name);
 		gui_state.force_redraw_patch = true;
 		if (lv_obj_has_flag(ui_PluginScanButton, LV_OBJ_FLAG_HIDDEN)) {
@@ -433,7 +436,7 @@ private:
 
 			auto *plugins = page->plugin_manager.found_plugin_list();
 			page->play_loader.prepare_patch_for_plugin_change(
-				page->plugin_manager.brands_of((*plugins)[idx - 1].plugin_name));
+				page->plugin_manager.module_slugs_of((*plugins)[idx - 1].plugin_name));
 
 			page->plugin_manager.load_plugin(idx - 1);
 			page->load_in_progress_obj = event->target;

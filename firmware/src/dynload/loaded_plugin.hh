@@ -23,10 +23,11 @@ struct LoadedPlugin {
 	std::vector<std::string> loaded_files;
 	CodeBuffer code;
 	PluginFiniArray fini_array;
-	// Brands registered by the plugin's init(). These can differ from the plugin
-	// (file) name, e.g. a native plugin jacktest.mmplugin calling
-	// register_module("Jack Test", ...)
-	std::vector<std::string> brands;
+	// The plugin's modules: brands the plugin created, plus "Brand:Module" for each
+	// module it added to a brand that already existed (see PluginModuleSlugs).
+	// The brands can differ from the plugin (file) name, e.g. a native plugin
+	// jacktest.mmplugin calling register_module("Jack Test", ...)
+	std::vector<std::string> loaded_module_slugs;
 };
 
 using LoadedPluginList = std::list<LoadedPlugin>;

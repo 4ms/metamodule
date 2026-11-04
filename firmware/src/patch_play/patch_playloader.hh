@@ -304,10 +304,10 @@ struct PatchPlayLoader {
 
 	void remove_module(unsigned module_id);
 
-	// brand_slugs: all brands the plugin registers (see PluginManager::brands_of())
-	void prepare_patch_for_plugin_change(std::span<const std::string> brand_slugs);
+	// plugin_slugs: the plugin's brands and modules (see PluginManager::module_slugs_of())
+	void prepare_patch_for_plugin_change(std::span<const std::string> plugin_slugs);
 
-	bool playing_patch_uses_brand(std::span<const std::string> brand_slugs);
+	bool playing_patch_uses_plugin(std::span<const std::string> plugin_slugs);
 
 	//
 	// Load balancing (patch_playloader_balance.cc)

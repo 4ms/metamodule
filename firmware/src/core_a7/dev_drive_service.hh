@@ -195,7 +195,12 @@ private:
 			// Remove it so the next eject does not install it again
 			drive_.files().delete_file(current_);
 
-			notify_queue_.put({"Installed " + current_, Notification::Priority::Status, 3000});
+			if (status.warning_message.length())
+				notify_queue_.put({"Installed " + current_ + "\n" + status.warning_message,
+								   Notification::Priority::Error,
+								   6000});
+			else
+				notify_queue_.put({"Installed " + current_, Notification::Priority::Status, 3000});
 
 		} else {
 			auto why = status.error_message.empty() ? ("loader stopped in state " + std::to_string((int)status.state)) :
@@ -236,12 +241,12 @@ private:
 			// The GUI may hold objects created by the plugin (e.g. ModuleView's context menu):
 			// they must be destroyed while the plugin code is still loaded
 			// The plugin's brands may differ from its name
-			auto brands = plugin_manager_.brands_of(name);
+			auto plugin_slugs = plugin_manager_.module_slugs_of(name);
 
-			if (play_loader_.playing_patch_uses_brand(brands) && release_gui_plugin_objects_)
+			if (play_loader_.playing_patch_uses_plugin(plugin_slugs) && release_gui_plugin_objects_)
 				release_gui_plugin_objects_();
 
-			play_loader_.prepare_patch_for_plugin_change(brands);
+			play_loader_.prepare_patch_for_plugin_change(plugin_slugs);
 			plugin_manager_.unload_plugin(name);
 		}
 

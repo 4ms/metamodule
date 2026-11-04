@@ -3,6 +3,7 @@
 #include "gui/fonts/ttf.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
+#include "plugin_module_slugs.hh"
 
 #include "gui/fonts/fonts.hh"
 #include <csetjmp>
@@ -33,24 +34,21 @@ public:
 	void unload_plugin(std::string_view name) {
 		for (unsigned i = 0; auto const &plugin : loaded_plugin_list) {
 			if (plugin.fileinfo.plugin_name == name) {
-				// Unregister the brand first, while the plugin code is still loaded.
+				// Unregister the plugin's modules first, while the plugin code is still loaded.
 				// This destroys each module's CreateModuleFunc std::function, whose
 				// type-erasure manager (for a plugin's lambda) lives in the plugin's
 				// code. If we did this after erasing/poisoning the code, that manager
 				// call would jump into freed/poisoned memory (an 0xEAFFFFFE "bl ." spin)
 				// and hang -- which is native-plugin-only, since VCV plugins tear down
 				// their create-funcs earlier in ~Plugin.
-				// (For VCV plugins ~Plugin's per-module unregister then finds the brand
+				// Only the brands the plugin created are removed whole: modules it added
+				// to an existing brand (e.g. a built-in one) are removed one by one.
+				// (For VCV plugins ~Plugin's per-module unregister then finds the modules
 				// already gone and logs a harmless "failed to remove module" warning.)
-				unsigned num_unregistered = 0;
-				for (auto const &brand : brands_of(plugin)) {
-					if (ModuleFactory::unregisterBrand(brand)) {
-						pr_dbg("Unregistered brand %s\n", brand.c_str());
-						num_unregistered++;
-					}
-				}
-				if (num_unregistered == 0)
-					pr_dbg("Failed to unregister brand %.*s\n", (int)name.size(), name.data());
+				for (auto const &slug : plugin.loaded_module_slugs)
+					pr_dbg("Unregistering %s\n", slug.c_str());
+				if (PluginModuleSlugs::unregister(plugin.loaded_module_slugs) == 0)
+					pr_dbg("Plugin %.*s had no modules to unregister\n", (int)name.size(), name.data());
 
 				// Mirror of the .init_array constructors run at load time
 				run_fini_array(plugin);
@@ -100,24 +98,16 @@ public:
 		return filename;
 	}
 
-	// The brands that a plugin's modules are registered under: the plugin name
-	// (the brand by convention), plus any other brands its init() registered.
-	// Use this, not the plugin name, to find the plugin's modules in a patch.
-	std::vector<std::string> brands_of(std::string_view name) const {
+	// The slugs of a plugin's modules: brands it created, and "Brand:Module" for modules
+	// it added to existing brands (see PluginModuleSlugs). These can differ from the
+	// plugin name, so use this to find the plugin's modules in a patch.
+	// For a plugin that isn't loaded, this is the plugin name (the brand by convention).
+	std::vector<std::string> module_slugs_of(std::string_view name) const {
 		for (auto const &plugin : loaded_plugin_list) {
 			if (std::string_view{plugin.fileinfo.plugin_name} == name)
-				return brands_of(plugin);
+				return plugin.loaded_module_slugs;
 		}
 		return {std::string{name}};
-	}
-
-	static std::vector<std::string> brands_of(LoadedPlugin const &plugin) {
-		std::vector<std::string> brands{std::string{plugin.fileinfo.plugin_name}};
-		for (auto const &brand : plugin.brands) {
-			if (std::ranges::find(brands, brand) == brands.end())
-				brands.push_back(brand);
-		}
-		return brands;
 	}
 
 	bool is_plugin_loaded(std::string_view name) {

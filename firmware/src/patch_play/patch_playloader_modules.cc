@@ -1,5 +1,6 @@
 #include "patch_play/modules_helpers.hh"
 #include "patch_play/patch_playloader.hh"
+#include "dynload/plugin_module_slugs.hh"
 
 namespace MetaModule
 {
@@ -63,24 +64,21 @@ void PatchPlayLoader::remove_module(unsigned module_id) {
 	pr_info("Heap: %u\n", get_heap_size());
 }
 
-bool PatchPlayLoader::playing_patch_uses_brand(std::span<const std::string> brand_slugs) {
+bool PatchPlayLoader::playing_patch_uses_plugin(std::span<const std::string> plugin_slugs) {
 	auto playing_patch = patches_.get_playing_patch();
 	if (!playing_patch)
 		return false;
 
-	for (auto const &brand_slug : brand_slugs) {
-		std::string brand = ModuleFactory::cleanupBrandName(brand_slug);
-		for (std::string_view combined_slug : playing_patch->module_slugs) {
-			if (ModuleFactory::cleanupBrandName(combined_slug) == brand)
-				return true;
-		}
+	for (std::string_view combined_slug : playing_patch->module_slugs) {
+		if (PluginModuleSlugs::module_is_from_plugin(combined_slug, plugin_slugs))
+			return true;
 	}
 
 	return false;
 }
 
-void PatchPlayLoader::prepare_patch_for_plugin_change(std::span<const std::string> brand_slugs) {
-	if (playing_patch_uses_brand(brand_slugs)) {
+void PatchPlayLoader::prepare_patch_for_plugin_change(std::span<const std::string> plugin_slugs) {
+	if (playing_patch_uses_plugin(plugin_slugs)) {
 		pr_dbg("Currently playing patch contains a module in the plugin to be removed. Stopping\n");
 		stop_audio_and_wait();
 		player_.unload_patch();

@@ -4,12 +4,15 @@
 #include "dynload/json_parse.hh"
 #include "dynload/loaded_plugin.hh"
 #include "dynload/plugin_file_load_states.hh"
+#include "dynload/plugin_module_slugs.hh"
+#include "dynload/plugin_registration_check.hh"
 #include "dynload/register_metadata.hh"
 #include "dynload/version_sort.hh"
 #include "fat_file_io.hh"
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "plugin/Model.hpp"
 #include "plugin/Plugin.hpp"
 #include "system/abort_rescue.hh"
 #include "untar_contents.hh"
@@ -32,6 +35,8 @@ public:
 		State state{State::NotInit};
 		std::string name;
 		std::string error_message;
+		// Set when a plugin loaded but has a problem its developer should fix
+		std::string warning_message;
 	};
 
 	PluginFileLoader(FileStorageProxy &file_storage, FatFileIO &ramdisk)
@@ -203,6 +208,7 @@ public:
 			} break;
 
 			case State::ProcessingPlugin: {
+				status.warning_message.clear();
 				auto num_loaded_before = loaded_plugins.size();
 				bool plugin_inited = false;
 				try {
@@ -222,7 +228,7 @@ public:
 
 					plugin.loaded_files = std::move(contents.files_copied_to_ramdisk);
 
-					if (load_plugin(plugin)) {
+					if (load_plugin(plugin, metadata)) {
 						plugin_inited = true;
 
 						Plugin::register_metadata(metadata);
@@ -278,6 +284,7 @@ public:
 				break;
 			case State::Success:
 				status.state = State::Idle;
+				status.warning_message.clear();
 				break;
 			case State::Error:
 			case State::InvalidPlugin:
@@ -345,14 +352,64 @@ public:
 		}
 	}
 
-	bool load_plugin(LoadedPlugin &plugin) {
+	bool load_plugin(LoadedPlugin &plugin, Plugin::Metadata const &metadata) {
 		using InitPluginFunc = void(rack::plugin::Plugin *);
 
 		DynLoader dynloader{contents.so_buffer, plugin.code};
 
+		// Snapshot registered brands, and record the modules the plugin registers.
+		// Both start before load(), which runs the plugin's static constructors:
+		// those can register modules, too.
+		auto brands_before = ModuleFactory::getAllBrands();
+		PluginRegistrationCheck::Recorder registrations;
+
+		// Copies names: unregistering invalidates registry views
+		auto brands_registered_by_plugin = [&] {
+			std::vector<std::string> new_brands;
+			for (auto brand : ModuleFactory::getAllBrands()) {
+				if (std::ranges::find(brands_before, brand) == brands_before.end())
+					new_brands.emplace_back(brand);
+			}
+			return new_brands;
+		};
+
+		// The brands the plugin created, plus "Brand:Module" for each module it
+		// added to a brand that already existed
+		auto plugin_module_slugs = [&](std::vector<std::string> const &new_brands) {
+			std::vector<std::string> slugs = new_brands;
+
+			auto add_module = [&](std::string_view brand, std::string_view module_slug) {
+				bool brand_is_new = std::ranges::any_of(new_brands, [&](auto const &b) { return equal_ci(b, brand); });
+				if (brand_is_new)
+					return;
+				auto slug = std::string{brand} + ":" + std::string{module_slug};
+				if (std::ranges::find(slugs, slug) == slugs.end())
+					slugs.push_back(std::move(slug));
+			};
+
+			for (auto const &reg : registrations.registrations())
+				add_module(reg.brand, reg.module_slug);
+
+			for (auto const *model : plugin.rack_plugin.models) {
+				if (model)
+					add_module(plugin.rack_plugin.slug, model->slug);
+			}
+
+			return slugs;
+		};
+
+		// The plugin's code is about to be freed: remove anything that refers to it
+		auto unregister_plugin_modules = [&] {
+			auto slugs = plugin_module_slugs(brands_registered_by_plugin());
+			for (auto const &slug : slugs)
+				pr_err("Unregistering '%s' from failed plugin\n", slug.c_str());
+			PluginModuleSlugs::unregister(slugs);
+		};
+
 		if (auto err_msg = dynloader.load(); err_msg != "") {
 			status.error_message = err_msg;
 			pr_err("Could not load plugin\n");
+			unregister_plugin_modules();
 			return false;
 		}
 
@@ -362,6 +419,7 @@ public:
 		if (!plugin_sdk_version.has_value()) {
 			pr_err("Plugin uses SDK < 0.15.0, or is not valid: not sdk_version() symbol found\n");
 			status.error_message = "Plugin's SDK is older than 0.14, or is corrupted.";
+			unregister_plugin_modules();
 			return false;
 		}
 
@@ -372,6 +430,7 @@ public:
 				   plugin_sdk_version->minor,
 				   firmware_sdk_version.major,
 				   firmware_sdk_version.minor);
+			unregister_plugin_modules();
 			return false;
 		}
 
@@ -379,31 +438,16 @@ public:
 		if (!init) {
 			status.error_message = "No init function found";
 			pr_err("Could not init plugin\n");
+			unregister_plugin_modules();
 			return false;
 		}
-
-		// Snapshot registered brands so a crashed init can be backed out
-		auto brands_before = ModuleFactory::getAllBrands();
 
 		// Back out everything a crashed/throwing init() registered. Its
 		// Model objects live in the plugin arena: do not run plugin code to
 		// destroy them -- drop the references and leak them (bounded,
 		// reclaimed on reboot).
-		// Copies names: unregistering invalidates registry views
-		auto brands_registered_by_init = [&] {
-			std::vector<std::string> new_brands;
-			for (auto brand : ModuleFactory::getAllBrands()) {
-				if (std::ranges::find(brands_before, brand) == brands_before.end())
-					new_brands.emplace_back(brand);
-			}
-			return new_brands;
-		};
-
 		auto rollback_crashed_init = [&] {
-			for (auto const &brand : brands_registered_by_init()) {
-				pr_err("Unregistering brand '%s' from crashed plugin\n", brand.c_str());
-				ModuleFactory::unregisterBrand(brand);
-			}
+			unregister_plugin_modules();
 			plugin.rack_plugin.models.clear();
 			plugin.rack_plugin = {};
 			ExidxRegistry::unregister_range(reinterpret_cast<uintptr_t>(plugin.code.data()));
@@ -440,16 +484,77 @@ public:
 		// Only a successfully initialized plugin gets its destructors run at unload
 		plugin.fini_array = dynloader.fini_array();
 
-		// Remember the brands so unloading can find the plugin's modules
-		plugin.brands = brands_registered_by_init();
-		for (auto const &brand : plugin.brands) {
-			if (brand != std::string_view{plugin.fileinfo.plugin_name})
-				pr_info("Plugin %s registered brand '%s'\n", plugin.fileinfo.plugin_name.c_str(), brand.c_str());
-		}
+		// Remember the plugin's modules, so unloading can remove them
+		auto new_brands = brands_registered_by_plugin();
+		plugin.loaded_module_slugs = plugin_module_slugs(new_brands);
+
+		check_registrations(plugin, metadata, registrations.registrations(), new_brands);
 
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";
 		return true;
+	}
+
+	// Warns if the plugin registered modules that don't match its plugin.json and plugin-mm.json.
+	// Patches, the plugin's metadata, and the online plugin/module lists all assume that every
+	// module is registered under the plugin's brand slug, with a module slug listed in plugin.json.
+	// Printed with pr_dev() so it's shown with any LOG_LEVEL (including CPU load tests).
+	void check_registrations(LoadedPlugin const &plugin,
+							 Plugin::Metadata const &metadata,
+							 std::vector<PluginRegistrationCheck::Registration> const &native_registrations,
+							 std::vector<std::string> const &new_brands) {
+		std::string_view plugin_name = plugin.fileinfo.plugin_name;
+		std::string_view brand_slug = plugin.rack_plugin.slug;
+
+		// Native plugins: whatever they passed to register_module().
+		// VCV-style plugins: addModel() always uses the brand slug.
+		std::vector<PluginRegistrationCheck::Registration> registered = native_registrations;
+		for (auto const *model : plugin.rack_plugin.models) {
+			if (model)
+				registered.push_back({std::string{brand_slug}, model->slug});
+		}
+
+		std::vector<std::string> problems;
+
+		for (auto const &reg : registered) {
+			if (reg.brand != brand_slug)
+				problems.push_back("'" + reg.brand + ":" + reg.module_slug + "': brand '" + reg.brand +
+								   "' is not the plugin's brand slug '" + std::string{brand_slug} + "'");
+		}
+
+		// Brands that weren't registered with register_module() or addModel()
+		for (auto const &brand : new_brands) {
+			bool seen = std::ranges::any_of(registered, [&](auto const &reg) { return reg.brand == brand; });
+			if (!seen && brand != brand_slug)
+				problems.push_back("brand '" + brand + "' is not the plugin's brand slug '" + std::string{brand_slug} +
+								   "'");
+		}
+
+		for (auto const &reg : registered) {
+			bool listed = std::ranges::any_of(metadata.module_extras, [&](auto const &m) { return m.slug == reg.module_slug; });
+			if (!listed)
+				problems.push_back("'" + reg.brand + ":" + reg.module_slug + "': module slug '" + reg.module_slug +
+								   "' is not listed in plugin.json \"modules\"");
+		}
+
+		if (problems.empty())
+			return;
+
+		pr_dev("WARNING: Plugin '%.*s' registers modules that don't match its plugin.json/plugin-mm.json:\n",
+			   (int)plugin_name.size(),
+			   plugin_name.data());
+		for (auto const &problem : problems)
+			pr_dev("WARNING:   %s\n", problem.c_str());
+		pr_dev("WARNING: The brand slug is \"slug\" in plugin.json, or \"MetaModuleBrandSlug\" in plugin-mm.json.\n");
+		pr_dev("WARNING: Patches, plugin metadata, and online module lists may not find these modules.\n");
+		pr_dev("WARNING: To fix, register modules with register_module<Module, Info>() (no brand argument)\n");
+		pr_dev("WARNING: and list each module's slug in plugin.json.\n");
+
+		status.warning_message = "Plugin " + std::string{plugin_name} + " has modules that don't match its plugin.json";
+		if (problems.size() == 1)
+			status.warning_message += ":\n" + problems.front();
+		else
+			status.warning_message += " (" + std::to_string(problems.size()) + " problems, see console)";
 	}
 
 private:
