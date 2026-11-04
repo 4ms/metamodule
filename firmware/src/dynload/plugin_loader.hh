@@ -389,14 +389,18 @@ public:
 		// Model objects live in the plugin arena: do not run plugin code to
 		// destroy them -- drop the references and leak them (bounded,
 		// reclaimed on reboot).
-		auto rollback_crashed_init = [&] {
-			// Copy names first: unregistering invalidates registry views
+		// Copies names: unregistering invalidates registry views
+		auto brands_registered_by_init = [&] {
 			std::vector<std::string> new_brands;
 			for (auto brand : ModuleFactory::getAllBrands()) {
 				if (std::ranges::find(brands_before, brand) == brands_before.end())
 					new_brands.emplace_back(brand);
 			}
-			for (auto const &brand : new_brands) {
+			return new_brands;
+		};
+
+		auto rollback_crashed_init = [&] {
+			for (auto const &brand : brands_registered_by_init()) {
 				pr_err("Unregistering brand '%s' from crashed plugin\n", brand.c_str());
 				ModuleFactory::unregisterBrand(brand);
 			}
@@ -435,6 +439,13 @@ public:
 
 		// Only a successfully initialized plugin gets its destructors run at unload
 		plugin.fini_array = dynloader.fini_array();
+
+		// Remember the brands so unloading can find the plugin's modules
+		plugin.brands = brands_registered_by_init();
+		for (auto const &brand : plugin.brands) {
+			if (brand != std::string_view{plugin.fileinfo.plugin_name})
+				pr_info("Plugin %s registered brand '%s'\n", plugin.fileinfo.plugin_name.c_str(), brand.c_str());
+		}
 
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";

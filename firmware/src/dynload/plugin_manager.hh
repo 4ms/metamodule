@@ -42,10 +42,15 @@ public:
 				// their create-funcs earlier in ~Plugin.
 				// (For VCV plugins ~Plugin's per-module unregister then finds the brand
 				// already gone and logs a harmless "failed to remove module" warning.)
-				if (ModuleFactory::unregisterBrand(name) > 0)
-					pr_dbg("Unregistered brand %s\n", name.data());
-				else
-					pr_dbg("Failed to unregister brand %s\n", name.data());
+				unsigned num_unregistered = 0;
+				for (auto const &brand : brands_of(plugin)) {
+					if (ModuleFactory::unregisterBrand(brand)) {
+						pr_dbg("Unregistered brand %s\n", brand.c_str());
+						num_unregistered++;
+					}
+				}
+				if (num_unregistered == 0)
+					pr_dbg("Failed to unregister brand %.*s\n", (int)name.size(), name.data());
 
 				// Mirror of the .init_array constructors run at load time
 				run_fini_array(plugin);
@@ -93,6 +98,26 @@ public:
 		}
 
 		return filename;
+	}
+
+	// The brands that a plugin's modules are registered under: the plugin name
+	// (the brand by convention), plus any other brands its init() registered.
+	// Use this, not the plugin name, to find the plugin's modules in a patch.
+	std::vector<std::string> brands_of(std::string_view name) const {
+		for (auto const &plugin : loaded_plugin_list) {
+			if (std::string_view{plugin.fileinfo.plugin_name} == name)
+				return brands_of(plugin);
+		}
+		return {std::string{name}};
+	}
+
+	static std::vector<std::string> brands_of(LoadedPlugin const &plugin) {
+		std::vector<std::string> brands{std::string{plugin.fileinfo.plugin_name}};
+		for (auto const &brand : plugin.brands) {
+			if (std::ranges::find(brands, brand) == brands.end())
+				brands.push_back(brand);
+		}
+		return brands;
 	}
 
 	bool is_plugin_loaded(std::string_view name) {

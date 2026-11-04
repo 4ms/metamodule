@@ -235,10 +235,13 @@ private:
 
 			// The GUI may hold objects created by the plugin (e.g. ModuleView's context menu):
 			// they must be destroyed while the plugin code is still loaded
-			if (play_loader_.playing_patch_uses_brand(name) && release_gui_plugin_objects_)
+			// The plugin's brands may differ from its name
+			auto brands = plugin_manager_.brands_of(name);
+
+			if (play_loader_.playing_patch_uses_brand(brands) && release_gui_plugin_objects_)
 				release_gui_plugin_objects_();
 
-			play_loader_.prepare_patch_for_plugin_change(name);
+			play_loader_.prepare_patch_for_plugin_change(brands);
 			plugin_manager_.unload_plugin(name);
 		}
 

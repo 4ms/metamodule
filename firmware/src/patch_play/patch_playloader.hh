@@ -11,6 +11,8 @@
 #include "result_t.hh"
 #include "user_settings/settings.hh"
 #include <atomic>
+#include <span>
+#include <string>
 
 size_t get_heap_size();
 
@@ -302,9 +304,10 @@ struct PatchPlayLoader {
 
 	void remove_module(unsigned module_id);
 
-	void prepare_patch_for_plugin_change(std::string_view brand_slug);
+	// brand_slugs: all brands the plugin registers (see PluginManager::brands_of())
+	void prepare_patch_for_plugin_change(std::span<const std::string> brand_slugs);
 
-	bool playing_patch_uses_brand(std::string_view brand_slug);
+	bool playing_patch_uses_brand(std::span<const std::string> brand_slugs);
 
 	//
 	// Load balancing (patch_playloader_balance.cc)
