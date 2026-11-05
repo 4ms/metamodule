@@ -3,6 +3,7 @@
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/helpers/midi_port_menu.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/keyboard_entry.hh"
@@ -54,8 +55,7 @@ struct KnobMapPage : PageBase {
 
 		lv_obj_add_event_cb(ui_EditMapMidiChannelDropdown, midichan_cb, LV_EVENT_VALUE_CHANGED, this);
 
-		midi_port_dropdown =
-			create_midi_map_dropdown(ui_EditMapMidiChannelCont, "All Ports\nUSB only\nTRS only\nDIN5 only");
+		midi_port_dropdown = create_midi_map_dropdown(ui_EditMapMidiChannelCont, MidiPortMenu::LongOptions);
 		lv_obj_set_height(midi_port_dropdown, 28);
 		lv_obj_set_width(midi_port_dropdown, 110);
 		lv_obj_move_to_index(midi_port_dropdown, lv_obj_get_index(ui_EditMapMidiChannelDropdown));
@@ -178,7 +178,7 @@ struct KnobMapPage : PageBase {
 		lv_dropdown_set_selected(ui_EditMapMidiChannelDropdown, map.midi_chan);
 
 		auto port = Midi::selected_port(map.midi_port_mask);
-		lv_dropdown_set_selected(midi_port_dropdown, port.has_value() ? *port + 1 : 0);
+		lv_dropdown_set_selected(midi_port_dropdown, MidiPortMenu::item(port));
 
 		// Knob arc
 
@@ -435,9 +435,7 @@ private:
 		if (!page)
 			return;
 
-		// Index 0 is "All Ports"; the rest are Midi::Event::Port values offset by one
-		auto sel = lv_dropdown_get_selected(page->midi_port_dropdown);
-		page->map.midi_port_mask = sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
+		page->map.midi_port_mask = MidiPortMenu::port_mask(lv_dropdown_get_selected(page->midi_port_dropdown));
 		page->commit_midi_map();
 	}
 

@@ -137,8 +137,11 @@ endif()
 # #################### VCV Adaptor ##################################
 
 add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
+
 # The panel's conf/ headers (e.g. the GUI's styles.hh needs PanelDef), before src/ as for the simulator
 target_include_directories(vcv_plugin_internal BEFORE PRIVATE ${PANEL_DIR})
+# conf/midi_ports_conf.hh: the MIDI ports that modules can choose
+target_include_directories(vcv_plugin_export PRIVATE ${PANEL_DIR})
 
 # #################### Other brands ##################################
  

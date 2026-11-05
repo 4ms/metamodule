@@ -1,6 +1,7 @@
 #include <tuple>
 #include <utility>
 
+#include "conf/midi_ports_conf.hh"
 #include "midi/midi_message.hh" // MetaModule::Midi::Port
 #include <context.hpp>
 #include <engine/Engine.hpp>
@@ -158,7 +159,7 @@ void Input::reset() {
 // Modules pick one through the standard Rack device API, and messages from the
 // others are filtered out (see InputQueue::tryPop).
 std::vector<int> Input::getDeviceIds() {
-	return {MetaModule::Midi::USB, MetaModule::Midi::TRS, MetaModule::Midi::DIN5};
+	return {MetaModule::Midi::BoardPorts.begin(), MetaModule::Midi::BoardPorts.end()};
 }
 
 int Input::getDefaultDeviceId() {

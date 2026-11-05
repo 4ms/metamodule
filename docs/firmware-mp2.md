@@ -132,6 +132,10 @@ MIDI and USB drive class drivers on an xHCI driver (see Host mode, below). The M
 - USB MIDI to and from the patch: `PanelControls` (`src/core_m33/panel_controls.hh`)
   does what MP1's `Controls::parse_midi()` does, each audio frame, with the USB
   MIDI host or device (whichever is connected).
+- DIN5 MIDI: the jack board's DIN5 jacks are on USART6 (`src/core_m33/din_midi.hh`),
+  polled from the same frame interrupt. They're MP1's MIDI Expander's DIN5 port, always
+  connected; the pro has no TRS MIDI port. The GUI's port dropdowns and the modules' MIDI
+  port menus list the board's ports (`conf/midi_ports_conf.hh`).
 - `src/core_m33/usb/usb_host_manager.hh`: MP2's version of MP1's
   `UsbHostManager`, found first in the M33's include path (see Host mode, below).
 

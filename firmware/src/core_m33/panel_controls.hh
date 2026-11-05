@@ -3,6 +3,7 @@
 #include "conf/control_expander_conf.hh"
 #include "conf/frame_rate_conf.hh"
 #include "core_m4/midi_controls.hh"
+#include "din_midi.hh"
 #include "expander_controls.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/i2c.hh"
@@ -40,8 +41,9 @@ namespace MetaModule
 // As on MP1: when the A35 releases a param block's semaphore, we start filling the other block,
 // one frame per audio frame, from an interrupt on the SAI's frame clock (LRCLK), so we fill the
 // frames the audio stream reads (the first block-size frames) at the sample rate. The metaparams
-// are written at a block's first frame. Each frame sends the patch's outgoing USB MIDI and takes
-// one received message (MP1's Controls::parse_midi()).
+// are written at a block's first frame. Each frame sends the patch's outgoing MIDI (USB or DIN5) and
+// takes one received message (MP1's Controls::parse_midi()). The DIN5 jacks are MP1's MIDI Expander's
+// DIN5 port (the pro has no TRS MIDI jacks).
 class PanelControls {
 public:
 	PanelControls(DoubleBufParamBlock &param_blocks);
@@ -152,6 +154,8 @@ private:
 	// Set by the HSEM interrupt, and taken by update(), which owns the pointers above
 	std::atomic<int> next_block = -1;
 	volatile UsbConnection usb_connection = UsbConnection::None;
+
+	DinMidi din_midi;
 
 	MidiHost *midi_host = nullptr;
 	UsbMidiDevice *midi_device = nullptr;

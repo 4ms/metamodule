@@ -56,6 +56,7 @@ void PanelControls::start() {
 	HWSemaphoreGlobalBase::enable_all_handlers();
 
 	expanders.start();
+	din_midi.init();
 
 	frame_task.init([this] { update(); });
 	frame_task.start();
@@ -97,6 +98,7 @@ void PanelControls::update() {
 	gate_in_2.update();
 	expanders.update();
 	update_headphone_amp();
+	din_midi.update();
 
 	if (auto block = next_block.exchange(-1, std::memory_order_relaxed); block >= 0) {
 		auto &param_block = param_blocks[block];
@@ -117,8 +119,7 @@ void PanelControls::update() {
 
 	cur_params->gate_ins = (gate_in_1.is_high() ? 0b01 : 0b00) | (gate_in_2.is_high() ? 0b10 : 0b00);
 
-	if (midi_device)
-		process_midi_frame(*cur_params);
+	process_midi_frame(*cur_params);
 
 	if (++cur_params == cur_params_end)
 		block_full = true;
@@ -137,10 +138,9 @@ void PanelControls::update_metaparams() {
 	cur_metaparams->jack_senses = jack_senses.load(std::memory_order_relaxed);
 	cur_metaparams->jack_sense_faults = jack_sense_faults.load(std::memory_order_relaxed);
 
-	if (midi_device) {
-		update_midi_connected();
-		cur_metaparams->midi_ports_connected = midi_usb_connected ? (1 << Midi::Event::USB) : 0;
-	}
+	update_midi_connected();
+	// The DIN5 jacks are always there
+	cur_metaparams->midi_ports_connected = (midi_usb_connected ? (1 << Midi::Event::USB) : 0) | (1 << Midi::Event::DIN5);
 }
 
 // The knob encoders ENC1..16: their clicks since the last block
@@ -176,13 +176,15 @@ void PanelControls::update_button_expander() {
 
 // Same as MP1's Controls::update_midi_connected()
 void PanelControls::update_midi_connected() {
-	midi_usb_connected_raw.update(midi_host->is_connected() || midi_device->is_connected());
+	if (midi_device) {
+		midi_usb_connected_raw.update(midi_host->is_connected() || midi_device->is_connected());
 
-	if (midi_usb_connected_raw.went_low())
-		midi_parser.start_all_notes_off_sequence();
+		if (midi_usb_connected_raw.went_low())
+			midi_parser.start_all_notes_off_sequence();
 
-	if (midi_usb_connected_raw.went_high())
-		midi_usb_connected = true;
+		if (midi_usb_connected_raw.went_high())
+			midi_usb_connected = true;
+	}
 
 	if (cur_metaparams->midi_poly_chans > 0)
 		midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
@@ -190,9 +192,9 @@ void PanelControls::update_midi_connected() {
 	midi_parser.set_14bit_mode(cur_metaparams->midi_14bit_mode);
 }
 
-// MP1's Controls::parse_midi(), for one frame, without the MIDI expander
+// MP1's Controls::parse_midi(), for one frame
 void PanelControls::process_midi_frame(Params &params) {
-	// The audio stream left this frame's outgoing message here
+	// The audio stream left this frame's outgoing message here, for the one port the module chose
 	if (MidiMessage out_msg = params.raw_msg; out_msg.raw() != MidiMessage{}.raw()) {
 		if (params.midi_port == Midi::Event::Port::USB && midi_usb_connected_raw.is_high()) {
 			std::array<uint8_t, 4> bytes;
@@ -202,6 +204,9 @@ void PanelControls::process_midi_frame(Params &params) {
 			else if (midi_device->is_connected())
 				midi_device->transmit(bytes);
 		}
+
+		if (params.midi_port == Midi::Event::Port::DIN5)
+			din_midi.send(out_msg);
 	}
 
 	if (auto msg = midi_usb_rx_buf.get(); msg.has_value()) {
@@ -209,6 +214,12 @@ void PanelControls::process_midi_frame(Params &params) {
 		params.midi_port = Midi::Event::Port::USB;
 		params.midi_event = midi_parser.parse(msg.value());
 		params.midi_event.port = Midi::Event::Port::USB;
+
+	} else if (auto din_msg = din_midi.receive(); din_msg.has_value()) {
+		params.raw_msg = din_msg.value();
+		params.midi_port = Midi::Event::Port::DIN5;
+		params.midi_event = midi_parser.parse(din_msg.value());
+		params.midi_event.port = Midi::Event::Port::DIN5;
 
 	} else if (auto noteoff = midi_parser.step_all_notes_off_sequence()) {
 		if (noteoff->type == Midi::Event::Type::None) {

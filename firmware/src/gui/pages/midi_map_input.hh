@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/helpers/midi_port_menu.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -31,7 +32,7 @@ struct MidiMapPopup {
 
 		midi_port_label = create_midi_map_label(ui_MidiMapCont, "Port: ");
 		lv_obj_add_flag(midi_port_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
-		midi_port_dropdown = create_midi_map_dropdown(ui_MidiMapCont, "All\nUSB\nTRS\nDIN5");
+		midi_port_dropdown = create_midi_map_dropdown(ui_MidiMapCont, MidiPortMenu::ShortOptions);
 		lv_obj_set_width(midi_port_dropdown, 90);
 
 		midi_channel_label = create_midi_map_label(ui_MidiMapCont, "Channel: ");
@@ -181,8 +182,8 @@ struct MidiMapPopup {
 	}
 
 	void learn_port(uint8_t port) {
-		if (midi_learn_port && port < Midi::NumPorts)
-			lv_dropdown_set_selected(midi_port_dropdown, port + 1);
+		if (midi_learn_port && MidiPortMenu::lists(port))
+			lv_dropdown_set_selected(midi_port_dropdown, MidiPortMenu::item(port));
 	}
 
 	void hide() {
@@ -296,8 +297,7 @@ struct MidiMapPopup {
 		// If the port drop down is hidden, the use "All Ports" for the port
 		auto port = Midi::AllPorts;
 		if (!lv_obj_has_flag(midi_port_dropdown, LV_OBJ_FLAG_HIDDEN)) {
-			auto sel = lv_dropdown_get_selected(midi_port_dropdown);
-			port = sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
+			port = MidiPortMenu::port_mask(lv_dropdown_get_selected(midi_port_dropdown));
 		}
 
 		return Midi::set_port_mask(*signal, port);
@@ -384,7 +384,7 @@ struct MidiMapPopup {
 		lv_dropdown_set_selected(midi_channel_dropdown, midi_chan);
 
 		auto port = Midi::selected_port(Midi::port_mask(panel_jack_id));
-		lv_dropdown_set_selected(midi_port_dropdown, port.has_value() ? *port + 1 : 0);
+		lv_dropdown_set_selected(midi_port_dropdown, MidiPortMenu::item(port));
 
 		auto polychan = Midi::polychan(panel_jack_id); //1-8 for poly note chan, or nullopt for poly cables
 		auto midi_jack_id = Midi::strip_midi_channel(panel_jack_id);

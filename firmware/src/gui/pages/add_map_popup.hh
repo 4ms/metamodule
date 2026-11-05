@@ -3,6 +3,7 @@
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/helpers/midi_port_menu.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -32,7 +33,7 @@ struct AddMapPopUp {
 
 		lv_obj_set_width(midi_channel_dropdown, LV_PCT(100));
 
-		midi_port_dropdown = create_midi_map_dropdown(ui_AddMapPopUp, "All Ports\nUSB only\nTRS only\nDIN5 only");
+		midi_port_dropdown = create_midi_map_dropdown(ui_AddMapPopUp, MidiPortMenu::LongOptions);
 		lv_obj_set_height(midi_port_dropdown, 28);
 		lv_obj_move_to_index(midi_port_dropdown, -3);
 		lv_obj_set_width(midi_port_dropdown, LV_PCT(100));
@@ -188,8 +189,8 @@ struct AddMapPopUp {
 	}
 
 	void learn_port(uint8_t port) {
-		if (midi_learn_port && port < Midi::NumPorts)
-			lv_dropdown_set_selected(midi_port_dropdown, port + 1);
+		if (midi_learn_port && MidiPortMenu::lists(port))
+			lv_dropdown_set_selected(midi_port_dropdown, MidiPortMenu::item(port));
 	}
 
 	uint8_t selected_port_mask() const {
@@ -197,8 +198,7 @@ struct AddMapPopUp {
 		auto port = Midi::AllPorts;
 
 		if (!lv_obj_has_flag(midi_port_dropdown, LV_OBJ_FLAG_HIDDEN)) {
-			auto sel = lv_dropdown_get_selected(midi_port_dropdown);
-			port = sel == 0 ? Midi::AllPorts : Midi::only_port(uint8_t(sel - 1));
+			port = MidiPortMenu::port_mask(lv_dropdown_get_selected(midi_port_dropdown));
 		}
 
 		return port;

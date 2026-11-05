@@ -1,4 +1,5 @@
 #include "midi.hpp"
+#include "conf/midi_ports_conf.hh"
 #include "midi/midi_queue.hh"
 #include "midi/midi_router.hh"
 #include <utility>
@@ -29,7 +30,7 @@ void Output::reset() {
 
 // METAMODULE: a MIDI "device" is one of the hardware's physical MIDI ports.
 std::vector<int> Output::getDeviceIds() {
-	return {MetaModule::Midi::USB, MetaModule::Midi::TRS, MetaModule::Midi::DIN5};
+	return {MetaModule::Midi::BoardPorts.begin(), MetaModule::Midi::BoardPorts.end()};
 }
 
 void Output::setDeviceId(int deviceId) {

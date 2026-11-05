@@ -129,6 +129,8 @@ add_subdirectory(vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
 target_sources(vcv_plugin_export PRIVATE vcv_plugin/export/src/keep-symbols.cc)
 # The panel's conf/ headers (e.g. the GUI's styles.hh needs PanelDef), before src/ as for a35_core
 target_include_directories(vcv_plugin_internal BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pro)
+# conf/midi_ports_conf.hh: the MIDI ports that modules can choose
+target_include_directories(vcv_plugin_export BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pro)
 
 # Brands: VCV Rack plugins ported to MetaModule (built-in unless OMIT_BRAND_x or BUILD_DYN_PLUGIN_x is set)
 add_subdirectory(vcv_ports ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
