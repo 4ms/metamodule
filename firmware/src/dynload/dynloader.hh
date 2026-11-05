@@ -12,7 +12,6 @@
 #include "host_sym_list.hh"
 #include "keep-symbols.hh"
 #include "memory/plugin_arena.hh"
-#include "plugin_registration_check.hh"
 #include "metamodule-plugin-sdk/version.hh"
 #include "pr_dbg.hh"
 #include <cstring>
@@ -177,19 +176,10 @@ private:
 			hostsyms.insert(hostsyms.end(), host_symbols.begin(), host_symbols.end());
 
 			// Route plugin allocations/frees to our dispatchers instead of the newlib functions
-			bool found_register_module = false;
 			for (auto &sym : hostsyms) {
 				if (auto *redirect = PluginArena::allocator_redirect(sym.name))
 					sym.address = reinterpret_cast<uintptr_t>(redirect);
-
-				// Record the modules plugins register, to check their brand and slugs
-				if (auto *redirect = PluginRegistrationCheck::symbol_redirect(sym.name)) {
-					sym.address = reinterpret_cast<uintptr_t>(redirect);
-					found_register_module = true;
-				}
 			}
-			if (!found_register_module)
-				pr_err("register_module() not found in host symbols: plugin brand checks are disabled\n");
 
 			// for (auto sym : hostsyms)
 			// 	pr_dump("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);

@@ -12,7 +12,6 @@
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "metamodule-plugin-sdk/version.hh"
 #include "patch_file/file_storage_proxy.hh"
-#include "plugin/Model.hpp"
 #include "plugin/Plugin.hpp"
 #include "system/abort_rescue.hh"
 #include "untar_contents.hh"
@@ -390,11 +389,6 @@ public:
 			for (auto const &reg : registrations.registrations())
 				add_module(reg.brand, reg.module_slug);
 
-			for (auto const *model : plugin.rack_plugin.models) {
-				if (model)
-					add_module(plugin.rack_plugin.slug, model->slug);
-			}
-
 			return slugs;
 		};
 
@@ -485,10 +479,9 @@ public:
 		plugin.fini_array = dynloader.fini_array();
 
 		// Remember the plugin's modules, so unloading can remove them
-		auto new_brands = brands_registered_by_plugin();
-		plugin.loaded_module_slugs = plugin_module_slugs(new_brands);
+		plugin.loaded_module_slugs = plugin_module_slugs(brands_registered_by_plugin());
 
-		check_registrations(plugin, metadata, registrations.registrations(), new_brands);
+		check_registrations(plugin, metadata, registrations.registrations());
 
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";
@@ -501,18 +494,9 @@ public:
 	// Printed with pr_dev() so it's shown with any LOG_LEVEL (including CPU load tests).
 	void check_registrations(LoadedPlugin const &plugin,
 							 Plugin::Metadata const &metadata,
-							 std::vector<PluginRegistrationCheck::Registration> const &native_registrations,
-							 std::vector<std::string> const &new_brands) {
+							 std::vector<PluginRegistrationCheck::Registration> const &registered) {
 		std::string_view plugin_name = plugin.fileinfo.plugin_name;
 		std::string_view brand_slug = plugin.rack_plugin.slug;
-
-		// Native plugins: whatever they passed to register_module().
-		// VCV-style plugins: addModel() always uses the brand slug.
-		std::vector<PluginRegistrationCheck::Registration> registered = native_registrations;
-		for (auto const *model : plugin.rack_plugin.models) {
-			if (model)
-				registered.push_back({std::string{brand_slug}, model->slug});
-		}
 
 		std::vector<std::string> problems;
 
@@ -520,14 +504,6 @@ public:
 			if (reg.brand != brand_slug)
 				problems.push_back("'" + reg.brand + ":" + reg.module_slug + "': brand '" + reg.brand +
 								   "' is not the plugin's brand slug '" + std::string{brand_slug} + "'");
-		}
-
-		// Brands that weren't registered with register_module() or addModel()
-		for (auto const &brand : new_brands) {
-			bool seen = std::ranges::any_of(registered, [&](auto const &reg) { return reg.brand == brand; });
-			if (!seen && brand != brand_slug)
-				problems.push_back("brand '" + brand + "' is not the plugin's brand slug '" + std::string{brand_slug} +
-								   "'");
 		}
 
 		for (auto const &reg : registered) {
