@@ -3,6 +3,7 @@
 #include "util/circular_buffer.hh"
 #include "util/fixed_vector.hh"
 #include <atomic>
+#include <iterator>
 #include <sys/lock.h>
 #include <utility>
 
@@ -44,6 +45,35 @@ int mm_malloc_lock_held() {
 }
 int mm_arena_lock_held() {
 	return __lock_mm_plugin_arena.count != 0;
+}
+
+// Used by ReadPatchGuiElements (SGI1 on core 1)
+// This ISR must never wait for a lock because Audio (core 0) waits for it to finish, so if it spun on a
+// lock held by a process that audio had preempted, we get a deadlock.
+// Also, SGIs can't be disabled so we can't just disable SGI1 whenever a lower-priority process takes a lock.
+//
+// Only these locks are allowed by CoreProcessor::get_display_text():
+static _LOCK_T const alloc_and_stdio_locks[] = {
+	&__lock___malloc_recursive_mutex,
+	&__lock_mm_plugin_arena,
+	&__lock___sfp_recursive_mutex, // for printf()
+};
+
+int mm_try_lock_alloc_and_stdio() {
+	// Try to get all the locks: if not, then release them and return failure
+	for (unsigned i = 0; i < std::size(alloc_and_stdio_locks); i++) {
+		if (!__retarget_lock_try_acquire_recursive(alloc_and_stdio_locks[i])) {
+			while (i-- > 0)
+				__retarget_lock_release_recursive(alloc_and_stdio_locks[i]);
+			return 0;
+		}
+	}
+	return 1;
+}
+
+void mm_unlock_alloc_and_stdio() {
+	for (unsigned i = std::size(alloc_and_stdio_locks); i-- > 0;)
+		__retarget_lock_release_recursive(alloc_and_stdio_locks[i]);
 }
 
 struct __lock __lock___tz_mutex;
