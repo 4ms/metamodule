@@ -2,7 +2,6 @@
 
 #include "md5_hash.h"
 #include <array>
-#include <cstdio>
 #include <span>
 
 namespace MetaModule
@@ -22,9 +21,11 @@ private:
 };
 
 inline auto to_hex_string = [](MD5Processor::Digest_t val) {
+	constexpr char digits[] = "0123456789abcdef";
 	std::array<char, 32> result;
 	for (std::size_t i = 0; i < val.size(); i++) {
-		snprintf(result.data() + 2 * i, 3, "%02x", val[i]);
+		result[2 * i] = digits[val[i] >> 4];
+		result[2 * i + 1] = digits[val[i] & 15];
 	}
 	return result;
 };
