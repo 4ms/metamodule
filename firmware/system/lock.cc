@@ -147,13 +147,11 @@ static IrqList disable_higher_priority_irqs(MetaModule::Processes cur_proc) {
 		}
 	}
 
-	if (cur_proc == MetaModule::Processes::Core1AsyncThread || cur_proc == MetaModule::Processes::Core1Main) {
-		// Disable ReadPatchGuiElements
-		if (mdrivlib::InterruptControl::is_enabled_irq(SGI1_IRQn)) {
-			mdrivlib::InterruptControl::disable_irq(SGI1_IRQn);
-			disabled.push_back(SGI1_IRQn);
-		}
-	}
+	// Note:
+	// ReadPatchGuiElements (SGI1) can interrupt Core1Main and Core1AsyncThread, but it isn't disabled here
+	// because SGIs can't be disabled on the GIC-400.
+	// Instead the SGI1 handler only runs if it can take all the locks, which is functionally the same
+	// as disabling it
 
 	return disabled;
 }
