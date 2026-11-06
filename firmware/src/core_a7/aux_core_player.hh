@@ -9,6 +9,10 @@
 #include "util/fixed_vector.hh"
 #include <atomic>
 
+// system/lock.cc
+extern "C" int mm_try_lock_alloc_and_stdio();
+extern "C" void mm_unlock_alloc_and_stdio();
+
 namespace MetaModule
 {
 
@@ -108,7 +112,9 @@ struct AuxPlayer {
 			midi_sync.clear_last_values();
 		}
 
-		if (ui.new_patch_data.load() == false) {
+		// Module code here may allocate or printf, but this must never wait for a lock (see lock.cc), so it
+		// takes those locks up front. If one is busy, the GUI gets the data after the next audio block instead.
+		if (ui.new_patch_data.load() == false && mm_try_lock_alloc_and_stdio()) {
 
 			for (auto &d : ui.displays().watch_displays) {
 				if (d.is_active()) {
@@ -140,6 +146,7 @@ struct AuxPlayer {
 				}
 			}
 
+			mm_unlock_alloc_and_stdio();
 			ui.new_patch_data.store(true, std::memory_order_release);
 		}
 

@@ -77,6 +77,7 @@ static uint32_t Sect_Normal_NonCache;
 static uint32_t Sect_Normal_NonCache_Shared;
 
 static uint32_t Sect_NormalShared;
+static uint32_t Sect_Normal_RW_Shared;
 
 static uint32_t Page_L1_4k = 0x0;	// generic
 static uint32_t Page_L1_64k = 0x0;	// generic
@@ -125,11 +126,21 @@ void MMU_CreateTranslationTable(void) {
 	section_normal_nc(Sect_Normal_NonCache_Shared, region);
 	MMU_SharedSection(&Sect_Normal_NonCache_Shared, SHARED);
 
-	create_aligned_section(TTB_BASE, A7_CODE, A7_CODE_SZ, Sect_Normal);
+	section_normal_rw(Sect_Normal_RW_Shared, region);
+	MMU_SharedSection(&Sect_Normal_RW_Shared, SHARED);
 
-	create_aligned_section(TTB_BASE, A7_RAM, A7_RAM_SZ, Sect_Normal_RW);
+	// Both A7 cores use these regions, and the atomics both cores use on them (such as the CAS in the newlib
+	// locks, lock.cc) must be Shareable: on Non-shareable memory LDREX/STREX only check the core's own exclusive
+	// monitor, so both cores' CAS on a lock can succeed at once. (The caches stay coherent either way, which is
+	// why everything else worked.) With the SMP bit set, Shareable write-back memory is still cached.
+	// .text and .data (which holds the newlib locks: they have initializers)
+	create_aligned_section(TTB_BASE, A7_CODE, A7_CODE_SZ, Sect_NormalShared);
 
-	create_aligned_section(TTB_BASE, A7_HEAP, A7_HEAP_SZ, Sect_Normal); //Executable!
+	// .bss
+	create_aligned_section(TTB_BASE, A7_RAM, A7_RAM_SZ, Sect_Normal_RW_Shared);
+
+	// Firmware heap and plugin arena
+	create_aligned_section(TTB_BASE, A7_HEAP, A7_HEAP_SZ, Sect_NormalShared); //Executable!
 
 	//.ddma: non-cacheable
 	// Note: section_so is quite a bit faster than section_normal_nc (sometimes)
