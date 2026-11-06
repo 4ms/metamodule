@@ -60,3 +60,20 @@ TEST_CASE("split_volume: path from a C string is still null-terminated") {
 	CHECK(path.data() == fullpath + 5);
 	CHECK(path.data()[path.size()] == '\0');
 }
+
+TEST_CASE("split_volume + make_full_path: rebuilds the path with the volume's canonical prefix") {
+	// The syscalls rebuild SD Card and USB paths this way for FatFS on the M4,
+	// which needs the prefix to pick the drive
+	auto rebuild = [](std::string_view fullpath) {
+		auto [path, vol] = split_volume(fullpath);
+		return make_full_path(vol, path);
+	};
+
+	CHECK(rebuild("sdc:/dir/patch.yml") == "sdc:/dir/patch.yml");
+	CHECK(rebuild("sdc:dir/patch.yml") == "sdc:/dir/patch.yml");
+	CHECK(rebuild("usb:/dir/") == "usb:/dir/");
+	CHECK(rebuild("SD Card:/dir/patch.yml") == "sdc:/dir/patch.yml");
+	CHECK(rebuild("USB:/patch.yml") == "usb:/patch.yml");
+	CHECK(rebuild("sdc:/") == "sdc:/");
+	CHECK(rebuild("usb:") == "usb:/");
+}
