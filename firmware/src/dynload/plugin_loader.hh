@@ -350,6 +350,9 @@ public:
 
 		DynLoader dynloader{contents.so_buffer, plugin.code};
 
+		// Before load(): it runs the plugin's static constructors, which can register modules
+		auto module_slugs_before = all_module_slugs();
+
 		if (auto err_msg = dynloader.load(); err_msg != "") {
 			status.error_message = err_msg;
 			pr_err("Could not load plugin\n");
@@ -436,9 +439,52 @@ public:
 		// Only a successfully initialized plugin gets its destructors run at unload
 		plugin.fini_array = dynloader.fini_array();
 
+		warn_if_brand_mismatch(plugin, module_slugs_before);
+
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";
 		return true;
+	}
+
+	// Sorted "Brand:Module" slugs of all registered modules
+	static std::vector<std::string> all_module_slugs() {
+		std::vector<std::string> slugs;
+		for (auto brand : ModuleFactory::getAllBrands()) {
+			for (auto module : ModuleFactory::getAllModuleSlugs(brand))
+				slugs.push_back(std::string{brand} + ":" + std::string{module});
+		}
+		std::ranges::sort(slugs);
+		return slugs;
+	}
+
+	// Every module a plugin registers must use the plugin's brand slug: unloading the
+	// plugin, patches, the plugin's metadata, and the online module lists depend on it.
+	// Printed with pr_dev() so it's shown with any LOG_LEVEL (e.g. in CPU load tests).
+	static void warn_if_brand_mismatch(LoadedPlugin const &plugin, std::vector<std::string> const &slugs_before) {
+		std::string_view brand_slug = plugin.rack_plugin.slug;
+		bool warned = false;
+
+		for (auto const &slug : all_module_slugs()) {
+			if (std::ranges::binary_search(slugs_before, slug))
+				continue;
+
+			if (std::string_view{slug}.substr(0, slug.find(':')) == brand_slug)
+				continue;
+
+			if (!warned) {
+				pr_dev("WARNING: Plugin '%s' registered modules under a brand that is not its brand slug '%s':\n",
+					   plugin.fileinfo.plugin_name.c_str(),
+					   plugin.rack_plugin.slug.c_str());
+				warned = true;
+			}
+			pr_dev("WARNING:   %s\n", slug.c_str());
+		}
+
+		if (warned) {
+			pr_dev("WARNING: The MetaModule may crash when this plugin is unloaded or reinstalled.\n");
+			pr_dev("WARNING: The brand slug is \"slug\" in plugin.json, or \"MetaModuleBrandSlug\" in plugin-mm.json.\n");
+			pr_dev("WARNING: To fix, use register_module<Module, Info>() with no brand argument (SDK v2.4.1+).\n");
+		}
 	}
 
 private:
