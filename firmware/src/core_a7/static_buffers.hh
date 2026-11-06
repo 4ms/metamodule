@@ -8,6 +8,7 @@
 #include "patch_file/patch_dir_list.hh"
 #include "sync_params.hh"
 #include "usb/dev_drive_block.hh"
+#include "wifi/wifi_live_block.hh"
 #include "usb/usb_connection_status_block.hh"
 #include <array>
 
@@ -42,6 +43,7 @@ extern std::array<uint8_t, 320 * 240 * 2> uvc_shadow_framebuffer;
 extern DeviceSettingsMessage icc_device_settings_message;
 extern UsbConnectionStatusBlock usb_connection_status;
 extern DevDriveBlock dev_drive_block;
+extern WifiLiveBlock wifi_live;
 
 void init();
 
