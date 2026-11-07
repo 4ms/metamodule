@@ -4,6 +4,7 @@
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/module_name.hh"
+#include "gui/helpers/selected_display.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/keyboard_entry.hh"
 #include "gui/pages/module_view/automap.hh"
@@ -19,6 +20,7 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace MetaModule
@@ -55,7 +57,8 @@ public:
 		, moduleViewActionResetNameBut{create_lv_list_button(ui_ModuleViewActionMenu, "Reset name")}
 		, moduleViewActionReplaceBut{create_lv_list_button(ui_ModuleViewActionMenu, "Replace...")}
 		, moduleViewActionMoveBut{create_lv_list_button(ui_ModuleViewActionMenu, "Move")}
-		, moduleViewActionExpanderBut{create_lv_list_button(ui_ModuleViewActionMenu, "Expanders...")} {
+		, moduleViewActionExpanderBut{create_lv_list_button(ui_ModuleViewActionMenu, "Expanders...")}
+		, moduleViewActionSelectDisplayBut{create_lv_list_button(ui_ModuleViewActionMenu, "Select display")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
 		lv_show(moduleViewActionPresetBut);
@@ -94,6 +97,7 @@ public:
 		lv_obj_add_event_cb(moduleViewActionReplaceBut, replace_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionMoveBut, move_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(moduleViewActionExpanderBut, expander_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(moduleViewActionSelectDisplayBut, select_display_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_remove_all_objs(group);
 
@@ -109,6 +113,7 @@ public:
 		lv_group_add_obj(group, moduleViewActionReplaceBut);
 		lv_group_add_obj(group, moduleViewActionMoveBut);
 		lv_group_add_obj(group, moduleViewActionExpanderBut);
+		lv_group_add_obj(group, moduleViewActionSelectDisplayBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 
 		lv_group_set_wrap(group, false);
@@ -214,6 +219,7 @@ public:
 	void show() {
 		update_bypass_text();
 		update_reset_name_visibility();
+		update_select_display_button();
 		lv_group_focus_obj(ui_ModuleViewActionAutopatchBut);
 
 		if (!visible) {
@@ -245,6 +251,16 @@ public:
 			expander_popup.activate();
 		else if (!popup_visible())
 			lv_group_activate(group);
+	}
+
+	// The module view should list its displays to choose the selected display from
+	bool take_choose_display_request() {
+		return std::exchange(choose_display_requested, false);
+	}
+
+	// The patch's selected display changed: the module view should refresh its list
+	bool take_selected_display_changed() {
+		return std::exchange(selected_display_changed, false);
 	}
 
 	void update() {
@@ -641,6 +657,79 @@ private:
 			PageArguments{.patch_loc_hash = page->patches.get_view_patch_loc_hash(), .module_id = this_id});
 	}
 
+	// Selected display
+
+	void update_select_display_button() {
+		auto *pd = patches.get_view_patch();
+		auto info = ModuleFactory::getModuleInfo(pd->module_slugs[module_idx]);
+		auto num_displays = count_fullscreen_displays(info);
+		auto ss = pd->find_selected_display();
+
+		const char *text = "";
+		if (ss && ss->module_id == module_idx) {
+			select_display_action = SelectDisplayAction::Remove;
+			text = "Deselect display";
+		} else if (num_displays == 1) {
+			select_display_action = SelectDisplayAction::Set;
+			text = "Select display";
+		} else if (num_displays > 1) {
+			select_display_action = SelectDisplayAction::Choose;
+			text = "Select display...";
+		} else {
+			select_display_action = SelectDisplayAction::None;
+		}
+
+		if (auto *label = lv_obj_get_child(moduleViewActionSelectDisplayBut, 0))
+			lv_label_set_text(label, text);
+		lv_show(moduleViewActionSelectDisplayBut, select_display_action != SelectDisplayAction::None);
+	}
+
+	void select_display_but_cb() {
+		auto *pd = patches.get_view_patch();
+		auto this_id = static_cast<uint16_t>(module_idx);
+
+		switch (select_display_action) {
+			case SelectDisplayAction::Set: {
+				auto info = ModuleFactory::getModuleInfo(pd->module_slugs[module_idx]);
+				for (auto i = 0u; i < info.elements.size() && i < info.indices.size(); i++) {
+					if (fullscreen_display(info.elements[i])) {
+						pd->set_selected_display(this_id, info.indices[i].light_idx);
+						patches.mark_view_patch_modified();
+						notify_queue.put({selected_display_message(*pd, this_id, info.elements[i]),
+										  Notification::Priority::Status,
+										  2000});
+						selected_display_changed = true;
+						break;
+					}
+				}
+				update_select_display_button();
+			} break;
+
+			case SelectDisplayAction::Choose:
+				choose_display_requested = true;
+				hide();
+				break;
+
+			case SelectDisplayAction::Remove:
+				pd->clear_selected_display();
+				patches.mark_view_patch_modified();
+				notify_queue.put({"Display deselected", Notification::Priority::Status, 1500});
+				selected_display_changed = true;
+				update_select_display_button();
+				break;
+
+			case SelectDisplayAction::None:
+				break;
+		}
+	}
+
+	static void select_display_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		page->select_display_but_cb();
+	}
+
 	static void expander_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -712,6 +801,7 @@ private:
 	lv_obj_t *moduleViewActionReplaceBut;
 	lv_obj_t *moduleViewActionMoveBut;
 	lv_obj_t *moduleViewActionExpanderBut;
+	lv_obj_t *moduleViewActionSelectDisplayBut;
 	lv_obj_t *rename_textarea = nullptr;
 	std::string pending_alias{};
 	KeyboardEntry keyboard_entry;
@@ -726,6 +816,10 @@ private:
 	std::optional<ExpanderConnection> pending_detach{};
 	std::optional<uint16_t> pending_goto_module{};
 	bool reopen_expander_popup = false;
+
+	enum class SelectDisplayAction { None, Set, Choose, Remove } select_display_action = SelectDisplayAction::None;
+	bool choose_display_requested = false;
+	bool selected_display_changed = false;
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 };

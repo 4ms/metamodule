@@ -536,6 +536,11 @@ struct PatchViewPage : PageBase {
 		update_map_ring_style();
 	}
 
+	// Leaving would drop a module that's being moved
+	bool can_leave_for_screensaver() override {
+		return !rearranging.has_value();
+	}
+
 	void blur() override {
 		if (rearranging) {
 			// The group is set up for re-arranging, so make sure it gets rebuilt next time
