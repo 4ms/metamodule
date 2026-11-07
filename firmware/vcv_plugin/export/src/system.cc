@@ -80,16 +80,26 @@ bool copy(const std::string &srcPath, const std::string &destPath) {
 	// return true;
 }
 
+// Directories can only be created on the SD Card and USB drives
+
 bool createDirectory(const std::string &path) {
-	// fs is read-only
-	return false;
-	// return fs::create_directory(fs::path(path));
+	std::error_code ec;
+	return fs::create_directory(fs::path(path), ec);
 }
 
 bool createDirectories(const std::string &path) {
-	// fs is read-only
-	return false;
-	// return fs::create_directories(fs::path(path));
+	// Create each level in turn. fs::create_directories would ask stat() whether
+	// the volume root (e.g. "sdc:") exists, and FatFS can't stat a volume root.
+	bool created = false;
+	fs::path partial;
+	for (auto const &part : fs::path(path)) {
+		partial /= part;
+		// Skip the volume itself ("sdc:"), and the empty part of a trailing slash
+		if (part.empty() || part.string().ends_with(':'))
+			continue;
+		created = createDirectory(partial.string());
+	}
+	return created;
 }
 
 bool createSymbolicLink(const std::string &target, const std::string &link) {

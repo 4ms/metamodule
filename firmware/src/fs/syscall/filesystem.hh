@@ -30,6 +30,8 @@ dirent *readdir(DIR *dir);
 void rewinddir(DIR *dir);
 int closedir(DIR *dir);
 
+int mkdir(const char *path);
+
 }; // namespace Filesystem
 
 } // namespace MetaModule

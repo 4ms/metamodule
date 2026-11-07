@@ -27,7 +27,7 @@ public:
 	bool findfirst(DIR *dir, FILINFO *info, std::string_view path, std::string_view pattern);
 	bool findnext(DIR *dir, FILINFO *info);
 
-	bool mkdir(std::string_view path);
+	FRESULT mkdir(std::string_view path);
 	std::optional<size_t> write(FIL *fil, std::span<const char> data);
 	bool sync(FIL *fil);
 	bool trunc(FIL *fil);

@@ -1,6 +1,7 @@
 #include "console/pr_dbg.hh"
 #include "filesystem.hh"
 #include <cstdio>
+#include <sys/stat.h>
 
 // These are used by newlib to provide libc filesystem and io functions
 
@@ -72,6 +73,16 @@ int _write(int fd, const char *ptr, int len) {
 	auto res = MetaModule::Filesystem::write(fd, ptr, len);
 	if (res < 0) {
 		pr_dbg("write(%d) returned %d\n", fd, res);
+		// Can debug fs errors here
+	}
+	return res;
+}
+
+// Not a newlib syscall: newlib declares mkdir() in sys/stat.h but leaves it to the host
+int mkdir(const char *path, mode_t mode) {
+	auto res = MetaModule::Filesystem::mkdir(path);
+	if (res < 0) {
+		pr_dbg("mkdir(%s) returned %d\n", path, res);
 		// Can debug fs errors here
 	}
 	return res;
