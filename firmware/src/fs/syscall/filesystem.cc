@@ -51,9 +51,18 @@ FsSyscallProxy fs_proxy;
 // FatFS can't stat a volume root, so report it as a dir if it can be opened
 bool stat_volume_root(Volume volume, FILINFO &filinfo) {
 	DIR dir{};
-	if (!fs_proxy.opendir(volume_string(volume), &dir))
-		return false;
-	fs_proxy.closedir(&dir);
+
+	if (volume == Volume::RamDisk) {
+		// FatFileIO selects its own drive, so "" opens the root
+		if (!mRamdisk || !mRamdisk->opendir("", &dir))
+			return false;
+		mRamdisk->closedir(&dir);
+
+	} else {
+		if (!fs_proxy.opendir(volume_string(volume), &dir))
+			return false;
+		fs_proxy.closedir(&dir);
+	}
 
 	filinfo = FILINFO{};
 	filinfo.fattrib = AM_DIR;
@@ -205,10 +214,10 @@ int stat(const char *filename, struct stat *st) {
 		FILINFO filinfo;
 
 		bool ok = false;
-		if (volume == Volume::RamDisk && mRamdisk)
-			ok = mRamdisk->get_fat_filinfo(path, filinfo);
-		else if (path.empty())
+		if (path.empty())
 			ok = stat_volume_root(volume, filinfo);
+		else if (volume == Volume::RamDisk)
+			ok = mRamdisk && mRamdisk->get_fat_filinfo(path, filinfo);
 		else
 			ok = fs_proxy.stat(make_full_path(volume, path), &filinfo);
 
