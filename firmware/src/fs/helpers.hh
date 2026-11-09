@@ -65,10 +65,20 @@ inline std::string make_full_path(Volume vol, std::string_view path, std::string
 	return std::filesystem::path(fullpath).lexically_normal().string();
 }
 
-// Cleans up the path
+// Cleans up the path. As with "/.." in POSIX, ".." at the volume root stays at
+// the root, so the result always starts with the volume prefix (which FatFS
+// needs to pick the drive)
 inline std::string make_full_path(Volume vol, std::string_view path) {
-	auto fullpath = std::string(volume_string(vol)) + std::string(path);
-	return std::filesystem::path(fullpath).lexically_normal().string();
+	auto vol_str = volume_string(vol);
+	if (vol_str.empty())
+		return std::filesystem::path(path).lexically_normal().string();
+
+	// Normalize the path as an absolute one, which can't go above its root
+	auto rooted = std::filesystem::path("/" + std::string(path)).lexically_normal().string();
+
+	// "sdc:/" + "/dir/file" would double the slash, so drop the one from the prefix
+	vol_str.remove_suffix(1);
+	return std::string(vol_str) + rooted;
 }
 
 static inline void

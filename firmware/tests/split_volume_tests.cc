@@ -77,3 +77,14 @@ TEST_CASE("split_volume + make_full_path: rebuilds the path with the volume's ca
 	CHECK(rebuild("sdc:/") == "sdc:/");
 	CHECK(rebuild("usb:") == "usb:/");
 }
+
+TEST_CASE("make_full_path: '..' can't go above the volume root") {
+	// Without the prefix, FatFS on the M4 would use whichever drive was used last
+	CHECK(make_full_path(Volume::SDCard, "../x") == "sdc:/x");
+	CHECK(make_full_path(Volume::SDCard, "a/../../x") == "sdc:/x");
+	CHECK(make_full_path(Volume::SDCard, "..") == "sdc:/");
+	CHECK(make_full_path(Volume::USB, "a/..") == "usb:/");
+	CHECK(make_full_path(Volume::USB, "a/../b/./c/") == "usb:/b/c/");
+	CHECK(make_full_path(Volume::SDCard, "/a//b") == "sdc:/a/b");
+	CHECK(make_full_path(Volume::SDCard, "") == "sdc:/");
+}
