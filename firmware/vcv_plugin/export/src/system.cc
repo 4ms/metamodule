@@ -2,6 +2,7 @@
 #include "filesystem/dirent.h"
 #include "system/time.hh"
 #include <filesystem>
+#include <sys/stat.h>
 #include <system.hpp>
 
 namespace rack::system
@@ -83,8 +84,14 @@ bool copy(const std::string &srcPath, const std::string &destPath) {
 // Directories can only be created on the SD Card and USB drives
 
 bool createDirectory(const std::string &path) {
+#ifdef _WIN32
 	std::error_code ec;
 	return fs::create_directory(fs::path(path), ec);
+#else
+	// The firmware's libstdc++ is built without _GLIBCXX_USE_MKDIR, so there
+	// fs::create_directory() always fails with ENOTSUP and never calls mkdir()
+	return ::mkdir(path.c_str(), 0777) == 0;
+#endif
 }
 
 bool createDirectories(const std::string &path) {
