@@ -53,16 +53,31 @@ constexpr Volume string_to_volume(std::string_view str) {
 	return Volume::MaxVolumes;
 }
 
-// Cleans up the path
+// Joins a dir and a file name on a volume (without the volume prefix) and cleans
+// up the result. As with "/.." in POSIX, ".." at the volume root stays at the root.
+// A relative dir gives a relative result: ("dir" -> "dir/file")
+// Empty or absolute dir gives an absolute result: ("" -> "/file").
 inline std::string make_full_path(std::string_view path, std::string_view filename) {
-	std::string fullpath = std::string(path) + std::string("/");
-	return std::filesystem::path(fullpath).lexically_normal().string() + std::string(filename);
-}
+	// Check if it has a leading slash (we treat "" as "/")
+	bool relative = !path.empty() && !path.starts_with('/');
 
-// Cleans up the path
-inline std::string make_full_path(Volume vol, std::string_view path, std::string_view filename) {
-	auto fullpath = std::string(volume_string(vol)) + make_full_path(path, filename);
-	return std::filesystem::path(fullpath).lexically_normal().string();
+	// Remove all leading slashes
+	while (path.starts_with('/'))
+		path.remove_prefix(1);
+
+	// Make sure `path` has a slash before and after
+	auto fullpath = "/" + std::string(path);
+	if (!fullpath.ends_with('/'))
+		fullpath += '/';
+	// Append the filename
+	fullpath += filename;
+	// Normalize
+	auto normal = std::filesystem::path(fullpath).lexically_normal().string();
+
+	// Remove the leading slash if we passed in a relative path
+	if (relative && normal.size() > 1)
+		normal.erase(0, 1);
+	return normal;
 }
 
 // Cleans up the path. As with "/.." in POSIX, ".." at the volume root stays at
@@ -73,12 +88,20 @@ inline std::string make_full_path(Volume vol, std::string_view path) {
 	if (vol_str.empty())
 		return std::filesystem::path(path).lexically_normal().string();
 
-	// Normalize the path as an absolute one, which can't go above its root
+	// Normalize the path as an absolute one, which can't go above its root.
+	// Strip its own leading slashes first: on Windows (simulator), "//x" is a network path
+	while (path.starts_with('/'))
+		path.remove_prefix(1);
 	auto rooted = std::filesystem::path("/" + std::string(path)).lexically_normal().string();
 
 	// "sdc:/" + "/dir/file" would double the slash, so drop the one from the prefix
 	vol_str.remove_suffix(1);
 	return std::string(vol_str) + rooted;
+}
+
+// Cleans up the path. ".." at the volume root stays at the root
+inline std::string make_full_path(Volume vol, std::string_view path, std::string_view filename) {
+	return make_full_path(vol, make_full_path(path, filename));
 }
 
 static inline void

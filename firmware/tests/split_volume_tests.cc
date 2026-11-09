@@ -88,3 +88,32 @@ TEST_CASE("make_full_path: '..' can't go above the volume root") {
 	CHECK(make_full_path(Volume::SDCard, "/a//b") == "sdc:/a/b");
 	CHECK(make_full_path(Volume::SDCard, "") == "sdc:/");
 }
+
+TEST_CASE("make_full_path(dir, file): joins a dir and a file name") {
+	CHECK(make_full_path("", "p.yml") == "/p.yml");
+	CHECK(make_full_path("", "") == "/");
+	CHECK(make_full_path("dir", "p.yml") == "dir/p.yml");
+	CHECK(make_full_path("dir/", "p.yml") == "dir/p.yml");
+	CHECK(make_full_path("dir", "") == "dir/");
+	CHECK(make_full_path("/dir", "p.yml") == "/dir/p.yml");
+	CHECK(make_full_path("a/./b", "x/p.yml") == "a/b/x/p.yml");
+}
+
+TEST_CASE("make_full_path(dir, file): '..' can't go above the volume root") {
+	CHECK(make_full_path("..", "p.yml") == "p.yml"); // was "..p.yml"
+	CHECK(make_full_path("../x", "p.yml") == "x/p.yml");
+	CHECK(make_full_path("a/../..", "") == "/");
+	CHECK(make_full_path("", "../p.yml") == "/p.yml");
+	CHECK(make_full_path("dir", "../p.yml") == "p.yml");
+	CHECK(make_full_path("a/b", "../p.yml") == "a/p.yml");
+}
+
+TEST_CASE("make_full_path(vol, dir, file): '..' can't go above the volume root") {
+	CHECK(make_full_path(Volume::SDCard, "", "p.yml") == "sdc:/p.yml");
+	CHECK(make_full_path(Volume::SDCard, "dir", "p.yml") == "sdc:/dir/p.yml");
+	CHECK(make_full_path(Volume::USB, "dir", "") == "usb:/dir/");
+	CHECK(make_full_path(Volume::SDCard, "..", "p.yml") == "sdc:/p.yml");
+	CHECK(make_full_path(Volume::SDCard, "../x", "p.yml") == "sdc:/x/p.yml");
+	CHECK(make_full_path(Volume::SDCard, "", "../p.yml") == "sdc:/p.yml");
+	CHECK(make_full_path(Volume::USB, "a/../..", "") == "usb:/");
+}
