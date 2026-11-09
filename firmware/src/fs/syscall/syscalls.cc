@@ -79,7 +79,7 @@ int _write(int fd, const char *ptr, int len) {
 }
 
 // Not a newlib syscall: newlib declares mkdir() in sys/stat.h but leaves it to the host
-int mkdir(const char *path, mode_t mode) {
+int mkdir(const char *path, mode_t /*mode*/) {
 	auto res = MetaModule::Filesystem::mkdir(path);
 	if (res < 0) {
 		pr_dbg("mkdir(%s) returned %d\n", path, res);
