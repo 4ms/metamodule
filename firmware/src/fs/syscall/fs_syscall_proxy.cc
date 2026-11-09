@@ -7,6 +7,23 @@ namespace MetaModule
 // #define fs_trace pr_dbg
 #define fs_trace(...)
 
+namespace
+{
+
+// A path too long for the message's StaticString would be cut short, and
+// FatFS would act on a different file or dir than the one asked for
+template<typename Message>
+bool path_fits(std::string_view path) {
+	constexpr auto max_len = decltype(Message::path)::capacity;
+	if (path.length() <= max_len)
+		return true;
+
+	pr_err("A7: path is too long (%zu chars, max is %zu): %.*s...\n", path.length(), max_len, 63, path.data());
+	return false;
+}
+
+} // namespace
+
 FsSyscallProxy::FsSyscallProxy()
 	: impl{std::make_unique<FsProxy>()} {
 }
@@ -14,6 +31,9 @@ FsSyscallProxy::FsSyscallProxy()
 FsSyscallProxy::~FsSyscallProxy() = default;
 
 bool FsSyscallProxy::open(std::string_view path, FIL *fil, uint8_t mode) {
+	if (!path_fits<IntercoreModuleFS::Open>(path))
+		return false;
+
 	auto msg = IntercoreModuleFS::Open{
 		.fil = *fil, //copy to non-cacheable Message
 		.path = path,
@@ -102,6 +122,9 @@ int FsSyscallProxy::close(FIL *fil) {
 }
 
 bool FsSyscallProxy::stat(std::string_view path, FILINFO *info) {
+	if (!path_fits<IntercoreModuleFS::Stat>(path))
+		return false;
+
 	auto msg = IntercoreModuleFS::Stat{
 		.path = path,
 		.info = *info, //copy to non-cacheable message
@@ -120,6 +143,9 @@ bool FsSyscallProxy::stat(std::string_view path, FILINFO *info) {
 }
 
 bool FsSyscallProxy::opendir(std::string_view path, DIR *dir) {
+	if (!path_fits<IntercoreModuleFS::OpenDir>(path))
+		return false;
+
 	auto msg = IntercoreModuleFS::OpenDir{
 		.dir = *dir, //copy to non-cacheable Message
 		.path = path,
