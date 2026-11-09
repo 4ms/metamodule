@@ -64,7 +64,6 @@ _write_r
 _kill_r
 _read_r
 _lseek_r
-mkdir
 _sbrk_r
 gettimeofday
 _gettimeofday
