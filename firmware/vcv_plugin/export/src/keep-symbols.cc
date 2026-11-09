@@ -35,6 +35,7 @@
 #include <ctime>
 #include <memory>
 #include <random>
+#include <sys/stat.h>
 #include <unordered_map>
 
 #include "midi/midi_in.hh"
@@ -165,6 +166,7 @@ void keep_dirent() {
 	[[maybe_unused]] auto x4 = scandir({}, {}, {}, {});
 	seekdir(d, 0);
 	telldir(d);
+	mkdir("ram:/", 0);
 }
 
 void __attribute__((optimize("-O0"))) keep_coreproc() {
