@@ -329,6 +329,64 @@ int closedir(DIR *dir) {
 	return FileDescManager::dealloc_dir(dir) ? 0 : -1;
 }
 
+int mkdir(const char *fullpath) {
+	auto [path, volume] = split_volume(fullpath);
+
+	if (volume != Volume::SDCard && volume != Volume::USB) {
+		pr_err("mkdir(%s): creating directories is only supported on SD Card and USB drives\n", fullpath);
+		errno = EACCES;
+		return -1;
+	}
+
+	if (path.empty()) {
+		// The volume root always exists
+		errno = EEXIST;
+		return -1;
+	}
+
+	// The M4 needs the volume prefix to pick the drive
+	auto res = fs_proxy.mkdir(make_full_path(volume, path));
+
+	switch (res) {
+		case FR_OK:
+			return 0;
+		case FR_EXIST:
+			errno = EEXIST;
+			break;
+		case FR_NO_PATH:
+			errno = ENOENT;
+			break;
+		case FR_INVALID_NAME:
+			errno = EINVAL;
+			break;
+		case FR_DENIED:
+			// FatFS reports a full disk or directory table as denied
+			errno = ENOSPC;
+			break;
+		case FR_WRITE_PROTECTED:
+			errno = EROFS;
+			break;
+		case FR_TIMEOUT:
+			errno = ETIMEDOUT;
+			break;
+		case FR_DISK_ERR: // what a missing USB drive reports
+		case FR_NOT_READY:
+		case FR_INVALID_DRIVE:
+		case FR_NOT_ENABLED:
+		case FR_NO_FILESYSTEM:
+			errno = ENODEV;
+			break;
+		default:
+			errno = EIO;
+			break;
+	}
+
+	if (res != FR_EXIST)
+		pr_err("mkdir(%s) failed: %d\n", fullpath, (int)res);
+
+	return -1;
+}
+
 int write(int fd, const char *ptr, int len) {
 	if (fd == STDOUT_FILENO || fd == STDERR_FILENO) {
 		UartLog::write_stdout(ptr, len);
