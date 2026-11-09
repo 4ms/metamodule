@@ -90,13 +90,29 @@ bool createDirectory(const std::string &path) {
 bool createDirectories(const std::string &path) {
 	// Create each level in turn. fs::create_directories would ask stat() whether
 	// the volume root (e.g. "sdc:") exists, and FatFS can't stat a volume root.
-	bool created = false;
-	fs::path partial;
+
+	// First resolve "." and "..", so "a/../b" creates only "b".
+	// As with "/.." in POSIX, ".." at the volume root stays at the root.
+	fs::path base; // the volume ("sdc:") or root dir ("/"), which already exist
+	std::vector<fs::path> dirs;
 	for (auto const &part : fs::path(path)) {
-		partial /= part;
-		// Skip the volume itself ("sdc:"), and the empty part of a trailing slash
-		if (part.empty() || part.string().ends_with(':'))
+		auto s = part.string();
+		// Skip the empty part of a trailing slash
+		if (s.empty() || s == ".")
 			continue;
+		if (dirs.empty() && (s.ends_with(':') || part == part.root_directory()))
+			base /= part;
+		else if (s == "..") {
+			if (!dirs.empty())
+				dirs.pop_back();
+		} else
+			dirs.push_back(part);
+	}
+
+	bool created = false;
+	fs::path partial = base;
+	for (auto const &dir : dirs) {
+		partial /= dir;
 		created = createDirectory(partial.string());
 	}
 	return created;
