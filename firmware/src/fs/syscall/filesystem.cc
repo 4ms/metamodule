@@ -48,6 +48,27 @@ namespace
 FatFileIO *mRamdisk{nullptr};
 FsSyscallProxy fs_proxy;
 
+// FatFS can't stat a volume root, so report it as a dir if it can be opened
+bool stat_volume_root(Volume volume, FILINFO &filinfo) {
+	DIR dir{};
+
+	if (volume == Volume::RamDisk) {
+		// FatFileIO selects its own drive, so "" opens the root
+		if (!mRamdisk || !mRamdisk->opendir("", &dir))
+			return false;
+		mRamdisk->closedir(&dir);
+
+	} else {
+		if (!fs_proxy.opendir(volume_string(volume), &dir))
+			return false;
+		fs_proxy.closedir(&dir);
+	}
+
+	filinfo = FILINFO{};
+	filinfo.fattrib = AM_DIR;
+	return true;
+}
+
 } // namespace
 
 void init(FatFileIO &ramdisk) {
@@ -91,7 +112,7 @@ int open(const char *filename, int flags, int mode) {
 				}
 			} else {
 				// SDCard or USB:
-				if (fs_proxy.open(filename, file->fatfil, fatfs_modes)) {
+				if (fs_proxy.open(make_full_path(volume, path), file->fatfil, fatfs_modes)) {
 					file->vol = volume;
 					return *fd;
 				}
@@ -193,10 +214,12 @@ int stat(const char *filename, struct stat *st) {
 		FILINFO filinfo;
 
 		bool ok = false;
-		if (volume == Volume::RamDisk && mRamdisk)
-			ok = mRamdisk->get_fat_filinfo(path, filinfo);
+		if (path.empty())
+			ok = stat_volume_root(volume, filinfo);
+		else if (volume == Volume::RamDisk)
+			ok = mRamdisk && mRamdisk->get_fat_filinfo(path, filinfo);
 		else
-			ok = fs_proxy.stat(path, &filinfo);
+			ok = fs_proxy.stat(make_full_path(volume, path), &filinfo);
 
 		if (ok) {
 			FatTime fattime{.date = filinfo.fdate, .time = filinfo.ftime};
@@ -241,7 +264,7 @@ DIR *opendir(std::string_view fullpath) {
 		}
 
 		if (volume == Volume::SDCard || volume == Volume::USB) {
-			if (fs_proxy.opendir(path, dirdesc->dir)) {
+			if (fs_proxy.opendir(make_full_path(volume, path), dirdesc->dir)) {
 				dirdesc->vol = volume;
 				return dirdesc->dir;
 			}

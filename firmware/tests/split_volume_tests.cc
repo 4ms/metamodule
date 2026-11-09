@@ -60,3 +60,31 @@ TEST_CASE("split_volume: path from a C string is still null-terminated") {
 	CHECK(path.data() == fullpath + 5);
 	CHECK(path.data()[path.size()] == '\0');
 }
+
+TEST_CASE("split_volume + make_full_path: rebuilds the path with the volume's canonical prefix") {
+	// The syscalls rebuild SD Card and USB paths this way for FatFS on the M4,
+	// which needs the prefix to pick the drive
+	auto rebuild = [](std::string_view fullpath) {
+		auto [path, vol] = split_volume(fullpath);
+		return make_full_path(vol, path);
+	};
+
+	CHECK(rebuild("sdc:/dir/patch.yml") == "sdc:/dir/patch.yml");
+	CHECK(rebuild("sdc:dir/patch.yml") == "sdc:/dir/patch.yml");
+	CHECK(rebuild("usb:/dir/") == "usb:/dir/");
+	CHECK(rebuild("SD Card:/dir/patch.yml") == "sdc:/dir/patch.yml");
+	CHECK(rebuild("USB:/patch.yml") == "usb:/patch.yml");
+	CHECK(rebuild("sdc:/") == "sdc:/");
+	CHECK(rebuild("usb:") == "usb:/");
+}
+
+TEST_CASE("make_full_path: '..' can't go above the volume root") {
+	// Without the prefix, FatFS on the M4 would use whichever drive was used last
+	CHECK(make_full_path(Volume::SDCard, "../x") == "sdc:/x");
+	CHECK(make_full_path(Volume::SDCard, "a/../../x") == "sdc:/x");
+	CHECK(make_full_path(Volume::SDCard, "..") == "sdc:/");
+	CHECK(make_full_path(Volume::USB, "a/..") == "usb:/");
+	CHECK(make_full_path(Volume::USB, "a/../b/./c/") == "usb:/b/c/");
+	CHECK(make_full_path(Volume::SDCard, "/a//b") == "sdc:/a/b");
+	CHECK(make_full_path(Volume::SDCard, "") == "sdc:/");
+}
