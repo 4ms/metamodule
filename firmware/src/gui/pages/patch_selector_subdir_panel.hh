@@ -145,7 +145,9 @@ struct PatchSelectorSubdirPanel {
 		lv_group_activate(group);
 
 		if (last_subdir_sel) {
-			if (lv_obj_has_flag(last_subdir_sel, LV_OBJ_FLAG_HIDDEN)) {
+			// The last selection may be hidden, or disabled (e.g. its volume was
+			// removed) and therefore not in the group: focus something that is
+			if (lv_obj_has_flag(last_subdir_sel, LV_OBJ_FLAG_HIDDEN) || lv_obj_get_group(last_subdir_sel) != group) {
 				if (group) {
 					lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
 					lv_group_focus_next(group);
