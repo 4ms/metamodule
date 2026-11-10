@@ -63,6 +63,11 @@ struct PluginModuleMenu {
 	}
 
 	void show() {
+		// Rebuild the menu from the module's current state: anything might have changed
+		// since it was last built (e.g. a file was chosen in the file browser)
+		if (plugin_menu)
+			plugin_menu->close();
+
 		populate_menu_items();
 
 		auto ht = lv_obj_get_height(ui_ElementRollerButtonCont);
