@@ -19,6 +19,7 @@ struct RackModuleMenu : BasePluginModuleMenu {
 
 	std::vector<std::string> get_items() override {
 		std::vector<std::string> item_strings;
+		displayed_child_idx.clear();
 
 		if (auto mw = module_widget.lock()) {
 			// Initialize the first time
@@ -58,13 +59,20 @@ struct RackModuleMenu : BasePluginModuleMenu {
 			return std::nullopt;
 		}
 
-		if (idx > current_menu->children.size()) {
+		// Not all children are displayed, so translate the displayed row to the child index
+		if (idx >= displayed_child_idx.size()) {
 			pr_err("Clicked vcv module menu out of range\n");
 			return std::nullopt;
 		}
 
+		auto child_idx = displayed_child_idx[idx];
+		if (child_idx >= current_menu->children.size()) {
+			pr_err("VCV module menu changed since it was displayed\n");
+			return std::nullopt;
+		}
+
 		//find the child that was clicked
-		auto child = std::next(current_menu->children.begin(), idx);
+		auto child = std::next(current_menu->children.begin(), child_idx);
 		if (auto menu_item = dynamic_cast<rack::ui::MenuItem *>(*child)) {
 
 			if (auto mw = module_widget.lock()) {
@@ -102,6 +110,7 @@ struct RackModuleMenu : BasePluginModuleMenu {
 	void close() override {
 		current_menu = nullptr;
 		menu_owner.reset();
+		displayed_child_idx.clear();
 		exited = true;
 	}
 
@@ -160,8 +169,11 @@ private:
 			unsigned num_children = 0;
 			for (auto child : children) {
 				// Reasonable limit to size of menu:
-				if (num_children++ >= 256)
+				if (num_children >= 256)
 					break;
+
+				const auto child_idx = num_children++;
+				const auto num_displayed = menu.size();
 
 				if (auto rack_item = dynamic_cast<rack::ui::MenuItem *>(child)) {
 					child->step();
@@ -201,6 +213,10 @@ private:
 					// Hide unknown items
 					// menu.emplace_back("?");
 				}
+
+				// Remember which child each displayed row refers to (hidden children have no row)
+				if (menu.size() > num_displayed)
+					displayed_child_idx.push_back(child_idx);
 			}
 		}
 	}
@@ -210,6 +226,9 @@ private:
 
 	rack::ui::Menu *current_menu{};	   //can't use smart pointer because must point to a raw pointer in rack API
 	rack::ui::Slider *active_slider{}; //the slider currently being adjusted via a SliderPopup, if any
+
+	// Maps each displayed row to its index in current_menu->children
+	std::vector<unsigned> displayed_child_idx;
 
 	bool exited = false;
 };
