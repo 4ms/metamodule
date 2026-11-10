@@ -246,7 +246,7 @@ private:
 
 		auto screensaver_item = get_index(ScreensaverSettings::ValidOptions,
 										  [this](auto t) { return t.timeout_ms == screensaver.timeout_ms; });
-		lv_dropdown_set_selected(ssaver_section.time_dropdown, screensaver_item >= 0 ? screensaver_item : 1);
+		lv_dropdown_set_selected(ssaver_section.time_dropdown, screensaver_item >= 0 ? screensaver_item : 0);
 
 		lv_check(ssaver_section.knobs_check, screensaver.knobs_can_wake);
 

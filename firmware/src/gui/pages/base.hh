@@ -135,6 +135,12 @@ struct PageBase {
 	virtual void update() {
 	}
 
+	// False while the page has unfinished edits that leaving it would lose: then the
+	// screensaver covers the page instead of showing a module display on another page
+	virtual bool can_leave_for_screensaver() {
+		return true;
+	}
+
 	bool patch_is_playing(std::optional<PatchLocHash> patch_loc_hash) {
 		if (patch_loc_hash.has_value()) {
 			return (patch_loc_hash.value() == patches.get_playing_patch_loc_hash());

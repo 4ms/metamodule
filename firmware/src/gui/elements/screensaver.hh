@@ -6,6 +6,7 @@
 #include "src/core/lv_disp.h"
 #include "user_settings/screensaver_settings.hh"
 #include <array>
+#include <utility>
 
 namespace MetaModule
 {
@@ -30,8 +31,18 @@ public:
 		wake();
 	}
 
+	// How long the selected display is shown before the screen goes black
+	static constexpr uint64_t MaxSelectedDisplayMs = 3 * 60 * 60 * 1000;
+
+	// Blank: the black overlay. Display: a module display is shown full-screen (by the PageManager)
+	enum class Mode { Off, Blank, Display };
+
 	bool is_active() const {
-		return !lv_obj_has_flag(screensaver, LV_OBJ_FLAG_HIDDEN);
+		return mode != Mode::Off;
+	}
+
+	bool in_display_mode() const {
+		return mode == Mode::Display;
 	}
 
 	bool can_wake_on_knob() const {
@@ -41,19 +52,44 @@ public:
 	void wake() {
 		lv_disp_trig_activity(nullptr);
 		lv_hide(screensaver);
+		if (mode == Mode::Display)
+			display_woke = true;
+		mode = Mode::Off;
 	}
 
-	void update() {
-		if (lv_obj_is_visible(screensaver))
-			return;
+	bool timed_out() const {
+		return lv_disp_get_inactive_time(nullptr) >= s.timeout_ms;
+	}
 
-		const auto t = lv_disp_get_inactive_time(nullptr);
+	// The selected display has been shown long enough that a still part of it could burn into the screen
+	bool display_timed_out() const {
+		return uint64_t{lv_disp_get_inactive_time(nullptr)} >= uint64_t{s.timeout_ms} + MaxSelectedDisplayMs;
+	}
 
-		if (t < s.timeout_ms)
-			return;
-
+	void show_blank() {
+		mode = Mode::Blank;
 		lv_obj_move_foreground(screensaver);
 		lv_show(screensaver);
 	}
+
+	void enter_display_mode() {
+		lv_hide(screensaver);
+		mode = Mode::Display;
+	}
+
+	// The display is no longer shown for some other reason (e.g. the patch was unloaded)
+	void reset_display_mode() {
+		if (mode == Mode::Display)
+			mode = Mode::Off;
+	}
+
+	// Returns true once after the display screensaver was woken
+	bool take_display_wake() {
+		return std::exchange(display_woke, false);
+	}
+
+private:
+	Mode mode = Mode::Off;
+	bool display_woke = false;
 };
 } // namespace MetaModule
