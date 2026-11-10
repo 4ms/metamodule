@@ -19,8 +19,11 @@ public:
 
 	SDCardOps() = default;
 
+	// A card that was removed reports STA_NOINIT too. Otherwise FatFS keeps
+	// using the volume it mounted from that card, and the root dir of the
+	// removed card still opens (it needs no disk read).
 	DSTATUS status() override {
-		return (_status == Status::NotInit) ? (STA_NOINIT | STA_NODISK) : 0;
+		return (_status == Status::Mounted) ? 0 : (STA_NOINIT | STA_NODISK);
 	}
 
 	// FatFS calls this :
@@ -36,7 +39,7 @@ public:
 			return 0;
 		} else {
 			_status = Status::NoCard;
-			return STA_NODISK;
+			return STA_NOINIT | STA_NODISK;
 		}
 	}
 

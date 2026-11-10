@@ -20,8 +20,14 @@ public:
 		: usbh{usbh} {
 	}
 
+	// A drive that was disconnected (ejected) reports STA_NOINIT, so FatFS
+	// doesn't keep using the volume it mounted from it. While connected, a
+	// busy drive (MSC not idle) only reports STA_NODISK, so FatFS doesn't
+	// remount it mid-transfer and invalidate open files.
 	DSTATUS status() override {
-		return (is_mounted_ && msc_isready()) ? 0 : STA_NODISK;
+		if (!is_mounted_)
+			return STA_NOINIT | STA_NODISK;
+		return msc_isready() ? 0 : STA_NODISK;
 	}
 
 	DSTATUS initialize() override {
