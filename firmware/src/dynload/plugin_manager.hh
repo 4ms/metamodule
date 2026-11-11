@@ -65,6 +65,9 @@ public:
 				auto plug = std::next(loaded_plugin_list.begin(), i);
 				auto code = std::span<uint32_t>(reinterpret_cast<uint32_t *>(plug->code.data()), plug->code.size() / 4);
 
+				// Unregister the plugin's unwind table
+				ExidxRegistry::unregister_range(reinterpret_cast<uintptr_t>(plug->code.data()));
+
 				// Delete it
 				loaded_plugin_list.erase(std::next(loaded_plugin_list.begin(), i));
 
