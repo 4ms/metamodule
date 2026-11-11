@@ -109,6 +109,14 @@ std::optional<size_t> FsSyscallProxy::read(FIL *fil, std::span<char> buffer) {
 		*fil = response->fil;
 		total_read += response->bytes_read;
 
+		if (response->res != FR_OK) {
+			pr_err("A7: read responded with error: %d\n", response->res);
+			// What was read already is in buffer
+			if (total_read > 0)
+				return total_read;
+			return {};
+		}
+
 		// End of file
 		if (response->bytes_read < bytes_to_read)
 			break;

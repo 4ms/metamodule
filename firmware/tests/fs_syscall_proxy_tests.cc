@@ -146,6 +146,24 @@ TEST_CASE("FsSyscallProxy::read returns what it has if a later chunk times out")
 	CHECK(buffer == FakeM4::file);
 }
 
+TEST_CASE("FsSyscallProxy::read fails if the first chunk has a disk error") {
+	FsSyscallProxy proxy;
+	make_file(3 * ChunkSize);
+	FakeM4::diskerr_on_call = 1;
+
+	FIL fil{};
+	std::vector<char> buffer(3 * ChunkSize);
+
+	// An error, not a read of 0 bytes (which would mean end of file)
+	CHECK_FALSE(proxy.read(&fil, buffer).has_value());
+
+	// The error is kept in the FIL, so FatFS refuses later reads of it
+	CHECK(fil.err == FR_DISK_ERR);
+
+	// No more requests are sent after the error
+	CHECK(FakeM4::read_calls == 1);
+}
+
 TEST_CASE("FsSyscallProxy::read returns what it has if a later chunk has a disk error") {
 	FsSyscallProxy proxy;
 	make_file(3 * ChunkSize);
