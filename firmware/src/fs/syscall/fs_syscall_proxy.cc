@@ -80,29 +80,41 @@ uint64_t FsSyscallProxy::seek(FIL *fil, int offset, int whence) {
 }
 
 std::optional<size_t> FsSyscallProxy::read(FIL *fil, std::span<char> buffer) {
-	auto bytes_to_read = buffer.size();
+	fs_trace("A7: read %p into {%p, +%zu}, max %zu\n", fil, buffer.data(), buffer.size(), impl->file_buffer().size());
 
-	if (bytes_to_read > impl->file_buffer().size()) {
-		pr_err("Cannot f_read %d bytes, max is %zu\n", bytes_to_read, impl->file_buffer().size());
-		return {};
-	}
+	// Read in chunks that are <= shared buffer
+	size_t total_read = 0;
 
-	auto msg = IntercoreModuleFS::Read{
-		.fil = *fil,
-		.buffer = impl->file_buffer().subspan(0, bytes_to_read),
-	};
+	while (total_read < buffer.size()) {
+		auto bytes_to_read = std::min(buffer.size() - total_read, impl->file_buffer().size());
 
-	fs_trace("A7: read %p into {%p, +%zu}\n", fil, buffer.data(), buffer.size());
+		auto msg = IntercoreModuleFS::Read{
+			.fil = *fil,
+			.buffer = impl->file_buffer().subspan(0, bytes_to_read),
+		};
 
-	if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Read>(msg, 3000)) {
-		std::copy(response->buffer.begin(), std::next(response->buffer.begin(), response->bytes_read), buffer.data());
+		auto response = impl->get_response_or_timeout<IntercoreModuleFS::Read>(msg, 3000);
+		if (!response) {
+			pr_err("Failed to send read request\n");
+			// What was read already is in buffer
+			if (total_read > 0)
+				return total_read;
+			return {};
+		}
+
+		std::copy(response->buffer.begin(),
+				  std::next(response->buffer.begin(), response->bytes_read),
+				  std::next(buffer.begin(), total_read));
 
 		*fil = response->fil;
-		return response->bytes_read;
+		total_read += response->bytes_read;
+
+		// End of file
+		if (response->bytes_read < bytes_to_read)
+			break;
 	}
 
-	pr_err("Failed to send read request\n");
-	return {};
+	return total_read;
 }
 
 int FsSyscallProxy::close(FIL *fil) {
