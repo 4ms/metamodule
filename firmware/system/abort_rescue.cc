@@ -2,10 +2,10 @@
 #include "reent_mm.hh"
 #include "safe_log.hh"
 
-// Defined in lock.cc: rescuing while an allocator lock is held would leave
-// the heap/arena locked forever (the lock owner's stack is abandoned)
-extern "C" int mm_malloc_lock_held();
-extern "C" int mm_arena_lock_held();
+// Defined in lock.cc: rescuing a process while it holds an allocator lock would
+// leave the heap/arena locked forever (the lock owner's stack is abandoned)
+extern "C" int mm_malloc_lock_held_by_current_proc();
+extern "C" int mm_arena_lock_held_by_current_proc();
 
 namespace MetaModule
 {
@@ -44,7 +44,9 @@ void abort_rescue_try(const char *reason) {
 		log.flush();
 		return;
 	}
-	if (mm_malloc_lock_held() || mm_arena_lock_held()) {
+	// Only this process's stack is abandoned by the longjmp, so only the locks it holds matter.
+	// Other processes (e.g. on the other core) can be holding these locks at any time.
+	if (mm_malloc_lock_held_by_current_proc() || mm_arena_lock_held_by_current_proc()) {
 		log.str(": allocator lock held, cannot rescue");
 		log.flush();
 		return;

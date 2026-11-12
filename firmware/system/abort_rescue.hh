@@ -49,9 +49,9 @@ struct AbortRescue {
 	bool active = false;
 };
 
-// Called from the plugin abort hook. If the current process has an armed
-// scope and no allocator locks are held, disarms and longjmps (does not
-// return). Returns if rescue is not possible; the caller must halt.
+// Called from the plugin abort hook. It disarms and longjmps (no return)
+// if the current process has an armed scope and holds no allocator locks.
+// If rescue is not possible, it returns and the caller must halt.
 void abort_rescue_try(const char *reason);
 
 #endif

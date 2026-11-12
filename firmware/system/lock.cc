@@ -38,13 +38,18 @@ struct __lock __lock___env_recursive_mutex{};
 // IRQ-disabling treatment as the malloc lock so async threads can allocate
 struct __lock __lock_mm_plugin_arena{};
 
-// Used by abort_rescue: longjmp'ing while an allocator lock is held would
-// leave the heap/arena locked (and the lock's disabled IRQs off) forever
-int mm_malloc_lock_held() {
-	return __lock___malloc_recursive_mutex.count != 0;
+// True if the process that calls this holds the lock.
+static bool is_held_by_current_proc(struct __lock const &lock) {
+	return lock.count != 0 && lock.proc_id == MetaModule::get_current_proc_id();
 }
-int mm_arena_lock_held() {
-	return __lock_mm_plugin_arena.count != 0;
+
+// Used by abort_rescue: longjmp'ing out of a process while it holds an allocator lock
+// would leave the heap/arena locked (and the lock's disabled IRQs off) forever.
+int mm_malloc_lock_held_by_current_proc() {
+	return is_held_by_current_proc(__lock___malloc_recursive_mutex);
+}
+int mm_arena_lock_held_by_current_proc() {
+	return is_held_by_current_proc(__lock_mm_plugin_arena);
 }
 
 // Used by ReadPatchGuiElements (SGI1 on core 1)
