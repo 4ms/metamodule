@@ -19,6 +19,8 @@ namespace MetaModule::WifiInterface
 /////////////////////////
 
 PatchStorage *patchStorage;
+DoubleBufParamBlock *paramBlocks;
+WifiLiveBlock *liveBlock;
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
 
@@ -169,10 +171,12 @@ void send_heartbeat() {
 
 ////////////////////////////////
 
-void init(PatchStorage *storage) {
+void init(PatchStorage *storage, DoubleBufParamBlock *param_blocks, WifiLiveBlock *live_block) {
 	pr_info("Initializing Wifi\n");
 
 	patchStorage = storage;
+	paramBlocks = param_blocks;
+	liveBlock = live_block;
 }
 
 void start() {
@@ -241,6 +245,34 @@ void handle_management_channel(std::span<uint8_t> payload) {
 	}
 }
 
+// Status with the playing patch's per-module loads. Also keeps the A7 measuring them.
+flatbuffers::Offset<Status> CreateStatusWithModules(flatbuffers::FlatBufferBuilder &fbb, MetaParams const &metaparams) {
+	liveBlock->request_detail();
+
+	auto live = liveBlock->read();
+	if (!live)
+		return CreateStatus(fbb, metaparams.audio_load, metaparams.patch_playing);
+
+	auto name = fbb.CreateString(std::string_view{live->patch_name});
+	auto num_modules = std::min<size_t>(live->num_modules, live->modules.size());
+	auto loads = fbb.CreateVector(live->modules.data(), num_modules);
+	auto num_cores = std::min<size_t>(live->num_module_cores, live->module_cores.size());
+	auto cores = fbb.CreateVector(live->module_cores.data(), num_cores);
+	auto core_loads = fbb.CreateVector(live->core_loads.data(), live->core_loads.size());
+
+	return CreateStatus(fbb,
+						metaparams.audio_load,
+						metaparams.patch_playing,
+						false,
+						name,
+						loads,
+						live->overhead,
+						live->modules_valid && live->playing,
+						cores,
+						core_loads,
+						live->fingerprint);
+}
+
 void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 
 	auto sendResponse = [destination](auto payload) {
@@ -288,7 +320,12 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				auto timestamp = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
 
 				if (timestamp != 0) {
-					auto result = CreateResult(fbb, true);
+					// Ask the GUI (A7) to load and play the patch that was just saved
+					bool load = uploadPatchMessage->load_after_save();
+					if (load)
+						liveBlock->request_load(PatchLocation{filename, *thisVolume});
+
+					auto result = CreateResult(fbb, true, 0, load);
 					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 					fbb.Finish(message);
 
@@ -304,6 +341,18 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 				fbb.Finish(message);
 			}
+
+			sendResponse(fbb.GetBufferSpan());
+
+		} else if (auto statusMessage = message->content_as_Status(); statusMessage) {
+			// Audio updates the two blocks alternately, so block 0 is at most one block old
+			auto const &metaparams = (*paramBlocks)[0].metaparams;
+
+			flatbuffers::FlatBufferBuilder fbb;
+			auto status = statusMessage->include_modules() ? CreateStatusWithModules(fbb, metaparams) :
+															 CreateStatus(fbb, metaparams.audio_load, metaparams.patch_playing);
+			auto message = CreateMessage(fbb, AnyMessage_Status, status.Union());
+			fbb.Finish(message);
 
 			sendResponse(fbb.GetBufferSpan());
 

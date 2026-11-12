@@ -7,6 +7,7 @@
 #include "patch_file/patch_dir_list.hh"
 #include "sync_params.hh"
 #include "usb/dev_drive_block.hh"
+#include "wifi/wifi_live_block.hh"
 #include "usb/usb_connection_status_block.hh"
 #include <array>
 
@@ -57,6 +58,7 @@ __attribute__((section(".ddma"))) DeviceSettingsMessage icc_device_settings_mess
 __attribute__((section(".ddma"))) UsbConnectionStatusBlock usb_connection_status;
 
 __attribute__((section(".ddma"))) DevDriveBlock dev_drive_block;
+__attribute__((section(".ddma"))) WifiLiveBlock wifi_live;
 
 void init() {
 	for (auto &block : param_blocks) {

@@ -356,9 +356,19 @@ struct PatchPlayLoader {
 	}
 
 	// Per-module live measurement costs a few percent CPU, so it only runs
-	// while a page displaying it is open
+	// while a page displaying it is open, or a Wi-Fi client asks for it
 	void set_live_load_detail(bool on) {
-		player_.live_load.set_detailed(on);
+		live_load_detail_gui_ = on;
+		player_.live_load.set_detailed(live_load_detail_gui_ || live_load_detail_remote_);
+	}
+
+	void set_live_load_detail_remote(bool on) {
+		live_load_detail_remote_ = on;
+		player_.live_load.set_detailed(live_load_detail_gui_ || live_load_detail_remote_);
+	}
+
+	bool is_live_load_detailed() const {
+		return player_.live_load.detailed();
 	}
 
 	//
@@ -398,6 +408,9 @@ struct PatchPlayLoader {
 	}
 
 private:
+	bool live_load_detail_gui_ = false;
+	bool live_load_detail_remote_ = false;
+
 	// patch_playloader_load.cc
 	Result load_patch(bool start_audio_immediately = true);
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "fs/volumes.hh"
 #include "util/static_string.hh"
+#include <cstdint>
 
 namespace MetaModule
 {

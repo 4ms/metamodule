@@ -8,6 +8,7 @@
 #include "params/metaparams.hh"
 #include "patch/patch_data.hh"
 #include "patch_file/open_patch_manager.hh"
+#include "patch_play/live_overhead.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/view_settings.hh"
 #include <algorithm>
@@ -424,30 +425,13 @@ private:
 		if constexpr (NumCores > 1)
 			cable_ppm[1] = live.core2_cables * 1000u;
 
-		// Each core's modules + cables: this is the part the cores run in parallel
-		std::array<uint32_t, NumCores> core_ppm{};
-		for (auto core = 0u; core < NumCores; core++) {
-			core_ppm[core] = cable_ppm[core];
-			for (auto module_id = 1u; module_id < patch->module_cores.size(); module_id++) {
-				if (patch->module_cores[module_id] == core)
-					core_ppm[core] += live_ppm(module_id);
-			}
-		}
-		auto max_core_ppm = *std::ranges::max_element(core_ppm);
+		auto overhead = live_overhead(live, patch->module_cores);
+		overhead_ppm[MappingsPart] = overhead.mappings;
+		overhead_ppm[MidiPart] = overhead.midi;
+		overhead_ppm[SyncPart] = overhead.sync;
+		overhead_ppm[OtherPart] = overhead.other;
 
-		// Core 1's time outside the parallel part. Core 1 waiting for Core 2 (Sync) already
-		// shows as the gap after Core 1's bar, so only the waiting beyond that is counted.
-		auto core1_parallel_ppm = core_ppm[0] + (live.sync + live.sync2) * 1000u;
-		overhead_ppm[MappingsPart] = live.mappings * 1000u;
-		overhead_ppm[MidiPart] = live.midi * 1000u;
-		overhead_ppm[SyncPart] = core1_parallel_ppm > max_core_ppm ? core1_parallel_ppm - max_core_ppm : 0;
-		overhead_ppm[OtherPart] = live.overhead * 1000u;
-
-		uint32_t overhead_total_ppm = 0;
-		for (auto ppm : overhead_ppm)
-			overhead_total_ppm += ppm;
-
-		set_bar_layout(max_core_ppm, overhead_total_ppm);
+		set_bar_layout(overhead.max_core, overhead.total());
 
 		for (auto core = 0u; core < NumCores; core++) {
 			for (auto *box : boxes[core])
@@ -462,7 +446,7 @@ private:
 		for (auto part = 0u; part < NumOverheadParts; part++)
 			set_box_width(overhead_boxes[part], overhead_ppm[part]);
 
-		lv_label_set_text_fmt(overhead_label, "Overhead: %u%%", (unsigned)std::round(overhead_total_ppm / 10000.f));
+		lv_label_set_text_fmt(overhead_label, "Overhead: %u%%", (unsigned)std::round(overhead.total() / 10000.f));
 		lv_show(overhead_cont);
 
 		place_full_core_markers();
