@@ -43,10 +43,21 @@ set(entry_sym "_Z${init_name_len}init_${BRAND}PN4rack6plugin6PluginE")
 # already define init_<BRAND>() need no rename.
 execute_process(COMMAND nm -g ${ARCHIVE} OUTPUT_VARIABLE archive_syms COMMAND_ERROR_IS_FATAL ANY)
 
+# A plugin may define both init() (for hardware) and init_<BRAND>() (for the
+# simulator). Renaming init() then would clash with the existing init_<BRAND>.
+# (macOS symbol names have an extra leading underscore, hence the `_?`)
+if (archive_syms MATCHES "T _?${entry_sym}([\r\n]|$)")
+	set(has_entry_sym TRUE)
+else()
+	set(has_entry_sym FALSE)
+endif()
+
 if (HOST_APPLE)
 	# macOS symbol names have a leading underscore
 	set(alias_args "")
-	if (archive_syms MATCHES "T __Z4initPN4rack6plugin6PluginE")
+	if (has_entry_sym)
+		# Already defines init_<BRAND>: nothing to rename
+	elseif (archive_syms MATCHES "T __Z4initPN4rack6plugin6PluginE")
 		set(alias_args -Wl,-alias,__Z4initPN4rack6plugin6PluginE,_${entry_sym})
 	elseif (archive_syms MATCHES "T _init([\r\n]|$)")
 		set(alias_args -Wl,-alias,_init,_${entry_sym})
@@ -69,7 +80,9 @@ if (HOST_APPLE)
 	)
 else()
 	set(rename_args "")
-	if (archive_syms MATCHES "T _Z4initPN4rack6plugin6PluginE")
+	if (has_entry_sym)
+		# Already defines init_<BRAND>: nothing to rename
+	elseif (archive_syms MATCHES "T _Z4initPN4rack6plugin6PluginE")
 		set(rename_args --redefine-sym _Z4initPN4rack6plugin6PluginE=${entry_sym})
 	elseif (archive_syms MATCHES "T init([\r\n]|$)")
 		set(rename_args --redefine-sym init=${entry_sym})
