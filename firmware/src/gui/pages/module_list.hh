@@ -420,7 +420,7 @@ private:
 
 	// Last two items of the brand/tag lists: a divider and "Load more plugins"
 	static std::string load_plugins_item() {
-		return "________________\n" + Gui::blue_text("Load more plugins " LV_SYMBOL_RIGHT);
+		return "________________\n" + Gui::blue_text("Load more plugins");
 	}
 	static constexpr unsigned SystemMenuPluginsTab = 1;
 
