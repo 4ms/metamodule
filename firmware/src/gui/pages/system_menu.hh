@@ -46,12 +46,20 @@ struct SystemMenuPage : PageBase {
 	void prepare_focus() final {
 		lv_hide(ui_FWUpdateSpinner);
 		lv_tabview_set_act(ui_SystemMenuTabView, 0, LV_ANIM_OFF);
+		active_tab = &info_tab;
 		info_tab.prepare_focus(group);
 
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, tab_bar);
 		lv_group_focus_obj(tab_bar);
 		lv_group_set_editing(group, true);
+
+		// Open directly to a tab (e.g. Plugins, from the module list)
+		if (auto tab = args.system_menu_tab; tab && *tab < tabs.size()) {
+			lv_tabview_set_act(ui_SystemMenuTabView, *tab, LV_ANIM_OFF);
+			lv_btnmatrix_set_selected_btn(tab_bar, *tab);
+			tab_click();
+		}
 
 		prefs_tab.set_patch_clicked_callback([this](std::string_view path) {
 			auto [filename, vol] = split_volume(path);
@@ -81,8 +89,9 @@ struct SystemMenuPage : PageBase {
 		if (gui_state.back_button.is_just_released()) {
 			if (!active_tab->consume_back_event()) {
 
-				if (lv_group_get_focused(group) == tab_bar) {
-					page_list.request_last_page();
+				// When opened directly to a tab, back returns to the page that opened it
+				if (lv_group_get_focused(group) == tab_bar || args.system_menu_tab) {
+					leave_page();
 				} else {
 					lv_group_remove_all_objs(group);
 					lv_group_add_obj(group, tab_bar);
@@ -102,6 +111,15 @@ struct SystemMenuPage : PageBase {
 	}
 
 private:
+	void leave_page() {
+		// (Un)loading a plugin that the open patch uses closes the patch,
+		// so we can't go back to a page that edits it
+		if (!patches.get_view_patch())
+			page_list.remove_history_matching_args({});
+
+		page_list.request_last_page();
+	}
+
 	static void tab_cb(lv_event_t *event) {
 		auto page = static_cast<SystemMenuPage *>(event->user_data);
 		if (!page)
