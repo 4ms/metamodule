@@ -252,17 +252,16 @@ private:
 	}
 
 	// Loading or unloading a plugin that the playing patch uses closes the patch.
-	// Returns a message warning about that, or an empty string if it won't happen.
+	// Returns a message warning that unsaved changes will be lost, or an empty
+	// string if the patch won't be closed or has no unsaved changes.
 	std::string patch_close_warning(std::string_view action, std::string_view plugin_name) {
 		auto patch = patches.get_playing_patch();
-		if (!patch || !play_loader.playing_patch_uses_brand(plugin_name))
+		if (!patch || patches.get_playing_patch_modification_count() == 0 ||
+			!play_loader.playing_patch_uses_brand(plugin_name))
 			return "";
 
-		std::string msg = std::string(action) + " " + std::string(plugin_name) + " will stop and close the patch " +
-						  std::string(patch->patch_name) + ".";
-		if (patches.get_playing_patch_modification_count() > 0)
-			msg += " Its unsaved changes will be lost.";
-		return msg;
+		return std::string(action) + " " + std::string(plugin_name) + " will close the patch " +
+			   std::string(patch->patch_name) + ". Its unsaved changes will be lost.";
 	}
 
 	void unload_plugin(std::string_view plugin_name) {
