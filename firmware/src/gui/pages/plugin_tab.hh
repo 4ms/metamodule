@@ -107,6 +107,7 @@ struct PluginTab : SystemMenuTab {
 
 		is_loading_all = false;
 		stopping_load_all = false;
+		unloaded_plugins_remain = false;
 	}
 
 	bool consume_back_event() override {
@@ -122,6 +123,11 @@ struct PluginTab : SystemMenuTab {
 			// Stop after the plugin currently loading finishes, then end_loading_all() cleans up
 			if (!stopping_load_all) {
 				stopping_load_all = true;
+				// Other versions of the plugin now loading would be skipped anyway
+				auto const *found_plugins = plugin_manager.found_plugin_list();
+				unloaded_plugins_remain = std::ranges::any_of(plugins_to_load, [&](auto const &item) {
+					return std::string_view((*found_plugins)[item.second].plugin_name) != last_loaded_name;
+				});
 				plugins_to_load.clear();
 				lv_label_set_text_fmt(load_in_progress_label, "Stopping after %s...", last_loaded_name.c_str());
 			}
@@ -501,15 +507,23 @@ private:
 	void end_loading_all() {
 		lv_hide(ui_PluginTabSpinner);
 		lv_hide(load_all_popup);
-		lv_show(ui_PluginScanButton);
 
 		is_loading_all = false;
 
 		lv_group_activate(group);
 		reset_group();
-		lv_hide(load_all_found_button);
+
+		if (stopping_load_all && unloaded_plugins_remain) {
+			// The plugins not yet loaded stay in the found list, with Load All still available.
+			// Scan stays hidden while the found list is showing, else a rescan would add duplicates
+			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, 0));
+		} else {
+			lv_show(ui_PluginScanButton);
+			lv_hide(load_all_found_button);
+		}
 		notify_queue.put({stopping_load_all ? "Stopped loading plugins" : "Done loading all plugins"});
 		stopping_load_all = false;
+		unloaded_plugins_remain = false;
 	}
 
 	void start_loading_all() {
@@ -588,6 +602,7 @@ private:
 
 	bool is_loading_all = false;
 	bool stopping_load_all = false;
+	bool unloaded_plugins_remain = false;
 	// bool loading_done = false;
 	std::deque<std::pair<lv_obj_t *, uint32_t>> plugins_to_load;
 
