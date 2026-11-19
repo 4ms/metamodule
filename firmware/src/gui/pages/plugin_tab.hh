@@ -262,6 +262,8 @@ private:
 		show_ramdisk_free();
 	}
 
+	// Appends to the found list, so the list must be empty first.
+	// That's why the Scan button is only shown while the found list is empty
 	void display_found_plugins() {
 		auto *found_plugins = plugin_manager.found_plugin_list();
 		std::string last_pluginname = "";
