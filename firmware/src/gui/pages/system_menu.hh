@@ -98,6 +98,11 @@ struct SystemMenuPage : PageBase {
 			poll_patch_file_changed();
 	}
 
+	// Leaving would lose unsaved preferences and the selected tab
+	bool can_leave_for_screensaver() final {
+		return false;
+	}
+
 	void blur() final {
 	}
 

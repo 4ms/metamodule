@@ -1,6 +1,7 @@
 #pragma once
 #include "fs/helpers.hh"
 #include "gui/elements/screensaver.hh"
+#include "gui/helpers/selected_display.hh"
 #include "gui/knobset_button.hh"
 #include "gui/notify/clip_indicators.hh"
 #include "gui/notify/display.hh"
@@ -62,6 +63,10 @@ class PageManager {
 	JackMapViewPage page_jackmap{info};
 	MidiMapViewPage page_midimap{info};
 	FullscreenGraphicPage page_fullscreen_graphic{info};
+
+	std::optional<PatchLocHash> checked_selected_display_patch{};
+	// The selected display was already being shown when the screensaver started
+	bool screensaver_in_place = false;
 
 	enum class MidiPCLoadState { Idle, Requesting, Loading };
 	PatchLocation midi_pc_target_loc{};
@@ -130,11 +135,21 @@ public:
 		handle_back_event();
 
 		if (auto newpage = page_list.get_requested_page()) {
-			if (newpage->page) {
+			bool screensaver_page =
+				newpage->page == &page_fullscreen_graphic && newpage->args->screensaver_mode.value_or(false);
+
+			if (screensaver_page && screensaver.take_display_wake()) {
+				// The screensaver was woken before its page was shown: stay on this page
+				page_list.cancel_requested_page();
+
+			} else if (newpage->page) {
 				cur_page->blur();
 				cur_page = newpage->page;
 				// debug_print_args(newpage);
 				cur_page->focus(newpage->args);
+
+				if (screensaver_page)
+					screensaver.enter_display_mode();
 			}
 		} else {
 			handle_dialog_popups();
@@ -146,7 +161,9 @@ public:
 
 		handle_write_settings();
 
-		screensaver.update();
+		check_selected_display();
+
+		update_screensaver_timeout();
 	}
 
 	// Blur the current page and jump to MainMenu if we're on a page related to a patch.
@@ -384,6 +401,106 @@ public:
 				}
 			}
 		}
+	}
+
+	// Warn once when a patch starts playing if its selected display can't be found,
+	// e.g. a patch made in VCV Rack that refers to a display this module doesn't have here
+	void check_selected_display() {
+		auto patch = info.open_patch_manager.get_playing_patch();
+		if (!patch || info.patch_playloader.is_loading_patch())
+			return;
+
+		auto loc_hash = info.open_patch_manager.get_playing_patch_loc_hash();
+		if (checked_selected_display_patch == loc_hash)
+			return;
+		checked_selected_display_patch = loc_hash;
+
+		if (auto ss = patch->find_selected_display(); ss && !selected_display_light_idx(*patch)) {
+			info.notify_queue.put({"Selected display not found on " + module_display_name(*patch, ss->module_id) +
+									   ": the screensaver will be blank",
+								   Notification::Priority::Info,
+								   3000});
+		}
+	}
+
+	void update_screensaver_timeout() {
+		// The display screensaver was woken: go back to the page we were on
+		if (screensaver.take_display_wake()) {
+			if (cur_page == &page_fullscreen_graphic && !screensaver_in_place)
+				page_list.request_last_page();
+			screensaver_in_place = false;
+			return;
+		}
+
+		// The patch stopped while its display was showing, or it's been showing for a long time:
+		// a still display, or a still part of one, would burn in, so go blank
+		if (screensaver.in_display_mode() && cur_page == &page_fullscreen_graphic &&
+			(!info.patch_playloader.is_playing() || screensaver.display_timed_out()))
+		{
+			if (!screensaver_in_place)
+				page_list.request_last_page();
+			screensaver_in_place = false;
+			screensaver.show_blank();
+			return;
+		}
+
+		// Something else took us off the display (e.g. the patch was unloaded)
+		if (screensaver.in_display_mode() && cur_page != &page_fullscreen_graphic) {
+			screensaver.reset_display_mode();
+			screensaver_in_place = false;
+		}
+
+		// Wait for a requested patch load: until then the playing patch is the old one
+		if (info.patch_playloader.is_loading_patch())
+			return;
+
+		// Let a requested page be shown first, so it's the one we return to on waking
+		if (page_list.has_requested_page())
+			return;
+
+		if (screensaver.is_active() || !screensaver.timed_out())
+			return;
+
+		if (auto args = selected_display_args()) {
+			// Already showing this display: keep it as it is, rather than redrawing it from scratch
+			if (is_showing_display(*args)) {
+				screensaver_in_place = true;
+				screensaver.enter_display_mode();
+				return;
+			}
+
+			page_list.request_new_page(PageId::FullscreenGraphic, *args);
+			// Swallow input until the page change lands, then enter_display_mode() is called
+			screensaver.enter_display_mode();
+		} else {
+			screensaver.show_blank();
+		}
+	}
+
+	bool is_showing_display(PageArguments const &args) const {
+		auto const &cur = page_fullscreen_graphic.args;
+		return cur_page == &page_fullscreen_graphic && cur.patch_loc_hash == args.patch_loc_hash &&
+			   cur.module_id == args.module_id && cur.element_indices.has_value() && args.element_indices.has_value() &&
+			   cur.element_indices->light_idx == args.element_indices->light_idx;
+	}
+
+	std::optional<PageArguments> selected_display_args() {
+		// Don't navigate away from a dialog, the keyboard, or a page that's in use
+		if (file_browser.is_visible() || file_save_dialog.is_visible() || missing_plugins.is_active())
+			return std::nullopt;
+
+		if (lv_obj_is_visible(ui_Keyboard) || !cur_page->can_leave_for_screensaver())
+			return std::nullopt;
+
+		// A stopped patch's display doesn't change, so it would burn in: go blank instead
+		if (!info.patch_playloader.is_playing())
+			return std::nullopt;
+
+		auto patch = info.open_patch_manager.get_playing_patch();
+		if (!patch)
+			return std::nullopt;
+
+		return selected_display_page_args(*patch, info.open_patch_manager.get_playing_patch_loc_hash());
 	}
 
 	void handle_back_event() {

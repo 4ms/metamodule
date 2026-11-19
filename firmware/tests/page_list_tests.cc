@@ -175,3 +175,75 @@ TEST_CASE("Push arguments") {
 	CHECK(pwa->args->patch_loc == std::nullopt);
 	CHECK(pwa->args->module_id == std::nullopt);
 }
+
+TEST_CASE("has_requested_page reports a pending request") {
+	PageBase pagea{PageId::PatchSel};
+	PageBase pageb{PageId::PatchView};
+	PageList page_list;
+	page_list.register_page(&pagea, pagea.id);
+	page_list.register_page(&pageb, pageb.id);
+
+	page_list.request_initial_page(pagea.id, {});
+	CHECK(page_list.has_requested_page());
+	page_list.get_requested_page();
+	CHECK_FALSE(page_list.has_requested_page());
+
+	page_list.request_new_page(pageb.id, {});
+	CHECK(page_list.has_requested_page());
+}
+
+TEST_CASE("cancel_requested_page stays on the current page") {
+	PageBase pagea{PageId::PatchSel};
+	PageBase pageb{PageId::PatchView};
+	PageBase pagec{PageId::FullscreenGraphic};
+	PageList page_list;
+	page_list.register_page(&pagea, pagea.id);
+	page_list.register_page(&pageb, pageb.id);
+	page_list.register_page(&pagec, pagec.id);
+
+	page_list.request_initial_page(pagea.id, {});
+	page_list.get_requested_page();
+	page_list.request_new_page(pageb.id, {});
+	page_list.get_requested_page();
+
+	// Request c, but cancel it as it's about to be shown
+	page_list.request_new_page(pagec.id, {.screensaver_mode = true});
+	auto pwa = page_list.get_requested_page();
+	REQUIRE(pwa);
+	CHECK(pwa->page == &pagec);
+
+	page_list.cancel_requested_page();
+	CHECK(page_list.current_page() == PageId::PatchView);
+	CHECK_FALSE(page_list.has_requested_page());
+
+	// History is as it was before requesting c
+	CHECK(page_list.request_last_page());
+	pwa = page_list.get_requested_page();
+	REQUIRE(pwa);
+	CHECK(pwa->page == &pagea);
+}
+
+TEST_CASE("cancel_requested_page undoes a request that popped history") {
+	PageBase pagea{PageId::PatchSel};
+	PageBase pageb{PageId::PatchView};
+	PageList page_list;
+	page_list.register_page(&pagea, pagea.id);
+	page_list.register_page(&pageb, pageb.id);
+
+	page_list.request_initial_page(pagea.id, {});
+	page_list.get_requested_page();
+	page_list.request_new_page(pageb.id, {});
+	page_list.get_requested_page();
+
+	// Requesting the previous page pops it from history
+	page_list.request_new_page(pagea.id, {});
+	page_list.get_requested_page();
+
+	page_list.cancel_requested_page();
+	CHECK(page_list.current_page() == PageId::PatchView);
+
+	CHECK(page_list.request_last_page());
+	auto pwa = page_list.get_requested_page();
+	REQUIRE(pwa);
+	CHECK(pwa->page == &pagea);
+}

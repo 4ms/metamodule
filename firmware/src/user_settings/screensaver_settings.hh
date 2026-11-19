@@ -19,6 +19,7 @@ struct ScreensaverSettings {
 	};
 	static constexpr std::array ValidOptions = {
 		Option{defaultTimeout, "Never"},
+		Option{10'000, "10 Sec"},
 		Option{minToMs(0.5), "30 Sec"},
 		Option{minToMs(1), "1 Min"},
 		Option{minToMs(5), "5 Min"},

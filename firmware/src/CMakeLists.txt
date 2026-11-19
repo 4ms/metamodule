@@ -144,6 +144,7 @@ add_executable(
   ${FWDIR}/src/gui/pages/module_view/element_layout.cc
   ${FWDIR}/src/gui/pages/module_view/draw_module.cc
   ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
+  ${FWDIR}/src/gui/pages/module_view/selected_display.cc
   ${FWDIR}/src/gui/pages/tags.cc
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
@@ -239,6 +240,7 @@ set_source_files_properties(
   ${FWDIR}/src/gui/pages/module_view/draw_module.cc
   ${FWDIR}/src/gui/pages/module_view/element_roller.cc
   ${FWDIR}/src/gui/pages/module_view/quick_assign.cc
+  ${FWDIR}/src/gui/pages/module_view/selected_display.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/gui/fonts/ttf.cc
   ${FWDIR}/src/gui/pages/file_browser/file_browser_adaptor.cc
