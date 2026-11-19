@@ -106,6 +106,7 @@ struct PluginTab : SystemMenuTab {
 		}
 
 		is_loading_all = false;
+		stopping_load_all = false;
 	}
 
 	bool consume_back_event() override {
@@ -118,9 +119,13 @@ struct PluginTab : SystemMenuTab {
 			return true;
 		}
 		if (is_loading_all) {
-			is_loading_all = false;
-			lv_hide(load_all_popup);
-			return false;
+			// Stop after the plugin currently loading finishes, then end_loading_all() cleans up
+			if (!stopping_load_all) {
+				stopping_load_all = true;
+				plugins_to_load.clear();
+				lv_label_set_text_fmt(load_in_progress_label, "Stopping after %s...", last_loaded_name.c_str());
+			}
+			return true;
 		}
 		// Loading only progresses while this tab is active, so don't let Back leave mid-load
 		if (load_in_progress_obj) {
@@ -503,7 +508,8 @@ private:
 		lv_group_activate(group);
 		reset_group();
 		lv_hide(load_all_found_button);
-		notify_queue.put({"Done loading all plugins"});
+		notify_queue.put({stopping_load_all ? "Stopped loading plugins" : "Done loading all plugins"});
+		stopping_load_all = false;
 	}
 
 	void start_loading_all() {
@@ -581,6 +587,7 @@ private:
 	lv_obj_t *load_all_found_button;
 
 	bool is_loading_all = false;
+	bool stopping_load_all = false;
 	// bool loading_done = false;
 	std::deque<std::pair<lv_obj_t *, uint32_t>> plugins_to_load;
 
