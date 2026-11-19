@@ -85,6 +85,8 @@ struct PluginTab : SystemMenuTab {
 		populate_loaded_list();
 
 		clear_found_list();
+		// The found list items were just deleted, so drop any pointer into it
+		load_in_progress_obj = nullptr;
 		reset_group();
 		lv_hide(load_all_popup);
 		lv_hide(load_all_found_button);
@@ -119,6 +121,11 @@ struct PluginTab : SystemMenuTab {
 			is_loading_all = false;
 			lv_hide(load_all_popup);
 			return false;
+		}
+		// Loading only progresses while this tab is active, so don't let Back leave mid-load
+		if (load_in_progress_obj) {
+			notify_queue.put({"Plugin is still loading..."});
+			return true;
 		}
 
 		if (should_write_settings)
@@ -156,6 +163,7 @@ struct PluginTab : SystemMenuTab {
 			notify_queue.put({err, Notification::Priority::Error, 2500});
 
 			last_loaded_name = "";
+			load_in_progress_obj = nullptr;
 			loading_done = true;
 		}
 
