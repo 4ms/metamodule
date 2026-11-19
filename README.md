@@ -48,5 +48,7 @@ For information about building and using these components, please follow the sep
 
 ## Contributing
 
+If you would like to report a bug or contribute to the firmware or simulator, please see the [Contributing Guide](./CONTRIBUTING.md).
+
 If you would like to create plugins of your own VCV modules for the MetaModule platform, please see the [Plugin Guide](./docs/Plugins.md).
 
