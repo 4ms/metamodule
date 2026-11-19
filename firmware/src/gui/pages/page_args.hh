@@ -7,6 +7,9 @@
 namespace MetaModule
 {
 
+// Tabs of the System Menu, in the order they appear
+enum class SystemMenuTabId : unsigned { Info, Plugins, Prefs, System, FirmwareUpdate, NumTabs };
+
 struct PageArguments {
 	std::optional<PatchLocation> patch_loc{};
 	std::optional<PatchLocHash> patch_loc_hash{};
@@ -18,7 +21,7 @@ struct PageArguments {
 	std::optional<bool> detail_mode{};
 	std::optional<std::pair<float, float>> element_mm{};
 	std::optional<bool> replace_module{};
-	std::optional<unsigned> system_menu_tab{};
+	std::optional<SystemMenuTabId> system_menu_tab{};
 
 	bool operator==(PageArguments const &that) const = default;
 };

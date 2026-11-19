@@ -55,9 +55,10 @@ struct SystemMenuPage : PageBase {
 		lv_group_set_editing(group, true);
 
 		// Open directly to a tab (e.g. Plugins, from the module list)
-		if (auto tab = args.system_menu_tab; tab && *tab < tabs.size()) {
-			lv_tabview_set_act(ui_SystemMenuTabView, *tab, LV_ANIM_OFF);
-			lv_btnmatrix_set_selected_btn(tab_bar, *tab);
+		if (auto tab = args.system_menu_tab; tab && *tab < SystemMenuTabId::NumTabs) {
+			auto tab_idx = static_cast<unsigned>(*tab);
+			lv_tabview_set_act(ui_SystemMenuTabView, tab_idx, LV_ANIM_OFF);
+			lv_btnmatrix_set_selected_btn(tab_bar, tab_idx);
 			tab_click();
 		}
 
@@ -142,7 +143,9 @@ private:
 	PrefsTab prefs_tab;
 	SystemTab system_tab;
 	FirmwareUpdateTab fwupdate_tab;
-	std::array<SystemMenuTab *, 5> tabs{&info_tab, &plugin_tab, &prefs_tab, &system_tab, &fwupdate_tab};
+	// Same order as SystemMenuTabId
+	std::array<SystemMenuTab *, static_cast<unsigned>(SystemMenuTabId::NumTabs)> tabs{
+		&info_tab, &plugin_tab, &prefs_tab, &system_tab, &fwupdate_tab};
 	SystemMenuTab *active_tab = &info_tab;
 	ReloadPatch patch_reloader;
 	PatchSwitcher patch_switcher;

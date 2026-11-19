@@ -338,7 +338,7 @@ private:
 
 		if (page->view == View::CategoryRoller) {
 			if (page->is_load_plugins_item(lv_roller_get_selected(event->target))) {
-				page->load_page(PageId::SystemMenu, {.system_menu_tab = SystemMenuPluginsTab});
+				page->load_page(PageId::SystemMenu, {.system_menu_tab = SystemMenuTabId::Plugins});
 
 			} else if (page->sort == Sort::Brand) {
 				auto idx = lv_roller_get_selected(event->target);
@@ -422,7 +422,6 @@ private:
 	static std::string load_plugins_item() {
 		return "________________\n" + Gui::blue_text("Load more plugins");
 	}
-	static constexpr unsigned SystemMenuPluginsTab = 1;
 
 	static bool is_load_plugins_item(unsigned idx) {
 		return idx + 2 >= lv_roller_get_option_cnt(ui_ModuleListRoller);
