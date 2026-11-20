@@ -123,10 +123,10 @@ struct PluginTab : SystemMenuTab {
 			// Stop after the plugin currently loading finishes, then end_loading_all() cleans up
 			if (!stopping_load_all) {
 				stopping_load_all = true;
-				// Other versions of the plugin now loading would be skipped anyway
-				auto const *found_plugins = plugin_manager.found_plugin_list();
+				// Other versions of the plugin now loading would be skipped anyway.
+				// Not found_plugin_list(): it resets the loader to Idle, which would abort the load in progress
 				unloaded_plugins_remain = std::ranges::any_of(plugins_to_load, [&](auto const &item) {
-					return std::string_view((*found_plugins)[item.second].plugin_name) != last_loaded_name;
+					return std::string_view(plugin_manager.plugin_name(item.second)) != last_loaded_name;
 				});
 				plugins_to_load.clear();
 				lv_label_set_text_fmt(load_in_progress_label, "Stopping after %s...", last_loaded_name.c_str());
