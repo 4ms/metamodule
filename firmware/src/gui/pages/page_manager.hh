@@ -26,6 +26,7 @@
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"
 #include "gui/pages/system_menu.hh"
+#include "gui/wifi_live_publisher.hh"
 
 #include "vcv_plugin/internal/osdialog-mm.hh"
 
@@ -62,6 +63,9 @@ class PageManager {
 	JackMapViewPage page_jackmap{info};
 	MidiMapViewPage page_midimap{info};
 	FullscreenGraphicPage page_fullscreen_graphic{info};
+
+	WifiLivePublisher wifi_live;
+	PatchLocation wifi_target_loc{};
 
 	enum class MidiPCLoadState { Idle, Requesting, Loading };
 	PatchLocation midi_pc_target_loc{};
@@ -102,7 +106,8 @@ public:
 			   .missing_plugins = missing_plugins}
 		, screensaver{screensaver}
 		, patch_reloader{patch_storage, open_patch_manager, settings.filesystem}
-		, patch_switch{patch_reloader, info.patch_playloader, missing_plugins} {
+		, patch_switch{patch_reloader, info.patch_playloader, missing_plugins}
+		, wifi_live{open_patch_manager, patch_playloader} {
 
 		// Register file browser with VCV to support osdialog/async_dialog_filebrowser
 		register_file_browser_vcv(file_browser, file_save_dialog);
@@ -119,11 +124,19 @@ public:
 		page_list.request_initial_page(id, args);
 	}
 
+	void set_wifi_live_block(WifiLiveBlock *block) {
+		wifi_live.set_block(block);
+	}
+
 	void update_current_page() {
 
 		handle_knobset_change();
 
 		handle_midi_pc_patch_load();
+
+		wifi_live.update(lv_tick_get());
+
+		handle_wifi_patch_load();
 
 		update_screensaver();
 
@@ -371,6 +384,32 @@ public:
 				}
 			}
 			pc.num = -1;
+		}
+	}
+
+	// Load and play a patch sent over Wi-Fi with "load after save" (same as MIDI PC patch load)
+	void handle_wifi_patch_load() {
+		auto loc = wifi_live.take_load_request();
+		if (!loc)
+			return;
+
+		auto &patches = info.open_patch_manager;
+		auto playing = patches.get_playing_patch() ? std::optional{patches.get_playing_patch_loc()} : std::nullopt;
+		if (!needs_wifi_load(*loc, playing))
+			return;
+
+		wifi_target_loc = *loc;
+
+		auto result = patch_switch.jump_to_patch(wifi_target_loc, [this]() {
+			gui_state.force_redraw_patch = true;
+			page_list.request_new_page_no_history(PageId::PatchView,
+												  {.patch_loc_hash = PatchLocHash{wifi_target_loc}});
+			info.patch_playloader.request_load_view_patch();
+		});
+
+		if (!result.success) {
+			info.notify_queue.put(
+				{"Wi-Fi: error loading patch: " + result.error_string, Notification::Priority::Error, 2000});
 		}
 	}
 

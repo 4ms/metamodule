@@ -72,6 +72,8 @@ extern "C" void aux_core_main() {
 		  plugin_manager,
 		  ramdisk};
 
+	ui.set_wifi_live_block(SharedMemoryS::ptrs.wifi_live);
+
 	auto usb_role_mode = ui.get_settings().usb_role_mode;
 	if (usb_role_mode != UsbRoleMode::Auto) {
 		while (!DeviceSettingsProxy::send_role_mode(usb_role_mode))
