@@ -134,6 +134,8 @@ public:
 		return plugin_file_loader.plugin_name(idx);
 	}
 
+	// Also resets the loader to Idle, which aborts a plugin load in progress.
+	// While loading, use plugin_name() instead
 	PluginFileList const *found_plugin_list() {
 		return plugin_file_loader.found_plugin_list();
 	}

@@ -90,6 +90,8 @@ struct PluginTab : SystemMenuTab {
 		populate_loaded_list();
 
 		clear_found_list();
+		// The found list items were just deleted, so drop any pointer into it
+		load_in_progress_obj = nullptr;
 		reset_group();
 		lv_hide(load_all_popup);
 		lv_hide(load_all_found_button);
@@ -109,6 +111,8 @@ struct PluginTab : SystemMenuTab {
 		}
 
 		is_loading_all = false;
+		stopping_load_all = false;
+		unloaded_plugins_remain = false;
 	}
 
 	bool consume_back_event() override {
@@ -121,9 +125,22 @@ struct PluginTab : SystemMenuTab {
 			return true;
 		}
 		if (is_loading_all) {
-			is_loading_all = false;
-			lv_hide(load_all_popup);
-			return false;
+			// Stop after the plugin currently loading finishes, then end_loading_all() cleans up
+			if (!stopping_load_all) {
+				stopping_load_all = true;
+				// Other versions of the plugin now loading would be skipped anyway.
+				unloaded_plugins_remain = std::ranges::any_of(plugins_to_load, [&](auto const &item) {
+					return std::string_view(plugin_manager.plugin_name(item.second)) != last_loaded_name;
+				});
+				plugins_to_load.clear();
+				lv_label_set_text_fmt(load_in_progress_label, "Stopping after %s...", last_loaded_name.c_str());
+			}
+			return true;
+		}
+		// Loading only progresses while this tab is active, so don't let Back leave mid-load
+		if (load_in_progress_obj) {
+			notify_queue.put({"Plugin is still loading..."});
+			return true;
 		}
 
 		if (should_write_settings)
@@ -179,6 +196,7 @@ struct PluginTab : SystemMenuTab {
 			notify_queue.put({err, Notification::Priority::Error, 2500});
 
 			last_loaded_name = "";
+			load_in_progress_obj = nullptr;
 			loading_done = true;
 		}
 
@@ -282,6 +300,8 @@ private:
 		show_ramdisk_free();
 	}
 
+	// Appends to the found list, so the list must be empty first.
+	// That's why the Scan button is only shown while the found list is empty
 	void display_found_plugins() {
 		auto *found_plugins = plugin_manager.found_plugin_list();
 		std::string last_pluginname = "";
@@ -560,14 +580,23 @@ private:
 	void end_loading_all() {
 		lv_hide(ui_PluginTabSpinner);
 		lv_hide(load_all_popup);
-		lv_show(ui_PluginScanButton);
 
 		is_loading_all = false;
 
 		lv_group_activate(group);
 		reset_group();
-		lv_hide(load_all_found_button);
-		notify_queue.put({"Done loading all plugins"});
+
+		if (stopping_load_all && unloaded_plugins_remain) {
+			// The plugins not yet loaded stay in the found list, with Load All still available.
+			// Scan stays hidden while the found list is showing, else a rescan would add duplicates
+			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, 0));
+		} else {
+			lv_show(ui_PluginScanButton);
+			lv_hide(load_all_found_button);
+		}
+		notify_queue.put({stopping_load_all ? "Stopped loading plugins" : "Done loading all plugins"});
+		stopping_load_all = false;
+		unloaded_plugins_remain = false;
 
 		reload_paused_patch();
 	}
@@ -656,6 +685,8 @@ private:
 	lv_obj_t *load_all_found_button;
 
 	bool is_loading_all = false;
+	bool stopping_load_all = false;
+	bool unloaded_plugins_remain = false;
 	// bool loading_done = false;
 	std::deque<std::pair<lv_obj_t *, uint32_t>> plugins_to_load;
 

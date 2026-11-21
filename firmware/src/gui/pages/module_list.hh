@@ -120,9 +120,7 @@ private:
 		if (sel_idx == 1 || sel_idx == 2)
 			sel_idx = 3;
 
-		// Remove last newline
-		if (roller_str.size())
-			roller_str.pop_back();
+		roller_str += load_plugins_item();
 		lv_roller_set_options(ui_ModuleListRoller, roller_str.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_selected(ui_ModuleListRoller, sel_idx, LV_ANIM_OFF);
 		cur_selected = sel_idx;
@@ -167,8 +165,7 @@ private:
 				sel_idx = i + 3; // shift by 1
 			i++;
 		}
-		if (roller_str.size())
-			roller_str.pop_back();
+		roller_str += load_plugins_item();
 		lv_roller_set_options(ui_ModuleListRoller, roller_str.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_selected(ui_ModuleListRoller, sel_idx, LV_ANIM_OFF);
 		cur_selected = sel_idx;
@@ -340,7 +337,10 @@ private:
 			return;
 
 		if (page->view == View::CategoryRoller) {
-			if (page->sort == Sort::Brand) {
+			if (page->is_load_plugins_item(lv_roller_get_selected(event->target))) {
+				page->load_page(PageId::SystemMenu, {.system_menu_tab = SystemMenuTabId::Plugins});
+
+			} else if (page->sort == Sort::Brand) {
 				auto idx = lv_roller_get_selected(event->target);
 				if (idx == 0 || idx == 1) {
 					page->sort = Sort::Tag;
@@ -418,6 +418,15 @@ private:
 
 	static inline unsigned cur_selected = 0;
 
+	// Last two items of the brand/tag lists: a divider and "Load more plugins"
+	static std::string load_plugins_item() {
+		return "________________\n" + Gui::blue_text("Load more plugins");
+	}
+
+	static bool is_load_plugins_item(unsigned idx) {
+		return idx + 2 >= lv_roller_get_option_cnt(ui_ModuleListRoller);
+	}
+
 	static void scroll_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleListPage *>(event->user_data);
 		if (!page)
@@ -441,6 +450,13 @@ private:
 				} else {
 					cur_sel = 3;
 				}
+				lv_roller_set_selected(ui_ModuleListRoller, cur_sel, LV_ANIM_ON);
+			}
+
+			// Skip over the divider above "Load more plugins"
+			auto num_items = lv_roller_get_option_cnt(ui_ModuleListRoller);
+			if (cur_sel + 2 == num_items) {
+				cur_sel = (prev_sel > cur_sel) ? cur_sel - 1 : cur_sel + 1;
 				lv_roller_set_selected(ui_ModuleListRoller, cur_sel, LV_ANIM_ON);
 			}
 			page->cur_selected = cur_sel;
