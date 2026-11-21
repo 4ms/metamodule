@@ -124,7 +124,6 @@ struct PluginTab : SystemMenuTab {
 			if (!stopping_load_all) {
 				stopping_load_all = true;
 				// Other versions of the plugin now loading would be skipped anyway.
-				// Not found_plugin_list(): it resets the loader to Idle, which would abort the load in progress
 				unloaded_plugins_remain = std::ranges::any_of(plugins_to_load, [&](auto const &item) {
 					return std::string_view(plugin_manager.plugin_name(item.second)) != last_loaded_name;
 				});
