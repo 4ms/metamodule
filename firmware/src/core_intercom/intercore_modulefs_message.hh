@@ -2,6 +2,7 @@
 #include "ff.h"
 #include "fs/volumes.hh"
 #include "util/static_string.hh"
+#include <cstdint>
 #include <span>
 #include <string_view>
 #include <variant>
