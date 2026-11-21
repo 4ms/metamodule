@@ -144,7 +144,7 @@ struct PluginTab : SystemMenuTab {
 						lv_obj_del_async(target);
 					}
 				},
-				patch_close_warning("Unloading", plugin_name).c_str(),
+				patch_close_warning(plugin_name).c_str(),
 				"Unload");
 		}
 
@@ -167,6 +167,8 @@ struct PluginTab : SystemMenuTab {
 			lv_hide(ui_PluginTabSpinner);
 			move_found_plugin_to_loaded();
 
+			if (loading_plugin_used_by_patch)
+				loaded_plugin_used_by_patch = true;
 			loading_done = true;
 		}
 
@@ -185,6 +187,8 @@ struct PluginTab : SystemMenuTab {
 
 			lv_show(ui_PluginTabSpinner);
 			load_next();
+		} else if (loading_done) {
+			reload_paused_patch();
 		}
 	}
 
@@ -251,16 +255,16 @@ private:
 		return false;
 	}
 
-	// Loading or unloading a plugin that the playing patch uses closes the patch.
+	// Unloading a plugin that the playing patch uses closes the patch.
 	// Returns a message warning that unsaved changes will be lost, or an empty
 	// string if the patch won't be closed or has no unsaved changes.
-	std::string patch_close_warning(std::string_view action, std::string_view plugin_name) {
+	std::string patch_close_warning(std::string_view plugin_name) {
 		auto patch = patches.get_playing_patch();
 		if (!patch || patches.get_playing_patch_modification_count() == 0 ||
 			!play_loader.playing_patch_uses_brand(plugin_name))
 			return "";
 
-		return std::string(action) + " " + std::string(plugin_name) + " will close the patch " +
+		return "Unloading " + std::string(plugin_name) + " will close the patch " +
 			   std::string(patch->patch_name) + ". Its unsaved changes will be lost.";
 	}
 
@@ -406,7 +410,7 @@ private:
 
 					// Unload
 					if (*button == 1) {
-						if (page->patch_close_warning("Unloading", plugin_name).size()) {
+						if (page->patch_close_warning(plugin_name).size()) {
 							page->pending_unload_warning = {plugin_name, target};
 						} else {
 							page->unload_plugin(plugin_name);
@@ -467,32 +471,44 @@ private:
 
 		auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
 		if (idx > 0) {
-			auto target = event->target;
-			auto *plugins = page->plugin_manager.found_plugin_list();
-			std::string plugin_name = (*plugins)[idx - 1].plugin_name;
+			lv_show(ui_PluginTabSpinner);
 
-			if (auto warning = page->patch_close_warning("Loading", plugin_name); warning.size()) {
-				page->confirm_popup.show(
-					[page, idx, target](unsigned ok) {
-						if (ok)
-							page->load_plugin(idx - 1, target);
-					},
-					warning.c_str(),
-					"Load");
-			} else {
-				page->load_plugin(idx - 1, target);
-			}
+			auto *plugins = page->plugin_manager.found_plugin_list();
+			page->pause_patch_if_it_uses((*plugins)[idx - 1].plugin_name);
+
+			page->plugin_manager.load_plugin(idx - 1);
+			page->load_in_progress_obj = event->target;
 		}
 	}
 
-	void load_plugin(unsigned found_idx, lv_obj_t *target) {
-		lv_show(ui_PluginTabSpinner);
+	// Loading a plugin that the playing patch uses (i.e. it has modules missing from that plugin):
+	// stop audio while loading, then reload the patch from RAM so unsaved changes are kept.
+	// This is the same thing the Missing Plugins popup does.
+	void pause_patch_if_it_uses(std::string_view plugin_name) {
+		loading_plugin_used_by_patch = play_loader.playing_patch_uses_brand(plugin_name);
+		if (loading_plugin_used_by_patch && !paused_patch_for_loading) {
+			resume_audio_after_loading = !play_loader.is_audio_muted();
+			if (resume_audio_after_loading)
+				play_loader.stop_audio_and_wait();
+			paused_patch_for_loading = true;
+		}
+	}
 
-		auto *plugins = plugin_manager.found_plugin_list();
-		play_loader.prepare_patch_for_plugin_change((*plugins)[found_idx].plugin_name);
+	// Call when a single load or Load All has finished, whether or not it succeeded
+	void reload_paused_patch() {
+		if (!paused_patch_for_loading)
+			return;
 
-		plugin_manager.load_plugin(found_idx);
-		load_in_progress_obj = target;
+		if (loaded_plugin_used_by_patch) {
+			play_loader.request_reload_playing_patch(resume_audio_after_loading);
+			gui_state.force_redraw_patch = true;
+		} else if (resume_audio_after_loading) {
+			play_loader.resume_audio();
+		}
+
+		paused_patch_for_loading = false;
+		loaded_plugin_used_by_patch = false;
+		resume_audio_after_loading = false;
 	}
 
 	static void clear_autoloads(lv_event_t *event) {
@@ -552,6 +568,8 @@ private:
 		reset_group();
 		lv_hide(load_all_found_button);
 		notify_queue.put({"Done loading all plugins"});
+
+		reload_paused_patch();
 	}
 
 	void start_loading_all() {
@@ -596,6 +614,7 @@ private:
 
 			load_in_progress_obj = obj;
 
+			pause_patch_if_it_uses(plugin.plugin_name);
 			plugin_manager.load_plugin(idx);
 		} else {
 			end_loading_all();
@@ -615,6 +634,11 @@ private:
 	lv_obj_t *load_in_progress_obj = nullptr;
 
 	std::optional<std::pair<std::string, lv_obj_t *>> pending_unload_warning;
+
+	bool loading_plugin_used_by_patch = false;
+	bool loaded_plugin_used_by_patch = false;
+	bool paused_patch_for_loading = false;
+	bool resume_audio_after_loading = false;
 	lv_obj_t *load_in_progress_label = nullptr;
 
 	lv_group_t *group = nullptr;
