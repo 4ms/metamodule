@@ -9,10 +9,13 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "patch_file/open_patch_manager.hh"
 #include "patch_play/patch_playloader.hh"
 #include "user_settings/plugin_preload_settings.hh"
 #include <algorithm>
 #include <deque>
+#include <optional>
+#include <string>
 
 namespace MetaModule
 {
@@ -23,12 +26,14 @@ struct PluginTab : SystemMenuTab {
 			  PluginPreloadSettings &settings,
 			  NotificationQueue &notify_queue,
 			  GuiState &gui_state,
-			  PatchPlayLoader &play_loader)
+			  PatchPlayLoader &play_loader,
+			  OpenPatchManager &patches)
 		: plugin_manager{plugin_manager}
 		, notify_queue{notify_queue}
 		, settings{settings}
 		, gui_state{gui_state}
-		, play_loader{play_loader} {
+		, play_loader{play_loader}
+		, patches{patches} {
 
 		clear_autoloads_button = create_button(ui_PluginsRightColumn, "Pre-load None");
 		current_autoloads_button = create_button(ui_PluginsRightColumn, "Pre-load Current");
@@ -127,6 +132,22 @@ struct PluginTab : SystemMenuTab {
 	}
 
 	void update() override {
+		// Show this after the plugin popup has closed, since closing it resets the input group
+		if (pending_unload_warning) {
+			auto [plugin_name, target] = *pending_unload_warning;
+			pending_unload_warning.reset();
+
+			confirm_popup.show(
+				[this, plugin_name, target](unsigned ok) {
+					if (ok) {
+						unload_plugin(plugin_name);
+						lv_obj_del_async(target);
+					}
+				},
+				patch_close_warning(plugin_name).c_str(),
+				"Unload");
+		}
+
 		auto result = plugin_manager.process_loading();
 		bool loading_done = false;
 
@@ -146,6 +167,8 @@ struct PluginTab : SystemMenuTab {
 			lv_hide(ui_PluginTabSpinner);
 			move_found_plugin_to_loaded();
 
+			if (loading_plugin_used_by_patch)
+				loaded_plugin_used_by_patch = true;
 			loading_done = true;
 		}
 
@@ -164,6 +187,8 @@ struct PluginTab : SystemMenuTab {
 
 			lv_show(ui_PluginTabSpinner);
 			load_next();
+		} else if (loading_done) {
+			reload_paused_patch();
 		}
 	}
 
@@ -230,7 +255,21 @@ private:
 		return false;
 	}
 
+	// Unloading a plugin that the playing patch uses closes the patch.
+	// Returns a message warning that unsaved changes will be lost, or an empty
+	// string if the patch won't be closed or has no unsaved changes.
+	std::string patch_close_warning(std::string_view plugin_name) {
+		auto patch = patches.get_playing_patch();
+		if (!patch || patches.get_playing_patch_modification_count() == 0 ||
+			!play_loader.playing_patch_uses_brand(plugin_name))
+			return "";
+
+		return "Unloading " + std::string(plugin_name) + " will close the patch " +
+			   std::string(patch->patch_name) + ". Its unsaved changes will be lost.";
+	}
+
 	void unload_plugin(std::string_view plugin_name) {
+		pr_info("Unload Plugin: %.*s\n", (int)plugin_name.size(), plugin_name.data());
 		play_loader.prepare_patch_for_plugin_change(plugin_name);
 		plugin_manager.unload_plugin(plugin_name);
 		gui_state.force_redraw_patch = true;
@@ -371,9 +410,12 @@ private:
 
 					// Unload
 					if (*button == 1) {
-						pr_info("Unload Plugin: %s\n", plugin_name.data());
-						page->unload_plugin(plugin_name);
-						lv_obj_del_async(target);
+						if (page->patch_close_warning(plugin_name).size()) {
+							page->pending_unload_warning = {plugin_name, target};
+						} else {
+							page->unload_plugin(plugin_name);
+							lv_obj_del_async(target);
+						}
 					}
 				}
 
@@ -432,11 +474,41 @@ private:
 			lv_show(ui_PluginTabSpinner);
 
 			auto *plugins = page->plugin_manager.found_plugin_list();
-			page->play_loader.prepare_patch_for_plugin_change((*plugins)[idx - 1].plugin_name);
+			page->pause_patch_if_it_uses((*plugins)[idx - 1].plugin_name);
 
 			page->plugin_manager.load_plugin(idx - 1);
 			page->load_in_progress_obj = event->target;
 		}
+	}
+
+	// Loading a plugin that the playing patch uses (i.e. it has modules missing from that plugin):
+	// stop audio while loading, then reload the patch from RAM so unsaved changes are kept.
+	// This is the same thing the Missing Plugins popup does.
+	void pause_patch_if_it_uses(std::string_view plugin_name) {
+		loading_plugin_used_by_patch = play_loader.playing_patch_uses_brand(plugin_name);
+		if (loading_plugin_used_by_patch && !paused_patch_for_loading) {
+			resume_audio_after_loading = !play_loader.is_audio_muted();
+			if (resume_audio_after_loading)
+				play_loader.stop_audio_and_wait();
+			paused_patch_for_loading = true;
+		}
+	}
+
+	// Call when a single load or Load All has finished, whether or not it succeeded
+	void reload_paused_patch() {
+		if (!paused_patch_for_loading)
+			return;
+
+		if (loaded_plugin_used_by_patch) {
+			play_loader.request_reload_playing_patch(resume_audio_after_loading);
+			gui_state.force_redraw_patch = true;
+		} else if (resume_audio_after_loading) {
+			play_loader.resume_audio();
+		}
+
+		paused_patch_for_loading = false;
+		loaded_plugin_used_by_patch = false;
+		resume_audio_after_loading = false;
 	}
 
 	static void clear_autoloads(lv_event_t *event) {
@@ -496,6 +568,8 @@ private:
 		reset_group();
 		lv_hide(load_all_found_button);
 		notify_queue.put({"Done loading all plugins"});
+
+		reload_paused_patch();
 	}
 
 	void start_loading_all() {
@@ -540,6 +614,7 @@ private:
 
 			load_in_progress_obj = obj;
 
+			pause_patch_if_it_uses(plugin.plugin_name);
 			plugin_manager.load_plugin(idx);
 		} else {
 			end_loading_all();
@@ -552,10 +627,18 @@ private:
 	GuiState &gui_state;
 	bool should_write_settings = false;
 	PatchPlayLoader &play_loader;
+	OpenPatchManager &patches;
 	PluginPopup plugin_state_popup;
 	ConfirmPopup confirm_popup;
 
 	lv_obj_t *load_in_progress_obj = nullptr;
+
+	std::optional<std::pair<std::string, lv_obj_t *>> pending_unload_warning;
+
+	bool loading_plugin_used_by_patch = false;
+	bool loaded_plugin_used_by_patch = false;
+	bool paused_patch_for_loading = false;
+	bool resume_audio_after_loading = false;
 	lv_obj_t *load_in_progress_label = nullptr;
 
 	lv_group_t *group = nullptr;
