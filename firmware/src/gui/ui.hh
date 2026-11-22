@@ -91,6 +91,11 @@ public:
 		}
 	}
 
+	// Live loads for the Wi-Fi interface (not set: no Wi-Fi)
+	void set_wifi_live_block(WifiLiveBlock *block) {
+		page_manager.set_wifi_live_block(block);
+	}
+
 	void update_page() {
 		auto now = HAL_GetTick();
 		if ((now - last_page_update_tm) > 16) {

@@ -67,9 +67,11 @@ int main() {
 		&StaticBuffers::icc_device_settings_message,
 		&StaticBuffers::usb_connection_status,
 		&StaticBuffers::dev_drive_block,
+		&StaticBuffers::wifi_live,
 	};
 
 	StaticBuffers::dev_drive_block.reset();
+	StaticBuffers::wifi_live.reset();
 
 	A7SharedMemoryS::ptrs = {
 		&patch_player,

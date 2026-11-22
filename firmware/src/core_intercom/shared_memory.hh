@@ -5,6 +5,7 @@
 #include "params/param_block.hh"
 #include "usb/dev_drive_block.hh"
 #include "usb/usb_connection_status_block.hh"
+#include "wifi/wifi_live_block.hh"
 
 namespace MetaModule
 {
@@ -27,6 +28,7 @@ struct SharedMemoryS {
 		DeviceSettingsMessage *icc_device_settings_message;
 		UsbConnectionStatusBlock *usb_connection_status;
 		DevDriveBlock *dev_drive_msgs;
+		WifiLiveBlock *wifi_live;
 	};
 
 	static Ptrs ptrs;
