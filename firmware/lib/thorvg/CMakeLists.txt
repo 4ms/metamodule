@@ -54,6 +54,25 @@ target_sources(ThorVG PRIVATE
    thorvg/src/loaders/raw/tvgRawLoader.cpp
 )
 
+# SVG loader: used to draw module faceplates from SVG files on platforms with a screen
+# dense enough to need it (see src/gui/elements/svg_faceplate.hh)
+if(METAMODULE_PLATFORM STREQUAL "mp2")
+  set(THORVG_SVG_SOURCES
+     thorvg/src/loaders/svg/tvgSvgCssStyle.cpp
+     thorvg/src/loaders/svg/tvgSvgLoader.cpp
+     thorvg/src/loaders/svg/tvgSvgPath.cpp
+     thorvg/src/loaders/svg/tvgSvgSceneBuilder.cpp
+     thorvg/src/loaders/svg/tvgSvgUtil.cpp
+     thorvg/src/loaders/svg/tvgXmlParser.cpp
+  )
+  target_sources(ThorVG PRIVATE ${THORVG_SVG_SOURCES})
+  # The loader calls tvg's identity() unqualified, with `using namespace std`: that's ambiguous
+  # with std::identity in C++20 and later (gcc). ThorVG is written for C++14.
+  set_source_files_properties(${THORVG_SVG_SOURCES} PROPERTIES COMPILE_OPTIONS "-std=gnu++17")
+  target_include_directories(ThorVG PRIVATE thorvg/src/loaders/svg)
+  target_compile_definitions(ThorVG PUBLIC THORVG_SVG_LOADER_SUPPORT=1)
+endif()
+
 target_compile_options(ThorVG PRIVATE 
 	-Wno-unknown-pragmas
 )
