@@ -357,6 +357,11 @@ add_custom_command(
 )
 
 #
+# The image TF-A BL2 loads (main.uimg): the A35 image, in a self-extracting stub
+
+add_subdirectory(flashing/selfextract_mp2 ${CMAKE_CURRENT_BINARY_DIR}/selfextract)
+
+#
 # Flashing
 
 add_custom_target(
@@ -369,6 +374,5 @@ add_custom_target(
 )
 
 # TODO (in bring-up order):
-# - image packaging: FIP for TF-A BL2 (successor of flashing/elf_to_uimg.py)
 # - port src/medium/conf headers into src/pro/conf as each subsystem
 #   comes up; then start compiling src/shared_sources.cmake lists here

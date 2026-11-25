@@ -9,10 +9,18 @@
 _TFA_DDR		= 0x80000000;
 _TFA_DDR_END	= 0xA0000000;
 
-/* The A35 image. TF-A BL2 loads it here (set by the TF-A build), after its 0x40-byte header */
-_A35_CODE		= 0x88000040;
-_A35_CODE_SZ	= 32M - 0x40;
-_A35_CODE_END	= 0x8A000000;
+/* The boot image: the self-extracting stub and the compressed A35 image (flashing/selfextract_mp2).
+   TF-A BL2 loads it here: the base and maximum size are set in the TF-A build
+   (plat_bl2_mem_params_desc.c). The stub unpacks the A35 image to where it's linked (_A35_CODE and
+   _A35_RAM) and jumps to it. After that, this memory is unused. */
+_A35_BOOT		= 0x88000000;
+_A35_BOOT_SZ	= 16M;
+_A35_BOOT_END	= 0x89000000;
+
+/* The A35 image's code and constants (the stub unpacks them here; a debugger loads them here) */
+_A35_CODE		= 0x89000040;
+_A35_CODE_SZ	= 48M - 0x40;
+_A35_CODE_END	= 0x8C000000;
 
 /* Size of .symlist, the table of symbols plugins can use, in the A35 image (src/dynload/host_sym_list.hh) */
 _A35_SYMS_SZ	= 1M;
@@ -64,6 +72,8 @@ ASSERT(_SHAREDMEM + _SHAREDMEM_SZ == _SHAREDMEM_END, "_SHAREDMEM + _SHAREDMEM_SZ
 ASSERT(_DMABUF + _DMABUF_SZ == _DMABUF_END, "_DMABUF + _DMABUF_SZ != _DMABUF_END")
 ASSERT(_A35_HEAP + _A35_HEAP_SZ == _A35_HEAP_END, "_A35_HEAP + _A35_HEAP_SZ != _A35_HEAP_END")
 
+ASSERT(_A35_BOOT + _A35_BOOT_SZ == _A35_BOOT_END, "_A35_BOOT + _A35_BOOT_SZ != _A35_BOOT_END")
+ASSERT(_TFA_DDR <= _A35_BOOT && _A35_BOOT_END <= _A35_CODE - 0x40, "The boot image overlaps the A35 image")
 ASSERT(_A35_CODE_END <= _M33_REGION && _M33_REGION_END <= _A35_RAM && _A35_RAM_END <= _FRAMEBUF &&
 	   _FRAMEBUF_END <= _SHAREDMEM && _SHAREDMEM_END <= _DMABUF && _DMABUF_END <= _TFA_DDR_END &&
 	   _TFA_DDR_END <= _A35_HEAP, "MP2 memory regions overlap, or leave TF-A's DDR window")

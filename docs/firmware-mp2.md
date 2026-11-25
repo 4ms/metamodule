@@ -29,16 +29,28 @@ or `make PRESET=mp2`. Until p1 boards arrive, use the `mp2-test-carrier` preset
 instead of `mp2` (the mp2-devboard with the stm32mp2-baremetal breakout and a
 PCM3168 module).
 
-Produces `build-mp2/main_a35.elf` / `main_a35.bin` (`build-mp2-test-carrier/`
-for the test carrier), with the M33 image (`core_m33/main_m33.bin`) embedded.
+Produces `build-mp2/main_a35.elf` and `build-mp2/main.uimg`
+(`build-mp2-test-carrier/` for the test carrier), with the M33 image
+(`core_m33/main_m33.bin`) embedded.
 
 For CI machines that only have `aarch64-linux-gnu-gcc`:
 `cmake --preset mp2-linux-gnu && cmake --build build-mp2-linux-gnu --target a35_core`
 
-Load and boot it over SWD with TRACE32: `make PRESET=mp2 flash-t32`
-(`flashing/flash-t32-mp2.py`). Or boot it the same way as the
-stm32mp2-baremetal examples: TF-A BL2 (4ms fork) + FIP on SD card (see that
-repo's README). Image packaging via FIP assembly is TODO.
+Load and boot the ELF over SWD with TRACE32: `make PRESET=mp2 flash-t32`
+(`flashing/flash-t32-mp2.py`).
+
+Or boot `main.uimg` the same way as the stm32mp2-baremetal examples: TF-A BL2
+(4ms fork) loads it from the SD card's `app` partition (see that repo's README).
+This has not been tried on hardware yet.
+
+`main.uimg` is a self-extracting image, like MP1's (`flashing/selfextract_mp2`).
+TF-A loads one image to one place, 16MB at most (`_A35_BOOT` in
+`system/linker/memory_mp2.ld`). The A35 image is bigger than that, and its code
+and its `.data` go to different places. So TF-A loads a small stub with the A35
+image LZ4-packed inside it, and the stub unpacks each part to where it's linked
+and jumps to it. The build fails if the packed image is over 16MB.
+`flashing/selfextract_mp2/test_qemu.py` runs the stub in QEMU and checks what it
+unpacked. If the image is corrupted, the stub hangs without printing anything.
 
 MP2 can't read the assets (module images, fonts) from flash yet, so the assets
 image is embedded in the firmware image. The MP2 build doesn't make one yet: it
