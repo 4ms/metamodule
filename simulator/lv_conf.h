@@ -377,17 +377,29 @@
 /*Optionally declare custom fonts here.
  *You can use these fonts as default font too and they will be available globally.
  *E.g. #define LV_FONT_CUSTOM_DECLARE   LV_FONT_DECLARE(my_font_1) LV_FONT_DECLARE(my_font_2)*/
+#ifdef METAMODULE_UI_SCALED_FONTS
+/*High-density screens (MP2): scaled-up GUI fonts, see gui/fonts/ui_fonts.hh*/
+#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(ui_font_medium_bold)
+
+/*Always set a default font*/
+#define LV_FONT_DEFAULT &ui_font_medium_bold
+#else
 #define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE( ui_font_MuseoSansRounded50012)\
 LV_FONT_DECLARE( ui_font_MuseoSansRounded70014)\
 LV_FONT_DECLARE( ui_font_MuseoSansRounded70016)\
 
 /*Always set a default font*/
 #define LV_FONT_DEFAULT &ui_font_MuseoSansRounded70014
+#endif
 
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
  *Compiler error will be triggered if a font needs it.*/
+#ifdef METAMODULE_UI_SCALED_FONTS
+#define LV_FONT_FMT_TXT_LARGE 1
+#else
 #define LV_FONT_FMT_TXT_LARGE 0
+#endif
 
 /*Enables/disables support for compressed fonts.*/
 #define LV_USE_FONT_COMPRESSED 0
