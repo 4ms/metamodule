@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
+#include "gui/elements/module_art.hh"
 #include "conf/panel_conf.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/helpers/units_conversion.hh"
@@ -37,9 +38,9 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 
 	if (Midi::is_midi_panel_id(panel_id)) {
 		ring_thickness = 3;
-		gap = module_height == 240 ? 2 : 0;
+		gap = module_height >= ModuleArtHeightPx ? 2 : 0;
 	} else {
-		if (module_height == 240) {
+		if (module_height >= ModuleArtHeightPx) {
 			ring_thickness = (panel_id >= 6) ? 2 : 5;
 			gap = 2;
 
@@ -59,7 +60,7 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 
 	//TODO: shrink box around center by width * (1-zoom)
 	// So that it's consistant at all zoom levels
-	// float zoom = module_height / 240.f;
+	// float zoom = module_height / (float)ModuleArtHeightPx;
 
 	auto ring_obj = lv_obj_create(canvas);
 	lv_obj_set_pos(ring_obj, x, y);

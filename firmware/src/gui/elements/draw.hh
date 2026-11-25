@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/elements/draw_img.hh"
+#include "gui/elements/module_art.hh"
 #include "gui/fonts/fonts.hh"
 #include "gui/helpers/units_conversion.hh"
 #include "gui/styles.hh"
@@ -32,8 +33,8 @@ inline lv_obj_t *draw_element(const LightElement &el, lv_obj_t *canvas, uint32_t
 		return nullptr;
 
 	lv_obj_set_style_radius(obj, 20, LV_PART_MAIN);
-	lv_obj_set_style_shadow_width(obj, module_height == 240 ? 16 : 0, LV_PART_MAIN);
-	lv_obj_set_style_shadow_spread(obj, module_height == 240 ? 4 : 0, LV_PART_MAIN);
+	lv_obj_set_style_shadow_width(obj, module_height >= ModuleArtHeightPx ? 16 : 0, LV_PART_MAIN);
+	lv_obj_set_style_shadow_spread(obj, module_height >= ModuleArtHeightPx ? 4 : 0, LV_PART_MAIN);
 	lv_obj_set_style_shadow_opa(obj, LV_OPA_0, LV_PART_MAIN);
 	return obj;
 }
@@ -54,7 +55,7 @@ inline lv_obj_t *draw_element(const Knob &el, lv_obj_t *canvas, uint32_t module_
 	diameter = std::max<int16_t>(diameter, 10);
 	if (diameter & 0b1) //odd
 		diameter += 1;	//make even
-	float zoom = module_height / 240.f;
+	float zoom = module_height / (float)ModuleArtHeightPx;
 	float x = fix_zoomed_coord(el.coords, mm_to_px(el.x_mm, module_height), diameter, zoom);
 	float y = fix_zoomed_coord(el.coords, mm_to_px(el.y_mm, module_height), diameter, zoom);
 	int16_t pos_x = std::round(x);
@@ -111,7 +112,7 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 			width -= module_height / 30.f; //padding
 			height = channel_width_px;
 		}
-		float zoom = module_height / 240.f;
+		float zoom = module_height / (float)ModuleArtHeightPx;
 		x = fix_zoomed_coord(el.coords, x, width, zoom);
 		y = fix_zoomed_coord(el.coords, y, height, zoom);
 		int16_t pos_x = std::round(x);
@@ -167,8 +168,8 @@ inline lv_obj_t *draw_element(const SliderLight &el, lv_obj_t *canvas, uint32_t 
 		lv_color_t color{.full = el.color};
 		lv_obj_set_style_bg_color(handle, color, LV_PART_MAIN);
 		lv_obj_set_style_radius(handle, 20, LV_PART_MAIN);
-		lv_obj_set_style_shadow_width(handle, module_height == 240 ? 16 : 0, LV_PART_MAIN);
-		lv_obj_set_style_shadow_spread(handle, module_height == 240 ? 4 : 0, LV_PART_MAIN);
+		lv_obj_set_style_shadow_width(handle, module_height >= ModuleArtHeightPx ? 16 : 0, LV_PART_MAIN);
+		lv_obj_set_style_shadow_spread(handle, module_height >= ModuleArtHeightPx ? 4 : 0, LV_PART_MAIN);
 		lv_obj_set_style_shadow_opa(handle, LV_OPA_0, LV_PART_MAIN);
 	}
 	return obj;
@@ -179,8 +180,8 @@ inline lv_obj_t *draw_element(const Button &el, lv_obj_t *canvas, uint32_t modul
 	if (!obj)
 		return nullptr;
 	lv_obj_set_style_radius(obj, 20, LV_PART_MAIN);
-	lv_obj_set_style_shadow_width(obj, module_height >= 240 ? 8 : 0, LV_PART_MAIN);
-	lv_obj_set_style_shadow_spread(obj, module_height >= 240 ? 2 : 0, LV_PART_MAIN);
+	lv_obj_set_style_shadow_width(obj, module_height >= ModuleArtHeightPx ? 8 : 0, LV_PART_MAIN);
+	lv_obj_set_style_shadow_spread(obj, module_height >= ModuleArtHeightPx ? 2 : 0, LV_PART_MAIN);
 	lv_obj_set_style_shadow_opa(obj, LV_OPA_0, LV_PART_MAIN);
 
 	return obj;
@@ -225,12 +226,12 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t 
 inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
 	float ox = mm_to_px(el.x_mm, module_h);
 	float oy = mm_to_px(el.y_mm, module_h);
-	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h) * (240.f / module_h));
-	lv_coord_t h = std::round(mm_to_px(el.height_mm, module_h) * (240.f / module_h));
+	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h) * ((float)ModuleArtHeightPx / module_h));
+	lv_coord_t h = std::round(mm_to_px(el.height_mm, module_h) * ((float)ModuleArtHeightPx / module_h));
 
 	//If TopLeft coords are used, skip the "fix" for zoomed coords (lv_label objects don't need the fix for some reason)
-	lv_coord_t x = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, ox, w, module_h / 240.f) : std::round(ox);
-	lv_coord_t y = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, oy, h, module_h / 240.f) : std::round(oy);
+	lv_coord_t x = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, ox, w, module_h / (float)ModuleArtHeightPx) : std::round(ox);
+	lv_coord_t y = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, oy, h, module_h / (float)ModuleArtHeightPx) : std::round(oy);
 
 	auto label = lv_label_create(canvas);
 	lv_label_set_text(label, el.text.data());
@@ -240,8 +241,8 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 	lv_obj_set_align(label, LV_ALIGN_TOP_LEFT);
 	lv_obj_set_pos(label, x, y);
 	lv_obj_set_size(label, w, h);
-	if (module_h < 240) {
-		float zoom = (float)module_h / 240.f;
+	if (module_h < ModuleArtHeightPx) {
+		float zoom = (float)module_h / (float)ModuleArtHeightPx;
 		lv_obj_set_style_transform_zoom(label, 255 * zoom, LV_PART_MAIN);
 	}
 	if (el.coords == Coords::Center) {

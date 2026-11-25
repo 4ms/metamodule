@@ -2,6 +2,7 @@
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 #include "console/pr_dbg.hh"
+#include "gui/elements/module_art.hh"
 #include "gui/helpers/units_conversion.hh"
 #include "gui/images/paths.hh"
 #include "gui/styles.hh"
@@ -44,7 +45,7 @@ inline void draw_image(float x,
 	float width = w;
 	float height = h;
 
-	float zoom = module_height / 240.f;
+	float zoom = module_height / (float)ModuleArtHeightPx;
 
 	x = fix_zoomed_coord(coord_ref, x, width, zoom);
 	y = fix_zoomed_coord(coord_ref, y, height, zoom);
