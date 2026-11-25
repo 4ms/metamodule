@@ -7,7 +7,8 @@
 // FIXME: on MP1 the RamDisk is in memory shared by all cores, so the M4 can present it over USB.
 // Share it with the M33 when it does USB. Until then, the M33 just has a token one, since
 // PatchStorage needs one to exist.
-#if defined(CORE_CA35)
+// The simulator has no M33: it only has the GUI core's full-size RamDisk.
+#if defined(CORE_CA35) || defined(SIMULATOR)
 static constexpr uint32_t RamDiskSizeBytes = 60 * 1024 * 1024;
 #else
 static constexpr uint32_t RamDiskSizeBytes = 64 * 1024;
