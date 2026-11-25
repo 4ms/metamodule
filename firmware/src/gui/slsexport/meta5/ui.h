@@ -7,6 +7,8 @@ extern "C" {
 
 #include "lvgl.h"
 
+#include "../../ui_scale.h"
+
 #include "components/ui_comp.h"
 #include "components/ui_comp_hook.h"
 #include "ui_events.h"
@@ -599,23 +601,24 @@ extern lv_obj_t *ui_MidiMapOKButton;
 extern lv_obj_t *ui_MidiMapOKButtonLabel;
 extern lv_obj_t *ui____initial_actions0;
 
-LV_IMG_DECLARE(ui_img_1x_play1_png);		// assets/1x/Play1.png
-LV_IMG_DECLARE(ui_img_1x_add1_png);			// assets/1x/Add1.png
-LV_IMG_DECLARE(ui_img_1x_settings1_png);	// assets/1x/Settings1.png
-LV_IMG_DECLARE(ui_img_1x_info1_png);		// assets/1x/Info1.png
-LV_IMG_DECLARE(ui_img_1x_knob1_png);		// assets/1x/Knob1.png
-LV_IMG_DECLARE(ui_img_1x_knob1pressed_png); // assets/1x/Knob1Pressed.png
-LV_IMG_DECLARE(ui_img_1x_infosmall2_png);	// assets/1x/InfoSmall2.png
-LV_IMG_DECLARE(ui_img_1x_knob1_png);		// assets/1x/Knob1.png
 
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50010);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50012);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50014);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50016);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded70014);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded70016);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded90018);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded90040);
+LV_FONT_DECLARE(ui_font_tiny);
+LV_FONT_DECLARE(ui_font_small);
+LV_FONT_DECLARE(ui_font_medium);
+LV_FONT_DECLARE(ui_font_med_large);
+LV_FONT_DECLARE(ui_font_medium_bold);
+LV_FONT_DECLARE(ui_font_med_large_bold);
+LV_FONT_DECLARE(ui_font_large);
+LV_FONT_DECLARE(ui_font_huge);
+LV_FONT_DECLARE(ui_font_icons);
+
+// Icons: glyphs in ui_font_icons (LV_SYMBOL_PLAY, LV_SYMBOL_PLUS, LV_SYMBOL_SETTINGS, LV_SYMBOL_SAVE, and:)
+#define UI_SYMBOL_INFO "\xEF\x84\xA9" // U+F129
+
+// Icons that are not a glyph. The 1x images are in images/. Builds with a GUI scale use the ones
+// in images/scaled, made from graphics/ui/*.svg by images/generate_scaled_images.py
+LV_IMG_DECLARE(ui_img_knob);
+LV_IMG_DECLARE(ui_img_knob_pressed);
 LV_FONT_DECLARE(ui_font_Segment7Standard24);
 LV_FONT_DECLARE(Segment14_10);
 LV_FONT_DECLARE(Segment14_12);

@@ -8,10 +8,10 @@ void _ui_bar_set_property( lv_obj_t *target, int id, int val)
 
 void _ui_basic_set_property( lv_obj_t *target, int id, int val) 
 {
-   if (id == _UI_BASIC_PROPERTY_POSITION_X) lv_obj_set_x(target, val);
-   if (id == _UI_BASIC_PROPERTY_POSITION_Y) lv_obj_set_y(target, val);
-   if (id == _UI_BASIC_PROPERTY_WIDTH) lv_obj_set_width(target, val);
-   if (id == _UI_BASIC_PROPERTY_HEIGHT) lv_obj_set_height(target, val);
+   if (id == _UI_BASIC_PROPERTY_POSITION_X) lv_obj_set_x(target, ui_px(val));
+   if (id == _UI_BASIC_PROPERTY_POSITION_Y) lv_obj_set_y(target, ui_px(val));
+   if (id == _UI_BASIC_PROPERTY_WIDTH) lv_obj_set_width(target, ui_px(val));
+   if (id == _UI_BASIC_PROPERTY_HEIGHT) lv_obj_set_height(target, ui_px(val));
 }
 
 void _ui_dropdown_set_property( lv_obj_t *target, int id, int val) 
@@ -133,25 +133,25 @@ void _ui_anim_callback_free_user_data(lv_anim_t *a)
 void _ui_anim_callback_set_x(lv_anim_t* a, int32_t v)
 {
    ui_anim_user_data_t *usr = (ui_anim_user_data_t *)a->user_data;
-   lv_obj_set_x(usr->target, v);
+   lv_obj_set_x(usr->target, ui_px(v));
 }
 
 void _ui_anim_callback_set_y(lv_anim_t* a, int32_t v)
 {
    ui_anim_user_data_t *usr = (ui_anim_user_data_t *)a->user_data;
-   lv_obj_set_y(usr->target, v);
+   lv_obj_set_y(usr->target, ui_px(v));
 }
 
 void _ui_anim_callback_set_width(lv_anim_t* a, int32_t v)
 {
    ui_anim_user_data_t *usr = (ui_anim_user_data_t *)a->user_data;
-   lv_obj_set_width(usr->target, v);
+   lv_obj_set_width(usr->target, ui_px(v));
 }
 
 void _ui_anim_callback_set_height(lv_anim_t* a, int32_t v)
 {
    ui_anim_user_data_t *usr = (ui_anim_user_data_t *)a->user_data;
-   lv_obj_set_height(usr->target, v);
+   lv_obj_set_height(usr->target, ui_px(v));
 }
 
 void _ui_anim_callback_set_opacity(lv_anim_t* a, int32_t v)

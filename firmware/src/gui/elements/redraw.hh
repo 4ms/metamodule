@@ -2,6 +2,7 @@
 #include "CoreModules/elements/element_state_conversion.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
+#include "gui/elements/draw_img.hh"
 #include "gui/images/paths.hh"
 #include "lvgl.h"
 #include "patch/patch_data.hh"
@@ -96,7 +97,7 @@ inline bool redraw_element(const FlipSwitch &element, const GuiElement &gui_el, 
 
 	if (frame_num < element.frames.size()) {
 
-		auto img = ComponentImages::get_comp_path(element.frames[frame_num]);
+		auto img = ElementDrawer::image_src_like(gui_el.obj, element.frames[frame_num]);
 		if (!img.length())
 			return false;
 
@@ -121,7 +122,7 @@ inline bool redraw_element(const MomentaryButton &element, const GuiElement &gui
 	if (!image_name.length() || image_name.length() >= 256)
 		return false;
 
-	auto img = ComponentImages::get_comp_path(image_name);
+	auto img = ElementDrawer::image_src_like(gui_el.obj, image_name);
 
 	auto cur_img = std::string_view{static_cast<const char *>(lv_img_get_src(gui_el.obj))};
 

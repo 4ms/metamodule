@@ -11,8 +11,8 @@ _TFA_DDR_END	= 0xA0000000;
 
 /* The A35 image. TF-A BL2 loads it here (set by the TF-A build), after its 0x40-byte header */
 _A35_CODE		= 0x88000040;
-_A35_CODE_SZ	= 16M - 0x40;
-_A35_CODE_END	= 0x89000000;
+_A35_CODE_SZ	= 32M - 0x40;
+_A35_CODE_END	= 0x8A000000;
 
 /* Size of .symlist, the table of symbols plugins can use, in the A35 image (src/dynload/host_sym_list.hh) */
 _A35_SYMS_SZ	= 1M;

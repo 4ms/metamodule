@@ -18,26 +18,22 @@ set(SOURCES
     ui.c
     ui_helpers.c
     ui_events.c
-    images/ui_img_1x_play1_png.c
-    images/ui_img_1x_add1_png.c
-    images/ui_img_1x_settings1_png.c
-    images/ui_img_1x_info1_png.c
-    images/ui_img_1x_knob1_png.c
-    images/ui_img_1x_knob1pressed_png.c
-    images/ui_img_1x_infosmall2_png.c
 )
 
 file(GLOB FONTS fonts/*.c)
 
-# Builds for high-density screens (METAMODULE_UI_SCALE, see gui/ui_scale.h) use scaled-up GUI fonts,
-# and scale the pixel sizes in the exported sources: see ../sls_hidpi.h
-# (Not for the MP1 font files themselves: module displays still use them.)
+# Builds for high-density screens (METAMODULE_UI_SCALE, see gui/ui_scale.h) use scaled-up GUI fonts
+# as well as the MP1 fonts above (which module displays still use). See gui/fonts/ui_font_names.h
 if(METAMODULE_UI_SCALE)
   file(GLOB SCALED_FONTS ${CMAKE_CURRENT_LIST_DIR}/../../fonts/scaled/*.c)
   list(APPEND FONTS ${SCALED_FONTS})
-  set_source_files_properties(
-    ${SOURCES} PROPERTIES COMPILE_OPTIONS "-include;${CMAKE_CURRENT_LIST_DIR}/../sls_hidpi.h"
-  )
 endif()
 
-add_library(ui ${SOURCES} ${FONTS} ../sls_hidpi_img.c)
+# Icon images: made at the GUI scale, like the fonts (images/generate_scaled_images.py)
+if(METAMODULE_UI_SCALE)
+  file(GLOB IMAGES images/scaled/*.c)
+else()
+  set(IMAGES images/ui_img_knob.c images/ui_img_knob_pressed.c)
+endif()
+
+add_library(ui ${SOURCES} ${FONTS} ${IMAGES})

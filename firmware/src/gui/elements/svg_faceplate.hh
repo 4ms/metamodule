@@ -17,7 +17,7 @@
 //
 // Only in builds where ThorVG has its SVG loader (lib/thorvg/CMakeLists.txt). ThorVG is built
 // without fonts or image loaders, so the SVGs must not rely on <text> or <image>
-// (tools/make_svg_faceplates.py prepares them).
+// (tools/make_svg_assets.py prepares them).
 
 #if defined(THORVG_SVG_LOADER_SUPPORT)
 

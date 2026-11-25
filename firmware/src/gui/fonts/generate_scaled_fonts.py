@@ -34,6 +34,7 @@ ROLES = {
     "med_large_bold": "ui_font_MuseoSansRounded70016",
     "large": "ui_font_MuseoSansRounded90018",
     "huge": "ui_font_MuseoSansRounded90040",
+    "icons": "ui_font_FontAwesome26",
 }
 
 

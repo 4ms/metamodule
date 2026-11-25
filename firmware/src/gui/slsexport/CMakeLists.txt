@@ -28,13 +28,6 @@ target_sources(
           filebrowser/screens/ui_FileBrowserPage.c
 )
 
-if(METAMODULE_UI_SCALE)
-  set_source_files_properties(
-    filebrowser/ui.c filebrowser/screens/ui_FileBrowserPage.c
-    PROPERTIES COMPILE_OPTIONS "-include;${CMAKE_CURRENT_LIST_DIR}/sls_hidpi.h"
-  )
-endif()
-
 target_include_directories(ui_lvgl PRIVATE ${FWDIR}/src)
 target_compile_features(ui_lvgl PRIVATE cxx_std_20)
 

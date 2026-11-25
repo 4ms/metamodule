@@ -3,6 +3,7 @@
 #include "CoreModules/elements/elements.hh"
 #include "console/pr_dbg.hh"
 #include "gui/elements/module_art.hh"
+#include "gui/elements/scaled_image.hh"
 #include "gui/helpers/units_conversion.hh"
 #include "gui/images/paths.hh"
 #include "gui/styles.hh"
@@ -31,26 +32,40 @@ inline std::optional<ImageSize> get_image_size(std::string_view img_path) {
 namespace Impl
 {
 
-inline void draw_image(float x,
-					   float y,
-					   lv_coord_t w,
-					   lv_coord_t h,
-					   Coords coord_ref,
-					   std::string const &img_path,
-					   lv_obj_t *obj,
-					   uint32_t module_height) {
+// What to give an lv_img to draw a component image in a module of some height
+struct ImageSource {
+	std::string src;
+	uint32_t w;
+	uint32_t h;
+	float zoom;
+};
 
-	lv_img_set_src(obj, img_path.c_str());
+inline std::optional<ImageSource> image_source(std::string const &img_path, uint32_t module_height) {
+#if defined(THORVG_SVG_LOADER_SUPPORT)
+	// The image at the size it's drawn at (from an SVG if there is one): see scaled_image.hh
+	auto scaled_src = ScaledImage::make_src(img_path, module_height);
+	if (auto sz = get_image_size(scaled_src))
+		return ImageSource{scaled_src, sz->w, sz->h, 1.f};
+#endif
 
-	float width = w;
-	float height = h;
+	// The image as made for a module that's ModuleArtHeightPx high, zoomed by LVGL
+	if (auto sz = get_image_size(img_path))
+		return ImageSource{img_path, sz->w, sz->h, module_height / (float)ModuleArtHeightPx};
 
-	float zoom = module_height / (float)ModuleArtHeightPx;
+	return {};
+}
 
-	x = fix_zoomed_coord(coord_ref, x, width, zoom);
-	y = fix_zoomed_coord(coord_ref, y, height, zoom);
+inline void draw_image(float x, float y, Coords coord_ref, ImageSource const &img, lv_obj_t *obj) {
 
-	uint16_t lv_zoom = 256.f * zoom;
+	lv_img_set_src(obj, img.src.c_str());
+
+	float width = img.w;
+	float height = img.h;
+
+	x = fix_zoomed_coord(coord_ref, x, width, img.zoom);
+	y = fix_zoomed_coord(coord_ref, y, height, img.zoom);
+
+	uint16_t lv_zoom = 256.f * img.zoom;
 	lv_img_set_zoom(obj, lv_zoom);
 	lv_img_set_size_mode(obj, LV_IMG_SIZE_MODE_VIRTUAL);
 	lv_img_set_antialias(obj, true);
@@ -69,10 +84,27 @@ draw_image(float x, float y, Coords coord_ref, std::string_view img_filename, lv
 
 	auto img_path = ComponentImages::get_comp_path(img_filename);
 
-	if (auto sz = get_image_size(img_path)) {
-		Impl::draw_image(x, y, sz->w, sz->h, coord_ref, img_path, obj, module_height);
+	if (auto img = Impl::image_source(img_path, module_height)) {
+		Impl::draw_image(x, y, coord_ref, *img, obj);
 	} else
 		pr_warn("Could not read image '%s'\n", img_path.c_str());
+}
+
+// Returns the source to give an lv_img that is showing a component image, to show another one
+// in its place (a different frame of a switch, a pressed button...)
+inline std::string image_src_like(lv_obj_t *img_obj, std::string_view img_filename) {
+	auto img_path = ComponentImages::get_comp_path(img_filename);
+
+#if defined(THORVG_SVG_LOADER_SUPPORT)
+	// Keep drawing at the size the module is drawn at (see scaled_image.hh)
+	auto cur_src = static_cast<const char *>(lv_img_get_src(img_obj));
+	if (cur_src && img_path.length()) {
+		if (auto module_height = ScaledImage::module_height_of(cur_src))
+			return ScaledImage::make_src(img_path, module_height);
+	}
+#endif
+
+	return img_path;
 }
 
 // Create an object as a sub-object of the canvas, and draw img in it
@@ -82,14 +114,14 @@ draw_image(const BaseElement &el, std::string_view img_filename, lv_obj_t *canva
 
 	auto img_path = ComponentImages::get_comp_path(img_filename);
 	if (img_path.length() > 0) {
-		if (auto sz = get_image_size(img_path)) {
+		if (auto img = Impl::image_source(img_path, module_height)) {
 			lv_obj_t *obj = lv_img_create(canvas);
 			float x = mm_to_px(el.x_mm, module_height);
 			float y = mm_to_px(el.y_mm, module_height);
-			Impl::draw_image(x, y, sz->w, sz->h, el.coords, img_path, obj, module_height);
+			Impl::draw_image(x, y, el.coords, *img, obj);
 			lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
 			lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
-			lv_obj_set_size(obj, sz->w, sz->h);
+			lv_obj_set_size(obj, img->w, img->h);
 			lv_obj_set_style_pad_all(obj, 0, LV_STATE_DEFAULT);
 			lv_obj_add_flag(obj, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 			return obj;

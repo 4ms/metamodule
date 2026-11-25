@@ -5,6 +5,7 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
 
+#include "gui/elements/scaled_image.hh"
 #include "gui/fonts/fonts.hh"
 #include <csetjmp>
 #include <ranges>
@@ -50,6 +51,11 @@ public:
 
 				// Mirror of the .init_array constructors run at load time
 				run_fini_array(plugin);
+
+#if defined(THORVG_SVG_LOADER_SUPPORT)
+				// The plugin's component images might be different if it's loaded again
+				ScaledImage::clear_cache();
+#endif
 
 				// Cleanup files we copied to the ramdisk
 				for (auto const &file : plugin.loaded_files) {

@@ -12,10 +12,8 @@
 // Sizes that are a fraction of the screen (full-width bars, half-width columns...) should
 // not use this: use lv_pct(), flex grow, or ScreenBufferConf::viewWidth/viewHeight.
 //
-// The SquareLine-exported sources (slsexport/) are scaled when they are compiled,
-// see slsexport/sls_hidpi.h
-//
-// The fonts in gui/fonts/scaled must be generated at the same scale (fonts/generate_scaled_fonts.py)
+// The fonts in gui/fonts/scaled, and the icon images in gui/slsexport/meta5/images/scaled, must be
+// generated at the same scale (fonts/generate_scaled_fonts.py, images/generate_scaled_images.py)
 
 #ifndef METAMODULE_UI_SCALE
 #define METAMODULE_UI_SCALE 100

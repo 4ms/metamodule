@@ -8,6 +8,12 @@
 #include <map>
 #include <string_view>
 
+// Fonts that modules ask for by name are always these sizes (not the GUI fonts in ui_fonts.hh,
+// which are bigger on high-density screens)
+LV_FONT_DECLARE(ui_font_MuseoSansRounded50010);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded50012);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded70014);
+
 LV_FONT_DECLARE(Segment7Standard_14);
 LV_FONT_DECLARE(Segment7Standard_20);
 

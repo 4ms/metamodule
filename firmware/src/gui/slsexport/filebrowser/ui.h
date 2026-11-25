@@ -7,6 +7,8 @@ extern "C" {
 
 #include "lvgl.h"
 
+#include "../../ui_scale.h"
+
 // #include "ui_helpers.h"
 // #include "ui_events.h"
 
@@ -22,14 +24,14 @@ extern lv_obj_t *ui_FileBrowserPathLabel;
 extern lv_obj_t *ui_FileBrowserRoller;
 extern lv_obj_t *ui_FileBrowserSpinner;
 // CUSTOM VARIABLES
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50010);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50012);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50014);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50016);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded70014);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded70016);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded90018);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded90040);
+LV_FONT_DECLARE(ui_font_tiny);
+LV_FONT_DECLARE(ui_font_small);
+LV_FONT_DECLARE(ui_font_medium);
+LV_FONT_DECLARE(ui_font_med_large);
+LV_FONT_DECLARE(ui_font_medium_bold);
+LV_FONT_DECLARE(ui_font_med_large_bold);
+LV_FONT_DECLARE(ui_font_large);
+LV_FONT_DECLARE(ui_font_huge);
 
 #ifdef __cplusplus
 } /*extern "C"*/

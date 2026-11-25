@@ -6,19 +6,19 @@ ui_JackMapViewPage = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_JackMapViewPage, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_flex_flow(ui_JackMapViewPage,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_JackMapViewPage, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_set_style_pad_left(ui_JackMapViewPage, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_JackMapViewPage, ui_px(4), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_JackMapViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_JackMapViewPage, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_JackMapViewPage, ui_px(3), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_JackMapViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_JackMapViewCont = lv_obj_create(ui_JackMapViewPage);
-lv_obj_set_width( ui_JackMapViewCont, 312);
-lv_obj_set_height( ui_JackMapViewCont, 232);
+lv_obj_set_width(ui_JackMapViewCont, lv_pct(100));
+lv_obj_set_height(ui_JackMapViewCont, lv_pct(100));
 lv_obj_set_align( ui_JackMapViewCont, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_JackMapViewCont,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_JackMapViewCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_clear_flag( ui_JackMapViewCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_style_radius(ui_JackMapViewCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_radius(ui_JackMapViewCont, ui_px(4), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_JackMapViewCont, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_img_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -29,31 +29,31 @@ lv_obj_set_style_border_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFA
 lv_obj_set_style_border_width(ui_JackMapViewCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_color(ui_JackMapViewCont, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_outline_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_width(ui_JackMapViewCont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_pad(ui_JackMapViewCont, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_ofs_x(ui_JackMapViewCont, 5, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_ofs_y(ui_JackMapViewCont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_JackMapViewCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_JackMapViewCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_JackMapViewCont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_JackMapViewCont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_JackMapViewCont, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_JackMapViewCont, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_width(ui_JackMapViewCont, ui_px(2), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_pad(ui_JackMapViewCont, ui_px(1), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_shadow_ofs_x(ui_JackMapViewCont, ui_px(5), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_shadow_ofs_y(ui_JackMapViewCont, ui_px(2), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_JackMapViewCont, ui_px(4), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_JackMapViewCont, ui_px(4), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_JackMapViewCont, ui_px(2), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_JackMapViewCont, ui_px(2), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_JackMapViewCont, ui_px(3), LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_JackMapViewCont, ui_px(8), LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_JackMapLeftColumn = lv_obj_create(ui_JackMapViewCont);
 lv_obj_remove_style_all(ui_JackMapLeftColumn);
-lv_obj_set_width( ui_JackMapLeftColumn, 150);
-lv_obj_set_height( ui_JackMapLeftColumn, 228);
+lv_obj_set_flex_grow(ui_JackMapLeftColumn, 1);
+lv_obj_set_height(ui_JackMapLeftColumn, lv_pct(100));
 lv_obj_set_align( ui_JackMapLeftColumn, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_JackMapLeftColumn,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_JackMapLeftColumn, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_clear_flag( ui_JackMapLeftColumn, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE) ;    /// Flags
-lv_obj_set_style_pad_hor(ui_JackMapLeftColumn, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_hor(ui_JackMapLeftColumn, ui_px(2), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_ver(ui_JackMapLeftColumn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_JackMapLeftColumn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_JackMapLeftColumn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-// lv_obj_set_style_border_width(ui_JackMapLeftColumn, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_border_width(ui_JackMapLeftColumn, ui_px(1), LV_PART_MAIN| LV_STATE_DEFAULT);
 // lv_obj_set_style_border_color(ui_JackMapLeftColumn, lv_color_hex(0x00FF00), LV_PART_MAIN| LV_STATE_DEFAULT);
 // lv_obj_set_style_border_opa(ui_JackMapLeftColumn, LV_OPA_100, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -64,10 +64,10 @@ lv_obj_set_align( ui_JackMapInputsTitle, LV_ALIGN_CENTER );
 lv_label_set_text(ui_JackMapInputsTitle,"INPUTS");
 lv_obj_set_style_text_color(ui_JackMapInputsTitle, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_JackMapInputsTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_JackMapInputsTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_JackMapInputsTitle, ui_px(1), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_JackMapInputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_JackMapInputsTitle, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_JackMapInputsTitle, 16, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_JackMapInputsTitle, &ui_font_med_large_bold, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_JackMapInputsTitle, ui_px(16), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_JackMapInputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_JackMapInputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_JackMapInputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -75,7 +75,7 @@ lv_obj_set_style_pad_bottom(ui_JackMapInputsTitle, 0, LV_PART_MAIN| LV_STATE_DEF
 ui_JackMapLeftItems = lv_obj_create(ui_JackMapLeftColumn);
 lv_obj_remove_style_all(ui_JackMapLeftItems);
 lv_obj_set_width(ui_JackMapLeftItems, lv_pct(100));
-lv_obj_set_height(ui_JackMapLeftItems, 208);
+lv_obj_set_flex_grow(ui_JackMapLeftItems, 1);
 lv_obj_set_align(ui_JackMapLeftItems, LV_ALIGN_CENTER);
 lv_obj_set_flex_flow(ui_JackMapLeftItems, LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_JackMapLeftItems, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -83,31 +83,31 @@ lv_obj_add_flag(ui_JackMapLeftItems, LV_OBJ_FLAG_SCROLLABLE); /// Flags
 lv_obj_clear_flag(ui_JackMapLeftItems,
 				  LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK |
 					  LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
-lv_obj_set_style_pad_left(ui_JackMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_JackMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_JackMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_JackMapLeftItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_JackMapLeftItems, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_JackMapLeftItems, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_JackMapLeftItems, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_JackMapLeftItems, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_JackMapLeftItems, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_JackMapLeftItems, ui_px(6), LV_PART_MAIN | LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_JackMapLeftItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-// lv_obj_set_style_border_width(ui_JackMapLeftItems, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_border_width(ui_JackMapLeftItems, ui_px(1), LV_PART_MAIN| LV_STATE_DEFAULT);
 // lv_obj_set_style_border_color(ui_JackMapLeftItems, lv_color_hex(0xFF0000), LV_PART_MAIN| LV_STATE_DEFAULT);
 // lv_obj_set_style_border_opa(ui_JackMapLeftItems, LV_OPA_100, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_JackMapRightColumn = lv_obj_create(ui_JackMapViewCont);
 lv_obj_remove_style_all(ui_JackMapRightColumn);
-lv_obj_set_width( ui_JackMapRightColumn, 150);
-lv_obj_set_height( ui_JackMapRightColumn, 228);
+lv_obj_set_flex_grow(ui_JackMapRightColumn, 1);
+lv_obj_set_height(ui_JackMapRightColumn, lv_pct(100));
 lv_obj_set_align( ui_JackMapRightColumn, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_JackMapRightColumn,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_JackMapRightColumn, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_clear_flag( ui_JackMapRightColumn, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE );    /// Flags
-lv_obj_set_style_pad_hor(ui_JackMapRightColumn, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_hor(ui_JackMapRightColumn, ui_px(2), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_ver(ui_JackMapRightColumn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_JackMapRightColumn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_JackMapRightColumn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-// lv_obj_set_style_border_width(ui_JackMapRightColumn, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_border_width(ui_JackMapRightColumn, ui_px(1), LV_PART_MAIN| LV_STATE_DEFAULT);
 // lv_obj_set_style_border_color(ui_JackMapRightColumn, lv_color_hex(0x00FF00), LV_PART_MAIN| LV_STATE_DEFAULT);
 // lv_obj_set_style_border_opa(ui_JackMapRightColumn, LV_OPA_100, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -118,10 +118,10 @@ lv_obj_set_align( ui_JackMapOutputsTitle, LV_ALIGN_CENTER );
 lv_label_set_text(ui_JackMapOutputsTitle,"OUTPUTS");
 lv_obj_set_style_text_color(ui_JackMapOutputsTitle, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_JackMapOutputsTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_JackMapOutputsTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_JackMapOutputsTitle, ui_px(1), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_JackMapOutputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_JackMapOutputsTitle, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_JackMapOutputsTitle, 16, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_JackMapOutputsTitle, &ui_font_med_large_bold, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_JackMapOutputsTitle, ui_px(16), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_JackMapOutputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_JackMapOutputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_JackMapOutputsTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -129,18 +129,18 @@ lv_obj_set_style_pad_bottom(ui_JackMapOutputsTitle, 0, LV_PART_MAIN| LV_STATE_DE
 ui_JackMapRightItems = lv_obj_create(ui_JackMapRightColumn);
 lv_obj_remove_style_all(ui_JackMapRightItems);
 lv_obj_set_width(ui_JackMapRightItems, lv_pct(100));
-lv_obj_set_height(ui_JackMapRightItems, 208);
+lv_obj_set_flex_grow(ui_JackMapRightItems, 1);
 lv_obj_set_align(ui_JackMapRightItems, LV_ALIGN_CENTER);
 lv_obj_set_flex_flow(ui_JackMapRightItems, LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_JackMapRightItems, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_add_flag(ui_JackMapRightItems, LV_OBJ_FLAG_SCROLLABLE);
 lv_obj_clear_flag(ui_JackMapRightItems, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK |
 					  LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
-lv_obj_set_style_pad_left(ui_JackMapRightItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_JackMapRightItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_JackMapRightItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_JackMapRightItems, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_JackMapRightItems, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_JackMapRightItems, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_JackMapRightItems, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_JackMapRightItems, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_JackMapRightItems, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_JackMapRightItems, ui_px(6), LV_PART_MAIN | LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_JackMapRightItems, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 // lv_obj_set_scrollbar_mode(ui_JackMapRightItems, LV_SCROLLBAR_MODE_ON);
@@ -148,12 +148,12 @@ lv_obj_set_style_pad_column(ui_JackMapRightItems, 0, LV_PART_MAIN | LV_STATE_DEF
 // lv_obj_set_style_bg_color(ui_JackMapRightItems, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
 // lv_obj_set_style_bg_opa(ui_JackMapRightItems, 128, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 // lv_obj_set_style_pad_left(ui_JackMapRightItems, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
-// lv_obj_set_style_pad_right(ui_JackMapRightItems, 6, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+// lv_obj_set_style_pad_right(ui_JackMapRightItems, ui_px(6), LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 // lv_obj_set_style_pad_top(ui_JackMapRightItems, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 // lv_obj_set_style_pad_bottom(ui_JackMapRightItems, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
-// lv_obj_set_style_width(ui_JackMapRightItems, 3, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+// lv_obj_set_style_width(ui_JackMapRightItems, ui_px(3), LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 
-// lv_obj_set_style_border_width(ui_JackMapRightItems, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_border_width(ui_JackMapRightItems, ui_px(1), LV_PART_MAIN| LV_STATE_DEFAULT);
 // lv_obj_set_style_border_color(ui_JackMapRightItems, lv_color_hex(0xFF0000), LV_PART_MAIN| LV_STATE_DEFAULT);
 // lv_obj_set_style_border_opa(ui_JackMapRightItems, LV_OPA_100, LV_PART_MAIN| LV_STATE_DEFAULT);
 
