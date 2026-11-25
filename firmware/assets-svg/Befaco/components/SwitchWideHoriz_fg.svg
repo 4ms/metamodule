@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="6.911" height="8.482" viewBox="0 0 2.3406391 2.8726232" version="1.1" id="svg3573">
+  <defs id="defs3570">
+    <linearGradient id="path5815_00000176018740175221449750000008623012870990731937_" gradientUnits="userSpaceOnUse" x1="4.9991698" y1="10.67955" x2="4.9991698" y2="19.52606">
+      <stop offset="0.00559" style="stop-color:#3D3B3B" id="stop16" />
+      <stop offset="1" style="stop-color:#2D2C2C" id="stop18" />
+    </linearGradient>
+  </defs>
+  <g id="layer1" transform="translate(-58.765578,-147.06369)">
+    <g id="g4303" transform="matrix(0,0.27552525,-0.26458333,0,63.931848,146.70305)" style="fill:#000000;fill-opacity:1">
+      <g id="g27" style="display:inline;fill:#000000;fill-opacity:1">
+        <linearGradient id="linearGradient1363" gradientUnits="userSpaceOnUse" x1="4.9991698" y1="10.67955" x2="4.9991698" y2="19.52606">
+          <stop offset="0.00559" style="stop-color:#3D3B3B" id="stop1359" />
+          <stop offset="1" style="stop-color:#2D2C2C" id="stop1361" />
+        </linearGradient>
+        <path id="path5815_4_" fill="url(#path5815_00000176018740175221449750000008623012870990731937_)" d="m 1.30891,10.67955 h 10.425989 v 8.84651 H 1.30891 Z" style="fill:#000000;fill-opacity:1" />
+        <path id="path5821_4_" fill="#5e5e5e" d="m 1.30891,13.629997 h 10.423762 v 2.948032 H 1.30891 Z" style="fill:#cacaca;fill-opacity:1;stroke-width:1.83304" />
+      </g>
+    </g>
+  </g>
+</svg>

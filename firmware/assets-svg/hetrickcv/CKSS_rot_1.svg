@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20.641" height="14.000" viewBox="0 0 5.4612924 3.7041668" version="1.1" id="svg56722">
+  <defs id="defs56716" />
+  <g id="layer1" transform="translate(-29.28931,-66.25302)">
+    <g transform="matrix(0,0.27523902,0.27523902,0,-286.94414,-143.61888)" id="g56702" style="stroke-width:1.2817142">
+      <g transform="translate(762.5078,1167.3652)" id="g5827" style="stroke-width:1.2817142">
+        <path id="path5829" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.2817142" d="M 0,0 C 0,0.779 0.639,1.418 1.418,1.418 H 12.04 c 0.779,0 1.418,-0.639 1.418,-1.418 v -17.007 c 0,-0.779 -0.639,-1.417 -1.418,-1.417 H 1.418 C 0.639,-18.424 0,-17.786 0,-17.007 Z" />
+      </g>
+      <g style="fill:#282828;fill-opacity:1;stroke-width:1.2817142" id="g5839">
+        <g style="fill:#282828;fill-opacity:1;stroke-width:1.2817142" id="g5841">
+          <path id="path5849" style="fill:#282828;fill-opacity:1;stroke:none;stroke-width:1.2817142" d="m 764.617,1167.502 c -0.468,0 -0.852,-0.382 -0.852,-0.85 v 0 -15.724 c 0,-0.468 0.384,-0.851 0.852,-0.851 v 0 h 9.239 c 0.467,0 0.85,0.383 0.85,0.851 v 0 15.724 c 0,0.468 -0.383,0.85 -0.85,0.85 v 0 z" />
+        </g>
+      </g>
+      <path id="path5859" style="fill:#444444;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.2817142" d="m 763.767,1167.503 h 10.94 v -8.504 h -10.94 z" />
+      <path id="path5861" style="fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.2817142" d="m 763.767,1163.719 h 10.94 v -0.936 h -10.94 z" />
+      <path id="path5863" style="fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.2817142" d="m 763.767,1159.935 h 10.94 v -0.936 h -10.94 z" />
+      <path id="path5865" style="fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.2817142" d="m 763.767,1161.826 h 10.94 v -0.936 h -10.94 z" />
+      <path id="path5867" style="fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.2817142" d="m 763.767,1165.611 h 10.94 v -0.936 h -10.94 z" />
+      <path id="path5869" style="fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.2817142" d="m 763.767,1167.503 h 10.94 v -0.936 h -10.94 z" />
+    </g>
+  </g>
+</svg>
