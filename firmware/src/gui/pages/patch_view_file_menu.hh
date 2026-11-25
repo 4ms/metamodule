@@ -1,5 +1,6 @@
 #pragma once
 #include "delay.hh"
+#include "gui/ui_scale.h"
 #include "fs/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
@@ -42,7 +43,7 @@ struct PatchViewFileMenu {
 		, missing_plugins{missing_plugins} {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
-		lv_obj_set_x(ui_PatchFileMenu, 140);
+		lv_obj_set_x(ui_PatchFileMenu, ui_px(140));
 
 		lv_obj_add_event_cb(ui_SaveButton, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileMenuCloseButton, menu_button_cb, LV_EVENT_CLICKED, this);
@@ -69,7 +70,7 @@ struct PatchViewFileMenu {
 		lv_group_add_obj(group, midi_pc_menu_item);
 		lv_group_add_obj(group, ui_PatchFileDeleteBut);
 
-		lv_obj_set_width(ui_PatchFileMenu, 140);
+		lv_obj_set_width(ui_PatchFileMenu, ui_px(140));
 		lv_label_set_text(ui_PatchFileRenameLabel, "Move/Rename");
 	}
 
@@ -306,7 +307,7 @@ private:
 		current_action = method;
 		patch_save_dialog.prepare_focus(method);
 
-		lv_obj_set_x(ui_PatchFileMenu, 200);
+		lv_obj_set_x(ui_PatchFileMenu, ui_px(200));
 		visible = false;
 
 		hide_menu();

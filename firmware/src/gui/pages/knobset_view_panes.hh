@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
@@ -80,7 +81,7 @@ struct ProKnobSetPanes {
 			if (col == NumColumns / 2) {
 				auto gap = lv_obj_create(ui_KnobSetContainer);
 				lv_obj_remove_style_all(gap);
-				lv_obj_set_height(gap, 1);
+				lv_obj_set_height(gap, ui_px(1));
 				lv_obj_set_flex_grow(gap, 1);
 				lv_obj_clear_flag(gap, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 				lv_obj_move_to_index(gap, index++);
@@ -121,17 +122,17 @@ struct ProKnobSetPanes {
 	}
 
 private:
-	static constexpr lv_coord_t ColumnWidth = 50;
-	static constexpr lv_coord_t PaneWidth = 52;
+	static constexpr lv_coord_t ColumnWidth = ui_px(50);
+	static constexpr lv_coord_t PaneWidth = ui_px(52);
 	// Room below the knob for the pane's scrollbar (when a knob has more than one mapping)
-	static constexpr lv_coord_t PaneHeight = 52;
+	static constexpr lv_coord_t PaneHeight = ui_px(52);
 
 	// MP1's small knob is 64 high: 44 arc, 22 circle, label at 31 (two lines)
-	static constexpr lv_coord_t KnobHeight = 50;
-	static constexpr lv_coord_t ArcSize = 36;
-	static constexpr lv_coord_t CircleSize = 20;
-	static constexpr lv_coord_t LabelY = 25;
-	static constexpr lv_coord_t IndicatorPivot = 10; // the indicator's transform_pivot_y
+	static constexpr lv_coord_t KnobHeight = ui_px(50);
+	static constexpr lv_coord_t ArcSize = ui_px(36);
+	static constexpr lv_coord_t CircleSize = ui_px(20);
+	static constexpr lv_coord_t LabelY = ui_px(25);
+	static constexpr lv_coord_t IndicatorPivot = ui_px(10); // the indicator's transform_pivot_y
 
 	// Like the SquareLine page's ui_KnobSetPanelLeft
 	static lv_obj_t *create_column() {
@@ -171,16 +172,16 @@ private:
 		lv_obj_set_style_border_side(pane, LV_BORDER_SIDE_NONE, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_all(pane, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_row(pane, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_column(pane, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_column(pane, ui_px(8), LV_PART_MAIN | LV_STATE_DEFAULT);
 
 		lv_obj_set_style_radius(pane, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_color(pane, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(pane, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_width(pane, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(pane, 2, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(pane, 2, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_left(pane, ui_px(2), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_right(pane, ui_px(2), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_top(pane, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_bottom(pane, -1, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_bottom(pane, ui_px(-1), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 		return pane;
 	}
 };

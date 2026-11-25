@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "core_a7/device_settings_proxy.hh"
 #include "fs/helpers.hh"
 #include "gui/gui_state.hh"
@@ -145,7 +147,7 @@ struct PrefsTab : SystemMenuTab {
 		}
 
 		lv_dropdown_set_options(audio_section.overrun_retries, opts.c_str());
-		lv_obj_set_width(audio_section.samplerate_dropdown, 80);
+		lv_obj_set_width(audio_section.samplerate_dropdown, ui_px(80));
 
 		opts = "";
 		for (auto item : AudioSettings::ValidSampleRates) {
@@ -327,27 +329,27 @@ private:
 		if (cur_sr >= 0 && cur_sr != settings.audio.sample_rate) {
 			std::string msg = "Sample Rate:\n(default)";
 			lv_label_set_text(audio_section.samplerate_label, msg.c_str());
-			lv_obj_set_style_text_font(audio_section.samplerate_label, &ui_font_MuseoSansRounded70014, 0);
+			lv_obj_set_style_text_font(audio_section.samplerate_label, font_medium_bold, 0);
 
 			lv_show(audio_section.sr_override_cont);
 			lv_label_set_text(audio_section.sr_override_label, samplerate_string(cur_sr).c_str());
 
 		} else {
 			lv_label_set_text(audio_section.samplerate_label, "Sample Rate:");
-			lv_obj_set_style_text_font(audio_section.samplerate_label, &ui_font_MuseoSansRounded70016, 0);
+			lv_obj_set_style_text_font(audio_section.samplerate_label, font_med_large_bold, 0);
 			lv_hide(audio_section.sr_override_cont);
 		}
 
 		if (cur_bs > 0 && cur_bs != settings.audio.block_size) {
 			std::string msg = "Block Size:\n(default)";
 			lv_label_set_text(audio_section.blocksize_label, msg.c_str());
-			lv_obj_set_style_text_font(audio_section.blocksize_label, &ui_font_MuseoSansRounded70014, 0);
+			lv_obj_set_style_text_font(audio_section.blocksize_label, font_medium_bold, 0);
 
 			lv_show(audio_section.bs_override_cont);
 			lv_label_set_text_fmt(audio_section.bs_override_label, "%u", (unsigned)cur_bs);
 		} else {
 			lv_label_set_text(audio_section.blocksize_label, "Block size:");
-			lv_obj_set_style_text_font(audio_section.blocksize_label, &ui_font_MuseoSansRounded70016, 0);
+			lv_obj_set_style_text_font(audio_section.blocksize_label, font_med_large_bold, 0);
 			lv_hide(audio_section.bs_override_cont);
 		}
 	}

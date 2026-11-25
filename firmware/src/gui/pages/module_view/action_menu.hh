@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
+#include "gui/ui_scale.h"
 #include "fat_file_io.hh"
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -67,15 +68,15 @@ public:
 		lv_hide(rename_textarea);
 		lv_textarea_set_max_length(rename_textarea, AliasNameString::capacity);
 		lv_textarea_set_one_line(rename_textarea, true);
-		lv_obj_set_width(rename_textarea, 300); // screen width (320) minus 10px margin each side
+		lv_obj_set_width(rename_textarea, ui_px(300)); // screen width (320) minus 10px margin each side
 		lv_obj_set_style_bg_opa(rename_textarea, LV_OPA_COVER, 0);
 		lv_obj_set_style_border_color(rename_textarea, lv_color_white(), LV_PART_CURSOR | LV_STATE_DEFAULT);
 		lv_obj_set_style_border_opa(rename_textarea, LV_OPA_COVER, LV_PART_CURSOR | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_width(rename_textarea, 1, LV_PART_CURSOR | LV_STATE_DEFAULT);
+		lv_obj_set_style_border_width(rename_textarea, ui_px(1), LV_PART_CURSOR | LV_STATE_DEFAULT);
 		lv_obj_set_style_border_side(rename_textarea, LV_BORDER_SIDE_LEFT, LV_PART_CURSOR | LV_STATE_DEFAULT);
 		lv_obj_add_event_cb(rename_textarea, textarea_changed_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
-		lv_obj_set_height(ui_ModuleViewActionMenu, 240);
+		lv_obj_set_x(ui_ModuleViewActionMenu, ui_px(160));
+		lv_obj_set_height(ui_ModuleViewActionMenu, LV_VER_RES);
 
 		lv_obj_move_foreground(ui_ModuleViewActionDeleteBut);
 
@@ -681,7 +682,7 @@ private:
 			},
 			/*hide_field_on_dismiss=*/true);
 		lv_show(page->rename_textarea);
-		lv_obj_align_to(page->rename_textarea, ui_Keyboard, LV_ALIGN_OUT_TOP_MID, 0, -4);
+		lv_obj_align_to(page->rename_textarea, ui_Keyboard, LV_ALIGN_OUT_TOP_MID, 0, ui_px(-4));
 	}
 
 	FatFileIO &ramdisk;

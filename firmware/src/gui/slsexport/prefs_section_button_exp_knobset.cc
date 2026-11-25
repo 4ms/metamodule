@@ -1,4 +1,5 @@
 #include "prefs_section_button_exp_knobset.hh"
+#include "gui/ui_scale.h"
 #include "lvgl.h"
 #include "ui_local.h"
 
@@ -11,7 +12,7 @@ void PrefsSectionButtonExpKnobSet::create(lv_obj_t *parent) {
 
 	auto cont = create_prefs_labeled_dropdown(parent, "MetaButton #:");
 	expander_dropdown = lv_obj_get_child(cont, 1);
-	lv_obj_set_width(expander_dropdown, 80);
+	lv_obj_set_width(expander_dropdown, ui_px(80));
 
 	require_back_cont = create_prefs_labeled_check(parent, "Back + Button:");
 	create_prefs_note(require_back_cont, "Hold Back and press a\nButton to change Knob Sets");

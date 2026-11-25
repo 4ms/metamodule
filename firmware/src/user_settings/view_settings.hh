@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include "conf/screen_buffer_conf.hh"
 #include <cstdint>
 
 namespace MetaModule
@@ -9,7 +10,8 @@ namespace MetaModule
 
 // Size of the PatchView module canvas
 struct RackSize {
-	constexpr static unsigned ViewWidthPx = 308;
+	// The screen width less padding (on MP1: 308 of 320px)
+	constexpr static unsigned ViewWidthPx = ScreenBufferConf::viewWidth * 308 / 320;
 	constexpr static unsigned RackWidthStepHP = 4;
 	constexpr static unsigned MinRackWidthHP = 28;
 
@@ -87,9 +89,17 @@ struct ModuleDisplaySettings {
 		return std::clamp<uint8_t>(tension, MinCableTension, MaxCableTension);
 	}
 
-	// Height in px of a module faceplate in PatchView (240 = full screen height)
-	constexpr static std::array<unsigned, 5> ZoomLevels = {120, 150, 180, 210, 240};
-	constexpr static unsigned DefaultZoomLevel = 180;
+	// Height in px of a module faceplate in PatchView: from half to all of the screen height
+	// (on MP1: 120, 150, 180, 210, 240)
+	constexpr static unsigned ScreenHeightPx = ScreenBufferConf::viewHeight;
+	constexpr static std::array<unsigned, 5> ZoomLevels = {
+		ScreenHeightPx * 4 / 8,
+		ScreenHeightPx * 5 / 8,
+		ScreenHeightPx * 6 / 8,
+		ScreenHeightPx * 7 / 8,
+		ScreenHeightPx,
+	};
+	constexpr static unsigned DefaultZoomLevel = ZoomLevels[2];
 	unsigned view_height_px = DefaultZoomLevel;
 
 	// Index into ZoomLevels of the level closest to the given height

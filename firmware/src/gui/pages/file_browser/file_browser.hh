@@ -1,5 +1,6 @@
 #pragma once
 #include "fs/helpers.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
 #include "gui/slsexport/filebrowser/ui.h"
@@ -25,7 +26,7 @@ struct FileBrowserDialog {
 
 		lv_obj_add_event_cb(ui_FileBrowserRoller, roller_click_cb, LV_EVENT_CLICKED, this);
 
-		lv_obj_set_width(ui_FileBrowserPathLabel, 300);
+		lv_obj_set_width(ui_FileBrowserPathLabel, ui_px(300));
 		lv_label_set_long_mode(ui_FileBrowserPathLabel, LV_LABEL_LONG_SCROLL);
 	}
 

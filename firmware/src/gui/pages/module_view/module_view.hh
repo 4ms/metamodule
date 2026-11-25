@@ -1,5 +1,7 @@
 #pragma once
 #include "gui/dyn_display.hh"
+#include "gui/elements/module_art.hh"
+#include "gui/ui_scale.h"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/helpers/load_meter.hh"
 #include "gui/helpers/roller_hover_text.hh"
@@ -88,12 +90,12 @@ struct ModuleViewPage : PageBase {
 
 		load_meter = create_load_meter(lv_layer_sys());
 		lv_obj_set_align(load_meter, LV_ALIGN_TOP_LEFT);
-		lv_obj_set_y(load_meter, -2);
+		lv_obj_set_y(load_meter, ui_px(-2));
 		lv_hide(load_meter);
 
-		// lv_obj_set_x(roller_hover.get_cont(), 8);
-		lv_obj_set_style_pad_left(lv_obj_get_child(roller_hover.get_cont(), 0), 15, 0);
-		lv_obj_set_style_pad_right(lv_obj_get_child(roller_hover.get_cont(), 0), 10, 0);
+		// lv_obj_set_x(roller_hover.get_cont(), ui_px(8));
+		lv_obj_set_style_pad_left(lv_obj_get_child(roller_hover.get_cont(), 0), ui_px(15), 0);
+		lv_obj_set_style_pad_right(lv_obj_get_child(roller_hover.get_cont(), 0), ui_px(10), 0);
 	}
 
 	void prepare_focus() override {
@@ -148,8 +150,8 @@ struct ModuleViewPage : PageBase {
 			lv_show(ui_ModuleViewCableCreateLabel);
 			lv_label_set_text(ui_ModuleViewCableCreateLabel,
 							  gui_state.new_cable ? "Creating a cable" : "Attaching an expander");
-			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
-			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
+			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, ui_px(8), LV_PART_MAIN);
+			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, ui_px(8), LV_PART_MAIN);
 			lv_obj_set_flex_align(
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 		} else {
@@ -158,8 +160,8 @@ struct ModuleViewPage : PageBase {
 			lv_show(ui_ModuleViewSettingsBut);
 			lv_hide(ui_ModuleViewCableCancelBut);
 			lv_hide(ui_ModuleViewCableCreateLabel);
-			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 2, LV_PART_MAIN);
-			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, -4, LV_PART_MAIN);
+			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, ui_px(2), LV_PART_MAIN);
+			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, ui_px(-4), LV_PART_MAIN);
 			lv_obj_set_flex_align(
 				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 			settings_menu.prepare_focus(group);
@@ -342,7 +344,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		auto ht = lv_obj_get_height(ui_ElementRollerButtonCont);
-		lv_obj_set_height(ui_ElementRoller, 240 - ht);
+		lv_obj_set_height(ui_ElementRoller, LV_VER_RES - ht);
 	}
 
 	bool handle_patch_mods() {
@@ -523,8 +525,10 @@ private:
 
 	// Defined in module_view/draw_module.cc
 	void prepare_dynamic_elements();
-	static constexpr unsigned FullHeightPx = 240;
-	static constexpr unsigned ScreenWidthPx = 320;
+	static constexpr unsigned FullHeightPx = ModuleFullHeightPx;
+	static constexpr unsigned ScreenWidthPx = ScreenBufferConf::viewWidth;
+	// The widest module that can be drawn (at full height) is 3 times as wide as it is high
+	static constexpr unsigned MaxModuleWidthPx = std::min<unsigned>(FullHeightPx * 3, 2047);
 
 	unsigned resize_module_image(unsigned max);
 	void redraw_module();
@@ -557,7 +561,7 @@ private:
 	void perform_jack_assign(const DrawnElement *element, ElementType jack_type);
 	bool cycle_port_selection(const DrawnElement *element, int motion, ElementType jack_type);
 
-	CableDrawer<320, 240> cable_drawer;
+	CableDrawer<ScreenWidthPx, FullHeightPx> cable_drawer;
 
 	ModuleInfoView moduleinfo;
 	PatchModQueue module_mods;
@@ -600,7 +604,7 @@ private:
 
 	ModuleViewActionMenu action_menu;
 
-	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};
+	lv_color_t buffer[MaxModuleWidthPx * FullHeightPx]{};
 	lv_draw_img_dsc_t img_dsc{};
 
 	enum class ViewMode { List, Mapping, ModuleContextMenu } mode{ViewMode::List};

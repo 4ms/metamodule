@@ -1,5 +1,6 @@
 #pragma once
 #include "delay.hh"
+#include "gui/ui_scale.h"
 #include "CoreModules/elements/element_counter.hh"
 #include "gui/dyn_display.hh"
 #include "gui/elements/map_ring_animate.hh"
@@ -175,7 +176,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_scrollbar_mode(viewport, LV_SCROLLBAR_MODE_ACTIVE);
 		lv_obj_set_style_pad_row(viewport, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_column(viewport, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_right(viewport, 2, LV_PART_MAIN);
+		lv_obj_set_style_pad_right(viewport, ui_px(2), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(viewport, LV_OPA_0, LV_PART_MAIN);
 
 		auto rack = lv_obj_create(viewport);
@@ -186,7 +187,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_style_bg_color(rack, lv_color_hex(0x222222), LV_PART_MAIN);
 		lv_obj_set_style_border_width(rack, 0, LV_PART_MAIN);
 		lv_obj_set_style_radius(rack, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_all(rack, 2, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(rack, ui_px(2), LV_PART_MAIN);
 		return rack;
 	}
 
@@ -797,8 +798,8 @@ private:
 			lv_obj_set_parent(load_meter, lv_layer_sys());
 			lv_obj_move_foreground(ui_OverloadMsgLabel);
 			lv_obj_set_style_bg_opa(load_meter, LV_OPA_80, 0);
-			lv_obj_set_x(load_meter, -4);
-			lv_obj_set_y(load_meter, 4);
+			lv_obj_set_x(load_meter, ui_px(-4));
+			lv_obj_set_y(load_meter, ui_px(4));
 		} else {
 			lv_obj_set_parent(load_meter, ui_PatchViewPage);
 			lv_obj_move_to_index(load_meter, 2);
@@ -828,7 +829,7 @@ private:
 		// Redraw all elements that have changed state (knobs, lights, etc)
 		auto is_visible = [](lv_coord_t pos) {
 			auto visible_top = lv_obj_get_scroll_y(ui_PatchViewPage);
-			auto visible_bot = visible_top + 240;
+			auto visible_bot = visible_top + LV_VER_RES;
 			return pos >= visible_top && pos < visible_bot;
 		};
 
@@ -952,11 +953,11 @@ private:
 		int16_t module_top_on_screen = header_y - scroll_y + module_y;
 		int16_t module_bot_on_screen = module_top_on_screen + page_settings.view_height_px;
 		int16_t space_above = module_top_on_screen;
-		int16_t space_below = 240 - module_bot_on_screen;
+		int16_t space_below = LV_VER_RES - module_bot_on_screen;
 		if (space_below > space_above) {
-			lv_obj_set_y(ui_ModuleName, module_bot_on_screen - 120 + 16);
+			lv_obj_set_y(ui_ModuleName, module_bot_on_screen - LV_VER_RES / 2 + ui_px(16));
 		} else {
-			lv_obj_set_y(ui_ModuleName, module_top_on_screen - 120 - 9);
+			lv_obj_set_y(ui_ModuleName, module_top_on_screen - LV_VER_RES / 2 - ui_px(9));
 		}
 	}
 
@@ -1451,8 +1452,8 @@ private:
 	RackLayout drawn_rack_layout{};
 
 	// Where the next module goes, while draw_modules() is laying them out
-	static constexpr lv_coord_t RowGapPx = 3;
-	static constexpr lv_coord_t BottomMarginPx = 30;
+	static constexpr lv_coord_t RowGapPx = ui_px(3);
+	static constexpr lv_coord_t BottomMarginPx = ui_px(30);
 
 	// Top-left-most module as arranged, so the view can open on it
 	lv_obj_t *topleft_module = nullptr;

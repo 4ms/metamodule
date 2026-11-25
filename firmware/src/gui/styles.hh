@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "lvgl.h"
 #include "params/panel_knob.hh"
 #include "patch-serial/patch/mapping_ids.hh"
@@ -310,7 +312,7 @@ struct Gui {
 		lv_style_set_radius(&debug_border, 0);
 		lv_style_set_border_color(&debug_border, lv_color_hex(0xff0000));
 		lv_style_set_border_opa(&debug_border, LV_OPA_70);
-		lv_style_set_border_width(&debug_border, 1);
+		lv_style_set_border_width(&debug_border, ui_px(1));
 
 		// invisible_style
 		lv_style_init(&invisible_style);
@@ -321,40 +323,40 @@ struct Gui {
 
 		// panel_highlight_style
 		lv_style_init(&panel_highlight_style);
-		lv_style_set_radius(&panel_highlight_style, 120);
+		lv_style_set_radius(&panel_highlight_style, ui_px(120));
 		lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
 		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_40);
 		lv_style_set_border_opa(&panel_highlight_style, LV_OPA_70);
-		lv_style_set_border_width(&panel_highlight_style, 1);
+		lv_style_set_border_width(&panel_highlight_style, ui_px(1));
 		lv_style_set_border_color(&panel_highlight_style, orange_highlight);
 
 		// panel_large_highlight_style
 		lv_style_init(&panel_large_highlight_style);
-		lv_style_set_radius(&panel_large_highlight_style, 4);
+		lv_style_set_radius(&panel_large_highlight_style, ui_px(4));
 		lv_style_set_bg_color(&panel_large_highlight_style, orange_highlight);
 		lv_style_set_bg_opa(&panel_large_highlight_style, LV_OPA_10);
 		lv_style_set_border_opa(&panel_large_highlight_style, LV_OPA_70);
-		lv_style_set_border_width(&panel_large_highlight_style, 2);
+		lv_style_set_border_width(&panel_large_highlight_style, ui_px(2));
 		lv_style_set_border_color(&panel_large_highlight_style, orange_highlight);
 
 		// selected_module_style
 		lv_style_init(&selected_module_style);
 		lv_style_set_outline_color(&selected_module_style, lv_palette_lighten(LV_PALETTE_ORANGE, 1));
-		lv_style_set_outline_width(&selected_module_style, 3);
+		lv_style_set_outline_width(&selected_module_style, ui_px(3));
 		lv_style_set_outline_opa(&selected_module_style, LV_OPA_100);
 		lv_style_set_radius(&selected_module_style, 0);
 
 		// rearrange_module_style
 		lv_style_init(&rearrange_module_style);
 		lv_style_set_outline_color(&rearrange_module_style, red_highlight);
-		lv_style_set_outline_width(&rearrange_module_style, 3);
+		lv_style_set_outline_width(&rearrange_module_style, ui_px(3));
 		lv_style_set_outline_opa(&rearrange_module_style, LV_OPA_100);
 		lv_style_set_radius(&rearrange_module_style, 0);
 
 		// carried_module_style
 		lv_style_init(&carried_module_style);
 		lv_style_set_outline_color(&carried_module_style, yellow_highlight);
-		lv_style_set_outline_width(&carried_module_style, 4);
+		lv_style_set_outline_width(&carried_module_style, ui_px(4));
 		lv_style_set_outline_opa(&carried_module_style, LV_OPA_100);
 		lv_style_set_radius(&carried_module_style, 0);
 
@@ -364,15 +366,15 @@ struct Gui {
 		lv_style_set_bg_opa(&roller_style, LV_OPA_COVER);
 		lv_style_set_bg_color(&roller_style, lv_color_black());
 		lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_LEFT);
-		lv_style_set_text_font(&roller_style, &ui_font_MuseoSansRounded70014);
+		lv_style_set_text_font(&roller_style, font_medium_bold);
 		lv_style_set_text_color(&roller_style, lv_color_white());
 		lv_style_set_text_opa(&roller_style, LV_OPA_COVER);
-		lv_style_set_text_line_space(&roller_style, 5);
-		lv_style_set_pad_hor(&roller_style, 2);
-		lv_style_set_pad_ver(&roller_style, 1);
-		lv_style_set_pad_gap(&roller_style, 2);
+		lv_style_set_text_line_space(&roller_style, ui_px(5));
+		lv_style_set_pad_hor(&roller_style, ui_px(2));
+		lv_style_set_pad_ver(&roller_style, ui_px(1));
+		lv_style_set_pad_gap(&roller_style, ui_px(2));
 		lv_style_set_line_color(&roller_style, lv_palette_main(LV_PALETTE_GREY));
-		lv_style_set_line_width(&roller_style, 12);
+		lv_style_set_line_width(&roller_style, ui_px(12));
 
 		// roller_sel_style
 		lv_style_init(&roller_sel_style);
@@ -389,7 +391,7 @@ struct Gui {
 
 		//module border
 		lv_style_init(&module_border_style);
-		lv_style_set_outline_width(&module_border_style, 1);
+		lv_style_set_outline_width(&module_border_style, ui_px(1));
 		lv_style_set_outline_color(&module_border_style, lv_palette_main(LV_PALETTE_ORANGE));
 		lv_style_set_border_width(&module_border_style, 0);
 		lv_style_set_shadow_opa(&module_border_style, LV_OPA_TRANSP);
@@ -398,34 +400,34 @@ struct Gui {
 
 		// Map circle
 		lv_style_init(&mapped_circle_style);
-		lv_style_set_radius(&mapped_circle_style, 40);
+		lv_style_set_radius(&mapped_circle_style, ui_px(40));
 		lv_style_set_border_color(&mapped_circle_style, lv_color_white());
-		lv_style_set_border_width(&mapped_circle_style, 12);
+		lv_style_set_border_width(&mapped_circle_style, ui_px(12));
 		lv_style_set_border_opa(&mapped_circle_style, LV_OPA_50);
 		lv_style_set_bg_opa(&mapped_circle_style, LV_OPA_0);
 		lv_style_set_outline_opa(&mapped_circle_style, LV_OPA_100);
-		lv_style_set_outline_width(&mapped_circle_style, 3);
+		lv_style_set_outline_width(&mapped_circle_style, ui_px(3));
 		lv_style_set_outline_pad(&mapped_circle_style, 0);
-		lv_style_set_radius(&mapped_circle_style, 40);
+		lv_style_set_radius(&mapped_circle_style, ui_px(40));
 		lv_style_set_text_color(&mapped_circle_style, lv_color_hex(0x000000));
 		lv_style_set_text_opa(&mapped_circle_style, 255);
-		lv_style_set_text_font(&mapped_circle_style, &ui_font_MuseoSansRounded50010);
+		lv_style_set_text_font(&mapped_circle_style, font_tiny);
 
 		// Map circle label style for jacks
 		lv_style_init(&mapped_jack_circle_label_style);
-		lv_style_set_pad_left(&mapped_jack_circle_label_style, -2);
+		lv_style_set_pad_left(&mapped_jack_circle_label_style, ui_px(-2));
 		lv_style_set_pad_right(&mapped_jack_circle_label_style, 0);
-		lv_style_set_pad_top(&mapped_jack_circle_label_style, -1);
+		lv_style_set_pad_top(&mapped_jack_circle_label_style, ui_px(-1));
 		lv_style_set_pad_bottom(&mapped_jack_circle_label_style, 0);
 
 		// Subdir panel
 		lv_style_init(&subdir_panel_item_style);
 		lv_style_set_width(&subdir_panel_item_style, LV_PCT(100));
-		lv_style_set_height(&subdir_panel_item_style, 20);
-		lv_style_set_pad_top(&subdir_panel_item_style, 2);
+		lv_style_set_height(&subdir_panel_item_style, ui_px(20));
+		lv_style_set_pad_top(&subdir_panel_item_style, ui_px(2));
 		lv_style_set_pad_bottom(&subdir_panel_item_style, 0);
 		lv_style_set_pad_right(&subdir_panel_item_style, 0);
-		lv_style_set_pad_left(&subdir_panel_item_style, 12);
+		lv_style_set_pad_left(&subdir_panel_item_style, ui_px(12));
 		lv_style_set_bg_opa(&subdir_panel_item_style, LV_OPA_0);
 		lv_style_set_outline_width(&subdir_panel_item_style, 0);
 		lv_style_set_border_width(&subdir_panel_item_style, 0);
@@ -448,8 +450,8 @@ struct Gui {
 		lv_style_set_bg_color(&dropdown_style, lv_color_hex(0x555555));
 		lv_style_set_text_color(&dropdown_style, lv_color_white());
 		lv_style_set_text_opa(&dropdown_style, 255);
-		lv_style_set_text_font(&dropdown_style, &ui_font_MuseoSansRounded70014);
-		lv_style_set_pad_ver(&dropdown_style, 4);
+		lv_style_set_text_font(&dropdown_style, font_medium_bold);
+		lv_style_set_pad_ver(&dropdown_style, ui_px(4));
 
 		// Dropdown: Part Selected
 		lv_style_init(&dropdown_style_selected);
@@ -461,7 +463,7 @@ struct Gui {
 		lv_style_set_outline_color(&dropdown_style_main_checked, orange_highlight);
 		lv_style_set_outline_opa(&dropdown_style_main_checked, LV_OPA_100);
 		lv_style_set_outline_width(&dropdown_style_main_checked, 0);
-		lv_style_set_outline_pad(&dropdown_style_main_checked, 1);
+		lv_style_set_outline_pad(&dropdown_style_main_checked, ui_px(1));
 
 		// Title level 2: centered, underline, orange,
 		lv_style_init(&title2_style);
@@ -470,7 +472,7 @@ struct Gui {
 		lv_style_set_text_letter_space(&title2_style, 0);
 		lv_style_set_text_line_space(&title2_style, 0);
 		lv_style_set_text_align(&title2_style, LV_TEXT_ALIGN_CENTER);
-		lv_style_set_text_font(&title2_style, &ui_font_MuseoSansRounded70016);
+		lv_style_set_text_font(&title2_style, font_med_large_bold);
 		lv_style_set_border_side(&title2_style, LV_BORDER_SIDE_BOTTOM);
 		lv_style_set_pad_left(&title2_style, 0);
 		lv_style_set_pad_right(&title2_style, 0);
@@ -481,8 +483,8 @@ struct Gui {
 		lv_style_init(&focus_style);
 		lv_style_set_outline_color(&focus_style, orange_highlight);
 		lv_style_set_outline_opa(&focus_style, LV_OPA_100);
-		lv_style_set_outline_width(&focus_style, 3);
-		lv_style_set_outline_pad(&focus_style, 2);
+		lv_style_set_outline_width(&focus_style, ui_px(3));
+		lv_style_set_outline_pad(&focus_style, ui_px(2));
 	}
 
 	static lv_obj_t *create_map_circle(lv_obj_t *parent) {

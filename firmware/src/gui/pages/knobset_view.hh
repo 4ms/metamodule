@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/elements/element_name.hh"
+#include "gui/ui_scale.h"
 #include "gui/pages/base.hh"
 #include "gui/pages/helpers.hh"
 #include "gui/pages/keyboard_entry.hh"
@@ -31,13 +32,13 @@ struct KnobSetViewPage : PageBase {
 		lv_hide(ui_PreviousKnobSet);
 
 		jacks_button = create_button(ui_KnobSetPageHeader, "Jacks");
-		lv_obj_set_height(jacks_button, 18);
+		lv_obj_set_height(jacks_button, ui_px(18));
 		lv_obj_add_event_cb(jacks_button, goto_jackmap_cb, LV_EVENT_CLICKED, this);
 		lv_obj_move_to_index(jacks_button, 1);
 
 		// Add MIDI Maps button next to Jacks
 		midi_map_button = create_button(ui_KnobSetPageHeader, "MIDI");
-		lv_obj_set_height(midi_map_button, 18);
+		lv_obj_set_height(midi_map_button, ui_px(18));
 		lv_obj_add_event_cb(midi_map_button, goto_midimap_cb, LV_EVENT_CLICKED, this);
 		// Place immediately after the Jacks button in header
 		lv_obj_move_to_index(midi_map_button, 2);
@@ -71,7 +72,7 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		lv_obj_set_y(ui_Keyboard, 40);
+		lv_obj_set_y(ui_Keyboard, ui_px(40));
 		keyboard_entry.prepare_focus(ui_KnobSetViewPage, group);
 
 		clear_containers();
@@ -279,7 +280,7 @@ struct KnobSetViewPage : PageBase {
 			lv_obj_set_style_radius(arc, 0, LV_PART_KNOB);
 			lv_obj_set_style_bg_color(arc, lv_color_hex(0x000000), LV_PART_KNOB);
 		} else {
-			lv_obj_set_style_radius(arc, 20, LV_PART_KNOB);
+			lv_obj_set_style_radius(arc, ui_px(20), LV_PART_KNOB);
 
 			if (is_tracking) {
 				lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);

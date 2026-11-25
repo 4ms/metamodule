@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/ui_scale.h"
 #include "gui/slsexport/sls_layout_fixups.hh"
 #include "lvgl.h"
 #include "ui_local.h"
@@ -45,7 +46,7 @@ struct SlsComponentInit {
 		}
 
 		lv_obj_set_parent(ui_MessagePanel, lv_layer_top());
-		lv_obj_set_y(ui_MessagePanel, -80);
+		lv_obj_set_y(ui_MessagePanel, ui_px(-80));
 
 		lv_obj_set_parent(ui_OverloadMsgLabel, lv_layer_sys());
 		lv_hide(ui_OverloadMsgLabel);
@@ -54,12 +55,12 @@ struct SlsComponentInit {
 	static void style_slider(lv_obj_t *slider) {
 		lv_obj_set_style_outline_color(slider, lv_color_hex(0xFD8B18), LV_STATE_EDITED);
 		lv_obj_set_style_outline_opa(slider, 255, LV_STATE_EDITED);
-		lv_obj_set_style_outline_width(slider, 2, LV_STATE_EDITED);
-		lv_obj_set_style_outline_pad(slider, 1, LV_STATE_EDITED);
-		lv_obj_set_style_radius(slider, 20, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
+		lv_obj_set_style_outline_width(slider, ui_px(2), LV_STATE_EDITED);
+		lv_obj_set_style_outline_pad(slider, ui_px(1), LV_STATE_EDITED);
+		lv_obj_set_style_radius(slider, ui_px(20), (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
 		lv_obj_set_style_bg_color(slider, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
 		lv_obj_set_style_bg_opa(slider, 255, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
-		lv_obj_set_style_radius(slider, 15, (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
+		lv_obj_set_style_radius(slider, ui_px(15), (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
 		lv_obj_set_style_bg_color(slider, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
 		lv_obj_set_style_bg_opa(slider, 255, (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
 	}

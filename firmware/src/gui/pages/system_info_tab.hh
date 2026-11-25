@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
 #include "drivers/cache.hh"
 #include "git_version.h"
 #include "gui/helpers/lv_helpers.hh"
@@ -37,14 +38,14 @@ struct InfoTab : SystemMenuTab {
 		lv_obj_set_width(usb_label, lv_pct(100));
 		lv_obj_set_height(usb_label, LV_SIZE_CONTENT);
 		lv_label_set_long_mode(usb_label, LV_LABEL_LONG_WRAP);
-		lv_obj_set_style_text_font(usb_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(usb_label, font_medium, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 		// Secondary line: attached device details (host mode), smaller font.
 		usb_detail_label = lv_label_create(ui_SystemMenuMainModuleCont);
 		lv_obj_set_width(usb_detail_label, lv_pct(100));
 		lv_obj_set_height(usb_detail_label, LV_SIZE_CONTENT);
 		lv_label_set_long_mode(usb_detail_label, LV_LABEL_LONG_WRAP);
-		lv_obj_set_style_text_font(usb_detail_label, &ui_font_MuseoSansRounded50012, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(usb_detail_label, font_small, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_hide(usb_detail_label);
 
 		// The generated UI has no MIDI-expander label either, so create one in
@@ -53,7 +54,7 @@ struct InfoTab : SystemMenuTab {
 		lv_obj_set_width(midi_exp_label, lv_pct(100));
 		lv_obj_set_height(midi_exp_label, LV_SIZE_CONTENT);
 		lv_label_set_long_mode(midi_exp_label, LV_LABEL_LONG_WRAP);
-		lv_obj_set_style_text_font(midi_exp_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(midi_exp_label, font_medium, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 		update_usb_status();
 	}

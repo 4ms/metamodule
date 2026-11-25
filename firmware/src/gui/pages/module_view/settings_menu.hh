@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
@@ -25,7 +27,7 @@ struct ModuleViewSettingsMenu {
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
 
 		graphics_update_rate_label = create_settings_menu_slider(ui_MVSettingsMenu, "Update Rate");
-		lv_obj_set_style_text_font(graphics_update_rate_label, &ui_font_MuseoSansRounded50014, 0);
+		lv_obj_set_style_text_font(graphics_update_rate_label, font_medium, 0);
 		lv_obj_set_width(graphics_update_rate_label, lv_pct(100));
 		lv_obj_set_align(graphics_update_rate_label, LV_ALIGN_LEFT_MID);
 
@@ -104,7 +106,7 @@ struct ModuleViewSettingsMenu {
 
 		lv_obj_add_event_cb(nav_wrapping_check, nav_wrapping_cb, LV_EVENT_VALUE_CHANGED, this);
 
-		lv_obj_set_x(ui_MVSettingsMenu, 220);
+		lv_obj_set_x(ui_MVSettingsMenu, ui_px(220));
 
 		lv_group_add_obj(settings_menu_group, ui_MVSettingsCloseButton);
 

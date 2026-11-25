@@ -1,5 +1,6 @@
 #pragma once
 #include "fs/helpers.hh"
+#include "gui/ui_scale.h"
 #include "gui/gui_state.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/slsexport/ui_local.h"
@@ -142,11 +143,11 @@ private:
 	}
 
 	void init_widgets() {
-		lv_obj_set_width(panel, 300);
-		lv_obj_set_height(panel, 185);
+		lv_obj_set_width(panel, ui_px(300));
+		lv_obj_set_height(panel, ui_px(185));
 		lv_obj_set_flex_flow(panel, LV_FLEX_FLOW_ROW);
 		lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
-		lv_obj_set_style_pad_row(panel, 12, LV_PART_MAIN);
+		lv_obj_set_style_pad_row(panel, ui_px(12), LV_PART_MAIN);
 
 		auto title = create_title_level_2(panel, "Load patch on MIDI PC");
 		lv_obj_move_to_index(title, 0);
@@ -155,14 +156,14 @@ private:
 		lv_obj_add_flag(pc_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 		pc_dropdown = create_midi_map_dropdown(panel, "");
-		lv_obj_set_width(pc_dropdown, 220);
+		lv_obj_set_width(pc_dropdown, ui_px(220));
 		lv_obj_set_height(pc_dropdown, LV_SIZE_CONTENT);
 
 		auto chan_label = create_midi_map_label(panel, "MIDI Channel:");
 		lv_obj_add_flag(chan_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 		chan_dropdown = create_midi_map_dropdown(panel, "");
-		lv_obj_set_width(chan_dropdown, 100);
+		lv_obj_set_width(chan_dropdown, ui_px(100));
 		lv_obj_set_height(chan_dropdown, LV_SIZE_CONTENT);
 		lv_dropdown_set_options(chan_dropdown,
 								"Any\nChan. 1\nChan. 2\nChan. 3\nChan. 4\nChan. 5\nChan. 6\nChan. 7\nChan. 8\nChan. "
@@ -171,7 +172,7 @@ private:
 		auto button_panel = lv_obj_get_parent(cancel_button);
 		lv_obj_add_flag(button_panel, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		lv_obj_move_to_index(button_panel, -1);
-		lv_obj_set_style_pad_top(button_panel, 12, LV_PART_MAIN);
+		lv_obj_set_style_pad_top(button_panel, ui_px(12), LV_PART_MAIN);
 	}
 
 	static void chan_changed_cb(lv_event_t *event) {

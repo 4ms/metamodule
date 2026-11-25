@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "dynload/plugin_manager.hh"
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -36,11 +38,11 @@ struct PluginTab : SystemMenuTab {
 
 		{ // Load All popup
 			load_all_popup = lv_obj_create(lv_layer_top());
-			lv_obj_set_width(load_all_popup, 320);
+			lv_obj_set_width(load_all_popup, LV_HOR_RES);
 			lv_obj_set_height(load_all_popup, LV_SIZE_CONTENT);
 			lv_obj_set_style_radius(load_all_popup, 0, LV_PART_MAIN);
-			lv_obj_set_style_pad_hor(load_all_popup, 8, LV_PART_MAIN);
-			lv_obj_set_style_pad_ver(load_all_popup, 6, LV_PART_MAIN);
+			lv_obj_set_style_pad_hor(load_all_popup, ui_px(8), LV_PART_MAIN);
+			lv_obj_set_style_pad_ver(load_all_popup, ui_px(6), LV_PART_MAIN);
 			lv_obj_set_style_bg_color(load_all_popup, lv_color_hex(0xE1E878), LV_PART_MAIN);
 			lv_obj_add_flag(load_all_popup, LV_OBJ_FLAG_SNAPABLE);
 
@@ -71,7 +73,7 @@ struct PluginTab : SystemMenuTab {
 
 		ram_label = lv_label_create(ui_PluginsRightColumn);
 		lv_obj_move_to_index(ram_label, 1);
-		lv_obj_set_style_text_font(ram_label, &ui_font_MuseoSansRounded50012, 0);
+		lv_obj_set_style_text_font(ram_label, font_small, 0);
 		lv_label_set_text(ram_label, "");
 	}
 

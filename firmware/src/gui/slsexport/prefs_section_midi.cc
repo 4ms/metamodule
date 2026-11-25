@@ -1,4 +1,6 @@
 #include "prefs_section_midi.hh"
+#include "gui/ui_scale.h"
+#include "gui/fonts/ui_fonts.hh"
 #include "ui_local.h"
 #include <algorithm>
 #include <string>
@@ -47,7 +49,7 @@ void PrefsSectionMidi::create(lv_obj_t *parent) {
 	cc_opts.pop_back();
 	auto cc_cont = create_prefs_labeled_dropdown(parent, "MIDI CC:", cc_opts);
 	knobset_cc_dropdown = lv_obj_get_child(cc_cont, 1);
-	lv_obj_set_width(knobset_cc_dropdown, 60);
+	lv_obj_set_width(knobset_cc_dropdown, ui_px(60));
 
 	// MIDI Channel (1-16)
 	std::string ch_opts;
@@ -57,19 +59,19 @@ void PrefsSectionMidi::create(lv_obj_t *parent) {
 	ch_opts.pop_back();
 	auto ch_cont = create_prefs_labeled_dropdown(parent, "MIDI Channel:", ch_opts);
 	knobset_channel_dropdown = lv_obj_get_child(ch_cont, 1);
-	lv_obj_set_width(knobset_channel_dropdown, 50);
+	lv_obj_set_width(knobset_channel_dropdown, ui_px(50));
 }
 
 void PrefsSectionMidi::init_popup(lv_obj_t *parent, lv_group_t *group, MidiPCPatchLoadSettings &settings) {
 	this->settings = &settings;
 
 	pc_roller.init(lv_layer_top(), group);
-	lv_obj_set_width(pc_roller.popup, 312);
-	lv_obj_set_height(pc_roller.popup, 230);
-	lv_obj_set_width(pc_roller.roller, 290);
-	lv_obj_set_style_text_font(pc_roller.roller, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
-	lv_obj_set_style_text_font(pc_roller.roller, &ui_font_MuseoSansRounded50014, LV_STATE_EDITED);
-	lv_obj_set_style_text_font(pc_roller.roller, &ui_font_MuseoSansRounded50014, LV_PART_ITEMS);
+	lv_obj_set_width(pc_roller.popup, ui_px(312));
+	lv_obj_set_height(pc_roller.popup, ui_px(230));
+	lv_obj_set_width(pc_roller.roller, ui_px(290));
+	lv_obj_set_style_text_font(pc_roller.roller, font_medium, LV_PART_MAIN);
+	lv_obj_set_style_text_font(pc_roller.roller, font_medium, LV_STATE_EDITED);
+	lv_obj_set_style_text_font(pc_roller.roller, font_medium, LV_PART_ITEMS);
 }
 
 bool PrefsSectionMidi::close_popup() {

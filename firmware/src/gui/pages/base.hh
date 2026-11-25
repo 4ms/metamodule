@@ -1,6 +1,8 @@
 #pragma once
 #include "delay.hh"
+#include "gui/ui_scale.h"
 #include "dynload/plugin_manager.hh"
+#include "gui/elements/module_art.hh"
 #include "gui/gui_state.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages//file_browser/file_browser.hh"
@@ -62,13 +64,17 @@ struct PageBase {
 
 	PageId id;
 
-	//Note: LVGL cannot deal with canvas larger than 2047 because there are only 11 bits for the height. 2047 / 180 = 11.4
-	static constexpr uint32_t MaxBufferHeight = 11 * 180;
-	static constexpr uint32_t MaxBufferPixels = MaxBufferHeight * 320;
+	//Note: LVGL cannot deal with canvas larger than 2047 because there are only 11 bits for the height.
+	//On MP1 this is 11 rows of modules at the default PatchView zoom (180px): 2047 / 180 = 11.4
+	static constexpr uint32_t MaxBufferHeight = std::min<uint32_t>(11 * ModuleDisplaySettings::DefaultZoomLevel, 2047);
+	static constexpr uint32_t DefaultBufferWidth = ScreenBufferConf::viewWidth;
 
-	static constexpr uint32_t DefaultBufferWidth = MaxBufferPixels / MaxBufferHeight;
+	// Modules are drawn larger on a taller screen (the PatchView zoom levels are fractions of
+	// the screen height), so the pixel pool grows with it, to hold about as many HP of modules.
+	static constexpr uint32_t MaxBufferPixels =
+		MaxBufferHeight * DefaultBufferWidth * (ScreenBufferConf::viewHeight / ModuleArtHeightPx);
 
-	static inline std::array<lv_color_t, MaxBufferHeight * DefaultBufferWidth> page_pixel_buffer;
+	static inline std::array<lv_color_t, MaxBufferPixels> page_pixel_buffer;
 
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;
@@ -96,7 +102,7 @@ struct PageBase {
 	void init_bg(lv_obj_t *screen_ptr) {
 		group = lv_group_create();
 		screen = screen_ptr;
-		lv_obj_set_size(screen, 320, 240); //TODO: use Screen Conf, not hard-set values
+		lv_obj_set_size(screen, LV_HOR_RES, LV_VER_RES);
 		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_STATE_DEFAULT);
 	}
 

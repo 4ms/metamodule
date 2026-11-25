@@ -1,5 +1,6 @@
 #pragma once
 #include "delay.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "lvgl.h"
 
@@ -24,7 +25,7 @@ public:
 							  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SNAPPABLE);
 
 		lv_obj_set_height(bar, HeightPx);
-		lv_obj_set_style_radius(bar, 3, LV_PART_MAIN);
+		lv_obj_set_style_radius(bar, ui_px(3), LV_PART_MAIN);
 		lv_obj_set_style_bg_color(bar, lv_color_hex(0xDF7D1A), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, LV_PART_MAIN);
 		lv_obj_set_style_border_width(bar, 0, LV_PART_MAIN);
@@ -86,8 +87,8 @@ private:
 	static constexpr uint32_t HoldMs = 150;
 	static constexpr uint32_t FadeMs = 100;
 
-	static constexpr lv_coord_t HeightPx = 4;
-	static constexpr lv_coord_t MinWidthPx = 12;
+	static constexpr lv_coord_t HeightPx = ui_px(4);
+	static constexpr lv_coord_t MinWidthPx = ui_px(12);
 
 	lv_obj_t *page;
 	lv_obj_t *scroller;

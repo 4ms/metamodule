@@ -1,4 +1,5 @@
 #include "prefs_section_notifications.hh"
+#include "gui/ui_scale.h"
 #include "ui_local.h"
 
 namespace MetaModule
@@ -10,7 +11,7 @@ void PrefsSectionNotifications::create(lv_obj_t *parent) {
 
 	auto amount_cont = create_prefs_labeled_dropdown(parent, "Show:", "All\nFewer\nOnly Critical");
 	amount_dropdown = lv_obj_get_child(amount_cont, 1);
-	lv_obj_set_width(amount_dropdown, 110);
+	lv_obj_set_width(amount_dropdown, ui_px(110));
 
 	auto anim_cont = create_prefs_labeled_check(parent, "Animations:");
 	animation_check = lv_obj_get_child(anim_cont, 1);

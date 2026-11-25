@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/midi_port_menu.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
@@ -33,21 +34,21 @@ struct MidiMapPopup {
 		midi_port_label = create_midi_map_label(ui_MidiMapCont, "Port: ");
 		lv_obj_add_flag(midi_port_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		midi_port_dropdown = create_midi_map_dropdown(ui_MidiMapCont, MidiPortMenu::ShortOptions);
-		lv_obj_set_width(midi_port_dropdown, 90);
+		lv_obj_set_width(midi_port_dropdown, ui_px(90));
 
 		midi_channel_label = create_midi_map_label(ui_MidiMapCont, "Channel: ");
 		lv_obj_add_flag(midi_channel_label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		midi_channel_dropdown =
 			create_midi_map_dropdown(ui_MidiMapCont, "All\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16");
-		lv_obj_set_width(midi_channel_dropdown, 90);
+		lv_obj_set_width(midi_channel_dropdown, ui_px(90));
 
 		auto div = lv_obj_create(ui_MidiMapCont);
 		lv_obj_remove_style_all(div);
 		lv_obj_set_width(div, LV_PCT(100));
 		lv_obj_add_flag(div, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
-		lv_obj_set_height(div, 10);
+		lv_obj_set_height(div, ui_px(10));
 		lv_obj_set_style_border_side(div, LV_BORDER_SIDE_BOTTOM, 0);
-		lv_obj_set_style_border_width(div, 1, 0);
+		lv_obj_set_style_border_width(div, ui_px(1), 0);
 		lv_obj_set_style_border_color(div, lv_color_white(), 0);
 
 		lv_obj_move_to_index(midi_port_label, -12);
@@ -91,7 +92,7 @@ struct MidiMapPopup {
 				lv_obj_remove_style(dropdown, &Gui::focus_style, LV_STATE_EDITED);
 
 				lv_obj_add_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
-				lv_obj_set_style_pad_ver(dropdown, 8, LV_PART_MAIN);
+				lv_obj_set_style_pad_ver(dropdown, ui_px(8), LV_PART_MAIN);
 				lv_obj_add_style(dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);
 				lv_obj_add_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
 				lv_obj_add_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY | LV_STATE_PRESSED);

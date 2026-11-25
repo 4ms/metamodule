@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "CoreModules/moduleFactory.hh"
 #include "console/pr_dbg.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -27,20 +29,20 @@ struct PluginModuleMenu {
 		auto roller_label = lv_obj_get_child(roller, 0);
 		lv_label_set_recolor(roller_label, true);
 
-		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
-		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_SELECTED);
+		lv_obj_set_style_text_font(roller, font_medium_bold, LV_PART_MAIN);
+		lv_obj_set_style_text_font(roller, font_medium_bold, LV_PART_SELECTED);
 
 		lv_obj_set_style_text_color(roller, lv_color_hex(0xFFFFFF), LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(roller, 255, LV_STATE_DEFAULT);
 
 		auto hover_label = lv_obj_get_child(roller_hover.get_cont(), 0);
-		lv_obj_set_style_text_font(hover_label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
+		lv_obj_set_style_text_font(hover_label, font_medium_bold, LV_PART_MAIN);
 		lv_obj_set_style_text_color(hover_label, lv_color_hex(0xFFFFFF), LV_STATE_DEFAULT);
 
-		lv_obj_set_x(roller_hover.get_cont(), 6);
+		lv_obj_set_x(roller_hover.get_cont(), ui_px(6));
 		lv_obj_set_width(roller_hover.get_cont(), lv_pct(100));
-		lv_obj_set_style_pad_left(hover_label, 10, 0);
-		lv_obj_set_style_pad_right(hover_label, 10, 0);
+		lv_obj_set_style_pad_left(hover_label, ui_px(10), 0);
+		lv_obj_set_style_pad_right(hover_label, ui_px(10), 0);
 	}
 
 	bool create_options_menu(std::string_view slug, unsigned this_module_id) {
@@ -66,7 +68,7 @@ struct PluginModuleMenu {
 		populate_menu_items();
 
 		auto ht = lv_obj_get_height(ui_ElementRollerButtonCont);
-		lv_obj_set_height(ui_ModuleViewExtraMenuRoller, 240 - ht);
+		lv_obj_set_height(ui_ModuleViewExtraMenuRoller, LV_VER_RES - ht);
 
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 		lv_show(roller);

@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "conf/panel_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -26,15 +28,15 @@ private:
 	// Spread across the full width of the screen
 	static constexpr unsigned SlotsPerRow = 8;
 	static constexpr int SlotPitch = ScreenWidth / SlotsPerRow;
-	static constexpr int SlotGap = 2;
+	static constexpr int SlotGap = ui_px(2);
 	static constexpr int SlotWidth = SlotPitch - SlotGap;
 	static constexpr int SlotX0 = SlotGap / 2;
 
 	// One row: 8 outputs. Two rows (Audio Expander): shorter pills, smaller font
-	static constexpr int OneRowHeight = 16;
-	static constexpr int OneRowPadTop = 1; // centers the numeral vertically
-	static constexpr int TwoRowHeight = 12;
-	static constexpr int RowGap = 2;
+	static constexpr int OneRowHeight = ui_px(16);
+	static constexpr int OneRowPadTop = ui_px(1); // centers the numeral vertically
+	static constexpr int TwoRowHeight = ui_px(12);
+	static constexpr int RowGap = ui_px(2);
 
 	ClipHold<MaxOutputs> hold;
 	std::array<lv_obj_t *, MaxOutputs> pills{};
@@ -75,7 +77,7 @@ private:
 
 		bool two_rows = num_outputs > SlotsPerRow;
 		int height = two_rows ? TwoRowHeight : OneRowHeight;
-		auto font = two_rows ? &ui_font_MuseoSansRounded50010 : &ui_font_MuseoSansRounded50012;
+		auto font = two_rows ? font_tiny : font_small;
 		unsigned num_rows = two_rows ? 2 : 1;
 
 		for (unsigned i = 0; i < num_outputs; i++) {
@@ -94,7 +96,7 @@ private:
 			lv_obj_set_style_text_align(pill, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 			lv_obj_set_style_bg_color(pill, lv_color_hex(0xFF0000), LV_PART_MAIN);
 			lv_obj_set_style_bg_opa(pill, LV_OPA_COVER, LV_PART_MAIN);
-			lv_obj_set_style_radius(pill, 3, LV_PART_MAIN);
+			lv_obj_set_style_radius(pill, ui_px(3), LV_PART_MAIN);
 			lv_obj_set_style_pad_all(pill, 0, LV_PART_MAIN);
 			lv_obj_set_style_pad_top(pill, two_rows ? 0 : OneRowPadTop, LV_PART_MAIN);
 			lv_obj_clear_flag(pill, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);

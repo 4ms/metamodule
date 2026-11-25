@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/ui_local.h"
 #include <cmath>
@@ -100,7 +102,7 @@ private:
 		lv_obj_set_width(popup, lv_pct(100));
 		lv_obj_set_height(popup, LV_SIZE_CONTENT); /// 1
 		lv_obj_set_x(popup, 0);
-		lv_obj_set_y(popup, -10);
+		lv_obj_set_y(popup, ui_px(-10));
 		lv_obj_set_align(popup, LV_ALIGN_BOTTOM_MID);
 		lv_obj_set_flex_flow(popup, LV_FLEX_FLOW_COLUMN);
 		lv_obj_set_flex_align(popup, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -109,26 +111,26 @@ private:
 						  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
 							  LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
 							  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
-		lv_obj_set_style_radius(popup, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_radius(popup, ui_px(4), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_color(popup, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(popup, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_border_color(popup, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_border_opa(popup, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_width(popup, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_border_width(popup, ui_px(1), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_color(popup, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_opa(popup, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_outline_width(popup, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_outline_pad(popup, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(popup, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(popup, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_top(popup, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_bottom(popup, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_outline_width(popup, ui_px(2), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_outline_pad(popup, ui_px(1), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_left(popup, ui_px(6), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_right(popup, ui_px(6), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_top(popup, ui_px(6), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_bottom(popup, ui_px(6), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_color(popup, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(popup, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_align(popup, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-		lv_obj_set_style_pad_left(popup, -4, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(popup, -4, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_left(popup, ui_px(-4), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_right(popup, ui_px(-4), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_top(popup, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(popup, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_row(popup, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
@@ -163,9 +165,9 @@ private:
 		lv_label_set_text(label, "Turn rotary to adjust");
 		lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(label, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(label, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(label, font_med_large_bold, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_left(label, ui_px(4), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_right(label, ui_px(4), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_top(label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -185,9 +187,9 @@ private:
 		lv_label_set_text(click_label, "Click to change:");
 		lv_obj_set_style_text_color(click_label, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(click_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(click_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(click_label, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(click_label, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(click_label, font_medium, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_left(click_label, ui_px(4), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_right(click_label, ui_px(4), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_top(click_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(click_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -198,9 +200,9 @@ private:
 		lv_label_set_text(res_label, "Coarse");
 		lv_obj_set_style_text_color(res_label, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(res_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(res_label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(res_label, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(res_label, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(res_label, font_medium_bold, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_left(res_label, ui_px(4), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_right(res_label, ui_px(4), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_top(res_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_bottom(res_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 	}

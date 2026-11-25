@@ -1,4 +1,5 @@
 #include "prefs_section_missing_plugins.hh"
+#include "gui/ui_scale.h"
 #include "ui_local.h"
 
 namespace MetaModule
@@ -10,7 +11,7 @@ void PrefsSectionMissingPlugins::create(lv_obj_t *parent) {
 	auto cont = create_prefs_labeled_dropdown(parent, "Search for missing plugins:", "Ask\nAlways\nNever");
 
 	dropdown = lv_obj_get_child(cont, 1);
-	lv_obj_set_width(dropdown, 95);
+	lv_obj_set_width(dropdown, ui_px(95));
 
 	prefs_cont_justify_multiline(cont);
 }

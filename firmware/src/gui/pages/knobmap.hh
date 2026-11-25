@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "CoreModules/elements/elements_index.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
@@ -36,8 +38,8 @@ struct KnobMapPage : PageBase {
 		// Button Behavior dropdown replaces the Toggle switch
 		lv_hide(ui_ModuleMapToggleSwitch);
 		behavior_dropdown = create_midi_map_dropdown(ui_ModuleMapToggleSwitchCont, "Normal\nToggle\nStep");
-		lv_obj_set_height(behavior_dropdown, 28);
-		lv_obj_set_width(behavior_dropdown, 110);
+		lv_obj_set_height(behavior_dropdown, ui_px(28));
+		lv_obj_set_width(behavior_dropdown, ui_px(110));
 		lv_obj_add_event_cb(behavior_dropdown, behavior_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_ListButton, list_cb, LV_EVENT_RELEASED, this);
@@ -50,14 +52,14 @@ struct KnobMapPage : PageBase {
 			"All Chan.\nChannel 1\nChannel 2\nChannel 3\nChannel 4\nChannel 5\nChannel 6\nChannel 7\nChannel "
 			"8\nChannel 9\nChannel 10\nChannel 11\nChannel 12\nChannel 13\nChannel 14\nChannel 15\nChannel 16");
 
-		lv_obj_set_height(ui_EditMapMidiChannelDropdown, 28);
-		lv_obj_set_width(ui_EditMapMidiChannelDropdown, 110);
+		lv_obj_set_height(ui_EditMapMidiChannelDropdown, ui_px(28));
+		lv_obj_set_width(ui_EditMapMidiChannelDropdown, ui_px(110));
 
 		lv_obj_add_event_cb(ui_EditMapMidiChannelDropdown, midichan_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		midi_port_dropdown = create_midi_map_dropdown(ui_EditMapMidiChannelCont, MidiPortMenu::LongOptions);
-		lv_obj_set_height(midi_port_dropdown, 28);
-		lv_obj_set_width(midi_port_dropdown, 110);
+		lv_obj_set_height(midi_port_dropdown, ui_px(28));
+		lv_obj_set_width(midi_port_dropdown, ui_px(110));
 		lv_obj_move_to_index(midi_port_dropdown, lv_obj_get_index(ui_EditMapMidiChannelDropdown));
 
 		lv_obj_add_event_cb(midi_port_dropdown, midiport_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -84,22 +86,22 @@ struct KnobMapPage : PageBase {
 		lv_group_set_editing(group, false);
 
 		indicator = lv_btn_create(ui_EditMapKnob); //NOLINT
-		lv_obj_set_width(indicator, 3);
-		lv_obj_set_height(indicator, 10);
+		lv_obj_set_width(indicator, ui_px(3));
+		lv_obj_set_height(indicator, ui_px(10));
 		lv_obj_set_x(indicator, 0);
-		lv_obj_set_y(indicator, 31);
+		lv_obj_set_y(indicator, ui_px(31));
 		lv_obj_set_align(indicator, LV_ALIGN_TOP_MID);
 		lv_obj_set_style_bg_color(indicator, lv_color_hex(0x0), LV_PART_MAIN);
 		lv_obj_set_style_radius(indicator, 0, LV_PART_MAIN);
 		lv_obj_set_style_transform_pivot_x(indicator, 0, LV_PART_MAIN);
-		lv_obj_set_style_transform_pivot_y(indicator, 23, LV_PART_MAIN);
+		lv_obj_set_style_transform_pivot_y(indicator, ui_px(23), LV_PART_MAIN);
 
 		lv_group_set_wrap(group, false);
 	}
 
 	void prepare_focus() override {
 		keyboard_entry.prepare_focus(ui_EditMappingPage, group);
-		lv_obj_set_y(ui_Keyboard, 1);
+		lv_obj_set_y(ui_Keyboard, ui_px(1));
 
 		patch = patches.get_view_patch();
 
@@ -194,9 +196,9 @@ struct KnobMapPage : PageBase {
 		lv_label_set_text(ui_EditMappingLetter, panel_name.c_str());
 
 		if (map.is_midi() || is_button(map) || panel_name.size() > 3)
-			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
+			lv_obj_set_style_text_font(ui_EditMappingLetter, font_large, LV_PART_MAIN);
 		else
-			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
+			lv_obj_set_style_text_font(ui_EditMappingLetter, font_huge, LV_PART_MAIN);
 
 		if (is_button(map))
 			lv_obj_set_style_text_color(ui_EditMappingLetter, lv_color_white(), LV_PART_MAIN);

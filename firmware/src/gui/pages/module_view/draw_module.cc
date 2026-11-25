@@ -4,6 +4,7 @@
 #include "gui/elements/redraw_display.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/pages/module_view/module_view.hh"
+#include "gui/ui_scale.h"
 #include "util/countzip.hh"
 #include <algorithm>
 
@@ -12,7 +13,7 @@ namespace MetaModule
 unsigned ModuleViewPage::resize_module_image(unsigned max) {
 	lv_obj_refr_size(canvas);
 	auto width_px = lv_obj_get_width(canvas);
-	//module img + padding is no more than 190px wide
+	//module img + padding leaves room for the roller (on MP1: it is no more than 190px wide)
 	auto display_widthpx = std::min<lv_coord_t>(width_px, max);
 	lv_obj_set_width(ui_ModuleImage, display_widthpx);
 	lv_obj_refr_size(ui_ModuleImage);
@@ -26,10 +27,11 @@ unsigned ModuleViewPage::resize_module_image(unsigned max) {
 
 	lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
 
-	auto roller_width = std::min<lv_coord_t>(320 - display_widthpx, 220); //roller is no more than 220px wide
-	lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
-	if (max == 320) {
-		lv_obj_set_x(ui_ElementRollerPanel, 320);
+	//roller is no more than 220px wide (on MP1)
+	auto roller_width = std::min<lv_coord_t>(ScreenWidthPx - display_widthpx, ui_px(220));
+	lv_obj_set_size(ui_ElementRollerPanel, roller_width, FullHeightPx);
+	if (max == ScreenWidthPx) {
+		lv_obj_set_x(ui_ElementRollerPanel, ScreenWidthPx);
 	} else {
 		lv_obj_set_x(ui_ElementRollerPanel, 0);
 	}
@@ -68,7 +70,7 @@ void ModuleViewPage::exit_fullscreen() {
 	if (module_height != FullHeightPx)
 		redraw_module();
 	else
-		resize_module_image(190);
+		resize_module_image(ScreenWidthPx - ui_px(130));
 }
 
 void ModuleViewPage::redraw_module() {
@@ -115,7 +117,7 @@ void ModuleViewPage::redraw_module() {
 	// element into view: the scroll must be computed against this module's width, not the last one's
 	lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
 
-	resize_module_image(full_screen_mode ? ScreenWidthPx : 170);
+	resize_module_image(full_screen_mode ? ScreenWidthPx : ScreenWidthPx - ui_px(150));
 
 	// Clear any scroll left over from the previously drawn module
 	if (is_new_module)
@@ -132,7 +134,7 @@ void ModuleViewPage::redraw_module() {
 
 	update_map_ring_style();
 
-	cable_drawer.set_height(240);
+	cable_drawer.set_height(FullHeightPx);
 	update_cable_style(true);
 
 	dynamic_elements_prepared = false;

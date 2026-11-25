@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/load_balance_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -57,7 +59,7 @@ struct PatchDescriptionPanel {
 		lv_obj_add_event_cb(apply_settings_button, apply_settings_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_set_style_pad_row(ui_DescriptionPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_column(ui_DescriptionPanel, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_column(ui_DescriptionPanel, ui_px(8), LV_PART_MAIN | LV_STATE_DEFAULT);
 
 		lv_obj_add_event_cb(close_button, closebut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(load_balance_button, load_balance_but_cb, LV_EVENT_CLICKED, this);
@@ -208,44 +210,44 @@ private:
 		poly_cont = create_labeled_dropdown(ui_DescriptionPanel);
 		poly_label = lv_obj_get_child(poly_cont, 0);
 		poly_drop = lv_obj_get_child(poly_cont, 1);
-		lv_obj_set_style_pad_ver(poly_cont, 4, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(poly_cont, ui_px(4), LV_STATE_DEFAULT);
 
 		lv_label_set_text(poly_label, "MIDI Poly Chans:");
-		lv_obj_set_style_text_font(poly_label, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(poly_label, font_medium, LV_STATE_DEFAULT);
 
-		lv_obj_set_style_pad_left(poly_drop, 10, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(poly_drop, 6, LV_STATE_DEFAULT);
-		lv_obj_set_width(poly_drop, 90);
+		lv_obj_set_style_pad_left(poly_drop, ui_px(10), LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(poly_drop, ui_px(6), LV_STATE_DEFAULT);
+		lv_obj_set_width(poly_drop, ui_px(90));
 
 		lv_dropdown_set_options(poly_drop, "Auto\n1\n2\n3\n4\n5\n6\n7\n8");
 
 		suggest_sr_cont = create_labeled_dropdown(ui_DescriptionPanel);
 		suggest_sr_label = lv_obj_get_child(suggest_sr_cont, 0);
 		suggest_sr_drop = lv_obj_get_child(suggest_sr_cont, 1);
-		lv_obj_set_style_pad_ver(suggest_sr_cont, 4, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(suggest_sr_cont, ui_px(4), LV_STATE_DEFAULT);
 
 		suggest_bs_cont = create_labeled_dropdown(ui_DescriptionPanel);
 		suggest_bs_label = lv_obj_get_child(suggest_bs_cont, 0);
 		suggest_bs_drop = lv_obj_get_child(suggest_bs_cont, 1);
-		lv_obj_set_style_pad_ver(suggest_bs_cont, 4, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(suggest_bs_cont, ui_px(4), LV_STATE_DEFAULT);
 
 		lv_label_set_text(suggest_sr_label, "Patch Sample Rate:");
 		lv_label_set_text(suggest_bs_label, "Patch Block Size:");
-		lv_obj_set_style_text_font(suggest_sr_label, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(suggest_bs_label, &ui_font_MuseoSansRounded50014, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(suggest_sr_label, font_medium, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(suggest_bs_label, font_medium, LV_STATE_DEFAULT);
 
-		lv_obj_set_style_pad_left(suggest_sr_drop, 10, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(suggest_sr_drop, 6, LV_STATE_DEFAULT);
-		lv_obj_set_width(suggest_sr_drop, 90);
+		lv_obj_set_style_pad_left(suggest_sr_drop, ui_px(10), LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(suggest_sr_drop, ui_px(6), LV_STATE_DEFAULT);
+		lv_obj_set_width(suggest_sr_drop, ui_px(90));
 
-		lv_obj_set_style_pad_left(suggest_bs_drop, 10, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(suggest_bs_drop, 6, LV_STATE_DEFAULT);
-		lv_obj_set_width(suggest_bs_drop, 90);
+		lv_obj_set_style_pad_left(suggest_bs_drop, ui_px(10), LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(suggest_bs_drop, ui_px(6), LV_STATE_DEFAULT);
+		lv_obj_set_width(suggest_bs_drop, ui_px(90));
 
 		// The panel has no gap between rows, so button rows need a spacer above them
 		auto add_button_spacer = [] {
 			auto button_spacer = lv_obj_create(ui_DescriptionPanel);
-			lv_obj_set_size(button_spacer, lv_pct(100), 6);
+			lv_obj_set_size(button_spacer, lv_pct(100), ui_px(6));
 			lv_obj_add_flag(button_spacer, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 			lv_obj_clear_flag(button_spacer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 			lv_obj_set_style_bg_opa(button_spacer, 0, LV_PART_MAIN);
@@ -476,7 +478,7 @@ private:
 		lv_group_set_editing(group, true);
 
 		lv_obj_set_parent(ui_Keyboard, ui_PatchViewPage);
-		lv_obj_set_y(ui_Keyboard, 128);
+		lv_obj_set_y(ui_Keyboard, ui_px(128));
 		kb_visible = true;
 	}
 

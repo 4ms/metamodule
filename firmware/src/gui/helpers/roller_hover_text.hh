@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
@@ -28,7 +30,7 @@ public:
 		lv_obj_set_y(label_cont, lv_obj_get_y(roller) / 2 + 0);
 		lv_obj_set_x(label_cont, 0);
 		lv_obj_set_width(label_cont, lv_pct(100));
-		lv_obj_set_height(label_cont, 19);
+		lv_obj_set_height(label_cont, ui_px(19));
 		lv_obj_set_style_pad_all(label_cont, 0, LV_PART_MAIN);
 		lv_obj_set_style_radius(label_cont, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(label_cont, LV_OPA_0, LV_PART_MAIN);
@@ -38,8 +40,8 @@ public:
 
 		lv_obj_set_align(label, LV_ALIGN_CENTER);
 		lv_obj_set_y(label, 0);
-		lv_obj_set_x(label, -1);
-		lv_obj_set_height(label, 19);
+		lv_obj_set_x(label, ui_px(-1));
+		lv_obj_set_height(label, ui_px(19));
 		lv_obj_set_width(label, lv_pct(100));
 		lv_label_set_text(label, "");
 		lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL);
@@ -48,15 +50,15 @@ public:
 		lv_obj_set_style_text_letter_space(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_text_line_space(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
-		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_PART_MAIN);
+		lv_obj_set_style_text_font(label, font_med_large_bold, LV_PART_MAIN);
 		lv_obj_set_style_radius(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_color(label, lv_color_hex(0xFD8B18), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(label, LV_OPA_100, LV_PART_MAIN);
 		lv_obj_set_style_border_width(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_top(label, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_bottom(label, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_left(label, 15, LV_PART_MAIN);
-		lv_obj_set_style_pad_right(label, 10, LV_PART_MAIN);
+		lv_obj_set_style_pad_left(label, ui_px(15), LV_PART_MAIN);
+		lv_obj_set_style_pad_right(label, ui_px(10), LV_PART_MAIN);
 		lv_obj_set_style_radius(label, 0, LV_PART_MAIN);
 		lv_label_set_recolor(label, true);
 		lv_hide(label);

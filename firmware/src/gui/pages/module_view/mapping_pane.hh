@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements_index.hh"
+#include "gui/ui_scale.h"
 #include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/gui_state.hh"
@@ -54,8 +55,8 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_CablePanelAddButton, add_panel_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableMidiAddButton, add_midi_cable_button_cb, LV_EVENT_CLICKED, this);
 
-		lv_obj_set_style_pad_hor(ui_MapList, 3, LV_PART_MAIN);
-		lv_obj_set_style_pad_ver(ui_MapList, 3, LV_PART_MAIN);
+		lv_obj_set_style_pad_hor(ui_MapList, ui_px(3), LV_PART_MAIN);
+		lv_obj_set_style_pad_ver(ui_MapList, ui_px(3), LV_PART_MAIN);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -69,7 +70,7 @@ struct ModuleViewMappingPane {
 		panel_cable_popup.init(ui_MappingMenu, pane_group);
 		midi_map_popup.init(ui_MappingMenu, pane_group);
 
-		lv_obj_set_y(ui_Keyboard, 144);
+		lv_obj_set_y(ui_Keyboard, ui_px(144));
 	}
 
 	void show(const DrawnElement &drawn_el) {

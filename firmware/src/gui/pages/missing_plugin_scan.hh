@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -27,9 +29,9 @@ struct MissingPluginScanner {
 		lv_obj_set_pos(status_label, 0, 0);
 		lv_obj_set_style_bg_color(status_label, lv_color_hex(0x222222), 0);
 		lv_obj_set_style_bg_opa(status_label, LV_OPA_100, 0);
-		lv_obj_set_style_pad_ver(status_label, 4, 0);
-		lv_obj_set_style_pad_hor(status_label, 8, 0);
-		lv_obj_set_style_text_font(status_label, &ui_font_MuseoSansRounded50014, 0);
+		lv_obj_set_style_pad_ver(status_label, ui_px(4), 0);
+		lv_obj_set_style_pad_hor(status_label, ui_px(8), 0);
+		lv_obj_set_style_text_font(status_label, font_medium, 0);
 		lv_obj_set_style_text_color(status_label, Gui::orange_highlight, 0);
 		lv_obj_set_style_text_align(status_label, LV_TEXT_ALIGN_CENTER, 0);
 		lv_obj_add_flag(status_label, LV_OBJ_FLAG_FLOATING);
@@ -39,23 +41,23 @@ struct MissingPluginScanner {
 
 		title = lv_label_create(missing_plugin_popup.panel);
 		lv_obj_move_to_index(title, lv_obj_get_index(missing_plugin_popup.message_label));
-		lv_obj_set_width(title, 180);
+		lv_obj_set_width(title, ui_px(180));
 		lv_obj_set_height(title, LV_SIZE_CONTENT);
 		lv_label_set_text(title, "");
 		lv_obj_set_align(title, LV_ALIGN_TOP_LEFT);
 		lv_obj_set_style_text_color(title, Gui::orange_highlight, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_opa(title, 255, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_LEFT, LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(title, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(title, font_med_large_bold, LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(title, LV_OPA_0, LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_width(title, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_hor(title, 0, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_ver(title, 2, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_ver(title, ui_px(2), LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(title, 0, LV_STATE_DEFAULT);
 
 		lv_hide(waitspinner);
 
-		lv_obj_set_style_text_font(missing_plugin_popup.message_label, &ui_font_MuseoSansRounded50014, 0);
+		lv_obj_set_style_text_font(missing_plugin_popup.message_label, font_medium, 0);
 	}
 
 	// Call start() to begin the async process of finding and loading missing plugins.

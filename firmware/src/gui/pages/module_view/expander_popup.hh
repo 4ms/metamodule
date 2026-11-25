@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -21,11 +23,11 @@ struct ExpanderPopup {
 		: popup{create_lv_labeled_popup(lv_layer_top(), "Expanders")}
 		, group{lv_group_create()} {
 		lv_hide(popup);
-		lv_obj_set_width(popup, 300);
+		lv_obj_set_width(popup, ui_px(300));
 		lv_obj_set_height(popup, LV_SIZE_CONTENT);
 		lv_obj_set_align(popup, LV_ALIGN_CENTER);
-		lv_obj_set_style_pad_row(popup, 8, LV_PART_MAIN);
-		lv_obj_set_style_pad_bottom(popup, 12, LV_PART_MAIN);
+		lv_obj_set_style_pad_row(popup, ui_px(8), LV_PART_MAIN);
+		lv_obj_set_style_pad_bottom(popup, ui_px(12), LV_PART_MAIN);
 
 		for (auto side : {ExpanderSide::Left, ExpanderSide::Right}) {
 			auto &row = rows[idx(side)];
@@ -106,32 +108,32 @@ private:
 		// slot's outline, so highlighting the slot does not surround the X.
 		row.container = lv_obj_create(popup);
 		lv_obj_set_width(row.container, lv_pct(100));
-		lv_obj_set_height(row.container, 30);
+		lv_obj_set_height(row.container, ui_px(30));
 		lv_obj_clear_flag(row.container, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 		// Let the X button's focus outline draw past the row's right edge
 		lv_obj_add_flag(row.container, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 		lv_obj_set_style_bg_opa(row.container, LV_OPA_TRANSP, LV_PART_MAIN);
 		lv_obj_set_style_border_width(row.container, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_all(row.container, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_column(row.container, 6, LV_PART_MAIN);
+		lv_obj_set_style_pad_column(row.container, ui_px(6), LV_PART_MAIN);
 		lv_obj_set_flex_flow(row.container, LV_FLEX_FLOW_ROW);
 		lv_obj_set_flex_align(row.container, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
 		// Slot: plain text with a white outline, fills the row, orange when highlighted
 		row.slot = lv_btn_create(row.container);
 		lv_obj_set_flex_grow(row.slot, 1);
-		lv_obj_set_height(row.slot, 30);
+		lv_obj_set_height(row.slot, ui_px(30));
 		lv_obj_clear_flag(row.slot,
 						  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
 							  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 							  LV_OBJ_FLAG_SCROLL_CHAIN);
-		lv_obj_set_style_radius(row.slot, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_radius(row.slot, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(row.slot, LV_OPA_TRANSP, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_border_color(row.slot, lv_color_white(), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_border_opa(row.slot, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_width(row.slot, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(row.slot, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(row.slot, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_border_width(row.slot, ui_px(1), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_left(row.slot, ui_px(8), LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_right(row.slot, ui_px(4), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_ver(row.slot, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_shadow_width(row.slot, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_color(row.slot, Gui::orange_highlight, LV_PART_MAIN | LV_STATE_FOCUSED);
@@ -146,26 +148,26 @@ private:
 		lv_obj_set_align(row.label, LV_ALIGN_LEFT_MID);
 		lv_label_set_long_mode(row.label, LV_LABEL_LONG_DOT);
 		lv_obj_set_style_text_color(row.label, lv_color_white(), LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(row.label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(row.label, font_medium_bold, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_label_set_text(row.label, "");
 
 		// X button: red with a white X, only shown when the slot is filled
 		// (hidden objects are left out of the flex layout, so the slot then takes the full row)
 		row.remove_button = lv_btn_create(row.container);
-		lv_obj_set_size(row.remove_button, 22, 22);
+		lv_obj_set_size(row.remove_button, ui_px(22), ui_px(22));
 		lv_obj_clear_flag(row.remove_button,
 						  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
 							  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
 							  LV_OBJ_FLAG_SCROLL_CHAIN);
-		lv_obj_set_style_radius(row.remove_button, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_radius(row.remove_button, ui_px(3), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_color(row.remove_button, Gui::red_highlight, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(row.remove_button, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_all(row.remove_button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_shadow_width(row.remove_button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_outline_color(row.remove_button, Gui::orange_highlight, LV_PART_MAIN | LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_opa(row.remove_button, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_FOCUSED);
-		lv_obj_set_style_outline_width(row.remove_button, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
-		lv_obj_set_style_outline_pad(row.remove_button, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
+		lv_obj_set_style_outline_width(row.remove_button, ui_px(2), LV_PART_MAIN | LV_STATE_FOCUSED);
+		lv_obj_set_style_outline_pad(row.remove_button, ui_px(1), LV_PART_MAIN | LV_STATE_FOCUSED);
 		lv_obj_set_style_outline_color(row.remove_button, Gui::orange_highlight, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_outline_opa(row.remove_button, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
 		lv_obj_add_event_cb(row.remove_button, remove_click_cb, LV_EVENT_CLICKED, &row);
@@ -175,7 +177,7 @@ private:
 		lv_obj_set_align(x_label, LV_ALIGN_CENTER);
 		lv_label_set_text(x_label, "X");
 		lv_obj_set_style_text_color(x_label, lv_color_white(), LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(x_label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(x_label, font_medium_bold, LV_PART_MAIN | LV_STATE_DEFAULT);
 	}
 
 	static void slot_click_cb(lv_event_t *event) {

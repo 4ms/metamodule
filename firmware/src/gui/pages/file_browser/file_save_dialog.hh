@@ -1,5 +1,6 @@
 #pragma once
 #include "fs/helpers.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/patch_selector_subdir_panel.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -210,7 +211,7 @@ private:
 		lv_obj_add_flag(ui_Keyboard, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 		lv_obj_set_parent(ui_Keyboard, ui_SaveDialogCont);
-		lv_obj_set_y(ui_Keyboard, 108);
+		lv_obj_set_y(ui_Keyboard, ui_px(108));
 	}
 
 	void hide_keyboard() {

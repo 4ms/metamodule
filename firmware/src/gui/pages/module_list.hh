@@ -1,5 +1,7 @@
 #pragma once
 #include "gui/elements/module_drawer.hh"
+#include "gui/elements/module_art.hh"
+#include "gui/ui_scale.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
@@ -24,20 +26,20 @@ struct ModuleListPage : PageBase {
 		lv_obj_add_event_cb(ui_ModuleListRoller, scroll_cb, LV_EVENT_KEY, this);
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_FOCUS_KEY);
-		lv_obj_set_width(ui_ModuleListRollerPanel, 164);
+		lv_obj_set_width(ui_ModuleListRollerPanel, ui_px(164));
 
 		auto hov = roller_hover.get_cont();
 		lv_obj_set_align(hov, LV_ALIGN_LEFT_MID);
-		lv_obj_set_x(hov, -2);
-		lv_obj_set_y(hov, 13);
-		lv_obj_set_width(hov, 172);
+		lv_obj_set_x(hov, ui_px(-2));
+		lv_obj_set_y(hov, ui_px(13));
+		lv_obj_set_width(hov, ui_px(172));
 
 		lv_label_set_recolor(lv_obj_get_child(ui_ModuleListRoller, 0), true);
 
 		auto check_cont = lv_obj_get_parent(replace_popup.check);
-		lv_obj_set_height(check_cont, 30);
-		lv_obj_set_style_pad_ver(check_cont, 12, LV_PART_MAIN);
-		lv_obj_set_style_pad_left(check_cont, 20, LV_PART_MAIN);
+		lv_obj_set_height(check_cont, ui_px(30));
+		lv_obj_set_style_pad_ver(check_cont, ui_px(12), LV_PART_MAIN);
+		lv_obj_set_style_pad_left(check_cont, ui_px(20), LV_PART_MAIN);
 		auto check_label = lv_obj_get_child(check_cont, 0);
 		lv_obj_set_style_text_color(check_label, Gui::orange_highlight, LV_PART_MAIN);
 	}
@@ -257,14 +259,14 @@ private:
 	}
 
 	void show_roller() {
-		lv_obj_set_width(ui_ModuleListRollerPanel, 166);
+		lv_obj_set_width(ui_ModuleListRollerPanel, ui_px(166));
 		lv_group_focus_obj(ui_ModuleListRoller);
 		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
 	}
 
 	void hide_roller() {
-		lv_obj_set_width(ui_ModuleListRollerPanel, 2);
+		lv_obj_set_width(ui_ModuleListRollerPanel, ui_px(2));
 		lv_group_set_editing(group, true);
 	}
 
@@ -501,7 +503,7 @@ private:
 	void draw_module(BrandModuleSlug slug) {
 		clear_module_canvas();
 
-		ModuleDrawer drawer{ui_ModuleListImage, 240};
+		ModuleDrawer drawer{ui_ModuleListImage, ModuleFullHeightPx};
 
 		auto [faceplate, width] = drawer.read_faceplate(slug);
 		auto module_canvas = drawer.draw_faceplate(faceplate, width, page_pixel_buffer);

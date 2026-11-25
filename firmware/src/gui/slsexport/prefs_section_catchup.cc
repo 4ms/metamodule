@@ -1,4 +1,5 @@
 #include "prefs_section_catchup.hh"
+#include "gui/ui_scale.h"
 #include "lvgl.h"
 #include "ui_local.h"
 
@@ -11,7 +12,7 @@ void PrefsSectionCatchupMode::create(lv_obj_t *parent) {
 
 	auto cont = create_prefs_labeled_dropdown(parent, "Default Catchup Mode:");
 	mode_dropdown = lv_obj_get_child(cont, 1);
-	lv_obj_set_width(mode_dropdown, 185);
+	lv_obj_set_width(mode_dropdown, ui_px(185));
 
 	prefs_cont_justify_multiline(cont);
 

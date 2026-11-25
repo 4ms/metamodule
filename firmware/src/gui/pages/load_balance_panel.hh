@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "CoreModules/moduleFactory.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/page_list.hh"
@@ -326,7 +328,7 @@ private:
 		auto marker = lv_obj_create(row);
 		lv_obj_add_flag(marker, LV_OBJ_FLAG_FLOATING);
 		lv_obj_clear_flag(marker, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_set_size(marker, 3, lv_pct(100));
+		lv_obj_set_size(marker, ui_px(3), lv_pct(100));
 		lv_obj_set_style_radius(marker, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_width(marker, 0, LV_PART_MAIN);
 		lv_obj_set_style_pad_all(marker, 0, LV_PART_MAIN);
@@ -360,10 +362,10 @@ private:
 		lv_obj_set_width(row, lv_pct(100));
 		lv_obj_set_height(row, BarHeight);
 		lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-		lv_obj_set_style_pad_all(row, 2, LV_PART_MAIN);
-		lv_obj_set_style_pad_column(row, 1, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(row, ui_px(2), LV_PART_MAIN);
+		lv_obj_set_style_pad_column(row, ui_px(1), LV_PART_MAIN);
 		lv_obj_set_style_radius(row, 0, LV_PART_MAIN);
-		lv_obj_set_style_border_width(row, 1, LV_PART_MAIN);
+		lv_obj_set_style_border_width(row, ui_px(1), LV_PART_MAIN);
 		lv_obj_set_style_border_color(row, lv_color_hex(0x000000), LV_PART_MAIN);
 		lv_obj_set_style_bg_color(row, lv_color_hex(0x111111), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(row, 255, LV_PART_MAIN);
@@ -386,7 +388,7 @@ private:
 		for (auto state : {LV_STATE_FOCUSED, LV_STATE_FOCUS_KEY}) {
 			lv_obj_set_style_outline_color(box, Gui::orange_highlight, LV_PART_MAIN | state);
 			lv_obj_set_style_outline_opa(box, LV_OPA_COVER, LV_PART_MAIN | state);
-			lv_obj_set_style_outline_width(box, 2, LV_PART_MAIN | state);
+			lv_obj_set_style_outline_width(box, ui_px(2), LV_PART_MAIN | state);
 			lv_obj_set_style_outline_pad(box, 0, LV_PART_MAIN | state);
 		}
 
@@ -657,8 +659,8 @@ private:
 		lv_obj_set_pos(panel, 0, 0);
 		lv_obj_set_flex_flow(panel, LV_FLEX_FLOW_COLUMN);
 		lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-		lv_obj_set_style_pad_all(panel, 8, LV_PART_MAIN);
-		lv_obj_set_style_pad_row(panel, 4, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(panel, ui_px(8), LV_PART_MAIN);
+		lv_obj_set_style_pad_row(panel, ui_px(4), LV_PART_MAIN);
 		lv_obj_set_style_radius(panel, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_color(panel, lv_color_hex(0x202328), LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(panel, 255, LV_PART_MAIN);
@@ -676,19 +678,19 @@ private:
 
 		auto title = lv_label_create(title_row);
 		lv_label_set_text(title, "CPU Load Balancing");
-		lv_obj_set_style_text_font(title, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
+		lv_obj_set_style_text_font(title, font_medium_bold, LV_PART_MAIN);
 		lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 		lv_obj_set_flex_grow(title, 1);
 
 		cpu_load_label = lv_label_create(title_row);
 		lv_label_set_text(cpu_load_label, "");
-		lv_obj_set_style_text_font(cpu_load_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+		lv_obj_set_style_text_font(cpu_load_label, font_medium, LV_PART_MAIN);
 		lv_obj_set_style_text_color(cpu_load_label, Gui::orange_highlight, LV_PART_MAIN);
 
 		no_balance_label = lv_label_create(panel);
 		lv_label_set_long_mode(no_balance_label, LV_LABEL_LONG_WRAP);
 		lv_obj_set_width(no_balance_label, lv_pct(100));
-		lv_obj_set_style_text_font(no_balance_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+		lv_obj_set_style_text_font(no_balance_label, font_medium, LV_PART_MAIN);
 		lv_obj_set_style_text_color(no_balance_label, Gui::grey_highlight, LV_PART_MAIN);
 
 		for (auto core = 0u; core < NumCores; core++) {
@@ -697,14 +699,14 @@ private:
 			lv_obj_set_height(cont, LV_SIZE_CONTENT);
 			lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
 			lv_obj_set_style_pad_all(cont, 0, LV_PART_MAIN);
-			lv_obj_set_style_pad_row(cont, 2, LV_PART_MAIN);
+			lv_obj_set_style_pad_row(cont, ui_px(2), LV_PART_MAIN);
 			lv_obj_set_style_border_width(cont, 0, LV_PART_MAIN);
 			lv_obj_set_style_bg_opa(cont, 0, LV_PART_MAIN);
 			lv_obj_clear_flag(cont, LV_OBJ_FLAG_SCROLLABLE);
 			bar_conts[core] = cont;
 
 			core_labels[core] = lv_label_create(cont);
-			lv_obj_set_style_text_font(core_labels[core], &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+			lv_obj_set_style_text_font(core_labels[core], font_medium, LV_PART_MAIN);
 			lv_obj_set_style_text_color(core_labels[core], lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 			lv_label_set_text(core_labels[core], "");
 
@@ -717,13 +719,13 @@ private:
 		lv_obj_set_height(overhead_cont, LV_SIZE_CONTENT);
 		lv_obj_set_flex_flow(overhead_cont, LV_FLEX_FLOW_COLUMN);
 		lv_obj_set_style_pad_all(overhead_cont, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_row(overhead_cont, 2, LV_PART_MAIN);
+		lv_obj_set_style_pad_row(overhead_cont, ui_px(2), LV_PART_MAIN);
 		lv_obj_set_style_border_width(overhead_cont, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(overhead_cont, 0, LV_PART_MAIN);
 		lv_obj_clear_flag(overhead_cont, LV_OBJ_FLAG_SCROLLABLE);
 
 		overhead_label = lv_label_create(overhead_cont);
-		lv_obj_set_style_text_font(overhead_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+		lv_obj_set_style_text_font(overhead_label, font_medium, LV_PART_MAIN);
 		lv_obj_set_style_text_color(overhead_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 		lv_label_set_text(overhead_label, "");
 
@@ -750,12 +752,12 @@ private:
 		module_name_label = lv_label_create(panel);
 		lv_label_set_long_mode(module_name_label, LV_LABEL_LONG_DOT);
 		lv_obj_set_width(module_name_label, lv_pct(100));
-		lv_obj_set_style_text_font(module_name_label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
+		lv_obj_set_style_text_font(module_name_label, font_medium_bold, LV_PART_MAIN);
 		lv_obj_set_style_text_color(module_name_label, Gui::orange_highlight, LV_PART_MAIN);
 		lv_label_set_text(module_name_label, "");
 
 		module_load_label = lv_label_create(panel);
-		lv_obj_set_style_text_font(module_load_label, &ui_font_MuseoSansRounded50014, LV_PART_MAIN);
+		lv_obj_set_style_text_font(module_load_label, font_medium, LV_PART_MAIN);
 		lv_obj_set_style_text_color(module_load_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 		lv_label_set_text(module_load_label, "");
 
@@ -764,9 +766,9 @@ private:
 		lv_obj_set_height(button_row, LV_SIZE_CONTENT);
 		lv_obj_set_flex_flow(button_row, LV_FLEX_FLOW_ROW_WRAP);
 		lv_obj_set_flex_align(button_row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
-		lv_obj_set_style_pad_all(button_row, 4, LV_PART_MAIN);
-		lv_obj_set_style_pad_column(button_row, 8, LV_PART_MAIN);
-		lv_obj_set_style_pad_row(button_row, 8, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(button_row, ui_px(4), LV_PART_MAIN);
+		lv_obj_set_style_pad_column(button_row, ui_px(8), LV_PART_MAIN);
+		lv_obj_set_style_pad_row(button_row, ui_px(8), LV_PART_MAIN);
 		lv_obj_set_style_border_width(button_row, 0, LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(button_row, 0, LV_PART_MAIN);
 		lv_obj_clear_flag(button_row, LV_OBJ_FLAG_SCROLLABLE);
@@ -792,7 +794,7 @@ private:
 	// than that when the patch is overloaded and the bars wouldn't otherwise fit.
 	uint32_t bar_scale_ppm = OneCorePpm;
 
-	static constexpr lv_coord_t BarHeight = 24;
+	static constexpr lv_coord_t BarHeight = ui_px(24);
 
 	// Core 1's time outside the part where both cores run modules and cables
 	enum OverheadPart : unsigned { MappingsPart, MidiPart, SyncPart, OtherPart, NumOverheadParts };

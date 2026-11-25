@@ -1,5 +1,6 @@
 #pragma once
 #include "delay.hh"
+#include "gui/ui_scale.h"
 #include "fs/dir_entry_kind.hh"
 #include "gui/helpers/dir_entry_info.hh"
 #include "gui/helpers/load_meter.hh"
@@ -41,11 +42,11 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_clear_state(ui_Flashbut, LV_STATE_FOCUSED);
 
 		roller_hover.center_on_roller(false);
-		roller_hover.set_y_offset(13);
+		roller_hover.set_y_offset(ui_px(13));
 		auto hov = roller_hover.get_cont();
 		lv_obj_add_flag(hov, LV_OBJ_FLAG_FLOATING);
-		lv_obj_set_x(hov, 3);
-		lv_obj_set_width(hov, 210);
+		lv_obj_set_x(hov, ui_px(3));
+		lv_obj_set_width(hov, LV_HOR_RES - ui_px(110)); // just wider than the patch list
 		lv_obj_set_align(hov, LV_ALIGN_RIGHT_MID);
 
 		load_meter = create_load_meter(ui_PatchSelectorTitlePanel);

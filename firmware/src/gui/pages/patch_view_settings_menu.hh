@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "gui/gui_state.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -20,7 +22,7 @@ struct PatchViewSettingsMenu {
 		auto graphics_title = create_settings_menu_title(ui_PVSettingsMenu, "GRAPHICS");
 
 		auto zoom_label = create_settings_menu_slider(ui_PVSettingsMenu, "Module Size");
-		lv_obj_set_style_text_font(zoom_label, &ui_font_MuseoSansRounded50014, 0);
+		lv_obj_set_style_text_font(zoom_label, font_medium, 0);
 		lv_obj_set_width(zoom_label, lv_pct(100));
 		lv_obj_set_align(zoom_label, LV_ALIGN_LEFT_MID);
 
@@ -38,7 +40,7 @@ struct PatchViewSettingsMenu {
 		lv_obj_set_style_border_width(auto_width_cont, 0, 0);
 
 		auto rack_width_label = create_settings_menu_slider(ui_PVSettingsMenu, "Width");
-		lv_obj_set_style_text_font(rack_width_label, &ui_font_MuseoSansRounded50014, 0);
+		lv_obj_set_style_text_font(rack_width_label, font_medium, 0);
 		lv_obj_set_width(rack_width_label, lv_pct(100));
 		lv_obj_set_align(rack_width_label, LV_ALIGN_LEFT_MID);
 
@@ -51,8 +53,8 @@ struct PatchViewSettingsMenu {
 		rack_width_hp_label = lv_label_create(rack_width_label);
 		lv_obj_set_align(rack_width_hp_label, LV_ALIGN_TOP_RIGHT);
 		lv_obj_set_x(rack_width_hp_label, lv_pct(-43));
-		lv_obj_set_y(rack_width_hp_label, 3);
-		lv_obj_set_style_text_font(rack_width_hp_label, &ui_font_MuseoSansRounded50012, 0);
+		lv_obj_set_y(rack_width_hp_label, ui_px(3));
+		lv_obj_set_style_text_font(rack_width_hp_label, font_small, 0);
 		lv_obj_set_style_text_color(rack_width_hp_label, lv_color_hex(0xAAAAAA), LV_PART_MAIN | LV_STATE_DEFAULT);
 		lv_obj_set_style_text_color(rack_width_hp_label, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DISABLED);
 
@@ -60,7 +62,7 @@ struct PatchViewSettingsMenu {
 		graphics_show_check = lv_obj_get_child(graphics_settings, 1);
 
 		graphics_update_rate_label = create_settings_menu_slider(ui_PVSettingsMenu, "Update Rate");
-		lv_obj_set_style_text_font(graphics_update_rate_label, &ui_font_MuseoSansRounded50014, 0);
+		lv_obj_set_style_text_font(graphics_update_rate_label, font_medium, 0);
 		lv_obj_set_width(graphics_update_rate_label, lv_pct(100));
 		lv_obj_set_align(graphics_update_rate_label, LV_ALIGN_LEFT_MID);
 
@@ -120,7 +122,7 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_PVCablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(cable_tension_slider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
-		lv_obj_set_x(ui_PVSettingsMenu, 220);
+		lv_obj_set_x(ui_PVSettingsMenu, ui_px(220));
 
 		lv_obj_add_event_cb(zoom_slider, zoom_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(auto_layout_check, auto_rack_width_cb, LV_EVENT_VALUE_CHANGED, this);

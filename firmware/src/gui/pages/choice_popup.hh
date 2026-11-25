@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/ui_scale.h"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -26,7 +27,7 @@ struct ChoicePopup : ConfirmPopup {
 	void show(
 		auto cb, const char *message, std::string_view confirm_text, const char *options, const unsigned init_idx = 0) {
 		ConfirmPopup::show(std::move(cb), message, confirm_text, "");
-		lv_obj_set_width(message_label, 220);
+		lv_obj_set_width(message_label, ui_px(220));
 
 		dropdown = lv_dropdown_create(panel);
 		lv_obj_move_to_index(dropdown, 1);
@@ -34,8 +35,8 @@ struct ChoicePopup : ConfirmPopup {
 		lv_obj_add_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
 		lv_obj_add_style(dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);
 		lv_obj_add_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
-		lv_obj_set_style_text_line_space(lv_dropdown_get_list(dropdown), 6, LV_PART_MAIN);
-		lv_obj_set_width(dropdown, 180);
+		lv_obj_set_style_text_line_space(lv_dropdown_get_list(dropdown), ui_px(6), LV_PART_MAIN);
+		lv_obj_set_width(dropdown, ui_px(180));
 
 		lv_show(dropdown);
 		lv_dropdown_set_options(dropdown, options);
@@ -60,7 +61,7 @@ struct ChoicePopup : ConfirmPopup {
 
 	void hide() {
 		ConfirmPopup::hide();
-		lv_obj_set_width(message_label, 180);
+		lv_obj_set_width(message_label, ui_px(180));
 		lv_obj_del(dropdown);
 	}
 

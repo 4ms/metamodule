@@ -15,7 +15,7 @@ struct FullscreenGraphicPage : PageBase {
 		lv_obj_clear_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_set_style_opa(screen, LV_OPA_100, LV_PART_MAIN);
 		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_PART_MAIN);
-		lv_obj_set_size(screen, 320, 240);
+		lv_obj_set_size(screen, LV_HOR_RES, LV_VER_RES);
 		lv_obj_set_style_pad_all(screen, 0, LV_PART_MAIN);
 		lv_obj_set_style_border_width(screen, 0, LV_PART_MAIN);
 		lv_obj_set_style_outline_width(screen, 0, LV_PART_MAIN);
@@ -49,9 +49,11 @@ struct FullscreenGraphicPage : PageBase {
 		auto height_mm = args.element_mm->second;
 
 		const float ratio = width_mm / height_mm;
-		const float screen_ratio = 320.f / 240.f;
-		uint16_t w = (ratio >= screen_ratio) ? 320 : std::round(240 * ratio);
-		uint16_t h = (ratio <= screen_ratio) ? 240 : std::round(320 / ratio);
+		const float screen_w = LV_HOR_RES;
+		const float screen_h = LV_VER_RES;
+		const float screen_ratio = screen_w / screen_h;
+		uint16_t w = (ratio >= screen_ratio) ? screen_w : std::round(screen_h * ratio);
+		uint16_t h = (ratio <= screen_ratio) ? screen_h : std::round(screen_w / ratio);
 
 		lv_obj_set_size(canvas, w, h);
 

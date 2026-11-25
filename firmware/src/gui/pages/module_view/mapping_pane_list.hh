@@ -1,4 +1,6 @@
 #pragma once
+#include "gui/fonts/ui_fonts.hh"
+#include "gui/ui_scale.h"
 #include "conf/panel_conf.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
@@ -64,7 +66,7 @@ struct MappingPaneList {
 
 	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name, lv_obj_t *parent, bool is_active) {
 		auto obj = ui_UnmappedSetItem_create(parent);
-		lv_obj_set_style_pad_left(obj, 32, LV_PART_MAIN | LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_left(obj, ui_px(32), LV_PART_MAIN | LV_STATE_DEFAULT);
 
 		if (lv_obj_get_child_cnt(obj) == 0)
 			return nullptr;
@@ -83,8 +85,8 @@ struct MappingPaneList {
 				auto name = get_panel_name(JackInput{}, panel_jack_id);
 				lv_label_set_text_fmt(lv_obj_get_child(obj, 1), "%s", name.c_str());
 			}
-			lv_obj_set_style_pad_hor(obj, 1, LV_PART_MAIN);
-			lv_obj_set_style_pad_ver(obj, 1, LV_PART_MAIN);
+			lv_obj_set_style_pad_hor(obj, ui_px(1), LV_PART_MAIN);
+			lv_obj_set_style_pad_ver(obj, ui_px(1), LV_PART_MAIN);
 			lv_obj_set_width(obj, lv_pct(100));
 			return obj;
 
@@ -144,7 +146,7 @@ struct MappingPaneList {
 
 		lv_label_set_text(label, get_panel_brief_name(JackInput{}, panel_jack_id).c_str());
 
-		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(label, font_med_large_bold, LV_STATE_DEFAULT);
 
 		format_panel_cable_circle(circle);
 	}
@@ -175,7 +177,7 @@ struct MappingPaneList {
 			lv_label_set_text(setname, text.c_str());
 
 		lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
-		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_font(label, font_med_large_bold, LV_STATE_DEFAULT);
 
 		format_panel_cable_circle(circle);
 	}
@@ -191,7 +193,7 @@ struct MappingPaneList {
 
 private:
 	static void format_panel_cable_circle(lv_obj_t *circle) {
-		lv_obj_set_style_border_width(circle, 3, LV_STATE_DEFAULT);
+		lv_obj_set_style_border_width(circle, ui_px(3), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_color(circle, lv_color_hex(0xbbbbbb), LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(circle, LV_OPA_100, LV_STATE_DEFAULT);
 	}
@@ -199,14 +201,14 @@ private:
 	static void format_knob_map_circle(uint16_t panel_knob_id, lv_obj_t *circle, lv_obj_t *label) {
 		//workaround for lowercase letter positions off-center
 		if (panel_knob_id >= 6 && panel_knob_id < 12)
-			lv_obj_set_style_pad_bottom(label, 3, LV_STATE_DEFAULT);
+			lv_obj_set_style_pad_bottom(label, ui_px(3), LV_STATE_DEFAULT);
 
-		format_label(label, 0, &ui_font_MuseoSansRounded90018);
+		format_label(label, 0, font_large);
 		format_circle(circle, Gui::get_knob_color(panel_knob_id), 22);
 	}
 
 	static void format_button_map_circle(uint16_t panel_knob_id, lv_obj_t *circle, lv_obj_t *label) {
-		format_label(label, 0, &ui_font_MuseoSansRounded70014);
+		format_label(label, 0, font_medium_bold);
 		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
 		format_circle(circle, Gui::get_knob_color(panel_knob_id), 22);
 	}
