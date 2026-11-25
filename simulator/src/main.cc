@@ -166,6 +166,17 @@ int main(int argc, char *argv[]) {
 	auto flash_path = resolve_resource(settings.flash_path);
 	auto asset_tar_path = resolve_resource(settings.asset_file);
 
+	// Each preset builds its own assets image next to its simulator binary (build/assets.uimg,
+	// build-mp2/assets.uimg, ...), and they differ (MP2 has SVG faceplates). So unless a path was
+	// given with -s, use this binary's image, not whichever one is in build/
+	if (settings.asset_file == MetaModuleSim::Settings{}.asset_file && !sim_dir.empty()) {
+		std::error_code ec;
+		auto exe = fs::weakly_canonical(fs::absolute(argv[0], ec), ec);
+		auto own_assets = exe.parent_path() / "assets.uimg";
+		if (!ec && fs::exists(own_assets, ec))
+			asset_tar_path = own_assets;
+	}
+
 	if (std::error_code ec; !fs::exists(sdcard_path, ec))
 		std::cout << "Warning: SD-card patch dir not found: " << sdcard_path
 				  << " (pass -p <dir> or run from the simulator/ directory)\n";

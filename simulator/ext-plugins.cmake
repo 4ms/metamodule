@@ -173,16 +173,28 @@ foreach(name source_dir manifests IN ZIP_LISTS PLUGIN_ASSET_NAMES PLUGIN_ASSET_S
   endif()
 endforeach()
 
+# MP2 draws module faceplates from SVGs (see firmware/src/gui/elements/svg_faceplate.hh).
+# They are kept apart from the other assets so MP1's assets image doesn't carry them:
+# firmware/assets-svg has the same layout as firmware/assets, and is made by
+# tools/make_svg_faceplates.py
+set(SVG_ASSET_COPY_COMMAND "")
+set(SVG_ASSET_FILES "")
+if(METAMODULE_PLATFORM STREQUAL "mp2" AND IS_DIRECTORY ${FWDIR}/assets-svg)
+  set(SVG_ASSET_COPY_COMMAND COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets-svg ${ASSET_DIR})
+  file(GLOB_RECURSE SVG_ASSET_FILES CONFIGURE_DEPENDS ${FWDIR}/assets-svg/*)
+endif()
+
 add_custom_command(
   OUTPUT ${ASSET_IMG_PATH}
   COMMAND ${SYNC_PLUGIN_JSONS_COMMAND}
   COMMAND ${CMAKE_COMMAND} -E rm -rf ${ASSET_DIR}
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets ${ASSET_DIR}
+  ${SVG_ASSET_COPY_COMMAND}
   ${PLUGIN_ASSET_COPY_COMMANDS}
   COMMAND cd ${ASSET_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
   COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
   COMMENT "Creating assets uimg file at ${ASSET_IMG_PATH}"
-  DEPENDS ${FW_ASSET_FILES} ${SYNC_PLUGIN_JSONS_SOURCES} ${PLUGIN_ASSET_DEPENDS}
+  DEPENDS ${FW_ASSET_FILES} ${SVG_ASSET_FILES} ${SYNC_PLUGIN_JSONS_SOURCES} ${PLUGIN_ASSET_DEPENDS}
   VERBATIM USES_TERMINAL
 )
 
