@@ -72,16 +72,16 @@ COMPONENTS_WITH_DIFFERENT_ART = {
 # Component PNGs whose source artwork has a different name (paths are in graphics/)
 COMPONENT_SOURCES = {
     "rack-lib/BefacoSlidePot": "Rack/components-metamodule/BefacoSlidePot_bg.svg",
-    "rack-lib/Davies1900hBlack": "4ms/components/svg source/Davies1900hBlack.svg",
-    "rack-lib/Davies1900hLargeWhite": "Rack/components-metamodule/Davies1900hLargeWhite.ai",
+    # "rack-lib/Davies1900hBlack": "4ms/components/svg source/Davies1900hBlack.svg",
+    # "rack-lib/Davies1900hLargeWhite": "Rack/components-metamodule/Davies1900hLargeWhite.ai",
     "rack-lib/Rogan6PSLight": "4ms/components/Rogan6Light.svg",
     "rack-lib/Rogan6PSLight2": "4ms/components/Rogan6Light.svg",
 }
 
 # Where the component SVGs made for MetaModule are, for brands that aren't in graphics/<Brand>/components
-GRAPHICS_COMPONENT_DIRS = {
-    "rack-lib": REPO / "graphics" / "Rack" / "components-metamodule",
-}
+# GRAPHICS_COMPONENT_DIRS = {
+    # "rack-lib": REPO / "graphics" / "Rack" / "components-metamodule",
+# }
 
 
 def png_size(path: Path) -> tuple[int, int]:
@@ -117,14 +117,14 @@ def text_to_paths(svg_text: str, inkscape: str) -> str | None:
         return dst.read_text()
 
 
-def ai_to_svg(ai: Path, inkscape: str) -> str | None:
-    with tempfile.TemporaryDirectory() as tmp:
-        dst = Path(tmp) / "out.svg"
-        cmd = [inkscape, "--export-plain-svg", f"--export-filename={dst}", str(ai)]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0 or not dst.exists():
-            return None
-        return dst.read_text()
+# def ai_to_svg(ai: Path, inkscape: str) -> str | None:
+#     with tempfile.TemporaryDirectory() as tmp:
+#         dst = Path(tmp) / "out.svg"
+#         cmd = [inkscape, "--export-plain-svg", f"--export-filename={dst}", str(ai)]
+#         result = subprocess.run(cmd, capture_output=True, text=True)
+#         if result.returncode != 0 or not dst.exists():
+#             return None
+#         return dst.read_text()
 
 
 def text_fonts(svg_text: str) -> set[str]:
@@ -350,7 +350,8 @@ def main():
     for brand_dir in sorted(d for d in (FW / "assets").iterdir() if d.is_dir()):
         brand = brand_dir.name
         res = FW / "vcv_ports" / brand / "res"
-        graphics = GRAPHICS_COMPONENT_DIRS.get(brand, REPO / "graphics" / brand / "components")
+        # graphics = GRAPHICS_COMPONENT_DIRS.get(brand, REPO / "graphics" / brand / "components")
+        graphics = REPO / "graphics" / brand / "components"
         svgs = {}
         for svg in res.rglob("*.svg"):
             svgs.setdefault(svg.relative_to(res).with_suffix(""), svg)
@@ -382,11 +383,11 @@ def main():
                 if reason := COMPONENTS_WITH_DIFFERENT_ART.get(f"{brand}/{rel}"):
                     comp_skipped.append(f"{src.relative_to(REPO)}: {reason}")
                     continue
-                if src.suffix == ".ai":
-                    svg_text = ai_to_svg(src, inkscape) if inkscape else None
-                    if svg_text is None:
-                        comp_skipped.append(f"{src.relative_to(REPO)}: needs Inkscape to convert it to SVG")
-                        continue
+                # if src.suffix == ".ai":
+                #     svg_text = ai_to_svg(src, inkscape) if inkscape else None
+                #     if svg_text is None:
+                #         comp_skipped.append(f"{src.relative_to(REPO)}: needs Inkscape to convert it to SVG")
+                #         continue
                 else:
                     svg_text = src.read_text(errors="replace")
                 text, reason = prepare_component(svg_text, png)
