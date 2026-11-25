@@ -93,7 +93,12 @@
 
 /*Default Dot Per Inch. Used to initialize default sizes such as widgets sized, style paddings.
  *(Not so important, you can adjust it to modify default sizes and spaces)*/
+#ifdef METAMODULE_UI_SCALE
+/*Scales the default theme's sizes along with the rest of the GUI, see gui/ui_scale.h*/
+#define LV_DPI_DEF (140 * METAMODULE_UI_SCALE / 100)
+#else
 #define LV_DPI_DEF 140     /*[px/inch]*/
+#endif
 
 /*=======================
  * FEATURE CONFIGURATION
