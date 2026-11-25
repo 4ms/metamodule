@@ -1,5 +1,14 @@
 add_library(ui_lvgl STATIC)
 
+# MP2's screen has 4x the pixels of MP1's across, but is only about twice the size:
+# scale the GUI (fonts and sizes) so it's the same physical size. See gui/ui_scale.h
+# To change the scale, also regenerate the fonts: gui/fonts/generate_scaled_fonts.py
+if(METAMODULE_PLATFORM STREQUAL "mp2")
+  set(METAMODULE_UI_SCALE 200 CACHE STRING "GUI scale, in percent of MP1 pixel sizes")
+  # lv_conf.h (default font, dpi) and all GUI code need these, and all of it uses lvgl
+  target_compile_definitions(lvgl PUBLIC METAMODULE_UI_SCALE=${METAMODULE_UI_SCALE} METAMODULE_UI_SCALED_FONTS)
+endif()
+
 add_subdirectory(meta5)
 target_link_libraries(ui PUBLIC lvgl)
 target_link_libraries(ui_lvgl PUBLIC ui)
