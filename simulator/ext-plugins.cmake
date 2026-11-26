@@ -185,6 +185,12 @@ if(METAMODULE_PLATFORM STREQUAL "mp2" AND IS_DIRECTORY ${FWDIR}/assets-svg)
   file(GLOB_RECURSE SVG_ASSET_FILES CONFIGURE_DEPENDS ${FWDIR}/assets-svg/*)
 endif()
 
+# The list of asset files: it changes when a file is added or removed, which the files' own
+# timestamps don't show (a file copied in can be older than the image)
+string(REPLACE ";" "\n" ASSET_FILE_LIST "${FW_ASSET_FILES};${SVG_ASSET_FILES}")
+set(ASSET_FILE_LIST_FILE ${CMAKE_CURRENT_BINARY_DIR}/asset-files.txt)
+file(CONFIGURE OUTPUT ${ASSET_FILE_LIST_FILE} CONTENT "${ASSET_FILE_LIST}\n" @ONLY)
+
 add_custom_command(
   OUTPUT ${ASSET_IMG_PATH}
   COMMAND ${SYNC_PLUGIN_JSONS_COMMAND}
@@ -195,7 +201,7 @@ add_custom_command(
   COMMAND cd ${ASSET_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
   COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
   COMMENT "Creating assets uimg file at ${ASSET_IMG_PATH}"
-  DEPENDS ${FW_ASSET_FILES} ${SVG_ASSET_FILES} ${SYNC_PLUGIN_JSONS_SOURCES} ${PLUGIN_ASSET_DEPENDS}
+  DEPENDS ${FW_ASSET_FILES} ${SVG_ASSET_FILES} ${ASSET_FILE_LIST_FILE} ${SYNC_PLUGIN_JSONS_SOURCES} ${PLUGIN_ASSET_DEPENDS}
   VERBATIM USES_TERMINAL
 )
 

@@ -277,6 +277,11 @@ if(EXISTS ${MP2_ASSETS_UIMG})
   set(MP2_ASSETS_STAGE_DIR ${CMAKE_CURRENT_BINARY_DIR}/staged-assets)
   set(MP2_EMBEDDED_ASSETS_UIMG ${CMAKE_CURRENT_BINARY_DIR}/assets.uimg)
   file(GLOB_RECURSE MP2_SVG_ASSET_FILES CONFIGURE_DEPENDS ${FWDIR}/assets-svg/*)
+  # The list of SVG files: it changes when a file is added or removed, which the files' own
+  # timestamps don't show (a file copied in can be older than the image)
+  string(REPLACE ";" "\n" MP2_SVG_ASSET_LIST "${MP2_SVG_ASSET_FILES}")
+  set(MP2_SVG_ASSET_LIST_FILE ${CMAKE_CURRENT_BINARY_DIR}/svg-asset-files.txt)
+  file(CONFIGURE OUTPUT ${MP2_SVG_ASSET_LIST_FILE} CONTENT "${MP2_SVG_ASSET_LIST}\n" @ONLY)
 
   add_custom_command(
     OUTPUT ${MP2_EMBEDDED_ASSETS_UIMG}
@@ -288,7 +293,7 @@ if(EXISTS ${MP2_ASSETS_UIMG})
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets-svg ${MP2_ASSETS_STAGE_DIR}
     COMMAND ${CMAKE_COMMAND} -E chdir ${MP2_ASSETS_STAGE_DIR} ${CMAKE_COMMAND} -E tar -cf ${MP2_EMBEDDED_ASSETS_UIMG}.tar .
     COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${MP2_EMBEDDED_ASSETS_UIMG}.tar ${MP2_EMBEDDED_ASSETS_UIMG}
-    DEPENDS ${MP2_ASSETS_UIMG} ${MP2_SVG_ASSET_FILES}
+    DEPENDS ${MP2_ASSETS_UIMG} ${MP2_SVG_ASSET_FILES} ${MP2_SVG_ASSET_LIST_FILE}
     COMMENT "Creating assets uimg file with SVGs"
     VERBATIM
   )
