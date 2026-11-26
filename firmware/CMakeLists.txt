@@ -102,6 +102,12 @@ cmake_path(APPEND ASSET_IMG_PATH  "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FIL
 # the tar via DEPENDS, and added/deleted files trigger a reconfigure.
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS ${ASSET_DIR}/*)
 
+# Make a file listing all asset files, so we rebuild the asset image if a file is added
+# since timestamps don't show if a file is copied in since can be older than the image
+string(REPLACE ";" "\n" ASSET_FILE_LIST "${ASSET_FILES}")
+set(ASSET_FILE_LIST_FILE ${CMAKE_CURRENT_BINARY_DIR}/asset-files.txt)
+file(CONFIGURE OUTPUT ${ASSET_FILE_LIST_FILE} CONTENT "${ASSET_FILE_LIST}\n" @ONLY)
+
 # Copies vcv_ports/BRAND/plugin.json to assets/BRAND/plugin.json when a submodule's copy changes
 include(${CMAKE_CURRENT_SOURCE_DIR}/vcv_ports/sync_plugin_jsons.cmake)
 
@@ -136,7 +142,7 @@ add_custom_command(
   ${RESOLVE_GROUPS_COMMANDS}
   COMMAND cd ${ASSET_STAGE_DIR} && ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
-  DEPENDS ${ASSET_FILES} ${SYNC_PLUGIN_JSONS_SOURCES} ${RESOLVE_ELEMENT_GROUPS} main.elf
+  DEPENDS ${ASSET_FILES} ${ASSET_FILE_LIST_FILE} ${SYNC_PLUGIN_JSONS_SOURCES} ${RESOLVE_ELEMENT_GROUPS} main.elf
   COMMENT "Creating assets uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
