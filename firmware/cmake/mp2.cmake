@@ -269,12 +269,33 @@ set_source_files_properties(
   src/core_a35/m33_firmware.S PROPERTIES COMPILE_DEFINITIONS "M33_FIRMWARE_BIN=\"${M33_BIN}\"" OBJECT_DEPENDS ${M33_BIN}
 )
 # The assets image is embedded in the firmware image (src/core_a35/assets_image.S), since MP2 can't
-# read it from flash yet. The MP2 build doesn't make one yet: it uses the MP1 build's.
-set(MP2_ASSETS_UIMG ${FWDIR}/build/assets.uimg CACHE FILEPATH "Assets image to embed in the firmware")
+# read it from flash yet. It's the MP1 build's image (MP2_ASSETS_UIMG), with the SVG faceplates and
+# components (assets-svg/, made by tools/make_svg_assets.py) added, as in the MP2 simulator: the GUI
+# uses a module's .svg if there is one, and its .png if not.
+set(MP2_ASSETS_UIMG ${FWDIR}/build/assets.uimg CACHE FILEPATH "Assets image to add the SVGs to and embed in the firmware")
 if(EXISTS ${MP2_ASSETS_UIMG})
+  set(MP2_ASSETS_STAGE_DIR ${CMAKE_CURRENT_BINARY_DIR}/staged-assets)
+  set(MP2_EMBEDDED_ASSETS_UIMG ${CMAKE_CURRENT_BINARY_DIR}/assets.uimg)
+  file(GLOB_RECURSE MP2_SVG_ASSET_FILES CONFIGURE_DEPENDS ${FWDIR}/assets-svg/*)
+
+  add_custom_command(
+    OUTPUT ${MP2_EMBEDDED_ASSETS_UIMG}
+    COMMAND ${CMAKE_COMMAND} -E rm -rf ${MP2_ASSETS_STAGE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MP2_ASSETS_STAGE_DIR}
+    # The tar is after the 64-byte uimg header
+    COMMAND dd if=${MP2_ASSETS_UIMG} of=${MP2_EMBEDDED_ASSETS_UIMG}.tar bs=64 skip=1 status=none
+    COMMAND ${CMAKE_COMMAND} -E chdir ${MP2_ASSETS_STAGE_DIR} ${CMAKE_COMMAND} -E tar -xf ${MP2_EMBEDDED_ASSETS_UIMG}.tar
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets-svg ${MP2_ASSETS_STAGE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E chdir ${MP2_ASSETS_STAGE_DIR} ${CMAKE_COMMAND} -E tar -cf ${MP2_EMBEDDED_ASSETS_UIMG}.tar .
+    COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${MP2_EMBEDDED_ASSETS_UIMG}.tar ${MP2_EMBEDDED_ASSETS_UIMG}
+    DEPENDS ${MP2_ASSETS_UIMG} ${MP2_SVG_ASSET_FILES}
+    COMMENT "Creating assets uimg file with SVGs"
+    VERBATIM
+  )
+
   set_source_files_properties(
-    src/core_a35/assets_image.S PROPERTIES COMPILE_DEFINITIONS "ASSETS_IMAGE=\"${MP2_ASSETS_UIMG}\"" OBJECT_DEPENDS
-                                           ${MP2_ASSETS_UIMG}
+    src/core_a35/assets_image.S PROPERTIES COMPILE_DEFINITIONS "ASSETS_IMAGE=\"${MP2_EMBEDDED_ASSETS_UIMG}\""
+                                           OBJECT_DEPENDS ${MP2_EMBEDDED_ASSETS_UIMG}
   )
 else()
   message(WARNING "No assets image at ${MP2_ASSETS_UIMG}: the firmware will have no module images or fonts. "
