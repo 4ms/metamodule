@@ -1,6 +1,6 @@
 # The MP2 boot image: a self-extracting LZ4 stub around the A35 image.
 #
-# TF-A BL2 loads one image, to one place, of at most 16MB. The A35 image is bigger than that, and
+# TF-A BL2 loads one image, to one place, of at most 32MB. The A35 image is bigger than that, and
 # has two parts that go to different places (code and constants, and .data). So what TF-A loads is
 # this stub, which unpacks the parts to where they're linked.
 #

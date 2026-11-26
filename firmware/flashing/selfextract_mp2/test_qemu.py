@@ -75,7 +75,7 @@ def main():
     entry, app_segs, _ = load_segments(build / "main_a35.elf")
     _, _, hang = load_segments(build / "selfextract" / "selfextract_stub.elf")
     # TF-A's limits: image_base and image_max_size in its plat_bl2_mem_params_desc.c
-    load, start, stub = load_uimg(build / "main.uimg", 0x88000000, 0x1000000)
+    load, start, stub = load_uimg(build / "main.uimg", 0x88000000, 0x2000000)
     ok = True
 
     with tempfile.TemporaryDirectory() as tmp:

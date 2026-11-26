@@ -14,13 +14,13 @@ _TFA_DDR_END	= 0xA0000000;
    (plat_bl2_mem_params_desc.c). The stub unpacks the A35 image to where it's linked (_A35_CODE and
    _A35_RAM) and jumps to it. After that, this memory is unused. */
 _A35_BOOT		= 0x88000000;
-_A35_BOOT_SZ	= 16M;
-_A35_BOOT_END	= 0x89000000;
+_A35_BOOT_SZ	= 32M;
+_A35_BOOT_END	= 0x8A000000;
 
 /* The A35 image's code and constants (the stub unpacks them here; a debugger loads them here) */
-_A35_CODE		= 0x89000040;
-_A35_CODE_SZ	= 48M - 0x40;
-_A35_CODE_END	= 0x8C000000;
+_A35_CODE		= 0x8A000040;
+_A35_CODE_SZ	= 64M - 0x40;
+_A35_CODE_END	= 0x8E000000;
 
 /* Size of .symlist, the table of symbols plugins can use, in the A35 image (src/dynload/host_sym_list.hh) */
 _A35_SYMS_SZ	= 1M;
@@ -28,9 +28,9 @@ _A35_SYMS_SZ	= 1M;
 /* The M33's memory: code, data, heap, stack, and its DMA memory at the top. The A35 loads the M33
    image to the start, and opens the region to the M33 in RISAF4 (src/core_a35/main.cc).
    (The M33 can also run from SRAM2: 0x0E060000, size 0x1F000, its secure instruction-fetch alias.) */
-_M33_REGION		= 0x8C000000;
+_M33_REGION		= 0x8E000000;
 _M33_REGION_SZ	= 32M;
-_M33_REGION_END	= 0x8E000000;
+_M33_REGION_END	= 0x90000000;
 
 /* The A35's data, bss and stacks. The rest of it is the heap if the A35 can't open its own (see
    _A35_HEAP) */
