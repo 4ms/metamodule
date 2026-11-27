@@ -4,17 +4,11 @@ Firmware for the STM32MP25x hardware revision: 2x Cortex-A35 (AArch64, EL3
 secure) + Cortex-M33.
 
 It's built from the same `firmware/` directory as the MP1 firmware, selected by
-the `METAMODULE_PLATFORM` CMake variable (the `mp2*` presets set it). The A35
-application is built by `firmware/cmake/mp2.cmake`; the M33 firmware is a
-separate CMake project in `firmware/src/core_m33/` (it needs the arm-none-eabi
-toolchain), built as an ExternalProject and embedded in the A35 image.
+the `METAMODULE_PLATFORM` CMake variable (the `mp2*` presets set it). 
 
-
-## Prerequisites
-
-- `aarch64-none-elf-gcc` (same toolchain as stm32mp2-baremetal)
-- `arm-none-eabi-gcc` (same toolchain as MP1), for the M33
-
+The A35 binary is built by `firmware/cmake/mp2.cmake`, and the M33 firmware is a
+separate CMake project in `firmware/src/core_m33/` built as an ExternalProject
+and embedded in the A35 image (since it needs a different toolchain).
 
 ## Building
 
@@ -23,6 +17,10 @@ From `firmware/`:
 ```
 cmake --preset mp2
 cmake --build --preset mp2
+
+# OR:
+
+make PRESET=mp2
 ```
 
 or `make PRESET=mp2`. Until p1 boards arrive, use the `mp2-test-carrier` preset
