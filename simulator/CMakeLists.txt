@@ -273,6 +273,8 @@ endif()
 # the simulator's own sources need their opt level set here too 
 if (SIM_DEBUG_O0)
     target_compile_options(simulator PRIVATE -Wall -O0)
+elseif (HEADLESS)
+    target_compile_options(simulator PRIVATE -Wall -O3)
 else()
     target_compile_options(simulator PRIVATE -Wall -Og)
 endif()
