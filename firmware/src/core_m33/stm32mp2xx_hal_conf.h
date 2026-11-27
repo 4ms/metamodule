@@ -205,6 +205,12 @@ extern "C" {
 #define INSTRUCTION_CACHE_ENABLE 0U
 #define DATA_CACHE_ENABLE 0U
 
+/* 4ms: how many times SD_PowerON() sends ACMD41 waiting for the card to finish powering up.
+   ST's default (0xFFFF) blocks for ~37 s at the 400 kHz init clock (~0.55 ms per try) when a card
+   answers but stays busy, which a hot-inserted card can do. The SD spec gives a card 1 s,
+   so this is ~1.4 s. */
+#define SDMMC_MAX_VOLT_TRIAL ((uint32_t)2500U)
+
 /* ########################## Assert Selection ############################## */
 /**
  * @brief Uncomment the line below to expanse the "assert_param" macro in the
