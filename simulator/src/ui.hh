@@ -62,6 +62,13 @@ private:
 	FileStorageComm patch_comm;
 	FileStorageProxy file_storage_proxy;
 	AssetFS asset_fs;
+
+	// ThorVG has to be running before the built-in modules are registered:
+	// the Rack adaptor uses it to get the size of each widget's SVG
+	struct ThorvgInit {
+		ThorvgInit();
+	} thorvg_init;
+
 	InternalPluginManager internal_plugin_manager;
 	PluginManager plugin_manager;
 

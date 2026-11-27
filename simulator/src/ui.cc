@@ -9,6 +9,10 @@
 namespace MetaModule
 {
 
+Ui::ThorvgInit::ThorvgInit() {
+	tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
+}
+
 Ui::Ui(std::string_view sdcard_path,
 	   std::string_view flash_path,
 	   std::string_view asset_path,
@@ -48,8 +52,6 @@ Ui::Ui(std::string_view sdcard_path,
 
 	Gui::init_lvgl_styles();
 	page_manager.init();
-
-	tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 
 	if (!Settings::read_settings(file_storage_proxy, &settings)) {
 		settings = UserSettings{};

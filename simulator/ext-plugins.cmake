@@ -173,16 +173,19 @@ foreach(name source_dir manifests IN ZIP_LISTS PLUGIN_ASSET_NAMES PLUGIN_ASSET_S
   endif()
 endforeach()
 
-# MP2 draws module faceplates and components from SVGs (see svg_faceplate.hh and scaled_image.hh
-# in firmware/src/gui/elements).
+# MP2 draws module faceplates and components from SVGs only (see svg_file.hh, svg_faceplate.hh
+# and scaled_image.hh in firmware/src/gui/elements).
 # They are kept apart from the other assets so MP1's assets image doesn't carry them:
-# firmware/assets-svg has the same layout as firmware/assets, and is made by
-# tools/make_svg_assets.py
+# firmware/assets-svg has the same layout as firmware/assets. On MP2 they take the place of the
+# firmware's PNGs, which it doesn't use.
 set(SVG_ASSET_COPY_COMMAND "")
 set(SVG_ASSET_FILES "")
 if(METAMODULE_PLATFORM STREQUAL "mp2" AND IS_DIRECTORY ${FWDIR}/assets-svg)
-  set(SVG_ASSET_COPY_COMMAND COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets-svg ${ASSET_DIR})
+  set(SVG_ASSET_COPY_COMMAND
+    COMMAND ${CMAKE_COMMAND} -DDIR=${ASSET_DIR} -P ${FWDIR}/cmake/remove_png_assets.cmake
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets-svg ${ASSET_DIR})
   file(GLOB_RECURSE SVG_ASSET_FILES CONFIGURE_DEPENDS ${FWDIR}/assets-svg/*)
+  list(APPEND SVG_ASSET_FILES ${FWDIR}/cmake/remove_png_assets.cmake)
 endif()
 
 # The list of asset files: it changes when a file is added or removed, which the files' own
