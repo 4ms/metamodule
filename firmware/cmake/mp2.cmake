@@ -270,8 +270,8 @@ set_source_files_properties(
 )
 # The assets image is embedded in the firmware image (src/core_a35/assets_image.S), since MP2 can't
 # read it from flash yet. It's the MP1 build's image (MP2_ASSETS_UIMG), with the SVG faceplates and
-# components (assets-svg/, made by tools/make_svg_assets.py) added, as in the MP2 simulator: the GUI
-# uses a module's .svg if there is one, and its .png if not.
+# components (assets-svg/) in place of the PNG ones, as in the MP2 simulator: the GUI draws
+# modules from the SVGs only (src/gui/elements/svg_file.hh).
 set(MP2_ASSETS_UIMG ${FWDIR}/build/assets.uimg CACHE FILEPATH "Assets image to add the SVGs to and embed in the firmware")
 if(EXISTS ${MP2_ASSETS_UIMG})
   set(MP2_ASSETS_STAGE_DIR ${CMAKE_CURRENT_BINARY_DIR}/staged-assets)
@@ -290,10 +290,11 @@ if(EXISTS ${MP2_ASSETS_UIMG})
     # The tar is after the 64-byte uimg header
     COMMAND dd if=${MP2_ASSETS_UIMG} of=${MP2_EMBEDDED_ASSETS_UIMG}.tar bs=64 skip=1 status=none
     COMMAND ${CMAKE_COMMAND} -E chdir ${MP2_ASSETS_STAGE_DIR} ${CMAKE_COMMAND} -E tar -xf ${MP2_EMBEDDED_ASSETS_UIMG}.tar
+    COMMAND ${CMAKE_COMMAND} -DDIR=${MP2_ASSETS_STAGE_DIR} -P ${FWDIR}/cmake/remove_png_assets.cmake
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${FWDIR}/assets-svg ${MP2_ASSETS_STAGE_DIR}
     COMMAND ${CMAKE_COMMAND} -E chdir ${MP2_ASSETS_STAGE_DIR} ${CMAKE_COMMAND} -E tar -cf ${MP2_EMBEDDED_ASSETS_UIMG}.tar .
     COMMAND ${FWDIR}/flashing/uimg_header.py --name Assets ${MP2_EMBEDDED_ASSETS_UIMG}.tar ${MP2_EMBEDDED_ASSETS_UIMG}
-    DEPENDS ${MP2_ASSETS_UIMG} ${MP2_SVG_ASSET_FILES} ${MP2_SVG_ASSET_LIST_FILE}
+    DEPENDS ${MP2_ASSETS_UIMG} ${MP2_SVG_ASSET_FILES} ${MP2_SVG_ASSET_LIST_FILE} ${FWDIR}/cmake/remove_png_assets.cmake
     COMMENT "Creating assets uimg file with SVGs"
     VERBATIM
   )
