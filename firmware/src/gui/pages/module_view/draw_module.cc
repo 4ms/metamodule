@@ -73,7 +73,16 @@ void ModuleViewPage::exit_fullscreen() {
 		resize_module_image(ScreenWidthPx - ui_px(130));
 }
 
-void ModuleViewPage::redraw_module() {
+// Returns false, with nothing changed, if the module can't be drawn
+bool ModuleViewPage::redraw_module() {
+	auto draw_height = module_draw_height();
+	auto module_drawer = ModuleDrawer{.container = ui_ModuleImage, .height = draw_height};
+
+	// Everything here is drawn on the faceplate: a module without one can't be shown
+	auto [faceplate, width] = module_drawer.read_faceplate(slug);
+	if (faceplate.empty() || width == 0)
+		return false;
+
 	bool const is_new_module = stack_order_module_id != this_module_id;
 
 	save_element_stacking_order();
@@ -83,10 +92,7 @@ void ModuleViewPage::redraw_module() {
 	size_t num_elements = moduleinfo.elements.size();
 	drawn_elements.reserve(num_elements);
 
-	module_height = module_draw_height();
-	auto module_drawer = ModuleDrawer{.container = ui_ModuleImage, .height = module_height};
-
-	auto [faceplate, width] = module_drawer.read_faceplate(slug);
+	module_height = draw_height;
 	canvas = module_drawer.draw_faceplate(faceplate, width, buffer);
 
 	if (patch->is_module_bypassed(this_module_id))
@@ -139,6 +145,8 @@ void ModuleViewPage::redraw_module() {
 
 	dynamic_elements_prepared = false;
 	update_graphic_throttle_setting();
+
+	return true;
 }
 
 // Records the stacking order of the currently drawn elements, so it can be re-applied

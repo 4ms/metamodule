@@ -5,6 +5,7 @@
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
 #include "gui/elements/module_art.hh"
+#include "gui/elements/svg_file.hh"
 #include "gui/elements/svg_faceplate.hh"
 #include "gui/images/paths.hh"
 #include "patch/patch_data.hh"
@@ -19,9 +20,9 @@ struct ModuleDrawer {
 	lv_obj_t *container;
 	uint32_t height;
 
-	// Returns faceplate filename, and width of the png (or 0 if cannot read/decode file).
+	// Returns faceplate filename, and its width when drawn (or 0 if cannot read/decode file).
 	std::pair<std::string, lv_coord_t> read_faceplate(std::string_view slug) {
-		const auto img_filename = ModuleImages::get_faceplate_path(slug);
+		auto img_filename = ModuleImages::get_faceplate_path(slug);
 
 		if (img_filename.length() <= 2) {
 			if (!slug.ends_with("HubMedium"))
@@ -30,13 +31,14 @@ struct ModuleDrawer {
 		}
 
 #if defined(THORVG_SVG_LOADER_SUPPORT)
-		// Prefer an SVG faceplate, which is sharp at any size
-		if (auto svg_filename = SvgFaceplate::find(img_filename)) {
-			if (auto widthpx = SvgFaceplate::width_at_height(*svg_filename, height))
-				return {*svg_filename, widthpx};
+		// The faceplate is drawn from its SVG file (see svg_faceplate.hh)
+		img_filename = SvgFile::path_for(img_filename);
+		lv_coord_t widthpx = SvgFaceplate::width_at_height(img_filename, height);
+		if (widthpx == 0) {
+			pr_warn("Could not read image %s for module %.*s\n", img_filename.c_str(), (int)slug.size(), slug.data());
+			return {img_filename, 0};
 		}
-#endif
-
+#else
 		float zoom = height / (float)ModuleArtHeightPx;
 
 		lv_img_header_t img_header;
@@ -47,6 +49,7 @@ struct ModuleDrawer {
 		}
 
 		uint32_t widthpx = img_header.w * zoom;
+#endif
 
 		pr_trace("Read faceplate for %s (%d x %d)\n", slug.data(), widthpx, height);
 
@@ -71,23 +74,17 @@ struct ModuleDrawer {
 		lv_canvas_set_buffer(canvas, canvas_buffer.data(), widthpx, height, LV_IMG_CF_TRUE_COLOR);
 
 		// Draw module artwork
-		bool drawn = false;
+		std::string filename{img_filename};
 #if defined(THORVG_SVG_LOADER_SUPPORT)
-		if (SvgFaceplate::is_svg(img_filename))
-			drawn = SvgFaceplate::draw(std::string{img_filename}, canvas_buffer, widthpx, height);
+		if (!SvgFaceplate::draw(filename, canvas_buffer, widthpx, height))
+			lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
+#else
+		lv_draw_img_dsc_t draw_img_dsc;
+		lv_draw_img_dsc_init(&draw_img_dsc);
+		draw_img_dsc.zoom = (float)height / (float)ModuleArtHeightPx * 256;
+
+		lv_canvas_draw_img(canvas, 0, 0, filename.c_str(), &draw_img_dsc);
 #endif
-		if (!drawn) {
-			lv_draw_img_dsc_t draw_img_dsc;
-			lv_draw_img_dsc_init(&draw_img_dsc);
-			draw_img_dsc.zoom = (float)height / (float)ModuleArtHeightPx * 256;
-
-			// If the SVG could not be drawn, there's a PNG with the same name
-			std::string png_filename{img_filename};
-			if (png_filename.ends_with(".svg"))
-				png_filename.replace(png_filename.size() - 4, 4, ".png");
-
-			lv_canvas_draw_img(canvas, 0, 0, png_filename.c_str(), &draw_img_dsc);
-		}
 		// Overflow visible: requires too much processing when zoomed-out to view lots of modules
 		if (height >= ModuleFullHeightPx)
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);

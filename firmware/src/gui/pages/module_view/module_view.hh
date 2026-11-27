@@ -136,7 +136,11 @@ struct ModuleViewPage : PageBase {
 		open_group_for_target = true;
 		full_screen_mode = false;
 
-		redraw_module();
+		if (!redraw_module()) {
+			page_list.request_new_page(PageId::PatchView, args);
+			pr_err("Module has no faceplate image, cannot draw module\n");
+			return;
+		}
 
 		lv_hide(ui_ModuleViewActionMenu);
 		lv_hide(ui_AutoMapSelectPanel);
@@ -531,7 +535,7 @@ private:
 	static constexpr unsigned MaxModuleWidthPx = std::min<unsigned>(FullHeightPx * 3, 2047);
 
 	unsigned resize_module_image(unsigned max);
-	void redraw_module();
+	bool redraw_module();
 	unsigned module_draw_height();
 
 	// Center vertically in case module is scaled to fit to screen width

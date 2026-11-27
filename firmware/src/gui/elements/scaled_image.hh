@@ -1,16 +1,17 @@
 #pragma once
 #include "console/pr_dbg.hh"
-#include "gui/elements/module_art.hh"
+#include "gui/elements/svg_file.hh"
 #include "lvgl.h"
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <list>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
-// Component images (knobs, jacks, sliders, switches...) drawn at the size they appear on screen.
+// Component images (knobs, jacks, sliders, switches...) drawn from SVG files, at the size they
+// appear on screen.
 //
 // The component PNGs are made for a module drawn 240px high (ModuleArtHeightPx), and MP1 has
 // LVGL zoom them when it draws them. On a screen where modules are drawn much bigger than that
@@ -20,11 +21,10 @@
 // So on those platforms, an lv_img is given a source like
 //     A:ram:/4ms/comp/knob_x.svg@540
 // which is the image as it is in a module drawn 540px high, already at the right size
-// (make_src() makes these). An LVGL image decoder (registered here) provides the pixels:
-//   - from an .svg file with the same path as the component's .png, if there is one, rasterized
-//     at that size. Its size is as in VCV Rack: 380 SVG pixels are the height of a module.
-//     (tools/make_svg_assets.py prepares the SVGs for built-in modules)
-//   - otherwise from the .png, resized.
+// (make_src() makes these). An LVGL image decoder (registered here) provides the pixels,
+// by rasterizing the .svg file with the same path as the component's .png (see svg_file.hh)
+// at that size. The SVG's size is as in VCV Rack: 380 SVG pixels are the height of a module.
+// The PNG is not used: a component without an SVG is not drawn.
 // LVGL decodes an image every time it draws it, so the pixels are kept in a cache.
 //
 // Only in builds where ThorVG has its SVG loader (lib/thorvg/CMakeLists.txt). ThorVG is built
@@ -57,7 +57,6 @@ inline constexpr size_t MaxCacheBytes = 8 * 1024 * 1024;
 struct Cache {
 	std::list<Raster> rasters; // most recently used first
 	size_t bytes = 0;
-	std::unordered_map<std::string, bool> has_svg;
 };
 
 inline Cache &cache() {
@@ -84,41 +83,10 @@ inline ParsedSrc parse(std::string_view src) {
 	}
 
 	auto path = src.substr(0, at);
-	if (height == 0 || !(path.ends_with(".svg") || path.ends_with(".png")))
+	if (height == 0 || !path.ends_with(".svg"))
 		return {};
 
 	return {path, height};
-}
-
-inline bool file_exists(std::string const &path) {
-	lv_fs_file_t file;
-	if (lv_fs_open(&file, path.c_str(), LV_FS_MODE_RD) != LV_FS_RES_OK)
-		return false;
-	lv_fs_close(&file);
-	return true;
-}
-
-inline std::vector<char> read_file(std::string const &path) {
-	std::vector<char> data;
-
-	lv_fs_file_t file;
-	if (lv_fs_open(&file, path.c_str(), LV_FS_MODE_RD) != LV_FS_RES_OK)
-		return data;
-
-	uint32_t size = 0;
-	lv_fs_seek(&file, 0, LV_FS_SEEK_END);
-	lv_fs_tell(&file, &size);
-	lv_fs_seek(&file, 0, LV_FS_SEEK_SET);
-
-	data.resize(size);
-	uint32_t bytes_read = 0;
-	auto res = lv_fs_read(&file, data.data(), size, &bytes_read);
-	lv_fs_close(&file);
-
-	if (res != LV_FS_RES_OK || bytes_read != size)
-		data.clear();
-
-	return data;
 }
 
 inline constexpr unsigned PxSize = LV_IMG_PX_SIZE_ALPHA_BYTE;
@@ -129,30 +97,15 @@ inline void write_px(uint8_t *px, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	px[PxSize - 1] = a;
 }
 
-struct Rgba {
-	float r, g, b, a;
-};
-
-// Color is returned multiplied by alpha
-inline Rgba read_px_premultiplied(const uint8_t *px) {
-	lv_color_t color{};
-	std::memcpy(&color, px, PxSize - 1);
-	lv_color32_t c32;
-	c32.full = lv_color_to32(color);
-	float a = px[PxSize - 1];
-	return {c32.ch.red * a, c32.ch.green * a, c32.ch.blue * a, a};
-}
-
 inline bool rasterize_svg(std::string const &path, uint32_t module_height, Raster &raster) {
-	auto data = read_file(path);
-	if (data.empty())
+	auto data = SvgFile::read(path);
+	if (data.empty()) {
+		pr_warn("Could not read SVG %s\n", path.c_str());
 		return false;
+	}
 
-	auto picture = tvg::Picture::gen();
-	if (picture->load(data.data(), data.size(), "svg", nullptr, true) != tvg::Result::Success) {
-		// Free a picture that was not given to a canvas
-		picture->ref();
-		picture->unref();
+	auto picture = SvgFile::parse(data);
+	if (!picture) {
 		pr_warn("Could not parse SVG %s\n", path.c_str());
 		return false;
 	}
@@ -190,65 +143,6 @@ inline bool rasterize_svg(std::string const &path, uint32_t module_height, Raste
 	return true;
 }
 
-inline bool resize_png(std::string const &path, uint32_t module_height, Raster &raster) {
-	lv_img_decoder_dsc_t png;
-	if (lv_img_decoder_open(&png, path.c_str(), lv_color_black(), 0) != LV_RES_OK)
-		return false;
-
-	bool ok = false;
-
-	// LVGL's PNG decoder decodes the whole image to this format
-	if (png.img_data && png.header.cf == LV_IMG_CF_TRUE_COLOR_ALPHA && png.header.w > 0 && png.header.h > 0) {
-		int32_t src_w = png.header.w;
-		int32_t src_h = png.header.h;
-		float scale = (float)module_height / (float)ModuleArtHeightPx;
-		int32_t w = std::max<long>(1, std::lround(src_w * scale));
-		int32_t h = std::max<long>(1, std::lround(src_h * scale));
-
-		raster.w = w;
-		raster.h = h;
-		raster.pixels.resize(w * h * PxSize);
-
-		// Bilinear, on colors multiplied by alpha so transparent pixels don't bleed into the edges
-		for (int32_t y = 0; y < h; y++) {
-			float fy = std::clamp((y + 0.5f) * src_h / h - 0.5f, 0.f, src_h - 1.f);
-			int32_t y0 = fy;
-			int32_t y1 = std::min(y0 + 1, src_h - 1);
-			float wy = fy - y0;
-
-			for (int32_t x = 0; x < w; x++) {
-				float fx = std::clamp((x + 0.5f) * src_w / w - 0.5f, 0.f, src_w - 1.f);
-				int32_t x0 = fx;
-				int32_t x1 = std::min(x0 + 1, src_w - 1);
-				float wx = fx - x0;
-
-				auto p00 = read_px_premultiplied(&png.img_data[(y0 * src_w + x0) * PxSize]);
-				auto p01 = read_px_premultiplied(&png.img_data[(y0 * src_w + x1) * PxSize]);
-				auto p10 = read_px_premultiplied(&png.img_data[(y1 * src_w + x0) * PxSize]);
-				auto p11 = read_px_premultiplied(&png.img_data[(y1 * src_w + x1) * PxSize]);
-
-				auto mix = [=](float v00, float v01, float v10, float v11) {
-					return (v00 * (1 - wx) + v01 * wx) * (1 - wy) + (v10 * (1 - wx) + v11 * wx) * wy;
-				};
-				float a = mix(p00.a, p01.a, p10.a, p11.a);
-				float r = mix(p00.r, p01.r, p10.r, p11.r);
-				float g = mix(p00.g, p01.g, p10.g, p11.g);
-				float b = mix(p00.b, p01.b, p10.b, p11.b);
-
-				auto out = &raster.pixels[(y * w + x) * PxSize];
-				if (a < 0.5f)
-					write_px(out, 0, 0, 0, 0);
-				else
-					write_px(out, std::lround(r / a), std::lround(g / a), std::lround(b / a), std::lround(a));
-			}
-		}
-		ok = true;
-	}
-
-	lv_img_decoder_close(&png);
-	return ok;
-}
-
 inline void trim(Cache &c) {
 	for (auto it = c.rasters.end(); c.bytes > MaxCacheBytes && it != c.rasters.begin();) {
 		--it;
@@ -277,17 +171,7 @@ inline Raster *get_raster(std::string_view src) {
 
 	Raster raster;
 	raster.src = src;
-	std::string path{parsed.path};
-
-	bool ok = false;
-	if (path.ends_with(".svg")) {
-		ok = rasterize_svg(path, parsed.module_height, raster);
-		// If the SVG can't be drawn, there's a PNG with the same name
-		if (!ok)
-			path.replace(path.size() - 4, 4, ".png");
-	}
-	ok = ok || resize_png(path, parsed.module_height, raster);
-	if (!ok)
+	if (!rasterize_svg(std::string{parsed.path}, parsed.module_height, raster))
 		return nullptr;
 
 	c.bytes += raster.pixels.size();
@@ -354,24 +238,12 @@ inline void register_decoder() {
 
 } // namespace Impl
 
-// Returns the source to give an lv_img, to draw the component image at `png_path` as it is
+// Returns the source to give an lv_img, to draw the component image named `image_path` as it is
 // in a module drawn `module_height` pixels high
-inline std::string make_src(std::string_view png_path, uint32_t module_height) {
+inline std::string make_src(std::string_view image_path, uint32_t module_height) {
 	Impl::register_decoder();
 
-	std::string path{png_path};
-
-	if (auto dot = path.rfind('.'); dot != std::string::npos) {
-		auto svg_path = path.substr(0, dot) + ".svg";
-		auto &has_svg = Impl::cache().has_svg;
-		auto found = has_svg.find(svg_path);
-		if (found == has_svg.end())
-			found = has_svg.emplace(svg_path, Impl::file_exists(svg_path)).first;
-		if (found->second)
-			path = svg_path;
-	}
-
-	return path + "@" + std::to_string(module_height);
+	return SvgFile::path_for(image_path) + "@" + std::to_string(module_height);
 }
 
 // Returns the module height that a source was made for, or 0 if it's not from make_src()
@@ -381,8 +253,9 @@ inline uint32_t module_height_of(std::string_view src) {
 
 // Forgets everything that was read from files (to be called when the files could have changed)
 inline void clear_cache() {
+	SvgFile::forget_sizes();
+
 	auto &c = Impl::cache();
-	c.has_svg.clear();
 	for (auto it = c.rasters.begin(); it != c.rasters.end();) {
 		if (it->users == 0) {
 			c.bytes -= it->pixels.size();

@@ -42,15 +42,15 @@ struct ImageSource {
 
 inline std::optional<ImageSource> image_source(std::string const &img_path, uint32_t module_height) {
 #if defined(THORVG_SVG_LOADER_SUPPORT)
-	// The image at the size it's drawn at (from an SVG if there is one): see scaled_image.hh
+	// The image at the size it's drawn at, from its SVG file: see scaled_image.hh
 	auto scaled_src = ScaledImage::make_src(img_path, module_height);
 	if (auto sz = get_image_size(scaled_src))
 		return ImageSource{scaled_src, sz->w, sz->h, 1.f};
-#endif
-
+#else
 	// The image as made for a module that's ModuleArtHeightPx high, zoomed by LVGL
 	if (auto sz = get_image_size(img_path))
 		return ImageSource{img_path, sz->w, sz->h, module_height / (float)ModuleArtHeightPx};
+#endif
 
 	return {};
 }
@@ -96,12 +96,10 @@ inline std::string image_src_like(lv_obj_t *img_obj, std::string_view img_filena
 	auto img_path = ComponentImages::get_comp_path(img_filename);
 
 #if defined(THORVG_SVG_LOADER_SUPPORT)
-	// Keep drawing at the size the module is drawn at (see scaled_image.hh)
+	// For the same module height as the image it replaces (see scaled_image.hh)
 	auto cur_src = static_cast<const char *>(lv_img_get_src(img_obj));
-	if (cur_src && img_path.length()) {
-		if (auto module_height = ScaledImage::module_height_of(cur_src))
-			return ScaledImage::make_src(img_path, module_height);
-	}
+	if (cur_src && img_path.length())
+		return ScaledImage::make_src(img_path, ScaledImage::module_height_of(cur_src));
 #endif
 
 	return img_path;
