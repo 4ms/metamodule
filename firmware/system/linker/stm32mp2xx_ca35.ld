@@ -43,8 +43,12 @@ SECTIONS
 	.rodata :
 	{
 		. = ALIGN(8);
-		*(.rodata)         
-		*(.rodata*) 
+		/* Vtables and typeinfo of the plugin API classes, which plugins import even when the
+		   firmware doesn't use them. On AArch64 each is in its own COMDAT section, which
+		   --gc-sections drops if unused (MP1's are in the object's .rodata, kept with its .text) */
+		KEEP(*vcv_plugin*:(.rodata._ZTV* .rodata._ZTI* .rodata._ZTS*))
+		*(.rodata)
+		*(.rodata*)
 		*(.gcc_except_table*) /* C++ exception handling: language-specific data */
 		. = ALIGN(8);
 	} > ROM
