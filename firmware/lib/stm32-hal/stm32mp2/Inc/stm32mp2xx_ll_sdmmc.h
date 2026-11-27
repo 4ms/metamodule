@@ -303,7 +303,10 @@ typedef struct
 #define SDMMC_SDR25_SWITCH_PATTERN         ((uint32_t)0x80FFFF01U)
 #define SDMMC_SDR12_SWITCH_PATTERN         ((uint32_t)0x80FFFF00U)
 
+/* 4ms: overridable (see core_m33/stm32mp2xx_hal_conf.h) */
+#ifndef SDMMC_MAX_VOLT_TRIAL
 #define SDMMC_MAX_VOLT_TRIAL               ((uint32_t)0x0000FFFFU)
+#endif
 
 #define SDMMC_MAX_TRIAL                    ((uint32_t)0x0000FFFFU)
 
