@@ -353,6 +353,8 @@ add_custom_target(
           --objdir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/hardware_support.dir
           --objdir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/a35_core.dir/src/fs/dirent/
           --keep-list ${PROJECT_SOURCE_DIR}/flashing/api-keep-list-mp2.txt
+          # AArch64 vtables/typeinfo are always weak (MP1's are global): see dump_syms.py
+          --weak-class-data
           --elf $<TARGET_FILE:main_a35.elf>
           --text-out ${MP2_API_SYMBOL_NAMES_FILE}
   DEPENDS main_a35.elf
