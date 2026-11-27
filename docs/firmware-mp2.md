@@ -55,7 +55,13 @@ unpacked. If the image is corrupted, the stub hangs without printing anything.
 MP2 can't read the assets (module images, fonts) from flash yet, so the assets
 image is embedded in the firmware image. It's the MP1 build's
 `build/assets.uimg` (set `MP2_ASSETS_UIMG` to use another), so build MP1 first,
-with the SVG faceplates and components in `firmware/assets-svg/` added.
+with the SVG faceplates and components in `firmware/assets-svg/` in place of
+the PNG ones.
+
+MP2 draws module faceplates and components from SVG files only. They are still
+named by their `.png` files (in the module info, and by plugins): the `.svg`
+file with the same path is what's drawn, and a module or component that has no
+SVG is not drawn (`src/gui/elements/svg_file.hh`).
 
 ## What runs
 
