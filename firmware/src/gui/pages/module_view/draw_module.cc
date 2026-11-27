@@ -27,8 +27,13 @@ unsigned ModuleViewPage::resize_module_image(unsigned max) {
 
 	lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
 
-	//roller is no more than 220px wide (on MP1)
-	auto roller_width = std::min<lv_coord_t>(ScreenWidthPx - display_widthpx, ui_px(220));
+	//roller is no more than 220px wide on UI SCALE = 100, or 320px on larger
+	lv_coord_t width = 220;
+#if METAMODULE_UI_SCALE != 100
+	width = ui_px(320);
+#endif
+
+	auto roller_width = std::min<lv_coord_t>(ScreenWidthPx - display_widthpx, width);
 	lv_obj_set_size(ui_ElementRollerPanel, roller_width, FullHeightPx);
 	if (max == ScreenWidthPx) {
 		lv_obj_set_x(ui_ElementRollerPanel, ScreenWidthPx);
