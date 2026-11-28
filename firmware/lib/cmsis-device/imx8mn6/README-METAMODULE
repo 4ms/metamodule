@@ -1,0 +1,11 @@
+i.MX8M Nano (MIMX8MN6) device headers for the Cortex-A53.
+
+Source: zephyrproject-rtos/hal_nxp, mcux/mcux-sdk/devices/MIMX8MN6
+Commit: eaffbf4ea1c272988a8a4cbe5c001ad45e0965fd
+License: BSD-3-Clause (see SPDX headers)
+
+NXP's current device repo (nxp-mcuxpresso/mcux-devices-imx) only has the Cortex-M7 header for
+the 8MN. The A53 header (MIMX8MN6_ca53.h) is from the legacy MCUXpresso SDK, as kept by Zephyr.
+
+Build with -DCPU_MIMX8MN6DVTJZ_ca53 (selects the A53 header in fsl_device_registers.h).
+Unmodified.
