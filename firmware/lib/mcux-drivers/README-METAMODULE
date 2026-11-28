@@ -1,0 +1,8 @@
+NXP MCUXpresso SDK peripheral drivers, copied as needed.
+
+common/   : zephyrproject-rtos/hal_nxp mcux/mcux-sdk-ng/drivers/common
+imx8mn6/  : zephyrproject-rtos/hal_nxp mcux/mcux-sdk/devices/MIMX8MN6/drivers (clock, iomuxc)
+Commit: eaffbf4ea1c272988a8a4cbe5c001ad45e0965fd
+License: BSD-3-Clause (see SPDX headers)
+
+Unmodified. Add more drivers (iuart, igpio, ii2c, sai, sdma, ...) from the same commit.
